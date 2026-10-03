@@ -42,5 +42,5 @@ public class WantlistToggleIconTests : BunitContext
 		await Assert.That(cut.Find("button").ClassList).DoesNotContain("is-marked");
 	}
 
-	private static MediaLookup Lookup() => new PartialMovie { Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), []) }.ToMatch();
+	private static MediaLookup Lookup() => new IdentifiedMedia(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails()).ToMatch();
 }

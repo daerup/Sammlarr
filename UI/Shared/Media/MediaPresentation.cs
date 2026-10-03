@@ -10,7 +10,7 @@ public static class MediaPresentation
 			media switch
 			{
 				IdentifiedMedia identified => identified.Type,
-				UnmatchedMedia unmatched => unmatched.Type,
+				UnmatchedMedia unmatched => unmatched.Details.Type,
 			};
 
 		public MediaId Id =>
@@ -27,7 +27,7 @@ public static class MediaPresentation
 			media switch
 			{
 				IdentifiedMedia identified => identified.Title ?? "",
-				UnmatchedMedia unmatched => unmatched.Title ?? "",
+				UnmatchedMedia unmatched => unmatched.Details.Title ?? "",
 			};
 
 		public string Tagline =>
@@ -41,28 +41,28 @@ public static class MediaPresentation
 			media switch
 			{
 				IdentifiedMedia identified => identified.Summary ?? "",
-				UnmatchedMedia unmatched => unmatched.Summary ?? "",
+				UnmatchedMedia unmatched => unmatched.Details.Summary ?? "",
 			};
 
 		public string PosterUrl =>
 			media switch
 			{
 				IdentifiedMedia identified => identified.PosterUrl ?? "",
-				UnmatchedMedia unmatched => unmatched.PosterUrl ?? "",
+				UnmatchedMedia unmatched => unmatched.Details.PosterUrl ?? "",
 			};
 
 		public string BackdropUrl =>
 			media switch
 			{
 				IdentifiedMedia identified => identified.BackdropUrl ?? "",
-				UnmatchedMedia unmatched => unmatched.BackdropUrl ?? "",
+				UnmatchedMedia unmatched => unmatched.Details.BackdropUrl ?? "",
 			};
 
 		public DateOnly ReleaseDate =>
 			media switch
 			{
 				IdentifiedMedia identified => identified.ReleaseDate ?? DateOnly.MinValue,
-				UnmatchedMedia unmatched => unmatched.ReleaseDate ?? DateOnly.MinValue,
+				UnmatchedMedia unmatched => unmatched.Details.ReleaseDate ?? DateOnly.MinValue,
 			};
 
 		public float? Rating =>
@@ -70,7 +70,7 @@ public static class MediaPresentation
 				media switch
 				{
 					IdentifiedMedia identified => identified.Rating,
-					UnmatchedMedia unmatched => unmatched.Rating,
+					UnmatchedMedia unmatched => unmatched.Details.Rating,
 				}
 			).Average;
 
@@ -78,7 +78,7 @@ public static class MediaPresentation
 			media switch
 			{
 				IdentifiedMedia identified => [.. identified.Genres],
-				UnmatchedMedia unmatched => [.. unmatched.Genres],
+				UnmatchedMedia unmatched => [.. unmatched.Details.Genres],
 			};
 
 		public IReadOnlyList<IExternalMediaId> ExternalIds => [.. media.Externals];

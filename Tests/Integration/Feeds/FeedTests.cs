@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Contracts.Feed;
 using Domain.Media;
+using Domain.Media.Metadata;
 using Domain.Providers;
 using Harness;
 using Integration.Tests.Assertions;
@@ -107,7 +108,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		var items = await Testee.GetFeedItemsAsync("loose-list").ToListAsync();
 
 		await Assert.That(items).Count().IsEqualTo(2);
-		await AssertAllUnmatched(items);
+		await AssertNoneComplete(items);
 	}
 
 	[Test]
@@ -122,7 +123,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		var items = await Testee.GetFeedItemsAsync("failing-list").ToListAsync();
 
 		await Assert.That(items).Count().IsEqualTo(1);
-		await AssertAllUnmatched(items);
+		await AssertNoneComplete(items);
 	}
 
 	[Test]
@@ -282,8 +283,10 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		}
 	}
 
-	private static async Task AssertAllUnmatched(IReadOnlyList<MediaLookup> items) =>
-		await Assert.That(items.All(item => !(item is IdentifiedMedia identified && identified is IMedia))).IsTrue();
+	private static async Task AssertNoneComplete(IReadOnlyList<MediaLookup> items)
+	{
+		await Assert.That(items.All(item => !(item is IdentifiedMedia identified && identified.Details.Missing is MediaField.None))).IsTrue();
+	}
 
 	private async Task AssertExternalIdStored(MediaId mediaId, MediaProvider provider, string id)
 	{

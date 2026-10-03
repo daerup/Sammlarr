@@ -385,22 +385,25 @@ public class QueryProcessorRatingTests
 	private static IEnumerable<MediaQueryRow> Items(IEnumerable<QueryVerdict<MediaQueryRow>> rows, QueryOutcome outcome) =>
 		rows.Where(row => row.Outcome == outcome).Select(row => row.Item);
 
-	private static MediaQueryRow MovieWithRating(int year, float? rating) =>
-		MediaQueryRow.From(
-			new PartialMovie
-			{
-				Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(year.ToString(), MediaType.Movie)]),
-				Title = $"Movie {year}",
-				Tagline = string.Empty,
-				Summary = string.Empty,
-				PosterUrl = string.Empty,
-				BackdropUrl = string.Empty,
-				ReleaseDate = new DateOnly(year, 1, 1),
-				Genres = [],
-				Runtime = TimeSpan.FromMinutes(90),
-				Rating = rating is { } value ? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, value, 1)]) : RatingSummary.None,
-			}
+	private static MediaQueryRow MovieWithRating(int year, float? rating)
+	{
+		return MediaQueryRow.From(
+			new IdentifiedMedia(
+				new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(year.ToString(), MediaType.Movie)]),
+				new MovieDetails
+				{
+					Title = $"Movie {year}",
+					Tagline = string.Empty,
+					Summary = string.Empty,
+					PosterUrl = string.Empty,
+					BackdropUrl = string.Empty,
+					ReleaseDate = new DateOnly(year, 1, 1),
+					Runtime = TimeSpan.FromMinutes(90),
+					Rating = rating is { } value ? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, value, 1)]) : RatingSummary.None,
+				}
+			)
 		);
+	}
 }
 
 internal record Item(string Name, int Year, string Genre = "Unknown");

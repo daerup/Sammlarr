@@ -140,7 +140,7 @@ public class ChangeListTests : BunitContext
 		await cut.Find(".change-row").ClickAsync(new MouseEventArgs());
 
 		await Assert.That(selected).IsNotNull();
-		await Assert.That(selected!.Value.AsIdentified()!.Value.Identity.Id).IsEqualTo(item.Media!.Value.AsIdentified()!.Value.Identity.Id);
+		await Assert.That(selected!.Value.AsIdentified()!.Identity.Id).IsEqualTo(item.Media!.Value.AsIdentified()!.Identity.Id);
 	}
 
 	[Test]
@@ -334,18 +334,22 @@ public class ChangeListTests : BunitContext
 		});
 	}
 
-	private static MediaLookup Media(string title) =>
-		new PartialMovie
-		{
-			Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(title, MediaType.Movie)]),
-			Title = title,
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = "https://example.invalid/poster.jpg",
-			BackdropUrl = string.Empty,
-			ReleaseDate = new DateOnly(2024, 1, 1),
-			Genres = [],
-			Runtime = TimeSpan.FromMinutes(90),
-			Rating = RatingSummary.None,
-		}.ToMatch();
+	private static MediaLookup Media(string title)
+	{
+		return new IdentifiedMedia(
+			new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(title, MediaType.Movie)]),
+			new MovieDetails
+			{
+				Title = title,
+				Tagline = string.Empty,
+				Summary = string.Empty,
+				PosterUrl = "https://example.invalid/poster.jpg",
+				BackdropUrl = string.Empty,
+				ReleaseDate = new DateOnly(2024, 1, 1),
+				Genres = [],
+				Runtime = TimeSpan.FromMinutes(90),
+				Rating = RatingSummary.None,
+			}
+		).ToMatch();
+	}
 }

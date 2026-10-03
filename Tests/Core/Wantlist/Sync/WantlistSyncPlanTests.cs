@@ -65,7 +65,7 @@ public class WantlistSyncPlanTests
 	[Test]
 	public async Task Compute_CarriesTheTitlesTheSinkCouldNotMatch()
 	{
-		var unmatched = new UnmatchedMedia { Externals = [PlexId.From("plex-1", MediaType.Movie)], Title = "Solaris" };
+		var unmatched = new UnmatchedMedia([PlexId.From("plex-1", MediaType.Movie)], new MovieDetails { Title = "Solaris" });
 
 		var plan = WantlistSyncPlan.Compute(new SinkSnapshot([], [unmatched]), Wanted(), Queued());
 

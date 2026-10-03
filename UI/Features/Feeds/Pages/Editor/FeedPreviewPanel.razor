@@ -684,7 +684,7 @@
         _filteredUnmatchedResults = _atRiskOnly
             ? []
             : _unmatchedResults
-                .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unmatched, _activeFilters) && MatchesSearch(r.Title ?? string.Empty))
+                .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unmatched, _activeFilters) && MatchesSearch(r.Details.Title ?? string.Empty))
                 .Select(MediaLookup (r) => r)
                 .ToList();
         _filteredGoneResults = _activeFilters.Count > 0 ? [] : _goneResults.Where(gone => MatchesSearch(gone.Media.Title)).ToList();

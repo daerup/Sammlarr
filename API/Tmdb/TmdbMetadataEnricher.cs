@@ -28,18 +28,20 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IMet
 		id.Require<TmdbId>("TMDB enrichment requires a TMDB id.")
 			.Map(tmdbId => tmdbApi.GetDetailAsync(tmdbId, cancellationToken).Map(details => ToLookup(details, tmdbId)));
 
-	private MediaLookup ToLookup(TmdbTypes.Details details, TmdbId tmdbId) =>
-		tmdbId.Type switch
+	private MediaLookup ToLookup(TmdbTypes.Details details, TmdbId tmdbId)
+	{
+		return tmdbId.Type switch
 		{
-			MediaType.Movie => IdentifiedMedia.From(MapMovie(details, tmdbId)),
-			MediaType.Show => IdentifiedMedia.From(MapShow(details, tmdbId)),
+			MediaType.Movie => new IdentifiedMedia(new MediaIdentity(default, [tmdbId]), MapMovie(details)),
+			MediaType.Show => new IdentifiedMedia(new MediaIdentity(default, [tmdbId]), MapShow(details)),
 			MediaType.Unknown => throw new UnreachableException(),
 		};
+	}
 
-	private PartialMovie MapMovie(TmdbTypes.Details details, TmdbId sourceId) =>
-		new()
+	private MovieDetails MapMovie(TmdbTypes.Details details)
+	{
+		return new()
 		{
-			Identity = new MediaIdentity(default, [sourceId]),
 			Title = details.Title.NullIfBlank(),
 			Tagline = details.Tagline.NullIfBlank(),
 			Summary = details.Overview.NullIfBlank(),
@@ -50,11 +52,12 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IMet
 			Rating = BuildRating(details),
 			Runtime = details.Runtime is > 0 ? TimeSpan.FromMinutes(details.Runtime.Value) : null,
 		};
+	}
 
-	private PartialShow MapShow(TmdbTypes.Details details, TmdbId sourceId) =>
-		new()
+	private ShowDetails MapShow(TmdbTypes.Details details)
+	{
+		return new()
 		{
-			Identity = new MediaIdentity(default, [sourceId]),
 			Title = details.Name.NullIfBlank(),
 			Tagline = details.Tagline.NullIfBlank(),
 			Summary = details.Overview.NullIfBlank(),
@@ -67,6 +70,7 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IMet
 			Episodes = details.NumberOfEpisodes,
 			RuntimePerEpisode = details.EpisodeRunTime is { Count: > 0 } runtimes && runtimes[0] > 0 ? TimeSpan.FromMinutes(runtimes[0]) : null,
 		};
+	}
 
 	private static RatingSummary BuildRating(TmdbTypes.Details details) =>
 		details.VoteAverage is { } vote && vote > 0

@@ -1,43 +1,39 @@
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
-using TestInfrastructure;
 
 namespace Domain.Tests.Media.Metadata;
 
 public class MediaCompletenessTests
 {
 	[Test]
-	public async Task IsComplete_WhenAllFieldsPresent_IsTrue()
+	public async Task Missing_WhenAllFieldsPresent_IsNone()
 	{
-		IPartialMedia movie = MediaFakes.CompletePartialMovie();
+		var movie = MediaFakes.CompleteMovieDetails();
 
-		await Assert.That(movie.IsComplete).IsTrue();
 		await Assert.That(movie.Missing).IsEqualTo(MediaField.None);
 	}
 
 	[Test]
 	public async Task Missing_WhenRuntimeMissing_NamesRuntime()
 	{
-		IPartialMedia movie = MediaFakes.CompletePartialMovie() with { Runtime = null };
+		var movie = MediaFakes.CompleteMovieDetails() with { Runtime = null };
 
-		await Assert.That(movie.IsComplete).IsFalse();
 		await Assert.That(movie.Missing).IsEqualTo(MediaField.Runtime);
 	}
 
 	[Test]
 	public async Task Missing_WhenNoProviderHasRatedTheTitle_NamesRating()
 	{
-		IPartialMedia movie = MediaFakes.CompletePartialMovie() with { Rating = RatingSummary.None };
+		var movie = MediaFakes.CompleteMovieDetails() with { Rating = RatingSummary.None };
 
-		await Assert.That(movie.IsComplete).IsFalse();
 		await Assert.That(movie.Missing).IsEqualTo(MediaField.Rating);
 	}
 
 	[Test]
 	public async Task Missing_WhenSeveralFieldsAreBlank_NamesEachOfThem()
 	{
-		IPartialMedia movie = MediaFakes.CompletePartialMovie() with { Genres = [], Tagline = " ", BackdropUrl = null };
+		var movie = MediaFakes.CompleteMovieDetails() with { Genres = [], Tagline = " ", BackdropUrl = null };
 
 		await Assert.That(movie.Missing).IsEqualTo(MediaField.Genres | MediaField.Tagline | MediaField.Backdrop);
 	}
@@ -45,9 +41,8 @@ public class MediaCompletenessTests
 	[Test]
 	public async Task Missing_ForAShowWithoutSeasonsOrEpisodes_NamesBoth()
 	{
-		IPartialMedia show = new PartialShow
+		var show = new ShowDetails
 		{
-			Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), []),
 			Title = "Severance",
 			Tagline = "Work is life.",
 			Summary = "Office workers split their memories.",
@@ -63,13 +58,14 @@ public class MediaCompletenessTests
 	}
 
 	[Test]
-	public async Task WithConfirmedAbsent_KeepsTheFieldsOnThePartial()
+	public async Task Missing_ForAnUnknownTitle_NamesOnlyTheCommonFields()
 	{
-		IPartialMedia movie = MediaFakes.CompletePartialMovie() with { Tagline = null };
+		var unknown = new UnknownDetails { Title = "Christopher Nolan" };
 
 		await Assert
-			.That(movie.WithConfirmedAbsent(MediaField.Tagline))
-			.IsOfUnionType<IdentifiedMedia, IPartialMedia>()
-			.And.Multiple(async partial => await Assert.That(partial.ConfirmedAbsent).IsEqualTo(MediaField.Tagline));
+			.That(unknown.Missing)
+			.IsEqualTo(
+				MediaField.Tagline | MediaField.Summary | MediaField.Poster | MediaField.Backdrop | MediaField.ReleaseDate | MediaField.Genres | MediaField.Rating
+			);
 	}
 }

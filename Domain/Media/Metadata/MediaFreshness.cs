@@ -16,9 +16,6 @@ public static class MediaFreshness
 		{
 			return false;
 		}
-		return stored is IMedia || LacksOnlyConfirmedAbsentFields(stored) || sinceFetched < hydrationCooldown;
+		return stored.Details.Missing.Except(stored.ConfirmedAbsent) is MediaField.None || sinceFetched < hydrationCooldown;
 	}
-
-	private static bool LacksOnlyConfirmedAbsentFields(IdentifiedMedia stored) =>
-		stored is IPartialMedia partial && partial.Missing.Except(partial.ConfirmedAbsent) is MediaField.None;
 }

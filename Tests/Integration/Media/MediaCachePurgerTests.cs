@@ -257,7 +257,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		using var _ = Assert.Multiple();
 		await Assert.That(cached.Count).IsEqualTo(1);
-		await Assert.That(cached[0].Stored).IsOfUnionType<IdentifiedMedia, PartialMovie>();
+		await Assert.That(cached[0].Stored.Details).IsEqualTo(new MovieDetails());
 		await Assert.That(cached[0].Stored.Identity.Id).IsEqualTo(MediaId.From(media.Id));
 		await Assert.That(cached[0].Stored.Identity.Externals.Count).IsEqualTo(2);
 		await Assert.That(cached[0].FetchedAt).IsNull();

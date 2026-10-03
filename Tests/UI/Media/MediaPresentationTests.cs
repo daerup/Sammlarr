@@ -63,7 +63,7 @@ public class MediaPresentationTests
 	[Test]
 	public async Task Tagline_WhenTheMediaIsUnmatched_IsEmpty()
 	{
-		MediaLookup media = Unmatched() with { Title = "Inception" };
+		MediaLookup media = Unmatched() with { Details = new MovieDetails { Title = "Inception" } };
 
 		await Assert.That(media.Tagline).IsEqualTo(string.Empty);
 	}
@@ -79,27 +79,31 @@ public class MediaPresentationTests
 	}
 
 	[Test]
-	public async Task MediaType_WhenTheMediaIsUnmatched_ComesFromTheExternalId()
+	public async Task MediaType_WhenTheMediaIsUnmatched_ComesFromItsDetails()
 	{
-		MediaLookup media = Unmatched();
+		MediaLookup media = new UnmatchedMedia([], new ShowDetails());
 
-		await Assert.That(media.MediaType).IsEqualTo(MediaType.Movie);
+		await Assert.That(media.MediaType).IsEqualTo(MediaType.Show);
 	}
 
-	private static UnmatchedMedia Unmatched() => new() { Externals = [TmdbId.From("27205", MediaType.Movie)] };
+	private static UnmatchedMedia Unmatched() => new([TmdbId.From("27205", MediaType.Movie)], new MovieDetails());
 
-	private static Movie Identified() =>
-		new()
-		{
-			Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From("27205", MediaType.Movie)]),
-			Title = "Inception",
-			Tagline = "Your mind is the scene of the crime",
-			Summary = "A thief who steals corporate secrets.",
-			PosterUrl = "/poster.jpg",
-			BackdropUrl = "/backdrop.jpg",
-			ReleaseDate = new DateOnly(2010, 7, 16),
-			Genres = ["Action"],
-			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
-			Runtime = TimeSpan.FromMinutes(148),
-		};
+	private static IdentifiedMedia Identified()
+	{
+		return new(
+			new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From("27205", MediaType.Movie)]),
+			new MovieDetails
+			{
+				Title = "Inception",
+				Tagline = "Your mind is the scene of the crime",
+				Summary = "A thief who steals corporate secrets.",
+				PosterUrl = "/poster.jpg",
+				BackdropUrl = "/backdrop.jpg",
+				ReleaseDate = new DateOnly(2010, 7, 16),
+				Genres = ["Action"],
+				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
+				Runtime = TimeSpan.FromMinutes(148),
+			}
+		);
+	}
 }

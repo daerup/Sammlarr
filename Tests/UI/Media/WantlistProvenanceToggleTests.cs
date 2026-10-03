@@ -114,5 +114,5 @@ public class WantlistProvenanceToggleTests : BunitContext
 			new WantlistItemProvenance(TestFeeds.Origin(new Guid(21, 0, 0, new byte[8]), new Guid(22, 0, 0, new byte[8]), "Documentaries"))
 		);
 
-	private static MediaLookup Lookup() => new PartialMovie { Identity = new MediaIdentity(Id, []) }.ToMatch();
+	private static MediaLookup Lookup() => new IdentifiedMedia(new MediaIdentity(Id, []), new MovieDetails()).ToMatch();
 }

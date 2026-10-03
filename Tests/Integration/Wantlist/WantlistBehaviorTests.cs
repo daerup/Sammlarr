@@ -91,8 +91,7 @@ public class WantlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(items).Count().IsEqualTo(1);
 		await Assert
 			.That(items[0].Media)
-			.IsOfUnionType<IdentifiedMedia, PartialMovie>()
-			.And.Multiple(async movie =>
+			.Multiple(async movie =>
 			{
 				await Assert.That(movie.Title).IsEqualTo("Fight Club");
 				await Assert.That(movie.PosterUrl).IsNotNullOrEmpty();

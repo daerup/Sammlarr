@@ -41,7 +41,7 @@ public class PosterTrackTests : BunitContext
 	[Test]
 	public async Task ImageError_WhenTheSizedPosterFails_FallsBackToTheOriginal()
 	{
-		var media = new PartialMovie { Identity = new MediaIdentity(First, []), PosterUrl = Poster }.ToMatch();
+		var media = new IdentifiedMedia(new MediaIdentity(First, []), new MovieDetails { PosterUrl = Poster }).ToMatch();
 		var cut = Render<PosterTrack>(parameters =>
 			parameters.Add(track => track.Ids, [First]).Add(track => track.Media, new Dictionary<MediaId, MediaLookup> { [First] = media })
 		);

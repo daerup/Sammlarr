@@ -61,6 +61,23 @@ public class MdblistServiceTests
 		await Assert.That(first).IsOfUnionType<MediaLookup, UnmatchedMedia>();
 	}
 
+	[Test]
+	public async Task GetFeedItemsAsync_WhenAShowHasNoIds_ReportsItUnmatchedAsAShow()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[{"title":"No Ids","release_year":2024}]}""");
+		var testee = CreateTestee(handler, out _);
+
+		var results = await testee.GetFeedItemsAsync("id-less").ToListAsync();
+
+		await Assert
+			.That(results.Single())
+			.IsOfUnionType<MediaLookup, UnmatchedMedia>()
+			.And.Multiple(async unmatched =>
+				await Assert.That(unmatched.Details).IsEqualTo(new ShowDetails { Title = "No Ids", ReleaseDate = new DateOnly(2024, 1, 1) })
+			);
+	}
+
 	private static MdblistService CreateTestee(
 		HttpMessageHandler handler,
 		out Mock<IMediaService> media,
@@ -109,7 +126,7 @@ public class MdblistServiceTests
 	{
 		await foreach (var request in requests.WithCancellation(cancellationToken))
 		{
-			yield return new UnmatchedMedia { Externals = [.. request.Candidates] };
+			yield return new UnmatchedMedia([.. request.Candidates], new UnknownDetails());
 		}
 	}
 

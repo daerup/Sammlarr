@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
 using API.Tmdb.Types;
@@ -54,39 +53,17 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 			MediaType = response.MediaType,
 		};
 
-	private MediaLookup BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome) =>
-		outcome.Match(identity => IdentifiedMedia.From(BuildPartial(response, identity)), _ => BuildUnmatched(response));
+	private MediaLookup BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome)
+	{
+		return outcome.Match(identity => BuildIdentified(response, identity), _ => BuildUnmatched(response));
+	}
 
-	private IPartialMedia BuildPartial(TmdbTypes.Trending.Result response, MediaIdentity identity) =>
-		response.MediaType switch
-		{
-			MediaType.Show => new PartialShow
-			{
-				Identity = identity,
-				Title = response.DisplayTitle,
-				Summary = response.Overview,
-				PosterUrl = artwork.Original(response.PosterPath),
-				BackdropUrl = artwork.Original(response.BackdropPath),
-				ReleaseDate = ParseReleaseDate(response.AvailableDate),
-				Rating = BuildRating(response.VoteAverage),
-			},
-			MediaType.Movie => new PartialMovie
-			{
-				Identity = identity,
-				Title = response.DisplayTitle,
-				Summary = response.Overview,
-				PosterUrl = artwork.Original(response.PosterPath),
-				BackdropUrl = artwork.Original(response.BackdropPath),
-				ReleaseDate = ParseReleaseDate(response.AvailableDate),
-				Rating = BuildRating(response.VoteAverage),
-			},
-			MediaType.Unknown => throw new UnreachableException(),
-		};
+	private MediaLookup BuildIdentified(TmdbTypes.Trending.Result response, MediaIdentity identity) => new IdentifiedMedia(identity, BuildDetails(response));
 
-	private MediaLookup BuildUnmatched(TmdbTypes.Trending.Result response) =>
-		new UnmatchedMedia
+	private MediaDetails BuildDetails(TmdbTypes.Trending.Result response)
+	{
+		return MediaDetails.Empty(response.MediaType) with
 		{
-			Externals = [response.TmdbId],
 			Title = response.DisplayTitle,
 			Summary = response.Overview,
 			PosterUrl = artwork.Original(response.PosterPath),
@@ -94,6 +71,9 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 			ReleaseDate = ParseReleaseDate(response.AvailableDate),
 			Rating = BuildRating(response.VoteAverage),
 		};
+	}
+
+	private MediaLookup BuildUnmatched(TmdbTypes.Trending.Result response) => new UnmatchedMedia([response.TmdbId], BuildDetails(response));
 
 	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
 

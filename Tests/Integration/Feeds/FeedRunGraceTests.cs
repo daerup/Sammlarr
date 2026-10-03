@@ -103,20 +103,22 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(absences).IsEmpty();
 	}
 
-	private static MediaLookup Lookup(MediaId id) =>
-		new PartialMovie
-		{
-			Identity = new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
-			Title = "Title",
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = new DateOnly(2020, 1, 1),
-			Genres = [],
-			Runtime = TimeSpan.FromMinutes(90),
-			Rating = RatingSummary.None,
-		}.ToMatch();
+	private static MediaLookup Lookup(MediaId id)
+	{
+		return new IdentifiedMedia(
+			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
+			new MovieDetails
+			{
+				Title = "Title",
+				Tagline = string.Empty,
+				Summary = string.Empty,
+				PosterUrl = string.Empty,
+				BackdropUrl = string.Empty,
+				ReleaseDate = new DateOnly(2020, 1, 1),
+				Runtime = TimeSpan.FromMinutes(90),
+			}
+		);
+	}
 
 	private async Task<FeedId> SeedFeedAsync()
 	{

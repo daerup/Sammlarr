@@ -141,14 +141,9 @@ For algebraic laws over generated inputs (id round-trips, cross-provider `Equals
 
 ```csharp
 [Test]
-public async Task Merging_keeps_every_external_id_from_both_sides()
+public void FillFrom_WhenFillingGaps_NeverRemovesData()
 {
-    Gen.Bool.Array[12].Select(Build).Sample(scenario =>
-    {
-        var merged = scenario.Primary.MergeWith(scenario.Secondary);
-        return merged.Externals.IsSupersetOf(scenario.Primary.Externals);
-    });
-    await Task.CompletedTask;
+    Gen.Select(Primaries, Others).Sample((primary, other) => !primary.FillFrom(other).Missing.Overlaps(~primary.Missing));
 }
 ```
 Keep only high-value laws that catch real bugs; `.Sample(predicate)` shrinks to a minimal counter-example and reprints the seed on failure. One focused law per test, not nested `.Sample` blocks.

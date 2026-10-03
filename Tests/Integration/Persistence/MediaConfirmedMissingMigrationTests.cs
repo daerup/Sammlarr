@@ -20,17 +20,19 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 	{
 		var movie = await host.Movie(TestMedia.Inception).SeedAsync();
 		await SeedAsync(
-			new PartialMovie
-			{
-				Identity = new MediaIdentity(movie, []),
-				Title = "Inception",
-				Tagline = " \t",
-				Summary = "Dreams within dreams.",
-				PosterUrl = "poster",
-				ReleaseDate = new DateOnly(2010, 7, 16),
-				Genres = ["Science Fiction"],
-				Runtime = TimeSpan.FromMinutes(148),
-			}
+			new IdentifiedMedia(
+				new MediaIdentity(movie, []),
+				new MovieDetails
+				{
+					Title = "Inception",
+					Tagline = " \t",
+					Summary = "Dreams within dreams.",
+					PosterUrl = "poster",
+					ReleaseDate = new DateOnly(2010, 7, 16),
+					Genres = ["Science Fiction"],
+					Runtime = TimeSpan.FromMinutes(148),
+				}
+			)
 		);
 
 		await MigrateAsync(BeforeConfirmedGaps);
@@ -44,13 +46,15 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 	{
 		var show = await host.Show(TestMedia.BreakingBad).SeedAsync();
 		await SeedAsync(
-			new PartialShow
-			{
-				Identity = new MediaIdentity(show, []),
-				Title = "Breaking Bad",
-				Genres = ["Drama"],
-				Seasons = 5,
-			}
+			new IdentifiedMedia(
+				new MediaIdentity(show, []),
+				new ShowDetails
+				{
+					Title = "Breaking Bad",
+					Genres = ["Drama"],
+					Seasons = 5,
+				}
+			)
 		);
 
 		await MigrateAsync(BeforeConfirmedGaps);
@@ -59,12 +63,12 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 		await Assert.That(await ConfirmedAbsentAsync(show)).IsEqualTo(MediaField.None);
 	}
 
-	private Task SeedAsync(IPartialMedia partial) => host.Resolve<IMediaRepository>().UpsertMetadataAsync([IdentifiedMedia.From(partial)]);
+	private Task SeedAsync(IdentifiedMedia media) => host.Resolve<IMediaRepository>().UpsertMetadataAsync([media]);
 
 	private async Task<MediaField> ConfirmedAbsentAsync(MediaId id)
 	{
 		var stored = (await host.Resolve<IMediaRepository>().GetAsync([id])).Single().Stored;
-		return (await Assert.That(stored).IsOfUnionType<IdentifiedMedia, IPartialMedia>())!.ConfirmedAbsent;
+		return stored.ConfirmedAbsent;
 	}
 
 	private Task MigrateAsync(string? target) => host.Context.GetService<IMigrator>().MigrateAsync(target);

@@ -112,100 +112,58 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 
 file static class PlexMetadataMappingExtensions
 {
-	public static MediaLookup ToMediaResult(this PlexTypes.Search.Metadata result) =>
-		ParseMediaType(result.Type) switch
-		{
-			MediaType.Movie => IdentifiedMedia.From(MapMovieResult(result)),
-			MediaType.Show => IdentifiedMedia.From(MapShowResult(result)),
-			_ => MapUnmatched(result),
-		};
+	public static MediaLookup ToMediaResult(this PlexTypes.Search.Metadata result) => Lookup([result.PlexId], Details(result));
 
-	public static MediaLookup ToMedia(this PlexTypes.ById.Metadata result) =>
-		ParseMediaType(result.Type) switch
-		{
-			MediaType.Movie => IdentifiedMedia.From(MapMovieResult(result)),
-			MediaType.Show => IdentifiedMedia.From(MapShowResult(result)),
-			_ => MapUnmatched(result),
-		};
+	public static MediaLookup ToMedia(this PlexTypes.ById.Metadata result)
+	{
+		return Lookup([.. BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)], Details(result));
+	}
 
-	private static PartialMovie MapMovieResult(PlexTypes.ById.Metadata result) =>
-		new()
+	private static MediaLookup Lookup(ValueSet<IExternalMediaId> externals, MediaDetails details)
+	{
+		return details is UnknownDetails ? new UnmatchedMedia(externals, details) : new IdentifiedMedia(new MediaIdentity(default, externals), details);
+	}
+
+	private static MediaDetails Details(PlexTypes.ById.Metadata result)
+	{
+		return Shape(result.Type, result.Duration > 0 ? TimeSpan.FromMilliseconds(result.Duration) : null, result.SeasonCount, result.EpisodeCount) with
 		{
-			Identity = new MediaIdentity(default, [.. BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)]),
 			Title = result.Title.NullIfBlank(),
 			Tagline = result.Tagline.NullIfBlank(),
 			Summary = result.Summary.NullIfBlank(),
 			PosterUrl = NormalizePlexImageUrl(result.Poster).NullIfBlank(),
 			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
-			Runtime = result.Duration > 0 ? TimeSpan.FromMilliseconds(result.Duration) : null,
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
 			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
+	}
 
-	private static PartialShow MapShowResult(PlexTypes.ById.Metadata result) =>
-		new()
+	private static MediaDetails Details(PlexTypes.Search.Metadata result)
+	{
+		return Shape(result.Type, result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null, result.SeasonCount, result.EpisodeCount) with
 		{
-			Identity = new MediaIdentity(default, [.. BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)]),
-			Title = result.Title.NullIfBlank(),
-			Tagline = result.Tagline.NullIfBlank(),
-			Summary = result.Summary.NullIfBlank(),
-			Seasons = result.SeasonCount,
-			Episodes = result.EpisodeCount,
-			PosterUrl = NormalizePlexImageUrl(result.Poster).NullIfBlank(),
-			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
-			RuntimePerEpisode = result.Duration > 0 ? TimeSpan.FromMilliseconds(result.Duration) : null,
-			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
-			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
-		};
-
-	private static PartialMovie MapMovieResult(PlexTypes.Search.Metadata result) =>
-		new()
-		{
-			Identity = new MediaIdentity(default, [result.PlexId]),
-			Title = result.Title.NullIfBlank(),
-			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank(),
-			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
-			Runtime = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null,
-			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt) ?? ReleaseYear(result.Year),
-			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
-		};
-
-	private static PartialShow MapShowResult(PlexTypes.Search.Metadata result) =>
-		new()
-		{
-			Identity = new MediaIdentity(default, [result.PlexId]),
-			Title = result.Title.NullIfBlank(),
-			Seasons = result.SeasonCount,
-			Episodes = result.EpisodeCount,
-			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank(),
-			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
-			RuntimePerEpisode = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null,
-			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt) ?? ReleaseYear(result.Year),
-			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
-		};
-
-	private static UnmatchedMedia MapUnmatched(PlexTypes.ById.Metadata result) =>
-		new()
-		{
-			Externals = [.. BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)],
-			Title = result.Title.NullIfBlank(),
-			Summary = result.Summary.NullIfBlank(),
-			PosterUrl = NormalizePlexImageUrl(result.Poster).NullIfBlank(),
-			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
-			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
-			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
-		};
-
-	private static UnmatchedMedia MapUnmatched(PlexTypes.Search.Metadata result) =>
-		new()
-		{
-			Externals = [result.PlexId],
 			Title = result.Title.NullIfBlank(),
 			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank(),
 			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt) ?? ReleaseYear(result.Year),
 			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
+	}
+
+	private static MediaDetails Shape(string type, TimeSpan? duration, int? seasons, int? episodes)
+	{
+		return ParseMediaType(type) switch
+		{
+			MediaType.Movie => new MovieDetails { Runtime = duration },
+			MediaType.Show => new ShowDetails
+			{
+				Seasons = seasons,
+				Episodes = episodes,
+				RuntimePerEpisode = duration,
+			},
+			MediaType.Unknown => new UnknownDetails(),
+		};
+	}
 
 	private static List<IExternalMediaId> BuildExternals(PlexId plex, IEnumerable<TmdbId> tmdb, IEnumerable<ImdbId> imdb, IEnumerable<TvdbId> tvdb)
 	{

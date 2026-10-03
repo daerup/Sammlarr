@@ -34,7 +34,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 			else
 			{
 				unmatched.Add(item);
-				logger.LogWarning("Plex watchlist item {Title} could not be matched during sync", item.Title ?? item.Externals.FirstOrDefault()?.Value);
+				logger.LogWarning("Plex watchlist item {Title} could not be matched during sync", item.Details.Title ?? item.Externals.FirstOrDefault()?.Value);
 			}
 		}
 
@@ -125,13 +125,10 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		return (items, totalPages);
 	}
 
-	private static UnmatchedMedia Item(PlexTypes.Watchlist.Metadata metadata) =>
-		new()
-		{
-			Externals = [metadata.PlexId],
-			Title = metadata.Title.NullIfBlank(),
-			ReleaseDate = ReleasedOn(metadata),
-		};
+	private static UnmatchedMedia Item(PlexTypes.Watchlist.Metadata metadata)
+	{
+		return new([metadata.PlexId], MediaDetails.Empty(metadata.PlexId.Type) with { Title = metadata.Title.NullIfBlank(), ReleaseDate = ReleasedOn(metadata) });
+	}
 
 	private static DateOnly? ReleasedOn(PlexTypes.Watchlist.Metadata metadata) =>
 		DateOnly.TryParse(metadata.OriginallyAvailableAt, out var released) ? released

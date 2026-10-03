@@ -39,13 +39,15 @@ internal static class WantlistSyncView
 			}),
 		];
 
-	private static string UnmatchedTitle(UnmatchedMedia unmatched) =>
-		unmatched.Title.NullIfBlank() ?? unmatched.Externals.FirstOrDefault()?.Value ?? "Unknown title";
+	private static string UnmatchedTitle(UnmatchedMedia unmatched)
+	{
+		return unmatched.Details.Title.NullIfBlank() ?? unmatched.Externals.FirstOrDefault()?.Value ?? "Unknown title";
+	}
 
 	private static string UnmatchedSubtitle(UnmatchedMedia unmatched)
 	{
 		var source = unmatched.Externals.FirstOrDefault()?.Source.GetDescription();
-		var year = unmatched.ReleaseDate?.Year.ToString();
+		var year = unmatched.Details.ReleaseDate?.Year.ToString();
 		return string.Join(" · ", new[] { year, source is null ? null : $"on {source}", "Cannot be imported" }.Where(part => part is not null));
 	}
 

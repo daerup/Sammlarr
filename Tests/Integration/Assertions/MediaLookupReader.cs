@@ -7,50 +7,25 @@ internal static class MediaLookupReader
 {
 	extension(MediaLookup media)
 	{
-		public string Title =>
-			media switch
-			{
-				IdentifiedMedia identified => identified.Title ?? string.Empty,
-				UnmatchedMedia unmatched => unmatched.Title,
-			};
+		public string Title => Details(media).Title ?? string.Empty;
 
-		public string Summary =>
-			media switch
-			{
-				IdentifiedMedia identified => identified.Summary ?? string.Empty,
-				UnmatchedMedia unmatched => unmatched.Summary,
-			};
+		public string Summary => Details(media).Summary ?? string.Empty;
 
-		public string PosterUrl =>
-			media switch
-			{
-				IdentifiedMedia identified => identified.PosterUrl ?? string.Empty,
-				UnmatchedMedia unmatched => unmatched.PosterUrl,
-			};
+		public string PosterUrl => Details(media).PosterUrl ?? string.Empty;
 
-		public MediaType MediaType =>
-			media switch
-			{
-				IdentifiedMedia identified => identified.Type,
-				UnmatchedMedia unmatched => unmatched.Type,
-			};
+		public MediaType MediaType => Details(media).Type;
 
-		public IReadOnlyList<string> Genres =>
-			[
-				.. media switch
-				{
-					IdentifiedMedia identified => identified.Genres,
-					UnmatchedMedia unmatched => unmatched.Genres,
-				},
-			];
+		public IReadOnlyList<string> Genres => [.. Details(media).Genres];
 
-		public IReadOnlyList<MediaRating> Ratings =>
-			[
-				.. media switch
-				{
-					IdentifiedMedia identified => identified.Rating.Sources,
-					UnmatchedMedia unmatched => unmatched.Rating.Sources,
-				},
-			];
+		public IReadOnlyList<MediaRating> Ratings => [.. Details(media).Rating.Sources];
+	}
+
+	private static MediaDetails Details(MediaLookup media)
+	{
+		return media switch
+		{
+			IdentifiedMedia identified => identified.Details,
+			UnmatchedMedia unmatched => unmatched.Details,
+		};
 	}
 }
