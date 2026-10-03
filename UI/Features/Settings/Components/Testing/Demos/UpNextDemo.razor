@@ -10,9 +10,9 @@
     private static readonly IReadOnlyList<UpNextRow> Queued =
     [
         new(DemoFeeds.MirrorFeed.Name, "running now", "running", UpNextKind.Running, "/feeds", MediaProvider.Mdblist),
-        new("Sync Wantlist", "queued", "2nd in line", UpNextKind.Queued, null, MediaProvider.Plex, Job: JobId.From(Guid.NewGuid())),
-        new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null, MediaProvider.Plex, RunsAt: DemoFeeds.Now.AddMinutes(2), Job: JobId.From(Guid.NewGuid())),
-        new("A deleted feed", "queued", "4th in line", UpNextKind.Queued, null, Deleted: true, Job: JobId.From(Guid.NewGuid())),
+        new("Sync Wantlist", "queued", "2nd in line", UpNextKind.Queued, null, MediaProvider.Plex) { Job = JobId.From(Guid.NewGuid()) },
+        new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null, MediaProvider.Plex) { RunsAt = Some.Of(DemoFeeds.Now.AddMinutes(2)), Job = JobId.From(Guid.NewGuid()) },
+        new("A deleted feed", "queued", "4th in line", UpNextKind.Queued, null, Deleted: true) { Job = JobId.From(Guid.NewGuid()) },
     ];
 
     private static readonly IReadOnlyList<UpNextRow> Scheduled =

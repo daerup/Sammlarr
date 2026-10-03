@@ -1,6 +1,6 @@
 @using Domain.Feed
 
-@if (NextRun is { } next)
+@if (NextRun is Some<DateTimeOffset>(var next))
 {
     <FeedChip Tone="FeedChipTone.Scheduled" Title="@ScheduleText.Describe(Schedule)">
         <svg class="feed-chip-ring" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
@@ -22,7 +22,7 @@ else
 @code {
     [Parameter, EditorRequired] public required FeedRunTrigger Schedule { get; set; }
 
-    [Parameter] public DateTimeOffset? NextRun { get; set; }
+    [Parameter] public Optional<DateTimeOffset> NextRun { get; set; } = new None();
 
     [Parameter] public DateTimeOffset Now { get; set; }
 
@@ -30,8 +30,8 @@ else
 
     private string RingDash(DateTimeOffset next)
     {
-        var after = Schedule is Scheduled scheduled ? scheduled.NextRun(next, TimeZoneInfo.Local) : null;
-        var period = after is { } following ? following - next : TimeSpan.Zero;
+        var after = Schedule is Scheduled scheduled ? scheduled.NextRun(next, TimeZoneInfo.Local) : new None();
+        var period = after.Map(following => following - next).GetValueOr(TimeSpan.Zero);
         var left = period > TimeSpan.Zero ? Math.Clamp((next - Now) / period, 0, 1) : 1;
         return FormattableString.Invariant($"{Circumference * left:0.##} {Circumference:0.##}");
     }

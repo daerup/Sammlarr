@@ -28,7 +28,7 @@ internal static class FeedRunProjection
 			Removed = row.Removed,
 		},
 		Items = row.Items.Select(item => new FeedRunItem { MediaId = MediaId.From(item.MediaId), State = item.State }).ToList(),
-		SourceFailure = row.SourceFailure,
+		SourceFailure = Optional.Of(row.SourceFailure),
 	};
 
 	private static readonly Func<FeedRunRow, Domain.Feed.Run.FeedRun> map = Project.Compile();

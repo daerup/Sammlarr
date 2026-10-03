@@ -22,9 +22,8 @@ internal sealed class FeedRunJobHandler(IFeedRunEngine engine, IJobQueue queue, 
 
 		var result = await engine.RunAsync(request.Id, request.Trigger, cancellationToken);
 		announcer.Announce(new FeedRunFinishedEvent(currentUser.Id, request.Id));
-		if (FeedRunNotification.For(currentUser.Id, clock.Now, request.Id, result) is { } notification)
-		{
-			await announcer.AnnounceAsync(notification, cancellationToken);
-		}
+		await FeedRunNotification
+			.For(currentUser.Id, clock.Now, request.Id, result)
+			.Apply(notification => announcer.AnnounceAsync(notification, cancellationToken));
 	}
 }

@@ -29,12 +29,10 @@ internal sealed class FeedRunEngine(
 		using var _ = lease;
 		try
 		{
-			if (await feeds.FindAsync(feedId, cancellationToken) is not Some<Domain.Feed.Feed>(var feed))
-			{
-				return new FeedRunFailed("The feed no longer exists.");
-			}
-
-			return await ExecuteAsync(feed, trigger, cancellationToken);
+			return await feeds
+				.FindAsync(feedId, cancellationToken)
+				.Map(async feed => await ExecuteAsync(feed, trigger, cancellationToken))
+				.GetValueOr(new FeedRunFailed("The feed no longer exists."));
 		}
 		catch (Exception ex)
 		{
@@ -80,7 +78,7 @@ internal sealed class FeedRunEngine(
 		await feeds.CompleteRunAsync(completed, cancellationToken);
 
 		return completed.Failed
-			? new FeedRunFailed(completed.SourceFailure ?? "The source returned nothing.")
+			? new FeedRunFailed(completed.SourceFailure.GetValueOr("The source returned nothing."))
 			: new FeedRunCompleted(applied, planned.Conclusiveness);
 	}
 

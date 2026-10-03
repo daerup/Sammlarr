@@ -31,9 +31,10 @@ internal sealed class FeedRunPlanner(
 			return target switch
 			{
 				DraftFeed(var definition, var load) => await PlanAsync(definition, load, cancellationToken),
-				SavedFeed(var id) => await feeds.FindAsync(id, cancellationToken) is Some<Domain.Feed.Feed>(var feed)
-					? await PlanAsync(feed, cancellationToken)
-					: new FeedPlanFailed("The feed no longer exists."),
+				SavedFeed(var id) => await feeds
+					.FindAsync(id, cancellationToken)
+					.Map(async feed => (FeedPlanResult)await PlanAsync(feed, cancellationToken))
+					.GetValueOr(new FeedPlanFailed("The feed no longer exists.")),
 			};
 		}
 		catch (Exception ex)
@@ -114,7 +115,7 @@ internal sealed class FeedRunPlanner(
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
 			logger.LogWarning(ex, "Feed {FeedId} returned a partial list; removals are suppressed for this run", feed.Id);
-			return new RawFeedLoad(items, FeedLoadState.Unfinished, ex.Message);
+			return new RawFeedLoad(items, FeedLoadState.Unfinished, Some.Of(ex.Message));
 		}
 	}
 }

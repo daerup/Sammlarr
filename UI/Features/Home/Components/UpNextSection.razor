@@ -41,7 +41,7 @@
                 </span>
             </span>
             <span class="row-when">
-                @if (row.RunsAt is { } runsAt)
+                @if (row.RunsAt is Some<DateTimeOffset>(var runsAt))
                 {
                     <Countdown At="runsAt"/>
                 }

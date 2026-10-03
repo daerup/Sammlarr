@@ -81,7 +81,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var failed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunFailed>();
 		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(RunQuery.Take(1) with { Feed = Some.Of(feedId) })).Single();
 		await Assert.That(failed.Reason).IsEqualTo("No list found with identifier 'missing-list'.");
-		await Assert.That(recorded.SourceFailure).IsEqualTo(failed.Reason);
+		await Assert.That(recorded.SourceFailure).IsSome().And.IsEqualTo(failed.Reason);
 	}
 
 	[Test]
@@ -108,7 +108,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var result = await host.Resolve<IFeedRunPlanner>().PlanAsync(new SavedFeed(feedId));
 
 		var plan = await Assert.That(result).IsOfUnionType<FeedPlanResult, MirrorPlan>();
-		await Assert.That(plan!.SourceFailure).IsEqualTo("No MDBList API key is configured. Add one in Settings.");
+		await Assert.That(plan!.SourceFailure).IsSome().And.IsEqualTo("No MDBList API key is configured. Add one in Settings.");
 	}
 
 	[Test]

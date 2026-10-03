@@ -11,7 +11,7 @@ public class FeedOverviewTests
 	[Test]
 	public async Task Of_ForAFeedThatNeverRan_HasNoLastRunAndAnEmptyHistory()
 	{
-		var overview = FeedOverview.Of(Comedy, null, 0);
+		var overview = FeedOverview.Of(Comedy, new None(), 0);
 
 		await Assert.That(overview.LastRun).IsNone();
 		await Assert.That(overview.History).IsEqualTo(FeedRunHistory.None);
@@ -23,7 +23,7 @@ public class FeedOverviewTests
 		var run = TestFeeds.Run(Comedy, Guid.NewGuid());
 		var history = FeedRunHistory.None with { TotalRuns = 4 };
 
-		var overview = FeedOverview.Of(Comedy, new FeedRunTotals(run, history), 0);
+		var overview = FeedOverview.Of(Comedy, Some.Of(new FeedRunTotals(run, history)), 0);
 
 		await Assert.That(overview.LastRun).IsSome().And.IsEqualTo(run);
 		await Assert.That(overview.History).IsEqualTo(history);

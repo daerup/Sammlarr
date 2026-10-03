@@ -7,7 +7,7 @@ public class FeedSnapshotTests
 {
 	private static readonly Domain.Feed.Feed Comedy = TestFeeds.Feed(new Guid(1, 0, 0, new byte[8]), "Comedy");
 	private static readonly Domain.Feed.Feed Horror = TestFeeds.Feed(new Guid(2, 0, 0, new byte[8]), "Horror");
-	private static readonly FeedOverview ComedyOverview = FeedOverview.Of(Comedy, null, 3);
+	private static readonly FeedOverview ComedyOverview = FeedOverview.Of(Comedy, new None(), 3);
 
 	private static readonly FeedSnapshot Testee = new([ComedyOverview]);
 

@@ -70,7 +70,7 @@ public class LastRunCellTests : BunitContext
 			Conclusiveness = Conclusiveness.StillLoading,
 			Counts = FeedRunCounts.None,
 			Items = [],
-			SourceFailure = "No list found with identifier 'hdlists/comedy'.",
+			SourceFailure = Some.Of("No list found with identifier 'hdlists/comedy'."),
 		};
 
 		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.LastRun, failed));
@@ -189,7 +189,7 @@ public class LastRunCellTests : BunitContext
 					new FeedRunHistory
 					{
 						TotalRuns = 1,
-						FirstRunAt = LastRun.StartedAt,
+						FirstRunAt = Some.Of(LastRun.StartedAt),
 						TotalAdded = 1,
 						TotalRemoved = 0,
 					},

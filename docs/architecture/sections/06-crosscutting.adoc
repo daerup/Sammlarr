@@ -100,7 +100,8 @@ or the same on `Success<T>`) whose following code holds a method-scoped `using v
 loop with `continue` or `break`. Razor markup may also `@if` on a case. When a member turns from `T?` into `Optional<T>`, its old
 readers that still compile change meaning: `x is null` is always false, `x is not null` and `x is { } v` always true
 (`v` is the `Optional` itself), `OrderBy` on it throws, and interpolation prints the union; `x ?? y`, `x!.Value` and a
-constant `case` stop compiling.
+constant `case` stop compiling. A `null` passed where an `Optional<T>` is expected still compiles and builds a value
+that holds no case: pass `new None()`.
 
 === Modularity and dependency injection
 

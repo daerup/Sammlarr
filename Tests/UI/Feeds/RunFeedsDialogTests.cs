@@ -65,5 +65,5 @@ public class RunFeedsDialogTests : BunitContext
 		});
 
 	private static RunCandidate Candidate(string name, RunGroup group, bool enabled = true) =>
-		new(FeedId.From(Guid.NewGuid()), name, "Manual", new LastRun(true, 0, 0), null, null, group, enabled);
+		new(FeedId.From(Guid.NewGuid()), name, "Manual", new LastRun(true, 0, 0), null, new None(), group, enabled);
 }

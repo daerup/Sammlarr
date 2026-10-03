@@ -16,7 +16,7 @@
     <div class="flex flex-wrap items-center gap-2">
         <FeedTriggerChip Schedule="new Manual()" Now="DemoFeeds.Now"/>
         <FeedTriggerChip Schedule="DemoFeeds.Daily" Now="DemoFeeds.Now"/>
-        <FeedTriggerChip Schedule="DemoFeeds.Daily" NextRun="DemoFeeds.Now.AddMinutes(94)" Now="DemoFeeds.Now"/>
+        <FeedTriggerChip Schedule="DemoFeeds.Daily" NextRun="Some.Of(DemoFeeds.Now.AddMinutes(94))" Now="DemoFeeds.Now"/>
     </div>
     <div class="flex flex-wrap items-center gap-2">
         <FeedJobChip Job="JobState.Running"/>

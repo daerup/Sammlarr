@@ -1,6 +1,7 @@
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Providers;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
 
@@ -62,7 +63,7 @@ public class RunPlanTests
 		var candidates = RunPlan.Candidates([NeverRan(manual)], Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates[0].Group).IsEqualTo(RunGroup.ManualOnly);
-		await Assert.That(candidates[0].NextRun).IsNull();
+		await Assert.That(candidates[0].NextRun).IsNone();
 	}
 
 	[Test]
@@ -85,7 +86,7 @@ public class RunPlanTests
 
 		var candidates = RunPlan.Candidates([NeverRan(off)], Now, TimeZoneInfo.Utc);
 
-		await Assert.That(candidates[0].NextRun).IsNull();
+		await Assert.That(candidates[0].NextRun).IsNone();
 	}
 
 	[Test]
@@ -119,28 +120,32 @@ public class RunPlanTests
 		await Assert.That(candidates[0].LastRun.Changed).IsFalse();
 	}
 
-	private static FeedOverview NeverRan(Feed feed) => FeedOverview.Of(feed, null, 0);
+	private static FeedOverview NeverRan(Feed feed) => FeedOverview.Of(feed, new None(), 0);
 
-	private static FeedOverview Ran(Feed feed, Conclusiveness outcome, int fetched) =>
-		FeedOverview.Of(
+	private static FeedOverview Ran(Feed feed, Conclusiveness outcome, int fetched)
+	{
+		return FeedOverview.Of(
 			feed,
-			new FeedRunTotals(
-				new FeedRun
-				{
-					Id = RunId.From(Guid.NewGuid()),
-					FeedId = feed.Id,
-					StartedAt = Now.AddHours(-1),
-					Duration = TimeSpan.FromSeconds(2),
-					Strategy = new Append(),
-					Trigger = new Manual(),
-					Conclusiveness = outcome,
-					Counts = FeedRunCounts.None with { Total = fetched },
-					Items = [],
-				},
-				FeedRunHistory.None
+			Some.Of(
+				new FeedRunTotals(
+					new FeedRun
+					{
+						Id = RunId.From(Guid.NewGuid()),
+						FeedId = feed.Id,
+						StartedAt = Now.AddHours(-1),
+						Duration = TimeSpan.FromSeconds(2),
+						Strategy = new Append(),
+						Trigger = new Manual(),
+						Conclusiveness = outcome,
+						Counts = FeedRunCounts.None with { Total = fetched },
+						Items = [],
+					},
+					FeedRunHistory.None
+				)
 			),
 			0
 		);
+	}
 
 	private static Feed Feed(string name, FeedRunTrigger? schedule = null, bool enabled = true) =>
 		new()

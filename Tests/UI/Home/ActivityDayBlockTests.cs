@@ -63,7 +63,7 @@ public class ActivityDayBlockTests : BunitContext
 	[Test]
 	public async Task Problem_ForARunWhoseSourceFailed_SaysItFailedAndQuotesWhy()
 	{
-		var failed = Run(0, 0) with { Conclusiveness = Conclusiveness.StillLoading, SourceFailure = "No MDBList API key is configured." };
+		var failed = Run(0, 0) with { Conclusiveness = Conclusiveness.StillLoading, SourceFailure = Some.Of("No MDBList API key is configured.") };
 		var cut = Render(ActivityLog.Days([failed], Names, TimeZoneInfo.Utc)[0]);
 
 		await cut.Find(".dtoggle").ClickAsync(new());

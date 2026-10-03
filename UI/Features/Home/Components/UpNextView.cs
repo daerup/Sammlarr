@@ -15,18 +15,12 @@ public enum UpNextKind
 	Scheduled,
 }
 
-public sealed record UpNextRow(
-	string Name,
-	string Detail,
-	string When,
-	UpNextKind Kind,
-	string? Href,
-	MediaProvider? Brand = null,
-	bool Deleted = false,
-	DateTimeOffset? RunsAt = null,
-	JobId? Job = null
-)
+public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href, MediaProvider? Brand = null, bool Deleted = false)
 {
+	public Optional<DateTimeOffset> RunsAt { get; init; } = new None();
+
+	public JobId? Job { get; init; }
+
 	public bool CanCancel => Job is not null && Kind is UpNextKind.Queued or UpNextKind.Waiting;
 }
 
@@ -52,22 +46,30 @@ internal static class UpNextView
 			.Select(feed => feed.Id)
 			.ToHashSet();
 
-	internal static IReadOnlyList<UpNextRow> OnASchedule(IReadOnlyList<Feed> feeds, DateTimeOffset from, TimeZoneInfo zone) =>
+	internal static IReadOnlyList<UpNextRow> OnASchedule(IReadOnlyList<Feed> feeds, DateTimeOffset from, TimeZoneInfo zone)
+	{
+		return
 		[
 			.. feeds
 				.Where(feed => feed.Enabled)
-				.Select(feed => (feed, next: feed.Schedule is Scheduled scheduled ? scheduled.NextRun(from, zone) : null))
-				.Where(entry => entry.next is not null)
+				.Select(feed => NextRunOf(feed, from, zone).Map(next => (feed, next)))
+				.WhereSome()
 				.OrderBy(entry => entry.next)
 				.Select(entry => new UpNextRow(
 					entry.feed.Name,
 					ScheduleText.Describe(entry.feed.Schedule),
-					ScheduleText.Away(entry.next!.Value, from),
+					ScheduleText.Away(entry.next, from),
 					UpNextKind.Scheduled,
 					EditHref(entry.feed.Id),
 					entry.feed.Provider.AsMediaProvider()
 				)),
 		];
+	}
+
+	private static Optional<DateTimeOffset> NextRunOf(Feed feed, DateTimeOffset from, TimeZoneInfo zone)
+	{
+		return feed.Schedule is Scheduled scheduled ? scheduled.NextRun(from, zone) : new None();
+	}
 
 	private static UpNextRow Row(
 		PendingJob job,
@@ -80,9 +82,15 @@ internal static class UpNextView
 		var href = Href(job.Request, feedNames);
 		var brand = Brand(job.Request, feedBrands, sinkProvider);
 		var deleted = Deleted(job.Request, feedNames);
-		return job.State is JobState.Running ? new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, deleted, Job: job.Id)
-			: job.State is JobState.Waiting ? new UpNextRow(name, Waiting(job.Request), string.Empty, UpNextKind.Waiting, href, brand, deleted, job.RunAfter, job.Id)
-			: new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, deleted, Job: job.Id);
+		if (job.State is JobState.Running)
+		{
+			return new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, deleted) { Job = job.Id };
+		}
+		if (job.State is JobState.Waiting)
+		{
+			return new UpNextRow(name, Waiting(job.Request), string.Empty, UpNextKind.Waiting, href, brand, deleted) { RunsAt = Some.Of(job.RunAfter), Job = job.Id };
+		}
+		return new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, deleted) { Job = job.Id };
 	}
 
 	private static MediaProvider? Brand(IJobRequest request, IReadOnlyDictionary<FeedId, MediaProvider> feedBrands, MediaProvider sinkProvider) =>

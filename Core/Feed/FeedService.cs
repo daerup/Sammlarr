@@ -13,7 +13,7 @@ internal sealed class FeedService(IFeedRepository repository, IWantlistRepositor
 		var feeds = await repository.GetAllAsync(cancellationToken);
 		var totals = await repository.GetRunTotalsAsync(cancellationToken);
 		var onWantlist = await wantlist.CountByFeedAsync(cancellationToken);
-		return new FeedSnapshot([.. feeds.Select(feed => FeedOverview.Of(feed, totals.GetValueOrDefault(feed.Id), onWantlist.GetValueOrDefault(feed.Id)))]);
+		return new FeedSnapshot([.. feeds.Select(feed => FeedOverview.Of(feed, totals.GetValueOrNone(feed.Id), onWantlist.GetValueOrDefault(feed.Id)))]);
 	}
 
 	public async Task<FeedId> CreateAsync(FeedCreateData data, CancellationToken cancellationToken = default)

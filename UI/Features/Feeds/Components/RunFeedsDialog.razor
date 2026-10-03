@@ -88,7 +88,7 @@
                         {
                             <span class="run-flag @Tone(flag)">@RunPlan.Label(flag)</span>
                         }
-                        @if (candidate.NextRun is { } next)
+                        @if (candidate.NextRun is Some<DateTimeOffset>(var next))
                         {
                             <span class="run-row-next">
                                 next<br/>

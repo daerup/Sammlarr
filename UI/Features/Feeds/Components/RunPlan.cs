@@ -29,7 +29,7 @@ public sealed record RunCandidate(
 	string Schedule,
 	LastRun LastRun,
 	RunFlag? Flag,
-	DateTimeOffset? NextRun,
+	Optional<DateTimeOffset> NextRun,
 	RunGroup Group,
 	bool Enabled
 );
@@ -38,15 +38,18 @@ internal static class RunPlan
 {
 	private static readonly TimeSpan Soon = TimeSpan.FromHours(24);
 
-	internal static IReadOnlyList<RunCandidate> Candidates(IReadOnlyList<FeedOverview> feeds, DateTimeOffset from, TimeZoneInfo zone) =>
+	internal static IReadOnlyList<RunCandidate> Candidates(IReadOnlyList<FeedOverview> feeds, DateTimeOffset from, TimeZoneInfo zone)
+	{
+		return
 		[
 			.. feeds
 				.Select(overview => Candidate(overview, from, zone))
 				.OrderBy(candidate => candidate.Enabled ? 0 : 1)
 				.ThenBy(candidate => candidate.Group)
-				.ThenBy(candidate => candidate.NextRun ?? DateTimeOffset.MaxValue)
+				.ThenBy(candidate => candidate.NextRun.GetValueOr(DateTimeOffset.MaxValue))
 				.ThenBy(candidate => candidate.Name, StringComparer.CurrentCultureIgnoreCase),
 		];
+	}
 
 	internal static IReadOnlySet<FeedId> DefaultSelection(IEnumerable<RunCandidate> candidates) =>
 		candidates.Where(candidate => candidate.Enabled && candidate.Group is RunGroup.WorthRunning).Select(candidate => candidate.Id).ToHashSet();
@@ -79,30 +82,50 @@ internal static class RunPlan
 	private static RunCandidate Candidate(FeedOverview overview, DateTimeOffset from, TimeZoneInfo zone)
 	{
 		var feed = overview.Feed;
-		var next = feed.Schedule is Scheduled scheduled ? scheduled.NextRun(from, zone) : null;
-		var stalled = overview.LastRun is Some<FeedRun>({ Conclusiveness: not Conclusiveness.Conclusive });
-
-		var group =
-			feed.Schedule is Manual ? RunGroup.ManualOnly
-			: stalled || next is null || next - from > Soon ? RunGroup.WorthRunning
-			: RunGroup.SoonAnyway;
-
+		var next = feed.Schedule is Scheduled scheduled ? scheduled.NextRun(from, zone) : new None();
+		var stalled = overview.LastRun.Match(run => run.Conclusiveness is not Conclusiveness.Conclusive, () => false);
+		var dueSoon = next.Match(at => at - from <= Soon, () => false);
+		var group = Group(feed.Schedule, stalled, dueSoon);
 		return new RunCandidate(
 			feed.Id,
 			feed.Name,
 			ScheduleText.Describe(feed.Schedule),
 			Outcome(overview.LastRun),
-			!feed.Enabled ? RunFlag.Disabled
-				: overview.LastRun is Some<FeedRun>({ Failed: true }) ? RunFlag.Failed
-				: stalled ? RunFlag.Inconclusive
-				: group is RunGroup.WorthRunning && next is not null ? RunFlag.NotDue
-				: null,
-			feed.Enabled ? next : null,
+			Flag(overview, stalled, group is RunGroup.WorthRunning && next.IsSome()),
+			feed.Enabled ? next : new None(),
 			group,
 			feed.Enabled
 		);
 	}
 
-	private static LastRun Outcome(Optional<FeedRun> last) =>
-		last is Some<FeedRun>(var run) ? new LastRun(true, run.Counts.Added, run.Counts.Removed) : new LastRun(false, 0, 0);
+	private static RunGroup Group(FeedRunTrigger schedule, bool stalled, bool dueSoon)
+	{
+		if (schedule is Manual)
+		{
+			return RunGroup.ManualOnly;
+		}
+		return !stalled && dueSoon ? RunGroup.SoonAnyway : RunGroup.WorthRunning;
+	}
+
+	private static RunFlag? Flag(FeedOverview overview, bool stalled, bool notDue)
+	{
+		if (!overview.Feed.Enabled)
+		{
+			return RunFlag.Disabled;
+		}
+		if (overview.LastRun.Match(run => run.Failed, () => false))
+		{
+			return RunFlag.Failed;
+		}
+		if (stalled)
+		{
+			return RunFlag.Inconclusive;
+		}
+		return notDue ? RunFlag.NotDue : null;
+	}
+
+	private static LastRun Outcome(Optional<FeedRun> last)
+	{
+		return last.Match(run => new LastRun(true, run.Counts.Added, run.Counts.Removed), () => new LastRun(false, 0, 0));
+	}
 }

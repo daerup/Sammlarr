@@ -1,16 +1,16 @@
 <LucideIcon Name="@(Failed ? "cloud-off" : "shield")" Size="15" Class="shrink-0"/>
 <span class="run-problem @(Failed ? "is-failed" : "is-guarded")">
     <strong>@Headline</strong>
-    @if (Reason is not null)
+    @if (Reason is Some<string>(var reason))
     {
-        <span class="run-problem-reason">@Reason</span>
+        <span class="run-problem-reason">@reason</span>
     }
 </span>
 
 @code {
     [Parameter, EditorRequired] public required string Headline { get; set; }
 
-    [Parameter] public string? Reason { get; set; }
+    [Parameter] public Optional<string> Reason { get; set; } = new None();
 
     [Parameter] public bool Failed { get; set; }
 }
