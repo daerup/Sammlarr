@@ -65,14 +65,16 @@ public sealed record ListFilter
 
 	public bool MatchesSource(WantlistItemProvenance provenance) => Sources.Count == 0 || Sources.Any(source => source.Matches(provenance));
 
-	public IEnumerable<T> SortBy<T>(IEnumerable<T> items, Func<T, IdentifiedMedia> media, Func<T, DateTimeOffset> addedAt) =>
-		Sort switch
+	public IEnumerable<T> SortBy<T>(IEnumerable<T> items, Func<T, IdentifiedMedia> media, Func<T, DateTimeOffset> addedAt)
+	{
+		return Sort switch
 		{
 			ListSort.RecentlyAdded => items.OrderByDescending(addedAt),
 			ListSort.OldestAdded => items.OrderBy(addedAt),
-			ListSort.TitleAscending => items.OrderBy(item => media(item).Title, StringComparer.CurrentCultureIgnoreCase),
-			ListSort.TitleDescending => items.OrderByDescending(item => media(item).Title, StringComparer.CurrentCultureIgnoreCase),
-			ListSort.NewestRelease => items.OrderByDescending(item => media(item).ReleaseDate),
-			ListSort.OldestRelease => items.OrderBy(item => media(item).ReleaseDate),
+			ListSort.TitleAscending => items.OrderBy(item => media(item).Details.Title, StringComparer.CurrentCultureIgnoreCase),
+			ListSort.TitleDescending => items.OrderByDescending(item => media(item).Details.Title, StringComparer.CurrentCultureIgnoreCase),
+			ListSort.NewestRelease => items.OrderByDescending(item => media(item).Details.ReleaseDate),
+			ListSort.OldestRelease => items.OrderBy(item => media(item).Details.ReleaseDate),
 		};
+	}
 }

@@ -58,10 +58,10 @@
                                        Items="pageItems"
                                        AllItems="gridItems"
                                        Detail="@(i => i.Media)"
-                                       Key="@(i => i.Media.Id)"
+                                       Key="@(i => i.Media.Identity.Id)"
                                        IsEditMode="IsEditMode"
                                        IsEditModeChanged="SetEditMode"
-                                       OnTileClick="@(i => SelectItem(i.Media))"
+                                       OnTileClick="SelectItem"
                                        OnBulkRemove="RemoveBulkAsync"
                                        RemoveLabel="Remove"
                                        MarkLabel="Wantlist"
@@ -70,7 +70,7 @@
                                        OnBulkMark="WantlistBulkAsync"
                                        RemoveConfirm="RemoveConfirm"
                                        MarkConfirm="WantlistConfirm"
-                                       IsMarked="@(item => _wantlist.Contains(item.Media.Id))"
+                                       IsMarked="@(item => _wantlist.Contains(item.Media.Identity.Id))"
                                        AlreadyMarkedHint="Every selected title is already on your wantlist."/>
             </Grid>
         </MediaListBody>
@@ -79,18 +79,18 @@
 
 <MediaDetailSheet Open="IsSheetOpen"
                   OnOpenChanged="SheetOpenChangedAsync"
-                  Media="_selectedItem"
+                  Media="SelectedMedia"
                   OnEnrollmentChanged="@(_ => LoadAsync())"/>
 
 @code {
     private IReadOnlyList<BlocklistedMedia>? _items;
-    private MediaLookup? _selectedItem;
+    private BlocklistedMedia? _selectedItem;
     private WantlistSnapshot _wantlist = new([]);
 
     private IReadOnlyList<BlocklistedMedia> GridItems =>
         [
             .. Filter.SortBy(
-                (_items ?? []).Where(item => Filter.MatchesType(item.Media.ToMatch().MediaType) && Filter.MatchesSearch(item.Media.Title)),
+                (_items ?? []).Where(item => Filter.MatchesType(item.Media.Details.Type) && Filter.MatchesSearch(item.Media.Details.Title)),
                 item => item.Media,
                 item => item.AddedAt
             ),
@@ -112,10 +112,9 @@
             _items = await Media.GetDetailsAsync(blocklist.Items, Cancellation.Token).ToListAsync(Cancellation.Token);
             _wantlist = await WantlistService.GetAsync(Cancellation.Token);
 
-            if (_selectedItem.HasValue)
+            if (_selectedItem is not null)
             {
-                var selectedId = _selectedItem.Value.Id;
-                _selectedItem = _items.FirstOrDefault(i => i.Media.Id == selectedId)?.Media.ToMatch();
+                _selectedItem = _items.FirstOrDefault(item => item.Media.Identity.Id == _selectedItem.Media.Identity.Id);
                 if (_selectedItem is null)
                 {
                     IsSheetOpen = false;
@@ -138,9 +137,11 @@
         }
     }
 
-    private void SelectItem(MediaLookup detail)
+    private MediaLookup? SelectedMedia => _selectedItem is null ? null : (MediaLookup?)_selectedItem.Media;
+
+    private void SelectItem(BlocklistedMedia item)
     {
-        _selectedItem = detail;
+        _selectedItem = item;
         IsSheetOpen = true;
     }
 
@@ -148,7 +149,7 @@
     {
         foreach (var item in toRemove)
         {
-            await BlocklistService.RemoveAsync(item.Media.Id, Cancellation.Token);
+            await BlocklistService.RemoveAsync(item.Media.Identity.Id, Cancellation.Token);
         }
         ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blocklist.");
         await LoadAsync();
@@ -156,7 +157,7 @@
 
     private async Task WantlistBulkAsync(IReadOnlyList<BlocklistedMedia> toMark)
     {
-        await WantlistService.AddAsync(toMark.Select(item => item.Media.Id), new ManualOrigin(ManualSource.Search), Cancellation.Token);
+        await WantlistService.AddAsync(toMark.Select(item => item.Media.Identity.Id), new ManualOrigin(ManualSource.Search), Cancellation.Token);
         ToastService.Success($"Added {toMark.Count} title{(toMark.Count == 1 ? "" : "s")} to your wantlist.");
     }
 

@@ -57,13 +57,13 @@
 </div>
 
 @code {
-    private readonly HashSet<MediaId> _wantlisted = [DemoMedia.Movie.Id];
+    private readonly HashSet<MediaId> _wantlisted = [DemoMedia.Movie.Identity.Id];
 
-    private void ToggleWantlist(MediaLookup media)
+    private void ToggleWantlist(IdentifiedMedia media)
     {
-        if (!_wantlisted.Remove(media.Id))
+        if (!_wantlisted.Remove(media.Identity.Id))
         {
-            _wantlisted.Add(media.Id);
+            _wantlisted.Add(media.Identity.Id);
         }
     }
 }

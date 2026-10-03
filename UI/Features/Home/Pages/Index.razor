@@ -151,7 +151,7 @@ else
     [Inject] internal AccountConnectionPrompt AccountConnectionPrompt { get; set; } = null!;
 
     private readonly CancellationTokenSource _cancellation = new();
-    private readonly Dictionary<MediaId, MediaLookup> _media = [];
+    private readonly Dictionary<MediaId, IdentifiedMedia> _media = [];
 
     private IReadOnlyList<ActivityDay> _days = [];
     private IReadOnlyList<UpNextRow> _queued = [];
@@ -352,7 +352,7 @@ else
             {
                 if (result is Success<IdentifiedMedia>(var media))
                 {
-                    _media[media.Id] = media;
+                    _media[media.Identity.Id] = media;
                 }
             }
         }
@@ -394,7 +394,7 @@ else
         StateHasChanged();
     }
 
-    private void SelectMedia(MediaLookup media)
+    private void SelectMedia(IdentifiedMedia media)
     {
         _selected = media;
         _isSheetOpen = true;

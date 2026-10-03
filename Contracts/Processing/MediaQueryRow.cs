@@ -6,19 +6,19 @@ public sealed record MediaQueryRow(IdentifiedMedia Media)
 {
 	public static MediaQueryRow From(IdentifiedMedia media) => new(media);
 
-	public MediaType MediaType => Media.Type;
+	public MediaType MediaType => Media.Details.Type;
 
-	public string? Title => Media.Title;
+	public string? Title => Media.Details.Title;
 
-	public string? Tagline => Media.Tagline;
+	public string? Tagline => Media.Details.Tagline;
 
-	public string? Summary => Media.Summary;
+	public string? Summary => Media.Details.Summary;
 
-	public IReadOnlyList<string> Genres => [.. Media.Genres];
+	public IReadOnlyList<string> Genres => [.. Media.Details.Genres];
 
-	public DateOnly? ReleaseDate => Media.ReleaseDate is { } date && date > DateOnly.MinValue ? date : null;
+	public DateOnly? ReleaseDate => Media.Details.ReleaseDate is { } date && date > DateOnly.MinValue ? date : null;
 
-	public float? Rating => Media.Rating.Average;
+	public float? Rating => Media.Details.Rating.Average;
 
 	public int? RuntimeMinutes
 	{
@@ -33,9 +33,9 @@ public sealed record MediaQueryRow(IdentifiedMedia Media)
 		}
 	}
 
-	public int? Seasons => Media.Seasons;
+	public int? Seasons => Media.Details is ShowDetails show ? show.Seasons : null;
 
-	public int? Episodes => Media.Episodes;
+	public int? Episodes => Media.Details is ShowDetails show ? show.Episodes : null;
 
 	private static int? Minutes(TimeSpan? runtime) => runtime is { } value ? (int)Math.Round(value.TotalMinutes) : null;
 }

@@ -21,8 +21,8 @@
     <div class="space-y-2 overflow-hidden">
         <MediaDetailTile Media="DemoMedia.Movie">
             <Icons>
-                <WantlistToggleIcon Result="DemoMedia.Movie" IsToggled="@Wantlisted.Contains(DemoMedia.Movie.Id)" IsToggling="false" OnToggle="OnToggleWantlist"/>
-                <BlocklistToggleIcon Result="DemoMedia.Movie" IsToggled="@_blocklisted.Contains(DemoMedia.Movie.Id)" IsToggling="false" OnToggle="ToggleBlocklist"/>
+                <WantlistToggleIcon Result="DemoMedia.Movie" IsToggled="@Wantlisted.Contains(DemoMedia.Movie.Identity.Id)" IsToggling="false" OnToggle="OnToggleWantlist"/>
+                <BlocklistToggleIcon Result="DemoMedia.Movie" IsToggled="@_blocklisted.Contains(DemoMedia.Movie.Identity.Id)" IsToggling="false" OnToggle="ToggleBlocklist"/>
             </Icons>
         </MediaDetailTile>
         <MediaDetailTile Media="DemoMedia.Show" Class="result-dimmed">
@@ -37,8 +37,8 @@
                         <BbTooltipContent>Excluded by the specified import limit.</BbTooltipContent>
                     </BbTooltip>
                 </BbTooltipProvider>
-                <WantlistToggleIcon Result="DemoMedia.Show" IsToggled="@Wantlisted.Contains(DemoMedia.Show.Id)" IsToggling="false" OnToggle="OnToggleWantlist"/>
-                <BlocklistToggleIcon Result="DemoMedia.Show" IsToggled="@_blocklisted.Contains(DemoMedia.Show.Id)" IsToggling="false" OnToggle="ToggleBlocklist"/>
+                <WantlistToggleIcon Result="DemoMedia.Show" IsToggled="@Wantlisted.Contains(DemoMedia.Show.Identity.Id)" IsToggling="false" OnToggle="OnToggleWantlist"/>
+                <BlocklistToggleIcon Result="DemoMedia.Show" IsToggled="@_blocklisted.Contains(DemoMedia.Show.Identity.Id)" IsToggling="false" OnToggle="ToggleBlocklist"/>
             </Icons>
         </MediaDetailTile>
         <MediaDetailTile Media="DemoMedia.Unknown">
@@ -62,15 +62,15 @@
 @code {
     [Parameter, EditorRequired] public required IReadOnlySet<MediaId> Wantlisted { get; set; }
 
-    [Parameter] public EventCallback<MediaLookup> OnToggleWantlist { get; set; }
+    [Parameter] public EventCallback<IdentifiedMedia> OnToggleWantlist { get; set; }
 
     private readonly HashSet<MediaId> _blocklisted = [];
 
-    private void ToggleBlocklist(MediaLookup media)
+    private void ToggleBlocklist(IdentifiedMedia media)
     {
-        if (!_blocklisted.Remove(media.Id))
+        if (!_blocklisted.Remove(media.Identity.Id))
         {
-            _blocklisted.Add(media.Id);
+            _blocklisted.Add(media.Identity.Id);
         }
     }
 }

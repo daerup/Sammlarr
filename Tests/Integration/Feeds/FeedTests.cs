@@ -4,7 +4,6 @@ using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
 using Harness;
-using Integration.Tests.Assertions;
 using Microsoft.EntityFrameworkCore;
 using static Harness.Ids;
 
@@ -270,15 +269,15 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(items).Count().IsEqualTo(expected.Length);
 		foreach (var (item, row) in items.Zip(expected))
 		{
-			await Assert.That(item.Title).IsEqualTo(row.Title);
+			await Assert.That(item.Details.Title).IsEqualTo(row.Title);
 			if (row.Poster)
 			{
-				await Assert.That(item.PosterUrl).IsNotEmpty();
+				await Assert.That(item.Details.PosterUrl).IsNotNullOrEmpty();
 			}
 
 			if (row.Rating is { } rating)
 			{
-				await Assert.That(item.Ratings.Any(entry => entry.Source == rating)).IsTrue();
+				await Assert.That(item.Details.Rating.Sources.Any(entry => entry.Source == rating)).IsTrue();
 			}
 		}
 	}

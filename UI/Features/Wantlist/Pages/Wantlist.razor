@@ -77,10 +77,10 @@
                                        Items="pageItems"
                                        AllItems="gridItems"
                                        Detail="@(i => i.Media)"
-                                       Key="@(i => i.Media.Id)"
+                                       Key="@(i => i.Media.Identity.Id)"
                                        IsEditMode="IsEditMode"
                                        IsEditModeChanged="SetEditMode"
-                                       IsDimmed="@(gridItem => _removedIds.Contains(gridItem.Media.Id))"
+                                       IsDimmed="@(gridItem => _removedIds.Contains(gridItem.Media.Identity.Id))"
                                        OnTileClick="SelectItem"
                                        OnBulkRemove="RemoveBulkAsync"
                                        RemoveLabel="Remove"
@@ -89,12 +89,12 @@
                                        OnBulkMark="BlocklistBulkAsync"
                                        RemoveConfirm="RemoveConfirm"
                                        MarkConfirm="BlocklistConfirm"
-                                       IsMarked="@(item => _blocklist.Contains(item.Media.Id))"
+                                       IsMarked="@(item => _blocklist.Contains(item.Media.Identity.Id))"
                                        AlreadyMarkedHint="Every selected title is already blocklisted."
-                                       IsRemoved="@(item => _removedIds.Contains(item.Media.Id))"
+                                       IsRemoved="@(item => _removedIds.Contains(item.Media.Identity.Id))"
                                        AlreadyRemovedHint="Every selected title is already pending removal.">
                     <Overlay Context="item">
-                        @if (_removedIds.Contains(item.Media.Id))
+                        @if (_removedIds.Contains(item.Media.Identity.Id))
                         {
                             <div class="absolute top-2 right-2 z-10">
                                 <PushStatusDot State="PushDotState.Removed" ProviderName="@SinkName"/>
@@ -103,9 +103,9 @@
                         else
                         {
                             <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
-                                <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="item.Media.Id"/>
+                                <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="item.Media.Identity.Id"/>
                             </div>
-                            @if (PushDotFor(item.Media.Id) is { } dot)
+                            @if (PushDotFor(item.Media.Identity.Id) is { } dot)
                             {
                                 <div class="absolute top-2 right-2 z-10">
                                     <PushStatusDot State="dot.State" Attempts="dot.Attempts" ProviderName="@SinkName"/>
@@ -121,7 +121,7 @@
 
 <MediaDetailSheet Open="IsSheetOpen"
                   OnOpenChanged="SheetOpenChangedAsync"
-                  Media="_selectedItem?.Media.ToMatch()"
+                  Media="SelectedMedia"
                   OnEnrollmentChanged="ReloadAfterEnrollmentAsync"/>
 
 @code {
@@ -160,7 +160,7 @@
         [
             .. Filter.SortBy(
                 all.Where(item =>
-                    Filter.MatchesSource(item.Provenance) && Filter.MatchesType(item.Media.ToMatch().MediaType) && Filter.MatchesSearch(item.Media.Title)
+                    Filter.MatchesSource(item.Provenance) && Filter.MatchesType(item.Media.Details.Type) && Filter.MatchesSearch(item.Media.Details.Title)
                 ),
                 item => item.Media,
                 item => item.AddedAt
@@ -240,14 +240,14 @@
 
             var listed = WantlistStatusView.WithPendingRemovals(await WantlistService.GetAsync(Cancellation.Token), outbox);
             var all = await Media.GetDetailsAsync(listed, Cancellation.Token).ToListAsync(Cancellation.Token);
-            _items = all.Where(item => !_removedIds.Contains(item.Media.Id)).ToList();
-            _removedItems = all.Where(item => _removedIds.Contains(item.Media.Id)).ToList();
+            _items = all.Where(item => !_removedIds.Contains(item.Media.Identity.Id)).ToList();
+            _removedItems = all.Where(item => _removedIds.Contains(item.Media.Identity.Id)).ToList();
             Filter = Filter with { Statuses = WantlistStatusView.Adjusted(Filter.Statuses, _items.Count, _removedItems.Count) };
             ApplyFeedFromQuery();
 
             if (_selectedItem is not null)
             {
-                _selectedItem = _items.FirstOrDefault(item => item.Media.Id.Equals(_selectedItem.Media.Id));
+                _selectedItem = _items.FirstOrDefault(item => item.Media.Identity.Id.Equals(_selectedItem.Media.Identity.Id));
                 if (_selectedItem is null)
                 {
                     IsSheetOpen = false;
@@ -364,7 +364,7 @@
                 _outboxEntries.Remove(outboxEvent.MediaId);
                 if (_removedIds.Remove(outboxEvent.MediaId))
                 {
-                    _removedItems.RemoveAll(item => item.Media.Id == outboxEvent.MediaId);
+                    _removedItems.RemoveAll(item => item.Media.Identity.Id == outboxEvent.MediaId);
                 }
                 if (_syncing)
                 {
@@ -412,6 +412,8 @@
         });
     }
 
+    private MediaLookup? SelectedMedia => _selectedItem is null ? null : (MediaLookup?)_selectedItem.Media;
+
     private void SelectItem(WantlistedMedia item)
     {
         _selectedItem = item;
@@ -429,7 +431,7 @@
 
     private async Task RemoveBulkAsync(IReadOnlyList<WantlistedMedia> toRemove)
     {
-        await WantlistService.RemoveAsync(toRemove.Select(item => item.Media.Id), Cancellation.Token);
+        await WantlistService.RemoveAsync(toRemove.Select(item => item.Media.Identity.Id), Cancellation.Token);
         Notifier.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your wantlist.");
         await LoadAsync();
         await RefreshPendingAsync();
@@ -439,7 +441,7 @@
     {
         foreach (var item in toMark)
         {
-            await BlocklistService.AddAsync(item.Media.Id, Cancellation.Token);
+            await BlocklistService.AddAsync(item.Media.Identity.Id, Cancellation.Token);
         }
         Notifier.Success($"Blocklisted {toMark.Count} title{(toMark.Count == 1 ? "" : "s")}.");
     }

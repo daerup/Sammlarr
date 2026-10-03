@@ -40,8 +40,8 @@ internal static class DemoFeeds
 			Removed = 1,
 		},
 		[
-			new FeedRunItem { MediaId = DemoMedia.Movie.Id, State = FeedRunItemState.Added },
-			new FeedRunItem { MediaId = DemoMedia.Show.Id, State = FeedRunItemState.Removed },
+			new FeedRunItem { MediaId = DemoMedia.Movie.Identity.Id, State = FeedRunItemState.Added },
+			new FeedRunItem { MediaId = DemoMedia.Show.Identity.Id, State = FeedRunItemState.Removed },
 		]
 	);
 

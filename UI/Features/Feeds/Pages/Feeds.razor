@@ -554,7 +554,7 @@
 
     private async Task FillConfirmAsync(IFeedPlan summary)
     {
-        var media = new Dictionary<MediaId, MediaLookup>();
+        var media = new Dictionary<MediaId, IdentifiedMedia>();
         foreach (var verdict in summary.Verdicts)
         {
             media[verdict.Item.Identity.Id] = verdict.Item;
@@ -563,7 +563,7 @@
         var missing = summary.Delta.Drops.Where(id => !media.ContainsKey(id)).ToList();
         await foreach (var detail in Media.GetDetailsAsync(missing).WhereSuccessAwait())
         {
-            media[detail.Id] = detail.ToMatch();
+            media[detail.Identity.Id] = detail;
         }
 
         _pendingPlan = summary;
@@ -574,7 +574,7 @@
     private static RenderFragment PlanProblemBand(IFeedPlan plan, string problem) =>
         @<RunProblem Headline="@problem" Reason="@plan.SourceFailure" Failed="true"/>;
 
-    private Task ShowDetailsAsync(MediaLookup media)
+    private Task ShowDetailsAsync(IdentifiedMedia media)
     {
         _selected = media;
         return Task.CompletedTask;

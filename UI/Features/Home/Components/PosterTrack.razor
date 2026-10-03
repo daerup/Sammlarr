@@ -17,7 +17,7 @@
             @if (Media.TryGetValue(id, out var media))
             {
                 <button type="button" class="track-tile @(Faded ? "faded" : "")" @key="id.Value" @onclick="() => OnSelect.InvokeAsync(media)">
-                    @if (string.IsNullOrWhiteSpace(media.PosterUrl))
+                    @if (string.IsNullOrWhiteSpace(media.Details.PosterUrl))
                     {
                         <span class="track-blank">
                             <LucideIcon Name="image-off" Size="20"/>
@@ -25,7 +25,7 @@
                     }
                     else
                     {
-                        <img class="track-poster" src="@media.PosterUrl" srcset="@SrcSet(id, media)" alt="" loading="lazy" @onerror="() => _unsized.Add(id)"/>
+                        <img class="track-poster" src="@media.Details.PosterUrl" srcset="@SrcSet(id, media.Details.PosterUrl)" alt="" loading="lazy" @onerror="() => _unsized.Add(id)"/>
                     }
                     <span class="track-scrim"></span>
                     <span class="track-title">@Title(media)</span>
@@ -47,8 +47,8 @@
     private static readonly ArtworkSize FadedPoster = new(78, 117);
 
     [Parameter, EditorRequired] public required IReadOnlyList<MediaId> Ids { get; set; }
-    [Parameter, EditorRequired] public required IReadOnlyDictionary<MediaId, MediaLookup> Media { get; set; }
-    [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
+    [Parameter, EditorRequired] public required IReadOnlyDictionary<MediaId, IdentifiedMedia> Media { get; set; }
+    [Parameter] public EventCallback<IdentifiedMedia> OnSelect { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<MediaId>> OnNeedMedia { get; set; }
     [Parameter] public bool Faded { get; set; }
 
@@ -99,9 +99,9 @@
         return Task.CompletedTask;
     }
 
-    private static string Title(MediaLookup media) => string.IsNullOrWhiteSpace(media.Title) ? "Unknown title" : media.Title;
+    private static string Title(IdentifiedMedia media) => string.IsNullOrWhiteSpace(media.Details.Title) ? "Unknown title" : media.Details.Title;
 
-    private string? SrcSet(MediaId id, MediaLookup media) => _unsized.Contains(id) ? null : Artwork.ByDensity(media.PosterUrl, Faded ? FadedPoster : Poster);
+    private string? SrcSet(MediaId id, string poster) => _unsized.Contains(id) ? null : Artwork.ByDensity(poster, Faded ? FadedPoster : Poster);
 
     private async Task RequestMediaAsync()
     {

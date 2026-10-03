@@ -61,13 +61,14 @@ internal sealed class FeedRunPlanner(
 		var resolved = new List<MediaQueryRow>();
 		foreach (var item in load.Items)
 		{
-			if (item is IdentifiedMedia identified)
+			switch (item)
 			{
-				resolved.Add(MediaQueryRow.From(identified));
-			}
-			else if (item is UnmatchedMedia unmatched)
-			{
-				unmatchedItems.Add(unmatched);
+				case IdentifiedMedia identified:
+					resolved.Add(MediaQueryRow.From(identified));
+					break;
+				case UnmatchedMedia unmatched:
+					unmatchedItems.Add(unmatched);
+					break;
 			}
 		}
 
@@ -89,7 +90,7 @@ internal sealed class FeedRunPlanner(
 
 		var classified = resolved.Count > 0 ? await processor.ExecuteAsync(resolved, options, predicates, cancellationToken).ToListAsync(cancellationToken) : [];
 		var verdicts = classified
-			.Select(verdict => new QueryVerdict<MediaLookup>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot))
+			.Select(verdict => new QueryVerdict<IdentifiedMedia>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot))
 			.ToList();
 
 		var absences = feed.Strategy is Mirror mirror

@@ -69,9 +69,9 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 			.That(items[0].Media)
 			.Multiple(async movie =>
 			{
-				await Assert.That(movie.Title).IsEqualTo("Fight Club");
-				await Assert.That(movie.PosterUrl).IsNotNullOrEmpty();
-				await Assert.That(movie.Rating.Sources.Any(source => source.Source == MediaProvider.Tmdb)).IsTrue();
+				await Assert.That(movie.Details.Title).IsEqualTo("Fight Club");
+				await Assert.That(movie.Details.PosterUrl).IsNotNullOrEmpty();
+				await Assert.That(movie.Details.Rating.Sources.Any(source => source.Source == MediaProvider.Tmdb)).IsTrue();
 			});
 	}
 

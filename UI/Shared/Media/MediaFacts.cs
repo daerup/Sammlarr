@@ -4,30 +4,26 @@ namespace UI.Shared.Media;
 
 internal static class MediaFacts
 {
-	public static IReadOnlyList<string> GetDisplayFacts(MediaLookup media)
+	public static IReadOnlyList<string> GetDisplayFacts(MediaDetails details)
 	{
 		var facts = new List<string>();
-
-		if (media.MediaType is MediaType.Show)
+		switch (details)
 		{
-			AddCountFact(facts, media.Seasons ?? 0, "season");
-			AddCountFact(facts, media.Episodes ?? 0, "episode");
-		}
-		else if (media.MediaType is MediaType.Movie && media.Runtime is { } runtime)
-		{
-			var label = GetRuntimeLabel(runtime);
-			if (!string.IsNullOrWhiteSpace(label))
-			{
+			case ShowDetails show:
+				AddCountFact(facts, show.Seasons, "season");
+				AddCountFact(facts, show.Episodes, "episode");
+				break;
+			case MovieDetails { Runtime: { } runtime } when GetRuntimeLabel(runtime) is { } label:
 				facts.Add(label);
-			}
+				break;
 		}
 
 		return facts;
 	}
 
-	private static void AddCountFact(ICollection<string> facts, int count, string singularLabel)
+	private static void AddCountFact(ICollection<string> facts, int? count, string singularLabel)
 	{
-		if (count <= 0)
+		if (count is not > 0)
 		{
 			return;
 		}

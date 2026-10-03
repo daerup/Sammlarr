@@ -2,18 +2,21 @@ using Domain.Media;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using UI.Shared.Changes;
+using UI.Shared.Media;
 
 namespace UI.Features.Wantlist.Components;
 
 internal static class WantlistSyncView
 {
-	internal static IReadOnlyList<ChangeItem> Items(WantlistSyncSummary dryRun, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
+	internal static IReadOnlyList<ChangeItem> Items(WantlistSyncSummary dryRun, IReadOnlyDictionary<MediaId, IdentifiedMedia> media)
+	{
+		return
 		[
 			.. dryRun
 				.Changes.Where(change => media.ContainsKey(change.MediaId))
 				.Select(change => new ChangeItem
 				{
-					Title = media[change.MediaId] is IdentifiedMedia named ? named.Title : string.Empty,
+					Title = media[change.MediaId].Details.Title ?? string.Empty,
 					Media = media[change.MediaId],
 					Kind = change.Action is WantlistOperationAction.Add ? ChangeKind.Added : ChangeKind.Removed,
 					Subtitle = Subtitle(media[change.MediaId]),
@@ -24,7 +27,7 @@ internal static class WantlistSyncView
 				.NoOps.Where(media.ContainsKey)
 				.Select(id => new ChangeItem
 				{
-					Title = media[id] is IdentifiedMedia named ? named.Title : string.Empty,
+					Title = media[id].Details.Title ?? string.Empty,
 					Media = media[id],
 					Kind = ChangeKind.Unchanged,
 					Subtitle = Subtitle(media[id]),
@@ -38,6 +41,7 @@ internal static class WantlistSyncView
 				ContextTooltip = "Sammlarr could not identify this title",
 			}),
 		];
+	}
 
 	private static string UnmatchedTitle(UnmatchedMedia unmatched)
 	{
@@ -47,7 +51,7 @@ internal static class WantlistSyncView
 	private static string UnmatchedSubtitle(UnmatchedMedia unmatched)
 	{
 		var source = unmatched.Externals.FirstOrDefault()?.Source.GetDescription();
-		var year = unmatched.Details.ReleaseDate?.Year.ToString();
+		var year = unmatched.Details.Year?.ToString();
 		return string.Join(" · ", new[] { year, source is null ? null : $"on {source}", "Cannot be imported" }.Where(part => part is not null));
 	}
 
@@ -92,6 +96,5 @@ internal static class WantlistSyncView
 			},
 		];
 
-	private static string Subtitle(MediaLookup media) =>
-		media is IdentifiedMedia identified && identified.ReleaseDate is { } released ? released.Year.ToString() : string.Empty;
+	private static string Subtitle(IdentifiedMedia media) => media.Details.Year?.ToString() ?? string.Empty;
 }

@@ -3,19 +3,22 @@ using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using UI.Shared.Changes;
+using UI.Shared.Media;
 
 namespace UI.Features.Feeds.Components;
 
 internal static class FeedRunView
 {
-	internal static IReadOnlyList<ChangeItem> Items(FeedRun run, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
+	internal static IReadOnlyList<ChangeItem> Items(FeedRun run, IReadOnlyDictionary<MediaId, IdentifiedMedia> media)
+	{
+		return
 		[
 			.. run
 				.Items.Where(item => item.State is not FeedRunItemState.Kept)
 				.Where(item => media.ContainsKey(item.MediaId))
 				.Select(item => new ChangeItem
 				{
-					Title = media[item.MediaId] is IdentifiedMedia named ? named.Title : string.Empty,
+					Title = media[item.MediaId].Details.Title ?? string.Empty,
 					Id = item.MediaId,
 					Media = media[item.MediaId],
 					Kind = item.State is FeedRunItemState.Removed ? ChangeKind.Removed : ChangeKind.Added,
@@ -24,17 +27,22 @@ internal static class FeedRunView
 					ContextTooltip = item.State is FeedRunItemState.Removed ? "Removed once it had been absent from enough runs" : null,
 				}),
 		];
+	}
 
-	internal static IReadOnlyList<ChangeItem> Items(IFeedPlan summary, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
+	internal static IReadOnlyList<ChangeItem> Items(IFeedPlan summary, IReadOnlyDictionary<MediaId, IdentifiedMedia> media)
+	{
+		return
 		[
 			.. summary.Delta.Drops.Where(media.ContainsKey).Select(id => Pending(id, media[id], ChangeKind.Removed)),
 			.. summary.Delta.Adds.Where(media.ContainsKey).Select(id => Pending(id, media[id], ChangeKind.Added)),
 		];
+	}
 
-	private static ChangeItem Pending(MediaId id, MediaLookup item, ChangeKind kind) =>
-		new()
+	private static ChangeItem Pending(MediaId id, IdentifiedMedia item, ChangeKind kind)
+	{
+		return new()
 		{
-			Title = item is IdentifiedMedia named ? named.Title : string.Empty,
+			Title = item.Details.Title ?? string.Empty,
 			Id = id,
 			Media = item,
 			Kind = kind,
@@ -42,6 +50,7 @@ internal static class FeedRunView
 			ContextIcon = kind is ChangeKind.Removed ? "log-out" : null,
 			ContextTooltip = kind is ChangeKind.Removed ? "Absent long enough that this run will remove it" : null,
 		};
+	}
 
 	internal static string Pending(IFeedPlan summary)
 	{
@@ -147,6 +156,5 @@ internal static class FeedRunView
 		return string.Join(" · ", parts);
 	}
 
-	private static string Subtitle(MediaLookup media) =>
-		media is IdentifiedMedia identified && identified.ReleaseDate is { } released ? released.Year.ToString() : string.Empty;
+	private static string Subtitle(IdentifiedMedia media) => media.Details.Year?.ToString() ?? string.Empty;
 }

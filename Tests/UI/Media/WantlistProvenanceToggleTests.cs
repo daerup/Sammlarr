@@ -74,9 +74,9 @@ public class WantlistProvenanceToggleTests : BunitContext
 	[Test]
 	public async Task Click_WhenTheIconIsPressed_StillTogglesThroughToTheCaller()
 	{
-		MediaLookup? toggled = null;
+		IdentifiedMedia? toggled = null;
 		var cut = Render<WantlistProvenanceToggle>(parameters =>
-			parameters.Add(toggle => toggle.Result, Lookup()).Add(toggle => toggle.OnToggle, value => toggled = value)
+			parameters.Add(toggle => toggle.Result, Movie()).Add(toggle => toggle.OnToggle, value => toggled = value)
 		);
 
 		await cut.Find("button.search-result-toggle-btn").ClickAsync();
@@ -100,7 +100,7 @@ public class WantlistProvenanceToggleTests : BunitContext
 			builder.OpenComponent<BbPortalHost>(0);
 			builder.CloseComponent();
 			builder.OpenComponent<WantlistProvenanceToggle>(1);
-			builder.AddAttribute(2, nameof(WantlistProvenanceToggle.Result), Lookup());
+			builder.AddAttribute(2, nameof(WantlistProvenanceToggle.Result), Movie());
 			builder.AddAttribute(3, nameof(WantlistProvenanceToggle.IsToggled), IsToggled);
 			builder.AddAttribute(4, nameof(WantlistProvenanceToggle.Item), Item);
 			builder.CloseComponent();
@@ -114,5 +114,5 @@ public class WantlistProvenanceToggleTests : BunitContext
 			new WantlistItemProvenance(TestFeeds.Origin(new Guid(21, 0, 0, new byte[8]), new Guid(22, 0, 0, new byte[8]), "Documentaries"))
 		);
 
-	private static MediaLookup Lookup() => new IdentifiedMedia(new MediaIdentity(Id, []), new MovieDetails()).ToMatch();
+	private static IdentifiedMedia Movie() => new(new MediaIdentity(Id, []), new MovieDetails());
 }

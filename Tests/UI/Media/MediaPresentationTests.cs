@@ -8,24 +8,7 @@ namespace UI.Tests.Media;
 public class MediaPresentationTests
 {
 	[Test]
-	public async Task Id_WhenTheMediaIsUnmatched_Throws()
-	{
-		MediaLookup media = Unmatched();
-
-		await Assert.That(() => media.Id).Throws<InvalidOperationException>();
-	}
-
-	[Test]
-	public async Task Id_WhenTheMediaIsIdentified_ReturnsTheIdentityId()
-	{
-		var movie = Identified();
-		MediaLookup media = (IdentifiedMedia)movie;
-
-		await Assert.That(media.Id).IsEqualTo(movie.Identity.Id);
-	}
-
-	[Test]
-	public async Task Key_WhenTheMediaIsUnmatched_FallsBackToTheExternalIds()
+	public async Task Key_OfAnUnmatchedTitle_FallsBackToTheExternalIds()
 	{
 		MediaLookup media = Unmatched();
 
@@ -33,57 +16,33 @@ public class MediaPresentationTests
 	}
 
 	[Test]
-	public async Task Key_WhenTheMediaIsIdentified_UsesTheMediaId()
+	public async Task Key_OfAnIdentifiedTitle_UsesTheMediaId()
 	{
 		var movie = Identified();
-		MediaLookup media = (IdentifiedMedia)movie;
+		MediaLookup media = movie;
 
 		await Assert.That(media.Key).IsEqualTo(movie.Identity.Id.Value.ToString());
 	}
 
 	[Test]
-	public async Task Title_WhenMissing_IsEmptyRatherThanNull()
+	public async Task Key_OfAnIdentifiedTitle_IsTheSameWhetherReadAsALookupOrNot()
 	{
-		MediaLookup media = Unmatched();
+		var movie = Identified();
+		MediaLookup media = movie;
 
-		await Assert.That(media.Title).IsEqualTo(string.Empty);
-		await Assert.That(media.Summary).IsEqualTo(string.Empty);
-		await Assert.That(media.PosterUrl).IsEqualTo(string.Empty);
-		await Assert.That(media.BackdropUrl).IsEqualTo(string.Empty);
+		await Assert.That(movie.Key).IsEqualTo(media.Key);
 	}
 
 	[Test]
-	public async Task ReleaseDate_WhenMissing_IsMinValue()
+	public async Task Year_WhenReleased_IsTheReleaseYear()
 	{
-		MediaLookup media = Unmatched();
-
-		await Assert.That(media.ReleaseDate).IsEqualTo(DateOnly.MinValue);
+		await Assert.That(Identified().Details.Year).IsEqualTo(2010);
 	}
 
 	[Test]
-	public async Task Tagline_WhenTheMediaIsUnmatched_IsEmpty()
+	public async Task Year_WhenTheReleaseDateIsUnknown_IsNull()
 	{
-		MediaLookup media = Unmatched() with { Details = new MovieDetails { Title = "Inception" } };
-
-		await Assert.That(media.Tagline).IsEqualTo(string.Empty);
-	}
-
-	[Test]
-	public async Task Seasons_WhenTheMediaIsUnmatched_AreUnknown()
-	{
-		MediaLookup media = Unmatched();
-
-		await Assert.That(media.Seasons).IsNull();
-		await Assert.That(media.Episodes).IsNull();
-		await Assert.That(media.Runtime).IsNull();
-	}
-
-	[Test]
-	public async Task MediaType_WhenTheMediaIsUnmatched_ComesFromItsDetails()
-	{
-		MediaLookup media = new UnmatchedMedia([], new ShowDetails());
-
-		await Assert.That(media.MediaType).IsEqualTo(MediaType.Show);
+		await Assert.That(Unmatched().Details.Year).IsNull();
 	}
 
 	private static UnmatchedMedia Unmatched() => new([TmdbId.From("27205", MediaType.Movie)], new MovieDetails());

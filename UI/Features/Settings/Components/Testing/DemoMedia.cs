@@ -6,7 +6,7 @@ namespace UI.Features.Settings.Components.Testing;
 
 internal static class DemoMedia
 {
-	public static readonly MediaLookup Movie = new IdentifiedMedia(
+	public static readonly IdentifiedMedia Movie = new(
 		new MediaIdentity(
 			MediaId.From(new Guid("11111111-1111-1111-1111-111111111111")),
 			[TmdbId.From("687163", MediaType.Movie), ImdbId.From("tt12042730", MediaType.Movie), PlexId.From("5d776be07bb7e9001e73bb0f", MediaType.Movie)]
@@ -26,7 +26,7 @@ internal static class DemoMedia
 		}
 	);
 
-	public static readonly MediaLookup Show = new IdentifiedMedia(
+	public static readonly IdentifiedMedia Show = new(
 		new MediaIdentity(
 			MediaId.From(new Guid("22222222-2222-2222-2222-222222222222")),
 			[
@@ -53,7 +53,7 @@ internal static class DemoMedia
 		}
 	);
 
-	public static readonly MediaLookup Gohan = new IdentifiedMedia(
+	public static readonly IdentifiedMedia Gohan = new(
 		new MediaIdentity(MediaId.From(new Guid("33333333-3333-3333-3333-333333333333")), []),
 		new MovieDetails
 		{
@@ -70,7 +70,7 @@ internal static class DemoMedia
 		}
 	);
 
-	public static readonly MediaLookup YellowMirror = new IdentifiedMedia(
+	public static readonly IdentifiedMedia YellowMirror = new(
 		new MediaIdentity(MediaId.From(new Guid("44444444-4444-4444-4444-444444444444")), []),
 		new MovieDetails
 		{
@@ -86,7 +86,7 @@ internal static class DemoMedia
 		}
 	);
 
-	public static readonly MediaLookup WolfBeach = new IdentifiedMedia(
+	public static readonly IdentifiedMedia WolfBeach = new(
 		new MediaIdentity(MediaId.From(new Guid("55555555-5555-5555-5555-555555555555")), []),
 		new MovieDetails
 		{
@@ -103,7 +103,7 @@ internal static class DemoMedia
 		}
 	);
 
-	public static readonly MediaLookup NoHitWonder = new IdentifiedMedia(
+	public static readonly IdentifiedMedia NoHitWonder = new(
 		new MediaIdentity(MediaId.From(new Guid("66666666-6666-6666-6666-666666666666")), []),
 		new MovieDetails
 		{
@@ -119,7 +119,7 @@ internal static class DemoMedia
 		}
 	);
 
-	public static readonly MediaLookup Unknown = new UnmatchedMedia(
+	public static readonly UnmatchedMedia Unknown = new(
 		[TmdbId.From("999999", MediaType.Movie)],
 		new MovieDetails { Title = "Unmatched Title", ReleaseDate = new DateOnly(2024, 1, 1) }
 	);
