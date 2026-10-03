@@ -7,9 +7,6 @@
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Roslyn\Roslyn.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-	</ItemGroup>
-	<ItemGroup>
 		<InternalsVisibleTo Include="AppHost" />
 	</ItemGroup>
 	<ItemGroup>

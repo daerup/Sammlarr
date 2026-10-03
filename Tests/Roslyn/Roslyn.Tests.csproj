@@ -16,7 +16,6 @@
 		<PackageReference Include="TUnit.Mocks" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\Analyzers\Analyzers.csproj" />
 		<ProjectReference Include="..\..\Roslyn\Roslyn.csproj" />
 		<ProjectReference Include="..\..\Shared\Shared.csproj" />
 	</ItemGroup>

@@ -9,12 +9,10 @@ namespace Roslyn.Options;
 [Generator]
 public class OptionsSectionRegistrationGenerator : IIncrementalGenerator
 {
+	private const string OptionsSectionMetadataName = "Shared.Options.IOptionsSection";
+
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
-		context.RegisterPostInitializationOutput(static postInit =>
-			AddGeneratedSource(postInit, OptionsSectionInterfaceSource.FileName, OptionsSectionInterfaceSource.Source)
-		);
-
 		var candidateTypes = context
 			.SyntaxProvider.CreateSyntaxProvider(static (node, _) => IsCandidateTypeDeclaration(node), static (ctx, _) => GetCandidateType(ctx))
 			.Where(static type => type is not null)
@@ -30,7 +28,7 @@ public class OptionsSectionRegistrationGenerator : IIncrementalGenerator
 
 	private static void Execute(SourceProductionContext context, Compilation compilation, ImmutableArray<INamedTypeSymbol?> candidateTypes)
 	{
-		var markerInterface = compilation.GetTypeByMetadataName(OptionsSectionInterfaceSource.MetadataName);
+		var markerInterface = compilation.GetTypeByMetadataName(OptionsSectionMetadataName);
 		if (markerInterface is null)
 		{
 			return;
@@ -42,9 +40,6 @@ public class OptionsSectionRegistrationGenerator : IIncrementalGenerator
 			AddGeneratedSource(context, OptionsRegistrationSource.FileName, source);
 		}
 	}
-
-	private static void AddGeneratedSource(IncrementalGeneratorPostInitializationContext context, string fileName, string source) =>
-		context.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
 
 	private static void AddGeneratedSource(SourceProductionContext context, string fileName, string source) =>
 		context.AddSource(fileName, SourceText.From(source, Encoding.UTF8));

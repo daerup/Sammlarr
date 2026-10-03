@@ -119,7 +119,7 @@ constant `case` stop compiling. A `null` passed where an `Optional<T>` is expect
 that holds no case: pass `new None()`. A value handed over untyped (`RenderTreeBuilder.AddAttribute`, a
 parameter dictionary) is not converted at all and fails at run time: pass `Optional.Of(x)`.
 
-The build enforces this. The `Analyzers` project's `SAM0002` fails it on a hand match outside these guards, on a null
+The build enforces this. The `Roslyn` project's `SAM0002` fails it on a hand match outside these guards, on a null
 or constant pattern against a monad, on `null` or `default` converted to one, on a `?:` that picks `Some.Of(…)` or
 `new None()` (`Optional.Of` for a null test, `GetValueOrNone` for a dictionary `TryGetValue`, `Optional.Of(…).When(…)`
 for a null test joined by `&&`, `Optional.When` for any other condition) or an `Optional` it already holds and
