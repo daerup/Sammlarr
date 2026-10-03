@@ -20,19 +20,17 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 	{
 		var movie = await host.Movie(TestMedia.Inception).SeedAsync();
 		await SeedAsync(
-			new IdentifiedMedia(
-				new MediaIdentity(movie, []),
-				new MovieDetails
-				{
-					Title = "Inception",
-					Tagline = " \t",
-					Summary = "Dreams within dreams.",
-					PosterUrl = "poster",
-					ReleaseDate = new DateOnly(2010, 7, 16),
-					Genres = ["Science Fiction"],
-					Runtime = TimeSpan.FromMinutes(148),
-				}
-			)
+			movie,
+			new MovieDetails
+			{
+				Title = "Inception",
+				Tagline = " \t",
+				Summary = "Dreams within dreams.",
+				PosterUrl = "poster",
+				ReleaseDate = new DateOnly(2010, 7, 16),
+				Genres = ["Science Fiction"],
+				Runtime = TimeSpan.FromMinutes(148),
+			}
 		);
 
 		await MigrateAsync(BeforeConfirmedGaps);
@@ -46,15 +44,13 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 	{
 		var show = await host.Show(TestMedia.BreakingBad).SeedAsync();
 		await SeedAsync(
-			new IdentifiedMedia(
-				new MediaIdentity(show, []),
-				new ShowDetails
-				{
-					Title = "Breaking Bad",
-					Genres = ["Drama"],
-					Seasons = 5,
-				}
-			)
+			show,
+			new ShowDetails
+			{
+				Title = "Breaking Bad",
+				Genres = ["Drama"],
+				Seasons = 5,
+			}
 		);
 
 		await MigrateAsync(BeforeConfirmedGaps);
@@ -63,12 +59,17 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 		await Assert.That(await ConfirmedAbsentAsync(show)).IsEqualTo(MediaField.None);
 	}
 
-	private Task SeedAsync(IdentifiedMedia media) => host.Resolve<IMediaRepository>().UpsertMetadataAsync([media]);
+	private Task SeedAsync(MediaId id, MediaDetails details)
+	{
+		return host.Resolve<IMediaRepository>()
+			.UpsertDetailsAsync(new Dictionary<MediaId, CachedDetails> { [id] = new(details, DateTimeOffset.UtcNow, MediaField.None) });
+	}
 
 	private async Task<MediaField> ConfirmedAbsentAsync(MediaId id)
 	{
-		var stored = (await host.Resolve<IMediaRepository>().GetAsync([id])).Single().Stored;
-		return stored.ConfirmedAbsent;
+		var stored = (await host.Resolve<IMediaRepository>().GetAsync([id])).Single();
+		var cached = await Assert.That(stored.Cached).IsSome();
+		return cached!.ConfirmedAbsent;
 	}
 
 	private Task MigrateAsync(string? target) => host.Context.GetService<IMigrator>().MigrateAsync(target);

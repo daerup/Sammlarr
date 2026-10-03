@@ -1,4 +1,3 @@
-using Contracts;
 using DB.Data.Media;
 using DB.Data.Media.Metadata;
 using Domain.Media;
@@ -12,17 +11,11 @@ namespace Integration.Tests.Media;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	private static readonly DateTimeOffset FetchedAt = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
+
+	private readonly MediaMetadataFactory _testee = new();
+
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
-
-	private MediaMetadataFactory _testee = null!;
-
-	[Before(Test)]
-	public void Setup()
-	{
-		var dateTimeProvider = IDateTimeProvider.Mock();
-		dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
-		_testee = new MediaMetadataFactory(dateTimeProvider.Object);
-	}
 
 	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
 	{
@@ -38,7 +31,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	{
 		var details = MovieDetails();
 
-		var entity = (MovieMetadataRow)_testee.BuildFrom(Movie(MediaId.From(Guid.NewGuid()), [TmdbId.From("100", MediaType.Movie)], details), Guid.NewGuid());
+		var entity = (MovieMetadataRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
 
 		using var _ = Assert.Multiple();
 		await Assert.That(entity.Title).IsEqualTo(details.Title);
@@ -56,7 +49,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	{
 		var details = ShowDetails();
 
-		var entity = (ShowMetadataRow)_testee.BuildFrom(Show(MediaId.From(Guid.NewGuid()), [TmdbId.From("200", MediaType.Show)], details), Guid.NewGuid());
+		var entity = (ShowMetadataRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
 
 		using var _ = Assert.Multiple();
 		await Assert.That(entity.Title).IsEqualTo(details.Title);
@@ -66,11 +59,20 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	}
 
 	[Test]
+	public async Task BuildFrom_ForCachedDetails_CopiesFetchedAtAndConfirmedGaps()
+	{
+		var entity = _testee.BuildFrom(new CachedDetails(new MovieDetails { Title = "Solaris" }, FetchedAt, MediaField.Tagline), Guid.NewGuid());
+
+		await Assert.That(entity.LastFetchedAt).IsEqualTo(FetchedAt);
+		await Assert.That(entity.ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
+	}
+
+	[Test]
 	public async Task BuildFrom_WhenDetailsHaveRatings_BuildsRatings()
 	{
 		var details = MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.4f, 1234)]) };
 
-		var entity = (MovieMetadataRow)_testee.BuildFrom(Movie(MediaId.From(Guid.NewGuid()), [TmdbId.From("110", MediaType.Movie)], details), Guid.NewGuid());
+		var entity = (MovieMetadataRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
 
 		await Assert.That(entity.Ratings).Count().IsEqualTo(1);
 		await Assert.That(entity.Ratings[0].Source).IsEqualTo(MediaProvider.Tmdb);
@@ -82,12 +84,14 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	{
 		var plexId = PlexId.From("plex-300", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var existing = await PersistAsync(Movie(mediaId, [plexId], MovieDetails() with { Title = "Original" }), mediaId);
+		var existing = await PersistAsync(Cached(MovieDetails() with { Title = "Original" }), mediaId);
+		var refetched = FetchedAt.AddDays(1);
 
-		_testee.Update(existing, Movie(mediaId, [plexId], MovieDetails() with { Title = "Updated", Runtime = TimeSpan.FromMinutes(99) }));
+		_testee.Update(existing, new CachedDetails(MovieDetails() with { Title = "Updated", Runtime = TimeSpan.FromMinutes(99) }, refetched, MediaField.None));
 
 		await Assert.That(existing.Title).IsEqualTo("Updated");
 		await Assert.That(((MovieMetadataRow)existing).Runtime).IsEqualTo(TimeSpan.FromMinutes(99));
+		await Assert.That(existing.LastFetchedAt).IsEqualTo(refetched);
 	}
 
 	[Test]
@@ -95,12 +99,9 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	{
 		var plexId = PlexId.From("plex-310", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var existing = await PersistAsync(
-			Movie(mediaId, [plexId], MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 5.0f, 10)]) }),
-			mediaId
-		);
+		var existing = await PersistAsync(Cached(MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 5.0f, 10)]) }), mediaId);
 
-		_testee.Update(existing, Movie(mediaId, [plexId], MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 9.0f, 9999)]) }));
+		_testee.Update(existing, Cached(MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 9.0f, 9999)]) }));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
@@ -116,12 +117,9 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	{
 		var plexId = PlexId.From("plex-315", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var existing = await PersistAsync(
-			Movie(mediaId, [plexId], MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 5.0f, 10)]) }),
-			mediaId
-		);
+		var existing = await PersistAsync(Cached(MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 5.0f, 10)]) }), mediaId);
 
-		_testee.Update(existing, Movie(mediaId, [plexId], new MovieDetails { Title = "Title" }));
+		_testee.Update(existing, Cached(new MovieDetails { Title = "Title" }));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
@@ -133,54 +131,44 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	{
 		var plexId = PlexId.From("plex-320", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var existing = await PersistAsync(Movie(mediaId, [plexId], MovieDetails()), mediaId);
-		var show = Show(MediaId.From(Guid.NewGuid()), [TmdbId.From("321", MediaType.Show)], ShowDetails());
+		var existing = await PersistAsync(Cached(MovieDetails()), mediaId);
 
-		await Assert.That(() => _testee.Update(existing, show)).Throws<InvalidOperationException>();
+		await Assert.That(() => _testee.Update(existing, Cached(ShowDetails()))).Throws<InvalidOperationException>();
 	}
 
 	[Test]
-	public async Task ToStored_WhenMovieEntity_ReadsBackTheMovieItWrote()
+	public async Task ToCached_WhenMovieEntity_ReadsBackWhatItWrote()
 	{
 		var plexId = PlexId.From("plex-400", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var details = MovieDetails() with { Title = "Movie", Runtime = TimeSpan.FromMinutes(110) };
-		var entity = await PersistAsync(Movie(mediaId, [plexId], details), mediaId);
+		var written = new CachedDetails(MovieDetails() with { Title = "Movie", Runtime = TimeSpan.FromMinutes(110) }, FetchedAt, MediaField.Backdrop);
+		var entity = await PersistAsync(written, mediaId);
 
-		var stored = _testee.ToStored(entity, new MediaIdentity(mediaId, [plexId]));
-
-		await Assert.That(stored).IsEqualTo(Movie(mediaId, [plexId], details));
+		await Assert.That(_testee.ToCached(entity)).IsEqualTo(written);
 	}
 
 	[Test]
-	public async Task ToStored_WhenShowEntity_ReadsBackTheShowItWrote()
+	public async Task ToCached_WhenShowEntity_ReadsBackWhatItWrote()
 	{
 		var plexId = PlexId.From("plex-410", MediaType.Show);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var entity = await PersistAsync(Show(mediaId, [plexId], ShowDetails()), mediaId);
+		var entity = await PersistAsync(Cached(ShowDetails()), mediaId);
 
-		var stored = _testee.ToStored(entity, new MediaIdentity(mediaId, [plexId]));
-
-		await Assert.That(stored).IsEqualTo(Show(mediaId, [plexId], ShowDetails()));
+		await Assert.That(_testee.ToCached(entity)).IsEqualTo(Cached(ShowDetails()));
 	}
 
 	[Test]
-	public async Task ToStored_PassesThroughExternalsAndRatings()
+	public async Task ToCached_PassesThroughRatings()
 	{
 		var plexId = PlexId.From("plex-420", MediaType.Movie);
-		var imdbId = ImdbId.From("tt420", MediaType.Movie);
-		var mediaId = await SeedMediaAsync([plexId, imdbId]);
-		var entity = await PersistAsync(
-			Movie(mediaId, [plexId, imdbId], MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 500)]) }),
-			mediaId
-		);
+		var mediaId = await SeedMediaAsync([plexId]);
+		var entity = await PersistAsync(Cached(MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 500)]) }), mediaId);
 
-		var stored = _testee.ToStored(entity, new MediaIdentity(mediaId, [plexId, imdbId]));
+		var cached = _testee.ToCached(entity);
 
 		using var _ = Assert.Multiple();
-		await Assert.That(stored.Identity.Externals).Contains(imdbId);
-		await Assert.That(stored.Details.Rating.Sources.Count).IsEqualTo(1);
-		await Assert.That(stored.Details.Rating.Sources.Single().Source).IsEqualTo(MediaProvider.Tmdb);
+		await Assert.That(cached.Details.Rating.Sources.Count).IsEqualTo(1);
+		await Assert.That(cached.Details.Rating.Sources.Single().Source).IsEqualTo(MediaProvider.Tmdb);
 	}
 
 	[Test]
@@ -198,7 +186,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 			Runtime = TimeSpan.FromMinutes(95),
 		};
 
-		var entity = await PersistAsync(Movie(mediaId, [plexId], details), mediaId);
+		var entity = await PersistAsync(Cached(details), mediaId);
 
 		using var _ = Assert.Multiple();
 		await Assert.That(entity.Title).IsEqualTo("Partial Title");
@@ -210,27 +198,23 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	}
 
 	[Test]
-	public async Task ToStored_WhenTheMovieEntityHoldsSentinels_ReadsThemBackAsMissing()
+	public async Task ToCached_WhenTheMovieEntityHoldsSentinels_ReadsThemBackAsMissing()
 	{
 		var plexId = PlexId.From("plex-421", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var entity = await PersistAsync(Movie(mediaId, [plexId], new MovieDetails { Title = "Only a title" }), mediaId);
+		var entity = await PersistAsync(Cached(new MovieDetails { Title = "Only a title" }), mediaId);
 
-		var stored = _testee.ToStored(entity, new MediaIdentity(mediaId, [plexId]));
-
-		await Assert.That(stored.Details).IsEqualTo(new MovieDetails { Title = "Only a title" });
+		await Assert.That(_testee.ToCached(entity).Details).IsEqualTo(new MovieDetails { Title = "Only a title" });
 	}
 
 	[Test]
-	public async Task ToStored_WhenTheShowEntityHoldsSentinels_ReadsThemBackAsMissing()
+	public async Task ToCached_WhenTheShowEntityHoldsSentinels_ReadsThemBackAsMissing()
 	{
 		var plexId = PlexId.From("plex-422", MediaType.Show);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var entity = await PersistAsync(Show(mediaId, [plexId], new ShowDetails { Title = "Only a title" }), mediaId);
+		var entity = await PersistAsync(Cached(new ShowDetails { Title = "Only a title" }), mediaId);
 
-		var stored = _testee.ToStored(entity, new MediaIdentity(mediaId, [plexId]));
-
-		await Assert.That(stored.Details).IsEqualTo(new ShowDetails { Title = "Only a title" });
+		await Assert.That(_testee.ToCached(entity).Details).IsEqualTo(new ShowDetails { Title = "Only a title" });
 	}
 
 	[Test]
@@ -246,7 +230,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 			RuntimePerEpisode = TimeSpan.FromMinutes(22),
 		};
 
-		var entity = (ShowMetadataRow)await PersistAsync(Show(mediaId, [plexId], details), mediaId);
+		var entity = (ShowMetadataRow)await PersistAsync(Cached(details), mediaId);
 
 		using var _ = Assert.Multiple();
 		await Assert.That(entity.Seasons).IsEqualTo(4);
@@ -254,9 +238,9 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		await Assert.That(entity.RuntimePerEpisode).IsEqualTo(TimeSpan.FromMinutes(22));
 	}
 
-	private async Task<MediaMetadataRow> PersistAsync(IdentifiedMedia media, MediaId mediaId)
+	private async Task<MediaMetadataRow> PersistAsync(CachedDetails cached, MediaId mediaId)
 	{
-		var entity = _testee.BuildFrom(media, mediaId.Value);
+		var entity = _testee.BuildFrom(cached, mediaId.Value);
 		fixture.Context.MediaMetadata.Add(entity);
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
@@ -264,15 +248,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		return await fixture.Context.MediaMetadata.Include(m => m.Ratings).SingleAsync(m => m.MediaId == mediaId.Value);
 	}
 
-	private static IdentifiedMedia Movie(MediaId mediaId, IExternalMediaId[] externals, MovieDetails details)
-	{
-		return new(new MediaIdentity(mediaId, [.. externals]), details);
-	}
-
-	private static IdentifiedMedia Show(MediaId mediaId, IExternalMediaId[] externals, ShowDetails details)
-	{
-		return new(new MediaIdentity(mediaId, [.. externals]), details);
-	}
+	private static CachedDetails Cached(MediaDetails details) => new(details, FetchedAt, MediaField.None);
 
 	private static MovieDetails MovieDetails()
 	{

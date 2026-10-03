@@ -18,31 +18,29 @@ internal sealed class MediaMetadataResolver(
 	IDateTimeProvider clock
 )
 {
-	public async Task<Result<MediaLookup>> ResolveAsync(MediaIdentity identity, MediaResolutionBuffer buffer, CancellationToken cancellationToken = default)
+	public async Task<Result<IdentifiedMedia>> ResolveAsync(MediaIdentity identity, MediaResolutionBuffer buffer, CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
 		return await LookUpAsync(identity, config.SearchProvider, cancellationToken)
-			.Map(detail => CompleteAsync(detail, config.SearchProvider, cancellationToken))
-			.Apply(buffer.Add);
+			.Map(found => EnrichAsync(found, config.SearchProvider, buffer, cancellationToken));
 	}
 
-	private async Task<MediaLookup> CompleteAsync(MediaLookup detail, SearchProvider searchProvider, CancellationToken cancellationToken)
-	{
-		if (detail is not IdentifiedMedia identified)
-		{
-			return detail;
-		}
-		return await EnrichAsync(identified, searchProvider, cancellationToken);
-	}
-
-	private Task<Result<MediaLookup>> LookUpAsync(MediaIdentity identity, SearchProvider provider, CancellationToken cancellationToken)
+	private Task<Result<IdentifiedMedia>> LookUpAsync(MediaIdentity identity, SearchProvider provider, CancellationToken cancellationToken)
 	{
 		var providerMedia = provider.AsMediaProvider();
 		var external = identity.Externals.OfProvider(providerMedia) ?? identity.Externals.First();
-		return searchIndex[provider].LookUpAsync(external, cancellationToken).Map(found => found.LookUpAs(identity));
+		return searchIndex[provider]
+			.LookUpAsync(external, cancellationToken)
+			.When(found => found.Fits(identity.Type), "media could not be resolved")
+			.Map(found => found.IdentifiedAs(identity));
 	}
 
-	private async Task<IdentifiedMedia> EnrichAsync(IdentifiedMedia current, SearchProvider searchProvider, CancellationToken cancellationToken)
+	private async Task<IdentifiedMedia> EnrichAsync(
+		IdentifiedMedia current,
+		SearchProvider searchProvider,
+		MediaResolutionBuffer buffer,
+		CancellationToken cancellationToken
+	)
 	{
 		var now = clock.Now;
 		var asked = new HashSet<MediaProvider> { searchProvider.AsMediaProvider() };
@@ -67,7 +65,8 @@ internal sealed class MediaMetadataResolver(
 					break;
 			}
 		}
-		return current with { ConfirmedAbsent = current.Details.Missing.Except(unconfirmed) };
+		buffer.Add(current, new CachedDetails(current.Details, now, current.Details.Missing.Except(unconfirmed)));
+		return current;
 	}
 
 	private static IdentifiedMedia Merge(IdentifiedMedia current, FoundMedia found)

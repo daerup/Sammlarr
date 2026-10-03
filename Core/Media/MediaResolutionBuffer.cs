@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Contracts.Media;
 using Domain.Media;
+using Domain.Media.Metadata;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Media;
@@ -11,9 +12,10 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 	private readonly ILogger<MediaResolutionBuffer> _logger;
 	private readonly ConcurrentDictionary<MediaId, MediaIdentity> _identities = new();
 	private readonly ConcurrentDictionary<MediaId, MediaId> _absorbed = new();
+	private readonly ConcurrentDictionary<MediaId, CachedDetails> _details = new();
 
 	public IReadOnlyCollection<MediaIdentity> NewIdentities => [.. _identities.Values];
-	public ConcurrentBag<IdentifiedMedia> NewMetadata { get; } = new();
+	public IReadOnlyDictionary<MediaId, CachedDetails> NewDetails => _details;
 
 	public MediaResolutionBuffer(IMediaRepository mediaRepository, ILogger<MediaResolutionBuffer> logger)
 	{
@@ -31,43 +33,48 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 		AddIdentity(survivor);
 	}
 
-	public void Add(MediaLookup detail)
+	public void Add(IdentifiedMedia media, CachedDetails cached)
 	{
-		if (detail is not IdentifiedMedia stored)
-		{
-			return;
-		}
-		AddIdentity(stored.Identity);
-		NewMetadata.Add(stored);
+		AddIdentity(media.Identity);
+		_details[media.Identity.Id] = cached;
 	}
 
 	public async ValueTask DisposeAsync()
 	{
 		var identities = _identities.Values.ToList();
-		var metadata = NewMetadata.ToList();
+		var details = new Dictionary<MediaId, CachedDetails>(_details);
 		if (identities.Count > 0)
 		{
 			var canonical = await _mediaRepository.UpsertIdentitiesAsync(identities, CancellationToken.None);
-			metadata = RemapMetadata(metadata, identities, canonical);
+			details = RemapDetails(details, identities, canonical);
 		}
-		if (metadata.Count > 0)
+		if (details.Count > 0)
 		{
-			await _mediaRepository.UpsertMetadataAsync(metadata, CancellationToken.None);
+			await _mediaRepository.UpsertDetailsAsync(details, CancellationToken.None);
 		}
-		if (identities.Count > 0 || metadata.Count > 0)
+		if (identities.Count > 0 || details.Count > 0)
 		{
-			_logger.LogDebug("Media resolution buffer flushed: upserted {Identities} identities, {Metadata} metadata rows", identities.Count, metadata.Count);
+			_logger.LogDebug("Media resolution buffer flushed: upserted {Identities} identities, {Details} details rows", identities.Count, details.Count);
 		}
 	}
 
-	private List<IdentifiedMedia> RemapMetadata(List<IdentifiedMedia> metadata, List<MediaIdentity> identities, IReadOnlyList<MediaIdentity> canonical)
+	private Dictionary<MediaId, CachedDetails> RemapDetails(
+		Dictionary<MediaId, CachedDetails> details,
+		List<MediaIdentity> identities,
+		IReadOnlyList<MediaIdentity> canonical
+	)
 	{
 		var upserted = new Dictionary<MediaId, MediaId>();
 		for (var i = 0; i < identities.Count && i < canonical.Count; i++)
 		{
 			upserted[identities[i].Id] = canonical[i].Id;
 		}
-		return [.. metadata.Select(item => Remap(item, Survivor(item.Id, upserted)))];
+		var remapped = new Dictionary<MediaId, CachedDetails>();
+		foreach (var (id, cached) in details)
+		{
+			remapped[Survivor(id, upserted)] = cached;
+		}
+		return remapped;
 	}
 
 	private MediaId Survivor(MediaId id, IReadOnlyDictionary<MediaId, MediaId> upserted)
@@ -77,10 +84,5 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 			id = next;
 		}
 		return upserted.GetValueOrDefault(id, id);
-	}
-
-	private static IdentifiedMedia Remap(IdentifiedMedia item, MediaId survivor)
-	{
-		return survivor == item.Id ? item : item with { Identity = item.Identity with { Id = survivor } };
 	}
 }

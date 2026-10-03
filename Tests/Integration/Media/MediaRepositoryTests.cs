@@ -19,9 +19,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Before(Test)]
 	public void Setup()
 	{
-		var dateTimeProvider = IDateTimeProvider.Mock();
-		dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
-		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(dateTimeProvider.Object), new MediaWriteLock());
+		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(), new MediaWriteLock());
 	}
 
 	[Test]
@@ -233,7 +231,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var rows = await _testee.GetByExternalsAsync([imdbId]);
 
 		await Assert.That(rows.Count).IsEqualTo(1);
-		await Assert.That(rows[0].Stored.Identity.Id).IsEqualTo(seededMediaId);
+		await Assert.That(rows[0].Identity.Id).IsEqualTo(seededMediaId);
 	}
 
 	[Test]
@@ -245,7 +243,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var rows = await _testee.GetAsync([seededMediaId]);
 
 		await Assert.That(rows.Count).IsEqualTo(1);
-		await Assert.That(rows[0].Stored.Identity.Id).IsEqualTo(seededMediaId);
+		await Assert.That(rows[0].Identity.Id).IsEqualTo(seededMediaId);
 	}
 
 	private async Task<MediaId> SetUpMediaAsync(IEnumerable<IExternalMediaId> ids)

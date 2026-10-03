@@ -33,9 +33,9 @@ public class MediaMetadataResolverTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails()));
 		await using var buffer = deps.Buffer();
 
-		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
+		await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(resolved.ConfirmedAbsent).IsEqualTo(MediaField.Rating);
+		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Rating);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
@@ -50,7 +50,7 @@ public class MediaMetadataResolverTests
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
 		await Assert.That(resolved.Details.Missing).IsEqualTo(MediaField.Rating);
-		await Assert.That(resolved.ConfirmedAbsent).IsEqualTo(MediaField.None);
+		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.None);
 	}
 
 	[Test]
@@ -124,9 +124,9 @@ public class MediaMetadataResolverTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails()));
 		await using var buffer = deps.Buffer();
 
-		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
+		await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(resolved.ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
+		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
 	}
 
 	[Test]
@@ -137,9 +137,9 @@ public class MediaMetadataResolverTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("TMDB detail returned 404 for 500"));
 		await using var buffer = deps.Buffer();
 
-		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
+		await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(resolved.ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
+		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
 	}
 
 	[Test]
@@ -155,7 +155,7 @@ public class MediaMetadataResolverTests
 
 		await Assert.That(resolved.Identity).IsEqualTo(Identity);
 		await Assert.That(resolved.Details).IsEqualTo(Complete() with { Tagline = null });
-		await Assert.That(resolved.ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
+		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
 	}
 
 	[Test]
@@ -166,9 +166,9 @@ public class MediaMetadataResolverTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Unavailable);
 		await using var buffer = deps.Buffer();
 
-		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
+		await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(resolved.ConfirmedAbsent).IsEqualTo(MediaField.Summary);
+		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Summary);
 	}
 
 	[Test]
@@ -178,9 +178,9 @@ public class MediaMetadataResolverTests
 		deps.Primary(Complete() with { Tagline = null }, PlexOnly);
 		await using var buffer = deps.Buffer();
 
-		var resolved = await Identified(await deps.Testee.ResolveAsync(PlexOnly, buffer));
+		await Identified(await deps.Testee.ResolveAsync(PlexOnly, buffer));
 
-		await Assert.That(resolved.ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
+		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
@@ -208,10 +208,10 @@ public class MediaMetadataResolverTests
 		deps.Primary(Complete() with { Tagline = null });
 		await using var buffer = deps.Buffer();
 
-		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
+		await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
-		await Assert.That(resolved.ConfirmedAbsent).IsEqualTo(MediaField.None);
+		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.None);
 	}
 
 	[Test]
@@ -230,7 +230,7 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenThePrimaryAnswersAnotherType_AnswersUnmatchedAndAsksNoEnricher()
+	public async Task ResolveAsync_WhenThePrimaryAnswersAnotherType_FailsAndAsksNoEnricher()
 	{
 		var deps = Dependencies.Create();
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any())
@@ -239,14 +239,26 @@ public class MediaMetadataResolverTests
 
 		var resolved = await deps.Testee.ResolveAsync(Identity, buffer);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async lookup => await Assert.That(lookup).IsOfUnionType<MediaLookup, UnmatchedMedia>());
+		await Assert.That(resolved).IsError();
+		await Assert.That(buffer.NewDetails).IsEmpty();
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
-	private static async Task<IdentifiedMedia> Identified(Result<MediaLookup> result)
+	[Test]
+	public async Task ResolveAsync_WhenTheDetailsAreFetched_StampsThemWithTheTimeOfTheFetch()
 	{
-		var lookup = await Assert.That(result).IsSuccess();
-		var identified = await Assert.That(lookup!.ToIdentified()).IsSome();
+		var deps = Dependencies.Create();
+		deps.Primary(Complete());
+		await using var buffer = deps.Buffer();
+
+		await deps.Testee.ResolveAsync(Identity, buffer);
+
+		await Assert.That(buffer.NewDetails[Id].FetchedAt).IsEqualTo(Now);
+	}
+
+	private static async Task<IdentifiedMedia> Identified(Result<IdentifiedMedia> result)
+	{
+		var identified = await Assert.That(result).IsSuccess();
 		return identified!;
 	}
 

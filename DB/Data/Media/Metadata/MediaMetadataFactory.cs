@@ -1,30 +1,28 @@
-using Contracts;
 using Domain.Media;
 using Domain.Media.Metadata;
 
 namespace DB.Data.Media.Metadata;
 
-internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
+internal class MediaMetadataFactory
 {
-	public MediaMetadataRow BuildFrom(IdentifiedMedia media, Guid mediaId)
+	public MediaMetadataRow BuildFrom(CachedDetails cached, Guid mediaId)
 	{
-		var entity = NewEntity(media.Details);
-		ApplyCommonFields(entity, media, mediaId);
-		entity.LastFetchedAt = dateTimeProvider.Now;
-		entity.Ratings = [.. media.Details.Rating.Sources.Select(rating => BuildRating(rating, entity))];
+		var entity = NewEntity(cached.Details);
+		ApplyCommonFields(entity, cached, mediaId);
+		entity.Ratings = [.. cached.Details.Rating.Sources.Select(rating => BuildRating(rating, entity))];
 		return entity;
 	}
 
-	public void Update(MediaMetadataRow existing, IdentifiedMedia media)
+	public void Update(MediaMetadataRow existing, CachedDetails cached)
 	{
-		switch (existing, media.Details)
+		switch (existing, cached.Details)
 		{
 			case (MovieMetadataRow movie, MovieDetails details):
-				ApplyCommonFields(movie, media, movie.MediaId);
+				ApplyCommonFields(movie, cached, movie.MediaId);
 				movie.Runtime = details.Runtime ?? TimeSpan.Zero;
 				break;
 			case (ShowMetadataRow show, ShowDetails details):
-				ApplyCommonFields(show, media, show.MediaId);
+				ApplyCommonFields(show, cached, show.MediaId);
 				show.Seasons = details.Seasons ?? 0;
 				show.Episodes = details.Episodes ?? 0;
 				show.RuntimePerEpisode = details.RuntimePerEpisode ?? TimeSpan.Zero;
@@ -32,14 +30,10 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			default:
 				throw new InvalidOperationException($"Cannot update existing {existing.GetType().Name}.");
 		}
-		ReplaceRatings(existing, [.. media.Details.Rating.Sources]);
-		existing.LastFetchedAt = dateTimeProvider.Now;
+		ReplaceRatings(existing, [.. cached.Details.Rating.Sources]);
 	}
 
-	public IdentifiedMedia ToStored(MediaMetadataRow entity, MediaIdentity identity)
-	{
-		return new(identity, Details(entity)) { ConfirmedAbsent = entity.ConfirmedAbsent };
-	}
+	public CachedDetails ToCached(MediaMetadataRow entity) => new(Details(entity), entity.LastFetchedAt, entity.ConfirmedAbsent);
 
 	private static MediaDetails Details(MediaMetadataRow entity)
 	{
@@ -86,9 +80,9 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		};
 	}
 
-	private static void ApplyCommonFields(MediaMetadataRow entity, IdentifiedMedia media, Guid mediaId)
+	private static void ApplyCommonFields(MediaMetadataRow entity, CachedDetails cached, Guid mediaId)
 	{
-		var details = media.Details;
+		var details = cached.Details;
 		entity.MediaId = mediaId;
 		entity.Title = details.Title ?? string.Empty;
 		entity.Tagline = details.Tagline ?? string.Empty;
@@ -97,7 +91,8 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		entity.BackdropUrl = details.BackdropUrl ?? string.Empty;
 		entity.ReleaseDate = details.ReleaseDate ?? DateOnly.MinValue;
 		entity.Genres = [.. details.Genres];
-		entity.ConfirmedAbsent = media.ConfirmedAbsent;
+		entity.ConfirmedAbsent = cached.ConfirmedAbsent;
+		entity.LastFetchedAt = cached.FetchedAt;
 	}
 
 	private static void ReplaceRatings(MediaMetadataRow entity, IReadOnlyList<MediaRating> ratings)
