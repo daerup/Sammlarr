@@ -41,10 +41,10 @@ internal sealed class MediaService(
 		await using var buffer = bufferFactory.Create();
 		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
 		var sink = await activeSink.ResolveAsync(cancellationToken);
-		var identityMatches = await IdentifyBatchAsync(materialized, sink, building, buffer, cancellationToken);
-		foreach (var (request, identityMatch) in materialized.Zip(identityMatches))
+		var handoffs = await IdentifyBatchAsync(materialized, sink, building, buffer, cancellationToken);
+		foreach (var (request, handoff) in materialized.Zip(handoffs))
 		{
-			yield return ToIdentityResult(identityMatch);
+			yield return ToIdentityResult(handoff);
 		}
 	}
 
@@ -146,9 +146,9 @@ internal sealed class MediaService(
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
-		var identityMatches = await IdentifyBatchAsync(batch, sink, building, buffer, cancellationToken);
+		var handoffs = await IdentifyBatchAsync(batch, sink, building, buffer, cancellationToken);
 		var pipeline = batch
-			.Zip(identityMatches)
+			.Zip(handoffs)
 			.SelectAwait(pair => LoadRequestDetailsAsync(pair.First, pair.Second, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
 		await foreach (var result in pipeline)
 		{
@@ -191,7 +191,7 @@ internal sealed class MediaService(
 		return found;
 	}
 
-	private async Task<IReadOnlyList<Result<IdentityMatch>>> IdentifyBatchAsync(
+	private async Task<IReadOnlyList<Result<IdentifyHandoff>>> IdentifyBatchAsync(
 		IReadOnlyList<IdentifyRequest> requests,
 		IMediaSink sink,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
@@ -204,10 +204,10 @@ internal sealed class MediaService(
 		var preliminary = await requests
 			.SelectAwait(req => IdentifyOneAsync(req, sink, stored, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
 			.ToListAsync(cancellationToken);
-		return await coordinator.CoordinateIdentityMatchesAsync(preliminary, building, buffer, cancellationToken);
+		return await coordinator.CoordinateHandoffsAsync(preliminary, building, buffer, cancellationToken);
 	}
 
-	private async ValueTask<Result<IdentityMatch>> IdentifyOneAsync(
+	private async ValueTask<Result<IdentifyHandoff>> IdentifyOneAsync(
 		IdentifyRequest request,
 		IMediaSink sink,
 		IReadOnlyDictionary<IExternalMediaId, StoredMedia> stored,
@@ -218,11 +218,11 @@ internal sealed class MediaService(
 		return await sink.AddressedBy(request.Type)
 			.Match(
 				target => IdentifyForAsync(request, target, stored, buffer, cancellationToken),
-				() => ValueTask.FromResult<Result<IdentityMatch>>(Error.From($"The sink cannot address {request.Type} titles."))
+				() => ValueTask.FromResult<Result<IdentifyHandoff>>(Error.From($"The sink cannot address {request.Type} titles."))
 			);
 	}
 
-	private ValueTask<Result<IdentityMatch>> IdentifyForAsync(
+	private ValueTask<Result<IdentifyHandoff>> IdentifyForAsync(
 		IdentifyRequest request,
 		MediaProvider target,
 		IReadOnlyDictionary<IExternalMediaId, StoredMedia> stored,
@@ -231,10 +231,10 @@ internal sealed class MediaService(
 	)
 	{
 		return FindStored(request, target, stored, buffer)
-			.Match(found => ValueTask.FromResult<Result<IdentityMatch>>(Success.Of(found)), () => FindSinkIdAsync(request, target, cancellationToken));
+			.Match(found => ValueTask.FromResult<Result<IdentifyHandoff>>(Success.Of(found)), () => FindSinkIdAsync(request, target, cancellationToken));
 	}
 
-	private static Optional<IdentityMatch> FindStored(
+	private static Optional<IdentifyHandoff> FindStored(
 		IdentifyRequest request,
 		MediaProvider target,
 		IReadOnlyDictionary<IExternalMediaId, StoredMedia> stored,
@@ -249,24 +249,24 @@ internal sealed class MediaService(
 		return matches.FirstOrNone(match => match.Identity.Externals.OfProvider(target).IsSome()).Map(match => Matched(request, match, buffer));
 	}
 
-	private static IdentityMatch Matched(IdentifyRequest request, StoredMedia match, MediaWriteBuffer buffer)
+	private static IdentifyHandoff Matched(IdentifyRequest request, StoredMedia match, MediaWriteBuffer buffer)
 	{
 		var matched = match.Identity;
 		var missing = request.Candidates.Where(c => !matched.Externals.Contains(c)).ToList();
 		if (missing.Count == 0)
 		{
-			return new IdentityMatch(matched, Some.Of(match));
+			return new IdentifyHandoff(matched, Some.Of(match));
 		}
 		var merged = matched with { Externals = matched.Externals + missing };
 		buffer.AddIdentity(merged);
-		return new IdentityMatch(merged, Some.Of(match));
+		return new IdentifyHandoff(merged, Some.Of(match));
 	}
 
-	private async ValueTask<Result<IdentityMatch>> FindSinkIdAsync(IdentifyRequest request, MediaProvider target, CancellationToken cancellationToken)
+	private async ValueTask<Result<IdentifyHandoff>> FindSinkIdAsync(IdentifyRequest request, MediaProvider target, CancellationToken cancellationToken)
 	{
 		return await idResolver
 			.ResolveAsync(request, target, cancellationToken)
-			.Map(externals => new IdentityMatch(new MediaIdentity(MediaId.New(), [.. externals]), new None()));
+			.Map(externals => new IdentifyHandoff(new MediaIdentity(MediaId.New(), [.. externals]), new None()));
 	}
 
 	private async ValueTask<Result<MatchedMedia>> LoadStoredDetailsAsync(
@@ -285,12 +285,12 @@ internal sealed class MediaService(
 
 	private async ValueTask<MediaMatchResult> LoadRequestDetailsAsync(
 		IdentifyRequest request,
-		Result<IdentityMatch> identityMatch,
+		Result<IdentifyHandoff> handoff,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
-		var loaded = await identityMatch.Match(
+		var loaded = await handoff.Match(
 			match => LoadDetailsAsync(match.Identity, match.Stored, buffer, cancellationToken),
 			error => ValueTask.FromResult<Result<MatchedMedia>>(error)
 		);
@@ -342,7 +342,7 @@ internal sealed class MediaService(
 			.ToResult(error);
 	}
 
-	private static Result<MediaIdentity> ToIdentityResult(Result<IdentityMatch> identityMatch) => identityMatch.Map(r => r.Identity);
+	private static Result<MediaIdentity> ToIdentityResult(Result<IdentifyHandoff> handoff) => handoff.Map(r => r.Identity);
 
 	private async Task<IReadOnlyDictionary<MediaId, StoredMedia>> LoadByInternalsAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken)
 	{

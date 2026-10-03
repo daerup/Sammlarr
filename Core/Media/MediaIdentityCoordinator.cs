@@ -38,8 +38,8 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		return preliminary.Select(p => p.Externals.Count > 0 ? building[p.Externals.First()] : p).ToArray();
 	}
 
-	public async Task<IReadOnlyList<Result<IdentityMatch>>> CoordinateIdentityMatchesAsync(
-		List<Result<IdentityMatch>> identityMatches,
+	public async Task<IReadOnlyList<Result<IdentifyHandoff>>> CoordinateHandoffsAsync(
+		List<Result<IdentifyHandoff>> handoffs,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
@@ -47,24 +47,20 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 	{
 		var pendingIndices = new List<int>();
 		var pendingPreliminary = new List<MediaIdentity>();
-		foreach (var (idx, identityMatch) in identityMatches.Index())
+		foreach (var (idx, handoff) in handoffs.Index())
 		{
-			identityMatch
-				.ToOptional()
-				.When(match => match.Stored.IsNone())
-				.Apply(_ => pendingIndices.Add(idx))
-				.Apply(match => pendingPreliminary.Add(match.Identity));
+			handoff.ToOptional().When(match => match.Stored.IsNone()).Apply(_ => pendingIndices.Add(idx)).Apply(match => pendingPreliminary.Add(match.Identity));
 		}
 		if (pendingPreliminary.Count == 0)
 		{
-			return identityMatches;
+			return handoffs;
 		}
 		var corrected = await CoordinateAsync(pendingPreliminary, building, buffer, cancellationToken);
 		for (var i = 0; i < corrected.Count; i++)
 		{
-			identityMatches[pendingIndices[i]] = Success.Of(new IdentityMatch(corrected[i], new None()));
+			handoffs[pendingIndices[i]] = Success.Of(new IdentifyHandoff(corrected[i], new None()));
 		}
-		return identityMatches;
+		return handoffs;
 	}
 
 	private static void MergeIntoCanonical(

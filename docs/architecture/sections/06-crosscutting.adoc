@@ -102,7 +102,7 @@ _state = await ApiKeyFactory
 | act on success or failure | `result.Apply(…).ApplyError(…)` | `if (result is Success<T>(var v)) { … } else { … }`
 | keep the successes of a stream | `await foreach (var media in stream.WhereSuccessAwait())` | `if (result is Success<T>(var v))` inside the loop
 | a value or a fallback | `+loaded.Match(matched => (MediaMatchResult)matched, _ => request.Unmatched())+` | `loaded is Success<MatchedMedia>(var matched) ? matched : …`
-| keep a success that passes a test | `+identityMatch.ToOptional().When(match => match.Stored.IsNone())+` | `is Success<IdentityMatch>(var match) && …`
+| keep a success that passes a test | `+handoff.ToOptional().When(match => match.Stored.IsNone())+` | `is Success<IdentifyHandoff>(var match) && …`
 | read the cause of an error | `+error.CausedBy<ProviderUnavailableException>().Match(next.Fills, MediaField.None)+` | `Error { Exception: ProviderUnavailableException }`
 | chain a fallible step | `.Map(next)` (flattens a `Result`-returning step), `.MapError(…)` | a guard that returns the error by hand
 | leave the monad at a boundary | `+.GetOrThrow(error => new …Exception(error.Reason))+`, `.ToOptional()` | `is Error e ? throw … : …`
