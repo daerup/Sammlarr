@@ -38,7 +38,7 @@ public class TmdbTrendingServiceTests
 						new MovieDetails { ReleaseDate = new DateOnly(2024, 5, 1), Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 6.5f, Some.Of(120))]) }
 					)
 			);
-		media.IdentifyAsync(Arg.Is<IEnumerable<IdentifyRequest>>(requests => requests != null && requests.Single().Hints.IsNone()), Any()).WasCalled(Times.Once);
+		media.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests != null && requests.Single().Hints.IsNone()), Any()).WasCalled(Times.Once);
 	}
 
 	private static TmdbTrendingService Testee(MockHttpHandler handler, IMediaService media)

@@ -42,7 +42,7 @@ internal sealed class MediaService(
 		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
 		var sink = await activeSink.ResolveAsync(cancellationToken);
 		var handoffs = await IdentifyBatchAsync(materialized, sink, building, buffer, cancellationToken);
-		foreach (var (request, handoff) in materialized.Zip(handoffs))
+		foreach (var (_, handoff) in materialized.Zip(handoffs))
 		{
 			yield return ToIdentityResult(handoff);
 		}
@@ -294,7 +294,7 @@ internal sealed class MediaService(
 			match => LoadDetailsAsync(match.Identity, match.Stored, buffer, cancellationToken),
 			error => ValueTask.FromResult<Result<MatchedMedia>>(error)
 		);
-		return loaded.Match(matched => (MediaMatchResult)matched, _ => request.Unmatched());
+		return loaded.Match(matched => matched, _ => request.Unmatched());
 	}
 
 	private async ValueTask<Result<MatchedMedia>> LoadDetailsAsync(

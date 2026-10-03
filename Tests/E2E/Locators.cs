@@ -26,15 +26,11 @@ internal static class Locators
 
 		internal ILocator Row(string name) => page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name });
 
-		internal ILocator Cell(string name) => page.GetByRole(AriaRole.Cell, new PageGetByRoleOptions { Name = name });
-
 		internal ILocator FeedCard(string name) => page.GetByRole(AriaRole.Article, Exact(name));
 
 		internal ILocator Option(string name) => page.GetByRole(AriaRole.Option, Exact(name));
 
 		internal ILocator OptionContaining(string name) => page.GetByRole(AriaRole.Option, new PageGetByRoleOptions { Name = name });
-
-		internal ILocator Combobox => page.GetByRole(AriaRole.Combobox);
 
 		internal ILocator MenuItem(string name) => page.GetByRole(AriaRole.Menuitem, new PageGetByRoleOptions { Name = name });
 
@@ -55,15 +51,9 @@ internal static class Locators
 
 		internal ILocator ButtonContaining(string name) => scope.GetByRole(AriaRole.Button, new LocatorGetByRoleOptions { Name = name });
 
-		internal ILocator Heading(string name) => scope.GetByRole(AriaRole.Heading, ExactIn(name));
-
-		internal ILocator Option(string name) => scope.GetByRole(AriaRole.Option, ExactIn(name));
-
 		internal ILocator Combobox => scope.GetByRole(AriaRole.Combobox);
 
 		internal ILocator Switch => scope.GetByRole(AriaRole.Switch);
-
-		internal ILocator Checkbox => scope.GetByRole(AriaRole.Checkbox);
 
 		internal ILocator Text(string value) => scope.GetByText(value, new LocatorGetByTextOptions { Exact = true });
 

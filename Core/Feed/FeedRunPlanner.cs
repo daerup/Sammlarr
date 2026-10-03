@@ -1,7 +1,6 @@
 using Contracts.Blocklist;
 using Contracts.DI;
 using Contracts.Feed;
-using Contracts.Media;
 using Contracts.Processing;
 using Contracts.Wantlist;
 using Core.Processing;

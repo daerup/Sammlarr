@@ -122,7 +122,7 @@ public class UpNextPanelTests : BunitContext
 		];
 		UpNextRow? cancelled = null;
 
-		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued).Add(panel => panel.OnCancel, (UpNextRow row) => cancelled = row));
+		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued).Add(panel => panel.OnCancel, row => cancelled = row));
 		await cut.Find("[aria-label='Cancel hdlists/anime']").ClickAsync(new());
 
 		await Assert.That(cut.FindAll(".row-cancel")).Count().IsEqualTo(1);

@@ -99,10 +99,7 @@ public class NotificationDeliveryPipelineTests
 		var subscriptions = INotificationSubscriptionRepository.Mock();
 		subscriptions
 			.GetForEventTypeAsync(Any<NotificationEventType>(), Any())
-			.Returns(
-				(IReadOnlyList<NotificationSubscription>)
-					[new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)]
-			);
+			.Returns([new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)]);
 
 		var targets = INotificationTargetRepository.Mock();
 		targets
@@ -158,8 +155,6 @@ public class NotificationDeliveryPipelineTests
 	private sealed class RecordingChannel : INotificationChannel
 	{
 		public List<NotificationTarget> Sent { get; } = [];
-
-		public NotificationChannel Kind => NotificationChannel.Webhook;
 
 		public Task<DeliveryResult> SendAsync(
 			NotificationContext context,

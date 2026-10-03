@@ -7,7 +7,6 @@ using Contracts;
 using Contracts.Notifications;
 using Domain.Media;
 using Domain.Notifications;
-using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 

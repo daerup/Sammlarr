@@ -11,7 +11,7 @@ public class TracingProxy<T> : DispatchProxy
 	public static T Wrap(T target)
 	{
 		var proxy = Create<T, TracingProxy<T>>();
-		((TracingProxy<T>)(object)proxy!)._target = target;
+		((TracingProxy<T>)(object)proxy)._target = target;
 		return proxy;
 	}
 

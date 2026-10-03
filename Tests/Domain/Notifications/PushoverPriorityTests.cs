@@ -9,10 +9,7 @@ public class PushoverPriorityTests
 	{
 		await Assert
 			.That(PushoverPriorities.Ascending)
-			.IsEquivalentTo(
-				(IReadOnlyList<PushoverPriority>)
-					[PushoverPriority.Lowest, PushoverPriority.Low, PushoverPriority.Normal, PushoverPriority.High, PushoverPriority.Emergency]
-			);
+			.IsEquivalentTo([PushoverPriority.Lowest, PushoverPriority.Low, PushoverPriority.Normal, PushoverPriority.High, PushoverPriority.Emergency]);
 	}
 
 	[Test]

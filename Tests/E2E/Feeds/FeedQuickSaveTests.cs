@@ -1,5 +1,4 @@
 using System.Globalization;
-using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Feeds;

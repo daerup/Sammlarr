@@ -40,9 +40,9 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var taken = await Assert.That(await Testee.TakeNextAsync(Now)).IsSome();
 
-		await Assert.That(taken!.Request.Kind).IsEqualTo(JobKind.FeedRun);
-		await Assert.That(taken!.Request.Key).IsEqualTo(feedId.Value.ToString());
-		await Assert.That(taken!.Owner.Value).IsEqualTo(SammlarrTestHost.SeededAdmin.Id);
+		await Assert.That(taken.Request.Kind).IsEqualTo(JobKind.FeedRun);
+		await Assert.That(taken.Request.Key).IsEqualTo(feedId.Value.ToString());
+		await Assert.That(taken.Owner.Value).IsEqualTo(SammlarrTestHost.SeededAdmin.Id);
 	}
 
 	[Test]
@@ -73,7 +73,7 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 		await EnqueueAsync(FeedId.From(Guid.NewGuid()));
 		var taken = await Assert.That(await Testee.TakeNextAsync(Now)).IsSome();
 
-		await Testee.CompleteAsync(taken!.Id, Now);
+		await Testee.CompleteAsync(taken.Id, Now);
 
 		await Assert.That(await Testee.TakeNextAsync(Now.AddHours(1))).IsNone();
 	}
@@ -88,7 +88,7 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var taken = await Assert.That(await Testee.TakeNextAsync(Now.AddMinutes(2))).IsSome();
 
-		await Assert.That(taken!.Request.Key).IsEqualTo(earlier.Value.ToString());
+		await Assert.That(taken.Request.Key).IsEqualTo(earlier.Value.ToString());
 	}
 
 	[Test]
@@ -110,7 +110,7 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.RequeueRunningAsync(Now);
 
-		await Assert.That(await AttemptsOfAsync(taken!.Id)).IsEqualTo(1);
+		await Assert.That(await AttemptsOfAsync(taken.Id)).IsEqualTo(1);
 	}
 
 	[Test]
@@ -118,7 +118,7 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await EnqueueAsync(FeedId.From(Guid.NewGuid()));
 		var taken = await Assert.That(await Testee.TakeNextAsync(Now)).IsSome();
-		await Testee.CompleteAsync(taken!.Id, Now);
+		await Testee.CompleteAsync(taken.Id, Now);
 
 		await Assert.That(await Testee.RequeueRunningAsync(Now)).IsEqualTo(0);
 	}

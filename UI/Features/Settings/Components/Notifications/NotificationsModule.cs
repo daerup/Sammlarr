@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
 namespace UI.Features.Settings.Components.Notifications;

@@ -83,8 +83,6 @@ public static class E2EApp
 			? route.FulfillAsync(new RouteFulfillOptions { ContentType = "image/svg+xml", Body = PlaceholderArtwork })
 			: route.ContinueAsync();
 
-	internal static async Task<string> UnmatchedAsync() => await (await StackAsync()).UnmatchedAsync();
-
 	internal static async Task<string> RequestJournalAsync() => await (await StackAsync()).RequestJournalAsync();
 
 	internal static Task<IAsyncDisposable> StubAsync(string urlPath, int status, string body, string method = "GET") =>

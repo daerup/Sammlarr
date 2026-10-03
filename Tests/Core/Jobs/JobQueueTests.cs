@@ -1,5 +1,4 @@
 using Contracts;
-using Contracts.Identity;
 using Contracts.Jobs;
 using Core.Announcing;
 using Core.Jobs;

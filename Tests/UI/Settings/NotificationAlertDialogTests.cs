@@ -3,7 +3,6 @@ using Bunit;
 using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.DependencyInjection;
-using TestInfrastructure;
 using UI.Features.Settings.Components.Notifications;
 using UI.Shared.Services;
 

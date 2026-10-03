@@ -19,8 +19,6 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 		Converters = { new JsonStringEnumConverter() },
 	};
 
-	public NotificationChannel Kind => NotificationChannel.Webhook;
-
 	public async Task<DeliveryResult> SendAsync(
 		NotificationContext context,
 		NotificationTarget target,

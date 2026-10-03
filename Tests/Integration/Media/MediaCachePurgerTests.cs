@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;
@@ -87,7 +86,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(blocklistedMedia.Id);
 		await Assert.That(fixture.Context.ExternalMediaIds).IsSingleElement();
-		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(blocklistedId);
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo(blocklistedId);
 	}
 
 	[Test]
@@ -110,7 +109,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(await fixture.Context.Wantlist.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(wantlistedMedia.Id);
-		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(wantlistedId);
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo(wantlistedId);
 	}
 
 	[Test]
@@ -131,7 +130,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(await fixture.Context.WantlistOutbox.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(queuedMedia.Id);
-		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(queuedId);
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo(queuedId);
 	}
 
 	[Test]

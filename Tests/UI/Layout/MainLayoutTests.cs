@@ -82,5 +82,5 @@ public class MainLayoutTests : BunitContext
 		await Assert.That(cut.Find("footer a").TextContent).Contains(running);
 	}
 
-	private IRenderedComponent<MainLayout> RenderLayout() => Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, (RenderFragment)(_ => { })));
+	private IRenderedComponent<MainLayout> RenderLayout() => Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, _ => { }));
 }

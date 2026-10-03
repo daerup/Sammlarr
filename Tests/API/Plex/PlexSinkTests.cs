@@ -40,7 +40,7 @@ public class PlexSinkTests
 		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
 		await Assert.That(snapshot.Unmatched).IsEmpty();
 		media
-			.IdentifyAsync(Arg.Is<IEnumerable<IdentifyRequest>>(requests => requests?.Single() is { Candidates: [{ Value: "plex-42" }] }), Any())
+			.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests?.Single() is { Candidates: [{ Value: "plex-42" }] }), Any())
 			.WasCalled(Times.Once);
 	}
 

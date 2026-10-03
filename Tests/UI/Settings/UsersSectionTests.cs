@@ -2,7 +2,6 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Identity;
 using Contracts.Settings;
-using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.DependencyInjection;

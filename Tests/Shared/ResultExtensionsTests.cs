@@ -9,7 +9,7 @@ public class ResultExtensionsTests
 	{
 		Result<int> result = Success.Of(5);
 
-		var mapped = result.Match(value => value * 2, error => -1);
+		var mapped = result.Match(value => value * 2, _ => -1);
 
 		await Assert.That(mapped).IsEqualTo(10);
 	}
@@ -226,7 +226,7 @@ public class ResultExtensionsTests
 	{
 		Result<int> result = Success.Of(3);
 
-		var mapped = await result.Match(value => Task.FromResult(value + 1), error => Task.FromResult(-1));
+		var mapped = await result.Match(value => Task.FromResult(value + 1), _ => Task.FromResult(-1));
 
 		await Assert.That(mapped).IsEqualTo(4);
 	}

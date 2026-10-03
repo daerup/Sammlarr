@@ -9,8 +9,6 @@ namespace UI.Shared.Notifications.WebUi;
 internal sealed class WebUiChannel(WebUiCircuits circuits, ICurrentUser recipient, INotificationTemplateRenderer renderer, ILogger<WebUiChannel> logger)
 	: INotificationChannel
 {
-	public NotificationChannel Kind => NotificationChannel.WebUi;
-
 	public Task<DeliveryResult> SendAsync(
 		NotificationContext context,
 		NotificationTarget target,

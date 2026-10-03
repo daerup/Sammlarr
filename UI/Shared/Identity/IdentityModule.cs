@@ -1,5 +1,4 @@
 using Contracts.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
 namespace UI.Shared.Identity;

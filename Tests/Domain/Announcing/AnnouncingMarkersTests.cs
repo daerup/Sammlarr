@@ -1,5 +1,4 @@
 using Domain.Announcing;
-using Domain.Notifications;
 using Domain.Wantlist.Outbox;
 
 namespace Domain.Tests.Announcing;

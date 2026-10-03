@@ -4,7 +4,6 @@ namespace Core.Jobs;
 
 internal sealed class JobRunnerStatus : IJobRunnerStatus
 {
-	private const int NotStarted = 0;
 	private const int Started = 1;
 	private const int Finished = 2;
 

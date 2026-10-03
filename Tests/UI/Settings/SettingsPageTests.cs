@@ -3,7 +3,6 @@ using Bunit;
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
-using Domain.Auth;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;

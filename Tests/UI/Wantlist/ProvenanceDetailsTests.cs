@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;
 using Microsoft.Extensions.DependencyInjection;

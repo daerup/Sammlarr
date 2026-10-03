@@ -413,7 +413,7 @@ public class OptionalExtensionsTests
 	[Test]
 	public async Task FirstOrNoneAsync_ReturnsFirstMatchSkippingNulls()
 	{
-		var result = await ToAsync<string?>(null, "a", "bb", "ccc").FirstOrNoneAsync(s => s.Length >= 2);
+		var result = await ToAsync(null, "a", "bb", "ccc").FirstOrNoneAsync(s => s.Length >= 2);
 
 		await Assert.That(result).IsSome().And.IsEqualTo("bb");
 	}
@@ -421,7 +421,7 @@ public class OptionalExtensionsTests
 	[Test]
 	public async Task FirstOrNoneAsync_WhenNoMatch_IsNone()
 	{
-		var result = await ToAsync<string?>(null, "a").FirstOrNoneAsync(s => s.Length >= 5);
+		var result = await ToAsync(null, "a").FirstOrNoneAsync(s => s.Length >= 5);
 
 		await Assert.That(result).IsNone();
 	}

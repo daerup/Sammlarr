@@ -1,5 +1,4 @@
 using Contracts;
-using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Settings;
@@ -124,7 +123,7 @@ public class MediaServiceOrderingTests
 		var mediaRepo = IMediaRepository.Mock();
 		var unmatchedCache = TestUnmatchedCache.Empty();
 
-		var externalToId = builder.Items.Where(i => i.Identifies).ToDictionary(i => (IExternalMediaId)i.External, i => i.MediaId.Value);
+		var externalToId = builder.Items.Where(i => i.Identifies).ToDictionary(i => i.External, i => i.MediaId.Value);
 
 		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => [.. Enumerable.Repeat<Optional<MediaIdentity>>(new None(), groups.Count)]);
 		mediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
@@ -148,7 +147,7 @@ public class MediaServiceOrderingTests
 		foreach (var item in builder.Items.Where(i => !i.Identifies))
 		{
 			var key = UnmatchedCacheKey.Build([item.External], MediaProvider.Tmdb);
-			unmatchedCache.GetValueOrNone(Arg.Is<string>(k => k == key)).Returns(Some.Of(true));
+			unmatchedCache.GetValueOrNone(Is<string>(k => k == key)).Returns(Some.Of(true));
 		}
 
 		var dateTimeProvider = IDateTimeProvider.Mock();

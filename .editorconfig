@@ -141,6 +141,22 @@ dotnet_diagnostic.IDE0071.severity = silent
 # IDE0031: Use null propagation - keep as silent hint to avoid build errors with TreatWarningsAsErrors
 dotnet_diagnostic.IDE0031.severity = silent
 
+dotnet_diagnostic.IDE0001.severity = warning
+dotnet_diagnostic.IDE0002.severity = warning
+dotnet_diagnostic.IDE0003.severity = warning
+dotnet_diagnostic.IDE0004.severity = warning
+dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0035.severity = warning
+dotnet_diagnostic.IDE0051.severity = warning
+dotnet_diagnostic.IDE0052.severity = warning
+dotnet_diagnostic.IDE0059.severity = warning
+dotnet_diagnostic.IDE0060.severity = warning
+dotnet_diagnostic.IDE0079.severity = warning
+dotnet_diagnostic.IDE0080.severity = warning
+dotnet_diagnostic.IDE0240.severity = warning
+dotnet_diagnostic.IDE0241.severity = warning
+dotnet_diagnostic.IDE0350.severity = warning
+
 # Space preferences
 csharp_space_after_cast = false
 csharp_space_after_colon_in_inheritance_clause = true
@@ -171,6 +187,9 @@ file_header_template = unset
 # xUnit1051: recommends TestContext.Current.CancellationToken (v3 pattern) which
 # is not yet adopted; suppress until a full v3 migration is performed.
 dotnet_diagnostic.xUnit1051.severity = none
+
+[DB/Migrations/*.cs]
+generated_code = true
 
 [src/libraries/System.Net.Http/src/System/Net/Http/{SocketsHttpHandler/Http3RequestStream.cs,BrowserHttpHandler/BrowserHttpHandler.cs}]
 # disable CA2025, the analyzer throws a NullReferenceException when processing this file: https://github.com/dotnet/roslyn-analyzers/issues/7652

@@ -8,8 +8,6 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 {
 	private const string EmptyMessagePlaceholder = "(empty)";
 
-	public NotificationChannel Kind => NotificationChannel.Pushover;
-
 	public async Task<DeliveryResult> SendAsync(
 		NotificationContext context,
 		NotificationTarget target,

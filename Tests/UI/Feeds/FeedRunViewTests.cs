@@ -9,7 +9,7 @@ namespace UI.Tests.Feeds;
 
 public class FeedRunViewTests
 {
-	private static readonly Domain.Feed.Feed Comedy = TestFeeds.Feed(new Guid(1, 0, 0, new byte[8]), "Comedy");
+	private static readonly Feed Comedy = TestFeeds.Feed(new Guid(1, 0, 0, new byte[8]), "Comedy");
 
 	[Test]
 	public async Task Problem_WhenARunFailedReadingTheSource_SaysTheSourceCouldNotBeRead()

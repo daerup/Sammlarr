@@ -151,7 +151,7 @@ internal static class FeedRunView
 
 	internal static string Summary(FeedRun run)
 	{
-		var parts = new List<string> { run.Trigger is Domain.Feed.Scheduled ? "scheduled" : "manual" };
+		var parts = new List<string> { run.Trigger is Scheduled ? "scheduled" : "manual" };
 
 		if (run.Counts.Total > 0)
 		{

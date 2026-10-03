@@ -4,7 +4,6 @@ using Domain.Jobs;
 using Domain.Providers;
 using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages;
-using UI.Shared.Media;
 
 namespace UI.Features.Settings.Components.Testing;
 

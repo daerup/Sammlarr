@@ -175,8 +175,6 @@ public class NotificationDeliveryHandlerTests
 	{
 		public List<NotificationTarget> Sent { get; } = [];
 
-		public NotificationChannel Kind => NotificationChannel.Webhook;
-
 		public Task<DeliveryResult> SendAsync(
 			NotificationContext context,
 			NotificationTarget target,
