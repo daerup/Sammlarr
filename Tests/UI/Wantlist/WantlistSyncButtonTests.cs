@@ -26,6 +26,7 @@ using TestInfrastructure;
 using UI.Features.Wantlist.Components;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
+using UI.Tests.Media;
 
 namespace UI.Tests.Wantlist;
 
@@ -210,6 +211,7 @@ public class WantlistSyncButtonTests : BunitContext
 	private (Mock<IJobQueue> Queue, Mock<IWantlistSyncPlanner> Planner) RegisterServices(bool runningSync = false)
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 
 		Services.AddSingleton<IEventPublisher>(events);

@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Media;
 using Domain.Media;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Media;
 using ErrorEventArgs = Microsoft.AspNetCore.Components.Web.ErrorEventArgs;
@@ -17,6 +18,8 @@ public class MediaGridTileTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(RatingStub.Context());
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		Services.AddSingleton(IMediaService.Mock().Object);
 		Services.AddSingleton(ArtworkStub.Sizing());
 	}
@@ -72,6 +75,21 @@ public class MediaGridTileTests : BunitContext
 		cut.Render(parameters => parameters.Add(tile => tile.Media, Movie()));
 
 		await Assert.That(cut.Find("img.media-card-poster").GetAttribute("src")).IsEqualTo(Backdrop);
+	}
+
+	[Test]
+	public async Task RatingStar_WhenClicked_OpensNothingButItsBreakdown()
+	{
+		var opened = 0;
+		var cut = Render<MediaGridTile>(parameters =>
+			parameters.Add(tile => tile.Media, Movie()).Add(tile => tile.OnClick, EventCallback.Factory.Create(this, () => opened++))
+		);
+
+		await cut.Find(".rating-badge").ClickAsync();
+		await Assert.That(opened).IsEqualTo(0);
+
+		await cut.Find("[data-testid='media-tile']").ClickAsync();
+		await Assert.That(opened).IsEqualTo(1);
 	}
 
 	private static MediaMatchResult Movie(string? backdrop = Backdrop, string? poster = Poster)

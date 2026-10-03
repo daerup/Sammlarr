@@ -27,6 +27,8 @@ public class MediaDetailSheetTests : BunitContext
 
 	private Mock<IWantlistService> _wantlist = null!;
 
+	private Mock<IMediaService> _media = null!;
+
 	[Test]
 	public async Task Toggle_WhenARemovalIsAlreadyQueued_StillReadsAsAddRatherThanCancel()
 	{
@@ -38,6 +40,22 @@ public class MediaDetailSheetTests : BunitContext
 		await Toggle(cut)!.ClickAsync(new());
 
 		await Assert.That(Toggle(cut)!.GetAttribute("aria-label")).IsEqualTo("Add to wantlist");
+	}
+
+	[Test]
+	public async Task Rating_WhenTheSheetOpensOnAPartlyKnownTitle_ShowsTheRatingsItLoads()
+	{
+		Register();
+		var loaded = new MatchedMedia(
+			new MediaIdentity(Id, []),
+			new MovieDetails { Title = "Futurama", Rating = RatingSummary.From([new TmdbRating(7.4f, Some.Of(900))]) }
+		);
+		_media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new[] { (Result<MatchedMedia>)Success.Of(loaded) }.ToAsyncEnumerable());
+
+		var cut = RenderSheet();
+		cut.WaitForState(() => cut.FindAll(".rating-badge").Count > 0);
+
+		await Assert.That(cut.Find(".rating-badge").TextContent.Trim()).IsEqualTo("7.4");
 	}
 
 	[Test]
@@ -113,6 +131,7 @@ public class MediaDetailSheetTests : BunitContext
 	private void Register()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 
 		_wantlist = IWantlistService.Mock();
@@ -123,7 +142,9 @@ public class MediaDetailSheetTests : BunitContext
 		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
 		Services.AddSingleton(blocklist.Object);
 
-		Services.AddSingleton(IMediaService.Mock().Object);
+		_media = IMediaService.Mock();
+		_media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());
+		Services.AddSingleton(_media.Object);
 
 		var providerConfig = IProviderConfigService.Mock();
 		providerConfig

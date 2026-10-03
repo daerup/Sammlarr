@@ -24,6 +24,7 @@ using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
+using UI.Tests.Media;
 
 namespace UI.Tests.Feeds;
 
@@ -186,6 +187,7 @@ public class FeedPreviewPanelTests : BunitContext
 	private IRenderedComponent<FeedPreviewPanel> RenderPanel(IFeedRunPlanner planner, int resolved, int unmatched, MediaId? gone = null)
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 		Services.AddSingleton(planner);
 		var wantlist = IWantlistService.Mock();

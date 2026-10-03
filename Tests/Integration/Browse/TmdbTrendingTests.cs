@@ -1,4 +1,5 @@
 using Contracts;
+using Contracts.Media;
 using Contracts.Media.Trending;
 using Domain.Media;
 using Domain.Providers;
@@ -22,6 +23,27 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(items).Count().IsEqualTo(1);
 		await AssertResolvedAs(items[0], TestMedia.Inception);
+	}
+
+	[Test]
+	public async Task GetTrendingAsync_ForACachedMovie_AddsTheRatingsSammlarrStoresForIt()
+	{
+		await host.TmdbTrendingPage(1, TestMedia.Inception);
+		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
+		var stored = new MovieDetails { Title = "Inception", Rating = RatingSummary.From([new ImdbRating(8.8f, Some.Of(2_700_000))]) };
+		await host.Resolve<IMediaRepository>()
+			.UpsertDetailsAsync(new Dictionary<MediaId, CachedDetails> { [inception] = new(stored, DateTimeOffset.UtcNow, MediaField.None) });
+
+		var items = (await FetchTrending(1)).Items;
+
+		await Assert
+			.That(items[0])
+			.IsOfUnionType<MediaMatchResult, MatchedMedia>()
+			.And.Multiple(async matched =>
+			{
+				await Assert.That(matched.Details.Rating.Of(RatingSource.Imdb)).IsSome();
+				await Assert.That(matched.Details.Rating.Of(RatingSource.Tmdb)).IsSome();
+			});
 	}
 
 	[Test]

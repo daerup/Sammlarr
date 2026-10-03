@@ -6,12 +6,12 @@ namespace Domain.Tests.Media;
 public class RatingSummaryTests
 {
 	[Test]
-	public async Task From_WhenSources_AveragesTheirSammlarrValues()
+	public async Task From_WhenSources_KeepsOneRatingPerSource()
 	{
 		var summary = RatingSummary.From([new TmdbRating(8f, new None()), new RottenTomatoesCriticsRating(95)]);
 
-		await Assert.That(summary.Average).IsSome().And.IsEqualTo(8.75f);
 		await Assert.That(summary.Sources.Count).IsEqualTo(2);
+		await Assert.That(summary.Of(RatingSource.RottenTomatoesCritics).Map(rating => rating.SammlarrValue)).IsSome().And.IsEqualTo(9.5f);
 	}
 
 	[Test]
@@ -20,7 +20,6 @@ public class RatingSummaryTests
 		var summary = RatingSummary.From([]);
 
 		await Assert.That(summary).IsEqualTo(RatingSummary.None);
-		await Assert.That(summary.Average).IsNone();
 	}
 
 	[Test]

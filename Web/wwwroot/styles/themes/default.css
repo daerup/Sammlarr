@@ -66,6 +66,7 @@
     --alert-danger: oklch(0.55 0.22 27);
     --alert-danger-foreground: oklch(0.30 0.12 27);
     --alert-danger-bg: oklch(0.993 0.003 27);
+    --sammlarr-gold: #e3a008;
 }
 
 .dark,
@@ -129,6 +130,7 @@
     --alert-danger: oklch(0.55 0.20 27);
     --alert-danger-foreground: oklch(0.90 0.06 27);
     --alert-danger-bg: oklch(0.18 0.008 27);
+    --sammlarr-gold: #f5b82e;
 }
 
 .bb\:fixed.bb\:inset-0.bb\:z-50.bb\:bg-black\/80 {

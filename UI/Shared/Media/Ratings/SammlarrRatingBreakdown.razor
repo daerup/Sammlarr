@@ -1,0 +1,152 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<div class="rating-breakdown @(_model.Ranked ? "ranked" : null)">
+    <div class="rating-breakdown-band popover-band">
+        <div class="rating-breakdown-head">
+            @if (Value is { } value)
+            {
+                <span class="rating-breakdown-value">
+                    <RatingStar Value="value" Size="20"/>
+                    <BbTooltip DelayDuration="150">
+                        <BbTooltipTrigger AsChild="false" Class="rating-tip">@RatingTexts.Number(value)</BbTooltipTrigger>
+                        <BbTooltipContent>@Arithmetic</BbTooltipContent>
+                    </BbTooltip>
+                </span>
+                <span class="rating-breakdown-name">Sammlarr rating</span>
+            }
+            else
+            {
+                <span class="rating-breakdown-value is-unrated"><RatingStar Size="20"/>–</span>
+                <span class="rating-breakdown-name">@RatingTexts.Unrated</span>
+            }
+        </div>
+        <div class="rating-breakdown-how">
+            @How
+            @if (Votes is { } votes)
+            {
+                <span> · </span>
+                @if (VoteSources > 1)
+                {
+                    <BbTooltip DelayDuration="150">
+                        <BbTooltipTrigger AsChild="false" Class="rating-tip">@RatingTexts.Count(votes) votes</BbTooltipTrigger>
+                        <BbTooltipContent>@VoteParts</BbTooltipContent>
+                    </BbTooltip>
+                }
+                else
+                {
+                    <span>@RatingTexts.Count(votes) votes</span>
+                }
+            }
+            else if (Value is not null)
+            {
+                <span> · no votes</span>
+            }
+        </div>
+    </div>
+    @foreach (var row in _model.Rows)
+    {
+        var url = row.Rating.Map(_ => RatingTexts.Link(row.Source, Ids, Title)).ToNullable();
+        <div class="rating-row @(row.State is RatingRowState.Counts ? "counts" : "dim") @(url is null ? null : "is-link")" style="--brand: @Brand(row.Source)">
+            @if (_model.Ranked)
+            {
+                <span class="rating-row-rank">@row.Rank.Map(rank => rank.ToString()).GetValueOr(string.Empty)</span>
+            }
+            <RatingMarkIcon Source="row.Source" Rating="row.Rating"/>
+            <span class="rating-row-name">@RatingTexts.Name(row.Source)<small>@Detail(row)</small></span>
+            <span class="rating-row-value">
+                @if (row.Rating.ToNullable() is { } rating)
+                {
+                    <BbTooltip DelayDuration="150">
+                        <BbTooltipTrigger AsChild="false" Class="rating-tip">@RatingTexts.Number(rating.SammlarrValue)</BbTooltipTrigger>
+                        <BbTooltipContent>@RatingTexts.Conversion(rating)</BbTooltipContent>
+                    </BbTooltip>
+                }
+                else
+                {
+                    <span>–</span>
+                }
+            </span>
+            @if (url is not null)
+            {
+                <a class="rating-row-link" href="@url" target="_blank" rel="noopener noreferrer" aria-label="@($"Open {RatingTexts.Name(row.Source)} (opens in new tab)")">
+                    <LucideIcon Name="external-link" Size="13"/>
+                </a>
+            }
+            else
+            {
+                <span></span>
+            }
+        </div>
+    }
+    <div class="rating-breakdown-foot">@Footer</div>
+</div>
+
+@code {
+    private const string RottenTomatoesRed = "#FA320A";
+
+    private RatingBreakdown _model = null!;
+
+    [Parameter] [EditorRequired] public required RatingSummary Ratings { get; set; }
+
+    [Parameter] [EditorRequired] public required RatingStrategy Strategy { get; set; }
+
+    [Parameter] [EditorRequired] public required ValueSet<RatingSource> Available { get; set; }
+
+    [Parameter] [EditorRequired] public required string Where { get; set; }
+
+    [Parameter] public IReadOnlyList<IExternalMediaId> Ids { get; set; } = [];
+
+    [Parameter] public string? Title { get; set; }
+
+    [Parameter] public bool StoredOnly { get; set; }
+
+    protected override void OnParametersSet() => _model = RatingBreakdown.Of(Ratings, Strategy, Available, StoredOnly);
+
+    private float? Value => _model.Sammlarr.Map(rating => rating.Value).ToNullable();
+
+    private int? Votes => _model.Sammlarr.Map(rating => rating.Votes).ToNullable();
+
+    private string Footer
+    {
+        get
+        {
+            if (_model.Partial)
+            {
+                return RatingTexts.StoredFooter;
+            }
+
+            return Value is null ? RatingTexts.UnratedFooter : RatingTexts.Footer;
+        }
+    }
+
+    private string How => $"{RatingTexts.Strategy(Strategy)} · {Where}";
+
+    private string Arithmetic => _model.Sammlarr.Map(rating => RatingTexts.Arithmetic(rating, Strategy)).GetValueOr(string.Empty);
+
+    private int VoteSources => _model.Sammlarr.Map(RatingTexts.VoteSources).GetValueOr(0);
+
+    private string VoteParts => _model.Sammlarr.Map(RatingTexts.VoteParts).GetValueOr(string.Empty);
+
+    private string Detail(RatingRow row)
+    {
+        if (row.SaysWhy)
+        {
+            return RatingTexts.Reason(row.State, _model.Sammlarr, Where);
+        }
+
+        return row.Rating.Map(RatingTexts.Detail).Map(text => UsedInstead(row) ? $"{text} · used instead" : text).GetValueOr(string.Empty);
+    }
+
+    private bool UsedInstead(RatingRow row) => _model.UsedInstead && row.State is RatingRowState.Counts;
+
+    private string Brand(RatingSource source)
+    {
+        return source switch
+        {
+            RatingSource.Tmdb => Branding.GetBrandingInfo(MediaProvider.Tmdb).BrandColor,
+            RatingSource.Imdb => Branding.GetBrandingInfo(MediaProvider.Imdb).BrandColor,
+            RatingSource.RottenTomatoesCritics or RatingSource.RottenTomatoesAudience => RottenTomatoesRed,
+        };
+    }
+}

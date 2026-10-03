@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Settings.Components.Providers;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
+using UI.Tests.Media;
 using SettingsPage = UI.Features.Settings.Pages.Settings;
 
 namespace UI.Tests.Settings;
@@ -21,6 +22,7 @@ public class SettingsPageTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddSingleton<ProfileDropdownService>();
 		Services.AddSingleton<AccountConnectionPrompt>();

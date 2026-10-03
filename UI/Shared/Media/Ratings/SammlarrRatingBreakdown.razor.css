@@ -1,0 +1,155 @@
+.rating-breakdown {
+    width: 370px;
+    max-width: calc(100vw - 2rem);
+    font-size: 12.5px;
+}
+
+.rating-breakdown-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px 2px;
+}
+
+.rating-breakdown-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--sammlarr-gold);
+}
+
+.rating-breakdown-value.is-unrated {
+    color: var(--muted-foreground);
+}
+
+.rating-breakdown-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.rating-breakdown-how {
+    padding: 0 12px 10px;
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+}
+
+.rating-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 18px 1fr auto 14px;
+    gap: 8px;
+    align-items: center;
+    padding: 5px 12px;
+    border-top: 1px solid var(--border);
+}
+
+.ranked .rating-row {
+    grid-template-columns: 14px 18px 1fr auto 14px;
+}
+
+.rating-breakdown-band + .rating-row {
+    border-top: 0;
+}
+
+.rating-row-rank {
+    font-size: 10.5px;
+    color: var(--muted-foreground);
+    text-align: right;
+}
+
+.rating-row-name {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+}
+
+.rating-row-name small {
+    font-size: 10.5px;
+    color: var(--muted-foreground);
+}
+
+.rating-row-value {
+    position: relative;
+    z-index: 1;
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.rating-row.dim > :not(.rating-row-name) {
+    opacity: 0.5;
+}
+
+.rating-row.dim > .rating-row-name {
+    color: var(--muted-foreground);
+}
+
+.rating-row.dim > .rating-row-name small {
+    opacity: 0.9;
+}
+
+.rating-row ::deep .provider-tile {
+    border-radius: 3px;
+}
+
+.rating-row-link {
+    display: inline-flex;
+    color: var(--muted-foreground);
+    opacity: 0.5;
+    transition: opacity 180ms ease;
+}
+
+.rating-row-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.rating-row-link:focus-visible {
+    outline: none;
+}
+
+.rating-row.is-link {
+    cursor: pointer;
+    transition: background 180ms ease;
+}
+
+.rating-row.is-link:hover,
+.rating-row.is-link:has(.rating-row-link:focus-visible) {
+    background: color-mix(in srgb, var(--brand) 12%, transparent);
+}
+
+.rating-row.is-link:hover::before,
+.rating-row.is-link:has(.rating-row-link:focus-visible)::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--brand);
+}
+
+.rating-row.is-link:hover .rating-row-link,
+.rating-row-link:focus-visible {
+    opacity: 0.9;
+}
+
+.rating-breakdown-foot {
+    padding: 7px 12px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted-foreground);
+    background: color-mix(in srgb, var(--foreground) 3%, transparent);
+}
+
+.rating-breakdown ::deep .rating-tip {
+    cursor: help;
+    text-decoration: underline dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}

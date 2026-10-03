@@ -28,14 +28,8 @@
                         <span aria-hidden="true">•</span>
                         <span>@fact</span>
                     }
-                    @if (Details.Rating.Average is Some<float>(var rating))
-                    {
-                        <span aria-hidden="true">•</span>
-                        <span class="inline-flex items-center gap-1 text-yellow-400">
-                            <LucideIcon Name="star" Size="12" Fill="currentColor"/>
-                            <span class="font-medium">@rating.ToString("F1")</span>
-                        </span>
-                    }
+                    <span aria-hidden="true">•</span>
+                    <SammlarrRatingBadge Ratings="@Details.Rating" Ids="@_ids" Title="@Details.Title"/>
                 </div>
                 <div class="flex items-center gap-2 pt-2 min-w-0">
                     <MediaTitleLink Title="@Details.Title" Ids="@_ids" Class="font-bold truncate text-xl" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>

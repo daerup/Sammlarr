@@ -14,6 +14,7 @@ public class MediaDetailTileTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton(IMediaService.Mock().Object);
 		Services.AddSingleton<MediaProviderBrandingService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;

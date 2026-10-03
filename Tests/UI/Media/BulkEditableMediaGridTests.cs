@@ -13,6 +13,7 @@ public class BulkEditableMediaGridTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 		Services.AddSingleton(IMediaService.Mock().Object);
 		Services.AddSingleton(ArtworkStub.Sizing());

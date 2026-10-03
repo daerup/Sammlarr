@@ -48,6 +48,15 @@ public class DataSourcesCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Credit_NamesEveryRatingSource()
+	{
+		var cut = Render<DataSourcesCard>();
+
+		await Assert.That(cut.FindAll(".source-gives").Select(gives => gives.TextContent)).Contains(gives => gives.Contains("Rotten Tomatoes ratings"));
+		await Assert.That(cut.Find(".source-credit").TextContent).Contains("Rotten Tomatoes and its marks are trademarks of Fandango.");
+	}
+
+	[Test]
 	public async Task Links_EveryOneOpensInANewTab()
 	{
 		var cut = Render<DataSourcesCard>();

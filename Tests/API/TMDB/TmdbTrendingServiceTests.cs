@@ -25,6 +25,7 @@ public class TmdbTrendingServiceTests
 		media
 			.IdentifyAsync(Any<IEnumerable<IdentifyRequest>>(), Any())
 			.Returns((requests, _) => requests.Select(_ => (Result<MediaIdentity>)Error.From("not found")).ToAsyncEnumerable());
+		media.GetStoredRatingsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new Dictionary<MediaId, RatingSummary>());
 
 		var page = await Testee(handler, media.Object).GetTrendingAsync(1);
 

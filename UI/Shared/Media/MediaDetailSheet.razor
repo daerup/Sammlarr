@@ -66,14 +66,8 @@
                                 <span aria-hidden="true">•</span>
                                 <span>@fact</span>
                             }
-                            @if (details.Rating.Average is Some<float>(var rating))
-                            {
-                                <span aria-hidden="true">•</span>
-                                <span class="inline-flex items-center gap-1 text-yellow-400">
-                                    <LucideIcon Name="star" Size="16" Fill="currentColor"/>
-                                    <span class="font-semibold">@rating.ToString("F1")</span>
-                                </span>
-                            }
+                            <span aria-hidden="true">•</span>
+                            <SammlarrRatingBadge Ratings="@_loadedRatings.GetValueOr(details.Rating)" Ids="@(media.Externals.ToList())" Title="@details.Title" Size="17" Align="PopoverAlign.Center"/>
                         </span>
                     </BbSheetDescription>
                     @if (details.Genres.Count > 0)
@@ -126,6 +120,7 @@
     private bool _togglingWantlist;
     private bool _togglingBlocklist;
     private Optional<WantlistItem> _item = new None();
+    private Optional<RatingSummary> _loadedRatings = new None();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -139,7 +134,17 @@
         if (Media is MatchedMedia matched && _loadedFor != matched.Identity.Id)
         {
             _loadedFor = matched.Identity.Id;
+            _loadedRatings = new None();
             await LoadEnrollmentAsync(matched.Identity.Id);
+            await LoadRatingsAsync(matched.Identity.Id);
+        }
+    }
+
+    private async Task LoadRatingsAsync(MediaId id)
+    {
+        await foreach (var loaded in MediaService.GetDetailsAsync([id]))
+        {
+            loaded.Apply(found => _loadedRatings = Some.Of(found.Details.Rating));
         }
     }
 

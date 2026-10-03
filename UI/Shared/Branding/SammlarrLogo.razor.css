@@ -1,11 +1,6 @@
 .sammlarr-logo {
-    --sammlarr-gold: #e3a008;
     display: block;
     overflow: visible;
-}
-
-.dark .sammlarr-logo {
-    --sammlarr-gold: #f5b82e;
 }
 
 .sammlarr-mark {
@@ -54,11 +49,11 @@ a.active .sammlarr-tilt {
 .sammlarr-rays {
     fill: none;
     stroke: var(--sammlarr-gold);
-    stroke-width: 7;
+    stroke-width: 6;
     stroke-linecap: round;
     opacity: 0;
     transform-box: view-box;
-    transform-origin: 222.75px 45.58px;
+    transform-origin: 221.2px 45.3px;
 }
 
 .sammlarr-logo:hover .sammlarr-bird {

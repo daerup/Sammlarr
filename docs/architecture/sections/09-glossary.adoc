@@ -68,7 +68,10 @@ IMediaRating:: One source's rating, its own type per source: `Value` as the sour
 
 Sammlarr rating:: The one rating Sammlarr shows, filters and sorts on (`SammlarrRating`): a value on the 0 to 10 scale
 and the ratings it came from, whose votes add up to its `Votes`. A `RatingStrategy` derives it from a title's
-`RatingSummary`.
+`RatingSummary`. The UI draws it with `SammlarrRatingBadge` under your default (`RatingContext` reads it and the
+available sources once per circuit); a click shows `SammlarrRatingBreakdown`. Browse tiles add the ratings Sammlarr
+already stores for each title to TMDB's trending answer (`IMediaService.GetStoredRatingsAsync`, one read per page, no
+network), so their breakdown lists only the sources it has; opening the title loads its details and with them the rest.
 
 RatingStrategy:: How a Sammlarr rating is derived: `AveragedRating` (the mean of its switched-on sources; none listed
 means every source) or `OrderedRating` (First available: the first source in its order that rates the title). Each
