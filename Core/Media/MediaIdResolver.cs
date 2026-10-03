@@ -27,13 +27,23 @@ internal sealed class MediaIdResolver(
 		CancellationToken cancellationToken = default
 	)
 	{
-		var candidates = request.Candidates;
-		var key = UnmatchedCacheKey.Build(candidates, target);
-		if (unmatchedCache.GetValueOrNone(key).IsSome())
-		{
-			return Error.From("Candidates were previously resolved as unmatched.");
-		}
+		var key = UnmatchedCacheKey.Build(request.Candidates, target);
+		return await unmatchedCache
+			.GetValueOrNone(key)
+			.Match(
+				_ => Task.FromResult<Result<IReadOnlyList<IExternalMediaId>>>(Error.From("Candidates were previously resolved as unmatched.")),
+				() => LookUpAsync(request, target, key, cancellationToken)
+			);
+	}
 
+	private async Task<Result<IReadOnlyList<IExternalMediaId>>> LookUpAsync(
+		IdentifyRequest request,
+		MediaProvider target,
+		string key,
+		CancellationToken cancellationToken
+	)
+	{
+		var candidates = request.Candidates;
 		var plan = IdLookupPlanner.Plan(candidates.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, _hops, capacity, clock.Now);
 		var unresolved = Error.From($"No lookup resolved the candidates to a {target} id.");
 		var transient = false;

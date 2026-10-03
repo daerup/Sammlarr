@@ -185,10 +185,7 @@ internal sealed class MediaService(
 		{
 			foreach (var (id, external) in await mediaRepository.GetExternalsAsync(wanted, source, cancellationToken))
 			{
-				if (sink.AddressedBy(external.Type).Match(expected => expected == source, () => false))
-				{
-					found[id] = external;
-				}
+				sink.AddressedBy(external.Type).When(expected => expected == source).Apply(_ => found[id] = external);
 			}
 		}
 		return found;

@@ -32,7 +32,7 @@ public class MediaIdResolverTests
 
 	private readonly Mock<IExternalIdConverter> _tmdb = Converter(MediaProvider.Tmdb, Detail);
 	private readonly Mock<IExternalIdConverter> _plex = Converter(MediaProvider.Plex, PlexById, Search);
-	private readonly Mock<ITypedMemoryCache<string, bool>> _cache = ITypedMemoryCache<string, bool>.Mock();
+	private readonly Mock<ITypedMemoryCache<string, bool>> _cache = TestUnmatchedCache.Empty();
 
 	[Test]
 	public async Task ResolveAsync_WhenAProviderIsBlockedWithinItsMaxWait_WaitsThenTakesThePath()

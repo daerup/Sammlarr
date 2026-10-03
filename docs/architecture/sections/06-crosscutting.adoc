@@ -46,8 +46,9 @@ value or `null` and reads `null` as `None`. Wolverine's serializer registers it 
 
 * `None` means absent, never "not loaded yet".
 * Convert once, at the edge: `Optional.Of(x)` in, `.ToNullable()` out (an awaited chain writes `(await x).ToNullable()`).
-* An `Optional<T>` member always holds a case: initialise it with `new None()`. `default(Optional<T>)` holds neither,
-and every helper throws on it.
+* An `Optional<T>` member always holds a case: initialise it with `new None()`. `default(Optional<T>)` holds neither:
+`Match`, `Map` and `GetValueOr` throw on it, and `IsSome`, `IsNone`, `Apply` and `ApplyNone` quietly treat it as
+neither case (an unconfigured mock of an `Optional`-returning member returns it).
 * `Optional` says nothing about why. A failure with a reason is a `Result`; bridge with `.ToResult(reason)`.
 * An `Optional` is never a sort key and never sits inside an operator EF translates; `Optional.Of(row.X)` in a final
 `Select` projection runs client-side and is fine.
@@ -57,7 +58,12 @@ Build and read an `Optional` or a `Result` by chaining its helpers: values move 
 effects go in `Apply`, `ApplyNone` and `ApplyError`, one step each (a step that needs more than one statement is a named
 method); at most one exit (`Match`, `GetValueOr`, `IsSome`, `ToNullable`, `ToResult`, …) leaves the chain, last. An async step finishes before the next
 one starts, and one `await` covers the chain. A step that returns a `ValueTask` is written `+async x => await StepAsync(x)+`,
-because a bare `+x => StepAsync(x)+` binds to the synchronous `Action` overload and is not awaited.
+because a bare `+x => StepAsync(x)+` binds to the synchronous `Action` overload and is not awaited. A `bool` read
+(`IsSome`, `IsNone`, `IsSuccess`, `IsError`, `Map(…).GetValueOr(false)`) is for answers: a property, a predicate, a sort
+key, an argument, stored UI state, `Match(p, () => false)` asking about the value, a loop guard that leaves the loop.
+Outside a loop guard it never routes control flow on presence alone: a branch between side effects is `Apply` / `ApplyNone` / `ApplyError`, a branch between two
+values is `Match` or `Map(…).GetValueOr(…)`, and a service hands back its `Optional` rather than collapsing it to a
+`bool` its caller then branches on (`IJobQueue.CancelAsync` returns the cancelled request).
 
 [source,csharp]
 ----
@@ -82,7 +88,7 @@ _state = await ApiKeyFactory
 | a yes/no that ends the expression | `+run.Match(r => r.Failed, () => false)+` | `is Some<FeedRun>({ Failed: true })`, `+run.When(r => r.Failed).IsSome()+`
 | route around the value | `+query.Feed.When(feed => feed == Feed).Map(…).GetValueOr([])+` | `if (query.Feed is not Some<FeedId>(var feed) \|\| feed != Feed) { return []; }`
 | keep the present values | `+….Select(feed => NextRunOf(feed).Map(next => (feed, next))).WhereSome()+` | `+.Where(e => e.next is not null)+`, then `e.next!.Value`
-| act when present or absent | `.Apply(…).Apply(…)`, `+.ApplyNone(() => …)+` | `if (x is Some<T>(var v)) { … }`, one block lambda
+| act when present or absent | `+row.Job.Map(job => JobQueue.CancelAsync(job, token)).Apply(_ => …).ApplyNone(() => …)+` | `if (x is Some<T>(var v)) { … }`, `if (x.IsSome()) … else …`, `+if (x.Map(…).GetValueOr(false))+`, one block lambda
 | hand it to a framework | `+query.MustInclude.Map(run => run.Value).ToNullable()+` | `is Some<RunId>(var id) ? id.Value : null`
 | turn it into a `Result` | `.ToResult("The sink cannot address …")` | `is not Some<…> … { return Error.From(…); }`
 |===
@@ -113,9 +119,10 @@ parameter dictionary) is not converted at all and fails at run time: pass `Optio
 
 The build enforces this. The `Analyzers` project's `SAM0002` fails it on a hand match outside these guards, on a null
 or constant pattern against a monad, on `null` or `default` converted to one, on a block lambda or an unawaited `Task` or `ValueTask` step passed to
-`Apply`, and on a monad used as an ordering key or written as text; its message names the helper to use. `SAM0003` warns
-when a branch reads a monad as a `bool` (`if (x.IsSome())`, `if (x.Map(…).GetValueOr(false))`) and proposes the
-`Apply` / `ApplyNone` / `ApplyError` or `Match` chain instead. The `AbsenceTests` architecture test fails on a nullable
+`Apply`, and on a monad used as an ordering key or written as text; its message names the helper to use. `SAM0003` fails
+it when a branch reads a monad as a `bool` (`if (x.IsSome())`, `if (x.Map(…).GetValueOr(false))`, a `?:` on `IsSome()`)
+and proposes the `Apply` / `ApplyNone` / `ApplyError` or `Match` chain instead; a `bool` used as a value or argument, a
+`Match(p, () => false)` and a loop guard pass. The `AbsenceTests` architecture test fails on a nullable
 non-private member outside the framework edges and bridges listed in it.
 
 === Modularity and dependency injection
