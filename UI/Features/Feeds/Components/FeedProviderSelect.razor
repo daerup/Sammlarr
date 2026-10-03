@@ -30,7 +30,7 @@
             {
                 var available = !Unavailable.Contains(provider);
                 <BbSelectItem Value="@((FeedProvider?)provider)" Text="@Brand(provider).NickName" Disabled="@(!available)"
-                              Class="isolate bg-transparent data-[focused=true]:bg-transparent data-[disabled=true]:opacity-100 [&>span]:flex-1">
+                              Class="isolate bg-transparent data-[focused=true]:bg-transparent! data-[disabled=true]:opacity-100 [&>span]:flex-1">
                     <span class="provider-wash" style="@BrandStyle(provider)"></span>
                     <span class="flex items-center gap-2.5">
                         <span class="@(available ? "flex" : "flex grayscale opacity-45")">

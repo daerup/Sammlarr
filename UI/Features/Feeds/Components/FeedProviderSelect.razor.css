@@ -3,28 +3,30 @@
     color: var(--foreground);
     font-weight: 600;
     border-color: color-mix(in oklch, var(--tint) 55%, transparent);
-    background: linear-gradient(90deg, color-mix(in oklch, var(--tint) 26%, transparent) 0%, color-mix(in oklch, var(--tint) 12%, transparent) 100%);
+    background: color-mix(in oklch, var(--tint) 12%, transparent);
 }
 
 .feed-provider-select ::deep .provider-trigger:hover {
-    background: linear-gradient(90deg, color-mix(in oklch, var(--tint) 34%, transparent) 0%, color-mix(in oklch, var(--tint) 18%, transparent) 100%);
+    background: color-mix(in oklch, var(--tint) 18%, transparent);
 }
 
 .provider-wash {
     position: absolute;
-    inset: 0;
+    inset: 0 -4px;
     z-index: -1;
-    border-radius: calc(var(--radius) - 4px);
+    transition: background 180ms ease;
 }
 
-[data-focused=true] .provider-wash {
+[data-focused=true] .provider-wash,
+[aria-selected=true] .provider-wash {
     background: color-mix(in oklch, var(--brand) 12%, transparent);
 }
 
-[data-focused=true] .provider-wash::before {
+[data-focused=true] .provider-wash::before,
+[aria-selected=true] .provider-wash::before {
     content: "";
     position: absolute;
-    left: -4px;
+    left: 0;
     top: 5px;
     bottom: 5px;
     width: 3px;
