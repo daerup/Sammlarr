@@ -10,7 +10,7 @@ attributes that make them concrete and where each is enforced.
 |===
 | Goal | Refined into | Enforced by
 
-| Correctness of list building | Resolution matches the right title (a title search is confirmed by id); one title yields one library row whether duplicates arrive in one flush or across flushes (identity dedup); a cross-identity collision fails loud, not silent; a bad or empty load never evicts the wrong items | The identity coordinator and media repository (<<section-runtime-view>>, scenario C), keyed by the composite external-id constraint and surfacing collisions as `MediaIdentityConflictException`; the Mirror conclusiveness rule, under which a load that did not finish or came back empty drops nothing (<<section-runtime-view>>)
+| Correctness of list building | Identify matches the right title (a title search is confirmed by id); one title yields one library row whether duplicates arrive in one flush or across flushes (identity dedup); a cross-identity collision fails loud, not silent; a bad or empty load never evicts the wrong items | The identity coordinator and media repository (<<section-runtime-view>>, scenario C), keyed by the composite external-id constraint and surfacing collisions as `MediaIdentityConflictException`; the Mirror conclusiveness rule, under which a load that did not finish or came back empty drops nothing (<<section-runtime-view>>)
 | Resilience of provider calls | A 429 storm or outage degrades to partial results, never a failed run; outbound concurrency is bounded; transient faults retry, sustained ones trip a breaker | The shared HTTP pipeline (<<section-concepts>>); scenario R
 | Per-user data isolation | Reads are filtered to the current user; writes are stamped to the owner; the filter fails closed; background work runs under the right user | EF query filters, the ownership stamper and `IUserScope` (<<section-concepts>>); scenario I
 | Maintainability | Strong typing and unions over primitives; strict layer dependencies; provider wiring generated, not hand-written; least visibility; one test naming convention | Architecture tests; the module and generator patterns (<<section-concepts>>); the `SAM0001` analyzer; the tiers in `testing.md`
@@ -34,14 +34,14 @@ Scenario I (isolation):: User B requests feeds/wantlist/blocklist while User A's
 _Response:_ B sees only B's rows; a query with no authenticated user throws rather than returning
 everyone's. _Measure:_ the isolation integration tests pass; the current-user lookup is fail-closed.
 
-Scenario R (resilience):: A feed resolves while Plex returns 429 or is unreachable. _Response:_
+Scenario R (resilience):: A feed loads while Plex returns 429 or is unreachable. _Response:_
 affected ids become `UnmatchedMedia` ("not found"), the run completes and no exception escapes.
 A provider blocked by a 429 or an open circuit breaker is skipped by every title, and one that answered
 as unavailable is not asked again by the same title's other routes, so the storm is not amplified; the
 ids are not cached unmatched, so the next run retries them. _Measure:_ partial results are returned;
 `ProviderUnavailableException` is handled, not propagated.
 
-Scenario P (performance):: A feed of N items is previewed. _Response:_ resolution reuses fresh
+Scenario P (performance):: A feed of N items is previewed. _Response:_ identify reuses fresh
 library rows and the negative cache and calls providers at the recommended concurrency, so a
 repeat preview does little I/O. _Measure:_ the resilience concurrency limit stays at or above the
 recommended concurrency; an eight-wide cap slows a large feed by roughly an order of magnitude.

@@ -1,15 +1,15 @@
 [[section-runtime-view]]
 == Runtime View
 
-Four scenarios: resolving a title (the one the others build on), feed preview, a feed run through
+Four scenarios: identifying a title (the one the others build on), feed preview, a feed run through
 the job queue, and wantlist sync/push. Each runs across the layers through `Contracts`, with
 providers resolved by keyed DI.
 
-=== Resolving a title
+=== Identifying a title
 
 Turning an external reference (a TMDB/IMDb id or a bare title) into the right library row, and the
 Plex id it can be pushed under, is where correctness hinges: a wrong match corrupts every list the
-title appears in. Two phases: A settles _identity_ (which library row), B fills in _metadata_.
+title appears in. Two phases: A settles _identity_ (which library row), B loads its _details_.
 
 [mermaid]
 ....
@@ -18,25 +18,26 @@ sequenceDiagram
   participant MS as IMediaService
   participant DB as Library (IMediaRepository)
   participant IC as Id converter
-  participant MR as Metadata resolver
+  participant MR as Details fetcher
 
   C->>MS: IdentifyWithDetailsAsync(external ids + hints)
   MS->>DB: GetByExternalsAsync (one batched read)
   alt in library and fresh
     DB-->>MS: stored title
   else missing or stale
-    MS->>IC: Phase A, resolve ids to an identity
+    MS->>IC: Phase A, identify the ids
     IC-->>MS: canonical identity (or unmatched)
-    MS->>MR: Phase B, fill metadata
+    MS->>MR: Phase B, fetch the details
     MR->>DB: upsert (write-behind, on flush)
-    MR-->>MS: IdentifiedMedia
+    MR-->>MS: MatchedMedia
   end
-  MS-->>C: MediaLookup
+  MS-->>C: MediaMatchResult
 ....
 
 The first lookup is the library itself (one batched `GetByExternalsAsync`); a fresh row is
-returned as is (fresh = 7 days for a complete row or one whose gaps are all confirmed, 1 hour for
-any other partial row). Only a missing or stale title runs the two phases.
+returned as is (fresh = younger than 7 days, and younger than 1 hour while a missing field is still
+unconfirmed; see `CachedDetails` in <<section-glossary>>). A stored but stale title only refetches its
+details (Phase B); a title not yet in the library runs both phases.
 
 ==== Phase A: ids to a Plex identity
 
@@ -82,16 +83,16 @@ sequenceDiagram
 A title match is confirmed by id, never trusted on the title alone: Plex is searched by the hint,
 each hit's externals are looked up, and the first hit whose externals contain an original id wins
 (if the hint finds nothing, it retries with TMDB's title). A negative cache of known-unmatched ids
-(kept an hour) short-circuits repeats before any provider call. Resolved ids pass through the
+(kept an hour) short-circuits repeats before any provider call. Identified ids pass through the
 coordinator (not shown), which merges them against existing rows so one title can't become two
 library ids.
 
-==== Phase B: metadata
+==== Phase B: details
 
-Metadata comes from the search provider first (Plex), then from the open enricher that fills the
-most missing fields, one at a time, until the record is complete. The rating counts as one of those
+Details come from the search provider first (Plex), then from the open enricher that fills the
+most missing fields, one at a time, until no open enricher can fill what is still missing. The rating counts as one of those
 fields, filled by an enricher whose `Fills` include `MediaField.Rating` (today TMDB). Writes are
-batched write-behind (one identity + one metadata upsert per run). Two failure behaviours matter: an
+batched write-behind through the `MediaWriteBuffer` (one identity and one details upsert per run). Two failure behaviours matter: an
 unmatched candidate becomes `UnmatchedMedia` (surfaced, never persisted); and when a provider is down
 or rate-limiting the title shows as "not found" for that run but is not cached unmatched, so the next
 run retries it (see <<section-technical-risks>>).
@@ -99,7 +100,7 @@ run retries it (see <<section-technical-risks>>).
 === Feed preview
 
 The user edits a feed in the editor and previews it. The result is computed live and never
-written anywhere; it just shows what the feed would resolve to right now.
+written anywhere; it just shows what the feed would load right now.
 
 [mermaid]
 ....
@@ -118,7 +119,7 @@ sequenceDiagram
     F->>M: GET list items (resilience pipeline)
     M-->>F: entries
     F->>R: IdentifyWithDetailsAsync(externals)
-    R-->>F: MediaLookup (matched or unmatched)
+    R-->>F: MediaMatchResult (matched or unmatched)
     F-->>P: stream items
   end
   loop as items arrive, then once more when settled
@@ -130,8 +131,8 @@ sequenceDiagram
   P-->>U: tiles, stat badges, unmatched list
 ....
 
-`IFeedProvider` is resolved by the feed's `FeedProvider` key. Each entry is resolved to a
-`MediaLookup` by the pipeline above, so a preview reuses cached rows and rarely hits every
+`IFeedProvider` is resolved by the feed's `FeedProvider` key. Each entry is identified as a
+`MediaMatchResult` by the pipeline above, so a preview reuses cached rows and rarely hits every
 provider. On a circuit-breaker trip or timeout the client raises `ProviderUnavailableException`;
 the panel shows partial results and a retry rather than failing the whole preview.
 

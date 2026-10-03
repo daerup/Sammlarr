@@ -2,16 +2,21 @@
 == Cross-cutting Concepts
 
 Concerns that cut across every layer, carrying the quality goals from
-<<section-introduction-and-goals>>: correctness (media model + resolution), resilience (HTTP
+<<section-introduction-and-goals>>: correctness (media model + identify), resilience (HTTP
 pipeline), isolation (auth + query filters), maintainability (modules + code generation).
 
 === Domain model and kernel
 
-`Domain` holds the media model: the union types (`MediaLookup`, `IdentifiedMedia`, the `Movie`,
-`Show` and partial cases) every layer speaks, defined in <<section-glossary>> and produced by the
-resolution in <<section-runtime-view>>. Below it, `Shared` is the kernel: `Optional<T>`,
+`Domain` holds the media model every layer speaks: a title is `MatchedMedia` or `UnmatchedMedia`
+(the `MediaMatchResult` union), both carrying one `MediaDetails` record (`MovieDetails`, `ShowDetails`,
+`UnknownDetails`) whose fields are all optional, and a search provider or enricher answers with `FoundMedia`,
+which has no `MediaId`. The terms are defined in <<section-glossary>>, produced by identify in <<section-runtime-view>>,
+and the shape is
+link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0009-model-a-title-as-an-identity-plus-optional-details.md[ADR 0009]. Below it, `Shared` is the kernel: `Optional<T>`,
 `Result<T>`, `ValueSet<T>`, and the `union` types. Expected absence is an `Optional` not null;
-expected failure is a `Result` not an exception. Unions are matched by case directly, never through
+expected failure is a `Result` not an exception. Media details are the exception: a missing details value is
+`null` from the provider mapper to the column (missing genres are an empty set, a missing rating is
+`RatingSummary.None`). Unions are matched by case directly, never through
 `.Value`, and enum switches are exhaustive with no default arm.
 
 === Modularity and dependency injection
@@ -87,8 +92,8 @@ contract. Enrichment skips a blocked provider and never waits for it; id resolut
 `MaxWait` (below). The request already in flight still honours `Retry-After` through the retry policy.
 
 Enrichment asks, one at a time, the open enricher (`EnricherProvider`, generated from `ProviderCapability.Enricher`)
-whose `Fills` cover the most missing fields, the least busy first, among those the title has an id for, until the
-title is complete or nobody is left. An enricher that was skipped because it was blocked, or answered as unavailable,
+whose `Fills` cover the most missing fields, the least busy first, among those the title has an id for, until
+no open enricher can fill what is still missing. An enricher that was skipped because it was blocked, or answered as unavailable,
 leaves its fields unconfirmed, so the title is refetched after the 1-hour cooldown. The rating is one of those fields:
 `MediaCompleteness` counts a title nobody has rated as missing `MediaField.Rating`, and a rating's source is the
 `MediaProvider` that supplied it. An enricher that fills ratings and finds no votes confirms the gap like any other
