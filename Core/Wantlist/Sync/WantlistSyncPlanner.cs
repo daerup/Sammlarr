@@ -17,11 +17,12 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 		var sink = await activeSink.ResolveAsync(cancellationToken);
 		return await PlanAsync(sink, cancellationToken)
 			.ApplyError(error => logger.LogWarning("Reading {Sink} failed: {Reason}", sink.Kind, error.Reason))
-			.Match(plan => (WantlistPlanResult)Project(plan), error => new WantlistSyncSinkUnreachable(error.Reason));
+			.Match(Project, error => new WantlistSyncSinkUnreachable(error.Reason));
 	}
 
-	private async Task<Result<WantlistSyncPlan>> PlanAsync(IMediaSink sink, CancellationToken cancellationToken) =>
-		await TryGetAsync(sink, cancellationToken)
+	private async Task<Result<WantlistSyncPlan>> PlanAsync(IMediaSink sink, CancellationToken cancellationToken)
+	{
+		return await TryGetAsync(sink, cancellationToken)
 			.Map(async snapshot =>
 			{
 				var wanted = new WantlistSnapshot(await repo.GetAllAsync(cancellationToken));
@@ -30,6 +31,7 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 				await DropRedundantAsync(sink.Kind, plan, cancellationToken);
 				return Success.Of(plan);
 			});
+	}
 
 	private static async Task<Result<SinkSnapshot>> TryGetAsync(IMediaSink sink, CancellationToken cancellationToken)
 	{
@@ -54,6 +56,8 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 		logger.LogInformation("Dropped {Count} wantlist outbox entries {Sink} already agrees with", plan.Redundant.Count, sink);
 	}
 
-	private static WantlistSyncSummary Project(WantlistSyncPlan plan) =>
-		new WantlistSyncSummary(plan.Pull, plan.Push, [.. plan.NoOps, .. plan.Redundant]) { Unmatched = plan.Unmatched };
+	private static WantlistPlanResult Project(WantlistSyncPlan plan)
+	{
+		return new WantlistSyncSummary(plan.Pull, plan.Push, [.. plan.NoOps, .. plan.Redundant]) { Unmatched = plan.Unmatched };
+	}
 }
