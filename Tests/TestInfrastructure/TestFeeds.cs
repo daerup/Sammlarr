@@ -9,8 +9,9 @@ public static class TestFeeds
 {
 	private static readonly DateTimeOffset epoch = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
-	public static Domain.Feed.Feed Feed(Guid id, string name = "Comedy", FeedProvider provider = FeedProvider.Mdblist) =>
-		new()
+	public static Feed Feed(Guid id, string name = "Comedy", FeedProvider provider = FeedProvider.Mdblist)
+	{
+		return new()
 		{
 			Id = FeedId.From(id),
 			Name = name,
@@ -21,8 +22,9 @@ public static class TestFeeds
 			CreatedAt = epoch,
 			Schedule = new FeedRunTrigger(new Manual()),
 		};
+	}
 
-	public static FeedRun Run(Domain.Feed.Feed feed, Guid id, Conclusiveness conclusiveness = Conclusiveness.Conclusive) =>
+	public static FeedRun Run(Feed feed, Guid id, Conclusiveness conclusiveness = Conclusiveness.Conclusive) =>
 		new()
 		{
 			Id = RunId.From(id),

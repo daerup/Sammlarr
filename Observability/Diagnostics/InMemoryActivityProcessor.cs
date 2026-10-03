@@ -1,5 +1,5 @@
-using Observability.Tracing;
 using System.Diagnostics;
+using Observability.Tracing;
 using OpenTelemetry;
 
 namespace Observability.Diagnostics;

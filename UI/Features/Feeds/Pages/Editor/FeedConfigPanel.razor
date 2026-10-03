@@ -627,13 +627,6 @@
         _ => new MarkupString("The provider-specific identifier for the list (slug, numeric ID, or URL segment)."),
     };
 
-    private static string GetStrategyTooltip(StrategyMode strategy) =>
-        strategy switch
-        {
-            StrategyMode.Append => "Each sync adds only new items. Items already in your collection are kept.",
-            StrategyMode.Mirror => "Each sync removes items that were added by this feed and are no longer on the list. Items added by other feeds are unaffected, even if they appear on this list.",
-        };
-
     private const string SlotScopeHelper = "Only affects items this feed did not add itself.";
 
     private static string GetSlotPolicyTooltip(SlotPolicy behavior) =>

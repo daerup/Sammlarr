@@ -20,13 +20,6 @@ internal class RawDbContext<TTable>
 
 	internal RawDbContext(SammlarrDbContext context) => _context = context;
 
-	public async Task<TColumn> QueryByIdAsync<TColumn>(Guid id, Expression<Func<TTable, TColumn>> propertySelector)
-	{
-		var connection = GetConnection(propertySelector, out var columnName, out var tableName);
-		var sql = $"SELECT {columnName} FROM {tableName} WHERE {nameof(IIdentifiable<>.Id)} = @id";
-		return await connection.QuerySingleAsync<TColumn>(sql, new { id });
-	}
-
 	public async Task<IEnumerable<TColumn>> QueryAsync<TColumn>(string columnName)
 	{
 		var connection = GetConnection(out var tableName);

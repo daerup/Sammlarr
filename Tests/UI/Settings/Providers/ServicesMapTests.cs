@@ -88,8 +88,10 @@ public class ServicesMapTests : BunitContext
 		await Assert.That(cut.Markup).Contains("Managed by an admin");
 	}
 
-	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params MediaProvider[] ready) =>
-		Render<ServicesMap>(parameters =>
-			parameters.Add(map => map.Config, Config).Add(map => map.Ready, (IReadOnlySet<MediaProvider>)ready.ToHashSet()).Add(map => map.CanPick, canPick)
+	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params MediaProvider[] ready)
+	{
+		return Render<ServicesMap>(parameters =>
+			parameters.Add(map => map.Config, Config).Add(map => map.Ready, ready.ToHashSet()).Add(map => map.CanPick, canPick)
 		);
+	}
 }

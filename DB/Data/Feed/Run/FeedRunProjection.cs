@@ -7,7 +7,7 @@ namespace DB.Data.Feed.Run;
 
 internal static class FeedRunProjection
 {
-	public static readonly Expression<Func<FeedRunRow, Domain.Feed.Run.FeedRun>> Project = row => new Domain.Feed.Run.FeedRun
+	public static readonly Expression<Func<FeedRunRow, FeedRun>> Project = row => new FeedRun
 	{
 		Id = RunId.From(row.Id),
 		FeedId = FeedId.From(row.FeedId),
@@ -31,7 +31,7 @@ internal static class FeedRunProjection
 		SourceFailure = Optional.Of(row.SourceFailure),
 	};
 
-	private static readonly Func<FeedRunRow, Domain.Feed.Run.FeedRun> map = Project.Compile();
+	private static readonly Func<FeedRunRow, FeedRun> map = Project.Compile();
 
-	public static Domain.Feed.Run.FeedRun ToDomain(this FeedRunRow row) => map(row);
+	public static FeedRun ToDomain(this FeedRunRow row) => map(row);
 }

@@ -4,7 +4,6 @@ using DB.Data.Feed.Run;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
-using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Feed;
@@ -12,7 +11,7 @@ namespace DB.Data.Feed;
 internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IFeedRepository
 {
 	private static readonly Expression<Func<FeedRow, Domain.Feed.Feed>> project = FeedProjection.Project;
-	private static readonly Expression<Func<FeedRunRow, Domain.Feed.Run.FeedRun>> projectRun = FeedRunProjection.Project;
+	private static readonly Expression<Func<FeedRunRow, FeedRun>> projectRun = FeedRunProjection.Project;
 
 	public async Task<IReadOnlyList<Domain.Feed.Feed>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
@@ -127,7 +126,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			.ToDictionary(entry => entry.Id, entry => entry.Absences);
 	}
 
-	public async Task<IReadOnlyList<Domain.Feed.Run.FeedRun>> GetRunsAsync(RunQuery query, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<FeedRun>> GetRunsAsync(RunQuery query, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -191,7 +190,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			);
 	}
 
-	public async Task StartRunAsync(Domain.Feed.Run.FeedRun run, CancellationToken cancellationToken = default)
+	public async Task StartRunAsync(FeedRun run, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -207,7 +206,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task CompleteRunAsync(Domain.Feed.Run.FeedRun run, CancellationToken cancellationToken = default)
+	public async Task CompleteRunAsync(FeedRun run, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -218,7 +217,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	private static void Fill(FeedRunRow row, Domain.Feed.Run.FeedRun run)
+	private static void Fill(FeedRunRow row, FeedRun run)
 	{
 		row.DurationMs = (long)run.Duration.TotalMilliseconds;
 		row.Strategy = run.Strategy;

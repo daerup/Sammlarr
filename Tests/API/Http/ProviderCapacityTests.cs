@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using API.Http;
 using Contracts;
 using Domain.Providers;
-using TestInfrastructure;
 
 namespace API.Tests.Http;
 

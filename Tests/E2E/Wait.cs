@@ -16,8 +16,6 @@ internal static class Wait
 
 		internal Task ToBeEnabledAsync(float timeout) => assertions.ToBeEnabledAsync(new LocatorAssertionsToBeEnabledOptions { Timeout = timeout });
 
-		internal Task ToBeDisabledAsync(float timeout) => assertions.ToBeDisabledAsync(new LocatorAssertionsToBeDisabledOptions { Timeout = timeout });
-
 		internal Task ToHaveCountAsync(int count, float timeout) =>
 			assertions.ToHaveCountAsync(count, new LocatorAssertionsToHaveCountOptions { Timeout = timeout });
 

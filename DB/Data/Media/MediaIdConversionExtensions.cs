@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using Domain.Media;
 using Domain.Providers;
 
@@ -16,9 +15,6 @@ internal static class MediaIdConversionExtensions
 			Id = mediaId.Value,
 			Media = media,
 		};
-
-	public static Collection<ExternalMediaIdRow> ToExternalIdEntities(this IEnumerable<IExternalMediaId> mediaIds, MediaRow media) =>
-		[.. mediaIds.Select(id => id.ToExternalIdEntity(media))];
 
 	private static IExternalMediaId Create(MediaProvider source, MediaType mediaType, string externalId) =>
 		source switch

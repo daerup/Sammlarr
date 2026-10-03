@@ -22,8 +22,6 @@ internal static class RecordedStubs
 		string Body
 	)
 	{
-		internal string Route => $"{Provider.Name}{ReplayPath}";
-
 		internal string Discriminator => string.Join('-', Query.Values.Select(Sanitize));
 	}
 

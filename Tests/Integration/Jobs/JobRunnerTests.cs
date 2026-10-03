@@ -1,7 +1,6 @@
 using Contracts;
 using Contracts.Jobs;
 using Core.Jobs;
-using DB.Data.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Wantlist.Sync;
@@ -53,7 +52,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(await Testee.TryRunNextAsync(CancellationToken.None)).IsTrue();
 
-		await Assert.That(await StateOfAsync(queued!.Id)).IsEqualTo(JobState.Done);
+		await Assert.That(await StateOfAsync(queued.Id)).IsEqualTo(JobState.Done);
 	}
 
 	[Test]
@@ -65,7 +64,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger())))
 			.IsOfUnionType<EnqueueResult, Queued>();
 
-		await Assert.That(await StateOfAsync(queued!.Id)).IsEqualTo(JobState.Waiting);
+		await Assert.That(await StateOfAsync(queued.Id)).IsEqualTo(JobState.Waiting);
 		var pending = (await host.Resolve<IJobQueueView>().GetAsync()).Jobs.Single();
 		await Assert.That(pending.State).IsEqualTo(JobState.Waiting);
 		await Assert.That(pending.RunAfter).IsEqualTo(armedAt + host.Resolve<SchedulerOptions>().Grace);
@@ -89,7 +88,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger())))
 			.IsOfUnionType<EnqueueResult, AlreadyQueued>();
 
-		await Assert.That(await StateOfAsync(pressed!.Id)).IsEqualTo(JobState.Queued);
+		await Assert.That(await StateOfAsync(pressed.Id)).IsEqualTo(JobState.Queued);
 		await Assert.That(await KindsAsync()).IsEquivalentTo([JobKind.WantlistSync]);
 	}
 
@@ -105,7 +104,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Resolve<IJobRepository>().ReleaseDueAsync(host.Resolve<IDateTimeProvider>().Now);
 
 		await Assert.That(await Testee.TryRunNextAsync(CancellationToken.None)).IsTrue();
-		await Assert.That(await StateOfAsync(queued!.Id)).IsEqualTo(JobState.Done);
+		await Assert.That(await StateOfAsync(queued.Id)).IsEqualTo(JobState.Done);
 	}
 
 	[Test]
@@ -118,7 +117,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.RequeueRunningAsync(CancellationToken.None);
 
-		await Assert.That(await StateOfAsync(queued!.Id)).IsEqualTo(JobState.Queued);
+		await Assert.That(await StateOfAsync(queued.Id)).IsEqualTo(JobState.Queued);
 	}
 
 	[Test]

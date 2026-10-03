@@ -1,4 +1,3 @@
-using Domain.Media;
 using Domain.Processing;
 
 namespace Domain.Feed.Run;
@@ -10,7 +9,6 @@ public enum ChangeBucket
 	Bypassed,
 	Filtered,
 	Skipped,
-	Unmatched,
 }
 
 public static class ChangeBuckets

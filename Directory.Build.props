@@ -1,6 +1,9 @@
 <Project>
 	<PropertyGroup>
 		<RestoreEnablePackagePruning>false</RestoreEnablePackagePruning>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
 	</PropertyGroup>
 	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Roslyn' and '$(MSBuildProjectName)' != 'Roslyn.Tests' and '$(MSBuildProjectName)' != 'Analyzers'">
 		<Using Include="Shared" />

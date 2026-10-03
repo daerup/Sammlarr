@@ -2,13 +2,9 @@
 @using Contracts.Blocklist
 @using Contracts.Settings
 @using Contracts.Wantlist
-@using Domain.Wantlist
-@using UI.Features.Wantlist.Components
-@using UI.Shared.Media.Icons
 @inject IMediaService MediaService
 @inject IWantlistService WantlistService
 @inject IBlocklistService BlocklistService
-@inject IProviderConfigService ProviderConfigService
 @inject Notifier Notifier
 @if (Open)
 {

@@ -1,6 +1,5 @@
 using Contracts.Notifications;
 using Domain.Notifications;
-using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
 namespace UI.Shared.Notifications.WebUi;

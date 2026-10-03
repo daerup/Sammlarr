@@ -1,4 +1,3 @@
-using Domain.Announcing;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Identity;

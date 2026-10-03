@@ -10,7 +10,6 @@ using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
-using TestInfrastructure;
 using UI.Features.Feeds.Pages.Runs;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
@@ -90,7 +89,7 @@ public class FeedRunsTests : BunitContext
 			.Returns(
 				new FeedSnapshot([
 					new FeedOverview(
-						new Domain.Feed.Feed
+						new Feed
 						{
 							Name = "Comedy",
 							Id = Feed,

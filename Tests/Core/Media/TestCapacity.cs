@@ -1,6 +1,5 @@
 using Contracts.Providers;
 using Domain.Providers;
-using TestInfrastructure;
 
 namespace Core.Tests.Media;
 

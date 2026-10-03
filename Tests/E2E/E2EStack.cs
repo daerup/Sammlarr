@@ -158,7 +158,7 @@ internal sealed class E2EStack
 	private static Dictionary<TProvider, string> Credentials<TProvider>(string suffix)
 		where TProvider : struct, Enum =>
 		Enum.GetValues<TProvider>()
-			.Select(provider => (provider, secret: RecordingConfiguration.Value($"{provider.ToString()!.ToUpperInvariant()}{suffix}")))
+			.Select(provider => (provider, secret: RecordingConfiguration.Value($"{provider.ToString().ToUpperInvariant()}{suffix}")))
 			.Where(entry => !string.IsNullOrEmpty(entry.secret))
 			.ToDictionary(entry => entry.provider, entry => entry.secret!);
 }

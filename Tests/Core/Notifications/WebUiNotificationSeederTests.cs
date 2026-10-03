@@ -19,7 +19,7 @@ public class WebUiNotificationSeederTests
 		await Testee.SeedAsync();
 
 		targets
-			.CreateAsync(Arg.Is<NotificationTarget>(target => target.Channel == NotificationChannel.WebUi && target.Enabled && target.Name == "Sammlarr"), Any())
+			.CreateAsync(Is<NotificationTarget>(target => target.Channel == NotificationChannel.WebUi && target.Enabled && target.Name == "Sammlarr"), Any())
 			.WasCalled(Times.Once);
 	}
 
@@ -34,7 +34,7 @@ public class WebUiNotificationSeederTests
 		subscriptions
 			.AddAsync(
 				created,
-				Arg.Is<IReadOnlyList<NotificationEventType>>(types =>
+				Is<IReadOnlyList<NotificationEventType>>(types =>
 					types.SequenceEqual(
 						new[]
 						{
@@ -59,6 +59,6 @@ public class WebUiNotificationSeederTests
 
 		await Testee.SeedAsync();
 
-		subscriptions.AddAsync(Any(), Any(), Arg.Is<NotificationTemplate>(seeded => seeded == NotificationTemplate.None), Any()).WasCalled(Times.Once);
+		subscriptions.AddAsync(Any(), Any(), Is<NotificationTemplate>(seeded => seeded == NotificationTemplate.None), Any()).WasCalled(Times.Once);
 	}
 }

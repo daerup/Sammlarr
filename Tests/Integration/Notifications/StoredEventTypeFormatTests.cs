@@ -1,4 +1,3 @@
-using Contracts.Notifications;
 using DB.Data.Notifications;
 using Domain.Notifications;
 using Harness;

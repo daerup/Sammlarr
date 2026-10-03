@@ -1,13 +1,12 @@
 using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
-using Domain.Processing;
 using Domain.Providers;
 using Domain.Wantlist.Sync;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
-using UrlGuid = global::Shared.UrlGuid;
+using UrlGuid = Shared.UrlGuid;
 
 namespace UI.Tests.Home;
 

@@ -24,21 +24,11 @@ public static class MediaIdentityInvariants
 	}
 }
 
-public sealed class MissingSinkIdException(MediaProvider sinkProvider) : Exception($"No external ID for the configured sink '{sinkProvider}' is present.")
-{
-	public MediaProvider Sink { get; } = sinkProvider;
-}
+public sealed class MissingSinkIdException(MediaProvider sinkProvider) : Exception($"No external ID for the configured sink '{sinkProvider}' is present.");
 
 public sealed class MixedMediaTypesException() : Exception("All external IDs must be of the same media type.");
 
-public sealed class UnknownMediaException(MediaId mediaId) : Exception($"Media '{mediaId.Value}' is not known.")
-{
-	public MediaId MediaId { get; } = mediaId;
-}
+public sealed class UnknownMediaException(MediaId mediaId) : Exception($"Media '{mediaId.Value}' is not known.");
 
 public sealed class MediaIdentityConflictException(IReadOnlyList<MediaId> mediaIds, IReadOnlyList<IExternalMediaId> candidates)
-	: Exception($"External IDs [{string.Join(", ", candidates)}] match {mediaIds.Count} media rows [{string.Join(", ", mediaIds)}]; expected at most one.")
-{
-	public IReadOnlyList<MediaId> MediaIds { get; } = mediaIds;
-	public IReadOnlyList<IExternalMediaId> Candidates { get; } = candidates;
-}
+	: Exception($"External IDs [{string.Join(", ", candidates)}] match {mediaIds.Count} media rows [{string.Join(", ", mediaIds)}]; expected at most one.");

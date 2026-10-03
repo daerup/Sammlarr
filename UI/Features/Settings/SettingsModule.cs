@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 using UI.Features.Settings.Components;
 

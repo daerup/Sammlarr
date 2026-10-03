@@ -3,7 +3,7 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;
 using UI.Shared.Services.Branding;
-using UrlGuid = global::Shared.UrlGuid;
+using UrlGuid = Shared.UrlGuid;
 
 namespace UI.Features.Wantlist.Components;
 

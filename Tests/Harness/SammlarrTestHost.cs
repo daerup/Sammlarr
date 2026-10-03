@@ -548,7 +548,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton(CurrentUser);
-		services.AddScoped<OverrideAwareCurrentUser>(sp => new OverrideAwareCurrentUser(sp.GetRequiredService<CurrentUserOverride>(), CurrentUser));
+		services.AddScoped(sp => new OverrideAwareCurrentUser(sp.GetRequiredService<CurrentUserOverride>(), CurrentUser));
 		services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<OverrideAwareCurrentUser>());
 
 		services.AddScoped<IDbContextFactory<SammlarrDbContext>>(sp => new SharedConnectionFactory(

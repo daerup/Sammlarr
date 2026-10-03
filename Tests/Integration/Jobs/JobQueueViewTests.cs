@@ -5,7 +5,6 @@ using Domain.Identity;
 using Domain.Jobs;
 using Domain.Wantlist.Sync;
 using Harness;
-using TestInfrastructure;
 
 namespace Integration.Tests.Jobs;
 

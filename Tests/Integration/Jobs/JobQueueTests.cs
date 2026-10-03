@@ -35,7 +35,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var queued = await Assert.That(first).IsOfUnionType<EnqueueResult, Queued>();
 		var folded = await Assert.That(second).IsOfUnionType<EnqueueResult, AlreadyQueued>();
-		await Assert.That(folded!.Id).IsEqualTo(queued!.Id);
+		await Assert.That(folded.Id).IsEqualTo(queued.Id);
 	}
 
 	[Test]
@@ -67,7 +67,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var queued = await Assert.That(first).IsOfUnionType<EnqueueResult, Queued>();
 		var folded = await Assert.That(second).IsOfUnionType<EnqueueResult, AlreadyQueued>();
-		await Assert.That(folded!.Id).IsEqualTo(queued!.Id);
+		await Assert.That(folded.Id).IsEqualTo(queued.Id);
 	}
 
 	[Test]

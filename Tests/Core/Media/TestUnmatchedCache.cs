@@ -1,5 +1,4 @@
 using Contracts.Caching;
-using TestInfrastructure;
 
 namespace Core.Tests.Media;
 

@@ -17,6 +17,8 @@ internal static class FeedRunSeeding
 		return new FeedOrigin(feed, run);
 	}
 
-	public static async Task<Domain.Feed.Feed> FeedAsync(this SammlarrTestHost host, FeedId feedId) =>
-		(await Assert.That((await host.Resolve<IFeedService>().GetAsync()).Find(feedId)).IsSome())!.Feed;
+	public static async Task<Feed> FeedAsync(this SammlarrTestHost host, FeedId feedId)
+	{
+		return (await Assert.That((await host.Resolve<IFeedService>().GetAsync()).Find(feedId)).IsSome())!.Feed;
+	}
 }

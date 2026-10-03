@@ -4,7 +4,7 @@ namespace Architecture.Tests;
 
 internal static class Projects
 {
-	internal static readonly Assembly Shared = Of<Shared.SharedModule>();
+	internal static readonly Assembly Shared = Of<SharedModule>();
 	internal static readonly Assembly Domain = Of<Domain.Media.MediaId>();
 	internal static readonly Assembly Contracts = Of<Contracts.Media.IMediaService>();
 	internal static readonly Assembly Core = Of<Core.CoreModule>();

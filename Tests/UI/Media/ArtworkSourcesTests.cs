@@ -1,5 +1,4 @@
 using Contracts.Media.Artwork;
-using TestInfrastructure;
 
 namespace UI.Tests.Media;
 

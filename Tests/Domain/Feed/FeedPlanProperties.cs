@@ -3,7 +3,6 @@ using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Media;
 using Domain.Processing;
-using Domain.Providers;
 
 namespace Domain.Tests.Feed;
 

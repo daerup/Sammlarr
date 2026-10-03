@@ -7,7 +7,7 @@ namespace Harness;
 
 internal sealed class HttpStub : HttpMessageHandler
 {
-	private Func<HttpRequestMessage, Task<HttpResponseMessage>> _respond = _ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+	private readonly Func<HttpRequestMessage, Task<HttpResponseMessage>> _respond = _ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
 
 	private readonly List<(string UrlContains, Func<HttpRequestMessage, bool> Validator)> _credentialValidators = [];
 
@@ -16,9 +16,6 @@ internal sealed class HttpStub : HttpMessageHandler
 	private readonly ConcurrentQueue<string> _requested = new();
 
 	public int Requests(string urlContains) => _requested.Count(url => url.Contains(urlContains, StringComparison.OrdinalIgnoreCase));
-
-	public void RespondWithJson(string json) =>
-		_respond = _ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") });
 
 	public void RespondWithJsonForUrl(string urlContains, string json) =>
 		_urlResponders[urlContains] = _ =>

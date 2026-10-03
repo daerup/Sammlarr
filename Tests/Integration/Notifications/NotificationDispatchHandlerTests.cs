@@ -8,7 +8,6 @@ using Domain.Media;
 using Domain.Notifications;
 using Domain.Providers;
 using Messaging.Notifications;
-using Shared.Extensions;
 using TestInfrastructure;
 
 namespace Integration.Tests.Notifications;
@@ -308,14 +307,14 @@ public class NotificationDispatchHandlerTests
 	private static Mock<INotificationSubscriptionRepository> SubscriptionsFor(NotificationEventType eventType, params NotificationSubscription[] subscriptions)
 	{
 		var repository = INotificationSubscriptionRepository.Mock();
-		repository.GetForEventTypeAsync(eventType, Any()).Returns((IReadOnlyList<NotificationSubscription>)subscriptions);
+		repository.GetForEventTypeAsync(eventType, Any()).Returns(subscriptions);
 		return repository;
 	}
 
 	private static Mock<IMediaRepository> Media(params StoredMedia[] stored)
 	{
 		var repository = IMediaRepository.Mock();
-		repository.GetAsync(Any<IReadOnlyList<MediaId>>(), Any()).Returns((IReadOnlyList<StoredMedia>)stored);
+		repository.GetAsync(Any<IReadOnlyList<MediaId>>(), Any()).Returns(stored);
 		return repository;
 	}
 
@@ -329,7 +328,7 @@ public class NotificationDispatchHandlerTests
 
 	private static Mock<IFeedRepository> Feed() => Finding(new None());
 
-	private static Mock<IFeedRepository> Finding(Optional<Domain.Feed.Feed> feed)
+	private static Mock<IFeedRepository> Finding(Optional<Feed> feed)
 	{
 		var repository = IFeedRepository.Mock();
 		repository.FindAsync(Any<FeedId>(), Any()).Returns(feed);

@@ -80,11 +80,11 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 					catch (ProviderUnavailableException)
 					{
 						unavailable = true;
-						return (IReadOnlyList<IExternalMediaId>)[];
+						return [];
 					}
 					catch (Exception ex) when (ex is not OperationCanceledException)
 					{
-						return (IReadOnlyList<IExternalMediaId>)[];
+						return [];
 					}
 				},
 				LookupConcurrency,

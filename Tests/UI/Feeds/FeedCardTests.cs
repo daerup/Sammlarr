@@ -14,7 +14,7 @@ using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
-using UrlGuid = global::Shared.UrlGuid;
+using UrlGuid = Shared.UrlGuid;
 
 namespace UI.Tests.Feeds;
 

@@ -2,7 +2,6 @@ using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
 using Contracts.Blocklist;
-using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;

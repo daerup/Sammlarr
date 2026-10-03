@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Settings.Components.Providers;
 
 namespace UI.Tests.Settings.Providers;

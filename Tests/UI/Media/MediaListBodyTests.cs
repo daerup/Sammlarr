@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Microsoft.AspNetCore.Components;
 using UI.Shared.Media;
 
 namespace UI.Tests.Media;
@@ -28,8 +27,8 @@ public class MediaListBodyTests : BunitContext
 				.Add(body => body.TotalCount, totalCount)
 				.Add(body => body.VisibleCount, visibleCount)
 				.Add(body => body.ShowFilters, showFilters)
-				.Add<RenderFragment>(body => body.EmptyState, builder => builder.AddMarkupContent(0, "<p>nothing here yet</p>"))
-				.Add<RenderFragment>(body => body.Grid, builder => builder.AddMarkupContent(0, "<p>the grid</p>"))
+				.Add(body => body.EmptyState, builder => builder.AddMarkupContent(0, "<p>nothing here yet</p>"))
+				.Add(body => body.Grid, builder => builder.AddMarkupContent(0, "<p>the grid</p>"))
 		);
 
 	[Test]
@@ -59,8 +58,8 @@ public class MediaListBodyTests : BunitContext
 			parameters
 				.Add(body => body.ErrorMessage, "boom")
 				.Add(body => body.OnRetry, () => retried = true)
-				.Add<RenderFragment>(body => body.EmptyState, builder => builder.AddMarkupContent(0, "<p>nothing here yet</p>"))
-				.Add<RenderFragment>(body => body.Grid, builder => builder.AddMarkupContent(0, "<p>the grid</p>"))
+				.Add(body => body.EmptyState, builder => builder.AddMarkupContent(0, "<p>nothing here yet</p>"))
+				.Add(body => body.Grid, builder => builder.AddMarkupContent(0, "<p>the grid</p>"))
 		);
 
 		await cut.Find("button").ClickAsync();

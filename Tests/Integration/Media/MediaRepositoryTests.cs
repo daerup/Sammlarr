@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Media;
 using DB.Data.Media;
 using Domain.Media;
@@ -131,7 +130,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var result = await _testee.GetExternalsAsync([mediaId], MediaProvider.Plex);
 
 		await Assert.That(result.Count).IsEqualTo(1);
-		await Assert.That(result[mediaId]).IsEqualTo<IExternalMediaId>(PlexId.From("plex-210", MediaType.Movie));
+		await Assert.That(result[mediaId]).IsEqualTo(PlexId.From("plex-210", MediaType.Movie));
 	}
 
 	[Test]

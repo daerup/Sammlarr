@@ -66,11 +66,14 @@ internal sealed class NotificationTargetRepository(IDbContextFactory<SammlarrDbC
 			NotificationChannel.WebUi => new WebUiConfig(),
 		};
 
-	private static void ApplyConfig(NotificationTargetRow row, NotificationConfig config) =>
-		(row.Url, row.SigningSecret, row.AppToken, row.UserKey) = config switch
+	private static void ApplyConfig(NotificationTargetRow row, NotificationConfig config)
+	{
+		(string? Url, string? SigningSecret, string? AppToken, string? UserKey) columns = config switch
 		{
-			WebhookConfig webhook => (webhook.Url, webhook.SigningSecret, (string?)null, (string?)null),
-			PushoverConfig pushover => ((string?)null, (string?)null, pushover.AppToken, pushover.UserKey),
-			WebUiConfig => ((string?)null, (string?)null, (string?)null, (string?)null),
+			WebhookConfig webhook => (webhook.Url, webhook.SigningSecret, null, null),
+			PushoverConfig pushover => (null, null, pushover.AppToken, pushover.UserKey),
+			WebUiConfig => (null, null, null, null),
 		};
+		(row.Url, row.SigningSecret, row.AppToken, row.UserKey) = columns;
+	}
 }

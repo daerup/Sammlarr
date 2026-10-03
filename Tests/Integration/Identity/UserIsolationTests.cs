@@ -6,7 +6,6 @@ using Domain.Feed;
 using Domain.Providers;
 using Domain.Wantlist;
 using Harness;
-using TestInfrastructure;
 
 namespace Integration.Tests.Identity;
 

@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Microsoft.AspNetCore.Components;
 using UI.Shared.Layout;
 
 namespace UI.Tests.Layout;
@@ -35,6 +34,6 @@ public class PageContainerTests : BunitContext
 			parameters
 				.Add(container => container.Heading, "Your wantlist")
 				.Add(container => container.Fill, fill)
-				.Add(container => container.ChildContent, (RenderFragment)(builder => builder.AddMarkupContent(0, "<p>body</p>")))
+				.Add(container => container.ChildContent, builder => builder.AddMarkupContent(0, "<p>body</p>"))
 		);
 }

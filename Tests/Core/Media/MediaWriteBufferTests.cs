@@ -24,7 +24,7 @@ public class MediaWriteBufferTests
 		}
 
 		_repository
-			.UpsertDetailsAsync(Arg.Is<IReadOnlyDictionary<MediaId, CachedDetails>>(details => details is { Count: 1 } && details.ContainsKey(Survivor.Id)), Any())
+			.UpsertDetailsAsync(Is<IReadOnlyDictionary<MediaId, CachedDetails>>(details => details is { Count: 1 } && details.ContainsKey(Survivor.Id)), Any())
 			.WasCalled(Times.Once);
 	}
 
@@ -40,7 +40,7 @@ public class MediaWriteBufferTests
 		}
 
 		_repository
-			.UpsertIdentitiesAsync(Arg.Is<IReadOnlyList<MediaIdentity>>(identities => identities is [var only] && only.Externals.Contains(learned)), Any())
+			.UpsertIdentitiesAsync(Is<IReadOnlyList<MediaIdentity>>(identities => identities is [var only] && only.Externals.Contains(learned)), Any())
 			.WasCalled(Times.Once);
 	}
 

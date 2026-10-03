@@ -1,7 +1,6 @@
 using Domain.Announcing;
 using Domain.Feed;
 using Domain.Identity;
-using Domain.Media;
 using Domain.Notifications;
 using Domain.Providers;
 

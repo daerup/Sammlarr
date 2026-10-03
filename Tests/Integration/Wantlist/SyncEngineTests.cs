@@ -1,4 +1,3 @@
-using Contracts.Identity;
 using Contracts.Wantlist.Outbox;
 using Contracts.Wantlist.Sync;
 using DB.Data.Wantlist;
@@ -25,7 +24,6 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	private IWantlistSyncEngine Testee => host.Resolve<IWantlistSyncEngine>();
 	private IWantlistSyncPlanner Planner => host.Resolve<IWantlistSyncPlanner>();
 	private IWantlistOutbox Outbox => host.Resolve<IWantlistOutbox>();
-	private ICurrentUser CurrentUser => host.Resolve<ICurrentUser>();
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 

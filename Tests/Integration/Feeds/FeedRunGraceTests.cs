@@ -5,7 +5,6 @@ using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
-using Domain.Wantlist;
 using Harness;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
@@ -49,7 +48,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 					Duration = TimeSpan.FromSeconds(1),
 					Strategy = feed.Strategy,
 					Trigger = new FeedRunTrigger(new Manual()),
-					Conclusiveness = summary!.Conclusiveness,
+					Conclusiveness = summary.Conclusiveness,
 					Counts = FeedRunCounts.From(summary),
 					Items = [new FeedRunItem { MediaId = kept, State = FeedRunItemState.Kept }],
 				}

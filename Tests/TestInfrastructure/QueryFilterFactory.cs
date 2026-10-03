@@ -23,14 +23,6 @@ public static class QueryFilterFactory
 			Value = JsonSerializer.Serialize(value),
 		};
 
-	public static FilterPredicate Bool(string field, bool isTrue) =>
-		new()
-		{
-			Field = field,
-			Operator = isTrue ? FilterPredicateOperator.IsTrue : FilterPredicateOperator.IsFalse,
-			ValueKind = FilterValueKind.Boolean,
-		};
-
 	public static FilterPredicate Date(string field, FilterPredicateOperator op, DateOnly value) =>
 		new()
 		{
