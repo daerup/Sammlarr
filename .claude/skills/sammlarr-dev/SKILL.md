@@ -58,7 +58,7 @@ See the `write-tunit-test` skill for templates.
 
 ## Formatter
 
-**CSharpier** (`dotnet-tools.json`, v1.2.6) formats with tabs, `printWidth=160`. Always run `dotnet csharpier format <changed files>` before committing C# changes. Never hand-format — CSharpier will rewrite it.
+**CSharpier** (`dotnet-tools.json`, v1.3.0; it cannot parse `union` or `closed` yet, so `.csharpierignore` lists those files until a release ships belav/csharpier#1888) formats with tabs, `printWidth=160`. Always run `dotnet csharpier format <changed files>` before committing C# changes. Never hand-format: CSharpier will rewrite it.
 
 ## Code conventions (enforced)
 

@@ -10,7 +10,7 @@
       "rollForward": false
     },
     "powerutils.benchmarkdotnet.reporter": {
-      "version": "1.5.1",
+      "version": "1.8.1",
       "commands": [
         "pbreporter"
       ],

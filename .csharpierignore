@@ -1,6 +1,5 @@
 Domain/Media/MediaMatchResult.cs
 Domain/Media/MediaDetails.cs
-Contracts/Auth/AuthSession.cs
 Shared/Result/Result.cs
 Shared/Optional/Optional.cs
 Domain/Feed/RunSchedule.cs

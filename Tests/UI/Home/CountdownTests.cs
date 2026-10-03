@@ -1,5 +1,5 @@
 using BlazorBlueprint.Components;
-using BlazorBlueprint.Primitives.Services;
+using BlazorBlueprint.Primitives;
 using Bunit;
 using Contracts;
 using Microsoft.AspNetCore.Components;

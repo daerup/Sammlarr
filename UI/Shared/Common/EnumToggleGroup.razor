@@ -22,7 +22,7 @@
         {
             <BbTooltipProvider>
                 <BbTooltip>
-                    <BbTooltipTrigger>@button</BbTooltipTrigger>
+                    <BbTooltipTrigger AsChild="true">@button</BbTooltipTrigger>
                     <BbTooltipContent>@TooltipProvider?.Invoke(option)</BbTooltipContent>
                 </BbTooltip>
             </BbTooltipProvider>

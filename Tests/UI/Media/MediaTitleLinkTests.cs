@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
-using BlazorBlueprint.Primitives.Services;
 using Bunit;
 using Domain.Media;
 using Microsoft.AspNetCore.Components;
