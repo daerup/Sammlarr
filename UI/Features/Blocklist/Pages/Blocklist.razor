@@ -103,7 +103,6 @@
     {
         IsLoadingList = true;
         ErrorMessage = null;
-        StateHasChanged();
 
         try
         {
@@ -132,7 +131,6 @@
         finally
         {
             IsLoadingList = false;
-            StateHasChanged();
         }
     }
 

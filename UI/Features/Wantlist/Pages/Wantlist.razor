@@ -221,7 +221,6 @@
     {
         _userId ??= CurrentUser.Id;
         IsLoadingList = true;
-        StateHasChanged();
         await ReloadAsync();
     }
 
@@ -284,7 +283,6 @@
     {
         _pushed.Clear();
         _syncing = true;
-        StateHasChanged();
     }
 
     private void CompleteIfDrained()
