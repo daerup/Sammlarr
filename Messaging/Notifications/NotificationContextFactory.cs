@@ -29,10 +29,10 @@ internal static class NotificationContextFactory
 		{
 			return null;
 		}
-		return await feedRepository.FindAsync(FeedId.From(guid), cancellationToken) is Some<Feed>(var feed)
-			? new NotificationFeed(feed.Id.ToString(), feed.Name, feed.Provider, feed.Identifier)
-			: null;
+		return (await feedRepository.FindAsync(FeedId.From(guid), cancellationToken).Map(ToNotificationFeed)).ToNullable();
 	}
+
+	private static NotificationFeed ToNotificationFeed(Feed feed) => new(feed.Id.ToString(), feed.Name, feed.Provider, feed.Identifier);
 
 	private static NotificationPayload ToPayload(INotification message) =>
 		message switch

@@ -39,6 +39,11 @@ payloads, Serilog and OpenTelemetry models, BCL overrides and exception construc
 | UI-only state (selection, loading, busy, binding, create or edit mode, links), private fields, locals, sort keys
 |===
 
+An `Optional` that does cross a System.Text.Json boundary needs `OptionalJsonConverterFactory` (`Shared`): it writes the
+value or `null` and reads `null` as `None`. Wolverine's serializer registers it (`MessagingHostExtensions`), so
+`DeliverNotification` carries its `NotificationTemplate` as is; without it .NET's union handling cannot read an
+`Optional` back.
+
 * `None` means absent, never "not loaded yet".
 * Convert once, at the edge: `Optional.Of(x)` in, `.ToNullable()` out (an awaited chain writes `(await x).ToNullable()`).
 * An `Optional<T>` member always holds a case: initialise it with `new None()`. `default(Optional<T>)` holds neither,

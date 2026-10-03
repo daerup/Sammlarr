@@ -55,26 +55,20 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 	public async Task UpsertAsync_WhenTemplateAndLevelChange_RoundTripAndUpdate()
 	{
 		var targetId = await CreateTargetAsync();
-		var id = await _testee.AddAsync(
-			targetId,
-			[NotificationEventType.WantlistSyncCompleted],
-			new NotificationTemplate(Some.Of("{{ title }}"), new None(), new None(), Some.Of(NotificationLevel.Warning), Some.Of(PushoverPriority.Low))
+		var created = new NotificationTemplate(
+			Some.Of("{{ title }}"),
+			new None(),
+			Some.Of("{{ summary }}"),
+			Some.Of(NotificationLevel.Warning),
+			Some.Of(PushoverPriority.Low)
 		);
+		var updated = new NotificationTemplate(Some.Of("{{ summary }}"), new None(), new None(), new None(), new None());
 
-		var created = (await _testee.GetForTargetAsync(targetId)).Single();
-		await Assert.That(created.Template.Body.Match(value => value, () => null!)).IsEqualTo("{{ title }}");
-		await Assert.That(created.Template.Level.Match(value => (NotificationLevel?)value, () => null)).IsEqualTo(NotificationLevel.Warning);
-		await Assert.That(created.Template.Priority.Match(value => (PushoverPriority?)value, () => null)).IsEqualTo(PushoverPriority.Low);
+		var id = await _testee.AddAsync(targetId, [NotificationEventType.WantlistSyncCompleted], created);
+		await Assert.That((await _testee.GetForTargetAsync(targetId)).Single().Template).IsEqualTo(created);
 
-		await _testee.UpdateAsync(
-			id,
-			[NotificationEventType.WantlistSyncCompleted],
-			new NotificationTemplate(Some.Of("{{ summary }}"), new None(), new None(), new None(), new None())
-		);
-
-		var updated = (await _testee.GetForTargetAsync(targetId)).Single();
-		await Assert.That(updated.Template.Body.Match(value => value, () => null!)).IsEqualTo("{{ summary }}");
-		await Assert.That(updated.Template.Level.Match(value => (NotificationLevel?)value, () => null)).IsNull();
+		await _testee.UpdateAsync(id, [NotificationEventType.WantlistSyncCompleted], updated);
+		await Assert.That((await _testee.GetForTargetAsync(targetId)).Single().Template).IsEqualTo(updated);
 	}
 
 	[Test]

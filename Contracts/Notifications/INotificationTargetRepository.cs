@@ -6,7 +6,7 @@ public interface INotificationTargetRepository
 {
 	Task<IReadOnlyList<NotificationTarget>> GetAllAsync(CancellationToken cancellationToken = default);
 
-	Task<NotificationTarget?> FindAsync(Guid id, CancellationToken cancellationToken = default);
+	Task<Optional<NotificationTarget>> FindAsync(Guid id, CancellationToken cancellationToken = default);
 
 	Task<Guid> CreateAsync(NotificationTarget target, CancellationToken cancellationToken = default);
 

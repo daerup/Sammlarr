@@ -71,25 +71,17 @@ internal sealed class NotificationSubscriptionRepository(IDbContextFactory<Samml
 				Optional.Of(row.BodyTemplate),
 				Optional.Of(row.TitleTemplate),
 				Optional.Of(row.MessageTemplate),
-				FromColumn(row.Level),
-				FromColumn(row.Priority)
+				Optional.Of(row.Level),
+				Optional.Of(row.Priority)
 			)
 		);
 
 	private static void ApplyTemplate(NotificationSubscriptionRow row, NotificationTemplate template)
 	{
-		row.BodyTemplate = ToColumn(template.Body);
-		row.TitleTemplate = ToColumn(template.Title);
-		row.MessageTemplate = ToColumn(template.Message);
-		row.Level = ToColumn(template.Level);
-		row.Priority = ToColumn(template.Priority);
+		row.BodyTemplate = template.Body.ToNullable();
+		row.TitleTemplate = template.Title.ToNullable();
+		row.MessageTemplate = template.Message.ToNullable();
+		row.Level = template.Level.ToNullable();
+		row.Priority = template.Priority.ToNullable();
 	}
-
-	private static string? ToColumn(Optional<string> value) => value is Some<string> some ? some.Value : null;
-
-	private static T? ToColumn<T>(Optional<T> value)
-		where T : struct => value is Some<T> some ? some.Value : null;
-
-	private static Optional<T> FromColumn<T>(T? value)
-		where T : struct => value is { } present ? Some.Of(present) : new None();
 }

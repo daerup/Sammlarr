@@ -24,9 +24,8 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 			new NotificationTarget(Guid.Empty, "My Webhook", true, new WebhookConfig("https://example.test/hook", "whsec_topsecret"))
 		);
 
-		var target = await _testee.FindAsync(id);
+		var target = await Assert.That(await _testee.FindAsync(id)).IsSome();
 
-		await Assert.That(target).IsNotNull();
 		await Assert.That(target!.Name).IsEqualTo("My Webhook");
 		await Assert.That(target.Channel).IsEqualTo(NotificationChannel.Webhook);
 		await Assert.That(target.Enabled).IsTrue();
@@ -45,9 +44,8 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	{
 		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "My Pushover", true, new PushoverConfig("app-token", "user-key")));
 
-		var target = await _testee.FindAsync(id);
+		var target = await Assert.That(await _testee.FindAsync(id)).IsSome();
 
-		await Assert.That(target).IsNotNull();
 		await Assert.That(target!.Channel).IsEqualTo(NotificationChannel.Pushover);
 		await Assert
 			.That(target.Config)
@@ -101,7 +99,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 
 		await _testee.UpdateAsync(new NotificationTarget(id, "Renamed", false, new WebhookConfig("https://example.test/two", "whsec_two")));
 
-		var target = await _testee.FindAsync(id);
+		var target = await Assert.That(await _testee.FindAsync(id)).IsSome();
 		await Assert.That(target!.Name).IsEqualTo("Renamed");
 		await Assert.That(target.Enabled).IsFalse();
 		await Assert
@@ -117,7 +115,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 
 		await _testee.DeleteAsync(id);
 
-		await Assert.That(await _testee.FindAsync(id)).IsNull();
+		await Assert.That(await _testee.FindAsync(id)).IsNone();
 	}
 
 	[Test]

@@ -27,6 +27,7 @@ public static class MessagingHostExtensions
 	private static void Configure(WolverineOptions options, string connectionString)
 	{
 		options.ServiceLocationPolicy = ServiceLocationPolicy.AlwaysAllowed;
+		options.UseSystemTextJsonForSerialization(json => json.Converters.Add(new OptionalJsonConverterFactory()));
 		options.PersistMessagesWithSqlite(connectionString);
 		options.Policies.UseDurableLocalQueues();
 		options.Discovery.IncludeAssembly(typeof(MessagingModule).Assembly);
