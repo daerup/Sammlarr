@@ -15,7 +15,7 @@ public class MediaDetailsLoadingTests
 	[Test]
 	public async Task GetDetailsByIdAsync_WhenAnIdComesBackTwice_KeepsTheLastAnswer()
 	{
-		Result<IdentifiedMedia>[] answers = [Success.Of(Titled("First")), Success.Of(Titled("Second"))];
+		Result<MatchedMedia>[] answers = [Success.Of(Titled("First")), Success.Of(Titled("Second"))];
 		_media.GetDetailsAsync(Any(), Any()).Returns(answers.ToAsyncEnumerable());
 
 		var found = await Testee.GetDetailsByIdAsync([Id]);
@@ -26,7 +26,7 @@ public class MediaDetailsLoadingTests
 	[Test]
 	public async Task GetDetailsByIdAsync_WhenAnIdCannotBeLoaded_LeavesItOut()
 	{
-		Result<IdentifiedMedia>[] answers = [Error.From("gone")];
+		Result<MatchedMedia>[] answers = [Error.From("gone")];
 		_media.GetDetailsAsync(Any(), Any()).Returns(answers.ToAsyncEnumerable());
 
 		var found = await Testee.GetDetailsByIdAsync([Id]);
@@ -34,5 +34,5 @@ public class MediaDetailsLoadingTests
 		await Assert.That(found).IsEmpty();
 	}
 
-	private static IdentifiedMedia Titled(string title) => new(new MediaIdentity(Id, []), new MovieDetails { Title = title });
+	private static MatchedMedia Titled(string title) => new(new MediaIdentity(Id, []), new MovieDetails { Title = title });
 }

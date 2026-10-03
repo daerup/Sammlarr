@@ -76,7 +76,7 @@ public class ActivityDayBlockTests : BunitContext
 		Render<ActivityDayBlock>(parameters =>
 			parameters
 				.Add(block => block.Day, day)
-				.Add(block => block.Media, new Dictionary<MediaId, IdentifiedMedia>())
+				.Add(block => block.Media, new Dictionary<MediaId, MatchedMedia>())
 				.Add(block => block.Today, DateOnly.FromDateTime(Noon.DateTime))
 		);
 

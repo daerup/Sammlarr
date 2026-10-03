@@ -47,8 +47,8 @@
     private static readonly ArtworkSize FadedPoster = new(78, 117);
 
     [Parameter, EditorRequired] public required IReadOnlyList<MediaId> Ids { get; set; }
-    [Parameter, EditorRequired] public required IReadOnlyDictionary<MediaId, IdentifiedMedia> Media { get; set; }
-    [Parameter] public EventCallback<IdentifiedMedia> OnSelect { get; set; }
+    [Parameter, EditorRequired] public required IReadOnlyDictionary<MediaId, MatchedMedia> Media { get; set; }
+    [Parameter] public EventCallback<MatchedMedia> OnSelect { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<MediaId>> OnNeedMedia { get; set; }
     [Parameter] public bool Faded { get; set; }
 
@@ -99,7 +99,7 @@
         return Task.CompletedTask;
     }
 
-    private static string Title(IdentifiedMedia media) => media.Details.Title ?? "Unknown title";
+    private static string Title(MatchedMedia media) => media.Details.Title ?? "Unknown title";
 
     private string? SrcSet(MediaId id, string poster) => _unsized.Contains(id) ? null : Artwork.ByDensity(poster, Faded ? FadedPoster : Poster);
 

@@ -7,11 +7,11 @@ public interface IMediaService
 {
 	IAsyncEnumerable<Result<MediaIdentity>> IdentifyAsync(IEnumerable<IdentifyRequest> requests, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<Result<IdentifiedMedia>> GetDetailsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<Result<MatchedMedia>> GetDetailsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<TMedia> GetDetailsAsync<TMedia>(IEnumerable<IListItem<TMedia>> items, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<MediaLookup> IdentifyWithDetailsAsync(IAsyncEnumerable<IdentifyRequest> requests, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<MediaMatchResult> IdentifyWithDetailsAsync(IAsyncEnumerable<IdentifyRequest> requests, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<MediaIdentity>> RegisterAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,

@@ -32,7 +32,7 @@ internal sealed class MediaWriteBuffer : IAsyncDisposable
 		AddIdentity(survivor);
 	}
 
-	public void Add(IdentifiedMedia media, CachedDetails cached)
+	public void Add(MatchedMedia media, CachedDetails cached)
 	{
 		AddIdentity(media.Identity);
 		_details[media.Identity.Id] = cached;

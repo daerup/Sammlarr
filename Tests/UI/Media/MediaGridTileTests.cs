@@ -24,7 +24,7 @@ public class MediaGridTileTests : BunitContext
 	[Test]
 	public async Task Render_WhenTheBackdropCanBeResized_OffersItAtTheSizesTheTileDisplays()
 	{
-		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Lookup()));
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie()));
 
 		var image = cut.Find("img.media-card-poster");
 		await Assert.That(image.GetAttribute("src")).IsEqualTo(Backdrop);
@@ -34,7 +34,7 @@ public class MediaGridTileTests : BunitContext
 	[Test]
 	public async Task ImageError_WhenTheSizedBackdropFails_RetriesTheOriginalBeforeFallingBackToThePoster()
 	{
-		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Lookup()));
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie()));
 
 		await cut.Find("img.media-card-poster").TriggerEventAsync("onerror", new ErrorEventArgs());
 		var original = cut.Find("img.media-card-poster");
@@ -50,7 +50,7 @@ public class MediaGridTileTests : BunitContext
 	[Test]
 	public async Task Render_WhenThereIsNoBackdrop_ShowsThePosterStraightAway()
 	{
-		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Lookup(backdrop: null)));
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie(backdrop: null)));
 
 		await Assert.That(cut.Find("img.media-card-poster").GetAttribute("src")).IsEqualTo(Poster);
 	}
@@ -58,7 +58,7 @@ public class MediaGridTileTests : BunitContext
 	[Test]
 	public async Task Render_WhenThereIsNoArtworkAtAll_ShowsTheNoImageState()
 	{
-		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Lookup(backdrop: null, poster: null)));
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie(backdrop: null, poster: null)));
 
 		await Assert.That(cut.FindAll(".media-card-failed")).Count().IsEqualTo(1);
 		await Assert.That(cut.FindAll("img.media-card-poster")).IsEmpty();
@@ -67,15 +67,15 @@ public class MediaGridTileTests : BunitContext
 	[Test]
 	public async Task Render_WhenArtworkArrivesLater_ShowsTheBackdrop()
 	{
-		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Lookup(backdrop: null, poster: null)));
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie(backdrop: null, poster: null)));
 
-		cut.Render(parameters => parameters.Add(tile => tile.Media, Lookup()));
+		cut.Render(parameters => parameters.Add(tile => tile.Media, Movie()));
 
 		await Assert.That(cut.Find("img.media-card-poster").GetAttribute("src")).IsEqualTo(Backdrop);
 	}
 
-	private static MediaLookup Lookup(string? backdrop = Backdrop, string? poster = Poster)
+	private static MediaMatchResult Movie(string? backdrop = Backdrop, string? poster = Poster)
 	{
-		return new IdentifiedMedia(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails { BackdropUrl = backdrop, PosterUrl = poster });
+		return new MatchedMedia(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails { BackdropUrl = backdrop, PosterUrl = poster });
 	}
 }

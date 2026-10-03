@@ -296,7 +296,7 @@
     private IFeedPlan? _pendingPlan;
     private IReadOnlyList<ChangeItem> _pendingItems = [];
     private IReadOnlyList<ChangeChip> _pendingChips = [];
-    private MediaLookup? _selected;
+    private MediaMatchResult? _selected;
 
     private bool IsSignedIn() => _isSignedIn;
 
@@ -554,7 +554,7 @@
 
     private async Task FillConfirmAsync(IFeedPlan summary)
     {
-        var media = new Dictionary<MediaId, IdentifiedMedia>();
+        var media = new Dictionary<MediaId, MatchedMedia>();
         foreach (var verdict in summary.Verdicts)
         {
             media[verdict.Item.Identity.Id] = verdict.Item;
@@ -574,7 +574,7 @@
     private static RenderFragment PlanProblemBand(IFeedPlan plan, string problem) =>
         @<RunProblem Headline="@problem" Reason="@plan.SourceFailure" Failed="true"/>;
 
-    private Task ShowDetailsAsync(IdentifiedMedia media)
+    private Task ShowDetailsAsync(MatchedMedia media)
     {
         _selected = media;
         return Task.CompletedTask;

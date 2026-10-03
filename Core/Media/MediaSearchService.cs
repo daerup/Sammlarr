@@ -13,7 +13,7 @@ internal sealed class MediaSearchService(
 	IProviderConfigService providerConfig
 ) : IMediaSearchService
 {
-	public async Task<IReadOnlyList<MediaLookup>> SearchAsync(
+	public async Task<IReadOnlyList<MediaMatchResult>> SearchAsync(
 		string query,
 		IReadOnlyCollection<MediaType> mediaTypes,
 		CancellationToken cancellationToken = default
@@ -22,6 +22,6 @@ internal sealed class MediaSearchService(
 		var config = await providerConfig.GetAsync(cancellationToken);
 		var found = await providers[config.SearchProvider].SearchAsync(query, mediaTypes, cancellationToken);
 		var identities = await mediaService.RegisterAsync([.. found.Select(item => item.Externals.ToList())], cancellationToken);
-		return [.. found.Zip(identities, (item, identity) => item.LookUpAs(identity))];
+		return [.. found.Zip(identities, (item, identity) => item.MatchTo(identity))];
 	}
 }

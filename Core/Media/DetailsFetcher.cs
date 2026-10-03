@@ -17,25 +17,25 @@ internal sealed class DetailsFetcher(
 	IDateTimeProvider clock
 )
 {
-	public async Task<Result<IdentifiedMedia>> FetchAsync(MediaIdentity identity, MediaWriteBuffer buffer, CancellationToken cancellationToken = default)
+	public async Task<Result<MatchedMedia>> FetchAsync(MediaIdentity identity, MediaWriteBuffer buffer, CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
 		return await LookUpAsync(identity, config.SearchProvider, cancellationToken)
 			.Map(found => EnrichAsync(found, config.SearchProvider, buffer, cancellationToken));
 	}
 
-	private Task<Result<IdentifiedMedia>> LookUpAsync(MediaIdentity identity, SearchProvider provider, CancellationToken cancellationToken)
+	private Task<Result<MatchedMedia>> LookUpAsync(MediaIdentity identity, SearchProvider provider, CancellationToken cancellationToken)
 	{
 		var providerMedia = provider.AsMediaProvider();
 		var external = identity.Externals.OfProvider(providerMedia) ?? identity.Externals.First();
 		return searchIndex[provider]
 			.LookUpAsync(external, cancellationToken)
 			.When(found => found.Fits(identity.Type), "the details could not be fetched")
-			.Map(found => found.IdentifiedAs(identity));
+			.Map(found => found.Matched(identity));
 	}
 
-	private async Task<IdentifiedMedia> EnrichAsync(
-		IdentifiedMedia current,
+	private async Task<MatchedMedia> EnrichAsync(
+		MatchedMedia current,
 		SearchProvider searchProvider,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
@@ -68,7 +68,7 @@ internal sealed class DetailsFetcher(
 		return current;
 	}
 
-	private static IdentifiedMedia Merge(IdentifiedMedia current, FoundMedia found)
+	private static MatchedMedia Merge(MatchedMedia current, FoundMedia found)
 	{
 		return current with
 		{
@@ -77,7 +77,7 @@ internal sealed class DetailsFetcher(
 		};
 	}
 
-	private List<EnricherOption> Options(IdentifiedMedia current, MediaField missing, IReadOnlySet<MediaProvider> asked)
+	private List<EnricherOption> Options(MatchedMedia current, MediaField missing, IReadOnlySet<MediaProvider> asked)
 	{
 		var options = new List<EnricherOption>();
 		foreach (var provider in Enum.GetValues<EnricherProvider>().Select(enricher => enricher.AsMediaProvider()))

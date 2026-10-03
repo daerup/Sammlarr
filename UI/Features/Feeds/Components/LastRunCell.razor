@@ -90,9 +90,9 @@ else
     private int _runCount;
     private bool _open;
     private IReadOnlyList<ChangeItem> _items = [];
-    private MediaLookup? _selected;
+    private MediaMatchResult? _selected;
 
-    private Task ShowDetailsAsync(IdentifiedMedia media)
+    private Task ShowDetailsAsync(MatchedMedia media)
     {
         _selected = media;
         return Task.CompletedTask;

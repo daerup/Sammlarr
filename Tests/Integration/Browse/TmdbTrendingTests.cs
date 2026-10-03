@@ -96,12 +96,14 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 		await AssertResolvedAs(items[2], TestMedia.Interstellar);
 	}
 
-	private async Task<PagedResult<MediaLookup>> FetchTrending(int page) =>
-		await host.ResolveKeyed<ITrendingService>(TrendingProvider.Tmdb).GetTrendingAsync(page);
-
-	private static async Task AssertResolvedAs(MediaLookup item, MediaSpec spec)
+	private async Task<PagedResult<MediaMatchResult>> FetchTrending(int page)
 	{
-		await Assert.That(item).IsOfUnionType<MediaLookup, IdentifiedMedia>();
+		return await host.ResolveKeyed<ITrendingService>(TrendingProvider.Tmdb).GetTrendingAsync(page);
+	}
+
+	private static async Task AssertResolvedAs(MediaMatchResult item, MediaSpec spec)
+	{
+		await Assert.That(item).IsOfUnionType<MediaMatchResult, MatchedMedia>();
 		await Assert.That(item.Details.Title).IsEqualTo(spec.Title);
 		foreach (var id in spec.Ids)
 		{
@@ -109,9 +111,9 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 		}
 	}
 
-	private static async Task AssertUnmatched(MediaLookup item, string title)
+	private static async Task AssertUnmatched(MediaMatchResult item, string title)
 	{
-		await Assert.That(item).IsOfUnionType<MediaLookup, UnmatchedMedia>();
+		await Assert.That(item).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
 		await Assert.That(item.Details.Title).IsEqualTo(title);
 	}
 }

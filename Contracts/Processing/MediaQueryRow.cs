@@ -2,9 +2,9 @@ using Domain.Media;
 
 namespace Contracts.Processing;
 
-public sealed record MediaQueryRow(IdentifiedMedia Media)
+public sealed record MediaQueryRow(MatchedMedia Media)
 {
-	public static MediaQueryRow From(IdentifiedMedia media) => new(media);
+	public static MediaQueryRow From(MatchedMedia media) => new(media);
 
 	public MediaType MediaType => Media.Details.Type;
 

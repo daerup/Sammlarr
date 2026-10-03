@@ -12,7 +12,7 @@ namespace API.Tmdb;
 
 internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork artwork, IMediaService media, IApiKeyService apiKeys) : ITrendingService
 {
-	public async Task<PagedResult<MediaLookup>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
+	public async Task<PagedResult<MediaMatchResult>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
 		var apiKey = await apiKeys
@@ -26,7 +26,7 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
 
-		var finalItems = new MediaLookup[result.Results.Count];
+		var finalItems = new MediaMatchResult[result.Results.Count];
 		var indexed = result.Results.Index().ToList();
 
 		var unresolvable = indexed.Where(x => x.Item.MediaType is MediaType.Unknown).ToList();
@@ -40,7 +40,7 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		{
 			finalItems[entry.Index] = BuildTrending(entry.Item, identity);
 		}
-		return new PagedResult<MediaLookup>(finalItems, result.TotalPages);
+		return new PagedResult<MediaMatchResult>(finalItems, result.TotalPages);
 	}
 
 	private static Optional<IdentifyHints> BuildHints(TmdbTypes.Trending.Result response)
@@ -55,10 +55,10 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 			});
 	}
 
-	private MediaLookup BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome)
+	private MediaMatchResult BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome)
 	{
 		var found = Found(response);
-		return outcome.Map(found.LookUpAs).GetValueOr(found.Unmatched());
+		return outcome.Map(found.MatchTo).GetValueOr(found.Unmatched());
 	}
 
 	private FoundMedia Found(TmdbTypes.Trending.Result response) => new([response.TmdbId], BuildDetails(response));

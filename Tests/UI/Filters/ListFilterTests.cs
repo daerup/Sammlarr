@@ -167,9 +167,9 @@ public class ListFilterTests
 		await Assert.That(sorted).IsEquivalentTo(["Zodiac", "Moana", "Arrival"]);
 	}
 
-	private static IdentifiedMedia Movie(string title)
+	private static MatchedMedia Movie(string title)
 	{
-		return new IdentifiedMedia(
+		return new MatchedMedia(
 			new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(title, MediaType.Movie)]),
 			new MovieDetails
 			{

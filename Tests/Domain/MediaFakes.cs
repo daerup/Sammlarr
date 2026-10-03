@@ -29,5 +29,5 @@ internal static class MediaFakes
 		};
 	}
 
-	public static IdentifiedMedia CompleteMovie() => new(MovieIdentity(), CompleteMovieDetails());
+	public static MatchedMedia CompleteMovie() => new(MovieIdentity(), CompleteMovieDetails());
 }

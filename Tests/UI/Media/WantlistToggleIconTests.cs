@@ -18,7 +18,7 @@ public class WantlistToggleIconTests : BunitContext
 	public async Task Click_WhenTheIconIsPressed_InvokesTheToggleCallbackWithItsMedia()
 	{
 		var media = Movie();
-		IdentifiedMedia? toggled = null;
+		MatchedMedia? toggled = null;
 		var cut = Render<WantlistToggleIcon>(parameters => parameters.Add(icon => icon.Result, media).Add(icon => icon.OnToggle, value => toggled = value));
 
 		await cut.Find("button").ClickAsync();
@@ -42,5 +42,5 @@ public class WantlistToggleIconTests : BunitContext
 		await Assert.That(cut.Find("button").ClassList).DoesNotContain("is-marked");
 	}
 
-	private static IdentifiedMedia Movie() => new(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails());
+	private static MatchedMedia Movie() => new(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails());
 }

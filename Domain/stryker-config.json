@@ -1,7 +1,7 @@
 {
 	"stryker-config": {
 		"test-projects": ["../Tests/Domain/Domain.Tests.csproj"],
-		"mutate": ["Media/MediaMerger.cs", "Media/MediaLookups.cs"],
+		"mutate": ["Media/MediaMerger.cs", "Media/MediaMatchResults.cs"],
 		"test-runner": "mtp",
 		"reporters": ["progress", "html", "json"],
 		"concurrency": 4

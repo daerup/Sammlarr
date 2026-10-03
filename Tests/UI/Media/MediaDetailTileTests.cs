@@ -22,7 +22,7 @@ public class MediaDetailTileTests : BunitContext
 	[Test]
 	public async Task Render_WhenTheTitleIsUnmatched_StillShowsItsTaglineAndShowFacts()
 	{
-		MediaLookup unmatched = new UnmatchedMedia(
+		MediaMatchResult unmatched = new UnmatchedMedia(
 			[TmdbId.From("95396", MediaType.Show)],
 			new ShowDetails
 			{

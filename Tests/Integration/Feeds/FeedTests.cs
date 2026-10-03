@@ -56,7 +56,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedPartialThenUnavailable("partial-list", Item("Item1", MediaType.Movie), Item("Item2", MediaType.Movie));
 
-		var items = new List<MediaLookup>();
+		var items = new List<MediaMatchResult>();
 		await Assert
 			.That(async () =>
 			{
@@ -263,7 +263,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private static FeedPage Page(int offset, bool hasMore, params string[] titles) => new(offset, hasMore, titles);
 
-	private static async Task AssertItems(IReadOnlyList<MediaLookup> items, params (string Title, bool Poster, MediaProvider? Rating)[] expected)
+	private static async Task AssertItems(IReadOnlyList<MediaMatchResult> items, params (string Title, bool Poster, MediaProvider? Rating)[] expected)
 	{
 		await Assert.That(items).Count().IsEqualTo(expected.Length);
 		foreach (var (item, row) in items.Zip(expected))
@@ -281,9 +281,9 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		}
 	}
 
-	private static async Task AssertNoneComplete(IReadOnlyList<MediaLookup> items)
+	private static async Task AssertNoneComplete(IReadOnlyList<MediaMatchResult> items)
 	{
-		await Assert.That(items.All(item => !(item is IdentifiedMedia identified && identified.Details.Missing is MediaField.None))).IsTrue();
+		await Assert.That(items.All(item => !(item is MatchedMedia matched && matched.Details.Missing is MediaField.None))).IsTrue();
 	}
 
 	private async Task AssertExternalIdStored(MediaId mediaId, MediaProvider provider, string id)

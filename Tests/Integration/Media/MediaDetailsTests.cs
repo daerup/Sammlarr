@@ -330,15 +330,15 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private static MediaSpec Spec(string title, params ProviderId[] ids) => new(title, MediaType.Movie, ids);
 
-	private static MediaDetails Detail(Result<IdentifiedMedia> result)
+	private static MediaDetails Detail(Result<MatchedMedia> result)
 	{
 		return result.Map(media => media.Details).GetValueOr(error => throw new InvalidOperationException($"Expected a resolved detail but got {error}."));
 	}
 
-	private static async Task AssertTitle(Result<IdentifiedMedia> result, string title) => await Assert.That(Detail(result).Title).IsEqualTo(title);
+	private static async Task AssertTitle(Result<MatchedMedia> result, string title) => await Assert.That(Detail(result).Title).IsEqualTo(title);
 
 	private static async Task AssertDetail(
-		Result<IdentifiedMedia> result,
+		Result<MatchedMedia> result,
 		string title,
 		string? summary = null,
 		IReadOnlyList<string>? genres = null,

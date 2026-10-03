@@ -387,7 +387,7 @@ public class QueryProcessorRatingTests
 	private static MediaQueryRow MovieWithRating(int year, float? rating)
 	{
 		return MediaQueryRow.From(
-			new IdentifiedMedia(
+			new MatchedMedia(
 				new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(year.ToString(), MediaType.Movie)]),
 				new MovieDetails
 				{

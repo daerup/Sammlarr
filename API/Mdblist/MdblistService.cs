@@ -18,12 +18,12 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";
 
-	public IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
 	{
-		return Channel.CreateUnbounded<MediaLookup>().StreamAsync((items, token) => ResolveIntoAsync(identifier, items, token), cancellationToken);
+		return Channel.CreateUnbounded<MediaMatchResult>().StreamAsync((items, token) => ResolveIntoAsync(identifier, items, token), cancellationToken);
 	}
 
-	private async Task ResolveIntoAsync(string identifier, ChannelWriter<MediaLookup> items, CancellationToken cancellationToken)
+	private async Task ResolveIntoAsync(string identifier, ChannelWriter<MediaMatchResult> items, CancellationToken cancellationToken)
 	{
 		await foreach (var result in media.IdentifyWithDetailsAsync(BuildRequestsAsync(identifier, items, cancellationToken), cancellationToken))
 		{
@@ -33,7 +33,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 
 	private async IAsyncEnumerable<IdentifyRequest> BuildRequestsAsync(
 		string identifier,
-		ChannelWriter<MediaLookup> unmatched,
+		ChannelWriter<MediaMatchResult> unmatched,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
@@ -94,7 +94,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 			});
 	}
 
-	private static MediaLookup BuildUnmatched(MdblistTypes.ListItems.UnmatchedListItem item)
+	private static MediaMatchResult BuildUnmatched(MdblistTypes.ListItems.UnmatchedListItem item)
 	{
 		return new UnmatchedMedia(
 			[.. ExtractIds(item.ids, item.MediaType)],

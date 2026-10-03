@@ -6,7 +6,7 @@ namespace Domain.Feed.Planning;
 
 public interface IFeedPlan
 {
-	IReadOnlyList<QueryVerdict<IdentifiedMedia>> Verdicts { get; }
+	IReadOnlyList<QueryVerdict<MatchedMedia>> Verdicts { get; }
 	IReadOnlyList<UnmatchedMedia> Unmatched { get; }
 	FeedDelta Delta { get; }
 	Conclusiveness Conclusiveness { get; }
@@ -14,7 +14,7 @@ public interface IFeedPlan
 }
 
 public sealed record AppendPlan(
-	IReadOnlyList<QueryVerdict<IdentifiedMedia>> Verdicts,
+	IReadOnlyList<QueryVerdict<MatchedMedia>> Verdicts,
 	IReadOnlyList<UnmatchedMedia> Unmatched,
 	FeedDelta Delta,
 	Conclusiveness Conclusiveness
@@ -24,7 +24,7 @@ public sealed record AppendPlan(
 }
 
 public sealed record MirrorPlan(
-	IReadOnlyList<QueryVerdict<IdentifiedMedia>> Verdicts,
+	IReadOnlyList<QueryVerdict<MatchedMedia>> Verdicts,
 	IReadOnlyList<UnmatchedMedia> Unmatched,
 	FeedDelta Delta,
 	Conclusiveness Conclusiveness,

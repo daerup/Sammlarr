@@ -4,5 +4,5 @@ namespace Contracts.Feed;
 
 public interface IFeedProvider
 {
-	IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default);
 }

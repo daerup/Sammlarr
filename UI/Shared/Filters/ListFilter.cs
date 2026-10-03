@@ -65,7 +65,7 @@ public sealed record ListFilter
 
 	public bool MatchesSource(WantlistItemProvenance provenance) => Sources.Count == 0 || Sources.Any(source => source.Matches(provenance));
 
-	public IEnumerable<T> SortBy<T>(IEnumerable<T> items, Func<T, IdentifiedMedia> media, Func<T, DateTimeOffset> addedAt)
+	public IEnumerable<T> SortBy<T>(IEnumerable<T> items, Func<T, MatchedMedia> media, Func<T, DateTimeOffset> addedAt)
 	{
 		return Sort switch
 		{

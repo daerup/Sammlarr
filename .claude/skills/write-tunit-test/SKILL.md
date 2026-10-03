@@ -171,8 +171,8 @@ public class WantlistToggleIconTests : BunitContext
     [Test]
     public async Task Clicking_the_icon_invokes_the_toggle_callback()
     {
-        MediaLookup? toggled = null;
-        var cut = Render<WantlistToggleIcon>(p => p.Add(i => i.Result, Lookup()).Add(i => i.OnToggle, v => toggled = v));
+        MatchedMedia? toggled = null;
+        var cut = Render<WantlistToggleIcon>(p => p.Add(i => i.Result, Movie()).Add(i => i.OnToggle, v => toggled = v));
 
         await cut.Find("button").ClickAsync();
 

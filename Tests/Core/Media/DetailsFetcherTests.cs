@@ -31,7 +31,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails()));
 		await using var buffer = deps.Buffer();
 
-		await Identified(await deps.Testee.FetchAsync(Identity, buffer));
+		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
 		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Rating);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
@@ -45,7 +45,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Unavailable);
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Identified(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
 		await Assert.That(fetched.Details.Missing).IsEqualTo(MediaField.Rating);
 		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.None);
@@ -71,7 +71,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Tagline = "Your mind is the scene of the crime." }));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Identified(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
 		await Assert.That(fetched.Details.Tagline).IsEqualTo("Your mind is the scene of the crime.");
 	}
@@ -84,7 +84,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Rating = TmdbRating }));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Identified(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
 		await Assert.That(fetched.Details.Rating).IsEqualTo(TmdbRating);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
@@ -122,7 +122,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails()));
 		await using var buffer = deps.Buffer();
 
-		await Identified(await deps.Testee.FetchAsync(Identity, buffer));
+		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
 		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
 	}
@@ -135,7 +135,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("TMDB detail returned 404 for 500"));
 		await using var buffer = deps.Buffer();
 
-		await Identified(await deps.Testee.FetchAsync(Identity, buffer));
+		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
 		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
 	}
@@ -149,7 +149,7 @@ public class DetailsFetcherTests
 			.Returns(Success.Of(new FoundMedia([TvdbId.From("81189", MediaType.Show)], new ShowDetails { Tagline = "Say my name." })));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Identified(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
 		await Assert.That(fetched.Identity).IsEqualTo(Identity);
 		await Assert.That(fetched.Details).IsEqualTo(Complete() with { Tagline = null });
@@ -164,7 +164,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Unavailable);
 		await using var buffer = deps.Buffer();
 
-		await Identified(await deps.Testee.FetchAsync(Identity, buffer));
+		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
 		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Summary);
 	}
@@ -176,7 +176,7 @@ public class DetailsFetcherTests
 		deps.Primary(Complete() with { Tagline = null }, PlexOnly);
 		await using var buffer = deps.Buffer();
 
-		await Identified(await deps.Testee.FetchAsync(PlexOnly, buffer));
+		await Matched(await deps.Testee.FetchAsync(PlexOnly, buffer));
 
 		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -206,7 +206,7 @@ public class DetailsFetcherTests
 		deps.Primary(Complete() with { Tagline = null });
 		await using var buffer = deps.Buffer();
 
-		await Identified(await deps.Testee.FetchAsync(Identity, buffer));
+		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.None);
@@ -221,7 +221,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia([Tmdb, imdb], Complete())));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Identified(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
 		await Assert.That(fetched.Identity.Id).IsEqualTo(Id);
 		await Assert.That(fetched.Identity.Externals).IsEquivalentTo(new IExternalMediaId[] { Plex, Tmdb, imdb });
@@ -254,10 +254,10 @@ public class DetailsFetcherTests
 		await Assert.That(buffer.NewDetails[Id].FetchedAt).IsEqualTo(Now);
 	}
 
-	private static async Task<IdentifiedMedia> Identified(Result<IdentifiedMedia> result)
+	private static async Task<MatchedMedia> Matched(Result<MatchedMedia> result)
 	{
-		var identified = await Assert.That(result).IsSuccess();
-		return identified!;
+		var matched = await Assert.That(result).IsSuccess();
+		return matched!;
 	}
 
 	private static Result<FoundMedia> Answer(MediaDetails details)

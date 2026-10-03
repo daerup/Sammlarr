@@ -18,8 +18,8 @@ public class MediaWriteBufferTests
 	{
 		await using (var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance))
 		{
-			testee.Add(new IdentifiedMedia(Survivor, new MovieDetails { Title = "Survivor" }), Cached("Survivor"));
-			testee.Add(new IdentifiedMedia(Absorbed, new MovieDetails { Title = "Absorbed" }), Cached("Absorbed"));
+			testee.Add(new MatchedMedia(Survivor, new MovieDetails { Title = "Survivor" }), Cached("Survivor"));
+			testee.Add(new MatchedMedia(Absorbed, new MovieDetails { Title = "Absorbed" }), Cached("Absorbed"));
 			testee.MergeIdentity(Absorbed.Id, Survivor with { Externals = Survivor.Externals + Absorbed.Externals });
 		}
 
@@ -36,7 +36,7 @@ public class MediaWriteBufferTests
 
 		await using (var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance))
 		{
-			testee.Add(new IdentifiedMedia(plexOnly with { Externals = plexOnly.Externals + [learned] }, new MovieDetails()), Cached("Inception"));
+			testee.Add(new MatchedMedia(plexOnly with { Externals = plexOnly.Externals + [learned] }, new MovieDetails()), Cached("Inception"));
 		}
 
 		_repository

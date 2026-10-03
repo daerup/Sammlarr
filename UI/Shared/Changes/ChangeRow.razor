@@ -39,7 +39,7 @@
 
 @code {
     [Parameter] [EditorRequired] public required ChangeItem Item { get; set; }
-    [Parameter] public EventCallback<IdentifiedMedia> OnSelect { get; set; }
+    [Parameter] public EventCallback<MatchedMedia> OnSelect { get; set; }
     [Parameter] public bool Highlighted { get; set; }
 
     private ElementReference _root;

@@ -151,7 +151,7 @@ else
     [Inject] internal AccountConnectionPrompt AccountConnectionPrompt { get; set; } = null!;
 
     private readonly CancellationTokenSource _cancellation = new();
-    private readonly Dictionary<MediaId, IdentifiedMedia> _media = [];
+    private readonly Dictionary<MediaId, MatchedMedia> _media = [];
 
     private IReadOnlyList<ActivityDay> _days = [];
     private IReadOnlyList<UpNextRow> _queued = [];
@@ -166,7 +166,7 @@ else
     private bool _isRunOpen;
     private bool _syncing;
     private ProviderConfig? _settings;
-    private MediaLookup? _selected;
+    private MediaMatchResult? _selected;
     private UserId? _userId;
     private DateTimeOffset _now = DateTimeOffset.Now;
     private DateOnly _today = DateOnly.FromDateTime(DateTime.Now);
@@ -391,7 +391,7 @@ else
         StateHasChanged();
     }
 
-    private void SelectMedia(IdentifiedMedia media)
+    private void SelectMedia(MatchedMedia media)
     {
         _selected = media;
         _isSheetOpen = true;

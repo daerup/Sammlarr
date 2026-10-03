@@ -63,8 +63,8 @@ internal sealed class FeedRunPlanner(
 		{
 			switch (item)
 			{
-				case IdentifiedMedia identified:
-					resolved.Add(MediaQueryRow.From(identified));
+				case MatchedMedia matched:
+					resolved.Add(MediaQueryRow.From(matched));
 					break;
 				case UnmatchedMedia unmatched:
 					unmatchedItems.Add(unmatched);
@@ -90,7 +90,7 @@ internal sealed class FeedRunPlanner(
 
 		var classified = resolved.Count > 0 ? await processor.ExecuteAsync(resolved, options, predicates, cancellationToken).ToListAsync(cancellationToken) : [];
 		var verdicts = classified
-			.Select(verdict => new QueryVerdict<IdentifiedMedia>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot))
+			.Select(verdict => new QueryVerdict<MatchedMedia>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot))
 			.ToList();
 
 		var absences = feed.Strategy is Mirror mirror
@@ -102,7 +102,7 @@ internal sealed class FeedRunPlanner(
 
 	private async Task<RawFeedLoad> FetchAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken)
 	{
-		var items = new List<MediaLookup>();
+		var items = new List<MediaMatchResult>();
 		try
 		{
 			await foreach (var item in providers[feed.Provider].GetFeedItemsAsync(feed.Identifier, cancellationToken))

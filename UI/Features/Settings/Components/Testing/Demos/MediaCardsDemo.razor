@@ -16,9 +16,9 @@
     [Parameter, EditorRequired] public required IReadOnlySet<MediaId> Wantlisted { get; set; }
 
     private bool _sheetOpen;
-    private MediaLookup? _sheetMedia;
+    private MediaMatchResult? _sheetMedia;
 
-    private void OpenSheet(MediaLookup media)
+    private void OpenSheet(MediaMatchResult media)
     {
         _sheetMedia = media;
         _sheetOpen = true;

@@ -8,7 +8,7 @@
 @code {
     private static readonly DateOnly Today = DateOnly.FromDateTime(DemoFeeds.Now.LocalDateTime);
 
-    private static readonly IReadOnlyDictionary<MediaId, IdentifiedMedia> Media = new Dictionary<MediaId, IdentifiedMedia>
+    private static readonly IReadOnlyDictionary<MediaId, MatchedMedia> Media = new Dictionary<MediaId, MatchedMedia>
     {
         [DemoMedia.Movie.Identity.Id] = DemoMedia.Movie,
         [DemoMedia.Show.Identity.Id] = DemoMedia.Show,

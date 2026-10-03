@@ -9,7 +9,7 @@ namespace UI.Features.Feeds.Components;
 
 internal static class FeedRunView
 {
-	internal static IReadOnlyList<ChangeItem> Items(FeedRun run, IReadOnlyDictionary<MediaId, IdentifiedMedia> media)
+	internal static IReadOnlyList<ChangeItem> Items(FeedRun run, IReadOnlyDictionary<MediaId, MatchedMedia> media)
 	{
 		return
 		[
@@ -29,7 +29,7 @@ internal static class FeedRunView
 		];
 	}
 
-	internal static IReadOnlyList<ChangeItem> Items(IFeedPlan summary, IReadOnlyDictionary<MediaId, IdentifiedMedia> media)
+	internal static IReadOnlyList<ChangeItem> Items(IFeedPlan summary, IReadOnlyDictionary<MediaId, MatchedMedia> media)
 	{
 		return
 		[
@@ -38,7 +38,7 @@ internal static class FeedRunView
 		];
 	}
 
-	private static ChangeItem Pending(MediaId id, IdentifiedMedia item, ChangeKind kind)
+	private static ChangeItem Pending(MediaId id, MatchedMedia item, ChangeKind kind)
 	{
 		return new()
 		{
@@ -156,5 +156,5 @@ internal static class FeedRunView
 		return string.Join(" · ", parts);
 	}
 
-	private static string Subtitle(IdentifiedMedia media) => media.Details.Year?.ToString() ?? string.Empty;
+	private static string Subtitle(MatchedMedia media) => media.Details.Year?.ToString() ?? string.Empty;
 }

@@ -16,7 +16,7 @@ public class MediaValueEqualityTests
 	}
 
 	[Test]
-	public async Task IdentifiedMedia_WhenSameContentDifferentInstances_AreEqual()
+	public async Task MatchedMedia_WhenSameContentDifferentInstances_AreEqual()
 	{
 		var first = MediaFakes.CompleteMovie();
 		var second = first with
@@ -30,7 +30,7 @@ public class MediaValueEqualityTests
 	}
 
 	[Test]
-	public async Task IdentifiedMedia_WhenDifferentGenres_AreNotEqual()
+	public async Task MatchedMedia_WhenDifferentGenres_AreNotEqual()
 	{
 		var first = MediaFakes.CompleteMovie();
 		var second = first with { Details = first.Details with { Genres = [.. first.Details.Genres, "Extra Genre"] } };

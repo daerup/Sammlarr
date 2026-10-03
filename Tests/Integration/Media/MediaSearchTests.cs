@@ -46,9 +46,9 @@ public class MediaSearchTests(SammlarrTestHost host) : IAsyncDisposable
 		await AssertResolvedAs(results.Single(item => item.Details.Title == "Breaking Bad"), TestMedia.BreakingBad);
 	}
 
-	private static async Task AssertResolvedAs(MediaLookup item, MediaSpec spec)
+	private static async Task AssertResolvedAs(MediaMatchResult item, MediaSpec spec)
 	{
-		await Assert.That(item).IsOfUnionType<MediaLookup, IdentifiedMedia>();
+		await Assert.That(item).IsOfUnionType<MediaMatchResult, MatchedMedia>();
 		await Assert.That(item.Details.Title).IsEqualTo(spec.Title);
 		await Assert.That(item.Details.Type).IsEqualTo(spec.Type);
 		foreach (var id in spec.Ids)

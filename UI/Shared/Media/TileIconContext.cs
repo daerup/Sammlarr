@@ -3,4 +3,4 @@ using Microsoft.AspNetCore.Components;
 
 namespace UI.Shared.Media;
 
-public sealed record TileIconContext(IdentifiedMedia Result, bool IsToggled, bool IsToggling, EventCallback<IdentifiedMedia> OnToggle);
+public sealed record TileIconContext(MatchedMedia Result, bool IsToggled, bool IsToggling, EventCallback<MatchedMedia> OnToggle);

@@ -74,7 +74,7 @@ public class WantlistProvenanceToggleTests : BunitContext
 	[Test]
 	public async Task Click_WhenTheIconIsPressed_StillTogglesThroughToTheCaller()
 	{
-		IdentifiedMedia? toggled = null;
+		MatchedMedia? toggled = null;
 		var cut = Render<WantlistProvenanceToggle>(parameters =>
 			parameters.Add(toggle => toggle.Result, Movie()).Add(toggle => toggle.OnToggle, value => toggled = value)
 		);
@@ -114,5 +114,5 @@ public class WantlistProvenanceToggleTests : BunitContext
 			new WantlistItemProvenance(TestFeeds.Origin(new Guid(21, 0, 0, new byte[8]), new Guid(22, 0, 0, new byte[8]), "Documentaries"))
 		);
 
-	private static IdentifiedMedia Movie() => new(new MediaIdentity(Id, []), new MovieDetails());
+	private static MatchedMedia Movie() => new(new MediaIdentity(Id, []), new MovieDetails());
 }

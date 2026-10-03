@@ -9,25 +9,25 @@ public class MediaPresentationTests
 	[Test]
 	public async Task Key_OfAnUnmatchedTitle_FallsBackToTheExternalIds()
 	{
-		MediaLookup media = Unmatched();
+		MediaMatchResult media = Unmatched();
 
 		await Assert.That(media.Key).IsEqualTo("Tmdb:27205");
 	}
 
 	[Test]
-	public async Task Key_OfAnIdentifiedTitle_UsesTheMediaId()
+	public async Task Key_OfAMatchedTitle_UsesTheMediaId()
 	{
-		var movie = Identified();
-		MediaLookup media = movie;
+		var movie = Matched();
+		MediaMatchResult media = movie;
 
 		await Assert.That(media.Key).IsEqualTo(movie.Identity.Id.Value.ToString());
 	}
 
 	[Test]
-	public async Task Key_OfAnIdentifiedTitle_IsTheSameWhetherReadAsALookupOrNot()
+	public async Task Key_OfAMatchedTitle_IsTheSameWhetherReadAsAMatchResultOrNot()
 	{
-		var movie = Identified();
-		MediaLookup media = movie;
+		var movie = Matched();
+		MediaMatchResult media = movie;
 
 		await Assert.That(movie.Key).IsEqualTo(media.Key);
 	}
@@ -35,7 +35,7 @@ public class MediaPresentationTests
 	[Test]
 	public async Task Year_WhenReleased_IsTheReleaseYear()
 	{
-		await Assert.That(Identified().Details.Year).IsEqualTo(2010);
+		await Assert.That(Matched().Details.Year).IsEqualTo(2010);
 	}
 
 	[Test]
@@ -46,7 +46,7 @@ public class MediaPresentationTests
 
 	private static UnmatchedMedia Unmatched() => new([TmdbId.From("27205", MediaType.Movie)], new MovieDetails());
 
-	private static IdentifiedMedia Identified()
+	private static MatchedMedia Matched()
 	{
 		return new(
 			new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From("27205", MediaType.Movie)]),
