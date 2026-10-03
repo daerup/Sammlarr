@@ -22,20 +22,30 @@ public static class NotificationDeliveryHandler
 	{
 		using var scope = await userScope.AsAsync(message.UserId, cancellationToken);
 
-		var target = await targets.FindAsync(message.TargetId, cancellationToken);
-		if (target is null || !target.Enabled)
-		{
-			return;
-		}
+		await targets
+			.FindAsync(message.TargetId, cancellationToken)
+			.When(target => target.Enabled)
+			.Apply(target => DeliverAsync(message, target, envelope.Attempts, channels, outcomes, clock, cancellationToken));
+	}
 
+	private static async Task DeliverAsync(
+		DeliverNotification message,
+		NotificationTarget target,
+		int attempts,
+		IKeyedServiceIndex<NotificationChannel, INotificationChannel> channels,
+		INotificationDeliveryOutcomeRepository outcomes,
+		IDateTimeProvider clock,
+		CancellationToken cancellationToken
+	)
+	{
 		var result = await channels[target.Channel].SendAsync(message.Context, target, message.Template, cancellationToken);
 
 		DeliveryOutcome outcome = result switch
 		{
 			DeliverySucceeded => new Delivered(),
 			DeliveryUnrecoverable unrecoverable => new Failed(unrecoverable.Reason),
-			DeliveryRetryable retryable when envelope.Attempts >= NotificationDeliveryRetry.MaxAttempts => new Failed(retryable.Reason),
-			DeliveryRetryable retryable => new Retrying(retryable.Reason, clock.Now + NotificationDeliveryRetry.Cooldowns[envelope.Attempts - 1]),
+			DeliveryRetryable retryable when attempts >= NotificationDeliveryRetry.MaxAttempts => new Failed(retryable.Reason),
+			DeliveryRetryable retryable => new Retrying(retryable.Reason, clock.Now + NotificationDeliveryRetry.Cooldowns[attempts - 1]),
 		};
 
 		await outcomes.RecordAsync(message.Context.Id, message.TargetId, message.Context.Type, outcome, cancellationToken);

@@ -13,11 +13,11 @@ internal sealed class NotificationTargetRepository(IDbContextFactory<SammlarrDbC
 		return rows.Select(Map).ToList();
 	}
 
-	public async Task<NotificationTarget?> FindAsync(Guid id, CancellationToken cancellationToken = default)
+	public async Task<Optional<NotificationTarget>> FindAsync(Guid id, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var row = await ctx.NotificationTargets.AsNoTracking().FirstOrDefaultAsync(target => target.Id == id, cancellationToken);
-		return row is null ? null : Map(row);
+		return Optional.Of(row).Map(Map);
 	}
 
 	public async Task<Guid> CreateAsync(NotificationTarget target, CancellationToken cancellationToken = default)

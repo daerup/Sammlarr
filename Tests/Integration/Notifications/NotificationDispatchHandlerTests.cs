@@ -283,6 +283,28 @@ public class NotificationDispatchHandlerTests
 		await Assert.That(data.Added).IsEqualTo(2);
 	}
 
+	[Test]
+	public async Task Handle_WhenTheFeedOfAFailedRunIsGone_SendsTheContextWithoutAFeed()
+	{
+		var subscriptions = SubscriptionsFor(
+			NotificationEventType.FeedRunFailed,
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.FeedRunFailed], NotificationTemplate.None)
+		);
+
+		var messages = await NotificationDispatchHandler.Handle(
+			new FeedRunFailedNotification(User, DateTimeOffset.UtcNow, FeedId.From(Guid.NewGuid()), "HTTP 404"),
+			Scope().Object,
+			subscriptions.Object,
+			Media().Object,
+			Feed().Object,
+			CancellationToken.None
+		);
+
+		var data = messages.OfType<DeliverNotification>().Single().Context.Data;
+		await Assert.That(data.Feed).IsNull();
+		await Assert.That(data.Reason).IsEqualTo("HTTP 404");
+	}
+
 	private static Mock<INotificationSubscriptionRepository> SubscriptionsFor(NotificationEventType eventType, params NotificationSubscription[] subscriptions)
 	{
 		var repository = INotificationSubscriptionRepository.Mock();

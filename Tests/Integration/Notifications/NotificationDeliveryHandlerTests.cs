@@ -76,7 +76,7 @@ public class NotificationDeliveryHandlerTests
 	{
 		var channel = new RecordingChannel(new DeliverySucceeded());
 
-		var outcomes = await Handle(Guid.NewGuid(), target: null, channel);
+		var outcomes = await Handle(Guid.NewGuid(), target: new None(), channel);
 
 		await Assert.That(channel.Sent).IsEmpty();
 		await Assert.That(outcomes.Recorded).IsEmpty();
@@ -95,7 +95,7 @@ public class NotificationDeliveryHandlerTests
 
 	private static async Task<CapturingOutcomes> Handle(
 		Guid targetId,
-		NotificationTarget? target,
+		Optional<NotificationTarget> target,
 		RecordingChannel channel,
 		int attempts = 1,
 		CapturingOutcomes? outcomes = null
@@ -134,8 +134,10 @@ public class NotificationDeliveryHandlerTests
 			new NotificationData()
 		);
 
-	private static NotificationTarget WebhookTarget(bool enabled) =>
-		new(Guid.NewGuid(), "Hook", enabled, new WebhookConfig("https://example.test/hook", "whsec_x"));
+	private static Some<NotificationTarget> WebhookTarget(bool enabled)
+	{
+		return Some.Of(new NotificationTarget(Guid.NewGuid(), "Hook", enabled, new WebhookConfig("https://example.test/hook", "whsec_x")));
+	}
 
 	private static IUserScope Scope()
 	{

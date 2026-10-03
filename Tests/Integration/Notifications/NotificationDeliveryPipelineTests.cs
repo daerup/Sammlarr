@@ -15,6 +15,7 @@ using Shared.DI;
 using Shared.Options;
 using TestInfrastructure;
 using Wolverine;
+using Wolverine.Runtime;
 using Wolverine.Tracking;
 
 namespace Integration.Tests.Notifications;
@@ -64,6 +65,35 @@ public class NotificationDeliveryPipelineTests
 		);
 	}
 
+	[Test]
+	public async Task Serializer_ForATemplateWithAndWithoutItsFields_ReadsTheDeliveryBack()
+	{
+		var template = new NotificationTemplate(Some.Of("{{ title }}"), new None(), Some.Of("{{ summary }}"), Some.Of(NotificationLevel.Warning), new None());
+		var context = new NotificationContext(
+			Guid.NewGuid(),
+			NotificationEventType.FeedRunFailed,
+			NotificationLevel.Error,
+			DateTimeOffset.UnixEpoch,
+			"Feed run failed",
+			"The source could not be read",
+			new NotificationData { Reason = "HTTP 404" }
+		);
+		var message = new DeliverNotification(context, Guid.NewGuid(), User, template);
+
+		await WithHostAsync(
+			new RecordingChannel(),
+			async host =>
+			{
+				var serializer = host.Services.GetRequiredService<IWolverineRuntime>().Options.DefaultSerializer;
+
+				var read = (DeliverNotification)serializer.ReadFromData(typeof(DeliverNotification), new Envelope { Data = serializer.WriteMessage(message) });
+
+				await Assert.That(read.Template).IsEqualTo(template);
+				await Assert.That(read.Context.Data.Reason).IsEqualTo("HTTP 404");
+			}
+		);
+	}
+
 	private static async Task WithHostAsync(RecordingChannel channel, Func<IHost, Task> body)
 	{
 		var subscriptions = INotificationSubscriptionRepository.Mock();
@@ -77,7 +107,7 @@ public class NotificationDeliveryPipelineTests
 		var targets = INotificationTargetRepository.Mock();
 		targets
 			.FindAsync(Any<Guid>(), Any())
-			.Returns(new NotificationTarget(Guid.NewGuid(), "Hook", true, new WebhookConfig("https://example.test/hook", "whsec_x")));
+			.Returns(Some.Of(new NotificationTarget(Guid.NewGuid(), "Hook", true, new WebhookConfig("https://example.test/hook", "whsec_x"))));
 
 		var userScope = IUserScope.Mock();
 		userScope.AsAsync(Any<UserId>(), Any()).Returns(new NoopDisposable());

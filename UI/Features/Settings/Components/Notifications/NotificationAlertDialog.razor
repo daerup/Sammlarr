@@ -160,11 +160,11 @@
             {
                 _selected.Add(eventType);
             }
-            _body = Value(existing.Template.Body);
-            _title = Value(existing.Template.Title);
-            _message = Value(existing.Template.Message);
-            _level = existing.Template.Level.Match(value => (NotificationLevel?)value, () => null);
-            _priority = existing.Template.Priority.Match(value => (PushoverPriority?)value, () => null);
+            _body = existing.Template.Body.GetValueOr(string.Empty);
+            _title = existing.Template.Title.GetValueOr(string.Empty);
+            _message = existing.Template.Message.GetValueOr(string.Empty);
+            _level = existing.Template.Level.ToNullable();
+            _priority = existing.Template.Priority.ToNullable();
         }
         else
         {
@@ -267,14 +267,12 @@
             new None(),
             Opt(_title),
             Opt(_message),
-            !pushover && _level is { } level ? Some.Of(level) : new None(),
-            pushover && _priority is { } priority ? Some.Of(priority) : new None()
+            Optional.Of(_level).When(!pushover),
+            Optional.Of(_priority).When(pushover)
         );
     }
 
-    private static Optional<string> Opt(string value) => string.IsNullOrWhiteSpace(value) ? new None() : Some.Of(value);
-
-    private static string Value(Optional<string> optional) => optional.Match(value => value, () => string.Empty);
+    private static Optional<string> Opt(string value) => Optional.Of(value.NullIfBlank());
 
     private async Task TryClose()
     {
