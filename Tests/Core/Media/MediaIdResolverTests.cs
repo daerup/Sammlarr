@@ -28,10 +28,104 @@ public class MediaIdResolverTests
 	private static readonly ById PlexById = new(Accepts: [MediaProvider.Plex], Yields: [MediaProvider.Tvdb], Cost: 1);
 	private static readonly ByHints Search = new(Yields: [MediaProvider.Plex, MediaProvider.Tvdb], Cost: 4);
 	private static readonly IdentifyRequest Request = new([Tmdb], new None());
+	private static readonly CancellationToken WaitingThrows = new(canceled: true);
 
 	private readonly Mock<IExternalIdConverter> _tmdb = Converter(MediaProvider.Tmdb, Detail);
 	private readonly Mock<IExternalIdConverter> _plex = Converter(MediaProvider.Plex, PlexById, Search);
 	private readonly Mock<ITypedMemoryCache<string, bool>> _cache = ITypedMemoryCache<string, bool>.Mock();
+
+	[Test]
+	public async Task ResolveAsync_WhenAProviderIsBlockedWithinItsMaxWait_WaitsThenTakesThePath()
+	{
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Found(Tvdb));
+
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20))).ResolveAsync(Request, MediaProvider.Tvdb);
+
+		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhileWaitingForABlockedProvider_HonoursCancellation()
+	{
+		var testee = Testee(TmdbBlocked(() => Now.AddMilliseconds(20)));
+
+		await Assert.That(async () => await testee.ResolveAsync(Request, MediaProvider.Tvdb, WaitingThrows)).Throws<OperationCanceledException>();
+		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenABlockOutlastsTheMaxWait_GivesUpWithoutCachingTheTitle()
+	{
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, WaitingThrows);
+
+		await Assert.That(resolved).IsError();
+		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
+		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenTheBlockIsExtendedDuringTheWait_GivesUpWithoutCachingTheTitle()
+	{
+		var pushes = 0;
+
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20 + pushes++))).ResolveAsync(Request, MediaProvider.Tvdb);
+
+		await Assert.That(resolved).IsError();
+		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
+		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenAProviderIsBlockedAgainAfterTheWait_DoesNotWaitTwice()
+	{
+		var tmdbFreeAt = Now.AddMilliseconds(20);
+		_tmdb
+			.LookUpAsync(Any(), Any())
+			.Returns(
+				(_, _) =>
+				{
+					tmdbFreeAt = Now.AddMilliseconds(40);
+					return HintsOnly();
+				}
+			);
+
+		var resolved = await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb);
+
+		await Assert.That(resolved).IsError();
+		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
+		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenAProviderThatWentDownIsBlocked_NeverWaitsForIt()
+	{
+		var tmdbFreeAt = Now;
+		_tmdb
+			.LookUpAsync(Any(), Any())
+			.Returns(
+				(_, _) =>
+				{
+					tmdbFreeAt = Now.AddSeconds(5);
+					return Error.From(new ProviderUnavailableException(MediaProvider.Tmdb));
+				}
+			);
+
+		var resolved = await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, WaitingThrows);
+
+		await Assert.That(resolved).IsError();
+		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_AfterASuccessfulWait_CachesAnAnsweredMissAsUnmatched()
+	{
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From("TMDB knows no TVDB id."));
+
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20)), _tmdb).ResolveAsync(Request, MediaProvider.Tvdb);
+
+		await Assert.That(resolved).IsError();
+		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
+	}
 
 	[Test]
 	public async Task ResolveAsync_ForTheCheapestOpenPath_ResolvesWithoutTryingTheOthers()
@@ -301,6 +395,12 @@ public class MediaIdResolverTests
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(Now);
 		return new MediaIdResolver([.. converters.Select(converter => converter.Object)], _cache.Object, capacity, clock.Object);
+	}
+
+	private static IProviderCapacity TmdbBlocked(Func<DateTimeOffset> until)
+	{
+		var maxWait = TimeSpan.FromSeconds(15);
+		return TestCapacity.With(provider => provider is MediaProvider.Tmdb ? new ProviderLoad(Some.Of(until()), 0, maxWait) : new ProviderLoad(new None(), 0));
 	}
 
 	private static Mock<IExternalIdConverter> Converter(MediaProvider provider, params IdLookup[] lookups)

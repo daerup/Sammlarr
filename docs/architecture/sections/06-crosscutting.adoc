@@ -80,10 +80,11 @@ by roughly an order of magnitude.
 === Provider routing
 
 Which provider is asked depends on its load. `IProviderCapacity.Of(provider)` gives a `ProviderLoad`:
-`BlockedUntil` (set by a 429's `Retry-After`, 30 seconds without one, or an open circuit breaker's break) and `Busy`
-(in-flight requests over the concurrency gate's limit). It lives in `API/Http` next to the gates and handlers that
-feed it; Core reads only the contract. A blocked provider is skipped, never waited for: the request already in
-flight still honours `Retry-After` through the retry policy.
+`BlockedUntil` (set by a 429's `Retry-After`, 30 seconds without one, or an open circuit breaker's break), `Busy`
+(in-flight requests over the concurrency gate's limit) and `MaxWait` (the provider's `Http.MaxWaitSeconds`: Plex 90,
+TMDB 15, 0 never waits). It lives in `API/Http` next to the gates and handlers that feed it; Core reads only the
+contract. Enrichment skips a blocked provider and never waits for it; id resolution waits for it, capped by its
+`MaxWait` (below). The request already in flight still honours `Retry-After` through the retry policy.
 
 Enrichment asks, one at a time, the open enricher (`EnricherProvider`, generated from `ProviderCapability.Enricher`)
 whose `Fills` cover the most missing fields, the least busy first, among those the title has an id for, until the
@@ -99,15 +100,17 @@ Id resolution routes the same way. Each `IExternalIdConverter` announces its `Lo
 answers: a `ById` lookup accepts some providers' ids, a `ByHints` lookup accepts the title hints, and each says
 which providers' ids its answer may yield and what it costs in calls. `IdLookupPlanner` turns them into hops (an id
 to an id, an id to the hints, the hints to an id), plans every path of up to three hops from the ids the title
-already has to the target and drops the paths through a blocked provider. `MediaIdResolver` tries the rest cheapest
-first, weighting each hop's cost by how busy its provider is. Plex looks up a Plex id and searches by the hints;
+already has to the target, and orders them: the open paths cheapest first, weighting each hop's cost by how busy its
+provider is, then the paths through a blocked provider, the soonest free first. `MediaIdResolver` tries them in that
+order. Plex looks up a Plex id and searches by the hints;
 TMDB looks up a TMDB id's detail (its appended `external_ids` carry the IMDb and TheTVDB ids) and finds a TMDB id
 by an IMDb or TheTVDB id, so a title that carries a TMDB, IMDb or TheTVDB id can resolve without Plex. A TMDB answer
 also carries the original title, which a following Plex search uses. Within one resolution each lookup is asked
-once per input, so paths that share a call make it once. Capacity is checked again before every hop, and a provider
-that answered as unavailable is not asked again by the title's remaining paths. A title is cached as unmatched only
-when every path was tried and answered; a path that was blocked or met an unavailable provider leaves it to the next
-run.
+once per input, so paths that share a call make it once. Before every hop the resolver
+checks the providers of the hops left: a blocked one is waited for until it frees, once per provider per title and at
+most its `MaxWait`; a longer block, a second block of a provider already waited for, or a provider that answered as
+unavailable makes the path give up. A title is cached as unmatched only when no path gave up; a path that waited and
+was answered counts as tried.
 
 === Persistence and migrations
 

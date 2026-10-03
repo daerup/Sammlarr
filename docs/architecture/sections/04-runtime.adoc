@@ -74,7 +74,7 @@ sequenceDiagram
     IC-->>MS: canonical identity
   else nothing matched
     IC-->>MS: unmatched
-    MS->>NC: cache unmatched (1h), unless a path was blocked or unavailable
+    MS->>NC: cache unmatched (1h), unless a path gave up (blocked past its wait, or unavailable)
   end
 ....
 

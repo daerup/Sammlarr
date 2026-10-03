@@ -40,6 +40,7 @@ internal static class ProviderHttpExtensions
 		if (provider is { } measured)
 		{
 			builder.AddHttpMessageHandler(sp => new CapacityHandler(measured, sp.GetRequiredService<ProviderCapacity>()));
+			builder.Services.AddSingleton(sp => new ProviderWait(measured, TimeSpan.FromSeconds(Resolve(sp).MaxWaitSeconds)));
 		}
 
 		return builder;

@@ -96,29 +96,27 @@ public class IdLookupPlannerTests
 	}
 
 	[Test]
-	public async Task Plan_LeavesOutEveryPathThroughABlockedProviderAndSaysSo()
+	public async Task Plan_PutsPathsThroughABlockedProviderLastTheSoonestFreeFirst()
 	{
-		var plan = IdLookupPlanner.Plan(
-			new HashSet<MediaProvider> { MediaProvider.Imdb },
-			true,
-			MediaProvider.Tmdb,
-			Hops,
-			TestCapacity.With(provider => provider is MediaProvider.Plex ? Blocked : Idle),
-			Now
-		);
-		var refresh = IdLookupPlanner.Plan(
-			new HashSet<MediaProvider> { MediaProvider.Plex },
-			false,
-			MediaProvider.Plex,
-			Hops,
-			TestCapacity.With(provider => provider is MediaProvider.Plex ? Blocked : Idle),
-			Now
-		);
+		var tmdbBlocked = TestCapacity.With(provider => provider is MediaProvider.Tmdb ? Blocked : Idle);
+		var plexFreesFirst = TestCapacity.With(provider => provider is MediaProvider.Tmdb ? BlockedFor(2) : Blocked);
 
-		await Assert.That(plan.Paths.Select(Describe)).IsEquivalentTo(["find(Imdb)>Tmdb"]);
-		await Assert.That(plan.Blocked).IsTrue();
-		await Assert.That(refresh.Paths).IsEmpty();
-		await Assert.That(refresh.Blocked).IsTrue();
+		var afterTheOpen = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Tmdb }, true, MediaProvider.Tvdb, Hops, tmdbBlocked, Now);
+		var soonestFree = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Tmdb }, true, MediaProvider.Tvdb, Hops, plexFreesFirst, Now);
+
+		string[] expected = ["search>Tvdb", "detail(Tmdb)>Tvdb", "detail(Tmdb)>hints search>Tvdb", "detail(Tmdb)>Imdb find(Imdb)>hints search>Tvdb"];
+		await Assert.That(afterTheOpen.Paths.Select(Describe)).IsEquivalentTo(expected, CollectionOrdering.Matching);
+		await Assert.That(soonestFree.Paths.Select(Describe)).IsEquivalentTo(expected, CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Plan_ForAPlexTitleWhilePlexIsBlocked_KeepsTheSelfHop()
+	{
+		var plexBlocked = TestCapacity.With(provider => provider is MediaProvider.Plex ? Blocked : Idle);
+
+		var plan = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Plex }, false, MediaProvider.Plex, Hops, plexBlocked, Now);
+
+		await Assert.That(plan.Paths.Select(Describe)).IsEquivalentTo(["plex id(Plex)>Plex"]);
 	}
 
 	[Test]
@@ -281,6 +279,8 @@ public class IdLookupPlannerTests
 				["find(Imdb)>Tmdb", "search>Tmdb", "search>Tvdb find(Tvdb)>Tmdb", "find(Imdb)>hints search>Tmdb", "find(Imdb)>hints search>Tvdb find(Tvdb)>Tmdb"]
 			);
 	}
+
+	private static ProviderLoad BlockedFor(int minutes) => new(Some.Of(Now.AddMinutes(minutes)), 0);
 
 	private static IExternalIdConverter Converter(MediaProvider provider, IReadOnlyList<IdLookup> lookups)
 	{
