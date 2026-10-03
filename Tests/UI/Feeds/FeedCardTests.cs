@@ -139,11 +139,11 @@ public class FeedCardTests : BunitContext
 					CreatedAt = Now,
 					Schedule = new FeedRunTrigger(new Scheduled("0 26 * * * *")),
 				},
-				runs > 0 ? Some.Of(Totals(runs)) : new None(),
+				Optional.When(runs > 0, () => Totals(runs)),
 				onWantlist
 			),
 			Optional.Of(job),
-			enabled ? Some.Of(Now.AddMinutes(43)) : new None()
+			Optional.When(enabled, () => Now.AddMinutes(43))
 		);
 	}
 

@@ -81,6 +81,8 @@ _state = await ApiKeyFactory
 | build from a nullable | `+Optional.Of(RunIdParam).Map(id => RunId.From(UrlGuid.Decode(id)))+` | `RunIdParam is null ? new None() : Some.Of(…)`
 | build from a dictionary | `_byId.GetValueOrNone(id)` | `TryGetValue(…) ? Some.Of(v) : new None()`
 | build from a sequence | `+Widths.FirstOrNone(width => width >= size.Width)+` | `+FirstOrDefault(…) is var width and > 0 ? Some.Of(width) : new None()+`
+| build from a condition | `+Optional.When(ticks != 0, () => new DateTimeOffset(ticks, TimeSpan.Zero))+` (the value is built only when the condition holds) | `+ticks == 0 ? new None() : Some.Of(…)+`, `+Optional.Of(cond ? x : null)+`
+| keep it only while a condition holds | `next.When(feed.Enabled)` | `+feed.Enabled ? next : new None()+`
 | project either way | `+LinkedRun.Match(linked => …, () => …)+` | `LinkedRun is Some<RunId>(var linked) ? … : …`
 | a value or a fallback | `due.Map(Until).GetValueOr(Timeout.InfiniteTimeSpan)` | `due is Some<DateTimeOffset>(var at) ? Until(at) : …`
 | an async value or a fallback | `+await feeds.FindAsync(id).Map(async feed => (FeedPlanResult)await PlanAsync(feed)).GetValueOr(new FeedPlanFailed(…))+` | a ternary around `await`
@@ -118,7 +120,12 @@ that holds no case: pass `new None()`. A value handed over untyped (`RenderTreeB
 parameter dictionary) is not converted at all and fails at run time: pass `Optional.Of(x)`.
 
 The build enforces this. The `Analyzers` project's `SAM0002` fails it on a hand match outside these guards, on a null
-or constant pattern against a monad, on `null` or `default` converted to one, on a block lambda or an unawaited `Task` or `ValueTask` step passed to
+or constant pattern against a monad, on `null` or `default` converted to one, on a `?:` that picks `Some.Of(…)` or
+`new None()` (`Optional.Of` for a null test, `GetValueOrNone` for a dictionary `TryGetValue`, `Optional.Of(…).When(…)`
+for a null test joined by `&&`, `Optional.When` for any other condition) or an `Optional` it already holds and
+`new None()` (`When(…)` on that `Optional`), and on an `Optional.Of` over a `?:` that picks `null`; it stays quiet when
+the arm cannot move into a lambda (an `await`, a `ref` or span-like value, `this` in a struct, a variable the condition
+assigns only when it holds) and leaves a condition that reads a monad to its own rows, on a block lambda or an unawaited `Task` or `ValueTask` step passed to
 `Apply`, and on a monad used as an ordering key or written as text; its message names the helper to use. `SAM0003` fails
 it when a branch reads a monad as a `bool` (`if (x.IsSome())`, `if (x.Map(…).GetValueOr(false))`, a `?:` on `IsSome()`)
 and proposes the `Apply` / `ApplyNone` / `ApplyError` or `Match` chain instead; a `bool` used as a value or argument, a

@@ -281,7 +281,7 @@ public class MediaIdResolverTests
 	public async Task ResolveAsync_WhenAProviderGetsBlockedWhileResolving_SkipsTheRemainingPathsThroughIt()
 	{
 		var tmdbBlocked = false;
-		var capacity = TestCapacity.With(provider => new ProviderLoad(tmdbBlocked && provider is MediaProvider.Tmdb ? Some.Of(Now.AddMinutes(1)) : new None(), 0));
+		var capacity = TestCapacity.With(provider => new ProviderLoad(Optional.When(tmdbBlocked && provider is MediaProvider.Tmdb, () => Now.AddMinutes(1)), 0));
 		_tmdb
 			.LookUpAsync(Any(), Any())
 			.Returns(
@@ -303,7 +303,7 @@ public class MediaIdResolverTests
 	public async Task ResolveAsync_WhenAProviderGetsBlockedMidPath_StopsBeforeTheHopThroughIt()
 	{
 		var plexBlocked = false;
-		var capacity = TestCapacity.With(provider => new ProviderLoad(plexBlocked && provider is MediaProvider.Plex ? Some.Of(Now.AddMinutes(1)) : new None(), 0));
+		var capacity = TestCapacity.With(provider => new ProviderLoad(Optional.When(plexBlocked && provider is MediaProvider.Plex, () => Now.AddMinutes(1)), 0));
 		_tmdb
 			.LookUpAsync(Any(), Any())
 			.Returns(

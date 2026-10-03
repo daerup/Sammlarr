@@ -27,6 +27,15 @@ public union FeedRunTrigger(Manual, Scheduled)
 {
 	private const string ManualLiteral = "manual";
 
+	public Optional<DateTimeOffset> NextRun(DateTimeOffset from, TimeZoneInfo zone)
+	{
+		return this switch
+		{
+			Scheduled scheduled => scheduled.NextRun(from, zone),
+			Manual => new None(),
+		};
+	}
+
 	public override string ToString() =>
 		this switch
 		{

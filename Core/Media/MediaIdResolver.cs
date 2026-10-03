@@ -96,7 +96,7 @@ internal sealed class MediaIdResolver(
 			outcome.Found.Apply(found => ids = [.. ids.Concat(found.Ids).Distinct()]).Apply(found => current = found.Hints.Or(current));
 		}
 
-		return new StepOutcome(ids.Any(id => id.Source == target) ? Some.Of(new IdLookupResult(ids, current)) : new None(), false);
+		return new StepOutcome(Optional.When(ids.Any(id => id.Source == target), () => new IdLookupResult(ids, current)), false);
 	}
 
 	private static async Task<StepOutcome> TakeAsync(

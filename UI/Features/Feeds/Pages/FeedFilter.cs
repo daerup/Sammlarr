@@ -68,11 +68,7 @@ public sealed record FeedRow(FeedOverview Overview, Optional<JobState> Job, Opti
 
 	public static FeedRow Of(FeedOverview overview, IReadOnlyDictionary<FeedId, JobState> jobs, DateTimeOffset now, TimeZoneInfo zone)
 	{
-		return new(
-			overview,
-			jobs.GetValueOrNone(overview.Feed.Id),
-			overview.Feed.Enabled && overview.Feed.Schedule is Scheduled scheduled ? scheduled.NextRun(now, zone) : new None()
-		);
+		return new(overview, jobs.GetValueOrNone(overview.Feed.Id), overview.Feed.Schedule.NextRun(now, zone).When(overview.Feed.Enabled));
 	}
 }
 

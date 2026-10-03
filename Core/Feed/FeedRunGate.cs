@@ -10,7 +10,7 @@ internal sealed class FeedRunGate
 	internal async Task<Optional<IDisposable>> EnterAsync(FeedId feedId, CancellationToken cancellationToken = default)
 	{
 		var gate = _gates.GetOrAdd(feedId, _ => new SemaphoreSlim(1, 1));
-		return await gate.WaitAsync(0, cancellationToken) ? Some.Of<IDisposable>(new Lease(gate)) : new None();
+		return Optional.When<IDisposable>(await gate.WaitAsync(0, cancellationToken), () => new Lease(gate));
 	}
 
 	private sealed class Lease(SemaphoreSlim gate) : IDisposable

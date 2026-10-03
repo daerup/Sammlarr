@@ -22,7 +22,7 @@ internal sealed class JobRunnerStatus : IJobRunnerStatus
 		get
 		{
 			var ticks = Volatile.Read(ref _lastFailureAt);
-			return ticks == 0 ? new None() : Some.Of(new DateTimeOffset(ticks, TimeSpan.Zero));
+			return Optional.When(ticks != 0, () => new DateTimeOffset(ticks, TimeSpan.Zero));
 		}
 	}
 
