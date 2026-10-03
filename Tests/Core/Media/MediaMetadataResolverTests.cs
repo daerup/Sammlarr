@@ -143,15 +143,18 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenTheEnricherFindsNoMatch_ConfirmsTheGap()
+	public async Task ResolveAsync_WhenTheEnricherAnswersAnotherType_IgnoresTheAnswerAndConfirmsTheGap()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete() with { Tagline = null });
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of<MediaLookup>(new UnmatchedMedia([Tmdb], new MovieDetails())));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any())
+			.Returns(Success.Of(new FoundMedia([TvdbId.From("81189", MediaType.Show)], new ShowDetails { Tagline = "Say my name." })));
 		await using var buffer = deps.Buffer();
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
+		await Assert.That(resolved.Identity).IsEqualTo(Identity);
+		await Assert.That(resolved.Details).IsEqualTo(Complete() with { Tagline = null });
 		await Assert.That(resolved.ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
 	}
 
@@ -212,19 +215,32 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenAnEnricherAnswersACompleteRecordWithoutAMediaId_KeepsTheTitlesMediaId()
+	public async Task ResolveAsync_WhenAnEnricherAnswersACompleteRecord_KeepsTheTitlesMediaIdAndAddsTheIdsItFound()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Unrated());
 		var imdb = ImdbId.From("tt1375666", MediaType.Movie);
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any())
-			.Returns(Success.Of<MediaLookup>(new IdentifiedMedia(new MediaIdentity(default, [Tmdb, imdb]), Complete())));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia([Tmdb, imdb], Complete())));
 		await using var buffer = deps.Buffer();
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
 		await Assert.That(resolved.Identity.Id).IsEqualTo(Id);
 		await Assert.That(resolved.Identity.Externals).IsEquivalentTo(new IExternalMediaId[] { Plex, Tmdb, imdb });
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenThePrimaryAnswersAnotherType_AnswersUnmatchedAndAsksNoEnricher()
+	{
+		var deps = Dependencies.Create();
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any())
+			.Returns(Success.Of(new FoundMedia([PlexId.From("plex-rating", MediaType.Show)], new ShowDetails { Title = "Inception" })));
+		await using var buffer = deps.Buffer();
+
+		var resolved = await deps.Testee.ResolveAsync(Identity, buffer);
+
+		await Assert.That(resolved).IsSuccess().And.Multiple(async lookup => await Assert.That(lookup).IsOfUnionType<MediaLookup, UnmatchedMedia>());
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
 	private static async Task<IdentifiedMedia> Identified(Result<MediaLookup> result)
@@ -234,9 +250,9 @@ public class MediaMetadataResolverTests
 		return identified!;
 	}
 
-	private static Result<MediaLookup> Answer(MediaDetails details)
+	private static Result<FoundMedia> Answer(MediaDetails details)
 	{
-		return Success.Of<MediaLookup>(new IdentifiedMedia(new MediaIdentity(Id, [Tmdb]), details));
+		return Success.Of(new FoundMedia([Tmdb], details));
 	}
 
 	private static MovieDetails Complete()
@@ -300,7 +316,7 @@ public class MediaMetadataResolverTests
 
 		public void Primary(MovieDetails details, MediaIdentity? identity = null)
 		{
-			Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of<MediaLookup>(new IdentifiedMedia(identity ?? Identity, details)));
+			Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia((identity ?? Identity).Externals, details)));
 		}
 
 		private static IDateTimeProvider Clock()

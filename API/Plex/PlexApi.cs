@@ -29,7 +29,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		| MediaField.Episodes
 		| MediaField.RuntimePerEpisode;
 
-	private readonly ConcurrentDictionary<string, Lazy<Task<Result<MediaLookup>>>> _byRatingKey = new();
+	private readonly ConcurrentDictionary<string, Lazy<Task<Result<FoundMedia>>>> _byRatingKey = new();
 
 	private void EnsureUsable(HttpResponseMessage response, string endpoint)
 	{
@@ -42,10 +42,12 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		response.EnsureSuccessStatusCode();
 	}
 
-	public Task<Result<MediaLookup>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default) =>
-		mediaId.Require<PlexId>($"PlexApi only supports {nameof(PlexId)} lookups.").Map(plexId => ByIdAsync(plexId, cancellationToken));
+	public Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
+	{
+		return mediaId.Require<PlexId>($"PlexApi only supports {nameof(PlexId)} lookups.").Map(plexId => ByIdAsync(plexId, cancellationToken));
+	}
 
-	public async Task<IReadOnlyList<MediaLookup>> SearchAsync(
+	public async Task<IReadOnlyList<FoundMedia>> SearchAsync(
 		string title,
 		IReadOnlyCollection<MediaType> mediaTypes,
 		CancellationToken cancellationToken = default
@@ -64,20 +66,22 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 
 		return result
 			.MediaContainer.SearchResults.SelectMany(c => c.NestedSearchResult)
-			.Select(s => s.Metadata.ToMediaResult())
+			.Select(s => s.Metadata.ToFound())
 			.DistinctBy(r => r.Externals.OfType<PlexId>().FirstOrDefault())
 			.ToList();
 	}
 
 	internal Task<Result<IReadOnlyList<IExternalMediaId>>> LookUpExternalsAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
-		return ByIdAsync(plexId, cancellationToken).Map<MediaLookup, IReadOnlyList<IExternalMediaId>>(raw => [.. raw.Externals]);
+		return ByIdAsync(plexId, cancellationToken).Map<FoundMedia, IReadOnlyList<IExternalMediaId>>(found => [.. found.Externals]);
 	}
 
-	internal Task<Result<MediaLookup>> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default) =>
-		_byRatingKey.GetOrAdd(plexId.Value, key => new Lazy<Task<Result<MediaLookup>>>(() => FetchOnceAsync(key, plexId))).Value.WaitAsync(cancellationToken);
+	internal Task<Result<FoundMedia>> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
+	{
+		return _byRatingKey.GetOrAdd(plexId.Value, key => new Lazy<Task<Result<FoundMedia>>>(() => FetchOnceAsync(key, plexId))).Value.WaitAsync(cancellationToken);
+	}
 
-	private async Task<Result<MediaLookup>> FetchOnceAsync(string key, PlexId plexId)
+	private async Task<Result<FoundMedia>> FetchOnceAsync(string key, PlexId plexId)
 	{
 		try
 		{
@@ -90,7 +94,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		}
 	}
 
-	private async Task<Result<MediaLookup>> FetchByIdAsync(PlexId plexId, CancellationToken cancellationToken)
+	private async Task<Result<FoundMedia>> FetchByIdAsync(PlexId plexId, CancellationToken cancellationToken)
 	{
 		var endpoint = urls.RatingKeyMetadata(plexId.Value);
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
@@ -98,7 +102,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
 		var reason = $"Plex returned no metadata for ratingKey {plexId.Value}.";
-		return Result.WhenNotNull(result?.MediaContainer?.Metadata, reason).When(metadata => metadata.Count > 0, reason).Map(metadata => metadata[0].ToMedia());
+		return Result.WhenNotNull(result?.MediaContainer?.Metadata, reason).When(metadata => metadata.Count > 0, reason).Map(metadata => metadata[0].ToFound());
 	}
 
 	private static string ToPlexMediaType(MediaType mediaType) =>
@@ -112,16 +116,11 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 
 file static class PlexMetadataMappingExtensions
 {
-	public static MediaLookup ToMediaResult(this PlexTypes.Search.Metadata result) => Lookup([result.PlexId], Details(result));
+	public static FoundMedia ToFound(this PlexTypes.Search.Metadata result) => new([result.PlexId], Details(result));
 
-	public static MediaLookup ToMedia(this PlexTypes.ById.Metadata result)
+	public static FoundMedia ToFound(this PlexTypes.ById.Metadata result)
 	{
-		return Lookup([.. BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)], Details(result));
-	}
-
-	private static MediaLookup Lookup(ValueSet<IExternalMediaId> externals, MediaDetails details)
-	{
-		return details is UnknownDetails ? new UnmatchedMedia(externals, details) : new IdentifiedMedia(new MediaIdentity(default, externals), details);
+		return new([.. BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)], Details(result));
 	}
 
 	private static MediaDetails Details(PlexTypes.ById.Metadata result)

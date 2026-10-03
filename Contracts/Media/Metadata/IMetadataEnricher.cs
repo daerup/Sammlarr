@@ -7,5 +7,5 @@ public interface IMetadataEnricher
 {
 	MediaField Fills { get; }
 
-	Task<Result<MediaLookup>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default);
+	Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default);
 }

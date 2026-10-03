@@ -59,9 +59,9 @@ internal sealed class PlexStub : HttpMessageHandler
 		return this;
 	}
 
-	public static ITypedMemoryCache<IdentifyHints, IReadOnlyList<MediaLookup>> NoSearchCache()
+	public static ITypedMemoryCache<IdentifyHints, IReadOnlyList<FoundMedia>> NoSearchCache()
 	{
-		return ITypedMemoryCache<IdentifyHints, IReadOnlyList<MediaLookup>>.Mock().Object;
+		return ITypedMemoryCache<IdentifyHints, IReadOnlyList<FoundMedia>>.Mock().Object;
 	}
 
 	public PlexApi CreateApi()

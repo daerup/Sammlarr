@@ -20,13 +20,8 @@ internal sealed class MediaSearchService(
 	)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
-		var raws = await providers[config.SearchProvider].SearchAsync(query, mediaTypes, cancellationToken);
-		if (raws.Count == 0)
-		{
-			return raws;
-		}
-		var groups = raws.Select(r => r.Externals.ToList()).ToList();
-		var identities = await mediaService.RegisterAsync(groups, cancellationToken);
-		return raws.Zip(identities, (raw, identity) => raw.CombineIdentity(identity)).ToList();
+		var found = await providers[config.SearchProvider].SearchAsync(query, mediaTypes, cancellationToken);
+		var identities = await mediaService.RegisterAsync([.. found.Select(item => item.Externals.ToList())], cancellationToken);
+		return [.. found.Zip(identities, (item, identity) => item.LookUpAs(identity))];
 	}
 }

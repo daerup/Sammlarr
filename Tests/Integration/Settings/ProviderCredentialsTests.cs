@@ -112,9 +112,9 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithTmdbAccount("valid-tmdb-key");
 		host.Movie("Test Movie", tmdb: "550").ServedByTmdb(rating: 7.8, votes: 5000);
 
-		var lookup = await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsSuccess();
+		var found = await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsSuccess();
 
-		await Assert.That(lookup!.ToIdentified()).IsSome().And.Multiple(async media => await Assert.That(media.Rating.Sources).IsNotEmpty());
+		await Assert.That(found!.Details.Rating.Sources).IsNotEmpty();
 	}
 
 	[Test]

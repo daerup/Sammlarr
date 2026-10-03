@@ -39,7 +39,7 @@ internal sealed class MediaMetadataResolver(
 	{
 		var providerMedia = provider.AsMediaProvider();
 		var external = identity.Externals.OfProvider(providerMedia) ?? identity.Externals.First();
-		return searchIndex[provider].LookUpAsync(external, cancellationToken).Map(detail => detail.CombineIdentity(identity));
+		return searchIndex[provider].LookUpAsync(external, cancellationToken).Map(found => found.LookUpAs(identity));
 	}
 
 	private async Task<IdentifiedMedia> EnrichAsync(IdentifiedMedia current, SearchProvider searchProvider, CancellationToken cancellationToken)
@@ -59,8 +59,8 @@ internal sealed class MediaMetadataResolver(
 			asked.Add(next.Provider);
 			switch (await enricherIndex[next.Provider].LookUpAsync(next.Id, cancellationToken))
 			{
-				case Success<MediaLookup>(var lookup) when lookup.ToIdentified() is Some<IdentifiedMedia>(var enriched):
-					current = Merge(current, enriched);
+				case Success<FoundMedia>(var found) when found.Fits(current.Details.Type):
+					current = Merge(current, found);
 					break;
 				case Error { Exception: ProviderUnavailableException }:
 					unconfirmed |= next.Fills;
@@ -70,12 +70,12 @@ internal sealed class MediaMetadataResolver(
 		return current with { ConfirmedAbsent = current.Details.Missing.Except(unconfirmed) };
 	}
 
-	private static IdentifiedMedia Merge(IdentifiedMedia current, IdentifiedMedia enriched)
+	private static IdentifiedMedia Merge(IdentifiedMedia current, FoundMedia found)
 	{
 		return current with
 		{
-			Identity = current.Identity with { Externals = current.Identity.Externals + enriched.Identity.Externals },
-			Details = current.Details.FillFrom(enriched.Details),
+			Identity = current.Identity with { Externals = current.Identity.Externals + found.Externals },
+			Details = current.Details.FillFrom(found.Details),
 		};
 	}
 

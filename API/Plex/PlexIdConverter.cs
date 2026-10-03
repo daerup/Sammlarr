@@ -6,7 +6,7 @@ using Domain.Providers;
 
 namespace API.Plex;
 
-internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints, IReadOnlyList<MediaLookup>> searches) : IExternalIdConverter
+internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints, IReadOnlyList<FoundMedia>> searches) : IExternalIdConverter
 {
 	private const int LookupConcurrency = 4;
 	private const int MaxCandidateLookups = 3;
@@ -46,7 +46,7 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 
 	private static IdLookupResult Answer(IReadOnlyList<IExternalMediaId> ids) => new(ids, new None());
 
-	private async Task<IReadOnlyList<MediaLookup>> CachedSearchAsync(IdentifyHints hints, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<FoundMedia>> CachedSearchAsync(IdentifyHints hints, CancellationToken cancellationToken)
 	{
 		if (searches.TryGetValue(hints, out var cached) && cached is not null)
 		{
@@ -100,24 +100,17 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 		return match;
 	}
 
-	private static IEnumerable<MediaLookup> RankByHints(IReadOnlyList<MediaLookup> results, string title, int year) =>
-		results.OrderByDescending(result => Score(result, title, year));
-
-	private static int Score(MediaLookup result, string title, int year)
+	private static IEnumerable<FoundMedia> RankByHints(IReadOnlyList<FoundMedia> results, string title, int year)
 	{
-		var (resultTitle, resultYear) = Describe(result);
+		return results.OrderByDescending(result => Score(result, title, year));
+	}
+
+	private static int Score(FoundMedia result, string title, int year)
+	{
+		var (resultTitle, resultYear) = Describe(result.Details);
 		var titleMatches = resultTitle is not null && Comparable(resultTitle) == Comparable(title);
 		var yearMatches = year > 0 && resultYear == year;
 		return (yearMatches ? 2 : 0) + (titleMatches ? 1 : 0);
-	}
-
-	private static (string? Title, int? Year) Describe(MediaLookup result)
-	{
-		return result switch
-		{
-			IdentifiedMedia identified => Describe(identified.Details),
-			UnmatchedMedia unmatched => Describe(unmatched.Details),
-		};
 	}
 
 	private static (string? Title, int? Year) Describe(MediaDetails details) => (details.Title, details.ReleaseDate?.Year);

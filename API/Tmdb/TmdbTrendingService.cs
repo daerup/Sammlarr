@@ -32,7 +32,7 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		var indexed = result.Results.Index().ToList();
 
 		var unresolvable = indexed.Where(x => x.Item.MediaType is MediaType.Unknown).ToList();
-		unresolvable.ForEach(r => finalItems[r.Index] = BuildUnmatched(r.Item));
+		unresolvable.ForEach(r => finalItems[r.Index] = Found(r.Item).Unmatched());
 
 		var resolvable = indexed.Except(unresolvable).ToList();
 		var requests = resolvable.Select(x => new IdentifyRequest([x.Item.TmdbId], BuildHints(x.Item)));
@@ -55,10 +55,11 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 
 	private MediaLookup BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome)
 	{
-		return outcome.Match(identity => BuildIdentified(response, identity), _ => BuildUnmatched(response));
+		var found = Found(response);
+		return outcome.Map(found.LookUpAs).GetValueOr(found.Unmatched());
 	}
 
-	private MediaLookup BuildIdentified(TmdbTypes.Trending.Result response, MediaIdentity identity) => new IdentifiedMedia(identity, BuildDetails(response));
+	private FoundMedia Found(TmdbTypes.Trending.Result response) => new([response.TmdbId], BuildDetails(response));
 
 	private MediaDetails BuildDetails(TmdbTypes.Trending.Result response)
 	{
@@ -72,8 +73,6 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 			Rating = BuildRating(response.VoteAverage),
 		};
 	}
-
-	private MediaLookup BuildUnmatched(TmdbTypes.Trending.Result response) => new UnmatchedMedia([response.TmdbId], BuildDetails(response));
 
 	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
 

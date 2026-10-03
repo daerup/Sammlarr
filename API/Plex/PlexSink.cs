@@ -33,7 +33,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 			}
 			else
 			{
-				unmatched.Add(item);
+				unmatched.Add(item.Unmatched());
 				logger.LogWarning("Plex watchlist item {Title} could not be matched during sync", item.Details.Title ?? item.Externals.FirstOrDefault()?.Value);
 			}
 		}
@@ -63,7 +63,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 			WantlistOperationAction.Remove => urls.RemoveFromWatchlist(plexId.Value),
 		};
 
-	private async IAsyncEnumerable<UnmatchedMedia> WatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+	private async IAsyncEnumerable<FoundMedia> WatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var (items, pages) = await FetchPageAsync(1, cancellationToken);
 		foreach (var item in items)
@@ -109,7 +109,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		}
 	}
 
-	private async Task<(List<UnmatchedMedia>, int)> FetchPageAsync(int page, CancellationToken cancellationToken)
+	private async Task<(List<FoundMedia>, int)> FetchPageAsync(int page, CancellationToken cancellationToken)
 	{
 		const string containerStartHeader = "X-Plex-Container-Start";
 		var offset = (page - 1) * PlexClient.ContainerSize;
@@ -125,7 +125,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		return (items, totalPages);
 	}
 
-	private static UnmatchedMedia Item(PlexTypes.Watchlist.Metadata metadata)
+	private static FoundMedia Item(PlexTypes.Watchlist.Metadata metadata)
 	{
 		return new([metadata.PlexId], MediaDetails.Empty(metadata.PlexId.Type) with { Title = metadata.Title.NullIfBlank(), ReleaseDate = ReleasedOn(metadata) });
 	}
