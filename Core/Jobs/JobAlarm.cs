@@ -17,7 +17,7 @@ internal sealed class JobAlarm(IServiceScopeFactory scopes, JobSignal signal, ID
 	{
 		await using var scope = scopes.CreateAsyncScope();
 		var due = await scope.ServiceProvider.GetRequiredService<IJobRepository>().NextWaitingAsync(cancellationToken);
-		Set(due is Some<DateTimeOffset>(var at) ? Until(at) : Timeout.InfiniteTimeSpan);
+		Set(due.Map(Until).GetValueOr(Timeout.InfiniteTimeSpan));
 	}
 
 	private void Set(TimeSpan delay)

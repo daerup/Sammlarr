@@ -8,6 +8,7 @@ using Domain.Jobs;
 using Domain.Wantlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using TestInfrastructure;
 
 namespace Core.Tests.Jobs;
 
@@ -23,6 +24,7 @@ public class JobRunnerResilienceTests
 
 		await Assert.That(status.IsRunning).IsTrue();
 		await Assert.That(runner.ExecuteTask!.IsFaulted).IsFalse();
+		await Assert.That(status.LastFailureAt).IsSome().And.IsEqualTo(DateTimeOffset.UnixEpoch);
 
 		await runner.StopAsync(CancellationToken.None);
 	}
@@ -33,6 +35,14 @@ public class JobRunnerResilienceTests
 		var (_, status) = BuildTestee(Idle());
 
 		await Assert.That(status.HasStopped).IsFalse();
+	}
+
+	[Test]
+	public async Task ExecuteAsync_BeforeItHasStarted_HasNoFailureToDate()
+	{
+		var (_, status) = BuildTestee(Idle());
+
+		await Assert.That(status.LastFailureAt).IsNone();
 	}
 
 	[Test]

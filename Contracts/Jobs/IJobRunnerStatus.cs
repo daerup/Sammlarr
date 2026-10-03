@@ -6,5 +6,5 @@ public interface IJobRunnerStatus
 
 	int ConsecutiveFailures { get; }
 
-	DateTimeOffset? LastFailureAt { get; }
+	Optional<DateTimeOffset> LastFailureAt { get; }
 }

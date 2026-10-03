@@ -137,6 +137,7 @@ public class JobQueueTests
 
 		var cancelled = await testee.CancelAsync(JobId.From(Guid.NewGuid()));
 
+		jobs.NextWaitingAsync(Any()).WasCalled(Times.Once);
 		await Assert.That(cancelled).IsTrue();
 		await Assert
 			.That(seen.OfType<JobStateChangedEvent>().Single())
@@ -153,6 +154,7 @@ public class JobQueueTests
 
 		var cancelled = await testee.CancelAsync(JobId.From(Guid.NewGuid()));
 
+		jobs.NextWaitingAsync(Any()).WasCalled(Times.Never);
 		await Assert.That(cancelled).IsFalse();
 		await Assert.That(seen).IsEmpty();
 	}

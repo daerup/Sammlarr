@@ -22,13 +22,13 @@ internal sealed class JobRunnerHealthCheck(IJobRunnerStatus status) : IHealthChe
 	private HealthCheckResult Evaluate()
 	{
 		var failures = status.ConsecutiveFailures;
-		var since = status.LastFailureAt;
+		var since = status.LastFailureAt.Map(at => $" since {at:u}").GetValueOr(string.Empty);
 
 		return failures switch
 		{
 			0 => HealthCheckResult.Healthy(),
-			> ToleratedFailures => HealthCheckResult.Unhealthy($"The job runner has failed {failures} times in a row since {since:u}. Queued work is not running."),
-			_ => HealthCheckResult.Degraded($"The job runner has failed {failures} time(s) in a row since {since:u}. It retries when work is enqueued."),
+			> ToleratedFailures => HealthCheckResult.Unhealthy($"The job runner has failed {failures} times in a row{since}. Queued work is not running."),
+			_ => HealthCheckResult.Degraded($"The job runner has failed {failures} time(s) in a row{since}. It retries when work is enqueued."),
 		};
 	}
 }

@@ -5,6 +5,7 @@ using Contracts;
 using Domain.Jobs;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
 using UI.Shared.Services.Branding;
@@ -116,8 +117,8 @@ public class UpNextPanelTests : BunitContext
 		var job = JobId.From(Guid.NewGuid());
 		IReadOnlyList<UpNextRow> queued =
 		[
-			new("hdlists/documentaries", "running now", "running", UpNextKind.Running, null) { Job = JobId.From(Guid.NewGuid()) },
-			new("hdlists/anime", "queued", string.Empty, UpNextKind.Queued, null) { Job = job },
+			new("hdlists/documentaries", "running now", "running", UpNextKind.Running, null) { Job = Some.Of(JobId.From(Guid.NewGuid())) },
+			new("hdlists/anime", "queued", string.Empty, UpNextKind.Queued, null) { Job = Some.Of(job) },
 		];
 		UpNextRow? cancelled = null;
 
@@ -125,7 +126,7 @@ public class UpNextPanelTests : BunitContext
 		await cut.Find("[aria-label='Cancel hdlists/anime']").ClickAsync(new());
 
 		await Assert.That(cut.FindAll(".row-cancel")).Count().IsEqualTo(1);
-		await Assert.That(cancelled?.Job).IsEqualTo(job);
+		await Assert.That(cancelled!.Job).IsSome().And.IsEqualTo(job);
 	}
 
 	[Test]

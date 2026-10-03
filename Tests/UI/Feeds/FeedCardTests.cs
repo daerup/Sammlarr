@@ -103,6 +103,22 @@ public class FeedCardTests : BunitContext
 		await Assert.That(run.GetAttribute("aria-label")).IsEqualTo("Running now");
 	}
 
+	[Test]
+	[Arguments(JobState.Running, false, "Running now", "is-running")]
+	[Arguments(JobState.Queued, true, "Waiting in the queue", "is-queued")]
+	[Arguments(JobState.Waiting, false, "Waiting in the queue", "is-queued")]
+	[Arguments(JobState.Done, false, "Paused: resume the feed to run it", "is-paused")]
+	[Arguments(JobState.Done, true, "Run now", "")]
+	[Arguments(null, true, "Run now", "")]
+	public async Task Render_ForEachJobState_LabelsAndMarksTheRunButton(JobState? job, bool enabled, string label, string mark)
+	{
+		var cut = RenderCard(Row(enabled: enabled, job: job));
+
+		var run = cut.Find(".feed-card-run");
+		await Assert.That(run.GetAttribute("aria-label")).IsEqualTo(label);
+		await Assert.That(string.Join(' ', run.ClassList.Where(name => name.StartsWith("is-", StringComparison.Ordinal)))).IsEqualTo(mark);
+	}
+
 	private IRenderedComponent<FeedCard> RenderCard(FeedRow row, bool selecting = false) =>
 		Render<FeedCard>(parameters => parameters.Add(card => card.Row, row).Add(card => card.Now, Now).Add(card => card.IsSelecting, selecting));
 
@@ -126,7 +142,7 @@ public class FeedCardTests : BunitContext
 				runs > 0 ? Some.Of(Totals(runs)) : new None(),
 				onWantlist
 			),
-			job,
+			Optional.Of(job),
 			enabled ? Some.Of(Now.AddMinutes(43)) : new None()
 		);
 	}
