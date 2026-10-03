@@ -264,7 +264,7 @@ public class FeedPreviewPanelTests : BunitContext
 		}
 	}
 
-	private static RawFeedLoad Load(FeedPlanTarget target) => target is DraftFeed(_, var load) ? load : new RawFeedLoad([], Completeness.Complete);
+	private static RawFeedLoad Load(FeedPlanTarget target) => target is DraftFeed(_, var load) ? load : new RawFeedLoad([], FeedLoadState.Finished);
 
 	private static async IAsyncEnumerable<T> Async<T>(params T[] items)
 	{

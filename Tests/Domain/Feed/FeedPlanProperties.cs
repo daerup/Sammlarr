@@ -27,9 +27,9 @@ public class FeedPlanProperties
 		.SelectMany(situations =>
 			Gen.Select(
 				Gen.OneOfConst<FeedStrategy>(new Append(), new Mirror(Threshold), new Mirror(Threshold)),
-				Gen.OneOfConst(Completeness.Complete, Completeness.Complete, Completeness.Complete, Completeness.Partial),
+				Gen.OneOfConst(FeedLoadState.Finished, FeedLoadState.Finished, FeedLoadState.Finished, FeedLoadState.Unfinished),
 				Gen.Int[0, 3],
-				(strategy, completeness, unmatched) => Build(situations, strategy, completeness, unmatched)
+				(strategy, state, unmatched) => Build(situations, strategy, state, unmatched)
 			)
 		);
 
@@ -82,7 +82,7 @@ public class FeedPlanProperties
 	private static Scenario Build(
 		(QueryOutcome Outcome, bool Owned, bool InWantlist, bool InBlocklist, bool InSource, int Absences)[] situations,
 		FeedStrategy strategy,
-		Completeness completeness,
+		FeedLoadState state,
 		int unmatchedCount
 	)
 	{
@@ -118,7 +118,7 @@ public class FeedPlanProperties
 			.Select(index => new UnmatchedMedia([TmdbId.From($"unmatched-{index}", MediaType.Movie)], new MovieDetails()))
 			.ToList();
 
-		return new Scenario(FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatched, completeness), owned, absences, strategy), owned, strategy, absences);
+		return new Scenario(FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatched, state), owned, absences, strategy), owned, strategy, absences);
 	}
 
 	private static IdentifiedMedia Row(MediaId id)

@@ -43,7 +43,7 @@ public static class FeedPlans
 		var missing = owned.Where(id => !qualifying.Contains(id)).ToList();
 		var missedRuns = missing.ToDictionary(id => id, id => absences.GetValueOrDefault(id) + 1);
 
-		var conclusiveness = Assess(qualifying.Count, verdicts.Count, load.Unmatched.Count, load.Completeness);
+		var conclusiveness = Assess(qualifying.Count, verdicts.Count, load.Unmatched.Count, load.State);
 		var conclusive = conclusiveness is Conclusiveness.Conclusive;
 
 		var delta = new FeedDelta(
@@ -62,12 +62,14 @@ public static class FeedPlans
 		};
 	}
 
-	private static Conclusiveness Assess(int qualifying, int resolved, int unmatched, Completeness completeness) =>
-		completeness switch
+	private static Conclusiveness Assess(int qualifying, int resolved, int unmatched, FeedLoadState state)
+	{
+		return state switch
 		{
-			Completeness.Partial => Conclusiveness.StillLoading,
-			Completeness.Complete => Settled(qualifying, resolved, unmatched),
+			FeedLoadState.Unfinished => Conclusiveness.StillLoading,
+			FeedLoadState.Finished => Settled(qualifying, resolved, unmatched),
 		};
+	}
 
 	private static Conclusiveness Settled(int qualifying, int resolved, int unmatched)
 	{
