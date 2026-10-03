@@ -12,7 +12,7 @@ public static class ExternalMediaIdUrlResolver
 			{
 				MediaType.Movie => $"https://www.themoviedb.org/movie/{id.Value}",
 				MediaType.Show => $"https://www.themoviedb.org/tv/{id.Value}",
-				_ => null,
+				MediaType.Unknown => $"https://www.themoviedb.org/person/{id.Value}",
 			},
 			MediaProvider.Imdb => $"https://www.imdb.com/title/{id.Value}",
 			MediaProvider.Tvdb => id.Type switch
