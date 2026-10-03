@@ -454,7 +454,7 @@
             nameof(MediaQueryRow.MediaType),
             "Media Type",
             FilterFieldType.Enum,
-            [new SelectOption<string>(nameof(MediaType.Movie), "Movie"), new SelectOption<string>(nameof(MediaType.Show), "Show")]
+            [new SelectOption<string>(nameof(MediaType.Movie), MediaType.Movie.Label), new SelectOption<string>(nameof(MediaType.Show), MediaType.Show.Label)]
         ),
         new(nameof(MediaQueryRow.ReleaseDate), "Release Date", FilterFieldType.Date),
         new(nameof(MediaQueryRow.Rating), "Rating", FilterFieldType.Number),

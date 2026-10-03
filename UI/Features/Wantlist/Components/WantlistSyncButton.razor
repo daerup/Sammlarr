@@ -265,8 +265,8 @@
             case WantlistSyncSummary changes:
                 _dryRun = changes;
                 _dryRunError = null;
-                var metadata = await DryRunMetadataLoader.LoadAsync(Media, changes, cancellationToken);
-                _items = WantlistSyncView.Items(changes, metadata);
+                var ids = changes.Changes.Select(change => change.MediaId).Concat(changes.NoOps).Distinct();
+                _items = WantlistSyncView.Items(changes, await Media.GetDetailsByIdAsync(ids, cancellationToken));
                 _chips = WantlistSyncView.Chips(changes);
                 break;
             case WantlistSyncSinkUnreachable failed:

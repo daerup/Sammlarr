@@ -17,15 +17,15 @@
             @if (Media.TryGetValue(id, out var media))
             {
                 <button type="button" class="track-tile @(Faded ? "faded" : "")" @key="id.Value" @onclick="() => OnSelect.InvokeAsync(media)">
-                    @if (string.IsNullOrWhiteSpace(media.Details.PosterUrl))
+                    @if (media.Details.PosterUrl is { } poster)
+                    {
+                        <img class="track-poster" src="@poster" srcset="@SrcSet(id, poster)" alt="" loading="lazy" @onerror="() => _unsized.Add(id)"/>
+                    }
+                    else
                     {
                         <span class="track-blank">
                             <LucideIcon Name="image-off" Size="20"/>
                         </span>
-                    }
-                    else
-                    {
-                        <img class="track-poster" src="@media.Details.PosterUrl" srcset="@SrcSet(id, media.Details.PosterUrl)" alt="" loading="lazy" @onerror="() => _unsized.Add(id)"/>
                     }
                     <span class="track-scrim"></span>
                     <span class="track-title">@Title(media)</span>
@@ -99,7 +99,7 @@
         return Task.CompletedTask;
     }
 
-    private static string Title(IdentifiedMedia media) => string.IsNullOrWhiteSpace(media.Details.Title) ? "Unknown title" : media.Details.Title;
+    private static string Title(IdentifiedMedia media) => media.Details.Title ?? "Unknown title";
 
     private string? SrcSet(MediaId id, string poster) => _unsized.Contains(id) ? null : Artwork.ByDensity(poster, Faded ? FadedPoster : Poster);
 

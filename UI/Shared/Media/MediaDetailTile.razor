@@ -7,9 +7,9 @@
     <div class="flex items-start justify-between gap-3">
         <div class="search-result-main-content flex items-start">
             <div class="search-result-poster">
-                @if (!_failed && !string.IsNullOrWhiteSpace(Details.PosterUrl))
+                @if (!_failed && Details.PosterUrl is { } poster)
                 {
-                    <img src="@Details.PosterUrl" alt="@Details.Title" class="rounded-sm" loading="lazy" decoding="async" @onerror="OnPosterError"/>
+                    <img src="@poster" alt="@Details.Title" class="rounded-sm" loading="lazy" decoding="async" @onerror="OnPosterError"/>
                 }
                 else
                 {
@@ -18,18 +18,7 @@
             </div>
             <div class="search-result-content min-w-0">
                 <div class="text-xs text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1 space-x-1">
-                    @if (Details.Type is MediaType.Movie)
-                    {
-                        <LucideIcon Name="film" Size="13"/>
-                    }
-                    else if (Details.Type is MediaType.Show)
-                    {
-                        <LucideIcon Name="tv" Size="13"/>
-                    }
-                    else
-                    {
-                        <LucideIcon Name="circle-help" Size="13"/>
-                    }
+                    <LucideIcon Name="@Details.Type.Icon" Size="13"/>
                     @if (Details.ReleaseDate is { } released)
                     {
                         <span>@released.Year</span>
@@ -52,9 +41,9 @@
                     <MediaTitleLink Title="@Details.Title" Ids="@_ids" Class="font-bold truncate text-xl" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
                 </div>
 
-                @if (!string.IsNullOrWhiteSpace(Details.Tagline))
+                @if (Details.Tagline is { } tagline)
                 {
-                    <p class="text-xs italic text-muted-foreground line-clamp-1 pt-1">@Details.Tagline</p>
+                    <p class="text-xs italic text-muted-foreground line-clamp-1 pt-1">@tagline</p>
                 }
 
                 @if (Details.Genres.Count > 0)
@@ -67,9 +56,9 @@
                     </div>
                 }
 
-                @if (!string.IsNullOrWhiteSpace(Details.Summary))
+                @if (Details.Summary is { } summary)
                 {
-                    <p class="text-sm text-foreground line-clamp-2 pt-2">@Details.Summary</p>
+                    <p class="text-sm text-foreground line-clamp-2 pt-2">@summary</p>
                 }
             </div>
         </div>
@@ -93,7 +82,7 @@
 
     private MediaDetails Details => Media.Details;
 
-    private string _backgroundStyle = string.Empty;
+    private string? _backgroundStyle;
     private IReadOnlyList<string> _displayFacts = [];
     private IReadOnlyList<IExternalMediaId> _ids = new List<IExternalMediaId>();
     private bool _failed;
@@ -106,7 +95,7 @@
             _lastKey = Media.Key;
             _failed = false;
         }
-        _backgroundStyle = $"--hover-bg: url('{(Details.BackdropUrl ?? Details.PosterUrl)}')";
+        _backgroundStyle = (Details.BackdropUrl ?? Details.PosterUrl) is { } artwork ? $"--hover-bg: url('{artwork}')" : null;
         _displayFacts = MediaFacts.GetDisplayFacts(Details);
         _ids = [.. Media.Externals];
     }

@@ -561,9 +561,9 @@
         }
 
         var missing = summary.Delta.Drops.Where(id => !media.ContainsKey(id)).ToList();
-        await foreach (var detail in Media.GetDetailsAsync(missing).WhereSuccessAwait())
+        foreach (var (id, detail) in await Media.GetDetailsByIdAsync(missing))
         {
-            media[detail.Identity.Id] = detail;
+            media[id] = detail;
         }
 
         _pendingPlan = summary;

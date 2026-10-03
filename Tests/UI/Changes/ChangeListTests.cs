@@ -341,10 +341,7 @@ public class ChangeListTests : BunitContext
 			new MovieDetails
 			{
 				Title = title,
-				Tagline = string.Empty,
-				Summary = string.Empty,
 				PosterUrl = "https://example.invalid/poster.jpg",
-				BackdropUrl = string.Empty,
 				ReleaseDate = new DateOnly(2024, 1, 1),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(90),

@@ -16,7 +16,7 @@ public sealed record MediaQueryRow(IdentifiedMedia Media)
 
 	public IReadOnlyList<string> Genres => [.. Media.Details.Genres];
 
-	public DateOnly? ReleaseDate => Media.Details.ReleaseDate is { } date && date > DateOnly.MinValue ? date : null;
+	public DateOnly? ReleaseDate => Media.Details.ReleaseDate;
 
 	public float? Rating => Media.Details.Rating.Average;
 

@@ -22,17 +22,17 @@
             var details = media.Details;
             <div class="space-y-6">
                 <div class="media-sheet-hero">
-                    @if (_failed || string.IsNullOrWhiteSpace(details.PosterUrl))
+                    @if (!_failed && details.PosterUrl is { } poster)
                     {
-                        <div class="media-sheet-poster relative overflow-hidden">
-                            <div class="w-full h-full bg-muted flex items-center justify-center">
-                                <LucideIcon Name="@(details.Type is MediaType.Movie ? "film" : "tv")" Size="64" Class="text-muted-foreground"/>
-                            </div>
-                        </div>
+                        <PosterFade Src="@poster" Alt="@details.Title" OnError="OnImageError"/>
                     }
                     else
                     {
-                        <PosterFade Src="@details.PosterUrl" Alt="@details.Title" OnError="OnImageError"/>
+                        <div class="media-sheet-poster relative overflow-hidden">
+                            <div class="w-full h-full bg-muted flex items-center justify-center">
+                                <LucideIcon Name="@details.Type.Icon" Size="64" Class="text-muted-foreground"/>
+                            </div>
+                        </div>
                     }
                 </div>
 
@@ -58,8 +58,8 @@
                     </BbSheetTitle>
                     <BbSheetDescription Class="font-normal tracking-wide">
                         <span class="media-sheet-meta-line inline-flex items-center gap-1.5 flex-wrap">
-                            <LucideIcon Name="@(details.Type is MediaType.Movie ? "film" : "tv")" Size="16" Class="@(details.Type is MediaType.Movie ? "" : "meta-tv-icon")"/>
-                            <span>@details.Type.GetDescription()</span>
+                            <LucideIcon Name="@details.Type.Icon" Size="16" Class="@(details.Type is MediaType.Show ? "meta-tv-icon" : "")"/>
+                            <span>@details.Type.Label</span>
                             @if (details.ReleaseDate is { } released)
                             {
                                 <span aria-hidden="true">•</span>
@@ -91,12 +91,12 @@
                     }
                 </BbSheetHeader>
 
-                @if (!string.IsNullOrWhiteSpace(details.Summary))
+                @if (details.Summary is { } summary)
                 {
                     <div class="space-y-3">
                         <h3 class="text-sm font-bold tracking-wide">Overview</h3>
                         <p class="text-sm text-muted-foreground leading-relaxed font-normal tracking-wide antialiased">
-                            @details.Summary
+                            @summary
                         </p>
                     </div>
                 }

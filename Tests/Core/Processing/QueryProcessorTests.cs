@@ -393,10 +393,6 @@ public class QueryProcessorRatingTests
 				new MovieDetails
 				{
 					Title = $"Movie {year}",
-					Tagline = string.Empty,
-					Summary = string.Empty,
-					PosterUrl = string.Empty,
-					BackdropUrl = string.Empty,
 					ReleaseDate = new DateOnly(year, 1, 1),
 					Runtime = TimeSpan.FromMinutes(90),
 					Rating = rating is { } value ? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, value, 1)]) : RatingSummary.None,

@@ -112,17 +112,7 @@ else
         }
 
         var wanted = _run.Items.Where(item => item.State is not FeedRunItemState.Kept).Select(item => item.MediaId).ToList();
-        var described = new Dictionary<MediaId, IdentifiedMedia>();
-
-        await foreach (var result in Media.GetDetailsAsync(wanted))
-        {
-            if (result is Success<IdentifiedMedia>(var media))
-            {
-                described[media.Identity.Id] = media;
-            }
-        }
-
-        _items = FeedRunView.Items(_run, described);
+        _items = FeedRunView.Items(_run, await Media.GetDetailsByIdAsync(wanted));
         await SetOpenAsync(true);
     }
 

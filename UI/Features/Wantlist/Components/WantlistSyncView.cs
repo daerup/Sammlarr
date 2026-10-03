@@ -45,7 +45,7 @@ internal static class WantlistSyncView
 
 	private static string UnmatchedTitle(UnmatchedMedia unmatched)
 	{
-		return unmatched.Details.Title.NullIfBlank() ?? unmatched.Externals.FirstOrDefault()?.Value ?? "Unknown title";
+		return unmatched.Details.Title ?? unmatched.Externals.FirstOrDefault()?.Value ?? "Unknown title";
 	}
 
 	private static string UnmatchedSubtitle(UnmatchedMedia unmatched)

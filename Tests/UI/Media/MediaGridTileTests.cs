@@ -47,8 +47,35 @@ public class MediaGridTileTests : BunitContext
 		await Assert.That(poster.GetAttribute("srcset")).Contains($"{Poster}?width=780 780w");
 	}
 
-	private static MediaLookup Lookup()
+	[Test]
+	public async Task Render_WhenThereIsNoBackdrop_ShowsThePosterStraightAway()
 	{
-		return new IdentifiedMedia(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails { BackdropUrl = Backdrop, PosterUrl = Poster });
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Lookup(backdrop: null)));
+
+		await Assert.That(cut.Find("img.media-card-poster").GetAttribute("src")).IsEqualTo(Poster);
+	}
+
+	[Test]
+	public async Task Render_WhenThereIsNoArtworkAtAll_ShowsTheNoImageState()
+	{
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Lookup(backdrop: null, poster: null)));
+
+		await Assert.That(cut.FindAll(".media-card-failed")).Count().IsEqualTo(1);
+		await Assert.That(cut.FindAll("img.media-card-poster")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Render_WhenArtworkArrivesLater_ShowsTheBackdrop()
+	{
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Lookup(backdrop: null, poster: null)));
+
+		cut.Render(parameters => parameters.Add(tile => tile.Media, Lookup()));
+
+		await Assert.That(cut.Find("img.media-card-poster").GetAttribute("src")).IsEqualTo(Backdrop);
+	}
+
+	private static MediaLookup Lookup(string? backdrop = Backdrop, string? poster = Poster)
+	{
+		return new IdentifiedMedia(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails { BackdropUrl = backdrop, PosterUrl = poster });
 	}
 }
