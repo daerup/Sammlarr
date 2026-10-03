@@ -20,7 +20,7 @@ public static class MediaMerger
 			{
 				(PartialMovie p, Movie m) => m with
 				{
-					Identity = m.Identity with { Externals = p.Identity.Externals + m.Identity.Externals },
+					Identity = p.Identity with { Externals = p.Identity.Externals + m.Identity.Externals },
 					Title = p.Title ?? m.Title,
 					Tagline = p.Tagline ?? m.Tagline,
 					Summary = p.Summary ?? m.Summary,
@@ -33,7 +33,7 @@ public static class MediaMerger
 				},
 				(PartialShow p, Show s) => s with
 				{
-					Identity = s.Identity with { Externals = p.Identity.Externals + s.Identity.Externals },
+					Identity = p.Identity with { Externals = p.Identity.Externals + s.Identity.Externals },
 					Title = p.Title ?? s.Title,
 					Tagline = p.Tagline ?? s.Tagline,
 					Summary = p.Summary ?? s.Summary,
