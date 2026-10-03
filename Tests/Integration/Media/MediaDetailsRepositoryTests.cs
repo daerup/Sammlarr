@@ -152,6 +152,23 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
+	public async Task GetAsync_WhenAMediaHasSeveralIdsAndRatings_ReadsEachOnce()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-815", MediaType.Movie), TmdbId.From("815", MediaType.Movie), ImdbId.From("tt0815", MediaType.Movie)]);
+		var rated = Complete() with
+		{
+			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.5f, Some.Of(1200)), new MediaRating(MediaProvider.Plex, 7.0f)]),
+		};
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(rated)));
+		fixture.Context.ChangeTracker.Clear();
+
+		var stored = (await _testee.GetAsync([mediaId])).Single();
+
+		await Assert.That(stored.Identity.Externals).Count().IsEqualTo(3);
+		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.Details.Rating.Sources).Count().IsEqualTo(2));
+	}
+
+	[Test]
 	public async Task UpsertDetailsAsync_WhenConcurrentFlushesShareAMediaId_DoesNotViolateTheUniqueConstraint()
 	{
 		var plexId = PlexId.From("plex-race", MediaType.Movie);
