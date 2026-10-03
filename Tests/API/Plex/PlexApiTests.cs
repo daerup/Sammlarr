@@ -102,6 +102,29 @@ public class PlexApiTests
 	}
 
 	[Test]
+	public async Task SearchAsync_WhenPlexSendsBlankValuesAndZeroCounts_LeavesThoseDetailsUnknown()
+	{
+		var metadata = new PlexTypes.Search.Metadata(
+			RatingKey: "plex-9",
+			Title: " ",
+			Thumb: "",
+			Art: null,
+			Type: "show",
+			Year: 0,
+			Duration: 0,
+			Genre: [new PlexTypes.Search.Genre(" ")],
+			OriginallyAvailableAt: "",
+			SeasonCount: 0,
+			EpisodeCount: 0
+		);
+		var testee = CreatePlexApi(SearchPayloadOf(metadata));
+
+		var results = await testee.SearchAsync("anything", [MediaType.Show]);
+
+		await Assert.That(results.Single().Details).IsEqualTo(new ShowDetails());
+	}
+
+	[Test]
 	public async Task SearchAsync_WhenNoMatches_ReturnsEmpty()
 	{
 		var json = BuildEmptySearchPayload();
@@ -127,6 +150,11 @@ public class PlexApiTests
 			SeasonCount: null,
 			EpisodeCount: null
 		);
+		return SearchPayloadOf(metadata);
+	}
+
+	private static string SearchPayloadOf(PlexTypes.Search.Metadata metadata)
+	{
 		var nested = new PlexTypes.Search.NestedSearchResult(metadata);
 		var searchResult = new PlexTypes.Search.SearchResult(Size: 1, NestedSearchResult: [nested]);
 		var container = new PlexTypes.Search.MediaContainer(SuggestedTerms: [], Identifier: "search", Size: 1, SearchResults: [searchResult]);

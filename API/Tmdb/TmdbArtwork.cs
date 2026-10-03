@@ -9,7 +9,7 @@ internal sealed class TmdbArtwork(TmdbOptions options) : IArtworkResizer
 
 	private string Base => $"{options.ImageBaseUrl.TrimEnd('/')}/";
 
-	public string Original(string? path) => string.IsNullOrWhiteSpace(path) ? string.Empty : $"{Base}original/{path.TrimStart('/')}";
+	public string? Original(string? path) => string.IsNullOrWhiteSpace(path) ? null : $"{Base}original/{path.TrimStart('/')}";
 
 	public Optional<string> Resize(string url, ArtworkSize size) => FileOf(url).Map(file => WidthFor(size).Map(width => $"{Base}w{width}/{file}"));
 

@@ -12,10 +12,10 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	[Arguments(8.4, 23000)]
-	[Arguments(6.5, 0)]
-	[Arguments(0.1, 1)]
-	public async Task LookUpAsync_WhenTheVoteAverageIsPositive_DeliversARating(double average, int votes)
+	[Arguments(8.4, 23000, 23000)]
+	[Arguments(6.5, 0, null)]
+	[Arguments(0.1, 1, 1)]
+	public async Task LookUpAsync_WhenTheVoteAverageIsPositive_DeliversARating(double average, int votes, int? voteCount)
 	{
 		await host.Movie(TestMedia.FightClub).ServedByTmdb(rating: average, votes: votes).SeedAsync();
 
@@ -24,7 +24,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(ratings).Count().IsEqualTo(1);
 		await Assert.That(ratings[0].Source).IsEqualTo(MediaProvider.Tmdb);
 		await Assert.That(ratings[0].NormalizedValue).IsEqualTo((float)average);
-		await Assert.That(ratings[0].VoteCount).IsEqualTo(votes);
+		await Assert.That(ratings[0].VoteCount).IsEqualTo(voteCount);
 	}
 
 	[Test]

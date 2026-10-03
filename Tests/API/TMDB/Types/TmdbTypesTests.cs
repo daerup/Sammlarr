@@ -16,41 +16,60 @@ public class TmdbTypesTests
 	}
 
 	[Test]
-	public async Task TrendingResult_DisplayTitle_WhenMissingValues_ThrowsInvalidOperationException()
+	public async Task TrendingResult_DisplayTitle_WhenTheTitleIsBlank_UsesTheName()
+	{
+		var testee = CreateTrendingResult(" ");
+
+		await Assert.That(testee.DisplayTitle).IsEqualTo("Name");
+	}
+
+	[Test]
+	public async Task TrendingResult_DisplayTitle_WhenBothAreMissing_IsNull()
 	{
 		var testee = CreateTrendingResult(null, null);
 
-		await Assert.That(() => testee.DisplayTitle).Throws<InvalidOperationException>();
+		await Assert.That(testee.DisplayTitle).IsNull();
 	}
 
 	[Test]
-	public async Task TrendingResult_DisplayOriginalTitle_UsesOriginalTitleThenOriginalName()
+	public async Task TrendingResult_Released_ForAMovie_ReadsTheReleaseDateFirst()
 	{
-		var withTitle = CreateTrendingResult(originalTitle: "Original Title", originalName: "Original Name");
-		var withName = CreateTrendingResult(originalTitle: null, originalName: "Original Name");
+		var testee = CreateTrendingResult(firstAirDate: "2020-01-01", releaseDate: "2019-01-01");
 
-		await Assert.That(withTitle.DisplayOriginalTitle).IsEqualTo("Original Title");
-		await Assert.That(withName.DisplayOriginalTitle).IsEqualTo("Original Name");
+		await Assert.That(testee.Released).IsEqualTo(new DateOnly(2019, 1, 1));
 	}
 
 	[Test]
-	public async Task TrendingResult_AvailableDate_UsesFirstAirDateThenReleaseDate()
+	public async Task TrendingResult_Released_ForAShow_ReadsTheFirstAirDateFirst()
 	{
-		var withFirstAirDate = CreateTrendingResult(firstAirDate: "2020-01-01", releaseDate: "2019-01-01");
-		var withReleaseDate = CreateTrendingResult(firstAirDate: null, releaseDate: "2019-01-01");
+		var testee = CreateTrendingResult(firstAirDate: "2020-01-01", releaseDate: "2019-01-01", type: "tv");
 
-		await Assert.That(withFirstAirDate.AvailableDate).IsEqualTo("2020-01-01");
-		await Assert.That(withReleaseDate.AvailableDate).IsEqualTo("2019-01-01");
+		await Assert.That(testee.Released).IsEqualTo(new DateOnly(2020, 1, 1));
 	}
 
 	[Test]
-	public async Task Details_DisplayTitle_UsesTitleThenName()
+	public async Task TrendingResult_Released_WhenOnlyTheOtherDateIsKnown_FallsBackToIt()
 	{
-		var withTitle = new TmdbTypes.Details(1, "Original", "Original Name", "2020-01-01", null, "Title", "Name", "unknown");
-		var withName = new TmdbTypes.Details(1, "Original", "Original Name", "2020-01-01", null, null, "Name", "unknown");
+		var testee = CreateTrendingResult(firstAirDate: "2020-01-01", releaseDate: null);
 
-		await Assert.That(withTitle.DisplayTitle).IsEqualTo("Title");
-		await Assert.That(withName.DisplayTitle).IsEqualTo("Name");
+		await Assert.That(testee.Released).IsEqualTo(new DateOnly(2020, 1, 1));
+	}
+
+	[Test]
+	public async Task TrendingResult_Released_WhenBothDatesAreMissingOrBlank_IsNull()
+	{
+		var testee = CreateTrendingResult(firstAirDate: "", releaseDate: null);
+
+		await Assert.That(testee.Released).IsNull();
+	}
+
+	[Test]
+	public async Task Details_ReleasedAs_ReadsTheTypesOwnDateFirst()
+	{
+		var testee = new TmdbTypes.Details(1, null, null, "2019-01-01", "2020-01-01", "Title", null, "unknown");
+
+		await Assert.That(testee.ReleasedAs(MediaType.Show)).IsEqualTo(new DateOnly(2020, 1, 1));
+		await Assert.That(testee.ReleasedAs(MediaType.Movie)).IsEqualTo(new DateOnly(2019, 1, 1));
 	}
 
 	[Test]
@@ -62,44 +81,6 @@ public class TmdbTypesTests
 	}
 
 	[Test]
-	public async Task Details_DisplayOriginalTitle_UsesOriginalTitleThenOriginalName()
-	{
-		var withOriginalTitle = new TmdbTypes.Details(1, "Original Title", "Original Name", null, null, null, "Name", "unknown");
-		var withOriginalName = new TmdbTypes.Details(1, null, "Original Name", null, null, null, "Name", "unknown");
-
-		await Assert.That(withOriginalTitle.DisplayOriginalTitle).IsEqualTo("Original Title");
-		await Assert.That(withOriginalName.DisplayOriginalTitle).IsEqualTo("Original Name");
-	}
-
-	[Test]
-	public async Task Details_DisplayTitle_WhenBothNull_ThrowsInvalidOperationException()
-	{
-		var testee = new TmdbTypes.Details(1, "Original", "Original Name", null, null, null, null, "unknown");
-
-		await Assert.That(() => testee.DisplayTitle).Throws<InvalidOperationException>();
-	}
-
-	[Test]
-	public async Task Details_DisplayOriginalTitle_WhenBothNull_ThrowsInvalidOperationException()
-	{
-		var testee = new TmdbTypes.Details(1, null, null, null, null, "Title", null, "unknown");
-
-		await Assert.That(() => testee.DisplayOriginalTitle).Throws<InvalidOperationException>();
-	}
-
-	[Test]
-	public async Task Details_AvailableDate_UsesFirstAirDateThenReleaseDate()
-	{
-		var withFirstAirDate = new TmdbTypes.Details(1, null, null, "2019-01-01", "2020-01-01", "Title", null, "unknown");
-		var withReleaseDate = new TmdbTypes.Details(1, null, null, "2019-01-01", null, "Title", null, "unknown");
-		var withNeither = new TmdbTypes.Details(1, null, null, null, null, "Title", null, "unknown");
-
-		await Assert.That(withFirstAirDate.AvailableDate).IsEqualTo("2020-01-01");
-		await Assert.That(withReleaseDate.AvailableDate).IsEqualTo("2019-01-01");
-		await Assert.That(withNeither.AvailableDate).IsNull();
-	}
-
-	[Test]
 	public async Task TrendingResult_TmdbId_ReturnsExpectedValueObject()
 	{
 		var testee = CreateTrendingResult();
@@ -107,33 +88,25 @@ public class TmdbTypesTests
 		await Assert.That(testee.TmdbId).IsEqualTo(TmdbId.From("10", MediaType.Movie));
 	}
 
-	[Test]
-	public async Task TrendingResult_AvailableDate_WhenBothNull_ReturnsNull()
-	{
-		var testee = CreateTrendingResult(firstAirDate: null, releaseDate: null);
-
-		await Assert.That(testee.AvailableDate).IsNull();
-	}
-
 	private static TmdbTypes.Trending.Result CreateTrendingResult(
 		string? title = "Title",
 		string? name = "Name",
-		string? originalTitle = "Original Title",
-		string? originalName = "Original Name",
 		string? releaseDate = "2019-01-01",
-		string? firstAirDate = "2020-01-01"
-	) =>
-		new(
+		string? firstAirDate = "2020-01-01",
+		string type = "movie"
+	)
+	{
+		return new(
 			Adult: false,
 			BackdropPath: "/backdrop.jpg",
 			Id: 10,
 			Title: title,
 			Name: name,
-			OriginalTitle: originalTitle,
-			OriginalName: originalName,
+			OriginalTitle: "Original Title",
+			OriginalName: "Original Name",
 			Overview: "overview",
 			PosterPath: "/poster.jpg",
-			Type: "movie",
+			Type: type,
 			OriginalLanguage: "en",
 			GenreIds: [1, 2],
 			Popularity: 1.0,
@@ -143,4 +116,5 @@ public class TmdbTypesTests
 			VoteAverage: 8.4,
 			VoteCount: 100
 		);
+	}
 }

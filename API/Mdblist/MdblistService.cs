@@ -82,16 +82,16 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		return (page, hasMore);
 	}
 
-	private static Some<IdentifyHints> BuildHints(FeedItemResolution pair)
+	private static Optional<IdentifyHints> BuildHints(FeedItemResolution pair)
 	{
-		return Some.Of(
-			new IdentifyHints
+		return Optional
+			.Of(ProviderValues.Text(pair.ListItem.title))
+			.Map(title => new IdentifyHints
 			{
-				Title = pair.ListItem.title,
+				Title = title,
 				Year = pair.ListItem.release_year,
 				MediaType = pair.MediaType,
-			}
-		);
+			});
 	}
 
 	private static MediaLookup BuildUnmatched(MdblistTypes.ListItems.UnmatchedListItem item)
@@ -100,8 +100,8 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 			[.. ExtractIds(item.ids, item.MediaType)],
 			MediaDetails.Empty(item.MediaType) with
 			{
-				Title = item.title,
-				ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : null,
+				Title = ProviderValues.Text(item.title),
+				ReleaseDate = ProviderValues.YearStart(item.release_year),
 			}
 		);
 	}

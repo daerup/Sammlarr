@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json.Serialization;
 using Domain.Media;
 
@@ -6,7 +5,11 @@ namespace API.Tmdb.Types;
 
 internal static class TmdbTypes
 {
-	private static int YearOf(string? date) => DateTimeOffset.TryParse(date, CultureInfo.InvariantCulture, out var parsed) ? parsed.Year : 0;
+	private static DateOnly? ReleasedOn(MediaType type, string? releaseDate, string? firstAirDate)
+	{
+		var (first, second) = type is MediaType.Show ? (firstAirDate, releaseDate) : (releaseDate, firstAirDate);
+		return ProviderValues.Date(first) ?? ProviderValues.Date(second);
+	}
 
 	internal static class Trending
 	{
@@ -34,11 +37,8 @@ internal static class TmdbTypes
 			public MediaType MediaType => MediaType.Parse(Type);
 			public TmdbId TmdbId => TmdbId.From(Id.ToString(), MediaType);
 
-			public string DisplayTitle => Title ?? Name ?? throw new InvalidOperationException("Both Title and Name are null");
-			public string DisplayOriginalTitle =>
-				OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null");
-			public string? AvailableDate => FirstAirDate ?? ReleaseDate;
-			public int AvailableYear => YearOf(AvailableDate);
+			public string? DisplayTitle => ProviderValues.Text(Title) ?? ProviderValues.Text(Name);
+			public DateOnly? Released => ReleasedOn(MediaType, ReleaseDate, FirstAirDate);
 		}
 
 		public record Root(
@@ -72,11 +72,7 @@ internal static class TmdbTypes
 		[property: JsonPropertyName("external_ids")] ExternalIds? ExternalIds = null
 	)
 	{
-		public string DisplayTitle => Title ?? Name ?? throw new InvalidOperationException("Both Title and Name are null");
-		public string DisplayOriginalTitle =>
-			OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null for Id: " + Id);
-		public string? AvailableDate => FirstAirDate ?? ReleaseDate;
-		public int AvailableYear => YearOf(AvailableDate);
+		public DateOnly? ReleasedAs(MediaType type) => ReleasedOn(type, ReleaseDate, FirstAirDate);
 
 		public MediaType MediaType => MediaType.Parse(Type);
 		public TmdbId TmdbId => TmdbId.From(Id.ToString(), MediaType);
@@ -101,9 +97,6 @@ internal static class TmdbTypes
 		[property: JsonPropertyName("name")] string? Name
 	)
 	{
-		public string DisplayTitle => Title ?? Name ?? throw new InvalidOperationException("Both Title and Name are null");
-		public string DisplayOriginalTitle => OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null");
-		public string? AvailableDate => FirstAirDate ?? ReleaseDate;
-		public int AvailableYear => YearOf(AvailableDate);
+		public DateOnly? ReleasedAs(MediaType type) => ReleasedOn(type, ReleaseDate, FirstAirDate);
 	}
 }

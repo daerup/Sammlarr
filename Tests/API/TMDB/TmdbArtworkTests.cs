@@ -18,11 +18,11 @@ public class TmdbArtworkTests
 	}
 
 	[Test]
-	public async Task Original_WhenThePathIsMissing_IsEmpty()
+	public async Task Original_WhenThePathIsMissing_IsNull()
 	{
 		var url = Testee.Original(null);
 
-		await Assert.That(url).IsEqualTo(string.Empty);
+		await Assert.That(url).IsNull();
 	}
 
 	[Test]

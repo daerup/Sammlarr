@@ -127,11 +127,18 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 
 	private static FoundMedia Item(PlexTypes.Watchlist.Metadata metadata)
 	{
-		return new([metadata.PlexId], MediaDetails.Empty(metadata.PlexId.Type) with { Title = metadata.Title.NullIfBlank(), ReleaseDate = ReleasedOn(metadata) });
+		return new(
+			[metadata.PlexId],
+			MediaDetails.Empty(metadata.PlexId.Type) with
+			{
+				Title = ProviderValues.Text(metadata.Title),
+				ReleaseDate = ReleasedOn(metadata),
+			}
+		);
 	}
 
-	private static DateOnly? ReleasedOn(PlexTypes.Watchlist.Metadata metadata) =>
-		DateOnly.TryParse(metadata.OriginallyAvailableAt, out var released) ? released
-		: metadata.Year > 0 ? new DateOnly(metadata.Year, 1, 1)
-		: null;
+	private static DateOnly? ReleasedOn(PlexTypes.Watchlist.Metadata metadata)
+	{
+		return ProviderValues.Date(metadata.OriginallyAvailableAt) ?? ProviderValues.YearStart(metadata.Year);
+	}
 }
