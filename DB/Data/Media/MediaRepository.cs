@@ -1,8 +1,8 @@
 using System.Data;
 using Contracts.Media;
-using Contracts.Media.Metadata;
 using DB.Data.Media.Metadata;
 using Domain.Media;
+using Domain.Media.Metadata;
 using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 
@@ -94,7 +94,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		return result;
 	}
 
-	public async Task<IReadOnlyList<CachedMedia>> GetAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<StoredMedia>> GetAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default)
 	{
 		if (ids.Count == 0)
 		{
@@ -102,10 +102,10 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		}
 		var rawIds = ids.Select(id => id.Value).ToList();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await QueryMetadataAsync(ctx.Media.Where(m => rawIds.Contains(m.Id)), cancellationToken);
+		return await QueryStoredAsync(ctx.Media.Where(m => rawIds.Contains(m.Id)), cancellationToken);
 	}
 
-	public async Task<IReadOnlyList<CachedMedia>> GetByExternalsAsync(IReadOnlyList<IExternalMediaId> candidates, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<StoredMedia>> GetByExternalsAsync(IReadOnlyList<IExternalMediaId> candidates, CancellationToken cancellationToken = default)
 	{
 		if (candidates.Count == 0)
 		{
@@ -113,10 +113,10 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		}
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var mediaIds = ctx.ExternalMediaIds.WhereMatchingAny(candidates).Select(e => e.Media.Id).Distinct();
-		return await QueryMetadataAsync(ctx.Media.Where(m => mediaIds.Contains(m.Id)), cancellationToken);
+		return await QueryStoredAsync(ctx.Media.Where(m => mediaIds.Contains(m.Id)), cancellationToken);
 	}
 
-	private async Task<IReadOnlyList<CachedMedia>> QueryMetadataAsync(IQueryable<MediaRow> media, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<StoredMedia>> QueryStoredAsync(IQueryable<MediaRow> media, CancellationToken cancellationToken)
 	{
 		var rows = await media
 			.AsNoTracking()
@@ -126,53 +126,37 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			.AsSplitQuery()
 			.ToListAsync(cancellationToken);
 
-		return rows.Select(row =>
-			{
-				var mediaId = MediaId.From(row.Id);
-				var externals = row.ExternalIds.Select(e => e.ToExternalMediaId()).ToList();
-				var identity = new MediaIdentity(mediaId, [.. externals]);
-				return row.Metadata is null
-					? new CachedMedia(EmptyMedia(identity), null)
-					: new CachedMedia(metadataFactory.ToStored(row.Metadata, identity), row.Metadata.LastFetchedAt);
-			})
-			.ToList();
+		return [.. rows.Select(row => new StoredMedia(ToIdentity(row), Optional.Of(row.Metadata).Map(metadataFactory.ToCached)))];
 	}
 
-	private static IdentifiedMedia EmptyMedia(MediaIdentity identity)
+	public async Task UpsertDetailsAsync(IReadOnlyDictionary<MediaId, CachedDetails> details, CancellationToken cancellationToken = default)
 	{
-		return new(identity, MediaDetails.Empty(identity.Type));
-	}
-
-	public async Task UpsertMetadataAsync(IReadOnlyList<IdentifiedMedia> media, CancellationToken cancellationToken = default)
-	{
-		if (media.Count == 0)
+		if (details.Count == 0)
 		{
 			return;
 		}
 
-		var deduped = media.GroupBy(m => m.Identity.Id.Value).Select(g => g.Last()).ToList();
-
 		using var _ = await writeLock.AcquireAsync(cancellationToken);
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var rawIds = deduped.Select(m => m.Identity.Id.Value).ToList();
+		var rawIds = details.Keys.Select(id => id.Value).ToList();
 		var existing = await ctx.MediaMetadata.Include(m => m.Ratings).Where(m => rawIds.Contains(m.MediaId)).ToDictionaryAsync(m => m.MediaId, cancellationToken);
 
-		foreach (var item in deduped)
+		foreach (var (id, cached) in details)
 		{
-			if (existing.TryGetValue(item.Identity.Id.Value, out var entity))
+			if (existing.TryGetValue(id.Value, out var entity))
 			{
-				metadataFactory.Update(entity, item);
+				metadataFactory.Update(entity, cached);
 			}
 			else
 			{
-				ctx.MediaMetadata.Add(metadataFactory.BuildFrom(item, item.Identity.Id.Value));
+				ctx.MediaMetadata.Add(metadataFactory.BuildFrom(cached, id.Value));
 			}
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task RemoveMetadataAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default)
+	public async Task RemoveDetailsAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default)
 	{
 		if (ids.Count == 0)
 		{

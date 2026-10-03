@@ -133,7 +133,10 @@ public class MediaServiceOrderingTests
 
 		var metadataMap = builder
 			.Items.Where(i => i.Realizes)
-			.ToDictionary(i => i.MediaId.Value, i => new CachedMedia(i.Detail with { Identity = new MediaIdentity(i.MediaId, [i.External]) }, _now));
+			.ToDictionary(
+				i => i.MediaId.Value,
+				i => new StoredMedia(new MediaIdentity(i.MediaId, [i.External]), Some.Of(new CachedDetails(i.Detail.Details, _now, MediaField.None)))
+			);
 
 		mediaRepo.GetAsync(Any(), Any()).Returns((ids, _) => ids.Select(id => id.Value).Where(metadataMap.ContainsKey).Select(g => metadataMap[g]).ToList());
 

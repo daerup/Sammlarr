@@ -6,6 +6,7 @@ using Contracts.Notifications;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Media;
+using Domain.Media.Metadata;
 using Domain.Notifications;
 using Domain.Providers;
 using Messaging.Notifications;
@@ -55,10 +56,7 @@ public class NotificationDispatchHandlerTests
 			NotificationEventType.WantlistSyncCompleted,
 			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)
 		);
-		var media = Media(
-			new CachedMedia(new IdentifiedMedia(new MediaIdentity(pulledAdd, []), new MovieDetails { Title = "Pulled Movie" }), DateTimeOffset.UtcNow),
-			new CachedMedia(new IdentifiedMedia(new MediaIdentity(pushedRemove, []), new MovieDetails { Title = "Pushed Movie" }), DateTimeOffset.UtcNow)
-		);
+		var media = Media(Stored(pulledAdd, "Pulled Movie"), Stored(pushedRemove, "Pushed Movie"));
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [pulledAdd], [], [], [pushedRemove], []),
@@ -188,7 +186,7 @@ public class NotificationDispatchHandlerTests
 			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None),
 			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)
 		);
-		var media = Media(new CachedMedia(new IdentifiedMedia(new MediaIdentity(id, []), new MovieDetails { Title = "The Matrix" }), DateTimeOffset.UtcNow));
+		var media = Media(Stored(id, "The Matrix"));
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [id], [], [], [], []),
@@ -204,6 +202,42 @@ public class NotificationDispatchHandlerTests
 		media.GetAsync(Any<IReadOnlyList<MediaId>>(), Any()).WasCalled(Times.Once);
 		await Assert.That(deliveries[0].Context).IsSameReferenceAs(deliveries[1].Context);
 		await Assert.That(deliveries[0].Context.Data.Media!.Single().Title).IsEqualTo("The Matrix");
+	}
+
+	[Test]
+	public async Task Handle_ForStoredTitles_DescribesThemFromTheirCachedDetailsOrByTheirTypeAlone()
+	{
+		var described = MediaId.From(Guid.NewGuid());
+		var bare = MediaId.From(Guid.NewGuid());
+		var subscriptions = SubscriptionsFor(
+			NotificationEventType.WantlistSyncCompleted,
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)
+		);
+		var details = new MovieDetails { Title = "The Matrix", ReleaseDate = new DateOnly(1999, 3, 31) };
+		var media = Media(
+			new StoredMedia(
+				new MediaIdentity(described, [TmdbId.From("603", MediaType.Movie)]),
+				Some.Of(new CachedDetails(details, DateTimeOffset.UtcNow, MediaField.None))
+			),
+			new StoredMedia(new MediaIdentity(bare, [TmdbId.From("1396", MediaType.Show)]), new None())
+		);
+
+		var messages = await NotificationDispatchHandler.Handle(
+			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [described, bare], [], [], [], []),
+			Scope().Object,
+			subscriptions.Object,
+			media.Object,
+			Feed().Object,
+			CancellationToken.None
+		);
+
+		var items = messages.OfType<DeliverNotification>().Single().Context.Data.Media!;
+		await Assert
+			.That(items)
+			.IsEquivalentTo([
+				new NotificationMedia(described.ToString(), "The Matrix", MediaType.Movie, 1999, "Added locally"),
+				new NotificationMedia(bare.ToString(), null, MediaType.Show, null, "Added locally"),
+			]);
 	}
 
 	[Test]
@@ -258,11 +292,19 @@ public class NotificationDispatchHandlerTests
 		return repository;
 	}
 
-	private static Mock<IMediaRepository> Media(params CachedMedia[] cached)
+	private static Mock<IMediaRepository> Media(params StoredMedia[] stored)
 	{
 		var repository = IMediaRepository.Mock();
-		repository.GetAsync(Any<IReadOnlyList<MediaId>>(), Any()).Returns((IReadOnlyList<CachedMedia>)cached);
+		repository.GetAsync(Any<IReadOnlyList<MediaId>>(), Any()).Returns((IReadOnlyList<StoredMedia>)stored);
 		return repository;
+	}
+
+	private static StoredMedia Stored(MediaId id, string title)
+	{
+		return new(
+			new MediaIdentity(id, [TmdbId.From(id.ToString(), MediaType.Movie)]),
+			Some.Of(new CachedDetails(new MovieDetails { Title = title }, DateTimeOffset.UtcNow, MediaField.None))
+		);
 	}
 
 	private static Mock<IFeedRepository> Feed() => Finding(new None());

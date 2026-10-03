@@ -3,7 +3,6 @@ using System.Runtime.ExceptionServices;
 using Contracts;
 using Contracts.Media;
 using Contracts.Media.Conversions;
-using Contracts.Media.Metadata;
 using Contracts.Wantlist;
 using Core.Wantlist.Sync;
 using Domain.Media;
@@ -174,7 +173,7 @@ internal sealed class MediaService(
 
 	public Task InvalidateAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
 	{
-		return mediaRepository.RemoveMetadataAsync([.. ids], cancellationToken);
+		return mediaRepository.RemoveDetailsAsync([.. ids], cancellationToken);
 	}
 
 	public async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
@@ -222,7 +221,7 @@ internal sealed class MediaService(
 	private async ValueTask<Result<ResolvedIdentity>> ResolveIdentityAsync(
 		IdentifyRequest request,
 		IMediaSink sink,
-		IReadOnlyDictionary<IExternalMediaId, CachedMedia> cached,
+		IReadOnlyDictionary<IExternalMediaId, StoredMedia> cached,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -241,41 +240,41 @@ internal sealed class MediaService(
 	private static Optional<ResolvedIdentity> TryResolveFromCache(
 		IdentifyRequest request,
 		MediaProvider target,
-		IReadOnlyDictionary<IExternalMediaId, CachedMedia> cached,
+		IReadOnlyDictionary<IExternalMediaId, StoredMedia> cached,
 		MediaResolutionBuffer buffer
 	)
 	{
-		var matches = request.Candidates.Select(cached.GetValueOrDefault).Where(r => r is not null).Select(r => r!).DistinctBy(r => r.Stored.Identity.Id).ToList();
+		var matches = request.Candidates.Select(cached.GetValueOrDefault).Where(r => r is not null).Select(r => r!).DistinctBy(r => r.Identity.Id).ToList();
 		if (matches.Count > 1)
 		{
-			throw new MediaIdentityConflictException([.. matches.Select(m => m.Stored.Identity.Id)], [.. request.Candidates]);
+			throw new MediaIdentityConflictException([.. matches.Select(m => m.Identity.Id)], [.. request.Candidates]);
 		}
 		var match = matches.FirstOrDefault();
-		if (match is null || match.Stored.Externals.OfProvider(target) is null)
+		if (match is null || match.Identity.Externals.OfProvider(target) is null)
 		{
 			return new None();
 		}
-		var matched = match.Stored.Identity;
+		var matched = match.Identity;
 		var missing = request.Candidates.Where(c => !matched.Externals.Contains(c)).ToList();
 		if (missing.Count == 0)
 		{
-			return Some.Of(new ResolvedIdentity(matched, match));
+			return Some.Of(new ResolvedIdentity(matched, Some.Of(match)));
 		}
 		var merged = matched with { Externals = matched.Externals + missing };
 		buffer.AddIdentity(merged);
-		return Some.Of(new ResolvedIdentity(merged, match));
+		return Some.Of(new ResolvedIdentity(merged, Some.Of(match)));
 	}
 
 	private async ValueTask<Result<ResolvedIdentity>> ResolveFromProviderAsync(IdentifyRequest request, MediaProvider target, CancellationToken cancellationToken)
 	{
 		return await idResolver
 			.ResolveAsync(request, target, cancellationToken)
-			.Map(externals => new ResolvedIdentity(new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. externals]), null));
+			.Map(externals => new ResolvedIdentity(new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. externals]), new None()));
 	}
 
 	private async ValueTask<Result<IdentifiedMedia>> RealizeFromCacheAsync(
 		MediaId id,
-		IReadOnlyDictionary<MediaId, CachedMedia> cached,
+		IReadOnlyDictionary<MediaId, StoredMedia> cached,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -284,7 +283,7 @@ internal sealed class MediaService(
 		{
 			return Error.From("identity not found");
 		}
-		return await RealizeAsync(row.Stored.Identity, row, buffer, cancellationToken);
+		return await RealizeAsync(row.Identity, Some.Of(row), buffer, cancellationToken);
 	}
 
 	private async ValueTask<MediaLookup> RealizeFromRequestAsync(
@@ -304,59 +303,72 @@ internal sealed class MediaService(
 
 	private async ValueTask<Result<IdentifiedMedia>> RealizeAsync(
 		MediaIdentity identity,
-		CachedMedia? cached,
+		Optional<StoredMedia> stored,
+		MediaResolutionBuffer buffer,
+		CancellationToken cancellationToken
+	)
+	{
+		var cached = stored.Map(row => row.Cached);
+		return await cached
+			.When(details => details.IsFresh(dateTimeProvider.Now))
+			.Match(
+				fresh => ValueTask.FromResult<Result<IdentifiedMedia>>(Success.Of(new IdentifiedMedia(identity, fresh.Details))),
+				() => FetchAsync(identity, stored, cached, buffer, cancellationToken)
+			);
+	}
+
+	private async ValueTask<Result<IdentifiedMedia>> FetchAsync(
+		MediaIdentity identity,
+		Optional<StoredMedia> stored,
+		Optional<CachedDetails> cached,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
 		try
 		{
-			if (cached is { } row && MediaFreshness.IsFresh(row.Stored, row.FetchedAt, dateTimeProvider.Now))
-			{
-				return Success.Of(row.Stored);
-			}
-			var resolved = await metadataResolver.ResolveAsync(identity, buffer, cancellationToken);
-			if (resolved is Success<MediaLookup>(var lookup) && lookup is IdentifiedMedia identified)
-			{
-				return Success.Of(identified);
-			}
-			return cached is { } fallback ? Success.Of(fallback.Stored) : Error.From("media could not be resolved");
+			var fetched = await metadataResolver.ResolveAsync(identity, buffer, cancellationToken);
+			return fetched.Match(_ => fetched, error => Fallback(identity, stored, cached, error));
 		}
 		catch (Exception ex)
 		{
-			if (cached is { } stale)
-			{
-				logger.LogWarning(ex, "Media realize failed for {MediaId}; serving stale cache", identity.Id);
-				return Success.Of(stale.Stored);
-			}
-			logger.LogError(ex, "Media realize failed for {MediaId}; no cache fallback", identity.Id);
-			return Error.From(ex);
+			logger.Log(stored.Match(LogLevel.Warning, LogLevel.Error), ex, "Media details failed for {MediaId}", identity.Id);
+			return Fallback(identity, stored, cached, Error.From(ex));
 		}
+	}
+
+	private static Result<IdentifiedMedia> Fallback(MediaIdentity identity, Optional<StoredMedia> stored, Optional<CachedDetails> cached, Error error)
+	{
+		return cached
+			.Map(stale => stale.Details)
+			.Or(() => stored.Map(_ => MediaDetails.Empty(identity.Type)))
+			.Map(details => new IdentifiedMedia(identity, details))
+			.ToResult(error);
 	}
 
 	private static Result<MediaIdentity> ToIdentityResult(Result<ResolvedIdentity> resolution) => resolution.Map(r => r.Identity);
 
-	private async Task<IReadOnlyDictionary<MediaId, CachedMedia>> LoadByInternalsAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken)
+	private async Task<IReadOnlyDictionary<MediaId, StoredMedia>> LoadByInternalsAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken)
 	{
 		if (ids.Count == 0)
 		{
-			return new Dictionary<MediaId, CachedMedia>();
+			return new Dictionary<MediaId, StoredMedia>();
 		}
 		var rows = await mediaRepository.GetAsync(ids, cancellationToken);
-		return rows.ToDictionary(r => r.Stored.Identity.Id);
+		return rows.ToDictionary(r => r.Identity.Id);
 	}
 
-	private async Task<IReadOnlyDictionary<IExternalMediaId, CachedMedia>> LoadByExternalsAsync(
+	private async Task<IReadOnlyDictionary<IExternalMediaId, StoredMedia>> LoadByExternalsAsync(
 		IReadOnlyList<IExternalMediaId> ids,
 		CancellationToken cancellationToken
 	)
 	{
 		if (ids.Count == 0)
 		{
-			return new Dictionary<IExternalMediaId, CachedMedia>();
+			return new Dictionary<IExternalMediaId, StoredMedia>();
 		}
 		var rows = await mediaRepository.GetByExternalsAsync(ids, cancellationToken);
-		return rows.SelectMany(r => r.Stored.Externals.Select(e => (External: e, Row: r))).ToDictionary(t => t.External, t => t.Row);
+		return rows.SelectMany(r => r.Identity.Externals.Select(e => (External: e, Row: r))).ToDictionary(t => t.External, t => t.Row);
 	}
 }
 

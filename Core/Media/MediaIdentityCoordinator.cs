@@ -49,7 +49,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		var pendingPreliminary = new List<MediaIdentity>();
 		foreach (var (idx, resolution) in resolutions.Index())
 		{
-			if (resolution is Success<ResolvedIdentity>(var r) && r.Cached is null)
+			if (resolution is Success<ResolvedIdentity>(var r) && r.Cached.IsNone())
 			{
 				pendingIndices.Add(idx);
 				pendingPreliminary.Add(r.Identity);
@@ -62,7 +62,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		var corrected = await CoordinateAsync(pendingPreliminary, building, buffer, cancellationToken);
 		for (var i = 0; i < corrected.Count; i++)
 		{
-			resolutions[pendingIndices[i]] = Success.Of(new ResolvedIdentity(corrected[i], null));
+			resolutions[pendingIndices[i]] = Success.Of(new ResolvedIdentity(corrected[i], new None()));
 		}
 		return resolutions;
 	}

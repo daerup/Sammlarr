@@ -1,4 +1,4 @@
-using Contracts;
+using Contracts.Media;
 using DB.Data.Media;
 using DB.Data.Media.Metadata;
 using Domain.Media;
@@ -13,18 +13,16 @@ namespace Integration.Tests.Media;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
-	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+	private static readonly DateTimeOffset FetchedAt = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
 	private MediaRepository _testee = null!;
-	private Mock<IDateTimeProvider> _dateTimeProvider = null!;
+
+	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()
 	{
-		_dateTimeProvider = IDateTimeProvider.Mock();
-		_dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
-
-		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(_dateTimeProvider.Object), new MediaWriteLock());
+		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(), new MediaWriteLock());
 	}
 
 	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
@@ -37,37 +35,33 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 	}
 
 	[Test]
-	public async Task UpsertAsync_AdvancesLastFetchedAtEvenWhenPayloadIsIdentical()
+	public async Task UpsertDetailsAsync_WhenFetchedAgain_AdvancesFetchedAtEvenWhenThePayloadIsIdentical()
 	{
 		var plexId = PlexId.From("plex-700", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var firstFetch = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
-		var secondFetch = firstFetch.AddHours(2);
+		var secondFetch = FetchedAt.AddHours(2);
 
-		_dateTimeProvider.Now.Returns(firstFetch);
-		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId])]);
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete())));
+		fixture.Context.ChangeTracker.Clear();
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete()) with { FetchedAt = secondFetch }));
 		fixture.Context.ChangeTracker.Clear();
 
-		_dateTimeProvider.Now.Returns(secondFetch);
-		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId])]);
-		fixture.Context.ChangeTracker.Clear();
-
-		var row = (await _testee.GetAsync([mediaId])).Single();
-		await Assert.That(row.FetchedAt).IsEqualTo(secondFetch);
+		var stored = (await _testee.GetAsync([mediaId])).Single();
+		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.FetchedAt).IsEqualTo(secondFetch));
 	}
 
 	[Test]
-	public async Task UpsertAsync_WhenEntryExists_PreservesCreatedAt()
+	public async Task UpsertDetailsAsync_WhenEntryExists_PreservesCreatedAt()
 	{
 		var plexId = PlexId.From("plex-500", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId])]);
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete())));
 		fixture.Context.ChangeTracker.Clear();
 
 		var marker = new DateTimeOffset(2020, 6, 15, 0, 0, 0, TimeSpan.Zero);
 		await fixture.Context.MediaMetadata.ExecuteUpdateAsync(s => s.SetProperty(m => m.CreatedAt, marker));
 
-		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId], Complete() with { Title = "Updated" })]);
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete() with { Title = "Updated" })));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await fixture.Context.MediaMetadata.AsNoTracking().SingleAsync();
@@ -77,104 +71,103 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 	}
 
 	[Test]
-	public async Task QueryMediaMetadata_WhenMetadataExists_YieldsCachedDetailWithFetchedAt()
+	public async Task GetAsync_WhenDetailsExist_YieldsThemWithTheirIdentityAndFetchedAt()
 	{
 		var plexId = PlexId.From("plex-810", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId])]);
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete())));
 		fixture.Context.ChangeTracker.Clear();
 
-		var row = (await _testee.GetAsync([mediaId])).Single();
+		var stored = (await _testee.GetAsync([mediaId])).Single();
 
-		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
-		await Assert.That(row.Stored.Details.Missing).IsEqualTo(MediaField.None);
-		await Assert.That(row.Stored.Identity.Externals).Contains(plexId);
-		await Assert.That(row.FetchedAt).IsNotNull();
+		await Assert.That(stored.Identity).IsEqualTo(new MediaIdentity(mediaId, [plexId]));
+		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached).IsEqualTo(Cached(Complete())));
 	}
 
 	[Test]
-	public async Task UpsertAsync_ForAPartial_KeepsWhichGapsAreConfirmed()
+	public async Task UpsertDetailsAsync_ForAPartial_KeepsWhichGapsAreConfirmed()
 	{
 		var plexId = PlexId.From("plex-812", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var partial = new IdentifiedMedia(new MediaIdentity(mediaId, [plexId]), new MovieDetails { Title = "Solaris" })
-		{
-			ConfirmedAbsent = MediaField.Tagline | MediaField.Backdrop,
-		};
 
-		await _testee.UpsertMetadataAsync([partial]);
+		await _testee.UpsertDetailsAsync(
+			Details(mediaId, new CachedDetails(new MovieDetails { Title = "Solaris" }, FetchedAt, MediaField.Tagline | MediaField.Backdrop))
+		);
 		fixture.Context.ChangeTracker.Clear();
 
-		var stored = (await _testee.GetAsync([mediaId])).Single().Stored;
-		await Assert.That(stored.ConfirmedAbsent).IsEqualTo(MediaField.Tagline | MediaField.Backdrop);
+		var stored = (await _testee.GetAsync([mediaId])).Single();
+		await Assert
+			.That(stored.Cached)
+			.IsSome()
+			.And.Multiple(async cached => await Assert.That(cached.ConfirmedAbsent).IsEqualTo(MediaField.Tagline | MediaField.Backdrop));
 	}
 
 	[Test]
-	public async Task QueryMediaMetadata_WhenMetadataMissing_YieldsUnmatchedMediaWithoutFetchedAt()
+	public async Task GetAsync_WhenNoDetailsExist_YieldsTheIdentityWithoutCachedDetails()
 	{
 		var plexId = PlexId.From("plex-811", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		fixture.Context.ChangeTracker.Clear();
 
-		var row = (await _testee.GetAsync([mediaId])).Single();
+		var stored = (await _testee.GetAsync([mediaId])).Single();
 
-		await Assert.That(row.Stored.Details).IsEqualTo(new MovieDetails());
-		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
-		await Assert.That(row.FetchedAt).IsNull();
+		await Assert.That(stored.Identity.Id).IsEqualTo(mediaId);
+		await Assert.That(stored.Cached).IsNone();
 	}
 
 	[Test]
-	public async Task QueryMediaMetadata_MixedHitAndMiss_YieldsBothInOneRoundTrip()
+	public async Task GetAsync_WhenOneTitleHasDetailsAndOneHasNone_YieldsBothInOneRoundTrip()
 	{
 		var firstPlex = PlexId.From("plex-812", MediaType.Movie);
 		var secondPlex = PlexId.From("plex-813", MediaType.Movie);
 		var firstId = await SeedMediaAsync([firstPlex]);
 		var secondId = await SeedMediaAsync([secondPlex]);
-		await _testee.UpsertMetadataAsync([CreateMovieDetails(firstId, [firstPlex])]);
+		await _testee.UpsertDetailsAsync(Details(firstId, Cached(Complete())));
 		fixture.Context.ChangeTracker.Clear();
 
-		var rows = await _testee.GetAsync([firstId, secondId]);
+		var stored = await _testee.GetAsync([firstId, secondId]);
 
-		await Assert.That(rows.Count).IsEqualTo(2);
-		await Assert.That(rows.Single(r => r.Stored.Identity.Id == firstId).Stored.Details.Missing).IsEqualTo(MediaField.None);
-		await Assert.That(rows.Single(r => r.Stored.Identity.Id == secondId).Stored.Details).IsEqualTo(new MovieDetails());
+		await Assert.That(stored.Count).IsEqualTo(2);
+		await Assert.That(stored.Single(item => item.Identity.Id == firstId).Cached).IsSome();
+		await Assert.That(stored.Single(item => item.Identity.Id == secondId).Cached).IsNone();
 	}
 
 	[Test]
-	public async Task QueryMediaMetadata_WhenRatingsExist_RoundTripsRatingsThroughInclude()
+	public async Task GetAsync_WhenRatingsExist_RoundTripsRatingsThroughInclude()
 	{
 		var plexId = PlexId.From("plex-814", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var rated = CreateMovieDetails(mediaId, [plexId], Complete() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.5f, 1200)]) });
-		await _testee.UpsertMetadataAsync([rated]);
+		var rated = Complete() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.5f, 1200)]) };
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(rated)));
 		fixture.Context.ChangeTracker.Clear();
 
-		var row = (await _testee.GetAsync([mediaId])).Single();
+		var stored = (await _testee.GetAsync([mediaId])).Single();
 
-		using var _ = Assert.Multiple();
-		await Assert.That(row.Stored.Details.Missing).IsEqualTo(MediaField.None);
-		await Assert.That(row.Stored.Rating.Sources.Count).IsEqualTo(1);
-		var rating = row.Stored.Rating.Sources.Single();
-		await Assert.That(rating.Source).IsEqualTo(MediaProvider.Tmdb);
-		await Assert.That(rating.NormalizedValue).IsEqualTo(8.5f);
-		await Assert.That(rating.VoteCount).IsEqualTo(1200);
+		await Assert
+			.That(stored.Cached)
+			.IsSome()
+			.And.Multiple(async cached =>
+			{
+				var rating = cached.Details.Rating.Sources.Single();
+				await Assert.That(rating.Source).IsEqualTo(MediaProvider.Tmdb);
+				await Assert.That(rating.NormalizedValue).IsEqualTo(8.5f);
+				await Assert.That(rating.VoteCount).IsEqualTo(1200);
+			});
 	}
 
 	[Test]
-	public async Task UpsertMetadataAsync_WhenConcurrentFlushesShareAMediaId_DoesNotViolateTheUniqueConstraint()
+	public async Task UpsertDetailsAsync_WhenConcurrentFlushesShareAMediaId_DoesNotViolateTheUniqueConstraint()
 	{
 		var plexId = PlexId.From("plex-race", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
 
-		var flushes = Enumerable.Range(0, 8).Select(_ => Task.Run(() => _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId])])));
+		var flushes = Enumerable.Range(0, 8).Select(_ => Task.Run(() => _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete())))));
 
 		await Assert.That(async () => await Task.WhenAll(flushes)).ThrowsNothing();
 	}
 
-	private static IdentifiedMedia CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals, MovieDetails? details = null)
-	{
-		return new(new MediaIdentity(mediaId, [.. externals]), details ?? Complete());
-	}
+	private static Dictionary<MediaId, CachedDetails> Details(MediaId id, CachedDetails cached) => new() { [id] = cached };
+
+	private static CachedDetails Cached(MediaDetails details) => new(details, FetchedAt, MediaField.None);
 
 	private static MovieDetails Complete()
 	{

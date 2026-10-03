@@ -63,9 +63,15 @@ internal static class NotificationContextFactory
 			return NoMedia;
 		}
 		var cached = await mediaRepository.GetAsync(ids, cancellationToken);
-		return cached.ToDictionary(
-			entry => entry.Stored.Id,
-			entry => new NotificationMedia(entry.Stored.Id.ToString(), entry.Stored.Title, entry.Stored.Type, entry.Stored.ReleaseDate?.Year)
+		return cached.ToDictionary(entry => entry.Identity.Id, ToNotificationMedia);
+	}
+
+	private static NotificationMedia ToNotificationMedia(StoredMedia entry)
+	{
+		var id = entry.Identity.Id.ToString();
+		return entry.Cached.Match(
+			cached => new NotificationMedia(id, cached.Details.Title, cached.Details.Type, cached.Details.ReleaseDate?.Year),
+			() => new NotificationMedia(id, null, entry.Identity.Type, null)
 		);
 	}
 

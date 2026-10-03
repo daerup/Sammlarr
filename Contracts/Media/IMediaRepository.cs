@@ -1,5 +1,5 @@
-using Contracts.Media.Metadata;
 using Domain.Media;
+using Domain.Media.Metadata;
 using Domain.Providers;
 
 namespace Contracts.Media;
@@ -13,13 +13,13 @@ public interface IMediaRepository
 
 	Task<IReadOnlyList<MediaIdentity>> UpsertIdentitiesAsync(IReadOnlyList<MediaIdentity> identities, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyList<CachedMedia>> GetAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<StoredMedia>> GetAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyList<CachedMedia>> GetByExternalsAsync(IReadOnlyList<IExternalMediaId> candidates, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<StoredMedia>> GetByExternalsAsync(IReadOnlyList<IExternalMediaId> candidates, CancellationToken cancellationToken = default);
 
-	Task UpsertMetadataAsync(IReadOnlyList<IdentifiedMedia> media, CancellationToken cancellationToken = default);
+	Task UpsertDetailsAsync(IReadOnlyDictionary<MediaId, CachedDetails> details, CancellationToken cancellationToken = default);
 
-	Task RemoveMetadataAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default);
+	Task RemoveDetailsAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
 		IEnumerable<MediaId> ids,

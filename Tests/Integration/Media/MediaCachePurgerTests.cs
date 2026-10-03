@@ -250,17 +250,14 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		await _testee.PurgeMetadataAsync();
 
-		var dateTimeProvider = IDateTimeProvider.Mock();
-		dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
-		var repository = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(dateTimeProvider.Object), new MediaWriteLock());
+		var repository = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(), new MediaWriteLock());
 		var cached = await repository.GetAsync([MediaId.From(media.Id)]);
 
 		using var _ = Assert.Multiple();
 		await Assert.That(cached.Count).IsEqualTo(1);
-		await Assert.That(cached[0].Stored.Details).IsEqualTo(new MovieDetails());
-		await Assert.That(cached[0].Stored.Identity.Id).IsEqualTo(MediaId.From(media.Id));
-		await Assert.That(cached[0].Stored.Identity.Externals.Count).IsEqualTo(2);
-		await Assert.That(cached[0].FetchedAt).IsNull();
+		await Assert.That(cached[0].Identity.Id).IsEqualTo(MediaId.From(media.Id));
+		await Assert.That(cached[0].Identity.Externals.Count).IsEqualTo(2);
+		await Assert.That(cached[0].Cached).IsNone();
 	}
 
 	private static MovieMetadataRow BuildMetadata(MediaRow media, string title) =>
