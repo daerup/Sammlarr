@@ -6,7 +6,7 @@ namespace Harness;
 
 internal sealed class OverrideAwareCurrentUser(CurrentUserOverride overrides, TestCurrentUser fallback) : ICurrentUser
 {
-	private ICurrentUser Active => overrides.Value ?? fallback;
+	private ICurrentUser Active => overrides.Value.GetValueOr(fallback);
 
 	public bool IsAuthenticated => Active.IsAuthenticated;
 

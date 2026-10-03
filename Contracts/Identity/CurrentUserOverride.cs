@@ -2,5 +2,5 @@ namespace Contracts.Identity;
 
 public sealed class CurrentUserOverride
 {
-	public ICurrentUser? Value { get; set; }
+	public Optional<ICurrentUser> Value { get; set; } = new None();
 }
