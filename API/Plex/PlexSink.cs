@@ -27,15 +27,12 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		List<UnmatchedMedia> unmatched = [];
 		await foreach (var (result, item) in mediaService.IdentifyAsync(requests, cancellationToken).ZipAwait(items, cancellationToken))
 		{
-			if (result is Success<MediaIdentity>(var identity))
-			{
-				matched.Add(identity.Id);
-			}
-			else
-			{
-				unmatched.Add(item.Unmatched());
-				logger.LogWarning("Plex watchlist item {Title} could not be matched during sync", item.Details.Title ?? item.Externals.FirstOrDefault()?.Value);
-			}
+			result
+				.Apply(identity => matched.Add(identity.Id))
+				.ApplyError(_ => unmatched.Add(item.Unmatched()))
+				.ApplyError(_ =>
+					logger.LogWarning("Plex watchlist item {Title} could not be matched during sync", item.Details.Title ?? item.Externals.FirstOrDefault()?.Value)
+				);
 		}
 
 		return new SinkSnapshot(matched, unmatched);

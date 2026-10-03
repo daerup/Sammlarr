@@ -86,7 +86,7 @@ _state = await ApiKeyFactory
 | To | `Result`: write | not
 
 | project either way | `+await signIn.CompleteAsync(…).Map(user => SignInAndRedirectAsync(context, user, returnUrl)).GetValueOr(error => Results.Redirect(…))+` | `+switch { Success<User>(var user) => …, Error error => … }+`
-| pick a case, both sync | `+PlanAsync(sink).Match(plan => (WantlistPlanResult)Project(plan), error => OnPlanError(error, sink.Kind))+` | a type `switch` over the cases
+| pick a case, both sync | `+PlanAsync(sink).Match(plan => (WantlistPlanResult)Project(plan), error => new WantlistSyncSinkUnreachable(error.Reason))+` | a type `switch` over the cases
 | act on success or failure | `result.Apply(…).ApplyError(…)` | `if (result is Success<T>(var v)) { … } else { … }`
 | keep the successes of a stream | `await foreach (var media in stream.WhereSuccessAwait())` | `if (result is Success<T>(var v))` inside the loop
 | a value or a fallback | `+loaded.Match(matched => (MediaMatchResult)matched, _ => request.Unmatched())+` | `loaded is Success<MatchedMedia>(var matched) ? matched : …`
@@ -101,7 +101,8 @@ loop with `continue` or `break`. Razor markup may also `@if` on a case. When a m
 readers that still compile change meaning: `x is null` is always false, `x is not null` and `x is { } v` always true
 (`v` is the `Optional` itself), `OrderBy` on it throws, and interpolation prints the union; `x ?? y`, `x!.Value` and a
 constant `case` stop compiling. A `null` passed where an `Optional<T>` is expected still compiles and builds a value
-that holds no case: pass `new None()`.
+that holds no case: pass `new None()`. A value handed over untyped (`RenderTreeBuilder.AddAttribute`, a
+parameter dictionary) is not converted at all and fails at run time: pass `Optional.Of(x)`.
 
 === Modularity and dependency injection
 

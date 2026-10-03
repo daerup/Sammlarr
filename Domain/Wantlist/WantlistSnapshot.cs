@@ -12,5 +12,5 @@ public sealed class WantlistSnapshot(IReadOnlyList<WantlistItem> items)
 
 	public bool Contains(MediaId id) => _items.ContainsKey(id);
 
-	public Optional<WantlistItem> Find(MediaId id) => _items.TryGetValue(id, out var item) ? Some.Of(item) : new None();
+	public Optional<WantlistItem> Find(MediaId id) => _items.GetValueOrNone(id);
 }

@@ -62,10 +62,9 @@ internal sealed class WantlistSyncEngine(
 		var pulledRemoves = await repo.RemoveAsync(plan.Pull.Removes, cancellationToken);
 
 		var pushed = await DrainAsync(sink, cancellationToken);
-		if (SyncNotification.For(currentUser.Id, clock.Now, pulledAdds, pulledRemoves, pushed) is { } synced)
-		{
-			await announcer.AnnounceAsync(synced, cancellationToken);
-		}
+		await SyncNotification
+			.For(currentUser.Id, clock.Now, pulledAdds, pulledRemoves, pushed)
+			.Apply(synced => announcer.AnnounceAsync(synced, cancellationToken));
 
 		logger.LogInformation(
 			"Wantlist sync {Sink} complete: pulled {Pulled}, removed {Removed}, pushed {Pushed}, failed {Failed}",

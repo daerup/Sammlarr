@@ -1,8 +1,10 @@
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
+using Core.Wantlist.Sync;
 using Domain.Media;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
+using Microsoft.Extensions.Logging;
 using TestInfrastructure;
 
 namespace Core.Tests.Wantlist;
@@ -56,5 +58,19 @@ public class WantlistSyncPlannerTests
 
 		var unreachable = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSinkUnreachable>();
 		await Assert.That(unreachable.Reason).Contains("plex is down");
+	}
+
+	[Test]
+	public async Task PlanAsync_WhenTheSinkCannotBeRead_WarnsWhy()
+	{
+		var sink = IMediaSink.Mock();
+		sink.GetAsync(Any()).Throws(new HttpRequestException("plex is down"));
+		var logger = ILogger<WantlistSyncPlanner>.Mock();
+
+		await WantlistStubs.Planner(sink, WantlistStubs.EmptyOutbox(), logger.Object).PlanAsync();
+
+		await Assert
+			.That(Mock.Invocations(logger).Where(call => call.Arguments[0] is LogLevel.Warning).Select(call => $"{call.Arguments[2]}"))
+			.IsEquivalentTo(["Reading Plex failed: plex is down"]);
 	}
 }

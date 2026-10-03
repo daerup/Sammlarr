@@ -8,7 +8,7 @@ namespace Core.Wantlist.Sync;
 
 internal static class SyncNotification
 {
-	internal static INotification? For(
+	internal static Optional<INotification> For(
 		UserId owner,
 		DateTimeOffset now,
 		IReadOnlyList<MediaId> pulledAdds,
@@ -20,8 +20,8 @@ internal static class SyncNotification
 		var pushedRemoves = Delivered(pushed, WantlistOperationAction.Remove);
 		var failed = pushed.Where(outcome => outcome.Kind is not WantlistOutboxEventKind.Pushed).Select(outcome => outcome.MediaId).ToList();
 		return pulledAdds.Count + pulledRemoves.Count + pushedAdds.Count + pushedRemoves.Count + failed.Count == 0
-			? null
-			: new WantlistSyncCompletedNotification(owner, now, pulledAdds, pulledRemoves, pushedAdds, pushedRemoves, failed);
+			? new None()
+			: Some.Of<INotification>(new WantlistSyncCompletedNotification(owner, now, pulledAdds, pulledRemoves, pushedAdds, pushedRemoves, failed));
 	}
 
 	private static List<MediaId> Delivered(IReadOnlyList<PushOutcome> outcomes, WantlistOperationAction action) =>
