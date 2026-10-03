@@ -14,7 +14,7 @@ public class QueryProcessorSourceTests
 	public async Task Execute_WhenTheSourceIsLazyAndFiltered_ClassifiesAgainstASingleMaterialisation()
 	{
 		var lazy = new[] { "Keep", "Drop" }.Select(name => new LazyRow(name));
-		var options = new QueryOptions { Filter = Filter(Group(String(nameof(LazyRow.Name), FilterPredicateOperator.Equals, "Keep"))) };
+		var options = new QueryOptions { Filter = Some.Of(Filter(Group(String(nameof(LazyRow.Name), FilterPredicateOperator.Equals, "Keep")))) };
 		var predicates = new QueryPredicates<LazyRow>(IsWantlisted: _ => false, IsBlocklisted: _ => false, IsOwned: _ => false);
 
 		var results = await _testee.ExecuteAsync(lazy, options, predicates).ToListAsync();

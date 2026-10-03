@@ -28,7 +28,7 @@ public class QueryProcessorTests
 	public async Task Execute_WhenLimitProvided_TruncatesPastTheLimit()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama") };
-		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 1 }) };
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
 
@@ -39,10 +39,7 @@ public class QueryProcessorTests
 	public async Task Execute_WhenSortProvided_QualifiesEveryItemInSortedOrder()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama") };
-		var options = new QueryOptions
-		{
-			Sort = new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Descending },
-		};
+		var options = new QueryOptions { Sort = Some.Of(new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Descending }) };
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
 
@@ -56,8 +53,8 @@ public class QueryProcessorTests
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
 		var options = new QueryOptions
 		{
-			Limit = new QueryLimit { Count = 2 },
-			Sort = new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Ascending },
+			Limit = Some.Of(new QueryLimit { Count = 2 }),
+			Sort = Some.Of(new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Ascending }),
 		};
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
@@ -71,7 +68,7 @@ public class QueryProcessorTests
 	public async Task Execute_WhenFilterProvided_CullsEverythingThatDoesNotMatch()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
-		var options = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
+		var options = new QueryOptions { Filter = Some.Of(Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama")))) };
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
 
@@ -91,12 +88,14 @@ public class QueryProcessorTests
 		};
 		var options = new QueryOptions
 		{
-			Filter = Filter(
-				FilterOperator.Or,
-				Group(String("Genre", FilterPredicateOperator.Equals, "Drama")),
-				Group(Number("Year", FilterPredicateOperator.LessThan, 2017))
+			Filter = Some.Of(
+				Filter(
+					FilterOperator.Or,
+					Group(String("Genre", FilterPredicateOperator.Equals, "Drama")),
+					Group(Number("Year", FilterPredicateOperator.LessThan, 2017))
+				)
 			),
-			Limit = new QueryLimit { Count = 2 },
+			Limit = Some.Of(new QueryLimit { Count = 2 }),
 		};
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
@@ -115,10 +114,12 @@ public class QueryProcessorTests
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
 		var options = new QueryOptions
 		{
-			Filter = Filter(
-				FilterOperator.Or,
-				Group(String("Genre", FilterPredicateOperator.Equals, "Drama")),
-				Group(Number("Year", FilterPredicateOperator.LessOrEqual, 2019))
+			Filter = Some.Of(
+				Filter(
+					FilterOperator.Or,
+					Group(String("Genre", FilterPredicateOperator.Equals, "Drama")),
+					Group(Number("Year", FilterPredicateOperator.LessOrEqual, 2019))
+				)
 			),
 		};
 
@@ -132,10 +133,7 @@ public class QueryProcessorTests
 	{
 		var wantlisted = new Item("Wantlisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
-		var options = new QueryOptions
-		{
-			Limit = new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved },
-		};
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved }) };
 
 		var results = await _testee.ExecuteAsync([wantlisted, normal], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
@@ -149,10 +147,7 @@ public class QueryProcessorTests
 	{
 		var blocklisted = new Item("Blocklisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
-		var options = new QueryOptions
-		{
-			Limit = new QueryLimit { Count = 1, Blocklisted = SlotPolicy.Preserved },
-		};
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 1, Blocklisted = SlotPolicy.Preserved }) };
 
 		var results = await _testee.ExecuteAsync([blocklisted, normal], options, Enrolled(blocklisted: blocklisted)).ToListAsync();
 
@@ -167,10 +162,7 @@ public class QueryProcessorTests
 		var wantlisted = new Item("Wantlisted", 2019, "Action");
 		var normal1 = new Item("Normal1", 2020, "Drama");
 		var normal2 = new Item("Normal2", 2021, "Comedy");
-		var options = new QueryOptions
-		{
-			Limit = new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved },
-		};
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved }) };
 
 		var results = await _testee.ExecuteAsync([wantlisted, normal1, normal2], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
@@ -185,10 +177,7 @@ public class QueryProcessorTests
 		var normal1 = new Item("Normal1", 2019, "Action");
 		var wantlisted = new Item("Wantlisted", 2020, "Drama");
 		var normal2 = new Item("Normal2", 2021, "Comedy");
-		var options = new QueryOptions
-		{
-			Limit = new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved },
-		};
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved }) };
 
 		var results = await _testee.ExecuteAsync([normal1, wantlisted, normal2], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
@@ -200,7 +189,7 @@ public class QueryProcessorTests
 	{
 		var wantlisted = new Item("Wantlisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
-		var options = new QueryOptions { Limit = new QueryLimit { Count = 2 } };
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 2 }) };
 
 		var results = await _testee.ExecuteAsync([wantlisted, normal], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
@@ -217,12 +206,14 @@ public class QueryProcessorTests
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions
 		{
-			Limit = new QueryLimit
-			{
-				Count = 1,
-				Wantlisted = SlotPolicy.Preserved,
-				Blocklisted = SlotPolicy.Consumed,
-			},
+			Limit = Some.Of(
+				new QueryLimit
+				{
+					Count = 1,
+					Wantlisted = SlotPolicy.Preserved,
+					Blocklisted = SlotPolicy.Consumed,
+				}
+			),
 		};
 
 		var results = await _testee.ExecuteAsync([both, normal], options, Enrolled(wantlisted: both, blocklisted: both)).ToListAsync();
@@ -238,12 +229,14 @@ public class QueryProcessorTests
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions
 		{
-			Limit = new QueryLimit
-			{
-				Count = 1,
-				Wantlisted = SlotPolicy.Consumed,
-				Blocklisted = SlotPolicy.Preserved,
-			},
+			Limit = Some.Of(
+				new QueryLimit
+				{
+					Count = 1,
+					Wantlisted = SlotPolicy.Consumed,
+					Blocklisted = SlotPolicy.Preserved,
+				}
+			),
 		};
 
 		var results = await _testee.ExecuteAsync([both, normal], options, Enrolled(wantlisted: both, blocklisted: both)).ToListAsync();
@@ -257,7 +250,7 @@ public class QueryProcessorTests
 	{
 		var wantlisted = new Item("Wantlisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
-		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 1 }) };
 
 		var results = await _testee.ExecuteAsync([wantlisted, normal], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
@@ -283,10 +276,7 @@ public class QueryProcessorTests
 	{
 		var owned = new Item("Owned", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
-		var options = new QueryOptions
-		{
-			Limit = new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved },
-		};
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved }) };
 
 		var results = await _testee.ExecuteAsync([owned, normal], options, Enrolled(wantlisted: owned, owned: owned)).ToListAsync();
 
@@ -299,7 +289,7 @@ public class QueryProcessorTests
 	{
 		var first = new Item("First", 2020, "Action");
 		var owned = new Item("Owned", 2021, "Drama");
-		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 1 }) };
 
 		var results = await _testee.ExecuteAsync([first, owned], options, Enrolled(owned: owned)).ToListAsync();
 
@@ -311,7 +301,7 @@ public class QueryProcessorTests
 	public async Task Execute_WhenAnOwnedItemFailsTheFilter_ItIsCulledAndAtRisk()
 	{
 		var owned = new Item("Owned", 2020, "Action");
-		var options = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
+		var options = new QueryOptions { Filter = Some.Of(Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama")))) };
 
 		var results = await _testee.ExecuteAsync([owned], options, Enrolled(owned: owned)).ToListAsync();
 
@@ -324,7 +314,7 @@ public class QueryProcessorTests
 	{
 		var owned = new Item("Owned", 2020, "Action");
 		var predicates = Enrolled(blocklisted: owned, owned: owned);
-		var culling = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
+		var culling = new QueryOptions { Filter = Some.Of(Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama")))) };
 
 		var qualified = await _testee.ExecuteAsync([owned], new QueryOptions(), predicates).ToListAsync();
 		var culled = await _testee.ExecuteAsync([owned], culling, predicates).ToListAsync();
@@ -352,10 +342,7 @@ public class QueryProcessorRatingTests
 		var rated = MovieWithRating(2020, 8.5f);
 		var lowRated = MovieWithRating(2021, 5.0f);
 		var unrated = MovieWithRating(2022, null);
-		var options = new QueryOptions
-		{
-			Sort = new QuerySort { Property = nameof(MediaQueryRow.Rating), Direction = ListSortDirection.Descending },
-		};
+		var options = new QueryOptions { Sort = Some.Of(new QuerySort { Property = nameof(MediaQueryRow.Rating), Direction = ListSortDirection.Descending }) };
 
 		var results = await _testee.ExecuteAsync([lowRated, unrated, rated], options, NoEnrollment).ToListAsync();
 		var ordered = results.Select(row => row.Item).ToList();
@@ -371,7 +358,7 @@ public class QueryProcessorRatingTests
 		var high = MovieWithRating(2020, 9.0f);
 		var low = MovieWithRating(2021, 6.0f);
 		var unrated = MovieWithRating(2022, null);
-		var options = new QueryOptions { Filter = Filter(Group(Number(nameof(MediaQueryRow.Rating), FilterPredicateOperator.GreaterOrEqual, 7.0))) };
+		var options = new QueryOptions { Filter = Some.Of(Filter(Group(Number(nameof(MediaQueryRow.Rating), FilterPredicateOperator.GreaterOrEqual, 7.0)))) };
 
 		var results = await _testee.ExecuteAsync([high, low, unrated], options, NoEnrollment).ToListAsync();
 

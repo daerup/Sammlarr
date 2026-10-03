@@ -11,6 +11,7 @@ using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
 using Harness;
+using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
 using static Harness.Ids;
 
@@ -206,6 +207,35 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 			.That(item.Provenance)
 			.IsOfUnionType<WantlistItemProvenance, FeedOrigin>()
 			.And.Multiple(async origin => await Assert.That(origin.Run.Id).IsEqualTo(recorded.Id));
+	}
+
+	[Test]
+	public async Task RunAsync_ForAFeedWithAStoredFilterSortAndLimit_AddsOnlyTheTopRatedTitleTheFilterLetsThrough()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("top-rated-list", new Append());
+		await host.Context.Database.ExecuteSqlAsync(
+			$$"""
+			UPDATE "Feeds" SET
+				"Filter" = '{"Groups":[{"Predicates":[{"Field":"Rating","Operator":"Between","ValueKind":"Number","Value":"8","ValueEnd":"9"}],"Groups":[],"Operator":"And"}],"Operator":"And"}',
+				"Sort" = '{"Property":"Rating","Direction":"Descending"}',
+				"Limit" = '{"Count":1,"Wantlisted":"Consumed","Blocklisted":"Consumed"}'
+			WHERE "Id" = {{feedId.Value}}
+			"""
+		);
+		host.MdblistFeedContains(
+			"top-rated-list",
+			Item("Fight Club", MediaType.Movie, Tmdb("550")),
+			Item("Inception", MediaType.Movie, Tmdb("27205")),
+			Item("Interstellar", MediaType.Movie, Tmdb("157336"))
+		);
+		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 1000).SeedAsync();
+		var inception = await host.Movie(TestMedia.Inception).ServedByPlex().ServedByTmdb(rating: 8.8, votes: 1000).SeedAsync();
+		await host.Movie(TestMedia.Interstellar).ServedByPlex().ServedByTmdb(rating: 9.5, votes: 1000).SeedAsync();
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		await Assert.That(await WantlistIdsAsync()).IsEquivalentTo([inception]);
 	}
 
 	[Test]

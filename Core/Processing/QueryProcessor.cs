@@ -22,8 +22,8 @@ internal sealed class QueryProcessor<T>
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
-		var all = Sort(source, options?.Sort);
-		var qualifying = options?.Filter is { } filter ? new HashSet<T>(all.Where(Compile(filter)), Identity) : null;
+		var all = options.Sort.Map(sort => Sort(source, sort)).GetValueOr(() => [.. source]);
+		var qualifying = options.Filter.Map(filter => new HashSet<T>(all.Where(Compile(filter)), Identity));
 
 		var taken = 0;
 		const int cooperativeYieldInterval = 32;
@@ -42,17 +42,17 @@ internal sealed class QueryProcessor<T>
 				Owned = predicates.IsOwned(item),
 			};
 
-			if (qualifying?.Contains(item) is false)
+			if (qualifying.Match(set => !set.Contains(item), () => false))
 			{
 				yield return new QueryVerdict<T>(item, QueryOutcome.Culled, enrollment, false);
 			}
-			else if (options?.Limit is { Count: var limit } && taken >= limit)
+			else if (options.Limit.Match(limit => taken >= limit.Count, () => false))
 			{
 				yield return new QueryVerdict<T>(item, QueryOutcome.Truncated, enrollment, false);
 			}
 			else
 			{
-				var consumesSlot = ConsumesSlot(enrollment, options?.Limit);
+				var consumesSlot = options.Limit.Match(limit => ConsumesSlot(enrollment, limit), () => true);
 				if (consumesSlot)
 					taken++;
 				yield return new QueryVerdict<T>(item, QueryOutcome.Qualified, enrollment, consumesSlot);
@@ -60,13 +60,8 @@ internal sealed class QueryProcessor<T>
 		}
 	}
 
-	private static List<T> Sort(IEnumerable<T> source, QuerySort? sort)
+	private static List<T> Sort(IEnumerable<T> source, QuerySort sort)
 	{
-		if (sort is null)
-		{
-			return [.. source];
-		}
-
 		var direction = sort.Direction switch
 		{
 			ListSortDirection.Ascending => "ascending",
@@ -90,9 +85,9 @@ internal sealed class QueryProcessor<T>
 
 	private sealed record CompiledFilter(string Expression, Func<T, bool> Predicate);
 
-	private static bool ConsumesSlot(Enrollment enrollment, QueryLimit? limit)
+	private static bool ConsumesSlot(Enrollment enrollment, QueryLimit limit)
 	{
-		if (limit is null || enrollment.Owned)
+		if (enrollment.Owned)
 		{
 			return true;
 		}

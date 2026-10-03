@@ -1,6 +1,8 @@
+using System.ComponentModel;
 using Contracts.Feed;
 using DB.Data.Feed;
 using Domain.Feed;
+using Domain.Processing;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +13,10 @@ namespace Integration.Tests.Feeds;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	private static readonly QuerySort Sort = new() { Property = "Rating", Direction = ListSortDirection.Descending };
+
+	private static readonly QueryLimit Limit = new() { Count = 10, Blocklisted = SlotPolicy.Preserved };
+
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	private IFeedRepository _testee = null!;
@@ -78,6 +84,8 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Strategy = new FeedStrategy(new Mirror(5)),
 			Identifier = "top-250",
 			Schedule = new FeedRunTrigger(new Scheduled("0 0 9 * * *")),
+			Sort = Some.Of(Sort),
+			Limit = Some.Of(Limit),
 		};
 
 		await _testee.CreateAsync(createData);
@@ -89,6 +97,8 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Mirror(5)));
 		await Assert.That(feed.Enabled).IsTrue();
 		await Assert.That(feed.Schedule).IsOfUnionType<FeedRunTrigger, Scheduled>();
+		await Assert.That(feed.Sort).IsSome().And.IsEqualTo(Sort);
+		await Assert.That(feed.Limit).IsSome().And.IsEqualTo(Limit);
 	}
 
 	[Test]
@@ -102,6 +112,61 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed.Identifier).IsEqualTo("my-wantlist");
 		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Append()));
 		await Assert.That(feed.Enabled).IsTrue();
+	}
+
+	[Test]
+	public async Task FindAsync_WhenTheRowHoldsAStoredFilterSortAndLimit_ReadsThemBack()
+	{
+		var id = await SeedFeedAsync("Top rated", "top-rated", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
+		await fixture.Context.Database.ExecuteSqlAsync(
+			$$"""
+			UPDATE "Feeds" SET
+				"Filter" = '{"Groups":[{"Predicates":[{"Field":"Rating","Operator":"Between","ValueKind":"Number","Value":"8","ValueEnd":"9"}],"Groups":[],"Operator":"And"}],"Operator":"And"}',
+				"Sort" = '{"Property":"Rating","Direction":"Descending"}',
+				"Limit" = '{"Count":5,"Wantlisted":"Preserved","Blocklisted":"Preserved"}'
+			WHERE "Id" = {{id.Value}}
+			"""
+		);
+
+		var feed = await Assert.That(await _testee.FindAsync(id)).IsSome();
+
+		var filter = await Assert.That(feed!.Filter).IsSome();
+		await Assert
+			.That(filter!.Groups.Single().Predicates.Single())
+			.IsEqualTo(
+				new FilterPredicate
+				{
+					Field = "Rating",
+					Operator = FilterPredicateOperator.Between,
+					ValueKind = FilterValueKind.Number,
+					Value = "8",
+					ValueEnd = "9",
+				}
+			);
+		await Assert.That(feed.Sort).IsSome().And.IsEqualTo(new QuerySort { Property = "Rating", Direction = ListSortDirection.Descending });
+		await Assert
+			.That(feed.Limit)
+			.IsSome()
+			.And.IsEqualTo(
+				new QueryLimit
+				{
+					Count = 5,
+					Wantlisted = SlotPolicy.Preserved,
+					Blocklisted = SlotPolicy.Preserved,
+				}
+			);
+	}
+
+	[Test]
+	public async Task FindAsync_WhenTheRowHoldsNoFilterSortOrLimit_ReadsThemAsNone()
+	{
+		var id = await SeedFeedAsync("Plain", "plain", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
+
+		var feed = await Assert.That(await _testee.FindAsync(id)).IsSome();
+
+		await Assert.That(feed!.Filter).IsNone();
+		await Assert.That(feed.Sort).IsNone();
+		await Assert.That(feed.Limit).IsNone();
 	}
 
 	[Test]
@@ -132,6 +197,41 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Mirror(5)));
 		await Assert.That(feed.Enabled).IsFalse();
 		await Assert.That(feed.Schedule).IsOfUnionType<FeedRunTrigger, Manual>();
+	}
+
+	[Test]
+	public async Task UpdateAsync_WithoutASortOrLimit_ClearsTheStoredOnes()
+	{
+		var id = await _testee.CreateAsync(
+			new FeedCreateData
+			{
+				Name = "Sorted",
+				IsEnabled = true,
+				Provider = FeedProvider.Mdblist,
+				Strategy = new FeedStrategy(new Append()),
+				Identifier = "sorted",
+				Schedule = new FeedRunTrigger(new Manual()),
+				Sort = Some.Of(Sort),
+				Limit = Some.Of(Limit),
+			}
+		);
+
+		await _testee.UpdateAsync(
+			id,
+			new FeedUpdateData
+			{
+				Name = "Sorted",
+				IsEnabled = true,
+				Provider = FeedProvider.Mdblist,
+				Strategy = new FeedStrategy(new Append()),
+				Identifier = "sorted",
+				Schedule = new FeedRunTrigger(new Manual()),
+			}
+		);
+
+		var feed = await Assert.That(await _testee.FindAsync(id)).IsSome();
+		await Assert.That(feed!.Sort).IsNone();
+		await Assert.That(feed.Limit).IsNone();
 	}
 
 	[Test]

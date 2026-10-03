@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using AngleSharp.Dom;
 using BlazorBlueprint.Components;
@@ -137,13 +138,35 @@ public class FeedPreviewPanelTests : BunitContext
 		await Assert.That(cut.FindAll(".leaving-badge-slot")).IsEmpty();
 	}
 
+	[Test]
+	public async Task Apply_WithASortAndALimitButNoFilter_PlansADraftCarryingThemAndNoFilter()
+	{
+		var planner = IFeedRunPlanner.Mock();
+		planner.PlanAsync(Any(), Any()).Returns(new AppendPlan([], [], FeedDelta.None, Conclusiveness.Conclusive));
+		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0);
+		var sort = new QuerySort { Property = nameof(MediaQueryRow.Rating), Direction = ListSortDirection.Descending };
+		var limit = new QueryLimit { Count = 3 };
+
+		await ApplyAsync(cut, new Append(), sort, limit);
+
+		planner
+			.PlanAsync(
+				Is<FeedPlanTarget>(target =>
+					target is DraftFeed(var feed, _) && feed.Sort.ToNullable() == sort && feed.Limit.ToNullable() == limit && feed.Filter.IsNone()
+				),
+				Any()
+			)
+			.WasCalled(Times.Once);
+	}
+
 	private static int LeavingBadge(IRenderedComponent<FeedPreviewPanel> cut) =>
 		int.Parse(cut.Find(".leaving-badge-slot .preview-filter-badge span").TextContent);
 
 	private static IElement TotalBadge(IRenderedComponent<FeedPreviewPanel> cut) => cut.FindAll(".stat-badges-row .preview-filter-badge")[0];
 
-	private static Task ApplyAsync(IRenderedComponent<FeedPreviewPanel> cut, FeedStrategy strategy) =>
-		cut.InvokeAsync(() =>
+	private static Task ApplyAsync(IRenderedComponent<FeedPreviewPanel> cut, FeedStrategy strategy, QuerySort? sort = null, QueryLimit? limit = null)
+	{
+		return cut.InvokeAsync(() =>
 			cut.Instance.ApplyAsync(
 				new FeedConfig
 				{
@@ -151,9 +174,12 @@ public class FeedPreviewPanelTests : BunitContext
 					Provider = FeedProvider.Mdblist,
 					Identifier = "list",
 					Strategy = strategy,
+					Sort = sort,
+					Limit = limit,
 				}
 			)
 		);
+	}
 
 	private static List<int> BadgeCounts(IRenderedComponent<FeedPreviewPanel> cut) =>
 		[.. cut.FindAll(".stat-badges-row .preview-filter-badge span").Select(badge => int.Parse(badge.TextContent))];
