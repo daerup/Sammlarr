@@ -64,9 +64,9 @@ internal static class DemoMedia
 			PosterUrl = "https://image.tmdb.org/t/p/w500/nVq1Dn88NzVIVTDpGZeP7fxpLa1.jpg",
 			BackdropUrl = "https://image.tmdb.org/t/p/w780/edS1AlGAXopVq0L2voGOooYcE1S.jpg",
 			ReleaseDate = new DateOnly(2026, 4, 2),
-			Genres = [],
+			Genres = ["Drama", "Family"],
 			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.1f)]),
-			Runtime = TimeSpan.Zero,
+			Runtime = TimeSpan.FromMinutes(116),
 		}
 	);
 
@@ -75,14 +75,13 @@ internal static class DemoMedia
 		new MovieDetails
 		{
 			Title = "Yellow Mirror",
-			Tagline = string.Empty,
 			Summary = "A defective lamp reveals a heartbreaking truth about what Homer believes is reality, and an AI-powered tablet befriends and controls Maggie.",
 			PosterUrl = "https://image.tmdb.org/t/p/w500/1zdGvJAuuXC7dA3eV61OtUJNyjQ.jpg",
 			BackdropUrl = "https://image.tmdb.org/t/p/w780/rFjlsx5IygrHmBqr0KsVolAHhy7.jpg",
 			ReleaseDate = new DateOnly(2026, 8, 26),
-			Genres = [],
+			Genres = ["Animation", "Comedy"],
 			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.1f)]),
-			Runtime = TimeSpan.Zero,
+			Runtime = TimeSpan.FromMinutes(44),
 		}
 	);
 
@@ -97,9 +96,9 @@ internal static class DemoMedia
 			PosterUrl = "https://image.tmdb.org/t/p/w500/cBUeTWemlBG9b22TY2qMibtfgaA.jpg",
 			BackdropUrl = "https://image.tmdb.org/t/p/w780/pOGqAA6AOOKLRWOfYvRAdDP0vOl.jpg",
 			ReleaseDate = new DateOnly(2025, 12, 5),
-			Genres = [],
+			Genres = ["Comedy", "Thriller"],
 			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 5.8f)]),
-			Runtime = TimeSpan.Zero,
+			Runtime = TimeSpan.FromMinutes(98),
 		}
 	);
 
@@ -108,14 +107,13 @@ internal static class DemoMedia
 		new MovieDetails
 		{
 			Title = "No Hit Wonder",
-			Tagline = string.Empty,
 			Summary = "Singer Daniel has hit rock bottom. After a failed suicide attempt, the former one-hit wonder finds himself stuck in a psychiatric ward.",
 			PosterUrl = "https://image.tmdb.org/t/p/w500/91Nc6a2utk3K3wtosrkyQ5z3sxM.jpg",
 			BackdropUrl = "https://image.tmdb.org/t/p/w780/hDp8Itlhln0aBjlHXVIsUsxiRaa.jpg",
 			ReleaseDate = new DateOnly(2025, 10, 30),
-			Genres = [],
+			Genres = ["Comedy", "Drama"],
 			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 6.8f)]),
-			Runtime = TimeSpan.Zero,
+			Runtime = TimeSpan.FromMinutes(116),
 		}
 	);
 

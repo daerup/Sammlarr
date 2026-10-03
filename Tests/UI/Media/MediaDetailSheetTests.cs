@@ -166,10 +166,7 @@ public class MediaDetailSheetTests : BunitContext
 			new MovieDetails
 			{
 				Title = "Futurama",
-				Tagline = string.Empty,
 				Summary = "A delivery boy is frozen.",
-				PosterUrl = string.Empty,
-				BackdropUrl = string.Empty,
 				ReleaseDate = new DateOnly(1999, 3, 28),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(22),

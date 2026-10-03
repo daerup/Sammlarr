@@ -50,13 +50,13 @@
                 </div>
             }
 
-            @if (!string.IsNullOrWhiteSpace(Details.Tagline))
+            @if (Details.Tagline is not null)
             {
                 <h3 class="text-white text-base font-bold text-lg">@Details.Title</h3>
             }
 
             <div class="flex items-end justify-between gap-2">
-                @if (!string.IsNullOrWhiteSpace(Details.Tagline))
+                @if (Details.Tagline is not null)
                 {
                     <p class="text-white text-xs line-clamp-2">@Details.Tagline</p>
                 }
@@ -88,27 +88,28 @@
     private const string Sizes = "(min-width: 768px) calc(30vw - 40px), calc(120vw - 76px)";
     private static readonly ArtworkSize[] Candidates = [new(780, 413), new(1280, 678)];
 
-    private string _src = string.Empty;
+    private string? _src;
     private string? _srcSet;
-    private string? _lastImageUrl;
+    private (string? Backdrop, string? Poster)? _artwork;
     private bool _isShowingPoster;
     private bool _failed;
 
     protected override void OnParametersSet()
     {
-        if (_lastImageUrl != Details.BackdropUrl)
+        var artwork = (Details.BackdropUrl, Details.PosterUrl);
+        if (_artwork != artwork)
         {
-            _lastImageUrl = Details.BackdropUrl;
-            Show(Details.BackdropUrl);
-            _isShowingPoster = false;
-            _failed = false;
+            _artwork = artwork;
+            _isShowingPoster = Details.BackdropUrl is null;
+            Show(Details.BackdropUrl ?? Details.PosterUrl);
         }
     }
 
     private void Show(string? url)
     {
-        _src = url ?? string.Empty;
-        _srcSet = url is null ? null : Artwork.ByWidth(url, Candidates);
+        _src = url;
+        _srcSet = Artwork.ByWidth(url, Candidates);
+        _failed = url is null;
     }
 
     private async Task OnImageError()
@@ -119,7 +120,7 @@
             return;
         }
 
-        if (_isShowingPoster || string.IsNullOrWhiteSpace(Details.PosterUrl))
+        if (_isShowingPoster || Details.PosterUrl is null)
         {
             _failed = true;
             if (Media is IdentifiedMedia identified)

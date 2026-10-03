@@ -183,10 +183,6 @@ public class FeedPlanTests
 			new MovieDetails
 			{
 				Title = "Title",
-				Tagline = string.Empty,
-				Summary = string.Empty,
-				PosterUrl = string.Empty,
-				BackdropUrl = string.Empty,
 				ReleaseDate = new DateOnly(2020, 1, 1),
 				Runtime = TimeSpan.FromMinutes(90),
 			}

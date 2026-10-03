@@ -67,8 +67,8 @@
     private static readonly SelectOption<string>[] TypeOptions =
     [
         new(string.Empty, "Any type"),
-        new(nameof(MediaType.Movie), "Movies"),
-        new(nameof(MediaType.Show), "Shows"),
+        new(nameof(MediaType.Movie), MediaType.Movie.Plural),
+        new(nameof(MediaType.Show), MediaType.Show.Plural),
     ];
 
     private static readonly SelectOption<ListSort>[] SortOptions =

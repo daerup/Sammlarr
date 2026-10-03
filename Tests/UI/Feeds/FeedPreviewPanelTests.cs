@@ -282,10 +282,6 @@ public class FeedPreviewPanelTests : BunitContext
 			new MovieDetails
 			{
 				Title = "Gone",
-				Tagline = string.Empty,
-				Summary = string.Empty,
-				PosterUrl = string.Empty,
-				BackdropUrl = string.Empty,
 				ReleaseDate = new DateOnly(2020, 1, 1),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(90),
@@ -350,10 +346,6 @@ public class FeedPreviewPanelTests : BunitContext
 				new MovieDetails
 				{
 					Title = $"Movie {index}",
-					Tagline = string.Empty,
-					Summary = string.Empty,
-					PosterUrl = string.Empty,
-					BackdropUrl = string.Empty,
 					ReleaseDate = new DateOnly(2020, 1, 1),
 					Genres = [],
 					Runtime = TimeSpan.FromMinutes(90),

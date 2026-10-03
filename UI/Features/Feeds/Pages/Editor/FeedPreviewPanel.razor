@@ -636,14 +636,7 @@
         var present = _processedResults.Select(verdict => verdict.Item.Identity.Id).ToHashSet();
         var gone = mirrored.MissedRuns.Keys.Where(id => !present.Contains(id)).OrderByDescending(id => mirrored.MissedRuns[id]).ToList();
 
-        var described = new Dictionary<MediaId, IdentifiedMedia>();
-        await foreach (var result in Media.GetDetailsAsync(gone, cancellationToken))
-        {
-            if (result is Success<IdentifiedMedia>(var media))
-            {
-                described[media.Identity.Id] = media;
-            }
-        }
+        var described = await Media.GetDetailsByIdAsync(gone, cancellationToken);
 
         _goneResults = [.. gone.Where(described.ContainsKey).Select(id => new GoneItem(described[id]))];
         _goneShortfall = gone.Count - _goneResults.Count;

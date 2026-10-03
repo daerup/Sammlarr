@@ -5,9 +5,9 @@
      class="change-row @(Item.Kind is ChangeKind.Removed ? "is-leaving" : null) @(Highlighted ? "is-highlight" : null)"
      tabindex="@(Highlighted ? "-1" : null)"
      @onclick="HandleClickAsync">
-    @if (Item.Media is { } media && !string.IsNullOrWhiteSpace(media.Details.PosterUrl))
+    @if (Item.Media?.Details.PosterUrl is { } poster)
     {
-        <img class="change-poster" src="@media.Details.PosterUrl" alt=""/>
+        <img class="change-poster" src="@poster" alt=""/>
     }
     else
     {

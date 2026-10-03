@@ -348,12 +348,9 @@ else
 
         try
         {
-            await foreach (var result in MediaService.GetDetailsAsync(wanted, _cancellation.Token))
+            foreach (var (id, media) in await MediaService.GetDetailsByIdAsync(wanted, _cancellation.Token))
             {
-                if (result is Success<IdentifiedMedia>(var media))
-                {
-                    _media[media.Identity.Id] = media;
-                }
+                _media[id] = media;
             }
         }
         catch (OperationCanceledException)

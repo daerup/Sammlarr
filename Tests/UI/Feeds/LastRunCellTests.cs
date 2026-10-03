@@ -161,10 +161,6 @@ public class LastRunCellTests : BunitContext
 			new MovieDetails
 			{
 				Title = "Futurama",
-				Tagline = string.Empty,
-				Summary = string.Empty,
-				PosterUrl = string.Empty,
-				BackdropUrl = string.Empty,
 				ReleaseDate = new DateOnly(1999, 3, 28),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(22),

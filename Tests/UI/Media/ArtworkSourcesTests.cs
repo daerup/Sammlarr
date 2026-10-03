@@ -18,6 +18,16 @@ public class ArtworkSourcesTests
 	}
 
 	[Test]
+	public async Task ByWidth_WhenTheArtworkIsMissing_OffersNothing()
+	{
+		var testee = ArtworkStub.Sources(ArtworkStub.Resizing(), ArtworkStub.Declining());
+
+		var srcSet = testee.ByWidth(null, new ArtworkSize(780, 413));
+
+		await Assert.That(srcSet).IsNull();
+	}
+
+	[Test]
 	public async Task ByWidth_WhenTheFirstProviderDeclines_AsksTheNextOne()
 	{
 		var testee = ArtworkStub.Sources(ArtworkStub.Declining(), ArtworkStub.Resizing());
