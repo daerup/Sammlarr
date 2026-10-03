@@ -78,6 +78,21 @@ public class MdblistServiceTests
 			);
 	}
 
+	[Test]
+	public async Task GetFeedItemsAsync_WhenAnItemWithoutIdsHasABlankTitleAndNoYear_LeavesBothUnknown()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("""{"movies":[{"title":" ","release_year":0}],"shows":[]}""");
+		var testee = CreateTestee(handler, out _);
+
+		var results = await testee.GetFeedItemsAsync("blank").ToListAsync();
+
+		await Assert
+			.That(results.Single())
+			.IsOfUnionType<MediaLookup, UnmatchedMedia>()
+			.And.Multiple(async unmatched => await Assert.That(unmatched.Details).IsEqualTo(new MovieDetails()));
+	}
+
 	private static MdblistService CreateTestee(
 		HttpMessageHandler handler,
 		out Mock<IMediaService> media,

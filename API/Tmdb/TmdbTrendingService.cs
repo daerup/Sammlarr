@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using API.Tmdb.Types;
 using Contracts;
@@ -45,13 +44,17 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		return new PagedResult<MediaLookup>(finalItems, result.TotalPages);
 	}
 
-	private static Some<IdentifyHints> BuildHints(TmdbTypes.Trending.Result response) =>
-		new IdentifyHints
-		{
-			Title = response.DisplayTitle,
-			Year = response.AvailableYear,
-			MediaType = response.MediaType,
-		};
+	private static Optional<IdentifyHints> BuildHints(TmdbTypes.Trending.Result response)
+	{
+		return Optional
+			.Of(response.DisplayTitle)
+			.Map(title => new IdentifyHints
+			{
+				Title = title,
+				Year = response.Released?.Year ?? 0,
+				MediaType = response.MediaType,
+			});
+	}
 
 	private MediaLookup BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome)
 	{
@@ -66,16 +69,11 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		return MediaDetails.Empty(response.MediaType) with
 		{
 			Title = response.DisplayTitle,
-			Summary = response.Overview,
+			Summary = ProviderValues.Text(response.Overview),
 			PosterUrl = artwork.Original(response.PosterPath),
 			BackdropUrl = artwork.Original(response.BackdropPath),
-			ReleaseDate = ParseReleaseDate(response.AvailableDate),
-			Rating = BuildRating(response.VoteAverage),
+			ReleaseDate = response.Released,
+			Rating = TmdbRating.Of(response.VoteAverage, response.VoteCount),
 		};
 	}
-
-	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
-
-	private static RatingSummary BuildRating(double voteAverage) =>
-		voteAverage > 0 ? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, (float)voteAverage)]) : RatingSummary.None;
 }

@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using API.Plex.Types;
@@ -125,27 +124,27 @@ file static class PlexMetadataMappingExtensions
 
 	private static MediaDetails Details(PlexTypes.ById.Metadata result)
 	{
-		return Shape(result.Type, result.Duration > 0 ? TimeSpan.FromMilliseconds(result.Duration) : null, result.SeasonCount, result.EpisodeCount) with
+		return Shape(result.Type, ProviderValues.Milliseconds(result.Duration), result.SeasonCount, result.EpisodeCount) with
 		{
-			Title = result.Title.NullIfBlank(),
-			Tagline = result.Tagline.NullIfBlank(),
-			Summary = result.Summary.NullIfBlank(),
-			PosterUrl = NormalizePlexImageUrl(result.Poster).NullIfBlank(),
-			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
-			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
-			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
+			Title = ProviderValues.Text(result.Title),
+			Tagline = ProviderValues.Text(result.Tagline),
+			Summary = ProviderValues.Text(result.Summary),
+			PosterUrl = NormalizePlexImageUrl(result.Poster),
+			BackdropUrl = NormalizePlexImageUrl(result.Art),
+			ReleaseDate = ProviderValues.Date(result.OriginallyAvailableAt),
+			Genres = ProviderValues.Genres(result.Genre?.Select(genre => genre.Tag)),
 		};
 	}
 
 	private static MediaDetails Details(PlexTypes.Search.Metadata result)
 	{
-		return Shape(result.Type, result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null, result.SeasonCount, result.EpisodeCount) with
+		return Shape(result.Type, ProviderValues.Milliseconds(result.Duration), result.SeasonCount, result.EpisodeCount) with
 		{
-			Title = result.Title.NullIfBlank(),
-			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank(),
-			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
-			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt) ?? ReleaseYear(result.Year),
-			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
+			Title = ProviderValues.Text(result.Title),
+			PosterUrl = NormalizePlexImageUrl(result.Thumb),
+			BackdropUrl = NormalizePlexImageUrl(result.Art),
+			ReleaseDate = ProviderValues.Date(result.OriginallyAvailableAt) ?? ProviderValues.YearStart(result.Year),
+			Genres = ProviderValues.Genres(result.Genre?.Select(genre => genre.Tag)),
 		};
 	}
 
@@ -156,8 +155,8 @@ file static class PlexMetadataMappingExtensions
 			MediaType.Movie => new MovieDetails { Runtime = duration },
 			MediaType.Show => new ShowDetails
 			{
-				Seasons = seasons,
-				Episodes = episodes,
+				Seasons = ProviderValues.Count(seasons),
+				Episodes = ProviderValues.Count(episodes),
 				RuntimePerEpisode = duration,
 			},
 			MediaType.Unknown => new UnknownDetails(),
@@ -173,11 +172,6 @@ file static class PlexMetadataMappingExtensions
 		return set;
 	}
 
-	private static IEnumerable<string> GenreTags(IEnumerable<string>? tags)
-	{
-		return (tags ?? []).Where(tag => !string.IsNullOrWhiteSpace(tag)).Distinct(StringComparer.OrdinalIgnoreCase);
-	}
-
 	private static MediaType ParseMediaType(string value)
 	{
 		return value.ToLowerInvariant() switch
@@ -188,15 +182,11 @@ file static class PlexMetadataMappingExtensions
 		};
 	}
 
-	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
-
-	private static DateOnly? ReleaseYear(int year) => year > 0 ? new DateOnly(year, 1, 1) : null;
-
-	private static string NormalizePlexImageUrl(string? url)
+	private static string? NormalizePlexImageUrl(string? url)
 	{
 		if (string.IsNullOrWhiteSpace(url))
 		{
-			return string.Empty;
+			return null;
 		}
 
 		if (Uri.TryCreate(url, UriKind.Absolute, out _))

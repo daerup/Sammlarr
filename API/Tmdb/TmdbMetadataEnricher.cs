@@ -1,10 +1,8 @@
 using System.Diagnostics;
-using System.Globalization;
 using API.Tmdb.Types;
 using Contracts.Media.Metadata;
 using Domain.Media;
 using Domain.Media.Metadata;
-using Domain.Providers;
 
 namespace API.Tmdb;
 
@@ -45,15 +43,15 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IMet
 	{
 		return new()
 		{
-			Title = details.Title.NullIfBlank(),
-			Tagline = details.Tagline.NullIfBlank(),
-			Summary = details.Overview.NullIfBlank(),
-			PosterUrl = artwork.Original(details.PosterPath).NullIfBlank(),
-			BackdropUrl = artwork.Original(details.BackdropPath).NullIfBlank(),
-			ReleaseDate = ParseReleaseDate(details.ReleaseDate ?? details.FirstAirDate),
-			Genres = [.. (details.Genres ?? []).Select(g => g.Name).Where(name => !string.IsNullOrWhiteSpace(name))],
-			Rating = BuildRating(details),
-			Runtime = details.Runtime is > 0 ? TimeSpan.FromMinutes(details.Runtime.Value) : null,
+			Title = ProviderValues.Text(details.Title),
+			Tagline = ProviderValues.Text(details.Tagline),
+			Summary = ProviderValues.Text(details.Overview),
+			PosterUrl = artwork.Original(details.PosterPath),
+			BackdropUrl = artwork.Original(details.BackdropPath),
+			ReleaseDate = details.ReleasedAs(MediaType.Movie),
+			Genres = ProviderValues.Genres(details.Genres?.Select(genre => genre.Name)),
+			Rating = TmdbRating.Of(details.VoteAverage, details.VoteCount),
+			Runtime = ProviderValues.Minutes(details.Runtime),
 		};
 	}
 
@@ -61,24 +59,17 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IMet
 	{
 		return new()
 		{
-			Title = details.Name.NullIfBlank(),
-			Tagline = details.Tagline.NullIfBlank(),
-			Summary = details.Overview.NullIfBlank(),
-			PosterUrl = artwork.Original(details.PosterPath).NullIfBlank(),
-			BackdropUrl = artwork.Original(details.BackdropPath).NullIfBlank(),
-			ReleaseDate = ParseReleaseDate(details.FirstAirDate ?? details.ReleaseDate),
-			Genres = [.. (details.Genres ?? []).Select(g => g.Name).Where(name => !string.IsNullOrWhiteSpace(name))],
-			Rating = BuildRating(details),
-			Seasons = details.NumberOfSeasons,
-			Episodes = details.NumberOfEpisodes,
-			RuntimePerEpisode = details.EpisodeRunTime is { Count: > 0 } runtimes && runtimes[0] > 0 ? TimeSpan.FromMinutes(runtimes[0]) : null,
+			Title = ProviderValues.Text(details.Name),
+			Tagline = ProviderValues.Text(details.Tagline),
+			Summary = ProviderValues.Text(details.Overview),
+			PosterUrl = artwork.Original(details.PosterPath),
+			BackdropUrl = artwork.Original(details.BackdropPath),
+			ReleaseDate = details.ReleasedAs(MediaType.Show),
+			Genres = ProviderValues.Genres(details.Genres?.Select(genre => genre.Name)),
+			Rating = TmdbRating.Of(details.VoteAverage, details.VoteCount),
+			Seasons = ProviderValues.Count(details.NumberOfSeasons),
+			Episodes = ProviderValues.Count(details.NumberOfEpisodes),
+			RuntimePerEpisode = ProviderValues.Minutes(details.EpisodeRunTime?.FirstOrDefault()),
 		};
 	}
-
-	private static RatingSummary BuildRating(TmdbTypes.Details details) =>
-		details.VoteAverage is { } vote && vote > 0
-			? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, (float)vote, details.VoteCount)])
-			: RatingSummary.None;
-
-	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
 }

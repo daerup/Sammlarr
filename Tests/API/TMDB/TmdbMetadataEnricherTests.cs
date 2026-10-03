@@ -54,5 +54,40 @@ public class TmdbMetadataEnricherTests
 		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsNull());
 	}
 
+	[Test]
+	public async Task LookUpAsync_WhenTmdbSendsBlankValuesAndZeroCounts_LeavesThoseDetailsUnknown()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""{"id":123,"title":" ","tagline":"","overview":"  ","poster_path":null,"backdrop_path":"","release_date":"","runtime":0,"genres":[{"id":1,"name":" "}],"vote_average":0}"""
+			);
+
+		var result = await CreateTestee(handler).LookUpAsync(Id);
+
+		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Details).IsEqualTo(new MovieDetails()));
+	}
+
+	[Test]
+	public async Task LookUpAsync_ForAShow_ReadsTheFirstAirDateFirstAndTreatsZeroCountsAsUnknown()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""{"id":1396,"name":"Breaking Bad","first_air_date":"2008-01-20","release_date":"1999-01-01","number_of_seasons":0,"number_of_episodes":0,"episode_run_time":[0]}"""
+			);
+
+		var result = await CreateTestee(handler).LookUpAsync(TmdbId.From("1396", MediaType.Show));
+
+		await Assert
+			.That(result)
+			.IsSuccess()
+			.And.Multiple(async found =>
+				await Assert.That(found.Details).IsEqualTo(new ShowDetails { Title = "Breaking Bad", ReleaseDate = new DateOnly(2008, 1, 20) })
+			);
+	}
+
 	private static TmdbMetadataEnricher CreateTestee(MockHttpHandler handler) => new(TmdbApis.Over(handler), new TmdbArtwork(TmdbApis.Options));
 }

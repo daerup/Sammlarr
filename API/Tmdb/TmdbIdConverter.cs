@@ -39,14 +39,21 @@ internal class TmdbIdConverter(TmdbApi tmdbApi) : IExternalIdConverter
 
 	private static IdLookupResult FoundByDetail(TmdbTypes.Details detail, TmdbId tmdbId)
 	{
-		var hints = HintsOf(detail.OriginalTitle ?? detail.OriginalName, detail.AvailableYear, tmdbId.Type);
+		var hints = HintsOf(
+			ProviderValues.Text(detail.OriginalTitle) ?? ProviderValues.Text(detail.OriginalName),
+			detail.ReleasedAs(tmdbId.Type)?.Year ?? 0,
+			tmdbId.Type
+		);
 		return new IdLookupResult([.. IdsOf(detail.ExternalIds, tmdbId.Type)], hints);
 	}
 
 	private static IdLookupResult FoundByFind(TmdbTypes.FindItem item, IExternalMediaId id)
 	{
 		IReadOnlyList<IExternalMediaId> ids = [TmdbId.From(item.Id.ToString(CultureInfo.InvariantCulture), id.Type)];
-		return new IdLookupResult(ids, HintsOf(item.OriginalTitle ?? item.OriginalName, item.AvailableYear, id.Type));
+		return new IdLookupResult(
+			ids,
+			HintsOf(ProviderValues.Text(item.OriginalTitle) ?? ProviderValues.Text(item.OriginalName), item.ReleasedAs(id.Type)?.Year ?? 0, id.Type)
+		);
 	}
 
 	private static IEnumerable<IExternalMediaId> IdsOf(TmdbTypes.ExternalIds? externals, MediaType type)
