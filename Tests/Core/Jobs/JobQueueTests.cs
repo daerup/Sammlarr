@@ -130,15 +130,16 @@ public class JobQueueTests
 	public async Task CancelAsync_ForAJobThatHasNotStarted_AnnouncesItCancelled()
 	{
 		var feedId = FeedId.From(Guid.NewGuid());
+		IJobRequest request = new RunFeed(feedId, new Manual());
 		var (testee, jobs, events) = BuildTestee();
-		jobs.CancelAsync(Any<JobId>(), Any<UserId>(), Any<DateTimeOffset>(), Any()).Returns(Some.Of<IJobRequest>(new RunFeed(feedId, new Manual())));
+		jobs.CancelAsync(Any<JobId>(), Any<UserId>(), Any<DateTimeOffset>(), Any()).Returns(Some.Of(request));
 		List<IEvent> seen = [];
 		events.Published += seen.Add;
 
 		var cancelled = await testee.CancelAsync(JobId.From(Guid.NewGuid()));
 
 		jobs.NextWaitingAsync(Any()).WasCalled(Times.Once);
-		await Assert.That(cancelled).IsTrue();
+		await Assert.That(cancelled).IsSome().And.IsEqualTo(request);
 		await Assert
 			.That(seen.OfType<JobStateChangedEvent>().Single())
 			.IsEqualTo(new JobStateChangedEvent(TestCurrentUser.DefaultId, JobKind.FeedRun, feedId.ToString(), JobState.Cancelled));
@@ -155,7 +156,7 @@ public class JobQueueTests
 		var cancelled = await testee.CancelAsync(JobId.From(Guid.NewGuid()));
 
 		jobs.NextWaitingAsync(Any()).WasCalled(Times.Never);
-		await Assert.That(cancelled).IsFalse();
+		await Assert.That(cancelled).IsNone();
 		await Assert.That(seen).IsEmpty();
 	}
 

@@ -29,7 +29,7 @@ public class MonadBranchAnalyzerTests
 
 		await Assert.That(diagnostics).Count().IsEqualTo(1);
 		await Assert.That(diagnostics[0].Id).IsEqualTo("SAM0003");
-		await Assert.That(diagnostics[0].Severity).IsEqualTo(DiagnosticSeverity.Warning);
+		await Assert.That(diagnostics[0].Severity).IsEqualTo(DiagnosticSeverity.Error);
 		await Assert.That(diagnostics[0].GetMessage()).Contains(proposal);
 	}
 

@@ -52,12 +52,11 @@ internal sealed class JobQueue(
 		return result;
 	}
 
-	public async Task<bool> CancelAsync(JobId id, CancellationToken cancellationToken = default)
+	public async Task<Optional<IJobRequest>> CancelAsync(JobId id, CancellationToken cancellationToken = default)
 	{
 		return await jobs.CancelAsync(id, currentUser.Id, clock.Now, cancellationToken)
 			.Apply(_ => alarm.ArmAsync(cancellationToken))
-			.Apply(request => announcer.Announce(new JobStateChangedEvent(currentUser.Id, request.Kind, request.Key, JobState.Cancelled)))
-			.IsSome();
+			.Apply(request => announcer.Announce(new JobStateChangedEvent(currentUser.Id, request.Kind, request.Key, JobState.Cancelled)));
 	}
 
 	private async Task<bool> QueueSyncBehindFeedsAsync(IJobRequest request, DateTimeOffset now, CancellationToken cancellationToken)

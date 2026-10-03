@@ -92,12 +92,15 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 			)
 			.FirstOrNoneAsync(externals => ContainsAnyCandidate(externals, known), cancellationToken);
 
-		if (match.IsNone() && unavailable)
+		return match.ApplyNone(() => FailWhenUnavailable(unavailable));
+	}
+
+	private static void FailWhenUnavailable(bool unavailable)
+	{
+		if (unavailable)
 		{
 			throw new ProviderUnavailableException(MediaProvider.Plex);
 		}
-
-		return match;
 	}
 
 	private static IEnumerable<FoundMedia> RankByHints(IReadOnlyList<FoundMedia> results, string title, int year)

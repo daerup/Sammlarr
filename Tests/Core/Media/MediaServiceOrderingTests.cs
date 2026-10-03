@@ -122,7 +122,7 @@ public class MediaServiceOrderingTests
 	private static IMediaService CreateTestee(RequestBuilder builder)
 	{
 		var mediaRepo = IMediaRepository.Mock();
-		var unmatchedCache = ITypedMemoryCache<string, bool>.Mock();
+		var unmatchedCache = TestUnmatchedCache.Empty();
 
 		var externalToId = builder.Items.Where(i => i.Identifies).ToDictionary(i => (IExternalMediaId)i.External, i => i.MediaId.Value);
 

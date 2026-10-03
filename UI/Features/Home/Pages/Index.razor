@@ -232,14 +232,10 @@ else
 
         try
         {
-            if (await row.Job.Map(job => JobQueue.CancelAsync(job, _cancellation.Token)).GetValueOr(false))
-            {
-                Notifier.Success($"{row.Name} was cancelled.");
-            }
-            else
-            {
-                Notifier.Info($"{row.Name} already started, so it could not be cancelled.");
-            }
+            await row.Job
+                .Map(job => JobQueue.CancelAsync(job, _cancellation.Token))
+                .Apply(_ => Notifier.Success($"{row.Name} was cancelled."))
+                .ApplyNone(() => Notifier.Info($"{row.Name} already started, so it could not be cancelled."));
         }
         catch (Exception ex)
         {

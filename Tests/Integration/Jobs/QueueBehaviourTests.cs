@@ -271,7 +271,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var cancelled = await Testee.CancelAsync(queued.Id);
 
-		await Assert.That(cancelled).IsTrue();
+		await Assert.That(cancelled).IsSome().And.IsEqualTo(DocumentaryFeed);
 		await Assert.That((await JobAsync(queued.Id)).State).IsEqualTo(JobState.Cancelled);
 		await Assert.That(await RunNextJobAsync()).IsFalse();
 	}
@@ -306,7 +306,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var cancelled = await WhileTheNextJobRunsAsync(host.HoldMdblistFeed("documentaries"), () => Testee.CancelAsync(running.Id));
 
-		await Assert.That(cancelled).IsFalse();
+		await Assert.That(cancelled).IsNone();
 		await Assert.That((await JobAsync(running.Id)).State).IsEqualTo(JobState.Done);
 	}
 

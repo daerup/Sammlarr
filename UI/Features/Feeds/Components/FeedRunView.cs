@@ -140,12 +140,10 @@ internal static class FeedRunView
 		};
 	}
 
-	internal static string? Problem(IFeedPlan plan)
+	internal static string? Problem(IFeedPlan plan) => plan.SourceFailure.Map(_ => SourceProblem(plan)).ToNullable();
+
+	private static string SourceProblem(IFeedPlan plan)
 	{
-		if (plan.SourceFailure.IsNone())
-		{
-			return null;
-		}
 		return plan.Verdicts.Count + plan.Unmatched.Count == 0
 			? "The source could not be read, so this run would change nothing."
 			: "The source failed partway through, so this run would hold back removals.";

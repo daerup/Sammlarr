@@ -14,7 +14,7 @@ public sealed class MonadBranchAnalyzer : DiagnosticAnalyzer
 		"Act on an Optional or a Result through its helpers, not through a bool",
 		"'{0}' is read as a bool only to choose a branch; write {1}",
 		"Design",
-		DiagnosticSeverity.Warning,
+		DiagnosticSeverity.Error,
 		isEnabledByDefault: true,
 		description: "See docs/architecture section 6, Absence and failure."
 	);

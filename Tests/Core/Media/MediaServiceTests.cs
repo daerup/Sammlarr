@@ -469,7 +469,7 @@ public class MediaServiceTests
 		dateTimeProvider.Now.Returns(_now);
 		var mediaRepo = IMediaRepository.Mock();
 		var search = IMediaSearchProvider.Mock();
-		var unmatchedCache = ITypedMemoryCache<string, bool>.Mock();
+		var unmatchedCache = TestUnmatchedCache.Empty();
 
 		mediaRepo
 			.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
