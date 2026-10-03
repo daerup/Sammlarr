@@ -1,6 +1,7 @@
 using Core.Media;
 using Domain.Media;
 using Domain.Providers;
+using TestInfrastructure;
 
 namespace Core.Tests.Media;
 
@@ -19,9 +20,10 @@ public class EnricherChoiceTests
 						[Option(MediaProvider.Tvdb, MediaField.Tagline), Option(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Summary)],
 						Now
 					)
-					?.Provider
+					.Map(option => option.Provider)
 			)
-			.IsEqualTo(MediaProvider.Tmdb);
+			.IsSome()
+			.And.IsEqualTo(MediaProvider.Tmdb);
 
 	[Test]
 	public async Task Next_ForEqualCoverage_PicksTheLessBusyEnricher() =>
@@ -36,9 +38,10 @@ public class EnricherChoiceTests
 						],
 						Now
 					)
-					?.Provider
+					.Map(option => option.Provider)
 			)
-			.IsEqualTo(MediaProvider.Tvdb);
+			.IsSome()
+			.And.IsEqualTo(MediaProvider.Tvdb);
 
 	[Test]
 	public async Task Next_SkipsABlockedEnricherAndOneThatCannotFillAnything() =>
@@ -53,7 +56,7 @@ public class EnricherChoiceTests
 					Now
 				)
 			)
-			.IsNull();
+			.IsNone();
 
 	[Test]
 	public async Task Next_ForAnEnricherWhoseBlockHasPassed_PicksItAgain() =>
@@ -61,9 +64,10 @@ public class EnricherChoiceTests
 			.That(
 				EnricherChoice
 					.Next(MediaField.Tagline, [Option(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(-1)) })], Now)
-					?.Provider
+					.Map(option => option.Provider)
 			)
-			.IsEqualTo(MediaProvider.Tmdb);
+			.IsSome()
+			.And.IsEqualTo(MediaProvider.Tmdb);
 
 	[Test]
 	public async Task BlockedFills_NamesTheFieldsOfTheBlockedEnrichersThatCouldHaveHelped() =>

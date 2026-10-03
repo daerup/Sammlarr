@@ -495,6 +495,18 @@ public class OptionalExtensionsTests
 	}
 
 	[Test]
+	public async Task FirstOrNone_WhenAnItemMatches_IsTheFirstMatch()
+	{
+		await Assert.That(new[] { "a", "bb", "ccc" }.FirstOrNone(s => s.Length >= 2)).IsSome().And.IsEqualTo("bb");
+	}
+
+	[Test]
+	public async Task FirstOrNone_WhenNoItemMatches_IsNone()
+	{
+		await Assert.That(new[] { "a" }.FirstOrNone(s => s.Length >= 2)).IsNone();
+	}
+
+	[Test]
 	public async Task When_WhenConditionTrue_KeepsValue()
 	{
 		Optional<int> optional = Some.Of(5);

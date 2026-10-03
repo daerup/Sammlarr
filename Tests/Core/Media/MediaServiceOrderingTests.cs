@@ -126,7 +126,7 @@ public class MediaServiceOrderingTests
 
 		var externalToId = builder.Items.Where(i => i.Identifies).ToDictionary(i => (IExternalMediaId)i.External, i => i.MediaId.Value);
 
-		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
+		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => [.. Enumerable.Repeat<Optional<MediaIdentity>>(new None(), groups.Count)]);
 		mediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
 
 		var storedMap = builder
@@ -191,16 +191,17 @@ public class MediaServiceOrderingTests
 
 internal static class OrderingAssertionExtensions
 {
-	public static List<int> ExtractTargetExternals(this IEnumerable<Result<MediaIdentity>> results) =>
+	public static List<int> ExtractTargetExternals(this IEnumerable<Result<MediaIdentity>> results)
+	{
+		return
 		[
-			.. results
-				.Where(r => r is Success<MediaIdentity>)
-				.Select(r => r is Success<MediaIdentity>(var identity) ? int.Parse(identity.Externals.OfProvider(MediaProvider.Tmdb)!.Value) : 0),
+			.. results.Select(r => r.ToOptional()).WhereSome().Select(identity => int.Parse(identity.Externals.First(id => id.Source == MediaProvider.Tmdb).Value)),
 		];
+	}
 
 	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<MatchedMedia>> results)
 	{
-		return [.. results.Select(r => r is Success<MatchedMedia>(var matched) ? (MediaId?)matched.Identity.Id : null)];
+		return [.. results.Select(r => r.Match(matched => (MediaId?)matched.Identity.Id, _ => null))];
 	}
 
 	public static List<MediaId?> ExtractMediaIds(this IEnumerable<MediaMatchResult> results)
@@ -238,7 +239,7 @@ internal sealed record TestItem
 					BackdropUrl = "https://example.com/b.jpg",
 					ReleaseDate = new DateOnly(2024, 1, 1),
 					Genres = ["Action"],
-					Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
+					Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, Some.Of(100))]),
 					Runtime = TimeSpan.FromMinutes(120),
 				}
 			),

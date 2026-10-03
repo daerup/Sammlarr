@@ -179,20 +179,13 @@ internal sealed class MediaService(
 	{
 		var sink = await activeSink.ResolveAsync(cancellationToken);
 		var wanted = ids.ToList();
-		var sources = new HashSet<MediaProvider>();
-		foreach (var type in Enum.GetValues<MediaType>())
-		{
-			if (sink.AddressedBy(type) is Some<MediaProvider>(var addressed))
-			{
-				sources.Add(addressed);
-			}
-		}
+		var sources = Enum.GetValues<MediaType>().Select(sink.AddressedBy).WhereSome().ToHashSet();
 		var found = new Dictionary<MediaId, IExternalMediaId>();
 		foreach (var source in sources)
 		{
 			foreach (var (id, external) in await mediaRepository.GetExternalsAsync(wanted, source, cancellationToken))
 			{
-				if (sink.AddressedBy(external.Type) is Some<MediaProvider>(var expected) && expected == source)
+				if (sink.AddressedBy(external.Type).Match(expected => expected == source, () => false))
 				{
 					found[id] = external;
 				}
@@ -225,15 +218,23 @@ internal sealed class MediaService(
 		CancellationToken cancellationToken
 	)
 	{
-		if (sink.AddressedBy(request.Type) is not Some<MediaProvider>(var target))
-		{
-			return Error.From($"The sink cannot address {request.Type} titles.");
-		}
-		if (FindStored(request, target, stored, buffer) is Some<IdentityMatch>(var found))
-		{
-			return Success.Of(found);
-		}
-		return await FindSinkIdAsync(request, target, cancellationToken);
+		return await sink.AddressedBy(request.Type)
+			.Match(
+				target => IdentifyForAsync(request, target, stored, buffer, cancellationToken),
+				() => ValueTask.FromResult<Result<IdentityMatch>>(Error.From($"The sink cannot address {request.Type} titles."))
+			);
+	}
+
+	private ValueTask<Result<IdentityMatch>> IdentifyForAsync(
+		IdentifyRequest request,
+		MediaProvider target,
+		IReadOnlyDictionary<IExternalMediaId, StoredMedia> stored,
+		MediaWriteBuffer buffer,
+		CancellationToken cancellationToken
+	)
+	{
+		return FindStored(request, target, stored, buffer)
+			.Match(found => ValueTask.FromResult<Result<IdentityMatch>>(Success.Of(found)), () => FindSinkIdAsync(request, target, cancellationToken));
 	}
 
 	private static Optional<IdentityMatch> FindStored(
@@ -243,25 +244,25 @@ internal sealed class MediaService(
 		MediaWriteBuffer buffer
 	)
 	{
-		var matches = request.Candidates.Select(stored.GetValueOrDefault).Where(r => r is not null).Select(r => r!).DistinctBy(r => r.Identity.Id).ToList();
+		var matches = request.Candidates.Select(stored.GetValueOrNone).WhereSome().DistinctBy(r => r.Identity.Id).ToList();
 		if (matches.Count > 1)
 		{
 			throw new MediaIdentityConflictException([.. matches.Select(m => m.Identity.Id)], [.. request.Candidates]);
 		}
-		var match = matches.FirstOrDefault();
-		if (match is null || match.Identity.Externals.OfProvider(target) is null)
-		{
-			return new None();
-		}
+		return matches.FirstOrNone(match => match.Identity.Externals.OfProvider(target).IsSome()).Map(match => Matched(request, match, buffer));
+	}
+
+	private static IdentityMatch Matched(IdentifyRequest request, StoredMedia match, MediaWriteBuffer buffer)
+	{
 		var matched = match.Identity;
 		var missing = request.Candidates.Where(c => !matched.Externals.Contains(c)).ToList();
 		if (missing.Count == 0)
 		{
-			return Some.Of(new IdentityMatch(matched, Some.Of(match)));
+			return new IdentityMatch(matched, Some.Of(match));
 		}
 		var merged = matched with { Externals = matched.Externals + missing };
 		buffer.AddIdentity(merged);
-		return Some.Of(new IdentityMatch(merged, Some.Of(match)));
+		return new IdentityMatch(merged, Some.Of(match));
 	}
 
 	private async ValueTask<Result<IdentityMatch>> FindSinkIdAsync(IdentifyRequest request, MediaProvider target, CancellationToken cancellationToken)
@@ -292,12 +293,11 @@ internal sealed class MediaService(
 		CancellationToken cancellationToken
 	)
 	{
-		if (identityMatch is not Success<IdentityMatch>(var r))
-		{
-			return request.Unmatched();
-		}
-		var loaded = await LoadDetailsAsync(r.Identity, r.Stored, buffer, cancellationToken);
-		return loaded is Success<MatchedMedia>(var matched) ? matched : request.Unmatched();
+		var loaded = await identityMatch.Match(
+			match => LoadDetailsAsync(match.Identity, match.Stored, buffer, cancellationToken),
+			error => ValueTask.FromResult<Result<MatchedMedia>>(error)
+		);
+		return loaded.Match(matched => (MediaMatchResult)matched, _ => request.Unmatched());
 	}
 
 	private async ValueTask<Result<MatchedMedia>> LoadDetailsAsync(
@@ -377,15 +377,12 @@ file static class IdentifyRequestExtensions
 	{
 		public MediaMatchResult Unmatched()
 		{
-			var hint = request.Hints is Some<IdentifyHints>(var hints) ? hints : null;
-			return new UnmatchedMedia(
-				[.. request.Candidates],
-				MediaDetails.Empty(hint?.MediaType ?? request.Type) with
-				{
-					Title = hint?.Title,
-					ReleaseDate = hint is { Year: > 0 } year ? new DateOnly(year.Year, 1, 1) : null,
-				}
-			);
+			return new UnmatchedMedia([.. request.Candidates], request.Hints.Map(Hinted).GetValueOr(() => MediaDetails.Empty(request.Type)));
 		}
+	}
+
+	private static MediaDetails Hinted(IdentifyHints hints)
+	{
+		return MediaDetails.Empty(hints.MediaType) with { Title = hints.Title, ReleaseDate = hints.Year > 0 ? new DateOnly(hints.Year, 1, 1) : null };
 	}
 }

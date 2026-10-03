@@ -83,11 +83,7 @@ internal sealed class MediaIdResolver(
 				return outcome;
 			}
 
-			outcome.Found.Apply(found =>
-			{
-				ids = [.. ids.Concat(found.Ids).Distinct()];
-				current = found.Hints.Or(current);
-			});
+			outcome.Found.Apply(found => ids = [.. ids.Concat(found.Ids).Distinct()]).Apply(found => current = found.Hints.Or(current));
 		}
 
 		return new StepOutcome(ids.Any(id => id.Source == target) ? Some.Of(new IdLookupResult(ids, current)) : new None(), false);
@@ -163,7 +159,7 @@ internal sealed class MediaIdResolver(
 			var answer = await converter.LookUpAsync(request, cancellationToken);
 			return answer.Match(
 				_ => new LookupAnswer(answer, false),
-				error => error.Exception is ProviderUnavailableException unavailable ? Unavailable(unavailable, down) : new LookupAnswer(answer, false)
+				error => error.CausedBy<ProviderUnavailableException>().Match(unavailable => Unavailable(unavailable, down), () => new LookupAnswer(answer, false))
 			);
 		}
 		catch (ProviderUnavailableException unavailable)

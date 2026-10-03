@@ -2,6 +2,7 @@ using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
+using TestInfrastructure;
 
 namespace Integration.Tests.Browse;
 
@@ -23,7 +24,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(ratings).Count().IsEqualTo(1);
 		await Assert.That(ratings[0].Source).IsEqualTo(MediaProvider.Tmdb);
 		await Assert.That(ratings[0].NormalizedValue).IsEqualTo((float)average);
-		await Assert.That(ratings[0].VoteCount).IsEqualTo(voteCount);
+		await Assert.That(ratings[0].VoteCount).IsEqualTo(Optional.Of(voteCount));
 	}
 
 	[Test]
@@ -55,7 +56,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(ratings).Count().IsEqualTo(1);
 		await Assert.That(ratings[0].NormalizedValue).IsEqualTo(9.5f);
-		await Assert.That(ratings[0].VoteCount).IsEqualTo(50000);
+		await Assert.That(ratings[0].VoteCount).IsSome().And.IsEqualTo(50000);
 	}
 
 	private async Task<IReadOnlyList<MediaRating>> FetchTmdbRatings(IExternalMediaId id)

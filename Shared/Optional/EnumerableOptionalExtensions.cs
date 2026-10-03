@@ -15,6 +15,20 @@ public static class EnumerableOptionalExtensions
 		return new None();
 	}
 
+	public static Optional<T> FirstOrNone<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+		where T : notnull
+	{
+		foreach (var item in source)
+		{
+			if (predicate(item))
+			{
+				return Some.Of(item);
+			}
+		}
+
+		return new None();
+	}
+
 	public static Optional<TValue> GetValueOrNone<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> source, TKey key)
 		where TValue : notnull
 	{

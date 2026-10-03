@@ -56,7 +56,7 @@ public class MonadPatternAnalyzerTests
 	[Arguments("Optional<int> o = DateTime.Now.DayOfWeek is DayOfWeek.Monday ? Some.Of(1) : new None(); return o;")]
 	[Arguments("var list = new List<int>(); Optional<int> o = list is { Count: > 0 } ? Some.Of(list[0]) : new None(); return o;")]
 	[Arguments("return x.Map(v => v + 1).GetValueOr(0);")]
-	[Arguments("return r.Match(v => false, e => e is { Exception: InvalidOperationException });")]
+	[Arguments("return r.Match(v => false, e => e.CausedBy<InvalidOperationException>().IsSome());")]
 	[Arguments("await x.Apply(v => Task.CompletedTask); return null;")]
 	[Arguments("x.Apply(v => A()); return null;")]
 	public async Task Analyze_ForAHelperChainOrAnAllowedGuard_ReportsNothing(string body)

@@ -21,7 +21,7 @@ internal sealed class ProviderCapacity(ProviderConcurrencyGates gates, IDateTime
 
 	public ProviderLoad Of(MediaProvider provider)
 	{
-		Optional<DateTimeOffset> blockedUntil = _blockedUntil.TryGetValue(provider, out var until) ? Some.Of(until) : new None();
+		var blockedUntil = _blockedUntil.GetValueOrNone(provider);
 		return new ProviderLoad(blockedUntil, gates.Busy(provider), _maxWaits.GetValueOrDefault(provider));
 	}
 

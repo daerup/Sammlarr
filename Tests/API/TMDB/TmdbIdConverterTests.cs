@@ -121,7 +121,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(TvdbId.From("81189", MediaType.Show)));
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsTypeOf<ProviderUnavailableException>());
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<ProviderUnavailableException>()).IsSome());
 	}
 
 	[Test]
@@ -192,7 +192,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(BreakingBad));
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsTypeOf<ProviderUnavailableException>());
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<ProviderUnavailableException>()).IsSome());
 	}
 
 	[Test]

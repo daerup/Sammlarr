@@ -6,6 +6,6 @@ public static class ExternalMediaIds
 {
 	extension(IEnumerable<IExternalMediaId> externals)
 	{
-		public IExternalMediaId? OfProvider(MediaProvider provider) => externals.FirstOrDefault(id => id.Source == provider);
+		public Optional<IExternalMediaId> OfProvider(MediaProvider provider) => externals.FirstOrNone(id => id.Source == provider);
 	}
 }

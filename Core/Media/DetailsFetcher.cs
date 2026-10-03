@@ -27,7 +27,7 @@ internal sealed class DetailsFetcher(
 	private Task<Result<MatchedMedia>> LookUpAsync(MediaIdentity identity, SearchProvider provider, CancellationToken cancellationToken)
 	{
 		var providerMedia = provider.AsMediaProvider();
-		var external = identity.Externals.OfProvider(providerMedia) ?? identity.Externals.First();
+		var external = identity.Externals.OfProvider(providerMedia).GetValueOr(() => identity.Externals.First());
 		return searchIndex[provider]
 			.LookUpAsync(external, cancellationToken)
 			.When(found => found.Fits(identity.Type), "the details could not be fetched")
@@ -47,22 +47,16 @@ internal sealed class DetailsFetcher(
 		while (current.Details.Missing is var missing && missing is not MediaField.None)
 		{
 			var options = Options(current, missing, asked);
-			if (EnricherChoice.Next(missing, options, now) is not { } next)
+			if (EnricherChoice.Next(missing, options, now) is not Some<EnricherOption>(var next))
 			{
 				unconfirmed |= EnricherChoice.BlockedFills(missing, options, now);
 				break;
 			}
 
 			asked.Add(next.Provider);
-			switch (await enricherIndex[next.Provider].LookUpAsync(next.Id, cancellationToken))
-			{
-				case Success<FoundMedia>(var found) when found.Fits(current.Details.Type):
-					current = Merge(current, found);
-					break;
-				case Error { Exception: ProviderUnavailableException }:
-					unconfirmed |= next.Fills;
-					break;
-			}
+			var answer = await enricherIndex[next.Provider].LookUpAsync(next.Id, cancellationToken);
+			answer.ToOptional().When(found => found.Fits(current.Details.Type)).Apply(found => current = Merge(current, found));
+			unconfirmed |= answer.Match(_ => MediaField.None, error => error.CausedBy<ProviderUnavailableException>().Match(next.Fills, MediaField.None));
 		}
 		buffer.Add(current, new CachedDetails(current.Details, now, current.Details.Missing.Except(unconfirmed)));
 		return current;
@@ -79,17 +73,21 @@ internal sealed class DetailsFetcher(
 
 	private List<EnricherOption> Options(MatchedMedia current, MediaField missing, IReadOnlySet<MediaProvider> asked)
 	{
-		var options = new List<EnricherOption>();
-		foreach (var provider in Enum.GetValues<EnricherProvider>().Select(enricher => enricher.AsMediaProvider()))
-		{
-			if (!asked.Contains(provider) && current.Identity.Externals.OfProvider(provider) is { } id)
-			{
-				var fills = enricherIndex[provider].Fills;
-				var load = capacity.Of(provider);
-				var unavoidable = fills.Overlaps(MediaField.Rating) && missing.Overlaps(MediaField.Rating);
-				options.Add(new EnricherOption(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load));
-			}
-		}
-		return options;
+		return
+		[
+			.. Enum.GetValues<EnricherProvider>()
+				.Select(enricher => enricher.AsMediaProvider())
+				.Where(provider => !asked.Contains(provider))
+				.Select(provider => current.Identity.Externals.OfProvider(provider).Map(id => Option(provider, id, missing)))
+				.WhereSome(),
+		];
+	}
+
+	private EnricherOption Option(MediaProvider provider, IExternalMediaId id, MediaField missing)
+	{
+		var fills = enricherIndex[provider].Fills;
+		var load = capacity.Of(provider);
+		var unavoidable = fills.Overlaps(MediaField.Rating) && missing.Overlaps(MediaField.Rating);
+		return new EnricherOption(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load);
 	}
 }

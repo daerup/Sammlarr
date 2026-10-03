@@ -471,9 +471,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 			.IsSuccess()
 			.And.Multiple(async identity =>
 			{
-				var external = identity.Externals.OfProvider(expected.Provider);
-				await Assert.That(external).IsNotNull();
-				await Assert.That(external!.Value).IsEqualTo(expected.Value);
+				await Assert.That(identity.Externals.OfProvider(expected.Provider).Map(external => external.Value)).IsSome().And.IsEqualTo(expected.Value);
 			});
 
 	private async Task AssertStored(params ProviderId[] ids)

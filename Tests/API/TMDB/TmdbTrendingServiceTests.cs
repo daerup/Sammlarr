@@ -34,7 +34,9 @@ public class TmdbTrendingServiceTests
 			.And.Multiple(async unmatched =>
 				await Assert
 					.That(unmatched.Details)
-					.IsEqualTo(new MovieDetails { ReleaseDate = new DateOnly(2024, 5, 1), Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 6.5f, 120)]) })
+					.IsEqualTo(
+						new MovieDetails { ReleaseDate = new DateOnly(2024, 5, 1), Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 6.5f, Some.Of(120))]) }
+					)
 			);
 		media.IdentifyAsync(Arg.Is<IEnumerable<IdentifyRequest>>(requests => requests != null && requests.Single().Hints.IsNone()), Any()).WasCalled(Times.Once);
 	}

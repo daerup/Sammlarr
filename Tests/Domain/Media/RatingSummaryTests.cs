@@ -1,5 +1,6 @@
 using Domain.Media;
 using Domain.Providers;
+using TestInfrastructure;
 
 namespace Domain.Tests.Media;
 
@@ -10,7 +11,7 @@ public class RatingSummaryTests
 	{
 		var summary = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8f)]);
 
-		await Assert.That(summary.Average).IsEqualTo(8f);
+		await Assert.That(summary.Average).IsSome().And.IsEqualTo(8f);
 		await Assert.That(summary.Sources.Count).IsEqualTo(1);
 	}
 
@@ -20,7 +21,7 @@ public class RatingSummaryTests
 		var summary = RatingSummary.From([]);
 
 		await Assert.That(summary).IsEqualTo(RatingSummary.None);
-		await Assert.That(summary.Average).IsNull();
+		await Assert.That(summary.Average).IsNone();
 	}
 
 	[Test]

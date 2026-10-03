@@ -13,7 +13,7 @@ namespace Integration.Tests.Persistence;
 public class MediaDetailsNullableMigrationTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	private const string BeforeNullableDetails = "20261002083510_RenameConfirmedMissingToConfirmedAbsent";
-	private static readonly RatingSummary Rated = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.9f, 13000)]);
+	private static readonly RatingSummary Rated = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.9f, Some.Of(13000))]);
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 

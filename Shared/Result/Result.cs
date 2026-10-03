@@ -3,17 +3,23 @@ namespace Shared;
 public sealed record Error
 {
 	public string Reason { get; }
-	public Exception? Exception { get; }
+	public Optional<Exception> Exception { get; }
 
-	private Error(string reason, Exception? exception)
+	private Error(string reason, Optional<Exception> exception)
 	{
 		Reason = reason;
 		Exception = exception;
 	}
 
-	public static Error From(string reason) => new(reason, null);
+	public static Error From(string reason) => new(reason, new None());
 
-	public static Error From(Exception exception) => new(exception.Message, exception);
+	public static Error From(Exception exception) => new(exception.Message, Some.Of(exception));
+
+	public Optional<TException> CausedBy<TException>()
+		where TException : Exception
+	{
+		return Exception.When(exception => exception is TException).Map(exception => (TException)exception);
+	}
 }
 
 public record Success<T>(T Value) where T : notnull
