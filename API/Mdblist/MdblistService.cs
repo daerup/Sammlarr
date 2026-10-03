@@ -31,7 +31,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		}
 	}
 
-	private async IAsyncEnumerable<ResolveRequest> BuildRequestsAsync(
+	private async IAsyncEnumerable<IdentifyRequest> BuildRequestsAsync(
 		string identifier,
 		ChannelWriter<MediaLookup> unmatched,
 		[EnumeratorCancellation] CancellationToken cancellationToken
@@ -47,7 +47,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 			var pairs = page.shows.Select(FeedItemResolution.Show).Concat(page.movies.Select(FeedItemResolution.Movie));
 			foreach (var pair in pairs)
 			{
-				yield return new ResolveRequest(ExtractIds(pair.ListItem.ids, pair.MediaType), BuildHints(pair));
+				yield return new IdentifyRequest(ExtractIds(pair.ListItem.ids, pair.MediaType), BuildHints(pair));
 			}
 		}
 	}
@@ -82,10 +82,10 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		return (page, hasMore);
 	}
 
-	private static Some<ResolutionHints> BuildHints(FeedItemResolution pair)
+	private static Some<IdentifyHints> BuildHints(FeedItemResolution pair)
 	{
 		return Some.Of(
-			new ResolutionHints
+			new IdentifyHints
 			{
 				Title = pair.ListItem.title,
 				Year = pair.ListItem.release_year,

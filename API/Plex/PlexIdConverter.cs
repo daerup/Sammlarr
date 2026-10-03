@@ -35,11 +35,7 @@ internal class PlexIdConverter(PlexApi plexApi) : IExternalIdConverter
 		return plexApi.LookUpExternalsAsync(plexId, cancellationToken).Map(Answer);
 	}
 
-	private async Task<Result<IdLookupResult>> SearchByHintsAsync(
-		ResolutionHints hints,
-		IReadOnlyList<IExternalMediaId> known,
-		CancellationToken cancellationToken
-	)
+	private async Task<Result<IdLookupResult>> SearchByHintsAsync(IdentifyHints hints, IReadOnlyList<IExternalMediaId> known, CancellationToken cancellationToken)
 	{
 		var match = await ResolveByTitleAsync(hints, known, cancellationToken);
 		return match.Map(Answer).ToResult("Plex found no title matching the search.");
@@ -48,7 +44,7 @@ internal class PlexIdConverter(PlexApi plexApi) : IExternalIdConverter
 	private static IdLookupResult Answer(IReadOnlyList<IExternalMediaId> ids) => new(ids, new None());
 
 	private async Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveByTitleAsync(
-		ResolutionHints hints,
+		IdentifyHints hints,
 		IReadOnlyList<IExternalMediaId> known,
 		CancellationToken cancellationToken
 	)

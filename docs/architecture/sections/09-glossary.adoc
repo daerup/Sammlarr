@@ -61,7 +61,7 @@ ratings). The correctness-critical operation; see <<section-runtime-view>>.
 Candidate:: One external id offered as input to resolution. Several candidates for the same title
 are resolved together and merged into a single identity.
 
-ResolutionHints:: Title, year and media type passed alongside the candidates to help a provider
+IdentifyHints:: Title, year and media type passed alongside the candidates to help a provider
 match them to the right title, mainly the Plex title search.
 
 Id converter:: An `IExternalIdConverter`: one provider's id lookups and the `LookUpAsync` that answers them.

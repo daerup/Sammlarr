@@ -2,7 +2,7 @@ using Domain.Media;
 
 namespace Contracts.Media.Conversions;
 
-public record ResolutionHints
+public record IdentifyHints
 {
 	public required string Title { get; init; }
 

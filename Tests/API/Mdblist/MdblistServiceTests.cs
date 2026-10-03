@@ -41,7 +41,7 @@ public class MdblistServiceTests
 		var results = await testee.GetFeedItemsAsync("multi-page").ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
-		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).WasCalled(Times.Once);
+		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -64,7 +64,7 @@ public class MdblistServiceTests
 	private static MdblistService CreateTestee(
 		HttpMessageHandler handler,
 		out Mock<IMediaService> media,
-		Func<IAsyncEnumerable<ResolveRequest>, CancellationToken, IAsyncEnumerable<MediaLookup>>? resolve = null
+		Func<IAsyncEnumerable<IdentifyRequest>, CancellationToken, IAsyncEnumerable<MediaLookup>>? resolve = null
 	)
 	{
 		var apiKeyStore = IApiKeyService.Mock();
@@ -73,7 +73,7 @@ public class MdblistServiceTests
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();
-		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).Returns((requests, token) => (resolve ?? Realize)(requests, token));
+		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).Returns((requests, token) => (resolve ?? Realize)(requests, token));
 		return new MdblistService(client, media.Object, apiKeyStore.Object);
 	}
 
@@ -103,7 +103,7 @@ public class MdblistServiceTests
 	}
 
 	private static async IAsyncEnumerable<MediaLookup> Realize(
-		IAsyncEnumerable<ResolveRequest> requests,
+		IAsyncEnumerable<IdentifyRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
@@ -114,7 +114,7 @@ public class MdblistServiceTests
 	}
 
 	private static async IAsyncEnumerable<MediaLookup> Stall(
-		IAsyncEnumerable<ResolveRequest> requests,
+		IAsyncEnumerable<IdentifyRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{

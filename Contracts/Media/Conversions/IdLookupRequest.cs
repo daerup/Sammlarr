@@ -7,4 +7,4 @@ public union IdLookupRequest(ByIdRequest, ByHintsRequest);
 
 public readonly record struct ByIdRequest(ById Lookup, IExternalMediaId Id);
 
-public readonly record struct ByHintsRequest(ByHints Lookup, ResolutionHints Hints, IReadOnlyList<IExternalMediaId> Known);
+public readonly record struct ByHintsRequest(ByHints Lookup, IdentifyHints Hints, IReadOnlyList<IExternalMediaId> Known);

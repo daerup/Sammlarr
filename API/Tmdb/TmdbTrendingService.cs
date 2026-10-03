@@ -36,7 +36,7 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		unresolvable.ForEach(r => finalItems[r.Index] = BuildUnmatched(r.Item));
 
 		var resolvable = indexed.Except(unresolvable).ToList();
-		var requests = resolvable.Select(x => new ResolveRequest([x.Item.TmdbId], BuildHints(x.Item)));
+		var requests = resolvable.Select(x => new IdentifyRequest([x.Item.TmdbId], BuildHints(x.Item)));
 		var pipeline = media.IdentifyAsync(requests, cancellationToken);
 
 		await foreach (var (identity, entry) in pipeline.ZipAwait(resolvable, cancellationToken))
@@ -46,8 +46,8 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		return new PagedResult<MediaLookup>(finalItems, result.TotalPages);
 	}
 
-	private static Some<ResolutionHints> BuildHints(TmdbTypes.Trending.Result response) =>
-		new ResolutionHints
+	private static Some<IdentifyHints> BuildHints(TmdbTypes.Trending.Result response) =>
+		new IdentifyHints
 		{
 			Title = response.DisplayTitle,
 			Year = DateTimeOffset.TryParse(response.AvailableDate, out var d) ? d.Year : 0,
