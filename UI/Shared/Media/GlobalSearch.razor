@@ -51,7 +51,7 @@
 
     private bool IsWantlisted(MediaId mediaId) => _wantlist.Contains(mediaId);
 
-    private WantlistItem? ItemFor(MediaId mediaId) => _wantlist.Find(mediaId) is Some<WantlistItem>(var item) ? item : null;
+    private Optional<WantlistItem> ItemFor(MediaId mediaId) => _wantlist.Find(mediaId);
 
     private async Task RefreshAsync()
     {

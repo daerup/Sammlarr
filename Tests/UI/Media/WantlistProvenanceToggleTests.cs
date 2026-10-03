@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives.Services;
 using Bunit;
 using Domain.Media;
+using Domain.Providers;
 using Domain.Wantlist;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -41,6 +42,23 @@ public class WantlistProvenanceToggleTests : BunitContext
 		);
 
 		await Assert.That(cut.FindAll(".toggle-dot")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Render_WhenPulledFromTheSink_ColoursTheDotWithItsBrand()
+	{
+		var cut = RenderToggle(isToggled: true, item: new WantlistItem(Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(new SinkOrigin(SinkKind.Plex))));
+		var brand = Services.GetRequiredService<MediaProviderBrandingService>().GetBrandingInfo(MediaProvider.Plex).BrandColor;
+
+		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsEqualTo($"background: {brand}");
+	}
+
+	[Test]
+	public async Task Render_WhenItsFeedWasDeleted_ShowsAMutedDot()
+	{
+		var cut = RenderToggle(isToggled: true, item: new WantlistItem(Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(new OrphanedOrigin("Old feed"))));
+
+		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsEqualTo("background: var(--muted-foreground)");
 	}
 
 	[Test]
@@ -102,7 +120,7 @@ public class WantlistProvenanceToggleTests : BunitContext
 			builder.OpenComponent<WantlistProvenanceToggle>(1);
 			builder.AddAttribute(2, nameof(WantlistProvenanceToggle.Result), Movie());
 			builder.AddAttribute(3, nameof(WantlistProvenanceToggle.IsToggled), IsToggled);
-			builder.AddAttribute(4, nameof(WantlistProvenanceToggle.Item), Item);
+			builder.AddAttribute(4, nameof(WantlistProvenanceToggle.Item), Optional.Of(Item));
 			builder.CloseComponent();
 		}
 	}

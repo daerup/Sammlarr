@@ -11,6 +11,7 @@ using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
@@ -34,8 +35,10 @@ internal static class WantlistStubs
 		return sink;
 	}
 
-	public static WantlistSyncPlanner Planner(Mock<IMediaSink> sink, Mock<IWantlistOutbox> outbox) =>
-		new(Active(sink), EmptyRepository().Object, outbox.Object, NullLogger<WantlistSyncPlanner>.Instance);
+	public static WantlistSyncPlanner Planner(Mock<IMediaSink> sink, Mock<IWantlistOutbox> outbox, ILogger<WantlistSyncPlanner>? logger = null)
+	{
+		return new WantlistSyncPlanner(Active(sink), EmptyRepository().Object, outbox.Object, logger ?? NullLogger<WantlistSyncPlanner>.Instance);
+	}
 
 	public static WantlistSnapshot Wanted(IEnumerable<MediaId> ids) =>
 		new([.. ids.Select(id => new WantlistItem(id, DateTimeOffset.UnixEpoch, new ManualOrigin(ManualSource.Unknown)))]);

@@ -13,6 +13,7 @@ using Domain.Wantlist;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using UI.Shared.Media;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
@@ -24,12 +25,11 @@ public class GlobalSearchTests : BunitContext
 	private const string Movie = "Inception";
 	private const string Person = "Christopher Nolan";
 
-	private static readonly MediaMatchResult Matched = new MatchedMedia(
-		new MediaIdentity(MediaId.New(), [PlexId.From("1", MediaType.Movie)]),
-		new MovieDetails { Title = Movie }
-	);
+	private static readonly MatchedMedia Matched = new(new MediaIdentity(MediaId.New(), [PlexId.From("1", MediaType.Movie)]), new MovieDetails { Title = Movie });
 
 	private static readonly MediaMatchResult Unmatched = new UnmatchedMedia([PlexId.From("123", MediaType.Unknown)], new UnknownDetails { Title = Person });
+
+	private readonly Mock<IWantlistService> _wantlist = IWantlistService.Mock();
 
 	[Before(Test)]
 	public void Setup()
@@ -55,9 +55,8 @@ public class GlobalSearchTests : BunitContext
 			);
 		Services.AddSingleton(providerConfig.Object);
 
-		var wantlist = IWantlistService.Mock();
-		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
-		Services.AddSingleton(wantlist.Object);
+		_wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
+		Services.AddSingleton(_wantlist.Object);
 
 		var blocklist = IBlocklistService.Mock();
 		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
@@ -82,5 +81,20 @@ public class GlobalSearchTests : BunitContext
 		await Assert.That(rows).Count().IsEqualTo(2);
 		await Assert.That(rows.Single(row => row.TextContent.Contains(Movie)).QuerySelectorAll(".search-result-toggle-btn")).IsNotEmpty();
 		await Assert.That(rows.Single(row => row.TextContent.Contains(Person)).QuerySelectorAll(".search-result-toggle-btn")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Search_ForATitleAFeedPutOnTheWantlist_MarksItsToggleWithTheFeedsDot()
+	{
+		var origin = TestFeeds.Origin(new Guid(21, 0, 0, new byte[8]), new Guid(22, 0, 0, new byte[8]), "Documentaries");
+		_wantlist
+			.GetAsync(Any())
+			.Returns(new WantlistSnapshot([new WantlistItem(Matched.Identity.Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(origin))]));
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+
+		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
+
+		await Assert.That(cut.FindAll(".search-result-row").Single(row => row.TextContent.Contains(Movie)).QuerySelectorAll(".toggle-dot")).IsNotEmpty();
 	}
 }

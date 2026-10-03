@@ -44,7 +44,7 @@
                                                        Size="18"
                                                        IsToggled="IsWantlisted"
                                                        IsToggling="_togglingWantlist"
-                                                       Item="@(_item is Some<WantlistItem>(var shown) ? shown : null)"
+                                                       Item="_item"
                                                        OnToggle="ToggleWantlistAsync"/>
                             <BlocklistToggleIcon Result="matched"
                                                  Size="18"
@@ -125,7 +125,7 @@
     private bool _failed;
     private string? _lastImageUrl;
     private MediaId? _loadedFor;
-    private bool IsWantlisted => _item is Some<WantlistItem>;
+    private bool IsWantlisted => _item.IsSome();
     private bool _blocklisted;
     private bool _togglingWantlist;
     private bool _togglingBlocklist;

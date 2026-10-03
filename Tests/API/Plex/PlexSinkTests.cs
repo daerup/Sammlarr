@@ -9,6 +9,7 @@ using Contracts.Wantlist;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist.Outbox;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 using TUnit.Mocks.Http;
@@ -54,6 +55,19 @@ public class PlexSinkTests
 		await Assert.That(snapshot.Unmatched.Single().Details.Title).IsEqualTo("Futurama");
 		await Assert.That(snapshot.Unmatched.Single().Externals.Single().Value).IsEqualTo("plex-42");
 		await Assert.That(snapshot.Unmatched.Single().Details.Type).IsEqualTo(MediaType.Movie);
+	}
+
+	[Test]
+	public async Task GetAsync_WhenAnItemCannotBeMatched_WarnsWithItsTitle()
+	{
+		var logger = ILogger<PlexSink>.Mock();
+		var testee = Sink(BuildWantlistJson(1, CreateMetadata(ratingKey: "plex-42", title: "Futurama")), MatchingNothing(), logger.Object);
+
+		await testee.GetAsync();
+
+		await Assert
+			.That(Mock.Invocations(logger).Where(call => call.Arguments[0] is LogLevel.Warning).Select(call => $"{call.Arguments[2]}"))
+			.IsEquivalentTo(["Plex watchlist item Futurama could not be matched during sync"]);
 	}
 
 	[Test]
@@ -112,17 +126,19 @@ public class PlexSinkTests
 		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, expected)]);
 	}
 
-	private static PlexSink Sink(string json, Mock<IMediaService> media)
+	private static PlexSink Sink(string json, Mock<IMediaService> media, ILogger<PlexSink>? logger = null)
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(json);
-		return Sink(handler, media);
+		return Sink(handler, media, logger);
 	}
 
 	private static PlexSink Sink(HttpStatusCode status, Mock<IMediaService> media) => Sink(Mock.HttpHandler().WithDefaultStatus(status), media);
 
-	private static PlexSink Sink(MockHttpHandler handler, Mock<IMediaService> media) =>
-		new(Client(handler), PlexTestUrls.Instance, media.Object, NullLogger<PlexSink>.Instance);
+	private static PlexSink Sink(MockHttpHandler handler, Mock<IMediaService> media, ILogger<PlexSink>? logger = null)
+	{
+		return new PlexSink(Client(handler), PlexTestUrls.Instance, media.Object, logger ?? NullLogger<PlexSink>.Instance);
+	}
 
 	private static Mock<IMediaService> MatchingAs(MediaId mediaId) => Identifying(request => Success.Of(new MediaIdentity(mediaId, [.. request.Candidates])));
 

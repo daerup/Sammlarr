@@ -15,11 +15,9 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 	public async Task<WantlistPlanResult> PlanAsync(CancellationToken cancellationToken = default)
 	{
 		var sink = await activeSink.ResolveAsync(cancellationToken);
-		return await PlanAsync(sink, cancellationToken) switch
-		{
-			Error error => OnPlanError(error, sink.Kind),
-			Success<WantlistSyncPlan>(var plan) => Project(plan),
-		};
+		return await PlanAsync(sink, cancellationToken)
+			.ApplyError(error => logger.LogWarning("Reading {Sink} failed: {Reason}", sink.Kind, error.Reason))
+			.Match(plan => (WantlistPlanResult)Project(plan), error => new WantlistSyncSinkUnreachable(error.Reason));
 	}
 
 	private async Task<Result<WantlistSyncPlan>> PlanAsync(IMediaSink sink, CancellationToken cancellationToken) =>
@@ -54,12 +52,6 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 
 		await outbox.DropAsync(plan.Redundant, cancellationToken);
 		logger.LogInformation("Dropped {Count} wantlist outbox entries {Sink} already agrees with", plan.Redundant.Count, sink);
-	}
-
-	private WantlistSyncSinkUnreachable OnPlanError(Error error, SinkKind sink)
-	{
-		logger.LogWarning("Reading {Sink} failed: {Reason}", sink, error.Reason);
-		return new WantlistSyncSinkUnreachable(error.Reason);
 	}
 
 	private static WantlistSyncSummary Project(WantlistSyncPlan plan) =>
