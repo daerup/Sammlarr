@@ -7,7 +7,6 @@ using DB.Data.Blocklist;
 using DB.Data.Cleanup;
 using DB.Data.Identity;
 using DB.Data.Media;
-using DB.Data.Media.Metadata;
 using DB.Data.Wantlist;
 using DB.Data.Wantlist.Outbox;
 using Domain.Identity;
@@ -56,23 +55,23 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 			blocklistedImdb.ToExternalIdEntity(blocklistedMedia),
 			purgedId.ToExternalIdEntity(purgedMedia)
 		);
-		var blocklistedMetadata = BuildMetadata(blocklistedMedia, "Blocklisted");
-		var purgedMetadata = BuildMetadata(purgedMedia, "Purged");
-		fixture.Context.MediaMetadata.AddRange(blocklistedMetadata, purgedMetadata);
+		var blocklistedDetails = BuildDetails(blocklistedMedia, "Blocklisted");
+		var purgedDetails = BuildDetails(purgedMedia, "Purged");
+		fixture.Context.MediaDetails.AddRange(blocklistedDetails, purgedDetails);
 		fixture.Context.MediaRatings.AddRange(
 			new MediaRatingRow
 			{
 				Source = MediaProvider.Tmdb,
 				NormalizedValue = 8.0f,
 				VoteCount = 1234,
-				Metadata = blocklistedMetadata,
+				Details = blocklistedDetails,
 			},
 			new MediaRatingRow
 			{
 				Source = MediaProvider.Tmdb,
 				NormalizedValue = 7.0f,
 				VoteCount = 567,
-				Metadata = purgedMetadata,
+				Details = purgedDetails,
 			}
 		);
 		fixture.Context.Blocklist.Add(new BlocklistRow { Media = blocklistedMedia });
@@ -82,7 +81,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await _testee.PurgeAsync();
 
 		using var _ = Assert.Multiple();
-		await Assert.That(await fixture.Context.MediaMetadata.AnyAsync()).IsFalse();
+		await Assert.That(await fixture.Context.MediaDetails.AnyAsync()).IsFalse();
 		await Assert.That(await fixture.Context.MediaRatings.AnyAsync()).IsFalse();
 		await Assert.That(await fixture.Context.Blocklist.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
@@ -99,8 +98,8 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var wantlistedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(wantlistedId.ToExternalIdEntity(wantlistedMedia), wantlistedImdb.ToExternalIdEntity(wantlistedMedia));
-		var metadata = BuildMetadata(wantlistedMedia, "Wantlisted");
-		fixture.Context.MediaMetadata.Add(metadata);
+		var metadata = BuildDetails(wantlistedMedia, "Wantlisted");
+		fixture.Context.MediaDetails.Add(metadata);
 		fixture.Context.Wantlist.Add(new WantlistRow { Media = wantlistedMedia, Origin = WantlistItemOrigin.Manual });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
@@ -154,7 +153,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var sharedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.Add(PlexId.From("9000", MediaType.Movie).ToExternalIdEntity(sharedMedia));
-		fixture.Context.MediaMetadata.Add(BuildMetadata(sharedMedia, "Referenced By Other"));
+		fixture.Context.MediaDetails.Add(BuildDetails(sharedMedia, "Referenced By Other"));
 		await fixture.Context.SaveChangesAsync();
 
 		var adminId = fixture.CurrentUser.Id;
@@ -213,15 +212,15 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var media = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(plexId.ToExternalIdEntity(media), imdbId.ToExternalIdEntity(media));
-		var metadata = BuildMetadata(media, "Cached");
-		fixture.Context.MediaMetadata.Add(metadata);
+		var metadata = BuildDetails(media, "Cached");
+		fixture.Context.MediaDetails.Add(metadata);
 		fixture.Context.MediaRatings.Add(
 			new MediaRatingRow
 			{
 				Source = MediaProvider.Tmdb,
 				NormalizedValue = 8.5f,
 				VoteCount = 999,
-				Metadata = metadata,
+				Details = metadata,
 			}
 		);
 		await fixture.Context.SaveChangesAsync();
@@ -230,7 +229,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await _testee.PurgeMetadataAsync();
 
 		using var _ = Assert.Multiple();
-		await Assert.That(await fixture.Context.MediaMetadata.AnyAsync()).IsFalse();
+		await Assert.That(await fixture.Context.MediaDetails.AnyAsync()).IsFalse();
 		await Assert.That(await fixture.Context.MediaRatings.AnyAsync()).IsFalse();
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.ExternalMediaIds.CountAsync()).IsEqualTo(2);
@@ -244,13 +243,13 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var media = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(plexId.ToExternalIdEntity(media), imdbId.ToExternalIdEntity(media));
-		fixture.Context.MediaMetadata.Add(BuildMetadata(media, "Cached"));
+		fixture.Context.MediaDetails.Add(BuildDetails(media, "Cached"));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
 		await _testee.PurgeMetadataAsync();
 
-		var repository = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(), new MediaWriteLock());
+		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock());
 		var cached = await repository.GetAsync([MediaId.From(media.Id)]);
 
 		using var _ = Assert.Multiple();
@@ -260,8 +259,9 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(cached[0].Cached).IsNone();
 	}
 
-	private static MovieMetadataRow BuildMetadata(MediaRow media, string title) =>
-		new()
+	private static MovieDetailsRow BuildDetails(MediaRow media, string title)
+	{
+		return new()
 		{
 			Media = media,
 			Title = title,
@@ -273,6 +273,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Genres = ["Action"],
 			Runtime = TimeSpan.FromMinutes(120),
 		};
+	}
 
 	private MediaCachePurger Purger(Func<MediaType, Optional<MediaProvider>> addressing, ICurrentUser user)
 	{

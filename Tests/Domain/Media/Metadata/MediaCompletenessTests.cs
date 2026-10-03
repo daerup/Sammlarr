@@ -31,9 +31,9 @@ public class MediaCompletenessTests
 	}
 
 	[Test]
-	public async Task Missing_WhenSeveralFieldsAreBlank_NamesEachOfThem()
+	public async Task Missing_WhenSeveralFieldsAreUnknown_NamesEachOfThem()
 	{
-		var movie = MediaFakes.CompleteMovieDetails() with { Genres = [], Tagline = " ", BackdropUrl = null };
+		var movie = MediaFakes.CompleteMovieDetails() with { Genres = [], Tagline = null, BackdropUrl = null };
 
 		await Assert.That(movie.Missing).IsEqualTo(MediaField.Genres | MediaField.Tagline | MediaField.Backdrop);
 	}

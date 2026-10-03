@@ -100,7 +100,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_WhenThePosterIsEmptyPastTheCooldown_RefetchesIt()
+	public async Task GetDetailsAsync_WhenThePosterIsMissingPastTheCooldown_RefetchesIt()
 	{
 		host.SetCurrentTime(At(6, 1, 11, 30));
 		var fightClub = await host.Movie(TestMedia.FightClub)
@@ -371,20 +371,20 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	private async Task AssertCachedAs(MediaId mediaId, string title, DateTimeOffset fetched)
 	{
 		host.ScopedDbContext.ChangeTracker.Clear();
-		var metadata = await host.ScopedDbContext.MediaMetadata.AsNoTracking().FirstAsync(entry => entry.MediaId == mediaId.Value);
-		await Assert.That(metadata.Title).IsEqualTo(title);
-		await Assert.That(metadata.LastFetchedAt).IsEqualTo(fetched);
+		var details = await host.ScopedDbContext.MediaDetails.AsNoTracking().FirstAsync(entry => entry.MediaId == mediaId.Value);
+		await Assert.That(details.Title).IsEqualTo(title);
+		await Assert.That(details.FetchedAt).IsEqualTo(fetched);
 	}
 
 	private async Task AssertDetailCachedAs(MediaLookup detail, MediaId mediaId, DateTimeOffset fetched)
 	{
 		host.ScopedDbContext.ChangeTracker.Clear();
-		var metadata = await host.ScopedDbContext.MediaMetadata.AsNoTracking().Include(entry => entry.Ratings).FirstAsync(entry => entry.MediaId == mediaId.Value);
-		await Assert.That(metadata.Title).IsEqualTo(detail.Title);
-		await Assert.That(metadata.Summary).IsEqualTo(detail.Summary);
-		await Assert.That(metadata.Genres).IsEquivalentTo(detail.Genres);
-		await Assert.That(metadata.Ratings.Select(rating => rating.Source)).IsEquivalentTo(detail.Ratings.Select(rating => rating.Source));
-		await Assert.That(metadata.LastFetchedAt).IsEqualTo(fetched);
+		var details = await host.ScopedDbContext.MediaDetails.AsNoTracking().Include(entry => entry.Ratings).FirstAsync(entry => entry.MediaId == mediaId.Value);
+		await Assert.That(details.Title).IsEqualTo(detail.Title);
+		await Assert.That(details.Summary).IsEqualTo(detail.Summary);
+		await Assert.That(details.Genres).IsEquivalentTo(detail.Genres);
+		await Assert.That(details.Ratings.Select(rating => rating.Source)).IsEquivalentTo(detail.Ratings.Select(rating => rating.Source));
+		await Assert.That(details.FetchedAt).IsEqualTo(fetched);
 	}
 
 	private async Task AssertStoredIds(params ProviderId[] ids)

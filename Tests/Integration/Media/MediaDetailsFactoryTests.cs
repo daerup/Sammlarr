@@ -1,5 +1,4 @@
 using DB.Data.Media;
-using DB.Data.Media.Metadata;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
@@ -9,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Integration.Tests.Media;
 
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
-public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposable
+public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
 	private static readonly DateTimeOffset FetchedAt = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
 
-	private readonly MediaMetadataFactory _testee = new();
+	private readonly MediaDetailsFactory _testee = new();
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
@@ -31,7 +30,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	{
 		var details = MovieDetails();
 
-		var entity = (MovieMetadataRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
+		var entity = (MovieDetailsRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
 
 		using var _ = Assert.Multiple();
 		await Assert.That(entity.Title).IsEqualTo(details.Title);
@@ -49,7 +48,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	{
 		var details = ShowDetails();
 
-		var entity = (ShowMetadataRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
+		var entity = (ShowDetailsRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
 
 		using var _ = Assert.Multiple();
 		await Assert.That(entity.Title).IsEqualTo(details.Title);
@@ -63,7 +62,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	{
 		var entity = _testee.BuildFrom(new CachedDetails(new MovieDetails { Title = "Solaris" }, FetchedAt, MediaField.Tagline), Guid.NewGuid());
 
-		await Assert.That(entity.LastFetchedAt).IsEqualTo(FetchedAt);
+		await Assert.That(entity.FetchedAt).IsEqualTo(FetchedAt);
 		await Assert.That(entity.ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
 	}
 
@@ -72,7 +71,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	{
 		var details = MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.4f, 1234)]) };
 
-		var entity = (MovieMetadataRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
+		var entity = (MovieDetailsRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
 
 		await Assert.That(entity.Ratings).Count().IsEqualTo(1);
 		await Assert.That(entity.Ratings[0].Source).IsEqualTo(MediaProvider.Tmdb);
@@ -90,8 +89,8 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		_testee.Update(existing, new CachedDetails(MovieDetails() with { Title = "Updated", Runtime = TimeSpan.FromMinutes(99) }, refetched, MediaField.None));
 
 		await Assert.That(existing.Title).IsEqualTo("Updated");
-		await Assert.That(((MovieMetadataRow)existing).Runtime).IsEqualTo(TimeSpan.FromMinutes(99));
-		await Assert.That(existing.LastFetchedAt).IsEqualTo(refetched);
+		await Assert.That(((MovieDetailsRow)existing).Runtime).IsEqualTo(TimeSpan.FromMinutes(99));
+		await Assert.That(existing.FetchedAt).IsEqualTo(refetched);
 	}
 
 	[Test]
@@ -194,11 +193,11 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		await Assert.That(entity.Summary).IsEqualTo("Partial Summary");
 		await Assert.That(entity.PosterUrl).IsEqualTo("https://example.com/partial-poster.jpg");
 		await Assert.That(entity.ReleaseDate).IsEqualTo(new DateOnly(2019, 5, 4));
-		await Assert.That(((MovieMetadataRow)entity).Runtime).IsEqualTo(TimeSpan.FromMinutes(95));
+		await Assert.That(((MovieDetailsRow)entity).Runtime).IsEqualTo(TimeSpan.FromMinutes(95));
 	}
 
 	[Test]
-	public async Task ToCached_WhenTheMovieEntityHoldsSentinels_ReadsThemBackAsMissing()
+	public async Task ToCached_WhenAMovieRowHasOnlyATitle_ReadsTheRestAsUnknown()
 	{
 		var plexId = PlexId.From("plex-421", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
@@ -208,7 +207,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	}
 
 	[Test]
-	public async Task ToCached_WhenTheShowEntityHoldsSentinels_ReadsThemBackAsMissing()
+	public async Task ToCached_WhenAShowRowHasOnlyATitle_ReadsTheRestAsUnknown()
 	{
 		var plexId = PlexId.From("plex-422", MediaType.Show);
 		var mediaId = await SeedMediaAsync([plexId]);
@@ -230,7 +229,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 			RuntimePerEpisode = TimeSpan.FromMinutes(22),
 		};
 
-		var entity = (ShowMetadataRow)await PersistAsync(Cached(details), mediaId);
+		var entity = (ShowDetailsRow)await PersistAsync(Cached(details), mediaId);
 
 		using var _ = Assert.Multiple();
 		await Assert.That(entity.Seasons).IsEqualTo(4);
@@ -238,14 +237,14 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		await Assert.That(entity.RuntimePerEpisode).IsEqualTo(TimeSpan.FromMinutes(22));
 	}
 
-	private async Task<MediaMetadataRow> PersistAsync(CachedDetails cached, MediaId mediaId)
+	private async Task<MediaDetailsRow> PersistAsync(CachedDetails cached, MediaId mediaId)
 	{
 		var entity = _testee.BuildFrom(cached, mediaId.Value);
-		fixture.Context.MediaMetadata.Add(entity);
+		fixture.Context.MediaDetails.Add(entity);
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
-		return await fixture.Context.MediaMetadata.Include(m => m.Ratings).SingleAsync(m => m.MediaId == mediaId.Value);
+		return await fixture.Context.MediaDetails.Include(m => m.Ratings).SingleAsync(m => m.MediaId == mediaId.Value);
 	}
 
 	private static CachedDetails Cached(MediaDetails details) => new(details, FetchedAt, MediaField.None);

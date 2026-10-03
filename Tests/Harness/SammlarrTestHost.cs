@@ -17,7 +17,6 @@ using DB;
 using DB.Data.Access;
 using DB.Data.Identity;
 using DB.Data.Media;
-using DB.Data.Media.Metadata;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
@@ -141,33 +140,33 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		}
 
 		await context.SaveChangesAsync();
-		await context.MediaMetadata.AddAsync(BuildMetadata(media.Id, resolved, fetched));
+		await context.MediaDetails.AddAsync(BuildDetails(media.Id, resolved, fetched));
 		await context.SaveChangesAsync();
 		context.ChangeTracker.Clear();
 		return MediaId.From(media.Id);
 	}
 
-	private MediaMetadataRow BuildMetadata(Guid mediaId, ResolvedVersion resolved, DateTimeOffset? fetched)
+	private MediaDetailsRow BuildDetails(Guid mediaId, ResolvedVersion resolved, DateTimeOffset? fetched)
 	{
-		MediaMetadataRow metadata =
+		MediaDetailsRow details =
 			resolved.Type == MediaType.Show
-				? new ShowMetadataRow
+				? new ShowDetailsRow
 				{
 					Seasons = 1,
 					Episodes = 1,
 					RuntimePerEpisode = TimeSpan.FromMinutes(30),
 				}
-				: new MovieMetadataRow { Runtime = TimeSpan.FromHours(2) };
+				: new MovieDetailsRow { Runtime = TimeSpan.FromHours(2) };
 
-		metadata.MediaId = mediaId;
-		metadata.Title = resolved.Title;
-		metadata.Tagline = "Tagline";
-		metadata.Summary = resolved.Summary ?? "An overview";
-		metadata.PosterUrl = resolved.Poster ?? "/poster.jpg";
-		metadata.BackdropUrl = "/backdrop.jpg";
-		metadata.ReleaseDate = new DateOnly(resolved.Year, 1, 15);
-		metadata.Genres = resolved.Genres is null ? ["Action"] : [.. resolved.Genres];
-		metadata.Ratings =
+		details.MediaId = mediaId;
+		details.Title = resolved.Title;
+		details.Tagline = "Tagline";
+		details.Summary = resolved.Summary ?? "An overview";
+		details.PosterUrl = resolved.Poster is null ? "/poster.jpg" : resolved.Poster.NullIfBlank();
+		details.BackdropUrl = "/backdrop.jpg";
+		details.ReleaseDate = new DateOnly(resolved.Year, 1, 15);
+		details.Genres = resolved.Genres is null ? ["Action"] : [.. resolved.Genres];
+		details.Ratings =
 		[
 			new MediaRatingRow
 			{
@@ -176,8 +175,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				VoteCount = 100,
 			},
 		];
-		metadata.LastFetchedAt = fetched ?? _clock.Now;
-		return metadata;
+		details.FetchedAt = fetched ?? _clock.Now;
+		return details;
 	}
 
 	internal async Task WithPlexAccount(string token)

@@ -10,7 +10,6 @@ using DB.Data.Feed.Run;
 using DB.Data.Identity;
 using DB.Data.Jobs;
 using DB.Data.Media;
-using DB.Data.Media.Metadata;
 using DB.Data.Notifications;
 using DB.Data.Wantlist;
 using DB.Data.Wantlist.Outbox;
@@ -64,7 +63,7 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<ExternalMediaIdRow> ExternalMediaIds => Set<ExternalMediaIdRow>();
 
-	public DbSet<MediaMetadataRow> MediaMetadata => Set<MediaMetadataRow>();
+	public DbSet<MediaDetailsRow> MediaDetails => Set<MediaDetailsRow>();
 
 	public DbSet<MediaRatingRow> MediaRatings => Set<MediaRatingRow>();
 
