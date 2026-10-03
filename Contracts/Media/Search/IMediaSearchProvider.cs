@@ -4,7 +4,7 @@ namespace Contracts.Media.Search;
 
 public interface IMediaSearchProvider
 {
-	Task<IReadOnlyList<MediaLookup>> SearchAsync(string query, IReadOnlyCollection<MediaType> mediaTypes, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<FoundMedia>> SearchAsync(string query, IReadOnlyCollection<MediaType> mediaTypes, CancellationToken cancellationToken = default);
 
-	Task<Result<MediaLookup>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default);
+	Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default);
 }

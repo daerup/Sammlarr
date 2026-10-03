@@ -40,6 +40,28 @@ public class MediaIdTests
 	}
 
 	[Test]
+	public async Task MediaIdentity_WhenTheMediaIdIsDefault_Throws()
+	{
+		await Assert.That(() => new MediaIdentity(new MediaId(), [TmdbId.From("550", MediaType.Movie)])).Throws<ArgumentException>();
+	}
+
+	[Test]
+	public async Task Type_ForAShowIdentity_IsShow()
+	{
+		var identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From("1396", MediaType.Show)]);
+
+		await Assert.That(identity.Type).IsEqualTo(MediaType.Show);
+	}
+
+	[Test]
+	public async Task Type_WithoutExternalIds_IsUnknown()
+	{
+		var identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), []);
+
+		await Assert.That(identity.Type).IsEqualTo(MediaType.Unknown);
+	}
+
+	[Test]
 	public async Task Equality_WhenSameGuid_AreEqual()
 	{
 		var guid = Guid.NewGuid();

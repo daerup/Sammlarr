@@ -17,7 +17,7 @@ public class PlexApiTests
 	private const string PlexBaseUrl = "https://plex.tv";
 
 	[Test]
-	public async Task SearchAsync_ReturnsRawDetails_WithDefaultMediaId()
+	public async Task SearchAsync_ForAPlexHit_ReturnsItWithItsPlexId()
 	{
 		var faker = new Faker();
 		var plexValue = $"plex-{faker.Random.AlphaNumeric(10)}";
@@ -30,8 +30,7 @@ public class PlexApiTests
 		await Assert.That(results).IsNotEmpty();
 		foreach (var r in results)
 		{
-			await Assert.That(r.Identity.Id).IsEqualTo(default);
-			await Assert.That(r.Identity.Externals).Contains(PlexId.From(plexValue, MediaType.Movie));
+			await Assert.That(r.Externals).Contains(PlexId.From(plexValue, MediaType.Movie));
 		}
 	}
 

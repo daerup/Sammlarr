@@ -2,7 +2,13 @@ using Domain.Providers;
 
 namespace Domain.Media;
 
-public readonly record struct MediaIdentity(MediaId Id, ValueSet<IExternalMediaId> Externals);
+public readonly record struct MediaIdentity(MediaId Id, ValueSet<IExternalMediaId> Externals)
+{
+	public MediaId Id { get; init; } =
+		Id == default ? throw new ArgumentException("An identity needs a MediaId; a provider's answer is FoundMedia.", nameof(Id)) : Id;
+
+	public MediaType Type => Externals.FirstOrDefault()?.Type ?? MediaType.Unknown;
+}
 
 public readonly record struct MediaId
 {

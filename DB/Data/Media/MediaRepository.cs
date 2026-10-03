@@ -140,7 +140,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 
 	private static IdentifiedMedia EmptyMedia(MediaIdentity identity)
 	{
-		return new(identity, MediaDetails.Empty(identity.Externals.FirstOrDefault()?.Type ?? MediaType.Unknown));
+		return new(identity, MediaDetails.Empty(identity.Type));
 	}
 
 	public async Task UpsertMetadataAsync(IReadOnlyList<IdentifiedMedia> media, CancellationToken cancellationToken = default)

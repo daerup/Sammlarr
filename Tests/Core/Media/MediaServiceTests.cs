@@ -146,7 +146,7 @@ public class MediaServiceTests
 		var thirdId = MediaId.From(Guid.NewGuid());
 		var (testee, deps) = CreateTestee();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([StaleCached(firstId), StaleCached(secondId), StaleCached(thirdId)]);
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 
 		await testee.GetDetailsAsync([firstId, secondId, thirdId]).ToListAsync();
 
@@ -277,7 +277,7 @@ public class MediaServiceTests
 	{
 		var shared = TmdbId.From("shared", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		var requests = await BuildRequests(60).ToListAsync();
 		requests[0] = new IdentifyRequest([shared], new None());
 		requests[55] = new IdentifyRequest([shared], new None());
@@ -293,7 +293,7 @@ public class MediaServiceTests
 		var first = TmdbId.From("bridge-a", MediaType.Movie);
 		var second = ImdbId.From("tt7777777", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		var upserted = RecordUpsertedIdentities(deps);
 
 		var results = await testee
@@ -314,7 +314,7 @@ public class MediaServiceTests
 		var first = TmdbId.From("batch-bridge-a", MediaType.Movie);
 		var second = ImdbId.From("tt8888888", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		var upserted = RecordUpsertedIdentities(deps);
 		var requests = await BuildRequests(60).ToListAsync();
 		requests[0] = new IdentifyRequest([first], new None());
@@ -334,7 +334,7 @@ public class MediaServiceTests
 		var known = ImdbId.From("tt6666666", MediaType.Movie);
 		var persisted = new MediaIdentity(MediaId.From(Guid.NewGuid()), [known]);
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		deps.MediaRepo.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
 			.Returns((groups, _) => [.. groups.Select(group => group.Contains(known) ? persisted : (MediaIdentity?)null)]);
 		var upserted = RecordUpsertedIdentities(deps);
@@ -492,10 +492,10 @@ public class MediaServiceTests
 		);
 	}
 
-	private static IdentifiedMedia CompleteMovie(IExternalMediaId external)
+	private static FoundMedia CompleteMovie(IExternalMediaId external)
 	{
 		return new(
-			new MediaIdentity(MediaId.From(Guid.NewGuid()), [external]),
+			[external],
 			new MovieDetails
 			{
 				Title = "T",

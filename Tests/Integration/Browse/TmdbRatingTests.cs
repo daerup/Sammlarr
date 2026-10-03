@@ -59,9 +59,9 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(ratings[0].VoteCount).IsEqualTo(50000);
 	}
 
-	private async Task<IReadOnlyList<MediaRating>> FetchTmdbRatings(IExternalMediaId id) =>
-		(await host.ResolveKeyed<IMetadataEnricher>(MediaProvider.Tmdb).LookUpAsync(id)).Match(
-			lookup => lookup.ToIdentified() is Some<IdentifiedMedia>(var media) ? [.. media.Rating.Sources] : [],
-			_ => (IReadOnlyList<MediaRating>)[]
-		);
+	private async Task<IReadOnlyList<MediaRating>> FetchTmdbRatings(IExternalMediaId id)
+	{
+		var found = await host.ResolveKeyed<IMetadataEnricher>(MediaProvider.Tmdb).LookUpAsync(id);
+		return found.Map<FoundMedia, IReadOnlyList<MediaRating>>(media => [.. media.Details.Rating.Sources]).GetValueOr([]);
+	}
 }

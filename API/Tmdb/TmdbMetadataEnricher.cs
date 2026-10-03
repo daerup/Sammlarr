@@ -24,18 +24,21 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IMet
 		| MediaField.RuntimePerEpisode
 		| MediaField.Rating;
 
-	public Task<Result<MediaLookup>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default) =>
-		id.Require<TmdbId>("TMDB enrichment requires a TMDB id.")
-			.Map(tmdbId => tmdbApi.GetDetailAsync(tmdbId, cancellationToken).Map(details => ToLookup(details, tmdbId)));
-
-	private MediaLookup ToLookup(TmdbTypes.Details details, TmdbId tmdbId)
+	public Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
-		return tmdbId.Type switch
+		return id.Require<TmdbId>("TMDB enrichment requires a TMDB id.")
+			.Map(tmdbId => tmdbApi.GetDetailAsync(tmdbId, cancellationToken).Map(details => ToFound(details, tmdbId)));
+	}
+
+	private FoundMedia ToFound(TmdbTypes.Details details, TmdbId tmdbId)
+	{
+		MediaDetails mapped = tmdbId.Type switch
 		{
-			MediaType.Movie => new IdentifiedMedia(new MediaIdentity(default, [tmdbId]), MapMovie(details)),
-			MediaType.Show => new IdentifiedMedia(new MediaIdentity(default, [tmdbId]), MapShow(details)),
+			MediaType.Movie => MapMovie(details),
+			MediaType.Show => MapShow(details),
 			MediaType.Unknown => throw new UnreachableException(),
 		};
+		return new([tmdbId], mapped);
 	}
 
 	private MovieDetails MapMovie(TmdbTypes.Details details)
