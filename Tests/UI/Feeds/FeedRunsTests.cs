@@ -57,7 +57,7 @@ public class FeedRunsTests : BunitContext
 		var failed = Run(DateTimeOffset.UtcNow) with
 		{
 			Conclusiveness = Conclusiveness.StillLoading,
-			SourceFailure = "No list found with identifier 'hdlists/comedy'.",
+			SourceFailure = Some.Of("No list found with identifier 'hdlists/comedy'."),
 		};
 		RegisterServices([failed]);
 
@@ -105,7 +105,7 @@ public class FeedRunsTests : BunitContext
 						new FeedRunHistory
 						{
 							TotalRuns = runs.Count,
-							FirstRunAt = runs[^1].StartedAt,
+							FirstRunAt = Some.Of(runs[^1].StartedAt),
 							TotalAdded = 0,
 							TotalRemoved = 0,
 						},

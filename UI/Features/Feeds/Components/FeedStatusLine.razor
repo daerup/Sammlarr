@@ -17,7 +17,7 @@
     {
         <span class="status-sep" aria-hidden="true"></span>
     }
-    @if (FeedPulse.Next(Rows) is { NextRun: { } at } next)
+    @if (FeedPulse.Next(Rows) is { NextRun: Some<DateTimeOffset>(var at) } next)
     {
         <BbPopover>
             <BbPopoverTrigger AsChild="false" Class="status-next" aria-label="@($"Next run: {next.Feed.Name}")">
@@ -37,7 +37,7 @@
                         </span>
                         <span class="next-chips">
                             <FeedStrategyChip Strategy="next.Feed.Strategy"/>
-                            <FeedTriggerChip Schedule="next.Feed.Schedule" NextRun="at" Now="Now"/>
+                            <FeedTriggerChip Schedule="next.Feed.Schedule" NextRun="next.NextRun" Now="Now"/>
                         </span>
                         <span class="next-meta">
                             <span><span class="next-key">At</span><span class="next-value">@When(at)</span></span>

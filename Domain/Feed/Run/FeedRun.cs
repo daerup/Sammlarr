@@ -11,7 +11,7 @@ public sealed record FeedRun
 	public required Conclusiveness Conclusiveness { get; init; }
 	public required FeedRunCounts Counts { get; init; }
 	public required IReadOnlyList<FeedRunItem> Items { get; init; }
-	public string? SourceFailure { get; init; }
+	public Optional<string> SourceFailure { get; init; } = new None();
 
 	public bool HasChanges => Counts.Added + Counts.Removed > 0;
 

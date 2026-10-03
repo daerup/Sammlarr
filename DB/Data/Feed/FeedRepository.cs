@@ -132,17 +132,10 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
 		IQueryable<FeedRunRow> runs = ctx.FeedRuns.AsNoTracking();
-		if (query.Feed is Some<FeedId>(var feedId))
-		{
-			runs = runs.Where(row => row.FeedId == feedId.Value);
-		}
-		if (query.Since is Some<DateTimeOffset>(var since))
-		{
-			var cutoff = since.ToUniversalTime();
-			runs = runs.Where(row => row.StartedAt >= cutoff);
-		}
+		runs = query.Feed.Map(feed => runs.Where(row => row.FeedId == feed.Value)).GetValueOr(runs);
+		runs = query.Since.Map(since => since.ToUniversalTime()).Map(cutoff => runs.Where(row => row.StartedAt >= cutoff)).GetValueOr(runs);
 
-		Guid? linked = query.MustInclude is Some<RunId>(var runId) ? runId.Value : null;
+		var linked = query.MustInclude.Map(run => run.Value).ToNullable();
 		var newest = runs.OrderByDescending(row => row.StartedAt).Take(query.Limit).Select(row => row.Id);
 		var linkedStart = runs.Where(row => row.Id == linked).Select(row => row.StartedAt);
 
@@ -190,7 +183,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 					new FeedRunHistory
 					{
 						TotalRuns = entry.Total.TotalRuns,
-						FirstRunAt = entry.Total.FirstRunAt,
+						FirstRunAt = Some.Of(entry.Total.FirstRunAt),
 						TotalAdded = entry.Total.TotalAdded,
 						TotalRemoved = entry.Total.TotalRemoved,
 					}
@@ -239,7 +232,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		row.Skipped = run.Counts.Skipped;
 		row.Unmatched = run.Counts.Unmatched;
 		row.Removed = run.Counts.Removed;
-		row.SourceFailure = run.SourceFailure;
+		row.SourceFailure = run.SourceFailure.ToNullable();
 		row.Items.AddRange(run.Items.Select(item => new FeedRunItemRow { MediaId = item.MediaId.Value, State = item.State }));
 	}
 }

@@ -1,4 +1,5 @@
 using Domain.Feed;
+using TestInfrastructure;
 
 namespace Domain.Tests.Feed;
 
@@ -13,7 +14,7 @@ public class ScheduledTests
 
 		var next = testee.NextRun(Noon, TimeZoneInfo.Utc);
 
-		await Assert.That(next).IsEqualTo(new DateTimeOffset(2026, 9, 19, 9, 0, 0, TimeSpan.Zero));
+		await Assert.That(next).IsSome().And.IsEqualTo(new DateTimeOffset(2026, 9, 19, 9, 0, 0, TimeSpan.Zero));
 	}
 
 	[Test]
@@ -23,7 +24,7 @@ public class ScheduledTests
 
 		var next = testee.NextRun(new DateTimeOffset(2026, 9, 18, 9, 0, 0, TimeSpan.Zero), TimeZoneInfo.Utc);
 
-		await Assert.That(next).IsEqualTo(new DateTimeOffset(2026, 9, 19, 9, 0, 0, TimeSpan.Zero));
+		await Assert.That(next).IsSome().And.IsEqualTo(new DateTimeOffset(2026, 9, 19, 9, 0, 0, TimeSpan.Zero));
 	}
 
 	[Test]
@@ -34,6 +35,6 @@ public class ScheduledTests
 
 		var next = testee.NextRun(Noon, zone);
 
-		await Assert.That(next!.Value.UtcDateTime).IsEqualTo(new DateTime(2026, 9, 19, 7, 0, 0, DateTimeKind.Utc));
+		await Assert.That(next.Map(at => at.UtcDateTime)).IsSome().And.IsEqualTo(new DateTime(2026, 9, 19, 7, 0, 0, DateTimeKind.Utc));
 	}
 }

@@ -35,13 +35,11 @@ public enum FeedSort
 
 public sealed record ProviderCount(FeedProvider Provider, int Count);
 
-public sealed record FeedRow(FeedOverview Overview, JobState? Job, DateTimeOffset? NextRun)
+public sealed record FeedRow(FeedOverview Overview, JobState? Job, Optional<DateTimeOffset> NextRun)
 {
 	public Feed Feed => Overview.Feed;
 
 	public int OnWantlist => Overview.OnWantlist;
-
-	public DateTimeOffset? LastRunAt => Overview.LastRun is Some<FeedRun>(var run) ? run.StartedAt : null;
 
 	public bool IsBusy => Job is JobState.Waiting or JobState.Queued or JobState.Running;
 
@@ -67,12 +65,14 @@ public sealed record FeedRow(FeedOverview Overview, JobState? Job, DateTimeOffse
 			FeedStrategyKind.Mirror => Feed.Strategy is Mirror,
 		};
 
-	public static FeedRow Of(FeedOverview overview, IReadOnlyDictionary<FeedId, JobState> jobs, DateTimeOffset now, TimeZoneInfo zone) =>
-		new(
+	public static FeedRow Of(FeedOverview overview, IReadOnlyDictionary<FeedId, JobState> jobs, DateTimeOffset now, TimeZoneInfo zone)
+	{
+		return new(
 			overview,
 			jobs.TryGetValue(overview.Feed.Id, out var job) ? job : null,
-			overview.Feed.Enabled && overview.Feed.Schedule is Scheduled scheduled ? scheduled.NextRun(now, zone) : null
+			overview.Feed.Enabled && overview.Feed.Schedule is Scheduled scheduled ? scheduled.NextRun(now, zone) : new None()
 		);
+	}
 }
 
 public sealed record FeedFilter
@@ -111,15 +111,18 @@ public sealed record FeedFilter
 		|| feed.Name.Contains(Search.Trim(), StringComparison.CurrentCultureIgnoreCase)
 		|| feed.Identifier.Contains(Search.Trim(), StringComparison.CurrentCultureIgnoreCase);
 
-	private IEnumerable<FeedRow> SortBy(IEnumerable<FeedRow> rows) =>
-		Sort switch
+	private IEnumerable<FeedRow> SortBy(IEnumerable<FeedRow> rows)
+	{
+		return Sort switch
 		{
 			FeedSort.Name => rows.OrderBy(row => row.Feed.Name, StringComparer.CurrentCultureIgnoreCase),
-			FeedSort.RecentlyRun => rows.OrderBy(row => row.LastRunAt is null).ThenByDescending(row => row.LastRunAt),
-			FeedSort.NextRun => rows.OrderBy(row => row.NextRun is null).ThenBy(row => row.NextRun),
+			FeedSort.RecentlyRun => rows.OrderBy(row => row.Overview.LastRun.IsNone())
+				.ThenByDescending(row => row.Overview.LastRun.Map(run => run.StartedAt).ToNullable()),
+			FeedSort.NextRun => rows.OrderBy(row => row.NextRun.IsNone()).ThenBy(row => row.NextRun.ToNullable()),
 			FeedSort.MostOnWantlist => rows.OrderByDescending(row => row.OnWantlist).ThenBy(row => row.Feed.Name, StringComparer.CurrentCultureIgnoreCase),
 			FeedSort.RecentlyAdded => rows.OrderByDescending(row => row.Feed.CreatedAt),
 		};
+	}
 }
 
 internal static class FeedFilterText
@@ -163,7 +166,7 @@ internal static class FeedPulse
 
 	internal static int Queued(IEnumerable<FeedRow> rows) => rows.Count(row => row.Job is JobState.Waiting or JobState.Queued);
 
-	internal static FeedRow? Next(IEnumerable<FeedRow> rows) => rows.Where(row => !row.IsBusy && row.NextRun is not null).MinBy(row => row.NextRun);
+	internal static FeedRow? Next(IEnumerable<FeedRow> rows) => rows.Where(row => !row.IsBusy && row.NextRun.IsSome()).MinBy(row => row.NextRun.ToNullable());
 
 	internal static (int Added, int Removed) Moved(IEnumerable<FeedRun> runs) => (runs.Sum(run => run.Counts.Added), runs.Sum(run => run.Counts.Removed));
 

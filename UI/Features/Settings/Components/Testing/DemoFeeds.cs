@@ -47,7 +47,7 @@ internal static class DemoFeeds
 
 	public static readonly FeedRun FailedRun = Run(TrendingFeed, Conclusiveness.NoItems, FeedRunCounts.None, []) with
 	{
-		SourceFailure = "The list could not be found (HTTP 404).",
+		SourceFailure = Some.Of("The list could not be found (HTTP 404)."),
 	};
 
 	public static readonly FeedRun GuardedRun = Run(MirrorFeed, Conclusiveness.NoMatches, FeedRunCounts.None with { Total = 20, Unmatched = 20 }, []);
@@ -72,14 +72,14 @@ internal static class DemoFeeds
 				new FeedRunHistory
 				{
 					TotalRuns = 15,
-					FirstRunAt = Now.AddDays(-12),
+					FirstRunAt = Some.Of(Now.AddDays(-12)),
 					TotalAdded = 13913,
 					TotalRemoved = 0,
 				},
 				402
 			),
 			null,
-			Now.AddMinutes(34)
+			Some.Of(Now.AddMinutes(34))
 		),
 		new(
 			new FeedOverview(
@@ -88,14 +88,14 @@ internal static class DemoFeeds
 				new FeedRunHistory
 				{
 					TotalRuns = 30,
-					FirstRunAt = Now.AddDays(-30),
+					FirstRunAt = Some.Of(Now.AddDays(-30)),
 					TotalAdded = 180,
 					TotalRemoved = 40,
 				},
 				12
 			),
 			JobState.Running,
-			Now.AddMinutes(94)
+			Some.Of(Now.AddMinutes(94))
 		),
 		new(
 			new FeedOverview(
@@ -104,14 +104,14 @@ internal static class DemoFeeds
 				new FeedRunHistory
 				{
 					TotalRuns = 2,
-					FirstRunAt = Now.AddDays(-3),
+					FirstRunAt = Some.Of(Now.AddDays(-3)),
 					TotalAdded = 9,
 					TotalRemoved = 0,
 				},
 				0
 			),
 			null,
-			null
+			new None()
 		),
 	];
 

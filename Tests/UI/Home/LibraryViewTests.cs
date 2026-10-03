@@ -46,5 +46,5 @@ public class LibraryViewTests
 		await Assert.That(LibraryView.Sources([], total: 0)).IsEmpty();
 	}
 
-	private static FeedOverview Overview(string name, int onWantlist) => FeedOverview.Of(TestFeeds.Feed(Guid.NewGuid(), name), null, onWantlist);
+	private static FeedOverview Overview(string name, int onWantlist) => FeedOverview.Of(TestFeeds.Feed(Guid.NewGuid(), name), new None(), onWantlist);
 }

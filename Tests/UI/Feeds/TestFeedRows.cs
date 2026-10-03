@@ -25,8 +25,9 @@ internal static class TestFeedRows
 		DateTimeOffset? next = null,
 		JobState? job = null,
 		int onWantlist = 0
-	) =>
-		new(
+	)
+	{
+		return new(
 			FeedOverview.Of(
 				new Feed
 				{
@@ -39,10 +40,11 @@ internal static class TestFeedRows
 					CreatedAt = Now,
 					Schedule = next is null ? new FeedRunTrigger(new Manual()) : new FeedRunTrigger(new Scheduled("0 26 * * * *")),
 				},
-				null,
+				new None(),
 				onWantlist
 			),
 			job,
-			next
+			Optional.Of(next)
 		);
+	}
 }

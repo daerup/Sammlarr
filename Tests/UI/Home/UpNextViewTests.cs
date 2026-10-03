@@ -4,6 +4,7 @@ using Domain.Jobs;
 using Domain.Processing;
 using Domain.Providers;
 using Domain.Wantlist.Sync;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
 using UrlGuid = global::Shared.UrlGuid;
@@ -31,7 +32,8 @@ public class UpNextViewTests
 		await Assert.That(rows[0].When).IsEqualTo("running");
 		await Assert.That(rows[1].Kind).IsEqualTo(UpNextKind.Queued);
 		await Assert.That(rows[1].When).IsEmpty();
-		await Assert.That(rows.Select(row => row.RunsAt)).IsEquivalentTo(new DateTimeOffset?[] { null, null });
+		await Assert.That(rows[0].RunsAt).IsNone();
+		await Assert.That(rows[1].RunsAt).IsNone();
 	}
 
 	[Test]
@@ -81,7 +83,7 @@ public class UpNextViewTests
 
 		await Assert.That(row.Kind).IsEqualTo(UpNextKind.Waiting);
 		await Assert.That(row.Detail).IsEqualTo("waiting for grace period");
-		await Assert.That(row.RunsAt).IsEqualTo(Now.AddMinutes(2));
+		await Assert.That(row.RunsAt).IsSome().And.IsEqualTo(Now.AddMinutes(2));
 	}
 
 	[Test]
@@ -142,6 +144,16 @@ public class UpNextViewTests
 		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc);
 
 		await Assert.That(rows.Select(row => row.Name)).IsEquivalentTo(["hourly", "docs"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task OnASchedule_GivesTheRowsNoRunTimeOfTheirOwn()
+	{
+		IReadOnlyList<Feed> feeds = [Feed(Docs, "docs", new Scheduled("0 0 4 * * *"))];
+
+		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc);
+
+		await Assert.That(rows.Single().RunsAt).IsNone();
 	}
 
 	[Test]

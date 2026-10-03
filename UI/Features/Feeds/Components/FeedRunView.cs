@@ -121,26 +121,35 @@ internal static class FeedRunView
 			},
 		];
 
-	internal static string? Problem(FeedRun run) =>
-		run.Failed
-			? run.SourceFailure is null
-				? "The source returned nothing, so nothing was applied."
-				: "The source could not be read, so nothing was applied."
-			: run.Conclusiveness switch
-			{
-				Conclusiveness.Conclusive => null,
-				Conclusiveness.NoItems => "The source returned nothing, so no removals were applied.",
-				Conclusiveness.NoMatches => "Nothing the source returned could be matched, so no removals were applied.",
-				Conclusiveness.NoneAdmitted => "Nothing the source returned was admitted, so no removals were applied.",
-				Conclusiveness.StillLoading => run.SourceFailure is null
-					? "The source was still loading, so no removals were applied."
-					: "The source failed partway through, so no removals were applied.",
-			};
+	internal static string? Problem(FeedRun run)
+	{
+		if (run.Failed)
+		{
+			return run.SourceFailure.Match("The source could not be read, so nothing was applied.", "The source returned nothing, so nothing was applied.");
+		}
+		return run.Conclusiveness switch
+		{
+			Conclusiveness.Conclusive => null,
+			Conclusiveness.NoItems => "The source returned nothing, so no removals were applied.",
+			Conclusiveness.NoMatches => "Nothing the source returned could be matched, so no removals were applied.",
+			Conclusiveness.NoneAdmitted => "Nothing the source returned was admitted, so no removals were applied.",
+			Conclusiveness.StillLoading => run.SourceFailure.Match(
+				"The source failed partway through, so no removals were applied.",
+				"The source was still loading, so no removals were applied."
+			),
+		};
+	}
 
-	internal static string? Problem(IFeedPlan plan) =>
-		plan.SourceFailure is null ? null
-		: plan.Verdicts.Count + plan.Unmatched.Count == 0 ? "The source could not be read, so this run would change nothing."
-		: "The source failed partway through, so this run would hold back removals.";
+	internal static string? Problem(IFeedPlan plan)
+	{
+		if (plan.SourceFailure.IsNone())
+		{
+			return null;
+		}
+		return plan.Verdicts.Count + plan.Unmatched.Count == 0
+			? "The source could not be read, so this run would change nothing."
+			: "The source failed partway through, so this run would hold back removals.";
+	}
 
 	internal static string Summary(FeedRun run)
 	{

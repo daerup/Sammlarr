@@ -18,13 +18,16 @@ public sealed record ActivityRun(FeedRun Run, string FeedName)
 			Conclusiveness.NoneAdmitted => $"all {Run.Counts.Total} titles were filtered out",
 		};
 
-	internal string? Reason =>
-		Run.SourceFailure
-		?? (
-			!Run.Failed ? null
-			: Run.Conclusiveness is Conclusiveness.NoItems ? "The list came back empty."
-			: "The reason wasn't recorded."
-		);
+	internal string? Reason => Run.SourceFailure.Match(failure => failure, UnrecordedReason);
+
+	private string? UnrecordedReason()
+	{
+		if (!Run.Failed)
+		{
+			return null;
+		}
+		return Run.Conclusiveness is Conclusiveness.NoItems ? "The list came back empty." : "The reason wasn't recorded.";
+	}
 }
 
 public sealed record FeedContribution(FeedId FeedId, string Name, int Added, int Removed, int Runs, RunId LatestRunId);

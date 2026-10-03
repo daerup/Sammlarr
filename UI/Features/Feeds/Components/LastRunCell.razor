@@ -8,22 +8,14 @@
 @using global::Shared
 @inject IMediaService Media
 
-@if (_run is null)
-{
-    <span class="last-run is-never">
-        <LucideIcon Name="history" Size="14"/>
-        <span>Never</span>
-        <span class="last-run-badge is-empty">—</span>
-    </span>
-}
-else
+@if (Overview.LastRun is Some<FeedRun>(var run))
 {
     <BbTooltip>
     <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
-    <button type="button" class="last-run" @onclick="OpenAsync">
+    <button type="button" class="last-run" @onclick="() => OpenAsync(run)">
         <LucideIcon Name="history" Size="14"/>
-        <span>@ScheduleText.Ago(_run.StartedAt, DateTimeOffset.UtcNow)</span>
-        @if (_run.Conclusiveness is not Conclusiveness.Conclusive)
+        <span>@ScheduleText.Ago(run.StartedAt, DateTimeOffset.UtcNow)</span>
+        @if (run.Conclusiveness is not Conclusiveness.Conclusive)
         {
             <span class="last-run-badge is-guarded">
                 <LucideIcon Name="shield" Size="11"/>
@@ -32,15 +24,15 @@ else
         else
         {
             <span class="last-run-badge">
-                @if (_run.Counts.Added > 0)
+                @if (run.Counts.Added > 0)
                 {
-                    <span class="is-added">+@_run.Counts.Added</span>
+                    <span class="is-added">+@run.Counts.Added</span>
                 }
-                @if (_run.Counts.Removed > 0)
+                @if (run.Counts.Removed > 0)
                 {
-                    <span class="is-removed">−@_run.Counts.Removed</span>
+                    <span class="is-removed">−@run.Counts.Removed</span>
                 }
-                @if (!_run.HasChanges)
+                @if (!run.HasChanges)
                 {
                     <LucideIcon Name="check" Size="11"/>
                 }
@@ -53,23 +45,23 @@ else
 
     <ChangeDialog Open="_open"
                   OnOpenChanged="SetOpenAsync"
-                  Title="@Heading(_run)"
-                  Subtitle="@FeedRunView.Summary(_run)"
+                  Title="@Heading(run)"
+                  Subtitle="@FeedRunView.Summary(run)"
                   Items="_items"
-                  Chips="@FeedRunView.Chips(_run.Counts)"
+                  Chips="@FeedRunView.Chips(run.Counts)"
                   OnSelect="ShowDetailsAsync"
                   EmptyMessage="Nothing was added or removed."
                   Note="@($"{_runCount} {(_runCount == 1 ? "run" : "runs")}")"
                   NoteHref="@($"/feeds/{UrlGuid.Encode(Overview.Feed.Id.Value)}/runs")"
-                  Band="@(FeedRunView.Problem(_run) is { } problem ? ProblemBand(_run, problem) : null)"
-                  BandTone="@(_run.Failed ? ChangeBandTone.Bad : ChangeBandTone.Warn)">
+                  Band="@(FeedRunView.Problem(run) is { } problem ? ProblemBand(run, problem) : null)"
+                  BandTone="@(run.Failed ? ChangeBandTone.Bad : ChangeBandTone.Warn)">
         <Badges>
-            <FeedStrategyChip Strategy="_run.Strategy"/>
-            @if (_run.Failed)
+            <FeedStrategyChip Strategy="run.Strategy"/>
+            @if (run.Failed)
             {
                 <FeedChip Tone="FeedChipTone.Failed" Icon="cloud-off">Failed</FeedChip>
             }
-            else if (_run.Conclusiveness is not Conclusiveness.Conclusive)
+            else if (run.Conclusiveness is not Conclusiveness.Conclusive)
             {
                 <FeedChip Tone="FeedChipTone.Attention" Icon="shield">Guarded</FeedChip>
             }
@@ -80,13 +72,20 @@ else
                       OnOpenChanged="@(open => { if (!open) { _selected = null; } })"
                       Media="_selected"/>
 }
+else
+{
+    <span class="last-run is-never">
+        <LucideIcon Name="history" Size="14"/>
+        <span>Never</span>
+        <span class="last-run-badge is-empty">—</span>
+    </span>
+}
 
 @code {
     [Parameter] [EditorRequired] public required FeedOverview Overview { get; set; }
 
     [Parameter] public EventCallback<bool> DialogOpenChanged { get; set; }
 
-    private FeedRun? _run;
     private int _runCount;
     private bool _open;
     private IReadOnlyList<ChangeItem> _items = [];
@@ -100,19 +99,13 @@ else
 
     protected override void OnParametersSet()
     {
-        _run = Overview.LastRun is Some<FeedRun>(var run) ? run : null;
         _runCount = Overview.History.TotalRuns;
     }
 
-    private async Task OpenAsync()
+    private async Task OpenAsync(FeedRun run)
     {
-        if (_run is null)
-        {
-            return;
-        }
-
-        var wanted = _run.Items.Where(item => item.State is not FeedRunItemState.Kept).Select(item => item.MediaId).ToList();
-        _items = FeedRunView.Items(_run, await Media.GetDetailsByIdAsync(wanted));
+        var wanted = run.Items.Where(item => item.State is not FeedRunItemState.Kept).Select(item => item.MediaId).ToList();
+        _items = FeedRunView.Items(run, await Media.GetDetailsByIdAsync(wanted));
         await SetOpenAsync(true);
     }
 

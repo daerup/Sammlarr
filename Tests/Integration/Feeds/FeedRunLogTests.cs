@@ -113,6 +113,19 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task GetRunsAsync_ForRunsWithAndWithoutASourceFailure_ReadsBothBack()
+	{
+		var feedId = await SeedFeedAsync();
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1) with { SourceFailure = Some.Of("No list found.") });
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
+
+		var runs = await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId) });
+
+		await Assert.That(runs.Single(run => run.StartedAt == Day(1)).SourceFailure).IsSome().And.IsEqualTo("No list found.");
+		await Assert.That(runs.Single(run => run.StartedAt == Day(2)).SourceFailure).IsNone();
+	}
+
+	[Test]
 	public async Task GetRunsAsync_ForOneFeed_ReturnsItsNewestRunsFirstUpToTheLimit()
 	{
 		var comedy = await SeedFeedAsync();
@@ -249,7 +262,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(history.TotalRuns).IsEqualTo(2);
 		await Assert.That(history.TotalAdded).IsEqualTo(5);
 		await Assert.That(history.TotalRemoved).IsEqualTo(1);
-		await Assert.That(history.FirstRunAt).IsEqualTo(Day(1));
+		await Assert.That(history.FirstRunAt).IsSome().And.IsEqualTo(Day(1));
 	}
 
 	private static FeedRunCounts Counts(int added, int removed) =>

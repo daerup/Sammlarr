@@ -4,6 +4,7 @@ using Domain.Feed.Run;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
+using TestInfrastructure;
 
 namespace Core.Tests.Feed;
 
@@ -18,7 +19,7 @@ public class FeedRunNotificationTests
 	{
 		var notification = FeedRunNotification.For(Owner, Now, Id, Completed(added: 2, removed: 1));
 
-		var completed = (FeedRunCompletedNotification)notification!;
+		var completed = (FeedRunCompletedNotification)(await Assert.That(notification).IsSome())!;
 		await Assert.That(completed.FeedId).IsEqualTo(Id);
 		await Assert.That(completed.UserId).IsEqualTo(Owner);
 		await Assert.That(completed.Added).IsEqualTo(2);
@@ -30,7 +31,8 @@ public class FeedRunNotificationTests
 	{
 		var notification = FeedRunNotification.For(Owner, Now, Id, new FeedRunFailed("the provider timed out"));
 
-		await Assert.That(((FeedRunFailedNotification)notification!).Reason).IsEqualTo("The run could not finish - the provider timed out");
+		var failed = (FeedRunFailedNotification)(await Assert.That(notification).IsSome())!;
+		await Assert.That(failed.Reason).IsEqualTo("The run could not finish - the provider timed out");
 	}
 
 	[Test]
@@ -38,7 +40,7 @@ public class FeedRunNotificationTests
 	{
 		var notification = FeedRunNotification.For(Owner, Now, Id, new FeedRunAlreadyRunning());
 
-		await Assert.That(notification).IsNull();
+		await Assert.That(notification).IsNone();
 	}
 
 	private static FeedRunCompleted Completed(int added, int removed) => new(new FeedDelta([.. Ids(added)], [], [.. Ids(removed)]), Conclusiveness.Conclusive);

@@ -8,11 +8,15 @@ namespace Core.Feed;
 
 internal static class FeedRunNotification
 {
-	internal static INotification? For(UserId owner, DateTimeOffset now, FeedId id, FeedRunResult result) =>
-		result switch
+	internal static Optional<INotification> For(UserId owner, DateTimeOffset now, FeedId id, FeedRunResult result)
+	{
+		return result switch
 		{
-			FeedRunCompleted completed => new FeedRunCompletedNotification(owner, now, id, completed.Delta.Adds.Count, completed.Delta.Drops.Count),
-			FeedRunFailed failed => new FeedRunFailedNotification(owner, now, id, failed.ToString()),
-			FeedRunAlreadyRunning => null,
+			FeedRunCompleted completed => Some.Of<INotification>(
+				new FeedRunCompletedNotification(owner, now, id, completed.Delta.Adds.Count, completed.Delta.Drops.Count)
+			),
+			FeedRunFailed failed => Some.Of<INotification>(new FeedRunFailedNotification(owner, now, id, failed.ToString())),
+			FeedRunAlreadyRunning => new None(),
 		};
+	}
 }

@@ -100,7 +100,10 @@ public class UpNextPanelTests : BunitContext
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(now);
 		Services.AddSingleton(clock.Object);
-		IReadOnlyList<UpNextRow> queued = [new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null, RunsAt: now.AddMinutes(2))];
+		IReadOnlyList<UpNextRow> queued =
+		[
+			new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null) { RunsAt = Some.Of(now.AddMinutes(2)) },
+		];
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
 
@@ -113,8 +116,8 @@ public class UpNextPanelTests : BunitContext
 		var job = JobId.From(Guid.NewGuid());
 		IReadOnlyList<UpNextRow> queued =
 		[
-			new("hdlists/documentaries", "running now", "running", UpNextKind.Running, null, Job: JobId.From(Guid.NewGuid())),
-			new("hdlists/anime", "queued", string.Empty, UpNextKind.Queued, null, Job: job),
+			new("hdlists/documentaries", "running now", "running", UpNextKind.Running, null) { Job = JobId.From(Guid.NewGuid()) },
+			new("hdlists/anime", "queued", string.Empty, UpNextKind.Queued, null) { Job = job },
 		];
 		UpNextRow? cancelled = null;
 

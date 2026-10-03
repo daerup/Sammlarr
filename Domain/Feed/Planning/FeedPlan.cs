@@ -10,7 +10,7 @@ public interface IFeedPlan
 	IReadOnlyList<UnmatchedMedia> Unmatched { get; }
 	FeedDelta Delta { get; }
 	Conclusiveness Conclusiveness { get; }
-	string? SourceFailure { get; }
+	Optional<string> SourceFailure { get; }
 }
 
 public sealed record AppendPlan(
@@ -20,7 +20,7 @@ public sealed record AppendPlan(
 	Conclusiveness Conclusiveness
 ) : IFeedPlan
 {
-	public string? SourceFailure { get; init; }
+	public Optional<string> SourceFailure { get; init; } = new None();
 }
 
 public sealed record MirrorPlan(
@@ -31,7 +31,7 @@ public sealed record MirrorPlan(
 	IReadOnlyDictionary<MediaId, int> MissedRuns
 ) : IFeedPlan
 {
-	public string? SourceFailure { get; init; }
+	public Optional<string> SourceFailure { get; init; } = new None();
 }
 
 public static class FeedPlans

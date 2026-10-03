@@ -419,16 +419,24 @@
 
     private static string StrategyLabel(FeedStrategy strategy) => strategy is Mirror mirror ? $"Mirror · {mirror.AbsenceThreshold}" : "Append";
 
-    private DateTimeOffset? ChipNextRun =>
-        _feed is { Enabled: true, Schedule: Scheduled scheduled } ? scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) : null;
+    private Optional<DateTimeOffset> ChipNextRun
+    {
+        get
+        {
+            return _feed is { Enabled: true, Schedule: Scheduled scheduled } ? scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) : new None();
+        }
+    }
 
-    private string? NextRunLine =>
-        _feed is { Enabled: true, Schedule: Scheduled scheduled } && scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) is { } next
-            ? $"next run {next:d MMMM HH:mm}"
-            : null;
+    private string? NextRunLine => ChipNextRun.Map(next => $"next run {next:d MMMM HH:mm}").ToNullable();
 
-    private string HistoryLine =>
-        _history.FirstRunAt is { } first
-            ? $"{_history.TotalRuns} {(_history.TotalRuns == 1 ? "run" : "runs")} since {first.ToLocalTime():d MMMM}"
-            : $"{_history.TotalRuns} runs";
+    private string HistoryLine
+    {
+        get
+        {
+            return _history.FirstRunAt.Match(
+                first => $"{_history.TotalRuns} {(_history.TotalRuns == 1 ? "run" : "runs")} since {first.ToLocalTime():d MMMM}",
+                () => $"{_history.TotalRuns} runs"
+            );
+        }
+    }
 }

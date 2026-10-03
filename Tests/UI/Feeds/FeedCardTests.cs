@@ -108,8 +108,9 @@ public class FeedCardTests : BunitContext
 
 	private static string Normalized(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
-	private static FeedRow Row(bool enabled = true, int? mirror = null, int onWantlist = 0, int runs = 0, JobState? job = null) =>
-		new(
+	private static FeedRow Row(bool enabled = true, int? mirror = null, int onWantlist = 0, int runs = 0, JobState? job = null)
+	{
+		return new(
 			FeedOverview.Of(
 				new Feed
 				{
@@ -122,12 +123,13 @@ public class FeedCardTests : BunitContext
 					CreatedAt = Now,
 					Schedule = new FeedRunTrigger(new Scheduled("0 26 * * * *")),
 				},
-				runs > 0 ? Totals(runs) : null,
+				runs > 0 ? Some.Of(Totals(runs)) : new None(),
 				onWantlist
 			),
 			job,
-			enabled ? Now.AddMinutes(43) : null
+			enabled ? Some.Of(Now.AddMinutes(43)) : new None()
 		);
+	}
 
 	private static FeedRunTotals Totals(int runs) =>
 		new(
@@ -146,7 +148,7 @@ public class FeedCardTests : BunitContext
 			new FeedRunHistory
 			{
 				TotalRuns = runs,
-				FirstRunAt = Now.AddDays(-9),
+				FirstRunAt = Some.Of(Now.AddDays(-9)),
 				TotalAdded = 36,
 				TotalRemoved = 6,
 			}

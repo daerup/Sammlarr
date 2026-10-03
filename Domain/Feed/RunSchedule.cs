@@ -18,7 +18,7 @@ public readonly record struct Scheduled
 		_raw = cronExpression;
 	}
 
-	public DateTimeOffset? NextRun(DateTimeOffset from, TimeZoneInfo zone) => CronExpression.GetNextOccurrence(from, zone);
+	public Optional<DateTimeOffset> NextRun(DateTimeOffset from, TimeZoneInfo zone) => Optional.Of(CronExpression.GetNextOccurrence(from, zone));
 
 	public override string ToString() => _raw;
 }

@@ -125,7 +125,7 @@ public class ActivityLogTests
 		var broken = new ActivityRun(
 			Run(Docs, Today, conclusiveness: Conclusiveness.StillLoading) with
 			{
-				SourceFailure = "No MDBList API key is configured.",
+				SourceFailure = Some.Of("No MDBList API key is configured."),
 			},
 			"feed"
 		);
