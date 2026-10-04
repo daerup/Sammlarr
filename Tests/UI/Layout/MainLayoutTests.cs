@@ -22,6 +22,7 @@ public class MainLayoutTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddScoped(_ => new CurrentUserAccessor(new CurrentUserOverride()));
 		Services.AddSingleton(new AppVersionProvider(new ReleaseOptions()));
+		Services.AddScoped<SearchLauncher>();
 		ComponentFactories.AddStub<GlobalSearch>();
 		ComponentFactories.AddStub<ProfileCard>();
 		ComponentFactories.AddStub<SessionInvalidationListener>();
@@ -50,6 +51,25 @@ public class MainLayoutTests : BunitContext
 
 		await Assert.That(cut.FindComponents<Stub<GlobalSearch>>()).Count().IsEqualTo(1);
 		await Assert.That(cut.FindAll(".search-trigger")).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Search_WhenTheLauncherAsksForTheBlocklist_OpensForItUntilClosed()
+	{
+		AddAuthorization().SetAuthorized("alice");
+		var cut = RenderLayout();
+
+		await cut.InvokeAsync(() => Services.GetRequiredService<SearchLauncher>().Open(SearchPurpose.Blocklist));
+
+		var search = cut.FindComponent<Stub<GlobalSearch>>().Instance.Parameters;
+		await Assert.That(search.Get(global => global.IsOpen)).IsTrue();
+		await Assert.That(search.Get(global => global.Purpose)).IsEqualTo(SearchPurpose.Blocklist);
+
+		await cut.InvokeAsync(() => search.Get(global => global.IsOpenChanged).InvokeAsync(false));
+
+		var closed = cut.FindComponent<Stub<GlobalSearch>>().Instance.Parameters;
+		await Assert.That(closed.Get(global => global.IsOpen)).IsFalse();
+		await Assert.That(closed.Get(global => global.Purpose)).IsEqualTo(SearchPurpose.Wantlist);
 	}
 
 	[Test]

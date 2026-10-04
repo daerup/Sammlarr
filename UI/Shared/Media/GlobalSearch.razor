@@ -1,31 +1,49 @@
+@using Contracts.Announcing
 @using Contracts.Blocklist
+@using Contracts.Identity
 @using Contracts.Settings
 @using Contracts.Wantlist
+@using Domain.Announcing
+@using Domain.Identity
+@using UI.Shared.Announcing
 @implements IDisposable
 @inject IProviderConfigService ProviderConfigService
 @inject IWantlistService WantlistService
 @inject IBlocklistService BlocklistService
 @inject Notifier Notifier
+@inject IEventPublisher Events
+@inject ICurrentUser CurrentUser
 
 @if (_settings is not null)
 {
     <SearchModal IsOpen="IsOpen"
                  IsOpenChanged="IsOpenChanged"
                  SearchProvider="@_settings.SearchProvider"
-                 IsInWantlist="IsWantlisted"
-                 OnToggle="ToggleWantlistAsync"
-                 Title="Search"
-                 Description="Find a movie or show and add it to a list.">
+                 IsInWantlist="IsMarked"
+                 OnToggle="ToggleAsync"
+                 Title="@Title"
+                 Description="@Description">
         <TileIcons Context="ctx">
-            <WantlistProvenanceToggle Result="ctx.Result"
-                                       IsToggled="ctx.IsToggled"
-                                       IsToggling="ctx.IsToggling"
-                                       Item="@ItemFor(ctx.Result.Identity.Id)"
-                                       OnToggle="ctx.OnToggle"/>
-            <BlocklistToggleIcon Result="ctx.Result"
-                                 IsToggled="@_blocklist.Contains(ctx.Result.Identity.Id)"
-                                 IsToggling="@(_blocklisting == ctx.Result.Identity.Id)"
-                                 OnToggle="ToggleBlocklistAsync"/>
+            @switch (Purpose)
+            {
+                case SearchPurpose.Wantlist:
+                    <WantlistProvenanceToggle Result="ctx.Result"
+                                               IsToggled="ctx.IsToggled"
+                                               IsToggling="ctx.IsToggling"
+                                               Item="@ItemFor(ctx.Result.Identity.Id)"
+                                               OnToggle="ctx.OnToggle"/>
+                    <BlocklistToggleIcon Result="ctx.Result"
+                                         IsToggled="@_blocklist.Contains(ctx.Result.Identity.Id)"
+                                         IsToggling="@(_blocklisting == ctx.Result.Identity.Id)"
+                                         OnToggle="ToggleBlocklistAsync"/>
+                    break;
+                case SearchPurpose.Blocklist:
+                    <BlocklistToggleIcon Result="ctx.Result"
+                                         IsToggled="ctx.IsToggled"
+                                         IsToggling="ctx.IsToggling"
+                                         OnToggle="ctx.OnToggle"/>
+                    break;
+            }
         </TileIcons>
     </SearchModal>
 }
@@ -37,13 +55,20 @@
     private WantlistSnapshot _wantlist = new([]);
     private MediaId? _blocklisting;
     private bool _wasOpen;
+    private UserId? _viewer;
+    private CoalescedReload _follow = null!;
 
     [Parameter] public bool IsOpen { get; set; }
 
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
 
+    [Parameter] public SearchPurpose Purpose { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
+        _viewer = CurrentUser.Id;
+        _follow = new(FollowAsync);
+        Events.Published += OnEvent;
         _settings = await ProviderConfigService.GetAsync(_cancellation.Token);
         await RefreshAsync();
     }
@@ -58,7 +83,47 @@
         _wasOpen = IsOpen;
     }
 
-    private bool IsWantlisted(MediaId mediaId) => _wantlist.Contains(mediaId);
+    private string Title
+    {
+        get
+        {
+            return Purpose switch
+            {
+                SearchPurpose.Wantlist => "Search",
+                SearchPurpose.Blocklist => "Blocklist a title",
+            };
+        }
+    }
+
+    private string Description
+    {
+        get
+        {
+            return Purpose switch
+            {
+                SearchPurpose.Wantlist => "Find a movie or show and add it to a list.",
+                SearchPurpose.Blocklist => "Find a movie or show to keep your feeds from adding it.",
+            };
+        }
+    }
+
+    private bool IsMarked(MediaId mediaId)
+    {
+        return Purpose switch
+        {
+            SearchPurpose.Wantlist => _wantlist.Contains(mediaId),
+            SearchPurpose.Blocklist => _blocklist.Contains(mediaId),
+        };
+    }
+
+    private Task<bool> ToggleAsync(MediaId id, string title, bool isMarked)
+    {
+        return Purpose switch
+        {
+            SearchPurpose.Wantlist => ToggleWantlistAsync(id, title, isMarked),
+            SearchPurpose.Blocklist => ToggleBlocklistOfAsync(id, title, isMarked),
+        };
+    }
 
     private Optional<WantlistItem> ItemFor(MediaId mediaId) => _wantlist.Find(mediaId);
 
@@ -103,18 +168,7 @@
         _blocklisting = media.Identity.Id;
         try
         {
-            if (_blocklist.Contains(media.Identity.Id))
-            {
-                await BlocklistService.RemoveAsync(media.Identity.Id, _cancellation.Token);
-                Notifier.Success($"'{media.Details.Title}' has been removed from your blocklist.");
-            }
-            else
-            {
-                await BlocklistService.AddAsync(media.Identity.Id, _cancellation.Token);
-                Notifier.Success($"'{media.Details.Title}' has been blocklisted.");
-            }
-
-            await RefreshAsync();
+            await ToggleBlocklistOfAsync(media.Identity.Id, media.Details.Title ?? string.Empty, _blocklist.Contains(media.Identity.Id));
         }
         finally
         {
@@ -122,8 +176,46 @@
         }
     }
 
+    private async Task<bool> ToggleBlocklistOfAsync(MediaId id, string title, bool isMarked)
+    {
+        if (isMarked)
+        {
+            await BlocklistService.RemoveAsync([id], _cancellation.Token);
+            Notifier.Success($"'{title}' has been removed from your blocklist.");
+        }
+        else
+        {
+            await BlocklistService.AddAsync([id], _cancellation.Token);
+            Notifier.Success($"'{title}' has been blocklisted.");
+        }
+
+        await RefreshAsync();
+        return true;
+    }
+
+    private async Task FollowAsync()
+    {
+        await RefreshAsync();
+        StateHasChanged();
+    }
+
+    private void OnEvent(IEvent raised)
+    {
+        if (ViewerEvent.Own<WantlistChangedEvent>(raised, _viewer) is { } wanted)
+        {
+            _ = InvokeAsync(() => ListChange.Differs(_wantlist.Contains, wanted.Added, wanted.Removed) ? _follow.RunAsync() : Task.CompletedTask);
+            return;
+        }
+
+        if (ViewerEvent.Own<BlocklistChangedEvent>(raised, _viewer) is { } blocked)
+        {
+            _ = InvokeAsync(() => ListChange.Differs(_blocklist.Contains, blocked.Added, blocked.Removed) ? _follow.RunAsync() : Task.CompletedTask);
+        }
+    }
+
     public void Dispose()
     {
+        Events.Published -= OnEvent;
         _cancellation.Cancel();
         _cancellation.Dispose();
     }

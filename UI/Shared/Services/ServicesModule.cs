@@ -12,6 +12,7 @@ internal class ServicesModule : IServiceModule
 		services.AddScoped<Notifier>();
 		services.AddScoped<ProfileDropdownService>();
 		services.AddScoped<AccountConnectionPrompt>();
+		services.AddScoped<SearchLauncher>();
 		services.AddScoped<ArtworkSources>();
 		services.AddScoped<RatingContext>();
 		services.AddSingleton<AppVersionProvider>();

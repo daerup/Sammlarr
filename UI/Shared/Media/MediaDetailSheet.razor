@@ -107,9 +107,6 @@
     public MediaMatchResult? Media { get; set; }
 
     [Parameter]
-    public EventCallback<MediaListKind> OnEnrollmentChanged { get; set; }
-
-    [Parameter]
     public ManualSource Source { get; set; } = ManualSource.Unknown;
 
     private bool _failed;
@@ -184,9 +181,6 @@
         {
             _togglingWantlist = false;
         }
-
-        await OnEnrollmentChanged.InvokeAsync(MediaListKind.Wantlist);
-        await LoadEnrollmentAsync(media.Identity.Id);
     }
 
     private async Task ToggleBlocklistAsync(MatchedMedia media)
@@ -201,11 +195,11 @@
         {
             if (_blocklisted)
             {
-                await BlocklistService.RemoveAsync(media.Identity.Id);
+                await BlocklistService.RemoveAsync([media.Identity.Id]);
             }
             else
             {
-                await BlocklistService.AddAsync(media.Identity.Id);
+                await BlocklistService.AddAsync([media.Identity.Id]);
             }
 
             await LoadEnrollmentAsync(media.Identity.Id);
@@ -218,9 +212,6 @@
         {
             _togglingBlocklist = false;
         }
-
-        await OnEnrollmentChanged.InvokeAsync(MediaListKind.Blocklist);
-        await LoadEnrollmentAsync(media.Identity.Id);
     }
 
     private async Task OnImageError()

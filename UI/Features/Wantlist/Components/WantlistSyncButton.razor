@@ -4,6 +4,7 @@
 @using Contracts.Announcing
 @using Contracts.Jobs
 @using Domain.Announcing
+@using Domain.Identity
 @using UI.Shared.Announcing
 @using Domain.Jobs
 @using UI.Shared.Changes
@@ -12,7 +13,6 @@
 @inject IJobQueue JobQueue
 @inject IWantlistSyncPlanner Planner
 @inject ICurrentUser CurrentUser
-@inject NavigationManager Navigation
 @inject IEventPublisher Events
 @inject IJobQueueView JobQueueView
 @inject Notifier Notifier
@@ -90,8 +90,7 @@
 
     <MediaDetailSheet Open="_selected is not null"
                       OnOpenChanged="@(open => { if (!open) { _selected = null; } })"
-                      Media="_selected"
-                      OnEnrollmentChanged="HandleEnrollmentChangedAsync"/>
+                      Media="_selected"/>
 }
 
 @code {
@@ -133,8 +132,9 @@
     private bool _isRunning;
     private bool _isLoadingDryRun;
     private bool _open;
+    private UserId? _viewer;
+    private CoalescedReload _dryRunReload = null!;
     private MediaMatchResult? _selected;
-    private bool _wantlistChanged;
 
     private bool IsBusy => _isSyncing || _isRunning || IsSyncing;
 
@@ -142,17 +142,6 @@
     {
         _selected = media;
         return Task.CompletedTask;
-    }
-
-    private async Task HandleEnrollmentChangedAsync(MediaListKind changed)
-    {
-        if (changed is not MediaListKind.Wantlist)
-        {
-            return;
-        }
-
-        _wantlistChanged = true;
-        await LoadDryRunAsync();
     }
 
     private string OutboxSummary
@@ -178,6 +167,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _viewer = CurrentUser.Id;
+        _dryRunReload = new(LoadDryRunAsync);
         Events.Published += OnEvent;
         _isRunning = await IsSyncRunningAsync();
         await RefreshAsync();
@@ -191,7 +182,7 @@
 
     public async Task RefreshAsync() => await LoadDryRunAsync();
 
-    private async Task OpenAsync()
+    internal async Task OpenAsync()
     {
         _open = true;
         await OnStatusRefresh.InvokeAsync();
@@ -201,27 +192,13 @@
     private Task CloseAsync()
     {
         _open = false;
-        ReloadIfWantlistChanged();
         return Task.CompletedTask;
     }
 
     private Task HandleOpenChangedAsync(bool open)
     {
         _open = open;
-        if (!open)
-        {
-            ReloadIfWantlistChanged();
-        }
-
         return Task.CompletedTask;
-    }
-
-    private void ReloadIfWantlistChanged()
-    {
-        if (_wantlistChanged)
-        {
-            Navigation.Refresh(true);
-        }
     }
 
     private async Task LoadDryRunAsync()
@@ -276,7 +253,6 @@
     private async Task ConfirmAsync()
     {
         _open = false;
-        _wantlistChanged = false;
         await SyncAsync();
     }
 
@@ -321,7 +297,13 @@
 
     private void OnEvent(IEvent raised)
     {
-        if (ViewerEvent.Own<JobStateChangedEvent>(raised, CurrentUser.Id) is not { Kind: JobKind.WantlistSync } job)
+        if (ViewerEvent.Own<WantlistChangedEvent>(raised, _viewer) is not null)
+        {
+            _ = InvokeAsync(_dryRunReload.RunAsync);
+            return;
+        }
+
+        if (ViewerEvent.Own<JobStateChangedEvent>(raised, _viewer) is not { Kind: JobKind.WantlistSync } job)
         {
             return;
         }

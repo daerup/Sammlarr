@@ -61,6 +61,10 @@ internal sealed class WantlistSyncEngine(
 	{
 		var pulledAdds = await repo.AddAsync(plan.Pull.Adds, new SinkOrigin(sink.Kind), cancellationToken);
 		var pulledRemoves = await repo.RemoveAsync(plan.Pull.Removes, cancellationToken);
+		if (pulledAdds.Count > 0 || pulledRemoves.Count > 0)
+		{
+			announcer.Announce(new WantlistChangedEvent(currentUser.Id, pulledAdds, pulledRemoves));
+		}
 
 		var pushed = await DrainAsync(sink, cancellationToken);
 		await SyncNotification

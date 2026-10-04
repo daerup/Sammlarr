@@ -100,7 +100,7 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 	internal async Task<MediaId> OnBlocklist()
 	{
 		var id = await SeedAsync();
-		await host.Resolve<IBlocklistRepository>().AddAsync(id);
+		await host.Resolve<IBlocklistRepository>().AddAsync([id]);
 		return id;
 	}
 

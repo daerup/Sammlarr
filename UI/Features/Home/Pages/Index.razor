@@ -182,6 +182,9 @@ else
     private DateOnly _today = DateOnly.FromDateTime(DateTime.Now);
     private int _wantlistCount;
     private int _blocklistCount;
+    private WantlistSnapshot _wantlist = new([]);
+    private BlocklistSnapshot _blocklist = new([]);
+    private CoalescedReload _reload = null!;
     private bool _isLoading = true;
     private bool _isSignedIn;
     private bool _isSheetOpen;
@@ -255,6 +258,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        _reload = new(LoadAsync);
         Events.Published += OnEvent;
         _settings = await ProviderConfigService.GetAsync();
     }
@@ -309,15 +313,15 @@ else
             var feeds = await FeedService.GetAsync(_cancellation.Token);
             _feeds = [.. feeds.Feeds.Select(overview => overview.Feed)];
             var runs = await FeedService.GetRunsAsync(RunQuery.Take(RunCap) with { Since = Some.Of(_now - ActivityWindow) }, _cancellation.Token);
-            var wantlist = await WantlistService.GetAsync(_cancellation.Token);
-            var blocklist = await BlocklistService.GetAsync(_cancellation.Token);
+            _wantlist = await WantlistService.GetAsync(_cancellation.Token);
+            _blocklist = await BlocklistService.GetAsync(_cancellation.Token);
             _outbox = (await WantlistService.GetOutboxAsync(_cancellation.Token)).Entries;
             var queue = await JobQueueView.GetAsync(_cancellation.Token);
 
             var names = FeedNames();
             var brands = FeedBrands();
-            _wantlistCount = wantlist.Ids.Count;
-            _blocklistCount = blocklist.Ids.Count;
+            _wantlistCount = _wantlist.Ids.Count;
+            _blocklistCount = _blocklist.Ids.Count;
             _sources = LibraryView.Sources(feeds.Feeds, _wantlistCount, ProviderName);
             _queued = UpNextView.InTheQueue(queue, names, brands, Sink);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);
@@ -365,7 +369,19 @@ else
     {
         if (ViewerEvent.Own<FeedRunFinishedEvent>(raised, _userId) is not null)
         {
-            _ = InvokeAsync(LoadAsync);
+            _ = InvokeAsync(_reload.RunAsync);
+            return;
+        }
+
+        if (ViewerEvent.Own<WantlistChangedEvent>(raised, _userId) is { } wanted)
+        {
+            _ = InvokeAsync(() => ListChange.Differs(_wantlist.Contains, wanted.Added, wanted.Removed) ? _reload.RunAsync() : Task.CompletedTask);
+            return;
+        }
+
+        if (ViewerEvent.Own<BlocklistChangedEvent>(raised, _userId) is { } blocked)
+        {
+            _ = InvokeAsync(() => ListChange.Differs(_blocklist.Contains, blocked.Added, blocked.Removed) ? _reload.RunAsync() : Task.CompletedTask);
             return;
         }
 

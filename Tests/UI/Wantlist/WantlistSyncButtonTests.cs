@@ -1,8 +1,6 @@
-using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Bunit.TestDoubles;
 using Contracts.Announcing;
 using Contracts.Blocklist;
 using Contracts.Identity;
@@ -71,35 +69,29 @@ public class WantlistSyncButtonTests : BunitContext
 	}
 
 	[Test]
-	public async Task Dialog_WhenDismissedAfterAWantlistToggle_ReloadsThePage()
+	public async Task DryRun_WhenTheViewersWantlistChanges_IsPlannedAgain()
 	{
-		var cut = await OpenDialogAsync();
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary());
+		var cut = Render<WantlistSyncButton>();
+		cut.WaitForAssertion(() => planner.PlanAsync(Any()).WasCalled(Times.Once));
 
-		await ToggleWantlistAsync(cut);
-		await cut.Find(".change-foot button").ClickAsync(new());
+		await cut.InvokeAsync(() => events.Publish(new WantlistChangedEvent(Viewer, [Synced], [])));
 
-		await Assert.That(Navigation().History.Count()).IsEqualTo(1);
+		cut.WaitForAssertion(() => planner.PlanAsync(Any()).WasCalled(Times.Exactly(2)));
 	}
 
 	[Test]
-	public async Task Dialog_WhenDismissedWithoutAWantlistToggle_LeavesThePageAlone()
+	public async Task DryRun_WhenAnotherPersonsWantlistChanges_IsLeftAlone()
 	{
-		var cut = await OpenDialogAsync();
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary());
+		var cut = Render<WantlistSyncButton>();
+		cut.WaitForAssertion(() => planner.PlanAsync(Any()).WasCalled(Times.Once));
 
-		await cut.Find(".change-foot button").ClickAsync(new());
+		await cut.InvokeAsync(() => events.Publish(new WantlistChangedEvent(UserId.From(Guid.NewGuid()), [Synced], [])));
 
-		await Assert.That(Navigation().History).IsEmpty();
-	}
-
-	[Test]
-	public async Task Dialog_WhenSyncedAfterAWantlistToggle_DoesNotReloadOverTheSync()
-	{
-		var cut = await OpenDialogAsync();
-
-		await ToggleWantlistAsync(cut);
-		await cut.FindAll(".change-foot button")[1].ClickAsync(new());
-
-		await Assert.That(Navigation().History).IsEmpty();
+		planner.PlanAsync(Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -201,30 +193,6 @@ public class WantlistSyncButtonTests : BunitContext
 		cut.WaitForState(() => cut.FindAll(".change-row").Count == 1);
 
 		await Assert.That(cut.Markup).Contains("1 waiting to reach Radarr + Sonarr");
-	}
-
-	private async Task ToggleWantlistAsync(IRenderedComponent<Harness> cut)
-	{
-		await cut.Find(".change-row").ClickAsync(new());
-		cut.WaitForState(() => WantlistAction(cut) is not null);
-		await WantlistAction(cut)!.ClickAsync(new());
-	}
-
-	private static IElement? WantlistAction(IRenderedComponent<Harness> cut) =>
-		cut.FindAll(".media-detail-sheet-content button")
-			.FirstOrDefault(button => button.GetAttribute("aria-label")?.Contains("wantlist", StringComparison.OrdinalIgnoreCase) is true);
-
-	private BunitNavigationManager Navigation() => (BunitNavigationManager)Services.GetRequiredService<NavigationManager>();
-
-	private async Task<IRenderedComponent<Harness>> OpenDialogAsync()
-	{
-		var (_, planner) = RegisterServices();
-		planner.PlanAsync(Any()).Returns(Summary());
-
-		var cut = Render<Harness>();
-		await cut.Find("button").ClickAsync(new());
-		cut.WaitForState(() => cut.FindAll(".change-row").Count == 1);
-		return cut;
 	}
 
 	private static readonly PendingJob RunningSync = new(

@@ -1,14 +1,22 @@
 @page "/blocklist"
 @inherits MediaListPage
+@using Contracts.Announcing
 @using Contracts.Blocklist
+@using Contracts.Identity
 @using Contracts.Media
 @using Contracts.Wantlist
+@using Domain.Announcing
+@using Domain.Identity
+@using UI.Shared.Announcing
 @using UI.Shared.Services.Branding
 @inject IBlocklistService BlocklistService
 @inject ToastService ToastService
 @inject IWantlistService WantlistService
 @inject IMediaService Media
 @inject MediaProviderBrandingService BrandingService
+@inject IEventPublisher Events
+@inject ICurrentUser CurrentUser
+@inject SearchLauncher SearchLauncher
 
 <PageTitle>Blocklist</PageTitle>
 
@@ -49,7 +57,13 @@
                        PageChanged="GoToPageAsync">
             <EmptyState>
                 <MediaListEmptyState Icon="shield-off" Heading="Nothing blocklisted.">
-                    Add a title with <span class="font-medium text-foreground">Ctrl+K</span> to keep it out of your Wantlist.
+                    <ChildContent>@ListTexts.EmptyBlocklist</ChildContent>
+                    <Actions>
+                        <BbButton Size="ButtonSize.Small" Variant="ButtonVariant.Outline" OnClick="() => SearchLauncher.Open(SearchPurpose.Blocklist)">
+                            <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
+                            <span>Blocklist a title</span>
+                        </BbButton>
+                    </Actions>
                 </MediaListEmptyState>
             </EmptyState>
             <Grid>
@@ -78,13 +92,15 @@
 
 <MediaDetailSheet Open="IsSheetOpen"
                   OnOpenChanged="SheetOpenChangedAsync"
-                  Media="SelectedMedia"
-                  OnEnrollmentChanged="@(_ => LoadAsync())"/>
+                  Media="SelectedMedia"/>
 
 @code {
     private IReadOnlyList<BlocklistedMedia>? _items;
     private BlocklistedMedia? _selectedItem;
     private WantlistSnapshot _wantlist = new([]);
+    private UserId? _userId;
+    private CoalescedReload _blocklistReload = null!;
+    private CoalescedReload _wantlistReload = null!;
 
     private IReadOnlyList<BlocklistedMedia> GridItems =>
         [
@@ -95,13 +111,31 @@
             ),
         ];
 
-    protected override void ClearItems() => _items = null;
+    protected override async Task OnInitializedAsync()
+    {
+        _blocklistReload = new(ReloadAsync);
+        _wantlistReload = new(ReloadWantlistAsync);
+        Events.Published += OnEvent;
+        await base.OnInitializedAsync();
+    }
+
+    protected override void ClearItems()
+    {
+        _items = null;
+        _userId = null;
+    }
 
     protected override void ClearSelection() => _selectedItem = null;
 
     protected override async Task LoadAsync()
     {
+        _userId ??= CurrentUser.Id;
         IsLoadingList = true;
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
         ErrorMessage = null;
 
         try
@@ -131,7 +165,30 @@
         finally
         {
             IsLoadingList = false;
+            StateHasChanged();
         }
+    }
+
+    private void OnEvent(IEvent raised)
+    {
+        if (ViewerEvent.Own<BlocklistChangedEvent>(raised, _userId) is { } changed)
+        {
+            _ = InvokeAsync(() => ListChange.Differs(Shows, changed.Added, changed.Removed) ? _blocklistReload.RunAsync() : Task.CompletedTask);
+            return;
+        }
+
+        if (ViewerEvent.Own<WantlistChangedEvent>(raised, _userId) is { } wanted)
+        {
+            _ = InvokeAsync(() => ListChange.Differs(_wantlist.Contains, wanted.Added, wanted.Removed) ? _wantlistReload.RunAsync() : Task.CompletedTask);
+        }
+    }
+
+    private bool Shows(MediaId id) => _items is not null && _items.Any(item => item.Media.Identity.Id == id);
+
+    private async Task ReloadWantlistAsync()
+    {
+        _wantlist = await WantlistService.GetAsync(Cancellation.Token);
+        StateHasChanged();
     }
 
     private MediaMatchResult? SelectedMedia => _selectedItem is null ? null : (MediaMatchResult?)_selectedItem.Media;
@@ -144,12 +201,8 @@
 
     private async Task RemoveBulkAsync(IReadOnlyList<BlocklistedMedia> toRemove)
     {
-        foreach (var item in toRemove)
-        {
-            await BlocklistService.RemoveAsync(item.Media.Identity.Id, Cancellation.Token);
-        }
+        await BlocklistService.RemoveAsync(toRemove.Select(item => item.Media.Identity.Id), Cancellation.Token);
         ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blocklist.");
-        await LoadAsync();
     }
 
     private async Task WantlistBulkAsync(IReadOnlyList<BlocklistedMedia> toMark)
@@ -170,4 +223,10 @@
     private static BulkConfirm WantlistConfirm(int count) => new($"Wantlist {Titles(count)}?", "They stay blocklisted.");
 
     private static string Titles(int count) => count == 1 ? "1 title" : $"{count} titles";
+
+    public override void Dispose()
+    {
+        Events.Published -= OnEvent;
+        base.Dispose();
+    }
 }
