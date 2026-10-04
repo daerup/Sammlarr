@@ -1,6 +1,7 @@
 using Bunit;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using TUnit.Assertions.Enums;
 using UI.Shared.Branding;
 using UI.Shared.Services.Branding;
 
@@ -30,6 +31,16 @@ public class ProviderTileTests : BunitContext
 		var image = cut.Find(".provider-tile img");
 		await Assert.That(image.GetAttribute("src")).IsEqualTo("_content/UI/providers/imdb-tile.svg");
 		await Assert.That($"{image.GetAttribute("width")}x{image.GetAttribute("height")}").IsEqualTo("30x30");
+	}
+
+	[Test]
+	public async Task PairTile_ForRadarrAndSonarr_DrawsBothMarksAtEighteenTwentyEighthsOfTheTile()
+	{
+		var cut = Render<ProviderPairTile>(parameters => parameters.Add(tile => tile.First, MediaProvider.Radarr).Add(tile => tile.Second, MediaProvider.Sonarr));
+
+		var images = cut.FindAll(".provider-pair img.is-light");
+		await Assert.That(images.Select(image => image.GetAttribute("alt") ?? string.Empty)).IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);
+		await Assert.That(images.Select(image => image.GetAttribute("width") ?? string.Empty)).IsEquivalentTo(["18", "18"]);
 	}
 
 	[Test]

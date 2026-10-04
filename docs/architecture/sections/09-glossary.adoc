@@ -160,8 +160,15 @@ Unmatched candidates are reported separately as unmatched.
 
 Wantlist:: The set of titles Sammlarr keeps in sync with the sink.
 
-Sink:: The service the wantlist syncs to, an `IMediaSink` keyed by the hand-written `SinkKind`;
-Plex today. A sync reads the sink, pulls in what was added there, and pushes queued changes.
+Sink:: The service the wantlist syncs to, an `IMediaSink` keyed by the hand-written `SinkKind`:
+Plex, or Radarr + Sonarr as one target (`ArrSink`: movies to Radarr by their TMDB id, shows to Sonarr by
+their TVDB id). A sync reads the sink, pulls in what was added there, and pushes queued changes. Each push
+carries the feed that added the title, if any, as a `SinkPush`.
+
+Tag scheme:: How Radarr + Sonarr knows a title is Sammlarr's (`ArrTagScheme`): a user tag
+`{prefix}-u-{user}`, a feed tag `{prefix}-{feed}` and an optional plain `{prefix}`, each slugged to
+`a-z0-9-`. A sync reads only the titles carrying the user's tag; removing a title another user still tags
+only takes this user's tag off.
 
 Provenance:: Where a wantlist item came from: `SinkOrigin` (added on the sink and pulled in),
 `ManualOrigin` (search, browse, or feed preview), `FeedOrigin` (a feed put it there), or
@@ -171,7 +178,7 @@ Blocklist:: Titles excluded from curation so they never enter a list.
 
 === Providers and wiring
 
-Provider:: An external service (TMDB, MDBList, Plex) or an id namespace (IMDb, TheTVDB),
+Provider:: An external service (TMDB, MDBList, Plex, Radarr, Sonarr) or an id namespace (IMDb, TheTVDB),
 modelled as a `MediaProvider` enum value.
 
 Capability:: What a provider can do: `Search`, `Trending`, `Feed`, `ApiKey`, `Auth`, `Artwork` or
@@ -187,7 +194,8 @@ Keyed service:: A service resolved by an enum key, so a caller asks for, say, `I
 keyed to `FeedProvider.Mdblist`.
 
 `ProviderConfig`:: The single global, admin-managed row of active provider selections (sink,
-search, trending, auth) plus the registration mode. Not per-user.
+search, trending, auth) plus the registration mode. Not per-user. The same row holds the Radarr + Sonarr
+connection (`ArrSinkConfig`, its API keys encrypted), read through `IArrSinkConfigService`.
 
 `ProviderUnavailableException`:: Raised when a provider's circuit breaker is open or a call times
 out. Callers degrade on it (partial results) rather than fail a whole run.

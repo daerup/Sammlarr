@@ -26,11 +26,11 @@ public class ServicesMapModelTests
 	}
 
 	[Test]
-	public async Task Roles_WhileEveryChoiceHasOneOption_OfferNoPicker()
+	public async Task Roles_ForTodaysChoices_OfferAPickerOnlyWhereThereIsASecondOption()
 	{
-		var pickers = ServicesMapModel.For(Config).Roles.Where(role => role.Picker is not null);
+		var pickers = ServicesMapModel.For(Config).Roles.Where(role => role.Picker is not null).Select(role => role.Name);
 
-		await Assert.That(pickers).IsEmpty();
+		await Assert.That(pickers).IsEquivalentTo(["Wantlist"]);
 	}
 
 	[Test]
@@ -51,6 +51,17 @@ public class ServicesMapModelTests
 	}
 
 	[Test]
+	public async Task Roles_WhenTheWantlistSyncsToRadarrAndSonarr_LandOnOneBoxForBoth()
+	{
+		var model = ServicesMapModel.For(Config with { Sink = SinkKind.Arr });
+
+		var wantlist = model.Roles.Single(role => role.Name == "Wantlist");
+		await Assert.That(wantlist.Provider).IsEqualTo(new MapEndpoint(MediaProvider.Radarr, Some.Of(MediaProvider.Sonarr)));
+		await Assert.That(wantlist.Picker!.Options.Select(option => option.ToString())).IsEquivalentTo(["Plex", "Radarr+Sonarr"], CollectionOrdering.Matching);
+		await Assert.That(model.Services.Select(service => service.Provider.ToString())).Contains("Radarr+Sonarr");
+	}
+
+	[Test]
 	public async Task Traces_ForTheMiddleRoleOfEachService_RunStraight()
 	{
 		var straight = ServicesMapModel
@@ -64,7 +75,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task Traces_ForAFeedSourceWithABox_StayOnTheFeedsRowUntilTheyRise()
 	{
-		var tmdb = ServicesMapModel.For(Config).Traces.Single(trace => trace is { Role: "Feeds", Provider: MediaProvider.Tmdb });
+		var tmdb = ServicesMapModel.For(Config).Traces.Single(trace => trace.Role == "Feeds" && trace.Provider == MediaProvider.Tmdb);
 
 		await Assert.That(tmdb.Points.Max(point => point.Y)).IsEqualTo(216);
 	}

@@ -29,23 +29,26 @@
             <svg class="map-traces" width="@Px(ServicesMapModel.Width)" height="@Px(_model.Height)" viewBox="0 0 @Px(ServicesMapModel.Width) @Px(_model.Height)" aria-hidden="true">
                 @foreach (var trace in _model.Traces)
                 {
-                    <path class="@(trace.Role == Hot ? "is-hot" : null)" d="@trace.Path" stroke="@Brand(trace.Provider).BrandColor" stroke-dasharray="@Dash(trace.Provider)"/>
+                    <path class="@(trace.Role == Hot ? "is-hot" : null)" d="@trace.Path" stroke="@Color(trace.Provider)" stroke-dasharray="@Dash(trace.Provider)"/>
                 }
                 @foreach (var service in _model.Services)
                 {
                     @foreach (var pin in service.Pins)
                     {
-                        <rect x="@Px(ServicesMapModel.ServiceX - 5)" y="@Px(pin - 1.3)" width="5" height="2.6" rx="0.6" fill="@Brand(service.Provider).BrandColor"/>
+                        <rect x="@Px(ServicesMapModel.ServiceX - 5)" y="@Px(pin - 1.3)" width="5" height="2.6" rx="0.6" fill="@Color(service.Provider)"/>
                     }
                 }
             </svg>
 
             @foreach (var service in _model.Services)
             {
-                <div class="map-service" style="left: @Px(ServicesMapModel.ServiceX)px; top: @Px(service.Y - ServicesMapModel.ServiceHeight / 2)px; --brand: @Brand(service.Provider).BrandColor">
-                    <ProviderLogo Provider="service.Provider" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
+                <div class="map-service" style="left: @Px(ServicesMapModel.ServiceX)px; top: @Px(service.Y - ServicesMapModel.ServiceHeight / 2)px; --brand: @Color(service.Provider)">
+                    @foreach (var provider in service.Provider.Providers)
+                    {
+                        <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
+                    }
                     <span class="flex min-w-0 flex-col items-start">
-                        <span class="map-service-name">@Brand(service.Provider).NickName</span>
+                        <span class="map-service-name">@Name(service.Provider)</span>
                         <span class="map-service-status">
                             <span class="map-dot @DotClass(service.Provider)"></span>
                             @Status(service.Provider)
@@ -72,7 +75,7 @@
                 @foreach (var role in _model.Roles)
                 {
                     <circle class="@(role.Provider is null ? "is-feeds" : null)" cx="@Px(ServicesMapModel.RoleWidth)" cy="@Px(role.Y)" r="2.6"
-                            stroke="@(role.Provider is { } provider ? Brand(provider).BrandColor : null)"/>
+                            stroke="@(role.Provider is { } provider ? Color(provider) : null)"/>
                 }
             </svg>
 
@@ -82,7 +85,7 @@
                 {
                     @if (role.Picker is { } picker)
                     {
-                        <span class="map-chip-slot" style="left: @Px(ServicesMapModel.ChipX)px; top: @Px(role.Y)px; --brand: @Brand(picker.Current).BrandColor"
+                        <span class="map-chip-slot" style="left: @Px(ServicesMapModel.ChipX)px; top: @Px(role.Y)px; --brand: @Color(picker.Current)"
                               @onmouseenter="() => _hovered = role.Name" @onmouseleave="() => _hovered = null">
                             <BbDropdownMenu OnOpenChange="open => Opened(role.Name, open)">
                                 <BbDropdownMenuTrigger AsChild="false" Class="map-chip" ActiveClass="is-open" aria-label="@($"Change what {role.Name} uses")">
@@ -93,8 +96,11 @@
                                     @foreach (var option in picker.Options)
                                     {
                                         <BbDropdownMenuItem Class="gap-2.5">
-                                            <ProviderLogo Provider="option" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
-                                            <span>@Brand(option).NickName</span>
+                                            @foreach (var provider in option.Providers)
+                                            {
+                                                <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
+                                            }
+                                            <span>@Name(option)</span>
                                             @if (option == picker.Current)
                                             {
                                                 <LucideIcon Name="check" Size="14" Class="ml-auto"/>
@@ -139,9 +145,19 @@
 
     private BrandingInfo Brand(MediaProvider provider) => Branding.GetBrandingInfo(provider);
 
-    private string? Dash(MediaProvider provider) => Ready.Contains(provider) ? null : "4 3";
+    private string Color(MapEndpoint endpoint) => endpoint.Partner.Match(_ => Branding.SinkColor(SinkKind.Arr), () => Brand(endpoint.Provider).BrandColor);
 
-    private string DotClass(MediaProvider provider) => Ready.Contains(provider) ? "bg-success" : "bg-destructive";
+    private string Name(MapEndpoint endpoint) => string.Join(" + ", endpoint.Providers.Select(provider => Branding.GetBrandingInfo(provider).NickName));
+
+    private bool IsReady(MapEndpoint endpoint) => endpoint.Providers.All(Ready.Contains);
+
+    private string? Dash(MapEndpoint endpoint) => IsReady(endpoint) ? null : "4 3";
+
+    private string DotClass(MapEndpoint endpoint) => IsReady(endpoint) ? "bg-success" : "bg-destructive";
+
+    private string Status(MapEndpoint endpoint) => endpoint.Partner.Match(_ => PairStatus(endpoint), () => Status(endpoint.Provider));
+
+    private string PairStatus(MapEndpoint endpoint) => IsReady(endpoint) ? "Connected" : "Not set up";
 
     private string Status(MediaProvider provider) =>
         (ProviderCaption.IsAccount(provider), Ready.Contains(provider)) switch

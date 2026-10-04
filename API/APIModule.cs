@@ -1,3 +1,4 @@
+using API.Arr;
 using API.Auth;
 using API.Mdblist;
 using API.Notifications;
@@ -19,6 +20,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<TmdbModule>();
 		services.AddModule<MdblistModule>();
 		services.AddModule<WikidataModule>();
+		services.AddModule<ArrModule>();
 		services.AddModule<NotificationsApiModule>();
 		services.AddModule<InstrumentationModule>();
 		services.AddModule<ResilienceModule>();

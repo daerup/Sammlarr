@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261003232815_RottenTomatoesPages";
+    public override string LastMigrationId => "20261004010931_ArrSinkConfig";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -119,8 +119,51 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Property<int>("Id")
                     .HasColumnType("INTEGER");
 
+                b.Property<string>("ArrTagFeedSource")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("ArrTagPerFeed")
+                    .HasColumnType("INTEGER");
+
+                b.Property<bool>("ArrTagPerUser")
+                    .HasColumnType("INTEGER");
+
+                b.Property<bool>("ArrTagPlainPrefix")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("ArrTagPrefix")
+                    .IsRequired()
+                    .HasMaxLength(64)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ArrTagUserSource")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
                 b.Property<string>("AuthProvider")
                     .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("RadarrApiKey")
+                    .HasMaxLength(4096)
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("RadarrMonitored")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int?>("RadarrQualityProfileId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("RadarrRootFolderPath")
+                    .HasMaxLength(1024)
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("RadarrSearchOnAdd")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("RadarrUrl")
+                    .HasMaxLength(2048)
                     .HasColumnType("TEXT");
 
                 b.Property<string>("RegistrationMode")
@@ -135,6 +178,27 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("TEXT");
 
+                b.Property<string>("SonarrApiKey")
+                    .HasMaxLength(4096)
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("SonarrMonitored")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int?>("SonarrQualityProfileId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("SonarrRootFolderPath")
+                    .HasMaxLength(1024)
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("SonarrSearchOnAdd")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("SonarrUrl")
+                    .HasMaxLength(2048)
+                    .HasColumnType("TEXT");
+
                 b.Property<string>("TrendingProvider")
                     .IsRequired()
                     .HasColumnType("TEXT");
@@ -147,10 +211,20 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     new
                     {
                         Id = 1,
+                        ArrTagFeedSource = "ListName",
+                        ArrTagPerFeed = true,
+                        ArrTagPerUser = true,
+                        ArrTagPlainPrefix = false,
+                        ArrTagPrefix = "sammlarr",
+                        ArrTagUserSource = "Name",
                         AuthProvider = "Plex",
+                        RadarrMonitored = true,
+                        RadarrSearchOnAdd = true,
                         RegistrationMode = "Open",
                         SearchProvider = "Plex",
                         Sink = "Plex",
+                        SonarrMonitored = true,
+                        SonarrSearchOnAdd = true,
                         TrendingProvider = "Tmdb"
                     });
             });

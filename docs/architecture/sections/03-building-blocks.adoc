@@ -94,6 +94,7 @@ all.
 | IMDb | nothing: `ImdbId` is reached through Plex and TMDB lookups, and its rating arrives in Plex's answer
 | TheTVDB | nothing: `TvdbId` is reached through Plex and TMDB lookups
 | Wikidata | `IRottenTomatoesPageFinder`: a keyless SPARQL lookup of a title's Rotten Tomatoes page by its IMDb id
+| Radarr, Sonarr | one `IMediaSink` together (`ArrSink`, keyed `SinkKind.Arr`): a typed client per app over the shared `ArrClient`, its address and key from the admin's `ArrSinkConfig`
 |===
 
 The cross-cutting folders under `API`:

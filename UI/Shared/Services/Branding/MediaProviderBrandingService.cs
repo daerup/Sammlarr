@@ -8,6 +8,17 @@ public class MediaProviderBrandingService
 
 	private const string OwnTile = "transparent";
 
+	private const string RadarrAndSonarr = "color-mix(in oklch, #FFC230, #35C5F4)";
+
+	public string SinkColor(SinkKind sink)
+	{
+		return sink switch
+		{
+			SinkKind.Plex => GetBrandingInfo(MediaProvider.Plex).BrandColor,
+			SinkKind.Arr => RadarrAndSonarr,
+		};
+	}
+
 	public BrandingInfo GetBrandingInfo(MediaProvider provider) =>
 		provider switch
 		{
@@ -55,6 +66,24 @@ public class MediaProviderBrandingService
 				new BrandArt("mdblist-square.svg"),
 				new BrandArt("mdblist-logo-light.svg", "mdblist-logo-dark.svg") { Scale = 1.25 },
 				new BrandTile(OwnTile, new BrandArt("mdblist-square.svg"), 100)
+			),
+			MediaProvider.Radarr => new(
+				provider,
+				"Radarr",
+				"Radarr",
+				"#FFC230",
+				new BrandArt("radarr-square-light.svg", "radarr-square-dark.svg"),
+				new BrandArt("radarr-square-light.svg", "radarr-square-dark.svg"),
+				new BrandTile(MutedTile, new BrandArt("radarr-square-light.svg", "radarr-square-dark.svg"), 70)
+			),
+			MediaProvider.Sonarr => new(
+				provider,
+				"Sonarr",
+				"Sonarr",
+				"#35C5F4",
+				new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"),
+				new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"),
+				new BrandTile(MutedTile, new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"), 70)
 			),
 		};
 }

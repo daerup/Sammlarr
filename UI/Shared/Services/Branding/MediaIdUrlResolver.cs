@@ -28,5 +28,6 @@ public static class ExternalMediaIdUrlResolver
 				MediaType.Show => $"https://mdblist.com/show/{id.Value}",
 				_ => null,
 			},
+			MediaProvider.Radarr or MediaProvider.Sonarr => null,
 		};
 }

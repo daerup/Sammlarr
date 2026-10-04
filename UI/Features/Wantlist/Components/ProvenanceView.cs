@@ -19,15 +19,16 @@ internal static class ProvenanceView
 			_ => "circle",
 		};
 
-	internal static string Label(WantlistItemProvenance provenance, MediaProviderBrandingService branding) =>
-		provenance.Value switch
+	internal static string Label(WantlistItemProvenance provenance)
+	{
+		return provenance switch
 		{
-			SinkOrigin sink => ProviderName(sink.Provider, branding),
+			SinkOrigin sink => ProviderName(sink.Provider),
 			ManualOrigin => "Manual",
 			FeedOrigin feed => feed.Feed.Name,
 			OrphanedOrigin orphaned => orphaned.FormerFeedName,
-			_ => string.Empty,
 		};
+	}
 
 	internal static string Heading(WantlistItemProvenance provenance) =>
 		provenance.Value switch
@@ -39,34 +40,38 @@ internal static class ProvenanceView
 			_ => string.Empty,
 		};
 
-	internal static MediaProvider? Provider(WantlistItemProvenance provenance) =>
-		provenance.Value switch
+	internal static IReadOnlyList<MediaProvider> Providers(WantlistItemProvenance provenance)
+	{
+		return provenance switch
 		{
-			SinkOrigin sink => sink.Provider.AsMediaProvider(),
-			FeedOrigin feed => feed.Feed.Provider.AsMediaProvider(),
-			_ => null,
+			SinkOrigin sink => sink.Provider.Providers(),
+			FeedOrigin feed => [feed.Feed.Provider.AsMediaProvider()],
+			ManualOrigin or OrphanedOrigin => [],
 		};
+	}
 
 	internal static string? EditUrl(WantlistItemProvenance provenance) =>
 		provenance.Value is FeedOrigin feed ? $"/feeds/edit/{UrlGuid.Encode(feed.Feed.Id.Value)}" : null;
 
 	internal static FeedRunCounts? RunCounts(WantlistItemProvenance provenance) => provenance is FeedOrigin feed ? feed.Run.Counts : null;
 
-	internal static string? BrandColor(WantlistItemProvenance provenance, MediaProviderBrandingService branding) =>
-		provenance.Value switch
+	internal static string? BrandColor(WantlistItemProvenance provenance, MediaProviderBrandingService branding)
+	{
+		return provenance switch
 		{
-			SinkOrigin sink => branding.GetBrandingInfo(sink.Provider.AsMediaProvider()).BrandColor,
+			SinkOrigin sink => branding.SinkColor(sink.Provider),
 			FeedOrigin feed => branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider()).BrandColor,
-			_ => null,
+			ManualOrigin or OrphanedOrigin => null,
 		};
+	}
 
-	internal static string Description(WantlistItemProvenance provenance, DateTimeOffset addedAt, MediaProviderBrandingService branding)
+	internal static string Description(WantlistItemProvenance provenance, DateTimeOffset addedAt)
 	{
 		var when = addedAt.LocalDateTime.ToString("MMM d, yyyy HH:mm");
 
 		return provenance.Value switch
 		{
-			SinkOrigin sink => $"Added on {ProviderName(sink.Provider, branding)}",
+			SinkOrigin sink => $"Added on {ProviderName(sink.Provider)}",
 			ManualOrigin manual => manual.Source == ManualSource.Unknown ? $"Added manually on {when}" : $"Added from {ManualName(manual.Source)} on {when}",
 			FeedOrigin feed => $"Added by feed '{feed.Feed.Name}' on {when}",
 			OrphanedOrigin orphaned => $"Was from '{orphaned.FormerFeedName}' (deleted)",
@@ -79,8 +84,7 @@ internal static class ProvenanceView
 
 	private static string ItemQuery(MediaId? itemId) => itemId is { } id ? $"?item={UrlGuid.Encode(id.Value)}" : string.Empty;
 
-	private static string ProviderName(SinkKind provider, MediaProviderBrandingService branding) =>
-		branding.GetBrandingInfo(provider.AsMediaProvider()).DisplayName;
+	private static string ProviderName(SinkKind provider) => provider.GetDescription();
 
 	private static string ManualIcon(ManualSource source) =>
 		source switch

@@ -3,6 +3,7 @@ using Contracts.Blocklist;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Notifications;
+using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using NetArchTest.Rules;
@@ -72,6 +73,8 @@ public class RepositoryTests
 			);
 		yield return () => (typeof(IApiKeyConfigRepository), ["DB.Data.Access.ApiKeyConfigRepository", "DB.Data.Access.AccessModule", "Core.Auth.ApiKeyService"]);
 		yield return () => (typeof(ICredentialRepository), ["DB.Data.Access.CredentialRepository", "DB.Data.Access.AccessModule", "Core.Auth.CredentialService"]);
+		yield return () =>
+			(typeof(IArrSinkConfigRepository), ["DB.Data.Config.ArrSinkConfigRepository", "DB.Data.Config.ConfigModule", "Core.Settings.ArrSinkConfigService"]);
 	}
 
 	[Test]

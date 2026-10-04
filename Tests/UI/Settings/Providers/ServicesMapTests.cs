@@ -62,13 +62,19 @@ public class ServicesMapTests : BunitContext
 	}
 
 	[Test]
-	[Arguments(true)]
-	[Arguments(false)]
-	public async Task Map_WhileEveryRoleHasOneOption_OffersNoControl(bool canPick)
+	public async Task Map_ForAnAdmin_OffersAChipOnlyForTheWantlistWhichHasASecondTarget()
 	{
-		var cut = RenderMap(canPick);
+		var cut = RenderMap(canPick: true);
 
 		await Assert.That(cut.FindAll("button.map-service")).IsEmpty();
+		await Assert.That(cut.FindAll(".map-chip").Select(chip => chip.GetAttribute("aria-label") ?? string.Empty)).IsEquivalentTo(["Change what Wantlist uses"]);
+	}
+
+	[Test]
+	public async Task Map_ForAMember_OffersNoControl()
+	{
+		var cut = RenderMap(canPick: false);
+
 		await Assert.That(cut.FindAll(".map-chip")).IsEmpty();
 	}
 

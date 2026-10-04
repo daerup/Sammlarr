@@ -8,7 +8,7 @@ public class ProviderMatrixTests
 	public async Task Values_OnASubsetEnum_AreOnlyThatCapabilitysBrands()
 	{
 		await Assert.That(Enum.GetValues<SearchProvider>().Length).IsEqualTo(1);
-		await Assert.That(Enum.GetValues<SinkKind>().Length).IsEqualTo(1);
+		await Assert.That(Enum.GetValues<SinkKind>().Length).IsEqualTo(2);
 		await Assert.That(Enum.GetValues<TrendingProvider>().Length).IsEqualTo(1);
 		await Assert.That(Enum.GetValues<FeedProvider>().Length).IsEqualTo(2);
 		await Assert.That(Enum.GetValues<ApiKeyProvider>().Length).IsEqualTo(2);
@@ -19,9 +19,15 @@ public class ProviderMatrixTests
 	[Test]
 	public async Task ToMediaProvider_FromASubsetProvider_CollapsesToTheBrand()
 	{
-		await Assert.That(SinkKind.Plex.AsMediaProvider()).IsEqualTo(MediaProvider.Plex);
 		await Assert.That(SearchProvider.Plex.AsMediaProvider()).IsEqualTo(MediaProvider.Plex);
 		await Assert.That(FeedProvider.Mdblist.AsMediaProvider()).IsEqualTo(MediaProvider.Mdblist);
+	}
+
+	[Test]
+	public async Task Providers_OfASink_AreTheAppsBehindIt()
+	{
+		await Assert.That(SinkKind.Plex.Providers()).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(SinkKind.Arr.Providers()).IsEquivalentTo([MediaProvider.Radarr, MediaProvider.Sonarr]);
 	}
 
 	[Test]

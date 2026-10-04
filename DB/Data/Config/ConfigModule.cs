@@ -9,6 +9,7 @@ internal class ConfigModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddScoped<IProviderConfigRepository, ProviderConfigRepository>();
+		services.AddScoped<IArrSinkConfigRepository, ArrSinkConfigRepository>();
 		services.AddScoped<IModelConfiguration, ProviderConfigConfiguration>();
 	}
 }

@@ -29,5 +29,20 @@ public class MediaProviderBrandingServiceTests
 		await Assert.That(unclean).IsEmpty();
 	}
 
+	[Test]
+	public async Task SinkColor_ForPlex_IsPlexsBrand()
+	{
+		await Assert.That(Testee.SinkColor(SinkKind.Plex)).IsEqualTo(Testee.GetBrandingInfo(MediaProvider.Plex).BrandColor);
+	}
+
+	[Test]
+	public async Task SinkColor_ForRadarrAndSonarr_MixesBothBrands()
+	{
+		var radarr = Testee.GetBrandingInfo(MediaProvider.Radarr).BrandColor;
+		var sonarr = Testee.GetBrandingInfo(MediaProvider.Sonarr).BrandColor;
+
+		await Assert.That(Testee.SinkColor(SinkKind.Arr)).IsEqualTo($"color-mix(in oklch, {radarr}, {sonarr})");
+	}
+
 	private static bool IsUnclean(string svg) => svg.Contains("<?xml") || svg.Contains("<!--") || svg.Contains("<title") || svg.Contains("<text");
 }

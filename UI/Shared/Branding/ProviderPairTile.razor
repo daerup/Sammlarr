@@ -1,0 +1,16 @@
+<span class="provider-pair" style="--tile-size: @(Size)px; --mark-size: @(MarkSize)px">
+    <span class="provider-pair-first"><ProviderLogo Provider="First" Form="ProviderLogoForm.Mark" Size="@MarkSize" Decorative="Decorative"/></span>
+    <span class="provider-pair-second"><ProviderLogo Provider="Second" Form="ProviderLogoForm.Mark" Size="@MarkSize" Decorative="Decorative"/></span>
+</span>
+
+@code {
+    [Parameter] [EditorRequired] public required MediaProvider First { get; set; }
+
+    [Parameter] [EditorRequired] public required MediaProvider Second { get; set; }
+
+    [Parameter] public int Size { get; set; } = 28;
+
+    [Parameter] public bool Decorative { get; set; }
+
+    private int MarkSize => (int)Math.Round(Size * 18 / 28d);
+}

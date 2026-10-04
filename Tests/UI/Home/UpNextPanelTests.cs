@@ -57,8 +57,8 @@ public class UpNextPanelTests : BunitContext
 	{
 		IReadOnlyList<UpNextRow> queued =
 		[
-			new("hdlists/documentaries", "queued", string.Empty, UpNextKind.Queued, "/feeds/edit/docs", MediaProvider.Mdblist),
-			new("Sync Wantlist", "queued", string.Empty, UpNextKind.Queued, null, MediaProvider.Plex),
+			new("hdlists/documentaries", "queued", string.Empty, UpNextKind.Queued, "/feeds/edit/docs") { Brands = [MediaProvider.Mdblist] },
+			new("Sync Wantlist", "queued", string.Empty, UpNextKind.Queued, null) { Brands = [MediaProvider.Plex] },
 		];
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
@@ -66,6 +66,22 @@ public class UpNextPanelTests : BunitContext
 		await Assert
 			.That(cut.FindAll(".row .provider-tile img").Select(logo => logo.GetAttribute("alt") ?? string.Empty))
 			.IsEquivalentTo(["Movie Database List", "Plex"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Row_SyncingToRadarrAndSonarr_PairsBothMarksInOneTile()
+	{
+		IReadOnlyList<UpNextRow> queued =
+		[
+			new("Sync Wantlist", "queued", string.Empty, UpNextKind.Queued, null) { Brands = [MediaProvider.Radarr, MediaProvider.Sonarr] },
+		];
+
+		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
+
+		await Assert.That(cut.FindAll(".row .provider-tile")).IsEmpty();
+		await Assert
+			.That(cut.FindAll(".row .provider-pair img.is-light").Select(logo => logo.GetAttribute("alt") ?? string.Empty))
+			.IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);
 	}
 
 	[Test]
