@@ -1,14 +1,16 @@
 @inherits LayoutComponentBase
+@implements IDisposable
 @using UI.Features.Onboarding.Components
 @inject CurrentUserAccessor CurrentUser
 @inject AppVersionProvider Versions
+@inject SearchLauncher SearchLauncher
 
 <SessionInvalidationListener/>
 <AuthorizeView>
     <SetupRedirect/>
 </AuthorizeView>
 <AuthorizeView>
-    <GlobalSearch @bind-IsOpen="_isSearchOpen"/>
+    <GlobalSearch IsOpen="_isSearchOpen" IsOpenChanged="SearchOpenChanged" Purpose="_searchPurpose"/>
 </AuthorizeView>
 
 <div class="relative h-screen overflow-hidden flex flex-col">
@@ -68,6 +70,8 @@
 @code {
 	private bool _isSearchOpen;
 
+	private SearchPurpose _searchPurpose;
+
 	[CascadingParameter]
 	private Task<AuthenticationState>? AuthenticationState { get; set; }
 
@@ -78,4 +82,24 @@
 			CurrentUser.SetPrincipal((await AuthenticationState).User);
 		}
 	}
+
+	protected override void OnInitialized() => SearchLauncher.Opened += OpenSearch;
+
+	private void OpenSearch(SearchPurpose purpose)
+	{
+		_searchPurpose = purpose;
+		_isSearchOpen = true;
+		_ = InvokeAsync(StateHasChanged);
+	}
+
+	private void SearchOpenChanged(bool open)
+	{
+		_isSearchOpen = open;
+		if (!open)
+		{
+			_searchPurpose = SearchPurpose.Wantlist;
+		}
+	}
+
+	public void Dispose() => SearchLauncher.Opened -= OpenSearch;
 }

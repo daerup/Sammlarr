@@ -1,11 +1,14 @@
 using BlazorBlueprint.Components;
 using Bunit;
+using Contracts.Announcing;
 using Contracts.Blocklist;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Blocklist;
+using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
@@ -33,10 +36,16 @@ public class GlobalSearchTests : BunitContext
 
 	private readonly Mock<IProviderConfigService> _providerConfig = IProviderConfigService.Mock();
 
+	private readonly TestEventPublisher _events = new();
+
+	private readonly Mock<IBlocklistService> _blocklist = IBlocklistService.Mock();
+
 	[Before(Test)]
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton<IEventPublisher>(_events);
+		Services.AddSingleton<ICurrentUser>(new TestCurrentUser());
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 		Services.AddScoped<Notifier>();
@@ -61,9 +70,8 @@ public class GlobalSearchTests : BunitContext
 		_wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
 		Services.AddSingleton(_wantlist.Object);
 
-		var blocklist = IBlocklistService.Mock();
-		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
-		Services.AddSingleton(blocklist.Object);
+		_blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
+		Services.AddSingleton(_blocklist.Object);
 
 		var search = IMediaSearchService.Mock();
 		search.SearchAsync(Any(), Any(), Any()).Returns([Matched, Unmatched]);
@@ -163,5 +171,51 @@ public class GlobalSearchTests : BunitContext
 		var toast = Services.GetRequiredService<ToastService>().Toasts.Single();
 		await Assert.That(toast.Variant).IsEqualTo(ToastVariant.Warning);
 		await Assert.That(toast.Description).IsEqualTo($"Plex has no match for '{Movie}', so it can't go on your wantlist.");
+	}
+
+	[Test]
+	public async Task Wantlist_WhenTheViewerAddsATitleElsewhere_IsReadAgain()
+	{
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+
+		await cut.InvokeAsync(() => _events.Publish(new WantlistChangedEvent(TestCurrentUser.DefaultId, [Matched.Identity.Id], [])));
+
+		cut.WaitForAssertion(() => _wantlist.GetAsync(Any()).WasCalled(Times.Exactly(2)));
+	}
+
+	[Test]
+	public async Task Wantlist_WhenAnotherPersonAddsATitle_IsNotReadAgain()
+	{
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+
+		await cut.InvokeAsync(() => _events.Publish(new WantlistChangedEvent(UserId.New(), [Matched.Identity.Id], [])));
+
+		_wantlist.GetAsync(Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Wantlist_WhenTheChangeIsAlreadyShown_IsNotReadAgain()
+	{
+		var item = new WantlistItem(Matched.Identity.Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
+		_wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([item]));
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+
+		await cut.InvokeAsync(() => _events.Publish(new WantlistChangedEvent(TestCurrentUser.DefaultId, [Matched.Identity.Id], [])));
+
+		_wantlist.GetAsync(Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Purpose_WhenBlocklist_TitlesTheSearchAndBlocklistsTheTitle()
+	{
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true).Add(search => search.Purpose, SearchPurpose.Blocklist));
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
+
+		await cut.Find("button[aria-label='Add to blocklist']").ClickAsync(new MouseEventArgs());
+
+		await Assert.That(cut.Find(".search-modal").GetAttribute("aria-label")).IsEqualTo("Blocklist a title");
+		_blocklist.AddAsync(Any(), Any()).WasCalled(Times.Once);
+		_wantlist.AddAsync(Any(), Any(), Any()).WasNeverCalled();
 	}
 }

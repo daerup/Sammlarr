@@ -834,12 +834,12 @@
         {
             if (_blocklistIds.Contains(item.Identity.Id))
             {
-                await BlocklistService.RemoveAsync(item.Identity.Id);
+                await BlocklistService.RemoveAsync([item.Identity.Id]);
                 _blocklistIds.Remove(item.Identity.Id);
             }
             else
             {
-                await BlocklistService.AddAsync(item.Identity.Id);
+                await BlocklistService.AddAsync([item.Identity.Id]);
                 _blocklistIds.Add(item.Identity.Id);
             }
         }

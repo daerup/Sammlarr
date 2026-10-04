@@ -1,5 +1,6 @@
 using Contracts.Blocklist;
 using Contracts.Media;
+using Domain.Blocklist;
 using Domain.Media;
 using Harness;
 using TestInfrastructure;
@@ -16,7 +17,7 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 
-		await host.Resolve<IBlocklistService>().AddAsync(fightClub);
+		await host.Resolve<IBlocklistService>().AddAsync([fightClub]);
 
 		var items = await host.Resolve<IBlocklistRepository>().GetAllAsync();
 		await Assert.That(items.Select(item => item.MediaId)).IsEquivalentTo([fightClub]);
@@ -27,7 +28,7 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnBlocklist();
 
-		await host.Resolve<IBlocklistService>().AddAsync(fightClub);
+		await host.Resolve<IBlocklistService>().AddAsync([fightClub]);
 
 		var items = await host.Resolve<IBlocklistRepository>().GetAllAsync();
 		await Assert.That(items.Select(item => item.MediaId)).IsEquivalentTo([fightClub]);
@@ -38,7 +39,7 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnBlocklist();
 
-		await host.Resolve<IBlocklistService>().RemoveAsync(fightClub);
+		await host.Resolve<IBlocklistService>().RemoveAsync([fightClub]);
 
 		var items = await host.Resolve<IBlocklistRepository>().GetAllAsync();
 		await Assert.That(items).IsEmpty();
@@ -75,8 +76,56 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task AddAsync_ForANewTitle_AnnouncesItAsAdded()
+	{
+		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
+		var heard = host.Heard();
+
+		await host.Resolve<IBlocklistService>().AddAsync([fightClub]);
+
+		var changed = heard.OfType<BlocklistChangedEvent>().Single();
+		await Assert.That(changed.Added).IsEquivalentTo([fightClub]);
+		await Assert.That(changed.Removed).IsEmpty();
+	}
+
+	[Test]
+	public async Task AddAsync_WhenTheTitleIsAlreadyBlocklisted_AnnouncesNothing()
+	{
+		var fightClub = await host.Movie(TestMedia.FightClub).OnBlocklist();
+		var heard = host.Heard();
+
+		await host.Resolve<IBlocklistService>().AddAsync([fightClub]);
+
+		await Assert.That(heard.OfType<BlocklistChangedEvent>()).IsEmpty();
+	}
+
+	[Test]
+	public async Task RemoveAsync_ForABlocklistedTitle_AnnouncesItAsRemoved()
+	{
+		var fightClub = await host.Movie(TestMedia.FightClub).OnBlocklist();
+		var heard = host.Heard();
+
+		await host.Resolve<IBlocklistService>().RemoveAsync([fightClub]);
+
+		var changed = heard.OfType<BlocklistChangedEvent>().Single();
+		await Assert.That(changed.Removed).IsEquivalentTo([fightClub]);
+		await Assert.That(changed.Added).IsEmpty();
+	}
+
+	[Test]
+	public async Task RemoveAsync_WhenTheTitleIsNotBlocklisted_AnnouncesNothing()
+	{
+		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
+		var heard = host.Heard();
+
+		await host.Resolve<IBlocklistService>().RemoveAsync([fightClub]);
+
+		await Assert.That(heard.OfType<BlocklistChangedEvent>()).IsEmpty();
+	}
+
+	[Test]
 	public async Task AddAsync_WhenTheMediaIsNotInTheLibrary_IsRejected()
 	{
-		await Assert.That(async () => await host.Resolve<IBlocklistService>().AddAsync(MediaId.New())).Throws<UnknownMediaException>();
+		await Assert.That(async () => await host.Resolve<IBlocklistService>().AddAsync([MediaId.New()])).Throws<UnknownMediaException>();
 	}
 }

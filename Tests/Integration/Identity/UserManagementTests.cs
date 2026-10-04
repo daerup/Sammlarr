@@ -118,7 +118,7 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 		var wanted = await host.SeedMediaAsync(TmdbId.From("1", MediaType.Movie));
 		var blocked = await host.SeedMediaAsync(TmdbId.From("2", MediaType.Movie));
 		await host.Resolve<IWantlistService>().AddAsync([wanted], new ManualOrigin(ManualSource.Search));
-		await host.Resolve<IBlocklistService>().AddAsync(blocked);
+		await host.Resolve<IBlocklistService>().AddAsync([blocked]);
 
 		var holdings = Joined(await Testee.GetPeopleAsync(), TestCurrentUser.DefaultId).Holdings;
 
@@ -163,11 +163,11 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		host.SinkAddresses(MediaProvider.Tmdb);
 		var blocked = await host.SeedMediaAsync(TmdbId.From("2", MediaType.Movie));
-		await host.Resolve<IBlocklistService>().AddAsync(blocked);
+		await host.Resolve<IBlocklistService>().AddAsync([blocked]);
 		await host.SignInAs("member");
 		var member = host.CurrentUser.Id;
-		await host.Resolve<IBlocklistService>().AddAsync(blocked);
-		await host.Resolve<IBlocklistService>().AddAsync(await host.SeedMediaAsync(TmdbId.From("3", MediaType.Movie)));
+		await host.Resolve<IBlocklistService>().AddAsync([blocked]);
+		await host.Resolve<IBlocklistService>().AddAsync([await host.SeedMediaAsync(TmdbId.From("3", MediaType.Movie))]);
 		host.CurrentUser.Id = TestCurrentUser.DefaultId;
 		host.CurrentUser.Role = UserRole.Admin;
 

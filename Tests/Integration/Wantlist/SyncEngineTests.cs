@@ -45,6 +45,21 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task SyncAsync_WhenItPullsChanges_AnnouncesWhatItAddedAndRemoved()
+	{
+		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
+		var fightClub = await host.Movie(TestMedia.FightClub).OnWantlist(origin: Manual);
+		await host.RemoteWantlistHas(TestMedia.Inception);
+		var heard = host.Heard();
+
+		await Testee.SyncAsync(Trigger);
+
+		var changed = heard.OfType<WantlistChangedEvent>().Single();
+		await Assert.That(changed.Added).IsEquivalentTo([inception]);
+		await Assert.That(changed.Removed).IsEquivalentTo([fightClub]);
+	}
+
+	[Test]
 	public async Task SyncAsync_WhenALocalItemIsMissingRemotely_HardDeletesIt()
 	{
 		await host.Movie(TestMedia.Inception).OnWantlist(origin: Manual);

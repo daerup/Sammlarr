@@ -9,6 +9,7 @@ using API.Plex;
 using API.Tmdb;
 using API.Wikidata;
 using Contracts;
+using Contracts.Announcing;
 using Contracts.Auth;
 using Contracts.Feed;
 using Contracts.Identity;
@@ -21,6 +22,7 @@ using DB.Data;
 using DB.Data.Access;
 using DB.Data.Identity;
 using DB.Data.Media;
+using Domain.Announcing;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
@@ -114,6 +116,13 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	internal SammlarrDbContext ScopedDbContext => Resolve<SammlarrDbContext>();
 
 	internal IReadOnlyList<T> Published<T>() => Resolve<PublishedMessages>().Recorded<T>();
+
+	internal List<IEvent> Heard()
+	{
+		List<IEvent> heard = [];
+		Resolve<IEventPublisher>().Published += heard.Add;
+		return heard;
+	}
 
 	internal async Task<MediaId> SeedMediaAsync(params IExternalMediaId[] externals)
 	{

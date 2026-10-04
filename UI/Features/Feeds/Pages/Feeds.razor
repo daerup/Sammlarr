@@ -257,8 +257,7 @@
                   OnOpenChanged="@(open => {
                                      if (!open) { _selected = null; }
                                  })"
-                  Media="_selected"
-                  OnEnrollmentChanged="@(_ => HandleEnrollmentChangedAsync())"/>
+                  Media="_selected"/>
 
 @code {
     private enum FeedsConfirm
@@ -277,6 +276,7 @@
     private ProviderConfig? _providerConfig;
     private bool _isSignedIn;
     private UserId? _viewer;
+    private CoalescedReload _previewReload = null!;
     private DateTimeOffset _now = DateTimeOffset.Now;
 
     private IReadOnlyList<FeedOverview> _feeds = [];
@@ -316,6 +316,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _previewReload = new(ReloadPreviewAsync);
         Events.Published += OnEvent;
         await Task.Yield();
         _providerConfig = await ProviderConfigService.GetAsync();
@@ -494,6 +495,12 @@
         if (ViewerEvent.Own<FeedRunFinishedEvent>(raised, _viewer) is {})
         {
             _ = InvokeAsync(RefreshAfterRunAsync);
+            return;
+        }
+
+        if (ViewerEvent.Own<WantlistChangedEvent>(raised, _viewer) is not null || ViewerEvent.Own<BlocklistChangedEvent>(raised, _viewer) is not null)
+        {
+            _ = InvokeAsync(() => _confirmOpen ? _previewReload.RunAsync() : Task.CompletedTask);
         }
     }
 
@@ -548,7 +555,7 @@
         }
     }
 
-    private async Task HandleEnrollmentChangedAsync()
+    private async Task ReloadPreviewAsync()
     {
         if (_pendingFeed is {} feed && _confirmOpen)
         {

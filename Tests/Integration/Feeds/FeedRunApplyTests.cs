@@ -122,7 +122,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 
 		var blocklisted = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
-		await host.Resolve<IBlocklistRepository>().AddAsync(blocklisted);
+		await host.Resolve<IBlocklistRepository>().AddAsync([blocklisted]);
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
@@ -137,7 +137,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		host.MdblistFeedContains("blocklist-kept-list", Item("Inception", MediaType.Movie, Tmdb("27205")));
 
 		var blocklisted = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
-		await host.Resolve<IBlocklistRepository>().AddAsync(blocklisted);
+		await host.Resolve<IBlocklistRepository>().AddAsync([blocklisted]);
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
@@ -174,6 +174,23 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var queued = await host.Resolve<IWantlistOutbox>().GetAllAsync();
 		await Assert.That(queued.Where(op => op.Action == WantlistOperationAction.Add).Select(op => op.MediaId)).Contains(fightClub);
+	}
+
+	[Test]
+	public async Task RunAsync_ForAMirrorFeed_AnnouncesWhatItAddedAndDropped()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("announced-list", new Mirror(1));
+		host.MdblistFeedContains("announced-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
+		var dropped = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
+		var heard = host.Heard();
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		var changes = heard.OfType<WantlistChangedEvent>().ToList();
+		await Assert.That(changes.SelectMany(change => change.Added)).IsEquivalentTo([fightClub]);
+		await Assert.That(changes.SelectMany(change => change.Removed)).IsEquivalentTo([dropped]);
 	}
 
 	[Test]

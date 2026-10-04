@@ -1,7 +1,9 @@
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
+using Core.Announcing;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Wantlist;
@@ -9,8 +11,14 @@ using Domain.Wantlist.Outbox;
 
 namespace Core.Wantlist;
 
-internal sealed class WantlistService(IWantlistRepository repository, IWantlistOutbox outbox, IMediaService media, IProviderConfigService providerConfig)
-	: IWantlistService
+internal sealed class WantlistService(
+	IWantlistRepository repository,
+	IWantlistOutbox outbox,
+	IMediaService media,
+	IProviderConfigService providerConfig,
+	Announcer announcer,
+	ICurrentUser currentUser
+) : IWantlistService
 {
 	public async Task<WantlistSnapshot> GetAsync(CancellationToken cancellationToken = default) => new(await repository.GetAllAsync(cancellationToken));
 
@@ -35,7 +43,7 @@ internal sealed class WantlistService(IWantlistRepository repository, IWantlistO
 		await outbox.DropAsync(uncancel, cancellationToken);
 		var added = await repository.AddAsync(adding, provenance, cancellationToken);
 		await outbox.EnqueueAsync(WantlistOperationAction.Add, needsPush.Where(added.Contains).ToList(), cancellationToken);
-		return added;
+		return AnnounceAdded(added);
 	}
 
 	public async Task<IReadOnlyList<MediaId>> RemoveAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
@@ -61,7 +69,7 @@ internal sealed class WantlistService(IWantlistRepository repository, IWantlistO
 		{
 			await outbox.EnqueueAsync(WantlistOperationAction.Remove, needsEnqueue, cancellationToken);
 		}
-		return await repository.RemoveAsync(removing, cancellationToken);
+		return AnnounceRemoved(await repository.RemoveAsync(removing, cancellationToken));
 	}
 
 	public async Task<IReadOnlyList<MediaId>> RemoveAsync(IEnumerable<MediaId> ids, FeedId addedBy, CancellationToken cancellationToken = default)
@@ -86,7 +94,7 @@ internal sealed class WantlistService(IWantlistRepository repository, IWantlistO
 
 		await outbox.DropAsync(cancelAdds, cancellationToken);
 		await outbox.EnqueueAsync(WantlistOperationAction.Remove, pushable, cancellationToken);
-		return removed;
+		return AnnounceRemoved(removed);
 	}
 
 	public async Task<IReadOnlyList<MediaId>> RequeueAllAsync(CancellationToken cancellationToken = default)
@@ -94,6 +102,26 @@ internal sealed class WantlistService(IWantlistRepository repository, IWantlistO
 		var wantlist = await GetAsync(cancellationToken);
 		await outbox.EnqueueAsync(WantlistOperationAction.Add, wantlist.Ids, cancellationToken);
 		return [.. wantlist.Ids];
+	}
+
+	private IReadOnlyList<MediaId> AnnounceAdded(IReadOnlyList<MediaId> added)
+	{
+		if (added.Count > 0)
+		{
+			announcer.Announce(new WantlistChangedEvent(currentUser.Id, added, []));
+		}
+
+		return added;
+	}
+
+	private IReadOnlyList<MediaId> AnnounceRemoved(IReadOnlyList<MediaId> removed)
+	{
+		if (removed.Count > 0)
+		{
+			announcer.Announce(new WantlistChangedEvent(currentUser.Id, [], removed));
+		}
+
+		return removed;
 	}
 
 	private async Task EnsureSinkIdInExternalsAsync(List<MediaId> ids, CancellationToken cancellationToken)

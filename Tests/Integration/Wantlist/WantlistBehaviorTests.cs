@@ -53,6 +53,43 @@ public class WantlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task AddAsync_ForANewTitle_AnnouncesItAsAdded()
+	{
+		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
+		var heard = host.Heard();
+
+		await host.Resolve<IWantlistService>().AddAsync([inception], Manual);
+
+		var changed = heard.OfType<WantlistChangedEvent>().Single();
+		await Assert.That(changed.Added).IsEquivalentTo([inception]);
+		await Assert.That(changed.Removed).IsEmpty();
+	}
+
+	[Test]
+	public async Task AddAsync_WhenTheTitleIsAlreadyWantlisted_AnnouncesNothing()
+	{
+		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
+		var heard = host.Heard();
+
+		await host.Resolve<IWantlistService>().AddAsync([inception], Manual);
+
+		await Assert.That(heard.OfType<WantlistChangedEvent>()).IsEmpty();
+	}
+
+	[Test]
+	public async Task RemoveAsync_ForAWantlistedTitle_AnnouncesItAsRemoved()
+	{
+		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Manual);
+		var heard = host.Heard();
+
+		await host.Resolve<IWantlistService>().RemoveAsync([inception]);
+
+		var changed = heard.OfType<WantlistChangedEvent>().Single();
+		await Assert.That(changed.Removed).IsEquivalentTo([inception]);
+		await Assert.That(changed.Added).IsEmpty();
+	}
+
+	[Test]
 	public async Task GetAsync_WhenItemsAreWantlisted_HoldsAllOfTheirIds()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnWantlist(origin: Remote);

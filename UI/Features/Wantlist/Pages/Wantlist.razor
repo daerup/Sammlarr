@@ -7,7 +7,6 @@
 @using Contracts.Wantlist
 @using Domain.Announcing
 @using Domain.Identity
-@using Domain.Feed.Run
 @using global::Shared
 @using UI.Features.Wantlist.Components
 @using UI.Shared.Announcing
@@ -19,6 +18,7 @@
 @inject MediaProviderBrandingService BrandingService
 @inject IEventPublisher Events
 @inject ICurrentUser CurrentUser
+@inject SearchLauncher SearchLauncher
 
 <PageTitle>@PageHeading</PageTitle>
 
@@ -68,7 +68,24 @@
                        PageChanged="GoToPageAsync">
             <EmptyState>
                 <MediaListEmptyState Icon="inbox" Heading="Your wantlist is empty.">
-                    Click Sync above to load it from @SinkName, or add a title with <span class="font-medium text-foreground">Ctrl+K</span>.
+                    <ChildContent>@(Settings is { } settings ? ListTexts.EmptyWantlist(settings.Sink) : null)</ChildContent>
+                    <Actions>
+                        @if (IsConnected())
+                        {
+                            <BbButton Size="ButtonSize.Small" Disabled="_syncing" OnClick="OpenSyncAsync">
+                                <LucideIcon Name="refresh-cw" Size="14" Class="mr-1.5"/>
+                                <span>Sync from @SinkName</span>
+                            </BbButton>
+                        }
+                        <BbButton Size="ButtonSize.Small" Variant="ButtonVariant.Outline" OnClick="() => SearchLauncher.Open(SearchPurpose.Wantlist)">
+                            <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
+                            <span>Add a title</span>
+                        </BbButton>
+                        <BbButton Size="ButtonSize.Small" Variant="ButtonVariant.Outline" Href="/feeds/create">
+                            <LucideIcon Name="rss" Size="14" Class="mr-1.5"/>
+                            <span>Create a feed</span>
+                        </BbButton>
+                    </Actions>
                 </MediaListEmptyState>
             </EmptyState>
             <Grid>
@@ -120,8 +137,7 @@
 
 <MediaDetailSheet Open="IsSheetOpen"
                   OnOpenChanged="SheetOpenChangedAsync"
-                  Media="SelectedMedia"
-                  OnEnrollmentChanged="ReloadAfterEnrollmentAsync"/>
+                  Media="SelectedMedia"/>
 
 @code {
     private static readonly TimeSpan RenderCoalesceWindow = TimeSpan.FromMilliseconds(120);
@@ -133,6 +149,8 @@
     private readonly HashSet<MediaId> _pushed = [];
     private BlocklistSnapshot _blocklist = new([]);
     private UserId? _userId;
+    private CoalescedReload _wantlistReload = null!;
+    private CoalescedReload _blocklistReload = null!;
     private bool _syncing;
     private WantlistedMedia? _selectedItem;
     private WantlistSyncButton? _syncControl;
@@ -204,6 +222,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _wantlistReload = new(ReloadAsync);
+        _blocklistReload = new(ReloadBlocklistAsync);
         Events.Published += OnEvent;
         Filter = Filter with { Statuses = [WantlistStatusView.Active] };
         await base.OnInitializedAsync();
@@ -269,6 +289,8 @@
     }
 
     private Task RefreshPendingAsync() => _syncControl?.RefreshAsync() ?? Task.CompletedTask;
+
+    private Task OpenSyncAsync() => _syncControl?.OpenAsync() ?? Task.CompletedTask;
 
     private async Task LoadOutboxAsync() => ApplyOutbox(await WantlistService.GetOutboxAsync(Cancellation.Token));
 
@@ -340,9 +362,15 @@
 
     private void OnEvent(IEvent raised)
     {
-        if (ViewerEvent.Own<FeedRunFinishedEvent>(raised, _userId) is not null)
+        if (ViewerEvent.Own<WantlistChangedEvent>(raised, _userId) is { } changed)
         {
-            _ = InvokeAsync(ReloadAsync);
+            _ = InvokeAsync(() => ListChange.Differs(Shows, changed.Added, changed.Removed) ? _wantlistReload.RunAsync() : Task.CompletedTask);
+            return;
+        }
+
+        if (ViewerEvent.Own<BlocklistChangedEvent>(raised, _userId) is { } blocked)
+        {
+            _ = InvokeAsync(() => ListChange.Differs(_blocklist.Contains, blocked.Added, blocked.Removed) ? _blocklistReload.RunAsync() : Task.CompletedTask);
             return;
         }
 
@@ -417,29 +445,23 @@
         IsSheetOpen = true;
     }
 
-    private async Task ReloadAfterEnrollmentAsync(MediaListKind changed)
+    private bool Shows(MediaId id) => _items is not null && _items.Any(item => item.Media.Identity.Id == id);
+
+    private async Task ReloadBlocklistAsync()
     {
-        await LoadAsync();
-        if (changed is MediaListKind.Wantlist)
-        {
-            await RefreshPendingAsync();
-        }
+        _blocklist = await BlocklistService.GetAsync(Cancellation.Token);
+        StateHasChanged();
     }
 
     private async Task RemoveBulkAsync(IReadOnlyList<WantlistedMedia> toRemove)
     {
         await WantlistService.RemoveAsync(toRemove.Select(item => item.Media.Identity.Id), Cancellation.Token);
         Notifier.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your wantlist.");
-        await LoadAsync();
-        await RefreshPendingAsync();
     }
 
     private async Task BlocklistBulkAsync(IReadOnlyList<WantlistedMedia> toMark)
     {
-        foreach (var item in toMark)
-        {
-            await BlocklistService.AddAsync(item.Media.Identity.Id, Cancellation.Token);
-        }
+        await BlocklistService.AddAsync(toMark.Select(item => item.Media.Identity.Id), Cancellation.Token);
         Notifier.Success($"Blocklisted {toMark.Count} title{(toMark.Count == 1 ? "" : "s")}.");
     }
 
