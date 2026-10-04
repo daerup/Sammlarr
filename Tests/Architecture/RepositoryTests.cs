@@ -85,7 +85,14 @@ public class RepositoryTests
 					"Core.Auth.SignInService",
 					"Core.Auth.LocalAccountService",
 					"Core.Auth.AdminPasswordReset",
+					"Core.Auth.AccountLinkService",
+					"Core.Identity.UserManagementService",
 				]
+			);
+		yield return () =>
+			(
+				typeof(IAccountLinkRepository),
+				["DB.Data.Identity.AccountLinkRepository", "DB.Data.Identity.IdentityDataModule", "Core.Auth.AccountLinkService", "Core.Identity.UserManagementService"]
 			);
 	}
 

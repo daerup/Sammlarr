@@ -1,0 +1,42 @@
+@inject IJSRuntime JS
+
+<div class="flex w-full min-w-0 flex-col gap-1.5">
+    <div class="flex h-10 w-full min-w-0 items-center gap-2 rounded-lg border border-dashed bg-muted pl-3 pr-1.5 font-mono text-sm">
+        <span class="min-w-0 flex-1 truncate select-all" data-link>@Link</span>
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CopyAsync">
+            <LucideIcon Name="@(_copied ? "check" : "copy")" Size="13" Class="mr-1.5"/>
+            @(_copied ? "Copied" : "Copy")
+        </BbButton>
+    </div>
+    @if (_manual)
+    {
+        <p class="text-xs text-muted-foreground" role="status">This browser only copies on https. Select the link and copy it by hand.</p>
+    }
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required string Link { get; set; }
+
+    private bool _copied;
+
+    private bool _manual;
+
+    protected override void OnParametersSet()
+    {
+        _copied = false;
+        _manual = false;
+    }
+
+    private async Task CopyAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", Link);
+            _copied = true;
+        }
+        catch (JSException)
+        {
+            _manual = true;
+        }
+    }
+}

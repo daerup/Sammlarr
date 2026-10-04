@@ -8,6 +8,7 @@
 @inject IApiKeyService ApiKeys
 @inject ICredentialService Credentials
 @inject ICurrentUser CurrentUser
+@inject IUserManagementService UserManagement
 @inject ISinkSwitch SinkSwitch
 @inject Notifier Notifier
 
@@ -66,7 +67,7 @@
     {
         <section class="flex flex-col gap-3" aria-label="Services">
             <h3 class="text-sm font-semibold">Services</h3>
-            <ServicesMap Config="MapConfig(config)" Ready="MapReady(config)" CanPick="IsAdmin" SinkPicked="SinkPickedAsync"/>
+            <ServicesMap Config="MapConfig(config)" Ready="MapReady(config)" CanPick="IsAdmin" People="_people" SinkPicked="SinkPickedAsync"/>
         </section>
 
         @if (IsAdmin && (config.Sink == SinkKind.Arr || _settingUp))
@@ -99,6 +100,8 @@
 
     private ProviderConfig? _config;
 
+    private int _people;
+
     private HashSet<MediaProvider> _ready = [];
 
     private MediaProvider? _open;
@@ -109,6 +112,7 @@
     {
         await Task.Yield();
         _config = await ProviderConfigService.GetAsync();
+        _people = await UserManagement.CountAsync();
         await RefreshReadyAsync();
     }
 

@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261004034632_LocalAccounts";
+    public override string LastMigrationId => "20261004035353_AccountLinks";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -391,6 +391,61 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("FeedId", "StartedAt");
 
                 b.ToTable("FeedRuns");
+            });
+
+        modelBuilder.Entity("DB.Data.Identity.AccountLinkRow", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("CreatedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("DisplayName")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("ExpiresAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("IssuedBy")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Kind")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("TokenHash")
+                    .IsRequired()
+                    .HasMaxLength(64)
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("UpdatedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid?>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Username")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TokenHash")
+                    .IsUnique();
+
+                b.HasIndex("UserId");
+
+                b.HasIndex("Kind", "Username")
+                    .IsUnique();
+
+                b.ToTable("AccountLinks");
             });
 
         modelBuilder.Entity("DB.Data.Identity.UserRow", b =>
@@ -1161,6 +1216,14 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .HasForeignKey("UserId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Identity.AccountLinkRow", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
         modelBuilder.Entity("DB.Data.Jobs.JobRow", b =>

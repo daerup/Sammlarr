@@ -1,0 +1,17 @@
+.person-row {
+    position: relative;
+}
+
+.person-row + .person-row {
+    border-top: 1px solid var(--border);
+}
+
+.person-row::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--person-edge, transparent);
+}

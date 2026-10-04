@@ -1,11 +1,10 @@
+using Domain.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace Core.Auth;
 
 internal static class Passwords
 {
-	internal const int MinimumLength = 12;
-
 	private static readonly PasswordHasher<string> Hasher = new();
 
 	internal static readonly string Decoy = Hash(Guid.NewGuid().ToString());
@@ -16,6 +15,14 @@ internal static class Passwords
 
 	internal static Optional<Error> Weakness(string password)
 	{
-		return Optional.When(password.Length < MinimumLength, () => Error.From($"A password needs at least {MinimumLength} characters."));
+		return Optional.When(
+			password.Length < PasswordRules.MinimumLength,
+			() => Error.From($"A password needs at least {PasswordRules.MinimumLength} characters.")
+		);
+	}
+
+	internal static Optional<Error> Problem(string password, string confirmation)
+	{
+		return Optional.When(password != confirmation, () => Error.From("The two passwords do not match.")).Or(() => Weakness(password));
 	}
 }

@@ -1,3 +1,4 @@
+@using Domain.Identity
 @using Contracts.Identity
 @inject ILocalAccountService Accounts
 @inject ICurrentUser CurrentUser
@@ -29,7 +30,7 @@
                 <BbFieldLabel For="account-next">New password</BbFieldLabel>
                 <BbFieldContent>
                     <BbInput Id="account-next" Type="InputType.Password" Value="@_next" ValueChanged="value => _next = value ?? string.Empty"
-                             Placeholder="At least 12 characters" UpdateTiming="UpdateTiming.Immediate" Class="h-9 bg-accent text-sm" autocomplete="new-password"/>
+                             Placeholder="@($"At least {PasswordRules.MinimumLength} characters")" UpdateTiming="UpdateTiming.Immediate" Class="h-9 bg-accent text-sm" autocomplete="new-password"/>
                 </BbFieldContent>
             </BbField>
             <BbField>

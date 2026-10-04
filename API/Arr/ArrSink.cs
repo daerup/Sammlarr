@@ -5,6 +5,7 @@ using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;
+using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist.Arr;
@@ -76,6 +77,83 @@ internal sealed class ArrSink(
 				.Match(id => PushAsync(action, push, id, setup, sessions, cancellationToken), () => Task.FromResult(SinkSyncOutcome.Unaddressable));
 			yield return new SinkSyncAck(push.MediaId, outcome);
 		}
+	}
+
+	public async Task<Result<SinkHoldings>> HoldingsOfAsync(User person, CancellationToken cancellationToken = default)
+	{
+		var config = await configs.GetAsync(cancellationToken);
+		var owner = Owner(person);
+		var held = await HeldAsync(config, owner, cancellationToken);
+		return held.Map(apps => new SinkHoldings(apps.Sum(app => app.Sole.Count), apps.Sum(app => app.Staying.Count), config.Tags.UserTag(owner)));
+	}
+
+	public async Task<Result<int>> DeleteTitlesOfAsync(User person, CancellationToken cancellationToken = default)
+	{
+		var config = await configs.GetAsync(cancellationToken);
+		var held = await HeldAsync(config, Owner(person), cancellationToken);
+		return await held.Match(apps => ClearAllAsync(apps, cancellationToken), error => Task.FromResult<Result<int>>(error));
+	}
+
+	private static ArrTagUser Owner(User person) => new(person.Id.Value, person.DisplayName);
+
+	private async Task<Result<IReadOnlyList<Held>>> HeldAsync(ArrSinkConfig config, ArrTagUser owner, CancellationToken cancellationToken)
+	{
+		if (!config.Tags.PerUser)
+		{
+			return Error.From("Radarr + Sonarr tags titles without naming the person here, so their titles cannot be told apart.");
+		}
+
+		var others = (await users.GetAllAsync(cancellationToken))
+			.Where(user => user.Id.Value != owner.Id)
+			.Select(user => new ArrTagUser(user.Id.Value, user.DisplayName))
+			.ToList();
+		Result<IReadOnlyList<Held>> held = Success.Of<IReadOnlyList<Held>>([]);
+		foreach (var app in Enum.GetValues<ArrApp>())
+		{
+			var session = await ArrSession.OpenAsync(clients.For(app), ArrSession.Connect(app, Settings(config, app)), cancellationToken);
+			held = held.Map(found => session.Map(open => (IReadOnlyList<Held>)[.. found, Holdings(open, config.Tags, owner, others)]));
+		}
+
+		return held;
+	}
+
+	private static Held Holdings(ArrSession session, ArrTagScheme scheme, ArrTagUser owner, IReadOnlyList<ArrTagUser> others)
+	{
+		var theirs = session.Mine(scheme, owner);
+		ValueSet<int> taken = [.. others.SelectMany(other => session.Mine(scheme, other))];
+		ValueSet<int> only = [.. theirs.Where(tag => !taken.Contains(tag))];
+		var titles = session.Titles.Where(title => title.Tags.Any(theirs.Contains)).ToList();
+		var sole = titles.Where(title => title.Tags.Any(only.Contains) && !session.IsKept(title, scheme) && !session.WantedByOthers(title, scheme, only)).ToList();
+		return new Held(session, sole, [.. titles.Except(sole)], only);
+	}
+
+	private static async Task<Result<int>> ClearAllAsync(IReadOnlyList<Held> apps, CancellationToken cancellationToken)
+	{
+		Result<int> deleted = Success.Of(0);
+		foreach (var app in apps)
+		{
+			deleted = await deleted.Match(count => ClearAsync(app, count, cancellationToken), error => Task.FromResult<Result<int>>(error));
+		}
+
+		return deleted;
+	}
+
+	private static async Task<Result<int>> ClearAsync(Held app, int before, CancellationToken cancellationToken)
+	{
+		Result<int> deleted = app.Sole.Count == 0 ? Success.Of(0) : await app.Session.DeleteAsync(app.Sole, cancellationToken);
+		return await deleted.Match(gone => UntagAsync(app, before + gone, cancellationToken), error => Task.FromResult<Result<int>>(AlreadyDeleted(error, before)));
+	}
+
+	private static async Task<Result<int>> UntagAsync(Held app, int deleted, CancellationToken cancellationToken)
+	{
+		Result<int> untagged =
+			app.Staying.Count == 0 || app.Only.Count == 0 ? Success.Of(0) : await app.Session.UntagAsync(app.Staying, [.. app.Only], cancellationToken);
+		return untagged.Map(_ => deleted).MapError(error => AlreadyDeleted(error, deleted));
+	}
+
+	private static Error AlreadyDeleted(Error error, int deleted)
+	{
+		return deleted == 0 ? error : Error.From($"{error.Reason} {deleted} of their titles were already deleted.");
 	}
 
 	private async Task<IReadOnlyList<FoundMedia>> MineAsync(ArrClient client, ArrSinkConfig config, bool claims, CancellationToken cancellationToken)
@@ -230,7 +308,7 @@ internal sealed class ArrSink(
 	private async Task<Result<SinkSyncOutcome>> UntagAsync(ArrSession session, ArrTitle title, ArrTagScheme scheme, CancellationToken cancellationToken)
 	{
 		var mine = session.Mine(scheme, User);
-		var wantedByOthers = scheme.PerUser && title.Tags.Where(tag => !mine.Contains(tag)).Any(tag => scheme.IsUserTag(session.Label(tag)));
+		var wantedByOthers = scheme.PerUser && session.WantedByOthers(title, scheme, mine);
 		var removed = await (
 			(wantedByOthers, session.IsKept(title, scheme)) switch
 			{
@@ -278,4 +356,6 @@ internal sealed class ArrSink(
 	private static Task<Result<SinkSyncOutcome>> Failed(Error error) => Task.FromResult<Result<SinkSyncOutcome>>(error);
 
 	private sealed record Setup(ArrSinkConfig Config, Optional<ArrTagUser> Claimant);
+
+	private sealed record Held(ArrSession Session, IReadOnlyList<ArrTitle> Sole, IReadOnlyList<ArrTitle> Staying, ValueSet<int> Only);
 }

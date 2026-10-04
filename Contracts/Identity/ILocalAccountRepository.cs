@@ -10,6 +10,8 @@ public interface ILocalAccountRepository
 
 	Task<IReadOnlyList<LocalAccount>> GetAllAsync(CancellationToken cancellationToken = default);
 
+	Task CreateAsync(User user, string username, string passwordHash, CancellationToken cancellationToken = default);
+
 	Task SetPasswordAsync(UserId id, string passwordHash, DateTimeOffset revokedAt, CancellationToken cancellationToken = default);
 
 	Task ResetFromConfigAsync(UserId id, string passwordHash, DateTimeOffset revokedAt, CancellationToken cancellationToken = default);

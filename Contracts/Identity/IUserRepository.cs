@@ -13,6 +13,10 @@ public interface IUserRepository
 
 	Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default);
 
+	Task<int> CountAsync(CancellationToken cancellationToken = default);
+
+	Task<IReadOnlyDictionary<UserId, PersonHoldings>> GetHoldingsAsync(CancellationToken cancellationToken = default);
+
 	Task ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default);
 
 	Task DeleteAsync(UserId id, CancellationToken cancellationToken = default);

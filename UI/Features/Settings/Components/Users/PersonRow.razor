@@ -1,0 +1,276 @@
+@using Contracts
+@using Contracts.Identity
+@using Domain.Identity
+@inject IUserManagementService Users
+@inject IDateTimeProvider Clock
+@inject NavigationManager Navigation
+@inject Notifier Notifier
+
+<div class="person-row" data-person="@Name">
+    <BbCollapsible Open="Open" OpenChanged="OpenChanged">
+        <BbCollapsibleTrigger AsChild="false"
+                              Class="group grid w-full grid-cols-[15px_1fr_auto_auto] items-center gap-3.5 bg-foreground/5 py-3 pl-5 pr-4 text-left transition-colors hover:bg-foreground/8">
+            <LucideIcon Name="chevron-right" Size="15" Class="text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
+            <span class="flex min-w-0 items-center gap-2.5">
+                <BbAvatar Size="AvatarSize.Small">
+                    <BbAvatarImage Source="@AvatarUrl" Alt="@Name"/>
+                    <BbAvatarFallback>
+                        <LucideIcon Name="user" Size="15"/>
+                    </BbAvatarFallback>
+                </BbAvatar>
+                <span class="flex min-w-0 flex-col">
+                    <span class="flex items-center gap-2">
+                        <span class="truncate text-sm font-medium">@Name</span>
+                        @if (IsYou)
+                        {
+                            <span class="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">You</span>
+                        }
+                    </span>
+                    <span class="truncate text-xs text-muted-foreground" data-owns>@Owns</span>
+                </span>
+            </span>
+            <BbBadge Variant="@(Role == UserRole.Admin ? BadgeVariant.Default : BadgeVariant.Outline)" Class="h-5 text-[10px]">@Role</BbBadge>
+            <span class="flex items-center gap-1.5 whitespace-nowrap text-xs @Status.Tone" data-status>
+                <span class="inline-block size-1.5 rounded-full @Status.Dot"></span>
+                @Status.Text
+            </span>
+        </BbCollapsibleTrigger>
+        <BbCollapsibleContent>
+            <div class="flex flex-col gap-3 pb-4 pl-[61px] pr-4 pt-3">
+                <p class="text-[13px] text-muted-foreground">@About</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    @switch (Person)
+                    {
+                        case InvitedPerson invited:
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => RenewAsync(invited)">
+                                <LucideIcon Name="link" Size="13" Class="mr-1.5"/>
+                                New invite link
+                            </BbButton>
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => RevokeAsync(invited)">Revoke invite</BbButton>
+                            break;
+                        case JoinedPerson when IsLastAdmin:
+                            <p class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <LucideIcon Name="lock" Size="13"/>
+                                The last admin can't be made a member or removed.
+                            </p>
+                            break;
+                        case JoinedPerson joined:
+                            @if (joined.LockedUntil is Some<DateTimeOffset>)
+                            {
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => UnlockAsync(joined)">
+                                    <LucideIcon Name="lock-open" Size="13" Class="mr-1.5"/>
+                                    Unlock
+                                </BbButton>
+                            }
+                            @if (SignIn == AuthProvider.Local)
+                            {
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => ResetLinkAsync(joined)">
+                                    <LucideIcon Name="key-round" Size="13" Class="mr-1.5"/>
+                                    Reset link
+                                </BbButton>
+                            }
+                            <BbAlertDialog>
+                                <BbAlertDialogTrigger>
+                                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">@RoleAction</BbButton>
+                                </BbAlertDialogTrigger>
+                                <BbAlertDialogContent>
+                                    <BbAlertDialogHeader>
+                                        <BbAlertDialogTitle>@(Role == UserRole.Admin ? $"Make {Name} a member?" : $"Make {Name} an admin?")</BbAlertDialogTitle>
+                                        <BbAlertDialogDescription>
+                                            @(Role == UserRole.Admin
+                                                ? "They'll lose access to provider settings, cache, diagnostics, and user management."
+                                                : "They'll gain full access to provider settings, cache, diagnostics, and user management.")
+                                        </BbAlertDialogDescription>
+                                    </BbAlertDialogHeader>
+                                    <BbAlertDialogFooter>
+                                        <BbAlertDialogCancel>
+                                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                                        </BbAlertDialogCancel>
+                                        <BbAlertDialogAction>
+                                            <BbButton Variant="ButtonVariant.Default" OnClick="() => ChangeRoleAsync(joined)">@RoleAction</BbButton>
+                                        </BbAlertDialogAction>
+                                    </BbAlertDialogFooter>
+                                </BbAlertDialogContent>
+                            </BbAlertDialog>
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="ml-auto text-destructive hover:text-destructive"
+                                      OnClick="() => _removing = true">
+                                <LucideIcon Name="trash-2" Size="13" Class="mr-1.5"/>
+                                Remove
+                            </BbButton>
+                            <RemovePersonDialog Open="_removing" OpenChanged="open => _removing = open" Person="joined" Sink="Sink" Removed="Changed"/>
+                            break;
+                    }
+                </div>
+            </div>
+        </BbCollapsibleContent>
+    </BbCollapsible>
+</div>
+
+@if (_issued is { } issued)
+{
+    <LinkDialog Open="true" OpenChanged="open => _issued = open ? _issued : null" Title="@issued.Title" Description="@issued.Description" Link="@issued.Link"/>
+}
+
+@code {
+    [Parameter] [EditorRequired] public required Person Person { get; set; }
+
+    [Parameter] [EditorRequired] public required AuthProvider SignIn { get; set; }
+
+    [Parameter] [EditorRequired] public required SinkKind Sink { get; set; }
+
+    [Parameter] public bool IsYou { get; set; }
+
+    [Parameter] public bool IsLastAdmin { get; set; }
+
+    [Parameter] public bool Open { get; set; }
+
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private bool _removing;
+
+    private Issued? _issued;
+
+    private string Name
+    {
+        get
+        {
+            return Person switch
+            {
+                JoinedPerson joined => joined.User.DisplayName,
+                InvitedPerson invited => invited.DisplayName,
+            };
+        }
+    }
+
+    private string AvatarUrl
+    {
+        get
+        {
+            return Person switch
+            {
+                JoinedPerson joined => joined.User.AvatarUrl,
+                InvitedPerson => string.Empty,
+            };
+        }
+    }
+
+    private UserRole Role
+    {
+        get
+        {
+            return Person switch
+            {
+                JoinedPerson joined => joined.User.Role,
+                InvitedPerson => UserRole.Member,
+            };
+        }
+    }
+
+    private string RoleAction => Role == UserRole.Admin ? "Make member" : "Make admin";
+
+    private string Owns
+    {
+        get
+        {
+            return Person switch
+            {
+                JoinedPerson { Holdings: { Feeds: 0, Wanted: 0, Blocklisted: 0 } } => "No feeds or titles yet",
+                JoinedPerson joined => $"{Counted(joined.Holdings.Feeds, "feed", "feeds")} · {joined.Holdings.Wanted:N0} wanted · {joined.Holdings.Blocklisted:N0} blocklisted",
+                InvitedPerson => "Not joined yet",
+            };
+        }
+    }
+
+    private string About
+    {
+        get
+        {
+            var signsIn = SignIn switch
+            {
+                AuthProvider.Plex => "signs in with Plex",
+                AuthProvider.Local => "signs in with a Sammlarr account",
+            };
+            return Person switch
+            {
+                JoinedPerson joined => $"Joined {joined.User.JoinedAt.LocalDateTime:MMM d, yyyy} · {signsIn}",
+                InvitedPerson => $"Invited, not joined yet · {signsIn}",
+            };
+        }
+    }
+
+    private (string Text, string Tone, string Dot) Status
+    {
+        get
+        {
+            return Person switch
+            {
+                InvitedPerson invited => Invitation(invited.ExpiresAt - Clock.Now),
+                JoinedPerson joined => joined.LockedUntil.Match(
+                    until => ($"Locked until {until.ToLocalTime():HH:mm}", "text-destructive", "bg-destructive"),
+                    () => ("Active", "text-muted-foreground", "bg-success")
+                ),
+            };
+        }
+    }
+
+    private static (string Text, string Tone, string Dot) Invitation(TimeSpan left)
+    {
+        return (left <= TimeSpan.Zero ? "Invite expired" : $"Invited · link expires in {Remaining(left)}", "text-amber-500", "bg-amber-500");
+    }
+
+    private static string Remaining(TimeSpan left)
+    {
+        return left.TotalDays >= 1 ? Counted((int)left.TotalDays, "day", "days") : Counted(Math.Max(1, (int)left.TotalHours), "hour", "hours");
+    }
+
+    private static string Counted(int count, string one, string many) => $"{count:N0} {(count == 1 ? one : many)}";
+
+    private async Task RenewAsync(InvitedPerson invited)
+    {
+        var issued = await Users.RenewInviteAsync(invited.Username);
+        Present(issued, $"New invite link for {Name}", lifetime => $"Send {Name} this link. It works once and for {lifetime}; the earlier link no longer works.");
+        await Changed.InvokeAsync();
+    }
+
+    private async Task RevokeAsync(InvitedPerson invited)
+    {
+        await Users.RevokeInviteAsync(invited.Username);
+        Notifier.Success($"Revoked the invite for {Name}.");
+        await Changed.InvokeAsync();
+    }
+
+    private async Task ResetLinkAsync(JoinedPerson joined)
+    {
+        var issued = await Users.ResetLinkAsync(joined.User.Id);
+        Present(
+            issued,
+            $"Reset link for {Name}",
+            lifetime => $"Send {Name} this link. It works once and for {lifetime}; {Name} chooses a new password there. Their current password keeps working until then."
+        );
+    }
+
+    private async Task UnlockAsync(JoinedPerson joined)
+    {
+        await Users.UnlockAsync(joined.User.Id);
+        Notifier.Success($"Unlocked {Name}.");
+        await Changed.InvokeAsync();
+    }
+
+    private async Task ChangeRoleAsync(JoinedPerson joined)
+    {
+        var changed = await Users.ChangeRoleAsync(joined.User.Id, Role == UserRole.Admin ? UserRole.Member : UserRole.Admin);
+        changed.Apply(role => Notifier.Success($"{Name} is now {role.ToString().ToLowerInvariant()}.")).ApplyError(error => Notifier.Error(error.Reason));
+        await Changed.InvokeAsync();
+    }
+
+    private void Present(Result<IssuedLink> issued, string title, Func<string, string> describe)
+    {
+        issued
+            .Apply(link => _issued = new Issued(title, describe(LinkText.Lifetime(link.ExpiresAt, Clock.Now)), Navigation.ToAbsoluteUri(link.Path).ToString()))
+            .ApplyError(error => Notifier.Error(error.Reason));
+    }
+
+    private sealed record Issued(string Title, string Description, string Link);
+}

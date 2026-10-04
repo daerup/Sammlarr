@@ -10,6 +10,8 @@ internal class IdentityDataModule : IServiceModule
 	{
 		services.AddScoped<IUserRepository, UserRepository>();
 		services.AddScoped<ILocalAccountRepository, LocalAccountRepository>();
+		services.AddScoped<IAccountLinkRepository, AccountLinkRepository>();
+		services.AddScoped<IModelConfiguration, AccountLinkConfiguration>();
 		services.AddScoped<IModelConfiguration, IdentityConfiguration>();
 	}
 }

@@ -78,6 +78,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<WantlistRow> Wantlist => Set<WantlistRow>();
 	public DbSet<WantlistOutboxRow> WantlistOutbox => Set<WantlistOutboxRow>();
 	public DbSet<UserRow> Users => Set<UserRow>();
+	public DbSet<AccountLinkRow> AccountLinks => Set<AccountLinkRow>();
 	public DbSet<JobRow> Jobs => Set<JobRow>();
 	public DbSet<NotificationTargetRow> NotificationTargets => Set<NotificationTargetRow>();
 	public DbSet<NotificationSubscriptionRow> NotificationSubscriptions => Set<NotificationSubscriptionRow>();

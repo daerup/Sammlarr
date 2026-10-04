@@ -1,0 +1,18 @@
+<BbDialogHeader>
+    <BbDialogTitle>@Title</BbDialogTitle>
+    <BbDialogDescription>@Description</BbDialogDescription>
+</BbDialogHeader>
+<LinkBox Link="@Link"/>
+<BbDialogFooter>
+    <BbDialogClose>
+        <BbButton Size="ButtonSize.Small">Done</BbButton>
+    </BbDialogClose>
+</BbDialogFooter>
+
+@code {
+    [Parameter] [EditorRequired] public required string Title { get; set; }
+
+    [Parameter] [EditorRequired] public required string Description { get; set; }
+
+    [Parameter] [EditorRequired] public required string Link { get; set; }
+}

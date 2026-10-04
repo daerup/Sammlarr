@@ -131,6 +131,8 @@
 
     [Parameter] public bool CanPick { get; set; }
 
+    [Parameter] public int People { get; set; }
+
     [Parameter] public EventCallback<SinkKind> SinkPicked { get; set; }
 
     private ServicesMapModel _model = null!;
@@ -168,16 +170,22 @@
 
     private string Status(MapEndpoint endpoint) => endpoint.Partner.Match(_ => PairStatus(endpoint), () => Status(endpoint.Provider));
 
+    private string Accounts => People == 1 ? "Local accounts · 1 person" : $"Local accounts · {People} people";
+
     private string PairStatus(MapEndpoint endpoint) => IsReady(endpoint) ? "Connected" : "Not set up";
 
-    private string Status(MediaProvider provider) =>
-        (ProviderCaption.IsAccount(provider), Ready.Contains(provider)) switch
+    private string Status(MediaProvider provider) => provider == MediaProvider.Local ? Accounts : Readiness(provider);
+
+    private string Readiness(MediaProvider provider)
+    {
+        return (ProviderCaption.IsAccount(provider), Ready.Contains(provider)) switch
         {
             (true, true) => "Your account",
             (true, false) => "Not connected",
             (false, true) => "Your key is set",
             (false, false) => "No key yet",
         };
+    }
 
     private string TileLabel(MapTile tile) => $"{Brand(tile.Provider).NickName}: {Status(tile.Provider)}";
 

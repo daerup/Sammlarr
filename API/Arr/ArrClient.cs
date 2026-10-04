@@ -62,7 +62,7 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 
 	public async Task<Result<int>> RetagAsync(
 		ArrConnection connection,
-		int titleId,
+		IReadOnlyList<int> titleIds,
 		IReadOnlyList<int> tags,
 		ArrTagChange change,
 		CancellationToken cancellationToken
@@ -70,12 +70,12 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 	{
 		var body = new JsonObject
 		{
-			[app.TitleIds] = new JsonArray(titleId),
+			[app.TitleIds] = new JsonArray([.. titleIds.Select(id => JsonValue.Create(id))]),
 			["tags"] = new JsonArray([.. tags.Select(tag => JsonValue.Create(tag))]),
 			["applyTags"] = change.ToString().ToLowerInvariant(),
 		};
 		var sent = await SendAsync(connection, HttpMethod.Put, $"{app.Titles}/editor", Some.Of<object>(body), cancellationToken);
-		return sent.Map(_ => titleId);
+		return sent.Map(_ => titleIds.Count);
 	}
 
 	public async Task<Result<int>> DeleteAsync(ArrConnection connection, int titleId, CancellationToken cancellationToken)
@@ -88,6 +88,18 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 			cancellationToken
 		);
 		return sent.Map(_ => titleId);
+	}
+
+	public async Task<Result<int>> DeleteManyAsync(ArrConnection connection, IReadOnlyList<int> titleIds, CancellationToken cancellationToken)
+	{
+		var body = new JsonObject
+		{
+			[app.TitleIds] = new JsonArray([.. titleIds.Select(id => JsonValue.Create(id))]),
+			["deleteFiles"] = false,
+			[app.ExclusionFlag] = false,
+		};
+		var sent = await SendAsync(connection, HttpMethod.Delete, $"{app.Titles}/editor", Some.Of<object>(body), cancellationToken);
+		return sent.Map(_ => titleIds.Count);
 	}
 
 	private async Task<Result<T>> ReadAsync<T>(

@@ -1,0 +1,174 @@
+@using Contracts.Identity
+@using Contracts.Wantlist
+@using UI.Shared.Services.Branding
+@inject IUserManagementService Users
+@inject MediaProviderBrandingService Branding
+@inject Notifier Notifier
+
+<BbDialog Open="Open" OpenChanged="OpenChanged">
+    <BbDialogContent Class="sm:max-w-[520px]">
+        <BbDialogHeader>
+            <BbDialogTitle>Remove @Name?</BbDialogTitle>
+            <BbDialogDescription>@(Goes.Count > 0 ? "This goes with them and cannot be undone:" : "They have no feeds, titles or keys yet. This cannot be undone.")</BbDialogDescription>
+        </BbDialogHeader>
+        @if (Goes.Count > 0)
+        {
+            <div class="divide-y rounded-lg border bg-card text-[13px]" data-goes>
+                @foreach (var (icon, what, detail) in Goes)
+                {
+                    <div class="flex items-center gap-2.5 px-3 py-2">
+                        <LucideIcon Name="@icon" Size="14" Class="text-muted-foreground"/>
+                        <span class="font-medium">@what</span>
+                        <span class="text-muted-foreground">@detail</span>
+                    </div>
+                }
+            </div>
+        }
+        @switch (Sink)
+        {
+            case SinkKind.Plex:
+                <p class="text-xs text-muted-foreground">Titles already on their Plex watchlist stay there.</p>
+                break;
+            case SinkKind.Arr:
+                <label class="grid grid-cols-[18px_1fr] items-start gap-2.5 rounded-lg border px-3 py-2.5">
+                    <BbCheckbox Checked="_withSinkTitles" CheckedChanged="value => _withSinkTitles = value" Disabled="@(_held.IsNone())" Class="mt-0.5"/>
+                    <span>
+                        <span class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
+                            Also delete their titles from
+                            <ProviderLogo Provider="MediaProvider.Radarr" Form="ProviderLogoForm.Mark" Size="15" Decorative="true"/>
+                            Radarr and
+                            <ProviderLogo Provider="MediaProvider.Sonarr" Form="ProviderLogoForm.Mark" Size="15" Decorative="true"/>
+                            Sonarr
+                        </span>
+                        <span class="mt-0.5 block text-xs text-muted-foreground" data-holdings>
+                            @if (_held is Some<SinkHoldings>(var held))
+                            {
+                                @Titles(held.Sole)<text> carry only their tag (</text><code class="rounded bg-muted px-1 text-[11px]">@held.Tag</code><text>) and go; their files stay on disk.</text>
+                                @if (held.Shared > 0)
+                                {
+                                    @($" {Titles(held.Shared)} that someone else also wants stay.")
+                                }
+                            }
+                            else if (_holdingsError.Length > 0)
+                            {
+                                @_holdingsError
+                            }
+                            else
+                            {
+                                <text>Counting their titles in Radarr and Sonarr…</text>
+                            }
+                        </span>
+                    </span>
+                </label>
+                break;
+        }
+        <BbField>
+            <BbFieldLabel For="remove-confirm">Type <span class="font-semibold">@TypedName.Plain(Name)</span> to confirm</BbFieldLabel>
+            <BbFieldContent>
+                <BbInput Id="remove-confirm" Value="@_typed" ValueChanged="value => _typed = value ?? string.Empty" UpdateTiming="UpdateTiming.Immediate"
+                         Class="h-9 text-sm" autocomplete="off"/>
+            </BbFieldContent>
+        </BbField>
+        @if (_error.Length > 0)
+        {
+            <p class="flex items-start gap-1.5 text-xs text-destructive" role="alert">
+                <LucideIcon Name="circle-alert" Size="13" Class="mt-px shrink-0"/>
+                <span>@_error</span>
+            </p>
+        }
+        <BbDialogFooter>
+            <BbDialogClose>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Cancel</BbButton>
+            </BbDialogClose>
+            <BbButton Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" Disabled="@(!TypedName.Matches(_typed, Name) || _removing)" OnClick="RemoveAsync">
+                Remove @Name
+            </BbButton>
+        </BbDialogFooter>
+    </BbDialogContent>
+</BbDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] [EditorRequired] public required JoinedPerson Person { get; set; }
+
+    [Parameter] [EditorRequired] public required SinkKind Sink { get; set; }
+
+    [Parameter] public EventCallback Removed { get; set; }
+
+    private bool _wasOpen;
+
+    private string _typed = string.Empty;
+
+    private string _error = string.Empty;
+
+    private string _holdingsError = string.Empty;
+
+    private Optional<SinkHoldings> _held = new None();
+
+    private bool _withSinkTitles;
+
+    private bool _removing;
+
+    private string Name => Person.User.DisplayName;
+
+    private IReadOnlyList<(string Icon, string What, string Detail)> Goes
+    {
+        get
+        {
+            var holdings = Person.Holdings;
+            (string Icon, string What, string Detail, bool Shown)[] rows =
+            [
+                ("rss", Count(holdings.Feeds, "feed", "feeds"), "and their run history", holdings.Feeds > 0),
+                ("bookmark", Titles(holdings.Wanted), "on their wantlist", holdings.Wanted > 0),
+                ("ban", Titles(holdings.Blocklisted), "on their blocklist", holdings.Blocklisted > 0),
+                ("key-round", "Their keys", Listed(holdings.Keys.Select(key => Branding.GetBrandingInfo(key).NickName).Distinct().ToList()), holdings.Keys.Count > 0),
+            ];
+            return [.. rows.Where(row => row.Shown).Select(row => (row.Icon, row.What, row.Detail))];
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Open == _wasOpen)
+        {
+            return;
+        }
+
+        _wasOpen = Open;
+        if (!Open)
+        {
+            return;
+        }
+
+        _typed = string.Empty;
+        _error = string.Empty;
+        _holdingsError = string.Empty;
+        _held = new None();
+        _withSinkTitles = false;
+        if (Sink == SinkKind.Arr)
+        {
+            var loaded = await Users.SinkHoldingsAsync(Person.User.Id);
+            loaded.Apply(held => _held = Some.Of(held)).ApplyError(error => _holdingsError = error.Reason);
+        }
+    }
+
+    private async Task RemoveAsync()
+    {
+        _removing = true;
+        var removed = await (_withSinkTitles ? Users.DeleteWithSinkTitlesAsync(Person.User.Id) : Users.DeleteAsync(Person.User.Id));
+        _removing = false;
+        removed.Apply(cleared => Notifier.Success(Removal(cleared))).ApplyError(error => _error = error.Reason);
+        await removed.Match(_ => Removed.InvokeAsync(), _ => Task.CompletedTask);
+    }
+
+    private string Removal(int cleared) => _withSinkTitles ? $"Removed {Name} and {Titles(cleared)} from Radarr and Sonarr." : $"Removed {Name}.";
+
+    private static string Titles(int count) => Count(count, "title", "titles");
+
+    private static string Count(int count, string one, string many) => $"{count:N0} {(count == 1 ? one : many)}";
+
+    private static string Listed(IReadOnlyList<string> names) => names.Count > 1 ? $"{string.Join(", ", names.SkipLast(1))} and {names[^1]}" : string.Concat(names);
+}

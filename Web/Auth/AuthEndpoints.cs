@@ -82,6 +82,30 @@ internal static class AuthEndpoints
 				}
 			)
 			.RequireRateLimiting(AuthenticationModule.SignInLimit);
+		endpoints
+			.MapPost(
+				"/auth/join",
+				async ([FromForm] string token, [FromForm] string password, [FromForm] string confirmation, HttpContext context, IAccountLinkService links) =>
+				{
+					return await links
+						.JoinAsync(token, password, confirmation, context.RequestAborted)
+						.Map(user => SignInAndRedirectAsync(context, user, "/"))
+						.GetValueOr(error => Results.Redirect(LinkPage("join", token, error)));
+				}
+			)
+			.RequireRateLimiting(AuthenticationModule.SignInLimit);
+		endpoints
+			.MapPost(
+				"/auth/reset",
+				async ([FromForm] string token, [FromForm] string password, [FromForm] string confirmation, HttpContext context, IAccountLinkService links) =>
+				{
+					return await links
+						.ResetPasswordAsync(token, password, confirmation, context.RequestAborted)
+						.Map(user => SignInAndRedirectAsync(context, user, "/"))
+						.GetValueOr(error => Results.Redirect(LinkPage("reset", token, error)));
+				}
+			)
+			.RequireRateLimiting(AuthenticationModule.SignInLimit);
 		endpoints.MapGet(
 			"/auth/logout",
 			async (HttpContext context) =>
@@ -109,6 +133,11 @@ internal static class AuthEndpoints
 		}
 
 		return Some.Of(UserId.From(id));
+	}
+
+	private static string LinkPage(string page, string token, Error error)
+	{
+		return QueryHelpers.AddQueryString($"/{page}/{Uri.EscapeDataString(token)}", "error", error.Reason);
 	}
 
 	private static string SignInPage(Error error, string? returnUrl)

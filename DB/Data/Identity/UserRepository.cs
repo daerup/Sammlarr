@@ -49,6 +49,41 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		return await ctx.Users.AsNoTracking().OrderBy(user => user.JoinedAt).Select(Project).ToListAsync(cancellationToken);
 	}
 
+	public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await ctx.Users.CountAsync(cancellationToken);
+	}
+
+	public async Task<IReadOnlyDictionary<UserId, PersonHoldings>> GetHoldingsAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var feeds = await CountedAsync(ctx.Feeds.IgnoreQueryFilters(), cancellationToken);
+		var wanted = await CountedAsync(ctx.Wantlist.IgnoreQueryFilters(), cancellationToken);
+		var blocked = await CountedAsync(ctx.Blocklist.IgnoreQueryFilters(), cancellationToken);
+		var credentials = await ctx
+			.Credentials.IgnoreQueryFilters()
+			.Select(credential => new { Owner = EF.Property<Guid>(credential, UserOwnedConfigurationExtensions.UserIdColumn), credential.Provider })
+			.ToListAsync(cancellationToken);
+		var keys = await ctx
+			.ApiKeySettings.IgnoreQueryFilters()
+			.Select(key => new { Owner = EF.Property<Guid>(key, UserOwnedConfigurationExtensions.UserIdColumn), key.Provider })
+			.ToListAsync(cancellationToken);
+		var owners = await ctx.Users.AsNoTracking().Select(user => user.Id).ToListAsync(cancellationToken);
+		return owners.ToDictionary(
+			UserId.From,
+			owner => new PersonHoldings(
+				feeds.GetValueOrDefault(owner),
+				wanted.GetValueOrDefault(owner),
+				blocked.GetValueOrDefault(owner),
+				[
+					.. credentials.Where(credential => credential.Owner == owner).Select(credential => credential.Provider.AsMediaProvider()),
+					.. keys.Where(key => key.Owner == owner).Select(key => key.Provider.AsMediaProvider()),
+				]
+			)
+		);
+	}
+
 	public async Task ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -74,6 +109,14 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			.Select(user => new { user.Role, user.SessionsRevokedAt })
 			.SingleOrDefaultAsync(cancellationToken);
 		return Optional.Of(found).Map(session => new UserSession(session.Role, Optional.Of(session.SessionsRevokedAt)));
+	}
+
+	private static async Task<Dictionary<Guid, int>> CountedAsync<T>(IQueryable<T> rows, CancellationToken cancellationToken)
+		where T : class
+	{
+		return await rows.GroupBy(row => EF.Property<Guid>(row, UserOwnedConfigurationExtensions.UserIdColumn))
+			.Select(owned => new { Owner = owned.Key, Count = owned.Count() })
+			.ToDictionaryAsync(owned => owned.Owner, owned => owned.Count, cancellationToken);
 	}
 
 	private static System.Linq.Expressions.Expression<Func<UserRow, User>> Project =>

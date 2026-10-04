@@ -3,6 +3,7 @@ using System.Text.Json;
 using API.Plex.Types;
 using Contracts.Media;
 using Contracts.Wantlist;
+using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist.Outbox;
@@ -14,6 +15,8 @@ namespace API.Plex;
 internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService mediaService, ILogger<PlexSink> logger) : IMediaSink
 {
 	private const int PageConcurrency = 10;
+
+	private static readonly Error OwnWatchlist = Error.From("A Plex watchlist belongs to its Plex account, so Sammlarr leaves it as it is.");
 
 	public SinkKind Kind => SinkKind.Plex;
 
@@ -52,6 +55,16 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 			var outcome = plexIds.TryGetValue(id, out var plexId) ? await PushAsync(action, plexId, cancellationToken) : SinkSyncOutcome.Unaddressable;
 			yield return new SinkSyncAck(id, outcome);
 		}
+	}
+
+	public Task<Result<SinkHoldings>> HoldingsOfAsync(User person, CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult<Result<SinkHoldings>>(OwnWatchlist);
+	}
+
+	public Task<Result<int>> DeleteTitlesOfAsync(User person, CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult<Result<int>>(OwnWatchlist);
 	}
 
 	private string Endpoint(WantlistOperationAction action, IExternalMediaId plexId) =>

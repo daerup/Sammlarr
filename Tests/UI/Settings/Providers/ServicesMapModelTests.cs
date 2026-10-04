@@ -34,6 +34,16 @@ public class ServicesMapModelTests
 	}
 
 	[Test]
+	[Arguments(AuthProvider.Plex)]
+	[Arguments(AuthProvider.Local)]
+	public async Task Roles_SignIn_NeverOffersAPicker(AuthProvider signIn)
+	{
+		var role = ServicesMapModel.For(Config with { AuthProvider = signIn }).Roles.Single(candidate => candidate.Name == "Sign-in");
+
+		await Assert.That(role.Picker).IsNull();
+	}
+
+	[Test]
 	public async Task Traces_ForTodaysProviders_LandEachOnItsOwnPinInRoleOrder()
 	{
 		var traces = ServicesMapModel.For(Config).Traces.Select(trace => $"{trace.Role} > {trace.Provider} at {trace.Points[^1].X},{trace.Points[^1].Y}");

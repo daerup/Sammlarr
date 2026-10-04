@@ -1,4 +1,5 @@
 using Contracts.Wantlist;
+using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist.Outbox;
@@ -17,5 +18,15 @@ internal sealed class AddressingSink(IMediaSink sink, Func<MediaType, Optional<M
 	public IAsyncEnumerable<SinkSyncAck> ApplyAsync(WantlistOperationAction action, IReadOnlyList<SinkPush> pushes, CancellationToken cancellationToken = default)
 	{
 		return sink.ApplyAsync(action, pushes, cancellationToken);
+	}
+
+	public Task<Result<SinkHoldings>> HoldingsOfAsync(User person, CancellationToken cancellationToken = default)
+	{
+		return sink.HoldingsOfAsync(person, cancellationToken);
+	}
+
+	public Task<Result<int>> DeleteTitlesOfAsync(User person, CancellationToken cancellationToken = default)
+	{
+		return sink.DeleteTitlesOfAsync(person, cancellationToken);
 	}
 }
