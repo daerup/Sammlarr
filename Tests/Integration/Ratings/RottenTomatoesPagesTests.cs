@@ -11,7 +11,7 @@ public class RottenTomatoesPagesTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	private const string Imdb = "tt1375666";
 
-	private static readonly RatingSummary Rated = RatingSummary.From([new RottenTomatoesCriticsRating(87), new RottenTomatoesAudienceRating(91)]);
+	private static readonly MediaRatings Rated = MediaRatings.From([new RottenTomatoesCriticsRating(87), new RottenTomatoesAudienceRating(91)]);
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
@@ -50,7 +50,7 @@ public class RottenTomatoesPagesTests(SammlarrTestHost host) : IAsyncDisposable
 		host.WikidataHolds(Imdb, "m/inception");
 		await Testee.FindPathAsync(inception);
 
-		await StoreAsync(inception, RatingSummary.From([new RottenTomatoesCriticsRating(88), new RottenTomatoesAudienceRating(91)]));
+		await StoreAsync(inception, MediaRatings.From([new RottenTomatoesCriticsRating(88), new RottenTomatoesAudienceRating(91)]));
 
 		await Assert.That(await Testee.FindPathAsync(inception)).IsSome().And.IsEqualTo("m/inception");
 		await Assert.That(host.WikidataAsked(Imdb)).IsEqualTo(1);
@@ -76,9 +76,9 @@ public class RottenTomatoesPagesTests(SammlarrTestHost host) : IAsyncDisposable
 		return inception;
 	}
 
-	private Task StoreAsync(MediaId id, RatingSummary ratings)
+	private Task StoreAsync(MediaId id, MediaRatings ratings)
 	{
-		var details = new MovieDetails { Title = "Inception", Rating = ratings };
+		var details = new MovieDetails { Title = "Inception", Ratings = ratings };
 		return host.Resolve<IMediaRepository>()
 			.UpsertDetailsAsync(new Dictionary<MediaId, CachedDetails> { [id] = new(details, DateTimeOffset.UtcNow, MediaField.None) });
 	}

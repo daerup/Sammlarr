@@ -8,10 +8,8 @@ public class RatingStrategyProperties
 {
 	private static readonly RatingSource[] Sources = Enum.GetValues<RatingSource>();
 
-	private static readonly Gen<RatingSummary> Summaries = Gen.Select(Gen.Bool.Array[Sources.Length], Gen.Int[0, 100].Array[Sources.Length])
-		.Select(
-			(held, values) => RatingSummary.From(Sources.Where((_, index) => held[index]).Select(source => source.Rate(values[(int)source] / 10f, new None())))
-		);
+	private static readonly Gen<MediaRatings> Ratings = Gen.Select(Gen.Bool.Array[Sources.Length], Gen.Int[0, 100].Array[Sources.Length])
+		.Select((held, values) => MediaRatings.From(Sources.Where((_, index) => held[index]).Select(source => source.Rate(values[(int)source] / 10f, new None()))));
 
 	private static readonly Gen<ValueSet<RatingSource>> Availables = Gen.Bool.Array[Sources.Length].Select(Picked);
 
@@ -20,19 +18,19 @@ public class RatingStrategyProperties
 	[Test]
 	public void Resolve_WhenAveragingEverySource_GivesTheMeanOfTheAvailableRatings()
 	{
-		Gen.Select(Summaries, Availables).Sample(IsTheMeanOfTheAvailableRatings);
+		Gen.Select(Ratings, Availables).Sample(IsTheMeanOfTheAvailableRatings);
 	}
 
 	[Test]
 	public void Resolve_WhenFirstAvailable_GivesTheFirstAvailableRatingInTheOrder()
 	{
-		Gen.Select(Summaries, Availables, Orders).Sample(IsTheFirstAvailableRating);
+		Gen.Select(Ratings, Availables, Orders).Sample(IsTheFirstAvailableRating);
 	}
 
 	[Test]
 	public void Resolve_WhenNoneOfTheAveragedSourcesIsAvailable_EqualsTheAverageOverEveryAvailableSource()
 	{
-		Gen.Select(Summaries, Availables).Sample(FallsBackToEveryAvailableSource);
+		Gen.Select(Ratings, Availables).Sample(FallsBackToEveryAvailableSource);
 	}
 
 	[Test]
@@ -42,27 +40,27 @@ public class RatingStrategyProperties
 			.Sample(value => new SammlarrRating(value, []).Rounded.ToString("0.0", CultureInfo.InvariantCulture) == Text(value));
 	}
 
-	private static bool IsTheMeanOfTheAvailableRatings(RatingSummary summary, ValueSet<RatingSource> available)
+	private static bool IsTheMeanOfTheAvailableRatings(MediaRatings ratings, ValueSet<RatingSource> available)
 	{
-		var values = summary.Sources.Where(rating => available.Contains(rating.Source)).Select(rating => rating.SammlarrValue).ToList();
+		var values = ratings.All.Where(rating => available.Contains(rating.Source)).Select(rating => rating.SammlarrValue).ToList();
 		return AveragedRating
-			.Everything.Resolve(summary, available)
+			.Everything.Resolve(ratings, available)
 			.Match(rating => values.Count > 0 && Close(rating.Value, values.Average()), () => values.Count == 0);
 	}
 
-	private static bool IsTheFirstAvailableRating(RatingSummary summary, ValueSet<RatingSource> available, RatingSource[] order)
+	private static bool IsTheFirstAvailableRating(MediaRatings ratings, ValueSet<RatingSource> available, RatingSource[] order)
 	{
-		var rated = order.Where(source => available.Contains(source) && summary.Of(source).IsSome()).ToList();
+		var rated = order.Where(source => available.Contains(source) && ratings.Of(source).IsSome()).ToList();
 		return new OrderedRating(order)
-			.Resolve(summary, available)
-			.Match(rating => rated.Count > 0 && rating.From.Single().Source == rated[0], () => rated.Count == 0);
+			.Resolve(ratings, available)
+			.Match(rating => rated.Count > 0 && rating.Counted.Single().Source == rated[0], () => rated.Count == 0);
 	}
 
-	private static bool FallsBackToEveryAvailableSource(RatingSummary summary, ValueSet<RatingSource> available)
+	private static bool FallsBackToEveryAvailableSource(MediaRatings ratings, ValueSet<RatingSource> available)
 	{
 		ValueSet<RatingSource> unavailable = [.. Sources.Except(available)];
-		var averaged = new AveragedRating(unavailable).Resolve(summary, available).Map(rating => rating.Value);
-		var everything = AveragedRating.Everything.Resolve(summary, available).Map(rating => rating.Value);
+		var averaged = new AveragedRating(unavailable).Resolve(ratings, available).Map(rating => rating.Value);
+		var everything = AveragedRating.Everything.Resolve(ratings, available).Map(rating => rating.Value);
 		return unavailable.Count == 0 || averaged.Match(value => everything.Match(other => Close(value, other), () => false), () => everything.IsNone());
 	}
 

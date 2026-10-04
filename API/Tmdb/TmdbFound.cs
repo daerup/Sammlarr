@@ -17,7 +17,7 @@ internal static class TmdbFound
 				PosterUrl = artwork.Original(result.PosterPath),
 				BackdropUrl = artwork.Original(result.BackdropPath),
 				ReleaseDate = result.Released,
-				Rating = TmdbRatings.Of(result.VoteAverage, result.VoteCount),
+				Ratings = TmdbRatings.Of(result.VoteAverage, result.VoteCount),
 			}
 		);
 	}
@@ -44,7 +44,7 @@ internal static class TmdbFound
 			BackdropUrl = artwork.Original(details.BackdropPath),
 			ReleaseDate = details.ReleasedAs(MediaType.Movie),
 			Genres = ProviderValues.Genres(details.Genres?.Select(genre => genre.Name)),
-			Rating = TmdbRatings.Of(details.VoteAverage, details.VoteCount),
+			Ratings = TmdbRatings.Of(details.VoteAverage, details.VoteCount),
 			Runtime = ProviderValues.Minutes(details.Runtime),
 		};
 	}
@@ -60,7 +60,7 @@ internal static class TmdbFound
 			BackdropUrl = artwork.Original(details.BackdropPath),
 			ReleaseDate = details.ReleasedAs(MediaType.Show),
 			Genres = ProviderValues.Genres(details.Genres?.Select(genre => genre.Name)),
-			Rating = TmdbRatings.Of(details.VoteAverage, details.VoteCount),
+			Ratings = TmdbRatings.Of(details.VoteAverage, details.VoteCount),
 			Seasons = ProviderValues.Count(details.NumberOfSeasons),
 			Episodes = ProviderValues.Count(details.NumberOfEpisodes),
 			RuntimePerEpisode = ProviderValues.Minutes(details.EpisodeRunTime?.FirstOrDefault()),

@@ -593,7 +593,7 @@ public class MediaServiceTests
 				BackdropUrl = "https://example.com/b.jpg",
 				ReleaseDate = new DateOnly(2024, 1, 1),
 				Genres = ["Action"],
-				Rating = RatingSummary.From([new TmdbRating(7.5f, Some.Of(100))]),
+				Ratings = MediaRatings.From([new TmdbRating(7.5f, Some.Of(100))]),
 				Runtime = TimeSpan.FromMinutes(120),
 			}
 		);
@@ -612,7 +612,7 @@ public class MediaServiceTests
 				BackdropUrl = "https://example.com/b.jpg",
 				ReleaseDate = new DateOnly(2024, 1, 1),
 				Genres = ["Action"],
-				Rating = RatingSummary.From([new TmdbRating(7.5f, Some.Of(100))]),
+				Ratings = MediaRatings.From([new TmdbRating(7.5f, Some.Of(100))]),
 				Runtime = TimeSpan.FromMinutes(90),
 			}
 		);

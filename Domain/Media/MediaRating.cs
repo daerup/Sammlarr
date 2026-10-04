@@ -75,17 +75,17 @@ public readonly record struct RottenTomatoesAudienceRating(int Percent) : IMedia
 	public RatingMark Mark => Percent >= Upright ? RatingMark.Upright : RatingMark.Spilled;
 }
 
-public readonly record struct RatingSummary(ValueSet<IMediaRating> Sources)
+public readonly record struct MediaRatings(ValueSet<IMediaRating> All)
 {
-	public static readonly RatingSummary None = new([]);
+	public static readonly MediaRatings None = new([]);
 
-	public static RatingSummary From(IEnumerable<IMediaRating> sources) => new([.. sources.DistinctBy(rating => rating.Source)]);
+	public static MediaRatings From(IEnumerable<IMediaRating> ratings) => new([.. ratings.DistinctBy(rating => rating.Source)]);
 
-	public Optional<IMediaRating> Of(RatingSource source) => Sources.FirstOrNone(rating => rating.Source == source);
+	public Optional<IMediaRating> Of(RatingSource source) => All.FirstOrNone(rating => rating.Source == source);
 
-	public RatingSummary FillFrom(RatingSummary other)
+	public MediaRatings FillFrom(MediaRatings other)
 	{
-		return From([.. Sources.Select(mine => other.Of(mine.Source).When(theirs => Richer(theirs, mine)).GetValueOr(mine)), .. other.Sources]);
+		return From([.. All.Select(mine => other.Of(mine.Source).When(theirs => Richer(theirs, mine)).GetValueOr(mine)), .. other.All]);
 	}
 
 	private static bool Richer(IMediaRating candidate, IMediaRating current) => candidate.Votes.IsSome() && current.Votes.IsNone();

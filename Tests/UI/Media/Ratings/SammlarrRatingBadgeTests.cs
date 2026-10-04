@@ -19,14 +19,14 @@ public class SammlarrRatingBadgeTests : BunitContext
 		RatingSource.RottenTomatoesAudience,
 	];
 
-	private static readonly RatingSummary ProjectHailMary = RatingSummary.From([
+	private static readonly MediaRatings ProjectHailMary = MediaRatings.From([
 		new TmdbRating(8.6f, Some.Of(7705)),
 		new ImdbRating(8.2f, Some.Of(542195)),
 		new RottenTomatoesCriticsRating(95),
 		new RottenTomatoesAudienceRating(95),
 	]);
 
-	private static readonly RatingSummary LastSeen = RatingSummary.From([
+	private static readonly MediaRatings LastSeen = MediaRatings.From([
 		new TmdbRating(9.0f, Some.Of(8)),
 		new ImdbRating(7.6f, Some.Of(303)),
 		new RottenTomatoesCriticsRating(87),
@@ -76,7 +76,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 	{
 		var cut = Render<SammlarrRatingBadge>(parameters =>
 			parameters
-				.Add(badge => badge.Ratings, RatingSummary.From([new ImdbRating(9.46f, Some.Of(10))]))
+				.Add(badge => badge.Ratings, MediaRatings.From([new ImdbRating(9.46f, Some.Of(10))]))
 				.Add(badge => badge.Strategy, Some.Of(new RatingStrategy(new OrderedRating([RatingSource.Imdb]))))
 		);
 
@@ -103,7 +103,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 	[Test]
 	public async Task Badge_WhenNoSourceRatesTheTitle_ShowsTheDashedStarWithADash()
 	{
-		var cut = Render<SammlarrRatingBadge>(parameters => parameters.Add(badge => badge.Ratings, RatingSummary.None));
+		var cut = Render<SammlarrRatingBadge>(parameters => parameters.Add(badge => badge.Ratings, MediaRatings.None));
 
 		await Assert.That(cut.Find(".rating-badge").TextContent.Trim()).IsEqualTo("–");
 		await Assert.That(cut.Find(".rating-badge").ClassList).Contains("is-unrated");
@@ -156,7 +156,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 		_pages.FindPathAsync(Any<MediaId>(), Any()).WasCalled(Times.Once);
 	}
 
-	private IRenderedComponent<SammlarrRatingBreakdown> RenderBreakdown(RatingSummary ratings, RatingStrategy strategy)
+	private IRenderedComponent<SammlarrRatingBreakdown> RenderBreakdown(MediaRatings ratings, RatingStrategy strategy)
 	{
 		return Render<SammlarrRatingBreakdown>(parameters =>
 			parameters

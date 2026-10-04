@@ -328,7 +328,7 @@ public class WantlistSyncButtonTests : BunitContext
 				ReleaseDate = new DateOnly(1999, 3, 28),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(22),
-				Rating = RatingSummary.None,
+				Ratings = MediaRatings.None,
 			}
 		);
 	}

@@ -19,8 +19,8 @@ public class DetailsFetcherTests
 	private static readonly TmdbId Tmdb = TmdbId.From("500", MediaType.Movie);
 	private static readonly MediaIdentity Identity = new(Id, [Plex, Tmdb]);
 	private static readonly MediaIdentity PlexOnly = new(Id, [Plex]);
-	private static readonly RatingSummary TmdbOnly = RatingSummary.From([new TmdbRating(8f, Some.Of(500))]);
-	private static readonly RatingSummary EverySource = RatingSummary.From([
+	private static readonly MediaRatings TmdbOnly = MediaRatings.From([new TmdbRating(8f, Some.Of(500))]);
+	private static readonly MediaRatings EverySource = MediaRatings.From([
 		new TmdbRating(8f, Some.Of(500)),
 		new ImdbRating(8.8f, Some.Of(2_500_000)),
 		new RottenTomatoesCriticsRating(87),
@@ -87,12 +87,12 @@ public class DetailsFetcherTests
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Unrated());
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Rating = TmdbOnly }));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
 		await using var buffer = deps.Buffer();
 
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
-		await Assert.That(fetched.Details.Rating).IsEqualTo(TmdbOnly);
+		await Assert.That(fetched.Details.Ratings).IsEqualTo(TmdbOnly);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
@@ -195,7 +195,7 @@ public class DetailsFetcherTests
 			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Tmdb, () => Now.AddMinutes(1)), 0))
 		);
 		deps.Primary(Unrated() with { Tagline = null });
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Rating = TmdbOnly }));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
 		await using var buffer = deps.Buffer();
 
 		await deps.Testee.FetchAsync(Identity, buffer);
@@ -207,27 +207,27 @@ public class DetailsFetcherTests
 	public async Task FetchAsync_WhenOnlyOtherSourcesRatingsAreMissing_AsksAnEnricherAndKeepsBothRatings()
 	{
 		var deps = Dependencies.Create();
-		deps.Primary(Complete() with { Rating = TmdbOnly });
+		deps.Primary(Complete() with { Ratings = TmdbOnly });
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any())
-			.Returns(Answer(new MovieDetails { Rating = RatingSummary.From([new ImdbRating(8.8f, Some.Of(2_500_000))]) }));
+			.Returns(Answer(new MovieDetails { Ratings = MediaRatings.From([new ImdbRating(8.8f, Some.Of(2_500_000))]) }));
 		await using var buffer = deps.Buffer();
 
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
-		await Assert.That(fetched.Details.Rating.Sources.Select(rating => rating.Source)).IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb]);
+		await Assert.That(fetched.Details.Ratings.All.Select(rating => rating.Source)).IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb]);
 	}
 
 	[Test]
 	public async Task FetchAsync_WhenThePrimaryCopiesTmdbsRatingWithoutVotes_AsksTmdbAndKeepsItsOwnRating()
 	{
 		var deps = Dependencies.Create(tmdbFills: MediaField.TmdbRating);
-		deps.Primary(Complete() with { Rating = RatingSummary.From([new TmdbRating(8.9f, new None()), .. EverySource.Sources]) });
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Rating = TmdbOnly }));
+		deps.Primary(Complete() with { Ratings = MediaRatings.From([new TmdbRating(8.9f, new None()), .. EverySource.All]) });
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
 		await using var buffer = deps.Buffer();
 
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
 
-		await Assert.That(fetched.Details.Rating.Of(RatingSource.Tmdb).Map(rating => rating.Votes)).IsSome().And.IsEqualTo(500);
+		await Assert.That(fetched.Details.Ratings.Of(RatingSource.Tmdb).Map(rating => rating.Votes)).IsSome().And.IsEqualTo(500);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
@@ -237,7 +237,7 @@ public class DetailsFetcherTests
 		var deps = Dependencies.Create(
 			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Tmdb, () => Now.AddMinutes(1)), 0))
 		);
-		deps.Primary(Complete() with { Rating = TmdbOnly });
+		deps.Primary(Complete() with { Ratings = TmdbOnly });
 		await using var buffer = deps.Buffer();
 
 		await deps.Testee.FetchAsync(Identity, buffer);
@@ -369,12 +369,12 @@ public class DetailsFetcherTests
 			BackdropUrl = "backdrop",
 			ReleaseDate = new DateOnly(2010, 7, 16),
 			Genres = ["Science Fiction"],
-			Rating = EverySource,
+			Ratings = EverySource,
 			Runtime = TimeSpan.FromMinutes(148),
 		};
 	}
 
-	private static MovieDetails Unrated() => Complete() with { Rating = RatingSummary.None };
+	private static MovieDetails Unrated() => Complete() with { Ratings = MediaRatings.None };
 
 	private sealed record Dependencies(
 		Mock<IMediaRepository> MediaRepository,

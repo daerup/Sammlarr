@@ -276,7 +276,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 
 			if (row.Rating is { } rating)
 			{
-				await Assert.That(item.Details.Rating.Sources.Any(entry => entry.Source == rating)).IsTrue();
+				await Assert.That(item.Details.Ratings.All.Any(entry => entry.Source == rating)).IsTrue();
 			}
 		}
 	}

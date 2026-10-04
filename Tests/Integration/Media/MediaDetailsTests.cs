@@ -359,12 +359,12 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		if (rating is { } source)
 		{
-			await Assert.That(detail.Rating.Sources.Any(entry => entry.Source == source)).IsTrue();
+			await Assert.That(detail.Ratings.All.Any(entry => entry.Source == source)).IsTrue();
 		}
 
 		if (noRating)
 		{
-			await Assert.That(detail.Rating.Sources).IsEmpty();
+			await Assert.That(detail.Ratings.All).IsEmpty();
 		}
 	}
 
@@ -383,7 +383,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(details.Title).IsEqualTo(detail.Title);
 		await Assert.That(details.Summary).IsEqualTo(detail.Summary);
 		await Assert.That(details.Genres).IsEquivalentTo(detail.Genres);
-		await Assert.That(details.Ratings.Select(rating => rating.Source)).IsEquivalentTo(detail.Rating.Sources.Select(rating => rating.Source));
+		await Assert.That(details.Ratings.Select(rating => rating.Source)).IsEquivalentTo(detail.Ratings.All.Select(rating => rating.Source));
 		await Assert.That(details.FetchedAt).IsEqualTo(fetched);
 	}
 

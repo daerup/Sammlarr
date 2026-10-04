@@ -9,7 +9,7 @@ internal class MediaDetailsFactory
 	{
 		var row = NewRow(cached.Details);
 		ApplyCommonFields(row, cached, mediaId);
-		row.Ratings = [.. cached.Details.Rating.Sources.Select(rating => BuildRating(rating, row))];
+		row.Ratings = [.. cached.Details.Ratings.All.Select(rating => BuildRating(rating, row))];
 		return row;
 	}
 
@@ -29,7 +29,7 @@ internal class MediaDetailsFactory
 				throw new InvalidOperationException($"Cannot update existing {existing.GetType().Name}.");
 		}
 		ApplyCommonFields(existing, cached, existing.MediaId);
-		ReplaceRatings(existing, [.. cached.Details.Rating.Sources]);
+		ReplaceRatings(existing, [.. cached.Details.Ratings.All]);
 	}
 
 	public CachedDetails ToCached(MediaDetailsRow row) => new(Details(row), row.FetchedAt, row.ConfirmedAbsent);
@@ -45,7 +45,7 @@ internal class MediaDetailsFactory
 			BackdropUrl = row.BackdropUrl,
 			ReleaseDate = row.ReleaseDate,
 			Genres = [.. row.Genres],
-			Rating = RatingSummary.From(ToRatings(row.Ratings)),
+			Ratings = MediaRatings.From(ToRatings(row.Ratings)),
 		};
 	}
 

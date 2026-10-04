@@ -25,7 +25,7 @@ public class TmdbTrendingServiceTests
 		media
 			.IdentifyAsync(Any<IEnumerable<IdentifyRequest>>(), Any())
 			.Returns((requests, _) => requests.Select(_ => (Result<MediaIdentity>)Error.From("not found")).ToAsyncEnumerable());
-		media.GetStoredRatingsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new Dictionary<MediaId, RatingSummary>());
+		media.GetStoredRatingsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new Dictionary<MediaId, MediaRatings>());
 
 		var page = await Testee(handler, media.Object).GetTrendingAsync(1);
 
@@ -35,7 +35,7 @@ public class TmdbTrendingServiceTests
 			.And.Multiple(async unmatched =>
 				await Assert
 					.That(unmatched.Details)
-					.IsEqualTo(new MovieDetails { ReleaseDate = new DateOnly(2024, 5, 1), Rating = RatingSummary.From([new TmdbRating(6.5f, Some.Of(120))]) })
+					.IsEqualTo(new MovieDetails { ReleaseDate = new DateOnly(2024, 5, 1), Ratings = MediaRatings.From([new TmdbRating(6.5f, Some.Of(120))]) })
 			);
 		media.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests != null && requests.Single().Hints.IsNone()), Any()).WasCalled(Times.Once);
 	}

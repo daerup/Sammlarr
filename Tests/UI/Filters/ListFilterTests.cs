@@ -177,7 +177,7 @@ public class ListFilterTests
 				ReleaseDate = new DateOnly(2020, 1, 1),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(90),
-				Rating = RatingSummary.None,
+				Ratings = MediaRatings.None,
 			}
 		);
 	}

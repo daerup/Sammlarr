@@ -43,7 +43,7 @@ public class MediaMergerProperties
 			BackdropUrl = primary.BackdropUrl ?? other.BackdropUrl,
 			ReleaseDate = primary.ReleaseDate ?? other.ReleaseDate,
 			Genres = primary.Genres.Count > 0 ? primary.Genres : other.Genres,
-			Rating = primary.Rating.Sources.Count > 0 ? primary.Rating : other.Rating,
+			Ratings = primary.Ratings.All.Count > 0 ? primary.Ratings : other.Ratings,
 			Runtime = primary.Runtime ?? other.Runtime,
 		};
 	}
@@ -59,7 +59,7 @@ public class MediaMergerProperties
 			BackdropUrl = flags[4] ? $"/{side}-backdrop.jpg" : null,
 			ReleaseDate = flags[5] ? new DateOnly(2020, 1, side.Length) : null,
 			Genres = flags[6] ? [side] : [],
-			Rating = flags[8] ? RatingSummary.From([new TmdbRating(side.Length, new None())]) : RatingSummary.None,
+			Ratings = flags[8] ? MediaRatings.From([new TmdbRating(side.Length, new None())]) : MediaRatings.None,
 			Runtime = flags[7] ? TimeSpan.FromMinutes(side.Length) : null,
 		};
 	}

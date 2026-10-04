@@ -15,13 +15,13 @@ public class FeedRatingReasonsTests
 		RatingSource.RottenTomatoesAudience,
 	];
 
-	private static readonly RatingSummary LastSeen = RatingSummary.From([new TmdbRating(9.0f, Some.Of(8)), new ImdbRating(6.4f, Some.Of(303))]);
+	private static readonly MediaRatings LastSeen = MediaRatings.From([new TmdbRating(9.0f, Some.Of(8)), new ImdbRating(6.4f, Some.Of(303))]);
 
 	[Test]
 	public async Task For_WhenTheAverageIsBelowTheRule_SaysSoWithTheAverage()
 	{
 		var average = new RatingStrategy(AveragedRating.Everything);
-		var rating = average.Resolve(RatingSummary.From([new TmdbRating(6.4f, Some.Of(31)), new ImdbRating(6.4f, Some.Of(736))]), Everything);
+		var rating = average.Resolve(MediaRatings.From([new TmdbRating(6.4f, Some.Of(31)), new ImdbRating(6.4f, Some.Of(736))]), Everything);
 
 		await Assert.That(FeedRatingReasons.For(Rule("Rating", 7.0), rating, average)).IsEquivalentTo(["Rating 6.4 (the average) is below 7"]);
 	}
@@ -48,7 +48,7 @@ public class FeedRatingReasonsTests
 	public async Task For_WhenOnlyRottenTomatoesRates_SaysItPublishesNoVotes()
 	{
 		var ordered = new RatingStrategy(new OrderedRating([RatingSource.RottenTomatoesCritics]));
-		var rating = ordered.Resolve(RatingSummary.From([new RottenTomatoesCriticsRating(87)]), Everything);
+		var rating = ordered.Resolve(MediaRatings.From([new RottenTomatoesCriticsRating(87)]), Everything);
 
 		await Assert
 			.That(FeedRatingReasons.For(Rule("Votes", 500.0), rating, ordered))
@@ -59,7 +59,7 @@ public class FeedRatingReasonsTests
 	public async Task For_WhenTheAverageReadsAsTheBound_GivesNoReason()
 	{
 		var average = new RatingStrategy(AveragedRating.Everything);
-		var rating = average.Resolve(RatingSummary.From([new TmdbRating(6.5f, Some.Of(31)), new ImdbRating(7.4f, Some.Of(736))]), Everything);
+		var rating = average.Resolve(MediaRatings.From([new TmdbRating(6.5f, Some.Of(31)), new ImdbRating(7.4f, Some.Of(736))]), Everything);
 
 		await Assert.That(FeedRatingReasons.For(Rule("Rating", 7.0), rating, average)).IsEmpty();
 	}
@@ -76,7 +76,7 @@ public class FeedRatingReasonsTests
 	public async Task For_WhenTheRatingCameWithoutAVoteCount_SaysNoneCameWithIt()
 	{
 		var average = new RatingStrategy(AveragedRating.Everything);
-		var rating = average.Resolve(RatingSummary.From([new TmdbRating(10.0f, new None())]), Everything);
+		var rating = average.Resolve(MediaRatings.From([new TmdbRating(10.0f, new None())]), Everything);
 
 		await Assert.That(FeedRatingReasons.For(Rule("Votes", 500.0), rating, average)).IsEquivalentTo(["no votes behind its rating (no vote count came with it)"]);
 	}

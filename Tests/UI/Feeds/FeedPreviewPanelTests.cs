@@ -312,7 +312,7 @@ public class FeedPreviewPanelTests : BunitContext
 				ReleaseDate = new DateOnly(2020, 1, 1),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(90),
-				Rating = RatingSummary.None,
+				Ratings = MediaRatings.None,
 			}
 		);
 	}
@@ -376,7 +376,7 @@ public class FeedPreviewPanelTests : BunitContext
 					ReleaseDate = new DateOnly(2020, 1, 1),
 					Genres = [],
 					Runtime = TimeSpan.FromMinutes(90),
-					Rating = RatingSummary.None,
+					Ratings = MediaRatings.None,
 				}
 			);
 		}

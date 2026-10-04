@@ -24,10 +24,10 @@ public class TmdbDetailsEnricherTests
 			.IsSuccess()
 			.And.Multiple(async found =>
 			{
-				var rating = found.Details.Rating;
-				await Assert.That(rating.Sources.Any(source => source.Source == RatingSource.Tmdb)).IsTrue();
-				await Assert.That(rating.Sources.All(source => source.Source.SuppliedBy().Contains(MediaProvider.Tmdb))).IsTrue();
-				await Assert.That(rating.Of(RatingSource.Tmdb).Map(tmdb => tmdb.SammlarrValue)).IsSome().And.IsEqualTo(7.5f);
+				var ratings = found.Details.Ratings;
+				await Assert.That(ratings.All.Any(rating => rating.Source == RatingSource.Tmdb)).IsTrue();
+				await Assert.That(ratings.All.All(rating => rating.Source.SuppliedBy().Contains(MediaProvider.Tmdb))).IsTrue();
+				await Assert.That(ratings.Of(RatingSource.Tmdb).Map(tmdb => tmdb.SammlarrValue)).IsSome().And.IsEqualTo(7.5f);
 			});
 	}
 

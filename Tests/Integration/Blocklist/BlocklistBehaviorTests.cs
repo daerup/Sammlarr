@@ -70,7 +70,7 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 			{
 				await Assert.That(movie.Details.Title).IsEqualTo("Fight Club");
 				await Assert.That(movie.Details.PosterUrl).IsNotNullOrEmpty();
-				await Assert.That(movie.Details.Rating.Sources.Any(source => source.Source == RatingSource.Tmdb)).IsTrue();
+				await Assert.That(movie.Details.Ratings.All.Any(rating => rating.Source == RatingSource.Tmdb)).IsTrue();
 			});
 	}
 

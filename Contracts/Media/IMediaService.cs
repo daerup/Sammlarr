@@ -21,7 +21,7 @@ public interface IMediaService
 
 	Task InvalidateAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyDictionary<MediaId, RatingSummary>> GetStoredRatingsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
+	Task<IReadOnlyDictionary<MediaId, MediaRatings>> GetStoredRatingsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 

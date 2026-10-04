@@ -19,7 +19,7 @@ internal static class DemoMedia
 			BackdropUrl = "https://image.tmdb.org/t/p/w780/qL4dBGLkWOVP5vImN7EEoqJQYd8.jpg",
 			ReleaseDate = new DateOnly(2026, 3, 20),
 			Genres = ["Science Fiction", "Adventure"],
-			Rating = RatingSummary.From([new TmdbRating(8.4f, new None())]),
+			Ratings = MediaRatings.From([new TmdbRating(8.4f, new None())]),
 			Runtime = TimeSpan.FromMinutes(150),
 		}
 	);
@@ -44,7 +44,7 @@ internal static class DemoMedia
 			BackdropUrl = "https://image.tmdb.org/t/p/w780/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
 			ReleaseDate = new DateOnly(2008, 1, 20),
 			Genres = ["Drama", "Crime"],
-			Rating = RatingSummary.From([new TmdbRating(8.9f, new None())]),
+			Ratings = MediaRatings.From([new TmdbRating(8.9f, new None())]),
 			Seasons = 5,
 			Episodes = 62,
 			RuntimePerEpisode = TimeSpan.FromMinutes(47),
@@ -63,7 +63,7 @@ internal static class DemoMedia
 			BackdropUrl = "https://image.tmdb.org/t/p/w780/edS1AlGAXopVq0L2voGOooYcE1S.jpg",
 			ReleaseDate = new DateOnly(2026, 4, 2),
 			Genres = ["Drama", "Family"],
-			Rating = RatingSummary.From([new TmdbRating(7.1f, new None())]),
+			Ratings = MediaRatings.From([new TmdbRating(7.1f, new None())]),
 			Runtime = TimeSpan.FromMinutes(116),
 		}
 	);
@@ -78,7 +78,7 @@ internal static class DemoMedia
 			BackdropUrl = "https://image.tmdb.org/t/p/w780/rFjlsx5IygrHmBqr0KsVolAHhy7.jpg",
 			ReleaseDate = new DateOnly(2026, 8, 26),
 			Genres = ["Animation", "Comedy"],
-			Rating = RatingSummary.From([new TmdbRating(8.1f, new None())]),
+			Ratings = MediaRatings.From([new TmdbRating(8.1f, new None())]),
 			Runtime = TimeSpan.FromMinutes(44),
 		}
 	);
@@ -95,7 +95,7 @@ internal static class DemoMedia
 			BackdropUrl = "https://image.tmdb.org/t/p/w780/pOGqAA6AOOKLRWOfYvRAdDP0vOl.jpg",
 			ReleaseDate = new DateOnly(2025, 12, 5),
 			Genres = ["Comedy", "Thriller"],
-			Rating = RatingSummary.From([new TmdbRating(5.8f, new None())]),
+			Ratings = MediaRatings.From([new TmdbRating(5.8f, new None())]),
 			Runtime = TimeSpan.FromMinutes(98),
 		}
 	);
@@ -110,7 +110,7 @@ internal static class DemoMedia
 			BackdropUrl = "https://image.tmdb.org/t/p/w780/hDp8Itlhln0aBjlHXVIsUsxiRaa.jpg",
 			ReleaseDate = new DateOnly(2025, 10, 30),
 			Genres = ["Comedy", "Drama"],
-			Rating = RatingSummary.From([new TmdbRating(6.8f, new None())]),
+			Ratings = MediaRatings.From([new TmdbRating(6.8f, new None())]),
 			Runtime = TimeSpan.FromMinutes(116),
 		}
 	);

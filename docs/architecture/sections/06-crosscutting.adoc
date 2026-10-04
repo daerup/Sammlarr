@@ -15,8 +15,8 @@ and the shape is
 link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0009-model-a-title-as-an-identity-plus-optional-details.md[ADR 0009]. Below it, `Shared` is the kernel: `Optional<T>`,
 `Result<T>`, `ValueSet<T>`, and the `union` types. Expected absence is an `Optional`, not null
 (<<absence>>); expected failure is a `Result`, not an exception. Media details are the exception: a missing details
-value is `null` from the provider mapper to the column (missing genres are an empty set, a missing rating is
-`RatingSummary.None`). Unions are matched by case directly, never through `.Value`; `Optional` and `Result` are read
+value is `null` from the provider mapper to the column (missing genres are an empty set, missing ratings are
+`MediaRatings.None`). Unions are matched by case directly, never through `.Value`; `Optional` and `Result` are read
 through their helpers instead. Enum switches are exhaustive with no default arm.
 
 [[absence]]
