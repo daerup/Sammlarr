@@ -1,6 +1,6 @@
 .person-avatar {
-    --bird-body: oklch(0.47 0.12 var(--bird-hue));
-    --bird-back: oklch(0.93 0.035 var(--bird-hue));
+    --bird-body: oklch(0.47 calc(0.12 * var(--bird-scale, 1)) var(--bird-hue));
+    --bird-back: oklch(0.93 calc(0.035 * var(--bird-scale, 1)) var(--bird-hue));
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -11,8 +11,8 @@
 }
 
 .dark .person-avatar {
-    --bird-body: oklch(0.82 0.11 var(--bird-hue));
-    --bird-back: oklch(0.31 0.06 var(--bird-hue));
+    --bird-body: oklch(0.82 calc(0.11 * var(--bird-scale, 1)) var(--bird-hue));
+    --bird-back: oklch(0.31 calc(0.06 * var(--bird-scale, 1)) var(--bird-hue));
 }
 
 .person-avatar svg {

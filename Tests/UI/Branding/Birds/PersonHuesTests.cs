@@ -1,6 +1,6 @@
-using Domain.Identity;
+using UI.Shared.Branding.Birds;
 
-namespace Domain.Tests.Identity;
+namespace UI.Tests.Branding.Birds;
 
 public class PersonHuesTests
 {

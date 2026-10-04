@@ -10,6 +10,7 @@ using Domain.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Users;
+using UI.Shared.Branding.Birds;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
 
@@ -27,14 +28,16 @@ public class UsersSectionTests : BunitContext
 
 	private static readonly Person[] People =
 	[
-		new JoinedPerson(Admin, new PersonHoldings(3, 15, 2, []), new None(), 40),
-		new JoinedPerson(Member, PersonHoldings.Empty, Some.Of(LockedUntil), 177.5),
+		new JoinedPerson(Admin, new PersonHoldings(3, 15, 2, []), new None(), new StoredColour(Some.Of(40d), new None())),
+		new JoinedPerson(Member, PersonHoldings.Empty, Some.Of(LockedUntil), new StoredColour(Some.Of(177.5d), new None())),
 		new InvitedPerson("mira", "mira", Now.AddDays(6).AddHours(2)),
 	];
 
 	private readonly Mock<IUserManagementService> _users = IUserManagementService.Mock();
 
 	private readonly Mock<IProviderConfigService> _config = IProviderConfigService.Mock();
+
+	private readonly Mock<IPictureGrids> _pictures = IPictureGrids.Mock();
 
 	[Before(Test)]
 	public void Setup()
@@ -49,6 +52,9 @@ public class UsersSectionTests : BunitContext
 		_users.GetPeopleAsync(Any()).Returns(People);
 		Services.AddSingleton(_users.Object);
 		Services.AddSingleton(_config.Object);
+		_pictures.ReadAsync(Any(), Any()).Returns(new None());
+		Services.AddSingleton(_pictures.Object);
+		Services.AddScoped<PersonPainter>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -103,7 +109,7 @@ public class UsersSectionTests : BunitContext
 		_users
 			.GetPeopleAsync(Any())
 			.Returns([
-				new JoinedPerson(Admin, PersonHoldings.Empty, new None(), 40),
+				new JoinedPerson(Admin, PersonHoldings.Empty, new None(), new StoredColour(Some.Of(40d), new None())),
 				new InvitedPerson("soon", "soon", Now.AddHours(5)),
 				new InvitedPerson("old", "old", Now.AddHours(-1)),
 			]);
@@ -128,12 +134,86 @@ public class UsersSectionTests : BunitContext
 	}
 
 	[Test]
+	public async Task Rows_ForSomeoneWithAPictureColour_CarryItsChromaToTheEdge()
+	{
+		Installed(AuthProvider.Plex);
+		_users
+			.GetPeopleAsync(Any())
+			.Returns([
+				new JoinedPerson(
+					Admin,
+					PersonHoldings.Empty,
+					new None(),
+					new StoredColour(Some.Of(40d), Some.Of(new StoredPicture("https://plex.tv/users/guest/avatar", Some.Of(new PictureTone(90.7, 0.042)))))
+				),
+			]);
+
+		var cut = Render<UsersSection>();
+
+		await Assert.That(cut.WaitForElement(".person-row").GetAttribute("style")).IsEqualTo("--bird-hue: 90.7; --bird-chroma: 0.042; --bird-scale: 0.35");
+	}
+
+	[Test]
+	public async Task Rows_ForSomeoneWithoutAColourYet_GiveThemTheNextGoldenHueAndStoreIt()
+	{
+		Installed(AuthProvider.Local);
+		_users
+			.GetPeopleAsync(Any())
+			.Returns([
+				new JoinedPerson(Admin, PersonHoldings.Empty, new None(), new StoredColour(Some.Of(40d), new None())),
+				new JoinedPerson(Member, PersonHoldings.Empty, new None(), StoredColour.Empty),
+			]);
+
+		var cut = Render<UsersSection>();
+
+		cut.WaitForAssertion(() =>
+			_users.StoreColourAsync(Member.Id, Is<StoredColour>(colour => colour!.GoldenHue.GetValueOr(0) == 177.5), Any()).WasCalled(Times.Once)
+		);
+		cut.WaitForAssertion(() => _users.GetPeopleAsync(Any()).WasCalled(Times.Exactly(2)));
+		await Assert.That(cut.Find("[data-person='daerup']").GetAttribute("style")).IsEqualTo("--bird-hue: 177.5");
+	}
+
+	[Test]
+	public async Task Rows_WhileAPictureIsStillBeingRead_ShowWithTheColourTheyHave()
+	{
+		Installed(AuthProvider.Plex);
+		_pictures.ReadAsync(Any(), Any()).ReturnsAsync(new TaskCompletionSource<Optional<byte[]>>().Task);
+		_users
+			.GetPeopleAsync(Any())
+			.Returns([
+				new JoinedPerson(
+					Admin with
+					{
+						AvatarUrl = "https://plex.tv/users/guest/avatar",
+					},
+					PersonHoldings.Empty,
+					new None(),
+					new StoredColour(Some.Of(40d), new None())
+				),
+			]);
+
+		var cut = Render<UsersSection>();
+
+		await Assert.That(cut.WaitForElement(".person-row").GetAttribute("style")).IsEqualTo("--bird-hue: 40");
+	}
+
+	[Test]
 	public async Task Rows_OnAPlexInstall_ShowTheirPlexPictureWithTheBirdBehindIt()
 	{
 		Installed(AuthProvider.Plex);
 		_users
 			.GetPeopleAsync(Any())
-			.Returns([new JoinedPerson(Admin with { AvatarUrl = "https://plex.tv/users/guest/avatar" }, PersonHoldings.Empty, new None(), 40)]);
+			.Returns([
+				new JoinedPerson(
+					Admin with
+					{
+						AvatarUrl = "https://plex.tv/users/guest/avatar",
+					},
+					PersonHoldings.Empty,
+					new None(),
+					new StoredColour(Some.Of(40d), new None())
+				),
+			]);
 
 		var cut = Render<UsersSection>();
 
@@ -145,7 +225,7 @@ public class UsersSectionTests : BunitContext
 	public async Task Rows_OnAPlexInstall_ShowTheBirdForSomeoneWithoutAPlexPicture()
 	{
 		Installed(AuthProvider.Plex);
-		_users.GetPeopleAsync(Any()).Returns([new JoinedPerson(Admin, PersonHoldings.Empty, new None(), 40)]);
+		_users.GetPeopleAsync(Any()).Returns([new JoinedPerson(Admin, PersonHoldings.Empty, new None(), new StoredColour(Some.Of(40d), new None()))]);
 
 		var cut = Render<UsersSection>();
 

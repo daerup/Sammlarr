@@ -1,4 +1,5 @@
 using Shared.DI;
+using UI.Shared.Branding.Birds;
 using UI.Shared.Services.Branding;
 
 namespace UI.Shared.Services;
@@ -13,6 +14,7 @@ internal class ServicesModule : IServiceModule
 		services.AddScoped<ProfileDropdownService>();
 		services.AddScoped<AccountConnectionPrompt>();
 		services.AddScoped<SearchLauncher>();
+		services.AddScoped<PersonPainter>();
 		services.AddScoped<ArtworkSources>();
 		services.AddScoped<RatingContext>();
 		services.AddSingleton<AppVersionProvider>();

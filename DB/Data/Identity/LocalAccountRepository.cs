@@ -32,8 +32,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 	public async Task CreateAsync(User user, string username, string passwordHash, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await UserHues.AddAsync(
-			ctx,
+		ctx.Users.Add(
 			new UserRow
 			{
 				Id = user.Id.Value,
@@ -45,9 +44,9 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 				Role = user.Role,
 				JoinedAt = user.JoinedAt,
 				PasswordHash = passwordHash,
-			},
-			cancellationToken
+			}
 		);
+		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
 	public async Task SetPasswordAsync(UserId id, string passwordHash, DateTimeOffset revokedAt, CancellationToken cancellationToken = default)

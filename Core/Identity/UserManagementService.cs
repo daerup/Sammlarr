@@ -33,7 +33,7 @@ internal sealed class UserManagementService(
 		currentUser.EnsureAdmin();
 		var now = dateTimeProvider.Now;
 		var holdings = await users.GetHoldingsAsync(cancellationToken);
-		var hues = await users.GetHuesAsync(cancellationToken);
+		var colours = await users.GetColoursAsync(cancellationToken);
 		var locals = (await accounts.GetAllAsync(cancellationToken)).ToDictionary(account => account.User.Id);
 		var invites = await links.GetAllAsync(AccountLinkKind.Invite, cancellationToken);
 		var joined = (await users.GetAllAsync(cancellationToken)).Select(user =>
@@ -42,7 +42,7 @@ internal sealed class UserManagementService(
 					user,
 					holdings.GetValueOrNone(user.Id).GetValueOr(PersonHoldings.Empty),
 					LockOf(locals, user.Id, now),
-					hues.GetValueOrNone(user.Id).GetValueOr(PersonHues.First)
+					colours.GetValueOrNone(user.Id).GetValueOr(StoredColour.Empty)
 				)
 		);
 		return [.. joined, .. invites.Select(invite => (Person)new InvitedPerson(invite.Username, invite.DisplayName, invite.ExpiresAt))];
@@ -128,6 +128,12 @@ internal sealed class UserManagementService(
 	{
 		await EnsureCallerIsAdminAsync(cancellationToken);
 		await accounts.SetFailedSignInsAsync(id, 0, new None(), cancellationToken);
+	}
+
+	public Task StoreColourAsync(UserId id, StoredColour colour, CancellationToken cancellationToken = default)
+	{
+		currentUser.EnsureAdmin();
+		return users.StoreColourAsync(id, colour, cancellationToken);
 	}
 
 	private static Optional<DateTimeOffset> LockOf(IReadOnlyDictionary<UserId, LocalAccount> locals, UserId id, DateTimeOffset now)

@@ -2,9 +2,11 @@
 @using Contracts.Settings
 @using Domain.Identity
 @using Domain.Settings
+@using UI.Shared.Branding.Birds
 @inject IUserManagementService Users
 @inject IProviderConfigService ProviderConfigService
 @inject ICurrentUser CurrentUser
+@inject PersonPainter Painter
 
 @if (_config is { } config)
 {
@@ -19,7 +21,7 @@
         @foreach (var person in _people)
         {
             var key = Key(person);
-            <PersonRow @key="key" Person="person" SignIn="config.AuthProvider" Sink="config.Sink" IsYou="IsYou(person)" IsLastAdmin="IsLastAdmin(person)"
+            <PersonRow @key="key" Person="person" Colour="ColourOf(person)" SignIn="config.AuthProvider" Sink="config.Sink" IsYou="IsYou(person)" IsLastAdmin="IsLastAdmin(person)"
                        Open="_open == key" OpenChanged="open => _open = open ? key : null" Changed="LoadAsync"/>
         }
     </div>
@@ -36,17 +38,38 @@ else
 
     private string? _open;
 
+    private IReadOnlyDictionary<UserId, PersonColour> _colours = new Dictionary<UserId, PersonColour>();
+
+    private IReadOnlyList<JoinedPerson> Joined => [.. _people.Select(JoinedOf).WhereSome()];
+
+    private static Optional<JoinedPerson> JoinedOf(Person person)
+    {
+        return person switch
+        {
+            JoinedPerson joined => Some.Of(joined),
+            InvitedPerson => new None(),
+        };
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await Task.Yield();
         await LoadAsync();
+        StateHasChanged();
+        if (await Painter.PaintAsync(Joined))
+        {
+            await LoadAsync();
+        }
     }
 
     private async Task LoadAsync()
     {
         _people = await Users.GetPeopleAsync();
+        _colours = PersonColours.Of(Joined);
         _config = await ProviderConfigService.GetAsync();
     }
+
+    private PersonColour? ColourOf(Person person) => person is JoinedPerson joined ? _colours[joined.User.Id] : null;
 
     private static string Key(Person person)
     {
