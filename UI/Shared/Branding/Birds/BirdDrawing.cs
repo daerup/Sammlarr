@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Text;
-using Domain.Identity.Birds;
 
 namespace UI.Shared.Branding.Birds;
 

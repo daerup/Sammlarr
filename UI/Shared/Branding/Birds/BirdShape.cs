@@ -1,5 +1,3 @@
-using Domain.Identity.Birds;
-
 namespace UI.Shared.Branding.Birds;
 
 internal enum BirdLegs

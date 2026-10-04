@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using CsCheck;
-using Domain.Identity.Birds;
 using UI.Shared.Branding.Birds;
 
 namespace UI.Tests.Branding;
