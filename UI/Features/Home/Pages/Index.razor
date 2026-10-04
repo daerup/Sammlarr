@@ -100,7 +100,20 @@ else
             else if (_days.Count == 0 && _feeds.Count == 0)
             {
                 <MediaListEmptyState Icon="rss" Heading="Nothing has happened yet.">
-                    Sammlarr fills your wantlist from feeds, and every run shows up here with what it added and why.
+                    <ChildContent>
+                        A feed follows a list on TMDB or MDBList and adds its titles to your wantlist, by hand or on a schedule.
+                        Every run shows up here with what it added and why.
+                    </ChildContent>
+                    <Actions>
+                        <BbButton Size="ButtonSize.Small" Href="/feeds/create">
+                            <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
+                            <span>Create your first feed</span>
+                        </BbButton>
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Href="/browse">
+                            <LucideIcon Name="trending-up" Size="14" Class="mr-1.5"/>
+                            <span>Browse what's trending</span>
+                        </BbButton>
+                    </Actions>
                 </MediaListEmptyState>
             }
             else

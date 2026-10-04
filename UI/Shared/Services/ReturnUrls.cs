@@ -1,4 +1,4 @@
-namespace Web.Auth;
+namespace UI.Shared.Services;
 
 internal static class ReturnUrls
 {

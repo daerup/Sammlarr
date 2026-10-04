@@ -1,11 +1,16 @@
 <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
     <LucideIcon Name="@Icon" Size="36" Class="mx-auto text-muted-foreground"/>
     <h3 class="text-base font-semibold tracking-tight">@Heading</h3>
-    <p class="text-sm text-muted-foreground leading-relaxed">@ChildContent</p>
+    <p class="mx-auto max-w-xl text-sm text-muted-foreground leading-relaxed">@ChildContent</p>
+    @if (Actions is { } actions)
+    {
+        <div class="flex flex-wrap justify-center gap-2 pt-1">@actions</div>
+    }
 </div>
 
 @code {
     [Parameter, EditorRequired] public required string Icon { get; set; }
     [Parameter, EditorRequired] public required string Heading { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
 }

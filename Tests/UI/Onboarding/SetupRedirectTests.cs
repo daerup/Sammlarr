@@ -51,4 +51,27 @@ public class SetupRedirectTests : BunitContext
 		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).IsEqualTo("http://localhost/");
 		_onboarding.IsCompleteAsync(Any()).WasCalled(Times.Never);
 	}
+
+	[Test]
+	public async Task Member_WithoutAKeyOnTheirFirstVisit_IsAskedForOne()
+	{
+		_user.Role = UserRole.Member;
+		_onboarding.NeedsKeyPromptAsync(Any()).Returns(true);
+
+		Render<SetupRedirect>();
+
+		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).IsEqualTo("http://localhost/welcome");
+	}
+
+	[Test]
+	public async Task Member_ArrivingThroughALink_IsBroughtBackToItAfterwards()
+	{
+		_user.Role = UserRole.Member;
+		_onboarding.NeedsKeyPromptAsync(Any()).Returns(true);
+		Services.GetRequiredService<NavigationManager>().NavigateTo("/feeds/runs");
+
+		Render<SetupRedirect>();
+
+		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).IsEqualTo("http://localhost/welcome?returnUrl=%2Ffeeds%2Fruns");
+	}
 }

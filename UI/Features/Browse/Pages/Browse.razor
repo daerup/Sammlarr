@@ -24,6 +24,7 @@
             <ProtectedSection GuardState="HasTrendingProviderAccess"
                               ApiProvider="@_providerConfig.TrendingProvider.AsApiKeyProvider()"
                               DeniedActionDescription="browse trending media"
+                              ApiKeyReason="Browse shows what is trending on TMDB, read through your own key. Add it once and this fills in."
                               FallbackAction="@(() => NavigationManager.NavigateTo(SettingsLinks.Provider(_providerConfig.TrendingProvider.AsMediaProvider())))">
                 @if (_isLoading)
                 {

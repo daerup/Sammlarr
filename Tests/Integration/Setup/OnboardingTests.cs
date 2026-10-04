@@ -77,10 +77,47 @@ public class OnboardingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task NeedsKeyPromptAsync_ForANewMemberWithoutAKey_IsAskedOnce()
+	{
+		await AsNewMemberAsync();
+		var before = await Testee.NeedsKeyPromptAsync();
+
+		await Testee.DismissKeyPromptAsync();
+
+		await Assert.That(before).IsTrue();
+		await Assert.That(await Testee.NeedsKeyPromptAsync()).IsFalse();
+	}
+
+	[Test]
+	public async Task NeedsKeyPromptAsync_ForAMemberWithTheirOwnKey_IsNotAsked()
+	{
+		await AsNewMemberAsync();
+
+		await host.Resolve<IApiKeyService>().StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "their-key"));
+
+		await Assert.That(await Testee.NeedsKeyPromptAsync()).IsFalse();
+	}
+
+	[Test]
+	public async Task NeedsKeyPromptAsync_ForAnAdmin_IsNeverAsked()
+	{
+		var admin = await host.SeedLocalUser("ada", Password, UserRole.Admin);
+		host.CurrentUser.Id = admin;
+
+		await Assert.That(await Testee.NeedsKeyPromptAsync()).IsFalse();
+	}
+
+	[Test]
 	public async Task CompleteAsync_ForAMember_IsRefused()
 	{
 		host.CurrentUser.Role = UserRole.Member;
 
 		await Assert.That(async () => await Testee.CompleteAsync()).Throws<UnauthorizedAccessException>();
+	}
+
+	private async Task AsNewMemberAsync()
+	{
+		host.CurrentUser.Id = await host.SeedLocalUser("nora", Password, UserRole.Member);
+		host.CurrentUser.Role = UserRole.Member;
 	}
 }

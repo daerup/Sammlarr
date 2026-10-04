@@ -77,7 +77,13 @@
             else if (_feeds.Count == 0)
             {
                 <MediaListEmptyState Icon="rss" Heading="No feeds yet.">
-                    Feeds sync titles from lists on MDBList or TMDb into your library, by hand or on a schedule.
+                    <ChildContent>Feeds sync titles from lists on MDBList or TMDb into your library, by hand or on a schedule.</ChildContent>
+                    <Actions>
+                        <BbButton Size="ButtonSize.Small" Href="/feeds/create">
+                            <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
+                            <span>Create your first feed</span>
+                        </BbButton>
+                    </Actions>
                 </MediaListEmptyState>
             }
             else
