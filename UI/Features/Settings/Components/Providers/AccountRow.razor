@@ -26,7 +26,14 @@
                 <BbFieldDescription>
                     @if (_savedState == CredentialState.Saved)
                     {
-                        <span>Signed in as <span class="font-medium text-foreground">@CurrentUser.DisplayName</span>. Paste a @Branding.NickName access token to replace it, or connect through @Branding.NickName.</span>
+                        @if (SignsIn)
+                        {
+                            <span>Signed in as <span class="font-medium text-foreground">@CurrentUser.DisplayName</span>. Paste a @Branding.NickName access token to replace it, or connect through @Branding.NickName.</span>
+                        }
+                        else
+                        {
+                            <span>Connected. Paste a @Branding.NickName access token to replace it, or connect through @Branding.NickName.</span>
+                        }
                     }
                     else
                     {
@@ -72,6 +79,8 @@
 
 @code {
     [Parameter] [EditorRequired] public required AuthProvider Provider { get; set; }
+
+    [Parameter] public bool SignsIn { get; set; } = true;
 
     [Parameter] public bool Open { get; set; }
 

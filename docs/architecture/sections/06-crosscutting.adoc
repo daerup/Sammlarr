@@ -267,8 +267,15 @@ NOTE: Data-protection keys are persisted to a filesystem key ring under a stable
 
 === Authentication and per-user isolation
 
-Users sign in with Plex (<<section-runtime-view>>) and get an app auth cookie revalidated against
-the stored user on each request, so a removed user or a role change takes effect at once. Isolation
+An install signs in one way, set in `ProviderConfig.AuthProvider`: with Plex
+(<<section-runtime-view>>), or with Sammlarr accounts, a username and a password hashed by ASP.NET
+Core's `PasswordHasher` and posted as a form to `/auth/local` (a Blazor circuit cannot set a cookie).
+Password sign-ins are rate-limited per address, checked one at a time per account, and five wrong
+passwords lock the account for 15 minutes. The Plex round trip carries a state value bound to the
+browser by a short-lived cookie. Either way the app auth cookie is revalidated against the stored
+user on each request, so a removed user or a role change takes effect at once. A password change
+sets the user's `SessionsRevokedAt`; a cookie issued before that second is rejected, and open
+circuits are told to sign in again through `ISessionInvalidator`. Isolation
 is enforced in persistence: a user-owned entity implements `IUserOwned`, `OnModelCreating` gives it
 a global query filter on a shadow `UserId`, and the current-user lookup throws when unauthenticated
 (fails closed). An ownership stamper sets the owner on insert and blocks it from changing. Feeds,

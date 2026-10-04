@@ -5,7 +5,7 @@
 <div class="w-full max-w-md rounded-lg border bg-muted/40 p-8 text-center space-y-4">
     <div class="space-y-1.5">
         <h2 class="text-lg font-semibold tracking-tight">Sign in</h2>
-        <p class="text-sm text-muted-foreground">Use your @ProviderNames account to continue.</p>
+        <p class="text-sm text-muted-foreground">Use your @Branding.NickName account to continue.</p>
     </div>
     @if (!string.IsNullOrWhiteSpace(Error))
     {
@@ -14,32 +14,51 @@
             <span class="leading-relaxed">@Error</span>
         </div>
     }
-    <div class="space-y-2">
-        @foreach (var provider in Providers)
-        {
-            var branding = BrandingService.GetBrandingInfo(provider.AsMediaProvider());
-            <div class="signin" style="--brand: @branding.BrandColor">
-                <BbButton Variant="ButtonVariant.Outline" Class="signin-button w-full gap-2 font-medium" OnClick="() => SignIn(provider)">
+    @switch (Provider)
+    {
+        case AuthProvider.Plex:
+            <div class="signin" style="--brand: @Branding.BrandColor">
+                <BbButton Variant="ButtonVariant.Outline" Class="signin-button w-full gap-2 font-medium" OnClick="SignInWithPlex">
                     <span>Sign in with</span>
-                    <ProviderLogo Provider="@branding.Provider" Form="ProviderLogoForm.Logo" Size="16"/>
+                    <ProviderLogo Provider="@Branding.Provider" Form="ProviderLogoForm.Logo" Size="16"/>
                 </BbButton>
             </div>
-        }
-    </div>
+            break;
+        case AuthProvider.Local:
+            <form method="post" action="/auth/local" class="space-y-4 text-left">
+                <AntiforgeryToken/>
+                <input type="hidden" name="returnUrl" value="@Target"/>
+                <BbField>
+                    <BbFieldLabel For="signin-username">Username</BbFieldLabel>
+                    <BbFieldContent>
+                        <BbInput Id="signin-username" Name="username" Required="true" autocomplete="username"/>
+                    </BbFieldContent>
+                </BbField>
+                <BbField>
+                    <BbFieldLabel For="signin-password">Password</BbFieldLabel>
+                    <BbFieldContent>
+                        <BbInput Id="signin-password" Name="password" Type="InputType.Password" Required="true" autocomplete="current-password"/>
+                    </BbFieldContent>
+                </BbField>
+                <BbButton Type="ButtonType.Submit" Class="w-full">Sign in</BbButton>
+            </form>
+            break;
+    }
 </div>
 
 @code {
+    [Parameter] [EditorRequired] public required AuthProvider Provider { get; set; }
+
     [Parameter] public string? ReturnUrl { get; set; }
 
     [Parameter] public string? Error { get; set; }
 
-    private static readonly AuthProvider[] Providers = Enum.GetValues<AuthProvider>();
+    private BrandingInfo Branding => BrandingService.GetBrandingInfo(Provider.AsMediaProvider());
 
-    private string ProviderNames => string.Join(" or ", Providers.Select(provider => BrandingService.GetBrandingInfo(provider.AsMediaProvider()).NickName));
+    private string Target => string.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl;
 
-    private void SignIn(AuthProvider provider)
+    private void SignInWithPlex()
     {
-        var target = string.IsNullOrEmpty(ReturnUrl) ? "/" + NavigationManager.ToBaseRelativePath(NavigationManager.Uri) : ReturnUrl;
-        NavigationManager.NavigateTo($"/auth/{provider.ToString().ToLowerInvariant()}/login?returnUrl={Uri.EscapeDataString(target)}", forceLoad: true);
+        NavigationManager.NavigateTo($"/auth/plex/login?returnUrl={Uri.EscapeDataString(Target)}", forceLoad: true);
     }
 }

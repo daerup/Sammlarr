@@ -94,6 +94,7 @@ public class UsersManagementTests
 	[Test]
 	public async Task RegistrationClosed_WhenNewUserSignsIn_IsRejected()
 	{
+		await using var pins = await E2EApp.StubAsync("/api/v2/pins", 200, PinBody(), "POST");
 		await using var pin = await E2EApp.StubAsync($"/api/v2/pins/{PinId}", 200, PinBody());
 		await using var account = await E2EApp.StubAsync("/api/v2/user", 200, AccountBody());
 
@@ -104,7 +105,7 @@ public class UsersManagementTests
 		await Expect(registration).ToHaveAttributeAsync("aria-checked", "false");
 
 		var stranger = await E2EApp.OpenPageAsync();
-		await stranger.VisitAsync($"/auth/plex/callback?pinId={PinId}&clientId={Guid.NewGuid()}");
+		await stranger.VisitAsync(await stranger.PlexCallbackAsync());
 
 		await stranger.ShouldBeAtAsync(Routes.SignIn);
 		await Expect(stranger.GetByText("Registration is closed. Ask an admin for access.")).ToBeVisibleAsync();

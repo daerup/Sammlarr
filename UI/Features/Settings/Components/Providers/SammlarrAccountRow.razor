@@ -1,0 +1,85 @@
+@using Contracts.Identity
+@inject ILocalAccountService Accounts
+@inject ICurrentUser CurrentUser
+@inject NavigationManager NavigationManager
+
+<ProviderRow Provider="MediaProvider.Local" Open="Open" OpenChanged="OpenChanged">
+    <Title>
+        <span class="flex items-center gap-2 text-sm font-semibold">
+            <ProviderLogo Provider="MediaProvider.Local" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+            Sammlarr
+        </span>
+    </Title>
+    <Status>
+        <BbBadge Variant="BadgeVariant.Outline" Class="h-6 items-center gap-1.5 text-success border-success">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
+            Signed in as @CurrentUser.DisplayName
+        </BbBadge>
+    </Status>
+    <ChildContent>
+        <div class="flex w-full max-w-md flex-col gap-4">
+            <BbField>
+                <BbFieldLabel For="account-current">Current password</BbFieldLabel>
+                <BbFieldContent>
+                    <BbInput Id="account-current" Type="InputType.Password" Value="@_current" ValueChanged="value => _current = value ?? string.Empty"
+                             UpdateTiming="UpdateTiming.Immediate" Class="h-9 bg-accent text-sm" autocomplete="current-password"/>
+                </BbFieldContent>
+            </BbField>
+            <BbField>
+                <BbFieldLabel For="account-next">New password</BbFieldLabel>
+                <BbFieldContent>
+                    <BbInput Id="account-next" Type="InputType.Password" Value="@_next" ValueChanged="value => _next = value ?? string.Empty"
+                             Placeholder="At least 12 characters" UpdateTiming="UpdateTiming.Immediate" Class="h-9 bg-accent text-sm" autocomplete="new-password"/>
+                </BbFieldContent>
+            </BbField>
+            <BbField>
+                <BbFieldLabel For="account-confirm">Confirm password</BbFieldLabel>
+                <BbFieldContent>
+                    <BbInput Id="account-confirm" Type="InputType.Password" Value="@_confirm" ValueChanged="value => _confirm = value ?? string.Empty"
+                             UpdateTiming="UpdateTiming.Immediate" Class="h-9 bg-accent text-sm" autocomplete="new-password"
+                             AriaInvalid="@(_confirm.Length > 0 && _confirm != _next)"/>
+                </BbFieldContent>
+            </BbField>
+            @if (_error.Length > 0)
+            {
+                <p class="flex items-start gap-1.5 text-xs text-destructive" role="alert">
+                    <LucideIcon Name="circle-alert" Size="13" Class="mt-px shrink-0"/>
+                    <span>@_error</span>
+                </p>
+            }
+            <div>
+                <BbButton Size="ButtonSize.Small" Disabled="@(!CanChange || _changing)" OnClick="ChangeAsync">
+                    <LucideIcon Name="key-round" Size="14" Class="mr-2"/>
+                    <span>Change password</span>
+                </BbButton>
+            </div>
+            <p class="text-xs text-muted-foreground">Changing it signs you out everywhere, this browser included.</p>
+        </div>
+    </ChildContent>
+</ProviderRow>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    private string _current = string.Empty;
+
+    private string _next = string.Empty;
+
+    private string _confirm = string.Empty;
+
+    private string _error = string.Empty;
+
+    private bool _changing;
+
+    private bool CanChange => _current.Length > 0 && _next.Length > 0 && _next == _confirm;
+
+    private async Task ChangeAsync()
+    {
+        _changing = true;
+        var changed = await Accounts.ChangePasswordAsync(_current, _next);
+        _changing = false;
+        changed.Apply(_ => NavigationManager.NavigateTo("/auth/logout", forceLoad: true)).ApplyError(error => _error = error.Reason);
+    }
+}

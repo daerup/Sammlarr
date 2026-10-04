@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Web;
 using Microsoft.Playwright;
 
 namespace E2E.Tests;
@@ -33,6 +34,15 @@ internal static class PageExtensions
 				$"circuit never became ready at {page.Url} (blazor={blazor}, reconnecting={reconnecting}, handlers={handlers}), body '{body[..Math.Min(400, body.Length)]}'"
 			);
 		}
+	}
+
+	internal static async Task<string> PlexCallbackAsync(this IPage page, string returnUrl = "")
+	{
+		var login = returnUrl.Length == 0 ? "/auth/plex/login" : $"/auth/plex/login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+		var response = await page.Context.APIRequest.GetAsync(login, new APIRequestContextOptions { MaxRedirects = 0 });
+		var location = response.Headers["location"];
+		var forward = HttpUtility.ParseQueryString(location[(location.IndexOf("#?", StringComparison.Ordinal) + 2)..])["forwardUrl"]!;
+		return new Uri(forward).PathAndQuery;
 	}
 
 	internal static async Task ShouldBeAtAsync(this IPage page, string route, float timeout = Wait.Settle)

@@ -7,8 +7,15 @@ internal sealed class SessionValidator(IUserRepository users) : ISessionValidato
 {
 	public async Task<bool> IsCurrentAsync(UserId id, UserRole role, CancellationToken cancellationToken = default)
 	{
-		var all = await users.GetAllAsync(cancellationToken);
-		var user = all.FirstOrDefault(candidate => candidate.Id == id);
-		return user is not null && user.Role == role;
+		var session = await users.FindSessionAsync(id, cancellationToken);
+		return session.Match(found => found.Role == role, () => false);
 	}
+
+	public async Task<bool> IsValidAsync(UserId id, UserRole role, DateTimeOffset issuedAt, CancellationToken cancellationToken = default)
+	{
+		var session = await users.FindSessionAsync(id, cancellationToken);
+		return session.Match(found => found.Role == role && !found.RevokedAt.Match(at => issuedAt < WholeSeconds(at), () => false), () => false);
+	}
+
+	private static DateTimeOffset WholeSeconds(DateTimeOffset at) => at.AddTicks(-(at.Ticks % TimeSpan.TicksPerSecond));
 }

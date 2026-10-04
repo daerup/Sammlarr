@@ -115,3 +115,14 @@ public readonly record struct SonarrId : IExternalMediaId
 
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
+
+public readonly record struct LocalId : IExternalMediaId
+{
+	public MediaProvider Source => MediaProvider.Local;
+	public string Value { get; private init; }
+	public MediaType Type { get; private init; }
+
+	public static LocalId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
+}

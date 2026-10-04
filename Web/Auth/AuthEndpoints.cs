@@ -5,12 +5,15 @@ using Domain.Identity;
 using Domain.Providers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Web.Auth;
 
 internal static class AuthEndpoints
 {
+	private static readonly Error StaleSignIn = Error.From("The sign-in timed out or was started in another browser. Please try again.");
+
 	public static void MapAuthEndpoints(this IEndpointRouteBuilder endpoints)
 	{
 		var group = endpoints.MapGroup("/auth/{provider}");
@@ -24,7 +27,11 @@ internal static class AuthEndpoints
 					return Results.NotFound();
 				}
 
-				var callbackUrl = $"{context.Request.Scheme}://{context.Request.Host}/auth/{provider}/callback";
+				var callbackUrl = QueryHelpers.AddQueryString(
+					$"{context.Request.Scheme}://{context.Request.Host}/auth/{provider}/callback",
+					"state",
+					OAuthState.Issue(context)
+				);
 				if (!string.IsNullOrEmpty(returnUrl))
 				{
 					callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "returnUrl", returnUrl);
@@ -36,20 +43,45 @@ internal static class AuthEndpoints
 
 		group.MapGet(
 			"/callback",
-			async (string provider, string? returnUrl, HttpContext context, ISignInService signIn, CancellationToken cancellationToken) =>
+			async (string provider, string? state, string? returnUrl, HttpContext context, ISignInService signIn, CancellationToken cancellationToken) =>
 			{
 				if (!TryParseProvider(provider, out var authProvider))
 				{
 					return Results.NotFound();
 				}
 
-				return await signIn
-					.CompleteAsync(authProvider, context.Request.QueryString.Value ?? string.Empty, cancellationToken)
+				if (!OAuthState.Redeem(context, state))
+				{
+					return Results.Redirect(SignInPage(StaleSignIn, returnUrl));
+				}
+
+				var query = context.Request.QueryString.Value ?? string.Empty;
+				return await SignedIn(context.User)
+					.Match(user => signIn.LinkAsync(authProvider, query, user, cancellationToken), () => signIn.CompleteAsync(authProvider, query, cancellationToken))
 					.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
 					.GetValueOr(error => Results.Redirect($"/signin?authError={Uri.EscapeDataString(error.Reason)}"));
 			}
 		);
 
+		endpoints
+			.MapPost(
+				"/auth/local",
+				async (
+					[FromForm] string username,
+					[FromForm] string password,
+					[FromForm] string? returnUrl,
+					HttpContext context,
+					ISignInService signIn,
+					CancellationToken cancellationToken
+				) =>
+				{
+					return await signIn
+						.SignInWithPasswordAsync(username, password, cancellationToken)
+						.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
+						.GetValueOr(error => Results.Redirect(SignInPage(error, returnUrl)));
+				}
+			)
+			.RequireRateLimiting(AuthenticationModule.SignInLimit);
 		endpoints.MapGet(
 			"/auth/logout",
 			async (HttpContext context) =>
@@ -63,19 +95,27 @@ internal static class AuthEndpoints
 	private static async Task<IResult> SignInAndRedirectAsync(HttpContext context, User user, string? returnUrl)
 	{
 		await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, BuildPrincipal(user));
-		return Results.Redirect(SafeLocalUrl(returnUrl));
+		return Results.Redirect(ReturnUrls.Target(returnUrl));
 	}
 
-	private static string SafeLocalUrl(string? returnUrl) =>
-		!string.IsNullOrWhiteSpace(returnUrl)
-		&& Uri.TryCreate(returnUrl, UriKind.Relative, out _)
-		&& returnUrl.StartsWith('/')
-		&& !returnUrl.StartsWith("//", StringComparison.Ordinal)
-			? returnUrl
-			: "/";
-
 	private static bool TryParseProvider(string provider, out AuthProvider authProvider) =>
-		Enum.TryParse(provider, ignoreCase: true, out authProvider) && Enum.IsDefined(authProvider);
+		Enum.TryParse(provider, ignoreCase: true, out authProvider) && Enum.IsDefined(authProvider) && authProvider != AuthProvider.Local;
+
+	private static Optional<UserId> SignedIn(ClaimsPrincipal principal)
+	{
+		if (principal.Identity?.IsAuthenticated != true || !Guid.TryParse(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id))
+		{
+			return new None();
+		}
+
+		return Some.Of(UserId.From(id));
+	}
+
+	private static string SignInPage(Error error, string? returnUrl)
+	{
+		var page = QueryHelpers.AddQueryString("/signin", "authError", error.Reason);
+		return string.IsNullOrWhiteSpace(returnUrl) ? page : QueryHelpers.AddQueryString(page, "returnUrl", returnUrl);
+	}
 
 	private static ClaimsPrincipal BuildPrincipal(User user) =>
 		new(

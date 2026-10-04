@@ -6,7 +6,12 @@ namespace UI.Shared.Identity;
 
 internal static class SessionRevalidation
 {
-	public static async Task<bool> IsCurrentAsync(ClaimsPrincipal principal, ISessionValidator validator, CancellationToken cancellationToken)
+	public static async Task<bool> IsCurrentAsync(
+		ClaimsPrincipal principal,
+		DateTimeOffset issuedAt,
+		ISessionValidator validator,
+		CancellationToken cancellationToken
+	)
 	{
 		if (
 			Guid.TryParse(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var idValue) is false
@@ -16,6 +21,6 @@ internal static class SessionRevalidation
 			return false;
 		}
 
-		return await validator.IsCurrentAsync(UserId.From(idValue), role, cancellationToken);
+		return await validator.IsValidAsync(UserId.From(idValue), role, issuedAt, cancellationToken);
 	}
 }

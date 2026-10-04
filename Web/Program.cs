@@ -41,6 +41,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.UseAntiforgery();
 app.UseRequestTimeouts();
 app.UseOutputCache();

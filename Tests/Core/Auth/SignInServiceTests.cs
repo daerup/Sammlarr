@@ -30,9 +30,11 @@ public class SignInServiceTests
 				new FakeKeyedServiceIndex<AuthProvider, IOAuthProvider>().Register(AuthProvider.Plex, _plex.Object),
 				ICredentialService.Mock().Object,
 				_users.Object,
+				ILocalAccountRepository.Mock().Object,
 				IUserScope.Mock().Object,
 				_config.Object,
 				IDateTimeProvider.Mock().Object,
+				new SignInGate(),
 				new WebUiNotificationSeeder(INotificationTargetRepository.Mock().Object, INotificationSubscriptionRepository.Mock().Object),
 				_logger.Object
 			);
@@ -42,6 +44,8 @@ public class SignInServiceTests
 	[Test]
 	public async Task CompleteAsync_WhenTheProviderLoginFails_ReturnsItsReasonAndWarnsThatTheSignInFailed()
 	{
+		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Open));
+		_users.GetAllAsync(Any()).Returns([]);
 		_plex.CompleteLoginAsync(Any(), Any()).Returns(Error.From("denied"));
 
 		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
@@ -56,23 +60,24 @@ public class SignInServiceTests
 		_plex.CompleteLoginAsync(Any(), Any()).Returns(Success.Of(Login));
 		_users.FindByLoginAsync(Any<AuthProvider>(), Any(), Any()).Returns(new None());
 		_users.GetAllAsync(Any()).Returns([new User(UserId.New(), "Ada", "avatar", UserRole.Admin, DateTimeOffset.UnixEpoch)]);
-		_config
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Closed,
-				}
-			);
+		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Closed));
 
 		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
 
 		await Assert.That(result).IsError();
 		await Assert.That(Warnings()).IsEquivalentTo(["Registration is closed; rejected new Plex sign-in"]);
+	}
+
+	private static ProviderConfig Config(RegistrationMode registration)
+	{
+		return new ProviderConfig
+		{
+			Sink = SinkKind.Plex,
+			TrendingProvider = TrendingProvider.Tmdb,
+			SearchProvider = SearchProvider.Plex,
+			AuthProvider = AuthProvider.Plex,
+			RegistrationMode = registration,
+		};
 	}
 
 	private IEnumerable<string> Warnings()

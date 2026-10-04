@@ -8,34 +8,65 @@ public class SessionValidatorTests
 {
 	private static readonly UserId TargetId = UserId.New();
 
-	private static SessionValidator CreateTestee(params User[] users)
-	{
-		var repo = IUserRepository.Mock();
-		repo.GetAllAsync(Any()).Returns(users);
-		return new SessionValidator(repo.Object);
-	}
+	private static readonly DateTimeOffset RevokedAt = new(2026, 10, 4, 12, 0, 0, 400, TimeSpan.Zero);
+
+	private readonly Mock<IUserRepository> _users = IUserRepository.Mock();
+
+	private SessionValidator Testee => new(_users.Object);
 
 	[Test]
 	public async Task IsCurrentAsync_WhenRoleMatches_ReturnsTrue()
 	{
-		var testee = CreateTestee(new User(TargetId, "Ada", "", UserRole.Admin, DateTimeOffset.UnixEpoch));
+		_users.FindSessionAsync(TargetId, Any()).Returns(Some.Of(new UserSession(UserRole.Admin, new None())));
 
-		await Assert.That(await testee.IsCurrentAsync(TargetId, UserRole.Admin)).IsTrue();
+		await Assert.That(await Testee.IsCurrentAsync(TargetId, UserRole.Admin)).IsTrue();
 	}
 
 	[Test]
 	public async Task IsCurrentAsync_WhenRoleChanged_ReturnsFalse()
 	{
-		var testee = CreateTestee(new User(TargetId, "Ada", "", UserRole.Member, DateTimeOffset.UnixEpoch));
+		_users.FindSessionAsync(TargetId, Any()).Returns(Some.Of(new UserSession(UserRole.Member, new None())));
 
-		await Assert.That(await testee.IsCurrentAsync(TargetId, UserRole.Admin)).IsFalse();
+		await Assert.That(await Testee.IsCurrentAsync(TargetId, UserRole.Admin)).IsFalse();
 	}
 
 	[Test]
 	public async Task IsCurrentAsync_WhenUserRemoved_ReturnsFalse()
 	{
-		var testee = CreateTestee();
+		_users.FindSessionAsync(TargetId, Any()).Returns(new None());
 
-		await Assert.That(await testee.IsCurrentAsync(TargetId, UserRole.Admin)).IsFalse();
+		await Assert.That(await Testee.IsCurrentAsync(TargetId, UserRole.Admin)).IsFalse();
+	}
+
+	[Test]
+	public async Task IsValidAsync_ForASessionFromBeforeThePasswordChanged_ReturnsFalse()
+	{
+		_users.FindSessionAsync(TargetId, Any()).Returns(Some.Of(new UserSession(UserRole.Member, Some.Of(RevokedAt))));
+
+		await Assert.That(await Testee.IsValidAsync(TargetId, UserRole.Member, RevokedAt.AddMinutes(-1))).IsFalse();
+	}
+
+	[Test]
+	public async Task IsValidAsync_ForACookieIssuedInTheSecondOfTheChange_ReturnsTrue()
+	{
+		_users.FindSessionAsync(TargetId, Any()).Returns(Some.Of(new UserSession(UserRole.Member, Some.Of(RevokedAt))));
+
+		await Assert.That(await Testee.IsValidAsync(TargetId, UserRole.Member, RevokedAt.AddMilliseconds(-400))).IsTrue();
+	}
+
+	[Test]
+	public async Task IsValidAsync_WhenNothingWasEverRevoked_ReturnsTrue()
+	{
+		_users.FindSessionAsync(TargetId, Any()).Returns(Some.Of(new UserSession(UserRole.Member, new None())));
+
+		await Assert.That(await Testee.IsValidAsync(TargetId, UserRole.Member, DateTimeOffset.UnixEpoch)).IsTrue();
+	}
+
+	[Test]
+	public async Task IsValidAsync_WhenTheRoleChanged_ReturnsFalse()
+	{
+		_users.FindSessionAsync(TargetId, Any()).Returns(Some.Of(new UserSession(UserRole.Member, new None())));
+
+		await Assert.That(await Testee.IsValidAsync(TargetId, UserRole.Admin, DateTimeOffset.UnixEpoch)).IsFalse();
 	}
 }

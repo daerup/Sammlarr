@@ -17,5 +17,6 @@ internal sealed class CredentialFactory(IHttpClientFactory httpClientFactory) : 
 		provider switch
 		{
 			AuthProvider.Plex => PlexCredential.CreateAsync(clientId, accessToken, expiresAt, httpClientFactory, cancellationToken),
+			AuthProvider.Local => Task.FromResult<Result<ICredential>>(Error.From("Sammlarr accounts sign in with a password, not a token.")),
 		};
 }

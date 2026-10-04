@@ -93,8 +93,8 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.NoUsers();
 		host.OAuthReturns("plex-uuid", "John");
 
-		await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
 
-		await Assert.That(await host.HasStoredCredential(AuthProvider.Plex)).IsTrue();
+		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, user.Id)).IsTrue());
 	}
 }
