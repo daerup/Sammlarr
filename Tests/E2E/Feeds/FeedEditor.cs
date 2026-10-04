@@ -103,7 +103,9 @@ internal static class FeedEditor
 		await page.WaitForTimeoutAsync(FilterBuilderDebounceMs * 3);
 	}
 
-	internal static ILocator RatingStar(IPage page) => page.Locator("button.rating-star-button").First;
+	internal static ILocator RatingStar(IPage page) => page.Locator("button.field-segment.is-gold").First;
+
+	internal static ILocator VotesInfo(IPage page) => page.Locator(".number-rule-box button.field-segment[aria-label='How Votes are counted']");
 
 	internal static async Task PutFirstAsync(IPage page, string source, int steps)
 	{

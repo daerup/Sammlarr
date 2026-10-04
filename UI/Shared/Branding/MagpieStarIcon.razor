@@ -1,0 +1,17 @@
+<svg class="magpie-star" viewBox="@MagpieGeometry.StarIconViewBox" width="@Size" height="@Size" aria-hidden="true" focusable="false">
+    @switch (Variant)
+    {
+        case MagpieStarVariant.Outline:
+            <path d="@MagpieGeometry.Star" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
+            break;
+        case MagpieStarVariant.Filled:
+            <path d="@MagpieGeometry.Star" fill="currentColor"/>
+            break;
+    }
+</svg>
+
+@code {
+    [Parameter] public MagpieStarVariant Variant { get; set; }
+
+    [Parameter] public int Size { get; set; } = 16;
+}

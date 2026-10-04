@@ -1,7 +1,7 @@
 .rating-mark {
     display: block;
     flex: none;
-    width: 16px;
-    height: 16px;
+    width: var(--mark-size);
+    height: var(--mark-size);
     object-fit: contain;
 }

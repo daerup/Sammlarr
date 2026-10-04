@@ -24,7 +24,7 @@
                           OnClick="() => Show(item)">
                     @if (item.Mark is { } mark)
                     {
-                        <span class="mr-2.5 inline-flex shrink-0 text-[var(--sammlarr-gold)]">@mark</span>
+                        <span class="mr-2.5 inline-flex shrink-0">@mark</span>
                     }
                     else
                     {
@@ -48,12 +48,12 @@
 
     private record SettingsSection(string Label, string Icon, Type ComponentType, UserRole? RequiredRole = null, RenderFragment? Mark = null);
 
-    private static readonly RenderFragment GoldStar = @<RatingStar Value="10" Size="15" Shine="false"/>;
+    private static readonly RenderFragment MagpieStarOutline = @<MagpieStarIcon Variant="MagpieStarVariant.Outline" Size="16"/>;
 
     private readonly List<SettingsSection> _sections =
     [
         new("Providers", "plug", typeof(ProvidersSection)),
-        new("Ratings", "star", typeof(RatingsSection), Mark: GoldStar),
+        new("Ratings", "star", typeof(RatingsSection), Mark: MagpieStarOutline),
         new("Notifications", "bell", typeof(NotificationsSection)),
         new("Cache", "database", typeof(CacheSection), UserRole.Admin),
         new("Diagnostics", "activity", typeof(DiagnosticsSection), UserRole.Admin),

@@ -15,6 +15,8 @@ internal static class MagpieGeometry
 
 	public const string StarViewBox = "197.2 24.28 48 48";
 
+	public const string StarIconViewBox = "201.2 25.3 40 40";
+
 	public const double StarLeft = 201.26;
 
 	public const double StarTop = 24.73;

@@ -1,11 +1,14 @@
+using System.ComponentModel;
 using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives.Filtering;
 using Bunit;
 using Contracts.Auth;
+using Contracts.Processing;
 using Domain.Auth;
 using Domain.Feed;
 using Domain.Media;
+using Domain.Processing;
 using Domain.Providers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +21,13 @@ namespace UI.Tests.Feeds;
 
 public class FeedConfigPanelTests : BunitContext
 {
+	private static readonly FeedConfig Documentaries = new()
+	{
+		Name = "Documentaries",
+		Provider = FeedProvider.Mdblist,
+		Identifier = "hdlists/documentaries",
+	};
+
 	private readonly List<FeedConfig> _changes = [];
 
 	[Before(Test)]
@@ -128,17 +138,54 @@ public class FeedConfigPanelTests : BunitContext
 		var cut = RenderPanelFiltering("Rating", 7.0);
 
 		await Assert
-			.That(cut.Find("button.rating-star-button").GetAttribute("aria-label"))
+			.That(cut.Find(".number-rule-box button.field-segment.is-gold").GetAttribute("aria-label"))
 			.IsEqualTo("This feed's Sammlarr rating: My default (Average). Click to change.");
 	}
 
 	[Test]
-	public async Task Rule_WhenItFiltersOnVotes_CarriesTheInfoIconThatExplainsTheCount()
+	public async Task Rule_WhenItFiltersOnVotes_CarriesTheInfoSegmentThatExplainsTheCount()
 	{
 		var cut = RenderPanelFiltering("Votes", 500.0);
 
-		await Assert.That(cut.FindAll("[aria-label='How Votes are counted']")).IsNotEmpty();
-		await Assert.That(cut.FindAll("button.rating-star-button")).IsEmpty();
+		await Assert.That(cut.FindAll(".number-rule-box button.field-segment[aria-label='How Votes are counted']")).IsNotEmpty();
+		await Assert.That(cut.FindAll("button.field-segment.is-gold")).IsEmpty();
+	}
+
+	[Test]
+	[Arguments("Rating", 7.0)]
+	[Arguments("Votes", 500.0)]
+	public async Task Rule_ForANumber_HasNoStepper(string field, double value)
+	{
+		var cut = RenderPanelFiltering(field, value);
+
+		await Assert.That(cut.FindAll(".number-rule-box button[aria-label='Increase value']")).IsEmpty();
+		await Assert.That(cut.FindAll(".number-rule-box button[aria-label='Decrease value']")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Sort_WhenByRating_JoinsTheStarToTheSortField()
+	{
+		var cut = RenderPanelSorted(nameof(MediaQueryRow.Rating));
+
+		await Assert.That(cut.FindAll(".sort-field button.field-segment.is-gold")).IsNotEmpty();
+		await Assert.That(cut.FindAll(".sort-field [aria-label='How Votes are counted']")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Sort_WhenByVotes_JoinsTheInfoToTheSortField()
+	{
+		var cut = RenderPanelSorted(nameof(MediaQueryRow.Votes));
+
+		await Assert.That(cut.FindAll(".sort-field button.field-segment[aria-label='How Votes are counted']")).IsNotEmpty();
+		await Assert.That(cut.FindAll(".sort-field .is-gold")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Sort_WhenByTitle_HasNoSegment()
+	{
+		var cut = RenderPanelSorted(nameof(MediaQueryRow.Title));
+
+		await Assert.That(cut.FindAll(".sort-field .field-segment")).IsEmpty();
 	}
 
 	[Test]
@@ -171,51 +218,35 @@ public class FeedConfigPanelTests : BunitContext
 		double? end = null
 	)
 	{
-		var filter = new FilterDefinition
+		var condition = new FilterCondition
 		{
-			Conditions =
-			[
-				new FilterCondition
-				{
-					Field = field,
-					Operator = comparison,
-					Value = value,
-					ValueEnd = end,
-				},
-			],
+			Field = field,
+			Operator = comparison,
+			Value = value,
+			ValueEnd = end,
 		};
-		return Render<FeedConfigPanel>(parameters =>
-			parameters
-				.Add(
-					panel => panel.Value,
-					new FeedConfig
-					{
-						Name = "Documentaries",
-						Provider = FeedProvider.Mdblist,
-						Identifier = "hdlists/documentaries",
-						Filter = filter,
-					}
-				)
-				.Add(panel => panel.OnChange, EventCallback.Factory.Create<FeedConfig>(this, _changes.Add))
+		return RenderConfig(Documentaries with { Filter = new FilterDefinition { Conditions = [condition] } });
+	}
+
+	private IRenderedComponent<FeedConfigPanel> RenderPanelSorted(string field)
+	{
+		return RenderConfig(
+			Documentaries with
+			{
+				Sort = new QuerySort { Property = field, Direction = ListSortDirection.Descending },
+			}
 		);
 	}
 
 	private IRenderedComponent<FeedConfigPanel> RenderPanel(FeedProvider? provider, FeedStrategy strategy, RatingStrategy? rating = null)
 	{
+		return RenderConfig(Documentaries with { Provider = provider, Strategy = strategy, RatingStrategy = Optional.Of(rating) });
+	}
+
+	private IRenderedComponent<FeedConfigPanel> RenderConfig(FeedConfig config)
+	{
 		return Render<FeedConfigPanel>(parameters =>
-			parameters
-				.Add(
-					panel => panel.Value,
-					new FeedConfig
-					{
-						Name = "Documentaries",
-						Provider = provider,
-						Identifier = "hdlists/documentaries",
-						Strategy = strategy,
-						RatingStrategy = Optional.Of(rating),
-					}
-				)
-				.Add(panel => panel.OnChange, EventCallback.Factory.Create<FeedConfig>(this, _changes.Add))
+			parameters.Add(panel => panel.Value, config).Add(panel => panel.OnChange, EventCallback.Factory.Create<FeedConfig>(this, _changes.Add))
 		);
 	}
 }

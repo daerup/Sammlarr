@@ -12,7 +12,7 @@
                     <RatingStar Value="(float)sammlarr.Rounded" Size="20"/>
                     <BbTooltip DelayDuration="150">
                         <BbTooltipTrigger AsChild="false" Class="rating-tip">@RatingTexts.Number(sammlarr)</BbTooltipTrigger>
-                        <BbTooltipContent>@Arithmetic</BbTooltipContent>
+                        <BbTooltipContent Class="max-w-[360px]"><RatingSum Terms="RatingTexts.Terms(sammlarr)" Result="@RatingTexts.Number(sammlarr)" Why="@RatingTexts.Why(Strategy)"/></BbTooltipContent>
                     </BbTooltip>
                 </span>
                 <span class="rating-breakdown-name">Sammlarr rating</span>
@@ -32,7 +32,7 @@
                 {
                     <BbTooltip DelayDuration="150">
                         <BbTooltipTrigger AsChild="false" Class="rating-tip">@RatingTexts.Count(votes) votes</BbTooltipTrigger>
-                        <BbTooltipContent>@VoteParts</BbTooltipContent>
+                        <BbTooltipContent Class="max-w-[360px]"><RatingSum Terms="VoteTerms" Result="@RatingTexts.Count(votes)" Divided="false"/></BbTooltipContent>
                     </BbTooltip>
                 }
                 else
@@ -155,11 +155,9 @@
 
     private string How => $"{RatingTexts.Strategy(Strategy)} · {Where}";
 
-    private string Arithmetic => _model.Sammlarr.Map(rating => RatingTexts.Arithmetic(rating, Strategy)).GetValueOr(string.Empty);
-
     private int VoteSources => _model.Sammlarr.Map(RatingTexts.VoteSources).GetValueOr(0);
 
-    private string VoteParts => _model.Sammlarr.Map(RatingTexts.VoteParts).GetValueOr(string.Empty);
+    private IReadOnlyList<RatingTerm> VoteTerms => _model.Sammlarr.Map(RatingTexts.VoteTerms).GetValueOr([]);
 
     private string Detail(RatingRow row)
     {

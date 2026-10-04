@@ -35,15 +35,15 @@ internal sealed record RatingPipelineModel(IReadOnlyList<PipelineTile> Tiles, IR
 	private const double TurnSlope = 0.35;
 	private const double PinPitch = 8;
 
-	internal static RatingPipelineModel For(RatingStrategy strategy, ValueSet<RatingSource> available)
+	internal static RatingPipelineModel For(RatingStrategy strategy, OrderedRating order, ValueSet<RatingSource> available)
 	{
 		var (rows, counted, dashed) = strategy switch
 		{
-			AveragedRating averaged => Averaged(averaged, available),
+			AveragedRating averaged => Averaged(averaged, order, available),
 			OrderedRating ordered => Ordered(ordered, available),
 		};
 		var placed = rows.Select((row, index) => row with { Y = index * RowPitch + TileHeight / 2 }).ToList();
-		var middle = Middle(placed.Where(tile => counted.Contains(tile.Source)).ToList(), placed);
+		var middle = placed.Count > 0 ? placed.Average(tile => tile.Y) : OutputHeight / 2;
 		var shift = Math.Max(0, OutputHeight / 2 - middle);
 		var tiles = placed.Select(tile => tile with { Y = tile.Y + shift }).ToList();
 		var feeding = tiles.Where(tile => counted.Contains(tile.Source)).ToList();
@@ -53,30 +53,20 @@ internal sealed record RatingPipelineModel(IReadOnlyList<PipelineTile> Tiles, IR
 		return new RatingPipelineModel(tiles, traces, dashed, output, height);
 	}
 
-	private static double Middle(IReadOnlyList<PipelineTile> feeding, IReadOnlyList<PipelineTile> all)
-	{
-		if (feeding.Count > 0)
-		{
-			return feeding.Average(tile => tile.Y);
-		}
-
-		return all.Count > 0 ? all.Average(tile => tile.Y) : OutputHeight / 2;
-	}
-
 	private static PipelineTrace Trace(PipelineTile tile, double pin)
 	{
 		var turn = TurnX + Math.Abs(tile.Y - pin) * TurnSlope;
 		return new PipelineTrace(tile.Source, [new(TileWidth, tile.Y), new(turn, tile.Y), new(turn, pin), new(OutputX, pin)]);
 	}
 
-	private static (List<PipelineTile> Rows, ValueSet<RatingSource> Counted, bool Dashed) Averaged(AveragedRating averaged, ValueSet<RatingSource> available)
+	private static (List<PipelineTile> Rows, ValueSet<RatingSource> Counted, bool Dashed) Averaged(
+		AveragedRating averaged,
+		OrderedRating order,
+		ValueSet<RatingSource> available
+	)
 	{
 		var counted = averaged.Counted(available);
-		var rows = Enum.GetValues<RatingSource>()
-			.Where(available.Contains)
-			.OrderBy(source => !counted.Contains(source))
-			.Select(source => new PipelineTile(source, averaged.SwitchedOn.Contains(source), new None(), 0))
-			.ToList();
+		var rows = order.Order.Where(available.Contains).Select(source => new PipelineTile(source, averaged.SwitchedOn.Contains(source), new None(), 0)).ToList();
 		return (rows, counted, averaged.FallsBack(available));
 	}
 

@@ -119,7 +119,7 @@
         _strategy = Strategy;
         _averaged = Strategy is AveragedRating averaged ? averaged : AveragedRating.Everything;
         _ordered = Strategy is OrderedRating ordered ? ordered : new OrderedRating();
-        _model = RatingPipelineModel.For(_strategy, Available);
+        _model = RatingPipelineModel.For(_strategy, _ordered, Available);
     }
 
     private bool Ordered => _strategy is OrderedRating;
@@ -204,7 +204,7 @@
     private async Task StoreAsync(RatingStrategy strategy)
     {
         _strategy = strategy;
-        _model = RatingPipelineModel.For(strategy, Available);
+        _model = RatingPipelineModel.For(strategy, _ordered, Available);
         await Ratings.StoreDefaultAsync(strategy);
         RatingContext.Refresh();
     }

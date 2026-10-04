@@ -1,0 +1,45 @@
+<span class="rating-sum">
+    @if (Divided && Terms.Count == 1)
+    {
+        <span class="rating-sum-term">
+            <RatingMarkIcon Source="Terms[0].Rating.Source" Rating="Optional.Of(Terms[0].Rating)" Size="14"/>
+            <span>@Terms[0].Rating.Value</span>
+        </span>
+        <span class="rating-sum-op">→</span>
+        <b>@Result</b><span class="rating-sum-op">, @Why</span>
+    }
+    else
+    {
+        @if (Divided)
+        {
+            <span class="rating-sum-op">(</span>
+        }
+        @foreach (var (term, index) in Terms.Select((term, index) => (term, index)))
+        {
+            @if (index > 0)
+            {
+                <span class="rating-sum-op">+</span>
+            }
+            <span class="rating-sum-term">
+                <RatingMarkIcon Source="term.Rating.Source" Rating="Optional.Of(term.Rating)" Size="14"/>
+                <span>@term.Number</span>
+            </span>
+        }
+        <span class="rating-sum-op">@(Divided ? $") ÷ {Terms.Count} =" : "=")</span>
+        @if (Divided)
+        {
+            <span class="rating-sum-star"><MagpieStarIcon Variant="MagpieStarVariant.Filled" Size="13"/></span>
+        }
+        <b>@Result</b>
+    }
+</span>
+
+@code {
+    [Parameter] [EditorRequired] public required IReadOnlyList<RatingTerm> Terms { get; set; }
+
+    [Parameter] [EditorRequired] public required string Result { get; set; }
+
+    [Parameter] public bool Divided { get; set; } = true;
+
+    [Parameter] public string Why { get; set; } = string.Empty;
+}

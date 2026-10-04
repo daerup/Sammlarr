@@ -5,6 +5,7 @@ using Contracts.Ratings;
 using Domain.Media;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Ratings;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
@@ -153,6 +154,20 @@ public class RatingPipelineCardTests : BunitContext
 
 		await Assert.That(cut.FindAll(".pipeline-notice")).IsEmpty();
 	}
+
+	[Test]
+	public async Task Combination_WhenSwitchedFromFirstAvailableToAverage_KeepsTheRowOrder()
+	{
+		var cut = RenderCard(new RatingStrategy(new OrderedRating([RatingSource.RottenTomatoesAudience, RatingSource.Imdb])), Everything);
+		var ranked = Names(cut);
+
+		await Radio(cut, "Average").ClickAsync();
+
+		await Assert.That(Names(cut)).IsEquivalentTo(ranked, CollectionOrdering.Matching);
+		await Assert.That(ranked[0]).IsEqualTo("Rotten Tomatoes audience");
+	}
+
+	private static List<string> Names(IRenderedComponent<RatingPipelineCard> cut) => [.. cut.FindAll(".pipeline-name").Select(name => name.TextContent.Trim())];
 
 	private static IElement Radio(IRenderedComponent<RatingPipelineCard> cut, string name)
 	{
