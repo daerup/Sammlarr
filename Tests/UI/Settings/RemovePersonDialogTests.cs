@@ -90,7 +90,7 @@ public class RemovePersonDialogTests : BunitContext
 			builder.AddComponentParameter(
 				4,
 				nameof(RemovePersonDialog.Person),
-				new JoinedPerson(person, new PersonHoldings(2, 40, 1, [MediaProvider.Tmdb]), new None())
+				new JoinedPerson(person, new PersonHoldings(2, 40, 1, [MediaProvider.Tmdb]), new None(), 40)
 			);
 			builder.AddComponentParameter(5, nameof(RemovePersonDialog.Sink), sink);
 			builder.CloseComponent();

@@ -743,7 +743,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	private static void SeedSecondaryUsers(SammlarrDbContext context)
 	{
-		foreach (var (id, displayName, role) in new[] { SeededMember, SeededRemovable })
+		foreach (var ((id, displayName, role), hue) in new[] { (SeededMember, 177.5), (SeededRemovable, 315.0) })
 		{
 			context.Users.Add(
 				new UserRow
@@ -755,6 +755,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 					AvatarUrl = string.Empty,
 					Role = role,
 					JoinedAt = DateTimeOffset.UnixEpoch,
+					Hue = hue,
 				}
 			);
 		}
@@ -775,6 +776,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				AvatarUrl = user.AvatarUrl,
 				Role = user.Role,
 				JoinedAt = DateTimeOffset.UnixEpoch,
+				Hue = PersonHues.First,
 			}
 		);
 		context.SaveChanges();

@@ -1,0 +1,32 @@
+@using System.Globalization
+@using Domain.Identity
+@using Domain.Identity.Birds
+
+<span class="person-avatar" style="--bird-hue: @HueOf(Hue); width: @(Size)px; height: @(Size)px" data-bird>
+    <svg width="@Size" height="@Size" viewBox="@_art.ViewBox" aria-hidden="true" focusable="false">@((MarkupString)_art.Markup)</svg>
+</span>
+
+@code {
+    [Parameter] [EditorRequired] public required UserId Person { get; set; }
+
+    [Parameter] [EditorRequired] public required double Hue { get; set; }
+
+    [Parameter] public int Size { get; set; } = 32;
+
+    private BirdArt _art = null!;
+
+    private UserId? _drawn;
+
+    internal static string HueOf(double hue) => hue.ToString("0.##", CultureInfo.InvariantCulture);
+
+    protected override void OnParametersSet()
+    {
+        if (_drawn == Person)
+        {
+            return;
+        }
+
+        _art = BirdDrawing.Draw(BirdGenome.Of(Person), "var(--bird-body)", "var(--bird-back)");
+        _drawn = Person;
+    }
+}

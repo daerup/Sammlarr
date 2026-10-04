@@ -126,4 +126,52 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 	private static Task<int> CountForAsync<TRow>(DbSet<TRow> set, UserId userId)
 		where TRow : class => set.IgnoreQueryFilters().CountAsync(row => EF.Property<Guid>(row, "UserId") == userId.Value);
+
+	[Test]
+	public async Task CreateAsync_ForEachNewPerson_TakesTheNextColourFromTheLatestOne()
+	{
+		var latest = (await _testee.GetHuesAsync())[fixture.CurrentUser.Id];
+
+		var first = await CreateAsync("plex-first", DateTimeOffset.UnixEpoch.AddYears(60));
+		var second = await CreateAsync("plex-second", DateTimeOffset.UnixEpoch.AddYears(61));
+
+		var hues = await _testee.GetHuesAsync();
+		await Assert.That(hues[first]).IsEqualTo(PersonHues.After(Some.Of(latest)));
+		await Assert.That(hues[second]).IsEqualTo(PersonHues.After(Some.Of(hues[first])));
+	}
+
+	[Test]
+	public async Task DeleteAsync_OfSomeone_ChangesNobodyElsesColour()
+	{
+		var first = await CreateAsync("plex-first", DateTimeOffset.UnixEpoch.AddYears(60));
+		var second = await CreateAsync("plex-second", DateTimeOffset.UnixEpoch.AddYears(61));
+		var before = await _testee.GetHuesAsync();
+
+		await _testee.DeleteAsync(first);
+
+		await Assert.That((await _testee.GetHuesAsync())[second]).IsEqualTo(before[second]);
+	}
+
+	[Test]
+	public async Task CreateAsync_ForPeopleWhoJoinedInTheSameInstant_TakesTheColourAfterTheLastById()
+	{
+		var at = DateTimeOffset.UnixEpoch.AddYears(60);
+		var one = await CreateAsync("plex-one", at);
+		var two = await CreateAsync("plex-two", at);
+		var hues = await _testee.GetHuesAsync();
+		var last = string.CompareOrdinal(Stored(one), Stored(two)) > 0 ? one : two;
+
+		var third = await CreateAsync("plex-three", at.AddYears(1));
+
+		await Assert.That((await _testee.GetHuesAsync())[third]).IsEqualTo(PersonHues.After(Some.Of(hues[last])));
+	}
+
+	private static string Stored(UserId id) => id.Value.ToString().ToUpperInvariant();
+
+	private async Task<UserId> CreateAsync(string externalUserId, DateTimeOffset joinedAt)
+	{
+		var user = new User(UserId.New(), externalUserId, string.Empty, UserRole.Member, joinedAt);
+		await _testee.CreateAsync(user, AuthProvider.Plex, externalUserId);
+		return user.Id;
+	}
 }

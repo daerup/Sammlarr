@@ -12,6 +12,7 @@ internal sealed record UserRow : Entity<Guid>
 	public required string AvatarUrl { get; set; }
 	public required UserRole Role { get; set; }
 	public required DateTimeOffset JoinedAt { get; set; }
+	public double Hue { get; set; }
 
 	[MaxLength(512)]
 	public string? PasswordHash { get; set; }

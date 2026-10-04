@@ -28,7 +28,8 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	public async Task CreateAsync(User user, AuthProvider provider, string externalUserId, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		ctx.Users.Add(
+		await UserHues.AddAsync(
+			ctx,
 			new UserRow
 			{
 				Id = user.Id.Value,
@@ -38,9 +39,15 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 				AvatarUrl = user.AvatarUrl,
 				Role = user.Role,
 				JoinedAt = user.JoinedAt,
-			}
+			},
+			cancellationToken
 		);
-		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task<IReadOnlyDictionary<UserId, double>> GetHuesAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await ctx.Users.AsNoTracking().ToDictionaryAsync(user => UserId.From(user.Id), user => user.Hue, cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)

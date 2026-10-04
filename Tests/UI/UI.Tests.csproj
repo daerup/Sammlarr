@@ -9,6 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="Bogus" />
 		<PackageReference Include="bunit" />
+		<PackageReference Include="CsCheck" />
 		<PackageReference Include="TUnit" />
 		<PackageReference Include="TUnit.Assertions" />
 		<PackageReference Include="TUnit.Core" />
@@ -17,5 +18,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\UI\UI.csproj" />
 		<ProjectReference Include="..\TestInfrastructure\TestInfrastructure.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="Branding\BirdReference.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>
