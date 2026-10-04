@@ -1,0 +1,36 @@
+@using Contracts.Settings
+@using Domain.Wantlist.Arr
+@using UI.Features.Settings.Components.Providers
+
+<DemoCard Title="Radarr + Sonarr row" Where="Providers › Wantlist sync" Span="2"
+          Note="The parts of ArrSinkRow, which tests the real connection when it opens: an app not set up, one that answered with its profiles and folders, one that refused the key, and the tags it writes.">
+    <div class="overflow-hidden rounded-lg border bg-card">
+        <ArrAppSection App="ArrApp.Radarr" Instance="ArrInstanceConfig.Empty" State="ArrConnectionState.Empty"/>
+        <ArrAppSection App="ArrApp.Sonarr" Instance="Connected" State="ArrConnectionState.Connected" Choices="Choices"/>
+        <ArrAppSection App="ArrApp.Radarr" Instance="Connected with { Url = Some.Of(Radarr) }" State="ArrConnectionState.Failed"
+                       Error="@($"Radarr answered 401 Unauthorized at {Radarr}. Check the API key under Settings › General in Radarr.")"/>
+        <div class="px-5 py-4">
+            <ArrTagsSection Scheme="_scheme" SchemeChanged="scheme => _scheme = scheme" Users="Users" Feed="Feed"/>
+        </div>
+    </div>
+</DemoCard>
+
+@code {
+    private const string Radarr = "http://radarr:7878";
+
+    private static readonly ArrInstanceConfig Connected = new()
+    {
+        Url = Some.Of("http://sonarr:8989"),
+        ApiKey = Some.Of("0123456789abcdef0123456789abcdef"),
+        QualityProfileId = Some.Of(4),
+        RootFolderPath = Some.Of("/tv"),
+    };
+
+    private static readonly ArrInstanceChoices Choices = new([new ArrQualityProfile(4, "HD-1080p"), new ArrQualityProfile(6, "Ultra-HD")], [new ArrRootFolder("/tv", 1319413953331)]);
+
+    private static readonly IReadOnlyList<ArrTagUser> Users = [new(Guid.Parse("8f14e45f-ceea-467a-9575-6c0f6e3b4c11"), "Guest"), new(Guid.Parse("1c5d7a4e-2f10-4b8e-9f3a-6d2e8c1b0a77"), "Mira")];
+
+    private static readonly Optional<ArrTagFeed> Feed = Some.Of(new ArrTagFeed(Guid.Parse("5b8f3c2a-9d14-4e6f-8a7b-2c1d0e9f8a6b"), "Latest movies", "hdlists/latest"));
+
+    private ArrTagScheme _scheme = ArrTagScheme.Default;
+}

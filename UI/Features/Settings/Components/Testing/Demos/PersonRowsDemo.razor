@@ -1,0 +1,50 @@
+@using Contracts
+@using Contracts.Identity
+@using Domain.Identity
+@using UI.Features.Settings.Components.Users
+@using UI.Shared.Branding.Birds
+@inject IDateTimeProvider Clock
+
+<DemoCard Title="Person rows" Where="Settings › Users" Span="2"
+          Note="PersonRow for the last admin (you), a locked member, someone coloured by their Plex picture, and an open invite. Made-up people: opening a row shows its actions, which go to the real Users service and fail on them.">
+    <div class="overflow-hidden rounded-lg border bg-card">
+        @foreach (var (person, colour, isYou) in _rows)
+        {
+            <PersonRow Person="person" Colour="colour" SignIn="AuthProvider.Plex" Sink="SinkKind.Plex" IsYou="isYou" IsLastAdmin="isYou"
+                       Open="_open == Key(person)" OpenChanged="open => _open = open ? Key(person) : null"/>
+        }
+    </div>
+</DemoCard>
+
+@code {
+    private string? _open;
+
+    private IReadOnlyList<(Person Person, PersonColour? Colour, bool IsYou)> _rows = [];
+
+    protected override void OnInitialized()
+    {
+        var now = Clock.Now;
+        _rows =
+        [
+            (Joined("Ada", UserRole.Admin, string.Empty, new None(), now.AddDays(-40)), PersonColour.Golden(40), true),
+            (Joined("Bob", UserRole.Member, string.Empty, Some.Of(now.AddMinutes(12)), now.AddDays(-20)), PersonColour.Golden(177.5), false),
+            (Joined("Daerup", UserRole.Member, "/providers/plex-square.svg", new None(), now.AddDays(-9)), new PersonColour(31, Some.Of(0.063)), false),
+            (new InvitedPerson("demo-invitee", "Mira", now.AddDays(6)), null, false),
+        ];
+    }
+
+    private static JoinedPerson Joined(string name, UserRole role, string avatar, Optional<DateTimeOffset> lockedUntil, DateTimeOffset joinedAt)
+    {
+        var user = new User(UserId.New(), name, avatar, role, joinedAt);
+        return new JoinedPerson(user, new PersonHoldings(role == UserRole.Admin ? 3 : 0, name.Length * 4, 1, []), lockedUntil, StoredColour.Empty);
+    }
+
+    private static string Key(Person person)
+    {
+        return person switch
+        {
+            JoinedPerson joined => joined.User.DisplayName,
+            InvitedPerson invited => invited.Username,
+        };
+    }
+}

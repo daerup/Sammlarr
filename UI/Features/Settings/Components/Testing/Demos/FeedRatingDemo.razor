@@ -1,0 +1,35 @@
+@using UI.Features.Feeds.Pages.Editor
+
+<DemoCard Title="Feed star, strategy and votes" Where="Feed editor › sort and rules" Span="2"
+          Note="The star segment opens the strategy picker for one feed, and the info opens the Votes popover. Three feeds: one on your default (Average), one on First available, one counting Rotten Tomatoes alone.">
+    <div class="flex flex-col gap-3">
+        @foreach (var feed in _feeds)
+        {
+            <div class="flex items-center gap-3">
+                <span class="w-44 text-xs text-muted-foreground">@feed.Label</span>
+                <span class="flex h-9 items-center rounded-md border bg-background">
+                    <FeedRatingStarButton Value="feed.Value" ValueChanged="value => feed.Value = value" Default="DemoRatings.Average" Available="DemoRatings.Everything"/>
+                </span>
+                <span class="flex h-9 items-center rounded-md border bg-background">
+                    <FeedVotesPopover Value="feed.Value" Default="DemoRatings.Average" Available="DemoRatings.Everything"/>
+                </span>
+            </div>
+        }
+    </div>
+</DemoCard>
+
+@code {
+    private readonly DemoFeedRating[] _feeds =
+    [
+        new("Your default (Average)", new None()),
+        new("First available", Some.Of(DemoRatings.FirstAvailable)),
+        new("Rotten Tomatoes alone", Some.Of(DemoRatings.RottenTomatoesAlone)),
+    ];
+
+    private sealed class DemoFeedRating(string label, Optional<RatingStrategy> value)
+    {
+        public string Label { get; } = label;
+
+        public Optional<RatingStrategy> Value { get; set; } = value;
+    }
+}

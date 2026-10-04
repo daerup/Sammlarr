@@ -1,0 +1,24 @@
+@using UI.Shared.Media
+
+<DemoCard Title="Empty wantlist and blocklist" Where="Wantlist, Blocklist" Span="3"
+          Note="MediaListEmptyState with each list's words: the wantlist for each sink, then the blocklist. The buttons are drawn as the pages draw them and do nothing here.">
+    <div class="grid gap-4 md:grid-cols-3">
+        @foreach (var sink in Enum.GetValues<SinkKind>())
+        {
+            <MediaListEmptyState Icon="inbox" Heading="Your wantlist is empty.">
+                <ChildContent>@ListTexts.EmptyWantlist(sink)</ChildContent>
+                <Actions>
+                    <BbButton Size="ButtonSize.Small"><LucideIcon Name="refresh-cw" Size="14" Class="mr-1.5"/><span>Sync from @sink.GetDescription()</span></BbButton>
+                    <BbButton Size="ButtonSize.Small" Variant="ButtonVariant.Outline"><LucideIcon Name="plus" Size="14" Class="mr-1.5"/><span>Add a title</span></BbButton>
+                    <BbButton Size="ButtonSize.Small" Variant="ButtonVariant.Outline"><LucideIcon Name="rss" Size="14" Class="mr-1.5"/><span>Create a feed</span></BbButton>
+                </Actions>
+            </MediaListEmptyState>
+        }
+        <MediaListEmptyState Icon="shield-off" Heading="Nothing blocklisted.">
+            <ChildContent>@ListTexts.EmptyBlocklist</ChildContent>
+            <Actions>
+                <BbButton Size="ButtonSize.Small" Variant="ButtonVariant.Outline"><LucideIcon Name="plus" Size="14" Class="mr-1.5"/><span>Blocklist a title</span></BbButton>
+            </Actions>
+        </MediaListEmptyState>
+    </div>
+</DemoCard>
