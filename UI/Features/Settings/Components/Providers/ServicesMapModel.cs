@@ -3,7 +3,7 @@ using Domain.Settings;
 
 namespace UI.Features.Settings.Components.Providers;
 
-internal enum TileEntry
+internal enum TileEdge
 {
 	Bottom,
 	Top,
@@ -17,7 +17,7 @@ internal sealed record MapRole(string Name, string Icon, string Description, dou
 
 internal sealed record MapService(MediaProvider Provider, double Y, IReadOnlyList<double> Pins);
 
-internal sealed record MapTile(MediaProvider Provider, double X, double Y, TileEntry Entry);
+internal sealed record MapTile(MediaProvider Provider, double X, double Y, TileEdge Entry);
 
 internal sealed record MapTrace(string Role, MediaProvider Provider, IReadOnlyList<MapPoint> Points)
 {
@@ -127,7 +127,7 @@ internal sealed record ServicesMapModel(
 	{
 		if (sources.Count <= RowCapacity)
 		{
-			return [.. sources.Select((source, index) => new MapTile(source, ServiceX + index * TilePitch, top, TileEntry.Bottom))];
+			return [.. sources.Select((source, index) => new MapTile(source, ServiceX + index * TilePitch, top, TileEdge.Bottom))];
 		}
 
 		var upper = (sources.Count + 1) / 2;
@@ -138,8 +138,8 @@ internal sealed record ServicesMapModel(
 			.. sources.Select(
 				(source, index) =>
 					index < upper
-						? new MapTile(source, left + index * TilePitch, top, TileEntry.Bottom)
-						: new MapTile(source, left + (index - upper) * TilePitch, lower, TileEntry.Top)
+						? new MapTile(source, left + index * TilePitch, top, TileEdge.Bottom)
+						: new MapTile(source, left + (index - upper) * TilePitch, lower, TileEdge.Top)
 			),
 		];
 	}
@@ -196,10 +196,10 @@ internal sealed record ServicesMapModel(
 
 	private static IEnumerable<MapTrace> FeedTraces(MapRole feeds, IReadOnlyList<(MediaProvider Provider, MapPoint Pin)> boxed, IReadOnlyList<MapTile> tiles)
 	{
-		List<(MediaProvider Provider, MapPoint Entry, TileEntry Edge)> peels =
+		List<(MediaProvider Provider, MapPoint Entry, TileEdge Edge)> peels =
 		[
-			.. tiles.Where(tile => tile.Entry == TileEntry.Bottom).OrderBy(tile => tile.X).Select(Peel),
-			.. tiles.Where(tile => tile.Entry == TileEntry.Top).OrderByDescending(tile => tile.X).Select(Peel),
+			.. tiles.Where(tile => tile.Entry == TileEdge.Bottom).OrderBy(tile => tile.X).Select(Peel),
+			.. tiles.Where(tile => tile.Entry == TileEdge.Top).OrderByDescending(tile => tile.X).Select(Peel),
 		];
 		var centre = Centre(feeds.Y, peels);
 		var tracks = peels.Select((_, index) => centre + (index - (peels.Count - 1) / 2.0) * RibbonPitch).ToList();
@@ -222,20 +222,20 @@ internal sealed record ServicesMapModel(
 		});
 	}
 
-	private static double Centre(double feedsY, List<(MediaProvider Provider, MapPoint Entry, TileEntry Edge)> peels)
+	private static double Centre(double feedsY, List<(MediaProvider Provider, MapPoint Entry, TileEdge Edge)> peels)
 	{
 		var middle = (peels.Count - 1) / 2.0;
 		var floor = peels
-			.Select((peel, index) => peel.Edge == TileEntry.Bottom ? peel.Entry.Y + Clearance - (index - middle) * RibbonPitch : double.NegativeInfinity)
+			.Select((peel, index) => peel.Edge == TileEdge.Bottom ? peel.Entry.Y + Clearance - (index - middle) * RibbonPitch : double.NegativeInfinity)
 			.DefaultIfEmpty(double.NegativeInfinity)
 			.Max();
 		var ceiling = peels
-			.Select((peel, index) => peel.Edge == TileEntry.Top ? peel.Entry.Y - Clearance - (index - middle) * RibbonPitch : double.PositiveInfinity)
+			.Select((peel, index) => peel.Edge == TileEdge.Top ? peel.Entry.Y - Clearance - (index - middle) * RibbonPitch : double.PositiveInfinity)
 			.DefaultIfEmpty(double.PositiveInfinity)
 			.Min();
 		return Math.Min(Math.Max(feedsY, floor), ceiling);
 	}
 
-	private static (MediaProvider Provider, MapPoint Entry, TileEntry Edge) Peel(MapTile tile) =>
-		(tile.Provider, new MapPoint(tile.X + TileSize / 2, tile.Entry == TileEntry.Bottom ? tile.Y + TileSize : tile.Y), tile.Entry);
+	private static (MediaProvider Provider, MapPoint Entry, TileEdge Edge) Peel(MapTile tile) =>
+		(tile.Provider, new MapPoint(tile.X + TileSize / 2, tile.Entry == TileEdge.Bottom ? tile.Y + TileSize : tile.Y), tile.Entry);
 }

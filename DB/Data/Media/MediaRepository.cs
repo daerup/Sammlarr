@@ -182,6 +182,31 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		return rows.ToDictionary(r => MediaId.From(r.MediaId), r => r.External.ToExternalMediaId());
 	}
 
+	public async Task<Optional<RottenTomatoesAnswer>> FindRottenTomatoesAnswerAsync(MediaId id, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var asked = await ctx
+			.MediaRatings.AsNoTracking()
+			.Where(rating => EF.Property<Guid>(rating, "MediaId") == id.Value && rating.RottenTomatoesAskedAt != null)
+			.Select(rating => new { rating.RottenTomatoesPath })
+			.FirstOrDefaultAsync(cancellationToken);
+		return Optional.Of(asked).Map(answer => new RottenTomatoesAnswer(Optional.Of(answer.RottenTomatoesPath)));
+	}
+
+	public async Task StoreRottenTomatoesAnswerAsync(MediaId id, Optional<string> path, DateTimeOffset askedAt, CancellationToken cancellationToken = default)
+	{
+		var stored = path.ToNullable();
+		var rottenTomatoes = Enum.GetValues<RatingSource>().Where(source => source.IsRottenTomatoes).ToList();
+		using var _ = await writeLock.AcquireAsync(cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await ctx
+			.MediaRatings.Where(rating => EF.Property<Guid>(rating, "MediaId") == id.Value && rottenTomatoes.Contains(rating.Source))
+			.ExecuteUpdateAsync(
+				set => set.SetProperty(rating => rating.RottenTomatoesPath, stored).SetProperty(rating => rating.RottenTomatoesAskedAt, askedAt),
+				cancellationToken
+			);
+	}
+
 	private static MediaIdentity UpsertOne(
 		SammlarrDbContext ctx,
 		MediaIdentity identity,

@@ -64,6 +64,20 @@ public static class RatingSources
 			}
 		}
 
+		public bool IsRottenTomatoes
+		{
+			get
+			{
+				return source switch
+				{
+					RatingSource.Tmdb => false,
+					RatingSource.Imdb => false,
+					RatingSource.RottenTomatoesCritics => true,
+					RatingSource.RottenTomatoesAudience => true,
+				};
+			}
+		}
+
 		public IMediaRating Rate(float sammlarrValue, Optional<int> votes)
 		{
 			return source switch

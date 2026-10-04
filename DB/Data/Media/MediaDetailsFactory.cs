@@ -96,11 +96,20 @@ internal class MediaDetailsFactory
 
 	private static void ReplaceRatings(MediaDetailsRow row, IReadOnlyList<IMediaRating> ratings)
 	{
+		var asked = row.Ratings.FirstOrNone(rating => rating.RottenTomatoesAskedAt.HasValue);
 		row.Ratings.Clear();
 		foreach (var rating in ratings)
 		{
-			row.Ratings.Add(BuildRating(rating, row));
+			var built = BuildRating(rating, row);
+			asked.When(_ => rating.Source.IsRottenTomatoes).Apply(answer => KeepAnswer(built, answer));
+			row.Ratings.Add(built);
 		}
+	}
+
+	private static void KeepAnswer(MediaRatingRow rating, MediaRatingRow answer)
+	{
+		rating.RottenTomatoesPath = answer.RottenTomatoesPath;
+		rating.RottenTomatoesAskedAt = answer.RottenTomatoesAskedAt;
 	}
 
 	private static MediaRatingRow BuildRating(IMediaRating rating, MediaDetailsRow parent)

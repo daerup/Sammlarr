@@ -1,0 +1,18 @@
+{
+  "head" : {
+    "vars" : [ "path" ]
+  },
+  "results" : {
+    "bindings" : [ {
+      "path" : {
+        "type" : "literal",
+        "value" : "tv/bleach"
+      }
+    }, {
+      "path" : {
+        "type" : "literal",
+        "value" : "tv/bleach/s01"
+      }
+    } ]
+  }
+}

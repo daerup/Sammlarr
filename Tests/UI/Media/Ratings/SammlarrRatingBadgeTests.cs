@@ -34,6 +34,8 @@ public class SammlarrRatingBadgeTests : BunitContext
 
 	private readonly Mock<IRatingService> _ratings = IRatingService.Mock();
 
+	private readonly Mock<IRottenTomatoesPages> _pages = IRottenTomatoesPages.Mock();
+
 	[Before(Test)]
 	public void Setup()
 	{
@@ -41,6 +43,8 @@ public class SammlarrRatingBadgeTests : BunitContext
 		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddSingleton(_ratings.Object);
 		Services.AddScoped<RatingContext>();
+		Services.AddSingleton(_pages.Object);
+		_pages.FindPathAsync(Any<MediaId>(), Any()).Returns(new None());
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		_ratings.GetDefaultAsync(Any()).Returns(new RatingStrategy(new OrderedRating([RatingSource.Imdb])));
 		_ratings.GetAvailableAsync(Any()).Returns(Everything);
@@ -110,6 +114,19 @@ public class SammlarrRatingBadgeTests : BunitContext
 		await Assert.That(cut.FindAll(".rating-row").Last().QuerySelector(".rating-row-link")).IsNull();
 	}
 
+	[Test]
+	public async Task Breakdown_WhenWikidataKnowsTheTitlesPage_LinksRottenTomatoesThere()
+	{
+		_pages.FindPathAsync(Any<MediaId>(), Any()).Returns(Some.Of("tv/last_seen"));
+
+		var cut = RenderBreakdown(LastSeen, new RatingStrategy(AveragedRating.Everything));
+
+		await Assert
+			.That(cut.FindAll(".rating-row-link").Select(link => link.GetAttribute("href") ?? string.Empty))
+			.Contains("https://www.rottentomatoes.com/tv/last_seen");
+		_pages.FindPathAsync(Any<MediaId>(), Any()).WasCalled(Times.Once);
+	}
+
 	private IRenderedComponent<SammlarrRatingBreakdown> RenderBreakdown(RatingSummary ratings, RatingStrategy strategy)
 	{
 		return Render<SammlarrRatingBreakdown>(parameters =>
@@ -120,6 +137,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 				.Add(breakdown => breakdown.Where, "your default")
 				.Add(breakdown => breakdown.Title, "Last Seen")
 				.Add(breakdown => breakdown.Ids, [TmdbId.From("1396", MediaType.Show), ImdbId.From("tt0903747", MediaType.Show)])
+				.Add(breakdown => breakdown.Media, Some.Of(MediaId.New()))
 		);
 	}
 }

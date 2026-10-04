@@ -40,17 +40,8 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		{
 			finalItems[entry.Index] = BuildTrending(entry.Item, identity);
 		}
-		var stored = await media.GetStoredRatingsAsync(finalItems.Select(MatchedId).WhereSome(), cancellationToken);
+		var stored = await media.GetStoredRatingsAsync(finalItems.Select(item => item.MatchedId).WhereSome(), cancellationToken);
 		return new PagedResult<MediaMatchResult>([.. finalItems.Select(item => WithStoredRatings(item, stored))], result.TotalPages);
-	}
-
-	private static Optional<MediaId> MatchedId(MediaMatchResult item)
-	{
-		return item switch
-		{
-			MatchedMedia matched => Some.Of(matched.Identity.Id),
-			UnmatchedMedia => new None(),
-		};
 	}
 
 	private static MediaMatchResult WithStoredRatings(MediaMatchResult item, IReadOnlyDictionary<MediaId, RatingSummary> stored)

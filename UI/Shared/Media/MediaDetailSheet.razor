@@ -67,7 +67,7 @@
                                 <span>@fact</span>
                             }
                             <span aria-hidden="true">•</span>
-                            <SammlarrRatingBadge Ratings="@_loadedRatings.GetValueOr(details.Rating)" Ids="@(media.Externals.ToList())" Title="@details.Title" Size="17" Align="PopoverAlign.Center"/>
+                            <SammlarrRatingBadge Ratings="@_loadedRatings.GetValueOr(details.Rating)" Ids="@(media.Externals.ToList())" Title="@details.Title" Size="17" Align="PopoverAlign.Center" Media="media.MatchedId"/>
                         </span>
                     </BbSheetDescription>
                     @if (details.Genres.Count > 0)

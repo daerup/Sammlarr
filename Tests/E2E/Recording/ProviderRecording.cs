@@ -19,6 +19,7 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 	[
 		.. Enum.GetValues<ApiKeyProvider>().Select(ForApiKey),
 		.. Enum.GetValues<AuthProvider>().Select(ForAuth),
+		Build("wikidata", WikidataOptions.SectionName, "BaseUrl"),
 	];
 
 	internal static readonly IReadOnlyList<ProviderEndpoint> AllEndpoints = [.. All.SelectMany(provider => provider.Endpoints)];
@@ -26,20 +27,18 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 	private static ProviderRecording ForApiKey(ApiKeyProvider provider) =>
 		provider switch
 		{
-			ApiKeyProvider.Tmdb => Build(provider, TmdbOptions.SectionName, "BaseUrl"),
-			ApiKeyProvider.Mdblist => Build(provider, MdblistOptions.SectionName, "BaseUrl"),
+			ApiKeyProvider.Tmdb => Build(Slug(provider), TmdbOptions.SectionName, "BaseUrl"),
+			ApiKeyProvider.Mdblist => Build(Slug(provider), MdblistOptions.SectionName, "BaseUrl"),
 		};
 
 	private static ProviderRecording ForAuth(AuthProvider provider) =>
 		provider switch
 		{
-			AuthProvider.Plex => Build(provider, PlexOptions.SectionName, "BaseUrl", "DiscoverUrl", "VodUrl", "MetadataUrl"),
+			AuthProvider.Plex => Build(Slug(provider), PlexOptions.SectionName, "BaseUrl", "DiscoverUrl", "VodUrl", "MetadataUrl"),
 		};
 
-	private static ProviderRecording Build<T>(T provider, string section, params string[] configKeys)
-		where T : struct, Enum
+	private static ProviderRecording Build(string slug, string section, params string[] configKeys)
 	{
-		var slug = Slug(provider);
 		var endpoints = configKeys.Select(key => new ProviderEndpoint(EndpointName(slug, key), key, AppSettings[$"{section}:{key}"]!));
 		return new ProviderRecording(slug, section, [.. endpoints]);
 	}
