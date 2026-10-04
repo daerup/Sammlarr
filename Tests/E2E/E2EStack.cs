@@ -32,6 +32,8 @@ internal sealed class E2EStack
 
 	internal HttpClient WireMock { get; }
 
+	internal Uri WireMockUrl => WireMock.BaseAddress!;
+
 	internal string AdminCookie => _seed.AdminCookie;
 
 	internal string MemberCookie => _seed.MemberCookie;
@@ -51,7 +53,7 @@ internal sealed class E2EStack
 	internal static async Task<E2EStack> LaunchAsync(E2ESeed seed, int index, bool live, Action<string> onCircuitFailure)
 	{
 		var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
-			["--LaunchSammlarr=false"],
+			["--LaunchSammlarr=false", $"--RadarrSonarr={live.ToString().ToLowerInvariant()}"],
 			(options, _) => options.DisableDashboard = true
 		);
 		builder.Services.AddLogging(logging => logging.AddProvider(new CircuitFailureSink(CircuitLogCategory, CircuitFailure, index, onCircuitFailure)));
@@ -84,6 +86,10 @@ internal sealed class E2EStack
 		var app = await builder.BuildAsync();
 		await app.StartAsync();
 		await app.ResourceNotifications.WaitForResourceHealthyAsync("blazor-ui");
+		foreach (var arr in live ? ProviderRecording.Apps : [])
+		{
+			await app.ResourceNotifications.WaitForResourceHealthyAsync(arr.Name);
+		}
 
 		var stack = new E2EStack(app, seed);
 		if (live)
@@ -130,10 +136,19 @@ internal sealed class E2EStack
 			{
 				priority = 5,
 				request = new { urlPathPattern = $"{endpoint.Prefix}/.*" },
-				response = new { proxyBaseUrl = endpoint.RealBaseUrl, proxyUrlPrefixToRemove = endpoint.Prefix },
+				response = new { proxyBaseUrl = ProxyTarget(endpoint), proxyUrlPrefixToRemove = endpoint.Prefix },
 			};
 			await PostWithRetryAsync("/__admin/mappings", mapping);
 		}
+	}
+
+	private string ProxyTarget(ProviderEndpoint endpoint)
+	{
+		return endpoint.IsApp
+			? new UriBuilder(_app.GetEndpoint(endpoint.Name, "http")) { Host = "host.docker.internal" }
+				.Uri.ToString()
+				.TrimEnd('/')
+			: endpoint.RealBaseUrl;
 	}
 
 	private async Task PostWithRetryAsync(string path, object body)

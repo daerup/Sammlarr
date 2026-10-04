@@ -16,6 +16,11 @@ if (builder.ExecutionContext.IsRunMode)
 	{
 		ui.WithBrowserLaunch();
 	}
+
+	if (builder.Configuration["RadarrSonarr"] == "true")
+	{
+		builder.AddRadarrAndSonarr();
+	}
 }
 else
 {

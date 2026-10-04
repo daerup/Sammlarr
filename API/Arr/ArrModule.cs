@@ -1,4 +1,5 @@
 using API.Http;
+using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,8 @@ internal class ArrModule : IServiceModule
 	{
 		services.AddHttpClient<RadarrClient>().AddProviderHttp<ArrOptions>(MediaProvider.Radarr);
 		services.AddHttpClient<SonarrClient>().AddProviderHttp<ArrOptions>(MediaProvider.Sonarr);
+		services.AddScoped<ArrClients>();
 		services.AddKeyedScoped<IMediaSink, ArrSink>(SinkKind.Arr);
+		services.AddScoped<IArrConnectionTester, ArrConnectionTester>();
 	}
 }

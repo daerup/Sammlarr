@@ -34,14 +34,21 @@ public sealed record ArrTagScheme(string Prefix, bool PerUser, ArrUserTagSource 
 {
 	public static ArrTagScheme Default { get; } = new("sammlarr", true, ArrUserTagSource.Name, true, ArrFeedTagSource.ListName, false);
 
-	private string Root => ArrTagSlug.Of(Prefix).GetValueOr("sammlarr");
+	public string Root => ArrTagSlug.Of(Prefix).GetValueOr("sammlarr");
+
+	public static Optional<string> Slug(string text) => ArrTagSlug.Of(text);
 
 	public string UserTag(ArrTagUser user) => $"{Root}-u-{ArrTagSlug.Of(UserPart(user)).GetValueOr(() => ArrTagSlug.Of(user.Id))}";
+
+	public string KeptTag => $"{Root}-kept";
+
+	public IReadOnlyList<string> UserTags(ArrTagUser user) =>
+		[.. Enum.GetValues<ArrUserTagSource>().Select(source => (this with { UserSource = source }).UserTag(user)).Distinct()];
 
 	public string FeedTag(ArrTagFeed feed)
 	{
 		var slug = ArrTagSlug.Of(FeedPart(feed)).GetValueOr(() => ArrTagSlug.Of(feed.Id));
-		return slug.StartsWith("u-", StringComparison.Ordinal) ? $"{Root}-f-{slug}" : $"{Root}-{slug}";
+		return IsReserved(slug) ? $"{Root}-f-{slug}" : $"{Root}-{slug}";
 	}
 
 	public IReadOnlyList<string> Labels(ArrTagUser user, Optional<ArrTagFeed> feed)
@@ -58,6 +65,8 @@ public sealed record ArrTagScheme(string Prefix, bool PerUser, ArrUserTagSource 
 	public bool Owns(string label) => label == Root || label.StartsWith($"{Root}-", StringComparison.Ordinal);
 
 	public bool IsUserTag(string label) => label.StartsWith($"{Root}-u-", StringComparison.Ordinal);
+
+	private static bool IsReserved(string slug) => slug.StartsWith("u-", StringComparison.Ordinal) || slug == "kept";
 
 	private string UserPart(ArrTagUser user)
 	{

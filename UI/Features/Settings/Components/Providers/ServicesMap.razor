@@ -95,7 +95,7 @@
                                     <BbDropdownMenuLabel Class="text-xs font-normal text-muted-foreground">@picker.Label</BbDropdownMenuLabel>
                                     @foreach (var option in picker.Options)
                                     {
-                                        <BbDropdownMenuItem Class="gap-2.5">
+                                        <BbDropdownMenuItem Class="gap-2.5" OnClick="() => PickAsync(picker, option)">
                                             @foreach (var provider in option.Providers)
                                             {
                                                 <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
@@ -131,6 +131,8 @@
 
     [Parameter] public bool CanPick { get; set; }
 
+    [Parameter] public EventCallback<SinkKind> SinkPicked { get; set; }
+
     private ServicesMapModel _model = null!;
 
     private string? _hovered;
@@ -142,6 +144,15 @@
     private void Opened(string role, bool open) => _opened = open ? role : _opened == role ? null : _opened;
 
     protected override void OnParametersSet() => _model = ServicesMapModel.For(Config);
+
+    private Task PickAsync(MapPicker picker, MapEndpoint option)
+    {
+        return picker.Choice switch
+        {
+            MapChoice.Wantlist => SinkPicked.InvokeAsync(Enum.GetValues<SinkKind>().Single(sink => MapEndpoint.Of(sink) == option)),
+            MapChoice.Search => Task.CompletedTask,
+        };
+    }
 
     private BrandingInfo Brand(MediaProvider provider) => Branding.GetBrandingInfo(provider);
 

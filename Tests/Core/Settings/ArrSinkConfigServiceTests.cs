@@ -1,7 +1,9 @@
+using Contracts.Identity;
 using Contracts.Settings;
 using Core.Caching;
 using Core.Settings;
 using Domain.Identity;
+using Domain.Wantlist.Arr;
 using Microsoft.Extensions.Caching.Memory;
 using TestInfrastructure;
 
@@ -16,6 +18,7 @@ public sealed class ArrSinkConfigServiceTests : IDisposable
 
 	private readonly MemoryCache _memory = new(new MemoryCacheOptions());
 	private readonly Mock<IArrSinkConfigRepository> _repository = IArrSinkConfigRepository.Mock();
+	private readonly Mock<IUserRepository> _users = IUserRepository.Mock();
 	private readonly TestCurrentUser _user = new();
 
 	private readonly ArrSinkConfigService Testee;
@@ -23,7 +26,8 @@ public sealed class ArrSinkConfigServiceTests : IDisposable
 	public ArrSinkConfigServiceTests()
 	{
 		_repository.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
-		Testee = new ArrSinkConfigService(_repository.Object, new TypedMemoryCache<string, ArrSinkConfig>(_memory), _user);
+		_users.GetAllAsync(Any()).Returns([Member("Guest")]);
+		Testee = new ArrSinkConfigService(_repository.Object, new TypedMemoryCache<string, ArrSinkConfig>(_memory), _users.Object, _user);
 	}
 
 	public void Dispose() => _memory.Dispose();
@@ -47,6 +51,23 @@ public sealed class ArrSinkConfigServiceTests : IDisposable
 	}
 
 	[Test]
+	public async Task GetAsync_OnAOneUserInstall_KeepsUserTagsOff()
+	{
+		_repository.GetAsync(Any()).Returns(ArrSinkConfig.Empty with { Tags = ArrTagScheme.Default with { PerUser = false } });
+
+		await Assert.That((await Testee.GetAsync()).Tags.PerUser).IsFalse();
+	}
+
+	[Test]
+	public async Task GetAsync_OnceASecondUserSyncs_TurnsUserTagsBackOn()
+	{
+		_repository.GetAsync(Any()).Returns(ArrSinkConfig.Empty with { Tags = ArrTagScheme.Default with { PerUser = false } });
+		_users.GetAllAsync(Any()).Returns([Member("Guest"), Member("Daerup")]);
+
+		await Assert.That((await Testee.GetAsync()).Tags.PerUser).IsTrue();
+	}
+
+	[Test]
 	public async Task StoreAsync_AsAMember_Refuses()
 	{
 		_user.Role = UserRole.Member;
@@ -54,4 +75,6 @@ public sealed class ArrSinkConfigServiceTests : IDisposable
 		await Assert.That(async () => await Testee.StoreAsync(Connected)).Throws<UnauthorizedAccessException>();
 		_repository.StoreAsync(Any<ArrSinkConfig>(), Any()).WasCalled(Times.Never);
 	}
+
+	private static User Member(string name) => new(UserId.New(), name, string.Empty, UserRole.Member, DateTimeOffset.UnixEpoch);
 }

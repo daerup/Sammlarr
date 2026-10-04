@@ -179,7 +179,8 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			.Where(e => e.Source == source && rawIds.Contains(e.Media.Id))
 			.Select(e => new { MediaId = e.Media.Id, External = e })
 			.ToListAsync(cancellationToken);
-		return rows.ToDictionary(r => MediaId.From(r.MediaId), r => r.External.ToExternalMediaId());
+		return rows.GroupBy(r => r.MediaId)
+			.ToDictionary(group => MediaId.From(group.Key), group => group.MinBy(r => r.External.Id, StringComparer.Ordinal)!.External.ToExternalMediaId());
 	}
 
 	public async Task<Optional<RottenTomatoesAnswer>> FindRottenTomatoesAnswerAsync(MediaId id, CancellationToken cancellationToken = default)

@@ -4,6 +4,7 @@ using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Ratings;
 using Contracts.Settings;
+using Contracts.Wantlist;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
@@ -29,6 +30,8 @@ public class SettingsPageTests : BunitContext
 		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddSingleton<ProfileDropdownService>();
 		Services.AddSingleton<AccountConnectionPrompt>();
+		Services.AddScoped<Notifier>();
+		Services.AddSingleton(ISinkSwitch.Mock().Object);
 		AddAuthorization().SetAuthorized("alice");
 
 		var config = IProviderConfigService.Mock();

@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Contracts.Settings;
+using Domain.Wantlist.Arr;
 
 namespace API.Arr;
 

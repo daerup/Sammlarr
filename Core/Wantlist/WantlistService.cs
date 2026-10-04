@@ -89,6 +89,13 @@ internal sealed class WantlistService(IWantlistRepository repository, IWantlistO
 		return removed;
 	}
 
+	public async Task<IReadOnlyList<MediaId>> RequeueAllAsync(CancellationToken cancellationToken = default)
+	{
+		var wantlist = await GetAsync(cancellationToken);
+		await outbox.EnqueueAsync(WantlistOperationAction.Add, wantlist.Ids, cancellationToken);
+		return [.. wantlist.Ids];
+	}
+
 	private async Task EnsureSinkIdInExternalsAsync(List<MediaId> ids, CancellationToken cancellationToken)
 	{
 		if (ids.Count == 0)

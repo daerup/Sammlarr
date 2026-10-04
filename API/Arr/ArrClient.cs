@@ -2,18 +2,37 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using API.Arr.Types;
+using Domain.Wantlist.Arr;
 using Polly.CircuitBreaker;
 using Polly.Timeout;
 
 namespace API.Arr;
 
-internal sealed record ArrConnection(ArrApp App, Uri BaseUri, string ApiKey);
+internal sealed record ArrConnection(ArrApp App, Uri BaseUri, string ApiKey)
+{
+	public string Address => BaseUri.ToString().TrimEnd('/');
+}
 
 internal abstract class ArrClient(HttpClient http, ArrApp app)
 {
 	private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
 	public ArrApp App => app;
+
+	public Task<Result<ArrSystemStatus>> StatusAsync(ArrConnection connection, CancellationToken cancellationToken)
+	{
+		return ReadAsync<ArrSystemStatus>(connection, HttpMethod.Get, "system/status", new None(), cancellationToken);
+	}
+
+	public Task<Result<IReadOnlyList<ArrProfile>>> QualityProfilesAsync(ArrConnection connection, CancellationToken cancellationToken)
+	{
+		return ReadAsync<IReadOnlyList<ArrProfile>>(connection, HttpMethod.Get, "qualityprofile", new None(), cancellationToken);
+	}
+
+	public Task<Result<IReadOnlyList<ArrFolder>>> RootFoldersAsync(ArrConnection connection, CancellationToken cancellationToken)
+	{
+		return ReadAsync<IReadOnlyList<ArrFolder>>(connection, HttpMethod.Get, "rootfolder", new None(), cancellationToken);
+	}
 
 	public Task<Result<IReadOnlyList<ArrTag>>> TagsAsync(ArrConnection connection, CancellationToken cancellationToken)
 	{
@@ -90,11 +109,11 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 		try
 		{
 			var value = JsonSerializer.Deserialize<T>(text, Json);
-			return value is not null ? Success.Of(value) : Error.From($"{app.Name} at {connection.BaseUri} answered with nothing.");
+			return value is not null ? Success.Of(value) : Error.From($"{app.Name} at {connection.Address} answered with nothing.");
 		}
 		catch (JsonException ex)
 		{
-			return Error.From($"{app.Name} at {connection.BaseUri} answered something Sammlarr cannot read: {ex.Message}");
+			return Error.From($"{app.Name} at {connection.Address} answered something Sammlarr cannot read: {ex.Message}");
 		}
 	}
 
@@ -117,13 +136,13 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 		}
 		catch (Exception ex) when (ex is HttpRequestException or BrokenCircuitException or TimeoutRejectedException)
 		{
-			return Error.From($"{app.Name} could not be reached at {connection.BaseUri}: {ex.Message}");
+			return Error.From($"{app.Name} could not be reached at {connection.Address}: {ex.Message}");
 		}
 	}
 
 	private string Refusal(ArrConnection connection, HttpStatusCode status, string body)
 	{
-		var answer = $"{app.Name} answered {(int)status} {status} at {connection.BaseUri}.";
+		var answer = $"{app.Name} answered {(int)status} {status} at {connection.Address}.";
 		return status switch
 		{
 			HttpStatusCode.Unauthorized => $"{answer} Check the API key under Settings › General in {app.Name}.",

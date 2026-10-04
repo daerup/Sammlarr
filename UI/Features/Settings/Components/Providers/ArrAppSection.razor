@@ -1,0 +1,239 @@
+@using BlazorBlueprint.Primitives
+@using Contracts.Settings
+@using Domain.Wantlist.Arr
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<div class="arr-app" style="--seg: @Branding.GetBrandingInfo(App.Provider).BrandColor" aria-label="@App.Name">
+    <div class="arr-app-head">
+        <ProviderLogo Provider="App.Provider" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+        <span>@App.Name</span>
+        <span class="arr-app-for">@For</span>
+        <span class="arr-app-state">
+            @switch (State)
+            {
+                case ArrConnectionState.Empty:
+                    <span class="text-muted-foreground">Not connected</span>
+                    break;
+                case ArrConnectionState.Untested:
+                    <span class="text-muted-foreground">Not tested yet</span>
+                    break;
+                case ArrConnectionState.Testing:
+                    <span class="flex items-center gap-1.5 text-muted-foreground"><BbSpinner Size="SpinnerSize.Small"/>Testing…</span>
+                    break;
+                case ArrConnectionState.Connected:
+                    <span class="flex items-center gap-1.5 text-success"><LucideIcon Name="check" Size="13"/>Connected</span>
+                    break;
+                case ArrConnectionState.Failed:
+                    <span class="flex items-center gap-1.5 text-destructive"><LucideIcon Name="circle-alert" Size="13"/>Test failed</span>
+                    break;
+            }
+        </span>
+    </div>
+
+    <div class="arr-app-grid">
+        <BbField>
+            <BbFieldLabel>URL</BbFieldLabel>
+            <BbFieldContent>
+                <BbInput Value="@_url" ValueChanged="UrlChangedAsync" Placeholder="@Placeholder" AriaLabel="@($"{App.Name} URL")"
+                         Class="h-9 bg-accent text-sm" UpdateTiming="UpdateTiming.Immediate"/>
+            </BbFieldContent>
+        </BbField>
+
+        <BbField>
+            <BbFieldLabel>API key</BbFieldLabel>
+            <BbFieldContent>
+                <div class="flex items-center gap-2">
+                    <div class="min-w-0 flex-1">
+                        <SensitiveInput Value="@_key" ValueChanged="KeyChangedAsync" Compact="true" Label="@($"{App.Name} API key")"
+                                        Placeholder="@($"From {App.Name} › Settings › General")"
+                                        Class="@(State == ArrConnectionState.Failed ? "border-destructive" : string.Empty)"/>
+                    </div>
+                    @switch (State)
+                    {
+                        case ArrConnectionState.Testing:
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="true">
+                                <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                                <span>Testing…</span>
+                            </BbButton>
+                            break;
+                        case ArrConnectionState.Connected:
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="TestAsync">
+                                <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                                <span>Test again</span>
+                            </BbButton>
+                            break;
+                        case ArrConnectionState.Failed:
+                            <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" OnClick="TestAsync">
+                                <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                                <span>Test again</span>
+                            </BbButton>
+                            break;
+                        case ArrConnectionState.Empty or ArrConnectionState.Untested:
+                            <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" OnClick="TestAsync" Disabled="@(State == ArrConnectionState.Empty)">
+                                <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                                <span>Test</span>
+                            </BbButton>
+                            break;
+                    }
+                </div>
+            </BbFieldContent>
+        </BbField>
+
+        @if (State == ArrConnectionState.Failed)
+        {
+            <p class="arr-app-wide arr-app-line text-destructive" role="alert">
+                <LucideIcon Name="circle-alert" Size="13" Class="mt-px shrink-0"/>
+                <span>@Error</span>
+            </p>
+        }
+        else if (State != ArrConnectionState.Connected)
+        {
+            <p class="arr-app-wide arr-app-line text-muted-foreground">
+                <LucideIcon Name="info" Size="13" Class="mt-px shrink-0"/>
+                <span>Test the connection to load @(App.Name)'s quality profiles and root folders.</span>
+            </p>
+        }
+        else
+        {
+            @if (Choices.Folders.Count == 0)
+            {
+                <p class="arr-app-wide arr-app-line text-[var(--alert-warning)]" role="alert">
+                    <LucideIcon Name="triangle-alert" Size="13" Class="mt-px shrink-0"/>
+                    <span>@App.Name has no root folder yet. Add one under Settings › Media Management in @App.Name, then test again.</span>
+                </p>
+            }
+
+            <BbField>
+                <BbFieldLabel>Quality profile</BbFieldLabel>
+                <BbFieldContent>
+                    <BbSelect TValue="int?" Value="@Instance.QualityProfileId.ToNullable()" ValueChanged="ProfileChangedAsync"
+                              Options="ProfileOptions" Placeholder="Choose a profile" AriaLabel="@($"{App.Name} quality profile")" Class="w-full [&_[role=combobox]]:h-9"/>
+                </BbFieldContent>
+            </BbField>
+
+            <BbField>
+                <BbFieldLabel>Root folder</BbFieldLabel>
+                <BbFieldContent>
+                    <BbSelect TValue="string" Value="@Instance.RootFolderPath.GetValueOr(string.Empty)" ValueChanged="FolderChangedAsync"
+                              Options="FolderOptions" Placeholder="Choose a folder" AriaLabel="@($"{App.Name} root folder")" Class="w-full [&_[role=combobox]]:h-9"/>
+                </BbFieldContent>
+            </BbField>
+
+            <label class="arr-app-switch">
+                Monitor new titles
+                <BbSwitch Checked="Instance.Monitored" CheckedChanged="MonitoredChangedAsync" AriaLabel="@($"{App.Name} monitors new titles")"/>
+            </label>
+
+            <label class="arr-app-switch">
+                Search when added
+                <BbSwitch Checked="Instance.SearchOnAdd" CheckedChanged="SearchChangedAsync" AriaLabel="@($"{App.Name} searches when a title is added")"/>
+            </label>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required ArrApp App { get; set; }
+
+    [Parameter] [EditorRequired] public required ArrInstanceConfig Instance { get; set; }
+
+    [Parameter] public ArrConnectionState State { get; set; }
+
+    [Parameter] public string Error { get; set; } = string.Empty;
+
+    [Parameter] public ArrInstanceChoices Choices { get; set; } = new([], []);
+
+    [Parameter] public EventCallback<ArrInstanceConfig> Edited { get; set; }
+
+    [Parameter] public EventCallback<ArrInstanceConfig> Test { get; set; }
+
+    [Parameter] public EventCallback<ArrInstanceConfig> InstanceChanged { get; set; }
+
+    private string _url = string.Empty;
+
+    private string _key = string.Empty;
+
+    private (Optional<string> Url, Optional<string> Key)? _stored;
+
+    private string For
+    {
+        get
+        {
+            return App switch
+            {
+                ArrApp.Radarr => "movies",
+                ArrApp.Sonarr => "shows",
+            };
+        }
+    }
+
+    private string Placeholder
+    {
+        get
+        {
+            return App switch
+            {
+                ArrApp.Radarr => "http://radarr:7878",
+                ArrApp.Sonarr => "http://sonarr:8989",
+            };
+        }
+    }
+
+    private ArrInstanceConfig Typed => Instance with { Url = Text(_url), ApiKey = Text(_key) };
+
+    private IEnumerable<SelectOption<int?>> ProfileOptions => Choices.Profiles.Select(profile => new SelectOption<int?>(profile.Id, profile.Name));
+
+    private IEnumerable<SelectOption<string>> FolderOptions => Choices.Folders.Select(folder => new SelectOption<string>(folder.Path, $"{folder.Path} · {Free(folder.FreeSpace)} free"));
+
+    protected override void OnParametersSet()
+    {
+        var stored = (Instance.Url, Instance.ApiKey);
+        if (_stored.Equals(stored))
+        {
+            return;
+        }
+
+        _stored = stored;
+        _url = Instance.Url.GetValueOr(string.Empty);
+        _key = Instance.ApiKey.GetValueOr(string.Empty);
+    }
+
+    private async Task UrlChangedAsync(string url)
+    {
+        _url = url;
+        await Edited.InvokeAsync(Typed);
+    }
+
+    private async Task KeyChangedAsync(string key)
+    {
+        _key = key;
+        await Edited.InvokeAsync(Typed);
+    }
+
+    private Task TestAsync() => Test.InvokeAsync(Typed);
+
+    private Task ProfileChangedAsync(int? profile) => InstanceChanged.InvokeAsync(Instance with { QualityProfileId = Optional.Of(profile) });
+
+    private Task FolderChangedAsync(string? folder) => InstanceChanged.InvokeAsync(Instance with { RootFolderPath = Optional.Of(folder) });
+
+    private Task MonitoredChangedAsync(bool monitored) => InstanceChanged.InvokeAsync(Instance with { Monitored = monitored });
+
+    private Task SearchChangedAsync(bool search) => InstanceChanged.InvokeAsync(Instance with { SearchOnAdd = search });
+
+    private static Optional<string> Text(string typed) => Optional.When(!string.IsNullOrWhiteSpace(typed), typed.Trim);
+
+    private static string Free(long bytes)
+    {
+        string[] units = ["B", "KB", "MB", "GB", "TB", "PB"];
+        var size = (double)bytes;
+        var unit = 0;
+        while (size >= 1024 && unit < units.Length - 1)
+        {
+            size /= 1024;
+            unit++;
+        }
+
+        return FormattableString.Invariant($"{size:0.#} {units[unit]}");
+    }
+}

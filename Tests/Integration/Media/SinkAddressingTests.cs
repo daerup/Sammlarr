@@ -66,6 +66,26 @@ public class SinkAddressingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task EnsureSinkIdsAsync_ForATitleThatOnlyCarriesItsPlexId_FindsTheIdTheSinkAddsBy()
+	{
+		host.PlexHolds(TestMedia.FightClub);
+		var movie = await host.Movie(new MediaSpec("Fight Club", MediaType.Movie, [Plex("550")])).SeedAsync();
+
+		var missing = await Testee.EnsureSinkIdsAsync([movie], SinkKind.Plex);
+
+		await Assert.That(missing).IsEmpty();
+		await Assert.That((await Testee.GetSinkIdsAsync([movie]))[movie]).IsEqualTo(TmdbId.From("550", MediaType.Movie));
+	}
+
+	[Test]
+	public async Task EnsureSinkIdsAsync_ForATitleNoProviderCanConvert_ReturnsIt()
+	{
+		var movie = await host.Movie(new MediaSpec("Lost", MediaType.Movie, [Plex("999")])).SeedAsync();
+
+		await Assert.That(await Testee.EnsureSinkIdsAsync([movie], SinkKind.Plex)).IsEquivalentTo([movie]);
+	}
+
+	[Test]
 	public async Task AddAsync_ForAShowWithoutTheIdTheSinkAddressesShowsBy_RefusesIt()
 	{
 		var show = await host.Show(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Plex("1396")])).SeedAsync();

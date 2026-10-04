@@ -16,4 +16,6 @@ public interface IWantlistService
 	Task<IReadOnlyList<MediaId>> RemoveAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<MediaId>> RemoveAsync(IEnumerable<MediaId> ids, FeedId addedBy, CancellationToken cancellationToken = default);
+
+	Task<IReadOnlyList<MediaId>> RequeueAllAsync(CancellationToken cancellationToken = default);
 }

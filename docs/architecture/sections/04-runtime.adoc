@@ -270,6 +270,14 @@ reaches the open page as in-process events, and the sync ends with one notificat
 what actually reached Plex, not what was queued. The engine holds a per-user gate, so two syncs
 for one user never overlap.
 
+Switching the sink (Plex to Radarr + Sonarr or back, `ISinkSwitch`) holds every user's gate for the
+whole switch and refuses if a sync is running. Under each user it gives every wantlist, outbox and
+blocklist title the id the new sink addresses it by (re-identifying from the ids the title already
+carries), then queues every wantlist title as an add, and only then stores the new sink. Without the
+queued adds the first sync would read the new sink, find none of the titles and remove them all. A
+title no lookup can convert is counted and acks unaddressable on its first push; the cache purge
+keeps every id of a title that lacks the sink's id, so a later switch can still convert it.
+
 === Other flows
 
 Two flows are worth a mention but not a diagram of their own. Notifications are the one thing on

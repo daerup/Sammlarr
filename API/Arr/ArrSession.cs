@@ -19,10 +19,13 @@ internal sealed class ArrSession(ArrClient client, ArrConnection connection, Lis
 
 	public static Result<ArrConnection> Connect(ArrApp app, ArrInstanceConfig settings)
 	{
+		var invalid = Error.From($"{app.Name}'s address has to start with http:// or https://.");
 		return settings
-			.Url.Map(Address)
-			.Map(uri => settings.ApiKey.Map(key => new ArrConnection(app, uri, key)))
-			.Match(open => (Result<ArrConnection>)Success.Of(open), () => Error.From($"{app.Name} is not set up: it needs an address and an API key."));
+			.Url.Map(url => settings.ApiKey.Map(key => (Url: url, Key: key)))
+			.Match(
+				given => Address(given.Url).Map(uri => new ArrConnection(app, uri, given.Key)).ToResult(invalid),
+				() => Error.From($"{app.Name} is not set up: it needs an address and an API key.")
+			);
 	}
 
 	private static Optional<Uri> Address(string url)
@@ -32,9 +35,19 @@ internal sealed class ArrSession(ArrClient client, ArrConnection connection, Lis
 
 	public ValueSet<int> Mine(ArrTagScheme scheme, ArrTagUser user)
 	{
-		var label = scheme.UserTag(user);
-		return [.. tags.Where(tag => scheme.PerUser ? tag.Key == label : scheme.Owns(tag.Key)).Select(tag => tag.Value)];
+		var labels = scheme.UserTags(user).ToHashSet();
+		return [.. tags.Where(tag => scheme.PerUser ? labels.Contains(tag.Key) : scheme.Owns(tag.Key)).Select(tag => tag.Value)];
 	}
+
+	public bool IsUnclaimed(ArrTitle title, ArrTagScheme scheme)
+	{
+		var labels = title.Tags.Select(Label).ToList();
+		return labels.Any(scheme.Owns) && !labels.Any(scheme.IsUserTag);
+	}
+
+	public bool IsKept(ArrTitle title, ArrTagScheme scheme) => title.Tags.Select(Label).Contains(scheme.KeptTag);
+
+	public IReadOnlyList<int> Owned(ArrTitle title, ArrTagScheme scheme) => [.. title.Tags.Where(tag => scheme.Owns(Label(tag)))];
 
 	public Optional<int> TagId(string label) => tags.GetValueOrNone(label);
 

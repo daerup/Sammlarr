@@ -1,12 +1,15 @@
 @using Contracts.Auth
 @using Contracts.Identity
 @using Contracts.Settings
+@using Contracts.Wantlist
 @using Domain.Identity
 @inject IProviderConfigService ProviderConfigService
 @inject RatingContext RatingContext
 @inject IApiKeyService ApiKeys
 @inject ICredentialService Credentials
 @inject ICurrentUser CurrentUser
+@inject ISinkSwitch SinkSwitch
+@inject Notifier Notifier
 
 <div class="flex max-w-4xl flex-col gap-8">
     <div>
@@ -48,8 +51,24 @@
     {
         <section class="flex flex-col gap-3" aria-label="Services">
             <h3 class="text-sm font-semibold">Services</h3>
-            <ServicesMap Config="config" Ready="_ready" CanPick="@(CurrentUser.Role == UserRole.Admin)"/>
+            <ServicesMap Config="MapConfig(config)" Ready="MapReady(config)" CanPick="IsAdmin" SinkPicked="SinkPickedAsync"/>
         </section>
+
+        @if (IsAdmin && (config.Sink == SinkKind.Arr || _settingUp))
+        {
+            <section class="flex flex-col gap-3" aria-label="Wantlist sync">
+                <h3 class="text-sm font-semibold">Wantlist sync</h3>
+                <div class="rounded-lg border bg-card overflow-hidden">
+                    <ArrSinkRow Open="IsOpen(MediaProvider.Radarr)"
+                                OpenChanged="open => Toggle(MediaProvider.Radarr, open)"
+                                SettingUp="_settingUp"
+                                Switching="_switching"
+                                SwitchRequested="() => SwitchToAsync(SinkKind.Arr)"
+                                StayOnPlex="StayOnPlex"
+                                InstanceMoved="MoveAsync"/>
+                </div>
+            </section>
+        }
     }
     else
     {
@@ -101,6 +120,89 @@
             .. (await Credentials.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
             .. (await ApiKeys.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
         ];
+    }
+
+    private bool _settingUp;
+
+    private bool _switching;
+
+    private bool IsAdmin => CurrentUser.Role == UserRole.Admin;
+
+    private ProviderConfig MapConfig(ProviderConfig config) => _settingUp ? config with { Sink = SinkKind.Arr } : config;
+
+    private IReadOnlySet<MediaProvider> MapReady(ProviderConfig config)
+    {
+        var sink = config.Sink == SinkKind.Arr && !_settingUp ? SinkKind.Arr.Providers() : [];
+        return _ready.Concat(sink).ToHashSet();
+    }
+
+    private Task SinkPickedAsync(SinkKind sink)
+    {
+        if (_switching)
+        {
+            return Task.CompletedTask;
+        }
+
+        return sink switch
+        {
+            SinkKind.Arr => SetUpArrAsync(),
+            SinkKind.Plex => BackToPlexAsync(),
+        };
+    }
+
+    private Task SetUpArrAsync()
+    {
+        _settingUp = _config?.Sink != SinkKind.Arr;
+        _open = MediaProvider.Radarr;
+        return Task.CompletedTask;
+    }
+
+    private Task BackToPlexAsync()
+    {
+        if (_settingUp || _config?.Sink != SinkKind.Arr)
+        {
+            StayOnPlex();
+            return Task.CompletedTask;
+        }
+
+        return SwitchToAsync(SinkKind.Plex);
+    }
+
+    private void StayOnPlex()
+    {
+        _settingUp = false;
+        _open = _open == MediaProvider.Radarr ? null : _open;
+    }
+
+    private Task SwitchToAsync(SinkKind sink) => RunAsync(sink, () => SinkSwitch.SwitchAsync(sink));
+
+    private Task MoveAsync(ArrSinkConfig arr) => RunAsync(SinkKind.Arr, () => SinkSwitch.MoveAsync(arr));
+
+    private async Task RunAsync(SinkKind sink, Func<Task<Result<SinkSwitched>>> run)
+    {
+        _switching = true;
+        StateHasChanged();
+        try
+        {
+            var switched = await run();
+            switched.Apply(moved => Switched(sink, moved)).ApplyError(error => Notifier.Error(error.Reason, "The wantlist did not switch"));
+            _config = await ProviderConfigService.GetAsync();
+            _settingUp = switched.Match(_ => false, _ => _settingUp);
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "The wantlist did not switch");
+        }
+        finally
+        {
+            _switching = false;
+        }
+    }
+
+    private void Switched(SinkKind sink, SinkSwitched moved)
+    {
+        var skipped = moved.Unaddressable == 0 ? string.Empty : $" {moved.Unaddressable} more have no id {sink.GetDescription()} can add by and are skipped.";
+        Notifier.Success($"The wantlist now syncs to {sink.GetDescription()}: {moved.Queued - moved.Unaddressable} titles go across on each user's next sync.{skipped}");
     }
 
     private bool IsOpen(MediaProvider provider) => _open == provider;

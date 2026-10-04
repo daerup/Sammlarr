@@ -1,5 +1,6 @@
 using Contracts.Media.Conversions;
 using Domain.Media;
+using Domain.Providers;
 
 namespace Contracts.Media;
 
@@ -23,6 +24,8 @@ public interface IMediaService
 	Task<IReadOnlyDictionary<MediaId, RatingSummary>> GetStoredRatingsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
+
+	Task<IReadOnlyList<MediaId>> EnsureSinkIdsAsync(IEnumerable<MediaId> ids, SinkKind sink, CancellationToken cancellationToken = default);
 }
 
 public record IdentifyRequest(IReadOnlyList<IExternalMediaId> Candidates, Optional<IdentifyHints> Hints)

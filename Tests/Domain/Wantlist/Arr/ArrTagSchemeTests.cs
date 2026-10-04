@@ -1,4 +1,5 @@
 using Domain.Wantlist.Arr;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
 namespace Domain.Tests.Wantlist.Arr;
@@ -112,6 +113,30 @@ public class ArrTagSchemeTests
 
 		await Assert.That(scheme.UserTag(new ArrTagUser(GuestId, "Guest"))).IsEqualTo("media-sync-u-guest");
 		await Assert.That(scheme.Owns("media-sync-u-guest")).IsTrue();
+	}
+
+	[Test]
+	public async Task Slug_ForATypedPrefix_IsWhatTheTagsWouldStartWith()
+	{
+		await Assert.That(ArrTagScheme.Slug(" Media Sync ")).IsSome().And.IsEqualTo("media-sync");
+	}
+
+	[Test]
+	public async Task Slug_ForAPrefixWithNothingUsable_IsNone()
+	{
+		await Assert.That(ArrTagScheme.Slug("🎬")).IsNone();
+	}
+
+	[Test]
+	public async Task FeedTag_ForAListNamedKept_NeverPosesAsTheAdoptionMarker()
+	{
+		await Assert.That(Testee.FeedTag(new ArrTagFeed(FeedId, "Kept", "someone/kept"))).IsEqualTo("sammlarr-f-kept");
+	}
+
+	[Test]
+	public async Task UserTags_ForAUser_ListTheTagFromTheirNameAndFromTheirId()
+	{
+		await Assert.That(Testee.UserTags(new ArrTagUser(GuestId, "Guest"))).IsEquivalentTo(["sammlarr-u-guest", "sammlarr-u-8f14e45fceea467a95756c0f6e3b4c11"]);
 	}
 
 	[Test]

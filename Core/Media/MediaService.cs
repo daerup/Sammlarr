@@ -186,8 +186,55 @@ internal sealed class MediaService(
 
 	public async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
 	{
-		var sink = await activeSink.ResolveAsync(cancellationToken);
-		var wanted = ids.ToList();
+		return await SinkIdsAsync([.. ids], await activeSink.ResolveAsync(cancellationToken), cancellationToken);
+	}
+
+	public async Task<IReadOnlyList<MediaId>> EnsureSinkIdsAsync(IEnumerable<MediaId> ids, SinkKind sink, CancellationToken cancellationToken = default)
+	{
+		var target = activeSink.Of(sink);
+		var wanted = ids.Distinct().ToList();
+		var known = await SinkIdsAsync(wanted, target, cancellationToken);
+		var missing = wanted.Where(id => !known.ContainsKey(id)).ToList();
+		if (missing.Count == 0)
+		{
+			return [];
+		}
+
+		var stored = await mediaRepository.GetAsync(missing, cancellationToken);
+		IReadOnlyList<IdentifyRequest> requests = [.. stored.Select(media => new IdentifyRequest([.. media.Identity.Externals], HintsOf(media)))];
+		await using (var buffer = bufferFactory.Create())
+		{
+			await IdentifyBatchAsync(requests, target, [], buffer, cancellationToken);
+		}
+
+		var found = await SinkIdsAsync(missing, target, cancellationToken);
+		return [.. missing.Where(id => !found.ContainsKey(id))];
+	}
+
+	private static Optional<IdentifyHints> HintsOf(StoredMedia media)
+	{
+		return media.Cached.Map(cached =>
+			Optional
+				.Of(cached.Details.Title)
+				.Map(title =>
+					Optional
+						.Of(cached.Details.ReleaseDate)
+						.Map(released => new IdentifyHints
+						{
+							Title = title,
+							Year = released.Year,
+							MediaType = cached.Details.Type,
+						})
+				)
+		);
+	}
+
+	private async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> SinkIdsAsync(
+		IReadOnlyList<MediaId> wanted,
+		IMediaSink sink,
+		CancellationToken cancellationToken
+	)
+	{
 		var sources = Enum.GetValues<MediaType>().Select(sink.AddressedBy).WhereSome().ToHashSet();
 		var found = new Dictionary<MediaId, IExternalMediaId>();
 		foreach (var source in sources)
