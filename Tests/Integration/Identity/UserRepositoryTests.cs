@@ -52,6 +52,17 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task RefreshAsync_AfterARename_KeepsTheNameThePersonJoinedWithAsTheirTagName()
+	{
+		var bob = new User(UserId.New(), "Bob", "avatar", UserRole.Member, DateTimeOffset.UnixEpoch);
+		await _testee.CreateAsync(bob, AuthProvider.Plex, "bob-external");
+
+		await _testee.RefreshAsync(bob.Id, "Robert", "new-avatar");
+
+		await Assert.That(await _testee.GetAsync(bob.Id)).IsEqualTo(bob with { DisplayName = "Robert", AvatarUrl = "new-avatar" });
+	}
+
+	[Test]
 	public async Task DeleteAsync_RemovesUserAndCascadesAllOwnedData()
 	{
 		var victimId = UserId.New();

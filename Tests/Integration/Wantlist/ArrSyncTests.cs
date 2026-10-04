@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Sync;
@@ -33,7 +34,7 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private readonly List<string> _added = [];
 
-	private string _titles = "[]";
+	private readonly List<string> _titles = [];
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
@@ -71,7 +72,7 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task SyncAsync_ForATitleTaggedForTheUserInRadarr_PullsItIntoTheWantlist()
 	{
 		var movie = await host.Movie(Inception).SeedAsync();
-		_titles = """[{"id":10,"title":"Inception","year":2010,"tmdbId":27205,"tags":[1]}]""";
+		_titles.Add("""{"id":10,"title":"Inception","year":2010,"tmdbId":27205,"tags":[1]}""");
 
 		await host.Resolve<IWantlistSyncEngine>().SyncAsync(Trigger);
 
@@ -82,10 +83,23 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task SyncAsync_AfterTheUserIsRenamed_StillPullsTheTitlesTaggedBeforeTheRename()
+	{
+		var movie = await host.Movie(Inception).SeedAsync();
+		_titles.Add("""{"id":10,"title":"Inception","year":2010,"tmdbId":27205,"tags":[1]}""");
+		await host.Resolve<IUserRepository>().RefreshAsync(host.CurrentUser.Id, "Renamed", string.Empty);
+		host.CurrentUser.DisplayName = "Renamed";
+
+		await host.Resolve<IWantlistSyncEngine>().SyncAsync(Trigger);
+
+		await Assert.That((await host.Resolve<IWantlistService>().GetAsync()).Find(movie)).IsSome();
+	}
+
+	[Test]
 	public async Task SyncAsync_ForAnUntaggedTitleInRadarr_LeavesTheWantlistAlone()
 	{
 		await host.Movie(Inception).SeedAsync();
-		_titles = """[{"id":10,"title":"Inception","year":2010,"tmdbId":27205,"tags":[]}]""";
+		_titles.Add("""{"id":10,"title":"Inception","year":2010,"tmdbId":27205,"tags":[]}""");
 
 		await host.Resolve<IWantlistSyncEngine>().SyncAsync(Trigger);
 
@@ -96,7 +110,7 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		if (request.Method != HttpMethod.Post)
 		{
-			return Json(_titles);
+			return Json($"[{string.Join(",", _titles)}]");
 		}
 
 		_added.Add(request.Content!.ReadAsStringAsync().GetAwaiter().GetResult());

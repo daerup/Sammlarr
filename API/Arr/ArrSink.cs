@@ -26,8 +26,6 @@ internal sealed class ArrSink(
 {
 	public SinkKind Kind => SinkKind.Arr;
 
-	private ArrTagUser User => new(currentUser.Id.Value, currentUser.DisplayName);
-
 	public Optional<MediaProvider> AddressedBy(MediaType type)
 	{
 		return type switch
@@ -41,11 +39,12 @@ internal sealed class ArrSink(
 	public async Task<SinkSnapshot> GetAsync(CancellationToken cancellationToken = default)
 	{
 		var config = await configs.GetAsync(cancellationToken);
-		var claims = (await ClaimantAsync(config.Tags, cancellationToken)).Match(first => first.Id == User.Id, () => false);
+		var viewer = await ViewerAsync(cancellationToken);
+		var claims = (await ClaimantAsync(config.Tags, cancellationToken)).Match(first => first.Id == viewer.Id, () => false);
 		List<FoundMedia> items = [];
 		foreach (var app in Enum.GetValues<ArrApp>())
 		{
-			items.AddRange(await MineAsync(clients.For(app), config, claims, cancellationToken));
+			items.AddRange(await MineAsync(clients.For(app), config, viewer, claims, cancellationToken));
 		}
 
 		var requests = items.Select(item => new IdentifyRequest([.. item.Externals], new None()));
@@ -66,7 +65,7 @@ internal sealed class ArrSink(
 	)
 	{
 		var config = await configs.GetAsync(cancellationToken);
-		var setup = new Setup(config, await ClaimantAsync(config.Tags, cancellationToken));
+		var setup = new Setup(config, await ClaimantAsync(config.Tags, cancellationToken), await ViewerAsync(cancellationToken));
 		var sinkIds = await mediaService.GetSinkIdsAsync([.. pushes.Select(push => push.MediaId)], cancellationToken);
 		var sessions = new Dictionary<ArrApp, Result<ArrSession>>();
 		foreach (var push in pushes)
@@ -94,7 +93,9 @@ internal sealed class ArrSink(
 		return await held.Match(apps => ClearAllAsync(apps, cancellationToken), error => Task.FromResult<Result<int>>(error));
 	}
 
-	private static ArrTagUser Owner(User person) => new(person.Id.Value, person.DisplayName);
+	private static ArrTagUser Owner(User person) => new(person.Id.Value, person.TagName);
+
+	private async Task<ArrTagUser> ViewerAsync(CancellationToken cancellationToken) => Owner(await users.GetAsync(currentUser.Id, cancellationToken));
 
 	private async Task<Result<IReadOnlyList<Held>>> HeldAsync(ArrSinkConfig config, ArrTagUser owner, CancellationToken cancellationToken)
 	{
@@ -103,10 +104,7 @@ internal sealed class ArrSink(
 			return Error.From("Radarr + Sonarr tags titles without naming the person here, so their titles cannot be told apart.");
 		}
 
-		var others = (await users.GetAllAsync(cancellationToken))
-			.Where(user => user.Id.Value != owner.Id)
-			.Select(user => new ArrTagUser(user.Id.Value, user.DisplayName))
-			.ToList();
+		var others = (await users.GetAllAsync(cancellationToken)).Where(user => user.Id.Value != owner.Id).Select(Owner).ToList();
 		Result<IReadOnlyList<Held>> held = Success.Of<IReadOnlyList<Held>>([]);
 		foreach (var app in Enum.GetValues<ArrApp>())
 		{
@@ -156,11 +154,17 @@ internal sealed class ArrSink(
 		return deleted == 0 ? error : Error.From($"{error.Reason} {deleted} of their titles were already deleted.");
 	}
 
-	private async Task<IReadOnlyList<FoundMedia>> MineAsync(ArrClient client, ArrSinkConfig config, bool claims, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<FoundMedia>> MineAsync(
+		ArrClient client,
+		ArrSinkConfig config,
+		ArrTagUser viewer,
+		bool claims,
+		CancellationToken cancellationToken
+	)
 	{
 		var opened = await ArrSession.OpenAsync(client, ArrSession.Connect(client.App, config.Of(client.App)), cancellationToken);
 		var session = opened.Match(open => open, error => throw new InvalidOperationException(error.Reason));
-		var mine = session.Mine(config.Tags, User);
+		var mine = session.Mine(config.Tags, viewer);
 		return
 		[
 			.. session
@@ -203,14 +207,14 @@ internal sealed class ArrSink(
 		return action switch
 		{
 			WantlistOperationAction.Add => AddAsync(session, push, id, setup, cancellationToken),
-			WantlistOperationAction.Remove => RemoveAsync(session, id, setup.Config.Tags, cancellationToken),
+			WantlistOperationAction.Remove => RemoveAsync(session, id, setup, cancellationToken),
 		};
 	}
 
 	private async Task<Result<SinkSyncOutcome>> AddAsync(ArrSession session, SinkPush push, IExternalMediaId id, Setup setup, CancellationToken cancellationToken)
 	{
 		var feed = push.AddedBy.Map(added => new ArrTagFeed(added.Id.Value, added.Name, added.Identifier));
-		var labels = setup.Config.Tags.Labels(User, feed);
+		var labels = setup.Config.Tags.Labels(setup.Viewer, feed);
 		return await session
 			.Find(id)
 			.Match(
@@ -300,14 +304,15 @@ internal sealed class ArrSink(
 		return added.Map(_ => SinkSyncOutcome.Applied);
 	}
 
-	private Task<Result<SinkSyncOutcome>> RemoveAsync(ArrSession session, IExternalMediaId id, ArrTagScheme scheme, CancellationToken cancellationToken)
+	private Task<Result<SinkSyncOutcome>> RemoveAsync(ArrSession session, IExternalMediaId id, Setup setup, CancellationToken cancellationToken)
 	{
-		return session.Find(id).Match(title => UntagAsync(session, title, scheme, cancellationToken), () => Done(SinkSyncOutcome.Applied));
+		return session.Find(id).Match(title => UntagAsync(session, title, setup, cancellationToken), () => Done(SinkSyncOutcome.Applied));
 	}
 
-	private async Task<Result<SinkSyncOutcome>> UntagAsync(ArrSession session, ArrTitle title, ArrTagScheme scheme, CancellationToken cancellationToken)
+	private async Task<Result<SinkSyncOutcome>> UntagAsync(ArrSession session, ArrTitle title, Setup setup, CancellationToken cancellationToken)
 	{
-		var mine = session.Mine(scheme, User);
+		var scheme = setup.Config.Tags;
+		var mine = session.Mine(scheme, setup.Viewer);
 		var wantedByOthers = scheme.PerUser && session.WantedByOthers(title, scheme, mine);
 		var removed = await (
 			(wantedByOthers, session.IsKept(title, scheme)) switch
@@ -323,18 +328,14 @@ internal sealed class ArrSink(
 	private async Task<Optional<ArrTagUser>> ClaimantAsync(ArrTagScheme scheme, CancellationToken cancellationToken)
 	{
 		var everyone = await users.GetAllAsync(cancellationToken);
-		return everyone
-			.OrderBy(user => user.JoinedAt)
-			.FirstOrNone(_ => true)
-			.When(_ => scheme.PerUser)
-			.Map(first => new ArrTagUser(first.Id.Value, first.DisplayName));
+		return everyone.OrderBy(user => user.JoinedAt).FirstOrNone(_ => true).When(_ => scheme.PerUser).Map(Owner);
 	}
 
 	private static Task<Result<SinkSyncOutcome>> Done(SinkSyncOutcome outcome) => Task.FromResult<Result<SinkSyncOutcome>>(Success.Of(outcome));
 
 	private static Task<Result<SinkSyncOutcome>> Failed(Error error) => Task.FromResult<Result<SinkSyncOutcome>>(error);
 
-	private sealed record Setup(ArrSinkConfig Config, Optional<ArrTagUser> Claimant);
+	private sealed record Setup(ArrSinkConfig Config, Optional<ArrTagUser> Claimant, ArrTagUser Viewer);
 
 	private sealed record Held(ArrSession Session, IReadOnlyList<ArrTitle> Sole, IReadOnlyList<ArrTitle> Staying, ValueSet<int> Only);
 }

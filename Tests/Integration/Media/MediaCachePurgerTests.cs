@@ -144,6 +144,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 				Provider = AuthProvider.Plex,
 				ExternalUserId = otherUserId.ToString(),
 				DisplayName = "Other",
+				TagName = "Other",
 				AvatarUrl = string.Empty,
 				Role = UserRole.Member,
 				JoinedAt = DateTimeOffset.UnixEpoch,

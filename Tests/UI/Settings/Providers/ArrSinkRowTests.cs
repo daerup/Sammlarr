@@ -37,6 +37,10 @@ public class ArrSinkRowTests : BunitContext
 
 	private readonly Mock<IArrConnectionTester> _tester = IArrConnectionTester.Mock();
 
+	private readonly Mock<IUserManagementService> _users = IUserManagementService.Mock();
+
+	private static readonly User Guest = new(TestCurrentUser.DefaultId, "Guest", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch);
+
 	private int _switchRequests;
 
 	private readonly List<ArrSinkConfig> _moves = [];
@@ -48,9 +52,8 @@ public class ArrSinkRowTests : BunitContext
 		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddSingleton(_configs.Object);
 		Services.AddSingleton(_tester.Object);
-		var users = IUserManagementService.Mock();
-		users.GetAllAsync(Any()).Returns([new User(TestCurrentUser.DefaultId, "Guest", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch)]);
-		Services.AddSingleton(users.Object);
+		_users.GetAllAsync(Any()).Returns([Guest]);
+		Services.AddSingleton(_users.Object);
 		var feeds = IFeedService.Mock();
 		feeds.GetAsync(Any()).Returns(new FeedSnapshot([]));
 		Services.AddSingleton(feeds.Object);
@@ -151,6 +154,17 @@ public class ArrSinkRowTests : BunitContext
 		await cut.InvokeAsync(() => radarr.Instance.Test.InvokeAsync(Connected.Radarr));
 
 		await Assert.That(_moves).IsEmpty();
+	}
+
+	[Test]
+	public async Task Tags_ForAPersonRenamedSinceTheyJoined_PreviewTheNameTheyJoinedWith()
+	{
+		_users.GetAllAsync(Any()).Returns([Guest with { DisplayName = "Renamed" }]);
+
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => cut.FindComponents<ArrTagsSection>().Count == 1);
+		await Assert.That(cut.FindComponent<ArrTagsSection>().Instance.Users).IsEquivalentTo([new ArrTagUser(TestCurrentUser.DefaultId.Value, "Guest")]);
 	}
 
 	private void Answers(ArrApp app, string folder)

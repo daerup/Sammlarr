@@ -78,6 +78,7 @@ public class JobsTableTests(SammlarrTestHost host) : IAsyncDisposable
 				Provider = AuthProvider.Plex,
 				ExternalUserId = id.ToString(),
 				DisplayName = "Second User",
+				TagName = "Second User",
 				AvatarUrl = string.Empty,
 				Role = UserRole.Member,
 				JoinedAt = DateTimeOffset.UnixEpoch,

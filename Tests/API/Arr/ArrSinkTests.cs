@@ -47,10 +47,19 @@ public class ArrSinkTests
 
 	private readonly Mock<IUserRepository> _users = IUserRepository.Mock();
 
+	private readonly Mock<ICurrentUser> _viewer = ICurrentUser.Mock();
+
 	private static readonly UserId Guest = UserId.From(Guid.Parse("8f14e45f-ceea-467a-9575-6c0f6e3b4c11"));
 
+	private static readonly User GuestUser = new(Guest, "Guest", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch);
+
 	[Before(Test)]
-	public void Everyone() => _users.GetAllAsync(Any()).Returns([new User(Guest, "Guest", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch)]);
+	public void Everyone()
+	{
+		_users.GetAllAsync(Any()).Returns([GuestUser]);
+		_users.GetAsync(Guest, Any()).Returns(GuestUser);
+		_viewer.Id.Getter.Returns(Guest);
+	}
 
 	[Test]
 	[Arguments(MediaType.Movie, MediaProvider.Tmdb)]
@@ -81,6 +90,22 @@ public class ArrSinkTests
 		var snapshot = await Testee().GetAsync();
 
 		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
+		_media
+			.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests!.Single().Candidates.Any(id => id.Value == "27205")), Any())
+			.WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task GetAsync_ForAViewerRenamedSinceTheyJoined_ReadsTheTitlesTaggedWithTheirFirstName()
+	{
+		Renamed();
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"},{"id":2,"label":"sammlarr-u-renamed"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]},{"id":11,"tmdbId":550,"tags":[2]}]""");
+		EmptySonarr();
+		Identifying();
+
+		await Testee().GetAsync();
+
 		_media
 			.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests!.Single().Candidates.Any(id => id.Value == "27205")), Any())
 			.WasCalled(Times.Once);
@@ -132,6 +157,24 @@ public class ArrSinkTests
 					.BodyContains("\"searchForMovie\":true"),
 			Times.Once
 		);
+	}
+
+	[Test]
+	public async Task ApplyAsync_ForAViewerRenamedSinceTheyJoined_TagsTheTitleWithTheirFirstName()
+	{
+		Renamed();
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("[]");
+		_radarr
+			.OnRequest(request => request.Method(HttpMethod.Get).PathStartsWith("/api/v3/movie/lookup"))
+			.RespondWithJson("""[{"title":"Inception","tmdbId":27205}]""");
+		_radarr.OnPost("/api/v3/movie").RespondWithJson("""{"id":5,"tmdbId":27205,"tags":[1]}""");
+		Addressing(TmdbId.From("27205", MediaType.Movie));
+
+		await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_radarr.Verify(request => request.Method(HttpMethod.Post).Path("/api/v3/movie").BodyContains("\"tags\":[1]"), Times.Once);
+		_radarr.Verify(request => request.Method(HttpMethod.Post).Path("/api/v3/tag"), Times.Never);
 	}
 
 	[Test]
@@ -448,6 +491,18 @@ public class ArrSinkTests
 	}
 
 	[Test]
+	public async Task HoldingsOfAsync_ForAPersonRenamedSinceTheyJoined_CountsTheTitlesTaggedWithTheirFirstName()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":1,"tags":[1]}]""");
+		EmptySonarr();
+
+		var holdings = await Testee().HoldingsOfAsync(Mira with { DisplayName = "Mira Renamed" });
+
+		await Assert.That(holdings).IsSuccess().And.IsEqualTo(new SinkHoldings(1, 0, "sammlarr-u-mira"));
+	}
+
+	[Test]
 	public async Task DeleteTitlesOfAsync_DeletesOnlyTheirSoleTitlesInOneEditorCallPerApp()
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"},{"id":2,"label":"sammlarr-u-guest"}]""");
@@ -496,15 +551,14 @@ public class ArrSinkTests
 	[Test]
 	public async Task DeleteTitlesOfAsync_ForTwoPeopleWhoseNamesMakeTheSameTag_DeletesNothingOfTheOthers()
 	{
-		_users
-			.GetAllAsync(Any())
-			.Returns([Mira with { DisplayName = "bob.smith" }, new User(Guest, "bob_smith", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch)]);
+		var bob = Mira with { TagName = "bob.smith" };
+		_users.GetAllAsync(Any()).Returns([bob, new User(Guest, "bob_smith", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch)]);
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-bob-smith"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":1,"tags":[1]}]""");
 		EmptySonarr();
 
-		var holdings = await Testee().HoldingsOfAsync(Mira with { DisplayName = "bob.smith" });
-		var deleted = await Testee().DeleteTitlesOfAsync(Mira with { DisplayName = "bob.smith" });
+		var holdings = await Testee().HoldingsOfAsync(bob);
+		var deleted = await Testee().DeleteTitlesOfAsync(bob);
 
 		await Assert.That(holdings).IsSuccess().And.IsEqualTo(new SinkHoldings(0, 1, "sammlarr-u-bob-smith"));
 		await Assert.That(deleted).IsSuccess().And.IsEqualTo(0);
@@ -542,17 +596,21 @@ public class ArrSinkTests
 	{
 		var configs = IArrSinkConfigService.Mock();
 		configs.GetAsync(Any()).Returns(config);
-		var user = ICurrentUser.Mock();
-		user.Id.Getter.Returns(Guest);
-		user.DisplayName.Getter.Returns("Guest");
+
 		return new ArrSink(
 			new ArrClients(new RadarrClient(new HttpClient(_radarr)), new SonarrClient(new HttpClient(_sonarr))),
 			configs.Object,
 			_users.Object,
 			_media.Object,
-			user.Object,
+			_viewer.Object,
 			NullLogger<ArrSink>.Instance
 		);
+	}
+
+	private void Renamed()
+	{
+		_users.GetAsync(Guest, Any()).Returns(GuestUser with { DisplayName = "Renamed" });
+		_viewer.DisplayName.Getter.Returns("Renamed");
 	}
 
 	private void EmptySonarr()
