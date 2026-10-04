@@ -5,8 +5,6 @@ namespace E2E.Tests.SelfHosted;
 [SelfHosted]
 public class SetupTests
 {
-	private const string MemberPassword = "e2e-member-passphrase";
-
 	[Test]
 	public async Task AnyPage_OnAFreshInstall_GoesToSetup()
 	{
@@ -51,16 +49,7 @@ public class SetupTests
 	{
 		var stack = await SelfHostedApp.StackAsync();
 		var invite = await SelfHostedSetup.FinishAsync(await SelfHostedApp.OpenPageAsync(), stack);
-		var member = await SelfHostedApp.OpenPageAsync();
 
-		await member.VisitAsync(invite);
-		await member.Labelled("New password").EnterAsync(MemberPassword);
-		await member.Labelled("Confirm password").EnterAsync(MemberPassword);
-		await member.Button("Join").ClickAsync();
-
-		await Expect(member.Heading("One more thing")).ToBeVisibleAsync(Wait.Settle);
-		await member.WaitForCircuitAsync();
-		await member.Button("Skip for now").ClickAsync();
-		await SelfHostedSetup.StaysHomeAsync(member);
+		await SelfHostedSetup.JoinAsync(await SelfHostedApp.OpenPageAsync(), invite);
 	}
 }
