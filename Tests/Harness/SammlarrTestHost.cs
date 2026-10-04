@@ -659,6 +659,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		SearchWithPlex(context);
 		SetUp(context);
 		SeedUser(context, user);
+		Prompted(context);
 		return connection;
 	}
 
@@ -709,6 +710,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		SetUp(context);
 		SeedUser(context, user);
 		SeedSecondaryUsers(context);
+		Prompted(context);
 		seed(context);
 		EnableWriteAheadLogging(connection);
 		return Project(user);
@@ -743,6 +745,11 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		using var command = connection.CreateCommand();
 		command.CommandText = "PRAGMA journal_mode=WAL;";
 		command.ExecuteNonQuery();
+	}
+
+	private static void Prompted(SammlarrDbContext context)
+	{
+		context.Users.ExecuteUpdate(rows => rows.SetProperty(row => row.KeyPromptedAt, DateTimeOffset.UnixEpoch));
 	}
 
 	private static void SetUp(SammlarrDbContext context)

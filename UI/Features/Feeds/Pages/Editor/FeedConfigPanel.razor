@@ -69,6 +69,12 @@
                             API key is missing, fix in <AppLink Href="@SettingsLinks.Provider(missing.AsMediaProvider())" Color="inherit">Settings</AppLink>
                         </BbFieldError>
                     }
+                    else if (_disabledProviders.Contains(FeedProvider.Tmdb))
+                    {
+                        <BbFieldDescription>
+                            Add your TMDB key in <AppLink Href="@SettingsLinks.Provider(MediaProvider.Tmdb)">Settings › Providers</AppLink> to follow TMDB lists.
+                        </BbFieldDescription>
+                    }
                 </BbField>
 
                 <BbField>
@@ -633,7 +639,8 @@
         "Slug or numeric ID from the list URL, e.g. <code>top-250-movies</code> or <code>12345</code>. " +
         "<a href=\"https://mdblist.com/toplists/\" target=\"_blank\" " +
         "class=\"underline underline-offset-2 hover:text-foreground transition-colors\">Browse lists on MDBList</a>"),
-        null => new MarkupString("No provider is available. Configure an API key in Settings."),
+        null when Enum.GetValues<FeedProvider>().All(_disabledProviders.Contains) => new MarkupString("No provider is available until you add a TMDB or MDBList key in Settings › Providers."),
+        null => new MarkupString("Select a provider first."),
         _ => new MarkupString("The provider-specific identifier for the list (slug, numeric ID, or URL segment)."),
     };
 

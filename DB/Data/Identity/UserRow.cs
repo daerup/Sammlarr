@@ -19,6 +19,7 @@ internal sealed record UserRow : Entity<Guid>
 	public int FailedSignIns { get; set; }
 	public DateTimeOffset? LockedUntil { get; set; }
 	public DateTimeOffset? SessionsRevokedAt { get; set; }
+	public DateTimeOffset? KeyPromptedAt { get; set; }
 
 	[MaxLength(512)]
 	public string? ConfigResetHash { get; set; }

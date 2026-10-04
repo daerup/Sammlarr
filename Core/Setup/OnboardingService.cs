@@ -1,4 +1,5 @@
 using Contracts;
+using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Setup;
@@ -17,6 +18,7 @@ internal sealed class OnboardingService(
 	ILocalAccountRepository accounts,
 	ISetupStateRepository state,
 	IProviderConfigService providerConfig,
+	IApiKeyService apiKeys,
 	IUserScope userScope,
 	ICurrentUser currentUser,
 	IDateTimeProvider clock,
@@ -75,6 +77,19 @@ internal sealed class OnboardingService(
 	{
 		currentUser.EnsureAdmin();
 		await state.SetCompletedAtAsync(new None(), cancellationToken);
+	}
+
+	public async Task<bool> NeedsKeyPromptAsync(CancellationToken cancellationToken = default)
+	{
+		return currentUser.IsAuthenticated
+			&& currentUser.Role == UserRole.Member
+			&& !await users.WasKeyPromptedAsync(currentUser.Id, cancellationToken)
+			&& !await apiKeys.IsStoredAsync(ApiKeyProvider.Tmdb, cancellationToken);
+	}
+
+	public async Task DismissKeyPromptAsync(CancellationToken cancellationToken = default)
+	{
+		await users.MarkKeyPromptedAsync(currentUser.Id, clock.Now, cancellationToken);
 	}
 
 	private async Task<Result<User>> CreateAdminAsync(AdminClaim claim, CancellationToken cancellationToken)

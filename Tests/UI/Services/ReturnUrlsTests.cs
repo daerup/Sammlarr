@@ -1,6 +1,6 @@
-using Web.Auth;
+using UI.Shared.Services;
 
-namespace Web.Tests.Auth;
+namespace UI.Tests.Services;
 
 public class ReturnUrlsTests
 {

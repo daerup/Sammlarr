@@ -6,11 +6,19 @@ else if (ShowFallback)
 {
     <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-4">
         <LucideIcon Name="@FallbackIcon" Size="40" Class="mx-auto text-muted-foreground"/>
+        @if (ApiProvider is { } apiProvider)
+        {
+            <h3 class="text-base font-semibold tracking-tight">Add your @apiProvider.GetDescription() key</h3>
+        }
         <p class="text-muted-foreground">@GetFallbackMessage()</p>
 
         @if (FallbackAction.HasDelegate)
         {
-            <BbButton Variant="ButtonVariant.Outline" OnClick="InvokeFallbackActionAsync">
+            <BbButton Variant="@(ApiProvider.HasValue ? ButtonVariant.Default : ButtonVariant.Outline)" OnClick="InvokeFallbackActionAsync">
+                @if (ApiProvider.HasValue)
+                {
+                    <LucideIcon Name="key-round" Size="14" Class="mr-2"/>
+                }
                 @GetFallbackActionText()
             </BbButton>
         }
@@ -25,9 +33,15 @@ else if (ShowFallback)
     [Parameter] public AuthProvider? AuthProvider { get; set; }
     [Parameter] public ApiKeyProvider? ApiProvider { get; set; }
     [Parameter] public string DeniedActionDescription { get; set; } = "access this section";
+    [Parameter] public string? ApiKeyReason { get; set; }
     [Parameter] public EventCallback FallbackAction { get; set; }
 
-    private string FallbackIcon => AuthProvider.HasValue ? "lock" : ApiProvider.HasValue ? "key" : "log-in";
+    private string FallbackIcon => (AuthProvider, ApiProvider) switch
+    {
+        ({ }, _) => "lock",
+        (_, { }) => "key-round",
+        _ => "log-in",
+    };
 
     private string GetFallbackMessage()
     {
@@ -38,7 +52,7 @@ else if (ShowFallback)
 
         if (ApiProvider.HasValue)
         {
-            return $"A valid {ApiProvider.Value.GetDescription()} API key is required to {DeniedActionDescription}.";
+            return ApiKeyReason ?? $"A valid {ApiProvider.Value.GetDescription()} API key is required to {DeniedActionDescription}.";
         }
 
         return $"You need to sign in before {DeniedActionDescription}.";
@@ -53,7 +67,7 @@ else if (ShowFallback)
 
         if (ApiProvider.HasValue)
         {
-            return "Configure API Key";
+            return $"Add your {ApiProvider.Value.GetDescription()} key";
         }
 
         return "Sign in";

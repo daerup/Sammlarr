@@ -6,11 +6,22 @@
 @inject NavigationManager Navigation
 
 @code {
+    private string Welcome
+    {
+        get
+        {
+            var here = $"/{Navigation.ToBaseRelativePath(Navigation.Uri)}";
+            return here == "/" ? "/welcome" : $"/welcome?returnUrl={Uri.EscapeDataString(here)}";
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        if (CurrentUser.Role == UserRole.Admin && !await Onboarding.IsCompleteAsync())
+        var page = CurrentUser.Role switch
         {
-            Navigation.NavigateTo("/setup");
-        }
+            UserRole.Admin => Optional.When(!await Onboarding.IsCompleteAsync(), () => "/setup"),
+            UserRole.Member => Optional.When(await Onboarding.NeedsKeyPromptAsync(), () => Welcome),
+        };
+        page.Apply(target => Navigation.NavigateTo(target));
     }
 }

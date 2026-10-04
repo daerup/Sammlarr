@@ -1,0 +1,95 @@
+@page "/welcome"
+@layout AuthLayout
+@using Contracts.Auth
+@using Contracts.Setup
+@inject IApiKeyFactory ApiKeyFactory
+@inject IApiKeyService ApiKeys
+@inject IOnboardingService Onboarding
+@inject NavigationManager Navigation
+
+<PageTitle>One more thing</PageTitle>
+
+<div class="w-full max-w-md space-y-4 rounded-lg border bg-muted/40 p-8">
+    <div class="space-y-1.5 text-center">
+        <h2 class="text-lg font-semibold tracking-tight">One more thing</h2>
+        <p class="text-sm text-muted-foreground">Sammlarr reads trending titles, TMDB lists and every title's details through a TMDB key. Add yours to continue.</p>
+    </div>
+    @if (_error is { } error)
+    {
+        <div class="alert-soft-destructive flex items-start gap-3 rounded-lg border px-4 py-3 text-left text-sm" role="alert">
+            <LucideIcon Name="circle-alert" Size="18" Class="mt-0.5 shrink-0"/>
+            <span class="leading-relaxed">@error</span>
+        </div>
+    }
+    <BbField>
+        <BbFieldLabel For="welcome-key">TMDB API key</BbFieldLabel>
+        <BbFieldContent>
+            <SensitiveInput Id="welcome-key" @bind-Value="_key" Placeholder="Enter API key" Label="TMDB API key"/>
+            <BbFieldDescription>
+                Get one at
+                <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer"
+                   class="whitespace-nowrap underline underline-offset-2 hover:text-foreground transition-colors">themoviedb.org › Settings › API</a>
+                (free, takes a minute).
+            </BbFieldDescription>
+        </BbFieldContent>
+    </BbField>
+    <BbButton Class="w-full" Disabled="@(string.IsNullOrWhiteSpace(_key) || _testing)" OnClick="TestAsync">
+        @if (_testing)
+        {
+            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+        }
+        else
+        {
+            <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+        }
+        <span>Test and continue</span>
+    </BbButton>
+    <div class="text-center">
+        <BbButton Variant="ButtonVariant.Link" Size="ButtonSize.Small" Class="h-auto p-0 font-normal text-muted-foreground underline underline-offset-3 hover:text-foreground"
+                  OnClick="ContinueAsync">
+            Skip for now
+        </BbButton>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    private string _key = string.Empty;
+
+    private string? _error;
+
+    private bool _testing;
+
+    private string Target => ReturnUrls.Target(ReturnUrl);
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!await Onboarding.NeedsKeyPromptAsync())
+        {
+            Navigation.NavigateTo(Target);
+        }
+    }
+
+    private async Task TestAsync()
+    {
+        _testing = true;
+        _error = null;
+        var tested = await ApiKeyFactory.CreateAsync(ApiKeyProvider.Tmdb, _key.Trim());
+        _testing = false;
+        await tested.ApplyError(error => _error = error.Reason).Match(StoreAsync, _ => Task.CompletedTask);
+    }
+
+    private async Task StoreAsync(IApiKey key)
+    {
+        await ApiKeys.StoreAsync(key);
+        await ContinueAsync();
+    }
+
+    private async Task ContinueAsync()
+    {
+        await Onboarding.DismissKeyPromptAsync();
+        Navigation.NavigateTo(Target);
+    }
+}
