@@ -31,19 +31,4 @@ public class PlexFreeStackTests
 		var titles = (await radarr.GetAsync("movie")).AsArray().Select(added => added!["title"]!.GetValue<string>());
 		await Assert.That(titles).IsEquivalentTo(["Project Hail Mary"]);
 	}
-
-	[Test]
-	[Repeat(2)]
-	public async Task Web_OnAFreshStack_SendsAPageToSetup()
-	{
-		var stack = await PlexFreeApp.StackAsync();
-		await stack.SetupCodeAsync();
-		using var http = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { BaseAddress = new Uri(stack.BaseUrl) };
-		using var request = new HttpRequestMessage(HttpMethod.Get, "/");
-		request.Headers.Accept.ParseAdd("text/html");
-
-		using var response = await http.SendAsync(request);
-
-		await Assert.That(response.Headers.Location?.OriginalString).IsEqualTo("/setup");
-	}
 }

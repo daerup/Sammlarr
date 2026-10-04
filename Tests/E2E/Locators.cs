@@ -43,6 +43,8 @@ internal static class Locators
 		internal ILocator Field(string label) => page.Locator("[data-slot='field']").Filter(new LocatorFilterOptions { HasText = label });
 
 		internal ILocator Text(string value) => page.GetByText(value, new PageGetByTextOptions { Exact = true });
+
+		internal ILocator Labelled(string label) => page.GetByLabel(label, new PageGetByLabelOptions { Exact = true });
 	}
 
 	extension(ILocator scope)

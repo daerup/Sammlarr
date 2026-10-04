@@ -17,4 +17,6 @@ internal static class Routes
 	internal const string CreateFeed = "/feeds/create";
 
 	internal const string Settings = "/settings";
+
+	internal const string Setup = "/setup";
 }
