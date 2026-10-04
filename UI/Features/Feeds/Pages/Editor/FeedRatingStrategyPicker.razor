@@ -1,0 +1,219 @@
+<div class="rating-picker">
+    <div class="rating-picker-title"><RatingStar Value="10" Size="14" Shine="false"/>This feed's Sammlarr rating</div>
+    <BbTabs Value="@Tab" ValueChanged="SelectTabAsync" Class="rating-picker-tabs">
+        <BbTabsList>
+            <BbTabsTrigger Value="@DefaultTab">My default</BbTabsTrigger>
+            <BbTabsTrigger Value="@AverageTab">Average</BbTabsTrigger>
+            <BbTabsTrigger Value="@FirstTab">First available</BbTabsTrigger>
+        </BbTabsList>
+        <BbTabsContent Value="@DefaultTab">
+            <div class="rating-picker-follows">
+                <LucideIcon Name="link-2" Size="13"/>
+                <span>Follows your <a class="rating-picker-link" href="@SettingsLinks.Ratings">default</a></span>
+            </div>
+            <div class="rating-picker-list is-readonly">
+                @foreach (var (source, index) in Following.Select((source, index) => (source, index)))
+                {
+                    <div class="rating-picker-item">
+                        @if (Default is OrderedRating)
+                        {
+                            <span class="rating-picker-rank">@(index + 1)</span>
+                        }
+                        else
+                        {
+                            <span class="rating-picker-check"><LucideIcon Name="check" Size="13"/></span>
+                        }
+                        <RatingMarkIcon Source="source"/>
+                        <span>@RatingTexts.Name(source)</span>
+                    </div>
+                }
+            </div>
+        </BbTabsContent>
+        <BbTabsContent Value="@AverageTab">
+            <p class="rating-picker-desc">The ratings a title has from the providers switched on, averaged. At least one stays on.</p>
+            <div class="rating-picker-list">
+                @foreach (var source in AverageRows)
+                {
+                    var on = Averaged.SwitchedOn.Contains(source);
+                    var locked = on && SwitchedOnCount == 1;
+                    <div @key="source" class="rating-picker-item @(on ? null : "is-off")">
+                        <RatingMarkIcon Source="source"/>
+                        <span>@RatingTexts.Name(source)</span>
+                        @if (locked)
+                        {
+                            <span class="rating-picker-switch">
+                                <BbTooltip DelayDuration="150" Placement="PopoverPlacement.Bottom">
+                                    <BbTooltipTrigger AsChild="false">
+                                        <BbSwitch Checked="true" Disabled="true" Size="SwitchSize.Small" aria-label="@($"{RatingTexts.Name(source)} counts")"/>
+                                    </BbTooltipTrigger>
+                                    <BbTooltipContent>@FeedRatingTexts.LastOneOn</BbTooltipContent>
+                                </BbTooltip>
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="rating-picker-switch">
+                                <BbSwitch Checked="on" CheckedChanged="@(value => SwitchAsync(source, value))" Size="SwitchSize.Small" aria-label="@($"{RatingTexts.Name(source)} counts")"/>
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+        </BbTabsContent>
+        <BbTabsContent Value="@FirstTab">
+            <p class="rating-picker-desc">Every provider, in this order: a title gets the first rating it has. Drag to reorder.</p>
+            <div class="rating-picker-list" role="list">
+                @foreach (var (source, index) in OrderRows.Select((source, index) => (source, index)))
+                {
+                    <div @key="source"
+                         class="rating-picker-item @(_dragged == source ? "is-dragged" : null)"
+                         role="listitem"
+                         draggable="true"
+                         @ondragstart="() => _dragged = source"
+                         @ondragend="() => _dragged = null"
+                         @ondragover:preventDefault="true"
+                         @ondrop="() => DropAsync(source)">
+                        <button type="button"
+                                @ref="_grips[source]"
+                                class="rating-picker-grip"
+                                aria-label="@($"Move {RatingTexts.Name(source)}; Alt and an arrow key move it up or down")"
+                                @onkeydown="args => MoveByKeyAsync(args, source)">
+                            <LucideIcon Name="grip-vertical" Size="14"/>
+                        </button>
+                        <span class="rating-picker-rank">@(index + 1)</span>
+                        <RatingMarkIcon Source="source"/>
+                        <span>@RatingTexts.Name(source)</span>
+                    </div>
+                }
+            </div>
+        </BbTabsContent>
+    </BbTabs>
+    <p class="rating-picker-hint">Used by this feed's filter, sort and preview stars.</p>
+</div>
+
+@code {
+    private const string DefaultTab = "default";
+    private const string AverageTab = "average";
+    private const string FirstTab = "first";
+
+    private readonly Dictionary<RatingSource, ElementReference> _grips = [];
+
+    private RatingSource? _dragged;
+
+    private (RatingSource Source, int Index)? _refocus;
+
+    [Parameter] [EditorRequired] public required Optional<RatingStrategy> Value { get; set; }
+
+    [Parameter] public EventCallback<Optional<RatingStrategy>> ValueChanged { get; set; }
+
+    [Parameter] [EditorRequired] public required RatingStrategy Default { get; set; }
+
+    [Parameter] [EditorRequired] public required ValueSet<RatingSource> Available { get; set; }
+
+    private string Tab => Value.Match(TabOf, () => DefaultTab);
+
+    private AveragedRating Averaged => Value.Map(AveragedOf).GetValueOr(() => AveragedOf(Default).GetValueOr(AveragedRating.Everything));
+
+    private OrderedRating Ordered => Value.Map(OrderedOf).GetValueOr(() => OrderedOf(Default).GetValueOr(new OrderedRating()));
+
+    private int SwitchedOnCount => AverageRows.Count(source => Averaged.SwitchedOn.Contains(source));
+
+    private IEnumerable<RatingSource> AverageRows => Enum.GetValues<RatingSource>().Where(Available.Contains).OrderBy(source => !Averaged.SwitchedOn.Contains(source));
+
+    private List<RatingSource> OrderRows => [.. Ordered.Order.Where(Available.Contains)];
+
+    private IEnumerable<RatingSource> Following
+    {
+        get
+        {
+            return Default switch
+            {
+                AveragedRating averaged => averaged.SwitchedOn.Where(Available.Contains).Order(),
+                OrderedRating ordered => ordered.Order.Where(Available.Contains),
+            };
+        }
+    }
+
+    private static string TabOf(RatingStrategy strategy)
+    {
+        return strategy switch
+        {
+            AveragedRating => AverageTab,
+            OrderedRating => FirstTab,
+        };
+    }
+
+    private static Optional<AveragedRating> AveragedOf(RatingStrategy strategy)
+    {
+        return strategy switch
+        {
+            AveragedRating averaged => Some.Of(averaged),
+            OrderedRating => new None(),
+        };
+    }
+
+    private static Optional<OrderedRating> OrderedOf(RatingStrategy strategy)
+    {
+        return strategy switch
+        {
+            OrderedRating ordered => Some.Of(ordered),
+            AveragedRating => new None(),
+        };
+    }
+
+    private Task SelectTabAsync(string? tab)
+    {
+        return tab switch
+        {
+            AverageTab => ValueChanged.InvokeAsync(Some.Of(new RatingStrategy(Averaged))),
+            FirstTab => ValueChanged.InvokeAsync(Some.Of(new RatingStrategy(Ordered))),
+            _ => ValueChanged.InvokeAsync(new None()),
+        };
+    }
+
+    private Task SwitchAsync(RatingSource source, bool on)
+    {
+        var averaged = on ? Averaged.With(source) : Averaged.Without(source);
+        return ValueChanged.InvokeAsync(Some.Of(new RatingStrategy(averaged)));
+    }
+
+    private Task DropAsync(RatingSource target)
+    {
+        var dragged = _dragged;
+        _dragged = null;
+        return Optional.Of(dragged).Match(source => PlaceAsync(source, target), () => Task.CompletedTask);
+    }
+
+    private Task MoveByKeyAsync(KeyboardEventArgs args, RatingSource source)
+    {
+        var rows = OrderRows;
+        var index = rows.IndexOf(source);
+        var target = (args.AltKey, args.Key) switch
+        {
+            (true, "ArrowUp") => index - 1,
+            (true, "ArrowDown") => index + 1,
+            _ => -1,
+        };
+        if (target < 0 || target >= rows.Count)
+        {
+            return Task.CompletedTask;
+        }
+
+        _refocus = (source, target);
+        return PlaceAsync(source, rows[target]);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_refocus is { } moved && OrderRows.IndexOf(moved.Source) == moved.Index && _grips.TryGetValue(moved.Source, out var grip))
+        {
+            _refocus = null;
+            await grip.FocusAsync();
+        }
+    }
+
+    private Task PlaceAsync(RatingSource source, RatingSource target)
+    {
+        return ValueChanged.InvokeAsync(Some.Of(new RatingStrategy(Ordered.Moved(source, Ordered.Order.ToList().IndexOf(target)))));
+    }
+}

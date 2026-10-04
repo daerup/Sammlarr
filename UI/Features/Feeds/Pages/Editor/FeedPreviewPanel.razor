@@ -17,6 +17,7 @@
 @inject IFeedRunPlanner Planner
 @inject MediaProviderBrandingService Branding
 @inject Notifier Notifier
+@inject RatingContext RatingContext
 
 <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
     <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-base-100 rounded-t-lg">
@@ -162,6 +163,7 @@
                     <div class="pb-2">
                             <MediaDetailTile @key="item"
                                              Media="item"
+                                             Strategy="(_appliedConfig ?? Config).RatingStrategy"
                                              Class="@(hoverStyle)"
                                              IsFocused="_focusedResult == item.Key"
                                              OnFocusIn="() => _focusedResult = item.Key"
@@ -181,7 +183,7 @@
                                                     </div>
                                                 </BbTooltipTrigger>
                                                 <BbTooltipContent>
-                                                    @(isCulled ? "Filtered out by your filter rules." : "Excluded by the specified limit.")
+                                                    @(isCulled ? CulledTooltip(item) : "Excluded by the specified limit.")
                                                 </BbTooltipContent>
                                             </BbTooltip>
                                         </BbTooltipProvider>
@@ -367,6 +369,7 @@
     private int _goneShortfall;
     private bool _atRiskOnly;
     private FeedConfig? _appliedConfig;
+    private RatingView? _ratingView;
     private CancellationTokenSource? _cts;
     private PreviewStatus _lastEmittedStatus = new();
 
@@ -390,6 +393,20 @@
     private bool IsEmptyList => _fetchState == FetchState.Success && _rawResults.Count == 0;
     private bool HasFailed => _fetchState == FetchState.Failed;
     private bool EarlySaveAllowed => IsLoading && _fetchTimer.Elapsed >= EarlySaveDelay && _rawResults.Count >= EarlySaveMinItems;
+
+    protected override async Task OnInitializedAsync() => _ratingView = await RatingContext.GetAsync();
+
+    private string CulledTooltip(MatchedMedia item)
+    {
+        var reasons = Optional.Of(_ratingView).Map(view => RatingReasons(item, view, _appliedConfig ?? Config)).GetValueOr([]);
+        return reasons.Count > 0 ? $"Filtered out: {string.Join("; ", reasons)}." : "Filtered out by your filter rules.";
+    }
+
+    private static IReadOnlyList<string> RatingReasons(MatchedMedia item, RatingView view, FeedConfig applied)
+    {
+        var strategy = applied.RatingStrategy.GetValueOr(view.Default);
+        return Optional.Of(applied.Filter).Map(filter => FeedRatingReasons.For(filter, strategy.Resolve(item.Details.Rating, view.Available), strategy)).GetValueOr([]);
+    }
 
     protected override void OnParametersSet()
     {

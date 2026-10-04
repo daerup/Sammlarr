@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -88,6 +89,34 @@ internal static class FeedEditor
 		await page.Option(field).ClickAsync();
 		await FillAsync(page, "input[placeholder='Enter value...']", value);
 		await page.WaitForTimeoutAsync(FilterBuilderDebounceMs * 3);
+	}
+
+	internal static async Task AddNumberConditionAsync(IPage page, string field, string comparison, string value)
+	{
+		await page.ButtonContaining("Add condition").ClickAsync();
+		var condition = page.Locator("[role='group'][aria-label='Filter condition']").Last;
+		await condition.Combobox.First.ClickAsync();
+		await page.Option(field).ClickAsync();
+		await condition.Combobox.Nth(1).ClickAsync();
+		await page.Option(comparison).ClickAsync();
+		await condition.Locator($"input[aria-label='{field}']").EnterAsync(value);
+		await page.WaitForTimeoutAsync(FilterBuilderDebounceMs * 3);
+	}
+
+	internal static ILocator RatingStar(IPage page) => page.Locator("button.rating-star-button").First;
+
+	internal static async Task PutFirstAsync(IPage page, string source, int steps)
+	{
+		var grip = page.Locator($".rating-picker-grip[aria-label^='Move {source};']");
+		var rank = page.Locator(".rating-picker-item").Filter(new LocatorFilterOptions { Has = grip }).Locator(".rating-picker-rank");
+		var start = int.Parse(await rank.InnerTextAsync(), CultureInfo.InvariantCulture);
+		await grip.FocusAsync();
+		for (var step = 1; step <= steps; step++)
+		{
+			await page.Keyboard.PressAsync("Alt+ArrowUp");
+			await Expect(rank).ToHaveTextAsync((start - step).ToString(CultureInfo.InvariantCulture));
+			await Expect(grip).ToBeFocusedAsync();
+		}
 	}
 
 	internal static async Task OpenOptionalSectionAsync(IPage page, string heading)

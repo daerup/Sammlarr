@@ -1,0 +1,74 @@
+.number-rule {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.number-rule-box {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 8.5rem;
+    height: 36px;
+    overflow: hidden;
+    border: 1px solid var(--input);
+    border-radius: 6px;
+    background: var(--background);
+}
+
+.number-rule-box:focus-within {
+    box-shadow: 0 0 0 2px var(--ring);
+}
+
+.number-rule-box ::deep [data-number-rule] {
+    display: contents;
+}
+
+.number-rule-box ::deep [data-number-rule] > input {
+    order: 1;
+    width: 4.5ch;
+    min-width: 0;
+    height: 100%;
+    padding: 0 0 0 10px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+}
+
+@supports (field-sizing: content) {
+    .number-rule-box ::deep [data-number-rule] > input {
+        width: auto;
+        min-width: calc(1ch + 10px);
+        field-sizing: content;
+    }
+}
+
+.number-rule-box ::deep [data-number-rule] > input:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+.number-rule-unit {
+    order: 2;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.number-rule-adornment {
+    order: 3;
+    display: inline-flex;
+    margin-left: auto;
+}
+
+.number-rule-box ::deep [data-number-rule] > :not(input) {
+    order: 4;
+    align-self: stretch;
+}
+
+.number-rule-and {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}

@@ -29,7 +29,7 @@
                         <span>@fact</span>
                     }
                     <span aria-hidden="true">•</span>
-                    <SammlarrRatingBadge Ratings="@Details.Rating" Ids="@_ids" Title="@Details.Title" Media="Media.MatchedId"/>
+                    <SammlarrRatingBadge Ratings="@Details.Rating" Ids="@_ids" Title="@Details.Title" Media="Media.MatchedId" Strategy="Strategy"/>
                 </div>
                 <div class="flex items-center gap-2 pt-2 min-w-0">
                     <MediaTitleLink Title="@Details.Title" Ids="@_ids" Class="font-bold truncate text-xl" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
@@ -73,6 +73,7 @@
     [Parameter] public EventCallback OnFocusIn { get; set; }
     [Parameter] public EventCallback OnFocusOut { get; set; }
     [Parameter] public RenderFragment? Icons { get; set; }
+    [Parameter] public Optional<RatingStrategy> Strategy { get; set; } = new None();
 
     private MediaDetails Details => Media.Details;
 

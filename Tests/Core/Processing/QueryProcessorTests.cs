@@ -366,6 +366,22 @@ public class QueryProcessorRatingTests
 	}
 
 	[Test]
+	public async Task Execute_WhenFilterRatingGreaterOrEqual_KeepsATitleThatReadsAsTheBound()
+	{
+		var exact = MovieWithRating(2020, 7.1f);
+		var halfway = MovieWithRating(2021, 6.95f);
+		var below = MovieWithRating(2022, 6.94f);
+		var options = new QueryOptions { Filter = Some.Of(Filter(Group(Number(nameof(MediaQueryRow.Rating), FilterPredicateOperator.GreaterOrEqual, 7.0)))) };
+		var strict = new QueryOptions { Filter = Some.Of(Filter(Group(Number(nameof(MediaQueryRow.Rating), FilterPredicateOperator.GreaterOrEqual, 7.1)))) };
+
+		var results = await _testee.ExecuteAsync([exact, halfway, below], options, NoEnrollment).ToListAsync();
+		var strictResults = await _testee.ExecuteAsync([exact, halfway, below], strict, NoEnrollment).ToListAsync();
+
+		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([exact, halfway]);
+		await Assert.That(Items(strictResults, QueryOutcome.Qualified)).IsEquivalentTo([exact]);
+	}
+
+	[Test]
 	public async Task Execute_WhenFilterVotesGreaterOrEqual_ExcludesFewerAndThoseWithoutVotes()
 	{
 		var many = MovieWithRating(2020, 7.0f, votes: 900);

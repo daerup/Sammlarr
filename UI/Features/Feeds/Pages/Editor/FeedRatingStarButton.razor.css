@@ -1,0 +1,41 @@
+.rating-star-control {
+    display: inline-flex;
+}
+
+.rating-star-control ::deep .rating-star-button {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--sammlarr-gold);
+    cursor: pointer;
+}
+
+.rating-star-control.is-framed ::deep .rating-star-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--input);
+    border-radius: calc(var(--radius) * 0.8);
+    background: var(--background);
+}
+
+.rating-star-control.is-framed ::deep .rating-star-button:hover {
+    background: var(--accent);
+}
+
+.rating-star-control ::deep .rating-star-button[data-state="open"],
+.rating-star-control ::deep .rating-star-button[aria-expanded="true"] {
+    background: color-mix(in srgb, var(--sammlarr-gold) 18%, transparent);
+    box-shadow: inset 0 0 0 1px var(--sammlarr-gold);
+}
+
+.rating-star-control ::deep .rating-star-button:focus-visible {
+    outline: 2px solid var(--sammlarr-gold);
+    outline-offset: 2px;
+}

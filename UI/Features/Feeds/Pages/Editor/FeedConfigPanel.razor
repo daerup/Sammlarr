@@ -4,6 +4,7 @@
 @using Contracts.Processing
 @using UI.Features.Feeds.Components
 @inject IApiKeyService ApiKeyService
+@inject RatingContext RatingContext
 
 <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
     <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 py-6" style="scrollbar-gutter: stable;">
@@ -161,7 +162,7 @@
 
                     @if (_filterEnabled)
                     {
-                        <BbFilterBuilder Filter="@_filter" FilterChanged="@ChangeFilter" Fields="FilterFields"/>
+                        <BbFilterBuilder Filter="@_filter" FilterChanged="@ChangeFilter" Fields="FilterFields" ValueEditors="RuleEditors"/>
                     }
 
                     <BbField>
@@ -194,6 +195,14 @@
                                               Class="w-40"
                                               ValueChanged="@ChangeSortField"
                                               Options="SortFields"/>
+                                    @if (SortField == nameof(MediaQueryRow.Rating))
+                                    {
+                                        @RatingStar(framed: true)
+                                    }
+                                    else if (SortField == nameof(MediaQueryRow.Votes))
+                                    {
+                                        @VotesInfo
+                                    }
                                     <BbTooltipProvider>
                                         <BbTooltip DelayDuration="0">
                                             <BbTooltipTrigger AsChild="false" Class="p-0">
@@ -378,6 +387,7 @@
     private int _absenceThreshold = new Mirror().AbsenceThreshold;
     private string _identifier = string.Empty;
     private Optional<RatingStrategy> _ratingStrategy = new None();
+    private RatingView? _ratingView;
     private bool _filtersSectionOpen;
     private bool _filterEnabled;
     private FilterDefinition _filter = new();
@@ -438,6 +448,43 @@
             })
             .ToList();
 
+    private IReadOnlyDictionary<string, RenderFragment<FilterValueEditorContext>> RuleEditors
+    {
+        get
+        {
+            return new Dictionary<string, RenderFragment<FilterValueEditorContext>>
+            {
+                [nameof(MediaQueryRow.Rating)] = context => @<FeedNumberRuleEditor Context="context" Label="Rating" Unit="/ 10" Min="0" Max="10" Step="0.1" Adornment="@RatingStar(framed: false)"/>,
+                [nameof(MediaQueryRow.Votes)] = context => @<FeedNumberRuleEditor Context="context" Label="Votes" Min="0" Step="100" Adornment="VotesInfo"/>,
+            };
+        }
+    }
+
+    private RenderFragment RatingStar(bool framed) => @<text>
+        @if (_ratingView is { } view && view.Available.Count > 1)
+        {
+            <FeedRatingStarButton Value="_ratingStrategy" ValueChanged="ChangeRatingStrategy" Default="view.Default" Available="view.Available" Framed="framed"/>
+        }
+    </text>;
+
+    private RenderFragment VotesInfo => @<text>
+        @if (_ratingView is { } view)
+        {
+            <BbTooltip DelayDuration="150">
+                <BbTooltipTrigger AsChild="false" Class="inline-flex h-[26px] w-[26px] items-center justify-center p-0 text-muted-foreground cursor-help" aria-label="How Votes are counted">
+                    <LucideIcon Name="info" Size="15"/>
+                </BbTooltipTrigger>
+                <BbTooltipContent Class="max-w-xs">@FeedRatingTexts.VotesTip(_ratingStrategy, view.Default)</BbTooltipContent>
+            </BbTooltip>
+        }
+    </text>;
+
+    private void ChangeRatingStrategy(Optional<RatingStrategy> strategy)
+    {
+        _ratingStrategy = strategy;
+        NotifyChange();
+    }
+
     protected override async Task OnInitializedAsync()
     {
         _isEnabled = Value.IsEnabled;
@@ -459,6 +506,7 @@
         _scheduleCronExpression = Value.Schedule is Scheduled scheduled ? scheduled.ToString() : null;
         _syncFrequencySectionOpen = _scheduleMode == ScheduleMode.Scheduled;
 
+        _ratingView = await RatingContext.GetAsync();
         var ready = await ApiKeyService.GetReadyAsync();
         _disabledProviders.UnionWith(Enum.GetValues<FeedProvider>().ExceptBy(ready, provider => provider.AsApiKeyProvider()));
 

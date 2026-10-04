@@ -21,7 +21,7 @@ public sealed record MediaQueryRow(MatchedMedia Media, Optional<SammlarrRating> 
 
 	public DateOnly? ReleaseDate => Media.Details.ReleaseDate;
 
-	public float? Rating => Sammlarr.Map(rating => rating.Value).ToNullable();
+	public double? Rating => Sammlarr.Map(rating => rating.Rounded).ToNullable();
 
 	public int? Votes => Sammlarr.Map(rating => rating.Votes).ToNullable();
 

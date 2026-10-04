@@ -1,3 +1,4 @@
+using System.Globalization;
 using CsCheck;
 using Domain.Media;
 
@@ -34,6 +35,13 @@ public class RatingStrategyProperties
 		Gen.Select(Summaries, Availables).Sample(FallsBackToEveryAvailableSource);
 	}
 
+	[Test]
+	public void Rounded_ForAnyRating_ReadsAsItsValueReads()
+	{
+		Gen.OneOf(Gen.Float[0f, 10f], Gen.Int[0, 99].Select(tenth => (float)(tenth / 10.0 + 0.05)), Gen.Int[0, 40].Select(quarter => quarter / 4f))
+			.Sample(value => new SammlarrRating(value, []).Rounded.ToString("0.0", CultureInfo.InvariantCulture) == Text(value));
+	}
+
 	private static bool IsTheMeanOfTheAvailableRatings(RatingSummary summary, ValueSet<RatingSource> available)
 	{
 		var values = summary.Sources.Where(rating => available.Contains(rating.Source)).Select(rating => rating.SammlarrValue).ToList();
@@ -61,4 +69,6 @@ public class RatingStrategyProperties
 	private static ValueSet<RatingSource> Picked(bool[] flags) => [.. Sources.Where((_, index) => flags[index])];
 
 	private static bool Close(float value, double expected) => Math.Abs(value - expected) < 0.0001;
+
+	private static string Text(float value) => value.ToString("0.0", CultureInfo.InvariantCulture);
 }

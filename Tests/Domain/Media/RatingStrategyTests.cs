@@ -121,4 +121,60 @@ public class RatingStrategyTests
 		await Assert.That(rating).IsSome();
 		await Assert.That(rating.Map(found => found.Votes)).IsNone();
 	}
+
+	[Test]
+	public async Task Rounded_WhenTheValueIsHalfway_RoundsAwayFromZero()
+	{
+		var rating = new SammlarrRating(8.25f, []);
+
+		await Assert.That(rating.Rounded).IsEqualTo(8.3);
+	}
+
+	[Test]
+	public async Task Rounded_WhenAnAverageReadsAsHalfway_RoundsAsItReads()
+	{
+		var rating = new RatingStrategy(AveragedRating.Everything).Resolve(
+			RatingSummary.From([new TmdbRating(6.5f, new None()), new ImdbRating(7.4f, new None())]),
+			Everything
+		);
+
+		await Assert.That(rating.Map(found => found.Rounded)).IsSome().And.IsEqualTo(7.0);
+	}
+
+	[Test]
+	public async Task Without_WhenItIsTheLastSourceSwitchedOn_KeepsIt()
+	{
+		var averaged = new AveragedRating([RatingSource.Imdb]).Without(RatingSource.Imdb);
+
+		await Assert.That(averaged).IsEqualTo(new AveragedRating([RatingSource.Imdb]));
+	}
+
+	[Test]
+	public async Task Without_WhenEverySourceCountsAndOneIsSwitchedOff_ListsTheRest()
+	{
+		var averaged = AveragedRating.Everything.Without(RatingSource.RottenTomatoesAudience);
+
+		await Assert.That(averaged.Sources).IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics]);
+	}
+
+	[Test]
+	public async Task With_WhenTheLastMissingSourceComesBack_AveragesEverySourceAgain()
+	{
+		var averaged = new AveragedRating([RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics]).With(RatingSource.RottenTomatoesAudience);
+
+		await Assert.That(averaged).IsEqualTo(AveragedRating.Everything);
+	}
+
+	[Test]
+	public async Task Moved_WhenASourceGoesFirst_KeepsTheOthersInOrder()
+	{
+		var moved = new OrderedRating([RatingSource.Imdb, RatingSource.Tmdb]).Moved(RatingSource.RottenTomatoesCritics, 0);
+
+		await Assert
+			.That(moved.Order)
+			.IsEquivalentTo(
+				[RatingSource.RottenTomatoesCritics, RatingSource.Imdb, RatingSource.Tmdb, RatingSource.RottenTomatoesAudience],
+				CollectionOrdering.Matching
+			);
+	}
 }
