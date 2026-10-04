@@ -57,6 +57,7 @@ internal sealed class E2EStack
 			(options, _) => options.DisableDashboard = true
 		);
 		builder.Services.AddLogging(logging => logging.AddProvider(new CircuitFailureSink(CircuitLogCategory, CircuitFailure, index, onCircuitFailure)));
+		builder.WaitThroughBusyDocker();
 		var wiremock = builder.AddContainer("wiremock", "wiremock/wiremock", "latest").WithHttpEndpoint(targetPort: 8080);
 		var wiremockHttp = wiremock.GetEndpoint("http");
 		if (!live)
@@ -84,11 +85,12 @@ internal sealed class E2EStack
 		}
 
 		var app = await builder.BuildAsync();
-		await app.StartAsync();
-		await app.ResourceNotifications.WaitForResourceHealthyAsync("blazor-ui");
+		using var boot = new CancellationTokenSource(StackBoot.Timeout);
+		await app.StartAsync(boot.Token);
+		await app.ResourceNotifications.WaitForResourceHealthyAsync("blazor-ui", boot.Token);
 		foreach (var arr in live ? ProviderRecording.Apps : [])
 		{
-			await app.ResourceNotifications.WaitForResourceHealthyAsync(arr.Name);
+			await app.ResourceNotifications.WaitForResourceHealthyAsync(arr.Name, boot.Token);
 		}
 
 		var stack = new E2EStack(app, seed);
