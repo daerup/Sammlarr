@@ -1,0 +1,10 @@
+@using UI.Features.Onboarding.Components
+
+<DemoCard Title="Sink cards" Where="Setup wizard › Wantlist" Span="2"
+          Note="SinkCards on the shared ChoiceCard: hover shows the brand's own border, picking adds the ring and the tint.">
+    <SinkCards Picked="_sink" PickedChanged="sink => _sink = sink"/>
+</DemoCard>
+
+@code {
+    private SinkKind _sink = SinkKind.Arr;
+}

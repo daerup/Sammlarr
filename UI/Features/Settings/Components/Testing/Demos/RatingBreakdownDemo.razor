@@ -1,0 +1,29 @@
+@using UI.Shared.Media.Ratings
+
+<DemoCard Title="Rating breakdown" Where="Rating popover" Span="3"
+          Note="SammlarrRatingBreakdown for one title under Average and under First available, and a title IMDb has not rated; each with the arithmetic line the heading's tooltip shows.">
+    <div class="flex flex-wrap gap-4">
+        @foreach (var (label, ratings, strategy) in Cases)
+        {
+            <div class="flex w-fit flex-col gap-2">
+                <span class="text-xs font-medium text-muted-foreground">@label</span>
+                <div class="w-fit rounded-lg border bg-card">
+                    <SammlarrRatingBreakdown Ratings="ratings" Strategy="strategy" Available="DemoRatings.Everything" Where="demo"/>
+                </div>
+                @if (strategy.Resolve(ratings, DemoRatings.Everything).ToNullable() is { } rating)
+                {
+                    <RatingSum Terms="RatingTexts.Terms(rating)" Result="@RatingTexts.Number(rating)" Divided="rating.Counted.Count > 1" Why="@RatingTexts.Why(strategy)"/>
+                }
+            </div>
+        }
+    </div>
+</DemoCard>
+
+@code {
+    private static readonly (string Label, MediaRatings Ratings, RatingStrategy Strategy)[] Cases =
+    [
+        ("Average", DemoRatings.Digger, DemoRatings.Average),
+        ("First available", DemoRatings.Digger, DemoRatings.FirstAvailable),
+        ("No IMDb rating", DemoRatings.WithoutImdb, DemoRatings.Average),
+    ];
+}

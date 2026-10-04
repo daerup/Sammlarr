@@ -1,0 +1,31 @@
+@using UI.Shared.Branding.Birds
+
+<DemoCard Title="Bird avatars" Where="Settings › Users" Span="2"
+          Note="Type a name to see the bird it seeds (the app seeds by the person's id), then the same bird in each of the ten poses. The colours follow the golden sequence's first hue.">
+    <BbInput Value="@_name" ValueChanged="@(name => _name = name ?? string.Empty)" Placeholder="Type a name…" Class="max-w-xs"/>
+    <div class="flex items-center gap-4">
+        <span class="demo-bird" style="width: 96px; height: 96px">@Bird(Genome, 96)</span>
+        <span class="text-xs text-muted-foreground">@Genome.Pose, crest @Genome.Crest, @Genome.Feathers @(Genome.Feathers == 1 ? "feather" : "feathers")@(Genome.FacesLeft ? ", facing left" : null)</span>
+    </div>
+    <div class="flex flex-wrap gap-3">
+        @foreach (var pose in Enum.GetValues<BirdPose>())
+        {
+            <span class="flex flex-col items-center gap-1 text-[11px] text-muted-foreground">
+                <span class="demo-bird" style="width: 48px; height: 48px">@Bird(Genome with { Pose = pose }, 48)</span>
+                @pose
+            </span>
+        }
+    </div>
+</DemoCard>
+
+@code {
+    private string _name = "guest";
+
+    private BirdGenome Genome => BirdGenome.Of(_name);
+
+    private static RenderFragment Bird(BirdGenome genome, int size)
+    {
+        var art = BirdDrawing.Draw(genome, "var(--bird-body)", "var(--bird-back)");
+        return @<svg width="@size" height="@size" viewBox="@art.ViewBox" aria-hidden="true" focusable="false">@((MarkupString)art.Markup)</svg>;
+    }
+}

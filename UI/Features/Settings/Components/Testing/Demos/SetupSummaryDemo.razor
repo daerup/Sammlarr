@@ -1,0 +1,15 @@
+@using UI.Features.Onboarding.Components
+
+<DemoCard Title="Setup summary" Where="Setup wizard › Done" Span="2"
+          Note="SetupSummary with two done rows and one left for later, which links to Settings.">
+    <SetupSummary Rows="Summary"/>
+</DemoCard>
+
+@code {
+    private static readonly SummaryRow[] Summary =
+    [
+        new("Admin", "Ada, signs in with Plex", Done: true, Later: false),
+        new("Wantlist", "Syncs to Radarr + Sonarr", Done: true, Later: false),
+        new("TMDB key", "Not set", Done: false, Later: true),
+    ];
+}

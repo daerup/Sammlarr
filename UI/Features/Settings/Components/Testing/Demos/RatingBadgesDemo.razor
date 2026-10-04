@@ -1,0 +1,29 @@
+<DemoCard Title="Sammlarr rating and marks" Where="Tiles, detail sheet, feed preview"
+          Note="SammlarrRatingBadge under your default strategy and the providers you have set up (none set up shows every badge unrated): a shining 9.5 or more, an ordinary title, and an unrated one; click a badge for its breakdown. Then each provider's mark, Rotten Tomatoes' following the score.">
+    <div class="flex flex-wrap items-center gap-5">
+        <SammlarrRatingBadge Ratings="DemoRatings.Shining" Title="A shining title"/>
+        <SammlarrRatingBadge Ratings="DemoRatings.Digger" Title="Digger"/>
+        <SammlarrRatingBadge Ratings="MediaRatings.None" Title="Not rated yet"/>
+    </div>
+    <div class="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+        @foreach (var (label, source, rating) in Marks)
+        {
+            <span class="flex items-center gap-1.5">
+                <RatingMarkIcon Source="source" Rating="rating" Size="18"/>
+                @label
+            </span>
+        }
+    </div>
+</DemoCard>
+
+@code {
+    private static readonly (string Label, RatingSource Source, Optional<IMediaRating> Rating)[] Marks =
+    [
+        ("TMDB", RatingSource.Tmdb, new None()),
+        ("IMDb", RatingSource.Imdb, new None()),
+        ("Fresh", RatingSource.RottenTomatoesCritics, Some.Of<IMediaRating>(new RottenTomatoesCriticsRating(82))),
+        ("Rotten", RatingSource.RottenTomatoesCritics, Some.Of<IMediaRating>(new RottenTomatoesCriticsRating(41))),
+        ("Upright", RatingSource.RottenTomatoesAudience, Some.Of<IMediaRating>(new RottenTomatoesAudienceRating(76))),
+        ("Spilled", RatingSource.RottenTomatoesAudience, Some.Of<IMediaRating>(new RottenTomatoesAudienceRating(33))),
+    ];
+}
