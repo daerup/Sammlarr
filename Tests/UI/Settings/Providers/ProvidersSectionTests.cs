@@ -33,6 +33,8 @@ public class ProvidersSectionTests : BunitContext
 
 	private readonly TestCurrentUser _user = new();
 
+	private readonly Mock<IArrSinkConfigService> _arrConfigs = IArrSinkConfigService.Mock();
+
 	[Before(Test)]
 	public void Setup()
 	{
@@ -43,6 +45,8 @@ public class ProvidersSectionTests : BunitContext
 		Services.AddSingleton(_switch.Object);
 		Services.AddSingleton<ICurrentUser>(_user);
 		Services.AddSingleton(IUserManagementService.Mock().Object);
+		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
+		Services.AddSingleton(_arrConfigs.Object);
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
 		Services.AddSingleton(keys.Object);
@@ -160,6 +164,40 @@ public class ProvidersSectionTests : BunitContext
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Plex));
 
 		_switch.SwitchAsync(SinkKind.Plex, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task SearchPicked_StoresTheSearchProvider()
+	{
+		var cut = RenderSection();
+
+		await cut.InvokeAsync(() => Map(cut).Get(map => map.SearchPicked).InvokeAsync(SearchProvider.Tmdb));
+
+		_config.StoreAsync(OnPlex with { SearchProvider = SearchProvider.Tmdb }, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Section_OnPlexWithRadarrAndSonarrConnected_DrawsThemReadyForSearch()
+	{
+		var connected = new ArrInstanceConfig { Url = Some.Of("http://arr:7878"), ApiKey = Some.Of("key") };
+		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty with { Radarr = connected, Sonarr = connected });
+
+		var cut = RenderSection();
+
+		await Assert.That(Map(cut).Get(map => map.Ready)).Contains(MediaProvider.Radarr).And.Contains(MediaProvider.Sonarr);
+	}
+
+	[Test]
+	public async Task ArrRowChanged_OnceBothAppsAreConnected_DrawsThemReady()
+	{
+		var cut = RenderSection();
+		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Arr));
+		var connected = new ArrInstanceConfig { Url = Some.Of("http://arr:7878"), ApiKey = Some.Of("key") };
+		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty with { Radarr = connected, Sonarr = connected });
+
+		await cut.InvokeAsync(() => cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.Changed).InvokeAsync());
+
+		await Assert.That(Map(cut).Get(map => map.Ready)).Contains(MediaProvider.Radarr);
 	}
 
 	[Test]

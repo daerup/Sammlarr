@@ -17,32 +17,40 @@ internal sealed class DetailsFetcher(
 	IDateTimeProvider clock
 )
 {
+	private static readonly DetailsSource TmdbDetails = new(SearchProvider.Tmdb, [MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Imdb]);
+
+	private static readonly DetailsSource PlexDetails = new(SearchProvider.Plex, [MediaProvider.Plex]);
+
 	public async Task<Result<MatchedMedia>> FetchAsync(MediaIdentity identity, MediaWriteBuffer buffer, CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
-		return await LookUpAsync(identity, config.SearchProvider, cancellationToken)
-			.Map(found => EnrichAsync(found, config.SearchProvider, buffer, cancellationToken));
+		var primary = Primary(identity, config.SearchProvider);
+		return await LookUpAsync(identity, primary, cancellationToken).Map(found => EnrichAsync(found, primary, buffer, cancellationToken));
 	}
 
-	private Task<Result<MatchedMedia>> LookUpAsync(MediaIdentity identity, SearchProvider provider, CancellationToken cancellationToken)
+	private static DetailsSource Primary(MediaIdentity identity, SearchProvider search)
 	{
-		var providerMedia = provider.AsMediaProvider();
-		var external = identity.Externals.OfProvider(providerMedia).GetValueOr(() => identity.Externals.First());
-		return searchIndex[provider]
+		DetailsSource[] order = search switch
+		{
+			SearchProvider.Plex => [PlexDetails, TmdbDetails],
+			SearchProvider.Tmdb or SearchProvider.Arr => [TmdbDetails, PlexDetails],
+		};
+		return order.FirstOrNone(source => source.IdOf(identity).IsSome()).GetValueOr(order[0]);
+	}
+
+	private Task<Result<MatchedMedia>> LookUpAsync(MediaIdentity identity, DetailsSource primary, CancellationToken cancellationToken)
+	{
+		var external = primary.IdOf(identity).GetValueOr(() => identity.Externals.First());
+		return searchIndex[primary.Search]
 			.LookUpAsync(external, cancellationToken)
 			.When(found => found.Fits(identity.Type), "the details could not be fetched")
 			.Map(found => found.Matched(identity));
 	}
 
-	private async Task<MatchedMedia> EnrichAsync(
-		MatchedMedia current,
-		SearchProvider searchProvider,
-		MediaWriteBuffer buffer,
-		CancellationToken cancellationToken
-	)
+	private async Task<MatchedMedia> EnrichAsync(MatchedMedia current, DetailsSource primary, MediaWriteBuffer buffer, CancellationToken cancellationToken)
 	{
 		var now = clock.Now;
-		var asked = new HashSet<MediaProvider> { searchProvider.AsMediaProvider() };
+		var asked = new HashSet<MediaProvider> { primary.Reads[0] };
 		var unconfirmed = MediaField.None;
 		while (current.Details.Missing is var missing && missing is not MediaField.None)
 		{
@@ -87,7 +95,15 @@ internal sealed class DetailsFetcher(
 	{
 		var fills = enricherIndex[provider].Fills;
 		var load = capacity.Of(provider);
-		var unavoidable = fills.Overlaps(MediaField.Ratings) && ratings.Sources.Count == 0;
+		var unavoidable = provider == MediaProvider.Tmdb && fills.Overlaps(MediaField.Ratings) && ratings.Sources.Count == 0;
 		return new EnricherOption(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load);
+	}
+
+	private sealed record DetailsSource(SearchProvider Search, IReadOnlyList<MediaProvider> Reads)
+	{
+		public Optional<IExternalMediaId> IdOf(MediaIdentity identity)
+		{
+			return Reads.Select(provider => identity.Externals.OfProvider(provider)).WhereSome().FirstOrNone(_ => true);
+		}
 	}
 }

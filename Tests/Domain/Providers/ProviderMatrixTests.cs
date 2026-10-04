@@ -7,20 +7,26 @@ public class ProviderMatrixTests
 	[Test]
 	public async Task Values_OnASubsetEnum_AreOnlyThatCapabilitysBrands()
 	{
-		await Assert.That(Enum.GetValues<SearchProvider>().Length).IsEqualTo(1);
 		await Assert.That(Enum.GetValues<SinkKind>().Length).IsEqualTo(2);
 		await Assert.That(Enum.GetValues<TrendingProvider>().Length).IsEqualTo(1);
 		await Assert.That(Enum.GetValues<FeedProvider>().Length).IsEqualTo(2);
 		await Assert.That(Enum.GetValues<ApiKeyProvider>().Length).IsEqualTo(2);
-		await Assert.That(Enum.GetValues<ArtworkProvider>().Length).IsEqualTo(2);
+		await Assert.That(Enum.GetValues<ArtworkProvider>().Length).IsEqualTo(3);
 		await Assert.That(Enum.GetValues<EnricherProvider>().Length).IsEqualTo(2);
 	}
 
 	[Test]
 	public async Task ToMediaProvider_FromASubsetProvider_CollapsesToTheBrand()
 	{
-		await Assert.That(SearchProvider.Plex.AsMediaProvider()).IsEqualTo(MediaProvider.Plex);
 		await Assert.That(FeedProvider.Mdblist.AsMediaProvider()).IsEqualTo(MediaProvider.Mdblist);
+	}
+
+	[Test]
+	public async Task Providers_OfASearch_AreTheServicesBehindIt()
+	{
+		await Assert.That(SearchProvider.Tmdb.Providers()).IsEquivalentTo([MediaProvider.Tmdb]);
+		await Assert.That(SearchProvider.Plex.Providers()).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(SearchProvider.Arr.Providers()).IsEquivalentTo([MediaProvider.Radarr, MediaProvider.Sonarr]);
 	}
 
 	[Test]

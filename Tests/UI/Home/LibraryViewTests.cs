@@ -7,18 +7,18 @@ namespace UI.Tests.Home;
 public class LibraryViewTests
 {
 	[Test]
-	public async Task Sources_AttributesWhatIsLeftOverToEverythingThatIsNotAFeed()
+	public async Task Sources_AttributesWhatIsLeftOverToTheHandAndTheSink()
 	{
-		var shares = LibraryView.Sources([Overview("docs", 842), Overview("trending", 331)], total: 1282);
+		var shares = LibraryView.Sources([Overview("docs", 842), Overview("trending", 331)], total: 1282, sink: "Radarr + Sonarr");
 
-		await Assert.That(shares.Select(share => share.Name)).IsEquivalentTo(new[] { "docs", "trending", "Added by hand or from Plex" });
+		await Assert.That(shares.Select(share => share.Name)).IsEquivalentTo(new[] { "docs", "trending", "Added by hand or from Radarr + Sonarr" });
 		await Assert.That(shares[2].Count).IsEqualTo(109);
 	}
 
 	[Test]
 	public async Task Sources_OrdersTheBiggestContributorFirst()
 	{
-		var shares = LibraryView.Sources([Overview("docs", 12), Overview("trending", 400)], total: 412);
+		var shares = LibraryView.Sources([Overview("docs", 12), Overview("trending", 400)], total: 412, sink: "Plex");
 
 		await Assert.That(shares[0].Name).IsEqualTo("trending");
 		await Assert.That(shares[0].Count).IsEqualTo(400);
@@ -27,7 +27,7 @@ public class LibraryViewTests
 	[Test]
 	public async Task Sources_WhenEveryTitleCameFromAFeed_LeavesOutTheLeftoverRow()
 	{
-		var shares = LibraryView.Sources([Overview("docs", 50)], total: 50);
+		var shares = LibraryView.Sources([Overview("docs", 50)], total: 50, sink: "Plex");
 
 		await Assert.That(shares).HasSingleItem();
 	}
@@ -35,7 +35,7 @@ public class LibraryViewTests
 	[Test]
 	public async Task Sources_ForAFeedWithNothingOnTheWantlist_LeavesItOut()
 	{
-		var shares = LibraryView.Sources([Overview("docs", 50), Overview("trending", 0)], total: 50);
+		var shares = LibraryView.Sources([Overview("docs", 50), Overview("trending", 0)], total: 50, sink: "Plex");
 
 		await Assert.That(shares.Select(share => share.Name)).IsEquivalentTo(new[] { "docs" });
 	}
@@ -43,7 +43,7 @@ public class LibraryViewTests
 	[Test]
 	public async Task Sources_OnAnEmptyWantlist_ShowsNothingRatherThanZeroRows()
 	{
-		await Assert.That(LibraryView.Sources([], total: 0)).IsEmpty();
+		await Assert.That(LibraryView.Sources([], total: 0, sink: "Plex")).IsEmpty();
 	}
 
 	private static FeedOverview Overview(string name, int onWantlist) => FeedOverview.Of(TestFeeds.Feed(Guid.NewGuid(), name), new None(), onWantlist);

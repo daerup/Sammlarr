@@ -55,6 +55,17 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 		return found.Map(titles => titles.FirstOrNone(_ => true));
 	}
 
+	public Task<Result<IReadOnlyList<ArrTitle>>> SearchAsync(ArrConnection connection, string term, CancellationToken cancellationToken)
+	{
+		return ReadAsync<IReadOnlyList<ArrTitle>>(
+			connection,
+			HttpMethod.Get,
+			$"{app.Titles}/lookup?term={Uri.EscapeDataString(term)}",
+			new None(),
+			cancellationToken
+		);
+	}
+
 	public Task<Result<ArrTitle>> AddAsync(ArrConnection connection, JsonObject title, CancellationToken cancellationToken)
 	{
 		return ReadAsync<ArrTitle>(connection, HttpMethod.Post, app.Titles, Some.Of<object>(title), cancellationToken);

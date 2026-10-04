@@ -74,18 +74,5 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		return outcome.Map(found.MatchTo).GetValueOr(found.Unmatched());
 	}
 
-	private FoundMedia Found(TmdbTypes.Trending.Result response) => new([response.TmdbId], BuildDetails(response));
-
-	private MediaDetails BuildDetails(TmdbTypes.Trending.Result response)
-	{
-		return MediaDetails.Empty(response.MediaType) with
-		{
-			Title = response.DisplayTitle,
-			Summary = ProviderValues.Text(response.Overview),
-			PosterUrl = artwork.Original(response.PosterPath),
-			BackdropUrl = artwork.Original(response.BackdropPath),
-			ReleaseDate = response.Released,
-			Rating = TmdbRatings.Of(response.VoteAverage, response.VoteCount),
-		};
-	}
+	private FoundMedia Found(TmdbTypes.Trending.Result response) => TmdbFound.Of(response, artwork);
 }

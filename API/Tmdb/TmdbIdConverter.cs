@@ -56,18 +56,7 @@ internal class TmdbIdConverter(TmdbApi tmdbApi) : IExternalIdConverter
 		);
 	}
 
-	private static IEnumerable<IExternalMediaId> IdsOf(TmdbTypes.ExternalIds? externals, MediaType type)
-	{
-		if (!string.IsNullOrWhiteSpace(externals?.ImdbId))
-		{
-			yield return ImdbId.From(externals.ImdbId, type);
-		}
-
-		if (externals?.TvdbId is > 0)
-		{
-			yield return TvdbId.From(externals.TvdbId.Value.ToString(CultureInfo.InvariantCulture), type);
-		}
-	}
+	private static IEnumerable<IExternalMediaId> IdsOf(TmdbTypes.ExternalIds? externals, MediaType type) => externals?.Ids(type) ?? [];
 
 	private static Optional<IdentifyHints> HintsOf(string? originalTitle, int year, MediaType type)
 	{

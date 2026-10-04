@@ -125,6 +125,7 @@
     [Parameter] public EventCallback StayOnPlex { get; set; }
 
     [Parameter] public EventCallback<ArrSinkConfig> InstanceMoved { get; set; }
+    [Parameter] public EventCallback Changed { get; set; }
 
     private const string WarnBadge = "h-6 items-center gap-1.5 text-[var(--alert-warning)] border-[color-mix(in_oklab,var(--alert-warning)_55%,transparent)]";
 
@@ -242,6 +243,7 @@
 
         _config = config;
         await Configs.StoreAsync(config);
+        await Changed.InvokeAsync();
     }
 
     private string Said(ArrApp app)

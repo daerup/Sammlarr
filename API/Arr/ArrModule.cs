@@ -1,4 +1,5 @@
 using API.Http;
+using Contracts.Media.Search;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Providers;
@@ -16,6 +17,7 @@ internal class ArrModule : IServiceModule
 		services.AddHttpClient<SonarrClient>().AddProviderHttp<ArrOptions>(MediaProvider.Sonarr);
 		services.AddScoped<ArrClients>();
 		services.AddKeyedScoped<IMediaSink, ArrSink>(SinkKind.Arr);
+		services.AddKeyedScoped<IMediaSearchProvider, ArrSearch>(SearchProvider.Arr);
 		services.AddScoped<IArrConnectionTester, ArrConnectionTester>();
 	}
 }

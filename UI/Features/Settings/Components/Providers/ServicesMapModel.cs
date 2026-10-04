@@ -24,14 +24,11 @@ internal readonly record struct MapEndpoint(MediaProvider Provider, Optional<Med
 
 	public static implicit operator MapEndpoint(MediaProvider provider) => new(provider, new None());
 
-	public static MapEndpoint Of(SinkKind sink)
-	{
-		return sink switch
-		{
-			SinkKind.Plex => MediaProvider.Plex,
-			SinkKind.Arr => new MapEndpoint(MediaProvider.Radarr, Some.Of(MediaProvider.Sonarr)),
-		};
-	}
+	public static MapEndpoint Of(SinkKind sink) => Of(sink.Providers());
+
+	public static MapEndpoint Of(SearchProvider search) => Of(search.Providers());
+
+	private static MapEndpoint Of(IReadOnlyList<MediaProvider> providers) => new(providers[0], providers.Skip(1).FirstOrNone(_ => true));
 
 	public override string ToString() => string.Join("+", Providers);
 }
@@ -198,13 +195,8 @@ internal sealed record ServicesMapModel(
 				"Search",
 				"search",
 				"Finding titles to add",
-				config.SearchProvider.AsMediaProvider(),
-				Picker(
-					MapChoice.Search,
-					"Search uses",
-					Enum.GetValues<SearchProvider>().Select(search => (MapEndpoint)search.AsMediaProvider()),
-					config.SearchProvider.AsMediaProvider()
-				)
+				MapEndpoint.Of(config.SearchProvider),
+				Picker(MapChoice.Search, "Search uses", Enum.GetValues<SearchProvider>().Select(MapEndpoint.Of), MapEndpoint.Of(config.SearchProvider))
 			),
 			("Trending", "trending-up", "What Browse shows", config.TrendingProvider.AsMediaProvider(), null),
 			("Feeds", "rss", "Imported lists; each feed picks its source", null, null),

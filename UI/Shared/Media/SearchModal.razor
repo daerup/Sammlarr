@@ -97,6 +97,13 @@
                         }
                     </div>
                     <BbSeparator/>
+                    <p class="flex items-center gap-2 text-xs text-muted-foreground">
+                        @foreach (var provider in SearchProvider.Providers())
+                        {
+                            <ProviderLogo Provider="provider" Form="@FooterForm" Size="14" Decorative="true"/>
+                        }
+                        <span>Results from @ResultsSource</span>
+                    </p>
                 }
                 else if (_hasSearched)
                 {
@@ -142,6 +149,8 @@
     private string SearchProviderName => SearchProvider.GetDescription();
     private string SearchModalTitle => Title ?? $"Search {SearchProviderName}";
     private string SearchModalDescription => Description ?? $"Find a movie or show from {SearchProviderName} and add it to your wantlist.";
+    private ProviderLogoForm FooterForm => SearchProvider.Providers().Count == 1 ? ProviderLogoForm.Logo : ProviderLogoForm.Mark;
+    private string ResultsSource => string.Join(" and ", SearchProvider.Providers().Select(provider => provider.GetDescription()));
 
     protected override void OnParametersSet()
     {

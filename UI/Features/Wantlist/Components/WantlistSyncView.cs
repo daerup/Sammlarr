@@ -8,7 +8,7 @@ namespace UI.Features.Wantlist.Components;
 
 internal static class WantlistSyncView
 {
-	internal static IReadOnlyList<ChangeItem> Items(WantlistSyncSummary dryRun, IReadOnlyDictionary<MediaId, MatchedMedia> media)
+	internal static IReadOnlyList<ChangeItem> Items(WantlistSyncSummary dryRun, IReadOnlyDictionary<MediaId, MatchedMedia> media, string sink)
 	{
 		return
 		[
@@ -21,7 +21,7 @@ internal static class WantlistSyncView
 					Kind = change.Action is WantlistOperationAction.Add ? ChangeKind.Added : ChangeKind.Removed,
 					Subtitle = Subtitle(media[change.MediaId]),
 					ContextIcon = change.Direction is WantlistSyncDirection.Pull ? "arrow-down-left" : "arrow-up-right",
-					ContextTooltip = change.Direction is WantlistSyncDirection.Pull ? "Pulled from Plex" : "Pushed to Plex",
+					ContextTooltip = change.Direction is WantlistSyncDirection.Pull ? $"Pulled from {sink}" : $"Pushed to {sink}",
 				}),
 			.. dryRun
 				.NoOps.Where(media.ContainsKey)

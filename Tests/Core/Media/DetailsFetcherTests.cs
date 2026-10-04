@@ -302,6 +302,51 @@ public class DetailsFetcherTests
 		await Assert.That(buffer.NewDetails[Id].FetchedAt).IsEqualTo(Now);
 	}
 
+	[Test]
+	[Arguments(SearchProvider.Tmdb)]
+	[Arguments(SearchProvider.Arr)]
+	public async Task FetchAsync_WhenSearchIsNotPlex_LooksTheTitleUpOnTmdbByItsTmdbId(SearchProvider search)
+	{
+		var deps = Dependencies.Create(search: search);
+		deps.TmdbSearch.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia(Identity.Externals, Complete())));
+		await using var buffer = deps.Buffer();
+
+		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+
+		deps.TmdbSearch.LookUpAsync(Tmdb, Any()).WasCalled(Times.Once);
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenSearchIsTmdbAndTheTitleIsOnlyKnownToPlex_LooksItUpOnPlex()
+	{
+		var deps = Dependencies.Create(search: SearchProvider.Tmdb);
+		deps.Primary(Complete(), PlexOnly);
+		await using var buffer = deps.Buffer();
+
+		await Matched(await deps.Testee.FetchAsync(PlexOnly, buffer));
+
+		deps.Search.LookUpAsync(Plex, Any()).WasCalled(Times.Once);
+		deps.TmdbSearch.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenTmdbHasNoRatingAndPlexIsRateLimited_LeavesPlexAlone()
+	{
+		var deps = Dependencies.Create(
+			search: SearchProvider.Tmdb,
+			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Plex, () => Now.AddMinutes(1)), 0))
+		);
+		deps.TmdbSearch.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia(Identity.Externals, Unrated())));
+		await using var buffer = deps.Buffer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+
+		await Assert.That(fetched.Details.Missing).IsEqualTo(MediaField.Ratings);
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
 	private static async Task<MatchedMedia> Matched(Result<MatchedMedia> result)
 	{
 		var matched = await Assert.That(result).IsSuccess();
@@ -334,15 +379,20 @@ public class DetailsFetcherTests
 	private sealed record Dependencies(
 		Mock<IMediaRepository> MediaRepository,
 		Mock<IMediaSearchProvider> Search,
+		Mock<IMediaSearchProvider> TmdbSearch,
+		Mock<IDetailsEnricher> Plex,
 		Mock<IDetailsEnricher> Tmdb,
 		DetailsFetcher Testee
 	)
 	{
-		public static Dependencies Create(MediaField tmdbFills = ~MediaField.None, IProviderCapacity? capacity = null)
+		public static Dependencies Create(MediaField tmdbFills = ~MediaField.None, IProviderCapacity? capacity = null, SearchProvider search = SearchProvider.Plex)
 		{
 			var mediaRepository = IMediaRepository.Mock();
 			mediaRepository.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
-			var search = IMediaSearchProvider.Mock();
+			var plexSearch = IMediaSearchProvider.Mock();
+			var tmdbSearch = IMediaSearchProvider.Mock();
+			var plex = IDetailsEnricher.Mock();
+			plex.Fills.Returns(~MediaField.None);
 			var tmdb = IDetailsEnricher.Mock();
 			tmdb.Fills.Returns(tmdbFills);
 
@@ -354,22 +404,22 @@ public class DetailsFetcherTests
 					{
 						Sink = SinkKind.Plex,
 						TrendingProvider = TrendingProvider.Tmdb,
-						SearchProvider = SearchProvider.Plex,
+						SearchProvider = search,
 						AuthProvider = AuthProvider.Plex,
 						RegistrationMode = RegistrationMode.Open,
 					}
 				);
 
 			var testee = new DetailsFetcher(
-				new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>().Register(SearchProvider.Plex, search.Object),
-				new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>()
-					.Register(MediaProvider.Plex, IDetailsEnricher.Mock().Object)
-					.Register(MediaProvider.Tmdb, tmdb.Object),
+				new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>()
+					.Register(SearchProvider.Plex, plexSearch.Object)
+					.Register(SearchProvider.Tmdb, tmdbSearch.Object),
+				new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>().Register(MediaProvider.Plex, plex.Object).Register(MediaProvider.Tmdb, tmdb.Object),
 				config.Object,
 				capacity ?? TestCapacity.Open(),
 				Clock()
 			);
-			return new Dependencies(mediaRepository, search, tmdb, testee);
+			return new Dependencies(mediaRepository, plexSearch, tmdbSearch, plex, tmdb, testee);
 		}
 
 		public void Primary(MovieDetails details, MediaIdentity? identity = null)

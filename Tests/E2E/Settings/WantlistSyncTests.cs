@@ -13,7 +13,7 @@ public class WantlistSyncTests
 		var page = await E2EApp.AdminAt(SettingsPage.Section("providers"));
 		var wiremock = await E2EApp.WireMockUrlAsync();
 
-		await page.Locator(".map-chip").ClickAsync();
+		await SettingsPage.MapChip(page, "Wantlist").ClickAsync();
 		await page.MenuItem("Radarr + Sonarr").ClickAsync();
 		var switchButton = page.ButtonContaining("Switch the wantlist to Radarr + Sonarr");
 		await Expect(switchButton).ToBeDisabledAsync();
@@ -25,7 +25,7 @@ public class WantlistSyncTests
 		await Expect(page.Locator(".arr-row-head")).ToContainTextAsync("Radarr: Any into /movies");
 		await Expect(SettingsPage.MapService(page, "Radarr + Sonarr")).ToContainTextAsync("Connected");
 
-		await page.Locator(".map-chip").ClickAsync();
+		await SettingsPage.MapChip(page, "Wantlist").ClickAsync();
 		await page.MenuItem("Plex").ClickAsync();
 
 		await Expect(page.Locator("section[aria-label='Wantlist sync']")).ToHaveCountAsync(0);
@@ -37,7 +37,7 @@ public class WantlistSyncTests
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section("providers"));
 
-		await page.Locator(".map-chip").ClickAsync();
+		await SettingsPage.MapChip(page, "Wantlist").ClickAsync();
 		await page.MenuItem("Radarr + Sonarr").ClickAsync();
 		await page.Button("Stay on Plex").ClickAsync();
 

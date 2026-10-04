@@ -5,6 +5,7 @@ using API.Notifications;
 using API.Observability;
 using API.Plex;
 using API.Tmdb;
+using API.Tvdb;
 using API.Wikidata;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -21,6 +22,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<MdblistModule>();
 		services.AddModule<WikidataModule>();
 		services.AddModule<ArrModule>();
+		services.AddModule<TvdbModule>();
 		services.AddModule<NotificationsApiModule>();
 		services.AddModule<InstrumentationModule>();
 		services.AddModule<ResilienceModule>();

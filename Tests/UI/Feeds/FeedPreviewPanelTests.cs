@@ -208,6 +208,7 @@ public class FeedPreviewPanelTests : BunitContext
 		);
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddSingleton(ArtworkStub.Sizing());
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 

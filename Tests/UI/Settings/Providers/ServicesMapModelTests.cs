@@ -30,7 +30,7 @@ public class ServicesMapModelTests
 	{
 		var pickers = ServicesMapModel.For(Config).Roles.Where(role => role.Picker is not null).Select(role => role.Name);
 
-		await Assert.That(pickers).IsEquivalentTo(["Wantlist"]);
+		await Assert.That(pickers).IsEquivalentTo(["Wantlist", "Search"]);
 	}
 
 	[Test]

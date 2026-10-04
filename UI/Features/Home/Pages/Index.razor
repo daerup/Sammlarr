@@ -305,7 +305,7 @@ else
             var brands = FeedBrands();
             _wantlistCount = wantlist.Ids.Count;
             _blocklistCount = blocklist.Ids.Count;
-            _sources = LibraryView.Sources(feeds.Feeds, _wantlistCount);
+            _sources = LibraryView.Sources(feeds.Feeds, _wantlistCount, ProviderName);
             _queued = UpNextView.InTheQueue(queue, names, brands, Sink);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);
             _scheduled = UpNextView.OnASchedule(_feeds, _now, TimeZoneInfo.Local);

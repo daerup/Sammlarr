@@ -18,6 +18,7 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
 using Domain.Wantlist;
+using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -174,6 +175,32 @@ public class WantlistSyncButtonTests : BunitContext
 
 		cut.WaitForState(() => !cut.Find(".sync-status").TextContent.Contains("Comparing"), TimeSpan.FromSeconds(10));
 		await Assert.That(cut.Find(".sync-status").TextContent).Contains("Plex unreachable");
+	}
+
+	[Test]
+	public async Task Dialog_WithTitlesStillOnTheirWay_NamesTheSinkTheyAreWaitingFor()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary());
+		var cut = Render(builder =>
+		{
+			builder.OpenComponent<BbPortalHost>(0);
+			builder.CloseComponent();
+			builder.OpenComponent<WantlistSyncButton>(1);
+			builder.AddComponentParameter(2, nameof(WantlistSyncButton.ProviderName), "Radarr + Sonarr");
+			builder.AddComponentParameter(
+				3,
+				nameof(WantlistSyncButton.OutboxEntries),
+				(IReadOnlyCollection<WantlistOutboxEntry>)[new WantlistOutboxEntry(Synced, WantlistOperationAction.Add, WantlistOutboxState.Pending, 0)]
+			);
+			builder.CloseComponent();
+		});
+
+		await cut.Find("button").ClickAsync(new());
+
+		cut.WaitForState(() => cut.FindAll(".change-row").Count == 1);
+
+		await Assert.That(cut.Markup).Contains("1 waiting to reach Radarr + Sonarr");
 	}
 
 	private async Task ToggleWantlistAsync(IRenderedComponent<Harness> cut)

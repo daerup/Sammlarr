@@ -95,5 +95,16 @@ public class SinkAddressingTests(SammlarrTestHost host) : IAsyncDisposable
 			.Throws<MissingSinkIdException>();
 	}
 
+	[Test]
+	public async Task AddAsync_ForAShowFoundOnlyByItsTmdbId_LooksUpTheIdTheSinkAddsShowsBy()
+	{
+		await host.TmdbKnowsTheExternalIdsOf(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Tvdb("81189")]));
+		var show = await host.Show(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396")])).SeedAsync();
+
+		await host.Resolve<IWantlistService>().AddAsync([show], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
+
+		await Assert.That((await Testee.GetSinkIdsAsync([show]))[show]).IsEqualTo(TvdbId.From("81189", MediaType.Show));
+	}
+
 	private static IdentifyRequest Request(MediaType type, ProviderId id) => new([id.ToExternal(type)], new None());
 }

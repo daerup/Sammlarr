@@ -95,12 +95,19 @@
                                     <BbDropdownMenuLabel Class="text-xs font-normal text-muted-foreground">@picker.Label</BbDropdownMenuLabel>
                                     @foreach (var option in picker.Options)
                                     {
-                                        <BbDropdownMenuItem Class="gap-2.5" OnClick="() => PickAsync(picker, option)">
+                                        var unavailable = Unavailable(picker, option);
+                                        <BbDropdownMenuItem Class="gap-2.5" Disabled="@(unavailable.Length > 0)" OnClick="() => PickAsync(picker, option)">
                                             @foreach (var provider in option.Providers)
                                             {
                                                 <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
                                             }
-                                            <span>@Name(option)</span>
+                                            <span class="flex flex-col">
+                                                <span>@Name(option)</span>
+                                                @if (unavailable.Length > 0)
+                                                {
+                                                    <span class="text-xs text-muted-foreground">@unavailable</span>
+                                                }
+                                            </span>
                                             @if (option == picker.Current)
                                             {
                                                 <LucideIcon Name="check" Size="14" Class="ml-auto"/>
@@ -135,6 +142,8 @@
 
     [Parameter] public EventCallback<SinkKind> SinkPicked { get; set; }
 
+    [Parameter] public EventCallback<SearchProvider> SearchPicked { get; set; }
+
     private ServicesMapModel _model = null!;
 
     private string? _hovered;
@@ -152,7 +161,18 @@
         return picker.Choice switch
         {
             MapChoice.Wantlist => SinkPicked.InvokeAsync(Enum.GetValues<SinkKind>().Single(sink => MapEndpoint.Of(sink) == option)),
-            MapChoice.Search => Task.CompletedTask,
+            MapChoice.Search => SearchPicked.InvokeAsync(Enum.GetValues<SearchProvider>().Single(search => MapEndpoint.Of(search) == option)),
+        };
+    }
+
+    private string Unavailable(MapPicker picker, MapEndpoint option)
+    {
+        return picker.Choice switch
+        {
+            MapChoice.Wantlist => string.Empty,
+            MapChoice.Search when IsReady(option) => string.Empty,
+            MapChoice.Search when option.Provider == MediaProvider.Tmdb => $"Add your {Name(option)} key first",
+            MapChoice.Search => $"Connect {Name(option)} first",
         };
     }
 

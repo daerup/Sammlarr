@@ -31,6 +31,8 @@ public class GlobalSearchTests : BunitContext
 
 	private readonly Mock<IWantlistService> _wantlist = IWantlistService.Mock();
 
+	private readonly Mock<IProviderConfigService> _providerConfig = IProviderConfigService.Mock();
+
 	[Before(Test)]
 	public void Setup()
 	{
@@ -39,10 +41,10 @@ public class GlobalSearchTests : BunitContext
 		Services.AddLogging();
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddSingleton(ArtworkStub.Sizing());
 		Services.AddSingleton(IMediaService.Mock().Object);
 
-		var providerConfig = IProviderConfigService.Mock();
-		providerConfig
+		_providerConfig
 			.GetAsync(Any())
 			.Returns(
 				new ProviderConfig
@@ -54,7 +56,7 @@ public class GlobalSearchTests : BunitContext
 					RegistrationMode = RegistrationMode.Open,
 				}
 			);
-		Services.AddSingleton(providerConfig.Object);
+		Services.AddSingleton(_providerConfig.Object);
 
 		_wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
 		Services.AddSingleton(_wantlist.Object);
@@ -82,6 +84,55 @@ public class GlobalSearchTests : BunitContext
 		await Assert.That(rows).Count().IsEqualTo(2);
 		await Assert.That(rows.Single(row => row.TextContent.Contains(Movie)).QuerySelectorAll(".search-result-toggle-btn")).IsNotEmpty();
 		await Assert.That(rows.Single(row => row.TextContent.Contains(Person)).QuerySelectorAll(".search-result-toggle-btn")).IsEmpty();
+	}
+
+	[Test]
+	[Arguments(SearchProvider.Tmdb, "Results from TMDB")]
+	[Arguments(SearchProvider.Arr, "Results from Radarr and Sonarr")]
+	public async Task Search_WithResults_SaysWhereTheyCameFrom(SearchProvider provider, string source)
+	{
+		_providerConfig
+			.GetAsync(Any())
+			.Returns(
+				new ProviderConfig
+				{
+					Sink = SinkKind.Arr,
+					TrendingProvider = TrendingProvider.Tmdb,
+					SearchProvider = provider,
+					AuthProvider = AuthProvider.Local,
+					RegistrationMode = RegistrationMode.Open,
+				}
+			);
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+
+		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
+
+		await Assert.That(cut.Find(".search-modal-content").TextContent).Contains(source);
+	}
+
+	[Test]
+	public async Task Opening_AfterTheSearchProviderChanged_SaysTheNewSource()
+	{
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, false));
+		_providerConfig
+			.GetAsync(Any())
+			.Returns(
+				new ProviderConfig
+				{
+					Sink = SinkKind.Arr,
+					TrendingProvider = TrendingProvider.Tmdb,
+					SearchProvider = SearchProvider.Arr,
+					AuthProvider = AuthProvider.Local,
+					RegistrationMode = RegistrationMode.Open,
+				}
+			);
+
+		await cut.InvokeAsync(() => cut.Render(parameters => parameters.Add(search => search.IsOpen, true)));
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
+
+		await Assert.That(cut.Find(".search-modal-content").TextContent).Contains("Results from Radarr and Sonarr");
 	}
 
 	[Test]
