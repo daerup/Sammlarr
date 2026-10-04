@@ -15,7 +15,9 @@
 @inject Notifier Notifier
 @inject IOnboardingService Onboarding
 @inject NavigationManager Navigation
+@inject ScrollService ScrollService
 
+<CascadingValue Value="_ringed" Name="@ProviderRows.Ringed">
 <div class="flex max-w-4xl flex-col gap-8">
     <div class="flex items-start justify-between gap-4">
         <div>
@@ -39,7 +41,12 @@
         }
         else
         {
-            <AccountsAndKeys Config="_config" Open="_open" OpenChanged="open => _open = open" Changed="RefreshReadyAsync"/>
+            <AccountsAndKeys Config="_config"
+                             Open="_open"
+                             OpenChanged="open => _open = open"
+                             Changed="AccountsChangedAsync"
+                             ShowPlex="PlexForSearch"
+                             PlexReturnUrl="@(PlexForSearch ? PlexSearchReturn : SettingsLinks.Providers)"/>
         }
     </section>
 
@@ -47,7 +54,7 @@
     {
         <section class="flex flex-col gap-3" aria-label="Services">
             <h3 class="text-sm font-semibold">Services</h3>
-            <ServicesMap Config="MapConfig(config)" Ready="MapReady(config)" CanPick="IsAdmin" People="_people" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync"/>
+            <ServicesMap Config="MapConfig(config)" Ready="MapReady(config)" CanPick="IsAdmin" People="_people" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync" ServiceOpened="OpenService"/>
         </section>
 
         @if (IsAdmin && (config.Sink == SinkKind.Arr || _settingUp))
@@ -75,9 +82,26 @@
         </section>
     }
 </div>
+</CascadingValue>
 
 @code {
+    private const string PlexSearchReturn = $"{SettingsLinks.Providers}&search=plex";
+
+    private static readonly TimeSpan RingTime = TimeSpan.FromSeconds(1);
+
     [Parameter] public MediaProvider? Expanded { get; set; }
+
+    [Parameter] public SearchProvider? SearchAfterSignIn { get; set; }
+
+    private MediaProvider? _ringed;
+
+    private int _rings;
+
+    private MediaProvider? _scrollTo;
+
+    private bool _plexForSearch;
+
+    private bool _storePlexSearch;
 
     private ProviderConfig? _config;
 
@@ -97,10 +121,24 @@
         _config = await ProviderConfigService.GetAsync();
         _people = await UserManagement.CountAsync();
         await RefreshReadyAsync();
+        _storePlexSearch = IsAdmin && SearchAfterSignIn == SearchProvider.Plex && _config.SearchProvider != SearchProvider.Plex && _ready.Contains(MediaProvider.Plex);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (_scrollTo is { } target)
+        {
+            _scrollTo = null;
+            await ScrollService.IntoViewAsync(ProviderRows.Id(target));
+        }
+
+        if (_storePlexSearch)
+        {
+            _storePlexSearch = false;
+            await StoreSearchAsync(SearchProvider.Plex);
+            Navigation.NavigateTo(SettingsLinks.Providers, replace: true);
+        }
+
         if (!firstRender || Expanded is not { } provider)
         {
             return;
@@ -109,6 +147,18 @@
         await Task.Delay(RevealDelay);
         _open = provider;
         StateHasChanged();
+    }
+
+    private bool PlexForSearch => _plexForSearch || SearchAfterSignIn == SearchProvider.Plex;
+
+    private async Task AccountsChangedAsync()
+    {
+        await RefreshReadyAsync();
+        if (_plexForSearch && _ready.Contains(MediaProvider.Plex))
+        {
+            _plexForSearch = false;
+            await StoreSearchAsync(SearchProvider.Plex);
+        }
     }
 
     private async Task RefreshReadyAsync()
@@ -154,10 +204,46 @@
 
     private async Task SearchPickedAsync(SearchProvider search)
     {
+        if (search == SearchProvider.Plex && !_ready.Contains(MediaProvider.Plex))
+        {
+            _plexForSearch = true;
+            OpenService(MediaProvider.Plex);
+            return;
+        }
+
+        await StoreSearchAsync(search);
+    }
+
+    private async Task StoreSearchAsync(SearchProvider search)
+    {
         var config = await ProviderConfigService.GetAsync();
         await ProviderConfigService.StoreAsync(config with { SearchProvider = search });
         _config = await ProviderConfigService.GetAsync();
         Notifier.Success($"Search now uses {search.GetDescription()}.");
+    }
+
+    private void OpenService(MediaProvider provider)
+    {
+        if (provider == MediaProvider.Local && IsAdmin)
+        {
+            Navigation.NavigateTo(SettingsLinks.Users);
+            return;
+        }
+
+        _open = provider;
+        _ringed = provider;
+        _scrollTo = provider;
+        _ = UnringAsync(++_rings);
+    }
+
+    private async Task UnringAsync(int ring)
+    {
+        await Task.Delay(RingTime);
+        if (ring == _rings)
+        {
+            _ringed = null;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task RunSetupAgainAsync()

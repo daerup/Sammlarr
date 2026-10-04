@@ -25,7 +25,7 @@ public class ProviderGatingTests
 		await SettingsPage.VisitSectionAsync(page, "providers");
 		var row = await SettingsPage.OpenProviderAsync(page, Tmdb);
 		await DeleteKeyAsync(page, row);
-		await Expect(row.Text("Not set")).ToBeVisibleAsync();
+		await Expect(row.Text("Required")).ToBeVisibleAsync();
 		await Expect(SettingsPage.MapService(page, "TMDb")).ToContainTextAsync("No key yet");
 
 		await page.VisitAsync(Routes.CreateFeed);

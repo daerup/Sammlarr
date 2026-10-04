@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
@@ -5,6 +6,7 @@ using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
 using UI.Shared.Services.Branding;
 
@@ -68,7 +70,6 @@ public class ServicesMapTests : BunitContext
 	{
 		var cut = RenderMap(canPick: true);
 
-		await Assert.That(cut.FindAll("button.map-service")).IsEmpty();
 		await Assert
 			.That(cut.FindAll(".map-chip").Select(chip => chip.GetAttribute("aria-label") ?? string.Empty))
 			.IsEquivalentTo(["Change what Wantlist uses", "Change what Search uses"]);
@@ -106,7 +107,7 @@ public class ServicesMapTests : BunitContext
 		cut.WaitForElement("[role=menuitem]");
 		var items = cut.FindAll("[role=menuitem]").Select(item => $"{item.TextContent.Trim()} | {item.GetAttribute("aria-disabled") ?? "false"}");
 
-		await Assert.That(items).IsEquivalentTo(["TMDb | false", "Radarr + SonarrConnect Radarr + Sonarr first | true", "PlexConnect Plex first | true"]);
+		await Assert.That(items).IsEquivalentTo(["TMDb | false", "Radarr + SonarrConnect Radarr + Sonarr first | true", "Plex | false"]);
 	}
 
 	[Test]
@@ -173,9 +174,7 @@ public class ServicesMapTests : BunitContext
 	[Arguments(AuthProvider.Local)]
 	public async Task SignIn_WhicheverWayTheInstallSignsIn_HasNoChip(AuthProvider signIn)
 	{
-		var cut = Render<ServicesMap>(parameters =>
-			parameters.Add(map => map.Config, Config with { AuthProvider = signIn }).Add(map => map.Ready, new HashSet<MediaProvider>()).Add(map => map.CanPick, true)
-		);
+		var cut = RenderMap(Config with { AuthProvider = signIn }, canPick: true);
 
 		await Assert.That(cut.FindAll("[aria-label='Change what Sign-in uses']")).IsEmpty();
 		await Assert.That(cut.FindAll("[aria-label='Change what Wantlist uses']")).IsNotEmpty();
@@ -198,10 +197,53 @@ public class ServicesMapTests : BunitContext
 		await Assert.That(boxes).Contains("Sammlarr: Local accounts · 3 people");
 	}
 
-	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params MediaProvider[] ready)
+	[Test]
+	public async Task Service_WhenClicked_AsksToOpenItsRow()
+	{
+		List<MediaProvider> opened = [];
+		var cut = Render<ServicesMap>(parameters =>
+			parameters
+				.Add(map => map.Config, Config)
+				.Add(map => map.Ready, new HashSet<MediaProvider>())
+				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<MediaProvider>(this, opened.Add))
+		);
+
+		await Service(cut, "TMDb").ClickAsync();
+		await cut.Find("button.map-tile").ClickAsync();
+
+		await Assert.That(opened).IsEquivalentTo([MediaProvider.Tmdb, MediaProvider.Mdblist], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	[Arguments(SinkKind.Arr, true, "button")]
+	[Arguments(SinkKind.Arr, false, "div")]
+	[Arguments(SinkKind.Plex, true, "div")]
+	public async Task RadarrAndSonarr_OnlyForAnAdminWhoseWantlistSyncsThere_OpensTheWantlistSync(SinkKind sink, bool canPick, string element)
+	{
+		var cut = RenderMap(Config with { Sink = sink, SearchProvider = SearchProvider.Arr }, canPick);
+
+		await Assert.That(Service(cut, "Radarr + Sonarr").LocalName).IsEqualTo(element);
+	}
+
+	[Test]
+	public async Task Service_ThatOpens_NamesWhatTheClickDoes()
+	{
+		var cut = RenderMap(canPick: false);
+
+		await Assert.That(Service(cut, "TMDb").QuerySelector(".sr-only")!.TextContent).IsEqualTo("Open ");
+	}
+
+	private static IElement Service(IRenderedComponent<ServicesMap> cut, string name)
+	{
+		return cut.FindAll(".map-service").Single(service => service.QuerySelector(".map-service-name")!.TextContent.Trim() == name);
+	}
+
+	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params MediaProvider[] ready) => RenderMap(Config, canPick, ready);
+
+	private IRenderedComponent<ServicesMap> RenderMap(ProviderConfig config, bool canPick, params MediaProvider[] ready)
 	{
 		return Render<ServicesMap>(parameters =>
-			parameters.Add(map => map.Config, Config).Add(map => map.Ready, ready.ToHashSet()).Add(map => map.CanPick, canPick)
+			parameters.Add(map => map.Config, config).Add(map => map.Ready, ready.ToHashSet()).Add(map => map.CanPick, canPick)
 		);
 	}
 }

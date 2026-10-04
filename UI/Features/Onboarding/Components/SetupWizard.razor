@@ -70,7 +70,7 @@
                     @Head("API keys", "Keys are yours: each person who signs in adds their own. A TMDB key is needed on every install; MDBList only for MDBList lists.")
                     @if (_config is { } config)
                     {
-                        <AccountsAndKeys Config="config" Open="_keyOpen" OpenChanged="open => _keyOpen = open" Changed="RefreshAsync" TmdbRequired="true"/>
+                        <AccountsAndKeys Config="config" Open="_keyOpen" OpenChanged="open => _keyOpen = open" Changed="RefreshAsync" PlexReturnUrl="/setup"/>
                     }
                 </BbWizardStep>
                 <BbWizardStep Title="@PeopleTitle" Icon="@Icon(PeopleStep)" IsOptional="true">

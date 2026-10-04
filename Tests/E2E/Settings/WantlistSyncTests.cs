@@ -49,7 +49,7 @@ public class WantlistSyncTests
 	{
 		var section = page.Locator($"[aria-label='{app}']");
 		await section.Locator($"input[aria-label='{app} URL']").EnterAsync(url.ToString());
-		await section.Locator($"input[placeholder='From {app} › Settings › General']").EnterAsync(ApiKey);
+		await section.Locator("input[placeholder='Enter API key']").EnterAsync(ApiKey);
 		await section.Button("Test").ClickAsync();
 		await Expect(section.Text("Connected")).ToBeVisibleAsync();
 	}

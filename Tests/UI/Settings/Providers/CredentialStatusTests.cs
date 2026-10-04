@@ -27,4 +27,16 @@ public class CredentialStatusTests : BunitContext
 
 		await Assert.That(cut.Nodes.OfType<IElement>().Single().TextContent.Trim()).IsEqualTo(label);
 	}
+
+	[Test]
+	[Arguments(CredentialState.Idle, "Required")]
+	[Arguments(CredentialState.Saved, "Connected")]
+	public async Task Badge_ForARequiredKey_SaysRequiredOnlyWhileItIsMissing(CredentialState state, string label)
+	{
+		var cut = Render<CredentialStatus>(parameters =>
+			parameters.Add(status => status.State, state).Add(status => status.IdleText, "Not set").Add(status => status.Required, true)
+		);
+
+		await Assert.That(cut.Nodes.OfType<IElement>().Single().TextContent.Trim()).IsEqualTo(label);
+	}
 }

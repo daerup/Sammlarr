@@ -4,11 +4,11 @@
 @inject IApiKeyFactory ApiKeyFactory
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
-<ProviderRow Provider="@Provider.AsMediaProvider()" Open="Open" OpenChanged="OpenChanged" Required="Required">
+<ProviderRow Provider="@Provider.AsMediaProvider()" Open="Open" OpenChanged="OpenChanged">
     <Status>
         @if (_loaded)
         {
-            <CredentialStatus State="_state" IdleText="@(string.IsNullOrWhiteSpace(_apiKeyInput) ? "Not set" : "Not tested")"/>
+            <CredentialStatus State="_state" IdleText="@(string.IsNullOrWhiteSpace(_apiKeyInput) ? "Not set" : "Not tested")" Required="@(Required && string.IsNullOrWhiteSpace(_apiKeyInput))"/>
         }
         else
         {

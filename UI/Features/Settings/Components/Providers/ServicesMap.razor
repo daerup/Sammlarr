@@ -42,33 +42,37 @@
 
             @foreach (var service in _model.Services)
             {
-                <div class="map-service" style="left: @Px(ServicesMapModel.ServiceX)px; top: @Px(service.Y - ServicesMapModel.ServiceHeight / 2)px; --brand: @Color(service.Provider)">
-                    @foreach (var provider in service.Provider.Providers)
-                    {
-                        <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
-                    }
-                    <span class="flex min-w-0 flex-col items-start">
-                        <span class="map-service-name">@Name(service.Provider)</span>
-                        <span class="map-service-status">
-                            <span class="map-dot @DotClass(service.Provider)"></span>
-                            @Status(service.Provider)
-                        </span>
-                    </span>
-                </div>
+                var style = $"left: {Px(ServicesMapModel.ServiceX)}px; top: {Px(service.Y - ServicesMapModel.ServiceHeight / 2)}px; --brand: {Color(service.Provider)}";
+                @if (Opens(service.Provider) is { } opens)
+                {
+                    <button type="button" class="map-service is-openable" style="@style" @onclick="() => ServiceOpened.InvokeAsync(opens)">
+                        <span class="sr-only">Open </span>
+                        @ServiceBody(service.Provider)
+                        <span class="map-service-glyph"><LucideIcon Name="settings-2" Size="14"/></span>
+                    </button>
+                }
+                else
+                {
+                    <div class="map-service" style="@style">
+                        @ServiceBody(service.Provider)
+                    </div>
+                }
             }
 
             @foreach (var tile in _model.Tiles)
             {
-                <div class="map-tile @EdgeClass(tile) @(Ready.Contains(tile.Provider) ? null : "is-off")"
-                     style="left: @Px(tile.X)px; top: @Px(tile.Y)px; --brand: @Brand(tile.Provider).BrandColor"
-                     title="@TileLabel(tile)">
+                <button type="button"
+                        class="map-tile @EdgeClass(tile) @(Ready.Contains(tile.Provider) ? null : "is-off")"
+                        style="left: @Px(tile.X)px; top: @Px(tile.Y)px; --brand: @Brand(tile.Provider).BrandColor"
+                        title="@TileLabel(tile)"
+                        @onclick="() => ServiceOpened.InvokeAsync(tile.Provider)">
                     <ProviderLogo Provider="tile.Provider" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
                     @if (!Ready.Contains(tile.Provider))
                     {
                         <span class="map-dot bg-destructive"></span>
                     }
                     <span class="sr-only">@TileLabel(tile)</span>
-                </div>
+                </button>
             }
 
             <svg class="map-vias" width="@Px(ServicesMapModel.Width)" height="@Px(_model.Height)" viewBox="0 0 @Px(ServicesMapModel.Width) @Px(_model.Height)" aria-hidden="true">
@@ -144,6 +148,27 @@
 
     [Parameter] public EventCallback<SearchProvider> SearchPicked { get; set; }
 
+    [Parameter] public EventCallback<MediaProvider> ServiceOpened { get; set; }
+
+    private RenderFragment ServiceBody(MapEndpoint endpoint) => @<text>
+        @foreach (var provider in endpoint.Providers)
+        {
+            <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
+        }
+        <span class="flex min-w-0 flex-col items-start">
+            <span class="map-service-name">@Name(endpoint)</span>
+            <span class="map-service-status">
+                <span class="map-dot @DotClass(endpoint)"></span>
+                @Status(endpoint)
+            </span>
+        </span>
+    </text>;
+
+    private MediaProvider? Opens(MapEndpoint endpoint)
+    {
+        return endpoint.Partner.Match(_ => CanPick && Config.Sink == SinkKind.Arr ? (MediaProvider?)endpoint.Provider : null, () => endpoint.Provider);
+    }
+
     private ServicesMapModel _model = null!;
 
     private string? _hovered;
@@ -170,7 +195,7 @@
         return picker.Choice switch
         {
             MapChoice.Wantlist => string.Empty,
-            MapChoice.Search when IsReady(option) => string.Empty,
+            MapChoice.Search when IsReady(option) || option.Provider == MediaProvider.Plex => string.Empty,
             MapChoice.Search when option.Provider == MediaProvider.Tmdb => $"Add your {Name(option)} key first",
             MapChoice.Search => $"Connect {Name(option)} first",
         };
@@ -198,7 +223,7 @@
 
     private string Readiness(MediaProvider provider)
     {
-        return (ProviderCaption.IsAccount(provider), Ready.Contains(provider)) switch
+        return (ServiceRoles.IsAccount(provider), Ready.Contains(provider)) switch
         {
             (true, true) => "Your account",
             (true, false) => "Not connected",
