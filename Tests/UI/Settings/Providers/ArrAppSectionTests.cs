@@ -131,6 +131,19 @@ public class ArrAppSectionTests : BunitContext
 		await Assert.That(Description(cut)).IsEqualTo("Found in Sonarr › Settings › General.");
 	}
 
+	[Test]
+	public async Task Key_WhenTheUrlIsClearedAgain_DropsTheLink()
+	{
+		var cut = RenderSection(ArrInstanceConfig.Empty, ArrConnectionState.Empty);
+		var url = cut.FindComponent<BbInput>().Instance;
+		await cut.InvokeAsync(() => url.ValueChanged.InvokeAsync("http://host/sonarr/"));
+
+		await cut.InvokeAsync(() => url.ValueChanged.InvokeAsync(null));
+
+		await Assert.That(cut.FindAll("a.app-link")).IsEmpty();
+		await Assert.That(Description(cut)).IsEqualTo("Found in Sonarr › Settings › General.");
+	}
+
 	private static string Description(IRenderedComponent<ArrAppSection> cut)
 	{
 		var description = cut.FindAll("*").Last(element => element.TextContent.Contains("Found in"));

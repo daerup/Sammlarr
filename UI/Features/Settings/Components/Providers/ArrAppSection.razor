@@ -210,9 +210,9 @@
         _key = Instance.ApiKey.GetValueOr(string.Empty);
     }
 
-    private async Task UrlChangedAsync(string url)
+    private async Task UrlChangedAsync(string? url)
     {
-        _url = url;
+        _url = url ?? string.Empty;
         await Edited.InvokeAsync(Typed);
     }
 
