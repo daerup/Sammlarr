@@ -7,9 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shared.Options;
 
-namespace E2E.Tests.PlexFree;
+namespace E2E.Tests.SelfHosted;
 
-internal sealed class PlexFreeStack
+internal sealed class SelfHostedStack
 {
 	private const string Web = "blazor-ui";
 
@@ -35,7 +35,7 @@ internal sealed class PlexFreeStack
 
 	private bool _leased;
 
-	private PlexFreeStack(DistributedApplication app, SetupCodeSink setupCodes, string workDir)
+	private SelfHostedStack(DistributedApplication app, SetupCodeSink setupCodes, string workDir)
 	{
 		_app = app;
 		_setupCodes = setupCodes;
@@ -54,7 +54,7 @@ internal sealed class PlexFreeStack
 
 	internal Task<string> SetupCodeAsync() => _setupCodes.NextCodeAsync().WaitAsync(ReadyTimeout);
 
-	internal static async Task<PlexFreeStack> LaunchAsync(
+	internal static async Task<SelfHostedStack> LaunchAsync(
 		TestCertificates certificates,
 		string keyRing,
 		string workDir,
@@ -111,7 +111,7 @@ internal sealed class PlexFreeStack
 			.WithEnvironment("Sammlarr__ConnectionString", $"Data Source={DatabasePath(workDir)}")
 			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", keyRing)
 			.WaitFor(wiremock);
-		foreach (var provider in ProviderRecording.PlexFree)
+		foreach (var provider in ProviderRecording.SelfHosted)
 		{
 			foreach (var endpoint in provider.Endpoints)
 			{
@@ -133,7 +133,7 @@ internal sealed class PlexFreeStack
 			await app.ResourceNotifications.WaitForResourceHealthyAsync(resource, launch.Token);
 		}
 
-		var stack = new PlexFreeStack(app, setupCodes, workDir);
+		var stack = new SelfHostedStack(app, setupCodes, workDir);
 		await stack.AddIndexersAsync();
 		if (live)
 		{
@@ -194,7 +194,7 @@ internal sealed class PlexFreeStack
 
 	private async Task MirrorProviderMappingsAsync()
 	{
-		foreach (var endpoint in ProviderRecording.PlexFree.SelectMany(provider => provider.Endpoints))
+		foreach (var endpoint in ProviderRecording.SelfHosted.SelectMany(provider => provider.Endpoints))
 		{
 			var folder = Path.Combine(WireMockStubs.MappingsDirectory, endpoint.Name);
 			foreach (var file in Directory.Exists(folder) ? Directory.EnumerateFiles(folder, "*.json") : [])

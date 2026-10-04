@@ -3,9 +3,9 @@ using System.Threading.Channels;
 using E2E.Tests.Recording;
 using Microsoft.Playwright;
 
-namespace E2E.Tests.PlexFree;
+namespace E2E.Tests.SelfHosted;
 
-public static class PlexFreeApp
+public static class SelfHostedApp
 {
 	internal const int StackCount = 2;
 
@@ -15,14 +15,14 @@ public static class PlexFreeApp
 	private static readonly List<JournalEntry> Journal = [];
 	private static readonly List<string> CircuitFailures = [];
 	private static readonly ConcurrentDictionary<string, Lazy<Lease>> Leases = [];
-	private static readonly Channel<PlexFreeStack> Idle = Channel.CreateUnbounded<PlexFreeStack>();
+	private static readonly Channel<SelfHostedStack> Idle = Channel.CreateUnbounded<SelfHostedStack>();
 
-	private static PlexFreeStack[] _stacks = [];
+	private static SelfHostedStack[] _stacks = [];
 	private static string _sessionDir = "";
 	private static IPlaywright? _playwright;
 	private static IBrowser? _browser;
 
-	internal static Task<PlexFreeStack> StackAsync() => Current().Ready;
+	internal static Task<SelfHostedStack> StackAsync() => Current().Ready;
 
 	internal static async Task<IPage> OpenPageAsync()
 	{
@@ -41,14 +41,14 @@ public static class PlexFreeApp
 		return new Lease(taken, ReadyAsync(taken));
 	}
 
-	private static async Task<PlexFreeStack> TakeAsync()
+	private static async Task<SelfHostedStack> TakeAsync()
 	{
 		await Boot.Value;
 		using var timeout = new CancellationTokenSource(LeaseTimeout);
 		return await Idle.Reader.ReadAsync(timeout.Token);
 	}
 
-	private static async Task<PlexFreeStack> ReadyAsync(Task<PlexFreeStack> taken)
+	private static async Task<SelfHostedStack> ReadyAsync(Task<SelfHostedStack> taken)
 	{
 		var stack = await taken;
 		Record(await stack.ReadyAsync());
@@ -150,14 +150,14 @@ public static class PlexFreeApp
 	{
 		_playwright = await Playwright.CreateAsync();
 		_browser = await BrowserPages.LaunchAsync(_playwright);
-		_sessionDir = Directory.CreateTempSubdirectory("sammlarr-plexfree-").FullName;
+		_sessionDir = Directory.CreateTempSubdirectory("sammlarr-selfhosted-").FullName;
 		var certificates = await TestCertificates.CreateAsync(MetadataHosts.All, _sessionDir);
 		var keyRing = Directory.CreateDirectory(Path.Combine(_sessionDir, "keys")).FullName;
 		_stacks = await Task.WhenAll(
 			Enumerable
 				.Range(0, StackCount)
 				.Select(index =>
-					PlexFreeStack.LaunchAsync(
+					SelfHostedStack.LaunchAsync(
 						certificates,
 						keyRing,
 						Directory.CreateDirectory(Path.Combine(_sessionDir, $"stack-{index}")).FullName,
@@ -172,7 +172,7 @@ public static class PlexFreeApp
 		}
 	}
 
-	private sealed record Lease(Task<PlexFreeStack> Taken, Task<PlexFreeStack> Ready)
+	private sealed record Lease(Task<SelfHostedStack> Taken, Task<SelfHostedStack> Ready)
 	{
 		internal ConcurrentBag<IBrowserContext> Contexts { get; } = [];
 	}

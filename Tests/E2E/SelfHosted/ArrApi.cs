@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace E2E.Tests.PlexFree;
+namespace E2E.Tests.SelfHosted;
 
 internal sealed class ArrApi(HttpClient http)
 {

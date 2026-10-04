@@ -1,4 +1,4 @@
-namespace E2E.Tests.PlexFree;
+namespace E2E.Tests.SelfHosted;
 
 internal static class MetadataHosts
 {

@@ -1,7 +1,7 @@
-namespace E2E.Tests.PlexFree;
+namespace E2E.Tests.SelfHosted;
 
-[PlexFree]
-public class PlexFreeStackTests
+[SelfHosted]
+public class SelfHostedStackTests
 {
 	private const int ProjectHailMary = 687163;
 
@@ -9,7 +9,7 @@ public class PlexFreeStackTests
 	[Repeat(2)]
 	public async Task Radarr_WhenProjectHailMaryIsAdded_HoldsOnlyThatMovie()
 	{
-		var radarr = (await PlexFreeApp.StackAsync()).Radarr;
+		var radarr = (await SelfHostedApp.StackAsync()).Radarr;
 		var movie = (await radarr.GetAsync($"movie/lookup?term=tmdb:{ProjectHailMary}"))[0]!;
 		var profile = (await radarr.GetAsync("qualityprofile")).AsArray().First(candidate => candidate!["name"]!.GetValue<string>() == "HD-1080p")!;
 

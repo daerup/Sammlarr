@@ -26,7 +26,7 @@ internal sealed record Recordable(ProviderEndpoint Endpoint, string PathAndQuery
 
 internal static class MetadataRecorder
 {
-	private static readonly IReadOnlyList<ProviderEndpoint> Providers = [.. ProviderRecording.PlexFree.SelectMany(provider => provider.Endpoints)];
+	private static readonly IReadOnlyList<ProviderEndpoint> Providers = [.. ProviderRecording.SelfHosted.SelectMany(provider => provider.Endpoints)];
 
 	internal static Recordable? Find(string method, string url)
 	{

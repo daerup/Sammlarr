@@ -34,7 +34,7 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 
 	internal static readonly IReadOnlyList<ProviderEndpoint> AllEndpoints = [.. All.SelectMany(provider => provider.Endpoints), .. Apps];
 
-	internal static readonly IReadOnlyList<ProviderRecording> PlexFree = [.. All.Where(provider => provider.Section != PlexOptions.SectionName)];
+	internal static readonly IReadOnlyList<ProviderRecording> SelfHosted = [.. All.Where(provider => provider.Section != PlexOptions.SectionName)];
 
 	internal static readonly IReadOnlyList<ProviderEndpoint> ArrMetadata =
 	[

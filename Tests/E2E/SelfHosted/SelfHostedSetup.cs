@@ -1,9 +1,9 @@
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
-namespace E2E.Tests.PlexFree;
+namespace E2E.Tests.SelfHosted;
 
-internal static class PlexFreeSetup
+internal static class SelfHostedSetup
 {
 	internal const string AdminName = "ada";
 
@@ -13,7 +13,7 @@ internal static class PlexFreeSetup
 
 	private const string TmdbKey = "e2e-tmdb-key";
 
-	internal static async Task CreateAdminAsync(IPage page, PlexFreeStack stack)
+	internal static async Task CreateAdminAsync(IPage page, SelfHostedStack stack)
 	{
 		await page.VisitAsync(Routes.Setup);
 		await page.Labelled("Setup code").EnterAsync(await stack.SetupCodeAsync());
@@ -26,7 +26,7 @@ internal static class PlexFreeSetup
 		await page.WaitForCircuitAsync();
 	}
 
-	internal static async Task SwitchToRadarrAndSonarrAsync(IPage page, PlexFreeStack stack)
+	internal static async Task SwitchToRadarrAndSonarrAsync(IPage page, SelfHostedStack stack)
 	{
 		await Expect(page.Text("Connect Plex to continue")).ToBeVisibleAsync();
 		await page.Locator("#sink-Arr").ClickAsync();
@@ -59,7 +59,7 @@ internal static class PlexFreeSetup
 		return url;
 	}
 
-	internal static async Task<string> ReachDoneAsync(IPage page, PlexFreeStack stack)
+	internal static async Task<string> ReachDoneAsync(IPage page, SelfHostedStack stack)
 	{
 		await CreateAdminAsync(page, stack);
 		await SwitchToRadarrAndSonarrAsync(page, stack);
@@ -72,7 +72,7 @@ internal static class PlexFreeSetup
 		return invite;
 	}
 
-	internal static async Task<string> FinishAsync(IPage page, PlexFreeStack stack)
+	internal static async Task<string> FinishAsync(IPage page, SelfHostedStack stack)
 	{
 		var invite = await ReachDoneAsync(page, stack);
 		await page.Button("Finish setup").ClickAsync();
