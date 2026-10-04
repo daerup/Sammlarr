@@ -1,0 +1,28 @@
+{
+  "priority": 3,
+  "request": {
+    "method": "GET",
+    "urlPath": "/newznab/api",
+    "queryParameters": {
+      "t": {
+        "doesNotMatch": "caps"
+      },
+      "q": {
+        "absent": true
+      },
+      "tmdbid": {
+        "absent": true
+      },
+      "tvdbid": {
+        "absent": true
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/rss+xml"
+    },
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\" xmlns:newznab=\"http://www.newznab.com/DTD/2010/feeds/attributes/\"><channel><title>Sammlarr test indexer</title><newznab:response offset=\"0\" total=\"1\"/><item><title>Sammlarr.Indexer.Probe.1999.1080p.WEB-DL-SAMMLARR</title><guid isPermaLink=\"false\">sammlarr-probe</guid><link>http://wiremock:8080/newznab/probe.nzb</link><pubDate>Sun, 04 Oct 2026 12:00:00 +0000</pubDate><category>2040</category><enclosure url=\"http://wiremock:8080/newznab/probe.nzb\" length=\"1048576\" type=\"application/x-nzb\"/><newznab:attr name=\"category\" value=\"2000\"/><newznab:attr name=\"category\" value=\"2040\"/><newznab:attr name=\"category\" value=\"5000\"/><newznab:attr name=\"category\" value=\"5040\"/><newznab:attr name=\"size\" value=\"1048576\"/></item></channel></rss>"
+  }
+}

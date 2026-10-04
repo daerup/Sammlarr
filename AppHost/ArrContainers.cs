@@ -12,15 +12,15 @@ internal static class ArrContainers
 
 	public static void AddRadarrAndSonarr(this IDistributedApplicationBuilder builder)
 	{
+		var dataRoot = builder.Configuration["ArrDataRoot"] ?? Path.Combine(Path.GetTempPath(), "sammlarr-arr");
 		foreach (var app in Apps)
 		{
-			builder.AddArr(app);
+			builder.AddArr(app, Path.Combine(dataRoot, app.Name));
 		}
 	}
 
-	private static void AddArr(this IDistributedApplicationBuilder builder, ArrContainer app)
+	private static void AddArr(this IDistributedApplicationBuilder builder, ArrContainer app, string root)
 	{
-		var root = Path.Combine(Path.GetTempPath(), "sammlarr-arr", app.Name);
 		if (Directory.Exists(root))
 		{
 			Directory.Delete(root, recursive: true);
@@ -43,7 +43,8 @@ internal static class ArrContainers
 	{
 		using var http = new HttpClient { BaseAddress = new Uri($"{endpoint.Url}/api/v3/") };
 		http.DefaultRequestHeaders.Add("X-Api-Key", ApiKey);
-		using var _ = await http.PostAsJsonAsync("rootfolder", new { path = library }, cancellationToken);
+		using var response = await http.PostAsJsonAsync("rootfolder", new { path = library }, cancellationToken);
+		response.EnsureSuccessStatusCode();
 	}
 
 	private sealed record ArrContainer(string Name, string Image, string Tag, int Port, string Library);

@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "host": {
+      "equalTo": "skyhook.sonarr.tv"
+    },
+    "urlPath": "/v1/tvdb/shows/en/81189"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "sonarr-metadata/v1-tvdb-shows-en-81189.verified.json"
+  }
+}
