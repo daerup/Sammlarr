@@ -85,5 +85,14 @@ public class MediaProviderBrandingService
 				new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"),
 				new BrandTile(MutedTile, new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"), 70)
 			),
+			MediaProvider.Local => new(
+				provider,
+				"Sammlarr accounts",
+				"Sammlarr",
+				"#E3A008",
+				new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"),
+				new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"),
+				new BrandTile(MutedTile, new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"), 70)
+			),
 		};
 }

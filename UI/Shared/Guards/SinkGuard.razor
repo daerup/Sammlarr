@@ -1,0 +1,38 @@
+@using Contracts.Auth
+@using Contracts.Settings
+@inject ICredentialService Credentials
+@inject IArrSinkConfigService ArrConfigs
+
+@code {
+    [Parameter] [EditorRequired] public SinkKind Sink { get; set; }
+
+    [Parameter] public EventCallback<bool> ReadyChanged { get; set; }
+
+    private bool? _lastReported;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Yield();
+        var ready = await IsReadyAsync();
+        if (ReadyChanged.HasDelegate && _lastReported != ready)
+        {
+            _lastReported = ready;
+            await ReadyChanged.InvokeAsync(ready);
+        }
+    }
+
+    private async Task<bool> IsReadyAsync()
+    {
+        return Sink switch
+        {
+            SinkKind.Plex => await Credentials.GetAsync(AuthProvider.Plex).IsSuccess(),
+            SinkKind.Arr => IsSetUp(await ArrConfigs.GetAsync()),
+        };
+    }
+
+    private static bool IsSetUp(ArrSinkConfig config)
+    {
+        return new[] { config.Radarr, config.Sonarr }.All(instance =>
+            instance.Url.IsSome() && instance.ApiKey.IsSome() && instance.QualityProfileId.IsSome() && instance.RootFolderPath.IsSome());
+    }
+}

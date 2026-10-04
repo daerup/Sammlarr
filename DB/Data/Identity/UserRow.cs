@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Domain.Identity;
 using Domain.Providers;
 
@@ -11,4 +12,13 @@ internal sealed record UserRow : Entity<Guid>
 	public required string AvatarUrl { get; set; }
 	public required UserRole Role { get; set; }
 	public required DateTimeOffset JoinedAt { get; set; }
+
+	[MaxLength(512)]
+	public string? PasswordHash { get; set; }
+	public int FailedSignIns { get; set; }
+	public DateTimeOffset? LockedUntil { get; set; }
+	public DateTimeOffset? SessionsRevokedAt { get; set; }
+
+	[MaxLength(512)]
+	public string? ConfigResetHash { get; set; }
 }

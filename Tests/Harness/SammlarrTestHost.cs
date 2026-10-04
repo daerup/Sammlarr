@@ -17,6 +17,7 @@ using Contracts.Ratings;
 using Contracts.Wantlist;
 using Core;
 using DB;
+using DB.Data;
 using DB.Data.Access;
 using DB.Data.Identity;
 using DB.Data.Media;
@@ -25,6 +26,7 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -437,10 +439,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal IReadOnlyList<UserId> InvalidatedSessions => _sessionInvalidator.Invalidated;
 
-	internal async Task<bool> HasStoredCredential(AuthProvider provider)
+	internal async Task<bool> HasStoredCredential(AuthProvider provider, UserId owner)
 	{
 		ScopedDbContext.ChangeTracker.Clear();
-		return await ScopedDbContext.Credentials.IgnoreQueryFilters().AnyAsync(credential => credential.Provider == provider);
+		return await ScopedDbContext
+			.Credentials.IgnoreQueryFilters()
+			.AnyAsync(credential => credential.Provider == provider && EF.Property<Guid>(credential, UserOwnedConfigurationExtensions.UserIdColumn) == owner.Value);
 	}
 
 	internal async Task SetDatabaseRole(UserId userId, UserRole role)
@@ -482,6 +486,37 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				AvatarUrl = "avatar",
 				Role = role,
 				JoinedAt = DateTimeOffset.UnixEpoch,
+			}
+		);
+		await context.SaveChangesAsync();
+		context.ChangeTracker.Clear();
+		return UserId.From(id);
+	}
+
+	internal async Task SignsInWithSammlarrAccounts()
+	{
+		var context = ScopedDbContext;
+		var row = await context.ProviderSettings.SingleAsync();
+		row.AuthProvider = AuthProvider.Local;
+		await context.SaveChangesAsync();
+		context.ChangeTracker.Clear();
+	}
+
+	internal async Task<UserId> SeedLocalUser(string username, string password, UserRole role)
+	{
+		var id = Guid.NewGuid();
+		var context = ScopedDbContext;
+		context.Users.Add(
+			new UserRow
+			{
+				Id = id,
+				Provider = AuthProvider.Local,
+				ExternalUserId = Usernames.Normalize(username),
+				DisplayName = username,
+				AvatarUrl = string.Empty,
+				Role = role,
+				JoinedAt = DateTimeOffset.UnixEpoch,
+				PasswordHash = new PasswordHasher<string>().HashPassword(string.Empty, password),
 			}
 		);
 		await context.SaveChangesAsync();

@@ -47,7 +47,7 @@
                               OnEnterEditMode="EnterEditMode"
                               OnToggleFilters="ToggleFilterBar"/>
         <ProtectedComponent GuardState="IsConnected"
-                            AuthProvider="@Settings!.AuthProvider"
+                            Sink="@Settings!.Sink"
                             DeniedActionDescription="sync your wantlist">
             <WantlistSyncButton @ref="_syncControl" OnSynced="LoadAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@SinkBrandColor" ProviderName="@SinkName" OutboxEntries="_outboxEntries.Values"/>
         </ProtectedComponent>

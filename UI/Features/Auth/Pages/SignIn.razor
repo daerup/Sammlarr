@@ -1,12 +1,21 @@
 @page "/signin"
 @layout AuthLayout
 @attribute [AllowAnonymous]
+@using Contracts.Settings
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IProviderConfigService ProviderConfigService
 
 <PageTitle>Sign in</PageTitle>
 
-<SignInRequired ReturnUrl="@ReturnUrl" Error="@AuthError"/>
+@if (_provider is { } provider)
+{
+    <SignInRequired Provider="provider" ReturnUrl="@ReturnUrl" Error="@AuthError"/>
+}
+else
+{
+    <BbSkeleton Class="h-56 w-full max-w-md rounded-lg"/>
+}
 
 @code {
     [SupplyParameterFromQuery(Name = "returnUrl")]
@@ -14,6 +23,13 @@
 
     [SupplyParameterFromQuery(Name = "authError")]
     public string? AuthError { get; set; }
+
+    private AuthProvider? _provider;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _provider = (await ProviderConfigService.GetAsync()).AuthProvider;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

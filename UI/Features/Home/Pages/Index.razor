@@ -41,7 +41,7 @@
 else
 {
 <SignInGuard AccessChanged="HandleSignInChangedAsync"/>
-<OAuthGuard Provider="@_settings.AuthProvider" AccessChanged="HandleConnectionChanged"/>
+<SinkGuard Sink="@_settings.Sink" ReadyChanged="HandleConnectionChanged"/>
 
 <PageContainer Heading="Your library" Fill="true">
     <DescriptionContent>
@@ -75,7 +75,7 @@ else
                     </BbButton>
                 }
                 <ProtectedComponent GuardState="IsConnected"
-                                    AuthProvider="@_settings.AuthProvider"
+                                    Sink="@_settings.Sink"
                                     DeniedActionDescription="sync your wantlist">
                     <WantlistSyncButton @ref="_syncControl"
                                          OnSynced="SyncFinishedAsync"

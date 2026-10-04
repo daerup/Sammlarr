@@ -18,15 +18,19 @@ else
     [Parameter] [EditorRequired] public Func<bool> GuardState { get; set; } = () => true;
     [Parameter] [EditorRequired] public RenderFragment? ChildContent { get; set; }
 
-    [Parameter] public AuthProvider? AuthProvider { get; set; }
+    [Parameter] public SinkKind? Sink { get; set; }
     [Parameter] public ApiKeyProvider? ApiProvider { get; set; }
     [Parameter] public string DeniedActionDescription { get; set; } = "use this";
 
     private string GetDisabledMessage()
     {
-        if (AuthProvider.HasValue)
+        if (Sink is { } sink)
         {
-            return $"Connect your {AuthProvider.Value.GetDescription()} account to {DeniedActionDescription}.";
+            return sink switch
+            {
+                SinkKind.Plex => $"Connect your Plex account to {DeniedActionDescription}.",
+                SinkKind.Arr => $"Radarr + Sonarr needs setting up before you can {DeniedActionDescription}.",
+            };
         }
 
         if (ApiProvider.HasValue)

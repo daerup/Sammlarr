@@ -65,6 +65,17 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
+	public async Task<Optional<UserSession>> FindSessionAsync(UserId id, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var found = await ctx
+			.Users.AsNoTracking()
+			.Where(user => user.Id == id.Value)
+			.Select(user => new { user.Role, user.SessionsRevokedAt })
+			.SingleOrDefaultAsync(cancellationToken);
+		return Optional.Of(found).Map(session => new UserSession(session.Role, Optional.Of(session.SessionsRevokedAt)));
+	}
+
 	private static System.Linq.Expressions.Expression<Func<UserRow, User>> Project =>
 		user => new User(UserId.From(user.Id), user.DisplayName, user.AvatarUrl, user.Role, user.JoinedAt);
 }

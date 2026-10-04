@@ -1,5 +1,6 @@
 using BlazorBlueprint.Components;
 using Bunit;
+using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Guards;
 using UI.Shared.Services.Branding;
@@ -19,7 +20,7 @@ public class SignInRequiredTests : BunitContext
 	[Test]
 	public async Task Prompt_ForTheOnlyProvider_NamesItsAccount()
 	{
-		var cut = Render<SignInRequired>();
+		var cut = Render<SignInRequired>(parameters => parameters.Add(card => card.Provider, AuthProvider.Plex));
 
 		await Assert.That(cut.Find("h2").TextContent).IsEqualTo("Sign in");
 		await Assert.That(cut.Find("p").TextContent).IsEqualTo("Use your Plex account to continue.");
@@ -28,7 +29,7 @@ public class SignInRequiredTests : BunitContext
 	[Test]
 	public async Task Button_ForEachProvider_ReadsSignInWithThenTheProvidersWordmark()
 	{
-		var cut = Render<SignInRequired>();
+		var cut = Render<SignInRequired>(parameters => parameters.Add(card => card.Provider, AuthProvider.Plex));
 
 		var button = cut.Find("button.signin-button");
 		var wordmarks = button.QuerySelectorAll("img").Select(logo => $"{logo.GetAttribute("alt")}|{logo.GetAttribute("src")}");
@@ -37,9 +38,24 @@ public class SignInRequiredTests : BunitContext
 	}
 
 	[Test]
+	public async Task Form_OnASammlarrAccountsInstall_PostsTheUsernameAndPasswordWithoutAPlexButton()
+	{
+		var cut = Render<SignInRequired>(parameters => parameters.Add(card => card.Provider, AuthProvider.Local).Add(card => card.ReturnUrl, "/feeds"));
+
+		var form = cut.Find("form");
+		await Assert.That(cut.Find("p").TextContent).IsEqualTo("Use your Sammlarr account to continue.");
+		await Assert.That(form.GetAttribute("action")).IsEqualTo("/auth/local");
+		await Assert.That(form.QuerySelectorAll("input[name]").Select(input => input.GetAttribute("name") ?? string.Empty)).Contains("password");
+		await Assert.That(form.QuerySelector("input[name=returnUrl]")?.GetAttribute("value")).IsEqualTo("/feeds");
+		await Assert.That(cut.FindAll("button.signin-button")).IsEmpty();
+	}
+
+	[Test]
 	public async Task Alert_WithAnError_ShowsTheMessage()
 	{
-		var cut = Render<SignInRequired>(parameters => parameters.Add(card => card.Error, "Registration is closed. Ask an admin for access."));
+		var cut = Render<SignInRequired>(parameters =>
+			parameters.Add(card => card.Provider, AuthProvider.Plex).Add(card => card.Error, "Registration is closed. Ask an admin for access.")
+		);
 
 		await Assert.That(cut.Find(".alert-soft-destructive").TextContent.Trim()).IsEqualTo("Registration is closed. Ask an admin for access.");
 	}

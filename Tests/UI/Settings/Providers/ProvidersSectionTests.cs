@@ -49,11 +49,32 @@ public class ProvidersSectionTests : BunitContext
 		credentials.GetAsync(Any<AuthProvider>(), Any()).Returns(Error.From("Not connected."));
 		Services.AddSingleton(credentials.Object);
 		ComponentFactories.AddStub<AccountRow>();
+		ComponentFactories.AddStub<SammlarrAccountRow>();
 		ComponentFactories.AddStub<ApiKeyRow>();
 		ComponentFactories.AddStub<ServicesMap>();
 		ComponentFactories.AddStub<ArrSinkRow>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		_config.GetAsync(Any()).Returns(OnPlex);
+	}
+
+	[Test]
+	public async Task Section_OnASammlarrAccountsInstall_HeadsAccountsAndKeysWithTheSammlarrAccount()
+	{
+		_config.GetAsync(Any()).Returns(OnPlex with { AuthProvider = AuthProvider.Local });
+
+		var cut = RenderSection();
+
+		await Assert.That(cut.FindComponents<Stub<SammlarrAccountRow>>()).Count().IsEqualTo(1);
+		await Assert.That(Map(cut).Get(map => map.Ready)).Contains(MediaProvider.Local);
+	}
+
+	[Test]
+	public async Task Section_OnAPlexInstall_ShowsNoSammlarrAccount()
+	{
+		var cut = RenderSection();
+
+		await Assert.That(cut.FindComponents<Stub<SammlarrAccountRow>>()).IsEmpty();
+		await Assert.That(cut.FindComponents<Stub<AccountRow>>()).Count().IsEqualTo(1);
 	}
 
 	[Test]

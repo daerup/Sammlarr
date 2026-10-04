@@ -1,6 +1,7 @@
 using Contracts.Auth;
 using Contracts.Blocklist;
 using Contracts.Feed;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Notifications;
 using Contracts.Settings;
@@ -75,6 +76,17 @@ public class RepositoryTests
 		yield return () => (typeof(ICredentialRepository), ["DB.Data.Access.CredentialRepository", "DB.Data.Access.AccessModule", "Core.Auth.CredentialService"]);
 		yield return () =>
 			(typeof(IArrSinkConfigRepository), ["DB.Data.Config.ArrSinkConfigRepository", "DB.Data.Config.ConfigModule", "Core.Settings.ArrSinkConfigService"]);
+		yield return () =>
+			(
+				typeof(ILocalAccountRepository),
+				[
+					"DB.Data.Identity.LocalAccountRepository",
+					"DB.Data.Identity.IdentityDataModule",
+					"Core.Auth.SignInService",
+					"Core.Auth.LocalAccountService",
+					"Core.Auth.AdminPasswordReset",
+				]
+			);
 	}
 
 	[Test]

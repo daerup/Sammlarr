@@ -44,7 +44,7 @@ public class SessionTests
 		await Assert.That(login.Url).Contains($"returnUrl={Uri.EscapeDataString(DeepLink)}");
 
 		await page.UnrouteAsync(LoginRoute);
-		await page.VisitAsync($"/auth/plex/callback?pinId={PinId}&clientId={Guid.NewGuid()}&returnUrl={Uri.EscapeDataString(DeepLink)}");
+		await page.VisitAsync(await page.PlexCallbackAsync(DeepLink));
 
 		await Assert.That(new Uri(page.Url).AbsolutePath).IsEqualTo(DeepLink);
 		await Expect(page.Heading("Feeds")).ToBeVisibleAsync();

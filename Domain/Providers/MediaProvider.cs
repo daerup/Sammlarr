@@ -29,4 +29,8 @@ public enum MediaProvider
 
 	[Description("Sonarr")]
 	Sonarr,
+
+	[Description("Sammlarr")]
+	[Capabilities<ProviderCapability>(ProviderCapability.Auth)]
+	Local,
 }

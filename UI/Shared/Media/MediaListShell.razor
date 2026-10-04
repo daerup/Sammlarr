@@ -11,7 +11,7 @@
 else
 {
     <SignInGuard AccessChanged="OnSignInChanged"/>
-    <OAuthGuard Provider="@Settings.AuthProvider" AccessChanged="OnAccessChanged"/>
+    <SinkGuard Sink="@Settings.Sink" ReadyChanged="OnAccessChanged"/>
 
     <PageContainer Heading="@Heading" Description="@Description" Fill="true">
         <HeaderActions>

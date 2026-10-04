@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261004010931_ArrSinkConfig";
+    public override string LastMigrationId => "20261004034632_LocalAccounts";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -403,6 +403,10 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("TEXT");
 
+                b.Property<string>("ConfigResetHash")
+                    .HasMaxLength(512)
+                    .HasColumnType("TEXT");
+
                 b.Property<long>("CreatedAt")
                     .HasColumnType("INTEGER");
 
@@ -414,8 +418,18 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("TEXT");
 
+                b.Property<int>("FailedSignIns")
+                    .HasColumnType("INTEGER");
+
                 b.Property<long>("JoinedAt")
                     .HasColumnType("INTEGER");
+
+                b.Property<long?>("LockedUntil")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("PasswordHash")
+                    .HasMaxLength(512)
+                    .HasColumnType("TEXT");
 
                 b.Property<string>("Provider")
                     .IsRequired()
@@ -424,6 +438,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Property<string>("Role")
                     .IsRequired()
                     .HasColumnType("TEXT");
+
+                b.Property<long?>("SessionsRevokedAt")
+                    .HasColumnType("INTEGER");
 
                 b.Property<long>("UpdatedAt")
                     .HasColumnType("INTEGER");

@@ -20,7 +20,7 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 	internal static readonly IReadOnlyList<ProviderRecording> All =
 	[
 		.. Enum.GetValues<ApiKeyProvider>().Select(ForApiKey),
-		.. Enum.GetValues<AuthProvider>().Select(ForAuth),
+		.. Enum.GetValues<AuthProvider>().SelectMany(ForAuth),
 		Build("wikidata", WikidataOptions.SectionName, "BaseUrl"),
 	];
 
@@ -39,10 +39,11 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 			ApiKeyProvider.Mdblist => Build(Slug(provider), MdblistOptions.SectionName, "BaseUrl"),
 		};
 
-	private static ProviderRecording ForAuth(AuthProvider provider) =>
+	private static IReadOnlyList<ProviderRecording> ForAuth(AuthProvider provider) =>
 		provider switch
 		{
-			AuthProvider.Plex => Build(Slug(provider), PlexOptions.SectionName, "BaseUrl", "DiscoverUrl", "VodUrl", "MetadataUrl"),
+			AuthProvider.Plex => [Build(Slug(provider), PlexOptions.SectionName, "BaseUrl", "DiscoverUrl", "VodUrl", "MetadataUrl")],
+			AuthProvider.Local => [],
 		};
 
 	private static ProviderRecording Build(string slug, string section, params string[] configKeys)
