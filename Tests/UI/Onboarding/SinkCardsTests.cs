@@ -24,7 +24,7 @@ public class SinkCardsTests : BunitContext
 
 		var branding = Services.GetRequiredService<MediaProviderBrandingService>();
 		await Assert
-			.That(cut.FindAll(".choice-card").Select(card => card.GetAttribute("style")))
+			.That(cut.FindAll(".choice-card").Select(card => card.GetAttribute("style")).OfType<string>())
 			.IsEquivalentTo([$"--brand: {branding.SinkColor(SinkKind.Plex)}", $"--brand: {branding.SinkColor(SinkKind.Arr)}"]);
 	}
 
@@ -34,6 +34,6 @@ public class SinkCardsTests : BunitContext
 		var cut = Render<SinkCards>(parameters => parameters.Add(cards => cards.Picked, SinkKind.Arr));
 
 		await Assert.That(cut.Find(".choice-card[data-picked]").GetAttribute("for")).IsEqualTo("sink-Arr");
-		await Assert.That(cut.FindAll("[role=radio]").Select(radio => radio.GetAttribute("tabindex"))).IsEquivalentTo(["-1", "0"]);
+		await Assert.That(cut.FindAll("[role=radio]").Select(radio => radio.GetAttribute("tabindex")).OfType<string>()).IsEquivalentTo(["-1", "0"]);
 	}
 }

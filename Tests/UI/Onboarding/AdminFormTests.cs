@@ -43,7 +43,9 @@ public class AdminFormTests : BunitContext
 		var cut = Render<AdminForm>(parameters => parameters.Add(form => form.Picked, AuthProvider.Local));
 
 		await Assert.That(cut.Find("form").GetAttribute("action")).IsEqualTo("/setup/admin");
-		await Assert.That(cut.FindAll("input[name]").Select(input => input.GetAttribute("name"))).IsEquivalentTo(["code", "username", "password", "confirmation"]);
+		await Assert
+			.That(cut.FindAll("input[name]").Select(input => input.GetAttribute("name")).OfType<string>())
+			.IsEquivalentTo(["code", "username", "password", "confirmation"]);
 		await Assert.That(cut.Find("[data-passwords]").QuerySelectorAll("input[type=password]").Length).IsEqualTo(2);
 		await Assert.That(cut.FindAll("button[formaction]")).IsEmpty();
 	}
@@ -64,7 +66,7 @@ public class AdminFormTests : BunitContext
 	{
 		var cut = Render<AdminForm>();
 
-		await Assert.That(cut.FindAll("[role=radio]").Select(radio => radio.GetAttribute("tabindex"))).IsEquivalentTo(["0", "-1"]);
+		await Assert.That(cut.FindAll("[role=radio]").Select(radio => radio.GetAttribute("tabindex")).OfType<string>()).IsEquivalentTo(["0", "-1"]);
 		await Assert.That(cut.Find("button[type=submit]").HasAttribute("disabled")).IsTrue();
 	}
 
@@ -92,7 +94,7 @@ public class AdminFormTests : BunitContext
 	{
 		var cut = Render<AdminForm>();
 
-		var brands = cut.FindAll(".choice-card").Select(card => card.GetAttribute("style"));
+		var brands = cut.FindAll(".choice-card").Select(card => card.GetAttribute("style")).OfType<string>();
 		var plex = Services.GetRequiredService<MediaProviderBrandingService>().GetBrandingInfo(MediaProvider.Plex).BrandColor;
 		await Assert.That(brands).IsEquivalentTo([$"--brand: {plex}", "--brand: var(--foreground)"]);
 	}
