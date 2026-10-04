@@ -15,6 +15,8 @@ internal sealed class PlexFreeStack
 
 	private const string WebLogCategory = "AppHost.Resources.blazor-ui";
 
+	private const string CircuitFailure = "Unhandled exception in circuit";
+
 	private const string KeystoreDirectory = "/home/wiremock/tls";
 
 	private const string IndexerUrl = "http://wiremock:8080/newznab";
@@ -52,14 +54,22 @@ internal sealed class PlexFreeStack
 
 	internal Task<string> SetupCodeAsync() => _setupCodes.NextCodeAsync().WaitAsync(ReadyTimeout);
 
-	internal static async Task<PlexFreeStack> LaunchAsync(TestCertificates certificates, string keyRing, string workDir, bool live)
+	internal static async Task<PlexFreeStack> LaunchAsync(
+		TestCertificates certificates,
+		string keyRing,
+		string workDir,
+		bool live,
+		Action<string> onCircuitFailure
+	)
 	{
 		var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
 			["--LaunchSammlarr=false", "--RadarrSonarr=true", $"--ArrDataRoot={Path.Combine(workDir, "arr")}"],
 			(options, _) => options.DisableDashboard = true
 		);
 		var setupCodes = new SetupCodeSink(WebLogCategory);
-		builder.Services.AddLogging(logging => logging.AddProvider(setupCodes));
+		builder.Services.AddLogging(logging =>
+			logging.AddProvider(setupCodes).AddProvider(new CircuitFailureSink(WebLogCategory, CircuitFailure, 0, onCircuitFailure))
+		);
 		builder.WaitThroughBusyDocker();
 
 		var wiremock = builder

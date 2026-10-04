@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Threading.Channels;
 using E2E.Tests.Recording;
+using Microsoft.Playwright;
 
 namespace E2E.Tests.PlexFree;
 
@@ -12,13 +13,27 @@ public static class PlexFreeApp
 	private static readonly Lazy<Task> Boot = new(StartAsync);
 	private static readonly Lock Gate = new();
 	private static readonly List<JournalEntry> Journal = [];
+	private static readonly List<string> CircuitFailures = [];
 	private static readonly ConcurrentDictionary<string, Lazy<Lease>> Leases = [];
 	private static readonly Channel<PlexFreeStack> Idle = Channel.CreateUnbounded<PlexFreeStack>();
 
 	private static PlexFreeStack[] _stacks = [];
 	private static string _sessionDir = "";
+	private static IPlaywright? _playwright;
+	private static IBrowser? _browser;
 
-	internal static Task<PlexFreeStack> StackAsync() => Leases.GetOrAdd(TestContext.Current!.Id, _ => new Lazy<Lease>(Take)).Value.Ready;
+	internal static Task<PlexFreeStack> StackAsync() => Current().Ready;
+
+	internal static async Task<IPage> OpenPageAsync()
+	{
+		var lease = Current();
+		var stack = await lease.Ready;
+		var context = await BrowserPages.OpenAsync(_browser!, stack.BaseUrl);
+		lease.Contexts.Add(context);
+		return await context.NewPageAsync();
+	}
+
+	private static Lease Current() => Leases.GetOrAdd(TestContext.Current!.Id, _ => new Lazy<Lease>(Take)).Value;
 
 	private static Lease Take()
 	{
@@ -49,10 +64,20 @@ public static class PlexFreeApp
 		}
 
 		var taken = lease.Value.Taken;
-		await ((Task)taken).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-		if (taken.IsCompletedSuccessfully)
+		try
 		{
-			Idle.Writer.TryWrite(taken.Result);
+			foreach (var browserContext in lease.Value.Contexts)
+			{
+				await browserContext.CloseAsync();
+			}
+		}
+		finally
+		{
+			await ((Task)taken).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+			if (taken.IsCompletedSuccessfully)
+			{
+				Idle.Writer.TryWrite(taken.Result);
+			}
 		}
 	}
 
@@ -69,6 +94,8 @@ public static class PlexFreeApp
 			Record(await stack.JournalAsync());
 		}
 
+		await _browser!.DisposeAsync();
+		_playwright!.Dispose();
 		foreach (var stack in _stacks)
 		{
 			await stack.StopAsync();
@@ -80,7 +107,14 @@ public static class PlexFreeApp
 			journal = [.. Journal.Distinct()];
 		}
 
+		List<string> crashed;
+		lock (Gate)
+		{
+			crashed = [.. CircuitFailures];
+		}
+
 		await Assert.That(E2EApp.IsLive ? await RecordAsync(journal) : Unmatched(journal)).IsEmpty();
+		await Assert.That(crashed).IsEmpty();
 		Directory.Delete(_sessionDir, recursive: true);
 	}
 
@@ -96,6 +130,14 @@ public static class PlexFreeApp
 		return [.. Unmatched(unrecordable), .. await MetadataRecorder.RecordAsync(recordables)];
 	}
 
+	private static void RecordCircuitFailure(string message)
+	{
+		lock (Gate)
+		{
+			CircuitFailures.Add(message);
+		}
+	}
+
 	private static void Record(IReadOnlyList<JournalEntry> journal)
 	{
 		lock (Gate)
@@ -106,6 +148,8 @@ public static class PlexFreeApp
 
 	private static async Task StartAsync()
 	{
+		_playwright = await Playwright.CreateAsync();
+		_browser = await BrowserPages.LaunchAsync(_playwright);
 		_sessionDir = Directory.CreateTempSubdirectory("sammlarr-plexfree-").FullName;
 		var certificates = await TestCertificates.CreateAsync(MetadataHosts.All, _sessionDir);
 		var keyRing = Directory.CreateDirectory(Path.Combine(_sessionDir, "keys")).FullName;
@@ -113,7 +157,13 @@ public static class PlexFreeApp
 			Enumerable
 				.Range(0, StackCount)
 				.Select(index =>
-					PlexFreeStack.LaunchAsync(certificates, keyRing, Directory.CreateDirectory(Path.Combine(_sessionDir, $"stack-{index}")).FullName, E2EApp.IsLive)
+					PlexFreeStack.LaunchAsync(
+						certificates,
+						keyRing,
+						Directory.CreateDirectory(Path.Combine(_sessionDir, $"stack-{index}")).FullName,
+						E2EApp.IsLive,
+						RecordCircuitFailure
+					)
 				)
 		);
 		foreach (var stack in _stacks)
@@ -122,5 +172,8 @@ public static class PlexFreeApp
 		}
 	}
 
-	private sealed record Lease(Task<PlexFreeStack> Taken, Task<PlexFreeStack> Ready);
+	private sealed record Lease(Task<PlexFreeStack> Taken, Task<PlexFreeStack> Ready)
+	{
+		internal ConcurrentBag<IBrowserContext> Contexts { get; } = [];
+	}
 }
