@@ -4,9 +4,9 @@ namespace E2E.Tests.PlexFree;
 
 internal sealed class ArrApi(HttpClient http)
 {
-	private const string Key = "0123456789abcdef0123456789abcdef";
-
 	private static readonly TimeSpan SettleTimeout = TimeSpan.FromMinutes(1);
+
+	internal Uri Url => http.BaseAddress!;
 
 	internal async Task<JsonNode> GetAsync(string path)
 	{
@@ -68,7 +68,7 @@ internal sealed class ArrApi(HttpClient http)
 	internal static ArrApi For(Uri url)
 	{
 		var http = new HttpClient { BaseAddress = url };
-		http.DefaultRequestHeaders.Add("X-Api-Key", Key);
+		http.DefaultRequestHeaders.Add("X-Api-Key", StackBoot.ArrApiKey);
 		return new ArrApi(http);
 	}
 

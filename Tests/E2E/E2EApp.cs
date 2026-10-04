@@ -18,18 +18,6 @@ public static class E2EApp
 	private static readonly List<string> CircuitFailures = [];
 	private static readonly ConcurrentDictionary<string, Lazy<Task<Lease>>> Leases = [];
 	private static readonly Channel<E2EStack> Idle = Channel.CreateUnbounded<E2EStack>();
-	private const string PlaceholderArtwork = """
-		<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
-		  <rect width="200" height="300" fill="#334155"/>
-		  <g fill="none" stroke="#94a3b8" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
-		    <rect x="66" y="98" width="68" height="52" rx="6"/>
-		    <circle cx="84" cy="114" r="6"/>
-		    <path d="M66 142 l22 -18 l16 13 l10 -8 l20 17"/>
-		  </g>
-		  <text x="100" y="186" text-anchor="middle" font-family="system-ui, sans-serif" font-size="26" font-weight="700" fill="#e2e8f0">E2E</text>
-		  <text x="100" y="203" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" letter-spacing="1.5" fill="#94a3b8">PLACEHOLDER</text>
-		</svg>
-		""";
 
 	private static E2EStack[] _stacks = [];
 	private static IPlaywright? _playwright;
@@ -58,10 +46,8 @@ public static class E2EApp
 	private static async Task<IPage> NewPageAsync(Func<E2EStack, string?> cookie)
 	{
 		var lease = await LeaseAsync();
-		var context = await _browser!.NewContextAsync(new BrowserNewContextOptions { BaseURL = lease.Stack.BaseUrl });
+		var context = await BrowserPages.OpenAsync(_browser!, lease.Stack.BaseUrl);
 		lease.Contexts.Add(context);
-		await context.RouteAsync(url => !url.StartsWith(lease.Stack.BaseUrl, StringComparison.Ordinal), ServeArtworkLocallyAsync);
-		await context.AddInitScriptAsync(Locators.MarkListeningInputs);
 		if (cookie(lease.Stack) is { } value)
 		{
 			await context.AddCookiesAsync([
@@ -76,11 +62,6 @@ public static class E2EApp
 
 		return await context.NewPageAsync();
 	}
-
-	private static Task ServeArtworkLocallyAsync(IRoute route) =>
-		route.Request.ResourceType == "image"
-			? route.FulfillAsync(new RouteFulfillOptions { ContentType = "image/svg+xml", Body = PlaceholderArtwork })
-			: route.ContinueAsync();
 
 	internal static async Task<string> RequestJournalAsync() => await (await StackAsync()).RequestJournalAsync();
 
@@ -312,9 +293,8 @@ public static class E2EApp
 
 	private static async Task StartAsync()
 	{
-		var headed = Environment.GetEnvironmentVariable("E2E_HEADED") is "true";
 		_playwright = await Playwright.CreateAsync();
-		_browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = !headed, SlowMo = headed ? 2000 : 0 });
+		_browser = await BrowserPages.LaunchAsync(_playwright);
 
 		_keyRing = Directory.CreateTempSubdirectory("sammlarr-e2e-keys-").FullName;
 		var seeds = Enumerable.Range(0, StackCount).Select(_ => E2EStack.Seed(IsLive, _keyRing)).ToList();

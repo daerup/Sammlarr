@@ -7,6 +7,8 @@ namespace E2E.Tests;
 
 internal static class StackBoot
 {
+	internal const string ArrApiKey = "0123456789abcdef0123456789abcdef";
+
 	internal static readonly TimeSpan Timeout = TimeSpan.FromMinutes(10);
 
 	internal static void WaitThroughBusyDocker(this IDistributedApplicationTestingBuilder builder)

@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using System.Web;
 using Microsoft.Playwright;
 
@@ -47,8 +46,7 @@ internal static class PageExtensions
 
 	internal static async Task ShouldBeAtAsync(this IPage page, string route, float timeout = Wait.Settle)
 	{
-		await page.WaitForURLAsync(new Regex(Regex.Escape(route)), new PageWaitForURLOptions { Timeout = timeout });
-		await Assert.That(new Uri(page.Url).AbsolutePath).IsEqualTo(route);
+		await page.WaitForURLAsync(url => new Uri(url).AbsolutePath == route, new PageWaitForURLOptions { Timeout = timeout });
 	}
 
 	internal static async Task ShouldNotBeAtAsync(this IPage page, string route) => await Assert.That(page.Url).DoesNotContain(route);
