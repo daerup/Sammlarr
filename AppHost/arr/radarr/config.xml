@@ -1,0 +1,6 @@
+<Config>
+  <ApiKey>0123456789abcdef0123456789abcdef</ApiKey>
+  <AuthenticationMethod>External</AuthenticationMethod>
+  <AuthenticationRequired>DisabledForLocalAddresses</AuthenticationRequired>
+  <AnalyticsEnabled>False</AnalyticsEnabled>
+</Config>

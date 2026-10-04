@@ -134,6 +134,17 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task GetExternalsAsync_WhenATitleCarriesTwoIdsFromTheSource_ReturnsOneOfThem()
+	{
+		var ids = new IExternalMediaId[] { TmdbId.From("1341215", MediaType.Movie), TmdbId.From("1312572", MediaType.Movie) };
+		var mediaId = await SetUpMediaAsync(ids);
+
+		var result = await _testee.GetExternalsAsync([mediaId], MediaProvider.Tmdb);
+
+		await Assert.That(result[mediaId]).IsEqualTo(TmdbId.From("1312572", MediaType.Movie));
+	}
+
+	[Test]
 	public async Task UpsertManyAsync_WhenAllGroupsAreNew_CreatesOneRowPerGroupInSingleSave()
 	{
 		IReadOnlyList<MediaIdentity> identitiesInput =

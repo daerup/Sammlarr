@@ -36,7 +36,13 @@ internal readonly record struct MapEndpoint(MediaProvider Provider, Optional<Med
 	public override string ToString() => string.Join("+", Providers);
 }
 
-internal sealed record MapPicker(string Label, IReadOnlyList<MapEndpoint> Options, MapEndpoint Current);
+internal enum MapChoice
+{
+	Wantlist,
+	Search,
+}
+
+internal sealed record MapPicker(MapChoice Choice, string Label, IReadOnlyList<MapEndpoint> Options, MapEndpoint Current);
 
 internal sealed record MapRole(string Name, string Icon, string Description, double Y, MapEndpoint? Provider, MapPicker? Picker);
 
@@ -186,14 +192,19 @@ internal sealed record ServicesMapModel(
 				"bookmark",
 				"Where the wantlist syncs to",
 				MapEndpoint.Of(config.Sink),
-				Picker("Wantlist syncs to", Enum.GetValues<SinkKind>().Select(MapEndpoint.Of), MapEndpoint.Of(config.Sink))
+				Picker(MapChoice.Wantlist, "Wantlist syncs to", Enum.GetValues<SinkKind>().Select(MapEndpoint.Of), MapEndpoint.Of(config.Sink))
 			),
 			(
 				"Search",
 				"search",
 				"Finding titles to add",
 				config.SearchProvider.AsMediaProvider(),
-				Picker("Search uses", Enum.GetValues<SearchProvider>().Select(search => (MapEndpoint)search.AsMediaProvider()), config.SearchProvider.AsMediaProvider())
+				Picker(
+					MapChoice.Search,
+					"Search uses",
+					Enum.GetValues<SearchProvider>().Select(search => (MapEndpoint)search.AsMediaProvider()),
+					config.SearchProvider.AsMediaProvider()
+				)
 			),
 			("Trending", "trending-up", "What Browse shows", config.TrendingProvider.AsMediaProvider(), null),
 			("Feeds", "rss", "Imported lists; each feed picks its source", null, null),
@@ -201,9 +212,9 @@ internal sealed record ServicesMapModel(
 		return [.. rows.Select((row, index) => new MapRole(row.Name, row.Icon, row.Description, index * RowHeight + RowHeight / 2, row.Provider, row.Picker))];
 	}
 
-	private static MapPicker? Picker(string label, IEnumerable<MapEndpoint> options, MapEndpoint current)
+	private static MapPicker? Picker(MapChoice choice, string label, IEnumerable<MapEndpoint> options, MapEndpoint current)
 	{
-		return options.ToList() is { Count: > 1 } choices ? new MapPicker(label, choices, current) : null;
+		return options.ToList() is { Count: > 1 } choices ? new MapPicker(choice, label, choices, current) : null;
 	}
 
 	private static List<MapService> Place(List<MapRole> roles, List<(MapRole Role, MapEndpoint Provider)> landings)

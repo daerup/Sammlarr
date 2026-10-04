@@ -4,14 +4,20 @@ using Contracts.Settings;
 
 namespace Core.Settings;
 
-internal sealed class ArrSinkConfigService(IArrSinkConfigRepository repository, ITypedMemoryCache<string, ArrSinkConfig> cache, ICurrentUser currentUser)
-	: IArrSinkConfigService
+internal sealed class ArrSinkConfigService(
+	IArrSinkConfigRepository repository,
+	ITypedMemoryCache<string, ArrSinkConfig> cache,
+	IUserRepository users,
+	ICurrentUser currentUser
+) : IArrSinkConfigService
 {
 	private const string CacheKey = nameof(ArrSinkConfig);
 
 	public async Task<ArrSinkConfig> GetAsync(CancellationToken cancellationToken = default)
 	{
-		return await cache.GetValueOrNone(CacheKey).Match(Task.FromResult, () => LoadAsync(cancellationToken));
+		var config = await cache.GetValueOrNone(CacheKey).Match(Task.FromResult, () => LoadAsync(cancellationToken));
+		var syncing = await users.GetAllAsync(cancellationToken);
+		return config with { Tags = config.Tags with { PerUser = config.Tags.PerUser || syncing.Count > 1 } };
 	}
 
 	public async Task StoreAsync(ArrSinkConfig config, CancellationToken cancellationToken = default)

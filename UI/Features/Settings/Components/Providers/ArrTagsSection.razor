@@ -1,0 +1,189 @@
+@using BlazorBlueprint.Primitives
+@using Domain.Wantlist.Arr
+
+<div class="arr-tags">
+    <div class="arr-tags-head">
+        <span class="arr-tags-title">Tags</span>
+        <span class="arr-tags-lead">
+            Sammlarr treats a title as its own when one of its tags starts with <code>@Shown.Root</code>, and leaves everything else in Radarr and Sonarr alone.
+        </span>
+    </div>
+
+    <div class="arr-tags-body">
+        <div class="arr-tags-controls">
+            <BbField>
+                <BbFieldLabel>Prefix</BbFieldLabel>
+                <BbFieldContent>
+                    <div class="flex items-center gap-2">
+                        <BbInput Value="@_prefix" ValueChanged="PrefixTyped" AriaLabel="Tag prefix" AriaInvalid="@(!IsValid)"
+                                 Class="@PrefixClass" UpdateTiming="UpdateTiming.Immediate"/>
+                        @if (IsChanged && !_confirming)
+                        {
+                            <BbButton Size="ButtonSize.Small" Disabled="@(!IsValid)" OnClick="() => _confirming = true">Save</BbButton>
+                        }
+                    </div>
+                    <p class="arr-tags-note">Every tag starts with this. Saving a new one asks you to confirm.</p>
+                </BbFieldContent>
+            </BbField>
+
+            @if (_confirming)
+            {
+                <BbAlert Variant="AlertVariant.Danger">
+                    <ChildContent>
+                        <BbAlertTitle>Change the prefix from @Scheme.Root to @Shown.Root?</BbAlertTitle>
+                        <BbAlertDescription>
+                            Radarr and Sonarr keep the old <code>@Scheme.Root</code> tags. Sammlarr stops recognising those titles, so the next sync takes them off every wantlist.
+                        </BbAlertDescription>
+                    </ChildContent>
+                    <Actions>
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="Cancel">Cancel</BbButton>
+                        <BbButton Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" OnClick="ChangePrefixAsync">Change prefix</BbButton>
+                    </Actions>
+                </BbAlert>
+            }
+
+            <div class="arr-tags-part">
+                <div class="arr-tags-line">
+                    <label class="arr-tags-check">
+                        <BbCheckbox Checked="Scheme.PerUser" CheckedChanged="PerUserChangedAsync" Disabled="Locked"/>
+                        A tag per user
+                    </label>
+                    <span class="arr-tags-from">
+                        from
+                        <BbSelect TValue="ArrUserTagSource" Value="Scheme.UserSource" ValueChanged="UserSourceChangedAsync" Options="UserSources"
+                                  Disabled="@(!Scheme.PerUser)" AriaLabel="User tag from" Class="w-32 [&_[role=combobox]]:h-8 [&_[role=combobox]]:text-xs"/>
+                    </span>
+                </div>
+                <p class="arr-tags-note">
+                    @if (Locked)
+                    {
+                        <LucideIcon Name="lock" Size="11" Class="mr-1 inline align-[-1px]"/>
+                        <span>Needed while @Users.Count users sync here: each one's sync reads only the titles carrying their tag.</span>
+                    }
+                    else
+                    {
+                        <span>Each user's sync reads only the titles carrying their tag. With one user this can be switched off.</span>
+                    }
+                </p>
+            </div>
+
+            <div class="arr-tags-line">
+                <label class="arr-tags-check">
+                    <BbCheckbox Checked="Scheme.PerFeed" CheckedChanged="PerFeedChangedAsync"/>
+                    A tag per feed
+                </label>
+                <span class="arr-tags-from">
+                    from
+                    <BbSelect TValue="ArrFeedTagSource" Value="Scheme.FeedSource" ValueChanged="FeedSourceChangedAsync" Options="FeedSources"
+                              Disabled="@(!Scheme.PerFeed)" AriaLabel="Feed tag from" Class="w-36 [&_[role=combobox]]:h-8 [&_[role=combobox]]:text-xs"/>
+                </span>
+            </div>
+
+            <div class="arr-tags-line">
+                <label class="arr-tags-check">
+                    <BbCheckbox Checked="Scheme.PlainPrefix" CheckedChanged="PlainPrefixChangedAsync"/>
+                    <span>Also add plain <code>@Shown.Root</code> to every title</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="arr-tags-preview" aria-label="Tag preview">
+            <div class="arr-tags-preview-head">
+                <LucideIcon Name="eye" Size="12"/>
+                Preview: the tags these would get
+            </div>
+            @foreach (var row in ArrTagPreview.Rows(Shown, Users, Feed))
+            {
+                <div class="arr-tags-preview-row">
+                    <div class="arr-tags-preview-title">
+                        <span class="truncate font-medium">@row.Title</span>
+                        <span class="text-xs text-muted-foreground">@row.Detail</span>
+                    </div>
+                    <div class="arr-tags-chips">
+                        @foreach (var label in row.Labels)
+                        {
+                            <code class="arr-tags-chip">@label</code>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required ArrTagScheme Scheme { get; set; }
+
+    [Parameter] public EventCallback<ArrTagScheme> SchemeChanged { get; set; }
+
+    [Parameter] public IReadOnlyList<ArrTagUser> Users { get; set; } = [];
+
+    [Parameter] public Optional<ArrTagFeed> Feed { get; set; } = new None();
+
+    private static readonly SelectOption<ArrUserTagSource>[] UserSources =
+    [
+        new(ArrUserTagSource.Name, "their name"),
+        new(ArrUserTagSource.Id, "their id"),
+    ];
+
+    private static readonly SelectOption<ArrFeedTagSource>[] FeedSources =
+    [
+        new(ArrFeedTagSource.ListName, "list name"),
+        new(ArrFeedTagSource.OwnerAndList, "owner and list"),
+        new(ArrFeedTagSource.Id, "feed id"),
+    ];
+
+    private string _prefix = string.Empty;
+
+    private string? _saved;
+
+    private bool _confirming;
+
+    private bool Locked => Users.Count > 1;
+
+    private Optional<string> Typed => ArrTagScheme.Slug(_prefix);
+
+    private bool IsValid => Typed.IsSome();
+
+    private bool IsChanged => Typed.Match(slug => slug != Scheme.Root, () => true);
+
+    private ArrTagScheme Shown => Scheme with { Prefix = Typed.GetValueOr(Scheme.Root) };
+
+    private string PrefixClass => $"h-9 bg-accent font-mono text-sm {(IsValid ? null : "border-destructive")}".Trim();
+
+    protected override void OnParametersSet()
+    {
+        if (_saved == Scheme.Root)
+        {
+            return;
+        }
+
+        _saved = Scheme.Root;
+        _prefix = Scheme.Root;
+        _confirming = false;
+    }
+
+    private void PrefixTyped(string prefix)
+    {
+        _prefix = prefix;
+        _confirming &= IsChanged && IsValid;
+    }
+
+    private void Cancel()
+    {
+        _prefix = Scheme.Root;
+        _confirming = false;
+    }
+
+    private Task ChangePrefixAsync() => SchemeChanged.InvokeAsync(Shown);
+
+    private Task PerUserChangedAsync(bool on) => SchemeChanged.InvokeAsync(Scheme with { PerUser = on });
+
+    private Task UserSourceChangedAsync(ArrUserTagSource source) => SchemeChanged.InvokeAsync(Scheme with { UserSource = source });
+
+    private Task PerFeedChangedAsync(bool on) => SchemeChanged.InvokeAsync(Scheme with { PerFeed = on });
+
+    private Task FeedSourceChangedAsync(ArrFeedTagSource source) => SchemeChanged.InvokeAsync(Scheme with { FeedSource = source });
+
+    private Task PlainPrefixChangedAsync(bool on) => SchemeChanged.InvokeAsync(Scheme with { PlainPrefix = on });
+}

@@ -1,0 +1,275 @@
+@using Contracts.Feed
+@using Contracts.Identity
+@using Contracts.Settings
+@using Domain.Wantlist.Arr
+@using UI.Shared.Services.Branding
+@inject IArrSinkConfigService Configs
+@inject IArrConnectionTester Tester
+@inject IUserManagementService UserManagement
+@inject IFeedService Feeds
+@inject ICurrentUser CurrentUser
+@inject MediaProviderBrandingService Branding
+
+<div class="arr-row" style="--mix: @Branding.SinkColor(SinkKind.Arr)">
+    <BbCollapsible Open="Open" OpenChanged="OpenChanged">
+        <BbCollapsibleTrigger AsChild="false"
+                              Class="arr-row-head group w-full grid grid-cols-[15px_190px_1fr_auto] items-center gap-3.5 pl-5 pr-4 py-4 text-left bg-foreground/5 hover:bg-foreground/8 transition-colors">
+            <LucideIcon Name="chevron-right" Size="15" Class="text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
+            <span class="arr-lockup">
+                <ProviderLogo Provider="MediaProvider.Radarr" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+                Radarr
+                <span class="arr-lockup-plus">+</span>
+                <ProviderLogo Provider="MediaProvider.Sonarr" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+                Sonarr
+            </span>
+            <span class="flex min-w-0 flex-col text-sm text-muted-foreground">
+                <span class="truncate">Connection · wantlist</span>
+                <span class="truncate text-xs">@Summary</span>
+            </span>
+            <span>
+                @if (SettingUp)
+                {
+                    <BbBadge Variant="BadgeVariant.Outline" Class="@WarnBadge">
+                        <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--alert-warning)]"></span>
+                        Needs setup
+                    </BbBadge>
+                }
+                else if (_config is null || States.Contains(ArrConnectionState.Testing))
+                {
+                    <BbBadge Variant="BadgeVariant.Secondary" Class="h-6 items-center gap-1.5 text-muted-foreground">
+                        <BbSpinner Size="SpinnerSize.Small"/>
+                        Checking…
+                    </BbBadge>
+                }
+                else if (Silent.Count > 0)
+                {
+                    <BbBadge Variant="BadgeVariant.Outline" Class="@WarnBadge">
+                        <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--alert-warning)]"></span>
+                        @string.Join(" and ", Silent.Select(app => app.Name)) not answering
+                    </BbBadge>
+                }
+                else
+                {
+                    <BbBadge Variant="BadgeVariant.Outline" Class="h-6 items-center gap-1.5 text-success border-success">
+                        <span class="inline-block h-1.5 w-1.5 rounded-full bg-success"></span>
+                        Connected
+                    </BbBadge>
+                }
+            </span>
+        </BbCollapsibleTrigger>
+        <BbCollapsibleContent>
+            @if (_config is { } config)
+            {
+                @foreach (var app in Apps)
+                {
+                    var status = _apps[app];
+                    <ArrAppSection App="app" Instance="InstanceOf(config, app)" State="status.State" Error="@status.Error" Choices="status.Choices"
+                                   Edited="typed => Edited(app, typed)" Test="typed => TestAsync(app, typed)"
+                                   InstanceChanged="instance => StoreAsync(app, instance)"/>
+                }
+
+                <div class="arr-shared">
+                    @if (SettingUp)
+                    {
+                        <p class="arr-shared-note">
+                            <LucideIcon Name="info" Size="13" Class="mt-px shrink-0"/>
+                            <span>
+                                @(BothReady
+                                    ? "Both apps answered. Switching makes every user's next sync mirror their wantlist into Radarr and Sonarr."
+                                    : "Test both apps to switch; each needs a quality profile and a root folder. Until then the wantlist keeps syncing to Plex; picking Plex again in the map puts this away.")
+                            </span>
+                        </p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <BbButton Size="ButtonSize.Small" Disabled="@(!BothReady || Switching)" OnClick="SwitchRequested">
+                                @if (Switching)
+                                {
+                                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                                    <span>Switching…</span>
+                                }
+                                else
+                                {
+                                    <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
+                                    <span>Switch the wantlist to Radarr + Sonarr</span>
+                                }
+                            </BbButton>
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Disabled="Switching" OnClick="StayOnPlex">Stay on Plex</BbButton>
+                        </div>
+                    }
+                    else
+                    {
+                        <ArrTagsSection Scheme="config.Tags" SchemeChanged="tags => StoreAsync(config with { Tags = tags })" Users="_users" Feed="_feed"/>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="px-5 py-4">
+                    <BbSkeleton Class="h-40 w-full rounded-md"/>
+                </div>
+            }
+        </BbCollapsibleContent>
+    </BbCollapsible>
+</div>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] public bool SettingUp { get; set; }
+
+    [Parameter] public bool Switching { get; set; }
+
+    [Parameter] public EventCallback SwitchRequested { get; set; }
+
+    [Parameter] public EventCallback StayOnPlex { get; set; }
+
+    [Parameter] public EventCallback<ArrSinkConfig> InstanceMoved { get; set; }
+
+    private const string WarnBadge = "h-6 items-center gap-1.5 text-[var(--alert-warning)] border-[color-mix(in_oklab,var(--alert-warning)_55%,transparent)]";
+
+    private static readonly ArrApp[] Apps = Enum.GetValues<ArrApp>();
+
+    private ArrSinkConfig? _config;
+
+    private Dictionary<ArrApp, AppStatus> _apps = Apps.ToDictionary(app => app, _ => AppStatus.Of(ArrConnectionState.Empty));
+
+    private IReadOnlyList<ArrTagUser> _users = [];
+
+    private Optional<ArrTagFeed> _feed = new None();
+
+    private IEnumerable<ArrConnectionState> States => _apps.Values.Select(status => status.State);
+
+    private bool BothReady => _config is { } config && Apps.All(app => _apps[app].State == ArrConnectionState.Connected && IsChosen(InstanceOf(config, app)));
+
+    private IReadOnlyList<ArrApp> Silent => [.. Apps.Where(app => _apps[app].State != ArrConnectionState.Connected)];
+
+    private string Summary
+    {
+        get
+        {
+            return SettingUp || _config is null ? "Picked for the wantlist; connect both apps to switch" : string.Join(" · ", Apps.Select(Said));
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        var config = await Configs.GetAsync();
+        _config = config;
+        _apps = Apps.ToDictionary(app => app, app => AppStatus.Of(TypedState(InstanceOf(config, app))));
+        _users = await UsersAsync();
+        _feed = await FeedAsync();
+        StateHasChanged();
+        foreach (var app in Apps.Where(app => _apps[app].State == ArrConnectionState.Untested))
+        {
+            await TestAsync(app, InstanceOf(config, app));
+        }
+    }
+
+    private async Task<IReadOnlyList<ArrTagUser>> UsersAsync()
+    {
+        var users = await UserManagement.GetAllAsync();
+        return [.. users.OrderBy(user => user.Id != CurrentUser.Id).Select(user => new ArrTagUser(user.Id.Value, user.DisplayName))];
+    }
+
+    private async Task<Optional<ArrTagFeed>> FeedAsync()
+    {
+        var feeds = await Feeds.GetAsync();
+        return feeds.Feeds.FirstOrNone(_ => true).Map(overview => new ArrTagFeed(overview.Feed.Id.Value, overview.Feed.Name, overview.Feed.Identifier));
+    }
+
+    private void Edited(ArrApp app, ArrInstanceConfig typed)
+    {
+        _apps[app] = AppStatus.Of(TypedState(typed));
+    }
+
+    private async Task TestAsync(ArrApp app, ArrInstanceConfig typed)
+    {
+        _apps[app] = AppStatus.Of(ArrConnectionState.Testing);
+        StateHasChanged();
+        var tested = await Tester.TestAsync(app, typed);
+        await tested.Match(choices => ConnectedAsync(app, typed, choices), error => FailedAsync(app, error));
+    }
+
+    private async Task ConnectedAsync(ArrApp app, ArrInstanceConfig typed, ArrInstanceChoices choices)
+    {
+        _apps[app] = new AppStatus(ArrConnectionState.Connected, string.Empty, choices);
+        var chosen = typed with
+        {
+            QualityProfileId = typed
+                .QualityProfileId.When(id => choices.Profiles.Any(profile => profile.Id == id))
+                .Or(() => choices.Profiles.FirstOrNone(_ => true).Map(profile => profile.Id)),
+            RootFolderPath = typed
+                .RootFolderPath.When(path => choices.Folders.Any(folder => folder.Path == path))
+                .Or(() => choices.Folders.FirstOrNone(_ => true).Map(folder => folder.Path)),
+        };
+        var current = _config ?? ArrSinkConfig.Empty;
+        var moved = !SettingUp && InstanceOf(current, app).Url.Match(stored => chosen.Url.Match(url => url != stored, () => true), () => false);
+        if (!moved)
+        {
+            await StoreAsync(app, chosen);
+            return;
+        }
+
+        await InstanceMoved.InvokeAsync(WithInstance(current, app, chosen));
+        _config = await Configs.GetAsync();
+    }
+
+    private Task FailedAsync(ArrApp app, Error error)
+    {
+        _apps[app] = new AppStatus(ArrConnectionState.Failed, error.Reason, new ArrInstanceChoices([], []));
+        return Task.CompletedTask;
+    }
+
+    private Task StoreAsync(ArrApp app, ArrInstanceConfig instance) => StoreAsync(WithInstance(_config ?? ArrSinkConfig.Empty, app, instance));
+
+    private static ArrSinkConfig WithInstance(ArrSinkConfig config, ArrApp app, ArrInstanceConfig instance)
+    {
+        return app switch
+        {
+            ArrApp.Radarr => config with { Radarr = instance },
+            ArrApp.Sonarr => config with { Sonarr = instance },
+        };
+    }
+
+    private async Task StoreAsync(ArrSinkConfig config)
+    {
+        if (config == _config)
+        {
+            return;
+        }
+
+        _config = config;
+        await Configs.StoreAsync(config);
+    }
+
+    private string Said(ArrApp app)
+    {
+        var instance = InstanceOf(_config ?? ArrSinkConfig.Empty, app);
+        var profile = instance.QualityProfileId.Map(id => _apps[app].Choices.Profiles.FirstOrNone(choice => choice.Id == id).Map(choice => choice.Name));
+        var said = instance.RootFolderPath.Map(path => profile.Match(name => $"{name} into {path}", () => path)).GetValueOr("not set up");
+        return $"{app.Name}: {said}";
+    }
+
+    private static bool IsChosen(ArrInstanceConfig instance) => instance.QualityProfileId.IsSome() && instance.RootFolderPath.IsSome();
+
+    private static ArrConnectionState TypedState(ArrInstanceConfig instance)
+    {
+        return instance.Url.Map(_ => instance.ApiKey).Match(_ => ArrConnectionState.Untested, () => ArrConnectionState.Empty);
+    }
+
+    private static ArrInstanceConfig InstanceOf(ArrSinkConfig config, ArrApp app)
+    {
+        return app switch
+        {
+            ArrApp.Radarr => config.Radarr,
+            ArrApp.Sonarr => config.Sonarr,
+        };
+    }
+
+    private sealed record AppStatus(ArrConnectionState State, string Error, ArrInstanceChoices Choices)
+    {
+        public static AppStatus Of(ArrConnectionState state) => new(state, string.Empty, new ArrInstanceChoices([], []));
+    }
+}

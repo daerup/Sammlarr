@@ -45,6 +45,13 @@ public class ArrSinkTests
 
 	private readonly Mock<IMediaService> _media = IMediaService.Mock();
 
+	private readonly Mock<IUserRepository> _users = IUserRepository.Mock();
+
+	private static readonly UserId Guest = UserId.From(Guid.Parse("8f14e45f-ceea-467a-9575-6c0f6e3b4c11"));
+
+	[Before(Test)]
+	public void Everyone() => _users.GetAllAsync(Any()).Returns([new User(Guest, "Guest", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch)]);
+
 	[Test]
 	[Arguments(MediaType.Movie, MediaProvider.Tmdb)]
 	[Arguments(MediaType.Show, MediaProvider.Tvdb)]
@@ -95,7 +102,7 @@ public class ArrSinkTests
 		await Assert
 			.That(async () => await Testee().GetAsync())
 			.Throws<InvalidOperationException>()
-			.WithMessage("Radarr answered 401 Unauthorized at http://radarr:7878/. Check the API key under Settings › General in Radarr.");
+			.WithMessage("Radarr answered 401 Unauthorized at http://radarr:7878. Check the API key under Settings › General in Radarr.");
 	}
 
 	[Test]
@@ -311,6 +318,108 @@ public class ArrSinkTests
 		_radarr.Verify(request => request.Path("/api/v3/tag"), Times.Once);
 	}
 
+	[Test]
+	public async Task GetAsync_AfterUserTagsMovedFromNamesToIds_StillReadsTheTitlesTaggedByName()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]}]""");
+		EmptySonarr();
+		Identifying();
+
+		var snapshot = await Testee(Connected with { Tags = ArrTagScheme.Default with { UserSource = ArrUserTagSource.Id } }).GetAsync();
+
+		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
+	}
+
+	[Test]
+	public async Task GetAsync_ForTheFirstUserOnceUserTagsAreOn_ClaimsTitlesTaggedWhileTheyWereOff()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr"},{"id":2,"label":"sammlarr-u-daerup"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]},{"id":11,"tmdbId":550,"tags":[2]}]""");
+		EmptySonarr();
+		Identifying();
+
+		var snapshot = await Testee().GetAsync();
+
+		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
+		_media
+			.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests!.Single().Candidates.Any(id => id.Value == "27205")), Any())
+			.WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task GetAsync_ForALaterUser_LeavesTitlesWithoutAUserTagToTheFirst()
+	{
+		_users
+			.GetAllAsync(Any())
+			.Returns([
+				new User(UserId.New(), "Daerup", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch),
+				new User(Guest, "Guest", string.Empty, UserRole.Member, DateTimeOffset.UnixEpoch.AddDays(1)),
+			]);
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]}]""");
+		EmptySonarr();
+		Identifying();
+
+		var snapshot = await Testee().GetAsync();
+
+		await Assert.That(snapshot.Ids).IsEmpty();
+	}
+
+	[Test]
+	public async Task ApplyAsync_AddingATitleAlreadyInTheAppWithoutSammlarrsTags_MarksItKept()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_radarr.OnPost("/api/v3/tag").RespondWithJson("""{"id":4,"label":"sammlarr-kept"}""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[]}]""");
+		_radarr.OnPut("/api/v3/movie/editor").Respond(HttpStatusCode.Accepted);
+		Addressing(TmdbId.From("27205", MediaType.Movie));
+
+		await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_radarr.Verify(request => request.Method(HttpMethod.Put).BodyContains("\"tags\":[1,4]"), Times.Once);
+	}
+
+	[Test]
+	public async Task ApplyAsync_RemovingAKeptTitle_TakesSammlarrsTagsOffInsteadOfDeletingIt()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"},{"id":4,"label":"sammlarr-kept"},{"id":7,"label":"4k"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1,4,7]}]""");
+		_radarr.OnPut("/api/v3/movie/editor").Respond(HttpStatusCode.Accepted);
+		Addressing(TmdbId.From("27205", MediaType.Movie));
+
+		var acks = await Testee().ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
+		_radarr.Verify(request => request.Method(HttpMethod.Put).BodyContains("\"tags\":[1,4]").BodyContains("\"applyTags\":\"remove\""), Times.Once);
+		_radarr.Verify(request => request.Method(HttpMethod.Delete), Times.Never);
+	}
+
+	[Test]
+	public async Task ApplyAsync_AddingATitleTheFirstUserHoldsWithoutAUserTag_StampsTheirTagToo()
+	{
+		_users
+			.GetAllAsync(Any())
+			.Returns([
+				new User(UserId.New(), "Daerup", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch),
+				new User(Guest, "Guest", string.Empty, UserRole.Member, DateTimeOffset.UnixEpoch.AddDays(1)),
+			]);
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr"}]""");
+		_radarr
+			.OnRequest(request => request.Method(HttpMethod.Post).Path("/api/v3/tag").BodyContains("sammlarr-u-guest"))
+			.RespondWithJson("""{"id":2,"label":"sammlarr-u-guest"}""");
+		_radarr
+			.OnRequest(request => request.Method(HttpMethod.Post).Path("/api/v3/tag").BodyContains("sammlarr-u-daerup"))
+			.RespondWithJson("""{"id":3,"label":"sammlarr-u-daerup"}""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]}]""");
+		_radarr.OnPut("/api/v3/movie/editor").Respond(HttpStatusCode.Accepted);
+		Addressing(TmdbId.From("27205", MediaType.Movie));
+
+		await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_radarr.Verify(request => request.Method(HttpMethod.Put).BodyContains("\"tags\":[2,3]"), Times.Once);
+	}
+
 	private ArrSink Testee() => Testee(Connected);
 
 	private ArrSink Testee(ArrSinkConfig config)
@@ -318,12 +427,12 @@ public class ArrSinkTests
 		var configs = IArrSinkConfigService.Mock();
 		configs.GetAsync(Any()).Returns(config);
 		var user = ICurrentUser.Mock();
-		user.Id.Getter.Returns(UserId.From(Guid.Parse("8f14e45f-ceea-467a-9575-6c0f6e3b4c11")));
+		user.Id.Getter.Returns(Guest);
 		user.DisplayName.Getter.Returns("Guest");
 		return new ArrSink(
-			new RadarrClient(new HttpClient(_radarr)),
-			new SonarrClient(new HttpClient(_sonarr)),
+			new ArrClients(new RadarrClient(new HttpClient(_radarr)), new SonarrClient(new HttpClient(_sonarr))),
 			configs.Object,
+			_users.Object,
 			_media.Object,
 			user.Object,
 			NullLogger<ArrSink>.Instance

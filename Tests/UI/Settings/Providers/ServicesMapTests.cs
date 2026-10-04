@@ -1,7 +1,9 @@
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Primitives;
 using Bunit;
 using Domain.Providers;
 using Domain.Settings;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Settings.Components.Providers;
 using UI.Shared.Services.Branding;
@@ -68,6 +70,29 @@ public class ServicesMapTests : BunitContext
 
 		await Assert.That(cut.FindAll("button.map-service")).IsEmpty();
 		await Assert.That(cut.FindAll(".map-chip").Select(chip => chip.GetAttribute("aria-label") ?? string.Empty)).IsEquivalentTo(["Change what Wantlist uses"]);
+	}
+
+	[Test]
+	public async Task Chip_WhenRadarrAndSonarrIsPicked_RaisesThatSink()
+	{
+		List<SinkKind> picked = [];
+		var cut = Render(builder =>
+		{
+			builder.OpenComponent<BbPortalHost>(0);
+			builder.CloseComponent();
+			builder.OpenComponent<ServicesMap>(1);
+			builder.AddComponentParameter(2, nameof(ServicesMap.Config), Config);
+			builder.AddComponentParameter(3, nameof(ServicesMap.Ready), new HashSet<MediaProvider>());
+			builder.AddComponentParameter(4, nameof(ServicesMap.CanPick), true);
+			builder.AddComponentParameter(5, nameof(ServicesMap.SinkPicked), EventCallback.Factory.Create<SinkKind>(this, picked.Add));
+			builder.CloseComponent();
+		});
+
+		await cut.Find(".map-chip").ClickAsync();
+		cut.WaitForElement("[role=menuitem]");
+		await cut.FindAll("[role=menuitem]").Single(item => item.TextContent.Contains("Radarr")).ClickAsync();
+
+		await Assert.That(picked).IsEquivalentTo([SinkKind.Arr]);
 	}
 
 	[Test]

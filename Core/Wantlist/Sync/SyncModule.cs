@@ -1,3 +1,4 @@
+using Contracts.Wantlist;
 using Contracts.Wantlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Tracing;
@@ -11,6 +12,7 @@ internal class SyncModule : IServiceModule
 	{
 		services.AddSingleton<WantlistSyncGate>();
 		services.AddScoped<ActiveSink>();
+		services.AddTracedScoped<ISinkSwitch, SinkSwitch>();
 		services.AddTracedScoped<IWantlistSyncPlanner, WantlistSyncPlanner>();
 		services.AddTracedScoped<IWantlistSyncEngine, WantlistSyncEngine>();
 	}

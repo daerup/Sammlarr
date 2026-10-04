@@ -1,44 +1,11 @@
-using Domain.Media;
-using Domain.Providers;
+using Domain.Wantlist.Arr;
 
 namespace API.Arr;
 
-internal enum ArrApp
-{
-	Radarr,
-	Sonarr,
-}
-
-internal static class ArrApps
+internal static class ArrAppPaths
 {
 	extension(ArrApp app)
 	{
-		public string Name => app.Provider.ToString();
-
-		public MediaProvider Provider
-		{
-			get
-			{
-				return app switch
-				{
-					ArrApp.Radarr => MediaProvider.Radarr,
-					ArrApp.Sonarr => MediaProvider.Sonarr,
-				};
-			}
-		}
-
-		public MediaType Type
-		{
-			get
-			{
-				return app switch
-				{
-					ArrApp.Radarr => MediaType.Movie,
-					ArrApp.Sonarr => MediaType.Show,
-				};
-			}
-		}
-
 		public string Titles
 		{
 			get

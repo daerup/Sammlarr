@@ -50,6 +50,20 @@ public class RecordedStubsTests
 		await Assert.That(recorded.Select(entry => entry.Slug)).IsEquivalentTo(["movie-1", "movie-2"]);
 	}
 
+	[Test]
+	public async Task Write_ForAnAppTheStackRuns_KeepsItsPrefixSoRadarrAndSonarrDoNotCollide()
+	{
+		var directory = Directory.CreateTempSubdirectory("recorded-stubs-").FullName;
+		var merged = RecordedStubs.Merge([
+			Snapshot(200, """{"appName":"Radarr"}""", "/radarr/api/v3/system/status"),
+			Snapshot(200, """{"appName":"Sonarr"}""", "/sonarr/api/v3/system/status"),
+		]);
+
+		var recorded = RecordedStubs.Write(merged, directory, _ => false);
+
+		await Assert.That(recorded.Select(entry => entry.Path)).IsEquivalentTo(["/radarr/api/v3/system/status", "/sonarr/api/v3/system/status"]);
+	}
+
 	private static string Snapshot(int status, string body, string url = "/tmdb/movie/1?api_key=secret") =>
 		$$"""
 			{

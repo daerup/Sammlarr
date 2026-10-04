@@ -15,9 +15,9 @@ using Microsoft.Extensions.Logging;
 namespace API.Arr;
 
 internal sealed class ArrSink(
-	RadarrClient radarr,
-	SonarrClient sonarr,
+	ArrClients clients,
 	IArrSinkConfigService configs,
+	IUserRepository users,
 	IMediaService mediaService,
 	ICurrentUser currentUser,
 	ILogger<ArrSink> logger
@@ -40,7 +40,13 @@ internal sealed class ArrSink(
 	public async Task<SinkSnapshot> GetAsync(CancellationToken cancellationToken = default)
 	{
 		var config = await configs.GetAsync(cancellationToken);
-		List<FoundMedia> items = [.. await MineAsync(radarr, config, cancellationToken), .. await MineAsync(sonarr, config, cancellationToken)];
+		var claims = (await ClaimantAsync(config.Tags, cancellationToken)).Match(first => first.Id == User.Id, () => false);
+		List<FoundMedia> items = [];
+		foreach (var app in Enum.GetValues<ArrApp>())
+		{
+			items.AddRange(await MineAsync(clients.For(app), config, claims, cancellationToken));
+		}
+
 		var requests = items.Select(item => new IdentifyRequest([.. item.Externals], new None()));
 		List<MediaId> matched = [];
 		List<UnmatchedMedia> unmatched = [];
@@ -59,6 +65,7 @@ internal sealed class ArrSink(
 	)
 	{
 		var config = await configs.GetAsync(cancellationToken);
+		var setup = new Setup(config, await ClaimantAsync(config.Tags, cancellationToken));
 		var sinkIds = await mediaService.GetSinkIdsAsync([.. pushes.Select(push => push.MediaId)], cancellationToken);
 		var sessions = new Dictionary<ArrApp, Result<ArrSession>>();
 		foreach (var push in pushes)
@@ -66,24 +73,29 @@ internal sealed class ArrSink(
 			cancellationToken.ThrowIfCancellationRequested();
 			var outcome = await sinkIds
 				.GetValueOrNone(push.MediaId)
-				.Match(id => PushAsync(action, push, id, config, sessions, cancellationToken), () => Task.FromResult(SinkSyncOutcome.Unaddressable));
+				.Match(id => PushAsync(action, push, id, setup, sessions, cancellationToken), () => Task.FromResult(SinkSyncOutcome.Unaddressable));
 			yield return new SinkSyncAck(push.MediaId, outcome);
 		}
 	}
 
-	private async Task<IReadOnlyList<FoundMedia>> MineAsync(ArrClient client, ArrSinkConfig config, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<FoundMedia>> MineAsync(ArrClient client, ArrSinkConfig config, bool claims, CancellationToken cancellationToken)
 	{
 		var opened = await ArrSession.OpenAsync(client, ArrSession.Connect(client.App, Settings(config, client.App)), cancellationToken);
 		var session = opened.Match(open => open, error => throw new InvalidOperationException(error.Reason));
 		var mine = session.Mine(config.Tags, User);
-		return [.. session.Titles.Where(title => title.Tags.Any(mine.Contains)).Select(title => Found(client.App, title))];
+		return
+		[
+			.. session
+				.Titles.Where(title => title.Tags.Any(mine.Contains) || (claims && session.IsUnclaimed(title, config.Tags)))
+				.Select(title => Found(client.App, title)),
+		];
 	}
 
 	private async Task<SinkSyncOutcome> PushAsync(
 		WantlistOperationAction action,
 		SinkPush push,
 		IExternalMediaId id,
-		ArrSinkConfig config,
+		Setup setup,
 		Dictionary<ArrApp, Result<ArrSession>> sessions,
 		CancellationToken cancellationToken
 	)
@@ -91,11 +103,11 @@ internal sealed class ArrSink(
 		var app = id.Type is MediaType.Show ? ArrApp.Sonarr : ArrApp.Radarr;
 		if (!sessions.TryGetValue(app, out var session))
 		{
-			session = await ArrSession.OpenAsync(Client(app), ArrSession.Connect(app, Settings(config, app)), cancellationToken);
+			session = await ArrSession.OpenAsync(clients.For(app), ArrSession.Connect(app, Settings(setup.Config, app)), cancellationToken);
 			sessions[app] = session;
 		}
 
-		var pushed = await session.Match(open => PushToAsync(open, action, push, id, config, cancellationToken), Failed);
+		var pushed = await session.Match(open => PushToAsync(open, action, push, id, setup, cancellationToken), Failed);
 		return pushed
 			.ApplyError(error => logger.LogWarning("Pushing {Action} for {ExternalId} to {App} failed: {Reason}", action, id, app.Name, error.Reason))
 			.GetValueOr(SinkSyncOutcome.Failed);
@@ -106,63 +118,83 @@ internal sealed class ArrSink(
 		WantlistOperationAction action,
 		SinkPush push,
 		IExternalMediaId id,
-		ArrSinkConfig config,
+		Setup setup,
 		CancellationToken cancellationToken
 	)
 	{
 		return action switch
 		{
-			WantlistOperationAction.Add => AddAsync(session, push, id, config, cancellationToken),
-			WantlistOperationAction.Remove => RemoveAsync(session, id, config.Tags, cancellationToken),
+			WantlistOperationAction.Add => AddAsync(session, push, id, setup, cancellationToken),
+			WantlistOperationAction.Remove => RemoveAsync(session, id, setup.Config.Tags, cancellationToken),
 		};
 	}
 
-	private async Task<Result<SinkSyncOutcome>> AddAsync(
+	private async Task<Result<SinkSyncOutcome>> AddAsync(ArrSession session, SinkPush push, IExternalMediaId id, Setup setup, CancellationToken cancellationToken)
+	{
+		var feed = push.AddedBy.Map(added => new ArrTagFeed(added.Id.Value, added.Name, added.Identifier));
+		var labels = setup.Config.Tags.Labels(User, feed);
+		return await session
+			.Find(id)
+			.Match(
+				existing => TagAsync(session, existing, Labeling(session, existing, setup, labels), cancellationToken),
+				() => CreateAsync(session, id, Settings(setup.Config, session.App), labels, cancellationToken)
+			);
+	}
+
+	private static IReadOnlyList<string> Labeling(ArrSession session, ArrTitle title, Setup setup, IReadOnlyList<string> labels)
+	{
+		var scheme = setup.Config.Tags;
+		if (session.Owned(title, scheme).Count == 0)
+		{
+			return [.. labels, scheme.KeptTag];
+		}
+
+		return session.IsUnclaimed(title, scheme)
+			? setup.Claimant.Match(claimant => [.. labels.Append(scheme.UserTag(claimant)).Distinct()], () => labels)
+			: labels;
+	}
+
+	private static async Task<Result<SinkSyncOutcome>> TagAsync(
 		ArrSession session,
-		SinkPush push,
-		IExternalMediaId id,
-		ArrSinkConfig config,
+		ArrTitle title,
+		IReadOnlyList<string> labels,
 		CancellationToken cancellationToken
 	)
 	{
-		var feed = push.AddedBy.Map(added => new ArrTagFeed(added.Id.Value, added.Name, added.Identifier));
-		var tags = await session.EnsureTagsAsync(config.Tags.Labels(User, feed), cancellationToken);
-		return await tags.Match(ids => PlaceAsync(session, id, Settings(config, session.App), ids, cancellationToken), Failed);
+		var tags = await session.EnsureTagsAsync(labels, cancellationToken);
+		return await tags.Match(ids => RetaggedAsync(session, title, ids, cancellationToken), Failed);
 	}
 
-	private static Task<Result<SinkSyncOutcome>> PlaceAsync(
+	private static async Task<Result<SinkSyncOutcome>> RetaggedAsync(
 		ArrSession session,
-		IExternalMediaId id,
-		ArrInstanceConfig settings,
+		ArrTitle title,
 		IReadOnlyList<int> tags,
 		CancellationToken cancellationToken
 	)
-	{
-		return session
-			.Find(id)
-			.Match(existing => TagAsync(session, existing, tags, cancellationToken), () => CreateAsync(session, id, settings, tags, cancellationToken));
-	}
-
-	private static async Task<Result<SinkSyncOutcome>> TagAsync(ArrSession session, ArrTitle title, IReadOnlyList<int> tags, CancellationToken cancellationToken)
 	{
 		var tagged = await session.RetagAsync(title, tags, ArrTagChange.Add, cancellationToken);
 		return tagged.Map(_ => SinkSyncOutcome.Applied);
 	}
 
-	private static Task<Result<SinkSyncOutcome>> CreateAsync(
+	private static async Task<Result<SinkSyncOutcome>> CreateAsync(
 		ArrSession session,
 		IExternalMediaId id,
 		ArrInstanceConfig settings,
-		IReadOnlyList<int> tags,
+		IReadOnlyList<string> labels,
 		CancellationToken cancellationToken
 	)
 	{
-		return settings
-			.QualityProfileId.Map(profile => settings.RootFolderPath.Map(folder => new ArrAddition(profile, folder, tags)))
-			.Match(
-				addition => LookUpAndAddAsync(session, id, settings, addition, cancellationToken),
-				() => Failed(Error.From($"{session.App.Name} has no quality profile or root folder chosen yet."))
-			);
+		var tags = await session.EnsureTagsAsync(labels, cancellationToken);
+		return await tags.Match(
+			ids =>
+				settings
+					.QualityProfileId.Map(profile => settings.RootFolderPath.Map(folder => new ArrAddition(profile, folder, ids)))
+					.Match(
+						addition => LookUpAndAddAsync(session, id, settings, addition, cancellationToken),
+						() => Failed(Error.From($"{session.App.Name} has no quality profile or root folder chosen yet."))
+					),
+			Failed
+		);
 	}
 
 	private static async Task<Result<SinkSyncOutcome>> LookUpAndAddAsync(
@@ -199,19 +231,25 @@ internal sealed class ArrSink(
 	{
 		var mine = session.Mine(scheme, User);
 		var wantedByOthers = scheme.PerUser && title.Tags.Where(tag => !mine.Contains(tag)).Any(tag => scheme.IsUserTag(session.Label(tag)));
-		var removed = wantedByOthers
-			? await session.RetagAsync(title, [.. title.Tags.Where(mine.Contains)], ArrTagChange.Remove, cancellationToken)
-			: await session.DeleteAsync(title, cancellationToken);
+		var removed = await (
+			(wantedByOthers, session.IsKept(title, scheme)) switch
+			{
+				(true, _) => session.RetagAsync(title, [.. title.Tags.Where(mine.Contains)], ArrTagChange.Remove, cancellationToken),
+				(false, true) => session.RetagAsync(title, session.Owned(title, scheme), ArrTagChange.Remove, cancellationToken),
+				(false, false) => session.DeleteAsync(title, cancellationToken),
+			}
+		);
 		return removed.Map(_ => SinkSyncOutcome.Applied);
 	}
 
-	private ArrClient Client(ArrApp app)
+	private async Task<Optional<ArrTagUser>> ClaimantAsync(ArrTagScheme scheme, CancellationToken cancellationToken)
 	{
-		return app switch
-		{
-			ArrApp.Radarr => radarr,
-			ArrApp.Sonarr => sonarr,
-		};
+		var everyone = await users.GetAllAsync(cancellationToken);
+		return everyone
+			.OrderBy(user => user.JoinedAt)
+			.FirstOrNone(_ => true)
+			.When(_ => scheme.PerUser)
+			.Map(first => new ArrTagUser(first.Id.Value, first.DisplayName));
 	}
 
 	private static ArrInstanceConfig Settings(ArrSinkConfig config, ArrApp app)
@@ -238,4 +276,6 @@ internal sealed class ArrSink(
 	private static Task<Result<SinkSyncOutcome>> Done(SinkSyncOutcome outcome) => Task.FromResult<Result<SinkSyncOutcome>>(Success.Of(outcome));
 
 	private static Task<Result<SinkSyncOutcome>> Failed(Error error) => Task.FromResult<Result<SinkSyncOutcome>>(error);
+
+	private sealed record Setup(ArrSinkConfig Config, Optional<ArrTagUser> Claimant);
 }

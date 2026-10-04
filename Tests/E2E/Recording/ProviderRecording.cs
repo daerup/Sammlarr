@@ -7,6 +7,8 @@ namespace E2E.Tests.Recording;
 internal sealed record ProviderEndpoint(string Name, string ConfigKey, string RealBaseUrl)
 {
 	internal string Prefix => $"/{Name}";
+
+	internal bool IsApp { get; init; }
 }
 
 internal sealed record ProviderRecording(string Name, string Section, IReadOnlyList<ProviderEndpoint> Endpoints)
@@ -22,7 +24,13 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 		Build("wikidata", WikidataOptions.SectionName, "BaseUrl"),
 	];
 
-	internal static readonly IReadOnlyList<ProviderEndpoint> AllEndpoints = [.. All.SelectMany(provider => provider.Endpoints)];
+	internal static readonly IReadOnlyList<ProviderEndpoint> Apps =
+	[
+		new("radarr", string.Empty, string.Empty) { IsApp = true },
+		new("sonarr", string.Empty, string.Empty) { IsApp = true },
+	];
+
+	internal static readonly IReadOnlyList<ProviderEndpoint> AllEndpoints = [.. All.SelectMany(provider => provider.Endpoints), .. Apps];
 
 	private static ProviderRecording ForApiKey(ApiKeyProvider provider) =>
 		provider switch

@@ -5,7 +5,9 @@
     "/tv/*",
     "/lists/*",
     "/library/search",
-    "/library/metadata/*"
+    "/library/metadata/*",
+    "/radarr/*",
+    "/sonarr/*"
   ],
   "frozen": [
     "/library/sections/watchlist/all",

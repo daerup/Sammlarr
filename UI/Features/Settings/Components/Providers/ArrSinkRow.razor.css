@@ -1,0 +1,50 @@
+.arr-row {
+    position: relative;
+}
+
+.arr-row::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--mix);
+}
+
+.arr-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+.arr-lockup-plus {
+    font-weight: 500;
+    color: var(--muted-foreground);
+}
+
+.arr-shared {
+    position: relative;
+    border-top: 1px solid var(--border);
+    padding: 14px 16px 18px 49px;
+}
+
+.arr-shared-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 12px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--muted-foreground);
+}
+
+@media (max-width: 640px) {
+    .arr-shared {
+        padding-left: 20px;
+    }
+}

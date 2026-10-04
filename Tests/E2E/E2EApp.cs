@@ -85,6 +85,8 @@ public static class E2EApp
 
 	internal static async Task<string> RequestJournalAsync() => await (await StackAsync()).RequestJournalAsync();
 
+	internal static async Task<Uri> WireMockUrlAsync() => (await StackAsync()).WireMockUrl;
+
 	internal static Task<IAsyncDisposable> StubAsync(string urlPath, int status, string body, string method = "GET") =>
 		StubAsync(new StubSpec(urlPath, status, body) { Method = method });
 

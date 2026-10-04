@@ -75,7 +75,8 @@ internal static class RecordedStubs
 				continue;
 			}
 
-			var replayPath = url.Split('?')[0][provider.Prefix.Length..];
+			var path = url.Split('?')[0];
+			var replayPath = provider.IsApp ? path : path[provider.Prefix.Length..];
 			var response = mapping!["response"]!;
 			var status = response["status"]?.GetValue<int>() ?? 200;
 			if (status is < 200 or > 299)

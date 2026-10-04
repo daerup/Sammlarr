@@ -196,6 +196,25 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task PurgeAsync_ForATitleThatDoesNotCarryTheSinksIdYet_KeepsEveryIdItHasSoItCanStillBeConverted()
+	{
+		var movie = new MediaRow();
+		fixture.Context.ExternalMediaIds.AddRange(
+			PlexId.From("603", MediaType.Movie).ToExternalIdEntity(movie),
+			ImdbId.From("tt0133093", MediaType.Movie).ToExternalIdEntity(movie)
+		);
+		fixture.Context.Wantlist.Add(new WantlistRow { Media = movie, Origin = WantlistItemOrigin.Manual });
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+		var testee = Purger(TestAddressing.ArrLike, fixture.CurrentUser);
+
+		await testee.PurgeAsync();
+
+		var kept = await fixture.Context.ExternalMediaIds.AsNoTracking().Select(e => e.Source).ToListAsync();
+		await Assert.That(kept).IsEquivalentTo([MediaProvider.Plex, MediaProvider.Imdb]);
+	}
+
+	[Test]
 	public async Task PurgeDetailsAsync_WhenNotAdmin_Throws()
 	{
 		var testee = Purger(PlexForEveryTitle, new TestCurrentUser { Role = UserRole.Member });

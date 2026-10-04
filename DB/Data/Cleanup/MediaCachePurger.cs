@@ -43,7 +43,12 @@ internal class MediaCachePurger(
 				continue;
 			}
 			externalsDeleted += await ctx
-				.ExternalMediaIds.Where(e => protectedMediaIds.Contains(e.Media.Id) && e.MediaType == type && e.Source != anchor)
+				.ExternalMediaIds.Where(e =>
+					protectedMediaIds.Contains(e.Media.Id)
+					&& e.MediaType == type
+					&& e.Source != anchor
+					&& ctx.ExternalMediaIds.Any(kept => kept.Media.Id == e.Media.Id && kept.Source == anchor)
+				)
 				.ExecuteDeleteAsync(cancellationToken);
 		}
 
