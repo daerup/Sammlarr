@@ -1,0 +1,39 @@
+@typeparam TValue
+
+<label for="@Id" class="choice-card" data-picked="@(Picked ? "true" : null)" style="--brand: @Brand">
+    <span class="flex items-center gap-2">
+        @Mark
+        <span class="text-[15px] font-medium">@Title</span>
+        <span class="ml-auto"><BbRadioGroupItem TValue="TValue" Value="Value" Id="@Id" @attributes="Reachable"/></span>
+    </span>
+    <ul class="list-disc pl-5 text-sm text-muted-foreground">
+        @foreach (var line in Lines)
+        {
+            <li>@line</li>
+        }
+    </ul>
+</label>
+
+@code {
+    [Parameter] [EditorRequired] public required TValue Value { get; set; }
+
+    [Parameter] [EditorRequired] public required string Id { get; set; }
+
+    [Parameter] [EditorRequired] public required string Title { get; set; }
+
+    [Parameter] [EditorRequired] public required string Brand { get; set; }
+
+    [Parameter] [EditorRequired] public required IReadOnlyList<string> Lines { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment Mark { get; set; }
+
+    [Parameter] public bool Picked { get; set; }
+
+    [Parameter] public bool Focusable { get; set; }
+
+    private static readonly IReadOnlyDictionary<string, object> InTabOrder = new Dictionary<string, object> { ["tabindex"] = 0 };
+
+    private static readonly IReadOnlyDictionary<string, object> AsTheGroupDecides = new Dictionary<string, object>();
+
+    private IReadOnlyDictionary<string, object> Reachable => Focusable ? InTabOrder : AsTheGroupDecides;
+}

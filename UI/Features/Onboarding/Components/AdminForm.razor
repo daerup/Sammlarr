@@ -2,7 +2,7 @@
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService BrandingService
 
-<form method="post" action="/setup/admin" class="flex w-full max-w-[420px] flex-col gap-4">
+<form method="post" action="/setup/admin" class="flex w-full flex-col gap-4">
     <AntiforgeryToken/>
     @if (!string.IsNullOrWhiteSpace(Error))
     {
@@ -18,37 +18,76 @@
             <BbFieldDescription>Printed in the server log when Sammlarr starts without an admin.</BbFieldDescription>
         </BbFieldContent>
     </BbField>
-    <div class="signin" style="--brand: @Plex.BrandColor">
-        <BbButton Type="ButtonType.Submit" Variant="ButtonVariant.Outline" Class="signin-button w-full gap-2 font-medium" formaction="/setup/plex" formnovalidate="formnovalidate">
-            <span>Sign in with</span>
-            <ProviderLogo Provider="MediaProvider.Plex" Form="ProviderLogoForm.Logo" Size="16"/>
-        </BbButton>
+    <BbRadioGroup TValue="AuthProvider?" Value="_picked" ValueChanged="picked => _picked = picked" AriaLabel="How people sign in" aria-describedby="signin-final" Class="grid grid-cols-2 gap-3">
+        <ChoiceCard TValue="AuthProvider?" Value="AuthProvider.Plex" Id="signin-plex" Title="Plex" Brand="@Plex.BrandColor" Lines="PlexLines"
+                    Picked="_picked == AuthProvider.Plex" Focusable="_picked is null">
+            <Mark>
+                <ProviderLogo Provider="MediaProvider.Plex" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
+            </Mark>
+        </ChoiceCard>
+        <ChoiceCard TValue="AuthProvider?" Value="AuthProvider.Local" Id="signin-local" Title="Sammlarr accounts" Brand="var(--foreground)" Lines="LocalLines"
+                    Picked="_picked == AuthProvider.Local">
+            <Mark>
+                <ProviderLogo Provider="MediaProvider.Local" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
+            </Mark>
+        </ChoiceCard>
+    </BbRadioGroup>
+    <div id="signin-final" class="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-[13px]" data-final>
+        <LucideIcon Name="lock" Size="14" Class="shrink-0 text-muted-foreground"/>
+        <span><span class="font-medium">You can't change this after setup.</span> <span class="text-muted-foreground">Everyone signs in to this Sammlarr the way you pick here.</span></span>
     </div>
-    <div class="or-line">or a Sammlarr account</div>
-    <BbField>
-        <BbFieldLabel For="setup-username">Username</BbFieldLabel>
-        <BbFieldContent>
-            <BbInput Id="setup-username" Name="username" Required="true" Placeholder="admin" autocomplete="username"/>
-        </BbFieldContent>
-    </BbField>
-    <BbField>
-        <BbFieldLabel For="setup-password">Password</BbFieldLabel>
-        <BbFieldContent>
-            <BbInput Id="setup-password" Name="password" Type="InputType.Password" Required="true" Placeholder="@($"At least {PasswordRules.MinimumLength} characters")"
-                     autocomplete="new-password"/>
-        </BbFieldContent>
-    </BbField>
-    <BbField>
-        <BbFieldLabel For="setup-confirmation">Confirm password</BbFieldLabel>
-        <BbFieldContent>
-            <BbInput Id="setup-confirmation" Name="confirmation" Type="InputType.Password" Required="true" autocomplete="new-password"/>
-        </BbFieldContent>
-    </BbField>
-    <BbButton Type="ButtonType.Submit" Class="w-full">Create admin account</BbButton>
+    @switch (_picked)
+    {
+        case null:
+            <button type="submit" disabled hidden></button>
+            break;
+        case AuthProvider.Plex:
+            <div class="signin" style="--brand: @Plex.BrandColor">
+                <BbButton Type="ButtonType.Submit" Variant="ButtonVariant.Outline" Class="signin-button w-full gap-2 font-medium" formaction="/setup/plex" formnovalidate="formnovalidate">
+                    <span>Sign in with</span>
+                    <ProviderLogo Provider="MediaProvider.Plex" Form="ProviderLogoForm.Logo" Size="16"/>
+                </BbButton>
+            </div>
+            break;
+        case AuthProvider.Local:
+            <BbField>
+                <BbFieldLabel For="setup-username">Username</BbFieldLabel>
+                <BbFieldContent>
+                    <BbInput Id="setup-username" Name="username" Required="true" Placeholder="admin" autocomplete="username"/>
+                </BbFieldContent>
+            </BbField>
+            <div class="grid grid-cols-2 gap-4" data-passwords>
+                <BbField>
+                    <BbFieldLabel For="setup-password">Password</BbFieldLabel>
+                    <BbFieldContent>
+                        <BbInput Id="setup-password" Name="password" Type="InputType.Password" Required="true" Placeholder="@($"At least {PasswordRules.MinimumLength} characters")"
+                                 autocomplete="new-password"/>
+                    </BbFieldContent>
+                </BbField>
+                <BbField>
+                    <BbFieldLabel For="setup-confirmation">Confirm password</BbFieldLabel>
+                    <BbFieldContent>
+                        <BbInput Id="setup-confirmation" Name="confirmation" Type="InputType.Password" Required="true" autocomplete="new-password"/>
+                    </BbFieldContent>
+                </BbField>
+            </div>
+            <BbButton Type="ButtonType.Submit" Class="w-full">Create admin account</BbButton>
+            break;
+    }
 </form>
 
 @code {
+    private static readonly string[] PlexLines = ["You and everyone after you sign in with a Plex account", "New people can join by signing in, if you allow sign-ups"];
+
+    private static readonly string[] LocalLines = ["Usernames and passwords kept in Sammlarr", "You add each person; nobody signs themselves up"];
+
     [Parameter] public string? Error { get; set; }
 
+    [Parameter] public AuthProvider? Picked { get; set; }
+
+    private AuthProvider? _picked;
+
     private BrandingInfo Plex => BrandingService.GetBrandingInfo(MediaProvider.Plex);
+
+    protected override void OnInitialized() => _picked = Picked;
 }

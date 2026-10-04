@@ -29,7 +29,7 @@
                     @if (NeedsAdmin)
                     {
                         @Head("Create the admin account", "Nobody has signed in yet. Enter the setup code from the server log, then choose how people sign in to this Sammlarr: with Plex, or with Sammlarr accounts you create. Whoever does this becomes the admin.")
-                        <AdminForm Error="@Error"/>
+                        <AdminForm Error="@Error" Picked="SignInWith"/>
                     }
                     else
                     {
@@ -170,6 +170,8 @@
     [Parameter] public bool NeedsAdmin { get; set; }
 
     [Parameter] public string? Error { get; set; }
+
+    [Parameter] public AuthProvider? SignInWith { get; set; }
 
     private bool SignsInWithPlex => _config?.AuthProvider == AuthProvider.Plex;
 
