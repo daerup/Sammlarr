@@ -81,7 +81,7 @@ Explicit user preference. Applies everywhere.
 - **No `if (x == null) return;`** defensive early exits. A meaningful absence is an `Optional`, not a null (docs/architecture §06, "Absence and failure"); if it's semantically "never null", model it as non-nullable. A `T?` a framework hands in (a route or query parameter, an EF row) may still be null-checked where it enters. Read an `Optional` or a `Result` through its helpers; an early-return guard on one stays only where the code after it holds a method-scoped `using var` or a `try`, or where the guard itself leaves a loop (`continue`/`break`).
 - **Flat over nested.** Use early-return guards at the top; keep the happy path unindented. If nesting crosses ~3 levels, extract a helper.
 - **Readability beats micro-optimization.** Prefer clear LINQ to hand-rolled loops, simple property access to cached locals, plain `await` paths. The EF + HTTP layers in this repo are not hot paths — clarity wins there. Optimize only with a profiler trace in hand.
-- **Benchmark.** The existing `SammlarrDbContext.MigrateListColumns` try/catch is the bar: a concrete, reproducible SQLite "column already exists" condition with no other handling option. That shape is fine; "wrap this in try/catch to be safe" is not.
+- **Benchmark.** A try/catch earns its place only around a concrete, reproducible failure that has no other handling option, caught by its exact type. "Wrap this in try/catch to be safe" never does.
 - **When editing existing code**, delete defensive code you encounter — log-and-rethrow blocks, null-checks that contradict NRT annotations, redundant validators — unless removing them changes observable behavior.
 
 ## Layering

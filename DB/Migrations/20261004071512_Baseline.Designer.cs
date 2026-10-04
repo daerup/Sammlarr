@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DB.Migrations;
 
 [DbContext(typeof(SammlarrDbContext))]
-[Migration("20261003224618_RatingStrategies")]
-partial class _20261003224618_RatingStrategies
+[Migration("20261004071512_Baseline")]
+partial class _20261004071512_Baseline
 {
     /// <inheritdoc />
     protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -117,8 +117,54 @@ partial class _20261003224618_RatingStrategies
                 b.Property<int>("Id")
                     .HasColumnType("INTEGER");
 
+                b.Property<string>("ArrTagFeedSource")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("ArrTagPerFeed")
+                    .HasColumnType("INTEGER");
+
+                b.Property<bool>("ArrTagPerUser")
+                    .HasColumnType("INTEGER");
+
+                b.Property<bool>("ArrTagPlainPrefix")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("ArrTagPrefix")
+                    .IsRequired()
+                    .HasMaxLength(64)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ArrTagUserSource")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
                 b.Property<string>("AuthProvider")
                     .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<long?>("OnboardingCompletedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("RadarrApiKey")
+                    .HasMaxLength(4096)
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("RadarrMonitored")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int?>("RadarrQualityProfileId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("RadarrRootFolderPath")
+                    .HasMaxLength(1024)
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("RadarrSearchOnAdd")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("RadarrUrl")
+                    .HasMaxLength(2048)
                     .HasColumnType("TEXT");
 
                 b.Property<string>("RegistrationMode")
@@ -133,6 +179,27 @@ partial class _20261003224618_RatingStrategies
                     .IsRequired()
                     .HasColumnType("TEXT");
 
+                b.Property<string>("SonarrApiKey")
+                    .HasMaxLength(4096)
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("SonarrMonitored")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int?>("SonarrQualityProfileId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("SonarrRootFolderPath")
+                    .HasMaxLength(1024)
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("SonarrSearchOnAdd")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("SonarrUrl")
+                    .HasMaxLength(2048)
+                    .HasColumnType("TEXT");
+
                 b.Property<string>("TrendingProvider")
                     .IsRequired()
                     .HasColumnType("TEXT");
@@ -145,10 +212,20 @@ partial class _20261003224618_RatingStrategies
                     new
                     {
                         Id = 1,
+                        ArrTagFeedSource = "ListName",
+                        ArrTagPerFeed = true,
+                        ArrTagPerUser = true,
+                        ArrTagPlainPrefix = false,
+                        ArrTagPrefix = "sammlarr",
+                        ArrTagUserSource = "Name",
                         AuthProvider = "Plex",
+                        RadarrMonitored = true,
+                        RadarrSearchOnAdd = true,
                         RegistrationMode = "Open",
-                        SearchProvider = "Plex",
+                        SearchProvider = "Tmdb",
                         Sink = "Plex",
+                        SonarrMonitored = true,
+                        SonarrSearchOnAdd = true,
                         TrendingProvider = "Tmdb"
                     });
             });
@@ -317,6 +394,61 @@ partial class _20261003224618_RatingStrategies
                 b.ToTable("FeedRuns");
             });
 
+        modelBuilder.Entity("DB.Data.Identity.AccountLinkRow", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("CreatedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("DisplayName")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("ExpiresAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("IssuedBy")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Kind")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("TokenHash")
+                    .IsRequired()
+                    .HasMaxLength(64)
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("UpdatedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid?>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Username")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TokenHash")
+                    .IsUnique();
+
+                b.HasIndex("UserId");
+
+                b.HasIndex("Kind", "Username")
+                    .IsUnique();
+
+                b.ToTable("AccountLinks");
+            });
+
         modelBuilder.Entity("DB.Data.Identity.UserRow", b =>
             {
                 b.Property<Guid>("Id")
@@ -325,6 +457,10 @@ partial class _20261003224618_RatingStrategies
 
                 b.Property<string>("AvatarUrl")
                     .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ConfigResetHash")
+                    .HasMaxLength(512)
                     .HasColumnType("TEXT");
 
                 b.Property<long>("CreatedAt")
@@ -338,8 +474,24 @@ partial class _20261003224618_RatingStrategies
                     .IsRequired()
                     .HasColumnType("TEXT");
 
+                b.Property<int>("FailedSignIns")
+                    .HasColumnType("INTEGER");
+
+                b.Property<double>("Hue")
+                    .HasColumnType("REAL");
+
                 b.Property<long>("JoinedAt")
                     .HasColumnType("INTEGER");
+
+                b.Property<long?>("KeyPromptedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long?>("LockedUntil")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("PasswordHash")
+                    .HasMaxLength(512)
+                    .HasColumnType("TEXT");
 
                 b.Property<string>("Provider")
                     .IsRequired()
@@ -348,6 +500,9 @@ partial class _20261003224618_RatingStrategies
                 b.Property<string>("Role")
                     .IsRequired()
                     .HasColumnType("TEXT");
+
+                b.Property<long?>("SessionsRevokedAt")
+                    .HasColumnType("INTEGER");
 
                 b.Property<long>("UpdatedAt")
                     .HasColumnType("INTEGER");
@@ -498,6 +653,13 @@ partial class _20261003224618_RatingStrategies
 
                 b.Property<float>("NormalizedValue")
                     .HasColumnType("REAL");
+
+                b.Property<long?>("RottenTomatoesAskedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("RottenTomatoesPath")
+                    .HasMaxLength(256)
+                    .HasColumnType("TEXT");
 
                 b.Property<int?>("VoteCount")
                     .HasColumnType("INTEGER");
@@ -1061,6 +1223,14 @@ partial class _20261003224618_RatingStrategies
                     .HasForeignKey("UserId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Identity.AccountLinkRow", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
         modelBuilder.Entity("DB.Data.Jobs.JobRow", b =>
