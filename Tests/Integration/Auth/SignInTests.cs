@@ -1,4 +1,5 @@
 using Contracts.Auth;
+using Contracts.Identity;
 using Domain.Identity;
 using Domain.Providers;
 using Harness;
@@ -96,5 +97,20 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
 
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, user.Id)).IsTrue());
+	}
+
+	[Test]
+	public async Task SignInAsync_ForEachNewPerson_TakesTheNextColourRoundTheWheel()
+	{
+		await host.NoUsers();
+		host.OAuthReturns("plex-1", "Ada");
+		var first = (await Testee.CompleteAsync(AuthProvider.Plex, "callback")).GetOrThrow(error => new InvalidOperationException(error.Reason));
+		host.OAuthReturns("plex-2", "Bob");
+		var second = (await Testee.CompleteAsync(AuthProvider.Plex, "callback")).GetOrThrow(error => new InvalidOperationException(error.Reason));
+
+		var hues = await host.Resolve<IUserRepository>().GetHuesAsync();
+
+		await Assert.That(hues[first.Id]).IsEqualTo(40);
+		await Assert.That(hues[second.Id]).IsEqualTo(177.5);
 	}
 }

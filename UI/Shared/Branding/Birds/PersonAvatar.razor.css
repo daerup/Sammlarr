@@ -1,0 +1,20 @@
+.person-avatar {
+    --bird-body: oklch(0.47 0.12 var(--bird-hue));
+    --bird-back: oklch(0.93 0.035 var(--bird-hue));
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: var(--bird-back);
+}
+
+.dark .person-avatar {
+    --bird-body: oklch(0.82 0.11 var(--bird-hue));
+    --bird-back: oklch(0.31 0.06 var(--bird-hue));
+}
+
+.person-avatar svg {
+    display: block;
+}

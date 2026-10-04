@@ -27,8 +27,8 @@ public class UsersSectionTests : BunitContext
 
 	private static readonly Person[] People =
 	[
-		new JoinedPerson(Admin, new PersonHoldings(3, 15, 2, []), new None()),
-		new JoinedPerson(Member, PersonHoldings.Empty, Some.Of(LockedUntil)),
+		new JoinedPerson(Admin, new PersonHoldings(3, 15, 2, []), new None(), 40),
+		new JoinedPerson(Member, PersonHoldings.Empty, Some.Of(LockedUntil), 177.5),
 		new InvitedPerson("mira", "mira", Now.AddDays(6).AddHours(2)),
 	];
 
@@ -103,7 +103,7 @@ public class UsersSectionTests : BunitContext
 		_users
 			.GetPeopleAsync(Any())
 			.Returns([
-				new JoinedPerson(Admin, PersonHoldings.Empty, new None()),
+				new JoinedPerson(Admin, PersonHoldings.Empty, new None(), 40),
 				new InvitedPerson("soon", "soon", Now.AddHours(5)),
 				new InvitedPerson("old", "old", Now.AddHours(-1)),
 			]);
@@ -113,6 +113,44 @@ public class UsersSectionTests : BunitContext
 		cut.WaitForElement(".person-row");
 		var statuses = cut.FindAll("[data-status]").Select(status => status.TextContent.Trim());
 		await Assert.That(statuses).IsEquivalentTo(["Active", "Invited · link expires in 5 hours", "Invite expired"]);
+	}
+
+	[Test]
+	public async Task Rows_OnASammlarrAccountsInstall_ShowEachPersonsBirdInTheirColour()
+	{
+		Installed(AuthProvider.Local);
+
+		var cut = Render<UsersSection>();
+
+		cut.WaitForElement(".person-row");
+		var rows = cut.FindAll(".person-row").Select(row => $"{row.GetAttribute("style")} | {row.QuerySelectorAll("[data-bird]").Length}");
+		await Assert.That(rows).IsEquivalentTo(["--bird-hue: 40 | 1", "--bird-hue: 177.5 | 1", " | 0"]);
+	}
+
+	[Test]
+	public async Task Rows_OnAPlexInstall_ShowTheirPlexPictureWithTheBirdBehindIt()
+	{
+		Installed(AuthProvider.Plex);
+		_users
+			.GetPeopleAsync(Any())
+			.Returns([new JoinedPerson(Admin with { AvatarUrl = "https://plex.tv/users/guest/avatar" }, PersonHoldings.Empty, new None(), 40)]);
+
+		var cut = Render<UsersSection>();
+
+		await Assert.That(cut.WaitForElement(".person-row img").GetAttribute("src")).IsEqualTo("https://plex.tv/users/guest/avatar");
+		await Assert.That(cut.FindAll(".person-row [data-bird]")).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Rows_OnAPlexInstall_ShowTheBirdForSomeoneWithoutAPlexPicture()
+	{
+		Installed(AuthProvider.Plex);
+		_users.GetPeopleAsync(Any()).Returns([new JoinedPerson(Admin, PersonHoldings.Empty, new None(), 40)]);
+
+		var cut = Render<UsersSection>();
+
+		cut.WaitForElement(".person-row [data-bird]");
+		await Assert.That(cut.FindAll(".person-row img")).IsEmpty();
 	}
 
 	[Test]

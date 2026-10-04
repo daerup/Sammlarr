@@ -33,10 +33,17 @@ internal sealed class UserManagementService(
 		currentUser.EnsureAdmin();
 		var now = dateTimeProvider.Now;
 		var holdings = await users.GetHoldingsAsync(cancellationToken);
+		var hues = await users.GetHuesAsync(cancellationToken);
 		var locals = (await accounts.GetAllAsync(cancellationToken)).ToDictionary(account => account.User.Id);
 		var invites = await links.GetAllAsync(AccountLinkKind.Invite, cancellationToken);
 		var joined = (await users.GetAllAsync(cancellationToken)).Select(user =>
-			(Person)new JoinedPerson(user, holdings.GetValueOrNone(user.Id).GetValueOr(PersonHoldings.Empty), LockOf(locals, user.Id, now))
+			(Person)
+				new JoinedPerson(
+					user,
+					holdings.GetValueOrNone(user.Id).GetValueOr(PersonHoldings.Empty),
+					LockOf(locals, user.Id, now),
+					hues.GetValueOrNone(user.Id).GetValueOr(PersonHues.First)
+				)
 		);
 		return [.. joined, .. invites.Select(invite => (Person)new InvitedPerson(invite.Username, invite.DisplayName, invite.ExpiresAt))];
 	}
