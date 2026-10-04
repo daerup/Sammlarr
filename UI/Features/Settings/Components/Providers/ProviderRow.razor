@@ -1,7 +1,7 @@
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
 
-<div class="provider-row" style="--brand: @Branding.GetBrandingInfo(Provider).BrandColor">
+<div id="@ProviderRows.Id(Provider)" class="provider-row @(Ringed == Provider ? "is-ringed" : null)" style="--brand: @Branding.GetBrandingInfo(Provider).BrandColor">
     <BbCollapsible Open="Open" OpenChanged="OpenChanged">
         <BbCollapsibleTrigger AsChild="false"
                               Class="group w-full grid grid-cols-[15px_190px_1fr_auto] items-center gap-3.5 pl-5 pr-4 py-4 text-left bg-foreground/5 hover:bg-foreground/8 transition-colors">
@@ -16,7 +16,18 @@
                     <ProviderLogo Provider="Provider" Form="ProviderLogoForm.Logo" Size="18"/>
                 }
             </span>
-            <span class="text-sm text-muted-foreground truncate">@ProviderCaption.For(Provider)@if (Required){<span> · </span><span class="key-required"><LucideIcon Name="asterisk" Size="12"/>required</span>}</span>
+            <span class="provider-roles">
+                @foreach (var role in ServiceRoles.For(Provider))
+                {
+                    <BbTooltip DelayDuration="150">
+                        <BbTooltipTrigger AsChild="false" Class="provider-role" Focusable="false">
+                            <LucideIcon Name="@role.Icon" Size="13"/>
+                            <span class="sr-only">@role.Name</span>
+                        </BbTooltipTrigger>
+                        <BbTooltipContent>@role.Name</BbTooltipContent>
+                    </BbTooltip>
+                }
+            </span>
             <span>@Status</span>
         </BbCollapsibleTrigger>
         <BbCollapsibleContent>
@@ -36,9 +47,9 @@
 
     [Parameter] public RenderFragment? Title { get; set; }
 
-    [Parameter] public bool Required { get; set; }
-
     [Parameter] [EditorRequired] public required RenderFragment Status { get; set; }
 
     [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
+
+    [CascadingParameter(Name = ProviderRows.Ringed)] private MediaProvider? Ringed { get; set; }
 }

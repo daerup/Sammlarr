@@ -6,9 +6,11 @@ using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Setup;
 using Contracts.Wantlist;
+using Domain.Auth;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Providers;
@@ -36,6 +38,8 @@ public class ProvidersSectionTests : BunitContext
 
 	private readonly Mock<IArrSinkConfigService> _arrConfigs = IArrSinkConfigService.Mock();
 
+	private readonly Mock<ICredentialService> _credentials = ICredentialService.Mock();
+
 	[Before(Test)]
 	public void Setup()
 	{
@@ -52,9 +56,9 @@ public class ProvidersSectionTests : BunitContext
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
 		Services.AddSingleton(keys.Object);
-		var credentials = ICredentialService.Mock();
-		credentials.GetAsync(Any<AuthProvider>(), Any()).Returns(Error.From("Not connected."));
-		Services.AddSingleton(credentials.Object);
+		_credentials.GetAsync(Any<AuthProvider>(), Any()).Returns(Error.From("Not connected."));
+		Services.AddSingleton(_credentials.Object);
+		Services.AddScoped<ScrollService>();
 		ComponentFactories.AddStub<AccountRow>();
 		ComponentFactories.AddStub<SammlarrAccountRow>();
 		ComponentFactories.AddStub<ApiKeyRow>();
@@ -212,6 +216,108 @@ public class ProvidersSectionTests : BunitContext
 
 		await Assert.That(cut.FindComponents<Stub<ArrSinkRow>>()).IsEmpty();
 		await Assert.That(Map(cut).Get(map => map.Ready)).Contains(MediaProvider.Sonarr);
+	}
+
+	[Test]
+	public async Task ServiceOpened_ForTmdb_OpensItsRowAndScrollsToIt()
+	{
+		var cut = RenderSection();
+
+		await cut.InvokeAsync(() => _ = Map(cut).Get(map => map.ServiceOpened).InvokeAsync(MediaProvider.Tmdb));
+
+		var tmdb = cut.FindComponents<Stub<ApiKeyRow>>().Single(row => row.Instance.Parameters.Get(key => key.Provider) == ApiKeyProvider.Tmdb);
+		await Assert.That(tmdb.Instance.Parameters.Get(key => key.Open)).IsTrue();
+		await Assert.That(ScrolledTo(cut)).IsEqualTo("provider-row-tmdb");
+	}
+
+	[Test]
+	public async Task ServiceOpened_ForRadarrAndSonarrOnThatSink_OpensTheWantlistSyncAndScrollsToIt()
+	{
+		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
+		var cut = RenderSection();
+
+		await cut.InvokeAsync(() => _ = Map(cut).Get(map => map.ServiceOpened).InvokeAsync(MediaProvider.Radarr));
+
+		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.Open)).IsTrue();
+		await Assert.That(ScrolledTo(cut)).IsEqualTo("provider-row-radarr");
+	}
+
+	[Test]
+	public async Task ServiceOpened_ForLocalAccountsAsAnAdmin_GoesToTheUsers()
+	{
+		var cut = RenderSection();
+
+		await cut.InvokeAsync(() => Map(cut).Get(map => map.ServiceOpened).InvokeAsync(MediaProvider.Local));
+
+		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/settings?section=users");
+	}
+
+	[Test]
+	public async Task SearchPicked_PlexWithoutAPlexAccount_OpensThePlexRowAndStoresNothing()
+	{
+		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb, Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local });
+		var cut = RenderSection();
+		await Assert.That(cut.FindComponents<Stub<AccountRow>>()).IsEmpty();
+
+		await cut.InvokeAsync(() => _ = Map(cut).Get(map => map.SearchPicked).InvokeAsync(SearchProvider.Plex));
+
+		var plex = cut.FindComponent<Stub<AccountRow>>().Instance.Parameters;
+		await Assert.That(plex.Get(row => row.Open)).IsTrue();
+		await Assert.That(plex.Get(row => row.ReturnUrl)).IsEqualTo("/settings?section=providers&search=plex");
+		_config.StoreAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task SearchAfterSignIn_WithPlexConnected_StoresPlexForSearch()
+	{
+		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb });
+		_credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
+
+		var cut = Render<ProvidersSection>(parameters => parameters.Add(section => section.SearchAfterSignIn, SearchProvider.Plex));
+
+		cut.WaitForAssertion(() => _config.StoreAsync(OnPlex, Any()).WasCalled(Times.Once));
+		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/settings?section=providers");
+	}
+
+	[Test]
+	public async Task SearchAfterSignIn_ForAMember_StoresNothing()
+	{
+		_user.Role = UserRole.Member;
+		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb });
+		_credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
+
+		var cut = Render<ProvidersSection>(parameters => parameters.Add(section => section.SearchAfterSignIn, SearchProvider.Plex));
+		cut.WaitForState(() => cut.FindComponents<Stub<ServicesMap>>().Count == 1);
+
+		_config.StoreAsync(Any(), Any()).WasNeverCalled();
+		await Assert.That(Map(cut).Get(map => map.Config).SearchProvider).IsEqualTo(SearchProvider.Tmdb);
+	}
+
+	[Test]
+	public async Task PlexSignIn_AfterPickingPlexForSearch_StoresPlexForSearch()
+	{
+		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb, Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local });
+		var cut = RenderSection();
+		await cut.InvokeAsync(() => _ = Map(cut).Get(map => map.SearchPicked).InvokeAsync(SearchProvider.Plex));
+		_credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
+
+		await cut.InvokeAsync(() => cut.FindComponent<Stub<AccountRow>>().Instance.Parameters.Get(row => row.Changed).InvokeAsync());
+
+		_config.StoreAsync(OnPlex with { Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local }, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task PlexRow_OnAPlexInstall_ReturnsToTheProviders()
+	{
+		var cut = RenderSection();
+
+		await Assert.That(cut.FindComponent<Stub<AccountRow>>().Instance.Parameters.Get(row => row.ReturnUrl)).IsEqualTo("/settings?section=providers");
+	}
+
+	private string ScrolledTo(IRenderedComponent<ProvidersSection> cut)
+	{
+		cut.WaitForAssertion(() => JSInterop.VerifyInvoke("sammlarrScroll.intoView"));
+		return (string)JSInterop.VerifyInvoke("sammlarrScroll.intoView").Arguments[0]!;
 	}
 
 	private static CapturedParameterView<ServicesMap> Map(IRenderedComponent<ProvidersSection> cut)

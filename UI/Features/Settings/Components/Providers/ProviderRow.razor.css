@@ -1,5 +1,7 @@
 .provider-row {
     position: relative;
+    scroll-margin-top: 80px;
+    transition: box-shadow 300ms ease;
 }
 
 .provider-row + .provider-row {
@@ -16,9 +18,23 @@
     background: var(--brand);
 }
 
-.key-required {
+.provider-row.is-ringed {
+    box-shadow: inset 0 0 0 2px var(--brand);
+}
+
+.provider-roles {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.provider-roles ::deep .provider-role {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    color: var(--alert-warning);
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--secondary);
+    color: var(--muted-foreground);
 }

@@ -46,7 +46,7 @@
                 <div class="flex items-center gap-2">
                     <div class="min-w-0 flex-1">
                         <SensitiveInput Value="@_key" ValueChanged="KeyChangedAsync" Compact="true" Label="@($"{App.Name} API key")"
-                                        Placeholder="@($"From {App.Name} › Settings › General")"
+                                        Placeholder="Enter API key"
                                         Class="@(State == ArrConnectionState.Failed ? "border-destructive" : string.Empty)"/>
                     </div>
                     @switch (State)
@@ -77,6 +77,17 @@
                             break;
                     }
                 </div>
+                <BbFieldDescription>
+                    Found in
+                    @if (ArrSettingsLink.For(_url).ToNullable() is { } href)
+                    {
+                        <AppLink Href="@href" External="true">@App.Name › Settings › General</AppLink>
+                    }
+                    else
+                    {
+                        <span>@App.Name › Settings › General</span>
+                    }.
+                </BbFieldDescription>
             </BbFieldContent>
         </BbField>
 

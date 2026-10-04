@@ -32,6 +32,7 @@ public class SettingsPageTests : BunitContext
 		Services.AddSingleton<ProfileDropdownService>();
 		Services.AddSingleton<AccountConnectionPrompt>();
 		Services.AddScoped<Notifier>();
+		Services.AddScoped<ScrollService>();
 		Services.AddSingleton(ISinkSwitch.Mock().Object);
 		Services.AddSingleton(IUserManagementService.Mock().Object);
 		Services.AddSingleton(IOnboardingService.Mock().Object);

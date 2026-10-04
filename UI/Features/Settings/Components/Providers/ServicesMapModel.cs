@@ -181,27 +181,28 @@ internal sealed record ServicesMapModel(
 
 	private static List<MapRole> RolesFor(ProviderConfig config)
 	{
-		(string Name, string Icon, string Description, MapEndpoint? Provider, MapPicker? Picker)[] rows =
+		(ServiceRole Role, MapEndpoint? Provider, MapPicker? Picker)[] rows =
 		[
-			("Sign-in", "log-in", "Who can sign in", config.AuthProvider.AsMediaProvider(), null),
+			(ServiceRoles.SignIn, config.AuthProvider.AsMediaProvider(), null),
 			(
-				"Wantlist",
-				"bookmark",
-				"Where the wantlist syncs to",
+				ServiceRoles.Wantlist,
 				MapEndpoint.Of(config.Sink),
 				Picker(MapChoice.Wantlist, "Wantlist syncs to", Enum.GetValues<SinkKind>().Select(MapEndpoint.Of), MapEndpoint.Of(config.Sink))
 			),
 			(
-				"Search",
-				"search",
-				"Finding titles to add",
+				ServiceRoles.Search,
 				MapEndpoint.Of(config.SearchProvider),
 				Picker(MapChoice.Search, "Search uses", Enum.GetValues<SearchProvider>().Select(MapEndpoint.Of), MapEndpoint.Of(config.SearchProvider))
 			),
-			("Trending", "trending-up", "What Browse shows", config.TrendingProvider.AsMediaProvider(), null),
-			("Feeds", "rss", "Imported lists; each feed picks its source", null, null),
+			(ServiceRoles.Trending, config.TrendingProvider.AsMediaProvider(), null),
+			(ServiceRoles.Feeds, null, null),
 		];
-		return [.. rows.Select((row, index) => new MapRole(row.Name, row.Icon, row.Description, index * RowHeight + RowHeight / 2, row.Provider, row.Picker))];
+		return
+		[
+			.. rows.Select(
+				(row, index) => new MapRole(row.Role.Name, row.Role.Icon, row.Role.Description, index * RowHeight + RowHeight / 2, row.Provider, row.Picker)
+			),
+		];
 	}
 
 	private static MapPicker? Picker(MapChoice choice, string label, IEnumerable<MapEndpoint> options, MapEndpoint current)

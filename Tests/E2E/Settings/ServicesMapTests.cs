@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Settings;
@@ -11,7 +12,6 @@ public class ServicesMapTests
 
 		await Expect(SettingsPage.MapService(page, "Plex")).ToBeVisibleAsync();
 		await Expect(page.Text("Managed by an admin")).ToBeVisibleAsync();
-		await Expect(page.Locator("button.map-service")).ToHaveCountAsync(0);
 		await Expect(page.Locator(".map-chip")).ToHaveCountAsync(0);
 	}
 
@@ -22,9 +22,21 @@ public class ServicesMapTests
 
 		await Expect(SettingsPage.MapService(page, "Plex")).ToBeVisibleAsync();
 		await Expect(page.Text("Managed by an admin")).ToHaveCountAsync(0);
-		await Expect(page.Locator("button.map-service")).ToHaveCountAsync(0);
 		await Expect(page.Locator(".map-chip")).ToHaveCountAsync(2);
 		await Expect(SettingsPage.MapChip(page, "Wantlist")).ToBeVisibleAsync();
 		await Expect(SettingsPage.MapChip(page, "Search")).ToBeVisibleAsync();
+	}
+
+	[Test]
+	public async Task Map_WhenTmdbIsClicked_OpensTmdbsRowAndScrollsItIntoView()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("providers"));
+
+		await page.ButtonContaining("Open TMDb").ClickAsync();
+
+		var row = page.Locator("#provider-row-tmdb");
+		await Expect(row).ToHaveClassAsync(new Regex("is-ringed"));
+		await Expect(row).ToBeInViewportAsync();
+		await Expect(row.Text("API key")).ToBeVisibleAsync();
 	}
 }

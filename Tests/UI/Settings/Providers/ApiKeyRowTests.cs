@@ -60,6 +60,18 @@ public class ApiKeyRowTests : BunitContext
 	}
 
 	[Test]
+	[Arguments("", "Required")]
+	[Arguments("a-new-key", "Not tested")]
+	public async Task Status_ForARequiredKey_ReadsRequiredUntilOneIsTyped(string typed, string status)
+	{
+		var cut = RenderRow(required: true);
+
+		await TypeAsync(cut, typed);
+
+		await Assert.That(Status(cut)).IsEqualTo(status);
+	}
+
+	[Test]
 	public async Task Test_WhenTheProviderRejectsTheKey_OutlinesTheFieldAndLeavesTheReasonToTheBadge()
 	{
 		_factory.CreateAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Error.From(Rejection));
@@ -94,10 +106,10 @@ public class ApiKeyRowTests : BunitContext
 	private static Task TypeAsync(IRenderedComponent<ApiKeyRow> cut, string key) =>
 		cut.InvokeAsync(() => cut.FindComponent<SensitiveInput>().Instance.ValueChanged.InvokeAsync(key));
 
-	private IRenderedComponent<ApiKeyRow> RenderRow()
+	private IRenderedComponent<ApiKeyRow> RenderRow(bool required = false)
 	{
 		var cut = Render<ApiKeyRow>(parameters =>
-			parameters.Add(row => row.Provider, ApiKeyProvider.Tmdb).Add(row => row.Description, "<span>Your TMDB API key.</span>")
+			parameters.Add(row => row.Provider, ApiKeyProvider.Tmdb).Add(row => row.Description, "<span>Your TMDB API key.</span>").Add(row => row.Required, required)
 		);
 		cut.WaitForState(() => Status(cut).Length > 0);
 		return cut;

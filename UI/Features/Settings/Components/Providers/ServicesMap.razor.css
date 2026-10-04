@@ -80,6 +80,34 @@
     background: var(--card);
 }
 
+.map-service.is-openable {
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.map-service.is-openable:hover,
+.map-service.is-openable:focus-visible {
+    border-color: var(--brand);
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand) 25%, transparent);
+}
+
+.map-service-glyph {
+    display: inline-flex;
+    margin-left: auto;
+    color: var(--muted-foreground);
+    opacity: 0;
+    transition: opacity 150ms ease;
+}
+
+.map-service.is-openable:hover .map-service-glyph,
+.map-service.is-openable:focus-visible .map-service-glyph {
+    opacity: 1;
+}
+
 .map-service-name {
     font-size: 13px;
     font-weight: 600;
@@ -103,9 +131,18 @@
     justify-content: center;
     width: 28px;
     height: 28px;
+    padding: 0;
     border: 1px solid var(--border);
     border-radius: 7px;
     background: var(--card);
+    cursor: pointer;
+    transition: box-shadow 150ms ease;
+}
+
+.map-tile:hover,
+.map-tile:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand) 25%, transparent);
 }
 
 .map-tile.is-bottom {

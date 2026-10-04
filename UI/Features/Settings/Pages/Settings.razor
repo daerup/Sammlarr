@@ -82,6 +82,7 @@
 
     private const string SectionQuery = "section";
     private const string ProviderQuery = "provider";
+    private const string SearchQuery = "search";
 
     [SupplyParameterFromQuery(Name = SectionQuery)]
     public string? Section { get; set; }
@@ -89,10 +90,32 @@
     [SupplyParameterFromQuery(Name = ProviderQuery)]
     public string? Provider { get; set; }
 
-    private IDictionary<string, object>? SectionParameters =>
-        _activeSection.ComponentType == typeof(ProvidersSection) && Enum.TryParse<MediaProvider>(Provider, ignoreCase: true, out var provider)
-            ? new Dictionary<string, object> { [nameof(ProvidersSection.Expanded)] = provider }
-            : null;
+    [SupplyParameterFromQuery(Name = SearchQuery)]
+    public string? Search { get; set; }
+
+    private IDictionary<string, object>? SectionParameters
+    {
+        get
+        {
+            if (_activeSection.ComponentType != typeof(ProvidersSection))
+            {
+                return null;
+            }
+
+            var parameters = new Dictionary<string, object>();
+            if (Enum.TryParse<MediaProvider>(Provider, ignoreCase: true, out var provider))
+            {
+                parameters[nameof(ProvidersSection.Expanded)] = provider;
+            }
+
+            if (Enum.TryParse<SearchProvider>(Search, ignoreCase: true, out var search))
+            {
+                parameters[nameof(ProvidersSection.SearchAfterSignIn)] = search;
+            }
+
+            return parameters;
+        }
+    }
 
     protected override void OnInitialized()
     {
@@ -113,7 +136,7 @@
     }
 
     private void Show(SettingsSection section) =>
-        Navigation.NavigateTo(Navigation.GetUriWithQueryParameters(new Dictionary<string, object?> { [SectionQuery] = Slug(section.Label), [ProviderQuery] = null }));
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameters(new Dictionary<string, object?> { [SectionQuery] = Slug(section.Label), [ProviderQuery] = null, [SearchQuery] = null }));
 
     private SettingsSection? ResolveSection() =>
         string.IsNullOrEmpty(Section) ? null : VisibleSections.FirstOrDefault(section => Slug(section.Label).Equals(Section, StringComparison.OrdinalIgnoreCase));

@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Settings;
@@ -105,6 +106,35 @@ public class ArrAppSectionTests : BunitContext
 		await cut.FindAll("button").Single(button => button.TextContent.Trim() == "Test again").ClickAsync();
 
 		await Assert.That(_tested.Single().Url).IsSome().And.IsEqualTo("http://sonarr.lan:8989");
+	}
+
+	[Test]
+	public async Task Key_WithoutAUrl_NamesWhereItIsFoundWithoutALink()
+	{
+		var cut = RenderSection(ArrInstanceConfig.Empty, ArrConnectionState.Empty);
+
+		await Assert.That(Description(cut)).IsEqualTo("Found in Sonarr › Settings › General.");
+		await Assert.That(cut.FindAll("a.app-link")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Key_OnceAUrlIsTyped_LinksToTheAppsGeneralSettingsInANewTab()
+	{
+		var cut = RenderSection(ArrInstanceConfig.Empty, ArrConnectionState.Empty);
+
+		await cut.InvokeAsync(() => cut.FindComponent<BbInput>().Instance.ValueChanged.InvokeAsync("http://host/sonarr/"));
+
+		var link = cut.Find("a.app-link");
+		await Assert.That(link.GetAttribute("href")).IsEqualTo("http://host/sonarr/settings/general");
+		await Assert.That(link.GetAttribute("target")).IsEqualTo("_blank");
+		await Assert.That(link.TextContent.Trim()).IsEqualTo("Sonarr › Settings › General");
+		await Assert.That(Description(cut)).IsEqualTo("Found in Sonarr › Settings › General.");
+	}
+
+	private static string Description(IRenderedComponent<ArrAppSection> cut)
+	{
+		var description = cut.FindAll("*").Last(element => element.TextContent.Contains("Found in"));
+		return Regex.Replace(description.TextContent, @"\s+", " ").Trim();
 	}
 
 	private IRenderedComponent<ArrAppSection> RenderSection(ArrInstanceConfig instance, ArrConnectionState state, string error = "")
