@@ -11,7 +11,7 @@
                 <span>@(value is { } shown ? RatingTexts.Number(shown) : "–")</span>
             </BbPopoverTrigger>
             <BbPopoverContent Side="Side" Align="Align" Class="w-auto overflow-hidden rounded-[9px] p-0 shadow-[0_14px_34px_rgba(0,0,0,0.35)]" aria-label="How the Sammlarr rating came about">
-                <SammlarrRatingBreakdown Ratings="Ratings" Strategy="strategy" Available="view.Available" Where="@Where" Ids="Ids" Title="@Title" StoredOnly="StoredOnly"/>
+                <SammlarrRatingBreakdown Ratings="Ratings" Strategy="strategy" Available="view.Available" Where="@Where" Ids="Ids" Title="@Title" StoredOnly="StoredOnly" Media="Media"/>
             </BbPopoverContent>
         </BbPopover>
     </span>
@@ -29,6 +29,8 @@
     [Parameter] public string? Title { get; set; }
 
     [Parameter] public bool StoredOnly { get; set; }
+
+    [Parameter] public Optional<MediaId> Media { get; set; } = new None();
 
     [Parameter] public RatingBadgeLook Look { get; set; } = RatingBadgeLook.Inline;
 

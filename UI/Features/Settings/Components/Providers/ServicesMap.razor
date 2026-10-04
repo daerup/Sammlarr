@@ -157,8 +157,8 @@
     private static string EdgeClass(MapTile tile) =>
         tile.Entry switch
         {
-            TileEntry.Bottom => "is-bottom",
-            TileEntry.Top => "is-top",
+            TileEdge.Bottom => "is-bottom",
+            TileEdge.Top => "is-top",
         };
 
     private static string Px(double value) => Math.Round(value, 2).ToString(CultureInfo.InvariantCulture);

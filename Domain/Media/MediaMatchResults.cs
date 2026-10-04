@@ -16,6 +16,18 @@ public static class MediaMatchResults
 			}
 		}
 
+		public Optional<MediaId> MatchedId
+		{
+			get
+			{
+				return match switch
+				{
+					MatchedMedia matched => Some.Of(matched.Identity.Id),
+					UnmatchedMedia => new None(),
+				};
+			}
+		}
+
 		public ValueSet<IExternalMediaId> Externals
 		{
 			get

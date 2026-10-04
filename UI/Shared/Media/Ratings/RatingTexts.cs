@@ -15,6 +15,8 @@ internal static class RatingTexts
 
 	public const string StoredFooter = "Browse only has the ratings Sammlarr stores for this title; opening it loads the rest.";
 
+	private const string RottenTomatoesSite = "https://www.rottentomatoes.com/";
+
 	private const string RottenTomatoesSearch = "https://www.rottentomatoes.com/search?search=";
 
 	public static string Name(RatingSource source) => source.GetDescription();
@@ -72,15 +74,15 @@ internal static class RatingTexts
 
 	public static int VoteSources(SammlarrRating rating) => rating.From.Count(part => part.Votes.IsSome());
 
-	public static Optional<string> Link(RatingSource source, IReadOnlyList<IExternalMediaId> ids, string? title)
+	public static Optional<string> Link(RatingSource source, IReadOnlyList<IExternalMediaId> ids, string? title, Optional<string> rottenTomatoesPath)
 	{
 		return source switch
 		{
 			RatingSource.Tmdb => Page(ids, MediaProvider.Tmdb),
 			RatingSource.Imdb => Page(ids, MediaProvider.Imdb),
-			RatingSource.RottenTomatoesCritics or RatingSource.RottenTomatoesAudience => Optional
-				.Of(title)
-				.Map(name => $"{RottenTomatoesSearch}{Uri.EscapeDataString(name)}"),
+			RatingSource.RottenTomatoesCritics or RatingSource.RottenTomatoesAudience => rottenTomatoesPath
+				.Map(path => $"{RottenTomatoesSite}{path}")
+				.Or(() => Optional.Of(title).Map(name => $"{RottenTomatoesSearch}{Uri.EscapeDataString(name)}")),
 		};
 	}
 

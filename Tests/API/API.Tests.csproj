@@ -24,5 +24,6 @@
 			Link="Plex\Recorded\obsession.json"
 			CopyToOutputDirectory="PreserveNewest"
 		/>
+		<None Include="Wikidata\Recorded\*.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

@@ -84,6 +84,12 @@ falls back to every available source, so disconnecting the provider behind a kep
 another provider still supplies ratings. Availability is read from the stored keys and accounts, never from a live
 check, so a provider that is briefly unreachable still counts.
 
+Rotten Tomatoes page:: Where a breakdown's Rotten Tomatoes rows link (`IRottenTomatoesPages`): Wikidata's
+"Rotten Tomatoes ID" (P1258) found by the title's IMDb id (P345), asked the first time a breakdown with a Rotten
+Tomatoes rating opens. The answer, a path or none, is kept on the title's Rotten Tomatoes rating rows (and carried over
+when its ratings are rewritten), so a title is asked once while its details stay cached; a failed lookup is not kept and
+is asked again. Without a path the rows link to Rotten Tomatoes' search.
+
 === Identify and details
 
 Identify:: Turning external references into the right library title (`IMediaService.IdentifyAsync`

@@ -1,0 +1,13 @@
+{
+  "head" : {
+    "vars" : [ "path" ]
+  },
+  "results" : {
+    "bindings" : [ {
+      "path" : {
+        "type" : "literal",
+        "value" : "m/project_hail_mary"
+      }
+    } ]
+  }
+}

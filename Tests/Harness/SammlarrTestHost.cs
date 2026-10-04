@@ -6,11 +6,13 @@ using API.Http;
 using API.Mdblist;
 using API.Plex;
 using API.Tmdb;
+using API.Wikidata;
 using Contracts;
 using Contracts.Auth;
 using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Messaging;
+using Contracts.Ratings;
 using Contracts.Wantlist;
 using Core;
 using DB;
@@ -197,6 +199,18 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		await Resolve<IApiKeyService>().StoreAsync(new TestApiKey(ApiKeyProvider.Mdblist, apiKey));
 		HttpStub.RequireQueryParam(TestUrls.MdblistApi, "apikey", apiKey);
 	}
+
+	internal void WikidataHolds(string imdb, params string[] paths)
+	{
+		var bindings = string.Join(',', paths.Select(path => $$$"""{"path":{"type":"literal","value":"{{{path}}}"}}"""));
+		HttpStub.RespondWithJsonForUrl(WikidataQueryFor(imdb), $$$"""{"results":{"bindings":[{{{bindings}}}]}}""");
+	}
+
+	internal void WikidataFails(string imdb) => HttpStub.RespondWithStatusForUrl(WikidataQueryFor(imdb), HttpStatusCode.ServiceUnavailable);
+
+	internal int WikidataAsked(string imdb) => HttpStub.Requests(WikidataQueryFor(imdb));
+
+	private static string WikidataQueryFor(string imdb) => Uri.EscapeDataString($"\"{imdb}\"");
 
 	internal void TmdbUnreachable() => HttpStub.RespondForUrl(TestUrls.TmdbApi, _ => throw new HttpRequestException("The TMDB API is unreachable."));
 
@@ -578,9 +592,11 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddHttpClient(TmdbClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient<MdblistClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient(MdblistClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
+		services.AddHttpClient<IRottenTomatoesPageFinder, WikidataClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 
 		services.AddSingleton(new TmdbOptions { BaseUrl = $"https://{TestUrls.TmdbApi}", ImageBaseUrl = "https://image.tmdb.org/t/p" });
 		services.AddSingleton(new MdblistOptions { BaseUrl = $"https://{TestUrls.MdblistApi}" });
+		services.AddSingleton(new WikidataOptions { BaseUrl = $"https://{TestUrls.WikidataApi}", UserAgent = "Sammlarr tests" });
 		services.AddSingleton(
 			new PlexOptions
 			{
