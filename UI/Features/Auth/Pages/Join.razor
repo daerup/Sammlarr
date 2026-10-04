@@ -1,0 +1,16 @@
+@page "/join/{Token}"
+@layout AuthLayout
+@attribute [AllowAnonymous]
+@using Domain.Identity
+@using UI.Features.Auth.Components
+
+<PageTitle>Join Sammlarr</PageTitle>
+
+<PasswordLinkCard Kind="AccountLinkKind.Invite" Token="@Token" Error="@Error"/>
+
+@code {
+    [Parameter] public required string Token { get; set; }
+
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? Error { get; set; }
+}

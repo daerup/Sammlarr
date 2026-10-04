@@ -6,153 +6,74 @@
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 
-@if (!_isLoaded)
-{
-    <div class="w-full max-w-4xl rounded-lg border px-6 py-8 text-sm text-muted-foreground">Loading users…</div>
-}
-else
-{
-    <div class="w-full space-y-6">
-        <div class="space-y-1 px-1">
-            <h3 class="text-base font-semibold tracking-tight">Users</h3>
-            <p class="text-sm text-muted-foreground">People with access to this Sammlarr instance.</p>
-        </div>
-
-        <div class="flex items-end gap-8" style="flex-wrap: wrap-reverse">
-            <div class="w-full max-w-7xl min-w-0 rounded-lg border overflow-hidden">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            <th class="px-4 py-3 font-medium">User</th>
-                            <th class="px-4 py-3 font-medium">Role</th>
-                            <th class="px-4 py-3 font-medium">Joined</th>
-                            <th class="px-4 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y">
-                        @foreach (var user in _users)
-                        {
-                            var isAdmin = user.Role == UserRole.Admin;
-                            <tr class="hover:bg-muted/30 transition-colors">
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center gap-3">
-                                        <BbAvatar Size="AvatarSize.Small">
-                                            <BbAvatarImage Source="@user.AvatarUrl" Alt="@user.DisplayName"/>
-                                            <BbAvatarFallback>
-                                                <LucideIcon Name="user" Size="15"/>
-                                            </BbAvatarFallback>
-                                        </BbAvatar>
-                                        <span class="font-medium truncate">@user.DisplayName</span>
-                                        @if (user.Id == CurrentUser.Id)
-                                        {
-                                            <span class="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/15 text-primary">You</span>
-                                        }
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <BbBadge Variant="@(isAdmin ? BadgeVariant.Default : BadgeVariant.Outline)" Class="h-5 text-[10px]">
-                                        @user.Role
-                                    </BbBadge>
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                                    @user.JoinedAt.LocalDateTime.ToString("MMM d, yyyy")
-                                </td>
-                                <td class="px-4 py-3">
-                                    @if (IsLastAdmin(user))
-                                    {
-                                        <BbTooltip Placement="PopoverPlacement.Top">
-                                            <BbTooltipTrigger AsChild="false" Class="flex justify-end cursor-not-allowed" Focusable="false">
-                                                <div class="pointer-events-none opacity-40 flex items-center gap-1">
-                                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="whitespace-nowrap">Make member</BbButton>
-                                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.IconSmall"><LucideIcon Name="trash-2" Size="15"/></BbButton>
-                                                </div>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>The last admin can't be demoted or removed.</BbTooltipContent>
-                                        </BbTooltip>
-                                    }
-                                    else
-                                    {
-                                        <div class="flex items-center justify-end gap-1">
-                                            <BbAlertDialog>
-                                                <BbAlertDialogTrigger>
-                                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="whitespace-nowrap text-muted-foreground hover:text-foreground">
-                                                        @(isAdmin ? "Make member" : "Make admin")
-                                                    </BbButton>
-                                                </BbAlertDialogTrigger>
-                                                <BbAlertDialogContent>
-                                                    <BbAlertDialogHeader>
-                                                        <BbAlertDialogTitle>@(isAdmin ? $"Make {user.DisplayName} a member?" : $"Make {user.DisplayName} an admin?")</BbAlertDialogTitle>
-                                                        <BbAlertDialogDescription>
-                                                            @(isAdmin
-                                                                ? "They'll lose access to provider settings, cache, diagnostics, and user management."
-                                                                : "They'll gain full access to provider settings, cache, diagnostics, and user management.")
-                                                        </BbAlertDialogDescription>
-                                                    </BbAlertDialogHeader>
-                                                    <BbAlertDialogFooter>
-                                                        <BbAlertDialogCancel>
-                                                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                                                        </BbAlertDialogCancel>
-                                                        <BbAlertDialogAction>
-                                                            <BbButton Variant="ButtonVariant.Default" OnClick="() => ChangeRoleAsync(user, isAdmin ? UserRole.Member : UserRole.Admin)">
-                                                                @(isAdmin ? "Make member" : "Make admin")
-                                                            </BbButton>
-                                                        </BbAlertDialogAction>
-                                                    </BbAlertDialogFooter>
-                                                </BbAlertDialogContent>
-                                            </BbAlertDialog>
-
-                                            <BbAlertDialog>
-                                                <BbAlertDialogTrigger>
-                                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.IconSmall" AriaLabel="@($"Remove {user.DisplayName}")" Class="text-muted-foreground hover:text-destructive">
-                                                        <LucideIcon Name="trash-2" Size="15"/>
-                                                    </BbButton>
-                                                </BbAlertDialogTrigger>
-                                                <BbAlertDialogContent>
-                                                    <BbAlertDialogHeader>
-                                                        <BbAlertDialogTitle>Remove @user.DisplayName?</BbAlertDialogTitle>
-                                                        <BbAlertDialogDescription>
-                                                            This permanently deletes the user along with their feeds, wantlist, blocklist, and stored secrets. This cannot be undone.
-                                                        </BbAlertDialogDescription>
-                                                    </BbAlertDialogHeader>
-                                                    <BbAlertDialogFooter>
-                                                        <BbAlertDialogCancel>
-                                                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                                                        </BbAlertDialogCancel>
-                                                        <BbAlertDialogAction>
-                                                            <HoverButton Preset="HoverButtonPreset.Destructive" Text="Yes, remove" OnClick="() => RemoveAsync(user)"/>
-                                                        </BbAlertDialogAction>
-                                                    </BbAlertDialogFooter>
-                                                </BbAlertDialogContent>
-                                            </BbAlertDialog>
-                                        </div>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            <section class="w-full max-w-2xl shrink-0 flex items-center justify-between gap-6 rounded-lg border bg-card px-6" style="height: 102px">
-                <div class="space-y-1.5">
-                    <div class="flex items-center gap-2">
-                        <LucideIcon Name="user-plus" Size="16" Class="text-muted-foreground"/>
-                        <h3 class="text-sm font-semibold">Allow new sign-ups</h3>
-                    </div>
-                    <p class="text-sm text-muted-foreground leading-relaxed">
-                        When on, anyone who signs in gets a member account. When off, only people who already have an account can sign in.
-                    </p>
-                </div>
-                <BbSwitch Checked="_registrationOpen" CheckedChanged="SetRegistrationAsync" AriaLabel="Allow new sign-ups"/>
-            </section>
-        </div>
+<div class="flex w-full max-w-4xl flex-col gap-4">
+    <div class="space-y-1 px-1">
+        <h3 class="text-base font-semibold tracking-tight">Users</h3>
+        <p class="text-sm text-muted-foreground">People with access to this Sammlarr. @How</p>
     </div>
-}
+
+    @if (_config is { } config)
+    {
+        @switch (config.AuthProvider)
+        {
+            case AuthProvider.Plex:
+                <section class="flex items-center gap-4 rounded-lg border bg-card px-4 py-3.5" aria-label="Sign-ups">
+                    <LucideIcon Name="user-plus" Size="16" Class="shrink-0 text-muted-foreground"/>
+                    <div class="min-w-0 space-y-0.5">
+                        <h4 class="text-sm font-medium">Allow new sign-ups</h4>
+                        <p class="text-xs text-muted-foreground">
+                            When on, anyone who signs in with Plex gets a member account. When off, only people who already have an account can sign in.
+                        </p>
+                    </div>
+                    <span class="ml-auto">
+                        <BbSwitch Checked="_registrationOpen" CheckedChanged="SetRegistrationAsync" AriaLabel="Allow new sign-ups"/>
+                    </span>
+                </section>
+                break;
+            case AuthProvider.Local:
+                <div class="flex justify-end">
+                    <InviteDialog Invited="LoadAsync"/>
+                </div>
+                break;
+        }
+
+        <div class="overflow-hidden rounded-lg border bg-card" aria-label="People">
+            @foreach (var person in _people)
+            {
+                var key = Key(person);
+                <PersonRow @key="key" Person="person" SignIn="config.AuthProvider" Sink="config.Sink" IsYou="IsYou(person)" IsLastAdmin="IsLastAdmin(person)"
+                           Open="_open == key" OpenChanged="open => _open = open ? key : null" Changed="LoadAsync"/>
+            }
+        </div>
+    }
+    else
+    {
+        <BbSkeleton Class="h-[62px] w-full rounded-lg"/>
+        <BbSkeleton Class="h-[180px] w-full rounded-lg"/>
+    }
+</div>
 
 @code {
-    private IReadOnlyList<User> _users = [];
+    private ProviderConfig? _config;
+
+    private IReadOnlyList<Person> _people = [];
+
     private bool _registrationOpen;
-    private bool _isLoaded;
+
+    private string? _open;
+
+    private string How
+    {
+        get
+        {
+            return _config?.AuthProvider switch
+            {
+                AuthProvider.Plex => "Everyone signs in with Plex.",
+                AuthProvider.Local => "Everyone signs in with a Sammlarr account.",
+                null => string.Empty,
+            };
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -162,52 +83,31 @@ else
 
     private async Task LoadAsync()
     {
-        _users = await Users.GetAllAsync();
-        _registrationOpen = (await ProviderConfigService.GetAsync()).RegistrationMode == RegistrationMode.Open;
-        _isLoaded = true;
+        var config = await ProviderConfigService.GetAsync();
+        _people = await Users.GetPeopleAsync();
+        _registrationOpen = config.RegistrationMode == RegistrationMode.Open;
+        _config = config;
     }
 
-    private bool IsLastAdmin(User user) => user.Role == UserRole.Admin && _users.Count(candidate => candidate.Role == UserRole.Admin) <= 1;
-
-    private async Task ChangeRoleAsync(User user, UserRole role)
+    private static string Key(Person person)
     {
-        try
+        return person switch
         {
-            await Users.ChangeRoleAsync(user.Id, role);
-            Notifier.Success($"{user.DisplayName} is now {role.ToString().ToLowerInvariant()}.");
-            await LoadAsync();
-        }
-        catch (Exception ex)
-        {
-            Notifier.Error(ex, "Failed to change role");
-        }
+            JoinedPerson joined => joined.User.Id.ToString(),
+            InvitedPerson invited => $"invite:{invited.Username}",
+        };
     }
 
-    private async Task RemoveAsync(User user)
-    {
-        try
-        {
-            await Users.DeleteAsync(user.Id);
-            Notifier.Success($"Removed {user.DisplayName}.");
-            await LoadAsync();
-        }
-        catch (Exception ex)
-        {
-            Notifier.Error(ex, "Failed to remove user");
-        }
-    }
+    private bool IsYou(Person person) => person is JoinedPerson joined && joined.User.Id == CurrentUser.Id;
+
+    private bool IsLastAdmin(Person person) => person is JoinedPerson { User.Role: UserRole.Admin } && _people.Count(IsAdmin) <= 1;
+
+    private static bool IsAdmin(Person person) => person is JoinedPerson { User.Role: UserRole.Admin };
 
     private async Task SetRegistrationAsync(bool open)
     {
-        try
-        {
-            await Users.SetRegistrationModeAsync(open ? RegistrationMode.Open : RegistrationMode.Closed);
-            _registrationOpen = open;
-            Notifier.Success(open ? "Registration opened." : "Registration closed.");
-        }
-        catch (Exception ex)
-        {
-            Notifier.Error(ex, "Failed to update registration");
-        }
+        await Users.SetRegistrationModeAsync(open ? RegistrationMode.Open : RegistrationMode.Closed);
+        _registrationOpen = open;
+        Notifier.Success(open ? "New sign-ups are on." : "New sign-ups are off.");
     }
 }

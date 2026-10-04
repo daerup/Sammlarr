@@ -19,6 +19,6 @@ public class SettingsPageTests
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section("users"));
 
-		await Expect(page.Text("People with access to this Sammlarr instance.")).ToBeVisibleAsync();
+		await Expect(page.Text("People with access to this Sammlarr. Everyone signs in with Plex.")).ToBeVisibleAsync();
 	}
 }

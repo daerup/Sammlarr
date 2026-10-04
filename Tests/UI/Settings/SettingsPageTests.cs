@@ -32,6 +32,7 @@ public class SettingsPageTests : BunitContext
 		Services.AddSingleton<AccountConnectionPrompt>();
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton(ISinkSwitch.Mock().Object);
+		Services.AddSingleton(IUserManagementService.Mock().Object);
 		AddAuthorization().SetAuthorized("alice");
 
 		var config = IProviderConfigService.Mock();

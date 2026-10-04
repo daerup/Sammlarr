@@ -47,6 +47,11 @@ internal sealed class ArrSession(ArrClient client, ArrConnection connection, Lis
 
 	public bool IsKept(ArrTitle title, ArrTagScheme scheme) => title.Tags.Select(Label).Contains(scheme.KeptTag);
 
+	public bool WantedByOthers(ArrTitle title, ArrTagScheme scheme, ValueSet<int> mine)
+	{
+		return title.Tags.Where(tag => !mine.Contains(tag)).Any(tag => scheme.IsUserTag(Label(tag)));
+	}
+
 	public IReadOnlyList<int> Owned(ArrTitle title, ArrTagScheme scheme) => [.. title.Tags.Where(tag => scheme.Owns(Label(tag)))];
 
 	public Optional<int> TagId(string label) => tags.GetValueOrNone(label);
@@ -83,13 +88,24 @@ internal sealed class ArrSession(ArrClient client, ArrConnection connection, Lis
 
 	public Task<Result<int>> RetagAsync(ArrTitle title, IReadOnlyList<int> tagIds, ArrTagChange change, CancellationToken cancellationToken)
 	{
-		return client.RetagAsync(connection, title.Id, tagIds, change, cancellationToken);
+		return client.RetagAsync(connection, [title.Id], tagIds, change, cancellationToken);
 	}
 
 	public async Task<Result<int>> DeleteAsync(ArrTitle title, CancellationToken cancellationToken)
 	{
 		var deleted = await client.DeleteAsync(connection, title.Id, cancellationToken);
 		return deleted.Apply(_ => titles.Remove(title));
+	}
+
+	public Task<Result<int>> UntagAsync(IReadOnlyList<ArrTitle> staying, IReadOnlyList<int> tagIds, CancellationToken cancellationToken)
+	{
+		return client.RetagAsync(connection, [.. staying.Select(title => title.Id)], tagIds, ArrTagChange.Remove, cancellationToken);
+	}
+
+	public async Task<Result<int>> DeleteAsync(IReadOnlyList<ArrTitle> doomed, CancellationToken cancellationToken)
+	{
+		var deleted = await client.DeleteManyAsync(connection, [.. doomed.Select(title => title.Id)], cancellationToken);
+		return deleted.Apply(_ => titles.RemoveAll(title => doomed.Contains(title)));
 	}
 
 	private static async Task<Result<ArrSession>> OpenAsync(ArrClient client, ArrConnection connection, CancellationToken cancellationToken)

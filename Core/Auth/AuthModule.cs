@@ -16,6 +16,7 @@ internal class AuthModule : IServiceModule
 		services.AddTracedScoped<IApiKeyService, ApiKeyService>();
 		services.AddTracedScoped<ICredentialService, CredentialService>();
 		services.AddTracedScoped<ILocalAccountService, LocalAccountService>();
+		services.AddTracedScoped<IAccountLinkService, AccountLinkService>();
 		services.AddHostedService<AdminPasswordReset>();
 	}
 }

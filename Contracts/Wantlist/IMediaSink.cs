@@ -1,3 +1,4 @@
+using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist.Outbox;
@@ -14,7 +15,13 @@ public interface IMediaSink
 	Task<SinkSnapshot> GetAsync(CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<SinkSyncAck> ApplyAsync(WantlistOperationAction action, IReadOnlyList<SinkPush> pushes, CancellationToken cancellationToken = default);
+
+	Task<Result<SinkHoldings>> HoldingsOfAsync(User person, CancellationToken cancellationToken = default);
+
+	Task<Result<int>> DeleteTitlesOfAsync(User person, CancellationToken cancellationToken = default);
 }
+
+public readonly record struct SinkHoldings(int Sole, int Shared, string Tag);
 
 public readonly record struct SinkPush(MediaId MediaId, Optional<Domain.Feed.Feed> AddedBy);
 

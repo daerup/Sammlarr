@@ -29,6 +29,25 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		return [.. rows.Select(ToAccount)];
 	}
 
+	public async Task CreateAsync(User user, string username, string passwordHash, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		ctx.Users.Add(
+			new UserRow
+			{
+				Id = user.Id.Value,
+				Provider = AuthProvider.Local,
+				ExternalUserId = Usernames.Normalize(username),
+				DisplayName = user.DisplayName,
+				AvatarUrl = user.AvatarUrl,
+				Role = user.Role,
+				JoinedAt = user.JoinedAt,
+				PasswordHash = passwordHash,
+			}
+		);
+		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
 	public async Task SetPasswordAsync(UserId id, string passwordHash, DateTimeOffset revokedAt, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);

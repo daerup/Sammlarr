@@ -9,7 +9,7 @@ public class SettingsSectionTests
 	[Arguments("notifications", "Webhook or Pushover connections to deliver to.")]
 	[Arguments("cache", "Id groups.")]
 	[Arguments("diagnostics", "Live log stream")]
-	[Arguments("users", "People with access to this Sammlarr instance.")]
+	[Arguments("users", "People with access to this Sammlarr. Everyone signs in with Plex.")]
 #if DEBUG
 	[Arguments("testing", "Fire a toast of the chosen kind")]
 #endif

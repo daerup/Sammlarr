@@ -119,6 +119,36 @@ public class ServicesMapTests : BunitContext
 		await Assert.That(cut.Markup).Contains("Managed by an admin");
 	}
 
+	[Test]
+	[Arguments(AuthProvider.Plex)]
+	[Arguments(AuthProvider.Local)]
+	public async Task SignIn_WhicheverWayTheInstallSignsIn_HasNoChip(AuthProvider signIn)
+	{
+		var cut = Render<ServicesMap>(parameters =>
+			parameters.Add(map => map.Config, Config with { AuthProvider = signIn }).Add(map => map.Ready, new HashSet<MediaProvider>()).Add(map => map.CanPick, true)
+		);
+
+		await Assert.That(cut.FindAll("[aria-label='Change what Sign-in uses']")).IsEmpty();
+		await Assert.That(cut.FindAll("[aria-label='Change what Wantlist uses']")).IsNotEmpty();
+	}
+
+	[Test]
+	public async Task SignIn_OnASammlarrAccountsInstall_LandsOnTheLocalAccountsBoxWithItsPeople()
+	{
+		var cut = Render<ServicesMap>(parameters =>
+			parameters
+				.Add(map => map.Config, Config with { AuthProvider = AuthProvider.Local })
+				.Add(map => map.Ready, new HashSet<MediaProvider> { MediaProvider.Local })
+				.Add(map => map.People, 3)
+		);
+
+		var boxes = cut.FindAll(".map-service")
+			.Select(service =>
+				$"{service.QuerySelector(".map-service-name")!.TextContent.Trim()}: {service.QuerySelector(".map-service-status")!.TextContent.Trim()}"
+			);
+		await Assert.That(boxes).Contains("Sammlarr: Local accounts · 3 people");
+	}
+
 	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params MediaProvider[] ready)
 	{
 		return Render<ServicesMap>(parameters =>

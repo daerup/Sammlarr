@@ -1,0 +1,17 @@
+<BbDialog Open="Open" OpenChanged="OpenChanged">
+    <BbDialogContent Class="sm:max-w-[460px]">
+        <IssuedLinkBody Title="@Title" Description="@Description" Link="@Link"/>
+    </BbDialogContent>
+</BbDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] [EditorRequired] public required string Title { get; set; }
+
+    [Parameter] [EditorRequired] public required string Description { get; set; }
+
+    [Parameter] [EditorRequired] public required string Link { get; set; }
+}

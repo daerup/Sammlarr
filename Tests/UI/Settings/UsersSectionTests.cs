@@ -1,30 +1,164 @@
+using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using Bunit;
+using Contracts;
 using Contracts.Identity;
 using Contracts.Settings;
+using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using UI.Features.Settings.Components.Users;
 using UI.Shared.Services;
+using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings;
 
 public class UsersSectionTests : BunitContext
 {
-	[Test]
-	[Arguments(RegistrationMode.Open, "true")]
-	[Arguments(RegistrationMode.Closed, "false")]
-	public async Task Render_ShowsWhetherNewSignUpsAreAllowedFromTheProviderConfig(RegistrationMode mode, string allowed)
+	private static readonly DateTimeOffset Now = new(2026, 10, 4, 12, 0, 0, TimeSpan.Zero);
+
+	private static readonly User Admin = new(TestCurrentUser.DefaultId, "guest", string.Empty, UserRole.Admin, Now.AddDays(-25));
+
+	private static readonly User Member = new(UserId.New(), "daerup", string.Empty, UserRole.Member, Now.AddDays(-18));
+
+	private static readonly DateTimeOffset LockedUntil = Now.AddMinutes(10);
+
+	private static readonly Person[] People =
+	[
+		new JoinedPerson(Admin, new PersonHoldings(3, 15, 2, []), new None()),
+		new JoinedPerson(Member, PersonHoldings.Empty, Some.Of(LockedUntil)),
+		new InvitedPerson("mira", "mira", Now.AddDays(6).AddHours(2)),
+	];
+
+	private readonly Mock<IUserManagementService> _users = IUserManagementService.Mock();
+
+	private readonly Mock<IProviderConfigService> _config = IProviderConfigService.Mock();
+
+	[Before(Test)]
+	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton(ICurrentUser.Mock().Object);
-		var users = IUserManagementService.Mock();
-		users.GetAllAsync(Any()).Returns([]);
-		Services.AddSingleton(users.Object);
-		var config = IProviderConfigService.Mock();
-		config
+		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddSingleton<ICurrentUser>(new TestCurrentUser());
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(Now);
+		Services.AddSingleton(clock.Object);
+		_users.GetPeopleAsync(Any()).Returns(People);
+		Services.AddSingleton(_users.Object);
+		Services.AddSingleton(_config.Object);
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	[Test]
+	[Arguments(RegistrationMode.Open, "true")]
+	[Arguments(RegistrationMode.Closed, "false")]
+	public async Task Render_OnAPlexInstall_ShowsWhetherNewSignUpsAreAllowed(RegistrationMode mode, string allowed)
+	{
+		Installed(AuthProvider.Plex, mode);
+
+		var cut = Render<UsersSection>();
+
+		await Assert.That(cut.WaitForElement("[aria-label='Allow new sign-ups']").GetAttribute("aria-checked")).IsEqualTo(allowed);
+		await Assert.That(cut.FindAll("button").Any(button => button.TextContent.Contains("Invite member"))).IsFalse();
+	}
+
+	[Test]
+	public async Task Render_OnASammlarrAccountsInstall_OffersInvitesInsteadOfSignUps()
+	{
+		Installed(AuthProvider.Local);
+
+		var cut = Render<UsersSection>();
+
+		cut.WaitForElement(".person-row");
+		await Assert.That(cut.FindAll("[aria-label='Allow new sign-ups']")).IsEmpty();
+		await Assert.That(cut.FindAll("button").Any(button => button.TextContent.Contains("Invite member"))).IsTrue();
+	}
+
+	[Test]
+	public async Task Rows_SayWhatEachPersonHoldsAndWhereTheyStand()
+	{
+		Installed(AuthProvider.Local);
+
+		var cut = Render<UsersSection>();
+
+		cut.WaitForElement(".person-row");
+		var rows = cut.FindAll(".person-row")
+			.Select(row => $"{row.QuerySelector("[data-owns]")!.TextContent.Trim()} | {row.QuerySelector("[data-status]")!.TextContent.Trim()}");
+		await Assert
+			.That(rows)
+			.IsEquivalentTo([
+				"3 feeds · 15 wanted · 2 blocklisted | Active",
+				$"No feeds or titles yet | Locked until {LockedUntil.ToLocalTime():HH:mm}",
+				"Not joined yet | Invited · link expires in 6 days",
+			]);
+	}
+
+	[Test]
+	public async Task Rows_ForInvitesRunningOut_SayHowLongIsLeftOrThatTheyExpired()
+	{
+		Installed(AuthProvider.Local);
+		_users
+			.GetPeopleAsync(Any())
+			.Returns([
+				new JoinedPerson(Admin, PersonHoldings.Empty, new None()),
+				new InvitedPerson("soon", "soon", Now.AddHours(5)),
+				new InvitedPerson("old", "old", Now.AddHours(-1)),
+			]);
+
+		var cut = Render<UsersSection>();
+
+		cut.WaitForElement(".person-row");
+		var statuses = cut.FindAll("[data-status]").Select(status => status.TextContent.Trim());
+		await Assert.That(statuses).IsEquivalentTo(["Active", "Invited · link expires in 5 hours", "Invite expired"]);
+	}
+
+	[Test]
+	public async Task OpenRow_ForTheLastAdmin_SaysWhyTheyCannotBeDemotedOrRemoved()
+	{
+		Installed(AuthProvider.Local);
+
+		var row = await OpenRowAsync("guest");
+
+		await Assert.That(row.TextContent).Contains("The last admin can't be made a member or removed.");
+		await Assert.That(Buttons(row)).DoesNotContain("Remove");
+	}
+
+	[Test]
+	public async Task OpenRow_ForALockedMemberOnASammlarrAccountsInstall_OffersEveryAction()
+	{
+		Installed(AuthProvider.Local);
+
+		var row = await OpenRowAsync("daerup");
+
+		await Assert.That(Buttons(row)).IsEquivalentTo(["Unlock", "Reset link", "Make admin", "Remove"]);
+	}
+
+	[Test]
+	public async Task OpenRow_ForAMemberOnAPlexInstall_HasNoResetLink()
+	{
+		Installed(AuthProvider.Plex);
+
+		var row = await OpenRowAsync("daerup");
+
+		await Assert.That(Buttons(row)).DoesNotContain("Reset link");
+	}
+
+	[Test]
+	public async Task OpenRow_ForAnInvite_OffersANewLinkOrRevokingIt()
+	{
+		Installed(AuthProvider.Local);
+
+		var row = await OpenRowAsync("mira");
+
+		await Assert.That(Buttons(row)).IsEquivalentTo(["New invite link", "Revoke invite"]);
+	}
+
+	private void Installed(AuthProvider signIn, RegistrationMode registration = RegistrationMode.Open)
+	{
+		_config
 			.GetAsync(Any())
 			.Returns(
 				new ProviderConfig
@@ -32,15 +166,22 @@ public class UsersSectionTests : BunitContext
 					Sink = SinkKind.Plex,
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = mode,
+					AuthProvider = signIn,
+					RegistrationMode = registration,
 				}
 			);
-		Services.AddSingleton(config.Object);
-		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
 
+	private async Task<IElement> OpenRowAsync(string name)
+	{
 		var cut = Render<UsersSection>();
+		cut.WaitForElement(".person-row");
+		await cut.Find($"[data-person='{name}'] button").ClickAsync();
+		return cut.WaitForElement($"[data-person='{name}']");
+	}
 
-		await Assert.That(cut.WaitForElement("[aria-label='Allow new sign-ups']").GetAttribute("aria-checked")).IsEqualTo(allowed);
+	private static IReadOnlyList<string> Buttons(IElement row)
+	{
+		return [.. row.QuerySelectorAll("button").Skip(1).Select(button => button.TextContent.Trim())];
 	}
 }

@@ -42,6 +42,7 @@ public class ProvidersSectionTests : BunitContext
 		Services.AddSingleton(_config.Object);
 		Services.AddSingleton(_switch.Object);
 		Services.AddSingleton<ICurrentUser>(_user);
+		Services.AddSingleton(IUserManagementService.Mock().Object);
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
 		Services.AddSingleton(keys.Object);

@@ -420,6 +420,122 @@ public class ArrSinkTests
 		_radarr.Verify(request => request.Method(HttpMethod.Put).BodyContains("\"tags\":[2,3]"), Times.Once);
 	}
 
+	private static readonly User Mira = new(
+		UserId.From(Guid.Parse("1c5d7a4e-2f10-4b8e-9f3a-6d2e8c1b0a77")),
+		"Mira",
+		string.Empty,
+		UserRole.Member,
+		DateTimeOffset.UnixEpoch
+	);
+
+	[Test]
+	public async Task HoldingsOfAsync_CountsTheTitlesOnlyTheirTagHoldsApartFromSharedAndKeptOnes()
+	{
+		_radarr
+			.OnGet("/api/v3/tag")
+			.RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"},{"id":2,"label":"sammlarr-u-guest"},{"id":3,"label":"sammlarr-kept"}]""");
+		_radarr
+			.OnGet("/api/v3/movie")
+			.RespondWithJson(
+				"""[{"id":10,"tmdbId":1,"tags":[1]},{"id":11,"tmdbId":2,"tags":[1,2]},{"id":12,"tmdbId":3,"tags":[1,3]},{"id":13,"tmdbId":4,"tags":[2]}]"""
+			);
+		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":5,"label":"sammlarr-u-mira"}]""");
+		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":20,"tvdbId":81189,"tags":[5]}]""");
+
+		var holdings = await Testee().HoldingsOfAsync(Mira);
+
+		await Assert.That(holdings).IsSuccess().And.IsEqualTo(new SinkHoldings(2, 2, "sammlarr-u-mira"));
+	}
+
+	[Test]
+	public async Task DeleteTitlesOfAsync_DeletesOnlyTheirSoleTitlesInOneEditorCallPerApp()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"},{"id":2,"label":"sammlarr-u-guest"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":1,"tags":[1]},{"id":11,"tmdbId":2,"tags":[1,2]},{"id":12,"tmdbId":3,"tags":[1]}]""");
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/movie/editor")).Respond(HttpStatusCode.OK);
+		_radarr.OnPut("/api/v3/movie/editor").Respond(HttpStatusCode.Accepted);
+		EmptySonarr();
+
+		var deleted = await Testee().DeleteTitlesOfAsync(Mira);
+
+		await Assert.That(deleted).IsSuccess().And.IsEqualTo(2);
+		_radarr.Verify(
+			request =>
+				request
+					.Method(HttpMethod.Delete)
+					.Path("/api/v3/movie/editor")
+					.BodyContains("\"movieIds\":[10,12]")
+					.BodyContains("\"deleteFiles\":false")
+					.BodyContains("\"addImportExclusion\":false"),
+			Times.Once
+		);
+		_radarr.Verify(request => request.Method(HttpMethod.Put).BodyContains("\"movieIds\":[11]"), Times.Once);
+		_sonarr.Verify(request => request.Method(HttpMethod.Delete), Times.Never);
+	}
+
+	[Test]
+	public async Task DeleteTitlesOfAsync_TakesTheirTagOffTitlesThatStayIncludingKeptOnes()
+	{
+		_radarr
+			.OnGet("/api/v3/tag")
+			.RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"},{"id":2,"label":"sammlarr-u-guest"},{"id":3,"label":"sammlarr-kept"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":11,"tmdbId":2,"tags":[1,2]},{"id":12,"tmdbId":3,"tags":[1,3]}]""");
+		_radarr.OnPut("/api/v3/movie/editor").Respond(HttpStatusCode.Accepted);
+		EmptySonarr();
+
+		var deleted = await Testee().DeleteTitlesOfAsync(Mira);
+
+		await Assert.That(deleted).IsSuccess().And.IsEqualTo(0);
+		_radarr.Verify(request => request.Method(HttpMethod.Delete), Times.Never);
+		_radarr.Verify(
+			request => request.Method(HttpMethod.Put).BodyContains("\"movieIds\":[11,12]").BodyContains("\"tags\":[1]").BodyContains("\"applyTags\":\"remove\""),
+			Times.Once
+		);
+	}
+
+	[Test]
+	public async Task DeleteTitlesOfAsync_ForTwoPeopleWhoseNamesMakeTheSameTag_DeletesNothingOfTheOthers()
+	{
+		_users
+			.GetAllAsync(Any())
+			.Returns([Mira with { DisplayName = "bob.smith" }, new User(Guest, "bob_smith", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch)]);
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-bob-smith"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":1,"tags":[1]}]""");
+		EmptySonarr();
+
+		var holdings = await Testee().HoldingsOfAsync(Mira with { DisplayName = "bob.smith" });
+		var deleted = await Testee().DeleteTitlesOfAsync(Mira with { DisplayName = "bob.smith" });
+
+		await Assert.That(holdings).IsSuccess().And.IsEqualTo(new SinkHoldings(0, 1, "sammlarr-u-bob-smith"));
+		await Assert.That(deleted).IsSuccess().And.IsEqualTo(0);
+		_radarr.Verify(request => request.Method(HttpMethod.Delete), Times.Never);
+		_radarr.Verify(request => request.Method(HttpMethod.Put), Times.Never);
+	}
+
+	[Test]
+	public async Task DeleteTitlesOfAsync_WhenSonarrFailsAfterRadarr_SaysWhatWasAlreadyDeleted()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":1,"tags":[1]},{"id":12,"tmdbId":3,"tags":[1]}]""");
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/movie/editor")).Respond(HttpStatusCode.OK);
+		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":5,"label":"sammlarr-u-mira"}]""");
+		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":20,"tvdbId":81189,"tags":[5]}]""");
+		_sonarr.OnRequest(request => request.Method(HttpMethod.Delete)).Respond(HttpStatusCode.InternalServerError);
+
+		var deleted = await Testee().DeleteTitlesOfAsync(Mira);
+
+		await Assert.That(deleted).IsError().And.Multiple(async error => await Assert.That(error.Reason).EndsWith("2 of their titles were already deleted."));
+	}
+
+	[Test]
+	public async Task HoldingsOfAsync_WithoutPerPersonTags_SaysTheTitlesCannotBeToldApart()
+	{
+		var holdings = await Testee(Connected with { Tags = ArrTagScheme.Default with { PerUser = false } }).HoldingsOfAsync(Mira);
+
+		await Assert.That(holdings).IsError();
+		_radarr.Verify(request => request.Method(HttpMethod.Get), Times.Never);
+	}
+
 	private ArrSink Testee() => Testee(Connected);
 
 	private ArrSink Testee(ArrSinkConfig config)

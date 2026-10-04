@@ -1,0 +1,88 @@
+@using Contracts.Identity
+@inject IUserManagementService Users
+@using Contracts
+@inject NavigationManager Navigation
+@inject IDateTimeProvider Clock
+
+<BbDialog Open="_open" OpenChanged="SetOpen">
+    <BbDialogTrigger>
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">
+            <LucideIcon Name="send" Size="13" Class="mr-1.5"/>
+            Invite member
+        </BbButton>
+    </BbDialogTrigger>
+    <BbDialogContent Class="sm:max-w-[460px]">
+        @if (_issued is { } issued)
+        {
+            <IssuedLinkBody Title="@($"Invite {_invited}")"
+                            Description="@($"Send {_invited} this link. It works once and for {issued.Lifetime}; {_invited} sets their own password there.")"
+                            Link="@issued.Link"/>
+        }
+        else
+        {
+            <BbDialogHeader>
+                <BbDialogTitle>Invite member</BbDialogTitle>
+                <BbDialogDescription>Choose their username. You get a link to send them, where they set their own password.</BbDialogDescription>
+            </BbDialogHeader>
+            <BbField>
+                <BbFieldLabel For="invite-username">Username</BbFieldLabel>
+                <BbFieldContent>
+                    <BbInput Id="invite-username" Value="@_username" ValueChanged="value => _username = value ?? string.Empty"
+                             UpdateTiming="UpdateTiming.Immediate" Class="h-9 text-sm" autocomplete="off"/>
+                </BbFieldContent>
+            </BbField>
+            @if (_error.Length > 0)
+            {
+                <p class="flex items-start gap-1.5 text-xs text-destructive" role="alert">
+                    <LucideIcon Name="circle-alert" Size="13" Class="mt-px shrink-0"/>
+                    <span>@_error</span>
+                </p>
+            }
+            <BbDialogFooter>
+                <BbDialogClose>
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Cancel</BbButton>
+                </BbDialogClose>
+                <BbButton Size="ButtonSize.Small" Disabled="@(_username.Trim().Length == 0 || _creating)" OnClick="CreateAsync">Create link</BbButton>
+            </BbDialogFooter>
+        }
+    </BbDialogContent>
+</BbDialog>
+
+@code {
+    [Parameter] public EventCallback Invited { get; set; }
+
+    private bool _open;
+
+    private string _username = string.Empty;
+
+    private string _invited = string.Empty;
+
+    private string _error = string.Empty;
+
+    private Issued? _issued;
+
+    private bool _creating;
+
+    private void SetOpen(bool open)
+    {
+        _open = open;
+        if (open)
+        {
+            _username = string.Empty;
+            _error = string.Empty;
+            _issued = null;
+        }
+    }
+
+    private async Task CreateAsync()
+    {
+        _creating = true;
+        var issued = await Users.InviteAsync(_username);
+        _creating = false;
+        _invited = _username.Trim();
+        issued.Apply(link => _issued = new Issued(Navigation.ToAbsoluteUri(link.Path).ToString(), LinkText.Lifetime(link.ExpiresAt, Clock.Now))).ApplyError(error => _error = error.Reason);
+        await issued.Match(_ => Invited.InvokeAsync(), _ => Task.CompletedTask);
+    }
+
+    private sealed record Issued(string Link, string Lifetime);
+}
