@@ -456,6 +456,46 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
     }
 }
 
+@utility field-segment {
+    display: inline-flex;
+    flex: none;
+    align-self: stretch;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    padding: 0;
+    border: 0;
+    border-left: 1px solid var(--input);
+    border-radius: 0;
+    background: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
+
+    &:hover,
+    &[data-state="open"],
+    &[aria-expanded="true"] {
+        background: var(--accent);
+        color: var(--foreground);
+    }
+
+    &.is-gold:hover,
+    &.is-gold[data-state="open"],
+    &.is-gold[aria-expanded="true"] {
+        background: color-mix(in srgb, var(--sammlarr-gold) 14%, transparent);
+        color: var(--sammlarr-gold);
+    }
+
+    &[data-state="open"] .magpie-star path,
+    &[aria-expanded="true"] .magpie-star path {
+        fill: currentColor;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: -2px;
+    }
+}
+
 /* Classes the scanner cannot see because they are assembled in C# go here, e.g.
    @source inline("px-6 mt-7"); — plain literals in markup are found automatically. */
 

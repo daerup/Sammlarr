@@ -102,6 +102,8 @@
 
     private (RatingSource Source, int Index)? _refocus;
 
+    private Optional<OrderedRating> _held = new None();
+
     [Parameter] [EditorRequired] public required Optional<RatingStrategy> Value { get; set; }
 
     [Parameter] public EventCallback<Optional<RatingStrategy>> ValueChanged { get; set; }
@@ -114,11 +116,11 @@
 
     private AveragedRating Averaged => Value.Map(AveragedOf).GetValueOr(() => AveragedOf(Default).GetValueOr(AveragedRating.Everything));
 
-    private OrderedRating Ordered => Value.Map(OrderedOf).GetValueOr(() => OrderedOf(Default).GetValueOr(new OrderedRating()));
+    private OrderedRating Ordered => Value.Map(OrderedOf).Or(_held).GetValueOr(() => OrderedOf(Default).GetValueOr(new OrderedRating()));
 
     private int SwitchedOnCount => AverageRows.Count(source => Averaged.SwitchedOn.Contains(source));
 
-    private IEnumerable<RatingSource> AverageRows => Enum.GetValues<RatingSource>().Where(Available.Contains).OrderBy(source => !Averaged.SwitchedOn.Contains(source));
+    private IEnumerable<RatingSource> AverageRows => Ordered.Order.Where(Available.Contains);
 
     private List<RatingSource> OrderRows => [.. Ordered.Order.Where(Available.Contains)];
 
@@ -194,6 +196,8 @@
         _refocus = (source, moved.Index);
         return PlaceAsync(moved.Order);
     }
+
+    protected override void OnParametersSet() => _held = Value.Map(OrderedOf).Or(_held);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

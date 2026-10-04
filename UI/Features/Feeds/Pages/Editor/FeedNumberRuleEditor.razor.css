@@ -59,13 +59,9 @@
 
 .number-rule-adornment {
     order: 3;
-    display: inline-flex;
-    margin-left: auto;
-}
-
-.number-rule-box ::deep [data-number-rule] > :not(input) {
-    order: 4;
+    display: flex;
     align-self: stretch;
+    margin-left: auto;
 }
 
 .number-rule-and {

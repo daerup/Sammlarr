@@ -134,6 +134,19 @@ public class FeedRatingStrategyPickerTests : BunitContext
 			);
 	}
 
+	[Test]
+	public async Task AverageTab_WhenChosenAfterFirstAvailable_KeepsTheRowOrder()
+	{
+		var cut = RenderPicker(Some.Of(new RatingStrategy(new OrderedRating([RatingSource.RottenTomatoesAudience, RatingSource.Imdb]))));
+
+		await cut.FindAll("[role=tab]").Single(tab => tab.TextContent.Trim() == "Average").ClickAsync();
+		await cut.InvokeAsync(() => cut.Render(parameters => parameters.Add(picker => picker.Value, _changes.Last())));
+
+		await Assert
+			.That(cut.FindAll("button[role=switch]").Select(row => row.GetAttribute("aria-label")!))
+			.IsEquivalentTo(["Rotten Tomatoes audience counts", "IMDb counts", "TMDB counts", "Rotten Tomatoes critics counts"], CollectionOrdering.Matching);
+	}
+
 	private IRenderedComponent<FeedRatingStrategyPicker> RenderPicker(Optional<RatingStrategy> value)
 	{
 		return Render<FeedRatingStrategyPicker>(parameters =>

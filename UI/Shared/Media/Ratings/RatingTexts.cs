@@ -84,21 +84,28 @@ internal static class RatingTexts
 		};
 	}
 
-	public static string Arithmetic(SammlarrRating rating, RatingStrategy strategy)
+	public static IReadOnlyList<RatingTerm> Terms(SammlarrRating rating)
 	{
-		if (rating.Counted.Count > 1)
-		{
-			var parts = string.Join(" + ", rating.Counted.Select(part => Number(part.SammlarrValue)));
-			return $"({parts}) / {rating.Counted.Count} = {rating.Value.ToString("0.00", CultureInfo.InvariantCulture)}";
-		}
-
-		var only = rating.Counted[0];
-		return $"{Name(only.Source)} {only.Value} → {Number(rating)}, {Why(strategy)}";
+		return [.. InRowOrder(rating).Select(part => new RatingTerm(part, Number(part.SammlarrValue)))];
 	}
 
-	public static string VoteParts(SammlarrRating rating) => string.Join(" + ", rating.Counted.Select(part => part.Votes).WhereSome().Select(Count));
+	public static IReadOnlyList<RatingTerm> VoteTerms(SammlarrRating rating)
+	{
+		return [.. InRowOrder(rating).Select(part => part.Votes.Map(votes => new RatingTerm(part, Count(votes)))).WhereSome()];
+	}
 
 	public static int VoteSources(SammlarrRating rating) => rating.Counted.Count(part => part.Votes.IsSome());
+
+	public static string Why(RatingStrategy strategy)
+	{
+		return strategy switch
+		{
+			AveragedRating => "the only rating",
+			OrderedRating => "first in the order",
+		};
+	}
+
+	private static IEnumerable<IMediaRating> InRowOrder(SammlarrRating rating) => rating.Counted.OrderBy(part => part.Source);
 
 	public static Optional<string> Link(RatingSource source, IReadOnlyList<IExternalMediaId> ids, string? title, Optional<string> rottenTomatoesPath)
 	{
@@ -116,13 +123,6 @@ internal static class RatingTexts
 	{
 		return ids.FirstOrNone(id => id.Source == provider).Map(id => Optional.Of(ExternalMediaIdUrlResolver.Resolve(id)));
 	}
-
-	private static string Why(RatingStrategy strategy)
-	{
-		return strategy switch
-		{
-			AveragedRating => "the only rating",
-			OrderedRating => "first in the order",
-		};
-	}
 }
+
+public sealed record RatingTerm(IMediaRating Rating, string Number);

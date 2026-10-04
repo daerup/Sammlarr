@@ -1,0 +1,27 @@
+.rating-sum {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    line-height: 1.45;
+}
+
+.rating-sum-term {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.rating-sum-op {
+    color: var(--muted-foreground);
+}
+
+.rating-sum-star {
+    display: inline-flex;
+    color: var(--sammlarr-gold);
+}
+
+.rating-sum ::deep .provider-tile {
+    border-radius: 3px;
+}

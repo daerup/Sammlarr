@@ -196,19 +196,21 @@
                             </BbFieldLabel>
                             <BbFieldContent>
                                 <div class="flex items-center gap-3">
-                                    <BbSelect TValue="string"
-                                              Value="@SortField"
-                                              Class="w-40"
-                                              ValueChanged="@ChangeSortField"
-                                              Options="SortFields"/>
-                                    @if (SortField == nameof(MediaQueryRow.Rating))
-                                    {
-                                        @RatingStar(framed: true)
-                                    }
-                                    else if (SortField == nameof(MediaQueryRow.Votes))
-                                    {
-                                        @VotesInfo
-                                    }
+                                    <div class="sort-field">
+                                        <BbSelect TValue="string"
+                                                  Value="@SortField"
+                                                  Class="w-40"
+                                                  ValueChanged="@ChangeSortField"
+                                                  Options="SortFields"/>
+                                        @if (SortField == nameof(MediaQueryRow.Rating))
+                                        {
+                                            @RatingStar
+                                        }
+                                        else if (SortField == nameof(MediaQueryRow.Votes))
+                                        {
+                                            @VotesInfo
+                                        }
+                                    </div>
                                     <BbTooltipProvider>
                                         <BbTooltip DelayDuration="0">
                                             <BbTooltipTrigger AsChild="false" Class="p-0">
@@ -460,28 +462,23 @@
         {
             return new Dictionary<string, RenderFragment<FilterValueEditorContext>>
             {
-                [nameof(MediaQueryRow.Rating)] = context => @<FeedNumberRuleEditor Context="context" Label="Rating" Unit="/ 10" Min="0" Max="10" Step="0.1" Adornment="@RatingStar(framed: false)"/>,
+                [nameof(MediaQueryRow.Rating)] = context => @<FeedNumberRuleEditor Context="context" Label="Rating" Unit="/ 10" Min="0" Max="10" Step="0.1" Adornment="RatingStar"/>,
                 [nameof(MediaQueryRow.Votes)] = context => @<FeedNumberRuleEditor Context="context" Label="Votes" Min="0" Step="100" Adornment="VotesInfo"/>,
             };
         }
     }
 
-    private RenderFragment RatingStar(bool framed) => @<text>
+    private RenderFragment RatingStar => @<text>
         @if (_ratingView is { } view && view.Available.Count > 1)
         {
-            <FeedRatingStarButton Value="_ratingStrategy" ValueChanged="ChangeRatingStrategy" Default="view.Default" Available="view.Available" Framed="framed"/>
+            <FeedRatingStarButton Value="_ratingStrategy" ValueChanged="ChangeRatingStrategy" Default="view.Default" Available="view.Available"/>
         }
     </text>;
 
     private RenderFragment VotesInfo => @<text>
         @if (_ratingView is { } view)
         {
-            <BbTooltip DelayDuration="150">
-                <BbTooltipTrigger AsChild="false" Class="inline-flex h-[26px] w-[26px] items-center justify-center p-0 text-muted-foreground cursor-help" aria-label="How Votes are counted">
-                    <LucideIcon Name="info" Size="15"/>
-                </BbTooltipTrigger>
-                <BbTooltipContent Class="max-w-xs">@FeedRatingTexts.VotesTip(_ratingStrategy, view.Default)</BbTooltipContent>
-            </BbTooltip>
+            <FeedVotesPopover Value="_ratingStrategy" Default="view.Default" Available="view.Available"/>
         }
     </text>;
 

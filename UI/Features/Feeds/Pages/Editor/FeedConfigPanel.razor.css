@@ -1,3 +1,30 @@
+.sort-field {
+    display: inline-flex;
+    align-items: stretch;
+    height: 2.5rem;
+    overflow: hidden;
+    border: 1px solid var(--input);
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--background);
+}
+
+.sort-field:has([role="combobox"]:focus-visible) {
+    box-shadow: 0 0 0 2px var(--ring);
+}
+
+.sort-field ::deep [role="combobox"] {
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.sort-field ::deep [role="combobox"]:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
 .run-count-line ::deep [data-run-count] {
     width: 46px;
     height: 24px;

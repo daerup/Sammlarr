@@ -1,14 +1,16 @@
 @if (Art.Tile is { } tile)
 {
-    <ProviderTile Provider="tile" Size="16" Decorative="true"/>
+    <ProviderTile Provider="tile" Size="Size" Decorative="true"/>
 }
 else
 {
-    <img class="rating-mark" src="@Assets[$"_content/UI/providers/{Art.File}"]" alt="" width="16" height="16"/>
+    <img class="rating-mark" src="@Assets[$"_content/UI/providers/{Art.File}"]" alt="" style="--mark-size: @(Size)px"/>
 }
 
 @code {
     [Parameter] [EditorRequired] public required RatingSource Source { get; set; }
+
+    [Parameter] public int Size { get; set; } = 16;
 
     [Parameter] public Optional<IMediaRating> Rating { get; set; } = new None();
 

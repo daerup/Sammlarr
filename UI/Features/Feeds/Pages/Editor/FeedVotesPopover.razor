@@ -1,0 +1,52 @@
+<BbPopover>
+    <BbPopoverTrigger AsChild="false" class="field-segment" aria-label="How Votes are counted">
+        <LucideIcon Name="info" Size="15"/>
+    </BbPopoverTrigger>
+    <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-[330px] p-0" aria-label="How Votes are counted">
+        <div class="votes-pop">
+            <h5 class="votes-pop-title">@VotesExplanation.Heading</h5>
+            <p class="votes-pop-lead">@_explanation.Lead</p>
+            @foreach (var row in _explanation.Rows)
+            {
+                <div class="votes-pop-row @(row.HasVotes ? null : "is-dim")">
+                    <RatingMarkIcon Source="row.Source"/>
+                    <span>@(row.Rank.Match(rank => $"{rank} · {row.Name}", () => row.Name))</span>
+                    @if (row.HasVotes)
+                    {
+                        <LucideIcon Name="check" Size="14" Class="text-[var(--alert-success)]"/>
+                    }
+                    else
+                    {
+                        <span class="votes-pop-none">no votes</span>
+                    }
+                </div>
+            }
+            @switch (_explanation.Note)
+            {
+                case VotesNote.RottenTomatoesTitlesFail:
+                    <p class="votes-pop-lead">@VotesExplanation.RottenTomatoesLine</p>
+                    break;
+                case VotesNote.EveryTitleFails:
+                    <p class="votes-pop-warning">@VotesExplanation.Warning <span class="votes-pop-star"><MagpieStarIcon Size="12"/></span>.</p>
+                    break;
+                case VotesNote.Nothing:
+                    break;
+            }
+        </div>
+    </BbPopoverContent>
+</BbPopover>
+
+@code {
+    private VotesExplanation _explanation = null!;
+
+    [Parameter] [EditorRequired] public required Optional<RatingStrategy> Value { get; set; }
+
+    [Parameter] [EditorRequired] public required RatingStrategy Default { get; set; }
+
+    [Parameter] [EditorRequired] public required ValueSet<RatingSource> Available { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _explanation = Value.Match(own => VotesExplanation.For(own, true, Available), () => VotesExplanation.For(Default, false, Available));
+    }
+}

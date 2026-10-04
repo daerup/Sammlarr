@@ -1,18 +1,16 @@
-<span class="rating-star-control @(Framed ? "is-framed" : null)">
-    <BbPopover>
-        <BbPopoverTrigger AsChild="false" class="rating-star-button" aria-label="@FeedRatingTexts.StarTip(Value, Default)">
-            <BbTooltip DelayDuration="150">
-                <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
-                    <RatingStar Value="10" Size="15" Shine="false"/>
-                </BbTooltipTrigger>
-                <BbTooltipContent Class="max-w-xs">@FeedRatingTexts.StarTip(Value, Default)</BbTooltipContent>
-            </BbTooltip>
-        </BbPopoverTrigger>
-        <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-auto overflow-hidden rounded-[10px] p-0 shadow-[0_14px_34px_rgba(0,0,0,0.35)]" aria-label="This feed's Sammlarr rating">
-            <FeedRatingStrategyPicker Value="Value" ValueChanged="ValueChanged" Default="Default" Available="Available"/>
-        </BbPopoverContent>
-    </BbPopover>
-</span>
+<BbPopover>
+    <BbPopoverTrigger AsChild="false" class="field-segment is-gold" aria-label="@FeedRatingTexts.StarTip(Value, Default)">
+        <BbTooltip DelayDuration="150">
+            <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+                <MagpieStarIcon Size="15"/>
+            </BbTooltipTrigger>
+            <BbTooltipContent Class="max-w-xs">@FeedRatingTexts.StarTip(Value, Default)</BbTooltipContent>
+        </BbTooltip>
+    </BbPopoverTrigger>
+    <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-auto overflow-hidden rounded-[10px] p-0 shadow-[0_14px_34px_rgba(0,0,0,0.35)]" aria-label="This feed's Sammlarr rating">
+        <FeedRatingStrategyPicker Value="Value" ValueChanged="ValueChanged" Default="Default" Available="Available"/>
+    </BbPopoverContent>
+</BbPopover>
 
 @code {
     [Parameter] [EditorRequired] public required Optional<RatingStrategy> Value { get; set; }
@@ -22,6 +20,4 @@
     [Parameter] [EditorRequired] public required RatingStrategy Default { get; set; }
 
     [Parameter] [EditorRequired] public required ValueSet<RatingSource> Available { get; set; }
-
-    [Parameter] public bool Framed { get; set; }
 }
