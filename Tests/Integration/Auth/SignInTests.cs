@@ -107,6 +107,19 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task SignInAsync_AfterAPlexRename_RefreshesTheNameAndPictureButKeepsTheTagName()
+	{
+		var existing = await host.SeedExistingUser("plex-uuid", UserRole.Member, "John");
+		host.OAuthReturns("plex-uuid", "Johnny", "new-avatar");
+
+		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+
+		var stored = await host.Resolve<IUserRepository>().GetAsync(existing);
+		await Assert.That(result).IsSuccess().And.IsEqualTo(stored);
+		await Assert.That((stored.DisplayName, stored.AvatarUrl, stored.TagName)).IsEqualTo(("Johnny", "new-avatar", "John"));
+	}
+
+	[Test]
 	public async Task SignInAsync_WhenTheProviderLoginFails_ReportsAnError()
 	{
 		host.OAuthFails("Authentication was not completed.");

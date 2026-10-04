@@ -173,7 +173,7 @@
     private async Task<IReadOnlyList<ArrTagUser>> UsersAsync()
     {
         var users = await UserManagement.GetAllAsync();
-        return [.. users.OrderBy(user => user.Id != CurrentUser.Id).Select(user => new ArrTagUser(user.Id.Value, user.DisplayName))];
+        return [.. users.OrderBy(user => user.Id != CurrentUser.Id).Select(user => new ArrTagUser(user.Id.Value, user.TagName))];
     }
 
     private async Task<Optional<ArrTagFeed>> FeedAsync()

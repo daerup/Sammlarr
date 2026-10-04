@@ -432,6 +432,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 					Provider = AuthProvider.Plex,
 					ExternalUserId = CurrentUser.Id.Value.ToString(),
 					DisplayName = CurrentUser.DisplayName,
+					TagName = CurrentUser.DisplayName,
 					AvatarUrl = CurrentUser.AvatarUrl,
 					Role = CurrentUser.Role,
 					JoinedAt = DateTimeOffset.UnixEpoch,
@@ -441,8 +442,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		}
 	}
 
-	internal void OAuthReturns(string externalUserId, string displayName) =>
-		_oauth.Returns(new ExternalLogin(externalUserId, displayName, "avatar", new OAuthTokenGrant("plex-token", _clock.Now.AddDays(30), Guid.NewGuid())));
+	internal void OAuthReturns(string externalUserId, string displayName, string avatarUrl = "avatar") =>
+		_oauth.Returns(new ExternalLogin(externalUserId, displayName, avatarUrl, new OAuthTokenGrant("plex-token", _clock.Now.AddDays(30), Guid.NewGuid())));
 
 	internal void OAuthFails(string reason) => _oauth.Fails(reason);
 
@@ -492,6 +493,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				Provider = AuthProvider.Plex,
 				ExternalUserId = externalUserId,
 				DisplayName = displayName,
+				TagName = displayName,
 				AvatarUrl = "avatar",
 				Role = role,
 				JoinedAt = DateTimeOffset.UnixEpoch,
@@ -522,6 +524,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				Provider = AuthProvider.Local,
 				ExternalUserId = Usernames.Normalize(username),
 				DisplayName = username,
+				TagName = username,
 				AvatarUrl = string.Empty,
 				Role = role,
 				JoinedAt = DateTimeOffset.UnixEpoch,
@@ -786,6 +789,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 					Provider = AuthProvider.Plex,
 					ExternalUserId = id.ToString(),
 					DisplayName = displayName,
+					TagName = displayName,
 					AvatarUrl = string.Empty,
 					Role = role,
 					JoinedAt = DateTimeOffset.UnixEpoch,
@@ -807,6 +811,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				Provider = AuthProvider.Plex,
 				ExternalUserId = user.Id.Value.ToString(),
 				DisplayName = user.DisplayName,
+				TagName = user.DisplayName,
 				AvatarUrl = user.AvatarUrl,
 				Role = user.Role,
 				JoinedAt = DateTimeOffset.UnixEpoch,

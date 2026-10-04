@@ -36,6 +36,7 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 				Provider = provider,
 				ExternalUserId = externalUserId,
 				DisplayName = user.DisplayName,
+				TagName = user.TagName,
 				AvatarUrl = user.AvatarUrl,
 				Role = user.Role,
 				JoinedAt = user.JoinedAt,
@@ -91,6 +92,15 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		);
 	}
 
+	public async Task RefreshAsync(UserId id, string displayName, string avatarUrl, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var row = await ctx.Users.SingleAsync(user => user.Id == id.Value, cancellationToken);
+		row.DisplayName = displayName;
+		row.AvatarUrl = avatarUrl;
+		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
 	public async Task ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -141,5 +151,5 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	}
 
 	private static System.Linq.Expressions.Expression<Func<UserRow, User>> Project =>
-		user => new User(UserId.From(user.Id), user.DisplayName, user.AvatarUrl, user.Role, user.JoinedAt);
+		user => new User(UserId.From(user.Id), user.DisplayName, user.AvatarUrl, user.Role, user.JoinedAt) { TagName = user.TagName };
 }

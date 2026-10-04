@@ -19,6 +19,8 @@ public interface IUserRepository
 
 	Task<IReadOnlyDictionary<UserId, PersonHoldings>> GetHoldingsAsync(CancellationToken cancellationToken = default);
 
+	Task RefreshAsync(UserId id, string displayName, string avatarUrl, CancellationToken cancellationToken = default);
+
 	Task ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default);
 
 	Task DeleteAsync(UserId id, CancellationToken cancellationToken = default);

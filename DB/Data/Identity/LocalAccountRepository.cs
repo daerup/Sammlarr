@@ -40,6 +40,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 				Provider = AuthProvider.Local,
 				ExternalUserId = Usernames.Normalize(username),
 				DisplayName = user.DisplayName,
+				TagName = user.TagName,
 				AvatarUrl = user.AvatarUrl,
 				Role = user.Role,
 				JoinedAt = user.JoinedAt,
@@ -88,7 +89,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 	private static LocalAccount ToAccount(UserRow row)
 	{
 		return new LocalAccount(
-			new User(UserId.From(row.Id), row.DisplayName, row.AvatarUrl, row.Role, row.JoinedAt),
+			new User(UserId.From(row.Id), row.DisplayName, row.AvatarUrl, row.Role, row.JoinedAt) { TagName = row.TagName },
 			row.ExternalUserId,
 			Optional.Of(row.PasswordHash),
 			row.FailedSignIns,

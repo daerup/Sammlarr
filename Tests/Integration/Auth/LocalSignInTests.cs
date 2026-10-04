@@ -124,6 +124,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Id).IsEqualTo(guest));
 		await Assert.That((await host.Resolve<IUserRepository>().GetAllAsync()).Count).IsEqualTo(before);
 		await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, guest)).IsTrue();
+		await Assert.That((await host.Resolve<IUserRepository>().GetAsync(guest)).DisplayName).IsEqualTo("guest");
 	}
 
 	[Test]

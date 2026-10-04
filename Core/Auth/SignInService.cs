@@ -197,7 +197,8 @@ internal sealed class SignInService(
 		CancellationToken cancellationToken
 	)
 	{
-		using (userScope.As(user))
+		var refreshed = user with { DisplayName = login.DisplayName, AvatarUrl = login.AvatarUrl };
+		using (userScope.As(refreshed))
 		{
 			await credentials.StoreAsync(provider, new StoredCredential(login.Token.AccessToken, login.Token.ExpiresAt, login.Token.ClientId), cancellationToken);
 			if (isInitialAdmin)
@@ -206,8 +207,9 @@ internal sealed class SignInService(
 			}
 		}
 
+		await users.RefreshAsync(refreshed.Id, refreshed.DisplayName, refreshed.AvatarUrl, cancellationToken);
 		logger.LogInformation("Sign-in completed for {Provider} as user {UserId}", provider, user.Id);
-		return Success.Of(user);
+		return Success.Of(refreshed);
 	}
 
 	private async Task SetAuthProviderAsync(AuthProvider provider, CancellationToken cancellationToken)
