@@ -7,7 +7,9 @@
     "/library/search",
     "/library/metadata/*",
     "/radarr/*",
-    "/sonarr/*"
+    "/sonarr/*",
+    "/v1/movie/*",
+    "/v1/tvdb/*"
   ],
   "frozen": [
     "/library/sections/watchlist/all",

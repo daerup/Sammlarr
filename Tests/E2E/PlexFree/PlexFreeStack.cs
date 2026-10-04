@@ -52,7 +52,7 @@ internal sealed class PlexFreeStack
 
 	internal Task<string> SetupCodeAsync() => _setupCodes.NextCodeAsync().WaitAsync(ReadyTimeout);
 
-	internal static async Task<PlexFreeStack> LaunchAsync(TestCertificates certificates, string keyRing, string workDir)
+	internal static async Task<PlexFreeStack> LaunchAsync(TestCertificates certificates, string keyRing, string workDir, bool live)
 	{
 		var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
 			["--LaunchSammlarr=false", "--RadarrSonarr=true", $"--ArrDataRoot={Path.Combine(workDir, "arr")}"],
@@ -86,12 +86,9 @@ internal sealed class PlexFreeStack
 			wiremock.WithContainerNetworkAlias(host);
 		}
 
-		foreach (var arr in builder.Resources.OfType<ContainerResource>().Where(resource => resource.Name is "radarr" or "sonarr").ToList())
+		foreach (var arr in builder.UnpinArrPorts())
 		{
-			builder
-				.CreateResourceBuilder(arr)
-				.WithEndpoint("http", endpoint => endpoint.Port = null)
-				.WithContainerFiles("/etc/ssl/certs", [new ContainerOpenSSLCertificateFile { Name = "sammlarr-test-ca.pem", Contents = certificates.AuthorityPem }])
+			arr.WithContainerFiles("/etc/ssl/certs", [new ContainerOpenSSLCertificateFile { Name = "sammlarr-test-ca.pem", Contents = certificates.AuthorityPem }])
 				.WaitFor(wiremock);
 		}
 
@@ -104,11 +101,12 @@ internal sealed class PlexFreeStack
 			.WithEnvironment("Sammlarr__ConnectionString", $"Data Source={DatabasePath(workDir)}")
 			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", keyRing)
 			.WaitFor(wiremock);
-		foreach (var provider in ProviderRecording.All.Where(provider => provider.Section != PlexOptions.SectionName))
+		foreach (var provider in ProviderRecording.PlexFree)
 		{
 			foreach (var endpoint in provider.Endpoints)
 			{
-				webBuilder.WithEnvironment($"{provider.Section}__{endpoint.ConfigKey}", ReferenceExpression.Create($"{wiremockHttp}/"));
+				var baseUrl = live ? ReferenceExpression.Create($"{wiremockHttp}{endpoint.Prefix}/") : ReferenceExpression.Create($"{wiremockHttp}/");
+				webBuilder.WithEnvironment($"{provider.Section}__{endpoint.ConfigKey}", baseUrl);
 			}
 		}
 
@@ -127,20 +125,25 @@ internal sealed class PlexFreeStack
 
 		var stack = new PlexFreeStack(app, setupCodes, workDir);
 		await stack.AddIndexersAsync();
+		if (live)
+		{
+			await stack.MirrorProviderMappingsAsync();
+		}
+
 		return stack;
 	}
 
-	internal async Task<IReadOnlyList<string>> ReadyAsync()
+	internal async Task<IReadOnlyList<JournalEntry>> ReadyAsync()
 	{
-		var unmatched = _leased ? await ResetAsync() : await DrainAsync();
+		var journal = _leased ? await ResetAsync() : await DrainAsync();
 		_leased = true;
-		return unmatched;
+		return journal;
 	}
 
-	internal async Task<IReadOnlyList<string>> UnmatchedAsync()
+	internal async Task<IReadOnlyList<JournalEntry>> JournalAsync()
 	{
-		var journal = JsonNode.Parse(await _wireMock.GetStringAsync("/__admin/requests/unmatched"))!;
-		return [.. journal["requests"]!.AsArray().Select(entry => entry!["absoluteUrl"]!.GetValue<string>()).Distinct()];
+		var journal = JsonNode.Parse(await _wireMock.GetStringAsync("/__admin/requests"))!;
+		return [.. journal["requests"]!.AsArray().Select(entry => JournalEntry.From(entry!))];
 	}
 
 	internal async Task StopAsync()
@@ -149,7 +152,7 @@ internal sealed class PlexFreeStack
 		await _app.DisposeAsync();
 	}
 
-	private async Task<IReadOnlyList<string>> ResetAsync()
+	private async Task<IReadOnlyList<JournalEntry>> ResetAsync()
 	{
 		using var reset = new CancellationTokenSource(ResetTimeout);
 		_setupCodes.Forget();
@@ -170,13 +173,27 @@ internal sealed class PlexFreeStack
 		return await DrainAsync();
 	}
 
-	private async Task<IReadOnlyList<string>> DrainAsync()
+	private async Task<IReadOnlyList<JournalEntry>> DrainAsync()
 	{
 		await Radarr.SettleAsync();
 		await Sonarr.SettleAsync();
-		var unmatched = await UnmatchedAsync();
+		var journal = await JournalAsync();
 		(await _wireMock.DeleteAsync("/__admin/requests")).EnsureSuccessStatusCode();
-		return unmatched;
+		return journal;
+	}
+
+	private async Task MirrorProviderMappingsAsync()
+	{
+		foreach (var endpoint in ProviderRecording.PlexFree.SelectMany(provider => provider.Endpoints))
+		{
+			var folder = Path.Combine(WireMockStubs.MappingsDirectory, endpoint.Name);
+			foreach (var file in Directory.Exists(folder) ? Directory.EnumerateFiles(folder, "*.json") : [])
+			{
+				var mapping = JsonNode.Parse(await File.ReadAllTextAsync(file))!;
+				mapping["request"]!["urlPath"] = $"{endpoint.Prefix}{mapping["request"]!["urlPath"]!.GetValue<string>()}";
+				(await _wireMock.PostAsJsonAsync("/__admin/mappings", mapping)).EnsureSuccessStatusCode();
+			}
+		}
 	}
 
 	private async Task AddIndexersAsync()
@@ -225,4 +242,13 @@ internal sealed class PlexFreeStack
 	}
 
 	private sealed record IndexerField(string Name, object Value);
+}
+
+internal sealed record JournalEntry(string Method, string Url, bool Matched)
+{
+	internal static JournalEntry From(JsonNode served)
+	{
+		var request = served["request"]!;
+		return new JournalEntry(request["method"]!.GetValue<string>(), request["absoluteUrl"]!.GetValue<string>(), served["wasMatched"]!.GetValue<bool>());
+	}
 }

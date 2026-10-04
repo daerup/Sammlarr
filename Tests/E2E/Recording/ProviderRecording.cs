@@ -9,6 +9,8 @@ internal sealed record ProviderEndpoint(string Name, string ConfigKey, string Re
 	internal string Prefix => $"/{Name}";
 
 	internal bool IsApp { get; init; }
+
+	internal string? Host { get; init; }
 }
 
 internal sealed record ProviderRecording(string Name, string Section, IReadOnlyList<ProviderEndpoint> Endpoints)
@@ -31,6 +33,14 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 	];
 
 	internal static readonly IReadOnlyList<ProviderEndpoint> AllEndpoints = [.. All.SelectMany(provider => provider.Endpoints), .. Apps];
+
+	internal static readonly IReadOnlyList<ProviderRecording> PlexFree = [.. All.Where(provider => provider.Section != PlexOptions.SectionName)];
+
+	internal static readonly IReadOnlyList<ProviderEndpoint> ArrMetadata =
+	[
+		new("radarr-metadata", string.Empty, "https://api.radarr.video") { Host = "api.radarr.video" },
+		new("sonarr-metadata", string.Empty, "https://skyhook.sonarr.tv") { Host = "skyhook.sonarr.tv" },
+	];
 
 	private static ProviderRecording ForApiKey(ApiKeyProvider provider) =>
 		provider switch

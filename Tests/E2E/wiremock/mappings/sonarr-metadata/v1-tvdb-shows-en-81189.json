@@ -1,10 +1,10 @@
 {
   "request": {
     "method": "GET",
+    "urlPath": "/v1/tvdb/shows/en/81189",
     "host": {
       "equalTo": "skyhook.sonarr.tv"
-    },
-    "urlPath": "/v1/tvdb/shows/en/81189"
+    }
   },
   "response": {
     "status": 200,

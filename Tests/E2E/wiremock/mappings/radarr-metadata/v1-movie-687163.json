@@ -1,10 +1,10 @@
 {
   "request": {
     "method": "GET",
+    "urlPath": "/v1/movie/687163",
     "host": {
       "equalTo": "api.radarr.video"
-    },
-    "urlPath": "/v1/movie/687163"
+    }
   },
   "response": {
     "status": 200,
