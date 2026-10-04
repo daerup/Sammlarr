@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace E2E.Tests.Recording;
 
@@ -62,6 +63,31 @@ public class RecordedStubsTests
 		var recorded = RecordedStubs.Write(merged, directory, _ => false);
 
 		await Assert.That(recorded.Select(entry => entry.Path)).IsEquivalentTo(["/radarr/api/v3/system/status", "/sonarr/api/v3/system/status"]);
+	}
+
+	[Test]
+	public async Task Write_ForAMetadataHostRadarrCalls_MatchesTheHostAndDropsThePrefix()
+	{
+		var directory = Directory.CreateTempSubdirectory("recorded-stubs-").FullName;
+
+		var recorded = RecordedStubs.Write(Snapshot(200, """{"TmdbId":687163}""", "/radarr-metadata/v1/movie/687163"), directory, _ => false);
+
+		var request = JsonNode.Parse(await File.ReadAllTextAsync(Path.Combine(directory, "radarr-metadata", "v1-movie-687163.json")))!["request"]!;
+		await Assert.That(recorded.Single().Path).IsEqualTo("/v1/movie/687163");
+		await Assert.That(request["host"]!["equalTo"]!.GetValue<string>()).IsEqualTo("api.radarr.video");
+		await Assert.That(request["urlPath"]!.GetValue<string>()).IsEqualTo("/v1/movie/687163");
+	}
+
+	[Test]
+	public async Task Write_ForAQueryWithSpacesSentAsPlus_MatchesTheSpacesWireMockSees()
+	{
+		var directory = Directory.CreateTempSubdirectory("recorded-stubs-").FullName;
+
+		var recorded = RecordedStubs.Write(Snapshot(200, """{"results":[]}""", "/tmdb/search/multi?query=Project+Hail+Mary&api_key=secret"), directory, _ => false);
+
+		var mapping = JsonNode.Parse(await File.ReadAllTextAsync(Path.Combine(directory, "tmdb", $"{recorded.Single().Slug}.json")))!;
+		await Assert.That(mapping["request"]!["queryParameters"]!["query"]!["equalTo"]!.GetValue<string>()).IsEqualTo("Project Hail Mary");
+		await Assert.That(mapping["request"]!["queryParameters"]!["api_key"]).IsNull();
 	}
 
 	private static string Snapshot(int status, string body, string url = "/tmdb/movie/1?api_key=secret") =>

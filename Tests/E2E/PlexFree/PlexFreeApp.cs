@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Threading.Channels;
+using E2E.Tests.Recording;
 
 namespace E2E.Tests.PlexFree;
 
@@ -10,7 +11,7 @@ public static class PlexFreeApp
 	private static readonly TimeSpan LeaseTimeout = TimeSpan.FromMinutes(5);
 	private static readonly Lazy<Task> Boot = new(StartAsync);
 	private static readonly Lock Gate = new();
-	private static readonly List<string> Unmatched = [];
+	private static readonly List<JournalEntry> Journal = [];
 	private static readonly ConcurrentDictionary<string, Lazy<Lease>> Leases = [];
 	private static readonly Channel<PlexFreeStack> Idle = Channel.CreateUnbounded<PlexFreeStack>();
 
@@ -65,7 +66,7 @@ public static class PlexFreeApp
 
 		foreach (var stack in _stacks)
 		{
-			Record(await stack.UnmatchedAsync());
+			Record(await stack.JournalAsync());
 		}
 
 		foreach (var stack in _stacks)
@@ -73,21 +74,33 @@ public static class PlexFreeApp
 			await stack.StopAsync();
 		}
 
-		List<string> unmatched;
+		List<JournalEntry> journal;
 		lock (Gate)
 		{
-			unmatched = [.. Unmatched.Distinct()];
+			journal = [.. Journal.Distinct()];
 		}
 
-		await Assert.That(unmatched).IsEmpty();
+		await Assert.That(E2EApp.IsLive ? await RecordAsync(journal) : Unmatched(journal)).IsEmpty();
 		Directory.Delete(_sessionDir, recursive: true);
 	}
 
-	private static void Record(IReadOnlyList<string> unmatched)
+	private static IReadOnlyList<string> Unmatched(IEnumerable<JournalEntry> journal)
+	{
+		return [.. journal.Where(entry => !entry.Matched).Select(entry => entry.Url).Distinct()];
+	}
+
+	private static async Task<IReadOnlyList<string>> RecordAsync(IReadOnlyList<JournalEntry> journal)
+	{
+		var unrecordable = journal.Where(entry => MetadataRecorder.Find(entry.Method, entry.Url) is null);
+		var recordables = journal.Select(entry => MetadataRecorder.Find(entry.Method, entry.Url)).OfType<Recordable>().Distinct();
+		return [.. Unmatched(unrecordable), .. await MetadataRecorder.RecordAsync(recordables)];
+	}
+
+	private static void Record(IReadOnlyList<JournalEntry> journal)
 	{
 		lock (Gate)
 		{
-			Unmatched.AddRange(unmatched);
+			Journal.AddRange(journal);
 		}
 	}
 
@@ -99,7 +112,9 @@ public static class PlexFreeApp
 		_stacks = await Task.WhenAll(
 			Enumerable
 				.Range(0, StackCount)
-				.Select(index => PlexFreeStack.LaunchAsync(certificates, keyRing, Directory.CreateDirectory(Path.Combine(_sessionDir, $"stack-{index}")).FullName))
+				.Select(index =>
+					PlexFreeStack.LaunchAsync(certificates, keyRing, Directory.CreateDirectory(Path.Combine(_sessionDir, $"stack-{index}")).FullName, E2EApp.IsLive)
+				)
 		);
 		foreach (var stack in _stacks)
 		{

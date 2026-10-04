@@ -53,11 +53,12 @@ internal sealed class E2EStack
 	internal static async Task<E2EStack> LaunchAsync(E2ESeed seed, int index, bool live, Action<string> onCircuitFailure)
 	{
 		var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
-			["--LaunchSammlarr=false", $"--RadarrSonarr={live.ToString().ToLowerInvariant()}"],
+			["--LaunchSammlarr=false", $"--RadarrSonarr={live.ToString().ToLowerInvariant()}", $"--ArrDataRoot={Path.Combine(seed.WorkDir, "arr")}"],
 			(options, _) => options.DisableDashboard = true
 		);
 		builder.Services.AddLogging(logging => logging.AddProvider(new CircuitFailureSink(CircuitLogCategory, CircuitFailure, index, onCircuitFailure)));
 		builder.WaitThroughBusyDocker();
+		builder.UnpinArrPorts();
 		var wiremock = builder.AddContainer("wiremock", "wiremock/wiremock", "latest").WithHttpEndpoint(targetPort: 8080);
 		var wiremockHttp = wiremock.GetEndpoint("http");
 		if (!live)

@@ -10,7 +10,7 @@ internal static class RecordedStubs
 {
 	private static readonly JsonSerializerOptions Pretty = new() { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
-	private static readonly string[] CredentialParams = ["api_key", "apikey", "x-plex-token", "token"];
+	internal static readonly string[] CredentialParams = ["api_key", "apikey", "x-plex-token", "token"];
 
 	private sealed record RecordedEntry(
 		ProviderEndpoint Provider,
@@ -68,7 +68,8 @@ internal static class RecordedStubs
 			}
 
 			var provider = ProviderRecording
-				.AllEndpoints.OrderByDescending(candidate => candidate.Prefix.Length)
+				.AllEndpoints.Concat(ProviderRecording.ArrMetadata)
+				.OrderByDescending(candidate => candidate.Prefix.Length)
 				.FirstOrDefault(candidate => url.StartsWith($"{candidate.Prefix}/", StringComparison.Ordinal));
 			if (provider is null)
 			{
@@ -103,6 +104,11 @@ internal static class RecordedStubs
 	private static JsonObject Mapping(RecordedEntry entry, string slug)
 	{
 		var request = new JsonObject { ["method"] = entry.Method, ["urlPath"] = entry.ReplayPath };
+		if (entry.Provider.Host is { } host)
+		{
+			request["host"] = new JsonObject { ["equalTo"] = host };
+		}
+
 		if (entry.Query.Count > 0)
 		{
 			request["queryParameters"] = Matchers(entry.Query);
@@ -128,7 +134,7 @@ internal static class RecordedStubs
 			var parts = pair.Split('=', 2);
 			if (parts.Length == 2 && !CredentialParams.Contains(parts[0], StringComparer.OrdinalIgnoreCase))
 			{
-				matchers[parts[0]] = Uri.UnescapeDataString(parts[1]);
+				matchers[parts[0]] = Uri.UnescapeDataString(parts[1].Replace('+', ' '));
 			}
 		}
 

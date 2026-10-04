@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,5 +12,17 @@ internal static class StackBoot
 	internal static void WaitThroughBusyDocker(this IDistributedApplicationTestingBuilder builder)
 	{
 		builder.Services.Configure<ResourceNotificationServiceOptions>(options => options.DefaultWaitBehavior = WaitBehavior.WaitOnResourceUnavailable);
+	}
+
+	internal static IReadOnlyList<IResourceBuilder<ContainerResource>> UnpinArrPorts(this IDistributedApplicationTestingBuilder builder)
+	{
+		return
+		[
+			.. builder
+				.Resources.OfType<ContainerResource>()
+				.Where(resource => resource.Name is "radarr" or "sonarr")
+				.ToList()
+				.Select(arr => builder.CreateResourceBuilder(arr).WithEndpoint("http", endpoint => endpoint.Port = null)),
+		];
 	}
 }
