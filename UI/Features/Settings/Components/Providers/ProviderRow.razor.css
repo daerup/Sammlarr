@@ -15,3 +15,10 @@
     width: 3px;
     background: var(--brand);
 }
+
+.key-required {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: var(--alert-warning);
+}

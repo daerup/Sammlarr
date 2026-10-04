@@ -1,0 +1,42 @@
+@page "/setup"
+@layout AuthLayout
+@attribute [AllowAnonymous]
+@using Contracts.Identity
+@using Contracts.Setup
+@using Domain.Identity
+@using UI.Features.Onboarding.Components
+@inject IOnboardingService Onboarding
+@inject ICurrentUser CurrentUser
+@inject NavigationManager Navigation
+
+<PageTitle>Set up Sammlarr</PageTitle>
+
+@if (_needsAdmin is { } needsAdmin)
+{
+    <SetupWizard NeedsAdmin="needsAdmin" Error="@Error"/>
+}
+else
+{
+    <BbSkeleton Class="h-[560px] w-[800px] max-w-full rounded-xl"/>
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? Error { get; set; }
+
+    private bool? _needsAdmin;
+
+    private string SignInPage => string.IsNullOrWhiteSpace(Error) ? "/signin?returnUrl=%2Fsetup" : $"/signin?returnUrl=%2Fsetup&authError={Uri.EscapeDataString(Error)}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var needsAdmin = await Onboarding.NeedsAdminAsync();
+        if (needsAdmin || CurrentUser.Role == UserRole.Admin)
+        {
+            _needsAdmin = needsAdmin;
+            return;
+        }
+
+        Navigation.NavigateTo(CurrentUser.IsAuthenticated ? "/" : SignInPage, forceLoad: !CurrentUser.IsAuthenticated);
+    }
+}

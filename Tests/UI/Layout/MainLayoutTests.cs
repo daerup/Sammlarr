@@ -5,6 +5,7 @@ using Contracts.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Options;
+using UI.Features.Onboarding.Components;
 using UI.Shared.Identity;
 using UI.Shared.Layout;
 using UI.Shared.Media;
@@ -25,6 +26,7 @@ public class MainLayoutTests : BunitContext
 		ComponentFactories.AddStub<ProfileCard>();
 		ComponentFactories.AddStub<SessionInvalidationListener>();
 		ComponentFactories.AddStub<WebUiToastListener>();
+		ComponentFactories.AddStub<SetupRedirect>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

@@ -1,5 +1,8 @@
 using BlazorBlueprint.Components;
 using Bunit;
+using Contracts.Identity;
+using Microsoft.Extensions.DependencyInjection;
+using UI.Shared.Identity;
 using UI.Shared.Layout;
 
 namespace UI.Tests.Layout;
@@ -10,6 +13,7 @@ public class AuthLayoutTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddScoped(_ => new CurrentUserAccessor(new CurrentUserOverride()));
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

@@ -5,6 +5,7 @@ using Contracts.Notifications;
 using Contracts.Settings;
 using Core.Auth;
 using Core.Notifications;
+using Core.Setup;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
@@ -21,6 +22,7 @@ public class SignInServiceTests
 	private readonly Mock<IUserRepository> _users = IUserRepository.Mock();
 	private readonly Mock<IProviderConfigService> _config = IProviderConfigService.Mock();
 	private readonly Mock<ILogger<SignInService>> _logger = ILogger<SignInService>.Mock();
+	private readonly SetupGate _setup = new();
 
 	private SignInService Testee
 	{
@@ -35,6 +37,7 @@ public class SignInServiceTests
 				_config.Object,
 				IDateTimeProvider.Mock().Object,
 				new SignInGate(),
+				_setup,
 				new WebUiNotificationSeeder(INotificationTargetRepository.Mock().Object, INotificationSubscriptionRepository.Mock().Object),
 				_logger.Object
 			);
@@ -59,13 +62,51 @@ public class SignInServiceTests
 	{
 		_plex.CompleteLoginAsync(Any(), Any()).Returns(Success.Of(Login));
 		_users.FindByLoginAsync(Any<AuthProvider>(), Any(), Any()).Returns(new None());
-		_users.GetAllAsync(Any()).Returns([new User(UserId.New(), "Ada", "avatar", UserRole.Admin, DateTimeOffset.UnixEpoch)]);
+		_users.CountAsync(Any()).Returns(1);
 		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Closed));
 
 		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
 
 		await Assert.That(result).IsError();
 		await Assert.That(Warnings()).IsEquivalentTo(["Registration is closed; rejected new Plex sign-in"]);
+	}
+
+	[Test]
+	public async Task CompleteAsync_ForTheFirstSignInWithoutTheSetupCode_RefusesIt()
+	{
+		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Open));
+		_plex.CompleteLoginAsync(Any(), Any()).Returns(Success.Of(Login));
+		_users.FindByLoginAsync(Any<AuthProvider>(), Any(), Any()).Returns(new None());
+
+		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+
+		await Assert.That(result).IsError();
+		_users.CreateAsync(Any<User>(), Any<AuthProvider>(), Any(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task CompleteSetupAsync_WithAWrongSetupCode_RefusesTheFirstSignIn()
+	{
+		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Open));
+		_plex.CompleteLoginAsync(Any(), Any()).Returns(Success.Of(Login));
+		_users.FindByLoginAsync(Any<AuthProvider>(), Any(), Any()).Returns(new None());
+
+		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", "AAAA-AAAA");
+
+		await Assert.That(result).IsError();
+		_users.CreateAsync(Any<User>(), Any<AuthProvider>(), Any(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task CompleteSetupAsync_WithTheSetupCode_MakesTheFirstPersonTheAdmin()
+	{
+		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Open));
+		_plex.CompleteLoginAsync(Any(), Any()).Returns(Success.Of(Login));
+		_users.FindByLoginAsync(Any<AuthProvider>(), Any(), Any()).Returns(new None());
+
+		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", _setup.Code.ToLowerInvariant());
+
+		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Role).IsEqualTo(UserRole.Admin));
 	}
 
 	private static ProviderConfig Config(RegistrationMode registration)

@@ -1,0 +1,65 @@
+@using Contracts.Identity
+@using Contracts.Settings
+@using Domain.Identity
+@using Domain.Settings
+@inject IUserManagementService Users
+@inject IProviderConfigService ProviderConfigService
+@inject ICurrentUser CurrentUser
+
+@if (_config is { } config)
+{
+    @if (config.AuthProvider == AuthProvider.Local)
+    {
+        <div class="flex justify-end">
+            <InviteDialog Invited="LoadAsync"/>
+        </div>
+    }
+
+    <div class="overflow-hidden rounded-lg border bg-card" aria-label="People">
+        @foreach (var person in _people)
+        {
+            var key = Key(person);
+            <PersonRow @key="key" Person="person" SignIn="config.AuthProvider" Sink="config.Sink" IsYou="IsYou(person)" IsLastAdmin="IsLastAdmin(person)"
+                       Open="_open == key" OpenChanged="open => _open = open ? key : null" Changed="LoadAsync"/>
+        }
+    </div>
+}
+else
+{
+    <BbSkeleton Class="h-[180px] w-full rounded-lg"/>
+}
+
+@code {
+    private ProviderConfig? _config;
+
+    private IReadOnlyList<Person> _people = [];
+
+    private string? _open;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _people = await Users.GetPeopleAsync();
+        _config = await ProviderConfigService.GetAsync();
+    }
+
+    private static string Key(Person person)
+    {
+        return person switch
+        {
+            JoinedPerson joined => joined.User.Id.ToString(),
+            InvitedPerson invited => $"invite:{invited.Username}",
+        };
+    }
+
+    private bool IsYou(Person person) => person is JoinedPerson joined && joined.User.Id == CurrentUser.Id;
+
+    private bool IsLastAdmin(Person person) => person is JoinedPerson { User.Role: UserRole.Admin } && _people.Count(IsAdmin) <= 1;
+
+    private static bool IsAdmin(Person person) => person is JoinedPerson { User.Role: UserRole.Admin };
+}

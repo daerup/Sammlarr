@@ -4,6 +4,7 @@ using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Settings;
 using Core.Notifications;
+using Core.Setup;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
@@ -20,6 +21,7 @@ internal sealed class SignInService(
 	IProviderConfigService providerConfig,
 	IDateTimeProvider dateTimeProvider,
 	SignInGate gate,
+	SetupGate setupGate,
 	WebUiNotificationSeeder webUiNotifications,
 	ILogger<SignInService> logger
 ) : ISignInService
@@ -30,13 +32,25 @@ internal sealed class SignInService(
 
 	private static readonly Error WrongPassword = Error.From("Wrong username or password.");
 
+	private static readonly Error NoAdminYet = Error.From("This Sammlarr has no admin yet. Open /setup and enter the setup code from the server log.");
+
 	public Task<string> BeginAsync(AuthProvider provider, string callbackUrl, CancellationToken cancellationToken = default) =>
 		providers[provider].BeginLoginAsync(callbackUrl, cancellationToken);
 
-	public async Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, CancellationToken cancellationToken = default)
+	public Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, CancellationToken cancellationToken = default)
+	{
+		return CompleteAsync(provider, callbackQuery, new None(), cancellationToken);
+	}
+
+	public Task<Result<User>> CompleteSetupAsync(AuthProvider provider, string callbackQuery, string setupCode, CancellationToken cancellationToken = default)
+	{
+		return CompleteAsync(provider, callbackQuery, Some.Of(setupCode), cancellationToken);
+	}
+
+	private async Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, Optional<string> setupCode, CancellationToken cancellationToken)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
-		if (config.AuthProvider != provider && (await users.GetAllAsync(cancellationToken)).Count > 0)
+		if (config.AuthProvider != provider && await users.CountAsync(cancellationToken) > 0)
 		{
 			return Error.From($"This Sammlarr signs in with {SignInName(config.AuthProvider)}.");
 		}
@@ -44,7 +58,7 @@ internal sealed class SignInService(
 		return await providers[provider]
 			.CompleteLoginAsync(callbackQuery, cancellationToken)
 			.ApplyError(error => LogFailed(provider, error))
-			.Map(login => ProvisionAsync(provider, login, cancellationToken));
+			.Map(login => ProvisionAsync(provider, login, setupCode, cancellationToken));
 	}
 
 	public async Task<Result<User>> LinkAsync(AuthProvider provider, string callbackQuery, UserId signedIn, CancellationToken cancellationToken = default)
@@ -137,19 +151,26 @@ internal sealed class SignInService(
 		return Error.From($"Too many failed sign-ins. Try again in {minutes} {(minutes == 1 ? "minute" : "minutes")}.");
 	}
 
-	private async Task<Result<User>> ProvisionAsync(AuthProvider provider, ExternalLogin login, CancellationToken cancellationToken)
+	private async Task<Result<User>> ProvisionAsync(AuthProvider provider, ExternalLogin login, Optional<string> setupCode, CancellationToken cancellationToken)
 	{
 		return await users
 			.FindByLoginAsync(provider, login.ExternalUserId, cancellationToken)
 			.Match(
 				existing => CompleteSignInAsync(provider, login, existing, isInitialAdmin: false, cancellationToken),
-				() => RegisterAsync(provider, login, cancellationToken)
+				() => RegisterAsync(provider, login, setupCode, cancellationToken)
 			);
 	}
 
-	private async Task<Result<User>> RegisterAsync(AuthProvider provider, ExternalLogin login, CancellationToken cancellationToken)
+	private async Task<Result<User>> RegisterAsync(AuthProvider provider, ExternalLogin login, Optional<string> setupCode, CancellationToken cancellationToken)
 	{
-		var isFirstUser = (await users.GetAllAsync(cancellationToken)).Count == 0;
+		using var lease = await setupGate.EnterAsync(cancellationToken);
+		var isFirstUser = await users.CountAsync(cancellationToken) == 0;
+		if (isFirstUser && !setupCode.Match(setupGate.Accepts, () => false))
+		{
+			logger.LogWarning("Rejected a first {Provider} sign-in without the setup code", provider);
+			return NoAdminYet;
+		}
+
 		if (!isFirstUser && (await providerConfig.GetAsync(cancellationToken)).RegistrationMode == RegistrationMode.Closed)
 		{
 			logger.LogWarning("Registration is closed; rejected new {Provider} sign-in", provider);
@@ -159,6 +180,7 @@ internal sealed class SignInService(
 		var role = isFirstUser ? UserRole.Admin : UserRole.Member;
 		var user = new User(UserId.New(), login.DisplayName, login.AvatarUrl, role, dateTimeProvider.Now);
 		await users.CreateAsync(user, provider, login.ExternalUserId, cancellationToken);
+		setupGate.SawAdmin();
 		using (userScope.As(user))
 		{
 			await webUiNotifications.SeedAsync(cancellationToken);
@@ -191,7 +213,7 @@ internal sealed class SignInService(
 	private async Task SetAuthProviderAsync(AuthProvider provider, CancellationToken cancellationToken)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
-		await providerConfig.StoreAsync(config with { AuthProvider = provider }, cancellationToken);
+		await providerConfig.StoreAsync(config with { AuthProvider = provider, RegistrationMode = RegistrationMode.Closed }, cancellationToken);
 	}
 
 	private void LogFailed(AuthProvider provider, Error error) => logger.LogWarning("Sign-in failed for {Provider}: {Reason}", provider, error.Reason);

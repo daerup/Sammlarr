@@ -16,7 +16,7 @@
                     <ProviderLogo Provider="Provider" Form="ProviderLogoForm.Logo" Size="18"/>
                 }
             </span>
-            <span class="text-sm text-muted-foreground truncate">@ProviderCaption.For(Provider)</span>
+            <span class="text-sm text-muted-foreground truncate">@ProviderCaption.For(Provider)@if (Required){<span> · </span><span class="key-required"><LucideIcon Name="asterisk" Size="12"/>required</span>}</span>
             <span>@Status</span>
         </BbCollapsibleTrigger>
         <BbCollapsibleContent>
@@ -35,6 +35,8 @@
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
 
     [Parameter] public RenderFragment? Title { get; set; }
+
+    [Parameter] public bool Required { get; set; }
 
     [Parameter] [EditorRequired] public required RenderFragment Status { get; set; }
 

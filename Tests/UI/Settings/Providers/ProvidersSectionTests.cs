@@ -4,6 +4,7 @@ using Bunit.TestDoubles;
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
+using Contracts.Setup;
 using Contracts.Wantlist;
 using Domain.Identity;
 using Domain.Providers;
@@ -45,6 +46,7 @@ public class ProvidersSectionTests : BunitContext
 		Services.AddSingleton(_switch.Object);
 		Services.AddSingleton<ICurrentUser>(_user);
 		Services.AddSingleton(IUserManagementService.Mock().Object);
+		Services.AddSingleton(IOnboardingService.Mock().Object);
 		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
 		Services.AddSingleton(_arrConfigs.Object);
 		var keys = IApiKeyService.Mock();

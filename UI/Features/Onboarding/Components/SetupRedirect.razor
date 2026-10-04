@@ -1,0 +1,16 @@
+@using Contracts.Identity
+@using Contracts.Setup
+@using Domain.Identity
+@inject IOnboardingService Onboarding
+@inject ICurrentUser CurrentUser
+@inject NavigationManager Navigation
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        if (CurrentUser.Role == UserRole.Admin && !await Onboarding.IsCompleteAsync())
+        {
+            Navigation.NavigateTo("/setup");
+        }
+    }
+}

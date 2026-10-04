@@ -1,0 +1,42 @@
+@using Contracts.Identity
+@using Contracts.Settings
+@using Domain.Settings
+@inject IUserManagementService Users
+@inject IProviderConfigService ProviderConfigService
+@inject Notifier Notifier
+
+<section class="flex items-center gap-4 rounded-lg border bg-card px-4 py-3.5" aria-label="Sign-ups">
+    <LucideIcon Name="user-plus" Size="16" Class="shrink-0 text-muted-foreground"/>
+    <div class="min-w-0 space-y-0.5">
+        <h4 class="text-sm font-medium">Allow new sign-ups</h4>
+        <p class="text-xs text-muted-foreground">
+            When on, anyone who signs in with Plex gets a member account. When off, only people who already have an account can sign in.
+        </p>
+    </div>
+    <span class="ml-auto">
+        @if (_open is { } open)
+        {
+            <BbSwitch Checked="open" CheckedChanged="SetAsync" AriaLabel="Allow new sign-ups"/>
+        }
+        else
+        {
+            <BbSkeleton Class="h-6 w-11 rounded-full"/>
+        }
+    </span>
+</section>
+
+@code {
+    private bool? _open;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _open = (await ProviderConfigService.GetAsync()).RegistrationMode == RegistrationMode.Open;
+    }
+
+    private async Task SetAsync(bool open)
+    {
+        await Users.SetRegistrationModeAsync(open ? RegistrationMode.Open : RegistrationMode.Closed);
+        _open = open;
+        Notifier.Success(open ? "New sign-ups are on." : "New sign-ups are off.");
+    }
+}

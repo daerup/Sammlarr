@@ -1,0 +1,12 @@
+.setup-summary-row {
+    display: grid;
+    grid-template-columns: 16px 170px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    font-size: 14px;
+}
+
+.setup-summary-row + .setup-summary-row {
+    border-top: 1px solid var(--border);
+}
