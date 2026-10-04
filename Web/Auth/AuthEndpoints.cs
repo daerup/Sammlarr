@@ -57,7 +57,7 @@ internal static class AuthEndpoints
 				var setupCode = SetupClaim.Redeem(context);
 				if (!OAuthState.Redeem(context, state))
 				{
-					return Results.Redirect(Failed(StaleSignIn, setupCode, returnUrl));
+					return Results.Redirect(Failed(StaleSignIn, authProvider, setupCode, returnUrl));
 				}
 
 				var query = context.Request.QueryString.Value ?? string.Empty;
@@ -71,7 +71,7 @@ internal static class AuthEndpoints
 							)
 					)
 					.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
-					.GetValueOr(error => Results.Redirect(Failed(error, setupCode, returnUrl)));
+					.GetValueOr(error => Results.Redirect(Failed(error, authProvider, setupCode, returnUrl)));
 			}
 		);
 
@@ -133,7 +133,7 @@ internal static class AuthEndpoints
 					return await onboarding
 						.ClaimAsync(new AdminClaim(code, username, password, confirmation), context.RequestAborted)
 						.Map(user => SignInAndRedirectAsync(context, user, SetupPath))
-						.GetValueOr(error => Results.Redirect(SetupPage(error)));
+						.GetValueOr(error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Local)));
 				}
 			)
 			.RequireRateLimiting(AuthenticationModule.SignInLimit);
@@ -144,7 +144,7 @@ internal static class AuthEndpoints
 				{
 					var problem = await onboarding.CodeProblemAsync(code, context.RequestAborted);
 					return problem.Match(
-						error => Results.Redirect(SetupPage(error)),
+						error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Plex)),
 						() =>
 						{
 							SetupClaim.Issue(context, code);
@@ -188,12 +188,10 @@ internal static class AuthEndpoints
 		return QueryHelpers.AddQueryString($"/{page}/{Uri.EscapeDataString(token)}", "error", error.Reason);
 	}
 
-	private static string Failed(Error error, Optional<string> setupCode, string? returnUrl)
+	private static string Failed(Error error, AuthProvider provider, Optional<string> setupCode, string? returnUrl)
 	{
-		return setupCode.Match(_ => SetupPage(error), () => SignInPage(error, returnUrl));
+		return setupCode.Match(_ => SetupRedirect.For(error, provider), () => SignInPage(error, returnUrl));
 	}
-
-	private static string SetupPage(Error error) => QueryHelpers.AddQueryString(SetupPath, "error", error.Reason);
 
 	private static string SignInPage(Error error, string? returnUrl)
 	{

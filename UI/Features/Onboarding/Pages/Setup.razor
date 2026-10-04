@@ -13,16 +13,21 @@
 
 @if (_needsAdmin is { } needsAdmin)
 {
-    <SetupWizard NeedsAdmin="needsAdmin" Error="@Error"/>
+    <SetupWizard NeedsAdmin="needsAdmin" Error="@Error" SignInWith="SignInWith"/>
 }
 else
 {
-    <BbSkeleton Class="h-[560px] w-[800px] max-w-full rounded-xl"/>
+    <BbSkeleton Class="h-[560px] w-[950px] max-w-full rounded-xl"/>
 }
 
 @code {
     [SupplyParameterFromQuery(Name = "error")]
     public string? Error { get; set; }
+
+    [SupplyParameterFromQuery(Name = "with")]
+    public string? With { get; set; }
+
+    private AuthProvider? SignInWith => Enum.TryParse<AuthProvider>(With, ignoreCase: true, out var picked) && Enum.IsDefined(picked) ? picked : null;
 
     private bool? _needsAdmin;
 

@@ -65,6 +65,14 @@ public class SetupWizardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Wizard_BackFromAWrongSetupCode_KeepsTheWayThatWasPicked()
+	{
+		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, true).Add(wizard => wizard.SignInWith, AuthProvider.Local));
+
+		await Assert.That(cut.FindComponent<Stub<AdminForm>>().Instance.Parameters.Get(form => form.Picked)).IsEqualTo(AuthProvider.Local);
+	}
+
+	[Test]
 	public async Task Wizard_BeforeAnyoneExists_AsksForTheAdminAndOffersNoNext()
 	{
 		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, true));
@@ -175,7 +183,7 @@ public class SetupWizardTests : BunitContext
 	private IRenderedComponent<SetupWizard> RenderForAdmin()
 	{
 		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, false));
-		cut.WaitForState(() => cut.FindAll(".sink-card").Count == 2);
+		cut.WaitForState(() => cut.FindAll(".choice-card").Count == 2);
 		return cut;
 	}
 

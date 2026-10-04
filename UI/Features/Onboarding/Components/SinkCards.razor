@@ -4,23 +4,14 @@
 <BbRadioGroup TValue="SinkKind" Value="Picked" ValueChanged="PickedChanged" Disabled="Disabled" AriaLabel="Where your wantlist syncs" Class="grid grid-cols-2 gap-3">
     @foreach (var card in Cards)
     {
-        var id = $"sink-{card.Sink}";
-        <label for="@id" class="sink-card" data-picked="@(card.Sink == Picked ? "true" : null)" style="--brand: @Branding.SinkColor(card.Sink)">
-            <span class="flex items-center gap-2">
+        <ChoiceCard Value="card.Sink" Id="@($"sink-{card.Sink}")" Title="@card.Title" Brand="@Branding.SinkColor(card.Sink)" Lines="card.Lines" Picked="card.Sink == Picked">
+            <Mark>
                 @foreach (var provider in card.Sink.Providers())
                 {
                     <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
                 }
-                <span class="text-[15px] font-medium">@card.Title</span>
-                <span class="ml-auto"><BbRadioGroupItem Value="card.Sink" Id="@id"/></span>
-            </span>
-            <ul class="list-disc pl-5 text-sm text-muted-foreground">
-                @foreach (var line in card.Lines)
-                {
-                    <li>@line</li>
-                }
-            </ul>
-        </label>
+            </Mark>
+        </ChoiceCard>
     }
 </BbRadioGroup>
 
