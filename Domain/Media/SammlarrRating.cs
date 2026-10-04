@@ -83,6 +83,10 @@ public readonly record struct AveragedRating(ValueSet<RatingSource> Sources)
 		return Optional.When(from.Count > 0, () => new SammlarrRating(from.Average(rating => rating.SammlarrValue), from));
 	}
 
+	public bool FallsBack(ValueSet<RatingSource> available) => Sources.Count > 0 && available.Count > 0 && !Sources.Overlaps(available);
+
+	public IReadOnlyList<RatingSource> Missing(ValueSet<RatingSource> available) => [.. Sources.Where(source => !available.Contains(source)).Order()];
+
 	public ValueSet<RatingSource> Counted(ValueSet<RatingSource> available)
 	{
 		var sources = Sources;

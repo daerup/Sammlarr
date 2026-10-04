@@ -7,7 +7,7 @@
     <span class="rating-badge-wrap @(Look is RatingBadgeLook.OnImage ? "on-image" : null)" @onclick:stopPropagation="true" @onfocusin:stopPropagation="true" @onfocusout:stopPropagation="true">
         <BbPopover>
             <BbPopoverTrigger AsChild="false" class="@TriggerClass(rating)" aria-label="@Label(rating)">
-                <RatingStar Value="rating?.Value" Size="Size"/>
+                <RatingStar Value="(float?)rating?.Rounded" Size="Size"/>
                 <span>@(rating is { } shown ? RatingTexts.Number(shown) : "–")</span>
             </BbPopoverTrigger>
             <BbPopoverContent Side="Side" Align="Align" Class="w-auto overflow-hidden rounded-[9px] p-0 shadow-[0_14px_34px_rgba(0,0,0,0.35)]" aria-label="How the Sammlarr rating came about">

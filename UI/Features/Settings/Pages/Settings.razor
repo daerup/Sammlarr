@@ -22,7 +22,14 @@
                 <BbButton Variant="@(isActive ? ButtonVariant.Secondary : ButtonVariant.Ghost)"
                           Class="@($"w-full justify-start font-medium {(isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground")}")"
                           OnClick="() => Show(item)">
-                    <LucideIcon Name="@item.Icon" Size="15" Class="mr-2.5 shrink-0"/>
+                    @if (item.Mark is { } mark)
+                    {
+                        <span class="mr-2.5 inline-flex shrink-0 text-[var(--sammlarr-gold)]">@mark</span>
+                    }
+                    else
+                    {
+                        <LucideIcon Name="@item.Icon" Size="15" Class="mr-2.5 shrink-0"/>
+                    }
                     @item.Label
                 </BbButton>
             }
@@ -39,11 +46,14 @@
 
 @code {
 
-    private record SettingsSection(string Label, string Icon, Type ComponentType, UserRole? RequiredRole = null);
+    private record SettingsSection(string Label, string Icon, Type ComponentType, UserRole? RequiredRole = null, RenderFragment? Mark = null);
+
+    private static readonly RenderFragment GoldStar = @<RatingStar Value="10" Size="15" Shine="false"/>;
 
     private readonly List<SettingsSection> _sections =
     [
         new("Providers", "plug", typeof(ProvidersSection)),
+        new("Ratings", "star", typeof(RatingsSection), Mark: GoldStar),
         new("Notifications", "bell", typeof(NotificationsSection)),
         new("Cache", "database", typeof(CacheSection), UserRole.Admin),
         new("Diagnostics", "activity", typeof(DiagnosticsSection), UserRole.Admin),

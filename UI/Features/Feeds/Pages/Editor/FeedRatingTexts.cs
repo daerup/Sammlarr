@@ -5,19 +5,6 @@ namespace UI.Features.Feeds.Pages.Editor;
 
 internal static class FeedRatingTexts
 {
-	public const string LastOneOn = "At least one provider has to count, so the last one switched on stays on.";
-
-	public static string Short(RatingSource source)
-	{
-		return source switch
-		{
-			RatingSource.Tmdb => "TMDB",
-			RatingSource.Imdb => "IMDb",
-			RatingSource.RottenTomatoesCritics => "RT critics",
-			RatingSource.RottenTomatoesAudience => "RT audience",
-		};
-	}
-
 	public static string StarTip(Optional<RatingStrategy> own, RatingStrategy fallback)
 	{
 		var setting = own.Match(strategy => $"{RatingTexts.Strategy(strategy)} · {Listed(strategy)}", () => $"My default ({RatingTexts.Strategy(fallback)})");
@@ -37,7 +24,7 @@ internal static class FeedRatingTexts
 		};
 	}
 
-	private static string Listed(RatingStrategy strategy) => string.Join(", ", Counted(strategy).Select(Short));
+	private static string Listed(RatingStrategy strategy) => string.Join(", ", Counted(strategy).Select(RatingTexts.Short));
 
 	private static IEnumerable<RatingSource> Counted(RatingStrategy strategy)
 	{

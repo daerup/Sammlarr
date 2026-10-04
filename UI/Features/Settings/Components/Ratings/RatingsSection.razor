@@ -1,0 +1,27 @@
+@inject RatingContext RatingContext
+
+<div class="flex max-w-6xl flex-col gap-6">
+    <div>
+        <h2 class="text-lg font-semibold">Ratings</h2>
+        <p class="text-sm text-muted-foreground">How your Sammlarr rating is built wherever a feed does not set its own.</p>
+    </div>
+
+    @if (_view is { } view)
+    {
+        <RatingPipelineCard Strategy="view.Default" Available="view.Available"/>
+    }
+    else
+    {
+        <BbSkeleton Class="h-64 w-[792px] max-w-full rounded-lg"/>
+    }
+</div>
+
+@code {
+    private RatingView? _view;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        _view = await RatingContext.GetAsync();
+    }
+}

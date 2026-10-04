@@ -1,0 +1,39 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<span class="rating-suppliers">
+    <BbPopover>
+        <BbPopoverTrigger AsChild="false" class="rating-suppliers-link">provider</BbPopoverTrigger><BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-auto overflow-hidden rounded-lg p-0 shadow-[0_14px_34px_rgba(0,0,0,0.35)]" aria-label="@Heading">
+            <div class="rating-suppliers-pop">
+                <div class="rating-suppliers-head popover-band">@Heading</div>
+                <div class="rating-suppliers-lead">Connect one of them to count @Names again.</div>
+                @foreach (var supplier in Suppliers)
+                {
+                    <a class="rating-supplier" href="@SettingsLinks.Provider(supplier)" style="--brand: @Branding.GetBrandingInfo(supplier).BrandColor">
+                        <ProviderLogo Provider="supplier" Form="ProviderLogoForm.Tile" Size="30" Decorative="true"/>
+                        <span class="rating-supplier-name">@Branding.GetBrandingInfo(supplier).NickName</span>
+                        <BbBadge Variant="BadgeVariant.Secondary" Class="h-5 items-center gap-1.5 px-[7px] text-[10.5px] font-medium text-muted-foreground">
+                            <span class="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/60"></span>
+                            @Status(supplier)
+                        </BbBadge>
+                        <span class="rating-supplier-go"><LucideIcon Name="arrow-right" Size="14"/></span>
+                    </a>
+                }
+            </div>
+        </BbPopoverContent>
+    </BbPopover>
+</span>
+
+@code {
+    private static readonly IReadOnlySet<MediaProvider> Accounts = Enum.GetValues<AuthProvider>().Select(provider => provider.AsMediaProvider()).ToHashSet();
+
+    [Parameter] [EditorRequired] public required IReadOnlyList<RatingSource> Sources { get; set; }
+
+    private string Names => Sources.Count == 1 ? RatingTexts.Name(Sources[0]) : string.Join(", ", Sources.Select(RatingTexts.Short));
+
+    private string Heading => $"{Names} ratings come from";
+
+    private IEnumerable<MediaProvider> Suppliers => Sources.SelectMany(source => source.SuppliedBy()).Distinct().Order();
+
+    private static string Status(MediaProvider provider) => Accounts.Contains(provider) ? "Not connected" : "No key yet";
+}

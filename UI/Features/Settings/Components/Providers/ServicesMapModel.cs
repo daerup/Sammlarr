@@ -21,11 +21,14 @@ internal sealed record MapTile(MediaProvider Provider, double X, double Y, TileE
 
 internal sealed record MapTrace(string Role, MediaProvider Provider, IReadOnlyList<MapPoint> Points)
 {
+	internal string Path => TracePath.Draw(Points);
+}
+
+internal static class TracePath
+{
 	private const double CornerCut = 6;
 
-	internal string Path => Draw(Points);
-
-	private static string Draw(IReadOnlyList<MapPoint> points)
+	internal static string Draw(IReadOnlyList<MapPoint> points)
 	{
 		var path = points.Where((point, index) => index == 0 || point != points[index - 1]).ToList();
 		var corners = path.Skip(1).SkipLast(1).Select((corner, index) => Cut(path[index], corner, path[index + 2]));

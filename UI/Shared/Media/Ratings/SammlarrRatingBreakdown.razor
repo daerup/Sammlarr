@@ -9,7 +9,7 @@
             @if (_model.Sammlarr.ToNullable() is { } sammlarr)
             {
                 <span class="rating-breakdown-value">
-                    <RatingStar Value="sammlarr.Value" Size="20"/>
+                    <RatingStar Value="(float)sammlarr.Rounded" Size="20"/>
                     <BbTooltip DelayDuration="150">
                         <BbTooltipTrigger AsChild="false" Class="rating-tip">@RatingTexts.Number(sammlarr)</BbTooltipTrigger>
                         <BbTooltipContent>@Arithmetic</BbTooltipContent>
@@ -55,7 +55,19 @@
                 <span class="rating-row-rank">@row.Rank.Map(rank => rank.ToString()).GetValueOr(string.Empty)</span>
             }
             <RatingMarkIcon Source="row.Source" Rating="row.Rating"/>
-            <span class="rating-row-name">@RatingTexts.Name(row.Source)<small>@Detail(row)</small></span>
+            <span class="rating-row-name">
+                @RatingTexts.Name(row.Source)
+                <small>
+                    @if (row.State is RatingRowState.NeedsProvider)
+                    {
+                        <text>needs a </text><RatingSuppliersPopover Sources="[row.Source]"/>
+                    }
+                    else
+                    {
+                        @Detail(row)
+                    }
+                </small>
+            </span>
             <span class="rating-row-value">
                 @if (row.Rating.ToNullable() is { } rating)
                 {

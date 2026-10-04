@@ -72,6 +72,35 @@ public class SammlarrRatingBadgeTests : BunitContext
 	}
 
 	[Test]
+	public async Task Badge_WhenTheRatingReadsAsNineAndAHalf_Shines()
+	{
+		var cut = Render<SammlarrRatingBadge>(parameters =>
+			parameters
+				.Add(badge => badge.Ratings, RatingSummary.From([new ImdbRating(9.46f, Some.Of(10))]))
+				.Add(badge => badge.Strategy, Some.Of(new RatingStrategy(new OrderedRating([RatingSource.Imdb]))))
+		);
+
+		await Assert.That(cut.Find(".rating-badge").TextContent.Trim()).IsEqualTo("9.5");
+		await Assert.That(cut.Find(".rating-star").ClassList).Contains("shine");
+	}
+
+	[Test]
+	public async Task Breakdown_ForAChosenSourceWithoutAProvider_LinksTheWordProvider()
+	{
+		var cut = Render<SammlarrRatingBreakdown>(parameters =>
+			parameters
+				.Add(breakdown => breakdown.Ratings, ProjectHailMary)
+				.Add(breakdown => breakdown.Strategy, new RatingStrategy(new AveragedRating([RatingSource.Imdb])))
+				.Add(breakdown => breakdown.Available, [RatingSource.Tmdb])
+				.Add(breakdown => breakdown.Where, "your default")
+		);
+
+		var reason = cut.FindAll(".rating-row-name small").First();
+		await Assert.That(reason.TextContent.Trim()).IsEqualTo("needs a provider");
+		await Assert.That(reason.QuerySelector(".rating-suppliers-link")).IsNotNull();
+	}
+
+	[Test]
 	public async Task Badge_WhenNoSourceRatesTheTitle_ShowsTheDashedStarWithADash()
 	{
 		var cut = Render<SammlarrRatingBadge>(parameters => parameters.Add(badge => badge.Ratings, RatingSummary.None));

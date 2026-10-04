@@ -1,0 +1,222 @@
+@using System.Globalization
+@using Contracts.Ratings
+@inject IRatingService Ratings
+@inject RatingContext RatingContext
+
+<div class="w-fit max-w-full overflow-hidden rounded-lg border bg-card">
+    <CardHead Title="Your Sammlarr rating">
+        <Mark><span class="pipeline-gold"><RatingStar Value="10" Size="15" Shine="false"/></span></Mark>
+    </CardHead>
+
+    <div class="pipeline-body">
+        <div class="pipeline-combine">
+            <span class="pipeline-label">How they combine</span>
+            <EnumToggleGroup TEnum="RatingCombination" Value="Combination" OnChange="CombineAsync" TooltipProvider="null"/>
+            <span class="pipeline-hint">@Hint</span>
+        </div>
+
+        @if (Missing.Count > 0)
+        {
+            <div class="pipeline-notice" role="note">
+                <LucideIcon Name="unplug" Size="14"/>
+                <span>@NoticeLead<RatingSuppliersPopover Sources="Missing"/>@NoticeTail</span>
+            </div>
+        }
+
+        <div class="overflow-x-auto">
+            <div class="pipeline" style="width: @Px(RatingPipelineModel.Width)px; height: @Px(_model.Height)px">
+                <svg class="pipeline-traces" width="@Px(RatingPipelineModel.Width)" height="@Px(_model.Height)" viewBox="0 0 @Px(RatingPipelineModel.Width) @Px(_model.Height)" aria-hidden="true">
+                    @foreach (var trace in _model.Traces)
+                    {
+                        <path d="@trace.Path" stroke-dasharray="@(_model.Dashed ? "5 4" : null)"/>
+                        <rect x="@Px(RatingPipelineModel.OutputX - 5)" y="@Px(trace.Pin - 1.3)" width="5" height="2.6" rx="0.6"/>
+                    }
+                </svg>
+
+                <div class="pipeline-tiles" role="@(Ordered ? "list" : null)">
+                    @foreach (var tile in _model.Tiles)
+                    {
+                        <div @key="tile.Source"
+                             class="pipeline-tile @(tile.On ? null : "is-off") @(Ordered ? "is-sortable" : null) @(_dragged == tile.Source ? "is-dragged" : null)"
+                             style="top: @Px(tile.Y - RatingPipelineModel.TileHeight / 2)px"
+                             role="@(Ordered ? "listitem" : null)"
+                             draggable="@(Ordered ? "true" : null)"
+                             @ondragstart="() => _dragged = tile.Source"
+                             @ondragend="() => _dragged = null"
+                             @ondragover:preventDefault="Ordered"
+                             @ondrop="() => DropAsync(tile.Source)">
+                            @if (tile.Rank.ToNullable() is { } rank)
+                            {
+                                <button type="button"
+                                        @ref="_grips[tile.Source]"
+                                        class="pipeline-grip"
+                                        aria-label="@($"Move {RatingTexts.Name(tile.Source)}; Alt and an arrow key move it up or down")"
+                                        @onkeydown="args => MoveByKeyAsync(args, tile.Source)">
+                                    <LucideIcon Name="grip-vertical" Size="14"/>
+                                </button>
+                                <span class="pipeline-rank">@rank</span>
+                            }
+                            <RatingMarkIcon Source="tile.Source"/>
+                            <BbTooltip DelayDuration="150">
+                                <BbTooltipTrigger AsChild="false"><span class="pipeline-name">@RatingTexts.Name(tile.Source)</span></BbTooltipTrigger>
+                                <BbTooltipContent Class="max-w-xs">@RatingTexts.Scale(tile.Source)</BbTooltipContent>
+                            </BbTooltip>
+                            @if (!Ordered)
+                            {
+                                <span class="pipeline-switch">
+                                    @if (tile.On && SwitchedOnCount == 1)
+                                    {
+                                        <BbTooltip DelayDuration="150" Placement="PopoverPlacement.Bottom">
+                                            <BbTooltipTrigger AsChild="false">
+                                                <BbSwitch Checked="true" Disabled="true" Size="SwitchSize.Small" aria-label="@($"{RatingTexts.Name(tile.Source)} counts")"/>
+                                            </BbTooltipTrigger>
+                                            <BbTooltipContent>@RatingTexts.LastOneOn</BbTooltipContent>
+                                        </BbTooltip>
+                                    }
+                                    else
+                                    {
+                                        <BbSwitch Checked="tile.On" CheckedChanged="@(on => SwitchAsync(tile.Source, on))" Size="SwitchSize.Small" aria-label="@($"{RatingTexts.Name(tile.Source)} counts")"/>
+                                    }
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="pipeline-output" style="left: @Px(RatingPipelineModel.OutputX)px; top: @Px(_model.OutputY)px">
+                    <span class="pipeline-gold"><RatingStar Value="10" Size="26" Shine="false"/></span>
+                    <div>
+                        <div class="pipeline-output-name">Your Sammlarr rating</div>
+                        <div class="pipeline-output-scale">0 to 10, one decimal</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private readonly Dictionary<RatingSource, ElementReference> _grips = [];
+
+    private RatingSource? _dragged;
+
+    private (RatingSource Source, int Index)? _refocus;
+
+    private RatingPipelineModel _model = null!;
+
+    private AveragedRating _averaged;
+
+    private OrderedRating _ordered;
+
+    [Parameter] [EditorRequired] public required RatingStrategy Strategy { get; set; }
+
+    [Parameter] [EditorRequired] public required ValueSet<RatingSource> Available { get; set; }
+
+    private RatingStrategy _strategy;
+
+    protected override void OnInitialized()
+    {
+        _strategy = Strategy;
+        _averaged = Strategy is AveragedRating averaged ? averaged : AveragedRating.Everything;
+        _ordered = Strategy is OrderedRating ordered ? ordered : new OrderedRating();
+        _model = RatingPipelineModel.For(_strategy, Available);
+    }
+
+    private bool Ordered => _strategy is OrderedRating;
+
+    private RatingCombination Combination => Ordered ? RatingCombination.FirstAvailable : RatingCombination.Average;
+
+    private string Hint => Ordered ? "Every provider, in the order below: a title gets the first rating it has." : "The ratings a title has from the providers switched on, averaged. At least one stays on.";
+
+    private int SwitchedOnCount => _model.Tiles.Count(tile => tile.On);
+
+    private IReadOnlyList<RatingSource> Missing => Ordered ? [] : _averaged.Missing(Available);
+
+    private string NoticeLead
+    {
+        get
+        {
+            var missing = string.Join(", ", Missing.Select(RatingTexts.Short));
+            if (_averaged.FallsBack(Available))
+            {
+                return $"Your choice ({missing}) needs a ";
+            }
+
+            return Missing.Count == 1 ? $"{missing} needs a " : $"{missing} need a ";
+        }
+    }
+
+    private string NoticeTail
+    {
+        get
+        {
+            if (!_averaged.FallsBack(Available))
+            {
+                return ".";
+            }
+
+            var used = _averaged.Counted(Available).Order().Select(RatingTexts.Short).ToList();
+            return $"; {string.Join(", ", used)} {(used.Count == 1 ? "is" : "are")} used instead.";
+        }
+    }
+
+    private Task CombineAsync(RatingCombination combination)
+    {
+        return combination switch
+        {
+            RatingCombination.Average => StoreAsync(new RatingStrategy(_averaged)),
+            RatingCombination.FirstAvailable => StoreAsync(new RatingStrategy(_ordered)),
+        };
+    }
+
+    private Task SwitchAsync(RatingSource source, bool on)
+    {
+        _averaged = on ? _averaged.With(source) : _averaged.Without(source);
+        return StoreAsync(new RatingStrategy(_averaged));
+    }
+
+    private Task DropAsync(RatingSource target)
+    {
+        var dragged = _dragged;
+        _dragged = null;
+        return Optional.Of(dragged).Match(source => PlaceAsync(RatingOrderMoves.Onto(_ordered, source, target)), () => Task.CompletedTask);
+    }
+
+    private Task MoveByKeyAsync(KeyboardEventArgs args, RatingSource source)
+    {
+        return RatingOrderMoves.ByKey(_ordered, Rows, source, args).Match(moved => MoveAsync(source, moved), () => Task.CompletedTask);
+    }
+
+    private Task MoveAsync(RatingSource source, (OrderedRating Order, int Index) moved)
+    {
+        _refocus = (source, moved.Index);
+        return PlaceAsync(moved.Order);
+    }
+
+    private IReadOnlyList<RatingSource> Rows => [.. _model.Tiles.Select(tile => tile.Source)];
+
+    private Task PlaceAsync(OrderedRating ordered)
+    {
+        _ordered = ordered;
+        return StoreAsync(new RatingStrategy(ordered));
+    }
+
+    private async Task StoreAsync(RatingStrategy strategy)
+    {
+        _strategy = strategy;
+        _model = RatingPipelineModel.For(strategy, Available);
+        await Ratings.StoreDefaultAsync(strategy);
+        RatingContext.Refresh();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_refocus is { } moved && Rows.ToList().IndexOf(moved.Source) == moved.Index && _grips.TryGetValue(moved.Source, out var grip))
+        {
+            _refocus = null;
+            await grip.FocusAsync();
+        }
+    }
+
+    private static string Px(double value) => Math.Round(value, 2).ToString(CultureInfo.InvariantCulture);
+}

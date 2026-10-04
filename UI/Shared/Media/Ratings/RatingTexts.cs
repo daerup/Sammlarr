@@ -13,6 +13,8 @@ internal static class RatingTexts
 
 	public const string Unrated = "No Sammlarr rating yet";
 
+	public const string LastOneOn = "At least one provider has to count, so the last one switched on stays on.";
+
 	public const string StoredFooter = "Browse only has the ratings Sammlarr stores for this title; opening it loads the rest.";
 
 	private const string RottenTomatoesSite = "https://www.rottentomatoes.com/";
@@ -20,6 +22,28 @@ internal static class RatingTexts
 	private const string RottenTomatoesSearch = "https://www.rottentomatoes.com/search?search=";
 
 	public static string Name(RatingSource source) => source.GetDescription();
+
+	public static string Short(RatingSource source)
+	{
+		return source switch
+		{
+			RatingSource.Tmdb => "TMDB",
+			RatingSource.Imdb => "IMDb",
+			RatingSource.RottenTomatoesCritics => "RT critics",
+			RatingSource.RottenTomatoesAudience => "RT audience",
+		};
+	}
+
+	public static string Scale(RatingSource source)
+	{
+		return source switch
+		{
+			RatingSource.Tmdb => "TMDB: its users rate from 0.5 to 10 in half steps, and the average counts as it reads (8.6 is 8.6).",
+			RatingSource.Imdb => "IMDb: its users rate from 1 to 10, never 0, so an IMDb rating is at least 1.0. It counts as it reads (8.2 is 8.2).",
+			RatingSource.RottenTomatoesCritics => "Rotten Tomatoes critics: the share of critics who liked it, 0 to 100%, counted as a tenth (95% is 9.5).",
+			RatingSource.RottenTomatoesAudience => "Rotten Tomatoes audience: the share of users who liked it, 0 to 100%, counted as a tenth (95% is 9.5).",
+		};
+	}
 
 	public static string Number(float value) => value.ToString("0.0", CultureInfo.InvariantCulture);
 
