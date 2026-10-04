@@ -9,7 +9,9 @@ internal static class SelfHostedSetup
 
 	internal const string MemberName = "grace";
 
-	private const string AdminPassword = "e2e-admin-passphrase";
+	internal const string AdminPassword = "e2e-admin-passphrase";
+
+	internal const string MemberPassword = "e2e-member-passphrase";
 
 	private const string TmdbKey = "e2e-tmdb-key";
 
@@ -52,11 +54,7 @@ internal static class SelfHostedSetup
 		var dialog = page.Modal("Invite member");
 		await dialog.Labelled("Username").EnterAsync(username);
 		await dialog.Button("Create link").ClickAsync();
-		var link = page.Locator("[data-link]");
-		await Expect(link).ToBeVisibleAsync();
-		var url = await link.InnerTextAsync();
-		await page.Button("Done").ClickAsync();
-		return url;
+		return await IssuedLinkAsync(page);
 	}
 
 	internal static async Task<string> ReachDoneAsync(IPage page, SelfHostedStack stack)
@@ -78,6 +76,27 @@ internal static class SelfHostedSetup
 		await page.Button("Finish setup").ClickAsync();
 		await StaysHomeAsync(page);
 		return invite;
+	}
+
+	internal static async Task JoinAsync(IPage member, string invite)
+	{
+		await member.VisitAsync(invite);
+		await member.Labelled("New password").EnterAsync(MemberPassword);
+		await member.Labelled("Confirm password").EnterAsync(MemberPassword);
+		await member.Button("Join").ClickAsync();
+		await Expect(member.Heading("One more thing")).ToBeVisibleAsync(Wait.Settle);
+		await member.WaitForCircuitAsync();
+		await member.Button("Skip for now").ClickAsync();
+		await StaysHomeAsync(member);
+	}
+
+	internal static async Task<string> IssuedLinkAsync(IPage page)
+	{
+		var link = page.Locator("[data-link]");
+		await Expect(link).ToBeVisibleAsync();
+		var url = await link.InnerTextAsync();
+		await page.Button("Done").ClickAsync();
+		return url;
 	}
 
 	internal static async Task StaysHomeAsync(IPage page)

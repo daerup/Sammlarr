@@ -70,11 +70,11 @@ public class UsersManagementTests
 		var page = await E2EApp.AdminAt(SettingsPage.Section("users"));
 
 		await Expect(Badge(page, AdminName, "Admin")).ToBeVisibleAsync();
-		await OpenAsync(page, AdminName);
-		await Expect(Row(page, AdminName).Text("The last admin can't be made a member or removed.")).ToBeVisibleAsync();
-		await Expect(Row(page, AdminName).Button("Remove")).ToBeHiddenAsync();
-		await OpenAsync(page, MemberName);
-		await Expect(Row(page, MemberName).Button("Remove")).ToBeVisibleAsync();
+		await SettingsPage.OpenPersonAsync(page, AdminName);
+		await Expect(SettingsPage.PersonRow(page, AdminName).Text("The last admin can't be made a member or removed.")).ToBeVisibleAsync();
+		await Expect(SettingsPage.PersonRow(page, AdminName).Button("Remove")).ToBeHiddenAsync();
+		await SettingsPage.OpenPersonAsync(page, MemberName);
+		await Expect(SettingsPage.PersonRow(page, MemberName).Button("Remove")).ToBeVisibleAsync();
 	}
 
 	[Test]
@@ -82,18 +82,18 @@ public class UsersManagementTests
 	{
 		var removable = SammlarrTestHost.SeededRemovable.DisplayName;
 		var page = await E2EApp.AdminAt(SettingsPage.Section("users"));
-		await Expect(Row(page, removable)).ToBeVisibleAsync();
+		await Expect(SettingsPage.PersonRow(page, removable)).ToBeVisibleAsync();
 
-		await OpenAsync(page, removable);
-		await Row(page, removable).Button("Remove").ClickAsync();
+		await SettingsPage.OpenPersonAsync(page, removable);
+		await SettingsPage.PersonRow(page, removable).Button("Remove").ClickAsync();
 		var dialog = page.Modal($"Remove {removable}?");
 		await Expect(dialog.Button($"Remove {removable}")).ToBeDisabledAsync();
 		await dialog.Locator("#remove-confirm").EnterAsync(removable);
 		await dialog.Button($"Remove {removable}").ClickAsync();
 
-		await Expect(Row(page, removable)).ToBeHiddenAsync(Wait.Settle);
+		await Expect(SettingsPage.PersonRow(page, removable)).ToBeHiddenAsync(Wait.Settle);
 		await SettingsPage.VisitSectionAsync(page, "users");
-		await Expect(Row(page, removable)).ToBeHiddenAsync();
+		await Expect(SettingsPage.PersonRow(page, removable)).ToBeHiddenAsync();
 	}
 
 	[Test]
@@ -114,29 +114,18 @@ public class UsersManagementTests
 
 		await stranger.ShouldBeAtAsync(Routes.SignIn);
 		await Expect(stranger.GetByText("Registration is closed. Ask an admin for access.")).ToBeVisibleAsync();
-		await Expect(Row(admin, "Stranger")).ToBeHiddenAsync();
+		await Expect(SettingsPage.PersonRow(admin, "Stranger")).ToBeHiddenAsync();
 
 		await registration.ClickAsync();
 		await Expect(registration).ToHaveAttributeAsync("aria-checked", "true");
 	}
 
-	private static ILocator Row(IPage page, string user) => page.Locator($"[data-person='{user}']");
-
-	private static ILocator Badge(IPage page, string user, string role) => Row(page, user).Text(role);
-
-	private static async Task OpenAsync(IPage page, string user)
-	{
-		var trigger = Row(page, user).Locator("button").First;
-		if (await trigger.GetAttributeAsync("data-state") != "open")
-		{
-			await trigger.ClickAsync();
-		}
-	}
+	private static ILocator Badge(IPage page, string user, string role) => SettingsPage.PersonRow(page, user).Text(role);
 
 	private static async Task ChangeRoleAsync(IPage page, string action)
 	{
-		await OpenAsync(page, MemberName);
-		await Row(page, MemberName).Button(action).ClickAsync();
+		await SettingsPage.OpenPersonAsync(page, MemberName);
+		await SettingsPage.PersonRow(page, MemberName).Button(action).ClickAsync();
 		await page.AlertDialog.Button(action).ClickAsync();
 	}
 
