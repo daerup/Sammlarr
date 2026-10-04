@@ -1,4 +1,6 @@
-namespace Domain.Identity.Birds;
+using Domain.Identity;
+
+namespace UI.Shared.Branding.Birds;
 
 public enum BirdPose
 {
@@ -21,7 +23,7 @@ public enum BirdCrest
 	Plume,
 }
 
-public readonly record struct BirdGenome(
+internal readonly record struct BirdGenome(
 	BirdPose Pose,
 	int Head,
 	int Tilt,
@@ -42,11 +44,11 @@ public readonly record struct BirdGenome(
 
 	private static readonly double[] Beaks = [0.78, 1, 1, 1.3];
 
-	public static BirdGenome Of(UserId id) => Of(id.Value.ToString());
+	internal static BirdGenome Of(UserId id) => Of(id.Value.ToString());
 
-	public static BirdGenome Of(string seed) => From(Fnv1a($"{seed}#"));
+	internal static BirdGenome Of(string seed) => From(Fnv1a($"{seed}#"));
 
-	public static BirdGenome From(uint genes)
+	internal static BirdGenome From(uint genes)
 	{
 		return new BirdGenome(
 			(BirdPose)(genes % 10),
@@ -62,7 +64,7 @@ public readonly record struct BirdGenome(
 		);
 	}
 
-	public static uint Fnv1a(string text)
+	internal static uint Fnv1a(string text)
 	{
 		var hash = 2166136261;
 		foreach (var rune in text.EnumerateRunes())

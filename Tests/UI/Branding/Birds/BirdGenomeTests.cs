@@ -1,8 +1,8 @@
 using CsCheck;
 using Domain.Identity;
-using Domain.Identity.Birds;
+using UI.Shared.Branding.Birds;
 
-namespace Domain.Tests.Identity.Birds;
+namespace UI.Tests.Branding.Birds;
 
 public class BirdGenomeTests
 {
