@@ -1,0 +1,357 @@
+@using Contracts.Auth
+@using Contracts.Identity
+@using Contracts.Settings
+@using Contracts.Setup
+@using Contracts.Wantlist
+@using Domain.Identity
+@inject IOnboardingService Onboarding
+@inject IProviderConfigService ProviderConfigService
+@inject ICredentialService Credentials
+@inject IApiKeyService ApiKeys
+@inject ISinkSwitch SinkSwitch
+@inject IUserManagementService Users
+@inject ICurrentUser CurrentUser
+@inject NavigationManager Navigation
+@inject Notifier Notifier
+
+<div class="setup-card">
+    <div class="mb-[18px] flex items-center">
+        <span class="text-[15px] font-semibold">Set up Sammlarr</span>
+        @if (!NeedsAdmin && _step > AccountStep)
+        {
+            <BbButton Variant="ButtonVariant.Link" Size="ButtonSize.Small" Class="setup-link ml-auto h-auto p-0 text-[13px] font-normal text-muted-foreground underline underline-offset-3 hover:text-foreground" OnClick="() => FinishAsync(Home)">Skip setup</BbButton>
+        }
+    </div>
+    <div class="setup-wizard" data-passed="@_step" data-skipped="@(_skipped ? "true" : null)">
+        <BbFormWizard CurrentStep="_step" CurrentStepChanged="step => _step = step" ShowNavigation="false" IndicatorClass="px-11" NavigationClass="mt-6 border-t pt-5 pb-0">
+            <ChildContent>
+                <BbWizardStep Title="Account" Icon="@Icon(AccountStep)">
+                    @if (NeedsAdmin)
+                    {
+                        @Head("Create the admin account", "Nobody has signed in yet. Enter the setup code from the server log, then choose how people sign in to this Sammlarr: with Plex, or with Sammlarr accounts you create. Whoever does this becomes the admin.")
+                        <AdminForm Error="@Error"/>
+                    }
+                    else
+                    {
+                        @Head("The admin account", "Sammlarr has its admin. Whoever signs in this way manages this Sammlarr.")
+                        <p class="text-sm"><span class="font-medium">@CurrentUser.DisplayName</span>, @AdminKind</p>
+                    }
+                </BbWizardStep>
+                <BbWizardStep Title="Wantlist" Icon="@Icon(WantlistStep)">
+                    @Head("Where your wantlist syncs", "Pick where the titles you want end up. You can change it later in Settings › Providers.")
+                    @if (_config is { } config)
+                    {
+                        <SinkCards Picked="PickedSink" PickedChanged="PickSinkAsync" Disabled="_switching"/>
+                        <div class="mt-4 overflow-hidden rounded-lg border bg-card">
+                            @if (PickedSink == SinkKind.Arr)
+                            {
+                                <ArrSinkRow Open="_arrOpen"
+                                            OpenChanged="open => _arrOpen = open"
+                                            SettingUp="_settingUp"
+                                            Switching="_switching"
+                                            SwitchRequested="() => SwitchAsync(SinkKind.Arr)"
+                                            StayOnPlex="() => PickSinkAsync(SinkKind.Plex)"
+                                            InstanceMoved="MoveAsync"
+                                            Changed="RefreshAsync"/>
+                            }
+                            else
+                            {
+                                <AccountRow Provider="AuthProvider.Plex"
+                                            SignsIn="config.AuthProvider == AuthProvider.Plex"
+                                            Open="_plexOpen"
+                                            OpenChanged="open => _plexOpen = open"
+                                            Changed="RefreshAsync"
+                                            ReturnUrl="/setup"/>
+                            }
+                        </div>
+                    }
+                </BbWizardStep>
+                <BbWizardStep Title="API keys" Icon="@Icon(KeysStep)">
+                    @Head("API keys", "Keys are yours: each person who signs in adds their own. A TMDB key is needed on every install; MDBList only for MDBList lists.")
+                    @if (_config is { } config)
+                    {
+                        <AccountsAndKeys Config="config" Open="_keyOpen" OpenChanged="open => _keyOpen = open" Changed="RefreshAsync" TmdbRequired="true"/>
+                    }
+                </BbWizardStep>
+                <BbWizardStep Title="@PeopleTitle" Icon="@Icon(PeopleStep)" IsOptional="true">
+                    @if (SignsInWithPlex)
+                    {
+                        @Head("Sign-ups", "Whether other people can join by signing in with their Plex account.")
+                        <SignUpsCard/>
+                    }
+                    else
+                    {
+                        @Head("Members", "Nobody signs themselves up to a Sammlarr with its own accounts: add the people who should have one. You can do this later in Settings › Users.")
+                        <div class="flex flex-col gap-3">
+                            <PeopleList/>
+                        </div>
+                    }
+                </BbWizardStep>
+                <BbWizardStep Title="Done" Icon="@Icon(DoneStep)">
+                    @Head("Sammlarr is set up", "Everything below can be changed in Settings. Run setup again from Settings › Providers.")
+                    <SetupSummary Rows="_summary" LaterClicked="() => FinishAsync(SettingsLinks.Providers)"/>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <BbButton Size="ButtonSize.Small" OnClick="() => FinishAsync(FirstFeed)">
+                            <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
+                            <span>Create your first feed</span>
+                        </BbButton>
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => FinishAsync(Settings)">
+                            <LucideIcon Name="settings" Size="14" Class="mr-1.5"/>
+                            <span>Open Settings</span>
+                        </BbButton>
+                    </div>
+                </BbWizardStep>
+            </ChildContent>
+            <NavigationTemplate>
+                @if (NeedsAdmin)
+                {
+                    <span class="text-xs text-muted-foreground">The step completes when the admin exists; the Plex sign-in comes back here, on the Wantlist step.</span>
+                }
+                else
+                {
+                    <div class="flex w-full items-center gap-3">
+                        @if (_step > AccountStep)
+                        {
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => _step--">
+                                <LucideIcon Name="arrow-left" Size="14" Class="mr-1.5"/>
+                                <span>Back</span>
+                            </BbButton>
+                        }
+                        <div class="ml-auto flex items-center gap-3">
+                            @if (Why is { } why)
+                            {
+                                <span class="text-xs text-muted-foreground">@why</span>
+                            }
+                            @if (_step == PeopleStep)
+                            {
+                                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="SkipPeopleAsync">Skip</BbButton>
+                            }
+                            @if (_step == DoneStep)
+                            {
+                                <BbButton Size="ButtonSize.Small" OnClick="() => FinishAsync(Home)">Finish setup</BbButton>
+                            }
+                            else
+                            {
+                                <BbButton Size="ButtonSize.Small" Disabled="@(Why is not null)" OnClick="NextAsync">
+                                    <span>Next</span>
+                                    <LucideIcon Name="arrow-right" Size="14" Class="ml-1.5"/>
+                                </BbButton>
+                            }
+                        </div>
+                    </div>
+                }
+            </NavigationTemplate>
+        </BbFormWizard>
+    </div>
+</div>
+
+@code {
+    private const int AccountStep = 0;
+    private const int WantlistStep = 1;
+    private const int KeysStep = 2;
+    private const int PeopleStep = 3;
+    private const int DoneStep = 4;
+    private const string Home = "/";
+    private const string FirstFeed = "/feeds/create";
+    private const string Settings = "/settings";
+
+    private int _step;
+    private int _drawnStep = -1;
+    private ProviderConfig? _config;
+    private HashSet<MediaProvider> _ready = [];
+    private bool _settingUp;
+    private bool _switching;
+    private bool _skipped;
+    private bool _arrOpen = true;
+    private bool _plexOpen = true;
+    private MediaProvider? _keyOpen = MediaProvider.Tmdb;
+    private IReadOnlyList<SummaryRow> _summary = [];
+
+    [Parameter] public bool NeedsAdmin { get; set; }
+
+    [Parameter] public string? Error { get; set; }
+
+    private bool SignsInWithPlex => _config?.AuthProvider == AuthProvider.Plex;
+
+    private string PeopleTitle => SignsInWithPlex ? "Sign-ups" : "Members";
+
+    private string AdminKind => SignsInWithPlex ? "signs in with Plex" : "a Sammlarr account";
+
+    private SinkKind PickedSink => _settingUp ? SinkKind.Arr : _config?.Sink ?? SinkKind.Plex;
+
+    private string? Why
+    {
+        get
+        {
+            return _step switch
+            {
+                WantlistStep when PickedSink == SinkKind.Arr && (_settingUp || _config?.Sink != SinkKind.Arr) => "Connect Radarr and Sonarr to continue",
+                WantlistStep when PickedSink == SinkKind.Plex && !_ready.Contains(MediaProvider.Plex) => "Connect Plex to continue",
+                KeysStep when !_ready.Contains(MediaProvider.Tmdb) => "Add a TMDB key to continue",
+                _ => null,
+            };
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        _step = NeedsAdmin ? AccountStep : WantlistStep;
+        if (!NeedsAdmin)
+        {
+            await RefreshAsync();
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (_drawnStep != _step)
+        {
+            _drawnStep = _step;
+            StateHasChanged();
+        }
+    }
+
+    private string? Icon(int step)
+    {
+        return step switch
+        {
+            PeopleStep when _skipped && _step > PeopleStep => "minus",
+            AccountStep when !NeedsAdmin => "check",
+            _ when step < _step => "check",
+            _ => null,
+        };
+    }
+
+    private static RenderFragment Head(string title, string text)
+    {
+        return @<div class="mb-4 space-y-1.5">
+            <h4 class="text-lg font-semibold tracking-tight">@title</h4>
+            <p class="max-w-[600px] text-sm text-muted-foreground">@text</p>
+        </div>;
+    }
+
+    private async Task RefreshAsync()
+    {
+        _config = await ProviderConfigService.GetAsync();
+        _ready =
+        [
+            .. (await Credentials.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
+            .. (await ApiKeys.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
+        ];
+    }
+
+    private async Task NextAsync()
+    {
+        _step++;
+        if (_step == PeopleStep)
+        {
+            _skipped = false;
+        }
+
+        if (_step == DoneStep)
+        {
+            await SummarizeAsync();
+        }
+    }
+
+    private async Task SkipPeopleAsync()
+    {
+        if (SignsInWithPlex)
+        {
+            await Users.SetRegistrationModeAsync(RegistrationMode.Closed);
+        }
+
+        _skipped = true;
+        _step = DoneStep;
+        await SummarizeAsync();
+    }
+
+    private async Task PickSinkAsync(SinkKind sink)
+    {
+        switch (sink)
+        {
+            case SinkKind.Arr:
+                _settingUp = _config?.Sink != SinkKind.Arr;
+                _arrOpen = true;
+                break;
+            case SinkKind.Plex when _settingUp:
+                _settingUp = false;
+                break;
+            case SinkKind.Plex when _config?.Sink == SinkKind.Arr:
+                await SwitchAsync(SinkKind.Plex);
+                break;
+            case SinkKind.Plex:
+                break;
+        }
+    }
+
+    private Task SwitchAsync(SinkKind sink) => RunAsync(() => SinkSwitch.SwitchAsync(sink));
+
+    private Task MoveAsync(ArrSinkConfig arr) => RunAsync(() => SinkSwitch.MoveAsync(arr));
+
+    private async Task RunAsync(Func<Task<Result<SinkSwitched>>> run)
+    {
+        _switching = true;
+        StateHasChanged();
+        try
+        {
+            var switched = await run();
+            switched.ApplyError(error => Notifier.Error(error.Reason, "The wantlist did not switch"));
+            _settingUp = switched.Match(_ => false, _ => _settingUp);
+            await RefreshAsync();
+        }
+        finally
+        {
+            _switching = false;
+        }
+    }
+
+    private async Task SummarizeAsync()
+    {
+        await RefreshAsync();
+        var config = _config!;
+        var people = await PeopleAsync(config);
+        _summary =
+        [
+            new("Admin", $"{CurrentUser.DisplayName}, {AdminKind}", Done: true, Later: false),
+            new("Wantlist", config.Sink == SinkKind.Arr ? "Syncs to Radarr + Sonarr" : "Syncs to your Plex watchlist", Done: true, Later: false),
+            Key("TMDB key", MediaProvider.Tmdb, "Not set"),
+            Key("MDBList key", MediaProvider.Mdblist, "Not set: needed only for MDBList feeds"),
+            people,
+        ];
+    }
+
+    private SummaryRow Key(string label, MediaProvider provider, string missing)
+    {
+        var ready = _ready.Contains(provider);
+        return new SummaryRow(label, ready ? "Connected" : missing, ready, Later: !ready);
+    }
+
+    private async Task<SummaryRow> PeopleAsync(ProviderConfig config)
+    {
+        if (config.AuthProvider == AuthProvider.Plex)
+        {
+            var open = config.RegistrationMode == RegistrationMode.Open;
+            return new SummaryRow("New sign-ups", open ? "On: anyone who signs in with Plex gets a member account" : "Off: only existing accounts can sign in", Done: true, Later: false);
+        }
+
+        var others = (await Users.GetPeopleAsync()).Select(Describe).WhereSome().ToList();
+        return new SummaryRow("Members", others.Count == 0 ? "Nobody else yet" : string.Join(", ", others), Done: true, Later: false);
+    }
+
+    private Optional<string> Describe(Person person)
+    {
+        return person switch
+        {
+            JoinedPerson joined => Optional.When(joined.User.Id != CurrentUser.Id, () => joined.User.DisplayName),
+            InvitedPerson invited => Some.Of($"{invited.DisplayName}, invited"),
+        };
+    }
+
+    private async Task FinishAsync(string target)
+    {
+        await Onboarding.CompleteAsync();
+        Navigation.NavigateTo(target);
+    }
+}

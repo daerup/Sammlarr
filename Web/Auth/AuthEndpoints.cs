@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Contracts.Auth;
 using Contracts.Identity;
+using Contracts.Setup;
 using Domain.Identity;
 using Domain.Providers;
 using Microsoft.AspNetCore.Authentication;
@@ -12,6 +13,8 @@ namespace Web.Auth;
 
 internal static class AuthEndpoints
 {
+	private const string SetupPath = "/setup";
+
 	private static readonly Error StaleSignIn = Error.From("The sign-in timed out or was started in another browser. Please try again.");
 
 	public static void MapAuthEndpoints(this IEndpointRouteBuilder endpoints)
@@ -50,16 +53,24 @@ internal static class AuthEndpoints
 					return Results.NotFound();
 				}
 
+				var setupCode = SetupClaim.Redeem(context);
 				if (!OAuthState.Redeem(context, state))
 				{
-					return Results.Redirect(SignInPage(StaleSignIn, returnUrl));
+					return Results.Redirect(Failed(StaleSignIn, setupCode, returnUrl));
 				}
 
 				var query = context.Request.QueryString.Value ?? string.Empty;
 				return await SignedIn(context.User)
-					.Match(user => signIn.LinkAsync(authProvider, query, user, cancellationToken), () => signIn.CompleteAsync(authProvider, query, cancellationToken))
+					.Match(
+						user => signIn.LinkAsync(authProvider, query, user, cancellationToken),
+						() =>
+							setupCode.Match(
+								code => signIn.CompleteSetupAsync(authProvider, query, code, cancellationToken),
+								() => signIn.CompleteAsync(authProvider, query, cancellationToken)
+							)
+					)
 					.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
-					.GetValueOr(error => Results.Redirect($"/signin?authError={Uri.EscapeDataString(error.Reason)}"));
+					.GetValueOr(error => Results.Redirect(Failed(error, setupCode, returnUrl)));
 			}
 		);
 
@@ -106,6 +117,42 @@ internal static class AuthEndpoints
 				}
 			)
 			.RequireRateLimiting(AuthenticationModule.SignInLimit);
+		endpoints
+			.MapPost(
+				"/setup/admin",
+				async (
+					[FromForm] string code,
+					[FromForm] string username,
+					[FromForm] string password,
+					[FromForm] string confirmation,
+					HttpContext context,
+					IOnboardingService onboarding
+				) =>
+				{
+					return await onboarding
+						.ClaimAsync(new AdminClaim(code, username, password, confirmation), context.RequestAborted)
+						.Map(user => SignInAndRedirectAsync(context, user, SetupPath))
+						.GetValueOr(error => Results.Redirect(SetupPage(error)));
+				}
+			)
+			.RequireRateLimiting(AuthenticationModule.SignInLimit);
+		endpoints
+			.MapPost(
+				"/setup/plex",
+				async ([FromForm] string code, HttpContext context, IOnboardingService onboarding) =>
+				{
+					var problem = await onboarding.CodeProblemAsync(code, context.RequestAborted);
+					return problem.Match(
+						error => Results.Redirect(SetupPage(error)),
+						() =>
+						{
+							SetupClaim.Issue(context, code);
+							return Results.Redirect(QueryHelpers.AddQueryString("/auth/plex/login", "returnUrl", SetupPath));
+						}
+					);
+				}
+			)
+			.RequireRateLimiting(AuthenticationModule.SignInLimit);
 		endpoints.MapGet(
 			"/auth/logout",
 			async (HttpContext context) =>
@@ -139,6 +186,13 @@ internal static class AuthEndpoints
 	{
 		return QueryHelpers.AddQueryString($"/{page}/{Uri.EscapeDataString(token)}", "error", error.Reason);
 	}
+
+	private static string Failed(Error error, Optional<string> setupCode, string? returnUrl)
+	{
+		return setupCode.Match(_ => SetupPage(error), () => SignInPage(error, returnUrl));
+	}
+
+	private static string SetupPage(Error error) => QueryHelpers.AddQueryString(SetupPath, "error", error.Reason);
 
 	private static string SignInPage(Error error, string? returnUrl)
 	{

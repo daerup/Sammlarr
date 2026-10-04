@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@inject CurrentUserAccessor CurrentUser
 
 <div class="relative min-h-screen flex flex-col items-center justify-center gap-8 px-6 bg-background">
     <div class="absolute top-4 right-4">
@@ -8,4 +9,19 @@
     @Body
 </div>
 
+<BbToastProvider Position="ToastPosition.BottomRight"/>
+<BbDialogProvider/>
 <BbPortalHost/>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (AuthenticationState is not null)
+        {
+            CurrentUser.SetPrincipal((await AuthenticationState).User);
+        }
+    }
+}

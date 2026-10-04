@@ -13,6 +13,7 @@ using Web;
 using Web.Auth;
 using Web.Health;
 using Web.Localization;
+using Web.Setup;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<FirstRunRedirect>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();

@@ -24,6 +24,8 @@ internal record ProviderConfigRow
 
 	public required RegistrationMode RegistrationMode { get; set; }
 
+	public DateTimeOffset? OnboardingCompletedAt { get; set; }
+
 	[MaxLength(2048)]
 	public string? RadarrUrl { get; set; }
 

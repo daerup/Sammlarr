@@ -1,0 +1,54 @@
+@using Domain.Identity
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService BrandingService
+
+<form method="post" action="/setup/admin" class="flex w-full max-w-[420px] flex-col gap-4">
+    <AntiforgeryToken/>
+    @if (!string.IsNullOrWhiteSpace(Error))
+    {
+        <div class="alert-soft-destructive flex items-start gap-3 rounded-lg border px-4 py-3 text-left text-sm" role="alert">
+            <LucideIcon Name="circle-alert" Size="18" Class="shrink-0 mt-0.5"/>
+            <span class="leading-relaxed">@Error</span>
+        </div>
+    }
+    <BbField>
+        <BbFieldLabel For="setup-code">Setup code</BbFieldLabel>
+        <BbFieldContent>
+            <BbInput Id="setup-code" Name="code" Placeholder="e.g. 4F7K-29QD" autocomplete="off" spellcheck="false"/>
+            <BbFieldDescription>Printed in the server log when Sammlarr starts without an admin.</BbFieldDescription>
+        </BbFieldContent>
+    </BbField>
+    <div class="signin" style="--brand: @Plex.BrandColor">
+        <BbButton Type="ButtonType.Submit" Variant="ButtonVariant.Outline" Class="signin-button w-full gap-2 font-medium" formaction="/setup/plex" formnovalidate="formnovalidate">
+            <span>Sign in with</span>
+            <ProviderLogo Provider="MediaProvider.Plex" Form="ProviderLogoForm.Logo" Size="16"/>
+        </BbButton>
+    </div>
+    <div class="or-line">or a Sammlarr account</div>
+    <BbField>
+        <BbFieldLabel For="setup-username">Username</BbFieldLabel>
+        <BbFieldContent>
+            <BbInput Id="setup-username" Name="username" Required="true" Placeholder="admin" autocomplete="username"/>
+        </BbFieldContent>
+    </BbField>
+    <BbField>
+        <BbFieldLabel For="setup-password">Password</BbFieldLabel>
+        <BbFieldContent>
+            <BbInput Id="setup-password" Name="password" Type="InputType.Password" Required="true" Placeholder="@($"At least {PasswordRules.MinimumLength} characters")"
+                     autocomplete="new-password"/>
+        </BbFieldContent>
+    </BbField>
+    <BbField>
+        <BbFieldLabel For="setup-confirmation">Confirm password</BbFieldLabel>
+        <BbFieldContent>
+            <BbInput Id="setup-confirmation" Name="confirmation" Type="InputType.Password" Required="true" autocomplete="new-password"/>
+        </BbFieldContent>
+    </BbField>
+    <BbButton Type="ButtonType.Submit" Class="w-full">Create admin account</BbButton>
+</form>
+
+@code {
+    [Parameter] public string? Error { get; set; }
+
+    private BrandingInfo Plex => BrandingService.GetBrandingInfo(MediaProvider.Plex);
+}

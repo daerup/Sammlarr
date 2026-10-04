@@ -5,6 +5,7 @@ using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Notifications;
 using Contracts.Settings;
+using Contracts.Setup;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using NetArchTest.Rules;
@@ -87,8 +88,10 @@ public class RepositoryTests
 					"Core.Auth.AdminPasswordReset",
 					"Core.Auth.AccountLinkService",
 					"Core.Identity.UserManagementService",
+					"Core.Setup.OnboardingService",
 				]
 			);
+		yield return () => (typeof(ISetupStateRepository), ["DB.Data.Config.SetupStateRepository", "DB.Data.Config.ConfigModule", "Core.Setup.OnboardingService"]);
 		yield return () =>
 			(
 				typeof(IAccountLinkRepository),

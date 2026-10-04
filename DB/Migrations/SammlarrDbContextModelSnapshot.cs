@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261004051349_SearchDefaultsToTmdb";
+    public override string LastMigrationId => "20261004061136_OnboardingCompletedAt";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -144,6 +144,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Property<string>("AuthProvider")
                     .IsRequired()
                     .HasColumnType("TEXT");
+
+                b.Property<long?>("OnboardingCompletedAt")
+                    .HasColumnType("INTEGER");
 
                 b.Property<string>("RadarrApiKey")
                     .HasMaxLength(4096)

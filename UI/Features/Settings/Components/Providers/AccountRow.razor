@@ -88,6 +88,8 @@
 
     [Parameter] public EventCallback Changed { get; set; }
 
+    [Parameter] public string ReturnUrl { get; set; } = SettingsLinks.Providers;
+
     private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider.AsMediaProvider());
 
     private string _tokenInput = string.Empty;
@@ -168,7 +170,7 @@
 
     private void Connect()
     {
-        var returnUrl = Uri.EscapeDataString("/settings?section=providers");
+        var returnUrl = Uri.EscapeDataString(ReturnUrl);
         NavigationManager.NavigateTo($"/auth/{Provider.ToString().ToLowerInvariant()}/login?returnUrl={returnUrl}", forceLoad: true);
     }
 }

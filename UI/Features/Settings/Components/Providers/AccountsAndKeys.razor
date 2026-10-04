@@ -1,0 +1,76 @@
+@using Contracts.Auth
+@using Domain.Settings
+
+<div class="rounded-lg border bg-card overflow-hidden">
+    @if (Config.AuthProvider == AuthProvider.Local)
+    {
+        <SammlarrAccountRow Open="Open == MediaProvider.Local" OpenChanged="open => ToggleAsync(MediaProvider.Local, open)"/>
+    }
+    @if (UsesPlex)
+    {
+        <AccountRow Provider="AuthProvider.Plex"
+                    SignsIn="Config.AuthProvider == AuthProvider.Plex"
+                    Open="Open == MediaProvider.Plex"
+                    OpenChanged="open => ToggleAsync(MediaProvider.Plex, open)"
+                    Changed="Changed"/>
+    }
+    <ApiKeyRow Provider="ApiKeyProvider.Tmdb"
+               Required="TmdbRequired"
+               Uses="TmdbUses"
+               Open="Open == MediaProvider.Tmdb"
+               OpenChanged="open => ToggleAsync(MediaProvider.Tmdb, open)"
+               Changed="Changed">
+        <Description>
+            Your TMDB API key. Get one at
+            <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer"
+               class="underline underline-offset-2 hover:text-foreground transition-colors">themoviedb.org › Settings › API</a>
+            (free, takes a minute).
+        </Description>
+    </ApiKeyRow>
+    <ApiKeyRow Provider="ApiKeyProvider.Mdblist"
+               Uses="MdblistUses"
+               Open="Open == MediaProvider.Mdblist"
+               OpenChanged="open => ToggleAsync(MediaProvider.Mdblist, open)"
+               Changed="Changed">
+        <Description>
+            Your MDBList API key. Get one at
+            <a href="https://mdblist.com/preferences/#api" target="_blank" rel="noopener noreferrer"
+               class="underline underline-offset-2 hover:text-foreground transition-colors">mdblist.com › Preferences › API</a>
+            (free).
+        </Description>
+    </ApiKeyRow>
+</div>
+
+@code {
+    private static readonly string[] TmdbUses =
+    [
+        "Search, to find titles to add",
+        "Trending titles in Browse",
+        "TMDB lists as feeds",
+        "the poster, summary and rating on every title",
+        "the ids Radarr and Sonarr need to add a title",
+    ];
+
+    private static readonly string[] MdblistUses =
+    [
+        "MDBList lists as feeds, like hdlists/latest-hd-documentary-movies-1980-to-today",
+        "nothing else, so leave it empty if you will not follow MDBList lists",
+    ];
+
+    [Parameter] [EditorRequired] public required ProviderConfig Config { get; set; }
+
+    [Parameter] public MediaProvider? Open { get; set; }
+
+    [Parameter] public EventCallback<MediaProvider?> OpenChanged { get; set; }
+
+    [Parameter] public EventCallback Changed { get; set; }
+
+    [Parameter] public bool TmdbRequired { get; set; }
+
+    private bool UsesPlex => Config.AuthProvider == AuthProvider.Plex || Config.Sink == SinkKind.Plex || Config.SearchProvider == SearchProvider.Plex;
+
+    private Task ToggleAsync(MediaProvider provider, bool open)
+    {
+        return OpenChanged.InvokeAsync(open ? provider : null);
+    }
+}

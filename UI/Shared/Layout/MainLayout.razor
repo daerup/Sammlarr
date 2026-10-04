@@ -1,8 +1,12 @@
 @inherits LayoutComponentBase
+@using UI.Features.Onboarding.Components
 @inject CurrentUserAccessor CurrentUser
 @inject AppVersionProvider Versions
 
 <SessionInvalidationListener/>
+<AuthorizeView>
+    <SetupRedirect/>
+</AuthorizeView>
 <AuthorizeView>
     <GlobalSearch @bind-IsOpen="_isSearchOpen"/>
 </AuthorizeView>

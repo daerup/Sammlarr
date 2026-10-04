@@ -1,7 +1,10 @@
 using Contracts.Auth;
 using Contracts.Identity;
+using Contracts.Settings;
+using Core.Setup;
 using Domain.Identity;
 using Domain.Providers;
+using Domain.Settings;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
@@ -13,6 +16,8 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	private ISignInService Testee => host.Resolve<ISignInService>();
 
+	private string SetupCode => host.Resolve<SetupGate>().Code;
+
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
@@ -21,7 +26,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.NoUsers();
 		host.OAuthReturns("plex-uuid", "John");
 
-		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", SetupCode);
 
 		await Assert
 			.That(result)
@@ -62,9 +67,32 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RegistrationClosed();
 		host.OAuthReturns("plex-uuid", "Ada");
 
-		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", SetupCode);
 
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Role).IsEqualTo(UserRole.Admin));
+	}
+
+	[Test]
+	public async Task SignInAsync_ForTheFirstUser_ClosesSignUpsUntilTheAdminOpensThem()
+	{
+		await host.NoUsers();
+		host.OAuthReturns("plex-uuid", "Ada");
+
+		await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", SetupCode);
+
+		await Assert.That((await host.Resolve<IProviderConfigService>().GetAsync()).RegistrationMode).IsEqualTo(RegistrationMode.Closed);
+	}
+
+	[Test]
+	public async Task SignInAsync_ForTheFirstUserWithoutTheSetupCode_CreatesNobody()
+	{
+		await host.NoUsers();
+		host.OAuthReturns("plex-uuid", "Mallory");
+
+		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+
+		await Assert.That(result).IsError();
+		await Assert.That(await host.ScopedDbContext.Users.CountAsync()).IsEqualTo(0);
 	}
 
 	[Test]
@@ -94,7 +122,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.NoUsers();
 		host.OAuthReturns("plex-uuid", "John");
 
-		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", SetupCode);
 
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(await host.HasStoredCredential(AuthProvider.Plex, user.Id)).IsTrue());
 	}
@@ -104,7 +132,9 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.NoUsers();
 		host.OAuthReturns("plex-1", "Ada");
-		var first = (await Testee.CompleteAsync(AuthProvider.Plex, "callback")).GetOrThrow(error => new InvalidOperationException(error.Reason));
+		var first = (await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", SetupCode)).GetOrThrow(error => new InvalidOperationException(error.Reason));
+		host.CurrentUser.Id = first.Id;
+		await host.Resolve<IUserManagementService>().SetRegistrationModeAsync(RegistrationMode.Open);
 		host.OAuthReturns("plex-2", "Bob");
 		var second = (await Testee.CompleteAsync(AuthProvider.Plex, "callback")).GetOrThrow(error => new InvalidOperationException(error.Reason));
 

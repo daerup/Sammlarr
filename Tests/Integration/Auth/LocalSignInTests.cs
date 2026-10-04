@@ -1,6 +1,7 @@
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
+using Core.Setup;
 using Domain.Identity;
 using Domain.Providers;
 using Harness;
@@ -139,12 +140,12 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task CompleteAsync_ForTheFirstPlexSignInOnAnEmptyInstall_MakesThemAdminAndSwitchesToPlex()
+	public async Task CompleteSetupAsync_ForTheFirstPlexSignInOnAnEmptyInstall_MakesThemAdminAndSwitchesToPlex()
 	{
 		await host.NoUsers();
 		host.OAuthReturns("plex-uuid", "First");
 
-		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", host.Resolve<SetupGate>().Code);
 
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Role).IsEqualTo(UserRole.Admin));
 		await Assert.That((await host.Resolve<IProviderConfigService>().GetAsync()).AuthProvider).IsEqualTo(AuthProvider.Plex);

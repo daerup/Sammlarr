@@ -4,7 +4,7 @@
 @inject IApiKeyFactory ApiKeyFactory
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
-<ProviderRow Provider="@Provider.AsMediaProvider()" Open="Open" OpenChanged="OpenChanged">
+<ProviderRow Provider="@Provider.AsMediaProvider()" Open="Open" OpenChanged="OpenChanged" Required="Required">
     <Status>
         @if (_loaded)
         {
@@ -23,6 +23,19 @@
                 <BbFieldDescription>@Description</BbFieldDescription>
             </BbFieldContent>
         </BbField>
+
+        @if (Uses.Count > 0)
+        {
+            <div class="text-sm text-muted-foreground">
+                <span class="font-medium text-foreground">What it gets you</span>
+                <ul class="mt-1 list-disc pl-5">
+                    @foreach (var use in Uses)
+                    {
+                        <li>@use</li>
+                    }
+                </ul>
+            </div>
+        }
 
         <CredentialActions State="_state" HasChange="HasChange" OnTest="TestAsync" OnSave="SaveAsync" OnCancel="Cancel">
             <Remove>
@@ -57,6 +70,10 @@
     [Parameter] [EditorRequired] public required ApiKeyProvider Provider { get; set; }
 
     [Parameter] [EditorRequired] public required RenderFragment Description { get; set; }
+
+    [Parameter] public IReadOnlyList<string> Uses { get; set; } = [];
+
+    [Parameter] public bool Required { get; set; }
 
     [Parameter] public bool Open { get; set; }
 

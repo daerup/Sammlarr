@@ -1,0 +1,47 @@
+.setup-card {
+    width: 800px;
+    max-width: 100%;
+    margin-bottom: 48px;
+    padding: 22px 26px 20px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--muted) 40%, var(--background));
+}
+
+.setup-wizard ::deep nav > button:nth-of-type(4)::after {
+    content: "optional";
+    font-size: 11px;
+    color: var(--muted-foreground);
+}
+
+.setup-wizard[data-passed="1"] ::deep nav > button:nth-of-type(-n + 1) > span:first-child,
+.setup-wizard[data-passed="2"] ::deep nav > button:nth-of-type(-n + 2) > span:first-child,
+.setup-wizard[data-passed="3"] ::deep nav > button:nth-of-type(-n + 3) > span:first-child,
+.setup-wizard[data-passed="4"] ::deep nav > button:nth-of-type(-n + 4) > span:first-child {
+    border-color: var(--foreground);
+    color: var(--foreground);
+}
+
+.setup-wizard[data-passed="1"] ::deep nav > button:nth-of-type(-n + 1) > span + span,
+.setup-wizard[data-passed="2"] ::deep nav > button:nth-of-type(-n + 2) > span + span,
+.setup-wizard[data-passed="3"] ::deep nav > button:nth-of-type(-n + 3) > span + span,
+.setup-wizard[data-passed="4"] ::deep nav > button:nth-of-type(-n + 4) > span + span {
+    color: var(--foreground);
+}
+
+.setup-wizard[data-passed="1"] ::deep nav > div:nth-of-type(-n + 1),
+.setup-wizard[data-passed="2"] ::deep nav > div:nth-of-type(-n + 2),
+.setup-wizard[data-passed="3"] ::deep nav > div:nth-of-type(-n + 3),
+.setup-wizard[data-passed="4"] ::deep nav > div:nth-of-type(-n + 4) {
+    background-color: var(--foreground);
+}
+
+.setup-wizard[data-skipped] ::deep nav > button:nth-of-type(4) > span:first-child {
+    border-style: dashed;
+    border-color: var(--muted-foreground);
+    color: var(--muted-foreground);
+}
+
+.setup-wizard[data-skipped] ::deep nav > button:nth-of-type(4) > span + span {
+    color: var(--muted-foreground);
+}

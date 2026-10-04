@@ -1,10 +1,6 @@
-@using Contracts.Identity
 @using Contracts.Settings
-@using Domain.Identity
-@inject IUserManagementService Users
+@using Domain.Settings
 @inject IProviderConfigService ProviderConfigService
-@inject ICurrentUser CurrentUser
-@inject Notifier Notifier
 
 <div class="flex w-full max-w-4xl flex-col gap-4">
     <div class="space-y-1 px-1">
@@ -14,37 +10,12 @@
 
     @if (_config is { } config)
     {
-        @switch (config.AuthProvider)
+        @if (config.AuthProvider == AuthProvider.Plex)
         {
-            case AuthProvider.Plex:
-                <section class="flex items-center gap-4 rounded-lg border bg-card px-4 py-3.5" aria-label="Sign-ups">
-                    <LucideIcon Name="user-plus" Size="16" Class="shrink-0 text-muted-foreground"/>
-                    <div class="min-w-0 space-y-0.5">
-                        <h4 class="text-sm font-medium">Allow new sign-ups</h4>
-                        <p class="text-xs text-muted-foreground">
-                            When on, anyone who signs in with Plex gets a member account. When off, only people who already have an account can sign in.
-                        </p>
-                    </div>
-                    <span class="ml-auto">
-                        <BbSwitch Checked="_registrationOpen" CheckedChanged="SetRegistrationAsync" AriaLabel="Allow new sign-ups"/>
-                    </span>
-                </section>
-                break;
-            case AuthProvider.Local:
-                <div class="flex justify-end">
-                    <InviteDialog Invited="LoadAsync"/>
-                </div>
-                break;
+            <SignUpsCard/>
         }
 
-        <div class="overflow-hidden rounded-lg border bg-card" aria-label="People">
-            @foreach (var person in _people)
-            {
-                var key = Key(person);
-                <PersonRow @key="key" Person="person" SignIn="config.AuthProvider" Sink="config.Sink" IsYou="IsYou(person)" IsLastAdmin="IsLastAdmin(person)"
-                           Open="_open == key" OpenChanged="open => _open = open ? key : null" Changed="LoadAsync"/>
-            }
-        </div>
+        <PeopleList/>
     }
     else
     {
@@ -55,12 +26,6 @@
 
 @code {
     private ProviderConfig? _config;
-
-    private IReadOnlyList<Person> _people = [];
-
-    private bool _registrationOpen;
-
-    private string? _open;
 
     private string How
     {
@@ -78,36 +43,6 @@
     protected override async Task OnInitializedAsync()
     {
         await Task.Yield();
-        await LoadAsync();
-    }
-
-    private async Task LoadAsync()
-    {
-        var config = await ProviderConfigService.GetAsync();
-        _people = await Users.GetPeopleAsync();
-        _registrationOpen = config.RegistrationMode == RegistrationMode.Open;
-        _config = config;
-    }
-
-    private static string Key(Person person)
-    {
-        return person switch
-        {
-            JoinedPerson joined => joined.User.Id.ToString(),
-            InvitedPerson invited => $"invite:{invited.Username}",
-        };
-    }
-
-    private bool IsYou(Person person) => person is JoinedPerson joined && joined.User.Id == CurrentUser.Id;
-
-    private bool IsLastAdmin(Person person) => person is JoinedPerson { User.Role: UserRole.Admin } && _people.Count(IsAdmin) <= 1;
-
-    private static bool IsAdmin(Person person) => person is JoinedPerson { User.Role: UserRole.Admin };
-
-    private async Task SetRegistrationAsync(bool open)
-    {
-        await Users.SetRegistrationModeAsync(open ? RegistrationMode.Open : RegistrationMode.Closed);
-        _registrationOpen = open;
-        Notifier.Success(open ? "New sign-ups are on." : "New sign-ups are off.");
+        _config = await ProviderConfigService.GetAsync();
     }
 }
