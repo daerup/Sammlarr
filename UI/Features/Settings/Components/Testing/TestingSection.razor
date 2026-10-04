@@ -1,59 +1,80 @@
 @using UI.Features.Settings.Components.Testing.Demos
+@inject ScrollService ScrollService
 
-<div class="w-full flex flex-col gap-3">
-    <div class="mb-1">
-        <h2 class="text-lg font-semibold tracking-tight">Testing</h2>
-        <p class="text-muted-foreground mt-1 text-sm leading-relaxed max-w-2xl">
-            A playground for the app's UI components, for checking them during development. Release builds leave it out.
-        </p>
+<div class="flex w-full flex-col gap-8">
+    <div class="flex flex-col gap-3">
+        <div>
+            <h2 class="text-lg font-semibold tracking-tight">Testing</h2>
+            <p class="text-muted-foreground mt-1 text-sm leading-relaxed max-w-2xl">
+                A playground for the app's UI components, for checking them during development. Release builds leave it out.
+            </p>
+        </div>
+        <nav class="flex flex-wrap gap-1.5" aria-label="Jump to a group">
+            @foreach (var group in TestingGroup.All)
+            {
+                <button type="button" class="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                        @onclick="() => ScrollService.IntoViewAsync(group.Id)">
+                    @group.Name
+                </button>
+            }
+        </nav>
     </div>
 
-    <MediaCardsDemo Wantlisted="_wantlisted"/>
+    <DemoGroup Group="TestingGroup.Branding">
+        <LogoDemo/>
+        <BrandingDemo/>
+        <MediaIconsDemo/>
+        <DataSourcesDemo/>
+    </DemoGroup>
 
-    <DemoGrid>
-        <MediaDetailTilesDemo Wantlisted="_wantlisted" OnToggleWantlist="ToggleWantlist"/>
-        <BulkEditGridDemo/>
+    <DemoGroup Group="TestingGroup.Providers">
         <ProviderRowDemo/>
         <ServicesMapDemo/>
-        <AlertFieldsDemo/>
-        <BrandingDemo/>
-        <StatesDemo/>
-        <ChangeListDemo/>
-        <FormControlsDemo/>
-        <UpNextDemo/>
-        <ProvenanceDetailsDemo/>
-        <VersionCardDemo/>
-        <RunProblemsDemo/>
-        <LogoDemo/>
-        <MediaIconsDemo/>
-        <TemplateVariablesDemo/>
-        <AppLinksDemo/>
-        <AlertPreviewDemo/>
-        <DataSourcesDemo/>
-        <FeedFilterBarDemo/>
-        <ListFilterBarDemo/>
-        <RunsDemo/>
-        <ProviderPickersDemo/>
-        <MediaTitleLinkDemo/>
-        <ActivityDayDemo/>
-        <ToastsDemo/>
-        <FeedCardsDemo/>
-        <PageHeaderDemo/>
-        <HoverButtonsDemo/>
-        <ButtonsDemo/>
-        <LibrarySourcesDemo/>
-        <GuardsDemo/>
-        <EnumToggleDemo/>
-        <ProvenanceBadgesDemo/>
-        <NotificationClientsDemo/>
-        <PushStatusDemo/>
-        <SettingsCardDemo/>
         <CredentialStatusDemo/>
-        <DialogsDemo/>
-        <FeedChipsDemo/>
-        <HealthDotDemo/>
-        <ScheduleDemo/>
-    </DemoGrid>
+        <ProviderPickersDemo/>
+    </DemoGroup>
+
+    <DemoGroup Group="TestingGroup.Common">
+        <Lead>
+            <MediaCardsDemo Wantlisted="_wantlisted"/>
+        </Lead>
+        <ChildContent>
+            <MediaDetailTilesDemo Wantlisted="_wantlisted" OnToggleWantlist="ToggleWantlist"/>
+            <BulkEditGridDemo/>
+            <PageHeaderDemo/>
+            <ListFilterBarDemo/>
+            <StatesDemo/>
+            <ProvenanceBadgesDemo/>
+            <ProvenanceDetailsDemo/>
+            <PushStatusDemo/>
+            <MediaTitleLinkDemo/>
+            <FeedCardsDemo/>
+            <FeedFilterBarDemo/>
+            <FeedChipsDemo/>
+            <RunsDemo/>
+            <RunProblemsDemo/>
+            <ChangeListDemo/>
+            <ScheduleDemo/>
+            <UpNextDemo/>
+            <ActivityDayDemo/>
+            <LibrarySourcesDemo/>
+            <AlertFieldsDemo/>
+            <AlertPreviewDemo/>
+            <TemplateVariablesDemo/>
+            <NotificationClientsDemo/>
+            <HealthDotDemo/>
+            <ButtonsDemo/>
+            <HoverButtonsDemo/>
+            <FormControlsDemo/>
+            <EnumToggleDemo/>
+            <DialogsDemo/>
+            <ToastsDemo/>
+            <GuardsDemo/>
+            <AppLinksDemo/>
+            <SettingsCardDemo/>
+            <VersionCardDemo/>
+        </ChildContent>
+    </DemoGroup>
 </div>
 
 @code {

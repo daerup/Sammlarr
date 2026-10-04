@@ -1,0 +1,20 @@
+<div id="@Group.Id" role="region" class="flex scroll-mt-4 flex-col gap-3" aria-labelledby="@Heading">
+    <h3 id="@Heading" class="flex items-center gap-2 text-sm font-semibold">
+        <LucideIcon Name="@Group.Icon" Size="14" Class="text-muted-foreground"/>
+        @Group.Name
+    </h3>
+    @Lead
+    <DemoGrid>
+        @ChildContent
+    </DemoGrid>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required TestingGroup Group { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
+
+    [Parameter] public RenderFragment? Lead { get; set; }
+
+    private string Heading => $"{Group.Id}-heading";
+}
