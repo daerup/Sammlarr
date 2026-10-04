@@ -150,6 +150,41 @@ public class RatingStrategyTests
 	}
 
 	[Test]
+	public async Task FallsBack_WhenNoneOfTheChosenSourcesIsAvailable_IsTrue()
+	{
+		await Assert.That(new AveragedRating([RatingSource.Imdb, RatingSource.RottenTomatoesCritics]).FallsBack([RatingSource.Tmdb])).IsTrue();
+	}
+
+	[Test]
+	public async Task FallsBack_WhenOneChosenSourceIsAvailable_IsFalse()
+	{
+		await Assert.That(new AveragedRating([RatingSource.Imdb, RatingSource.RottenTomatoesCritics]).FallsBack([RatingSource.Tmdb, RatingSource.Imdb])).IsFalse();
+	}
+
+	[Test]
+	public async Task FallsBack_WhenEverySourceIsAveraged_IsFalse()
+	{
+		await Assert.That(AveragedRating.Everything.FallsBack([RatingSource.Tmdb])).IsFalse();
+	}
+
+	[Test]
+	public async Task FallsBack_WhenNothingIsAvailable_IsFalse()
+	{
+		await Assert.That(new AveragedRating([RatingSource.Imdb]).FallsBack([])).IsFalse();
+	}
+
+	[Test]
+	public async Task Missing_WhenSomeChosenSourcesHaveNoProvider_ListsThemInOrder()
+	{
+		var averaged = new AveragedRating([RatingSource.RottenTomatoesCritics, RatingSource.Tmdb, RatingSource.Imdb]);
+
+		await Assert
+			.That(averaged.Missing([RatingSource.Tmdb]))
+			.IsEquivalentTo([RatingSource.Imdb, RatingSource.RottenTomatoesCritics], CollectionOrdering.Matching);
+		await Assert.That(AveragedRating.Everything.Missing([RatingSource.Tmdb])).IsEmpty();
+	}
+
+	[Test]
 	public async Task Without_WhenEverySourceCountsAndOneIsSwitchedOff_ListsTheRest()
 	{
 		var averaged = AveragedRating.Everything.Without(RatingSource.RottenTomatoesAudience);

@@ -20,7 +20,7 @@ internal sealed record RatingBreakdown(Optional<SammlarrRating> Sammlarr, IReadO
 		var sammlarr = strategy.Resolve(ratings, available);
 		var (states, ranked, usedInstead) = strategy switch
 		{
-			AveragedRating averaged => (Averaged(ratings, averaged, available), false, Replaced(averaged, available)),
+			AveragedRating averaged => (Averaged(ratings, averaged, available), false, averaged.FallsBack(available)),
 			OrderedRating ordered => (Ordered(ratings, ordered, available, sammlarr), true, false),
 		};
 		var kept = states.Where(entry => !storedOnly || entry.State != RatingRowState.NoRating).ToList();
@@ -30,14 +30,9 @@ internal sealed record RatingBreakdown(Optional<SammlarrRating> Sammlarr, IReadO
 	private static List<(RatingSource Source, RatingRowState State)> Averaged(RatingSummary ratings, AveragedRating averaged, ValueSet<RatingSource> available)
 	{
 		var counted = averaged.Counted(available);
-		var needed = averaged.Sources.Where(source => !available.Contains(source)).Order().Select(source => (source, RatingRowState.NeedsProvider));
+		var needed = averaged.Missing(available).Select(source => (source, RatingRowState.NeedsProvider));
 		var listed = Enum.GetValues<RatingSource>().Where(available.Contains).Select(source => (source, Averaging(source, counted, ratings)));
 		return [.. needed, .. listed];
-	}
-
-	private static bool Replaced(AveragedRating averaged, ValueSet<RatingSource> available)
-	{
-		return averaged.Sources.Count > 0 && available.Count > 0 && !averaged.Sources.Overlaps(available);
 	}
 
 	private static List<(RatingSource Source, RatingRowState State)> Ordered(

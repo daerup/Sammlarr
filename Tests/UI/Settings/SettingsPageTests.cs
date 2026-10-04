@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Auth;
 using Contracts.Identity;
+using Contracts.Ratings;
 using Contracts.Settings;
 using Domain.Identity;
 using Domain.Providers;
@@ -9,6 +10,7 @@ using Domain.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Settings.Components.Providers;
+using UI.Features.Settings.Components.Ratings;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
 using UI.Tests.Media;
@@ -23,6 +25,7 @@ public class SettingsPageTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton(RatingStub.Context());
+		Services.AddSingleton(IRatingService.Mock().Object);
 		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddSingleton<ProfileDropdownService>();
 		Services.AddSingleton<AccountConnectionPrompt>();
@@ -105,6 +108,19 @@ public class SettingsPageTests : BunitContext
 #else
 		await Assert.That(offered).DoesNotContain("Testing");
 #endif
+	}
+
+	[Test]
+	public async Task SectionNav_ForAMember_OffersRatingsWhoseLinkOpensIt()
+	{
+		var member = ICurrentUser.Mock();
+		member.Role.Getter.Returns(UserRole.Member);
+		Services.AddSingleton(member.Object);
+
+		var cut = RenderAt(SettingsLinks.Ratings);
+
+		await Assert.That(cut.FindAll("nav button").Select(button => button.TextContent.Trim())).Contains("Ratings");
+		cut.WaitForState(() => cut.FindComponents<RatingPipelineCard>().Count > 0);
 	}
 
 	private static IEnumerable<MediaProvider> OpenRows(IRenderedComponent<SettingsPage> cut) =>

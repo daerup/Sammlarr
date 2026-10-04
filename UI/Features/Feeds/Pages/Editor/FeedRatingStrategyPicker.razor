@@ -46,7 +46,7 @@
                                     <BbTooltipTrigger AsChild="false">
                                         <BbSwitch Checked="true" Disabled="true" Size="SwitchSize.Small" aria-label="@($"{RatingTexts.Name(source)} counts")"/>
                                     </BbTooltipTrigger>
-                                    <BbTooltipContent>@FeedRatingTexts.LastOneOn</BbTooltipContent>
+                                    <BbTooltipContent>@RatingTexts.LastOneOn</BbTooltipContent>
                                 </BbTooltip>
                             </span>
                         }
@@ -181,26 +181,18 @@
     {
         var dragged = _dragged;
         _dragged = null;
-        return Optional.Of(dragged).Match(source => PlaceAsync(source, target), () => Task.CompletedTask);
+        return Optional.Of(dragged).Match(source => PlaceAsync(RatingOrderMoves.Onto(Ordered, source, target)), () => Task.CompletedTask);
     }
 
     private Task MoveByKeyAsync(KeyboardEventArgs args, RatingSource source)
     {
-        var rows = OrderRows;
-        var index = rows.IndexOf(source);
-        var target = (args.AltKey, args.Key) switch
-        {
-            (true, "ArrowUp") => index - 1,
-            (true, "ArrowDown") => index + 1,
-            _ => -1,
-        };
-        if (target < 0 || target >= rows.Count)
-        {
-            return Task.CompletedTask;
-        }
+        return RatingOrderMoves.ByKey(Ordered, OrderRows, source, args).Match(moved => MoveAsync(source, moved), () => Task.CompletedTask);
+    }
 
-        _refocus = (source, target);
-        return PlaceAsync(source, rows[target]);
+    private Task MoveAsync(RatingSource source, (OrderedRating Order, int Index) moved)
+    {
+        _refocus = (source, moved.Index);
+        return PlaceAsync(moved.Order);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -212,8 +204,5 @@
         }
     }
 
-    private Task PlaceAsync(RatingSource source, RatingSource target)
-    {
-        return ValueChanged.InvokeAsync(Some.Of(new RatingStrategy(Ordered.Moved(source, Ordered.Order.ToList().IndexOf(target)))));
-    }
+    private Task PlaceAsync(OrderedRating ordered) => ValueChanged.InvokeAsync(Some.Of(new RatingStrategy(ordered)));
 }
