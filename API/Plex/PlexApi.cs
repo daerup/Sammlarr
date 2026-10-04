@@ -133,13 +133,13 @@ file static class PlexMetadataMappingExtensions
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
 			ReleaseDate = ProviderValues.Date(result.OriginallyAvailableAt),
 			Genres = ProviderValues.Genres(result.Genre?.Select(genre => genre.Tag)),
-			Rating = Ratings(result),
+			Ratings = Ratings(result),
 		};
 	}
 
-	private static RatingSummary Ratings(PlexTypes.ById.Metadata result)
+	private static MediaRatings Ratings(PlexTypes.ById.Metadata result)
 	{
-		return RatingSummary.From(
+		return MediaRatings.From(
 			(result.Ratings ?? []).Select(entry => SourceOf(entry).Map(source => source.Rate((float)entry.Value, VotesOf(source, result)))).WhereSome()
 		);
 	}

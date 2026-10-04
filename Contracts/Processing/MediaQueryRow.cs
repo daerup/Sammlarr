@@ -6,7 +6,7 @@ public sealed record MediaQueryRow(MatchedMedia Media, Optional<SammlarrRating> 
 {
 	public static MediaQueryRow From(MatchedMedia media, RatingStrategy strategy, ValueSet<RatingSource> available)
 	{
-		return new(media, strategy.Resolve(media.Details.Rating, available));
+		return new(media, strategy.Resolve(media.Details.Ratings, available));
 	}
 
 	public MediaType MediaType => Media.Details.Type;

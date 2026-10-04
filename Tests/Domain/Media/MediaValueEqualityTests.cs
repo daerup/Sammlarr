@@ -22,7 +22,7 @@ public class MediaValueEqualityTests
 		var second = first with
 		{
 			Identity = first.Identity with { Externals = [.. first.Identity.Externals] },
-			Details = first.Details with { Genres = [.. first.Details.Genres], Rating = RatingSummary.From([.. first.Details.Rating.Sources]) },
+			Details = first.Details with { Genres = [.. first.Details.Genres], Ratings = MediaRatings.From([.. first.Details.Ratings.All]) },
 		};
 
 		await Assert.That(first).IsEqualTo(second);

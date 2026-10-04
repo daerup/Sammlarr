@@ -34,7 +34,7 @@ public static class MediaMerger
 			BackdropUrl = mine.BackdropUrl ?? theirs.BackdropUrl,
 			ReleaseDate = mine.ReleaseDate ?? theirs.ReleaseDate,
 			Genres = Coalesce(mine.Genres, theirs.Genres),
-			Rating = mine.Rating.FillFrom(theirs.Rating),
+			Ratings = mine.Ratings.FillFrom(theirs.Ratings),
 		};
 	}
 }

@@ -2,7 +2,7 @@ namespace Domain.Media;
 
 public union RatingStrategy(OrderedRating, AveragedRating)
 {
-	public Optional<SammlarrRating> Resolve(RatingSummary ratings, ValueSet<RatingSource> available)
+	public Optional<SammlarrRating> Resolve(MediaRatings ratings, ValueSet<RatingSource> available)
 	{
 		return this switch
 		{

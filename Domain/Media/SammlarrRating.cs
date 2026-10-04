@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace Domain.Media;
 
-public readonly record struct SammlarrRating(float Value, IReadOnlyList<IMediaRating> From)
+public readonly record struct SammlarrRating(float Value, IReadOnlyList<IMediaRating> Counted)
 {
 	public double Rounded
 	{
@@ -17,7 +17,7 @@ public readonly record struct SammlarrRating(float Value, IReadOnlyList<IMediaRa
 	{
 		get
 		{
-			var counts = From.Select(rating => rating.Votes).WhereSome().ToList();
+			var counts = Counted.Select(rating => rating.Votes).WhereSome().ToList();
 			return Optional.When(counts.Count > 0, () => counts.Sum());
 		}
 	}
@@ -36,7 +36,7 @@ public readonly record struct OrderedRating
 
 	public IReadOnlyList<RatingSource> Order { get; }
 
-	public Optional<SammlarrRating> Resolve(RatingSummary ratings, ValueSet<RatingSource> available)
+	public Optional<SammlarrRating> Resolve(MediaRatings ratings, ValueSet<RatingSource> available)
 	{
 		return Order
 			.Select(ratings.Of)
@@ -76,11 +76,11 @@ public readonly record struct AveragedRating(ValueSet<RatingSource> Sources)
 		return sources.Count == Enum.GetValues<RatingSource>().Length ? Everything : new AveragedRating(sources);
 	}
 
-	public Optional<SammlarrRating> Resolve(RatingSummary ratings, ValueSet<RatingSource> available)
+	public Optional<SammlarrRating> Resolve(MediaRatings ratings, ValueSet<RatingSource> available)
 	{
-		var counted = Counted(available);
-		var from = ratings.Sources.Where(rating => counted.Contains(rating.Source)).ToList();
-		return Optional.When(from.Count > 0, () => new SammlarrRating(from.Average(rating => rating.SammlarrValue), from));
+		var sources = Counted(available);
+		var counted = ratings.All.Where(rating => sources.Contains(rating.Source)).ToList();
+		return Optional.When(counted.Count > 0, () => new SammlarrRating(counted.Average(rating => rating.SammlarrValue), counted));
 	}
 
 	public bool FallsBack(ValueSet<RatingSource> available) => Sources.Count > 0 && available.Count > 0 && !Sources.Overlaps(available);

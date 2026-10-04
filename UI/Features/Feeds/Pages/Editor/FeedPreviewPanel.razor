@@ -405,7 +405,7 @@
     private static IReadOnlyList<string> RatingReasons(MatchedMedia item, RatingView view, FeedConfig applied)
     {
         var strategy = applied.RatingStrategy.GetValueOr(view.Default);
-        return Optional.Of(applied.Filter).Map(filter => FeedRatingReasons.For(filter, strategy.Resolve(item.Details.Rating, view.Available), strategy)).GetValueOr([]);
+        return Optional.Of(applied.Filter).Map(filter => FeedRatingReasons.For(filter, strategy.Resolve(item.Details.Ratings, view.Available), strategy)).GetValueOr([]);
     }
 
     protected override void OnParametersSet()

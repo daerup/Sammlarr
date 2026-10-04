@@ -19,7 +19,7 @@ public class MediaMergerTests
 			PosterUrl = "poster",
 			BackdropUrl = "backdrop",
 			ReleaseDate = new DateOnly(2021, 10, 22),
-			Rating = MediaFakes.EverySourceRating(),
+			Ratings = MediaFakes.EverySourceRating(),
 			Runtime = TimeSpan.FromMinutes(155),
 		};
 

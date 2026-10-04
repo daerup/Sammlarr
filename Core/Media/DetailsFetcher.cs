@@ -86,16 +86,16 @@ internal sealed class DetailsFetcher(
 			.. Enum.GetValues<EnricherProvider>()
 				.Select(enricher => enricher.AsMediaProvider())
 				.Where(provider => !asked.Contains(provider))
-				.Select(provider => current.Identity.Externals.OfProvider(provider).Map(id => Option(provider, id, current.Details.Rating)))
+				.Select(provider => current.Identity.Externals.OfProvider(provider).Map(id => Option(provider, id, current.Details.Ratings)))
 				.WhereSome(),
 		];
 	}
 
-	private EnricherOption Option(MediaProvider provider, IExternalMediaId id, RatingSummary ratings)
+	private EnricherOption Option(MediaProvider provider, IExternalMediaId id, MediaRatings ratings)
 	{
 		var fills = enricherIndex[provider].Fills;
 		var load = capacity.Of(provider);
-		var unavoidable = provider == MediaProvider.Tmdb && fills.Overlaps(MediaField.Ratings) && ratings.Sources.Count == 0;
+		var unavoidable = provider == MediaProvider.Tmdb && fills.Overlaps(MediaField.Ratings) && ratings.All.Count == 0;
 		return new EnricherOption(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load);
 	}
 

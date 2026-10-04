@@ -15,7 +15,7 @@ public class RatingBreakdownTests
 		RatingSource.RottenTomatoesAudience,
 	];
 
-	private static readonly RatingSummary ProjectHailMary = RatingSummary.From([
+	private static readonly MediaRatings ProjectHailMary = MediaRatings.From([
 		new TmdbRating(8.6f, Some.Of(7705)),
 		new ImdbRating(8.2f, Some.Of(542195)),
 		new RottenTomatoesCriticsRating(95),
@@ -99,7 +99,7 @@ public class RatingBreakdownTests
 	[Test]
 	public async Task Of_WhenNoSourceRatesTheTitle_DimsEveryRowWithoutRepeatingWhy()
 	{
-		var breakdown = RatingBreakdown.Of(RatingSummary.None, new RatingStrategy(AveragedRating.Everything), Everything);
+		var breakdown = RatingBreakdown.Of(MediaRatings.None, new RatingStrategy(AveragedRating.Everything), Everything);
 
 		await Assert.That(breakdown.Sammlarr).IsNone();
 		await Assert.That(breakdown.Rows.All(row => row.State == RatingRowState.NoRating && !row.SaysWhy)).IsTrue();
@@ -118,7 +118,7 @@ public class RatingBreakdownTests
 	public async Task Of_WhenOnlyStoredRatingsAreKnown_ListsTheRatedSourcesAndSaysTheRestMayFollow()
 	{
 		var breakdown = RatingBreakdown.Of(
-			RatingSummary.From([new TmdbRating(9.0f, Some.Of(8))]),
+			MediaRatings.From([new TmdbRating(9.0f, Some.Of(8))]),
 			new RatingStrategy(AveragedRating.Everything),
 			Everything,
 			storedOnly: true
@@ -131,13 +131,13 @@ public class RatingBreakdownTests
 	[Test]
 	public async Task Of_WhenOneSourceHasNoRating_SaysSoOnItsRowAndAveragesTheRest()
 	{
-		var lastSeen = RatingSummary.From([new TmdbRating(9.0f, Some.Of(8)), new ImdbRating(7.6f, Some.Of(303)), new RottenTomatoesCriticsRating(87)]);
+		var lastSeen = MediaRatings.From([new TmdbRating(9.0f, Some.Of(8)), new ImdbRating(7.6f, Some.Of(303)), new RottenTomatoesCriticsRating(87)]);
 
 		var breakdown = RatingBreakdown.Of(lastSeen, new RatingStrategy(AveragedRating.Everything), Everything);
 
 		var audience = breakdown.Rows.Single(row => row.Source == RatingSource.RottenTomatoesAudience);
 		await Assert.That(audience.State).IsEqualTo(RatingRowState.NoRating);
 		await Assert.That(audience.SaysWhy).IsTrue();
-		await Assert.That(breakdown.Sammlarr.Map(rating => rating.From.Count)).IsSome().And.IsEqualTo(3);
+		await Assert.That(breakdown.Sammlarr.Map(rating => rating.Counted.Count)).IsSome().And.IsEqualTo(3);
 	}
 }

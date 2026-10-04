@@ -30,7 +30,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception);
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
-		var stored = new MovieDetails { Title = "Inception", Rating = RatingSummary.From([new ImdbRating(8.8f, Some.Of(2_700_000))]) };
+		var stored = new MovieDetails { Title = "Inception", Ratings = MediaRatings.From([new ImdbRating(8.8f, Some.Of(2_700_000))]) };
 		await host.Resolve<IMediaRepository>()
 			.UpsertDetailsAsync(new Dictionary<MediaId, CachedDetails> { [inception] = new(stored, DateTimeOffset.UtcNow, MediaField.None) });
 
@@ -41,8 +41,8 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 			.IsOfUnionType<MediaMatchResult, MatchedMedia>()
 			.And.Multiple(async matched =>
 			{
-				await Assert.That(matched.Details.Rating.Of(RatingSource.Imdb)).IsSome();
-				await Assert.That(matched.Details.Rating.Of(RatingSource.Tmdb)).IsSome();
+				await Assert.That(matched.Details.Ratings.Of(RatingSource.Imdb)).IsSome();
+				await Assert.That(matched.Details.Ratings.Of(RatingSource.Tmdb)).IsSome();
 			});
 	}
 

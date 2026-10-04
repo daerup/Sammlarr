@@ -20,7 +20,7 @@
 @code {
     private RatingView? _view;
 
-    [Parameter] [EditorRequired] public required RatingSummary Ratings { get; set; }
+    [Parameter] [EditorRequired] public required MediaRatings Ratings { get; set; }
 
     [Parameter] public Optional<RatingStrategy> Strategy { get; set; } = new None();
 

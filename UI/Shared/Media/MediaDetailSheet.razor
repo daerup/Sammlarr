@@ -67,7 +67,7 @@
                                 <span>@fact</span>
                             }
                             <span aria-hidden="true">•</span>
-                            <SammlarrRatingBadge Ratings="@_loadedRatings.GetValueOr(details.Rating)" Ids="@(media.Externals.ToList())" Title="@details.Title" Size="17" Align="PopoverAlign.Center" Media="media.MatchedId"/>
+                            <SammlarrRatingBadge Ratings="@_loadedRatings.GetValueOr(details.Ratings)" Ids="@(media.Externals.ToList())" Title="@details.Title" Size="17" Align="PopoverAlign.Center" Media="media.MatchedId"/>
                         </span>
                     </BbSheetDescription>
                     @if (details.Genres.Count > 0)
@@ -120,7 +120,7 @@
     private bool _togglingWantlist;
     private bool _togglingBlocklist;
     private Optional<WantlistItem> _item = new None();
-    private Optional<RatingSummary> _loadedRatings = new None();
+    private Optional<MediaRatings> _loadedRatings = new None();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -144,7 +144,7 @@
     {
         await foreach (var loaded in MediaService.GetDetailsAsync([id]))
         {
-            loaded.Apply(found => _loadedRatings = Some.Of(found.Details.Rating));
+            loaded.Apply(found => _loadedRatings = Some.Of(found.Details.Ratings));
         }
     }
 

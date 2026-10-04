@@ -15,7 +15,7 @@ internal sealed record RatingRow(RatingSource Source, Optional<IMediaRating> Rat
 
 internal sealed record RatingBreakdown(Optional<SammlarrRating> Sammlarr, IReadOnlyList<RatingRow> Rows, bool Ranked, bool UsedInstead, bool Partial)
 {
-	public static RatingBreakdown Of(RatingSummary ratings, RatingStrategy strategy, ValueSet<RatingSource> available, bool storedOnly = false)
+	public static RatingBreakdown Of(MediaRatings ratings, RatingStrategy strategy, ValueSet<RatingSource> available, bool storedOnly = false)
 	{
 		var sammlarr = strategy.Resolve(ratings, available);
 		var (states, ranked, usedInstead) = strategy switch
@@ -27,7 +27,7 @@ internal sealed record RatingBreakdown(Optional<SammlarrRating> Sammlarr, IReadO
 		return new RatingBreakdown(sammlarr, RowsOf(kept, ratings, ranked), ranked, usedInstead, Partial: kept.Count < states.Count);
 	}
 
-	private static List<(RatingSource Source, RatingRowState State)> Averaged(RatingSummary ratings, AveragedRating averaged, ValueSet<RatingSource> available)
+	private static List<(RatingSource Source, RatingRowState State)> Averaged(MediaRatings ratings, AveragedRating averaged, ValueSet<RatingSource> available)
 	{
 		var counted = averaged.Counted(available);
 		var needed = averaged.Missing(available).Select(source => (source, RatingRowState.NeedsProvider));
@@ -36,17 +36,17 @@ internal sealed record RatingBreakdown(Optional<SammlarrRating> Sammlarr, IReadO
 	}
 
 	private static List<(RatingSource Source, RatingRowState State)> Ordered(
-		RatingSummary ratings,
+		MediaRatings ratings,
 		OrderedRating ordered,
 		ValueSet<RatingSource> available,
 		Optional<SammlarrRating> sammlarr
 	)
 	{
-		var first = sammlarr.Map(rating => rating.From[0].Source);
+		var first = sammlarr.Map(rating => rating.Counted[0].Source);
 		return [.. ordered.Order.Where(available.Contains).Select(source => (source, Ordering(source, first, ratings)))];
 	}
 
-	private static RatingRowState Averaging(RatingSource source, ValueSet<RatingSource> counted, RatingSummary ratings)
+	private static RatingRowState Averaging(RatingSource source, ValueSet<RatingSource> counted, MediaRatings ratings)
 	{
 		if (!counted.Contains(source))
 		{
@@ -56,7 +56,7 @@ internal sealed record RatingBreakdown(Optional<SammlarrRating> Sammlarr, IReadO
 		return ratings.Of(source).Match(_ => RatingRowState.Counts, () => RatingRowState.NoRating);
 	}
 
-	private static RatingRowState Ordering(RatingSource source, Optional<RatingSource> first, RatingSummary ratings)
+	private static RatingRowState Ordering(RatingSource source, Optional<RatingSource> first, MediaRatings ratings)
 	{
 		return ratings.Of(source).Match(_ => Picked(source, first), () => RatingRowState.NoRating);
 	}
@@ -66,7 +66,7 @@ internal sealed record RatingBreakdown(Optional<SammlarrRating> Sammlarr, IReadO
 		return first.When(picked => picked == source).Match(_ => RatingRowState.Counts, () => RatingRowState.NotNeeded);
 	}
 
-	private static List<RatingRow> RowsOf(IReadOnlyList<(RatingSource Source, RatingRowState State)> states, RatingSummary ratings, bool ranked)
+	private static List<RatingRow> RowsOf(IReadOnlyList<(RatingSource Source, RatingRowState State)> states, MediaRatings ratings, bool ranked)
 	{
 		var everyRowUnrated = states.All(entry => entry.State == RatingRowState.NoRating);
 		var said = new HashSet<RatingRowState>();

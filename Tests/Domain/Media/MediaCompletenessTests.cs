@@ -23,7 +23,7 @@ public class MediaCompletenessTests
 	[Test]
 	public async Task Missing_WhenNoProviderHasRatedTheTitle_NamesEveryRatingSource()
 	{
-		var movie = MediaFakes.CompleteMovieDetails() with { Rating = RatingSummary.None };
+		var movie = MediaFakes.CompleteMovieDetails() with { Ratings = MediaRatings.None };
 
 		await Assert.That(movie.Missing).IsEqualTo(MediaField.Ratings);
 	}
@@ -31,7 +31,7 @@ public class MediaCompletenessTests
 	[Test]
 	public async Task Missing_WhenOnlyTmdbHasRatedTheTitle_NamesTheOtherSources()
 	{
-		var movie = MediaFakes.CompleteMovieDetails() with { Rating = RatingSummary.From([new TmdbRating(7.4f, Some.Of(900))]) };
+		var movie = MediaFakes.CompleteMovieDetails() with { Ratings = MediaRatings.From([new TmdbRating(7.4f, Some.Of(900))]) };
 
 		await Assert.That(movie.Missing).IsEqualTo(MediaField.ImdbRating | MediaField.RottenTomatoesCriticsRating | MediaField.RottenTomatoesAudienceRating);
 	}
@@ -41,7 +41,7 @@ public class MediaCompletenessTests
 	{
 		var movie = MediaFakes.CompleteMovieDetails() with
 		{
-			Rating = RatingSummary.From([
+			Ratings = MediaRatings.From([
 				new TmdbRating(8.9f, new None()),
 				new ImdbRating(7.6f, Some.Of(303)),
 				new RottenTomatoesCriticsRating(87),
@@ -72,7 +72,7 @@ public class MediaCompletenessTests
 			BackdropUrl = "backdrop",
 			ReleaseDate = new DateOnly(2022, 2, 18),
 			Genres = ["Drama"],
-			Rating = MediaFakes.EverySourceRating(),
+			Ratings = MediaFakes.EverySourceRating(),
 			RuntimePerEpisode = TimeSpan.FromMinutes(50),
 		};
 

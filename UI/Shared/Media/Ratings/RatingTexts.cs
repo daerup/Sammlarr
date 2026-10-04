@@ -76,7 +76,7 @@ internal static class RatingTexts
 	{
 		return state switch
 		{
-			RatingRowState.NotNeeded => $"not needed, {sammlarr.Map(rating => Name(rating.From[0].Source)).GetValueOr(string.Empty)} came first",
+			RatingRowState.NotNeeded => $"not needed, {sammlarr.Map(rating => Name(rating.Counted[0].Source)).GetValueOr(string.Empty)} came first",
 			RatingRowState.SwitchedOff => $"switched off in {where}",
 			RatingRowState.NoRating => "no rating for this title",
 			RatingRowState.NeedsProvider => "needs a provider",
@@ -86,19 +86,19 @@ internal static class RatingTexts
 
 	public static string Arithmetic(SammlarrRating rating, RatingStrategy strategy)
 	{
-		if (rating.From.Count > 1)
+		if (rating.Counted.Count > 1)
 		{
-			var parts = string.Join(" + ", rating.From.Select(part => Number(part.SammlarrValue)));
-			return $"({parts}) / {rating.From.Count} = {rating.Value.ToString("0.00", CultureInfo.InvariantCulture)}";
+			var parts = string.Join(" + ", rating.Counted.Select(part => Number(part.SammlarrValue)));
+			return $"({parts}) / {rating.Counted.Count} = {rating.Value.ToString("0.00", CultureInfo.InvariantCulture)}";
 		}
 
-		var only = rating.From[0];
+		var only = rating.Counted[0];
 		return $"{Name(only.Source)} {only.Value} → {Number(rating)}, {Why(strategy)}";
 	}
 
-	public static string VoteParts(SammlarrRating rating) => string.Join(" + ", rating.From.Select(part => part.Votes).WhereSome().Select(Count));
+	public static string VoteParts(SammlarrRating rating) => string.Join(" + ", rating.Counted.Select(part => part.Votes).WhereSome().Select(Count));
 
-	public static int VoteSources(SammlarrRating rating) => rating.From.Count(part => part.Votes.IsSome());
+	public static int VoteSources(SammlarrRating rating) => rating.Counted.Count(part => part.Votes.IsSome());
 
 	public static Optional<string> Link(RatingSource source, IReadOnlyList<IExternalMediaId> ids, string? title, Optional<string> rottenTomatoesPath)
 	{

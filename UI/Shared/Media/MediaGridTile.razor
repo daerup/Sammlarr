@@ -42,7 +42,7 @@
         }
 
         <div class="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
-            <SammlarrRatingBadge Ratings="@Details.Rating" Ids="@([.. Media.Externals])" Title="@Details.Title" Look="RatingBadgeLook.OnImage" Size="17" StoredOnly="RatingsStoredOnly" Media="Media.MatchedId"/>
+            <SammlarrRatingBadge Ratings="@Details.Ratings" Ids="@([.. Media.Externals])" Title="@Details.Title" Look="RatingBadgeLook.OnImage" Size="17" StoredOnly="RatingsStoredOnly" Media="Media.MatchedId"/>
 
             @if (Details.Tagline is not null)
             {

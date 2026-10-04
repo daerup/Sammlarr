@@ -143,7 +143,7 @@ public class PlexApiTests
 
 		var found = await Assert.That(await testee.ByIdAsync(PlexId.From(metadata.RatingKey, MediaType.Movie))).IsSuccess();
 
-		var ratings = found!.Details.Rating.Sources;
+		var ratings = found!.Details.Ratings.All;
 		await Assert
 			.That(ratings)
 			.IsEquivalentTo(
@@ -166,9 +166,9 @@ public class PlexApiTests
 		var found = await Assert.That(await testee.ByIdAsync(PlexId.From("5d77682eeb5d26001f1df4fe", MediaType.Movie))).IsSuccess();
 
 		await Assert
-			.That(found!.Details.Rating)
+			.That(found!.Details.Ratings)
 			.IsEqualTo(
-				RatingSummary.From([
+				MediaRatings.From([
 					new ImdbRating(7.5f, Some.Of(9133)),
 					new RottenTomatoesCriticsRating(100),
 					new RottenTomatoesAudienceRating(85),
@@ -184,7 +184,7 @@ public class PlexApiTests
 
 		var found = await Assert.That(await testee.ByIdAsync(PlexId.From(ObsessionById().RatingKey, MediaType.Movie))).IsSuccess();
 
-		await Assert.That(found!.Details.Rating).IsEqualTo(RatingSummary.None);
+		await Assert.That(found!.Details.Ratings).IsEqualTo(MediaRatings.None);
 	}
 
 	[Test]

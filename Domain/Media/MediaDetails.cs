@@ -10,7 +10,7 @@ public closed record MediaDetails
 	public string? BackdropUrl { get; init; }
 	public DateOnly? ReleaseDate { get; init; }
 	public ValueSet<string> Genres { get; init; } = [];
-	public RatingSummary Rating { get; init; } = RatingSummary.None;
+	public MediaRatings Ratings { get; init; } = MediaRatings.None;
 
 	public static MediaDetails Empty(MediaType type)
 	{

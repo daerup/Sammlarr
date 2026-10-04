@@ -113,7 +113,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var found = await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsSuccess();
 
-		await Assert.That(found!.Details.Rating.Sources).IsNotEmpty();
+		await Assert.That(found!.Details.Ratings.All).IsNotEmpty();
 	}
 
 	[Test]

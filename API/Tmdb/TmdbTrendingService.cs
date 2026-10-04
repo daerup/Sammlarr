@@ -44,13 +44,13 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		return new PagedResult<MediaMatchResult>([.. finalItems.Select(item => WithStoredRatings(item, stored))], result.TotalPages);
 	}
 
-	private static MediaMatchResult WithStoredRatings(MediaMatchResult item, IReadOnlyDictionary<MediaId, RatingSummary> stored)
+	private static MediaMatchResult WithStoredRatings(MediaMatchResult item, IReadOnlyDictionary<MediaId, MediaRatings> stored)
 	{
 		return item switch
 		{
 			MatchedMedia matched => stored
 				.GetValueOrNone(matched.Identity.Id)
-				.Map(ratings => new MediaMatchResult(matched with { Details = matched.Details with { Rating = matched.Details.Rating.FillFrom(ratings) } }))
+				.Map(ratings => new MediaMatchResult(matched with { Details = matched.Details with { Ratings = matched.Details.Ratings.FillFrom(ratings) } }))
 				.GetValueOr(item),
 			UnmatchedMedia => item,
 		};

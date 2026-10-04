@@ -62,6 +62,6 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	private async Task<IReadOnlyList<IMediaRating>> FetchTmdbRatings(IExternalMediaId id)
 	{
 		var found = await host.ResolveKeyed<IDetailsEnricher>(MediaProvider.Tmdb).LookUpAsync(id);
-		return found.Map<FoundMedia, IReadOnlyList<IMediaRating>>(media => [.. media.Details.Rating.Sources]).GetValueOr([]);
+		return found.Map<FoundMedia, IReadOnlyList<IMediaRating>>(media => [.. media.Details.Ratings.All]).GetValueOr([]);
 	}
 }

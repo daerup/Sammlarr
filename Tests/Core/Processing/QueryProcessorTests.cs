@@ -410,7 +410,7 @@ public class QueryProcessorRatingTests
 					Title = $"Movie {year}",
 					ReleaseDate = new DateOnly(year, 1, 1),
 					Runtime = TimeSpan.FromMinutes(90),
-					Rating = rating is { } value ? RatingSummary.From([new TmdbRating(value, Optional.Of(votes))]) : RatingSummary.None,
+					Ratings = rating is { } value ? MediaRatings.From([new TmdbRating(value, Optional.Of(votes))]) : MediaRatings.None,
 				}
 			),
 			new RatingStrategy(AveragedRating.Everything),

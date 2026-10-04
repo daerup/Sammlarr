@@ -14,7 +14,7 @@ public class RatingStrategyTests
 		RatingSource.RottenTomatoesAudience,
 	];
 
-	private static readonly RatingSummary ProjectHailMary = RatingSummary.From([
+	private static readonly MediaRatings ProjectHailMary = MediaRatings.From([
 		new TmdbRating(8.6f, Some.Of(7705)),
 		new ImdbRating(8.2f, Some.Of(542195)),
 		new RottenTomatoesCriticsRating(95),
@@ -73,8 +73,8 @@ public class RatingStrategyTests
 	[Test]
 	public async Task Resolve_WhenTheTitleHasNoRating_GivesNone()
 	{
-		await Assert.That(new RatingStrategy(AveragedRating.Everything).Resolve(RatingSummary.None, Everything)).IsNone();
-		await Assert.That(new RatingStrategy(new OrderedRating([])).Resolve(RatingSummary.None, Everything)).IsNone();
+		await Assert.That(new RatingStrategy(AveragedRating.Everything).Resolve(MediaRatings.None, Everything)).IsNone();
+		await Assert.That(new RatingStrategy(new OrderedRating([])).Resolve(MediaRatings.None, Everything)).IsNone();
 	}
 
 	[Test]
@@ -134,7 +134,7 @@ public class RatingStrategyTests
 	public async Task Rounded_WhenAnAverageReadsAsHalfway_RoundsAsItReads()
 	{
 		var rating = new RatingStrategy(AveragedRating.Everything).Resolve(
-			RatingSummary.From([new TmdbRating(6.5f, new None()), new ImdbRating(7.4f, new None())]),
+			MediaRatings.From([new TmdbRating(6.5f, new None()), new ImdbRating(7.4f, new None())]),
 			Everything
 		);
 

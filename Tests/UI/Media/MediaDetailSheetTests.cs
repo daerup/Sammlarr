@@ -48,7 +48,7 @@ public class MediaDetailSheetTests : BunitContext
 		Register();
 		var loaded = new MatchedMedia(
 			new MediaIdentity(Id, []),
-			new MovieDetails { Title = "Futurama", Rating = RatingSummary.From([new TmdbRating(7.4f, Some.Of(900))]) }
+			new MovieDetails { Title = "Futurama", Ratings = MediaRatings.From([new TmdbRating(7.4f, Some.Of(900))]) }
 		);
 		_media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new[] { (Result<MatchedMedia>)Success.Of(loaded) }.ToAsyncEnumerable());
 
@@ -190,7 +190,7 @@ public class MediaDetailSheetTests : BunitContext
 				ReleaseDate = new DateOnly(1999, 3, 28),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(22),
-				Rating = RatingSummary.None,
+				Ratings = MediaRatings.None,
 			}
 		);
 	}

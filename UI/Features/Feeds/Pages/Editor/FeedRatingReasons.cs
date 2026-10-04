@@ -49,13 +49,13 @@ internal static class FeedRatingReasons
 		return strategy switch
 		{
 			AveragedRating => "the average",
-			OrderedRating => $"{RatingTexts.Name(rating.From[0].Source)} {rating.From[0].Value}, first in this feed's order",
+			OrderedRating => $"{RatingTexts.Name(rating.Counted[0].Source)} {rating.Counted[0].Value}, first in this feed's order",
 		};
 	}
 
 	private static string Unvoted(SammlarrRating rating)
 	{
-		var silent = rating.From.Select(part => part.Source).Where(source => !source.PublishesVotes).Distinct().Select(RatingTexts.Name).ToList();
+		var silent = rating.Counted.Select(part => part.Source).Where(source => !source.PublishesVotes).Distinct().Select(RatingTexts.Name).ToList();
 		return silent.Count switch
 		{
 			0 => "no votes behind its rating (no vote count came with it)",
