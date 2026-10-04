@@ -445,6 +445,10 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
     z-index: 40 !important;
 }
 
+[data-portal-content]:has(> [role="tooltip"]) {
+    z-index: 10000 !important;
+}
+
 @layer components {
     .popover-band {
         background: oklch(from var(--muted) calc(l - 0.08) c h);

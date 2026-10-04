@@ -23,6 +23,8 @@ internal static class RatingTexts
 
 	public static string Number(float value) => value.ToString("0.0", CultureInfo.InvariantCulture);
 
+	public static string Number(SammlarrRating rating) => rating.Rounded.ToString("0.0", CultureInfo.InvariantCulture);
+
 	public static string Count(int votes) => votes.ToString("N0", CultureInfo.InvariantCulture);
 
 	public static string Conversion(IMediaRating rating) => $"{rating.Value} → {Number(rating.SammlarrValue)}";
@@ -67,7 +69,7 @@ internal static class RatingTexts
 		}
 
 		var only = rating.From[0];
-		return $"{Name(only.Source)} {only.Value} → {Number(rating.Value)}, {Why(strategy)}";
+		return $"{Name(only.Source)} {only.Value} → {Number(rating)}, {Why(strategy)}";
 	}
 
 	public static string VoteParts(SammlarrRating rating) => string.Join(" + ", rating.From.Select(part => part.Votes).WhereSome().Select(Count));

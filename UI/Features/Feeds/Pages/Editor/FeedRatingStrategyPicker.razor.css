@@ -1,0 +1,125 @@
+.rating-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 380px;
+    max-width: calc(100vw - 2rem);
+    padding: 12px;
+    font-size: 12.5px;
+}
+
+.rating-picker-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.rating-picker-title ::deep .rating-star {
+    color: var(--sammlarr-gold);
+}
+
+.rating-picker ::deep .rating-picker-tabs [role="tabpanel"] {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.rating-picker-desc,
+.rating-picker-hint {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+}
+
+.rating-picker-follows {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted-foreground);
+}
+
+.rating-picker-link {
+    color: var(--foreground);
+    text-decoration: none;
+}
+
+.rating-picker-link:hover,
+.rating-picker-link:focus-visible {
+    text-decoration: underline;
+}
+
+.rating-picker-list {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.rating-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 6px 10px 6px 6px;
+    background: var(--background);
+}
+
+.rating-picker-list.is-readonly .rating-picker-item {
+    padding-left: 10px;
+}
+
+.rating-picker-item + .rating-picker-item {
+    border-top: 1px solid var(--border);
+}
+
+.rating-picker-item.is-off {
+    color: var(--muted-foreground);
+}
+
+.rating-picker-item.is-off ::deep .provider-tile,
+.rating-picker-item.is-off ::deep .rating-mark {
+    opacity: 0.45;
+}
+
+.rating-picker-item.is-dragged {
+    opacity: 0.5;
+}
+
+.rating-picker-item ::deep .provider-tile {
+    border-radius: 3px;
+}
+
+.rating-picker-switch {
+    display: inline-flex;
+    margin-left: auto;
+}
+
+.rating-picker-switch ::deep button:disabled {
+    pointer-events: none;
+}
+
+.rating-picker-grip {
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted-foreground);
+    cursor: grab;
+}
+
+.rating-picker-rank {
+    width: 14px;
+    font-size: 11px;
+    color: var(--muted-foreground);
+    text-align: right;
+}
+
+.rating-picker-check {
+    display: inline-flex;
+    width: 14px;
+    color: var(--sammlarr-gold);
+}

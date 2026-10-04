@@ -1,0 +1,59 @@
+@using BlazorBlueprint.Primitives.Filtering
+
+<div class="number-rule">
+    <div class="number-rule-box">
+        <BbNumericInput TValue="double"
+                        Value="@Read(Context.Value)"
+                        ValueChanged="@(value => Context.SetValueAsync(value, Context.ValueEnd))"
+                        Min="Min"
+                        Max="Max"
+                        Step="Step"
+                        ShowButtons="true"
+                        AllowNegative="false"
+                        AriaLabel="@Label"
+                        data-number-rule/>
+        @if (Unit is not null)
+        {
+            <span class="number-rule-unit">@Unit</span>
+        }
+        <span class="number-rule-adornment">@Adornment</span>
+    </div>
+    @if (Context.Operator is BlazorBlueprint.Primitives.Filtering.FilterOperator.Between)
+    {
+        <span class="number-rule-and">and</span>
+        <div class="number-rule-box">
+            <BbNumericInput TValue="double"
+                            Value="@Read(Context.ValueEnd)"
+                            ValueChanged="@(value => Context.SetValueAsync(Context.Value, value))"
+                            Min="Min"
+                            Max="Max"
+                            Step="Step"
+                            ShowButtons="true"
+                            AllowNegative="false"
+                            AriaLabel="@($"{Label}, upper bound")"
+                            data-number-rule/>
+            @if (Unit is not null)
+            {
+                <span class="number-rule-unit">@Unit</span>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required FilterValueEditorContext Context { get; set; }
+
+    [Parameter] [EditorRequired] public required string Label { get; set; }
+
+    [Parameter] public string? Unit { get; set; }
+
+    [Parameter] public double? Min { get; set; }
+
+    [Parameter] public double? Max { get; set; }
+
+    [Parameter] public double? Step { get; set; }
+
+    [Parameter] public RenderFragment? Adornment { get; set; }
+
+    private static double Read(object? value) => value is double number ? number : 0;
+}

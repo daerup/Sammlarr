@@ -3,12 +3,12 @@
 @if (_view is { } view)
 {
     var strategy = Strategy.GetValueOr(view.Default);
-    var value = strategy.Resolve(Ratings, view.Available).Map(rating => rating.Value).ToNullable();
+    var rating = strategy.Resolve(Ratings, view.Available).ToNullable();
     <span class="rating-badge-wrap @(Look is RatingBadgeLook.OnImage ? "on-image" : null)" @onclick:stopPropagation="true" @onfocusin:stopPropagation="true" @onfocusout:stopPropagation="true">
         <BbPopover>
-            <BbPopoverTrigger AsChild="false" class="@TriggerClass(value)" aria-label="@Label(value)">
-                <RatingStar Value="value" Size="Size"/>
-                <span>@(value is { } shown ? RatingTexts.Number(shown) : "–")</span>
+            <BbPopoverTrigger AsChild="false" class="@TriggerClass(rating)" aria-label="@Label(rating)">
+                <RatingStar Value="rating?.Value" Size="Size"/>
+                <span>@(rating is { } shown ? RatingTexts.Number(shown) : "–")</span>
             </BbPopoverTrigger>
             <BbPopoverContent Side="Side" Align="Align" Class="w-auto overflow-hidden rounded-[9px] p-0 shadow-[0_14px_34px_rgba(0,0,0,0.35)]" aria-label="How the Sammlarr rating came about">
                 <SammlarrRatingBreakdown Ratings="Ratings" Strategy="strategy" Available="view.Available" Where="@Where" Ids="Ids" Title="@Title" StoredOnly="StoredOnly" Media="Media"/>
@@ -44,18 +44,18 @@
 
     private string Where => Strategy.Match(_ => "this feed", () => "your default");
 
-    private string TriggerClass(float? value)
+    private string TriggerClass(SammlarrRating? rating)
     {
         var look = Look switch
         {
             RatingBadgeLook.OnImage => "on-image",
             RatingBadgeLook.Inline => "inline",
         };
-        return value is null ? $"rating-badge {look} is-unrated" : $"rating-badge {look}";
+        return rating is null ? $"rating-badge {look} is-unrated" : $"rating-badge {look}";
     }
 
-    private static string Label(float? value)
+    private static string Label(SammlarrRating? rating)
     {
-        return value is { } shown ? $"Sammlarr rating {RatingTexts.Number(shown)}, show how it came about" : RatingTexts.Unrated;
+        return rating is { } shown ? $"Sammlarr rating {RatingTexts.Number(shown)}, show how it came about" : RatingTexts.Unrated;
     }
 }

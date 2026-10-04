@@ -1,5 +1,6 @@
 using AngleSharp.Dom;
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Primitives.Filtering;
 using Bunit;
 using Contracts.Auth;
 using Domain.Auth;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Feeds.Pages.Editor;
 using UI.Shared.Services.Branding;
+using UI.Tests.Media;
 
 namespace UI.Tests.Feeds;
 
@@ -23,6 +25,7 @@ public class FeedConfigPanelTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddSingleton(RatingStub.Context());
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(IApiKey.Mock().Object));
 		keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Error.From("No API key is configured for this provider."));
@@ -119,6 +122,34 @@ public class FeedConfigPanelTests : BunitContext
 		await Assert.That(_changes.Last().RatingStrategy).IsSome().And.IsEqualTo(ordered);
 	}
 
+	[Test]
+	public async Task Rule_WhenItFiltersOnRating_CarriesTheStarThatNamesTheFeedsRating()
+	{
+		var cut = RenderPanelFiltering("Rating", 7.0);
+
+		await Assert
+			.That(cut.Find("button.rating-star-button").GetAttribute("aria-label"))
+			.IsEqualTo("This feed's Sammlarr rating: My default (Average). Click to change.");
+	}
+
+	[Test]
+	public async Task Rule_WhenItFiltersOnVotes_CarriesTheInfoIconThatExplainsTheCount()
+	{
+		var cut = RenderPanelFiltering("Votes", 500.0);
+
+		await Assert.That(cut.FindAll("[aria-label='How Votes are counted']")).IsNotEmpty();
+		await Assert.That(cut.FindAll("button.rating-star-button")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Rule_WhenARatingIsBetweenTwoBounds_ShowsBothBounds()
+	{
+		var cut = RenderPanelFiltering("Rating", 7.0, BlazorBlueprint.Primitives.Filtering.FilterOperator.Between, 8.5);
+
+		await Assert.That(cut.Find("input[aria-label='Rating']").GetAttribute("value")).IsEqualTo("7");
+		await Assert.That(cut.Find("input[aria-label='Rating, upper bound']").GetAttribute("value")).IsEqualTo("8.5");
+	}
+
 	private static IElement ProviderLabel(IRenderedComponent<FeedConfigPanel> cut)
 	{
 		return cut.FindAll("label").First(label => label.TextContent.Trim().StartsWith("Provider"));
@@ -132,6 +163,42 @@ public class FeedConfigPanelTests : BunitContext
 	private static IElement RunLine(IRenderedComponent<FeedConfigPanel> cut) => cut.Find(".run-count-line");
 
 	private IRenderedComponent<FeedConfigPanel> RenderPanel(FeedProvider? provider) => RenderPanel(provider, new Append());
+
+	private IRenderedComponent<FeedConfigPanel> RenderPanelFiltering(
+		string field,
+		double value,
+		BlazorBlueprint.Primitives.Filtering.FilterOperator comparison = BlazorBlueprint.Primitives.Filtering.FilterOperator.GreaterOrEqual,
+		double? end = null
+	)
+	{
+		var filter = new FilterDefinition
+		{
+			Conditions =
+			[
+				new FilterCondition
+				{
+					Field = field,
+					Operator = comparison,
+					Value = value,
+					ValueEnd = end,
+				},
+			],
+		};
+		return Render<FeedConfigPanel>(parameters =>
+			parameters
+				.Add(
+					panel => panel.Value,
+					new FeedConfig
+					{
+						Name = "Documentaries",
+						Provider = FeedProvider.Mdblist,
+						Identifier = "hdlists/documentaries",
+						Filter = filter,
+					}
+				)
+				.Add(panel => panel.OnChange, EventCallback.Factory.Create<FeedConfig>(this, _changes.Add))
+		);
+	}
 
 	private IRenderedComponent<FeedConfigPanel> RenderPanel(FeedProvider? provider, FeedStrategy strategy, RatingStrategy? rating = null)
 	{

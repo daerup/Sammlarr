@@ -6,12 +6,12 @@
 <div class="rating-breakdown @(_model.Ranked ? "ranked" : null)">
     <div class="rating-breakdown-band popover-band">
         <div class="rating-breakdown-head">
-            @if (Value is { } value)
+            @if (_model.Sammlarr.ToNullable() is { } sammlarr)
             {
                 <span class="rating-breakdown-value">
-                    <RatingStar Value="value" Size="20"/>
+                    <RatingStar Value="sammlarr.Value" Size="20"/>
                     <BbTooltip DelayDuration="150">
-                        <BbTooltipTrigger AsChild="false" Class="rating-tip">@RatingTexts.Number(value)</BbTooltipTrigger>
+                        <BbTooltipTrigger AsChild="false" Class="rating-tip">@RatingTexts.Number(sammlarr)</BbTooltipTrigger>
                         <BbTooltipContent>@Arithmetic</BbTooltipContent>
                     </BbTooltip>
                 </span>

@@ -32,7 +32,9 @@
 
     [Parameter] public int Size { get; set; } = 17;
 
-    private bool Shines => Value >= ShineFrom;
+    [Parameter] public bool Shine { get; set; } = true;
+
+    private bool Shines => Shine && Value >= ShineFrom;
 
     private string? Margin => Shines ? $"margin: 0 {Math.Round(Size * 0.14)}px" : null;
 
