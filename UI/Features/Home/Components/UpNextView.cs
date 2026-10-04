@@ -15,8 +15,10 @@ public enum UpNextKind
 	Scheduled,
 }
 
-public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href, MediaProvider? Brand = null, bool Deleted = false)
+public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href, bool Deleted = false)
 {
+	public IReadOnlyList<MediaProvider> Brands { get; init; } = [];
+
 	public Optional<DateTimeOffset> RunsAt { get; init; } = new None();
 
 	public Optional<JobId> Job { get; init; } = new None();
@@ -30,13 +32,16 @@ internal static class UpNextView
 		QueueSnapshot queue,
 		IReadOnlyDictionary<FeedId, string> feedNames,
 		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
-		MediaProvider sinkProvider
-	) =>
+		IReadOnlyList<MediaProvider> sinkProviders
+	)
+	{
+		return
 		[
 			.. queue
 				.Jobs.Where(job => job.State is JobState.Waiting or JobState.Queued or JobState.Running)
-				.Select(job => Row(job, feedNames, feedBrands, sinkProvider)),
+				.Select(job => Row(job, feedNames, feedBrands, sinkProviders)),
 		];
+	}
 
 	internal static IReadOnlySet<FeedId> FeedsAlreadyPending(QueueSnapshot queue) =>
 		queue
@@ -60,9 +65,11 @@ internal static class UpNextView
 					ScheduleText.Describe(entry.feed.Schedule),
 					ScheduleText.Away(entry.next, from),
 					UpNextKind.Scheduled,
-					EditHref(entry.feed.Id),
-					entry.feed.Provider.AsMediaProvider()
-				)),
+					EditHref(entry.feed.Id)
+				)
+				{
+					Brands = [entry.feed.Provider.AsMediaProvider()],
+				}),
 		];
 	}
 
@@ -70,35 +77,42 @@ internal static class UpNextView
 		PendingJob job,
 		IReadOnlyDictionary<FeedId, string> feedNames,
 		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
-		MediaProvider sinkProvider
+		IReadOnlyList<MediaProvider> sinkProviders
 	)
 	{
 		var name = Name(job.Request, feedNames);
 		var href = Href(job.Request, feedNames);
-		var brand = Brand(job.Request, feedBrands, sinkProvider);
+		var brands = Brands(job.Request, feedBrands, sinkProviders);
 		var deleted = Deleted(job.Request, feedNames);
 		if (job.State is JobState.Running)
 		{
-			return new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, deleted) { Job = Some.Of(job.Id) };
+			return new UpNextRow(name, "running now", "running", UpNextKind.Running, href, deleted) { Job = Some.Of(job.Id), Brands = brands };
 		}
 		if (job.State is JobState.Waiting)
 		{
-			return new UpNextRow(name, Waiting(job.Request), string.Empty, UpNextKind.Waiting, href, brand, deleted)
+			return new UpNextRow(name, Waiting(job.Request), string.Empty, UpNextKind.Waiting, href, deleted)
 			{
 				RunsAt = Some.Of(job.RunAfter),
 				Job = Some.Of(job.Id),
+				Brands = brands,
 			};
 		}
-		return new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, deleted) { Job = Some.Of(job.Id) };
+		return new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, deleted) { Job = Some.Of(job.Id), Brands = brands };
 	}
 
-	private static MediaProvider? Brand(IJobRequest request, IReadOnlyDictionary<FeedId, MediaProvider> feedBrands, MediaProvider sinkProvider) =>
-		request switch
+	private static IReadOnlyList<MediaProvider> Brands(
+		IJobRequest request,
+		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
+		IReadOnlyList<MediaProvider> sinkProviders
+	)
+	{
+		return request switch
 		{
-			RunFeed feed => feedBrands.TryGetValue(feed.Id, out var provider) ? provider : null,
-			SyncWantlist => sinkProvider,
-			_ => null,
+			RunFeed feed => feedBrands.GetValueOrNone(feed.Id).Match(provider => (IReadOnlyList<MediaProvider>)[provider], () => []),
+			SyncWantlist => sinkProviders,
+			_ => [],
 		};
+	}
 
 	private static string Waiting(IJobRequest request) => request is SyncWantlist ? "waiting for grace period" : "waiting";
 

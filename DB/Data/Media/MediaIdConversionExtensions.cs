@@ -24,5 +24,7 @@ internal static class MediaIdConversionExtensions
 			MediaProvider.Tvdb => TvdbId.From(externalId, mediaType),
 			MediaProvider.Plex => PlexId.From(externalId, mediaType),
 			MediaProvider.Mdblist => MdblistId.From(externalId, mediaType),
+			MediaProvider.Radarr => RadarrId.From(externalId, mediaType),
+			MediaProvider.Sonarr => SonarrId.From(externalId, mediaType),
 		};
 }

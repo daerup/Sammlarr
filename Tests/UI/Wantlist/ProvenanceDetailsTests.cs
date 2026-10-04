@@ -57,6 +57,16 @@ public class ProvenanceDetailsTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_ForATitleFoundOnRadarrAndSonarr_ShowsBothMarks()
+	{
+		var cut = RenderDetails(new SinkOrigin(SinkKind.Arr));
+
+		await Assert
+			.That(cut.FindAll(".provenance-mark img").Select(mark => mark.GetAttribute("src") ?? string.Empty).Where(src => src.Contains("light")))
+			.IsEquivalentTo(["_content/UI/providers/radarr-square-light.svg", "_content/UI/providers/sonarr-square-light.svg"]);
+	}
+
+	[Test]
 	public async Task Render_ForAnItemWhoseFeedWasDeleted_KeepsTheNameButOffersNoDeadLinks()
 	{
 		var cut = RenderDetails(new OrphanedOrigin("Weekly picks"));

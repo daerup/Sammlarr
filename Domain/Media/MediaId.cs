@@ -93,3 +93,25 @@ public readonly record struct MdblistId : IExternalMediaId
 
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
+
+public readonly record struct RadarrId : IExternalMediaId
+{
+	public MediaProvider Source => MediaProvider.Radarr;
+	public string Value { get; private init; }
+	public MediaType Type { get; private init; }
+
+	public static RadarrId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
+}
+
+public readonly record struct SonarrId : IExternalMediaId
+{
+	public MediaProvider Source => MediaProvider.Sonarr;
+	public string Value { get; private init; }
+	public MediaType Type { get; private init; }
+
+	public static SonarrId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
+}

@@ -5,6 +5,7 @@ using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Contracts.Wantlist.Sync;
 using Core.Announcing;
+using Domain.Media;
 using Domain.Notifications;
 using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
@@ -80,25 +81,45 @@ internal sealed class WantlistSyncEngine(
 	private async Task<IReadOnlyList<PushOutcome>> DrainAsync(IMediaSink sink, CancellationToken cancellationToken)
 	{
 		var pending = new OutboxSnapshot(await outbox.GetAllAsync(cancellationToken)).Pending;
+		var addedBy = pending.Any(entry => entry.Action is WantlistOperationAction.Add) ? await AddingFeedsAsync(cancellationToken) : [];
 		List<PushOutcome> outcomes = [];
 		foreach (var batch in pending.GroupBy(entry => entry.Action))
 		{
-			outcomes.AddRange(await ApplyBatchAsync(sink, batch.Key, [.. batch], cancellationToken));
+			outcomes.AddRange(await ApplyBatchAsync(sink, batch.Key, [.. batch], addedBy, cancellationToken));
 		}
 
 		return outcomes;
+	}
+
+	private async Task<Dictionary<MediaId, Domain.Feed.Feed>> AddingFeedsAsync(CancellationToken cancellationToken)
+	{
+		return (await repo.GetAllAsync(cancellationToken))
+			.Select(item => AddingFeed(item.Provenance).Map(feed => (item.MediaId, Feed: feed)))
+			.WhereSome()
+			.ToDictionary(entry => entry.MediaId, entry => entry.Feed);
+	}
+
+	private static Optional<Domain.Feed.Feed> AddingFeed(WantlistItemProvenance provenance)
+	{
+		return provenance switch
+		{
+			FeedOrigin origin => Some.Of(origin.Feed),
+			SinkOrigin or ManualOrigin or OrphanedOrigin => new None(),
+		};
 	}
 
 	private async Task<IReadOnlyList<PushOutcome>> ApplyBatchAsync(
 		IMediaSink sink,
 		WantlistOperationAction action,
 		IReadOnlyList<WantlistOutboxEntry> entries,
+		IReadOnlyDictionary<MediaId, Domain.Feed.Feed> addedBy,
 		CancellationToken cancellationToken
 	)
 	{
 		var awaiting = entries.ToDictionary(entry => entry.MediaId);
 		List<PushOutcome> outcomes = [];
-		await foreach (var ack in sink.ApplyAsync(action, [.. awaiting.Keys], cancellationToken))
+		var pushes = awaiting.Keys.Select(id => new SinkPush(id, addedBy.GetValueOrNone(id))).ToList();
+		await foreach (var ack in sink.ApplyAsync(action, pushes, cancellationToken))
 		{
 			var acked = awaiting[ack.MediaId];
 			awaiting.Remove(ack.MediaId);

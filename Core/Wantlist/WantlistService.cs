@@ -4,7 +4,6 @@ using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Domain.Feed;
 using Domain.Media;
-using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
 
@@ -100,7 +99,7 @@ internal sealed class WantlistService(IWantlistRepository repository, IWantlistO
 		if (ids.Any(id => !sinkIds.ContainsKey(id)))
 		{
 			var config = await providerConfig.GetAsync(cancellationToken);
-			throw new MissingSinkIdException(config.Sink.AsMediaProvider());
+			throw new MissingSinkIdException(config.Sink.ToString());
 		}
 	}
 

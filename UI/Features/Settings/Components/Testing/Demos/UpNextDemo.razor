@@ -9,15 +9,15 @@
 @code {
     private static readonly IReadOnlyList<UpNextRow> Queued =
     [
-        new(DemoFeeds.MirrorFeed.Name, "running now", "running", UpNextKind.Running, "/feeds", MediaProvider.Mdblist),
-        new("Sync Wantlist", "queued", "2nd in line", UpNextKind.Queued, null, MediaProvider.Plex) { Job = Some.Of(JobId.From(Guid.NewGuid())) },
-        new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null, MediaProvider.Plex) { RunsAt = Some.Of(DemoFeeds.Now.AddMinutes(2)), Job = Some.Of(JobId.From(Guid.NewGuid())) },
+        new(DemoFeeds.MirrorFeed.Name, "running now", "running", UpNextKind.Running, "/feeds") { Brands = [MediaProvider.Mdblist] },
+        new("Sync Wantlist", "queued", "2nd in line", UpNextKind.Queued, null) { Job = Some.Of(JobId.From(Guid.NewGuid())), Brands = [MediaProvider.Plex] },
+        new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null) { Brands = [MediaProvider.Radarr, MediaProvider.Sonarr], RunsAt = Some.Of(DemoFeeds.Now.AddMinutes(2)), Job = Some.Of(JobId.From(Guid.NewGuid())) },
         new("A deleted feed", "queued", "4th in line", UpNextKind.Queued, null, Deleted: true) { Job = Some.Of(JobId.From(Guid.NewGuid())) },
     ];
 
     private static readonly IReadOnlyList<UpNextRow> Scheduled =
     [
-        new(DemoFeeds.MirrorFeed.Name, "At 09:00", "in 13 hours", UpNextKind.Scheduled, "/feeds", MediaProvider.Mdblist),
-        new("hdlists/latest-hd-documentary-movies-1980-to-today", "At 26 minutes past the hour", "in 34 min", UpNextKind.Scheduled, "/feeds", MediaProvider.Mdblist),
+        new(DemoFeeds.MirrorFeed.Name, "At 09:00", "in 13 hours", UpNextKind.Scheduled, "/feeds") { Brands = [MediaProvider.Mdblist] },
+        new("hdlists/latest-hd-documentary-movies-1980-to-today", "At 26 minutes past the hour", "in 34 min", UpNextKind.Scheduled, "/feeds") { Brands = [MediaProvider.Mdblist] },
     ];
 }

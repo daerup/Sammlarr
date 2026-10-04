@@ -10,5 +10,6 @@ internal class SettingsModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddTracedScoped<IProviderConfigService, ProviderConfigService>();
+		services.AddTracedScoped<IArrSinkConfigService, ArrSinkConfigService>();
 	}
 }

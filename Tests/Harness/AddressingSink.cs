@@ -14,6 +14,8 @@ internal sealed class AddressingSink(IMediaSink sink, Func<MediaType, Optional<M
 
 	public Task<SinkSnapshot> GetAsync(CancellationToken cancellationToken = default) => sink.GetAsync(cancellationToken);
 
-	public IAsyncEnumerable<SinkSyncAck> ApplyAsync(WantlistOperationAction action, IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default) =>
-		sink.ApplyAsync(action, ids, cancellationToken);
+	public IAsyncEnumerable<SinkSyncAck> ApplyAsync(WantlistOperationAction action, IReadOnlyList<SinkPush> pushes, CancellationToken cancellationToken = default)
+	{
+		return sink.ApplyAsync(action, pushes, cancellationToken);
+	}
 }

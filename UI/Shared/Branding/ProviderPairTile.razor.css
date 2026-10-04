@@ -1,0 +1,27 @@
+.provider-pair {
+    position: relative;
+    display: block;
+    flex: none;
+    width: var(--tile-size);
+    height: var(--tile-size);
+    border-radius: 6px;
+    background: var(--muted);
+}
+
+.provider-pair-first,
+.provider-pair-second {
+    position: absolute;
+    display: flex;
+    width: var(--mark-size);
+    height: var(--mark-size);
+}
+
+.provider-pair-first {
+    left: calc(var(--tile-size) * -0.0625);
+    top: calc(var(--tile-size) * -0.0625);
+}
+
+.provider-pair-second {
+    right: calc(var(--tile-size) * -0.0625);
+    bottom: calc(var(--tile-size) * -0.0625);
+}

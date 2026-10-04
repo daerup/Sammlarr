@@ -121,7 +121,7 @@ public class PlexSinkTests
 	{
 		var testee = Sink(status, Addressing(Known, PlexId.From("plex-1", MediaType.Movie)));
 
-		var acks = await testee.ApplyAsync(action, [Known]).ToListAsync();
+		var acks = await testee.ApplyAsync(action, [new SinkPush(Known, new None())]).ToListAsync();
 
 		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, expected)]);
 	}
@@ -134,7 +134,7 @@ public class PlexSinkTests
 		media.GetSinkIdsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new Dictionary<MediaId, IExternalMediaId>());
 		var testee = Sink(handler, media);
 
-		var acks = await testee.ApplyAsync(WantlistOperationAction.Add, [Known]).ToListAsync();
+		var acks = await testee.ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
 		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Unaddressable)]);
 		await Assert.That(handler.Requests).IsEmpty();

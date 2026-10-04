@@ -6,9 +6,12 @@
     <div class="provenance-body">
         <div class="provenance-head">
             <span class="provenance-mark">
-                @if (ProvenanceView.Provider(Provenance) is { } provider)
+                @if (ProvenanceView.Providers(Provenance) is { Count: > 0 } providers)
                 {
-                    <ProviderLogo Provider="provider" Size="16" Decorative="true"/>
+                    @foreach (var provider in providers)
+                    {
+                        <ProviderLogo Provider="provider" Size="16" Decorative="true"/>
+                    }
                 }
                 else
                 {

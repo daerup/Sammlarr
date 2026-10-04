@@ -72,7 +72,8 @@ internal static class WantlistStubs
 		Mock<IEventPublisher>? events = null,
 		WantlistSyncGate? gate = null,
 		ICurrentUser? user = null,
-		IMessagePublisher? publisher = null
+		IMessagePublisher? publisher = null,
+		Mock<IWantlistRepository>? repository = null
 	)
 	{
 		outbox ??= EmptyOutbox();
@@ -83,7 +84,7 @@ internal static class WantlistStubs
 			gate ?? new WantlistSyncGate(),
 			Planner(sink, outbox),
 			Active(sink),
-			EmptyRepository().Object,
+			(repository ?? EmptyRepository()).Object,
 			outbox.Object,
 			new Announcer((events ?? IEventPublisher.Mock()).Object, publisher ?? new RecordingPublisher()),
 			user ?? new TestCurrentUser(),

@@ -11,15 +11,40 @@ internal enum TileEdge
 
 internal sealed record MapPoint(double X, double Y);
 
-internal sealed record MapPicker(string Label, IReadOnlyList<MediaProvider> Options, MediaProvider Current);
+internal readonly record struct MapEndpoint(MediaProvider Provider, Optional<MediaProvider> Partner)
+{
+	public IReadOnlyList<MediaProvider> Providers
+	{
+		get
+		{
+			var provider = Provider;
+			return Partner.Match(partner => (IReadOnlyList<MediaProvider>)[provider, partner], () => [provider]);
+		}
+	}
 
-internal sealed record MapRole(string Name, string Icon, string Description, double Y, MediaProvider? Provider, MapPicker? Picker);
+	public static implicit operator MapEndpoint(MediaProvider provider) => new(provider, new None());
 
-internal sealed record MapService(MediaProvider Provider, double Y, IReadOnlyList<double> Pins);
+	public static MapEndpoint Of(SinkKind sink)
+	{
+		return sink switch
+		{
+			SinkKind.Plex => MediaProvider.Plex,
+			SinkKind.Arr => new MapEndpoint(MediaProvider.Radarr, Some.Of(MediaProvider.Sonarr)),
+		};
+	}
+
+	public override string ToString() => string.Join("+", Providers);
+}
+
+internal sealed record MapPicker(string Label, IReadOnlyList<MapEndpoint> Options, MapEndpoint Current);
+
+internal sealed record MapRole(string Name, string Icon, string Description, double Y, MapEndpoint? Provider, MapPicker? Picker);
+
+internal sealed record MapService(MapEndpoint Provider, double Y, IReadOnlyList<double> Pins);
 
 internal sealed record MapTile(MediaProvider Provider, double X, double Y, TileEdge Entry);
 
-internal sealed record MapTrace(string Role, MediaProvider Provider, IReadOnlyList<MapPoint> Points)
+internal sealed record MapTrace(string Role, MapEndpoint Provider, IReadOnlyList<MapPoint> Points)
 {
 	internal string Path => TracePath.Draw(Points);
 }
@@ -86,16 +111,20 @@ internal sealed record ServicesMapModel(
 	internal static ServicesMapModel For(ProviderConfig config, IReadOnlyList<MediaProvider> feeds)
 	{
 		var roles = RolesFor(config);
-		var landings = roles.SelectMany(role => (role.Provider is { } provider ? [provider] : feeds).Select(provider => (Role: role, Provider: provider))).ToList();
+		var landings = roles
+			.SelectMany(role =>
+				(role.Provider is { } provider ? [provider] : feeds.Select(feed => (MapEndpoint)feed)).Select(provider => (Role: role, Provider: provider))
+			)
+			.ToList();
 		var services = Place(roles, landings);
 
-		double Pin(MapRole role, MediaProvider provider)
+		double Pin(MapRole role, MapEndpoint provider)
 		{
 			var arriving = landings.Where(landing => landing.Provider == provider).Select(landing => landing.Role).ToList();
 			return services.Single(service => service.Provider == provider).Pins[arriving.IndexOf(role)];
 		}
 
-		var boxed = feeds.Where(feed => services.Any(service => service.Provider == feed)).ToList();
+		var boxed = feeds.Where(feed => services.Any(service => service.Provider == (MapEndpoint)feed)).ToList();
 		var tiles = PlaceTiles([.. feeds.Where(feed => !boxed.Contains(feed))], services[^1].Y + ServiceHeight / 2 + ServiceGap, feeds.Count);
 		var feedsRole = roles.Single(role => role.Provider is null);
 
@@ -149,22 +178,22 @@ internal sealed record ServicesMapModel(
 
 	private static List<MapRole> RolesFor(ProviderConfig config)
 	{
-		(string Name, string Icon, string Description, MediaProvider? Provider, MapPicker? Picker)[] rows =
+		(string Name, string Icon, string Description, MapEndpoint? Provider, MapPicker? Picker)[] rows =
 		[
 			("Sign-in", "log-in", "Who can sign in", config.AuthProvider.AsMediaProvider(), null),
 			(
 				"Wantlist",
 				"bookmark",
 				"Where the wantlist syncs to",
-				config.Sink.AsMediaProvider(),
-				Picker("Wantlist syncs to", Enum.GetValues<SinkKind>().Select(sink => sink.AsMediaProvider()), config.Sink.AsMediaProvider())
+				MapEndpoint.Of(config.Sink),
+				Picker("Wantlist syncs to", Enum.GetValues<SinkKind>().Select(MapEndpoint.Of), MapEndpoint.Of(config.Sink))
 			),
 			(
 				"Search",
 				"search",
 				"Finding titles to add",
 				config.SearchProvider.AsMediaProvider(),
-				Picker("Search uses", Enum.GetValues<SearchProvider>().Select(search => search.AsMediaProvider()), config.SearchProvider.AsMediaProvider())
+				Picker("Search uses", Enum.GetValues<SearchProvider>().Select(search => (MapEndpoint)search.AsMediaProvider()), config.SearchProvider.AsMediaProvider())
 			),
 			("Trending", "trending-up", "What Browse shows", config.TrendingProvider.AsMediaProvider(), null),
 			("Feeds", "rss", "Imported lists; each feed picks its source", null, null),
@@ -172,10 +201,12 @@ internal sealed record ServicesMapModel(
 		return [.. rows.Select((row, index) => new MapRole(row.Name, row.Icon, row.Description, index * RowHeight + RowHeight / 2, row.Provider, row.Picker))];
 	}
 
-	private static MapPicker? Picker(string label, IEnumerable<MediaProvider> options, MediaProvider current) =>
-		options.ToList() is { Count: > 1 } choices ? new MapPicker(label, choices, current) : null;
+	private static MapPicker? Picker(string label, IEnumerable<MapEndpoint> options, MapEndpoint current)
+	{
+		return options.ToList() is { Count: > 1 } choices ? new MapPicker(label, choices, current) : null;
+	}
 
-	private static List<MapService> Place(List<MapRole> roles, List<(MapRole Role, MediaProvider Provider)> landings)
+	private static List<MapService> Place(List<MapRole> roles, List<(MapRole Role, MapEndpoint Provider)> landings)
 	{
 		var services = new List<MapService>();
 		foreach (

@@ -3,6 +3,7 @@ using Contracts.Identity;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Domain.Media;
+using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using TestInfrastructure;
@@ -29,6 +30,27 @@ public class WantlistPushTests
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
 		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), Any<WantlistOutboxState>(), Any()).WasCalled(Times.Never);
 		events.Publish(Event(mediaId, WantlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task SyncAsync_ForAPendingAddAFeedBrought_TellsTheSinkWhichFeedAddedIt()
+	{
+		var mediaId = MediaId.New();
+		var repository = WantlistStubs.EmptyRepository();
+		repository
+			.GetAllAsync(Any())
+			.Returns([new WantlistItem(mediaId, DateTimeOffset.UnixEpoch, TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "Latest movies"))]);
+		var sink = WantlistStubs.SinkAcking(new SinkSyncAck(mediaId, SinkSyncOutcome.Applied));
+		var testee = WantlistStubs.Engine(sink, OutboxWith(Pending(mediaId, WantlistOperationAction.Add)), user: Owner, repository: repository);
+
+		await testee.SyncAsync(Trigger);
+
+		sink.ApplyAsync(
+				WantlistOperationAction.Add,
+				Is<IReadOnlyList<SinkPush>>(pushes => pushes!.Single().AddedBy.Match(feed => feed.Name == "Latest movies", () => false)),
+				Any()
+			)
+			.WasCalled(Times.Once);
 	}
 
 	[Test]

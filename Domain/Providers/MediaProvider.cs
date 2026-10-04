@@ -23,4 +23,10 @@ public enum MediaProvider
 	[Description("Mdblist")]
 	[Capabilities<ProviderCapability>(ProviderCapability.Feed | ProviderCapability.ApiKey)]
 	Mdblist,
+
+	[Description("Radarr")]
+	Radarr,
+
+	[Description("Sonarr")]
+	Sonarr,
 }

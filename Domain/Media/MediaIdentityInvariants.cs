@@ -10,7 +10,7 @@ public static class MediaIdentityInvariants
 		{
 			if (externals.All(id => id.Source != sinkProvider))
 			{
-				throw new MissingSinkIdException(sinkProvider);
+				throw new MissingSinkIdException(sinkProvider.ToString());
 			}
 		}
 
@@ -24,7 +24,7 @@ public static class MediaIdentityInvariants
 	}
 }
 
-public sealed class MissingSinkIdException(MediaProvider sinkProvider) : Exception($"No external ID for the configured sink '{sinkProvider}' is present.");
+public sealed class MissingSinkIdException(string sink) : Exception($"No external ID for the configured sink '{sink}' is present.");
 
 public sealed class MixedMediaTypesException() : Exception("All external IDs must be of the same media type.");
 

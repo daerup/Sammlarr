@@ -13,8 +13,10 @@ public interface IMediaSink
 
 	Task<SinkSnapshot> GetAsync(CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<SinkSyncAck> ApplyAsync(WantlistOperationAction action, IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<SinkSyncAck> ApplyAsync(WantlistOperationAction action, IReadOnlyList<SinkPush> pushes, CancellationToken cancellationToken = default);
 }
+
+public readonly record struct SinkPush(MediaId MediaId, Optional<Domain.Feed.Feed> AddedBy);
 
 public readonly record struct SinkSyncAck(MediaId MediaId, SinkSyncOutcome Outcome);
 

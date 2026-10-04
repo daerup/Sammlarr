@@ -159,7 +159,7 @@
     }
 
     private string? SinkBrandColor =>
-        Settings is null ? null : BrandingService.GetBrandingInfo(Settings.Sink.AsMediaProvider()).BrandColor;
+        Settings is null ? null : BrandingService.SinkColor(Settings.Sink);
 
     private static BulkConfirm RemoveConfirm(int count) =>
         new(

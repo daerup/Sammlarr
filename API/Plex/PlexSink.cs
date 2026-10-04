@@ -40,10 +40,11 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 
 	public async IAsyncEnumerable<SinkSyncAck> ApplyAsync(
 		WantlistOperationAction action,
-		IReadOnlyList<MediaId> ids,
+		IReadOnlyList<SinkPush> pushes,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
+		var ids = pushes.Select(push => push.MediaId).ToList();
 		var plexIds = await mediaService.GetSinkIdsAsync(ids, cancellationToken);
 		foreach (var id in ids)
 		{

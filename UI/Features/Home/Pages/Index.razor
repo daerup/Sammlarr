@@ -179,11 +179,11 @@ else
 
     private IReadOnlyDictionary<FeedId, MediaProvider> FeedBrands() => _feeds.ToDictionary(feed => feed.Id, feed => feed.Provider.AsMediaProvider());
 
-    private MediaProvider Sink => _settings?.Sink.AsMediaProvider() ?? MediaProvider.Plex;
+    private IReadOnlyList<MediaProvider> Sink => (_settings?.Sink ?? SinkKind.Plex).Providers();
 
     private bool IsConnected() => _isConnected;
 
-    private string? BrandColor => _settings is null ? null : BrandingService.GetBrandingInfo(_settings.Sink.AsMediaProvider()).BrandColor;
+    private string? BrandColor => _settings is null ? null : BrandingService.SinkColor(_settings.Sink);
 
     private void StartSync()
     {

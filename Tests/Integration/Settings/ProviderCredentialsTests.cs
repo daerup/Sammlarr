@@ -121,7 +121,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var solaris = await host.Movie("Solaris", plex: "plex-100").SeedAsync();
 
-		var acks = await PlexSink.ApplyAsync(WantlistOperationAction.Add, [solaris]).ToListAsync();
+		var acks = await PlexSink.ApplyAsync(WantlistOperationAction.Add, [new SinkPush(solaris, new None())]).ToListAsync();
 
 		await Assert.That(acks.Single().Outcome).IsEqualTo(SinkSyncOutcome.Failed);
 	}
@@ -132,7 +132,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithPlexAccount("plex-access-token");
 		var solaris = await host.Movie("Solaris", plex: "plex-100").SeedAsync();
 
-		var acks = await PlexSink.ApplyAsync(WantlistOperationAction.Add, [solaris]).ToListAsync();
+		var acks = await PlexSink.ApplyAsync(WantlistOperationAction.Add, [new SinkPush(solaris, new None())]).ToListAsync();
 
 		await Assert.That(acks.Single().Outcome).IsEqualTo(SinkSyncOutcome.Applied);
 	}
