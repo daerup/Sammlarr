@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace E2E.Tests.PlexFree;
+namespace E2E.Tests.SelfHosted;
 
 internal sealed record TestCertificates(string AuthorityPem, string KeystorePath, string Password)
 {

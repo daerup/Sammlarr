@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace E2E.Tests.PlexFree;
+namespace E2E.Tests.SelfHosted;
 
 internal sealed partial class SetupCodeSink(string category) : ILoggerProvider
 {

@@ -1,13 +1,13 @@
 using TUnit.Core.Interfaces;
 
-namespace E2E.Tests.PlexFree;
+namespace E2E.Tests.SelfHosted;
 
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class PlexFreeAttribute : Attribute, ITestRegisteredEventReceiver, ITestDiscoveryEventReceiver
+public sealed class SelfHostedAttribute : Attribute, ITestRegisteredEventReceiver, ITestDiscoveryEventReceiver
 {
 	private static readonly StackLimit Limit = new();
 
-	private static readonly ParallelGroupAttribute Group = new(nameof(PlexFree));
+	private static readonly ParallelGroupAttribute Group = new(nameof(SelfHosted));
 
 	public int Order => 1;
 
@@ -22,6 +22,6 @@ public sealed class PlexFreeAttribute : Attribute, ITestRegisteredEventReceiver,
 
 	private sealed class StackLimit : IParallelLimit
 	{
-		public int Limit => PlexFreeApp.StackCount;
+		public int Limit => SelfHostedApp.StackCount;
 	}
 }
