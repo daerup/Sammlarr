@@ -149,4 +149,19 @@ public class GlobalSearchTests : BunitContext
 
 		await Assert.That(cut.FindAll(".search-result-row").Single(row => row.TextContent.Contains(Movie)).QuerySelectorAll(".toggle-dot")).IsNotEmpty();
 	}
+
+	[Test]
+	public async Task Adding_ATitleTheSinkHasNoMatchFor_WarnsInsteadOfFailing()
+	{
+		_wantlist.AddAsync(Any(), Any(), Any()).Throws(new MissingSinkIdException(nameof(SinkKind.Plex)));
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
+
+		await cut.Find("button[aria-label='Add to wantlist']").ClickAsync(new MouseEventArgs());
+
+		var toast = Services.GetRequiredService<ToastService>().Toasts.Single();
+		await Assert.That(toast.Variant).IsEqualTo(ToastVariant.Warning);
+		await Assert.That(toast.Description).IsEqualTo($"Plex has no match for '{Movie}', so it can't go on your wantlist.");
+	}
 }
