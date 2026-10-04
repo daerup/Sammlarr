@@ -28,6 +28,25 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
 	}
 
+	public async Task<Result<IReadOnlyList<TmdbTypes.Trending.Result>>> SearchAsync(string query, CancellationToken cancellationToken = default)
+	{
+		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchSearchAsync(query, apiKey, cancellationToken));
+	}
+
+	private async Task<Result<IReadOnlyList<TmdbTypes.Trending.Result>>> FetchSearchAsync(string query, IApiKey apiKey, CancellationToken cancellationToken)
+	{
+		var endpoint = string.Format(TmdbEndpoints.Search, Uri.EscapeDataString(query));
+		using var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
+		if (!response.IsSuccessStatusCode)
+		{
+			logger.LogWarning("TMDB search returned {StatusCode} for {Query}", (int)response.StatusCode, query);
+			return Unanswered(response.StatusCode, $"TMDB search returned {(int)response.StatusCode}.");
+		}
+		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+		var result = await JsonSerializer.DeserializeAsync<TmdbTypes.Trending.Root>(stream, cancellationToken: cancellationToken);
+		return Success.Of<IReadOnlyList<TmdbTypes.Trending.Result>>(result?.Results ?? []);
+	}
+
 	private async Task<Result<TmdbTypes.Details>> FetchDetailAsync(TmdbId id, string endpointFormat, IApiKey apiKey, CancellationToken cancellationToken)
 	{
 		if (ToTmdbMediaType(id.Type) is not { } mediaType)

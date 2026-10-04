@@ -164,7 +164,7 @@
             var parts = new List<string>(2);
             if (inFlight > 0)
             {
-                parts.Add($"{inFlight} waiting to reach Plex");
+                parts.Add($"{inFlight} waiting to reach {ProviderName}");
             }
             if (failed > 0)
             {
@@ -174,7 +174,7 @@
         }
     }
 
-    private string Subtitle => _dryRun is { } report ? $"{report.NoOps.Count + report.TotalChanges} titles compared" : "Comparing with Plex…";
+    private string Subtitle => _dryRun is { } report ? $"{report.NoOps.Count + report.TotalChanges} titles compared" : $"Comparing with {ProviderName}…";
 
     protected override async Task OnInitializedAsync()
     {
@@ -264,7 +264,7 @@
                 _dryRun = changes;
                 _dryRunError = null;
                 var ids = changes.Changes.Select(change => change.MediaId).Concat(changes.NoOps).Distinct();
-                _items = WantlistSyncView.Items(changes, await Media.GetDetailsByIdAsync(ids, cancellationToken));
+                _items = WantlistSyncView.Items(changes, await Media.GetDetailsByIdAsync(ids, cancellationToken), ProviderName);
                 _chips = WantlistSyncView.Chips(changes);
                 break;
             case WantlistSyncSinkUnreachable failed:

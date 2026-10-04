@@ -493,7 +493,9 @@ public class MediaServiceTests
 				}
 			);
 
-		var searchIndex = new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>().Register(SearchProvider.Plex, search.Object);
+		var searchIndex = new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>()
+			.Register(SearchProvider.Plex, search.Object)
+			.Register(SearchProvider.Tmdb, search.Object);
 		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>()
 			.Register(MediaProvider.Plex, enricher.Object)
 			.Register(MediaProvider.Tmdb, enricher.Object);

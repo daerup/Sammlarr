@@ -64,12 +64,14 @@ public class ServicesMapTests : BunitContext
 	}
 
 	[Test]
-	public async Task Map_ForAnAdmin_OffersAChipOnlyForTheWantlistWhichHasASecondTarget()
+	public async Task Map_ForAnAdmin_OffersAChipForEachRoleWithASecondChoice()
 	{
 		var cut = RenderMap(canPick: true);
 
 		await Assert.That(cut.FindAll("button.map-service")).IsEmpty();
-		await Assert.That(cut.FindAll(".map-chip").Select(chip => chip.GetAttribute("aria-label") ?? string.Empty)).IsEquivalentTo(["Change what Wantlist uses"]);
+		await Assert
+			.That(cut.FindAll(".map-chip").Select(chip => chip.GetAttribute("aria-label") ?? string.Empty))
+			.IsEquivalentTo(["Change what Wantlist uses", "Change what Search uses"]);
 	}
 
 	[Test]
@@ -93,6 +95,53 @@ public class ServicesMapTests : BunitContext
 		await cut.FindAll("[role=menuitem]").Single(item => item.TextContent.Contains("Radarr")).ClickAsync();
 
 		await Assert.That(picked).IsEquivalentTo([SinkKind.Arr]);
+	}
+
+	[Test]
+	public async Task SearchChip_BeforeTheServicesAreConnected_OffersOnlyTheOnesThatAre()
+	{
+		var cut = RenderPicker(Config with { SearchProvider = SearchProvider.Tmdb }, new HashSet<MediaProvider> { MediaProvider.Tmdb }, _ => { });
+
+		await cut.FindAll(".map-chip")[1].ClickAsync();
+		cut.WaitForElement("[role=menuitem]");
+		var items = cut.FindAll("[role=menuitem]").Select(item => $"{item.TextContent.Trim()} | {item.GetAttribute("aria-disabled") ?? "false"}");
+
+		await Assert.That(items).IsEquivalentTo(["TMDb | false", "Radarr + SonarrConnect Radarr + Sonarr first | true", "PlexConnect Plex first | true"]);
+	}
+
+	[Test]
+	public async Task SearchChip_WhenAConnectedServiceIsPicked_RaisesIt()
+	{
+		List<SearchProvider> picked = [];
+		var cut = RenderPicker(
+			Config with
+			{
+				SearchProvider = SearchProvider.Tmdb,
+			},
+			new HashSet<MediaProvider> { MediaProvider.Tmdb, MediaProvider.Radarr, MediaProvider.Sonarr },
+			picked.Add
+		);
+
+		await cut.FindAll(".map-chip")[1].ClickAsync();
+		cut.WaitForElement("[role=menuitem]");
+		await cut.FindAll("[role=menuitem]").Single(item => item.TextContent.Contains("Radarr")).ClickAsync();
+
+		await Assert.That(picked).IsEquivalentTo([SearchProvider.Arr]);
+	}
+
+	private IRenderedComponent<IComponent> RenderPicker(ProviderConfig config, IReadOnlySet<MediaProvider> ready, Action<SearchProvider> picked)
+	{
+		return Render(builder =>
+		{
+			builder.OpenComponent<BbPortalHost>(0);
+			builder.CloseComponent();
+			builder.OpenComponent<ServicesMap>(1);
+			builder.AddComponentParameter(2, nameof(ServicesMap.Config), config);
+			builder.AddComponentParameter(3, nameof(ServicesMap.Ready), ready);
+			builder.AddComponentParameter(4, nameof(ServicesMap.CanPick), true);
+			builder.AddComponentParameter(5, nameof(ServicesMap.SearchPicked), EventCallback.Factory.Create(this, picked));
+			builder.CloseComponent();
+		});
 	}
 
 	[Test]

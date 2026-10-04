@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 using Domain.Media;
 
@@ -85,7 +86,21 @@ internal static class TmdbTypes
 		[property: JsonPropertyName("tv_results")] IReadOnlyList<FindItem> TvResults
 	);
 
-	public record ExternalIds([property: JsonPropertyName("imdb_id")] string? ImdbId, [property: JsonPropertyName("tvdb_id")] int? TvdbId);
+	public record ExternalIds([property: JsonPropertyName("imdb_id")] string? ImdbId, [property: JsonPropertyName("tvdb_id")] int? TvdbId)
+	{
+		public IEnumerable<IExternalMediaId> Ids(MediaType type)
+		{
+			if (!string.IsNullOrWhiteSpace(ImdbId))
+			{
+				yield return Domain.Media.ImdbId.From(ImdbId, type);
+			}
+
+			if (TvdbId is > 0)
+			{
+				yield return Domain.Media.TvdbId.From(TvdbId.Value.ToString(CultureInfo.InvariantCulture), type);
+			}
+		}
+	}
 
 	public record FindItem(
 		[property: JsonPropertyName("id")] int Id,

@@ -17,6 +17,7 @@ public class MediaDetailTileTests : BunitContext
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton(IMediaService.Mock().Object);
 		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddSingleton(ArtworkStub.Sizing());
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -39,5 +40,18 @@ public class MediaDetailTileTests : BunitContext
 		await Assert.That(cut.Markup).Contains("Work is life.");
 		await Assert.That(cut.Markup).Contains("2 seasons");
 		await Assert.That(cut.Markup).Contains("19 episodes");
+	}
+
+	[Test]
+	public async Task Poster_WhenItsSizedCopyFailsToLoad_FallsBackToTheOriginalForGood()
+	{
+		MediaMatchResult found = new UnmatchedMedia([TmdbId.From("95396", MediaType.Show)], new ShowDetails { Title = "Severance", PosterUrl = "poster.jpg" });
+		var cut = Render<MediaDetailTile>(parameters => parameters.Add(tile => tile.Media, found));
+		await Assert.That(cut.Find("img").GetAttribute("srcset")).IsEqualTo("poster.jpg?width=192 1x, poster.jpg?width=384 2x");
+
+		await cut.Find("img").TriggerEventAsync("onerror", EventArgs.Empty);
+		cut.Render(parameters => parameters.Add(tile => tile.Media, found));
+
+		await Assert.That(cut.Find("img").HasAttribute("srcset")).IsFalse();
 	}
 }

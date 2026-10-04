@@ -3,8 +3,6 @@ namespace Domain.Providers;
 [Flags]
 internal enum ProviderCapability
 {
-	Search = 1 << 0,
-
 	[ConvertsTo<ProviderCapability>(ApiKey)]
 	Trending = 1 << 1,
 

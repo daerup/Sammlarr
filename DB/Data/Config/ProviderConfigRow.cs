@@ -74,7 +74,7 @@ internal record ProviderConfigRow
 		{
 			Sink = SinkKind.Plex,
 			TrendingProvider = TrendingProvider.Tmdb,
-			SearchProvider = SearchProvider.Plex,
+			SearchProvider = SearchProvider.Tmdb,
 			AuthProvider = AuthProvider.Plex,
 			RegistrationMode = RegistrationMode.Open,
 		};

@@ -14,10 +14,11 @@ public enum MediaProvider
 	Imdb,
 
 	[Description("TVDB")]
+	[Capabilities<ProviderCapability>(ProviderCapability.Artwork)]
 	Tvdb,
 
 	[Description("Plex")]
-	[Capabilities<ProviderCapability>(ProviderCapability.Search | ProviderCapability.Auth | ProviderCapability.Artwork | ProviderCapability.Enricher)]
+	[Capabilities<ProviderCapability>(ProviderCapability.Auth | ProviderCapability.Artwork | ProviderCapability.Enricher)]
 	Plex,
 
 	[Description("Mdblist")]

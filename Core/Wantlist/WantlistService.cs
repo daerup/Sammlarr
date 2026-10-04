@@ -102,10 +102,10 @@ internal sealed class WantlistService(IWantlistRepository repository, IWantlistO
 		{
 			return;
 		}
-		var sinkIds = await media.GetSinkIdsAsync(ids, cancellationToken);
-		if (ids.Any(id => !sinkIds.ContainsKey(id)))
+		var config = await providerConfig.GetAsync(cancellationToken);
+		var unaddressable = await media.EnsureSinkIdsAsync(ids, config.Sink, cancellationToken);
+		if (unaddressable.Count > 0)
 		{
-			var config = await providerConfig.GetAsync(cancellationToken);
 			throw new MissingSinkIdException(config.Sink.ToString());
 		}
 	}

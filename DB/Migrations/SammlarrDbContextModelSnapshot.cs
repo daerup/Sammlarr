@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261004043312_PersonHues";
+    public override string LastMigrationId => "20261004051349_SearchDefaultsToTmdb";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -221,7 +221,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                         RadarrMonitored = true,
                         RadarrSearchOnAdd = true,
                         RegistrationMode = "Open",
-                        SearchProvider = "Plex",
+                        SearchProvider = "Tmdb",
                         Sink = "Plex",
                         SonarrMonitored = true,
                         SonarrSearchOnAdd = true,

@@ -1,5 +1,7 @@
 @using Contracts.Media
+@using Contracts.Media.Artwork
 @inject IMediaService MediaService
+@inject ArtworkSources Artwork
 <div class="search-result-row rounded-sm border bg-card @Class @(Media is UnmatchedMedia ? "is-unmatched" : null) @(IsFocused ? "row-focused" : "")"
      style="@_backgroundStyle"
      @onfocusin="OnFocusIn"
@@ -9,7 +11,7 @@
             <div class="search-result-poster">
                 @if (!_failed && Details.PosterUrl is { } poster)
                 {
-                    <img src="@poster" alt="@Details.Title" class="rounded-sm" loading="lazy" decoding="async" @onerror="OnPosterError"/>
+                    <img src="@poster" srcset="@_posterSet" alt="@Details.Title" class="rounded-sm" loading="lazy" decoding="async" @onerror="OnPosterError"/>
                 }
                 else
                 {
@@ -81,6 +83,10 @@
     private IReadOnlyList<string> _displayFacts = [];
     private IReadOnlyList<IExternalMediaId> _ids = new List<IExternalMediaId>();
     private bool _failed;
+    private string? _poster;
+    private string? _posterSet;
+    private static readonly ArtworkSize Poster = new(192, 288);
+    private static readonly ArtworkSize Backdrop = new(780, 439);
     private string? _lastKey;
 
     protected override void OnParametersSet()
@@ -90,13 +96,25 @@
             _lastKey = Media.Key;
             _failed = false;
         }
-        _backgroundStyle = (Details.BackdropUrl ?? Details.PosterUrl) is { } artwork ? $"--hover-bg: url('{artwork}')" : null;
+        _backgroundStyle = (Details.BackdropUrl ?? Details.PosterUrl) is { } artwork ? $"--hover-bg: url('{Artwork.Sized(artwork, Backdrop)}')" : null;
+        if (Details.PosterUrl != _poster)
+        {
+            _poster = Details.PosterUrl;
+            _posterSet = _poster is { } poster ? Artwork.ByDensity(poster, Poster) : null;
+        }
+
         _displayFacts = MediaFacts.GetDisplayFacts(Details);
         _ids = [.. Media.Externals];
     }
 
     private async Task OnPosterError()
     {
+        if (_posterSet is not null)
+        {
+            _posterSet = null;
+            return;
+        }
+
         _failed = true;
         if (Media is MatchedMedia matched)
         {

@@ -8,6 +8,8 @@ internal sealed class ArtworkSources(IKeyedServiceIndex<ArtworkProvider, IArtwor
 {
 	public string? ByWidth(string? url, params IReadOnlyList<ArtworkSize> sizes) => SrcSet(url, [.. sizes.Select(size => (size, $"{size.Width}w"))]);
 
+	public string Sized(string url, ArtworkSize size) => Resize(url, size).GetValueOr(url);
+
 	public string? ByDensity(string url, ArtworkSize size) => SrcSet(url, [(size, "1x"), (new ArtworkSize(size.Width * 2, size.Height * 2), "2x")]);
 
 	private string? SrcSet(string? url, IEnumerable<(ArtworkSize Size, string Descriptor)> candidates)

@@ -10,7 +10,12 @@ internal static class ArtworkStub
 	internal static ArtworkSources Sizing() => Sources(Resizing(), Declining());
 
 	internal static ArtworkSources Sources(IArtworkResizer tmdb, IArtworkResizer plex) =>
-		new(new FakeKeyedServiceIndex<ArtworkProvider, IArtworkResizer>().Register(ArtworkProvider.Tmdb, tmdb).Register(ArtworkProvider.Plex, plex));
+		new(
+			new FakeKeyedServiceIndex<ArtworkProvider, IArtworkResizer>()
+				.Register(ArtworkProvider.Tmdb, tmdb)
+				.Register(ArtworkProvider.Plex, plex)
+				.Register(ArtworkProvider.Tvdb, Declining())
+		);
 
 	internal static IArtworkResizer Resizing()
 	{

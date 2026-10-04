@@ -22,7 +22,6 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		await Assert.That(providerSettings).IsNotNull();
 		await Assert.That(providerSettings.Sink).IsEqualTo(SinkKind.Plex);
 		await Assert.That(providerSettings.TrendingProvider).IsEqualTo(TrendingProvider.Tmdb);
-		await Assert.That(providerSettings.SearchProvider).IsEqualTo(SearchProvider.Plex);
 		await Assert.That(providerSettings.AuthProvider).IsEqualTo(AuthProvider.Plex);
 	}
 

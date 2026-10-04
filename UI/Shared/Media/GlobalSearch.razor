@@ -36,6 +36,7 @@
     private BlocklistSnapshot _blocklist = new([]);
     private WantlistSnapshot _wantlist = new([]);
     private MediaId? _blocklisting;
+    private bool _wasOpen;
 
     [Parameter] public bool IsOpen { get; set; }
 
@@ -45,6 +46,16 @@
     {
         _settings = await ProviderConfigService.GetAsync(_cancellation.Token);
         await RefreshAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsOpen && !_wasOpen && _settings is not null)
+        {
+            _settings = await ProviderConfigService.GetAsync(_cancellation.Token);
+        }
+
+        _wasOpen = IsOpen;
     }
 
     private bool IsWantlisted(MediaId mediaId) => _wantlist.Contains(mediaId);

@@ -656,6 +656,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		var user = new TestCurrentUser();
 		using var context = BuildContext(provider, user, connection);
 		context.Database.Migrate();
+		SearchWithPlex(context);
 		SeedUser(context, user);
 		return connection;
 	}
@@ -703,6 +704,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		var user = new TestCurrentUser();
 		using var context = BuildContext(provider, user, connection);
 		context.Database.Migrate();
+		SearchWithPlex(context);
 		SeedUser(context, user);
 		SeedSecondaryUsers(context);
 		seed(context);
@@ -739,6 +741,13 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		using var command = connection.CreateCommand();
 		command.CommandText = "PRAGMA journal_mode=WAL;";
 		command.ExecuteNonQuery();
+	}
+
+	private static void SearchWithPlex(SammlarrDbContext context)
+	{
+		context.ProviderSettings.Single().SearchProvider = SearchProvider.Plex;
+		context.SaveChanges();
+		context.ChangeTracker.Clear();
 	}
 
 	private static void SeedSecondaryUsers(SammlarrDbContext context)

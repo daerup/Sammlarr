@@ -33,6 +33,9 @@ public class SettingsPageTests : BunitContext
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton(ISinkSwitch.Mock().Object);
 		Services.AddSingleton(IUserManagementService.Mock().Object);
+		var arrConfigs = IArrSinkConfigService.Mock();
+		arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
+		Services.AddSingleton(arrConfigs.Object);
 		AddAuthorization().SetAuthorized("alice");
 
 		var config = IProviderConfigService.Mock();
