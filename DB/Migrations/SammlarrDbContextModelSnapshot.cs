@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261004154304_UserTagName";
+    public override string LastMigrationId => "20261004162805_PersonColours";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -479,7 +479,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Property<int>("FailedSignIns")
                     .HasColumnType("INTEGER");
 
-                b.Property<double>("Hue")
+                b.Property<double?>("Hue")
                     .HasColumnType("REAL");
 
                 b.Property<long>("JoinedAt")
@@ -493,6 +493,16 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
 
                 b.Property<string>("PasswordHash")
                     .HasMaxLength(512)
+                    .HasColumnType("TEXT");
+
+                b.Property<double?>("PictureChroma")
+                    .HasColumnType("REAL");
+
+                b.Property<double?>("PictureHue")
+                    .HasColumnType("REAL");
+
+                b.Property<string>("PictureUrl")
+                    .HasMaxLength(2048)
                     .HasColumnType("TEXT");
 
                 b.Property<string>("Provider")

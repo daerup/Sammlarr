@@ -17,9 +17,9 @@
 }
 
 .person-row.has-hue::before {
-    background: oklch(0.6 0.13 var(--bird-hue));
+    background: oklch(0.6 var(--bird-chroma, 0.13) var(--bird-hue));
 }
 
 .dark .person-row.has-hue::before {
-    background: oklch(0.74 0.12 var(--bird-hue));
+    background: oklch(0.74 var(--bird-chroma, 0.12) var(--bird-hue));
 }

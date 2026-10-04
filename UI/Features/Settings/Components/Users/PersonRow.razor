@@ -7,7 +7,7 @@
 @inject NavigationManager Navigation
 @inject Notifier Notifier
 
-<div class="person-row @(Hue is { } ? "has-hue" : null)" style="@HueStyle" data-person="@Name">
+<div class="person-row @(Colour is { } ? "has-hue" : null)" style="@ColourStyle" data-person="@Name">
     <BbCollapsible Open="Open" OpenChanged="OpenChanged">
         <BbCollapsibleTrigger AsChild="false"
                               Class="group grid w-full grid-cols-[15px_1fr_auto_auto] items-center gap-3.5 bg-foreground/5 py-3 pl-5 pr-4 text-left transition-colors hover:bg-foreground/8">
@@ -19,12 +19,12 @@
                         <BbAvatar Size="AvatarSize.Small">
                             <BbAvatarImage Source="@joined.User.AvatarUrl" Alt="@Name"/>
                             <BbAvatarFallback>
-                                <PersonAvatar Person="joined.User.Id" Hue="joined.Hue"/>
+                                <PersonAvatar Person="joined.User.Id" Colour="Colour!"/>
                             </BbAvatarFallback>
                         </BbAvatar>
                         break;
                     case JoinedPerson joined:
-                        <PersonAvatar Person="joined.User.Id" Hue="joined.Hue"/>
+                        <PersonAvatar Person="joined.User.Id" Colour="Colour!"/>
                         break;
                     case InvitedPerson:
                         <BbAvatar Size="AvatarSize.Small">
@@ -130,6 +130,8 @@
 @code {
     [Parameter] [EditorRequired] public required Person Person { get; set; }
 
+    [Parameter] [EditorRequired] public required PersonColour? Colour { get; set; }
+
     [Parameter] [EditorRequired] public required AuthProvider SignIn { get; set; }
 
     [Parameter] [EditorRequired] public required SinkKind Sink { get; set; }
@@ -160,19 +162,7 @@
         }
     }
 
-    private double? Hue
-    {
-        get
-        {
-            return Person switch
-            {
-                JoinedPerson joined => joined.Hue,
-                InvitedPerson => null,
-            };
-        }
-    }
-
-    private string? HueStyle => Hue is { } hue ? $"--bird-hue: {PersonAvatar.HueOf(hue)}" : null;
+    private string? ColourStyle => Colour is { } colour ? PersonAvatar.StyleOf(colour) : null;
 
     private UserRole Role
     {

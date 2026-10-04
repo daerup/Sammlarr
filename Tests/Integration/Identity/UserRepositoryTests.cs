@@ -13,12 +13,15 @@ using Domain.Providers;
 using Domain.Wantlist.Outbox;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 
 namespace Integration.Tests.Identity;
 
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	private const string Avatar = "https://plex.tv/users/first/avatar";
+
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	private IUserRepository _testee = null!;
@@ -139,45 +142,50 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		where TRow : class => set.IgnoreQueryFilters().CountAsync(row => EF.Property<Guid>(row, "UserId") == userId.Value);
 
 	[Test]
-	public async Task CreateAsync_ForEachNewPerson_TakesTheNextColourFromTheLatestOne()
+	public async Task CreateAsync_LeavesTheColourForTheUsersListToPaint()
 	{
-		var latest = (await _testee.GetHuesAsync())[fixture.CurrentUser.Id];
+		var person = await CreateAsync("plex-first", DateTimeOffset.UnixEpoch.AddYears(60));
 
-		var first = await CreateAsync("plex-first", DateTimeOffset.UnixEpoch.AddYears(60));
-		var second = await CreateAsync("plex-second", DateTimeOffset.UnixEpoch.AddYears(61));
-
-		var hues = await _testee.GetHuesAsync();
-		await Assert.That(hues[first]).IsEqualTo(PersonHues.After(Some.Of(latest)));
-		await Assert.That(hues[second]).IsEqualTo(PersonHues.After(Some.Of(hues[first])));
+		var stored = (await _testee.GetColoursAsync())[person];
+		await Assert.That(stored.GoldenHue).IsNone();
+		await Assert.That(stored.Picture).IsNone();
 	}
 
 	[Test]
-	public async Task DeleteAsync_OfSomeone_ChangesNobodyElsesColour()
+	public async Task StoreColourAsync_ForAColourfulPicture_GivesBackTheGoldenHueAndThePicturesTone()
 	{
-		var first = await CreateAsync("plex-first", DateTimeOffset.UnixEpoch.AddYears(60));
-		var second = await CreateAsync("plex-second", DateTimeOffset.UnixEpoch.AddYears(61));
-		var before = await _testee.GetHuesAsync();
+		var person = await CreateAsync("plex-first", DateTimeOffset.UnixEpoch.AddYears(60));
 
-		await _testee.DeleteAsync(first);
+		await _testee.StoreColourAsync(person, new StoredColour(Some.Of(177.5), Some.Of(new StoredPicture(Avatar, Some.Of(new PictureTone(195, 0.09))))));
 
-		await Assert.That((await _testee.GetHuesAsync())[second]).IsEqualTo(before[second]);
+		var stored = (await _testee.GetColoursAsync())[person];
+		await Assert.That(stored.GoldenHue).IsSome().And.IsEqualTo(177.5);
+		await Assert.That(stored.Picture.Map(picture => picture.Url)).IsSome().And.IsEqualTo(Avatar);
+		await Assert.That(stored.Picture.Map(picture => picture.Tone)).IsSome().And.IsEqualTo(new PictureTone(195, 0.09));
 	}
 
 	[Test]
-	public async Task CreateAsync_ForPeopleWhoJoinedInTheSameInstant_TakesTheColourAfterTheLastById()
+	public async Task StoreColourAsync_ForSomeoneAlreadyRemoved_ChangesNothing()
 	{
-		var at = DateTimeOffset.UnixEpoch.AddYears(60);
-		var one = await CreateAsync("plex-one", at);
-		var two = await CreateAsync("plex-two", at);
-		var hues = await _testee.GetHuesAsync();
-		var last = string.CompareOrdinal(Stored(one), Stored(two)) > 0 ? one : two;
+		var person = await CreateAsync("plex-first", DateTimeOffset.UnixEpoch.AddYears(60));
+		await _testee.DeleteAsync(person);
 
-		var third = await CreateAsync("plex-three", at.AddYears(1));
+		await _testee.StoreColourAsync(person, new StoredColour(Some.Of(40d), new None()));
 
-		await Assert.That((await _testee.GetHuesAsync())[third]).IsEqualTo(PersonHues.After(Some.Of(hues[last])));
+		await Assert.That((await _testee.GetColoursAsync()).ContainsKey(person)).IsFalse();
 	}
 
-	private static string Stored(UserId id) => id.Value.ToString().ToUpperInvariant();
+	[Test]
+	public async Task StoreColourAsync_ForAGreyPicture_RemembersThePictureWithoutATone()
+	{
+		var person = await CreateAsync("plex-first", DateTimeOffset.UnixEpoch.AddYears(60));
+
+		await _testee.StoreColourAsync(person, new StoredColour(Some.Of(40d), Some.Of(new StoredPicture(Avatar, new None()))));
+
+		var stored = (await _testee.GetColoursAsync())[person];
+		await Assert.That(stored.Picture.Map(picture => picture.Url)).IsSome().And.IsEqualTo(Avatar);
+		await Assert.That(stored.Picture.Map(picture => picture.Tone)).IsNone();
+	}
 
 	private async Task<UserId> CreateAsync(string externalUserId, DateTimeOffset joinedAt)
 	{

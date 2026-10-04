@@ -52,29 +52,6 @@ public class AccountLinkTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task JoinAsync_ForANewMember_ShowsThemInTheirOwnColour()
-	{
-		var token = await InviteAsync("Mira");
-		var before = await host.Resolve<IUserRepository>().GetHuesAsync();
-
-		var mira = (await Testee.JoinAsync(token, Password, Password)).GetOrThrow(error => new InvalidOperationException(error.Reason));
-
-		var person = (await Users.GetPeopleAsync())
-			.Select(candidate =>
-				candidate switch
-				{
-					JoinedPerson joined => Some.Of(joined),
-					InvitedPerson => (Optional<JoinedPerson>)new None(),
-				}
-			)
-			.WhereSome()
-			.Single(joined => joined.User.Id == mira.Id);
-		await Assert.That(before.ContainsKey(mira.Id)).IsFalse();
-		await Assert.That(person.Hue).IsEqualTo((await host.Resolve<IUserRepository>().GetHuesAsync())[mira.Id]);
-		await Assert.That(before.Values).DoesNotContain(person.Hue);
-	}
-
-	[Test]
 	public async Task JoinAsync_ASecondTime_IsRefused()
 	{
 		var token = await InviteAsync("Mira");

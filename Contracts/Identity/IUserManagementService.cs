@@ -31,4 +31,6 @@ public interface IUserManagementService
 	Task<Result<IssuedLink>> ResetLinkAsync(UserId id, CancellationToken cancellationToken = default);
 
 	Task UnlockAsync(UserId id, CancellationToken cancellationToken = default);
+
+	Task StoreColourAsync(UserId id, StoredColour colour, CancellationToken cancellationToken = default);
 }

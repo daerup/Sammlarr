@@ -3,6 +3,7 @@ using API.Auth;
 using API.Mdblist;
 using API.Notifications;
 using API.Observability;
+using API.Pictures;
 using API.Plex;
 using API.Tmdb;
 using API.Tvdb;
@@ -22,6 +23,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<MdblistModule>();
 		services.AddModule<WikidataModule>();
 		services.AddModule<ArrModule>();
+		services.AddModule<PicturesModule>();
 		services.AddModule<TvdbModule>();
 		services.AddModule<NotificationsApiModule>();
 		services.AddModule<InstrumentationModule>();

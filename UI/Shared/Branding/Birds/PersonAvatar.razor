@@ -1,14 +1,14 @@
 @using System.Globalization
 @using Domain.Identity
 
-<span class="person-avatar" style="--bird-hue: @HueOf(Hue); width: @(Size)px; height: @(Size)px" data-bird>
+<span class="person-avatar" style="@StyleOf(Colour); width: @(Size)px; height: @(Size)px" data-bird>
     <svg width="@Size" height="@Size" viewBox="@_art.ViewBox" aria-hidden="true" focusable="false">@((MarkupString)_art.Markup)</svg>
 </span>
 
 @code {
     [Parameter] [EditorRequired] public required UserId Person { get; set; }
 
-    [Parameter] [EditorRequired] public required double Hue { get; set; }
+    [Parameter] [EditorRequired] public required PersonColour Colour { get; set; }
 
     [Parameter] public int Size { get; set; } = 32;
 
@@ -16,7 +16,15 @@
 
     private UserId? _drawn;
 
-    internal static string HueOf(double hue) => hue.ToString("0.##", CultureInfo.InvariantCulture);
+    private const double ToneChroma = 0.12;
+
+    internal static string StyleOf(PersonColour colour)
+    {
+        var hue = $"--bird-hue: {Number(colour.Hue)}";
+        return colour.Chroma.Match(chroma => $"{hue}; --bird-chroma: {Number(chroma)}; --bird-scale: {Number(chroma / ToneChroma)}", () => hue);
+    }
+
+    private static string Number(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
 
     protected override void OnParametersSet()
     {

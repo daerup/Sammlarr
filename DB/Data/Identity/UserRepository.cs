@@ -28,8 +28,7 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	public async Task CreateAsync(User user, AuthProvider provider, string externalUserId, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await UserHues.AddAsync(
-			ctx,
+		ctx.Users.Add(
 			new UserRow
 			{
 				Id = user.Id.Value,
@@ -40,15 +39,49 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 				AvatarUrl = user.AvatarUrl,
 				Role = user.Role,
 				JoinedAt = user.JoinedAt,
-			},
-			cancellationToken
+			}
+		);
+		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task<IReadOnlyDictionary<UserId, StoredColour>> GetColoursAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var rows = await ctx
+			.Users.AsNoTracking()
+			.Select(user => new
+			{
+				user.Id,
+				user.Hue,
+				user.PictureUrl,
+				user.PictureHue,
+				user.PictureChroma,
+			})
+			.ToListAsync(cancellationToken);
+		return rows.ToDictionary(
+			row => UserId.From(row.Id),
+			row => new StoredColour(Optional.Of(row.Hue), Optional.Of(row.PictureUrl).Map(url => new StoredPicture(url, Tone(row.PictureHue, row.PictureChroma))))
 		);
 	}
 
-	public async Task<IReadOnlyDictionary<UserId, double>> GetHuesAsync(CancellationToken cancellationToken = default)
+	public async Task StoreColourAsync(UserId id, StoredColour colour, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx.Users.AsNoTracking().ToDictionaryAsync(user => UserId.From(user.Id), user => user.Hue, cancellationToken);
+		var tone = colour.Picture.Map(picture => picture.Tone);
+		var hue = colour.GoldenHue.ToNullable();
+		var url = colour.Picture.Map(picture => picture.Url).ToNullable();
+		var pictureHue = tone.Map(found => found.Hue).ToNullable();
+		var pictureChroma = tone.Map(found => found.Chroma).ToNullable();
+		await ctx
+			.Users.Where(user => user.Id == id.Value)
+			.ExecuteUpdateAsync(
+				row =>
+					row.SetProperty(user => user.Hue, hue)
+						.SetProperty(user => user.PictureUrl, url)
+						.SetProperty(user => user.PictureHue, pictureHue)
+						.SetProperty(user => user.PictureChroma, pictureChroma),
+				cancellationToken
+			);
 	}
 
 	public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -148,6 +181,11 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		return await rows.GroupBy(row => EF.Property<Guid>(row, UserOwnedConfigurationExtensions.UserIdColumn))
 			.Select(owned => new { Owner = owned.Key, Count = owned.Count() })
 			.ToDictionaryAsync(owned => owned.Owner, owned => owned.Count, cancellationToken);
+	}
+
+	private static Optional<PictureTone> Tone(double? hue, double? chroma)
+	{
+		return Optional.Of(hue).Map(found => Optional.Of(chroma).Map(saturation => new PictureTone(found, saturation)));
 	}
 
 	private static System.Linq.Expressions.Expression<Func<UserRow, User>> Project =>
