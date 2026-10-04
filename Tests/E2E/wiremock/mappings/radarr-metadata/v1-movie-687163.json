@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "host": {
+      "equalTo": "api.radarr.video"
+    },
+    "urlPath": "/v1/movie/687163"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "radarr-metadata/v1-movie-687163.verified.json"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "host": {
+      "equalTo": "services.sonarr.tv"
+    },
+    "urlPath": "/v1/dailyseries"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "[]"
+  }
+}

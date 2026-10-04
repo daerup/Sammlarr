@@ -1,0 +1,1381 @@
+{
+  "TmdbId": 687163,
+  "ImdbId": "tt12042730",
+  "Title": "Project Hail Mary",
+  "Overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
+  "OriginalTitle": "Project Hail Mary",
+  "OriginalLanguage": "en",
+  "TitleSlug": "687163",
+  "Runtime": 157,
+  "Popularity": 98.1788,
+  "Year": 2026,
+  "Premier": "2026-03-09T00:00:00Z",
+  "InCinema": "2026-03-18T00:00:00Z",
+  "PhysicalRelease": "2026-08-11T00:00:00Z",
+  "DigitalRelease": "2026-05-12T00:00:00Z",
+  "Images": [
+    {
+      "CoverType": "Poster",
+      "Url": "https://image.tmdb.org/t/p/original/iOb2fjXLbpJgyQXe46n1WtGCnaa.jpg"
+    },
+    {
+      "CoverType": "Fanart",
+      "Url": "https://image.tmdb.org/t/p/original/8Tfys3mDZVp4tNoH2ktm06a0Tau.jpg"
+    }
+  ],
+  "Ratings": [
+    {
+      "Count": 8113,
+      "Value": 8.6,
+      "Origin": "Tmdb",
+      "Type": "User"
+    }
+  ],
+  "MovieRatings": {
+    "Tmdb": {
+      "Count": 8113,
+      "Value": 8.6,
+      "Type": "User"
+    },
+    "Imdb": {
+      "Count": 560115,
+      "Value": 8.2,
+      "Type": "User"
+    },
+    "Metacritic": {
+      "Count": 0,
+      "Value": 77,
+      "Type": "User"
+    },
+    "RottenTomatoes": {
+      "Count": 0,
+      "Value": 95,
+      "Type": "User"
+    },
+    "Trakt": {
+      "Count": 34350,
+      "Value": 8.74547,
+      "Type": "User"
+    }
+  },
+  "Genres": [
+    "Science Fiction",
+    "Adventure"
+  ],
+  "Keywords": [
+    "alien",
+    "astronaut",
+    "based on novel or book",
+    "bravery",
+    "coma",
+    "friendship",
+    "interspecies friendship",
+    "language barrier",
+    "memory loss",
+    "save the planet",
+    "science teacher",
+    "scientist",
+    "space",
+    "space mission",
+    "space travel",
+    "spaceship",
+    "sun"
+  ],
+  "AlternativeTitles": [
+    {
+      "Title": "Projet derni\u00E8re chance",
+      "Type": "Tmdb",
+      "Language": "en"
+    },
+    {
+      "Title": "\u0E20\u0E32\u0E23\u0E01\u0E34\u0E08\u0E01\u0E39\u0E49\u0E2A\u0E38\u0E23\u0E34\u0E22\u0E30",
+      "Type": "Tmdb",
+      "Language": "th"
+    },
+    {
+      "Title": "\u041F\u0440\u043E\u0435\u043A\u0442 \u00AB\u0410\u0432\u0435 \u041C\u0430\u0440\u0438\u044F\u00BB",
+      "Type": "Tmdb",
+      "Language": "ru"
+    },
+    {
+      "Title": "\u041F\u0440\u043E\u0435\u043A\u0442 \u00AB\u041A\u043E\u043D\u0435\u0446 \u0441\u0432\u0435\u0442\u0430\u00BB",
+      "Type": "Tmdb",
+      "Language": "ru"
+    },
+    {
+      "Title": "\u0645\u0634\u0631\u0648\u0639 \u0647\u064A\u0644 \u0645\u0627\u0631\u064A",
+      "Type": "Tmdb",
+      "Language": "en"
+    },
+    {
+      "Title": "\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u30FB\u30D8\u30A4\u30EB\u30FB\u30E1\u30A2\u30EA\u30FC",
+      "Type": "Tmdb",
+      "Language": "ja"
+    },
+    {
+      "Title": "Devoradores de Estrelas",
+      "Type": "Tmdb",
+      "Language": "en"
+    },
+    {
+      "Title": "Projecto Hail Mary",
+      "Type": "Tmdb",
+      "Language": "en"
+    },
+    {
+      "Title": "\u041F\u0440\u043E\u0435\u043A\u0442 \u00AB\u041F\u043E\u0441\u043B\u0435\u0434\u043D\u044F\u044F \u043D\u0430\u0434\u0435\u0436\u0434\u0430\u00BB",
+      "Type": "Tmdb",
+      "Language": "ru"
+    },
+    {
+      "Title": "Projecto Fin del Mundo",
+      "Type": "Tmdb",
+      "Language": "es"
+    },
+    {
+      "Title": "Projekti Shpresa e Fundit",
+      "Type": "Tmdb",
+      "Language": "en"
+    },
+    {
+      "Title": "Projekti Shpresa e Fundit",
+      "Type": "Tmdb",
+      "Language": "en"
+    },
+    {
+      "Title": "Proyek Hail Mary",
+      "Type": "Tmdb",
+      "Language": "en"
+    }
+  ],
+  "Translations": [
+    {
+      "Title": "Project Hail Mary",
+      "Overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
+      "Language": "en-US"
+    },
+    {
+      "Title": "Der Astronaut \u2013 Project Hail Mary",
+      "Overview": "Als Ryland Grace erwacht, muss er feststellen, dass er ganz allein ist. Er ist anscheinend der einzige \u00DCberlebende einer Raumfahrtmission, Millionen Kilometer von zu Hause entfernt, auf einem Flug ins Tau-Ceti-Sternsystem. Aber was erwartet ihn dort? Und warum sind alle anderen Besatzungsmitglieder tot? Nach und nach d\u00E4mmert es Grace, dass von seinem \u00DCberleben nicht nur die Mission, sondern die Zukunft der gesamten Erdbev\u00F6lkerung abh\u00E4ngt.",
+      "Language": "de-DE"
+    },
+    {
+      "Title": "\u633D\u6551\u8BA1\u5212",
+      "Overview": "\u592A\u9633\u6B63\u5728\u88AB\u201C\u5403\u201D\u6389\uFF0C\u7EDD\u671B\u541E\u566C\u5730\u7403\u3002\u4E00\u540D\u201C\u5E73\u51E1\u201D\u7684\u4E2D\u5B66\u6559\u5E08\u683C\u96F7\u65AF\uFF08\u745E\u6069\u00B7\u9AD8\u65AF\u6797 \u9970\uFF09\u80CC\u8D1F\u5168\u4EBA\u7C7B\u7684\u5E0C\u671B\uFF0C\u8E0F\u4E0A\u201C\u592A\u7A7A\u4E0D\u5F52\u8DEF\u201D\u3002\u672B\u8DEF\u5B64\u65C5\u4E2D\uFF0C\u4ED6\u610F\u5916\u9047\u5230\u4E00\u4F4D\u5916\u661F\u840C\u53CB\uFF0C\u4E00\u4E2A\u540C\u6837\u8EAB\u9677\u7EDD\u5883\u7684\u5916\u661F\u5DE5\u7A0B\u5E08\uFF0C\u8FD9\u5BF9\u201C\u5B87\u5B99\u642D\u5B50\u201D\u6210\u4E86\u4E24\u4E2A\u6587\u660E\u6700\u540E\u7684\u6551\u547D\u7A3B\u8349\u3002\u4ED6\u4EEC\u80FD\u5426\u5728\u8D44\u6E90\u7D27\u7F3A\u7684\u60C5\u51B5\u4E0B\u653B\u514B\u91CD\u91CD\u79D1\u5B66\u8C1C\u9898\uFF0C\u5BFB\u56DE\u552F\u4E00\u7684\u5E0C\u671B\u706B\u79CD\uFF1F \u5F71\u7247\u6539\u7F16\u81EA\u5B89\u8FEA\u00B7\u5A01\u5C14\u7684\u540C\u540D\u7545\u9500\u79D1\u5E7B\u5C0F\u8BF4\u3002",
+      "Language": "zh-CN"
+    },
+    {
+      "Title": "\uD504\uB85C\uC81D\uD2B8 \uD5E4\uC77C\uBA54\uB9AC",
+      "Overview": "\uB208\uC744 \uB5A0\uBCF4\uB2C8 \uC544\uB4DD\uD55C \uC6B0\uC8FC\uC758 \uD55C\uAC00\uC6B4\uB370\uC5D0\uC11C \uAE68\uC5B4\uB09C \uC911\uD559\uAD50 \uACFC\uD559\uAD50\uC0AC \uADF8\uB808\uC774\uC2A4\uB294 \uD76C\uBBF8\uD55C \uAE30\uC5B5 \uC18D\uC5D0\uC11C \uC790\uC2E0\uC774 \uC8FD\uC5B4\uAC00\uB294 \uD0DC\uC591\uC73C\uB85C\uBD80\uD130 \uC9C0\uAD6C\uC640 \uC778\uB958\uB97C \uC0B4\uB9B4 \uB9C8\uC9C0\uB9C9 \uD76C\uB9DD\uC73C\uB85C \uC774\uACF3\uC5D0 \uC654\uB2E4\uB294 \uC0AC\uC2E4\uC744 \uC54C\uAC8C \uB41C\uB2E4. \uC783\uC5B4\uBC84\uB9B0 \uAE30\uC5B5\uC73C\uB85C \uC778\uD574 \uBAA8\uB4E0 \uAC83\uC774 \uD63C\uB780\uC2A4\uB7EC\uC6B4 \uC0C1\uD669\uC5D0\uC11C \uADF8\uB808\uC774\uC2A4\uB294 \uC6B0\uC5F0\uD788 \uC6B0\uC8FC \uD55C\uBCF5\uD310\uC5D0\uC11C \uAC19\uC740 \uBAA9\uC801\uC73C\uB85C \uC628 \uB73B\uBC16\uC758 \uC874\uC7AC \uB85C\uD0A4\uB97C \uB9CC\uB098\uAC8C \uB418\uACE0 \uADF8\uB808\uC774\uC2A4\uC640 \uB85C\uD0A4\uB294 \uAC01 \uB450 \uD589\uC131\uC758 \uC6B4\uBA85\uC744 \uAC74 \uB9C8\uC9C0\uB9C9 \uBBF8\uC158\uC744 \uC218\uD589\uD558\uB7EC \uB5A0\uB098\uAC8C \uB418\uB294\uB370\u2026",
+      "Language": "ko-KR"
+    },
+    {
+      "Title": "Tho\u00E1t Kh\u1ECFi T\u1EADn Th\u1EBF",
+      "Overview": "M\u1EA5t tr\u00ED nh\u1EDB v\u00E0 l\u1EA1c l\u00F5ng tr\u00EAn m\u1ED9t con t\u00E0u v\u0169 tr\u1EE5, m\u1ED9t phi h\u00E0nh gia kh\u00E1m ph\u00E1 ra r\u1EB1ng anh l\u00E0 hy v\u1ECDng duy nh\u1EA5t c\u1EE7a nh\u00E2n lo\u1EA1i tr\u01B0\u1EDBc b\u1EDD v\u1EF1c tuy\u1EC7t ch\u1EE7ng. M\u1ED9t li\u00EAn minh b\u1EA5t ng\u1EDD \u0111\u01B0\u1EE3c h\u00ECnh th\u00E0nh, n\u1EAFm gi\u1EEF v\u1EADn m\u1EC7nh c\u1EE7a t\u1EA5t c\u1EA3.",
+      "Language": "vi-VN"
+    },
+    {
+      "Title": "Projet Derni\u00E8re Chance",
+      "Overview": "Le professeur de sciences Ryland Grace se r\u00E9veille \u00E0 bord d\u2019un vaisseau spatial, \u00E0 des ann\u00E9es-lumi\u00E8re de la Terre, sans aucun souvenir de qui il est ni de la fa\u00E7on dont il est arriv\u00E9 l\u00E0. \u00C0 mesure que sa m\u00E9moire lui revient, il commence \u00E0 d\u00E9couvrir sa mission : r\u00E9soudre l\u2019\u00E9nigme d\u2019une myst\u00E9rieuse substance qui provoque l\u2019extinction du Soleil. Il doit faire appel \u00E0 ses connaissances scientifiques et ses id\u00E9es peu orthodoxes pour sauver toute vie sur Terre mais une amiti\u00E9 inattendue pourrait signifier qu\u2019il n\u2019aura pas \u00E0 accomplir cette t\u00E2che seul.",
+      "Language": "fr-FR"
+    },
+    {
+      "Title": "Devoradores de Estrelas",
+      "Overview": "O professor de ci\u00EAncias Ryland Grace acorda em uma espa\u00E7onave a anos-luz de casa, sem nenhuma lembran\u00E7a de quem \u00E9 ou como chegou ali. \u00C0 medida que sua mem\u00F3ria retorna, ele come\u00E7a a descobrir sua miss\u00E3o: resolver o enigma de uma subst\u00E2ncia misteriosa que est\u00E1 fazendo o Sol morrer. Ele precisar\u00E1 recorrer ao seu conhecimento cient\u00EDfico e a ideias nada convencionais para salvar tudo na Terra da extin\u00E7\u00E3o\u2026 mas uma amizade inesperada pode significar que ele n\u00E3o ter\u00E1 que fazer isso sozinho.",
+      "Language": "pt-BR"
+    },
+    {
+      "Title": "Project Hail Mary",
+      "Overview": "Natuurkundeleraar Ryland Grace wordt lichtjaren van huis wakker op een ruimteschip zonder zich te herinneren wie hij is of hoe hij daar is gekomen. Langzamerhand keert zijn geheugen terug: hij is op een missie om erachter te komen waarom een mysterieuze substantie ervoor zorgt dat de zon uitdooft. Om alles op aarde voor uitsterven te behoeden, moet hij een beroep doen op zijn wetenschappelijke kennis en een aantal onorthodoxe idee\u00EBn. Maar een onverwachte vriendschap betekent dat hij er misschien niet helemaal alleen voor staat.",
+      "Language": "nl-NL"
+    },
+    {
+      "Title": "\u041F\u0440\u043E\u0454\u043A\u0442 \u00AB\u0410\u0432\u0435 \u041C\u0430\u0440\u0456\u044F\u00BB",
+      "Overview": "\u0428\u043A\u0456\u043B\u044C\u043D\u0438\u0439 \u0443\u0447\u0438\u0442\u0435\u043B\u044C \u0420\u0430\u0439\u043B\u0430\u043D\u0434 \u0413\u0440\u0435\u0439\u0441 \u043F\u0440\u043E\u043A\u0438\u0434\u0430\u0454\u0442\u044C\u0441\u044F \u043D\u0430 \u043A\u043E\u0441\u043C\u0456\u0447\u043D\u043E\u043C\u0443 \u043A\u043E\u0440\u0430\u0431\u043B\u0456 \u0437\u0430 \u0441\u0432\u0456\u0442\u043B\u043E\u0432\u0456 \u0440\u043E\u043A\u0438 \u0432\u0456\u0434 \u0417\u0435\u043C\u043B\u0456 \u0431\u0435\u0437 \u0436\u043E\u0434\u043D\u043E\u0457 \u0437\u0433\u0430\u0434\u043A\u0438 \u043F\u0440\u043E \u0441\u0435\u0431\u0435 \u0447\u0438 \u0441\u0432\u043E\u044E \u043C\u0456\u0441\u0456\u044E. \u041F\u0430\u043C\u2019\u044F\u0442\u044C \u043F\u043E\u0432\u0435\u0440\u0442\u0430\u0454\u0442\u044C\u0441\u044F \u2014 \u0456 \u0437 \u043D\u0435\u044E \u0443\u0441\u0432\u0456\u0434\u043E\u043C\u043B\u0435\u043D\u043D\u044F: \u0432\u0456\u043D \u043E\u0441\u0442\u0430\u043D\u043D\u0456\u0439 \u0448\u0430\u043D\u0441 \u043B\u044E\u0434\u0441\u0442\u0432\u0430 \u0437\u0443\u043F\u0438\u043D\u0438\u0442\u0438 \u0437\u0433\u0430\u0441\u0430\u043D\u043D\u044F \u0421\u043E\u043D\u0446\u044F. \u0419\u043E\u0433\u043E \u0437\u0431\u0440\u043E\u044F \u2014 \u043D\u0430\u0443\u043A\u0430, \u043A\u043C\u0456\u0442\u043B\u0438\u0432\u0456\u0441\u0442\u044C \u0456\u2026 \u043D\u0435\u0441\u043F\u043E\u0434\u0456\u0432\u0430\u043D\u0438\u0439 \u0441\u043E\u044E\u0437\u043D\u0438\u043A, \u044F\u043A\u0438\u0439 \u0437\u043C\u0456\u043D\u0438\u0442\u044C \u0443\u0441\u0435.",
+      "Language": "uk-UA"
+    },
+    {
+      "Title": "Proyecto Salvaci\u00F3n",
+      "Overview": "El profesor de ciencias Ryland Grace se despierta en una nave espacial a a\u00F1os luz de casa sin recordar qui\u00E9n es ni c\u00F3mo ha llegado hasta all\u00ED. A medida que recupera la memoria, empieza a descubrir su misi\u00F3n: resolver el enigma de la misteriosa sustancia que provoca la extinci\u00F3n del sol. Deber\u00E1 recurrir a sus conocimientos cient\u00EDficos y a sus ideas poco ortodoxas para salvar todo lo que hay en la Tierra de la extinci\u00F3n... pero una amistad inesperada significa que quiz\u00E1 no tenga que hacerlo solo.",
+      "Language": "es-ES"
+    },
+    {
+      "Title": "Operaatio Ave Maria",
+      "Overview": "Tiedeopettaja Ryland Grace her\u00E4\u00E4 avaruusalukselta valovuosien p\u00E4\u00E4ss\u00E4 Maasta muistamatta, kuka h\u00E4n on tai miten h\u00E4n p\u00E4\u00E4tyi sinne. Kun h\u00E4nen muistinsa palautuu v\u00E4h\u00E4n kerrallaan, h\u00E4n alkaa ymm\u00E4rt\u00E4\u00E4 teht\u00E4v\u00E4ns\u00E4: ratkaista arvoitus salaper\u00E4isest\u00E4 aineesta, joka aiheuttaa auringon kuihtumista. H\u00E4n joutuu turvautumaan tieteelliseen tiet\u00E4mykseens\u00E4 ja ep\u00E4tavanomaisiin ideoihinsa pelastaakseen koko Maan sukupuutolta\u2026 mutta yll\u00E4tt\u00E4v\u00E4 yst\u00E4vyys voi tarkoittaa, ettei h\u00E4nen tarvitse tehd\u00E4 sit\u00E4 yksin.",
+      "Language": "fi-FI"
+    },
+    {
+      "Title": "Proyecto Fin del Mundo",
+      "Overview": "El profesor de ciencias Ryland Grace despierta en una nave espacial a a\u00F1os luz de su hogar sin recordar qui\u00E9n es ni c\u00F3mo lleg\u00F3 all\u00ED. A medida que recupera la memoria, comienza a descubrir su misi\u00F3n: resolver el enigma de la misteriosa sustancia que est\u00E1 causando la extinci\u00F3n del sol.",
+      "Language": "es-MX"
+    },
+    {
+      "Title": "\u672B\u65E5\u8056\u6BCD\u865F",
+      "Overview": "\u79D1\u5B78\u8001\u5E2B Ryland Grace\uFF08\u8CF4\u6069\u9AD8\u65AF\u5BE7 \u98FE\uFF09\u5728\u4E00\u8258\u8DDD\u96E2\u5730\u7403\u6578\u5149\u5E74\u9060\u7684\u592A\u7A7A\u8239\u4E0A\u9192\u4F86\uFF0C\u96A8\u7740\u8A18\u61B6\u6162\u6162\u9010\u6F38\u6062\u5FA9\uFF0C\u4F62\u5148\u81F3\u77E5\u9053\u5927\u944A\uFF01\u539F\u4F86\u592A\u967D\u5C31\u5FEB\u73A9\u5B8C\uFF0C\u800C\u4F62\u7ADF\u7136\u662F\u4EBA\u985E\u6700\u5F8C\u5E0C\u671B\uFF1F\uFF01\u70BA\u4E86\u7834\u89E3\u4EE4\u592A\u967D\u7184\u6A5F\u4E4B\u8B0E\uFF0C\u4ED6\u5FC5\u9808\u7528\u76E1\u7562\u751F\u79D1\u5B78\u77E5\u8B58\u3001\u975E\u50B3\u7D71\u8AD7\u982D\uFF0C\u8A93\u6B7B\u62EF\u6551\u5730\u7403\u3002\u4E0D\u904E\u4F30\u5514\u5230\u55BA\u5462\u8D9F\u5B64\u7368\u592A\u7A7A\u4E4B\u65C5\uFF0C\u7ADF\u7136\u8B58\u5230\u500B\u610F\u60F3\u4E0D\u5230\u5605\u62CD\u6A94\u22EF\u22EF",
+      "Language": "zh-HK"
+    },
+    {
+      "Title": "\u05E4\u05E8\u05D5\u05D9\u05E7\u05D8 \u05D4\u05D9\u05D9\u05DC \u05DE\u05E8\u05D9",
+      "Overview": "\u05DE\u05D5\u05E8\u05D4 \u05DC\u05DE\u05D3\u05E2\u05D9\u05DD \u05DE\u05EA\u05E2\u05D5\u05E8\u05E8 \u05E2\u05DC \u05E1\u05D9\u05E4\u05D5\u05DF \u05D7\u05DC\u05DC\u05D9\u05EA, \u05D1\u05DE\u05E8\u05D7\u05E7 \u05E9\u05E0\u05D5\u05EA \u05D0\u05D5\u05E8 \u05DE\u05D4\u05D1\u05D9\u05EA, \u05DC\u05DC\u05D0 \u05DB\u05DC \u05D6\u05D9\u05DB\u05E8\u05D5\u05DF \u05DC\u05D2\u05D1\u05D9 \u05D6\u05D4\u05D5\u05EA\u05D5 \u05D0\u05D5 \u05D0\u05D9\u05DA \u05D4\u05D2\u05D9\u05E2 \u05DC\u05E9\u05DD.  \u05DB\u05DB\u05DC \u05E9\u05D6\u05D9\u05DB\u05E8\u05D5\u05E0\u05D5 \u05DE\u05EA\u05D7\u05D9\u05DC \u05DC\u05E9\u05D5\u05D1 \u05D0\u05DC\u05D9\u05D5, \u05D4\u05D5\u05D0 \u05DE\u05D1\u05D9\u05DF \u05DB\u05D9 \u05D9\u05E9 \u05DC\u05D5 \u05DE\u05E9\u05D9\u05DE\u05D4 \u05D5\u05D4\u05D9\u05D0- \u05DC\u05E4\u05E2\u05E0\u05D7 \u05D0\u05EA \u05D4\u05D7\u05D5\u05DE\u05E8 \u05D4\u05DE\u05E1\u05EA\u05D5\u05E8\u05D9 \u05E9\u05D2\u05D5\u05E8\u05DD \u05DC\u05E9\u05DE\u05E9 \u05DC\u05D2\u05D5\u05D5\u05E2.  \u05DB\u05E2\u05EA \u05E2\u05DC\u05D9\u05D5 \u05DC\u05D4\u05D9\u05E2\u05D6\u05E8 \u05D1\u05D9\u05D3\u05E2 \u05D4\u05DE\u05D3\u05E2\u05D9 \u05E9\u05DC\u05D5 \u05D5\u05D1\u05E8\u05E2\u05D9\u05D5\u05E0\u05D5\u05EA \u05DC\u05D0 \u05E9\u05D2\u05E8\u05EA\u05D9\u05D9\u05DD \u05DB\u05D3\u05D9 \u05DC\u05D4\u05E6\u05D9\u05DC \u05D0\u05EA \u05DB\u05D3\u05D5\u05E8 \u05D4\u05D0\u05E8\u05E5 \u05DE\u05D4\u05DB\u05D7\u05D3\u05D4, \u05D0\u05DA \u05D9\u05D3\u05D9\u05D3\u05D5\u05EA \u05D1\u05DC\u05EA\u05D9 \u05E6\u05E4\u05D5\u05D9\u05D4 \u05D2\u05D5\u05E8\u05DE\u05EA \u05DC\u05D5 \u05DC\u05D4\u05D1\u05D9\u05DF \u05E9\u05D4\u05D5\u05D0 \u05DC\u05D0 \u05D7\u05D9\u05D9\u05D1 \u05DC\u05E2\u05E9\u05D5\u05EA \u05D6\u05D0\u05EA \u05DC\u05D1\u05D3.",
+      "Language": "he-IL"
+    },
+    {
+      "Title": "L\u0027ultima missione: Project Hail Mary",
+      "Overview": "L\u2019insegnante di scienze Ryland Grace si sveglia su un\u2019astronave lontano anni luce da casa senza alcun ricordo di chi sia o di come sia arrivato l\u00EC. Con il riaffiorare della sua memoria, torna alla luce lo scopo della sua missione: risolvere l\u2019enigma della misteriosa sostanza che sta causando il collasso del Sole. Dovr\u00E0 fare affidamento sulle sue conoscenze scientifiche e sulle sue capacit\u00E0 di pensare fuori dagli schemi per salvare dall\u2019estinzione la vita sulla Terra, mentre un\u0027inaspettata amicizia gli far\u00E0 capire che non \u00E8 solo in questa impresa.",
+      "Language": "it-IT"
+    },
+    {
+      "Title": "\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u30FB\u30D8\u30A4\u30EB\u30FB\u30E1\u30A2\u30EA\u30FC",
+      "Overview": "\u672A\u77E5\u306E\u539F\u56E0\u306B\u3088\u3063\u3066\u592A\u967D\u30A8\u30CD\u30EB\u30AE\u30FC\u304C\u596A\u308F\u308C\u308B\u7570\u5E38\u4E8B\u614B\u304C\u767A\u751F\u3002\u3053\u306E\u307E\u307E\u3067\u306F\u5730\u7403\u306E\u6C17\u6E29\u306F\u4F4E\u4E0B\u3057\u3001\u5168\u751F\u547D\u306F\u6EC5\u4EA1\u3059\u308B\u3002 \u3053\u306E\u7D76\u671B\u7684\u306A\u5371\u6A5F\u3092\u6551\u3046\u9375\u304C\u300111.9\u5149\u5E74\u5148\u306E\u5B87\u5B99\u306B\u3042\u308B\u3068\u7A81\u304D\u6B62\u3081\u305F\u4EBA\u985E\u306F\u3001 \u4E00\u7E37\u306E\u671B\u307F\u3092\u304B\u3051\u3066\u5B87\u5B99\u8239\u3092\u5EFA\u9020\u3002\u4E2D\u5B66\u6821\u306E\u79D1\u5B66\u6559\u5E2B\u30B0\u30EC\u30FC\u30B9\u3092\u9001\u308A\u8FBC\u3080\u3002 \u5F7C\u306F\u77E5\u8B58\u3092\u6B66\u5668\u306B\u3001\u201C\u30A4\u30C1\u304B\u30D0\u30C1\u304B\u201D\u306E\u30DF\u30C3\u30B7\u30E7\u30F3\uFF1C\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u30FB\u30D8\u30A4\u30EB\u30FB\u30E1\u30A2\u30EA\u30FC\uFF1E\u306B\u7ACB\u3061\u5411\u304B\u3046\u3053\u3068\u306B\u306A\u308B\u3002  \u5B87\u5B99\u306E\u679C\u3066\u3001\u6975\u9650\u306E\u5B64\u72EC\u306E\u306A\u304B\u3067\u3001\u30B0\u30EC\u30FC\u30B9\u304C\u51FA\u4F1A\u3063\u305F\u306E\u306F\u3001\u540C\u3058\u304F\u6BCD\u661F\u3092\u6551\u3046\u305F\u3081\u306B\u3072\u3068\u308A\u596E\u95D8\u3059\u308B\u7570\u661F\u4EBA\u30ED\u30C3\u30AD\u30FC\u3060\u3063\u305F\u3002 \u59FF\u5F62\u3001\u8A00\u8449\u3082\u9055\u3046\u4E8C\u4EBA\u304C\u3001\u79D1\u5B66\u3092\u5171\u901A\u8A00\u8A9E\u306B\u6311\u3080\u3001\u5B87\u5B99\u6700\u5927\u306E\u96E3\u984C\u3002 \u3084\u304C\u3066\u80B2\u307E\u308C\u308B\u7A2E\u65CF\u3092\u8D85\u3048\u305F\u53CB\u60C5\u306E\u5148\u3067\u3001\u4E8C\u4EBA\u304C\u8FBF\u308A\u7740\u3044\u305F\u7B54\u3048\u3068\u306F \u2015\u2015\u3002",
+      "Language": "ja-JP"
+    },
+    {
+      "Title": "Posledn\u00E1 \u0161anca",
+      "Overview": "Ryland Grace je u\u010Dite\u013E biol\u00F3gie na z\u00E1kladnej \u0161kole. Ke\u010F sa Ryland prebud\u00ED \u00FAplne s\u00E1m na vesm\u00EDrnej lodi, mnoho sveteln\u00FDch rokov od domova, bez akejko\u013Evek spomienky \u010Di tu\u0161enia, \u010Do vo vesm\u00EDre rob\u00ED, zd\u00E1 sa, \u017Ee hor\u0161ie to u\u017E by\u0165 nem\u00F4\u017Ee. No ako sa mu pam\u00E4\u0165 postupne vracia, odha\u013Euje pravdu o svojej misii: jeho \u00FAlohou je vyrie\u0161i\u0165 z\u00E1hadu zomieraj\u00FAcich hviezd - vr\u00E1tane n\u00E1\u0161ho Slnka. Aby zabr\u00E1nil vyhynutiu \u013Eudstva, mus\u00ED vyu\u017Ei\u0165 v\u0161etky svoje vedeck\u00E9 poznatky, netradi\u010Dn\u00E9 n\u00E1pady... a aj pomoc ne\u010Dakan\u00E9ho spojenca z hlbok\u00E9ho vesm\u00EDru.",
+      "Language": "sk-SK"
+    },
+    {
+      "Title": "A Hail Mary-k\u00FCldet\u00E9s",
+      "Overview": "Ryland Grace, a term\u00E9szettudom\u00E1nytan\u00E1r egy \u0171rhaj\u00F3n \u00E9bred, f\u00E9ny\u00E9vekre az otthon\u00E1t\u00F3l \u00E9s semmire sem eml\u00E9kszik - sem arra, hogy kicsoda, sem arra, hogyan ker\u00FClt oda. Ahogy lassan visszanyeri az eml\u00E9keit, felt\u00E1rul el\u0151tte a k\u00FCldet\u00E9se: meg kell fejtenie annak a rejt\u00E9lyes anyagnak a titk\u00E1t, amely a Nap kihuny\u00E1s\u00E1t okozza. Tudom\u00E1nyos ismereteire \u00E9s szokatlan \u00F6tleteire t\u00E1maszkodva kell megakad\u00E1lyoznia a F\u00F6ld teljes kipusztul\u00E1s\u00E1t\u2026 \u00E1m egy v\u00E1ratlan bar\u00E1ts\u00E1g r\u00E9v\u00E9n tal\u00E1n m\u00E9gsem kell egyed\u00FCl szemben\u00E9znie a lehetetlennel.",
+      "Language": "hu-HU"
+    },
+    {
+      "Title": "Projekt Spasitelj",
+      "Overview": "Profesor prirodoslovlja Ryland Grace budi se na svemirskom brodu 11,9 svjetlosnih godina od ku\u0107e, bez sje\u0107anja tko je ili kako je tamo dospio. Kako mu se pam\u0107enje vra\u0107a, po\u010Dinje otkrivati \u200B\u200Bsvoju misiju: \u200B\u200Brije\u0161iti zagonetku misteriozne tvari koja uzrokuje izumiranje Sunca. Mora se pozvati na svoje znanstveno znanje i neortodoksne ideje kako bi spasio sve na Zemlji od izumiranja... ali neo\u010Dekivano prijateljstvo zna\u010Di da to mo\u017Eda ne\u0107e morati u\u010Diniti sam.",
+      "Language": "hr-HR"
+    },
+    {
+      "Title": "Projekt Hail Mary",
+      "Overview": "Nauczyciel nauk \u015Bcis\u0142ych Ryland Grace budzi si\u0119 na statku kosmicznym lata \u015Bwietlne od domu, nie pami\u0119taj\u0105c, kim jest ani jak si\u0119 tam znalaz\u0142. Gdy wraca mu pami\u0119\u0107, zaczyna odkrywa\u0107 swoj\u0105 misj\u0119: rozwi\u0105za\u0107 zagadk\u0119 tajemniczej substancji powoduj\u0105cej wyga\u015Bni\u0119cie s\u0142o\u0144ca. Musi wykorzysta\u0107 swoj\u0105 wiedz\u0119 naukow\u0105 i niekonwencjonalne pomys\u0142y, aby ocali\u0107 wszystko na Ziemi przed zag\u0142ad\u0105, ale nieoczekiwana przyja\u017A\u0144 oznacza, \u017Ce by\u0107 mo\u017Ce nie b\u0119dzie musia\u0142 robi\u0107 tego sam.",
+      "Language": "pl-PL"
+    },
+    {
+      "Title": "\u6975\u9650\u8FD4\u822A",
+      "Overview": "\u79D1\u5B78\u8001\u5E2B\u840A\u502B\u683C\u96F7\u65AF\u5728\u4E00\u8258\u8DDD\u96E2\u5730\u7403\u597D\u5E7E\u5149\u5E74\u7684\u592A\u7A7A\u8239\u4E0A\u9192\u4F86\uFF0C\u537B\u5C0D\u81EA\u5DF1\u7684\u8EAB\u5206\u548C\u4F86\u5230\u9019\u88E1\u7684\u539F\u56E0\u4E00\u7121\u6240\u77E5\u3002\u96A8\u8457\u8A18\u61B6\u9010\u6F38\u6062\u5FA9\uFF0C\u4ED6\u958B\u59CB\u63ED\u958B\u4EFB\u52D9\u7684\u771F\u76F8\uFF0C\u89E3\u958B\u4E00\u7A2E\u795E\u7955\u7269\u8CEA\u5C0E\u81F4\u592A\u967D\u8870\u4EA1\u7684\u8B0E\u5718\u3002\u4ED6\u5FC5\u9808\u904B\u7528\u81EA\u5DF1\u7684\u79D1\u5B78\u77E5\u8B58\u8207\u5275\u610F\u60F3\u6CD5\uFF0C\u62EF\u6551\u5730\u7403\u7684\u6EC5\u7D55\u5371\u6A5F\u2026\u2026\u4F46\u4E00\u4F4D\u610F\u6599\u4E4B\u5916\u7684\u8A2A\u5BA2\uFF0C\u8B93\u4ED6\u6216\u8A31\u4E0D\u7528\u7368\u81EA\u596E\u9B25\u3002",
+      "Language": "zh-TW"
+    },
+    {
+      "Title": "\u041F\u0440\u043E\u0435\u043A\u0442 \u00AB\u041A\u043E\u043D\u0435\u0446 \u0441\u0432\u0435\u0442\u0430\u00BB",
+      "Overview": "\u0410\u0441\u0442\u0440\u043E\u043D\u0430\u0432\u0442 \u0420\u0430\u0439\u043B\u0435\u043D\u0434 \u0413\u0440\u0435\u0439\u0441 \u043F\u0440\u043E\u0441\u044B\u043F\u0430\u0435\u0442\u0441\u044F \u043D\u0430 \u043A\u043E\u0441\u043C\u0438\u0447\u0435\u0441\u043A\u043E\u043C \u043A\u043E\u0440\u0430\u0431\u043B\u0435, \u043D\u0435 \u043F\u043E\u043C\u043D\u044F \u043D\u0438 \u0441\u0435\u0431\u044F, \u043D\u0438 \u0441\u0432\u043E\u044E \u043C\u0438\u0441\u0441\u0438\u044E. \u041F\u043E\u0441\u0442\u0435\u043F\u0435\u043D\u043D\u043E \u043C\u0443\u0436\u0447\u0438\u043D\u0430 \u043F\u0440\u0438\u0445\u043E\u0434\u0438\u0442 \u043A \u0432\u044B\u0432\u043E\u0434\u0443, \u0447\u0442\u043E \u043E\u043D \u2014 \u0435\u0434\u0438\u043D\u0441\u0442\u0432\u0435\u043D\u043D\u044B\u0439 \u0432\u044B\u0436\u0438\u0432\u0448\u0438\u0439 \u0438\u0437 \u044D\u043A\u0438\u043F\u0430\u0436\u0430, \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u043D\u043E\u0433\u043E \u0432 \u0437\u0432\u0451\u0437\u0434\u043D\u0443\u044E \u0441\u0438\u0441\u0442\u0435\u043C\u0443 \u0422\u0430\u0443 \u041A\u0438\u0442\u0430 \u0432 \u043F\u043E\u0438\u0441\u043A\u0430\u0445 \u0441\u043F\u0430\u0441\u0435\u043D\u0438\u044F \u043E\u0442 \u043A\u0430\u0442\u0430\u0441\u0442\u0440\u043E\u0444\u044B \u043D\u0430 \u0417\u0435\u043C\u043B\u0435. \u0420\u0430\u0439\u043B\u0435\u043D\u0434\u0443 \u043F\u0440\u0435\u0434\u0441\u0442\u043E\u0438\u0442 \u043F\u043E\u043B\u043E\u0436\u0438\u0442\u044C\u0441\u044F \u043D\u0430 \u0441\u0432\u043E\u0438 \u043E\u0431\u0448\u0438\u0440\u043D\u044B\u0435 \u043D\u0430\u0443\u0447\u043D\u044B\u0435 \u0437\u043D\u0430\u043D\u0438\u044F, \u0438\u0437\u043E\u0431\u0440\u0435\u0442\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C \u0438 \u0441\u0438\u043B\u0443 \u0432\u043E\u043B\u0438, \u043D\u043E, \u0432\u043E\u0437\u043C\u043E\u0436\u043D\u043E, \u0435\u043C\u0443 \u043D\u0435 \u043F\u0440\u0438\u0434\u0451\u0442\u0441\u044F \u0438\u0441\u043A\u0430\u0442\u044C \u0432 \u043E\u0434\u0438\u043D\u043E\u0447\u043A\u0443.",
+      "Language": "ru-RU"
+    },
+    {
+      "Title": "\u0E20\u0E32\u0E23\u0E01\u0E34\u0E08\u0E01\u0E39\u0E49\u0E2A\u0E38\u0E23\u0E34\u0E22\u0E30",
+      "Overview": "\u0E04\u0E38\u0E13\u0E04\u0E23\u0E39\u0E27\u0E34\u0E0A\u0E32\u0E27\u0E34\u0E17\u0E22\u0E32\u0E28\u0E32\u0E2A\u0E15\u0E23\u0E4C \u0E44\u0E23\u0E41\u0E25\u0E19\u0E14\u0E4C \u0E40\u0E01\u0E23\u0E0B \u0E15\u0E37\u0E48\u0E19\u0E02\u0E36\u0E49\u0E19\u0E21\u0E32\u0E1A\u0E19\u0E22\u0E32\u0E19\u0E2D\u0E27\u0E01\u0E32\u0E28\u0E17\u0E35\u0E48\u0E2D\u0E22\u0E39\u0E48\u0E2B\u0E48\u0E32\u0E07\u0E44\u0E01\u0E25\u0E08\u0E32\u0E01\u0E42\u0E25\u0E01\u0E2B\u0E25\u0E32\u0E22\u0E25\u0E49\u0E32\u0E19\u0E1B\u0E35\u0E41\u0E2A\u0E07 \u0E42\u0E14\u0E22\u0E17\u0E35\u0E48\u0E44\u0E21\u0E48\u0E21\u0E35\u0E04\u0E27\u0E32\u0E21\u0E17\u0E23\u0E07\u0E08\u0E33\u0E27\u0E48\u0E32\u0E40\u0E02\u0E32\u0E04\u0E37\u0E2D\u0E43\u0E04\u0E23 \u0E2B\u0E23\u0E37\u0E2D\u0E40\u0E02\u0E32\u0E21\u0E32\u0E2D\u0E22\u0E39\u0E48\u0E17\u0E35\u0E48\u0E19\u0E35\u0E48\u0E44\u0E14\u0E49\u0E2D\u0E22\u0E48\u0E32\u0E07\u0E44\u0E23 \u0E43\u0E19\u0E02\u0E13\u0E30\u0E17\u0E35\u0E48\u0E04\u0E27\u0E32\u0E21\u0E17\u0E23\u0E07\u0E08\u0E33\u0E02\u0E2D\u0E07\u0E40\u0E02\u0E32\u0E40\u0E23\u0E34\u0E48\u0E21\u0E01\u0E25\u0E31\u0E1A\u0E04\u0E37\u0E19\u0E21\u0E32 \u0E40\u0E02\u0E32\u0E01\u0E47\u0E40\u0E23\u0E34\u0E48\u0E21\u0E17\u0E35\u0E48\u0E08\u0E30\u0E40\u0E02\u0E49\u0E32\u0E43\u0E08\u0E16\u0E36\u0E07\u0E20\u0E32\u0E23\u0E01\u0E34\u0E08\u0E02\u0E2D\u0E07\u0E40\u0E02\u0E32 \u0E04\u0E37\u0E2D \u0E01\u0E32\u0E23\u0E44\u0E02\u0E1B\u0E23\u0E34\u0E28\u0E19\u0E32\u0E02\u0E2D\u0E07\u0E2A\u0E32\u0E23\u0E25\u0E36\u0E01\u0E25\u0E31\u0E1A\u0E1A\u0E32\u0E07\u0E2D\u0E22\u0E48\u0E32\u0E07\u0E17\u0E35\u0E48\u0E01\u0E33\u0E25\u0E31\u0E07\u0E17\u0E33\u0E43\u0E2B\u0E49\u0E14\u0E27\u0E07\u0E2D\u0E32\u0E17\u0E34\u0E15\u0E22\u0E4C\u0E21\u0E2D\u0E14\u0E14\u0E31\u0E1A\u0E25\u0E07 \u0E40\u0E02\u0E32\u0E15\u0E49\u0E2D\u0E07\u0E43\u0E0A\u0E49\u0E04\u0E27\u0E32\u0E21\u0E23\u0E39\u0E49\u0E17\u0E32\u0E07\u0E27\u0E34\u0E17\u0E22\u0E32\u0E28\u0E32\u0E2A\u0E15\u0E23\u0E4C\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14\u0E17\u0E35\u0E48\u0E40\u0E02\u0E32\u0E21\u0E35 \u0E41\u0E25\u0E30\u0E04\u0E27\u0E32\u0E21\u0E04\u0E34\u0E14\u0E19\u0E2D\u0E01\u0E02\u0E19\u0E1A\u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E17\u0E35\u0E48\u0E08\u0E30\u0E0A\u0E48\u0E27\u0E22\u0E40\u0E2B\u0E25\u0E37\u0E2D\u0E17\u0E38\u0E01\u0E0A\u0E35\u0E27\u0E34\u0E15\u0E1A\u0E19\u0E42\u0E25\u0E01\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E2A\u0E39\u0E0D\u0E1E\u0E31\u0E19\u0E18\u0E38\u0E4C \u0E41\u0E15\u0E48\u0E21\u0E34\u0E15\u0E23\u0E20\u0E32\u0E1E\u0E17\u0E35\u0E48\u0E04\u0E32\u0E14\u0E44\u0E21\u0E48\u0E16\u0E36\u0E07\u0E17\u0E35\u0E48\u0E40\u0E02\u0E49\u0E32\u0E21\u0E32 \u0E01\u0E47\u0E2B\u0E21\u0E32\u0E22\u0E04\u0E27\u0E32\u0E21\u0E27\u0E48\u0E32\u0E40\u0E02\u0E32\u0E2D\u0E32\u0E08\u0E08\u0E30\u0E44\u0E21\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E17\u0E33\u0E21\u0E31\u0E19\u0E40\u0E1E\u0E35\u0E22\u0E07\u0E41\u0E04\u0E48\u0E04\u0E19\u0E40\u0E14\u0E35\u0E22\u0E27",
+      "Language": "th-TH"
+    },
+    {
+      "Title": "\u10DE\u10E0\u10DD\u10D4\u10E5\u10E2\u10D8 \u10D0\u10D5\u10D4 \u10DB\u10D0\u10E0\u10D8\u10D0",
+      "Overview": "\u10DB\u10D4\u10EA\u10DC\u10D8\u10D4\u10E0\u10D4\u10D1\u10D8\u10E1 \u10DB\u10D0\u10E1\u10EC\u10D0\u10D5\u10DA\u10D4\u10D1\u10D4\u10DA\u10D8, \u10E0\u10D0\u10D8\u10DA\u10D0\u10DC \u10D2\u10E0\u10D4\u10D8\u10E1\u10D8, \u10D9\u10DD\u10E1\u10DB\u10DD\u10E1\u10E3\u10E0 \u10EE\u10DD\u10DB\u10D0\u10DA\u10D3\u10D6\u10D4 \u10D8\u10E6\u10D5\u10D8\u10EB\u10D4\u10D1\u10E1 \u10D3\u10D0 \u10EC\u10D0\u10E0\u10DB\u10DD\u10D3\u10D2\u10D4\u10DC\u10D0 \u10D0\u10E0 \u10D0\u10E5\u10D5\u10E1, \u10D5\u10D8\u10DC \u10D0\u10E0\u10D8\u10E1 \u10D0\u10DC \u10D0\u10E5 \u10E0\u10DD\u10D2\u10DD\u10E0 \u10DB\u10DD\u10EE\u10D5\u10D3\u10D0. \u10DB\u10D4\u10EE\u10E1\u10D8\u10D4\u10E0\u10D4\u10D1\u10D8\u10E1 \u10D3\u10D0\u10D1\u10E0\u10E3\u10DC\u10D4\u10D1\u10D0\u10E1\u10D7\u10D0\u10DC \u10D4\u10E0\u10D7\u10D0\u10D3, \u10D8\u10E1 \u10D7\u10D0\u10D5\u10D8\u10E1 \u10DB\u10D7\u10D0\u10D5\u10D0\u10E0 \u10DB\u10D8\u10E1\u10D8\u10D0\u10D6\u10D4\u10EA \u10D8\u10EE\u10E1\u10D4\u10DC\u10D4\u10D1\u10E1 \u10E7\u10D5\u10D4\u10DA\u10D0\u10E4\u10D4\u10E0\u10E1: \u10DB\u10D0\u10DC \u10E3\u10DC\u10D3\u10D0 \u10D0\u10DB\u10DD\u10EE\u10E1\u10DC\u10D0\u10E1 \u10E1\u10D0\u10D8\u10D3\u10E3\u10DB\u10DA\u10DD \u10DC\u10D8\u10D5\u10D7\u10D8\u10D4\u10E0\u10D4\u10D1\u10D8\u10E1 \u10D2\u10D0\u10DB\u10DD\u10EA\u10D0\u10DC\u10D0, \u10E0\u10DD\u10DB\u10D4\u10DA\u10D8\u10EA \u10DB\u10D6\u10D4\u10E1 \u10D0\u10E5\u10E0\u10DD\u10D1\u10E1. \u10D0\u10EE\u10DA\u10D0 \u10DB\u10D0\u10E1 \u10DB\u10EE\u10DD\u10DA\u10DD\u10D3 \u10E1\u10D0\u10D9\u10E3\u10D7\u10D0\u10E0\u10D8 \u10EA\u10DD\u10D3\u10DC\u10D0 \u10D3\u10D0 \u10D2\u10D8\u10DF\u10E3\u10E0\u10D8 \u10D8\u10D3\u10D4\u10D4\u10D1\u10D8 \u10D7\u10E3 \u10D2\u10D0\u10D3\u10D0\u10D0\u10E0\u10E9\u10D4\u10DC\u10E1, \u10E0\u10D0\u10D7\u10D0 \u10D3\u10D4\u10D3\u10D0\u10DB\u10D8\u10EC\u10D0 \u10E1\u10E0\u10E3\u10DA\u10D8 \u10D2\u10D0\u10DC\u10D0\u10D3\u10D2\u10E3\u10E0\u10D4\u10D1\u10D8\u10E1\u10D2\u10D0\u10DC \u10D8\u10EE\u10E1\u10DC\u10D0\u10E1.",
+      "Language": "ka-GE"
+    },
+    {
+      "Title": "Project Hail Mary",
+      "Overview": "NO-l\u00E4raren Ryland Grace vaknar upp ensam p\u00E5 ett rymdskepp, ljus\u00E5r fr\u00E5n jorden. I takt med att minnet kommer tillbaka inser han vidden av sitt uppdrag: han m\u00E5ste stoppa en mystisk substans som hotar att sl\u00E4cka solen och d\u00E4rmed r\u00E4dda m\u00E4nskligheten fr\u00E5n underg\u00E5ng.",
+      "Language": "sv-SE"
+    },
+    {
+      "Title": "\u041F\u0440\u043E\u0435\u043A\u0442\u044A\u0442 \u0410\u0432\u0435 \u041C\u0430\u0440\u0438\u044F",
+      "Overview": "\u041F\u0440\u043E\u0435\u043A\u0442\u044A\u0442 \u0410\u0432\u0435 \u041C\u0430\u0440\u0438\u044F \u043D\u0438 \u0437\u0430\u043F\u043E\u0437\u043D\u0430\u0432\u0430 \u0441 \u0420\u0430\u0439\u043B\u044A\u043D\u0434 \u0413\u0440\u0435\u0439\u0441 \u2013 \u0443\u0447\u0438\u0442\u0435\u043B \u043F\u043E \u043F\u0440\u0438\u0440\u043E\u0434\u043D\u0438 \u043D\u0430\u0443\u043A\u0438, \u043A\u043E\u0439\u0442\u043E \u0441\u0435 \u0441\u044A\u0431\u0443\u0436\u0434\u0430 \u043D\u0430 \u0431\u043E\u0440\u0434\u0430 \u043D\u0430 \u043A\u043E\u0441\u043C\u0438\u0447\u0435\u0441\u043A\u0438 \u043A\u043E\u0440\u0430\u0431, \u0431\u0435\u0437 \u043D\u0438\u043A\u0430\u043A\u0432\u0438 \u0441\u043F\u043E\u043C\u0435\u043D\u0438 \u043A\u043E\u0439 \u0435, \u043A\u044A\u0434\u0435 \u0441\u0435 \u043D\u0430\u043C\u0438\u0440\u0430 \u0438 \u043A\u0430\u043A\u0432\u0430 \u0435 \u043C\u0438\u0441\u0438\u044F\u0442\u0430 \u043C\u0443. \u041F\u043E\u0441\u0442\u0435\u043F\u0435\u043D\u043D\u043E \u0413\u0440\u0435\u0439\u0441 \u0441\u0438 \u043F\u0440\u0438\u043F\u043E\u043C\u043D\u044F \u0438\u0441\u0442\u0438\u043D\u0430\u0442\u0430: \u0417\u0435\u043C\u044F\u0442\u0430 \u0435 \u0438\u0437\u043F\u0440\u0430\u0432\u0435\u043D\u0430 \u043F\u0440\u0435\u0434 \u0433\u043B\u043E\u0431\u0430\u043B\u043D\u0430 \u043A\u0430\u0442\u0430\u0441\u0442\u0440\u043E\u0444\u0430, \u0430 \u0442\u043E\u0439 \u043F\u044A\u0442\u0443\u0432\u0430 \u043A\u044A\u043C \u0437\u0432\u0435\u0437\u0434\u0430\u0442\u0430 \u0422\u0430\u0443 \u0432 \u0441\u044A\u0437\u0432\u0435\u0437\u0434\u0438\u0435\u0442\u043E \u041A\u0438\u0442 \u043A\u0430\u0442\u043E \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0430, \u043E\u0442\u0447\u0430\u044F\u043D\u0430 \u043D\u0430\u0434\u0435\u0436\u0434\u0430 \u0437\u0430 \u0441\u043F\u0430\u0441\u0435\u043D\u0438\u0435 \u043D\u0430 \u0447\u043E\u0432\u0435\u0447\u0435\u0441\u0442\u0432\u043E\u0442\u043E. \u0411\u0435\u0437 \u0435\u043A\u0438\u043F\u0430\u0436 \u0438 \u0441 \u0435\u0434\u0438\u043D\u0441\u0442\u0432\u0435\u043D \u0441\u043F\u044A\u0442\u043D\u0438\u043A \u0432 \u043B\u0438\u0446\u0435\u0442\u043E \u043D\u0430 \u043C\u0438\u0441\u0442\u0435\u0440\u0438\u043E\u0437\u043D\u043E \u0438\u0437\u0432\u044A\u043D\u0437\u0435\u043C\u043D\u043E \u0441\u044A\u0437\u0434\u0430\u043D\u0438\u0435, \u0420\u0430\u0439\u043B\u044A\u043D\u0434 \u0413\u0440\u0435\u0439\u0441 \u0442\u0440\u044F\u0431\u0432\u0430 \u0434\u0430 \u0440\u0430\u0437\u0433\u0430\u0434\u0430\u0435 \u043C\u0438\u0441\u0442\u0435\u0440\u0438\u044F\u0442\u0430 \u043D\u0430 \u0441\u043C\u044A\u0440\u0442\u043E\u043D\u043E\u0441\u043D\u0430\u0442\u0430 \u0437\u0430\u043F\u043B\u0430\u0445\u0430, \u0437\u0430 \u0434\u0430 \u0441\u043F\u0430\u0441\u0438 \u0441\u0432\u0435\u0442\u0430.",
+      "Language": "bg-BG"
+    },
+    {
+      "Title": "Kurtulu\u015F Projesi",
+      "Overview": "Fen bilgisi \u00F6\u011Fretmeni Ryland Grace, evinden \u0131\u015F\u0131k y\u0131llar\u0131 uzakta bir uzay gemisinde uyan\u0131r, kim oldu\u011Funa ya da oraya nas\u0131l geldi\u011Fine dair hi\u00E7bir \u015Fey hat\u0131rlamaz. Haf\u0131zas\u0131 yava\u015F yava\u015F yerine gelirken g\u00F6revini de \u00E7\u00F6zmeye ba\u015Flar: G\u00FCne\u015Fin s\u00F6nmesine neden olan gizemli maddenin s\u0131rr\u0131n\u0131 \u00E7\u00F6zmek. D\u00FCnyadaki her \u015Feyi yok olmaktan kurtarmak i\u00E7in t\u00FCm bilimsel bilgisine ve s\u0131ra d\u0131\u015F\u0131 fikirlerine ba\u015Fvurmak zorundad\u0131r. Ancak beklenmedik bir dostluk, bu g\u00F6revi tek ba\u015F\u0131na yapmak zorunda kalmayaca\u011F\u0131 anlam\u0131na gelecektir.",
+      "Language": "tr-TR"
+    },
+    {
+      "Title": "Spasitel",
+      "Overview": "U\u010Ditel p\u0159\u00EDrodopisu Ryland Grace se probud\u00ED na vesm\u00EDrn\u00E9 lodi vzd\u00E1len\u00E9 sv\u011Bteln\u00E9 roky od domova, ani\u017E by si pamatoval, kdo je a jak se tam dostal. Kdy\u017E se mu pam\u011B\u0165 vr\u00E1t\u00ED, za\u010Dne odhalovat sv\u016Fj \u00FAkol: vy\u0159e\u0161it z\u00E1hadu tajemn\u00E9 l\u00E1tky, kter\u00E1 zp\u016Fsobuje vyhas\u00EDn\u00E1n\u00ED Slunce. Mus\u00ED vyu\u017E\u00EDt sv\u00FDch v\u011Bdeck\u00FDch znalost\u00ED a neortodoxn\u00EDch n\u00E1pad\u016F, aby zachr\u00E1nil v\u0161e na Zemi p\u0159ed z\u00E1nikem\u2026 ale d\u00EDky ne\u010Dekan\u00E9mu p\u0159\u00E1telstv\u00ED na to mo\u017En\u00E1 nebude muset b\u00FDt s\u00E1m.",
+      "Language": "cs-CZ"
+    },
+    {
+      "Title": "Projekt Zadnje upanje",
+      "Overview": "U\u010Ditelj znanosti Ryland Grace se prebudi na vesoljski ladji svetlobna leta od doma, brez spomina kdo je in kako se je zna\u0161el tam. Ko se mu spomin vra\u010Da, za\u010Dne odkrivati svojo misijo: re\u0161itev uganke skrivnostne snovi, ki povzro\u010Da, da sonce uga\u0161a. Uporabiti mora svoje znanstveno znanje in neortodoksne ideje, da re\u0161i Zemljo pred izumrtjem... toda zahvaljujo\u010D nepri\u010Dakovanemu prijateljstvu morda pri tem ne bo sam.",
+      "Language": "sl-SI"
+    },
+    {
+      "Title": "Projekts \u0027Ave Maria\u0027",
+      "Overview": "",
+      "Language": "lv-LV"
+    },
+    {
+      "Title": "\u00ABD\u00FCnyan\u0131n Sonu\u00BB layih\u0259si",
+      "Overview": "Astronavt Raylend Qreys kosmik g\u0259mid\u0259 ay\u0131l\u0131r, n\u0259 \u00F6z\u00FC haqq\u0131nda, n\u0259 d\u0259 missiyas\u0131 bar\u0259d\u0259 he\u00E7 n\u0259 xat\u0131rlam\u0131r. T\u0259dric\u0259n o q\u0259na\u0259t\u0259 g\u0259lir ki, Yer \u00FCz\u00FCnd\u0259 ba\u015F ver\u0259n f\u0259lak\u0259td\u0259n xilas axtarmaq \u00FC\u00E7\u00FCn Tau Kita g\u00FCn\u0259\u015F sistemin\u0259 g\u00F6nd\u0259rilmi\u015F ekipaj\u0131n yegan\u0259 sa\u011F qalan \u00FCzv\u00FCd\u00FCr. Cavablar axtarark\u0259n Raylend geni\u015F elmi bilikl\u0259rin\u0259, yarad\u0131c\u0131 d\u00FC\u015F\u00FCnc\u0259sin\u0259 v\u0259 irad\u0259sin\u0259 g\u00FCv\u0259nm\u0259li olacaq, lakin b\u0259lk\u0259 d\u0259 bunu t\u0259k ba\u015F\u0131na etm\u0259li olmayacaq.",
+      "Language": "az-AZ"
+    },
+    {
+      "Title": "Ave Maria",
+      "Overview": "Teadus\u00F5petaja Ryland Grace (Ryan Gosling) \u00E4rkab kosmoselaeval valgusaastate kaugusel kodust, m\u00E4letamata, kes ta on v\u00F5i kuidas sinna sattus. M\u00E4lu taastudes asub ta oma missiooni kallale. Tal tuleb nimelt lahendada p\u00E4ikest h\u00E4vitava salap\u00E4rase aine m\u00F5istatus. Maal k\u00F5ige v\u00E4ljasuremisest p\u00E4\u00E4stmiseks kasutab ta oma teadmisi teadusest ja ebatavalisi ideid. Ootamatu s\u00F5prus aga t\u00E4hendab, et ta ehk ei peagi seda \u00FCksi tegema.",
+      "Language": "et-EE"
+    },
+    {
+      "Title": "Der Astronaut - Project Hail Mary",
+      "Overview": "",
+      "Language": "de-CH"
+    },
+    {
+      "Title": "Proiectul Hail Mary",
+      "Overview": "Profesorul de \u0219tiin\u021Be Ryland Grace se treze\u0219te pe o nav\u0103 spa\u021Bial\u0103 la ani-lumin\u0103 de cas\u0103, f\u0103r\u0103 s\u0103-\u0219i aminteasc\u0103 cine e sau cum a ajuns acolo. Pe m\u0103sur\u0103 ce memoria \u00EEi revine, Ryland \u00EEncepe s\u0103-\u0219i \u00EEn\u021Beleag\u0103 misiunea: trebuie s\u0103 rezolve misterul substan\u021Bei care provoac\u0103 stingerea soarelui. Profesorul trebuie s\u0103-\u0219i foloseasc\u0103 cuno\u0219tin\u021Bele \u0219i ingeniozitatea pentru a \u00EEmpiedica dispari\u021Bia vie\u021Bii pe P\u0103m\u00E2nt...",
+      "Language": "ro-RO"
+    },
+    {
+      "Title": "Project Hail Mary",
+      "Overview": "Naturfagsl\u00E6reren Ryland Grace v\u00E5gner op p\u00E5 et rumskib lys\u00E5r hjemmefra uden nogen erindring om, hvem han er, eller hvordan han er havnet der. Efterh\u00E5nden som hans hukommelse vender tilbage, begynder han at afd\u00E6kke sin mission: at l\u00F8se g\u00E5den om det mystiske stof, der f\u00E5r solen til at udd\u00F8. Han m\u00E5 tr\u00E6kke p\u00E5 sin videnskabelige viden og uortodokse ideer for at redde alt p\u00E5 Jorden fra udryddelse ... men et uventet venskab betyder, at han m\u00E5ske ikke beh\u00F8ver at g\u00F8re det alene.",
+      "Language": "da-DK"
+    },
+    {
+      "Title": "Projeto Hail Mary",
+      "Overview": "O professor de Ci\u00EAncias Ryland Grace acorda numa nave espacial sem se lembrar de quem \u00E9 ou como chegou l\u00E1. \u00C0 medida que a mem\u00F3ria volta, come\u00E7a a descobrir a sua miss\u00E3o: resolver o enigma da misteriosa subst\u00E2ncia que est\u00E1 a causar a extin\u00E7\u00E3o do Sol. Tem de recorrer aos seus conhecimentos cient\u00EDficos para salvar tudo na Terra da extin\u00E7\u00E3o... mas uma amizade inesperada acompanha-o nesta miss\u00E3o.",
+      "Language": "pt-PT"
+    },
+    {
+      "Title": "\u0391\u03C0\u03BF\u03C3\u03C4\u03BF\u03BB\u03AE \u03A7\u03B1\u03AF\u03C1\u03B5 \u039C\u03B1\u03C1\u03AF\u03B1",
+      "Overview": "\u039F \u03BA\u03B1\u03B8\u03B7\u03B3\u03B7\u03C4\u03AE\u03C2 \u03C6\u03C5\u03C3\u03B9\u03BA\u03CE\u03BD \u03B5\u03C0\u03B9\u03C3\u03C4\u03B7\u03BC\u03CE\u03BD Ryland Grace \u03BE\u03C5\u03C0\u03BD\u03AC \u03C3\u03B5 \u03AD\u03BD\u03B1 \u03B4\u03B9\u03B1\u03C3\u03C4\u03B7\u03BC\u03CC\u03C0\u03BB\u03BF\u03B9\u03BF, \u03AD\u03C4\u03B7 \u03C6\u03C9\u03C4\u03CC\u03C2 \u03BC\u03B1\u03BA\u03C1\u03B9\u03AC \u03B1\u03C0\u03CC \u03C4\u03BF \u03C3\u03C0\u03AF\u03C4\u03B9 \u03C4\u03BF\u03C5. \u0394\u03B5\u03BD \u03BC\u03C0\u03BF\u03C1\u03B5\u03AF \u03BD\u03B1 \u03B8\u03C5\u03BC\u03B7\u03B8\u03B5\u03AF  \u03BF\u03CD\u03C4\u03B5 \u03C0\u03BF\u03B9\u03BF\u03C2 \u03B5\u03AF\u03BD\u03B1\u03B9 \u03BF\u03CD\u03C4\u03B5 \u03C0\u03CE\u03C2 \u03B2\u03C1\u03AD\u03B8\u03B7\u03BA\u03B5 \u03B5\u03BA\u03B5\u03AF. \u038C\u03C4\u03B1\u03BD \u03B7 \u03BC\u03BD\u03AE\u03BC\u03B7 \u03C4\u03BF\u03C5 \u03B1\u03C1\u03C7\u03AF\u03B6\u03B5\u03B9 \u03BD\u03B1  \u03B5\u03C0\u03B1\u03BD\u03AD\u03C1\u03C7\u03B5\u03C4\u03B1\u03B9, \u03B1\u03BD\u03B1\u03BA\u03B1\u03BB\u03CD\u03C0\u03C4\u03B5\u03B9 \u03C4\u03B7\u03BD \u03BA\u03C1\u03AF\u03C3\u03B9\u03BC\u03B7 \u03B1\u03C0\u03BF\u03C3\u03C4\u03BF\u03BB\u03AE \u03C4\u03BF\u03C5. \u03A0\u03C1\u03AD\u03C0\u03B5\u03B9 \u03BD\u03B1 \u03B2\u03C1\u03B5\u03B9 \u03C4\u03B7 \u03BC\u03C5\u03C3\u03C4\u03B7\u03C1\u03B9\u03CE\u03B4\u03B7 \u03BF\u03C5\u03C3\u03AF\u03B1 \u03C0\u03BF\u03C5 \u03BA\u03AC\u03BD\u03B5\u03B9 \u03C4\u03BF\u03BD \u0389\u03BB\u03B9\u03BF \u03BD\u03B1 \u03C3\u03B2\u03AE\u03BD\u03B5\u03B9, \u03BA\u03B1\u03B9 \u03BD\u03B1 \u03B5\u03C0\u03B9\u03C3\u03C4\u03C1\u03B1\u03C4\u03B5\u03CD\u03C3\u03B5\u03B9 \u03C4\u03B9\u03C2 \u03B5\u03C0\u03B9\u03C3\u03C4\u03B7\u03BC\u03BF\u03BD\u03B9\u03BA\u03AD\u03C2 \u03B3\u03BD\u03CE\u03C3\u03B5\u03B9\u03C2 \u03BA\u03B1\u03B9 \u03C4\u03B9\u03C2 \u03B1\u03BD\u03BF\u03C1\u03B8\u03CC\u03B4\u03BF\u03BE\u03B5\u03C2 \u03B9\u03B4\u03AD\u03B5\u03C2 \u03C4\u03BF\u03C5, \u03B3\u03B9\u03B1 \u03BD\u03B1  \u03C3\u03CE\u03C3\u03B5\u03B9  \u03C4\u03B7  \u0393\u03B7.  \u03A7\u03AC\u03C1\u03B7 \u03C3\u03B5 \u03BC\u03B9\u03B1 \u03B1\u03C0\u03C1\u03CC\u03C3\u03BC\u03B5\u03BD\u03B7 \u03C6\u03B9\u03BB\u03AF\u03B1 \u03BC\u03C0\u03BF\u03C1\u03B5\u03AF \u03BD\u03B1 \u03BC\u03B7  \u03C7\u03C1\u03B5\u03B9\u03B1\u03C3\u03C4\u03B5\u03AF  \u03BD\u03B1  \u03C4\u03BF  \u03BA\u03AC\u03BD\u03B5\u03B9  \u03BF\u03BB\u03BF\u03BC\u03CC\u03BD\u03B1\u03C7\u03BF\u03C2.",
+      "Language": "el-GR"
+    },
+    {
+      "Title": "\u092A\u094D\u0930\u094B\u091C\u0947\u0915\u094D\u091F \u0939\u0947\u0932 \u092E\u0948\u0930\u0940",
+      "Overview": "",
+      "Language": "hi-IN"
+    },
+    {
+      "Title": "Projet derni\u00E8re chance",
+      "Overview": "Le professeur de sciences Ryland Grace se r\u00E9veille \u00E0 bord d\u2019un vaisseau spatial, \u00E0 des ann\u00E9es-lumi\u00E8re de la Terre, sans aucun souvenir de qui il est ni de la fa\u00E7on dont il est arriv\u00E9 l\u00E0. \u00C0 mesure que sa m\u00E9moire lui revient, il commence \u00E0 d\u00E9couvrir sa mission : r\u00E9soudre l\u2019\u00E9nigme d\u2019une myst\u00E9rieuse substance qui provoque l\u2019extinction du Soleil. Il doit faire appel \u00E0 ses connaissances scientifiques et ses id\u00E9es peu orthodoxes pour sauver toute vie sur Terre\u2026 mais une amiti\u00E9 inattendue pourrait signifier qu\u2019il n\u2019aura pas \u00E0 accomplir cette t\u00E2che seul.",
+      "Language": "fr-CA"
+    },
+    {
+      "Title": "\u0645\u0634\u0631\u0648\u0639 \u0647\u064A\u0644 \u0645\u0627\u0631\u064A",
+      "Overview": "\u064A\u0633\u062A\u064A\u0642\u0638 \u0022\u0631\u0627\u064A\u0644\u0627\u0646\u062F \u063A\u0631\u064A\u0633\u0022\u060C \u0645\u062F\u0631\u0633 \u0627\u0644\u0639\u0644\u0648\u0645\u060C \u0639\u0644\u0649 \u0645\u062A\u0646 \u0645\u0631\u0643\u0628\u0629 \u0641\u0636\u0627\u0626\u064A\u0629 \u062A\u0628\u0639\u062F \u0633\u0646\u0648\u0627\u062A \u0636\u0648\u0626\u064A\u0629 \u0639\u0646 \u0645\u0648\u0637\u0646\u0647\u060C \u0641\u0627\u0642\u062F\u064B\u0627 \u0644\u0644\u0630\u0627\u0643\u0631\u0629 \u062A\u0645\u0627\u0645\u064B\u0627\u060C \u0644\u0627 \u064A\u062A\u0630\u0643\u0631 \u0645\u0646 \u0647\u0648 \u0648\u0644\u0627 \u0643\u064A\u0641 \u0648\u0635\u0644 \u0625\u0644\u0649 \u0647\u0646\u0627\u0643. \u0648\u0645\u0639 \u0639\u0648\u062F\u0629 \u0630\u0627\u0643\u0631\u062A\u0647 \u062A\u062F\u0631\u064A\u062C\u064A\u064B\u0627\u060C \u064A\u0628\u062F\u0623 \u0641\u064A \u0627\u0643\u062A\u0634\u0627\u0641 \u0645\u0647\u0645\u062A\u0647: \u062D\u0644 \u0644\u063A\u0632 \u0627\u0644\u0645\u0627\u062F\u0629 \u0627\u0644\u063A\u0627\u0645\u0636\u0629 \u0627\u0644\u062A\u064A \u062A\u062A\u0633\u0628\u0628 \u0641\u064A \u0627\u0646\u0637\u0641\u0627\u0621 \u0627\u0644\u0634\u0645\u0633. \u0639\u0644\u064A\u0647 \u0623\u0646 \u064A\u0633\u062A\u0639\u064A\u0646 \u0628\u0645\u0639\u0631\u0641\u062A\u0647 \u0627\u0644\u0639\u0644\u0645\u064A\u0629 \u0648\u0623\u0641\u0643\u0627\u0631\u0647 \u063A\u064A\u0631 \u0627\u0644\u062A\u0642\u0644\u064A\u062F\u064A\u0629 \u0644\u0625\u0646\u0642\u0627\u0630 \u0643\u0644 \u0634\u064A\u0621 \u0639\u0644\u0649 \u0627\u0644\u0623\u0631\u0636 \u0645\u0646 \u0627\u0644\u0641\u0646\u0627\u0621... \u0644\u0643\u0646 \u0635\u062F\u0627\u0642\u0629 \u063A\u064A\u0631 \u0645\u062A\u0648\u0642\u0639\u0629 \u062A\u0639\u0646\u064A \u0623\u0646\u0647 \u0642\u062F \u0644\u0627 \u064A\u0636\u0637\u0631 \u0625\u0644\u0649 \u0627\u0644\u0642\u064A\u0627\u0645 \u0628\u0630\u0644\u0643 \u0628\u0645\u0641\u0631\u062F\u0647.",
+      "Language": "ar-SA"
+    },
+    {
+      "Title": "Projecte Hail Mary",
+      "Overview": "El professor de ci\u00E8ncies Ryland Grace es desperta en una nau espacial a anys llum de casa sense recordar qui \u00E9s ni com hi ha arribat. A mesura que recupera la mem\u00F2ria, comen\u00E7a a descobrir-ne la missi\u00F3: resoldre l\u0027enigma de la misteriosa subst\u00E0ncia que provoca l\u0027extinci\u00F3 del sol. Haur\u00E0 de rec\u00F3rrer als seus coneixements cient\u00EDfics ia les seves idees poc ortodoxes per salvar tot el que hi ha a la Terra de l\u0027extinci\u00F3... per\u00F2 una amistat inesperada vol dir que potser no ho haur\u00E0 de fer sol.",
+      "Language": "ca-ES"
+    },
+    {
+      "Title": "\u041F\u0440\u043E\u0458\u0435\u043A\u0430\u0442 \u041E\u0447\u0430\u0458\u043D\u0438\u0447\u043A\u0438 \u043F\u043E\u043A\u0443\u0448\u0430\u0458",
+      "Overview": "\u041D\u0430\u0441\u0442\u0430\u0432\u043D\u0438\u043A \u043F\u0440\u0438\u0440\u043E\u0434\u043D\u0438\u0445 \u043D\u0430\u0443\u043A\u0430 \u0420\u0430\u0458\u043B\u0430\u043D\u0434 \u0413\u0440\u0435\u0458\u0441 \u0431\u0443\u0434\u0438 \u0441\u0435 \u043D\u0430 \u0441\u0432\u0435\u043C\u0438\u0440\u0441\u043A\u043E\u043C \u0431\u0440\u043E\u0434\u0443 \u0441\u0432\u0435\u0442\u043B\u043E\u0441\u043D\u0438\u043C \u0433\u043E\u0434\u0438\u043D\u0430\u043C\u0430 \u043E\u0434 \u043A\u0443\u045B\u0435, \u0431\u0435\u0437 \u0441\u0435\u045B\u0430\u045A\u0430 \u043A\u043E \u0458\u0435 \u0438\u043B\u0438 \u043A\u0430\u043A\u043E \u0458\u0435 \u0442\u0430\u043C\u043E \u0441\u0442\u0438\u0433\u0430\u043E. \u041A\u0430\u043A\u043E \u043C\u0443 \u0441\u0435 \u043F\u0430\u043C\u045B\u0435\u045A\u0435 \u0432\u0440\u0430\u045B\u0430, \u043F\u043E\u0447\u0438\u045A\u0435 \u0434\u0430 \u043E\u0442\u043A\u0440\u0438\u0432\u0430 \u0441\u0432\u043E\u0458\u0443 \u043C\u0438\u0441\u0438\u0458\u0443: \u0434\u0430 \u0440\u0435\u0448\u0438 \u0437\u0430\u0433\u043E\u043D\u0435\u0442\u043A\u0443 \u043C\u0438\u0441\u0442\u0435\u0440\u0438\u043E\u0437\u043D\u0435 \u0441\u0443\u043F\u0441\u0442\u0430\u043D\u0446\u0435 \u043A\u043E\u0458\u0430 \u0443\u0437\u0440\u043E\u043A\u0443\u0458\u0435 \u0433\u0430\u0448\u0435\u045A\u0435 \u0441\u0443\u043D\u0446\u0430. \u041C\u043E\u0440\u0430 \u0434\u0430 \u0441\u0435 \u043F\u043E\u0437\u043E\u0432\u0435 \u043D\u0430 \u0441\u0432\u043E\u0458\u0435 \u043D\u0430\u0443\u0447\u043D\u043E \u0437\u043D\u0430\u045A\u0435 \u0438 \u043D\u0435\u0443\u043E\u0431\u0438\u0447\u0430\u0458\u0435\u043D\u0435 \u0438\u0434\u0435\u0458\u0435 \u043A\u0430\u043A\u043E \u0431\u0438 \u0441\u043F\u0430\u0441\u0430\u043E \u0441\u0432\u0435 \u043D\u0430 \u0417\u0435\u043C\u0459\u0438 \u043E\u0434 \u0438\u0437\u0443\u043C\u0438\u0440\u0430\u045A\u0430... \u0430\u043B\u0438 \u043D\u0435\u043E\u0447\u0435\u043A\u0438\u0432\u0430\u043D\u043E \u043F\u0440\u0438\u0458\u0430\u0442\u0435\u0459\u0441\u0442\u0432\u043E \u0437\u043D\u0430\u0447\u0438 \u0434\u0430 \u043C\u043E\u0436\u0434\u0430 \u043D\u0435\u045B\u0435 \u043C\u043E\u0440\u0430\u0442\u0438 \u0442\u043E \u0434\u0430 \u0443\u0440\u0430\u0434\u0438 \u0441\u0430\u043C.",
+      "Language": "sr-RS"
+    },
+    {
+      "Title": "Projektas \u201ESveika, Marija\u201C",
+      "Overview": "Railandas Greisas (aktorius Ryanas Goslingas) \u2013 talentingas gamtos moksl\u0173 mokytojas. Kitaip tariant, jis yra b\u016Btent toks \u017Emogus, kokio reikia naujam kosmoso projektui.  Mokslininkai kosmose aptinka paslapting\u0105 rei\u0161kin\u012F, naikinant\u012F \u017Evaig\u017Edes. Jei nepavyks rasti sprendimo, kaip tam u\u017Ekirsti keli\u0105, Saul\u0117 u\u017Eges ir \u017Emonija i\u0161nyks. Vienintel\u0117 s\u0105lyginai netoliese esanti \u017Evaig\u017Ed\u0117, kuriai pavyko i\u0161vengti negailestingo likimo, yra u\u017E 12 \u0161viesme\u010Di\u0173 nuo \u017Dem\u0117s. B\u016Btent ten ir i\u0161siun\u010Diamas Railandas Greisas, kad pabandyt\u0173 surasti atsakym\u0105, kurio kaina \u2013 a\u0161tuoni milijardai gyvybi\u0173.  Pakeliui \u012F kelion\u0117s tiksl\u0105 naujai i\u0161keptas astronautas turi suprasti ir i\u0161mokti daugyb\u0119 dalyk\u0173, su kuriais anks\u010Diau niekados nebuvo susid\u016Br\u0119s. Ir susidraugauti su organizmu, su kokiu n\u0117ra susid\u016Br\u0119s joks kitas \u017Emogus. Tik sujung\u0119 j\u0117gas ir dirbdami kartu, \u017Emogus ir ateivis turi menk\u0105 \u0161ans\u0105 i\u0161gelb\u0117ti Visat\u0105 nuo pra\u017E\u016Bties.",
+      "Language": "lt-LT"
+    },
+    {
+      "Title": "Project Hail Mary",
+      "Overview": "En dag naturfagl\u00E6reren Ryland Grace (Ryan Gosling) v\u00E5kner, er han p\u00E5 et romskip lys\u00E5r hjemmefra, uten noen minner om hvem han er eller hvordan han kom dit. Etter hvert som hukommelsen vender tilbake, begynner han \u00E5 avdekke oppdraget sitt: \u00E5 l\u00F8se g\u00E5ten rundt det mystiske stoffet som f\u00E5r solen til \u00E5 d\u00F8 ut. Han m\u00E5 bruke sin vitenskapelige kunnskap og uortodokse id\u00E9er for \u00E5 redde alt liv p\u00E5 jorden fra utryddelse\u2026 men et uventet vennskap gj\u00F8r at han kanskje ikke m\u00E5 gj\u00F8re det alene.",
+      "Language": "no-NO"
+    },
+    {
+      "Title": "\u067E\u0631\u0648\u062C\u06CC\u06A9\u0679 \u06C1\u06CC\u0644 \u0645\u06CC\u0631\u06CC",
+      "Overview": "",
+      "Language": "ur-PK"
+    },
+    {
+      "Title": "\u067E\u0631\u0648\u0698\u0647 \u0647\u06CC\u0644 \u0645\u0631\u06CC",
+      "Overview": "\u00AB\u0631\u0627\u06CC\u0644\u0646\u062F \u06AF\u0631\u06CC\u0633\u00BB\u060C \u0645\u0639\u0644\u0645 \u0639\u0644\u0648\u0645\u060C \u062F\u0631 \u06CC\u06A9 \u0641\u0636\u0627\u067E\u06CC\u0645\u0627 \u062F\u0631 \u0641\u0627\u0635\u0644\u0647 \u0686\u0646\u062F \u0633\u0627\u0644 \u0646\u0648\u0631\u06CC \u0627\u0632 \u062E\u0627\u0646\u0647 \u0628\u06CC\u062F\u0627\u0631 \u0645\u06CC\u200C\u0634\u0648\u062F\u060C \u062F\u0631 \u062D\u0627\u0644\u06CC \u06A9\u0647 \u0647\u06CC\u0686 \u062E\u0627\u0637\u0631\u06CC \u0627\u0632 \u0627\u06CC\u0646\u06A9\u0647 \u06A9\u06CC\u0633\u062A \u0648 \u0686\u0637\u0648\u0631 \u0628\u0647 \u0622\u0646\u062C\u0627 \u0622\u0645\u062F\u0647 \u0646\u062F\u0627\u0631\u062F. \u0628\u0627 \u0628\u0627\u0632\u06AF\u0634\u062A \u062D\u0627\u0641\u0638\u0647\u200C\u0627\u0634\u060C \u0627\u0648 \u0634\u0631\u0648\u0639 \u0628\u0647 \u06A9\u0634\u0641 \u0645\u0623\u0645\u0648\u0631\u06CC\u062A \u062E\u0648\u062F \u0645\u06CC\u200C\u06A9\u0646\u062F: \u062D\u0644 \u0645\u0639\u0645\u0627 \u0648 \u0631\u0627\u0632 \u0645\u0627\u062F\u0647 \u0627\u0633\u0631\u0627\u0631\u0622\u0645\u06CC\u0632\u06CC \u06A9\u0647 \u0628\u0627\u0639\u062B \u062E\u0627\u0645\u0648\u0634 \u0634\u062F\u0646 \u062E\u0648\u0631\u0634\u06CC\u062F \u0634\u062F\u0647 \u0627\u0633\u062A. \u0627\u0648 \u0628\u0627\u06CC\u062F \u0628\u0631\u0627\u06CC \u0646\u062C\u0627\u062A \u062A\u0645\u0627\u0645 \u0645\u0648\u062C\u0648\u062F\u0627\u062A \u0632\u0645\u06CC\u0646 \u0627\u0632 \u0627\u0646\u0642\u0631\u0627\u0636\u060C \u0628\u0647 \u062F\u0627\u0646\u0634 \u0639\u0644\u0645\u06CC \u0648 \u0627\u06CC\u062F\u0647\u200C\u0647\u0627\u06CC \u063A\u06CC\u0631\u0645\u062A\u0639\u0627\u0631\u0641 \u062E\u0648\u062F \u0645\u062A\u06A9\u06CC \u0634\u0648\u062F.",
+      "Language": "fa-IR"
+    }
+  ],
+  "Recommendations": [
+    {
+      "TmdbId": 157336,
+      "Title": "Interstellar"
+    },
+    {
+      "TmdbId": 329865,
+      "Title": "Arrival"
+    },
+    {
+      "TmdbId": 74,
+      "Title": "War of the Worlds"
+    },
+    {
+      "TmdbId": 118340,
+      "Title": "Guardians of the Galaxy"
+    },
+    {
+      "TmdbId": 181812,
+      "Title": "Star Wars: The Rise of Skywalker"
+    },
+    {
+      "TmdbId": 696806,
+      "Title": "The Adam Project"
+    },
+    {
+      "TmdbId": 49047,
+      "Title": "Gravity"
+    },
+    {
+      "TmdbId": 188927,
+      "Title": "Star Trek Beyond"
+    },
+    {
+      "TmdbId": 49529,
+      "Title": "John Carter"
+    },
+    {
+      "TmdbId": 80274,
+      "Title": "Ender\u0027s Game"
+    }
+  ],
+  "Credits": {
+    "Cast": [
+      {
+        "Name": "Ryan Gosling",
+        "Order": 0,
+        "Character": "Ryland Grace",
+        "TmdbId": 30614,
+        "CreditId": "69b1f6054812db78124ef8fe",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/lyUyVARQKhGxaxy0FbPJCQRpiaW.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Sandra H\u00FCller",
+        "Order": 1,
+        "Character": "Eva Stratt",
+        "TmdbId": 7152,
+        "CreditId": "69b25470d5362088ae21d1af",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/jQfKXVCPTH9KEnzHHU4QemCnlMe.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "James Ortiz",
+        "Order": 2,
+        "Character": "Rocky (voice)",
+        "TmdbId": 2096164,
+        "CreditId": "69b25524eebf9bc41921d1a0",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/unzBwVsoq8rAH8BAYlPR1zsWQ4E.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Lionel Boyce",
+        "Order": 3,
+        "Character": "Carl",
+        "TmdbId": 2320708,
+        "CreditId": "69b254822e3d5e39b621d1c1",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/hpIxX5nkfA3pWCW8rYkEUCSBVyS.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Milana Vayntrub",
+        "Order": 4,
+        "Character": "Olesya Ilyukhina",
+        "TmdbId": 1454946,
+        "CreditId": "69b254a805c13524b64efaaa",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/i5Cou9ExwTZvRRtl79V75CsI7oC.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Ken Leung",
+        "Order": 5,
+        "Character": "Yao",
+        "TmdbId": 2131,
+        "CreditId": "69b25491eb39740bd821d2bd",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/hpatUP6u74gkpDRmn9voNY9V43O.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Priya Kansara",
+        "Order": 6,
+        "Character": "Mary (voice)",
+        "TmdbId": 3554544,
+        "CreditId": "69b25537236690071e4b6e4d",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/zv9kpaQ8AVBfjI2LAAZV58NeVQg.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Mia Soteriou",
+        "Order": 7,
+        "Character": "Dr. Browne",
+        "TmdbId": 1749206,
+        "CreditId": "69baba1a67d8e22ff367521d",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/bU4Twfk4as290gPFouByj7Wjd2.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Annelle Olaleye",
+        "Order": 8,
+        "Character": "Olivia",
+        "TmdbId": 3074054,
+        "CreditId": "69b88287d88436277e95fe67",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/V0UqW30EQaHjGhwDnb6dT0AWmz.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Maya Eva Hosein",
+        "Order": 9,
+        "Character": "Rekha",
+        "TmdbId": 6080198,
+        "CreditId": "69baba36a495b1a8079b345b",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/lDHbsnyUoBzmtbMevNl4F2n8B8B.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Bastian Antonio Fuentes",
+        "Order": 10,
+        "Character": "Parker",
+        "TmdbId": 3144892,
+        "CreditId": "69b88229e223530c11674424",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/u7SDAocZ7ZCMOCejLRZtZFdb2Bl.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Alice Brittain",
+        "Order": 11,
+        "Character": "Hardware Store Cashier",
+        "TmdbId": 3796265,
+        "CreditId": "69b882071699b1f8c7a63fac",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/qOlSX2GtTU1Rhn5iYf4K0bqQJgu.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Michael Akinsulire",
+        "Order": 12,
+        "Character": "Air Force Officer",
+        "TmdbId": 1917042,
+        "CreditId": "69baba554335cdd74e57d187",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/9bW2Cd86NjKX5qxkRzYOQbY0gNy.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Travis Jay",
+        "Order": 13,
+        "Character": "Tilt-A-Whirl",
+        "TmdbId": 3740439,
+        "CreditId": "69baba698696419dc53ba92f",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/uVSPp04qhtO01b3qYMJTXlRKJ8i.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Geoffrey Lumb",
+        "Order": 14,
+        "Character": "Aircraft Carrier Officer",
+        "TmdbId": 1944791,
+        "CreditId": "69baba7d181da5e9383bad18",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/c2xgAokzGEVtDMzSy9Y4eusw2x0.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Paul Lambert",
+        "Order": 15,
+        "Character": "Dr. Scyther",
+        "TmdbId": 1982162,
+        "CreditId": "69baba92694d02a74f020feb",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/6hynQERnQfZOeTOmnopEGonhFR5.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Orion Lee",
+        "Order": 16,
+        "Character": "Dr. Li",
+        "TmdbId": 1333452,
+        "CreditId": "69b254f1eebf9bc41921d19b",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/jHz7papyoOAFvMql64cXQVQqKYu.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Aaron Neil",
+        "Order": 17,
+        "Character": "Narender",
+        "TmdbId": 204802,
+        "CreditId": "69b2550ceb39740bd821d2c2",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/k1fgcLv6ZPvAGWcxZgEQY5GTnFq.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Michelle Greenidge",
+        "Order": 18,
+        "Character": "Chimamanda",
+        "TmdbId": 1966036,
+        "CreditId": "69babab632bab72d1f960f46",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/to5tGfkCVdVnl49vZXOUhbJkAxV.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Bernhard Sch\u00FCtz",
+        "Order": 19,
+        "Character": "Voigt",
+        "TmdbId": 44516,
+        "CreditId": "69babac616a8024c6c2c93fb",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/h3sRpqPmAHkcG5ifYfiRvArEV46.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Amira Ghazalla",
+        "Order": 20,
+        "Character": "Dr. Lokken",
+        "TmdbId": 1108725,
+        "CreditId": "69babad474b23bd5e521ee6b",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/pYOVA7yWtosslFgNh8lVivaNdT7.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Malachi Kirby",
+        "Order": 21,
+        "Character": "DuBois",
+        "TmdbId": 1145665,
+        "CreditId": "69babae1bdfe6908d0021159",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/8v1anxRcmDRDaVS7Cpk4KCoGPK4.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Liz Kingsman",
+        "Order": 22,
+        "Character": "Shapiro",
+        "TmdbId": 1488078,
+        "CreditId": "69b254e534356d367c685a4d",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/sNCFfAVWGe4d4SLlUiNWvLk1Vwe.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Piotr Baumann",
+        "Order": 23,
+        "Character": "Piotr",
+        "TmdbId": 1174385,
+        "CreditId": "69babaf8a03bbbf0849b33d2",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/2oRCCXy5gcNK7yuWfe2ghYACa7b.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Eunice Huthart",
+        "Order": 24,
+        "Character": "Rejected Rocky Voice (voice)",
+        "TmdbId": 40712,
+        "CreditId": "69bec6afa5847c18442b7d5a",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/8OowlelunJvuiEebU7olJuv6PCQ.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Damien de Froberville",
+        "Order": 25,
+        "Character": "Rejected Rocky Voice (voice)",
+        "TmdbId": 2018201,
+        "CreditId": "69bec6c6b409857ff2708a4c",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/vwlptE197B8BI8jKXc2Y9lQB4lQ.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Ray Porter",
+        "Order": 26,
+        "Character": "Rejected Rocky Voice (voice)",
+        "TmdbId": 11675,
+        "CreditId": "69bdb031953bb35acc355119",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/AsTrRNAZzYYF0nYkZzGiO0kAGbr.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Meryl Streep",
+        "Order": 27,
+        "Character": "Rejected Rocky Voice (voice)",
+        "TmdbId": 5064,
+        "CreditId": "69bdb03aa5f40a7c6f355141",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/pSyM9cteYYWUBDalJzMPLH0SLgB.jpg"
+          }
+        ]
+      }
+    ],
+    "Crew": [
+      {
+        "Name": "Phil Lord",
+        "Order": 0,
+        "Job": "Director",
+        "Department": "Directing",
+        "TmdbId": 107446,
+        "CreditId": "5ebf24c779b3d4001b91c0ff",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/2MagibFHZxky3FmMubyABUnf4lw.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Christopher Miller",
+        "Order": 1,
+        "Job": "Director",
+        "Department": "Directing",
+        "TmdbId": 155267,
+        "CreditId": "5ebf24e7bc8abc0022c516a8",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/dr2yCgYtmNmO5vzjk9KNbjTpbzO.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Drew Goddard",
+        "Order": 2,
+        "Job": "Screenplay",
+        "Department": "Writing",
+        "TmdbId": 47506,
+        "CreditId": "66e06a5b919e4a20abba3241",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/2ff2wbCu0kc61JDHgBiPSqtb3e3.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Ryan Gosling",
+        "Order": 3,
+        "Job": "Producer",
+        "Department": "Production",
+        "TmdbId": 30614,
+        "CreditId": "5e7eb05f70309f0012604527",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/lyUyVARQKhGxaxy0FbPJCQRpiaW.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Phil Lord",
+        "Order": 4,
+        "Job": "Producer",
+        "Department": "Production",
+        "TmdbId": 107446,
+        "CreditId": "5ebf29edd2147c0023b075e6",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/2MagibFHZxky3FmMubyABUnf4lw.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Christopher Miller",
+        "Order": 5,
+        "Job": "Producer",
+        "Department": "Production",
+        "TmdbId": 155267,
+        "CreditId": "5ebf29dd3d3557001ee14b15",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/dr2yCgYtmNmO5vzjk9KNbjTpbzO.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Amy Pascal",
+        "Order": 6,
+        "Job": "Producer",
+        "Department": "Production",
+        "TmdbId": 1425616,
+        "CreditId": "5ebf29c29979d2001f2b1b7c",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/cZ526e4oPN1i44Q0BxYW8nOtrzR.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Andy Weir",
+        "Order": 7,
+        "Job": "Producer",
+        "Department": "Production",
+        "TmdbId": 1352085,
+        "CreditId": "5ebf2a02d2147c0021b026cb",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/e5QyrLpEBwE6qhPERT9aDvRF66x.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Aditya Sood",
+        "Order": 8,
+        "Job": "Producer",
+        "Department": "Production",
+        "TmdbId": 1320090,
+        "CreditId": "5ebf2a2fbc8abc0022c51e97",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/kPumbiCdRWWkmLG5yROqd2plfBK.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Rachel O\u0027Connor",
+        "Order": 9,
+        "Job": "Producer",
+        "Department": "Production",
+        "TmdbId": 1774412,
+        "CreditId": "661776780a517c017dffb7ef",
+        "Images": []
+      },
+      {
+        "Name": "Drew Goddard",
+        "Order": 10,
+        "Job": "Executive Producer",
+        "Department": "Production",
+        "TmdbId": 47506,
+        "CreditId": "6622545f78570e017e1171c5",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/2ff2wbCu0kc61JDHgBiPSqtb3e3.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Ken Kao",
+        "Order": 11,
+        "Job": "Executive Producer",
+        "Department": "Production",
+        "TmdbId": 1024274,
+        "CreditId": "66225472960cde0187a82799",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/2u0LA8H2AIEwtDvyg5hGq4JjMk3.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Patricia Whitcher",
+        "Order": 12,
+        "Job": "Executive Producer",
+        "Department": "Production",
+        "TmdbId": 8703,
+        "CreditId": "674a5602876b3d37bbba661b",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/jiDM8SD5WYtvaZd40Lwu5MJAMzD.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Sarah Esberg",
+        "Order": 13,
+        "Job": "Executive Producer",
+        "Department": "Production",
+        "TmdbId": 1341690,
+        "CreditId": "6622546d7a3c52017d4dbce1",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/yPr9930dI79ygF1AWFehHmxDgV3.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Nikki Baida",
+        "Order": 14,
+        "Job": "Executive Producer",
+        "Department": "Production",
+        "TmdbId": 2143809,
+        "CreditId": "6863e1a0ab754a4b67520d93",
+        "Images": []
+      },
+      {
+        "Name": "Lucy Kitada",
+        "Order": 15,
+        "Job": "Executive Producer",
+        "Department": "Production",
+        "TmdbId": 2415082,
+        "CreditId": "6863e21f3a05dbe4a6d12322",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/cVyzoMSSJfxbICFM29ahZuoFf68.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Will Allegra",
+        "Order": 16,
+        "Job": "Executive Producer",
+        "Department": "Production",
+        "TmdbId": 1724979,
+        "CreditId": "660acad2cabfe4017e2f7619",
+        "Images": []
+      },
+      {
+        "Name": "Greig Fraser",
+        "Order": 17,
+        "Job": "Director of Photography",
+        "Department": "Camera",
+        "TmdbId": 67113,
+        "CreditId": "6657fd14dc8efee4671d119d",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/cwj0aValmr7TGQ2OOQk5CAy1PWf.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Harry Styles",
+        "Order": 18,
+        "Job": "Songs",
+        "Department": "Sound",
+        "TmdbId": 1052109,
+        "CreditId": "6a0a12441db0eb4612db3102",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/9EKjDDD8Naa7dBH76renIjso6CP.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Erik Aadahl",
+        "Order": 19,
+        "Job": "Sound Designer",
+        "Department": "Sound",
+        "TmdbId": 1378695,
+        "CreditId": "695c45c5f6df9d7d3edc2a91",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/c02IxbuxyZR93j0gaothnjw1lsZ.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Erik Aadahl",
+        "Order": 20,
+        "Job": "Supervising Sound Editor",
+        "Department": "Sound",
+        "TmdbId": 1378695,
+        "CreditId": "695c45cbe8b4c24a136bd9f5",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/c02IxbuxyZR93j0gaothnjw1lsZ.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Andy Weir",
+        "Order": 21,
+        "Job": "Novel",
+        "Department": "Writing",
+        "TmdbId": 1352085,
+        "CreditId": "5e7eb0c9e635710012582be8",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/e5QyrLpEBwE6qhPERT9aDvRF66x.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Ethan Van der Ryn",
+        "Order": 22,
+        "Job": "Supervising Sound Editor",
+        "Department": "Sound",
+        "TmdbId": 1378696,
+        "CreditId": "69b9559d821bed9db6960369",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/cee7w7XpNMSXyFv0F7CtwpBtERB.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Ethan Van der Ryn",
+        "Order": 23,
+        "Job": "Sound Designer",
+        "Department": "Sound",
+        "TmdbId": 1378696,
+        "CreditId": "69b955b08c0bdcf6336749b1",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/cee7w7XpNMSXyFv0F7CtwpBtERB.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Daniel Pemberton",
+        "Order": 24,
+        "Job": "Original Music Composer",
+        "Department": "Sound",
+        "TmdbId": 582922,
+        "CreditId": "68862ec54a27e542aed9b1dd",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/dPcjpSoCg1nraqCUD4tvRK3QtHQ.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Daniel Pemberton",
+        "Order": 25,
+        "Job": "Music Producer",
+        "Department": "Sound",
+        "TmdbId": 582922,
+        "CreditId": "6abac2dd8191f023daeefe3a",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/dPcjpSoCg1nraqCUD4tvRK3QtHQ.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Jeanne McCarthy",
+        "Order": 26,
+        "Job": "Casting",
+        "Department": "Production",
+        "TmdbId": 546,
+        "CreditId": "69b96864a971da988a57cb28",
+        "Images": []
+      },
+      {
+        "Name": "Joaquim Dos Santos",
+        "Order": 27,
+        "Job": "Storyboard Artist",
+        "Department": "Art",
+        "TmdbId": 89596,
+        "CreditId": "69bae5044a82b70e1a501a6e",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/w45GPb3cW6TqPw4FxB5Hc6zzAwx.jpg"
+          }
+        ]
+      },
+      {
+        "Name": "Tami Treadwell",
+        "Order": 28,
+        "Job": "ADR Mixer",
+        "Department": "Sound",
+        "TmdbId": 13173,
+        "CreditId": "69bf068d2d460cc7d5d340ea",
+        "Images": []
+      },
+      {
+        "Name": "Kira Roessler",
+        "Order": 29,
+        "Job": "Dialogue Editor",
+        "Department": "Sound",
+        "TmdbId": 1404718,
+        "CreditId": "69bb1a08694d02a74f021301",
+        "Images": [
+          {
+            "CoverType": "Headshot",
+            "Url": "https://image.tmdb.org/t/p/original/mTIgjLUtCxRr8ZP2tmeVIJw4t5O.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  "Studio": "Lord Miller",
+  "YoutubeTrailerId": "NKYea63tQmI",
+  "Certifications": [
+    {
+      "Country": "AR",
+      "Certification": "\u002B13"
+    },
+    {
+      "Country": "AT",
+      "Certification": "10"
+    },
+    {
+      "Country": "AU",
+      "Certification": "M"
+    },
+    {
+      "Country": "BE",
+      "Certification": "12"
+    },
+    {
+      "Country": "BG",
+      "Certification": "C"
+    },
+    {
+      "Country": "BR",
+      "Certification": "14"
+    },
+    {
+      "Country": "CA",
+      "Certification": "PG"
+    },
+    {
+      "Country": "CH",
+      "Certification": "12"
+    },
+    {
+      "Country": "CL",
+      "Certification": "TE\u002B7"
+    },
+    {
+      "Country": "CZ",
+      "Certification": "U"
+    },
+    {
+      "Country": "DE",
+      "Certification": "12"
+    },
+    {
+      "Country": "DK",
+      "Certification": "11"
+    },
+    {
+      "Country": "ES",
+      "Certification": "12"
+    },
+    {
+      "Country": "FI",
+      "Certification": "K-12"
+    },
+    {
+      "Country": "FR",
+      "Certification": "TP"
+    },
+    {
+      "Country": "GB",
+      "Certification": "12A"
+    },
+    {
+      "Country": "GR",
+      "Certification": "K12"
+    },
+    {
+      "Country": "HK",
+      "Certification": "IIA"
+    },
+    {
+      "Country": "HU",
+      "Certification": "12"
+    },
+    {
+      "Country": "ID",
+      "Certification": "13\u002B"
+    },
+    {
+      "Country": "IE",
+      "Certification": "12A"
+    },
+    {
+      "Country": "IL",
+      "Certification": "All"
+    },
+    {
+      "Country": "IN",
+      "Certification": "U/A 13\u002B"
+    },
+    {
+      "Country": "IT",
+      "Certification": "T"
+    },
+    {
+      "Country": "JP",
+      "Certification": "G"
+    },
+    {
+      "Country": "KR",
+      "Certification": "12"
+    },
+    {
+      "Country": "LT",
+      "Certification": "N-13"
+    },
+    {
+      "Country": "MO",
+      "Certification": "B"
+    },
+    {
+      "Country": "MX",
+      "Certification": "B"
+    },
+    {
+      "Country": "NL",
+      "Certification": "12"
+    },
+    {
+      "Country": "NO",
+      "Certification": "12"
+    },
+    {
+      "Country": "NZ",
+      "Certification": "M"
+    },
+    {
+      "Country": "PH",
+      "Certification": "PG"
+    },
+    {
+      "Country": "PL",
+      "Certification": "12"
+    },
+    {
+      "Country": "PR",
+      "Certification": "PG-13"
+    },
+    {
+      "Country": "PT",
+      "Certification": "M/12"
+    },
+    {
+      "Country": "RO",
+      "Certification": "12"
+    },
+    {
+      "Country": "SE",
+      "Certification": "11"
+    },
+    {
+      "Country": "SG",
+      "Certification": "PG"
+    },
+    {
+      "Country": "SK",
+      "Certification": "12"
+    },
+    {
+      "Country": "TH",
+      "Certification": "13"
+    },
+    {
+      "Country": "TR",
+      "Certification": "13A"
+    },
+    {
+      "Country": "TW",
+      "Certification": "6\u002B"
+    },
+    {
+      "Country": "UA",
+      "Certification": "12\u002B"
+    },
+    {
+      "Country": "US",
+      "Certification": "PG-13"
+    },
+    {
+      "Country": "ZA",
+      "Certification": "13"
+    }
+  ],
+  "Status": null,
+  "Collection": null,
+  "Homepage": "https://www.amazon.com/salp/projecthailmary?hhf"
+}
