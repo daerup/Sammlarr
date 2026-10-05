@@ -140,11 +140,19 @@ internal sealed class DetailsFetcher(
 		var now = clock.Now;
 		var answers = known.ToList();
 		var asked = answers.Select(answer => answer.Provider).ToHashSet();
+		var waited = new HashSet<MediaProvider>();
 		while (current.Details.Missing is var missing && !missing.IsEmpty)
 		{
-			if (EnricherChoice.Next(missing, EnrichersLeftToAsk(current, asked, connected), now) is not Some<EnricherCandidate>(var next))
+			var leftToAsk = EnrichersLeftToAsk(current, asked, connected);
+			if (EnricherChoice.Next(missing, leftToAsk, now) is not Some<EnricherCandidate>(var next))
 			{
-				break;
+				if (await WaitForBlockedAsync(missing, leftToAsk, waited, now, cancellationToken) is not Some<DateTimeOffset>(var freeAt))
+				{
+					break;
+				}
+
+				now = freeAt;
+				continue;
 			}
 
 			asked.Add(next.Provider);
@@ -155,6 +163,21 @@ internal sealed class DetailsFetcher(
 		}
 
 		return (current, [.. answers]);
+	}
+
+	private async Task<Optional<DateTimeOffset>> WaitForBlockedAsync(
+		MediaFields missing,
+		IEnumerable<EnricherCandidate> leftToAsk,
+		HashSet<MediaProvider> waited,
+		DateTimeOffset now,
+		CancellationToken cancellationToken
+	)
+	{
+		var blocked = EnricherChoice.WorthWaitingFor(missing, leftToAsk, waited, now);
+		blocked.Apply(candidate => waited.Add(candidate.Provider));
+		var freeAt = blocked.Map(candidate => candidate.Load.FreeAt(now));
+		await freeAt.Match(until => clock.WaitUntilAsync(until, cancellationToken), () => Task.CompletedTask);
+		return freeAt;
 	}
 
 	private async Task<Result<FoundMedia>> AskAsync(EnricherCandidate candidate, MediaIdentity identity, CancellationToken cancellationToken)
@@ -210,17 +233,14 @@ internal sealed class DetailsFetcher(
 		[
 			.. Enrichers
 				.Where(provider => !asked.Contains(provider) && connected.Contains(provider))
-				.Select(provider => current.Identity.Externals.OfProvider(provider).Map(id => CandidateFor(provider, id, current.Details.Ratings)))
+				.Select(provider => current.Identity.Externals.OfProvider(provider).Map(id => CandidateFor(provider, id)))
 				.WhereSome(),
 		];
 	}
 
-	private EnricherCandidate CandidateFor(MediaProvider provider, IExternalMediaId id, MediaRatings ratings)
+	private EnricherCandidate CandidateFor(MediaProvider provider, IExternalMediaId id)
 	{
-		var fills = enricherIndex[provider].Fills;
-		var load = capacity.Of(provider);
-		var unavoidable = provider == MediaProvider.Tmdb && fills.Overlaps(MediaFields.AllRatings) && ratings.All.Count == 0;
-		return new EnricherCandidate(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load);
+		return new EnricherCandidate(provider, id, enricherIndex[provider].Fills, capacity.Of(provider));
 	}
 
 	private sealed record DetailsSource(SearchProvider Search, IReadOnlyList<MediaProvider> Reads)

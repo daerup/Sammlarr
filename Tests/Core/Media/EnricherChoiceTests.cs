@@ -9,6 +9,7 @@ public class EnricherChoiceTests
 {
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 	private static readonly ProviderLoad Idle = new(new None(), 0);
+	private static readonly IReadOnlySet<MediaProvider> NoneWaited = new HashSet<MediaProvider>();
 	private static readonly MediaFields PlexFills = MediaField.Tagline | MediaFields.AllRatings;
 
 	private static readonly MovieDetails Complete = new()
@@ -89,6 +90,73 @@ public class EnricherChoiceTests
 			.And.IsEqualTo(MediaProvider.Tmdb);
 
 	[Test]
+	public async Task WorthWaitingFor_WhenNoneIsBlocked_PicksTheOneThatFillsAMissingField()
+	{
+		var picked = EnricherChoice.WorthWaitingFor(
+			MediaField.Tagline,
+			[Candidate(MediaProvider.Tvdb, MediaField.Poster), Candidate(MediaProvider.Tmdb, MediaField.Tagline)],
+			NoneWaited,
+			Now
+		);
+
+		await Assert.That(picked.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
+	}
+
+	[Test]
+	public async Task WorthWaitingFor_WhenTheBlockEndsWithinTheEnrichWait_PicksIt()
+	{
+		var picked = EnricherChoice.WorthWaitingFor(MediaField.Tagline, [Candidate(MediaProvider.Tmdb, MediaField.Tagline, Blocked(seconds: 5))], NoneWaited, Now);
+
+		await Assert.That(picked.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
+	}
+
+	[Test]
+	public async Task WorthWaitingFor_WhenTheBlockOutlastsTheEnrichWait_IsNone()
+	{
+		await Assert
+			.That(EnricherChoice.WorthWaitingFor(MediaField.Tagline, [Candidate(MediaProvider.Tmdb, MediaField.Tagline, Blocked(seconds: 30))], NoneWaited, Now))
+			.IsNone();
+	}
+
+	[Test]
+	public async Task WorthWaitingFor_WhenItHasNoEnrichWait_IsNoneEvenForAShortBlock()
+	{
+		var unbudgeted = Idle with { BlockedUntil = Some.Of(Now.AddSeconds(1)) };
+
+		await Assert
+			.That(EnricherChoice.WorthWaitingFor(MediaField.Tagline, [Candidate(MediaProvider.Plex, MediaField.Tagline, unbudgeted)], NoneWaited, Now))
+			.IsNone();
+	}
+
+	[Test]
+	public async Task WorthWaitingFor_WhenItWasWaitedForAlready_IsNone()
+	{
+		await Assert
+			.That(
+				EnricherChoice.WorthWaitingFor(
+					MediaField.Tagline,
+					[Candidate(MediaProvider.Tmdb, MediaField.Tagline, Blocked(seconds: 5))],
+					new HashSet<MediaProvider> { MediaProvider.Tmdb },
+					Now
+				)
+			)
+			.IsNone();
+	}
+
+	[Test]
+	public async Task WorthWaitingFor_OfTwoBlocked_PicksTheSoonestFree()
+	{
+		var picked = EnricherChoice.WorthWaitingFor(
+			MediaField.Tagline,
+			[Candidate(MediaProvider.Tmdb, MediaField.Tagline, Blocked(seconds: 10)), Candidate(MediaProvider.Plex, MediaField.Tagline, Blocked(seconds: 3))],
+			NoneWaited,
+			Now
+		);
+
+		await Assert.That(picked.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Plex);
+	}
+
+	[Test]
 	public async Task NeedsRefetch_WhenNobodyLeftToAskCanFillAGap_IsFalse()
 	{
 		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [], Now)).IsFalse();
@@ -167,6 +235,8 @@ public class EnricherChoiceTests
 	{
 		await Assert.That(Candidate(MediaProvider.Plex, MediaFields.AllRatings).CanHelp(MediaFields.Rated([RatingSource.Imdb]), Now)).IsTrue();
 	}
+
+	private static ProviderLoad Blocked(int seconds) => Idle with { BlockedUntil = Some.Of(Now.AddSeconds(seconds)), EnrichWait = TimeSpan.FromSeconds(15) };
 
 	private static CachedDetails Dune(TimeSpan askedAgo)
 	{

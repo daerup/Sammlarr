@@ -80,13 +80,14 @@ public class ProviderHttpExtensionsTests
 	}
 
 	[Test]
-	public async Task AddProviderHttp_ForAProviderWithAMaxWait_ReportsItInItsCapacity()
+	public async Task AddProviderHttp_ForAProviderWithWaitBudgets_ReportsBothInItsCapacity()
 	{
-		using var host = Host(IProviderRateLimitReporter.Mock().Object, maxWaitSeconds: 90);
+		using var host = Host(IProviderRateLimitReporter.Mock().Object, maxWaitSeconds: 90, enrichWaitSeconds: 15);
 
 		var load = host.Services.GetRequiredService<ProviderCapacity>().Of(MediaProvider.Plex);
 
 		await Assert.That(load.MaxWait).IsEqualTo(TimeSpan.FromSeconds(90));
+		await Assert.That(load.EnrichWait).IsEqualTo(TimeSpan.FromSeconds(15));
 	}
 
 	private static HttpRequestMessage Stamped()
@@ -110,7 +111,8 @@ public class ProviderHttpExtensionsTests
 		IProviderRateLimitReporter reporter,
 		HttpStatusCode answer = HttpStatusCode.TooManyRequests,
 		int minimumThroughput = 20,
-		int maxWaitSeconds = 0
+		int maxWaitSeconds = 0,
+		int enrichWaitSeconds = 0
 	)
 	{
 		return new HostBuilder()
@@ -126,6 +128,7 @@ public class ProviderHttpExtensionsTests
 							RetryAttempts = 1,
 							CircuitBreakerMinimumThroughput = minimumThroughput,
 							MaxWaitSeconds = maxWaitSeconds,
+							EnrichWaitSeconds = enrichWaitSeconds,
 						},
 					}
 				);

@@ -35,6 +35,7 @@ public class DetailsFetcherTests
 	private static readonly Error Unavailable = Error.From(new ProviderUnavailableException(MediaProvider.Tmdb));
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 	private static readonly DateTimeOffset LastRefresh = Now.AddDays(-3);
+	private static readonly CancellationToken WaitingThrows = new(canceled: true);
 	private static readonly ProviderAnswer PlexLeftTheRatings = new(MediaProvider.Plex, MediaFields.AllRatings);
 	private static readonly CachedDetails UnratedByPlex = new(Unrated(), LastRefresh, LastRefresh, [PlexLeftTheRatings]);
 
@@ -203,18 +204,53 @@ public class DetailsFetcherTests
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenTheEnricherThatRatesIsRateLimitedAndTheRatingIsMissing_StillAsksItOnce()
+	public async Task FetchAsync_WhenTheEnricherThatFillsAGapIsBlockedWithinItsEnrichWait_WaitsAndAsksIt()
 	{
-		var deps = Dependencies.Create(
-			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Tmdb, () => Now.AddMinutes(1)), 0))
-		);
-		deps.Primary(Unrated() with { Tagline = null });
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
+		var deps = Dependencies.Create(capacity: TmdbBlocked(() => Now.AddMilliseconds(20)));
+		deps.Primary(Complete() with { Tagline = null });
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Tagline = "A dream within a dream." }));
 		await using var buffer = deps.Buffer();
 
-		await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer);
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
+		await Assert.That(fetched.Details.Tagline).IsEqualTo("A dream within a dream.");
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenTheBlockOutlastsTheEnrichWait_SkipsTheEnricherEvenForAMissingRating()
+	{
+		var deps = Dependencies.Create(capacity: TmdbBlocked(() => Now.AddMinutes(1)));
+		deps.Primary(Unrated());
+		await using var buffer = deps.Buffer();
+
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer, WaitingThrows));
+
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhileWaitingForABlockedEnricher_HonoursCancellation()
+	{
+		var deps = Dependencies.Create(capacity: TmdbBlocked(() => Now.AddMilliseconds(20)));
+		deps.Primary(Complete() with { Tagline = null });
+		await using var buffer = deps.Buffer();
+
+		await Assert.That(async () => await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer, WaitingThrows)).Throws<OperationCanceledException>();
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenTheBlockIsExtendedWhileWaiting_WaitsForTheEnricherOnlyOnce()
+	{
+		var pushes = 0;
+		var deps = Dependencies.Create(capacity: TmdbBlocked(() => Now.AddMilliseconds(20 + pushes++)));
+		deps.Primary(Complete() with { Tagline = null });
+		await using var buffer = deps.Buffer();
+
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
+
+		await Assert.That(pushes).IsEqualTo(2);
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
@@ -243,20 +279,6 @@ public class DetailsFetcherTests
 
 		await Assert.That(fetched.Details.Ratings.Of(RatingSource.Tmdb).Map(rating => rating.Votes)).IsSome().And.IsEqualTo(500);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
-	}
-
-	[Test]
-	public async Task FetchAsync_WhenTheTitleHasARatingAndTheEnricherIsRateLimited_SkipsItForTheOtherSources()
-	{
-		var deps = Dependencies.Create(
-			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Tmdb, () => Now.AddMinutes(1)), 0))
-		);
-		deps.Primary(Complete() with { Ratings = TmdbOnly });
-		await using var buffer = deps.Buffer();
-
-		await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer);
-
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
@@ -419,16 +441,16 @@ public class DetailsFetcherTests
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenTmdbHasNoRatingAndPlexIsRateLimited_LeavesPlexAlone()
+	public async Task FetchAsync_WhenPlexIsBrieflyBlockedButHasNoEnrichWait_LeavesItAlone()
 	{
 		var deps = Dependencies.Create(
 			search: SearchProvider.Tmdb,
-			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Plex, () => Now.AddMinutes(1)), 0))
+			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Plex, () => Now.AddMilliseconds(20)), 0))
 		);
 		deps.TmdbSearch.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia(Identity.Externals, Unrated())));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer, WaitingThrows));
 
 		await Assert.That(fetched.Details.Missing).IsEqualTo(MediaFields.AllRatings);
 		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -473,6 +495,11 @@ public class DetailsFetcherTests
 	{
 		var matched = await Assert.That(result).IsSuccess();
 		return matched!;
+	}
+
+	private static IProviderCapacity TmdbBlocked(Func<DateTimeOffset> until)
+	{
+		return TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Tmdb, until), 0, EnrichWait: TimeSpan.FromSeconds(1)));
 	}
 
 	private static Result<FoundMedia> Answer(MediaDetails details)

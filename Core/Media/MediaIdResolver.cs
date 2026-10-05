@@ -212,13 +212,12 @@ internal sealed class MediaIdResolver(
 				continue;
 			}
 
-			var until = load.BlockedUntil.GetValueOr(now);
-			if (waited.Contains(provider) || until - now > load.MaxWait)
+			if (waited.Contains(provider) || !load.FreesWithin(now, load.MaxWait))
 			{
 				return false;
 			}
 
-			blocked[provider] = until;
+			blocked[provider] = load.FreeAt(now);
 		}
 
 		if (blocked.Count == 0)
@@ -228,7 +227,7 @@ internal sealed class MediaIdResolver(
 
 		waited.UnionWith(blocked.Keys);
 		var freeAt = blocked.Values.Max();
-		await Task.Delay(freeAt, clock, cancellationToken);
+		await clock.WaitUntilAsync(freeAt, cancellationToken);
 		return blocked.Keys.All(provider => capacity.Of(provider).IsOpen(freeAt));
 	}
 
@@ -251,18 +250,6 @@ internal sealed class MediaIdResolver(
 		{
 			var ids = known.Select(id => $"{id}").Order(StringComparer.Ordinal);
 			return $"{hints.MediaType}:{hints.Year}:{hints.Title}|{string.Join(",", ids)}";
-		}
-	}
-}
-
-file static class TaskExtensions
-{
-	extension(Task)
-	{
-		public static Task Delay(DateTimeOffset until, IDateTimeProvider clock, CancellationToken cancellationToken)
-		{
-			var remaining = until - clock.Now;
-			return Task.Delay(remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero, cancellationToken);
 		}
 	}
 }
