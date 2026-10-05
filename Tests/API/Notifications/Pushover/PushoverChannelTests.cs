@@ -181,7 +181,11 @@ public class PushoverChannelTests
 	}
 
 	private static PushoverChannel Channel(HttpMessageHandler handler) =>
-		new(new PushoverClient(new HttpClient(handler)), new FluidTemplateRenderer(), NullLogger<PushoverChannel>.Instance);
+		new(
+			new PushoverClient(new HttpClient(handler) { BaseAddress = new Uri("https://api.pushover.net/1/") }),
+			new FluidTemplateRenderer(),
+			NullLogger<PushoverChannel>.Instance
+		);
 
 	private static NotificationContext Context(
 		NotificationEventType type = NotificationEventType.WantlistSyncCompleted,
