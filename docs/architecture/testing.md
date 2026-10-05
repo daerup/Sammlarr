@@ -22,11 +22,11 @@ snapshots need the native runner).
 Rule of thumb: wiring more than one or two `.Mock()`s just to construct the subject means it belongs in `Tests/Integration` as a harness scenario, not a unit
 test.
 
-Current suite: **2770** non-E2E tests plus **158** E2E (17 of them on the self-hosted stacks).
+Current suite: **2783** non-E2E tests plus **159** E2E (17 of them on the self-hosted stacks, and the staging smoke test, skipped by default).
 
 | Domain | Shared | Core | API | DB | Architecture | Roslyn | Integration | UI | Web |
 |--------|--------|------|-----|----|--------------|------------|-------------|----|-----|
-| 245    | 179    | 345  | 279 | 47 | 44           | 98         | 562         | 943 | 28  |
+| 245    | 179    | 345  | 280 | 47 | 44           | 98         | 571         | 946 | 28  |
 
 ## Running
 
@@ -38,7 +38,7 @@ dotnet run --project Tests/Core --no-build --treenode-filter "/*/*/FilterEvaluat
 dotnet run --project Tests/Domain --no-build -- --coverage --coverage-output-format cobertura
 ```
 
-The non-E2E tiers run in roughly 20 seconds combined; E2E takes about seven minutes, because it boots real application stacks and then runs the self-hosted
+The non-E2E tiers run in roughly 20 seconds combined; E2E takes about nine minutes, because it boots real application stacks and then runs the self-hosted
 batch with its Radarr and Sonarr containers. Never use coverlet: it is VSTest-only and incompatible with MTP.
 
 ## The E2E tier
@@ -115,12 +115,69 @@ What a breaking bump has looked like so far:
 
 A bump that only rebuilds the image (Radarr `6.4.4.10685-ls318` to `-ls319`, tried 2026-10-05) passes the self-hosted tests unchanged.
 
+## Staging
+
+Staging is a long-lived, seeded Sammlarr for clicking around by hand, next to the dev session: the `staging` launch profile on the same
+`AppHost`, running Sammlarr from the image `Web/Dockerfile` builds, with real Radarr and Sonarr already connected.
+
+```powershell
+dotnet user-secrets set Parameters:tmdb-api-key <your key> --project AppHost      # once; Parameters:mdblist-api-key is optional
+dotnet run --project AppHost -c Staging --launch-profile staging
+```
+
+The `Staging` configuration builds into `bin\Staging`, so a running staging session never locks the dev build, and dev and staging can run
+at the same time. The first start pulls the images and builds Sammlarr's (about half a minute once the layers are cached).
+
+| Resource | Where | Notes |
+|----------|-------|-------|
+| Sammlarr | http://staging.localhost:6789 | its own host name, so its sign-in cookie never replaces the dev one on `localhost` |
+| Dashboard | http://localhost:15224 | logs, traces and the commands below; anonymous, like everything here only on 127.0.0.1 |
+| Radarr / Sonarr | http://localhost:7879, http://localhost:8990 | persistent containers, key `0123456789abcdef0123456789abcdef` |
+| Catcher | http://localhost:6790 | every webhook and Pushover message staging sends (`tarampampam/webhook-tester`) |
+| WireMock | http://localhost:6791/__admin/requests | persistent like Radarr and Sonarr, so their indexer never goes away; the Newznab indexer, and any Plex call that got blocked |
+
+Every port is published on 127.0.0.1 only.
+
+**Scenarios.** The `seed` resource (`StagingSeeder`, built on the `Seeding` library) prepares Radarr and Sonarr (root folder, a blackhole
+download client, the Newznab indexer, a small library: titles on disk, monitored titles without files, and The Martian tagged for `admin`
+so the pull-back path shows; each step skips what is already there) and, unless the database carries the `.seeded` marker of a finished seed, seeds a scenario:
+
+| Scenario | State |
+|----------|-------|
+| `Configured` (default) | `admin` / `staging-admin-passphrase` and `member` / `staging-member-passphrase`, setup finished, the wantlist on Radarr + Sonarr, both people's TMDB key (and the MDBList key when `Parameters:mdblist-api-key` is set), two manual MDBList feeds (switched off without that key), Project Hail Mary and Breaking Bad on the admin's wantlist with a sync queued, a webhook and a Pushover target pointing at the catcher |
+| `Fresh` | migrations only: every page goes to `/setup`, the setup code is in Sammlarr's log |
+
+Appending `-- --StagingScenario=Fresh` to the run command picks the other one for a new data directory. The seeded feeds are manual because TickerQ only schedules inside a
+running Sammlarr; switching one to a schedule in staging schedules it as usual.
+
+**Commands** on the `sammlarr` resource, from the dashboard (or `aspire resource sammlarr <command>` while staging is the only AppHost running), each confirming first, one at a time:
+`reset-configured` (Reset to set up) and `reset-fresh` (Reset to fresh install) stop Sammlarr, Radarr and Sonarr, wipe their data, run the
+seeder again and start everything; `update-image` (Update to current code) rebuilds the image from the working tree and restarts Sammlarr.
+
+**What is real and what is caught.** TMDB, MDBList and Wikidata are real (with your keys). Radarr and Sonarr use their own metadata
+services. Plex points at WireMock (`/plex-blocked/<url>`), webhooks and Pushover (`Pushover:BaseUrl`) at the catcher, and Sammlarr's
+`HTTP_PROXY`/`HTTPS_PROXY` point at a dead port with a `NO_PROXY` allowlist, so a call to any other host fails. Searches go to WireMock's
+Newznab indexer, which answers every title search with one release; the AppHost's fake downloader turns each grabbed `.nzb` into
+`downloads/<app>/watch/<release>/<release>.mkv` from `AppHost/Staging/stub.mkv`, and Radarr imports it about a minute and a half later. Sonarr
+searches a new show season by season, and a one-file season pack stays in its queue unimported.
+
+**Data** lives under `%LOCALAPPDATA%\Sammlarr\staging` (`-- --StagingRoot=<dir>` moves it) and survives restarts; it is never `Web/sammlarr.db` or
+`Web/dp-keys`. Radarr, Sonarr and WireMock keep running after the session stops, as `sammlarr-staging-radarr`, `-sonarr` and
+`-wiremock`. `aspire stop --force` does not remove them for a session started with `dotnet run`;
+`docker rm -f sammlarr-staging-radarr sammlarr-staging-sonarr sammlarr-staging-wiremock` does, and their data stays in the data directory.
+
+`Tests/E2E/Staging/StagingSmokeTests` boots the staging profile on a temporary data directory, with session containers on free ports, and
+signs in as `admin`. It is skipped unless `E2E_STAGING=true`: it builds the image and needs the internet (Radarr's and Sonarr's metadata
+services), and in two of three full runs on 2026-10-05 DCP's image build ran past the ten-minute boot budget. With the variable set it runs
+alone (`[NotInParallel]`).
+
 ## Environment variables
 
 | Variable                 | Effect                                                                         |
 |--------------------------|--------------------------------------------------------------------------------|
 | `E2E_LIVE=true`          | Live record mode against the real providers; needs secrets and forces one main-pool stack. The self-hosted pool keeps its two stacks, keeps replaying and records what it can fetch |
 | `E2E_HEADED=true`        | Headed browser with slow motion, for watching a test run                       |
+| `E2E_STAGING=true`       | Run `StagingSmokeTests`, which boots the staging profile (builds the image, needs the internet) |
 | `E2E_PRUNE=true`         | Delete fixtures the live run did not capture. Opt-in on purpose: a filtered run only touches some endpoints, so pruning would delete the rest |
 | `E2E_AUDIT=true`         | Dump the main pool's served and unmatched request URLs to the temp directory   |
 | `E2E_RESOURCE_LOG=<dir>` | Write each stack's application log to `<dir>/stack-<n>.log` (`self-hosted-<n>.log` for the self-hosted pool) |
