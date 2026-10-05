@@ -32,7 +32,6 @@ public class DemoRenderTests : BunitContext
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(new DateTimeOffset(2026, 10, 4, 12, 0, 0, TimeSpan.Zero));
 		Services.AddSingleton(clock.Object);
-		Services.AddSingleton(IRottenTomatoesPages.Mock().Object);
 		Services.AddSingleton(IUserManagementService.Mock().Object);
 		Services.AddSingleton(IMediaService.Mock().Object);
 		Services.AddSingleton(IWantlistService.Mock().Object);

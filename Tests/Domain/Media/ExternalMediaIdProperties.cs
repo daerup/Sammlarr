@@ -53,6 +53,7 @@ public class ExternalMediaIdProperties
 		{
 			MediaProvider.Tmdb => TmdbId.From(value, type),
 			MediaProvider.Imdb => ImdbId.From(value, type),
+			MediaProvider.RottenTomatoes => RottenTomatoesId.From(value, type),
 			MediaProvider.Tvdb => TvdbId.From(value, type),
 			MediaProvider.Plex => PlexId.From(value, type),
 			MediaProvider.Mdblist => MdblistId.From(value, type),

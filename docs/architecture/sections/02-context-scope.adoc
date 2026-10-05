@@ -16,7 +16,7 @@ sync with Plex.
 | Plex | OAuth identity, search results, ratings (IMDb, Rotten Tomatoes, a copy of TMDB's), the Plex watchlist | Wantlist additions and removals (push)
 | TMDB | Trending titles, ratings, metadata, id conversion | (none, read only)
 | MDBList | The contents of a list, for feeds | (none, read only)
-| IMDb, TheTVDB | (none) | (none; identifier namespaces only, see below)
+| IMDb, Rotten Tomatoes, TheTVDB | (none) | (none; identifier namespaces only, see below)
 |===
 
 [mermaid]
@@ -50,7 +50,7 @@ across providers.
 | Plex | Plex OAuth (PIN flow) for sign-in; HTTPS/JSON for search and the wantlist; additions and removals via HTTP `PUT` to the Plex watchlist endpoints | Read + Write
 | TMDB | REST API, authenticated with an API key | Read only
 | MDBList | REST API with an API key; list entries are paged and resolved to media | Read only
-| IMDb, TheTVDB | No HTTP client; `ImdbId` / `TvdbId` value objects reached through Plex or TMDB lookups | Reference only
+| IMDb, Rotten Tomatoes, TheTVDB | No HTTP client of their own; `ImdbId` / `TvdbId` value objects reached through Plex or TMDB lookups, `RottenTomatoesId` (a page path) through Wikidata | Reference only
 |===
 
 Provider credentials and API keys are held as `[Sensitive]` secrets and redacted from logs.

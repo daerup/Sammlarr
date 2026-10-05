@@ -21,6 +21,7 @@ internal static class MediaIdConversionExtensions
 		{
 			MediaProvider.Tmdb => TmdbId.From(externalId, mediaType),
 			MediaProvider.Imdb => ImdbId.From(externalId, mediaType),
+			MediaProvider.RottenTomatoes => RottenTomatoesId.From(externalId, mediaType),
 			MediaProvider.Tvdb => TvdbId.From(externalId, mediaType),
 			MediaProvider.Plex => PlexId.From(externalId, mediaType),
 			MediaProvider.Mdblist => MdblistId.From(externalId, mediaType),

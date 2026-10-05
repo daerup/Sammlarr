@@ -84,11 +84,12 @@ falls back to every available source, so disconnecting the provider behind a kep
 another provider still supplies ratings. Availability is read from the stored keys and accounts, never from a live
 check, so a provider that is briefly unreachable still counts.
 
-Rotten Tomatoes page:: Where a breakdown's Rotten Tomatoes rows link (`IRottenTomatoesPages`): Wikidata's
-"Rotten Tomatoes ID" (P1258) found by the title's IMDb id (P345), asked the first time a breakdown with a Rotten
-Tomatoes rating opens. The answer, a path or none, is kept on the title's Rotten Tomatoes rating rows (and carried over
-when its ratings are rewritten), so a title is asked once while its details stay cached; a failed lookup is not kept and
-is asked again. Without a path the rows link to Rotten Tomatoes' search.
+Rotten Tomatoes page:: Where a breakdown's Rotten Tomatoes rows link: the title's `RottenTomatoesId` (a path such as
+`m/dune_part_two`), an external id like any other in `ExternalMediaIds`. A breakdown with a Rotten Tomatoes rating whose title has
+no such id yet asks `IMediaService.FindIdAsync` for it the first time it opens; the resolver finds it through `WikidataIdConverter`
+(Wikidata's "Rotten Tomatoes ID", P1258, by the title's IMDb id, P345, which TMDB supplies first when the title lacks it)
+and stores it with the title's other ids. "No page" is remembered by the resolver's one-hour miss cache; a failed lookup
+is not. A page Wikidata gives two titles stays with the first; the second finds none. Without an id the rows link to Rotten Tomatoes' search.
 
 === Identify and details
 
@@ -106,11 +107,13 @@ match them to the right title, mainly the Plex title search.
 
 Id converter:: An `IExternalIdConverter`: one provider's id lookups and the `LookUpAsync` that answers them.
 `MediaIdResolver` chains the lookups toward the target (the provider the active sink addresses the title's
-type by). Plex looks up a Plex id and searches by title, confirming each hit by id; TMDB looks up a TMDB id's
-detail and finds a TMDB id by an IMDb or TheTVDB id.
+type by, or the provider `FindIdAsync` asks for). Plex looks up a Plex id and searches by title, confirming each hit
+by id; TMDB looks up a TMDB id's detail and finds a TMDB id by an IMDb or TheTVDB id; Wikidata finds a Rotten Tomatoes
+id by an IMDb id.
 
 Id lookup:: An `IdLookup`: what one provider call accepts (`ById`: some providers' ids; `ByHints`: the title
-hints), which providers' ids its answer may yield, and its cost in calls. The planner turns each into hops; a path
+hints), which providers' ids its answer may yield, its cost in calls, and for a `ById` whether its answer carries
+title hints (`GivesHints`; Wikidata's does not, so no path asks it for hints). The planner turns each into hops; a path
 through a blocked provider waits for it, capped by its `MaxWait`, or gives up.
 
 Enricher:: An `IDetailsEnricher`, keyed by provider, that fills missing details fields after the
@@ -178,7 +181,7 @@ Blocklist:: Titles excluded from curation so they never enter a list.
 
 === Providers and wiring
 
-Provider:: An external service (TMDB, MDBList, Plex, Radarr, Sonarr) or an id namespace (IMDb, TheTVDB),
+Provider:: An external service (TMDB, MDBList, Plex, Radarr, Sonarr) or an id namespace (IMDb, Rotten Tomatoes, TheTVDB),
 modelled as a `MediaProvider` enum value.
 
 Capability:: What a provider can do: `Search`, `Trending`, `Feed`, `ApiKey`, `Auth`, `Artwork` or

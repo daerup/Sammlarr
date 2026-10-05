@@ -2,32 +2,41 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using Contracts.Ratings;
+using API.Http;
+using Contracts.Media.Conversions;
 using Domain.Media;
-using Polly.CircuitBreaker;
-using Polly.Timeout;
+using Domain.Media.Conversions;
+using Domain.Providers;
 
 namespace API.Wikidata;
 
-internal sealed partial class WikidataClient(HttpClient http) : IRottenTomatoesPageFinder
+internal sealed partial class WikidataIdConverter(HttpClient http) : IExternalIdConverter
 {
 	private const string Accept = "application/sparql-results+json";
 
-	public async Task<Result<Optional<string>>> FindPathAsync(ImdbId imdb, CancellationToken cancellationToken = default)
+	private static readonly ById ByImdb = new(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.RottenTomatoes], Cost: 1, GivesHints: false);
+
+	public MediaProvider Provider => MediaProvider.RottenTomatoes;
+
+	public IReadOnlyList<IdLookup> Lookups { get; } = [ByImdb];
+
+	public async Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	{
+		return request switch
+		{
+			ByIdRequest(var lookup, ImdbId imdb) when lookup == ByImdb => await PageAsync(imdb, cancellationToken),
+			_ => Error.From("Wikidata does not offer this lookup."),
+		};
+	}
+
+	private async Task<Result<IdLookupResult>> PageAsync(ImdbId imdb, CancellationToken cancellationToken)
 	{
 		if (!ImdbPattern().IsMatch(imdb.Value))
 		{
 			return Error.From($"'{imdb.Value}' is not an IMDb title id.");
 		}
 
-		try
-		{
-			return await AskAsync(imdb.Value, cancellationToken);
-		}
-		catch (Exception ex) when (ex is HttpRequestException or BrokenCircuitException or TimeoutRejectedException or JsonException)
-		{
-			return Error.From($"Wikidata could not be asked for {imdb.Value}: {ex.Message}");
-		}
+		return await AskAsync(imdb.Value, cancellationToken).Map(path => new IdLookupResult(Ids(path, imdb.Type), new None()));
 	}
 
 	private async Task<Result<Optional<string>>> AskAsync(string imdb, CancellationToken cancellationToken)
@@ -37,7 +46,7 @@ internal sealed partial class WikidataClient(HttpClient http) : IRottenTomatoesP
 		using var response = await http.SendAsync(request, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
-			return Error.From($"Wikidata answered {(int)response.StatusCode} for {imdb}.");
+			return response.StatusCode.Unanswered(MediaProvider.RottenTomatoes, $"Wikidata answered {(int)response.StatusCode} for {imdb}.");
 		}
 
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -45,15 +54,16 @@ internal sealed partial class WikidataClient(HttpClient http) : IRottenTomatoesP
 		return Success.Of(PathOf(answer?.Results?.Bindings ?? []));
 	}
 
+	private static IReadOnlyList<IExternalMediaId> Ids(Optional<string> path, MediaType type)
+	{
+		return path.Map(found => (IReadOnlyList<IExternalMediaId>)[RottenTomatoesId.From(found, type)]).GetValueOr([]);
+	}
+
 	private static string Query(string imdb) => $$"""SELECT ?path WHERE { ?item wdt:P345 "{{imdb}}" ; wdt:P1258 ?path . }""";
 
 	private static Optional<string> PathOf(IEnumerable<SparqlBinding> bindings)
 	{
-		return bindings
-			.Select(binding => binding.Path?.Value ?? string.Empty)
-			.Select(path => string.Join('/', path.Split('/').Take(2)))
-			.Order(StringComparer.Ordinal)
-			.FirstOrNone(PagePattern().IsMatch);
+		return bindings.Select(binding => binding.Path?.Value ?? string.Empty).Order(StringComparer.Ordinal).FirstOrNone(PagePattern().IsMatch);
 	}
 
 	[GeneratedRegex(@"^tt[0-9]+\z")]

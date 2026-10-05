@@ -94,6 +94,17 @@ public readonly record struct MdblistId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
+public readonly record struct RottenTomatoesId : IExternalMediaId
+{
+	public MediaProvider Source => MediaProvider.RottenTomatoes;
+	public string Value { get; private init; }
+	public MediaType Type { get; private init; }
+
+	public static RottenTomatoesId From(string path, MediaType type) => new() { Value = path, Type = type };
+
+	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
+}
+
 public readonly record struct RadarrId : IExternalMediaId
 {
 	public MediaProvider Source => MediaProvider.Radarr;

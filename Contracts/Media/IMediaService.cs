@@ -26,6 +26,8 @@ public interface IMediaService
 	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<MediaId>> EnsureSinkIdsAsync(IEnumerable<MediaId> ids, SinkKind sink, CancellationToken cancellationToken = default);
+
+	Task<Optional<IExternalMediaId>> FindIdAsync(MediaId id, MediaProvider provider, CancellationToken cancellationToken = default);
 }
 
 public record IdentifyRequest(IReadOnlyList<IExternalMediaId> Candidates, Optional<IdentifyHints> Hints)

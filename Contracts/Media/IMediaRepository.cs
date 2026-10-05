@@ -25,8 +25,4 @@ public interface IMediaRepository
 		MediaProvider source,
 		CancellationToken cancellationToken = default
 	);
-
-	Task<Optional<RottenTomatoesAnswer>> FindRottenTomatoesAnswerAsync(MediaId id, CancellationToken cancellationToken = default);
-
-	Task StoreRottenTomatoesAnswerAsync(MediaId id, Optional<string> path, DateTimeOffset askedAt, CancellationToken cancellationToken = default);
 }

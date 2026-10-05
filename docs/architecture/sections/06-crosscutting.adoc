@@ -237,7 +237,9 @@ already has to the target, and orders them: the open paths cheapest first, weigh
 provider is, then the paths through a blocked provider, the soonest free first. `MediaIdResolver` tries them in that
 order. Plex looks up a Plex id and searches by the hints;
 TMDB looks up a TMDB id's detail (its appended `external_ids` carry the IMDb and TheTVDB ids) and finds a TMDB id
-by an IMDb or TheTVDB id, so a title that carries a TMDB, IMDb or TheTVDB id can resolve without Plex. A TMDB answer
+by an IMDb or TheTVDB id, so a title that carries a TMDB, IMDb or TheTVDB id can resolve without Plex; Wikidata finds
+a Rotten Tomatoes id by an IMDb id, a `ById` lookup without hints (`GivesHints` false), so it never stands in for a
+search's hints and only a request for a Rotten Tomatoes id reaches it. A TMDB answer
 also carries the original title and its release year, which a following Plex search uses; Plex keeps a search's hits
 for 10 minutes per hints (title, year and type), shared by every user, so equal hints are searched once. Within one
 resolution each lookup is asked once per input, so paths that share a call make it once. Before every hop the resolver
