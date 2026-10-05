@@ -17,6 +17,12 @@ public class PlexApiTests
 	private const string PlexBaseUrl = "https://plex.tv";
 
 	[Test]
+	public async Task Fills_RateWithEverySourcePlexCarries()
+	{
+		await Assert.That(CreatePlexApi("{}").Fills.Ratings).IsEquivalentTo(Enum.GetValues<RatingSource>());
+	}
+
+	[Test]
 	public async Task SearchAsync_ForAPlexHit_ReturnsItWithItsPlexId()
 	{
 		var faker = new Faker();

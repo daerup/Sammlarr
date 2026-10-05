@@ -1,11 +1,12 @@
 using Contracts.Media;
 using Domain.Media;
+using Domain.Providers;
 
 namespace API.Tmdb;
 
 internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDetailsEnricher
 {
-	public MediaField Fills =>
+	public MediaFields Fills { get; } =
 		MediaField.Title
 		| MediaField.Tagline
 		| MediaField.Summary
@@ -17,7 +18,7 @@ internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDeta
 		| MediaField.Seasons
 		| MediaField.Episodes
 		| MediaField.RuntimePerEpisode
-		| MediaField.TmdbRating;
+		| MediaFields.Rated(MediaProvider.Tmdb.SuppliedRatingSources());
 
 	public Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{

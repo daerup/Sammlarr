@@ -87,15 +87,6 @@ public class MediaRatingTests
 	}
 
 	[Test]
-	public async Task Field_ForEverySource_IsOneOfTheRatingFields()
-	{
-		var fields = Enum.GetValues<RatingSource>().Select(source => source.Field).ToList();
-
-		await Assert.That(fields.Distinct().Count()).IsEqualTo(fields.Count);
-		await Assert.That(fields.Aggregate(MediaField.None, (all, field) => all | field)).IsEqualTo(MediaField.Ratings);
-	}
-
-	[Test]
 	public async Task SuppliedBy_NamesEveryProviderThatSuppliesTheSource()
 	{
 		await Assert.That(RatingSource.Tmdb.SuppliedBy()).IsEquivalentTo([MediaProvider.Tmdb, MediaProvider.Plex]);

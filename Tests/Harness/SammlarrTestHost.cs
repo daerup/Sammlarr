@@ -190,7 +190,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				VoteCount = 100,
 			},
 		];
-		details.ConfirmedAbsent = MediaField.Ratings.Except(MediaField.TmdbRating);
+		details.ConfirmedAbsent = MediaFields.AllRatings.Except(MediaFields.Rated([RatingSource.Tmdb]));
 		details.FetchedAt = fetched ?? _clock.Now;
 		return details;
 	}

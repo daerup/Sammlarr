@@ -283,7 +283,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private static async Task AssertNoneComplete(IReadOnlyList<MediaMatchResult> items)
 	{
-		await Assert.That(items.All(item => !(item is MatchedMedia matched && matched.Details.Missing is MediaField.None))).IsTrue();
+		await Assert.That(items.All(item => !(item is MatchedMedia matched && matched.Details.Missing.IsEmpty))).IsTrue();
 	}
 
 	private async Task AssertExternalIdStored(MediaId mediaId, MediaProvider provider, string id)

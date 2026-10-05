@@ -70,5 +70,15 @@ public class CachedDetailsTests
 		await Assert.That(cached.IsFresh(Now)).IsTrue();
 	}
 
-	private static CachedDetails Cached(MediaDetails details, TimeSpan age, MediaField confirmedAbsent) => new(details, Now - age, confirmedAbsent);
+	[Test]
+	public async Task IsFresh_PastTheCooldown_IsFreshOnlyWhileEveryMissingRatingSourceIsConfirmed()
+	{
+		var details = MediaFakes.CompleteMovieDetails() with { Ratings = MediaRatings.From([new TmdbRating(7.4f, Some.Of(900))]) };
+		var everyGap = MediaFields.Rated([RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience]);
+
+		await Assert.That(Cached(details, TimeSpan.FromHours(2), everyGap).IsFresh(Now)).IsTrue();
+		await Assert.That(Cached(details, TimeSpan.FromHours(2), MediaFields.Rated([RatingSource.Imdb])).IsFresh(Now)).IsFalse();
+	}
+
+	private static CachedDetails Cached(MediaDetails details, TimeSpan age, MediaFields confirmedAbsent) => new(details, Now - age, confirmedAbsent);
 }

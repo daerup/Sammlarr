@@ -105,7 +105,7 @@ _state = await ApiKeyFactory
 | keep the successes of a stream | `await foreach (var media in stream.WhereSuccessAwait())` | `if (result is Success<T>(var v))` inside the loop
 | a value or a fallback | `+loaded.Match(matched => (MediaMatchResult)matched, _ => request.Unmatched())+` | `loaded is Success<MatchedMedia>(var matched) ? matched : …`
 | keep a success that passes a test | `+handoff.ToOptional().When(match => match.Stored.IsNone())+` | `is Success<IdentifyHandoff>(var match) && …`
-| read the cause of an error | `+error.CausedBy<ProviderUnavailableException>().Match(next.Fills, MediaField.None)+` | `Error { Exception: ProviderUnavailableException }`
+| read the cause of an error | `+error.CausedBy<ProviderUnavailableException>().Match(next.Fills, MediaFields.None)+` | `Error { Exception: ProviderUnavailableException }`
 | chain a fallible step | `.Map(next)` (flattens a `Result`-returning step), `.MapError(…)` | a guard that returns the error by hand
 | leave the monad at a boundary | `+.GetOrThrow(error => new …Exception(error.Reason))+`, `.ToOptional()` | `is Error e ? throw … : …`
 |===
@@ -209,7 +209,7 @@ whose `Fills` cover the most missing fields, the least busy first, among those t
 no open enricher can fill what is still missing. An enricher that was skipped because it was blocked, or answered as unavailable,
 leaves its fields unconfirmed, so the title is refetched after the 1-hour cooldown. Ratings are fields per source:
 `MediaCompleteness` counts each `RatingSource` (TMDB, IMDb, Rotten Tomatoes critics and audience) the title has no
-rating from as a missing field (`MediaField.TmdbRating` and its siblings, together `MediaField.Ratings`). A rating
+rating from as a missing field: `MediaFields` holds the `MediaField` detail flags and a set of `RatingSource`, and a provider's sources enter it through `MediaFields.Rated`, so a provider's rating fills come from its `[SuppliedBy]` sources. A rating
 from a source that publishes votes (TMDB, IMDb: `RatingSource.PublishesVotes`) still counts as missing while it has
 none, so Plex's copy of TMDB's rating, which carries no votes, leaves TMDB asked for its own. Each rating is its own type behind
 `IMediaRating` (`TmdbRating`, `ImdbRating`, `RottenTomatoesCriticsRating`, `RottenTomatoesAudienceRating`), keeping its

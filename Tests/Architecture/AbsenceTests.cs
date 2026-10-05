@@ -15,7 +15,7 @@ internal static class Edges
 
 	private static readonly string[] Telemetry = ["Observability.Diagnostics", "DB.Observability"];
 
-	private static readonly string[] MediaDetails = ["MediaDetails", "MovieDetails", "ShowDetails", "MediaFields"];
+	private static readonly string[] MediaDetails = ["MediaDetails", "MovieDetails", "ShowDetails", "FieldChecks"];
 
 	private static readonly string[] MediaDetailsFeeders = ["ProviderValues", "TmdbArtwork", "TmdbRatings"];
 

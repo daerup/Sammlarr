@@ -14,7 +14,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 {
 	private const int SearchLimit = 30;
 
-	public MediaField Fills =>
+	public MediaFields Fills { get; } =
 		MediaField.Title
 		| MediaField.Tagline
 		| MediaField.Summary
@@ -26,7 +26,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		| MediaField.Seasons
 		| MediaField.Episodes
 		| MediaField.RuntimePerEpisode
-		| MediaField.Ratings;
+		| MediaFields.Rated(MediaProvider.Plex.SuppliedRatingSources());
 
 	private readonly ConcurrentDictionary<string, Lazy<Task<Result<FoundMedia>>>> _byRatingKey = new();
 

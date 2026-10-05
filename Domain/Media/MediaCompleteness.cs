@@ -1,4 +1,4 @@
-using static Domain.Media.MediaFields;
+using static Domain.Media.FieldChecks;
 
 namespace Domain.Media;
 
@@ -6,7 +6,7 @@ public static class MediaCompleteness
 {
 	extension(MediaDetails details)
 	{
-		public MediaField Missing
+		public MediaFields Missing
 		{
 			get
 			{
@@ -32,10 +32,9 @@ public static class MediaCompleteness
 
 	private static MediaField Gap(bool missing, MediaField field) => missing ? field : MediaField.None;
 
-	private static MediaField RatingGaps(MediaRatings rating)
+	private static MediaFields RatingGaps(MediaRatings rating)
 	{
-		return Enum.GetValues<RatingSource>()
-			.Aggregate(MediaField.None, (gaps, source) => gaps | rating.Of(source).When(Complete).Match(_ => MediaField.None, () => source.Field));
+		return MediaFields.Rated(Enum.GetValues<RatingSource>().Where(source => rating.Of(source).When(Complete).IsNone()));
 	}
 
 	private static bool Complete(IMediaRating rating) => rating.Votes.IsSome() || !rating.Source.PublishesVotes;

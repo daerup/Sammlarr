@@ -11,6 +11,7 @@ internal sealed class MediaDetailsRowConfiguration : IModelConfiguration
 		{
 			builder.HasOne(m => m.Media).WithOne(media => media.Details).HasForeignKey<MediaDetailsRow>(m => m.MediaId).OnDelete(DeleteBehavior.Cascade);
 			builder.HasDiscriminator(m => m.MediaType).HasValue<MovieDetailsRow>(MediaType.Movie).HasValue<ShowDetailsRow>(MediaType.Show);
+			builder.Property(m => m.ConfirmedAbsent).HasConversion(fields => fields.ToString(), text => MediaFields.Parse(text));
 		});
 
 		modelBuilder.Entity<MediaRatingRow>(builder =>

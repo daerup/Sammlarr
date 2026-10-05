@@ -1,4 +1,4 @@
-using static Domain.Media.MediaFields;
+using static Domain.Media.FieldChecks;
 
 namespace Domain.Media;
 

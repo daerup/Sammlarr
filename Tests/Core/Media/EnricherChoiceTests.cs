@@ -84,6 +84,16 @@ public class EnricherChoiceTests
 			)
 			.IsEqualTo(MediaField.Tagline | MediaField.Summary);
 
-	private static EnricherOption Option(MediaProvider provider, MediaField fills, ProviderLoad? load = null) =>
+	[Test]
+	public async Task Next_WhenOnlyRatingsAreMissing_PicksTheEnricherThatRatesWithTheMostSources()
+	{
+		var options = new[] { Option(MediaProvider.Tmdb, MediaFields.Rated([RatingSource.Tmdb])), Option(MediaProvider.Plex, MediaFields.AllRatings) };
+
+		var next = EnricherChoice.Next(MediaFields.AllRatings, options, Now);
+
+		await Assert.That(next.Map(option => option.Provider)).IsSome().And.IsEqualTo(MediaProvider.Plex);
+	}
+
+	private static EnricherOption Option(MediaProvider provider, MediaFields fills, ProviderLoad? load = null) =>
 		new(provider, TmdbId.From("1", MediaType.Movie), fills, load ?? Idle);
 }

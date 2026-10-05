@@ -12,6 +12,12 @@ public class TmdbDetailsEnricherTests
 	private static readonly TmdbId Id = TmdbId.From("123", MediaType.Movie);
 
 	[Test]
+	public async Task Fills_RateOnlyWithTmdbsOwnRating()
+	{
+		await Assert.That(CreateTestee(Mock.HttpHandler()).Fills.Ratings).IsEquivalentTo([RatingSource.Tmdb]);
+	}
+
+	[Test]
 	public async Task LookUpAsync_MapsTmdbRatingFromDetail()
 	{
 		var handler = Mock.HttpHandler();
