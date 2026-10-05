@@ -43,9 +43,17 @@ internal static class ArrContainers
 	{
 		using var http = new HttpClient { BaseAddress = new Uri($"{endpoint.Url}/api/v3/") };
 		http.DefaultRequestHeaders.Add("X-Api-Key", ApiKey);
+		var folders = await http.GetFromJsonAsync<RootFolder[]>("rootfolder", cancellationToken);
+		if (folders!.Any(folder => folder.Path == library))
+		{
+			return;
+		}
+
 		using var response = await http.PostAsJsonAsync("rootfolder", new { path = library }, cancellationToken);
 		response.EnsureSuccessStatusCode();
 	}
 
 	private sealed record ArrContainer(string Name, string Image, string Tag, int Port, string Library);
+
+	private sealed record RootFolder(string Path);
 }
