@@ -7,11 +7,20 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\API\API.csproj" />
+		<ProjectReference Include="..\Core\Core.csproj" />
 		<ProjectReference Include="..\DB\DB.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+		<Content Include="..\Web\appsettings.json" Link="sammlarr-appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+	<ItemGroup>
 		<InternalsVisibleTo Include="Harness" />
+		<InternalsVisibleTo Include="E2E.Tests" />
+		<InternalsVisibleTo Include="Integration.Tests" />
+		<InternalsVisibleTo Include="StagingSeeder" />
 	</ItemGroup>
 </Project>

@@ -57,6 +57,7 @@
 	<Project Path="Roslyn/Roslyn.csproj" />
 	<Project Path="Seeding/Seeding.csproj" />
 	<Project Path="Shared/Shared.csproj" />
+	<Project Path="StagingSeeder/StagingSeeder.csproj" />
 	<Project Path="UI/UI.csproj" />
 	<Project Path="Web/Web.csproj" />
 </Solution>
