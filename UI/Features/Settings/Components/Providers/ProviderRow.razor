@@ -61,6 +61,7 @@
             return Key switch
             {
                 MediaProvider provider => ServiceRoles.For(provider),
+                Arr => [ServiceRoles.Wantlist, ServiceRoles.Search],
                 SammlarrAccounts => [ServiceRoles.SignIn],
             };
         }

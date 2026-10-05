@@ -169,18 +169,19 @@ public class ArrSinkRowTests : BunitContext
 	}
 
 	[Test]
-	[Arguments(MediaProvider.Radarr, true)]
-	[Arguments(MediaProvider.Plex, false)]
-	public async Task Row_WhenRadarrIsRinged_DrawsTheRing(MediaProvider ringed, bool drawn)
+	[Arguments(true)]
+	[Arguments(false)]
+	public async Task Row_WhenItIsRinged_DrawsTheRing(bool ringed)
 	{
+		ProviderRowKey key = ringed ? new Arr() : MediaProvider.Plex;
 		var cut = Render<CascadingValue<ProviderRowKey?>>(parameters =>
 			parameters
-				.Add(value => value.Value, ringed)
+				.Add(value => value.Value, key)
 				.Add(value => value.Name, ProviderRows.Ringed)
 				.AddChildContent<ArrSinkRow>(row => row.Add(arr => arr.SettingUp, false).Add(arr => arr.Open, true))
 		);
 
-		await Assert.That(cut.Find(".arr-row").ClassList.Contains("is-ringed")).IsEqualTo(drawn);
+		await Assert.That(cut.Find(".arr-row").ClassList.Contains("is-ringed")).IsEqualTo(ringed);
 	}
 
 	private void Answers(ArrApp app, string folder)

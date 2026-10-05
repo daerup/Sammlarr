@@ -1,6 +1,7 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Providers;
+using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using TUnit.Assertions.Enums;
@@ -94,6 +95,21 @@ public class ProviderRowTests : BunitContext
 
 		await Assert.That(cut.Find(".provider-row").Id).IsEqualTo("provider-row-sammlarr");
 		await Assert.That(cut.FindAll(".provider-role .sr-only").Select(role => role.TextContent)).IsEquivalentTo(["Sign-in"]);
+	}
+
+	[Test]
+	public async Task Row_ForRadarrAndSonarr_HasItsOwnIdAndTheWantlistAndSearchRoles()
+	{
+		var cut = Render<ProviderRow>(parameters =>
+			parameters
+				.Add(row => row.Key, new Arr())
+				.Add(row => row.Brand, Brands.GetBrandingInfo(ArrApp.Radarr))
+				.Add(row => row.Status, "<span>Connected</span>")
+				.AddChildContent("<p>The form</p>")
+		);
+
+		await Assert.That(cut.Find(".provider-row").Id).IsEqualTo("provider-row-arr");
+		await Assert.That(cut.FindAll(".provider-role .sr-only").Select(role => role.TextContent)).IsEquivalentTo(["Wantlist", "Search"]);
 	}
 
 	private IRenderedComponent<ProviderRow> RenderRow(EventCallback<bool> openChanged = default) =>

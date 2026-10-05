@@ -5,8 +5,10 @@ using Bunit;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
+using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.Providers;
 
@@ -112,14 +114,7 @@ public class ServicesMapTests : BunitContext
 	public async Task SearchChip_WhenAConnectedServiceIsPicked_RaisesIt()
 	{
 		List<SearchProvider> picked = [];
-		var cut = RenderPicker(
-			Config with
-			{
-				SearchProvider = SearchProvider.Tmdb,
-			},
-			new HashSet<MediaProvider> { MediaProvider.Tmdb, MediaProvider.Radarr, MediaProvider.Sonarr },
-			picked.Add
-		);
+		var cut = RenderPicker(Config with { SearchProvider = SearchProvider.Tmdb }, new HashSet<MediaProvider> { MediaProvider.Tmdb }, picked.Add, arrReady: true);
 
 		await cut.FindAll(".map-chip")[1].ClickAsync();
 		cut.WaitForElement("[role=menuitem]");
@@ -128,7 +123,12 @@ public class ServicesMapTests : BunitContext
 		await Assert.That(picked).IsEquivalentTo([SearchProvider.Arr]);
 	}
 
-	private IRenderedComponent<IComponent> RenderPicker(ProviderConfig config, IReadOnlySet<MediaProvider> ready, Action<SearchProvider> picked)
+	private IRenderedComponent<IComponent> RenderPicker(
+		ProviderConfig config,
+		IReadOnlySet<MediaProvider> ready,
+		Action<SearchProvider> picked,
+		bool arrReady = false
+	)
 	{
 		return Render(builder =>
 		{
@@ -137,8 +137,9 @@ public class ServicesMapTests : BunitContext
 			builder.OpenComponent<ServicesMap>(1);
 			builder.AddComponentParameter(2, nameof(ServicesMap.Config), config);
 			builder.AddComponentParameter(3, nameof(ServicesMap.Ready), ready);
-			builder.AddComponentParameter(4, nameof(ServicesMap.CanPick), true);
-			builder.AddComponentParameter(5, nameof(ServicesMap.SearchPicked), EventCallback.Factory.Create(this, picked));
+			builder.AddComponentParameter(4, nameof(ServicesMap.ArrReady), arrReady);
+			builder.AddComponentParameter(5, nameof(ServicesMap.CanPick), true);
+			builder.AddComponentParameter(6, nameof(ServicesMap.SearchPicked), EventCallback.Factory.Create(this, picked));
 			builder.CloseComponent();
 		});
 	}
@@ -242,6 +243,38 @@ public class ServicesMapTests : BunitContext
 		var cut = RenderMap(Config with { Sink = sink, SearchProvider = SearchProvider.Arr }, canPick);
 
 		await Assert.That(Service(cut, "Radarr + Sonarr").LocalName).IsEqualTo(element);
+	}
+
+	[Test]
+	public async Task RadarrAndSonarr_WhenClicked_DrawsBothMarksInTheMixedColourAndAsksToOpenTheWantlistSync()
+	{
+		List<MediaProvider> opened = [];
+		var arr = 0;
+		var cut = Render<ServicesMap>(parameters =>
+			parameters
+				.Add(map => map.Config, Config with { Sink = SinkKind.Arr })
+				.Add(map => map.Ready, new HashSet<MediaProvider>())
+				.Add(map => map.ArrReady, true)
+				.Add(map => map.CanPick, true)
+				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<MediaProvider>(this, opened.Add))
+				.Add(map => map.ArrOpened, EventCallback.Factory.Create(this, () => arr++))
+		);
+		var box = Service(cut, "Radarr + Sonarr");
+
+		await Assert.That(box.QuerySelector(".map-service-status")!.TextContent.Trim()).IsEqualTo("Connected");
+		await Assert.That(box.InnerHtml).Contains("radarr-square").And.Contains("sonarr-square");
+		await Assert.That(box.GetAttribute("style")).Contains($"--brand: {Services.GetRequiredService<MediaProviderBrandingService>().ArrColor}");
+		await box.ClickAsync();
+		await Assert.That(arr).IsEqualTo(1);
+		await Assert.That(opened).IsEmpty();
+	}
+
+	[Test]
+	public async Task RadarrAndSonarr_WhenNotConnected_SaysNotSetUp()
+	{
+		var cut = RenderMap(Config with { Sink = SinkKind.Arr }, canPick: true);
+
+		await Assert.That(Service(cut, "Radarr + Sonarr").QuerySelector(".map-service-status")!.TextContent.Trim()).IsEqualTo("Not set up");
 	}
 
 	[Test]

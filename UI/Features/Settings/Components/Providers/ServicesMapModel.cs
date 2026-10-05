@@ -11,15 +11,13 @@ internal enum TileEdge
 
 internal sealed record MapPoint(double X, double Y);
 
-internal union MapEndpoint(ServiceEndpoint, SammlarrAccounts)
+internal union MapEndpoint(MediaProvider, Arr, SammlarrAccounts)
 {
-	public static implicit operator MapEndpoint(MediaProvider provider) => new ServiceEndpoint(provider, new None());
-
 	public static MapEndpoint Of(AuthProvider signIn) => signIn.Provider().Map(provider => (MapEndpoint)provider).GetValueOr(new SammlarrAccounts());
 
-	public static MapEndpoint Of(SinkKind sink) => ServiceEndpoint.Of(sink.Providers());
+	public static MapEndpoint Of(SinkKind sink) => sink.Provider().Map(provider => (MapEndpoint)provider).GetValueOr(new Arr());
 
-	public static MapEndpoint Of(SearchProvider search) => ServiceEndpoint.Of(search.Providers());
+	public static MapEndpoint Of(SearchProvider search) => search.Provider().Map(provider => (MapEndpoint)provider).GetValueOr(new Arr());
 
 	public static bool operator ==(MapEndpoint left, MapEndpoint right) => Equals(left.Value, right.Value);
 
@@ -33,26 +31,11 @@ internal union MapEndpoint(ServiceEndpoint, SammlarrAccounts)
 	{
 		return this switch
 		{
-			ServiceEndpoint service => service.ToString(),
+			MediaProvider provider => provider.ToString(),
+			Arr => "Radarr+Sonarr",
 			SammlarrAccounts => "Sammlarr",
 		};
 	}
-}
-
-internal readonly record struct ServiceEndpoint(MediaProvider Provider, Optional<MediaProvider> Partner)
-{
-	public IReadOnlyList<MediaProvider> Providers
-	{
-		get
-		{
-			var provider = Provider;
-			return Partner.Match(partner => (IReadOnlyList<MediaProvider>)[provider, partner], () => [provider]);
-		}
-	}
-
-	public static ServiceEndpoint Of(IReadOnlyList<MediaProvider> providers) => new(providers[0], providers.Skip(1).FirstOrNone());
-
-	public override string ToString() => string.Join("+", Providers);
 }
 
 internal enum MapChoice
@@ -149,7 +132,7 @@ internal sealed record ServicesMapModel(
 			return services.Single(service => service.Provider == provider).Pins[arriving.IndexOf(role)];
 		}
 
-		var boxed = feeds.Where(feed => services.Any(service => service.Provider == (MapEndpoint)feed)).ToList();
+		var boxed = feeds.Where(feed => services.Any(service => service.Provider == feed)).ToList();
 		var tiles = PlaceTiles([.. feeds.Where(feed => !boxed.Contains(feed))], services[^1].Y + ServiceHeight / 2 + ServiceGap, feeds.Count);
 		var feedsRole = roles.Single(role => role.Provider is null);
 
