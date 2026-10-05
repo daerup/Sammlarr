@@ -21,6 +21,8 @@ public class ProviderMatrixGeneratorTests
 			Feed = 1 << 2,
 
 			ApiKey = 1 << 3,
+
+			[ConvertsTo<ProviderCapability>(ApiKey)]
 			Artwork = 1 << 5,
 		}
 
@@ -37,7 +39,6 @@ public class ProviderMatrixGeneratorTests
 			[Capabilities<ProviderCapability>(ProviderCapability.Artwork)]
 			Plex,
 
-			[Description("Mdblist")]
 			[Capabilities<ProviderCapability>(ProviderCapability.Feed | ProviderCapability.ApiKey)]
 			Mdblist,
 		}

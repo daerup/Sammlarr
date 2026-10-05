@@ -20,6 +20,8 @@ public class AsyncMirrorGeneratorTests
 			public sealed record Box<T>(T Item)
 				where T : notnull;
 
+			public sealed record Counter(int Value);
+
 			public static partial class BoxExtensions
 			{
 				extension<T>(Box<T> box)
@@ -37,6 +39,12 @@ public class AsyncMirrorGeneratorTests
 						visit(box.Item);
 						return box;
 					}
+				}
+
+				extension(Counter counter)
+				{
+					[GenerateAsync]
+					public int Add(Func<int> step) => counter.Value + step();
 				}
 			}
 		}

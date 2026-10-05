@@ -33,4 +33,18 @@ public static partial class BoxExtensions
 		[CompilerGenerated] public async ValueTask<Box<T>> Visit(Action<T> visit) => (await source).Visit(visit);
 		[CompilerGenerated] public async ValueTask<Box<T>> Visit(Func<T, Task> visit) => await (await source).Visit(visit);
 	}
+	extension(Counter counter)
+	{
+		[CompilerGenerated] public async Task<int> Add(Func<Task<int>> step) => counter.Value + await step();
+	}
+	extension(Task<Counter> source)
+	{
+		[CompilerGenerated] public async Task<int> Add(Func<int> step) => (await source).Add(step);
+		[CompilerGenerated] public async Task<int> Add(Func<Task<int>> step) => await (await source).Add(step);
+	}
+	extension(ValueTask<Counter> source)
+	{
+		[CompilerGenerated] public async ValueTask<int> Add(Func<int> step) => (await source).Add(step);
+		[CompilerGenerated] public async ValueTask<int> Add(Func<Task<int>> step) => await (await source).Add(step);
+	}
 }
