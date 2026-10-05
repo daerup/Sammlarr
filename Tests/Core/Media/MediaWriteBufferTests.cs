@@ -7,7 +7,7 @@ namespace Core.Tests.Media;
 
 public class MediaWriteBufferTests
 {
-	private static readonly DateTimeOffset FetchedAt = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
+	private static readonly DateTimeOffset RefreshedAt = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
 	private static readonly MediaIdentity Survivor = new(MediaId.New(), [TmdbId.From("1", MediaType.Movie)]);
 	private static readonly MediaIdentity Absorbed = new(MediaId.New(), [ImdbId.From("tt1", MediaType.Movie)]);
 
@@ -44,7 +44,7 @@ public class MediaWriteBufferTests
 			.WasCalled(Times.Once);
 	}
 
-	private static CachedDetails Cached(string title) => new(new MovieDetails { Title = title }, FetchedAt, MediaField.None);
+	private static CachedDetails Cached(string title) => new(new MovieDetails { Title = title }, RefreshedAt, RefreshedAt, []);
 
 	private static Mock<IMediaRepository> Repository()
 	{

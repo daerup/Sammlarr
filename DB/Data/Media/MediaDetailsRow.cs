@@ -7,7 +7,8 @@ internal abstract record MediaDetailsRow : IAuditable
 {
 	public DateTimeOffset CreatedAt { get; set; }
 	public DateTimeOffset UpdatedAt { get; set; }
-	public DateTimeOffset FetchedAt { get; set; }
+	public DateTimeOffset RefreshedAt { get; set; }
+	public DateTimeOffset AskedAt { get; set; }
 
 	[Key]
 	public Guid MediaId { get; set; }
@@ -35,9 +36,9 @@ internal abstract record MediaDetailsRow : IAuditable
 	[Required]
 	public MediaType MediaType { get; init; }
 
-	public MediaFields ConfirmedAbsent { get; set; }
-
 	public List<MediaRatingRow> Ratings { get; set; } = [];
+
+	public List<ProviderAnswerRow> Answers { get; set; } = [];
 }
 
 internal record MovieDetailsRow : MediaDetailsRow

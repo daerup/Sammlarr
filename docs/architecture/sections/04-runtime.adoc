@@ -22,9 +22,9 @@ sequenceDiagram
 
   C->>MS: IdentifyWithDetailsAsync(external ids + hints)
   MS->>DB: GetByExternalsAsync (one batched read)
-  alt in library and fresh
+  alt in library and reusable
     DB-->>MS: stored title
-  else missing or stale
+  else missing, stale, or a gap someone new can fill
     MS->>IC: Phase A, identify the ids
     IC-->>MS: canonical identity (or unmatched)
     MS->>MR: Phase B, fetch the details
@@ -34,10 +34,11 @@ sequenceDiagram
   MS-->>C: MediaMatchResult
 ....
 
-The first lookup is the library itself (one batched `GetByExternalsAsync`); a fresh row is
-returned as is (fresh = younger than 7 days, and younger than 1 hour while a missing field is still
-unconfirmed; see `CachedDetails` in <<section-glossary>>). A stored but stale title only refetches its
-details (Phase B); a title not yet in the library runs both phases.
+The first lookup is the library itself (one batched `GetByExternalsAsync`); a stored row is
+returned as is unless the details fetcher would ask again: 14 days after its last refresh, or when a field is
+missing, an hour has passed since anyone was asked, and an enricher that has not answered could fill it (see
+Freshness in <<section-glossary>>). A stored title only refetches its details (Phase B); a title not yet in the
+library runs both phases.
 
 ==== Phase A: ids to a Plex identity
 
@@ -90,8 +91,13 @@ library ids.
 
 ==== Phase B: details
 
-Details come from the search provider first (Plex), then from the open enricher that fills the
-most missing fields, one at a time, until no open enricher can fill what is still missing. Each rating source counts as one of
+A refresh asks the search provider first (Plex), then the open enricher that fills the
+most missing fields, one at a time, until no open enricher can fill what is still missing. A gap fill starts from the
+stored copy and its answers and asks only the enrichers that have not answered. The cache stores who answered and
+what each could not give (`ProviderAnswer`); only a successful answer is stored, so a provider that failed, was
+blocked, or was never asked (no id for it, or the user has no key or sign-in for it) still counts as not having
+answered. A refresh that did not hear from everyone who answered before is laid over the stored copy, so it never
+deletes what it could not get; one that did replaces it, so a value removed upstream goes too. Each rating source counts as one of
 those fields (`MediaFields` pairs the detail flags with a set of `RatingSource`): TMDB fills its own, Plex fills IMDb, Rotten Tomatoes and its copy of TMDB's. Writes are
 batched write-behind through the `MediaWriteBuffer` (one identity and one details upsert per run). Two failure behaviours matter: an
 unmatched candidate becomes `UnmatchedMedia` (surfaced, never persisted); and when a provider is down

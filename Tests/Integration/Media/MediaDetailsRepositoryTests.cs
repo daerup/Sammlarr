@@ -1,5 +1,6 @@
 using DB.Data.Media;
 using Domain.Media;
+using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
@@ -9,10 +10,13 @@ namespace Integration.Tests.Media;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
-	private static readonly MediaFields Gaps =
-		MediaField.Tagline | MediaField.Backdrop | MediaFields.Rated([RatingSource.Imdb, RatingSource.RottenTomatoesAudience]);
+	private static readonly ProviderAnswer[] Answers =
+	[
+		new(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Backdrop | MediaFields.Rated([RatingSource.Imdb])),
+		new(MediaProvider.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience])),
+	];
 
-	private static readonly DateTimeOffset FetchedAt = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+	private static readonly DateTimeOffset RefreshedAt = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
 	private MediaRepository _testee = null!;
 
@@ -34,19 +38,19 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task UpsertDetailsAsync_WhenFetchedAgain_AdvancesFetchedAtEvenWhenThePayloadIsIdentical()
+	public async Task UpsertDetailsAsync_WhenAskedAgain_AdvancesAskedAtEvenWhenThePayloadIsIdentical()
 	{
 		var plexId = PlexId.From("plex-700", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var secondFetch = FetchedAt.AddHours(2);
+		var secondAsk = RefreshedAt.AddHours(2);
 
 		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete())));
 		fixture.Context.ChangeTracker.Clear();
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete()) with { FetchedAt = secondFetch }));
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete()) with { AskedAt = secondAsk }));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
-		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.FetchedAt).IsEqualTo(secondFetch));
+		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.AskedAt).IsEqualTo(secondAsk));
 	}
 
 	[Test]
@@ -70,7 +74,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task GetAsync_WhenDetailsExist_YieldsThemWithTheirIdentityAndFetchedAt()
+	public async Task GetAsync_WhenDetailsExist_YieldsThemWithTheirIdentityAndTimes()
 	{
 		var plexId = PlexId.From("plex-810", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
@@ -84,16 +88,16 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task UpsertDetailsAsync_ForAPartial_KeepsWhichDetailsAndRatingSourcesAreConfirmedAbsent()
+	public async Task UpsertDetailsAsync_ForAPartial_KeepsWhoAnsweredAndWhatEachLeftUnfilled()
 	{
 		var plexId = PlexId.From("plex-812", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
 
-		await _testee.UpsertDetailsAsync(Details(mediaId, new CachedDetails(new MovieDetails { Title = "Solaris" }, FetchedAt, Gaps)));
+		await _testee.UpsertDetailsAsync(Details(mediaId, new CachedDetails(new MovieDetails { Title = "Solaris" }, RefreshedAt, RefreshedAt, [.. Answers])));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
-		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.ConfirmedAbsent).IsEqualTo(Gaps));
+		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.Answers).IsEquivalentTo(Answers));
 	}
 
 	[Test]
@@ -193,7 +197,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 
 	private static Dictionary<MediaId, CachedDetails> Details(MediaId id, CachedDetails cached) => new() { [id] = cached };
 
-	private static CachedDetails Cached(MediaDetails details) => new(details, FetchedAt, MediaField.None);
+	private static CachedDetails Cached(MediaDetails details) => new(details, RefreshedAt, RefreshedAt, []);
 
 	private static MovieDetails Complete()
 	{

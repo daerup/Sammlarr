@@ -11,7 +11,6 @@ internal sealed class MediaDetailsRowConfiguration : IModelConfiguration
 		{
 			builder.HasOne(m => m.Media).WithOne(media => media.Details).HasForeignKey<MediaDetailsRow>(m => m.MediaId).OnDelete(DeleteBehavior.Cascade);
 			builder.HasDiscriminator(m => m.MediaType).HasValue<MovieDetailsRow>(MediaType.Movie).HasValue<ShowDetailsRow>(MediaType.Show);
-			builder.Property(m => m.ConfirmedAbsent).HasConversion(fields => fields.ToString(), text => MediaFields.Parse(text));
 		});
 
 		modelBuilder.Entity<MediaRatingRow>(builder =>
@@ -20,6 +19,14 @@ internal sealed class MediaDetailsRowConfiguration : IModelConfiguration
 			builder.HasKey("MediaId", nameof(MediaRatingRow.Source));
 			builder.HasOne(r => r.Details).WithMany(m => m.Ratings).HasForeignKey("MediaId").OnDelete(DeleteBehavior.Cascade);
 			builder.HasIndex(r => r.Source);
+		});
+
+		modelBuilder.Entity<ProviderAnswerRow>(builder =>
+		{
+			builder.Property<Guid>("MediaId");
+			builder.HasKey("MediaId", nameof(ProviderAnswerRow.Provider));
+			builder.HasOne(answer => answer.Details).WithMany(details => details.Answers).HasForeignKey("MediaId").OnDelete(DeleteBehavior.Cascade);
+			builder.Property(answer => answer.Unfilled).HasConversion(fields => fields.ToString(), text => MediaFields.Parse(text));
 		});
 	}
 }

@@ -10,6 +10,8 @@ internal readonly record struct EnricherCandidate(MediaProvider Provider, IExter
 
 internal static class EnricherChoice
 {
+	private static readonly TimeSpan RefetchMissingCooldown = TimeSpan.FromHours(1);
+
 	internal static Optional<EnricherCandidate> Next(MediaFields needed, IEnumerable<EnricherCandidate> leftToAsk, DateTimeOffset now)
 	{
 		return leftToAsk
@@ -18,10 +20,11 @@ internal static class EnricherChoice
 			.FirstOrNone(candidate => candidate.CanHelp(needed, now));
 	}
 
-	internal static MediaFields BlockedFills(MediaFields needed, IEnumerable<EnricherCandidate> leftToAsk, DateTimeOffset now)
+	internal static bool NeedsRefetch(CachedDetails cached, IReadOnlyList<EnricherCandidate> leftToAsk, DateTimeOffset now)
 	{
-		return leftToAsk
-			.Where(candidate => needed.Overlaps(candidate.Fills) && !candidate.Load.IsOpen(now))
-			.Aggregate(MediaFields.None, (fields, candidate) => fields | candidate.Fills);
+		var stale = cached.IsStale(now);
+		var pastCooldown = now - cached.AskedAt >= RefetchMissingCooldown;
+		var someoneNewCanHelp = leftToAsk.Any(candidate => candidate.CanHelp(cached.Details.Missing, now));
+		return stale || (pastCooldown && someoneNewCanHelp);
 	}
 }

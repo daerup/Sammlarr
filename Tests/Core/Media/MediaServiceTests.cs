@@ -1,4 +1,5 @@
 using Contracts;
+using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;
@@ -204,7 +205,7 @@ public class MediaServiceTests
 		var detail = BuildDetail(id);
 		var (testee, deps) = CreateTestee();
 		deps.MediaRepo.GetAsync(Any(), Any())
-			.Returns([new StoredMedia(detail.Identity, Some.Of(new CachedDetails(detail.Details, _now - TimeSpan.FromDays(8), MediaField.None)))]);
+			.Returns([new StoredMedia(detail.Identity, Some.Of(new CachedDetails(detail.Details, _now - TimeSpan.FromDays(15), _now - TimeSpan.FromDays(15), [])))]);
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
 
 		var results = await testee.GetDetailsAsync([id]).ToListAsync();
@@ -221,7 +222,10 @@ public class MediaServiceTests
 		var (testee, deps) = CreateTestee();
 		deps.MediaRepo.GetAsync(Any(), Any())
 			.Returns([
-				new StoredMedia(stale.Identity, Some.Of(new CachedDetails(stale.Details with { Title = "Stale" }, _now - TimeSpan.FromDays(8), MediaField.None))),
+				new StoredMedia(
+					stale.Identity,
+					Some.Of(new CachedDetails(stale.Details with { Title = "Stale" }, _now - TimeSpan.FromDays(15), _now - TimeSpan.FromDays(15), []))
+				),
 			]);
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 
@@ -505,7 +509,16 @@ public class MediaServiceTests
 		converter.Lookups.Returns([new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb], Cost: 1)]);
 		converter.LookUpAsync(Any(), Any()).Returns((request, _) => FoundByFind(request));
 
-		var detailsFetcher = new DetailsFetcher(searchIndex, enricherIndex, configRepo.Object, TestCapacity.Open(), dateTimeProvider.Object);
+		var detailsFetcher = new DetailsFetcher(
+			searchIndex,
+			enricherIndex,
+			configRepo.Object,
+			TestCapacity.Open(),
+			IApiKeyService.Mock().Object,
+			ICredentialService.Mock().Object,
+			dateTimeProvider.Object,
+			NullLogger<DetailsFetcher>.Instance
+		);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		var testee = new MediaService(
 			new MediaIdResolver([converter.Object], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),
@@ -514,7 +527,6 @@ public class MediaServiceTests
 			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),
 			TestSinks.AddressingBy(MediaProvider.Tmdb, configRepo.Object),
 			mediaRepo.Object,
-			dateTimeProvider.Object,
 			NullLogger<MediaService>.Instance
 		);
 		return (testee, new Deps(mediaRepo, search, unmatchedCache));
@@ -570,7 +582,7 @@ public class MediaServiceTests
 		return Stored(new MatchedMedia(new MediaIdentity(id, [external]), new MovieDetails()));
 	}
 
-	private static StoredMedia Stored(MatchedMedia media) => new(media.Identity, Some.Of(new CachedDetails(media.Details, _now, MediaField.None)));
+	private static StoredMedia Stored(MatchedMedia media) => new(media.Identity, Some.Of(new CachedDetails(media.Details, _now, _now, [])));
 
 	private static StoredMedia StaleCached(MediaId id) => new(new MediaIdentity(id, [PlexId.From($"plex-{id}", MediaType.Movie)]), new None());
 

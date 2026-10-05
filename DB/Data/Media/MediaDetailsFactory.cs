@@ -10,6 +10,7 @@ internal class MediaDetailsFactory
 		var row = NewRow(cached.Details);
 		ApplyCommonFields(row, cached, mediaId);
 		row.Ratings = [.. cached.Details.Ratings.All.Select(rating => BuildRating(rating, row))];
+		row.Answers = [.. cached.Answers.Select(answer => BuildAnswer(answer, row))];
 		return row;
 	}
 
@@ -30,9 +31,13 @@ internal class MediaDetailsFactory
 		}
 		ApplyCommonFields(existing, cached, existing.MediaId);
 		ReplaceRatings(existing, [.. cached.Details.Ratings.All]);
+		ReplaceAnswers(existing, cached.Answers);
 	}
 
-	public CachedDetails ToCached(MediaDetailsRow row) => new(Details(row), row.FetchedAt, row.ConfirmedAbsent);
+	public CachedDetails ToCached(MediaDetailsRow row)
+	{
+		return new(Details(row), row.RefreshedAt, row.AskedAt, [.. row.Answers.Select(answer => new ProviderAnswer(answer.Provider, answer.Unfilled))]);
+	}
 
 	private static MediaDetails Details(MediaDetailsRow row)
 	{
@@ -90,8 +95,8 @@ internal class MediaDetailsFactory
 		row.BackdropUrl = details.BackdropUrl;
 		row.ReleaseDate = details.ReleaseDate;
 		row.Genres = [.. details.Genres];
-		row.ConfirmedAbsent = cached.ConfirmedAbsent;
-		row.FetchedAt = cached.FetchedAt;
+		row.RefreshedAt = cached.RefreshedAt;
+		row.AskedAt = cached.AskedAt;
 	}
 
 	private static void ReplaceRatings(MediaDetailsRow row, IReadOnlyList<IMediaRating> ratings)
@@ -104,6 +109,22 @@ internal class MediaDetailsFactory
 			asked.When(_ => rating.Source.IsRottenTomatoes).Apply(answer => KeepAnswer(built, answer));
 			row.Ratings.Add(built);
 		}
+	}
+
+	private static void ReplaceAnswers(MediaDetailsRow row, IEnumerable<ProviderAnswer> answers)
+	{
+		row.Answers.Clear();
+		row.Answers.AddRange(answers.Select(answer => BuildAnswer(answer, row)));
+	}
+
+	private static ProviderAnswerRow BuildAnswer(ProviderAnswer answer, MediaDetailsRow parent)
+	{
+		return new()
+		{
+			Provider = answer.Provider,
+			Unfilled = answer.Unfilled,
+			Details = parent,
+		};
 	}
 
 	private static void KeepAnswer(MediaRatingRow rating, MediaRatingRow answer)

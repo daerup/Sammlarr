@@ -9,6 +9,25 @@ public class EnricherChoiceTests
 {
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 	private static readonly ProviderLoad Idle = new(new None(), 0);
+	private static readonly MediaFields PlexFills = MediaField.Tagline | MediaFields.AllRatings;
+
+	private static readonly MovieDetails Complete = new()
+	{
+		Title = "Dune",
+		Tagline = "Fear is the mind-killer.",
+		Summary = "A noble family becomes embroiled in a war.",
+		PosterUrl = "poster",
+		BackdropUrl = "backdrop",
+		ReleaseDate = new DateOnly(2021, 10, 22),
+		Genres = ["Science Fiction"],
+		Ratings = MediaRatings.From([
+			new TmdbRating(7.8f, Some.Of(12_000)),
+			new ImdbRating(8.0f, Some.Of(900_000)),
+			new RottenTomatoesCriticsRating(83),
+			new RottenTomatoesAudienceRating(90),
+		]),
+		Runtime = TimeSpan.FromMinutes(155),
+	};
 
 	[Test]
 	public async Task Next_PicksTheEnricherThatFillsTheMostMissingFields() =>
@@ -70,19 +89,54 @@ public class EnricherChoiceTests
 			.And.IsEqualTo(MediaProvider.Tmdb);
 
 	[Test]
-	public async Task BlockedFills_NamesTheFieldsOfTheBlockedEnrichersThatCouldHaveHelped() =>
-		await Assert
-			.That(
-				EnricherChoice.BlockedFills(
-					MediaField.Tagline,
-					[
-						Candidate(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Summary, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
-						Candidate(MediaProvider.Tvdb, MediaField.Tagline),
-					],
-					Now
-				)
-			)
-			.IsEqualTo(MediaField.Tagline | MediaField.Summary);
+	public async Task NeedsRefetch_WhenNobodyLeftToAskCanFillAGap_IsFalse()
+	{
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [], Now)).IsFalse();
+	}
+
+	[Test]
+	public async Task NeedsRefetch_WhenANewlyConnectedEnricherFillsAGap_IsTrue()
+	{
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [Candidate(MediaProvider.Plex, PlexFills)], Now)).IsTrue();
+	}
+
+	[Test]
+	public async Task NeedsRefetch_WhenTheOnlyEnricherThatFillsAGapIsBlocked_IsFalse()
+	{
+		var blocked = Candidate(MediaProvider.Plex, PlexFills, Idle with { BlockedUntil = Some.Of(Now.AddMinutes(1)) });
+
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [blocked], Now)).IsFalse();
+	}
+
+	[Test]
+	public async Task NeedsRefetch_OnceTheBlockHasLifted_IsTrue()
+	{
+		var lifted = Candidate(MediaProvider.Plex, PlexFills, Idle with { BlockedUntil = Some.Of(Now.AddMinutes(-1)) });
+
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [lifted], Now)).IsTrue();
+	}
+
+	[Test]
+	public async Task NeedsRefetch_WithinAnHourOfTheLastAsk_WaitsEvenThoughSomeoneNewCouldFillAGap()
+	{
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromMinutes(30)), [Candidate(MediaProvider.Plex, PlexFills)], Now)).IsFalse();
+	}
+
+	[Test]
+	public async Task NeedsRefetch_WhenNothingIsMissing_IsFalse()
+	{
+		var complete = Dune(askedAgo: TimeSpan.FromDays(1)) with { Details = Complete };
+
+		await Assert.That(EnricherChoice.NeedsRefetch(complete, [Candidate(MediaProvider.Plex, PlexFills)], Now)).IsFalse();
+	}
+
+	[Test]
+	public async Task NeedsRefetch_TwoWeeksAfterTheRefresh_IsTrueEvenRightAfterAnAskWithNobodyLeft()
+	{
+		var stale = Dune(askedAgo: TimeSpan.FromMinutes(1)) with { RefreshedAt = Now.AddDays(-14) };
+
+		await Assert.That(EnricherChoice.NeedsRefetch(stale, [], Now)).IsTrue();
+	}
 
 	[Test]
 	public async Task Next_WhenOnlyRatingsAreMissing_PicksTheEnricherThatRatesWithTheMostSources()
@@ -112,6 +166,12 @@ public class EnricherChoiceTests
 	public async Task CanHelp_WhenItIsOpenAndFillsANeededField_IsTrue()
 	{
 		await Assert.That(Candidate(MediaProvider.Plex, MediaFields.AllRatings).CanHelp(MediaFields.Rated([RatingSource.Imdb]), Now)).IsTrue();
+	}
+
+	private static CachedDetails Dune(TimeSpan askedAgo)
+	{
+		var details = new MovieDetails { Title = "Dune", Ratings = MediaRatings.From([new TmdbRating(7.8f, Some.Of(12_000))]) };
+		return new CachedDetails(details, Now.AddDays(-3), Now - askedAgo, [new ProviderAnswer(MediaProvider.Tmdb, MediaField.Tagline)]);
 	}
 
 	private static EnricherCandidate Candidate(MediaProvider provider, MediaFields fills, ProviderLoad? load = null) =>

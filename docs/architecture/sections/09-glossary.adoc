@@ -42,18 +42,18 @@ Missing:: The details fields and rating sources with no value (`MediaDetails.Mis
 never stored. A title nobody has rated is missing every rating source (`MediaFields.AllRatings`); a TMDB or IMDb rating
 without votes still counts as missing.
 
-Confirmed gap:: A field still missing after every enricher that could fill it answered
-(`CachedDetails.ConfirmedAbsent`). An enricher that was unavailable (rate limited or down) leaves its
-fields unconfirmed, so they retry after the hour; a lookup that finds nothing counts as an answer. An
-enricher is only asked when its `Fills` overlap a missing field. A confirmed gap lasts until the
-title goes stale after 7 days, even if a new enricher, a config change or a newly learned id could
-fill it sooner.
+Provider answer:: Which provider answered a fetch of a title and what it could not give
+(`ProviderAnswer`: `Provider` and `Unfilled`, the fields it fills that were still missing after its answer). Only a
+successful answer is stored; a provider that failed, was blocked, or was never asked has no answer. An enricher is only
+asked when its `Fills` overlap a missing field.
 
-`CachedDetails`:: Stored details with the time they were fetched (`FetchedAt`) and their confirmed
-gaps.
+`CachedDetails`:: Stored details with two times and the provider answers: `RefreshedAt` (the last refresh) and
+`AskedAt` (the last time anyone was asked; a gap fill moves only this one).
 
-Freshness:: Whether cached details are recent enough to skip a re-fetch (`CachedDetails.IsFresh`):
-younger than 7 days, and younger than 1 hour while any missing field is still unconfirmed.
+Freshness:: Whether a stored title is used as it is (`DetailsFetcher.FindReusable`). It is refreshed 14 days after
+`RefreshedAt` (`CachedDetails.IsStale`), starting over and asking until nothing is missing. Before that its gaps are
+filled when a field is missing, an hour has passed since `AskedAt`, and an enricher could fill it that the title has
+an id for, the current user has connected, has not answered, and is not blocked (`EnricherChoice.NeedsRefetch`).
 
 `StoredMedia`:: A stored title as the repository returns it: its `MediaIdentity` and its
 `CachedDetails`, if it has any.

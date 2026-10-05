@@ -214,7 +214,7 @@ public class NotificationDispatchHandlerTests
 		var media = Media(
 			new StoredMedia(
 				new MediaIdentity(described, [TmdbId.From("603", MediaType.Movie)]),
-				Some.Of(new CachedDetails(details, DateTimeOffset.UtcNow, MediaField.None))
+				Some.Of(new CachedDetails(details, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []))
 			),
 			new StoredMedia(new MediaIdentity(bare, [TmdbId.From("1396", MediaType.Show)]), new None())
 		);
@@ -322,7 +322,7 @@ public class NotificationDispatchHandlerTests
 	{
 		return new(
 			new MediaIdentity(id, [TmdbId.From(id.ToString(), MediaType.Movie)]),
-			Some.Of(new CachedDetails(new MovieDetails { Title = title }, DateTimeOffset.UtcNow, MediaField.None))
+			Some.Of(new CachedDetails(new MovieDetails { Title = title }, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []))
 		);
 	}
 

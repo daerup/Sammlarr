@@ -80,6 +80,6 @@ public class RottenTomatoesPagesTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var details = new MovieDetails { Title = "Inception", Ratings = ratings };
 		return host.Resolve<IMediaRepository>()
-			.UpsertDetailsAsync(new Dictionary<MediaId, CachedDetails> { [id] = new(details, DateTimeOffset.UtcNow, MediaField.None) });
+			.UpsertDetailsAsync(new Dictionary<MediaId, CachedDetails> { [id] = new(details, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []) });
 	}
 }

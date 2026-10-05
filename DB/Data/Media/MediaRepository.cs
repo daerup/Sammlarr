@@ -116,6 +116,8 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			.Include(m => m.ExternalIds)
 			.Include(m => m.Details!)
 				.ThenInclude(details => details.Ratings)
+			.Include(m => m.Details!)
+				.ThenInclude(details => details.Answers)
 			.AsSingleQuery()
 			.ToListAsync(cancellationToken);
 
@@ -132,7 +134,12 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		using var _ = await writeLock.AcquireAsync(cancellationToken);
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rawIds = details.Keys.Select(id => id.Value).ToList();
-		var existing = await ctx.MediaDetails.Include(m => m.Ratings).Where(m => rawIds.Contains(m.MediaId)).ToDictionaryAsync(m => m.MediaId, cancellationToken);
+		var existing = await ctx
+			.MediaDetails.Include(m => m.Ratings)
+			.Include(m => m.Answers)
+			.AsSingleQuery()
+			.Where(m => rawIds.Contains(m.MediaId))
+			.ToDictionaryAsync(m => m.MediaId, cancellationToken);
 
 		foreach (var (id, cached) in details)
 		{

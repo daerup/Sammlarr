@@ -67,6 +67,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<MediaDetailsRow> MediaDetails => Set<MediaDetailsRow>();
 
 	public DbSet<MediaRatingRow> MediaRatings => Set<MediaRatingRow>();
+	public DbSet<ProviderAnswerRow> ProviderAnswers => Set<ProviderAnswerRow>();
 
 	public DbSet<ApiKeyConfigRow> ApiKeySettings => Set<ApiKeyConfigRow>();
 

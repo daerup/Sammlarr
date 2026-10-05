@@ -32,7 +32,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		var stored = new MovieDetails { Title = "Inception", Ratings = MediaRatings.From([new ImdbRating(8.8f, Some.Of(2_700_000))]) };
 		await host.Resolve<IMediaRepository>()
-			.UpsertDetailsAsync(new Dictionary<MediaId, CachedDetails> { [inception] = new(stored, DateTimeOffset.UtcNow, MediaField.None) });
+			.UpsertDetailsAsync(new Dictionary<MediaId, CachedDetails> { [inception] = new(stored, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []) });
 
 		var items = (await FetchTrending(1)).Items;
 

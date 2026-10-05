@@ -1,4 +1,5 @@
 using Contracts;
+using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Settings;
@@ -132,7 +133,7 @@ public class MediaServiceOrderingTests
 			.Items.Where(i => i.HasDetails)
 			.ToDictionary(
 				i => i.MediaId.Value,
-				i => new StoredMedia(new MediaIdentity(i.MediaId, [i.External]), Some.Of(new CachedDetails(i.Detail.Details, _now, MediaField.None)))
+				i => new StoredMedia(new MediaIdentity(i.MediaId, [i.External]), Some.Of(new CachedDetails(i.Detail.Details, _now, _now, [])))
 			);
 
 		mediaRepo.GetAsync(Any(), Any()).Returns((ids, _) => ids.Select(id => id.Value).Where(storedMap.ContainsKey).Select(g => storedMap[g]).ToList());
@@ -173,7 +174,16 @@ public class MediaServiceOrderingTests
 			.Register(MediaProvider.Plex, enricher.Object)
 			.Register(MediaProvider.Tmdb, enricher.Object);
 
-		var detailsFetcher = new DetailsFetcher(searchIndex, enricherIndex, configRepository.Object, TestCapacity.Open(), dateTimeProvider.Object);
+		var detailsFetcher = new DetailsFetcher(
+			searchIndex,
+			enricherIndex,
+			configRepository.Object,
+			TestCapacity.Open(),
+			IApiKeyService.Mock().Object,
+			ICredentialService.Mock().Object,
+			dateTimeProvider.Object,
+			NullLogger<DetailsFetcher>.Instance
+		);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		return new MediaService(
 			new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),
@@ -182,7 +192,6 @@ public class MediaServiceOrderingTests
 			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),
 			TestSinks.AddressingBy(MediaProvider.Tmdb, configRepository.Object),
 			mediaRepo.Object,
-			dateTimeProvider.Object,
 			NullLogger<MediaService>.Instance
 		);
 	}
