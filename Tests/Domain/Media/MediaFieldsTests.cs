@@ -5,15 +5,7 @@ namespace Domain.Tests.Media;
 
 public class MediaFieldsTests
 {
-	private static readonly MediaField[] Details = [.. Enum.GetValues<MediaField>().Where(field => field is not MediaField.None)];
-
-	private static readonly RatingSource[] Sources = Enum.GetValues<RatingSource>();
-
-	private static readonly Gen<MediaFields> Fields = Gen.Select(
-		Subsets(Details.Length),
-		Subsets(Sources.Length),
-		(details, sources) => new MediaFields(Pick(Details, details).Aggregate(MediaField.None, (all, field) => all | field), [.. Pick(Sources, sources)])
-	);
+	private static readonly Gen<MediaFields> Fields = MediaFieldsGen.Fields;
 
 	[Test]
 	public async Task Rated_HoldsExactlyTheSourcesGivenAndNoDetail()
@@ -86,8 +78,4 @@ public class MediaFieldsTests
 	{
 		Fields.Sample(fields => MediaFields.Parse(fields.ToString()) == fields);
 	}
-
-	private static Gen<int> Subsets(int size) => Gen.OneOf(Gen.Const(0), Gen.Int[0, (1 << size) - 1]);
-
-	private static IEnumerable<T> Pick<T>(T[] items, int mask) => items.Where((_, index) => (mask & (1 << index)) != 0);
 }

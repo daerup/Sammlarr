@@ -1,5 +1,6 @@
 using DB.Data.Media;
 using Domain.Media;
+using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,9 @@ namespace Integration.Tests.Media;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
-	private static readonly DateTimeOffset FetchedAt = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
+	private static readonly DateTimeOffset RefreshedAt = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
+	private static readonly ProviderAnswer TmdbLackedTheTagline = new(MediaProvider.Tmdb, MediaField.Tagline);
+	private static readonly ProviderAnswer PlexLackedTheAudience = new(MediaProvider.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience]));
 
 	private readonly MediaDetailsFactory _testee = new();
 
@@ -56,12 +59,17 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 	}
 
 	[Test]
-	public async Task BuildFrom_ForCachedDetails_CopiesFetchedAtAndConfirmedGaps()
+	public async Task BuildFrom_ForCachedDetails_CopiesBothTimesAndTheAnswers()
 	{
-		var entity = _testee.BuildFrom(new CachedDetails(new MovieDetails { Title = "Solaris" }, FetchedAt, MediaField.Tagline), Guid.NewGuid());
+		var asked = RefreshedAt.AddHours(2);
 
-		await Assert.That(entity.FetchedAt).IsEqualTo(FetchedAt);
-		await Assert.That(entity.ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
+		var entity = _testee.BuildFrom(new CachedDetails(new MovieDetails { Title = "Solaris" }, RefreshedAt, asked, [TmdbLackedTheTagline]), Guid.NewGuid());
+
+		await Assert.That(entity.RefreshedAt).IsEqualTo(RefreshedAt);
+		await Assert.That(entity.AskedAt).IsEqualTo(asked);
+		await Assert
+			.That(entity.Answers.Select(answer => (answer.Provider, answer.Unfilled)))
+			.IsEquivalentTo([(MediaProvider.Tmdb, (MediaFields)MediaField.Tagline)]);
 	}
 
 	[Test]
@@ -82,13 +90,29 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		var plexId = PlexId.From("plex-300", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
 		var existing = await PersistAsync(Cached(MovieDetails() with { Title = "Original" }), mediaId);
-		var refetched = FetchedAt.AddDays(1);
+		var refreshed = RefreshedAt.AddDays(1);
 
-		_testee.Update(existing, new CachedDetails(MovieDetails() with { Title = "Updated", Runtime = TimeSpan.FromMinutes(99) }, refetched, MediaField.None));
+		_testee.Update(existing, new CachedDetails(MovieDetails() with { Title = "Updated", Runtime = TimeSpan.FromMinutes(99) }, refreshed, refreshed, []));
 
 		await Assert.That(existing.Title).IsEqualTo("Updated");
 		await Assert.That(((MovieDetailsRow)existing).Runtime).IsEqualTo(TimeSpan.FromMinutes(99));
-		await Assert.That(existing.FetchedAt).IsEqualTo(refetched);
+		await Assert.That(existing.RefreshedAt).IsEqualTo(refreshed);
+	}
+
+	[Test]
+	public async Task Update_ReplacesTheAnswers()
+	{
+		var plexId = PlexId.From("plex-305", MediaType.Movie);
+		var mediaId = await SeedMediaAsync([plexId]);
+		var existing = await PersistAsync(Cached(MovieDetails()) with { Answers = [TmdbLackedTheTagline, PlexLackedTheAudience] }, mediaId);
+		var tmdbFilledEverything = new ProviderAnswer(MediaProvider.Tmdb, MediaFields.None);
+
+		_testee.Update(existing, Cached(MovieDetails()) with { Answers = [tmdbFilledEverything] });
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+
+		var stored = await fixture.Context.ProviderAnswers.AsNoTracking().SingleAsync();
+		await Assert.That(new ProviderAnswer(stored.Provider, stored.Unfilled)).IsEqualTo(tmdbFilledEverything);
 	}
 
 	[Test]
@@ -138,7 +162,16 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 	{
 		var plexId = PlexId.From("plex-400", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var written = new CachedDetails(MovieDetails() with { Title = "Movie", Runtime = TimeSpan.FromMinutes(110) }, FetchedAt, MediaField.Backdrop);
+		var written = new CachedDetails(
+			MovieDetails() with
+			{
+				Title = "Movie",
+				Runtime = TimeSpan.FromMinutes(110),
+			},
+			RefreshedAt,
+			RefreshedAt.AddHours(1),
+			[TmdbLackedTheTagline, PlexLackedTheAudience]
+		);
 		var entity = await PersistAsync(written, mediaId);
 
 		await Assert.That(_testee.ToCached(entity)).IsEqualTo(written);
@@ -242,10 +275,10 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
-		return await fixture.Context.MediaDetails.Include(m => m.Ratings).SingleAsync(m => m.MediaId == mediaId.Value);
+		return await fixture.Context.MediaDetails.Include(m => m.Ratings).Include(m => m.Answers).SingleAsync(m => m.MediaId == mediaId.Value);
 	}
 
-	private static CachedDetails Cached(MediaDetails details) => new(details, FetchedAt, MediaField.None);
+	private static CachedDetails Cached(MediaDetails details) => new(details, RefreshedAt, RefreshedAt, []);
 
 	private static MovieDetails MovieDetails()
 	{

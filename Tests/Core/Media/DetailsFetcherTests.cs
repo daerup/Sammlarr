@@ -1,9 +1,11 @@
 using Contracts;
+using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Providers;
 using Contracts.Settings;
 using Core.Media;
+using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
@@ -19,6 +21,8 @@ public class DetailsFetcherTests
 	private static readonly TmdbId Tmdb = TmdbId.From("500", MediaType.Movie);
 	private static readonly MediaIdentity Identity = new(Id, [Plex, Tmdb]);
 	private static readonly MediaIdentity PlexOnly = new(Id, [Plex]);
+	private static readonly IReadOnlySet<MediaProvider> Everyone = new HashSet<MediaProvider> { MediaProvider.Tmdb, MediaProvider.Plex };
+	private static readonly IReadOnlySet<MediaProvider> OnlyPlex = new HashSet<MediaProvider> { MediaProvider.Plex };
 
 	private static readonly MediaFields Everything = ~MediaField.None | MediaFields.AllRatings;
 	private static readonly MediaRatings TmdbOnly = MediaRatings.From([new TmdbRating(8f, Some.Of(500))]);
@@ -30,33 +34,50 @@ public class DetailsFetcherTests
 	]);
 	private static readonly Error Unavailable = Error.From(new ProviderUnavailableException(MediaProvider.Tmdb));
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
+	private static readonly DateTimeOffset LastRefresh = Now.AddDays(-3);
+	private static readonly ProviderAnswer PlexLeftTheRatings = new(MediaProvider.Plex, MediaFields.AllRatings);
+	private static readonly CachedDetails UnratedByPlex = new(Unrated(), LastRefresh, LastRefresh, [PlexLeftTheRatings]);
 
 	[Test]
-	public async Task FetchAsync_WhenTheEnricherThatRatesHasNoRating_AsksItOnceAndConfirmsTheGap()
+	public async Task FetchAsync_WhenTheEnricherThatRatesHasNoRating_AsksItOnceAndStoresThatItLeftTheRatingsUnfilled()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Unrated());
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails()));
 		await using var buffer = deps.Buffer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
-		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaFields.AllRatings);
+		await Assert.That(buffer.NewDetails[Id].Answers).Contains(new ProviderAnswer(MediaProvider.Tmdb, MediaFields.AllRatings));
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenTheEnricherThatRatesIsUnavailable_LeavesTheRatingUnconfirmed()
+	public async Task FetchAsync_WhenTheEnricherFails_StoresNoAnswerForIt()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Unrated());
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Unavailable);
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Missing).IsEqualTo(MediaFields.AllRatings);
-		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.None);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenTheEnricherThrows_KeepsWhatThePrimaryFoundAndStoresNoAnswerForIt()
+	{
+		var deps = Dependencies.Create();
+		deps.Primary(Complete() with { Tagline = null });
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Throws(new HttpRequestException("TMDB is down"));
+		await using var buffer = deps.Buffer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
+
+		await Assert.That(fetched.Details).IsEqualTo(Complete() with { Tagline = null });
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
 	}
 
 	[Test]
@@ -66,7 +87,7 @@ public class DetailsFetcherTests
 		deps.Primary(Complete() with { Tagline = null });
 		await using var buffer = deps.Buffer();
 
-		await deps.Testee.FetchAsync(Identity, buffer);
+		await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer);
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
@@ -79,9 +100,10 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Tagline = "Your mind is the scene of the crime." }));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Tagline).IsEqualTo("Your mind is the scene of the crime.");
+		await Assert.That(buffer.NewDetails[Id].Answers).Contains(new ProviderAnswer(MediaProvider.Tmdb, MediaFields.None));
 	}
 
 	[Test]
@@ -92,22 +114,23 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Ratings).IsEqualTo(TmdbOnly);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task FetchAsync_ForACompletePrimaryResult_AsksNoEnricher()
+	public async Task FetchAsync_ForACompletePrimaryResult_AsksNoEnricherAndStoresOnlyThePrimarysAnswer()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete());
 		await using var buffer = deps.Buffer();
 
-		await deps.Testee.FetchAsync(Identity, buffer);
+		await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer);
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+		await Assert.That(buffer.NewDetails[Id].Answers).IsEquivalentTo([new ProviderAnswer(MediaProvider.Plex, MediaFields.None)]);
 	}
 
 	[Test]
@@ -117,39 +140,28 @@ public class DetailsFetcherTests
 		deps.Primary(Unrated());
 		await using var buffer = deps.Buffer();
 
-		await deps.Testee.FetchAsync(Identity, buffer);
+		await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer);
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenAGapSurvivesEveryEnricher_RecordsItAsConfirmed()
+	public async Task FetchAsync_WhenAGapSurvivesEveryEnricher_StoresItAsUnfilledByEach()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete() with { Tagline = null });
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails()));
 		await using var buffer = deps.Buffer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
-		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
+		await Assert
+			.That(buffer.NewDetails[Id].Answers)
+			.IsEquivalentTo([new ProviderAnswer(MediaProvider.Plex, MediaField.Tagline), new ProviderAnswer(MediaProvider.Tmdb, MediaField.Tagline)]);
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenTheEnricherAnswersThatItHasNothing_ConfirmsTheGap()
-	{
-		var deps = Dependencies.Create();
-		deps.Primary(Complete() with { Tagline = null });
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("TMDB detail returned 404 for 500"));
-		await using var buffer = deps.Buffer();
-
-		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
-
-		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
-	}
-
-	[Test]
-	public async Task FetchAsync_WhenTheEnricherAnswersAnotherType_IgnoresTheAnswerAndConfirmsTheGap()
+	public async Task FetchAsync_WhenTheEnricherAnswersAnotherType_IgnoresTheAnswerAndStoresNoAnswerForIt()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete() with { Tagline = null });
@@ -157,36 +169,36 @@ public class DetailsFetcherTests
 			.Returns(Success.Of(new FoundMedia([TvdbId.From("81189", MediaType.Show)], new ShowDetails { Tagline = "Say my name." })));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Identity).IsEqualTo(Identity);
 		await Assert.That(fetched.Details).IsEqualTo(Complete() with { Tagline = null });
-		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenTheEnricherIsUnavailable_LeavesOnlyItsFieldsUnconfirmed()
-	{
-		var deps = Dependencies.Create(tmdbFills: MediaField.Tagline);
-		deps.Primary(Complete() with { Tagline = null, Summary = null });
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Unavailable);
-		await using var buffer = deps.Buffer();
-
-		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
-
-		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Summary);
-	}
-
-	[Test]
-	public async Task FetchAsync_WhenTheTitleHasNoIdForTheEnricher_ConfirmsTheGapWithoutAsking()
+	public async Task FetchAsync_WhenTheTitleHasNoIdForTheEnricher_NeverAsksIt()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete() with { Tagline = null }, PlexOnly);
 		await using var buffer = deps.Buffer();
 
-		await Matched(await deps.Testee.FetchAsync(PlexOnly, buffer));
+		await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), Everyone, buffer));
 
-		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.Tagline);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenTheUserHasNotConnectedTheEnricher_NeverAsksIt()
+	{
+		var deps = Dependencies.Create();
+		deps.Primary(Complete() with { Tagline = null });
+		await using var buffer = deps.Buffer();
+
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), OnlyPlex, buffer));
+
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
@@ -200,7 +212,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
 		await using var buffer = deps.Buffer();
 
-		await deps.Testee.FetchAsync(Identity, buffer);
+		await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer);
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
@@ -214,7 +226,7 @@ public class DetailsFetcherTests
 			.Returns(Answer(new MovieDetails { Ratings = MediaRatings.From([new ImdbRating(8.8f, Some.Of(2_500_000))]) }));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Ratings.All.Select(rating => rating.Source)).IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb]);
 	}
@@ -227,7 +239,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Ratings.Of(RatingSource.Tmdb).Map(rating => rating.Votes)).IsSome().And.IsEqualTo(500);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
@@ -242,13 +254,13 @@ public class DetailsFetcherTests
 		deps.Primary(Complete() with { Ratings = TmdbOnly });
 		await using var buffer = deps.Buffer();
 
-		await deps.Testee.FetchAsync(Identity, buffer);
+		await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer);
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenTheEnricherIsRateLimited_SkipsItAndLeavesItsFieldsUnconfirmed()
+	public async Task FetchAsync_WhenTheEnricherIsRateLimited_SkipsItAndStoresNoAnswerForIt()
 	{
 		var deps = Dependencies.Create(
 			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Tmdb, () => Now.AddMinutes(1)), 0))
@@ -256,10 +268,10 @@ public class DetailsFetcherTests
 		deps.Primary(Complete() with { Tagline = null });
 		await using var buffer = deps.Buffer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
-		await Assert.That(buffer.NewDetails[Id].ConfirmedAbsent).IsEqualTo(MediaField.None);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
 	}
 
 	[Test]
@@ -271,7 +283,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia([Tmdb, imdb], Complete())));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Identity.Id).IsEqualTo(Id);
 		await Assert.That(fetched.Identity.Externals).IsEquivalentTo(new IExternalMediaId[] { Plex, Tmdb, imdb });
@@ -285,7 +297,7 @@ public class DetailsFetcherTests
 			.Returns(Success.Of(new FoundMedia([PlexId.From("plex-rating", MediaType.Show)], new ShowDetails { Title = "Inception" })));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await deps.Testee.FetchAsync(Identity, buffer);
+		var fetched = await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer);
 
 		await Assert.That(fetched).IsError();
 		await Assert.That(buffer.NewDetails).IsEmpty();
@@ -293,15 +305,89 @@ public class DetailsFetcherTests
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenTheDetailsAreFetched_StampsThemWithTheTimeOfTheFetch()
+	public async Task FetchAsync_WhenRefreshing_StampsBothTimesWithTheTimeOfTheRefresh()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete());
 		await using var buffer = deps.Buffer();
 
-		await deps.Testee.FetchAsync(Identity, buffer);
+		await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer);
 
-		await Assert.That(buffer.NewDetails[Id].FetchedAt).IsEqualTo(Now);
+		await Assert.That(buffer.NewDetails[Id].RefreshedAt).IsEqualTo(Now);
+		await Assert.That(buffer.NewDetails[Id].AskedAt).IsEqualTo(Now);
+	}
+
+	[Test]
+	public async Task FetchAsync_ForAStaleCopy_RefreshesItFromThePrimary()
+	{
+		var deps = Dependencies.Create();
+		deps.Primary(Complete());
+		var stale = new CachedDetails(
+			Complete() with
+			{
+				Title = "Old",
+			},
+			Now.AddDays(-14),
+			Now.AddDays(-14),
+			[new ProviderAnswer(MediaProvider.Plex, MediaFields.None)]
+		);
+		await using var buffer = deps.Buffer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, buffer));
+
+		await Assert.That(fetched.Details.Title).IsEqualTo("Inception");
+		await Assert.That(buffer.NewDetails[Id].RefreshedAt).IsEqualTo(Now);
+		deps.Search.LookUpAsync(Plex, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task FetchAsync_ForACopyThatIsNotStale_AsksOnlyTheEnrichersThatHaveNotAnsweredAndKeepsWhatIsStored()
+	{
+		var deps = Dependencies.Create();
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Title = "Other", Ratings = TmdbOnly }));
+		await using var buffer = deps.Buffer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Everyone, buffer));
+
+		await Assert.That(fetched.Details).IsEqualTo(Unrated() with { Ratings = TmdbOnly });
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenFillingGaps_KeepsTheRefreshTimeMovesTheAskTimeAndAddsTheNewAnswer()
+	{
+		var deps = Dependencies.Create();
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
+		await using var buffer = deps.Buffer();
+
+		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Everyone, buffer));
+
+		var filled = buffer.NewDetails[Id];
+		await Assert.That(filled.RefreshedAt).IsEqualTo(LastRefresh);
+		await Assert.That(filled.AskedAt).IsEqualTo(Now);
+		await Assert
+			.That(filled.Answers)
+			.IsEquivalentTo([
+				PlexLeftTheRatings,
+				new ProviderAnswer(MediaProvider.Tmdb, MediaFields.Rated([RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience])),
+			]);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenTheEnricherOfAGapFillFails_StillMovesTheAskTimeAndStoresNoAnswerForIt()
+	{
+		var deps = Dependencies.Create();
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Unavailable);
+		await using var buffer = deps.Buffer();
+
+		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Everyone, buffer));
+
+		var filled = buffer.NewDetails[Id];
+		await Assert.That(filled.RefreshedAt).IsEqualTo(LastRefresh);
+		await Assert.That(filled.AskedAt).IsEqualTo(Now);
+		await Assert.That(filled.Answered).IsEquivalentTo([MediaProvider.Plex]);
 	}
 
 	[Test]
@@ -313,7 +399,7 @@ public class DetailsFetcherTests
 		deps.TmdbSearch.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia(Identity.Externals, Complete())));
 		await using var buffer = deps.Buffer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		deps.TmdbSearch.LookUpAsync(Tmdb, Any()).WasCalled(Times.Once);
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -326,7 +412,7 @@ public class DetailsFetcherTests
 		deps.Primary(Complete(), PlexOnly);
 		await using var buffer = deps.Buffer();
 
-		await Matched(await deps.Testee.FetchAsync(PlexOnly, buffer));
+		await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), Everyone, buffer));
 
 		deps.Search.LookUpAsync(Plex, Any()).WasCalled(Times.Once);
 		deps.TmdbSearch.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -342,11 +428,45 @@ public class DetailsFetcherTests
 		deps.TmdbSearch.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia(Identity.Externals, Unrated())));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, buffer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Missing).IsEqualTo(MediaFields.AllRatings);
 		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task FindReusable_WhenAnEnricherTheUserHasConnectedCanFillAGap_IsNone()
+	{
+		var deps = Dependencies.Create();
+		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(UnratedByPlex), Everyone)).IsNone();
+	}
+
+	[Test]
+	public async Task FindReusable_WhenTheOnlyEnricherThatCanFillAGapIsNotConnected_IsTheStoredCopy()
+	{
+		var deps = Dependencies.Create();
+		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(UnratedByPlex), OnlyPlex)).IsSome().And.IsEqualTo(UnratedByPlex);
+	}
+
+	[Test]
+	public async Task ConnectedAsync_ReadsTheEnrichersWhoseKeyOrSignInIsReady()
+	{
+		var deps = Dependencies.Create();
+		deps.Keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Error.From("no TMDB key"));
+		deps.Credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
+
+		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([MediaProvider.Plex]);
+	}
+
+	[Test]
+	public async Task ConnectedAsync_WhenReadingASecretThrows_LeavesThatEnricherOut()
+	{
+		var deps = Dependencies.Create();
+		deps.Keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(IApiKey.Mock().Object));
+		deps.Credentials.GetAsync(AuthProvider.Plex, Any()).Throws(new HttpRequestException("plex.tv is down"));
+
+		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([MediaProvider.Tmdb]);
 	}
 
 	private static async Task<MatchedMedia> Matched(Result<MatchedMedia> result)
@@ -384,6 +504,8 @@ public class DetailsFetcherTests
 		Mock<IMediaSearchProvider> TmdbSearch,
 		Mock<IDetailsEnricher> Plex,
 		Mock<IDetailsEnricher> Tmdb,
+		Mock<IApiKeyService> Keys,
+		Mock<ICredentialService> Credentials,
 		DetailsFetcher Testee
 	)
 	{
@@ -397,6 +519,8 @@ public class DetailsFetcherTests
 			plex.Fills.Returns(Everything);
 			var tmdb = IDetailsEnricher.Mock();
 			tmdb.Fills.Returns(tmdbFills ?? Everything);
+			var keys = IApiKeyService.Mock();
+			var credentials = ICredentialService.Mock();
 
 			var config = IProviderConfigService.Mock();
 			config
@@ -419,9 +543,12 @@ public class DetailsFetcherTests
 				new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>().Register(MediaProvider.Plex, plex.Object).Register(MediaProvider.Tmdb, tmdb.Object),
 				config.Object,
 				capacity ?? TestCapacity.Open(),
-				Clock()
+				keys.Object,
+				credentials.Object,
+				Clock(),
+				NullLogger<DetailsFetcher>.Instance
 			);
-			return new Dependencies(mediaRepository, plexSearch, tmdbSearch, plex, tmdb, testee);
+			return new Dependencies(mediaRepository, plexSearch, tmdbSearch, plex, tmdb, keys, credentials, testee);
 		}
 
 		public void Primary(MovieDetails details, MediaIdentity? identity = null)

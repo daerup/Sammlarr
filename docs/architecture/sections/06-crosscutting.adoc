@@ -206,8 +206,9 @@ contract. Enrichment skips a blocked provider and never waits for it; id resolut
 
 Enrichment asks, one at a time, the open enricher (`EnricherProvider`, generated from `ProviderCapability.Enricher`)
 whose `Fills` cover the most missing fields, the least busy first, among those the title has an id for, until
-no open enricher can fill what is still missing. An enricher that was skipped because it was blocked, or answered as unavailable,
-leaves its fields unconfirmed, so the title is refetched after the 1-hour cooldown. Ratings are fields per source:
+no open enricher can fill what is still missing. Only the enrichers the current user has connected (a key or a
+sign-in, read once per call to the media service, so once per batch or feed run) are asked. An enricher that was skipped because it was blocked, or that failed, stores no
+answer, so a later load asks it once the hour since the last ask has passed and it is open again. Ratings are fields per source:
 `MediaCompleteness` counts each `RatingSource` (TMDB, IMDb, Rotten Tomatoes critics and audience) the title has no
 rating from as a missing field: `MediaFields` holds the `MediaField` detail flags and a set of `RatingSource`, and a provider's sources enter it through `MediaFields.Rated`, so a provider's rating fills come from its `[SuppliedBy]` sources. A rating
 from a source that publishes votes (TMDB, IMDb: `RatingSource.PublishesVotes`) still counts as missing while it has
@@ -216,10 +217,11 @@ none, so Plex's copy of TMDB's rating, which carries no votes, leaves TMDB asked
 own scale and its conversion onto the Sammlarr scale of 0 to 10; `RatingSource` lists the providers that supply each
 source in `[SuppliedBy]`, read through the generated `SuppliedBy()`. Merging keeps one rating per source, and a rating
 with votes wins over a copy without (TMDB's own rating over Plex's copy of it). An enricher that fills ratings and
-finds none confirms the gap like any other empty answer. Unlike the other fields, while a title has no rating at all,
+finds none answers like any other: the rating stays in what it could not give. Unlike the other fields, while a title has no rating at all,
 an enricher that fills ratings is asked even when it is blocked, so the retry pipeline waits out its `Retry-After`;
 once the title has one rating, the other sources wait for an open enricher like any other field, so a blocked TMDB
-leaves its rating unconfirmed beside Plex's copy and the title is refetched after the hour.
+stores no answer beside Plex's copy and is asked on the first load after its block lifts and an hour has passed since
+the last ask.
 
 Id resolution routes the same way. Each `IExternalIdConverter` announces its `Lookups`, the calls its own provider
 answers: a `ById` lookup accepts some providers' ids, a `ByHints` lookup accepts the title hints, and each says

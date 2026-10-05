@@ -12,8 +12,10 @@ using API.Wikidata;
 using Contracts;
 using Contracts.Announcing;
 using Contracts.Auth;
+using Contracts.DI;
 using Contracts.Feed;
 using Contracts.Identity;
+using Contracts.Media;
 using Contracts.Messaging;
 using Contracts.Ratings;
 using Contracts.Wantlist;
@@ -145,7 +147,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void SinkAddresses(MediaProvider provider) => SinkAddresses(_ => Some.Of(provider));
 
-	internal async Task<MediaId> SeedWithDetailsAsync(ResolvedVersion resolved, DateTimeOffset? fetched)
+	internal async Task<MediaId> SeedWithDetailsAsync(ResolvedVersion resolved, DateTimeOffset fetched, IReadOnlyList<MediaProvider> answeredBy)
 	{
 		var context = ScopedDbContext;
 		var media = new MediaRow();
@@ -155,13 +157,13 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		}
 
 		await context.SaveChangesAsync();
-		await context.MediaDetails.AddAsync(BuildDetails(media.Id, resolved, fetched));
+		await context.MediaDetails.AddAsync(BuildDetails(media.Id, resolved, fetched, answeredBy));
 		await context.SaveChangesAsync();
 		context.ChangeTracker.Clear();
 		return MediaId.From(media.Id);
 	}
 
-	private MediaDetailsRow BuildDetails(Guid mediaId, ResolvedVersion resolved, DateTimeOffset? fetched)
+	private MediaDetailsRow BuildDetails(Guid mediaId, ResolvedVersion resolved, DateTimeOffset fetched, IReadOnlyList<MediaProvider> answeredBy)
 	{
 		MediaDetailsRow details =
 			resolved.Type == MediaType.Show
@@ -190,8 +192,16 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				VoteCount = 100,
 			},
 		];
-		details.ConfirmedAbsent = MediaFields.AllRatings.Except(MediaFields.Rated([RatingSource.Tmdb]));
-		details.FetchedAt = fetched ?? _clock.Now;
+		details.RefreshedAt = fetched;
+		details.AskedAt = fetched;
+		var seeded = new MediaDetailsFactory().ToCached(details).Details;
+		var enrichers = Resolve<IKeyedServiceIndex<MediaProvider, IDetailsEnricher>>();
+		details.Answers =
+		[
+			.. answeredBy
+				.Select(provider => ProviderAnswer.After(provider, enrichers[provider].Fills, seeded))
+				.Select(answer => new ProviderAnswerRow { Provider = answer.Provider, Unfilled = answer.Unfilled }),
+		];
 		return details;
 	}
 

@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261005053003_MediaFieldsRatingSources";
+    public override string LastMigrationId => "20261005055551_ProviderAnswers";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -589,17 +589,13 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Property<Guid>("MediaId")
                     .HasColumnType("TEXT");
 
+                b.Property<long>("AskedAt")
+                    .HasColumnType("INTEGER");
+
                 b.Property<string>("BackdropUrl")
                     .HasColumnType("TEXT");
 
-                b.Property<string>("ConfirmedAbsent")
-                    .IsRequired()
-                    .HasColumnType("TEXT");
-
                 b.Property<long>("CreatedAt")
-                    .HasColumnType("INTEGER");
-
-                b.Property<long>("FetchedAt")
                     .HasColumnType("INTEGER");
 
                 b.PrimitiveCollection<string>("Genres")
@@ -612,6 +608,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
 
                 b.Property<string>("PosterUrl")
                     .HasColumnType("TEXT");
+
+                b.Property<long>("RefreshedAt")
+                    .HasColumnType("INTEGER");
 
                 b.Property<DateOnly?>("ReleaseDate")
                     .HasColumnType("TEXT");
@@ -681,6 +680,23 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasKey("Id");
 
                 b.ToTable("Media");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.ProviderAnswerRow", b =>
+            {
+                b.Property<Guid>("MediaId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Provider")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Unfilled")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.HasKey("MediaId", "Provider");
+
+                b.ToTable("ProviderAnswers");
             });
 
         modelBuilder.Entity("DB.Data.Notifications.NotificationDeliveryOutcomeRow", b =>
@@ -1270,6 +1286,17 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Details");
             });
 
+        modelBuilder.Entity("DB.Data.Media.ProviderAnswerRow", b =>
+            {
+                b.HasOne("DB.Data.Media.MediaDetailsRow", "Details")
+                    .WithMany("Answers")
+                    .HasForeignKey("MediaId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Details");
+            });
+
         modelBuilder.Entity("DB.Data.Notifications.NotificationDeliveryOutcomeRow", b =>
             {
                 b.HasOne("DB.Data.Notifications.NotificationTargetRow", null)
@@ -1394,6 +1421,8 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>
             {
+                b.Navigation("Answers");
+
                 b.Navigation("Ratings");
             });
 

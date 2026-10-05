@@ -52,14 +52,13 @@ public class MediaModelTests
 	}
 
 	[Test]
-	public async Task MediaModel_OfConfirmedAbsent_LivesOnlyOnTheCachedDetails()
+	public async Task MediaModel_OfProviderAnswers_LiveOnlyOnTheCachedDetails()
 	{
 		var holders = new[] { Projects.Domain, Projects.Contracts }
 			.SelectMany(assembly => assembly.GetTypes())
 			.Where(type => type != typeof(CachedDetails))
 			.Where(type =>
-				type.GetMember(nameof(CachedDetails.ConfirmedAbsent), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).Length
-				> 0
+				type.GetMember(nameof(CachedDetails.Answers), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).Length > 0
 			)
 			.Select(type => type.FullName);
 
