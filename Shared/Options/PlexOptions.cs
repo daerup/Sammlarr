@@ -13,4 +13,12 @@ public record PlexOptions : IOptionsSection, IProviderHttpOptions
 	public required OAuthenticationOptions Authentication { get; set; }
 	public ProviderHttpOptions Http { get; set; } = new();
 	public static string SectionName => "Plex";
+
+	public static IReadOnlyList<string> UrlSettings { get; } =
+	[
+		.. typeof(PlexOptions)
+			.GetProperties()
+			.Where(property => property.PropertyType == typeof(string) && property.Name.EndsWith("Url", StringComparison.Ordinal))
+			.Select(property => property.Name),
+	];
 }

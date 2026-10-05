@@ -14,6 +14,8 @@ internal sealed partial class SelfHostedStack
 {
 	private const string Web = "blazor-ui";
 
+	private const int StopAttempts = 3;
+
 	private const string BrokenKey = "fedcba9876543210fedcba9876543210";
 
 	private const string WebLogCategory = "AppHost.Resources.blazor-ui";
@@ -131,7 +133,7 @@ internal sealed partial class SelfHostedStack
 			}
 		}
 
-		foreach (var key in PlexUrlKeys())
+		foreach (var key in PlexOptions.UrlSettings)
 		{
 			webBuilder.WithEnvironment($"{PlexOptions.SectionName}__{key}", ReferenceExpression.Create($"{wiremockHttp}/plex-blocked/{key}"));
 		}
@@ -200,8 +202,7 @@ internal sealed partial class SelfHostedStack
 	{
 		using var reset = new CancellationTokenSource(ResetTimeout);
 		_setupCodes.Forget();
-		await CommandAsync(Web, KnownResourceCommands.StopCommand, reset.Token);
-		await _app.ResourceNotifications.WaitForResourceAsync(Web, KnownResourceStates.TerminalStates, reset.Token);
+		await StopResourceAsync(Web, reset.Token);
 		foreach (var suffix in new[] { "", "-wal", "-shm" })
 		{
 			File.Delete($"{DatabasePath(_workDir)}{suffix}");
@@ -274,11 +275,7 @@ internal sealed partial class SelfHostedStack
 
 	private async Task SetSonarrKeyAsync(string key, CancellationToken cancellationToken)
 	{
-		if (_app.ResourceNotifications.TryGetCurrentState("sonarr", out var current) && current.Snapshot.State?.Text == KnownResourceStates.Running)
-		{
-			await CommandAsync("sonarr", KnownResourceCommands.StopCommand, cancellationToken);
-			await _app.ResourceNotifications.WaitForResourceAsync("sonarr", KnownResourceStates.TerminalStates, cancellationToken);
-		}
+		await StopResourceAsync("sonarr", cancellationToken);
 
 		var config = Path.Combine(_workDir, "arr", "sonarr", "config", "config.xml");
 		var xml = await File.ReadAllTextAsync(config, cancellationToken);
@@ -295,6 +292,32 @@ internal sealed partial class SelfHostedStack
 	[GeneratedRegex("<ApiKey>[^<]*</ApiKey>")]
 	private static partial Regex ApiKeyElement();
 
+	private async Task StopResourceAsync(string resource, CancellationToken cancellationToken)
+	{
+		for (var attempt = 1; !IsStopped(resource); attempt++)
+		{
+			var result = await _app.ResourceCommands.ExecuteCommandAsync(resource, KnownResourceCommands.StopCommand, cancellationToken);
+			if (result.Success)
+			{
+				await _app.ResourceNotifications.WaitForResourceAsync(resource, KnownResourceStates.TerminalStates, cancellationToken);
+			}
+			else if (attempt == StopAttempts)
+			{
+				throw new InvalidOperationException($"stop {resource}: {result.Message}");
+			}
+			else
+			{
+				await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+			}
+		}
+	}
+
+	private bool IsStopped(string resource)
+	{
+		return _app.ResourceNotifications.TryGetCurrentState(resource, out var current)
+			&& KnownResourceStates.TerminalStates.Contains(current.Snapshot.State?.Text);
+	}
+
 	private async Task CommandAsync(string resource, string command, CancellationToken cancellationToken)
 	{
 		var result = await _app.ResourceCommands.ExecuteCommandAsync(resource, command, cancellationToken);
@@ -305,14 +328,6 @@ internal sealed partial class SelfHostedStack
 	}
 
 	private static string DatabasePath(string workDir) => Path.Combine(workDir, "sammlarr.db");
-
-	private static IEnumerable<string> PlexUrlKeys()
-	{
-		return typeof(PlexOptions)
-			.GetProperties()
-			.Where(property => property.PropertyType == typeof(string) && property.Name.EndsWith("Url", StringComparison.Ordinal))
-			.Select(property => property.Name);
-	}
 
 	private sealed record IndexerField(string Name, object Value);
 }
