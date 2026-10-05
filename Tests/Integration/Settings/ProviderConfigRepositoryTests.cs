@@ -53,6 +53,27 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		await Assert.That(entities).Count().IsEqualTo(1);
 	}
 
+	[Test]
+	public async Task Migrate_WithTheRowMissing_PutsBackOneRowOfDefaults()
+	{
+		await fixture.Context.ProviderSettings.ExecuteDeleteAsync();
+
+		await fixture.Context.Database.MigrateAsync();
+
+		await Assert.That(await fixture.Context.ProviderSettings.AsNoTracking().ToListAsync()).IsEquivalentTo([ProviderConfigRow.Default]);
+	}
+
+	[Test]
+	public async Task Migrate_WithTheRowEdited_KeepsTheEdits()
+	{
+		var edited = await fixture.Context.ProviderSettings.AsNoTracking().SingleAsync();
+
+		await fixture.Context.Database.MigrateAsync();
+
+		await Assert.That(await fixture.Context.ProviderSettings.AsNoTracking().SingleAsync()).IsEqualTo(edited);
+		await Assert.That(edited).IsNotEqualTo(ProviderConfigRow.Default);
+	}
+
 	private static ProviderConfig CreateProviderSettings(SinkKind sinkProvider, TrendingProvider trendingProvider, SearchProvider searchProvider) =>
 		new()
 		{

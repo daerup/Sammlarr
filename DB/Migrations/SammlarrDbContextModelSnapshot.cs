@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261004162805_PersonColours";
+    public override string LastMigrationId => "20261005015945_DropProviderConfigSeed";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -209,27 +209,6 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasKey("Id");
 
                 b.ToTable("ProviderConfig");
-
-                b.HasData(
-                    new
-                    {
-                        Id = 1,
-                        ArrTagFeedSource = "ListName",
-                        ArrTagPerFeed = true,
-                        ArrTagPerUser = true,
-                        ArrTagPlainPrefix = false,
-                        ArrTagPrefix = "sammlarr",
-                        ArrTagUserSource = "Name",
-                        AuthProvider = "Plex",
-                        RadarrMonitored = true,
-                        RadarrSearchOnAdd = true,
-                        RegistrationMode = "Open",
-                        SearchProvider = "Tmdb",
-                        Sink = "Plex",
-                        SonarrMonitored = true,
-                        SonarrSearchOnAdd = true,
-                        TrendingProvider = "Tmdb"
-                    });
             });
 
         modelBuilder.Entity("DB.Data.Feed.FeedRow", b =>
