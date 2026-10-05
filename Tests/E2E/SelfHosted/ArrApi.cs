@@ -39,7 +39,69 @@ internal sealed class ArrApi(HttpClient http)
 		}
 	}
 
-	internal async Task<JsonNode> WaitForAsync(string library, Func<JsonNode, bool> match)
+	internal async Task<JsonNode> AddMovieAsync(int tmdbId)
+	{
+		var movie = (await GetAsync($"movie/lookup?term=tmdb:{tmdbId}"))[0]!;
+		var profile = (await GetAsync("qualityprofile"))[0]!;
+		return await PostAsync(
+			"movie",
+			new
+			{
+				title = movie["title"]!.GetValue<string>(),
+				tmdbId,
+				year = movie["year"]!.GetValue<int>(),
+				qualityProfileId = profile["id"]!.GetValue<int>(),
+				rootFolderPath = "/movies",
+				monitored = true,
+				minimumAvailability = "announced",
+				addOptions = new { searchForMovie = false },
+			}
+		);
+	}
+
+	internal async Task TagMovieAsync(JsonNode movie, string label)
+	{
+		var tag = await PostAsync("tag", new { label });
+		using var response = await http.PutAsJsonAsync(
+			"api/v3/movie/editor",
+			new
+			{
+				movieIds = new[] { movie["id"]!.GetValue<int>() },
+				tags = new[] { tag["id"]!.GetValue<int>() },
+				applyTags = "add",
+			}
+		);
+		response.EnsureSuccessStatusCode();
+	}
+
+	internal static IEnumerable<int> TagsOf(JsonNode title) => title["tags"]!.AsArray().Select(id => id!.GetValue<int>());
+
+	internal async Task<int> TagIdAsync(string label)
+	{
+		var tag = (await GetAsync("tag")).AsArray().Single(found => found!["label"]!.GetValue<string>() == label)!;
+		return tag["id"]!.GetValue<int>();
+	}
+
+	internal Task DeleteMovieAsync(JsonNode movie) => DeleteAsync($"movie/{movie["id"]}?deleteFiles=false");
+
+	internal Task<JsonNode> WaitForMovieAsync(int tmdbId) => WaitForAsync("movie", movie => movie["tmdbId"]!.GetValue<int>() == tmdbId);
+
+	internal Task<JsonNode> WaitForSeriesAsync(int tvdbId) => WaitForAsync("series", series => series["tvdbId"]!.GetValue<int>() == tvdbId);
+
+	internal Task WaitForMovieGoneAsync(int tmdbId)
+	{
+		return Poll.UntilAsync(
+			async () => await FindAsync("movie", movie => movie["tmdbId"]!.GetValue<int>() == tmdbId) is null,
+			() => $"{http.BaseAddress}api/v3/movie still holds {tmdbId}"
+		);
+	}
+
+	internal Task WaitUntilUpAsync()
+	{
+		return Poll.UntilAsync(AnswersPingAsync, () => $"{http.BaseAddress} never answered /ping");
+	}
+
+	private async Task<JsonNode> WaitForAsync(string library, Func<JsonNode, bool> match)
 	{
 		JsonNode? found = null;
 		await Poll.UntilAsync(async () => (found = await FindAsync(library, match)) is not null, () => $"{http.BaseAddress}api/v3/{library} never held the title");
@@ -76,6 +138,19 @@ internal sealed class ArrApi(HttpClient http)
 	}
 
 	private static DateTimeOffset Time(JsonNode value) => DateTimeOffset.Parse(value.GetValue<string>(), CultureInfo.InvariantCulture);
+
+	private async Task<bool> AnswersPingAsync()
+	{
+		try
+		{
+			using var response = await http.GetAsync("ping");
+			return response.IsSuccessStatusCode;
+		}
+		catch (HttpRequestException)
+		{
+			return false;
+		}
+	}
 
 	private async Task<IReadOnlyList<string>> BusyAsync()
 	{
