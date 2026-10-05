@@ -6,64 +6,32 @@ namespace Domain.Media;
 public enum RatingSource
 {
 	[Description("TMDB")]
+	[OwnedBy<MediaProvider>(MediaProvider.Tmdb)]
 	[SuppliedBy<MediaProvider>(MediaProvider.Tmdb, MediaProvider.Plex)]
+	[Votes]
 	Tmdb,
 
 	[Description("IMDb")]
+	[OwnedBy<MediaProvider>(MediaProvider.Imdb)]
 	[SuppliedBy<MediaProvider>(MediaProvider.Plex)]
+	[Votes]
 	Imdb,
 
 	[Description("Rotten Tomatoes critics")]
+	[OwnedBy<MediaProvider>(MediaProvider.RottenTomatoes)]
 	[SuppliedBy<MediaProvider>(MediaProvider.Plex)]
 	RottenTomatoesCritics,
 
 	[Description("Rotten Tomatoes audience")]
+	[OwnedBy<MediaProvider>(MediaProvider.RottenTomatoes)]
 	[SuppliedBy<MediaProvider>(MediaProvider.Plex)]
 	RottenTomatoesAudience,
-}
-
-public enum RatingMark
-{
-	Tmdb,
-	Imdb,
-	Fresh,
-	Rotten,
-	Upright,
-	Spilled,
 }
 
 public static class RatingSources
 {
 	extension(RatingSource source)
 	{
-		public bool PublishesVotes
-		{
-			get
-			{
-				return source switch
-				{
-					RatingSource.Tmdb => true,
-					RatingSource.Imdb => true,
-					RatingSource.RottenTomatoesCritics => false,
-					RatingSource.RottenTomatoesAudience => false,
-				};
-			}
-		}
-
-		public bool IsRottenTomatoes
-		{
-			get
-			{
-				return source switch
-				{
-					RatingSource.Tmdb => false,
-					RatingSource.Imdb => false,
-					RatingSource.RottenTomatoesCritics => true,
-					RatingSource.RottenTomatoesAudience => true,
-				};
-			}
-		}
-
 		public IMediaRating Rate(float sammlarrValue, Optional<int> votes)
 		{
 			return source switch

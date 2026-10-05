@@ -179,7 +179,8 @@ Members say what they do; the type already says what to:
 Providers are declared, not hand-wired. Each `MediaProvider` value carries a `[Capabilities]`
 attribute; Roslyn source generators emit the provider-subset enums (`FeedProvider`,
 `AuthProvider`, …) and their conversions from that matrix, plus the options-record
-registration. `SinkKind` is hand-written, because a sink can span providers (Radarr +
+registration. Each `RatingSource` member carries `[SuppliedBy]`, `[OwnedBy]` and `[Votes]`, from which generators emit
+`SuppliedBy()`, `Owner()`, `PublishesVotes()` and the reverse maps. `SinkKind` is hand-written, because a sink can span providers (Radarr +
 Sonarr). Adding a provider is a folder, an enum value and a module (recipe in
 <<section-building-block-view>>).
 
@@ -218,11 +219,14 @@ sign-in, read once per call to the media service, so once per batch or feed run)
 answer, so a later load asks it once the hour since the last ask has passed and it is open again. Ratings are fields per source:
 `MediaCompleteness` counts each `RatingSource` (TMDB, IMDb, Rotten Tomatoes critics and audience) the title has no
 rating from as a missing field: `MediaFields` holds the `MediaField` detail flags and a set of `RatingSource`, and a provider's sources enter it through `MediaFields.Rated`, so a provider's rating fills come from its `[SuppliedBy]` sources. A rating
-from a source that publishes votes (TMDB, IMDb: `RatingSource.PublishesVotes`) still counts as missing while it has
+from a source that publishes votes (TMDB, IMDb: `[Votes]`, read as `PublishesVotes()`) still counts as missing while it has
 none, so Plex's copy of TMDB's rating, which carries no votes, leaves TMDB asked for its own. Each rating is its own type behind
 `IMediaRating` (`TmdbRating`, `ImdbRating`, `RottenTomatoesCriticsRating`, `RottenTomatoesAudienceRating`), keeping its
-own scale and its conversion onto the Sammlarr scale of 0 to 10; `RatingSource` lists the providers that supply each
-source in `[SuppliedBy]`, read through the generated `SuppliedBy()`. Merging keeps one rating per source, and a rating
+own scale and its conversion onto the Sammlarr scale of 0 to 10, and its `Verdict` against its owner's bar (the UI draws a
+verdict as its art, a rating without one as its owner's tile); `RatingSource` declares each source's owner
+(`[OwnedBy]`, generated `Owner()` and `OwnedRatingSources()`), the providers that supply it (`[SuppliedBy]`, generated
+`SuppliedBy()`) and whether it carries votes (`[Votes]`), so no code outside its declaration, its rating type, `Rate`,
+Plex's wire mapping and the UI copy names a source (the Settings › Testing demos aside). Merging keeps one rating per source, and a rating
 with votes wins over a copy without (TMDB's own rating over Plex's copy of it). An enricher that fills ratings and
 finds none answers like any other: the rating stays in what it could not give. No field and no provider is special: a
 blocked TMDB is waited for within its 15 seconds for a missing rating, tagline or poster alike, and a TMDB blocked for

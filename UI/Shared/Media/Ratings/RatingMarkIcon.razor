@@ -1,10 +1,10 @@
-@if (Art.Tile is { } tile)
+@if (Verdict.ToNullable() is { } verdict)
 {
-    <ProviderTile Provider="tile" Size="Size" Decorative="true"/>
+    <img class="rating-mark" src="@VerdictArt(verdict)" alt="" style="--mark-size: @(Size)px"/>
 }
 else
 {
-    <img class="rating-mark" src="@Assets[$"_content/UI/providers/{Art.File}"]" alt="" style="--mark-size: @(Size)px"/>
+    <ProviderTile Provider="Source.Owner()" Size="Size" Decorative="true"/>
 }
 
 @code {
@@ -14,35 +14,9 @@ else
 
     [Parameter] public Optional<IMediaRating> Rating { get; set; } = new None();
 
-    private RatingMark Shown => Rating.Map(rating => rating.Mark).GetValueOr(Plain);
+    private Optional<RatingVerdict> Verdict => Rating.Map(rating => rating.Verdict);
 
-    private RatingMark Plain
-    {
-        get
-        {
-            return Source switch
-            {
-                RatingSource.Tmdb => RatingMark.Tmdb,
-                RatingSource.Imdb => RatingMark.Imdb,
-                RatingSource.RottenTomatoesCritics => RatingMark.Fresh,
-                RatingSource.RottenTomatoesAudience => RatingMark.Upright,
-            };
-        }
-    }
+    private string VerdictArt(RatingVerdict verdict) => Assets[$"_content/UI/providers/ratings/{Slug(Source)}-{Slug(verdict)}.svg"];
 
-    private (MediaProvider? Tile, string? File) Art
-    {
-        get
-        {
-            return Shown switch
-            {
-                RatingMark.Tmdb => (MediaProvider.Tmdb, null),
-                RatingMark.Imdb => (MediaProvider.Imdb, null),
-                RatingMark.Fresh => (null, "rt-fresh.svg"),
-                RatingMark.Rotten => (null, "rt-rotten.svg"),
-                RatingMark.Upright => (null, "rt-upright.svg"),
-                RatingMark.Spilled => (null, "rt-spilled.svg"),
-            };
-        }
-    }
+    private static string Slug(Enum value) => value.ToString().ToLowerInvariant();
 }
