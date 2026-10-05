@@ -3,22 +3,25 @@ using Domain.Providers;
 
 namespace Core.Media;
 
-internal readonly record struct EnricherOption(MediaProvider Provider, IExternalMediaId Id, MediaFields Fills, ProviderLoad Load);
+internal readonly record struct EnricherCandidate(MediaProvider Provider, IExternalMediaId Id, MediaFields Fills, ProviderLoad Load)
+{
+	public bool CanHelp(MediaFields needed, DateTimeOffset now) => needed.Overlaps(Fills) && Load.IsOpen(now);
+}
 
 internal static class EnricherChoice
 {
-	internal static Optional<EnricherOption> Next(MediaFields needed, IEnumerable<EnricherOption> options, DateTimeOffset now)
+	internal static Optional<EnricherCandidate> Next(MediaFields needed, IEnumerable<EnricherCandidate> leftToAsk, DateTimeOffset now)
 	{
-		return options
-			.OrderByDescending(option => (needed & option.Fills).Count)
-			.ThenBy(option => option.Load.Busy)
-			.FirstOrNone(option => needed.Overlaps(option.Fills) && option.Load.IsOpen(now));
+		return leftToAsk
+			.OrderByDescending(candidate => (needed & candidate.Fills).Count)
+			.ThenBy(candidate => candidate.Load.Busy)
+			.FirstOrNone(candidate => candidate.CanHelp(needed, now));
 	}
 
-	internal static MediaFields BlockedFills(MediaFields needed, IEnumerable<EnricherOption> options, DateTimeOffset now)
+	internal static MediaFields BlockedFills(MediaFields needed, IEnumerable<EnricherCandidate> leftToAsk, DateTimeOffset now)
 	{
-		return options
-			.Where(option => needed.Overlaps(option.Fills) && !option.Load.IsOpen(now))
-			.Aggregate(MediaFields.None, (fields, option) => fields | option.Fills);
+		return leftToAsk
+			.Where(candidate => needed.Overlaps(candidate.Fills) && !candidate.Load.IsOpen(now))
+			.Aggregate(MediaFields.None, (fields, candidate) => fields | candidate.Fills);
 	}
 }
