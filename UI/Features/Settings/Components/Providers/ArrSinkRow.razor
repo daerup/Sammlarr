@@ -179,7 +179,7 @@
     private async Task<Optional<ArrTagFeed>> FeedAsync()
     {
         var feeds = await Feeds.GetAsync();
-        return feeds.Feeds.FirstOrNone(_ => true).Map(overview => new ArrTagFeed(overview.Feed.Id.Value, overview.Feed.Name, overview.Feed.Identifier));
+        return feeds.Feeds.FirstOrNone().Map(overview => new ArrTagFeed(overview.Feed.Id.Value, overview.Feed.Name, overview.Feed.Identifier));
     }
 
     private void Edited(ArrApp app, ArrInstanceConfig typed)
@@ -202,10 +202,10 @@
         {
             QualityProfileId = typed
                 .QualityProfileId.When(id => choices.Profiles.Any(profile => profile.Id == id))
-                .Or(() => choices.Profiles.FirstOrNone(_ => true).Map(profile => profile.Id)),
+                .Or(() => choices.Profiles.FirstOrNone().Map(profile => profile.Id)),
             RootFolderPath = typed
                 .RootFolderPath.When(path => choices.Folders.Any(folder => folder.Path == path))
-                .Or(() => choices.Folders.FirstOrNone(_ => true).Map(folder => folder.Path)),
+                .Or(() => choices.Folders.FirstOrNone().Map(folder => folder.Path)),
         };
         var current = _config ?? ArrSinkConfig.Empty;
         var moved = !SettingUp && InstanceOf(current, app).Url.Match(stored => chosen.Url.Match(url => url != stored, () => true), () => false);

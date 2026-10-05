@@ -1,3 +1,5 @@
+using System.Globalization;
+using CsCheck;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
@@ -513,6 +515,24 @@ public class OptionalExtensionsTests
 	}
 
 	[Test]
+	public async Task FirstOrNone_WithoutAPredicate_IsTheFirstItem()
+	{
+		await Assert.That(new[] { "a", "bb" }.FirstOrNone()).IsSome().And.IsEqualTo("a");
+	}
+
+	[Test]
+	public async Task FirstOrNone_WithoutAPredicateOnAnEmptySequence_IsNone()
+	{
+		await Assert.That(Array.Empty<string>().FirstOrNone()).IsNone();
+	}
+
+	[Test]
+	public void FirstOrNone_WithoutAPredicate_EqualsThePredicateThatAcceptsEverything()
+	{
+		Gen.Int.List.Sample(list => Shown(list.FirstOrNone()) == Shown(list.FirstOrNone(_ => true)));
+	}
+
+	[Test]
 	public async Task FirstOrNone_WhenNoItemMatches_IsNone()
 	{
 		await Assert.That(new[] { "a" }.FirstOrNone(s => s.Length >= 2)).IsNone();
@@ -591,4 +611,9 @@ public class OptionalExtensionsTests
 	}
 
 	private static Optional<string> ToLabel(int value) => Optional.When(value > 0, () => $"n{value}");
+
+	private static string Shown(Optional<int> first)
+	{
+		return first.Map(value => value.ToString(CultureInfo.InvariantCulture)).GetValueOr("none");
+	}
 }
