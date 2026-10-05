@@ -10,7 +10,7 @@ WORKDIR /src
 COPY . .
 RUN --mount=type=cache,id=sammlarr-nuget,target=/root/.nuget/packages \
     --mount=type=cache,id=sammlarr-npm,target=/root/.npm \
-    dotnet publish Web/Web.csproj -c Release -r linux-x64 --self-contained false -o /app -p:MinVerVersionOverride=$VERSION
+    dotnet publish Web/Web.csproj -c Release -r linux-x64 --self-contained false -o /app -p:MinVerVersionOverride=$VERSION -p:ExcludeStaging=true
 
 FROM mcr.microsoft.com/dotnet/aspnet:11.0.0-rc.1
 WORKDIR /app

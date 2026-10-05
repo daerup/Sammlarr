@@ -1,4 +1,4 @@
-namespace StagingSeeder;
+namespace Web.Staging;
 
 internal sealed record StagedApp(int[] Categories)
 {

@@ -19,6 +19,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\AppHost\AppHost.csproj" />
 		<ProjectReference Include="..\Harness\Harness.csproj" />
+		<ProjectReference Include="..\..\Web\Web.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Remove="wiremock\responses\plex-metadata\library-metadata-5d7768f6ad5437001f75426f.verified.json" />

@@ -2,7 +2,7 @@ using DB.Conversion.Feed;
 using Domain.Feed;
 using TestInfrastructure;
 
-namespace DB.Tests.Conversion;
+namespace Integration.Tests.DB.Conversion;
 
 public class FeedStrategyConverterTests
 {

@@ -5,7 +5,7 @@ using E2E.Tests.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
-using Seeding.Staging;
+using Web.Staging;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Staging;

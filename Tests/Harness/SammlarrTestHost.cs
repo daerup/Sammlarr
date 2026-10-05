@@ -36,7 +36,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
-using Seeding;
 using Shared.DI;
 using Shared.Options;
 using TestInfrastructure;
