@@ -99,10 +99,16 @@ Rotten Tomatoes' search.
 
 Page linker:: An `IExternalPageLinker`, registered in the UI keyed by `MediaProvider`, one class per provider, that turns a
 title's ids (and its title) into that provider's page, by its own id: TMDB, TheTVDB and MDBList by media type too (TheTVDB and
-MDBList have none for an unknown type), Rotten Tomatoes by its id or else its search for the title; every provider has one. The External IDs popover asks per id, so each row links to its own page;
-the rating breakdown's rows ask with the title's ids. For an admin whose wantlist syncs to Radarr + Sonarr the popover adds one
-card more, the title's Add New search in the app its type belongs to (`ArrSearchLinks`), by the first id that app searches by
-(`ArrApp.SearchableBy`); neither app has a page for a title outside its library.
+MDBList have none for an unknown type), Rotten Tomatoes by its id or else its search for the title; every provider has one.
+The rating breakdown's rows ask with the title's ids.
+
+External IDs view:: `ExternalIdsView` (UI, scoped) decides every card the External IDs popover shows, and `MediaTitleLink`
+only draws them: a card per id that has a page (each asked with that id alone, so two Plex ids link to two pages), none for
+Rotten Tomatoes (its page opens from the rating rows) or for an id without a page, and, for an admin whose wantlist syncs to
+Radarr + Sonarr, one card more: the title's Add New search in the app its type belongs to (`ArrSearchLinks`), by the first
+id that app searches by (`ArrApp.SearchableBy`), since neither app has a page for a title outside its library. The
+role and the sink are checked on each call (the provider config is cached app-wide), the Radarr + Sonarr config is read once
+per circuit, and a title without a card shows no popover.
 
 === Identify and details
 

@@ -103,7 +103,3 @@
 .id-link:focus-visible .id-link-external {
     opacity: 0.9;
 }
-
-.id-link-readonly {
-    cursor: default;
-}

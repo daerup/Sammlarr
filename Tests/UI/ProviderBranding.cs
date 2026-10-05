@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Shared.DI;
 using TestInfrastructure;
+using UI.Shared.Media;
 using UI.Shared.Services.Branding;
 using UI.Shared.Services.Links;
 
@@ -30,6 +31,7 @@ internal static class ProviderBranding
 			services.TryAddSingleton<ICurrentUser>(new TestCurrentUser { Role = UserRole.Member });
 			services.TryAddSingleton(providers.Object);
 			services.TryAddSingleton(IArrSinkConfigService.Mock().Object);
+			services.TryAddScoped<ExternalIdsView>();
 		}
 	}
 
@@ -42,7 +44,7 @@ internal static class ProviderBranding
 		RegistrationMode = RegistrationMode.Open,
 	};
 
-	private static readonly IKeyedServiceIndex<MediaProvider, IExternalPageLinker> Linkers = PageLinkers();
+	internal static readonly IKeyedServiceIndex<MediaProvider, IExternalPageLinker> Linkers = PageLinkers();
 
 	private static IKeyedServiceIndex<MediaProvider, IExternalPageLinker> PageLinkers()
 	{
