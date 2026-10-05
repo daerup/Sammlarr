@@ -9,6 +9,7 @@
 *.woff binary
 *.woff2 binary
 *.db binary
+*.mkv binary
 
 # Verify snapshots: never line-ending-convert (keeps CRLF/LF stable for the comparer)
 *.verified.txt -text

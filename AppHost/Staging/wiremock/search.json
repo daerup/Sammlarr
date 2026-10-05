@@ -1,0 +1,19 @@
+{
+  "priority": 5,
+  "request": {
+    "method": "GET",
+    "urlPath": "/newznab/api",
+    "queryParameters": {
+      "q": {
+        "matches": ".+"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/rss+xml"
+    },
+    "body": "{{#assign 'release'}}{{replace request.query.q ' ' '.'}}{{#if request.query.season}}.S{{request.query.season}}{{#if request.query.ep}}E{{request.query.ep}}{{/if}}{{/if}}.1080p.WEB-DL.x264-STAGING{{/assign}}{{#assign 'category'}}{{#if request.query.season}}5040{{else}}2040{{/if}}{{/assign}}<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\" xmlns:newznab=\"http://www.newznab.com/DTD/2010/feeds/attributes/\"><channel><title>Sammlarr staging indexer</title><newznab:response offset=\"0\" total=\"1\"/><item><title>{{release}}</title><guid isPermaLink=\"false\">{{release}}</guid><link>http://wiremock:8080/newznab/nzb/{{release}}.nzb</link><pubDate>Sun, 04 Oct 2026 12:00:00 +0000</pubDate><category>{{category}}</category><enclosure url=\"http://wiremock:8080/newznab/nzb/{{release}}.nzb\" length=\"4294967296\" type=\"application/x-nzb\"/><newznab:attr name=\"category\" value=\"{{category}}\"/><newznab:attr name=\"size\" value=\"4294967296\"/></item></channel></rss>"
+  }
+}

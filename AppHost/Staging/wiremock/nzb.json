@@ -1,0 +1,14 @@
+{
+  "priority": 5,
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/newznab/nzb/.+"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/x-nzb"
+    },
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><nzb xmlns=\"http://www.newzbin.com/DTD/2003/nzb\"><file poster=\"staging@sammlarr\" date=\"1791100000\" subject=\"staging.mkv\"><groups><group>alt.binaries.staging</group></groups><segments><segment bytes=\"440000\" number=\"1\">staging@sammlarr</segment></segments></file></nzb>"
+  }
+}

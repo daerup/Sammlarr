@@ -1,9 +1,14 @@
 using AppHost;
+using AppHost.Staging;
 using Shared.Options;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-if (builder.ExecutionContext.IsRunMode)
+if (builder.ExecutionContext.IsRunMode && builder.Configuration["Staging"] == "true")
+{
+	builder.AddStaging();
+}
+else if (builder.ExecutionContext.IsRunMode)
 {
 	var ui = builder
 		.AddProject<Projects.Web>("blazor-ui")
