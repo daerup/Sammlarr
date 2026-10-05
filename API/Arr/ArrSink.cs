@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 namespace API.Arr;
 
 internal sealed class ArrSink(
-	ArrClients clients,
+	ArrApis apis,
 	IArrSinkConfigService configs,
 	IUserRepository users,
 	IMediaService mediaService,
@@ -26,15 +26,7 @@ internal sealed class ArrSink(
 {
 	public SinkKind Kind => SinkKind.Arr;
 
-	public Optional<MediaProvider> AddressedBy(MediaType type)
-	{
-		return type switch
-		{
-			MediaType.Movie => Some.Of(MediaProvider.Tmdb),
-			MediaType.Show => Some.Of(MediaProvider.Tvdb),
-			MediaType.Unknown => new None(),
-		};
-	}
+	public Optional<MediaProvider> AddressedBy(MediaType type) => apis.All.FirstOrNone(api => api.App.Type == type).Map(api => api.AddressedBy);
 
 	public async Task<SinkSnapshot> GetAsync(CancellationToken cancellationToken = default)
 	{
@@ -42,9 +34,9 @@ internal sealed class ArrSink(
 		var viewer = await ViewerAsync(cancellationToken);
 		var claims = (await ClaimantAsync(config.Tags, cancellationToken)).Match(first => first.Id == viewer.Id, () => false);
 		List<FoundMedia> items = [];
-		foreach (var app in Enum.GetValues<ArrApp>())
+		foreach (var api in apis.All)
 		{
-			items.AddRange(await MineAsync(clients.For(app), config, viewer, claims, cancellationToken));
+			items.AddRange(await MineAsync(api, config, viewer, claims, cancellationToken));
 		}
 
 		var requests = items.Select(item => new IdentifyRequest([.. item.Externals], new None()));
@@ -106,9 +98,9 @@ internal sealed class ArrSink(
 
 		var others = (await users.GetAllAsync(cancellationToken)).Where(user => user.Id.Value != owner.Id).Select(Owner).ToList();
 		Result<IReadOnlyList<Held>> held = Success.Of<IReadOnlyList<Held>>([]);
-		foreach (var app in Enum.GetValues<ArrApp>())
+		foreach (var api in apis.All)
 		{
-			var session = await ArrSession.OpenAsync(clients.For(app), ArrSession.Connect(app, config.Of(app)), cancellationToken);
+			var session = await ArrSession.OpenAsync(api, ArrSession.Connect(api.App, config.Of(api.App)), cancellationToken);
 			held = held.Map(found => session.Map(open => (IReadOnlyList<Held>)[.. found, Holdings(open, config.Tags, owner, others)]));
 		}
 
@@ -154,26 +146,20 @@ internal sealed class ArrSink(
 		return deleted == 0 ? error : Error.From($"{error.Reason} {deleted} of their titles were already deleted.");
 	}
 
-	private async Task<IReadOnlyList<FoundMedia>> MineAsync(
-		ArrClient client,
-		ArrSinkConfig config,
-		ArrTagUser viewer,
-		bool claims,
-		CancellationToken cancellationToken
-	)
+	private async Task<IReadOnlyList<FoundMedia>> MineAsync(ArrApi api, ArrSinkConfig config, ArrTagUser viewer, bool claims, CancellationToken cancellationToken)
 	{
-		var opened = await ArrSession.OpenAsync(client, ArrSession.Connect(client.App, config.Of(client.App)), cancellationToken);
+		var opened = await ArrSession.OpenAsync(api, ArrSession.Connect(api.App, config.Of(api.App)), cancellationToken);
 		var session = opened.Match(open => open, error => throw new InvalidOperationException(error.Reason));
 		var mine = session.Mine(config.Tags, viewer);
 		return
 		[
 			.. session
 				.Titles.Where(title => title.Tags.Any(mine.Contains) || (claims && session.IsUnclaimed(title, config.Tags)))
-				.Select(title => ArrFound.Of(client.App, title)),
+				.Select(title => ArrFound.Of(api, title)),
 		];
 	}
 
-	private async Task<SinkSyncOutcome> PushAsync(
+	private Task<SinkSyncOutcome> PushAsync(
 		WantlistOperationAction action,
 		SinkPush push,
 		IExternalMediaId id,
@@ -182,16 +168,29 @@ internal sealed class ArrSink(
 		CancellationToken cancellationToken
 	)
 	{
-		var app = id.Type is MediaType.Show ? ArrApp.Sonarr : ArrApp.Radarr;
-		if (!sessions.TryGetValue(app, out var session))
+		return apis.Taking(id)
+			.Match(api => PushWithAsync(api, action, push, id, setup, sessions, cancellationToken), () => Task.FromResult(SinkSyncOutcome.Unaddressable));
+	}
+
+	private async Task<SinkSyncOutcome> PushWithAsync(
+		ArrApi api,
+		WantlistOperationAction action,
+		SinkPush push,
+		IExternalMediaId id,
+		Setup setup,
+		Dictionary<ArrApp, Result<ArrSession>> sessions,
+		CancellationToken cancellationToken
+	)
+	{
+		if (!sessions.TryGetValue(api.App, out var session))
 		{
-			session = await ArrSession.OpenAsync(clients.For(app), ArrSession.Connect(app, setup.Config.Of(app)), cancellationToken);
-			sessions[app] = session;
+			session = await ArrSession.OpenAsync(api, ArrSession.Connect(api.App, setup.Config.Of(api.App)), cancellationToken);
+			sessions[api.App] = session;
 		}
 
 		var pushed = await session.Match(open => PushToAsync(open, action, push, id, setup, cancellationToken), Failed);
 		return pushed
-			.ApplyError(error => logger.LogWarning("Pushing {Action} for {ExternalId} to {App} failed: {Reason}", action, id, app.Name, error.Reason))
+			.ApplyError(error => logger.LogWarning("Pushing {Action} for {ExternalId} to {App} failed: {Reason}", action, id, api.App.Name, error.Reason))
 			.GetValueOr(SinkSyncOutcome.Failed);
 	}
 
@@ -290,10 +289,7 @@ internal sealed class ArrSink(
 		var looked = await session.LookupAsync(id, cancellationToken);
 		return await looked.Match(
 			found =>
-				found.Match(
-					title => AddedAsync(session, ArrAdd.Prepare(session.App, title, settings, addition), cancellationToken),
-					() => Done(SinkSyncOutcome.Unaddressable)
-				),
+				found.Match(title => AddedAsync(session, session.Prepare(title, settings, addition), cancellationToken), () => Done(SinkSyncOutcome.Unaddressable)),
 			Failed
 		);
 	}

@@ -95,7 +95,7 @@ all.
 | TheTVDB | nothing: `TvdbId` is reached through Plex and TMDB lookups
 | Rotten Tomatoes | nothing of its own: `RottenTomatoesId` (the title's page) is found by Wikidata, and its ratings arrive in Plex's answer
 | Wikidata | `IExternalIdConverter` (`WikidataIdConverter`, its `Provider` and HTTP capacity `MediaProvider.RottenTomatoes`): a keyless SPARQL lookup of a title's Rotten Tomatoes page by its IMDb id
-| Radarr, Sonarr | one `IMediaSink` together (`ArrSink`, keyed `SinkKind.Arr`): a typed client per app over the shared `ArrClient`, its address and key from the admin's `ArrSinkConfig`
+| Radarr, Sonarr | one `IMediaSink` together (`ArrSink`, keyed `SinkKind.Arr`): `RadarrApi` and `SonarrApi` over the shared `ArrApi`, each holding what is its own (paths, the id it adds by, its add options from `Arr:Radarr` or `Arr:Sonarr`), its address and key from the admin's `ArrSinkConfig`
 |===
 
 The cross-cutting folders under `API`:

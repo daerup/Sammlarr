@@ -2,6 +2,9 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using API.Arr.Types;
+using Contracts.Settings;
+using Domain.Media;
+using Domain.Providers;
 using Domain.Wantlist.Arr;
 using Polly.CircuitBreaker;
 using Polly.Timeout;
@@ -13,11 +16,43 @@ internal sealed record ArrConnection(ArrApp App, Uri BaseUri, string ApiKey)
 	public string Address => BaseUri.ToString().TrimEnd('/');
 }
 
-internal abstract class ArrClient(HttpClient http, ArrApp app)
+internal abstract class ArrApi(HttpClient http)
 {
 	private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
-	public ArrApp App => app;
+	public abstract ArrApp App { get; }
+
+	public abstract MediaProvider AddressedBy { get; }
+
+	protected abstract string Titles { get; }
+
+	protected abstract string TitleIds { get; }
+
+	protected abstract string ExclusionFlag { get; }
+
+	protected abstract string LookupTerm { get; }
+
+	public abstract int AddressOf(ArrTitle title);
+
+	public abstract IReadOnlyList<IExternalMediaId> IdsOf(ArrTitle title);
+
+	protected abstract void AddOptions(JsonObject title, ArrInstanceConfig settings);
+
+	public bool Takes(IExternalMediaId id) => id.Source == AddressedBy && id.Type == App.Type;
+
+	public string Term(IExternalMediaId id) => $"{LookupTerm}:{id.Value}";
+
+	public JsonObject Prepare(JsonObject lookup, ArrInstanceConfig settings, ArrAddition addition)
+	{
+		lookup["qualityProfileId"] = addition.QualityProfileId;
+		lookup["rootFolderPath"] = addition.RootFolderPath;
+		lookup["monitored"] = settings.Monitored;
+		lookup["tags"] = new JsonArray([.. addition.Tags.Select(tag => JsonValue.Create(tag))]);
+		AddOptions(lookup, settings);
+		return lookup;
+	}
+
+	protected static string Wire(Enum value) => JsonNamingPolicy.CamelCase.ConvertName(value.ToString());
 
 	public Task<Result<ArrSystemStatus>> StatusAsync(ArrConnection connection, CancellationToken cancellationToken)
 	{
@@ -46,29 +81,23 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 
 	public Task<Result<IReadOnlyList<ArrTitle>>> TitlesAsync(ArrConnection connection, CancellationToken cancellationToken)
 	{
-		return ReadAsync<IReadOnlyList<ArrTitle>>(connection, HttpMethod.Get, app.Titles, new None(), cancellationToken);
+		return ReadAsync<IReadOnlyList<ArrTitle>>(connection, HttpMethod.Get, Titles, new None(), cancellationToken);
 	}
 
-	public async Task<Result<Optional<JsonObject>>> LookupAsync(ArrConnection connection, string id, CancellationToken cancellationToken)
+	public async Task<Result<Optional<JsonObject>>> LookupAsync(ArrConnection connection, IExternalMediaId id, CancellationToken cancellationToken)
 	{
-		var found = await ReadAsync<List<JsonObject>>(connection, HttpMethod.Get, $"{app.Titles}/lookup?term={app.LookupTerm}:{id}", new None(), cancellationToken);
+		var found = await ReadAsync<List<JsonObject>>(connection, HttpMethod.Get, $"{Titles}/lookup?term={Term(id)}", new None(), cancellationToken);
 		return found.Map(titles => titles.FirstOrNone());
 	}
 
 	public Task<Result<IReadOnlyList<ArrTitle>>> SearchAsync(ArrConnection connection, string term, CancellationToken cancellationToken)
 	{
-		return ReadAsync<IReadOnlyList<ArrTitle>>(
-			connection,
-			HttpMethod.Get,
-			$"{app.Titles}/lookup?term={Uri.EscapeDataString(term)}",
-			new None(),
-			cancellationToken
-		);
+		return ReadAsync<IReadOnlyList<ArrTitle>>(connection, HttpMethod.Get, $"{Titles}/lookup?term={Uri.EscapeDataString(term)}", new None(), cancellationToken);
 	}
 
 	public Task<Result<ArrTitle>> AddAsync(ArrConnection connection, JsonObject title, CancellationToken cancellationToken)
 	{
-		return ReadAsync<ArrTitle>(connection, HttpMethod.Post, app.Titles, Some.Of<object>(title), cancellationToken);
+		return ReadAsync<ArrTitle>(connection, HttpMethod.Post, Titles, Some.Of<object>(title), cancellationToken);
 	}
 
 	public async Task<Result<int>> RetagAsync(
@@ -81,23 +110,17 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 	{
 		var body = new JsonObject
 		{
-			[app.TitleIds] = new JsonArray([.. titleIds.Select(id => JsonValue.Create(id))]),
+			[TitleIds] = new JsonArray([.. titleIds.Select(id => JsonValue.Create(id))]),
 			["tags"] = new JsonArray([.. tags.Select(tag => JsonValue.Create(tag))]),
 			["applyTags"] = change.ToString().ToLowerInvariant(),
 		};
-		var sent = await SendAsync(connection, HttpMethod.Put, $"{app.Titles}/editor", Some.Of<object>(body), cancellationToken);
+		var sent = await SendAsync(connection, HttpMethod.Put, $"{Titles}/editor", Some.Of<object>(body), cancellationToken);
 		return sent.Map(_ => titleIds.Count);
 	}
 
 	public async Task<Result<int>> DeleteAsync(ArrConnection connection, int titleId, CancellationToken cancellationToken)
 	{
-		var sent = await SendAsync(
-			connection,
-			HttpMethod.Delete,
-			$"{app.Titles}/{titleId}?deleteFiles=false&{app.ExclusionFlag}=false",
-			new None(),
-			cancellationToken
-		);
+		var sent = await SendAsync(connection, HttpMethod.Delete, $"{Titles}/{titleId}?deleteFiles=false&{ExclusionFlag}=false", new None(), cancellationToken);
 		return sent.Map(_ => titleId);
 	}
 
@@ -105,11 +128,11 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 	{
 		var body = new JsonObject
 		{
-			[app.TitleIds] = new JsonArray([.. titleIds.Select(id => JsonValue.Create(id))]),
+			[TitleIds] = new JsonArray([.. titleIds.Select(id => JsonValue.Create(id))]),
 			["deleteFiles"] = false,
-			[app.ExclusionFlag] = false,
+			[ExclusionFlag] = false,
 		};
-		var sent = await SendAsync(connection, HttpMethod.Delete, $"{app.Titles}/editor", Some.Of<object>(body), cancellationToken);
+		var sent = await SendAsync(connection, HttpMethod.Delete, $"{Titles}/editor", Some.Of<object>(body), cancellationToken);
 		return sent.Map(_ => titleIds.Count);
 	}
 
@@ -132,11 +155,11 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 		try
 		{
 			var value = JsonSerializer.Deserialize<T>(text, Json);
-			return value is not null ? Success.Of(value) : Error.From($"{app.Name} at {connection.Address} answered with nothing.");
+			return value is not null ? Success.Of(value) : Error.From($"{App.Name} at {connection.Address} answered with nothing.");
 		}
 		catch (JsonException ex)
 		{
-			return Error.From($"{app.Name} at {connection.Address} answered something Sammlarr cannot read: {ex.Message}");
+			return Error.From($"{App.Name} at {connection.Address} answered something Sammlarr cannot read: {ex.Message}");
 		}
 	}
 
@@ -159,16 +182,16 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 		}
 		catch (Exception ex) when (ex is HttpRequestException or BrokenCircuitException or TimeoutRejectedException)
 		{
-			return Error.From($"{app.Name} could not be reached at {connection.Address}: {ex.Message}");
+			return Error.From($"{App.Name} could not be reached at {connection.Address}: {ex.Message}");
 		}
 	}
 
 	private string Refusal(ArrConnection connection, HttpStatusCode status, string body)
 	{
-		var answer = $"{app.Name} answered {(int)status} {status} at {connection.Address}.";
+		var answer = $"{App.Name} answered {(int)status} {status} at {connection.Address}.";
 		return status switch
 		{
-			HttpStatusCode.Unauthorized => $"{answer} Check the API key under Settings › General in {app.Name}.",
+			HttpStatusCode.Unauthorized => $"{answer} Check the API key under Settings › General in {App.Name}.",
 			HttpStatusCode.BadRequest => $"{answer} {Validation(body)}".TrimEnd(),
 			_ => answer,
 		};
@@ -196,6 +219,4 @@ internal enum ArrTagChange
 	Remove,
 }
 
-internal sealed class RadarrClient(HttpClient http) : ArrClient(http, ArrApp.Radarr);
-
-internal sealed class SonarrClient(HttpClient http) : ArrClient(http, ArrApp.Sonarr);
+internal sealed record ArrAddition(int QualityProfileId, string RootFolderPath, IReadOnlyList<int> Tags);

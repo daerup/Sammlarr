@@ -1,8 +1,11 @@
 using System.Net;
 using API.Arr;
+using API.Arr.Radarr;
+using API.Arr.Sonarr;
 using Contracts.Settings;
 using Domain.Identity;
 using Domain.Wantlist.Arr;
+using Shared.Options;
 using TestInfrastructure;
 using TUnit.Mocks.Http;
 
@@ -22,7 +25,13 @@ public class ArrConnectionTesterTests
 
 	private ArrConnectionTester Testee
 	{
-		get { return new(new ArrClients(new RadarrClient(new HttpClient(_radarr)), new SonarrClient(new HttpClient(Mock.HttpHandler()))), _user); }
+		get
+		{
+			return new(
+				new ArrApis(new RadarrApi(new HttpClient(_radarr), new RadarrOptions()), new SonarrApi(new HttpClient(Mock.HttpHandler()), new SonarrOptions())),
+				_user
+			);
+		}
 	}
 
 	[Test]

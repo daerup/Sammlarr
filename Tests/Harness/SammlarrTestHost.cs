@@ -2,7 +2,8 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using API;
-using API.Arr;
+using API.Arr.Radarr;
+using API.Arr.Sonarr;
 using API.Http;
 using API.Mdblist;
 using API.Pictures;
@@ -17,7 +18,6 @@ using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Messaging;
-using Contracts.Ratings;
 using Contracts.Wantlist;
 using Core;
 using DB;
@@ -659,14 +659,15 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddHttpClient<MdblistClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient(MdblistClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient<WikidataIdConverter>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
-		services.AddHttpClient<RadarrClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
-		services.AddHttpClient<SonarrClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
+		services.AddHttpClient<RadarrApi>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
+		services.AddHttpClient<SonarrApi>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient<IPictureGrids, PictureGrids>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 
 		services.AddSingleton(new TmdbOptions { BaseUrl = $"https://{TestUrls.TmdbApi}", ImageBaseUrl = "https://image.tmdb.org/t/p" });
 		services.AddSingleton(new MdblistOptions { BaseUrl = $"https://{TestUrls.MdblistApi}" });
 		services.AddSingleton(new WikidataOptions { BaseUrl = $"https://{TestUrls.WikidataApi}", UserAgent = "Sammlarr tests" });
-		services.AddSingleton(new ArrOptions());
+		services.AddSingleton(new RadarrOptions());
+		services.AddSingleton(new SonarrOptions());
 		services.AddSingleton(new PictureOptions());
 		services.AddSingleton(
 			new PlexOptions

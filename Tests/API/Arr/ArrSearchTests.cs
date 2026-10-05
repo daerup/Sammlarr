@@ -1,9 +1,12 @@
 using System.Net;
 using API.Arr;
+using API.Arr.Radarr;
+using API.Arr.Sonarr;
 using Contracts.Settings;
 using Domain.Media;
 using Domain.Wantlist.Arr;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shared.Options;
 using TestInfrastructure;
 using TUnit.Mocks.Http;
 
@@ -112,8 +115,8 @@ public class ArrSearchTests
 		{
 			var configs = IArrSinkConfigService.Mock();
 			configs.GetAsync(Any()).Returns(Connected);
-			var clients = new ArrClients(new RadarrClient(new HttpClient(_radarr)), new SonarrClient(new HttpClient(_sonarr)));
-			return new ArrSearch(clients, configs.Object, NullLogger<ArrSearch>.Instance);
+			var apis = new ArrApis(new RadarrApi(new HttpClient(_radarr), new RadarrOptions()), new SonarrApi(new HttpClient(_sonarr), new SonarrOptions()));
+			return new ArrSearch(apis, configs.Object, NullLogger<ArrSearch>.Instance);
 		}
 	}
 }
