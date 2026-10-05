@@ -1,5 +1,6 @@
 using Shared.DI;
 using UI.Shared.Branding.Birds;
+using UI.Shared.Media;
 using UI.Shared.Services.Branding;
 using UI.Shared.Services.Links;
 
@@ -19,6 +20,7 @@ internal class ServicesModule : IServiceModule
 		services.AddScoped<PersonPainter>();
 		services.AddScoped<ArtworkSources>();
 		services.AddScoped<RatingContext>();
+		services.AddScoped<ExternalIdsView>();
 		services.AddSingleton<AppVersionProvider>();
 	}
 }
