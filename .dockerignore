@@ -1,4 +1,4 @@
-﻿**/.dockerignore
+**/.dockerignore
 **/.env
 **/.git
 **/.gitignore
@@ -23,3 +23,16 @@
 **/values.dev.yaml
 LICENSE
 README.md
+**/artifacts
+**/.claude
+**/.husky
+**/.idea
+**/plans
+**/docs
+**/Tests
+**/StrykerOutput
+**/TestResults
+**/dp-keys
+**/*.db
+**/*.db-shm
+**/*.db-wal
