@@ -75,6 +75,17 @@ public class FindIdTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task FindIdAsync_ForATitleKnownOnlyByItsImdbId_FindsItsTmdbId()
+	{
+		var inception = await host.Movie(new MediaSpec("Inception", MediaType.Movie, [Imdb(ImdbTitle)])).SeedAsync();
+		await host.TmdbFinds(Inception);
+
+		var found = await Testee.FindIdAsync(inception, MediaProvider.Tmdb);
+
+		await Assert.That(found).IsSome().And.IsEqualTo(TmdbId.From("27205", MediaType.Movie));
+	}
+
+	[Test]
 	public async Task FindIdAsync_ForATitleKnownOnlyByItsTmdbId_TakesTheImdbIdFromTmdbFirst()
 	{
 		var inception = await host.Movie(new MediaSpec("Inception", MediaType.Movie, [Tmdb("27205")])).SeedAsync();

@@ -12,9 +12,9 @@ internal enum VotesNote
 
 internal sealed record VotesRow(RatingSource Source, Optional<int> Rank)
 {
-	internal string Name => Source.IsRottenTomatoes ? "Rotten Tomatoes" : RatingTexts.Name(Source);
+	internal string Name => Source.Owner().GetDescription();
 
-	internal bool HasVotes => Source.PublishesVotes;
+	internal bool HasVotes => Source.PublishesVotes();
 }
 
 internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Rows, VotesNote Note)
@@ -37,7 +37,7 @@ internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Row
 
 	private static VotesExplanation Averaged(AveragedRating averaged, string whose, ValueSet<RatingSource> available)
 	{
-		List<VotesRow> rows = [.. averaged.Counted(available).Order().DistinctBy(Publisher).Select(source => new VotesRow(source, new None()))];
+		List<VotesRow> rows = [.. averaged.Counted(available).Order().DistinctBy(source => source.Owner()).Select(source => new VotesRow(source, new None()))];
 		if (rows.Count > 0 && rows.All(row => !row.HasVotes))
 		{
 			return new("This feed's rating averages Rotten Tomatoes only:", rows, VotesNote.EveryTitleFails);
@@ -50,12 +50,10 @@ internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Row
 	{
 		List<VotesRow> rows =
 		[
-			.. ordered.Order.Where(available.Contains).Select((source, index) => new VotesRow(source, Some.Of(index + 1))).DistinctBy(row => Publisher(row.Source)),
+			.. ordered.Order.Where(available.Contains).Select((source, index) => new VotesRow(source, Some.Of(index + 1))).DistinctBy(row => row.Source.Owner()),
 		];
 		return new($"Taken from the first of these that rated it ({whose}):", rows, Closing(rows));
 	}
 
 	private static VotesNote Closing(IReadOnlyList<VotesRow> rows) => rows.Any(row => !row.HasVotes) ? VotesNote.RottenTomatoesTitlesFail : VotesNote.Nothing;
-
-	private static RatingSource Publisher(RatingSource source) => source.IsRottenTomatoes ? RatingSource.RottenTomatoesCritics : source;
 }

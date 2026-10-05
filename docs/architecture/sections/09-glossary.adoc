@@ -60,11 +60,16 @@ an id for, the current user has connected, has not answered, and is not blocked 
 
 MediaRatings:: Every rating a title has (`All`), one `IMediaRating` per `RatingSource`, or `None` when it is unrated.
 
-RatingSource:: Where a rating comes from: TMDB, IMDb, Rotten Tomatoes critics or audience. Not a `MediaProvider`:
-Plex supplies the IMDb and Rotten Tomatoes ratings (`[SuppliedBy]`).
+RatingSource:: Where a rating comes from: TMDB, IMDb, Rotten Tomatoes critics or audience. Each member answers three
+questions once, as attributes the generator reads: whose rating it is (`[OwnedBy]`, read as `Owner()`; both Rotten
+Tomatoes sources belong to `MediaProvider.RottenTomatoes`), who delivers it (`[SuppliedBy]`: Plex supplies the IMDb and
+Rotten Tomatoes ratings) and whether it carries votes (`[Votes]`, read as `PublishesVotes()`). Its colour, its page
+link, the id the breakdown asks for and its row in the Votes popover all follow from the owner.
 
 IMediaRating:: One source's rating, its own type per source: `Value` as the source writes it ("8.2", "95%"),
-`SammlarrValue` on the Sammlarr scale of 0 to 10, its `Votes` if the source publishes them, and the `Mark` the UI draws.
+`SammlarrValue` on the Sammlarr scale of 0 to 10, its `Votes` if the source publishes them, and its `Verdict`: whether
+it passed its owner's bar (`Liked` or `Disliked`; Rotten Tomatoes from 60%, TMDB and IMDb have none). The UI draws a
+verdict as its art (`providers/ratings/{source}-{verdict}.svg`) and anything else as the owner's tile.
 
 Sammlarr rating:: The one rating Sammlarr shows, filters and sorts on (`SammlarrRating`): a value on the 0 to 10 scale
 and the ratings it counted (`Counted`), whose votes add up to its `Votes`. A `RatingStrategy` derives it from a title's

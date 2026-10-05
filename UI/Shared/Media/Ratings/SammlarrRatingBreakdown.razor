@@ -102,9 +102,9 @@
 @code {
     private RatingBreakdown _model = null!;
 
-    private Optional<IExternalMediaId> _rottenTomatoes = new None();
+    private IReadOnlyList<IExternalMediaId> _found = [];
 
-    private bool _askedRottenTomatoes;
+    private bool _askedForIds;
 
     [Parameter] [EditorRequired] public required MediaRatings Ratings { get; set; }
 
@@ -125,38 +125,31 @@
     protected override async Task OnParametersSetAsync()
     {
         _model = RatingBreakdown.Of(Ratings, Strategy, Available, StoredOnly);
-        if (!_askedRottenTomatoes && _model.Rows.Any(NeedsARottenTomatoesId))
+        var missing = MissingOwners();
+        if (!_askedForIds && missing.Count > 0)
         {
-            _askedRottenTomatoes = true;
-            _rottenTomatoes = await RottenTomatoesIdAsync();
+            _askedForIds = true;
+            _found = await Media.Match(id => FindAsync(id, missing), () => Task.FromResult<IReadOnlyList<IExternalMediaId>>([]));
         }
     }
 
-    private Task<Optional<IExternalMediaId>> RottenTomatoesIdAsync()
+    private IReadOnlyList<MediaProvider> MissingOwners()
     {
-        return Ids
-            .OfProvider(MediaProvider.RottenTomatoes)
-            .Match(
-                known => Task.FromResult<Optional<IExternalMediaId>>(Some.Of(known)),
-                () => Media.Match(id => MediaService.FindIdAsync(id, MediaProvider.RottenTomatoes), () => Task.FromResult<Optional<IExternalMediaId>>(new None()))
-            );
+        return [.. _model.Rows.Where(row => row.Rating.IsSome()).Select(row => row.Source.Owner()).Distinct().Where(owner => Ids.OfProvider(owner).IsNone())];
     }
 
-    private Optional<string> Link(RatingSource source) => Linkers[ProviderOf(source)].PageOf(LinkIds, Optional.Of(Title));
-
-    private static MediaProvider ProviderOf(RatingSource source)
+    private async Task<IReadOnlyList<IExternalMediaId>> FindAsync(MediaId id, IReadOnlyList<MediaProvider> owners)
     {
-        return source switch
+        var found = new List<IExternalMediaId>();
+        foreach (var owner in owners)
         {
-            RatingSource.Tmdb => MediaProvider.Tmdb,
-            RatingSource.Imdb => MediaProvider.Imdb,
-            RatingSource.RottenTomatoesCritics or RatingSource.RottenTomatoesAudience => MediaProvider.RottenTomatoes,
-        };
+            (await MediaService.FindIdAsync(id, owner)).Apply(found.Add);
+        }
+
+        return found;
     }
 
-    private IReadOnlyCollection<IExternalMediaId> LinkIds => _rottenTomatoes.Map(found => (IReadOnlyCollection<IExternalMediaId>)[.. Ids, found]).GetValueOr(Ids);
-
-    private static bool NeedsARottenTomatoesId(RatingRow row) => row.Rating.IsSome() && ProviderOf(row.Source) == MediaProvider.RottenTomatoes;
+    private Optional<string> Link(RatingSource source) => Linkers[source.Owner()].PageOf([.. Ids, .. _found], Optional.Of(Title));
 
     private float? Value => _model.Sammlarr.Map(rating => rating.Value).ToNullable();
 
@@ -193,5 +186,5 @@
 
     private bool UsedInstead(RatingRow row) => _model.UsedInstead && row.State is RatingRowState.Counts;
 
-    private string Brand(RatingSource source) => Branding.GetBrandingInfo(ProviderOf(source)).BrandColor;
+    private string Brand(RatingSource source) => Branding.GetBrandingInfo(source.Owner()).BrandColor;
 }

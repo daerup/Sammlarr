@@ -5,6 +5,7 @@ using Contracts.Ratings;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using TUnit.Assertions.Enums;
 using UI.Shared.Media.Ratings;
 using UI.Shared.Services;
 
@@ -160,6 +161,26 @@ public class SammlarrRatingBadgeTests : BunitContext
 	}
 
 	[Test]
+	public void Breakdown_WhenTheTitleLacksTheIdOfARatedOwner_AsksForThatIdOnce()
+	{
+		RenderBreakdownWith(LastSeen, new RatingStrategy(AveragedRating.Everything), [ImdbId.From("tt0903747", MediaType.Show)]);
+
+		_media.FindIdAsync(Any<MediaId>(), MediaProvider.Tmdb, Any()).WasCalled(Times.Once);
+		_media.FindIdAsync(Any<MediaId>(), MediaProvider.RottenTomatoes, Any()).WasCalled(Times.Once);
+		_media.FindIdAsync(Any<MediaId>(), MediaProvider.Imdb, Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task Breakdown_ForEachRow_UsesItsOwnersBrandColour()
+	{
+		var cut = RenderBreakdown(LastSeen, new RatingStrategy(AveragedRating.Everything));
+
+		await Assert
+			.That(cut.FindAll(".rating-row").Select(row => row.GetAttribute("style") ?? string.Empty))
+			.IsEquivalentTo(["--brand: #01B4E4", "--brand: #F5DE50", "--brand: #FA320A", "--brand: #FA320A"], CollectionOrdering.Matching);
+	}
+
+	[Test]
 	public async Task Breakdown_WhenTheTitleAlreadyHasARottenTomatoesId_LinksThereWithoutAsking()
 	{
 		var cut = RenderBreakdown(LastSeen, new RatingStrategy(AveragedRating.Everything), RottenTomatoesId.From("tv/last_seen", MediaType.Show));
@@ -172,6 +193,11 @@ public class SammlarrRatingBadgeTests : BunitContext
 
 	private IRenderedComponent<SammlarrRatingBreakdown> RenderBreakdown(MediaRatings ratings, RatingStrategy strategy, params IExternalMediaId[] known)
 	{
+		return RenderBreakdownWith(ratings, strategy, [TmdbId.From("1396", MediaType.Show), ImdbId.From("tt0903747", MediaType.Show), .. known]);
+	}
+
+	private IRenderedComponent<SammlarrRatingBreakdown> RenderBreakdownWith(MediaRatings ratings, RatingStrategy strategy, IReadOnlyList<IExternalMediaId> ids)
+	{
 		return Render<SammlarrRatingBreakdown>(parameters =>
 			parameters
 				.Add(breakdown => breakdown.Ratings, ratings)
@@ -179,7 +205,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 				.Add(breakdown => breakdown.Available, Everything)
 				.Add(breakdown => breakdown.Where, "your default")
 				.Add(breakdown => breakdown.Title, "Last Seen")
-				.Add(breakdown => breakdown.Ids, [TmdbId.From("1396", MediaType.Show), ImdbId.From("tt0903747", MediaType.Show), .. known])
+				.Add(breakdown => breakdown.Ids, ids)
 				.Add(breakdown => breakdown.Media, Some.Of(MediaId.New()))
 		);
 	}

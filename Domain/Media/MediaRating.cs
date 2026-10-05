@@ -12,7 +12,7 @@ public interface IMediaRating
 
 	Optional<int> Votes { get; }
 
-	RatingMark Mark { get; }
+	Optional<RatingVerdict> Verdict { get; }
 }
 
 public readonly record struct TmdbRating(float Average, Optional<int> Votes) : IMediaRating
@@ -23,7 +23,7 @@ public readonly record struct TmdbRating(float Average, Optional<int> Votes) : I
 
 	public float SammlarrValue => Average;
 
-	public RatingMark Mark => RatingMark.Tmdb;
+	public Optional<RatingVerdict> Verdict => new None();
 }
 
 public readonly record struct ImdbRating(float Average, Optional<int> Votes) : IMediaRating
@@ -34,7 +34,7 @@ public readonly record struct ImdbRating(float Average, Optional<int> Votes) : I
 
 	public float SammlarrValue => Average;
 
-	public RatingMark Mark => RatingMark.Imdb;
+	public Optional<RatingVerdict> Verdict => new None();
 }
 
 public readonly record struct RottenTomatoesCriticsRating(int Percent) : IMediaRating
@@ -53,7 +53,7 @@ public readonly record struct RottenTomatoesCriticsRating(int Percent) : IMediaR
 
 	public Optional<int> Votes => new None();
 
-	public RatingMark Mark => Percent >= Fresh ? RatingMark.Fresh : RatingMark.Rotten;
+	public Optional<RatingVerdict> Verdict => Some.Of(Percent >= Fresh ? RatingVerdict.Liked : RatingVerdict.Disliked);
 }
 
 public readonly record struct RottenTomatoesAudienceRating(int Percent) : IMediaRating
@@ -72,7 +72,7 @@ public readonly record struct RottenTomatoesAudienceRating(int Percent) : IMedia
 
 	public Optional<int> Votes => new None();
 
-	public RatingMark Mark => Percent >= Upright ? RatingMark.Upright : RatingMark.Spilled;
+	public Optional<RatingVerdict> Verdict => Some.Of(Percent >= Upright ? RatingVerdict.Liked : RatingVerdict.Disliked);
 }
 
 public readonly record struct MediaRatings(ValueSet<IMediaRating> All)

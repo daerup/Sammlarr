@@ -14,7 +14,7 @@ public class MediaRatingTests
 		await Assert.That(rating.Value).IsEqualTo("8.6");
 		await Assert.That(rating.SammlarrValue).IsEqualTo(8.64f);
 		await Assert.That(rating.Votes).IsSome().And.IsEqualTo(7705);
-		await Assert.That(rating.Mark).IsEqualTo(RatingMark.Tmdb);
+		await Assert.That(rating.Verdict).IsNone();
 	}
 
 	[Test]
@@ -34,7 +34,7 @@ public class MediaRatingTests
 
 		await Assert.That(rating.Value).IsEqualTo("8.2");
 		await Assert.That(rating.SammlarrValue).IsEqualTo(8.2f);
-		await Assert.That(rating.Mark).IsEqualTo(RatingMark.Imdb);
+		await Assert.That(rating.Verdict).IsNone();
 	}
 
 	[Test]
@@ -57,19 +57,19 @@ public class MediaRatingTests
 	}
 
 	[Test]
-	[Arguments(59, RatingMark.Rotten)]
-	[Arguments(60, RatingMark.Fresh)]
-	public async Task RottenTomatoesCriticsRating_IsFreshFromSixtyPercent(int percent, RatingMark mark)
+	[Arguments(59, RatingVerdict.Disliked)]
+	[Arguments(60, RatingVerdict.Liked)]
+	public async Task RottenTomatoesCriticsRating_IsLikedFromSixtyPercent(int percent, RatingVerdict verdict)
 	{
-		await Assert.That(new RottenTomatoesCriticsRating(percent).Mark).IsEqualTo(mark);
+		await Assert.That(new RottenTomatoesCriticsRating(percent).Verdict).IsSome().And.IsEqualTo(verdict);
 	}
 
 	[Test]
-	[Arguments(59, RatingMark.Spilled)]
-	[Arguments(60, RatingMark.Upright)]
-	public async Task RottenTomatoesAudienceRating_IsUprightFromSixtyPercent(int percent, RatingMark mark)
+	[Arguments(59, RatingVerdict.Disliked)]
+	[Arguments(60, RatingVerdict.Liked)]
+	public async Task RottenTomatoesAudienceRating_IsLikedFromSixtyPercent(int percent, RatingVerdict verdict)
 	{
-		await Assert.That(new RottenTomatoesAudienceRating(percent).Mark).IsEqualTo(mark);
+		await Assert.That(new RottenTomatoesAudienceRating(percent).Verdict).IsSome().And.IsEqualTo(verdict);
 	}
 
 	[Test]
