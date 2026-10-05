@@ -36,7 +36,12 @@ internal class MediaDetailsFactory
 
 	public CachedDetails ToCached(MediaDetailsRow row)
 	{
-		return new(Details(row), row.RefreshedAt, row.AskedAt, [.. row.Answers.Select(answer => new ProviderAnswer(answer.Provider, answer.Unfilled))]);
+		return new(
+			Details(row),
+			row.RefreshedAt,
+			row.AskedAt,
+			[.. row.Answers.Select(answer => new ProviderAnswer(answer.Provider, answer.Unfilled, answer.AnsweredAt))]
+		);
 	}
 
 	private static MediaDetails Details(MediaDetailsRow row)
@@ -117,6 +122,7 @@ internal class MediaDetailsFactory
 		{
 			Provider = answer.Provider,
 			Unfilled = answer.Unfilled,
+			AnsweredAt = answer.AnsweredAt,
 			Details = parent,
 		};
 	}

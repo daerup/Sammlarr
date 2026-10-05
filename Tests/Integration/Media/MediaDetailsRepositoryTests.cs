@@ -10,13 +10,13 @@ namespace Integration.Tests.Media;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	private static readonly DateTimeOffset RefreshedAt = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
 	private static readonly ProviderAnswer[] Answers =
 	[
-		new(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Backdrop | MediaFields.Rated([RatingSource.Imdb])),
-		new(MediaProvider.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience])),
+		new(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Backdrop | MediaFields.Rated([RatingSource.Imdb]), RefreshedAt),
+		new(MediaProvider.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience]), RefreshedAt.AddDays(-3)),
 	];
-
-	private static readonly DateTimeOffset RefreshedAt = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
 	private MediaRepository _testee = null!;
 
@@ -88,7 +88,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task UpsertDetailsAsync_ForAPartial_KeepsWhoAnsweredAndWhatEachLeftUnfilled()
+	public async Task UpsertDetailsAsync_ForAPartial_KeepsWhoAnsweredWhenAndWhatEachLeftUnfilled()
 	{
 		var plexId = PlexId.From("plex-812", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);

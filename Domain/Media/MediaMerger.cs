@@ -21,7 +21,35 @@ public static class MediaMerger
 				_ => details,
 			};
 		}
+
+		public MediaDetails Only(MediaFields kept)
+		{
+			var common = details with
+			{
+				Title = Kept(kept, MediaField.Title, details.Title),
+				Tagline = Kept(kept, MediaField.Tagline, details.Tagline),
+				Summary = Kept(kept, MediaField.Summary, details.Summary),
+				PosterUrl = Kept(kept, MediaField.Poster, details.PosterUrl),
+				BackdropUrl = Kept(kept, MediaField.Backdrop, details.BackdropUrl),
+				ReleaseDate = Kept(kept, MediaField.ReleaseDate, details.ReleaseDate),
+				Genres = kept.Details.Overlaps(MediaField.Genres) ? details.Genres : [],
+				Ratings = MediaRatings.From(details.Ratings.All.Where(rating => kept.Ratings.Contains(rating.Source))),
+			};
+			return common switch
+			{
+				MovieDetails movie => movie with { Runtime = Kept(kept, MediaField.Runtime, movie.Runtime) },
+				ShowDetails show => show with
+				{
+					Seasons = Kept(kept, MediaField.Seasons, show.Seasons),
+					Episodes = Kept(kept, MediaField.Episodes, show.Episodes),
+					RuntimePerEpisode = Kept(kept, MediaField.RuntimePerEpisode, show.RuntimePerEpisode),
+				},
+				UnknownDetails unknown => unknown,
+			};
+		}
 	}
+
+	private static T? Kept<T>(MediaFields kept, MediaField field, T? value) => kept.Details.Overlaps(field) ? value : default;
 
 	private static MediaDetails Common(MediaDetails mine, MediaDetails theirs)
 	{

@@ -283,7 +283,7 @@ public class EnricherChoiceTests
 	private static CachedDetails Dune(TimeSpan askedAgo)
 	{
 		var details = new MovieDetails { Title = "Dune", Ratings = MediaRatings.From([new TmdbRating(7.8f, Some.Of(12_000))]) };
-		return new CachedDetails(details, Now.AddDays(-3), Now - askedAgo, [new ProviderAnswer(MediaProvider.Tmdb, MediaField.Tagline)]);
+		return new CachedDetails(details, Now.AddDays(-3), Now - askedAgo, [new ProviderAnswer(MediaProvider.Tmdb, MediaField.Tagline, Now - askedAgo)]);
 	}
 
 	private static EnricherCandidate Candidate(MediaProvider provider, MediaFields fills, ProviderLoad? load = null) =>

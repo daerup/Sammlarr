@@ -49,52 +49,76 @@ internal sealed class DetailsFetcher(
 		CancellationToken cancellationToken = default
 	)
 	{
-		return await stored
-			.When(previous => !previous.IsStale(clock.Now))
-			.Match(
-				previous => FillGapsAsync(identity, previous, connected, buffer, cancellationToken),
-				() => RefreshAsync(identity, stored, connected, buffer, cancellationToken)
-			);
-	}
-
-	private bool NeedsRefetch(MediaIdentity identity, CachedDetails cached, IReadOnlySet<MediaProvider> connected)
-	{
-		var leftToAsk = EnrichersLeftToAsk(new MatchedMedia(identity, cached.Details), cached.Answered, connected);
-		return EnricherChoice.NeedsRefetch(cached, leftToAsk, clock.Now);
-	}
-
-	private async Task<Result<MatchedMedia>> FillGapsAsync(
-		MediaIdentity identity,
-		CachedDetails stored,
-		IReadOnlySet<MediaProvider> connected,
-		MediaWriteBuffer buffer,
-		CancellationToken cancellationToken
-	)
-	{
+		var now = clock.Now;
+		var reason = stored.Map(previous => Reason(previous, now)).GetValueOr(new Uncached());
 		var preferred = await PreferredAsync(cancellationToken);
-		var (enriched, answers) = await EnrichAsync(new MatchedMedia(identity, stored.Details), stored.Answers, connected, preferred, cancellationToken);
-		var filled = stored with { Details = enriched.Details, AskedAt = clock.Now, Answers = answers };
-		return Success.Of(Store(enriched, filled, buffer));
-	}
-
-	private async Task<Result<MatchedMedia>> RefreshAsync(
-		MediaIdentity identity,
-		Optional<CachedDetails> stored,
-		IReadOnlySet<MediaProvider> connected,
-		MediaWriteBuffer buffer,
-		CancellationToken cancellationToken
-	)
-	{
-		var preferred = await PreferredAsync(cancellationToken);
-		var (enriched, answers) = await EnrichAsync(new MatchedMedia(identity, MediaDetails.Empty(identity.Type)), [], connected, preferred, cancellationToken);
-		if (answers.Count == 0)
+		var (enriched, answers) = await EnrichAsync(identity, reason, Backup(reason, identity.Type, now), connected, preferred, cancellationToken);
+		if (answers.Count == 0 && reason is not Gaps)
 		{
 			return Error.From("the details could not be fetched");
 		}
 
-		var now = clock.Now;
-		var refreshed = new CachedDetails(enriched.Details, now, now, answers);
-		return Success.Of(Store(enriched, stored.Map(refreshed.Replacing).GetValueOr(refreshed), buffer));
+		var askedAt = clock.Now;
+		var cached = new CachedDetails(enriched.Details, RefreshedAt(reason, askedAt), askedAt, Answers(reason, answers, now));
+		buffer.Add(enriched, cached);
+		return Success.Of(enriched);
+	}
+
+	private static FetchReason Reason(CachedDetails stored, DateTimeOffset now)
+	{
+		return stored.IsStale(now) ? new Stale(stored) : new Gaps(stored);
+	}
+
+	private bool NeedsRefetch(MediaIdentity identity, CachedDetails cached, IReadOnlySet<MediaProvider> connected)
+	{
+		var leftToAsk = EnrichersLeftToAsk(identity, cached.Answered, connected);
+		return EnricherChoice.NeedsRefetch(cached, leftToAsk, clock.Now);
+	}
+
+	private MediaDetails Backup(FetchReason reason, MediaType type, DateTimeOffset now)
+	{
+		return reason switch
+		{
+			Uncached => MediaDetails.Empty(type),
+			Gaps gaps => gaps.Stored.Details,
+			Stale stale => stale.Stored.Details.Only(GivenWithin(stale.Stored, now)),
+		};
+	}
+
+	private MediaFields GivenWithin(CachedDetails stored, DateTimeOffset now)
+	{
+		return stored
+			.Answers.Where(answer => now - answer.AnsweredAt < CachedDetails.StaleAfter)
+			.Aggregate(MediaFields.None, (given, answer) => given | enricherIndex[answer.Provider].Fills.Except(answer.Unfilled));
+	}
+
+	private static IReadOnlySet<MediaProvider> AlreadyAnswered(FetchReason reason)
+	{
+		return reason switch
+		{
+			Gaps gaps => gaps.Stored.Answered,
+			Uncached or Stale => [],
+		};
+	}
+
+	private static DateTimeOffset RefreshedAt(FetchReason reason, DateTimeOffset now)
+	{
+		return reason switch
+		{
+			Gaps gaps => gaps.Stored.RefreshedAt,
+			Uncached or Stale => now,
+		};
+	}
+
+	private static ValueSet<ProviderAnswer> Answers(FetchReason reason, IEnumerable<ProviderAnswer> fresh, DateTimeOffset now)
+	{
+		IEnumerable<ProviderAnswer> previous = reason switch
+		{
+			Gaps gaps => gaps.Stored.Answers,
+			Stale stale => stale.Stored.Answers.Where(answer => now - answer.AnsweredAt < CachedDetails.StaleAfter),
+			Uncached => [],
+		};
+		return [.. fresh.UnionBy(previous, answer => answer.Provider)];
 	}
 
 	private async Task<Optional<MediaProvider>> PreferredAsync(CancellationToken cancellationToken)
@@ -103,21 +127,25 @@ internal sealed class DetailsFetcher(
 		return config.SearchProvider.Provider();
 	}
 
-	private async Task<(MatchedMedia Enriched, ValueSet<ProviderAnswer> Answers)> EnrichAsync(
-		MatchedMedia current,
-		IEnumerable<ProviderAnswer> known,
+	private async Task<(MatchedMedia Enriched, List<ProviderAnswer> Answers)> EnrichAsync(
+		MediaIdentity identity,
+		FetchReason reason,
+		MediaDetails backup,
 		IReadOnlySet<MediaProvider> connected,
 		Optional<MediaProvider> preferred,
 		CancellationToken cancellationToken
 	)
 	{
 		var now = clock.Now;
-		var answers = known.ToList();
-		var asked = answers.Select(answer => answer.Provider).ToHashSet();
+		var known = identity;
+		var fresh = MediaDetails.Empty(backup.Type);
+		var current = Layered(reason, fresh, backup, answered: false);
+		List<ProviderAnswer> answers = [];
+		var asked = AlreadyAnswered(reason).ToHashSet();
 		var waited = new HashSet<MediaProvider>();
-		while (current.Details.Missing is var missing && !missing.IsEmpty)
+		while (current.Missing is var missing && !missing.IsEmpty)
 		{
-			var leftToAsk = EnrichersLeftToAsk(current, asked, connected);
+			var leftToAsk = EnrichersLeftToAsk(known, asked, connected);
 			if (EnricherChoice.Next(missing, leftToAsk, preferred, now) is not Some<EnricherCandidate>(var next))
 			{
 				if (await WaitForBlockedAsync(missing, leftToAsk, waited, now, cancellationToken) is not Some<DateTimeOffset>(var freeAt))
@@ -130,13 +158,20 @@ internal sealed class DetailsFetcher(
 			}
 
 			asked.Add(next.Provider);
-			var answer = await AskAsync(next, current.Identity, cancellationToken);
-			var fitting = answer.ToOptional().When(found => found.Fits(current.Details.Type));
-			fitting.Apply(found => current = Merge(current, found));
-			fitting.Apply(_ => answers.Add(ProviderAnswer.After(next.Provider, next.Fills, current.Details)));
+			var answer = await AskAsync(next, known, cancellationToken);
+			var fitting = answer.ToOptional().When(found => found.Fits(backup.Type));
+			fitting.Apply(found => known = known with { Externals = known.Externals + found.Externals });
+			fitting.Apply(found => fresh = fresh.FillFrom(found.Details));
+			fitting.Apply(found => answers.Add(ProviderAnswer.After(next.Provider, next.Fills, found.Details, now)));
+			current = Layered(reason, fresh, backup, answered: answers.Count > 0);
 		}
 
-		return (current, [.. answers]);
+		return (new MatchedMedia(known, current), answers);
+	}
+
+	private static MediaDetails Layered(FetchReason reason, MediaDetails fresh, MediaDetails backup, bool answered)
+	{
+		return reason is Stale && !answered ? fresh : fresh.FillFrom(backup);
 	}
 
 	private async Task<Optional<DateTimeOffset>> WaitForBlockedAsync(
@@ -185,29 +220,13 @@ internal sealed class DetailsFetcher(
 		}
 	}
 
-	private static MatchedMedia Store(MatchedMedia enriched, CachedDetails cached, MediaWriteBuffer buffer)
-	{
-		var result = enriched with { Details = cached.Details };
-		buffer.Add(result, cached);
-		return result;
-	}
-
-	private static MatchedMedia Merge(MatchedMedia current, FoundMedia found)
-	{
-		return current with
-		{
-			Identity = current.Identity with { Externals = current.Identity.Externals + found.Externals },
-			Details = current.Details.FillFrom(found.Details),
-		};
-	}
-
-	private List<EnricherCandidate> EnrichersLeftToAsk(MatchedMedia current, IReadOnlySet<MediaProvider> asked, IReadOnlySet<MediaProvider> connected)
+	private List<EnricherCandidate> EnrichersLeftToAsk(MediaIdentity identity, IReadOnlySet<MediaProvider> asked, IReadOnlySet<MediaProvider> connected)
 	{
 		return
 		[
 			.. Enrichers
 				.Where(provider => !asked.Contains(provider) && connected.Contains(provider))
-				.Select(provider => AcceptedId(current.Identity, provider).Map(id => CandidateFor(provider, id)))
+				.Select(provider => AcceptedId(identity, provider).Map(id => CandidateFor(provider, id)))
 				.WhereSome(),
 		];
 	}

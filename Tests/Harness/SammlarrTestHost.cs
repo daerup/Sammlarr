@@ -198,8 +198,13 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		details.Answers =
 		[
 			.. answeredBy
-				.Select(provider => ProviderAnswer.After(provider, enrichers[provider].Fills, seeded))
-				.Select(answer => new ProviderAnswerRow { Provider = answer.Provider, Unfilled = answer.Unfilled }),
+				.Select(provider => ProviderAnswer.After(provider, enrichers[provider].Fills, seeded, fetched))
+				.Select(answer => new ProviderAnswerRow
+				{
+					Provider = answer.Provider,
+					Unfilled = answer.Unfilled,
+					AnsweredAt = answer.AnsweredAt,
+				}),
 		];
 		return details;
 	}
