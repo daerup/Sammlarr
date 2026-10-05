@@ -100,7 +100,9 @@ Rotten Tomatoes' search.
 Page linker:: An `IExternalPageLinker`, registered in the UI keyed by `MediaProvider`, one class per provider, that turns a
 title's ids (and its title) into that provider's page, by its own id: TMDB, TheTVDB and MDBList by media type too (TheTVDB and
 MDBList have none for an unknown type), Rotten Tomatoes by its id or else its search for the title; every provider has one. The External IDs popover asks per id, so each row links to its own page;
-the rating breakdown's rows ask with the title's ids.
+the rating breakdown's rows ask with the title's ids. For an admin whose wantlist syncs to Radarr + Sonarr the popover adds one
+card more, the title's Add New search in the app its type belongs to (`ArrSearchLinks`), by the first id that app searches by
+(`ArrApp.SearchableBy`); neither app has a page for a title outside its library.
 
 === Identify and details
 

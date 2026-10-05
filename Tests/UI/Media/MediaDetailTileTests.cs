@@ -16,6 +16,7 @@ public class MediaDetailTileTests : BunitContext
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton(IMediaService.Mock().Object);
 		Services.AddProviderBranding();
+		Services.AddMediaTitleLink();
 		Services.AddSingleton(ArtworkStub.Sizing());
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

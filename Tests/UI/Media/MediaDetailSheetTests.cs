@@ -162,6 +162,7 @@ public class MediaDetailSheetTests : BunitContext
 
 		Services.AddScoped<Notifier>();
 		Services.AddProviderBranding();
+		Services.AddMediaTitleLink();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

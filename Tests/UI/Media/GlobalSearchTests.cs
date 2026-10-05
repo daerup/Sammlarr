@@ -49,6 +49,7 @@ public class GlobalSearchTests : BunitContext
 		Services.AddLogging();
 		Services.AddScoped<Notifier>();
 		Services.AddProviderBranding();
+		Services.AddMediaTitleLink();
 		Services.AddSingleton(ArtworkStub.Sizing());
 		Services.AddSingleton(IMediaService.Mock().Object);
 

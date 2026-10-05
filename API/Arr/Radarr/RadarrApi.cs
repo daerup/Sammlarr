@@ -19,8 +19,6 @@ internal sealed class RadarrApi(HttpClient http, RadarrOptions options) : ArrApi
 
 	protected override string ExclusionFlag => "addImportExclusion";
 
-	protected override string LookupTerm => "tmdb";
-
 	public override int AddressOf(ArrTitle title) => title.TmdbId;
 
 	public override IReadOnlyList<IExternalMediaId> IdsOf(ArrTitle title) => [TmdbId.From(title.TmdbId.ToString(), MediaType.Movie)];

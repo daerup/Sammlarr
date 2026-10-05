@@ -29,8 +29,6 @@ internal abstract class ArrApi(HttpClient http)
 
 	protected abstract string ExclusionFlag { get; }
 
-	protected abstract string LookupTerm { get; }
-
 	public abstract int AddressOf(ArrTitle title);
 
 	public abstract IReadOnlyList<IExternalMediaId> IdsOf(ArrTitle title);
@@ -38,8 +36,6 @@ internal abstract class ArrApi(HttpClient http)
 	protected abstract void AddOptions(JsonObject title, ArrInstanceConfig settings);
 
 	public bool Takes(IExternalMediaId id) => id.Source == AddressedBy && id.Type == App.Type;
-
-	public string Term(IExternalMediaId id) => $"{LookupTerm}:{id.Value}";
 
 	public JsonObject Prepare(JsonObject lookup, ArrInstanceConfig settings, ArrAddition addition)
 	{
@@ -85,7 +81,7 @@ internal abstract class ArrApi(HttpClient http)
 
 	public async Task<Result<Optional<JsonObject>>> LookupAsync(ArrConnection connection, IExternalMediaId id, CancellationToken cancellationToken)
 	{
-		var found = await ReadAsync<List<JsonObject>>(connection, HttpMethod.Get, $"{Titles}/lookup?term={Term(id)}", new None(), cancellationToken);
+		var found = await ReadAsync<List<JsonObject>>(connection, HttpMethod.Get, $"{Titles}/lookup?term={ArrSearchTerm.Of(id)}", new None(), cancellationToken);
 		return found.Map(titles => titles.FirstOrNone());
 	}
 

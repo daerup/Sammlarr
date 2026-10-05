@@ -1,13 +1,19 @@
 @using Contracts.DI
+@using Contracts.Identity
+@using Contracts.Settings
+@using Domain.Identity
 @using UI.Shared.Services.Branding
 @using UI.Shared.Services.Links
 @inject MediaProviderBrandingService Branding
 @inject IKeyedServiceIndex<MediaProvider, IExternalPageLinker> Linkers
+@inject ICurrentUser CurrentUser
+@inject IProviderConfigService ProviderConfigs
+@inject IArrSinkConfigService ArrConfigs
 
 @if (Ids.Count > 0)
 {
     <span @onfocusin:stopPropagation="true" @onfocusout:stopPropagation="true" @onclick:stopPropagation="true" class="media-title-link-wrap">
-	<BbPopover>
+	<BbPopover OnOpenChange="OpenChangedAsync">
 		<BbPopoverTrigger AsChild="false" aria-label="@($"View external IDs for {Title}")" tabindex="-1" class="media-title-trigger text-left">
 			<span class="@Class media-title-text">@Title</span><LucideIcon Name="external-link" Size="14" Class="media-title-icon"/>
 		</BbPopoverTrigger>
@@ -51,6 +57,24 @@
 						</span>
                     }
                 }
+                @if (_arrLink.ToNullable() is { } arr)
+                {
+                    var arrBrand = Branding.GetBrandingInfo(arr.App);
+                    <div style="--brand: @arrBrand.BrandColor" class="id-link-card">
+                        <BrandedTile Brand="arrBrand" Size="30" Decorative="true"/>
+                        <a href="@arr.Url"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="@($"Find {arr.Term} in {arrBrand.DisplayName} (opens in new tab)")"
+                           class="id-link">
+                            <span class="id-link-text">
+                                <span class="id-link-name">@arrBrand.DisplayName</span>
+                                <span class="id-link-value">@arr.Term</span>
+                            </span>
+                            <LucideIcon Name="external-link" Size="14" Class="id-link-external"/>
+                        </a>
+                    </div>
+                }
 			</div>
 		</BbPopoverContent>
 	</BbPopover>
@@ -67,4 +91,24 @@ else
     [Parameter] public string? Class { get; set; }
     [Parameter] [EditorRequired] public required PopoverSide Side { get; set; }
     [Parameter] [EditorRequired] public required PopoverAlign Align { get; set; }
+
+    private Optional<ArrSearchLink> _arrLink = new None();
+
+    private async Task OpenChangedAsync(bool open)
+    {
+        if (open)
+        {
+            _arrLink = await ArrLinkAsync();
+        }
+    }
+
+    private async Task<Optional<ArrSearchLink>> ArrLinkAsync()
+    {
+        if (CurrentUser.Role != UserRole.Admin || (await ProviderConfigs.GetAsync()).Sink != SinkKind.Arr)
+        {
+            return new None();
+        }
+
+        return ArrSearchLinks.For(await ArrConfigs.GetAsync(), Ids);
+    }
 }
