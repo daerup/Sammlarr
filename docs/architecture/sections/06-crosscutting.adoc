@@ -270,7 +270,8 @@ the owning user.
 
 Two distinct secret mechanisms: `[Encrypted]` (`DB`) encrypts credential and API-key columns at
 rest through an EF converter over `Microsoft.AspNetCore.DataProtection`; `[Sensitive]` (`Contracts`)
-only masks members as `***` in logs. A stored credential is usually both. Configuration comes in
+only masks members as `***` in logs, and a Domain type, which cannot carry it, names its secrets in
+`SensitiveModel` (`Observability`) instead. A stored credential is usually both. Configuration comes in
 two shapes: static infrastructure settings (URLs, timeouts, connection string) are options records
 bound from config, with a generator emitting their section names and registration so a component
 injects the record itself; runtime settings an admin changes (active search and auth
@@ -336,7 +337,7 @@ link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0008-separate-events-
 === Logging and observability
 
 Serilog with two custom destructuring policies: one unwraps `Optional`/`Result` to log the payload
-rather than the wrapper, the other masks `[Sensitive]` members as `***`. Sinks: console, an
+rather than the wrapper, the other masks `[Sensitive]` members and those `SensitiveModel` names as `***`. Sinks: console, an
 in-memory ring buffer behind the admin `/diagnostics/export` zip, and OTLP when an endpoint is
 present. Tracing is OpenTelemetry over the `Sammlarr` activity source; services opt in via
 `AddTracedScoped`/`AddTracedKeyedScoped`, a proxy that spans each method call. OTLP export turns on

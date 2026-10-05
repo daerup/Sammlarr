@@ -1,4 +1,4 @@
-using Contracts.Settings;
+using Domain.Wantlist.Arr;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

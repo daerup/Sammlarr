@@ -9,6 +9,7 @@ using Contracts.Wantlist;
 using Domain.Jobs;
 using Domain.Notifications;
 using Domain.Providers;
+using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;

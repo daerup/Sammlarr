@@ -1,5 +1,5 @@
-using Contracts.Settings;
 using Domain.Providers;
+using Domain.Wantlist.Arr;
 
 namespace Contracts.Wantlist;
 

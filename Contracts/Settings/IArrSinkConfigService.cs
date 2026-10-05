@@ -1,3 +1,5 @@
+using Domain.Wantlist.Arr;
+
 namespace Contracts.Settings;
 
 public interface IArrSinkConfigService

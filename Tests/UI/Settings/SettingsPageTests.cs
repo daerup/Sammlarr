@@ -8,6 +8,7 @@ using Contracts.Wantlist;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
+using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Settings.Components.Providers;

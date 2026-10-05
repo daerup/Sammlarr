@@ -9,6 +9,7 @@ using Domain.Auth;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
+using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;

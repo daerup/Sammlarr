@@ -2,6 +2,7 @@ using Bunit;
 using Contracts.Auth;
 using Contracts.Settings;
 using Domain.Providers;
+using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Guards;

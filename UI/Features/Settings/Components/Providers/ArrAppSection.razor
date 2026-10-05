@@ -167,29 +167,9 @@
 
     private (Optional<string> Url, Optional<string> Key)? _stored;
 
-    private string For
-    {
-        get
-        {
-            return App switch
-            {
-                ArrApp.Radarr => "movies",
-                ArrApp.Sonarr => "shows",
-            };
-        }
-    }
+    private string For => App.Type.Plural.ToLowerInvariant();
 
-    private string Placeholder
-    {
-        get
-        {
-            return App switch
-            {
-                ArrApp.Radarr => "http://radarr:7878",
-                ArrApp.Sonarr => "http://sonarr:8989",
-            };
-        }
-    }
+    private string Placeholder => $"http://{App.Name.ToLowerInvariant()}:{App.DefaultPort}";
 
     private ArrInstanceConfig Typed => Instance with { Url = Text(_url), ApiKey = Text(_key) };
 

@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261005070523_RottenTomatoesIds";
+    public override string LastMigrationId => "20261005085347_ArrInstanceParts";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -148,27 +148,6 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Property<long?>("OnboardingCompletedAt")
                     .HasColumnType("INTEGER");
 
-                b.Property<string>("RadarrApiKey")
-                    .HasMaxLength(4096)
-                    .HasColumnType("TEXT");
-
-                b.Property<bool>("RadarrMonitored")
-                    .HasColumnType("INTEGER");
-
-                b.Property<int?>("RadarrQualityProfileId")
-                    .HasColumnType("INTEGER");
-
-                b.Property<string>("RadarrRootFolderPath")
-                    .HasMaxLength(1024)
-                    .HasColumnType("TEXT");
-
-                b.Property<bool>("RadarrSearchOnAdd")
-                    .HasColumnType("INTEGER");
-
-                b.Property<string>("RadarrUrl")
-                    .HasMaxLength(2048)
-                    .HasColumnType("TEXT");
-
                 b.Property<string>("RegistrationMode")
                     .IsRequired()
                     .HasColumnType("TEXT");
@@ -179,27 +158,6 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
 
                 b.Property<string>("Sink")
                     .IsRequired()
-                    .HasColumnType("TEXT");
-
-                b.Property<string>("SonarrApiKey")
-                    .HasMaxLength(4096)
-                    .HasColumnType("TEXT");
-
-                b.Property<bool>("SonarrMonitored")
-                    .HasColumnType("INTEGER");
-
-                b.Property<int?>("SonarrQualityProfileId")
-                    .HasColumnType("INTEGER");
-
-                b.Property<string>("SonarrRootFolderPath")
-                    .HasMaxLength(1024)
-                    .HasColumnType("TEXT");
-
-                b.Property<bool>("SonarrSearchOnAdd")
-                    .HasColumnType("INTEGER");
-
-                b.Property<string>("SonarrUrl")
-                    .HasMaxLength(2048)
                     .HasColumnType("TEXT");
 
                 b.Property<string>("TrendingProvider")
@@ -1188,6 +1146,83 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired();
 
                 b.Navigation("Media");
+            });
+
+        modelBuilder.Entity("DB.Data.Config.ProviderConfigRow", b =>
+            {
+                b.OwnsOne("DB.Data.Config.ArrInstanceRow", "Radarr", b1 =>
+                    {
+                        b1.Property<int>("ProviderConfigRowId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("ApiKey")
+                            .HasMaxLength(4096)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<bool>("Monitored")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<int?>("QualityProfileId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("RootFolderPath")
+                            .HasMaxLength(1024)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<bool>("SearchOnAdd")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("Url")
+                            .HasMaxLength(2048)
+                            .HasColumnType("TEXT");
+
+                        b1.HasKey("ProviderConfigRowId");
+
+                        b1.ToTable("ProviderConfig");
+
+                        b1.WithOwner()
+                            .HasForeignKey("ProviderConfigRowId");
+                    });
+
+                b.OwnsOne("DB.Data.Config.ArrInstanceRow", "Sonarr", b1 =>
+                    {
+                        b1.Property<int>("ProviderConfigRowId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("ApiKey")
+                            .HasMaxLength(4096)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<bool>("Monitored")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<int?>("QualityProfileId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("RootFolderPath")
+                            .HasMaxLength(1024)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<bool>("SearchOnAdd")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("Url")
+                            .HasMaxLength(2048)
+                            .HasColumnType("TEXT");
+
+                        b1.HasKey("ProviderConfigRowId");
+
+                        b1.ToTable("ProviderConfig");
+
+                        b1.WithOwner()
+                            .HasForeignKey("ProviderConfigRowId");
+                    });
+
+                b.Navigation("Radarr")
+                    .IsRequired();
+
+                b.Navigation("Sonarr")
+                    .IsRequired();
             });
 
         modelBuilder.Entity("DB.Data.Feed.FeedRow", b =>

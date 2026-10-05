@@ -1,5 +1,6 @@
 using Contracts;
 using Domain.Notifications;
+using Domain.Wantlist.Arr;
 using Observability.Logging;
 using Serilog;
 using Serilog.Core;
@@ -49,6 +50,22 @@ public class SensitiveDataDestructuringPolicyTests
 		await Assert.That(url).IsEqualTo("https://example.test/hook");
 		await Assert.That(secret).DoesNotContain("whsec_super-secret");
 		await Assert.That(captured.Last.RenderMessage()).DoesNotContain("whsec_super-secret");
+	}
+
+	[Test]
+	public async Task Destructure_MasksBothArrApiKeysInsideTheSinkConfig()
+	{
+		var captured = new CapturingSink();
+		using var logger = new LoggerConfiguration().Destructure.With(WithModel()).WriteTo.Sink(captured).CreateLogger();
+		var radarr = ArrInstanceConfig.Empty with { Url = Some.Of("http://radarr:7878"), ApiKey = Some.Of("radarr-super-secret") };
+		var sonarr = ArrInstanceConfig.Empty with { Url = Some.Of("http://sonarr:8989"), ApiKey = Some.Of("sonarr-super-secret") };
+
+		logger.Information("Loaded {@Config}", new ArrSinkConfig(radarr, sonarr, ArrTagScheme.Default));
+
+		var rendered = captured.Last.RenderMessage();
+		await Assert.That(rendered).DoesNotContain("radarr-super-secret");
+		await Assert.That(rendered).DoesNotContain("sonarr-super-secret");
+		await Assert.That(rendered).Contains("Monitored");
 	}
 
 	[Test]

@@ -26,13 +26,7 @@
         return Sink switch
         {
             SinkKind.Plex => await Credentials.GetAsync(AuthProvider.Plex).IsSuccess(),
-            SinkKind.Arr => IsSetUp(await ArrConfigs.GetAsync()),
+            SinkKind.Arr => (await ArrConfigs.GetAsync()).IsSetUp,
         };
-    }
-
-    private static bool IsSetUp(ArrSinkConfig config)
-    {
-        return new[] { config.Radarr, config.Sonarr }.All(instance =>
-            instance.Url.IsSome() && instance.ApiKey.IsSome() && instance.QualityProfileId.IsSome() && instance.RootFolderPath.IsSome());
     }
 }

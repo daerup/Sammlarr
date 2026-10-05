@@ -17,6 +17,7 @@ using Domain.Notifications;
 using Domain.Processing;
 using Domain.Providers;
 using Domain.Wantlist;
+using Domain.Wantlist.Arr;
 using Domain.Wantlist.Sync;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
