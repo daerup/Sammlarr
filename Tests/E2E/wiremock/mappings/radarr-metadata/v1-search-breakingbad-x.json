@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/v1/search",
+    "host": {
+      "equalTo": "api.radarr.video"
+    },
+    "queryParameters": {
+      "q": {
+        "equalTo": "breaking+bad"
+      },
+      "year": {
+        "equalTo": ""
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "bodyFileName": "radarr-metadata/v1-search-breakingbad-x.verified.json"
+  }
+}

@@ -1,0 +1,1873 @@
+[
+  {
+    "tvdbId": 81189,
+    "title": "Breaking Bad",
+    "overview": "When Walter White, a chemistry teacher, is diagnosed with Stage III cancer and given a prognosis of two years left to live, he chooses to enter a dangerous world of drugs and crime with the intent to secure his family's financial security.",
+    "slug": "breaking-bad",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2008-01-20",
+    "lastAired": "2013-09-29",
+    "tvRageId": 18164,
+    "tvMazeId": 169,
+    "tmdbId": 1396,
+    "imdbId": "tt0903747",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-09-26T13:24:05Z",
+    "status": "Ended",
+    "runtime": 48,
+    "timeOfDay": {
+      "hours": 21,
+      "minutes": 0
+    },
+    "originalNetwork": "AMC",
+    "network": "AMC",
+    "genres": [
+      "Crime",
+      "Drama",
+      "Thriller",
+      "Western"
+    ],
+    "contentRating": "TV-MA",
+    "rating": {
+      "count": 2685479,
+      "value": "9.5"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Breaking Bad: Original Minisodes"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Bryan Cranston",
+        "character": "Walter White",
+        "image": "https://artworks.thetvdb.com/banners/person/255211/68e688c12965e.jpg"
+      },
+      {
+        "name": "Anna Gunn",
+        "character": "Skyler White",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/269404/photo/61138b8f549b0.jpg"
+      },
+      {
+        "name": "Aaron Paul",
+        "character": "Jesse Pinkman",
+        "image": "https://artworks.thetvdb.com/banners/person/275750/primary.jpg"
+      },
+      {
+        "name": "Dean Norris",
+        "character": "Hank Schrader",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/248280/photo/64ed5a8bda865.jpg"
+      },
+      {
+        "name": "Betsy Brandt",
+        "character": "Marie Schrader",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/325833/photo/651bd7cfcd801.jpg"
+      },
+      {
+        "name": "RJ Mitte",
+        "character": "Walter White Jr.",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/472989/photo/630f6bebea0f3.jpg"
+      },
+      {
+        "name": "Giancarlo Esposito",
+        "character": "Gustavo Fring",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/272968/photo/6696465832f3c.jpg"
+      },
+      {
+        "name": "Bob Odenkirk",
+        "character": "Saul Goodman",
+        "image": "https://artworks.thetvdb.com/banners/person/290451/primary.jpg"
+      },
+      {
+        "name": "Jonathan Banks",
+        "character": "Mike Ehrmantraut",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/293588/photo/651bd47df1599.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/81189-g21.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/81189-10.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/81189-21.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/81189/clearlogo/611b4df33bac5.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/81189-0.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/81189-1-3.jpg"
+          },
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/81189-1.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 2,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/81189-2-17.jpg"
+          },
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/81189-2.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 3,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/81189-3-16.jpg"
+          },
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/81189-3.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 4,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/81189-4-15.jpg"
+          },
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/81189-4.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 5,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/81189-5-18.jpg"
+          },
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/81189-5.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 306432,
+    "title": "Breaking Band",
+    "overview": "Six emerging musicians are each paired with one rock legend, who provides guidance to help the up and comers work to achieve their dreams of stardom. Mentors Dave Navarro, Moby, Sebastian Bach, Robin Zander, Belinda Carlisle, and Mark McGrath share invaluable advice and collaborate with their proteges before deciding whether to join them on stage for a live performance at YouTube Space LA.",
+    "slug": "breaking-band",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2016-01-24",
+    "lastAired": "2016-02-28",
+    "tvMazeId": 6101,
+    "imdbId": "tt4854852",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2021-05-10T19:20:34Z",
+    "status": "Ended",
+    "runtime": 30,
+    "timeOfDay": {
+      "hours": 21,
+      "minutes": 30
+    },
+    "originalNetwork": "AXS TV",
+    "network": "AXS TV",
+    "genres": [
+      "Musical",
+      "Reality"
+    ],
+    "rating": {
+      "count": 11,
+      "value": "6.4"
+    },
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 357539,
+    "title": "Bradley & Barney Walsh: Breaking Dad",
+    "overview": "Actor Bradley Walsh and his 20-year-old son Barney are hitting the road together for a brand-new four-part series, travelling over 2000 miles from Los Angeles to New Orleans.",
+    "slug": "bradley-and-barney-walsh-breaking-dad",
+    "originalCountry": "gbr",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2019-01-02",
+    "lastAired": "2026-06-12",
+    "tvMazeId": 39967,
+    "tmdbId": 85466,
+    "imdbId": "tt9516768",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-06-12T20:09:40Z",
+    "status": "Continuing",
+    "runtime": 28,
+    "timeOfDay": {
+      "hours": 20,
+      "minutes": 0
+    },
+    "originalNetwork": "ITV1",
+    "network": "ITV1",
+    "genres": [
+      "Comedy",
+      "Documentary",
+      "Reality"
+    ],
+    "rating": {
+      "count": 217,
+      "value": "7.4"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Bradley Walsh & Son: Breaking Dad"
+      },
+      {
+        "title": "Bradley Walsh and Son Breaking Dad"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Bradley Walsh",
+        "character": "Himself",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/300880/photo/642c7339655c2.jpg"
+      },
+      {
+        "name": "Barney Walsh",
+        "character": "Himself",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/8080695/photo/647f1705e5308.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/357539/banners/67ec2f1a2b3d8.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/357539/posters/60ef7c4f4f42d.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/357539/backgrounds/67ece38e63eeb.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      },
+      {
+        "seasonNumber": 2
+      },
+      {
+        "seasonNumber": 3,
+        "name": "Europe"
+      },
+      {
+        "seasonNumber": 4
+      },
+      {
+        "seasonNumber": 5
+      },
+      {
+        "seasonNumber": 6
+      },
+      {
+        "seasonNumber": 7
+      }
+    ]
+  },
+  {
+    "tvdbId": 348998,
+    "title": "Breaking The Band",
+    "overview": "Sold out tours, chart-topping hits, and runaway world domination can all mean nothing when you’re in a band on the brink of collapse. Tempers flare, arguments erupt and the sweet sound of musical success comes to an abrupt end. Breaking the Band shows the battling egos, power struggles and inter-band rivalries that split up The Beatles, The Supremes, Fleetwood Mac, The Eagles, The Beach Boys, N.W.A, Van Halen and Sonny and Cher. From crippling drug addictions to scandalous affairs Breaking the Band uncovers the incredible true stories by recreating the key moments the cameras missed in addition to using rare band interviews and off-stage footage to piece together each dramatic tale.",
+    "slug": "breaking-the-band",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2018-06-10",
+    "lastAired": "2022-06-26",
+    "tvMazeId": 37136,
+    "tmdbId": 80106,
+    "imdbId": "tt8068670",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2024-04-01T18:23:20Z",
+    "status": "Ended",
+    "runtime": 47,
+    "originalNetwork": "ReelzChannel",
+    "network": "ReelzChannel",
+    "genres": [
+      "Documentary"
+    ],
+    "contentRating": "TV-PG",
+    "rating": {
+      "count": 100,
+      "value": "6.9"
+    },
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/348998/banners/660afb96c91f7.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/5b22b772b154b.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/5b379ec3483d2.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      },
+      {
+        "seasonNumber": 2
+      },
+      {
+        "seasonNumber": 3
+      },
+      {
+        "seasonNumber": 4
+      }
+    ]
+  },
+  {
+    "tvdbId": 273859,
+    "title": "Metástasis",
+    "overview": "“Metástasis” is the story of a struggling high school chemistry teacher who is diagnosed with inoperable lung cancer. He turns to a life of crime, producing and selling meth with a former student in order to secure his family’s financial future before he passes away.",
+    "slug": "metastasis",
+    "originalCountry": "usa",
+    "originalLanguage": "spa",
+    "language": "eng",
+    "firstAired": "2014-06-08",
+    "lastAired": "2014-09-18",
+    "tvRageId": 42983,
+    "tmdbId": 72812,
+    "imdbId": "tt3190448",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2025-12-24T13:39:50Z",
+    "status": "Ended",
+    "runtime": 60,
+    "timeOfDay": {
+      "hours": 22,
+      "minutes": 0
+    },
+    "originalNetwork": "Univision",
+    "network": "Univision",
+    "genres": [
+      "Crime",
+      "Drama",
+      "Thriller"
+    ],
+    "contentRating": "TV-14",
+    "rating": {
+      "count": 5435,
+      "value": "2.5"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Breaking Bad (ES)"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Roberto Urvina",
+        "character": "José Miguel Rosas"
+      },
+      {
+        "name": "Julián Arango",
+        "character": "Henry Navarro",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/299471/photo/64286d963081a.jpg"
+      },
+      {
+        "name": "Diego Trujillo",
+        "character": "Walter Blanco"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/273859/banners/6632efedb1a6e.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/273859-1.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/273859-1.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/273859-1.jpg"
+          },
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/273859-1.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 357407,
+    "title": "Baking Bad",
+    "slug": "baking-bad",
+    "originalCountry": "usa",
+    "originalLanguage": "deu",
+    "imdbId": "tt3808074",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2019-11-13T10:28:45Z",
+    "status": "Ended",
+    "originalNetwork": "Twitch",
+    "network": "Twitch",
+    "genres": [
+      "Food"
+    ],
+    "rating": {
+      "count": 27,
+      "value": "5.2"
+    },
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 398219,
+    "title": "Now, We Are Breaking Up",
+    "overview": "Successful but pragmatic to a fault, a fashion designer becomes entangled with a charming photographer — forcing her to challenge her entire worldview.",
+    "slug": "now-we-are-breaking-up",
+    "originalCountry": "kor",
+    "originalLanguage": "kor",
+    "language": "eng",
+    "firstAired": "2021-11-12",
+    "lastAired": "2022-01-08",
+    "tvMazeId": 54178,
+    "tmdbId": 129887,
+    "imdbId": "tt14408016",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-04-03T08:45:58Z",
+    "status": "Ended",
+    "runtime": 64,
+    "timeOfDay": {
+      "hours": 22,
+      "minutes": 0
+    },
+    "originalNetwork": "SBS",
+    "network": "SBS",
+    "genres": [
+      "Drama",
+      "Romance"
+    ],
+    "contentRating": "14",
+    "rating": {
+      "count": 1955,
+      "value": "6.4"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Breaking Up"
+      },
+      {
+        "title": "I'm Breaking Up Now"
+      },
+      {
+        "title": "Now, We're Breaking Up"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Song Hye-kyo",
+        "character": "Ha Young-eun",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/501869/photo/678582f7b77b9.jpg"
+      },
+      {
+        "name": "Jang Ki-yong",
+        "character": "Yoon Jae-guk",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/515331/photo/68eab97d3a91f.jpg"
+      },
+      {
+        "name": "Choi Hee-seo",
+        "character": "Hwang Chi-sook",
+        "image": "https://artworks.thetvdb.com/banners/person/728617/primary.jpg"
+      },
+      {
+        "name": "Kim Joo-hun",
+        "character": "Seok Do-hoon",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7919461/photo/65044700e4523.jpg"
+      },
+      {
+        "name": "Park Hyo-joo",
+        "character": "Jeon Mi-sook",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/8134365/photo/64fb2226d44c9.jpg"
+      },
+      {
+        "name": "Yoon Na-moo",
+        "character": "Kwak Soo-ho",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7901969/photo/63a355c5a631f.jpg"
+      },
+      {
+        "name": "Joo Jin-mo",
+        "character": "CEO Hwang",
+        "image": "https://artworks.thetvdb.com/banners/person/7932162/62091744.jpg"
+      },
+      {
+        "name": "Sehun",
+        "character": "Hwang Chi-hyung",
+        "image": "https://artworks.thetvdb.com/banners/person/7897415/5eb7283792b36.jpg"
+      },
+      {
+        "name": "Jang Hyuk-jin",
+        "character": "Go Gwang-soo",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/570109/photo/632e46cab124f.jpg"
+      },
+      {
+        "name": "Song Yoo-hyun",
+        "character": "Oh In-ah"
+      },
+      {
+        "name": "Kim Bo-jung",
+        "character": "Nam Na-ri"
+      },
+      {
+        "name": "Moon Joo-yeon",
+        "character": "Ahn Sun-joo\t"
+      },
+      {
+        "name": "Ahn Ha-young",
+        "character": "Jung So-yong",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/8175470/photo/6a50d5cc31cea.jpg"
+      },
+      {
+        "name": "Choi Hong-il",
+        "character": "Ha Taek-soo"
+      },
+      {
+        "name": "Nam Gi-ae",
+        "character": "Kang Jung-ja",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7921449/photo/636945238e231.jpg"
+      },
+      {
+        "name": "Cha Hwa-yeon",
+        "character": "Min Hye-ok",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7997772/photo/6395bafb87c73.jpg"
+      },
+      {
+        "name": "Yoon Jung-hee",
+        "character": "Shin Yoo-jung",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7988355/photo/66941dba39ac7.jpg"
+      },
+      {
+        "name": "Yura",
+        "character": "Hye-rin",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7866737/photo/636d679819450.jpg"
+      },
+      {
+        "name": "Ki Eun-se",
+        "character": "Seo Min-kyung",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7888676/photo/653bd48d74087.jpg"
+      },
+      {
+        "name": "Shin Dong-wook",
+        "character": "Yoon Soo-wan",
+        "image": "https://artworks.thetvdb.com/banners/person/8098503/5f1dbd9d3ab04.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/398219/banners/627e8f50e58c4.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/398219/posters/6182cedd04097.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/398219/backgrounds/6453bf4ac3186.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 206751,
+    "title": "Breaking In",
+    "overview": "Contra Security, corporate America's answer to \"The A-Team\", gives clients a sense of security by first ripping it away. The firm is led by OZ, a larger-than-life head honcho who is a man of mystery and master of manipulation. The members of the odd squad include alluring bad girl Melanie, who is in charge of lock-picking, safe-cracking and heart-breaking; and Cash, a fanboy who specializes in strategy, logistics and office pranks only a mad genius could think up.\r\n\r\nOz's newest recruit, plucked right out of college, is lovable and charming computer hacker Cameron Price. Unfortunately for Cameron, cracking into state-of-the-art security systems is a lot easier than dealing with his co-workers. Between Melanie's sex appeal and Cash's hazing, Cameron has more than a few obstacles to overcome if he wants to cement his status as part of the team and become Oz's go-to guy.",
+    "slug": "breaking-in",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2011-04-06",
+    "lastAired": "2012-08-22",
+    "tvRageId": 26082,
+    "tvMazeId": 510,
+    "tmdbId": 34541,
+    "imdbId": "tt1630574",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-09-02T14:37:20Z",
+    "status": "Ended",
+    "runtime": 25,
+    "timeOfDay": {
+      "hours": 21,
+      "minutes": 30
+    },
+    "originalNetwork": "FOX",
+    "network": "FOX",
+    "genres": [
+      "Action",
+      "Comedy",
+      "Crime"
+    ],
+    "contentRating": "TV-14",
+    "rating": {
+      "count": 7738,
+      "value": "7.1"
+    },
+    "actors": [
+      {
+        "name": "Christian Slater",
+        "character": "Oz",
+        "image": "https://artworks.thetvdb.com/banners/person/254388/5eb1a2829cd82.jpg"
+      },
+      {
+        "name": "Alphonso McAuley",
+        "character": "Calvin \"Cash\" Sparks",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/338272/photo/64b8db477256e.jpg"
+      },
+      {
+        "name": "Bret Harrison",
+        "character": "Cameron Bright",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/332165/photo/6066d7123ca18.jpg"
+      },
+      {
+        "name": "Odette Annable",
+        "character": "Melanie Green",
+        "image": "https://artworks.thetvdb.com/banners/person/308120/5f9c5003e9fbc.jpg"
+      },
+      {
+        "name": "Michael Rosenbaum",
+        "character": "Dutch",
+        "image": "https://artworks.thetvdb.com/banners/person/317894/5f0e02d93272e.jpg"
+      },
+      {
+        "name": "Megan Mullally",
+        "character": "Veronica Mann ",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/261310/photo/65bc38a807a39.jpg"
+      },
+      {
+        "name": "Erin Richards",
+        "character": "Molly",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/516843/photo/65ad3b32cef24.jpg"
+      },
+      {
+        "name": "Jennifer Irwin",
+        "character": "Carol"
+      },
+      {
+        "name": "Lance Krall",
+        "character": "Ricky"
+      },
+      {
+        "name": "Terrell Lee",
+        "character": "Buddy"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/206751-g.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/206751-1.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/206751-5.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/206751/clearlogo/611b8ff2df330.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/359611/posters/634ddf30cc23d.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 2,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/479561/posters/634ddf4f1b253.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 404643,
+    "title": "Breaking News",
+    "overview": "In this newsroom, breaking means losing. Our reporters don't know what's about to be on the teleprompter, and every laugh is a point against them.",
+    "slug": "breaking-news",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2018-07-07",
+    "lastAired": "2024-10-15",
+    "tvMazeId": 63012,
+    "tmdbId": 203942,
+    "imdbId": "tt10887470",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2025-10-11T00:31:25Z",
+    "status": "Continuing",
+    "runtime": 7,
+    "timeOfDay": {
+      "hours": 19,
+      "minutes": 0
+    },
+    "originalNetwork": "Dropout",
+    "network": "Dropout",
+    "genres": [
+      "Comedy"
+    ],
+    "rating": {
+      "count": 271,
+      "value": "7.4"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Breaking News: No Laugh Newsroom"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Brennan Lee Mulligan",
+        "character": "himself",
+        "image": "https://artworks.thetvdb.com/banners/person/7907077/5ff645533728d.jpg"
+      },
+      {
+        "name": "Emily Axford",
+        "image": "https://artworks.thetvdb.com/banners/person/7907079/5ff64748e66fa.jpg"
+      },
+      {
+        "name": "Ally Beardsley",
+        "image": "https://artworks.thetvdb.com/banners/person/7907080/5ff6532d81674.jpg"
+      },
+      {
+        "name": "Mike Trapp",
+        "character": "himself",
+        "image": "https://artworks.thetvdb.com/banners/person/7906862/5ff722a822147.jpg"
+      },
+      {
+        "name": "Raphael Chestang",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7918997/photo/64247adc47a12.jpg"
+      },
+      {
+        "name": "Katie Marovitch",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7918985/photo/6426d078a705e.jpg"
+      },
+      {
+        "name": "Rekha Shankar",
+        "image": "https://artworks.thetvdb.com/banners/person/7918976/5f8579b1dfc76.jpg"
+      },
+      {
+        "name": "Sam Reich",
+        "character": "himself",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/481661/photo/62aa4280e464c.jpg"
+      },
+      {
+        "name": "Grant O'Brien",
+        "character": "himself",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7918998/photo/6425c60282aec.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/404643/banners/6135592c7fa4a.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/404643/posters/6487b4b463534.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/404643/backgrounds/6138014dea37a.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      },
+      {
+        "seasonNumber": 2
+      },
+      {
+        "seasonNumber": 3
+      },
+      {
+        "seasonNumber": 4
+      },
+      {
+        "seasonNumber": 5
+      },
+      {
+        "seasonNumber": 6
+      },
+      {
+        "seasonNumber": 7
+      }
+    ]
+  },
+  {
+    "tvdbId": 179791,
+    "title": "Broken Blade",
+    "overview": "In the continent of Cruzon, an impending war between the Kingdom of Krishna and the nation of Athens is brimming. The people of this land are able to wield the crystals from the ground for whatever purpose they desire. Yet one person, Rygart Arrow, is not. He is an \"un-sorcerer\", a person unable to wield the crystals. But this characteristic will enable him to pilot an ancient mecha, one strong enough to put up a fight against the invading army of Athens.",
+    "slug": "broken-blade",
+    "originalCountry": "jpn",
+    "originalLanguage": "jpn",
+    "language": "eng",
+    "firstAired": "2014-04-06",
+    "lastAired": "2014-06-22",
+    "tvRageId": 41844,
+    "tvMazeId": 16259,
+    "tmdbId": 44163,
+    "imdbId": "tt3509378",
+    "malIds": [
+      22433
+    ],
+    "anidbIds": [
+      7103,
+      10426
+    ],
+    "aniListIds": [
+      20618
+    ],
+    "lastUpdated": "2026-06-23T07:04:51Z",
+    "status": "Ended",
+    "runtime": 25,
+    "originalNetwork": "Tokyo MX",
+    "network": "Tokyo MX",
+    "genres": [
+      "Action",
+      "Animation",
+      "Anime",
+      "Drama",
+      "Science Fiction"
+    ],
+    "contentRating": "TV-MA",
+    "rating": {
+      "count": 330,
+      "value": "6.8"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Break Blade"
+      },
+      {
+        "title": "Break Blade (2014)"
+      },
+      {
+        "title": "Broken Blade (2014)"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Garret Sato",
+        "character": "Joe Hitana",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/352472/photo/62733da6ed899.jpg"
+      },
+      {
+        "name": "Souichirou Hoshi",
+        "character": "Rygart Arrow",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/303112/photo/61f7c4406218f.jpg"
+      },
+      {
+        "name": "Hiroshi Kamiya",
+        "character": "Zess ",
+        "image": "https://artworks.thetvdb.com/banners/person/277078/6190e39157551.jpg"
+      },
+      {
+        "name": "Masashi Sugawara",
+        "character": "General Bard",
+        "image": "https://artworks.thetvdb.com/banners/person/339516/primary.jpg"
+      },
+      {
+        "name": "Kana Hanazawa",
+        "character": "Cleo Saburafu",
+        "image": "https://artworks.thetvdb.com/banners/person/300736/5fa7b78d1827d.jpg"
+      },
+      {
+        "name": "Yuichi Nakamura",
+        "character": "Hodr",
+        "image": "https://artworks.thetvdb.com/banners/person/7864375/61a4e29c56d7d.jpg"
+      },
+      {
+        "name": "Yuhko Kaida",
+        "character": "Lee",
+        "image": "https://artworks.thetvdb.com/banners/person/7888642/61a64b88983f6.jpg"
+      },
+      {
+        "name": "Chiwa Saito",
+        "character": "Sigyn Erster",
+        "image": "https://artworks.thetvdb.com/banners/person/351765/61e44c0fa0203.jpg"
+      },
+      {
+        "name": "Kazuya Nakai",
+        "character": "Borcuse",
+        "image": "https://artworks.thetvdb.com/banners/person/280725/61f8fbff71dff.jpg"
+      },
+      {
+        "name": "Mayumi Yanagisawa",
+        "character": "Elsa"
+      },
+      {
+        "name": "Kousuke Toriumi",
+        "character": "Girge",
+        "image": "https://artworks.thetvdb.com/banners/person/7875254/primary.jpg"
+      },
+      {
+        "name": "Ryouko Shiraishi",
+        "character": "Nike",
+        "image": "https://artworks.thetvdb.com/banners/person/397933/61ee32254c2b8.jpg"
+      },
+      {
+        "name": "Minoru Shiraishi",
+        "character": "Nile Stryze",
+        "image": "https://artworks.thetvdb.com/banners/person/448668/6228add597f4c.jpg"
+      },
+      {
+        "name": "Marina Inoue",
+        "character": "Narvi Stryze",
+        "image": "https://artworks.thetvdb.com/banners/person/307075/61e1ad093bd47.jpg"
+      },
+      {
+        "name": "Ken'ichi Ogata",
+        "character": "General True",
+        "image": "https://artworks.thetvdb.com/banners/person/313246/61be2bf8269cc.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/179791-g.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/179791-5.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/179791-1.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/179791/clearlogo/611c859edc954.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/179791-1-2.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 364224,
+    "title": "Breaking Italy Podcast",
+    "overview": "Breaking Italy, Alessandro Masala's show, debuts even in a podcast version, where our Shy will discuss various topics with his guests.",
+    "slug": "breaking-italy-podcast",
+    "originalCountry": "ita",
+    "originalLanguage": "ita",
+    "language": "eng",
+    "firstAired": "2019-05-18",
+    "lastAired": "2024-06-01",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2025-09-30T08:11:29Z",
+    "status": "Ended",
+    "runtime": 134,
+    "timeOfDay": {
+      "hours": 15,
+      "minutes": 0
+    },
+    "originalNetwork": "YouTube",
+    "network": "YouTube",
+    "genres": [
+      "Podcast",
+      "Talk Show"
+    ],
+    "actors": [
+      {
+        "name": "Alessandro Masala",
+        "character": "Shy"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/5ce2a13d1eb1c.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/series/364224/posters/62092654.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/5ce2a1b50f5d3.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      },
+      {
+        "seasonNumber": 2
+      },
+      {
+        "seasonNumber": 3
+      },
+      {
+        "seasonNumber": 4
+      }
+    ]
+  },
+  {
+    "tvdbId": 359219,
+    "title": "Breaking the News (2018)",
+    "overview": "TV version of Radio Scotland's topical panel show, hosted by Des Clarke.",
+    "slug": "breaking-the-news-2018",
+    "originalCountry": "gbr",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2019-03-01",
+    "lastAired": "2026-10-16",
+    "tvMazeId": 45575,
+    "imdbId": "tt10102954",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-10-01T13:24:02Z",
+    "status": "Continuing",
+    "runtime": 29,
+    "timeOfDay": {
+      "hours": 23,
+      "minutes": 30
+    },
+    "originalNetwork": "BBC Scotland",
+    "network": "BBC Scotland",
+    "genres": [
+      "Comedy",
+      "Game Show"
+    ],
+    "contentRating": "TV-14",
+    "rating": {
+      "count": 9,
+      "value": "8.2"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Breaking the News"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Des Clarke",
+        "character": "Host"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/359219/banners/664e737c21dab.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/5c59ecf079827.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/359219/backgrounds/618d9c6f3ba1f.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 12
+      },
+      {
+        "seasonNumber": 13
+      },
+      {
+        "seasonNumber": 14
+      },
+      {
+        "seasonNumber": 15
+      },
+      {
+        "seasonNumber": 16
+      }
+    ]
+  },
+  {
+    "tvdbId": 415491,
+    "title": "Breaking Bad Fortune Teller",
+    "overview": "During the Ming Dynasty, the emperor sets out for Xinjiang to advocate peace. Shortly after his absence, mysterious occurrences plague the palace and Daoist Tian Mu Tong (Zhang Xiao Chen) is called to cast out demons. Together with eunuch Xiao Mo Gu (Zhang Hao Ran) and Jin Yi Wei leader Yun Xiang Rong (Lu Qing), Mu Tong uncovers deep dark secrets and conspiracies hidden within conspiracies.",
+    "slug": "breaking-bad-fortune-teller",
+    "originalCountry": "chn",
+    "originalLanguage": "zho",
+    "language": "eng",
+    "firstAired": "2016-04-11",
+    "lastAired": "2016-04-11",
+    "tmdbId": 232533,
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2023-08-13T12:10:42Z",
+    "status": "Ended",
+    "runtime": 25,
+    "timeOfDay": {
+      "hours": 0,
+      "minutes": 0
+    },
+    "genres": [
+      "Fantasy",
+      "History",
+      "Mystery"
+    ],
+    "alternativeTitles": [
+      {
+        "title": "Desperate Master"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/415491/posters/61f834ad1d22d.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 404253,
+    "title": "Break It Down",
+    "overview": "Featuring legendary skater Danny Way and the youngest X Games gold medalist Tom Schaar, the special shows a behind-the-scenes look at the X Games.",
+    "slug": "break-it-down",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2013-01-01",
+    "lastAired": "2013-01-01",
+    "imdbId": "tt3150080",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2021-06-03T15:29:34Z",
+    "status": "Ended",
+    "timeOfDay": {
+      "hours": 0,
+      "minutes": 0
+    },
+    "originalNetwork": "Disney XD",
+    "network": "Disney XD",
+    "genres": [
+      "Family"
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 428389,
+    "title": "Break Point (2023)",
+    "overview": "Travel alongside some of the world's most talented tennis players as they swing for greatness and Grand Slams through an action-packed season.",
+    "slug": "break-point-2023",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2023-01-13",
+    "lastAired": "2024-01-10",
+    "tvMazeId": 65904,
+    "tmdbId": 216386,
+    "imdbId": "tt17048442",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-04-17T08:34:13Z",
+    "status": "Ended",
+    "runtime": 48,
+    "timeOfDay": {
+      "hours": 3,
+      "minutes": 0
+    },
+    "originalNetwork": "Netflix",
+    "network": "Netflix",
+    "genres": [
+      "Documentary",
+      "Reality",
+      "Sport"
+    ],
+    "contentRating": "6+",
+    "rating": {
+      "count": 5029,
+      "value": "7.3"
+    },
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/428389/banners/63b0897c432ce.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/428389/posters/63f50e70aa9b6.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/428389/backgrounds/639bdbcc84bef.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/428389/clearlogo/6449f652a5e0b.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/2034928/posters/646e50f88484a.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 2,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/2056082/posters/659ecfc412ca7.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 362308,
+    "title": "Break Up",
+    "slug": "break-up",
+    "originalLanguage": "fra",
+    "firstAired": "2019-05-17",
+    "lastAired": "2019-05-17",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2019-11-13T10:30:19Z",
+    "status": "Ended",
+    "runtime": 10,
+    "genres": [
+      "Comedy",
+      "Romance"
+    ],
+    "images": [
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/5cfc29e25e67f.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 358646,
+    "title": "Dogs Behaving Very Badly",
+    "overview": "Graeme seeks to save bewildered owners from their four-legged friends' terrible behaviour.",
+    "slug": "dogs-behaving-very-badly",
+    "originalCountry": "gbr",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2019-01-15",
+    "lastAired": "2026-06-07",
+    "tvMazeId": 40497,
+    "tmdbId": 97530,
+    "imdbId": "tt9606804",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-06-07T19:12:44Z",
+    "status": "Continuing",
+    "runtime": 52,
+    "timeOfDay": {
+      "hours": 20,
+      "minutes": 0
+    },
+    "originalNetwork": "5",
+    "network": "5",
+    "genres": [
+      "Reality"
+    ],
+    "contentRating": "U",
+    "rating": {
+      "count": 168,
+      "value": "7.5"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Dogs Behaving Very Badly"
+      },
+      {
+        "title": "Dogs Behaving (Very) Badly"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/358646/banners/65fc3b582f1f8.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/358646/posters/6692c48d8ceb4.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/5ce4607cc72d9.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      },
+      {
+        "seasonNumber": 2
+      },
+      {
+        "seasonNumber": 3
+      },
+      {
+        "seasonNumber": 4
+      },
+      {
+        "seasonNumber": 5
+      },
+      {
+        "seasonNumber": 6
+      },
+      {
+        "seasonNumber": 7
+      },
+      {
+        "seasonNumber": 8
+      }
+    ]
+  },
+  {
+    "tvdbId": 404462,
+    "title": "Bangkok Breaking",
+    "overview": "Newly arrived in Bangkok, Wanchai joins the road rescue service and unravels a city-wide conspiracy with the help of a journalist.",
+    "slug": "bangkok-breaking",
+    "originalCountry": "tha",
+    "originalLanguage": "tha",
+    "language": "eng",
+    "firstAired": "2021-09-23",
+    "lastAired": "2021-09-23",
+    "tvMazeId": 57880,
+    "tmdbId": 132158,
+    "imdbId": "tt14202282",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2024-08-03T03:47:26Z",
+    "status": "Ended",
+    "runtime": 60,
+    "timeOfDay": {
+      "hours": 14,
+      "minutes": 0
+    },
+    "originalNetwork": "Netflix",
+    "network": "Netflix",
+    "genres": [
+      "Action",
+      "Adventure",
+      "Crime",
+      "Drama",
+      "Thriller"
+    ],
+    "contentRating": "TV-MA",
+    "rating": {
+      "count": 477,
+      "value": "5.9"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Bangkok Breaking (2021)"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Sahajak Boonthanakit",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/552466/photo/6282d06ebd508.jpg"
+      },
+      {
+        "name": "Sukollawat Kanarot",
+        "character": "Wanchai",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7876748/photo/61dcbe82d99f0.jpg"
+      },
+      {
+        "name": "Sushar Manaying",
+        "character": "Kat",
+        "image": "https://artworks.thetvdb.com/banners/person/494070/5fc98a44a4d54.jpg"
+      },
+      {
+        "name": "Bank Pavarit Mongkolpisit",
+        "character": "Somsak",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/8683110/photo/63a6fff6ca9fb.jpg"
+      },
+      {
+        "name": "On Nophand Boonyai",
+        "character": "Em",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/614855/photo/64188dc123881.jpg"
+      },
+      {
+        "name": "Arisara Wongchalee",
+        "character": "Bua",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7987964/photo/605fd9218018c.jpg"
+      },
+      {
+        "name": "Jane Jaytiya Naiwattanakul",
+        "character": "Pipo",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9123707/photo/65d134079993f.jpg"
+      },
+      {
+        "name": "Supranee Jayrinpon",
+        "character": "Pen",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/8037154/photo/67b197224d650.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/404462/banners/614da1d272d7c.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/404462/posters/61423ac3ac6a0.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/404462/backgrounds/61423aedaa330.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 360115,
+    "title": "Prison Break",
+    "overview": "Due to a political conspiracy, an innocent man is sent to death row and his only hope is his brother, who makes it his mission to deliberately get himself sent to the same prison to break them both out from the inside.",
+    "slug": "prison-break",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2005-08-29",
+    "lastAired": "2017-05-30",
+    "tvMazeId": 541,
+    "tmdbId": 2288,
+    "imdbId": "tt0455275",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-09-19T17:42:28Z",
+    "status": "Ended",
+    "runtime": 45,
+    "timeOfDay": {
+      "hours": 21,
+      "minutes": 0
+    },
+    "originalNetwork": "FOX",
+    "network": "FOX",
+    "genres": [
+      "Action",
+      "Crime",
+      "Drama",
+      "Mystery",
+      "Suspense",
+      "Thriller"
+    ],
+    "contentRating": "TV-14",
+    "rating": {
+      "count": 681818,
+      "value": "8.3"
+    },
+    "actors": [
+      {
+        "name": "Wentworth Miller",
+        "character": "Michael J. Scofield",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/252320/photo/60612ab0a1f70.jpg"
+      },
+      {
+        "name": "Dominic Purcell",
+        "character": "Lincoln Burrows",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/358679/photo/6084983726f29.jpg"
+      },
+      {
+        "name": "Robert Knepper",
+        "character": "Theodore \"T-Bag\" Bagwell",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/274935/photo/64fce34b80f06.jpg"
+      },
+      {
+        "name": "Amaury Nolasco",
+        "character": "Fernando Sucre",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/275652/photo/6527a7c6d5b58.jpg"
+      },
+      {
+        "name": "Sarah Wayne Callies",
+        "character": "Sara Tancredi",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/270520/photo/606129af197ea.jpg"
+      },
+      {
+        "name": "Wade Williams",
+        "character": "Bradley Bellick",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/252654/photo/64ba52e6b9262.jpg"
+      },
+      {
+        "name": "William Fichtner",
+        "character": "Alexander \"Alex\" Mahone",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/279435/photo/652329b420142.jpg"
+      },
+      {
+        "name": "Paul Adelstein",
+        "character": "Paul Kellerman",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/275262/photo/6080a4a44aaaf.jpg"
+      },
+      {
+        "name": "Rockmond Dunbar",
+        "character": "Benjamin Miles “C-Note” Franklin"
+      },
+      {
+        "name": "Jodi Lyn O'Keefe",
+        "character": "Gretchen Morgan (Susan B. Anthony)",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/248111/photo/651424f7502fb.jpg"
+      },
+      {
+        "name": "Leon Russom",
+        "character": "General Jonathan Krantz"
+      },
+      {
+        "name": "Marshall Allman",
+        "character": "LJ Burrows",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/329400/photo/60a040fc0cef4.jpg"
+      },
+      {
+        "name": "Robin Tunney",
+        "character": "Veronica Donovan",
+        "image": "https://artworks.thetvdb.com/banners/person/314789/primary.jpg"
+      },
+      {
+        "name": "Stacy Keach",
+        "character": "Warden Henry Pope",
+        "image": "https://artworks.thetvdb.com/banners/person/261301/primary.jpg"
+      },
+      {
+        "name": "Michael Rapaport",
+        "character": "Don Self",
+        "image": "https://artworks.thetvdb.com/banners/person/248261/primary.jpg"
+      },
+      {
+        "name": "Peter Stormare",
+        "character": "John Abruzzi",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/346638/photo/6514223b53b35.jpg"
+      },
+      {
+        "name": "Danay Garcia",
+        "character": "Sofia Lugo",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7905808/photo/65c265a5988d2.jpg"
+      },
+      {
+        "name": "Robert Wisdom",
+        "character": "Norman 'Lechero'",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/275472/photo/662a94558c370.jpg"
+      },
+      {
+        "name": "Chris Vance",
+        "character": "James Whistler"
+      },
+      {
+        "name": "Mark Feuerstein",
+        "character": "Jacob Anton Ness",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/306860/photo/60622516f07ee.jpg"
+      },
+      {
+        "name": "Inbar Lavi",
+        "character": "Sheba",
+        "image": "https://artworks.thetvdb.com/banners/person/346865/5f3936a5af0fd.jpg"
+      },
+      {
+        "name": "Augustus Prew",
+        "character": "David 'Whip' Martin",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/330095/photo/6354fadd5c956.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/5c9dff708b17f.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/5c9e0957ce5be.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/5c9e06b046ab6.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/360115/clearlogo/611c4d12f1c8e.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/5c76f2c0a3731.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/5c9e1071abd21.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 2,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/5c76f27a43edc.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 3,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/5c76f28d3de99.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 4,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/5c76f29964095.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 5,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/5c76f2a61418e.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 415437,
+    "title": "Down Bad",
+    "overview": "Follows three childhood friends with their own trials and tribulations as they navigate life in small town America.",
+    "slug": "down-bad",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2021-10-01",
+    "lastAired": "2021-10-28",
+    "tmdbId": 156773,
+    "imdbId": "tt13814546",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2024-04-11T02:47:44Z",
+    "status": "Ended",
+    "runtime": 29,
+    "timeOfDay": {
+      "hours": 0,
+      "minutes": 0
+    },
+    "genres": [
+      "Drama"
+    ],
+    "rating": {
+      "count": 46,
+      "value": "7.0"
+    },
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/415437/banners/66174f4fdca27.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/415437/posters/61f6f7bdeed3f.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/415437/backgrounds/620600feaa265.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  }
+]

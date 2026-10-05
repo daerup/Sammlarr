@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/search/multi",
+    "queryParameters": {
+      "include_adult": {
+        "equalTo": "false"
+      },
+      "query": {
+        "equalTo": "Project Hail Mary"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json;charset=utf-8"
+    },
+    "bodyFileName": "tmdb/search-multi-false-projecthailmary.verified.json"
+  }
+}

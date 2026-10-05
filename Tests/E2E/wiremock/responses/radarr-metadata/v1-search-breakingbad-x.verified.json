@@ -1,0 +1,5627 @@
+[
+  {
+    "TmdbId": 559969,
+    "ImdbId": "tt9243946",
+    "Title": "El Camino: A Breaking Bad Movie",
+    "Overview": "In the wake of his dramatic escape from captivity, Jesse Pinkman must come to terms with his past in order to forge some kind of future.",
+    "OriginalTitle": "El Camino: A Breaking Bad Movie",
+    "OriginalLanguage": "en",
+    "TitleSlug": "559969",
+    "Runtime": 123,
+    "Popularity": 12.0213,
+    "Year": 2019,
+    "Premier": null,
+    "InCinema": "2019-10-11T00:00:00Z",
+    "PhysicalRelease": "2020-10-13T00:00:00Z",
+    "DigitalRelease": "2019-10-10T00:00:00Z",
+    "Images": [
+      {
+        "CoverType": "Poster",
+        "Url": "https://image.tmdb.org/t/p/original/ePXuKdXZuJx8hHMNr2yM4jY2L7Z.jpg"
+      },
+      {
+        "CoverType": "Fanart",
+        "Url": "https://image.tmdb.org/t/p/original/uLXK1LQM28XovWHPao3ViTeggXA.jpg"
+      }
+    ],
+    "Ratings": [
+      {
+        "Count": 5884,
+        "Value": 7.1,
+        "Origin": "Tmdb",
+        "Type": "User"
+      }
+    ],
+    "MovieRatings": {
+      "Tmdb": {
+        "Count": 5884,
+        "Value": 7.1,
+        "Type": "User"
+      },
+      "Imdb": {
+        "Count": 352835,
+        "Value": 7.3,
+        "Type": "User"
+      },
+      "Metacritic": {
+        "Count": 0,
+        "Value": 72,
+        "Type": "User"
+      },
+      "RottenTomatoes": {
+        "Count": 0,
+        "Value": 92,
+        "Type": "User"
+      },
+      "Trakt": {
+        "Count": 18521,
+        "Value": 7.43362,
+        "Type": "User"
+      }
+    },
+    "Genres": [
+      "Crime",
+      "Drama",
+      "Thriller"
+    ],
+    "Keywords": [
+      "albuquerque, new mexico",
+      "based on tv series",
+      "crystal meth",
+      "drugs",
+      "meth lab",
+      "methamphetamine",
+      "new mexico"
+    ],
+    "AlternativeTitles": [
+      {
+        "Title": "绝命毒师",
+        "Type": "Tmdb",
+        "Language": "zh"
+      },
+      {
+        "Title": "Пуститися берега: Ель Каміно",
+        "Type": "Tmdb",
+        "Language": "uk"
+      },
+      {
+        "Title": "El Camino",
+        "Type": "Tmdb",
+        "Language": "en"
+      },
+      {
+        "Title": "Путь: Во все тяжкие. Фильм",
+        "Type": "Tmdb",
+        "Language": "ru"
+      },
+      {
+        "Title": "El Camino Ein Breaking Bad - Film",
+        "Type": "Tmdb",
+        "Language": "de"
+      },
+      {
+        "Title": "El Camino - A Breaking Bad Movie",
+        "Type": "Tmdb",
+        "Language": "nl"
+      },
+      {
+        "Title": "El Camino - Un film Breaking Bad",
+        "Type": "Tmdb",
+        "Language": "fr"
+      },
+      {
+        "Title": "El Camino։ A Breaking Bad Movie",
+        "Type": "Tmdb",
+        "Language": "en"
+      },
+      {
+        "Title": "续命之徒：绝命毒师电影",
+        "Type": "Tmdb",
+        "Language": "zh"
+      },
+      {
+        "Title": "เอล คามิโน่: ดับเครื่องชน คนดีแตก (เดอะ มูฟวี่)",
+        "Type": "Tmdb",
+        "Language": "th"
+      },
+      {
+        "Title": "ال کامینو",
+        "Type": "Tmdb",
+        "Language": "fa"
+      },
+      {
+        "Title": "El Camino A Breaking Bad Movie",
+        "Type": "Tmdb",
+        "Language": "en"
+      },
+      {
+        "Title": "الكمينو: فيلم بريكنق باد",
+        "Type": "Tmdb",
+        "Language": "en"
+      },
+      {
+        "Title": "Breaking Bad - El Camino",
+        "Type": "Tmdb",
+        "Language": "de"
+      },
+      {
+        "Title": "El Camino: Во все тяжкие",
+        "Type": "Tmdb",
+        "Language": "ru"
+      },
+      {
+        "Title": "エルカミーノ",
+        "Type": "Tmdb",
+        "Language": "ja"
+      },
+      {
+        "Title": "Путь: Во все тяжкие",
+        "Type": "Tmdb",
+        "Language": "ru"
+      }
+    ],
+    "Translations": [
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "In the wake of his dramatic escape from captivity, Jesse Pinkman must come to terms with his past in order to forge some kind of future.",
+        "Language": "en-US"
+      },
+      {
+        "Title": "El Camino : Un film \"Breaking Bad\"",
+        "Overview": "À la suite de sa tragique évasion, Jesse doit accepter son passé s’il veut se reconstruire un avenir…  ou quelque chose qui s'en rapproche.",
+        "Language": "fr-FR"
+      },
+      {
+        "Title": "브레이킹 배드 무비: 엘 카미노",
+        "Overview": "도망자로 돌아온 제시 핑크맨. 범죄로부터, 과거로부터, 그는 달아나야만 한다. 《브레이킹 배드》의 제작자 빈스 길리건이 각본과 연출을 맡은 영화. 에런 폴이 출연한다.",
+        "Language": "ko-KR"
+      },
+      {
+        "Title": "El Camino: Una película de Breaking Bad",
+        "Overview": "Tiempo después de los eventos sucedidos tras el último episodio de la serie \"Breaking Bad\", el fugitivo Jesse Pinkman (Aaron Paul) huye de sus perseguidores, de la ley y de su pasado.",
+        "Language": "es-ES"
+      },
+      {
+        "Title": "El Camino: Il film di Breaking Bad",
+        "Overview": "Jesse Pinkman è sopravvissuto alla trappola che Walter White, a costo della sua vita, ha fatto scattare contro i nazisti in un ultimo atto di redenzione. Quindi, dopo aver ucciso il sociopatico Todd, Jesse si è dato alla macchia su una Chevrolet El Camino, chiedendo prima di tutto aiuto ai vecchi amici Sneaky Pete e Badger. Ma non sono loro ad avere i fondi e gli strumenti che gli servono per far perdere davvero le proprie tracce e iniziare altrove una nuova vita. Così Jesse, ancora pesantemente traumatizzato dalla prigionia, deve trovare soldi e riallacciare contatti per riguadagnarsi una vera libertà.",
+        "Language": "it-IT"
+      },
+      {
+        "Title": "El Camino: Μια Ταινία του Breaking Bad",
+        "Overview": "Ο Τζέσι Πίνκμαν δραπέτευσε και προσπαθεί να ξεπεράσει το παρελθόν. Σε σενάριο και σκηνοθεσία του δημιουργού του \"Breaking Bad\" Βινς Γκίλιγκαν. Πρωταγωνιστεί ο Άαρον Πολ.",
+        "Language": "el-GR"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Film",
+        "Overview": "Após sua dramática fuga do cativeiro, Jesse precisa se reconciliar com o passado para que consiga criar algum tipo de futuro. Escrito e dirigido pelo criador de Breaking Bad, Vince Gilligan, e estrelado por Aaron Paul.",
+        "Language": "pt-BR"
+      },
+      {
+        "Title": "续命之徒：绝命毒师电影",
+        "Overview": "在沃尔特·怀特（布莱恩·科兰斯顿饰）死后，杰西·平克曼（亚伦·保尔饰）正在被新墨西哥当地警方追捕，为了躲避追捕并重新开始生活，他先去找挚友并得到了他们的帮助，而后完成了之前的未结之事，最终在阿拉斯加以新的身份重新开始了生活。",
+        "Language": "zh-CN"
+      },
+      {
+        "Title": "El Camino: Ein „Breaking Bad“-Film",
+        "Overview": "Der Ex-Drogenkoch Jesse Pinkman muss sich nach seinem dramatischen Entkommen aus der Gefangenschaft auf der Flucht vor der Polizei und anderen Verfolgern mit seiner Vergangenheit auseinandersetzen, um überhaupt so etwas wie eine Zukunft zu haben. Skinny Pete, der von der Polizei wegen Jesses Verbleib vernommen wird, will unterdessen dichthalten …",
+        "Language": "de-DE"
+      },
+      {
+        "Title": "El Camino: фильм по мотивам сериала Во все тяжкие",
+        "Overview": "Джесси Пинкман сбежал от неонацистов. Не зная, куда ему податься, он скрывается от полиции, похитителей и прошлого. Теперь он должен понять, как ему жить дальше.",
+        "Language": "ru-RU"
+      },
+      {
+        "Title": "El Camino: Una película de Breaking Bad",
+        "Overview": "Después de escapar de Jack y su pandilla, Jesse Pinkman huye de la policía e intenta escapar de su propia tormenta interna.",
+        "Language": "es-MX"
+      },
+      {
+        "Title": "El Camino: Film podle seriálu Perníkový táta",
+        "Overview": "Po svém dramatickém útěku ze zajetí se musí Jesse Pinkman vyrovnat se svojí minulostí, aby byl schopný mít jakoukoliv budoucnost. Jeho věznitelé i zákon jsou mu v patách.",
+        "Language": "cs-CZ"
+      },
+      {
+        "Title": "El Camino: Bir Breaking Bad Filmi",
+        "Overview": "Firari Jesse Pinkman, geçmişinden kaçmaya çalışır.",
+        "Language": "tr-TR"
+      },
+      {
+        "Title": "續命之徒：絕命毒師電影",
+        "Overview": "亡命之徒傑斯·平克曼試圖擺脫自己的過去。",
+        "Language": "zh-TW"
+      },
+      {
+        "Title": "El Camino: Film „Breaking Bad”",
+        "Overview": "Za sprawą wydarzenia telewizyjnego Netflix pt. EL CAMINO: FILM „BREAKING BAD\" widzowie mają szansę poznać dalsze losy Jessego Pinkmana (Aaron Paul). Po dramatycznej ucieczce Jesse musi pogodzić się z przeszłością, aby w ogóle móc myśleć o jakiejkolwiek przyszłości.",
+        "Language": "pl-PL"
+      },
+      {
+        "Title": "אל קמינו: שובר שורות – הסרט",
+        "Overview": "העבריין הנמלט ג'סי פינקמן מנסה לברוח מעברו. סרט שכתב וביים היוצר של \"שובר שורות\" וינס גיליגאן, בכיכובו של אהרון פול.",
+        "Language": "he-IL"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "Jesse Pinkman är på flykt, men det förflutna är alltid hack i häl. Med Aaron Paul i huvudrollen och manus och regi av Vince Gilligan, skaparen av Breaking Bad.",
+        "Language": "sv-SE"
+      },
+      {
+        "Title": "El Camino: Breaking Bad -elokuva",
+        "Overview": "Jesse Pinkman on juuri selvinnyt epäonnistuneen huumekaupan jälkeisestä verilöylystä. Hän pakenee tapahtumapaikalta, jättäen haavoittunaeeen pomonsa Walter Whiten oman onnensa nojaan. Nyt Jesse on tavallaan vapaa kaikesta menneestä ja häntä kohtaan tehdyistä vääryyksistä. Mutta Jessen täytyy silti kadota maisemista, häntä tullaan kuitenkin etsimään sekä rikollisten että viranomaisten taholta. Hän selvisi viisi vuotta Walter Whiten apurina hengissä ja nyt hänen tarvitsee ottaa käyttöön kaikki matkanvarrella opitut keinot elää parempaa elämää. Jessen on päästävä pois Albuquerquesta ennen kuin poliisit jäljittävät hänet, mutta ensin hänen on kerättävä pääomaa  ja sanottava hyvästit harvoille ihmisille, joita hän rakastaa ja joiden elämän Walt on säästynyt. Ensimmäisenä  on vuorossa vanhat ystävät Skinny Pete ja Badger.",
+        "Language": "fi-FI"
+      },
+      {
+        "Title": "El Camino: Totál szívás – A film",
+        "Overview": "A fogságból való drámai menekülés után Jesse Pinkmannek meg kell birkóznia a múltjával, hogy valamiféle jövőt teremtsen.",
+        "Language": "hu-HU"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "Vervolg op de serie 'Breaking Bad'. Na enkele dramatische gebeurtenissen heeft Jesse Pinkman weten te ontsnappen. Ondertussen is de politie naarstig naar hem op zoek. Jesse zal zaken uit zijn misdadige verleden onder ogen moeten zien te komen, wil hij nog iets van een toekomst hebben.",
+        "Language": "nl-NL"
+      },
+      {
+        "Title": "El Camino : Un film \"Breaking Bad\"",
+        "Overview": "Le fugitif Jesse Pinkman tente d'échapper à son passé.",
+        "Language": "fr-CA"
+      },
+      {
+        "Title": "Ель Каміно: Пуститися берега",
+        "Overview": "Дія відбувається після останнього епізоду серіалу Пуститися берега «Феліна». Джессі Пінкман намагається здобути свободу після втечі від своїх викрадачів.",
+        "Language": "uk-UA"
+      },
+      {
+        "Title": "В обувките на Сатаната: Ел Камино",
+        "Overview": "След като успява да избяга на Джак и бандата му, Джеси Пинкман се превръща в беглец от закона, а същевременно се опитва да избяга от вътрешните си демони.",
+        "Language": "bg-BG"
+      },
+      {
+        "Title": "El Camino: Um Filme Breaking Bad",
+        "Overview": "O fugitivo Jesse Pinkman foge dos seus captores, da polícia e do seu passado.",
+        "Language": "pt-PT"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "تدور الأحداث حول الهارب \"جيسي بينكمن\" وهو يحاول تجاوز ماضيه...",
+        "Language": "ar-SA"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "Efter sin dramatiske flugt fra fangenskab må Jesse forlige sig med sin fortid for at kunne skabe sig en fremtid.",
+        "Language": "da-DK"
+      },
+      {
+        "Title": "เอล คามิโน่: ดับเครื่องชน คนดีแตก (เดอะ มูฟวี่)",
+        "Overview": "เจสซี่ พิงค์แมน อาชญากรหลบหนี พยายามหนีอดีตของตัวเอง",
+        "Language": "th-TH"
+      },
+      {
+        "Title": "Ел Камино: Чиста хемија",
+        "Overview": "Џеси Пинкман је исцрпљени младић који успева драматично да побегне из суровог заробљеништва, где су га немилосрдни криминалци месецима држали као роба и приморавали да производи кућни метамфетамин. Коначно слободан, али дубоко трауматизован, он мора брзо да пронађе начин да се сакрије од полиције која је покренула масовну потеру за њим након крвавог обрачуна који је изазвао његов бивши партнер Волтер Вајт. Док покушава да прикупи довољно новца за нови почетак и лажни идентитет, Џеси је приморан да се суочи са демонима из своје прошлости и рачуна на помоћ јединих преосталих пријатеља. Овај неовестерн криминалистички трилер доноси напету трку са временом и коначно поглавље о преживљавању и потрази за искупљењем након потпуног слома нарко-империје.",
+        "Language": "sr-RS"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "Nakon bijega od Jacka i njegove bande, Jesse Pinkman u bijegu je od policije i pokušava pobjeći od vlastitog unutrašnjeg nemira.",
+        "Language": "hr-HR"
+      },
+      {
+        "Title": "El Camino: Un film Breaking Bad",
+        "Overview": "Intriga are în centru personajul lui Aaron Paul, care, într-un Chevrolet El Camino furat, fuge de inamicii săi, de lege și de trecutul tumultuos, acțiunea petrecându-se la scurtă vreme după cea din ultimul episod al serialului Breaking Bad.",
+        "Language": "ro-RO"
+      },
+      {
+        "Title": "エルカミーノ: ブレイキング・バッド THE MOVIE",
+        "Overview": "監禁場所から逃げ出したジェシー・ピンクマンが、やるべきことはただひとつ。監督・脚本は「ブレイキング・バッド」のヴィンス・ギリガン。主演アーロン・ポール。",
+        "Language": "ja-JP"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "Pokračovanie slávneho seriálu Breaking Bad, ktoré konečne odhalí osud kľúčovej postavy. Po svojom dramatickom úteku zo zajatia sa musí Jesse Pinkman vyrovnať so svojou minulosťou, aby bol schopný mať akúkoľvek budúcnosť. Jeho väznitelia aj zákon sú mu v pätách.",
+        "Language": "sk-SK"
+      },
+      {
+        "Title": "El Camino: Phim hậu bản của \"Tập làm người xấu\"",
+        "Overview": "Kẻ đào tẩu Jesse Pinkman cố gắng trốn chạy khỏi quá khứ. Phim do Vince Gilligan của \"Tập làm người xấu\" đạo diễn và viết kịch bản, với sự tham diễn của Aaron Paul.",
+        "Language": "vi-VN"
+      },
+      {
+        "Title": "ელ კამინო: მძიმე დანაშაული ფილმი",
+        "Overview": "",
+        "Language": "ka-GE"
+      },
+      {
+        "Title": "續命之徒：絕命毒師電影",
+        "Overview": "亡命之徒傑斯·平克曼試圖擺脫自己的過去。本片由《絕命毒師》創作人文斯·吉利根編導，亞倫·保羅主演。",
+        "Language": "zh-HK"
+      },
+      {
+        "Title": "Bręstantis blogis. Filmas",
+        "Overview": "Pabėgęs iš nelaisvės Jesse'is Pinkmanas turi susitvarkyti su savo praeitimi, kad galėtų pradėti naują gyvenimą.",
+        "Language": "lt-LT"
+      },
+      {
+        "Title": "ال کامینو: فیلم بریکینگ بد",
+        "Overview": "در پی فرار دراماتیکش از اسارت، «جسی پینکمن» باید برای ساختن آینده‌ای هرچند مبهم، با گذشته‌اش روبه‌رو شود و آن را بپذیرد.",
+        "Language": "fa-IR"
+      },
+      {
+        "Title": "O Camiño: Un Filme de Breaking Bad",
+        "Overview": "Despois da súa dramática fuxida de cautiverio, Jesse Pinkman debe facer fronte ao seu pasado para forxar algún tipo de futuro.",
+        "Language": "gl-ES"
+      },
+      {
+        "Title": "La Vojo: Filmo de Breaking Bad",
+        "Overview": "Post kiam li eskapis dramige el malliberejo, Jesse Pinkman devas konfrontiĝi kun sia pasinteco por povi konstrui iun specon de estonteco.",
+        "Language": "eo-EO"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Film",
+        "Overview": "Po dramatičnem pobegu iz zapora Jesse Pinkman beži pred svojimi ugrabitelji, zakonom in svojo preteklostjo. Soočiti se mora z njo, če si želi ustvariti kakršnokoli prihodnost.",
+        "Language": "sl-SI"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "تدور الأحداث حول الهارب \"جيسي بينكمن\" وهو يحاول تجاوز ماضيه...",
+        "Language": "ar-AE"
+      },
+      {
+        "Title": "续命之徒：绝命毒师电影",
+        "Overview": "逃亡者杰西·平克曼试图战胜过去。",
+        "Language": "zh-SG"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "Buronan Jesse Pinkman berupaya lari dari masa lalunya.",
+        "Language": "id-ID"
+      },
+      {
+        "Title": "El Camino: En Breaking Bad-film",
+        "Overview": "Rømlingen Jesse Pinkman forsøker å legge fortiden bak seg.",
+        "Language": "no-NO"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "Tinangkang takasan ng puganteng si Jesse Pinkman ang kanyang nakaraan",
+        "Language": "tl-PH"
+      },
+      {
+        "Title": "El Camino: A Breaking Bad Movie",
+        "Overview": "Lõpuks vabanenud piinamistest ja orjusest Todi onu Jacki ja härra White käest, peab Jesse põgenema deemonite eest oma minevikust. Ta põgeneb politsei eest ja tema ainus lootus pääseda on Ed Galbraith. Mees kes saab õige hinna eest anda teile uue identiteedi ja uue alguse.",
+        "Language": "et-EE"
+      }
+    ],
+    "Recommendations": [
+      {
+        "TmdbId": 4959,
+        "Title": "The International"
+      },
+      {
+        "TmdbId": 10431,
+        "Title": "War"
+      },
+      {
+        "TmdbId": 1242501,
+        "Title": "Icefall"
+      },
+      {
+        "TmdbId": 862552,
+        "Title": "The Ritual Killer"
+      },
+      {
+        "TmdbId": 848123,
+        "Title": "Black Site"
+      },
+      {
+        "TmdbId": 1293162,
+        "Title": "Thieves Highway"
+      },
+      {
+        "TmdbId": 1155324,
+        "Title": "King Ivory"
+      },
+      {
+        "TmdbId": 20411,
+        "Title": "Until Death"
+      },
+      {
+        "TmdbId": 339095,
+        "Title": "The Last Days of American Crime"
+      },
+      {
+        "TmdbId": 1146344,
+        "Title": "Misdirection"
+      }
+    ],
+    "Credits": {
+      "Cast": [
+        {
+          "Name": "Aaron Paul",
+          "Order": 0,
+          "Character": "Jesse",
+          "TmdbId": 84497,
+          "CreditId": "5be34d7a0e0a2614ba01c2cb",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/8Ac9uuoYwZoYVAIJfRLzzLsGGJn.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jesse Plemons",
+          "Order": 1,
+          "Character": "Todd",
+          "TmdbId": 88124,
+          "CreditId": "5da05913ae36680013209712",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/og4I51GsuwohdPgoELOHVMMqMre.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Charles Baker",
+          "Order": 2,
+          "Character": "Skinny Pete",
+          "TmdbId": 82945,
+          "CreditId": "5d61c2ae87f3f20013fd2e76",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/l2plWtvYRcLX4CXf8azXIyANq.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Matt Jones",
+          "Order": 3,
+          "Character": "Badger",
+          "TmdbId": 191202,
+          "CreditId": "5d823ebacabfe4002c8aec5a",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/x13vFDaJHY1CxNvSPWujYe12bMc.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Scott MacArthur",
+          "Order": 4,
+          "Character": "Neil",
+          "TmdbId": 209087,
+          "CreditId": "5da05932ae3668001f20668a",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/rGTPhDMQYR7mmtcOwPMK7R4SDgV.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Larry Hankin",
+          "Order": 5,
+          "Character": "Old Joe",
+          "TmdbId": 11519,
+          "CreditId": "5d91b94aec1879000ed724bb",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/2uR8SZ9geiSQOpBhKrerh9qY7CX.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Scott Shepherd",
+          "Order": 6,
+          "Character": "Casey",
+          "TmdbId": 1475960,
+          "CreditId": "5da0594ecdf2e6002a693c53",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/leLuJUpF6uySDWPS7FwHpObAMs4.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Tom Bower",
+          "Order": 7,
+          "Character": "Lou",
+          "TmdbId": 19453,
+          "CreditId": "5da09f54e54d5d0011830ebd",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/q26z6T3QZfpirZV3Ex885zUgUR4.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Robert Forster",
+          "Order": 8,
+          "Character": "Ed",
+          "TmdbId": 5694,
+          "CreditId": "5da05998e54d5d001d82bead",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/vGDifxN2PnO69rnpg6FoWkocFCD.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jonathan Banks",
+          "Order": 9,
+          "Character": "Mike",
+          "TmdbId": 783,
+          "CreditId": "5d8d1960172d7f0027514f73",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/bswk26L13PvY4iMTwUTAsepXCLv.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Bryan Cranston",
+          "Order": 10,
+          "Character": "Walt",
+          "TmdbId": 17419,
+          "CreditId": "5da059bdcdf2e6002a693d41",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/7Jahy5LZX2Fo8fGJltMreAI49hC.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Krysten Ritter",
+          "Order": 11,
+          "Character": "Jane",
+          "TmdbId": 78080,
+          "CreditId": "5da059df4a2226001fe09d01",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/9pfKWfSU5i8N6JJuLlVMKfPCDIN.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Kevin Rankin",
+          "Order": 12,
+          "Character": "Kenny",
+          "TmdbId": 114000,
+          "CreditId": "5da09f81ae3668002b2114e2",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/fOW5R6BSgRvMrt2R7KAxSk7L4H2.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Tess Harper",
+          "Order": 13,
+          "Character": "Mrs. Pinkman",
+          "TmdbId": 41249,
+          "CreditId": "5da09f9ccdf2e6002a69d557",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/8Z770Kk13MK1NP7skWmTxvRGx3V.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Michael Bofshever",
+          "Order": 14,
+          "Character": "Mr. Pinkman",
+          "TmdbId": 95195,
+          "CreditId": "5da09fa9cdf2e6001d69e83a",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/t7vAtGPSUfvPRIAvKfaCJ2JNrQW.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Marla Gibbs",
+          "Order": 15,
+          "Character": "Jean",
+          "TmdbId": 68751,
+          "CreditId": "5da09fc5ae36680013212307",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/ovjJm4i0n5vr38ywvz2dsVLei5F.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Todd Terry",
+          "Order": 16,
+          "Character": "SAC Ramey",
+          "TmdbId": 1178637,
+          "CreditId": "5da0a081ae3668001f210404",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/vB9zZNg8qZPlSijYs84F4LpwVpo.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Julie Pearl",
+          "Order": 17,
+          "Character": "ADA Ericsen",
+          "TmdbId": 588278,
+          "CreditId": "5da0a093ae3668001f210422",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/A0MYm6EBEB1vX8KHUHEnxTfPz4L.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Gloria Sandoval",
+          "Order": 18,
+          "Character": "Sonia",
+          "TmdbId": 1188686,
+          "CreditId": "5da0a0bed34eb3001d481d9b",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/rOUi5HwAXPfOhd9SkHs9vxLpWaP.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Simon Drobik",
+          "Order": 19,
+          "Character": "Senior Officer",
+          "TmdbId": 2987872,
+          "CreditId": "6034d533746457003e0162c5",
+          "Images": []
+        },
+        {
+          "Name": "Carlos Sepulveda",
+          "Order": 20,
+          "Character": "Officer",
+          "TmdbId": 2040317,
+          "CreditId": "5da0ce8cdd258900197fd31f",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/jYnrh38AwvbQsLWoVX5Swu9xabV.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Brendan Sexton III",
+          "Order": 21,
+          "Character": "Kyle",
+          "TmdbId": 2839,
+          "CreditId": "5da09fd3e54d5d001d8359d5",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/kfvO3Mdk5yqzuaN8aIeaFfVl4T5.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Matthew Van Wettering",
+          "Order": 22,
+          "Character": "Colin",
+          "TmdbId": 1865683,
+          "CreditId": "5da13d19afe2240018e7ccac",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/19KWXW7EmsWtG6wcVErsapu7pRr.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Chris Bylsma",
+          "Order": 23,
+          "Character": "Sean",
+          "TmdbId": 1128308,
+          "CreditId": "5da13d1ab84f94001897a603",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/ckGu8M5UdMZXrDKpxlkQCYLz5TC.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "David Mattey",
+          "Order": 24,
+          "Character": "Clarence",
+          "TmdbId": 66634,
+          "CreditId": "5da13d1ab84f94001897a606",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/elz9J0KJEiKj1F3d106628m4wc8.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Cody Renee Cameron",
+          "Order": 25,
+          "Character": "Candy",
+          "TmdbId": 1648701,
+          "CreditId": "5da13d1ab84f94001597cc48",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/1RNJirWGBgNyhggRPls4oJoqk9a.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Alison Law",
+          "Order": 26,
+          "Character": "Wanda",
+          "TmdbId": 2873425,
+          "CreditId": "6034d5774c1d9a0040df59c6",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/i5uV12DTyb9jQ2NOKcni617v5oY.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Gabriela Alicia Ortega",
+          "Order": 27,
+          "Character": "April",
+          "TmdbId": 2987873,
+          "CreditId": "6034d587a14e100040cf8d1b",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/iyRcUnTFRBqXWUeid9XhVZFL2W6.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Gregory Steven Soliz",
+          "Order": 28,
+          "Character": "TV News Anchor",
+          "TmdbId": 2573530,
+          "CreditId": "6034d515a14e10003fcf7437",
+          "Images": []
+        },
+        {
+          "Name": "Danielle Todesco",
+          "Order": 29,
+          "Character": "Reporter",
+          "TmdbId": 2987870,
+          "CreditId": "6034d52397eab40040d1c632",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/hem2T5Pg6m17xHLilTEcRmJo17p.jpg"
+            }
+          ]
+        }
+      ],
+      "Crew": [
+        {
+          "Name": "Vince Gilligan",
+          "Order": 0,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 66633,
+          "CreditId": "5cd0552a0e0a2627aa016405",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/wJIxATESjzsjSgvRhVavOmdamXc.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Vince Gilligan",
+          "Order": 1,
+          "Job": "Writer",
+          "Department": "Writing",
+          "TmdbId": 66633,
+          "CreditId": "5be2d25e0e0a2614b60124c0",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/wJIxATESjzsjSgvRhVavOmdamXc.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Aaron Paul",
+          "Order": 2,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 84497,
+          "CreditId": "5d8d19d9172d7f0027514fd9",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/8Ac9uuoYwZoYVAIJfRLzzLsGGJn.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Vince Gilligan",
+          "Order": 3,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 66633,
+          "CreditId": "5da09dcecdf2e6002a69d21b",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/wJIxATESjzsjSgvRhVavOmdamXc.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Mark Johnson",
+          "Order": 4,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 5162,
+          "CreditId": "5d8d19a8d9f4a60020535172",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/gLuXkOQjqB81aHMGJ2OtYzEpHQu.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Melissa Bernstein",
+          "Order": 5,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 1223199,
+          "CreditId": "5d8d198e79b3d4001788edc2",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/rSztwqMUIko8RkmwjxBse1XDW3g.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Charles Newirth",
+          "Order": 6,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 15004,
+          "CreditId": "5d8d19ca172d7f0017520b45",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/4tTEd7eQRB9n0tj4Q9U7Wt0D5Qn.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Diane Mercer",
+          "Order": 7,
+          "Job": "Executive Producer",
+          "Department": "Production",
+          "TmdbId": 1223202,
+          "CreditId": "5da09debe54d5d001d835596",
+          "Images": []
+        },
+        {
+          "Name": "Marshall Adams",
+          "Order": 8,
+          "Job": "Director of Photography",
+          "Department": "Camera",
+          "TmdbId": 1543194,
+          "CreditId": "5da09e70e54d5d001d835672",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/ncUZjPfQrKBdUZV0fOlUwn984rx.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Peter Gould",
+          "Order": 9,
+          "Job": "Thanks",
+          "Department": "Crew",
+          "TmdbId": 24951,
+          "CreditId": "646349e5e3fa2f0145ed9752",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/a2dJSpUiXQ2NAxqSzztr6WsnhOJ.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Thomas Schnauz",
+          "Order": 10,
+          "Job": "Thanks",
+          "Department": "Crew",
+          "TmdbId": 103009,
+          "CreditId": "646349f0dbbb420170aa4484",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/uMz5wsgv6QQAgFI809SgCCbwYn9.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Greg Nicotero",
+          "Order": 11,
+          "Job": "Prosthetic Makeup Artist",
+          "Department": "Costume & Make-Up",
+          "TmdbId": 59287,
+          "CreditId": "69a8da886f6d0d612633eff2",
+          "Images": []
+        },
+        {
+          "Name": "Sharon Bialy",
+          "Order": 12,
+          "Job": "Casting",
+          "Department": "Production",
+          "TmdbId": 6479,
+          "CreditId": "5da09ee9ae3668001f20ff87",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/uOex6LpaQYncD0sQfVYD1frI5uJ.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Michelle MacLaren",
+          "Order": 13,
+          "Job": "Thanks",
+          "Department": "Crew",
+          "TmdbId": 29779,
+          "CreditId": "646349ebe3fa2f0124473c65",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/3LcH5eNiysMWaepARllVrS4Dzn7.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Ed Duran",
+          "Order": 14,
+          "Job": "Stunts",
+          "Department": "Crew",
+          "TmdbId": 1335375,
+          "CreditId": "6445c336b54002046426a296",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/mzPJkVKg7ve3whmvyf2TyDIuewr.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Eliza Coleman",
+          "Order": 15,
+          "Job": "Stunts",
+          "Department": "Crew",
+          "TmdbId": 1464310,
+          "CreditId": "6445c2f0fba6250908705cad",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/fhcKvNFhPCqL0fGYAYjlcl9kTeE.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Chris Navarro",
+          "Order": 16,
+          "Job": "ADR Mixer",
+          "Department": "Sound",
+          "TmdbId": 1491848,
+          "CreditId": "5da0aa35e54d5d00298335da",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/tKQjPzFDhYVZkzaq2j4NCKb4oVe.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jenn Carroll",
+          "Order": 17,
+          "Job": "Co-Producer",
+          "Department": "Production",
+          "TmdbId": 2430272,
+          "CreditId": "5da09e144a22260013e0df52",
+          "Images": []
+        },
+        {
+          "Name": "Charles Newirth",
+          "Order": 18,
+          "Job": "Unit Production Manager",
+          "Department": "Production",
+          "TmdbId": 15004,
+          "CreditId": "5da0a02c4a2226001fe13775",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/4tTEd7eQRB9n0tj4Q9U7Wt0D5Qn.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Whitney Coleman",
+          "Order": 19,
+          "Job": "Stunts",
+          "Department": "Crew",
+          "TmdbId": 1463661,
+          "CreditId": "6445c301a06efe0fc8a4630e",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/e6MyQLNmQUgIIoyJH5s4eGxVUF6.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Edie Mirman",
+          "Order": 20,
+          "Job": "ADR Voice Casting",
+          "Department": "Production",
+          "TmdbId": 571265,
+          "CreditId": "5da0aa1a4a22260013e0fedb",
+          "Images": []
+        },
+        {
+          "Name": "Paul Eliopoulos",
+          "Order": 21,
+          "Job": "Stunts",
+          "Department": "Crew",
+          "TmdbId": 1737945,
+          "CreditId": "6445c2fdb3f6f502fc9f422f",
+          "Images": []
+        },
+        {
+          "Name": "Dave Porter",
+          "Order": 22,
+          "Job": "Original Music Composer",
+          "Department": "Sound",
+          "TmdbId": 1280070,
+          "CreditId": "5da09eb6ae3668001321210f",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/flRW9QknVtU8HG7lLjMvflbhl2a.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Doug Coleman",
+          "Order": 23,
+          "Job": "Stunt Coordinator",
+          "Department": "Crew",
+          "TmdbId": 142157,
+          "CreditId": "5d9e38917739410042d11d2f",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/temeKPrQ9VosJXwb51O3EWxQ5yO.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Lori McCoy-Bell",
+          "Order": 24,
+          "Job": "Hair Department Head",
+          "Department": "Costume & Make-Up",
+          "TmdbId": 1401606,
+          "CreditId": "5d8d1abad9f4a60020535465",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/xoR4oQtcGewEz5nOJXCHlAtF0F8.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Gordon Smith",
+          "Order": 25,
+          "Job": "Thanks",
+          "Department": "Crew",
+          "TmdbId": 1626105,
+          "CreditId": "646349f40f365500e20ca75c",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/oM204aEgATNdQZe8OCUxBxilFL2.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "John Trejo",
+          "Order": 26,
+          "Job": "Stunts",
+          "Department": "Crew",
+          "TmdbId": 1488513,
+          "CreditId": "6445c314fba6250908705cbd",
+          "Images": []
+        },
+        {
+          "Name": "Thomas Golubić",
+          "Order": 27,
+          "Job": "Music Supervisor",
+          "Department": "Sound",
+          "TmdbId": 1069688,
+          "CreditId": "5da09eced34eb30011481801",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/umzkpmX3p3GdrSutAHFX7Rij0Sm.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Louise Frogley",
+          "Order": 28,
+          "Job": "Costume Design",
+          "Department": "Costume & Make-Up",
+          "TmdbId": 4061,
+          "CreditId": "5da09ea1ae366800132120eb",
+          "Images": []
+        },
+        {
+          "Name": "Christian Diaz de Bedoya",
+          "Order": 29,
+          "Job": "Location Manager",
+          "Department": "Production",
+          "TmdbId": 1930718,
+          "CreditId": "5da0a4764a22260013e0ed66",
+          "Images": []
+        }
+      ]
+    },
+    "Studio": "Sony Pictures Television",
+    "YoutubeTrailerId": "rklOejPnD3Y",
+    "Certifications": [
+      {
+        "Country": "AR",
+        "Certification": "+16"
+      },
+      {
+        "Country": "AU",
+        "Certification": "MA 15+"
+      },
+      {
+        "Country": "BR",
+        "Certification": "16"
+      },
+      {
+        "Country": "CA",
+        "Certification": "R"
+      },
+      {
+        "Country": "CH",
+        "Certification": "16"
+      },
+      {
+        "Country": "CZ",
+        "Certification": "18+"
+      },
+      {
+        "Country": "DE",
+        "Certification": "16"
+      },
+      {
+        "Country": "ES",
+        "Certification": "16"
+      },
+      {
+        "Country": "FI",
+        "Certification": "K-16"
+      },
+      {
+        "Country": "FR",
+        "Certification": "16"
+      },
+      {
+        "Country": "GB",
+        "Certification": "15"
+      },
+      {
+        "Country": "HU",
+        "Certification": "16"
+      },
+      {
+        "Country": "IE",
+        "Certification": "15"
+      },
+      {
+        "Country": "IL",
+        "Certification": "16"
+      },
+      {
+        "Country": "IN",
+        "Certification": "U/A 16+"
+      },
+      {
+        "Country": "KR",
+        "Certification": "15"
+      },
+      {
+        "Country": "LT",
+        "Certification": "N-16"
+      },
+      {
+        "Country": "LU",
+        "Certification": "16"
+      },
+      {
+        "Country": "LV",
+        "Certification": "16+"
+      },
+      {
+        "Country": "NL",
+        "Certification": "16"
+      },
+      {
+        "Country": "NZ",
+        "Certification": "R16"
+      },
+      {
+        "Country": "PH",
+        "Certification": "R-16"
+      },
+      {
+        "Country": "PL",
+        "Certification": "16"
+      },
+      {
+        "Country": "PR",
+        "Certification": "R"
+      },
+      {
+        "Country": "PT",
+        "Certification": "M/16"
+      },
+      {
+        "Country": "RO",
+        "Certification": "18"
+      },
+      {
+        "Country": "RU",
+        "Certification": "16+"
+      },
+      {
+        "Country": "SG",
+        "Certification": "M18"
+      },
+      {
+        "Country": "TR",
+        "Certification": "16+"
+      },
+      {
+        "Country": "US",
+        "Certification": "R"
+      },
+      {
+        "Country": "VI",
+        "Certification": "R"
+      },
+      {
+        "Country": "ZA",
+        "Certification": "13"
+      }
+    ],
+    "Status": null,
+    "Collection": null,
+    "Homepage": "https://www.netflix.com/title/81078819"
+  },
+  {
+    "TmdbId": 635602,
+    "ImdbId": "tt9746510",
+    "Title": "Breaking Bad Wolf",
+    "Overview": "Veteran cop John Mark Dougan left the force, appalled by corruption within. He started a forum for honest cops to anonymously expose police the bad. Fierce backlash eventually forced Dougan to flee the US and seek refuge in Russia.",
+    "OriginalTitle": "Breaking Bad Wolf",
+    "OriginalLanguage": "en",
+    "TitleSlug": "635602",
+    "Runtime": 51,
+    "Popularity": 0.4472,
+    "Year": 0,
+    "Premier": null,
+    "InCinema": null,
+    "PhysicalRelease": null,
+    "DigitalRelease": null,
+    "Images": [
+      {
+        "CoverType": "Poster",
+        "Url": "https://image.tmdb.org/t/p/original/bKiGcZ13r8nkYiuKUBakbzAjmwn.jpg"
+      },
+      {
+        "CoverType": "Fanart",
+        "Url": "https://image.tmdb.org/t/p/original/wKRXQ9OWXNwmRyIgLMULkedKtiU.jpg"
+      }
+    ],
+    "Ratings": [
+      {
+        "Count": 2,
+        "Value": 8,
+        "Origin": "Tmdb",
+        "Type": "User"
+      }
+    ],
+    "MovieRatings": {
+      "Tmdb": {
+        "Count": 2,
+        "Value": 8,
+        "Type": "User"
+      },
+      "Imdb": {
+        "Count": 19,
+        "Value": 5.9,
+        "Type": "User"
+      },
+      "Metacritic": null,
+      "RottenTomatoes": null,
+      "Trakt": null
+    },
+    "Genres": [
+      "Documentary"
+    ],
+    "Keywords": [],
+    "AlternativeTitles": [],
+    "Translations": [
+      {
+        "Title": "Breaking Bad Wolf",
+        "Overview": "Veteran cop John Mark Dougan left the force, appalled by corruption within. He started a forum for honest cops to anonymously expose police the bad. Fierce backlash eventually forced Dougan to flee the US and seek refuge in Russia.",
+        "Language": "en-US"
+      }
+    ],
+    "Recommendations": [
+      {
+        "TmdbId": 1723460,
+        "Title": "A Toxic Love Story"
+      },
+      {
+        "TmdbId": 1492608,
+        "Title": "John Candy: I Like Me"
+      },
+      {
+        "TmdbId": 961722,
+        "Title": "Sidney"
+      },
+      {
+        "TmdbId": 1400780,
+        "Title": "Come See Me in the Good Light"
+      },
+      {
+        "TmdbId": 1591516,
+        "Title": "Evil Influencer: The Jodi Hildebrandt Story"
+      },
+      {
+        "TmdbId": 1059673,
+        "Title": "Avatar: The Deep Dive - A Special Edition of 20/20"
+      },
+      {
+        "TmdbId": 1461714,
+        "Title": "My Mom Jayne"
+      },
+      {
+        "TmdbId": 39333,
+        "Title": "180° South"
+      },
+      {
+        "TmdbId": 473415,
+        "Title": "Voyeur"
+      },
+      {
+        "TmdbId": 124074,
+        "Title": "Mea Maxima Culpa: Silence in the House of God"
+      }
+    ],
+    "Credits": {
+      "Cast": [],
+      "Crew": []
+    },
+    "Studio": "",
+    "YoutubeTrailerId": "",
+    "Certifications": [],
+    "Status": null,
+    "Collection": null,
+    "Homepage": ""
+  },
+  {
+    "TmdbId": 675519,
+    "ImdbId": "tt11828264",
+    "Title": "Snow Globe: A Breaking Bad Short",
+    "Overview": "Todd finds the courage to reach out to his Breaking Bad co-conspirator Lydia with a very important question.",
+    "OriginalTitle": "Snow Globe: A Breaking Bad Short",
+    "OriginalLanguage": "en",
+    "TitleSlug": "675519",
+    "Runtime": 3,
+    "Popularity": 0.6901,
+    "Year": 2020,
+    "Premier": null,
+    "InCinema": null,
+    "PhysicalRelease": null,
+    "DigitalRelease": "2020-02-16T00:00:00Z",
+    "Images": [
+      {
+        "CoverType": "Poster",
+        "Url": "https://image.tmdb.org/t/p/original/2KOPxe7fy7sizottwvMk0s7YxL1.jpg"
+      },
+      {
+        "CoverType": "Fanart",
+        "Url": "https://image.tmdb.org/t/p/original/cQxduX8VJGpunwNeGF0M1GE4oj9.jpg"
+      }
+    ],
+    "Ratings": [
+      {
+        "Count": 7,
+        "Value": 5.9,
+        "Origin": "Tmdb",
+        "Type": "User"
+      }
+    ],
+    "MovieRatings": {
+      "Tmdb": {
+        "Count": 7,
+        "Value": 5.9,
+        "Type": "User"
+      },
+      "Imdb": {
+        "Count": 207,
+        "Value": 6.3,
+        "Type": "User"
+      },
+      "Metacritic": null,
+      "RottenTomatoes": null,
+      "Trakt": {
+        "Count": 25,
+        "Value": 6.32,
+        "Type": "User"
+      }
+    },
+    "Genres": [
+      "Comedy",
+      "Crime"
+    ],
+    "Keywords": [],
+    "AlternativeTitles": [],
+    "Translations": [
+      {
+        "Title": "Snow Globe: A Breaking Bad Short",
+        "Overview": "Todd finds the courage to reach out to his Breaking Bad co-conspirator Lydia with a very important question.",
+        "Language": "en-US"
+      },
+      {
+        "Title": "Globo de Neve: Um Curta de Breaking Bad",
+        "Overview": "Em meio aos acontecimentos que antecedem *El Camino*, Todd Alquist prepara um presente peculiar para Lydia Rodarte-Quayle. Enquanto constrói cuidadosamente um globo de neve personalizado, Todd reúne coragem para ligar para a mulher por quem desenvolveu uma obsessão silenciosa. O que deveria ser um simples gesto romântico revela, porém, mais uma vez a estranha e perturbadora personalidade de um dos personagens mais imprevisíveis do universo de *Breaking Bad*.",
+        "Language": "pt-BR"
+      }
+    ],
+    "Recommendations": [
+      {
+        "TmdbId": 36593,
+        "Title": "Naked Gun 33⅓: The Final Insult"
+      },
+      {
+        "TmdbId": 402900,
+        "Title": "Ocean's Eight"
+      },
+      {
+        "TmdbId": 37136,
+        "Title": "The Naked Gun: From the Files of Police Squad!"
+      },
+      {
+        "TmdbId": 926670,
+        "Title": "Henry Danger: The Movie"
+      },
+      {
+        "TmdbId": 504827,
+        "Title": "The Bob's Burgers Movie"
+      },
+      {
+        "TmdbId": 12268,
+        "Title": "The Pink Panther Strikes Again"
+      },
+      {
+        "TmdbId": 602307,
+        "Title": "LEGO DC Batman: Family Matters"
+      },
+      {
+        "TmdbId": 1594,
+        "Title": "A Shot in the Dark"
+      },
+      {
+        "TmdbId": 14008,
+        "Title": "Cadet Kelly"
+      },
+      {
+        "TmdbId": 1001783,
+        "Title": "LaRoy, Texas"
+      }
+    ],
+    "Credits": {
+      "Cast": [
+        {
+          "Name": "Jesse Plemons",
+          "Order": 0,
+          "Character": "Todd",
+          "TmdbId": 88124,
+          "CreditId": "5e50690a9b861600136d375b",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/og4I51GsuwohdPgoELOHVMMqMre.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Laura Fraser",
+          "Order": 1,
+          "Character": "Lydia (voice)",
+          "TmdbId": 42279,
+          "CreditId": "5e506932a76ac50011a098e2",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/4aD3xDLA22CIf6jdK0IAs75h8pp.jpg"
+            }
+          ]
+        }
+      ],
+      "Crew": [
+        {
+          "Name": "Eric Schmidt",
+          "Order": 0,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 445256,
+          "CreditId": "5e5069b2a76ac50011a09aa5",
+          "Images": []
+        },
+        {
+          "Name": "Melissa Ng Mei-Heng",
+          "Order": 1,
+          "Job": "Writer",
+          "Department": "Writing",
+          "TmdbId": 1254988,
+          "CreditId": "5e5069d2a93d25001a46bae3",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/pppZuVpAI9diCIwzo6Jdpayt32E.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Dan Appel",
+          "Order": 2,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 1329796,
+          "CreditId": "5e5069e99b861600116db642",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/K0vYeGBy5yhrCTxf82XehjLzV4.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Eric Schmidt",
+          "Order": 3,
+          "Job": "Director of Photography",
+          "Department": "Camera",
+          "TmdbId": 445256,
+          "CreditId": "5e5069c0f48b3400176cf215",
+          "Images": []
+        }
+      ]
+    },
+    "Studio": "AMC Studios",
+    "YoutubeTrailerId": "y5hU56vJewo",
+    "Certifications": [
+      {
+        "Country": "US",
+        "Certification": "NR"
+      }
+    ],
+    "Status": null,
+    "Collection": null,
+    "Homepage": "https://www.amc.com/blogs/breaking-bad/watch-el-camino-short-snow-globe-todd-jesse-plemmons--3097"
+  },
+  {
+    "TmdbId": 1089398,
+    "ImdbId": "tt26774263",
+    "Title": "Daniel Brühl: Breaking Bad",
+    "Overview": "A portrait of the Spanish-German actor Daniel Brühl, a versatile performer capable of moving easily from the gentlest to the darkest role.",
+    "OriginalTitle": "Daniel Brühl – Der Reiz des Bösen",
+    "OriginalLanguage": "de",
+    "TitleSlug": "1089398",
+    "Runtime": 52,
+    "Popularity": 1.1116,
+    "Year": 2023,
+    "Premier": null,
+    "InCinema": null,
+    "PhysicalRelease": null,
+    "DigitalRelease": "2023-02-19T00:00:00Z",
+    "Images": [
+      {
+        "CoverType": "Poster",
+        "Url": "https://image.tmdb.org/t/p/original/kxwtTdHquKObHiT8LAWsHDQricj.jpg"
+      },
+      {
+        "CoverType": "Fanart",
+        "Url": "https://image.tmdb.org/t/p/original/mR04QRFtok3EJn4fMBrCvi5xOeh.jpg"
+      }
+    ],
+    "Ratings": [
+      {
+        "Count": 3,
+        "Value": 4.333,
+        "Origin": "Tmdb",
+        "Type": "User"
+      }
+    ],
+    "MovieRatings": {
+      "Tmdb": {
+        "Count": 3,
+        "Value": 4.333,
+        "Type": "User"
+      },
+      "Imdb": null,
+      "Metacritic": null,
+      "RottenTomatoes": null,
+      "Trakt": {
+        "Count": 2,
+        "Value": 6.5,
+        "Type": "User"
+      }
+    },
+    "Genres": [
+      "Documentary",
+      "TV Movie"
+    ],
+    "Keywords": [
+      "hollywood star",
+      "movie business",
+      "portrait of an artist"
+    ],
+    "AlternativeTitles": [
+      {
+        "Title": "Daniel Brühl: el atractivo del mal",
+        "Type": "Tmdb",
+        "Language": "es"
+      },
+      {
+        "Title": "Daniel Brühl: good bye grzeczny chłopcze!",
+        "Type": "Tmdb",
+        "Language": "en"
+      },
+      {
+        "Title": "Daniel Brühl: A European in Hollywood",
+        "Type": "Tmdb",
+        "Language": "en"
+      },
+      {
+        "Title": "Daniel Brühl : le faux gentil du cinema",
+        "Type": "Tmdb",
+        "Language": "fr"
+      }
+    ],
+    "Translations": [
+      {
+        "Title": "Daniel Brühl: Breaking Bad",
+        "Overview": "A portrait of the Spanish-German actor Daniel Brühl, a versatile performer capable of moving easily from the gentlest to the darkest role.",
+        "Language": "en-US"
+      },
+      {
+        "Title": "Daniel Brühl : goodbye l'éternel gentil !",
+        "Overview": "Portrait de l'acteur hispano-allemand Daniel Brühl, un interprète polyvalent capable de passer aisément du rôle le plus doux au plus sombre.",
+        "Language": "fr-FR"
+      },
+      {
+        "Title": "Daniel Brühl: il «finto buono» del cinema",
+        "Overview": "Un ritratto dell'attore ispano-tedesco Daniel Brühl, un interprete versatile capace di passare con facilità dal ruolo più dolce a quello più cupo.",
+        "Language": "it-IT"
+      },
+      {
+        "Title": "Daniel Brühl – Der Reiz des Bösen",
+        "Overview": "Ein Porträt des spanisch-deutschen Schauspielers Daniel Brühl, eines vielseitigen Darstellers, der sich mühelos von der sanftesten bis zur dunkelsten Rolle bewegen kann.",
+        "Language": "de-DE"
+      }
+    ],
+    "Recommendations": [
+      {
+        "TmdbId": 961722,
+        "Title": "Sidney"
+      },
+      {
+        "TmdbId": 1059673,
+        "Title": "Avatar: The Deep Dive - A Special Edition of 20/20"
+      },
+      {
+        "TmdbId": 1426518,
+        "Title": "Being Eddie"
+      },
+      {
+        "TmdbId": 565276,
+        "Title": "Love, Antosha"
+      },
+      {
+        "TmdbId": 1146302,
+        "Title": "Sly"
+      },
+      {
+        "TmdbId": 877657,
+        "Title": "Attack of the Hollywood Clichés!"
+      },
+      {
+        "TmdbId": 1112547,
+        "Title": "Anselm"
+      },
+      {
+        "TmdbId": 191720,
+        "Title": "Jodorowsky's Dune"
+      },
+      {
+        "TmdbId": 631143,
+        "Title": "QT8: The First Eight"
+      },
+      {
+        "TmdbId": 37757,
+        "Title": "Never Sleep Again: The Elm Street Legacy"
+      }
+    ],
+    "Credits": {
+      "Cast": [
+        {
+          "Name": "Philipp Moog",
+          "Order": 0,
+          "Character": "Self - Narrator (voice)",
+          "TmdbId": 37190,
+          "CreditId": "645ce9ff1b70ae01260e8c83",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/dY4zjHrVdI88rcgzmv8Lu21Cllk.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Daniel Brühl",
+          "Order": 1,
+          "Character": "Self - Actor",
+          "TmdbId": 3872,
+          "CreditId": "63f39758524978008efe71a2",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/3YlmTfiy5qZXkrdKGjaM1uMjGKP.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Julie Delpy",
+          "Order": 2,
+          "Character": "Self - Actress",
+          "TmdbId": 1146,
+          "CreditId": "63f398fea24c5000d4e48d87",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/rd40f4QpAUUne3hMaUhHrZtcK2c.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Andrew Eaton",
+          "Order": 3,
+          "Character": "Self - Film Producer",
+          "TmdbId": 173,
+          "CreditId": "63f3992da6725400a3a3d46d",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/8NLEP2n3lvdvXCeWqeuopjPix9B.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Katharina Schüttler",
+          "Order": 4,
+          "Character": "Self - Actress",
+          "TmdbId": 2343,
+          "CreditId": "63f399d5a24c5000c0ba1d73",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/flIGG4GZ1r8IsrpvsuVV0LegK59.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Wolfgang Becker",
+          "Order": 5,
+          "Character": "Self - Filmmaker",
+          "TmdbId": 4780,
+          "CreditId": "63f399f8a6725400865e6791",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/bMdE7xiXaqXQyA9pk3g7VG6gH46.jpg"
+            }
+          ]
+        }
+      ],
+      "Crew": [
+        {
+          "Name": "Lukas Hoffmann",
+          "Order": 0,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 2614555,
+          "CreditId": "63f3976ca24c500078c9decd",
+          "Images": []
+        },
+        {
+          "Name": "Leopold Hoesch",
+          "Order": 1,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 67646,
+          "CreditId": "645cebff156cc7013ff398b7",
+          "Images": []
+        },
+        {
+          "Name": "Britta Luckas",
+          "Order": 2,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 2417572,
+          "CreditId": "63f397c8a6725400d7c9349c",
+          "Images": []
+        },
+        {
+          "Name": "Lilly Solms",
+          "Order": 3,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 2417573,
+          "CreditId": "63f397b34a4bfc0096390de7",
+          "Images": []
+        },
+        {
+          "Name": "Kirby Welcker",
+          "Order": 4,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 3241603,
+          "CreditId": "63f397bda3491100d4d5b526",
+          "Images": []
+        },
+        {
+          "Name": "Tobias Sybel",
+          "Order": 5,
+          "Job": "Unit Manager",
+          "Department": "Production",
+          "TmdbId": 3064277,
+          "CreditId": "645cecc81b70ae0145efa5ad",
+          "Images": []
+        },
+        {
+          "Name": "Annebeth Jacobsen",
+          "Order": 6,
+          "Job": "Co-Director",
+          "Department": "Directing",
+          "TmdbId": 2417568,
+          "CreditId": "645cea8a3fe16001386860c9",
+          "Images": []
+        },
+        {
+          "Name": "Karl Hax",
+          "Order": 7,
+          "Job": "Production Assistant",
+          "Department": "Production",
+          "TmdbId": 3415545,
+          "CreditId": "645cec7877d23b00fcccd42c",
+          "Images": []
+        },
+        {
+          "Name": "Torbjörn Karvang",
+          "Order": 8,
+          "Job": "Camera Operator",
+          "Department": "Camera",
+          "TmdbId": 1426553,
+          "CreditId": "63f39816a24c500078c9df1b",
+          "Images": []
+        },
+        {
+          "Name": "Stephen James",
+          "Order": 9,
+          "Job": "Camera Operator",
+          "Department": "Camera",
+          "TmdbId": 2130347,
+          "CreditId": "645ceb1677d23b00fcccd363",
+          "Images": []
+        },
+        {
+          "Name": "Thomas Rist",
+          "Order": 10,
+          "Job": "Camera Operator",
+          "Department": "Camera",
+          "TmdbId": 1875484,
+          "CreditId": "645ceaeb3fe16000fed11f3b",
+          "Images": []
+        },
+        {
+          "Name": "Tizian Satlek",
+          "Order": 11,
+          "Job": "Sound Mixer",
+          "Department": "Sound",
+          "TmdbId": 2417578,
+          "CreditId": "645ceb976aa8e00139bd7b3b",
+          "Images": []
+        },
+        {
+          "Name": "Carsten Götsche",
+          "Order": 12,
+          "Job": "Production Manager",
+          "Department": "Production",
+          "TmdbId": 3054766,
+          "CreditId": "645cec541b70ae0166bf705f",
+          "Images": []
+        },
+        {
+          "Name": "Lars Roland",
+          "Order": 13,
+          "Job": "Editor",
+          "Department": "Editing",
+          "TmdbId": 3064266,
+          "CreditId": "63f397a4caaca200892f5aac",
+          "Images": []
+        },
+        {
+          "Name": "Sebastian Woithe",
+          "Order": 14,
+          "Job": "Camera Operator",
+          "Department": "Camera",
+          "TmdbId": 2996877,
+          "CreditId": "63f39806caaca2007c7d2d0d",
+          "Images": []
+        },
+        {
+          "Name": "Bettina Kluge",
+          "Order": 15,
+          "Job": "Line Producer",
+          "Department": "Production",
+          "TmdbId": 1899882,
+          "CreditId": "645ced18156cc700e3a01377",
+          "Images": []
+        },
+        {
+          "Name": "Max Rüngeler",
+          "Order": 16,
+          "Job": "Color Grading",
+          "Department": "Editing",
+          "TmdbId": 4056506,
+          "CreditId": "645ceb673fe1600138686142",
+          "Images": []
+        },
+        {
+          "Name": "Dieter Schneider",
+          "Order": 17,
+          "Job": "Commissioning Editor",
+          "Department": "Crew",
+          "TmdbId": 1914282,
+          "CreditId": "645cebc6fe077a5cac6dd925",
+          "Images": []
+        },
+        {
+          "Name": "Sarah Berg",
+          "Order": 18,
+          "Job": "Researcher",
+          "Department": "Production",
+          "TmdbId": 4056504,
+          "CreditId": "645ceb331b70ae0187e2c34c",
+          "Images": []
+        },
+        {
+          "Name": "Peter Kanoblich",
+          "Order": 19,
+          "Job": "Graphic Designer",
+          "Department": "Art",
+          "TmdbId": 4056507,
+          "CreditId": "645ceb7c6aa8e0011ca35163",
+          "Images": []
+        }
+      ]
+    },
+    "Studio": "ARTE",
+    "YoutubeTrailerId": "",
+    "Certifications": [],
+    "Status": null,
+    "Collection": null,
+    "Homepage": "https://www.broadview.tv/en/daniel-bruehl-der-reiz-des-boesen"
+  },
+  {
+    "TmdbId": 1309626,
+    "ImdbId": "tt33883401",
+    "Title": "ISMO – Breaking Bad English",
+    "Overview": "ISMO – Breaking Bad English is a cinematic version of the saying “through hardships to the stars.” Ismo, who grew up in Jyväskylä, is a shy boy with a vivid imagination who has trouble fitting in. As a student in his twenties, he stumbles upon a new form of expression in Finland, stand-up comedy, which suits him perfectly. Ismo quickly rises to become one of Finland’s most successful stand-up comedians, but that’s not enough for him. He decides to pursue a career in the United States, the homeland of the world’s most famous comedians.",
+    "OriginalTitle": "ISMO - Maailman hauskin ulkopuolinen",
+    "OriginalLanguage": "fi",
+    "TitleSlug": "1309626",
+    "Runtime": 99,
+    "Popularity": 1.2293,
+    "Year": 2024,
+    "Premier": null,
+    "InCinema": "2024-11-01T00:00:00Z",
+    "PhysicalRelease": null,
+    "DigitalRelease": null,
+    "Images": [
+      {
+        "CoverType": "Poster",
+        "Url": "https://image.tmdb.org/t/p/original/gXvhYtXGct4soepY5TyiG7rkHwb.jpg"
+      },
+      {
+        "CoverType": "Fanart",
+        "Url": "https://image.tmdb.org/t/p/original/cePSjMBWJgeGKhJGf6akXFBEQJ0.jpg"
+      }
+    ],
+    "Ratings": [
+      {
+        "Count": 6,
+        "Value": 5.2,
+        "Origin": "Tmdb",
+        "Type": "User"
+      }
+    ],
+    "MovieRatings": {
+      "Tmdb": {
+        "Count": 6,
+        "Value": 5.2,
+        "Type": "User"
+      },
+      "Imdb": {
+        "Count": 377,
+        "Value": 7.1,
+        "Type": "User"
+      },
+      "Metacritic": null,
+      "RottenTomatoes": null,
+      "Trakt": {
+        "Count": 6,
+        "Value": 7,
+        "Type": "User"
+      }
+    },
+    "Genres": [
+      "Documentary"
+    ],
+    "Keywords": [
+      "stand-up comedian"
+    ],
+    "AlternativeTitles": [],
+    "Translations": [
+      {
+        "Title": "ISMO – Breaking Bad English",
+        "Overview": "ISMO – Breaking Bad English is a cinematic version of the saying “through hardships to the stars.” Ismo, who grew up in Jyväskylä, is a shy boy with a vivid imagination who has trouble fitting in. As a student in his twenties, he stumbles upon a new form of expression in Finland, stand-up comedy, which suits him perfectly. Ismo quickly rises to become one of Finland’s most successful stand-up comedians, but that’s not enough for him. He decides to pursue a career in the United States, the homeland of the world’s most famous comedians.",
+        "Language": "en-US"
+      },
+      {
+        "Title": "ISMO - Maailman hauskin ulkopuolinen",
+        "Overview": "Jyväskylässä varttunut Ismo Leikola on vilkkaalla mielikuvituksella varustettu ujo poika, jolla on vaikeuksia kuulua joukkoon. Parikymppisenä opiskelijana hän törmää Suomessa uuteen ilmaisumuotoon, stand up -komediaan, joka sopii hänelle täydellisesti. Ismo nousee nopeasti Suomen menestyneimmäksi stand up -esiintyjäksi, mutta se ei hänelle riitä. Ismo päättää lähteä luomaan uraa Yhdysvaltoihin, maailman tunnetuimpien koomikkojen kotimaahan.",
+        "Language": "fi-FI"
+      },
+      {
+        "Title": "Ismo - Världens roligaste outsider",
+        "Overview": "Ismo Leikola var en blyg liten pojke som hellre ville ligga hemma och gråta på sängen än att vara ute med kompisarna. I tjugoårsåldern hittade dock Ismo ett fenomen som nyss kommit till Finland: stand upen. Ismo, som tidigare hade haft svårt att känna sig som en i gänget, hittade snabbt sin plats på stand up-scenen. Snart blev han en av Finlands största komiker - men det räckte inte för honom. Han bestämde sig för att erövra stand up-komedins hemland, USA.",
+        "Language": "sv-SE"
+      }
+    ],
+    "Recommendations": [
+      {
+        "TmdbId": 1400780,
+        "Title": "Come See Me in the Good Light"
+      },
+      {
+        "TmdbId": 1059673,
+        "Title": "Avatar: The Deep Dive - A Special Edition of 20/20"
+      },
+      {
+        "TmdbId": 1723460,
+        "Title": "A Toxic Love Story"
+      },
+      {
+        "TmdbId": 936643,
+        "Title": "Marvel Studios Assembled: The Making of Hawkeye"
+      },
+      {
+        "TmdbId": 239459,
+        "Title": "No Half Measures: Creating the Final Season of Breaking Bad"
+      },
+      {
+        "TmdbId": 734586,
+        "Title": "Joker: Put on a Happy Face"
+      },
+      {
+        "TmdbId": 338544,
+        "Title": "For the Love of Spock"
+      },
+      {
+        "TmdbId": 979163,
+        "Title": "Beyond Infinity: Buzz and the Journey to Lightyear"
+      },
+      {
+        "TmdbId": 736280,
+        "Title": "Lucy and Desi"
+      },
+      {
+        "TmdbId": 565255,
+        "Title": "Struggle: The Life and Lost Art of Szukalski"
+      }
+    ],
+    "Credits": {
+      "Cast": [
+        {
+          "Name": "Ismo Leikola",
+          "Order": 0,
+          "Character": "Self",
+          "TmdbId": 2030377,
+          "CreditId": "667d42b14cede2f2fb8cfa4b",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/5GqmIADUOi14GzKadgWUzr4YU2n.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Aku Salo",
+          "Order": 1,
+          "Character": "Ismo as a child (Voice)",
+          "TmdbId": 5040010,
+          "CreditId": "6728829b555e3efc89c33e5f",
+          "Images": []
+        },
+        {
+          "Name": "Jarmo Ylinikka",
+          "Order": 2,
+          "Character": "God / Neighbor",
+          "TmdbId": 2795844,
+          "CreditId": "672882bc554083a56a0d854e",
+          "Images": []
+        }
+      ],
+      "Crew": [
+        {
+          "Name": "Ilkka Hynninen",
+          "Order": 0,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 1556567,
+          "CreditId": "667d42c1757027fcb27eaf40",
+          "Images": []
+        },
+        {
+          "Name": "Saku Pollari",
+          "Order": 1,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 1860234,
+          "CreditId": "667d42cc1d9f587bd409203c",
+          "Images": []
+        },
+        {
+          "Name": "Ismo Leikola",
+          "Order": 2,
+          "Job": "Screenplay",
+          "Department": "Writing",
+          "TmdbId": 2030377,
+          "CreditId": "667d42ed543e98e56daf978f",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/5GqmIADUOi14GzKadgWUzr4YU2n.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Riku Suokas",
+          "Order": 3,
+          "Job": "Screenplay",
+          "Department": "Writing",
+          "TmdbId": 1182829,
+          "CreditId": "667d42d659928414847eaf54",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/oM1iVY8RHf4xkDyWbDgfQCHFoes.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Johanna Tohni",
+          "Order": 4,
+          "Job": "Screenplay",
+          "Department": "Writing",
+          "TmdbId": 3407852,
+          "CreditId": "667d42e2f0c7469681fe1cae",
+          "Images": []
+        }
+      ]
+    },
+    "Studio": "ICS Nordic",
+    "YoutubeTrailerId": "",
+    "Certifications": [],
+    "Status": null,
+    "Collection": null,
+    "Homepage": ""
+  },
+  {
+    "TmdbId": 239459,
+    "ImdbId": "tt3088036",
+    "Title": "No Half Measures: Creating the Final Season of Breaking Bad",
+    "Overview": "A documentary about the making of season five of the acclaimed AMC series Breaking Bad.",
+    "OriginalTitle": "No Half Measures: Creating the Final Season of Breaking Bad",
+    "OriginalLanguage": "en",
+    "TitleSlug": "239459",
+    "Runtime": 136,
+    "Popularity": 4.2204,
+    "Year": 2013,
+    "Premier": null,
+    "InCinema": null,
+    "PhysicalRelease": "2013-11-26T00:00:00Z",
+    "DigitalRelease": null,
+    "Images": [
+      {
+        "CoverType": "Poster",
+        "Url": "https://image.tmdb.org/t/p/original/uI6dU5hbhskkgA7TQL0qq74ALjR.jpg"
+      },
+      {
+        "CoverType": "Fanart",
+        "Url": "https://image.tmdb.org/t/p/original/27JyB13Wr2KEVUIKjtw9x669I39.jpg"
+      }
+    ],
+    "Ratings": [
+      {
+        "Count": 135,
+        "Value": 8.5,
+        "Origin": "Tmdb",
+        "Type": "User"
+      }
+    ],
+    "MovieRatings": {
+      "Tmdb": {
+        "Count": 135,
+        "Value": 8.5,
+        "Type": "User"
+      },
+      "Imdb": {
+        "Count": 835,
+        "Value": 8.3,
+        "Type": "User"
+      },
+      "Metacritic": null,
+      "RottenTomatoes": null,
+      "Trakt": {
+        "Count": 444,
+        "Value": 8.84459,
+        "Type": "User"
+      }
+    },
+    "Genres": [
+      "Documentary"
+    ],
+    "Keywords": [
+      "making of"
+    ],
+    "AlternativeTitles": [
+      {
+        "Title": "No Half Measures",
+        "Type": "Tmdb",
+        "Language": "en"
+      },
+      {
+        "Title": "绝不折中",
+        "Type": "Tmdb",
+        "Language": "zh"
+      },
+      {
+        "Title": "Asla Taviz Vermek Yok",
+        "Type": "Tmdb",
+        "Language": "en"
+      }
+    ],
+    "Translations": [
+      {
+        "Title": "No Half Measures: Creating the Final Season of Breaking Bad",
+        "Overview": "A documentary about the making of season five of the acclaimed AMC series Breaking Bad.",
+        "Language": "en-US"
+      },
+      {
+        "Title": "No Half Measures: Creating the Final Season of Breaking Bad",
+        "Overview": "Walter White (Bryan Cranston) es un frustrado profesor de química en un instituto, padre de un joven discapacitado y con una mujer (Anna Gunn) embarazada. Walt, además, trabaja en un lavadero de coches por las tardes. Cuando le diagnostican un cáncer pulmonar terminal se plantea qué pasará con su familia cuando él muera. En una redada de la DEA organizada por Hank Schrader, su cuñado (Dean Norris) reconoce a un antiguo alumno suyo, Jesse Pinkman (Aaron Paul), a quien contacta para fabricar y vender metanfetamina y así asegurar el bienestar económico de su familia. Pero el acercamiento al mundo de las drogas y el trato con traficantes y mafiosos contamina la personalidad de Walter, el cual va abandonando poco a poco su personalidad recta y predecible para convertirse en alguien sin demasiados escrúpulos cuando se trata de conseguir lo que quiere.",
+        "Language": "es-ES"
+      },
+      {
+        "Title": "绝不折中：绝命毒师最终季制作记录",
+        "Overview": "随着美剧《绝命毒师》全五季完结，一段荧屏上的传奇之旅就此结束。尽管故事已经完结，然而精彩还在继续。日前，纪录片《绝不折中》以及剧集的第五季蓝光和DVD光碟在美国洛杉矶同步进行发售。当天，《绝命毒师》主创团队都悉数到场。男主角布赖恩·克兰斯顿和鲍勃·奥登科克、迪恩·诺里斯等纷纷现身，引来了影迷们的围观。据主创团队介绍，纪录片深度探索了最后一季《绝命毒师》。",
+        "Language": "zh-CN"
+      },
+      {
+        "Title": "No Half Measures: Creating the Final Season of Breaking Bad",
+        "Overview": "Un documentaire sur la réalisation de la cinquième saison de la célèbre série du diffuseur télévisé AMC, Breaking Bad.",
+        "Language": "fr-FR"
+      },
+      {
+        "Title": "No Half Measures: Creating the Final Season of Breaking Bad",
+        "Overview": "Breaking Bad'in inanılmaz mirasının sona ermeden önce nasıl oluştuğunu kapsamlı ve ayrıntılı bir şekilde anlatan, son sezonunun çekimlerini samimi bir detayla belgeleyen bir belgesel.",
+        "Language": "tr-TR"
+      },
+      {
+        "Title": "絕不折中：絕命毒師最終季制作記錄",
+        "Overview": "隨著美劇《絕命毒師》全五季完結，一段熒屏上的傳奇之旅就此結束。盡管故事已經完結，然而精彩還在繼續。日前，紀錄片《絕不折中》以及劇集的第五季藍光和 DVD 光碟在美國洛杉磯同步進行發售。當天，《絕命毒師》主創團隊都悉數到場。男主角布賴恩·克蘭斯頓和鮑勃·奧登科克、迪恩·諾里斯等紛紛現身，引來了影迷們的圍觀。據主創團隊介紹，紀錄片深度探索了最後一季《絕命毒師》。",
+        "Language": "zh-HK"
+      },
+      {
+        "Title": "Sem Meias Medidas: Criando a Temporada Final de Breaking Bad",
+        "Overview": "Um olhar aprofundado sobre os bastidores da temporada final de Breaking Bad, acompanhando o elenco e a equipe durante a produção dos últimos episódios da série. Entre entrevistas, cenas de gravação e relatos de Vince Gilligan, Bryan Cranston, Aaron Paul e outros nomes fundamentais, o documentário revela os desafios, as decisões criativas e a dedicação por trás da conclusão de uma das séries mais marcantes da televisão.",
+        "Language": "pt-BR"
+      }
+    ],
+    "Recommendations": [
+      {
+        "TmdbId": 1015606,
+        "Title": "Obi-Wan Kenobi: A Jedi's Return"
+      },
+      {
+        "TmdbId": 1400780,
+        "Title": "Come See Me in the Good Light"
+      },
+      {
+        "TmdbId": 1461714,
+        "Title": "My Mom Jayne"
+      },
+      {
+        "TmdbId": 940075,
+        "Title": "Embrace the Panda: Making Turning Red"
+      },
+      {
+        "TmdbId": 57656,
+        "Title": "Dangerous Days: Making Blade Runner"
+      },
+      {
+        "TmdbId": 939356,
+        "Title": "Marvel Studios Assembled: The Making of Eternals"
+      },
+      {
+        "TmdbId": 450945,
+        "Title": "I Am Heath Ledger"
+      },
+      {
+        "TmdbId": 72680,
+        "Title": "The Curse of the Dragon"
+      },
+      {
+        "TmdbId": 229296,
+        "Title": "Justin Bieber's Believe"
+      },
+      {
+        "TmdbId": 627133,
+        "Title": "The Crystal Calls - Making The Dark Crystal: Age of Resistance"
+      }
+    ],
+    "Credits": {
+      "Cast": [
+        {
+          "Name": "Bryan Cranston",
+          "Order": 0,
+          "Character": "Self",
+          "TmdbId": 17419,
+          "CreditId": "52fe4e93c3a36847f8299dfb",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/7Jahy5LZX2Fo8fGJltMreAI49hC.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Aaron Paul",
+          "Order": 1,
+          "Character": "Self",
+          "TmdbId": 84497,
+          "CreditId": "52fe4e93c3a36847f8299e17",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/8Ac9uuoYwZoYVAIJfRLzzLsGGJn.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Anna Gunn",
+          "Order": 2,
+          "Character": "Self",
+          "TmdbId": 134531,
+          "CreditId": "52fe4e93c3a36847f8299e03",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/adppyeu1a4REN3khtgmXusrapFi.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Dean Norris",
+          "Order": 3,
+          "Character": "Self",
+          "TmdbId": 14329,
+          "CreditId": "52fe4e93c3a36847f8299e13",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/mKRrEbsxAX3ro700HsViFArRM7l.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Betsy Brandt",
+          "Order": 4,
+          "Character": "Self",
+          "TmdbId": 1217934,
+          "CreditId": "52fe4e93c3a36847f8299df3",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/xAnuzyjdMbQq9L1c4JNwXL52Wm4.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "RJ Mitte",
+          "Order": 5,
+          "Character": "Self",
+          "TmdbId": 209674,
+          "CreditId": "6208c5621d78f2004220413c",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/sNPA92ZrssYhlaB1UA2pWcLD9db.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Bob Odenkirk",
+          "Order": 6,
+          "Character": "Self",
+          "TmdbId": 59410,
+          "CreditId": "6208c539297338132edb277a",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/rF0Lb6SBhGSTvjRffmlKRSeI3jE.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Steven Michael Quezada",
+          "Order": 7,
+          "Character": "Self",
+          "TmdbId": 61535,
+          "CreditId": "6208cac6945d3600b3820caa",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/pVYrDkwI6GWvCNL2kJhpDJfBFyd.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Laura Fraser",
+          "Order": 8,
+          "Character": "Self",
+          "TmdbId": 42279,
+          "CreditId": "6208c555f48b34001b141743",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/4aD3xDLA22CIf6jdK0IAs75h8pp.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Michael Bowen",
+          "Order": 9,
+          "Character": "Self",
+          "TmdbId": 2234,
+          "CreditId": "52fe4e93c3a36847f8299def",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/dYIzQQ4yozTIlpqJbmDkSyDd86C.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Robert Forster",
+          "Order": 10,
+          "Character": "Self",
+          "TmdbId": 5694,
+          "CreditId": "6208ca39db154f010de6f5ad",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/vGDifxN2PnO69rnpg6FoWkocFCD.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Vince Gilligan",
+          "Order": 11,
+          "Character": "Self",
+          "TmdbId": 66633,
+          "CreditId": "52fe4e93c3a36847f8299dff",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/wJIxATESjzsjSgvRhVavOmdamXc.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Peter Gould",
+          "Order": 12,
+          "Character": "Self",
+          "TmdbId": 24951,
+          "CreditId": "6208c7f9cb802800ca67ee19",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/a2dJSpUiXQ2NAxqSzztr6WsnhOJ.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Rian Johnson",
+          "Order": 13,
+          "Character": "Self",
+          "TmdbId": 67367,
+          "CreditId": "52fe4e93c3a36847f8299e07",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/ggwlJvCn0laNGjcvwGchuwC00hQ.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Sam Catlin",
+          "Order": 14,
+          "Character": "Self",
+          "TmdbId": 1223194,
+          "CreditId": "52fe4e93c3a36847f8299df7",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/xc9Ax2kpvQLayUaFL1d1NTUQ7df.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Moira Walley-Beckett",
+          "Order": 15,
+          "Character": "Self",
+          "TmdbId": 1223198,
+          "CreditId": "52fe4e93c3a36847f8299e1b",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/1sRNcxMZVsVcY6NFNQzASJuR8By.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Sharon Bialy",
+          "Order": 16,
+          "Character": "Self",
+          "TmdbId": 6479,
+          "CreditId": "6208c766dd83fa00665c617c",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/uOex6LpaQYncD0sQfVYD1frI5uJ.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Mark Johnson",
+          "Order": 17,
+          "Character": "Self",
+          "TmdbId": 5162,
+          "CreditId": "6208c7d91d78f2009e9ce0ec",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/gLuXkOQjqB81aHMGJ2OtYzEpHQu.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Adam Bernstein",
+          "Order": 18,
+          "Character": "Self",
+          "TmdbId": 111338,
+          "CreditId": "6208c7e91bf266001ce338a0",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/mnob89jXPcPfW85PPw7tTPCKSig.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Dave Porter",
+          "Order": 19,
+          "Character": "Self",
+          "TmdbId": 1280070,
+          "CreditId": "6208caa5af2da800423d7470",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/flRW9QknVtU8HG7lLjMvflbhl2a.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Melissa Bernstein",
+          "Order": 20,
+          "Character": "Self",
+          "TmdbId": 1223199,
+          "CreditId": "6208c79135a61e00dfd8e153",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/rSztwqMUIko8RkmwjxBse1XDW3g.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Kelley Dixon",
+          "Order": 21,
+          "Character": "Self",
+          "TmdbId": 1280074,
+          "CreditId": "6208ca1f9408ec00cc6d3bb7",
+          "Images": []
+        },
+        {
+          "Name": "Steve Mosko",
+          "Order": 22,
+          "Character": "Self",
+          "TmdbId": 3424505,
+          "CreditId": "6208c709db154f00a087190b",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/wsWQQoM78qAJslef1if1h4Bvmn1.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Stewart Lyons",
+          "Order": 23,
+          "Character": "Self",
+          "TmdbId": 1223200,
+          "CreditId": "52fe4e93c3a36847f8299e0b",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/dCAN4EMn8rsqALwDIjf9aNjuVTm.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Zack Van Amburg",
+          "Order": 24,
+          "Character": "Self",
+          "TmdbId": 3424506,
+          "CreditId": "6208c71fe33f830043b7cadc",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/bPXkd3zf5V03MAsifa9CkDMbkYp.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Michelle MacLaren",
+          "Order": 25,
+          "Character": "Self",
+          "TmdbId": 29779,
+          "CreditId": "52fe4e93c3a36847f8299e0f",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/3LcH5eNiysMWaepARllVrS4Dzn7.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Thomas Schnauz",
+          "Order": 26,
+          "Character": "Self",
+          "TmdbId": 103009,
+          "CreditId": "6208c6e9fab3fa001f693dc9",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/uMz5wsgv6QQAgFI809SgCCbwYn9.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jamie Erlicht",
+          "Order": 27,
+          "Character": "Self",
+          "TmdbId": 3424509,
+          "CreditId": "6208c753c2ff3d00b0261a24",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/1SKHFUNeXZ5MfrahKEdt4Fnx7zq.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Michael Lynton",
+          "Order": 28,
+          "Character": "Self",
+          "TmdbId": 3424508,
+          "CreditId": "6208c739cae17c37db5b3fe0",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/mMRqcp6uKZNOivjPmXzcWszw1RL.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Mark S. Freeborn",
+          "Order": 29,
+          "Character": "Self",
+          "TmdbId": 12706,
+          "CreditId": "6208c8689b6e4700693da442",
+          "Images": []
+        }
+      ],
+      "Crew": [
+        {
+          "Name": "Stuart Richardson",
+          "Order": 0,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 1210260,
+          "CreditId": "6362e92dd207f3007cdcbc82",
+          "Images": []
+        },
+        {
+          "Name": "Stuart Richardson",
+          "Order": 1,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 1210260,
+          "CreditId": "635fc7c640d0fe007acd1b02",
+          "Images": []
+        },
+        {
+          "Name": "Tyler Rumph",
+          "Order": 2,
+          "Job": "Director of Photography",
+          "Department": "Camera",
+          "TmdbId": 1275035,
+          "CreditId": "6362e900858678007a1c3ed8",
+          "Images": []
+        },
+        {
+          "Name": "Hugo Diaz",
+          "Order": 3,
+          "Job": "Editor",
+          "Department": "Editing",
+          "TmdbId": 1275036,
+          "CreditId": "52fe4e93c3a36847f8299deb",
+          "Images": []
+        }
+      ]
+    },
+    "Studio": "Sony Pictures",
+    "YoutubeTrailerId": "",
+    "Certifications": [],
+    "Status": null,
+    "Collection": null,
+    "Homepage": ""
+  },
+  {
+    "TmdbId": 19050,
+    "ImdbId": "tt0075718",
+    "Title": "The Bad News Bears in Breaking Training",
+    "Overview": "A troubled, rebellious teen drives his rambunctious baseball team out to Houston where they play an exhibition game and the boy meets his estranged father, and hires him as the teams coach.",
+    "OriginalTitle": "The Bad News Bears in Breaking Training",
+    "OriginalLanguage": "en",
+    "TitleSlug": "19050",
+    "Runtime": 100,
+    "Popularity": 1.2647,
+    "Year": 1977,
+    "Premier": null,
+    "InCinema": "1977-07-08T00:00:00Z",
+    "PhysicalRelease": null,
+    "DigitalRelease": null,
+    "Images": [
+      {
+        "CoverType": "Poster",
+        "Url": "https://image.tmdb.org/t/p/original/aGShIKIKWDCPVGDfeEXwTfmE4mi.jpg"
+      },
+      {
+        "CoverType": "Fanart",
+        "Url": "https://image.tmdb.org/t/p/original/mZP6RmsSUAA46s1Dl1tjhCzhTUs.jpg"
+      }
+    ],
+    "Ratings": [
+      {
+        "Count": 48,
+        "Value": 5.8,
+        "Origin": "Tmdb",
+        "Type": "User"
+      }
+    ],
+    "MovieRatings": {
+      "Tmdb": {
+        "Count": 48,
+        "Value": 5.8,
+        "Type": "User"
+      },
+      "Imdb": {
+        "Count": 4053,
+        "Value": 5.7,
+        "Type": "User"
+      },
+      "Metacritic": {
+        "Count": 0,
+        "Value": 47,
+        "Type": "User"
+      },
+      "RottenTomatoes": {
+        "Count": 0,
+        "Value": 42,
+        "Type": "User"
+      },
+      "Trakt": {
+        "Count": 109,
+        "Value": 6.06422,
+        "Type": "User"
+      }
+    },
+    "Genres": [
+      "Comedy",
+      "Family"
+    ],
+    "Keywords": [
+      "baseball",
+      "houston, texas",
+      "kids' sports team",
+      "little league",
+      "sequel",
+      "sports"
+    ],
+    "AlternativeTitles": [],
+    "Translations": [
+      {
+        "Title": "The Bad News Bears in Breaking Training",
+        "Overview": "A troubled, rebellious teen drives his rambunctious baseball team out to Houston where they play an exhibition game and the boy meets his estranged father, and hires him as the teams coach.",
+        "Language": "en-US"
+      },
+      {
+        "Title": "Die Bären bleiben am Ball",
+        "Overview": "Eine jugendliche Baseball-Amateurliga-Mannschaft hat vor dem Spiel gegen eine gefürchtete texanische Mannschaft den Trainer vergrault und macht sich auf eigene Faust auf ins \"feindliche Gebiet\". Schließlich übernimmt der von seiner Familie getrennt lebende Vater eines Spielers das Training.",
+        "Language": "de-DE"
+      },
+      {
+        "Title": "Gli orsi interrompono gli allenamenti",
+        "Overview": "La squadretta di baseball dei Bears è invitata a giocare nel celebre Astrodome coperto di Houston (Texas), ma è in difficoltà perché ha perso l'allenatore.",
+        "Language": "it-IT"
+      },
+      {
+        "Title": "がんばれ！ベアーズ特訓中",
+        "Overview": "大ヒットした「がんばれ！ベアーズ」の続編。ヒューストン名物のアストロドームでの遠征試合が実現したベアーズ一行は、子供たちだけでテキサスへと向かう。ヒューストンには今やチームのリーダー的存在となったケリーの別れた父親がおり、ケリーは父にチームのコーチを頼む。互いの誤解も解けようやくアストロドームでの試合と相成るが、相手チームの猛攻に試合時間がどんどんなくなり、ベアーズは最大の危機を迎える……。",
+        "Language": "ja-JP"
+      },
+      {
+        "Title": "Straszne misie 2  Mocno trenują",
+        "Overview": "Niesforne dzieci tworzące zespół Misiów tak dobrze ostatnio grały, że udało im się zdobyć mistrzostwo Kalifornii. Jako zwycięscy zostają zaproszeni do rozegrania meczu wyjazdowego z dziecięcą drużyną mistrzów Houston - Toros. Problem w tym, że dzieciaki nie mają trenera. W tej sytuacji do Misiów decyduje się ponownie dołączyć najbardziej utalentowany gracz, zbuntowany Kelly Leak (Jackie Earle Haley). Chłopiec ma jednak własny cel, dla którego chce jechać do Houston. Zamierza spotkać się z mieszkającym tam dawno niewidzianym ojcem, Mikiem (William Devane). Niespodziewanie zatrudnia go jako trenera Misiów.",
+        "Language": "pl-PL"
+      },
+      {
+        "Title": "Dejenlos jugar",
+        "Overview": "Un atribulado y rebelde adolescente conduce a su equipo de béisbol hacia a Houston donde jugarán un partido de exhibición. Ahí el chico se encuentra con su padre, que está separado de su madre, y lo contrata como entrenador de su equipo.",
+        "Language": "es-ES"
+      },
+      {
+        "Title": "少棒闯天下之破碎的旅程",
+        "Overview": "",
+        "Language": "zh-CN"
+      },
+      {
+        "Title": "The Bad News Bears in Breaking Training",
+        "Overview": "Een onrustige, opstandige tiener rijdt met zijn uitbundige honkbalteam naar Houston, waar ze een oefenwedstrijd spelen. Daar ontmoet de jongen zijn vervreemde vader en neemt hem aan als coach van het team.",
+        "Language": "nl-NL"
+      },
+      {
+        "Title": "少棒闖天下之破碎的旅程",
+        "Overview": "",
+        "Language": "zh-HK"
+      }
+    ],
+    "Recommendations": [
+      {
+        "TmdbId": 1035259,
+        "Title": "The Naked Gun"
+      },
+      {
+        "TmdbId": 1248226,
+        "Title": "Playdate"
+      },
+      {
+        "TmdbId": 9595,
+        "Title": "Hot Shots!"
+      },
+      {
+        "TmdbId": 818,
+        "Title": "Austin Powers in Goldmember"
+      },
+      {
+        "TmdbId": 1716513,
+        "Title": "Extreme Makeover: Homer Edition"
+      },
+      {
+        "TmdbId": 353616,
+        "Title": "Pitch Perfect 3"
+      },
+      {
+        "TmdbId": 9942,
+        "Title": "Major League"
+      },
+      {
+        "TmdbId": 1029119,
+        "Title": "Minions & More Volume 1"
+      },
+      {
+        "TmdbId": 11381,
+        "Title": "Tommy Boy"
+      },
+      {
+        "TmdbId": 28597,
+        "Title": "Problem Child 2"
+      }
+    ],
+    "Credits": {
+      "Cast": [
+        {
+          "Name": "William Devane",
+          "Order": 0,
+          "Character": "Mike Leak",
+          "TmdbId": 21416,
+          "CreditId": "52fe47b59251416c750a2d29",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/wCfPYMkAOCXM4RF1Pg6VhtKR50U.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Clifton James",
+          "Order": 1,
+          "Character": "Sy Orlansky",
+          "TmdbId": 10224,
+          "CreditId": "54be659cc3a3686c6b00f64e",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/4XRoVhgoeQEZdg4BAKCWRkI1UfR.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jackie Earle Haley",
+          "Order": 2,
+          "Character": "Kelly Leak",
+          "TmdbId": 17183,
+          "CreditId": "52fe47b59251416c750a2d1f",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/xDPeiyklN8f9Ilowsti4lGVbioj.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jimmy Baio",
+          "Order": 3,
+          "Character": "Carmen Ronzonni",
+          "TmdbId": 123898,
+          "CreditId": "54be65ad9251413635007801",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/mcQKdMWdzPIlKsw56gIzPUqQeaw.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Chris Barnes",
+          "Order": 4,
+          "Character": "Tanner Boyle",
+          "TmdbId": 1220512,
+          "CreditId": "69fa52c33ee088b7b2722320",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/2oIdFkfT08QI3KTVRoAOiPOpeEV.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Erin Blunt",
+          "Order": 5,
+          "Character": "Ahmad Abdul Rahim",
+          "TmdbId": 90164,
+          "CreditId": "54be66559251416e600067f0",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/tKcquclvAfVkMYYFnC8ucedLxRp.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jayme Escobedo",
+          "Order": 6,
+          "Character": "Jose Agilar",
+          "TmdbId": 90166,
+          "CreditId": "54be66dec3a3686c6b00f669",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/b1b0PoYlawiFjcbOALkX0yY8G04.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "George Gonzales",
+          "Order": 7,
+          "Character": "Miguel Agilar",
+          "TmdbId": 90169,
+          "CreditId": "54be66cdc3a3684046008407",
+          "Images": []
+        },
+        {
+          "Name": "Alfred Lutter",
+          "Order": 8,
+          "Character": "Ogilvie",
+          "TmdbId": 90170,
+          "CreditId": "5be3b4d1c3a36810cd0224d0",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/AgEgzlLwvhjXWFgX1TbfS32g8tF.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Brett Marx",
+          "Order": 9,
+          "Character": "Jimmie Feldman",
+          "TmdbId": 90172,
+          "CreditId": "54be671092514148b000a648",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/3PkdGnaqfiM9mbj2pdD775wpzCJ.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "David Pollock",
+          "Order": 10,
+          "Character": "Rudi Stein",
+          "TmdbId": 90173,
+          "CreditId": "54be6720c3a3687c40006d1d",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/za5tvKmUrbX7oYiJTMYcRvr4xYn.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Quinn Smith",
+          "Order": 11,
+          "Character": "Timmy Lupus (The Big Looper)",
+          "TmdbId": 90174,
+          "CreditId": "54be67369251413635007826",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/m2Qc74YFLZGUFNE7tdoFxsS3nTp.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "David Stambaugh",
+          "Order": 12,
+          "Character": "Toby Whitewood",
+          "TmdbId": 90175,
+          "CreditId": "54be67489251416eae006389",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/aCjFelex6bXspKBu3RRGYSrIPcy.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jeffrey Louis Starr",
+          "Order": 13,
+          "Character": "Mike Engelberg",
+          "TmdbId": 1416109,
+          "CreditId": "54be675a9251411d6a00dd6c",
+          "Images": []
+        },
+        {
+          "Name": "Lane Smith",
+          "Order": 14,
+          "Character": "Officer Mackie",
+          "TmdbId": 65019,
+          "CreditId": "643e95afc7176d04de98c2f7",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/stmbrf2qdq6umxt3Jh30IDhCfi3.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Fred Stuthman",
+          "Order": 15,
+          "Character": "Lester Eastland",
+          "TmdbId": 66295,
+          "CreditId": "643e95e6d7a70a053cab37e4",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/4nBc5UBvSdrmfiNtBMkuL9eiDS8.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Dolph Sweet",
+          "Order": 16,
+          "Character": "Mr. Manning",
+          "TmdbId": 3015,
+          "CreditId": "54be677bc3a368145e00b493",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/wDQZk5M9uqTs0sKPS0TpfXaikI6.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Pat Corley",
+          "Order": 17,
+          "Character": "Morrie Slaytor",
+          "TmdbId": 52883,
+          "CreditId": "643e95fbd7a70a04ddab3515",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/pURZ107MmpcGp52q6dwNtiTTP6G.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Ira Gilbert",
+          "Order": 18,
+          "Character": "Motel Manager",
+          "TmdbId": 4016765,
+          "CreditId": "643ebbb0f288380527aae6aa",
+          "Images": []
+        },
+        {
+          "Name": "Gene Rader",
+          "Order": 19,
+          "Character": "Grocery Clerk",
+          "TmdbId": 1177596,
+          "CreditId": "643ebbbcf2883804a1aae88a",
+          "Images": []
+        },
+        {
+          "Name": "Ronnie Thomas",
+          "Order": 20,
+          "Character": "Indian Pitcher",
+          "TmdbId": 4016766,
+          "CreditId": "643ebbdae0ca7f04df0730c7",
+          "Images": []
+        },
+        {
+          "Name": "Douglas Anderson",
+          "Order": 21,
+          "Character": "Carl Rutherford",
+          "TmdbId": 40631,
+          "CreditId": "643ebbfbd4fe0404b2493b9b",
+          "Images": []
+        },
+        {
+          "Name": "Jerry Lawson",
+          "Order": 22,
+          "Character": "Chip Roberts",
+          "TmdbId": 4016767,
+          "CreditId": "643ebc13c7176d053298d718",
+          "Images": []
+        },
+        {
+          "Name": "G.G. Lively",
+          "Order": 23,
+          "Character": "1st Patrolman",
+          "TmdbId": 4016768,
+          "CreditId": "643ebc1fe0ca7f04df0730fa",
+          "Images": []
+        },
+        {
+          "Name": "Martha Turner",
+          "Order": 24,
+          "Character": "Evonne",
+          "TmdbId": 4016769,
+          "CreditId": "643ebc2743250f049c514d47",
+          "Images": []
+        },
+        {
+          "Name": "Maggie Burns",
+          "Order": 25,
+          "Character": "Ruth",
+          "TmdbId": 4016770,
+          "CreditId": "643ebc30d7a70a0568ab4a79",
+          "Images": []
+        },
+        {
+          "Name": "Michelle Fruge",
+          "Order": 26,
+          "Character": "Janet",
+          "TmdbId": 4016771,
+          "CreditId": "643ebc40c7176d053298d732",
+          "Images": []
+        },
+        {
+          "Name": "Leigh Manley",
+          "Order": 27,
+          "Character": "Janet's Girl Friend",
+          "TmdbId": 4016772,
+          "CreditId": "643ebc4cd7a70a0314ab4c90",
+          "Images": []
+        },
+        {
+          "Name": "Jason Cooper",
+          "Order": 28,
+          "Character": "Leon Waterson",
+          "TmdbId": 3296920,
+          "CreditId": "643ebc63f288380314aae759",
+          "Images": []
+        },
+        {
+          "Name": "Yvonne McCord",
+          "Order": 29,
+          "Character": "Sheila Lansing",
+          "TmdbId": 1946554,
+          "CreditId": "643ebc6fd7a70a0314ab4ca5",
+          "Images": []
+        }
+      ],
+      "Crew": [
+        {
+          "Name": "Michael Pressman",
+          "Order": 0,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 59649,
+          "CreditId": "52fe47b59251416c750a2d25",
+          "Images": []
+        },
+        {
+          "Name": "Paul Brickman",
+          "Order": 1,
+          "Job": "Writer",
+          "Department": "Writing",
+          "TmdbId": 57383,
+          "CreditId": "643e964bc7176d048a98c2fc",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/bzzQdcH7DkO0ibRpSKnblWlQ0Ch.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Leonard Goldberg",
+          "Order": 2,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 12842,
+          "CreditId": "54be67b892514148f000ac33",
+          "Images": []
+        },
+        {
+          "Name": "Fred J. Koenekamp",
+          "Order": 3,
+          "Job": "Director of Photography",
+          "Department": "Camera",
+          "TmdbId": 19102,
+          "CreditId": "5807db08c3a36810bb003620",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/yxTbBWproHj24o8yrTLEjtzlF9u.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Bill Lancaster",
+          "Order": 4,
+          "Job": "Characters",
+          "Department": "Writing",
+          "TmdbId": 15406,
+          "CreditId": "5548dc329251417afc001005",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/4CYmRRI9bZC9fgM30MeNZaA8SSQ.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Mike Benson",
+          "Order": 5,
+          "Job": "Camera Operator",
+          "Department": "Camera",
+          "TmdbId": 65238,
+          "CreditId": "643ebe4ae0ca7f0533073372",
+          "Images": []
+        },
+        {
+          "Name": "Craig Safan",
+          "Order": 6,
+          "Job": "Original Music Composer",
+          "Department": "Sound",
+          "TmdbId": 63923,
+          "CreditId": "5807db00c3a3681219003822",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/lb3YcDOdMpS4F1BkGb6Jkti7zuv.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Howard Beals",
+          "Order": 7,
+          "Job": "Sound Effects Editor",
+          "Department": "Sound",
+          "TmdbId": 3102,
+          "CreditId": "643ebdddd4fe04055a493c15",
+          "Images": []
+        },
+        {
+          "Name": "John Murray",
+          "Order": 8,
+          "Job": "Key Grip",
+          "Department": "Camera",
+          "TmdbId": 160060,
+          "CreditId": "643ebe85e0ca7f048b0732af",
+          "Images": []
+        },
+        {
+          "Name": "Fred Price",
+          "Order": 9,
+          "Job": "Set Decoration",
+          "Department": "Art",
+          "TmdbId": 13865,
+          "CreditId": "643ebd4ff288380527aae760",
+          "Images": []
+        },
+        {
+          "Name": "Jack Hayes",
+          "Order": 10,
+          "Job": "Orchestrator",
+          "Department": "Sound",
+          "TmdbId": 1532774,
+          "CreditId": "643ebd85e0ca7f04df073194",
+          "Images": []
+        },
+        {
+          "Name": "John Wilkinson",
+          "Order": 11,
+          "Job": "Sound Re-Recording Mixer",
+          "Department": "Sound",
+          "TmdbId": 1710243,
+          "CreditId": "643ebdefc7176d053298d7ec",
+          "Images": []
+        },
+        {
+          "Name": "John W. Wheeler",
+          "Order": 12,
+          "Job": "Editor",
+          "Department": "Editing",
+          "TmdbId": 2512,
+          "CreditId": "5807db0ec3a368121900382a",
+          "Images": []
+        },
+        {
+          "Name": "Michael Daves",
+          "Order": 13,
+          "Job": "Assistant Director",
+          "Department": "Directing",
+          "TmdbId": 1593331,
+          "CreditId": "643ebdb3e0ca7f048b073241",
+          "Images": []
+        },
+        {
+          "Name": "Stephen Myles Berger",
+          "Order": 14,
+          "Job": "Art Direction",
+          "Department": "Art",
+          "TmdbId": 137191,
+          "CreditId": "643ebd38d7a70a0507ab4bc8",
+          "Images": []
+        },
+        {
+          "Name": "Liz Keigley",
+          "Order": 15,
+          "Job": "Location Casting",
+          "Department": "Production",
+          "TmdbId": 961528,
+          "CreditId": "643ebdfdf2883804a1aae9a3",
+          "Images": []
+        },
+        {
+          "Name": "Milton Lustig",
+          "Order": 16,
+          "Job": "Music Editor",
+          "Department": "Sound",
+          "TmdbId": 1440885,
+          "CreditId": "643ebd59d7a70a04b3ab4c29",
+          "Images": []
+        },
+        {
+          "Name": "Fred T. Gallo",
+          "Order": 17,
+          "Job": "Associate Producer",
+          "Department": "Production",
+          "TmdbId": 10546,
+          "CreditId": "643e9624e0ca7f048b071d24",
+          "Images": []
+        },
+        {
+          "Name": "Fred T. Gallo",
+          "Order": 18,
+          "Job": "Unit Production Manager",
+          "Department": "Production",
+          "TmdbId": 10546,
+          "CreditId": "643ebda443250f04ca514f06",
+          "Images": []
+        },
+        {
+          "Name": "Kim Kurumada",
+          "Order": 19,
+          "Job": "Second Assistant Director",
+          "Department": "Directing",
+          "TmdbId": 1535816,
+          "CreditId": "643ebdced7a70a04ddab4b22",
+          "Images": []
+        },
+        {
+          "Name": "Joan Phillips",
+          "Order": 20,
+          "Job": "Hairstylist",
+          "Department": "Costume & Make-Up",
+          "TmdbId": 14440,
+          "CreditId": "643ebedad4fe040506493c9a",
+          "Images": []
+        },
+        {
+          "Name": "Jack Martell",
+          "Order": 21,
+          "Job": "Costumer",
+          "Department": "Costume & Make-Up",
+          "TmdbId": 1762446,
+          "CreditId": "643ebea7d4fe040506493c79",
+          "Images": []
+        },
+        {
+          "Name": "Gene Stout",
+          "Order": 22,
+          "Job": "Gaffer",
+          "Department": "Lighting",
+          "TmdbId": 559912,
+          "CreditId": "643ebe9ed7a70a04ddab4b8f",
+          "Images": []
+        },
+        {
+          "Name": "Hope Williams",
+          "Order": 23,
+          "Job": "Script Supervisor",
+          "Department": "Directing",
+          "TmdbId": 1411705,
+          "CreditId": "643ebe1643250f052651515c",
+          "Images": []
+        },
+        {
+          "Name": "John Inzerella",
+          "Order": 24,
+          "Job": "Makeup Artist",
+          "Department": "Costume & Make-Up",
+          "TmdbId": 1338883,
+          "CreditId": "643ebed043250f0554514fed",
+          "Images": []
+        },
+        {
+          "Name": "Matt Springman",
+          "Order": 25,
+          "Job": "Property Master",
+          "Department": "Art",
+          "TmdbId": 1903539,
+          "CreditId": "643ebe55c7176d053298d828",
+          "Images": []
+        },
+        {
+          "Name": "Dominick Gaffey",
+          "Order": 26,
+          "Job": "Sound Mixer",
+          "Department": "Sound",
+          "TmdbId": 2547930,
+          "CreditId": "643ebde5d4fe04055a493c1b",
+          "Images": []
+        },
+        {
+          "Name": "Douglas D. Anderson",
+          "Order": 27,
+          "Job": "Dialogue Coach",
+          "Department": "Crew",
+          "TmdbId": 4016786,
+          "CreditId": "643ebec5c6006d031580d42b",
+          "Images": []
+        },
+        {
+          "Name": "Dave Nicksay",
+          "Order": 28,
+          "Job": "Second Assistant Director",
+          "Department": "Directing",
+          "TmdbId": 4016785,
+          "CreditId": "643ebdc2f288380527aae78e",
+          "Images": []
+        }
+      ]
+    },
+    "Studio": "Paramount Pictures",
+    "YoutubeTrailerId": "C67D20c_Kls",
+    "Certifications": [
+      {
+        "Country": "US",
+        "Certification": "PG"
+      }
+    ],
+    "Status": null,
+    "Collection": {
+      "TmdbId": 215326,
+      "Name": "The Bad News Bears Collection",
+      "Images": null,
+      "Overview": null,
+      "Translations": null,
+      "Parts": null
+    },
+    "Homepage": ""
+  },
+  {
+    "TmdbId": 934809,
+    "ImdbId": "tt11151792",
+    "Title": "The Road to El Camino: Behind the Scenes of El Camino: A Breaking Bad Movie",
+    "Overview": "Aaron Paul, Vince Gilligan and other cast members, producers and crew share stories and footage from the making of \"El Camino.\"",
+    "OriginalTitle": "The Road to El Camino: Behind the Scenes of El Camino: A Breaking Bad Movie",
+    "OriginalLanguage": "en",
+    "TitleSlug": "934809",
+    "Runtime": 13,
+    "Popularity": 1.3564,
+    "Year": 2019,
+    "Premier": null,
+    "InCinema": null,
+    "PhysicalRelease": null,
+    "DigitalRelease": "2019-10-28T00:00:00Z",
+    "Images": [
+      {
+        "CoverType": "Poster",
+        "Url": "https://image.tmdb.org/t/p/original/2BcQ0ZScTBj3sihSQkV1SXYHqdU.jpg"
+      },
+      {
+        "CoverType": "Fanart",
+        "Url": "https://image.tmdb.org/t/p/original/qyVxRsc5RKF85ejeSnT3MO4gwLX.jpg"
+      }
+    ],
+    "Ratings": [
+      {
+        "Count": 36,
+        "Value": 6.889,
+        "Origin": "Tmdb",
+        "Type": "User"
+      }
+    ],
+    "MovieRatings": {
+      "Tmdb": {
+        "Count": 36,
+        "Value": 6.889,
+        "Type": "User"
+      },
+      "Imdb": {
+        "Count": 1734,
+        "Value": 7.1,
+        "Type": "User"
+      },
+      "Metacritic": null,
+      "RottenTomatoes": null,
+      "Trakt": {
+        "Count": 231,
+        "Value": 7.07792,
+        "Type": "User"
+      }
+    },
+    "Genres": [
+      "Documentary"
+    ],
+    "Keywords": [
+      "behind the scenes",
+      "making of",
+      "new mexico"
+    ],
+    "AlternativeTitles": [],
+    "Translations": [
+      {
+        "Title": "The Road to El Camino: Behind the Scenes of El Camino: A Breaking Bad Movie",
+        "Overview": "Aaron Paul, Vince Gilligan and other cast members, producers and crew share stories and footage from the making of \"El Camino.\"",
+        "Language": "en-US"
+      },
+      {
+        "Title": "브레이킹 배드 무비: 엘 카미노로 가는 길 - 메이킹 필름",
+        "Overview": "주연 에런 폴과 감독 빈스 길리건이 말하는 《브레이킹 배드 무비: 엘 카미노》. 다른 출연진과 프로듀서, 스태프들도 함께한다. 메이킹 영상도 공개되니, 놓치지 말기를.",
+        "Language": "ko-KR"
+      },
+      {
+        "Title": "Detrás de cámaras de El Camino: Una película de Breaking Bad",
+        "Overview": "Aaron Paul, Vince Gilligan y otros actores, productores e integrantes del equipo técnico comparten historias e imágenes del rodaje de El Camino.",
+        "Language": "es-MX"
+      },
+      {
+        "Title": "El Camino : Un film \"Breaking Bad\" : En coulisse",
+        "Overview": "Aaron Paul, Vince Gilligan, d'autres acteurs et des membres de l'équipe de production partagent leurs anecdotes au sujet du tournage de El Camino, un film \"Breaking Bad\".",
+        "Language": "fr-FR"
+      },
+      {
+        "Title": "The Road to El Camino: Behind the Scenes of El Camino: A Breaking Bad Movie",
+        "Overview": "Аарон Пол, Вінс Гілліган та інші актори, продюсери і члени знімальної групи діляться історіями і кадрами зі зйомок \"Ель Каміно\".",
+        "Language": "uk-UA"
+      },
+      {
+        "Title": "สู่เอล คามิโน่: เบื้องหลังการสร้างเอล คามิโน่: ดับเครื่องชน คนดีแตก (เดอะ มูฟวี่)",
+        "Overview": "แอรอน พอล, วินซ์ กิลลิแกน ทีมนักแสดง ผู้อำนวยการสร้าง พร้อมทีมงานร่วมแชร์เรื่องราวและฟุตเทจเบื้องหลังการสร้าง \"เอล คามิโน่: ดับเครื่องชน คนดีแตก\"",
+        "Language": "th-TH"
+      },
+      {
+        "Title": "續命之徒：絕命毒師電影製作特輯",
+        "Overview": "亞倫·保羅、文斯·吉利根等演員和製作團隊，分享拍攝《續命之徒》的幕後故事和相關演出片段。",
+        "Language": "zh-HK"
+      },
+      {
+        "Title": "Der Weg von El Camino: Hinter den Kulissen von „El Camino: Ein ‚Breaking Bad‘-Film“",
+        "Overview": "Aaron Paul, Vince Gilligan und andere Darsteller sowie Produzenten und Crew-Mitglieder gewähren Einblicke hinter die Kulissen von „El Camino: Ein ‚Breaking Bad‘-Film“.",
+        "Language": "de-DE"
+      },
+      {
+        "Title": "رحلة في كواليس El Camino: A Breaking Bad Movie",
+        "Overview": "يشارك \"آرون بول\" و\"فينس غيليغان\" وباقي طاقم التمثيل والمنتجون وفريق العمل الجمهورَ قصصًا ولقطات من كواليس فيلم El Camino... لا يفتكم!",
+        "Language": "ar-AE"
+      },
+      {
+        "Title": "رحلة في كواليس El Camino: A Breaking Bad Movie",
+        "Overview": "يشارك \"آرون بول\" و\"فينس غيليغان\" وباقي طاقم التمثيل والمنتجون وفريق العمل الجمهورَ قصصًا ولقطات من كواليس فيلم El Camino... لا يفتكم!",
+        "Language": "ar-SA"
+      },
+      {
+        "Title": "续命之途：绝命毒师电影幕后花絮",
+        "Overview": "亚伦·保尔、文斯·吉里根及其他演艺人员、制片人和剧组成员分享了他们制作《续命之徒》期间的故事和片段镜头。",
+        "Language": "zh-SG"
+      },
+      {
+        "Title": "續命之徒：絕命毒師電影製作特輯",
+        "Overview": "亞倫·保羅、文斯·吉利根等演員和製作團隊，分享拍攝《續命之徒》的幕後故事和相關演出片段。",
+        "Language": "zh-TW"
+      },
+      {
+        "Title": "Cesta k El Camino: Film podle seriálu Perníkový táta",
+        "Overview": "Aaron Paul, Vince Gilligan a další herci, producenti a členové štábu se podělí o historky a záběry z natáčení filmu „El Camino“.",
+        "Language": "cs-CZ"
+      },
+      {
+        "Title": "Vejen til El Camino: Bag kulisserne på El Camino: A Breaking Bad Movie",
+        "Overview": "Aaron Paul, Vince Gilligan og andre medvirkende, producere og medlemmer af filmholdet fortæller historier og viser optagelser fra indspilningen af El Camino.",
+        "Language": "da-DK"
+      },
+      {
+        "Title": "The Road to El Camino: Behind the Scenes of El Camino: A Breaking Bad Movie",
+        "Overview": "Aaron Paul, Vince Gilligan en andere leden van de cast, producenten en crew delen verhalen en filmmateriaal over het maken van 'El Camino'.",
+        "Language": "nl-NL"
+      },
+      {
+        "Title": "Tie El Caminoon: Näin tehtiin El Camino: Breaking Bad -elokuva",
+        "Overview": "Aaron Paul, Vince Gilligan sekä muut näyttelijät, tuottajat ja kuvausryhmän jäsenet kertovat tarinoita ja näyttävät materiaalia El Caminon kuvauksista.",
+        "Language": "fi-FI"
+      },
+      {
+        "Title": "El Camino : Un film \"Breaking Bad\" : En coulisse",
+        "Overview": "Aaron Paul, Vince Gilligan et d'autres membres de la distribution et de l'équipe partagent des histoires et des images du tournage de « El Camino ».",
+        "Language": "fr-CA"
+      },
+      {
+        "Title": "Στα Παρασκήνια του El Camino: Μια Ταινία του Breaking Bad",
+        "Overview": "Ο Άαρον Πολ, ο Βινς Γκίλιγκαν και άλλα μέλη του καστ, της παραγωγής και του συνεργείου μοιράζονται μαζί μας ιστορίες και πλάνα από τα γυρίσματα του \"El Camino\".",
+        "Language": "el-GR"
+      },
+      {
+        "Title": "הדרך לאל קמינו: מאחורי הקלעים של אל קמינו: שובר שורות – הסרט",
+        "Overview": "אהרון פול, וינס גיליגאן ושאר השחקנים, המפיקים ואנשי הצוות מדברים על תהליך היצירה של \"אל קמינו\" בליווי סצנות מהסרט.",
+        "Language": "he-IL"
+      },
+      {
+        "Title": "El Camino: Totál szívás – A film kulisszái mögött",
+        "Overview": "Aaron Paul, Vince Gilligan és további szereplők, producerek és stábtagok megosztják velünk az El Camino készítéséről szóló történeteiket és felvételeiket.",
+        "Language": "hu-HU"
+      },
+      {
+        "Title": "The Road to El Camino: Behind the Scenes of El Camino: A Breaking Bad Movie",
+        "Overview": "Aaron Paul, Vince Gilligan, beserta para pemeran lain, para produser, dan kru membagikan cerita dan rekaman dari proses pembuatan \"El Camino\".",
+        "Language": "id-ID"
+      },
+      {
+        "Title": "In cammino verso El Camino: Dietro le quinte del film di Breaking Bad",
+        "Overview": "Aaron Paul, Vince Gilligan e altri membri del cast, della troupe e produttori raccontano aneddoti documentati da immagini sulla realizzazione di \"El Camino\".",
+        "Language": "it-IT"
+      },
+      {
+        "Title": "エルカミーノ: ブレイキング・バッド THE MOVIEの舞台裏",
+        "Overview": "主演のアーロン・ポールやヴィンス・ギリガン監督など、本作のキャストとスタッフが語る製作秘話や撮影にまつわるエピソードを特別映像とともにお届け。",
+        "Language": "ja-JP"
+      },
+      {
+        "Title": "Veien mot El Camino: Bak kulissene på El Camino: En Breaking Bad-film",
+        "Overview": "Aaron Paul, Vince Gilligan og andre skuespillere, produsenter og crew deler historier og filmklipp fra innspillingen av El Camino.",
+        "Language": "no-NO"
+      },
+      {
+        "Title": "Droga do El Camino. El Camino: Film „Breaking Bad” – za kulisami",
+        "Overview": "Vince Gilligan, Aaron Paul i inni aktorzy, a także producenci i ekipa filmowa opowiadają o kulisach powstawania „El Camino: Filmu Breaking Bad”.",
+        "Language": "pl-PL"
+      },
+      {
+        "Title": "O Caminho para El Camino: Nos Bastidores de El Camino: Um Filme Breaking Bad",
+        "Overview": "Aaron Paul e Vince Gilligan juntam-se a outros membros do elenco e da equipa técnica para partilharem histórias e imagens dos bastidores de \"El Camino\".",
+        "Language": "pt-PT"
+      },
+      {
+        "Title": "A Estrada de El Camino - Bastidores de El Camino: A Breaking Bad Film",
+        "Overview": "Aaron Paul, Vince Gilligan e outros atores, produtores e integrantes da equipe de El Camino revelam histórias e imagens dos bastidores da produção do filme.",
+        "Language": "pt-BR"
+      },
+      {
+        "Title": "Drumul către El Camino: Din culisele El Camino: Un film Breaking Bad",
+        "Overview": "Aaron Paul, Vince Gilligan și alți actori, producători și membri ai echipei împărtășesc povești și ne arată filmări din culisele filmului „El Camino”.",
+        "Language": "ro-RO"
+      },
+      {
+        "Title": "За кадром El Camino, фильма по мотивам сериала Во все тяжкие",
+        "Overview": "Аарон Пол, Винс Гиллиган и другие актеры, продюсеры и члены съемочной группы рассказывают о работе над El Camino и показывают закулисные кадры.",
+        "Language": "ru-RU"
+      },
+      {
+        "Title": "Detrás de las cámaras de El Camino: Una película de Breaking Bad",
+        "Overview": "Aaron Paul, Vince Gilligan y otros miembros del reparto, productores y técnicos comparten historias e imágenes del rodaje de \"El Camino\".",
+        "Language": "es-ES"
+      },
+      {
+        "Title": "Vägen till El Camino: Bakom kulisserna på El Camino: A Breaking Bad Movie",
+        "Overview": "Aaron Paul, Vince Gilligan och andra skådespelare, producenter och medlemmar av filmteamet delar med sig av berättelser och bilder från inspelningen av El Camino.",
+        "Language": "sv-SE"
+      },
+      {
+        "Title": "El Camino Yolu: El Camino: Bir Breaking Bad Filmi'nin Kamera Arkası",
+        "Overview": "Aaron Paul, Vince Gilligan, diğer oyuncular, yapımcılar ve teknik ekip, \"El Camino\"nun kamera arkasından hikâyeler ve görüntüler paylaşıyor.",
+        "Language": "tr-TR"
+      },
+      {
+        "Title": "Hậu trường El Camino: Phim hậu bản của \"Tập làm người xấu\"",
+        "Overview": "Aaron Paul, Vince Gilligan và các diễn viên phụ, nhà sản xuất cùng đoàn làm phim chia sẻ những câu chuyện và cảnh quay trong quá trình thực hiện \"El Camino\".",
+        "Language": "vi-VN"
+      }
+    ],
+    "Recommendations": [
+      {
+        "TmdbId": 1642859,
+        "Title": "Iron Maiden: Burning Ambition"
+      },
+      {
+        "TmdbId": 1015606,
+        "Title": "Obi-Wan Kenobi: A Jedi's Return"
+      },
+      {
+        "TmdbId": 1226841,
+        "Title": "The Greatest Night in Pop"
+      },
+      {
+        "TmdbId": 961722,
+        "Title": "Sidney"
+      },
+      {
+        "TmdbId": 961651,
+        "Title": "Spider-Man: All Roads Lead to No Way Home"
+      },
+      {
+        "TmdbId": 467062,
+        "Title": "Spielberg"
+      },
+      {
+        "TmdbId": 1059673,
+        "Title": "Avatar: The Deep Dive - A Special Edition of 20/20"
+      },
+      {
+        "TmdbId": 869250,
+        "Title": "Being James Bond"
+      },
+      {
+        "TmdbId": 1308619,
+        "Title": "Jaws @ 50: The Definitive Inside Story"
+      },
+      {
+        "TmdbId": 1015595,
+        "Title": "Marvel Studios Assembled: The Making of Thor: Love and Thunder"
+      }
+    ],
+    "Credits": {
+      "Cast": [
+        {
+          "Name": "Aaron Paul",
+          "Order": 0,
+          "Character": "Self",
+          "TmdbId": 84497,
+          "CreditId": "6208ce78945d3600db29b914",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/8Ac9uuoYwZoYVAIJfRLzzLsGGJn.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Charles Baker",
+          "Order": 1,
+          "Character": "Self",
+          "TmdbId": 82945,
+          "CreditId": "61fd0d5aae6f0900a2e5ff3a",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/l2plWtvYRcLX4CXf8azXIyANq.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Matt Jones",
+          "Order": 2,
+          "Character": "Self",
+          "TmdbId": 191202,
+          "CreditId": "61fd0ddc7390c0001dac5c2e",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/x13vFDaJHY1CxNvSPWujYe12bMc.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jonathan Banks",
+          "Order": 3,
+          "Character": "Self",
+          "TmdbId": 783,
+          "CreditId": "61fd0d6aeee18600911d88cd",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/bswk26L13PvY4iMTwUTAsepXCLv.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Krysten Ritter",
+          "Order": 4,
+          "Character": "Self",
+          "TmdbId": 78080,
+          "CreditId": "6208cfccdd83fa008cd19b36",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/9pfKWfSU5i8N6JJuLlVMKfPCDIN.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Robert Forster",
+          "Order": 5,
+          "Character": "Self",
+          "TmdbId": 5694,
+          "CreditId": "61ffd450e8d0b4001b8f2c9c",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/vGDifxN2PnO69rnpg6FoWkocFCD.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Scott MacArthur",
+          "Order": 6,
+          "Character": "Self",
+          "TmdbId": 209087,
+          "CreditId": "61fd0de668929c0068b29123",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/rGTPhDMQYR7mmtcOwPMK7R4SDgV.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jesse Plemons",
+          "Order": 7,
+          "Character": "Self",
+          "TmdbId": 88124,
+          "CreditId": "6208cfabfab3fa001f6940cc",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/og4I51GsuwohdPgoELOHVMMqMre.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Kevin Rankin",
+          "Order": 8,
+          "Character": "Self",
+          "TmdbId": 114000,
+          "CreditId": "6208cfb5cb8028009c01a7e6",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/fOW5R6BSgRvMrt2R7KAxSk7L4H2.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Michael Bofshever",
+          "Order": 9,
+          "Character": "Self",
+          "TmdbId": 95195,
+          "CreditId": "61fd0d7fbf0f6300dd006fb1",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/t7vAtGPSUfvPRIAvKfaCJ2JNrQW.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Tess Harper",
+          "Order": 10,
+          "Character": "Self",
+          "TmdbId": 41249,
+          "CreditId": "61fd0dc2eee18600cd3ea8bc",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/8Z770Kk13MK1NP7skWmTxvRGx3V.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Larry Hankin",
+          "Order": 11,
+          "Character": "Self",
+          "TmdbId": 11519,
+          "CreditId": "61fd0db77a97ab00732bcb5f",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/2uR8SZ9geiSQOpBhKrerh9qY7CX.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Vince Gilligan",
+          "Order": 12,
+          "Character": "Self",
+          "TmdbId": 66633,
+          "CreditId": "61fd0dabeee18600911d88e5",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/wJIxATESjzsjSgvRhVavOmdamXc.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Mark Johnson",
+          "Order": 13,
+          "Character": "Self",
+          "TmdbId": 5162,
+          "CreditId": "61fd0dd1559d22006a0b7106",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/gLuXkOQjqB81aHMGJ2OtYzEpHQu.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Trina Siopy",
+          "Order": 14,
+          "Character": "Self",
+          "TmdbId": 1803318,
+          "CreditId": "6208cfedc56d2d004107f2f1",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/mMV1Bj6kdiocP0EGkcUAFRBDEeY.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Melissa Bernstein",
+          "Order": 15,
+          "Character": "Self",
+          "TmdbId": 1223199,
+          "CreditId": "61fd0d756f31af00ba037e6c",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/rSztwqMUIko8RkmwjxBse1XDW3g.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jenn Carroll",
+          "Order": 16,
+          "Character": "Self",
+          "TmdbId": 2430272,
+          "CreditId": "61fd0d8bdfaae9009c58a479",
+          "Images": []
+        },
+        {
+          "Name": "Donna Casey-Aira",
+          "Order": 17,
+          "Character": "Self",
+          "TmdbId": 1521472,
+          "CreditId": "61fd0d95dfaae9009c58a483",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/c8vozfOYX4prHJFBQ40YL452YaA.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Lori McCoy-Bell",
+          "Order": 18,
+          "Character": "Self",
+          "TmdbId": 1401606,
+          "CreditId": "61fd0df1d100b60043c63a5e",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/xoR4oQtcGewEz5nOJXCHlAtF0F8.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Cheri Montesanto",
+          "Order": 19,
+          "Character": "Self",
+          "TmdbId": 1835570,
+          "CreditId": "6208cf5dcb802800ca67f19b",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/lI6PpCV4MErs0dIbubri9dpWLom.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "John Wildermuth",
+          "Order": 20,
+          "Character": "Self",
+          "TmdbId": 1492644,
+          "CreditId": "6208d01f93388b001b2ae67b",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/fSwvTEPAkKWUTXSga0PzCmjOe6d.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Charles Newirth",
+          "Order": 21,
+          "Character": "Self",
+          "TmdbId": 15004,
+          "CreditId": "6208cfa126dac100e5307576",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/4tTEd7eQRB9n0tj4Q9U7Wt0D5Qn.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Judy Rhee",
+          "Order": 22,
+          "Character": "Self",
+          "TmdbId": 9547,
+          "CreditId": "6208cfc2ecbde9009e9eb27c",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/hJ5pXlTBjLp1CmiawBS485UzCka.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Marcus Montoya",
+          "Order": 23,
+          "Character": "Self",
+          "TmdbId": 2350636,
+          "CreditId": "6208cf86f48b34011dc26c16",
+          "Images": []
+        },
+        {
+          "Name": "Lily Scott",
+          "Order": 24,
+          "Character": "Self",
+          "TmdbId": 2092974,
+          "CreditId": "6208cfe18586780066d13d40",
+          "Images": []
+        }
+      ],
+      "Crew": [
+        {
+          "Name": "Rob Knox",
+          "Order": 0,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 2472392,
+          "CreditId": "61fd0e275c3247006daa7f5d",
+          "Images": []
+        },
+        {
+          "Name": "Dan Appel",
+          "Order": 1,
+          "Job": "Executive Producer",
+          "Department": "Production",
+          "TmdbId": 1329796,
+          "CreditId": "61fd0e15ae6f090043f41068",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/K0vYeGBy5yhrCTxf82XehjLzV4.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Alice Gu",
+          "Order": 2,
+          "Job": "Director of Photography",
+          "Department": "Camera",
+          "TmdbId": 1851314,
+          "CreditId": "64983e7bbbd0b00144f41c8f",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/sWMQ6J4SSVkFhtINI60JkuFsQt4.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Rob Sorrenti",
+          "Order": 3,
+          "Job": "Director of Photography",
+          "Department": "Camera",
+          "TmdbId": 1873686,
+          "CreditId": "69bd6b81e7c605b32d8c21ad",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/jrw8kggz2uELI0UXR7ITwjmIlK3.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Pete Chiaramonte",
+          "Order": 4,
+          "Job": "Director of Photography",
+          "Department": "Camera",
+          "TmdbId": 2266384,
+          "CreditId": "64983e7062f3350146290aed",
+          "Images": []
+        },
+        {
+          "Name": "Eric Haase",
+          "Order": 5,
+          "Job": "Director of Photography",
+          "Department": "Camera",
+          "TmdbId": 54600,
+          "CreditId": "64983e92955c6500c7aee175",
+          "Images": []
+        },
+        {
+          "Name": "Kyle Sklenar",
+          "Order": 6,
+          "Job": "Assistant Editor",
+          "Department": "Editing",
+          "TmdbId": 2565841,
+          "CreditId": "64983f7aeb79c200e29f2e80",
+          "Images": []
+        },
+        {
+          "Name": "Justin Engel",
+          "Order": 7,
+          "Job": "Sound Mixer",
+          "Department": "Sound",
+          "TmdbId": 2123818,
+          "CreditId": "61fd0e4859e8a90044e787e6",
+          "Images": []
+        },
+        {
+          "Name": "Kevin Oliver",
+          "Order": 8,
+          "Job": "Editor",
+          "Department": "Editing",
+          "TmdbId": 2472394,
+          "CreditId": "61fd0e390721664f6c5be574",
+          "Images": []
+        },
+        {
+          "Name": "Emily Menez",
+          "Order": 9,
+          "Job": "Assistant Editor",
+          "Department": "Editing",
+          "TmdbId": 4130244,
+          "CreditId": "64983f70eb79c200ff010ae7",
+          "Images": []
+        },
+        {
+          "Name": "Cedric K. Williams",
+          "Order": 10,
+          "Job": "Assistant Editor",
+          "Department": "Editing",
+          "TmdbId": 2565846,
+          "CreditId": "64983f8e62f3350146290b97",
+          "Images": []
+        },
+        {
+          "Name": "Robert Chynoweth",
+          "Order": 11,
+          "Job": "Assistant Editor",
+          "Department": "Editing",
+          "TmdbId": 2565838,
+          "CreditId": "64983f4bb34409011c7be4d4",
+          "Images": []
+        }
+      ]
+    },
+    "Studio": "Bacon & Sons Film Co.",
+    "YoutubeTrailerId": "",
+    "Certifications": [
+      {
+        "Country": "AR",
+        "Certification": "+13"
+      },
+      {
+        "Country": "AU",
+        "Certification": "M"
+      },
+      {
+        "Country": "BE",
+        "Certification": "12"
+      },
+      {
+        "Country": "BR",
+        "Certification": "14"
+      },
+      {
+        "Country": "CA",
+        "Certification": "14A"
+      },
+      {
+        "Country": "DE",
+        "Certification": "12"
+      },
+      {
+        "Country": "ES",
+        "Certification": "16"
+      },
+      {
+        "Country": "GB",
+        "Certification": "15"
+      },
+      {
+        "Country": "IE",
+        "Certification": "15"
+      },
+      {
+        "Country": "IN",
+        "Certification": "U/A 16+"
+      },
+      {
+        "Country": "KR",
+        "Certification": "15"
+      },
+      {
+        "Country": "LT",
+        "Certification": "N-13"
+      },
+      {
+        "Country": "LU",
+        "Certification": "12"
+      },
+      {
+        "Country": "NL",
+        "Certification": "12"
+      },
+      {
+        "Country": "NZ",
+        "Certification": "M"
+      },
+      {
+        "Country": "PH",
+        "Certification": "R-13"
+      },
+      {
+        "Country": "PR",
+        "Certification": "PG-13"
+      },
+      {
+        "Country": "SG",
+        "Certification": "NC16"
+      },
+      {
+        "Country": "TH",
+        "Certification": "13"
+      },
+      {
+        "Country": "TR",
+        "Certification": "16+"
+      },
+      {
+        "Country": "US",
+        "Certification": "PG-13"
+      },
+      {
+        "Country": "VI",
+        "Certification": "PG-13"
+      },
+      {
+        "Country": "ZA",
+        "Certification": "13"
+      }
+    ],
+    "Status": null,
+    "Collection": null,
+    "Homepage": "https://www.netflix.com/title/81211714"
+  },
+  {
+    "TmdbId": 1739202,
+    "ImdbId": "tt43700441",
+    "Title": "Untold Raygun: Breaking Badly",
+    "Overview": "Nobody, least of all Rachael Gunn, expected to be an Olympian. But as Raygun’s performance at the 2024 Paris Olympics went viral overnight, so did an avalanche of memes, misinformation, and conspiracy theories questioning how she ever got there.",
+    "OriginalTitle": "Untold Raygun: Breaking Badly",
+    "OriginalLanguage": "en",
+    "TitleSlug": "1739202",
+    "Runtime": 72,
+    "Popularity": 6.2361,
+    "Year": 2026,
+    "Premier": null,
+    "InCinema": null,
+    "PhysicalRelease": null,
+    "DigitalRelease": "2026-09-01T00:00:00Z",
+    "Images": [
+      {
+        "CoverType": "Poster",
+        "Url": "https://image.tmdb.org/t/p/original/3pnlJjsGtrUp3cPEOLzkR0sPQAK.jpg"
+      },
+      {
+        "CoverType": "Fanart",
+        "Url": "https://image.tmdb.org/t/p/original/iBik58vWTbO3s9GgUW86v7fYqfZ.jpg"
+      }
+    ],
+    "Ratings": [
+      {
+        "Count": 15,
+        "Value": 6,
+        "Origin": "Tmdb",
+        "Type": "User"
+      }
+    ],
+    "MovieRatings": {
+      "Tmdb": {
+        "Count": 15,
+        "Value": 6,
+        "Type": "User"
+      },
+      "Imdb": {
+        "Count": 1270,
+        "Value": 5.3,
+        "Type": "User"
+      },
+      "Metacritic": null,
+      "RottenTomatoes": null,
+      "Trakt": null
+    },
+    "Genres": [
+      "Documentary"
+    ],
+    "Keywords": [
+      "b-girl",
+      "break dance",
+      "breakdance",
+      "olympic athlete",
+      "olympic games",
+      "olympics",
+      "paris olympics"
+    ],
+    "AlternativeTitles": [
+      {
+        "Title": "Untold Raygun: Breaking Badly",
+        "Type": "Tmdb",
+        "Language": "en"
+      }
+    ],
+    "Translations": [
+      {
+        "Title": "Untold Raygun: Breaking Badly",
+        "Overview": "Nobody, least of all Rachael Gunn, expected to be an Olympian. But as Raygun’s performance at the 2024 Paris Olympics went viral overnight, so did an avalanche of memes, misinformation, and conspiracy theories questioning how she ever got there.",
+        "Language": "en-US"
+      },
+      {
+        "Title": "말하지 못한 이야기: 배드 비걸 레이건",
+        "Overview": "활동명 '레이건'으로 알려진 레이철 건. 그녀가 올림픽에 출전하리라고는 누구도, 무엇보다 레이건 본인조차 예상하지 못했다. 하지만 2024 파리 올림픽에서 선보인 레이건의 퍼포먼스가 하룻밤 새 큰 화제를 모으면서, 그녀가 어떻게 올림픽 무대에 설 수 있었는지 의문을 제기하는 온갖 밈과 허위 정보, 음모론도 걷잡을 수 없이 퍼져 나갔다.",
+        "Language": "ko-KR"
+      },
+      {
+        "Title": "L'Envers du sport : Raygun, Breaking Badly",
+        "Overview": "Lorsque la performance de Raygun aux Jeux olympiques de Paris 2024 est devenue virale du jour au lendemain, une avalanche de mèmes, de fausses informations et de théories du complot a suivi, tous remettant en question la manière dont elle avait réussi à atteindre la scène olympique.",
+        "Language": "fr-FR"
+      },
+      {
+        "Title": "体坛秘史：霹雳舞博士雷切尔·冈恩",
+        "Overview": "没有人，甚至是瑞秋·冈恩自己，也没想到能成为奥运选手。但当“雷冈”在2024年巴黎奥运会上的表现一夜之间走红网络时，随之而来的还有铺天盖地的表情包、虚假信息和阴谋论，纷纷质疑她究竟是如何站上奥运舞台的。",
+        "Language": "zh-CN"
+      },
+      {
+        "Title": "Histórias do Desporto: Raygun - Dar a Volta por Cima",
+        "Overview": "Ninguém, muito menos Rachael Gunn, esperava tornar-se uma atleta olímpica. Mas, à medida que a atuação de Raygun nos Jogos Olímpicos de Paris de 2024 se tornou viral da noite para o dia, uma avalanche de memes, informações falsas e teorias da conspiração a questionar como conseguiu lá chegar também a invadiu.",
+        "Language": "pt-PT"
+      },
+      {
+        "Title": "Secretos del deporte: Raygun",
+        "Overview": "De académica australiana a meme mundial, la bailarina de breakdance Raygun relata su peculiar trayectoria hasta los Juegos Olímpicos… y el aluvión de críticas que vino después.",
+        "Language": "es-ES"
+      },
+      {
+        "Title": "Untold - Raygun: A Polêmica do Breaking",
+        "Overview": "Da universidade na Austrália aos memes do mundo todo, a B-girl \"Raygun\" conta como foi seu caminho até as Olimpíadas, a fama viral e o hate.",
+        "Language": "pt-BR"
+      },
+      {
+        "Title": "Al descubierto: Raygun, la breakdancer viral",
+        "Overview": "Desde académica australiana hasta meme global, la breakdancer «Raygun» relata su peculiar camino hasta los Juegos Olímpicos… y la infamia que le siguió.",
+        "Language": "es-MX"
+      },
+      {
+        "Title": "Untold: เรย์กัน: ดับเครื่องเต้น จนดีแตก",
+        "Overview": "จากนักวิชาการชาวออสเตรเลีย มาสู่การเป็นมีมระดับโลก \"เรย์กัน\" เล่าถึงเส้นทางสู่เวทีโอลิมปิกที่แหวกแนว และเรื่องฉาวที่ตามมา",
+        "Language": "th-TH"
+      },
+      {
+        "Title": "Neslýchané: Raygun – Zlomená jak šíp",
+        "Overview": "Nikdo, a už vůbec ne Rachael Gunnová, nečekal, že se stane olympijskou sportovkyní. Jakmile se však výkon Raygunové na olympijských hrách v Paříži v roce 2024 přes noc stal virálním hitem, spustila se lavina memů, dezinformací a konspiračních teorií, které zpochybňovaly, jak se tam vůbec dostala.",
+        "Language": "cs-CZ"
+      },
+      {
+        "Title": "הסיפור שלא סופר: מחול השדים של רייגאן",
+        "Overview": "מאקדמאית אוסטרלית למם עולמי: רקדנית הברייקדאנס רייגאן מספרת על דרכה הלא-שגרתית אל הזירה האולימפית – ועל הפרסום השלילי שבא בעקבותיה.",
+        "Language": "he-IL"
+      },
+      {
+        "Title": "Untold Raygun: Breaking Badly",
+        "Overview": "Niemand, en Rachael Gunn al helemaal niet, had verwacht ooit Olympisch atleet te worden. Maar toen Rayguns prestatie op de Olympische Spelen van 2024 in Parijs van de ene op de andere dag viraal ging, ontstond er een lawine aan memes, misinformatie en complottheorieën die zich afvroegen hoe ze daar ooit terecht was gekomen.",
+        "Language": "nl-NL"
+      },
+      {
+        "Title": "Első kézből: Rachel Gunn",
+        "Overview": "Amikor Raygun teljesítménye a 2024-es párizsi olimpián egyik napról a másikra virálissá vált, mémek, félretájékoztatás és összeesküvés-elméletek özöne követte, amelyek mind azt firtatták, hogyan kerülhetett egyáltalán az olimpiai színpadra.",
+        "Language": "hu-HU"
+      },
+      {
+        "Title": "Untold Raygun: Breaking Badly",
+        "Overview": "Von der australischen Akademikerin zum weltweiten Meme: Breakdancerin „Raygun“ erzählt von ihrem Weg zur olympischen Bühne und dem Spott, der daraufhin folgte.",
+        "Language": "de-DE"
+      },
+      {
+        "Title": "Sportowe opowieści: Raygun – Kiepski break",
+        "Overview": "Od doktorantki do bohaterki memów — tancerka breakdance’u znana jako Raygun opowiada o swojej nietypowej drodze na olimpijską scenę i późniejszym skandalu.",
+        "Language": "pl-PL"
+      }
+    ],
+    "Recommendations": [
+      {
+        "TmdbId": 1400780,
+        "Title": "Come See Me in the Good Light"
+      },
+      {
+        "TmdbId": 1265066,
+        "Title": "The Beach Boys"
+      },
+      {
+        "TmdbId": 1591516,
+        "Title": "Evil Influencer: The Jodi Hildebrandt Story"
+      },
+      {
+        "TmdbId": 1477566,
+        "Title": "Trainwreck: Balloon Boy"
+      },
+      {
+        "TmdbId": 593691,
+        "Title": "HOMECOMING: A film by Beyoncé"
+      },
+      {
+        "TmdbId": 10174,
+        "Title": "Madonna: Truth or Dare"
+      },
+      {
+        "TmdbId": 565255,
+        "Title": "Struggle: The Life and Lost Art of Szukalski"
+      },
+      {
+        "TmdbId": 1015356,
+        "Title": "To Kill a Tiger"
+      },
+      {
+        "TmdbId": 508003,
+        "Title": "McQueen"
+      },
+      {
+        "TmdbId": 473415,
+        "Title": "Voyeur"
+      }
+    ],
+    "Credits": {
+      "Cast": [
+        {
+          "Name": "Rachael Gunn",
+          "Order": 0,
+          "Character": "Self - Raygun",
+          "TmdbId": 6424825,
+          "CreditId": "6a86f504662fcfd016d156d0",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/6G466HeNiMvaP2kDBGzR9L2iLID.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Samuel Free",
+          "Order": 1,
+          "Character": "Self - Raygun's Husband",
+          "TmdbId": 6461621,
+          "CreditId": "6a9df54a36db278d86143ebb",
+          "Images": []
+        },
+        {
+          "Name": "Beverly Gunn",
+          "Order": 2,
+          "Character": "Self - Raygun's Parent",
+          "TmdbId": 6461669,
+          "CreditId": "6a9dfa9ba3becbbfc4c749ac",
+          "Images": []
+        },
+        {
+          "Name": "Russell Gunn",
+          "Order": 3,
+          "Character": "Self - Raygun's Parent",
+          "TmdbId": 6461670,
+          "CreditId": "6a9dfaa9108c3d5544f5749b",
+          "Images": []
+        },
+        {
+          "Name": "Sammy Tinylocks",
+          "Order": 4,
+          "Character": "Self - B-Girl (as Tinylocks)",
+          "TmdbId": 6461683,
+          "CreditId": "6a9dfc24173dfc3b71f574b7",
+          "Images": []
+        },
+        {
+          "Name": "Leah Clark",
+          "Order": 5,
+          "Character": "Self - B-Girl (as Flix)",
+          "TmdbId": 6461706,
+          "CreditId": "6a9dfe7336db278d86143ee5",
+          "Images": []
+        },
+        {
+          "Name": "Lowe Napalan",
+          "Order": 6,
+          "Character": "Self - Head of AUSBreaking",
+          "TmdbId": 6461747,
+          "CreditId": "6a9e04eaf03f7fee1d0c599c",
+          "Images": []
+        },
+        {
+          "Name": "Richard Branson",
+          "Order": 7,
+          "Character": "Self",
+          "TmdbId": 158079,
+          "CreditId": "6a9dfadaed85cedabb7d4727",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/1MiGnNZO5vJYsjuW0JVrup6rO8N.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Michael Chambers",
+          "Order": 8,
+          "Character": "Self (archive footage)",
+          "TmdbId": 57392,
+          "CreditId": "6a9df5c20ddd8a000b0c0e96",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/qrEIrI0o6upnQl4yjJGAABVmdXg.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Ben Lokey",
+          "Order": 9,
+          "Character": "Self (archive footage)",
+          "TmdbId": 128128,
+          "CreditId": "6a9df88e566d755a0d0c0e86",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/bdd5EGVjRbSV1XUjBDqoL9LWIDi.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Adolfo Quinones",
+          "Order": 10,
+          "Character": "Self (archive footage)",
+          "TmdbId": 81896,
+          "CreditId": "6a9df9163d4487b7784b0363",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/tSc60ecTxyYtLXfFHI4vKY2ojys.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Larry Potash",
+          "Order": 11,
+          "Character": "Self (archive footage)",
+          "TmdbId": 4728366,
+          "CreditId": "6a9e00266cdaf2bb87996972",
+          "Images": []
+        },
+        {
+          "Name": "Joe Donlon",
+          "Order": 12,
+          "Character": "Self (archive footage)",
+          "TmdbId": 6461724,
+          "CreditId": "6a9e003b2e76f69515996885",
+          "Images": []
+        },
+        {
+          "Name": "Seth Meyers",
+          "Order": 13,
+          "Character": "Self (archive footage)",
+          "TmdbId": 62856,
+          "CreditId": "6a9dffbc4c1199cd9c5afdb8",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/nCcvpJFHWYHfu5oPxTOyA1uSdqA.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Willie Geist",
+          "Order": 14,
+          "Character": "Self (archive footage)",
+          "TmdbId": 1491641,
+          "CreditId": "6a9dffc885721dcc3233aef7",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/euqjz2LSGaPRh5yGVLoOwkWlszn.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Harvey Levin",
+          "Order": 15,
+          "Character": "Self (archive footage)",
+          "TmdbId": 1218634,
+          "CreditId": "6a9e00831678abd0844b4871",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/x8QJZcapTzQ8sSLU8VpPpmb9saA.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jimmy Kimmel",
+          "Order": 16,
+          "Character": "Self (archive footage)",
+          "TmdbId": 78303,
+          "CreditId": "6a9e00a22e76f69515996898",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/nBe0ByVL5hpPUby6rlU6DELgJ8Z.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Jimmy Fallon",
+          "Order": 17,
+          "Character": "Self (archive footage)",
+          "TmdbId": 11669,
+          "CreditId": "6a9e00abffdf7f1f4d5afe6d",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/h9kYouEP6VrM8GkS2jl7jMDKbwu.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Nick Offerman",
+          "Order": 18,
+          "Character": "Self (archive footage)",
+          "TmdbId": 17039,
+          "CreditId": "6a9e00b42113381e2d143ec3",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/f6z3mPVtaF40ewfdmZydprAjmYd.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Sylvia Jeffreys",
+          "Order": 19,
+          "Character": "Self (archive footage)",
+          "TmdbId": 6461740,
+          "CreditId": "6a9e0442085e79c47b0c59e0",
+          "Images": []
+        },
+        {
+          "Name": "Michael Atkinson",
+          "Order": 20,
+          "Character": "Self - Stan Sport (archive footage)",
+          "TmdbId": 6461820,
+          "CreditId": "6a9e0e16ccd9bb16f80c59ce",
+          "Images": []
+        },
+        {
+          "Name": "Snoop Dogg",
+          "Order": 21,
+          "Character": "Self (archive footage)",
+          "TmdbId": 19767,
+          "CreditId": "6a9e0f3475bca148c97d46bb",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/rbxBK2m6fEq0oHeMoBUMVYkJEdJ.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Logan Edra",
+          "Order": 22,
+          "Character": "Self (archive footage)",
+          "TmdbId": 2613411,
+          "CreditId": "6a9e0f71108c3d5544f5751f",
+          "Images": []
+        },
+        {
+          "Name": "Sya Dembélé",
+          "Order": 23,
+          "Character": "Self (archive footage)",
+          "TmdbId": 6461829,
+          "CreditId": "6a9e10a98ce03647c84b4831",
+          "Images": []
+        },
+        {
+          "Name": "Dominika Banevič",
+          "Order": 24,
+          "Character": "Self (archive footage)",
+          "TmdbId": 6461836,
+          "CreditId": "6a9e112a8ce03647c84b483f",
+          "Images": []
+        },
+        {
+          "Name": "Joe Rogan",
+          "Order": 25,
+          "Character": "Self (archive footage)",
+          "TmdbId": 91609,
+          "CreditId": "6a9e138d45c7adcf8c4b491f",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/mWb6QIsGGHMdhN9yVGZXCHQIRzS.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Kiké Hernández",
+          "Order": 26,
+          "Character": "Self (archive footage)",
+          "TmdbId": 6461848,
+          "CreditId": "6a9e1481867d716d24f66065",
+          "Images": []
+        },
+        {
+          "Name": "Camryn Bynum",
+          "Order": 27,
+          "Character": "Self (archive footage)",
+          "TmdbId": 6461856,
+          "CreditId": "6a9e15a7c6f871854233c878",
+          "Images": []
+        },
+        {
+          "Name": "Adele",
+          "Order": 28,
+          "Character": "Self (archive footage)",
+          "TmdbId": 449538,
+          "CreditId": "6a9e1626a3becbbfc4c74ab9",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/kKIDm4BMIzbCBPn45BV2DqAfq7S.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Rachel Dratch",
+          "Order": 29,
+          "Character": "Self (archive footage)",
+          "TmdbId": 32905,
+          "CreditId": "6a9e163445c7adcf8c4b4944",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/j8vNwap7BM69dRz5zXVWvIn4lJ7.jpg"
+            }
+          ]
+        }
+      ],
+      "Crew": [
+        {
+          "Name": "Chapman Way",
+          "Order": 0,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 1285876,
+          "CreditId": "6a867e02cad6aabaf21f6125",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/q5R9yh00hkuOylRnd8bdYXCpYeO.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Maclain Way",
+          "Order": 1,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 1285877,
+          "CreditId": "6a867e3946387f6345675335",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/yhB5cUGOzpHiYN4rsnRZ2v28YRV.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Chapman Way",
+          "Order": 2,
+          "Job": "Executive Producer",
+          "Department": "Production",
+          "TmdbId": 1285876,
+          "CreditId": "6a9e1b76747ddc7c5d143fc8",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/q5R9yh00hkuOylRnd8bdYXCpYeO.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Maclain Way",
+          "Order": 3,
+          "Job": "Executive Producer",
+          "Department": "Production",
+          "TmdbId": 1285877,
+          "CreditId": "6a9e1b7f4d871ea51d5afe67",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/yhB5cUGOzpHiYN4rsnRZ2v28YRV.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Johnny Lowry",
+          "Order": 4,
+          "Job": "Executive Producer",
+          "Department": "Production",
+          "TmdbId": 1696415,
+          "CreditId": "6a9e1b8e07dd817a934b4846",
+          "Images": []
+        },
+        {
+          "Name": "Stephanie Scicchitano",
+          "Order": 5,
+          "Job": "Executive Producer",
+          "Department": "Production",
+          "TmdbId": 6461886,
+          "CreditId": "6a9e1bcc28d92bb2cef6604a",
+          "Images": []
+        },
+        {
+          "Name": "Harry Gamsu",
+          "Order": 6,
+          "Job": "Executive Producer",
+          "Department": "Production",
+          "TmdbId": 6461887,
+          "CreditId": "6a9e1bda1ac3c71e4433af87",
+          "Images": []
+        },
+        {
+          "Name": "David Bolen",
+          "Order": 7,
+          "Job": "Director of Photography",
+          "Department": "Camera",
+          "TmdbId": 1426834,
+          "CreditId": "6a9e1c15867d716d24f6610a",
+          "Images": []
+        },
+        {
+          "Name": "Brocker Way",
+          "Order": 8,
+          "Job": "Music",
+          "Department": "Sound",
+          "TmdbId": 108942,
+          "CreditId": "6a9e1c29f03f7fee1d0c5aa1",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/yUqm62fswRAQwUpAV81MIGOCpWi.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Chris Dallas-Feeney",
+          "Order": 9,
+          "Job": "Editor",
+          "Department": "Editing",
+          "TmdbId": 4281180,
+          "CreditId": "6a9e1c21f9c8f3de914b496f",
+          "Images": []
+        },
+        {
+          "Name": "Catherine Joy",
+          "Order": 10,
+          "Job": "Music Producer",
+          "Department": "Sound",
+          "TmdbId": 2262953,
+          "CreditId": "6a9e1d4a739d15bd7f4b4a35",
+          "Images": []
+        },
+        {
+          "Name": "Elliot Thompson",
+          "Order": 11,
+          "Job": "Dialogue Editor",
+          "Department": "Sound",
+          "TmdbId": 2005166,
+          "CreditId": "6a9e1da1f352273b71c74afc",
+          "Images": []
+        },
+        {
+          "Name": "Charles Christopher Rubino",
+          "Order": 12,
+          "Job": "Title Designer",
+          "Department": "Art",
+          "TmdbId": 1590582,
+          "CreditId": "6a9e1e05747ddc7c5d143ffb",
+          "Images": []
+        },
+        {
+          "Name": "Shuli Harel",
+          "Order": 13,
+          "Job": "Co-Executive Producer",
+          "Department": "Production",
+          "TmdbId": 2855142,
+          "CreditId": "6a9e1be645a23434be0c5a4b",
+          "Images": []
+        },
+        {
+          "Name": "Jake Graham-Felsen",
+          "Order": 14,
+          "Job": "Co-Executive Producer",
+          "Department": "Production",
+          "TmdbId": 1800420,
+          "CreditId": "6a9e1bf2867d716d24f66107",
+          "Images": []
+        },
+        {
+          "Name": "Billy Sheahan",
+          "Order": 15,
+          "Job": "Assistant Sound Editor",
+          "Department": "Sound",
+          "TmdbId": 4831056,
+          "CreditId": "6a9e1dc728d92bb2cef66066",
+          "Images": []
+        },
+        {
+          "Name": "Jacob Flack",
+          "Order": 16,
+          "Job": "Sound Designer",
+          "Department": "Sound",
+          "TmdbId": 2010670,
+          "CreditId": "6a9e1cdff352273b71c74ae5",
+          "Images": []
+        },
+        {
+          "Name": "Jessica Berndt",
+          "Order": 17,
+          "Job": "Music Supervisor",
+          "Department": "Sound",
+          "TmdbId": 2093665,
+          "CreditId": "6a9e1c80e3492e2bb04b04cc",
+          "Images": []
+        },
+        {
+          "Name": "Brent Kiser",
+          "Order": 18,
+          "Job": "Supervising Sound Editor",
+          "Department": "Sound",
+          "TmdbId": 1995153,
+          "CreditId": "6a9e1d6a2e6c9a8ac1996845",
+          "Images": []
+        },
+        {
+          "Name": "Brent Kiser",
+          "Order": 19,
+          "Job": "Sound Re-Recording Mixer",
+          "Department": "Sound",
+          "TmdbId": 1995153,
+          "CreditId": "6a9e1d7e36db278d86143fbe",
+          "Images": []
+        },
+        {
+          "Name": "Simon Vaughton",
+          "Order": 20,
+          "Job": "Head of Production",
+          "Department": "Production",
+          "TmdbId": 6461898,
+          "CreditId": "6a9e1e474aafd03126c74aa7",
+          "Images": []
+        },
+        {
+          "Name": "Carolyn Craddock",
+          "Order": 21,
+          "Job": "Co-Executive Producer",
+          "Department": "Production",
+          "TmdbId": 2195933,
+          "CreditId": "6a9e1bfd00c64c87725afe0b",
+          "Images": []
+        },
+        {
+          "Name": "Jed Shiheng Xu",
+          "Order": 22,
+          "Job": "Sound Re-Recording Mixer",
+          "Department": "Sound",
+          "TmdbId": 3447989,
+          "CreditId": "6a9e1d92319336991a99699f",
+          "Images": []
+        },
+        {
+          "Name": "Chris Swanson",
+          "Order": 23,
+          "Job": "Music Supervisor",
+          "Department": "Sound",
+          "TmdbId": 1445606,
+          "CreditId": "6a9e1c74ccd9bb16f80c59ed",
+          "Images": []
+        },
+        {
+          "Name": "Mikey Rossiter",
+          "Order": 24,
+          "Job": "Colorist",
+          "Department": "Editing",
+          "TmdbId": 2384186,
+          "CreditId": "6a9e1de062b01cd93c5afdfb",
+          "Images": []
+        },
+        {
+          "Name": "Adam Karp",
+          "Order": 25,
+          "Job": "Co-Producer",
+          "Department": "Production",
+          "TmdbId": 4614393,
+          "CreditId": "6a9e1c423ac0e856f5f65ff6",
+          "Images": []
+        },
+        {
+          "Name": "Adam Uhl",
+          "Order": 26,
+          "Job": "Cinematography",
+          "Department": "Crew",
+          "TmdbId": 1547768,
+          "CreditId": "6a9e1ca89a73601d6133b00e",
+          "Images": []
+        },
+        {
+          "Name": "Leanne Chan",
+          "Order": 27,
+          "Job": "Graphic Designer",
+          "Department": "Art",
+          "TmdbId": 3624851,
+          "CreditId": "6a9e1e1bf352273b71c74b01",
+          "Images": []
+        },
+        {
+          "Name": "Patrick O'Meara",
+          "Order": 28,
+          "Job": "Accountant",
+          "Department": "Production",
+          "TmdbId": 6461895,
+          "CreditId": "6a9e1d25739d15bd7f4b4a32",
+          "Images": []
+        },
+        {
+          "Name": "Baxter Bailey",
+          "Order": 29,
+          "Job": "Post Producer",
+          "Department": "Production",
+          "TmdbId": 4599400,
+          "CreditId": "6a9e1c35a3becbbfc4c74af7",
+          "Images": []
+        }
+      ]
+    },
+    "Studio": "Stardust Frames",
+    "YoutubeTrailerId": "OCZg5l9BfRg",
+    "Certifications": [
+      {
+        "Country": "AU",
+        "Certification": "MA 15+"
+      },
+      {
+        "Country": "BR",
+        "Certification": "16"
+      },
+      {
+        "Country": "DE",
+        "Certification": "16"
+      },
+      {
+        "Country": "GB",
+        "Certification": "15"
+      },
+      {
+        "Country": "IN",
+        "Certification": "A"
+      },
+      {
+        "Country": "KR",
+        "Certification": "19"
+      },
+      {
+        "Country": "NL",
+        "Certification": "6"
+      },
+      {
+        "Country": "SG",
+        "Certification": "M18"
+      },
+      {
+        "Country": "TR",
+        "Certification": "18+"
+      },
+      {
+        "Country": "US",
+        "Certification": "NR"
+      }
+    ],
+    "Status": null,
+    "Collection": {
+      "TmdbId": 1745820,
+      "Name": "Untold Collection",
+      "Images": null,
+      "Overview": null,
+      "Translations": null,
+      "Parts": null
+    },
+    "Homepage": "https://www.netflix.com/title/82048542"
+  },
+  {
+    "TmdbId": 1399762,
+    "ImdbId": null,
+    "Title": "Breaking in Badly",
+    "Overview": "A detective is called in at the dead of night to investigate a series of seemingly unrelated crimes. Slowly, he begins to realise something far more insidious may be afoot.",
+    "OriginalTitle": "Breaking in Badly",
+    "OriginalLanguage": "en",
+    "TitleSlug": "1399762",
+    "Runtime": 10,
+    "Popularity": 0.4574,
+    "Year": 2024,
+    "Premier": null,
+    "InCinema": null,
+    "PhysicalRelease": null,
+    "DigitalRelease": "2024-10-28T00:00:00Z",
+    "Images": [
+      {
+        "CoverType": "Poster",
+        "Url": "https://image.tmdb.org/t/p/original/AhGKTOt4OGVGEX5vkMwl3QvwVJn.jpg"
+      },
+      {
+        "CoverType": "Fanart",
+        "Url": "https://image.tmdb.org/t/p/original/sOpNLL9gtQINKUHIHhtaZZZs9pV.jpg"
+      }
+    ],
+    "Ratings": [
+      {
+        "Count": 2,
+        "Value": 9.5,
+        "Origin": "Tmdb",
+        "Type": "User"
+      }
+    ],
+    "MovieRatings": {
+      "Tmdb": {
+        "Count": 2,
+        "Value": 9.5,
+        "Type": "User"
+      },
+      "Imdb": null,
+      "Metacritic": null,
+      "RottenTomatoes": null,
+      "Trakt": null
+    },
+    "Genres": [
+      "Comedy",
+      "Thriller",
+      "Drama"
+    ],
+    "Keywords": [
+      "crime",
+      "jack daniels",
+      "john doe",
+      "mac and cheese",
+      "seatbelts",
+      "students"
+    ],
+    "AlternativeTitles": [
+      {
+        "Title": "Break-in-Badly",
+        "Type": "Tmdb",
+        "Language": "en"
+      }
+    ],
+    "Translations": [
+      {
+        "Title": "Breaking in Badly",
+        "Overview": "A detective is called in at the dead of night to investigate a series of seemingly unrelated crimes. Slowly, he begins to realise something far more insidious may be afoot.",
+        "Language": "en-US"
+      }
+    ],
+    "Recommendations": [
+      {
+        "TmdbId": 1161617,
+        "Title": "Code 3"
+      },
+      {
+        "TmdbId": 926008,
+        "Title": "The Beanie Bubble"
+      },
+      {
+        "TmdbId": 848123,
+        "Title": "Black Site"
+      },
+      {
+        "TmdbId": 32049,
+        "Title": "Best of the Best 2"
+      },
+      {
+        "TmdbId": 1128546,
+        "Title": "Barron's Cove"
+      },
+      {
+        "TmdbId": 1319895,
+        "Title": "Hostile Takeover"
+      },
+      {
+        "TmdbId": 1020662,
+        "Title": "Inside Man"
+      },
+      {
+        "TmdbId": 157351,
+        "Title": "The Truth About Emanuel"
+      },
+      {
+        "TmdbId": 893086,
+        "Title": "The Good Neighbor"
+      },
+      {
+        "TmdbId": 27004,
+        "Title": "Ca$h"
+      }
+    ],
+    "Credits": {
+      "Cast": [
+        {
+          "Name": "Musa",
+          "Order": 0,
+          "Character": "Jack Daniels",
+          "TmdbId": 5108886,
+          "CreditId": "6757298c98c33892a2559da6",
+          "Images": []
+        },
+        {
+          "Name": "Matt Royle",
+          "Order": 1,
+          "Character": "Rob",
+          "TmdbId": 5108887,
+          "CreditId": "675729c06f37f6e89adc871c",
+          "Images": []
+        },
+        {
+          "Name": "Rhys Hender",
+          "Order": 2,
+          "Character": "John Doe",
+          "TmdbId": 5108891,
+          "CreditId": "675729e4f31dc8ce88fda163",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/f4kG6rgaGir49nyo1Kn1b9ck29d.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Sami De Jong",
+          "Order": 3,
+          "Character": "Jake",
+          "TmdbId": 5108895,
+          "CreditId": "675729f1f31dc8ce88fda191",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/oJkNzVsvZSDm6TU62KO59lA2apH.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "James Maister",
+          "Order": 4,
+          "Character": "James",
+          "TmdbId": 5108897,
+          "CreditId": "67572a03ce47f209005162e9",
+          "Images": []
+        },
+        {
+          "Name": "Hywel Bimpong",
+          "Order": 5,
+          "Character": "Old Lady / Bodyguard",
+          "TmdbId": 5108902,
+          "CreditId": "67572a1e6f37f6e89adc8742",
+          "Images": []
+        },
+        {
+          "Name": "Teo",
+          "Order": 6,
+          "Character": "Martha",
+          "TmdbId": 5108999,
+          "CreditId": "675730e898c33892a2559ed8",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/5ZuoZwoQzAqCb3JsYzmgQou8kFI.jpg"
+            }
+          ]
+        }
+      ],
+      "Crew": [
+        {
+          "Name": "William Barraclough",
+          "Order": 0,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 5108911,
+          "CreditId": "67572a77997d956422f4674e",
+          "Images": []
+        },
+        {
+          "Name": "Sami De Jong",
+          "Order": 1,
+          "Job": "Director",
+          "Department": "Directing",
+          "TmdbId": 5108895,
+          "CreditId": "67572a42997d956422f46733",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/oJkNzVsvZSDm6TU62KO59lA2apH.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Teo",
+          "Order": 2,
+          "Job": "Writer",
+          "Department": "Writing",
+          "TmdbId": 5108999,
+          "CreditId": "67573172997d956422f4689d",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/5ZuoZwoQzAqCb3JsYzmgQou8kFI.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "James Maister",
+          "Order": 3,
+          "Job": "Writer",
+          "Department": "Writing",
+          "TmdbId": 5108897,
+          "CreditId": "67572a9d9cc0b6fc319a7a61",
+          "Images": []
+        },
+        {
+          "Name": "Rhys Hender",
+          "Order": 4,
+          "Job": "Writer",
+          "Department": "Writing",
+          "TmdbId": 5108891,
+          "CreditId": "67572a8698c33892a2559e2d",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/f4kG6rgaGir49nyo1Kn1b9ck29d.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "James Maister",
+          "Order": 5,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 5108897,
+          "CreditId": "67572aa9cf1801968f02fb21",
+          "Images": []
+        },
+        {
+          "Name": "Hywel Bimpong",
+          "Order": 6,
+          "Job": "Producer",
+          "Department": "Production",
+          "TmdbId": 5108902,
+          "CreditId": "67572ad36f37f6e89adc87db",
+          "Images": []
+        },
+        {
+          "Name": "Teo",
+          "Order": 7,
+          "Job": "Editorial Consultant",
+          "Department": "Editing",
+          "TmdbId": 5108999,
+          "CreditId": "6757313766c89f44182c267e",
+          "Images": [
+            {
+              "CoverType": "Headshot",
+              "Url": "https://image.tmdb.org/t/p/original/5ZuoZwoQzAqCb3JsYzmgQou8kFI.jpg"
+            }
+          ]
+        },
+        {
+          "Name": "Wong Kahho",
+          "Order": 8,
+          "Job": "Editor",
+          "Department": "Editing",
+          "TmdbId": 5108916,
+          "CreditId": "67572af0cf1801968f02fb66",
+          "Images": []
+        },
+        {
+          "Name": "Bilaal khan",
+          "Order": 9,
+          "Job": "Cinematography",
+          "Department": "Crew",
+          "TmdbId": 5108915,
+          "CreditId": "67572ae1f31dc8ce88fda20e",
+          "Images": []
+        }
+      ]
+    },
+    "Studio": "uonfilmmakingsociety",
+    "YoutubeTrailerId": "",
+    "Certifications": [],
+    "Status": null,
+    "Collection": null,
+    "Homepage": ""
+  }
+]

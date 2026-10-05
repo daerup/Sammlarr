@@ -161,6 +161,22 @@ internal sealed class SelfHostedStack
 		return [.. journal["requests"]!.AsArray().Select(entry => JournalEntry.From(entry!))];
 	}
 
+	internal async Task<IReadOnlyList<string>> IndexerSearchesAsync()
+	{
+		using var response = await _wireMock.PostAsJsonAsync("/__admin/requests/find", new { method = "GET", urlPath = "/newznab/api" });
+		response.EnsureSuccessStatusCode();
+		var found = JsonNode.Parse(await response.Content.ReadAsStringAsync())!["requests"]!.AsArray();
+		return [.. found.Select(request => request!["url"]!.GetValue<string>()).Where(url => !url.Contains("t=caps", StringComparison.Ordinal))];
+	}
+
+	internal Task WaitForIndexerSearchAsync(params string[] parts)
+	{
+		return Poll.UntilAsync(
+			async () => (await IndexerSearchesAsync()).Any(url => parts.All(part => url.Contains(part, StringComparison.Ordinal))),
+			() => $"the indexer never saw a search with {string.Join(" and ", parts)}"
+		);
+	}
+
 	internal async Task StopAsync()
 	{
 		_wireMock.Dispose();
