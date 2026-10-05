@@ -474,6 +474,13 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		context.ChangeTracker.Clear();
 	}
 
+	internal async Task SetupUnfinished()
+	{
+		var context = ScopedDbContext;
+		await context.ProviderSettings.ExecuteUpdateAsync(rows => rows.SetProperty(row => row.OnboardingCompletedAt, (DateTimeOffset?)null));
+		context.ChangeTracker.Clear();
+	}
+
 	internal async Task RegistrationClosed()
 	{
 		var context = ScopedDbContext;

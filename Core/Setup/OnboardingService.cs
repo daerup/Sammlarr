@@ -70,13 +70,7 @@ internal sealed class OnboardingService(
 	public async Task CompleteAsync(CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
-		await state.SetCompletedAtAsync(Some.Of(clock.Now), cancellationToken);
-	}
-
-	public async Task ResetAsync(CancellationToken cancellationToken = default)
-	{
-		currentUser.EnsureAdmin();
-		await state.SetCompletedAtAsync(new None(), cancellationToken);
+		await state.SetCompletedAtAsync(clock.Now, cancellationToken);
 	}
 
 	public async Task<bool> NeedsKeyPromptAsync(CancellationToken cancellationToken = default)

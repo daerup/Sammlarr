@@ -12,10 +12,9 @@ internal sealed class SetupStateRepository(IDbContextFactory<SammlarrDbContext> 
 		return Optional.Of(completedAt);
 	}
 
-	public async Task SetCompletedAtAsync(Optional<DateTimeOffset> completedAt, CancellationToken cancellationToken = default)
+	public async Task SetCompletedAtAsync(DateTimeOffset completedAt, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var stamp = completedAt.ToNullable();
-		await ctx.ProviderSettings.ExecuteUpdateAsync(rows => rows.SetProperty(row => row.OnboardingCompletedAt, stamp), cancellationToken);
+		await ctx.ProviderSettings.ExecuteUpdateAsync(rows => rows.SetProperty(row => row.OnboardingCompletedAt, completedAt), cancellationToken);
 	}
 }
