@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "host": {
+      "equalTo": "services.sonarr.tv"
+    },
+    "urlPathPattern": "/v1/update/[^/]+"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"available\":false}"
+  }
+}
