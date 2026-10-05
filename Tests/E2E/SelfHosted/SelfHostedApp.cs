@@ -161,6 +161,7 @@ public static class SelfHostedApp
 						certificates,
 						keyRing,
 						Directory.CreateDirectory(Path.Combine(_sessionDir, $"stack-{index}")).FullName,
+						index,
 						E2EApp.IsLive,
 						RecordCircuitFailure
 					)

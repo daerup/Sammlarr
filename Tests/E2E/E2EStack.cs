@@ -56,7 +56,7 @@ internal sealed class E2EStack
 			["--LaunchSammlarr=false", $"--RadarrSonarr={live.ToString().ToLowerInvariant()}", $"--ArrDataRoot={Path.Combine(seed.WorkDir, "arr")}"],
 			(options, _) => options.DisableDashboard = true
 		);
-		builder.Services.AddLogging(logging => logging.AddProvider(new CircuitFailureSink(CircuitLogCategory, CircuitFailure, index, onCircuitFailure)));
+		builder.Services.AddLogging(logging => logging.AddProvider(new CircuitFailureSink(CircuitLogCategory, CircuitFailure, $"stack-{index}", onCircuitFailure)));
 		builder.WaitThroughBusyDocker();
 		builder.UnpinArrPorts();
 		var wiremock = builder.AddContainer("wiremock", "wiremock/wiremock", "latest").WithHttpEndpoint(targetPort: 8080);
