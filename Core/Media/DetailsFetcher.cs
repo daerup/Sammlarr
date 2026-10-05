@@ -177,7 +177,7 @@ internal sealed class DetailsFetcher(
 		var blocked = EnricherChoice.WorthWaitingFor(missing, leftToAsk, waited, now);
 		blocked.Apply(candidate => waited.Add(candidate.Provider));
 		var freeAt = blocked.Map(candidate => candidate.Load.FreeAt(now));
-		await freeAt.Match(until => clock.WaitUntilAsync(until, cancellationToken), () => Task.CompletedTask);
+		await freeAt.Apply(until => clock.WaitUntilAsync(until, cancellationToken));
 		return freeAt;
 	}
 
