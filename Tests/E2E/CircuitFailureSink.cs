@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace E2E.Tests;
 
-internal sealed class CircuitFailureSink(string category, string marker, int stack, Action<string> capture) : ILoggerProvider
+internal sealed class CircuitFailureSink(string category, string marker, string traceName, Action<string> capture) : ILoggerProvider
 {
 	private const int TrailingLines = 15;
 
@@ -44,7 +44,7 @@ internal sealed class CircuitFailureSink(string category, string marker, int sta
 		Directory.CreateDirectory(TraceDirectory);
 		lock (TraceGate)
 		{
-			File.AppendAllText(Path.Combine(TraceDirectory, $"stack-{stack}.log"), $"{message}{Environment.NewLine}");
+			File.AppendAllText(Path.Combine(TraceDirectory, $"{traceName}.log"), $"{message}{Environment.NewLine}");
 		}
 	}
 

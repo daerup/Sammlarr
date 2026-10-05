@@ -67,6 +67,7 @@ internal sealed partial class SelfHostedStack
 		TestCertificates certificates,
 		string keyRing,
 		string workDir,
+		int index,
 		bool live,
 		Action<string> onCircuitFailure
 	)
@@ -77,7 +78,7 @@ internal sealed partial class SelfHostedStack
 		);
 		var setupCodes = new SetupCodeSink(WebLogCategory);
 		builder.Services.AddLogging(logging =>
-			logging.AddProvider(setupCodes).AddProvider(new CircuitFailureSink(WebLogCategory, CircuitFailure, 0, onCircuitFailure))
+			logging.AddProvider(setupCodes).AddProvider(new CircuitFailureSink(WebLogCategory, CircuitFailure, $"self-hosted-{index}", onCircuitFailure))
 		);
 		builder.WaitThroughBusyDocker();
 

@@ -22,11 +22,11 @@ snapshots need the native runner).
 Rule of thumb: wiring more than one or two `.Mock()`s just to construct the subject means it belongs in `Tests/Integration` as a harness scenario, not a unit
 test.
 
-Current suite: **880** non-E2E tests plus **106** E2E.
+Current suite: **2770** non-E2E tests plus **158** E2E (17 of them on the self-hosted stacks).
 
 | Domain | Shared | Core | API | DB | Architecture | Roslyn | Integration | UI | Web |
 |--------|--------|------|-----|----|--------------|------------|-------------|----|-----|
-| 49     | 153    | 102  | 118 | 21 | 21           | 13         | 314         | 76 | 13  |
+| 245    | 179    | 345  | 279 | 47 | 44           | 98         | 562         | 943 | 28  |
 
 ## Running
 
@@ -38,44 +38,92 @@ dotnet run --project Tests/Core --no-build --treenode-filter "/*/*/FilterEvaluat
 dotnet run --project Tests/Domain --no-build -- --coverage --coverage-output-format cobertura
 ```
 
-The non-E2E tiers run in roughly 20 seconds combined; E2E takes about two minutes because it boots real application stacks. Never use coverlet: it is
-VSTest-only and incompatible with MTP.
+The non-E2E tiers run in roughly 20 seconds combined; E2E takes about seven minutes, because it boots real application stacks and then runs the self-hosted
+batch with its Radarr and Sonarr containers. Never use coverlet: it is VSTest-only and incompatible with MTP.
 
 ## The E2E tier
 
 Each test leases an **isolated stack** for its duration: its own Aspire application, WireMock container and SQLite database. Nothing is shared between
-concurrent tests, so no test class needs
-`[NotInParallel]`, and TUnit's parallel limit is the stack count. Stacks boot once per session and are pooled; a test never runs concurrently with another test
-on the same stack.
+concurrent tests, so no test class needs `[NotInParallel]`, and TUnit's parallel limit is the stack count. Stacks boot once per session and are pooled; a
+test never runs concurrently with another test on the same stack.
 
-How many stacks is `E2EApp.StackCount`. More is not automatically faster: each stack costs an application and a container to boot, and boot dominates a suite
-this size.
+How many stacks the main pool has is `E2EApp.StackCount` (the self-hosted pool's is `SelfHostedApp.StackCount`). More is not automatically faster: each
+stack costs an application and a container to boot, and boot dominates a suite this size.
 
-Provider traffic is served by WireMock from committed fixtures under `Tests/E2E/wiremock`:
-`mappings/<provider>/` holds the request matchers and `responses/<provider>/` the bodies, which are bind-mounted as WireMock's `__files`. Fixtures are committed
-and `*.verified.json` is pinned to LF by `.gitattributes`.
+Provider traffic is served by WireMock from committed fixtures under `Tests/E2E/wiremock`: `mappings/<provider>/` holds the request matchers and
+`responses/<provider>/` the bodies, which are bind-mounted as WireMock's `__files` (the hand-written `arr-stubs` and `newznab` mappings carry their bodies
+inline). Fixtures are committed and `*.verified.json` is pinned to LF by `.gitattributes`.
 
-**Replay** is the default: offline, deterministic, no secrets. **Live** (`E2E_LIVE=true`) proxies the real providers, captures what it sees, and compares
-against what is committed. Each endpoint has a policy in `wiremock/fixture-policy.json`:
+**Replay** is the default: offline, deterministic, no secrets. **Live** (`E2E_LIVE=true`) makes the main pool proxy the real providers, capture what it
+sees, and compare it against what is committed. Each endpoint has a policy in `wiremock/fixture-policy.json`:
 
-- `value` — the live body must match the committed fixture exactly
-- `contract` — only the JSON shape is compared, so values may churn freely
-- `frozen` — never written; these hold redacted placeholders and must stay that way
+- `value`: the live body must match the committed fixture exactly
+- `contract`: only the JSON shape is compared, so values may churn freely
+- `frozen`: never written; these hold redacted placeholders and must stay that way
 
 A drift failure writes a `.received.json` beside the fixture for review. Non-2xx provider responses are never recorded, so a rate-limited live run cannot poison
 the fixture set.
 
 Live runs genuinely mutate: they hit the real accounts. After any live run, scan the fixtures for real tokens and API keys before committing.
 
+### Self-hosted stacks
+
+Tests marked `[SelfHosted]` (`Tests/E2E/SelfHosted`) run on a second pool: two stacks that each run the pinned Radarr and Sonarr images from
+`AppHost/ArrContainers.cs` beside Sammlarr, which starts on an empty database with no users, so each test makes its Sammlarr accounts through setup. They
+cover what needs an empty install or the real apps: the first run, sign-in, search, the wantlist sync, and what Sammlarr shows when an app refuses its key.
+
+```mermaid
+flowchart LR
+  PW["Playwright"] --> WEB["Sammlarr<br/>empty database"]
+  WEB --> RAD["Radarr"] & SON["Sonarr"]
+  WEB -->|"TMDB, MDBList, Wikidata"| WM["WireMock :8080"]
+  WEB -.->|"every Plex URL: /plex-blocked/"| WM
+  RAD & SON -->|"metadata hosts over TLS<br/>(network aliases, test CA)"| WMS["WireMock :443"]
+  RAD & SON -->|"Newznab searches"| WM
+```
+
+- **Interception.** Radarr and Sonarr hard-code their metadata hosts. WireMock answers to every name in `MetadataHosts` as a Docker network alias, on 443
+  with a certificate from a CA made per session (`TestCertificates`). Both apps get that CA through `SSL_CERT_FILE`, which makes it their only trusted root,
+  so a call to any other HTTPS host fails.
+- **What answers.** Recorded metadata in `mappings/{radarr,sonarr}-metadata` (matched by host); in `mappings/arr-stubs`, stubs for the apps' background calls
+  (update check, time, notifications, Sonarr's scene mappings and daily series) and a 404 for every image and scene-numbering request; and a Newznab indexer
+  in `mappings/newznab`. The tests read the indexer's requests from WireMock's journal (`SelfHostedStack.IndexerSearchesAsync`).
+- **Pool.** `SelfHostedApp` boots both stacks on first use and leases one per test. A used stack is reset when it is leased again: Sammlarr stops and its
+  database files are deleted, Sonarr gets its API key back if a test broke it, both apps' command queues settle, both apps lose every title, tag and
+  indexer, the indexer is added again, Sammlarr starts on the fresh database, the queues settle once more, and WireMock's journal is kept for the
+  session-end check and cleared. `[SelfHosted]` gives these tests their own parallel limit of two and a `ParallelGroup`, so they run as a batch after the
+  rest of the suite.
+- **The run fails** on any request WireMock could not answer (a Plex call included) and on a crashed circuit, like the main pool.
+
+**Recording.** With `E2E_LIVE=true` the self-hosted pool still replays, with Sammlarr's providers under a `/<provider>` prefix. At session end
+`MetadataRecorder` fetches every served or unmatched GET to `api.radarr.video`, `skyhook.sonarr.tv` or one of Sammlarr's providers straight from the real
+host (adding the TMDB or MDBList key from user-secrets or the environment itself), writes the mapping and fixture, and compares existing fixtures under the
+policies. A request that had no fixture got a 404 in that run, so its test fails: run again until the replay is green.
+
+**After an image bump.** When a tag in `AppHost/ArrContainers.cs` is raised (by hand for now; Renovate takes over once `release-engineering` adds its regex
+manager), run `Tests/E2E`. A failing self-hosted test, or an unmatched request in the session failure, names what changed: a new metadata call (record it
+with `E2E_LIVE=true` if it goes to `api.radarr.video` or `skyhook.sonarr.tv`, otherwise stub it in `arr-stubs`), a changed API shape (the failing
+assertion), or a new host (add it to `MetadataHosts`, and to `ProviderRecording.ArrMetadata` if its calls should be recorded).
+
+What a breaking bump has looked like so far:
+
+| Change                                           | What the run shows                                                                                                    |
+|--------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| A metadata call with no fixture                  | the app's lookup gets WireMock's 404, the test that needed it fails, and the session failure names the URL (`https://api.radarr.video/v1/movie/687163`) |
+| A new background call                            | nothing fails until the session end, which names it (Sonarr's `services.sonarr.tv/v1/time` and `/v1/notification`)    |
+| An app that cannot reach its mocked hosts at all | its lookups answer 503 and the search never shows a result; the app's own log (`GET /api/v3/log`) names the cause, here Sonarr rejecting the test CA's chain |
+
+A bump that only rebuilds the image (Radarr `6.4.4.10685-ls318` to `-ls319`, tried 2026-10-05) passes the self-hosted tests unchanged.
+
 ## Environment variables
 
 | Variable                 | Effect                                                                         |
 |--------------------------|--------------------------------------------------------------------------------|
-| `E2E_LIVE=true`          | Live record mode against the real providers; needs secrets, forces one stack   |
+| `E2E_LIVE=true`          | Live record mode against the real providers; needs secrets and forces one main-pool stack. The self-hosted pool keeps its two stacks, keeps replaying and records what it can fetch |
 | `E2E_HEADED=true`        | Headed browser with slow motion, for watching a test run                       |
 | `E2E_PRUNE=true`         | Delete fixtures the live run did not capture. Opt-in on purpose: a filtered run only touches some endpoints, so pruning would delete the rest |
-| `E2E_AUDIT=true`         | Dump served and unmatched request URLs to the temp directory                   |
-| `E2E_RESOURCE_LOG=<dir>` | Write each stack's application log to `<dir>/stack-<n>.log`                    |
+| `E2E_AUDIT=true`         | Dump the main pool's served and unmatched request URLs to the temp directory   |
+| `E2E_RESOURCE_LOG=<dir>` | Write each stack's application log to `<dir>/stack-<n>.log` (`self-hosted-<n>.log` for the self-hosted pool) |
 
 Live secrets come from `dotnet user-secrets` on `Tests/E2E`, named from the generated provider enums: `{PROVIDER}_API_KEY` and `{PROVIDER}_TOKEN`, for example
 `TMDB_API_KEY`, `PLEX_TOKEN`.

@@ -193,6 +193,10 @@ dotnet run --project Tests/Domain/Domain.Tests.csproj --no-build -- --coverage -
 ```
 Build first (`dotnet build Sammlarr.slnx`) then `--no-build`. The E2E tier (Playwright, Docker) is opt-in and excluded from the fast loop.
 
+E2E has two pools. Most tests lease a seeded stack through `E2EApp` (`AdminAt`, `StubAsync`). A test that needs the real Radarr and Sonarr, an empty
+install or Sammlarr accounts goes in `Tests/E2E/SelfHosted`, carries `[SelfHosted]` and leases through `SelfHostedApp` (`StackAsync`, `OpenPageAsync`);
+`SelfHostedSetup`, `SelfHostedWantlist` and `ArrApi` hold its steps. `docs/architecture/testing.md` explains the stack, the reset and how to record.
+
 ## After writing a test file
 
 Every file must be **analyzer-clean** (zero Rider warnings, including unused usings). Note the out-of-process analyzer emits false positives it can't see through the TUnit source generators — phantom "Cannot resolve 'Returns'/'Mock'", "cannot convert `Success<T>` to `Result<T>`", and "`using TestInfrastructure;`/`using Harness;` unused" — ignore those; the real `dotnet build` is authoritative.
