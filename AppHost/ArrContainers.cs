@@ -2,21 +2,45 @@ namespace AppHost;
 
 internal static class ArrContainers
 {
-	private const string ApiKey = "0123456789abcdef0123456789abcdef";
+	internal const string ApiKey = "0123456789abcdef0123456789abcdef";
 
-	private static readonly ArrContainer[] Apps =
-	[
-		new("radarr", "lscr.io/linuxserver/radarr", "6.4.4.10685-ls318", 7878, "/movies"),
-		new("sonarr", "lscr.io/linuxserver/sonarr", "4.0.20.3014-ls326", 8989, "/tv"),
-	];
+	internal static readonly ArrContainer Radarr = new("radarr", "Radarr", "lscr.io/linuxserver/radarr", "6.4.4.10685-ls318", 7878, "/movies");
+
+	internal static readonly ArrContainer Sonarr = new("sonarr", "Sonarr", "lscr.io/linuxserver/sonarr", "4.0.20.3014-ls326", 8989, "/tv");
 
 	public static void AddRadarrAndSonarr(this IDistributedApplicationBuilder builder)
 	{
 		var dataRoot = builder.Configuration["ArrDataRoot"] ?? Path.Combine(Path.GetTempPath(), "sammlarr-arr");
-		foreach (var app in Apps)
+		foreach (var app in new[] { Radarr, Sonarr })
 		{
 			builder.AddArr(app, Path.Combine(dataRoot, app.Name));
 		}
+	}
+
+	internal static IResourceBuilder<ContainerResource> AddPersistentArr(
+		this IDistributedApplicationBuilder builder,
+		ArrContainer app,
+		int port,
+		string config,
+		string library,
+		string downloads
+	)
+	{
+		var prefix = app.Name.ToUpperInvariant();
+		return builder
+			.AddContainer(app.Name, app.Image, app.Tag)
+			.WithContainerName($"sammlarr-staging-{app.Name}")
+			.WithLifetime(ContainerLifetime.Persistent)
+			.WithHttpEndpoint(port: port, targetPort: app.Port, name: "http", isProxied: false)
+			.WithBindMount(config, "/config")
+			.WithBindMount(library, app.Library)
+			.WithBindMount(downloads, "/downloads")
+			.WithEnvironment($"{prefix}__AUTH__APIKEY", ApiKey)
+			.WithEnvironment($"{prefix}__AUTH__METHOD", "External")
+			.WithEnvironment($"{prefix}__AUTH__REQUIRED", "DisabledForLocalAddresses")
+			.WithEnvironment($"{prefix}__LOG__ANALYTICSENABLED", "false")
+			.WithEnvironment($"{prefix}__APP__INSTANCENAME", $"{app.DisplayName}-Staging")
+			.WithHttpHealthCheck("/ping");
 	}
 
 	private static void AddArr(this IDistributedApplicationBuilder builder, ArrContainer app, string root)
@@ -53,7 +77,7 @@ internal static class ArrContainers
 		response.EnsureSuccessStatusCode();
 	}
 
-	private sealed record ArrContainer(string Name, string Image, string Tag, int Port, string Library);
+	internal sealed record ArrContainer(string Name, string DisplayName, string Image, string Tag, int Port, string Library);
 
 	private sealed record RootFolder(string Path);
 }
