@@ -51,8 +51,8 @@ How many stacks the main pool has is `E2EApp.StackCount` (the self-hosted pool's
 stack costs an application and a container to boot, and boot dominates a suite this size.
 
 Provider traffic is served by WireMock from committed fixtures under `Tests/E2E/wiremock`: `mappings/<provider>/` holds the request matchers and
-`responses/<provider>/` the bodies, which are bind-mounted as WireMock's `__files` (the hand-written `arr-stubs` and `newznab` mappings carry their bodies
-inline). Fixtures are committed and `*.verified.json` is pinned to LF by `.gitattributes`.
+`responses/<provider>/` the bodies, which are bind-mounted as WireMock's `__files` (the hand-written `arr-stubs`, `newznab` and `plex-stubs` mappings
+carry their bodies inline; `plex-stubs` acknowledges Plex watchlist adds and removals, which a switch back to Plex sends for every title on the stack). Fixtures are committed and `*.verified.json` is pinned to LF by `.gitattributes`.
 
 **Replay** is the default: offline, deterministic, no secrets. **Live** (`E2E_LIVE=true`) makes the main pool proxy the real providers, capture what it
 sees, and compare it against what is committed. Each endpoint has a policy in `wiremock/fixture-policy.json`:

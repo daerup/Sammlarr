@@ -1,0 +1,10 @@
+{
+  "priority": 5,
+  "request": {
+    "method": "ANY",
+    "urlPathPattern": "/actions/(addTo|removeFrom)Watchlist"
+  },
+  "response": {
+    "status": 200
+  }
+}
