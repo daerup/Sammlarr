@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
@@ -9,9 +10,11 @@ using Shared.Options;
 
 namespace E2E.Tests.SelfHosted;
 
-internal sealed class SelfHostedStack
+internal sealed partial class SelfHostedStack
 {
 	private const string Web = "blazor-ui";
+
+	private const string BrokenKey = "fedcba9876543210fedcba9876543210";
 
 	private const string WebLogCategory = "AppHost.Resources.blazor-ui";
 
@@ -38,6 +41,8 @@ internal sealed class SelfHostedStack
 	private readonly HttpClient _wireMock;
 
 	private bool _leased;
+
+	private bool _sonarrRefuses;
 
 	private SelfHostedStack(DistributedApplication app, SetupCodeSink setupCodes, string workDir)
 	{
@@ -177,6 +182,13 @@ internal sealed class SelfHostedStack
 		);
 	}
 
+	internal async Task MakeSonarrRefuseItsKeyAsync()
+	{
+		_sonarrRefuses = true;
+		using var flip = new CancellationTokenSource(ResetTimeout);
+		await SetSonarrKeyAsync(BrokenKey, flip.Token);
+	}
+
 	internal async Task StopAsync()
 	{
 		_wireMock.Dispose();
@@ -187,11 +199,17 @@ internal sealed class SelfHostedStack
 	{
 		using var reset = new CancellationTokenSource(ResetTimeout);
 		_setupCodes.Forget();
-		await CommandAsync(KnownResourceCommands.StopCommand, reset.Token);
+		await CommandAsync(Web, KnownResourceCommands.StopCommand, reset.Token);
 		await _app.ResourceNotifications.WaitForResourceAsync(Web, KnownResourceStates.TerminalStates, reset.Token);
 		foreach (var suffix in new[] { "", "-wal", "-shm" })
 		{
 			File.Delete($"{DatabasePath(_workDir)}{suffix}");
+		}
+
+		if (_sonarrRefuses)
+		{
+			await SetSonarrKeyAsync(StackBoot.ArrApiKey, reset.Token);
+			_sonarrRefuses = false;
 		}
 
 		await Radarr.SettleAsync();
@@ -199,7 +217,7 @@ internal sealed class SelfHostedStack
 		await Radarr.ClearAsync("movie");
 		await Sonarr.ClearAsync("series");
 		await AddIndexersAsync();
-		await CommandAsync(KnownResourceCommands.StartCommand, reset.Token);
+		await CommandAsync(Web, KnownResourceCommands.StartCommand, reset.Token);
 		await _app.ResourceNotifications.WaitForResourceHealthyAsync(Web, reset.Token);
 		return await DrainAsync();
 	}
@@ -253,12 +271,35 @@ internal sealed class SelfHostedStack
 		);
 	}
 
-	private async Task CommandAsync(string command, CancellationToken cancellationToken)
+	private async Task SetSonarrKeyAsync(string key, CancellationToken cancellationToken)
 	{
-		var result = await _app.ResourceCommands.ExecuteCommandAsync(Web, command, cancellationToken);
+		if (_app.ResourceNotifications.TryGetCurrentState("sonarr", out var current) && current.Snapshot.State?.Text == KnownResourceStates.Running)
+		{
+			await CommandAsync("sonarr", KnownResourceCommands.StopCommand, cancellationToken);
+			await _app.ResourceNotifications.WaitForResourceAsync("sonarr", KnownResourceStates.TerminalStates, cancellationToken);
+		}
+
+		var config = Path.Combine(_workDir, "arr", "sonarr", "config", "config.xml");
+		var xml = await File.ReadAllTextAsync(config, cancellationToken);
+		if (!ApiKeyElement().IsMatch(xml))
+		{
+			throw new InvalidOperationException($"{config} has no ApiKey to change");
+		}
+
+		await File.WriteAllTextAsync(config, ApiKeyElement().Replace(xml, $"<ApiKey>{key}</ApiKey>"), cancellationToken);
+		await CommandAsync("sonarr", KnownResourceCommands.StartCommand, cancellationToken);
+		await Sonarr.WaitUntilUpAsync();
+	}
+
+	[GeneratedRegex("<ApiKey>[^<]*</ApiKey>")]
+	private static partial Regex ApiKeyElement();
+
+	private async Task CommandAsync(string resource, string command, CancellationToken cancellationToken)
+	{
+		var result = await _app.ResourceCommands.ExecuteCommandAsync(resource, command, cancellationToken);
 		if (!result.Success)
 		{
-			throw new InvalidOperationException($"{command} {Web}: {result.Message}");
+			throw new InvalidOperationException($"{command} {resource}: {result.Message}");
 		}
 	}
 
