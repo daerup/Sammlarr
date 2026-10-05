@@ -17,7 +17,7 @@ public class MediaMergerProperties
 	[Test]
 	public void FillFrom_WhenFillingGaps_NeverRemovesData()
 	{
-		Gen.Select(Primaries, Others).Sample((primary, other) => !primary.FillFrom(other).Missing.Overlaps(~primary.Missing));
+		Gen.Select(Primaries, Others).Sample((primary, other) => primary.FillFrom(other).Missing.Except(primary.Missing).IsEmpty);
 	}
 
 	[Test]

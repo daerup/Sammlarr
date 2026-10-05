@@ -36,20 +36,6 @@ public static class RatingSources
 {
 	extension(RatingSource source)
 	{
-		public MediaField Field
-		{
-			get
-			{
-				return source switch
-				{
-					RatingSource.Tmdb => MediaField.TmdbRating,
-					RatingSource.Imdb => MediaField.ImdbRating,
-					RatingSource.RottenTomatoesCritics => MediaField.RottenTomatoesCriticsRating,
-					RatingSource.RottenTomatoesAudience => MediaField.RottenTomatoesAudienceRating,
-				};
-			}
-		}
-
 		public bool PublishesVotes
 		{
 			get

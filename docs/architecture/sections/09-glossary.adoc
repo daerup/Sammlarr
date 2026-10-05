@@ -38,8 +38,8 @@ details known about it. It has no `MediaIdentity`, so it cannot be wantlisted or
 `MediaMatchResult`:: The union of `MatchedMedia` and `UnmatchedMedia`: the outcome of identifying a
 title. Search, trending and feed loading answer with it; list building works over it.
 
-Missing:: The details fields with no value (`MediaDetails.Missing`, a `MediaField` set), computed and
-never stored. A title nobody has rated is missing every rating source (`MediaField.Ratings`); a TMDB or IMDb rating
+Missing:: The details fields and rating sources with no value (`MediaDetails.Missing`, a `MediaFields`), computed and
+never stored. A title nobody has rated is missing every rating source (`MediaFields.AllRatings`); a TMDB or IMDb rating
 without votes still counts as missing.
 
 Confirmed gap:: A field still missing after every enricher that could fill it answered

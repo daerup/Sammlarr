@@ -51,8 +51,8 @@ internal sealed class DetailsFetcher(
 	{
 		var now = clock.Now;
 		var asked = new HashSet<MediaProvider> { primary.Reads[0] };
-		var unconfirmed = MediaField.None;
-		while (current.Details.Missing is var missing && missing is not MediaField.None)
+		var unconfirmed = MediaFields.None;
+		while (current.Details.Missing is var missing && !missing.IsEmpty)
 		{
 			var options = Options(current, asked);
 			if (EnricherChoice.Next(missing, options, now) is not Some<EnricherOption>(var next))
@@ -64,7 +64,7 @@ internal sealed class DetailsFetcher(
 			asked.Add(next.Provider);
 			var answer = await enricherIndex[next.Provider].LookUpAsync(next.Id, cancellationToken);
 			answer.ToOptional().When(found => found.Fits(current.Details.Type)).Apply(found => current = Merge(current, found));
-			unconfirmed |= answer.Match(_ => MediaField.None, error => error.CausedBy<ProviderUnavailableException>().Match(next.Fills, MediaField.None));
+			unconfirmed |= answer.Match(_ => MediaFields.None, error => error.CausedBy<ProviderUnavailableException>().Match(next.Fills, MediaFields.None));
 		}
 		buffer.Add(current, new CachedDetails(current.Details, now, current.Details.Missing.Except(unconfirmed)));
 		return current;
@@ -95,7 +95,7 @@ internal sealed class DetailsFetcher(
 	{
 		var fills = enricherIndex[provider].Fills;
 		var load = capacity.Of(provider);
-		var unavoidable = provider == MediaProvider.Tmdb && fills.Overlaps(MediaField.Ratings) && ratings.All.Count == 0;
+		var unavoidable = provider == MediaProvider.Tmdb && fills.Overlaps(MediaFields.AllRatings) && ratings.All.Count == 0;
 		return new EnricherOption(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load);
 	}
 
@@ -103,7 +103,7 @@ internal sealed class DetailsFetcher(
 	{
 		public Optional<IExternalMediaId> IdOf(MediaIdentity identity)
 		{
-			return Reads.Select(provider => identity.Externals.OfProvider(provider)).WhereSome().FirstOrNone(_ => true);
+			return Reads.Select(provider => identity.Externals.OfProvider(provider)).WhereSome().FirstOrNone();
 		}
 	}
 }

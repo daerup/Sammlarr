@@ -35,7 +35,7 @@ internal abstract record MediaDetailsRow : IAuditable
 	[Required]
 	public MediaType MediaType { get; init; }
 
-	public MediaField ConfirmedAbsent { get; set; }
+	public MediaFields ConfirmedAbsent { get; set; }
 
 	public List<MediaRatingRow> Ratings { get; set; } = [];
 }

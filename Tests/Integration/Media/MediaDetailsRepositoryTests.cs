@@ -9,6 +9,9 @@ namespace Integration.Tests.Media;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	private static readonly MediaFields Gaps =
+		MediaField.Tagline | MediaField.Backdrop | MediaFields.Rated([RatingSource.Imdb, RatingSource.RottenTomatoesAudience]);
+
 	private static readonly DateTimeOffset FetchedAt = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
 	private MediaRepository _testee = null!;
@@ -81,21 +84,16 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task UpsertDetailsAsync_ForAPartial_KeepsWhichGapsAreConfirmed()
+	public async Task UpsertDetailsAsync_ForAPartial_KeepsWhichDetailsAndRatingSourcesAreConfirmedAbsent()
 	{
 		var plexId = PlexId.From("plex-812", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
 
-		await _testee.UpsertDetailsAsync(
-			Details(mediaId, new CachedDetails(new MovieDetails { Title = "Solaris" }, FetchedAt, MediaField.Tagline | MediaField.Backdrop))
-		);
+		await _testee.UpsertDetailsAsync(Details(mediaId, new CachedDetails(new MovieDetails { Title = "Solaris" }, FetchedAt, Gaps)));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
-		await Assert
-			.That(stored.Cached)
-			.IsSome()
-			.And.Multiple(async cached => await Assert.That(cached.ConfirmedAbsent).IsEqualTo(MediaField.Tagline | MediaField.Backdrop));
+		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.ConfirmedAbsent).IsEqualTo(Gaps));
 	}
 
 	[Test]

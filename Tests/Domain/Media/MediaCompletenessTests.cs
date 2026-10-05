@@ -25,7 +25,7 @@ public class MediaCompletenessTests
 	{
 		var movie = MediaFakes.CompleteMovieDetails() with { Ratings = MediaRatings.None };
 
-		await Assert.That(movie.Missing).IsEqualTo(MediaField.Ratings);
+		await Assert.That(movie.Missing).IsEqualTo(MediaFields.AllRatings);
 	}
 
 	[Test]
@@ -33,7 +33,7 @@ public class MediaCompletenessTests
 	{
 		var movie = MediaFakes.CompleteMovieDetails() with { Ratings = MediaRatings.From([new TmdbRating(7.4f, Some.Of(900))]) };
 
-		await Assert.That(movie.Missing).IsEqualTo(MediaField.ImdbRating | MediaField.RottenTomatoesCriticsRating | MediaField.RottenTomatoesAudienceRating);
+		await Assert.That(movie.Missing).IsEqualTo(MediaFields.Rated([RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience]));
 	}
 
 	[Test]
@@ -49,7 +49,7 @@ public class MediaCompletenessTests
 			]),
 		};
 
-		await Assert.That(movie.Missing).IsEqualTo(MediaField.TmdbRating);
+		await Assert.That(movie.Missing).IsEqualTo(MediaFields.Rated([RatingSource.Tmdb]));
 	}
 
 	[Test]
@@ -87,7 +87,7 @@ public class MediaCompletenessTests
 		await Assert
 			.That(unknown.Missing)
 			.IsEqualTo(
-				MediaField.Tagline | MediaField.Summary | MediaField.Poster | MediaField.Backdrop | MediaField.ReleaseDate | MediaField.Genres | MediaField.Ratings
+				MediaField.Tagline | MediaField.Summary | MediaField.Poster | MediaField.Backdrop | MediaField.ReleaseDate | MediaField.Genres | MediaFields.AllRatings
 			);
 	}
 }

@@ -92,7 +92,7 @@ library ids.
 
 Details come from the search provider first (Plex), then from the open enricher that fills the
 most missing fields, one at a time, until no open enricher can fill what is still missing. Each rating source counts as one of
-those fields (`MediaField.Ratings`): TMDB fills its own, Plex fills IMDb, Rotten Tomatoes and its copy of TMDB's. Writes are
+those fields (`MediaFields` pairs the detail flags with a set of `RatingSource`): TMDB fills its own, Plex fills IMDb, Rotten Tomatoes and its copy of TMDB's. Writes are
 batched write-behind through the `MediaWriteBuffer` (one identity and one details upsert per run). Two failure behaviours matter: an
 unmatched candidate becomes `UnmatchedMedia` (surfaced, never persisted); and when a provider is down
 or rate-limiting the title shows as "not found" for that run but is not cached unmatched, so the next

@@ -4,7 +4,7 @@ namespace Contracts.Media;
 
 public interface IDetailsEnricher
 {
-	MediaField Fills { get; }
+	MediaFields Fills { get; }
 
 	Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default);
 }

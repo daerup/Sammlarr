@@ -3,11 +3,11 @@ using Domain.Providers;
 
 namespace Core.Media;
 
-internal readonly record struct EnricherOption(MediaProvider Provider, IExternalMediaId Id, MediaField Fills, ProviderLoad Load);
+internal readonly record struct EnricherOption(MediaProvider Provider, IExternalMediaId Id, MediaFields Fills, ProviderLoad Load);
 
 internal static class EnricherChoice
 {
-	internal static Optional<EnricherOption> Next(MediaField needed, IEnumerable<EnricherOption> options, DateTimeOffset now)
+	internal static Optional<EnricherOption> Next(MediaFields needed, IEnumerable<EnricherOption> options, DateTimeOffset now)
 	{
 		return options
 			.OrderByDescending(option => (needed & option.Fills).Count)
@@ -15,6 +15,10 @@ internal static class EnricherChoice
 			.FirstOrNone(option => needed.Overlaps(option.Fills) && option.Load.IsOpen(now));
 	}
 
-	internal static MediaField BlockedFills(MediaField needed, IEnumerable<EnricherOption> options, DateTimeOffset now) =>
-		options.Where(option => needed.Overlaps(option.Fills) && !option.Load.IsOpen(now)).Aggregate(MediaField.None, (fields, option) => fields | option.Fills);
+	internal static MediaFields BlockedFills(MediaFields needed, IEnumerable<EnricherOption> options, DateTimeOffset now)
+	{
+		return options
+			.Where(option => needed.Overlaps(option.Fills) && !option.Load.IsOpen(now))
+			.Aggregate(MediaFields.None, (fields, option) => fields | option.Fills);
+	}
 }

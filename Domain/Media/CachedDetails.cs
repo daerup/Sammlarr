@@ -1,6 +1,6 @@
 namespace Domain.Media;
 
-public sealed record CachedDetails(MediaDetails Details, DateTimeOffset FetchedAt, MediaField ConfirmedAbsent)
+public sealed record CachedDetails(MediaDetails Details, DateTimeOffset FetchedAt, MediaFields ConfirmedAbsent)
 {
 	private static readonly TimeSpan staleAfter = TimeSpan.FromDays(7);
 	private static readonly TimeSpan retryGapsAfter = TimeSpan.FromHours(1);
@@ -8,6 +8,6 @@ public sealed record CachedDetails(MediaDetails Details, DateTimeOffset FetchedA
 	public bool IsFresh(DateTimeOffset now)
 	{
 		var age = now - FetchedAt;
-		return age < staleAfter && (Details.Missing.Except(ConfirmedAbsent) is MediaField.None || age < retryGapsAfter);
+		return age < staleAfter && (Details.Missing.Except(ConfirmedAbsent).IsEmpty || age < retryGapsAfter);
 	}
 }
