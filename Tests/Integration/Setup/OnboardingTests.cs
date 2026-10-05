@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Auth;
 using Contracts.Settings;
 using Contracts.Setup;
@@ -65,15 +66,15 @@ public class OnboardingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task ResetAsync_ThenCompleteAsync_RunsSetupAgainAndEndsIt()
+	public async Task CompleteAsync_ForAnAdminMidSetup_EndsSetupAndStampsWhen()
 	{
-		await Testee.ResetAsync();
-		var reset = await Testee.IsCompleteAsync();
+		await host.SetupUnfinished();
+		var before = await Testee.IsCompleteAsync();
 
 		await Testee.CompleteAsync();
 
-		await Assert.That(reset).IsFalse();
-		await Assert.That(await Testee.IsCompleteAsync()).IsTrue();
+		await Assert.That(before).IsFalse();
+		await Assert.That(await host.Resolve<ISetupStateRepository>().CompletedAtAsync()).IsSome().And.IsEqualTo(host.Resolve<IDateTimeProvider>().Now);
 	}
 
 	[Test]

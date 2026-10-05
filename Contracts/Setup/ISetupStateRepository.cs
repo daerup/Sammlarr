@@ -4,5 +4,5 @@ public interface ISetupStateRepository
 {
 	Task<Optional<DateTimeOffset>> CompletedAtAsync(CancellationToken cancellationToken = default);
 
-	Task SetCompletedAtAsync(Optional<DateTimeOffset> completedAt, CancellationToken cancellationToken = default);
+	Task SetCompletedAtAsync(DateTimeOffset completedAt, CancellationToken cancellationToken = default);
 }

@@ -4,7 +4,6 @@ using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Ratings;
 using Contracts.Settings;
-using Contracts.Setup;
 using Contracts.Wantlist;
 using Domain.Identity;
 using Domain.Providers;
@@ -35,7 +34,6 @@ public class SettingsPageTests : BunitContext
 		Services.AddScoped<ScrollService>();
 		Services.AddSingleton(ISinkSwitch.Mock().Object);
 		Services.AddSingleton(IUserManagementService.Mock().Object);
-		Services.AddSingleton(IOnboardingService.Mock().Object);
 		var arrConfigs = IArrSinkConfigService.Mock();
 		arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
 		Services.AddSingleton(arrConfigs.Object);

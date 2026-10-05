@@ -4,7 +4,6 @@ using Bunit.TestDoubles;
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
-using Contracts.Setup;
 using Contracts.Wantlist;
 using Domain.Auth;
 using Domain.Identity;
@@ -50,7 +49,6 @@ public class ProvidersSectionTests : BunitContext
 		Services.AddSingleton(_switch.Object);
 		Services.AddSingleton<ICurrentUser>(_user);
 		Services.AddSingleton(IUserManagementService.Mock().Object);
-		Services.AddSingleton(IOnboardingService.Mock().Object);
 		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
 		Services.AddSingleton(_arrConfigs.Object);
 		var keys = IApiKeyService.Mock();
@@ -86,6 +84,14 @@ public class ProvidersSectionTests : BunitContext
 
 		await Assert.That(cut.FindComponents<Stub<SammlarrAccountRow>>()).IsEmpty();
 		await Assert.That(cut.FindComponents<Stub<AccountRow>>()).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Section_ForAnAdmin_OffersNoWayToRunSetupAgain()
+	{
+		var cut = RenderSection();
+
+		await Assert.That(cut.Markup).DoesNotContain("Run setup again");
 	}
 
 	[Test]

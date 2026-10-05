@@ -1,7 +1,6 @@
 @using Contracts.Auth
 @using Contracts.Identity
 @using Contracts.Settings
-@using Contracts.Setup
 @using Contracts.Wantlist
 @using Domain.Identity
 @inject IProviderConfigService ProviderConfigService
@@ -13,24 +12,14 @@
 @inject IArrSinkConfigService ArrConfigs
 @inject ISinkSwitch SinkSwitch
 @inject Notifier Notifier
-@inject IOnboardingService Onboarding
 @inject NavigationManager Navigation
 @inject ScrollService ScrollService
 
 <CascadingValue Value="_ringed" Name="@ProviderRows.Ringed">
 <div class="flex max-w-4xl flex-col gap-8">
-    <div class="flex items-start justify-between gap-4">
-        <div>
-            <h2 class="text-lg font-semibold">Providers</h2>
-            <p class="text-sm text-muted-foreground">Which service does what, and the account, keys and connections behind it.</p>
-        </div>
-        @if (IsAdmin)
-        {
-            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="RunSetupAgainAsync">
-                <LucideIcon Name="rotate-ccw" Size="14" Class="mr-2"/>
-                <span>Run setup again</span>
-            </BbButton>
-        }
+    <div>
+        <h2 class="text-lg font-semibold">Providers</h2>
+        <p class="text-sm text-muted-foreground">Which service does what, and the account, keys and connections behind it.</p>
     </div>
 
     <section class="flex flex-col gap-3" aria-label="Accounts and keys">
@@ -244,12 +233,6 @@
             _ringed = null;
             await InvokeAsync(StateHasChanged);
         }
-    }
-
-    private async Task RunSetupAgainAsync()
-    {
-        await Onboarding.ResetAsync();
-        Navigation.NavigateTo("/setup");
     }
 
     private Task SetUpArrAsync()

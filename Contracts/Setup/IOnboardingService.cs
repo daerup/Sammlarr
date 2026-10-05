@@ -14,8 +14,6 @@ public interface IOnboardingService
 
 	Task CompleteAsync(CancellationToken cancellationToken = default);
 
-	Task ResetAsync(CancellationToken cancellationToken = default);
-
 	Task<bool> NeedsKeyPromptAsync(CancellationToken cancellationToken = default);
 
 	Task DismissKeyPromptAsync(CancellationToken cancellationToken = default);

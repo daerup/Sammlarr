@@ -171,13 +171,21 @@ public class SetupWizardTests : BunitContext
 	}
 
 	[Test]
-	public async Task SkipSetup_CompletesSetupFromAnyStep()
+	public async Task Wizard_FromTheWantlistToDone_OffersNoWayToSkipOrRunSetupAgain()
 	{
+		WithTmdbKey();
 		var cut = RenderForAdmin();
+		var steps = new List<string> { cut.Markup };
 
-		await cut.Find(".setup-link").ClickAsync(new());
+		foreach (var _ in Enumerable.Range(0, 3))
+		{
+			await Next(cut).ClickAsync(new());
+			steps.Add(cut.Markup);
+		}
 
-		_onboarding.CompleteAsync(Any()).WasCalled(Times.Once);
+		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("Sammlarr is set up");
+		await Assert.That(steps.Where(markup => markup.Contains("Skip setup", StringComparison.Ordinal))).IsEmpty();
+		await Assert.That(cut.Markup).DoesNotContain("setup again");
 	}
 
 	private IRenderedComponent<SetupWizard> RenderForAdmin()
