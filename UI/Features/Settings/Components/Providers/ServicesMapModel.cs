@@ -28,7 +28,7 @@ internal readonly record struct MapEndpoint(MediaProvider Provider, Optional<Med
 
 	public static MapEndpoint Of(SearchProvider search) => Of(search.Providers());
 
-	private static MapEndpoint Of(IReadOnlyList<MediaProvider> providers) => new(providers[0], providers.Skip(1).FirstOrNone(_ => true));
+	private static MapEndpoint Of(IReadOnlyList<MediaProvider> providers) => new(providers[0], providers.Skip(1).FirstOrNone());
 
 	public override string ToString() => string.Join("+", Providers);
 }

@@ -15,6 +15,17 @@ public static class EnumerableOptionalExtensions
 		return new None();
 	}
 
+	public static Optional<T> FirstOrNone<T>(this IEnumerable<T> source)
+		where T : notnull
+	{
+		foreach (var item in source)
+		{
+			return Some.Of(item);
+		}
+
+		return new None();
+	}
+
 	public static Optional<T> FirstOrNone<T>(this IEnumerable<T> source, Func<T, bool> predicate)
 		where T : notnull
 	{

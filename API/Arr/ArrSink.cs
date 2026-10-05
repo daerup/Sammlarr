@@ -328,7 +328,7 @@ internal sealed class ArrSink(
 	private async Task<Optional<ArrTagUser>> ClaimantAsync(ArrTagScheme scheme, CancellationToken cancellationToken)
 	{
 		var everyone = await users.GetAllAsync(cancellationToken);
-		return everyone.OrderBy(user => user.JoinedAt).FirstOrNone(_ => true).When(_ => scheme.PerUser).Map(Owner);
+		return everyone.OrderBy(user => user.JoinedAt).FirstOrNone().When(_ => scheme.PerUser).Map(Owner);
 	}
 
 	private static Task<Result<SinkSyncOutcome>> Done(SinkSyncOutcome outcome) => Task.FromResult<Result<SinkSyncOutcome>>(Success.Of(outcome));

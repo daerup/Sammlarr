@@ -52,7 +52,7 @@ internal abstract class ArrClient(HttpClient http, ArrApp app)
 	public async Task<Result<Optional<JsonObject>>> LookupAsync(ArrConnection connection, string id, CancellationToken cancellationToken)
 	{
 		var found = await ReadAsync<List<JsonObject>>(connection, HttpMethod.Get, $"{app.Titles}/lookup?term={app.LookupTerm}:{id}", new None(), cancellationToken);
-		return found.Map(titles => titles.FirstOrNone(_ => true));
+		return found.Map(titles => titles.FirstOrNone());
 	}
 
 	public Task<Result<IReadOnlyList<ArrTitle>>> SearchAsync(ArrConnection connection, string term, CancellationToken cancellationToken)
