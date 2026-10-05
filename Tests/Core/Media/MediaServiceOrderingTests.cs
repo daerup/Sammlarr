@@ -1,7 +1,6 @@
 using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media.Search;
 using Contracts.Settings;
 using Core.Media;
 using Domain.Media;
@@ -153,7 +152,6 @@ public class MediaServiceOrderingTests
 
 		var dateTimeProvider = IDateTimeProvider.Mock();
 		dateTimeProvider.Now.Returns(_now);
-		var search = IMediaSearchProvider.Mock();
 		var enricher = IDetailsEnricher.Mock();
 		var configRepository = IProviderConfigService.Mock();
 		configRepository
@@ -169,13 +167,11 @@ public class MediaServiceOrderingTests
 				}
 			);
 
-		var searchIndex = new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>().Register(SearchProvider.Plex, search.Object);
 		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>()
 			.Register(MediaProvider.Plex, enricher.Object)
 			.Register(MediaProvider.Tmdb, enricher.Object);
 
 		var detailsFetcher = new DetailsFetcher(
-			searchIndex,
 			enricherIndex,
 			configRepository.Object,
 			TestCapacity.Open(),

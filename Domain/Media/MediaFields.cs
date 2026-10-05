@@ -14,6 +14,8 @@ public readonly record struct MediaFields(MediaField Details, ValueSet<RatingSou
 
 	public int Count => Details.Count + Ratings.Count;
 
+	public int DetailCount => Details.Count;
+
 	public static MediaFields Rated(IEnumerable<RatingSource> sources) => new(MediaField.None, [.. sources]);
 
 	public bool Overlaps(MediaFields other) => Details.Overlaps(other.Details) || Ratings.Overlaps(other.Ratings);

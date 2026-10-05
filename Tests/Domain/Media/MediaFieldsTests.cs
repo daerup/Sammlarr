@@ -17,6 +17,15 @@ public class MediaFieldsTests
 	}
 
 	[Test]
+	public async Task DetailCount_CountsTheDetailsAndIgnoresTheRatingSources()
+	{
+		var fields = MediaField.Tagline | MediaField.Summary | MediaFields.Rated([RatingSource.Imdb, RatingSource.Tmdb]);
+
+		await Assert.That(fields.DetailCount).IsEqualTo(2);
+		await Assert.That(fields.Count).IsEqualTo(4);
+	}
+
+	[Test]
 	public async Task ToString_NamesTheDetailsThenTheSources()
 	{
 		var fields = MediaField.Tagline | MediaFields.Rated([RatingSource.RottenTomatoesAudience, RatingSource.Imdb]);

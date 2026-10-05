@@ -2,6 +2,7 @@ using System.ComponentModel;
 
 namespace Domain.Providers;
 
+// The members' order breaks ties when EnricherChoice.Next picks which enricher to ask.
 public enum MediaProvider
 {
 	[Description("TMDB")]

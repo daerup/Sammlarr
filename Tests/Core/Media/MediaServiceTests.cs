@@ -3,9 +3,9 @@ using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;
-using Contracts.Media.Search;
 using Contracts.Settings;
 using Core.Media;
+using Domain.Auth;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
@@ -140,7 +140,7 @@ public class MediaServiceTests
 		var thirdId = MediaId.New();
 		var (testee, deps) = CreateTestee();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([StaleCached(firstId), StaleCached(secondId), StaleCached(thirdId)]);
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 
 		await testee.GetDetailsAsync([firstId, secondId, thirdId]).ToListAsync();
 
@@ -172,14 +172,14 @@ public class MediaServiceTests
 	public async Task IdentifyWithDetailsAsync_WhenAProviderFoundTitleCannotBeFetched_YieldsItUnmatched()
 	{
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
 
 		var results = await testee
 			.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([TmdbId.From("404", MediaType.Movie)], new None()) }.ToAsyncEnumerable())
 			.ToListAsync();
 
 		await Assert.That(results.Single()).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -188,7 +188,7 @@ public class MediaServiceTests
 		var id = MediaId.New();
 		var (testee, deps) = CreateTestee();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([StaleCached(id)]);
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Throws(new HttpRequestException("plex is down"));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Throws(new HttpRequestException("plex is down"));
 
 		var results = await testee.GetDetailsAsync([id]).ToListAsync();
 
@@ -206,12 +206,12 @@ public class MediaServiceTests
 		var (testee, deps) = CreateTestee();
 		deps.MediaRepo.GetAsync(Any(), Any())
 			.Returns([new StoredMedia(detail.Identity, Some.Of(new CachedDetails(detail.Details, _now - TimeSpan.FromDays(15), _now - TimeSpan.FromDays(15), [])))]);
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
 
 		var results = await testee.GetDetailsAsync([id]).ToListAsync();
 
 		await Assert.That(results.Single()).IsSuccess().And.Multiple(async media => await Assert.That(media).IsEqualTo(detail));
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -227,7 +227,7 @@ public class MediaServiceTests
 					Some.Of(new CachedDetails(stale.Details with { Title = "Stale" }, _now - TimeSpan.FromDays(15), _now - TimeSpan.FromDays(15), []))
 				),
 			]);
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 
 		var results = await testee.GetDetailsAsync([id]).ToListAsync();
 
@@ -383,7 +383,7 @@ public class MediaServiceTests
 	{
 		var shared = TmdbId.From("shared", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		var requests = await BuildRequests(60).ToListAsync();
 		requests[0] = new IdentifyRequest([shared], new None());
 		requests[55] = new IdentifyRequest([shared], new None());
@@ -400,7 +400,7 @@ public class MediaServiceTests
 		var first = TmdbId.From("bridge-a", MediaType.Movie);
 		var second = ImdbId.From("tt7777777", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		var upserted = RecordUpsertedIdentities(deps);
 
 		var requests = new List<IdentifyRequest> { new([first], new None()), new([second], new None()), new([first, second], new None()) };
@@ -420,7 +420,7 @@ public class MediaServiceTests
 		var first = TmdbId.From("batch-bridge-a", MediaType.Movie);
 		var second = ImdbId.From("tt8888888", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		var upserted = RecordUpsertedIdentities(deps);
 		var requests = await BuildRequests(60).ToListAsync();
 		requests[0] = new IdentifyRequest([first], new None());
@@ -441,7 +441,7 @@ public class MediaServiceTests
 		var known = ImdbId.From("tt6666666", MediaType.Movie);
 		var persisted = new MediaIdentity(MediaId.New(), [known]);
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		deps.MediaRepo.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
 			.Returns((groups, _) => [.. groups.Select(group => Optional.When(group.Contains(known), () => persisted))]);
 		var upserted = RecordUpsertedIdentities(deps);
@@ -472,7 +472,14 @@ public class MediaServiceTests
 		var dateTimeProvider = IDateTimeProvider.Mock();
 		dateTimeProvider.Now.Returns(_now);
 		var mediaRepo = IMediaRepository.Mock();
-		var search = IMediaSearchProvider.Mock();
+		var details = IDetailsEnricher.Mock();
+		details.Fills.Returns(~MediaField.None | MediaFields.AllRatings);
+		details.Accepts.Returns([.. Enum.GetValues<MediaProvider>()]);
+		var idle = IDetailsEnricher.Mock();
+		idle.Fills.Returns(MediaFields.None);
+		idle.Accepts.Returns([]);
+		var credentials = ICredentialService.Mock();
+		credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
 		var unmatchedCache = TestUnmatchedCache.Empty();
 
 		mediaRepo
@@ -482,7 +489,6 @@ public class MediaServiceTests
 		mediaRepo.GetAsync(Any(), Any()).Returns(Array.Empty<StoredMedia>());
 		mediaRepo.GetByExternalsAsync(Any(), Any()).Returns(Array.Empty<StoredMedia>());
 
-		var enricher = IDetailsEnricher.Mock();
 		var configRepo = IProviderConfigService.Mock();
 		configRepo
 			.GetAsync(Any())
@@ -497,12 +503,9 @@ public class MediaServiceTests
 				}
 			);
 
-		var searchIndex = new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>()
-			.Register(SearchProvider.Plex, search.Object)
-			.Register(SearchProvider.Tmdb, search.Object);
 		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>()
-			.Register(MediaProvider.Plex, enricher.Object)
-			.Register(MediaProvider.Tmdb, enricher.Object);
+			.Register(MediaProvider.Plex, details.Object)
+			.Register(MediaProvider.Tmdb, idle.Object);
 
 		var converter = IExternalIdConverter.Mock();
 		converter.Provider.Returns(MediaProvider.Tmdb);
@@ -510,12 +513,11 @@ public class MediaServiceTests
 		converter.LookUpAsync(Any(), Any()).Returns((request, _) => FoundByFind(request));
 
 		var detailsFetcher = new DetailsFetcher(
-			searchIndex,
 			enricherIndex,
 			configRepo.Object,
 			TestCapacity.Open(),
 			IApiKeyService.Mock().Object,
-			ICredentialService.Mock().Object,
+			credentials.Object,
 			dateTimeProvider.Object,
 			NullLogger<DetailsFetcher>.Instance
 		);
@@ -529,10 +531,10 @@ public class MediaServiceTests
 			mediaRepo.Object,
 			NullLogger<MediaService>.Instance
 		);
-		return (testee, new Deps(mediaRepo, search, unmatchedCache));
+		return (testee, new Deps(mediaRepo, details, unmatchedCache));
 	}
 
-	private record Deps(Mock<IMediaRepository> MediaRepo, Mock<IMediaSearchProvider> Search, Mock<ITypedMemoryCache<string, bool>> UnmatchedCache);
+	private record Deps(Mock<IMediaRepository> MediaRepo, Mock<IDetailsEnricher> Details, Mock<ITypedMemoryCache<string, bool>> UnmatchedCache);
 
 	private static Result<IdLookupResult> FoundByFind(IdLookupRequest request)
 	{

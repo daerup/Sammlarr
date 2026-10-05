@@ -1,7 +1,6 @@
 using System.Net;
 using API.Tmdb;
 using Domain.Media;
-using TestInfrastructure;
 using TUnit.Mocks.Http;
 
 namespace API.Tests.TMDB;
@@ -49,31 +48,6 @@ public class TmdbSearchTests
 		_tmdb.OnAnyRequest().Respond(HttpStatusCode.TooManyRequests);
 
 		await Assert.That(async () => await Testee.SearchAsync("project hail", [MediaType.Movie])).Throws<InvalidOperationException>();
-	}
-
-	[Test]
-	public async Task LookUpAsync_ForATvdbId_FindsTheTmdbTitleAndReturnsItsDetailsWithEveryId()
-	{
-		_tmdb
-			.OnRequest(request => request.PathMatches(".*/find/81189\\?external_source=tvdb_id&.*"))
-			.RespondWithJson("""{"movie_results":[],"tv_results":[{"id":1396,"name":"Breaking Bad"}]}""");
-		_tmdb
-			.OnRequest(request => request.PathMatches(".*/tv/1396\\?append_to_response=external_ids&.*"))
-			.RespondWithJson(
-				"""{"id":1396,"name":"Breaking Bad","media_type":"tv","first_air_date":"2008-01-20","number_of_seasons":5,"external_ids":{"imdb_id":"tt0903747","tvdb_id":81189}}"""
-			);
-
-		var found = await Testee.LookUpAsync(TvdbId.From("81189", MediaType.Show));
-
-		await Assert
-			.That(found)
-			.IsSuccess()
-			.And.Multiple(async show =>
-			{
-				await Assert.That(show.Details.Title).IsEqualTo("Breaking Bad");
-				IExternalMediaId[] expected = [TmdbId.From("1396", MediaType.Show), ImdbId.From("tt0903747", MediaType.Show), TvdbId.From("81189", MediaType.Show)];
-				await Assert.That(show.Externals).IsEquivalentTo(expected);
-			});
 	}
 
 	private TmdbSearch Testee => new(TmdbApis.Over(_tmdb), new TmdbArtwork(TmdbApis.Options));

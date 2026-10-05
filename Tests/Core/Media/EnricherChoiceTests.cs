@@ -37,13 +37,14 @@ public class EnricherChoiceTests
 				EnricherChoice
 					.Next(
 						MediaField.Tagline | MediaField.Summary,
-						[Candidate(MediaProvider.Tvdb, MediaField.Tagline), Candidate(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Summary)],
+						[Candidate(MediaProvider.Tmdb, MediaField.Tagline), Candidate(MediaProvider.Tvdb, MediaField.Tagline | MediaField.Summary)],
+						new None(),
 						Now
 					)
 					.Map(candidate => candidate.Provider)
 			)
 			.IsSome()
-			.And.IsEqualTo(MediaProvider.Tmdb);
+			.And.IsEqualTo(MediaProvider.Tvdb);
 
 	[Test]
 	public async Task Next_ForEqualCoverage_PicksTheLessBusyEnricher() =>
@@ -56,6 +57,7 @@ public class EnricherChoiceTests
 							Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { Busy = 0.8 }),
 							Candidate(MediaProvider.Tvdb, MediaField.Tagline, Idle with { Busy = 0.1 }),
 						],
+						new None(),
 						Now
 					)
 					.Map(candidate => candidate.Provider)
@@ -73,6 +75,7 @@ public class EnricherChoiceTests
 						Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
 						Candidate(MediaProvider.Tvdb, MediaField.Poster),
 					],
+					new None(),
 					Now
 				)
 			)
@@ -83,7 +86,12 @@ public class EnricherChoiceTests
 		await Assert
 			.That(
 				EnricherChoice
-					.Next(MediaField.Tagline, [Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(-1)) })], Now)
+					.Next(
+						MediaField.Tagline,
+						[Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(-1)) })],
+						new None(),
+						Now
+					)
 					.Map(candidate => candidate.Provider)
 			)
 			.IsSome()
@@ -207,13 +215,47 @@ public class EnricherChoiceTests
 	}
 
 	[Test]
-	public async Task Next_WhenOnlyRatingsAreMissing_PicksTheEnricherThatRatesWithTheMostSources()
+	public async Task Next_WhenOnlyRatingsAreMissing_CountsNoRatingsAndFallsBackToProviderOrder()
 	{
-		var candidates = new[] { Candidate(MediaProvider.Tmdb, MediaFields.Rated([RatingSource.Tmdb])), Candidate(MediaProvider.Plex, MediaFields.AllRatings) };
+		var candidates = new[] { Candidate(MediaProvider.Plex, MediaFields.AllRatings), Candidate(MediaProvider.Tmdb, MediaFields.Rated([RatingSource.Tmdb])) };
 
-		var next = EnricherChoice.Next(MediaFields.AllRatings, candidates, Now);
+		var next = EnricherChoice.Next(MediaFields.AllRatings, candidates, new None(), Now);
+
+		await Assert.That(next.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
+	}
+
+	[Test]
+	public async Task Next_WhenThePreferredProviderCanHelp_PicksItOverOneThatFillsMore()
+	{
+		var candidates = new[] { Candidate(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Summary), Candidate(MediaProvider.Plex, MediaField.Tagline) };
+
+		var next = EnricherChoice.Next(MediaField.Tagline | MediaField.Summary, candidates, Some.Of(MediaProvider.Plex), Now);
 
 		await Assert.That(next.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Plex);
+	}
+
+	[Test]
+	public async Task Next_WhenThePreferredProviderIsBlocked_FallsThroughToTheOther()
+	{
+		var candidates = new[]
+		{
+			Candidate(MediaProvider.Plex, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
+			Candidate(MediaProvider.Tmdb, MediaField.Tagline),
+		};
+
+		var next = EnricherChoice.Next(MediaField.Tagline, candidates, Some.Of(MediaProvider.Plex), Now);
+
+		await Assert.That(next.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
+	}
+
+	[Test]
+	public async Task Next_ForEqualFieldsAndLoad_PicksTmdbBeforePlex()
+	{
+		var candidates = new[] { Candidate(MediaProvider.Plex, MediaField.Tagline), Candidate(MediaProvider.Tmdb, MediaField.Tagline) };
+
+		var next = EnricherChoice.Next(MediaField.Tagline, candidates, new None(), Now);
+
+		await Assert.That(next.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
 	}
 
 	[Test]
