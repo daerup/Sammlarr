@@ -54,10 +54,10 @@ internal sealed class DetailsFetcher(
 		var unconfirmed = MediaFields.None;
 		while (current.Details.Missing is var missing && !missing.IsEmpty)
 		{
-			var options = Options(current, asked);
-			if (EnricherChoice.Next(missing, options, now) is not Some<EnricherOption>(var next))
+			var leftToAsk = EnrichersLeftToAsk(current, asked);
+			if (EnricherChoice.Next(missing, leftToAsk, now) is not Some<EnricherCandidate>(var next))
 			{
-				unconfirmed |= EnricherChoice.BlockedFills(missing, options, now);
+				unconfirmed |= EnricherChoice.BlockedFills(missing, leftToAsk, now);
 				break;
 			}
 
@@ -79,24 +79,24 @@ internal sealed class DetailsFetcher(
 		};
 	}
 
-	private List<EnricherOption> Options(MatchedMedia current, IReadOnlySet<MediaProvider> asked)
+	private List<EnricherCandidate> EnrichersLeftToAsk(MatchedMedia current, IReadOnlySet<MediaProvider> asked)
 	{
 		return
 		[
 			.. Enum.GetValues<EnricherProvider>()
 				.Select(enricher => enricher.AsMediaProvider())
 				.Where(provider => !asked.Contains(provider))
-				.Select(provider => current.Identity.Externals.OfProvider(provider).Map(id => Option(provider, id, current.Details.Ratings)))
+				.Select(provider => current.Identity.Externals.OfProvider(provider).Map(id => CandidateFor(provider, id, current.Details.Ratings)))
 				.WhereSome(),
 		];
 	}
 
-	private EnricherOption Option(MediaProvider provider, IExternalMediaId id, MediaRatings ratings)
+	private EnricherCandidate CandidateFor(MediaProvider provider, IExternalMediaId id, MediaRatings ratings)
 	{
 		var fills = enricherIndex[provider].Fills;
 		var load = capacity.Of(provider);
 		var unavoidable = provider == MediaProvider.Tmdb && fills.Overlaps(MediaFields.AllRatings) && ratings.All.Count == 0;
-		return new EnricherOption(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load);
+		return new EnricherCandidate(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load);
 	}
 
 	private sealed record DetailsSource(SearchProvider Search, IReadOnlyList<MediaProvider> Reads)

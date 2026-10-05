@@ -17,10 +17,10 @@ public class EnricherChoiceTests
 				EnricherChoice
 					.Next(
 						MediaField.Tagline | MediaField.Summary,
-						[Option(MediaProvider.Tvdb, MediaField.Tagline), Option(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Summary)],
+						[Candidate(MediaProvider.Tvdb, MediaField.Tagline), Candidate(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Summary)],
 						Now
 					)
-					.Map(option => option.Provider)
+					.Map(candidate => candidate.Provider)
 			)
 			.IsSome()
 			.And.IsEqualTo(MediaProvider.Tmdb);
@@ -33,12 +33,12 @@ public class EnricherChoiceTests
 					.Next(
 						MediaField.Tagline,
 						[
-							Option(MediaProvider.Tmdb, MediaField.Tagline, Idle with { Busy = 0.8 }),
-							Option(MediaProvider.Tvdb, MediaField.Tagline, Idle with { Busy = 0.1 }),
+							Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { Busy = 0.8 }),
+							Candidate(MediaProvider.Tvdb, MediaField.Tagline, Idle with { Busy = 0.1 }),
 						],
 						Now
 					)
-					.Map(option => option.Provider)
+					.Map(candidate => candidate.Provider)
 			)
 			.IsSome()
 			.And.IsEqualTo(MediaProvider.Tvdb);
@@ -50,8 +50,8 @@ public class EnricherChoiceTests
 				EnricherChoice.Next(
 					MediaField.Tagline,
 					[
-						Option(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
-						Option(MediaProvider.Tvdb, MediaField.Poster),
+						Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
+						Candidate(MediaProvider.Tvdb, MediaField.Poster),
 					],
 					Now
 				)
@@ -63,8 +63,8 @@ public class EnricherChoiceTests
 		await Assert
 			.That(
 				EnricherChoice
-					.Next(MediaField.Tagline, [Option(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(-1)) })], Now)
-					.Map(option => option.Provider)
+					.Next(MediaField.Tagline, [Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(-1)) })], Now)
+					.Map(candidate => candidate.Provider)
 			)
 			.IsSome()
 			.And.IsEqualTo(MediaProvider.Tmdb);
@@ -76,8 +76,8 @@ public class EnricherChoiceTests
 				EnricherChoice.BlockedFills(
 					MediaField.Tagline,
 					[
-						Option(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Summary, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
-						Option(MediaProvider.Tvdb, MediaField.Tagline),
+						Candidate(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Summary, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
+						Candidate(MediaProvider.Tvdb, MediaField.Tagline),
 					],
 					Now
 				)
@@ -87,13 +87,33 @@ public class EnricherChoiceTests
 	[Test]
 	public async Task Next_WhenOnlyRatingsAreMissing_PicksTheEnricherThatRatesWithTheMostSources()
 	{
-		var options = new[] { Option(MediaProvider.Tmdb, MediaFields.Rated([RatingSource.Tmdb])), Option(MediaProvider.Plex, MediaFields.AllRatings) };
+		var candidates = new[] { Candidate(MediaProvider.Tmdb, MediaFields.Rated([RatingSource.Tmdb])), Candidate(MediaProvider.Plex, MediaFields.AllRatings) };
 
-		var next = EnricherChoice.Next(MediaFields.AllRatings, options, Now);
+		var next = EnricherChoice.Next(MediaFields.AllRatings, candidates, Now);
 
-		await Assert.That(next.Map(option => option.Provider)).IsSome().And.IsEqualTo(MediaProvider.Plex);
+		await Assert.That(next.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Plex);
 	}
 
-	private static EnricherOption Option(MediaProvider provider, MediaFields fills, ProviderLoad? load = null) =>
+	[Test]
+	public async Task CanHelp_WhenItFillsNothingNeeded_IsFalse()
+	{
+		await Assert.That(Candidate(MediaProvider.Tmdb, MediaField.Poster).CanHelp(MediaField.Tagline, Now)).IsFalse();
+	}
+
+	[Test]
+	public async Task CanHelp_WhenItIsBlocked_IsFalse()
+	{
+		var blocked = Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) });
+
+		await Assert.That(blocked.CanHelp(MediaField.Tagline, Now)).IsFalse();
+	}
+
+	[Test]
+	public async Task CanHelp_WhenItIsOpenAndFillsANeededField_IsTrue()
+	{
+		await Assert.That(Candidate(MediaProvider.Plex, MediaFields.AllRatings).CanHelp(MediaFields.Rated([RatingSource.Imdb]), Now)).IsTrue();
+	}
+
+	private static EnricherCandidate Candidate(MediaProvider provider, MediaFields fills, ProviderLoad? load = null) =>
 		new(provider, TmdbId.From("1", MediaType.Movie), fills, load ?? Idle);
 }
