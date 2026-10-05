@@ -10,6 +10,17 @@ public class MediaProviderBrandingService
 
 	private const string RadarrAndSonarr = "color-mix(in oklch, #FFC230, #35C5F4)";
 
+	private static readonly BrandingInfo Sammlarr = new(
+		"Sammlarr accounts",
+		"Sammlarr",
+		"#E3A008",
+		new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"),
+		new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"),
+		new BrandTile(MutedTile, new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"), 70)
+	);
+
+	public BrandingInfo GetBrandingInfo(AuthProvider signIn) => signIn.Provider().Match(GetBrandingInfo, () => Sammlarr);
+
 	public string SinkColor(SinkKind sink)
 	{
 		return sink switch
@@ -23,7 +34,6 @@ public class MediaProviderBrandingService
 		provider switch
 		{
 			MediaProvider.Plex => new(
-				provider,
 				"Plex",
 				"Plex",
 				"#E5A00D",
@@ -32,7 +42,6 @@ public class MediaProviderBrandingService
 				new BrandTile(MutedTile, new BrandArt("plex-square.svg"), 70)
 			),
 			MediaProvider.Tmdb => new(
-				provider,
 				"The Movie Database",
 				"TMDb",
 				"#01B4E4",
@@ -41,7 +50,6 @@ public class MediaProviderBrandingService
 				new BrandTile("#0D253F", new BrandArt("tmdb-logo.svg"), 86)
 			),
 			MediaProvider.Imdb => new(
-				provider,
 				"IMDb",
 				"IMDb",
 				"#F5DE50",
@@ -50,7 +58,6 @@ public class MediaProviderBrandingService
 				new BrandTile(OwnTile, new BrandArt("imdb-tile.svg"), 100)
 			),
 			MediaProvider.RottenTomatoes => new(
-				provider,
 				"Rotten Tomatoes",
 				"Rotten Tomatoes",
 				"#FA320A",
@@ -59,7 +66,6 @@ public class MediaProviderBrandingService
 				new BrandTile(MutedTile, new BrandArt("rottentomatoes-square.svg"), 70)
 			),
 			MediaProvider.Tvdb => new(
-				provider,
 				"The TVDB",
 				"TVDB",
 				"#23A962",
@@ -68,7 +74,6 @@ public class MediaProviderBrandingService
 				new BrandTile($"color-mix(in oklab, #23A962 16%, {MutedTile})", new BrandArt("tvdb-tile-light.svg", "tvdb-tile-dark.svg"), 82)
 			),
 			MediaProvider.Mdblist => new(
-				provider,
 				"Movie Database List",
 				"MDBList",
 				"#4284CA",
@@ -77,7 +82,6 @@ public class MediaProviderBrandingService
 				new BrandTile(OwnTile, new BrandArt("mdblist-square.svg"), 100)
 			),
 			MediaProvider.Radarr => new(
-				provider,
 				"Radarr",
 				"Radarr",
 				"#FFC230",
@@ -86,22 +90,12 @@ public class MediaProviderBrandingService
 				new BrandTile(MutedTile, new BrandArt("radarr-square-light.svg", "radarr-square-dark.svg"), 70)
 			),
 			MediaProvider.Sonarr => new(
-				provider,
 				"Sonarr",
 				"Sonarr",
 				"#35C5F4",
 				new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"),
 				new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"),
 				new BrandTile(MutedTile, new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"), 70)
-			),
-			MediaProvider.Local => new(
-				provider,
-				"Sammlarr accounts",
-				"Sammlarr",
-				"#E3A008",
-				new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"),
-				new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"),
-				new BrandTile(MutedTile, new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"), 70)
 			),
 		};
 }

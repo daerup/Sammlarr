@@ -74,7 +74,6 @@ public class ProvidersSectionTests : BunitContext
 		var cut = RenderSection();
 
 		await Assert.That(cut.FindComponents<Stub<SammlarrAccountRow>>()).Count().IsEqualTo(1);
-		await Assert.That(Map(cut).Get(map => map.Ready)).Contains(MediaProvider.Local);
 	}
 
 	[Test]
@@ -249,13 +248,27 @@ public class ProvidersSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task ServiceOpened_ForLocalAccountsAsAnAdmin_GoesToTheUsers()
+	public async Task AccountsOpened_AsAnAdmin_GoesToTheUsers()
 	{
 		var cut = RenderSection();
 
-		await cut.InvokeAsync(() => Map(cut).Get(map => map.ServiceOpened).InvokeAsync(MediaProvider.Local));
+		await cut.InvokeAsync(() => Map(cut).Get(map => map.AccountsOpened).InvokeAsync());
 
 		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/settings?section=users");
+	}
+
+	[Test]
+	public async Task AccountsOpened_AsAMember_OpensAndRingsTheSammlarrAccountRow()
+	{
+		_user.Role = UserRole.Member;
+		_config.GetAsync(Any()).Returns(OnPlex with { AuthProvider = AuthProvider.Local });
+		var cut = RenderSection();
+
+		await cut.InvokeAsync(() => Map(cut).Get(map => map.AccountsOpened).InvokeAsync());
+
+		await Assert.That(cut.FindComponent<CascadingValue<ProviderRowKey?>>().Instance.Value).IsEqualTo(new SammlarrAccounts());
+		await Assert.That(cut.FindComponent<Stub<SammlarrAccountRow>>().Instance.Parameters.Get(row => row.Open)).IsTrue();
+		await Assert.That(ScrolledTo(cut)).IsEqualTo("provider-row-sammlarr");
 	}
 
 	[Test]

@@ -11,7 +11,35 @@ internal enum TileEdge
 
 internal sealed record MapPoint(double X, double Y);
 
-internal readonly record struct MapEndpoint(MediaProvider Provider, Optional<MediaProvider> Partner)
+internal union MapEndpoint(ServiceEndpoint, SammlarrAccounts)
+{
+	public static implicit operator MapEndpoint(MediaProvider provider) => new ServiceEndpoint(provider, new None());
+
+	public static MapEndpoint Of(AuthProvider signIn) => signIn.Provider().Map(provider => (MapEndpoint)provider).GetValueOr(new SammlarrAccounts());
+
+	public static MapEndpoint Of(SinkKind sink) => ServiceEndpoint.Of(sink.Providers());
+
+	public static MapEndpoint Of(SearchProvider search) => ServiceEndpoint.Of(search.Providers());
+
+	public static bool operator ==(MapEndpoint left, MapEndpoint right) => Equals(left.Value, right.Value);
+
+	public static bool operator !=(MapEndpoint left, MapEndpoint right) => !Equals(left.Value, right.Value);
+
+	public override bool Equals(object? obj) => obj is MapEndpoint other && this == other;
+
+	public override int GetHashCode() => Value?.GetHashCode() ?? 0;
+
+	public override string ToString()
+	{
+		return this switch
+		{
+			ServiceEndpoint service => service.ToString(),
+			SammlarrAccounts => "Sammlarr",
+		};
+	}
+}
+
+internal readonly record struct ServiceEndpoint(MediaProvider Provider, Optional<MediaProvider> Partner)
 {
 	public IReadOnlyList<MediaProvider> Providers
 	{
@@ -22,13 +50,7 @@ internal readonly record struct MapEndpoint(MediaProvider Provider, Optional<Med
 		}
 	}
 
-	public static implicit operator MapEndpoint(MediaProvider provider) => new(provider, new None());
-
-	public static MapEndpoint Of(SinkKind sink) => Of(sink.Providers());
-
-	public static MapEndpoint Of(SearchProvider search) => Of(search.Providers());
-
-	private static MapEndpoint Of(IReadOnlyList<MediaProvider> providers) => new(providers[0], providers.Skip(1).FirstOrNone());
+	public static ServiceEndpoint Of(IReadOnlyList<MediaProvider> providers) => new(providers[0], providers.Skip(1).FirstOrNone());
 
 	public override string ToString() => string.Join("+", Providers);
 }
@@ -183,7 +205,7 @@ internal sealed record ServicesMapModel(
 	{
 		(ServiceRole Role, MapEndpoint? Provider, MapPicker? Picker)[] rows =
 		[
-			(ServiceRoles.SignIn, config.AuthProvider.AsMediaProvider(), null),
+			(ServiceRoles.SignIn, MapEndpoint.Of(config.AuthProvider), null),
 			(
 				ServiceRoles.Wantlist,
 				MapEndpoint.Of(config.Sink),

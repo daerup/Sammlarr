@@ -1,9 +1,7 @@
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
 
-<span class="provider-tile" style="--tile-size: @(Size)px; background: @Tile.Background">
-    <ProviderLogo Provider="Provider" Form="ProviderLogoForm.Tile" Size="@ArtSize" Decorative="Decorative"/>
-</span>
+<BrandedTile Brand="Branding.GetBrandingInfo(Provider)" Size="Size" Decorative="Decorative"/>
 
 @code {
     [Parameter] [EditorRequired] public required MediaProvider Provider { get; set; }
@@ -11,8 +9,4 @@
     [Parameter] public int Size { get; set; } = 28;
 
     [Parameter] public bool Decorative { get; set; }
-
-    private BrandTile Tile => Branding.GetBrandingInfo(Provider).Tile;
-
-    private int ArtSize => (int)Math.Round(Size * Tile.ArtPercent / 100d);
 }

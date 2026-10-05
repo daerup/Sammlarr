@@ -4,7 +4,7 @@
 @inject IApiKeyFactory ApiKeyFactory
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
-<ProviderRow Provider="@Provider.AsMediaProvider()" Open="Open" OpenChanged="OpenChanged">
+<ProviderRow Key="@Provider.AsMediaProvider()" Brand="Branding" Open="Open" OpenChanged="OpenChanged">
     <Status>
         @if (_loaded)
         {

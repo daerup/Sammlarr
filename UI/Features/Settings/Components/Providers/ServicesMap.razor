@@ -43,9 +43,9 @@
             @foreach (var service in _model.Services)
             {
                 var style = $"left: {Px(ServicesMapModel.ServiceX)}px; top: {Px(service.Y - ServicesMapModel.ServiceHeight / 2)}px; --brand: {Color(service.Provider)}";
-                @if (Opens(service.Provider) is { } opens)
+                @if (Opener(service.Provider) is { } open)
                 {
-                    <button type="button" class="map-service is-openable" style="@style" @onclick="() => ServiceOpened.InvokeAsync(opens)">
+                    <button type="button" class="map-service is-openable" style="@style" @onclick="open">
                         <span class="sr-only">Open </span>
                         @ServiceBody(service.Provider)
                         <span class="map-service-glyph"><LucideIcon Name="settings-2" Size="14"/></span>
@@ -101,7 +101,7 @@
                                     {
                                         var unavailable = Unavailable(picker, option);
                                         <BbDropdownMenuItem Class="gap-2.5" Disabled="@(unavailable.Length > 0)" OnClick="() => PickAsync(picker, option)">
-                                            @foreach (var provider in option.Providers)
+                                            @foreach (var provider in Providers(option))
                                             {
                                                 <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
                                             }
@@ -150,8 +150,16 @@
 
     [Parameter] public EventCallback<MediaProvider> ServiceOpened { get; set; }
 
+    [Parameter] public EventCallback AccountsOpened { get; set; }
+
+    private BrandingInfo Accounts => Branding.GetBrandingInfo(AuthProvider.Local);
+
     private RenderFragment ServiceBody(MapEndpoint endpoint) => @<text>
-        @foreach (var provider in endpoint.Providers)
+        @if (endpoint is SammlarrAccounts)
+        {
+            <BrandedLogo Brand="Accounts" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
+        }
+        @foreach (var provider in Providers(endpoint))
         {
             <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
         }
@@ -164,9 +172,27 @@
         </span>
     </text>;
 
-    private MediaProvider? Opens(MapEndpoint endpoint)
+    private Func<Task>? Opener(MapEndpoint endpoint)
     {
-        return endpoint.Partner.Match(_ => CanPick && Config.Sink == SinkKind.Arr ? (MediaProvider?)endpoint.Provider : null, () => endpoint.Provider);
+        return endpoint switch
+        {
+            ServiceEndpoint service => Opens(service) is { } provider ? () => ServiceOpened.InvokeAsync(provider) : null,
+            SammlarrAccounts => () => AccountsOpened.InvokeAsync(),
+        };
+    }
+
+    private MediaProvider? Opens(ServiceEndpoint service)
+    {
+        return service.Partner.Match(_ => CanPick && Config.Sink == SinkKind.Arr ? (MediaProvider?)service.Provider : null, () => service.Provider);
+    }
+
+    private static IReadOnlyList<MediaProvider> Providers(MapEndpoint endpoint)
+    {
+        return endpoint switch
+        {
+            ServiceEndpoint service => service.Providers,
+            SammlarrAccounts => [],
+        };
     }
 
     private ServicesMapModel _model = null!;
@@ -195,31 +221,48 @@
         return picker.Choice switch
         {
             MapChoice.Wantlist => string.Empty,
-            MapChoice.Search when IsReady(option) || option.Provider == MediaProvider.Plex => string.Empty,
-            MapChoice.Search when option.Provider == MediaProvider.Tmdb => $"Add your {Name(option)} key first",
+            MapChoice.Search when IsReady(option) || option == MapEndpoint.Of(SearchProvider.Plex) => string.Empty,
+            MapChoice.Search when option == MapEndpoint.Of(SearchProvider.Tmdb) => $"Add your {Name(option)} key first",
             MapChoice.Search => $"Connect {Name(option)} first",
         };
     }
 
     private BrandingInfo Brand(MediaProvider provider) => Branding.GetBrandingInfo(provider);
 
-    private string Color(MapEndpoint endpoint) => endpoint.Partner.Match(_ => Branding.SinkColor(SinkKind.Arr), () => Brand(endpoint.Provider).BrandColor);
+    private string Color(MapEndpoint endpoint)
+    {
+        return endpoint switch
+        {
+            ServiceEndpoint service => service.Partner.Match(_ => Branding.SinkColor(SinkKind.Arr), () => Brand(service.Provider).BrandColor),
+            SammlarrAccounts => Accounts.BrandColor,
+        };
+    }
 
-    private string Name(MapEndpoint endpoint) => string.Join(" + ", endpoint.Providers.Select(provider => Branding.GetBrandingInfo(provider).NickName));
+    private string Name(MapEndpoint endpoint)
+    {
+        return endpoint switch
+        {
+            ServiceEndpoint service => string.Join(" + ", service.Providers.Select(provider => Brand(provider).NickName)),
+            SammlarrAccounts => Accounts.NickName,
+        };
+    }
 
-    private bool IsReady(MapEndpoint endpoint) => endpoint.Providers.All(Ready.Contains);
+    private bool IsReady(MapEndpoint endpoint) => Providers(endpoint).All(Ready.Contains);
 
     private string? Dash(MapEndpoint endpoint) => IsReady(endpoint) ? null : "4 3";
 
     private string DotClass(MapEndpoint endpoint) => IsReady(endpoint) ? "bg-success" : "bg-destructive";
 
-    private string Status(MapEndpoint endpoint) => endpoint.Partner.Match(_ => PairStatus(endpoint), () => Status(endpoint.Provider));
-
-    private string Accounts => People == 1 ? "Local accounts · 1 person" : $"Local accounts · {People} people";
+    private string Status(MapEndpoint endpoint)
+    {
+        return endpoint switch
+        {
+            ServiceEndpoint service => service.Partner.Match(_ => PairStatus(endpoint), () => Readiness(service.Provider)),
+            SammlarrAccounts => People == 1 ? "Local accounts · 1 person" : $"Local accounts · {People} people",
+        };
+    }
 
     private string PairStatus(MapEndpoint endpoint) => IsReady(endpoint) ? "Connected" : "Not set up";
-
-    private string Status(MediaProvider provider) => provider == MediaProvider.Local ? Accounts : Readiness(provider);
 
     private string Readiness(MediaProvider provider)
     {
@@ -232,7 +275,7 @@
         };
     }
 
-    private string TileLabel(MapTile tile) => $"{Brand(tile.Provider).NickName}: {Status(tile.Provider)}";
+    private string TileLabel(MapTile tile) => $"{Brand(tile.Provider).NickName}: {Readiness(tile.Provider)}";
 
     private static string EdgeClass(MapTile tile) =>
         tile.Entry switch

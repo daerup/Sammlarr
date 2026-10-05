@@ -20,7 +20,7 @@
             <div class="signin" style="--brand: @Branding.BrandColor">
                 <BbButton Variant="ButtonVariant.Outline" Class="signin-button w-full gap-2 font-medium" OnClick="SignInWithPlex">
                     <span>Sign in with</span>
-                    <ProviderLogo Provider="@Branding.Provider" Form="ProviderLogoForm.Logo" Size="16"/>
+                    <BrandedLogo Brand="Branding" Form="ProviderLogoForm.Logo" Size="16"/>
                 </BbButton>
             </div>
             break;
@@ -53,7 +53,7 @@
 
     [Parameter] public string? Error { get; set; }
 
-    private BrandingInfo Branding => BrandingService.GetBrandingInfo(Provider.AsMediaProvider());
+    private BrandingInfo Branding => BrandingService.GetBrandingInfo(Provider);
 
     private string Target => string.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl;
 

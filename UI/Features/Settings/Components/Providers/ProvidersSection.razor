@@ -43,7 +43,7 @@
     {
         <section class="flex flex-col gap-3" aria-label="Services">
             <h3 class="text-sm font-semibold">Services</h3>
-            <ServicesMap Config="MapConfig(config)" Ready="MapReady(config)" CanPick="IsAdmin" People="_people" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync" ServiceOpened="OpenService"/>
+            <ServicesMap Config="MapConfig(config)" Ready="MapReady(config)" CanPick="IsAdmin" People="_people" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync" ServiceOpened="OpenService" AccountsOpened="OpenAccounts"/>
         </section>
 
         @if (IsAdmin && (config.Sink == SinkKind.Arr || _settingUp))
@@ -82,11 +82,11 @@
 
     [Parameter] public SearchProvider? SearchAfterSignIn { get; set; }
 
-    private MediaProvider? _ringed;
+    private ProviderRowKey? _ringed;
 
     private int _rings;
 
-    private MediaProvider? _scrollTo;
+    private ProviderRowKey? _scrollTo;
 
     private bool _plexForSearch;
 
@@ -100,7 +100,7 @@
 
     private bool _arrConnected;
 
-    private MediaProvider? _open;
+    private ProviderRowKey? _open;
 
     private static readonly TimeSpan RevealDelay = TimeSpan.FromMilliseconds(250);
 
@@ -155,7 +155,7 @@
         RatingContext.Refresh();
         _ready =
         [
-            .. (await Credentials.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
+            .. (await Credentials.GetReadyAsync()).Select(signIn => signIn.Provider()).WhereSome(),
             .. (await ApiKeys.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
         ];
         var arr = await ArrConfigs.GetAsync();
@@ -173,8 +173,7 @@
     private IReadOnlySet<MediaProvider> MapReady(ProviderConfig config)
     {
         var sink = (config.Sink == SinkKind.Arr && !_settingUp) || _arrConnected ? SinkKind.Arr.Providers() : [];
-        var signIn = config.AuthProvider == AuthProvider.Local ? [MediaProvider.Local] : Array.Empty<MediaProvider>();
-        return _ready.Concat(sink).Concat(signIn).ToHashSet();
+        return _ready.Concat(sink).ToHashSet();
     }
 
     private Task SinkPickedAsync(SinkKind sink)
@@ -211,17 +210,24 @@
         Notifier.Success($"Search now uses {search.GetDescription()}.");
     }
 
-    private void OpenService(MediaProvider provider)
+    private void OpenService(MediaProvider provider) => OpenRow(provider);
+
+    private void OpenAccounts()
     {
-        if (provider == MediaProvider.Local && IsAdmin)
+        if (IsAdmin)
         {
             Navigation.NavigateTo(SettingsLinks.Users);
             return;
         }
 
-        _open = provider;
-        _ringed = provider;
-        _scrollTo = provider;
+        OpenRow(new SammlarrAccounts());
+    }
+
+    private void OpenRow(ProviderRowKey key)
+    {
+        _open = key;
+        _ringed = key;
+        _scrollTo = key;
         _ = UnringAsync(++_rings);
     }
 
@@ -292,5 +298,5 @@
 
     private bool IsOpen(MediaProvider provider) => _open == provider;
 
-    private void Toggle(MediaProvider provider, bool open) => _open = open ? provider : null;
+    private void Toggle(MediaProvider provider, bool open) => _open = open ? provider : (ProviderRowKey?)null;
 }

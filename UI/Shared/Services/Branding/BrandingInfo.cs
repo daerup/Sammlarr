@@ -1,8 +1,6 @@
-using Domain.Providers;
-
 namespace UI.Shared.Services.Branding;
 
-public sealed record BrandingInfo(MediaProvider Provider, string DisplayName, string NickName, string BrandColor, BrandArt Mark, BrandArt Logo, BrandTile Tile);
+public sealed record BrandingInfo(string DisplayName, string NickName, string BrandColor, BrandArt Mark, BrandArt Logo, BrandTile Tile);
 
 public sealed record BrandArt(string Light, string Dark)
 {

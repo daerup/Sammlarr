@@ -15,6 +15,17 @@ namespace UI.Tests.Layout;
 
 public class ProfileCardTests : BunitContext
 {
+	private static readonly ProviderConfig OnArr = new()
+	{
+		Sink = SinkKind.Arr,
+		TrendingProvider = TrendingProvider.Tmdb,
+		SearchProvider = SearchProvider.Plex,
+		AuthProvider = AuthProvider.Plex,
+		RegistrationMode = RegistrationMode.Open,
+	};
+
+	private static readonly MediaProviderBrandingService Brands = new();
+
 	private readonly ProfileDropdownService _dropdown = new();
 
 	[Before(Test)]
@@ -30,27 +41,30 @@ public class ProfileCardTests : BunitContext
 	[Test]
 	public async Task Card_WhenTheWantlistSyncsToRadarrAndSonarr_WearsTheSignInProvidersBrand()
 	{
-		var config = IProviderConfigService.Mock();
-		config
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Arr,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
-		Services.AddSingleton(config.Object);
-		var plex = new MediaProviderBrandingService().GetBrandingInfo(MediaProvider.Plex).BrandColor;
-
-		var cut = Render<Harness>();
-		await cut.InvokeAsync(_dropdown.RequestOpenAsync);
+		var cut = await RenderOpenCardAsync(OnArr);
 
 		await Assert.That(cut.WaitForElement("[aria-label='Open Plex account in new tab']")).IsNotNull();
-		await Assert.That(cut.Find("[style*='linear-gradient']").GetAttribute("style")).Contains($"{plex}1F");
+		await Assert.That(cut.Find("[style*='linear-gradient']").GetAttribute("style")).Contains($"{Brands.GetBrandingInfo(MediaProvider.Plex).BrandColor}1F");
+	}
+
+	[Test]
+	public async Task Card_OnASammlarrAccountsInstall_WearsSammlarrsBrand()
+	{
+		var cut = await RenderOpenCardAsync(OnArr with { Sink = SinkKind.Plex, AuthProvider = AuthProvider.Local });
+
+		await Assert
+			.That(cut.WaitForElement("[style*='linear-gradient']").GetAttribute("style"))
+			.Contains($"{Brands.GetBrandingInfo(AuthProvider.Local).BrandColor}1F");
+	}
+
+	private async Task<IRenderedComponent<Harness>> RenderOpenCardAsync(ProviderConfig providers)
+	{
+		var config = IProviderConfigService.Mock();
+		config.GetAsync(Any()).Returns(providers);
+		Services.AddSingleton(config.Object);
+		var cut = Render<Harness>();
+		await cut.InvokeAsync(_dropdown.RequestOpenAsync);
+		return cut;
 	}
 
 	private sealed class Harness : ComponentBase

@@ -1,13 +1,15 @@
 @using Domain.Identity
 @using Contracts.Identity
+@using UI.Shared.Services.Branding
 @inject ILocalAccountService Accounts
+@inject MediaProviderBrandingService Branding
 @inject ICurrentUser CurrentUser
 @inject NavigationManager NavigationManager
 
-<ProviderRow Provider="MediaProvider.Local" Open="Open" OpenChanged="OpenChanged">
+<ProviderRow Key="new SammlarrAccounts()" Brand="Brand" Open="Open" OpenChanged="OpenChanged">
     <Title>
         <span class="flex items-center gap-2 text-sm font-semibold">
-            <ProviderLogo Provider="MediaProvider.Local" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+            <BrandedLogo Brand="Brand" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
             Sammlarr
         </span>
     </Title>
@@ -63,6 +65,8 @@
     [Parameter] public bool Open { get; set; }
 
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    private BrandingInfo Brand => Branding.GetBrandingInfo(AuthProvider.Local);
 
     private string _current = string.Empty;
 

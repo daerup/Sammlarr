@@ -184,7 +184,7 @@ public class ServicesMapTests : BunitContext
 		var cut = Render<ServicesMap>(parameters =>
 			parameters
 				.Add(map => map.Config, Config with { AuthProvider = AuthProvider.Local })
-				.Add(map => map.Ready, new HashSet<MediaProvider> { MediaProvider.Local })
+				.Add(map => map.Ready, new HashSet<MediaProvider>())
 				.Add(map => map.People, 3)
 		);
 
@@ -210,6 +210,27 @@ public class ServicesMapTests : BunitContext
 		await cut.Find("button.map-tile").ClickAsync();
 
 		await Assert.That(opened).IsEquivalentTo([MediaProvider.Tmdb, MediaProvider.Mdblist], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task SammlarrAccounts_WhenClicked_AsksToOpenTheAccountsOverASolidTrace()
+	{
+		List<MediaProvider> opened = [];
+		var accounts = 0;
+		var cut = Render<ServicesMap>(parameters =>
+			parameters
+				.Add(map => map.Config, Config with { AuthProvider = AuthProvider.Local })
+				.Add(map => map.Ready, new HashSet<MediaProvider>())
+				.Add(map => map.People, 3)
+				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<MediaProvider>(this, opened.Add))
+				.Add(map => map.AccountsOpened, EventCallback.Factory.Create(this, () => accounts++))
+		);
+
+		await Service(cut, "Sammlarr").ClickAsync();
+
+		await Assert.That(accounts).IsEqualTo(1);
+		await Assert.That(opened).IsEmpty();
+		await Assert.That(cut.FindAll(".map-traces path")[0].HasAttribute("stroke-dasharray")).IsFalse();
 	}
 
 	[Test]

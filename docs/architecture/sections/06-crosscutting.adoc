@@ -178,10 +178,12 @@ Members say what they do; the type already says what to:
 
 Providers are declared, not hand-wired. Each `MediaProvider` value carries a `[Capabilities]`
 attribute; Roslyn source generators emit the provider-subset enums (`FeedProvider`,
-`AuthProvider`, …) and their conversions from that matrix, plus the options-record
+`ApiKeyProvider`, …) and their conversions from that matrix, plus the options-record
 registration. Each `RatingSource` member carries `[SuppliedBy]`, `[OwnedBy]` and `[Votes]`, from which generators emit
-`SuppliedBy()`, `Owner()`, `PublishesVotes()` and the reverse maps. `SinkKind` is hand-written, because a sink can span providers (Radarr +
-Sonarr). Adding a provider is a folder, an enum value and a module (recipe in
+`SuppliedBy()`, `Owner()`, `PublishesVotes()` and the reverse maps. `SinkKind` and `SearchProvider` are hand-written, because they
+can span providers (Radarr + Sonarr), and so is `AuthProvider`, because a sign-in is not a provider: Sammlarr accounts
+know no media, so `AuthProvider.Local` has no `MediaProvider` (`AuthProvider.Provider()` answers `None`), and the UI
+draws a sign-in with its own brand (`GetBrandingInfo(AuthProvider)`). Adding a provider is a folder, an enum value and a module (recipe in
 <<section-building-block-view>>).
 
 === HTTP resilience
@@ -282,7 +284,7 @@ NOTE: Data-protection keys are persisted to a filesystem key ring under a stable
 
 === Authentication and per-user isolation
 
-An install signs in one way, set in `ProviderConfig.AuthProvider`: with Plex
+An install signs in one way, set in `ProviderConfig.AuthProvider` (a hand-written enum, not a `MediaProvider`): with Plex
 (<<section-runtime-view>>), or with Sammlarr accounts, a username and a password hashed by ASP.NET
 Core's `PasswordHasher` and posted as a form to `/auth/local` (a Blazor circuit cannot set a cookie).
 Password sign-ins are rate-limited per address, checked one at a time per account, and five wrong

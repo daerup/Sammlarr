@@ -4,7 +4,7 @@
 <div class="rounded-lg border bg-card overflow-hidden">
     @if (Config.AuthProvider == AuthProvider.Local)
     {
-        <SammlarrAccountRow Open="Open == MediaProvider.Local" OpenChanged="open => ToggleAsync(MediaProvider.Local, open)"/>
+        <SammlarrAccountRow Open="Open is SammlarrAccounts" OpenChanged="open => ToggleAsync(new SammlarrAccounts(), open)"/>
     }
     @if (UsesPlex)
     {
@@ -60,9 +60,9 @@
 
     [Parameter] [EditorRequired] public required ProviderConfig Config { get; set; }
 
-    [Parameter] public MediaProvider? Open { get; set; }
+    [Parameter] public ProviderRowKey? Open { get; set; }
 
-    [Parameter] public EventCallback<MediaProvider?> OpenChanged { get; set; }
+    [Parameter] public EventCallback<ProviderRowKey?> OpenChanged { get; set; }
 
     [Parameter] public EventCallback Changed { get; set; }
 
@@ -72,8 +72,8 @@
 
     private bool UsesPlex => ShowPlex || Config.AuthProvider == AuthProvider.Plex || Config.Sink == SinkKind.Plex || Config.SearchProvider == SearchProvider.Plex;
 
-    private Task ToggleAsync(MediaProvider provider, bool open)
+    private Task ToggleAsync(ProviderRowKey key, bool open)
     {
-        return OpenChanged.InvokeAsync(open ? provider : null);
+        return OpenChanged.InvokeAsync(open ? key : null);
     }
 }

@@ -1,0 +1,37 @@
+@using UI.Shared.Services.Branding
+
+@if (Art.IsThemed)
+{
+    <img class="provider-logo is-light" src="@Source(Art.Light)" alt="@Alt" width="@Width" height="@Size" style="@HeightStyle"/>
+    <img class="provider-logo is-dark" src="@Source(Art.Dark)" alt="@Alt" width="@Width" height="@Size" style="@HeightStyle"/>
+}
+else
+{
+    <img class="provider-logo" src="@Source(Art.Light)" alt="@Alt" width="@Width" height="@Size" style="@HeightStyle"/>
+}
+
+@code {
+    [Parameter] [EditorRequired] public required BrandingInfo Brand { get; set; }
+
+    [Parameter] public ProviderLogoForm Form { get; set; }
+
+    [Parameter] public int Size { get; set; } = 16;
+
+    [Parameter] public bool Decorative { get; set; }
+
+    private BrandArt Art =>
+        Form switch
+        {
+            ProviderLogoForm.Mark => Brand.Mark,
+            ProviderLogoForm.Logo => Brand.Logo,
+            ProviderLogoForm.Tile => Brand.Tile.Art,
+        };
+
+    private string Alt => Decorative ? string.Empty : Brand.DisplayName;
+
+    private int? Width => Form is ProviderLogoForm.Logo ? null : Size;
+
+    private string? HeightStyle => Form is ProviderLogoForm.Logo ? FormattableString.Invariant($"height: {Size * Art.Scale}px") : null;
+
+    private string Source(string file) => Assets[$"_content/UI/providers/{file}"];
+}

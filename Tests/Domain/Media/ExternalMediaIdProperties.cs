@@ -59,6 +59,5 @@ public class ExternalMediaIdProperties
 			MediaProvider.Mdblist => MdblistId.From(value, type),
 			MediaProvider.Radarr => RadarrId.From(value, type),
 			MediaProvider.Sonarr => SonarrId.From(value, type),
-			MediaProvider.Local => LocalId.From(value, type),
 		};
 }

@@ -33,6 +33,15 @@ public class SammlarrAccountRowTests : BunitContext
 	}
 
 	[Test]
+	public async Task Row_WearsSammlarrsOwnMarkAndColour()
+	{
+		var cut = Render<SammlarrAccountRow>();
+
+		await Assert.That(cut.Find(".provider-row img.provider-logo").GetAttribute("src")).Contains("sammlarr-square-light.svg");
+		await Assert.That(cut.Find(".provider-row").GetAttribute("style")).Contains("#E3A008");
+	}
+
+	[Test]
 	public async Task ChangePassword_UntilTheNewPasswordIsConfirmed_StaysDisabled()
 	{
 		var cut = Render<SammlarrAccountRow>(parameters => parameters.Add(row => row.Open, true));

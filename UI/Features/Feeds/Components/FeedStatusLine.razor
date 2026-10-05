@@ -29,7 +29,7 @@
                     <span class="next-rail" style="background: @Brand(next.Feed).BrandColor"></span>
                     <span class="next-body">
                         <span class="next-head">
-                            <ProviderTile Provider="@Brand(next.Feed).Provider" Size="16" Decorative="true"/>
+                            <ProviderTile Provider="@next.Feed.Provider.AsMediaProvider()" Size="16" Decorative="true"/>
                             <AppLink Href="@($"/feeds/edit/{UrlGuid.Encode(next.Feed.Id.Value)}")" Title="Open feed settings" Class="min-w-0">
                                 <span class="next-name">@next.Feed.Name</span>
                             </AppLink>

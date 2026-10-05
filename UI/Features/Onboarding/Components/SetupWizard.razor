@@ -158,7 +158,7 @@
     private bool _skipped;
     private bool _arrOpen = true;
     private bool _plexOpen = true;
-    private MediaProvider? _keyOpen = MediaProvider.Tmdb;
+    private ProviderRowKey? _keyOpen = MediaProvider.Tmdb;
     private IReadOnlyList<SummaryRow> _summary = [];
 
     [Parameter] public bool NeedsAdmin { get; set; }
@@ -232,7 +232,7 @@
         _config = await ProviderConfigService.GetAsync();
         _ready =
         [
-            .. (await Credentials.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
+            .. (await Credentials.GetReadyAsync()).Select(signIn => signIn.Provider()).WhereSome(),
             .. (await ApiKeys.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
         ];
     }
