@@ -1,7 +1,9 @@
 using BlazorBlueprint.Components;
 using Bunit;
+using Contracts.Media;
 using Contracts.Ratings;
 using Domain.Media;
+using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Media.Ratings;
 using UI.Shared.Services;
@@ -34,7 +36,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 
 	private readonly Mock<IRatingService> _ratings = IRatingService.Mock();
 
-	private readonly Mock<IRottenTomatoesPages> _pages = IRottenTomatoesPages.Mock();
+	private readonly Mock<IMediaService> _media = IMediaService.Mock();
 
 	[Before(Test)]
 	public void Setup()
@@ -43,8 +45,8 @@ public class SammlarrRatingBadgeTests : BunitContext
 		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddSingleton(_ratings.Object);
 		Services.AddScoped<RatingContext>();
-		Services.AddSingleton(_pages.Object);
-		_pages.FindPathAsync(Any<MediaId>(), Any()).Returns(new None());
+		Services.AddSingleton(_media.Object);
+		_media.FindIdAsync(Any<MediaId>(), Any<MediaProvider>(), Any()).Returns(new None());
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		_ratings.GetDefaultAsync(Any()).Returns(new RatingStrategy(new OrderedRating([RatingSource.Imdb])));
 		_ratings.GetAvailableAsync(Any()).Returns(Everything);
@@ -144,19 +146,32 @@ public class SammlarrRatingBadgeTests : BunitContext
 	}
 
 	[Test]
-	public async Task Breakdown_WhenWikidataKnowsTheTitlesPage_LinksRottenTomatoesThere()
+	public async Task Breakdown_WhenTheTitlesRottenTomatoesIdIsFound_LinksRottenTomatoesThere()
 	{
-		_pages.FindPathAsync(Any<MediaId>(), Any()).Returns(Some.Of("tv/last_seen"));
+		_media
+			.FindIdAsync(Any<MediaId>(), MediaProvider.RottenTomatoes, Any())
+			.Returns(Some.Of<IExternalMediaId>(RottenTomatoesId.From("tv/last_seen", MediaType.Show)));
 
 		var cut = RenderBreakdown(LastSeen, new RatingStrategy(AveragedRating.Everything));
 
 		await Assert
 			.That(cut.FindAll(".rating-row-link").Select(link => link.GetAttribute("href") ?? string.Empty))
 			.Contains("https://www.rottentomatoes.com/tv/last_seen");
-		_pages.FindPathAsync(Any<MediaId>(), Any()).WasCalled(Times.Once);
+		_media.FindIdAsync(Any<MediaId>(), MediaProvider.RottenTomatoes, Any()).WasCalled(Times.Once);
 	}
 
-	private IRenderedComponent<SammlarrRatingBreakdown> RenderBreakdown(MediaRatings ratings, RatingStrategy strategy)
+	[Test]
+	public async Task Breakdown_WhenTheTitleAlreadyHasARottenTomatoesId_LinksThereWithoutAsking()
+	{
+		var cut = RenderBreakdown(LastSeen, new RatingStrategy(AveragedRating.Everything), RottenTomatoesId.From("tv/last_seen", MediaType.Show));
+
+		await Assert
+			.That(cut.FindAll(".rating-row-link").Select(link => link.GetAttribute("href") ?? string.Empty))
+			.Contains("https://www.rottentomatoes.com/tv/last_seen");
+		_media.FindIdAsync(Any<MediaId>(), Any<MediaProvider>(), Any()).WasCalled(Times.Never);
+	}
+
+	private IRenderedComponent<SammlarrRatingBreakdown> RenderBreakdown(MediaRatings ratings, RatingStrategy strategy, params IExternalMediaId[] known)
 	{
 		return Render<SammlarrRatingBreakdown>(parameters =>
 			parameters
@@ -165,7 +180,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 				.Add(breakdown => breakdown.Available, Everything)
 				.Add(breakdown => breakdown.Where, "your default")
 				.Add(breakdown => breakdown.Title, "Last Seen")
-				.Add(breakdown => breakdown.Ids, [TmdbId.From("1396", MediaType.Show), ImdbId.From("tt0903747", MediaType.Show)])
+				.Add(breakdown => breakdown.Ids, [TmdbId.From("1396", MediaType.Show), ImdbId.From("tt0903747", MediaType.Show), .. known])
 				.Add(breakdown => breakdown.Media, Some.Of(MediaId.New()))
 		);
 	}

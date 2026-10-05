@@ -146,6 +146,16 @@ public class IdLookupPlannerTests
 	}
 
 	[Test]
+	public async Task Derive_ForALookupThatGivesNoHints_OffersNoHintsHop()
+	{
+		IdLookup imdbToRottenTomatoes = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.RottenTomatoes], Cost: 1, GivesHints: false);
+
+		var hops = IdLookupPlanner.Derive([Converter(MediaProvider.RottenTomatoes, [imdbToRottenTomatoes])]);
+
+		await Assert.That(hops.Select(Describe)).IsEquivalentTo(["find(Imdb)>RottenTomatoes"]);
+	}
+
+	[Test]
 	public async Task Plan_NeverTakesMoreThanThreeHops()
 	{
 		var plan = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Tvdb }, false, MediaProvider.Plex, Hops, Open, Now);

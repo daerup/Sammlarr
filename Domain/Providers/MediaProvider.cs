@@ -13,6 +13,9 @@ public enum MediaProvider
 	[Description("IMDb")]
 	Imdb,
 
+	[Description("Rotten Tomatoes")]
+	RottenTomatoes,
+
 	[Description("TVDB")]
 	[Capabilities<ProviderCapability>(ProviderCapability.Artwork)]
 	Tvdb,

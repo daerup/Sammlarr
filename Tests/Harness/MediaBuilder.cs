@@ -14,6 +14,7 @@ internal readonly record struct ProviderId(MediaProvider Provider, string Value)
 			MediaProvider.Tmdb => TmdbId.From(Value, type),
 			MediaProvider.Plex => PlexId.From(Value, type),
 			MediaProvider.Imdb => ImdbId.From(Value, type),
+			MediaProvider.RottenTomatoes => RottenTomatoesId.From(Value, type),
 			MediaProvider.Tvdb => TvdbId.From(Value, type),
 			MediaProvider.Mdblist => MdblistId.From(Value, type),
 			MediaProvider.Radarr => RadarrId.From(Value, type),

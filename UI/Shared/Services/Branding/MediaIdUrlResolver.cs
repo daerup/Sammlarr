@@ -15,6 +15,7 @@ public static class ExternalMediaIdUrlResolver
 				MediaType.Unknown => $"https://www.themoviedb.org/person/{id.Value}",
 			},
 			MediaProvider.Imdb => $"https://www.imdb.com/title/{id.Value}",
+			MediaProvider.RottenTomatoes => $"https://www.rottentomatoes.com/{id.Value}",
 			MediaProvider.Tvdb => id.Type switch
 			{
 				MediaType.Movie => $"https://thetvdb.com/dereferrer/movie/{id.Value}",

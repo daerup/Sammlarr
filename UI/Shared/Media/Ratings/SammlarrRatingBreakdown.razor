@@ -1,7 +1,7 @@
-@using Contracts.Ratings
+@using Contracts.Media
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
-@inject IRottenTomatoesPages RottenTomatoesPages
+@inject IMediaService MediaService
 
 <div class="rating-breakdown @(_model.Ranked ? "ranked" : null)">
     <div class="rating-breakdown-band popover-band">
@@ -48,7 +48,7 @@
     </div>
     @foreach (var row in _model.Rows)
     {
-        var url = row.Rating.Map(_ => RatingTexts.Link(row.Source, Ids, Title, _rottenTomatoesPath)).ToNullable();
+        var url = row.Rating.Map(_ => RatingTexts.Link(row.Source, Ids, Title, _rottenTomatoes.Map(id => id.Value))).ToNullable();
         <div class="rating-row @(row.State is RatingRowState.Counts ? "counts" : "dim") @(url is null ? null : "is-link")" style="--brand: @Brand(row.Source)">
             @if (_model.Ranked)
             {
@@ -97,11 +97,9 @@
 </div>
 
 @code {
-    private const string RottenTomatoesRed = "#FA320A";
-
     private RatingBreakdown _model = null!;
 
-    private Optional<string> _rottenTomatoesPath = new None();
+    private Optional<IExternalMediaId> _rottenTomatoes = new None();
 
     private bool _askedRottenTomatoes;
 
@@ -127,8 +125,18 @@
         if (!_askedRottenTomatoes && _model.Rows.Any(RatesOnRottenTomatoes))
         {
             _askedRottenTomatoes = true;
-            _rottenTomatoesPath = await Media.Match(id => RottenTomatoesPages.FindPathAsync(id), () => Task.FromResult<Optional<string>>(new None()));
+            _rottenTomatoes = await RottenTomatoesIdAsync();
         }
+    }
+
+    private Task<Optional<IExternalMediaId>> RottenTomatoesIdAsync()
+    {
+        return Ids
+            .OfProvider(MediaProvider.RottenTomatoes)
+            .Match(
+                known => Task.FromResult<Optional<IExternalMediaId>>(Some.Of(known)),
+                () => Media.Match(id => MediaService.FindIdAsync(id, MediaProvider.RottenTomatoes), () => Task.FromResult<Optional<IExternalMediaId>>(new None()))
+            );
     }
 
     private static bool RatesOnRottenTomatoes(RatingRow row)
@@ -177,7 +185,7 @@
         {
             RatingSource.Tmdb => Branding.GetBrandingInfo(MediaProvider.Tmdb).BrandColor,
             RatingSource.Imdb => Branding.GetBrandingInfo(MediaProvider.Imdb).BrandColor,
-            RatingSource.RottenTomatoesCritics or RatingSource.RottenTomatoesAudience => RottenTomatoesRed,
+            RatingSource.RottenTomatoesCritics or RatingSource.RottenTomatoesAudience => Branding.GetBrandingInfo(MediaProvider.RottenTomatoes).BrandColor,
         };
     }
 }

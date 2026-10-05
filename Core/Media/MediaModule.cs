@@ -1,6 +1,5 @@
 using Contracts.Media;
 using Contracts.Media.Search;
-using Contracts.Ratings;
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Tracing;
 using Shared.DI;
@@ -18,6 +17,5 @@ internal class MediaModule : IServiceModule
 		services.AddScoped<MediaWriteBufferFactory>();
 		services.AddTracedScoped<IMediaService, MediaService>();
 		services.AddTracedScoped<IMediaSearchService, MediaSearchService>();
-		services.AddTracedScoped<IRottenTomatoesPages, RottenTomatoesPages>();
 	}
 }

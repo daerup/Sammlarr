@@ -1,5 +1,5 @@
-using System.Net;
 using System.Text.Json;
+using API.Http;
 using API.Tmdb.Types;
 using Contracts.Auth;
 using Domain.Auth;
@@ -40,7 +40,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning("TMDB search returned {StatusCode} for {Query}", (int)response.StatusCode, query);
-			return Unanswered(response.StatusCode, $"TMDB search returned {(int)response.StatusCode}.");
+			return response.StatusCode.Unanswered(MediaProvider.Tmdb, $"TMDB search returned {(int)response.StatusCode}.");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<TmdbTypes.Trending.Root>(stream, cancellationToken: cancellationToken);
@@ -62,7 +62,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 				(int)response.StatusCode,
 				id.Value
 			);
-			return Unanswered(response.StatusCode, $"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
+			return response.StatusCode.Unanswered(MediaProvider.Tmdb, $"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var reason = $"TMDB has no details for {id.Value}";
@@ -77,11 +77,6 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 			_ => null,
 		};
 
-	private static Error Unanswered(HttpStatusCode status, string reason) =>
-		IsTransient(status) ? Error.From(new ProviderUnavailableException(MediaProvider.Tmdb)) : Error.From(reason);
-
-	private static bool IsTransient(HttpStatusCode status) => status is HttpStatusCode.TooManyRequests or HttpStatusCode.RequestTimeout || (int)status >= 500;
-
 	private async Task<Result<TmdbTypes.FindItem>> FetchFindAsync(IExternalMediaId id, IApiKey apiKey, CancellationToken cancellationToken)
 	{
 		if (FindSource(id) is not { } source)
@@ -93,7 +88,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning("TMDB find returned {StatusCode} for {ExternalId}", (int)response.StatusCode, id.Value);
-			return Unanswered(response.StatusCode, $"TMDB find returned {(int)response.StatusCode} for {id.Value}");
+			return response.StatusCode.Unanswered(MediaProvider.Tmdb, $"TMDB find returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Find>(stream);

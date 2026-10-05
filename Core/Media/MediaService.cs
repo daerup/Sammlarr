@@ -39,7 +39,7 @@ internal sealed class MediaService(
 		await using var buffer = bufferFactory.Create();
 		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
 		var sink = await activeSink.ResolveAsync(cancellationToken);
-		var handoffs = await IdentifyBatchAsync(materialized, sink, building, buffer, cancellationToken);
+		var handoffs = await IdentifyBatchAsync(materialized, sink.AddressedBy, building, buffer, cancellationToken);
 		foreach (var (_, handoff) in materialized.Zip(handoffs))
 		{
 			yield return ToIdentityResult(handoff);
@@ -151,7 +151,7 @@ internal sealed class MediaService(
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
-		var handoffs = await IdentifyBatchAsync(batch, sink, building, buffer, cancellationToken);
+		var handoffs = await IdentifyBatchAsync(batch, sink.AddressedBy, building, buffer, cancellationToken);
 		var pipeline = batch
 			.Zip(handoffs)
 			.SelectAwait(pair => LoadRequestDetailsAsync(pair.First, pair.Second, connected, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
@@ -191,29 +191,53 @@ internal sealed class MediaService(
 
 	public async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
 	{
-		return await SinkIdsAsync([.. ids], await activeSink.ResolveAsync(cancellationToken), cancellationToken);
+		var sink = await activeSink.ResolveAsync(cancellationToken);
+		return await IdsAsync([.. ids], sink.AddressedBy, cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<MediaId>> EnsureSinkIdsAsync(IEnumerable<MediaId> ids, SinkKind sink, CancellationToken cancellationToken = default)
 	{
-		var target = activeSink.Of(sink);
 		var wanted = ids.Distinct().ToList();
-		var known = await SinkIdsAsync(wanted, target, cancellationToken);
+		var found = await EnsureIdsAsync(wanted, activeSink.Of(sink).AddressedBy, cancellationToken);
+		return [.. wanted.Where(id => !found.ContainsKey(id))];
+	}
+
+	public async Task<Optional<IExternalMediaId>> FindIdAsync(MediaId id, MediaProvider provider, CancellationToken cancellationToken = default)
+	{
+		try
+		{
+			var found = await EnsureIdsAsync([id], _ => Some.Of(provider), cancellationToken);
+			return found.GetValueOrNone(id);
+		}
+		catch (MediaIdentityConflictException conflict)
+		{
+			logger.LogWarning(conflict, "The {Provider} id found for {MediaId} already belongs to another title", provider, id);
+			return new None();
+		}
+	}
+
+	private async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> EnsureIdsAsync(
+		IReadOnlyList<MediaId> wanted,
+		Func<MediaType, Optional<MediaProvider>> addressedBy,
+		CancellationToken cancellationToken
+	)
+	{
+		var known = await IdsAsync(wanted, addressedBy, cancellationToken);
 		var missing = wanted.Where(id => !known.ContainsKey(id)).ToList();
 		if (missing.Count == 0)
 		{
-			return [];
+			return known;
 		}
 
 		var stored = await mediaRepository.GetAsync(missing, cancellationToken);
 		IReadOnlyList<IdentifyRequest> requests = [.. stored.Select(media => new IdentifyRequest([.. media.Identity.Externals], HintsOf(media)))];
 		await using (var buffer = bufferFactory.Create())
 		{
-			await IdentifyBatchAsync(requests, target, [], buffer, cancellationToken);
+			await IdentifyBatchAsync(requests, addressedBy, [], buffer, cancellationToken);
 		}
 
-		var found = await SinkIdsAsync(missing, target, cancellationToken);
-		return [.. missing.Where(id => !found.ContainsKey(id))];
+		var found = await IdsAsync(missing, addressedBy, cancellationToken);
+		return known.Concat(found).ToDictionary();
 	}
 
 	private static Optional<IdentifyHints> HintsOf(StoredMedia media)
@@ -234,19 +258,19 @@ internal sealed class MediaService(
 		);
 	}
 
-	private async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> SinkIdsAsync(
+	private async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> IdsAsync(
 		IReadOnlyList<MediaId> wanted,
-		IMediaSink sink,
+		Func<MediaType, Optional<MediaProvider>> addressedBy,
 		CancellationToken cancellationToken
 	)
 	{
-		var sources = Enum.GetValues<MediaType>().Select(sink.AddressedBy).WhereSome().ToHashSet();
+		var sources = Enum.GetValues<MediaType>().Select(addressedBy).WhereSome().ToHashSet();
 		var found = new Dictionary<MediaId, IExternalMediaId>();
 		foreach (var source in sources)
 		{
 			foreach (var (id, external) in await mediaRepository.GetExternalsAsync(wanted, source, cancellationToken))
 			{
-				sink.AddressedBy(external.Type).When(expected => expected == source).Apply(_ => found[id] = external);
+				addressedBy(external.Type).When(expected => expected == source).Apply(_ => found[id] = external);
 			}
 		}
 		return found;
@@ -254,7 +278,7 @@ internal sealed class MediaService(
 
 	private async Task<IReadOnlyList<Result<IdentifyHandoff>>> IdentifyBatchAsync(
 		IReadOnlyList<IdentifyRequest> requests,
-		IMediaSink sink,
+		Func<MediaType, Optional<MediaProvider>> addressedBy,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
@@ -263,23 +287,23 @@ internal sealed class MediaService(
 		var allCandidates = requests.SelectMany(r => r.Candidates).Distinct().ToList();
 		var stored = await LoadByExternalsAsync(allCandidates, cancellationToken);
 		var preliminary = await requests
-			.SelectAwait(req => IdentifyOneAsync(req, sink, stored, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
+			.SelectAwait(req => IdentifyOneAsync(req, addressedBy, stored, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
 			.ToListAsync(cancellationToken);
 		return await coordinator.CoordinateHandoffsAsync(preliminary, building, buffer, cancellationToken);
 	}
 
 	private async ValueTask<Result<IdentifyHandoff>> IdentifyOneAsync(
 		IdentifyRequest request,
-		IMediaSink sink,
+		Func<MediaType, Optional<MediaProvider>> addressedBy,
 		IReadOnlyDictionary<IExternalMediaId, StoredMedia> stored,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
-		return await sink.AddressedBy(request.Type)
+		return await addressedBy(request.Type)
 			.Match(
 				target => IdentifyForAsync(request, target, stored, buffer, cancellationToken),
-				() => ValueTask.FromResult<Result<IdentifyHandoff>>(Error.From($"The sink cannot address {request.Type} titles."))
+				() => ValueTask.FromResult<Result<IdentifyHandoff>>(Error.From($"No provider addresses {request.Type} titles here."))
 			);
 	}
 
@@ -292,7 +316,7 @@ internal sealed class MediaService(
 	)
 	{
 		return FindStored(request, target, stored, buffer)
-			.Match(found => ValueTask.FromResult<Result<IdentifyHandoff>>(Success.Of(found)), () => FindSinkIdAsync(request, target, cancellationToken));
+			.Match(found => ValueTask.FromResult<Result<IdentifyHandoff>>(Success.Of(found)), () => ResolveAsync(request, target, cancellationToken));
 	}
 
 	private static Optional<IdentifyHandoff> FindStored(
@@ -323,7 +347,7 @@ internal sealed class MediaService(
 		return new IdentifyHandoff(merged, Some.Of(match));
 	}
 
-	private async ValueTask<Result<IdentifyHandoff>> FindSinkIdAsync(IdentifyRequest request, MediaProvider target, CancellationToken cancellationToken)
+	private async ValueTask<Result<IdentifyHandoff>> ResolveAsync(IdentifyRequest request, MediaProvider target, CancellationToken cancellationToken)
 	{
 		return await idResolver
 			.ResolveAsync(request, target, cancellationToken)

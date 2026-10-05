@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261005055551_ProviderAnswers";
+    public override string LastMigrationId => "20261005070523_RottenTomatoesIds";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -647,13 +647,6 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
 
                 b.Property<float>("NormalizedValue")
                     .HasColumnType("REAL");
-
-                b.Property<long?>("RottenTomatoesAskedAt")
-                    .HasColumnType("INTEGER");
-
-                b.Property<string>("RottenTomatoesPath")
-                    .HasMaxLength(256)
-                    .HasColumnType("TEXT");
 
                 b.Property<int?>("VoteCount")
                     .HasColumnType("INTEGER");

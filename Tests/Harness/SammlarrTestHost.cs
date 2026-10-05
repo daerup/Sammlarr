@@ -658,7 +658,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddHttpClient(TmdbClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient<MdblistClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient(MdblistClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
-		services.AddHttpClient<IRottenTomatoesPageFinder, WikidataClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
+		services.AddHttpClient<WikidataIdConverter>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient<RadarrClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient<SonarrClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient<IPictureGrids, PictureGrids>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);

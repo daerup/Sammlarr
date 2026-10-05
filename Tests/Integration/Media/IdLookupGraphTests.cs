@@ -15,7 +15,7 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task Derive_OverTheRegisteredConverters_GivesPlexsHopsBeforeTmdbs()
+	public async Task Derive_OverTheRegisteredConverters_GivesPlexsHopsThenTmdbsThenWikidatasHintlessOne()
 	{
 		var hops = IdLookupPlanner.Derive(Converters);
 
@@ -39,6 +39,7 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 					"Tmdb Imdb>hints (1)",
 					"Tmdb Tvdb>Tmdb (1)",
 					"Tmdb Tvdb>hints (1)",
+					"RottenTomatoes Imdb>RottenTomatoes (1)",
 				],
 				CollectionOrdering.Matching
 			);

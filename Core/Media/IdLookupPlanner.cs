@@ -70,7 +70,10 @@ internal static class IdLookupPlanner
 				yield return new IdToId(converter, byId, from, to);
 			}
 
-			yield return new IdToHints(converter, byId, from);
+			if (byId.GivesHints)
+			{
+				yield return new IdToHints(converter, byId, from);
+			}
 		}
 	}
 

@@ -30,7 +30,7 @@ internal class MediaDetailsFactory
 				throw new InvalidOperationException($"Cannot update existing {existing.GetType().Name}.");
 		}
 		ApplyCommonFields(existing, cached, existing.MediaId);
-		ReplaceRatings(existing, [.. cached.Details.Ratings.All]);
+		ReplaceRatings(existing, cached.Details.Ratings.All);
 		ReplaceAnswers(existing, cached.Answers);
 	}
 
@@ -99,16 +99,10 @@ internal class MediaDetailsFactory
 		row.AskedAt = cached.AskedAt;
 	}
 
-	private static void ReplaceRatings(MediaDetailsRow row, IReadOnlyList<IMediaRating> ratings)
+	private static void ReplaceRatings(MediaDetailsRow row, IEnumerable<IMediaRating> ratings)
 	{
-		var asked = row.Ratings.FirstOrNone(rating => rating.RottenTomatoesAskedAt.HasValue);
 		row.Ratings.Clear();
-		foreach (var rating in ratings)
-		{
-			var built = BuildRating(rating, row);
-			asked.When(_ => rating.Source.IsRottenTomatoes).Apply(answer => KeepAnswer(built, answer));
-			row.Ratings.Add(built);
-		}
+		row.Ratings.AddRange(ratings.Select(rating => BuildRating(rating, row)));
 	}
 
 	private static void ReplaceAnswers(MediaDetailsRow row, IEnumerable<ProviderAnswer> answers)
@@ -125,12 +119,6 @@ internal class MediaDetailsFactory
 			Unfilled = answer.Unfilled,
 			Details = parent,
 		};
-	}
-
-	private static void KeepAnswer(MediaRatingRow rating, MediaRatingRow answer)
-	{
-		rating.RottenTomatoesPath = answer.RottenTomatoesPath;
-		rating.RottenTomatoesAskedAt = answer.RottenTomatoesAskedAt;
 	}
 
 	private static MediaRatingRow BuildRating(IMediaRating rating, MediaDetailsRow parent)

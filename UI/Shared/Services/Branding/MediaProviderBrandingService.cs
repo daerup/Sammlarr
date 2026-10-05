@@ -49,6 +49,15 @@ public class MediaProviderBrandingService
 				new BrandArt("imdb-logo.svg"),
 				new BrandTile(OwnTile, new BrandArt("imdb-tile.svg"), 100)
 			),
+			MediaProvider.RottenTomatoes => new(
+				provider,
+				"Rotten Tomatoes",
+				"Rotten Tomatoes",
+				"#FA320A",
+				new BrandArt("rottentomatoes-square.svg"),
+				new BrandArt("rottentomatoes-square.svg"),
+				new BrandTile(MutedTile, new BrandArt("rottentomatoes-square.svg"), 70)
+			),
 			MediaProvider.Tvdb => new(
 				provider,
 				"The TVDB",
