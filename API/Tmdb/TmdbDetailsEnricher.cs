@@ -1,3 +1,5 @@
+using System.Globalization;
+using API.Tmdb.Types;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -20,9 +22,26 @@ internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDeta
 		| MediaField.RuntimePerEpisode
 		| MediaFields.Rated(MediaProvider.Tmdb.SuppliedRatingSources());
 
-	public Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Imdb];
+
+	public async Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
-		return id.Require<TmdbId>("TMDB enrichment requires a TMDB id.")
-			.Map(tmdbId => tmdbApi.GetDetailAsync(tmdbId, cancellationToken).Map(details => TmdbFound.Of(details, tmdbId, artwork)));
+		var tmdbId = await TmdbIdOfAsync(id, cancellationToken);
+		return await tmdbId.Map(found => tmdbApi.GetDetailWithExternalIdsAsync(found, cancellationToken).Map(details => WithIds(details, found)));
+	}
+
+	private async Task<Result<TmdbId>> TmdbIdOfAsync(IExternalMediaId id, CancellationToken cancellationToken)
+	{
+		return id switch
+		{
+			TmdbId tmdbId => Success.Of(tmdbId),
+			_ => await tmdbApi.FindAsync(id, cancellationToken).Map(item => TmdbId.From(item.Id.ToString(CultureInfo.InvariantCulture), id.Type)),
+		};
+	}
+
+	private FoundMedia WithIds(TmdbTypes.Details details, TmdbId tmdbId)
+	{
+		var mapped = TmdbFound.Of(details, tmdbId, artwork);
+		return mapped with { Externals = [.. mapped.Externals, .. details.ExternalIds?.Ids(tmdbId.Type) ?? []] };
 	}
 }

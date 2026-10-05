@@ -43,7 +43,23 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_WhenTheProviderIsUnreachable_ServesTheStaleCache()
+	public async Task GetDetailsAsync_WhenEveryProviderIsUnreachable_ServesTheStaleCache()
+	{
+		var fightClub = await host.Movie(TestMedia.FightClub)
+			.ServedByPlex(title: "")
+			.ServedByTmdb(title: "Live Title")
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 17));
+		host.PlexLookupFails(TestMedia.FightClub);
+		host.TmdbDetailFails(TestMedia.FightClub, HttpStatusCode.ServiceUnavailable);
+
+		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+
+		await AssertTitle(results[0], "Cached Title");
+		await AssertCachedAs(fightClub, "Cached Title", At(5, 17));
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_WhenPlexIsUnreachableForAStaleCopy_RefreshesItFromTmdb()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
@@ -53,8 +69,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
-		await AssertTitle(results[0], "Cached Title");
-		await AssertCachedAs(fightClub, "Cached Title", At(5, 17));
+		await AssertTitle(results[0], "Live Title");
 	}
 
 	[Test]

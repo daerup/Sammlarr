@@ -26,14 +26,6 @@ internal sealed class ArrSearch(ArrApis apis, IArrSinkConfigService configs, ILo
 		return [.. answers.SelectMany(answer => answer.GetValueOr([]))];
 	}
 
-	public async Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
-	{
-		var config = await configs.GetAsync(cancellationToken);
-		return await apis.Taking(mediaId)
-			.ToResult("Radarr looks movies up by their TMDB id and Sonarr shows by their TVDB id.")
-			.Map(api => FindAsync(api, config, mediaId, cancellationToken));
-	}
-
 	private async Task<Result<List<FoundMedia>>> FoundAsync(ArrApi api, ArrSinkConfig config, string query, CancellationToken cancellationToken)
 	{
 		var titles = await SearchAsync(api, config, query, cancellationToken);
@@ -47,11 +39,5 @@ internal sealed class ArrSearch(ArrApis apis, IArrSinkConfigService configs, ILo
 		return ArrSession
 			.Connect(api.App, config.Of(api.App))
 			.Match(connection => api.SearchAsync(connection, term, cancellationToken), error => Task.FromResult<Result<IReadOnlyList<ArrTitle>>>(error));
-	}
-
-	private static async Task<Result<FoundMedia>> FindAsync(ArrApi api, ArrSinkConfig config, IExternalMediaId mediaId, CancellationToken cancellationToken)
-	{
-		var titles = await SearchAsync(api, config, ArrSearchTerm.Of(mediaId), cancellationToken);
-		return titles.Map(found => found.FirstOrNone().Map(title => ArrFound.Of(api, title)).ToResult($"{api.App.Name} has no title for {mediaId.Value}."));
 	}
 }

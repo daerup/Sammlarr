@@ -12,12 +12,20 @@ internal static class EnricherChoice
 {
 	private static readonly TimeSpan RefetchMissingCooldown = TimeSpan.FromHours(1);
 
-	internal static Optional<EnricherCandidate> Next(MediaFields needed, IEnumerable<EnricherCandidate> leftToAsk, DateTimeOffset now)
+	internal static Optional<EnricherCandidate> Next(
+		MediaFields needed,
+		IEnumerable<EnricherCandidate> leftToAsk,
+		Optional<MediaProvider> preferred,
+		DateTimeOffset now
+	)
 	{
 		return leftToAsk
-			.OrderByDescending(candidate => (needed & candidate.Fills).Count)
+			.Where(candidate => candidate.CanHelp(needed, now))
+			.OrderByDescending(candidate => preferred.When(provider => provider == candidate.Provider).IsSome())
+			.ThenByDescending(candidate => (needed & candidate.Fills).DetailCount)
 			.ThenBy(candidate => candidate.Load.Busy)
-			.FirstOrNone(candidate => candidate.CanHelp(needed, now));
+			.ThenBy(candidate => candidate.Provider)
+			.FirstOrNone();
 	}
 
 	internal static Optional<EnricherCandidate> WorthWaitingFor(

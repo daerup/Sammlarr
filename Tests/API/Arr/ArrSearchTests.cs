@@ -7,7 +7,6 @@ using Domain.Media;
 using Domain.Wantlist.Arr;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
-using TestInfrastructure;
 using TUnit.Mocks.Http;
 
 namespace API.Tests.Arr;
@@ -88,25 +87,6 @@ public class ArrSearchTests
 		_sonarr.OnAnyRequest().Respond(HttpStatusCode.ServiceUnavailable);
 
 		await Assert.That(async () => await Testee.SearchAsync("project hail", [MediaType.Movie, MediaType.Show])).Throws<InvalidOperationException>();
-	}
-
-	[Test]
-	public async Task LookUpAsync_ForAShowsTvdbId_AsksSonarrByThatId()
-	{
-		_sonarr.OnAnyRequest().RespondWithJson("""[{"id":0,"title":"Breaking Bad","year":2008,"tvdbId":81189,"tmdbId":1396,"tags":[]}]""");
-
-		var found = await Testee.LookUpAsync(TvdbId.From("81189", MediaType.Show));
-
-		await Assert.That(found).IsSuccess().And.Multiple(async show => await Assert.That(show.Details.Title).IsEqualTo("Breaking Bad"));
-		_sonarr.Verify(request => request.PathMatches(".*/series/lookup\\?term=tvdb%3A81189$"), Times.Once);
-	}
-
-	[Test]
-	public async Task LookUpAsync_ForAnIdNeitherAppReads_SaysWhichIdsTheyRead()
-	{
-		var found = await Testee.LookUpAsync(ImdbId.From("tt0903747", MediaType.Show));
-
-		await Assert.That(found).IsError();
 	}
 
 	private ArrSearch Testee

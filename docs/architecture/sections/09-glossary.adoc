@@ -52,8 +52,8 @@ asked when its `Fills` overlap a missing field.
 
 Freshness:: Whether a stored title is used as it is (`DetailsFetcher.FindReusable`). It is refreshed 14 days after
 `RefreshedAt` (`CachedDetails.IsStale`), starting over and asking until nothing is missing. Before that its gaps are
-filled when a field is missing, an hour has passed since `AskedAt`, and an enricher could fill it that the title has
-an id for, the current user has connected, has not answered, and is not blocked (`EnricherChoice.NeedsRefetch`).
+filled when a field is missing, an hour has passed since `AskedAt`, and an enricher could fill it that accepts
+one of the title's ids, the current user has connected, has not answered, and is not blocked (`EnricherChoice.NeedsRefetch`).
 
 `StoredMedia`:: A stored title as the repository returns it: its `MediaIdentity` and its
 `CachedDetails`, if it has any.
@@ -116,7 +116,7 @@ Identify:: Turning external references into the right library title (`IMediaServ
 and `IdentifyWithDetailsAsync`). The correctness-critical operation; see <<section-runtime-view>>.
 
 Details:: Loading what is known about an identified title: the cached details while they are fresh,
-otherwise a fetch through the `DetailsFetcher` (the primary lookup, then the enrichers).
+otherwise a fetch through the `DetailsFetcher`, which asks the enrichers one at a time.
 
 Candidate:: One external id offered as input to identify. Several candidates for the same title
 are identified together and merged into a single identity.
@@ -135,9 +135,10 @@ hints), which providers' ids its answer may yield, its cost in calls, and for a 
 title hints (`GivesHints`; Wikidata's does not, so no path asks it for hints). The planner turns each into hops; a path
 through a blocked provider waits for it, capped by its `MaxWait`, or gives up.
 
-Enricher:: An `IDetailsEnricher`, keyed by provider, that fills missing details fields after the
-primary lookup. Sammlarr asks the open enricher that fills the most missing fields, one at a time,
-until no open enricher can fill what is still missing.
+Enricher:: An `IDetailsEnricher`, keyed by provider, that fills details fields and declares the ids it accepts (TMDB takes its own,
+TheTVDB's and IMDb's, finding a TMDB id first; Plex takes its own). Every details lookup is an enricher's: Sammlarr asks one open
+enricher at a time, the search setting's provider first, then the one filling the most missing detail fields, then the least busy, then
+`MediaProvider`'s order, until no open enricher can fill what is still missing.
 
 Coordinator:: The step that merges freshly identified ids against existing library rows, so two
 references to the same title never create two library ids.

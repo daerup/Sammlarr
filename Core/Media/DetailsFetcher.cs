@@ -2,7 +2,6 @@ using Contracts;
 using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Media;
-using Contracts.Media.Search;
 using Contracts.Providers;
 using Contracts.Settings;
 using Domain.Media;
@@ -12,7 +11,6 @@ using Microsoft.Extensions.Logging;
 namespace Core.Media;
 
 internal sealed class DetailsFetcher(
-	IKeyedServiceIndex<SearchProvider, IMediaSearchProvider> searchIndex,
 	IKeyedServiceIndex<MediaProvider, IDetailsEnricher> enricherIndex,
 	IProviderConfigService providerConfig,
 	IProviderCapacity capacity,
@@ -22,10 +20,6 @@ internal sealed class DetailsFetcher(
 	ILogger<DetailsFetcher> logger
 )
 {
-	private static readonly DetailsSource TmdbDetails = new(SearchProvider.Tmdb, [MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Imdb]);
-
-	private static readonly DetailsSource PlexDetails = new(SearchProvider.Plex, [MediaProvider.Plex]);
-
 	private static readonly IReadOnlyList<MediaProvider> Enrichers = [.. Enum.GetValues<EnricherProvider>().Select(enricher => enricher.AsMediaProvider())];
 
 	public async Task<IReadOnlySet<MediaProvider>> ConnectedAsync(CancellationToken cancellationToken)
@@ -77,7 +71,8 @@ internal sealed class DetailsFetcher(
 		CancellationToken cancellationToken
 	)
 	{
-		var (enriched, answers) = await EnrichAsync(new MatchedMedia(identity, stored.Details), stored.Answers, connected, cancellationToken);
+		var preferred = await PreferredAsync(cancellationToken);
+		var (enriched, answers) = await EnrichAsync(new MatchedMedia(identity, stored.Details), stored.Answers, connected, preferred, cancellationToken);
 		var filled = stored with { Details = enriched.Details, AskedAt = clock.Now, Answers = answers };
 		return Success.Of(Store(enriched, filled, buffer));
 	}
@@ -90,51 +85,29 @@ internal sealed class DetailsFetcher(
 		CancellationToken cancellationToken
 	)
 	{
-		var config = await providerConfig.GetAsync(cancellationToken);
-		var primary = Primary(identity, config.SearchProvider);
-		return await LookUpAsync(identity, primary, cancellationToken)
-			.Map(found => RefreshFromAsync(found, primary.Reads[0], stored, connected, buffer, cancellationToken));
-	}
+		var preferred = await PreferredAsync(cancellationToken);
+		var (enriched, answers) = await EnrichAsync(new MatchedMedia(identity, MediaDetails.Empty(identity.Type)), [], connected, preferred, cancellationToken);
+		if (answers.Count == 0)
+		{
+			return Error.From("the details could not be fetched");
+		}
 
-	private async Task<MatchedMedia> RefreshFromAsync(
-		MatchedMedia found,
-		MediaProvider primary,
-		Optional<CachedDetails> stored,
-		IReadOnlySet<MediaProvider> connected,
-		MediaWriteBuffer buffer,
-		CancellationToken cancellationToken
-	)
-	{
-		var primaryAnswer = ProviderAnswer.After(primary, enricherIndex[primary].Fills, found.Details);
-		var (enriched, answers) = await EnrichAsync(found, [primaryAnswer], connected, cancellationToken);
 		var now = clock.Now;
 		var refreshed = new CachedDetails(enriched.Details, now, now, answers);
-		return Store(enriched, stored.Map(refreshed.Replacing).GetValueOr(refreshed), buffer);
+		return Success.Of(Store(enriched, stored.Map(refreshed.Replacing).GetValueOr(refreshed), buffer));
 	}
 
-	private static DetailsSource Primary(MediaIdentity identity, SearchProvider search)
+	private async Task<Optional<MediaProvider>> PreferredAsync(CancellationToken cancellationToken)
 	{
-		DetailsSource[] order = search switch
-		{
-			SearchProvider.Plex => [PlexDetails, TmdbDetails],
-			SearchProvider.Tmdb or SearchProvider.Arr => [TmdbDetails, PlexDetails],
-		};
-		return order.FirstOrNone(source => source.IdOf(identity).IsSome()).GetValueOr(order[0]);
-	}
-
-	private Task<Result<MatchedMedia>> LookUpAsync(MediaIdentity identity, DetailsSource primary, CancellationToken cancellationToken)
-	{
-		var external = primary.IdOf(identity).GetValueOr(() => identity.Externals.First());
-		return searchIndex[primary.Search]
-			.LookUpAsync(external, cancellationToken)
-			.When(found => found.Fits(identity.Type), "the details could not be fetched")
-			.Map(found => found.Matched(identity));
+		var config = await providerConfig.GetAsync(cancellationToken);
+		return config.SearchProvider.Provider();
 	}
 
 	private async Task<(MatchedMedia Enriched, ValueSet<ProviderAnswer> Answers)> EnrichAsync(
 		MatchedMedia current,
 		IEnumerable<ProviderAnswer> known,
 		IReadOnlySet<MediaProvider> connected,
+		Optional<MediaProvider> preferred,
 		CancellationToken cancellationToken
 	)
 	{
@@ -145,7 +118,7 @@ internal sealed class DetailsFetcher(
 		while (current.Details.Missing is var missing && !missing.IsEmpty)
 		{
 			var leftToAsk = EnrichersLeftToAsk(current, asked, connected);
-			if (EnricherChoice.Next(missing, leftToAsk, now) is not Some<EnricherCandidate>(var next))
+			if (EnricherChoice.Next(missing, leftToAsk, preferred, now) is not Some<EnricherCandidate>(var next))
 			{
 				if (await WaitForBlockedAsync(missing, leftToAsk, waited, now, cancellationToken) is not Some<DateTimeOffset>(var freeAt))
 				{
@@ -234,21 +207,18 @@ internal sealed class DetailsFetcher(
 		[
 			.. Enrichers
 				.Where(provider => !asked.Contains(provider) && connected.Contains(provider))
-				.Select(provider => current.Identity.Externals.OfProvider(provider).Map(id => CandidateFor(provider, id)))
+				.Select(provider => AcceptedId(current.Identity, provider).Map(id => CandidateFor(provider, id)))
 				.WhereSome(),
 		];
+	}
+
+	private Optional<IExternalMediaId> AcceptedId(MediaIdentity identity, MediaProvider provider)
+	{
+		return enricherIndex[provider].Accepts.Select(source => identity.Externals.OfProvider(source)).WhereSome().FirstOrNone();
 	}
 
 	private EnricherCandidate CandidateFor(MediaProvider provider, IExternalMediaId id)
 	{
 		return new EnricherCandidate(provider, id, enricherIndex[provider].Fills, capacity.Of(provider));
-	}
-
-	private sealed record DetailsSource(SearchProvider Search, IReadOnlyList<MediaProvider> Reads)
-	{
-		public Optional<IExternalMediaId> IdOf(MediaIdentity identity)
-		{
-			return Reads.Select(provider => identity.Externals.OfProvider(provider)).WhereSome().FirstOrNone();
-		}
 	}
 }

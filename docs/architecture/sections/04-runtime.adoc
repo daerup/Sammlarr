@@ -91,8 +91,8 @@ library ids.
 
 ==== Phase B: details
 
-A refresh asks the search provider first (Plex), then the open enricher that fills the
-most missing fields, one at a time, until no open enricher can fill what is still missing; a blocked enricher whose
+A refresh asks the search setting's enricher first, then the open enricher that fills the
+most missing detail fields, one at a time, until no open enricher can fill what is still missing; a blocked enricher whose
 block ends within its `EnrichWait` (TMDB 15 s) is slept for once and then asked (see Provider routing in
 <<section-concepts>>). A gap fill starts from the
 stored copy and its answers and asks only the enrichers that have not answered. The cache stores who answered and

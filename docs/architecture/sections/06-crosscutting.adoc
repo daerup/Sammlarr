@@ -211,7 +211,8 @@ instead of sending a request into the block. The request already in flight still
 retry policy.
 
 Enrichment asks, one at a time, the open enricher (`EnricherProvider`, generated from `ProviderCapability.Enricher`)
-whose `Fills` cover the most missing fields, the least busy first, among those the title has an id for, until
+the search setting names, else the one whose `Fills` cover the most missing detail fields, the least busy first, among those that accept
+one of the title's ids (`Accepts`), until
 no open enricher can fill what is still missing; then it sleeps for the blocked enricher worth waiting for (one that
 fills a missing field, frees within its `EnrichWait` and has not been waited for yet, the soonest free first) and
 carries on, else it stops. A feed run loads about 100 titles in parallel and they sleep through the same block, so the
