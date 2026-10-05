@@ -12,8 +12,6 @@ internal sealed record PushoverMessage(string AppToken, string UserKey, string T
 
 internal sealed class PushoverClient(HttpClient client)
 {
-	private const string Endpoint = "https://api.pushover.net/1/messages.json";
-
 	public async Task<DeliveryResult> SendAsync(PushoverMessage message, CancellationToken cancellationToken)
 	{
 		Dictionary<string, string> fields = new()
@@ -35,7 +33,7 @@ internal sealed class PushoverClient(HttpClient client)
 
 		try
 		{
-			using var response = await client.PostAsync(Endpoint, content, cancellationToken);
+			using var response = await client.PostAsync("messages.json", content, cancellationToken);
 			return await MapAsync(response, cancellationToken);
 		}
 		catch (HttpRequestException error)

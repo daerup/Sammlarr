@@ -11,7 +11,12 @@ internal sealed class PushoverModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddHttpClient<PushoverClient>().AddProviderHttp<PushoverOptions>();
+		services.AddHttpClient<PushoverClient>(Configure).AddProviderHttp<PushoverOptions>();
 		services.AddKeyedScoped<INotificationChannel, PushoverChannel>(NotificationChannel.Pushover);
+	}
+
+	private static void Configure(IServiceProvider sp, HttpClient client)
+	{
+		client.BaseAddress = new Uri($"{sp.GetRequiredService<PushoverOptions>().BaseUrl.TrimEnd('/')}/");
 	}
 }
