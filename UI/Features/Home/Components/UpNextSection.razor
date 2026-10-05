@@ -14,9 +14,9 @@
     {
         <div class="row @(row.Kind is UpNextKind.Running ? "is-running" : null)">
             <span class="row-lead">
-                @if (row.Brands is [var provider])
+                @if (row.Brands is [var brand])
                 {
-                    <ProviderTile Provider="provider"/>
+                    <BrandedTile Brand="brand"/>
                 }
                 else if (row.Brands is [var first, var second])
                 {

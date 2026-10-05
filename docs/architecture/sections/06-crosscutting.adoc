@@ -180,8 +180,8 @@ Providers are declared, not hand-wired. Each `MediaProvider` value carries a `[C
 attribute; Roslyn source generators emit the provider-subset enums (`FeedProvider`,
 `ApiKeyProvider`, …) and their conversions from that matrix, plus the options-record
 registration. Each `RatingSource` member carries `[SuppliedBy]`, `[OwnedBy]` and `[Votes]`, from which generators emit
-`SuppliedBy()`, `Owner()`, `PublishesVotes()` and the reverse maps. `SinkKind` and `SearchProvider` are hand-written, because they
-can span providers (Radarr + Sonarr), and so is `AuthProvider`, because a sign-in is not a provider: Sammlarr accounts
+`SuppliedBy()`, `Owner()`, `PublishesVotes()` and the reverse maps. `SinkKind` and `SearchProvider` are hand-written, because their
+Radarr + Sonarr choice is no provider (`Provider()` answers `None`; the UI brands each `ArrApp` itself), and so is `AuthProvider`, because a sign-in is not a provider: Sammlarr accounts
 know no media, so `AuthProvider.Local` has no `MediaProvider` (`AuthProvider.Provider()` answers `None`), and the UI
 draws a sign-in with its own brand (`GetBrandingInfo(AuthProvider)`). Adding a provider is a folder, an enum value and a module (recipe in
 <<section-building-block-view>>).

@@ -40,12 +40,12 @@ internal static class ProvenanceView
 			_ => string.Empty,
 		};
 
-	internal static IReadOnlyList<MediaProvider> Providers(WantlistItemProvenance provenance)
+	internal static IReadOnlyList<BrandingInfo> Brands(WantlistItemProvenance provenance, MediaProviderBrandingService branding)
 	{
 		return provenance switch
 		{
-			SinkOrigin sink => sink.Provider.Providers(),
-			FeedOrigin feed => [feed.Feed.Provider.AsMediaProvider()],
+			SinkOrigin sink => branding.Brands(sink.Provider),
+			FeedOrigin feed => [branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider())],
 			ManualOrigin or OrphanedOrigin => [],
 		};
 	}

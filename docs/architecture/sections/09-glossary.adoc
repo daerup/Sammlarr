@@ -99,8 +99,7 @@ Rotten Tomatoes' search.
 
 Page linker:: An `IExternalPageLinker`, registered in the UI keyed by `MediaProvider`, one class per provider, that turns a
 title's ids (and its title) into that provider's page, by its own id: TMDB, TheTVDB and MDBList by media type too (TheTVDB and
-MDBList have none for an unknown type), Rotten Tomatoes by its id or else its search for the title; Radarr, Sonarr and
-Sammlarr accounts have none (`NoPageLinker`). The External IDs popover asks per id, so each row links to its own page;
+MDBList have none for an unknown type), Rotten Tomatoes by its id or else its search for the title; every provider has one. The External IDs popover asks per id, so each row links to its own page;
 the rating breakdown's rows ask with the title's ids.
 
 === Identify and details
@@ -193,9 +192,11 @@ Blocklist:: Titles excluded from curation so they never enter a list.
 
 === Providers and wiring
 
-Provider:: An external service (TMDB, MDBList, Plex, Radarr, Sonarr) or an id namespace (IMDb, Rotten Tomatoes, TheTVDB),
+Provider:: An external service (TMDB, MDBList, Plex) or an id namespace (IMDb, Rotten Tomatoes, TheTVDB),
 modelled as a `MediaProvider` enum value. Every one knows media by its own ids. A way to sign in is an `AuthProvider`
-(Plex, Sammlarr accounts), not a provider; `AuthProvider.Provider()` names the provider behind it, if any.
+(Plex, Sammlarr accounts), not a provider; `AuthProvider.Provider()` names the provider behind it, if any. Radarr and
+Sonarr are apps (`ArrApp`), not providers: Sammlarr holds none of their ids, and `SinkKind.Arr` and `SearchProvider.Arr`
+have no `Provider()`.
 
 Capability:: What a provider can do: `Trending`, `Feed`, `ApiKey`, `Artwork` or
 `Enricher`. Declared per provider and used to generate the provider-subset enums.

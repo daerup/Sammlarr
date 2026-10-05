@@ -57,7 +57,5 @@ public class ExternalMediaIdProperties
 			MediaProvider.Tvdb => TvdbId.From(value, type),
 			MediaProvider.Plex => PlexId.From(value, type),
 			MediaProvider.Mdblist => MdblistId.From(value, type),
-			MediaProvider.Radarr => RadarrId.From(value, type),
-			MediaProvider.Sonarr => SonarrId.From(value, type),
 		};
 }

@@ -20,7 +20,28 @@ public class MediaProviderBrandingService
 
 	public BrandingInfo GetBrandingInfo(AuthProvider signIn) => signIn.Provider().Match(GetBrandingInfo, () => Sammlarr);
 
-	public BrandingInfo GetBrandingInfo(ArrApp app) => GetBrandingInfo(app.Provider);
+	public BrandingInfo GetBrandingInfo(ArrApp app)
+	{
+		return app switch
+		{
+			ArrApp.Radarr => new(
+				"Radarr",
+				"Radarr",
+				"#FFC230",
+				new BrandArt("radarr-square-light.svg", "radarr-square-dark.svg"),
+				new BrandArt("radarr-square-light.svg", "radarr-square-dark.svg"),
+				new BrandTile(MutedTile, new BrandArt("radarr-square-light.svg", "radarr-square-dark.svg"), 70)
+			),
+			ArrApp.Sonarr => new(
+				"Sonarr",
+				"Sonarr",
+				"#35C5F4",
+				new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"),
+				new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"),
+				new BrandTile(MutedTile, new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"), 70)
+			),
+		};
+	}
 
 	public string ArrColor
 	{
@@ -97,22 +118,6 @@ public class MediaProviderBrandingService
 				new BrandArt("mdblist-square.svg"),
 				new BrandArt("mdblist-logo-light.svg", "mdblist-logo-dark.svg") { Scale = 1.25 },
 				new BrandTile(OwnTile, new BrandArt("mdblist-square.svg"), 100)
-			),
-			MediaProvider.Radarr => new(
-				"Radarr",
-				"Radarr",
-				"#FFC230",
-				new BrandArt("radarr-square-light.svg", "radarr-square-dark.svg"),
-				new BrandArt("radarr-square-light.svg", "radarr-square-dark.svg"),
-				new BrandTile(MutedTile, new BrandArt("radarr-square-light.svg", "radarr-square-dark.svg"), 70)
-			),
-			MediaProvider.Sonarr => new(
-				"Sonarr",
-				"Sonarr",
-				"#35C5F4",
-				new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"),
-				new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"),
-				new BrandTile(MutedTile, new BrandArt("sonarr-square-light.svg", "sonarr-square-dark.svg"), 70)
 			),
 		};
 }

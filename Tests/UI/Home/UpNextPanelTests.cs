@@ -8,11 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
+using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Home;
 
 public class UpNextPanelTests : BunitContext
 {
+	private static readonly MediaProviderBrandingService Branding = new();
+
 	[Before(Test)]
 	public void Setup()
 	{
@@ -56,8 +59,11 @@ public class UpNextPanelTests : BunitContext
 	{
 		IReadOnlyList<UpNextRow> queued =
 		[
-			new("hdlists/documentaries", "queued", string.Empty, UpNextKind.Queued, "/feeds/edit/docs") { Brands = [MediaProvider.Mdblist] },
-			new("Sync Wantlist", "queued", string.Empty, UpNextKind.Queued, null) { Brands = [MediaProvider.Plex] },
+			new("hdlists/documentaries", "queued", string.Empty, UpNextKind.Queued, "/feeds/edit/docs")
+			{
+				Brands = [Branding.GetBrandingInfo(MediaProvider.Mdblist)],
+			},
+			new("Sync Wantlist", "queued", string.Empty, UpNextKind.Queued, null) { Brands = [Branding.GetBrandingInfo(MediaProvider.Plex)] },
 		];
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
@@ -70,10 +76,7 @@ public class UpNextPanelTests : BunitContext
 	[Test]
 	public async Task Row_SyncingToRadarrAndSonarr_PairsBothMarksInOneTile()
 	{
-		IReadOnlyList<UpNextRow> queued =
-		[
-			new("Sync Wantlist", "queued", string.Empty, UpNextKind.Queued, null) { Brands = [MediaProvider.Radarr, MediaProvider.Sonarr] },
-		];
+		IReadOnlyList<UpNextRow> queued = [new("Sync Wantlist", "queued", string.Empty, UpNextKind.Queued, null) { Brands = Branding.Brands(SinkKind.Arr) }];
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
 

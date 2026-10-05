@@ -23,14 +23,6 @@ public class ProviderMatrixTests
 	}
 
 	[Test]
-	public async Task Providers_OfASearch_AreTheServicesBehindIt()
-	{
-		await Assert.That(SearchProvider.Tmdb.Providers()).IsEquivalentTo([MediaProvider.Tmdb]);
-		await Assert.That(SearchProvider.Plex.Providers()).IsEquivalentTo([MediaProvider.Plex]);
-		await Assert.That(SearchProvider.Arr.Providers()).IsEquivalentTo([MediaProvider.Radarr, MediaProvider.Sonarr]);
-	}
-
-	[Test]
 	public async Task Provider_OfASearch_IsTheServiceBehindIt()
 	{
 		await Assert.That(SearchProvider.Tmdb.Provider()).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
@@ -43,13 +35,6 @@ public class ProviderMatrixTests
 	{
 		await Assert.That(SinkKind.Plex.Provider()).IsSome().And.IsEqualTo(MediaProvider.Plex);
 		await Assert.That(SinkKind.Arr.Provider()).IsNone();
-	}
-
-	[Test]
-	public async Task Providers_OfASink_AreTheAppsBehindIt()
-	{
-		await Assert.That(SinkKind.Plex.Providers()).IsEquivalentTo([MediaProvider.Plex]);
-		await Assert.That(SinkKind.Arr.Providers()).IsEquivalentTo([MediaProvider.Radarr, MediaProvider.Sonarr]);
 	}
 
 	[Test]

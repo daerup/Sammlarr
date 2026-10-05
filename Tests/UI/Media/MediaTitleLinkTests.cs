@@ -51,7 +51,7 @@ public class MediaTitleLinkTests : BunitContext
 	[Test]
 	public async Task Popover_ForARottenTomatoesIdAndAnIdWithoutAPage_LinksTheFirstAndListsTheSecondPlain()
 	{
-		IReadOnlyList<IExternalMediaId> ids = [RottenTomatoesId.From("m/shawshank_redemption", MediaType.Movie), RadarrId.From("12", MediaType.Movie)];
+		IReadOnlyList<IExternalMediaId> ids = [RottenTomatoesId.From("m/shawshank_redemption", MediaType.Movie), TvdbId.From("12", MediaType.Unknown)];
 		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Ids, ids));
 
 		await cut.Find(".media-title-trigger").ClickAsync(new());

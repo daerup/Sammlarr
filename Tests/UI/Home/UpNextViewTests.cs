@@ -6,6 +6,7 @@ using Domain.Wantlist.Sync;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
+using UI.Shared.Services.Branding;
 using UrlGuid = Shared.UrlGuid;
 
 namespace UI.Tests.Home;
@@ -17,7 +18,16 @@ public class UpNextViewTests
 
 	private static readonly Dictionary<FeedId, string> Names = new() { [Docs] = "hdlists/documentaries", [Anime] = "hdlists/anime" };
 
-	private static readonly Dictionary<FeedId, MediaProvider> Brands = new() { [Docs] = MediaProvider.Mdblist, [Anime] = MediaProvider.Tmdb };
+	private static readonly MediaProviderBrandingService Branding = new();
+
+	private static readonly Dictionary<FeedId, BrandingInfo> Brands = new()
+	{
+		[Docs] = Branding.GetBrandingInfo(MediaProvider.Mdblist),
+		[Anime] = Branding.GetBrandingInfo(MediaProvider.Tmdb),
+	};
+
+	private static readonly IReadOnlyList<BrandingInfo> Plex = [Branding.GetBrandingInfo(MediaProvider.Plex)];
+
 	private static readonly DateTimeOffset Now = new(2026, 9, 27, 14, 0, 0, TimeSpan.Zero);
 
 	[Test]
@@ -25,7 +35,7 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(Job(Anime, JobState.Running), Job(Docs, JobState.Queued));
 
-		var rows = UpNextView.InTheQueue(queue, Names, Brands, [MediaProvider.Plex]);
+		var rows = UpNextView.InTheQueue(queue, Names, Brands, Plex);
 
 		await Assert.That(rows[0].Kind).IsEqualTo(UpNextKind.Running);
 		await Assert.That(rows[0].When).IsEqualTo("running");
@@ -40,9 +50,9 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(Job(Anime, JobState.Queued));
 
-		var row = UpNextView.InTheQueue(queue, Names, Brands, [MediaProvider.Plex])[0];
+		var row = UpNextView.InTheQueue(queue, Names, Brands, Plex)[0];
 
-		await Assert.That(row.Brands).IsEquivalentTo([MediaProvider.Tmdb]);
+		await Assert.That(row.Brands).IsEquivalentTo([Branding.GetBrandingInfo(MediaProvider.Tmdb)]);
 	}
 
 	[Test]
@@ -50,9 +60,9 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ManualTrigger()), JobState.Queued, default, 0));
 
-		var row = UpNextView.InTheQueue(queue, Names, Brands, [MediaProvider.Plex])[0];
+		var row = UpNextView.InTheQueue(queue, Names, Brands, Plex)[0];
 
-		await Assert.That(row.Brands).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(row.Brands).IsEquivalentTo(Plex);
 	}
 
 	[Test]
@@ -60,7 +70,7 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(Job(FeedId.From(Guid.NewGuid()), JobState.Queued));
 
-		await Assert.That(UpNextView.InTheQueue(queue, Names, Brands, [MediaProvider.Plex])[0].Brands).IsEmpty();
+		await Assert.That(UpNextView.InTheQueue(queue, Names, Brands, Plex)[0].Brands).IsEmpty();
 	}
 
 	[Test]
@@ -68,7 +78,7 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ManualTrigger()), JobState.Queued, default, 0));
 
-		var rows = UpNextView.InTheQueue(queue, Names, Brands, [MediaProvider.Plex]);
+		var rows = UpNextView.InTheQueue(queue, Names, Brands, Plex);
 
 		await Assert.That(rows[0].Name).IsEqualTo("Sync Wantlist");
 	}
@@ -78,7 +88,7 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ScheduledFeedTrigger()), JobState.Waiting, Now.AddMinutes(2), 0));
 
-		var row = UpNextView.InTheQueue(queue, Names, Brands, [MediaProvider.Plex])[0];
+		var row = UpNextView.InTheQueue(queue, Names, Brands, Plex)[0];
 
 		await Assert.That(row.Kind).IsEqualTo(UpNextKind.Waiting);
 		await Assert.That(row.Detail).IsEqualTo("waiting for grace period");
@@ -90,7 +100,7 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(Job(Docs, JobState.Done), Job(Anime, JobState.Failed));
 
-		await Assert.That(UpNextView.InTheQueue(queue, Names, Brands, [MediaProvider.Plex])).IsEmpty();
+		await Assert.That(UpNextView.InTheQueue(queue, Names, Brands, Plex)).IsEmpty();
 	}
 
 	[Test]
@@ -98,7 +108,7 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(Job(FeedId.From(Guid.NewGuid()), JobState.Queued));
 
-		var row = UpNextView.InTheQueue(queue, Names, Brands, [MediaProvider.Plex])[0];
+		var row = UpNextView.InTheQueue(queue, Names, Brands, Plex)[0];
 
 		await Assert.That(row.Name).IsEqualTo("A deleted feed");
 		await Assert.That(row.Href).IsNull();
@@ -113,7 +123,7 @@ public class UpNextViewTests
 			new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ManualTrigger()), JobState.Queued, default, 0)
 		);
 
-		var rows = UpNextView.InTheQueue(queue, Names, Brands, [MediaProvider.Plex]);
+		var rows = UpNextView.InTheQueue(queue, Names, Brands, Plex);
 
 		await Assert.That(rows[0].Href).IsEqualTo($"/feeds/edit/{UrlGuid.Encode(Docs.Value)}");
 		await Assert.That(rows[1].Href).IsNull();
@@ -125,7 +135,7 @@ public class UpNextViewTests
 	{
 		IReadOnlyList<Feed> feeds = [Feed(Docs, "docs", new Scheduled("0 0 4 * * *"))];
 
-		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc);
+		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc, Branding);
 
 		await Assert.That(rows[0].Href).IsEqualTo($"/feeds/edit/{UrlGuid.Encode(Docs.Value)}");
 	}
@@ -140,7 +150,7 @@ public class UpNextViewTests
 			Feed(FeedId.From(Guid.NewGuid()), "hourly", new Scheduled("0 0 * * * *")),
 		];
 
-		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc);
+		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc, Branding);
 
 		await Assert.That(rows.Select(row => row.Name)).IsEquivalentTo(["hourly", "docs"], CollectionOrdering.Matching);
 	}
@@ -150,7 +160,7 @@ public class UpNextViewTests
 	{
 		IReadOnlyList<Feed> feeds = [Feed(Docs, "docs", new Scheduled("0 0 4 * * *"))];
 
-		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc);
+		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc, Branding);
 
 		await Assert.That(rows.Single().RunsAt).IsNone();
 	}
@@ -160,7 +170,7 @@ public class UpNextViewTests
 	{
 		IReadOnlyList<Feed> feeds = [Feed(Docs, "docs", new Scheduled("0 0 4 * * *")) with { Enabled = false }];
 
-		await Assert.That(UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc)).IsEmpty();
+		await Assert.That(UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc, Branding)).IsEmpty();
 	}
 
 	[Test]
@@ -172,7 +182,7 @@ public class UpNextViewTests
 			new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ScheduledFeedTrigger()), JobState.Waiting, Now.AddMinutes(2), 0)
 		);
 
-		var rows = UpNextView.InTheQueue(queue, Names, Brands, [MediaProvider.Plex]);
+		var rows = UpNextView.InTheQueue(queue, Names, Brands, Plex);
 
 		await Assert.That(rows.Select(row => row.CanCancel)).IsEquivalentTo([false, true, true], CollectionOrdering.Matching);
 		await Assert.That(rows.Select(row => row.Job.ToNullable())).IsEquivalentTo(queue.Jobs.Select(job => (JobId?)job.Id), CollectionOrdering.Matching);

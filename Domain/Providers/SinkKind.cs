@@ -21,13 +21,4 @@ public static class SinkKindConversions
 			SinkKind.Arr => new None(),
 		};
 	}
-
-	public static IReadOnlyList<MediaProvider> Providers(this SinkKind value)
-	{
-		return value switch
-		{
-			SinkKind.Plex => [MediaProvider.Plex],
-			SinkKind.Arr => [MediaProvider.Radarr, MediaProvider.Sonarr],
-		};
-	}
 }

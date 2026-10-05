@@ -1,23 +1,32 @@
 @using Domain.Jobs
 @using UI.Features.Home.Components
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
 
 <DemoCard Title="Up next" Where="Home" Span="2"
           Note="UpNextPanel with a running feed, a queued sync, a sync waiting out its grace period (with its countdown), a job for a deleted feed, and the scheduled feeds. Queued and waiting jobs can be cancelled.">
-    <UpNextPanel Queued="Queued" Scheduled="Scheduled" OnCancel="_ => {}"/>
+    <UpNextPanel Queued="_queued" Scheduled="_scheduled" OnCancel="_ => {}"/>
 </DemoCard>
 
 @code {
-    private static readonly IReadOnlyList<UpNextRow> Queued =
-    [
-        new(DemoFeeds.MirrorFeed.Name, "running now", "running", UpNextKind.Running, "/feeds") { Brands = [MediaProvider.Mdblist] },
-        new("Sync Wantlist", "queued", "2nd in line", UpNextKind.Queued, null) { Job = Some.Of(JobId.From(Guid.NewGuid())), Brands = [MediaProvider.Plex] },
-        new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null) { Brands = [MediaProvider.Radarr, MediaProvider.Sonarr], RunsAt = Some.Of(DemoFeeds.Now.AddMinutes(2)), Job = Some.Of(JobId.From(Guid.NewGuid())) },
-        new("A deleted feed", "queued", "4th in line", UpNextKind.Queued, null, Deleted: true) { Job = Some.Of(JobId.From(Guid.NewGuid())) },
-    ];
+    private IReadOnlyList<UpNextRow> _queued = [];
 
-    private static readonly IReadOnlyList<UpNextRow> Scheduled =
-    [
-        new(DemoFeeds.MirrorFeed.Name, "At 09:00", "in 13 hours", UpNextKind.Scheduled, "/feeds") { Brands = [MediaProvider.Mdblist] },
-        new("hdlists/latest-hd-documentary-movies-1980-to-today", "At 26 minutes past the hour", "in 34 min", UpNextKind.Scheduled, "/feeds") { Brands = [MediaProvider.Mdblist] },
-    ];
+    private IReadOnlyList<UpNextRow> _scheduled = [];
+
+    protected override void OnInitialized()
+    {
+        var mdblist = Branding.GetBrandingInfo(MediaProvider.Mdblist);
+        _queued =
+        [
+            new(DemoFeeds.MirrorFeed.Name, "running now", "running", UpNextKind.Running, "/feeds") { Brands = [mdblist] },
+            new("Sync Wantlist", "queued", "2nd in line", UpNextKind.Queued, null) { Job = Some.Of(JobId.From(Guid.NewGuid())), Brands = [Branding.GetBrandingInfo(MediaProvider.Plex)] },
+            new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null) { Brands = Branding.Brands(SinkKind.Arr), RunsAt = Some.Of(DemoFeeds.Now.AddMinutes(2)), Job = Some.Of(JobId.From(Guid.NewGuid())) },
+            new("A deleted feed", "queued", "4th in line", UpNextKind.Queued, null, Deleted: true) { Job = Some.Of(JobId.From(Guid.NewGuid())) },
+        ];
+        _scheduled =
+        [
+            new(DemoFeeds.MirrorFeed.Name, "At 09:00", "in 13 hours", UpNextKind.Scheduled, "/feeds") { Brands = [mdblist] },
+            new("hdlists/latest-hd-documentary-movies-1980-to-today", "At 26 minutes past the hour", "in 34 min", UpNextKind.Scheduled, "/feeds") { Brands = [mdblist] },
+        ];
+    }
 }

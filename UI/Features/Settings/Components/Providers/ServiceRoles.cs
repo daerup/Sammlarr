@@ -17,14 +17,14 @@ internal static class ServiceRoles
 		"Wantlist",
 		"bookmark",
 		"Where the wantlist syncs to",
-		Enum.GetValues<SinkKind>().SelectMany(sink => sink.Providers()).ToHashSet()
+		Enum.GetValues<SinkKind>().Select(sink => sink.Provider()).WhereSome().ToHashSet()
 	);
 
 	internal static readonly ServiceRole Search = new(
 		"Search",
 		"search",
 		"Finding titles to add",
-		Enum.GetValues<SearchProvider>().SelectMany(search => search.Providers()).ToHashSet()
+		Enum.GetValues<SearchProvider>().Select(search => search.Provider()).WhereSome().ToHashSet()
 	);
 
 	internal static readonly ServiceRole Trending = new(
