@@ -73,7 +73,6 @@ public enum FeedProvider
 {
 	[Description("TMDB")]
 	Tmdb,
-	[Description("Mdblist")]
 	Mdblist,
 }
 
@@ -81,7 +80,6 @@ public enum ApiKeyProvider
 {
 	[Description("TMDB")]
 	Tmdb,
-	[Description("Mdblist")]
 	Mdblist,
 }
 
