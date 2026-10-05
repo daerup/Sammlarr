@@ -6,11 +6,11 @@
     <div class="provenance-body">
         <div class="provenance-head">
             <span class="provenance-mark">
-                @if (ProvenanceView.Providers(Provenance) is { Count: > 0 } providers)
+                @if (ProvenanceView.Brands(Provenance, Branding) is { Count: > 0 } brands)
                 {
-                    @foreach (var provider in providers)
+                    @foreach (var brand in brands)
                     {
-                        <ProviderLogo Provider="provider" Size="16" Decorative="true"/>
+                        <BrandedLogo Brand="brand" Size="16" Decorative="true"/>
                     }
                 }
                 else

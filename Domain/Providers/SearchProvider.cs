@@ -25,14 +25,4 @@ public static class SearchProviderConversions
 			SearchProvider.Arr => new None(),
 		};
 	}
-
-	public static IReadOnlyList<MediaProvider> Providers(this SearchProvider value)
-	{
-		return value switch
-		{
-			SearchProvider.Tmdb => [MediaProvider.Tmdb],
-			SearchProvider.Plex => [MediaProvider.Plex],
-			SearchProvider.Arr => [MediaProvider.Radarr, MediaProvider.Sonarr],
-		};
-	}
 }

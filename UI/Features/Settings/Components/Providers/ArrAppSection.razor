@@ -4,9 +4,9 @@
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
 
-<div class="arr-app" style="--seg: @Branding.GetBrandingInfo(App.Provider).BrandColor" aria-label="@App.Name">
+<div class="arr-app" style="--seg: @Branding.GetBrandingInfo(App).BrandColor" aria-label="@App.Name">
     <div class="arr-app-head">
-        <ProviderLogo Provider="App.Provider" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+        <BrandedLogo Brand="Branding.GetBrandingInfo(App)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
         <span>@App.Name</span>
         <span class="arr-app-for">@For</span>
         <span class="arr-app-state">

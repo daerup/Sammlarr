@@ -1,12 +1,16 @@
 using Bunit;
 using Domain.Providers;
+using Domain.Wantlist.Arr;
 using TUnit.Assertions.Enums;
 using UI.Shared.Branding;
+using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Branding;
 
 public class ProviderTileTests : BunitContext
 {
+	private static readonly MediaProviderBrandingService Branding = new();
+
 	[Before(Test)]
 	public void Setup() => Services.AddProviderBranding();
 
@@ -34,7 +38,9 @@ public class ProviderTileTests : BunitContext
 	[Test]
 	public async Task PairTile_ForRadarrAndSonarr_DrawsBothMarksAtEighteenTwentyEighthsOfTheTile()
 	{
-		var cut = Render<ProviderPairTile>(parameters => parameters.Add(tile => tile.First, MediaProvider.Radarr).Add(tile => tile.Second, MediaProvider.Sonarr));
+		var cut = Render<ProviderPairTile>(parameters =>
+			parameters.Add(tile => tile.First, Branding.GetBrandingInfo(ArrApp.Radarr)).Add(tile => tile.Second, Branding.GetBrandingInfo(ArrApp.Sonarr))
+		);
 
 		var images = cut.FindAll(".provider-pair img.is-light");
 		await Assert.That(images.Select(image => image.GetAttribute("alt") ?? string.Empty)).IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);

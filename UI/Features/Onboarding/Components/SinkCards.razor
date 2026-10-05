@@ -6,9 +6,9 @@
     {
         <ChoiceCard Value="card.Sink" Id="@($"sink-{card.Sink}")" Title="@card.Title" Brand="@Branding.SinkColor(card.Sink)" Lines="card.Lines" Picked="card.Sink == Picked">
             <Mark>
-                @foreach (var provider in card.Sink.Providers())
+                @foreach (var brand in Branding.Brands(card.Sink))
                 {
-                    <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
+                    <BrandedLogo Brand="brand" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
                 }
             </Mark>
         </ChoiceCard>

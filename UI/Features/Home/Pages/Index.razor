@@ -193,9 +193,12 @@ else
 
     private IReadOnlyDictionary<FeedId, string> FeedNames() => _feeds.ToDictionary(feed => feed.Id, feed => feed.Name);
 
-    private IReadOnlyDictionary<FeedId, MediaProvider> FeedBrands() => _feeds.ToDictionary(feed => feed.Id, feed => feed.Provider.AsMediaProvider());
+    private IReadOnlyDictionary<FeedId, BrandingInfo> FeedBrands()
+    {
+        return _feeds.ToDictionary(feed => feed.Id, feed => BrandingService.GetBrandingInfo(feed.Provider.AsMediaProvider()));
+    }
 
-    private IReadOnlyList<MediaProvider> Sink => (_settings?.Sink ?? SinkKind.Plex).Providers();
+    private IReadOnlyList<BrandingInfo> Sink => BrandingService.Brands(_settings?.Sink ?? SinkKind.Plex);
 
     private bool IsConnected() => _isConnected;
 
@@ -325,7 +328,7 @@ else
             _sources = LibraryView.Sources(feeds.Feeds, _wantlistCount, ProviderName);
             _queued = UpNextView.InTheQueue(queue, names, brands, Sink);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);
-            _scheduled = UpNextView.OnASchedule(_feeds, _now, TimeZoneInfo.Local);
+            _scheduled = UpNextView.OnASchedule(_feeds, _now, TimeZoneInfo.Local, BrandingService);
             _candidates = RunPlan.Candidates(feeds.Feeds, _now, TimeZoneInfo.Local);
             _days = ActivityLog.Days(runs, names, TimeZoneInfo.Local);
         }

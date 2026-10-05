@@ -1,10 +1,14 @@
+@using Domain.Wantlist.Arr
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
 <DemoCard Title="Provider tiles" Where="Services map, sink cards"
           Note="ProviderTile for one provider and ProviderPairTile for Radarr + Sonarr, at the sizes the app draws them.">
     <div class="flex flex-wrap items-end gap-4">
         @foreach (var size in Sizes)
         {
             <ProviderTile Provider="MediaProvider.Plex" Size="size"/>
-            <ProviderPairTile First="MediaProvider.Radarr" Second="MediaProvider.Sonarr" Size="size"/>
+            <ProviderPairTile First="Branding.GetBrandingInfo(ArrApp.Radarr)" Second="Branding.GetBrandingInfo(ArrApp.Sonarr)" Size="size"/>
         }
     </div>
 </DemoCard>

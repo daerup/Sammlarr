@@ -94,8 +94,9 @@ public class GlobalSearchTests : BunitContext
 	}
 
 	[Test]
-	[Arguments(SearchProvider.Tmdb, "Results from TMDB")]
+	[Arguments(SearchProvider.Tmdb, "Results from The Movie Database")]
 	[Arguments(SearchProvider.Arr, "Results from Radarr and Sonarr")]
+	[Arguments(SearchProvider.Plex, "Results from Plex")]
 	public async Task Search_WithResults_SaysWhereTheyCameFrom(SearchProvider provider, string source)
 	{
 		_providerConfig

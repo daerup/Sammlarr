@@ -15,8 +15,8 @@ internal class ArrModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddHttpClient<RadarrApi>().AddProviderHttp<RadarrOptions>(MediaProvider.Radarr);
-		services.AddHttpClient<SonarrApi>().AddProviderHttp<SonarrOptions>(MediaProvider.Sonarr);
+		services.AddHttpClient<RadarrApi>().AddProviderHttp<RadarrOptions>();
+		services.AddHttpClient<SonarrApi>().AddProviderHttp<SonarrOptions>();
 		services.AddScoped<ArrApis>();
 		services.AddKeyedScoped<IMediaSink, ArrSink>(SinkKind.Arr);
 		services.AddKeyedScoped<IMediaSearchProvider, ArrSearch>(SearchProvider.Arr);

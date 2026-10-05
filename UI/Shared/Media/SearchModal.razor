@@ -1,5 +1,7 @@
 @using Contracts.Media.Search
+@using UI.Shared.Services.Branding
 @inject IMediaSearchService SearchService
+@inject MediaProviderBrandingService Branding
 @inject Notifier Notifier
 <KeyboardShortcut Keys="@ShortcutKeys" OnInvoked="OpenFromShortcutAsync" Enabled="ShortcutEnabled"/>
 @if (IsOpen)
@@ -98,9 +100,9 @@
                     </div>
                     <BbSeparator/>
                     <p class="flex items-center gap-2 text-xs text-muted-foreground">
-                        @foreach (var provider in SearchProvider.Providers())
+                        @foreach (var brand in Brands)
                         {
-                            <ProviderLogo Provider="provider" Form="@FooterForm" Size="14" Decorative="true"/>
+                            <BrandedLogo Brand="brand" Form="@FooterForm" Size="14" Decorative="true"/>
                         }
                         <span>Results from @ResultsSource</span>
                     </p>
@@ -149,8 +151,9 @@
     private string SearchProviderName => SearchProvider.GetDescription();
     private string SearchModalTitle => Title ?? $"Search {SearchProviderName}";
     private string SearchModalDescription => Description ?? $"Find a movie or show from {SearchProviderName} and add it to your wantlist.";
-    private ProviderLogoForm FooterForm => SearchProvider.Providers().Count == 1 ? ProviderLogoForm.Logo : ProviderLogoForm.Mark;
-    private string ResultsSource => string.Join(" and ", SearchProvider.Providers().Select(provider => provider.GetDescription()));
+    private IReadOnlyList<BrandingInfo> Brands => Branding.Brands(SearchProvider);
+    private ProviderLogoForm FooterForm => Brands.Count == 1 ? ProviderLogoForm.Logo : ProviderLogoForm.Mark;
+    private string ResultsSource => string.Join(" and ", Brands.Select(brand => brand.DisplayName));
 
     protected override void OnParametersSet()
     {

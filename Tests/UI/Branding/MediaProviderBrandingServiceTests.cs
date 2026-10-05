@@ -12,14 +12,21 @@ public class MediaProviderBrandingServiceTests
 
 	private MediaProviderBrandingService Testee { get; } = new();
 
-	public static IEnumerable<MediaProvider> AllProviders() => Enum.GetValues<MediaProvider>();
+	public static IEnumerable<Func<BrandingInfo>> AllBrands()
+	{
+		var branding = new MediaProviderBrandingService();
+		return
+		[
+			.. Enum.GetValues<MediaProvider>().Select(provider => (Func<BrandingInfo>)(() => branding.GetBrandingInfo(provider))),
+			.. Enum.GetValues<ArrApp>().Select(app => (Func<BrandingInfo>)(() => branding.GetBrandingInfo(app))),
+			() => branding.GetBrandingInfo(AuthProvider.Local),
+		];
+	}
 
 	[Test]
-	[MethodDataSource(nameof(AllProviders))]
-	public async Task GetBrandingInfo_ForEveryProvider_NamesFilesThatExistAndAreClean(MediaProvider provider)
+	[MethodDataSource(nameof(AllBrands))]
+	public async Task GetBrandingInfo_ForEveryBrand_NamesFilesThatExistAndAreClean(BrandingInfo brand)
 	{
-		var brand = Testee.GetBrandingInfo(provider);
-
 		var files = new[] { brand.Mark, brand.Logo, brand.Tile.Art }
 			.SelectMany(art => new[] { art.Light, art.Dark })
 			.Distinct()
@@ -38,12 +45,9 @@ public class MediaProviderBrandingServiceTests
 	}
 
 	[Test]
-	public async Task GetBrandingInfo_ForSammlarrAccounts_IsSammlarrsOwnBrandWithFilesThatExist()
+	public async Task GetBrandingInfo_ForSammlarrAccounts_IsSammlarrsOwnBrand()
 	{
-		var brand = Testee.GetBrandingInfo(AuthProvider.Local);
-
-		await Assert.That(brand.NickName).IsEqualTo("Sammlarr");
-		await Assert.That(new[] { brand.Mark.Light, brand.Mark.Dark }.Where(file => !File.Exists(Path.Combine(ProvidersFolder, file)))).IsEmpty();
+		await Assert.That(Testee.GetBrandingInfo(AuthProvider.Local).NickName).IsEqualTo("Sammlarr");
 	}
 
 	[Test]

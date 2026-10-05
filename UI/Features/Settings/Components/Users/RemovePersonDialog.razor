@@ -1,5 +1,6 @@
 @using Contracts.Identity
 @using Contracts.Wantlist
+@using Domain.Wantlist.Arr
 @using UI.Shared.Services.Branding
 @inject IUserManagementService Users
 @inject MediaProviderBrandingService Branding
@@ -35,9 +36,9 @@
                     <span>
                         <span class="flex flex-wrap items-center gap-1.5 text-sm font-medium">
                             Also delete their titles from
-                            <ProviderLogo Provider="MediaProvider.Radarr" Form="ProviderLogoForm.Mark" Size="15" Decorative="true"/>
+                            <BrandedLogo Brand="Branding.GetBrandingInfo(ArrApp.Radarr)" Form="ProviderLogoForm.Mark" Size="15" Decorative="true"/>
                             Radarr and
-                            <ProviderLogo Provider="MediaProvider.Sonarr" Form="ProviderLogoForm.Mark" Size="15" Decorative="true"/>
+                            <BrandedLogo Brand="Branding.GetBrandingInfo(ArrApp.Sonarr)" Form="ProviderLogoForm.Mark" Size="15" Decorative="true"/>
                             Sonarr
                         </span>
                         <span class="mt-0.5 block text-xs text-muted-foreground" data-holdings>

@@ -3,6 +3,7 @@ using Domain.Feed;
 using Domain.Jobs;
 using Domain.Providers;
 using UI.Features.Feeds.Components;
+using UI.Shared.Services.Branding;
 using UrlGuid = Shared.UrlGuid;
 
 namespace UI.Features.Home.Components;
@@ -17,7 +18,7 @@ public enum UpNextKind
 
 public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href, bool Deleted = false)
 {
-	public IReadOnlyList<MediaProvider> Brands { get; init; } = [];
+	public IReadOnlyList<BrandingInfo> Brands { get; init; } = [];
 
 	public Optional<DateTimeOffset> RunsAt { get; init; } = new None();
 
@@ -31,15 +32,15 @@ internal static class UpNextView
 	internal static IReadOnlyList<UpNextRow> InTheQueue(
 		QueueSnapshot queue,
 		IReadOnlyDictionary<FeedId, string> feedNames,
-		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
-		IReadOnlyList<MediaProvider> sinkProviders
+		IReadOnlyDictionary<FeedId, BrandingInfo> feedBrands,
+		IReadOnlyList<BrandingInfo> sinkBrands
 	)
 	{
 		return
 		[
 			.. queue
 				.Jobs.Where(job => job.State is JobState.Waiting or JobState.Queued or JobState.Running)
-				.Select(job => Row(job, feedNames, feedBrands, sinkProviders)),
+				.Select(job => Row(job, feedNames, feedBrands, sinkBrands)),
 		];
 	}
 
@@ -51,7 +52,7 @@ internal static class UpNextView
 			.Select(feed => feed.Id)
 			.ToHashSet();
 
-	internal static IReadOnlyList<UpNextRow> OnASchedule(IReadOnlyList<Feed> feeds, DateTimeOffset from, TimeZoneInfo zone)
+	internal static IReadOnlyList<UpNextRow> OnASchedule(IReadOnlyList<Feed> feeds, DateTimeOffset from, TimeZoneInfo zone, MediaProviderBrandingService branding)
 	{
 		return
 		[
@@ -68,7 +69,7 @@ internal static class UpNextView
 					EditHref(entry.feed.Id)
 				)
 				{
-					Brands = [entry.feed.Provider.AsMediaProvider()],
+					Brands = [branding.GetBrandingInfo(entry.feed.Provider.AsMediaProvider())],
 				}),
 		];
 	}
@@ -76,13 +77,13 @@ internal static class UpNextView
 	private static UpNextRow Row(
 		PendingJob job,
 		IReadOnlyDictionary<FeedId, string> feedNames,
-		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
-		IReadOnlyList<MediaProvider> sinkProviders
+		IReadOnlyDictionary<FeedId, BrandingInfo> feedBrands,
+		IReadOnlyList<BrandingInfo> sinkBrands
 	)
 	{
 		var name = Name(job.Request, feedNames);
 		var href = Href(job.Request, feedNames);
-		var brands = Brands(job.Request, feedBrands, sinkProviders);
+		var brands = Brands(job.Request, feedBrands, sinkBrands);
 		var deleted = Deleted(job.Request, feedNames);
 		if (job.State is JobState.Running)
 		{
@@ -100,16 +101,16 @@ internal static class UpNextView
 		return new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, deleted) { Job = Some.Of(job.Id), Brands = brands };
 	}
 
-	private static IReadOnlyList<MediaProvider> Brands(
+	private static IReadOnlyList<BrandingInfo> Brands(
 		IJobRequest request,
-		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
-		IReadOnlyList<MediaProvider> sinkProviders
+		IReadOnlyDictionary<FeedId, BrandingInfo> feedBrands,
+		IReadOnlyList<BrandingInfo> sinkBrands
 	)
 	{
 		return request switch
 		{
-			RunFeed feed => feedBrands.GetValueOrNone(feed.Id).Match(provider => (IReadOnlyList<MediaProvider>)[provider], () => []),
-			SyncWantlist => sinkProviders,
+			RunFeed feed => feedBrands.GetValueOrNone(feed.Id).Match(brand => (IReadOnlyList<BrandingInfo>)[brand], () => []),
+			SyncWantlist => sinkBrands,
 			_ => [],
 		};
 	}
