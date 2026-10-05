@@ -36,7 +36,8 @@ everyone's. _Measure:_ the isolation integration tests pass; the current-user lo
 
 Scenario R (resilience):: A feed loads while Plex returns 429 or is unreachable. _Response:_
 affected ids become `UnmatchedMedia` ("not found"), the run completes and no exception escapes.
-A provider blocked by a 429 or an open circuit breaker is skipped by every title, and one that answered
+A provider blocked by a 429 or an open circuit breaker is never sent a request into the block: a title waits for it at
+most once and only within its budget (`MaxWait` for ids, `EnrichWait` for details), else skips it, and one that answered
 as unavailable is not asked again by the same title's other routes, so the storm is not amplified; the
 ids are not cached unmatched, so the next run retries them. _Measure:_ partial results are returned;
 `ProviderUnavailableException` is handled, not propagated.

@@ -199,14 +199,21 @@ by roughly an order of magnitude.
 
 Which provider is asked depends on its load. `IProviderCapacity.Of(provider)` gives a `ProviderLoad`:
 `BlockedUntil` (set by a 429's `Retry-After`, 30 seconds without one, or an open circuit breaker's break), `Busy`
-(in-flight requests over the concurrency gate's limit) and `MaxWait` (the provider's `Http.MaxWaitSeconds`: Plex 90,
-TMDB 15, 0 never waits). It lives in `API/Http` next to the gates and handlers that feed it; Core reads only the
-contract. Enrichment skips a blocked provider and never waits for it; id resolution waits for it, capped by its
-`MaxWait` (below). The request already in flight still honours `Retry-After` through the retry policy.
+(in-flight requests over the concurrency gate's limit), `MaxWait` (the provider's `Http.MaxWaitSeconds`: Plex 90,
+TMDB 15, 0 never waits) and `EnrichWait` (`Http.EnrichWaitSeconds`: TMDB 15, Plex unset, so never). It lives in
+`API/Http` next to the gates and handlers that feed it; Core reads only the contract. Both id resolution and
+enrichment wait for a blocked provider the same way, asking `FreesWithin`: only while its block ends within its
+budget (`MaxWait` for id lookups, `EnrichWait` for enrichment), at most once per title, sleeping until it is free
+instead of sending a request into the block. The request already in flight still honours `Retry-After` through the
+retry policy.
 
 Enrichment asks, one at a time, the open enricher (`EnricherProvider`, generated from `ProviderCapability.Enricher`)
 whose `Fills` cover the most missing fields, the least busy first, among those the title has an id for, until
-no open enricher can fill what is still missing. Only the enrichers the current user has connected (a key or a
+no open enricher can fill what is still missing; then it sleeps for the blocked enricher worth waiting for (one that
+fills a missing field, frees within its `EnrichWait` and has not been waited for yet, the soonest free first) and
+carries on, else it stops. A feed run loads about 100 titles in parallel and they sleep through the same block, so the
+sleep adds at most one budget per provider to a title, though the request after it can still wait out a new
+`Retry-After` within its timeout. Only the enrichers the current user has connected (a key or a
 sign-in, read once per call to the media service, so once per batch or feed run) are asked. An enricher that was skipped because it was blocked, or that failed, stores no
 answer, so a later load asks it once the hour since the last ask has passed and it is open again. Ratings are fields per source:
 `MediaCompleteness` counts each `RatingSource` (TMDB, IMDb, Rotten Tomatoes critics and audience) the title has no
@@ -217,11 +224,10 @@ none, so Plex's copy of TMDB's rating, which carries no votes, leaves TMDB asked
 own scale and its conversion onto the Sammlarr scale of 0 to 10; `RatingSource` lists the providers that supply each
 source in `[SuppliedBy]`, read through the generated `SuppliedBy()`. Merging keeps one rating per source, and a rating
 with votes wins over a copy without (TMDB's own rating over Plex's copy of it). An enricher that fills ratings and
-finds none answers like any other: the rating stays in what it could not give. Unlike the other fields, while a title has no rating at all,
-an enricher that fills ratings is asked even when it is blocked, so the retry pipeline waits out its `Retry-After`;
-once the title has one rating, the other sources wait for an open enricher like any other field, so a blocked TMDB
-stores no answer beside Plex's copy and is asked on the first load after its block lifts and an hour has passed since
-the last ask.
+finds none answers like any other: the rating stays in what it could not give. No field and no provider is special: a
+blocked TMDB is waited for within its 15 seconds for a missing rating, tagline or poster alike, and a TMDB blocked for
+longer, like a blocked Plex, stores no answer and is asked on the first load after its block lifts and an hour has
+passed since the last ask.
 
 Id resolution routes the same way. Each `IExternalIdConverter` announces its `Lookups`, the calls its own provider
 answers: a `ById` lookup accepts some providers' ids, a `ByHints` lookup accepts the title hints, and each says

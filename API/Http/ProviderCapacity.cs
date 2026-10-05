@@ -7,7 +7,7 @@ using Domain.Providers;
 
 namespace API.Http;
 
-internal sealed record ProviderWait(MediaProvider Provider, TimeSpan MaxWait);
+internal sealed record ProviderWait(MediaProvider Provider, TimeSpan MaxWait, TimeSpan EnrichWait);
 
 internal sealed class ProviderCapacity(ProviderConcurrencyGates gates, IDateTimeProvider clock, IEnumerable<ProviderWait> waits) : IProviderCapacity
 {
@@ -15,14 +15,18 @@ internal sealed class ProviderCapacity(ProviderConcurrencyGates gates, IDateTime
 
 	private readonly ConcurrentDictionary<MediaProvider, DateTimeOffset> _blockedUntil = new();
 
-	private readonly IReadOnlyDictionary<MediaProvider, TimeSpan> _maxWaits = waits
-		.DistinctBy(wait => wait.Provider)
-		.ToDictionary(wait => wait.Provider, wait => wait.MaxWait);
+	private readonly IReadOnlyDictionary<MediaProvider, ProviderWait> _waits = waits.DistinctBy(wait => wait.Provider).ToDictionary(wait => wait.Provider);
 
 	public ProviderLoad Of(MediaProvider provider)
 	{
 		var blockedUntil = _blockedUntil.GetValueOrNone(provider);
-		return new ProviderLoad(blockedUntil, gates.Busy(provider), _maxWaits.GetValueOrDefault(provider));
+		var wait = _waits.GetValueOrNone(provider);
+		return new ProviderLoad(
+			blockedUntil,
+			gates.Busy(provider),
+			wait.Map(found => found.MaxWait).GetValueOr(TimeSpan.Zero),
+			wait.Map(found => found.EnrichWait).GetValueOr(TimeSpan.Zero)
+		);
 	}
 
 	internal void Block(MediaProvider provider, RetryConditionHeaderValue? retryAfter) =>

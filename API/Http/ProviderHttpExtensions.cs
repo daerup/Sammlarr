@@ -51,9 +51,14 @@ internal static class ProviderHttpExtensions
 
 		provider
 			.Apply(measured => builder.AddHttpMessageHandler(sp => new CapacityHandler(measured, sp.GetRequiredService<ProviderCapacity>())))
-			.Apply(measured => builder.Services.AddSingleton(sp => new ProviderWait(measured, TimeSpan.FromSeconds(Resolve(sp).MaxWaitSeconds))));
+			.Apply(measured => builder.Services.AddSingleton(sp => Wait(measured, Resolve(sp))));
 
 		return builder;
+	}
+
+	private static ProviderWait Wait(MediaProvider provider, ProviderHttpOptions http)
+	{
+		return new ProviderWait(provider, TimeSpan.FromSeconds(http.MaxWaitSeconds), TimeSpan.FromSeconds(http.EnrichWaitSeconds));
 	}
 
 	private static void ConfigureResilience(

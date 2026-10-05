@@ -20,6 +20,20 @@ internal static class EnricherChoice
 			.FirstOrNone(candidate => candidate.CanHelp(needed, now));
 	}
 
+	internal static Optional<EnricherCandidate> WorthWaitingFor(
+		MediaFields needed,
+		IEnumerable<EnricherCandidate> leftToAsk,
+		IReadOnlySet<MediaProvider> waited,
+		DateTimeOffset now
+	)
+	{
+		return leftToAsk
+			.Where(candidate => needed.Overlaps(candidate.Fills) && !waited.Contains(candidate.Provider))
+			.Where(candidate => candidate.Load.FreesWithin(now, candidate.Load.EnrichWait))
+			.OrderBy(candidate => candidate.Load.FreeAt(now))
+			.FirstOrNone();
+	}
+
 	internal static bool NeedsRefetch(CachedDetails cached, IReadOnlyList<EnricherCandidate> leftToAsk, DateTimeOffset now)
 	{
 		var stale = cached.IsStale(now);
