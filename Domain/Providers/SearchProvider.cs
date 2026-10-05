@@ -16,6 +16,16 @@ public enum SearchProvider
 
 public static class SearchProviderConversions
 {
+	public static Optional<MediaProvider> Provider(this SearchProvider value)
+	{
+		return value switch
+		{
+			SearchProvider.Tmdb => Some.Of(MediaProvider.Tmdb),
+			SearchProvider.Plex => Some.Of(MediaProvider.Plex),
+			SearchProvider.Arr => new None(),
+		};
+	}
+
 	public static IReadOnlyList<MediaProvider> Providers(this SearchProvider value)
 	{
 		return value switch

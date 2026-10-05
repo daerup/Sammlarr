@@ -1,4 +1,5 @@
 using Domain.Providers;
+using Domain.Wantlist.Arr;
 
 namespace UI.Shared.Services.Branding;
 
@@ -7,8 +8,6 @@ public class MediaProviderBrandingService
 	private const string MutedTile = "var(--muted)";
 
 	private const string OwnTile = "transparent";
-
-	private const string RadarrAndSonarr = "color-mix(in oklch, #FFC230, #35C5F4)";
 
 	private static readonly BrandingInfo Sammlarr = new(
 		"Sammlarr accounts",
@@ -21,12 +20,30 @@ public class MediaProviderBrandingService
 
 	public BrandingInfo GetBrandingInfo(AuthProvider signIn) => signIn.Provider().Match(GetBrandingInfo, () => Sammlarr);
 
+	public BrandingInfo GetBrandingInfo(ArrApp app) => GetBrandingInfo(app.Provider);
+
+	public string ArrColor
+	{
+		get
+		{
+			var radarr = GetBrandingInfo(ArrApp.Radarr).BrandColor;
+			var sonarr = GetBrandingInfo(ArrApp.Sonarr).BrandColor;
+			return $"color-mix(in oklch, {radarr}, {sonarr})";
+		}
+	}
+
+	public IReadOnlyList<BrandingInfo> Brands(SinkKind sink) => sink.Provider().Match(provider => [GetBrandingInfo(provider)], ArrBrands);
+
+	public IReadOnlyList<BrandingInfo> Brands(SearchProvider search) => search.Provider().Match(provider => [GetBrandingInfo(provider)], ArrBrands);
+
+	private IReadOnlyList<BrandingInfo> ArrBrands() => [.. Enum.GetValues<ArrApp>().Select(GetBrandingInfo)];
+
 	public string SinkColor(SinkKind sink)
 	{
 		return sink switch
 		{
 			SinkKind.Plex => GetBrandingInfo(MediaProvider.Plex).BrandColor,
-			SinkKind.Arr => RadarrAndSonarr,
+			SinkKind.Arr => ArrColor,
 		};
 	}
 

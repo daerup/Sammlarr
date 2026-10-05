@@ -44,7 +44,7 @@
     {
         <section class="flex flex-col gap-3" aria-label="Services">
             <h3 class="text-sm font-semibold">Services</h3>
-            <ServicesMap Config="MapConfig(config)" Ready="MapReady(config)" CanPick="IsAdmin" People="_people" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync" ServiceOpened="OpenService" AccountsOpened="OpenAccounts"/>
+            <ServicesMap Config="MapConfig(config)" Ready="_ready" ArrReady="ArrReady(config)" CanPick="IsAdmin" People="_people" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync" ServiceOpened="OpenService" ArrOpened="() => OpenRow(new Arr())" AccountsOpened="OpenAccounts"/>
         </section>
 
         @if (IsAdmin && (config.Sink == SinkKind.Arr || _settingUp))
@@ -52,8 +52,8 @@
             <section class="flex flex-col gap-3" aria-label="Wantlist sync">
                 <h3 class="text-sm font-semibold">Wantlist sync</h3>
                 <div class="rounded-lg border bg-card overflow-hidden">
-                    <ArrSinkRow Open="IsOpen(MediaProvider.Radarr)"
-                                OpenChanged="open => Toggle(MediaProvider.Radarr, open)"
+                    <ArrSinkRow Open="IsOpen(new Arr())"
+                                OpenChanged="open => Toggle(new Arr(), open)"
                                 SettingUp="_settingUp"
                                 Switching="_switching"
                                 SwitchRequested="() => SwitchToAsync(SinkKind.Arr)"
@@ -171,11 +171,7 @@
 
     private ProviderConfig MapConfig(ProviderConfig config) => _settingUp ? config with { Sink = SinkKind.Arr } : config;
 
-    private IReadOnlySet<MediaProvider> MapReady(ProviderConfig config)
-    {
-        var sink = (config.Sink == SinkKind.Arr && !_settingUp) || _arrConnected ? SinkKind.Arr.Providers() : [];
-        return _ready.Concat(sink).ToHashSet();
-    }
+    private bool ArrReady(ProviderConfig config) => (config.Sink == SinkKind.Arr && !_settingUp) || _arrConnected;
 
     private Task SinkPickedAsync(SinkKind sink)
     {
@@ -245,7 +241,7 @@
     private Task SetUpArrAsync()
     {
         _settingUp = _config?.Sink != SinkKind.Arr;
-        _open = MediaProvider.Radarr;
+        _open = new Arr();
         return Task.CompletedTask;
     }
 
@@ -263,7 +259,7 @@
     private void StayOnPlex()
     {
         _settingUp = false;
-        _open = _open == MediaProvider.Radarr ? null : _open;
+        _open = _open is Arr ? null : _open;
     }
 
     private Task SwitchToAsync(SinkKind sink) => RunAsync(sink, () => SinkSwitch.SwitchAsync(sink));
@@ -297,7 +293,7 @@
         Notifier.Success($"The wantlist now syncs to {sink.GetDescription()}: {moved.Queued - moved.Unaddressable} titles go across on each user's next sync.{skipped}");
     }
 
-    private bool IsOpen(MediaProvider provider) => _open == provider;
+    private bool IsOpen(ProviderRowKey key) => _open == key;
 
-    private void Toggle(MediaProvider provider, bool open) => _open = open ? provider : (ProviderRowKey?)null;
+    private void Toggle(ProviderRowKey key, bool open) => _open = open ? key : null;
 }

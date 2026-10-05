@@ -113,7 +113,7 @@ public class ProvidersSectionTests : BunitContext
 		await Assert.That(row.Get(arr => arr.SettingUp)).IsTrue();
 		await Assert.That(row.Get(arr => arr.Open)).IsTrue();
 		await Assert.That(Map(cut).Get(map => map.Config).Sink).IsEqualTo(SinkKind.Arr);
-		await Assert.That(Map(cut).Get(map => map.Ready)).DoesNotContain(MediaProvider.Radarr);
+		await Assert.That(Map(cut).Get(map => map.ArrReady)).IsFalse();
 	}
 
 	[Test]
@@ -196,7 +196,7 @@ public class ProvidersSectionTests : BunitContext
 
 		var cut = RenderSection();
 
-		await Assert.That(Map(cut).Get(map => map.Ready)).Contains(MediaProvider.Radarr).And.Contains(MediaProvider.Sonarr);
+		await Assert.That(Map(cut).Get(map => map.ArrReady)).IsTrue();
 	}
 
 	[Test]
@@ -209,7 +209,7 @@ public class ProvidersSectionTests : BunitContext
 
 		await cut.InvokeAsync(() => cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.Changed).InvokeAsync());
 
-		await Assert.That(Map(cut).Get(map => map.Ready)).Contains(MediaProvider.Radarr);
+		await Assert.That(Map(cut).Get(map => map.ArrReady)).IsTrue();
 	}
 
 	[Test]
@@ -221,7 +221,7 @@ public class ProvidersSectionTests : BunitContext
 		var cut = RenderSection();
 
 		await Assert.That(cut.FindComponents<Stub<ArrSinkRow>>()).IsEmpty();
-		await Assert.That(Map(cut).Get(map => map.Ready)).Contains(MediaProvider.Sonarr);
+		await Assert.That(Map(cut).Get(map => map.ArrReady)).IsTrue();
 	}
 
 	[Test]
@@ -237,15 +237,16 @@ public class ProvidersSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task ServiceOpened_ForRadarrAndSonarrOnThatSink_OpensTheWantlistSyncAndScrollsToIt()
+	public async Task ArrOpened_OpensTheWantlistSyncRingsItAndScrollsToIt()
 	{
 		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
 		var cut = RenderSection();
 
-		await cut.InvokeAsync(() => _ = Map(cut).Get(map => map.ServiceOpened).InvokeAsync(MediaProvider.Radarr));
+		await cut.InvokeAsync(() => Map(cut).Get(map => map.ArrOpened).InvokeAsync());
 
+		await Assert.That(cut.FindComponent<CascadingValue<ProviderRowKey?>>().Instance.Value).IsEqualTo(new Arr());
 		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.Open)).IsTrue();
-		await Assert.That(ScrolledTo(cut)).IsEqualTo("provider-row-radarr");
+		await Assert.That(ScrolledTo(cut)).IsEqualTo("provider-row-arr");
 	}
 
 	[Test]

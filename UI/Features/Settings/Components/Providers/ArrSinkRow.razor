@@ -10,7 +10,7 @@
 @inject ICurrentUser CurrentUser
 @inject MediaProviderBrandingService Branding
 
-<div id="@ProviderRows.Id(MediaProvider.Radarr)" class="arr-row @(Ringed == MediaProvider.Radarr ? "is-ringed" : null)" style="--mix: @Branding.SinkColor(SinkKind.Arr)">
+<div id="@ProviderRows.Id(new Arr())" class="arr-row @(Ringed is Arr ? "is-ringed" : null)" style="--mix: @Branding.SinkColor(SinkKind.Arr)">
     <BbCollapsible Open="Open" OpenChanged="OpenChanged">
         <BbCollapsibleTrigger AsChild="false"
                               Class="arr-row-head group w-full grid grid-cols-[15px_190px_1fr_auto] items-center gap-3.5 pl-5 pr-4 py-4 text-left bg-foreground/5 hover:bg-foreground/8 transition-colors">

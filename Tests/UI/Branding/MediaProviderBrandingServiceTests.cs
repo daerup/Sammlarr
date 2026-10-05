@@ -1,5 +1,7 @@
 using Domain.Providers;
+using Domain.Wantlist.Arr;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Branding;
@@ -51,12 +53,28 @@ public class MediaProviderBrandingServiceTests
 	}
 
 	[Test]
-	public async Task SinkColor_ForRadarrAndSonarr_MixesBothBrands()
+	public async Task SinkColor_ForRadarrAndSonarr_MixesBothAppsBrands()
 	{
-		var radarr = Testee.GetBrandingInfo(MediaProvider.Radarr).BrandColor;
-		var sonarr = Testee.GetBrandingInfo(MediaProvider.Sonarr).BrandColor;
+		var radarr = Testee.GetBrandingInfo(ArrApp.Radarr).BrandColor;
+		var sonarr = Testee.GetBrandingInfo(ArrApp.Sonarr).BrandColor;
 
-		await Assert.That(Testee.SinkColor(SinkKind.Arr)).IsEqualTo($"color-mix(in oklch, {radarr}, {sonarr})");
+		await Assert.That(Testee.ArrColor).IsEqualTo($"color-mix(in oklch, {radarr}, {sonarr})");
+		await Assert.That(Testee.SinkColor(SinkKind.Arr)).IsEqualTo(Testee.ArrColor);
+	}
+
+	[Test]
+	public async Task Brands_OfASink_AreTheBrandsBehindIt()
+	{
+		await Assert.That(Testee.Brands(SinkKind.Plex).Select(brand => brand.NickName)).IsEquivalentTo(["Plex"]);
+		await Assert.That(Testee.Brands(SinkKind.Arr).Select(brand => brand.NickName)).IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Brands_OfASearch_AreTheBrandsBehindIt()
+	{
+		await Assert.That(Testee.Brands(SearchProvider.Tmdb).Select(brand => brand.NickName)).IsEquivalentTo(["TMDb"]);
+		await Assert.That(Testee.Brands(SearchProvider.Plex).Select(brand => brand.NickName)).IsEquivalentTo(["Plex"]);
+		await Assert.That(Testee.Brands(SearchProvider.Arr).Select(brand => brand.NickName)).IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);
 	}
 
 	private static bool IsUnclean(string svg) => svg.Contains("<?xml") || svg.Contains("<!--") || svg.Contains("<title") || svg.Contains("<text");

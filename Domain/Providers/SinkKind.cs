@@ -13,6 +13,15 @@ public enum SinkKind
 
 public static class SinkKindConversions
 {
+	public static Optional<MediaProvider> Provider(this SinkKind value)
+	{
+		return value switch
+		{
+			SinkKind.Plex => Some.Of(MediaProvider.Plex),
+			SinkKind.Arr => new None(),
+		};
+	}
+
 	public static IReadOnlyList<MediaProvider> Providers(this SinkKind value)
 	{
 		return value switch

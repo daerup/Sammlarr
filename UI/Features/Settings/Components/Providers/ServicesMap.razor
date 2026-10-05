@@ -101,9 +101,9 @@
                                     {
                                         var unavailable = Unavailable(picker, option);
                                         <BbDropdownMenuItem Class="gap-2.5" Disabled="@(unavailable.Length > 0)" OnClick="() => PickAsync(picker, option)">
-                                            @foreach (var provider in Providers(option))
+                                            @foreach (var mark in Marks(option))
                                             {
-                                                <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
+                                                <BrandedLogo Brand="mark" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
                                             }
                                             <span class="flex flex-col">
                                                 <span>@Name(option)</span>
@@ -140,6 +140,8 @@
 
     [Parameter] [EditorRequired] public required IReadOnlySet<MediaProvider> Ready { get; set; }
 
+    [Parameter] public bool ArrReady { get; set; }
+
     [Parameter] public bool CanPick { get; set; }
 
     [Parameter] public int People { get; set; }
@@ -150,18 +152,16 @@
 
     [Parameter] public EventCallback<MediaProvider> ServiceOpened { get; set; }
 
+    [Parameter] public EventCallback ArrOpened { get; set; }
+
     [Parameter] public EventCallback AccountsOpened { get; set; }
 
     private BrandingInfo Accounts => Branding.GetBrandingInfo(AuthProvider.Local);
 
     private RenderFragment ServiceBody(MapEndpoint endpoint) => @<text>
-        @if (endpoint is SammlarrAccounts)
+        @foreach (var mark in Marks(endpoint))
         {
-            <BrandedLogo Brand="Accounts" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
-        }
-        @foreach (var provider in Providers(endpoint))
-        {
-            <ProviderLogo Provider="provider" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
+            <BrandedLogo Brand="mark" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
         }
         <span class="flex min-w-0 flex-col items-start">
             <span class="map-service-name">@Name(endpoint)</span>
@@ -176,22 +176,19 @@
     {
         return endpoint switch
         {
-            ServiceEndpoint service => Opens(service) is { } provider ? () => ServiceOpened.InvokeAsync(provider) : null,
+            MediaProvider provider => () => ServiceOpened.InvokeAsync(provider),
+            Arr => CanPick && Config.Sink == SinkKind.Arr ? () => ArrOpened.InvokeAsync() : null,
             SammlarrAccounts => () => AccountsOpened.InvokeAsync(),
         };
     }
 
-    private MediaProvider? Opens(ServiceEndpoint service)
-    {
-        return service.Partner.Match(_ => CanPick && Config.Sink == SinkKind.Arr ? (MediaProvider?)service.Provider : null, () => service.Provider);
-    }
-
-    private static IReadOnlyList<MediaProvider> Providers(MapEndpoint endpoint)
+    private IReadOnlyList<BrandingInfo> Marks(MapEndpoint endpoint)
     {
         return endpoint switch
         {
-            ServiceEndpoint service => service.Providers,
-            SammlarrAccounts => [],
+            MediaProvider provider => [Brand(provider)],
+            Arr => Branding.Brands(SinkKind.Arr),
+            SammlarrAccounts => [Accounts],
         };
     }
 
@@ -233,7 +230,8 @@
     {
         return endpoint switch
         {
-            ServiceEndpoint service => service.Partner.Match(_ => Branding.SinkColor(SinkKind.Arr), () => Brand(service.Provider).BrandColor),
+            MediaProvider provider => Brand(provider).BrandColor,
+            Arr => Branding.ArrColor,
             SammlarrAccounts => Accounts.BrandColor,
         };
     }
@@ -242,12 +240,21 @@
     {
         return endpoint switch
         {
-            ServiceEndpoint service => string.Join(" + ", service.Providers.Select(provider => Brand(provider).NickName)),
+            MediaProvider provider => Brand(provider).NickName,
+            Arr => SinkKind.Arr.GetDescription(),
             SammlarrAccounts => Accounts.NickName,
         };
     }
 
-    private bool IsReady(MapEndpoint endpoint) => Providers(endpoint).All(Ready.Contains);
+    private bool IsReady(MapEndpoint endpoint)
+    {
+        return endpoint switch
+        {
+            MediaProvider provider => Ready.Contains(provider),
+            Arr => ArrReady,
+            SammlarrAccounts => true,
+        };
+    }
 
     private string? Dash(MapEndpoint endpoint) => IsReady(endpoint) ? null : "4 3";
 
@@ -257,12 +264,11 @@
     {
         return endpoint switch
         {
-            ServiceEndpoint service => service.Partner.Match(_ => PairStatus(endpoint), () => Readiness(service.Provider)),
+            MediaProvider provider => Readiness(provider),
+            Arr => ArrReady ? "Connected" : "Not set up",
             SammlarrAccounts => People == 1 ? "Local accounts · 1 person" : $"Local accounts · {People} people",
         };
     }
-
-    private string PairStatus(MapEndpoint endpoint) => IsReady(endpoint) ? "Connected" : "Not set up";
 
     private string Readiness(MediaProvider provider)
     {

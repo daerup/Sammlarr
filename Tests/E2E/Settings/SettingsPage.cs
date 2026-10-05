@@ -22,7 +22,7 @@ internal static class SettingsPage
 	internal static async Task<ILocator> OpenWantlistSyncAsync(IPage page)
 	{
 		await VisitSectionAsync(page, "providers");
-		var row = page.Locator("#provider-row-radarr");
+		var row = page.Locator("#provider-row-arr");
 		await row.Locator("button").First.ClickAsync();
 		return row;
 	}
