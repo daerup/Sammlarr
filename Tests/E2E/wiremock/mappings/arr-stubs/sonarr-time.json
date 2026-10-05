@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "host": {
+      "equalTo": "services.sonarr.tv"
+    },
+    "urlPath": "/v1/time"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"dateTimeUtc\":\"{{now}}\"}",
+    "transformers": [
+      "response-template"
+    ]
+  }
+}

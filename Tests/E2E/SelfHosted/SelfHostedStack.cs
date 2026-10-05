@@ -19,6 +19,10 @@ internal sealed class SelfHostedStack
 
 	private const string KeystoreDirectory = "/home/wiremock/tls";
 
+	private const string CaDirectory = "/test-ca";
+
+	private const string CaFile = "sammlarr-test-ca.pem";
+
 	private const string IndexerUrl = "http://wiremock:8080/newznab";
 
 	private static readonly TimeSpan ReadyTimeout = TimeSpan.FromMinutes(1);
@@ -98,7 +102,8 @@ internal sealed class SelfHostedStack
 
 		foreach (var arr in builder.UnpinArrPorts())
 		{
-			arr.WithContainerFiles("/etc/ssl/certs", [new ContainerOpenSSLCertificateFile { Name = "sammlarr-test-ca.pem", Contents = certificates.AuthorityPem }])
+			arr.WithContainerFiles(CaDirectory, [new ContainerFile { Name = CaFile, Contents = certificates.AuthorityPem }])
+				.WithEnvironment("SSL_CERT_FILE", $"{CaDirectory}/{CaFile}")
 				.WaitFor(wiremock);
 		}
 
