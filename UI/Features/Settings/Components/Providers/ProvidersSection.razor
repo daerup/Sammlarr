@@ -3,6 +3,7 @@
 @using Contracts.Settings
 @using Contracts.Wantlist
 @using Domain.Identity
+@using Domain.Wantlist.Arr
 @inject IProviderConfigService ProviderConfigService
 @inject RatingContext RatingContext
 @inject IApiKeyService ApiKeys
@@ -159,7 +160,7 @@
             .. (await ApiKeys.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
         ];
         var arr = await ArrConfigs.GetAsync();
-        _arrConnected = new[] { arr.Radarr, arr.Sonarr }.All(instance => instance.Url.IsSome() && instance.ApiKey.IsSome());
+        _arrConnected = arr.IsConnectable;
     }
 
     private bool _settingUp;

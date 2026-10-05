@@ -142,17 +142,28 @@ public class ArrAppSectionTests : BunitContext
 		await Assert.That(Description(cut)).IsEqualTo("Found in Sonarr › Settings › General.");
 	}
 
+	[Test]
+	[Arguments(ArrApp.Radarr, "movies", "http://radarr:7878")]
+	[Arguments(ArrApp.Sonarr, "shows", "http://sonarr:8989")]
+	public async Task Section_ForAnApp_NamesWhatItAddsAndSuggestsItsDefaultAddress(ArrApp app, string adds, string address)
+	{
+		var cut = RenderSection(ArrInstanceConfig.Empty, ArrConnectionState.Empty, app: app);
+
+		await Assert.That(cut.Find(".arr-app-for").TextContent).IsEqualTo(adds);
+		await Assert.That(cut.Find($"input[aria-label='{app} URL']").GetAttribute("placeholder")).IsEqualTo(address);
+	}
+
 	private static string Description(IRenderedComponent<ArrAppSection> cut)
 	{
 		var description = cut.FindAll("*").Last(element => element.TextContent.Contains("Found in"));
 		return Regex.Replace(description.TextContent, @"\s+", " ").Trim();
 	}
 
-	private IRenderedComponent<ArrAppSection> RenderSection(ArrInstanceConfig instance, ArrConnectionState state, string error = "")
+	private IRenderedComponent<ArrAppSection> RenderSection(ArrInstanceConfig instance, ArrConnectionState state, string error = "", ArrApp app = ArrApp.Sonarr)
 	{
 		return Render<ArrAppSection>(parameters =>
 			parameters
-				.Add(section => section.App, ArrApp.Sonarr)
+				.Add(section => section.App, app)
 				.Add(section => section.Instance, instance)
 				.Add(section => section.State, state)
 				.Add(section => section.Error, error)

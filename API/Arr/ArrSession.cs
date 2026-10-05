@@ -1,6 +1,5 @@
 using System.Text.Json.Nodes;
 using API.Arr.Types;
-using Contracts.Settings;
 using Domain.Media;
 using Domain.Wantlist.Arr;
 

@@ -11,24 +11,8 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var row = await ctx.ProviderSettings.AsNoTracking().SingleAsync(cancellationToken);
 		return new ArrSinkConfig(
-			new ArrInstanceConfig
-			{
-				Url = Optional.Of(row.RadarrUrl),
-				ApiKey = Optional.Of(row.RadarrApiKey),
-				QualityProfileId = Optional.Of(row.RadarrQualityProfileId),
-				RootFolderPath = Optional.Of(row.RadarrRootFolderPath),
-				Monitored = row.RadarrMonitored,
-				SearchOnAdd = row.RadarrSearchOnAdd,
-			},
-			new ArrInstanceConfig
-			{
-				Url = Optional.Of(row.SonarrUrl),
-				ApiKey = Optional.Of(row.SonarrApiKey),
-				QualityProfileId = Optional.Of(row.SonarrQualityProfileId),
-				RootFolderPath = Optional.Of(row.SonarrRootFolderPath),
-				Monitored = row.SonarrMonitored,
-				SearchOnAdd = row.SonarrSearchOnAdd,
-			},
+			Instance(row.Radarr),
+			Instance(row.Sonarr),
 			new ArrTagScheme(row.ArrTagPrefix, row.ArrTagPerUser, row.ArrTagUserSource, row.ArrTagPerFeed, row.ArrTagFeedSource, row.ArrTagPlainPrefix)
 		);
 	}
@@ -37,18 +21,8 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var row = await ctx.ProviderSettings.SingleAsync(cancellationToken);
-		row.RadarrUrl = config.Radarr.Url.ToNullable();
-		row.RadarrApiKey = config.Radarr.ApiKey.ToNullable();
-		row.RadarrQualityProfileId = config.Radarr.QualityProfileId.ToNullable();
-		row.RadarrRootFolderPath = config.Radarr.RootFolderPath.ToNullable();
-		row.RadarrMonitored = config.Radarr.Monitored;
-		row.RadarrSearchOnAdd = config.Radarr.SearchOnAdd;
-		row.SonarrUrl = config.Sonarr.Url.ToNullable();
-		row.SonarrApiKey = config.Sonarr.ApiKey.ToNullable();
-		row.SonarrQualityProfileId = config.Sonarr.QualityProfileId.ToNullable();
-		row.SonarrRootFolderPath = config.Sonarr.RootFolderPath.ToNullable();
-		row.SonarrMonitored = config.Sonarr.Monitored;
-		row.SonarrSearchOnAdd = config.Sonarr.SearchOnAdd;
+		Write(row.Radarr, config.Radarr);
+		Write(row.Sonarr, config.Sonarr);
 		row.ArrTagPrefix = config.Tags.Prefix;
 		row.ArrTagPerUser = config.Tags.PerUser;
 		row.ArrTagUserSource = config.Tags.UserSource;
@@ -56,5 +30,28 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 		row.ArrTagFeedSource = config.Tags.FeedSource;
 		row.ArrTagPlainPrefix = config.Tags.PlainPrefix;
 		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	private static ArrInstanceConfig Instance(ArrInstanceRow row)
+	{
+		return new ArrInstanceConfig
+		{
+			Url = Optional.Of(row.Url),
+			ApiKey = Optional.Of(row.ApiKey),
+			QualityProfileId = Optional.Of(row.QualityProfileId),
+			RootFolderPath = Optional.Of(row.RootFolderPath),
+			Monitored = row.Monitored,
+			SearchOnAdd = row.SearchOnAdd,
+		};
+	}
+
+	private static void Write(ArrInstanceRow row, ArrInstanceConfig instance)
+	{
+		row.Url = instance.Url.ToNullable();
+		row.ApiKey = instance.ApiKey.ToNullable();
+		row.QualityProfileId = instance.QualityProfileId.ToNullable();
+		row.RootFolderPath = instance.RootFolderPath.ToNullable();
+		row.Monitored = instance.Monitored;
+		row.SearchOnAdd = instance.SearchOnAdd;
 	}
 }

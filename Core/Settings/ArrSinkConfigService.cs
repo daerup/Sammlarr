@@ -1,6 +1,7 @@
 using Contracts.Caching;
 using Contracts.Identity;
 using Contracts.Settings;
+using Domain.Wantlist.Arr;
 
 namespace Core.Settings;
 

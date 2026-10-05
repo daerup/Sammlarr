@@ -63,7 +63,7 @@
                 @foreach (var app in Apps)
                 {
                     var status = _apps[app];
-                    <ArrAppSection App="app" Instance="InstanceOf(config, app)" State="status.State" Error="@status.Error" Choices="status.Choices"
+                    <ArrAppSection App="app" Instance="config.Of(app)" State="status.State" Error="@status.Error" Choices="status.Choices"
                                    Edited="typed => Edited(app, typed)" Test="typed => TestAsync(app, typed)"
                                    InstanceChanged="instance => StoreAsync(app, instance)"/>
                 }
@@ -143,7 +143,7 @@
 
     private IEnumerable<ArrConnectionState> States => _apps.Values.Select(status => status.State);
 
-    private bool BothReady => _config is { } config && Apps.All(app => _apps[app].State == ArrConnectionState.Connected && IsChosen(InstanceOf(config, app)));
+    private bool BothReady => _config is { } config && Apps.All(app => _apps[app].State == ArrConnectionState.Connected && IsChosen(config.Of(app)));
 
     private IReadOnlyList<ArrApp> Silent => [.. Apps.Where(app => _apps[app].State != ArrConnectionState.Connected)];
 
@@ -160,13 +160,13 @@
         await Task.Yield();
         var config = await Configs.GetAsync();
         _config = config;
-        _apps = Apps.ToDictionary(app => app, app => AppStatus.Of(TypedState(InstanceOf(config, app))));
+        _apps = Apps.ToDictionary(app => app, app => AppStatus.Of(TypedState(config.Of(app))));
         _users = await UsersAsync();
         _feed = await FeedAsync();
         StateHasChanged();
         foreach (var app in Apps.Where(app => _apps[app].State == ArrConnectionState.Untested))
         {
-            await TestAsync(app, InstanceOf(config, app));
+            await TestAsync(app, config.Of(app));
         }
     }
 
@@ -208,14 +208,14 @@
                 .Or(() => choices.Folders.FirstOrNone().Map(folder => folder.Path)),
         };
         var current = _config ?? ArrSinkConfig.Empty;
-        var moved = !SettingUp && InstanceOf(current, app).Url.Match(stored => chosen.Url.Match(url => url != stored, () => true), () => false);
+        var moved = !SettingUp && current.Of(app).Url.Match(stored => chosen.Url.Match(url => url != stored, () => true), () => false);
         if (!moved)
         {
             await StoreAsync(app, chosen);
             return;
         }
 
-        await InstanceMoved.InvokeAsync(WithInstance(current, app, chosen));
+        await InstanceMoved.InvokeAsync(current.With(app, chosen));
         _config = await Configs.GetAsync();
     }
 
@@ -225,16 +225,7 @@
         return Task.CompletedTask;
     }
 
-    private Task StoreAsync(ArrApp app, ArrInstanceConfig instance) => StoreAsync(WithInstance(_config ?? ArrSinkConfig.Empty, app, instance));
-
-    private static ArrSinkConfig WithInstance(ArrSinkConfig config, ArrApp app, ArrInstanceConfig instance)
-    {
-        return app switch
-        {
-            ArrApp.Radarr => config with { Radarr = instance },
-            ArrApp.Sonarr => config with { Sonarr = instance },
-        };
-    }
+    private Task StoreAsync(ArrApp app, ArrInstanceConfig instance) => StoreAsync((_config ?? ArrSinkConfig.Empty).With(app, instance));
 
     private async Task StoreAsync(ArrSinkConfig config)
     {
@@ -250,7 +241,7 @@
 
     private string Said(ArrApp app)
     {
-        var instance = InstanceOf(_config ?? ArrSinkConfig.Empty, app);
+        var instance = (_config ?? ArrSinkConfig.Empty).Of(app);
         var profile = instance.QualityProfileId.Map(id => _apps[app].Choices.Profiles.FirstOrNone(choice => choice.Id == id).Map(choice => choice.Name));
         var said = instance.RootFolderPath.Map(path => profile.Match(name => $"{name} into {path}", () => path)).GetValueOr("not set up");
         return $"{app.Name}: {said}";
@@ -258,19 +249,7 @@
 
     private static bool IsChosen(ArrInstanceConfig instance) => instance.QualityProfileId.IsSome() && instance.RootFolderPath.IsSome();
 
-    private static ArrConnectionState TypedState(ArrInstanceConfig instance)
-    {
-        return instance.Url.Map(_ => instance.ApiKey).Match(_ => ArrConnectionState.Untested, () => ArrConnectionState.Empty);
-    }
-
-    private static ArrInstanceConfig InstanceOf(ArrSinkConfig config, ArrApp app)
-    {
-        return app switch
-        {
-            ArrApp.Radarr => config.Radarr,
-            ArrApp.Sonarr => config.Sonarr,
-        };
-    }
+    private static ArrConnectionState TypedState(ArrInstanceConfig instance) => instance.IsConnectable ? ArrConnectionState.Untested : ArrConnectionState.Empty;
 
     private sealed record AppStatus(ArrConnectionState State, string Error, ArrInstanceChoices Choices)
     {

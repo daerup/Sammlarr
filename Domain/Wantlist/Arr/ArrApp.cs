@@ -38,5 +38,17 @@ public static class ArrApps
 				};
 			}
 		}
+
+		public int DefaultPort
+		{
+			get
+			{
+				return app switch
+				{
+					ArrApp.Radarr => 7878,
+					ArrApp.Sonarr => 8989,
+				};
+			}
+		}
 	}
 }
