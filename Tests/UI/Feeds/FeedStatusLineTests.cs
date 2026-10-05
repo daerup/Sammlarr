@@ -5,7 +5,6 @@ using Contracts.Media;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages;
-using UI.Shared.Services.Branding;
 using static UI.Tests.Feeds.TestFeedRows;
 
 namespace UI.Tests.Feeds;
@@ -16,7 +15,7 @@ public class FeedStatusLineTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(IMediaService.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

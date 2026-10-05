@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Providers;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.Providers;
 
@@ -19,7 +18,7 @@ public class SammlarrAccountRowTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(_accounts.Object);
 		Services.AddSingleton<ICurrentUser>(new TestCurrentUser { DisplayName = "guest" });
 		JSInterop.Mode = JSRuntimeMode.Loose;

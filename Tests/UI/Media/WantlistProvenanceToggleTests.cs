@@ -21,7 +21,7 @@ public class WantlistProvenanceToggleTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

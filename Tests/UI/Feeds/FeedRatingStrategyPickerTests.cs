@@ -3,11 +3,9 @@ using Bunit;
 using Domain.Media;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Feeds;
 
@@ -27,7 +25,7 @@ public class FeedRatingStrategyPickerTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

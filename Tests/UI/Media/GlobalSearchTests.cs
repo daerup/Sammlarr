@@ -19,7 +19,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Shared.Media;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Media;
 
@@ -49,7 +48,7 @@ public class GlobalSearchTests : BunitContext
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(ArtworkStub.Sizing());
 		Services.AddSingleton(IMediaService.Mock().Object);
 

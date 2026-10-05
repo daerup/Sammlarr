@@ -4,9 +4,7 @@ using BlazorBlueprint.Primitives;
 using Bunit;
 using Domain.Media;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Media.Ratings;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Media.Ratings;
 
@@ -16,7 +14,7 @@ public class RatingSuppliersPopoverTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

@@ -1,7 +1,10 @@
+@using Contracts.DI
 @using Contracts.Media
 @using UI.Shared.Services.Branding
+@using UI.Shared.Services.Links
 @inject MediaProviderBrandingService Branding
 @inject IMediaService MediaService
+@inject IKeyedServiceIndex<MediaProvider, IExternalPageLinker> Linkers
 
 <div class="rating-breakdown @(_model.Ranked ? "ranked" : null)">
     <div class="rating-breakdown-band popover-band">
@@ -48,7 +51,7 @@
     </div>
     @foreach (var row in _model.Rows)
     {
-        var url = row.Rating.Map(_ => RatingTexts.Link(row.Source, Ids, Title, _rottenTomatoes.Map(id => id.Value))).ToNullable();
+        var url = row.Rating.Map(_ => Link(row.Source)).ToNullable();
         <div class="rating-row @(row.State is RatingRowState.Counts ? "counts" : "dim") @(url is null ? null : "is-link")" style="--brand: @Brand(row.Source)">
             @if (_model.Ranked)
             {
@@ -122,7 +125,7 @@
     protected override async Task OnParametersSetAsync()
     {
         _model = RatingBreakdown.Of(Ratings, Strategy, Available, StoredOnly);
-        if (!_askedRottenTomatoes && _model.Rows.Any(RatesOnRottenTomatoes))
+        if (!_askedRottenTomatoes && _model.Rows.Any(NeedsARottenTomatoesId))
         {
             _askedRottenTomatoes = true;
             _rottenTomatoes = await RottenTomatoesIdAsync();
@@ -139,10 +142,21 @@
             );
     }
 
-    private static bool RatesOnRottenTomatoes(RatingRow row)
+    private Optional<string> Link(RatingSource source) => Linkers[ProviderOf(source)].PageOf(LinkIds, Optional.Of(Title));
+
+    private static MediaProvider ProviderOf(RatingSource source)
     {
-        return row.Rating.IsSome() && row.Source.IsRottenTomatoes;
+        return source switch
+        {
+            RatingSource.Tmdb => MediaProvider.Tmdb,
+            RatingSource.Imdb => MediaProvider.Imdb,
+            RatingSource.RottenTomatoesCritics or RatingSource.RottenTomatoesAudience => MediaProvider.RottenTomatoes,
+        };
     }
+
+    private IReadOnlyCollection<IExternalMediaId> LinkIds => _rottenTomatoes.Map(found => (IReadOnlyCollection<IExternalMediaId>)[.. Ids, found]).GetValueOr(Ids);
+
+    private static bool NeedsARottenTomatoesId(RatingRow row) => row.Rating.IsSome() && ProviderOf(row.Source) == MediaProvider.RottenTomatoes;
 
     private float? Value => _model.Sammlarr.Map(rating => rating.Value).ToNullable();
 
@@ -179,13 +193,5 @@
 
     private bool UsedInstead(RatingRow row) => _model.UsedInstead && row.State is RatingRowState.Counts;
 
-    private string Brand(RatingSource source)
-    {
-        return source switch
-        {
-            RatingSource.Tmdb => Branding.GetBrandingInfo(MediaProvider.Tmdb).BrandColor,
-            RatingSource.Imdb => Branding.GetBrandingInfo(MediaProvider.Imdb).BrandColor,
-            RatingSource.RottenTomatoesCritics or RatingSource.RottenTomatoesAudience => Branding.GetBrandingInfo(MediaProvider.RottenTomatoes).BrandColor,
-        };
-    }
+    private string Brand(RatingSource source) => Branding.GetBrandingInfo(ProviderOf(source)).BrandColor;
 }

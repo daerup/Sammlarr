@@ -4,10 +4,8 @@ using Bunit;
 using Domain.Media;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
-using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Shared.Media;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Media;
 
@@ -17,7 +15,7 @@ public class MediaTitleLinkTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -50,9 +48,40 @@ public class MediaTitleLinkTests : BunitContext
 			.IsEquivalentTo(["--brand: #01B4E4", "--brand: #F5DE50"], CollectionOrdering.Matching);
 	}
 
+	[Test]
+	public async Task Popover_ForARottenTomatoesIdAndAnIdWithoutAPage_LinksTheFirstAndListsTheSecondPlain()
+	{
+		IReadOnlyList<IExternalMediaId> ids = [RottenTomatoesId.From("m/shawshank_redemption", MediaType.Movie), RadarrId.From("12", MediaType.Movie)];
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Ids, ids));
+
+		await cut.Find(".media-title-trigger").ClickAsync(new());
+		cut.WaitForElement(".id-links-popover-list");
+
+		await Assert
+			.That(cut.FindAll("a.id-link").Select(link => link.GetAttribute("href") ?? string.Empty))
+			.IsEquivalentTo(["https://www.rottentomatoes.com/m/shawshank_redemption"]);
+		await Assert.That(cut.FindAll(".id-link-readonly .id-link-value").Select(value => value.TextContent)).IsEquivalentTo(["12"]);
+	}
+
+	[Test]
+	public async Task Popover_ForTwoIdsOfOneProvider_LinksEachToItsOwnPage()
+	{
+		IReadOnlyList<IExternalMediaId> ids = [PlexId.From("plex-a", MediaType.Movie), PlexId.From("plex-b", MediaType.Movie)];
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Ids, ids));
+
+		await cut.Find(".media-title-trigger").ClickAsync(new());
+		cut.WaitForElement(".id-links-popover-list");
+
+		const string discover = "https://app.plex.tv/desktop/#!/provider/tv.plex.provider.discover/details?key=%2Flibrary%2Fmetadata%2F";
+		await Assert
+			.That(cut.FindAll("a.id-link").Select(link => link.GetAttribute("href") ?? string.Empty))
+			.IsEquivalentTo([$"{discover}plex-a", $"{discover}plex-b"], CollectionOrdering.Matching);
+	}
+
 	private sealed class Harness : ComponentBase
 	{
-		private static readonly IReadOnlyList<IExternalMediaId> Ids = [TmdbId.From("278", MediaType.Movie), ImdbId.From("tt0111161", MediaType.Movie)];
+		[Parameter]
+		public IReadOnlyList<IExternalMediaId> Ids { get; set; } = [TmdbId.From("278", MediaType.Movie), ImdbId.From("tt0111161", MediaType.Movie)];
 
 		protected override void BuildRenderTree(RenderTreeBuilder builder)
 		{

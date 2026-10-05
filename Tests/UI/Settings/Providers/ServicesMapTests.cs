@@ -5,10 +5,8 @@ using Bunit;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.Providers;
 
@@ -27,7 +25,7 @@ public class ServicesMapTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

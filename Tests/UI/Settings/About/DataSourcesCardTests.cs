@@ -1,9 +1,7 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.About;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.About;
 
@@ -13,7 +11,7 @@ public class DataSourcesCardTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

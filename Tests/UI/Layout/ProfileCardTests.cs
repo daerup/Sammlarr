@@ -21,7 +21,7 @@ public class ProfileCardTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(_dropdown);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		AddAuthorization().SetAuthorized("Guest");

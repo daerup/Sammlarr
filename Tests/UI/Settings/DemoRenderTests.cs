@@ -4,14 +4,12 @@ using Contracts;
 using Contracts.Blocklist;
 using Contracts.Identity;
 using Contracts.Media;
-using Contracts.Ratings;
 using Contracts.Wantlist;
 using Domain.Media;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Settings.Components.Testing;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 using UI.Tests.Media;
 
 namespace UI.Tests.Settings;
@@ -24,7 +22,7 @@ public class DemoRenderTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddScoped<Notifier>();
 		Services.AddScoped<ScrollService>();
 		Services.AddSingleton(RatingStub.Context());

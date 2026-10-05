@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Settings.Components.Users;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings;
 
@@ -25,7 +24,7 @@ public class RemovePersonDialogTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(_users.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

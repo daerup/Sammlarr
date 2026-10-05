@@ -4,7 +4,6 @@ using Contracts.Media;
 using Domain.Media;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Media;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Media;
 
@@ -16,7 +15,7 @@ public class MediaDetailTileTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton(IMediaService.Mock().Object);
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(ArtworkStub.Sizing());
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

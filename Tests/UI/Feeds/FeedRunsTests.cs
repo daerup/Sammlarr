@@ -12,7 +12,6 @@ using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Feeds.Pages.Runs;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Feeds;
 
@@ -124,7 +123,7 @@ public class FeedRunsTests : BunitContext
 		Services.AddSingleton(IBlocklistService.Mock().Object);
 		Services.AddSingleton(IProviderConfigService.Mock().Object);
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		return feeds;

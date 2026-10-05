@@ -17,7 +17,6 @@ using UI.Features.Onboarding.Components;
 using UI.Features.Settings.Components.Providers;
 using UI.Features.Settings.Components.Users;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Onboarding;
 
@@ -43,7 +42,7 @@ public class SetupWizardTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(_onboarding.Object);
 		Services.AddSingleton(_config.Object);
 		Services.AddSingleton(_keys.Object);

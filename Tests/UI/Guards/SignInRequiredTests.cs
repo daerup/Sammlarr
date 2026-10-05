@@ -1,9 +1,7 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Providers;
-using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Guards;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Guards;
 
@@ -13,7 +11,7 @@ public class SignInRequiredTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
