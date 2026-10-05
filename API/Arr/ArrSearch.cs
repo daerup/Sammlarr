@@ -51,7 +51,7 @@ internal sealed class ArrSearch(ArrApis apis, IArrSinkConfigService configs, ILo
 
 	private static async Task<Result<FoundMedia>> FindAsync(ArrApi api, ArrSinkConfig config, IExternalMediaId mediaId, CancellationToken cancellationToken)
 	{
-		var titles = await SearchAsync(api, config, api.Term(mediaId), cancellationToken);
+		var titles = await SearchAsync(api, config, ArrSearchTerm.Of(mediaId), cancellationToken);
 		return titles.Map(found => found.FirstOrNone().Map(title => ArrFound.Of(api, title)).ToResult($"{api.App.Name} has no title for {mediaId.Value}."));
 	}
 }

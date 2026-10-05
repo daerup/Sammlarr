@@ -1,9 +1,17 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
+using Contracts.Identity;
+using Contracts.Settings;
+using Domain.Identity;
 using Domain.Media;
+using Domain.Providers;
+using Domain.Settings;
+using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Shared.Media;
 
@@ -16,6 +24,7 @@ public class MediaTitleLinkTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
+		Services.AddMediaTitleLink();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -76,6 +85,69 @@ public class MediaTitleLinkTests : BunitContext
 		await Assert
 			.That(cut.FindAll("a.id-link").Select(link => link.GetAttribute("href") ?? string.Empty))
 			.IsEquivalentTo([$"{discover}plex-a", $"{discover}plex-b"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Popover_ForAnAdminWhoseWantlistSyncsToRadarrAndSonarr_AddsACardThatFindsTheTitleInRadarr()
+	{
+		Arrange(UserRole.Admin, SinkKind.Arr);
+		var cut = Render<Harness>();
+
+		await cut.Find(".media-title-trigger").ClickAsync(new());
+		var card = cut.WaitForElement("a.id-link[href*='/add/new']");
+
+		await Assert.That(card.GetAttribute("href")).IsEqualTo("http://radarr:7878/add/new?term=tmdb%3A278");
+		await Assert.That(card.GetAttribute("aria-label")).IsEqualTo("Find tmdb:278 in Radarr (opens in new tab)");
+		await Assert.That(card.QuerySelector(".id-link-value")!.TextContent).IsEqualTo("tmdb:278");
+	}
+
+	[Test]
+	[Arguments(UserRole.Member, SinkKind.Arr)]
+	[Arguments(UserRole.Admin, SinkKind.Plex)]
+	public async Task Popover_ForAMemberOrOnAPlexWantlist_HasNoRadarrCard(UserRole role, SinkKind sink)
+	{
+		Arrange(role, sink);
+		var cut = Render<Harness>();
+
+		await cut.Find(".media-title-trigger").ClickAsync(new());
+		cut.WaitForElement(".id-links-popover-list");
+
+		await Assert.That(cut.FindAll("a.id-link[href*='/add/new']")).IsEmpty();
+		await Assert.That(cut.FindAll(".id-link-card")).Count().IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task Render_BeforeThePopoverOpens_ReadsNoSettings()
+	{
+		var providers = Arrange(UserRole.Admin, SinkKind.Arr);
+
+		var cut = Render<Harness>();
+
+		await Assert.That(cut.FindAll(".media-title-trigger")).Count().IsEqualTo(1);
+		providers.GetAsync(Any()).WasCalled(Times.Never);
+	}
+
+	private Mock<IProviderConfigService> Arrange(UserRole role, SinkKind sink)
+	{
+		var providers = IProviderConfigService.Mock();
+		providers
+			.GetAsync(Any())
+			.Returns(
+				new ProviderConfig
+				{
+					Sink = sink,
+					TrendingProvider = TrendingProvider.Tmdb,
+					SearchProvider = SearchProvider.Tmdb,
+					AuthProvider = AuthProvider.Plex,
+					RegistrationMode = RegistrationMode.Open,
+				}
+			);
+		var arr = IArrSinkConfigService.Mock();
+		arr.GetAsync(Any()).Returns(ArrSinkConfig.Empty with { Radarr = ArrInstanceConfig.Empty with { Url = Some.Of("http://radarr:7878") } });
+		Services.AddSingleton<ICurrentUser>(new TestCurrentUser { Role = role });
+		Services.AddSingleton(providers.Object);
+		Services.AddSingleton(arr.Object);
+		return providers;
 	}
 
 	private sealed class Harness : ComponentBase

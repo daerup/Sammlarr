@@ -1,4 +1,5 @@
 using Domain.Media;
+using Domain.Providers;
 
 namespace Domain.Wantlist.Arr;
 
@@ -22,6 +23,18 @@ public static class ArrApps
 				{
 					ArrApp.Radarr => MediaType.Movie,
 					ArrApp.Sonarr => MediaType.Show,
+				};
+			}
+		}
+
+		public IReadOnlyList<MediaProvider> SearchableBy
+		{
+			get
+			{
+				return app switch
+				{
+					ArrApp.Radarr => [MediaProvider.Tmdb, MediaProvider.Imdb],
+					ArrApp.Sonarr => [MediaProvider.Tvdb, MediaProvider.Tmdb, MediaProvider.Imdb],
 				};
 			}
 		}

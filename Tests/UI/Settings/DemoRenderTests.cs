@@ -23,6 +23,7 @@ public class DemoRenderTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
+		Services.AddMediaTitleLink();
 		Services.AddScoped<Notifier>();
 		Services.AddScoped<ScrollService>();
 		Services.AddSingleton(RatingStub.Context());

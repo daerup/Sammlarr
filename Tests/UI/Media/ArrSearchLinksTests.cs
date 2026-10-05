@@ -1,0 +1,105 @@
+using Domain.Media;
+using Domain.Wantlist.Arr;
+using TestInfrastructure;
+using UI.Shared.Media;
+
+namespace UI.Tests.Media;
+
+public class ArrSearchLinksTests
+{
+	private static readonly ArrSinkConfig Addressed = new(
+		ArrInstanceConfig.Empty with
+		{
+			Url = Some.Of("http://radarr:7878"),
+		},
+		ArrInstanceConfig.Empty with
+		{
+			Url = Some.Of("http://sonarr:8989/"),
+		},
+		ArrTagScheme.Default
+	);
+
+	private static readonly ImdbId MatrixImdb = ImdbId.From("tt0133093", MediaType.Movie);
+
+	private static readonly ImdbId BreakingBadImdb = ImdbId.From("tt0903747", MediaType.Show);
+
+	[Test]
+	public async Task For_AMovieWithTmdbAndImdbIds_FindsItInRadarrByItsTmdbId()
+	{
+		var link = ArrSearchLinks.For(Addressed, [MatrixImdb, TmdbId.From("603", MediaType.Movie)]);
+
+		await Assert.That(link).IsSome().And.IsEqualTo(Radarr("tmdb:603", "tmdb%3A603"));
+	}
+
+	[Test]
+	public async Task For_AMovieWithOnlyAnImdbId_FindsItInRadarrByThatId()
+	{
+		await Assert.That(ArrSearchLinks.For(Addressed, [MatrixImdb])).IsSome().And.IsEqualTo(Radarr("imdb:tt0133093", "imdb%3Att0133093"));
+	}
+
+	[Test]
+	public async Task For_AShowWithTvdbTmdbAndImdbIds_FindsItInSonarrByItsTvdbIdWithoutTheTrailingSlash()
+	{
+		var link = ArrSearchLinks.For(Addressed, [BreakingBadImdb, TmdbId.From("1396", MediaType.Show), TvdbId.From("81189", MediaType.Show)]);
+
+		await Assert.That(link).IsSome().And.IsEqualTo(Sonarr("tvdb:81189", "tvdb%3A81189"));
+	}
+
+	[Test]
+	public async Task For_AShowWithTmdbAndImdbIds_FindsItInSonarrByItsTmdbId()
+	{
+		var link = ArrSearchLinks.For(Addressed, [BreakingBadImdb, TmdbId.From("1396", MediaType.Show)]);
+
+		await Assert.That(link).IsSome().And.IsEqualTo(Sonarr("tmdb:1396", "tmdb%3A1396"));
+	}
+
+	[Test]
+	public async Task For_AShowWithOnlyAnImdbId_FindsItInSonarrByThatId()
+	{
+		await Assert.That(ArrSearchLinks.For(Addressed, [BreakingBadImdb])).IsSome().And.IsEqualTo(Sonarr("imdb:tt0903747", "imdb%3Att0903747"));
+	}
+
+	[Test]
+	public async Task For_ATitleWithOnlyAPlexId_IsNone()
+	{
+		await Assert.That(ArrSearchLinks.For(Addressed, [PlexId.From("5d776", MediaType.Movie)])).IsNone();
+	}
+
+	[Test]
+	public async Task For_AnIdOfUnknownType_IsNone()
+	{
+		await Assert.That(ArrSearchLinks.For(Addressed, [TmdbId.From("603", MediaType.Unknown)])).IsNone();
+	}
+
+	[Test]
+	public async Task For_AnAppWithoutAnAddress_IsNone()
+	{
+		await Assert.That(ArrSearchLinks.For(ArrSinkConfig.Empty, [TmdbId.From("603", MediaType.Movie)])).IsNone();
+	}
+
+	[Test]
+	[Arguments("javascript:alert(1)//")]
+	[Arguments("radarr:7878")]
+	[Arguments("not an address")]
+	public async Task For_AnAddressThatIsNotHttp_IsNone(string address)
+	{
+		var config = ArrSinkConfig.Empty.With(ArrApp.Radarr, ArrInstanceConfig.Empty with { Url = Some.Of(address) });
+
+		await Assert.That(ArrSearchLinks.For(config, [TmdbId.From("603", MediaType.Movie)])).IsNone();
+	}
+
+	[Test]
+	public async Task For_AnAddressWithABaseAndAQuery_KeepsTheBaseAndDropsTheQuery()
+	{
+		var config = ArrSinkConfig.Empty.With(ArrApp.Radarr, ArrInstanceConfig.Empty with { Url = Some.Of("https://home.example/radarr/?tab=1#top") });
+
+		await Assert
+			.That(ArrSearchLinks.For(config, [TmdbId.From("603", MediaType.Movie)]).Map(link => link.Url))
+			.IsSome()
+			.And.IsEqualTo("https://home.example/radarr/add/new?term=tmdb%3A603");
+	}
+
+	private static ArrSearchLink Radarr(string term, string escaped) => new(ArrApp.Radarr, term, $"http://radarr:7878/add/new?term={escaped}");
+
+	private static ArrSearchLink Sonarr(string term, string escaped) => new(ArrApp.Sonarr, term, $"http://sonarr:8989/add/new?term={escaped}");
+}

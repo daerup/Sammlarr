@@ -1,6 +1,11 @@
 using Contracts.DI;
+using Contracts.Identity;
+using Contracts.Settings;
+using Domain.Identity;
 using Domain.Providers;
+using Domain.Settings;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Shared.DI;
 using TestInfrastructure;
 using UI.Shared.Services.Branding;
@@ -17,7 +22,25 @@ internal static class ProviderBranding
 			services.AddSingleton<MediaProviderBrandingService>();
 			services.AddSingleton(Linkers);
 		}
+
+		internal void AddMediaTitleLink()
+		{
+			var providers = IProviderConfigService.Mock();
+			providers.GetAsync(Any()).Returns(OnPlex);
+			services.TryAddSingleton<ICurrentUser>(new TestCurrentUser { Role = UserRole.Member });
+			services.TryAddSingleton(providers.Object);
+			services.TryAddSingleton(IArrSinkConfigService.Mock().Object);
+		}
 	}
+
+	private static readonly ProviderConfig OnPlex = new()
+	{
+		Sink = SinkKind.Plex,
+		TrendingProvider = TrendingProvider.Tmdb,
+		SearchProvider = SearchProvider.Tmdb,
+		AuthProvider = AuthProvider.Plex,
+		RegistrationMode = RegistrationMode.Open,
+	};
 
 	private static readonly IKeyedServiceIndex<MediaProvider, IExternalPageLinker> Linkers = PageLinkers();
 

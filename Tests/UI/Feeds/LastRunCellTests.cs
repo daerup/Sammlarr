@@ -116,6 +116,7 @@ public class LastRunCellTests : BunitContext
 
 		Services.AddScoped<Notifier>();
 		Services.AddProviderBranding();
+		Services.AddMediaTitleLink();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
