@@ -1,15 +1,13 @@
 using Bunit;
 using Domain.Providers;
-using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Branding;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Branding;
 
 public class ProviderLogoTests : BunitContext
 {
 	[Before(Test)]
-	public void Setup() => Services.AddSingleton<MediaProviderBrandingService>();
+	public void Setup() => Services.AddProviderBranding();
 
 	[Test]
 	public async Task Mark_ForAProvider_IsASquareImageAtTheGivenSize()

@@ -3,11 +3,9 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Settings;
 using Domain.Wantlist.Arr;
-using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Providers;
 using UI.Shared.Common;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.Providers;
 
@@ -29,7 +27,7 @@ public class ArrAppSectionTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

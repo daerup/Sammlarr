@@ -7,7 +7,6 @@ using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Media.Ratings;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Media.Ratings;
 
@@ -42,7 +41,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(_ratings.Object);
 		Services.AddScoped<RatingContext>();
 		Services.AddSingleton(_media.Object);

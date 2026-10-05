@@ -3,9 +3,7 @@ using BlazorBlueprint.Primitives;
 using Bunit;
 using Domain.Providers;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Feeds.Components;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Feeds;
 
@@ -15,7 +13,7 @@ public class FeedProviderSelectTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

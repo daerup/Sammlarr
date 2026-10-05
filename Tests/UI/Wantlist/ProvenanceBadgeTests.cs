@@ -5,7 +5,6 @@ using Domain.Wantlist;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Wantlist.Components;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Wantlist;
 
@@ -56,7 +55,7 @@ public class ProvenanceBadgeTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		return Render<ProvenanceBadge>(parameters =>

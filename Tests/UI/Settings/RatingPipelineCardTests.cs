@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Ratings;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings;
 
@@ -33,7 +32,7 @@ public class RatingPipelineCardTests : BunitContext
 		_ratings.GetAvailableAsync(Any()).Returns(Everything);
 		_context = new RatingContext(_ratings.Object);
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(_ratings.Object);
 		Services.AddSingleton(_context);
 		JSInterop.Mode = JSRuntimeMode.Loose;

@@ -12,7 +12,6 @@ using TestInfrastructure;
 using UI.Features.Settings.Components.Users;
 using UI.Shared.Branding.Birds;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings;
 
@@ -44,7 +43,7 @@ public class UsersSectionTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton<ICurrentUser>(new TestCurrentUser());
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);

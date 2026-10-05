@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Home;
 
@@ -18,7 +17,7 @@ public class UpNextPanelTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

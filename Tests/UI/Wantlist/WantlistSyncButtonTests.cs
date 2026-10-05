@@ -24,7 +24,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Wantlist.Components;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 using UI.Tests.Media;
 
 namespace UI.Tests.Wantlist;
@@ -253,7 +252,7 @@ public class WantlistSyncButtonTests : BunitContext
 		currentUser.Id.Getter.Returns(Viewer);
 		Services.AddSingleton(currentUser.Object);
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 

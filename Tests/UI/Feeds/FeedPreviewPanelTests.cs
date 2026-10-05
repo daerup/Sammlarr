@@ -23,7 +23,6 @@ using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 using UI.Tests.Media;
 
 namespace UI.Tests.Feeds;
@@ -207,7 +206,7 @@ public class FeedPreviewPanelTests : BunitContext
 			new FakeKeyedServiceIndex<FeedProvider, IFeedProvider>().Register(FeedProvider.Mdblist, new StubFeedService(resolved, unmatched))
 		);
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(ArtworkStub.Sizing());
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;

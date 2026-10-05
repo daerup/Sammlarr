@@ -89,7 +89,14 @@ Rotten Tomatoes page:: Where a breakdown's Rotten Tomatoes rows link: the title'
 no such id yet asks `IMediaService.FindIdAsync` for it the first time it opens; the resolver finds it through `WikidataIdConverter`
 (Wikidata's "Rotten Tomatoes ID", P1258, by the title's IMDb id, P345, which TMDB supplies first when the title lacks it)
 and stores it with the title's other ids. "No page" is remembered by the resolver's one-hour miss cache; a failed lookup
-is not. A page Wikidata gives two titles stays with the first; the second finds none. Without an id the rows link to Rotten Tomatoes' search.
+is not. A page Wikidata gives two titles stays with the first; the second finds none. Without an id the rows link to
+Rotten Tomatoes' search.
+
+Page linker:: An `IExternalPageLinker`, registered in the UI keyed by `MediaProvider`, one class per provider, that turns a
+title's ids (and its title) into that provider's page, by its own id: TMDB, TheTVDB and MDBList by media type too (TheTVDB and
+MDBList have none for an unknown type), Rotten Tomatoes by its id or else its search for the title; Radarr, Sonarr and
+Sammlarr accounts have none (`NoPageLinker`). The External IDs popover asks per id, so each row links to its own page;
+the rating breakdown's rows ask with the title's ids.
 
 === Identify and details
 

@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Feeds.Pages.Editor;
-using UI.Shared.Services.Branding;
 using UI.Tests.Media;
 
 namespace UI.Tests.Feeds;
@@ -34,7 +33,7 @@ public class FeedConfigPanelTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(RatingStub.Context());
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(IApiKey.Mock().Object));

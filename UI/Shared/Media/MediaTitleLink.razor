@@ -1,5 +1,8 @@
+@using Contracts.DI
 @using UI.Shared.Services.Branding
+@using UI.Shared.Services.Links
 @inject MediaProviderBrandingService Branding
+@inject IKeyedServiceIndex<MediaProvider, IExternalPageLinker> Linkers
 
 @if (Ids.Count > 0)
 {
@@ -13,7 +16,7 @@
 			<div class="id-links-popover-list">
 				@foreach (var id in Ids)
                 {
-                    var url = ExternalMediaIdUrlResolver.Resolve(id);
+                    var url = Linkers[id.Source].PageOf([id], Optional.Of(Title)).ToNullable();
                     var branding = Branding.GetBrandingInfo(id.Source);
                     var brandStyle = $"--brand: {branding.BrandColor}";
                     var ariaLabel = url is not null ? $"View {id.Value} on {branding.DisplayName} (opens in new tab)" : $"{branding.DisplayName} ID {id.Value}";

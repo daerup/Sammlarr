@@ -17,7 +17,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Shared.Media;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Media;
 
@@ -162,7 +161,7 @@ public class MediaDetailSheetTests : BunitContext
 		Services.AddSingleton(providerConfig.Object);
 
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

@@ -9,7 +9,6 @@ using Domain.Wantlist.Arr;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Providers;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.Providers;
 
@@ -49,7 +48,7 @@ public class ArrSinkRowTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddSingleton(_configs.Object);
 		Services.AddSingleton(_tester.Object);
 		_users.GetAllAsync(Any()).Returns([Guest]);

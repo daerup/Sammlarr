@@ -4,9 +4,7 @@ using Bunit;
 using Domain.Media;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
-using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Feeds.Pages.Editor;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Feeds;
 
@@ -16,7 +14,7 @@ public class FeedVotesPopoverTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

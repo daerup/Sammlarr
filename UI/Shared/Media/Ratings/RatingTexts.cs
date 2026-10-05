@@ -1,7 +1,5 @@
 using System.Globalization;
 using Domain.Media;
-using Domain.Providers;
-using UI.Shared.Services.Branding;
 
 namespace UI.Shared.Media.Ratings;
 
@@ -16,10 +14,6 @@ internal static class RatingTexts
 	public const string LastOneOn = "At least one provider has to count, so the last one switched on stays on.";
 
 	public const string StoredFooter = "Browse only has the ratings Sammlarr stores for this title; opening it loads the rest.";
-
-	private const string RottenTomatoesSite = "https://www.rottentomatoes.com/";
-
-	private const string RottenTomatoesSearch = "https://www.rottentomatoes.com/search?search=";
 
 	public static string Name(RatingSource source) => source.GetDescription();
 
@@ -106,23 +100,6 @@ internal static class RatingTexts
 	}
 
 	private static IEnumerable<IMediaRating> InRowOrder(SammlarrRating rating) => rating.Counted.OrderBy(part => part.Source);
-
-	public static Optional<string> Link(RatingSource source, IReadOnlyList<IExternalMediaId> ids, string? title, Optional<string> rottenTomatoesPath)
-	{
-		return source switch
-		{
-			RatingSource.Tmdb => Page(ids, MediaProvider.Tmdb),
-			RatingSource.Imdb => Page(ids, MediaProvider.Imdb),
-			RatingSource.RottenTomatoesCritics or RatingSource.RottenTomatoesAudience => rottenTomatoesPath
-				.Map(path => $"{RottenTomatoesSite}{path}")
-				.Or(() => Optional.Of(title).Map(name => $"{RottenTomatoesSearch}{Uri.EscapeDataString(name)}")),
-		};
-	}
-
-	private static Optional<string> Page(IReadOnlyList<IExternalMediaId> ids, MediaProvider provider)
-	{
-		return ids.FirstOrNone(id => id.Source == provider).Map(id => Optional.Of(ExternalMediaIdUrlResolver.Resolve(id)));
-	}
 }
 
 public sealed record RatingTerm(IMediaRating Rating, string Number);

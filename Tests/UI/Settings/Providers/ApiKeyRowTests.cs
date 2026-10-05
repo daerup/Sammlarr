@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Settings.Components.Providers;
 using UI.Shared.Common;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.Providers;
 
@@ -23,7 +22,7 @@ public class ApiKeyRowTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		_keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
 		Services.AddSingleton(_keys.Object);
 		Services.AddSingleton(_factory.Object);

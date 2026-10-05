@@ -1,11 +1,9 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Media;
-using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Shared.Media.Ratings;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Media.Ratings;
 
@@ -24,7 +22,7 @@ public class RatingSumTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 	}
 
 	[Test]

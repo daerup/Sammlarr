@@ -1,16 +1,14 @@
 using Bunit;
 using Domain.Providers;
-using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Shared.Branding;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Branding;
 
 public class ProviderTileTests : BunitContext
 {
 	[Before(Test)]
-	public void Setup() => Services.AddSingleton<MediaProviderBrandingService>();
+	public void Setup() => Services.AddProviderBranding();
 
 	[Test]
 	[Arguments(28, "20x20")]

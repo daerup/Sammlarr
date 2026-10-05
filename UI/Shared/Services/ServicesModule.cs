@@ -1,6 +1,7 @@
 using Shared.DI;
 using UI.Shared.Branding.Birds;
 using UI.Shared.Services.Branding;
+using UI.Shared.Services.Links;
 
 namespace UI.Shared.Services;
 
@@ -9,6 +10,7 @@ internal class ServicesModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddModule<BrandingModule>();
+		services.AddModule<LinksModule>();
 		services.AddScoped<ScrollService>();
 		services.AddScoped<Notifier>();
 		services.AddScoped<ProfileDropdownService>();

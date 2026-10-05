@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 using UrlGuid = Shared.UrlGuid;
 
 namespace UI.Tests.Feeds;
@@ -34,7 +33,7 @@ public class FeedCardTests : BunitContext
 		Services.AddSingleton(IBlocklistService.Mock().Object);
 		Services.AddSingleton(IProviderConfigService.Mock().Object);
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

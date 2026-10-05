@@ -19,7 +19,6 @@ using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 using UI.Tests.Media;
 
 namespace UI.Tests.Feeds;
@@ -116,7 +115,7 @@ public class LastRunCellTests : BunitContext
 		Services.AddSingleton(providerConfig.Object);
 
 		Services.AddScoped<Notifier>();
-		Services.AddSingleton<MediaProviderBrandingService>();
+		Services.AddProviderBranding();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
