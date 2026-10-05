@@ -20,7 +20,6 @@ using Contracts.Wantlist;
 using Core;
 using DB;
 using DB.Data;
-using DB.Data.Access;
 using DB.Data.Identity;
 using DB.Data.Media;
 using Domain.Announcing;
@@ -35,6 +34,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
+using Seeding;
 using Shared.DI;
 using Shared.Options;
 using TestInfrastructure;
@@ -678,10 +678,10 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		var user = new TestCurrentUser();
 		using var context = BuildContext(provider, user, connection);
 		context.Database.Migrate();
-		SearchWithPlex(context);
-		SetUp(context);
+		SeedRows.SearchWith(context, SearchProvider.Plex);
+		SeedRows.SetupFinished(context);
 		SeedUser(context, user);
-		Prompted(context);
+		SeedRows.KeyPrompted(context);
 		return connection;
 	}
 
@@ -691,9 +691,9 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			keyRingPath,
 			context =>
 			{
-				SeedApiKey(context, ApiKeyProvider.Tmdb, TmdbApiKey);
-				SeedApiKey(context, ApiKeyProvider.Mdblist, MdblistApiKey);
-				SeedCredential(context, AuthProvider.Plex, PlexToken);
+				SeedRows.ApiKey(context, ApiKeyProvider.Tmdb, TmdbApiKey);
+				SeedRows.ApiKey(context, ApiKeyProvider.Mdblist, MdblistApiKey);
+				SeedRows.Credential(context, AuthProvider.Plex, PlexToken);
 			}
 		);
 
@@ -710,12 +710,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			{
 				foreach (var (provider, apiKey) in apiKeys)
 				{
-					SeedApiKey(context, provider, apiKey);
+					SeedRows.ApiKey(context, provider, apiKey);
 				}
 
 				foreach (var (provider, token) in tokens)
 				{
-					SeedCredential(context, provider, token);
+					SeedRows.Credential(context, provider, token);
 				}
 			}
 		);
@@ -728,107 +728,27 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		var user = new TestCurrentUser();
 		using var context = BuildContext(provider, user, connection);
 		context.Database.Migrate();
-		SearchWithPlex(context);
-		SetUp(context);
+		SeedRows.SearchWith(context, SearchProvider.Plex);
+		SeedRows.SetupFinished(context);
 		SeedUser(context, user);
 		SeedSecondaryUsers(context);
-		Prompted(context);
+		SeedRows.KeyPrompted(context);
 		seed(context);
-		EnableWriteAheadLogging(connection);
+		SeedRows.WriteAheadLogging(connection);
 		return Project(user);
-	}
-
-	private static void SeedApiKey(SammlarrDbContext context, ApiKeyProvider provider, string apiKey)
-	{
-		context.Set<ApiKeyConfigRow>().Add(new ApiKeyConfigRow { Provider = provider, ApiKey = apiKey });
-		context.SaveChanges();
-		context.ChangeTracker.Clear();
-	}
-
-	private static void SeedCredential(SammlarrDbContext context, AuthProvider provider, string token)
-	{
-		context
-			.Set<CredentialRow>()
-			.Add(
-				new CredentialRow
-				{
-					Provider = provider,
-					ClientId = Guid.NewGuid(),
-					AccessToken = token,
-					ExpiresAt = new DateTimeOffset(2030, 1, 1, 0, 0, 0, TimeSpan.Zero),
-				}
-			);
-		context.SaveChanges();
-		context.ChangeTracker.Clear();
-	}
-
-	private static void EnableWriteAheadLogging(SqliteConnection connection)
-	{
-		using var command = connection.CreateCommand();
-		command.CommandText = "PRAGMA journal_mode=WAL;";
-		command.ExecuteNonQuery();
-	}
-
-	private static void Prompted(SammlarrDbContext context)
-	{
-		context.Users.ExecuteUpdate(rows => rows.SetProperty(row => row.KeyPromptedAt, DateTimeOffset.UnixEpoch));
-	}
-
-	private static void SetUp(SammlarrDbContext context)
-	{
-		context.ProviderSettings.Single().OnboardingCompletedAt = DateTimeOffset.UnixEpoch;
-		context.SaveChanges();
-		context.ChangeTracker.Clear();
-	}
-
-	private static void SearchWithPlex(SammlarrDbContext context)
-	{
-		context.ProviderSettings.Single().SearchProvider = SearchProvider.Plex;
-		context.SaveChanges();
-		context.ChangeTracker.Clear();
 	}
 
 	private static void SeedSecondaryUsers(SammlarrDbContext context)
 	{
 		foreach (var ((id, displayName, role), hue) in new[] { (SeededMember, 177.5), (SeededRemovable, 315.0) })
 		{
-			context.Users.Add(
-				new UserRow
-				{
-					Id = id,
-					Provider = AuthProvider.Plex,
-					ExternalUserId = id.ToString(),
-					DisplayName = displayName,
-					TagName = displayName,
-					AvatarUrl = string.Empty,
-					Role = role,
-					JoinedAt = DateTimeOffset.UnixEpoch,
-					Hue = hue,
-				}
-			);
+			SeedRows.PlexUser(context, id, displayName, role, string.Empty, hue);
 		}
-
-		context.SaveChanges();
-		context.ChangeTracker.Clear();
 	}
 
 	private static void SeedUser(SammlarrDbContext context, TestCurrentUser user)
 	{
-		context.Users.Add(
-			new UserRow
-			{
-				Id = user.Id.Value,
-				Provider = AuthProvider.Plex,
-				ExternalUserId = user.Id.Value.ToString(),
-				DisplayName = user.DisplayName,
-				TagName = user.DisplayName,
-				AvatarUrl = user.AvatarUrl,
-				Role = user.Role,
-				JoinedAt = DateTimeOffset.UnixEpoch,
-				Hue = 40,
-			}
-		);
-		context.SaveChanges();
+		SeedRows.PlexUser(context, user.Id.Value, user.DisplayName, user.Role, user.AvatarUrl, 40);
 	}
 
 	private sealed class FixedClock : IDateTimeProvider
