@@ -104,5 +104,6 @@ internal static class SelfHostedSetup
 		await page.ShouldBeAtAsync(Routes.Home);
 		await page.ReloadAsync();
 		await page.ShouldBeAtAsync(Routes.Home);
+		await page.WaitForCircuitAsync();
 	}
 }

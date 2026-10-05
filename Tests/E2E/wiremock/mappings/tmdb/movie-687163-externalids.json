@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/movie/687163",
+    "queryParameters": {
+      "append_to_response": {
+        "equalTo": "external_ids"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json;charset=utf-8"
+    },
+    "bodyFileName": "tmdb/movie-687163-externalids.verified.json"
+  }
+}

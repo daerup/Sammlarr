@@ -1,0 +1,109 @@
+{
+  "adult": false,
+  "backdrop_path": "/8Tfys3mDZVp4tNoH2ktm06a0Tau.jpg",
+  "belongs_to_collection": null,
+  "budget": 200000000,
+  "genres": [
+    {
+      "id": 878,
+      "name": "Science Fiction"
+    },
+    {
+      "id": 12,
+      "name": "Adventure"
+    }
+  ],
+  "homepage": "https://www.amazon.com/salp/projecthailmary?hhf",
+  "id": 687163,
+  "imdb_id": "tt12042730",
+  "origin_country": [
+    "US"
+  ],
+  "original_language": "en",
+  "original_title": "Project Hail Mary",
+  "overview": "Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction.",
+  "popularity": 98.1788,
+  "poster_path": "/iOb2fjXLbpJgyQXe46n1WtGCnaa.jpg",
+  "production_companies": [
+    {
+      "id": 77973,
+      "logo_path": "/fAajboa3w8LNvweN0hNZ4K0z03L.png",
+      "name": "Lord Miller",
+      "origin_country": "US"
+    },
+    {
+      "id": 210099,
+      "logo_path": "/g5oRCNCi8kNVb8gEoSoIcqkhjmR.png",
+      "name": "Amazon MGM Studios",
+      "origin_country": "US"
+    },
+    {
+      "id": 84041,
+      "logo_path": "/nw4kyc29QRpNtFbdsBHkRSFavvt.png",
+      "name": "Pascal Pictures",
+      "origin_country": "US"
+    },
+    {
+      "id": 232193,
+      "logo_path": "/87yLRX32cLqxEhNy1fWkDrPL72v.png",
+      "name": "Open Invite Entertainment",
+      "origin_country": "US"
+    },
+    {
+      "id": 22842,
+      "logo_path": "/buyfiDYTfPVTHxvYZ4yHu69zFPs.png",
+      "name": "Waypoint Entertainment",
+      "origin_country": "US"
+    }
+  ],
+  "production_countries": [
+    {
+      "iso_3166_1": "US",
+      "name": "United States of America"
+    }
+  ],
+  "release_date": "2026-03-15",
+  "revenue": 684586806,
+  "runtime": 157,
+  "softcore": false,
+  "spoken_languages": [
+    {
+      "english_name": "Mandarin",
+      "iso_639_1": "zh",
+      "name": "普通话"
+    },
+    {
+      "english_name": "English",
+      "iso_639_1": "en",
+      "name": "English"
+    },
+    {
+      "english_name": "Japanese",
+      "iso_639_1": "ja",
+      "name": "日本語"
+    },
+    {
+      "english_name": "Russian",
+      "iso_639_1": "ru",
+      "name": "Pусский"
+    },
+    {
+      "english_name": "Spanish",
+      "iso_639_1": "es",
+      "name": "Español"
+    }
+  ],
+  "status": "Released",
+  "tagline": "Believe in the Hail Mary.",
+  "title": "Project Hail Mary",
+  "video": false,
+  "vote_average": 8.64,
+  "vote_count": 8119,
+  "external_ids": {
+    "imdb_id": "tt12042730",
+    "wikidata_id": "Q107105860",
+    "facebook_id": "ProjectHailMary",
+    "instagram_id": "projecthailmary",
+    "twitter_id": "projecthailmary"
+  }
+}

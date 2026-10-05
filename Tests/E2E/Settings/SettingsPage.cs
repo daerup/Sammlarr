@@ -12,6 +12,21 @@ internal static class SettingsPage
 
 	internal static ILocator MapChip(IPage page, string role) => page.Locator($".map-chip[aria-label='Change what {role} uses']");
 
+	internal static async Task PickAsync(IPage page, string role, string option)
+	{
+		await VisitSectionAsync(page, "providers");
+		await MapChip(page, role).ClickAsync();
+		await page.MenuItem(option).ClickAsync();
+	}
+
+	internal static async Task<ILocator> OpenWantlistSyncAsync(IPage page)
+	{
+		await VisitSectionAsync(page, "providers");
+		var row = page.Locator("#provider-row-radarr");
+		await row.Locator("button").First.ClickAsync();
+		return row;
+	}
+
 	internal static ILocator PersonRow(IPage page, string user) => page.Locator($"[data-person='{user}']");
 
 	internal static async Task OpenPersonAsync(IPage page, string user)

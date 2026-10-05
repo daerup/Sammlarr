@@ -9,7 +9,9 @@
     "/radarr/*",
     "/sonarr/*",
     "/v1/movie/*",
-    "/v1/tvdb/*"
+    "/v1/tvdb/*",
+    "/search/*",
+    "/v1/search"
   ],
   "frozen": [
     "/library/sections/watchlist/all",
