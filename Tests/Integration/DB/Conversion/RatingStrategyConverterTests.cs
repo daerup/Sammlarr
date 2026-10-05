@@ -2,7 +2,7 @@ using DB.Conversion.Ratings;
 using Domain.Media;
 using TestInfrastructure;
 
-namespace DB.Tests.Conversion;
+namespace Integration.Tests.DB.Conversion;
 
 public class RatingStrategyConverterTests
 {

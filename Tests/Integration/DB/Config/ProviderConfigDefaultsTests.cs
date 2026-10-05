@@ -2,7 +2,7 @@ using DB.Data.Config;
 using Domain.Providers;
 using Domain.Settings;
 
-namespace DB.Tests.Config;
+namespace Integration.Tests.DB.Config;
 
 public class ProviderConfigDefaultsTests
 {

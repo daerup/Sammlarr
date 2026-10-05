@@ -1,11 +1,8 @@
 using Domain.Wantlist.Arr;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Seeding.Staging;
 using Shared.Options;
 
-namespace StagingSeeder;
+namespace Web.Staging;
 
 internal sealed record StagingOptions
 {
@@ -43,6 +40,7 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 {
 	internal async Task RunAsync(CancellationToken cancellationToken)
 	{
+		var database = Database();
 		var options = configuration.GetRequiredSection(StagingOptions.SectionName).Get<StagingOptions>()!;
 		var radarr = ArrClient.For(options.Radarr.Url, options.ArrApiKey);
 		var sonarr = ArrClient.For(options.Sonarr.Url, options.ArrApiKey);
@@ -51,7 +49,6 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 		await StagingLibrary.FillRadarrAsync(radarr, options.Radarr, movies, cancellationToken);
 		await StagingLibrary.FillSonarrAsync(sonarr, options.Sonarr, shows, cancellationToken);
 
-		var database = new SqliteConnectionStringBuilder(configuration.GetSection(SammlarOptions.SectionName)[nameof(SammlarOptions.ConnectionString)]).DataSource;
 		var seeded = $"{database}.seeded";
 		if (File.Exists(seeded))
 		{
@@ -77,6 +74,14 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 				StagingPersonas.MemberPassword
 			);
 		}
+	}
+
+	private string Database()
+	{
+		var database = new SqliteConnectionStringBuilder(configuration.GetSection(SammlarOptions.SectionName)[nameof(SammlarOptions.ConnectionString)]).DataSource;
+		return Path.IsPathRooted(database)
+			? database
+			: throw new InvalidOperationException($"The staging seed deletes and reseeds its database, so it takes an absolute path only, not '{database}'.");
 	}
 
 	private static StagingSettings Settings(StagingOptions options, int movies, int shows)

@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace StagingSeeder;
+namespace Web.Staging;
 
 internal sealed class ArrClient(HttpClient http)
 {

@@ -20,9 +20,8 @@ using Domain.Wantlist;
 using Domain.Wantlist.Arr;
 using Domain.Wantlist.Sync;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Seeding.Staging;
+namespace Web.Staging;
 
 internal enum StagingScenario
 {

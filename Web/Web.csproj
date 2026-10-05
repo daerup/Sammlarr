@@ -27,8 +27,19 @@
 		<PackageReference Include="TickerQ" />
 		<PackageReference Include="MinVer" PrivateAssets="all" />
 	</ItemGroup>
+	<PropertyGroup>
+		<ExcludeStaging Condition="'$(ExcludeStaging)' == '' and '$(_IsPublishing)' == 'true'">true</ExcludeStaging>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(ExcludeStaging)' != 'true'">
+		<DefineConstants>$(DefineConstants);STAGING_SEED</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(ExcludeStaging)' == 'true'">
+		<Compile Remove="Staging/**" />
+	</ItemGroup>
 	<ItemGroup>
 		<InternalsVisibleTo Include="Web.Tests" />
+		<InternalsVisibleTo Include="Integration.Tests" />
+		<InternalsVisibleTo Include="E2E.Tests" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<Content Remove="wwwroot\js\masonry.js" />

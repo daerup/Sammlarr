@@ -35,7 +35,6 @@
 		<Project Path="Tests/API/API.Tests.csproj" />
 		<Project Path="Tests/Architecture/Architecture.Tests.csproj" />
 		<Project Path="Tests/Core/Core.Tests.csproj" />
-		<Project Path="Tests/DB/DB.Tests.csproj" />
 		<Project Path="Tests/E2E/E2E.Tests.csproj" />
 		<Project Path="Tests/Harness/Harness.csproj" />
 		<Project Path="Tests/Domain/Domain.Tests.csproj" />
@@ -55,9 +54,7 @@
 	<Project Path="Observability/Observability.csproj" />
 	<Project Path="AppHost/AppHost.csproj" />
 	<Project Path="Roslyn/Roslyn.csproj" />
-	<Project Path="Seeding/Seeding.csproj" />
 	<Project Path="Shared/Shared.csproj" />
-	<Project Path="StagingSeeder/StagingSeeder.csproj" />
 	<Project Path="UI/UI.csproj" />
 	<Project Path="Web/Web.csproj" />
 </Solution>

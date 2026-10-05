@@ -25,6 +25,7 @@
 		<ProjectReference Include="..\..\Core\Core.csproj" />
 		<ProjectReference Include="..\..\DB\DB.csproj" />
 		<ProjectReference Include="..\..\Messaging\Messaging.csproj" />
+		<ProjectReference Include="..\..\Web\Web.csproj" />
 		<ProjectReference Include="..\Harness\Harness.csproj" />
 		<ProjectReference Include="..\TestInfrastructure\TestInfrastructure.csproj" />
 	</ItemGroup>

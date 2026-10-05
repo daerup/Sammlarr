@@ -3,7 +3,7 @@ using Domain.Providers;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-namespace DB.Tests.Conversion;
+namespace Integration.Tests.DB.Conversion;
 
 public class EnumAsStringConventionTests
 {

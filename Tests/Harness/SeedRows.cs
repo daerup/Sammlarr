@@ -6,7 +6,7 @@ using Domain.Providers;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-namespace Seeding;
+namespace Harness;
 
 internal static class SeedRows
 {

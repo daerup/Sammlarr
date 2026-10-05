@@ -10,7 +10,7 @@ namespace Observability.Logging;
 internal static class LogPipeline
 {
 	private const string ConsoleTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {SourceContext} {Message:lj}{NewLine}{Exception}";
-	private static readonly string[] AppLogCategories = ["Sammlarr", "Core", "DB", "API", "UI", "Shared", "Domain", "Contracts"];
+	private static readonly string[] AppLogCategories = ["Sammlarr", "Core", "DB", "API", "UI", "Web", "Shared", "Domain", "Contracts"];
 
 	public static void Configure(LoggerConfiguration logger, IServiceProvider provider, ObservabilityContext context)
 	{

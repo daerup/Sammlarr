@@ -65,7 +65,8 @@ internal static class StagingEnvironment
 			.WithEnvironment("FS_STORAGE_DIR", "/data");
 
 		var seed = builder
-			.AddProject<Projects.StagingSeeder>("seed")
+			.AddProject<Projects.Web>("seed", launchProfileName: null)
+			.WithArgs("seed-staging")
 			.WithEnvironment((SammlarOptions options) => options.ConnectionString, $"Data Source={layout.Database};Pooling=False")
 			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", layout.KeyRing)
 			.WithEnvironment(context => context.EnvironmentVariables["Staging__Scenario"] = scenario.Value)

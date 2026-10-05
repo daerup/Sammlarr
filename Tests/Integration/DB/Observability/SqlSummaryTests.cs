@@ -1,6 +1,6 @@
 using DB.Observability;
 
-namespace DB.Tests.Observability;
+namespace Integration.Tests.DB.Observability;
 
 public class SqlSummaryTests
 {

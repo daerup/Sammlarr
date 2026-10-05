@@ -4,7 +4,7 @@ using Domain.Jobs;
 using Domain.Wantlist.Sync;
 using TestInfrastructure;
 
-namespace DB.Tests.Conversion;
+namespace Integration.Tests.DB.Conversion;
 
 public class JobRequestConverterTests
 {

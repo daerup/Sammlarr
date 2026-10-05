@@ -2,7 +2,7 @@ using DB.Conversion.Encryption;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DB.Tests.Conversion;
+namespace Integration.Tests.DB.Conversion;
 
 public class DataProtectionKeyPersistenceTests
 {

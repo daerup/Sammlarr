@@ -14,6 +14,9 @@ using Web.Auth;
 using Web.Health;
 using Web.Localization;
 using Web.Setup;
+#if STAGING_SEED
+using Web.Staging;
+#endif
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +25,17 @@ builder.Services.AddModule<ObservabilityModule>();
 builder.Services.AddModule<DbModule>();
 builder.Services.AddModule<CoreModule>();
 builder.Services.AddModule<ApiModule>();
+
+#if STAGING_SEED
+if (args is ["seed-staging", ..])
+{
+	builder.Services.AddStagingSeed(builder.Configuration);
+	await using var seeding = builder.Build();
+	await seeding.Services.GetRequiredService<StagingRun>().RunAsync(CancellationToken.None);
+	return;
+}
+#endif
+
 builder.Services.AddModule<MessagingModule>();
 builder.Services.AddModule<UiModule>();
 builder.Services.AddModule<WebModule>();

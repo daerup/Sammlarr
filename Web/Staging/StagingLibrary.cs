@@ -1,7 +1,6 @@
 using System.Text.Json.Nodes;
-using Seeding.Staging;
 
-namespace StagingSeeder;
+namespace Web.Staging;
 
 internal static class StagingLibrary
 {

@@ -13,7 +13,7 @@ snapshots need the native runner).
 | Pure unit                 | `Tests/Domain`, `Tests/Shared` | Value objects, unions, algebraic laws                   | plain `[Test]`, CsCheck for laws  |
 | Provider clients          | `Tests/API`                    | HTTP clients and converters                             | `TUnit.Mocks.Http` at the handler |
 | Single-collaborator units | `Tests/Core`                   | A service with one dependency                           | one `IFoo.Mock()`                 |
-| Behaviour + repositories  | `Tests/Integration`            | The real Core+DB+API graph, EF queries, migration drift | `SammlarrTestHost` on real SQLite |
+| Behaviour + repositories  | `Tests/Integration`            | The real Core+DB+API graph, EF queries, migration drift; the DB converters and conventions (`Tests/Integration/DB`) | `SammlarrTestHost` on real SQLite |
 | Components                | `Tests/UI`                     | Blazor render logic, event wiring, empty/error states   | bUnit, `.cs` only                 |
 | End to end                | `Tests/E2E`                    | Cross-feature flows through a real browser              | Playwright + Aspire + WireMock    |
 | Conventions               | `Tests/Architecture`           | Dependency direction, naming, design rules              | NetArchTest                       |
@@ -22,11 +22,11 @@ snapshots need the native runner).
 Rule of thumb: wiring more than one or two `.Mock()`s just to construct the subject means it belongs in `Tests/Integration` as a harness scenario, not a unit
 test.
 
-Current suite: **2783** non-E2E tests plus **159** E2E (17 of them on the self-hosted stacks, and the staging smoke test, skipped by default).
+Current suite: **2942** non-E2E tests plus **159** E2E (17 of them on the self-hosted stacks, and the staging smoke test, skipped by default).
 
-| Domain | Shared | Core | API | DB | Architecture | Roslyn | Integration | UI | Web |
-|--------|--------|------|-----|----|--------------|------------|-------------|----|-----|
-| 245    | 179    | 345  | 280 | 47 | 44           | 98         | 571         | 946 | 28  |
+| Domain | Shared | Core | API | Architecture | Roslyn | Integration | UI   | Web |
+|--------|--------|------|-----|--------------|--------|-------------|------|-----|
+| 279    | 183    | 372  | 302 | 44           | 98     | 625         | 1011 | 28  |
 
 ## Running
 
@@ -138,7 +138,7 @@ at the same time. The first start pulls the images and builds Sammlarr's (about 
 
 Every port is published on 127.0.0.1 only.
 
-**Scenarios.** The `seed` resource (`StagingSeeder`, built on the `Seeding` library) prepares Radarr and Sonarr (root folder, a blackhole
+**Scenarios.** The `seed` resource (Web started with `seed-staging`, its code in `Web/Staging`, which the published image leaves out) prepares Radarr and Sonarr (root folder, a blackhole
 download client, the Newznab indexer, a small library: titles on disk, monitored titles without files, and The Martian tagged for `admin`
 so the pull-back path shows; each step skips what is already there) and, unless the database carries the `.seeded` marker of a finished seed, seeds a scenario:
 

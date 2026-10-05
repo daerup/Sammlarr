@@ -1,3 +1,4 @@
+using API;
 using Contracts.Auth;
 using Contracts.Feed;
 using Contracts.Identity;
@@ -6,6 +7,8 @@ using Contracts.Notifications;
 using Contracts.Settings;
 using Contracts.Setup;
 using Contracts.Wantlist;
+using Core;
+using DB;
 using Domain.Jobs;
 using Domain.Notifications;
 using Domain.Providers;
@@ -14,9 +17,9 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Seeding;
-using Seeding.Staging;
+using Shared.DI;
 using TestInfrastructure;
+using Web.Staging;
 
 namespace Integration.Tests.Staging;
 
@@ -50,13 +53,17 @@ public class StagingSeedTests : IAsyncDisposable
 	public StagingSeedTests()
 	{
 		var configuration = new ConfigurationBuilder()
-			.AddSammlarrDefaults()
+			.AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json"))
 			.AddInMemoryCollection(new Dictionary<string, string?> { ["Sammlarr:ConnectionString"] = $"Data Source={Path.Combine(_directory, "sammlarr.db")}" })
 			.Build();
 		var services = new ServiceCollection();
 		services.AddLogging();
 		services.AddSingleton<IConfiguration>(configuration);
-		services.AddSeeding(configuration);
+		services.AddModule<SharedModule>();
+		services.AddModule<DbModule>();
+		services.AddModule<CoreModule>();
+		services.AddModule<ApiModule>();
+		services.AddStagingSeed(configuration);
 		services.AddDataProtection().UseEphemeralDataProtectionProvider();
 		_services = services.BuildServiceProvider();
 	}

@@ -1,37 +1,22 @@
-using API;
 using Contracts.Identity;
 using Contracts.Messaging;
-using Core;
 using DB;
 using DB.Scheduling;
 using Domain.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Shared.DI;
 
-namespace Seeding;
+namespace Web.Staging;
 
-internal static class SeedServices
+internal static class StagingServices
 {
-	private const string Defaults = "sammlarr-appsettings.json";
-
-	extension(IConfigurationBuilder configuration)
-	{
-		internal IConfigurationBuilder AddSammlarrDefaults() => configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, Defaults));
-	}
-
 	extension(IServiceCollection services)
 	{
-		internal IServiceCollection AddSeeding(IConfiguration configuration)
+		internal IServiceCollection AddStagingSeed(IConfiguration configuration)
 		{
-			services.AddModule<SharedModule>();
-			services.AddModule<DbModule>();
-			services.AddModule<CoreModule>();
-			services.AddModule<ApiModule>();
 			services.AddSammlarrScheduling(configuration);
 			services.AddScoped<ICurrentUser, SeedingUser>();
 			services.AddScoped<IMessagePublisher, UnsentMessages>();
 			services.AddSingleton<ISessionInvalidator, NoSessions>();
+			services.AddSingleton<StagingRun>();
 			return services;
 		}
 	}
