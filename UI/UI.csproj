@@ -44,6 +44,7 @@
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<Content Remove="Features\Settings\Components\Testing\**" />
+		<None Remove="Features\Settings\Components\Testing\**" />
 		<Compile Remove="Features\Settings\Components\Testing\**" />
 	</ItemGroup>
 </Project>

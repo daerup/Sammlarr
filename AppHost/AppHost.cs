@@ -31,7 +31,7 @@ else
 #pragma warning restore ASPIRECOMPUTE003
 
 	var ui = builder
-		.AddDockerfile("blazor-ui", "..", "UI/Dockerfile")
+		.AddDockerfile("blazor-ui", "..", "Web/Dockerfile")
 		.WithHttpEndpoint(port: 8080, targetPort: 8080, name: "http")
 		.WithExternalHttpEndpoints()
 		.WithHttpHealthCheck("/health")

@@ -3,7 +3,7 @@
     image: ui
     build:
       context: .
-      dockerfile: UI/Dockerfile
+      dockerfile: Web/Dockerfile
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889
       Sammlarr__Telemetry__Exporter: Auto
