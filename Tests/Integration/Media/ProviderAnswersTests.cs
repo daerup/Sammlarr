@@ -83,10 +83,24 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_WhenPlexIsDownForTheRefresh_KeepsTheRatingsItGaveBefore()
+	public async Task GetDetailsAsync_WhenPlexIsDownForTheRefresh_DropsTheRatingsItLastGaveTwoWeeksAgo()
 	{
 		var dune = await DuneAsync();
-		await StoreRefreshedOnTheFirstAsync(dune);
+		await StoreRefreshedOnTheFirstAsync(dune, plexAnsweredAt: At(6, 1));
+		host.PlexLookupFails(Dune);
+		host.SetCurrentTime(At(6, 15));
+
+		var refreshed = await Testee.GetDetailsAsync([dune]).ToListAsync();
+
+		await Assert.That(await Sources(refreshed[0])).IsEquivalentTo([RatingSource.Tmdb]);
+		await AssertCached(dune, refreshed: At(6, 15), asked: At(6, 15), MediaProvider.Tmdb);
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_WhenPlexIsDownForTheRefresh_KeepsTheRatingsItGaveWithinTwoWeeks()
+	{
+		var dune = await DuneAsync();
+		await StoreRefreshedOnTheFirstAsync(dune, plexAnsweredAt: At(6, 12));
 		host.PlexLookupFails(Dune);
 		host.SetCurrentTime(At(6, 15));
 
@@ -100,7 +114,7 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task GetDetailsAsync_WhenEveryoneAnswersTheRefresh_DropsTheRatingsPlexNoLongerHas()
 	{
 		var dune = await DuneAsync();
-		await StoreRefreshedOnTheFirstAsync(dune);
+		await StoreRefreshedOnTheFirstAsync(dune, plexAnsweredAt: At(6, 1));
 		host.Movie(Dune).ServedByPlex();
 		host.SetCurrentTime(At(6, 15));
 
@@ -116,7 +130,7 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 		return await host.Movie(Dune).ServedByTmdb(rating: 7.8, votes: 12_000).ServedByPlex(imdbRating: 8.0, imdbVotes: 900_000).SeedAsync();
 	}
 
-	private async Task StoreRefreshedOnTheFirstAsync(MediaId dune)
+	private async Task StoreRefreshedOnTheFirstAsync(MediaId dune, DateTimeOffset plexAnsweredAt)
 	{
 		var details = new MovieDetails
 		{
@@ -125,8 +139,8 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 		};
 		ValueSet<ProviderAnswer> answers =
 		[
-			new(MediaProvider.Tmdb, MediaFields.None),
-			new(MediaProvider.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience])),
+			new(MediaProvider.Tmdb, MediaFields.None, At(6, 1)),
+			new(MediaProvider.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience]), plexAnsweredAt),
 		];
 		await host.Resolve<IMediaRepository>().UpsertDetailsAsync(new Dictionary<MediaId, CachedDetails> { [dune] = new(details, At(6, 1), At(6, 1), answers) });
 	}

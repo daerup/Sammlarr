@@ -98,8 +98,11 @@ block ends within its `EnrichWait` (TMDB 15 s) is slept for once and then asked 
 stored copy and its answers and asks only the enrichers that have not answered. The cache stores who answered and
 what each could not give (`ProviderAnswer`); only a successful answer is stored, so a provider that failed, was
 blocked, or was never asked (no id for it, or the user has no key or sign-in for it) still counts as not having
-answered. A refresh that did not hear from everyone who answered before is laid over the stored copy, so it never
-deletes what it could not get; one that did replaces it, so a value removed upstream goes too. Each rating source counts as one of
+answered. Every answer wins over the stored copy and each answer over the later ones (`first ?? second ?? ... ?? stored`),
+so the stored copy only fills what no answer has; the next enricher is asked only while that still leaves a gap. A refresh
+asks from scratch until its first answer and keeps a stored value only while a provider gave it within the last 14 days
+(`ProviderAnswer.AnsweredAt`), so a value removed upstream, or one whose provider is down or not connected, goes with
+the first refresh 14 or more days after a provider last gave it. Each rating source counts as one of
 those fields (`MediaFields` pairs the detail flags with a set of `RatingSource`): TMDB fills its own, Plex fills IMDb, Rotten Tomatoes and its copy of TMDB's. Writes are
 batched write-behind through the `MediaWriteBuffer` (one identity and one details upsert per run). Two failure behaviours matter: an
 unmatched candidate becomes `UnmatchedMedia` (surfaced, never persisted); and when a provider is down

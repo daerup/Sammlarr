@@ -103,4 +103,32 @@ public class MediaMergerTests
 				}
 			);
 	}
+
+	[Test]
+	public async Task Only_ForAShow_KeepsTheNamedDetailsAndRatingSources()
+	{
+		var show = new ShowDetails
+		{
+			Title = "Breaking Bad",
+			Tagline = "Say my name.",
+			Seasons = 5,
+			Episodes = 62,
+			RuntimePerEpisode = TimeSpan.FromMinutes(47),
+			Ratings = MediaRatings.From([new TmdbRating(8.9f, Some.Of(15_000)), new ImdbRating(9.5f, Some.Of(2_300_000))]),
+		};
+
+		var kept = show.Only(MediaField.Title | MediaField.Episodes | MediaField.RuntimePerEpisode | MediaFields.Rated([RatingSource.Imdb]));
+
+		await Assert
+			.That(kept)
+			.IsEqualTo(
+				new ShowDetails
+				{
+					Title = "Breaking Bad",
+					Episodes = 62,
+					RuntimePerEpisode = TimeSpan.FromMinutes(47),
+					Ratings = MediaRatings.From([new ImdbRating(9.5f, Some.Of(2_300_000))]),
+				}
+			);
+	}
 }

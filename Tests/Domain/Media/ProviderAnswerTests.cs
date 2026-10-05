@@ -6,6 +6,8 @@ namespace Domain.Tests.Media;
 
 public class ProviderAnswerTests
 {
+	private static readonly DateTimeOffset At = new(2026, 10, 5, 12, 0, 0, TimeSpan.Zero);
+
 	private static readonly Gen<MovieDetails> Titles = Gen.Select(
 		Gen.Bool.Array[3],
 		MediaFieldsGen.RatingSources,
@@ -21,11 +23,11 @@ public class ProviderAnswerTests
 	);
 
 	[Test]
-	public async Task After_NamesWhatTheProviderFillsAndTheTitleStillLacks()
+	public async Task After_NamesWhatTheProviderFillsAndItsAnswerLacks()
 	{
-		var merged = new MovieDetails { Title = "Dune", Ratings = MediaRatings.From([new TmdbRating(7.8f, Some.Of(12_000))]) };
+		var answered = new MovieDetails { Title = "Dune", Ratings = MediaRatings.From([new TmdbRating(7.8f, Some.Of(12_000))]) };
 
-		var answer = ProviderAnswer.After(MediaProvider.Plex, MediaField.Tagline | MediaField.Summary | MediaFields.AllRatings, merged);
+		var answer = ProviderAnswer.After(MediaProvider.Plex, MediaField.Tagline | MediaField.Summary | MediaFields.AllRatings, answered, At);
 
 		await Assert
 			.That(answer.Unfilled)
@@ -34,18 +36,20 @@ public class ProviderAnswerTests
 					| MediaField.Summary
 					| MediaFields.Rated([RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience])
 			);
+		await Assert.That(answer.AnsweredAt).IsEqualTo(At);
 	}
 
 	[Test]
-	public void After_ForAnyFillsAndTitle_NeverNamesAFieldOutsideTheFills()
-	{
-		Gen.Select(MediaFieldsGen.Fields, Titles).Sample((fills, merged) => ProviderAnswer.After(MediaProvider.Tmdb, fills, merged).Unfilled.Except(fills).IsEmpty);
-	}
-
-	[Test]
-	public void After_ForAnyFillsAndTitle_NeverNamesAFieldTheTitleHas()
+	public void After_ForAnyFillsAndAnswer_NeverNamesAFieldOutsideTheFills()
 	{
 		Gen.Select(MediaFieldsGen.Fields, Titles)
-			.Sample((fills, merged) => ProviderAnswer.After(MediaProvider.Tmdb, fills, merged).Unfilled.Except(merged.Missing).IsEmpty);
+			.Sample((fills, answered) => ProviderAnswer.After(MediaProvider.Tmdb, fills, answered, At).Unfilled.Except(fills).IsEmpty);
+	}
+
+	[Test]
+	public void After_ForAnyFillsAndAnswer_NeverNamesAFieldTheAnswerHas()
+	{
+		Gen.Select(MediaFieldsGen.Fields, Titles)
+			.Sample((fills, answered) => ProviderAnswer.After(MediaProvider.Tmdb, fills, answered, At).Unfilled.Except(answered.Missing).IsEmpty);
 	}
 }

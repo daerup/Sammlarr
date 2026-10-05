@@ -21,3 +21,4 @@ Domain/Media/RatingStrategy.cs
 Contracts/Identity/Person.cs
 UI/Features/Settings/Components/Providers/ProviderRows.cs
 UI/Features/Settings/Components/Providers/ServicesMapModel.cs
+Core/Media/FetchReason.cs

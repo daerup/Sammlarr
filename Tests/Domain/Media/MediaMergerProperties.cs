@@ -7,6 +7,7 @@ public class MediaMergerProperties
 {
 	private static readonly Gen<MovieDetails> Primaries = Gen.Bool.Array[9].Select(flags => Build(flags, "primary"));
 	private static readonly Gen<MovieDetails> Others = Gen.Bool.Array[9].Select(flags => Build(flags, "other"));
+	private static readonly MediaFields Everything = ~MediaField.None | MediaFields.AllRatings;
 
 	[Test]
 	public void FillFrom_ForAnyTwoMovies_TakesEachFieldFromThePrimaryFirst()
@@ -30,6 +31,24 @@ public class MediaMergerProperties
 	public void FillFrom_WhenTheOtherIsAShow_LeavesTheMovieUnchanged()
 	{
 		Primaries.Sample(movie => movie.FillFrom(new ShowDetails { Title = "Show", Seasons = 2 }) == movie);
+	}
+
+	[Test]
+	public void Only_ForAnyMovieAndFields_LosesNoKeptField()
+	{
+		Gen.Select(Primaries, MediaFieldsGen.Fields).Sample((movie, kept) => !movie.Only(kept).Missing.Except(movie.Missing).Overlaps(kept));
+	}
+
+	[Test]
+	public void Only_ForAnyMovieAndFields_HoldsNoOtherField()
+	{
+		Gen.Select(Primaries, MediaFieldsGen.Fields).Sample((movie, kept) => movie.Only(kept).Only(Everything.Except(kept)) == new MovieDetails());
+	}
+
+	[Test]
+	public void Only_ThenFilledFromTheWhole_GivesTheWholeBack()
+	{
+		Gen.Select(Primaries, MediaFieldsGen.Fields).Sample((movie, kept) => movie.Only(kept).FillFrom(movie) == movie);
 	}
 
 	private static MovieDetails Expected(MovieDetails primary, MovieDetails other)
@@ -59,7 +78,7 @@ public class MediaMergerProperties
 			BackdropUrl = flags[4] ? $"/{side}-backdrop.jpg" : null,
 			ReleaseDate = flags[5] ? new DateOnly(2020, 1, side.Length) : null,
 			Genres = flags[6] ? [side] : [],
-			Ratings = flags[8] ? MediaRatings.From([new TmdbRating(side.Length, new None())]) : MediaRatings.None,
+			Ratings = flags[8] ? MediaRatings.From([new TmdbRating(side.Length, Some.Of(side.Length))]) : MediaRatings.None,
 			Runtime = flags[7] ? TimeSpan.FromMinutes(side.Length) : null,
 		};
 	}

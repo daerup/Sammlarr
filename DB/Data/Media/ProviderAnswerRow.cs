@@ -12,6 +12,9 @@ internal record ProviderAnswerRow
 	[Required]
 	public required MediaFields Unfilled { get; set; }
 
+	[Required]
+	public required DateTimeOffset AnsweredAt { get; set; }
+
 #pragma warning disable CS8618
 	public MediaDetailsRow Details { get; set; }
 #pragma warning restore CS8618

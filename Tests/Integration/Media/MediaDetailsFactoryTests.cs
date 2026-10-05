@@ -10,8 +10,12 @@ namespace Integration.Tests.Media;
 public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
 	private static readonly DateTimeOffset RefreshedAt = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
-	private static readonly ProviderAnswer TmdbLackedTheTagline = new(MediaProvider.Tmdb, MediaField.Tagline);
-	private static readonly ProviderAnswer PlexLackedTheAudience = new(MediaProvider.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience]));
+	private static readonly ProviderAnswer TmdbLackedTheTagline = new(MediaProvider.Tmdb, MediaField.Tagline, RefreshedAt);
+	private static readonly ProviderAnswer PlexLackedTheAudience = new(
+		MediaProvider.Plex,
+		MediaFields.Rated([RatingSource.RottenTomatoesAudience]),
+		RefreshedAt.AddDays(-3)
+	);
 
 	private readonly MediaDetailsFactory _testee = new();
 
@@ -68,8 +72,8 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		await Assert.That(entity.RefreshedAt).IsEqualTo(RefreshedAt);
 		await Assert.That(entity.AskedAt).IsEqualTo(asked);
 		await Assert
-			.That(entity.Answers.Select(answer => (answer.Provider, answer.Unfilled)))
-			.IsEquivalentTo([(MediaProvider.Tmdb, (MediaFields)MediaField.Tagline)]);
+			.That(entity.Answers.Select(answer => (answer.Provider, answer.Unfilled, answer.AnsweredAt)))
+			.IsEquivalentTo([(MediaProvider.Tmdb, (MediaFields)MediaField.Tagline, RefreshedAt)]);
 	}
 
 	[Test]
@@ -100,19 +104,19 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 	}
 
 	[Test]
-	public async Task Update_ReplacesTheAnswers()
+	public async Task Update_ReplacesTheAnswersAndKeepsWhenEachWasGiven()
 	{
 		var plexId = PlexId.From("plex-305", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
 		var existing = await PersistAsync(Cached(MovieDetails()) with { Answers = [TmdbLackedTheTagline, PlexLackedTheAudience] }, mediaId);
-		var tmdbFilledEverything = new ProviderAnswer(MediaProvider.Tmdb, MediaFields.None);
+		var tmdbFilledEverything = new ProviderAnswer(MediaProvider.Tmdb, MediaFields.None, RefreshedAt.AddDays(1));
 
 		_testee.Update(existing, Cached(MovieDetails()) with { Answers = [tmdbFilledEverything] });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await fixture.Context.ProviderAnswers.AsNoTracking().SingleAsync();
-		await Assert.That(new ProviderAnswer(stored.Provider, stored.Unfilled)).IsEqualTo(tmdbFilledEverything);
+		await Assert.That(new ProviderAnswer(stored.Provider, stored.Unfilled, stored.AnsweredAt)).IsEqualTo(tmdbFilledEverything);
 	}
 
 	[Test]
