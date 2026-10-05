@@ -15,6 +15,5 @@ internal class LinksModule : IServiceModule
 		services.AddKeyedSingleton<IExternalPageLinker, MdblistPageLinker>(MediaProvider.Mdblist);
 		services.AddKeyedSingleton<IExternalPageLinker, NoPageLinker>(MediaProvider.Radarr);
 		services.AddKeyedSingleton<IExternalPageLinker, NoPageLinker>(MediaProvider.Sonarr);
-		services.AddKeyedSingleton<IExternalPageLinker, NoPageLinker>(MediaProvider.Local);
 	}
 }

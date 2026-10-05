@@ -48,6 +48,5 @@ public class ProviderMatrixTests
 	{
 		await Assert.That(SinkKind.Plex.GetDescription()).IsEqualTo("Plex");
 		await Assert.That(TrendingProvider.Tmdb.GetDescription()).IsEqualTo("TMDB");
-		await Assert.That(AuthProvider.Plex.GetDescription()).IsEqualTo("Plex");
 	}
 }

@@ -25,10 +25,11 @@ internal sealed class RatingService(IRatingDefaultRepository defaults, IApiKeySe
 			.Select(provider => provider.AsMediaProvider())
 			.ToListAsync(cancellationToken);
 		var signedIn = await Enum.GetValues<AuthProvider>()
-			.Where(provider => SuppliesRatings(provider.AsMediaProvider()))
+			.Select(signIn => signIn.Provider().When(SuppliesRatings).Map(provider => (SignIn: signIn, Provider: provider)))
+			.WhereSome()
 			.ToAsyncEnumerable()
-			.Where(async (provider, ct) => await credentials.IsStoredAsync(provider, ct))
-			.Select(provider => provider.AsMediaProvider())
+			.Where(async (pair, ct) => await credentials.IsStoredAsync(pair.SignIn, ct))
+			.Select(pair => pair.Provider)
 			.ToListAsync(cancellationToken);
 		return keyed.Concat(signedIn).SuppliedRatingSources();
 	}

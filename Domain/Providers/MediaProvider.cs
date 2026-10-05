@@ -21,7 +21,7 @@ public enum MediaProvider
 	Tvdb,
 
 	[Description("Plex")]
-	[Capabilities<ProviderCapability>(ProviderCapability.Auth | ProviderCapability.Artwork | ProviderCapability.Enricher)]
+	[Capabilities<ProviderCapability>(ProviderCapability.Artwork | ProviderCapability.Enricher)]
 	Plex,
 
 	[Description("Mdblist")]
@@ -33,8 +33,4 @@ public enum MediaProvider
 
 	[Description("Sonarr")]
 	Sonarr,
-
-	[Description("Sammlarr")]
-	[Capabilities<ProviderCapability>(ProviderCapability.Auth)]
-	Local,
 }

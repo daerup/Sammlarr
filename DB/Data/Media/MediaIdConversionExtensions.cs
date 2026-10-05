@@ -27,6 +27,5 @@ internal static class MediaIdConversionExtensions
 			MediaProvider.Mdblist => MdblistId.From(externalId, mediaType),
 			MediaProvider.Radarr => RadarrId.From(externalId, mediaType),
 			MediaProvider.Sonarr => SonarrId.From(externalId, mediaType),
-			MediaProvider.Local => LocalId.From(externalId, mediaType),
 		};
 }

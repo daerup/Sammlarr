@@ -66,7 +66,7 @@ public class ServicesMapModelTests
 		var model = ServicesMapModel.For(Config with { Sink = SinkKind.Arr });
 
 		var wantlist = model.Roles.Single(role => role.Name == "Wantlist");
-		await Assert.That(wantlist.Provider).IsEqualTo(new MapEndpoint(MediaProvider.Radarr, Some.Of(MediaProvider.Sonarr)));
+		await Assert.That(wantlist.Provider).IsEqualTo(new ServiceEndpoint(MediaProvider.Radarr, Some.Of(MediaProvider.Sonarr)));
 		await Assert.That(wantlist.Picker!.Options.Select(option => option.ToString())).IsEquivalentTo(["Plex", "Radarr+Sonarr"], CollectionOrdering.Matching);
 		await Assert.That(model.Services.Select(service => service.Provider.ToString())).Contains("Radarr+Sonarr");
 	}

@@ -5,7 +5,9 @@ using Contracts.Identity;
 using Contracts.Settings;
 using Domain.Feed;
 using Domain.Identity;
+using Domain.Providers;
 using Domain.Wantlist.Arr;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Providers;
@@ -164,6 +166,21 @@ public class ArrSinkRowTests : BunitContext
 
 		cut.WaitForState(() => cut.FindComponents<ArrTagsSection>().Count == 1);
 		await Assert.That(cut.FindComponent<ArrTagsSection>().Instance.Users).IsEquivalentTo([new ArrTagUser(TestCurrentUser.DefaultId.Value, "Guest")]);
+	}
+
+	[Test]
+	[Arguments(MediaProvider.Radarr, true)]
+	[Arguments(MediaProvider.Plex, false)]
+	public async Task Row_WhenRadarrIsRinged_DrawsTheRing(MediaProvider ringed, bool drawn)
+	{
+		var cut = Render<CascadingValue<ProviderRowKey?>>(parameters =>
+			parameters
+				.Add(value => value.Value, ringed)
+				.Add(value => value.Name, ProviderRows.Ringed)
+				.AddChildContent<ArrSinkRow>(row => row.Add(arr => arr.SettingUp, false).Add(arr => arr.Open, true))
+		);
+
+		await Assert.That(cut.Find(".arr-row").ClassList.Contains("is-ringed")).IsEqualTo(drawn);
 	}
 
 	private void Answers(ArrApp app, string folder)

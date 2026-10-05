@@ -194,13 +194,14 @@ Blocklist:: Titles excluded from curation so they never enter a list.
 === Providers and wiring
 
 Provider:: An external service (TMDB, MDBList, Plex, Radarr, Sonarr) or an id namespace (IMDb, Rotten Tomatoes, TheTVDB),
-modelled as a `MediaProvider` enum value.
+modelled as a `MediaProvider` enum value. Every one knows media by its own ids. A way to sign in is an `AuthProvider`
+(Plex, Sammlarr accounts), not a provider; `AuthProvider.Provider()` names the provider behind it, if any.
 
-Capability:: What a provider can do: `Search`, `Trending`, `Feed`, `ApiKey`, `Auth`, `Artwork` or
+Capability:: What a provider can do: `Trending`, `Feed`, `ApiKey`, `Artwork` or
 `Enricher`. Declared per provider and used to generate the provider-subset enums.
 
 Provider-subset enum:: A generated enum holding only the providers with a given capability,
-such as `FeedProvider` or `AuthProvider`. See <<section-concepts>>.
+such as `FeedProvider` or `ApiKeyProvider`. See <<section-concepts>>.
 
 Module:: An `IServiceModule`: a layer's or a provider's self-contained DI registration, added
 from `Web`'s `Program.cs` via `AddModule<T>()`.

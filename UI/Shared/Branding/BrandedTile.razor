@@ -1,0 +1,15 @@
+@using UI.Shared.Services.Branding
+
+<span class="provider-tile" style="--tile-size: @(Size)px; background: @Brand.Tile.Background">
+    <BrandedLogo Brand="Brand" Form="ProviderLogoForm.Tile" Size="@ArtSize" Decorative="Decorative"/>
+</span>
+
+@code {
+    [Parameter] [EditorRequired] public required BrandingInfo Brand { get; set; }
+
+    [Parameter] public int Size { get; set; } = 28;
+
+    [Parameter] public bool Decorative { get; set; }
+
+    private int ArtSize => (int)Math.Round(Size * Brand.Tile.ArtPercent / 100d);
+}

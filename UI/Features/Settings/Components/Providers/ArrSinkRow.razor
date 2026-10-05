@@ -114,7 +114,7 @@
 @code {
     [Parameter] public bool Open { get; set; }
 
-    [CascadingParameter(Name = ProviderRows.Ringed)] private MediaProvider? Ringed { get; set; }
+    [CascadingParameter(Name = ProviderRows.Ringed)] private ProviderRowKey? Ringed { get; set; }
 
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
 

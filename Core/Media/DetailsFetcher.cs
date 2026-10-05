@@ -34,8 +34,9 @@ internal sealed class DetailsFetcher(
 			.Where(provider => Enrichers.Contains(provider.AsMediaProvider()))
 			.Select(provider => CheckAsync(provider.AsMediaProvider(), () => apiKeys.GetAsync(provider, cancellationToken), cancellationToken));
 		var signIns = Enum.GetValues<AuthProvider>()
-			.Where(provider => Enrichers.Contains(provider.AsMediaProvider()))
-			.Select(provider => CheckAsync(provider.AsMediaProvider(), () => credentials.GetAsync(provider, cancellationToken), cancellationToken));
+			.Select(signIn => signIn.Provider().When(Enrichers.Contains).Map(provider => (SignIn: signIn, Provider: provider)))
+			.WhereSome()
+			.Select(pair => CheckAsync(pair.Provider, () => credentials.GetAsync(pair.SignIn, cancellationToken), cancellationToken));
 		var checks = await Task.WhenAll(keys.Concat(signIns));
 		var disconnected = checks.Where(check => !check.Ready).Select(check => check.Provider).ToHashSet();
 		return Enrichers.Where(provider => !disconnected.Contains(provider)).ToHashSet();

@@ -10,7 +10,7 @@ internal static class ServiceRoles
 		"Sign-in",
 		"log-in",
 		"Who can sign in",
-		Enum.GetValues<AuthProvider>().Select(provider => provider.AsMediaProvider()).ToHashSet()
+		Enum.GetValues<AuthProvider>().Select(signIn => signIn.Provider()).WhereSome().ToHashSet()
 	);
 
 	internal static readonly ServiceRole Wantlist = new(

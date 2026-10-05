@@ -30,6 +30,21 @@ public class MediaProviderBrandingServiceTests
 	}
 
 	[Test]
+	public async Task GetBrandingInfo_ForThePlexSignIn_IsPlexsBrand()
+	{
+		await Assert.That(Testee.GetBrandingInfo(AuthProvider.Plex)).IsEqualTo(Testee.GetBrandingInfo(MediaProvider.Plex));
+	}
+
+	[Test]
+	public async Task GetBrandingInfo_ForSammlarrAccounts_IsSammlarrsOwnBrandWithFilesThatExist()
+	{
+		var brand = Testee.GetBrandingInfo(AuthProvider.Local);
+
+		await Assert.That(brand.NickName).IsEqualTo("Sammlarr");
+		await Assert.That(new[] { brand.Mark.Light, brand.Mark.Dark }.Where(file => !File.Exists(Path.Combine(ProvidersFolder, file)))).IsEmpty();
+	}
+
+	[Test]
 	public async Task SinkColor_ForPlex_IsPlexsBrand()
 	{
 		await Assert.That(Testee.SinkColor(SinkKind.Plex)).IsEqualTo(Testee.GetBrandingInfo(MediaProvider.Plex).BrandColor);

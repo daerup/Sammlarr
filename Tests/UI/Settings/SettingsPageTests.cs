@@ -77,7 +77,7 @@ public class SettingsPageTests : BunitContext
 
 		await Assert.That(OpenRows(cut)).IsEmpty();
 		cut.WaitForState(() => OpenRows(cut).Any());
-		await Assert.That(OpenRows(cut)).IsEquivalentTo([provider]);
+		await Assert.That(OpenRows(cut)).IsEquivalentTo([(ProviderRowKey)provider]);
 	}
 
 	[Test]
@@ -130,8 +130,8 @@ public class SettingsPageTests : BunitContext
 		cut.WaitForState(() => cut.FindComponents<RatingPipelineCard>().Count > 0);
 	}
 
-	private static IEnumerable<MediaProvider> OpenRows(IRenderedComponent<SettingsPage> cut) =>
-		cut.FindComponents<ProviderRow>().Where(row => row.Instance.Open).Select(row => row.Instance.Provider);
+	private static IEnumerable<ProviderRowKey> OpenRows(IRenderedComponent<SettingsPage> cut) =>
+		cut.FindComponents<ProviderRow>().Where(row => row.Instance.Open).Select(row => row.Instance.Key);
 
 	private IRenderedComponent<SettingsPage> RenderAt(string uri)
 	{

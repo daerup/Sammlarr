@@ -25,7 +25,7 @@
 </span>
 
 @code {
-    private static readonly IReadOnlySet<MediaProvider> Accounts = Enum.GetValues<AuthProvider>().Select(provider => provider.AsMediaProvider()).ToHashSet();
+    private static readonly IReadOnlySet<MediaProvider> Accounts = Enum.GetValues<AuthProvider>().Select(signIn => signIn.Provider()).WhereSome().ToHashSet();
 
     [Parameter] [EditorRequired] public required IReadOnlyList<RatingSource> Sources { get; set; }
 

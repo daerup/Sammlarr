@@ -19,3 +19,5 @@ Contracts/Media/Conversions/IdLookupRequest.cs
 Core/Media/Hop.cs
 Domain/Media/RatingStrategy.cs
 Contracts/Identity/Person.cs
+UI/Features/Settings/Components/Providers/ProviderRows.cs
+UI/Features/Settings/Components/Providers/ServicesMapModel.cs

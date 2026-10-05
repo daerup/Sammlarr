@@ -7,7 +7,7 @@
 @inject ICurrentUser CurrentUser
 @inject NavigationManager NavigationManager
 
-<ProviderRow Provider="@Provider.AsMediaProvider()" Open="Open" OpenChanged="OpenChanged">
+<ProviderRow Key="Key" Brand="Branding" Open="Open" OpenChanged="OpenChanged">
     <Status>
         @if (_loaded)
         {
@@ -90,7 +90,9 @@
 
     [Parameter] public string ReturnUrl { get; set; } = SettingsLinks.Providers;
 
-    private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider.AsMediaProvider());
+    private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider);
+
+    private ProviderRowKey Key => Provider.Provider().Map(provider => (ProviderRowKey)provider).GetValueOr(new SammlarrAccounts());
 
     private string _tokenInput = string.Empty;
     private string _savedToken = string.Empty;

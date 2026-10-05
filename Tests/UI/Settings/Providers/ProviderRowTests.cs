@@ -5,11 +5,14 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
+using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.Providers;
 
 public class ProviderRowTests : BunitContext
 {
+	private static readonly MediaProviderBrandingService Brands = new();
+
 	[Before(Test)]
 	public void Setup()
 	{
@@ -62,12 +65,13 @@ public class ProviderRowTests : BunitContext
 	[Arguments(MediaProvider.Plex, false)]
 	public async Task Row_WhenItsProviderIsRinged_DrawsTheRing(MediaProvider ringed, bool drawn)
 	{
-		var cut = Render<CascadingValue<MediaProvider?>>(parameters =>
+		var cut = Render<CascadingValue<ProviderRowKey?>>(parameters =>
 			parameters
 				.Add(value => value.Value, ringed)
 				.Add(value => value.Name, ProviderRows.Ringed)
 				.AddChildContent<ProviderRow>(row =>
-					row.Add(provider => provider.Provider, MediaProvider.Tmdb)
+					row.Add(provider => provider.Key, MediaProvider.Tmdb)
+						.Add(provider => provider.Brand, Brands.GetBrandingInfo(MediaProvider.Tmdb))
 						.Add(provider => provider.Status, "<span>Connected</span>")
 						.AddChildContent("<p>The form</p>")
 				)
@@ -77,10 +81,26 @@ public class ProviderRowTests : BunitContext
 		await Assert.That(cut.Find(".provider-row").Id).IsEqualTo("provider-row-tmdb");
 	}
 
+	[Test]
+	public async Task Row_ForSammlarrAccounts_HasItsOwnIdAndOnlyTheSignInRole()
+	{
+		var cut = Render<ProviderRow>(parameters =>
+			parameters
+				.Add(row => row.Key, new SammlarrAccounts())
+				.Add(row => row.Brand, Brands.GetBrandingInfo(AuthProvider.Local))
+				.Add(row => row.Status, "<span>Signed in</span>")
+				.AddChildContent("<p>The form</p>")
+		);
+
+		await Assert.That(cut.Find(".provider-row").Id).IsEqualTo("provider-row-sammlarr");
+		await Assert.That(cut.FindAll(".provider-role .sr-only").Select(role => role.TextContent)).IsEquivalentTo(["Sign-in"]);
+	}
+
 	private IRenderedComponent<ProviderRow> RenderRow(EventCallback<bool> openChanged = default) =>
 		Render<ProviderRow>(parameters =>
 			parameters
-				.Add(row => row.Provider, MediaProvider.Tmdb)
+				.Add(row => row.Key, MediaProvider.Tmdb)
+				.Add(row => row.Brand, Brands.GetBrandingInfo(MediaProvider.Tmdb))
 				.Add(row => row.OpenChanged, openChanged)
 				.Add(row => row.Status, "<span>Connected</span>")
 				.AddChildContent("<p>The form</p>")
