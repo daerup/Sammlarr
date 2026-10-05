@@ -12,7 +12,8 @@ with seed data, and it must not silently drift from the code model.
 ## Decision
 
 Use EF Core migrations. `Database.Migrate()` runs on startup in production and in tests (never
-`EnsureCreated`); seed data ships through `HasData`; a `HasPendingModelChanges` guard fails the
+`EnsureCreated`); seed data ships through the context's seeding hooks (through `HasData` until 2026-10-05, see
+Notes); a `HasPendingModelChanges` guard fails the
 build when the model drifts from the committed migrations.
 
 Rejected: FluentMigrator (adopted, then reverted, it restated a schema the EF model already
@@ -34,3 +35,8 @@ live database).
   tests that replayed their data rewrites. A schema compared through `pragma_table_info`, `pragma_index_list` and
   `pragma_foreign_key_list` matched the old chain's, except column order and the defaults the old `AddColumn`
   calls had added to fill existing rows.
+* 2026-10-05: the provider-config row left `HasData` for the context's `UseSeeding` and `UseAsyncSeeding` hooks,
+  which insert it after a migrate only when it is missing. The row is edited at runtime, and `HasData` would turn any
+  later change to its defaults into an `UpdateData` that resets every install's settings. `Baseline` no longer inserts
+  the row and `DropProviderConfigSeed` carries only the snapshot change, so existing databases keep their row and a
+  new one gets `ProviderConfigRow.Default` from the hooks.

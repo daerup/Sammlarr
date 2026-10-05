@@ -85,6 +85,33 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<NotificationDeliveryOutcomeRow> NotificationDeliveryOutcomes => Set<NotificationDeliveryOutcomeRow>();
 	public DbSet<RatingDefaultRow> RatingDefaults => Set<RatingDefaultRow>();
 
+	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+	{
+		optionsBuilder
+			.UseSeeding((context, _) => EnsureProviderConfig(context))
+			.UseAsyncSeeding((context, _, cancellationToken) => EnsureProviderConfigAsync(context, cancellationToken));
+	}
+
+	private static void EnsureProviderConfig(DbContext context)
+	{
+		var settings = context.Set<ProviderConfigRow>();
+		if (!settings.Any())
+		{
+			settings.Add(ProviderConfigRow.Default);
+			context.SaveChanges();
+		}
+	}
+
+	private static async Task EnsureProviderConfigAsync(DbContext context, CancellationToken cancellationToken)
+	{
+		var settings = context.Set<ProviderConfigRow>();
+		if (!await settings.AnyAsync(cancellationToken))
+		{
+			settings.Add(ProviderConfigRow.Default);
+			await context.SaveChangesAsync(cancellationToken);
+		}
+	}
+
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
 		_propertyConventions.ToList().ForEach(convention => configurationBuilder.Conventions.Add(_ => convention));

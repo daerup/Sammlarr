@@ -710,66 +710,6 @@ public partial class _20261004071512_Baseline : Migration
 			}
 		);
 
-		migrationBuilder.InsertData(
-			table: "ProviderConfig",
-			columns: new[]
-			{
-				"Id",
-				"ArrTagFeedSource",
-				"ArrTagPerFeed",
-				"ArrTagPerUser",
-				"ArrTagPlainPrefix",
-				"ArrTagPrefix",
-				"ArrTagUserSource",
-				"AuthProvider",
-				"OnboardingCompletedAt",
-				"RadarrApiKey",
-				"RadarrMonitored",
-				"RadarrQualityProfileId",
-				"RadarrRootFolderPath",
-				"RadarrSearchOnAdd",
-				"RadarrUrl",
-				"RegistrationMode",
-				"SearchProvider",
-				"Sink",
-				"SonarrApiKey",
-				"SonarrMonitored",
-				"SonarrQualityProfileId",
-				"SonarrRootFolderPath",
-				"SonarrSearchOnAdd",
-				"SonarrUrl",
-				"TrendingProvider",
-			},
-			values: new object[]
-			{
-				1,
-				"ListName",
-				true,
-				true,
-				false,
-				"sammlarr",
-				"Name",
-				"Plex",
-				null,
-				null,
-				true,
-				null,
-				null,
-				true,
-				null,
-				"Open",
-				"Tmdb",
-				"Plex",
-				null,
-				true,
-				null,
-				null,
-				true,
-				null,
-				"Tmdb",
-			}
-		);
-
 		migrationBuilder.CreateIndex(name: "IX_AccountLinks_Kind_Username", table: "AccountLinks", columns: new[] { "Kind", "Username" }, unique: true);
 
 		migrationBuilder.CreateIndex(name: "IX_AccountLinks_TokenHash", table: "AccountLinks", column: "TokenHash", unique: true);

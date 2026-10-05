@@ -9,6 +9,5 @@ internal sealed class ProviderConfigConfiguration : IModelConfiguration
 		{
 			builder.HasKey(row => row.Id);
 			builder.Property(row => row.Id).ValueGeneratedNever();
-			builder.HasData(ProviderConfigRow.Default);
 		});
 }

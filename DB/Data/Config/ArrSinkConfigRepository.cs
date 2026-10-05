@@ -9,7 +9,7 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 	public async Task<ArrSinkConfig> GetAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var row = await ctx.ProviderSettings.AsNoTracking().SingleOrDefaultAsync(cancellationToken) ?? ProviderConfigRow.Default;
+		var row = await ctx.ProviderSettings.AsNoTracking().SingleAsync(cancellationToken);
 		return new ArrSinkConfig(
 			new ArrInstanceConfig
 			{
@@ -36,8 +36,7 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 	public async Task StoreAsync(ArrSinkConfig config, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var stored = await ctx.ProviderSettings.SingleOrDefaultAsync(cancellationToken);
-		var row = stored ?? ctx.ProviderSettings.Add(ProviderConfigRow.Default).Entity;
+		var row = await ctx.ProviderSettings.SingleAsync(cancellationToken);
 		row.RadarrUrl = config.Radarr.Url.ToNullable();
 		row.RadarrApiKey = config.Radarr.ApiKey.ToNullable();
 		row.RadarrQualityProfileId = config.Radarr.QualityProfileId.ToNullable();

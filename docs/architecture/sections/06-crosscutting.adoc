@@ -244,8 +244,9 @@ State is one SQLite database via EF Core. Repositories create a context per oper
 `IDbContextFactory<SammlarrDbContext>` (the context is `internal`). A `SqlitePragmaInterceptor`
 sets WAL, `synchronous=NORMAL` and a busy timeout. Schema is applied at startup by a hosted
 `DbInitializer` calling `Database.Migrate()`, never `EnsureCreated`; migrations live in
-`DB/Migrations`, the only `HasData` seed is the singleton provider-config row, and a test asserts
-`HasPendingModelChanges()` is false. Conventions: enums stored as their string name
+`DB/Migrations`, and a test asserts `HasPendingModelChanges()` is false. The singleton
+provider-config row comes from the context's `UseSeeding` and `UseAsyncSeeding` hooks, which insert
+the defaults after every migrate when the row is missing, so readers and writers can assume it. Conventions: enums stored as their string name
 (`EnumAsStringConvention`), `DateTimeOffset` as binary. `SaveChanges` stamps audit timestamps and
 the owning user.
 
