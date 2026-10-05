@@ -5,22 +5,22 @@ using Domain.Wantlist.Arr;
 
 namespace API.Arr;
 
-internal sealed class ArrConnectionTester(ArrClients clients, ICurrentUser currentUser) : IArrConnectionTester
+internal sealed class ArrConnectionTester(ArrApis apis, ICurrentUser currentUser) : IArrConnectionTester
 {
 	public async Task<Result<ArrInstanceChoices>> TestAsync(ArrApp app, ArrInstanceConfig instance, CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
 		return await ArrSession
 			.Connect(app, instance)
-			.Match(connection => ChoicesAsync(clients.For(app), connection, cancellationToken), error => Task.FromResult<Result<ArrInstanceChoices>>(error));
+			.Match(connection => ChoicesAsync(apis.For(app), connection, cancellationToken), error => Task.FromResult<Result<ArrInstanceChoices>>(error));
 	}
 
-	private static async Task<Result<ArrInstanceChoices>> ChoicesAsync(ArrClient client, ArrConnection connection, CancellationToken cancellationToken)
+	private static async Task<Result<ArrInstanceChoices>> ChoicesAsync(ArrApi api, ArrConnection connection, CancellationToken cancellationToken)
 	{
-		var status = await client.StatusAsync(connection, cancellationToken);
+		var status = await api.StatusAsync(connection, cancellationToken);
 		return await status
 			.Map(answered => Answers(connection, answered))
-			.Match(_ => ReadChoicesAsync(client, connection, cancellationToken), error => Task.FromResult<Result<ArrInstanceChoices>>(error));
+			.Match(_ => ReadChoicesAsync(api, connection, cancellationToken), error => Task.FromResult<Result<ArrInstanceChoices>>(error));
 	}
 
 	private static Result<ArrSystemStatus> Answers(ArrConnection connection, ArrSystemStatus status)
@@ -31,10 +31,10 @@ internal sealed class ArrConnectionTester(ArrClients clients, ICurrentUser curre
 			.ToResult(Error.From($"{connection.Address} answers as {status.AppName ?? "another app"}, not {expected}. Check the URL."));
 	}
 
-	private static async Task<Result<ArrInstanceChoices>> ReadChoicesAsync(ArrClient client, ArrConnection connection, CancellationToken cancellationToken)
+	private static async Task<Result<ArrInstanceChoices>> ReadChoicesAsync(ArrApi api, ArrConnection connection, CancellationToken cancellationToken)
 	{
-		var profiles = await client.QualityProfilesAsync(connection, cancellationToken);
-		var folders = await client.RootFoldersAsync(connection, cancellationToken);
+		var profiles = await api.QualityProfilesAsync(connection, cancellationToken);
+		var folders = await api.RootFoldersAsync(connection, cancellationToken);
 		return profiles.Map(found => folders.Map(roots => new ArrInstanceChoices([.. found.Select(Profile)], [.. roots.Select(Folder).WhereSome()])));
 	}
 

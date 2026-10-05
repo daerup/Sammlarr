@@ -1,5 +1,7 @@
 using System.Net;
 using API.Arr;
+using API.Arr.Radarr;
+using API.Arr.Sonarr;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;
@@ -10,6 +12,7 @@ using Domain.Providers;
 using Domain.Wantlist.Arr;
 using Domain.Wantlist.Outbox;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shared.Options;
 using TestInfrastructure;
 using TUnit.Mocks.Http;
 
@@ -264,6 +267,18 @@ public class ArrSinkTests
 	public async Task ApplyAsync_ForATitleWithoutAnAppId_AcksItUnaddressableWithoutCallingEitherApp()
 	{
 		_media.GetSinkIdsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new Dictionary<MediaId, IExternalMediaId>());
+
+		var acks = await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Unaddressable)]);
+		await Assert.That(_radarr.Requests).IsEmpty();
+		await Assert.That(_sonarr.Requests).IsEmpty();
+	}
+
+	[Test]
+	public async Task ApplyAsync_ForAnIdNeitherAppTakes_AcksItUnaddressableWithoutCallingEitherApp()
+	{
+		Addressing(TmdbId.From("1396", MediaType.Show));
 
 		var acks = await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
@@ -598,7 +613,7 @@ public class ArrSinkTests
 		configs.GetAsync(Any()).Returns(config);
 
 		return new ArrSink(
-			new ArrClients(new RadarrClient(new HttpClient(_radarr)), new SonarrClient(new HttpClient(_sonarr))),
+			new ArrApis(new RadarrApi(new HttpClient(_radarr), new RadarrOptions()), new SonarrApi(new HttpClient(_sonarr), new SonarrOptions())),
 			configs.Object,
 			_users.Object,
 			_media.Object,

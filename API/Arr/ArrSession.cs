@@ -6,15 +6,15 @@ using Domain.Wantlist.Arr;
 
 namespace API.Arr;
 
-internal sealed class ArrSession(ArrClient client, ArrConnection connection, List<ArrTitle> titles, Dictionary<string, int> tags)
+internal sealed class ArrSession(ArrApi api, ArrConnection connection, List<ArrTitle> titles, Dictionary<string, int> tags)
 {
-	public ArrApp App => client.App;
+	public ArrApp App => api.App;
 
 	public IReadOnlyList<ArrTitle> Titles => titles;
 
-	public static async Task<Result<ArrSession>> OpenAsync(ArrClient client, Result<ArrConnection> connection, CancellationToken cancellationToken)
+	public static async Task<Result<ArrSession>> OpenAsync(ArrApi api, Result<ArrConnection> connection, CancellationToken cancellationToken)
 	{
-		return await connection.Match(open => OpenAsync(client, open, cancellationToken), error => Task.FromResult<Result<ArrSession>>(error));
+		return await connection.Match(open => OpenAsync(api, open, cancellationToken), error => Task.FromResult<Result<ArrSession>>(error));
 	}
 
 	public static Result<ArrConnection> Connect(ArrApp app, ArrInstanceConfig settings)
@@ -60,7 +60,7 @@ internal sealed class ArrSession(ArrClient client, ArrConnection connection, Lis
 
 	public Optional<ArrTitle> Find(IExternalMediaId id)
 	{
-		return titles.FirstOrNone(title => (App is ArrApp.Radarr ? title.TmdbId : title.TvdbId).ToString() == id.Value);
+		return titles.FirstOrNone(title => api.AddressOf(title).ToString() == id.Value);
 	}
 
 	public async Task<Result<IReadOnlyList<int>>> EnsureTagsAsync(IReadOnlyList<string> labels, CancellationToken cancellationToken)
@@ -77,47 +77,49 @@ internal sealed class ArrSession(ArrClient client, ArrConnection connection, Lis
 
 	public async Task<Result<ArrTitle>> AddAsync(JsonObject title, CancellationToken cancellationToken)
 	{
-		var added = await client.AddAsync(connection, title, cancellationToken);
+		var added = await api.AddAsync(connection, title, cancellationToken);
 		return added.Apply(titles.Add);
 	}
 
+	public JsonObject Prepare(JsonObject lookup, ArrInstanceConfig settings, ArrAddition addition) => api.Prepare(lookup, settings, addition);
+
 	public Task<Result<Optional<JsonObject>>> LookupAsync(IExternalMediaId id, CancellationToken cancellationToken)
 	{
-		return client.LookupAsync(connection, id.Value, cancellationToken);
+		return api.LookupAsync(connection, id, cancellationToken);
 	}
 
 	public Task<Result<int>> RetagAsync(ArrTitle title, IReadOnlyList<int> tagIds, ArrTagChange change, CancellationToken cancellationToken)
 	{
-		return client.RetagAsync(connection, [title.Id], tagIds, change, cancellationToken);
+		return api.RetagAsync(connection, [title.Id], tagIds, change, cancellationToken);
 	}
 
 	public async Task<Result<int>> DeleteAsync(ArrTitle title, CancellationToken cancellationToken)
 	{
-		var deleted = await client.DeleteAsync(connection, title.Id, cancellationToken);
+		var deleted = await api.DeleteAsync(connection, title.Id, cancellationToken);
 		return deleted.Apply(_ => titles.Remove(title));
 	}
 
 	public Task<Result<int>> UntagAsync(IReadOnlyList<ArrTitle> staying, IReadOnlyList<int> tagIds, CancellationToken cancellationToken)
 	{
-		return client.RetagAsync(connection, [.. staying.Select(title => title.Id)], tagIds, ArrTagChange.Remove, cancellationToken);
+		return api.RetagAsync(connection, [.. staying.Select(title => title.Id)], tagIds, ArrTagChange.Remove, cancellationToken);
 	}
 
 	public async Task<Result<int>> DeleteAsync(IReadOnlyList<ArrTitle> doomed, CancellationToken cancellationToken)
 	{
-		var deleted = await client.DeleteManyAsync(connection, [.. doomed.Select(title => title.Id)], cancellationToken);
+		var deleted = await api.DeleteManyAsync(connection, [.. doomed.Select(title => title.Id)], cancellationToken);
 		return deleted.Apply(_ => titles.RemoveAll(title => doomed.Contains(title)));
 	}
 
-	private static async Task<Result<ArrSession>> OpenAsync(ArrClient client, ArrConnection connection, CancellationToken cancellationToken)
+	private static async Task<Result<ArrSession>> OpenAsync(ArrApi api, ArrConnection connection, CancellationToken cancellationToken)
 	{
-		var titles = await client.TitlesAsync(connection, cancellationToken);
-		var tags = await client.TagsAsync(connection, cancellationToken);
-		return titles.Map(loaded => tags.Map(labels => new ArrSession(client, connection, [.. loaded], labels.ToDictionary(tag => tag.Label, tag => tag.Id))));
+		var titles = await api.TitlesAsync(connection, cancellationToken);
+		var tags = await api.TagsAsync(connection, cancellationToken);
+		return titles.Map(loaded => tags.Map(labels => new ArrSession(api, connection, [.. loaded], labels.ToDictionary(tag => tag.Label, tag => tag.Id))));
 	}
 
 	private async Task<Result<int>> CreateTagAsync(string label, CancellationToken cancellationToken)
 	{
-		var created = await client.CreateTagAsync(connection, label, cancellationToken);
+		var created = await api.CreateTagAsync(connection, label, cancellationToken);
 		return created.Apply(tag => tags[tag.Label] = tag.Id).Map(tag => tag.Id);
 	}
 }

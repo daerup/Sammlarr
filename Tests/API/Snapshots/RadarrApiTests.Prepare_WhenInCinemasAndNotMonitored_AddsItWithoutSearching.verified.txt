@@ -1,0 +1,16 @@
+﻿{
+  title: The Matrix,
+  tmdbId: 603,
+  qualityProfileId: 4,
+  rootFolderPath: /movies,
+  monitored: false,
+  tags: [
+    1,
+    2
+  ],
+  minimumAvailability: inCinemas,
+  addOptions: {
+    searchForMovie: false,
+    monitor: none
+  }
+}

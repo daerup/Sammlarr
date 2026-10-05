@@ -6,18 +6,12 @@ namespace API.Arr;
 
 internal static class ArrFound
 {
-	internal static FoundMedia Of(ArrApp app, ArrTitle title)
+	internal static FoundMedia Of(ArrApi api, ArrTitle title)
 	{
-		Optional<IExternalMediaId>[] ids =
-		[
-			Optional.When(app is ArrApp.Radarr, () => (IExternalMediaId)TmdbId.From(title.TmdbId.ToString(), MediaType.Movie)),
-			Optional.When(app is ArrApp.Sonarr, () => (IExternalMediaId)TvdbId.From(title.TvdbId.ToString(), MediaType.Show)),
-			Optional.When(app is ArrApp.Sonarr && title.TmdbId > 0, () => (IExternalMediaId)TmdbId.From(title.TmdbId.ToString(), MediaType.Show)),
-			Optional.Of(title.ImdbId).When(imdb => imdb.Length > 0).Map(imdb => (IExternalMediaId)ImdbId.From(imdb, app.Type)),
-		];
+		Optional<IExternalMediaId>[] imdb = [Optional.Of(title.ImdbId).When(id => id.Length > 0).Map(id => (IExternalMediaId)ImdbId.From(id, api.App.Type))];
 		return new FoundMedia(
-			[.. ids.WhereSome()],
-			MediaDetails.Empty(app.Type) with
+			[.. api.IdsOf(title), .. imdb.WhereSome()],
+			MediaDetails.Empty(api.App.Type) with
 			{
 				Title = title.Title,
 				Summary = ProviderValues.Text(title.Overview),

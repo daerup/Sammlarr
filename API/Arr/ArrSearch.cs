@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Arr;
 
-internal sealed class ArrSearch(ArrClients clients, IArrSinkConfigService configs, ILogger<ArrSearch> logger) : IMediaSearchProvider
+internal sealed class ArrSearch(ArrApis apis, IArrSinkConfigService configs, ILogger<ArrSearch> logger) : IMediaSearchProvider
 {
 	public async Task<IReadOnlyList<FoundMedia>> SearchAsync(
 		string query,
@@ -16,8 +16,8 @@ internal sealed class ArrSearch(ArrClients clients, IArrSinkConfigService config
 	)
 	{
 		var config = await configs.GetAsync(cancellationToken);
-		var apps = Enum.GetValues<ArrApp>().Where(app => mediaTypes.Contains(app.Type));
-		var answers = await Task.WhenAll(apps.Select(app => FoundAsync(app, config, query, cancellationToken)));
+		var asked = apis.All.Where(api => mediaTypes.Contains(api.App.Type));
+		var answers = await Task.WhenAll(asked.Select(api => FoundAsync(api, config, query, cancellationToken)));
 		if (answers.Length > 0 && answers.All(answer => answer.IsError()))
 		{
 			throw new InvalidOperationException(string.Join(" ", answers.Select(answer => answer.Match(_ => string.Empty, error => error.Reason))));
@@ -29,39 +29,29 @@ internal sealed class ArrSearch(ArrClients clients, IArrSinkConfigService config
 	public async Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		var config = await configs.GetAsync(cancellationToken);
-		return await AppFor(mediaId)
+		return await apis.Taking(mediaId)
 			.ToResult("Radarr looks movies up by their TMDB id and Sonarr shows by their TVDB id.")
-			.Map(app => FindAsync(app, config, mediaId, cancellationToken));
+			.Map(api => FindAsync(api, config, mediaId, cancellationToken));
 	}
 
-	private async Task<Result<List<FoundMedia>>> FoundAsync(ArrApp app, ArrSinkConfig config, string query, CancellationToken cancellationToken)
+	private async Task<Result<List<FoundMedia>>> FoundAsync(ArrApi api, ArrSinkConfig config, string query, CancellationToken cancellationToken)
 	{
-		var titles = await SearchAsync(app, config, query, cancellationToken);
+		var titles = await SearchAsync(api, config, query, cancellationToken);
 		return titles
-			.ApplyError(error => logger.LogWarning("{App} search for {Query} failed: {Reason}", app.Name, query, error.Reason))
-			.Map(found => found.Select(title => ArrFound.Of(app, title)).ToList());
+			.ApplyError(error => logger.LogWarning("{App} search for {Query} failed: {Reason}", api.App.Name, query, error.Reason))
+			.Map(found => found.Select(title => ArrFound.Of(api, title)).ToList());
 	}
 
-	private Task<Result<IReadOnlyList<ArrTitle>>> SearchAsync(ArrApp app, ArrSinkConfig config, string term, CancellationToken cancellationToken)
+	private static Task<Result<IReadOnlyList<ArrTitle>>> SearchAsync(ArrApi api, ArrSinkConfig config, string term, CancellationToken cancellationToken)
 	{
 		return ArrSession
-			.Connect(app, config.Of(app))
-			.Match(connection => clients.For(app).SearchAsync(connection, term, cancellationToken), error => Task.FromResult<Result<IReadOnlyList<ArrTitle>>>(error));
+			.Connect(api.App, config.Of(api.App))
+			.Match(connection => api.SearchAsync(connection, term, cancellationToken), error => Task.FromResult<Result<IReadOnlyList<ArrTitle>>>(error));
 	}
 
-	private async Task<Result<FoundMedia>> FindAsync(ArrApp app, ArrSinkConfig config, IExternalMediaId mediaId, CancellationToken cancellationToken)
+	private static async Task<Result<FoundMedia>> FindAsync(ArrApi api, ArrSinkConfig config, IExternalMediaId mediaId, CancellationToken cancellationToken)
 	{
-		var titles = await SearchAsync(app, config, $"{app.LookupTerm}:{mediaId.Value}", cancellationToken);
-		return titles.Map(found => found.FirstOrNone().Map(title => ArrFound.Of(app, title)).ToResult($"{app.Name} has no title for {mediaId.Value}."));
-	}
-
-	private static Optional<ArrApp> AppFor(IExternalMediaId mediaId)
-	{
-		return mediaId switch
-		{
-			TmdbId { Type: MediaType.Movie } => Some.Of(ArrApp.Radarr),
-			TvdbId { Type: MediaType.Show } => Some.Of(ArrApp.Sonarr),
-			_ => new None(),
-		};
+		var titles = await SearchAsync(api, config, api.Term(mediaId), cancellationToken);
+		return titles.Map(found => found.FirstOrNone().Map(title => ArrFound.Of(api, title)).ToResult($"{api.App.Name} has no title for {mediaId.Value}."));
 	}
 }

@@ -1,0 +1,17 @@
+﻿{
+  title: Breaking Bad,
+  tvdbId: 81189,
+  qualityProfileId: 4,
+  rootFolderPath: /tv,
+  monitored: false,
+  tags: [
+    1
+  ],
+  seasonFolder: false,
+  seriesType: anime,
+  addOptions: {
+    monitor: none,
+    searchForMissingEpisodes: false,
+    searchForCutoffUnmetEpisodes: false
+  }
+}

@@ -1,3 +1,5 @@
+using API.Arr.Radarr;
+using API.Arr.Sonarr;
 using API.Http;
 using Contracts.Media.Search;
 using Contracts.Settings;
@@ -13,9 +15,9 @@ internal class ArrModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddHttpClient<RadarrClient>().AddProviderHttp<ArrOptions>(MediaProvider.Radarr);
-		services.AddHttpClient<SonarrClient>().AddProviderHttp<ArrOptions>(MediaProvider.Sonarr);
-		services.AddScoped<ArrClients>();
+		services.AddHttpClient<RadarrApi>().AddProviderHttp<RadarrOptions>(MediaProvider.Radarr);
+		services.AddHttpClient<SonarrApi>().AddProviderHttp<SonarrOptions>(MediaProvider.Sonarr);
+		services.AddScoped<ArrApis>();
 		services.AddKeyedScoped<IMediaSink, ArrSink>(SinkKind.Arr);
 		services.AddKeyedScoped<IMediaSearchProvider, ArrSearch>(SearchProvider.Arr);
 		services.AddScoped<IArrConnectionTester, ArrConnectionTester>();

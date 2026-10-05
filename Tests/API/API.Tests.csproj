@@ -13,6 +13,7 @@
 		<PackageReference Include="TUnit.Core" />
 		<PackageReference Include="TUnit.Mocks" />
 		<PackageReference Include="TUnit.Mocks.Http" />
+		<PackageReference Include="Verify.TUnit" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\API\API.csproj" />
