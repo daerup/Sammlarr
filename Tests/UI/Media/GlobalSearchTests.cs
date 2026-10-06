@@ -39,6 +39,8 @@ public class GlobalSearchTests : BunitContext
 
 	private readonly Mock<IBlocklistService> _blocklist = IBlocklistService.Mock();
 
+	private readonly Mock<IMediaSearchService> _search = IMediaSearchService.Mock();
+
 	[Before(Test)]
 	public void Setup()
 	{
@@ -73,9 +75,8 @@ public class GlobalSearchTests : BunitContext
 		_blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
 		Services.AddSingleton(_blocklist.Object);
 
-		var search = IMediaSearchService.Mock();
-		search.SearchAsync(Any(), Any(), Any()).Returns([Matched, Unmatched]);
-		Services.AddSingleton(search.Object);
+		_search.SearchAsync(Any(), Any(), Any()).Returns([Matched, Unmatched]);
+		Services.AddSingleton(_search.Object);
 
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
@@ -118,6 +119,39 @@ public class GlobalSearchTests : BunitContext
 		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
 
 		await Assert.That(cut.Find(".search-modal-content").TextContent).Contains(source);
+	}
+
+	[Test]
+	public async Task Search_OnRadarrAndSonarr_SplitsMoviesAndShowsIntoTabsOpeningTheLarger()
+	{
+		SearchWith(SearchProvider.Arr);
+		_search
+			.SearchAsync(Any(), Any(), Any())
+			.Returns([Found("Dune: Prophecy", MediaType.Show), Found("Dune", MediaType.Movie), Found("Dune: Part Two", MediaType.Movie)]);
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = "dune" });
+		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
+
+		await Assert
+			.That(cut.FindAll("[role=tab]").Select(tab => string.Concat(tab.TextContent.Where(character => !char.IsWhiteSpace(character)))))
+			.IsEquivalentTo(["Movies2", "Shows1"]);
+		await Assert.That(cut.FindAll(".search-result-row")).Count().IsEqualTo(2);
+
+		await cut.Find("[role=tab][aria-selected=false]").ClickAsync(new MouseEventArgs());
+
+		await Assert.That(cut.FindAll(".search-result-row").Single().TextContent).Contains("Dune: Prophecy");
+	}
+
+	[Test]
+	public async Task Search_OnTmdb_ListsEveryResultWithoutTabs()
+	{
+		SearchWith(SearchProvider.Tmdb);
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
+
+		await Assert.That(cut.FindAll("[role=tab]")).IsEmpty();
+		await Assert.That(cut.FindAll(".search-result-row")).Count().IsEqualTo(2);
 	}
 
 	[Test]
@@ -218,5 +252,27 @@ public class GlobalSearchTests : BunitContext
 		await Assert.That(cut.Find(".search-modal").GetAttribute("aria-label")).IsEqualTo("Blocklist a title");
 		_blocklist.AddAsync(Any(), Any()).WasCalled(Times.Once);
 		_wantlist.AddAsync(Any(), Any(), Any()).WasNeverCalled();
+	}
+
+	private void SearchWith(SearchProvider provider)
+	{
+		_providerConfig
+			.GetAsync(Any())
+			.Returns(
+				new ProviderConfig
+				{
+					Sink = SinkKind.Plex,
+					TrendingProvider = TrendingProvider.Tmdb,
+					SearchProvider = provider,
+					AuthProvider = AuthProvider.Local,
+					RegistrationMode = RegistrationMode.Open,
+				}
+			);
+	}
+
+	private static MediaMatchResult Found(string title, MediaType type)
+	{
+		var identity = new MediaIdentity(MediaId.New(), [TmdbId.From(title.Length.ToString(), type)]);
+		return new MatchedMedia(identity, type == MediaType.Movie ? new MovieDetails { Title = title } : new ShowDetails { Title = title });
 	}
 }

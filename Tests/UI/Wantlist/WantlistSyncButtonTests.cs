@@ -16,6 +16,7 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
 using Domain.Wantlist;
+using Domain.Wantlist.Arr;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using Microsoft.AspNetCore.Components;
@@ -97,7 +98,7 @@ public class WantlistSyncButtonTests : BunitContext
 	public async Task Plan_WhenAnAttemptFailsTransiently_RetriesInsteadOfReportingAnError()
 	{
 		var (_, planner) = RegisterServices();
-		planner.PlanAsync(Any()).ReturnsSequentially(new WantlistSyncSinkUnreachable("temporary"), Summary(), Summary());
+		planner.PlanAsync(Any()).ReturnsSequentially(new WantlistSyncSinkUnreachable("temporary", []), Summary(), Summary());
 
 		var cut = Render<Harness>();
 
@@ -109,7 +110,7 @@ public class WantlistSyncButtonTests : BunitContext
 	public async Task Plan_WhenEveryAttemptFails_GivesUpAfterThreeTries()
 	{
 		var (_, planner) = RegisterServices();
-		planner.PlanAsync(Any()).Returns(new WantlistSyncSinkUnreachable("unreachable"));
+		planner.PlanAsync(Any()).Returns(new WantlistSyncSinkUnreachable("unreachable", []));
 
 		var cut = Render<Harness>();
 
@@ -160,12 +161,47 @@ public class WantlistSyncButtonTests : BunitContext
 	public async Task Status_WhenEveryPlanAttemptFails_NamesTheUnreachableProvider()
 	{
 		var (_, planner) = RegisterServices();
-		planner.PlanAsync(Any()).Returns(new WantlistSyncSinkUnreachable("unreachable"));
+		planner.PlanAsync(Any()).Returns(new WantlistSyncSinkUnreachable("unreachable", []));
 
 		var cut = Render<WantlistSyncButton>(parameters => parameters.Add(button => button.ProviderName, "Plex"));
 
 		cut.WaitForState(() => !cut.Find(".sync-status").TextContent.Contains("Comparing"), TimeSpan.FromSeconds(10));
 		await Assert.That(cut.Find(".sync-status").TextContent).Contains("Plex unreachable");
+	}
+
+	[Test]
+	public async Task Status_OnRadarrAndSonarr_SplitsTheCountsPerApp()
+	{
+		var (_, planner) = RegisterServices();
+		var movie = MediaId.New();
+		var shows = Ids(3);
+		planner.PlanAsync(Any()).Returns(Summary(new WantlistDelta([movie, shows[0], shows[1]], []), new WantlistDelta([], [shows[2]])));
+		var media = IMediaService.Mock();
+		media
+			.GetDetailsAsync(Any(), Any())
+			.Returns((ids, _) => Async([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, id == movie ? MediaType.Movie : MediaType.Show)))]));
+		Services.AddSingleton(media.Object);
+
+		var cut = Render<WantlistSyncButton>(parameters => parameters.Add(button => button.Sink, SinkKind.Arr));
+
+		cut.WaitForElement("[data-app=Sonarr] .is-removed");
+		await Assert.That(Spaceless(cut.Find("[data-app=Radarr]").TextContent)).IsEqualTo("+1");
+		await Assert.That(Spaceless(cut.Find("[data-app=Sonarr]").TextContent)).IsEqualTo("+2−1");
+	}
+
+	[Test]
+	public async Task Status_OnRadarrAndSonarrWhenSonarrIsUnreachable_SaysSoBesideRadarr()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(new WantlistSyncSinkUnreachable("Sonarr answered 401 Unauthorized.", [ArrApp.Sonarr]));
+
+		var cut = Render<WantlistSyncButton>(parameters => parameters.Add(button => button.Sink, SinkKind.Arr));
+
+		cut.WaitForState(
+			() => cut.FindAll("[data-app=Sonarr]").Count == 1 && cut.Find("[data-app=Sonarr]").TextContent.Contains("unreachable"),
+			TimeSpan.FromSeconds(10)
+		);
+		await Assert.That(cut.Find("[data-app=Radarr]").TextContent.Trim()).IsEqualTo("in sync");
 	}
 
 	[Test]
@@ -283,6 +319,14 @@ public class WantlistSyncButtonTests : BunitContext
 			await Task.Yield();
 			yield return item;
 		}
+	}
+
+	private static string Spaceless(string text) => string.Concat(text.Where(character => !char.IsWhiteSpace(character)));
+
+	private static MatchedMedia Typed(MediaId id, MediaType type)
+	{
+		MediaDetails details = type == MediaType.Movie ? new MovieDetails { Title = "Dune" } : new ShowDetails { Title = "Dune: Prophecy" };
+		return new MatchedMedia(new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), type)]), details);
 	}
 
 	private static MatchedMedia Detail(MediaId id)

@@ -45,7 +45,8 @@ internal static class SelfHostedWantlist
 		await Expect(syncNow).ToBeEnabledAsync(Wait.Settle);
 		await syncNow.ClickAsync();
 		await Expect(page.Text("Sync has been queued")).ToBeVisibleAsync();
-		await Expect(SyncGroup(page)).ToContainTextAsync("In sync", new LocatorAssertionsToContainTextOptions { Timeout = Wait.Preview });
+		await Expect(SyncGroup(page).Locator(".sync-app").Filter(new LocatorFilterOptions { HasText = "in sync" }))
+			.ToHaveCountAsync(2, new LocatorAssertionsToHaveCountOptions { Timeout = Wait.Preview });
 	}
 
 	internal static async Task SearchWithRadarrAndSonarrAsync(IPage page)
@@ -65,6 +66,12 @@ internal static class SelfHostedWantlist
 		await input.PressAsync("Enter");
 		var named = page.Locator(".media-title-text", new PageLocatorOptions { HasTextRegex = new Regex($"^{Regex.Escape(title)}$") });
 		var row = modal.Locator(".search-result-row").Filter(new LocatorFilterOptions { Has = named }).First;
+		var otherTab = modal.Locator("[role=tab][aria-selected=false]");
+		await Expect(row.Or(otherTab).First).ToBeVisibleAsync(Wait.Settle);
+		if (!await row.IsVisibleAsync())
+		{
+			await otherTab.ClickAsync();
+		}
 		await Expect(row).ToBeVisibleAsync(Wait.Settle);
 		return row;
 	}

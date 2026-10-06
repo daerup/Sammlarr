@@ -2,6 +2,7 @@ using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Core.Wantlist.Sync;
 using Domain.Media;
+using Domain.Wantlist.Arr;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using Microsoft.Extensions.Logging;
@@ -58,6 +59,18 @@ public class WantlistSyncPlannerTests
 
 		var unreachable = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSinkUnreachable>();
 		await Assert.That(unreachable.Reason).Contains("plex is down");
+	}
+
+	[Test]
+	public async Task PlanAsync_WhenOneArrAppCannotBeRead_ReportsWhichOne()
+	{
+		var sink = IMediaSink.Mock();
+		sink.GetAsync(Any()).Throws(new ArrAppsUnreachableException("Sonarr answered 401 Unauthorized.", [ArrApp.Sonarr]));
+
+		var result = await WantlistStubs.Planner(sink, WantlistStubs.EmptyOutbox()).PlanAsync();
+
+		var unreachable = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSinkUnreachable>();
+		await Assert.That(unreachable.Apps).IsEquivalentTo([ArrApp.Sonarr]);
 	}
 
 	[Test]

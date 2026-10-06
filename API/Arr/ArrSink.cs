@@ -34,9 +34,16 @@ internal sealed class ArrSink(
 		var viewer = await ViewerAsync(cancellationToken);
 		var claims = (await ClaimantAsync(config.Tags, cancellationToken)).Match(first => first.Id == viewer.Id, () => false);
 		List<FoundMedia> items = [];
+		List<(ArrApp App, string Reason)> failed = [];
 		foreach (var api in apis.All)
 		{
-			items.AddRange(await MineAsync(api, config, viewer, claims, cancellationToken));
+			var mine = await MineAsync(api, config, viewer, claims, cancellationToken);
+			mine.Apply(items.AddRange).ApplyError(error => failed.Add((api.App, error.Reason)));
+		}
+
+		if (failed.Count > 0)
+		{
+			throw new ArrAppsUnreachableException(string.Join(" ", failed.Select(app => app.Reason)), [.. failed.Select(app => app.App)]);
 		}
 
 		var requests = items.Select(item => new IdentifyRequest([.. item.Externals], new None()));
@@ -146,10 +153,20 @@ internal sealed class ArrSink(
 		return deleted == 0 ? error : Error.From($"{error.Reason} {deleted} of their titles were already deleted.");
 	}
 
-	private async Task<IReadOnlyList<FoundMedia>> MineAsync(ArrApi api, ArrSinkConfig config, ArrTagUser viewer, bool claims, CancellationToken cancellationToken)
+	private static async Task<Result<IReadOnlyList<FoundMedia>>> MineAsync(
+		ArrApi api,
+		ArrSinkConfig config,
+		ArrTagUser viewer,
+		bool claims,
+		CancellationToken cancellationToken
+	)
 	{
 		var opened = await ArrSession.OpenAsync(api, ArrSession.Connect(api.App, config.Of(api.App)), cancellationToken);
-		var session = opened.Match(open => open, error => throw new InvalidOperationException(error.Reason));
+		return opened.Map(session => Mine(api, session, config, viewer, claims));
+	}
+
+	private static IReadOnlyList<FoundMedia> Mine(ArrApi api, ArrSession session, ArrSinkConfig config, ArrTagUser viewer, bool claims)
+	{
 		var mine = session.Mine(config.Tags, viewer);
 		return
 		[

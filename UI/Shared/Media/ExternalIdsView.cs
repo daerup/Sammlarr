@@ -26,8 +26,7 @@ internal sealed class ExternalIdsView(
 
 	public async Task<IReadOnlyList<ExternalIdCard>> CardsAsync(IReadOnlyList<IExternalMediaId> ids, Optional<string> title)
 	{
-		var arr = await ArrAsync();
-		var arrCard = arr.Map(config => ArrSearchLinks.For(config, ids)).Map(ArrCard);
+		var arrCard = await ArrAsync().Map(config => ArrSearchLinks.For(config, ids)).Map(ArrCard);
 		return [.. IdCards(ids, title).Append(arrCard).WhereSome()];
 	}
 

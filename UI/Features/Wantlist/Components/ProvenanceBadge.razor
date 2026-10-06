@@ -27,16 +27,19 @@ else
     [Parameter]
     public MediaId? ItemId { get; set; }
 
+    [Parameter, EditorRequired]
+    public required MediaType Type { get; set; }
+
     private RenderFragment Badge =>
         @<BbBadge Variant="@ProvenanceBadgeVariant(Provenance)" Class="wl-badge">
             <BbTooltip>
                 <BbTooltipTrigger AsChild="false" Class="p-0">
                     <span class="flex items-center gap-1 wl-badge-content">
                         <LucideIcon Name="@ProvenanceView.Icon(Provenance)" Size="14" Color="@IconColor"/>
-                        <span class="wl-badge-label">@ProvenanceView.Label(Provenance)</span>
+                        <span class="wl-badge-label">@ProvenanceView.Label(Provenance, Type)</span>
                     </span>
                 </BbTooltipTrigger>
-                <BbTooltipContent>@ProvenanceView.Description(Provenance, AddedAt)</BbTooltipContent>
+                <BbTooltipContent>@ProvenanceView.Description(Provenance, AddedAt, Type)</BbTooltipContent>
             </BbTooltip>
         </BbBadge>;
 
@@ -50,7 +53,7 @@ else
             _ => BadgeVariant.Secondary,
         };
 
-    private string IconColor => ProvenanceView.BrandColor(Provenance, Branding) ?? "currentColor";
+    private string IconColor => ProvenanceView.BrandColor(Provenance, Branding, Type) ?? "currentColor";
 
-    private string? BrandStyle => ProvenanceView.BrandColor(Provenance, Branding) is { } color ? $"--wl-brand: {color}" : null;
+    private string? BrandStyle => ProvenanceView.BrandColor(Provenance, Branding, Type) is { } color ? $"--wl-brand: {color}" : null;
 }
