@@ -28,29 +28,33 @@ public class FeedConfigPanelTests : BunitContext
 
 	private readonly List<FeedConfig> _changes = [];
 
+	private readonly HashSet<RemoteService> _connected = [RemoteService.Mdblist];
+
 	[Before(Test)]
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
 		Services.AddSingleton(RatingStub.Context());
-		Services.AddSingleton(ReadinessStub.Connected(new HashSet<RemoteService> { RemoteService.Mdblist }));
+		Services.AddSingleton(ReadinessStub.Connected(_connected));
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
 	[Test]
 	public async Task Provider_WhenAnOpenedFeedsProviderHasNoKey_StaysChosenSaysWhereToAddItAndBlocksTesting()
 	{
-		var cut = RenderPanel(FeedProvider.Tmdb);
+		_connected.Remove(RemoteService.Mdblist);
+
+		var cut = RenderPanel(FeedProvider.Mdblist);
 
 		var config = _changes.Last();
-		await Assert.That(config.Provider).IsEqualTo(FeedProvider.Tmdb);
+		await Assert.That(config.Provider).IsEqualTo(FeedProvider.Mdblist);
 		await Assert.That(config.IsTestable).IsFalse();
 		await Assert.That(ProviderLabel(cut).TextContent).Contains("*");
 		await Assert.That(cut.Markup).Contains("API key is missing, fix in");
 		await Assert
 			.That(cut.FindAll("a").Single(link => link.TextContent.Trim() == "Settings").GetAttribute("href"))
-			.IsEqualTo("/settings?section=providers&provider=tmdb");
+			.IsEqualTo("/settings?section=providers&provider=mdblist");
 	}
 
 	[Test]

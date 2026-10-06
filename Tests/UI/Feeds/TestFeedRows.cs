@@ -11,7 +11,7 @@ internal static class TestFeedRows
 
 	internal static readonly FeedRow Comedy = Row("hdlists/comedy-movies-2001-2020", FeedProvider.Mdblist, mirror: true, next: Now.AddMinutes(43), onWantlist: 1);
 	internal static readonly FeedRow Documentaries = Row("hdlists/latest-hd-documentary-movies-1980-to-today", FeedProvider.Mdblist, job: JobState.Running);
-	internal static readonly FeedRow WeeklyPicks = Row("Weekly picks", FeedProvider.Tmdb, identifier: "8305012", enabled: false);
+	internal static readonly FeedRow WeeklyPicks = Row("Weekly picks", FeedProvider.Mdblist, identifier: "garycrawfordgc/weekly-picks", enabled: false);
 	internal static readonly FeedRow Trending = Row("snoak/trending-movies", FeedProvider.Mdblist, next: Now.AddHours(8), job: JobState.Queued, onWantlist: 25);
 
 	internal static readonly FeedRow[] All = [Comedy, Documentaries, WeeklyPicks, Trending];

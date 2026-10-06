@@ -17,11 +17,11 @@ public class FeedFilterTests
 	}
 
 	[Test]
-	public async Task Apply_ForAProvider_KeepsOnlyItsFeeds()
+	public async Task Apply_ForAProvider_KeepsItsFeeds()
 	{
-		var shown = (FeedFilter.None with { Providers = [FeedProvider.Tmdb] }).Apply(All);
+		var shown = (FeedFilter.None with { Providers = [FeedProvider.Mdblist] }).Apply(All);
 
-		await Assert.That(shown).IsEquivalentTo([WeeklyPicks]);
+		await Assert.That(shown).IsEquivalentTo(All);
 	}
 
 	[Test]
@@ -43,7 +43,7 @@ public class FeedFilterTests
 	[Test]
 	public async Task Apply_WithASearch_MatchesTheListIdentifierToo()
 	{
-		var shown = (FeedFilter.None with { Search = "8305" }).Apply(All);
+		var shown = (FeedFilter.None with { Search = "garycrawford" }).Apply(All);
 
 		await Assert.That(shown).IsEquivalentTo([WeeklyPicks]);
 	}
@@ -78,7 +78,7 @@ public class FeedFilterTests
 	[Test]
 	public async Task ClearFilters_KeepsTheChosenSort()
 	{
-		var filter = FeedFilter.None with { Providers = [FeedProvider.Tmdb], Search = "picks", Sort = FeedSort.RecentlyAdded };
+		var filter = FeedFilter.None with { Providers = [FeedProvider.Mdblist], Search = "picks", Sort = FeedSort.RecentlyAdded };
 
 		var cleared = filter.ClearFilters();
 

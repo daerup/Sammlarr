@@ -8,8 +8,8 @@
 </DemoCard>
 
 @code {
-    private static readonly IReadOnlyList<ProviderCount> Counts = [new(FeedProvider.Tmdb, 3), new(FeedProvider.Mdblist, 5)];
+    private static readonly IReadOnlyList<ProviderCount> Counts = [new(FeedProvider.Mdblist, 5)];
 
-    private FeedProvider? _provider = FeedProvider.Tmdb;
+    private FeedProvider? _provider = FeedProvider.Mdblist;
     private IReadOnlyList<FeedProvider> _filter = [];
 }

@@ -22,7 +22,14 @@ internal static class DemoFeeds
 		enabled: true
 	);
 
-	public static readonly Feed TrendingFeed = Create("Trending this week", FeedProvider.Tmdb, "8321", new Append(), new Manual(), enabled: false);
+	public static readonly Feed TrendingFeed = Create(
+		"Trending this week",
+		FeedProvider.Mdblist,
+		"snoak/trakt-s-trending-shows",
+		new Append(),
+		new Manual(),
+		enabled: false
+	);
 
 	public static readonly FeedRun MirrorRun = Run(
 		MirrorFeed,

@@ -51,13 +51,13 @@ public class ServicesMapTests : BunitContext
 		var cut = RenderMap(canPick: false, RemoteService.Plex, RemoteService.Tmdb, RemoteService.Mdblist);
 
 		var starts = cut.FindAll(".map-traces path").Select(path => path.GetAttribute("d")!.Split(' ')[0]);
-		await Assert.That(starts).IsEquivalentTo(Enumerable.Repeat("M256", 6));
+		await Assert.That(starts).IsEquivalentTo(Enumerable.Repeat("M256", 5));
 	}
 
 	[Test]
 	[Arguments(new[] { RemoteService.Plex, RemoteService.Tmdb, RemoteService.Mdblist }, 0)]
 	[Arguments(new[] { RemoteService.Plex, RemoteService.Tmdb }, 1)]
-	[Arguments(new RemoteService[0], 6)]
+	[Arguments(new RemoteService[0], 5)]
 	public async Task Traces_ToAServiceTheViewerHasNotSetUp_AreDotted(RemoteService[] ready, int dotted)
 	{
 		var cut = RenderMap(false, ready);

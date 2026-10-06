@@ -41,4 +41,14 @@ public class AccountsAndKeysTests : BunitContext
 				"IMDb, Trakt and Letterboxd lists, once you add them on mdblist.com (a free account adds one, updated weekly)",
 			]);
 	}
+
+	[Test]
+	public async Task TmdbRow_OffersNoListsAsFeeds()
+	{
+		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));
+
+		var tmdb = cut.FindComponents<Stub<ApiKeyRow>>().Select(row => row.Instance.Parameters).Single(row => row.Get(key => key.Provider) == ApiKeyProvider.Tmdb);
+
+		await Assert.That(tmdb.Get(key => key.Uses)).DoesNotContain(use => use.Contains("feeds"));
+	}
 }
