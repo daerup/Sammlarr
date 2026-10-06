@@ -136,7 +136,7 @@ profile; the staging smoke test does neither).
 | Dashboard | http://localhost:15224 | logs, traces and the commands below; anonymous, like everything here only on 127.0.0.1 |
 | Radarr / Sonarr | http://localhost:7879, http://localhost:8990 | persistent containers, key `0123456789abcdef0123456789abcdef` |
 | Catcher | http://localhost:6790 | every webhook and Pushover message staging sends (`tarampampam/webhook-tester`) |
-| WireMock | http://localhost:6791/__admin/requests | persistent like Radarr and Sonarr, so their indexer never goes away; the Newznab indexer, and any Plex call that got blocked |
+| WireMock | http://localhost:6791/__admin/requests | persistent like Radarr and Sonarr, so their indexer never goes away; the Newznab indexer, and every Plex call (reads proxied, watchlist writes caught) |
 
 Every port is published on 127.0.0.1 only.
 
@@ -165,7 +165,9 @@ running Sammlarr; switching one to a schedule in staging schedules it as usual.
 seeder again and start everything; `update-image` (Update to current code) rebuilds the image from the working tree and restarts Sammlarr.
 
 **What is real and what is caught.** TMDB, MDBList and Wikidata are real (with your keys). Radarr and Sonarr use their own metadata
-services. Plex points at WireMock (`/plex-blocked/<url>`), webhooks and Pushover (`Pushover:BaseUrl`) at the catcher, and Sammlarr's
+services. Plex is read-only: its APIs (`Plex` in the settings) go through WireMock, which proxies sign-in, search, the watchlist and
+metadata to the real Plex (`AppHost/Staging/wiremock/plex.json`) but answers watchlist adds and removes itself, so they show in its journal and
+never reach your watchlist; Plex's images and sign-in page stay the real ones. Webhooks and Pushover (`Pushover:BaseUrl`) go to the catcher, and Sammlarr's
 `HTTP_PROXY`/`HTTPS_PROXY` point at a dead port with a `NO_PROXY` allowlist, so a call to any other host fails. Searches go to WireMock's
 Newznab indexer, which answers every title search with one release; the AppHost's fake downloader turns each grabbed `.nzb` into
 `downloads/<app>/watch/<release>/<release>.mkv` from `AppHost/Staging/stub.mkv`, and Radarr imports it about a minute and a half later. Sonarr

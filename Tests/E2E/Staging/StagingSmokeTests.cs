@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -19,7 +20,7 @@ namespace E2E.Tests.Staging;
 public class StagingSmokeTests
 {
 	[Test]
-	public async Task Staging_OnAnEmptyDataDirectory_SignsTheSeededAdminInWithRadarrAndSonarrConnectedAndNotifiesTheCatcher()
+	public async Task Staging_OnAnEmptyDataDirectory_ComesUpSeededWithEveryServiceWired()
 	{
 		var root = Directory.CreateTempSubdirectory("sammlarr-staging-e2e-");
 		try
@@ -41,6 +42,7 @@ public class StagingSmokeTests
 			await Expect(SettingsPage.MapService(page, "Radarr + Sonarr"))
 				.ToContainTextAsync("Connected", new LocatorAssertionsToContainTextOptions { Timeout = Wait.Settle });
 			await CatchesAWebhookAndAPushoverMessageAsync(app.GetEndpoint("catcher", "http"), session);
+			await ReadsPlexButKeepsWatchlistWritesInWireMockAsync(app.GetEndpoint("wiremock", "http"));
 		}
 		finally
 		{
@@ -67,6 +69,17 @@ public class StagingSmokeTests
 	}
 
 	private static string Body(string base64) => Encoding.UTF8.GetString(Convert.FromBase64String(base64));
+
+	private static async Task ReadsPlexButKeepsWatchlistWritesInWireMockAsync(Uri wiremock)
+	{
+		using var http = new HttpClient { BaseAddress = wiremock };
+
+		using var read = await http.GetAsync("plex/plex.tv/api/v2/user");
+		using var write = await http.PutAsync("plex/vod.provider.plex.tv/actions/addToWatchlist?ratingKey=staging", new StringContent(string.Empty));
+
+		await Assert.That(read.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+		await Assert.That(write.Headers.GetValues("X-Staging")).Contains("Plex write caught by WireMock");
+	}
 
 	private static async Task<(DistributedApplication App, StagingPersona Admin, string CatcherSession)> StartAsync(string root)
 	{

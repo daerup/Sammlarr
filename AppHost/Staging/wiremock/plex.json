@@ -1,0 +1,63 @@
+{
+  "mappings": [
+    {
+      "priority": 1,
+      "request": {
+        "method": "PUT",
+        "urlPathPattern": "/plex/.+"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "X-Staging": "Plex write caught by WireMock"
+        }
+      }
+    },
+    {
+      "priority": 2,
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/plex/vod\\.provider\\.plex\\.tv/.*"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "X-Staging": "Plex write caught by WireMock"
+        }
+      }
+    },
+    {
+      "priority": 5,
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/plex/plex\\.tv/.*"
+      },
+      "response": {
+        "proxyBaseUrl": "https://plex.tv",
+        "proxyUrlPrefixToRemove": "/plex/plex.tv"
+      }
+    },
+    {
+      "priority": 5,
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/plex/discover\\.provider\\.plex\\.tv/.*"
+      },
+      "response": {
+        "proxyBaseUrl": "https://discover.provider.plex.tv",
+        "proxyUrlPrefixToRemove": "/plex/discover.provider.plex.tv"
+      }
+    },
+    {
+      "priority": 5,
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": "/plex/metadata\\.provider\\.plex\\.tv/.*"
+      },
+      "response": {
+        "proxyBaseUrl": "https://metadata.provider.plex.tv",
+        "proxyUrlPrefixToRemove": "/plex/metadata.provider.plex.tv"
+      }
+    }
+  ]
+}
