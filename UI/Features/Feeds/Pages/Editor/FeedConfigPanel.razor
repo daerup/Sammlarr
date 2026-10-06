@@ -66,13 +66,13 @@
                     @if (ProviderWithoutKey is { } missing)
                     {
                         <BbFieldError>
-                            API key is missing, fix in <AppLink Href="@SettingsLinks.Provider(missing.AsMediaProvider())" Color="inherit">Settings</AppLink>
+                            API key is missing, fix in <AppLink Href="@SettingsLinks.Provider(missing.Service)" Color="inherit">Settings</AppLink>
                         </BbFieldError>
                     }
                     else if (_disabledProviders.Contains(FeedProvider.Tmdb))
                     {
                         <BbFieldDescription>
-                            Add your TMDB key in <AppLink Href="@SettingsLinks.Provider(MediaProvider.Tmdb)">Settings › Providers</AppLink> to follow TMDB lists.
+                            Add your TMDB key in <AppLink Href="@SettingsLinks.Provider(RemoteService.Tmdb)">Settings › Providers</AppLink> to follow TMDB lists.
                         </BbFieldDescription>
                     }
                 </BbField>

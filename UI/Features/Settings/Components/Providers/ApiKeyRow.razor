@@ -4,7 +4,7 @@
 @inject IApiKeyFactory ApiKeyFactory
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
-<ProviderRow Key="@Provider.AsMediaProvider()" Brand="Branding" Open="Open" OpenChanged="OpenChanged">
+<ProviderRow Key="@Provider.Remote" Brand="Branding" Open="Open" OpenChanged="OpenChanged">
     <Status>
         @if (_loaded)
         {
@@ -81,7 +81,7 @@
 
     [Parameter] public EventCallback Changed { get; set; }
 
-    private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider.AsMediaProvider());
+    private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider.Remote);
 
     private string _apiKeyInput = string.Empty;
     private string _savedApiKey = string.Empty;

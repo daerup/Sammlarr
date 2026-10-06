@@ -276,7 +276,7 @@ public class ProvidersSectionTests : BunitContext
 	{
 		var cut = RenderSection();
 
-		await cut.InvokeAsync(() => _ = Map(cut).Get(map => map.ServiceOpened).InvokeAsync(MediaProvider.Tmdb));
+		await cut.InvokeAsync(() => _ = Map(cut).Get(map => map.ServiceOpened).InvokeAsync(RemoteService.Tmdb));
 
 		var tmdb = cut.FindComponents<Stub<ApiKeyRow>>().Single(row => row.Instance.Parameters.Get(key => key.Provider) == ApiKeyProvider.Tmdb);
 		await Assert.That(tmdb.Instance.Parameters.Get(key => key.Open)).IsTrue();

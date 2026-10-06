@@ -34,7 +34,7 @@ public class ServicesMapTests : BunitContext
 	[Test]
 	public async Task Services_ForTheViewersOwnSetup_SayWhetherEachIsReady()
 	{
-		var cut = RenderMap(canPick: false, MediaProvider.Plex, MediaProvider.Tmdb);
+		var cut = RenderMap(canPick: false, RemoteService.Plex, RemoteService.Tmdb);
 
 		var boxes = cut.FindAll(".map-service")
 			.Select(service =>
@@ -48,17 +48,17 @@ public class ServicesMapTests : BunitContext
 	[Test]
 	public async Task Traces_Always_StartFromTheRoleColumn()
 	{
-		var cut = RenderMap(canPick: false, MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Mdblist);
+		var cut = RenderMap(canPick: false, RemoteService.Plex, RemoteService.Tmdb, RemoteService.Mdblist);
 
 		var starts = cut.FindAll(".map-traces path").Select(path => path.GetAttribute("d")!.Split(' ')[0]);
 		await Assert.That(starts).IsEquivalentTo(Enumerable.Repeat("M256", 6));
 	}
 
 	[Test]
-	[Arguments(new[] { MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Mdblist }, 0)]
-	[Arguments(new[] { MediaProvider.Plex, MediaProvider.Tmdb }, 1)]
-	[Arguments(new MediaProvider[0], 6)]
-	public async Task Traces_ToAServiceTheViewerHasNotSetUp_AreDotted(MediaProvider[] ready, int dotted)
+	[Arguments(new[] { RemoteService.Plex, RemoteService.Tmdb, RemoteService.Mdblist }, 0)]
+	[Arguments(new[] { RemoteService.Plex, RemoteService.Tmdb }, 1)]
+	[Arguments(new RemoteService[0], 6)]
+	public async Task Traces_ToAServiceTheViewerHasNotSetUp_AreDotted(RemoteService[] ready, int dotted)
 	{
 		var cut = RenderMap(false, ready);
 
@@ -85,7 +85,7 @@ public class ServicesMapTests : BunitContext
 			builder.CloseComponent();
 			builder.OpenComponent<ServicesMap>(1);
 			builder.AddComponentParameter(2, nameof(ServicesMap.Config), Config);
-			builder.AddComponentParameter(3, nameof(ServicesMap.Ready), new HashSet<MediaProvider>());
+			builder.AddComponentParameter(3, nameof(ServicesMap.Ready), new HashSet<RemoteService>());
 			builder.AddComponentParameter(4, nameof(ServicesMap.CanPick), true);
 			builder.AddComponentParameter(5, nameof(ServicesMap.SinkPicked), EventCallback.Factory.Create<SinkKind>(this, picked.Add));
 			builder.CloseComponent();
@@ -101,7 +101,7 @@ public class ServicesMapTests : BunitContext
 	[Test]
 	public async Task SearchChip_BeforeTheServicesAreConnected_OffersOnlyTheOnesThatAre()
 	{
-		var cut = RenderPicker(Config with { SearchProvider = SearchProvider.Tmdb }, new HashSet<MediaProvider> { MediaProvider.Tmdb }, _ => { });
+		var cut = RenderPicker(Config with { SearchProvider = SearchProvider.Tmdb }, new HashSet<RemoteService> { RemoteService.Tmdb }, _ => { });
 
 		await cut.FindAll(".map-chip")[1].ClickAsync();
 		cut.WaitForElement("[role=menuitem]");
@@ -114,7 +114,7 @@ public class ServicesMapTests : BunitContext
 	public async Task SearchChip_WhenAConnectedServiceIsPicked_RaisesIt()
 	{
 		List<SearchProvider> picked = [];
-		var cut = RenderPicker(Config with { SearchProvider = SearchProvider.Tmdb }, new HashSet<MediaProvider> { MediaProvider.Tmdb }, picked.Add, arrReady: true);
+		var cut = RenderPicker(Config with { SearchProvider = SearchProvider.Tmdb }, new HashSet<RemoteService> { RemoteService.Tmdb }, picked.Add, arrReady: true);
 
 		await cut.FindAll(".map-chip")[1].ClickAsync();
 		cut.WaitForElement("[role=menuitem]");
@@ -125,7 +125,7 @@ public class ServicesMapTests : BunitContext
 
 	private IRenderedComponent<IComponent> RenderPicker(
 		ProviderConfig config,
-		IReadOnlySet<MediaProvider> ready,
+		IReadOnlySet<RemoteService> ready,
 		Action<SearchProvider> picked,
 		bool arrReady = false
 	)
@@ -185,7 +185,7 @@ public class ServicesMapTests : BunitContext
 		var cut = Render<ServicesMap>(parameters =>
 			parameters
 				.Add(map => map.Config, Config with { AuthProvider = AuthProvider.Local })
-				.Add(map => map.Ready, new HashSet<MediaProvider>())
+				.Add(map => map.Ready, new HashSet<RemoteService>())
 				.Add(map => map.People, 3)
 		);
 
@@ -199,31 +199,31 @@ public class ServicesMapTests : BunitContext
 	[Test]
 	public async Task Service_WhenClicked_AsksToOpenItsRow()
 	{
-		List<MediaProvider> opened = [];
+		List<RemoteService> opened = [];
 		var cut = Render<ServicesMap>(parameters =>
 			parameters
 				.Add(map => map.Config, Config)
-				.Add(map => map.Ready, new HashSet<MediaProvider>())
-				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<MediaProvider>(this, opened.Add))
+				.Add(map => map.Ready, new HashSet<RemoteService>())
+				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<RemoteService>(this, opened.Add))
 		);
 
 		await Service(cut, "TMDb").ClickAsync();
 		await cut.Find("button.map-tile").ClickAsync();
 
-		await Assert.That(opened).IsEquivalentTo([MediaProvider.Tmdb, MediaProvider.Mdblist], CollectionOrdering.Matching);
+		await Assert.That(opened).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Mdblist], CollectionOrdering.Matching);
 	}
 
 	[Test]
 	public async Task SammlarrAccounts_WhenClicked_AsksToOpenTheAccountsOverASolidTrace()
 	{
-		List<MediaProvider> opened = [];
+		List<RemoteService> opened = [];
 		var accounts = 0;
 		var cut = Render<ServicesMap>(parameters =>
 			parameters
 				.Add(map => map.Config, Config with { AuthProvider = AuthProvider.Local })
-				.Add(map => map.Ready, new HashSet<MediaProvider>())
+				.Add(map => map.Ready, new HashSet<RemoteService>())
 				.Add(map => map.People, 3)
-				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<MediaProvider>(this, opened.Add))
+				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<RemoteService>(this, opened.Add))
 				.Add(map => map.AccountsOpened, EventCallback.Factory.Create(this, () => accounts++))
 		);
 
@@ -248,15 +248,15 @@ public class ServicesMapTests : BunitContext
 	[Test]
 	public async Task RadarrAndSonarr_WhenClicked_DrawsBothMarksInTheMixedColourAndAsksToOpenTheWantlistSync()
 	{
-		List<MediaProvider> opened = [];
+		List<RemoteService> opened = [];
 		var arr = 0;
 		var cut = Render<ServicesMap>(parameters =>
 			parameters
 				.Add(map => map.Config, Config with { Sink = SinkKind.Arr })
-				.Add(map => map.Ready, new HashSet<MediaProvider>())
+				.Add(map => map.Ready, new HashSet<RemoteService>())
 				.Add(map => map.ArrReady, true)
 				.Add(map => map.CanPick, true)
-				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<MediaProvider>(this, opened.Add))
+				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<RemoteService>(this, opened.Add))
 				.Add(map => map.ArrOpened, EventCallback.Factory.Create(this, () => arr++))
 		);
 		var box = Service(cut, "Radarr + Sonarr");
@@ -290,9 +290,9 @@ public class ServicesMapTests : BunitContext
 		return cut.FindAll(".map-service").Single(service => service.QuerySelector(".map-service-name")!.TextContent.Trim() == name);
 	}
 
-	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params MediaProvider[] ready) => RenderMap(Config, canPick, ready);
+	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params RemoteService[] ready) => RenderMap(Config, canPick, ready);
 
-	private IRenderedComponent<ServicesMap> RenderMap(ProviderConfig config, bool canPick, params MediaProvider[] ready)
+	private IRenderedComponent<ServicesMap> RenderMap(ProviderConfig config, bool canPick, params RemoteService[] ready)
 	{
 		return Render<ServicesMap>(parameters =>
 			parameters.Add(map => map.Config, config).Add(map => map.Ready, ready.ToHashSet()).Add(map => map.CanPick, canPick)

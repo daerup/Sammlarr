@@ -4,7 +4,7 @@
 
 <DemoCard Title="Provider row" Where="Providers" Span="2"
           Note="ProviderRow opened on an API key: its CredentialStatus, the masked key and CredentialActions. Type to get Test, Save and Cancel; the states only change here, nothing is stored.">
-    <ProviderRow Key="MediaProvider.Tmdb" Brand="@Branding.GetBrandingInfo(MediaProvider.Tmdb)" Open="_open" OpenChanged="v => _open = v">
+    <ProviderRow Key="RemoteService.Tmdb" Brand="@Branding.GetBrandingInfo(RemoteService.Tmdb)" Open="_open" OpenChanged="v => _open = v">
         <Status>
             <CredentialStatus State="_state" IdleText="@(string.IsNullOrWhiteSpace(_key) ? "Not set" : "Not tested")"/>
         </Status>

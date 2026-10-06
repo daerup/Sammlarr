@@ -32,7 +32,7 @@
                               ApiProvider="@_providerConfig.TrendingProvider.AsApiKeyProvider()"
                               DeniedActionDescription="browse trending media"
                               ApiKeyReason="Browse shows what is trending on TMDB, read through your own key. Add it once and this fills in."
-                              FallbackAction="@(() => NavigationManager.NavigateTo(SettingsLinks.Provider(_providerConfig.TrendingProvider.AsMediaProvider())))">
+                              FallbackAction="@(() => NavigationManager.NavigateTo(SettingsLinks.Provider(_providerConfig.TrendingProvider.Service)))">
                 @if (_isLoading)
                 {
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">

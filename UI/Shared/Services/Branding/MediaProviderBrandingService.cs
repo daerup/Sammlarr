@@ -20,6 +20,56 @@ public class MediaProviderBrandingService
 
 	public BrandingInfo GetBrandingInfo(AuthProvider signIn) => signIn.Provider().Match(GetBrandingInfo, () => Sammlarr);
 
+	public BrandingInfo GetBrandingInfo(RemoteService remote)
+	{
+		return remote switch
+		{
+			RemoteService.Tmdb => GetBrandingInfo(MediaProvider.Tmdb),
+			RemoteService.Plex => GetBrandingInfo(MediaProvider.Plex),
+			RemoteService.Mdblist => GetBrandingInfo(MediaProvider.Mdblist),
+			RemoteService.Wikidata => new(
+				"Wikidata",
+				"Wikidata",
+				"#006699",
+				new BrandArt("wikidata-square.svg"),
+				new BrandArt("wikidata-square.svg"),
+				new BrandTile(MutedTile, new BrandArt("wikidata-square.svg"), 70)
+			),
+			RemoteService.Radarr => GetBrandingInfo(ArrApp.Radarr),
+			RemoteService.Sonarr => GetBrandingInfo(ArrApp.Sonarr),
+		};
+	}
+
+	public IReadOnlyList<BrandingInfo> Brands(Service service)
+	{
+		return service switch
+		{
+			RemoteService remote => [GetBrandingInfo(remote)],
+			Arr => [.. Enum.GetValues<ArrApp>().Select(app => GetBrandingInfo(app.Remote))],
+			SammlarrAccounts => [Sammlarr],
+		};
+	}
+
+	public string Color(Service service)
+	{
+		var colors = Brands(service).Select(brand => brand.BrandColor).ToList();
+		return colors.Count == 1 ? colors[0] : $"color-mix(in oklch, {string.Join(", ", colors)})";
+	}
+
+	public string Name(Service service)
+	{
+		return service switch
+		{
+			RemoteService remote => Name(remote),
+			Arr => string.Join(" + ", Enum.GetValues<ArrApp>().Select(app => Name(app.Remote))),
+			SammlarrAccounts => Sammlarr.DisplayName,
+		};
+	}
+
+	public string NickName(Service service) => string.Join(" + ", Brands(service).Select(brand => brand.NickName));
+
+	public string Name(RemoteService remote) => remote.OwnIds.Map(provider => provider.GetDescription()).GetValueOr(() => GetBrandingInfo(remote).NickName);
+
 	public BrandingInfo GetBrandingInfo(ArrApp app)
 	{
 		return app switch

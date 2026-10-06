@@ -104,10 +104,7 @@
             }
 
             var parameters = new Dictionary<string, object>();
-            if (Enum.TryParse<MediaProvider>(Provider, ignoreCase: true, out var provider))
-            {
-                parameters[nameof(ProvidersSection.Expanded)] = provider;
-            }
+            ServiceKeys.Parse(Provider).Apply(service => parameters[nameof(ProvidersSection.Expanded)] = service);
 
             if (Enum.TryParse<SearchProvider>(Search, ignoreCase: true, out var search))
             {

@@ -67,8 +67,8 @@ public class ServicesMapModelTests
 
 		var wantlist = model.Roles.Single(role => role.Name == "Wantlist");
 		await Assert.That(wantlist.Provider).IsEqualTo(new Arr());
-		await Assert.That(wantlist.Picker!.Options.Select(option => option.ToString())).IsEquivalentTo(["Plex", "Radarr+Sonarr"], CollectionOrdering.Matching);
-		await Assert.That(model.Services.Select(service => service.Provider.ToString())).Contains("Radarr+Sonarr");
+		await Assert.That(wantlist.Picker!.Options.Select(option => option.ToString())).IsEquivalentTo(["Plex", "Arr"], CollectionOrdering.Matching);
+		await Assert.That(model.Services.Select(service => service.Provider.ToString())).Contains("Arr");
 	}
 
 	[Test]
@@ -90,7 +90,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task Traces_ForAFeedSourceWithABox_RiseStraightOffTheFeedsRow()
 	{
-		var tmdb = ServicesMapModel.For(Config).Traces.Single(trace => trace.Role == "Feeds" && trace.Provider == MediaProvider.Tmdb);
+		var tmdb = ServicesMapModel.For(Config).Traces.Single(trace => trace.Role == "Feeds" && trace.Provider == RemoteService.Tmdb);
 
 		await Assert.That(tmdb.Points.Select(point => point.Y).Distinct()).IsEquivalentTo([234d, 190d]);
 	}
@@ -114,7 +114,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task PlaceTiles_WhenTheRowFitsOnTheFeedsRow_CentresItThereAndEntersTheFirstTileFromTheLeft()
 	{
-		var tiles = ServicesMapModel.PlaceTiles([MediaProvider.Mdblist, MediaProvider.Tmdb], 0, 100, 3);
+		var tiles = ServicesMapModel.PlaceTiles([RemoteService.Mdblist, RemoteService.Tmdb], 0, 100, 3);
 
 		await Assert.That(tiles.Select(tile => $"{tile.X},{tile.Y} {tile.Entry}")).IsEquivalentTo(["596,86 Left", "629,86 Bottom"], CollectionOrdering.Matching);
 	}
@@ -122,7 +122,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task PlaceTiles_ForEightSources_FillsTheTopRow()
 	{
-		var tiles = ServicesMapModel.PlaceTiles([.. Enumerable.Repeat(MediaProvider.Mdblist, 8)], 0, 0, 9);
+		var tiles = ServicesMapModel.PlaceTiles([.. Enumerable.Repeat<Service>(RemoteService.Mdblist, 8)], 0, 0, 9);
 
 		await Assert
 			.That(tiles.Select(tile => $"{tile.X} {tile.Entry}"))
@@ -132,17 +132,17 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task PlaceTiles_ForNineSources_RebalancesRowByRow()
 	{
-		MediaProvider[] sources =
+		Service[] sources =
 		[
-			MediaProvider.Tmdb,
-			MediaProvider.Imdb,
-			MediaProvider.Tvdb,
-			MediaProvider.Plex,
-			MediaProvider.Mdblist,
-			MediaProvider.Tmdb,
-			MediaProvider.Imdb,
-			MediaProvider.Tvdb,
-			MediaProvider.Plex,
+			RemoteService.Tmdb,
+			RemoteService.Wikidata,
+			RemoteService.Radarr,
+			RemoteService.Plex,
+			RemoteService.Mdblist,
+			RemoteService.Tmdb,
+			RemoteService.Wikidata,
+			RemoteService.Radarr,
+			RemoteService.Plex,
 		];
 
 		var tiles = ServicesMapModel.PlaceTiles(sources, 0, 0, 10);
@@ -151,13 +151,13 @@ public class ServicesMapModelTests
 			.That(tiles.Select(tile => $"{tile.Provider} {tile.X},{Math.Round(tile.Y, 2)} {tile.Entry}"))
 			.IsEquivalentTo([
 				"Tmdb 596,0 Bottom",
-				"Imdb 629,0 Bottom",
-				"Tvdb 662,0 Bottom",
+				"Wikidata 629,0 Bottom",
+				"Radarr 662,0 Bottom",
 				"Plex 695,0 Bottom",
 				"Mdblist 728,0 Bottom",
 				"Tmdb 596,82.2 Top",
-				"Imdb 629,82.2 Top",
-				"Tvdb 662,82.2 Top",
+				"Wikidata 629,82.2 Top",
+				"Radarr 662,82.2 Top",
 				"Plex 695,82.2 Top",
 			]);
 	}
@@ -165,7 +165,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task PlaceTiles_PastSixteenSources_GrowsLeftOfTheServiceColumn()
 	{
-		var tiles = ServicesMapModel.PlaceTiles([.. Enumerable.Repeat(MediaProvider.Mdblist, 17)], 0, 0, 18);
+		var tiles = ServicesMapModel.PlaceTiles([.. Enumerable.Repeat<Service>(RemoteService.Mdblist, 17)], 0, 0, 18);
 
 		await Assert.That(tiles[0].X).IsEqualTo(570);
 	}
@@ -181,7 +181,7 @@ public class ServicesMapModelTests
 	public async Task Traces_ForAnyNumberOfFeedSources_NeverCross(int sources)
 	{
 		var runs = ServicesMapModel
-			.For(Config, [MediaProvider.Tmdb, .. Enumerable.Repeat(MediaProvider.Mdblist, sources)])
+			.For(Config, [RemoteService.Tmdb, .. Enumerable.Repeat<Service>(RemoteService.Mdblist, sources)])
 			.Traces.Select(trace => trace.Points.Zip(trace.Points.Skip(1)).ToList())
 			.ToList();
 
@@ -201,7 +201,7 @@ public class ServicesMapModelTests
 	[Arguments(0, 0, 10, 0, 10, 3.3, "M0 0 L8.35 0 L10 1.65 L10 3.3")]
 	public async Task Path_ForAnLShapedRun_CutsTheCornerAt45Degrees(double x0, double y0, double x1, double y1, double x2, double y2, string path)
 	{
-		var trace = new MapTrace("Feeds", MediaProvider.Tmdb, [new(x0, y0), new(x1, y1), new(x2, y2)]);
+		var trace = new MapTrace("Feeds", RemoteService.Tmdb, [new(x0, y0), new(x1, y1), new(x2, y2)]);
 
 		await Assert.That(trace.Path).IsEqualTo(path);
 	}
@@ -210,7 +210,7 @@ public class ServicesMapModelTests
 	public async Task Path_UnderACommaDecimalCulture_StillWritesDots()
 	{
 		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
-		var trace = new MapTrace("Feeds", MediaProvider.Tmdb, [new(0, 0.5), new(10.25, 0.5)]);
+		var trace = new MapTrace("Feeds", RemoteService.Tmdb, [new(0, 0.5), new(10.25, 0.5)]);
 
 		await Assert.That(trace.Path).IsEqualTo("M0 0.5 L10.25 0.5");
 	}
@@ -218,7 +218,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task Path_ForARepeatedPoint_DrawsItOnce()
 	{
-		var trace = new MapTrace("Wantlist", MediaProvider.Plex, [new(0, 0), new(10, 0), new(10, 0), new(20, 0)]);
+		var trace = new MapTrace("Wantlist", RemoteService.Plex, [new(0, 0), new(10, 0), new(10, 0), new(20, 0)]);
 
 		await Assert.That(trace.Path).IsEqualTo("M0 0 L5 0 L15 0 L20 0");
 	}

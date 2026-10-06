@@ -92,7 +92,7 @@
 
     private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider);
 
-    private ProviderRowKey Key => Provider.Provider().Map(provider => (ProviderRowKey)provider).GetValueOr(new SammlarrAccounts());
+    private Service Key => Provider.Service;
 
     private string _tokenInput = string.Empty;
     private string _savedToken = string.Empty;

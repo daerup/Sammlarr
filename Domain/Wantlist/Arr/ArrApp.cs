@@ -17,6 +17,18 @@ public static class ArrApps
 	{
 		public string Name => app.ToString();
 
+		public RemoteService Remote
+		{
+			get
+			{
+				return app switch
+				{
+					ArrApp.Radarr => RemoteService.Radarr,
+					ArrApp.Sonarr => RemoteService.Sonarr,
+				};
+			}
+		}
+
 		public MediaType Type
 		{
 			get

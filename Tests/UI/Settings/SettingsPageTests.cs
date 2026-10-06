@@ -69,16 +69,16 @@ public class SettingsPageTests : BunitContext
 	}
 
 	[Test]
-	[Arguments("tmdb", MediaProvider.Tmdb)]
-	[Arguments("mdblist", MediaProvider.Mdblist)]
-	[Arguments("plex", MediaProvider.Plex)]
-	public async Task Providers_WhenLinkedToAProvider_StartsClosedThenOpensOnlyThatProvidersRow(string slug, MediaProvider provider)
+	[Arguments("tmdb", RemoteService.Tmdb)]
+	[Arguments("mdblist", RemoteService.Mdblist)]
+	[Arguments("plex", RemoteService.Plex)]
+	public async Task Providers_WhenLinkedToAProvider_StartsClosedThenOpensOnlyThatProvidersRow(string slug, RemoteService remote)
 	{
 		var cut = RenderAt($"/settings?section=providers&provider={slug}");
 
 		await Assert.That(OpenRows(cut)).IsEmpty();
 		cut.WaitForState(() => OpenRows(cut).Any());
-		await Assert.That(OpenRows(cut)).IsEquivalentTo([(ProviderRowKey)provider]);
+		await Assert.That(OpenRows(cut)).IsEquivalentTo([(Service)remote]);
 	}
 
 	[Test]
@@ -157,7 +157,7 @@ public class SettingsPageTests : BunitContext
 		await Assert.That(offered).DoesNotContain("Users");
 	}
 
-	private static IEnumerable<ProviderRowKey> OpenRows(IRenderedComponent<SettingsPage> cut) =>
+	private static IEnumerable<Service> OpenRows(IRenderedComponent<SettingsPage> cut) =>
 		cut.FindComponents<ProviderRow>().Where(row => row.Instance.Open).Select(row => row.Instance.Key);
 
 	private IRenderedComponent<SettingsPage> RenderAt(string uri)
