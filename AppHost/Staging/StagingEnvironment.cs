@@ -28,7 +28,8 @@ internal static class StagingEnvironment
 			.WithHttpEndpoint(port: config.Ports.WireMock, targetPort: 8080, name: "http", isProxied: false)
 			.WithHttpHealthCheck("/__admin/health")
 			.WithBindMount(Path.Combine(builder.AppHostDirectory, "Staging", "wiremock"), "/home/wiremock/mappings", isReadOnly: true)
-			.WithArgs("--global-response-templating", "--disable-banner");
+			.WithArgs("--global-response-templating", "--disable-banner")
+			.OnResourceReady((resource, _, cancellationToken) => ReloadMappingsAsync(resource.GetEndpoint("http"), cancellationToken));
 
 		var catcher = builder
 			.AddContainer("catcher", "ghcr.io/tarampampam/webhook-tester", "2")
@@ -105,6 +106,13 @@ internal static class StagingEnvironment
 
 		var stub = Path.Combine(builder.AppHostDirectory, "Staging", "stub.mkv");
 		builder.Services.AddHostedService(services => new FakeDownloader(layout.Downloads, stub, services.GetRequiredService<ILogger<FakeDownloader>>()));
+	}
+
+	private static async Task ReloadMappingsAsync(EndpointReference endpoint, CancellationToken cancellationToken)
+	{
+		using var http = new HttpClient();
+		using var response = await http.PostAsync(new Uri($"{endpoint.Url}/__admin/mappings/reset"), null, cancellationToken);
+		response.EnsureSuccessStatusCode();
 	}
 
 	private static IResourceBuilder<ContainerResource> AddStagingArr(
