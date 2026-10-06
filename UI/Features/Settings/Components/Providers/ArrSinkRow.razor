@@ -58,7 +58,7 @@
             @if (_config is { } config)
             {
                 <div class="arr-panel" style="--seg: @SegColour">
-                    <BbTabs Value="@OpenTab" ValueChanged="tab => _tab = tab ?? _tab">
+                    <BbTabs Value="@OpenTab" ValueChanged="tab => _picked = Optional.Of(tab).Or(() => _picked)">
                         <BbTabsList>
                             @foreach (var app in Apps)
                             {
@@ -178,9 +178,13 @@
 
     private string _tab = ArrApp.Radarr.Name;
 
+    private Optional<string> _picked = new None();
+
     private bool ShowsTags => Syncs && !SettingUp;
 
-    private string OpenTab => _tab == TagsTab && !ShowsTags ? ArrApp.Radarr.Name : _tab;
+    private string Chosen => _picked.GetValueOr(_tab);
+
+    private string OpenTab => Chosen == TagsTab && !ShowsTags ? ArrApp.Radarr.Name : Chosen;
 
     private string SegColour => Apps.FirstOrNone(app => app.Name == OpenTab).Map(app => Branding.GetBrandingInfo(app).BrandColor).GetValueOr(() => Branding.SinkColor(SinkKind.Arr));
 

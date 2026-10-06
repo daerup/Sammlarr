@@ -137,6 +137,7 @@ public class ArrTagsSectionTests : BunitContext
 
 	private IRenderedComponent<IComponent> RenderTags(IReadOnlyList<ArrTagUser> users)
 	{
+		Optional<ArrTagFeed> feed = Some.Of(Feed);
 		return Render(builder =>
 		{
 			builder.OpenComponent<BbPortalHost>(0);
@@ -144,7 +145,7 @@ public class ArrTagsSectionTests : BunitContext
 			builder.OpenComponent<ArrTagsSection>(1);
 			builder.AddComponentParameter(2, nameof(ArrTagsSection.Scheme), ArrTagScheme.Default);
 			builder.AddComponentParameter(3, nameof(ArrTagsSection.Users), users);
-			builder.AddComponentParameter(4, nameof(ArrTagsSection.Feed), (Optional<ArrTagFeed>)Some.Of(Feed));
+			builder.AddComponentParameter(4, nameof(ArrTagsSection.Feed), feed);
 			builder.AddComponentParameter(5, nameof(ArrTagsSection.SchemeChanged), EventCallback.Factory.Create<ArrTagScheme>(this, scheme => _stored.Add(scheme)));
 			builder.CloseComponent();
 		});
