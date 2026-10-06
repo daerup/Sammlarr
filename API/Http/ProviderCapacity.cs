@@ -9,7 +9,7 @@ namespace API.Http;
 
 internal sealed record ProviderWait(MediaProvider Provider, TimeSpan MaxWait, TimeSpan EnrichWait);
 
-internal sealed class ProviderCapacity(ProviderConcurrencyGates gates, IDateTimeProvider clock, IEnumerable<ProviderWait> waits) : IProviderCapacity
+internal sealed class ProviderCapacity(ProviderGates gates, IDateTimeProvider clock, IEnumerable<ProviderWait> waits) : IProviderCapacity
 {
 	private static readonly TimeSpan DefaultBlock = TimeSpan.FromSeconds(30);
 

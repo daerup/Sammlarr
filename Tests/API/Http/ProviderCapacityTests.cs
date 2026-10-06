@@ -10,7 +10,7 @@ public class ProviderCapacityTests
 {
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 
-	private readonly ProviderConcurrencyGates _gates = new();
+	private readonly ProviderGates _gates = new();
 	private readonly ProviderCapacity Testee;
 
 	public ProviderCapacityTests()
@@ -65,7 +65,7 @@ public class ProviderCapacityTests
 	[Test]
 	public async Task Of_WhileHalfTheGateIsInUse_ReportsTheProviderHalfBusy()
 	{
-		var gate = _gates.Get("tmdb", 4, Some.Of(MediaProvider.Tmdb));
+		var gate = _gates.Concurrency("tmdb", 4, Some.Of(MediaProvider.Tmdb));
 		await gate.WaitAsync();
 		await gate.WaitAsync();
 
@@ -76,10 +76,24 @@ public class ProviderCapacityTests
 	[Test]
 	public async Task Of_WhileAGateWithoutAProviderIsInUse_CountsItForNoProvider()
 	{
-		var gate = _gates.Get("webhook", 2, new None());
+		var gate = _gates.Concurrency("webhook", 2, new None());
 		await gate.WaitAsync();
 
 		await Assert.That(Testee.Of(MediaProvider.Tmdb).Busy).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Of_WhileARequestWaitsBehindAUsedUpRateWindow_ReportsTheProviderBusierThanFull()
+	{
+		var window = _gates.Rate("Tmdb", 2, Some.Of(MediaProvider.Tmdb));
+		using var first = await window.AcquireAsync();
+		using var second = await window.AcquireAsync();
+
+		var waiting = window.AcquireAsync().AsTask();
+
+		await Assert.That(Testee.Of(MediaProvider.Tmdb).Busy).IsEqualTo(1.5);
+		await Assert.That(Testee.Of(MediaProvider.Plex).Busy).IsEqualTo(0);
+		using var third = await waiting;
 	}
 
 	private async Task SendAsync(HttpResponseMessage response)

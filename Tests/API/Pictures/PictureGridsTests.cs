@@ -137,7 +137,7 @@ public class PictureGridsTests
 			.ConfigureServices(services =>
 			{
 				services.AddSingleton(new PictureOptions());
-				services.AddSingleton<ProviderConcurrencyGates>();
+				services.AddSingleton<ProviderGates>();
 				services.AddModule<PicturesModule>();
 			})
 			.Build();
