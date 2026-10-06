@@ -155,6 +155,11 @@
     border-radius: 4px 4px 7px 7px;
 }
 
+.map-tile.is-left {
+    border-left: 3px solid var(--brand);
+    border-radius: 4px 7px 7px 4px;
+}
+
 .map-tile.is-off {
     border-style: dashed;
 }
@@ -167,6 +172,11 @@
 .map-tile.is-off.is-top {
     border-top-style: solid;
     border-top-color: color-mix(in oklch, var(--brand) 35%, transparent);
+}
+
+.map-tile.is-off.is-left {
+    border-left-style: solid;
+    border-left-color: color-mix(in oklch, var(--brand) 35%, transparent);
 }
 
 .map-tile .map-dot {
