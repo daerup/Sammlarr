@@ -12,7 +12,7 @@ internal sealed class PicturesModule : IServiceModule
 
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddHttpClient<IPictureGrids, PictureGrids>(Configure).AddProviderHttp<PictureOptions>();
+		services.AddHttpClient<IPictureGrids, PictureGrids>(Configure).AddClientHttp<PictureOptions>();
 	}
 
 	private static void Configure(IServiceProvider sp, HttpClient client)

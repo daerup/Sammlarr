@@ -4,6 +4,7 @@ using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Settings;
+using Core.DI;
 using Core.Media;
 using Domain.Auth;
 using Domain.Media;
@@ -187,7 +188,7 @@ public class MediaServiceTests
 	{
 		var external = TmdbId.From("550", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From(new ProviderUnavailableException(MediaProvider.Plex)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From(new RemoteUnavailableException(RemoteService.Plex)));
 		var hints = new IdentifyHints
 		{
 			Title = "Fight Club",
@@ -525,17 +526,14 @@ public class MediaServiceTests
 				}
 			);
 
-		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>()
-			.Register(MediaProvider.Plex, details.Object)
-			.Register(MediaProvider.Tmdb, idle.Object);
+		var enrichers = new KeyedServiceSet<RemoteService, IDetailsEnricher>([new(RemoteService.Plex, details.Object), new(RemoteService.Tmdb, idle.Object)]);
 
 		var converter = IExternalIdConverter.Mock();
-		converter.Provider.Returns(MediaProvider.Tmdb);
 		converter.Lookups.Returns([new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb], Cost: 1)]);
 		converter.LookUpAsync(Any(), Any()).Returns((request, _) => FoundByFind(request));
 
 		var detailsFetcher = new DetailsFetcher(
-			enricherIndex,
+			enrichers,
 			configRepo.Object,
 			TestCapacity.Open(),
 			IApiKeyService.Mock().Object,
@@ -545,7 +543,7 @@ public class MediaServiceTests
 		);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		var testee = new MediaService(
-			new MediaIdResolver([converter.Object], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),
+			new MediaIdResolver([new(RemoteService.Tmdb, converter.Object)], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),
 			detailsFetcher,
 			coordinator,
 			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),

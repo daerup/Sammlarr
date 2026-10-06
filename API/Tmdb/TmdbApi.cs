@@ -33,7 +33,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning("TMDB search returned {StatusCode} for {Query}", (int)response.StatusCode, query);
-			return response.StatusCode.Unanswered(MediaProvider.Tmdb, $"TMDB search returned {(int)response.StatusCode}.");
+			return response.StatusCode.Unanswered(RemoteService.Tmdb, $"TMDB search returned {(int)response.StatusCode}.");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<TmdbTypes.Trending.Root>(stream, cancellationToken: cancellationToken);
@@ -55,7 +55,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 				(int)response.StatusCode,
 				id.Value
 			);
-			return response.StatusCode.Unanswered(MediaProvider.Tmdb, $"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
+			return response.StatusCode.Unanswered(RemoteService.Tmdb, $"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var reason = $"TMDB has no details for {id.Value}";
@@ -81,7 +81,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning("TMDB find returned {StatusCode} for {ExternalId}", (int)response.StatusCode, id.Value);
-			return response.StatusCode.Unanswered(MediaProvider.Tmdb, $"TMDB find returned {(int)response.StatusCode} for {id.Value}");
+			return response.StatusCode.Unanswered(RemoteService.Tmdb, $"TMDB find returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Find>(stream);

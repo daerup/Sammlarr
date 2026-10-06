@@ -13,8 +13,6 @@ internal class TmdbIdConverter(TmdbApi tmdbApi) : IExternalIdConverter
 
 	private static readonly ById Find = new(Accepts: [MediaProvider.Imdb, MediaProvider.Tvdb], Yields: [MediaProvider.Tmdb], Cost: 1);
 
-	public MediaProvider Provider => MediaProvider.Tmdb;
-
 	public IReadOnlyList<IdLookup> Lookups { get; } = [ByTmdbId, Find];
 
 	public async Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)

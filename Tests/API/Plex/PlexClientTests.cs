@@ -45,7 +45,7 @@ public class PlexClientTests
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credentialFaker.Generate());
 		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 
-		await Assert.That(async () => await testee.SendAsync(HttpMethod.Get, PlexBaseUrl)).Throws<ProviderUnavailableException>();
+		await Assert.That(async () => await testee.SendAsync(HttpMethod.Get, PlexBaseUrl)).Throws<RemoteUnavailableException>();
 	}
 
 	[Test]

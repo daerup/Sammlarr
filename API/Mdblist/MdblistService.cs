@@ -51,7 +51,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 			using var response = await client.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 			return await ListPathAsync(number, response, cancellationToken);
 		}
-		catch (Exception ex) when (ex is ProviderUnavailableException or HttpRequestException)
+		catch (Exception ex) when (ex is RemoteUnavailableException or HttpRequestException)
 		{
 			return NotReached(number, ex);
 		}
@@ -66,8 +66,8 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 
 		if (!response.IsSuccessStatusCode)
 		{
-			var refused = response.StatusCode.Unanswered(MediaProvider.Mdblist, $"MDBList refused to look up list {number} ({(int)response.StatusCode}).");
-			return refused.CausedBy<ProviderUnavailableException>().Match(unavailable => NotReached(number, unavailable), () => refused);
+			var refused = response.StatusCode.Unanswered(RemoteService.Mdblist, $"MDBList refused to look up list {number} ({(int)response.StatusCode}).");
+			return refused.CausedBy<RemoteUnavailableException>().Match(unavailable => NotReached(number, unavailable), () => refused);
 		}
 
 		var lists = await response.Content.ReadFromJsonAsync<IReadOnlyList<MdblistTypes.Lists.Info>>(cancellationToken);
@@ -78,7 +78,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 
 	private static Error NotReached(long number, Exception cause)
 	{
-		var unavailable = cause as ProviderUnavailableException ?? new ProviderUnavailableException(MediaProvider.Mdblist, cause);
+		var unavailable = cause as RemoteUnavailableException ?? new RemoteUnavailableException(RemoteService.Mdblist, cause);
 		return Error.From($"MDBList didn't answer, so {number} can't be looked up yet. Paste the list's link instead; it needs no request.", unavailable);
 	}
 

@@ -3,7 +3,7 @@ using Domain.Providers;
 
 namespace Core.Media;
 
-internal readonly record struct EnricherCandidate(MediaProvider Provider, IExternalMediaId Id, MediaFields Fills, ProviderLoad Load)
+internal readonly record struct EnricherCandidate(RemoteService Remote, IExternalMediaId Id, MediaFields Fills, RemoteLoad Load)
 {
 	public bool CanHelp(MediaFields needed, DateTimeOffset now) => needed.Overlaps(Fills) && Load.IsOpen(now);
 }
@@ -15,28 +15,28 @@ internal static class EnricherChoice
 	internal static Optional<EnricherCandidate> Next(
 		MediaFields needed,
 		IEnumerable<EnricherCandidate> leftToAsk,
-		Optional<MediaProvider> preferred,
+		IReadOnlySet<RemoteService> preferred,
 		DateTimeOffset now
 	)
 	{
 		return leftToAsk
 			.Where(candidate => candidate.CanHelp(needed, now))
-			.OrderByDescending(candidate => preferred.When(provider => provider == candidate.Provider).IsSome())
+			.OrderByDescending(candidate => preferred.Contains(candidate.Remote))
 			.ThenByDescending(candidate => (needed & candidate.Fills).DetailCount)
 			.ThenBy(candidate => candidate.Load.Busy)
-			.ThenBy(candidate => candidate.Provider)
+			.ThenBy(candidate => candidate.Remote)
 			.FirstOrNone();
 	}
 
 	internal static Optional<EnricherCandidate> WorthWaitingFor(
 		MediaFields needed,
 		IEnumerable<EnricherCandidate> leftToAsk,
-		IReadOnlySet<MediaProvider> waited,
+		IReadOnlySet<RemoteService> waited,
 		DateTimeOffset now
 	)
 	{
 		return leftToAsk
-			.Where(candidate => needed.Overlaps(candidate.Fills) && !waited.Contains(candidate.Provider))
+			.Where(candidate => needed.Overlaps(candidate.Fills) && !waited.Contains(candidate.Remote))
 			.Where(candidate => candidate.Load.FreesWithin(now, candidate.Load.EnrichWait))
 			.OrderBy(candidate => candidate.Load.FreeAt(now))
 			.FirstOrNone();

@@ -47,7 +47,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedUnavailable("storm-list");
 
-		await Assert.That(async () => await Testee.GetFeedItemsAsync("storm-list").ToListAsync()).Throws<ProviderUnavailableException>();
+		await Assert.That(async () => await Testee.GetFeedItemsAsync("storm-list").ToListAsync()).Throws<RemoteUnavailableException>();
 	}
 
 	[Test]
@@ -65,7 +65,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 					items.Add(item);
 				}
 			})
-			.Throws<ProviderUnavailableException>();
+			.Throws<RemoteUnavailableException>();
 		await Assert.That(items).Count().IsEqualTo(2);
 	}
 

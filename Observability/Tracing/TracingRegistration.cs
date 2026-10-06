@@ -14,12 +14,10 @@ public static class TracingRegistration
 			services.AddScoped(provider => TracingProxy<TInterface>.Wrap(provider.GetRequiredService<TImplementation>()));
 		}
 
-		public void AddTracedKeyedScoped<TInterface, TImplementation>(object key)
+		public void AddTracedKeyedScoped<TInterface>(object key, Func<IServiceProvider, TInterface> factory)
 			where TInterface : class
-			where TImplementation : class, TInterface
 		{
-			services.AddKeyedScoped<TImplementation>(key);
-			services.AddKeyedScoped(key, (provider, resolvedKey) => TracingProxy<TInterface>.Wrap(provider.GetRequiredKeyedService<TImplementation>(resolvedKey)));
+			services.AddKeyedScoped(key, (provider, _) => TracingProxy<TInterface>.Wrap(factory(provider)));
 		}
 	}
 }

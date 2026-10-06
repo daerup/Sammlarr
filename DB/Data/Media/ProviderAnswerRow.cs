@@ -7,7 +7,7 @@ namespace DB.Data.Media;
 internal record ProviderAnswerRow
 {
 	[Required]
-	public required MediaProvider Provider { get; set; }
+	public required RemoteService Provider { get; set; }
 
 	[Required]
 	public required MediaFields Unfilled { get; set; }

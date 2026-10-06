@@ -418,7 +418,7 @@
         }
     }
 
-    private static bool Unreachable(Error error) => error.CausedBy<ProviderUnavailableException>().IsSome();
+    private static bool Unreachable(Error error) => error.CausedBy<RemoteUnavailableException>().IsSome();
 
     private static RenderFragment IdentifierNote(string typed, string stored) => @<text>
         @if (typed != stored && NoteFor(typed) is { } note)

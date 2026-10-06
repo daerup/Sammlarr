@@ -6,18 +6,18 @@ using Domain.Providers;
 
 namespace API.Tests.Http;
 
-public class ProviderCapacityTests
+public class RemoteCapacityTests
 {
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 
 	private readonly ProviderGates _gates = new();
-	private readonly ProviderCapacity Testee;
+	private readonly RemoteCapacity Testee;
 
-	public ProviderCapacityTests()
+	public RemoteCapacityTests()
 	{
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(Now);
-		Testee = new ProviderCapacity(_gates, clock.Object, []);
+		Testee = new RemoteCapacity(_gates, clock.Object, []);
 	}
 
 	[Test]
@@ -28,7 +28,7 @@ public class ProviderCapacityTests
 
 		await SendAsync(response);
 
-		var load = Testee.Of(MediaProvider.Tmdb);
+		var load = Testee.Of(RemoteService.Tmdb);
 		await Assert.That(load.IsOpen(Now)).IsFalse();
 		await Assert.That(load.IsOpen(Now.AddSeconds(20))).IsTrue();
 	}
@@ -38,7 +38,7 @@ public class ProviderCapacityTests
 	{
 		await SendAsync(new HttpResponseMessage(HttpStatusCode.TooManyRequests));
 
-		var load = Testee.Of(MediaProvider.Tmdb);
+		var load = Testee.Of(RemoteService.Tmdb);
 		await Assert.That(load.IsOpen(Now.AddSeconds(29))).IsFalse();
 		await Assert.That(load.IsOpen(Now.AddSeconds(30))).IsTrue();
 	}
@@ -51,7 +51,7 @@ public class ProviderCapacityTests
 
 		await SendAsync(response);
 
-		await Assert.That(Testee.Of(MediaProvider.Tmdb).IsOpen(Now)).IsTrue();
+		await Assert.That(Testee.Of(RemoteService.Tmdb).IsOpen(Now)).IsTrue();
 	}
 
 	[Test]
@@ -59,40 +59,40 @@ public class ProviderCapacityTests
 	{
 		await SendAsync(new HttpResponseMessage(HttpStatusCode.OK));
 
-		await Assert.That(Testee.Of(MediaProvider.Tmdb).IsOpen(Now)).IsTrue();
+		await Assert.That(Testee.Of(RemoteService.Tmdb).IsOpen(Now)).IsTrue();
 	}
 
 	[Test]
-	public async Task Of_WhileHalfTheGateIsInUse_ReportsTheProviderHalfBusy()
+	public async Task Of_WhileHalfTheGateIsInUse_ReportsTheRemoteServiceHalfBusy()
 	{
-		var gate = _gates.Concurrency("tmdb", 4, Some.Of(MediaProvider.Tmdb));
+		var gate = _gates.Concurrency("tmdb", 4, Some.Of(RemoteService.Tmdb));
 		await gate.WaitAsync();
 		await gate.WaitAsync();
 
-		await Assert.That(Testee.Of(MediaProvider.Tmdb).Busy).IsEqualTo(0.5);
-		await Assert.That(Testee.Of(MediaProvider.Plex).Busy).IsEqualTo(0);
+		await Assert.That(Testee.Of(RemoteService.Tmdb).Busy).IsEqualTo(0.5);
+		await Assert.That(Testee.Of(RemoteService.Plex).Busy).IsEqualTo(0);
 	}
 
 	[Test]
-	public async Task Of_WhileAGateWithoutAProviderIsInUse_CountsItForNoProvider()
+	public async Task Of_WhileAGateWithoutARemoteServiceIsInUse_CountsItForNone()
 	{
 		var gate = _gates.Concurrency("webhook", 2, new None());
 		await gate.WaitAsync();
 
-		await Assert.That(Testee.Of(MediaProvider.Tmdb).Busy).IsEqualTo(0);
+		await Assert.That(Testee.Of(RemoteService.Tmdb).Busy).IsEqualTo(0);
 	}
 
 	[Test]
-	public async Task Of_WhileARequestWaitsBehindAUsedUpRateWindow_ReportsTheProviderBusierThanFull()
+	public async Task Of_WhileARequestWaitsBehindAUsedUpRateWindow_ReportsTheRemoteServiceBusierThanFull()
 	{
-		var window = _gates.Rate("Tmdb", 2, Some.Of(MediaProvider.Tmdb));
+		var window = _gates.Rate("Tmdb", 2, Some.Of(RemoteService.Tmdb));
 		using var first = await window.AcquireAsync();
 		using var second = await window.AcquireAsync();
 
 		var waiting = window.AcquireAsync().AsTask();
 
-		await Assert.That(Testee.Of(MediaProvider.Tmdb).Busy).IsEqualTo(1.5);
-		await Assert.That(Testee.Of(MediaProvider.Plex).Busy).IsEqualTo(0);
+		await Assert.That(Testee.Of(RemoteService.Tmdb).Busy).IsEqualTo(1.5);
+		await Assert.That(Testee.Of(RemoteService.Plex).Busy).IsEqualTo(0);
 		using var third = await waiting;
 	}
 
@@ -100,7 +100,7 @@ public class ProviderCapacityTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWith(response);
-		using var invoker = new HttpMessageInvoker(new CapacityHandler(MediaProvider.Tmdb, Testee) { InnerHandler = handler });
+		using var invoker = new HttpMessageInvoker(new CapacityHandler(RemoteService.Tmdb, Testee) { InnerHandler = handler });
 		await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https://api.themoviedb.org/3/movie/550"), CancellationToken.None);
 	}
 }

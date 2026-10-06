@@ -15,19 +15,19 @@ using TestInfrastructure;
 
 namespace API.Tests.Http;
 
-public class ProviderHttpExtensionsTests
+public class RemoteHttpExtensionsTests
 {
 	private static readonly UserId user = UserId.New();
 
 	[Test]
-	public async Task AddProviderHttp_WithZeroRetries_PassesStartupOptionsValidation()
+	public async Task AddClientHttp_WithZeroRetries_PassesStartupOptionsValidation()
 	{
 		using var host = new HostBuilder()
 			.ConfigureServices(services =>
 			{
 				services.AddSingleton(new WebhookOptions());
 				services.AddSingleton<ProviderGates>();
-				services.AddHttpClient<WebhookClient>().AddProviderHttp<WebhookOptions>();
+				services.AddHttpClient<WebhookClient>().AddClientHttp<WebhookOptions>();
 			})
 			.Build();
 
@@ -36,7 +36,7 @@ public class ProviderHttpExtensionsTests
 	}
 
 	[Test]
-	public async Task AddProviderHttp_WhenAStampedRequestIsThrottled_ReportsTheRateLimit()
+	public async Task AddRemoteHttp_WhenAStampedRequestIsThrottled_ReportsTheRateLimit()
 	{
 		var reporter = IProviderRateLimitReporter.Mock();
 		using var host = Host(reporter.Object);
@@ -44,11 +44,11 @@ public class ProviderHttpExtensionsTests
 		using var response = await SendAsync(host, Stamped());
 
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
-		reporter.ReportAsync(MediaProvider.Plex, Any(), user, Any()).WasCalled(Times.Once);
+		reporter.ReportAsync(RemoteService.Plex, Any(), user, Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task AddProviderHttp_WhenTheRequestHasNoUser_ReportsNothing()
+	public async Task AddRemoteHttp_WhenTheRequestHasNoUser_ReportsNothing()
 	{
 		var reporter = IProviderRateLimitReporter.Mock();
 		using var host = Host(reporter.Object);
@@ -56,42 +56,42 @@ public class ProviderHttpExtensionsTests
 		using var response = await SendAsync(host, new HttpRequestMessage(HttpMethod.Get, "https://plex.test/library"));
 
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
-		reporter.ReportAsync(Any<MediaProvider>(), Any(), Any<UserId>(), Any()).WasCalled(Times.Never);
+		reporter.ReportAsync(Any<RemoteService>(), Any(), Any<UserId>(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
-	public async Task AddProviderHttp_WhenThrottled_BlocksTheProviderInItsCapacity()
+	public async Task AddRemoteHttp_WhenThrottled_BlocksTheRemoteServiceInItsCapacity()
 	{
 		using var host = Host(IProviderRateLimitReporter.Mock().Object);
 
 		using var response = await SendAsync(host, Stamped());
 
-		await Assert.That(host.Services.GetRequiredService<ProviderCapacity>().Of(MediaProvider.Plex).BlockedUntil).IsSome();
+		await Assert.That(host.Services.GetRequiredService<RemoteCapacity>().Of(RemoteService.Plex).BlockedUntil).IsSome();
 	}
 
 	[Test]
-	public async Task AddProviderHttp_WhenTheCircuitBreakerOpens_BlocksTheProviderInItsCapacity()
+	public async Task AddRemoteHttp_WhenTheCircuitBreakerOpens_BlocksTheRemoteServiceInItsCapacity()
 	{
 		using var host = Host(IProviderRateLimitReporter.Mock().Object, HttpStatusCode.ServiceUnavailable, minimumThroughput: 2);
 		using var failed = await SendAsync(host, Stamped());
 
 		await Assert.That(async () => await SendAsync(host, Stamped())).Throws<BrokenCircuitException>();
-		await Assert.That(host.Services.GetRequiredService<ProviderCapacity>().Of(MediaProvider.Plex).BlockedUntil).IsSome();
+		await Assert.That(host.Services.GetRequiredService<RemoteCapacity>().Of(RemoteService.Plex).BlockedUntil).IsSome();
 	}
 
 	[Test]
-	public async Task AddProviderHttp_ForAProviderWithWaitBudgets_ReportsBothInItsCapacity()
+	public async Task AddRemoteHttp_ForARemoteServiceWithWaitBudgets_ReportsBothInItsCapacity()
 	{
 		using var host = Host(IProviderRateLimitReporter.Mock().Object, maxWaitSeconds: 90, enrichWaitSeconds: 15);
 
-		var load = host.Services.GetRequiredService<ProviderCapacity>().Of(MediaProvider.Plex);
+		var load = host.Services.GetRequiredService<RemoteCapacity>().Of(RemoteService.Plex);
 
 		await Assert.That(load.MaxWait).IsEqualTo(TimeSpan.FromSeconds(90));
 		await Assert.That(load.EnrichWait).IsEqualTo(TimeSpan.FromSeconds(15));
 	}
 
 	[Test]
-	public async Task AddProviderHttp_WithARequestRate_HoldsTheRequestsBeyondItForTheNextWindow()
+	public async Task AddRemoteHttp_WithARequestRate_HoldsTheRequestsBeyondItForTheNextWindow()
 	{
 		var handler = new AnsweringHandler(HttpStatusCode.OK);
 		using var host = Host(IProviderRateLimitReporter.Mock().Object, handler, requestsPerSecond: 2);
@@ -160,10 +160,10 @@ public class ProviderHttpExtensionsTests
 					}
 				);
 				services.AddSingleton<ProviderGates>();
-				services.AddSingleton<ProviderCapacity>();
+				services.AddSingleton<RemoteCapacity>();
 				services.AddSingleton(IDateTimeProvider.Mock().Object);
 				services.AddSingleton(reporter);
-				services.AddHttpClient("plex").AddProviderHttp<PlexOptions>(MediaProvider.Plex).ConfigurePrimaryHttpMessageHandler(() => handler);
+				services.AddHttpClient("plex").AddRemoteHttp<PlexOptions>(RemoteService.Plex).ConfigurePrimaryHttpMessageHandler(() => handler);
 			})
 			.Build();
 	}

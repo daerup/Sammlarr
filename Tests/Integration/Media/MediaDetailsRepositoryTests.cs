@@ -14,8 +14,8 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 
 	private static readonly ProviderAnswer[] Answers =
 	[
-		new(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Backdrop | MediaFields.Rated([RatingSource.Imdb]), RefreshedAt),
-		new(MediaProvider.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience]), RefreshedAt.AddDays(-3)),
+		new(RemoteService.Tmdb, MediaField.Tagline | MediaField.Backdrop | MediaFields.Rated([RatingSource.Imdb]), RefreshedAt),
+		new(RemoteService.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience]), RefreshedAt.AddDays(-3)),
 	];
 
 	private MediaRepository _testee = null!;

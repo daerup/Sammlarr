@@ -108,7 +108,7 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 		string? summary = null,
 		IReadOnlyList<string>? genres = null,
 		string? poster = null,
-		IReadOnlyList<MediaProvider>? answeredBy = null
+		IReadOnlyCollection<RemoteService>? answeredBy = null
 	)
 	{
 		if (_usesPlex)
@@ -130,11 +130,7 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 			summary,
 			genres
 		);
-		_seeded = await host.SeedWithDetailsAsync(
-			resolved,
-			fetched,
-			answeredBy ?? [.. Enum.GetValues<EnricherProvider>().Select(enricher => enricher.AsMediaProvider())]
-		);
+		_seeded = await host.SeedWithDetailsAsync(resolved, fetched, answeredBy ?? host.Enrichers);
 		return _seeded.Value;
 	}
 

@@ -1,4 +1,3 @@
-using Contracts.Media;
 using Contracts.Media.Search;
 using Domain.Providers;
 using Harness;
@@ -15,6 +14,6 @@ public class PlexRegistrationTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		object search = host.ResolveKeyed<IMediaSearchProvider>(SearchProvider.Plex);
 
-		await Assert.That(host.ResolveKeyed<IDetailsEnricher>(MediaProvider.Plex)).IsSameReferenceAs(search);
+		await Assert.That(host.Enricher(RemoteService.Plex)).IsSameReferenceAs(search);
 	}
 }

@@ -72,7 +72,7 @@ public sealed record FeedRunFailedNotification(UserId UserId, DateTimeOffset Occ
 	public NotificationLevel DefaultLevel => NotificationLevel.Error;
 }
 
-public sealed record ProviderRateLimitedNotification(UserId UserId, DateTimeOffset OccurredAt, MediaProvider Provider, TimeSpan RetryAfter) : INotification
+public sealed record ProviderRateLimitedNotification(UserId UserId, DateTimeOffset OccurredAt, RemoteService Provider, TimeSpan RetryAfter) : INotification
 {
 	public Guid Id { get; init; } = Guid.CreateVersion7();
 

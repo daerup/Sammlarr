@@ -19,8 +19,6 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 
 	private static readonly ByHints Search = new(Yields: Guids, Cost: 1 + MaxCandidateLookups);
 
-	public MediaProvider Provider => MediaProvider.Plex;
-
 	public IReadOnlyList<IdLookup> Lookups { get; } = [ByRatingKey, Search];
 
 	public async Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
@@ -77,7 +75,7 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 					{
 						return await plexApi.LookUpExternalsAsync(plexId, cancellationToken).GetValueOr([]);
 					}
-					catch (ProviderUnavailableException)
+					catch (RemoteUnavailableException)
 					{
 						unavailable = true;
 						return [];
@@ -99,7 +97,7 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 	{
 		if (unavailable)
 		{
-			throw new ProviderUnavailableException(MediaProvider.Plex);
+			throw new RemoteUnavailableException(RemoteService.Plex);
 		}
 	}
 

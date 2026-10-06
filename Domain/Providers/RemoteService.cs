@@ -1,14 +1,26 @@
+using System.ComponentModel;
 using Domain.Wantlist.Arr;
 
 namespace Domain.Providers;
 
 public enum RemoteService
 {
+	[Description("TMDB")]
 	Tmdb,
+
+	[Description("Plex")]
 	Plex,
+
+	[Description("MDBList")]
 	Mdblist,
+
+	[Description("Wikidata")]
 	Wikidata,
+
+	[Description("Radarr")]
 	Radarr,
+
+	[Description("Sonarr")]
 	Sonarr,
 }
 

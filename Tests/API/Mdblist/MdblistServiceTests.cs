@@ -142,7 +142,7 @@ public class MdblistServiceTests
 		var error = await Assert.That(await testee.NormalizeAsync("88434")).IsError();
 
 		await Assert.That(error!.Reason).Contains("Paste the list's link instead");
-		await Assert.That(error.CausedBy<ProviderUnavailableException>()).IsSome();
+		await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsSome();
 	}
 
 	[Test]
@@ -154,7 +154,7 @@ public class MdblistServiceTests
 
 		var error = await Assert.That(await testee.NormalizeAsync("88434")).IsError();
 
-		await Assert.That(error!.CausedBy<ProviderUnavailableException>()).IsSome();
+		await Assert.That(error!.CausedBy<RemoteUnavailableException>()).IsSome();
 	}
 
 	[Test]

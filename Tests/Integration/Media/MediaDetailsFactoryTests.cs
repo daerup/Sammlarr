@@ -10,9 +10,9 @@ namespace Integration.Tests.Media;
 public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
 	private static readonly DateTimeOffset RefreshedAt = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
-	private static readonly ProviderAnswer TmdbLackedTheTagline = new(MediaProvider.Tmdb, MediaField.Tagline, RefreshedAt);
+	private static readonly ProviderAnswer TmdbLackedTheTagline = new(RemoteService.Tmdb, MediaField.Tagline, RefreshedAt);
 	private static readonly ProviderAnswer PlexLackedTheAudience = new(
-		MediaProvider.Plex,
+		RemoteService.Plex,
 		MediaFields.Rated([RatingSource.RottenTomatoesAudience]),
 		RefreshedAt.AddDays(-3)
 	);
@@ -73,7 +73,7 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		await Assert.That(entity.AskedAt).IsEqualTo(asked);
 		await Assert
 			.That(entity.Answers.Select(answer => (answer.Provider, answer.Unfilled, answer.AnsweredAt)))
-			.IsEquivalentTo([(MediaProvider.Tmdb, (MediaFields)MediaField.Tagline, RefreshedAt)]);
+			.IsEquivalentTo([(RemoteService.Tmdb, (MediaFields)MediaField.Tagline, RefreshedAt)]);
 	}
 
 	[Test]
@@ -109,7 +109,7 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		var plexId = PlexId.From("plex-305", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
 		var existing = await PersistAsync(Cached(MovieDetails()) with { Answers = [TmdbLackedTheTagline, PlexLackedTheAudience] }, mediaId);
-		var tmdbFilledEverything = new ProviderAnswer(MediaProvider.Tmdb, MediaFields.None, RefreshedAt.AddDays(1));
+		var tmdbFilledEverything = new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, RefreshedAt.AddDays(1));
 
 		_testee.Update(existing, Cached(MovieDetails()) with { Answers = [tmdbFilledEverything] });
 		await fixture.Context.SaveChangesAsync();

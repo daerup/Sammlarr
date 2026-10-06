@@ -16,8 +16,6 @@ internal sealed partial class WikidataIdConverter(HttpClient http) : IExternalId
 
 	private static readonly ById ByImdb = new(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.RottenTomatoes], Cost: 1, GivesHints: false);
 
-	public MediaProvider Provider => MediaProvider.RottenTomatoes;
-
 	public IReadOnlyList<IdLookup> Lookups { get; } = [ByImdb];
 
 	public async Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
@@ -46,7 +44,7 @@ internal sealed partial class WikidataIdConverter(HttpClient http) : IExternalId
 		using var response = await http.SendAsync(request, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(MediaProvider.RottenTomatoes, $"Wikidata answered {(int)response.StatusCode} for {imdb}.");
+			return response.StatusCode.Unanswered(RemoteService.Wikidata, $"Wikidata answered {(int)response.StatusCode} for {imdb}.");
 		}
 
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);

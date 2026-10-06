@@ -575,7 +575,7 @@
             _fetchState = FetchState.Failed;
             Notifier.Warning($"No list found with identifier '{ex.Identifier}'.", "List not found");
         }
-        catch (ProviderUnavailableException)
+        catch (RemoteUnavailableException)
         {
             _providerUnavailable = true;
             if (_rawResults.Count == 0)

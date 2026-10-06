@@ -5,5 +5,5 @@ namespace Contracts.Providers;
 
 public interface IProviderRateLimitReporter
 {
-	Task ReportAsync(MediaProvider provider, TimeSpan retryAfter, UserId triggeredBy, CancellationToken cancellationToken = default);
+	Task ReportAsync(RemoteService remote, TimeSpan retryAfter, UserId triggeredBy, CancellationToken cancellationToken = default);
 }

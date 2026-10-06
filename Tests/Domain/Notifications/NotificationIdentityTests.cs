@@ -18,7 +18,7 @@ public class NotificationIdentityTests
 			() => new TestPingNotification(Owner, Now, Guid.NewGuid()),
 			() => new FeedRunCompletedNotification(Owner, Now, FeedId.From(Guid.NewGuid()), 1, 0),
 			() => new FeedRunFailedNotification(Owner, Now, FeedId.From(Guid.NewGuid()), "nope"),
-			() => new ProviderRateLimitedNotification(Owner, Now, MediaProvider.Tmdb, TimeSpan.FromSeconds(1)),
+			() => new ProviderRateLimitedNotification(Owner, Now, RemoteService.Tmdb, TimeSpan.FromSeconds(1)),
 		];
 
 	[Test]

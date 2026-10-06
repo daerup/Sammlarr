@@ -1,5 +1,4 @@
 using API.Http;
-using Contracts.Media.Conversions;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -11,8 +10,7 @@ internal class WikidataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddHttpClient<WikidataIdConverter>(Configure).AddProviderHttp<WikidataOptions>(MediaProvider.RottenTomatoes);
-		services.AddScoped<IExternalIdConverter>(sp => sp.GetRequiredService<WikidataIdConverter>());
+		services.ForRemote<WikidataOptions>(RemoteService.Wikidata).Client<WikidataIdConverter>(Configure).Converter<WikidataIdConverter>();
 	}
 
 	private static void Configure(IServiceProvider sp, HttpClient client)

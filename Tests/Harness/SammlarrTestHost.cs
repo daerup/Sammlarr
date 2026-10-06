@@ -146,7 +146,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void SinkAddresses(MediaProvider provider) => SinkAddresses(_ => Some.Of(provider));
 
-	internal async Task<MediaId> SeedWithDetailsAsync(ResolvedVersion resolved, DateTimeOffset fetched, IReadOnlyList<MediaProvider> answeredBy)
+	internal async Task<MediaId> SeedWithDetailsAsync(ResolvedVersion resolved, DateTimeOffset fetched, IReadOnlyCollection<RemoteService> answeredBy)
 	{
 		var context = ScopedDbContext;
 		var media = new MediaRow();
@@ -162,7 +162,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return MediaId.From(media.Id);
 	}
 
-	private MediaDetailsRow BuildDetails(Guid mediaId, ResolvedVersion resolved, DateTimeOffset fetched, IReadOnlyList<MediaProvider> answeredBy)
+	private MediaDetailsRow BuildDetails(Guid mediaId, ResolvedVersion resolved, DateTimeOffset fetched, IReadOnlyCollection<RemoteService> answeredBy)
 	{
 		MediaDetailsRow details =
 			resolved.Type == MediaType.Show
@@ -194,11 +194,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		details.RefreshedAt = fetched;
 		details.AskedAt = fetched;
 		var seeded = new MediaDetailsFactory().ToCached(details).Details;
-		var enrichers = Resolve<IKeyedServiceIndex<MediaProvider, IDetailsEnricher>>();
+		var enrichers = Resolve<IKeyedServiceSet<RemoteService, IDetailsEnricher>>();
 		details.Answers =
 		[
 			.. answeredBy
-				.Select(provider => ProviderAnswer.After(provider, enrichers[provider].Fills, seeded, fetched))
+				.Select(remote => enrichers.Find(remote).Map(enricher => ProviderAnswer.After(remote, enricher.Fills, seeded, fetched)))
+				.WhereSome()
 				.Select(answer => new ProviderAnswerRow
 				{
 					Provider = answer.Provider,
@@ -285,7 +286,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		TmdbStub.Detail(HttpStub, FullVersion(spec));
 	}
 
-	internal void RateLimited(MediaProvider provider) => Resolve<ProviderCapacity>().Block(provider, TimeSpan.FromMinutes(1));
+	internal IReadOnlyCollection<RemoteService> Enrichers => Resolve<IKeyedServiceSet<RemoteService, IDetailsEnricher>>().Keys;
+
+	internal IDetailsEnricher Enricher(RemoteService remote) =>
+		Resolve<IEnumerable<Keyed<RemoteService, IDetailsEnricher>>>().Single(enricher => enricher.Key == remote).Capability;
+
+	internal void RateLimited(RemoteService remote) => Resolve<RemoteCapacity>().Block(remote, TimeSpan.FromMinutes(1));
 
 	internal void TmdbHasNoDetail(MediaSpec spec)
 	{

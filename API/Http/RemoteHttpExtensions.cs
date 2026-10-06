@@ -10,21 +10,21 @@ using Shared.Options;
 
 namespace API.Http;
 
-internal static class ProviderHttpExtensions
+internal static class RemoteHttpExtensions
 {
-	public static IHttpClientBuilder AddProviderHttp<TOptions>(this IHttpClientBuilder builder)
+	public static IHttpClientBuilder AddClientHttp<TOptions>(this IHttpClientBuilder builder)
 		where TOptions : class, IProviderHttpOptions
 	{
 		return AddPipeline<TOptions>(builder, new None());
 	}
 
-	public static IHttpClientBuilder AddProviderHttp<TOptions>(this IHttpClientBuilder builder, MediaProvider provider)
+	public static IHttpClientBuilder AddRemoteHttp<TOptions>(this IHttpClientBuilder builder, RemoteService remote)
 		where TOptions : class, IProviderHttpOptions
 	{
-		return AddPipeline<TOptions>(builder, Some.Of(provider));
+		return AddPipeline<TOptions>(builder, Some.Of(remote));
 	}
 
-	private static IHttpClientBuilder AddPipeline<TOptions>(IHttpClientBuilder builder, Optional<MediaProvider> provider)
+	private static IHttpClientBuilder AddPipeline<TOptions>(IHttpClientBuilder builder, Optional<RemoteService> remote)
 		where TOptions : class, IProviderHttpOptions
 	{
 		var clientName = builder.Name;
@@ -42,37 +42,37 @@ internal static class ProviderHttpExtensions
 		builder.AddHttpMessageHandler(sp =>
 		{
 			var http = Resolve(sp);
-			var gate = Optional.When(http.MaxConcurrency > 0, () => sp.GetRequiredService<ProviderGates>().Concurrency(clientName, http.MaxConcurrency, provider));
+			var gate = Optional.When(http.MaxConcurrency > 0, () => sp.GetRequiredService<ProviderGates>().Concurrency(clientName, http.MaxConcurrency, remote));
 			return new ConcurrencyGateHandler(gate);
 		});
 
 		builder.ConfigurePrimaryHttpMessageHandler(sp => new SocketsHttpHandler { EnableMultipleHttp2Connections = Resolve(sp).EnableMultipleHttp2Connections });
 
-		builder.AddStandardResilienceHandler().Configure((options, sp) => ConfigureResilience(options, Resolve(sp), clientName, provider, sp));
+		builder.AddStandardResilienceHandler().Configure((options, sp) => ConfigureResilience(options, Resolve(sp), clientName, remote, sp));
 
-		provider
-			.Apply(measured => builder.AddHttpMessageHandler(sp => new CapacityHandler(measured, sp.GetRequiredService<ProviderCapacity>())))
+		remote
+			.Apply(measured => builder.AddHttpMessageHandler(sp => new CapacityHandler(measured, sp.GetRequiredService<RemoteCapacity>())))
 			.Apply(measured => builder.Services.AddSingleton(sp => Wait(measured, Resolve(sp))));
 
 		return builder;
 	}
 
-	private static ProviderWait Wait(MediaProvider provider, ProviderHttpOptions http)
+	private static RemoteWait Wait(RemoteService remote, ProviderHttpOptions http)
 	{
-		return new ProviderWait(provider, TimeSpan.FromSeconds(http.MaxWaitSeconds), TimeSpan.FromSeconds(http.EnrichWaitSeconds));
+		return new RemoteWait(remote, TimeSpan.FromSeconds(http.MaxWaitSeconds), TimeSpan.FromSeconds(http.EnrichWaitSeconds));
 	}
 
 	private static void ConfigureResilience(
 		HttpStandardResilienceOptions options,
 		ProviderHttpOptions http,
 		string clientName,
-		Optional<MediaProvider> provider,
+		Optional<RemoteService> remote,
 		IServiceProvider services
 	)
 	{
-		var paced = provider.Map(owner => $"{owner}").GetValueOr(clientName);
+		var paced = remote.Map(owner => $"{owner}").GetValueOr(clientName);
 		Optional
-			.When(http.RequestsPerSecond > 0, () => services.GetRequiredService<ProviderGates>().Rate(paced, http.RequestsPerSecond, provider))
+			.When(http.RequestsPerSecond > 0, () => services.GetRequiredService<ProviderGates>().Rate(paced, http.RequestsPerSecond, remote))
 			.Apply(limiter => options.RateLimiter.RateLimiter = args => limiter.AcquireAsync(1, args.Context.CancellationToken));
 		options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(http.AttemptTimeoutSeconds);
 		options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(http.TotalTimeoutSeconds);
@@ -94,10 +94,10 @@ internal static class ProviderHttpExtensions
 
 		options.CircuitBreaker.FailureRatio = http.CircuitBreakerFailureRatio;
 		options.CircuitBreaker.MinimumThroughput = http.CircuitBreakerMinimumThroughput;
-		provider.Apply(limited => ReportRateLimits(options, limited, services)).Apply(broken => BlockWhileOpen(options, broken, services));
+		remote.Apply(limited => ReportRateLimits(options, limited, services)).Apply(broken => BlockWhileOpen(options, broken, services));
 	}
 
-	private static void ReportRateLimits(HttpStandardResilienceOptions options, MediaProvider provider, IServiceProvider services)
+	private static void ReportRateLimits(HttpStandardResilienceOptions options, RemoteService remote, IServiceProvider services)
 	{
 		var reporter = services.GetRequiredService<IProviderRateLimitReporter>();
 		options.Retry.OnRetry = async args =>
@@ -106,17 +106,17 @@ internal static class ProviderHttpExtensions
 			{
 				await args
 					.Outcome.Result.TriggeredBy()
-					.Apply(triggeredBy => reporter.ReportAsync(provider, args.RetryDelay, triggeredBy, args.Context.CancellationToken));
+					.Apply(triggeredBy => reporter.ReportAsync(remote, args.RetryDelay, triggeredBy, args.Context.CancellationToken));
 			}
 		};
 	}
 
-	private static void BlockWhileOpen(HttpStandardResilienceOptions options, MediaProvider provider, IServiceProvider services)
+	private static void BlockWhileOpen(HttpStandardResilienceOptions options, RemoteService remote, IServiceProvider services)
 	{
-		var capacity = services.GetRequiredService<ProviderCapacity>();
+		var capacity = services.GetRequiredService<RemoteCapacity>();
 		options.CircuitBreaker.OnOpened = args =>
 		{
-			capacity.Block(provider, args.BreakDuration);
+			capacity.Block(remote, args.BreakDuration);
 			return default;
 		};
 	}
@@ -133,28 +133,28 @@ internal static class ProviderHttpExtensions
 
 internal sealed class ProviderGates
 {
-	private readonly ConcurrentDictionary<string, (SemaphoreSlim Gate, int Limit, Optional<MediaProvider> Provider)> _gates = new();
+	private readonly ConcurrentDictionary<string, (SemaphoreSlim Gate, int Limit, Optional<RemoteService> Remote)> _gates = new();
 
-	private readonly ConcurrentDictionary<string, (SlidingWindowRateLimiter Window, int Limit, Optional<MediaProvider> Provider)> _windows = new();
+	private readonly ConcurrentDictionary<string, (SlidingWindowRateLimiter Window, int Limit, Optional<RemoteService> Remote)> _windows = new();
 
-	public SemaphoreSlim Concurrency(string key, int limit, Optional<MediaProvider> provider)
+	public SemaphoreSlim Concurrency(string key, int limit, Optional<RemoteService> remote)
 	{
-		return _gates.GetOrAdd(key, static (_, gate) => (new SemaphoreSlim(gate.limit, gate.limit), gate.limit, gate.provider), (limit, provider)).Gate;
+		return _gates.GetOrAdd(key, static (_, gate) => (new SemaphoreSlim(gate.limit, gate.limit), gate.limit, gate.remote), (limit, remote)).Gate;
 	}
 
-	public RateLimiter Rate(string key, int perSecond, Optional<MediaProvider> provider)
+	public RateLimiter Rate(string key, int perSecond, Optional<RemoteService> remote)
 	{
-		return _windows.GetOrAdd(key, static (_, rate) => (PerSecond(rate.perSecond), rate.perSecond, rate.provider), (perSecond, provider)).Window;
+		return _windows.GetOrAdd(key, static (_, rate) => (PerSecond(rate.perSecond), rate.perSecond, rate.remote), (perSecond, remote)).Window;
 	}
 
-	public double Busy(MediaProvider provider)
+	public double Busy(RemoteService remote)
 	{
-		var gates = _gates.Values.Where(gate => Owns(gate.Provider, provider)).Select(gate => (gate.Limit - gate.Gate.CurrentCount) / (double)gate.Limit);
-		var windows = _windows.Values.Where(window => Owns(window.Provider, provider)).Select(window => Used(window.Window, window.Limit));
+		var gates = _gates.Values.Where(gate => Owns(gate.Remote, remote)).Select(gate => (gate.Limit - gate.Gate.CurrentCount) / (double)gate.Limit);
+		var windows = _windows.Values.Where(window => Owns(window.Remote, remote)).Select(window => Used(window.Window, window.Limit));
 		return gates.Concat(windows).DefaultIfEmpty(0).Max();
 	}
 
-	private static bool Owns(Optional<MediaProvider> owner, MediaProvider provider) => owner.Match(found => found == provider, () => false);
+	private static bool Owns(Optional<RemoteService> owner, RemoteService remote) => owner.Match(found => found == remote, () => false);
 
 	private static double Used(SlidingWindowRateLimiter window, int limit)
 	{

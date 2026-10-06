@@ -6,8 +6,8 @@ namespace Domain.Tests.Media;
 public class CachedDetailsTests
 {
 	private static readonly DateTimeOffset Now = new(2026, 9, 14, 12, 0, 0, TimeSpan.Zero);
-	private static readonly ProviderAnswer TmdbFilledEverything = new(MediaProvider.Tmdb, MediaFields.None, Now);
-	private static readonly ProviderAnswer PlexLackedTheAudience = new(MediaProvider.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience]), Now);
+	private static readonly ProviderAnswer TmdbFilledEverything = new(RemoteService.Tmdb, MediaFields.None, Now);
+	private static readonly ProviderAnswer PlexLackedTheAudience = new(RemoteService.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience]), Now);
 
 	private static readonly MovieDetails Stored = new()
 	{
@@ -39,7 +39,7 @@ public class CachedDetailsTests
 	[Test]
 	public async Task Answered_NamesEveryProviderThatAnswered()
 	{
-		await Assert.That(Cached(Stored, Now, TmdbFilledEverything, PlexLackedTheAudience).Answered).IsEquivalentTo([MediaProvider.Tmdb, MediaProvider.Plex]);
+		await Assert.That(Cached(Stored, Now, TmdbFilledEverything, PlexLackedTheAudience).Answered).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Plex]);
 	}
 
 	private static CachedDetails Cached(MediaDetails details, DateTimeOffset refreshedAt, params ProviderAnswer[] answers) =>

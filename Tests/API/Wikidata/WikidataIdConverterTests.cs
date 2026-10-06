@@ -93,7 +93,7 @@ public class WikidataIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt12042730", MediaType.Movie)));
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<ProviderUnavailableException>()).IsSome());
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsSome());
 	}
 
 	[Test]
@@ -105,7 +105,7 @@ public class WikidataIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt12042730", MediaType.Movie)));
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<ProviderUnavailableException>()).IsNone());
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsNone());
 	}
 
 	[Test]

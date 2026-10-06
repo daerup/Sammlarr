@@ -18,7 +18,7 @@ public class ProviderRateLimitReporterTests
 	{
 		var (testee, publisher, _) = CreateTestee();
 
-		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(5), Owner);
+		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
 		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Once);
 	}
@@ -27,10 +27,10 @@ public class ProviderRateLimitReporterTests
 	public async Task ReportAsync_WhenTheBurstIsStillRunning_DoesNotPublishAgain()
 	{
 		var (testee, publisher, clock) = CreateTestee();
-		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(5), Owner);
+		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
 		clock.Now.Returns(Now + TimeSpan.FromSeconds(1));
-		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(5), Owner);
+		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
 		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Once);
 	}
@@ -39,10 +39,10 @@ public class ProviderRateLimitReporterTests
 	public async Task ReportAsync_WhenThePreviousBurstElapsed_PublishesAgain()
 	{
 		var (testee, publisher, clock) = CreateTestee();
-		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(5), Owner);
+		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
 		clock.Now.Returns(Now + TimeSpan.FromSeconds(6));
-		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(5), Owner);
+		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
 		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Exactly(2));
 	}
@@ -51,13 +51,13 @@ public class ProviderRateLimitReporterTests
 	public async Task ReportAsync_WhenAShorterDelayFollows_EndsTheBurstAtTheNewestDelay()
 	{
 		var (testee, publisher, clock) = CreateTestee();
-		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(60), Owner);
+		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(60), Owner);
 
 		clock.Now.Returns(Now + TimeSpan.FromSeconds(1));
-		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(2), Owner);
+		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(2), Owner);
 
 		clock.Now.Returns(Now + TimeSpan.FromSeconds(5));
-		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(5), Owner);
+		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
 		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Exactly(2));
 	}
@@ -67,8 +67,8 @@ public class ProviderRateLimitReporterTests
 	{
 		var (testee, publisher, _) = CreateTestee();
 
-		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(30), Owner);
-		await testee.ReportAsync(MediaProvider.Plex, TimeSpan.FromSeconds(30), Owner);
+		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(30), Owner);
+		await testee.ReportAsync(RemoteService.Plex, TimeSpan.FromSeconds(30), Owner);
 
 		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Exactly(2));
 	}

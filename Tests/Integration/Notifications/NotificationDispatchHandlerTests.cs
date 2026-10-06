@@ -107,7 +107,7 @@ public class NotificationDispatchHandlerTests
 		);
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new ProviderRateLimitedNotification(User, DateTimeOffset.UtcNow, MediaProvider.Plex, TimeSpan.FromSeconds(30)),
+			new ProviderRateLimitedNotification(User, DateTimeOffset.UtcNow, RemoteService.Plex, TimeSpan.FromSeconds(30)),
 			Scope().Object,
 			subscriptions.Object,
 			Media().Object,
@@ -118,7 +118,7 @@ public class NotificationDispatchHandlerTests
 		var delivery = messages.OfType<DeliverNotification>().Single();
 		await Assert.That(delivery.TargetId).IsEqualTo(targetId);
 		await Assert.That(delivery.UserId).IsEqualTo(User);
-		await Assert.That(delivery.Context.Data.Provider).IsEqualTo(MediaProvider.Plex);
+		await Assert.That(delivery.Context.Data.Provider).IsEqualTo(RemoteService.Plex);
 		await Assert.That(delivery.Context.Data.RetryAfter).IsEqualTo(TimeSpan.FromSeconds(30));
 	}
 
