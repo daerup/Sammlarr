@@ -144,7 +144,7 @@ so the pull-back path shows; each step skips what is already there) and, unless 
 
 | Scenario | State |
 |----------|-------|
-| `Configured` (default) | `admin` / `staging-admin-passphrase` and `member` / `staging-member-passphrase`, setup finished, the wantlist on Radarr + Sonarr (their External URLs on the published ports, so links open in your browser), both people's TMDB key (and the MDBList key when `Parameters:mdblist-api-key` is set), two manual MDBList feeds (switched off without that key), Project Hail Mary and Breaking Bad on the admin's wantlist with a sync queued, a webhook and a Pushover target pointing at the catcher |
+| `Configured` (default) | `admin` / `admin` and `member` / `member` (the AppHost lowers `Sammlarr:Accounts:MinimumPasswordLength` to 5 for staging), setup finished, the wantlist on Radarr + Sonarr (their External URLs on the published ports, so links open in your browser), both people's TMDB key (and the MDBList key when `Parameters:mdblist-api-key` is set), two manual MDBList feeds (switched off without that key), Project Hail Mary and Breaking Bad on the admin's wantlist with a sync queued, a webhook and a Pushover target pointing at the catcher |
 | `Fresh` | migrations only: every page goes to `/setup`, which takes the setup code `SAMM-LARR` (the AppHost sets `Sammlarr:Accounts:SetupCode`; unset, Sammlarr makes one and logs it) |
 
 Appending `-- --StagingScenario=Fresh` to the run command picks the other one for a new data directory. The seeded feeds are manual because TickerQ only schedules inside a

@@ -12,6 +12,7 @@ using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Options;
 using TestInfrastructure;
 using UI.Features.Onboarding.Components;
 using UI.Features.Settings.Components.Providers;
@@ -41,6 +42,7 @@ public class SetupWizardTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(new AccountsOptions());
 		Services.AddScoped<Notifier>();
 		Services.AddProviderBranding();
 		Services.AddSingleton(_onboarding.Object);

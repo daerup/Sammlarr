@@ -49,6 +49,28 @@ public class SignInRequiredTests : BunitContext
 	}
 
 	[Test]
+	public async Task Button_WhenPlexSignInIsClicked_SpinsAndDisablesItself()
+	{
+		var cut = Render<SignInRequired>(parameters => parameters.Add(card => card.Provider, AuthProvider.Plex));
+
+		await cut.Find("button.signin-button").ClickAsync();
+
+		var button = cut.Find("button.signin-button");
+		await Assert.That(button.HasAttribute("disabled")).IsTrue();
+		await Assert.That(button.TextContent.Trim()).IsEqualTo("Signing in…");
+	}
+
+	[Test]
+	public async Task Form_OnSubmit_MarksItselfBusyAndDisablesItsButton()
+	{
+		var cut = Render<SignInRequired>(parameters => parameters.Add(card => card.Provider, AuthProvider.Local));
+
+		var form = cut.Find("form");
+		await Assert.That(form.GetAttribute("onsubmit")).IsEqualTo("this.dataset.busy = ''; this.querySelector('button[type=submit]').disabled = true");
+		await Assert.That(form.QuerySelector("button[type=submit] .signin-busy")?.TextContent.Trim()).IsEqualTo("Signing in…");
+	}
+
+	[Test]
 	public async Task Alert_WithAnError_ShowsTheMessage()
 	{
 		var cut = Render<SignInRequired>(parameters =>

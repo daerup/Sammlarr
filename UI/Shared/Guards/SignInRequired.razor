@@ -18,14 +18,22 @@
     {
         case AuthProvider.Plex:
             <div class="signin" style="--brand: @Branding.BrandColor">
-                <BbButton Variant="ButtonVariant.Outline" Class="signin-button w-full gap-2 font-medium" OnClick="SignInWithPlex">
-                    <span>Sign in with</span>
-                    <BrandedLogo Brand="Branding" Form="ProviderLogoForm.Logo" Size="16"/>
+                <BbButton Variant="ButtonVariant.Outline" Class="signin-button w-full gap-2 font-medium" OnClick="SignInWithPlex" Disabled="_signingIn">
+                    @if (_signingIn)
+                    {
+                        <BbSpinner Size="SpinnerSize.Small"/>
+                        <span>Signing in…</span>
+                    }
+                    else
+                    {
+                        <span>Sign in with</span>
+                        <BrandedLogo Brand="Branding" Form="ProviderLogoForm.Logo" Size="16"/>
+                    }
                 </BbButton>
             </div>
             break;
         case AuthProvider.Local:
-            <form method="post" action="/auth/local" class="space-y-4 text-left">
+            <form method="post" action="/auth/local" class="signin-form space-y-4 text-left" onsubmit="this.dataset.busy = ''; this.querySelector('button[type=submit]').disabled = true">
                 <AntiforgeryToken/>
                 <input type="hidden" name="returnUrl" value="@Target"/>
                 <BbField>
@@ -40,7 +48,10 @@
                         <BbInput Id="signin-password" Name="password" Type="InputType.Password" Required="true" autocomplete="current-password"/>
                     </BbFieldContent>
                 </BbField>
-                <BbButton Type="ButtonType.Submit" Class="w-full">Sign in</BbButton>
+                <BbButton Type="ButtonType.Submit" Class="w-full">
+                    <span class="signin-idle">Sign in</span>
+                    <span class="signin-busy"><BbSpinner Size="SpinnerSize.Small"/>Signing in…</span>
+                </BbButton>
             </form>
             break;
     }
@@ -57,8 +68,11 @@
 
     private string Target => string.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl;
 
+    private bool _signingIn;
+
     private void SignInWithPlex()
     {
+        _signingIn = true;
         NavigationManager.NavigateTo($"/auth/plex/login?returnUrl={Uri.EscapeDataString(Target)}", forceLoad: true);
     }
 }

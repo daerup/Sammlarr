@@ -5,6 +5,7 @@ using Contracts.Setup;
 using Domain.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Options;
 using TestInfrastructure;
 using UI.Features.Onboarding.Components;
 using UI.Features.Onboarding.Pages;
@@ -22,6 +23,7 @@ public class SetupPageTests : BunitContext
 	{
 		_onboarding.NeedsAdminAsync(Any()).Returns(true);
 		Services.AddSingleton(_onboarding.Object);
+		Services.AddSingleton(new AccountsOptions());
 		Services.AddSingleton<ICurrentUser>(_user);
 		ComponentFactories.AddStub<SetupWizard>();
 	}

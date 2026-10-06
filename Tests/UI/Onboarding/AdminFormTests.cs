@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Options;
 using UI.Features.Onboarding.Components;
 using UI.Shared.Services.Branding;
 
@@ -13,6 +14,7 @@ public class AdminFormTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(new AccountsOptions());
 		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
@@ -35,6 +37,16 @@ public class AdminFormTests : BunitContext
 
 		await Assert.That(cut.Find("button[formaction]").GetAttribute("formaction")).IsEqualTo("/setup/plex");
 		await Assert.That(cut.FindAll("input[name=username]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Password_WithAConfiguredMinimum_AsksForThatManyCharacters()
+	{
+		Services.AddSingleton(new AccountsOptions { MinimumPasswordLength = 5 });
+
+		var cut = Render<AdminForm>(parameters => parameters.Add(form => form.Picked, AuthProvider.Local));
+
+		await Assert.That(cut.Find("input[name=password]").GetAttribute("placeholder")).IsEqualTo("At least 5 characters");
 	}
 
 	[Test]

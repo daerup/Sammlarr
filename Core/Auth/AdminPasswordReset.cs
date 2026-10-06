@@ -20,7 +20,9 @@ internal sealed class AdminPasswordReset(IServiceProvider services, AccountsOpti
 		}
 
 		await using var scope = services.CreateAsyncScope();
-		await Passwords.Weakness(options.ResetAdminPassword).Match(Refuse, () => ResetAsync(scope.ServiceProvider, cancellationToken));
+		await Passwords
+			.Weakness(options.ResetAdminPassword, options.MinimumPasswordLength)
+			.Match(Refuse, () => ResetAsync(scope.ServiceProvider, cancellationToken));
 	}
 
 	public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

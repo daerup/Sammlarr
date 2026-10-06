@@ -14,6 +14,8 @@ internal static class StagingEnvironment
 
 	private const string SetupCode = "SAMM-LARR";
 
+	private const int MinimumPasswordLength = 5;
+
 	private const int SammlarrPort = 6789;
 
 	private const int CatcherPort = 6790;
@@ -72,6 +74,7 @@ internal static class StagingEnvironment
 			.WithEnvironment((SammlarOptions options) => options.ConnectionString, $"Data Source={layout.Database};Pooling=False")
 			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", layout.KeyRing)
 			.WithEnvironment((AccountsOptions options) => options.SetupCode, SetupCode)
+			.WithEnvironment((AccountsOptions options) => options.MinimumPasswordLength, MinimumPasswordLength)
 			.WithEnvironment(context => context.EnvironmentVariables["Staging__Scenario"] = scenario.Value)
 			.WithEnvironment("Staging__TmdbKey", tmdb)
 			.WithEnvironment("Staging__ArrApiKey", ArrContainers.ApiKey)
@@ -92,6 +95,7 @@ internal static class StagingEnvironment
 			.WithHttpEndpoint(port: SammlarrPort, targetPort: 8080, name: "http", isProxied: false)
 			.WithBindMount(layout.Sammlarr, "/data")
 			.WithEnvironment((AccountsOptions options) => options.SetupCode, SetupCode)
+			.WithEnvironment((AccountsOptions options) => options.MinimumPasswordLength, MinimumPasswordLength)
 			.WithEnvironment((PushoverOptions options) => options.BaseUrl, $"http://catcher:8080/{CatcherSession}/pushover/1")
 			.WithEnvironment("HTTP_PROXY", DeadProxy)
 			.WithEnvironment("HTTPS_PROXY", DeadProxy)

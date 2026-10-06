@@ -6,6 +6,7 @@ using Core.Notifications;
 using Domain.Identity;
 using Domain.Providers;
 using Microsoft.Extensions.Logging;
+using Shared.Options;
 
 namespace Core.Auth;
 
@@ -17,6 +18,7 @@ internal sealed class AccountLinkService(
 	ISessionInvalidator sessionInvalidator,
 	IDateTimeProvider dateTimeProvider,
 	WebUiNotificationSeeder webUiNotifications,
+	AccountsOptions options,
 	ILogger<AccountLinkService> logger
 ) : IAccountLinkService
 {
@@ -54,9 +56,9 @@ internal sealed class AccountLinkService(
 		return found.When(link => local && link.Kind == kind && link.ExpiresAt > now);
 	}
 
-	private static Task<Result<User>> Checked(string password, string confirmation, Func<Task<Result<User>>> next)
+	private Task<Result<User>> Checked(string password, string confirmation, Func<Task<Result<User>>> next)
 	{
-		return Passwords.Problem(password, confirmation).Match(problem => Task.FromResult<Result<User>>(problem), next);
+		return Passwords.Problem(password, confirmation, options.MinimumPasswordLength).Match(problem => Task.FromResult<Result<User>>(problem), next);
 	}
 
 	private async Task<Result<User>> JoinAsync(AccountLink invite, string token, string password, CancellationToken cancellationToken)

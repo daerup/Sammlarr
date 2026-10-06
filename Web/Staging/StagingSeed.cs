@@ -34,11 +34,11 @@ internal static class StagingPersonas
 {
 	internal const string Admin = "admin";
 
-	internal const string AdminPassword = "staging-admin-passphrase";
+	internal const string AdminPassword = "admin";
 
 	internal const string Member = "member";
 
-	internal const string MemberPassword = "staging-member-passphrase";
+	internal const string MemberPassword = "member";
 }
 
 internal static class StagingSeed

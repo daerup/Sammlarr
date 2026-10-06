@@ -3,6 +3,7 @@ using Bunit;
 using Contracts.Auth;
 using Domain.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Options;
 using UI.Features.Auth.Components;
 using UI.Features.Auth.Pages;
 
@@ -16,6 +17,7 @@ public class PasswordLinkCardTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(new AccountsOptions());
 		Services.AddSingleton(_links.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

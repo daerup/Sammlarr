@@ -1,6 +1,7 @@
 using Contracts;
 using Contracts.Identity;
 using Domain.Identity;
+using Shared.Options;
 
 namespace Core.Auth;
 
@@ -8,7 +9,8 @@ internal sealed class LocalAccountService(
 	ILocalAccountRepository accounts,
 	ICurrentUser currentUser,
 	IDateTimeProvider dateTimeProvider,
-	ISessionInvalidator sessionInvalidator
+	ISessionInvalidator sessionInvalidator,
+	AccountsOptions options
 ) : ILocalAccountService
 {
 	public async Task<Result<User>> ChangePasswordAsync(string current, string next, CancellationToken cancellationToken = default)
@@ -27,7 +29,9 @@ internal sealed class LocalAccountService(
 			return Error.From("The current password is not right.");
 		}
 
-		return await Passwords.Weakness(next).Match(weak => Task.FromResult<Result<User>>(weak), () => StoreAsync(account, next, cancellationToken));
+		return await Passwords
+			.Weakness(next, options.MinimumPasswordLength)
+			.Match(weak => Task.FromResult<Result<User>>(weak), () => StoreAsync(account, next, cancellationToken));
 	}
 
 	private async Task<Result<User>> StoreAsync(LocalAccount account, string next, CancellationToken cancellationToken)
