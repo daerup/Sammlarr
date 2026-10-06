@@ -51,12 +51,12 @@ public class ServicesMapModelTests
 		await Assert
 			.That(traces)
 			.IsEquivalentTo([
-				"Sign-in > Plex at 596,64",
-				"Wantlist > Plex at 596,72",
-				"Search > Plex at 596,80",
-				"Trending > Tmdb at 596,168",
-				"Feeds > Tmdb at 596,176",
-				"Feeds > Mdblist at 610,230",
+				"Sign-in > Plex at 596,70",
+				"Wantlist > Plex at 596,78",
+				"Search > Plex at 596,86",
+				"Trending > Tmdb at 596,182",
+				"Feeds > Tmdb at 596,190",
+				"Feeds > Mdblist at 596,234",
 			]);
 	}
 
@@ -72,22 +72,27 @@ public class ServicesMapModelTests
 	}
 
 	[Test]
-	public async Task Traces_ForTheMiddleRoleOfEachService_RunStraight()
+	public async Task Traces_ForTheMiddleRoleOfEachServiceAndTheFirstFeedTile_RunStraight()
 	{
-		var straight = ServicesMapModel
-			.For(Config)
-			.Traces.Where(trace => trace.Points.Select(point => point.Y).Distinct().Count() == 1)
-			.Select(trace => trace.Role);
+		var straight = Straight(ServicesMapModel.For(Config));
 
-		await Assert.That(straight).IsEquivalentTo(["Wantlist", "Trending"]);
+		await Assert.That(straight).IsEquivalentTo(["Wantlist", "Trending", "Feeds > Mdblist"]);
 	}
 
 	[Test]
-	public async Task Traces_ForAFeedSourceWithABox_StayOnTheFeedsRowUntilTheyRise()
+	public async Task Traces_ForServicesThatEachTakeOneRoleInARow_RunStraight()
+	{
+		var model = ServicesMapModel.For(Config with { AuthProvider = AuthProvider.Local, SearchProvider = SearchProvider.Tmdb });
+
+		await Assert.That(Straight(model)).IsEquivalentTo(["Sign-in", "Wantlist", "Search", "Feeds > Mdblist"]);
+	}
+
+	[Test]
+	public async Task Traces_ForAFeedSourceWithABox_RiseStraightOffTheFeedsRow()
 	{
 		var tmdb = ServicesMapModel.For(Config).Traces.Single(trace => trace.Role == "Feeds" && trace.Provider == MediaProvider.Tmdb);
 
-		await Assert.That(tmdb.Points.Max(point => point.Y)).IsEqualTo(216);
+		await Assert.That(tmdb.Points.Select(point => point.Y).Distinct()).IsEquivalentTo([234d, 190d]);
 	}
 
 	[Test]
@@ -95,21 +100,29 @@ public class ServicesMapModelTests
 	{
 		var services = ServicesMapModel.For(Config).Services.Select(service => $"{service.Provider} {service.Y}: {string.Join(" ", service.Pins)}");
 
-		await Assert.That(services).IsEquivalentTo(["Plex 72: 64 72 80", "Tmdb 172: 168 176"]);
+		await Assert.That(services).IsEquivalentTo(["Plex 78: 70 78 86", "Tmdb 186: 182 190"]);
 	}
 
 	[Test]
-	public async Task Tiles_ForTodaysProviders_PutMdblistAloneUnderTmdb()
+	public async Task Tiles_ForTodaysProviders_PutMdblistAloneOnTheFeedsRow()
 	{
 		var tiles = ServicesMapModel.For(Config).Tiles.Select(tile => $"{tile.Provider} {tile.X},{tile.Y} {tile.Entry}");
 
-		await Assert.That(tiles).IsEquivalentTo(["Mdblist 596,202 Bottom"]);
+		await Assert.That(tiles).IsEquivalentTo(["Mdblist 596,220 Left"]);
+	}
+
+	[Test]
+	public async Task PlaceTiles_WhenTheRowFitsOnTheFeedsRow_CentresItThereAndEntersTheFirstTileFromTheLeft()
+	{
+		var tiles = ServicesMapModel.PlaceTiles([MediaProvider.Mdblist, MediaProvider.Tmdb], 0, 100, 3);
+
+		await Assert.That(tiles.Select(tile => $"{tile.X},{tile.Y} {tile.Entry}")).IsEquivalentTo(["596,86 Left", "629,86 Bottom"], CollectionOrdering.Matching);
 	}
 
 	[Test]
 	public async Task PlaceTiles_ForEightSources_FillsTheTopRow()
 	{
-		var tiles = ServicesMapModel.PlaceTiles([.. Enumerable.Repeat(MediaProvider.Mdblist, 8)], 0, 9);
+		var tiles = ServicesMapModel.PlaceTiles([.. Enumerable.Repeat(MediaProvider.Mdblist, 8)], 0, 0, 9);
 
 		await Assert
 			.That(tiles.Select(tile => $"{tile.X} {tile.Entry}"))
@@ -132,7 +145,7 @@ public class ServicesMapModelTests
 			MediaProvider.Plex,
 		];
 
-		var tiles = ServicesMapModel.PlaceTiles(sources, 0, 10);
+		var tiles = ServicesMapModel.PlaceTiles(sources, 0, 0, 10);
 
 		await Assert
 			.That(tiles.Select(tile => $"{tile.Provider} {tile.X},{Math.Round(tile.Y, 2)} {tile.Entry}"))
@@ -152,7 +165,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task PlaceTiles_PastSixteenSources_GrowsLeftOfTheServiceColumn()
 	{
-		var tiles = ServicesMapModel.PlaceTiles([.. Enumerable.Repeat(MediaProvider.Mdblist, 17)], 0, 18);
+		var tiles = ServicesMapModel.PlaceTiles([.. Enumerable.Repeat(MediaProvider.Mdblist, 17)], 0, 0, 18);
 
 		await Assert.That(tiles[0].X).IsEqualTo(570);
 	}
@@ -209,6 +222,11 @@ public class ServicesMapModelTests
 
 		await Assert.That(trace.Path).IsEqualTo("M0 0 L5 0 L15 0 L20 0");
 	}
+
+	private static IEnumerable<string> Straight(ServicesMapModel model) =>
+		model
+			.Traces.Where(trace => trace.Points.Select(point => point.Y).Distinct().Count() == 1)
+			.Select(trace => trace.Role == "Feeds" ? $"{trace.Role} > {trace.Provider}" : trace.Role);
 
 	private static bool Crosses((MapPoint First, MapPoint Second) horizontal, (MapPoint First, MapPoint Second) vertical) =>
 		horizontal.First.Y == horizontal.Second.Y
