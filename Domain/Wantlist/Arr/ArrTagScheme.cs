@@ -27,17 +27,32 @@ public sealed record ArrTagUser(Guid Id, string Name);
 
 public sealed record ArrTagFeed(Guid Id, string Name);
 
-public sealed record ArrTagScheme(string Prefix, bool PerUser, ArrUserTagSource UserSource, bool PerFeed, ArrFeedTagSource FeedSource, bool PlainPrefix)
+public sealed record ArrTagScheme(
+	string Prefix,
+	bool PerUser,
+	ArrUserTagSource UserSource,
+	bool PerFeed,
+	ArrFeedTagSource FeedSource,
+	bool PlainPrefix,
+	string Protection
+)
 {
-	public static ArrTagScheme Default { get; } = new("sammlarr", true, ArrUserTagSource.Name, true, ArrFeedTagSource.ListName, false);
+	public static ArrTagScheme Default { get; } = new("sammlarr", true, ArrUserTagSource.Name, true, ArrFeedTagSource.ListName, false, DefaultProtection);
+
+	private const string DefaultProtection = "protected";
 
 	public string Root => ArrTagSlug.Of(Prefix).GetValueOr("sammlarr");
 
 	public static Optional<string> Slug(string text) => ArrTagSlug.Of(text);
 
+	public static Optional<string> ProtectionSlug(string text) =>
+		ArrTagSlug.Of(text).When(slug => !slug.StartsWith("u-", StringComparison.Ordinal) && !slug.StartsWith("f-", StringComparison.Ordinal));
+
+	public string Guard => ProtectionSlug(Protection).GetValueOr(DefaultProtection);
+
 	public string UserTag(ArrTagUser user) => $"{Root}-u-{ArrTagSlug.Of(UserPart(user)).GetValueOr(() => ArrTagSlug.Of(user.Id))}";
 
-	public string KeptTag => $"{Root}-kept";
+	public string ProtectedTag => $"{Root}-{Guard}";
 
 	public IReadOnlyList<string> UserTags(ArrTagUser user) =>
 		[.. Enum.GetValues<ArrUserTagSource>().Select(source => (this with { UserSource = source }).UserTag(user)).Distinct()];
@@ -63,7 +78,7 @@ public sealed record ArrTagScheme(string Prefix, bool PerUser, ArrUserTagSource 
 
 	public bool IsUserTag(string label) => label.StartsWith($"{Root}-u-", StringComparison.Ordinal);
 
-	private static bool IsReserved(string slug) => slug.StartsWith("u-", StringComparison.Ordinal) || slug == "kept";
+	private bool IsReserved(string slug) => slug.StartsWith("u-", StringComparison.Ordinal) || slug == Guard;
 
 	private string UserPart(ArrTagUser user)
 	{

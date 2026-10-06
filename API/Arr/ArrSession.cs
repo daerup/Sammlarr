@@ -44,7 +44,7 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, List<ArrT
 		return labels.Any(scheme.Owns) && !labels.Any(scheme.IsUserTag);
 	}
 
-	public bool IsKept(ArrTitle title, ArrTagScheme scheme) => title.Tags.Select(Label).Contains(scheme.KeptTag);
+	public bool IsProtected(ArrTitle title, ArrTagScheme scheme) => title.Tags.Select(Label).Contains(scheme.ProtectedTag);
 
 	public bool WantedByOthers(ArrTitle title, ArrTagScheme scheme, ValueSet<int> mine)
 	{

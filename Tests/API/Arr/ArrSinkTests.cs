@@ -439,10 +439,10 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	public async Task ApplyAsync_AddingATitleAlreadyInTheAppWithoutSammlarrsTags_MarksItKept()
+	public async Task ApplyAsync_AddingATitleAlreadyInTheAppWithoutSammlarrsTags_MarksItProtected()
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
-		_radarr.OnPost("/api/v3/tag").RespondWithJson("""{"id":4,"label":"sammlarr-kept"}""");
+		_radarr.OnPost("/api/v3/tag").RespondWithJson("""{"id":4,"label":"sammlarr-protected"}""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[]}]""");
 		_radarr.OnPut("/api/v3/movie/editor").Respond(HttpStatusCode.Accepted);
 		Addressing(TmdbId.From("27205", MediaType.Movie));
@@ -453,9 +453,9 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	public async Task ApplyAsync_RemovingAKeptTitle_TakesSammlarrsTagsOffInsteadOfDeletingIt()
+	public async Task ApplyAsync_RemovingAProtectedTitle_TakesSammlarrsTagsOffInsteadOfDeletingIt()
 	{
-		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"},{"id":4,"label":"sammlarr-kept"},{"id":7,"label":"4k"}]""");
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"},{"id":4,"label":"sammlarr-protected"},{"id":7,"label":"4k"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1,4,7]}]""");
 		_radarr.OnPut("/api/v3/movie/editor").Respond(HttpStatusCode.Accepted);
 		Addressing(TmdbId.From("27205", MediaType.Movie));
@@ -465,6 +465,19 @@ public class ArrSinkTests
 		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
 		_radarr.Verify(request => request.Method(HttpMethod.Put).BodyContains("\"tags\":[1,4]").BodyContains("\"applyTags\":\"remove\""), Times.Once);
 		_radarr.Verify(request => request.Method(HttpMethod.Delete), Times.Never);
+	}
+
+	[Test]
+	public async Task ApplyAsync_RemovingATitleWithTheOldKeptTag_DeletesItAsNoLongerProtected()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"},{"id":4,"label":"sammlarr-kept"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1,4]}]""");
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/movie/10")).Respond(HttpStatusCode.OK);
+		Addressing(TmdbId.From("27205", MediaType.Movie));
+
+		await Testee().ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_radarr.Verify(request => request.Method(HttpMethod.Delete).PathMatches(".*/movie/10\\?deleteFiles=false&addImportExclusion=false$"), Times.Once);
 	}
 
 	[Test]
@@ -501,11 +514,11 @@ public class ArrSinkTests
 	);
 
 	[Test]
-	public async Task HoldingsOfAsync_CountsTheTitlesOnlyTheirTagHoldsApartFromSharedAndKeptOnes()
+	public async Task HoldingsOfAsync_CountsTheTitlesOnlyTheirTagHoldsApartFromSharedAndProtectedOnes()
 	{
 		_radarr
 			.OnGet("/api/v3/tag")
-			.RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"},{"id":2,"label":"sammlarr-u-guest"},{"id":3,"label":"sammlarr-kept"}]""");
+			.RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"},{"id":2,"label":"sammlarr-u-guest"},{"id":3,"label":"sammlarr-protected"}]""");
 		_radarr
 			.OnGet("/api/v3/movie")
 			.RespondWithJson(
@@ -558,11 +571,11 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	public async Task DeleteTitlesOfAsync_TakesTheirTagOffTitlesThatStayIncludingKeptOnes()
+	public async Task DeleteTitlesOfAsync_TakesTheirTagOffTitlesThatStayIncludingProtectedOnes()
 	{
 		_radarr
 			.OnGet("/api/v3/tag")
-			.RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"},{"id":2,"label":"sammlarr-u-guest"},{"id":3,"label":"sammlarr-kept"}]""");
+			.RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"},{"id":2,"label":"sammlarr-u-guest"},{"id":3,"label":"sammlarr-protected"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":11,"tmdbId":2,"tags":[1,2]},{"id":12,"tmdbId":3,"tags":[1,3]}]""");
 		_radarr.OnPut("/api/v3/movie/editor").Respond(HttpStatusCode.Accepted);
 		EmptySonarr();

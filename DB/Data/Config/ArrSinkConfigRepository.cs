@@ -13,7 +13,15 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 		return new ArrSinkConfig(
 			Instance(row.Radarr),
 			Instance(row.Sonarr),
-			new ArrTagScheme(row.ArrTagPrefix, row.ArrTagPerUser, row.ArrTagUserSource, row.ArrTagPerFeed, row.ArrTagFeedSource, row.ArrTagPlainPrefix)
+			new ArrTagScheme(
+				row.ArrTagPrefix,
+				row.ArrTagPerUser,
+				row.ArrTagUserSource,
+				row.ArrTagPerFeed,
+				row.ArrTagFeedSource,
+				row.ArrTagPlainPrefix,
+				row.ArrTagProtection
+			)
 		);
 	}
 
@@ -29,6 +37,7 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 		row.ArrTagPerFeed = config.Tags.PerFeed;
 		row.ArrTagFeedSource = config.Tags.FeedSource;
 		row.ArrTagPlainPrefix = config.Tags.PlainPrefix;
+		row.ArrTagProtection = config.Tags.Protection;
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 

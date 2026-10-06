@@ -128,9 +128,40 @@ public class ArrTagSchemeTests
 	}
 
 	[Test]
-	public async Task FeedTag_ForAListNamedKept_NeverPosesAsTheAdoptionMarker()
+	public async Task FeedTag_ForAListNamedProtected_NeverPosesAsTheProtectedTag()
 	{
-		await Assert.That(Testee.FeedTag(new ArrTagFeed(FeedId, "Kept"))).IsEqualTo("sammlarr-f-kept");
+		await Assert.That(Testee.FeedTag(new ArrTagFeed(FeedId, "Protected"))).IsEqualTo("sammlarr-f-protected");
+	}
+
+	[Test]
+	public async Task ProtectedTag_ByDefault_IsThePrefixAndProtected()
+	{
+		await Assert.That(Testee.ProtectedTag).IsEqualTo("sammlarr-protected");
+	}
+
+	[Test]
+	public async Task ProtectedTag_WithItsOwnName_UsesItAndEscapesAFeedNamedTheSame()
+	{
+		var scheme = Testee with { Protection = "Keep Me" };
+
+		await Assert.That(scheme.ProtectedTag).IsEqualTo("sammlarr-keep-me");
+		await Assert.That(scheme.FeedTag(new ArrTagFeed(FeedId, "Keep me"))).IsEqualTo("sammlarr-f-keep-me");
+		await Assert.That(scheme.FeedTag(new ArrTagFeed(FeedId, "Protected"))).IsEqualTo("sammlarr-protected");
+	}
+
+	[Test]
+	[Arguments("u-guest")]
+	[Arguments("f-latest")]
+	[Arguments("🎬")]
+	public async Task ProtectionSlug_ForANameThatWouldPoseAsAnotherTag_IsNone(string name)
+	{
+		await Assert.That(ArrTagScheme.ProtectionSlug(name)).IsNone();
+	}
+
+	[Test]
+	public async Task ProtectedTag_WithANameItRefuses_FallsBackToProtected()
+	{
+		await Assert.That((Testee with { Protection = "u-guest" }).ProtectedTag).IsEqualTo("sammlarr-protected");
 	}
 
 	[Test]
