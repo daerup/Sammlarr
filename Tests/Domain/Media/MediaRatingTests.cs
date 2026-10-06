@@ -83,21 +83,21 @@ public class MediaRatingTests
 			new RottenTomatoesAudienceRating(93),
 		];
 
-		await Assert.That(ratings.Select(rating => rating.Source.Rate(rating.SammlarrValue, rating.Votes))).IsEquivalentTo(ratings);
+		await Assert.That(ratings.Select(rating => rating.Source.Card.Rate(rating.SammlarrValue, rating.Votes))).IsEquivalentTo(ratings);
 	}
 
 	[Test]
-	public async Task SuppliedBy_NamesEveryProviderThatSuppliesTheSource()
+	public async Task SuppliedBy_NamesEveryRemoteServiceThatSuppliesTheSource()
 	{
-		await Assert.That(RatingSource.Tmdb.SuppliedBy()).IsEquivalentTo([MediaProvider.Tmdb, MediaProvider.Plex]);
-		await Assert.That(RatingSource.RottenTomatoesAudience.SuppliedBy()).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(RatingSource.Tmdb.SuppliedBy()).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Plex]);
+		await Assert.That(RatingSource.RottenTomatoesAudience.SuppliedBy()).IsEquivalentTo([RemoteService.Plex]);
 	}
 
 	[Test]
-	public async Task SuppliedRatingSources_ForTheConnectedProviders_AreTheSourcesAnyOfThemSupplies()
+	public async Task SuppliedRatingSources_ForTheConnectedRemoteServices_AreTheSourcesAnyOfThemSupplies()
 	{
-		await Assert.That(MediaProvider.Plex.SuppliedRatingSources()).IsEquivalentTo(Enum.GetValues<RatingSource>());
-		await Assert.That(MediaProvider.Mdblist.SuppliedRatingSources()).IsEmpty();
-		await Assert.That(new[] { MediaProvider.Tmdb, MediaProvider.Mdblist }.SuppliedRatingSources()).IsEquivalentTo([RatingSource.Tmdb]);
+		await Assert.That(RemoteService.Plex.SuppliedRatingSources()).IsEquivalentTo(Enum.GetValues<RatingSource>());
+		await Assert.That(RemoteService.Mdblist.SuppliedRatingSources()).IsEmpty();
+		await Assert.That(new[] { RemoteService.Tmdb, RemoteService.Mdblist }.SuppliedRatingSources()).IsEquivalentTo([RatingSource.Tmdb]);
 	}
 }

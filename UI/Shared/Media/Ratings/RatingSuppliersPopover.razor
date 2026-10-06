@@ -10,7 +10,7 @@
                 @foreach (var supplier in Suppliers)
                 {
                     <a class="rating-supplier" href="@SettingsLinks.Provider(supplier)" style="--brand: @Branding.GetBrandingInfo(supplier).BrandColor">
-                        <ProviderLogo Provider="supplier" Form="ProviderLogoForm.Tile" Size="30" Decorative="true"/>
+                        <BrandedLogo Brand="Branding.GetBrandingInfo(supplier)" Form="ProviderLogoForm.Tile" Size="30" Decorative="true"/>
                         <span class="rating-supplier-name">@Branding.GetBrandingInfo(supplier).NickName</span>
                         <BbBadge Variant="BadgeVariant.Secondary" Class="h-5 items-center gap-1.5 px-[7px] text-[10.5px] font-medium text-muted-foreground">
                             <span class="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/60"></span>
@@ -25,15 +25,22 @@
 </span>
 
 @code {
-    private static readonly IReadOnlySet<MediaProvider> Accounts = Enum.GetValues<AuthProvider>().Select(signIn => signIn.Provider()).WhereSome().ToHashSet();
-
     [Parameter] [EditorRequired] public required IReadOnlyList<RatingSource> Sources { get; set; }
 
     private string Names => Sources.Count == 1 ? RatingTexts.Name(Sources[0]) : string.Join(", ", Sources.Select(RatingTexts.Short));
 
     private string Heading => $"{Names} ratings come from";
 
-    private IEnumerable<MediaProvider> Suppliers => Sources.SelectMany(source => source.SuppliedBy()).Distinct().Order();
+    private IEnumerable<RemoteService> Suppliers => Sources.SelectMany(source => source.SuppliedBy()).Distinct().Order();
 
-    private static string Status(MediaProvider provider) => Accounts.Contains(provider) ? "Not connected" : "No key yet";
+    private static string Status(RemoteService supplier)
+    {
+        return supplier.Access switch
+        {
+            UserSignIn => "Not connected",
+            UserKey => "No key yet",
+            AppInstance => "Not set up",
+            Open => "Ready",
+        };
+    }
 }

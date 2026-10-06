@@ -18,7 +18,7 @@ public class ProviderAnswerTests
 				Tagline = present[0] ? "Fear is the mind-killer." : null,
 				Summary = present[1] ? "A noble family becomes embroiled in a war." : null,
 				Runtime = present[2] ? TimeSpan.FromMinutes(155) : null,
-				Ratings = MediaRatings.From([.. rated.Select(source => source.Rate(8, new None()))]),
+				Ratings = MediaRatings.From([.. rated.Select(source => source.Card.Rate(8, new None()))]),
 			}
 	);
 

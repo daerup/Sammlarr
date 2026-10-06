@@ -50,7 +50,7 @@ public class RatingMarkIconTests : BunitContext
 	public async Task VerdictArt_ForEveryVerdictASourceCanGive_IsAFileThatExists()
 	{
 		var shown = Enum.GetValues<RatingSource>()
-			.SelectMany(source => new[] { 0f, 10f }.Select(value => source.Rate(value, new None())))
+			.SelectMany(source => new[] { 0f, 10f }.Select(value => source.Card.Rate(value, new None())))
 			.Where(rating => rating.Verdict.IsSome())
 			.Select(rating => Render<RatingMarkIcon>(parameters => parameters.Add(icon => icon.Source, rating.Source).Add(icon => icon.Rating, Some.Of(rating))))
 			.Select(cut => cut.Find("img.rating-mark").GetAttribute("src") ?? string.Empty)

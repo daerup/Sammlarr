@@ -6,41 +6,47 @@ namespace Domain.Media;
 public enum RatingSource
 {
 	[Description("TMDB")]
-	[OwnedBy<MediaProvider>(MediaProvider.Tmdb)]
-	[SuppliedBy<MediaProvider>(MediaProvider.Tmdb, MediaProvider.Plex)]
-	[Votes]
+	[SuppliedBy<RemoteService>(RemoteService.Tmdb, RemoteService.Plex)]
 	Tmdb,
 
 	[Description("IMDb")]
-	[OwnedBy<MediaProvider>(MediaProvider.Imdb)]
-	[SuppliedBy<MediaProvider>(MediaProvider.Plex)]
-	[Votes]
+	[SuppliedBy<RemoteService>(RemoteService.Plex)]
 	Imdb,
 
 	[Description("Rotten Tomatoes critics")]
-	[OwnedBy<MediaProvider>(MediaProvider.RottenTomatoes)]
-	[SuppliedBy<MediaProvider>(MediaProvider.Plex)]
+	[SuppliedBy<RemoteService>(RemoteService.Plex)]
 	RottenTomatoesCritics,
 
 	[Description("Rotten Tomatoes audience")]
-	[OwnedBy<MediaProvider>(MediaProvider.RottenTomatoes)]
-	[SuppliedBy<MediaProvider>(MediaProvider.Plex)]
+	[SuppliedBy<RemoteService>(RemoteService.Plex)]
 	RottenTomatoesAudience,
+}
+
+public readonly record struct RatingCard(MediaProvider Owner, bool PublishesVotes, Func<float, Optional<int>, IMediaRating> Rate)
+{
+	internal static RatingCard Of<TRating>()
+		where TRating : struct, IOwnedRating<TRating>
+	{
+		return new RatingCard(TRating.Owner, TRating.PublishesVotes, (value, votes) => TRating.Rate(value, votes));
+	}
 }
 
 public static class RatingSources
 {
 	extension(RatingSource source)
 	{
-		public IMediaRating Rate(float sammlarrValue, Optional<int> votes)
+		public RatingCard Card
 		{
-			return source switch
+			get
 			{
-				RatingSource.Tmdb => new TmdbRating(sammlarrValue, votes),
-				RatingSource.Imdb => new ImdbRating(sammlarrValue, votes),
-				RatingSource.RottenTomatoesCritics => RottenTomatoesCriticsRating.Of(sammlarrValue),
-				RatingSource.RottenTomatoesAudience => RottenTomatoesAudienceRating.Of(sammlarrValue),
-			};
+				return source switch
+				{
+					RatingSource.Tmdb => RatingCard.Of<TmdbRating>(),
+					RatingSource.Imdb => RatingCard.Of<ImdbRating>(),
+					RatingSource.RottenTomatoesCritics => RatingCard.Of<RottenTomatoesCriticsRating>(),
+					RatingSource.RottenTomatoesAudience => RatingCard.Of<RottenTomatoesAudienceRating>(),
+				};
+			}
 		}
 	}
 }

@@ -55,7 +55,7 @@ internal static class FeedRatingReasons
 
 	private static string Unvoted(SammlarrRating rating)
 	{
-		var silent = rating.Counted.Select(part => part.Source).Where(source => !source.PublishesVotes()).Distinct().Select(RatingTexts.Name).ToList();
+		var silent = rating.Counted.Select(part => part.Source).Where(source => !source.Card.PublishesVotes).Distinct().Select(RatingTexts.Name).ToList();
 		return silent.Count switch
 		{
 			0 => "no votes behind its rating (no vote count came with it)",

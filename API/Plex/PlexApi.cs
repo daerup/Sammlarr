@@ -26,7 +26,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		| MediaField.Seasons
 		| MediaField.Episodes
 		| MediaField.RuntimePerEpisode
-		| MediaFields.Rated(MediaProvider.Plex.SuppliedRatingSources());
+		| MediaFields.Rated(RemoteService.Plex.SuppliedRatingSources());
 
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Plex];
 
@@ -142,7 +142,7 @@ file static class PlexMetadataMappingExtensions
 	private static MediaRatings Ratings(PlexTypes.ById.Metadata result)
 	{
 		return MediaRatings.From(
-			(result.Ratings ?? []).Select(entry => SourceOf(entry).Map(source => source.Rate((float)entry.Value, VotesOf(source, result)))).WhereSome()
+			(result.Ratings ?? []).Select(entry => SourceOf(entry).Map(source => source.Card.Rate((float)entry.Value, VotesOf(source, result)))).WhereSome()
 		);
 	}
 

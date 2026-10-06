@@ -62,10 +62,10 @@ one of the title's ids, the current user has connected, has not answered, and is
 
 MediaRatings:: Every rating a title has (`All`), one `IMediaRating` per `RatingSource`, or `None` when it is unrated.
 
-RatingSource:: Where a rating comes from: TMDB, IMDb, Rotten Tomatoes critics or audience. Each member answers three
-questions once, as attributes the generator reads: whose rating it is (`[OwnedBy]`, read as `Owner()`; both Rotten
-Tomatoes sources belong to `MediaProvider.RottenTomatoes`), who delivers it (`[SuppliedBy]`: Plex supplies the IMDb and
-Rotten Tomatoes ratings) and whether it carries votes (`[Votes]`, read as `PublishesVotes()`). Its colour, its page
+RatingSource:: Where a rating comes from: TMDB, IMDb, Rotten Tomatoes critics or audience. Each member names who
+delivers it (`[SuppliedBy<RemoteService>]`: Plex supplies the IMDb and Rotten Tomatoes ratings), and its `Card` answers
+whose rating it is (`Owner`; both Rotten Tomatoes sources belong to `MediaProvider.RottenTomatoes`), whether it carries
+votes (`PublishesVotes`) and how a value becomes its rating (`Rate`), all read from its rating type. Its colour, its page
 link, the id the breakdown asks for and its row in the Votes popover all follow from the owner.
 
 IMediaRating:: One source's rating, its own type per source: `Value` as the source writes it ("8.2", "95%"),
