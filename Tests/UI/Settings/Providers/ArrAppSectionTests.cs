@@ -62,7 +62,7 @@ public class ArrAppSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task Section_WhenTheAppHasNoRootFolder_SaysWhereToAddOne()
+	public async Task Section_WhenTheAppHasNoRootFolder_SaysWhereToAddOneUnderTheFolder()
 	{
 		var cut = Render<ArrAppSection>(parameters =>
 			parameters
@@ -72,9 +72,11 @@ public class ArrAppSectionTests : BunitContext
 				.Add(section => section.Choices, new ArrInstanceChoices([new ArrQualityProfile(4, "HD-1080p")], []))
 		);
 
+		var warning = cut.Find("[role=alert]");
 		await Assert
-			.That(cut.Find("[role=alert]").TextContent.Trim())
+			.That(warning.TextContent.Trim())
 			.IsEqualTo("Sonarr has no root folder yet. Add one under Settings › Media Management in Sonarr, then test again.");
+		await Assert.That(warning.ParentElement!.QuerySelector("[aria-label='Sonarr root folder']")).IsNotNull();
 	}
 
 	[Test]
@@ -178,12 +180,12 @@ public class ArrAppSectionTests : BunitContext
 	[Test]
 	[Arguments(ArrApp.Radarr, "movies", "http://radarr:7878")]
 	[Arguments(ArrApp.Sonarr, "shows", "http://sonarr:8989")]
-	public async Task Section_ForAnApp_NamesWhatItAddsAndSuggestsItsDefaultAddress(ArrApp app, string adds, string address)
+	public async Task Section_ForAnApp_SuggestsItsDefaultAddressWithoutSayingWhatItAdds(ArrApp app, string adds, string address)
 	{
 		var cut = RenderSection(ArrInstanceConfig.Empty, ArrConnectionState.Empty, app: app);
 
-		await Assert.That(cut.Find(".arr-app-for").TextContent).IsEqualTo(adds);
 		await Assert.That(cut.Find($"input[aria-label='{app} URL']").GetAttribute("placeholder")).IsEqualTo(address);
+		await Assert.That(cut.Markup).DoesNotContain(adds);
 	}
 
 	private static string Description(IRenderedComponent<ArrAppSection> cut)

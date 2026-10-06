@@ -1,170 +1,138 @@
 @using BlazorBlueprint.Primitives
 @using Contracts.Settings
 @using Domain.Wantlist.Arr
-@using UI.Shared.Services.Branding
-@inject MediaProviderBrandingService Branding
 
-<div class="arr-app" style="--seg: @Branding.GetBrandingInfo(App).BrandColor" aria-label="@App.Name">
-    <div class="arr-app-head">
-        <BrandedLogo Brand="Branding.GetBrandingInfo(App)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
-        <span>@App.Name</span>
-        <span class="arr-app-for">@For</span>
-        <span class="arr-app-state">
-            @switch (State)
+<div class="arr-app" data-arr-app="@App.Name">
+    <BbField>
+        <BbFieldLabel>URL</BbFieldLabel>
+        <BbFieldContent>
+            <BbInput Value="@_url" ValueChanged="UrlChangedAsync" Placeholder="@Placeholder" AriaLabel="@($"{App.Name} URL")"
+                     Class="h-9 bg-accent text-sm" UpdateTiming="UpdateTiming.Immediate"/>
+            @if (ShowsExternalUrl)
             {
-                case ArrConnectionState.Empty:
-                    <span class="text-muted-foreground">Not connected</span>
-                    break;
-                case ArrConnectionState.Untested:
-                    <span class="text-muted-foreground">Not tested yet</span>
-                    break;
-                case ArrConnectionState.Testing:
-                    <span class="flex items-center gap-1.5 text-muted-foreground"><BbSpinner Size="SpinnerSize.Small"/>Testing…</span>
-                    break;
-                case ArrConnectionState.Connected:
-                    <span class="flex items-center gap-1.5 text-success"><LucideIcon Name="check" Size="13"/>Connected</span>
-                    break;
-                case ArrConnectionState.Failed:
-                    <span class="flex items-center gap-1.5 text-destructive"><LucideIcon Name="circle-alert" Size="13"/>Test failed</span>
-                    break;
+                <div class="arr-app-external">
+                    <span class="arr-app-external-head">
+                        <span class="font-medium">External URL</span>
+                        <span class="text-muted-foreground">Links to @App.Name open here</span>
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="ml-auto h-6 px-2 text-xs text-muted-foreground" OnClick="RemoveExternalUrlAsync">
+                            <LucideIcon Name="x" Size="12" Class="mr-1"/>
+                            Remove
+                        </BbButton>
+                    </span>
+                    <BbInput Value="@Instance.ExternalUrl.GetValueOr(string.Empty)" ValueChanged="ExternalUrlChangedAsync" Placeholder="@($"http://localhost:{App.DefaultPort}")"
+                             AriaLabel="@($"{App.Name} external URL")" Class="h-9 bg-accent text-sm"/>
+                </div>
             }
-        </span>
-    </div>
+            else
+            {
+                <BbButton Variant="ButtonVariant.Link" Size="ButtonSize.Small" Class="arr-app-add h-auto self-start p-0 text-xs text-muted-foreground" OnClick="() => _addingExternalUrl = true">
+                    <LucideIcon Name="plus" Size="12" Class="mr-1"/>
+                    Add external URL
+                </BbButton>
+            }
+        </BbFieldContent>
+    </BbField>
 
-    <div class="arr-app-grid">
-        <BbField Class="col-span-full">
-            <BbFieldLabel>URL</BbFieldLabel>
-            <BbFieldContent>
-                <BbInput Value="@_url" ValueChanged="UrlChangedAsync" Placeholder="@Placeholder" AriaLabel="@($"{App.Name} URL")"
-                         Class="h-9 bg-accent text-sm" UpdateTiming="UpdateTiming.Immediate"/>
-                @if (ShowsExternalUrl)
+    <BbField>
+        <BbFieldLabel>API key</BbFieldLabel>
+        <BbFieldContent>
+            <div class="flex items-center gap-2">
+                <div class="min-w-0 flex-1">
+                    <SensitiveInput Value="@_key" ValueChanged="KeyChangedAsync" Compact="true" Label="@($"{App.Name} API key")"
+                                    Placeholder="Enter API key"
+                                    Class="@(State == ArrConnectionState.Failed ? "border-destructive" : string.Empty)"/>
+                </div>
+                @switch (State)
                 {
-                    <div class="arr-app-external">
-                        <span class="arr-app-external-head">
-                            <span class="font-medium">External URL</span>
-                            <span class="text-muted-foreground">Links to @App.Name open here</span>
-                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="ml-auto h-6 px-2 text-xs text-muted-foreground" OnClick="RemoveExternalUrlAsync">
-                                <LucideIcon Name="x" Size="12" Class="mr-1"/>
-                                Remove
-                            </BbButton>
-                        </span>
-                        <BbInput Value="@Instance.ExternalUrl.GetValueOr(string.Empty)" ValueChanged="ExternalUrlChangedAsync" Placeholder="@($"http://localhost:{App.DefaultPort}")"
-                                 AriaLabel="@($"{App.Name} external URL")" Class="h-9 bg-accent text-sm"/>
-                    </div>
+                    case ArrConnectionState.Testing:
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="true">
+                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                            <span>Testing…</span>
+                        </BbButton>
+                        break;
+                    case ArrConnectionState.Connected:
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="TestAsync">
+                            <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                            <span>Test again</span>
+                        </BbButton>
+                        break;
+                    case ArrConnectionState.Failed:
+                        <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" OnClick="TestAsync">
+                            <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                            <span>Test again</span>
+                        </BbButton>
+                        break;
+                    case ArrConnectionState.Empty or ArrConnectionState.Untested:
+                        <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" OnClick="TestAsync" Disabled="@(State == ArrConnectionState.Empty)">
+                            <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                            <span>Test</span>
+                        </BbButton>
+                        break;
+                }
+            </div>
+            <BbFieldDescription>
+                Found in
+                @if (ArrSettingsLink.For(Typed.LinkUrl.GetValueOr(string.Empty)).ToNullable() is { } href)
+                {
+                    <AppLink Href="@href" External="true">@App.Name › Settings › General</AppLink>
                 }
                 else
                 {
-                    <BbButton Variant="ButtonVariant.Link" Size="ButtonSize.Small" Class="arr-app-add h-auto self-start p-0 text-xs text-muted-foreground" OnClick="() => _addingExternalUrl = true">
-                        <LucideIcon Name="plus" Size="12" Class="mr-1"/>
-                        Add external URL
-                    </BbButton>
+                    <span>@App.Name › Settings › General</span>
+                }.
+            </BbFieldDescription>
+            @if (State == ArrConnectionState.Failed)
+            {
+                <p class="arr-app-line text-destructive" role="alert">
+                    <LucideIcon Name="circle-alert" Size="13" Class="mt-px shrink-0"/>
+                    <span>@Error</span>
+                </p>
+            }
+        </BbFieldContent>
+    </BbField>
+
+    @if (State == ArrConnectionState.Connected)
+    {
+        <BbField>
+            <BbFieldLabel>Quality profile</BbFieldLabel>
+            <BbFieldContent>
+                <BbSelect TValue="int?" Value="@Instance.QualityProfileId.ToNullable()" ValueChanged="ProfileChangedAsync"
+                          Options="ProfileOptions" Placeholder="Choose a profile" AriaLabel="@($"{App.Name} quality profile")" Class="w-full [&_[role=combobox]]:h-9"/>
+            </BbFieldContent>
+        </BbField>
+
+        <label class="arr-app-switch">
+            Monitor new titles
+            <BbSwitch Checked="Instance.Monitored" CheckedChanged="MonitoredChangedAsync" AriaLabel="@($"{App.Name} monitors new titles")"/>
+        </label>
+
+        <BbField>
+            <BbFieldLabel>Root folder</BbFieldLabel>
+            <BbFieldContent>
+                <BbSelect TValue="string" Value="@Instance.RootFolderPath.GetValueOr(string.Empty)" ValueChanged="FolderChangedAsync"
+                          Options="FolderOptions" Placeholder="Choose a folder" AriaLabel="@($"{App.Name} root folder")" Class="w-full [&_[role=combobox]]:h-9"/>
+                @if (Choices.Folders.Count == 0)
+                {
+                    <p class="arr-app-line text-[var(--alert-warning)]" role="alert">
+                        <LucideIcon Name="triangle-alert" Size="13" Class="mt-px shrink-0"/>
+                        <span>@App.Name has no root folder yet. Add one under Settings › Media Management in @App.Name, then test again.</span>
+                    </p>
                 }
             </BbFieldContent>
         </BbField>
 
-        <BbField Class="col-span-full">
-            <BbFieldLabel>API key</BbFieldLabel>
-            <BbFieldContent>
-                <div class="flex items-center gap-2">
-                    <div class="min-w-0 flex-1">
-                        <SensitiveInput Value="@_key" ValueChanged="KeyChangedAsync" Compact="true" Label="@($"{App.Name} API key")"
-                                        Placeholder="Enter API key"
-                                        Class="@(State == ArrConnectionState.Failed ? "border-destructive" : string.Empty)"/>
-                    </div>
-                    @switch (State)
-                    {
-                        case ArrConnectionState.Testing:
-                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="true">
-                                <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                                <span>Testing…</span>
-                            </BbButton>
-                            break;
-                        case ArrConnectionState.Connected:
-                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="TestAsync">
-                                <LucideIcon Name="zap" Size="14" Class="mr-2"/>
-                                <span>Test again</span>
-                            </BbButton>
-                            break;
-                        case ArrConnectionState.Failed:
-                            <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" OnClick="TestAsync">
-                                <LucideIcon Name="zap" Size="14" Class="mr-2"/>
-                                <span>Test again</span>
-                            </BbButton>
-                            break;
-                        case ArrConnectionState.Empty or ArrConnectionState.Untested:
-                            <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" OnClick="TestAsync" Disabled="@(State == ArrConnectionState.Empty)">
-                                <LucideIcon Name="zap" Size="14" Class="mr-2"/>
-                                <span>Test</span>
-                            </BbButton>
-                            break;
-                    }
-                </div>
-                <BbFieldDescription>
-                    Found in
-                    @if (ArrSettingsLink.For(Typed.LinkUrl.GetValueOr(string.Empty)).ToNullable() is { } href)
-                    {
-                        <AppLink Href="@href" External="true">@App.Name › Settings › General</AppLink>
-                    }
-                    else
-                    {
-                        <span>@App.Name › Settings › General</span>
-                    }.
-                </BbFieldDescription>
-            </BbFieldContent>
-        </BbField>
-
-
-        @if (State == ArrConnectionState.Failed)
-        {
-            <p class="arr-app-wide arr-app-line text-destructive" role="alert">
-                <LucideIcon Name="circle-alert" Size="13" Class="mt-px shrink-0"/>
-                <span>@Error</span>
-            </p>
-        }
-        else if (State != ArrConnectionState.Connected)
-        {
-            <p class="arr-app-wide arr-app-line text-muted-foreground">
-                <LucideIcon Name="info" Size="13" Class="mt-px shrink-0"/>
-                <span>Test the connection to load @(App.Name)'s quality profiles and root folders.</span>
-            </p>
-        }
-        else
-        {
-            @if (Choices.Folders.Count == 0)
-            {
-                <p class="arr-app-wide arr-app-line text-[var(--alert-warning)]" role="alert">
-                    <LucideIcon Name="triangle-alert" Size="13" Class="mt-px shrink-0"/>
-                    <span>@App.Name has no root folder yet. Add one under Settings › Media Management in @App.Name, then test again.</span>
-                </p>
-            }
-
-            <BbField>
-                <BbFieldLabel>Quality profile</BbFieldLabel>
-                <BbFieldContent>
-                    <BbSelect TValue="int?" Value="@Instance.QualityProfileId.ToNullable()" ValueChanged="ProfileChangedAsync"
-                              Options="ProfileOptions" Placeholder="Choose a profile" AriaLabel="@($"{App.Name} quality profile")" Class="w-full [&_[role=combobox]]:h-9"/>
-                </BbFieldContent>
-            </BbField>
-
-            <BbField>
-                <BbFieldLabel>Root folder</BbFieldLabel>
-                <BbFieldContent>
-                    <BbSelect TValue="string" Value="@Instance.RootFolderPath.GetValueOr(string.Empty)" ValueChanged="FolderChangedAsync"
-                              Options="FolderOptions" Placeholder="Choose a folder" AriaLabel="@($"{App.Name} root folder")" Class="w-full [&_[role=combobox]]:h-9"/>
-                </BbFieldContent>
-            </BbField>
-
-            <label class="arr-app-switch">
-                Monitor new titles
-                <BbSwitch Checked="Instance.Monitored" CheckedChanged="MonitoredChangedAsync" AriaLabel="@($"{App.Name} monitors new titles")"/>
-            </label>
-
-            <label class="arr-app-switch">
-                Search when added
-                <BbSwitch Checked="Instance.SearchOnAdd" CheckedChanged="SearchChangedAsync" AriaLabel="@($"{App.Name} searches when a title is added")"/>
-            </label>
-        }
-    </div>
+        <label class="arr-app-switch">
+            Search when added
+            <BbSwitch Checked="Instance.SearchOnAdd" CheckedChanged="SearchChangedAsync" AriaLabel="@($"{App.Name} searches when a title is added")"/>
+        </label>
+    }
+    else if (State != ArrConnectionState.Failed)
+    {
+        <p class="arr-app-wide arr-app-line text-muted-foreground">
+            <LucideIcon Name="info" Size="13" Class="mt-px shrink-0"/>
+            <span>Test the connection to load @(App.Name)'s quality profiles and root folders.</span>
+        </p>
+    }
 </div>
 
 @code {
@@ -189,8 +157,6 @@
     private string _key = string.Empty;
 
     private (Optional<string> Url, Optional<string> Key)? _stored;
-
-    private string For => App.Type.Plural.ToLowerInvariant();
 
     private string Placeholder => $"http://{App.Name.ToLowerInvariant()}:{App.DefaultPort}";
 

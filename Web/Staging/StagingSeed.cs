@@ -11,7 +11,6 @@ using DB;
 using Domain.Auth;
 using Domain.Feed;
 using Domain.Jobs;
-using Domain.Media;
 using Domain.Notifications;
 using Domain.Processing;
 using Domain.Providers;

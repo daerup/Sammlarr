@@ -2,13 +2,19 @@
 @using Domain.Wantlist.Arr
 @using UI.Features.Settings.Components.Providers
 
-<DemoCard Title="Radarr + Sonarr row" Where="Providers › Wantlist sync" Span="2"
-          Note="The parts of ArrSinkRow, which tests the real connection when it opens: an app not set up, one that answered with its profiles and folders, one that refused the key, and the tags it writes.">
-    <div class="overflow-hidden rounded-lg border bg-card">
-        <ArrAppSection App="ArrApp.Radarr" Instance="ArrInstanceConfig.Empty" State="ArrConnectionState.Empty"/>
-        <ArrAppSection App="ArrApp.Sonarr" Instance="Connected" State="ArrConnectionState.Connected" Choices="Choices"/>
-        <ArrAppSection App="ArrApp.Radarr" Instance="Connected with { Url = Some.Of(Radarr) }" State="ArrConnectionState.Failed"
-                       Error="@($"Radarr answered 401 Unauthorized at {Radarr}. Check the API key under Settings › General in Radarr.")"/>
+<DemoCard Title="Radarr + Sonarr row" Where="Providers › Accounts and keys › Radarr + Sonarr" Span="2"
+          Note="The panels of ArrSinkRow's tabs, which test the real connection when the row opens: an app not set up, one that answered with its profiles and folders, one that refused the key, and the tags it writes.">
+    <div class="divide-y overflow-hidden rounded-lg border bg-card">
+        <div class="px-5 py-4">
+            <ArrAppSection App="ArrApp.Radarr" Instance="ArrInstanceConfig.Empty" State="ArrConnectionState.Empty"/>
+        </div>
+        <div class="px-5 py-4">
+            <ArrAppSection App="ArrApp.Sonarr" Instance="Connected" State="ArrConnectionState.Connected" Choices="Choices"/>
+        </div>
+        <div class="px-5 py-4">
+            <ArrAppSection App="ArrApp.Radarr" Instance="Connected with { Url = Some.Of(Radarr) }" State="ArrConnectionState.Failed"
+                           Error="@($"Radarr answered 401 Unauthorized at {Radarr}. Check the API key under Settings › General in Radarr.")"/>
+        </div>
         <div class="px-5 py-4">
             <ArrTagsSection Scheme="_scheme" SchemeChanged="scheme => _scheme = scheme" Users="Users" Feed="Feed"/>
         </div>

@@ -6,9 +6,12 @@ using Contracts.Settings;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Wantlist.Arr;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
+using UI.Shared.Common;
 
 namespace UI.Tests.Settings.Providers;
 
@@ -174,8 +177,10 @@ public class ArrSinkRowTests : BunitContext
 		_users.GetAllAsync(Any()).Returns([Guest with { DisplayName = "Renamed" }]);
 
 		var cut = RenderRow(settingUp: false);
+		cut.WaitForState(() => Badge(cut) == "Connected");
 
-		cut.WaitForState(() => cut.FindComponents<ArrTagsSection>().Count == 1);
+		await Tab(cut, "Tags").ClickAsync(new MouseEventArgs());
+
 		await Assert.That(cut.FindComponent<ArrTagsSection>().Instance.Users).IsEquivalentTo([new ArrTagUser(TestCurrentUser.DefaultId.Value, "Guest")]);
 	}
 
@@ -187,6 +192,77 @@ public class ArrSinkRowTests : BunitContext
 		cut.WaitForState(() => Badge(cut) == "Connected");
 		await Assert.That(cut.FindComponents<ArrTagsSection>()).IsEmpty();
 	}
+
+	[Test]
+	public async Task Tabs_WhileTheWantlistSyncsThere_AreRadarrSonarrAndTagsWithoutWhatEachAdds()
+	{
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => Badge(cut) == "Connected");
+		await Assert.That(Tabs(cut).Select(Name)).IsEquivalentTo(["Radarr", "Sonarr", "Tags"], CollectionOrdering.Matching);
+		await Assert.That(cut.FindAll("[role=tab]").Select(tab => tab.TextContent)).DoesNotContain(text => text.Contains("movies") || text.Contains("shows"));
+	}
+
+	[Test]
+	[Arguments(true, false)]
+	[Arguments(false, false)]
+	public async Task Tabs_WhileSettingUpOrForSearchOnly_LeaveTagsOut(bool settingUp, bool syncs)
+	{
+		var cut = RenderRow(settingUp, syncs);
+
+		cut.WaitForState(() => Tabs(cut).Count == 2);
+		await Assert.That(Tabs(cut).Select(Name)).IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Tabs_WhenSonarrFailsItsTest_OpenOnSonarr()
+	{
+		_tester.TestAsync(ArrApp.Sonarr, Any<ArrInstanceConfig>(), Any()).Returns(Error.From("Sonarr answered 401 Unauthorized at http://sonarr:8989."));
+
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => Badge(cut) == "Sonarr not answering");
+		await Assert.That(Name(cut.Find("[role=tab][aria-selected=true]"))).IsEqualTo("Sonarr");
+		await Assert.That(Tab(cut, "Sonarr").TextContent).Contains("Test failed");
+	}
+
+	[Test]
+	public async Task Tabs_WhenBothAppsAnswer_OpenOnRadarr()
+	{
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => Badge(cut) == "Connected");
+		await Assert.That(Name(cut.Find("[role=tab][aria-selected=true]"))).IsEqualTo("Radarr");
+	}
+
+	[Test]
+	public async Task Tabs_WhenSwitchedAndBack_KeepAKeyTypedButNotTested()
+	{
+		var cut = RenderRow(settingUp: false);
+		cut.WaitForState(() => Badge(cut) == "Connected");
+		var radarr = cut.FindComponents<ArrAppSection>().First(section => section.Instance.App == ArrApp.Radarr);
+		await cut.InvokeAsync(() => radarr.FindComponent<SensitiveInput>().Instance.ValueChanged.InvokeAsync("a-key-not-tested-yet"));
+
+		await Tab(cut, "Sonarr").ClickAsync(new MouseEventArgs());
+		await Tab(cut, "Radarr").ClickAsync(new MouseEventArgs());
+
+		await Assert.That(radarr.FindComponent<SensitiveInput>().Instance.Value).IsEqualTo("a-key-not-tested-yet");
+	}
+
+	[Test]
+	public async Task Setup_WhileSettingUp_SitsUnderTheTabsNotInOne()
+	{
+		var cut = RenderRow(settingUp: true);
+
+		cut.WaitForState(() => cut.FindAll(".arr-shared").Count == 1);
+		await Assert.That(cut.Find(".arr-shared").Closest("[role=tabpanel]")).IsNull();
+	}
+
+	private static IReadOnlyList<AngleSharp.Dom.IElement> Tabs(IRenderedComponent<ArrSinkRow> cut) => cut.FindAll("[role=tab]");
+
+	private static AngleSharp.Dom.IElement Tab(IRenderedComponent<ArrSinkRow> cut, string name) => Tabs(cut).Single(tab => Name(tab) == name);
+
+	private static string Name(AngleSharp.Dom.IElement tab) => tab.QuerySelector("span:not(.sr-only)")!.TextContent.Trim();
 
 	private void Answers(ArrApp app, string folder)
 	{

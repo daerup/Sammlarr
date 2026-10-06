@@ -1,0 +1,5 @@
+.sammlarr-lockup {
+    position: relative;
+    top: 2px;
+    --sammlarr-knockout: color-mix(in oklch, var(--foreground) 5%, var(--card));
+}
