@@ -42,6 +42,11 @@ internal static class EnricherChoice
 			.FirstOrNone();
 	}
 
+	internal static Optional<EnricherCandidate> Blocked(MediaFields needed, IEnumerable<EnricherCandidate> leftToAsk, DateTimeOffset now)
+	{
+		return leftToAsk.Where(candidate => needed.Overlaps(candidate.Fills) && !candidate.Load.IsOpen(now)).FirstOrNone();
+	}
+
 	internal static bool NeedsRefetch(CachedDetails cached, IReadOnlyList<EnricherCandidate> leftToAsk, DateTimeOffset now)
 	{
 		var stale = cached.IsStale(now);
