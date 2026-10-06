@@ -1,12 +1,14 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
+using Contracts.Identity;
 using Contracts.Settings;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using UI.Shared.Layout;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
@@ -28,12 +30,18 @@ public class ProfileCardTests : BunitContext
 
 	private readonly ProfileDropdownService _dropdown = new();
 
+	private readonly TestCurrentUser _user = new() { DisplayName = "Guest" };
+
 	[Before(Test)]
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
 		Services.AddSingleton(_dropdown);
+		Services.AddSingleton<ICurrentUser>(_user);
+		var users = IUserManagementService.Mock();
+		users.GetColourRosterAsync(Any()).Returns([new RosterColour(_user.Id, DateTimeOffset.UnixEpoch, StoredColour.Empty)]);
+		Services.AddSingleton(users.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		AddAuthorization().SetAuthorized("Guest");
 	}
@@ -55,6 +63,14 @@ public class ProfileCardTests : BunitContext
 		await Assert
 			.That(cut.WaitForElement("[style*='linear-gradient']").GetAttribute("style"))
 			.Contains($"{Brands.GetBrandingInfo(AuthProvider.Local).BrandColor}1F");
+	}
+
+	[Test]
+	public async Task Avatar_ForAnAccountWithoutAPicture_DrawsTheirBird()
+	{
+		var cut = await RenderOpenCardAsync(OnArr with { AuthProvider = AuthProvider.Local });
+
+		await Assert.That(cut.WaitForElement("#profile-dropdown-trigger [data-bird]")).IsNotNull();
 	}
 
 	private async Task<IRenderedComponent<Harness>> RenderOpenCardAsync(ProviderConfig providers)

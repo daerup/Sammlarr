@@ -1,11 +1,15 @@
 @implements IDisposable
 @using System.Security.Claims
+@using Contracts.Identity
 @using Contracts.Settings
+@using UI.Shared.Branding.Birds
 @using UI.Shared.Services.Branding
 @inject NavigationManager NavigationManager
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigService ProviderConfigService
 @inject MediaProviderBrandingService BrandingService
+@inject IUserManagementService Users
+@inject ICurrentUser CurrentUser
 
 @if (_isAuthenticated && _branding is not null)
 {
@@ -19,7 +23,14 @@
                 <BbAvatar Size="AvatarSize.Small" ShowDot="true" DotClass="bg-green-500">
                     <BbAvatarImage Source="@_avatarUrl" Alt="@_displayName"/>
                     <BbAvatarFallback>
-                        <LucideIcon Name="user" Size="16"/>
+                        @if (_colour is { } colour)
+                        {
+                            <PersonAvatar Person="CurrentUser.Id" Colour="colour" Size="32"/>
+                        }
+                        else
+                        {
+                            <LucideIcon Name="user" Size="16"/>
+                        }
                     </BbAvatarFallback>
                 </BbAvatar>
             </BbButton>
@@ -39,7 +50,14 @@
                         <BbAvatar Size="AvatarSize.Large" Class="avatar-rect">
                             <BbAvatarImage Source="@_avatarUrl" Alt="@_displayName"/>
                             <BbAvatarFallback>
-                                <LucideIcon Name="user-round" Size="20"/>
+                                @if (_colour is { } colour)
+                                {
+                                    <PersonAvatar Person="CurrentUser.Id" Colour="colour" Size="48"/>
+                                }
+                                else
+                                {
+                                    <LucideIcon Name="user-round" Size="20"/>
+                                }
                             </BbAvatarFallback>
                         </BbAvatar>
                         <div class="flex min-w-0 flex-1 flex-col gap-1">
@@ -72,6 +90,7 @@
     private string? _accountUrl;
     private bool _isProfileDropdownOpen;
     private BrandingInfo? _branding;
+    private PersonColour? _colour;
 
     public void Dispose() => ProfileDropdownService.OnOpenRequested -= HandleProfileDropdownOpenRequestedAsync;
 
@@ -88,6 +107,11 @@
             _displayName = principal.Identity?.Name;
             _avatarUrl = principal.FindFirst(Contracts.Identity.AuthClaims.Avatar)?.Value;
             _role = principal.FindFirst(ClaimTypes.Role)?.Value;
+        }
+
+        if (_isAuthenticated && string.IsNullOrEmpty(_avatarUrl))
+        {
+            _colour = PersonColours.Of(await Users.GetColourRosterAsync())[CurrentUser.Id];
         }
     }
 

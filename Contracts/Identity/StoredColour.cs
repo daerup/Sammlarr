@@ -1,3 +1,5 @@
+using Domain.Identity;
+
 namespace Contracts.Identity;
 
 public sealed record StoredColour(Optional<double> GoldenHue, Optional<StoredPicture> Picture)
@@ -8,3 +10,5 @@ public sealed record StoredColour(Optional<double> GoldenHue, Optional<StoredPic
 public sealed record StoredPicture(string Url, Optional<PictureTone> Tone);
 
 public sealed record PictureTone(double Hue, double Chroma);
+
+public sealed record RosterColour(UserId Id, DateTimeOffset JoinedAt, StoredColour Colour);
