@@ -13,7 +13,7 @@ internal static class ArrSearchLinks
 			.Select(app => SearchId(app, ids).Map(id => (App: app, Id: id)))
 			.WhereSome()
 			.FirstOrNone()
-			.Map(found => config.Of(found.App).Url.Map(Address).Map(address => Link(found.App, found.Id, address)));
+			.Map(found => config.Of(found.App).LinkUrl.Map(Address).Map(address => Link(found.App, found.Id, address)));
 	}
 
 	private static Optional<IExternalMediaId> SearchId(ArrApp app, IReadOnlyList<IExternalMediaId> ids)

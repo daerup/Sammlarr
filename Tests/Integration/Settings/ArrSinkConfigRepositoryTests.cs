@@ -17,6 +17,7 @@ public class ArrSinkConfigRepositoryTests(SammlarrTestHost host) : IAsyncDisposa
 		new ArrInstanceConfig
 		{
 			Url = Some.Of("http://radarr:7878"),
+			ExternalUrl = Some.Of("http://localhost:7879"),
 			ApiKey = Some.Of(RadarrKey),
 			QualityProfileId = Some.Of(4),
 			RootFolderPath = Some.Of("/movies"),

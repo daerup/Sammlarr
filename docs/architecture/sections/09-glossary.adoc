@@ -142,6 +142,10 @@ TheTVDB's and IMDb's, finding a TMDB id first; Plex takes its own). Every detail
 enricher at a time, the search setting's provider first, then the one filling the most missing detail fields, then the least busy, then
 `MediaProvider`'s order, until no open enricher can fill what is still missing.
 
+External URL:: An optional second address for Radarr or Sonarr (`ArrInstanceConfig.ExternalUrl`), for when a browser reaches the app
+somewhere other than the URL Sammlarr calls, such as a container name only Sammlarr resolves. Only links a person opens use it
+(the API key hint in Settings, the find card in the External IDs popover); `LinkUrl` falls back to the URL when it is empty.
+
 Coordinator:: The step that merges freshly identified ids against existing library rows, so two
 references to the same title never create two library ids.
 

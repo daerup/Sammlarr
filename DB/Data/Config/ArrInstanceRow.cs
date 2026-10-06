@@ -8,6 +8,9 @@ internal sealed record ArrInstanceRow
 	[MaxLength(2048)]
 	public string? Url { get; set; }
 
+	[MaxLength(2048)]
+	public string? ExternalUrl { get; set; }
+
 	[MaxLength(4096)]
 	[Encrypted]
 	public string? ApiKey { get; set; }
