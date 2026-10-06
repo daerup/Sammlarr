@@ -83,12 +83,12 @@
     private const string PlexSearchReturn = $"{SettingsLinks.Providers}&search=plex";
 
 
-    [Parameter] public MediaProvider? Expanded { get; set; }
+    [Parameter] public Service? Expanded { get; set; }
 
     [Parameter] public SearchProvider? SearchAfterSignIn { get; set; }
 
 
-    private ProviderRowKey? _scrollTo;
+    private Service? _scrollTo;
 
     private bool _plexForSearch;
 
@@ -98,11 +98,11 @@
 
     private int _people;
 
-    private HashSet<MediaProvider> _ready = [];
+    private HashSet<RemoteService> _ready = [];
 
     private bool _arrConnected;
 
-    private ProviderRowKey? _open;
+    private Service? _open;
 
     private static readonly TimeSpan RevealDelay = TimeSpan.FromMilliseconds(250);
 
@@ -112,7 +112,7 @@
         _config = await ProviderConfigService.GetAsync();
         _people = await UserManagement.CountAsync();
         await RefreshReadyAsync();
-        _storePlexSearch = IsAdmin && SearchAfterSignIn == SearchProvider.Plex && _config.SearchProvider != SearchProvider.Plex && _ready.Contains(MediaProvider.Plex);
+        _storePlexSearch = IsAdmin && SearchAfterSignIn == SearchProvider.Plex && _config.SearchProvider != SearchProvider.Plex && _ready.Contains(RemoteService.Plex);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -145,7 +145,7 @@
     private async Task AccountsChangedAsync()
     {
         await RefreshReadyAsync();
-        if (_plexForSearch && _ready.Contains(MediaProvider.Plex))
+        if (_plexForSearch && _ready.Contains(RemoteService.Plex))
         {
             _plexForSearch = false;
             await StoreSearchAsync(SearchProvider.Plex);
@@ -157,8 +157,8 @@
         RatingContext.Refresh();
         _ready =
         [
-            .. (await Credentials.GetReadyAsync()).Select(signIn => signIn.Provider()).WhereSome(),
-            .. (await ApiKeys.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
+            .. (await Credentials.GetReadyAsync()).SelectMany(signIn => signIn.Service.Remotes),
+            .. (await ApiKeys.GetReadyAsync()).Select(slot => slot.Remote),
         ];
         var arr = await ArrConfigs.GetAsync();
         _arrConnected = arr.IsConnectable;
@@ -198,10 +198,10 @@
 
     private async Task SearchPickedAsync(SearchProvider search)
     {
-        if (search == SearchProvider.Plex && !_ready.Contains(MediaProvider.Plex))
+        if (search == SearchProvider.Plex && !_ready.Contains(RemoteService.Plex))
         {
             _plexForSearch = true;
-            OpenService(MediaProvider.Plex);
+            OpenService(RemoteService.Plex);
             return;
         }
 
@@ -216,11 +216,11 @@
         Notifier.Success($"Search now uses {search.GetDescription()}.");
     }
 
-    private void OpenService(MediaProvider provider) => OpenRow(provider);
+    private void OpenService(RemoteService remote) => OpenRow(remote);
 
     private void OpenAccounts() => OpenRow(new SammlarrAccounts());
 
-    private void OpenRow(ProviderRowKey key)
+    private void OpenRow(Service key)
     {
         _open = key;
         _scrollTo = key;
@@ -296,7 +296,7 @@
         Notifier.Success($"The wantlist now syncs to {sink.GetDescription()}: {moved.Queued - moved.Unaddressable} titles go across on each user's next sync.{skipped}");
     }
 
-    private bool IsOpen(ProviderRowKey key) => _open == key;
+    private bool IsOpen(Service key) => _open == key;
 
-    private void Toggle(ProviderRowKey key, bool open) => _open = open ? key : null;
+    private void Toggle(Service key, bool open) => _open = open ? key : null;
 }

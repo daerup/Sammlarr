@@ -25,7 +25,7 @@ public enum MediaProvider
 	[Capabilities<ProviderCapability>(ProviderCapability.Artwork | ProviderCapability.Enricher)]
 	Plex,
 
-	[Description("Mdblist")]
+	[Description("MDBList")]
 	[Capabilities<ProviderCapability>(ProviderCapability.Feed | ProviderCapability.ApiKey)]
 	Mdblist,
 }

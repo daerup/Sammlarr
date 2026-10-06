@@ -78,7 +78,7 @@
         : Unavailable.Count == 1 ? Unavailable.Single()
         : null;
 
-    private string KeysLink => KeyToAdd is { } provider ? SettingsLinks.Provider(provider.AsMediaProvider()) : SettingsLinks.Providers;
+    private string KeysLink => KeyToAdd is { } provider ? SettingsLinks.Provider(provider.Service) : SettingsLinks.Providers;
 
     private BrandingInfo Brand(FeedProvider provider) => Branding.GetBrandingInfo(provider.AsMediaProvider());
 

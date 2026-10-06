@@ -14,6 +14,12 @@ public class ProviderRowTests : BunitContext
 {
 	private static readonly MediaProviderBrandingService Brands = new();
 
+	private static readonly Service TmdbRow = RemoteService.Tmdb;
+
+	private static readonly Service AccountsRow = new SammlarrAccounts();
+
+	private static readonly Service ArrRow = new Arr();
+
 	[Before(Test)]
 	public void Setup()
 	{
@@ -65,7 +71,7 @@ public class ProviderRowTests : BunitContext
 	public async Task Row_ForAProvider_IsTheMapsScrollTargetWithoutARing()
 	{
 		var cut = Render<ProviderRow>(row =>
-			row.Add(provider => provider.Key, MediaProvider.Tmdb)
+			row.Add(provider => provider.Key, TmdbRow)
 				.Add(provider => provider.Brand, Brands.GetBrandingInfo(MediaProvider.Tmdb))
 				.Add(provider => provider.Status, "<span>Connected</span>")
 				.AddChildContent("<p>The form</p>")
@@ -80,7 +86,7 @@ public class ProviderRowTests : BunitContext
 	{
 		var cut = Render<ProviderRow>(parameters =>
 			parameters
-				.Add(row => row.Key, new SammlarrAccounts())
+				.Add(row => row.Key, AccountsRow)
 				.Add(row => row.Brand, Brands.GetBrandingInfo(AuthProvider.Local))
 				.Add(row => row.Status, "<span>Signed in</span>")
 				.AddChildContent("<p>The form</p>")
@@ -95,7 +101,7 @@ public class ProviderRowTests : BunitContext
 	{
 		var cut = Render<ProviderRow>(parameters =>
 			parameters
-				.Add(row => row.Key, new Arr())
+				.Add(row => row.Key, ArrRow)
 				.Add(row => row.Brand, Brands.GetBrandingInfo(ArrApp.Radarr))
 				.Add(row => row.Status, "<span>Connected</span>")
 				.AddChildContent("<p>The form</p>")
@@ -108,7 +114,7 @@ public class ProviderRowTests : BunitContext
 	private IRenderedComponent<ProviderRow> RenderRow(EventCallback<bool> openChanged = default) =>
 		Render<ProviderRow>(parameters =>
 			parameters
-				.Add(row => row.Key, MediaProvider.Tmdb)
+				.Add(row => row.Key, TmdbRow)
 				.Add(row => row.Brand, Brands.GetBrandingInfo(MediaProvider.Tmdb))
 				.Add(row => row.OpenChanged, openChanged)
 				.Add(row => row.Status, "<span>Connected</span>")

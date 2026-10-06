@@ -12,48 +12,21 @@ internal enum TileEdge
 
 internal sealed record MapPoint(double X, double Y);
 
-internal union MapEndpoint(MediaProvider, Arr, SammlarrAccounts)
-{
-	public static MapEndpoint Of(AuthProvider signIn) => signIn.Provider().Map(provider => (MapEndpoint)provider).GetValueOr(new SammlarrAccounts());
-
-	public static MapEndpoint Of(SinkKind sink) => sink.Provider().Map(provider => (MapEndpoint)provider).GetValueOr(new Arr());
-
-	public static MapEndpoint Of(SearchProvider search) => search.Provider().Map(provider => (MapEndpoint)provider).GetValueOr(new Arr());
-
-	public static bool operator ==(MapEndpoint left, MapEndpoint right) => Equals(left.Value, right.Value);
-
-	public static bool operator !=(MapEndpoint left, MapEndpoint right) => !Equals(left.Value, right.Value);
-
-	public override bool Equals(object? obj) => obj is MapEndpoint other && this == other;
-
-	public override int GetHashCode() => Value?.GetHashCode() ?? 0;
-
-	public override string ToString()
-	{
-		return this switch
-		{
-			MediaProvider provider => provider.ToString(),
-			Arr => "Radarr+Sonarr",
-			SammlarrAccounts => "Sammlarr",
-		};
-	}
-}
-
 internal enum MapChoice
 {
 	Wantlist,
 	Search,
 }
 
-internal sealed record MapPicker(MapChoice Choice, string Label, IReadOnlyList<MapEndpoint> Options, MapEndpoint Current);
+internal sealed record MapPicker(MapChoice Choice, string Label, IReadOnlyList<Service> Options, Service Current);
 
-internal sealed record MapRole(string Name, string Icon, string Description, double Y, MapEndpoint? Provider, MapPicker? Picker);
+internal sealed record MapRole(string Name, string Icon, string Description, double Y, Service? Provider, MapPicker? Picker);
 
-internal sealed record MapService(MapEndpoint Provider, double Y, IReadOnlyList<double> Pins);
+internal sealed record MapService(Service Provider, double Y, IReadOnlyList<double> Pins);
 
-internal sealed record MapTile(MediaProvider Provider, double X, double Y, TileEdge Entry);
+internal sealed record MapTile(Service Provider, double X, double Y, TileEdge Entry);
 
-internal sealed record MapTrace(string Role, MapEndpoint Provider, IReadOnlyList<MapPoint> Points)
+internal sealed record MapTrace(string Role, Service Provider, IReadOnlyList<MapPoint> Points)
 {
 	internal string Path => TracePath.Draw(Points);
 }
@@ -116,20 +89,15 @@ internal sealed record ServicesMapModel(
 	private const double RiseInset = 16;
 	private const double RiseLead = 10;
 
-	internal static ServicesMapModel For(ProviderConfig config) =>
-		For(config, [.. Enum.GetValues<FeedProvider>().Select(provider => provider.AsMediaProvider())]);
+	internal static ServicesMapModel For(ProviderConfig config) => For(config, [.. Enum.GetValues<FeedProvider>().Select(feed => feed.Service).Distinct()]);
 
-	internal static ServicesMapModel For(ProviderConfig config, IReadOnlyList<MediaProvider> feeds)
+	internal static ServicesMapModel For(ProviderConfig config, IReadOnlyList<Service> feeds)
 	{
 		var roles = RolesFor(config);
-		var landings = roles
-			.SelectMany(role =>
-				(role.Provider is { } provider ? [provider] : feeds.Select(feed => (MapEndpoint)feed)).Select(provider => (Role: role, Provider: provider))
-			)
-			.ToList();
+		var landings = roles.SelectMany(role => (role.Provider is { } provider ? [provider] : feeds).Select(provider => (Role: role, Provider: provider))).ToList();
 		var services = Place(roles, landings);
 
-		double Pin(MapRole role, MapEndpoint provider)
+		double Pin(MapRole role, Service provider)
 		{
 			var arriving = landings.Where(landing => landing.Provider == provider).Select(landing => landing.Role).ToList();
 			return services.Single(service => service.Provider == provider).Pins[arriving.IndexOf(role)];
@@ -166,7 +134,7 @@ internal sealed record ServicesMapModel(
 		return new ServicesMapModel(roles, services, tiles, traces, height);
 	}
 
-	internal static IReadOnlyList<MapTile> PlaceTiles(IReadOnlyList<MediaProvider> sources, double floor, double feedsRow, int lines)
+	internal static IReadOnlyList<MapTile> PlaceTiles(IReadOnlyList<Service> sources, double floor, double feedsRow, int lines)
 	{
 		var top = Math.Max(floor, feedsRow - TileSize / 2);
 		var first = floor <= feedsRow - TileSize / 2 ? TileEdge.Left : TileEdge.Bottom;
@@ -193,20 +161,20 @@ internal sealed record ServicesMapModel(
 
 	private static List<MapRole> RolesFor(ProviderConfig config)
 	{
-		(ServiceRole Role, MapEndpoint? Provider, MapPicker? Picker)[] rows =
+		(ServiceRole Role, Service? Provider, MapPicker? Picker)[] rows =
 		[
-			(ServiceRoles.SignIn, MapEndpoint.Of(config.AuthProvider), null),
+			(ServiceRoles.SignIn, config.AuthProvider.Service, null),
 			(
 				ServiceRoles.Wantlist,
-				MapEndpoint.Of(config.Sink),
-				Picker(MapChoice.Wantlist, "Wantlist syncs to", Enum.GetValues<SinkKind>().Select(MapEndpoint.Of), MapEndpoint.Of(config.Sink))
+				config.Sink.Service,
+				Picker(MapChoice.Wantlist, "Wantlist syncs to", Enum.GetValues<SinkKind>().Select(sink => sink.Service), config.Sink.Service)
 			),
 			(
 				ServiceRoles.Search,
-				MapEndpoint.Of(config.SearchProvider),
-				Picker(MapChoice.Search, "Search uses", Enum.GetValues<SearchProvider>().Select(MapEndpoint.Of), MapEndpoint.Of(config.SearchProvider))
+				config.SearchProvider.Service,
+				Picker(MapChoice.Search, "Search uses", Enum.GetValues<SearchProvider>().Select(search => search.Service), config.SearchProvider.Service)
 			),
-			(ServiceRoles.Trending, config.TrendingProvider.AsMediaProvider(), null),
+			(ServiceRoles.Trending, config.TrendingProvider.Service, null),
 			(ServiceRoles.Feeds, null, null),
 		];
 		return
@@ -217,12 +185,12 @@ internal sealed record ServicesMapModel(
 		];
 	}
 
-	private static MapPicker? Picker(MapChoice choice, string label, IEnumerable<MapEndpoint> options, MapEndpoint current)
+	private static MapPicker? Picker(MapChoice choice, string label, IEnumerable<Service> options, Service current)
 	{
 		return options.ToList() is { Count: > 1 } choices ? new MapPicker(choice, label, choices, current) : null;
 	}
 
-	private static List<MapService> Place(List<MapRole> roles, List<(MapRole Role, MapEndpoint Provider)> landings)
+	private static List<MapService> Place(List<MapRole> roles, List<(MapRole Role, Service Provider)> landings)
 	{
 		var services = new List<MapService>();
 		foreach (
@@ -244,9 +212,9 @@ internal sealed record ServicesMapModel(
 
 	private static double PinOffset(int index, int count) => (index - (count - 1) / 2.0) * PinPitch;
 
-	private static IEnumerable<MapTrace> FeedTraces(MapRole feeds, IReadOnlyList<(MediaProvider Provider, MapPoint Pin)> boxed, IReadOnlyList<MapTile> tiles)
+	private static IEnumerable<MapTrace> FeedTraces(MapRole feeds, IReadOnlyList<(Service Provider, MapPoint Pin)> boxed, IReadOnlyList<MapTile> tiles)
 	{
-		List<(MediaProvider Provider, MapPoint Entry, TileEdge Edge)> peels =
+		List<(Service Provider, MapPoint Entry, TileEdge Edge)> peels =
 		[
 			.. tiles.Where(tile => tile.Entry == TileEdge.Bottom).OrderBy(tile => tile.X).Select(Peel),
 			.. tiles.Where(tile => tile.Entry == TileEdge.Top).OrderByDescending(tile => tile.X).Select(Peel),
@@ -254,7 +222,7 @@ internal sealed record ServicesMapModel(
 		var centre = Centre(feeds.Y, peels);
 		var tracks = peels.Select((_, index) => centre + (index - (peels.Count - 1) / 2.0) * RibbonPitch).ToList();
 		var below = tracks.DefaultIfEmpty(double.PositiveInfinity).First();
-		List<(MediaProvider Provider, MapPoint Entry, bool Boxed, double Track)> lines =
+		List<(Service Provider, MapPoint Entry, bool Boxed, double Track)> lines =
 		[
 			.. boxed.Select((box, index) => (box.Provider, box.Pin, true, Math.Min(feeds.Y, below - (boxed.Count - index) * RibbonPitch))),
 			.. tiles.Where(tile => tile.Entry == TileEdge.Left).Select(tile => (tile.Provider, Entry(tile), false, feeds.Y)),
@@ -273,7 +241,7 @@ internal sealed record ServicesMapModel(
 		});
 	}
 
-	private static double Centre(double feedsY, List<(MediaProvider Provider, MapPoint Entry, TileEdge Edge)> peels)
+	private static double Centre(double feedsY, List<(Service Provider, MapPoint Entry, TileEdge Edge)> peels)
 	{
 		var middle = (peels.Count - 1) / 2.0;
 		var floor = peels
@@ -287,7 +255,7 @@ internal sealed record ServicesMapModel(
 		return Math.Min(Math.Max(feedsY, floor), ceiling);
 	}
 
-	private static (MediaProvider Provider, MapPoint Entry, TileEdge Edge) Peel(MapTile tile) => (tile.Provider, Entry(tile), tile.Entry);
+	private static (Service Provider, MapPoint Entry, TileEdge Edge) Peel(MapTile tile) => (tile.Provider, Entry(tile), tile.Entry);
 
 	private static MapPoint Entry(MapTile tile)
 	{

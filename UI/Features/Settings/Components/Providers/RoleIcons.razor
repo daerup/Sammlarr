@@ -1,5 +1,5 @@
 <span class="provider-roles">
-    @foreach (var role in Roles)
+    @foreach (var role in ServiceRoles.For(Key))
     {
         <BbTooltip DelayDuration="150">
             <BbTooltipTrigger AsChild="false" Class="provider-role" Focusable="false">
@@ -12,18 +12,5 @@
 </span>
 
 @code {
-    [Parameter] [EditorRequired] public required ProviderRowKey Key { get; set; }
-
-    private IReadOnlyList<ServiceRole> Roles
-    {
-        get
-        {
-            return Key switch
-            {
-                MediaProvider provider => ServiceRoles.For(provider),
-                Arr => [ServiceRoles.Wantlist, ServiceRoles.Search],
-                SammlarrAccounts => [ServiceRoles.SignIn],
-            };
-        }
-    }
+    [Parameter] [EditorRequired] public required Service Key { get; set; }
 }

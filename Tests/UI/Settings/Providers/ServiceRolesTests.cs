@@ -6,12 +6,22 @@ namespace UI.Tests.Settings.Providers;
 
 public class ServiceRolesTests
 {
-	[Test]
-	[Arguments(MediaProvider.Plex, new[] { "Sign-in", "Wantlist", "Search" })]
-	[Arguments(MediaProvider.Tmdb, new[] { "Search", "Trending", "Feeds" })]
-	[Arguments(MediaProvider.Mdblist, new[] { "Feeds" })]
-	public async Task For_AProvider_NamesTheMapsRolesItCanFillInTheMapsOrder(MediaProvider provider, string[] roles)
+	public static IEnumerable<Func<(Service Service, string[] Roles)>> Services()
 	{
-		await Assert.That(ServiceRoles.For(provider).Select(role => role.Name)).IsEquivalentTo(roles, CollectionOrdering.Matching);
+		return
+		[
+			() => (RemoteService.Plex, ["Sign-in", "Wantlist", "Search"]),
+			() => (RemoteService.Tmdb, ["Search", "Trending", "Feeds"]),
+			() => (RemoteService.Mdblist, ["Feeds"]),
+			() => (new Arr(), ["Wantlist", "Search"]),
+			() => (new SammlarrAccounts(), ["Sign-in"]),
+		];
+	}
+
+	[Test]
+	[MethodDataSource(nameof(Services))]
+	public async Task For_AService_NamesTheMapsRolesItCanFillInTheMapsOrder(Service service, string[] roles)
+	{
+		await Assert.That(ServiceRoles.For(service).Select(role => role.Name)).IsEquivalentTo(roles, CollectionOrdering.Matching);
 	}
 }

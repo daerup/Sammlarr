@@ -62,12 +62,15 @@
             @foreach (var tile in _model.Tiles)
             {
                 <button type="button"
-                        class="map-tile @EdgeClass(tile) @(Ready.Contains(tile.Provider) ? null : "is-off")"
-                        style="left: @Px(tile.X)px; top: @Px(tile.Y)px; --brand: @Brand(tile.Provider).BrandColor"
+                        class="map-tile @EdgeClass(tile) @(IsReady(tile.Provider) ? null : "is-off")"
+                        style="left: @Px(tile.X)px; top: @Px(tile.Y)px; --brand: @Color(tile.Provider)"
                         title="@TileLabel(tile)"
-                        @onclick="() => ServiceOpened.InvokeAsync(tile.Provider)">
-                    <ProviderLogo Provider="tile.Provider" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
-                    @if (!Ready.Contains(tile.Provider))
+                        @onclick="() => Opener(tile.Provider)?.Invoke() ?? Task.CompletedTask">
+                    @foreach (var mark in Marks(tile.Provider))
+                    {
+                        <BrandedLogo Brand="mark" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+                    }
+                    @if (!IsReady(tile.Provider))
                     {
                         <span class="map-dot bg-destructive"></span>
                     }
@@ -138,7 +141,7 @@
 @code {
     [Parameter] [EditorRequired] public required ProviderConfig Config { get; set; }
 
-    [Parameter] [EditorRequired] public required IReadOnlySet<MediaProvider> Ready { get; set; }
+    [Parameter] [EditorRequired] public required IReadOnlySet<RemoteService> Ready { get; set; }
 
     [Parameter] public bool ArrReady { get; set; }
 
@@ -150,47 +153,37 @@
 
     [Parameter] public EventCallback<SearchProvider> SearchPicked { get; set; }
 
-    [Parameter] public EventCallback<MediaProvider> ServiceOpened { get; set; }
+    [Parameter] public EventCallback<RemoteService> ServiceOpened { get; set; }
 
     [Parameter] public EventCallback ArrOpened { get; set; }
 
     [Parameter] public EventCallback AccountsOpened { get; set; }
 
-    private BrandingInfo Accounts => Branding.GetBrandingInfo(AuthProvider.Local);
-
-    private RenderFragment ServiceBody(MapEndpoint endpoint) => @<text>
-        @foreach (var mark in Marks(endpoint))
+    private RenderFragment ServiceBody(Service service) => @<text>
+        @foreach (var mark in Marks(service))
         {
             <BrandedLogo Brand="mark" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
         }
         <span class="flex min-w-0 flex-col items-start">
-            <span class="map-service-name">@Name(endpoint)</span>
+            <span class="map-service-name">@Name(service)</span>
             <span class="map-service-status">
-                <span class="map-dot @DotClass(endpoint)"></span>
-                @Status(endpoint)
+                <span class="map-dot @DotClass(service)"></span>
+                @Status(service)
             </span>
         </span>
     </text>;
 
-    private Func<Task>? Opener(MapEndpoint endpoint)
+    private Func<Task>? Opener(Service service)
     {
-        return endpoint switch
+        return service switch
         {
-            MediaProvider provider => () => ServiceOpened.InvokeAsync(provider),
+            RemoteService remote => () => ServiceOpened.InvokeAsync(remote),
             Arr => CanPick && Config.Sink == SinkKind.Arr ? () => ArrOpened.InvokeAsync() : null,
             SammlarrAccounts => () => AccountsOpened.InvokeAsync(),
         };
     }
 
-    private IReadOnlyList<BrandingInfo> Marks(MapEndpoint endpoint)
-    {
-        return endpoint switch
-        {
-            MediaProvider provider => [Brand(provider)],
-            Arr => Branding.Brands(SinkKind.Arr),
-            SammlarrAccounts => [Accounts],
-        };
-    }
+    private IReadOnlyList<BrandingInfo> Marks(Service service) => Branding.Brands(service);
 
     private ServicesMapModel _model = null!;
 
@@ -204,84 +197,67 @@
 
     protected override void OnParametersSet() => _model = ServicesMapModel.For(Config);
 
-    private Task PickAsync(MapPicker picker, MapEndpoint option)
+    private Task PickAsync(MapPicker picker, Service option)
     {
         return picker.Choice switch
         {
-            MapChoice.Wantlist => SinkPicked.InvokeAsync(Enum.GetValues<SinkKind>().Single(sink => MapEndpoint.Of(sink) == option)),
-            MapChoice.Search => SearchPicked.InvokeAsync(Enum.GetValues<SearchProvider>().Single(search => MapEndpoint.Of(search) == option)),
+            MapChoice.Wantlist => SinkPicked.InvokeAsync(Enum.GetValues<SinkKind>().Single(sink => sink.Service == option)),
+            MapChoice.Search => SearchPicked.InvokeAsync(Enum.GetValues<SearchProvider>().Single(search => search.Service == option)),
         };
     }
 
-    private string Unavailable(MapPicker picker, MapEndpoint option)
+    private string Unavailable(MapPicker picker, Service option)
     {
         return picker.Choice switch
         {
             MapChoice.Wantlist => string.Empty,
-            MapChoice.Search when IsReady(option) || option == MapEndpoint.Of(SearchProvider.Plex) => string.Empty,
-            MapChoice.Search when option == MapEndpoint.Of(SearchProvider.Tmdb) => $"Add your {Name(option)} key first",
+            MapChoice.Search when IsReady(option) || option == SearchProvider.Plex.Service => string.Empty,
+            MapChoice.Search when option == SearchProvider.Tmdb.Service => $"Add your {Name(option)} key first",
             MapChoice.Search => $"Connect {Name(option)} first",
         };
     }
 
-    private BrandingInfo Brand(MediaProvider provider) => Branding.GetBrandingInfo(provider);
+    private string Color(Service service) => Branding.Color(service);
 
-    private string Color(MapEndpoint endpoint)
-    {
-        return endpoint switch
-        {
-            MediaProvider provider => Brand(provider).BrandColor,
-            Arr => Branding.ArrColor,
-            SammlarrAccounts => Accounts.BrandColor,
-        };
-    }
+    private string Name(Service service) => string.Join(" + ", Marks(service).Select(brand => brand.NickName));
 
-    private string Name(MapEndpoint endpoint)
+    private bool IsReady(Service service)
     {
-        return endpoint switch
+        return service switch
         {
-            MediaProvider provider => Brand(provider).NickName,
-            Arr => SinkKind.Arr.GetDescription(),
-            SammlarrAccounts => Accounts.NickName,
-        };
-    }
-
-    private bool IsReady(MapEndpoint endpoint)
-    {
-        return endpoint switch
-        {
-            MediaProvider provider => Ready.Contains(provider),
+            RemoteService remote => Ready.Contains(remote),
             Arr => ArrReady,
             SammlarrAccounts => true,
         };
     }
 
-    private string? Dash(MapEndpoint endpoint) => IsReady(endpoint) ? null : "4 3";
+    private string? Dash(Service service) => IsReady(service) ? null : "4 3";
 
-    private string DotClass(MapEndpoint endpoint) => IsReady(endpoint) ? "bg-success" : "bg-destructive";
+    private string DotClass(Service service) => IsReady(service) ? "bg-success" : "bg-destructive";
 
-    private string Status(MapEndpoint endpoint)
+    private string Status(Service service)
     {
-        return endpoint switch
+        return service switch
         {
-            MediaProvider provider => Readiness(provider),
+            RemoteService remote => Readiness(remote),
             Arr => ArrReady ? "Connected" : "Not set up",
             SammlarrAccounts => People == 1 ? "Local accounts · 1 person" : $"Local accounts · {People} people",
         };
     }
 
-    private string Readiness(MediaProvider provider)
+    private string Readiness(RemoteService remote)
     {
-        return (ServiceRoles.IsAccount(provider), Ready.Contains(provider)) switch
+        var ready = Ready.Contains(remote);
+        return remote.Access switch
         {
-            (true, true) => "Your account",
-            (true, false) => "Not connected",
-            (false, true) => "Your key is set",
-            (false, false) => "No key yet",
+            UserSignIn => ready ? "Your account" : "Not connected",
+            UserKey => ready ? "Your key is set" : "No key yet",
+            AppInstance => ready ? "Connected" : "Not set up",
+            Open => "Ready",
         };
     }
 
-    private string TileLabel(MapTile tile) => $"{Brand(tile.Provider).NickName}: {Readiness(tile.Provider)}";
+    private string TileLabel(MapTile tile) => $"{Name(tile.Provider)}: {Status(tile.Provider)}";
 
     private static string EdgeClass(MapTile tile) =>
         tile.Entry switch

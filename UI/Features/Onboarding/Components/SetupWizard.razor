@@ -156,13 +156,13 @@
     private int _step;
     private int _drawnStep = -1;
     private ProviderConfig? _config;
-    private HashSet<MediaProvider> _ready = [];
+    private HashSet<RemoteService> _ready = [];
     private bool _settingUp;
     private bool _switching;
     private bool _skipped;
     private bool _arrOpen = true;
     private bool _plexOpen = true;
-    private ProviderRowKey? _keyOpen = MediaProvider.Tmdb;
+    private Service? _keyOpen = RemoteService.Tmdb;
     private IReadOnlyList<SummaryRow> _summary = [];
 
     [Parameter] public bool NeedsAdmin { get; set; }
@@ -186,8 +186,8 @@
             return _step switch
             {
                 WantlistStep when PickedSink == SinkKind.Arr && (_settingUp || _config?.Sink != SinkKind.Arr) => "Connect Radarr and Sonarr to continue",
-                WantlistStep when PickedSink == SinkKind.Plex && !_ready.Contains(MediaProvider.Plex) => "Connect Plex to continue",
-                KeysStep when !_ready.Contains(MediaProvider.Tmdb) => "Add a TMDB key to continue",
+                WantlistStep when PickedSink == SinkKind.Plex && !_ready.Contains(RemoteService.Plex) => "Connect Plex to continue",
+                KeysStep when !_ready.Contains(RemoteService.Tmdb) => "Add a TMDB key to continue",
                 _ => null,
             };
         }
@@ -236,8 +236,8 @@
         _config = await ProviderConfigService.GetAsync();
         _ready =
         [
-            .. (await Credentials.GetReadyAsync()).Select(signIn => signIn.Provider()).WhereSome(),
-            .. (await ApiKeys.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
+            .. (await Credentials.GetReadyAsync()).SelectMany(signIn => signIn.Service.Remotes),
+            .. (await ApiKeys.GetReadyAsync()).Select(slot => slot.Remote),
         ];
     }
 
@@ -316,15 +316,15 @@
         [
             new("Admin", $"{CurrentUser.DisplayName}, {AdminKind}", Done: true, Later: false),
             new("Wantlist", config.Sink == SinkKind.Arr ? "Syncs to Radarr + Sonarr" : "Syncs to your Plex watchlist", Done: true, Later: false),
-            Key("TMDB key", MediaProvider.Tmdb, "Not set"),
-            Key("MDBList key", MediaProvider.Mdblist, "Not set: needed only for MDBList feeds"),
+            Key("TMDB key", RemoteService.Tmdb, "Not set"),
+            Key("MDBList key", RemoteService.Mdblist, "Not set: needed only for MDBList feeds"),
             people,
         ];
     }
 
-    private SummaryRow Key(string label, MediaProvider provider, string missing)
+    private SummaryRow Key(string label, RemoteService remote, string missing)
     {
-        var ready = _ready.Contains(provider);
+        var ready = _ready.Contains(remote);
         return new SummaryRow(label, ready ? "Connected" : missing, ready, Later: !ready);
     }
 
