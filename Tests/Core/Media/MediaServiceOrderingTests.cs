@@ -1,5 +1,4 @@
 using Contracts;
-using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Settings;
 using Core.DI;
@@ -146,7 +145,7 @@ public class MediaServiceOrderingTests
 
 		foreach (var item in builder.Items.Where(i => !i.Identifies))
 		{
-			var key = UnmatchedCacheKey.Build([item.External], MediaProvider.Tmdb);
+			var key = UnmatchedCacheKey.Build([item.External], MediaProvider.Tmdb, []);
 			unmatchedCache.GetValueOrNone(Is<string>(k => k == key)).Returns(Some.Of(true));
 		}
 
@@ -173,14 +172,13 @@ public class MediaServiceOrderingTests
 			enrichers,
 			configRepository.Object,
 			TestCapacity.Open(),
-			IApiKeyService.Mock().Object,
-			ICredentialService.Mock().Object,
+			TestReadiness.Everything(),
 			dateTimeProvider.Object,
 			NullLogger<DetailsFetcher>.Instance
 		);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		return new MediaService(
-			new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),
+			new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), TestReadiness.Everything(), dateTimeProvider.Object),
 			detailsFetcher,
 			coordinator,
 			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),

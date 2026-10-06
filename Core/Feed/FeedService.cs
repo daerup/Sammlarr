@@ -1,5 +1,6 @@
 using Contracts.DI;
 using Contracts.Feed;
+using Contracts.Providers;
 using Contracts.Wantlist;
 using Domain.Feed;
 using Domain.Feed.Run;
@@ -11,7 +12,8 @@ internal sealed class FeedService(
 	IFeedRepository repository,
 	IWantlistRepository wantlist,
 	IFeedScheduler scheduler,
-	IKeyedServiceIndex<FeedProvider, IFeedProvider> providers
+	IKeyedServiceIndex<FeedProvider, IFeedProvider> providers,
+	IServiceReadiness readiness
 ) : IFeedService
 {
 	public async Task<FeedSnapshot> GetAsync(CancellationToken cancellationToken = default)
@@ -69,13 +71,15 @@ internal sealed class FeedService(
 		return await RescheduleAllAsync(await repository.PauseAsync(ids, cancellationToken), cancellationToken);
 	}
 
-	public async Task<IReadOnlyList<FeedId>> PauseAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<FeedId>> PauseFeedsOfAsync(RemoteService remote, CancellationToken cancellationToken = default)
 	{
-		var affected = (await repository.GetAllAsync(cancellationToken))
-			.Where(feed => feed.Provider.AsApiKeyProvider() == provider)
-			.Select(feed => feed.Id)
-			.ToList();
-		return await PauseAsync(affected, cancellationToken);
+		var unready = await Enum.GetValues<FeedProvider>()
+			.Where(provider => provider.Service.DependsOn(remote))
+			.ToAsyncEnumerable()
+			.Where(async (provider, ct) => !await readiness.ReadyAsync(provider.Service, ct))
+			.ToHashSetAsync(cancellationToken: cancellationToken);
+		var feeds = await repository.GetAllAsync(cancellationToken);
+		return await PauseAsync([.. feeds.Where(feed => unready.Contains(feed.Provider)).Select(feed => feed.Id)], cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<FeedId>> ResumeAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default)

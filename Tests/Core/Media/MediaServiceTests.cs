@@ -1,12 +1,10 @@
 using Contracts;
-using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Settings;
 using Core.DI;
 using Core.Media;
-using Domain.Auth;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
@@ -501,8 +499,6 @@ public class MediaServiceTests
 		var idle = IDetailsEnricher.Mock();
 		idle.Fills.Returns(MediaFields.None);
 		idle.Accepts.Returns([]);
-		var credentials = ICredentialService.Mock();
-		credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
 		var unmatchedCache = TestUnmatchedCache.Empty();
 
 		mediaRepo
@@ -536,14 +532,19 @@ public class MediaServiceTests
 			enrichers,
 			configRepo.Object,
 			TestCapacity.Open(),
-			IApiKeyService.Mock().Object,
-			credentials.Object,
+			TestReadiness.Everything(),
 			dateTimeProvider.Object,
 			NullLogger<DetailsFetcher>.Instance
 		);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		var testee = new MediaService(
-			new MediaIdResolver([new(RemoteService.Tmdb, converter.Object)], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),
+			new MediaIdResolver(
+				[new(RemoteService.Tmdb, converter.Object)],
+				unmatchedCache.Object,
+				TestCapacity.Open(),
+				TestReadiness.Everything(),
+				dateTimeProvider.Object
+			),
 			detailsFetcher,
 			coordinator,
 			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),

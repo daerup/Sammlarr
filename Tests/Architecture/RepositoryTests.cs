@@ -73,8 +73,16 @@ public class RepositoryTests
 					"Messaging.Notifications.NotificationDispatchHandler",
 				]
 			);
-		yield return () => (typeof(IApiKeyConfigRepository), ["DB.Data.Access.ApiKeyConfigRepository", "DB.Data.Access.AccessModule", "Core.Auth.ApiKeyService"]);
-		yield return () => (typeof(ICredentialRepository), ["DB.Data.Access.CredentialRepository", "DB.Data.Access.AccessModule", "Core.Auth.CredentialService"]);
+		yield return () =>
+			(
+				typeof(IApiKeyConfigRepository),
+				["DB.Data.Access.ApiKeyConfigRepository", "DB.Data.Access.AccessModule", "Core.Auth.ApiKeyService", "Core.Providers.ServiceReadiness"]
+			);
+		yield return () =>
+			(
+				typeof(ICredentialRepository),
+				["DB.Data.Access.CredentialRepository", "DB.Data.Access.AccessModule", "Core.Auth.CredentialService", "Core.Providers.ServiceReadiness"]
+			);
 		yield return () =>
 			(typeof(IArrSinkConfigRepository), ["DB.Data.Config.ArrSinkConfigRepository", "DB.Data.Config.ConfigModule", "Core.Settings.ArrSinkConfigService"]);
 		yield return () =>

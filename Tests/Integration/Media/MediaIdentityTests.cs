@@ -258,7 +258,8 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(results[0]).IsError();
 		var unmatched = host.Resolve<ITypedMemoryCache<string, bool>>();
-		await Assert.That(unmatched.GetValueOrNone(UnmatchedCacheKey.Build([Ext(Plex("777"))], MediaProvider.Plex))).IsSome();
+		var connected = await host.Resolve<MediaIdResolver>().ConnectedAsync(CancellationToken.None);
+		await Assert.That(unmatched.GetValueOrNone(UnmatchedCacheKey.Build([Ext(Plex("777"))], MediaProvider.Plex, connected))).IsSome();
 	}
 
 	[Test]
@@ -360,6 +361,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task IdentifyAsync_ForATmdbIdWhileTmdbIsUnavailable_LeavesTheTitleForTheNextRun()
 	{
+		await host.EnsurePlexAccount();
 		await host.EnsureTmdbAccount();
 		host.TmdbDetailFails(Spec("Fight Club", Tmdb("550")), HttpStatusCode.ServiceUnavailable);
 
@@ -367,7 +369,8 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(results[0]).IsError();
 		var unmatched = host.Resolve<ITypedMemoryCache<string, bool>>();
-		await Assert.That(unmatched.GetValueOrNone(UnmatchedCacheKey.Build([Ext(Tmdb("550"))], MediaProvider.Plex))).IsNone();
+		var connected = await host.Resolve<MediaIdResolver>().ConnectedAsync(CancellationToken.None);
+		await Assert.That(unmatched.GetValueOrNone(UnmatchedCacheKey.Build([Ext(Tmdb("550"))], MediaProvider.Plex, connected))).IsNone();
 	}
 
 	[Test]

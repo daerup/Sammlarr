@@ -15,6 +15,7 @@ internal sealed class MediaIdResolver(
 	IEnumerable<Keyed<RemoteService, IExternalIdConverter>> converters,
 	ITypedMemoryCache<string, bool> unmatchedCache,
 	IRemoteCapacity capacity,
+	IServiceReadiness readiness,
 	IDateTimeProvider clock
 )
 {
@@ -22,30 +23,38 @@ internal sealed class MediaIdResolver(
 
 	private readonly IReadOnlyList<Hop> _hops = IdLookupPlanner.Derive(converters);
 
+	public Task<IReadOnlySet<RemoteService>> ConnectedAsync(CancellationToken cancellationToken)
+	{
+		return readiness.ConnectedAsync(_hops.Select(hop => hop.Remote), cancellationToken);
+	}
+
 	public async Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveAsync(
 		IdentifyRequest request,
 		MediaProvider target,
+		IReadOnlySet<RemoteService> connected,
 		CancellationToken cancellationToken = default
 	)
 	{
-		var key = UnmatchedCacheKey.Build(request.Candidates, target);
+		var key = UnmatchedCacheKey.Build(request.Candidates, target, connected);
 		return await unmatchedCache
 			.GetValueOrNone(key)
 			.Match(
 				_ => Task.FromResult<Result<IReadOnlyList<IExternalMediaId>>>(Error.From("Candidates were previously resolved as unmatched.")),
-				() => LookUpAsync(request, target, key, cancellationToken)
+				() => LookUpAsync(request, target, connected, key, cancellationToken)
 			);
 	}
 
 	private async Task<Result<IReadOnlyList<IExternalMediaId>>> LookUpAsync(
 		IdentifyRequest request,
 		MediaProvider target,
+		IReadOnlySet<RemoteService> connected,
 		string key,
 		CancellationToken cancellationToken
 	)
 	{
 		var candidates = request.Candidates;
-		var plan = IdLookupPlanner.Plan(candidates.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, _hops, capacity, clock.Now);
+		IReadOnlyList<Hop> hops = [.. _hops.Where(hop => connected.Contains(hop.Remote))];
+		var plan = IdLookupPlanner.Plan(candidates.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, hops, capacity, clock.Now);
 		var unresolved = Error.From($"No lookup resolved the candidates to a {target} id.");
 		var transient = false;
 		var answers = new Dictionary<AnswerKey, LookupAnswer>();

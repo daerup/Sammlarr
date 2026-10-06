@@ -16,7 +16,7 @@ public interface IFeedService
 
 	Task<IReadOnlyList<FeedId>> PauseAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyList<FeedId>> PauseAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<FeedId>> PauseFeedsOfAsync(RemoteService remote, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<FeedId>> ResumeAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default);
 

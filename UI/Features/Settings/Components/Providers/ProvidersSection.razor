@@ -1,4 +1,4 @@
-@using Contracts.Auth
+@using Contracts.Providers
 @using Contracts.Identity
 @using Contracts.Settings
 @using Contracts.Wantlist
@@ -7,8 +7,7 @@
 @using UI.Features.Settings.Components.Users
 @inject IProviderConfigService ProviderConfigService
 @inject RatingContext RatingContext
-@inject IApiKeyService ApiKeys
-@inject ICredentialService Credentials
+@inject IServiceReadiness Readiness
 @inject ICurrentUser CurrentUser
 @inject IUserManagementService UserManagement
 @inject IArrSinkConfigService ArrConfigs
@@ -155,11 +154,7 @@
     private async Task RefreshReadyAsync()
     {
         RatingContext.Refresh();
-        _ready =
-        [
-            .. (await Credentials.GetReadyAsync()).SelectMany(signIn => signIn.Service.Remotes),
-            .. (await ApiKeys.GetReadyAsync()).Select(slot => slot.Remote),
-        ];
+        _ready = [.. await Readiness.ConnectedAsync(Enum.GetValues<RemoteService>())];
         var arr = await ArrConfigs.GetAsync();
         _arrConnected = arr.IsConnectable;
     }

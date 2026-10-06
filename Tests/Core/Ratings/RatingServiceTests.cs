@@ -1,4 +1,4 @@
-using Contracts.Auth;
+using Contracts.Providers;
 using Contracts.Ratings;
 using Core.Ratings;
 using Domain.Media;
@@ -9,29 +9,28 @@ namespace Core.Tests.Ratings;
 public class RatingServiceTests
 {
 	private readonly Mock<IRatingDefaultRepository> _defaults = IRatingDefaultRepository.Mock();
-	private readonly Mock<IApiKeyService> _keys = IApiKeyService.Mock();
-	private readonly Mock<ICredentialService> _credentials = ICredentialService.Mock();
+	private readonly Mock<IServiceReadiness> _readiness = IServiceReadiness.Mock();
+	private readonly HashSet<RemoteService> _connected = [];
 
 	public RatingServiceTests()
 	{
-		_keys.IsStoredAsync(Any<ApiKeyProvider>(), Any()).Returns(false);
-		_credentials.IsStoredAsync(Any<AuthProvider>(), Any()).Returns(false);
+		_readiness.ConnectedAsync(Any(), Any()).Returns((asked, _) => asked.Where(_connected.Contains).ToHashSet());
 	}
 
-	private RatingService Testee => new(_defaults.Object, _keys.Object, _credentials.Object);
+	private RatingService Testee => new(_defaults.Object, _readiness.Object);
 
 	[Test]
-	public async Task GetAvailableAsync_WithOnlyATmdbKey_OffersOnlyTmdb()
+	public async Task GetAvailableAsync_WithOnlyTmdbConnected_OffersOnlyTmdb()
 	{
-		_keys.IsStoredAsync(ApiKeyProvider.Tmdb, Any()).Returns(true);
+		_connected.Add(RemoteService.Tmdb);
 
 		await Assert.That(await Testee.GetAvailableAsync()).IsEquivalentTo([RatingSource.Tmdb]);
 	}
 
 	[Test]
-	public async Task GetAvailableAsync_WithAPlexAccount_OffersEverySourcePlexSupplies()
+	public async Task GetAvailableAsync_WithPlexConnected_OffersEverySourcePlexSupplies()
 	{
-		_credentials.IsStoredAsync(AuthProvider.Plex, Any()).Returns(true);
+		_connected.Add(RemoteService.Plex);
 
 		await Assert
 			.That(await Testee.GetAvailableAsync())
@@ -45,11 +44,11 @@ public class RatingServiceTests
 	}
 
 	[Test]
-	public async Task GetAvailableAsync_NeverLooksUpAProviderThatSuppliesNoRating()
+	public async Task GetAvailableAsync_NeverAsksAfterAServiceThatSuppliesNoRating()
 	{
 		await Testee.GetAvailableAsync();
 
-		_keys.IsStoredAsync(ApiKeyProvider.Mdblist, Any()).WasCalled(Times.Never);
+		_readiness.ConnectedAsync(Is<IEnumerable<RemoteService>>(asked => asked.Contains(RemoteService.Mdblist)), Any()).WasNeverCalled();
 	}
 
 	[Test]

@@ -1,0 +1,20 @@
+@using Contracts.Providers
+@inject IServiceReadiness Readiness
+
+@code {
+    [Parameter] [EditorRequired] public required Service Service { get; set; }
+    [Parameter] public EventCallback<bool> AccessChanged { get; set; }
+
+    private bool? _lastReportedAccess;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var ready = await Readiness.ReadyAsync(Service);
+
+        if (AccessChanged.HasDelegate && _lastReportedAccess != ready)
+        {
+            _lastReportedAccess = ready;
+            await AccessChanged.InvokeAsync(ready);
+        }
+    }
+}

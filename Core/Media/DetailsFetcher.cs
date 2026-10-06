@@ -1,5 +1,4 @@
 using Contracts;
-using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Media;
 using Contracts.Providers;
@@ -14,17 +13,12 @@ internal sealed class DetailsFetcher(
 	IKeyedServiceSet<RemoteService, IDetailsEnricher> enrichers,
 	IProviderConfigService providerConfig,
 	IRemoteCapacity capacity,
-	IApiKeyService apiKeys,
-	ICredentialService credentials,
+	IServiceReadiness readiness,
 	IDateTimeProvider clock,
 	ILogger<DetailsFetcher> logger
 )
 {
-	public async Task<IReadOnlySet<RemoteService>> ConnectedAsync(CancellationToken cancellationToken)
-	{
-		var checks = await Task.WhenAll(enrichers.Keys.Select(remote => ConnectedAsync(remote, cancellationToken)));
-		return checks.Where(check => check.Ready).Select(check => check.Remote).ToHashSet();
-	}
+	public Task<IReadOnlySet<RemoteService>> ConnectedAsync(CancellationToken cancellationToken) => readiness.ConnectedAsync(enrichers.Keys, cancellationToken);
 
 	public Optional<CachedDetails> FindReusable(MediaIdentity identity, Optional<CachedDetails> cached, IReadOnlySet<RemoteService> connected)
 	{
@@ -200,34 +194,6 @@ internal sealed class DetailsFetcher(
 		{
 			logger.LogWarning(exception, "{Remote} could not fill the details of {MediaId}", candidate.Remote, identity.Id);
 			return Error.From(new RemoteUnavailableException(candidate.Remote, exception));
-		}
-	}
-
-	private Task<(RemoteService Remote, bool Ready)> ConnectedAsync(RemoteService remote, CancellationToken cancellationToken)
-	{
-		return remote.Access switch
-		{
-			UserKey(var slot) => CheckAsync(remote, () => apiKeys.GetAsync(slot, cancellationToken), cancellationToken),
-			UserSignIn(var signIn) => CheckAsync(remote, () => credentials.GetAsync(signIn, cancellationToken), cancellationToken),
-			Open or AppInstance => Task.FromResult((remote, true)),
-		};
-	}
-
-	private async Task<(RemoteService Remote, bool Ready)> CheckAsync<TSecret>(
-		RemoteService remote,
-		Func<ValueTask<Result<TSecret>>> load,
-		CancellationToken cancellationToken
-	)
-		where TSecret : notnull
-	{
-		try
-		{
-			return (remote, await load().IsSuccess());
-		}
-		catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
-		{
-			logger.LogWarning(exception, "The {Remote} secret could not be read, so it fills no details", remote);
-			return (remote, false);
 		}
 	}
 

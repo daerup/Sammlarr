@@ -286,8 +286,9 @@ internal sealed class MediaService(
 	{
 		var allCandidates = requests.SelectMany(r => r.Candidates).Distinct().ToList();
 		var stored = await LoadByExternalsAsync(allCandidates, cancellationToken);
+		var connected = await idResolver.ConnectedAsync(cancellationToken);
 		var preliminary = await requests
-			.SelectAwait(req => IdentifyOneAsync(req, addressedBy, stored, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
+			.SelectAwait(req => IdentifyOneAsync(req, addressedBy, stored, connected, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
 			.ToListAsync(cancellationToken);
 		return await coordinator.CoordinateHandoffsAsync(preliminary, building, buffer, cancellationToken);
 	}
@@ -296,13 +297,14 @@ internal sealed class MediaService(
 		IdentifyRequest request,
 		Func<MediaType, Optional<MediaProvider>> addressedBy,
 		IReadOnlyDictionary<IExternalMediaId, StoredMedia> stored,
+		IReadOnlySet<RemoteService> connected,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
 		return await addressedBy(request.Type)
 			.Match(
-				target => IdentifyForAsync(request, target, stored, buffer, cancellationToken),
+				target => IdentifyForAsync(request, target, stored, connected, buffer, cancellationToken),
 				() => ValueTask.FromResult<Result<IdentifyHandoff>>(Error.From($"No provider addresses {request.Type} titles here."))
 			);
 	}
@@ -311,12 +313,13 @@ internal sealed class MediaService(
 		IdentifyRequest request,
 		MediaProvider target,
 		IReadOnlyDictionary<IExternalMediaId, StoredMedia> stored,
+		IReadOnlySet<RemoteService> connected,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
 		return FindStored(request, target, stored, buffer)
-			.Match(found => ValueTask.FromResult<Result<IdentifyHandoff>>(Success.Of(found)), () => ResolveAsync(request, target, cancellationToken));
+			.Match(found => ValueTask.FromResult<Result<IdentifyHandoff>>(Success.Of(found)), () => ResolveAsync(request, target, connected, cancellationToken));
 	}
 
 	private static Optional<IdentifyHandoff> FindStored(
@@ -347,10 +350,15 @@ internal sealed class MediaService(
 		return new IdentifyHandoff(merged, Some.Of(match));
 	}
 
-	private async ValueTask<Result<IdentifyHandoff>> ResolveAsync(IdentifyRequest request, MediaProvider target, CancellationToken cancellationToken)
+	private async ValueTask<Result<IdentifyHandoff>> ResolveAsync(
+		IdentifyRequest request,
+		MediaProvider target,
+		IReadOnlySet<RemoteService> connected,
+		CancellationToken cancellationToken
+	)
 	{
 		return await idResolver
-			.ResolveAsync(request, target, cancellationToken)
+			.ResolveAsync(request, target, connected, cancellationToken)
 			.Map(externals => new IdentifyHandoff(new MediaIdentity(MediaId.New(), [.. externals]), new None()));
 	}
 
