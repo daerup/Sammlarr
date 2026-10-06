@@ -27,7 +27,9 @@
         "ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS": "true",
         "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19094",
         "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20297",
-        "Staging": "true"
+        "Staging": "true",
+        "LaunchDashboard": "true",
+        "LaunchSammlarr": "true"
       }
     }
   }

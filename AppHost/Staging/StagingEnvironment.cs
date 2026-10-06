@@ -88,6 +88,16 @@ internal static class StagingEnvironment
 		}
 
 		sammlarr.WithStagingCommands(new StagingResources(layout, scenario, radarr, sonarr, seed));
+		if (builder.Configuration["LaunchSammlarr"] == "true")
+		{
+			sammlarr.WithBrowserLaunch(() => $"http://{config.Host}:{config.Ports.Sammlarr}");
+		}
+
+		if (builder.Configuration["LaunchDashboard"] == "true")
+		{
+			builder.OpenOnceStarted(builder.Configuration["ASPNETCORE_URLS"]!.Split(';')[0]);
+		}
+
 		Label(radarr, "Radarr", "/");
 		Label(sonarr, "Sonarr", "/");
 		Label(wiremock, "WireMock journal", "/__admin/requests");
