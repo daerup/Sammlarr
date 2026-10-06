@@ -2,6 +2,7 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using E2E.Tests.Settings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
@@ -20,15 +21,16 @@ public class StagingSmokeTests
 		var root = Directory.CreateTempSubdirectory("sammlarr-staging-e2e-");
 		try
 		{
-			await using var app = await StartAsync(root.FullName);
+			var (app, admin) = await StartAsync(root.FullName);
+			await using var _ = app;
 			using var playwright = await Playwright.CreateAsync();
 			await using var browser = await BrowserPages.LaunchAsync(playwright);
 			await using var context = await BrowserPages.OpenAsync(browser, app.GetEndpoint("sammlarr", "http").ToString().TrimEnd('/'));
 			var page = await context.NewPageAsync();
 
 			await page.VisitAsync(Routes.Home);
-			await page.Labelled("Username").EnterAsync(StagingPersonas.Admin);
-			await page.Labelled("Password").EnterAsync(StagingPersonas.AdminPassword);
+			await page.Labelled("Username").EnterAsync(admin.Name);
+			await page.Labelled("Password").EnterAsync(admin.Password);
 			await page.Button("Sign in").ClickAsync();
 			await page.ShouldBeAtAsync(Routes.Home);
 			await page.VisitAsync(SettingsPage.Section("providers"));
@@ -42,7 +44,7 @@ public class StagingSmokeTests
 		}
 	}
 
-	private static async Task<DistributedApplication> StartAsync(string root)
+	private static async Task<(DistributedApplication App, StagingPersona Admin)> StartAsync(string root)
 	{
 		using var timeout = new CancellationTokenSource(StackBoot.Timeout);
 		var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
@@ -61,9 +63,10 @@ public class StagingSmokeTests
 			builder.CreateResourceBuilder(container).WithLifetime(ContainerLifetime.Session).WithEndpoint("http", endpoint => endpoint.Port = null);
 		}
 
+		var admin = builder.Configuration.GetSection("Staging:Personas:Admin").Get<StagingPersona>()!;
 		var app = await builder.BuildAsync(timeout.Token);
 		await app.StartAsync(timeout.Token);
 		await app.ResourceNotifications.WaitForResourceHealthyAsync("sammlarr", timeout.Token);
-		return app;
+		return (app, admin);
 	}
 }

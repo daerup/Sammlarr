@@ -10,6 +10,8 @@ internal sealed record StagingOptions
 
 	public required StagingScenario Scenario { get; init; }
 
+	public required StagingPersonas Personas { get; init; }
+
 	public required string TmdbKey { get; init; }
 
 	public string? MdblistKey { get; init; }
@@ -23,6 +25,20 @@ internal sealed record StagingOptions
 	public required ArrAppOptions Radarr { get; init; }
 
 	public required ArrAppOptions Sonarr { get; init; }
+}
+
+internal sealed record StagingPersonas
+{
+	public required StagingPersona Admin { get; init; }
+
+	public required StagingPersona Member { get; init; }
+}
+
+internal sealed record StagingPersona
+{
+	public required string Name { get; init; }
+
+	public required string Password { get; init; }
 }
 
 internal sealed record ArrAppOptions
@@ -46,7 +62,7 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 		var sonarr = ArrClient.For(options.Sonarr.Url, options.ArrApiKey);
 		var movies = await ArrSetup.PrepareAsync(radarr, StagedApp.Radarr, options.Radarr, options.IndexerUrl, cancellationToken);
 		var shows = await ArrSetup.PrepareAsync(sonarr, StagedApp.Sonarr, options.Sonarr, options.IndexerUrl, cancellationToken);
-		await StagingLibrary.FillRadarrAsync(radarr, options.Radarr, movies, cancellationToken);
+		await StagingLibrary.FillRadarrAsync(radarr, options.Radarr, movies, options.Personas.Admin.Name, cancellationToken);
 		await StagingLibrary.FillSonarrAsync(sonarr, options.Sonarr, shows, cancellationToken);
 
 		var seeded = $"{database}.seeded";
@@ -68,10 +84,10 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 		{
 			logger.LogInformation(
 				"Sign in as {Admin} / {AdminPassword} (admin) or {Member} / {MemberPassword} (member)",
-				StagingPersonas.Admin,
-				StagingPersonas.AdminPassword,
-				StagingPersonas.Member,
-				StagingPersonas.MemberPassword
+				options.Personas.Admin.Name,
+				options.Personas.Admin.Password,
+				options.Personas.Member.Name,
+				options.Personas.Member.Password
 			);
 		}
 	}
@@ -89,6 +105,7 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 		var radarr = Instance(options.Radarr, options.ArrApiKey, movies);
 		var sonarr = Instance(options.Sonarr, options.ArrApiKey, shows);
 		return new StagingSettings(
+			options.Personas,
 			options.TmdbKey,
 			Optional.Of(options.MdblistKey),
 			ArrSinkConfig.Empty with

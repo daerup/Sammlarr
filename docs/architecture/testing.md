@@ -138,13 +138,17 @@ at the same time. The first start pulls the images and builds Sammlarr's (about 
 
 Every port is published on 127.0.0.1 only.
 
+**Settings** live in `AppHost/appsettings.Staging.json`, which the staging profile loads on top of the AppHost's own: under
+`Staging`, the host name, the ports, the catcher session, the proxy and its allowlist, and the two personas; under `Sammlarr`, settings
+handed as they are to the staged Sammlarr and its seed (the setup code, `Accounts:MinimumPasswordLength`). The values above are its defaults.
+
 **Scenarios.** The `seed` resource (Web started with `seed-staging`, its code in `Web/Staging`, which the published image leaves out) prepares Radarr and Sonarr (root folder, a blackhole
 download client, the Newznab indexer, a small library: titles on disk, monitored titles without files, and The Martian tagged for `admin`
 so the pull-back path shows; each step skips what is already there) and, unless the database carries the `.seeded` marker of a finished seed, seeds a scenario:
 
 | Scenario | State |
 |----------|-------|
-| `Configured` (default) | `admin` / `admin` and `member` / `member` (the AppHost lowers `Sammlarr:Accounts:MinimumPasswordLength` to 5 for staging), setup finished, the wantlist on Radarr + Sonarr (their External URLs on the published ports, so links open in your browser), both people's TMDB key (and the MDBList key when `Parameters:mdblist-api-key` is set), two manual MDBList feeds (switched off without that key), Project Hail Mary and Breaking Bad on the admin's wantlist with a sync queued, a webhook and a Pushover target pointing at the catcher |
+| `Configured` (default) | the personas `admin` / `admin` and `member` / `member` (staging lowers `Sammlarr:Accounts:MinimumPasswordLength` to 5), setup finished, the wantlist on Radarr + Sonarr (their External URLs on the published ports, so links open in your browser), both people's TMDB key (and the MDBList key when `Parameters:mdblist-api-key` is set), two manual MDBList feeds (switched off without that key), Project Hail Mary and Breaking Bad on the admin's wantlist with a sync queued, a webhook and a Pushover target pointing at the catcher |
 | `Fresh` | migrations only: every page goes to `/setup`, which takes the setup code `SAMM-LARR` (the AppHost sets `Sammlarr:Accounts:SetupCode`; unset, Sammlarr makes one and logs it) |
 
 Appending `-- --StagingScenario=Fresh` to the run command picks the other one for a new data directory. The seeded feeds are manual because TickerQ only schedules inside a

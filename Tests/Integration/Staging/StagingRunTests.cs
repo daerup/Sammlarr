@@ -28,6 +28,11 @@ public class StagingRunTests
 		var options = new StagingOptions
 		{
 			Scenario = StagingScenario.Configured,
+			Personas = new StagingPersonas
+			{
+				Admin = new StagingPersona { Name = "admin", Password = "admin" },
+				Member = new StagingPersona { Name = "member", Password = "member" },
+			},
 			TmdbKey = "staging-tmdb-key",
 			ArrApiKey = "0123456789abcdef0123456789abcdef",
 			IndexerUrl = "http://wiremock:8080/newznab",
