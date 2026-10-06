@@ -45,6 +45,12 @@ internal sealed class ServiceRegistration(IServiceCollection services, Service b
 		return Forward<IOAuthProvider, TSignIn>(signIn).Claims(signIn, signIn.Service);
 	}
 
+	public ServiceRegistration ApiKey<TValidator>(ApiKeyProvider slot)
+		where TValidator : class, IApiKeyValidator
+	{
+		return Forward<IApiKeyValidator, TValidator>(slot).Claims(slot, slot.Remote);
+	}
+
 	private ServiceRegistration Forward<TCapability, TImplementation>(Enum role)
 		where TCapability : class
 		where TImplementation : class, TCapability

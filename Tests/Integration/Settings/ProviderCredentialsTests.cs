@@ -14,7 +14,6 @@ namespace Integration.Tests.Settings;
 public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	private IApiKeyService ApiKeys => host.Resolve<IApiKeyService>();
-	private IApiKeyFactory ApiKeyFactory => host.Resolve<IApiKeyFactory>();
 	private IDetailsEnricher Tmdb => host.Enricher(RemoteService.Tmdb);
 	private IMediaSink PlexSink => host.ResolveKeyed<IMediaSink>(SinkKind.Plex);
 
@@ -63,43 +62,57 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task CreateAsync_WhenTmdbRejectsTheKey_ReportsItInvalid()
+	public async Task TestAsync_WhenTmdbRejectsTheKey_ReportsItInvalid()
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
 
-		await Assert.That(await ApiKeyFactory.CreateAsync(ApiKeyProvider.Tmdb, "wrong-key")).IsError();
+		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, "wrong-key")).IsError();
 	}
 
 	[Test]
-	public async Task CreateAsync_WhenTmdbAcceptsTheKey_ReportsItValid()
+	public async Task TestAsync_WhenTmdbAcceptsTheKey_ReportsItValid()
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
 
-		await Assert.That(await ApiKeyFactory.CreateAsync(ApiKeyProvider.Tmdb, "valid-tmdb-key")).IsSuccess();
+		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, "valid-tmdb-key")).IsSuccess();
 	}
 
 	[Test]
-	public async Task CreateAsync_WhenMdblistRejectsTheKey_ReportsItInvalid()
+	public async Task TestAsync_WhenMdblistRejectsTheKey_ReportsItInvalid()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
 
-		await Assert.That(await ApiKeyFactory.CreateAsync(ApiKeyProvider.Mdblist, "wrong-key")).IsError();
+		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Mdblist, "wrong-key")).IsError();
 	}
 
 	[Test]
-	public async Task CreateAsync_WhenMdblistAcceptsTheKey_ReportsItValid()
+	public async Task TestAsync_WhenMdblistAcceptsTheKey_ReportsItValid()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
 
-		await Assert.That(await ApiKeyFactory.CreateAsync(ApiKeyProvider.Mdblist, "valid-mdblist-key")).IsSuccess();
+		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Mdblist, "valid-mdblist-key")).IsSuccess();
 	}
 
 	[Test]
-	public async Task CreateAsync_WhenTheProviderIsUnreachable_FailsGracefully()
+	public async Task TestAsync_WhenTheProviderIsUnreachable_FailsGracefully()
 	{
 		host.TmdbUnreachable();
 
-		await Assert.That(await ApiKeyFactory.CreateAsync(ApiKeyProvider.Tmdb, "any-key")).IsError();
+		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, "any-key")).IsError();
+	}
+
+	[Test]
+	public async Task GetAsync_AfterTmdbRefusesTheStoredKey_FailsUntilAKeyIsStoredAgain()
+	{
+		await host.WithTmdbAccount("valid-tmdb-key");
+		host.Movie("Test Movie", tmdb: "550").ServedByTmdb(rating: 7.8, votes: 5000);
+		host.HttpStub.RequireQueryParam(TestUrls.TmdbApi, "api_key", "rotated-tmdb-key");
+
+		await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie));
+
+		await Assert.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb)).IsError();
+		await ApiKeys.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "rotated-tmdb-key"));
+		await Assert.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb)).IsSuccess();
 	}
 
 	[Test]

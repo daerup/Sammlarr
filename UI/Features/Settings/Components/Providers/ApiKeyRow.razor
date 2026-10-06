@@ -1,7 +1,6 @@
 @using Contracts.Auth
 @using UI.Shared.Services.Branding
 @inject IApiKeyService ApiKeyService
-@inject IApiKeyFactory ApiKeyFactory
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
 <ProviderRow Key="@Provider.Remote" Brand="Branding" Open="Open" OpenChanged="OpenChanged">
@@ -130,8 +129,8 @@
     {
         _state = CredentialState.Testing;
 
-        _state = await ApiKeyFactory
-            .CreateAsync(Provider, _apiKeyInput)
+        _state = await ApiKeyService
+            .TestAsync(Provider, _apiKeyInput)
             .Apply(key => _validatedKey = key)
             .ApplyError(_ => _validatedKey = null)
             .Match(CredentialState.Success, CredentialState.Failed);

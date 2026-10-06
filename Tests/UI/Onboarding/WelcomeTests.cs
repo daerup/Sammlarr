@@ -13,7 +13,6 @@ namespace UI.Tests.Onboarding;
 
 public class WelcomeTests : BunitContext
 {
-	private readonly Mock<IApiKeyFactory> _factory = IApiKeyFactory.Mock();
 	private readonly Mock<IApiKeyService> _keys = IApiKeyService.Mock();
 	private readonly Mock<IOnboardingService> _onboarding = IOnboardingService.Mock();
 
@@ -21,7 +20,6 @@ public class WelcomeTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton(_factory.Object);
 		Services.AddSingleton(_keys.Object);
 		Services.AddSingleton(_onboarding.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
@@ -43,7 +41,7 @@ public class WelcomeTests : BunitContext
 	public async Task TestAndContinue_WithAWorkingKey_StoresItAndLetsThemIn()
 	{
 		var key = new TestApiKey(ApiKeyProvider.Tmdb, "their-key");
-		_factory.CreateAsync(ApiKeyProvider.Tmdb, "their-key", Any()).Returns(Success.Of<IApiKey>(key));
+		_keys.TestAsync(ApiKeyProvider.Tmdb, "their-key", Any()).Returns(Success.Of<IApiKey>(key));
 		var cut = Render<Welcome>();
 		await TypeAsync(cut, " their-key ");
 
@@ -57,7 +55,7 @@ public class WelcomeTests : BunitContext
 	[Test]
 	public async Task TestAndContinue_WithAKeyTmdbRefuses_SaysWhyAndStays()
 	{
-		_factory.CreateAsync(ApiKeyProvider.Tmdb, "wrong", Any()).Returns(Error.From("TMDB did not accept this key."));
+		_keys.TestAsync(ApiKeyProvider.Tmdb, "wrong", Any()).Returns(Error.From("TMDB did not accept this key."));
 		var cut = Render<Welcome>();
 		await TypeAsync(cut, "wrong");
 

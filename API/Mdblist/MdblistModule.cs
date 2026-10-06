@@ -14,6 +14,7 @@ public class MdblistModule : IServiceModule
 			.ForRemote<MdblistOptions>(RemoteService.Mdblist)
 			.Client<MdblistClient>()
 			.Client(MdblistClient.Unauthenticated)
+			.ApiKey<MdblistKeyCheck>(ApiKeyProvider.Mdblist)
 			.Feed<MdblistService>(FeedProvider.Mdblist);
 	}
 }

@@ -1,5 +1,4 @@
 using API.Arr;
-using API.Auth;
 using API.Mdblist;
 using API.Notifications;
 using API.Observability;
@@ -17,7 +16,6 @@ public class ApiModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddModule<AuthModule>();
 		services.AddModule<PlexModule>();
 		services.AddModule<TmdbModule>();
 		services.AddModule<MdblistModule>();

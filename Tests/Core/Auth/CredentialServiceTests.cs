@@ -1,6 +1,7 @@
 using Contracts.Auth;
 using Core.Auth;
 using Core.Caching;
+using Core.DI;
 using Domain.Auth;
 using Domain.Providers;
 using Microsoft.Extensions.Caching.Memory;
@@ -14,16 +15,22 @@ public sealed class CredentialServiceTests : IDisposable
 
 	private readonly MemoryCache _memory = new(new MemoryCacheOptions());
 	private readonly Mock<ICredentialRepository> _credentials = ICredentialRepository.Mock();
+	private readonly Mock<ICredentialValidator> _plex = ICredentialValidator.Mock();
 
 	private readonly CredentialService Testee;
 
 	public CredentialServiceTests()
 	{
 		_credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(Stored));
+		_plex.CheckAsync(Any(), Any(), Any()).Returns(AccessCheck.Valid);
 		Testee = new CredentialService(
 			_credentials.Object,
-			new TestCredentialFactory(),
-			new SecretCache<AuthProvider, ICredential>(new TypedMemoryCache<(Guid User, AuthProvider Provider), ICredential>(_memory), new TestCurrentUser())
+			new KeyedServiceSet<AuthProvider, ICredentialValidator>([new(AuthProvider.Plex, _plex.Object)]),
+			new SecretCache<AuthProvider, ICredential>(
+				new TypedMemoryCache<(Guid User, AuthProvider Provider), ICredential>(_memory),
+				new TypedMemoryCache<(Guid User, AuthProvider Provider), AccessCheck>(_memory),
+				new TestCurrentUser()
+			)
 		);
 	}
 
@@ -52,14 +59,43 @@ public sealed class CredentialServiceTests : IDisposable
 	}
 
 	[Test]
-	public async Task ReportRejected_AfterARead_MakesTheNextReadLoadTheStoredCredentialAgain()
+	public async Task ReportRejected_AfterARead_FailsTheNextReadUntilACredentialIsStoredAgain()
 	{
 		await Testee.GetAsync(AuthProvider.Plex);
 
 		Testee.ReportRejected(AuthProvider.Plex);
 
-		await Testee.GetAsync(AuthProvider.Plex);
-		_credentials.GetAsync(AuthProvider.Plex, Any()).WasCalled(Times.Exactly(2));
+		await Assert.That(await Testee.GetAsync(AuthProvider.Plex)).IsError();
+		await Testee.StoreAsync(AuthProvider.Plex, Stored with { AccessToken = "new-token" });
+		await Assert.That(await Testee.GetAsync(AuthProvider.Plex)).IsSuccess();
+	}
+
+	[Test]
+	public async Task GetAsync_WhenPlexCannotBeReached_StillServesTheStoredCredential()
+	{
+		_plex.CheckAsync(Any(), Any(), Any()).Returns(AccessCheck.Unreachable);
+
+		await Assert.That(await Testee.GetAsync(AuthProvider.Plex)).IsSuccess();
+	}
+
+	[Test]
+	public async Task TestAsync_ForATokenPlexRefuses_SaysItIsNotValid()
+	{
+		_plex.CheckAsync(Any(), "typed-token", Any()).Returns(AccessCheck.Rejected);
+
+		await Assert
+			.That(await Testee.TestAsync(AuthProvider.Plex, Stored with { AccessToken = "typed-token" }))
+			.IsError()
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("The Plex token is not valid."));
+	}
+
+	[Test]
+	public async Task TestAsync_ForATokenPlexAccepts_IsThatToken()
+	{
+		await Assert
+			.That(await Testee.TestAsync(AuthProvider.Plex, Stored with { AccessToken = "typed-token" }))
+			.IsSuccess()
+			.And.Multiple(async credential => await Assert.That(credential.AccessToken).IsEqualTo("typed-token"));
 	}
 
 	[Test]

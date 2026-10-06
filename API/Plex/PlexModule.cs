@@ -19,6 +19,7 @@ internal class PlexModule : IServiceModule
 			.Client<PlexClient>(ConfigurePlexClient)
 			.Client(PlexClient.Unauthenticated, ConfigurePlexClient)
 			.SignIn<PlexOAuthProvider>(AuthProvider.Plex)
+			.Credential<PlexTokenCheck>(AuthProvider.Plex)
 			.Search<PlexApi>(SearchProvider.Plex)
 			.Sink<PlexSink>(SinkKind.Plex)
 			.Converter<PlexIdConverter>()

@@ -108,7 +108,7 @@ internal static class IdLookupPlanner
 		var first = path.Count == 0;
 		return hop switch
 		{
-			HintsToId search => search.Remote.OwnIds.When(reached.Contains).IsNone() && (first ? hasHints : path[^1] is IdToHints),
+			HintsToId search => !search.Remote.OwnIds.Match(own => reached.Contains(own), () => false) && (first ? hasHints : path[^1] is IdToHints),
 			IdToId id => first ? reached.Contains(id.From) : Follows(hop, id.From, path[^1]),
 			IdToHints hints => first ? reached.Contains(hints.From) : Follows(hop, hints.From, path[^1]),
 		};
@@ -134,7 +134,7 @@ internal static class IdLookupPlanner
 		};
 	}
 
-	private static bool Owns(RemoteService remote, MediaProvider provider) => remote.OwnIds.When(own => own == provider).IsSome();
+	private static bool Owns(RemoteService remote, MediaProvider provider) => remote.OwnIds.Match(own => own == provider, () => false);
 
 	private static double Weight(IReadOnlyList<Hop> path, IRemoteCapacity capacity)
 	{

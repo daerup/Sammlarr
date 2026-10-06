@@ -2,7 +2,6 @@
 @layout AuthLayout
 @using Contracts.Auth
 @using Contracts.Setup
-@inject IApiKeyFactory ApiKeyFactory
 @inject IApiKeyService ApiKeys
 @inject IOnboardingService Onboarding
 @inject NavigationManager Navigation
@@ -76,7 +75,7 @@
     {
         _testing = true;
         _error = null;
-        var tested = await ApiKeyFactory.CreateAsync(ApiKeyProvider.Tmdb, _key.Trim());
+        var tested = await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, _key.Trim());
         _testing = false;
         await tested.ApplyError(error => _error = error.Reason).Match(StoreAsync, _ => Task.CompletedTask);
     }

@@ -61,8 +61,6 @@ public class SettingsPageTests : BunitContext
 		var credentials = ICredentialService.Mock();
 		credentials.GetAsync(Any<AuthProvider>(), Any()).Returns(Error.From("No credential is stored for this provider."));
 		Services.AddSingleton(credentials.Object);
-		Services.AddSingleton(IApiKeyFactory.Mock().Object);
-		Services.AddSingleton(ICredentialFactory.Mock().Object);
 
 		Services.AddSingleton(ICurrentUser.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
