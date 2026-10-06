@@ -1,5 +1,11 @@
 namespace Domain.Providers;
 
+public enum FeedProvider
+{
+	Tmdb,
+	Mdblist,
+}
+
 public static class FeedProviders
 {
 	extension(FeedProvider feed)

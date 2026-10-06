@@ -1,5 +1,11 @@
 namespace Domain.Providers;
 
+public enum ApiKeyProvider
+{
+	Tmdb,
+	Mdblist,
+}
+
 public static class ApiKeyProviders
 {
 	extension(ApiKeyProvider slot)

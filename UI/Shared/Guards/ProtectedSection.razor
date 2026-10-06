@@ -1,3 +1,6 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
 @if (GuardState())
 {
     @ChildContent
@@ -8,7 +11,7 @@ else if (ShowFallback)
         <LucideIcon Name="@FallbackIcon" Size="40" Class="mx-auto text-muted-foreground"/>
         @if (ApiProvider is { } apiProvider)
         {
-            <h3 class="text-base font-semibold tracking-tight">Add your @apiProvider.GetDescription() key</h3>
+            <h3 class="text-base font-semibold tracking-tight">Add your @Branding.Name(apiProvider.Remote) key</h3>
         }
         <p class="text-muted-foreground">@GetFallbackMessage()</p>
 
@@ -47,12 +50,12 @@ else if (ShowFallback)
     {
         if (AuthProvider.HasValue)
         {
-            return $"You need to connect your {AuthProvider.Value.GetDescription()} account before {DeniedActionDescription}.";
+            return $"You need to connect your {Branding.Name(AuthProvider.Value.Service)} account before {DeniedActionDescription}.";
         }
 
         if (ApiProvider.HasValue)
         {
-            return ApiKeyReason ?? $"A valid {ApiProvider.Value.GetDescription()} API key is required to {DeniedActionDescription}.";
+            return ApiKeyReason ?? $"A valid {Branding.Name(ApiProvider.Value.Remote)} API key is required to {DeniedActionDescription}.";
         }
 
         return $"You need to sign in before {DeniedActionDescription}.";
@@ -62,12 +65,12 @@ else if (ShowFallback)
     {
         if (AuthProvider.HasValue)
         {
-            return $"Connect {AuthProvider.Value.GetDescription()} Account";
+            return $"Connect {Branding.Name(AuthProvider.Value.Service)} Account";
         }
 
         if (ApiProvider.HasValue)
         {
-            return $"Add your {ApiProvider.Value.GetDescription()} key";
+            return $"Add your {Branding.Name(ApiProvider.Value.Remote)} key";
         }
 
         return "Sign in";

@@ -6,6 +6,7 @@
 @using Domain.Announcing
 @using Domain.Identity
 @using UI.Shared.Announcing
+@using UI.Shared.Services.Branding
 @implements IDisposable
 @inject IProviderConfigService ProviderConfigService
 @inject IWantlistService WantlistService
@@ -13,6 +14,7 @@
 @inject Notifier Notifier
 @inject IEventPublisher Events
 @inject ICurrentUser CurrentUser
+@inject MediaProviderBrandingService Branding
 
 @if (_settings is not null)
 {
@@ -150,7 +152,7 @@
         }
         catch (MissingSinkIdException)
         {
-            Notifier.Warning($"{_settings!.Sink.GetDescription()} has no match for '{title}', so it can't go on your wantlist.", "Can't update wantlist");
+            Notifier.Warning($"{Branding.Name(_settings!.Sink.Service)} has no match for '{title}', so it can't go on your wantlist.", "Can't update wantlist");
             return false;
         }
 

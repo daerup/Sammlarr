@@ -29,7 +29,7 @@
                           DeniedActionDescription="browsing trending media"
                           FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
             <ProtectedSection GuardState="HasTrendingProviderAccess"
-                              ApiProvider="@_providerConfig.TrendingProvider.AsApiKeyProvider()"
+                              ApiProvider="@KeySlot(_providerConfig.TrendingProvider)"
                               DeniedActionDescription="browse trending media"
                               ApiKeyReason="Browse shows what is trending on TMDB, read through your own key. Add it once and this fills in."
                               FallbackAction="@(() => NavigationManager.NavigateTo(SettingsLinks.Provider(_providerConfig.TrendingProvider.Service)))">
@@ -69,6 +69,14 @@
                   Source="ManualSource.Browse"/>
 
 @code {
+    private static ApiKeyProvider KeySlot(TrendingProvider trending)
+    {
+        return trending switch
+        {
+            TrendingProvider.Tmdb => ApiKeyProvider.Tmdb,
+        };
+    }
+
     private IReadOnlyList<MediaMatchResult>? _trendingMedia;
     private MediaMatchResult? _selectedMedia;
     private bool _isLoading;

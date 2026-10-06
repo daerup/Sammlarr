@@ -14,6 +14,7 @@
 @using UI.Features.Feeds.Components
 @using UI.Shared.Announcing
 @using UI.Shared.Changes
+@using UI.Shared.Services.Branding
 @inject IFeedService FeedService
 @inject NavigationManager NavigationManager
 @inject IProviderConfigService ProviderConfigService
@@ -25,6 +26,7 @@
 @inject IMediaService Media
 @inject IEventPublisher Events
 @inject IJobQueueView JobQueueView
+@inject MediaProviderBrandingService Branding
 
 <PageTitle>Feeds</PageTitle>
 
@@ -312,7 +314,7 @@
 
     private IReadOnlyList<ProviderCount> ProviderCounts => FeedPulse.Providers(_rows);
 
-    private string ProviderName => _providerConfig is null ? "your media service" : _providerConfig.Sink.GetDescription();
+    private string ProviderName => _providerConfig is null ? "your media service" : Branding.Name(_providerConfig.Sink.Service);
 
     protected override async Task OnInitializedAsync()
     {

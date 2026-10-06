@@ -1,16 +1,19 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
 <BbDialog Open="Open" OpenChanged="OpenChanged">
     <BbDialogContent Class="sm:max-w-[470px]">
         <BbDialogHeader>
-            <BbDialogTitle>Switch the wantlist to @Target.GetDescription()?</BbDialogTitle>
+            <BbDialogTitle>Switch the wantlist to @Branding.Name(Target.Service)?</BbDialogTitle>
             <BbDialogDescription>@What</BbDialogDescription>
         </BbDialogHeader>
         <BbDialogFooter>
             <BbDialogClose>
-                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Stay on @From.GetDescription()</BbButton>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Stay on @Branding.Name(From.Service)</BbButton>
             </BbDialogClose>
             <BbButton Size="ButtonSize.Small" OnClick="Confirmed" Disabled="Switching">
                 <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
-                Switch to @Target.GetDescription()
+                Switch to @Branding.Name(Target.Service)
             </BbButton>
         </BbDialogFooter>
     </BbDialogContent>
@@ -33,7 +36,7 @@
 
     private SinkKind From => Target == SinkKind.Arr ? SinkKind.Plex : SinkKind.Arr;
 
-    private string What => $"Every title on everyone's wantlist ({Counted(People, "person", "people")}, {Counted(Titles, "title", "titles")}) goes to {Target.GetDescription()} on their next sync. {Keeps}";
+    private string What => $"Every title on everyone's wantlist ({Counted(People, "person", "people")}, {Counted(Titles, "title", "titles")}) goes to {Branding.Name(Target.Service)} on their next sync. {Keeps}";
 
     private string Keeps
     {

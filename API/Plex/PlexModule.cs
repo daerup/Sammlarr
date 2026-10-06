@@ -13,7 +13,7 @@ internal class PlexModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddSingleton<PlexUrls>();
-		services.AddKeyedSingleton<IArtworkResizer, PlexArtwork>(ArtworkProvider.Plex);
+		services.AddSingleton<IArtworkResizer, PlexArtwork>();
 		services
 			.ForRemote<PlexOptions>(RemoteService.Plex)
 			.Client<PlexClient>(ConfigurePlexClient)

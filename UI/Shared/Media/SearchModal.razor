@@ -175,7 +175,7 @@
     private bool _wasOpen;
     private string? _focusedResult;
 
-    private string SearchProviderName => SearchProvider.GetDescription();
+    private string SearchProviderName => Branding.Name(SearchProvider.Service);
     private string SearchModalTitle => Title ?? $"Search {SearchProviderName}";
     private string SearchModalDescription => Description ?? $"Find a movie or show from {SearchProviderName} and add it to your wantlist.";
     private IReadOnlyList<BrandingInfo> Brands => Branding.Brands(SearchProvider.Service);

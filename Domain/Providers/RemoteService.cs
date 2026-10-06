@@ -3,6 +3,7 @@ using Domain.Wantlist.Arr;
 
 namespace Domain.Providers;
 
+// The members' order breaks ties when EnricherChoice.Next picks which enricher to ask.
 public enum RemoteService
 {
 	[Description("TMDB")]

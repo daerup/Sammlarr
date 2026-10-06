@@ -20,11 +20,11 @@ internal static class ProvenanceView
 			_ => "circle",
 		};
 
-	internal static string Label(WantlistItemProvenance provenance, MediaType type)
+	internal static string Label(WantlistItemProvenance provenance, MediaProviderBrandingService branding, MediaType type)
 	{
 		return provenance switch
 		{
-			SinkOrigin sink => SinkName(sink.Provider, type),
+			SinkOrigin sink => SinkName(sink.Provider, branding, type),
 			ManualOrigin => "Manual",
 			FeedOrigin feed => feed.Feed.Name,
 			OrphanedOrigin orphaned => orphaned.FormerFeedName,
@@ -70,13 +70,13 @@ internal static class ProvenanceView
 		};
 	}
 
-	internal static string Description(WantlistItemProvenance provenance, DateTimeOffset addedAt, MediaType type)
+	internal static string Description(WantlistItemProvenance provenance, MediaProviderBrandingService branding, DateTimeOffset addedAt, MediaType type)
 	{
 		var when = addedAt.LocalDateTime.ToString("MMM d, yyyy HH:mm");
 
 		return provenance.Value switch
 		{
-			SinkOrigin sink => $"Added on {SinkName(sink.Provider, type)}",
+			SinkOrigin sink => $"Added on {SinkName(sink.Provider, branding, type)}",
 			ManualOrigin manual => manual.Source == ManualSource.Unknown ? $"Added manually on {when}" : $"Added from {ManualName(manual.Source)} on {when}",
 			FeedOrigin feed => $"Added by feed '{feed.Feed.Name}' on {when}",
 			OrphanedOrigin orphaned => $"Was from '{orphaned.FormerFeedName}' (deleted)",
@@ -89,7 +89,8 @@ internal static class ProvenanceView
 
 	private static string ItemQuery(MediaId? itemId) => itemId is { } id ? $"?item={UrlGuid.Encode(id.Value)}" : string.Empty;
 
-	private static string SinkName(SinkKind sink, MediaType type) => App(sink, type).Map(app => app.Name).GetValueOr(() => sink.GetDescription());
+	private static string SinkName(SinkKind sink, MediaProviderBrandingService branding, MediaType type) =>
+		App(sink, type).Map(app => app.Name).GetValueOr(() => branding.Name(sink.Service));
 
 	private static Optional<ArrApp> App(SinkKind sink, MediaType type) => ArrApps.For(type).When(_ => sink == SinkKind.Arr);
 

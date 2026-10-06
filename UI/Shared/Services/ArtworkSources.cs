@@ -1,10 +1,8 @@
-using Contracts.DI;
 using Contracts.Media.Artwork;
-using Domain.Providers;
 
 namespace UI.Shared.Services;
 
-internal sealed class ArtworkSources(IKeyedServiceIndex<ArtworkProvider, IArtworkResizer> resizers)
+internal sealed class ArtworkSources(IEnumerable<IArtworkResizer> resizers)
 {
 	public string? ByWidth(string? url, params IReadOnlyList<ArtworkSize> sizes) => SrcSet(url, [.. sizes.Select(size => (size, $"{size.Width}w"))]);
 
@@ -28,6 +26,5 @@ internal sealed class ArtworkSources(IKeyedServiceIndex<ArtworkProvider, IArtwor
 	}
 
 	private Optional<string> Resize(string url, ArtworkSize size) =>
-		Enum.GetValues<ArtworkProvider>()
-			.Aggregate<ArtworkProvider, Optional<string>>(new None(), (found, provider) => found.Or(() => resizers[provider].Resize(url, size)));
+		resizers.Aggregate<IArtworkResizer, Optional<string>>(new None(), (found, resizer) => found.Or(() => resizer.Resize(url, size)));
 }

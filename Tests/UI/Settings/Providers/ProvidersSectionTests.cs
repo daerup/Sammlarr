@@ -44,6 +44,7 @@ public class ProvidersSectionTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddProviderBranding();
 		Services.AddSingleton(new AccountsOptions());
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton(RatingStub.Context());

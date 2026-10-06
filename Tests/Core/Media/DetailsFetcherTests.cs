@@ -688,7 +688,10 @@ public class DetailsFetcherTests
 		deps.Readiness.ConnectedAsync(Any(), Any()).Returns(new HashSet<RemoteService> { RemoteService.Plex });
 
 		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([RemoteService.Plex]);
-		deps.Readiness.ConnectedAsync(Is<IEnumerable<RemoteService>>(asked => asked.Order().SequenceEqual(new[] { RemoteService.Tmdb, RemoteService.Plex })), Any())
+		deps.Readiness.ConnectedAsync(
+				Is<IEnumerable<RemoteService>>(asked => asked!.Order().SequenceEqual(new[] { RemoteService.Tmdb, RemoteService.Plex })),
+				Any()
+			)
 			.WasCalled(Times.Once);
 	}
 
