@@ -33,6 +33,22 @@ public class StagingRunTests
 				Admin = new StagingPersona { Name = "admin", Password = "admin" },
 				Member = new StagingPersona { Name = "member", Password = "member" },
 			},
+			Seed = new StagingSeedData
+			{
+				Wantlist = [],
+				Feeds = [],
+				Library = new SeedLibrary { Radarr = [], Sonarr = [] },
+				Notifications = new SeedNotifications
+				{
+					Webhook = new SeedWebhook { Name = "Catcher webhook", Secret = "whsec_staging" },
+					Pushover = new SeedPushover
+					{
+						Name = "Catcher Pushover",
+						AppToken = "staging-app-token",
+						UserKey = "staging-user-key",
+					},
+				},
+			},
 			TmdbKey = "staging-tmdb-key",
 			ArrApiKey = "0123456789abcdef0123456789abcdef",
 			IndexerUrl = "http://wiremock:8080/newznab",

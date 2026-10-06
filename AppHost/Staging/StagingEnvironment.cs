@@ -45,6 +45,7 @@ internal static class StagingEnvironment
 			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", layout.KeyRing)
 			.WithConfiguration(sammlarrSettings)
 			.WithConfiguration(builder.Configuration.GetSection(StagingConfig.PersonasSection))
+			.WithConfiguration(builder.Configuration.GetSection(StagingConfig.SeedSection))
 			.WithEnvironment(context => context.EnvironmentVariables["Staging__Scenario"] = scenario.Value)
 			.WithEnvironment("Staging__TmdbKey", tmdb)
 			.WithEnvironment("Staging__ArrApiKey", ArrContainers.ApiKey)

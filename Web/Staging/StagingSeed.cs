@@ -28,14 +28,17 @@ internal enum StagingScenario
 	Fresh,
 }
 
-internal sealed record StagingSettings(StagingPersonas Personas, string TmdbKey, Optional<string> MdblistKey, ArrSinkConfig Arr, string CatcherUrl);
+internal sealed record StagingSettings(
+	StagingPersonas Personas,
+	StagingSeedData Seed,
+	string TmdbKey,
+	Optional<string> MdblistKey,
+	ArrSinkConfig Arr,
+	string CatcherUrl
+);
 
 internal static class StagingSeed
 {
-	private static readonly IExternalMediaId[] ProjectHailMary = [TmdbId.From("687163", MediaType.Movie)];
-
-	private static readonly IExternalMediaId[] BreakingBad = [TmdbId.From("1396", MediaType.Show), TvdbId.From("81189", MediaType.Show)];
-
 	internal static async Task SeedAsync(IServiceProvider services, StagingScenario scenario, StagingSettings settings, CancellationToken cancellationToken)
 	{
 		await services.MigrateDatabaseAsync(cancellationToken);
@@ -62,9 +65,9 @@ internal static class StagingSeed
 			await StoreKeysAsync(scoped, settings, cancellationToken);
 			await scoped.GetRequiredService<IArrSinkConfigService>().StoreAsync(settings.Arr, cancellationToken);
 			Require(await scoped.GetRequiredService<ISinkSwitch>().SwitchAsync(SinkKind.Arr, cancellationToken));
-			await AddTitlesAsync(scoped, cancellationToken);
-			await CreateFeedsAsync(scoped, settings.MdblistKey.IsSome(), cancellationToken);
-			await CreateTargetsAsync(scoped, settings.CatcherUrl, cancellationToken);
+			await AddTitlesAsync(scoped, settings.Seed.Wantlist, cancellationToken);
+			await CreateFeedsAsync(scoped, settings.Seed.Feeds, settings.MdblistKey.IsSome(), cancellationToken);
+			await CreateTargetsAsync(scoped, settings.Seed.Notifications, settings.CatcherUrl, cancellationToken);
 			invite = Require(await scoped.GetRequiredService<IUserManagementService>().InviteAsync(personas.Member.Name, cancellationToken));
 			await scoped.GetRequiredService<IOnboardingService>().CompleteAsync(cancellationToken);
 			await scoped.GetRequiredService<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger()), cancellationToken);
@@ -87,50 +90,44 @@ internal static class StagingSeed
 		await settings.MdblistKey.Apply(key => keys.StoreAsync(new SeededKey(ApiKeyProvider.Mdblist, key), cancellationToken));
 	}
 
-	private static async Task AddTitlesAsync(IServiceProvider scoped, CancellationToken cancellationToken)
+	private static async Task AddTitlesAsync(IServiceProvider scoped, IReadOnlyList<SeedTitle> wantlist, CancellationToken cancellationToken)
 	{
-		var titles = await scoped.GetRequiredService<IMediaService>().RegisterAsync([ProjectHailMary, BreakingBad], cancellationToken);
+		var titles = await scoped.GetRequiredService<IMediaService>().RegisterAsync([.. wantlist.Select(title => title.Ids())], cancellationToken);
 		await scoped.GetRequiredService<IWantlistService>().AddAsync(titles.Select(title => title.Id), new ManualOrigin(ManualSource.Search), cancellationToken);
 	}
 
-	private static async Task CreateFeedsAsync(IServiceProvider scoped, bool enabled, CancellationToken cancellationToken)
+	private static async Task CreateFeedsAsync(IServiceProvider scoped, IReadOnlyList<SeedFeed> seeded, bool enabled, CancellationToken cancellationToken)
 	{
 		var feeds = scoped.GetRequiredService<IFeedService>();
-		await feeds.CreateAsync(
-			new FeedCreateData
-			{
-				Name = "Top movies of the week",
-				IsEnabled = enabled,
-				Provider = FeedProvider.Mdblist,
-				Strategy = new FeedStrategy(new Append()),
-				Identifier = "2236",
-				Schedule = new Manual(),
-			},
-			cancellationToken
-		);
-		await feeds.CreateAsync(
-			new FeedCreateData
-			{
-				Name = "Trending shows",
-				IsEnabled = enabled,
-				Provider = FeedProvider.Mdblist,
-				Strategy = new FeedStrategy(new Mirror()),
-				Identifier = "88434",
-				Limit = Some.Of(new QueryLimit { Count = 10 }),
-				Schedule = new Manual(),
-			},
-			cancellationToken
-		);
+		foreach (var feed in seeded)
+		{
+			await feeds.CreateAsync(
+				new FeedCreateData
+				{
+					Name = feed.Name,
+					IsEnabled = enabled,
+					Provider = feed.Provider,
+					Strategy = feed.FeedStrategy(),
+					Identifier = feed.Identifier,
+					Limit = Optional.Of(feed.Limit).Map(count => new QueryLimit { Count = count }),
+					Schedule = new Manual(),
+				},
+				cancellationToken
+			);
+		}
 	}
 
-	private static async Task CreateTargetsAsync(IServiceProvider scoped, string catcherUrl, CancellationToken cancellationToken)
+	private static async Task CreateTargetsAsync(IServiceProvider scoped, SeedNotifications seeded, string catcherUrl, CancellationToken cancellationToken)
 	{
 		var targets = scoped.GetRequiredService<INotificationTargetRepository>();
 		var subscriptions = scoped.GetRequiredService<INotificationSubscriptionRepository>();
-		NotificationConfig[] configs = [new WebhookConfig($"{catcherUrl}/webhook", "whsec_staging"), new PushoverConfig("staging-app-token", "staging-user-key")];
-		foreach (var config in configs)
+		(string Name, NotificationConfig Config)[] configs =
+		[
+			(seeded.Webhook.Name, new WebhookConfig($"{catcherUrl}/webhook", seeded.Webhook.Secret)),
+			(seeded.Pushover.Name, new PushoverConfig(seeded.Pushover.AppToken, seeded.Pushover.UserKey)),
+		];
+		foreach (var (name, config) in configs)
 		{
-			var name = config is WebhookConfig ? "Catcher webhook" : "Catcher Pushover";
 			var target = await targets.CreateAsync(new NotificationTarget(Guid.NewGuid(), name, true, config), cancellationToken);
 			await subscriptions.AddAsync(target, Enum.GetValues<NotificationEventType>(), NotificationTemplate.None, cancellationToken);
 		}

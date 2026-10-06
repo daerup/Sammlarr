@@ -139,8 +139,10 @@ at the same time. The first start pulls the images and builds Sammlarr's (about 
 Every port is published on 127.0.0.1 only.
 
 **Settings** live in `AppHost/appsettings.Staging.json`, which the staging profile loads on top of the AppHost's own: under
-`Staging`, the host name, the ports, the catcher session, the proxy and its allowlist, and the two personas; under `Sammlarr`, settings
-handed as they are to the staged Sammlarr and its seed (the setup code, `Accounts:MinimumPasswordLength`). The values above are its defaults.
+`Staging`, the host name, the ports, the catcher session, the proxy and its allowlist, the two personas and `Seed`, what the seed puts in
+(the wantlist's titles by TMDB, TVDB or IMDb id, the feeds, the Radarr library by TMDB id and the Sonarr one by TVDB id with each title's
+`OnDisk` and tag `Owner`, and the webhook's and Pushover's names and secrets); under `Sammlarr`, settings handed as they are to the staged
+Sammlarr and its seed (the setup code, `Accounts:MinimumPasswordLength`). The values above are its defaults.
 
 **Scenarios.** The `seed` resource (Web started with `seed-staging`, its code in `Web/Staging`, which the published image leaves out) prepares Radarr and Sonarr (root folder, a blackhole
 download client, the Newznab indexer, a small library: titles on disk, monitored titles without files, and The Martian tagged for `admin`

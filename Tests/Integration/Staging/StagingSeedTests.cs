@@ -10,6 +10,7 @@ using Contracts.Wantlist;
 using Core;
 using DB;
 using Domain.Jobs;
+using Domain.Media;
 using Domain.Notifications;
 using Domain.Providers;
 using Domain.Wantlist.Arr;
@@ -48,6 +49,48 @@ public class StagingSeedTests : IAsyncDisposable
 		{
 			Admin = new StagingPersona { Name = Admin, Password = AdminPassword },
 			Member = new StagingPersona { Name = Member, Password = MemberPassword },
+		},
+		new StagingSeedData
+		{
+			Wantlist =
+			[
+				new SeedTitle { Type = MediaType.Movie, Tmdb = "687163" },
+				new SeedTitle
+				{
+					Type = MediaType.Show,
+					Tmdb = "1396",
+					Tvdb = "81189",
+				},
+			],
+			Feeds =
+			[
+				new SeedFeed
+				{
+					Name = "Top movies of the week",
+					Provider = FeedProvider.Mdblist,
+					Identifier = "2236",
+					Strategy = SeedStrategy.Append,
+				},
+				new SeedFeed
+				{
+					Name = "Trending shows",
+					Provider = FeedProvider.Mdblist,
+					Identifier = "88434",
+					Strategy = SeedStrategy.Mirror,
+					Limit = 10,
+				},
+			],
+			Library = new SeedLibrary { Radarr = [], Sonarr = [] },
+			Notifications = new SeedNotifications
+			{
+				Webhook = new SeedWebhook { Name = "Catcher webhook", Secret = "whsec_staging" },
+				Pushover = new SeedPushover
+				{
+					Name = "Catcher Pushover",
+					AppToken = "staging-app-token",
+					UserKey = "staging-user-key",
+				},
+			},
 		},
 		"staging-tmdb-key",
 		Some.Of("staging-mdblist-key"),
