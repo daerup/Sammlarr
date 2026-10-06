@@ -41,7 +41,11 @@ internal static class AuthEndpoints
 					callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "returnUrl", returnUrl);
 				}
 
-				return Results.Redirect(await signIn.BeginAsync(authProvider, callbackUrl, cancellationToken));
+				var started = await signIn.BeginAsync(authProvider, callbackUrl, cancellationToken);
+				return started.Match(
+					signInPage => Results.Redirect(signInPage),
+					error => Results.Redirect(Failed(error, authProvider, SetupClaim.Redeem(context), returnUrl))
+				);
 			}
 		);
 

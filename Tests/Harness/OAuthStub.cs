@@ -10,7 +10,8 @@ internal sealed class OAuthStub : IOAuthProvider
 
 	internal void Fails(string reason) => _completion = Error.From(reason);
 
-	public Task<string> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default) => Task.FromResult("https://auth.plex.tv/link");
+	public Task<Result<string>> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default) =>
+		Task.FromResult<Result<string>>(Success.Of("https://auth.plex.tv/link"));
 
 	public Task<Result<ExternalLogin>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default) => Task.FromResult(_completion);
 }
