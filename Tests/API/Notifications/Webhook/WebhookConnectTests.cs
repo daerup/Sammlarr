@@ -32,4 +32,13 @@ public class WebhookConnectTests
 	{
 		await Assert.That(WebhookConnect.IsBlocked(IPAddress.Parse(address))).IsEqualTo(blocked);
 	}
+
+	[Test]
+	[Arguments("catcher", true)]
+	[Arguments("CATCHER", true)]
+	[Arguments("router", false)]
+	public async Task MayReach_APrivateAddress_OnlyForAListedHost(string host, bool reached)
+	{
+		await Assert.That(WebhookConnect.MayReach(host, IPAddress.Parse("172.18.0.7"), ["catcher"])).IsEqualTo(reached);
+	}
 }

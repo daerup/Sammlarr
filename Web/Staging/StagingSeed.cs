@@ -129,7 +129,7 @@ internal static class StagingSeed
 		foreach (var (name, config) in configs)
 		{
 			var target = await targets.CreateAsync(new NotificationTarget(Guid.NewGuid(), name, true, config), cancellationToken);
-			await subscriptions.AddAsync(target, Enum.GetValues<NotificationEventType>(), NotificationTemplate.None, cancellationToken);
+			await subscriptions.AddAsync(target, Enum.GetValues<NotificationEventType>(), seeded.Template.ToNotificationTemplate(), cancellationToken);
 		}
 	}
 

@@ -1,3 +1,6 @@
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json.Nodes;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
@@ -16,12 +19,12 @@ namespace E2E.Tests.Staging;
 public class StagingSmokeTests
 {
 	[Test]
-	public async Task Staging_OnAnEmptyDataDirectory_SignsTheSeededAdminInWithRadarrAndSonarrConnected()
+	public async Task Staging_OnAnEmptyDataDirectory_SignsTheSeededAdminInWithRadarrAndSonarrConnectedAndNotifiesTheCatcher()
 	{
 		var root = Directory.CreateTempSubdirectory("sammlarr-staging-e2e-");
 		try
 		{
-			var (app, admin) = await StartAsync(root.FullName);
+			var (app, admin, session) = await StartAsync(root.FullName);
 			await using var _ = app;
 			using var playwright = await Playwright.CreateAsync();
 			await using var browser = await BrowserPages.LaunchAsync(playwright);
@@ -37,6 +40,7 @@ public class StagingSmokeTests
 
 			await Expect(SettingsPage.MapService(page, "Radarr + Sonarr"))
 				.ToContainTextAsync("Connected", new LocatorAssertionsToContainTextOptions { Timeout = Wait.Settle });
+			await CatchesAWebhookAndAPushoverMessageAsync(app.GetEndpoint("catcher", "http"), session);
 		}
 		finally
 		{
@@ -44,7 +48,27 @@ public class StagingSmokeTests
 		}
 	}
 
-	private static async Task<(DistributedApplication App, StagingPersona Admin)> StartAsync(string root)
+	private static async Task CatchesAWebhookAndAPushoverMessageAsync(Uri catcher, string session)
+	{
+		using var http = new HttpClient { BaseAddress = catcher };
+		List<(string Url, string Body)> caught = [];
+		await Poll.UntilAsync(
+			async () =>
+			{
+				var requests = (await http.GetFromJsonAsync<JsonArray>($"api/session/{session}/requests"))!;
+				caught = [.. requests.Select(request => (request!["url"]!.GetValue<string>(), Body(request["request_payload_base64"]!.GetValue<string>())))];
+				return caught.Any(request => request.Url.EndsWith("/webhook", StringComparison.Ordinal))
+					&& caught.Any(request =>
+						request.Url.EndsWith("/messages.json", StringComparison.Ordinal) && !request.Body.Contains("message=%28empty%29", StringComparison.Ordinal)
+					);
+			},
+			() => $"The catcher did not get a webhook and a Pushover message with text, only {string.Join(", ", caught.Select(request => request.Url))}"
+		);
+	}
+
+	private static string Body(string base64) => Encoding.UTF8.GetString(Convert.FromBase64String(base64));
+
+	private static async Task<(DistributedApplication App, StagingPersona Admin, string CatcherSession)> StartAsync(string root)
 	{
 		using var timeout = new CancellationTokenSource(StackBoot.Timeout);
 		var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
@@ -64,9 +88,10 @@ public class StagingSmokeTests
 		}
 
 		var admin = builder.Configuration.GetSection("Staging:Personas:Admin").Get<StagingPersona>()!;
+		var session = builder.Configuration["Staging:CatcherSession"]!;
 		var app = await builder.BuildAsync(timeout.Token);
 		await app.StartAsync(timeout.Token);
 		await app.ResourceNotifications.WaitForResourceHealthyAsync("sammlarr", timeout.Token);
-		return (app, admin);
+		return (app, admin, session);
 	}
 }

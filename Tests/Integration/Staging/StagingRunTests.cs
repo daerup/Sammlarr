@@ -40,7 +40,8 @@ public class StagingRunTests
 				Library = new SeedLibrary { Radarr = [], Sonarr = [] },
 				Notifications = new SeedNotifications
 				{
-					Webhook = new SeedWebhook { Name = "Catcher webhook", Secret = "whsec_staging" },
+					Template = new SeedTemplate { Title = "{{ title }}", Message = "{{ summary }}" },
+					Webhook = new SeedWebhook { Name = "Catcher webhook", Secret = "whsec_c2FtbWxhcnItc3RhZ2luZy13ZWJob29rLXNlY3JldCE=" },
 					Pushover = new SeedPushover
 					{
 						Name = "Catcher Pushover",
