@@ -18,21 +18,21 @@ internal sealed class RatingService(IRatingDefaultRepository defaults, IApiKeySe
 
 	public async Task<ValueSet<RatingSource>> GetAvailableAsync(CancellationToken cancellationToken = default)
 	{
-		var keyed = await Enum.GetValues<ApiKeyProvider>()
-			.Where(provider => SuppliesRatings(provider.AsMediaProvider()))
+		var connected = await Enum.GetValues<RemoteService>()
+			.Where(remote => remote.SuppliedRatingSources().Count > 0)
 			.ToAsyncEnumerable()
-			.Where(async (provider, ct) => await apiKeys.IsStoredAsync(provider, ct))
-			.Select(provider => provider.AsMediaProvider())
+			.Where(async (remote, ct) => await StoredAsync(remote, ct))
 			.ToListAsync(cancellationToken);
-		var signedIn = await Enum.GetValues<AuthProvider>()
-			.Select(signIn => signIn.Provider().When(SuppliesRatings).Map(provider => (SignIn: signIn, Provider: provider)))
-			.WhereSome()
-			.ToAsyncEnumerable()
-			.Where(async (pair, ct) => await credentials.IsStoredAsync(pair.SignIn, ct))
-			.Select(pair => pair.Provider)
-			.ToListAsync(cancellationToken);
-		return keyed.Concat(signedIn).SuppliedRatingSources();
+		return connected.SuppliedRatingSources();
 	}
 
-	private static bool SuppliesRatings(MediaProvider provider) => provider.SuppliedRatingSources().Count > 0;
+	private async Task<bool> StoredAsync(RemoteService remote, CancellationToken cancellationToken)
+	{
+		return remote.Access switch
+		{
+			UserKey(var slot) => await apiKeys.IsStoredAsync(slot, cancellationToken),
+			UserSignIn(var signIn) => await credentials.IsStoredAsync(signIn, cancellationToken),
+			Open or AppInstance => true,
+		};
+	}
 }

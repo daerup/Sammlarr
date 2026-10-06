@@ -135,7 +135,7 @@
 
     private IReadOnlyList<MediaProvider> MissingOwners()
     {
-        return [.. _model.Rows.Where(row => row.Rating.IsSome()).Select(row => row.Source.Owner()).Distinct().Where(owner => Ids.OfProvider(owner).IsNone())];
+        return [.. _model.Rows.Where(row => row.Rating.IsSome()).Select(row => row.Source.Card.Owner).Distinct().Where(owner => Ids.OfProvider(owner).IsNone())];
     }
 
     private async Task<IReadOnlyList<IExternalMediaId>> FindAsync(MediaId id, IReadOnlyList<MediaProvider> owners)
@@ -149,7 +149,7 @@
         return found;
     }
 
-    private Optional<string> Link(RatingSource source) => Linkers[source.Owner()].PageOf([.. Ids, .. _found], Optional.Of(Title));
+    private Optional<string> Link(RatingSource source) => Linkers[source.Card.Owner].PageOf([.. Ids, .. _found], Optional.Of(Title));
 
     private float? Value => _model.Sammlarr.Map(rating => rating.Value).ToNullable();
 
@@ -186,5 +186,5 @@
 
     private bool UsedInstead(RatingRow row) => _model.UsedInstead && row.State is RatingRowState.Counts;
 
-    private string Brand(RatingSource source) => Branding.GetBrandingInfo(source.Owner()).BrandColor;
+    private string Brand(RatingSource source) => Branding.GetBrandingInfo(source.Card.Owner).BrandColor;
 }

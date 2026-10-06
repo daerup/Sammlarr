@@ -20,7 +20,7 @@ internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDeta
 		| MediaField.Seasons
 		| MediaField.Episodes
 		| MediaField.RuntimePerEpisode
-		| MediaFields.Rated(MediaProvider.Tmdb.SuppliedRatingSources());
+		| MediaFields.Rated(RemoteService.Tmdb.SuppliedRatingSources());
 
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Imdb];
 

@@ -9,7 +9,9 @@ public class RatingStrategyProperties
 	private static readonly RatingSource[] Sources = Enum.GetValues<RatingSource>();
 
 	private static readonly Gen<MediaRatings> Ratings = Gen.Select(Gen.Bool.Array[Sources.Length], Gen.Int[0, 100].Array[Sources.Length])
-		.Select((held, values) => MediaRatings.From(Sources.Where((_, index) => held[index]).Select(source => source.Rate(values[(int)source] / 10f, new None()))));
+		.Select(
+			(held, values) => MediaRatings.From(Sources.Where((_, index) => held[index]).Select(source => source.Card.Rate(values[(int)source] / 10f, new None())))
+		);
 
 	private static readonly Gen<ValueSet<RatingSource>> Availables = Gen.Bool.Array[Sources.Length].Select(Picked);
 

@@ -37,5 +37,5 @@ public static class MediaCompleteness
 		return MediaFields.Rated(Enum.GetValues<RatingSource>().Where(source => rating.Of(source).When(Complete).IsNone()));
 	}
 
-	private static bool Complete(IMediaRating rating) => rating.Votes.IsSome() || !rating.Source.PublishesVotes();
+	private static bool Complete(IMediaRating rating) => rating.Votes.IsSome() || !rating.Source.Card.PublishesVotes;
 }

@@ -1,4 +1,5 @@
 using System.Globalization;
+using Domain.Providers;
 
 namespace Domain.Media;
 
@@ -15,8 +16,24 @@ public interface IMediaRating
 	Optional<RatingVerdict> Verdict { get; }
 }
 
-public readonly record struct TmdbRating(float Average, Optional<int> Votes) : IMediaRating
+public interface IOwnedRating<TSelf> : IMediaRating
+	where TSelf : struct, IOwnedRating<TSelf>
 {
+	static abstract MediaProvider Owner { get; }
+
+	static abstract bool PublishesVotes { get; }
+
+	static abstract TSelf Rate(float sammlarrValue, Optional<int> votes);
+}
+
+public readonly record struct TmdbRating(float Average, Optional<int> Votes) : IOwnedRating<TmdbRating>
+{
+	public static MediaProvider Owner => MediaProvider.Tmdb;
+
+	public static bool PublishesVotes => true;
+
+	public static TmdbRating Rate(float sammlarrValue, Optional<int> votes) => new(sammlarrValue, votes);
+
 	public RatingSource Source => RatingSource.Tmdb;
 
 	public string Value => Average.ToString("0.0", CultureInfo.InvariantCulture);
@@ -26,8 +43,14 @@ public readonly record struct TmdbRating(float Average, Optional<int> Votes) : I
 	public Optional<RatingVerdict> Verdict => new None();
 }
 
-public readonly record struct ImdbRating(float Average, Optional<int> Votes) : IMediaRating
+public readonly record struct ImdbRating(float Average, Optional<int> Votes) : IOwnedRating<ImdbRating>
 {
+	public static MediaProvider Owner => MediaProvider.Imdb;
+
+	public static bool PublishesVotes => true;
+
+	public static ImdbRating Rate(float sammlarrValue, Optional<int> votes) => new(sammlarrValue, votes);
+
 	public RatingSource Source => RatingSource.Imdb;
 
 	public string Value => Average.ToString("0.0", CultureInfo.InvariantCulture);
@@ -37,13 +60,17 @@ public readonly record struct ImdbRating(float Average, Optional<int> Votes) : I
 	public Optional<RatingVerdict> Verdict => new None();
 }
 
-public readonly record struct RottenTomatoesCriticsRating(int Percent) : IMediaRating
+public readonly record struct RottenTomatoesCriticsRating(int Percent) : IOwnedRating<RottenTomatoesCriticsRating>
 {
 	private const float Ceiling = 100;
 
 	private const int Fresh = 60;
 
-	internal static RottenTomatoesCriticsRating Of(float sammlarrValue) => new((int)MathF.Round(sammlarrValue / 10 * Ceiling));
+	public static MediaProvider Owner => MediaProvider.RottenTomatoes;
+
+	public static bool PublishesVotes => false;
+
+	public static RottenTomatoesCriticsRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue / 10 * Ceiling));
 
 	public RatingSource Source => RatingSource.RottenTomatoesCritics;
 
@@ -56,13 +83,17 @@ public readonly record struct RottenTomatoesCriticsRating(int Percent) : IMediaR
 	public Optional<RatingVerdict> Verdict => Some.Of(Percent >= Fresh ? RatingVerdict.Liked : RatingVerdict.Disliked);
 }
 
-public readonly record struct RottenTomatoesAudienceRating(int Percent) : IMediaRating
+public readonly record struct RottenTomatoesAudienceRating(int Percent) : IOwnedRating<RottenTomatoesAudienceRating>
 {
 	private const float Ceiling = 100;
 
 	private const int Upright = 60;
 
-	internal static RottenTomatoesAudienceRating Of(float sammlarrValue) => new((int)MathF.Round(sammlarrValue / 10 * Ceiling));
+	public static MediaProvider Owner => MediaProvider.RottenTomatoes;
+
+	public static bool PublishesVotes => false;
+
+	public static RottenTomatoesAudienceRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue / 10 * Ceiling));
 
 	public RatingSource Source => RatingSource.RottenTomatoesAudience;
 

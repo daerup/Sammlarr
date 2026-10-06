@@ -179,8 +179,9 @@ Members say what they do; the type already says what to:
 Providers are declared, not hand-wired. Each `MediaProvider` value carries a `[Capabilities]`
 attribute; Roslyn source generators emit the provider-subset enums (`FeedProvider`,
 `ApiKeyProvider`, …) and their conversions from that matrix, plus the options-record
-registration. Each `RatingSource` member carries `[SuppliedBy]`, `[OwnedBy]` and `[Votes]`, from which generators emit
-`SuppliedBy()`, `Owner()`, `PublishesVotes()` and the reverse maps. `SinkKind` and `SearchProvider` are hand-written, because their
+registration. Each `RatingSource` member names the remote services that supply it (`[SuppliedBy<RemoteService>]`), from
+which a generator emits `SuppliedBy()` and the reverse, `SuppliedRatingSources()`; its owner and whether it publishes votes
+are facts of its rating type, read through `source.Card`. `SinkKind` and `SearchProvider` are hand-written, because their
 Radarr + Sonarr choice is no provider (`Provider()` answers `None`; the UI brands each `ArrApp` itself), and so is `AuthProvider`, because a sign-in is not a provider: Sammlarr accounts
 know no media, so `AuthProvider.Local` has no `MediaProvider` (`AuthProvider.Provider()` answers `None`), and the UI
 draws a sign-in with its own brand (`GetBrandingInfo(AuthProvider)`). Adding a provider is a folder, an enum value and a module (recipe in
@@ -222,13 +223,14 @@ sign-in, read once per call to the media service, so once per batch or feed run)
 answer, so a later load asks it once the hour since the last ask has passed and it is open again. Ratings are fields per source:
 `MediaCompleteness` counts each `RatingSource` (TMDB, IMDb, Rotten Tomatoes critics and audience) the title has no
 rating from as a missing field: `MediaFields` holds the `MediaField` detail flags and a set of `RatingSource`, and a provider's sources enter it through `MediaFields.Rated`, so a provider's rating fills come from its `[SuppliedBy]` sources. A rating
-from a source that publishes votes (TMDB, IMDb: `[Votes]`, read as `PublishesVotes()`) still counts as missing while it has
+from a source that publishes votes (TMDB, IMDb: `Card.PublishesVotes`) still counts as missing while it has
 none, so Plex's copy of TMDB's rating, which carries no votes, leaves TMDB asked for its own. Each rating is its own type behind
 `IMediaRating` (`TmdbRating`, `ImdbRating`, `RottenTomatoesCriticsRating`, `RottenTomatoesAudienceRating`), keeping its
 own scale and its conversion onto the Sammlarr scale of 0 to 10, and its `Verdict` against its owner's bar (the UI draws a
-verdict as its art, a rating without one as its owner's tile); `RatingSource` declares each source's owner
-(`[OwnedBy]`, generated `Owner()` and `OwnedRatingSources()`), the providers that supply it (`[SuppliedBy]`, generated
-`SuppliedBy()`) and whether it carries votes (`[Votes]`), so no code outside its declaration, its rating type, `Rate`,
+verdict as its art, a rating without one as its owner's tile); each rating type states its owner, whether it publishes
+votes and how it rates behind `IOwnedRating<TSelf>`, `RatingSource.Card` reads them for a source, and each source names the
+remote services that supply it (`[SuppliedBy<RemoteService>]`, generated `SuppliedBy()`), so no code outside its
+declaration, its rating type, its `Card` arm,
 Plex's wire mapping and the UI copy names a source (the Settings › Testing demos aside). Merging keeps one rating per source, and a rating
 with votes wins over a copy without (TMDB's own rating over Plex's copy of it). An enricher that fills ratings and
 finds none answers like any other: the rating stays in what it could not give. No field and no provider is special: a

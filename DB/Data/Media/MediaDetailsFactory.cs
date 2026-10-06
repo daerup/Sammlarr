@@ -140,6 +140,6 @@ internal class MediaDetailsFactory
 
 	private static IReadOnlyList<IMediaRating> ToRatings(IEnumerable<MediaRatingRow> ratings)
 	{
-		return [.. ratings.Select(rating => rating.Source.Rate(rating.NormalizedValue, Optional.Of(rating.VoteCount)))];
+		return [.. ratings.Select(rating => rating.Source.Card.Rate(rating.NormalizedValue, Optional.Of(rating.VoteCount)))];
 	}
 }
