@@ -12,7 +12,7 @@ public partial class ArrTagSchemeProperties
 		Gen.Select(Gen.String, Gen.String, Gen.Guid, Gen.Guid)
 			.Sample(
 				(user, feed, userId, feedId) =>
-					ArrTagScheme.Default.Labels(new ArrTagUser(userId, user), Some.Of(new ArrTagFeed(feedId, feed, feed))).All(label => Accepted().IsMatch(label))
+					ArrTagScheme.Default.Labels(new ArrTagUser(userId, user), Some.Of(new ArrTagFeed(feedId, feed))).All(label => Accepted().IsMatch(label))
 			);
 	}
 
@@ -34,8 +34,7 @@ public partial class ArrTagSchemeProperties
 	[Test]
 	public void FeedTag_ForAnyFeed_IsNeverAUsersTag()
 	{
-		Gen.Select(Gen.String, Gen.String)
-			.Sample((name, identifier) => !ArrTagScheme.Default.IsUserTag(ArrTagScheme.Default.FeedTag(new ArrTagFeed(Guid.NewGuid(), name, identifier))));
+		Gen.String.Sample(name => !ArrTagScheme.Default.IsUserTag(ArrTagScheme.Default.FeedTag(new ArrTagFeed(Guid.NewGuid(), name))));
 	}
 
 	[GeneratedRegex("^[a-z0-9-]+$")]

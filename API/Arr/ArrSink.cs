@@ -212,7 +212,7 @@ internal sealed class ArrSink(
 
 	private async Task<Result<SinkSyncOutcome>> AddAsync(ArrSession session, SinkPush push, IExternalMediaId id, Setup setup, CancellationToken cancellationToken)
 	{
-		var feed = push.AddedBy.Map(added => new ArrTagFeed(added.Id.Value, added.Name, added.Identifier));
+		var feed = push.AddedBy.Map(added => new ArrTagFeed(added.Id.Value, added.Name));
 		var labels = setup.Config.Tags.Labels(setup.Viewer, feed);
 		return await session
 			.Find(id)

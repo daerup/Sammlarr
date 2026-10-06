@@ -19,16 +19,13 @@ public enum ArrFeedTagSource
 	[Description("List name")]
 	ListName,
 
-	[Description("Owner and list")]
-	OwnerAndList,
-
 	[Description("Feed id")]
 	Id,
 }
 
 public sealed record ArrTagUser(Guid Id, string Name);
 
-public sealed record ArrTagFeed(Guid Id, string Name, string Identifier);
+public sealed record ArrTagFeed(Guid Id, string Name);
 
 public sealed record ArrTagScheme(string Prefix, bool PerUser, ArrUserTagSource UserSource, bool PerFeed, ArrFeedTagSource FeedSource, bool PlainPrefix)
 {
@@ -82,7 +79,6 @@ public sealed record ArrTagScheme(string Prefix, bool PerUser, ArrUserTagSource 
 		return FeedSource switch
 		{
 			ArrFeedTagSource.ListName => feed.Name,
-			ArrFeedTagSource.OwnerAndList => feed.Identifier,
 			ArrFeedTagSource.Id => ArrTagSlug.Of(feed.Id),
 		};
 	}
@@ -97,7 +93,7 @@ internal static partial class ArrTagSlug
 		return Optional.When(slug.Length > 0, () => slug);
 	}
 
-	public static string Of(Guid id) => id.ToString("N");
+	public static string Of(Guid id) => id.ToString("N")[..8];
 
 	private static bool Shown(char character)
 	{

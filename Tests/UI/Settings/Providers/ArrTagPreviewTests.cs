@@ -10,7 +10,7 @@ public class ArrTagPreviewTests
 
 	private static readonly ArrTagUser Daerup = new(Guid.NewGuid(), "Daerup");
 
-	private static readonly ArrTagFeed Latest = new(Guid.NewGuid(), "Latest movies", "snoak/latest");
+	private static readonly ArrTagFeed Latest = new(Guid.NewGuid(), "Latest movies");
 
 	[Test]
 	public async Task Rows_ForTwoUsersAndAFeed_ShowTheViewersTitleTheirFeedsTitleThenTheOtherUsers()
