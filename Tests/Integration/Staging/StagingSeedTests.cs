@@ -54,7 +54,13 @@ public class StagingSeedTests : IAsyncDisposable
 	{
 		var configuration = new ConfigurationBuilder()
 			.AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json"))
-			.AddInMemoryCollection(new Dictionary<string, string?> { ["Sammlarr:ConnectionString"] = $"Data Source={Path.Combine(_directory, "sammlarr.db")}" })
+			.AddInMemoryCollection(
+				new Dictionary<string, string?>
+				{
+					["Sammlarr:ConnectionString"] = $"Data Source={Path.Combine(_directory, "sammlarr.db")}",
+					["Sammlarr:Accounts:SetupCode"] = "SAMM-LARR",
+				}
+			)
 			.Build();
 		var services = new ServiceCollection();
 		services.AddLogging();
@@ -158,12 +164,14 @@ public class StagingSeedTests : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Fresh_LeavesTheInstallWaitingForItsAdmin()
+	public async Task Fresh_LeavesTheInstallWaitingForItsAdminBehindTheConfiguredSetupCode()
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Fresh, Settings, CancellationToken.None);
 
 		await using var scope = _services.CreateAsyncScope();
-		await Assert.That(await scope.ServiceProvider.GetRequiredService<IOnboardingService>().NeedsAdminAsync()).IsTrue();
+		var onboarding = scope.ServiceProvider.GetRequiredService<IOnboardingService>();
+		await Assert.That(await onboarding.NeedsAdminAsync()).IsTrue();
+		await Assert.That(await onboarding.CodeProblemAsync("samm-larr")).IsNone();
 	}
 
 	private async Task AsAsync(string username, string password, Func<IServiceProvider, Task> check)

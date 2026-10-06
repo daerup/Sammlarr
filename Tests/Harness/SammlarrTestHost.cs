@@ -644,6 +644,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddScoped(sp => sp.GetRequiredService<IDbContextFactory<SammlarrDbContext>>().CreateDbContext());
 
 		services.AddSingleton(new SchedulerOptions());
+		services.AddSingleton(new AccountsOptions());
 		services.AddModule<CoreModule>();
 		services.AddModule<DbModule>();
 		services.AddModule<ApiModule>();

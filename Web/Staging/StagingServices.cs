@@ -1,6 +1,5 @@
 using Contracts.Identity;
 using Contracts.Messaging;
-using DB;
 using DB.Scheduling;
 using Domain.Identity;
 
@@ -23,7 +22,7 @@ internal static class StagingServices
 
 	private sealed class SeedingUser(CurrentUserOverride overrides) : ICurrentUser
 	{
-		private ICurrentUser Active => overrides.Value.GetValueOr(new AnonymousCurrentUser());
+		private ICurrentUser Active => overrides.Value.GetValueOr(new Nobody());
 
 		public bool IsAuthenticated => Active.IsAuthenticated;
 
@@ -34,6 +33,19 @@ internal static class StagingServices
 		public string AvatarUrl => Active.AvatarUrl;
 
 		public UserRole Role => Active.Role;
+	}
+
+	private sealed class Nobody : ICurrentUser
+	{
+		public bool IsAuthenticated => false;
+
+		public UserId Id => throw new InvalidOperationException("Nobody is signed in to the staging seed yet.");
+
+		public string DisplayName => string.Empty;
+
+		public string AvatarUrl => string.Empty;
+
+		public UserRole Role => UserRole.Member;
 	}
 
 	private sealed class UnsentMessages : IMessagePublisher

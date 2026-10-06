@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Contracts.Identity;
 using Domain.Identity;
 
-namespace UI.Shared.Identity;
+namespace Web.Auth;
 
 internal static class SessionRevalidation
 {

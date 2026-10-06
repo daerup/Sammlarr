@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
-using UI.Observability;
 
 namespace Web.Instrumentation;
 

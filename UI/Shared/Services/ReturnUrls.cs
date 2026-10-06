@@ -1,8 +1,8 @@
 namespace UI.Shared.Services;
 
-internal static class ReturnUrls
+public static class ReturnUrls
 {
-	internal static string Target(string? returnUrl) => returnUrl is { } url && IsLocal(url) ? url : "/";
+	public static string Target(string? returnUrl) => returnUrl is { } url && IsLocal(url) ? url : "/";
 
 	private static bool IsLocal(string url)
 	{

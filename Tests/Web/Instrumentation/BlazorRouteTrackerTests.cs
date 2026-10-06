@@ -1,6 +1,6 @@
-using UI.Observability;
+using Web.Instrumentation;
 
-namespace UI.Tests.Observability;
+namespace Web.Tests.Instrumentation;
 
 public class BlazorRouteTrackerTests
 {

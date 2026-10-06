@@ -7,7 +7,6 @@ using Contracts.Notifications;
 using Contracts.Settings;
 using Contracts.Setup;
 using Contracts.Wantlist;
-using Core.Setup;
 using DB;
 using Domain.Auth;
 using Domain.Feed;
@@ -19,7 +18,7 @@ using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Arr;
 using Domain.Wantlist.Sync;
-using Microsoft.EntityFrameworkCore;
+using Shared.Options;
 
 namespace Web.Staging;
 
@@ -50,13 +49,9 @@ internal static class StagingSeed
 
 	internal static async Task SeedAsync(IServiceProvider services, StagingScenario scenario, StagingSettings settings, CancellationToken cancellationToken)
 	{
+		await services.MigrateDatabaseAsync(cancellationToken);
 		await using var scope = services.CreateAsyncScope();
 		var scoped = scope.ServiceProvider;
-		await using (var context = await scoped.GetRequiredService<IDbContextFactory<SammlarrDbContext>>().CreateDbContextAsync(cancellationToken))
-		{
-			await context.Database.MigrateAsync(cancellationToken);
-		}
-
 		await (
 			scenario switch
 			{
@@ -70,7 +65,7 @@ internal static class StagingSeed
 	{
 		var users = scoped.GetRequiredService<IUserScope>();
 		var claim = new AdminClaim(
-			scoped.GetRequiredService<SetupGate>().Code,
+			scoped.GetRequiredService<AccountsOptions>().SetupCode,
 			StagingPersonas.Admin,
 			StagingPersonas.AdminPassword,
 			StagingPersonas.AdminPassword

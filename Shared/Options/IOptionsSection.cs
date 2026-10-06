@@ -1,6 +1,6 @@
 namespace Shared.Options;
 
-internal interface IOptionsSection
+public interface IOptionsSection
 {
 	static abstract string SectionName { get; }
 }
