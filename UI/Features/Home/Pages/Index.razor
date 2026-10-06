@@ -194,16 +194,16 @@ else
 
     private IReadOnlyDictionary<FeedId, string> FeedNames() => _feeds.ToDictionary(feed => feed.Id, feed => feed.Name);
 
-    private IReadOnlyDictionary<FeedId, BrandingInfo> FeedBrands()
+    private IReadOnlyDictionary<FeedId, IReadOnlyList<BrandingInfo>> FeedBrands()
     {
-        return _feeds.ToDictionary(feed => feed.Id, feed => BrandingService.GetBrandingInfo(feed.Provider.AsMediaProvider()));
+        return _feeds.ToDictionary(feed => feed.Id, feed => BrandingService.Brands(feed.Provider.Service));
     }
 
-    private IReadOnlyList<BrandingInfo> Sink => BrandingService.Brands(_settings?.Sink ?? SinkKind.Plex);
+    private IReadOnlyList<BrandingInfo> Sink => BrandingService.Brands((_settings?.Sink ?? SinkKind.Plex).Service);
 
     private bool IsConnected() => _isConnected;
 
-    private string? BrandColor => _settings is null ? null : BrandingService.SinkColor(_settings.Sink);
+    private string? BrandColor => _settings is null ? null : BrandingService.Color(_settings.Sink.Service);
 
     private void StartSync()
     {

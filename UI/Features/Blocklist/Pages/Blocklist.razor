@@ -212,7 +212,7 @@
     }
 
     private string? SinkBrandColor =>
-        Settings is null ? null : BrandingService.SinkColor(Settings.Sink);
+        Settings is null ? null : BrandingService.Color(Settings.Sink.Service);
 
     private static BulkConfirm RemoveConfirm(int count) =>
         new(

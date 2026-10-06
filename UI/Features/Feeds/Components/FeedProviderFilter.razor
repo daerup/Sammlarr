@@ -16,8 +16,11 @@
                 @foreach (var provider in Values)
                 {
                     <span class="provider-filter-tag">
-                        <ProviderTile Provider="@provider.AsMediaProvider()" Size="14" Decorative="true"/>
-                        @Brand(provider).NickName
+                        @foreach (var brand in Branding.Brands(provider.Service))
+                        {
+                            <BrandedTile Brand="brand" Size="14" Decorative="true"/>
+                        }
+                        @Branding.NickName(provider.Service)
                     </span>
                 }
             </span>
@@ -33,10 +36,13 @@
                         role="menuitemcheckbox"
                         aria-checked="@(chosen ? "true" : "false")"
                         class="provider-filter-row @(chosen ? "is-chosen" : null)"
-                        style="--brand: @Brand(option.Provider).BrandColor"
+                        style="--brand: @Branding.Color(option.Provider.Service)"
                         @onclick="() => ToggleAsync(option.Provider)">
-                    <ProviderTile Provider="@option.Provider.AsMediaProvider()" Size="22" Decorative="true"/>
-                    <span class="provider-filter-name">@Brand(option.Provider).NickName</span>
+                    @foreach (var brand in Branding.Brands(option.Provider.Service))
+                    {
+                        <BrandedTile Brand="brand" Size="22" Decorative="true"/>
+                    }
+                    <span class="provider-filter-name">@Branding.NickName(option.Provider.Service)</span>
                     <span class="provider-filter-count">@option.Count</span>
                     <span class="provider-filter-check">
                         @if (chosen)
@@ -57,7 +63,6 @@
 
     [Parameter] public EventCallback<IReadOnlyList<FeedProvider>> ValuesChanged { get; set; }
 
-    private BrandingInfo Brand(FeedProvider provider) => Branding.GetBrandingInfo(provider.AsMediaProvider());
 
     private Task ToggleAsync(FeedProvider provider) =>
         ValuesChanged.InvokeAsync(Values.Contains(provider) ? [.. Values.Where(value => value != provider)] : [.. Values, provider]);

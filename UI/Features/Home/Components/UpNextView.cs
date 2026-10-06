@@ -32,7 +32,7 @@ internal static class UpNextView
 	internal static IReadOnlyList<UpNextRow> InTheQueue(
 		QueueSnapshot queue,
 		IReadOnlyDictionary<FeedId, string> feedNames,
-		IReadOnlyDictionary<FeedId, BrandingInfo> feedBrands,
+		IReadOnlyDictionary<FeedId, IReadOnlyList<BrandingInfo>> feedBrands,
 		IReadOnlyList<BrandingInfo> sinkBrands
 	)
 	{
@@ -69,7 +69,7 @@ internal static class UpNextView
 					EditHref(entry.feed.Id)
 				)
 				{
-					Brands = [branding.GetBrandingInfo(entry.feed.Provider.AsMediaProvider())],
+					Brands = branding.Brands(entry.feed.Provider.Service),
 				}),
 		];
 	}
@@ -77,7 +77,7 @@ internal static class UpNextView
 	private static UpNextRow Row(
 		PendingJob job,
 		IReadOnlyDictionary<FeedId, string> feedNames,
-		IReadOnlyDictionary<FeedId, BrandingInfo> feedBrands,
+		IReadOnlyDictionary<FeedId, IReadOnlyList<BrandingInfo>> feedBrands,
 		IReadOnlyList<BrandingInfo> sinkBrands
 	)
 	{
@@ -103,13 +103,13 @@ internal static class UpNextView
 
 	private static IReadOnlyList<BrandingInfo> Brands(
 		IJobRequest request,
-		IReadOnlyDictionary<FeedId, BrandingInfo> feedBrands,
+		IReadOnlyDictionary<FeedId, IReadOnlyList<BrandingInfo>> feedBrands,
 		IReadOnlyList<BrandingInfo> sinkBrands
 	)
 	{
 		return request switch
 		{
-			RunFeed feed => feedBrands.GetValueOrNone(feed.Id).Match(brand => (IReadOnlyList<BrandingInfo>)[brand], () => []),
+			RunFeed feed => feedBrands.GetValueOrNone(feed.Id).GetValueOr([]),
 			SyncWantlist => sinkBrands,
 			_ => [],
 		};

@@ -46,9 +46,9 @@ internal static class ProvenanceView
 		return provenance switch
 		{
 			SinkOrigin sink => App(sink.Provider, type)
-				.Map(app => (IReadOnlyList<BrandingInfo>)[branding.GetBrandingInfo(app)])
-				.GetValueOr(() => branding.Brands(sink.Provider)),
-			FeedOrigin feed => [branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider())],
+				.Map(app => (IReadOnlyList<BrandingInfo>)[branding.GetBrandingInfo(app.Remote)])
+				.GetValueOr(() => branding.Brands(sink.Provider.Service)),
+			FeedOrigin feed => branding.Brands(feed.Feed.Provider.Service),
 			ManualOrigin or OrphanedOrigin => [],
 		};
 	}
@@ -62,8 +62,10 @@ internal static class ProvenanceView
 	{
 		return provenance switch
 		{
-			SinkOrigin sink => App(sink.Provider, type).Map(app => branding.GetBrandingInfo(app).BrandColor).GetValueOr(() => branding.SinkColor(sink.Provider)),
-			FeedOrigin feed => branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider()).BrandColor,
+			SinkOrigin sink => App(sink.Provider, type)
+				.Map(app => branding.GetBrandingInfo(app.Remote).BrandColor)
+				.GetValueOr(() => branding.Color(sink.Provider.Service)),
+			FeedOrigin feed => branding.Color(feed.Feed.Provider.Service),
 			ManualOrigin or OrphanedOrigin => null,
 		};
 	}

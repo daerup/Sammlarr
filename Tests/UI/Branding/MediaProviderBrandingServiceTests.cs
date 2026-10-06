@@ -1,5 +1,4 @@
 using Domain.Providers;
-using Domain.Wantlist.Arr;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Shared.Services.Branding;
@@ -18,9 +17,8 @@ public class MediaProviderBrandingServiceTests
 		return
 		[
 			.. Enum.GetValues<MediaProvider>().Select(provider => (Func<BrandingInfo>)(() => branding.GetBrandingInfo(provider))),
-			.. Enum.GetValues<ArrApp>().Select(app => (Func<BrandingInfo>)(() => branding.GetBrandingInfo(app))),
 			.. Enum.GetValues<RemoteService>().Select(remote => (Func<BrandingInfo>)(() => branding.GetBrandingInfo(remote))),
-			() => branding.GetBrandingInfo(AuthProvider.Local),
+			() => branding.Brands(new SammlarrAccounts()).Single(),
 		];
 	}
 
@@ -40,55 +38,47 @@ public class MediaProviderBrandingServiceTests
 	}
 
 	[Test]
-	public async Task GetBrandingInfo_ForThePlexSignIn_IsPlexsBrand()
-	{
-		await Assert.That(Testee.GetBrandingInfo(AuthProvider.Plex)).IsEqualTo(Testee.GetBrandingInfo(MediaProvider.Plex));
-	}
-
-	[Test]
-	public async Task GetBrandingInfo_ForSammlarrAccounts_IsSammlarrsOwnBrand()
-	{
-		await Assert.That(Testee.GetBrandingInfo(AuthProvider.Local).NickName).IsEqualTo("Sammlarr");
-	}
-
-	[Test]
-	public async Task SinkColor_ForPlex_IsPlexsBrand()
-	{
-		await Assert.That(Testee.SinkColor(SinkKind.Plex)).IsEqualTo(Testee.GetBrandingInfo(MediaProvider.Plex).BrandColor);
-	}
-
-	[Test]
-	public async Task SinkColor_ForRadarrAndSonarr_MixesBothAppsBrands()
-	{
-		var radarr = Testee.GetBrandingInfo(ArrApp.Radarr).BrandColor;
-		var sonarr = Testee.GetBrandingInfo(ArrApp.Sonarr).BrandColor;
-
-		await Assert.That(Testee.ArrColor).IsEqualTo($"color-mix(in oklch, {radarr}, {sonarr})");
-		await Assert.That(Testee.SinkColor(SinkKind.Arr)).IsEqualTo(Testee.ArrColor);
-	}
-
-	[Test]
-	public async Task Brands_OfASink_AreTheBrandsBehindIt()
-	{
-		await Assert.That(Testee.Brands(SinkKind.Plex).Select(brand => brand.NickName)).IsEquivalentTo(["Plex"]);
-		await Assert.That(Testee.Brands(SinkKind.Arr).Select(brand => brand.NickName)).IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);
-	}
-
-	[Test]
-	public async Task Brands_OfASearch_AreTheBrandsBehindIt()
-	{
-		await Assert.That(Testee.Brands(SearchProvider.Tmdb).Select(brand => brand.NickName)).IsEquivalentTo(["TMDb"]);
-		await Assert.That(Testee.Brands(SearchProvider.Plex).Select(brand => brand.NickName)).IsEquivalentTo(["Plex"]);
-		await Assert.That(Testee.Brands(SearchProvider.Arr).Select(brand => brand.NickName)).IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);
-	}
-
-	[Test]
 	public async Task GetBrandingInfo_ForARemoteServiceWithItsOwnIds_IsTheBrandOfThoseIds()
 	{
 		var mismatched = Enum.GetValues<RemoteService>()
 			.Where(remote => remote.OwnIds.Map(ids => Testee.GetBrandingInfo(ids) != Testee.GetBrandingInfo(remote)).GetValueOr(false));
 
 		await Assert.That(mismatched).IsEmpty();
+	}
+
+	[Test]
+	public async Task Brands_OfThePlexSignIn_IsPlexsBrand()
+	{
+		await Assert.That(Testee.Brands(AuthProvider.Plex.Service)).IsEquivalentTo([Testee.GetBrandingInfo(MediaProvider.Plex)]);
+	}
+
+	[Test]
+	public async Task Brands_OfSammlarrAccounts_IsSammlarrsOwnBrand()
+	{
+		await Assert.That(Testee.Brands(AuthProvider.Local.Service).Single().NickName).IsEqualTo("Sammlarr");
+	}
+
+	[Test]
+	public async Task Brands_OfAService_AreTheBrandsBehindIt()
+	{
+		await Assert.That(Testee.Brands(SinkKind.Plex.Service).Select(brand => brand.NickName)).IsEquivalentTo(["Plex"]);
+		await Assert.That(Testee.Brands(SearchProvider.Tmdb.Service).Select(brand => brand.NickName)).IsEquivalentTo(["TMDb"]);
+		await Assert.That(Testee.Brands(new Arr()).Select(brand => brand.NickName)).IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Color_OfASingleService_IsItsBrand()
+	{
+		await Assert.That(Testee.Color(SinkKind.Plex.Service)).IsEqualTo(Testee.GetBrandingInfo(MediaProvider.Plex).BrandColor);
+	}
+
+	[Test]
+	public async Task Color_OfRadarrAndSonarr_MixesBothAppsBrands()
+	{
+		var radarr = Testee.GetBrandingInfo(RemoteService.Radarr).BrandColor;
+		var sonarr = Testee.GetBrandingInfo(RemoteService.Sonarr).BrandColor;
+
+		await Assert.That(Testee.Color(new Arr())).IsEqualTo($"color-mix(in oklch, {radarr}, {sonarr})");
 	}
 
 	[Test]
@@ -102,18 +92,10 @@ public class MediaProviderBrandingServiceTests
 	}
 
 	[Test]
-	public async Task Brands_OfAService_AreTheBrandsBehindIt()
+	public async Task NickName_OfAService_JoinsItsBrandsShortNames()
 	{
-		await Assert.That(Testee.Brands(RemoteService.Plex).Select(brand => brand.NickName)).IsEquivalentTo(["Plex"]);
-		await Assert.That(Testee.Brands(new Arr()).Select(brand => brand.NickName)).IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);
-		await Assert.That(Testee.Brands(new SammlarrAccounts()).Select(brand => brand.NickName)).IsEquivalentTo(["Sammlarr"]);
-	}
-
-	[Test]
-	public async Task Color_OfAServiceOfTwoApps_MixesTheirBrands()
-	{
-		await Assert.That(Testee.Color(new Arr())).IsEqualTo(Testee.ArrColor);
-		await Assert.That(Testee.Color(RemoteService.Plex)).IsEqualTo(Testee.GetBrandingInfo(MediaProvider.Plex).BrandColor);
+		await Assert.That(Testee.NickName(RemoteService.Tmdb)).IsEqualTo("TMDb");
+		await Assert.That(Testee.NickName(new Arr())).IsEqualTo("Radarr + Sonarr");
 	}
 
 	private static bool IsUnclean(string svg) => svg.Contains("<?xml") || svg.Contains("<!--") || svg.Contains("<title") || svg.Contains("<text");

@@ -20,7 +20,7 @@
         [
             new(DemoFeeds.MirrorFeed.Name, "running now", "running", UpNextKind.Running, "/feeds") { Brands = [mdblist] },
             new("Sync Wantlist", "queued", "2nd in line", UpNextKind.Queued, null) { Job = Some.Of(JobId.From(Guid.NewGuid())), Brands = [Branding.GetBrandingInfo(MediaProvider.Plex)] },
-            new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null) { Brands = Branding.Brands(SinkKind.Arr), RunsAt = Some.Of(DemoFeeds.Now.AddMinutes(2)), Job = Some.Of(JobId.From(Guid.NewGuid())) },
+            new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null) { Brands = Branding.Brands(SinkKind.Arr.Service), RunsAt = Some.Of(DemoFeeds.Now.AddMinutes(2)), Job = Some.Of(JobId.From(Guid.NewGuid())) },
             new("A deleted feed", "queued", "4th in line", UpNextKind.Queued, null, Deleted: true) { Job = Some.Of(JobId.From(Guid.NewGuid())) },
         ];
         _scheduled =

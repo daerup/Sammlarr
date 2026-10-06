@@ -25,7 +25,7 @@ public class SinkCardsTests : BunitContext
 		var branding = Services.GetRequiredService<MediaProviderBrandingService>();
 		await Assert
 			.That(cut.FindAll(".choice-card").Select(card => card.GetAttribute("style")).OfType<string>())
-			.IsEquivalentTo([$"--brand: {branding.SinkColor(SinkKind.Plex)}", $"--brand: {branding.SinkColor(SinkKind.Arr)}"]);
+			.IsEquivalentTo([$"--brand: {branding.Color(SinkKind.Plex.Service)}", $"--brand: {branding.Color(SinkKind.Arr.Service)}"]);
 	}
 
 	[Test]

@@ -30,7 +30,7 @@
         <ChoiceCard TValue="AuthProvider?" Value="AuthProvider.Local" Id="signin-local" Title="Sammlarr accounts" Brand="var(--foreground)" Lines="LocalLines"
                     Picked="_picked == AuthProvider.Local">
             <Mark>
-                <BrandedLogo Brand="BrandingService.GetBrandingInfo(AuthProvider.Local)" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
+                <BrandedLogo Brand="BrandingService.Brands(AuthProvider.Local.Service).Single()" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
             </Mark>
         </ChoiceCard>
     </BbRadioGroup>

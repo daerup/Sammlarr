@@ -1,7 +1,7 @@
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
 
-<AppLink Href="@Url" External="true" Muted="Muted" Title="@($"Open on {Branding.GetBrandingInfo(Provider.AsMediaProvider()).NickName}")" Class="@($"min-w-0 max-w-full {Class ?? "text-sm"}")">
+<AppLink Href="@Url" External="true" Muted="Muted" Title="@($"Open on {Branding.NickName(Provider.Service)}")" Class="@($"min-w-0 max-w-full {Class ?? "text-sm"}")">
     <span class="min-w-0 truncate font-mono">@Identifier</span>
 </AppLink>
 

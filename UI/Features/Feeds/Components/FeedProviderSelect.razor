@@ -8,9 +8,12 @@
             {
                 <span class="flex min-w-0 items-center gap-2">
                     <span class="@(HasNoKey ? "flex grayscale opacity-45" : "flex")">
-                        <ProviderTile Provider="@selected.AsMediaProvider()" Size="22" Decorative="true"/>
+                        @foreach (var brand in Branding.Brands(selected.Service))
+                        {
+                            <BrandedTile Brand="brand" Size="22" Decorative="true"/>
+                        }
                     </span>
-                    <span class="@(HasNoKey ? "truncate font-normal text-muted-foreground" : "truncate")">@Brand(selected).NickName</span>
+                    <span class="@(HasNoKey ? "truncate font-normal text-muted-foreground" : "truncate")">@Branding.NickName(selected.Service)</span>
                     @if (HasNoKey)
                     {
                         <span class="inline-flex shrink-0 items-center gap-1 text-xs font-normal text-muted-foreground">
@@ -29,14 +32,17 @@
             @foreach (var provider in Providers)
             {
                 var available = !Unavailable.Contains(provider);
-                <BbSelectItem Value="@((FeedProvider?)provider)" Text="@Brand(provider).NickName" Disabled="@(!available)"
+                <BbSelectItem Value="@((FeedProvider?)provider)" Text="@Branding.NickName(provider.Service)" Disabled="@(!available)"
                               Class="isolate bg-transparent data-[focused=true]:bg-transparent! data-[disabled=true]:opacity-100 [&>span]:flex-1">
                     <span class="provider-wash" style="@BrandStyle(provider)"></span>
                     <span class="flex items-center gap-2.5">
                         <span class="@(available ? "flex" : "flex grayscale opacity-45")">
-                            <ProviderTile Provider="@provider.AsMediaProvider()" Size="22" Decorative="true"/>
+                            @foreach (var brand in Branding.Brands(provider.Service))
+                            {
+                                <BrandedTile Brand="brand" Size="22" Decorative="true"/>
+                            }
                         </span>
-                        <span class="@NameClass(provider, available)">@Brand(provider).NickName</span>
+                        <span class="@NameClass(provider, available)">@Branding.NickName(provider.Service)</span>
                         @if (!available)
                         {
                             <span class="inline-flex items-center gap-1 text-xs text-muted-foreground">
@@ -80,9 +86,8 @@
 
     private string KeysLink => KeyToAdd is { } provider ? SettingsLinks.Provider(provider.Service) : SettingsLinks.Providers;
 
-    private BrandingInfo Brand(FeedProvider provider) => Branding.GetBrandingInfo(provider.AsMediaProvider());
 
-    private string? BrandStyle(FeedProvider? provider) => provider is { } brand ? $"--brand: {Brand(brand).BrandColor}" : null;
+    private string? BrandStyle(FeedProvider? provider) => provider is { } brand ? $"--brand: {Branding.Color(brand.Service)}" : null;
 
     private string NameClass(FeedProvider provider, bool available) =>
         !available ? "flex-1 text-muted-foreground"

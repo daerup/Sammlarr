@@ -4,9 +4,9 @@
 <BbRadioGroup TValue="SinkKind" Value="Picked" ValueChanged="PickedChanged" Disabled="Disabled" AriaLabel="Where your wantlist syncs" Class="grid grid-cols-2 gap-3">
     @foreach (var card in Cards)
     {
-        <ChoiceCard Value="card.Sink" Id="@($"sink-{card.Sink}")" Title="@card.Title" Brand="@Branding.SinkColor(card.Sink)" Lines="card.Lines" Picked="card.Sink == Picked">
+        <ChoiceCard Value="card.Sink" Id="@($"sink-{card.Sink}")" Title="@card.Title" Brand="@Branding.Color(card.Sink.Service)" Lines="card.Lines" Picked="card.Sink == Picked">
             <Mark>
-                @foreach (var brand in Branding.Brands(card.Sink))
+                @foreach (var brand in Branding.Brands(card.Sink.Service))
                 {
                     <BrandedLogo Brand="brand" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
                 }

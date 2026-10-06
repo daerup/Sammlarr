@@ -263,7 +263,7 @@ public class ServicesMapTests : BunitContext
 
 		await Assert.That(box.QuerySelector(".map-service-status")!.TextContent.Trim()).IsEqualTo("Connected");
 		await Assert.That(box.InnerHtml).Contains("radarr-square").And.Contains("sonarr-square");
-		await Assert.That(box.GetAttribute("style")).Contains($"--brand: {Services.GetRequiredService<MediaProviderBrandingService>().ArrColor}");
+		await Assert.That(box.GetAttribute("style")).Contains($"--brand: {Services.GetRequiredService<MediaProviderBrandingService>().Color(new Arr())}");
 		await box.ClickAsync();
 		await Assert.That(arr).IsEqualTo(1);
 		await Assert.That(opened).IsEmpty();

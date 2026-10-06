@@ -20,10 +20,10 @@ public class UpNextViewTests
 
 	private static readonly MediaProviderBrandingService Branding = new();
 
-	private static readonly Dictionary<FeedId, BrandingInfo> Brands = new()
+	private static readonly Dictionary<FeedId, IReadOnlyList<BrandingInfo>> Brands = new()
 	{
-		[Docs] = Branding.GetBrandingInfo(MediaProvider.Mdblist),
-		[Anime] = Branding.GetBrandingInfo(MediaProvider.Tmdb),
+		[Docs] = [Branding.GetBrandingInfo(MediaProvider.Mdblist)],
+		[Anime] = [Branding.GetBrandingInfo(MediaProvider.Tmdb)],
 	};
 
 	private static readonly IReadOnlyList<BrandingInfo> Plex = [Branding.GetBrandingInfo(MediaProvider.Plex)];

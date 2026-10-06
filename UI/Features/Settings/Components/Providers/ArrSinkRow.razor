@@ -10,16 +10,16 @@
 @inject ICurrentUser CurrentUser
 @inject MediaProviderBrandingService Branding
 
-<div id="@ProviderRows.Id(new Arr())" class="arr-row" style="--mix: @Branding.SinkColor(SinkKind.Arr)">
+<div id="@ProviderRows.Id(new Arr())" class="arr-row" style="--mix: @Branding.Color(SinkKind.Arr.Service)">
     <BbCollapsible Open="Open" OpenChanged="OpenChanged">
         <BbCollapsibleTrigger AsChild="false"
                               Class="arr-row-head group w-full grid grid-cols-[15px_190px_1fr_auto] items-center gap-3.5 pl-5 pr-4 py-4 text-left bg-foreground/5 hover:bg-foreground/8 transition-colors">
             <LucideIcon Name="chevron-right" Size="15" Class="text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
             <span class="arr-lockup">
-                <BrandedLogo Brand="Branding.GetBrandingInfo(ArrApp.Radarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+                <BrandedLogo Brand="Branding.GetBrandingInfo(RemoteService.Radarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
                 Radarr
                 <span class="arr-lockup-plus">+</span>
-                <BrandedLogo Brand="Branding.GetBrandingInfo(ArrApp.Sonarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+                <BrandedLogo Brand="Branding.GetBrandingInfo(RemoteService.Sonarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
                 Sonarr
             </span>
             <RoleIcons Key="new Arr()"/>
@@ -63,7 +63,7 @@
                             @foreach (var app in Apps)
                             {
                                 <BbTabsTrigger Value="@app.Name" Class="gap-2">
-                                    <BrandedLogo Brand="Branding.GetBrandingInfo(app)" Form="ProviderLogoForm.Mark" Size="16" Decorative="true"/>
+                                    <BrandedLogo Brand="Branding.GetBrandingInfo(app.Remote)" Form="ProviderLogoForm.Mark" Size="16" Decorative="true"/>
                                     <span>@app.Name</span>
                                     @StateMark(app)
                                 </BbTabsTrigger>
@@ -186,7 +186,7 @@
 
     private string OpenTab => Chosen == TagsTab && !ShowsTags ? ArrApp.Radarr.Name : Chosen;
 
-    private string SegColour => Apps.FirstOrNone(app => app.Name == OpenTab).Map(app => Branding.GetBrandingInfo(app).BrandColor).GetValueOr(() => Branding.SinkColor(SinkKind.Arr));
+    private string SegColour => Apps.FirstOrNone(app => app.Name == OpenTab).Map(app => Branding.GetBrandingInfo(app.Remote).BrandColor).GetValueOr(() => Branding.Color(SinkKind.Arr.Service));
 
     protected override async Task OnInitializedAsync()
     {

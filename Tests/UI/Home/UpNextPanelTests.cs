@@ -76,7 +76,10 @@ public class UpNextPanelTests : BunitContext
 	[Test]
 	public async Task Row_SyncingToRadarrAndSonarr_PairsBothMarksInOneTile()
 	{
-		IReadOnlyList<UpNextRow> queued = [new("Sync Wantlist", "queued", string.Empty, UpNextKind.Queued, null) { Brands = Branding.Brands(SinkKind.Arr) }];
+		IReadOnlyList<UpNextRow> queued =
+		[
+			new("Sync Wantlist", "queued", string.Empty, UpNextKind.Queued, null) { Brands = Branding.Brands(SinkKind.Arr.Service) },
+		];
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
 

@@ -62,7 +62,7 @@ public class ProfileCardTests : BunitContext
 
 		await Assert
 			.That(cut.WaitForElement("[style*='linear-gradient']").GetAttribute("style"))
-			.Contains($"{Brands.GetBrandingInfo(AuthProvider.Local).BrandColor}1F");
+			.Contains($"{Brands.Brands(AuthProvider.Local.Service).Single().BrandColor}1F");
 	}
 
 	[Test]

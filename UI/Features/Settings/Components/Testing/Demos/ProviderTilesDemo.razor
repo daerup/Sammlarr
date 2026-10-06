@@ -8,7 +8,7 @@
         @foreach (var size in Sizes)
         {
             <ProviderTile Provider="MediaProvider.Plex" Size="size"/>
-            <ProviderPairTile First="Branding.GetBrandingInfo(ArrApp.Radarr)" Second="Branding.GetBrandingInfo(ArrApp.Sonarr)" Size="size"/>
+            <ProviderPairTile First="Branding.GetBrandingInfo(RemoteService.Radarr)" Second="Branding.GetBrandingInfo(RemoteService.Sonarr)" Size="size"/>
         }
     </div>
 </DemoCard>
