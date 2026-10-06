@@ -195,17 +195,21 @@
     {
         get
         {
-            var signsIn = SignIn switch
-            {
-                AuthProvider.Plex => "signs in with Plex",
-                AuthProvider.Local => "signs in with a Sammlarr account",
-            };
             return Person switch
             {
-                JoinedPerson joined => $"Joined {joined.User.JoinedAt.LocalDateTime:MMM d, yyyy} · {signsIn}",
-                InvitedPerson => $"Invited, not joined yet · {signsIn}",
+                JoinedPerson joined => $"Joined {joined.User.JoinedAt.LocalDateTime:MMM d, yyyy} · {SignsIn(SignIn)}",
+                InvitedPerson => $"Invited, not joined yet · {SignsIn(SignIn)}",
             };
         }
+    }
+
+    internal static string SignsIn(AuthProvider signIn)
+    {
+        return signIn switch
+        {
+            AuthProvider.Plex => "signs in with Plex",
+            AuthProvider.Local => "signs in with a Sammlarr account",
+        };
     }
 
     private (string Text, string Tone, string Dot) Status

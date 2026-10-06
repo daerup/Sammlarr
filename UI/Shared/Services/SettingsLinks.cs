@@ -10,5 +10,7 @@ internal static class SettingsLinks
 
 	internal const string Users = "/settings?section=users";
 
+	internal const string Account = "/settings?section=account";
+
 	internal static string Provider(MediaProvider provider) => $"{Providers}&provider={provider.ToString().ToLowerInvariant()}";
 }

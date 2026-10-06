@@ -10,12 +10,20 @@
 
     @if (_config is { } config)
     {
+        <section class="flex flex-col gap-2" aria-label="You">
+            <h4 class="px-1 text-sm font-semibold">You</h4>
+            <YouCard/>
+        </section>
+
         @if (config.AuthProvider == AuthProvider.Plex)
         {
             <SignUpsCard/>
         }
 
-        <PeopleList/>
+        <section class="flex flex-col gap-2" aria-label="People">
+            <h4 class="px-1 text-sm font-semibold">People</h4>
+            <PeopleList/>
+        </section>
     }
     else
     {
