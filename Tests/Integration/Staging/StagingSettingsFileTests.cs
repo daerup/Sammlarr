@@ -21,6 +21,23 @@ public class StagingSettingsFileTests
 	}
 
 	[Test]
+	public async Task Webhook_InTheStagingSettings_MayReachTheCatcherOnItsPrivateAddress()
+	{
+		var webhook = Settings.GetSection(WebhookOptions.SectionName).Get<WebhookOptions>()!;
+
+		await Assert.That(webhook.PrivateHosts).Contains("catcher");
+	}
+
+	[Test]
+	public async Task Seed_InTheStagingSettings_SignsWebhooksWithAStandardWebhooksSecret()
+	{
+		var secret = Settings.GetSection("Staging:Seed:Notifications:Webhook").Get<SeedWebhook>()!.Secret;
+
+		await Assert.That(secret).StartsWith("whsec_");
+		await Assert.That(Convert.FromBase64String(secret["whsec_".Length..])).Count().IsGreaterThanOrEqualTo(24);
+	}
+
+	[Test]
 	public async Task Seed_InTheStagingSettings_NamesEveryWantedTitleByAnId()
 	{
 		var seed = Settings.GetSection("Staging:Seed").Get<StagingSeedData>()!;

@@ -83,7 +83,8 @@ public class StagingSeedTests : IAsyncDisposable
 			Library = new SeedLibrary { Radarr = [], Sonarr = [] },
 			Notifications = new SeedNotifications
 			{
-				Webhook = new SeedWebhook { Name = "Catcher webhook", Secret = "whsec_staging" },
+				Template = new SeedTemplate { Title = "{{ title }}", Message = "{{ summary }}" },
+				Webhook = new SeedWebhook { Name = "Catcher webhook", Secret = "whsec_c2FtbWxhcnItc3RhZ2luZy13ZWJob29rLXNlY3JldCE=" },
 				Pushover = new SeedPushover
 				{
 					Name = "Catcher Pushover",
@@ -200,6 +201,28 @@ public class StagingSeedTests : IAsyncDisposable
 				await Assert.That(targets.Count(target => target.Config is PushoverConfig)).IsEqualTo(1);
 				var feeds = (await services.GetRequiredService<IFeedService>().GetAsync()).Feeds;
 				await Assert.That(feeds.Select(feed => feed.Feed.Enabled)).IsEquivalentTo([true, true]);
+			}
+		);
+	}
+
+	[Test]
+	public async Task Configured_SubscribesBothCatcherTargetsToEveryEventWithTheSeededTemplate()
+	{
+		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
+
+		await AsAsync(
+			Admin,
+			AdminPassword,
+			async services =>
+			{
+				var subscriptions = services.GetRequiredService<INotificationSubscriptionRepository>();
+				var targets = await services.GetRequiredService<INotificationTargetRepository>().GetAllAsync();
+				foreach (var target in targets.Where(target => target.Config is WebhookConfig or PushoverConfig))
+				{
+					var subscription = (await subscriptions.GetForTargetAsync(target.Id)).Single();
+					await Assert.That(subscription.EventTypes).IsEquivalentTo(Enum.GetValues<NotificationEventType>());
+					await Assert.That(subscription.Template.Message).IsSome().And.IsEqualTo("{{ summary }}");
+				}
 			}
 		);
 	}

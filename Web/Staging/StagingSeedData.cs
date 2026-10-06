@@ -1,5 +1,6 @@
 using Domain.Feed;
 using Domain.Media;
+using Domain.Notifications;
 using Domain.Providers;
 
 namespace Web.Staging;
@@ -83,9 +84,20 @@ internal sealed record LibraryTitle
 
 internal sealed record SeedNotifications
 {
+	public required SeedTemplate Template { get; init; }
+
 	public required SeedWebhook Webhook { get; init; }
 
 	public required SeedPushover Pushover { get; init; }
+}
+
+internal sealed record SeedTemplate
+{
+	public string? Title { get; init; }
+
+	public string? Message { get; init; }
+
+	internal NotificationTemplate ToNotificationTemplate() => NotificationTemplate.None with { Title = Optional.Of(Title), Message = Optional.Of(Message) };
 }
 
 internal sealed record SeedWebhook

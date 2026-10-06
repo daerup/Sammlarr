@@ -14,14 +14,16 @@ internal sealed class WebhookModule : IServiceModule
 		services
 			.AddHttpClient<WebhookClient>()
 			.AddProviderHttp<WebhookOptions>()
-			.ConfigurePrimaryHttpMessageHandler(() =>
-				new SocketsHttpHandler
+			.ConfigurePrimaryHttpMessageHandler(provider =>
+			{
+				var privateHosts = provider.GetRequiredService<WebhookOptions>().PrivateHosts;
+				return new SocketsHttpHandler
 				{
 					EnableMultipleHttp2Connections = true,
 					AllowAutoRedirect = false,
-					ConnectCallback = WebhookConnect.ConnectAsync,
-				}
-			);
+					ConnectCallback = (context, cancellationToken) => WebhookConnect.ConnectAsync(context, privateHosts, cancellationToken),
+				};
+			});
 
 		services.AddKeyedScoped<INotificationChannel, WebhookChannel>(NotificationChannel.Webhook);
 	}

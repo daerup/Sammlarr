@@ -5,11 +5,17 @@ namespace API.Notifications.Webhook;
 
 internal static class WebhookConnect
 {
-	public static async ValueTask<Stream> ConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
+	public static async ValueTask<Stream> ConnectAsync(
+		SocketsHttpConnectionContext context,
+		IReadOnlyCollection<string> privateHosts,
+		CancellationToken cancellationToken
+	)
 	{
 		var host = context.DnsEndPoint.Host;
 		var addresses = await Dns.GetHostAddressesAsync(host, cancellationToken);
-		var target = Array.Find(addresses, IsAllowed) ?? throw new WebhookBlockedException($"The webhook host '{host}' resolves only to blocked addresses.");
+		var target =
+			Array.Find(addresses, address => MayReach(host, address, privateHosts))
+			?? throw new WebhookBlockedException($"The webhook host '{host}' resolves only to blocked addresses.");
 
 		var socket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
 		try
@@ -24,7 +30,8 @@ internal static class WebhookConnect
 		}
 	}
 
-	private static bool IsAllowed(IPAddress address) => !IsBlocked(address);
+	internal static bool MayReach(string host, IPAddress address, IReadOnlyCollection<string> privateHosts) =>
+		privateHosts.Contains(host, StringComparer.OrdinalIgnoreCase) || !IsBlocked(address);
 
 	internal static bool IsBlocked(IPAddress address)
 	{

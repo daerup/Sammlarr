@@ -10,7 +10,7 @@ internal sealed record StagingConfig(string Host, string CatcherSession, Staging
 
 	internal const string SeedSection = "Staging:Seed";
 
-	internal const string SammlarrSection = "Sammlarr";
+	internal static readonly string[] AppSections = ["Sammlarr", "Webhook"];
 
 	private const string FileName = "appsettings.Staging.json";
 

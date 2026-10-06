@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shared.Options;
@@ -13,7 +14,6 @@ internal static class StagingEnvironment
 	internal static void AddStaging(this IDistributedApplicationBuilder builder)
 	{
 		var config = StagingConfig.Load(builder);
-		var sammlarrSettings = builder.Configuration.GetSection(StagingConfig.SammlarrSection);
 		var layout = StagingLayout.From(builder.Configuration["StagingRoot"]);
 		var scenario = new StagingScenarioChoice(builder.Configuration["StagingScenario"] ?? StagingScenarioChoice.Configured);
 		var tmdb = builder.AddParameter("tmdb-api-key", secret: true);
@@ -43,7 +43,7 @@ internal static class StagingEnvironment
 			.WithArgs("seed-staging")
 			.WithEnvironment((SammlarOptions options) => options.ConnectionString, $"Data Source={layout.Database};Pooling=False")
 			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", layout.KeyRing)
-			.WithConfiguration(sammlarrSettings)
+			.WithAppSettings(builder.Configuration)
 			.WithConfiguration(builder.Configuration.GetSection(StagingConfig.PersonasSection))
 			.WithConfiguration(builder.Configuration.GetSection(StagingConfig.SeedSection))
 			.WithEnvironment(context => context.EnvironmentVariables["Staging__Scenario"] = scenario.Value)
@@ -65,7 +65,7 @@ internal static class StagingEnvironment
 			.AddDockerfile("sammlarr", RepositoryRoot(builder), Dockerfile)
 			.WithHttpEndpoint(port: config.Ports.Sammlarr, targetPort: 8080, name: "http", isProxied: false)
 			.WithBindMount(layout.Sammlarr, "/data")
-			.WithConfiguration(sammlarrSettings)
+			.WithAppSettings(builder.Configuration)
 			.WithEnvironment((PushoverOptions options) => options.BaseUrl, $"http://catcher:8080/{config.CatcherSession}/pushover/1")
 			.WithEnvironment("HTTP_PROXY", config.Network.DeadProxy)
 			.WithEnvironment("HTTPS_PROXY", config.Network.DeadProxy)
@@ -125,6 +125,17 @@ internal static class StagingEnvironment
 			.WithEnvironment($"{section}__Address", address)
 			.WithEnvironment($"{section}__RootFolder", app.Library)
 			.WithEnvironment($"{section}__Library", layout.LibraryOf(app));
+	}
+
+	private static IResourceBuilder<T> WithAppSettings<T>(this IResourceBuilder<T> resource, IConfiguration configuration)
+		where T : IResourceWithEnvironment
+	{
+		foreach (var section in StagingConfig.AppSections)
+		{
+			resource.WithConfiguration(configuration.GetSection(section));
+		}
+
+		return resource;
 	}
 
 	private static void Label(IResourceBuilder<ContainerResource> container, string name, string path)
