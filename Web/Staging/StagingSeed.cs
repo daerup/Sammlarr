@@ -100,19 +100,21 @@ internal static class StagingSeed
 		var feeds = scoped.GetRequiredService<IFeedService>();
 		foreach (var feed in seeded)
 		{
-			await feeds.CreateAsync(
-				new FeedCreateData
-				{
-					Name = feed.Name,
-					IsEnabled = enabled,
-					Provider = feed.Provider,
-					Strategy = feed.FeedStrategy(),
-					Identifier = feed.Identifier,
-					Limit = Optional.Of(feed.Limit).Map(count => new QueryLimit { Count = count }),
-					Schedule = new Manual(),
-				},
-				cancellationToken
-			);
+			await feeds
+				.CreateAsync(
+					new FeedCreateData
+					{
+						Name = feed.Name,
+						IsEnabled = enabled,
+						Provider = feed.Provider,
+						Strategy = feed.FeedStrategy(),
+						Identifier = feed.Identifier,
+						Limit = Optional.Of(feed.Limit).Map(count => new QueryLimit { Count = count }),
+						Schedule = new Manual(),
+					},
+					cancellationToken
+				)
+				.GetOrThrow(error => new InvalidOperationException($"The staging feed {feed.Name} was refused: {error.Reason}"));
 		}
 	}
 

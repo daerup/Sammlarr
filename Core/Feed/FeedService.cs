@@ -1,3 +1,4 @@
+using Contracts.DI;
 using Contracts.Feed;
 using Contracts.Wantlist;
 using Domain.Feed;
@@ -6,7 +7,12 @@ using Domain.Providers;
 
 namespace Core.Feed;
 
-internal sealed class FeedService(IFeedRepository repository, IWantlistRepository wantlist, IFeedScheduler scheduler) : IFeedService
+internal sealed class FeedService(
+	IFeedRepository repository,
+	IWantlistRepository wantlist,
+	IFeedScheduler scheduler,
+	IKeyedServiceIndex<FeedProvider, IFeedProvider> providers
+) : IFeedService
 {
 	public async Task<FeedSnapshot> GetAsync(CancellationToken cancellationToken = default)
 	{
@@ -16,17 +22,37 @@ internal sealed class FeedService(IFeedRepository repository, IWantlistRepositor
 		return new FeedSnapshot([.. feeds.Select(feed => FeedOverview.Of(feed, totals.GetValueOrNone(feed.Id), onWantlist.GetValueOrDefault(feed.Id)))]);
 	}
 
-	public async Task<FeedId> CreateAsync(FeedCreateData data, CancellationToken cancellationToken = default)
+	public async Task<Result<FeedId>> CreateAsync(FeedCreateData data, CancellationToken cancellationToken = default)
+	{
+		return await providers[data.Provider]
+			.NormalizeAsync(data.Identifier, cancellationToken)
+			.Map(normalized => CreatedAsync(data with { Identifier = normalized }, cancellationToken));
+	}
+
+	public async Task<Result<FeedId>> UpdateAsync(FeedId id, FeedUpdateData data, CancellationToken cancellationToken = default)
+	{
+		var stored = await repository.FindAsync(id, cancellationToken);
+		return await stored
+			.When(feed => feed.Provider == data.Provider && feed.Identifier == data.Identifier)
+			.Match(
+				feed => Task.FromResult<Result<string>>(Success.Of(feed.Identifier)),
+				() => providers[data.Provider].NormalizeAsync(data.Identifier, cancellationToken)
+			)
+			.Map(normalized => UpdatedAsync(id, data with { Identifier = normalized }, cancellationToken));
+	}
+
+	private async Task<FeedId> CreatedAsync(FeedCreateData data, CancellationToken cancellationToken)
 	{
 		var id = await repository.CreateAsync(data, cancellationToken);
 		await RescheduleAsync(id, cancellationToken);
 		return id;
 	}
 
-	public async Task UpdateAsync(FeedId id, FeedUpdateData data, CancellationToken cancellationToken = default)
+	private async Task<FeedId> UpdatedAsync(FeedId id, FeedUpdateData data, CancellationToken cancellationToken)
 	{
 		await repository.UpdateAsync(id, data, cancellationToken);
 		await RescheduleAsync(id, cancellationToken);
+		return id;
 	}
 
 	public async Task DeleteAsync(FeedId id, CancellationToken cancellationToken = default)

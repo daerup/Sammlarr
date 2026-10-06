@@ -351,6 +351,11 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private sealed class StubFeedService(int resolved, int unmatched) : IFeedProvider
 	{
+		public Task<Result<string>> NormalizeAsync(string input, CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<Result<string>>(Success.Of(input));
+		}
+
 		public async IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 		{
 			for (var i = 0; i < resolved; i++)

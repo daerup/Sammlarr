@@ -88,7 +88,7 @@ public class FeedPreviewTests
 	[Test]
 	public async Task RefreshAssets_WhenThePreviewHasUnmatchedItems_StillRefreshes()
 	{
-		const string identifier = "e2e-refresh-unmatched";
+		const string identifier = "e2e/refresh-unmatched";
 		await using var stub = await E2EApp.StubAsync($"/lists/{identifier}/items", 200, UnmatchedList(3));
 
 		var page = await E2EApp.OpenAuthenticatedPageAsync();

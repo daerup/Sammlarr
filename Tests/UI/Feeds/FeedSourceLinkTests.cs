@@ -16,7 +16,8 @@ public class FeedSourceLinkTests : BunitContext
 	}
 
 	[Test]
-	[Arguments(FeedProvider.Mdblist, "top-250", "https://mdblist.com/lists/top-250")]
+	[Arguments(FeedProvider.Mdblist, "snoak/trakt-s-trending-shows", "https://mdblist.com/lists/snoak/trakt-s-trending-shows")]
+	[Arguments(FeedProvider.Mdblist, "chazlarson/external/2868", "https://mdblist.com/lists/chazlarson/external/2868")]
 	[Arguments(FeedProvider.Tmdb, "12345", "https://www.themoviedb.org/list/12345")]
 	public async Task Render_ForAProvider_LinksToItsListUrl(FeedProvider provider, string identifier, string expectedUrl)
 	{

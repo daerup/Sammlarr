@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/lists/2236/items",
+    "urlPath": "/lists/garycrawfordgc/top-movies-of-the-week/items",
     "queryParameters": {
       "limit": {
         "equalTo": "1000"
@@ -16,6 +16,6 @@
     "headers": {
       "Content-Type": "application/json"
     },
-    "bodyFileName": "mdblist/lists-2236-items-1000-0.verified.json"
+    "bodyFileName": "mdblist/lists-garycrawfordgc-top-movies-of-the-week-items-1000-0.verified.json"
   }
 }

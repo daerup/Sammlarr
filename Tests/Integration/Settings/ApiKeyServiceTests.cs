@@ -48,9 +48,9 @@ public class ApiKeyServiceTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task ClearAsync_DisablesAndUnschedulesEveryFeedThatNeedsTheKey()
 	{
-		var trending = await Feeds.CreateAsync(Feed("Trending movies", FeedProvider.Tmdb));
+		var trending = await Feeds.CreatedAsync(Feed("Trending movies", FeedProvider.Mdblist));
 
-		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
+		await Testee.ClearAsync(ApiKeyProvider.Mdblist);
 
 		await Assert.That((await host.FeedAsync(trending)).Enabled).IsFalse();
 		await Assert.That(Scheduler.Unscheduled).Contains(trending);
@@ -59,7 +59,7 @@ public class ApiKeyServiceTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task ClearAsync_LeavesFeedsOnOtherKeysRunning()
 	{
-		var documentaries = await Feeds.CreateAsync(Feed("Documentaries", FeedProvider.Mdblist));
+		var documentaries = await Feeds.CreatedAsync(Feed("Documentaries", FeedProvider.Mdblist));
 
 		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
 
@@ -70,11 +70,11 @@ public class ApiKeyServiceTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task ClearAsync_WhenAnotherUserRemovesTheirKey_LeavesYourFeedsRunning()
 	{
-		var yours = await Feeds.CreateAsync(Feed("Trending movies", FeedProvider.Tmdb));
+		var yours = await Feeds.CreatedAsync(Feed("Trending movies", FeedProvider.Mdblist));
 		var owner = host.CurrentUser.Id;
 		host.CurrentUser.Id = UserId.From(SammlarrTestHost.SeededMember.Id);
 
-		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
+		await Testee.ClearAsync(ApiKeyProvider.Mdblist);
 
 		host.CurrentUser.Id = owner;
 		await Assert.That((await host.FeedAsync(yours)).Enabled).IsTrue();
@@ -88,7 +88,7 @@ public class ApiKeyServiceTests(SammlarrTestHost host) : IAsyncDisposable
 			IsEnabled = true,
 			Provider = provider,
 			Strategy = new FeedStrategy(new Append()),
-			Identifier = name.ToLowerInvariant(),
+			Identifier = FeedRunSeeding.ListOf(name),
 			Schedule = new FeedRunTrigger(new Scheduled(Nightly)),
 		};
 }

@@ -196,6 +196,84 @@ public class FeedConfigPanelTests : BunitContext
 		await Assert.That(cut.Find("input[aria-label='Rating, upper bound']").GetAttribute("value")).IsEqualTo("8.5");
 	}
 
+	[Test]
+	public async Task Identifier_AfterANumberWasLookedUp_ShowsWhatIsSavedAndWhereItCameFrom()
+	{
+		var cut = RenderConfig(Documentaries with { Identifier = "88434" });
+
+		Checked(cut, new IdentifierCheck("88434", Success.Of("snoak/trakt-s-trending-shows")));
+
+		await Assert.That(IdentifierField(cut).GetAttribute("value")).IsEqualTo("snoak/trakt-s-trending-shows");
+		await Assert.That(cut.Find("[data-identifier-note]").TextContent.Trim()).IsEqualTo("Looked up from 88434.");
+	}
+
+	[Test]
+	[Arguments("https://mdblist.com/lists/snoak/trakt-s-trending-shows")]
+	[Arguments("www.mdblist.com/lists/snoak/trakt-s-trending-shows")]
+	public async Task Identifier_AfterALinkWasRead_SaysItCameFromTheLink(string link)
+	{
+		var cut = RenderConfig(Documentaries with { Identifier = link });
+
+		Checked(cut, new IdentifierCheck(link, Success.Of("snoak/trakt-s-trending-shows")));
+
+		await Assert.That(cut.Find("[data-identifier-note]").TextContent.Trim()).IsEqualTo("Taken from the mdblist.com link.");
+	}
+
+	[Test]
+	public async Task Identifier_ThatWasAlreadyTheStoredForm_HasNoNote()
+	{
+		var cut = RenderConfig(Documentaries);
+
+		Checked(cut, new IdentifierCheck("hdlists/documentaries", Success.Of("hdlists/documentaries")));
+
+		await Assert.That(cut.FindAll("[data-identifier-note]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Identifier_WhenRefused_SaysWhyUnderTheFieldAndMarksIt()
+	{
+		var cut = RenderConfig(Documentaries with { Identifier = "top-250-movies" });
+
+		Checked(cut, new IdentifierCheck("top-250-movies", Error.From("Paste the list's link from mdblist.com, its owner/list, or its number.")));
+
+		await Assert
+			.That(cut.Find("[data-identifier-error]").TextContent.Trim())
+			.IsEqualTo("Paste the list's link from mdblist.com, its owner/list, or its number.");
+		await Assert.That(IdentifierField(cut).GetAttribute("aria-invalid")).IsEqualTo("true");
+	}
+
+	[Test]
+	public async Task Identifier_WhenTheProviderDidNotAnswer_WarnsWithoutMarkingTheField()
+	{
+		var cut = RenderConfig(Documentaries with { Identifier = "88434" });
+
+		Checked(cut, new IdentifierCheck("88434", Error.From("MDBList didn't answer.", new ProviderUnavailableException(MediaProvider.Mdblist))));
+
+		await Assert.That(cut.Find("[data-identifier-warning]").TextContent.Trim()).IsEqualTo("MDBList didn't answer.");
+		await Assert.That(cut.FindAll("[data-identifier-error]")).IsEmpty();
+		await Assert.That(IdentifierField(cut).GetAttribute("aria-invalid")).IsNotEqualTo("true");
+	}
+
+	[Test]
+	public async Task Identifier_OnceEditedAgain_DropsTheNote()
+	{
+		var cut = RenderConfig(Documentaries with { Identifier = "88434" });
+		Checked(cut, new IdentifierCheck("88434", Success.Of("snoak/trakt-s-trending-shows")));
+
+		await cut.InvokeAsync(() =>
+			cut.FindComponents<BbInput>().Single(input => input.Instance.Id == "list-identifier").Instance.ValueChanged.InvokeAsync("12345")
+		);
+
+		await Assert.That(cut.FindAll("[data-identifier-note]")).IsEmpty();
+	}
+
+	private static IElement IdentifierField(IRenderedComponent<FeedConfigPanel> cut) => cut.Find("#list-identifier");
+
+	private static void Checked(IRenderedComponent<FeedConfigPanel> cut, IdentifierCheck check)
+	{
+		cut.Render(parameters => parameters.Add(panel => panel.Check, check));
+	}
+
 	private static IElement ProviderLabel(IRenderedComponent<FeedConfigPanel> cut)
 	{
 		return cut.FindAll("label").First(label => label.TextContent.Trim().StartsWith("Provider"));

@@ -2,9 +2,11 @@
 @page "/feeds/edit/{EditFeedId}"
 @page "/feeds/clone/{CloneFeedId}"
 @using Contracts.Auth
+@using Contracts.DI
 @using Contracts.Feed
 @using global::Shared
 @inject IFeedService FeedService
+@inject IKeyedServiceIndex<FeedProvider, IFeedProvider> FeedProviders
 @inject NavigationManager NavigationManager
 @inject IApiKeyService ApiKeyService
 @inject AccountConnectionPrompt AccountConnectionPrompt
@@ -101,6 +103,7 @@
                     <FeedConfigPanel @key="_configKey"
                                      Value="@_config"
                                      IsLoading="@(_previewStatus.IsLoading || _isApplying)"
+                                     Check="@_identifierCheck"
                                      OnChange="@OnConfigChanged"/>
 
                     <FeedPreviewPanel @ref="_previewPanel"
@@ -144,6 +147,7 @@
     private bool _isApplying;
     private bool _pendingAutoApply;
     private PreviewStatus _previewStatus = new();
+    private IdentifierCheck? _identifierCheck;
     private FeedPreviewPanel _previewPanel = null!;
 
     private int _configKey;
@@ -160,6 +164,11 @@
     private void OnPreviewStatusChanged(PreviewStatus status) => _previewStatus = status;
     private void OnConfigChanged(FeedConfig config)
     {
+        if (config.Provider != _config.Provider)
+        {
+            _identifierCheck = null;
+        }
+
         _config = config;
     }
 
@@ -255,15 +264,38 @@
         StateHasChanged();
         try
         {
-            var applied = _config;
-            await _previewPanel.ApplyAsync(applied);
-            _appliedHash = applied.GetPreviewHash();
+            var identifier = await CheckIdentifierAsync(_config.Identifier.Trim());
+            await identifier.Apply(PreviewAsync);
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to test the feed");
         }
         finally
         {
             _isApplying = false;
             StateHasChanged();
         }
+    }
+
+    private async Task<Result<string>> CheckIdentifierAsync(string typed)
+    {
+        if (_identifierCheck is { } check && check.Answer.Match(stored => stored == typed, _ => false))
+        {
+            return check.Answer;
+        }
+
+        var answer = await FeedProviders[_config.Provider!.Value].NormalizeAsync(typed, CancellationToken.None);
+        _identifierCheck = new IdentifierCheck(typed, answer);
+        return answer;
+    }
+
+    private async Task PreviewAsync(string identifier)
+    {
+        _config = _config with { Identifier = identifier };
+        var applied = _config;
+        await _previewPanel.ApplyAsync(applied);
+        _appliedHash = applied.GetPreviewHash();
     }
 
     private Task ReturnAsync()
@@ -300,7 +332,7 @@
 
         try
         {
-            await PersistAsync(navigate: true);
+            _isSaving = await PersistAsync(navigate: true);
         }
         catch (OperationCanceledException) {}
         catch (Exception ex)
@@ -320,8 +352,10 @@
         _isSaving = true;
         try
         {
-            await PersistAsync(navigate: false);
-            Notifier.Info("Feed saved.");
+            if (await PersistAsync(navigate: false))
+            {
+                Notifier.Info("Feed saved.");
+            }
         }
         catch (Exception ex)
         {
@@ -334,23 +368,35 @@
         }
     }
 
-    private async Task PersistAsync(bool navigate)
+    private async Task<bool> PersistAsync(bool navigate)
     {
-        if (_savedFeedId is { } id)
-        {
-            await FeedService.UpdateAsync(id, BuildUpdateData(), CancellationToken.None);
-        }
-        else
-        {
-            _savedFeedId = await FeedService.CreateAsync(BuildCreateData(), CancellationToken.None);
-        }
+        var saved = await SaveFeedAsync();
+        return saved.Match(id => Saved(id, navigate), Refused);
+    }
 
+    private Task<Result<FeedId>> SaveFeedAsync()
+    {
+        return _savedFeedId is { } id
+            ? FeedService.UpdateAsync(id, BuildUpdateData(), CancellationToken.None)
+            : FeedService.CreateAsync(BuildCreateData(), CancellationToken.None);
+    }
+
+    private bool Saved(FeedId id, bool navigate)
+    {
+        _savedFeedId = id;
         _storedHash = _config.GetSaveHash();
-
         if (navigate)
         {
             NavigationManager.NavigateTo("/feeds");
         }
+
+        return true;
+    }
+
+    private bool Refused(Error error)
+    {
+        _identifierCheck = new IdentifierCheck(_config.Identifier.Trim(), error);
+        return false;
     }
 
     private FeedUpdateData BuildUpdateData() =>

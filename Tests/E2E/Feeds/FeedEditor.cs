@@ -19,6 +19,8 @@ internal static class FeedEditor
 {
 	internal const string ListIdentifier = "2236";
 
+	internal const string StoredListIdentifier = "garycrawfordgc/top-movies-of-the-week";
+
 	internal const string ResultRow = ".preview-main-results .search-result-row";
 
 	internal const string UnmatchedRow = ".search-result-row.is-unmatched";
@@ -127,7 +129,7 @@ internal static class FeedEditor
 		await page.WaitForTimeoutAsync(500);
 	}
 
-	internal static Task<IReadOnlyList<string>> ServedTitlesAsync() => MdblistFeed.ServedTitlesAsync(ListIdentifier);
+	internal static Task<IReadOnlyList<string>> ServedTitlesAsync() => MdblistFeed.ServedTitlesAsync(StoredListIdentifier);
 
 	private static int Position(PreviewBadge badge) =>
 		badge switch
