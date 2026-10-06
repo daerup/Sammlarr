@@ -69,12 +69,6 @@
                             API key is missing, fix in <AppLink Href="@SettingsLinks.Provider(missing.Service)" Color="inherit">Settings</AppLink>
                         </BbFieldError>
                     }
-                    else if (_disabledProviders.Contains(FeedProvider.Tmdb))
-                    {
-                        <BbFieldDescription>
-                            Add your TMDB key in <AppLink Href="@SettingsLinks.Provider(RemoteService.Tmdb)">Settings › Providers</AppLink> to follow TMDB lists.
-                        </BbFieldDescription>
-                    }
                 </BbField>
 
                 <BbField>
@@ -713,7 +707,7 @@
         "Paste the list's link from mdblist.com, or its owner/list, e.g. <code>snoak/trakt-s-trending-shows</code>. Its number works too. " +
         "<a href=\"https://mdblist.com/toplists/\" target=\"_blank\" " +
         "class=\"underline underline-offset-2 hover:text-foreground transition-colors\">Browse lists on MDBList</a>"),
-        null when Enum.GetValues<FeedProvider>().All(_disabledProviders.Contains) => new MarkupString("No provider is available until you add a TMDB or MDBList key in Settings › Providers."),
+        null when Enum.GetValues<FeedProvider>().All(_disabledProviders.Contains) => new MarkupString("No provider is available until you add an MDBList key in Settings › Providers."),
         null => new MarkupString("Select a provider first."),
         _ => new MarkupString("The provider-specific identifier for the list (slug, numeric ID, or URL segment)."),
     };

@@ -18,21 +18,19 @@ public class FeedProviderSelectTests : BunitContext
 	}
 
 	[Test]
-	[Arguments(FeedProvider.Tmdb, "TMDb", "#01B4E4")]
-	[Arguments(FeedProvider.Mdblist, "MDBList", "#4284CA")]
-	public async Task Trigger_WithAProvider_TintsItWithThatBrand(FeedProvider provider, string nickName, string brandColor)
+	public async Task Trigger_WithAProvider_TintsItWithThatBrand()
 	{
-		var cut = RenderSelect(provider);
+		var cut = RenderSelect(FeedProvider.Mdblist);
 
 		var trigger = cut.Find("[role=combobox]");
-		await Assert.That(trigger.TextContent).Contains(nickName);
-		await Assert.That(trigger.GetAttribute("style")).IsEqualTo($"--brand: {brandColor}");
+		await Assert.That(trigger.TextContent).Contains("MDBList");
+		await Assert.That(trigger.GetAttribute("style")).IsEqualTo("--brand: #4284CA");
 	}
 
 	[Test]
 	public async Task Trigger_WithoutAProvider_StaysNeutral()
 	{
-		var cut = RenderSelect(null, FeedProvider.Tmdb, FeedProvider.Mdblist);
+		var cut = RenderSelect(null, FeedProvider.Mdblist);
 
 		var trigger = cut.Find("[role=combobox]");
 		await Assert.That(trigger.TextContent).Contains("No provider available");
@@ -52,43 +50,33 @@ public class FeedProviderSelectTests : BunitContext
 	[Test]
 	public async Task Trigger_WhenTheChosenProviderLostItsKey_KeepsItButGreysItOutLikeItsOption()
 	{
-		var cut = RenderSelect(FeedProvider.Tmdb, FeedProvider.Tmdb);
+		var cut = RenderSelect(FeedProvider.Mdblist, FeedProvider.Mdblist);
 
 		var trigger = cut.Find("[role=combobox]");
-		await Assert.That(trigger.TextContent).Contains("TMDb").And.Contains("No API key");
+		await Assert.That(trigger.TextContent).Contains("MDBList").And.Contains("No API key");
 		await Assert.That(trigger.QuerySelector(".grayscale")).IsNotNull();
 		await Assert.That(trigger.HasAttribute("style")).IsFalse();
 		await Assert.That(trigger.HasAttribute("aria-invalid")).IsFalse();
 	}
 
 	[Test]
-	public async Task Open_WithASelection_TintsEveryRowWithItsOwnBrand()
+	public async Task Open_WithASelection_TintsItsRowWithItsBrand()
 	{
 		var cut = await OpenAsync(FeedProvider.Mdblist);
 
 		var washes = cut.FindAll("[role=option] .provider-wash").Select(wash => wash.GetAttribute("style") ?? string.Empty).ToList();
-		await Assert.That(washes).IsEquivalentTo(["--brand: #01B4E4", "--brand: #4284CA"]);
+		await Assert.That(washes).IsEquivalentTo(["--brand: #4284CA"]);
 	}
 
 	[Test]
-	public async Task Open_ForAProviderWithoutAKey_DisablesItAndOffersTheKeys()
+	public async Task Open_ForAProviderWithoutAKey_DisablesItAndOffersItsKey()
 	{
-		var cut = await OpenAsync(FeedProvider.Mdblist, FeedProvider.Tmdb);
+		var cut = await OpenAsync(null, FeedProvider.Mdblist);
 
-		var tmdb = cut.FindAll("[role=option]").Single(option => option.TextContent.Contains("TMDb"));
-		await Assert.That(tmdb.GetAttribute("data-disabled")).IsEqualTo("true");
-		await Assert.That(tmdb.TextContent).Contains("No API key");
-		await Assert.That(cut.Find("[role=listbox] a").GetAttribute("href")).IsEqualTo("/settings?section=providers&provider=tmdb");
-	}
-
-	[Test]
-	[Arguments(FeedProvider.Mdblist, "/settings?section=providers&provider=mdblist")]
-	[Arguments(null, "/settings?section=providers")]
-	public async Task KeysLink_WithSeveralKeysMissing_OpensTheChosenProvidersKeyOrElseAllKeys(FeedProvider? value, string href)
-	{
-		var cut = await OpenAsync(value, FeedProvider.Tmdb, FeedProvider.Mdblist);
-
-		await Assert.That(cut.Find("[role=listbox] a").GetAttribute("href")).IsEqualTo(href);
+		var mdblist = cut.FindAll("[role=option]").Single(option => option.TextContent.Contains("MDBList"));
+		await Assert.That(mdblist.GetAttribute("data-disabled")).IsEqualTo("true");
+		await Assert.That(mdblist.TextContent).Contains("No API key");
+		await Assert.That(cut.Find("[role=listbox] a").GetAttribute("href")).IsEqualTo("/settings?section=providers&provider=mdblist");
 	}
 
 	[Test]

@@ -91,6 +91,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal SammlarrDbContext Context => _context ??= BuildContext(DbOnlyProvider, CurrentUser, _connection);
 
+	internal SammlarrDbContext ContextOn(SqliteConnection connection) => BuildContext(DbOnlyProvider, CurrentUser, connection);
+
 	internal IDbContextFactory<SammlarrDbContext> ContextFactory => _contextFactory ??= new SharedConnectionFactory(DbOnlyProvider, _connection, CurrentUser);
 
 	internal RawDbContext RawContext => _rawContext ??= new RawDbContext(Context);

@@ -10,6 +10,8 @@ internal static class SettingsPage
 
 	internal static ILocator MapService(IPage page, string name) => page.Locator(".map-service").Filter(new LocatorFilterOptions { HasText = name });
 
+	internal static ILocator MapTile(IPage page, string name) => page.Locator(".map-tile").Filter(new LocatorFilterOptions { HasText = name });
+
 	internal static ILocator MapChip(IPage page, string role) => page.Locator($".map-chip[aria-label='Change what {role} uses']");
 
 	internal static async Task PickAsync(IPage page, string role, string option)

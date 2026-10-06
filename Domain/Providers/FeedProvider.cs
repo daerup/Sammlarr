@@ -2,7 +2,6 @@ namespace Domain.Providers;
 
 public enum FeedProvider
 {
-	Tmdb,
 	Mdblist,
 }
 
@@ -16,7 +15,6 @@ public static class FeedProviders
 			{
 				return feed switch
 				{
-					FeedProvider.Tmdb => RemoteService.Tmdb,
 					FeedProvider.Mdblist => RemoteService.Mdblist,
 				};
 			}

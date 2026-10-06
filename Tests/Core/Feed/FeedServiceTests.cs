@@ -122,17 +122,6 @@ public class FeedServiceTests
 		_repository.UpdateAsync(Any<FeedId>(), Any<FeedUpdateData>(), Any()).WasNeverCalled();
 	}
 
-	[Test]
-	public async Task UpdateAsync_ThatChangesOnlyTheSource_ConvertsTheIdentifierAgain()
-	{
-		_repository.FindAsync(Id, Any()).Returns(Some.Of(StoredFeed() with { Provider = FeedProvider.Tmdb }));
-		_mdblist.NormalizeAsync(Stored, Any()).Returns(Success.Of(Stored));
-
-		await Testee.UpdateAsync(Id, UpdateData(Stored));
-
-		_mdblist.NormalizeAsync(Stored, Any()).WasCalled(Times.Once);
-	}
-
 	private static FeedCreateData CreateData(string identifier)
 	{
 		return new FeedCreateData
