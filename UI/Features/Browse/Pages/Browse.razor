@@ -21,7 +21,7 @@
 <PageTitle>Browse Movies</PageTitle>
 
 <SignInGuard AccessChanged="HandleSignInChanged"/>
-<ApiKeyGuard Provider="@_providerConfig.TrendingProvider.AsApiKeyProvider()" AccessChanged="HandleTrendingProviderAccessChanged"/>
+<ServiceGuard Service="@_providerConfig.TrendingProvider.Service" AccessChanged="HandleTrendingProviderAccessChanged"/>
 
 <PageContainer Heading="Trending Movies & Shows" Description="Discover what's popular this week">
     <ChildContent>

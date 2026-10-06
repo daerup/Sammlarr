@@ -1,11 +1,11 @@
-using Contracts.Auth;
+using Contracts.Providers;
 using Contracts.Ratings;
 using Domain.Media;
 using Domain.Providers;
 
 namespace Core.Ratings;
 
-internal sealed class RatingService(IRatingDefaultRepository defaults, IApiKeyService apiKeys, ICredentialService credentials) : IRatingService
+internal sealed class RatingService(IRatingDefaultRepository defaults, IServiceReadiness readiness) : IRatingService
 {
 	private static readonly RatingStrategy Fallback = new(AveragedRating.Everything);
 
@@ -18,21 +18,7 @@ internal sealed class RatingService(IRatingDefaultRepository defaults, IApiKeySe
 
 	public async Task<ValueSet<RatingSource>> GetAvailableAsync(CancellationToken cancellationToken = default)
 	{
-		var connected = await Enum.GetValues<RemoteService>()
-			.Where(remote => remote.SuppliedRatingSources().Count > 0)
-			.ToAsyncEnumerable()
-			.Where(async (remote, ct) => await StoredAsync(remote, ct))
-			.ToListAsync(cancellationToken);
-		return connected.SuppliedRatingSources();
-	}
-
-	private async Task<bool> StoredAsync(RemoteService remote, CancellationToken cancellationToken)
-	{
-		return remote.Access switch
-		{
-			UserKey(var slot) => await apiKeys.IsStoredAsync(slot, cancellationToken),
-			UserSignIn(var signIn) => await credentials.IsStoredAsync(signIn, cancellationToken),
-			Open or AppInstance => true,
-		};
+		var suppliers = Enum.GetValues<RemoteService>().Where(remote => remote.SuppliedRatingSources().Count > 0);
+		return (await readiness.ConnectedAsync(suppliers, cancellationToken)).SuppliedRatingSources();
 	}
 }

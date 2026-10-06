@@ -1,4 +1,5 @@
 using Contracts.Feed;
+using Contracts.Providers;
 using Contracts.Wantlist;
 using Core.Feed;
 using Domain.Feed;
@@ -17,6 +18,8 @@ public class FeedServiceTests
 
 	private readonly Mock<IFeedProvider> _mdblist = IFeedProvider.Mock();
 
+	private readonly Mock<IServiceReadiness> _readiness = IServiceReadiness.Mock();
+
 	private IFeedService Testee
 	{
 		get
@@ -25,7 +28,8 @@ public class FeedServiceTests
 				_repository.Object,
 				IWantlistRepository.Mock().Object,
 				IFeedScheduler.Mock().Object,
-				new FakeKeyedServiceIndex<FeedProvider, IFeedProvider>().Register(FeedProvider.Mdblist, _mdblist.Object)
+				new FakeKeyedServiceIndex<FeedProvider, IFeedProvider>().Register(FeedProvider.Mdblist, _mdblist.Object),
+				_readiness.Object
 			);
 		}
 	}
@@ -35,6 +39,32 @@ public class FeedServiceTests
 	{
 		_repository.CreateAsync(Any<FeedCreateData>(), Any()).Returns(Id);
 		_repository.FindAsync(Id, Any()).Returns(Some.Of(StoredFeed()));
+		_repository.GetAllAsync(Any()).Returns([StoredFeed()]);
+		_repository.PauseAsync(Any(), Any()).Returns((ids, _) => [.. ids]);
+	}
+
+	[Test]
+	public async Task PauseFeedsOfAsync_WhenTheClearedKeyLeavesItsFeedsUnready_PausesThem()
+	{
+		_readiness.ReadyAsync(Any(), Any()).Returns(false);
+
+		await Assert.That(await Testee.PauseFeedsOfAsync(RemoteService.Mdblist)).IsEquivalentTo([Id]);
+	}
+
+	[Test]
+	public async Task PauseFeedsOfAsync_WhileTheServiceIsStillReady_PausesNothing()
+	{
+		_readiness.ReadyAsync(Any(), Any()).Returns(true);
+
+		await Assert.That(await Testee.PauseFeedsOfAsync(RemoteService.Mdblist)).IsEmpty();
+	}
+
+	[Test]
+	public async Task PauseFeedsOfAsync_ForAServiceTheFeedsDoNotNeed_LeavesThemAlone()
+	{
+		_readiness.ReadyAsync(Any(), Any()).Returns(false);
+
+		await Assert.That(await Testee.PauseFeedsOfAsync(RemoteService.Tmdb)).IsEmpty();
 	}
 
 	[Test]

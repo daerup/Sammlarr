@@ -43,7 +43,7 @@ internal sealed class ApiKeyService(
 	{
 		await keys.ClearAsync(provider, cancellationToken);
 		cache.Evict(provider);
-		await feeds.PauseAsync(provider, cancellationToken);
+		await feeds.PauseFeedsOfAsync(provider.Remote, cancellationToken);
 	}
 
 	public void ReportRejected(ApiKeyProvider provider)

@@ -3,9 +3,7 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives.Filtering;
 using Bunit;
-using Contracts.Auth;
 using Contracts.Processing;
-using Domain.Auth;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Processing;
@@ -15,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Feeds.Pages.Editor;
 using UI.Tests.Media;
+using UI.Tests.Providers;
 
 namespace UI.Tests.Feeds;
 
@@ -35,10 +34,7 @@ public class FeedConfigPanelTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
 		Services.AddSingleton(RatingStub.Context());
-		var keys = IApiKeyService.Mock();
-		keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(IApiKey.Mock().Object));
-		keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Error.From("No API key is configured for this provider."));
-		Services.AddSingleton(keys.Object);
+		Services.AddSingleton(ReadinessStub.Connected(new HashSet<RemoteService> { RemoteService.Mdblist }));
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

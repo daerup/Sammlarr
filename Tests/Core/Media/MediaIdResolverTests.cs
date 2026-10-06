@@ -30,6 +30,7 @@ public class MediaIdResolverTests
 	private static readonly ByHints Search = new(Yields: [MediaProvider.Plex, MediaProvider.Tvdb], Cost: 4);
 	private static readonly IdentifyRequest Request = new([Tmdb], new None());
 	private static readonly CancellationToken WaitingThrows = new(canceled: true);
+	private static readonly IReadOnlySet<RemoteService> Everyone = Enum.GetValues<RemoteService>().ToHashSet();
 
 	private readonly Dictionary<Mock<IExternalIdConverter>, RemoteService> _remotes = [];
 	private readonly Mock<IExternalIdConverter> _tmdb;
@@ -47,7 +48,7 @@ public class MediaIdResolverTests
 	{
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Found(Tvdb));
 
-		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20))).ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
 	}
@@ -57,14 +58,14 @@ public class MediaIdResolverTests
 	{
 		var testee = Testee(TmdbBlocked(() => Now.AddMilliseconds(20)));
 
-		await Assert.That(async () => await testee.ResolveAsync(Request, MediaProvider.Tvdb, WaitingThrows)).Throws<OperationCanceledException>();
+		await Assert.That(async () => await testee.ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows)).Throws<OperationCanceledException>();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]
 	public async Task ResolveAsync_WhenABlockOutlastsTheMaxWait_GivesUpWithoutCachingTheTitle()
 	{
-		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, WaitingThrows);
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
 
 		await Assert.That(resolved).IsError();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -76,7 +77,7 @@ public class MediaIdResolverTests
 	{
 		var pushes = 0;
 
-		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20 + pushes++))).ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20 + pushes++))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -97,7 +98,7 @@ public class MediaIdResolverTests
 				}
 			);
 
-		var resolved = await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -118,7 +119,7 @@ public class MediaIdResolverTests
 				}
 			);
 
-		var resolved = await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, WaitingThrows);
+		var resolved = await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
 
 		await Assert.That(resolved).IsError();
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -129,7 +130,7 @@ public class MediaIdResolverTests
 	{
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From("TMDB knows no TVDB id."));
 
-		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20)), _tmdb).ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20)), _tmdb).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
@@ -140,7 +141,7 @@ public class MediaIdResolverTests
 	{
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Found(Tvdb));
 
-		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).IsEquivalentTo(new IExternalMediaId[] { Tmdb, Tvdb }));
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -156,9 +157,18 @@ public class MediaIdResolverTests
 				(request, _) => request is ByHintsRequest { Known: var known } && known.Contains(Tmdb) ? Found(Plex, Tvdb) : Error.From("The TMDB id never arrived.")
 			);
 
-		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhileTmdbIsNotConnected_AsksNothingOfIt()
+	{
+		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, new HashSet<RemoteService> { RemoteService.Plex });
+
+		await Assert.That(resolved).IsError();
+		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -169,7 +179,7 @@ public class MediaIdResolverTests
 			.LookUpAsync(Any(), Any())
 			.Returns((request, _) => request is ByHintsRequest { Hints: var given } && given == FromTmdb ? Found(Plex) : Error.From("TMDB's hints never arrived."));
 
-		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Plex);
+		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Plex, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Plex));
 	}
@@ -180,7 +190,7 @@ public class MediaIdResolverTests
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), HintsOnly());
 		_plex.LookUpAsync(Any(), Any()).Returns(Error.From("Plex found nothing."));
 
-		await Testee().ResolveAsync(Request, MediaProvider.Tvdb);
+		await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		_tmdb.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
 	}
@@ -194,7 +204,7 @@ public class MediaIdResolverTests
 		Answer(tmdb, new ByIdRequest(first, Tmdb), Error.From("The first lookup knows no TVDB id."));
 		Answer(tmdb, new ByIdRequest(second, Tmdb), Found(Tvdb));
 
-		var resolved = await Testee(tmdb).ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee(tmdb).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
 	}
@@ -206,7 +216,7 @@ public class MediaIdResolverTests
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From("TMDB knows no TVDB id."));
 		Answer(other, new ByIdRequest(Detail, Tmdb), Found(Tvdb));
 
-		var resolved = await Testee(_tmdb, other).ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee(_tmdb, other).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
 		other.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
@@ -218,7 +228,7 @@ public class MediaIdResolverTests
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Success.Of(new IdLookupResult([Imdb], Some.Of(FromTmdb))));
 		_plex.LookUpAsync(Any(), Any()).Returns(Error.From("Plex found nothing."));
 
-		await Testee().ResolveAsync(new IdentifyRequest([Tmdb], Some.Of(FromTmdb)), MediaProvider.Tvdb);
+		await Testee().ResolveAsync(new IdentifyRequest([Tmdb], Some.Of(FromTmdb)), MediaProvider.Tvdb, Everyone);
 
 		_plex.LookUpAsync(Any(), Any()).WasCalled(Times.Exactly(2));
 	}
@@ -230,7 +240,7 @@ public class MediaIdResolverTests
 		Answer(_plex, new ByIdRequest(PlexById, Plex), Found(Plex));
 		Answer(_plex, new ByIdRequest(PlexById, second), Found(second, Tvdb));
 
-		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Plex, second], new None()), MediaProvider.Tvdb);
+		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Plex, second], new None()), MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
 	}
@@ -244,7 +254,7 @@ public class MediaIdResolverTests
 		Answer(tmdb, new ByIdRequest(find, unknown), Error.From("TMDB has no match for tt0000001."));
 		Answer(tmdb, new ByIdRequest(find, Imdb), Found(Tmdb));
 
-		var resolved = await Testee(tmdb).ResolveAsync(new IdentifyRequest([unknown, Imdb], new None()), MediaProvider.Tmdb);
+		var resolved = await Testee(tmdb).ResolveAsync(new IdentifyRequest([unknown, Imdb], new None()), MediaProvider.Tmdb, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tmdb));
 	}
@@ -255,7 +265,7 @@ public class MediaIdResolverTests
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Found(Imdb));
 		Answer(_plex, new ByIdRequest(PlexById, Plex), Found(Tvdb));
 
-		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Tmdb, Plex], new None()), MediaProvider.Tvdb);
+		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Tmdb, Plex], new None()), MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
 	}
@@ -266,7 +276,7 @@ public class MediaIdResolverTests
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From(new RemoteUnavailableException(RemoteService.Tmdb)));
 		Answer(_plex, new ByIdRequest(PlexById, Plex), Found(Tvdb));
 
-		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Tmdb, Plex], new None()), MediaProvider.Tvdb);
+		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Tmdb, Plex], new None()), MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
@@ -277,7 +287,7 @@ public class MediaIdResolverTests
 	{
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From(new RemoteUnavailableException(RemoteService.Tmdb)));
 
-		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_tmdb.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
@@ -300,7 +310,7 @@ public class MediaIdResolverTests
 				}
 			);
 
-		var resolved = await Testee(capacity).ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee(capacity).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -322,7 +332,7 @@ public class MediaIdResolverTests
 				}
 			);
 
-		var resolved = await Testee(capacity).ResolveAsync(Request, MediaProvider.Plex);
+		var resolved = await Testee(capacity).ResolveAsync(Request, MediaProvider.Plex, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -335,7 +345,7 @@ public class MediaIdResolverTests
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), HintsOnly());
 		_plex.LookUpAsync(Any(), Any()).Returns(Error.From("Plex found nothing."));
 
-		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
@@ -346,7 +356,7 @@ public class MediaIdResolverTests
 	{
 		_tmdb.LookUpAsync(Any(), Any()).Throws(new InvalidOperationException("transient"));
 
-		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
@@ -357,7 +367,7 @@ public class MediaIdResolverTests
 	{
 		var blocked = TestCapacity.With(_ => new RemoteLoad(Some.Of(Now.AddMinutes(1)), 0));
 
-		var resolved = await Testee(blocked).ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee(blocked).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -367,7 +377,7 @@ public class MediaIdResolverTests
 	[Test]
 	public async Task ResolveAsync_ForATitleThatAlreadyHoldsTheTarget_ReturnsItsCandidatesWithoutCachingItAsUnmatched()
 	{
-		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tmdb);
+		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tmdb, Everyone);
 
 		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).IsEquivalentTo(new IExternalMediaId[] { Tmdb }));
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -377,7 +387,7 @@ public class MediaIdResolverTests
 	[Test]
 	public async Task ResolveAsync_WhenNoLookupReachesTheTarget_CachesTheTitleAsUnmatched()
 	{
-		var resolved = await Testee().ResolveAsync(new IdentifyRequest([MdblistId.From("42", MediaType.Show)], new None()), MediaProvider.Tvdb);
+		var resolved = await Testee().ResolveAsync(new IdentifyRequest([MdblistId.From("42", MediaType.Show)], new None()), MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
@@ -388,7 +398,7 @@ public class MediaIdResolverTests
 	{
 		_cache.GetValueOrNone(Any()).Returns(Some.Of(true));
 
-		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb);
+		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -406,6 +416,7 @@ public class MediaIdResolverTests
 			[.. converters.Select(converter => new Keyed<RemoteService, IExternalIdConverter>(_remotes[converter], converter.Object))],
 			_cache.Object,
 			capacity,
+			IServiceReadiness.Mock().Object,
 			clock.Object
 		);
 	}

@@ -2,12 +2,10 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using Bunit;
 using Bunit.TestDoubles;
-using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Setup;
 using Contracts.Wantlist;
-using Domain.Auth;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
@@ -18,6 +16,7 @@ using UI.Features.Onboarding.Components;
 using UI.Features.Settings.Components.Providers;
 using UI.Features.Settings.Components.Users;
 using UI.Shared.Services;
+using UI.Tests.Providers;
 
 namespace UI.Tests.Onboarding;
 
@@ -34,8 +33,7 @@ public class SetupWizardTests : BunitContext
 
 	private readonly Mock<IOnboardingService> _onboarding = IOnboardingService.Mock();
 	private readonly Mock<IProviderConfigService> _config = IProviderConfigService.Mock();
-	private readonly Mock<IApiKeyService> _keys = IApiKeyService.Mock();
-	private readonly Mock<ICredentialService> _credentials = ICredentialService.Mock();
+	private readonly HashSet<RemoteService> _connected = [];
 	private readonly Mock<IUserManagementService> _users = IUserManagementService.Mock();
 
 	[Before(Test)]
@@ -47,8 +45,7 @@ public class SetupWizardTests : BunitContext
 		Services.AddProviderBranding();
 		Services.AddSingleton(_onboarding.Object);
 		Services.AddSingleton(_config.Object);
-		Services.AddSingleton(_keys.Object);
-		Services.AddSingleton(_credentials.Object);
+		Services.AddSingleton(ReadinessStub.Connected(_connected));
 		Services.AddSingleton(_users.Object);
 		Services.AddSingleton(ISinkSwitch.Mock().Object);
 		Services.AddSingleton<ICurrentUser>(new TestCurrentUser { DisplayName = "guest" });
@@ -60,8 +57,6 @@ public class SetupWizardTests : BunitContext
 		ComponentFactories.AddStub<PeopleList>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		_config.GetAsync(Any()).Returns(OnArr);
-		_keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No key."));
-		_credentials.GetAsync(Any<AuthProvider>(), Any()).Returns(Error.From("Not connected."));
 		_users.GetPeopleAsync(Any()).Returns([]);
 	}
 
@@ -212,7 +207,7 @@ public class SetupWizardTests : BunitContext
 		return cut;
 	}
 
-	private void WithTmdbKey() => _keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of<IApiKey>(new TestApiKey(ApiKeyProvider.Tmdb, "key")));
+	private void WithTmdbKey() => _connected.Add(RemoteService.Tmdb);
 
 	private static IElement Next(IRenderedComponent<SetupWizard> cut) => Buttons(cut, "Next").Single();
 

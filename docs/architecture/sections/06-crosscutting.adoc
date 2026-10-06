@@ -220,8 +220,11 @@ no open enricher can fill what is still missing; then it sleeps for the blocked 
 fills a missing field, frees within its `EnrichWait` and has not been waited for yet, the soonest free first) and
 carries on, else it stops. A feed run loads about 100 titles in parallel and they sleep through the same block, so the
 sleep adds at most one budget per provider to a title, though the request after it can still wait out a new
-`Retry-After` within its timeout. Only the enrichers the current user has connected (a key or a
-sign-in, read once per call to the media service, so once per batch or feed run) are asked. An enricher that was skipped because it was blocked, or that failed, stores no
+`Retry-After` within its timeout. Only the enrichers the current user has connected are asked, and id lookups take only paths through
+connected services: `IServiceReadiness` answers it once per call to the media service, so once per batch or feed
+run, from the access each remote service needs (a stored key or sign-in that was never rejected, a reachable
+Radarr or Sonarr, or none), never by calling the service. A key check answers `Valid`, `Rejected`, `Unreachable` or
+`Spent`, and only `Rejected` is remembered, so an outage or a rate limit never disconnects anything. An enricher that was skipped because it was blocked, or that failed, stores no
 answer, so a later load asks it once the hour since the last ask has passed and it is open again. Ratings are fields per source:
 `MediaCompleteness` counts each `RatingSource` (TMDB, IMDb, Rotten Tomatoes critics and audience) the title has no
 rating from as a missing field: `MediaFields` holds the `MediaField` detail flags and a set of `RatingSource`, and a provider's sources enter it through `MediaFields.Rated`, so a provider's rating fills come from its `[SuppliedBy]` sources. A rating

@@ -1,11 +1,9 @@
 using Contracts;
-using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Providers;
 using Contracts.Settings;
 using Core.DI;
 using Core.Media;
-using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
@@ -684,23 +682,14 @@ public class DetailsFetcherTests
 	}
 
 	[Test]
-	public async Task ConnectedAsync_ReadsTheEnrichersWhoseKeyOrSignInIsReady()
+	public async Task ConnectedAsync_IsWhatReadinessSaysOfTheEnrichers()
 	{
 		var deps = Dependencies.Create();
-		deps.Keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Error.From("no TMDB key"));
-		deps.Credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
+		deps.Readiness.ConnectedAsync(Any(), Any()).Returns(new HashSet<RemoteService> { RemoteService.Plex });
 
 		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([RemoteService.Plex]);
-	}
-
-	[Test]
-	public async Task ConnectedAsync_WhenReadingASecretThrows_LeavesThatEnricherOut()
-	{
-		var deps = Dependencies.Create();
-		deps.Keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(IApiKey.Mock().Object));
-		deps.Credentials.GetAsync(AuthProvider.Plex, Any()).Throws(new HttpRequestException("plex.tv is down"));
-
-		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([RemoteService.Tmdb]);
+		deps.Readiness.ConnectedAsync(Is<IEnumerable<RemoteService>>(asked => asked.Order().SequenceEqual(new[] { RemoteService.Tmdb, RemoteService.Plex })), Any())
+			.WasCalled(Times.Once);
 	}
 
 	private static async Task<MatchedMedia> Matched(Result<MatchedMedia> result)
@@ -741,8 +730,7 @@ public class DetailsFetcherTests
 		Mock<IMediaRepository> MediaRepository,
 		Mock<IDetailsEnricher> Plex,
 		Mock<IDetailsEnricher> Tmdb,
-		Mock<IApiKeyService> Keys,
-		Mock<ICredentialService> Credentials,
+		Mock<IServiceReadiness> Readiness,
 		DetailsFetcher Testee
 	)
 	{
@@ -756,8 +744,7 @@ public class DetailsFetcherTests
 			var tmdb = IDetailsEnricher.Mock();
 			tmdb.Fills.Returns(tmdbFills ?? Everything);
 			tmdb.Accepts.Returns([MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Imdb]);
-			var keys = IApiKeyService.Mock();
-			var credentials = ICredentialService.Mock();
+			var readiness = IServiceReadiness.Mock();
 
 			var config = IProviderConfigService.Mock();
 			config
@@ -777,12 +764,11 @@ public class DetailsFetcherTests
 				new KeyedServiceSet<RemoteService, IDetailsEnricher>([new(RemoteService.Plex, plex.Object), new(RemoteService.Tmdb, tmdb.Object)]),
 				config.Object,
 				capacity ?? TestCapacity.Open(),
-				keys.Object,
-				credentials.Object,
+				readiness.Object,
 				Clock(),
 				NullLogger<DetailsFetcher>.Instance
 			);
-			return new Dependencies(mediaRepository, plex, tmdb, keys, credentials, testee);
+			return new Dependencies(mediaRepository, plex, tmdb, readiness, testee);
 		}
 
 		public void PlexAnswers(MovieDetails details, MediaIdentity? identity = null)

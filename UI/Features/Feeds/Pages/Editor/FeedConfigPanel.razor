@@ -1,9 +1,9 @@
 @using System.ComponentModel
 @using BlazorBlueprint.Primitives.Filtering
-@using Contracts.Auth
+@using Contracts.Providers
 @using Contracts.Processing
 @using UI.Features.Feeds.Components
-@inject IApiKeyService ApiKeyService
+@inject IServiceReadiness Readiness
 @inject RatingContext RatingContext
 
 <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
@@ -587,8 +587,8 @@
         _syncFrequencySectionOpen = _scheduleMode == ScheduleMode.Scheduled;
 
         _ratingView = await RatingContext.GetAsync();
-        var ready = await ApiKeyService.GetReadyAsync();
-        _disabledProviders.UnionWith(Enum.GetValues<FeedProvider>().ExceptBy(ready, provider => provider.AsApiKeyProvider()));
+        var ready = await Enum.GetValues<FeedProvider>().ToAsyncEnumerable().Where(async (feed, ct) => await Readiness.ReadyAsync(feed.Service, ct)).ToHashSetAsync();
+        _disabledProviders.UnionWith(Enum.GetValues<FeedProvider>().Where(feed => !ready.Contains(feed)));
 
         if (ProviderHasNoKey)
         {

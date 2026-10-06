@@ -1,11 +1,9 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Bunit.TestDoubles;
-using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Wantlist;
-using Domain.Auth;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
@@ -17,6 +15,7 @@ using TestInfrastructure;
 using UI.Features.Settings.Components.Providers;
 using UI.Shared.Services;
 using UI.Tests.Media;
+using UI.Tests.Providers;
 
 namespace UI.Tests.Settings.Providers;
 
@@ -39,7 +38,7 @@ public class ProvidersSectionTests : BunitContext
 
 	private readonly Mock<IArrSinkConfigService> _arrConfigs = IArrSinkConfigService.Mock();
 
-	private readonly Mock<ICredentialService> _credentials = ICredentialService.Mock();
+	private readonly HashSet<RemoteService> _connected = [];
 
 	[Before(Test)]
 	public void Setup()
@@ -56,11 +55,7 @@ public class ProvidersSectionTests : BunitContext
 		Services.AddSingleton(users.Object);
 		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
 		Services.AddSingleton(_arrConfigs.Object);
-		var keys = IApiKeyService.Mock();
-		keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
-		Services.AddSingleton(keys.Object);
-		_credentials.GetAsync(Any<AuthProvider>(), Any()).Returns(Error.From("Not connected."));
-		Services.AddSingleton(_credentials.Object);
+		Services.AddSingleton(ReadinessStub.Connected(_connected));
 		Services.AddScoped<ScrollService>();
 		ComponentFactories.AddStub<AccountRow>();
 		ComponentFactories.AddStub<SammlarrAccountRow>();
@@ -329,7 +324,7 @@ public class ProvidersSectionTests : BunitContext
 	public async Task SearchAfterSignIn_WithPlexConnected_StoresPlexForSearch()
 	{
 		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb });
-		_credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
+		_connected.Add(RemoteService.Plex);
 
 		var cut = Render<ProvidersSection>(parameters => parameters.Add(section => section.SearchAfterSignIn, SearchProvider.Plex));
 
@@ -342,7 +337,7 @@ public class ProvidersSectionTests : BunitContext
 	{
 		_user.Role = UserRole.Member;
 		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb });
-		_credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
+		_connected.Add(RemoteService.Plex);
 
 		var cut = Render<ProvidersSection>(parameters => parameters.Add(section => section.SearchAfterSignIn, SearchProvider.Plex));
 		cut.WaitForState(() => cut.FindComponents<Stub<ServicesMap>>().Count == 1);
@@ -357,7 +352,7 @@ public class ProvidersSectionTests : BunitContext
 		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb, Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local });
 		var cut = RenderSection();
 		await cut.InvokeAsync(() => _ = Map(cut).Get(map => map.SearchPicked).InvokeAsync(SearchProvider.Plex));
-		_credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
+		_connected.Add(RemoteService.Plex);
 
 		await cut.InvokeAsync(() => cut.FindComponent<Stub<AccountRow>>().Instance.Parameters.Get(row => row.Changed).InvokeAsync());
 

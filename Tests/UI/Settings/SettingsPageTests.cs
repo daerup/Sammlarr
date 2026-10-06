@@ -15,6 +15,7 @@ using UI.Features.Settings.Components.Providers;
 using UI.Features.Settings.Components.Ratings;
 using UI.Shared.Services;
 using UI.Tests.Media;
+using UI.Tests.Providers;
 using SettingsPage = UI.Features.Settings.Pages.Settings;
 
 namespace UI.Tests.Settings;
@@ -61,6 +62,7 @@ public class SettingsPageTests : BunitContext
 		var credentials = ICredentialService.Mock();
 		credentials.GetAsync(Any<AuthProvider>(), Any()).Returns(Error.From("No credential is stored for this provider."));
 		Services.AddSingleton(credentials.Object);
+		Services.AddSingleton(ReadinessStub.Connected(new HashSet<RemoteService>()));
 
 		Services.AddSingleton(ICurrentUser.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
