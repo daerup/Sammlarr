@@ -42,6 +42,7 @@ public class StagingSmokeTests
 				.ToContainTextAsync("Connected", new LocatorAssertionsToContainTextOptions { Timeout = Wait.Settle });
 			await CatchesAWebhookAndAPushoverMessageAsync(app.GetEndpoint("catcher", "http"), session);
 			await ReadsPlexButKeepsWatchlistWritesInWireMockAsync(app.GetEndpoint("wiremock", "http"));
+			await StartsThePlexSignInThroughWireMockAsync(app.GetEndpoint("sammlarr", "http"));
 		}
 		finally
 		{
@@ -78,6 +79,16 @@ public class StagingSmokeTests
 
 		await Assert.That(read.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
 		await Assert.That(write.Headers.GetValues("X-Staging")).Contains("Plex write caught by WireMock");
+	}
+
+	private static async Task StartsThePlexSignInThroughWireMockAsync(Uri sammlarr)
+	{
+		using var http = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { BaseAddress = sammlarr };
+
+		using var login = await http.GetAsync("auth/plex/login");
+
+		await Assert.That(login.StatusCode).IsEqualTo(HttpStatusCode.Redirect);
+		await Assert.That(login.Headers.Location!.Host).IsEqualTo("app.plex.tv");
 	}
 
 	private static async Task<(DistributedApplication App, StagingPersona Admin, string CatcherSession)> StartAsync(string root)
