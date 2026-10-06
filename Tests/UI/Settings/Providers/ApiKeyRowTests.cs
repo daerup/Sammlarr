@@ -16,7 +16,6 @@ public class ApiKeyRowTests : BunitContext
 	private const string Rejection = "The TMDB API key is not valid.";
 
 	private readonly Mock<IApiKeyService> _keys = IApiKeyService.Mock();
-	private readonly Mock<IApiKeyFactory> _factory = IApiKeyFactory.Mock();
 
 	[Before(Test)]
 	public void Setup()
@@ -25,7 +24,6 @@ public class ApiKeyRowTests : BunitContext
 		Services.AddProviderBranding();
 		_keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
 		Services.AddSingleton(_keys.Object);
-		Services.AddSingleton(_factory.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -73,7 +71,7 @@ public class ApiKeyRowTests : BunitContext
 	[Test]
 	public async Task Test_WhenTheProviderRejectsTheKey_OutlinesTheFieldAndLeavesTheReasonToTheBadge()
 	{
-		_factory.CreateAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Error.From(Rejection));
+		_keys.TestAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Error.From(Rejection));
 		var cut = RenderRow();
 		await TypeAsync(cut, "a-wrong-key");
 
@@ -87,7 +85,7 @@ public class ApiKeyRowTests : BunitContext
 	[Test]
 	public async Task Test_WhenTheProviderAcceptsTheKey_ReadsVerifiedAndOffersSaveWithNoSubtext()
 	{
-		_factory.CreateAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Success.Of(IApiKey.Mock().Object));
+		_keys.TestAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Success.Of(IApiKey.Mock().Object));
 		var cut = RenderRow();
 		await TypeAsync(cut, "a-good-key");
 

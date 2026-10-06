@@ -9,6 +9,8 @@ public interface ICredentialService
 
 	Task<bool> IsStoredAsync(AuthProvider provider, CancellationToken cancellationToken = default);
 
+	Task<Result<ICredential>> TestAsync(AuthProvider provider, StoredCredential credential, CancellationToken cancellationToken = default);
+
 	Task StoreAsync(AuthProvider provider, StoredCredential credential, CancellationToken cancellationToken = default);
 
 	Task ClearAsync(AuthProvider provider, CancellationToken cancellationToken = default);

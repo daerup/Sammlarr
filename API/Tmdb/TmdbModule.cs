@@ -18,6 +18,7 @@ internal class TmdbModule : IServiceModule
 			.ForRemote<TmdbOptions>(RemoteService.Tmdb)
 			.Client<TmdbClient>()
 			.Client(TmdbClient.Unauthenticated)
+			.ApiKey<TmdbKeyCheck>(ApiKeyProvider.Tmdb)
 			.Trending<TmdbTrendingService>(TrendingProvider.Tmdb)
 			.Search<TmdbSearch>(SearchProvider.Tmdb)
 			.Converter<TmdbIdConverter>()

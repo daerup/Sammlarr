@@ -67,8 +67,8 @@ values is `Match` or `Map(…).GetValueOr(…)`, and a service hands back its `O
 
 [source,csharp]
 ----
-_state = await ApiKeyFactory
-    .CreateAsync(Provider, _apiKeyInput)
+_state = await ApiKeyService
+    .TestAsync(Provider, _apiKeyInput)
     .Apply(key => _validatedKey = key)
     .ApplyError(_ => _validatedKey = null)
     .Match(CredentialState.Success, CredentialState.Failed);
@@ -189,10 +189,12 @@ draws a sign-in with its own brand (`GetBrandingInfo(AuthProvider)`). Adding a p
 
 === HTTP resilience
 
-Every outbound provider call goes through one pipeline, `AddProviderHttp<TOptions>` (`API/Http`): a
-per-provider concurrency gate, then the standard resilience handler (retry with jitter honouring
-`Retry-After`, a circuit breaker, per-attempt and total timeouts), all from the provider's options.
-On breaker-open or timeout the client raises `ProviderUnavailableException`, which callers degrade
+Every outbound provider call goes through one pipeline, `AddRemoteHttp<TOptions>` (`API/Http`), which every client of a
+remote service gets through `ForRemote(...).Client`: a per-service concurrency gate and request rate, then the standard
+resilience handler (retry with jitter honouring `Retry-After`, a circuit breaker, per-attempt and total timeouts), all
+from the service's options. Clients that call no remote service (Pushover, the webhook, the picture grids) get the same
+pipeline without a service through `AddClientHttp<TOptions>`.
+On breaker-open or timeout the client raises `RemoteUnavailableException`, which callers degrade
 on rather than fail a whole run. Per-provider numbers are in configuration
 (<<section-deployment-view>>); the rate-limit-storm interaction is in <<section-runtime-view>>.
 `MediaService.RecommendedConcurrency` (100) is how many titles `MediaService` identifies or fetches
@@ -201,7 +203,7 @@ by roughly an order of magnitude.
 
 === Provider routing
 
-Which provider is asked depends on its load. `IProviderCapacity.Of(provider)` gives a `ProviderLoad`:
+Which remote service is asked depends on its load. `IRemoteCapacity.Of(remote)` gives a `RemoteLoad`:
 `BlockedUntil` (set by a 429's `Retry-After`, 30 seconds without one, or an open circuit breaker's break), `Busy`
 (in-flight requests over the concurrency gate's limit), `MaxWait` (the provider's `Http.MaxWaitSeconds`: Plex 90,
 TMDB 15, 0 never waits) and `EnrichWait` (`Http.EnrichWaitSeconds`: TMDB 15, Plex unset, so never). It lives in

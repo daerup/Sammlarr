@@ -100,8 +100,7 @@ all.
 
 The cross-cutting folders under `API`:
 
-* `Http`: `AddProviderHttp<TOptions>`, the resilience pipeline (per-provider concurrency gate, retry with jitter and `Retry-After`, circuit breaker, attempt and total timeouts).
-* `Auth`: `IApiKeyFactory` and `ICredentialFactory`, which turn stored secrets into request credentials.
+* `Http`: the registration builder (`ForRemote<TOptions>(RemoteService)` and `ForService(Service)`, through which every provider module registers its clients, roles, key checks, converters and enrichers), `AddRemoteHttp<TOptions>` and its keyless `AddClientHttp<TOptions>` with the resilience pipeline (per-service concurrency gate and request rate, retry with jitter and `Retry-After`, circuit breaker, attempt and total timeouts), and `CheckAccessAsync`, which every key and token check shares to answer `Valid`, `Rejected`, `Unreachable` or `Spent`.
 * `Notifications`: the webhook and Pushover channels and the Fluid template renderer.
 * `Observability`: HTTP and provider instrumentation.
 
@@ -121,16 +120,21 @@ pages are discovered), the auth and health endpoints, and the admin-only `/diagn
 
 === Level 3
 
-The anatomy of a provider module, using MDBList. The whole registration is three lines:
+The anatomy of a provider module, using MDBList. The whole registration is one chain:
 
 [source,csharp]
 ----
-services.AddHttpClient<MdblistClient>().AddProviderHttp<MdblistOptions>();
-services.AddHttpClient(MdblistClient.Unauthenticated).AddProviderHttp<MdblistOptions>();
-services.AddTracedKeyedScoped<IFeedProvider, MdblistService>(FeedProvider.Mdblist);
+services
+	.ForRemote<MdblistOptions>(RemoteService.Mdblist)
+	.Client<MdblistClient>()
+	.Client(MdblistClient.Unauthenticated)
+	.ApiKey<MdblistKeyCheck>(ApiKeyProvider.Mdblist)
+	.Feed<MdblistService>(FeedProvider.Mdblist);
 ----
 
-* `MdblistClient` is a typed HTTP client. `AddProviderHttp` gives it the resilience pipeline and a concurrency gate sized from `MdblistOptions`.
+* `ForRemote` names the remote service the module calls, so every client after it shares MDBList's one rate limit, wait budget and outage state.
+* `MdblistClient` is a typed HTTP client. `Client` gives it the resilience pipeline, a concurrency gate and request rate sized from `MdblistOptions`, and records it as MDBList's client.
+* `MdblistKeyCheck` answers whether a key works, keyed to the `ApiKeyProvider.Mdblist` slot.
 * `MdblistService` implements `IFeedProvider`, keyed to `FeedProvider.Mdblist`. `FeedProvider` is a generated subset of `MediaProvider` holding only the providers with the `Feed` capability.
 * Nothing outside the folder references `MdblistService`. The feed preview resolves `IFeedProvider` by the feed's `FeedProvider` key.
 
@@ -138,7 +142,7 @@ Adding a provider is four steps, with no change to any consumer:
 
 . Add an enum value and its `[Capabilities<…>]` to `MediaProvider`.
 . Create an `API/<Provider>` folder with an `IServiceModule`.
-. Register the typed client and the keyed service(s) against the matching `Contracts` interface(s).
+. Register its clients and roles through `ForRemote` against the matching `Contracts` interface(s).
 . Add `AddModule<…>()` in `ApiModule`.
 
 The capability attribute drives the generated subset enums, so the new provider shows up in the
