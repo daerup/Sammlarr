@@ -36,10 +36,10 @@ else
                 <BbTooltipTrigger AsChild="false" Class="p-0">
                     <span class="flex items-center gap-1 wl-badge-content">
                         <LucideIcon Name="@ProvenanceView.Icon(Provenance)" Size="14" Color="@IconColor"/>
-                        <span class="wl-badge-label">@ProvenanceView.Label(Provenance, Type)</span>
+                        <span class="wl-badge-label">@ProvenanceView.Label(Provenance, Branding, Type)</span>
                     </span>
                 </BbTooltipTrigger>
-                <BbTooltipContent>@ProvenanceView.Description(Provenance, AddedAt, Type)</BbTooltipContent>
+                <BbTooltipContent>@ProvenanceView.Description(Provenance, Branding, AddedAt, Type)</BbTooltipContent>
             </BbTooltip>
         </BbBadge>;
 

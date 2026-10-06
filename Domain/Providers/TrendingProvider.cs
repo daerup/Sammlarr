@@ -1,5 +1,10 @@
 namespace Domain.Providers;
 
+public enum TrendingProvider
+{
+	Tmdb,
+}
+
 public static class TrendingProviders
 {
 	extension(TrendingProvider trending)

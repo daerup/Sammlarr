@@ -1,3 +1,6 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
 @if (GuardState())
 {
     @ChildContent
@@ -35,7 +38,7 @@ else
 
         if (ApiProvider.HasValue)
         {
-            return $"A valid {ApiProvider.Value.GetDescription()} API key is required to {DeniedActionDescription}.";
+            return $"A valid {Branding.Name(ApiProvider.Value.Remote)} API key is required to {DeniedActionDescription}.";
         }
 
         return $"Sign in to {DeniedActionDescription}.";

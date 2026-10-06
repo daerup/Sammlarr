@@ -12,6 +12,7 @@ public class ProtectedSectionTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

@@ -258,7 +258,7 @@ else
         }
     }
 
-    private string ProviderName => _settings is null ? "your media service" : _settings.Sink.GetDescription();
+    private string ProviderName => _settings is null ? "your media service" : BrandingService.Name(_settings.Sink.Service);
 
     protected override async Task OnInitializedAsync()
     {

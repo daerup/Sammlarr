@@ -13,7 +13,7 @@ internal class TmdbModule : IServiceModule
 	{
 		services.AddScoped<TmdbApi>();
 		services.AddSingleton<TmdbArtwork>();
-		services.AddKeyedSingleton<IArtworkResizer, TmdbArtwork>(ArtworkProvider.Tmdb);
+		services.AddSingleton<IArtworkResizer>(provider => provider.GetRequiredService<TmdbArtwork>());
 		services
 			.ForRemote<TmdbOptions>(RemoteService.Tmdb)
 			.Client<TmdbClient>()

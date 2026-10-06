@@ -1,14 +1,14 @@
 @page "/feeds/create"
 @page "/feeds/edit/{EditFeedId}"
 @page "/feeds/clone/{CloneFeedId}"
-@using Contracts.Auth
+@using Contracts.Providers
 @using Contracts.DI
 @using Contracts.Feed
 @using global::Shared
 @inject IFeedService FeedService
 @inject IKeyedServiceIndex<FeedProvider, IFeedProvider> FeedProviders
 @inject NavigationManager NavigationManager
-@inject IApiKeyService ApiKeyService
+@inject IServiceReadiness Readiness
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject Notifier Notifier
 @inject DialogService DialogService
@@ -210,7 +210,7 @@
             Limit = feed.Limit.ToNullable(),
             Schedule = feed.Schedule,
             RatingStrategy = feed.RatingStrategy,
-            IsProviderAvailable = await ApiKeyService.GetAsync(feed.Provider.AsApiKeyProvider()).IsSuccess(),
+            IsProviderAvailable = await Readiness.ReadyAsync(feed.Provider.Service),
         };
         _storedHash = _config.GetSaveHash();
         _storedStrategy = _config.Strategy;

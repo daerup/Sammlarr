@@ -5,6 +5,7 @@
 @using Domain.Identity
 @using Domain.Wantlist.Arr
 @using UI.Features.Settings.Components.Users
+@using UI.Shared.Services.Branding
 @inject IProviderConfigService ProviderConfigService
 @inject RatingContext RatingContext
 @inject IServiceReadiness Readiness
@@ -15,6 +16,7 @@
 @inject Notifier Notifier
 @inject NavigationManager Navigation
 @inject ScrollService ScrollService
+@inject MediaProviderBrandingService Branding
 
 <div class="flex max-w-full flex-col gap-8" style="@SectionWidth">
     <div>
@@ -208,7 +210,7 @@
         var config = await ProviderConfigService.GetAsync();
         await ProviderConfigService.StoreAsync(config with { SearchProvider = search });
         _config = await ProviderConfigService.GetAsync();
-        Notifier.Success($"Search now uses {search.GetDescription()}.");
+        Notifier.Success($"Search now uses {Branding.Name(search.Service)}.");
     }
 
     private void OpenService(RemoteService remote) => OpenRow(remote);
@@ -287,8 +289,8 @@
 
     private void Switched(SinkKind sink, SinkSwitched moved)
     {
-        var skipped = moved.Unaddressable == 0 ? string.Empty : $" {moved.Unaddressable} more have no id {sink.GetDescription()} can add by and are skipped.";
-        Notifier.Success($"The wantlist now syncs to {sink.GetDescription()}: {moved.Queued - moved.Unaddressable} titles go across on each user's next sync.{skipped}");
+        var skipped = moved.Unaddressable == 0 ? string.Empty : $" {moved.Unaddressable} more have no id {Branding.Name(sink.Service)} can add by and are skipped.";
+        Notifier.Success($"The wantlist now syncs to {Branding.Name(sink.Service)}: {moved.Queued - moved.Unaddressable} titles go across on each user's next sync.{skipped}");
     }
 
     private bool IsOpen(Service key) => _open == key;

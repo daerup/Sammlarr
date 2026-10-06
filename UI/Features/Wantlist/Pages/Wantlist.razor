@@ -162,11 +162,11 @@
     private const string PageHeading = "Wantlist";
 
     private string PageDescription =>
-        Settings is null ? "Your saved movies and shows." : $"Your saved movies and shows, synced with {Settings.Sink.GetDescription()}.";
+        Settings is null ? "Your saved movies and shows." : $"Your saved movies and shows, synced with {BrandingService.Name(Settings.Sink.Service)}.";
 
     private string? SinkBrandColor => Settings is null ? null : BrandingService.Color(Settings.Sink.Service);
 
-    private string SinkName => Settings is null ? "your media service" : Settings.Sink.GetDescription();
+    private string SinkName => Settings is null ? "your media service" : BrandingService.Name(Settings.Sink.Service);
 
     private IReadOnlyList<StatusOption> StatusOptions => WantlistStatusView.Options(_removedItems.Count);
 
@@ -184,7 +184,7 @@
             ),
         ];
 
-    private static IReadOnlyList<SourceOption> SourcesFrom(IReadOnlyList<WantlistedMedia> all) =>
+    private IReadOnlyList<SourceOption> SourcesFrom(IReadOnlyList<WantlistedMedia> all) =>
         [
             .. all.Select(item => item.Provenance)
                 .Select(SourceOptionFor)
@@ -194,12 +194,12 @@
                 .OrderBy(option => option.Label),
         ];
 
-    private static SourceOption? SourceOptionFor(WantlistItemProvenance provenance) =>
+    private SourceOption? SourceOptionFor(WantlistItemProvenance provenance) =>
         provenance.Value switch
         {
             FeedOrigin feed => new SourceOption(UrlGuid.Encode(feed.Feed.Id.Value), feed.Feed.Name, new SourceChoice(SourceKind.Feed, feed.Feed.Id)),
             ManualOrigin => new SourceOption("manual", "Added by hand", new SourceChoice(SourceKind.Manual)),
-            SinkOrigin sink => new SourceOption("sink", $"Added on {sink.Provider.GetDescription()}", new SourceChoice(SourceKind.Sink)),
+            SinkOrigin sink => new SourceOption("sink", $"Added on {BrandingService.Name(sink.Provider.Service)}", new SourceChoice(SourceKind.Sink)),
             OrphanedOrigin => new SourceOption("orphaned", "Feed deleted", new SourceChoice(SourceKind.Orphaned)),
             _ => null,
         };
