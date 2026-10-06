@@ -89,6 +89,19 @@ public class UserManagementServiceTests
 		_users.DeleteAsync(Any(), Any()).WasCalled(Times.Never);
 	}
 
+	[Test]
+	public async Task GetColourRosterAsync_ForAMember_PairsEveryoneWithTheirStoredColourOrNone()
+	{
+		var ada = new User(UserId.New(), "ada", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch.AddDays(1));
+		var painted = new StoredColour(Some.Of(92.5), new None());
+		_users.GetAllAsync(Any()).Returns([Mira, ada]);
+		_users.GetColoursAsync(Any()).Returns(new Dictionary<UserId, StoredColour> { [ada.Id] = painted });
+
+		var roster = await Testee.GetColourRosterAsync();
+
+		await Assert.That(roster).IsEquivalentTo([new RosterColour(Mira.Id, Mira.JoinedAt, StoredColour.Empty), new RosterColour(ada.Id, ada.JoinedAt, painted)]);
+	}
+
 	private void Holding(User person)
 	{
 		_users.GetAsync(Mira.Id, Any()).Returns(person);

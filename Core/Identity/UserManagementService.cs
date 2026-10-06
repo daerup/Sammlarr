@@ -50,6 +50,13 @@ internal sealed class UserManagementService(
 
 	public Task<int> CountAsync(CancellationToken cancellationToken = default) => users.CountAsync(cancellationToken);
 
+	public async Task<IReadOnlyList<RosterColour>> GetColourRosterAsync(CancellationToken cancellationToken = default)
+	{
+		var colours = await users.GetColoursAsync(cancellationToken);
+		var joined = await users.GetAllAsync(cancellationToken);
+		return [.. joined.Select(user => new RosterColour(user.Id, user.JoinedAt, colours.GetValueOrNone(user.Id).GetValueOr(StoredColour.Empty)))];
+	}
+
 	public async Task<Result<UserRole>> ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default)
 	{
 		await EnsureCallerIsAdminAsync(cancellationToken);

@@ -12,6 +12,8 @@ public interface IUserManagementService
 
 	Task<int> CountAsync(CancellationToken cancellationToken = default);
 
+	Task<IReadOnlyList<RosterColour>> GetColourRosterAsync(CancellationToken cancellationToken = default);
+
 	Task<Result<UserRole>> ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default);
 
 	Task<Result<SinkHoldings>> SinkHoldingsAsync(UserId id, CancellationToken cancellationToken = default);
