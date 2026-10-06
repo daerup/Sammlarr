@@ -3,7 +3,7 @@ using Domain.Providers;
 
 namespace Contracts.Identity;
 
-public sealed record PersonHoldings(int Feeds, int Wanted, int Blocklisted, IReadOnlyList<MediaProvider> Keys)
+public sealed record PersonHoldings(int Feeds, int Wanted, int Blocklisted, IReadOnlyList<RemoteService> Keys)
 {
 	public static PersonHoldings Empty { get; } = new(0, 0, 0, []);
 }

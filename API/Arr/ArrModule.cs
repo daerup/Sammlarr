@@ -1,9 +1,7 @@
 using API.Arr.Radarr;
 using API.Arr.Sonarr;
 using API.Http;
-using Contracts.Media.Search;
 using Contracts.Settings;
-using Contracts.Wantlist;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -15,11 +13,10 @@ internal class ArrModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddHttpClient<RadarrApi>().AddProviderHttp<RadarrOptions>();
-		services.AddHttpClient<SonarrApi>().AddProviderHttp<SonarrOptions>();
+		services.ForRemote<RadarrOptions>(RemoteService.Radarr).Client<RadarrApi>();
+		services.ForRemote<SonarrOptions>(RemoteService.Sonarr).Client<SonarrApi>();
+		services.ForService(new Domain.Providers.Arr()).Sink<ArrSink>(SinkKind.Arr).Search<ArrSearch>(SearchProvider.Arr);
 		services.AddScoped<ArrApis>();
-		services.AddKeyedScoped<IMediaSink, ArrSink>(SinkKind.Arr);
-		services.AddKeyedScoped<IMediaSearchProvider, ArrSearch>(SearchProvider.Arr);
 		services.AddScoped<IArrConnectionTester, ArrConnectionTester>();
 	}
 }

@@ -37,7 +37,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		if (response.StatusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.RequestTimeout || (int)response.StatusCode >= 500)
 		{
 			logger.LogWarning("Plex lookup was rate limited or unavailable ({StatusCode}) on {Endpoint}", (int)response.StatusCode, endpoint);
-			throw new ProviderUnavailableException(MediaProvider.Plex);
+			throw new RemoteUnavailableException(RemoteService.Plex);
 		}
 
 		response.EnsureSuccessStatusCode();

@@ -27,7 +27,7 @@ public class ProviderAnswerTests
 	{
 		var answered = new MovieDetails { Title = "Dune", Ratings = MediaRatings.From([new TmdbRating(7.8f, Some.Of(12_000))]) };
 
-		var answer = ProviderAnswer.After(MediaProvider.Plex, MediaField.Tagline | MediaField.Summary | MediaFields.AllRatings, answered, At);
+		var answer = ProviderAnswer.After(RemoteService.Plex, MediaField.Tagline | MediaField.Summary | MediaFields.AllRatings, answered, At);
 
 		await Assert
 			.That(answer.Unfilled)
@@ -43,13 +43,13 @@ public class ProviderAnswerTests
 	public void After_ForAnyFillsAndAnswer_NeverNamesAFieldOutsideTheFills()
 	{
 		Gen.Select(MediaFieldsGen.Fields, Titles)
-			.Sample((fills, answered) => ProviderAnswer.After(MediaProvider.Tmdb, fills, answered, At).Unfilled.Except(fills).IsEmpty);
+			.Sample((fills, answered) => ProviderAnswer.After(RemoteService.Tmdb, fills, answered, At).Unfilled.Except(fills).IsEmpty);
 	}
 
 	[Test]
 	public void After_ForAnyFillsAndAnswer_NeverNamesAFieldTheAnswerHas()
 	{
 		Gen.Select(MediaFieldsGen.Fields, Titles)
-			.Sample((fills, answered) => ProviderAnswer.After(MediaProvider.Tmdb, fills, answered, At).Unfilled.Except(answered.Missing).IsEmpty);
+			.Sample((fills, answered) => ProviderAnswer.After(RemoteService.Tmdb, fills, answered, At).Unfilled.Except(answered.Missing).IsEmpty);
 	}
 }

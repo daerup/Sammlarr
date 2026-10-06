@@ -146,7 +146,7 @@ internal sealed class MediaService(
 		IReadOnlyList<IdentifyRequest> batch,
 		IMediaSink sink,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
-		IReadOnlySet<MediaProvider> connected,
+		IReadOnlySet<RemoteService> connected,
 		MediaWriteBuffer buffer,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
@@ -357,7 +357,7 @@ internal sealed class MediaService(
 	private async ValueTask<Result<MatchedMedia>> LoadStoredDetailsAsync(
 		MediaId id,
 		IReadOnlyDictionary<MediaId, StoredMedia> stored,
-		IReadOnlySet<MediaProvider> connected,
+		IReadOnlySet<RemoteService> connected,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -372,7 +372,7 @@ internal sealed class MediaService(
 	private async ValueTask<MediaMatchResult> LoadRequestDetailsAsync(
 		IdentifyRequest request,
 		Result<IdentifyHandoff> handoff,
-		IReadOnlySet<MediaProvider> connected,
+		IReadOnlySet<RemoteService> connected,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -388,7 +388,7 @@ internal sealed class MediaService(
 		MediaIdentity identity,
 		Optional<StoredMedia> stored,
 		MediaDetails placeholder,
-		IReadOnlySet<MediaProvider> connected,
+		IReadOnlySet<RemoteService> connected,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -407,7 +407,7 @@ internal sealed class MediaService(
 		Optional<StoredMedia> stored,
 		Optional<CachedDetails> cached,
 		MediaDetails placeholder,
-		IReadOnlySet<MediaProvider> connected,
+		IReadOnlySet<RemoteService> connected,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -435,7 +435,7 @@ internal sealed class MediaService(
 		return cached
 			.Map(stale => stale.Details)
 			.Or(() => stored.Map(_ => placeholder))
-			.Or(() => error.CausedBy<ProviderUnavailableException>().Map(_ => placeholder))
+			.Or(() => error.CausedBy<RemoteUnavailableException>().Map(_ => placeholder))
 			.Map(details => new MatchedMedia(identity, details))
 			.ToResult(error);
 	}

@@ -9,7 +9,7 @@ internal class HttpModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddSingleton<ProviderGates>();
-		services.AddSingleton<ProviderCapacity>();
-		services.AddSingleton<IProviderCapacity>(sp => sp.GetRequiredService<ProviderCapacity>());
+		services.AddSingleton<RemoteCapacity>();
+		services.AddSingleton<IRemoteCapacity>(sp => sp.GetRequiredService<RemoteCapacity>());
 	}
 }

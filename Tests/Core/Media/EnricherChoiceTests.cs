@@ -8,8 +8,9 @@ namespace Core.Tests.Media;
 public class EnricherChoiceTests
 {
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
-	private static readonly ProviderLoad Idle = new(new None(), 0);
-	private static readonly IReadOnlySet<MediaProvider> NoneWaited = new HashSet<MediaProvider>();
+	private static readonly RemoteLoad Idle = new(new None(), 0);
+	private static readonly IReadOnlySet<RemoteService> NoneWaited = new HashSet<RemoteService>();
+	private static readonly IReadOnlySet<RemoteService> NoPreference = new HashSet<RemoteService>();
 	private static readonly MediaFields PlexFills = MediaField.Tagline | MediaFields.AllRatings;
 
 	private static readonly MovieDetails Complete = new()
@@ -37,14 +38,14 @@ public class EnricherChoiceTests
 				EnricherChoice
 					.Next(
 						MediaField.Tagline | MediaField.Summary,
-						[Candidate(MediaProvider.Tmdb, MediaField.Tagline), Candidate(MediaProvider.Tvdb, MediaField.Tagline | MediaField.Summary)],
-						new None(),
+						[Candidate(RemoteService.Tmdb, MediaField.Tagline), Candidate(RemoteService.Mdblist, MediaField.Tagline | MediaField.Summary)],
+						NoPreference,
 						Now
 					)
-					.Map(candidate => candidate.Provider)
+					.Map(candidate => candidate.Remote)
 			)
 			.IsSome()
-			.And.IsEqualTo(MediaProvider.Tvdb);
+			.And.IsEqualTo(RemoteService.Mdblist);
 
 	[Test]
 	public async Task Next_ForEqualCoverage_PicksTheLessBusyEnricher() =>
@@ -54,16 +55,16 @@ public class EnricherChoiceTests
 					.Next(
 						MediaField.Tagline,
 						[
-							Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { Busy = 0.8 }),
-							Candidate(MediaProvider.Tvdb, MediaField.Tagline, Idle with { Busy = 0.1 }),
+							Candidate(RemoteService.Tmdb, MediaField.Tagline, Idle with { Busy = 0.8 }),
+							Candidate(RemoteService.Mdblist, MediaField.Tagline, Idle with { Busy = 0.1 }),
 						],
-						new None(),
+						NoPreference,
 						Now
 					)
-					.Map(candidate => candidate.Provider)
+					.Map(candidate => candidate.Remote)
 			)
 			.IsSome()
-			.And.IsEqualTo(MediaProvider.Tvdb);
+			.And.IsEqualTo(RemoteService.Mdblist);
 
 	[Test]
 	public async Task Next_SkipsABlockedEnricherAndOneThatCannotFillAnything() =>
@@ -72,10 +73,10 @@ public class EnricherChoiceTests
 				EnricherChoice.Next(
 					MediaField.Tagline,
 					[
-						Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
-						Candidate(MediaProvider.Tvdb, MediaField.Poster),
+						Candidate(RemoteService.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
+						Candidate(RemoteService.Mdblist, MediaField.Poster),
 					],
-					new None(),
+					NoPreference,
 					Now
 				)
 			)
@@ -88,41 +89,41 @@ public class EnricherChoiceTests
 				EnricherChoice
 					.Next(
 						MediaField.Tagline,
-						[Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(-1)) })],
-						new None(),
+						[Candidate(RemoteService.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(-1)) })],
+						NoPreference,
 						Now
 					)
-					.Map(candidate => candidate.Provider)
+					.Map(candidate => candidate.Remote)
 			)
 			.IsSome()
-			.And.IsEqualTo(MediaProvider.Tmdb);
+			.And.IsEqualTo(RemoteService.Tmdb);
 
 	[Test]
 	public async Task WorthWaitingFor_WhenNoneIsBlocked_PicksTheOneThatFillsAMissingField()
 	{
 		var picked = EnricherChoice.WorthWaitingFor(
 			MediaField.Tagline,
-			[Candidate(MediaProvider.Tvdb, MediaField.Poster), Candidate(MediaProvider.Tmdb, MediaField.Tagline)],
+			[Candidate(RemoteService.Mdblist, MediaField.Poster), Candidate(RemoteService.Tmdb, MediaField.Tagline)],
 			NoneWaited,
 			Now
 		);
 
-		await Assert.That(picked.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
+		await Assert.That(picked.Map(candidate => candidate.Remote)).IsSome().And.IsEqualTo(RemoteService.Tmdb);
 	}
 
 	[Test]
 	public async Task WorthWaitingFor_WhenTheBlockEndsWithinTheEnrichWait_PicksIt()
 	{
-		var picked = EnricherChoice.WorthWaitingFor(MediaField.Tagline, [Candidate(MediaProvider.Tmdb, MediaField.Tagline, Blocked(seconds: 5))], NoneWaited, Now);
+		var picked = EnricherChoice.WorthWaitingFor(MediaField.Tagline, [Candidate(RemoteService.Tmdb, MediaField.Tagline, Blocked(seconds: 5))], NoneWaited, Now);
 
-		await Assert.That(picked.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
+		await Assert.That(picked.Map(candidate => candidate.Remote)).IsSome().And.IsEqualTo(RemoteService.Tmdb);
 	}
 
 	[Test]
 	public async Task WorthWaitingFor_WhenTheBlockOutlastsTheEnrichWait_IsNone()
 	{
 		await Assert
-			.That(EnricherChoice.WorthWaitingFor(MediaField.Tagline, [Candidate(MediaProvider.Tmdb, MediaField.Tagline, Blocked(seconds: 30))], NoneWaited, Now))
+			.That(EnricherChoice.WorthWaitingFor(MediaField.Tagline, [Candidate(RemoteService.Tmdb, MediaField.Tagline, Blocked(seconds: 30))], NoneWaited, Now))
 			.IsNone();
 	}
 
@@ -132,7 +133,7 @@ public class EnricherChoiceTests
 		var unbudgeted = Idle with { BlockedUntil = Some.Of(Now.AddSeconds(1)) };
 
 		await Assert
-			.That(EnricherChoice.WorthWaitingFor(MediaField.Tagline, [Candidate(MediaProvider.Plex, MediaField.Tagline, unbudgeted)], NoneWaited, Now))
+			.That(EnricherChoice.WorthWaitingFor(MediaField.Tagline, [Candidate(RemoteService.Plex, MediaField.Tagline, unbudgeted)], NoneWaited, Now))
 			.IsNone();
 	}
 
@@ -143,8 +144,8 @@ public class EnricherChoiceTests
 			.That(
 				EnricherChoice.WorthWaitingFor(
 					MediaField.Tagline,
-					[Candidate(MediaProvider.Tmdb, MediaField.Tagline, Blocked(seconds: 5))],
-					new HashSet<MediaProvider> { MediaProvider.Tmdb },
+					[Candidate(RemoteService.Tmdb, MediaField.Tagline, Blocked(seconds: 5))],
+					new HashSet<RemoteService> { RemoteService.Tmdb },
 					Now
 				)
 			)
@@ -156,12 +157,12 @@ public class EnricherChoiceTests
 	{
 		var picked = EnricherChoice.WorthWaitingFor(
 			MediaField.Tagline,
-			[Candidate(MediaProvider.Tmdb, MediaField.Tagline, Blocked(seconds: 10)), Candidate(MediaProvider.Plex, MediaField.Tagline, Blocked(seconds: 3))],
+			[Candidate(RemoteService.Tmdb, MediaField.Tagline, Blocked(seconds: 10)), Candidate(RemoteService.Plex, MediaField.Tagline, Blocked(seconds: 3))],
 			NoneWaited,
 			Now
 		);
 
-		await Assert.That(picked.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Plex);
+		await Assert.That(picked.Map(candidate => candidate.Remote)).IsSome().And.IsEqualTo(RemoteService.Plex);
 	}
 
 	[Test]
@@ -173,13 +174,13 @@ public class EnricherChoiceTests
 	[Test]
 	public async Task NeedsRefetch_WhenANewlyConnectedEnricherFillsAGap_IsTrue()
 	{
-		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [Candidate(MediaProvider.Plex, PlexFills)], Now)).IsTrue();
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [Candidate(RemoteService.Plex, PlexFills)], Now)).IsTrue();
 	}
 
 	[Test]
 	public async Task NeedsRefetch_WhenTheOnlyEnricherThatFillsAGapIsBlocked_IsFalse()
 	{
-		var blocked = Candidate(MediaProvider.Plex, PlexFills, Idle with { BlockedUntil = Some.Of(Now.AddMinutes(1)) });
+		var blocked = Candidate(RemoteService.Plex, PlexFills, Idle with { BlockedUntil = Some.Of(Now.AddMinutes(1)) });
 
 		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [blocked], Now)).IsFalse();
 	}
@@ -187,7 +188,7 @@ public class EnricherChoiceTests
 	[Test]
 	public async Task NeedsRefetch_OnceTheBlockHasLifted_IsTrue()
 	{
-		var lifted = Candidate(MediaProvider.Plex, PlexFills, Idle with { BlockedUntil = Some.Of(Now.AddMinutes(-1)) });
+		var lifted = Candidate(RemoteService.Plex, PlexFills, Idle with { BlockedUntil = Some.Of(Now.AddMinutes(-1)) });
 
 		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [lifted], Now)).IsTrue();
 	}
@@ -195,7 +196,7 @@ public class EnricherChoiceTests
 	[Test]
 	public async Task NeedsRefetch_WithinAnHourOfTheLastAsk_WaitsEvenThoughSomeoneNewCouldFillAGap()
 	{
-		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromMinutes(30)), [Candidate(MediaProvider.Plex, PlexFills)], Now)).IsFalse();
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromMinutes(30)), [Candidate(RemoteService.Plex, PlexFills)], Now)).IsFalse();
 	}
 
 	[Test]
@@ -203,7 +204,7 @@ public class EnricherChoiceTests
 	{
 		var complete = Dune(askedAgo: TimeSpan.FromDays(1)) with { Details = Complete };
 
-		await Assert.That(EnricherChoice.NeedsRefetch(complete, [Candidate(MediaProvider.Plex, PlexFills)], Now)).IsFalse();
+		await Assert.That(EnricherChoice.NeedsRefetch(complete, [Candidate(RemoteService.Plex, PlexFills)], Now)).IsFalse();
 	}
 
 	[Test]
@@ -217,21 +218,21 @@ public class EnricherChoiceTests
 	[Test]
 	public async Task Next_WhenOnlyRatingsAreMissing_CountsNoRatingsAndFallsBackToProviderOrder()
 	{
-		var candidates = new[] { Candidate(MediaProvider.Plex, MediaFields.AllRatings), Candidate(MediaProvider.Tmdb, MediaFields.Rated([RatingSource.Tmdb])) };
+		var candidates = new[] { Candidate(RemoteService.Plex, MediaFields.AllRatings), Candidate(RemoteService.Tmdb, MediaFields.Rated([RatingSource.Tmdb])) };
 
-		var next = EnricherChoice.Next(MediaFields.AllRatings, candidates, new None(), Now);
+		var next = EnricherChoice.Next(MediaFields.AllRatings, candidates, NoPreference, Now);
 
-		await Assert.That(next.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
+		await Assert.That(next.Map(candidate => candidate.Remote)).IsSome().And.IsEqualTo(RemoteService.Tmdb);
 	}
 
 	[Test]
 	public async Task Next_WhenThePreferredProviderCanHelp_PicksItOverOneThatFillsMore()
 	{
-		var candidates = new[] { Candidate(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Summary), Candidate(MediaProvider.Plex, MediaField.Tagline) };
+		var candidates = new[] { Candidate(RemoteService.Tmdb, MediaField.Tagline | MediaField.Summary), Candidate(RemoteService.Plex, MediaField.Tagline) };
 
-		var next = EnricherChoice.Next(MediaField.Tagline | MediaField.Summary, candidates, Some.Of(MediaProvider.Plex), Now);
+		var next = EnricherChoice.Next(MediaField.Tagline | MediaField.Summary, candidates, new HashSet<RemoteService> { RemoteService.Plex }, Now);
 
-		await Assert.That(next.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Plex);
+		await Assert.That(next.Map(candidate => candidate.Remote)).IsSome().And.IsEqualTo(RemoteService.Plex);
 	}
 
 	[Test]
@@ -239,35 +240,35 @@ public class EnricherChoiceTests
 	{
 		var candidates = new[]
 		{
-			Candidate(MediaProvider.Plex, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
-			Candidate(MediaProvider.Tmdb, MediaField.Tagline),
+			Candidate(RemoteService.Plex, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),
+			Candidate(RemoteService.Tmdb, MediaField.Tagline),
 		};
 
-		var next = EnricherChoice.Next(MediaField.Tagline, candidates, Some.Of(MediaProvider.Plex), Now);
+		var next = EnricherChoice.Next(MediaField.Tagline, candidates, new HashSet<RemoteService> { RemoteService.Plex }, Now);
 
-		await Assert.That(next.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
+		await Assert.That(next.Map(candidate => candidate.Remote)).IsSome().And.IsEqualTo(RemoteService.Tmdb);
 	}
 
 	[Test]
 	public async Task Next_ForEqualFieldsAndLoad_PicksTmdbBeforePlex()
 	{
-		var candidates = new[] { Candidate(MediaProvider.Plex, MediaField.Tagline), Candidate(MediaProvider.Tmdb, MediaField.Tagline) };
+		var candidates = new[] { Candidate(RemoteService.Plex, MediaField.Tagline), Candidate(RemoteService.Tmdb, MediaField.Tagline) };
 
-		var next = EnricherChoice.Next(MediaField.Tagline, candidates, new None(), Now);
+		var next = EnricherChoice.Next(MediaField.Tagline, candidates, NoPreference, Now);
 
-		await Assert.That(next.Map(candidate => candidate.Provider)).IsSome().And.IsEqualTo(MediaProvider.Tmdb);
+		await Assert.That(next.Map(candidate => candidate.Remote)).IsSome().And.IsEqualTo(RemoteService.Tmdb);
 	}
 
 	[Test]
 	public async Task CanHelp_WhenItFillsNothingNeeded_IsFalse()
 	{
-		await Assert.That(Candidate(MediaProvider.Tmdb, MediaField.Poster).CanHelp(MediaField.Tagline, Now)).IsFalse();
+		await Assert.That(Candidate(RemoteService.Tmdb, MediaField.Poster).CanHelp(MediaField.Tagline, Now)).IsFalse();
 	}
 
 	[Test]
 	public async Task CanHelp_WhenItIsBlocked_IsFalse()
 	{
-		var blocked = Candidate(MediaProvider.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) });
+		var blocked = Candidate(RemoteService.Tmdb, MediaField.Tagline, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) });
 
 		await Assert.That(blocked.CanHelp(MediaField.Tagline, Now)).IsFalse();
 	}
@@ -275,17 +276,17 @@ public class EnricherChoiceTests
 	[Test]
 	public async Task CanHelp_WhenItIsOpenAndFillsANeededField_IsTrue()
 	{
-		await Assert.That(Candidate(MediaProvider.Plex, MediaFields.AllRatings).CanHelp(MediaFields.Rated([RatingSource.Imdb]), Now)).IsTrue();
+		await Assert.That(Candidate(RemoteService.Plex, MediaFields.AllRatings).CanHelp(MediaFields.Rated([RatingSource.Imdb]), Now)).IsTrue();
 	}
 
-	private static ProviderLoad Blocked(int seconds) => Idle with { BlockedUntil = Some.Of(Now.AddSeconds(seconds)), EnrichWait = TimeSpan.FromSeconds(15) };
+	private static RemoteLoad Blocked(int seconds) => Idle with { BlockedUntil = Some.Of(Now.AddSeconds(seconds)), EnrichWait = TimeSpan.FromSeconds(15) };
 
 	private static CachedDetails Dune(TimeSpan askedAgo)
 	{
 		var details = new MovieDetails { Title = "Dune", Ratings = MediaRatings.From([new TmdbRating(7.8f, Some.Of(12_000))]) };
-		return new CachedDetails(details, Now.AddDays(-3), Now - askedAgo, [new ProviderAnswer(MediaProvider.Tmdb, MediaField.Tagline, Now - askedAgo)]);
+		return new CachedDetails(details, Now.AddDays(-3), Now - askedAgo, [new ProviderAnswer(RemoteService.Tmdb, MediaField.Tagline, Now - askedAgo)]);
 	}
 
-	private static EnricherCandidate Candidate(MediaProvider provider, MediaFields fills, ProviderLoad? load = null) =>
-		new(provider, TmdbId.From("1", MediaType.Movie), fills, load ?? Idle);
+	private static EnricherCandidate Candidate(RemoteService remote, MediaFields fills, RemoteLoad? load = null) =>
+		new(remote, TmdbId.From("1", MediaType.Movie), fills, load ?? Idle);
 }

@@ -75,7 +75,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.EnsurePlexAccount();
 		host.PlexHolds(fightClub);
 		await host.TmdbFinds(fightClub);
-		host.RateLimited(MediaProvider.Plex);
+		host.RateLimited(RemoteService.Plex);
 
 		var results = await Testee.IdentifyAsync([Request(null, Plex("550"), Imdb("tt0137523"))]).ToListAsync();
 

@@ -1,3 +1,4 @@
+using Contracts.DI;
 using Contracts.Media.Conversions;
 using Contracts.Providers;
 using Core.Media;
@@ -10,9 +11,9 @@ namespace Core.Tests.Media;
 public class IdLookupPlannerTests
 {
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
-	private static readonly ProviderLoad Idle = new(new None(), 0);
-	private static readonly ProviderLoad Blocked = new(Some.Of(Now.AddMinutes(1)), 0);
-	private static readonly IProviderCapacity Open = TestCapacity.Open();
+	private static readonly RemoteLoad Idle = new(new None(), 0);
+	private static readonly RemoteLoad Blocked = new(Some.Of(Now.AddMinutes(1)), 0);
+	private static readonly IRemoteCapacity Open = TestCapacity.Open();
 
 	private static readonly ValueSet<MediaProvider> Guids = [MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb, MediaProvider.Tvdb];
 	private static readonly IdLookup PlexId = new ById(Accepts: [MediaProvider.Plex], Yields: Guids, Cost: 1);
@@ -20,8 +21,8 @@ public class IdLookupPlannerTests
 	private static readonly IdLookup Detail = new ById(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Imdb, MediaProvider.Tvdb], Cost: 1);
 	private static readonly IdLookup Find = new ById(Accepts: [MediaProvider.Imdb, MediaProvider.Tvdb], Yields: [MediaProvider.Tmdb], Cost: 1);
 	private static readonly IReadOnlyList<Hop> Hops = IdLookupPlanner.Derive([
-		Converter(MediaProvider.Plex, [PlexId, Search]),
-		Converter(MediaProvider.Tmdb, [Detail, Find]),
+		Converter(RemoteService.Plex, [PlexId, Search]),
+		Converter(RemoteService.Tmdb, [Detail, Find]),
 	]);
 
 	[Test]
@@ -98,8 +99,8 @@ public class IdLookupPlannerTests
 	[Test]
 	public async Task Plan_PutsPathsThroughABlockedProviderLastTheSoonestFreeFirst()
 	{
-		var tmdbBlocked = TestCapacity.With(provider => provider is MediaProvider.Tmdb ? Blocked : Idle);
-		var plexFreesFirst = TestCapacity.With(provider => provider is MediaProvider.Tmdb ? BlockedFor(2) : Blocked);
+		var tmdbBlocked = TestCapacity.With(remote => remote is RemoteService.Tmdb ? Blocked : Idle);
+		var plexFreesFirst = TestCapacity.With(remote => remote is RemoteService.Tmdb ? BlockedFor(2) : Blocked);
 
 		var afterTheOpen = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Tmdb }, true, MediaProvider.Tvdb, Hops, tmdbBlocked, Now);
 		var soonestFree = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Tmdb }, true, MediaProvider.Tvdb, Hops, plexFreesFirst, Now);
@@ -112,7 +113,7 @@ public class IdLookupPlannerTests
 	[Test]
 	public async Task Plan_ForAPlexTitleWhilePlexIsBlocked_KeepsTheSelfHop()
 	{
-		var plexBlocked = TestCapacity.With(provider => provider is MediaProvider.Plex ? Blocked : Idle);
+		var plexBlocked = TestCapacity.With(remote => remote is RemoteService.Plex ? Blocked : Idle);
 
 		var plan = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Plex }, false, MediaProvider.Plex, Hops, plexBlocked, Now);
 
@@ -138,7 +139,7 @@ public class IdLookupPlannerTests
 		IdLookup imdbToPlex = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Plex], Cost: 1);
 		IdLookup plexToTvdb = new ById(Accepts: [MediaProvider.Plex], Yields: [MediaProvider.Tvdb], Cost: 1);
 		IdLookup imdbToTvdb = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tvdb], Cost: 2);
-		var hops = IdLookupPlanner.Derive([Converter(MediaProvider.Mdblist, [imdbToPlex, plexToTvdb, imdbToTvdb])]);
+		var hops = IdLookupPlanner.Derive([Converter(RemoteService.Mdblist, [imdbToPlex, plexToTvdb, imdbToTvdb])]);
 
 		var plan = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Imdb }, false, MediaProvider.Tvdb, hops, Open, Now);
 
@@ -150,7 +151,17 @@ public class IdLookupPlannerTests
 	{
 		IdLookup imdbToRottenTomatoes = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.RottenTomatoes], Cost: 1, GivesHints: false);
 
-		var hops = IdLookupPlanner.Derive([Converter(MediaProvider.RottenTomatoes, [imdbToRottenTomatoes])]);
+		var hops = IdLookupPlanner.Derive([Converter(RemoteService.Wikidata, [imdbToRottenTomatoes])]);
+
+		await Assert.That(hops.Select(Describe)).IsEquivalentTo(["find(Imdb)>RottenTomatoes"]);
+	}
+
+	[Test]
+	public async Task Derive_ForAServiceWithoutItsOwnIds_OffersNoSelfHop()
+	{
+		IdLookup imdbToImdb = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Imdb, MediaProvider.RottenTomatoes], Cost: 1, GivesHints: false);
+
+		var hops = IdLookupPlanner.Derive([Converter(RemoteService.Wikidata, [imdbToImdb])]);
 
 		await Assert.That(hops.Select(Describe)).IsEquivalentTo(["find(Imdb)>RottenTomatoes"]);
 	}
@@ -173,7 +184,7 @@ public class IdLookupPlannerTests
 			true,
 			MediaProvider.Tvdb,
 			Hops,
-			TestCapacity.With(provider => provider is MediaProvider.Tmdb ? Idle with { Busy = 9 } : Idle),
+			TestCapacity.With(remote => remote is RemoteService.Tmdb ? Idle with { Busy = 9 } : Idle),
 			Now
 		);
 
@@ -290,14 +301,13 @@ public class IdLookupPlannerTests
 			);
 	}
 
-	private static ProviderLoad BlockedFor(int minutes) => new(Some.Of(Now.AddMinutes(minutes)), 0);
+	private static RemoteLoad BlockedFor(int minutes) => new(Some.Of(Now.AddMinutes(minutes)), 0);
 
-	private static IExternalIdConverter Converter(MediaProvider provider, IReadOnlyList<IdLookup> lookups)
+	private static Keyed<RemoteService, IExternalIdConverter> Converter(RemoteService remote, IReadOnlyList<IdLookup> lookups)
 	{
 		var converter = IExternalIdConverter.Mock();
-		converter.Provider.Returns(provider);
 		converter.Lookups.Returns(lookups);
-		return converter.Object;
+		return new Keyed<RemoteService, IExternalIdConverter>(remote, converter.Object);
 	}
 
 	private static string NameOf(ById lookup)

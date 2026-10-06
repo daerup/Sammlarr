@@ -6,5 +6,9 @@ namespace Core.DI;
 
 internal class DiModule : IServiceModule
 {
-	public void RegisterServices(IServiceCollection services) => services.AddScoped(typeof(IKeyedServiceIndex<,>), typeof(KeyedServiceIndex<,>));
+	public void RegisterServices(IServiceCollection services)
+	{
+		services.AddScoped(typeof(IKeyedServiceIndex<,>), typeof(KeyedServiceIndex<,>));
+		services.AddScoped(typeof(IKeyedServiceSet<,>), typeof(KeyedServiceSet<,>));
+	}
 }

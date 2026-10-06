@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Contracts;
 using Contracts.Caching;
+using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Providers;
@@ -11,9 +12,9 @@ using Domain.Providers;
 namespace Core.Media;
 
 internal sealed class MediaIdResolver(
-	IEnumerable<IExternalIdConverter> converters,
+	IEnumerable<Keyed<RemoteService, IExternalIdConverter>> converters,
 	ITypedMemoryCache<string, bool> unmatchedCache,
-	IProviderCapacity capacity,
+	IRemoteCapacity capacity,
 	IDateTimeProvider clock
 )
 {
@@ -48,8 +49,8 @@ internal sealed class MediaIdResolver(
 		var unresolved = Error.From($"No lookup resolved the candidates to a {target} id.");
 		var transient = false;
 		var answers = new Dictionary<AnswerKey, LookupAnswer>();
-		var down = new HashSet<MediaProvider>();
-		var waited = new HashSet<MediaProvider>();
+		var down = new HashSet<RemoteService>();
+		var waited = new HashSet<RemoteService>();
 		foreach (var path in plan.Paths)
 		{
 			var outcome = await FollowAsync(path, candidates, request.Hints, target, answers, down, waited, cancellationToken);
@@ -73,8 +74,8 @@ internal sealed class MediaIdResolver(
 		Optional<IdentifyHints> hints,
 		MediaProvider target,
 		Dictionary<AnswerKey, LookupAnswer> answers,
-		HashSet<MediaProvider> down,
-		HashSet<MediaProvider> waited,
+		HashSet<RemoteService> down,
+		HashSet<RemoteService> waited,
 		CancellationToken cancellationToken
 	)
 	{
@@ -104,7 +105,7 @@ internal sealed class MediaIdResolver(
 		IReadOnlyList<IExternalMediaId> ids,
 		Optional<IdentifyHints> hints,
 		Dictionary<AnswerKey, LookupAnswer> answers,
-		HashSet<MediaProvider> down,
+		HashSet<RemoteService> down,
 		CancellationToken cancellationToken
 	)
 	{
@@ -160,7 +161,7 @@ internal sealed class MediaIdResolver(
 	private static async Task<LookupAnswer> AskAsync(
 		IExternalIdConverter converter,
 		IdLookupRequest request,
-		HashSet<MediaProvider> down,
+		HashSet<RemoteService> down,
 		CancellationToken cancellationToken
 	)
 	{
@@ -169,10 +170,10 @@ internal sealed class MediaIdResolver(
 			var answer = await converter.LookUpAsync(request, cancellationToken);
 			return answer.Match(
 				_ => new LookupAnswer(answer, false),
-				error => error.CausedBy<ProviderUnavailableException>().Match(unavailable => Unavailable(unavailable, down), () => new LookupAnswer(answer, false))
+				error => error.CausedBy<RemoteUnavailableException>().Match(unavailable => Unavailable(unavailable, down), () => new LookupAnswer(answer, false))
 			);
 		}
-		catch (ProviderUnavailableException unavailable)
+		catch (RemoteUnavailableException unavailable)
 		{
 			Activity.Current?.AddException(unavailable);
 			return Unavailable(unavailable, down);
@@ -184,40 +185,40 @@ internal sealed class MediaIdResolver(
 		}
 	}
 
-	private static LookupAnswer Unavailable(ProviderUnavailableException unavailable, HashSet<MediaProvider> down)
+	private static LookupAnswer Unavailable(RemoteUnavailableException unavailable, HashSet<RemoteService> down)
 	{
-		down.Add(unavailable.Provider);
+		down.Add(unavailable.Remote);
 		return new LookupAnswer(Error.From(unavailable), true);
 	}
 
 	private async Task<bool> WaitForAsync(
 		IEnumerable<Hop> remaining,
-		HashSet<MediaProvider> waited,
-		HashSet<MediaProvider> down,
+		HashSet<RemoteService> waited,
+		HashSet<RemoteService> down,
 		CancellationToken cancellationToken
 	)
 	{
 		var now = clock.Now;
-		var blocked = new Dictionary<MediaProvider, DateTimeOffset>();
-		foreach (var provider in remaining.Select(hop => hop.Converter.Provider).Distinct())
+		var blocked = new Dictionary<RemoteService, DateTimeOffset>();
+		foreach (var remote in remaining.Select(hop => hop.Remote).Distinct())
 		{
-			if (down.Contains(provider))
+			if (down.Contains(remote))
 			{
 				return false;
 			}
 
-			var load = capacity.Of(provider);
+			var load = capacity.Of(remote);
 			if (load.IsOpen(now))
 			{
 				continue;
 			}
 
-			if (waited.Contains(provider) || !load.FreesWithin(now, load.MaxWait))
+			if (waited.Contains(remote) || !load.FreesWithin(now, load.MaxWait))
 			{
 				return false;
 			}
 
-			blocked[provider] = load.FreeAt(now);
+			blocked[remote] = load.FreeAt(now);
 		}
 
 		if (blocked.Count == 0)
@@ -228,7 +229,7 @@ internal sealed class MediaIdResolver(
 		waited.UnionWith(blocked.Keys);
 		var freeAt = blocked.Values.Max();
 		await clock.WaitUntilAsync(freeAt, cancellationToken);
-		return blocked.Keys.All(provider => capacity.Of(provider).IsOpen(freeAt));
+		return blocked.Keys.All(remote => capacity.Of(remote).IsOpen(freeAt));
 	}
 
 	private readonly record struct StepOutcome(Optional<IdLookupResult> Found, bool Transient);

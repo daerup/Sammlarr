@@ -3,6 +3,7 @@ using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Providers;
 using Contracts.Settings;
+using Core.DI;
 using Core.Media;
 using Domain.Auth;
 using Domain.Media;
@@ -20,8 +21,8 @@ public class DetailsFetcherTests
 	private static readonly TmdbId Tmdb = TmdbId.From("500", MediaType.Movie);
 	private static readonly MediaIdentity Identity = new(Id, [Plex, Tmdb]);
 	private static readonly MediaIdentity PlexOnly = new(Id, [Plex]);
-	private static readonly IReadOnlySet<MediaProvider> Everyone = new HashSet<MediaProvider> { MediaProvider.Tmdb, MediaProvider.Plex };
-	private static readonly IReadOnlySet<MediaProvider> OnlyPlex = new HashSet<MediaProvider> { MediaProvider.Plex };
+	private static readonly IReadOnlySet<RemoteService> Everyone = new HashSet<RemoteService> { RemoteService.Tmdb, RemoteService.Plex };
+	private static readonly IReadOnlySet<RemoteService> OnlyPlex = new HashSet<RemoteService> { RemoteService.Plex };
 
 	private static readonly MediaFields Everything = ~MediaField.None | MediaFields.AllRatings;
 	private static readonly MediaRatings TmdbOnly = MediaRatings.From([new TmdbRating(8f, Some.Of(500))]);
@@ -31,11 +32,11 @@ public class DetailsFetcherTests
 		new RottenTomatoesCriticsRating(87),
 		new RottenTomatoesAudienceRating(91),
 	]);
-	private static readonly Error Unavailable = Error.From(new ProviderUnavailableException(MediaProvider.Tmdb));
+	private static readonly Error Unavailable = Error.From(new RemoteUnavailableException(RemoteService.Tmdb));
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 	private static readonly DateTimeOffset LastRefresh = Now.AddDays(-3);
 	private static readonly CancellationToken WaitingThrows = new(canceled: true);
-	private static readonly ProviderAnswer PlexLeftTheRatings = new(MediaProvider.Plex, MediaFields.AllRatings, LastRefresh);
+	private static readonly ProviderAnswer PlexLeftTheRatings = new(RemoteService.Plex, MediaFields.AllRatings, LastRefresh);
 	private static readonly CachedDetails UnratedByPlex = new(Unrated(), LastRefresh, LastRefresh, [PlexLeftTheRatings]);
 
 	[Test]
@@ -48,7 +49,7 @@ public class DetailsFetcherTests
 
 		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
-		await Assert.That(buffer.NewDetails[Id].Answers).Contains(new ProviderAnswer(MediaProvider.Tmdb, MediaFields.AllRatings, Now));
+		await Assert.That(buffer.NewDetails[Id].Answers).Contains(new ProviderAnswer(RemoteService.Tmdb, MediaFields.AllRatings, Now));
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
@@ -63,7 +64,7 @@ public class DetailsFetcherTests
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Missing).IsEqualTo(MediaFields.AllRatings);
-		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([RemoteService.Plex]);
 	}
 
 	[Test]
@@ -77,7 +78,7 @@ public class DetailsFetcherTests
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details).IsEqualTo(Complete() with { Tagline = null });
-		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([RemoteService.Plex]);
 	}
 
 	[Test]
@@ -103,7 +104,7 @@ public class DetailsFetcherTests
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Tagline).IsEqualTo("Your mind is the scene of the crime.");
-		await Assert.That(buffer.NewDetails[Id].Answers).Contains(new ProviderAnswer(MediaProvider.Tmdb, MediaFields.None, Now));
+		await Assert.That(buffer.NewDetails[Id].Answers).Contains(new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, Now));
 	}
 
 	[Test]
@@ -130,7 +131,7 @@ public class DetailsFetcherTests
 		await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer);
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
-		await Assert.That(buffer.NewDetails[Id].Answers).IsEquivalentTo([new ProviderAnswer(MediaProvider.Plex, MediaFields.None, Now)]);
+		await Assert.That(buffer.NewDetails[Id].Answers).IsEquivalentTo([new ProviderAnswer(RemoteService.Plex, MediaFields.None, Now)]);
 	}
 
 	[Test]
@@ -157,7 +158,7 @@ public class DetailsFetcherTests
 
 		await Assert
 			.That(buffer.NewDetails[Id].Answers)
-			.IsEquivalentTo([new ProviderAnswer(MediaProvider.Plex, MediaField.Tagline, Now), new ProviderAnswer(MediaProvider.Tmdb, MediaField.Tagline, Now)]);
+			.IsEquivalentTo([new ProviderAnswer(RemoteService.Plex, MediaField.Tagline, Now), new ProviderAnswer(RemoteService.Tmdb, MediaField.Tagline, Now)]);
 	}
 
 	[Test]
@@ -173,7 +174,7 @@ public class DetailsFetcherTests
 
 		await Assert.That(fetched.Identity).IsEqualTo(Identity);
 		await Assert.That(fetched.Details).IsEqualTo(Complete() with { Tagline = null });
-		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([RemoteService.Plex]);
 	}
 
 	[Test]
@@ -185,7 +186,7 @@ public class DetailsFetcherTests
 
 		await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), Everyone, buffer));
 
-		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([RemoteService.Plex]);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
@@ -198,7 +199,7 @@ public class DetailsFetcherTests
 
 		await Matched(await deps.Testee.FetchAsync(Identity, new None(), OnlyPlex, buffer));
 
-		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([RemoteService.Plex]);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
@@ -284,7 +285,7 @@ public class DetailsFetcherTests
 	public async Task FetchAsync_WhenTheEnricherIsRateLimited_SkipsItAndStoresNoAnswerForIt()
 	{
 		var deps = Dependencies.Create(
-			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Tmdb, () => Now.AddMinutes(1)), 0))
+			capacity: TestCapacity.With(remote => new RemoteLoad(Optional.When(remote is RemoteService.Tmdb, () => Now.AddMinutes(1)), 0))
 		);
 		deps.PlexAnswers(Complete() with { Tagline = null });
 		await using var buffer = deps.Buffer();
@@ -292,7 +293,7 @@ public class DetailsFetcherTests
 		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
-		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([RemoteService.Plex]);
 	}
 
 	[Test]
@@ -322,7 +323,7 @@ public class DetailsFetcherTests
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details).IsEqualTo(Complete());
-		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([MediaProvider.Tmdb]);
+		await Assert.That(buffer.NewDetails[Id].Answered).IsEquivalentTo([RemoteService.Tmdb]);
 	}
 
 	[Test]
@@ -346,12 +347,12 @@ public class DetailsFetcherTests
 	[Test]
 	public async Task FetchAsync_WhenEveryEnricherIsBlockedPastItsWait_FailsAsUnavailable()
 	{
-		var deps = Dependencies.Create(capacity: TestCapacity.With(_ => new ProviderLoad(Some.Of(Now.AddMinutes(1)), 0)));
+		var deps = Dependencies.Create(capacity: TestCapacity.With(_ => new RemoteLoad(Some.Of(Now.AddMinutes(1)), 0)));
 		await using var buffer = deps.Buffer();
 
 		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer)).IsError();
 
-		await Assert.That(error!.CausedBy<ProviderUnavailableException>()).IsSome();
+		await Assert.That(error!.CausedBy<RemoteUnavailableException>()).IsSome();
 		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
@@ -365,7 +366,7 @@ public class DetailsFetcherTests
 
 		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer)).IsError();
 
-		await Assert.That(error!.CausedBy<ProviderUnavailableException>()).IsSome();
+		await Assert.That(error!.CausedBy<RemoteUnavailableException>()).IsSome();
 	}
 
 	[Test]
@@ -378,7 +379,7 @@ public class DetailsFetcherTests
 
 		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer)).IsError();
 
-		await Assert.That(error!.CausedBy<ProviderUnavailableException>()).IsNone();
+		await Assert.That(error!.CausedBy<RemoteUnavailableException>()).IsNone();
 	}
 
 	[Test]
@@ -447,7 +448,7 @@ public class DetailsFetcherTests
 			},
 			Now.AddDays(-14),
 			Now.AddDays(-14),
-			[new ProviderAnswer(MediaProvider.Plex, MediaFields.None, Now.AddDays(-14))]
+			[new ProviderAnswer(RemoteService.Plex, MediaFields.None, Now.AddDays(-14))]
 		);
 		await using var buffer = deps.Buffer();
 
@@ -489,7 +490,7 @@ public class DetailsFetcherTests
 			.IsEquivalentTo([
 				PlexLeftTheRatings,
 				new ProviderAnswer(
-					MediaProvider.Tmdb,
+					RemoteService.Tmdb,
 					MediaFields.Rated([RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience]),
 					Now
 				),
@@ -508,7 +509,7 @@ public class DetailsFetcherTests
 		var filled = buffer.NewDetails[Id];
 		await Assert.That(filled.RefreshedAt).IsEqualTo(LastRefresh);
 		await Assert.That(filled.AskedAt).IsEqualTo(Now);
-		await Assert.That(filled.Answered).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(filled.Answered).IsEquivalentTo([RemoteService.Plex]);
 		await Assert.That(filled.Details).IsEqualTo(UnratedByPlex.Details);
 	}
 
@@ -536,7 +537,7 @@ public class DetailsFetcherTests
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Tagline).IsEqualTo("A dream within a dream.");
-		await Assert.That(buffer.NewDetails[Id].Answers.Single(answer => answer.Provider == MediaProvider.Tmdb).Unfilled.Overlaps(MediaField.Tagline)).IsTrue();
+		await Assert.That(buffer.NewDetails[Id].Answers.Single(answer => answer.Provider == RemoteService.Tmdb).Unfilled.Overlaps(MediaField.Tagline)).IsTrue();
 	}
 
 	[Test]
@@ -551,13 +552,32 @@ public class DetailsFetcherTests
 			Complete(),
 			Now.AddDays(-20),
 			Now.AddDays(-daysAgo),
-			[new ProviderAnswer(MediaProvider.Tmdb, MediaFields.None, Now.AddDays(-daysAgo))]
+			[new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, Now.AddDays(-daysAgo))]
 		);
 		await using var buffer = deps.Buffer();
 
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Tagline).IsEqualTo(tagline);
+	}
+
+	[Test]
+	public async Task FetchAsync_ForAStaleCopyAnsweredByAnEnricherNoLongerRegistered_KeepsNothingItGave()
+	{
+		var deps = Dependencies.Create();
+		deps.PlexAnswers(Complete() with { Tagline = null });
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(Complete() with { Tagline = null }));
+		var stale = new CachedDetails(
+			Complete(),
+			Now.AddDays(-20),
+			Now.AddDays(-1),
+			[new ProviderAnswer(RemoteService.Wikidata, MediaFields.None, Now.AddDays(-1))]
+		);
+		await using var buffer = deps.Buffer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, buffer));
+
+		await Assert.That(fetched.Details.Tagline).IsNull();
 	}
 
 	[Test]
@@ -573,8 +593,8 @@ public class DetailsFetcherTests
 			Now.AddDays(-20),
 			Now.AddDays(-daysAgo),
 			[
-				new ProviderAnswer(MediaProvider.Tmdb, MediaFields.None, Now.AddDays(-20)),
-				new ProviderAnswer(MediaProvider.Plex, MediaFields.None, Now.AddDays(-daysAgo)),
+				new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, Now.AddDays(-20)),
+				new ProviderAnswer(RemoteService.Plex, MediaFields.None, Now.AddDays(-daysAgo)),
 			]
 		);
 		await using var buffer = deps.Buffer();
@@ -582,7 +602,7 @@ public class DetailsFetcherTests
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Ratings).IsEqualTo(kept ? EverySource : TmdbOnly);
-		await Assert.That(buffer.NewDetails[Id].Answered.Contains(MediaProvider.Plex)).IsEqualTo(kept);
+		await Assert.That(buffer.NewDetails[Id].Answered.Contains(RemoteService.Plex)).IsEqualTo(kept);
 		await Assert.That(buffer.NewDetails[Id].RefreshedAt).IsEqualTo(Now);
 	}
 
@@ -595,7 +615,7 @@ public class DetailsFetcherTests
 			Complete(),
 			Now.AddDays(-14),
 			Now.AddDays(-14),
-			[new ProviderAnswer(MediaProvider.Tmdb, MediaFields.None, Now.AddDays(-14)), PlexLeftTheRatings]
+			[new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, Now.AddDays(-14)), PlexLeftTheRatings]
 		);
 		await using var buffer = deps.Buffer();
 
@@ -637,7 +657,7 @@ public class DetailsFetcherTests
 	{
 		var deps = Dependencies.Create(
 			search: SearchProvider.Tmdb,
-			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Plex, () => Now.AddMilliseconds(20)), 0))
+			capacity: TestCapacity.With(remote => new RemoteLoad(Optional.When(remote is RemoteService.Plex, () => Now.AddMilliseconds(20)), 0))
 		);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia(Identity.Externals, Unrated())));
 		await using var buffer = deps.Buffer();
@@ -670,7 +690,7 @@ public class DetailsFetcherTests
 		deps.Keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Error.From("no TMDB key"));
 		deps.Credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(ICredential.Mock().Object));
 
-		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([MediaProvider.Plex]);
+		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([RemoteService.Plex]);
 	}
 
 	[Test]
@@ -680,7 +700,7 @@ public class DetailsFetcherTests
 		deps.Keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(IApiKey.Mock().Object));
 		deps.Credentials.GetAsync(AuthProvider.Plex, Any()).Throws(new HttpRequestException("plex.tv is down"));
 
-		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([MediaProvider.Tmdb]);
+		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([RemoteService.Tmdb]);
 	}
 
 	private static async Task<MatchedMedia> Matched(Result<MatchedMedia> result)
@@ -689,9 +709,9 @@ public class DetailsFetcherTests
 		return matched!;
 	}
 
-	private static IProviderCapacity TmdbBlocked(Func<DateTimeOffset> until)
+	private static IRemoteCapacity TmdbBlocked(Func<DateTimeOffset> until)
 	{
-		return TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Tmdb, until), 0, EnrichWait: TimeSpan.FromSeconds(1)));
+		return TestCapacity.With(remote => new RemoteLoad(Optional.When(remote is RemoteService.Tmdb, until), 0, EnrichWait: TimeSpan.FromSeconds(1)));
 	}
 
 	private static Result<FoundMedia> Answer(MediaDetails details)
@@ -726,7 +746,7 @@ public class DetailsFetcherTests
 		DetailsFetcher Testee
 	)
 	{
-		public static Dependencies Create(MediaFields? tmdbFills = null, IProviderCapacity? capacity = null, SearchProvider search = SearchProvider.Plex)
+		public static Dependencies Create(MediaFields? tmdbFills = null, IRemoteCapacity? capacity = null, SearchProvider search = SearchProvider.Plex)
 		{
 			var mediaRepository = IMediaRepository.Mock();
 			mediaRepository.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
@@ -754,7 +774,7 @@ public class DetailsFetcherTests
 				);
 
 			var testee = new DetailsFetcher(
-				new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>().Register(MediaProvider.Plex, plex.Object).Register(MediaProvider.Tmdb, tmdb.Object),
+				new KeyedServiceSet<RemoteService, IDetailsEnricher>([new(RemoteService.Plex, plex.Object), new(RemoteService.Tmdb, tmdb.Object)]),
 				config.Object,
 				capacity ?? TestCapacity.Open(),
 				keys.Object,

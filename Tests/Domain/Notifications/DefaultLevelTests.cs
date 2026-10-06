@@ -54,7 +54,7 @@ public class DefaultLevelTests
 	[Test]
 	public async Task DefaultLevel_OfARateLimit_IsWarningBecauseTheRunStillRecovers()
 	{
-		var limited = new ProviderRateLimitedNotification(Owner, Now, MediaProvider.Tmdb, TimeSpan.FromSeconds(30));
+		var limited = new ProviderRateLimitedNotification(Owner, Now, RemoteService.Tmdb, TimeSpan.FromSeconds(30));
 
 		await Assert.That(limited.DefaultLevel).IsEqualTo(NotificationLevel.Warning);
 	}

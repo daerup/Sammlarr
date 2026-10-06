@@ -50,7 +50,7 @@ public class PlexIdConverterResilienceTests
 		var stub = new PlexStub().Returns(first).Returns(second).RateLimits(first).RateLimits(second);
 		var testee = new PlexIdConverter(stub.CreateApi(), PlexStub.NoSearchCache());
 
-		await Assert.That(async () => await testee.LookUpAsync(testee.RequestByHints(Hints, PlexCandidate.Create().TmdbId))).Throws<ProviderUnavailableException>();
+		await Assert.That(async () => await testee.LookUpAsync(testee.RequestByHints(Hints, PlexCandidate.Create().TmdbId))).Throws<RemoteUnavailableException>();
 	}
 
 	[Test]

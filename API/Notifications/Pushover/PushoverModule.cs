@@ -11,7 +11,7 @@ internal sealed class PushoverModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddHttpClient<PushoverClient>(Configure).AddProviderHttp<PushoverOptions>();
+		services.AddHttpClient<PushoverClient>(Configure).AddClientHttp<PushoverOptions>();
 		services.AddKeyedScoped<INotificationChannel, PushoverChannel>(NotificationChannel.Pushover);
 	}
 

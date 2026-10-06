@@ -37,7 +37,7 @@ internal class PlexClient(HttpClient client, ICredentialService credentials, ICu
 		}
 		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
 		{
-			throw new ProviderUnavailableException(MediaProvider.Plex, ex);
+			throw new RemoteUnavailableException(RemoteService.Plex, ex);
 		}
 	}
 }

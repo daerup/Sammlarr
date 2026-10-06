@@ -15,7 +15,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	private IApiKeyService ApiKeys => host.Resolve<IApiKeyService>();
 	private IApiKeyFactory ApiKeyFactory => host.Resolve<IApiKeyFactory>();
-	private IDetailsEnricher Tmdb => host.ResolveKeyed<IDetailsEnricher>(MediaProvider.Tmdb);
+	private IDetailsEnricher Tmdb => host.Enricher(RemoteService.Tmdb);
 	private IMediaSink PlexSink => host.ResolveKeyed<IMediaSink>(SinkKind.Plex);
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();

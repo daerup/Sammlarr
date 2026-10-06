@@ -11,26 +11,26 @@ namespace Core.Providers;
 
 internal sealed class ProviderRateLimitReporter(IServiceScopeFactory scopeFactory, IDateTimeProvider dateTimeProvider) : IProviderRateLimitReporter
 {
-	private readonly ConcurrentDictionary<MediaProvider, DateTimeOffset> _limitedUntil = new();
+	private readonly ConcurrentDictionary<RemoteService, DateTimeOffset> _limitedUntil = new();
 
-	public async Task ReportAsync(MediaProvider provider, TimeSpan retryAfter, UserId triggeredBy, CancellationToken cancellationToken = default)
+	public async Task ReportAsync(RemoteService remote, TimeSpan retryAfter, UserId triggeredBy, CancellationToken cancellationToken = default)
 	{
 		var now = dateTimeProvider.Now;
-		if (!StartsBurst(provider, now, now + retryAfter))
+		if (!StartsBurst(remote, now, now + retryAfter))
 		{
 			return;
 		}
 
 		await using var scope = scopeFactory.CreateAsyncScope();
 		var publisher = scope.ServiceProvider.GetRequiredService<IMessagePublisher>();
-		await publisher.PublishAsync(new ProviderRateLimitedNotification(triggeredBy, now, provider, retryAfter), cancellationToken);
+		await publisher.PublishAsync(new ProviderRateLimitedNotification(triggeredBy, now, remote, retryAfter), cancellationToken);
 	}
 
-	private bool StartsBurst(MediaProvider provider, DateTimeOffset now, DateTimeOffset until)
+	private bool StartsBurst(RemoteService remote, DateTimeOffset now, DateTimeOffset until)
 	{
 		var starting = true;
 		_limitedUntil.AddOrUpdate(
-			provider,
+			remote,
 			until,
 			(_, current) =>
 			{

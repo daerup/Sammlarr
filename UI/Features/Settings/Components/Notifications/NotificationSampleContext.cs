@@ -40,7 +40,7 @@ internal static class NotificationSampleContext
 			NotificationEventType.WantlistSyncFailed => new WantlistSyncFailedNotification(SampleUser, SampleMoment, "Provider timed out"),
 			NotificationEventType.FeedRunCompleted => new FeedRunCompletedNotification(SampleUser, SampleMoment, SampleFeed, 2, 1),
 			NotificationEventType.FeedRunFailed => new FeedRunFailedNotification(SampleUser, SampleMoment, SampleFeed, "Provider timed out"),
-			NotificationEventType.ProviderRateLimited => new ProviderRateLimitedNotification(SampleUser, SampleMoment, MediaProvider.Tmdb, TimeSpan.FromSeconds(30)),
+			NotificationEventType.ProviderRateLimited => new ProviderRateLimitedNotification(SampleUser, SampleMoment, RemoteService.Tmdb, TimeSpan.FromSeconds(30)),
 			NotificationEventType.TestPing => new TestPingNotification(SampleUser, SampleMoment, Guid.Empty),
 		};
 
@@ -56,7 +56,7 @@ internal static class NotificationSampleContext
 				Removed = 1,
 			},
 			NotificationEventType.FeedRunFailed => new NotificationData { Feed = Feed, Reason = "Provider timed out" },
-			NotificationEventType.ProviderRateLimited => new NotificationData { Provider = MediaProvider.Tmdb, RetryAfter = TimeSpan.FromSeconds(30) },
+			NotificationEventType.ProviderRateLimited => new NotificationData { Provider = RemoteService.Tmdb, RetryAfter = TimeSpan.FromSeconds(30) },
 			NotificationEventType.TestPing => new NotificationData(),
 		};
 

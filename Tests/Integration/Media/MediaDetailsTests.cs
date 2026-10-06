@@ -90,7 +90,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "", genres: ["Drama"])
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 11, 0), genres: [], answeredBy: [MediaProvider.Tmdb]);
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 11, 0), genres: [], answeredBy: [RemoteService.Tmdb]);
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
@@ -105,7 +105,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "", genres: ["Drama"])
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 9, 0), genres: [], answeredBy: [MediaProvider.Tmdb]);
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 9, 0), genres: [], answeredBy: [RemoteService.Tmdb]);
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 

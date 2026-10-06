@@ -7,9 +7,9 @@ internal static class HttpResponseExtensions
 {
 	extension(HttpStatusCode status)
 	{
-		public Error Unanswered(MediaProvider provider, string reason)
+		public Error Unanswered(RemoteService remote, string reason)
 		{
-			return IsTransient(status) ? Error.From(new ProviderUnavailableException(provider)) : Error.From(reason);
+			return IsTransient(status) ? Error.From(new RemoteUnavailableException(remote)) : Error.From(reason);
 		}
 	}
 

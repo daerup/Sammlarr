@@ -2,12 +2,12 @@ using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Settings;
+using Core.DI;
 using Core.Media;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
-using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
 namespace Core.Tests.Media;
@@ -167,12 +167,10 @@ public class MediaServiceOrderingTests
 				}
 			);
 
-		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>()
-			.Register(MediaProvider.Plex, enricher.Object)
-			.Register(MediaProvider.Tmdb, enricher.Object);
+		var enrichers = new KeyedServiceSet<RemoteService, IDetailsEnricher>([new(RemoteService.Plex, enricher.Object), new(RemoteService.Tmdb, enricher.Object)]);
 
 		var detailsFetcher = new DetailsFetcher(
-			enricherIndex,
+			enrichers,
 			configRepository.Object,
 			TestCapacity.Open(),
 			IApiKeyService.Mock().Object,

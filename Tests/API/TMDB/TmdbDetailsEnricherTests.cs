@@ -47,7 +47,7 @@ public class TmdbDetailsEnricherTests
 
 		var result = await CreateTestee(handler).LookUpAsync(Id);
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<ProviderUnavailableException>()).IsSome());
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsSome());
 	}
 
 	[Test]

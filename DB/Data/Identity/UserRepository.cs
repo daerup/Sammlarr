@@ -118,8 +118,8 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 				wanted.GetValueOrDefault(owner),
 				blocked.GetValueOrDefault(owner),
 				[
-					.. credentials.Where(credential => credential.Owner == owner).Select(credential => credential.Provider.Provider()).WhereSome(),
-					.. keys.Where(key => key.Owner == owner).Select(key => key.Provider.AsMediaProvider()),
+					.. credentials.Where(credential => credential.Owner == owner).SelectMany(credential => credential.Provider.Service.Remotes),
+					.. keys.Where(key => key.Owner == owner).Select(key => key.Provider.Remote),
 				]
 			)
 		);

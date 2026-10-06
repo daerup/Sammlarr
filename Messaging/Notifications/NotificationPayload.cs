@@ -20,7 +20,7 @@ internal sealed record NotificationPayload(
 	int? Added,
 	int? Removed,
 	string? Reason,
-	MediaProvider? Provider,
+	RemoteService? Provider,
 	TimeSpan? RetryAfter
 )
 {

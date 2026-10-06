@@ -46,7 +46,7 @@ public class FluidTemplateRendererTests
 	[Test]
 	public async Task Render_ForARetryDelay_EmitsTheTimeSpan()
 	{
-		var context = Context(new NotificationData { Provider = MediaProvider.Tmdb, RetryAfter = TimeSpan.FromSeconds(30) });
+		var context = Context(new NotificationData { Provider = RemoteService.Tmdb, RetryAfter = TimeSpan.FromSeconds(30) });
 		var template = NotificationTemplate.None with { Message = Some.Of("{{ data.provider }} waits {{ data.retryAfter }}") };
 
 		var result = _testee.Render(template, context);

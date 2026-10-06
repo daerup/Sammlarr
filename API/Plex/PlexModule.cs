@@ -1,11 +1,6 @@
 using System.Net.Http.Headers;
 using API.Http;
-using Contracts.Auth;
-using Contracts.Media;
 using Contracts.Media.Artwork;
-using Contracts.Media.Conversions;
-using Contracts.Media.Search;
-using Contracts.Wantlist;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -17,18 +12,17 @@ internal class PlexModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddScoped<PlexApi>();
-		// Forwarded so search and enrichment share one PlexApi (and its _byRatingKey cache) per scope.
-		services.AddKeyedScoped<IMediaSearchProvider>(SearchProvider.Plex, (provider, _) => provider.GetRequiredService<PlexApi>());
-		services.AddKeyedScoped<IDetailsEnricher>(MediaProvider.Plex, (provider, _) => provider.GetRequiredService<PlexApi>());
-		services.AddKeyedScoped<IOAuthProvider, PlexOAuthProvider>(AuthProvider.Plex);
-		services.AddKeyedScoped<IMediaSink, PlexSink>(SinkKind.Plex);
-		services.AddScoped<IExternalIdConverter, PlexIdConverter>();
-
 		services.AddSingleton<PlexUrls>();
 		services.AddKeyedSingleton<IArtworkResizer, PlexArtwork>(ArtworkProvider.Plex);
-		services.AddHttpClient<PlexClient>(ConfigurePlexClient).AddProviderHttp<PlexOptions>(MediaProvider.Plex);
-		services.AddHttpClient(PlexClient.Unauthenticated, ConfigurePlexClient).AddProviderHttp<PlexOptions>(MediaProvider.Plex);
+		services
+			.ForRemote<PlexOptions>(RemoteService.Plex)
+			.Client<PlexClient>(ConfigurePlexClient)
+			.Client(PlexClient.Unauthenticated, ConfigurePlexClient)
+			.SignIn<PlexOAuthProvider>(AuthProvider.Plex)
+			.Search<PlexApi>(SearchProvider.Plex)
+			.Sink<PlexSink>(SinkKind.Plex)
+			.Converter<PlexIdConverter>()
+			.Enricher<PlexApi>();
 	}
 
 	private static void ConfigurePlexClient(IServiceProvider sp, HttpClient client)

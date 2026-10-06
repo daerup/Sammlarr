@@ -1,3 +1,4 @@
+using Contracts.DI;
 using Contracts.Media.Conversions;
 using Contracts.Providers;
 using Core.Media;
@@ -10,7 +11,7 @@ namespace Integration.Tests.Media;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private IEnumerable<IExternalIdConverter> Converters => host.Resolve<IEnumerable<IExternalIdConverter>>();
+	private IEnumerable<Keyed<RemoteService, IExternalIdConverter>> Converters => host.Resolve<IEnumerable<Keyed<RemoteService, IExternalIdConverter>>>();
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
@@ -39,7 +40,7 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 					"Tmdb Imdb>hints (1)",
 					"Tmdb Tvdb>Tmdb (1)",
 					"Tmdb Tvdb>hints (1)",
-					"RottenTomatoes Imdb>RottenTomatoes (1)",
+					"Wikidata Imdb>RottenTomatoes (1)",
 				],
 				CollectionOrdering.Matching
 			);
@@ -49,7 +50,7 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task Plan_ForAnImdbIdWithHints_SearchesFirstThenThroughTmdbsTitle()
 	{
 		var hops = IdLookupPlanner.Derive(Converters);
-		var capacity = host.Resolve<IProviderCapacity>();
+		var capacity = host.Resolve<IRemoteCapacity>();
 
 		var plan = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Imdb }, true, MediaProvider.Plex, hops, capacity, DateTimeOffset.UnixEpoch);
 
@@ -69,6 +70,6 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 			IdToHints hints => (hints.From.ToString(), "hints"),
 			HintsToId search => ("hints", search.To.ToString()),
 		};
-		return $"{hop.Converter.Provider} {from}>{to} ({hop.Cost})";
+		return $"{hop.Remote} {from}>{to} ({hop.Cost})";
 	}
 }

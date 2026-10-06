@@ -13,7 +13,7 @@ internal sealed class WebhookModule : IServiceModule
 	{
 		services
 			.AddHttpClient<WebhookClient>()
-			.AddProviderHttp<WebhookOptions>()
+			.AddClientHttp<WebhookOptions>()
 			.ConfigurePrimaryHttpMessageHandler(provider =>
 			{
 				var privateHosts = provider.GetRequiredService<WebhookOptions>().PrivateHosts;

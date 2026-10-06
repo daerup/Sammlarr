@@ -11,32 +11,22 @@ using Microsoft.Extensions.Logging;
 namespace Core.Media;
 
 internal sealed class DetailsFetcher(
-	IKeyedServiceIndex<MediaProvider, IDetailsEnricher> enricherIndex,
+	IKeyedServiceSet<RemoteService, IDetailsEnricher> enrichers,
 	IProviderConfigService providerConfig,
-	IProviderCapacity capacity,
+	IRemoteCapacity capacity,
 	IApiKeyService apiKeys,
 	ICredentialService credentials,
 	IDateTimeProvider clock,
 	ILogger<DetailsFetcher> logger
 )
 {
-	private static readonly IReadOnlyList<MediaProvider> Enrichers = [.. Enum.GetValues<EnricherProvider>().Select(enricher => enricher.AsMediaProvider())];
-
-	public async Task<IReadOnlySet<MediaProvider>> ConnectedAsync(CancellationToken cancellationToken)
+	public async Task<IReadOnlySet<RemoteService>> ConnectedAsync(CancellationToken cancellationToken)
 	{
-		var keys = Enum.GetValues<ApiKeyProvider>()
-			.Where(provider => Enrichers.Contains(provider.AsMediaProvider()))
-			.Select(provider => CheckAsync(provider.AsMediaProvider(), () => apiKeys.GetAsync(provider, cancellationToken), cancellationToken));
-		var signIns = Enum.GetValues<AuthProvider>()
-			.Select(signIn => signIn.Provider().When(Enrichers.Contains).Map(provider => (SignIn: signIn, Provider: provider)))
-			.WhereSome()
-			.Select(pair => CheckAsync(pair.Provider, () => credentials.GetAsync(pair.SignIn, cancellationToken), cancellationToken));
-		var checks = await Task.WhenAll(keys.Concat(signIns));
-		var disconnected = checks.Where(check => !check.Ready).Select(check => check.Provider).ToHashSet();
-		return Enrichers.Where(provider => !disconnected.Contains(provider)).ToHashSet();
+		var checks = await Task.WhenAll(enrichers.Keys.Select(remote => ConnectedAsync(remote, cancellationToken)));
+		return checks.Where(check => check.Ready).Select(check => check.Remote).ToHashSet();
 	}
 
-	public Optional<CachedDetails> FindReusable(MediaIdentity identity, Optional<CachedDetails> cached, IReadOnlySet<MediaProvider> connected)
+	public Optional<CachedDetails> FindReusable(MediaIdentity identity, Optional<CachedDetails> cached, IReadOnlySet<RemoteService> connected)
 	{
 		return cached.When(details => !NeedsRefetch(identity, details, connected));
 	}
@@ -44,7 +34,7 @@ internal sealed class DetailsFetcher(
 	public async Task<Result<MatchedMedia>> FetchAsync(
 		MediaIdentity identity,
 		Optional<CachedDetails> stored,
-		IReadOnlySet<MediaProvider> connected,
+		IReadOnlySet<RemoteService> connected,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken = default
 	)
@@ -55,7 +45,7 @@ internal sealed class DetailsFetcher(
 		var (enriched, answers, unavailable) = await EnrichAsync(identity, reason, Backup(reason, identity.Type, now), connected, preferred, cancellationToken);
 		if (answers.Count == 0 && reason is not Gaps)
 		{
-			return unavailable.Match(provider => Error.From(new ProviderUnavailableException(provider)), () => Error.From("the details could not be fetched"));
+			return unavailable.Match(remote => Error.From(new RemoteUnavailableException(remote)), () => Error.From("the details could not be fetched"));
 		}
 
 		var askedAt = clock.Now;
@@ -69,7 +59,7 @@ internal sealed class DetailsFetcher(
 		return stored.IsStale(now) ? new Stale(stored) : new Gaps(stored);
 	}
 
-	private bool NeedsRefetch(MediaIdentity identity, CachedDetails cached, IReadOnlySet<MediaProvider> connected)
+	private bool NeedsRefetch(MediaIdentity identity, CachedDetails cached, IReadOnlySet<RemoteService> connected)
 	{
 		var leftToAsk = EnrichersLeftToAsk(identity, cached.Answered, connected);
 		return EnricherChoice.NeedsRefetch(cached, leftToAsk, clock.Now);
@@ -89,10 +79,15 @@ internal sealed class DetailsFetcher(
 	{
 		return stored
 			.Answers.Where(answer => now - answer.AnsweredAt < CachedDetails.StaleAfter)
-			.Aggregate(MediaFields.None, (given, answer) => given | enricherIndex[answer.Provider].Fills.Except(answer.Unfilled));
+			.Aggregate(MediaFields.None, (given, answer) => given | Given(answer));
 	}
 
-	private static IReadOnlySet<MediaProvider> AlreadyAnswered(FetchReason reason)
+	private MediaFields Given(ProviderAnswer answer)
+	{
+		return enrichers.Find(answer.Provider).Map(enricher => enricher.Fills.Except(answer.Unfilled)).GetValueOr(MediaFields.None);
+	}
+
+	private static IReadOnlySet<RemoteService> AlreadyAnswered(FetchReason reason)
 	{
 		return reason switch
 		{
@@ -121,18 +116,18 @@ internal sealed class DetailsFetcher(
 		return [.. fresh.UnionBy(previous, answer => answer.Provider)];
 	}
 
-	private async Task<Optional<MediaProvider>> PreferredAsync(CancellationToken cancellationToken)
+	private async Task<IReadOnlySet<RemoteService>> PreferredAsync(CancellationToken cancellationToken)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
-		return config.SearchProvider.Provider();
+		return config.SearchProvider.Service.Remotes;
 	}
 
-	private async Task<(MatchedMedia Enriched, List<ProviderAnswer> Answers, Optional<MediaProvider> Unavailable)> EnrichAsync(
+	private async Task<(MatchedMedia Enriched, List<ProviderAnswer> Answers, Optional<RemoteService> Unavailable)> EnrichAsync(
 		MediaIdentity identity,
 		FetchReason reason,
 		MediaDetails backup,
-		IReadOnlySet<MediaProvider> connected,
-		Optional<MediaProvider> preferred,
+		IReadOnlySet<RemoteService> connected,
+		IReadOnlySet<RemoteService> preferred,
 		CancellationToken cancellationToken
 	)
 	{
@@ -142,8 +137,8 @@ internal sealed class DetailsFetcher(
 		var current = Layered(reason, fresh, backup, answered: false);
 		List<ProviderAnswer> answers = [];
 		var asked = AlreadyAnswered(reason).ToHashSet();
-		var waited = new HashSet<MediaProvider>();
-		Optional<MediaProvider> unavailable = new None();
+		var waited = new HashSet<RemoteService>();
+		Optional<RemoteService> unavailable = new None();
 		while (current.Missing is var missing && !missing.IsEmpty)
 		{
 			var leftToAsk = EnrichersLeftToAsk(known, asked, connected);
@@ -151,7 +146,7 @@ internal sealed class DetailsFetcher(
 			{
 				if (await WaitForBlockedAsync(missing, leftToAsk, waited, now, cancellationToken) is not Some<DateTimeOffset>(var freeAt))
 				{
-					unavailable = unavailable.Or(() => EnricherChoice.Blocked(missing, leftToAsk, now).Map(blocked => blocked.Provider));
+					unavailable = unavailable.Or(() => EnricherChoice.Blocked(missing, leftToAsk, now).Map(blocked => blocked.Remote));
 					break;
 				}
 
@@ -159,13 +154,13 @@ internal sealed class DetailsFetcher(
 				continue;
 			}
 
-			asked.Add(next.Provider);
+			asked.Add(next.Remote);
 			var answer = await AskAsync(next, known, cancellationToken);
-			answer.ApplyError(error => unavailable = unavailable.Or(() => error.CausedBy<ProviderUnavailableException>().Map(cause => cause.Provider)));
+			answer.ApplyError(error => unavailable = unavailable.Or(() => error.CausedBy<RemoteUnavailableException>().Map(cause => cause.Remote)));
 			var fitting = answer.ToOptional().When(found => found.Fits(backup.Type));
 			fitting.Apply(found => known = known with { Externals = known.Externals + found.Externals });
 			fitting.Apply(found => fresh = fresh.FillFrom(found.Details));
-			fitting.Apply(found => answers.Add(ProviderAnswer.After(next.Provider, next.Fills, found.Details, now)));
+			fitting.Apply(found => answers.Add(ProviderAnswer.After(next.Remote, next.Fills, found.Details, now)));
 			current = Layered(reason, fresh, backup, answered: answers.Count > 0);
 		}
 
@@ -180,13 +175,13 @@ internal sealed class DetailsFetcher(
 	private async Task<Optional<DateTimeOffset>> WaitForBlockedAsync(
 		MediaFields missing,
 		IEnumerable<EnricherCandidate> leftToAsk,
-		HashSet<MediaProvider> waited,
+		HashSet<RemoteService> waited,
 		DateTimeOffset now,
 		CancellationToken cancellationToken
 	)
 	{
 		var blocked = EnricherChoice.WorthWaitingFor(missing, leftToAsk, waited, now);
-		blocked.Apply(candidate => waited.Add(candidate.Provider));
+		blocked.Apply(candidate => waited.Add(candidate.Remote));
 		var freeAt = blocked.Map(candidate => candidate.Load.FreeAt(now));
 		await freeAt.Apply(until => clock.WaitUntilAsync(until, cancellationToken));
 		return freeAt;
@@ -196,17 +191,30 @@ internal sealed class DetailsFetcher(
 	{
 		try
 		{
-			return await enricherIndex[candidate.Provider].LookUpAsync(candidate.Id, cancellationToken);
+			return await enrichers
+				.Find(candidate.Remote)
+				.ToResult($"{candidate.Remote} fills no details")
+				.Map(enricher => enricher.LookUpAsync(candidate.Id, cancellationToken));
 		}
 		catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
 		{
-			logger.LogWarning(exception, "{Provider} could not fill the details of {MediaId}", candidate.Provider, identity.Id);
-			return Error.From(new ProviderUnavailableException(candidate.Provider, exception));
+			logger.LogWarning(exception, "{Remote} could not fill the details of {MediaId}", candidate.Remote, identity.Id);
+			return Error.From(new RemoteUnavailableException(candidate.Remote, exception));
 		}
 	}
 
-	private async Task<(MediaProvider Provider, bool Ready)> CheckAsync<TSecret>(
-		MediaProvider provider,
+	private Task<(RemoteService Remote, bool Ready)> ConnectedAsync(RemoteService remote, CancellationToken cancellationToken)
+	{
+		return remote.Access switch
+		{
+			UserKey(var slot) => CheckAsync(remote, () => apiKeys.GetAsync(slot, cancellationToken), cancellationToken),
+			UserSignIn(var signIn) => CheckAsync(remote, () => credentials.GetAsync(signIn, cancellationToken), cancellationToken),
+			Open or AppInstance => Task.FromResult((remote, true)),
+		};
+	}
+
+	private async Task<(RemoteService Remote, bool Ready)> CheckAsync<TSecret>(
+		RemoteService remote,
 		Func<ValueTask<Result<TSecret>>> load,
 		CancellationToken cancellationToken
 	)
@@ -214,33 +222,32 @@ internal sealed class DetailsFetcher(
 	{
 		try
 		{
-			return (provider, await load().IsSuccess());
+			return (remote, await load().IsSuccess());
 		}
 		catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
 		{
-			logger.LogWarning(exception, "The {Provider} secret could not be read, so it fills no details", provider);
-			return (provider, false);
+			logger.LogWarning(exception, "The {Remote} secret could not be read, so it fills no details", remote);
+			return (remote, false);
 		}
 	}
 
-	private List<EnricherCandidate> EnrichersLeftToAsk(MediaIdentity identity, IReadOnlySet<MediaProvider> asked, IReadOnlySet<MediaProvider> connected)
+	private List<EnricherCandidate> EnrichersLeftToAsk(MediaIdentity identity, IReadOnlySet<RemoteService> asked, IReadOnlySet<RemoteService> connected)
 	{
 		return
 		[
-			.. Enrichers
-				.Where(provider => !asked.Contains(provider) && connected.Contains(provider))
-				.Select(provider => AcceptedId(identity, provider).Map(id => CandidateFor(provider, id)))
+			.. enrichers
+				.Keys.Where(remote => !asked.Contains(remote) && connected.Contains(remote))
+				.Select(remote => enrichers.Find(remote).Map(enricher => Candidate(identity, remote, enricher)))
 				.WhereSome(),
 		];
 	}
 
-	private Optional<IExternalMediaId> AcceptedId(MediaIdentity identity, MediaProvider provider)
+	private Optional<EnricherCandidate> Candidate(MediaIdentity identity, RemoteService remote, IDetailsEnricher enricher)
 	{
-		return enricherIndex[provider].Accepts.Select(source => identity.Externals.OfProvider(source)).WhereSome().FirstOrNone();
-	}
-
-	private EnricherCandidate CandidateFor(MediaProvider provider, IExternalMediaId id)
-	{
-		return new EnricherCandidate(provider, id, enricherIndex[provider].Fills, capacity.Of(provider));
+		return enricher
+			.Accepts.Select(source => identity.Externals.OfProvider(source))
+			.WhereSome()
+			.FirstOrNone()
+			.Map(id => new EnricherCandidate(remote, id, enricher.Fills, capacity.Of(remote)));
 	}
 }

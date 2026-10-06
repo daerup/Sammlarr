@@ -1,3 +1,4 @@
+using Contracts.DI;
 using Contracts.Media.Conversions;
 using Contracts.Providers;
 using Domain.Media.Conversions;
@@ -11,9 +12,9 @@ internal static class IdLookupPlanner
 {
 	private const int MaxHops = 3;
 
-	internal static IReadOnlyList<Hop> Derive(IEnumerable<IExternalIdConverter> converters)
+	internal static IReadOnlyList<Hop> Derive(IEnumerable<Keyed<RemoteService, IExternalIdConverter>> converters)
 	{
-		return [.. converters.SelectMany(converter => converter.Lookups.SelectMany(lookup => HopsOf(converter, lookup)))];
+		return [.. converters.SelectMany(converter => converter.Capability.Lookups.SelectMany(lookup => HopsOf(converter, lookup)))];
 	}
 
 	internal static IdLookupPlan Plan(
@@ -21,7 +22,7 @@ internal static class IdLookupPlanner
 		bool hasHints,
 		MediaProvider target,
 		IReadOnlyList<Hop> hops,
-		IProviderCapacity capacity,
+		IRemoteCapacity capacity,
 		DateTimeOffset now
 	)
 	{
@@ -34,7 +35,7 @@ internal static class IdLookupPlanner
 		return new IdLookupPlan(Ordered(paths, capacity, now));
 	}
 
-	private static IReadOnlyList<IReadOnlyList<Hop>> Ordered(IReadOnlyList<IReadOnlyList<Hop>> paths, IProviderCapacity capacity, DateTimeOffset now)
+	private static IReadOnlyList<IReadOnlyList<Hop>> Ordered(IReadOnlyList<IReadOnlyList<Hop>> paths, IRemoteCapacity capacity, DateTimeOffset now)
 	{
 		var byOpen = paths.ToLookup(path => IsOpen(path, capacity, now));
 		var open = byOpen[true].OrderBy(path => Weight(path, capacity)).ThenBy(path => path.Count);
@@ -42,42 +43,42 @@ internal static class IdLookupPlanner
 		return [.. open, .. blocked];
 	}
 
-	private static bool IsOpen(IReadOnlyList<Hop> path, IProviderCapacity capacity, DateTimeOffset now)
+	private static bool IsOpen(IReadOnlyList<Hop> path, IRemoteCapacity capacity, DateTimeOffset now)
 	{
-		return path.All(hop => capacity.Of(hop.Converter.Provider).IsOpen(now));
+		return path.All(hop => capacity.Of(hop.Remote).IsOpen(now));
 	}
 
-	private static DateTimeOffset FreeAt(IReadOnlyList<Hop> path, IProviderCapacity capacity)
+	private static DateTimeOffset FreeAt(IReadOnlyList<Hop> path, IRemoteCapacity capacity)
 	{
-		return path.Max(hop => capacity.Of(hop.Converter.Provider).BlockedUntil.GetValueOr(DateTimeOffset.MinValue));
+		return path.Max(hop => capacity.Of(hop.Remote).BlockedUntil.GetValueOr(DateTimeOffset.MinValue));
 	}
 
-	private static IEnumerable<Hop> HopsOf(IExternalIdConverter converter, IdLookup lookup)
+	private static IEnumerable<Hop> HopsOf(Keyed<RemoteService, IExternalIdConverter> converter, IdLookup lookup)
 	{
 		return lookup switch
 		{
 			ById byId => IdHops(converter, byId),
-			ByHints byHints => byHints.Yields.Order().Select(to => (Hop)new HintsToId(converter, byHints, to)),
+			ByHints byHints => byHints.Yields.Order().Select(to => (Hop)new HintsToId(converter.Key, converter.Capability, byHints, to)),
 		};
 	}
 
-	private static IEnumerable<Hop> IdHops(IExternalIdConverter converter, ById byId)
+	private static IEnumerable<Hop> IdHops(Keyed<RemoteService, IExternalIdConverter> converter, ById byId)
 	{
 		foreach (var from in byId.Accepts.Order())
 		{
-			foreach (var to in byId.Yields.Order().Where(to => to != from || to == converter.Provider))
+			foreach (var to in byId.Yields.Order().Where(to => to != from || Owns(converter.Key, to)))
 			{
-				yield return new IdToId(converter, byId, from, to);
+				yield return new IdToId(converter.Key, converter.Capability, byId, from, to);
 			}
 
 			if (byId.GivesHints)
 			{
-				yield return new IdToHints(converter, byId, from);
+				yield return new IdToHints(converter.Key, converter.Capability, byId, from);
 			}
 		}
 	}
 
-	private static IdLookupPlan PlanPresent(MediaProvider target, IReadOnlyList<Hop> hops, IProviderCapacity capacity, DateTimeOffset now)
+	private static IdLookupPlan PlanPresent(MediaProvider target, IReadOnlyList<Hop> hops, IRemoteCapacity capacity, DateTimeOffset now)
 	{
 		IReadOnlyList<IReadOnlyList<Hop>> self =
 		[
@@ -96,7 +97,7 @@ internal static class IdLookupPlanner
 		To(hop).Apply(provider => next.Add(provider));
 		if (hop is HintsToId)
 		{
-			next.Add(hop.Converter.Provider);
+			hop.Remote.OwnIds.Apply(own => next.Add(own));
 		}
 
 		return next;
@@ -107,7 +108,7 @@ internal static class IdLookupPlanner
 		var first = path.Count == 0;
 		return hop switch
 		{
-			HintsToId search => !reached.Contains(search.Converter.Provider) && (first ? hasHints : path[^1] is IdToHints),
+			HintsToId search => search.Remote.OwnIds.When(reached.Contains).IsNone() && (first ? hasHints : path[^1] is IdToHints),
 			IdToId id => first ? reached.Contains(id.From) : Follows(hop, id.From, path[^1]),
 			IdToHints hints => first ? reached.Contains(hints.From) : Follows(hop, hints.From, path[^1]),
 		};
@@ -118,7 +119,7 @@ internal static class IdLookupPlanner
 		return previous switch
 		{
 			IdToId id => id.To == from,
-			HintsToId search => search.To == from && search.Converter.Provider != hop.Converter.Provider,
+			HintsToId search => search.To == from && search.Remote != hop.Remote,
 			IdToHints => false,
 		};
 	}
@@ -133,9 +134,11 @@ internal static class IdLookupPlanner
 		};
 	}
 
-	private static double Weight(IReadOnlyList<Hop> path, IProviderCapacity capacity)
+	private static bool Owns(RemoteService remote, MediaProvider provider) => remote.OwnIds.When(own => own == provider).IsSome();
+
+	private static double Weight(IReadOnlyList<Hop> path, IRemoteCapacity capacity)
 	{
-		return path.Sum(hop => hop.Cost * (1 + capacity.Of(hop.Converter.Provider).Busy));
+		return path.Sum(hop => hop.Cost * (1 + capacity.Of(hop.Remote).Busy));
 	}
 
 	private sealed record PathSearch(bool HasHints, MediaProvider Target, IReadOnlyList<Hop> Hops)

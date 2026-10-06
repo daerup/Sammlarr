@@ -49,7 +49,7 @@ public class PlexApiTests
 	{
 		var testee = CreateFailingPlexApi(status);
 
-		await Assert.That(async () => await testee.SearchAsync("anything", [MediaType.Movie])).Throws<ProviderUnavailableException>();
+		await Assert.That(async () => await testee.SearchAsync("anything", [MediaType.Movie])).Throws<RemoteUnavailableException>();
 	}
 
 	[Test]
@@ -65,7 +65,7 @@ public class PlexApiTests
 	{
 		var testee = CreateFailingPlexApi(HttpStatusCode.TooManyRequests);
 
-		await Assert.That(async () => await testee.ByIdAsync(PlexId.From("plex-1", MediaType.Movie))).Throws<ProviderUnavailableException>();
+		await Assert.That(async () => await testee.ByIdAsync(PlexId.From("plex-1", MediaType.Movie))).Throws<RemoteUnavailableException>();
 	}
 
 	[Test]
@@ -85,7 +85,7 @@ public class PlexApiTests
 		handler.OnAnyRequest().RespondWith(new HttpResponseMessage(HttpStatusCode.TooManyRequests)).Then().RespondWithJson(BuildEmptyByIdPayload());
 		var testee = BuildPlexApi(handler.CreateClient(PlexBaseUrl));
 		var id = PlexId.From("plex-1", MediaType.Movie);
-		await Assert.That(async () => await testee.ByIdAsync(id)).Throws<ProviderUnavailableException>();
+		await Assert.That(async () => await testee.ByIdAsync(id)).Throws<RemoteUnavailableException>();
 
 		var retried = await testee.ByIdAsync(id);
 

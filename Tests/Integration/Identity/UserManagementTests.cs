@@ -125,7 +125,7 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(holdings.Feeds).IsEqualTo(0);
 		await Assert.That(holdings.Wanted).IsEqualTo(1);
 		await Assert.That(holdings.Blocklisted).IsEqualTo(1);
-		await Assert.That(holdings.Keys).Contains(MediaProvider.Tmdb);
+		await Assert.That(holdings.Keys).Contains(RemoteService.Tmdb);
 	}
 
 	[Test]

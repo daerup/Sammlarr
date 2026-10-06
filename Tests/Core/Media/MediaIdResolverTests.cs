@@ -1,5 +1,6 @@
 using Contracts;
 using Contracts.Caching;
+using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Providers;
@@ -30,9 +31,16 @@ public class MediaIdResolverTests
 	private static readonly IdentifyRequest Request = new([Tmdb], new None());
 	private static readonly CancellationToken WaitingThrows = new(canceled: true);
 
-	private readonly Mock<IExternalIdConverter> _tmdb = Converter(MediaProvider.Tmdb, Detail);
-	private readonly Mock<IExternalIdConverter> _plex = Converter(MediaProvider.Plex, PlexById, Search);
+	private readonly Dictionary<Mock<IExternalIdConverter>, RemoteService> _remotes = [];
+	private readonly Mock<IExternalIdConverter> _tmdb;
+	private readonly Mock<IExternalIdConverter> _plex;
 	private readonly Mock<ITypedMemoryCache<string, bool>> _cache = TestUnmatchedCache.Empty();
+
+	public MediaIdResolverTests()
+	{
+		_tmdb = Converter(RemoteService.Tmdb, Detail);
+		_plex = Converter(RemoteService.Plex, PlexById, Search);
+	}
 
 	[Test]
 	public async Task ResolveAsync_WhenAProviderIsBlockedWithinItsMaxWait_WaitsThenTakesThePath()
@@ -106,7 +114,7 @@ public class MediaIdResolverTests
 				(_, _) =>
 				{
 					tmdbFreeAt = Now.AddSeconds(5);
-					return Error.From(new ProviderUnavailableException(MediaProvider.Tmdb));
+					return Error.From(new RemoteUnavailableException(RemoteService.Tmdb));
 				}
 			);
 
@@ -182,7 +190,7 @@ public class MediaIdResolverTests
 	{
 		var first = new ById(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Tvdb], Cost: 1);
 		var second = new ById(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Imdb, MediaProvider.Tvdb], Cost: 1);
-		var tmdb = Converter(MediaProvider.Tmdb, first, second);
+		var tmdb = Converter(RemoteService.Tmdb, first, second);
 		Answer(tmdb, new ByIdRequest(first, Tmdb), Error.From("The first lookup knows no TVDB id."));
 		Answer(tmdb, new ByIdRequest(second, Tmdb), Found(Tvdb));
 
@@ -194,7 +202,7 @@ public class MediaIdResolverTests
 	[Test]
 	public async Task ResolveAsync_ForEqualLookupsOfTwoConverters_KeepsTheirAnswersApart()
 	{
-		var other = Converter(MediaProvider.Imdb, Detail);
+		var other = Converter(RemoteService.Wikidata, Detail);
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From("TMDB knows no TVDB id."));
 		Answer(other, new ByIdRequest(Detail, Tmdb), Found(Tvdb));
 
@@ -231,7 +239,7 @@ public class MediaIdResolverTests
 	public async Task ResolveAsync_WhenTmdbKnowsOnlyTheSecondImdbId_FindsTheTmdbIdThroughIt()
 	{
 		var find = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb], Cost: 1);
-		var tmdb = Converter(MediaProvider.Tmdb, find);
+		var tmdb = Converter(RemoteService.Tmdb, find);
 		var unknown = ImdbId.From("tt0000001", MediaType.Show);
 		Answer(tmdb, new ByIdRequest(find, unknown), Error.From("TMDB has no match for tt0000001."));
 		Answer(tmdb, new ByIdRequest(find, Imdb), Found(Tmdb));
@@ -255,7 +263,7 @@ public class MediaIdResolverTests
 	[Test]
 	public async Task ResolveAsync_WhenTheCheapestPathIsRateLimited_FallsThroughToAPathAroundIt()
 	{
-		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From(new ProviderUnavailableException(MediaProvider.Tmdb)));
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From(new RemoteUnavailableException(RemoteService.Tmdb)));
 		Answer(_plex, new ByIdRequest(PlexById, Plex), Found(Tvdb));
 
 		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Tmdb, Plex], new None()), MediaProvider.Tvdb);
@@ -267,7 +275,7 @@ public class MediaIdResolverTests
 	[Test]
 	public async Task ResolveAsync_WhenAProviderIsUnavailable_SkipsTheRemainingPathsThroughItAndCachesNothing()
 	{
-		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From(new ProviderUnavailableException(MediaProvider.Tmdb)));
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From(new RemoteUnavailableException(RemoteService.Tmdb)));
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb);
 
@@ -281,7 +289,7 @@ public class MediaIdResolverTests
 	public async Task ResolveAsync_WhenAProviderGetsBlockedWhileResolving_SkipsTheRemainingPathsThroughIt()
 	{
 		var tmdbBlocked = false;
-		var capacity = TestCapacity.With(provider => new ProviderLoad(Optional.When(tmdbBlocked && provider is MediaProvider.Tmdb, () => Now.AddMinutes(1)), 0));
+		var capacity = TestCapacity.With(remote => new RemoteLoad(Optional.When(tmdbBlocked && remote is RemoteService.Tmdb, () => Now.AddMinutes(1)), 0));
 		_tmdb
 			.LookUpAsync(Any(), Any())
 			.Returns(
@@ -303,7 +311,7 @@ public class MediaIdResolverTests
 	public async Task ResolveAsync_WhenAProviderGetsBlockedMidPath_StopsBeforeTheHopThroughIt()
 	{
 		var plexBlocked = false;
-		var capacity = TestCapacity.With(provider => new ProviderLoad(Optional.When(plexBlocked && provider is MediaProvider.Plex, () => Now.AddMinutes(1)), 0));
+		var capacity = TestCapacity.With(remote => new RemoteLoad(Optional.When(plexBlocked && remote is RemoteService.Plex, () => Now.AddMinutes(1)), 0));
 		_tmdb
 			.LookUpAsync(Any(), Any())
 			.Returns(
@@ -347,7 +355,7 @@ public class MediaIdResolverTests
 	[Test]
 	public async Task ResolveAsync_WhenEveryPathRunsThroughABlockedProvider_AsksNobodyAndCachesNothing()
 	{
-		var blocked = TestCapacity.With(_ => new ProviderLoad(Some.Of(Now.AddMinutes(1)), 0));
+		var blocked = TestCapacity.With(_ => new RemoteLoad(Some.Of(Now.AddMinutes(1)), 0));
 
 		var resolved = await Testee(blocked).ResolveAsync(Request, MediaProvider.Tvdb);
 
@@ -386,28 +394,33 @@ public class MediaIdResolverTests
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 	}
 
-	private MediaIdResolver Testee(IProviderCapacity? capacity = null) => Testee(capacity ?? TestCapacity.Open(), _tmdb, _plex);
+	private MediaIdResolver Testee(IRemoteCapacity? capacity = null) => Testee(capacity ?? TestCapacity.Open(), _tmdb, _plex);
 
 	private MediaIdResolver Testee(params Mock<IExternalIdConverter>[] converters) => Testee(TestCapacity.Open(), converters);
 
-	private MediaIdResolver Testee(IProviderCapacity capacity, params Mock<IExternalIdConverter>[] converters)
+	private MediaIdResolver Testee(IRemoteCapacity capacity, params Mock<IExternalIdConverter>[] converters)
 	{
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(Now);
-		return new MediaIdResolver([.. converters.Select(converter => converter.Object)], _cache.Object, capacity, clock.Object);
+		return new MediaIdResolver(
+			[.. converters.Select(converter => new Keyed<RemoteService, IExternalIdConverter>(_remotes[converter], converter.Object))],
+			_cache.Object,
+			capacity,
+			clock.Object
+		);
 	}
 
-	private static IProviderCapacity TmdbBlocked(Func<DateTimeOffset> until)
+	private static IRemoteCapacity TmdbBlocked(Func<DateTimeOffset> until)
 	{
 		var maxWait = TimeSpan.FromSeconds(15);
-		return TestCapacity.With(provider => provider is MediaProvider.Tmdb ? new ProviderLoad(Some.Of(until()), 0, maxWait) : new ProviderLoad(new None(), 0));
+		return TestCapacity.With(remote => remote is RemoteService.Tmdb ? new RemoteLoad(Some.Of(until()), 0, maxWait) : new RemoteLoad(new None(), 0));
 	}
 
-	private static Mock<IExternalIdConverter> Converter(MediaProvider provider, params IdLookup[] lookups)
+	private Mock<IExternalIdConverter> Converter(RemoteService remote, params IdLookup[] lookups)
 	{
 		var converter = IExternalIdConverter.Mock();
-		converter.Provider.Returns(provider);
 		converter.Lookups.Returns(lookups);
+		_remotes[converter] = remote;
 		return converter;
 	}
 
