@@ -4,6 +4,7 @@
 @using Contracts.Wantlist
 @using Domain.Identity
 @using Domain.Wantlist.Arr
+@using UI.Features.Settings.Components.Users
 @inject IProviderConfigService ProviderConfigService
 @inject RatingContext RatingContext
 @inject IApiKeyService ApiKeys
@@ -16,8 +17,7 @@
 @inject NavigationManager Navigation
 @inject ScrollService ScrollService
 
-<CascadingValue Value="_ringed" Name="@ProviderRows.Ringed">
-<div class="flex max-w-4xl flex-col gap-8">
+<div class="flex max-w-6xl flex-col gap-8">
     <div>
         <h2 class="text-lg font-semibold">Providers</h2>
         <p class="text-sm text-muted-foreground">Which service does what, and the account, keys and connections behind it.</p>
@@ -36,7 +36,22 @@
                              OpenChanged="open => _open = open"
                              Changed="AccountsChangedAsync"
                              ShowPlex="PlexForSearch"
-                             PlexReturnUrl="@(PlexForSearch ? PlexSearchReturn : SettingsLinks.Providers)"/>
+                             PlexReturnUrl="@(PlexForSearch ? PlexSearchReturn : SettingsLinks.Providers)">
+                <Arr>
+                    @if (IsAdmin && ShowsArr(_config))
+                    {
+                        <ArrSinkRow Open="IsOpen(new Arr())"
+                                    OpenChanged="open => Toggle(new Arr(), open)"
+                                    SettingUp="_settingUp"
+                                    Syncs="_config.Sink == SinkKind.Arr"
+                                    Switching="_switching"
+                                    SwitchRequested="() => ConfirmAsync(SinkKind.Arr)"
+                                    StayOnPlex="StayOnPlex"
+                                    InstanceMoved="MoveAsync"
+                                    Changed="RefreshReadyAsync"/>
+                    }
+                </Arr>
+            </AccountsAndKeys>
         }
     </section>
 
@@ -47,21 +62,10 @@
             <ServicesMap Config="MapConfig(config)" Ready="_ready" ArrReady="ArrReady(config)" CanPick="IsAdmin" People="_people" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync" ServiceOpened="OpenService" ArrOpened="() => OpenRow(new Arr())" AccountsOpened="OpenAccounts"/>
         </section>
 
-        @if (IsAdmin && (config.Sink == SinkKind.Arr || _settingUp))
+        @if (_confirming is { } target)
         {
-            <section class="flex flex-col gap-3" aria-label="Wantlist sync">
-                <h3 class="text-sm font-semibold">Wantlist sync</h3>
-                <div class="rounded-lg border bg-card overflow-hidden">
-                    <ArrSinkRow Open="IsOpen(new Arr())"
-                                OpenChanged="open => Toggle(new Arr(), open)"
-                                SettingUp="_settingUp"
-                                Switching="_switching"
-                                SwitchRequested="() => SwitchToAsync(SinkKind.Arr)"
-                                StayOnPlex="StayOnPlex"
-                                InstanceMoved="MoveAsync"
-                                Changed="RefreshReadyAsync"/>
-                </div>
-            </section>
+            <SinkSwitchDialog Open="true" OpenChanged="open => _confirming = open ? _confirming : null" Target="target" People="_switchPeople" Titles="_switchTitles"
+                              Switching="_switching" Confirmed="() => SwitchConfirmedAsync(target)"/>
         }
     }
     else
@@ -72,20 +76,15 @@
         </section>
     }
 </div>
-</CascadingValue>
 
 @code {
     private const string PlexSearchReturn = $"{SettingsLinks.Providers}&search=plex";
 
-    private static readonly TimeSpan RingTime = TimeSpan.FromSeconds(1);
 
     [Parameter] public MediaProvider? Expanded { get; set; }
 
     [Parameter] public SearchProvider? SearchAfterSignIn { get; set; }
 
-    private ProviderRowKey? _ringed;
-
-    private int _rings;
 
     private ProviderRowKey? _scrollTo;
 
@@ -167,9 +166,17 @@
 
     private bool _switching;
 
+    private SinkKind? _confirming;
+
+    private int _switchPeople;
+
+    private int _switchTitles;
+
     private bool IsAdmin => CurrentUser.Role == UserRole.Admin;
 
     private ProviderConfig MapConfig(ProviderConfig config) => _settingUp ? config with { Sink = SinkKind.Arr } : config;
+
+    private bool ShowsArr(ProviderConfig config) => config.Sink == SinkKind.Arr || config.SearchProvider == SearchProvider.Arr || _settingUp;
 
     private bool ArrReady(ProviderConfig config) => (config.Sink == SinkKind.Arr && !_settingUp) || _arrConnected;
 
@@ -209,39 +216,18 @@
 
     private void OpenService(MediaProvider provider) => OpenRow(provider);
 
-    private void OpenAccounts()
-    {
-        if (IsAdmin)
-        {
-            Navigation.NavigateTo(SettingsLinks.Users);
-            return;
-        }
-
-        OpenRow(new SammlarrAccounts());
-    }
+    private void OpenAccounts() => OpenRow(new SammlarrAccounts());
 
     private void OpenRow(ProviderRowKey key)
     {
         _open = key;
-        _ringed = key;
         _scrollTo = key;
-        _ = UnringAsync(++_rings);
-    }
-
-    private async Task UnringAsync(int ring)
-    {
-        await Task.Delay(RingTime);
-        if (ring == _rings)
-        {
-            _ringed = null;
-            await InvokeAsync(StateHasChanged);
-        }
     }
 
     private Task SetUpArrAsync()
     {
         _settingUp = _config?.Sink != SinkKind.Arr;
-        _open = new Arr();
+        OpenRow(new Arr());
         return Task.CompletedTask;
     }
 
@@ -253,7 +239,22 @@
             return Task.CompletedTask;
         }
 
-        return SwitchToAsync(SinkKind.Plex);
+        return ConfirmAsync(SinkKind.Plex);
+    }
+
+    private async Task ConfirmAsync(SinkKind target)
+    {
+        var joined = (await UserManagement.GetPeopleAsync()).Joined.ToList();
+        _switchPeople = joined.Count;
+        _switchTitles = joined.Sum(person => person.Holdings.Wanted);
+        _confirming = target;
+    }
+
+
+    private async Task SwitchConfirmedAsync(SinkKind target)
+    {
+        await SwitchToAsync(target);
+        _confirming = null;
     }
 
     private void StayOnPlex()

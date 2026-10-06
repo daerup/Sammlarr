@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Settings;
@@ -35,7 +34,6 @@ public class ServicesMapTests
 		await page.ButtonContaining("Open TMDb").ClickAsync();
 
 		var row = page.Locator("#provider-row-tmdb");
-		await Expect(row).ToHaveClassAsync(new Regex("is-ringed"));
 		await Expect(row).ToBeInViewportAsync();
 		await Expect(row.Text("API key")).ToBeVisibleAsync();
 	}

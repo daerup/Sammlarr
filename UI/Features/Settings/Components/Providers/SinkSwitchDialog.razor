@@ -1,0 +1,51 @@
+<BbDialog Open="Open" OpenChanged="OpenChanged">
+    <BbDialogContent Class="sm:max-w-[470px]">
+        <BbDialogHeader>
+            <BbDialogTitle>Switch the wantlist to @Target.GetDescription()?</BbDialogTitle>
+            <BbDialogDescription>@What</BbDialogDescription>
+        </BbDialogHeader>
+        <BbDialogFooter>
+            <BbDialogClose>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Stay on @From.GetDescription()</BbButton>
+            </BbDialogClose>
+            <BbButton Size="ButtonSize.Small" OnClick="Confirmed" Disabled="Switching">
+                <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
+                Switch to @Target.GetDescription()
+            </BbButton>
+        </BbDialogFooter>
+    </BbDialogContent>
+</BbDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] [EditorRequired] public required SinkKind Target { get; set; }
+
+    [Parameter] public int People { get; set; }
+
+    [Parameter] public int Titles { get; set; }
+
+    [Parameter] public bool Switching { get; set; }
+
+    [Parameter] public EventCallback Confirmed { get; set; }
+
+    private SinkKind From => Target == SinkKind.Arr ? SinkKind.Plex : SinkKind.Arr;
+
+    private string What => $"Every title on everyone's wantlist ({Counted(People, "person", "people")}, {Counted(Titles, "title", "titles")}) goes to {Target.GetDescription()} on their next sync. {Keeps}";
+
+    private string Keeps
+    {
+        get
+        {
+            return From switch
+            {
+                SinkKind.Arr => "Radarr and Sonarr keep what they have; Sammlarr stops adding to them and removing from them.",
+                SinkKind.Plex => "Everyone's Plex watchlist keeps what it has; Sammlarr stops adding to it and removing from it.",
+            };
+        }
+    }
+
+    private static string Counted(int count, string one, string many) => $"{count:N0} {(count == 1 ? one : many)}";
+}

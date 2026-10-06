@@ -1,6 +1,6 @@
 @using UI.Shared.Services.Branding
 
-<div id="@ProviderRows.Id(Key)" class="provider-row @(Ringed == Key ? "is-ringed" : null)" style="--brand: @Brand.BrandColor">
+<div id="@ProviderRows.Id(Key)" class="provider-row" style="--brand: @Brand.BrandColor">
     <BbCollapsible Open="Open" OpenChanged="OpenChanged">
         <BbCollapsibleTrigger AsChild="false"
                               Class="group w-full grid grid-cols-[15px_190px_1fr_auto] items-center gap-3.5 pl-5 pr-4 py-4 text-left bg-foreground/5 hover:bg-foreground/8 transition-colors">
@@ -15,18 +15,8 @@
                     <BrandedLogo Brand="Brand" Form="ProviderLogoForm.Logo" Size="18"/>
                 }
             </span>
-            <span class="provider-roles">
-                @foreach (var role in Roles)
-                {
-                    <BbTooltip DelayDuration="150">
-                        <BbTooltipTrigger AsChild="false" Class="provider-role" Focusable="false">
-                            <LucideIcon Name="@role.Icon" Size="13"/>
-                            <span class="sr-only">@role.Name</span>
-                        </BbTooltipTrigger>
-                        <BbTooltipContent>@role.Name</BbTooltipContent>
-                    </BbTooltip>
-                }
-            </span>
+            <RoleIcons Key="Key"/>
+
             <span>@Status</span>
         </BbCollapsibleTrigger>
         <BbCollapsibleContent>
@@ -51,19 +41,4 @@
     [Parameter] [EditorRequired] public required RenderFragment Status { get; set; }
 
     [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
-
-    [CascadingParameter(Name = ProviderRows.Ringed)] private ProviderRowKey? Ringed { get; set; }
-
-    private IReadOnlyList<ServiceRole> Roles
-    {
-        get
-        {
-            return Key switch
-            {
-                MediaProvider provider => ServiceRoles.For(provider),
-                Arr => [ServiceRoles.Wantlist, ServiceRoles.Search],
-                SammlarrAccounts => [ServiceRoles.SignIn],
-            };
-        }
-    }
 }

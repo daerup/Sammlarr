@@ -1,7 +1,11 @@
 .arr-app {
     position: relative;
-    border-top: 1px solid var(--border);
-    padding: 14px 16px 18px 49px;
+    min-width: 0;
+    padding: 16px 18px 18px 22px;
+}
+
+.arr-app + .arr-app {
+    border-left: 1px solid var(--border);
 }
 
 .arr-app::before {
@@ -54,12 +58,33 @@
     line-height: 1.4;
 }
 
+.arr-app-external {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.arr-app-external-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+}
+
 .arr-app-switch {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     font-size: 0.8125rem;
+}
+
+@media (max-width: 900px) {
+    .arr-app + .arr-app {
+        border-left: none;
+        border-top: 1px solid var(--border);
+    }
 }
 
 @media (max-width: 640px) {

@@ -32,15 +32,37 @@
     </div>
 
     <div class="arr-app-grid">
-        <BbField>
+        <BbField Class="col-span-full">
             <BbFieldLabel>URL</BbFieldLabel>
             <BbFieldContent>
                 <BbInput Value="@_url" ValueChanged="UrlChangedAsync" Placeholder="@Placeholder" AriaLabel="@($"{App.Name} URL")"
                          Class="h-9 bg-accent text-sm" UpdateTiming="UpdateTiming.Immediate"/>
+                @if (ShowsExternalUrl)
+                {
+                    <div class="arr-app-external">
+                        <span class="arr-app-external-head">
+                            <span class="font-medium">External URL</span>
+                            <span class="text-muted-foreground">Links to @App.Name open here</span>
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="ml-auto h-6 px-2 text-xs text-muted-foreground" OnClick="RemoveExternalUrlAsync">
+                                <LucideIcon Name="x" Size="12" Class="mr-1"/>
+                                Remove
+                            </BbButton>
+                        </span>
+                        <BbInput Value="@Instance.ExternalUrl.GetValueOr(string.Empty)" ValueChanged="ExternalUrlChangedAsync" Placeholder="@($"http://localhost:{App.DefaultPort}")"
+                                 AriaLabel="@($"{App.Name} external URL")" Class="h-9 bg-accent text-sm"/>
+                    </div>
+                }
+                else
+                {
+                    <BbButton Variant="ButtonVariant.Link" Size="ButtonSize.Small" Class="arr-app-add h-auto self-start p-0 text-xs text-muted-foreground" OnClick="() => _addingExternalUrl = true">
+                        <LucideIcon Name="plus" Size="12" Class="mr-1"/>
+                        Add external URL
+                    </BbButton>
+                }
             </BbFieldContent>
         </BbField>
 
-        <BbField>
+        <BbField Class="col-span-full">
             <BbFieldLabel>API key</BbFieldLabel>
             <BbFieldContent>
                 <div class="flex items-center gap-2">
@@ -91,14 +113,6 @@
             </BbFieldContent>
         </BbField>
 
-        <BbField Class="arr-app-wide">
-            <BbFieldLabel>External URL</BbFieldLabel>
-            <BbFieldContent>
-                <BbInput Value="@Instance.ExternalUrl.GetValueOr(string.Empty)" ValueChanged="ExternalUrlChangedAsync" Placeholder="Same as the URL"
-                         AriaLabel="@($"{App.Name} external URL")" Class="h-9 bg-accent text-sm"/>
-                <BbFieldDescription>Where your browser reaches @App.Name, when that differs from the URL Sammlarr uses. Links to @App.Name open here.</BbFieldDescription>
-            </BbFieldContent>
-        </BbField>
 
         @if (State == ArrConnectionState.Failed)
         {
@@ -213,7 +227,17 @@
 
     private Task TestAsync() => Test.InvokeAsync(Typed);
 
+    private bool _addingExternalUrl;
+
+    private bool ShowsExternalUrl => _addingExternalUrl || Instance.ExternalUrl.IsSome();
+
     private Task ExternalUrlChangedAsync(string? url) => InstanceChanged.InvokeAsync(Instance with { ExternalUrl = Text(url ?? string.Empty) });
+
+    private Task RemoveExternalUrlAsync()
+    {
+        _addingExternalUrl = false;
+        return InstanceChanged.InvokeAsync(Instance with { ExternalUrl = new None() });
+    }
 
     private Task ProfileChangedAsync(int? profile) => InstanceChanged.InvokeAsync(Instance with { QualityProfileId = Optional.Of(profile) });
 

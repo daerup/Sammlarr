@@ -43,6 +43,7 @@
                                 <ArrSinkRow Open="_arrOpen"
                                             OpenChanged="open => _arrOpen = open"
                                             SettingUp="_settingUp"
+                                            Syncs="config.Sink == SinkKind.Arr"
                                             Switching="_switching"
                                             SwitchRequested="() => SwitchAsync(SinkKind.Arr)"
                                             StayOnPlex="() => PickSinkAsync(SinkKind.Plex)"

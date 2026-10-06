@@ -5,9 +5,7 @@ using Contracts.Identity;
 using Contracts.Settings;
 using Domain.Feed;
 using Domain.Identity;
-using Domain.Providers;
 using Domain.Wantlist.Arr;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Providers;
@@ -66,13 +64,13 @@ public class ArrSinkRowTests : BunitContext
 	}
 
 	[Test]
-	public async Task Row_WhenBothAppsAnswer_SaysConnectedWithWhereEachAdds()
+	public async Task Row_WhenBothAppsAnswer_SaysConnectedNextToItsRoles()
 	{
 		var cut = RenderRow(settingUp: false);
 
 		cut.WaitForState(() => Badge(cut) == "Connected");
-		await Assert.That(Badge(cut)).IsEqualTo("Connected");
-		await Assert.That(cut.Markup).Contains("Radarr: HD-1080p into /movies · Sonarr: HD-1080p into /tv");
+		await Assert.That(cut.FindAll(".arr-row-head .provider-role .sr-only").Select(role => role.TextContent)).IsEquivalentTo(["Wantlist", "Search"]);
+		await Assert.That(cut.Markup).DoesNotContain("Connection · wantlist");
 	}
 
 	[Test]
@@ -158,6 +156,19 @@ public class ArrSinkRowTests : BunitContext
 	}
 
 	[Test]
+	public async Task Test_WhenOnlySearchUsesAnAppThatGetsANewAddress_StoresItWithoutMovingTitles()
+	{
+		var cut = RenderRow(settingUp: false, syncs: false);
+		cut.WaitForState(() => Badge(cut) == "Connected");
+
+		var radarr = cut.FindComponents<ArrAppSection>().First(section => section.Instance.App == ArrApp.Radarr);
+		await cut.InvokeAsync(() => radarr.Instance.Test.InvokeAsync(Connected.Radarr with { Url = Some.Of("http://radarr.lan:7878") }));
+
+		await Assert.That(_moves).IsEmpty();
+		_configs.StoreAsync(Any<ArrSinkConfig>(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
 	public async Task Tags_ForAPersonRenamedSinceTheyJoined_PreviewTheNameTheyJoinedWith()
 	{
 		_users.GetAllAsync(Any()).Returns([Guest with { DisplayName = "Renamed" }]);
@@ -169,19 +180,12 @@ public class ArrSinkRowTests : BunitContext
 	}
 
 	[Test]
-	[Arguments(true)]
-	[Arguments(false)]
-	public async Task Row_WhenItIsRinged_DrawsTheRing(bool ringed)
+	public async Task Tags_WhenOnlySearchUsesRadarrAndSonarr_AreLeftOut()
 	{
-		ProviderRowKey key = ringed ? new Arr() : MediaProvider.Plex;
-		var cut = Render<CascadingValue<ProviderRowKey?>>(parameters =>
-			parameters
-				.Add(value => value.Value, key)
-				.Add(value => value.Name, ProviderRows.Ringed)
-				.AddChildContent<ArrSinkRow>(row => row.Add(arr => arr.SettingUp, false).Add(arr => arr.Open, true))
-		);
+		var cut = RenderRow(settingUp: false, syncs: false);
 
-		await Assert.That(cut.Find(".arr-row").ClassList.Contains("is-ringed")).IsEqualTo(ringed);
+		cut.WaitForState(() => Badge(cut) == "Connected");
+		await Assert.That(cut.FindComponents<ArrTagsSection>()).IsEmpty();
 	}
 
 	private void Answers(ArrApp app, string folder)
@@ -200,11 +204,12 @@ public class ArrSinkRowTests : BunitContext
 		return cut.FindAll("button").Single(button => button.TextContent.Contains("Switch the wantlist"));
 	}
 
-	private IRenderedComponent<ArrSinkRow> RenderRow(bool settingUp)
+	private IRenderedComponent<ArrSinkRow> RenderRow(bool settingUp, bool syncs = true)
 	{
 		return Render<ArrSinkRow>(parameters =>
 			parameters
 				.Add(row => row.SettingUp, settingUp)
+				.Add(row => row.Syncs, syncs)
 				.Add(row => row.Open, true)
 				.Add(row => row.SwitchRequested, () => _switchRequests++)
 				.Add(row => row.InstanceMoved, config => _moves.Add(config))

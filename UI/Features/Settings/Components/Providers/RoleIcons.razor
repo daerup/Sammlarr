@@ -1,0 +1,29 @@
+<span class="provider-roles">
+    @foreach (var role in Roles)
+    {
+        <BbTooltip DelayDuration="150">
+            <BbTooltipTrigger AsChild="false" Class="provider-role" Focusable="false">
+                <LucideIcon Name="@role.Icon" Size="13"/>
+                <span class="sr-only">@role.Name</span>
+            </BbTooltipTrigger>
+            <BbTooltipContent>@role.Name</BbTooltipContent>
+        </BbTooltip>
+    }
+</span>
+
+@code {
+    [Parameter] [EditorRequired] public required ProviderRowKey Key { get; set; }
+
+    private IReadOnlyList<ServiceRole> Roles
+    {
+        get
+        {
+            return Key switch
+            {
+                MediaProvider provider => ServiceRoles.For(provider),
+                Arr => [ServiceRoles.Wantlist, ServiceRoles.Search],
+                SammlarrAccounts => [ServiceRoles.SignIn],
+            };
+        }
+    }
+}
