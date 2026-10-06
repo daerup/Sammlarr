@@ -36,7 +36,7 @@ public class ArrSinkConfigRepositoryTests(SammlarrTestHost host) : IAsyncDisposa
 		ArrTagScheme.Default with
 		{
 			Prefix = "media",
-			FeedSource = ArrFeedTagSource.OwnerAndList,
+			FeedSource = ArrFeedTagSource.Id,
 			PlainPrefix = true,
 		}
 	);

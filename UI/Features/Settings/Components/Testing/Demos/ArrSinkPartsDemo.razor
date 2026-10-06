@@ -30,7 +30,7 @@
 
     private static readonly IReadOnlyList<ArrTagUser> Users = [new(Guid.Parse("8f14e45f-ceea-467a-9575-6c0f6e3b4c11"), "Guest"), new(Guid.Parse("1c5d7a4e-2f10-4b8e-9f3a-6d2e8c1b0a77"), "Mira")];
 
-    private static readonly Optional<ArrTagFeed> Feed = Some.Of(new ArrTagFeed(Guid.Parse("5b8f3c2a-9d14-4e6f-8a7b-2c1d0e9f8a6b"), "Latest movies", "hdlists/latest"));
+    private static readonly Optional<ArrTagFeed> Feed = Some.Of(new ArrTagFeed(Guid.Parse("5b8f3c2a-9d14-4e6f-8a7b-2c1d0e9f8a6b"), "Latest movies"));
 
     private ArrTagScheme _scheme = ArrTagScheme.Default;
 }

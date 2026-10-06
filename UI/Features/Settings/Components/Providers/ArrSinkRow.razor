@@ -179,7 +179,7 @@
     private async Task<Optional<ArrTagFeed>> FeedAsync()
     {
         var feeds = await Feeds.GetAsync();
-        return feeds.Feeds.FirstOrNone().Map(overview => new ArrTagFeed(overview.Feed.Id.Value, overview.Feed.Name, overview.Feed.Identifier));
+        return feeds.Feeds.FirstOrNone().Map(overview => new ArrTagFeed(overview.Feed.Id.Value, overview.Feed.Name));
     }
 
     private void Edited(ArrApp app, ArrInstanceConfig typed)
