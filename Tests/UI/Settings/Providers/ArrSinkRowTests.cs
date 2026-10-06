@@ -236,6 +236,21 @@ public class ArrSinkRowTests : BunitContext
 	}
 
 	[Test]
+	public async Task Tabs_WhenTagsAreOpenedWhileTheAppsAreStillTested_StayOnTags()
+	{
+		var sonarr = new TaskCompletionSource<Result<ArrInstanceChoices>>();
+		_tester.TestAsync(ArrApp.Sonarr, Any<ArrInstanceConfig>(), Any()).ReturnsAsync(sonarr.Task);
+		var cut = RenderRow(settingUp: false);
+		cut.WaitForState(() => Tabs(cut).Count == 3);
+
+		await Tab(cut, "Tags").ClickAsync(new MouseEventArgs());
+		sonarr.SetResult(Success.Of(new ArrInstanceChoices([new ArrQualityProfile(4, "HD-1080p")], [new ArrRootFolder("/tv", 1)])));
+
+		cut.WaitForState(() => Badge(cut) == "Connected");
+		await Assert.That(Name(cut.Find("[role=tab][aria-selected=true]"))).IsEqualTo("Tags");
+	}
+
+	[Test]
 	public async Task Tabs_WhenSwitchedAndBack_KeepAKeyTypedButNotTested()
 	{
 		var cut = RenderRow(settingUp: false);
