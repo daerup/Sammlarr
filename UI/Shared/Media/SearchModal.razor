@@ -1,4 +1,5 @@
 @using Contracts.Media.Search
+@using Domain.Wantlist.Arr
 @using UI.Shared.Services.Branding
 @inject IMediaSearchService SearchService
 @inject MediaProviderBrandingService Branding
@@ -81,8 +82,24 @@
                 }
                 else if (_searchResults.Count > 0)
                 {
+                    @if (SplitsByApp)
+                    {
+                        <BbTabs Value="@_tab" ValueChanged="tab => _tab = tab ?? _tab">
+                            <BbTabsList>
+                                @foreach (var app in Enum.GetValues<ArrApp>())
+                                {
+                                    <BbTabsTrigger Value="@app.Name" Class="gap-1.5">
+                                        <LucideIcon Name="@app.Type.Icon" Size="14"/>
+                                        <span>@app.Type.Plural</span>
+                                        <span class="text-xs text-muted-foreground">@CountOf(app)</span>
+                                        <BrandedLogo Brand="Branding.GetBrandingInfo(app)" Form="ProviderLogoForm.Mark" Size="13" Decorative="true"/>
+                                    </BbTabsTrigger>
+                                }
+                            </BbTabsList>
+                        </BbTabs>
+                    }
                     <div class="search-modal-results scrollbar-thin space-y-2 pr-1" tabindex="-1">
-                        @foreach (var result in _searchResults)
+                        @foreach (var result in ShownResults)
                         {
                             <MediaDetailTile @key="result.Key"
                                              Media="result"
@@ -143,6 +160,16 @@
     private string? _searchError;
     private MediaId? _activeToggledSourceId;
     private List<MediaMatchResult> _searchResults = [];
+
+    private string _tab = ArrApp.Radarr.Name;
+
+    private bool SplitsByApp => SearchProvider == SearchProvider.Arr;
+
+    private IEnumerable<MediaMatchResult> ShownResults => SplitsByApp ? _searchResults.Where(result => result.Details.Type == TabApp.Type) : _searchResults;
+
+    private ArrApp TabApp => Enum.GetValues<ArrApp>().First(app => app.Name == _tab);
+
+    private int CountOf(ArrApp app) => _searchResults.Count(result => result.Details.Type == app.Type);
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
     private bool _wasOpen;
@@ -236,6 +263,7 @@
         try
         {
             _searchResults = [.. await SearchService.SearchAsync(query, [MediaType.Movie, MediaType.Show])];
+            _tab = Enum.GetValues<ArrApp>().OrderByDescending(CountOf).First().Name;
 
             _hasSearched = true;
         }

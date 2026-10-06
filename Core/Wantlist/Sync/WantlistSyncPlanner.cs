@@ -3,6 +3,7 @@ using Contracts.Wantlist.Outbox;
 using Contracts.Wantlist.Sync;
 using Domain.Providers;
 using Domain.Wantlist;
+using Domain.Wantlist.Arr;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,10 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 		var sink = await activeSink.ResolveAsync(cancellationToken);
 		return await PlanAsync(sink, cancellationToken)
 			.ApplyError(error => logger.LogWarning("Reading {Sink} failed: {Reason}", sink.Kind, error.Reason))
-			.Match(Project, error => new WantlistSyncSinkUnreachable(error.Reason));
+			.Match(
+				Project,
+				error => new WantlistSyncSinkUnreachable(error.Reason, error.CausedBy<ArrAppsUnreachableException>().Map(failed => failed.Apps).GetValueOr([]))
+			);
 	}
 
 	private async Task<Result<WantlistSyncPlan>> PlanAsync(IMediaSink sink, CancellationToken cancellationToken)

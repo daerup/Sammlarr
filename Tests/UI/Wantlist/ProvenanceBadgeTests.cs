@@ -1,6 +1,7 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Media;
+using Domain.Providers;
 using Domain.Wantlist;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
@@ -51,7 +52,17 @@ public class ProvenanceBadgeTests : BunitContext
 		await Assert.That(cut.FindAll("a")).IsEmpty();
 	}
 
-	private IRenderedComponent<ProvenanceBadge> RenderBadge(WantlistItemProvenance provenance, MediaId? itemId = null)
+	[Test]
+	[Arguments(MediaType.Movie, "Radarr")]
+	[Arguments(MediaType.Show, "Sonarr")]
+	public async Task Render_ForATitleAddedOnRadarrOrSonarr_NamesTheAppItCameFrom(MediaType type, string app)
+	{
+		var cut = RenderBadge(new SinkOrigin(SinkKind.Arr), type: type);
+
+		await Assert.That(cut.Find(".wl-badge-label").TextContent.Trim()).IsEqualTo(app);
+	}
+
+	private IRenderedComponent<ProvenanceBadge> RenderBadge(WantlistItemProvenance provenance, MediaId? itemId = null, MediaType type = MediaType.Movie)
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
@@ -59,7 +70,11 @@ public class ProvenanceBadgeTests : BunitContext
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		return Render<ProvenanceBadge>(parameters =>
-			parameters.Add(badge => badge.Provenance, provenance).Add(badge => badge.AddedAt, DateTimeOffset.UtcNow).Add(badge => badge.ItemId, itemId)
+			parameters
+				.Add(badge => badge.Provenance, provenance)
+				.Add(badge => badge.AddedAt, DateTimeOffset.UtcNow)
+				.Add(badge => badge.ItemId, itemId)
+				.Add(badge => badge.Type, type)
 		);
 	}
 }

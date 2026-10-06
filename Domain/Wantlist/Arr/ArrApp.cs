@@ -11,6 +11,8 @@ public enum ArrApp
 
 public static class ArrApps
 {
+	public static Optional<ArrApp> For(MediaType type) => Enum.GetValues<ArrApp>().FirstOrNone(app => app.Type == type);
+
 	extension(ArrApp app)
 	{
 		public string Name => app.ToString();

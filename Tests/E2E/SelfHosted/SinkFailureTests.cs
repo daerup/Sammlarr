@@ -19,6 +19,7 @@ public class SinkFailureTests
 		await Expect(preview.GetByText("Sonarr answered 401 Unauthorized")).ToBeVisibleAsync(Wait.Settle);
 		await Expect(preview.ButtonContaining("Sync now")).ToBeDisabledAsync();
 		await page.Keyboard.PressAsync("Escape");
-		await Expect(page.GetByText("Radarr + Sonarr unreachable")).ToBeVisibleAsync();
+		await Expect(page.Locator(".sync-app[data-app=Sonarr]")).ToContainTextAsync("unreachable");
+		await Expect(page.Locator(".sync-app[data-app=Radarr]")).Not.ToContainTextAsync("unreachable");
 	}
 }

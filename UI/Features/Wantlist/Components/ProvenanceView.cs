@@ -2,6 +2,7 @@ using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;
+using Domain.Wantlist.Arr;
 using UI.Shared.Services.Branding;
 using UrlGuid = Shared.UrlGuid;
 
@@ -19,11 +20,11 @@ internal static class ProvenanceView
 			_ => "circle",
 		};
 
-	internal static string Label(WantlistItemProvenance provenance)
+	internal static string Label(WantlistItemProvenance provenance, MediaType type)
 	{
 		return provenance switch
 		{
-			SinkOrigin sink => ProviderName(sink.Provider),
+			SinkOrigin sink => SinkName(sink.Provider, type),
 			ManualOrigin => "Manual",
 			FeedOrigin feed => feed.Feed.Name,
 			OrphanedOrigin orphaned => orphaned.FormerFeedName,
@@ -40,11 +41,13 @@ internal static class ProvenanceView
 			_ => string.Empty,
 		};
 
-	internal static IReadOnlyList<BrandingInfo> Brands(WantlistItemProvenance provenance, MediaProviderBrandingService branding)
+	internal static IReadOnlyList<BrandingInfo> Brands(WantlistItemProvenance provenance, MediaProviderBrandingService branding, MediaType type)
 	{
 		return provenance switch
 		{
-			SinkOrigin sink => branding.Brands(sink.Provider),
+			SinkOrigin sink => App(sink.Provider, type)
+				.Map(app => (IReadOnlyList<BrandingInfo>)[branding.GetBrandingInfo(app)])
+				.GetValueOr(() => branding.Brands(sink.Provider)),
 			FeedOrigin feed => [branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider())],
 			ManualOrigin or OrphanedOrigin => [],
 		};
@@ -55,23 +58,23 @@ internal static class ProvenanceView
 
 	internal static FeedRunCounts? RunCounts(WantlistItemProvenance provenance) => provenance is FeedOrigin feed ? feed.Run.Counts : null;
 
-	internal static string? BrandColor(WantlistItemProvenance provenance, MediaProviderBrandingService branding)
+	internal static string? BrandColor(WantlistItemProvenance provenance, MediaProviderBrandingService branding, MediaType type)
 	{
 		return provenance switch
 		{
-			SinkOrigin sink => branding.SinkColor(sink.Provider),
+			SinkOrigin sink => App(sink.Provider, type).Map(app => branding.GetBrandingInfo(app).BrandColor).GetValueOr(() => branding.SinkColor(sink.Provider)),
 			FeedOrigin feed => branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider()).BrandColor,
 			ManualOrigin or OrphanedOrigin => null,
 		};
 	}
 
-	internal static string Description(WantlistItemProvenance provenance, DateTimeOffset addedAt)
+	internal static string Description(WantlistItemProvenance provenance, DateTimeOffset addedAt, MediaType type)
 	{
 		var when = addedAt.LocalDateTime.ToString("MMM d, yyyy HH:mm");
 
 		return provenance.Value switch
 		{
-			SinkOrigin sink => $"Added on {ProviderName(sink.Provider)}",
+			SinkOrigin sink => $"Added on {SinkName(sink.Provider, type)}",
 			ManualOrigin manual => manual.Source == ManualSource.Unknown ? $"Added manually on {when}" : $"Added from {ManualName(manual.Source)} on {when}",
 			FeedOrigin feed => $"Added by feed '{feed.Feed.Name}' on {when}",
 			OrphanedOrigin orphaned => $"Was from '{orphaned.FormerFeedName}' (deleted)",
@@ -84,7 +87,9 @@ internal static class ProvenanceView
 
 	private static string ItemQuery(MediaId? itemId) => itemId is { } id ? $"?item={UrlGuid.Encode(id.Value)}" : string.Empty;
 
-	private static string ProviderName(SinkKind provider) => provider.GetDescription();
+	private static string SinkName(SinkKind sink, MediaType type) => App(sink, type).Map(app => app.Name).GetValueOr(() => sink.GetDescription());
+
+	private static Optional<ArrApp> App(SinkKind sink, MediaType type) => ArrApps.For(type).When(_ => sink == SinkKind.Arr);
 
 	private static string ManualIcon(ManualSource source) =>
 		source switch

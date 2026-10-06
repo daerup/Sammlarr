@@ -8,6 +8,8 @@
 @using UI.Shared.Announcing
 @using Domain.Jobs
 @using UI.Shared.Changes
+@using Domain.Wantlist.Arr
+@using UI.Shared.Services.Branding
 @implements IDisposable
 @inject IMediaService Media
 @inject IJobQueue JobQueue
@@ -16,27 +18,52 @@
 @inject IEventPublisher Events
 @inject IJobQueueView JobQueueView
 @inject Notifier Notifier
+@inject MediaProviderBrandingService Branding
 
 <BbButtonGroup AriaLabel="Wantlist sync">
-    @if (IsBusy)
+    @if (PerApp)
     {
-        <HoverButton Disabled="true" Color="@BrandColor" Class="whitespace-nowrap">
-            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-            <span>Syncing...</span>
-        </HoverButton>
+        <BbButton Variant="ButtonVariant.Outline" OnClick="OpenAsync" Disabled="IsBusy" Class="sync-neutral whitespace-nowrap">@SyncLabel</BbButton>
     }
     else
     {
-        <HoverButton OnClick="OpenAsync" Color="@BrandColor" Class="whitespace-nowrap">
-            <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
-            <span>Sync</span>
-        </HoverButton>
+        <HoverButton OnClick="OpenAsync" Disabled="IsBusy" Color="@BrandColor" Class="whitespace-nowrap">@SyncLabel</HoverButton>
     }
-    <span class="sync-status @(IsBusy ? "is-busy" : null)" style="@(string.IsNullOrEmpty(BrandColor) ? null : $"--tint: {BrandColor};")">
+    <span class="sync-status @(IsBusy ? "is-busy" : null)" style="@(PerApp || string.IsNullOrEmpty(BrandColor) ? null : $"--tint: {BrandColor};")">
         @if (_isLoadingDryRun || (_dryRun is null && _dryRunError is null))
         {
             <BbSpinner Size="SpinnerSize.Small"/>
             <span class="sync-note">Comparing</span>
+        }
+        else if (PerApp)
+        {
+            @foreach (var app in Enum.GetValues<ArrApp>())
+            {
+                <span class="sync-app" data-app="@app.Name" title="@app.Name">
+                    <BrandedLogo Brand="Branding.GetBrandingInfo(app)" Form="ProviderLogoForm.Mark" Size="14" Decorative="true"/>
+                    @if (_unreachable.Contains(app))
+                    {
+                        <LucideIcon Name="cloud-off" Size="13" Class="text-destructive"/>
+                        <span class="sync-note" title="@_dryRunError">unreachable</span>
+                    }
+                    else if (_dryRun is { } report && ChangesOf(report, app) is var (adds, removes) && (adds > 0 || removes > 0))
+                    {
+                        @if (adds > 0)
+                        {
+                            <span class="is-added">@($"+{adds:N0}")</span>
+                        }
+                        @if (removes > 0)
+                        {
+                            <span class="is-removed">@($"−{removes:N0}")</span>
+                        }
+                    }
+                    else
+                    {
+                        <LucideIcon Name="check" Size="13"/>
+                        <span class="sr-only">in sync</span>
+                    }
+                </span>
+            }
         }
         else if (_dryRun is { TotalChanges: > 0 } report)
         {
@@ -119,6 +146,34 @@
     [Parameter] public bool IsSyncing { get; set; }
 
     [Parameter] public EventCallback OnSyncStarted { get; set; }
+
+    [Parameter] public SinkKind? Sink { get; set; }
+
+    private bool PerApp => Sink == SinkKind.Arr;
+
+    private ValueSet<ArrApp> _unreachable = [];
+
+    private IReadOnlyDictionary<MediaId, MatchedMedia> _changedMedia = new Dictionary<MediaId, MatchedMedia>();
+
+    private RenderFragment SyncLabel =>
+        @<text>
+            @if (IsBusy)
+            {
+                <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                <span>Syncing...</span>
+            }
+            else
+            {
+                <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
+                <span>Sync</span>
+            }
+        </text>;
+
+    private (int Adds, int Removes) ChangesOf(WantlistSyncSummary report, ArrApp app)
+    {
+        var changes = report.Changes.Where(change => _changedMedia.TryGetValue(change.MediaId, out var media) && media.Identity.Type == app.Type).ToList();
+        return (changes.Count(change => change.Action == WantlistOperationAction.Add), changes.Count(change => change.Action == WantlistOperationAction.Remove));
+    }
 
     private const int DryRunAttempts = 3;
     private static readonly TimeSpan DryRunRetryDelay = TimeSpan.FromSeconds(1);
@@ -241,11 +296,14 @@
                 _dryRun = changes;
                 _dryRunError = null;
                 var ids = changes.Changes.Select(change => change.MediaId).Concat(changes.NoOps).Distinct();
-                _items = WantlistSyncView.Items(changes, await Media.GetDetailsByIdAsync(ids, cancellationToken), ProviderName);
+                _changedMedia = await Media.GetDetailsByIdAsync(ids, cancellationToken);
+                _unreachable = [];
+                _items = WantlistSyncView.Items(changes, _changedMedia, ProviderName);
                 _chips = WantlistSyncView.Chips(changes);
                 break;
             case WantlistSyncSinkUnreachable failed:
                 _dryRunError = failed.Reason;
+                _unreachable = failed.Apps;
                 break;
         }
     }

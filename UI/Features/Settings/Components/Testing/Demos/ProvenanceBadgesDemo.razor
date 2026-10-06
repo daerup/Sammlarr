@@ -6,7 +6,7 @@
         <div class="flex flex-wrap items-center gap-2">
             @foreach (var provenance in DemoProvenance.All)
             {
-                <ProvenanceBadge Provenance="provenance" AddedAt="DemoProvenance.AddedAt"/>
+                <ProvenanceBadge Provenance="provenance" AddedAt="DemoProvenance.AddedAt" Type="MediaType.Movie"/>
             }
         </div>
     </BbTooltipProvider>

@@ -49,7 +49,7 @@
         <ProtectedComponent GuardState="IsConnected"
                             Sink="@Settings!.Sink"
                             DeniedActionDescription="sync your wantlist">
-            <WantlistSyncButton @ref="_syncControl" OnSynced="LoadAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@SinkBrandColor" ProviderName="@SinkName" OutboxEntries="_outboxEntries.Values"/>
+            <WantlistSyncButton @ref="_syncControl" OnSynced="LoadAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@SinkBrandColor" ProviderName="@SinkName" Sink="Settings?.Sink" OutboxEntries="_outboxEntries.Values"/>
         </ProtectedComponent>
     </HeaderExtras>
     <ChildContent>
@@ -119,7 +119,7 @@
                         else
                         {
                             <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
-                                <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="item.Media.Identity.Id"/>
+                                <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="item.Media.Identity.Id" Type="item.Media.Identity.Type"/>
                             </div>
                             @if (PushDotFor(item.Media.Identity.Id) is { } dot)
                             {

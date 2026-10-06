@@ -6,7 +6,7 @@
     <div class="provenance-body">
         <div class="provenance-head">
             <span class="provenance-mark">
-                @if (ProvenanceView.Brands(Provenance, Branding) is { Count: > 0 } brands)
+                @if (ProvenanceView.Brands(Provenance, Branding, Type) is { Count: > 0 } brands)
                 {
                     @foreach (var brand in brands)
                     {
@@ -81,5 +81,8 @@
     [Parameter]
     public MediaId? ItemId { get; set; }
 
-    private string? RailStyle => ProvenanceView.BrandColor(Provenance, Branding) is { } color ? $"background: {color}" : null;
+    [Parameter, EditorRequired]
+    public required MediaType Type { get; set; }
+
+    private string? RailStyle => ProvenanceView.BrandColor(Provenance, Branding, Type) is { } color ? $"background: {color}" : null;
 }

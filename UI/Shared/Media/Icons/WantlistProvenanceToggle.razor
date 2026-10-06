@@ -14,7 +14,7 @@
         <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-auto p-0 overflow-hidden">
             @if (Item is Some<WantlistItem>(var item))
             {
-                <ProvenanceDetails Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="Result.Identity.Id"/>
+                <ProvenanceDetails Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="Result.Identity.Id" Type="Result.Identity.Type"/>
             }
         </BbPopoverContent>
     </BbPopover>

@@ -1,5 +1,6 @@
 using BlazorBlueprint.Components;
 using Bunit;
+using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,13 +57,15 @@ public class ProvenanceDetailsTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForATitleFoundOnRadarrAndSonarr_ShowsBothMarks()
+	[Arguments(MediaType.Movie, "radarr")]
+	[Arguments(MediaType.Show, "sonarr")]
+	public async Task Render_ForATitleFoundOnRadarrOrSonarr_ShowsOnlyThatAppsMark(MediaType type, string app)
 	{
-		var cut = RenderDetails(new SinkOrigin(SinkKind.Arr));
+		var cut = RenderDetails(new SinkOrigin(SinkKind.Arr), type);
 
 		await Assert
 			.That(cut.FindAll(".provenance-mark img").Select(mark => mark.GetAttribute("src") ?? string.Empty).Where(src => src.Contains("light")))
-			.IsEquivalentTo(["_content/UI/providers/radarr-square-light.svg", "_content/UI/providers/sonarr-square-light.svg"]);
+			.IsEquivalentTo([$"_content/UI/providers/{app}-square-light.svg"]);
 	}
 
 	[Test]
@@ -75,7 +78,7 @@ public class ProvenanceDetailsTests : BunitContext
 		await Assert.That(cut.FindAll("a")).IsEmpty();
 	}
 
-	private IRenderedComponent<ProvenanceDetails> RenderDetails(WantlistItemProvenance provenance)
+	private IRenderedComponent<ProvenanceDetails> RenderDetails(WantlistItemProvenance provenance, MediaType type = MediaType.Movie)
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
@@ -83,7 +86,7 @@ public class ProvenanceDetailsTests : BunitContext
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		return Render<ProvenanceDetails>(parameters =>
-			parameters.Add(details => details.Provenance, provenance).Add(details => details.AddedAt, DateTimeOffset.UnixEpoch)
+			parameters.Add(details => details.Provenance, provenance).Add(details => details.AddedAt, DateTimeOffset.UnixEpoch).Add(details => details.Type, type)
 		);
 	}
 }
