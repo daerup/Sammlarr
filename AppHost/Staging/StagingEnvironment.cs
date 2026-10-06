@@ -82,11 +82,6 @@ internal static class StagingEnvironment
 				context.Urls.Clear();
 				context.Urls.Add(new() { Url = $"http://{config.Host}:{config.Ports.Sammlarr}", DisplayText = "Sammlarr" });
 			});
-		foreach (var key in PlexOptions.UrlSettings)
-		{
-			sammlarr.WithEnvironment($"{PlexOptions.SectionName}__{key}", $"http://wiremock:8080/plex-blocked/{key}");
-		}
-
 		sammlarr.WithStagingCommands(new StagingResources(layout, scenario, radarr, sonarr, seed));
 		if (builder.Configuration["LaunchSammlarr"] == "true")
 		{
