@@ -1,4 +1,3 @@
-using Domain.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace Core.Auth;
@@ -13,16 +12,13 @@ internal static class Passwords
 
 	internal static bool Verify(string hash, string password) => Hasher.VerifyHashedPassword(string.Empty, hash, password) != PasswordVerificationResult.Failed;
 
-	internal static Optional<Error> Weakness(string password)
+	internal static Optional<Error> Weakness(string password, int minimum)
 	{
-		return Optional.When(
-			password.Length < PasswordRules.MinimumLength,
-			() => Error.From($"A password needs at least {PasswordRules.MinimumLength} characters.")
-		);
+		return Optional.When(password.Length < minimum, () => Error.From($"A password needs at least {minimum} characters."));
 	}
 
-	internal static Optional<Error> Problem(string password, string confirmation)
+	internal static Optional<Error> Problem(string password, string confirmation, int minimum)
 	{
-		return Optional.When(password != confirmation, () => Error.From("The two passwords do not match.")).Or(() => Weakness(password));
+		return Optional.When(password != confirmation, () => Error.From("The two passwords do not match.")).Or(() => Weakness(password, minimum));
 	}
 }

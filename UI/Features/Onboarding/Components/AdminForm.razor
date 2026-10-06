@@ -1,6 +1,8 @@
+@using global::Shared.Options
 @using Domain.Identity
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService BrandingService
+@inject AccountsOptions Accounts
 
 <form method="post" action="/setup/admin" class="flex w-full flex-col gap-4">
     <AntiforgeryToken/>
@@ -60,7 +62,7 @@
                 <BbField>
                     <BbFieldLabel For="setup-password">Password</BbFieldLabel>
                     <BbFieldContent>
-                        <BbInput Id="setup-password" Name="password" Type="InputType.Password" Required="true" Placeholder="@($"At least {PasswordRules.MinimumLength} characters")"
+                        <BbInput Id="setup-password" Name="password" Type="InputType.Password" Required="true" Placeholder="@($"At least {Accounts.MinimumPasswordLength} characters")"
                                  autocomplete="new-password"/>
                     </BbFieldContent>
                 </BbField>

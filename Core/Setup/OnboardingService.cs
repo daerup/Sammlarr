@@ -9,6 +9,7 @@ using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging;
+using Shared.Options;
 
 namespace Core.Setup;
 
@@ -23,6 +24,7 @@ internal sealed class OnboardingService(
 	ICurrentUser currentUser,
 	IDateTimeProvider clock,
 	WebUiNotificationSeeder webUiNotifications,
+	AccountsOptions options,
 	ILogger<OnboardingService> logger
 ) : IOnboardingService
 {
@@ -57,7 +59,7 @@ internal sealed class OnboardingService(
 		using var lease = await gate.EnterAsync(cancellationToken);
 		var problem = (await CodeProblemAsync(claim.SetupCode, cancellationToken))
 			.Or(() => Usernames.Problem(claim.Username))
-			.Or(() => Passwords.Problem(claim.Password, claim.Confirmation));
+			.Or(() => Passwords.Problem(claim.Password, claim.Confirmation, options.MinimumPasswordLength));
 		return await problem.Match(error => Task.FromResult<Result<User>>(error), () => CreateAdminAsync(claim, cancellationToken));
 	}
 

@@ -8,6 +8,7 @@ using Contracts.Wantlist;
 using Domain.Media;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Options;
 using UI.Features.Settings.Components.Testing;
 using UI.Shared.Services;
 using UI.Tests.Media;
@@ -26,6 +27,7 @@ public class DemoRenderTests : BunitContext
 		Services.AddMediaTitleLink();
 		Services.AddScoped<Notifier>();
 		Services.AddScoped<ScrollService>();
+		Services.AddSingleton(new AccountsOptions());
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton(ArtworkStub.Sizing());
 		var clock = IDateTimeProvider.Mock();

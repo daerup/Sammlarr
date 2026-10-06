@@ -59,6 +59,7 @@ public class StagingSeedTests : IAsyncDisposable
 				{
 					["Sammlarr:ConnectionString"] = $"Data Source={Path.Combine(_directory, "sammlarr.db")}",
 					["Sammlarr:Accounts:SetupCode"] = "SAMM-LARR",
+					["Sammlarr:Accounts:MinimumPasswordLength"] = "5",
 				}
 			)
 			.Build();

@@ -9,3 +9,17 @@
     background: color-mix(in oklch, var(--brand) 14%, var(--card));
     border-color: var(--brand);
 }
+
+.signin-busy {
+    display: none;
+    align-items: center;
+    gap: 8px;
+}
+
+.signin-form[data-busy] .signin-idle {
+    display: none;
+}
+
+.signin-form[data-busy] .signin-busy {
+    display: inline-flex;
+}
