@@ -38,6 +38,7 @@ public class ArrSinkConfigRepositoryTests(SammlarrTestHost host) : IAsyncDisposa
 			Prefix = "media",
 			FeedSource = ArrFeedTagSource.Id,
 			PlainPrefix = true,
+			Protection = "keep",
 		}
 	);
 

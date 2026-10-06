@@ -42,6 +42,8 @@ internal record ProviderConfigRow
 
 	public bool ArrTagPlainPrefix { get; set; } = ArrTagScheme.Default.PlainPrefix;
 
+	public string ArrTagProtection { get; set; } = ArrTagScheme.Default.Protection;
+
 	public static ProviderConfigRow Default =>
 		new()
 		{

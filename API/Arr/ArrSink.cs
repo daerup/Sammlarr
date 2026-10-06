@@ -120,7 +120,9 @@ internal sealed class ArrSink(
 		ValueSet<int> taken = [.. others.SelectMany(other => session.Mine(scheme, other))];
 		ValueSet<int> only = [.. theirs.Where(tag => !taken.Contains(tag))];
 		var titles = session.Titles.Where(title => title.Tags.Any(theirs.Contains)).ToList();
-		var sole = titles.Where(title => title.Tags.Any(only.Contains) && !session.IsKept(title, scheme) && !session.WantedByOthers(title, scheme, only)).ToList();
+		var sole = titles
+			.Where(title => title.Tags.Any(only.Contains) && !session.IsProtected(title, scheme) && !session.WantedByOthers(title, scheme, only))
+			.ToList();
 		return new Held(session, sole, [.. titles.Except(sole)], only);
 	}
 
@@ -244,7 +246,7 @@ internal sealed class ArrSink(
 		var scheme = setup.Config.Tags;
 		if (session.Owned(title, scheme).Count == 0)
 		{
-			return [.. labels, scheme.KeptTag];
+			return [.. labels, scheme.ProtectedTag];
 		}
 
 		return session.IsUnclaimed(title, scheme)
@@ -328,7 +330,7 @@ internal sealed class ArrSink(
 		var mine = session.Mine(scheme, setup.Viewer);
 		var wantedByOthers = scheme.PerUser && session.WantedByOthers(title, scheme, mine);
 		var removed = await (
-			(wantedByOthers, session.IsKept(title, scheme)) switch
+			(wantedByOthers, session.IsProtected(title, scheme)) switch
 			{
 				(true, _) => session.RetagAsync(title, [.. title.Tags.Where(mine.Contains)], ArrTagChange.Remove, cancellationToken),
 				(false, true) => session.RetagAsync(title, session.Owned(title, scheme), ArrTagChange.Remove, cancellationToken),
