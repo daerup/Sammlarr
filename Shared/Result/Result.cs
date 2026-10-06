@@ -15,6 +15,8 @@ public sealed record Error
 
 	public static Error From(Exception exception) => new(exception.Message, Some.Of(exception));
 
+	public static Error From(string reason, Exception exception) => new(reason, Some.Of(exception));
+
 	public Optional<TException> CausedBy<TException>()
 		where TException : Exception
 	{

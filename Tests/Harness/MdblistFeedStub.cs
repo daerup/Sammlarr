@@ -68,7 +68,7 @@ internal static class MdblistFeedStub
 		);
 	}
 
-	private static string Url(string identifier) => string.Format(MdblistEndpoints.ListItemsPath, identifier);
+	private static string Url(string identifier) => MdblistLists.ItemsPath(identifier);
 
 	private static int Offset(HttpRequestMessage request) => int.Parse(HttpUtility.ParseQueryString(request.RequestUri?.Query ?? string.Empty)["offset"] ?? "0");
 

@@ -8,7 +8,7 @@ public class FeedConfigurationTests
 {
 	private const string OptionalSection = "Filters, Sorting & Limits";
 
-	private const string UnknownIdentifier = "e2e-unknown-list";
+	private const string UnknownIdentifier = "e2e/unknown-list";
 
 	[Test]
 	public async Task Limit_WhenSet_CapsPreviewRows()
@@ -171,7 +171,7 @@ public class FeedConfigurationTests
 
 		await Expect(page.GetByText("Clone feed").First).ToBeVisibleAsync();
 		await Expect(page.Locator("#name")).ToHaveValueAsync(original);
-		await Expect(page.Locator("#list-identifier")).ToHaveValueAsync(FeedEditor.ListIdentifier);
+		await Expect(page.Locator("#list-identifier")).ToHaveValueAsync(FeedEditor.StoredListIdentifier);
 		await Expect(FeedEditor.Option(page, "Strategy", "Mirror")).ToHaveAttributeAsync("aria-checked", "true");
 
 		await FeedEditor.FillAsync(page, "#name", copy);
@@ -221,6 +221,36 @@ public class FeedConfigurationTests
 		await Expect(page.GetByText("Test failed")).ToBeVisibleAsync();
 		await Expect(page.Button("Retry")).ToBeVisibleAsync();
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
+	}
+
+	[Test]
+	public async Task ListNumber_WhenTested_TurnsIntoTheListsPathAndSaysWhereItCameFrom()
+	{
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.VisitAsync("/feeds/create");
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Number"));
+
+		await FeedEditor.TestAsync(page);
+		await FeedEditor.PreviewLoadedAsync(page);
+
+		await Expect(page.Locator("#list-identifier")).ToHaveValueAsync(FeedEditor.StoredListIdentifier);
+		await Expect(page.Locator("[data-identifier-note]")).ToHaveTextAsync($"Looked up from {FeedEditor.ListIdentifier}.");
+	}
+
+	[Test]
+	public async Task Identifier_ThatIsNoList_IsRefusedUnderTheFieldAndLoadsNothing()
+	{
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.VisitAsync("/feeds/create");
+		await FeedEditor.SelectMdblistAsync(page);
+		await FeedEditor.FillAsync(page, "#name", TestData.Name("Refused"));
+		await FeedEditor.FillAsync(page, "#list-identifier", "top-250-movies");
+
+		await FeedEditor.TestButton(page).ClickAsync();
+
+		await Expect(page.Locator("[data-identifier-error]")).ToHaveTextAsync("Paste the list's link from mdblist.com, its owner/list, or its number.");
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
+		await Expect(FeedEditor.SaveButton(page)).ToBeHiddenAsync();
 	}
 
 	private static string CronField(string label) => $"input[aria-label^='{label}']";

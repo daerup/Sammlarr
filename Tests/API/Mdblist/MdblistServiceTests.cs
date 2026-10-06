@@ -93,6 +93,94 @@ public class MdblistServiceTests
 			.And.Multiple(async unmatched => await Assert.That(unmatched.Details).IsEqualTo(new MovieDetails()));
 	}
 
+	[Test]
+	public async Task NormalizeAsync_ForAListNumber_StoresItsOwnerAndSlug()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("""[{"id":88434,"user_name":"snoak","name":"Trakt's Trending Shows","slug":"trakt-s-trending-shows"}]""");
+		var testee = CreateTestee(handler, out _);
+
+		var normalized = await testee.NormalizeAsync("88434");
+
+		await Assert.That(normalized).IsSuccess().And.IsEqualTo("snoak/trakt-s-trending-shows");
+		handler.Verify(request => request.Method(HttpMethod.Get).PathMatches(@"^/lists/88434(\?.*)?$"), Times.Once);
+	}
+
+	[Test]
+	[Arguments("https://mdblist.com/lists/snoak/trakt-s-trending-shows/", "snoak/trakt-s-trending-shows")]
+	[Arguments("chazlarson/external/2868", "chazlarson/external/2868")]
+	public async Task NormalizeAsync_ForALinkOrAPath_StoresThePathWithoutAsking(string input, string stored)
+	{
+		var handler = Mock.HttpHandler();
+		var testee = CreateTestee(handler, out _);
+
+		var normalized = await testee.NormalizeAsync(input);
+
+		await Assert.That(normalized).IsSuccess().And.IsEqualTo(stored);
+		handler.Verify(request => request.Method(HttpMethod.Get), Times.Never);
+	}
+
+	[Test]
+	public async Task NormalizeAsync_ForANumberMdblistDoesNotKnow_SaysItHasNoSuchList()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
+		var testee = CreateTestee(handler, out _);
+
+		var error = await Assert.That(await testee.NormalizeAsync("99999999")).IsError();
+
+		await Assert.That(error!.Reason).IsEqualTo("MDBList has no list 99999999.");
+	}
+
+	[Test]
+	public async Task NormalizeAsync_WhenMdblistDoesNotAnswer_AsksForTheLinkAndBlamesMdblist()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.ServiceUnavailable);
+		var testee = CreateTestee(handler, out _);
+
+		var error = await Assert.That(await testee.NormalizeAsync("88434")).IsError();
+
+		await Assert.That(error!.Reason).Contains("Paste the list's link instead");
+		await Assert.That(error.CausedBy<ProviderUnavailableException>()).IsSome();
+	}
+
+	[Test]
+	public async Task NormalizeAsync_WhenMdblistCannotBeReached_AsksForTheLinkAndBlamesMdblist()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Throws(new HttpRequestException("No such host is known."));
+		var testee = CreateTestee(handler, out _);
+
+		var error = await Assert.That(await testee.NormalizeAsync("88434")).IsError();
+
+		await Assert.That(error!.CausedBy<ProviderUnavailableException>()).IsSome();
+	}
+
+	[Test]
+	public async Task NormalizeAsync_ForSomethingThatIsNoList_RefusesWithoutAsking()
+	{
+		var handler = Mock.HttpHandler();
+		var testee = CreateTestee(handler, out _);
+
+		var error = await Assert.That(await testee.NormalizeAsync("top-250-movies")).IsError();
+
+		await Assert.That(error!.Reason).IsEqualTo("Paste the list's link from mdblist.com, its owner/list, or its number.");
+		handler.Verify(request => request.Method(HttpMethod.Get), Times.Never);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAnExternalList_PagesThroughItsExternalItems()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[]}""");
+		var testee = CreateTestee(handler, out _);
+
+		await testee.GetFeedItemsAsync("chazlarson/external/2868").ToListAsync();
+
+		handler.Verify(request => request.Method(HttpMethod.Get).PathMatches(@"^/external/lists/2868/items(\?.*)?$"), Times.Once);
+	}
+
 	private static MdblistService CreateTestee(
 		HttpMessageHandler handler,
 		out Mock<IMediaService> media,

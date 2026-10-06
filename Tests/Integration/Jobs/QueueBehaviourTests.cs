@@ -7,6 +7,7 @@ using Domain.Jobs;
 using Domain.Providers;
 using Domain.Wantlist.Sync;
 using Harness;
+using Integration.Tests.Feeds;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -50,7 +51,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		await ClockReachesAsync(Three);
 		await CronFiresAsync(_documentaries);
 
-		var duringTheRun = await WhileTheNextJobRunsAsync(host.HoldMdblistFeed("documentaries"), ArmedSyncAsync);
+		var duringTheRun = await WhileTheNextJobRunsAsync(host.HoldMdblistFeed(FeedRunSeeding.ListOf("Documentaries")), ArmedSyncAsync);
 
 		await Assert.That(duringTheRun.State).IsEqualTo(JobState.Waiting);
 	}
@@ -179,7 +180,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		await ClockReachesAsync(Three);
 		await CronFiresAsync(_documentaries);
 		var (anime, pressed) = await WhileTheNextJobRunsAsync(
-			host.HoldMdblistFeed("documentaries"),
+			host.HoldMdblistFeed(FeedRunSeeding.ListOf("Documentaries")),
 			async () =>
 			{
 				await ClockReachesAsync(Three.AddMinutes(1));
@@ -204,7 +205,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		await ClockReachesAsync(Three);
 		await CronFiresAsync(_documentaries);
 		var (pressed, anime) = await WhileTheNextJobRunsAsync(
-			host.HoldMdblistFeed("documentaries"),
+			host.HoldMdblistFeed(FeedRunSeeding.ListOf("Documentaries")),
 			async () =>
 			{
 				var pressedSync = await EnqueueAsync(ManualSync);
@@ -256,7 +257,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var running = await EnqueueAsync(DocumentaryFeed);
 
-		var again = await WhileTheNextJobRunsAsync(host.HoldMdblistFeed("documentaries"), () => EnqueueAsync(DocumentaryFeed));
+		var again = await WhileTheNextJobRunsAsync(host.HoldMdblistFeed(FeedRunSeeding.ListOf("Documentaries")), () => EnqueueAsync(DocumentaryFeed));
 
 		var queue = await QueueAsync();
 		await Assert.That(again.Id).IsEqualTo(running.Id);
@@ -304,7 +305,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var running = await EnqueueAsync(DocumentaryFeed);
 
-		var cancelled = await WhileTheNextJobRunsAsync(host.HoldMdblistFeed("documentaries"), () => Testee.CancelAsync(running.Id));
+		var cancelled = await WhileTheNextJobRunsAsync(host.HoldMdblistFeed(FeedRunSeeding.ListOf("Documentaries")), () => Testee.CancelAsync(running.Id));
 
 		await Assert.That(cancelled).IsNone();
 		await Assert.That((await JobAsync(running.Id)).State).IsEqualTo(JobState.Done);
@@ -312,10 +313,10 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private async Task<FeedId> FeedAsync(string name, string cron)
 	{
-		var identifier = name.ToLowerInvariant();
+		var identifier = FeedRunSeeding.ListOf(name);
 		host.MdblistFeedEmpty(identifier);
 		return await host.Resolve<IFeedService>()
-			.CreateAsync(
+			.CreatedAsync(
 				new FeedCreateData
 				{
 					Name = name,

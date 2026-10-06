@@ -112,6 +112,8 @@ internal static class MirrorSwitch
 	}
 }
 
+public sealed record IdentifierCheck(string Typed, Result<string> Answer);
+
 public record FeedConfig
 {
 	public bool IsEnabled { get; init; } = true;

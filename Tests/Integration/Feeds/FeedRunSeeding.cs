@@ -21,4 +21,11 @@ internal static class FeedRunSeeding
 	{
 		return (await Assert.That((await host.Resolve<IFeedService>().GetAsync()).Find(feedId)).IsSome())!.Feed;
 	}
+
+	public static async Task<FeedId> CreatedAsync(this IFeedService feeds, FeedCreateData data)
+	{
+		return (await Assert.That(await feeds.CreateAsync(data)).IsSuccess())!;
+	}
+
+	public static string ListOf(string name) => $"sammlarr/{name.ToLowerInvariant().Replace(' ', '-')}";
 }

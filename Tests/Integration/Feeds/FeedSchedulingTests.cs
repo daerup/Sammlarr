@@ -24,7 +24,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task CreateAsync_SchedulesTheFeedItJustSavedOnItsOwnCron()
 	{
-		var id = await Testee.CreateAsync(Feed("Nightly", new Scheduled(Nightly)));
+		var id = await Testee.CreatedAsync(Feed("Nightly", new Scheduled(Nightly)));
 
 		await Assert.That(Scheduler.Scheduled).Contains((id, new Scheduled(Nightly)));
 	}
@@ -32,7 +32,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task CreateAsync_WhenTheFeedIsManual_LeavesItUnscheduled()
 	{
-		var id = await Testee.CreateAsync(Feed("Hand cranked", new Manual()));
+		var id = await Testee.CreatedAsync(Feed("Hand cranked", new Manual()));
 
 		await Assert.That(Scheduler.Scheduled.Select(scheduled => scheduled.Id)).DoesNotContain(id);
 	}
@@ -40,7 +40,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task UpdateAsync_WhenTheFeedBecomesScheduled_SchedulesItOnTheNewCron()
 	{
-		var id = await Testee.CreateAsync(Feed("Hand cranked", new Manual()));
+		var id = await Testee.CreatedAsync(Feed("Hand cranked", new Manual()));
 
 		await Testee.UpdateAsync(id, Update("Hand cranked", new Scheduled(Hourly), isEnabled: true));
 
@@ -50,7 +50,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task UpdateAsync_WhenTheFeedIsReEnabled_SchedulesItAgain()
 	{
-		var id = await Testee.CreateAsync(Feed("Nightly", new Scheduled(Nightly)));
+		var id = await Testee.CreatedAsync(Feed("Nightly", new Scheduled(Nightly)));
 		await Testee.UpdateAsync(id, Update("Nightly", new Scheduled(Nightly), isEnabled: false));
 
 		await Testee.UpdateAsync(id, Update("Nightly", new Scheduled(Nightly), isEnabled: true));
@@ -61,7 +61,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task UpdateAsync_WhenTheFeedBecomesManual_UnschedulesIt()
 	{
-		var id = await Testee.CreateAsync(Feed("Nightly", new Scheduled(Nightly)));
+		var id = await Testee.CreatedAsync(Feed("Nightly", new Scheduled(Nightly)));
 
 		await Testee.UpdateAsync(id, Update("Nightly", new Manual(), isEnabled: true));
 
@@ -71,7 +71,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task UpdateAsync_WhenTheFeedIsDisabled_UnschedulesItWhateverItsCronSays()
 	{
-		var id = await Testee.CreateAsync(Feed("Nightly", new Scheduled(Nightly)));
+		var id = await Testee.CreatedAsync(Feed("Nightly", new Scheduled(Nightly)));
 
 		await Testee.UpdateAsync(id, Update("Nightly", new Scheduled(Nightly), isEnabled: false));
 
@@ -81,7 +81,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task DeleteAsync_UnschedulesBeforeItRemovesTheFeed()
 	{
-		var id = await Testee.CreateAsync(Feed("Doomed", new Scheduled(Nightly)));
+		var id = await Testee.CreatedAsync(Feed("Doomed", new Scheduled(Nightly)));
 
 		await Testee.DeleteAsync(id);
 
@@ -92,7 +92,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task DeleteAsync_ForAFeedWithTitlesOnTheWantlist_KeepsThemAsOrphanedUnderItsName()
 	{
-		var id = await Testee.CreateAsync(Feed("Nightly", new Scheduled(Nightly)));
+		var id = await Testee.CreatedAsync(Feed("Nightly", new Scheduled(Nightly)));
 		var title = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(id));
 
 		await Testee.DeleteAsync(id);
@@ -107,7 +107,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task DeleteAsync_WhenTheFeedBelongsToAnotherUser_LeavesTheirScheduleAndFeedIntact()
 	{
-		var id = await Testee.CreateAsync(Feed("Theirs", new Scheduled(Nightly)));
+		var id = await Testee.CreatedAsync(Feed("Theirs", new Scheduled(Nightly)));
 		var owner = host.CurrentUser.Id;
 		host.CurrentUser.Id = UserId.From(SammlarrTestHost.SeededMember.Id);
 
@@ -121,8 +121,8 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task PauseAsync_ForTheSelection_DisablesAndUnschedulesEverySelectedFeed()
 	{
-		var nightly = await Testee.CreateAsync(Feed("Nightly", new Scheduled(Nightly)));
-		var hourly = await Testee.CreateAsync(Feed("Hourly", new Scheduled(Hourly)));
+		var nightly = await Testee.CreatedAsync(Feed("Nightly", new Scheduled(Nightly)));
+		var hourly = await Testee.CreatedAsync(Feed("Hourly", new Scheduled(Hourly)));
 
 		await Testee.PauseAsync([nightly, hourly]);
 
@@ -134,7 +134,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task ResumeAsync_AfterAPause_SchedulesTheFeedOnItsOwnCronAgain()
 	{
-		var id = await Testee.CreateAsync(Feed("Nightly", new Scheduled(Nightly)));
+		var id = await Testee.CreatedAsync(Feed("Nightly", new Scheduled(Nightly)));
 		await Testee.PauseAsync([id]);
 
 		await Testee.ResumeAsync([id]);
@@ -146,8 +146,8 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task PauseAsync_ForFeedsOutsideTheSelection_LeavesThemRunning()
 	{
-		var paused = await Testee.CreateAsync(Feed("Paused", new Scheduled(Nightly)));
-		var untouched = await Testee.CreateAsync(Feed("Untouched", new Scheduled(Nightly)));
+		var paused = await Testee.CreatedAsync(Feed("Paused", new Scheduled(Nightly)));
+		var untouched = await Testee.CreatedAsync(Feed("Untouched", new Scheduled(Nightly)));
 
 		await Testee.PauseAsync([paused]);
 
@@ -158,8 +158,8 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task PauseAsync_WhenAFeedIsAlreadyPaused_ReturnsOnlyTheFeedsItChanged()
 	{
-		var enabled = await Testee.CreateAsync(Feed("Enabled", new Scheduled(Nightly)));
-		var alreadyPaused = await Testee.CreateAsync(Feed("Already paused", new Scheduled(Nightly)));
+		var enabled = await Testee.CreatedAsync(Feed("Enabled", new Scheduled(Nightly)));
+		var alreadyPaused = await Testee.CreatedAsync(Feed("Already paused", new Scheduled(Nightly)));
 		await Testee.PauseAsync([alreadyPaused]);
 
 		var changed = await Testee.PauseAsync([enabled, alreadyPaused]);
@@ -170,8 +170,8 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task ResumeAsync_WhenAFeedIsAlreadyRunning_ReturnsOnlyTheFeedsItChanged()
 	{
-		var paused = await Testee.CreateAsync(Feed("Paused", new Scheduled(Nightly)));
-		var running = await Testee.CreateAsync(Feed("Running", new Scheduled(Nightly)));
+		var paused = await Testee.CreatedAsync(Feed("Paused", new Scheduled(Nightly)));
+		var running = await Testee.CreatedAsync(Feed("Running", new Scheduled(Nightly)));
 		await Testee.PauseAsync([paused]);
 
 		var changed = await Testee.ResumeAsync([paused, running]);
@@ -182,7 +182,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task PauseAsync_WhenTheFeedBelongsToAnotherUser_LeavesItRunning()
 	{
-		var id = await Testee.CreateAsync(Feed("Theirs", new Scheduled(Nightly)));
+		var id = await Testee.CreatedAsync(Feed("Theirs", new Scheduled(Nightly)));
 		var owner = host.CurrentUser.Id;
 		host.CurrentUser.Id = UserId.From(SammlarrTestHost.SeededMember.Id);
 
@@ -200,7 +200,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 			IsEnabled = true,
 			Provider = FeedProvider.Mdblist,
 			Strategy = new FeedStrategy(new Append()),
-			Identifier = name.ToLowerInvariant(),
+			Identifier = FeedRunSeeding.ListOf(name),
 			Schedule = schedule,
 		};
 
@@ -211,7 +211,7 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 			IsEnabled = isEnabled,
 			Provider = FeedProvider.Mdblist,
 			Strategy = new FeedStrategy(new Append()),
-			Identifier = name.ToLowerInvariant(),
+			Identifier = FeedRunSeeding.ListOf(name),
 			Schedule = schedule,
 		};
 }

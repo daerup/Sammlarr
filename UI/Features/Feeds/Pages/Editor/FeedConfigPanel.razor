@@ -127,7 +127,12 @@
                              Value="@_identifier" ValueChanged="@ChangeIdentifier"
                              Class="bg-accent" Required="true"
                              Disabled="@IsLoading"
+                             AriaInvalid="@IdentifierRefused"
                              UpdateTiming="UpdateTiming.Immediate"/>
+                    @if (ShownCheck is { } check)
+                    {
+                        @check.Answer.Match(stored => IdentifierNote(check.Typed, stored), IdentifierProblem)
+                    }
                 </BbFieldContent>
                 <BbFieldDescription>@RenderIdentifierDescription()</BbFieldDescription>
             </BbField>
@@ -382,6 +387,78 @@
     [Parameter] public required FeedConfig Value { get; set; }
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public EventCallback<FeedConfig> OnChange { get; set; }
+    [Parameter] public IdentifierCheck? Check { get; set; }
+
+    private IdentifierCheck? _adopted;
+
+    private IdentifierCheck? ShownCheck
+    {
+        get
+        {
+            return Check is { } check && check.Answer.Match(stored => stored == _identifier, _ => check.Typed == _identifier.Trim()) ? check : null;
+        }
+    }
+
+    private bool IdentifierRefused => ShownCheck is { } check && check.Answer.Match(_ => false, error => !Unreachable(error));
+
+    protected override void OnParametersSet()
+    {
+        if (Check is { } check && !ReferenceEquals(check, _adopted))
+        {
+            _adopted = check;
+            check.Answer.Apply(stored => Adopt(check.Typed, stored));
+        }
+    }
+
+    private void Adopt(string typed, string stored)
+    {
+        if (_identifier.Trim() == typed)
+        {
+            _identifier = stored;
+        }
+    }
+
+    private static bool Unreachable(Error error) => error.CausedBy<ProviderUnavailableException>().IsSome();
+
+    private static RenderFragment IdentifierNote(string typed, string stored) => @<text>
+        @if (typed != stored && NoteFor(typed) is { } note)
+        {
+            <p class="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground" data-identifier-note>
+                <LucideIcon Name="wand-sparkles" Size="13"/>
+                <span>@note</span>
+            </p>
+        }
+    </text>;
+
+    private static RenderFragment IdentifierProblem(Error error) => @<text>
+        @if (Unreachable(error))
+        {
+            <p class="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--alert-warning)]" role="alert" data-identifier-warning>
+                <LucideIcon Name="cloud-off" Size="13"/>
+                <span>@error.Reason</span>
+            </p>
+        }
+        else
+        {
+            <BbFieldError Class="mt-1.5 flex items-center gap-1.5" data-identifier-error>
+                <LucideIcon Name="circle-alert" Size="13"/>
+                <span>@error.Reason</span>
+            </BbFieldError>
+        }
+    </text>;
+
+    private static RenderFragment? NoteFor(string typed)
+    {
+        if (typed.All(char.IsAsciiDigit))
+        {
+            return @<text>Looked up from <code>@typed</code>.</text>;
+        }
+
+        var address = typed.Contains("://", StringComparison.Ordinal) ? typed : $"https://{typed}";
+        return Uri.TryCreate(address, UriKind.Absolute, out var link) && link.Host.Contains('.')
+            ? @<text>Taken from the @link.Host.Replace("www.", string.Empty, StringComparison.OrdinalIgnoreCase) link.</text>
+            : null;
+    }
 
     private readonly HashSet<FeedProvider> _disabledProviders = [];
 
@@ -625,7 +702,7 @@
     private string GetIdentifierPlaceholder(FeedProvider? provider) =>
         provider switch
         {
-            FeedProvider.Mdblist => "e.g. top-250-movies or 12345",
+            FeedProvider.Mdblist => "e.g. https://mdblist.com/lists/snoak/trakt-s-trending-shows",
             null => "Select a provider first",
             _ => "Provider-specific list identifier",
         };
@@ -633,7 +710,7 @@
     private MarkupString RenderIdentifierDescription() => _provider switch
     {
         FeedProvider.Mdblist => new MarkupString(
-        "Slug or numeric ID from the list URL, e.g. <code>top-250-movies</code> or <code>12345</code>. " +
+        "Paste the list's link from mdblist.com, or its owner/list, e.g. <code>snoak/trakt-s-trending-shows</code>. Its number works too. " +
         "<a href=\"https://mdblist.com/toplists/\" target=\"_blank\" " +
         "class=\"underline underline-offset-2 hover:text-foreground transition-colors\">Browse lists on MDBList</a>"),
         null when Enum.GetValues<FeedProvider>().All(_disabledProviders.Contains) => new MarkupString("No provider is available until you add a TMDB or MDBList key in Settings › Providers."),

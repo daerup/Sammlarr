@@ -18,7 +18,7 @@ public class FeedOverviewTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task GetAsync_ForAFeedThatAddedTitles_CountsOnlyWhatItPutOnTheWantlist()
 	{
-		var comedy = await Testee.CreateAsync(Feed("Comedy"));
+		var comedy = await Testee.CreatedAsync(Feed("Comedy"));
 		var origin = await host.SeedFeedOriginAsync(comedy);
 		await host.Movie(TestMedia.Inception).OnWantlist(origin);
 		await host.Movie(TestMedia.FightClub).OnWantlist(origin);
@@ -34,7 +34,7 @@ public class FeedOverviewTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task GetAsync_ForAFeedThatNeverRan_HasNoLastRunAndNothingOnTheWantlist()
 	{
-		var fresh = await Testee.CreateAsync(Feed("Fresh"));
+		var fresh = await Testee.CreatedAsync(Feed("Fresh"));
 
 		var overview = await Assert.That((await Testee.GetAsync()).Find(fresh)).IsSome();
 
@@ -50,7 +50,7 @@ public class FeedOverviewTests(SammlarrTestHost host) : IAsyncDisposable
 			IsEnabled = true,
 			Provider = FeedProvider.Mdblist,
 			Strategy = new FeedStrategy(new Append()),
-			Identifier = name.ToLowerInvariant(),
+			Identifier = FeedRunSeeding.ListOf(name),
 			Schedule = new FeedRunTrigger(new Manual()),
 		};
 }

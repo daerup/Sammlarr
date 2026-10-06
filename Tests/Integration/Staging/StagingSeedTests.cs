@@ -68,14 +68,14 @@ public class StagingSeedTests : IAsyncDisposable
 				{
 					Name = "Top movies of the week",
 					Provider = FeedProvider.Mdblist,
-					Identifier = "2236",
+					Identifier = "garycrawfordgc/top-movies-of-the-week",
 					Strategy = SeedStrategy.Append,
 				},
 				new SeedFeed
 				{
 					Name = "Trending shows",
 					Provider = FeedProvider.Mdblist,
-					Identifier = "88434",
+					Identifier = "snoak/trakt-s-trending-shows",
 					Strategy = SeedStrategy.Mirror,
 					Limit = 10,
 				},

@@ -5,6 +5,11 @@ namespace API.Mdblist.Types;
 
 internal static class MdblistTypes
 {
+	public static class Lists
+	{
+		public record Info([property: JsonPropertyName("user_name")] string UserName, [property: JsonPropertyName("slug")] string Slug);
+	}
+
 	public static class ListItems
 	{
 		[JsonConverter(typeof(RootConverter))]

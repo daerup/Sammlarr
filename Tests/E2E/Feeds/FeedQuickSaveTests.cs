@@ -5,7 +5,7 @@ namespace E2E.Tests.Feeds;
 
 public class FeedQuickSaveTests
 {
-	private const string Identifier = "e2e-quicksave";
+	private const string Identifier = "e2e/quicksave";
 
 	private const int EarlySaveMinItems = 100;
 
