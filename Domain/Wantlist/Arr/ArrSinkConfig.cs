@@ -6,6 +6,8 @@ public sealed record ArrInstanceConfig
 
 	public Optional<string> Url { get; init; } = new None();
 
+	public Optional<string> ExternalUrl { get; init; } = new None();
+
 	public Optional<string> ApiKey { get; init; } = new None();
 
 	public Optional<int> QualityProfileId { get; init; } = new None();
@@ -15,6 +17,8 @@ public sealed record ArrInstanceConfig
 	public bool Monitored { get; init; } = true;
 
 	public bool SearchOnAdd { get; init; } = true;
+
+	public Optional<string> LinkUrl => ExternalUrl.Or(() => Url);
 
 	public bool IsConnectable => Url.IsSome() && ApiKey.IsSome();
 

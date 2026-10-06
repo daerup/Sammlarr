@@ -81,14 +81,7 @@ public class ArrAppSectionTests : BunitContext
 	public async Task Monitor_WhenSwitchedOff_RaisesTheChange()
 	{
 		List<ArrInstanceConfig> changes = [];
-		var cut = Render<ArrAppSection>(parameters =>
-			parameters
-				.Add(section => section.App, ArrApp.Sonarr)
-				.Add(section => section.Instance, Stored)
-				.Add(section => section.State, ArrConnectionState.Connected)
-				.Add(section => section.Choices, Choices)
-				.Add(section => section.InstanceChanged, changes.Add)
-		);
+		var cut = RenderWithChanges(Stored, changes);
 
 		await cut.Find("button[role=switch][aria-label='Sonarr monitors new titles']").ClickAsync();
 
@@ -143,6 +136,36 @@ public class ArrAppSectionTests : BunitContext
 	}
 
 	[Test]
+	public async Task Key_WithAnExternalUrl_LinksThereInsteadOfToTheUrl()
+	{
+		var cut = RenderSection(Stored with { ExternalUrl = Some.Of("http://localhost:8990") }, ArrConnectionState.Connected);
+
+		await Assert.That(cut.Find("a.app-link").GetAttribute("href")).IsEqualTo("http://localhost:8990/settings/general");
+	}
+
+	[Test]
+	public async Task ExternalUrl_WhenTyped_RaisesTheChangeTrimmed()
+	{
+		List<ArrInstanceConfig> changes = [];
+		var cut = RenderWithChanges(Stored, changes);
+
+		await cut.InvokeAsync(() => ExternalUrlInput(cut).ValueChanged.InvokeAsync(" http://localhost:8990 "));
+
+		await Assert.That(changes.Single()).IsEqualTo(Stored with { ExternalUrl = Some.Of("http://localhost:8990") });
+	}
+
+	[Test]
+	public async Task ExternalUrl_WhenCleared_RaisesTheChangeWithoutOne()
+	{
+		List<ArrInstanceConfig> changes = [];
+		var cut = RenderWithChanges(Stored with { ExternalUrl = Some.Of("http://localhost:8990") }, changes);
+
+		await cut.InvokeAsync(() => ExternalUrlInput(cut).ValueChanged.InvokeAsync(null));
+
+		await Assert.That(changes.Single()).IsEqualTo(Stored);
+	}
+
+	[Test]
 	[Arguments(ArrApp.Radarr, "movies", "http://radarr:7878")]
 	[Arguments(ArrApp.Sonarr, "shows", "http://sonarr:8989")]
 	public async Task Section_ForAnApp_NamesWhatItAddsAndSuggestsItsDefaultAddress(ArrApp app, string adds, string address)
@@ -157,6 +180,23 @@ public class ArrAppSectionTests : BunitContext
 	{
 		var description = cut.FindAll("*").Last(element => element.TextContent.Contains("Found in"));
 		return Regex.Replace(description.TextContent, @"\s+", " ").Trim();
+	}
+
+	private static BbInput ExternalUrlInput(IRenderedComponent<ArrAppSection> cut)
+	{
+		return cut.FindComponents<BbInput>().Single(input => input.Instance.AriaLabel == "Sonarr external URL").Instance;
+	}
+
+	private IRenderedComponent<ArrAppSection> RenderWithChanges(ArrInstanceConfig instance, List<ArrInstanceConfig> changes)
+	{
+		return Render<ArrAppSection>(parameters =>
+			parameters
+				.Add(section => section.App, ArrApp.Sonarr)
+				.Add(section => section.Instance, instance)
+				.Add(section => section.State, ArrConnectionState.Connected)
+				.Add(section => section.Choices, Choices)
+				.Add(section => section.InstanceChanged, changes.Add)
+		);
 	}
 
 	private IRenderedComponent<ArrAppSection> RenderSection(ArrInstanceConfig instance, ArrConnectionState state, string error = "", ArrApp app = ArrApp.Sonarr)

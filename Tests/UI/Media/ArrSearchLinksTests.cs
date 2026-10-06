@@ -99,6 +99,17 @@ public class ArrSearchLinksTests
 			.And.IsEqualTo("https://home.example/radarr/add/new?term=tmdb%3A603");
 	}
 
+	[Test]
+	public async Task For_AnAppWithAnExternalUrl_LinksThereInsteadOfToItsUrl()
+	{
+		var config = Addressed.With(ArrApp.Radarr, Addressed.Radarr with { ExternalUrl = Some.Of("http://localhost:7879") });
+
+		await Assert
+			.That(ArrSearchLinks.For(config, [TmdbId.From("603", MediaType.Movie)]).Map(link => link.Url))
+			.IsSome()
+			.And.IsEqualTo("http://localhost:7879/add/new?term=tmdb%3A603");
+	}
+
 	private static ArrSearchLink Radarr(string term, string escaped) => new(ArrApp.Radarr, term, $"http://radarr:7878/add/new?term={escaped}");
 
 	private static ArrSearchLink Sonarr(string term, string escaped) => new(ArrApp.Sonarr, term, $"http://sonarr:8989/add/new?term={escaped}");

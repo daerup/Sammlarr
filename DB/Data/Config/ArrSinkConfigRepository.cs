@@ -37,6 +37,7 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 		return new ArrInstanceConfig
 		{
 			Url = Optional.Of(row.Url),
+			ExternalUrl = Optional.Of(row.ExternalUrl),
 			ApiKey = Optional.Of(row.ApiKey),
 			QualityProfileId = Optional.Of(row.QualityProfileId),
 			RootFolderPath = Optional.Of(row.RootFolderPath),
@@ -48,6 +49,7 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 	private static void Write(ArrInstanceRow row, ArrInstanceConfig instance)
 	{
 		row.Url = instance.Url.ToNullable();
+		row.ExternalUrl = instance.ExternalUrl.ToNullable();
 		row.ApiKey = instance.ApiKey.ToNullable();
 		row.QualityProfileId = instance.QualityProfileId.ToNullable();
 		row.RootFolderPath = instance.RootFolderPath.ToNullable();

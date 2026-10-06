@@ -1,4 +1,5 @@
 using Domain.Wantlist.Arr;
+using TestInfrastructure;
 
 namespace Domain.Tests.Wantlist.Arr;
 
@@ -29,6 +30,20 @@ public class ArrSinkConfigTests
 		await Assert.That(changed.Of(app)).IsEqualTo(SetUp);
 		await Assert.That(changed.Of(Other(app))).IsEqualTo(ArrInstanceConfig.Empty);
 		await Assert.That(changed.Tags).IsEqualTo(ArrTagScheme.Default);
+	}
+
+	[Test]
+	public async Task LinkUrl_WithoutAnExternalUrl_IsTheUrl()
+	{
+		await Assert.That(Connectable.LinkUrl).IsSome().And.IsEqualTo("http://radarr:7878");
+	}
+
+	[Test]
+	public async Task LinkUrl_WithAnExternalUrl_IsTheExternalUrl()
+	{
+		var linked = Connectable with { ExternalUrl = Some.Of("http://localhost:7879") };
+
+		await Assert.That(linked.LinkUrl).IsSome().And.IsEqualTo("http://localhost:7879");
 	}
 
 	[Test]

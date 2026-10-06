@@ -79,7 +79,7 @@
                 </div>
                 <BbFieldDescription>
                     Found in
-                    @if (ArrSettingsLink.For(_url).ToNullable() is { } href)
+                    @if (ArrSettingsLink.For(Typed.LinkUrl.GetValueOr(string.Empty)).ToNullable() is { } href)
                     {
                         <AppLink Href="@href" External="true">@App.Name › Settings › General</AppLink>
                     }
@@ -88,6 +88,15 @@
                         <span>@App.Name › Settings › General</span>
                     }.
                 </BbFieldDescription>
+            </BbFieldContent>
+        </BbField>
+
+        <BbField Class="arr-app-wide">
+            <BbFieldLabel>External URL</BbFieldLabel>
+            <BbFieldContent>
+                <BbInput Value="@Instance.ExternalUrl.GetValueOr(string.Empty)" ValueChanged="ExternalUrlChangedAsync" Placeholder="Same as the URL"
+                         AriaLabel="@($"{App.Name} external URL")" Class="h-9 bg-accent text-sm"/>
+                <BbFieldDescription>Where your browser reaches @App.Name, when that differs from the URL Sammlarr uses. Links to @App.Name open here.</BbFieldDescription>
             </BbFieldContent>
         </BbField>
 
@@ -203,6 +212,8 @@
     }
 
     private Task TestAsync() => Test.InvokeAsync(Typed);
+
+    private Task ExternalUrlChangedAsync(string? url) => InstanceChanged.InvokeAsync(Instance with { ExternalUrl = Text(url ?? string.Empty) });
 
     private Task ProfileChangedAsync(int? profile) => InstanceChanged.InvokeAsync(Instance with { QualityProfileId = Optional.Of(profile) });
 

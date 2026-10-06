@@ -84,7 +84,7 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 			: throw new InvalidOperationException($"The staging seed deletes and reseeds its database, so it takes an absolute path only, not '{database}'.");
 	}
 
-	private static StagingSettings Settings(StagingOptions options, int movies, int shows)
+	internal static StagingSettings Settings(StagingOptions options, int movies, int shows)
 	{
 		var radarr = Instance(options.Radarr, options.ArrApiKey, movies);
 		var sonarr = Instance(options.Sonarr, options.ArrApiKey, shows);
@@ -105,6 +105,7 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 		return new ArrInstanceConfig
 		{
 			Url = Some.Of(app.Address),
+			ExternalUrl = Some.Of(app.Url),
 			ApiKey = Some.Of(apiKey),
 			QualityProfileId = Some.Of(profileId),
 			RootFolderPath = Some.Of(app.RootFolder),
