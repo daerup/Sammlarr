@@ -57,49 +57,73 @@
         <BbCollapsibleContent>
             @if (_config is { } config)
             {
-                <div class="arr-apps">
-                    @foreach (var app in Apps)
-                    {
-                        var status = _apps[app];
-                        <ArrAppSection App="app" Instance="config.Of(app)" State="status.State" Error="@status.Error" Choices="status.Choices"
-                                       Edited="typed => Edited(app, typed)" Test="typed => TestAsync(app, typed)"
-                                       InstanceChanged="instance => StoreAsync(app, instance)"/>
-                    }
+                <div class="arr-panel" style="--seg: @SegColour">
+                    <BbTabs Value="@OpenTab" ValueChanged="tab => _tab = tab ?? _tab">
+                        <BbTabsList>
+                            @foreach (var app in Apps)
+                            {
+                                <BbTabsTrigger Value="@app.Name" Class="gap-2">
+                                    <BrandedLogo Brand="Branding.GetBrandingInfo(app)" Form="ProviderLogoForm.Mark" Size="16" Decorative="true"/>
+                                    <span>@app.Name</span>
+                                    @StateMark(app)
+                                </BbTabsTrigger>
+                            }
+                            @if (ShowsTags)
+                            {
+                                <BbTabsTrigger Value="@TagsTab" Class="gap-2">
+                                    <LucideIcon Name="tag" Size="15"/>
+                                    <span>Tags</span>
+                                </BbTabsTrigger>
+                            }
+                        </BbTabsList>
+                        @foreach (var app in Apps)
+                        {
+                            var status = _apps[app];
+                            <BbTabsContent Value="@app.Name" ForceMount="true">
+                                <div class="pt-2">
+                                    <ArrAppSection App="app" Instance="config.Of(app)" State="status.State" Error="@status.Error" Choices="status.Choices"
+                                                   Edited="typed => Edited(app, typed)" Test="typed => TestAsync(app, typed)"
+                                                   InstanceChanged="instance => StoreAsync(app, instance)"/>
+                                </div>
+                            </BbTabsContent>
+                        }
+                        @if (ShowsTags)
+                        {
+                            <BbTabsContent Value="@TagsTab">
+                                <div class="pt-2">
+                                    <ArrTagsSection Scheme="config.Tags" SchemeChanged="tags => StoreAsync(config with { Tags = tags })" Users="_users" Feed="_feed"/>
+                                </div>
+                            </BbTabsContent>
+                        }
+                    </BbTabs>
                 </div>
 
-                @if (SettingUp || Syncs)
+                @if (SettingUp)
                 {
                     <div class="arr-shared">
-                        @if (SettingUp)
-                        {
-                            <p class="arr-shared-note">
-                                <LucideIcon Name="info" Size="13" Class="mt-px shrink-0"/>
-                                <span>
-                                    @(BothReady
-                                        ? "Both apps answered. Switching makes every user's next sync mirror their wantlist into Radarr and Sonarr."
-                                        : "Test both apps to switch; each needs a quality profile and a root folder. Until then the wantlist keeps syncing to Plex; picking Plex again in the map puts this away.")
-                                </span>
-                            </p>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <BbButton Size="ButtonSize.Small" Disabled="@(!BothReady || Switching)" OnClick="SwitchRequested">
-                                    @if (Switching)
-                                    {
-                                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                                        <span>Switching…</span>
-                                    }
-                                    else
-                                    {
-                                        <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
-                                        <span>Switch the wantlist to Radarr + Sonarr</span>
-                                    }
-                                </BbButton>
-                                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Disabled="Switching" OnClick="StayOnPlex">Stay on Plex</BbButton>
-                            </div>
-                        }
-                        else
-                        {
-                            <ArrTagsSection Scheme="config.Tags" SchemeChanged="tags => StoreAsync(config with { Tags = tags })" Users="_users" Feed="_feed"/>
-                        }
+                        <p class="arr-shared-note">
+                            <LucideIcon Name="info" Size="13" Class="mt-px shrink-0"/>
+                            <span>
+                                @(BothReady
+                                    ? "Both apps answered. Switching makes every user's next sync mirror their wantlist into Radarr and Sonarr."
+                                    : "Test both apps to switch; each needs a quality profile and a root folder. Until then the wantlist keeps syncing to Plex; picking Plex again in the map puts this away.")
+                            </span>
+                        </p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <BbButton Size="ButtonSize.Small" Disabled="@(!BothReady || Switching)" OnClick="SwitchRequested">
+                                @if (Switching)
+                                {
+                                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                                    <span>Switching…</span>
+                                }
+                                else
+                                {
+                                    <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
+                                    <span>Switch the wantlist to Radarr + Sonarr</span>
+                                }
+                            </BbButton>
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Disabled="Switching" OnClick="StayOnPlex">Stay on Plex</BbButton>
+                        </div>
                     </div>
                 }
             }
@@ -150,6 +174,15 @@
 
     private IReadOnlyList<ArrApp> Silent => [.. Apps.Where(app => _apps[app].State != ArrConnectionState.Connected)];
 
+    private const string TagsTab = "Tags";
+
+    private string _tab = ArrApp.Radarr.Name;
+
+    private bool ShowsTags => Syncs && !SettingUp;
+
+    private string OpenTab => _tab == TagsTab && !ShowsTags ? ArrApp.Radarr.Name : _tab;
+
+    private string SegColour => Apps.FirstOrNone(app => app.Name == OpenTab).Map(app => Branding.GetBrandingInfo(app).BrandColor).GetValueOr(() => Branding.SinkColor(SinkKind.Arr));
 
     protected override async Task OnInitializedAsync()
     {
@@ -164,7 +197,41 @@
         {
             await TestAsync(app, config.Of(app));
         }
+
+        _tab = Apps.FirstOrNone(NeedsAttention).GetValueOr(ArrApp.Radarr).Name;
     }
+
+    private bool NeedsAttention(ArrApp app) => _apps[app] is not { State: ArrConnectionState.Connected, Choices.Folders.Count: > 0 };
+
+    private RenderFragment StateMark(ArrApp app) => @<span class="arr-tab-state">
+        @switch (_apps[app].State)
+        {
+            case ArrConnectionState.Empty:
+                <span class="arr-ring"></span>
+                <span class="sr-only">Not set up</span>
+                break;
+            case ArrConnectionState.Untested:
+                <span class="arr-ring"></span>
+                <span class="sr-only">Not tested yet</span>
+                break;
+            case ArrConnectionState.Testing:
+                <BbSpinner Size="SpinnerSize.Small"/>
+                <span class="sr-only">Testing</span>
+                break;
+            case ArrConnectionState.Failed:
+                <LucideIcon Name="circle-alert" Size="13" Class="text-destructive"/>
+                <span class="sr-only">Test failed</span>
+                break;
+            case ArrConnectionState.Connected when _apps[app].Choices.Folders.Count == 0:
+                <LucideIcon Name="triangle-alert" Size="13" Class="text-[var(--alert-warning)]"/>
+                <span class="sr-only">No root folder</span>
+                break;
+            case ArrConnectionState.Connected:
+                <LucideIcon Name="check" Size="13" Class="text-success"/>
+                <span class="sr-only">Connected</span>
+                break;
+        }
+    </span>;
 
     private async Task<IReadOnlyList<ArrTagUser>> UsersAsync()
     {

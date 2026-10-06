@@ -13,8 +13,8 @@
 }
 
 .sammlarr-knockout {
-    fill: var(--background);
-    stroke: var(--background);
+    fill: var(--sammlarr-knockout, var(--background));
+    stroke: var(--sammlarr-knockout, var(--background));
     stroke-width: 90;
     stroke-linejoin: round;
 }

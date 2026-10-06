@@ -95,6 +95,7 @@ internal sealed record ServicesMapModel(
 	internal const double RoleWidth = 256;
 	internal const double ServiceX = RoleWidth + LineGap;
 	internal const double Width = ServiceX + ServiceWidth;
+	internal const double CardWidth = Width + 2 * CardPadding + 2;
 	private const double RowHeight = ServiceHeight + ServiceGap;
 	internal const double ServiceHeight = 44;
 	private const double TileSize = 28;
@@ -103,6 +104,7 @@ internal sealed record ServicesMapModel(
 	private const double JogX = RoleWidth + LineGap / 2;
 	private const double ServiceWidth = 266;
 	private const double ServiceGap = 8;
+	private const double CardPadding = 16;
 	private const double TileGap = 5;
 	private const double TilePitch = TileSize + TileGap;
 	private const int RowCapacity = (int)((ServiceWidth + TileGap) / TilePitch);

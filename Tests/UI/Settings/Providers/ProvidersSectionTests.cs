@@ -92,6 +92,14 @@ public class ProvidersSectionTests : BunitContext
 	}
 
 	[Test]
+	public async Task Section_IsAsWideAsTheServicesMapCard()
+	{
+		var cut = RenderSection();
+
+		await Assert.That(cut.Find("div").GetAttribute("style")).IsEqualTo($"width: {ServicesMapModel.CardWidth}px");
+	}
+
+	[Test]
 	public async Task Section_ForAnAdmin_OffersNoWayToRunSetupAgain()
 	{
 		var cut = RenderSection();

@@ -15,7 +15,7 @@
 @inject NavigationManager Navigation
 @inject Notifier Notifier
 
-<div class="setup-card">
+<div class="setup-card" style="@CardWidth">
     <div class="mb-[18px] text-[15px] font-semibold">Set up Sammlarr</div>
     <div class="setup-wizard" data-passed="@_step" data-skipped="@(_skipped ? "true" : null)">
         <BbFormWizard CurrentStep="_step" CurrentStepChanged="step => _step = step" ShowNavigation="false" IndicatorClass="px-11" NavigationClass="mt-6 border-t pt-5 pb-0">
@@ -142,6 +142,8 @@
 </div>
 
 @code {
+    private static string CardWidth => FormattableString.Invariant($"--map-card-width: {ServicesMapModel.CardWidth}px");
+
     private const int AccountStep = 0;
     private const int WantlistStep = 1;
     private const int KeysStep = 2;

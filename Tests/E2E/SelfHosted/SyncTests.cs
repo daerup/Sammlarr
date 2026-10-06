@@ -15,8 +15,9 @@ public class SyncTests
 		var stack = await SelfHostedApp.StackAsync();
 		var page = await SelfHostedApp.OpenPageAsync();
 		await SelfHostedSetup.FinishAsync(page, stack);
-		var settings = await SettingsPage.OpenWantlistSyncAsync(page);
-		var profiles = settings.GetByRole(AriaRole.Combobox, new LocatorGetByRoleOptions { Name = "Radarr quality profile" });
+		await SettingsPage.OpenWantlistSyncAsync(page);
+		var radarr = await ArrSections.OpenAsync(page, "Radarr");
+		var profiles = radarr.GetByRole(AriaRole.Combobox, new LocatorGetByRoleOptions { Name = "Radarr quality profile" });
 		await profiles.ClickAsync();
 		await page.Option(Profile).ClickAsync();
 		await Expect(profiles).ToContainTextAsync(Profile);
@@ -40,8 +41,9 @@ public class SyncTests
 		var stack = await SelfHostedApp.StackAsync();
 		var page = await SelfHostedApp.OpenPageAsync();
 		await SelfHostedSetup.FinishAsync(page, stack);
-		var settings = await SettingsPage.OpenWantlistSyncAsync(page);
-		var searchWhenAdded = settings.Locator("button[role=switch][aria-label='Radarr searches when a title is added']");
+		await SettingsPage.OpenWantlistSyncAsync(page);
+		var radarr = await ArrSections.OpenAsync(page, "Radarr");
+		var searchWhenAdded = radarr.Locator("button[role=switch][aria-label='Radarr searches when a title is added']");
 		await searchWhenAdded.ClickAsync();
 		await Expect(searchWhenAdded).ToHaveAttributeAsync("aria-checked", "false");
 

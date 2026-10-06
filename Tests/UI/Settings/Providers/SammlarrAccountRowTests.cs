@@ -42,11 +42,12 @@ public class SammlarrAccountRowTests : BunitContext
 	}
 
 	[Test]
-	public async Task Row_WearsSammlarrsOwnMarkAndColour()
+	public async Task Row_WearsSammlarrsLogoAndColour()
 	{
 		var cut = Render<SammlarrAccountRow>();
 
-		await Assert.That(cut.Find(".provider-row img.provider-logo").GetAttribute("src")).Contains("sammlarr-square-light.svg");
+		await Assert.That(cut.FindAll(".provider-row svg.sammlarr-logo")).HasSingleItem();
+		await Assert.That(cut.Find(".provider-row .sr-only").TextContent).IsEqualTo("Sammlarr");
 		await Assert.That(cut.Find(".provider-row").GetAttribute("style")).Contains("#E3A008");
 	}
 

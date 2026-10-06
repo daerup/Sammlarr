@@ -17,7 +17,7 @@
 @inject NavigationManager Navigation
 @inject ScrollService ScrollService
 
-<div class="flex max-w-6xl flex-col gap-8">
+<div class="flex max-w-full flex-col gap-8" style="@SectionWidth">
     <div>
         <h2 class="text-lg font-semibold">Providers</h2>
         <p class="text-sm text-muted-foreground">Which service does what, and the account, keys and connections behind it.</p>
@@ -78,6 +78,8 @@
 </div>
 
 @code {
+    private static string SectionWidth => FormattableString.Invariant($"width: {ServicesMapModel.CardWidth}px");
+
     private const string PlexSearchReturn = $"{SettingsLinks.Providers}&search=plex";
 
 
