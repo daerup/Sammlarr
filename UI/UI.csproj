@@ -17,10 +17,6 @@
 		<ProjectReference Include="..\Observability\Observability.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<InternalsVisibleTo Include="Web" />
-		<InternalsVisibleTo Include="UI.Tests" />
-	</ItemGroup>
-	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" />
 		<PackageReference Include="BlazorBlueprint.Components" />

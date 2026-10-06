@@ -10,6 +10,7 @@ using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging;
+using Shared.Options;
 using TestInfrastructure;
 
 namespace Core.Tests.Auth;
@@ -22,7 +23,7 @@ public class SignInServiceTests
 	private readonly Mock<IUserRepository> _users = IUserRepository.Mock();
 	private readonly Mock<IProviderConfigService> _config = IProviderConfigService.Mock();
 	private readonly Mock<ILogger<SignInService>> _logger = ILogger<SignInService>.Mock();
-	private readonly SetupGate _setup = new();
+	private readonly SetupGate _setup = new(new AccountsOptions());
 
 	private SignInService Testee
 	{

@@ -12,6 +12,8 @@ internal static class StagingEnvironment
 
 	private const string CatcherSession = "5a3a7a6e-0000-4000-8000-000000000001";
 
+	private const string SetupCode = "SAMM-LARR";
+
 	private const int SammlarrPort = 6789;
 
 	private const int CatcherPort = 6790;
@@ -69,6 +71,7 @@ internal static class StagingEnvironment
 			.WithArgs("seed-staging")
 			.WithEnvironment((SammlarOptions options) => options.ConnectionString, $"Data Source={layout.Database};Pooling=False")
 			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", layout.KeyRing)
+			.WithEnvironment((AccountsOptions options) => options.SetupCode, SetupCode)
 			.WithEnvironment(context => context.EnvironmentVariables["Staging__Scenario"] = scenario.Value)
 			.WithEnvironment("Staging__TmdbKey", tmdb)
 			.WithEnvironment("Staging__ArrApiKey", ArrContainers.ApiKey)
@@ -88,6 +91,7 @@ internal static class StagingEnvironment
 			.AddDockerfile("sammlarr", RepositoryRoot(builder), Dockerfile)
 			.WithHttpEndpoint(port: SammlarrPort, targetPort: 8080, name: "http", isProxied: false)
 			.WithBindMount(layout.Sammlarr, "/data")
+			.WithEnvironment((AccountsOptions options) => options.SetupCode, SetupCode)
 			.WithEnvironment((PushoverOptions options) => options.BaseUrl, $"http://catcher:8080/{CatcherSession}/pushover/1")
 			.WithEnvironment("HTTP_PROXY", DeadProxy)
 			.WithEnvironment("HTTPS_PROXY", DeadProxy)

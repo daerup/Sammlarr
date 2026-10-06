@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace UI.Observability;
+namespace Web.Instrumentation;
 
 internal sealed class BlazorRouteTracker
 {
