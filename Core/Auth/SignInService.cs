@@ -34,7 +34,7 @@ internal sealed class SignInService(
 
 	private static readonly Error NoAdminYet = Error.From("This Sammlarr has no admin yet. Open /setup and enter the setup code from the server log.");
 
-	public Task<string> BeginAsync(AuthProvider provider, string callbackUrl, CancellationToken cancellationToken = default) =>
+	public Task<Result<string>> BeginAsync(AuthProvider provider, string callbackUrl, CancellationToken cancellationToken = default) =>
 		providers[provider].BeginLoginAsync(callbackUrl, cancellationToken);
 
 	public Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, CancellationToken cancellationToken = default)

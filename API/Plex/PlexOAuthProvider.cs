@@ -9,14 +9,17 @@ namespace API.Plex;
 
 internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options, PlexUrls urls) : IOAuthProvider
 {
-	public async Task<string> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default)
+	public async Task<Result<string>> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default)
 	{
 		var clientId = Guid.NewGuid();
 		using var request = new HttpRequestMessage(HttpMethod.Post, urls.Pins);
 		request.Headers.AddClientId(clientId);
 		request.Content = new FormUrlEncodedContent(new Dictionary<string, string> { ["strong"] = "true" });
 		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
-		response.EnsureSuccessStatusCode();
+		if (!response.IsSuccessStatusCode)
+		{
+			return Error.From($"Plex could not start the sign-in (it answered {(int)response.StatusCode}). Please try again in a moment.");
+		}
 
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = (await JsonSerializer.DeserializeAsync<PlexTypes.Auth.Root>(stream, cancellationToken: cancellationToken))!;
@@ -32,7 +35,7 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 			["context%5Bdevice%5D%5Bproduct%5D"] = options.Authentication.ProductName,
 			["forwardUrl"] = forwardUrl,
 		};
-		return QueryHelpers.AddQueryString(urls.AuthApp, queryParams).Replace("?", "#?");
+		return Success.Of(QueryHelpers.AddQueryString(urls.AuthApp, queryParams).Replace("?", "#?"));
 	}
 
 	public async Task<Result<ExternalLogin>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default)
