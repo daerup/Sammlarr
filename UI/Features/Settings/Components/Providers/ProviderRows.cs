@@ -19,8 +19,6 @@ public readonly record struct SammlarrAccounts;
 
 internal static class ProviderRows
 {
-	internal const string Ringed = "RingedProvider";
-
 	internal static string Id(ProviderRowKey key)
 	{
 		return key switch

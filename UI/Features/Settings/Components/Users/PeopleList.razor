@@ -40,16 +40,8 @@ else
 
     private IReadOnlyDictionary<UserId, PersonColour> _colours = new Dictionary<UserId, PersonColour>();
 
-    private IReadOnlyList<JoinedPerson> Joined => [.. _people.Select(JoinedOf).WhereSome()];
+    private IReadOnlyList<JoinedPerson> Joined => [.. _people.Joined];
 
-    private static Optional<JoinedPerson> JoinedOf(Person person)
-    {
-        return person switch
-        {
-            JoinedPerson joined => Some.Of(joined),
-            InvitedPerson => new None(),
-        };
-    }
 
     protected override async Task OnInitializedAsync()
     {

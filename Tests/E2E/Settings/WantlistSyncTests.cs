@@ -17,15 +17,16 @@ public class WantlistSyncTests
 		await ArrSections.ConnectAsync(page, "Radarr", new Uri(wiremock, "radarr"));
 		await ArrSections.ConnectAsync(page, "Sonarr", new Uri(wiremock, "sonarr"));
 		await switchButton.ClickAsync();
+		await page.Button("Switch to Radarr + Sonarr").ClickAsync();
 
 		await Expect(page.Locator(".arr-row-head")).ToContainTextAsync("Connected");
-		await Expect(page.Locator(".arr-row-head")).ToContainTextAsync("Radarr: Any into /movies");
 		await Expect(SettingsPage.MapService(page, "Radarr + Sonarr")).ToContainTextAsync("Connected");
 
 		await SettingsPage.MapChip(page, "Wantlist").ClickAsync();
 		await page.MenuItem("Plex").ClickAsync();
+		await page.Button("Switch to Plex").ClickAsync();
 
-		await Expect(page.Locator("section[aria-label='Wantlist sync']")).ToHaveCountAsync(0);
+		await Expect(page.Locator(".arr-row")).ToHaveCountAsync(0);
 		await Expect(SettingsPage.MapService(page, "Radarr + Sonarr")).ToHaveCountAsync(0);
 	}
 
@@ -38,7 +39,7 @@ public class WantlistSyncTests
 		await page.MenuItem("Radarr + Sonarr").ClickAsync();
 		await page.Button("Stay on Plex").ClickAsync();
 
-		await Expect(page.Locator("section[aria-label='Wantlist sync']")).ToHaveCountAsync(0);
+		await Expect(page.Locator(".arr-row")).ToHaveCountAsync(0);
 		await Expect(SettingsPage.MapService(page, "Plex")).ToBeVisibleAsync();
 	}
 }

@@ -10,7 +10,7 @@
 @inject ICurrentUser CurrentUser
 @inject MediaProviderBrandingService Branding
 
-<div id="@ProviderRows.Id(new Arr())" class="arr-row @(Ringed is Arr ? "is-ringed" : null)" style="--mix: @Branding.SinkColor(SinkKind.Arr)">
+<div id="@ProviderRows.Id(new Arr())" class="arr-row" style="--mix: @Branding.SinkColor(SinkKind.Arr)">
     <BbCollapsible Open="Open" OpenChanged="OpenChanged">
         <BbCollapsibleTrigger AsChild="false"
                               Class="arr-row-head group w-full grid grid-cols-[15px_190px_1fr_auto] items-center gap-3.5 pl-5 pr-4 py-4 text-left bg-foreground/5 hover:bg-foreground/8 transition-colors">
@@ -22,10 +22,7 @@
                 <BrandedLogo Brand="Branding.GetBrandingInfo(ArrApp.Sonarr)" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
                 Sonarr
             </span>
-            <span class="flex min-w-0 flex-col text-sm text-muted-foreground">
-                <span class="truncate">Connection · wantlist</span>
-                <span class="truncate text-xs">@Summary</span>
-            </span>
+            <RoleIcons Key="new Arr()"/>
             <span>
                 @if (SettingUp)
                 {
@@ -60,46 +57,51 @@
         <BbCollapsibleContent>
             @if (_config is { } config)
             {
-                @foreach (var app in Apps)
-                {
-                    var status = _apps[app];
-                    <ArrAppSection App="app" Instance="config.Of(app)" State="status.State" Error="@status.Error" Choices="status.Choices"
-                                   Edited="typed => Edited(app, typed)" Test="typed => TestAsync(app, typed)"
-                                   InstanceChanged="instance => StoreAsync(app, instance)"/>
-                }
-
-                <div class="arr-shared">
-                    @if (SettingUp)
+                <div class="arr-apps">
+                    @foreach (var app in Apps)
                     {
-                        <p class="arr-shared-note">
-                            <LucideIcon Name="info" Size="13" Class="mt-px shrink-0"/>
-                            <span>
-                                @(BothReady
-                                    ? "Both apps answered. Switching makes every user's next sync mirror their wantlist into Radarr and Sonarr."
-                                    : "Test both apps to switch; each needs a quality profile and a root folder. Until then the wantlist keeps syncing to Plex; picking Plex again in the map puts this away.")
-                            </span>
-                        </p>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <BbButton Size="ButtonSize.Small" Disabled="@(!BothReady || Switching)" OnClick="SwitchRequested">
-                                @if (Switching)
-                                {
-                                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                                    <span>Switching…</span>
-                                }
-                                else
-                                {
-                                    <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
-                                    <span>Switch the wantlist to Radarr + Sonarr</span>
-                                }
-                            </BbButton>
-                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Disabled="Switching" OnClick="StayOnPlex">Stay on Plex</BbButton>
-                        </div>
-                    }
-                    else
-                    {
-                        <ArrTagsSection Scheme="config.Tags" SchemeChanged="tags => StoreAsync(config with { Tags = tags })" Users="_users" Feed="_feed"/>
+                        var status = _apps[app];
+                        <ArrAppSection App="app" Instance="config.Of(app)" State="status.State" Error="@status.Error" Choices="status.Choices"
+                                       Edited="typed => Edited(app, typed)" Test="typed => TestAsync(app, typed)"
+                                       InstanceChanged="instance => StoreAsync(app, instance)"/>
                     }
                 </div>
+
+                @if (SettingUp || Syncs)
+                {
+                    <div class="arr-shared">
+                        @if (SettingUp)
+                        {
+                            <p class="arr-shared-note">
+                                <LucideIcon Name="info" Size="13" Class="mt-px shrink-0"/>
+                                <span>
+                                    @(BothReady
+                                        ? "Both apps answered. Switching makes every user's next sync mirror their wantlist into Radarr and Sonarr."
+                                        : "Test both apps to switch; each needs a quality profile and a root folder. Until then the wantlist keeps syncing to Plex; picking Plex again in the map puts this away.")
+                                </span>
+                            </p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <BbButton Size="ButtonSize.Small" Disabled="@(!BothReady || Switching)" OnClick="SwitchRequested">
+                                    @if (Switching)
+                                    {
+                                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                                        <span>Switching…</span>
+                                    }
+                                    else
+                                    {
+                                        <LucideIcon Name="arrow-right-left" Size="14" Class="mr-2"/>
+                                        <span>Switch the wantlist to Radarr + Sonarr</span>
+                                    }
+                                </BbButton>
+                                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Disabled="Switching" OnClick="StayOnPlex">Stay on Plex</BbButton>
+                            </div>
+                        }
+                        else
+                        {
+                            <ArrTagsSection Scheme="config.Tags" SchemeChanged="tags => StoreAsync(config with { Tags = tags })" Users="_users" Feed="_feed"/>
+                        }
+                    </div>
+                }
             }
             else
             {
@@ -114,11 +116,12 @@
 @code {
     [Parameter] public bool Open { get; set; }
 
-    [CascadingParameter(Name = ProviderRows.Ringed)] private ProviderRowKey? Ringed { get; set; }
 
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
 
     [Parameter] public bool SettingUp { get; set; }
+
+    [Parameter] [EditorRequired] public required bool Syncs { get; set; }
 
     [Parameter] public bool Switching { get; set; }
 
@@ -147,13 +150,6 @@
 
     private IReadOnlyList<ArrApp> Silent => [.. Apps.Where(app => _apps[app].State != ArrConnectionState.Connected)];
 
-    private string Summary
-    {
-        get
-        {
-            return SettingUp || _config is null ? "Picked for the wantlist; connect both apps to switch" : string.Join(" · ", Apps.Select(Said));
-        }
-    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -208,7 +204,7 @@
                 .Or(() => choices.Folders.FirstOrNone().Map(folder => folder.Path)),
         };
         var current = _config ?? ArrSinkConfig.Empty;
-        var moved = !SettingUp && current.Of(app).Url.Match(stored => chosen.Url.Match(url => url != stored, () => true), () => false);
+        var moved = Syncs && current.Of(app).Url.Match(stored => chosen.Url.Match(url => url != stored, () => true), () => false);
         if (!moved)
         {
             await StoreAsync(app, chosen);
@@ -239,13 +235,6 @@
         await Changed.InvokeAsync();
     }
 
-    private string Said(ArrApp app)
-    {
-        var instance = (_config ?? ArrSinkConfig.Empty).Of(app);
-        var profile = instance.QualityProfileId.Map(id => _apps[app].Choices.Profiles.FirstOrNone(choice => choice.Id == id).Map(choice => choice.Name));
-        var said = instance.RootFolderPath.Map(path => profile.Match(name => $"{name} into {path}", () => path)).GetValueOr("not set up");
-        return $"{app.Name}: {said}";
-    }
 
     private static bool IsChosen(ArrInstanceConfig instance) => instance.QualityProfileId.IsSome() && instance.RootFolderPath.IsSome();
 

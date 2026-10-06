@@ -144,11 +144,21 @@ public class ArrAppSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task ExternalUrl_WhenTyped_RaisesTheChangeTrimmed()
+	public async Task ExternalUrl_WhenUnset_OffersToAddOneInsteadOfAField()
+	{
+		var cut = RenderWithChanges(Stored, []);
+
+		await Assert.That(AddExternalUrl(cut).TextContent.Trim()).IsEqualTo("Add external URL");
+		await Assert.That(cut.FindAll("input[aria-label='Sonarr external URL']")).IsEmpty();
+	}
+
+	[Test]
+	public async Task ExternalUrl_WhenAddedAndTyped_RaisesTheChangeTrimmed()
 	{
 		List<ArrInstanceConfig> changes = [];
 		var cut = RenderWithChanges(Stored, changes);
 
+		await AddExternalUrl(cut).ClickAsync();
 		await cut.InvokeAsync(() => ExternalUrlInput(cut).ValueChanged.InvokeAsync(" http://localhost:8990 "));
 
 		await Assert.That(changes.Single()).IsEqualTo(Stored with { ExternalUrl = Some.Of("http://localhost:8990") });
@@ -180,6 +190,22 @@ public class ArrAppSectionTests : BunitContext
 	{
 		var description = cut.FindAll("*").Last(element => element.TextContent.Contains("Found in"));
 		return Regex.Replace(description.TextContent, @"\s+", " ").Trim();
+	}
+
+	[Test]
+	public async Task ExternalUrl_WhenRemoved_RaisesTheChangeWithoutOneAndOffersToAddItAgain()
+	{
+		List<ArrInstanceConfig> changes = [];
+		var cut = RenderWithChanges(Stored with { ExternalUrl = Some.Of("http://localhost:8990") }, changes);
+
+		await cut.FindAll("button").Single(button => button.TextContent.Trim() == "Remove").ClickAsync();
+
+		await Assert.That(changes.Single()).IsEqualTo(Stored);
+	}
+
+	private static AngleSharp.Dom.IElement AddExternalUrl(IRenderedComponent<ArrAppSection> cut)
+	{
+		return cut.FindAll("button").Single(button => button.TextContent.Contains("Add external URL"));
 	}
 
 	private static BbInput ExternalUrlInput(IRenderedComponent<ArrAppSection> cut)

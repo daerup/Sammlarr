@@ -1,7 +1,8 @@
 @using Domain.Identity
 @using Contracts.Identity
+@using UI.Features.Settings.Components.Users
 @using UI.Shared.Services.Branding
-@inject ILocalAccountService Accounts
+@inject IUserManagementService Users
 @inject MediaProviderBrandingService Branding
 @inject ICurrentUser CurrentUser
 @inject NavigationManager NavigationManager
@@ -20,44 +21,39 @@
         </BbBadge>
     </Status>
     <ChildContent>
-        <div class="flex w-full max-w-md flex-col gap-4">
-            <BbField>
-                <BbFieldLabel For="account-current">Current password</BbFieldLabel>
-                <BbFieldContent>
-                    <BbInput Id="account-current" Type="InputType.Password" Value="@_current" ValueChanged="value => _current = value ?? string.Empty"
-                             UpdateTiming="UpdateTiming.Immediate" Class="h-9 bg-accent text-sm" autocomplete="current-password"/>
-                </BbFieldContent>
-            </BbField>
-            <BbField>
-                <BbFieldLabel For="account-next">New password</BbFieldLabel>
-                <BbFieldContent>
-                    <BbInput Id="account-next" Type="InputType.Password" Value="@_next" ValueChanged="value => _next = value ?? string.Empty"
-                             Placeholder="@($"At least {PasswordRules.MinimumLength} characters")" UpdateTiming="UpdateTiming.Immediate" Class="h-9 bg-accent text-sm" autocomplete="new-password"/>
-                </BbFieldContent>
-            </BbField>
-            <BbField>
-                <BbFieldLabel For="account-confirm">Confirm password</BbFieldLabel>
-                <BbFieldContent>
-                    <BbInput Id="account-confirm" Type="InputType.Password" Value="@_confirm" ValueChanged="value => _confirm = value ?? string.Empty"
-                             UpdateTiming="UpdateTiming.Immediate" Class="h-9 bg-accent text-sm" autocomplete="new-password"
-                             AriaInvalid="@(_confirm.Length > 0 && _confirm != _next)"/>
-                </BbFieldContent>
-            </BbField>
-            @if (_error.Length > 0)
+        @if (IsAdmin)
+        {
+            @if (_people is { } people)
             {
-                <p class="flex items-start gap-1.5 text-xs text-destructive" role="alert">
-                    <LucideIcon Name="circle-alert" Size="13" Class="mt-px shrink-0"/>
-                    <span>@_error</span>
-                </p>
+                <div class="flex flex-wrap gap-7 text-[13px]" data-counts>
+                    @foreach (var (count, one, many) in Counts(people))
+                    {
+                        <span><span class="text-lg font-semibold">@count.ToString("N0")</span> <span class="text-muted-foreground">@(count == 1 ? one : many)</span></span>
+                    }
+                </div>
             }
+            else
+            {
+                <BbSkeleton Class="h-7 w-80 rounded-md"/>
+            }
+            <div class="flex flex-wrap gap-2">
+                <BbButton Size="ButtonSize.Small" OnClick="() => NavigationManager.NavigateTo(SettingsLinks.Users)">
+                    <LucideIcon Name="users" Size="14" Class="mr-2"/>
+                    Manage users
+                </BbButton>
+                <InviteDialog Invited="LoadAsync"/>
+            </div>
+        }
+        else
+        {
+            <p class="text-[13px] text-muted-foreground">You sign in with your Sammlarr account. Your password lives in Account.</p>
             <div>
-                <BbButton Size="ButtonSize.Small" Disabled="@(!CanChange || _changing)" OnClick="ChangeAsync">
-                    <LucideIcon Name="key-round" Size="14" Class="mr-2"/>
-                    <span>Change password</span>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => NavigationManager.NavigateTo(SettingsLinks.Account)">
+                    <LucideIcon Name="user-round" Size="14" Class="mr-2"/>
+                    Open your account
                 </BbButton>
             </div>
-            <p class="text-xs text-muted-foreground">Changing it signs you out everywhere, this browser included.</p>
-        </div>
+        }
     </ChildContent>
 </ProviderRow>
 
@@ -68,23 +64,34 @@
 
     private BrandingInfo Brand => Branding.GetBrandingInfo(AuthProvider.Local);
 
-    private string _current = string.Empty;
+    private bool IsAdmin => CurrentUser.Role == UserRole.Admin;
 
-    private string _next = string.Empty;
+    private IReadOnlyList<Person>? _people;
 
-    private string _confirm = string.Empty;
-
-    private string _error = string.Empty;
-
-    private bool _changing;
-
-    private bool CanChange => _current.Length > 0 && _next.Length > 0 && _next == _confirm;
-
-    private async Task ChangeAsync()
+    private static IReadOnlyList<(int Count, string One, string Many)> Counts(IReadOnlyList<Person> people)
     {
-        _changing = true;
-        var changed = await Accounts.ChangePasswordAsync(_current, _next);
-        _changing = false;
-        changed.Apply(_ => NavigationManager.NavigateTo("/auth/logout", forceLoad: true)).ApplyError(error => _error = error.Reason);
+        var joined = people.Joined.ToList();
+        return
+        [
+            (joined.Count, "user", "users"),
+            (joined.Count(person => person.User.Role == UserRole.Admin), "admin", "admins"),
+            (people.Count - joined.Count, "invite pending", "invites pending"),
+            (joined.Count(person => person.LockedUntil.IsSome()), "locked out", "locked out"),
+        ];
     }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsAdmin)
+        {
+            await Task.Yield();
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _people = await Users.GetPeopleAsync();
+    }
+
 }

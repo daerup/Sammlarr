@@ -1,7 +1,7 @@
 @using Contracts.Auth
 @using Domain.Settings
 
-<div class="rounded-lg border bg-card overflow-hidden">
+<div class="rounded-lg border bg-card overflow-hidden divide-y">
     @if (Config.AuthProvider == AuthProvider.Local)
     {
         <SammlarrAccountRow Open="Open is SammlarrAccounts" OpenChanged="open => ToggleAsync(new SammlarrAccounts(), open)"/>
@@ -15,6 +15,7 @@
                     ReturnUrl="@PlexReturnUrl"
                     Changed="Changed"/>
     }
+    @Arr
     <ApiKeyRow Provider="ApiKeyProvider.Tmdb"
                Required="true"
                Uses="TmdbUses"
@@ -69,6 +70,8 @@
     [Parameter] public bool ShowPlex { get; set; }
 
     [Parameter] public string PlexReturnUrl { get; set; } = SettingsLinks.Providers;
+
+    [Parameter] public RenderFragment? Arr { get; set; }
 
     private bool UsesPlex => ShowPlex || Config.AuthProvider == AuthProvider.Plex || Config.Sink == SinkKind.Plex || Config.SearchProvider == SearchProvider.Plex;
 

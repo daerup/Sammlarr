@@ -1,6 +1,6 @@
-using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using Bunit;
+using Contracts;
 using Contracts.Identity;
 using Domain.Identity;
 using Microsoft.AspNetCore.Components;
@@ -12,15 +12,24 @@ namespace UI.Tests.Settings.Providers;
 
 public class SammlarrAccountRowTests : BunitContext
 {
-	private readonly Mock<ILocalAccountService> _accounts = ILocalAccountService.Mock();
+	private readonly TestCurrentUser _user = new() { DisplayName = "guest" };
 
 	[Before(Test)]
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
-		Services.AddSingleton(_accounts.Object);
-		Services.AddSingleton<ICurrentUser>(new TestCurrentUser { DisplayName = "guest" });
+		var users = IUserManagementService.Mock();
+		users
+			.GetPeopleAsync(Any())
+			.Returns([
+				Joined(UserRole.Admin, new None()),
+				Joined(UserRole.Member, Some.Of(DateTimeOffset.UnixEpoch)),
+				new InvitedPerson("lena", "lena", DateTimeOffset.UnixEpoch),
+			]);
+		Services.AddSingleton(users.Object);
+		Services.AddSingleton(IDateTimeProvider.Mock().Object);
+		Services.AddSingleton<ICurrentUser>(_user);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -42,54 +51,43 @@ public class SammlarrAccountRowTests : BunitContext
 	}
 
 	[Test]
-	public async Task ChangePassword_UntilTheNewPasswordIsConfirmed_StaysDisabled()
+	public async Task Row_ForAnAdmin_CountsUsersAdminsPendingInvitesAndLockedOut()
 	{
 		var cut = Render<SammlarrAccountRow>(parameters => parameters.Add(row => row.Open, true));
 
-		await TypeAsync(cut, "account-current", "correct horse battery");
-		await TypeAsync(cut, "account-next", "staple and a hinge");
-		await TypeAsync(cut, "account-confirm", "staple and a hing");
-
-		await Assert.That(ChangeButton(cut).HasAttribute("disabled")).IsTrue();
+		cut.WaitForState(() => cut.FindAll("[data-counts]").Count == 1);
+		await Assert
+			.That(cut.FindAll("[data-counts] > span").Select(count => Spaced(count.TextContent)))
+			.IsEquivalentTo(["2 users", "1 admin", "1 invite pending", "1 locked out"]);
 	}
 
 	[Test]
-	public async Task ChangePassword_WhenTheCurrentPasswordIsWrong_SaysSo()
+	public async Task ManageUsers_ForAnAdmin_GoesToTheUsersSection()
 	{
-		_accounts.ChangePasswordAsync(Any(), Any(), Any()).Returns(Error.From("The current password is not right."));
 		var cut = Render<SammlarrAccountRow>(parameters => parameters.Add(row => row.Open, true));
-		await TypeAsync(cut, "account-current", "not it at all");
-		await TypeAsync(cut, "account-next", "staple and a hinge");
-		await TypeAsync(cut, "account-confirm", "staple and a hinge");
 
-		await ChangeButton(cut).ClickAsync();
+		await cut.FindAll("button").Single(button => button.TextContent.Trim() == "Manage users").ClickAsync();
 
-		await Assert.That(cut.Find("[role=alert]").TextContent.Trim()).IsEqualTo("The current password is not right.");
+		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/settings?section=users");
 	}
 
 	[Test]
-	public async Task ChangePassword_WhenItWorks_SignsOutToUseTheNewOne()
+	public async Task OpenYourAccount_ForAMember_GoesToTheirAccountWithoutCountingAnyone()
 	{
-		_accounts
-			.ChangePasswordAsync(Any(), Any(), Any())
-			.Returns(Success.Of(new User(UserId.New(), "guest", string.Empty, UserRole.Member, DateTimeOffset.UnixEpoch)));
+		_user.Role = UserRole.Member;
 		var cut = Render<SammlarrAccountRow>(parameters => parameters.Add(row => row.Open, true));
-		await TypeAsync(cut, "account-current", "correct horse battery");
-		await TypeAsync(cut, "account-next", "staple and a hinge");
-		await TypeAsync(cut, "account-confirm", "staple and a hinge");
 
-		await ChangeButton(cut).ClickAsync();
+		await cut.FindAll("button").Single(button => button.TextContent.Trim() == "Open your account").ClickAsync();
 
-		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/auth/logout");
+		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/settings?section=account");
+		await Assert.That(cut.FindAll("[data-counts]")).IsEmpty();
 	}
 
-	private static Task TypeAsync(IRenderedComponent<SammlarrAccountRow> cut, string id, string text)
+	private static JoinedPerson Joined(UserRole role, Optional<DateTimeOffset> lockedUntil)
 	{
-		return cut.InvokeAsync(() => cut.FindComponents<BbInput>().Single(input => input.Instance.Id == id).Instance.ValueChanged.InvokeAsync(text));
+		var user = new User(UserId.New(), role.ToString(), string.Empty, role, DateTimeOffset.UnixEpoch);
+		return new JoinedPerson(user, PersonHoldings.Empty, lockedUntil, new StoredColour(new None(), new None()));
 	}
 
-	private static IElement ChangeButton(IRenderedComponent<SammlarrAccountRow> cut)
-	{
-		return cut.FindAll("button").Single(button => button.TextContent.Trim() == "Change password");
-	}
+	private static string Spaced(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 }

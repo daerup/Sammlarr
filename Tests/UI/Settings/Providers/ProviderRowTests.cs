@@ -62,24 +62,17 @@ public class ProviderRowTests : BunitContext
 	}
 
 	[Test]
-	[Arguments(MediaProvider.Tmdb, true)]
-	[Arguments(MediaProvider.Plex, false)]
-	public async Task Row_WhenItsProviderIsRinged_DrawsTheRing(MediaProvider ringed, bool drawn)
+	public async Task Row_ForAProvider_IsTheMapsScrollTargetWithoutARing()
 	{
-		var cut = Render<CascadingValue<ProviderRowKey?>>(parameters =>
-			parameters
-				.Add(value => value.Value, ringed)
-				.Add(value => value.Name, ProviderRows.Ringed)
-				.AddChildContent<ProviderRow>(row =>
-					row.Add(provider => provider.Key, MediaProvider.Tmdb)
-						.Add(provider => provider.Brand, Brands.GetBrandingInfo(MediaProvider.Tmdb))
-						.Add(provider => provider.Status, "<span>Connected</span>")
-						.AddChildContent("<p>The form</p>")
-				)
+		var cut = Render<ProviderRow>(row =>
+			row.Add(provider => provider.Key, MediaProvider.Tmdb)
+				.Add(provider => provider.Brand, Brands.GetBrandingInfo(MediaProvider.Tmdb))
+				.Add(provider => provider.Status, "<span>Connected</span>")
+				.AddChildContent("<p>The form</p>")
 		);
 
-		await Assert.That(cut.Find(".provider-row").ClassList.Contains("is-ringed")).IsEqualTo(drawn);
 		await Assert.That(cut.Find(".provider-row").Id).IsEqualTo("provider-row-tmdb");
+		await Assert.That(cut.Find(".provider-row").ClassList.Contains("is-ringed")).IsFalse();
 	}
 
 	[Test]

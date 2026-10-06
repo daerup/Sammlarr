@@ -115,6 +115,14 @@ public class SetupWizardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Wantlist_OnceItSyncsToRadarrAndSonarr_ShowsTheirRowAsSyncing()
+	{
+		var cut = RenderForAdmin();
+
+		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(row => row.Syncs)).IsTrue();
+	}
+
+	[Test]
 	public async Task Next_OnTheKeysStep_WaitsForATmdbKey()
 	{
 		var cut = RenderForAdmin();

@@ -12,6 +12,7 @@ using Domain.Settings;
 using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Options;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Providers;
 using UI.Shared.Services;
@@ -44,12 +45,15 @@ public class ProvidersSectionTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(new AccountsOptions());
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton(_config.Object);
 		Services.AddSingleton(_switch.Object);
 		Services.AddSingleton<ICurrentUser>(_user);
-		Services.AddSingleton(IUserManagementService.Mock().Object);
+		var users = IUserManagementService.Mock();
+		users.GetPeopleAsync(Any()).Returns([Joined(30), Joined(12), new InvitedPerson("lena", "lena", DateTimeOffset.UnixEpoch)]);
+		Services.AddSingleton(users.Object);
 		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
 		Services.AddSingleton(_arrConfigs.Object);
 		var keys = IApiKeyService.Mock();
@@ -63,6 +67,7 @@ public class ProvidersSectionTests : BunitContext
 		ComponentFactories.AddStub<ApiKeyRow>();
 		ComponentFactories.AddStub<ServicesMap>();
 		ComponentFactories.AddStub<ArrSinkRow>();
+		ComponentFactories.AddStub<SinkSwitchDialog>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		_config.GetAsync(Any()).Returns(OnPlex);
 	}
@@ -129,7 +134,7 @@ public class ProvidersSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task SwitchRequested_DuringSetup_SwitchesTheWantlist()
+	public async Task SwitchRequested_DuringSetup_AsksWithEveryonesTitlesThenSwitches()
 	{
 		_switch.SwitchAsync(SinkKind.Arr, Any()).Returns(Success.Of(new SinkSwitched(12, 0)));
 		var cut = RenderSection();
@@ -137,8 +142,16 @@ public class ProvidersSectionTests : BunitContext
 		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
 
 		await cut.InvokeAsync(() => cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.SwitchRequested).InvokeAsync());
+		var dialog = cut.FindComponent<Stub<SinkSwitchDialog>>().Instance.Parameters;
+		await Assert.That(dialog.Get(asked => asked.Target)).IsEqualTo(SinkKind.Arr);
+		await Assert.That(dialog.Get(asked => asked.People)).IsEqualTo(2);
+		await Assert.That(dialog.Get(asked => asked.Titles)).IsEqualTo(42);
+		_switch.SwitchAsync(Any<SinkKind>(), Any()).WasCalled(Times.Never);
+
+		await cut.InvokeAsync(() => dialog.Get(asked => asked.Confirmed).InvokeAsync());
 
 		_switch.SwitchAsync(SinkKind.Arr, Any()).WasCalled(Times.Once);
+		await Assert.That(cut.FindComponents<Stub<SinkSwitchDialog>>()).IsEmpty();
 		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.SettingUp)).IsFalse();
 	}
 
@@ -150,6 +163,7 @@ public class ProvidersSectionTests : BunitContext
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Arr));
 
 		await cut.InvokeAsync(() => cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.SwitchRequested).InvokeAsync());
+		await cut.InvokeAsync(() => cut.FindComponent<Stub<SinkSwitchDialog>>().Instance.Parameters.Get(asked => asked.Confirmed).InvokeAsync());
 
 		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.SettingUp)).IsTrue();
 	}
@@ -167,15 +181,40 @@ public class ProvidersSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task PickingPlex_OnRadarrAndSonarr_SwitchesBack()
+	public async Task PickingPlex_OnRadarrAndSonarr_AsksBeforeSwitchingBack()
 	{
 		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
 		_switch.SwitchAsync(SinkKind.Plex, Any()).Returns(Success.Of(new SinkSwitched(12, 0)));
 		var cut = RenderSection();
 
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Plex));
+		var dialog = cut.FindComponent<Stub<SinkSwitchDialog>>().Instance.Parameters;
+		await Assert.That(dialog.Get(asked => asked.Target)).IsEqualTo(SinkKind.Plex);
+		_switch.SwitchAsync(Any<SinkKind>(), Any()).WasCalled(Times.Never);
+
+		await cut.InvokeAsync(() => dialog.Get(asked => asked.Confirmed).InvokeAsync());
 
 		_switch.SwitchAsync(SinkKind.Plex, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Section_WhenSearchUsesRadarrAndSonarrButTheWantlistPlex_KeepsTheirRow()
+	{
+		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Arr });
+
+		var cut = RenderSection();
+
+		var arr = cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters;
+		await Assert.That(arr.Get(row => row.Syncs)).IsFalse();
+		await Assert.That(arr.Get(row => row.SettingUp)).IsFalse();
+	}
+
+	[Test]
+	public async Task Section_WhenNothingUsesRadarrAndSonarr_LeavesTheirRowOut()
+	{
+		var cut = RenderSection();
+
+		await Assert.That(cut.FindComponents<Stub<ArrSinkRow>>()).IsEmpty();
 	}
 
 	[Test]
@@ -237,38 +276,28 @@ public class ProvidersSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task ArrOpened_OpensTheWantlistSyncRingsItAndScrollsToIt()
+	public async Task ArrOpened_OpensTheRadarrAndSonarrRowAndScrollsToIt()
 	{
 		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
 		var cut = RenderSection();
 
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.ArrOpened).InvokeAsync());
 
-		await Assert.That(cut.FindComponent<CascadingValue<ProviderRowKey?>>().Instance.Value).IsEqualTo(new Arr());
 		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.Open)).IsTrue();
 		await Assert.That(ScrolledTo(cut)).IsEqualTo("provider-row-arr");
 	}
 
 	[Test]
-	public async Task AccountsOpened_AsAnAdmin_GoesToTheUsers()
+	[Arguments(UserRole.Admin)]
+	[Arguments(UserRole.Member)]
+	public async Task AccountsOpened_ForAnyone_OpensTheSammlarrAccountRowAndScrollsToIt(UserRole role)
 	{
-		var cut = RenderSection();
-
-		await cut.InvokeAsync(() => Map(cut).Get(map => map.AccountsOpened).InvokeAsync());
-
-		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/settings?section=users");
-	}
-
-	[Test]
-	public async Task AccountsOpened_AsAMember_OpensAndRingsTheSammlarrAccountRow()
-	{
-		_user.Role = UserRole.Member;
+		_user.Role = role;
 		_config.GetAsync(Any()).Returns(OnPlex with { AuthProvider = AuthProvider.Local });
 		var cut = RenderSection();
 
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.AccountsOpened).InvokeAsync());
 
-		await Assert.That(cut.FindComponent<CascadingValue<ProviderRowKey?>>().Instance.Value).IsEqualTo(new SammlarrAccounts());
 		await Assert.That(cut.FindComponent<Stub<SammlarrAccountRow>>().Instance.Parameters.Get(row => row.Open)).IsTrue();
 		await Assert.That(ScrolledTo(cut)).IsEqualTo("provider-row-sammlarr");
 	}
@@ -344,6 +373,12 @@ public class ProvidersSectionTests : BunitContext
 	private static CapturedParameterView<ServicesMap> Map(IRenderedComponent<ProvidersSection> cut)
 	{
 		return cut.FindComponent<Stub<ServicesMap>>().Instance.Parameters;
+	}
+
+	private static JoinedPerson Joined(int wanted)
+	{
+		var user = new User(UserId.New(), "admin", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch);
+		return new JoinedPerson(user, PersonHoldings.Empty with { Wanted = wanted }, new None(), new StoredColour(new None(), new None()));
 	}
 
 	private IRenderedComponent<ProvidersSection> RenderSection()
