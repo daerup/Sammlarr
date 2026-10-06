@@ -1,3 +1,4 @@
+using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Settings;
@@ -16,10 +17,12 @@ public class WantlistSyncTests
 		await Expect(switchButton).ToBeDisabledAsync();
 		await ArrSections.ConnectAsync(page, "Radarr", new Uri(wiremock, "radarr"));
 		await ArrSections.ConnectAsync(page, "Sonarr", new Uri(wiremock, "sonarr"));
+		await Expect(TagsTab(page)).ToHaveCountAsync(0);
 		await switchButton.ClickAsync();
 		await page.Button("Switch to Radarr + Sonarr").ClickAsync();
 
 		await Expect(page.Locator(".arr-row-head")).ToContainTextAsync("Connected");
+		await Expect(TagsTab(page)).ToBeVisibleAsync();
 		await Expect(SettingsPage.MapService(page, "Radarr + Sonarr")).ToContainTextAsync("Connected");
 
 		await SettingsPage.MapChip(page, "Wantlist").ClickAsync();
@@ -42,4 +45,6 @@ public class WantlistSyncTests
 		await Expect(page.Locator(".arr-row")).ToHaveCountAsync(0);
 		await Expect(SettingsPage.MapService(page, "Plex")).ToBeVisibleAsync();
 	}
+
+	private static ILocator TagsTab(IPage page) => page.GetByRole(AriaRole.Tab).Filter(new LocatorFilterOptions { HasText = "Tags" });
 }

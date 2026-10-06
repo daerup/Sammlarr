@@ -2,114 +2,128 @@
 @using Domain.Wantlist.Arr
 
 <div class="arr-tags">
-    <div class="arr-tags-head">
-        <span class="arr-tags-title">Tags</span>
-        <span class="arr-tags-lead">
-            Sammlarr treats a title as its own when one of its tags starts with <code>@Shown.Root</code>, and leaves everything else in Radarr and Sonarr alone.
-        </span>
+    <div class="arr-tag-row">
+        <span></span>
+        <div>
+            <div class="arr-tag-name">Prefix</div>
+            <div class="arr-tag-note">Every tag starts with this. Sammlarr treats a title as its own when one of its tags does, and leaves everything else alone.</div>
+        </div>
+        <div class="arr-tag-value">
+            <span class="arr-tag-locked w-[220px]" data-locked="prefix">
+                <span class="truncate">@Scheme.Root</span>
+                <LucideIcon Name="lock" Size="12" Class="ml-auto shrink-0 text-muted-foreground"/>
+            </span>
+        </div>
+        <div class="arr-tag-from">
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => Open(TagChange.Prefix)" AriaLabel="Change the prefix">
+                <LucideIcon Name="pencil" Size="13" Class="mr-1.5"/>
+                Change…
+            </BbButton>
+        </div>
     </div>
 
-    <div class="arr-tags-body">
-        <div class="arr-tags-controls">
-            <BbField>
-                <BbFieldLabel>Prefix</BbFieldLabel>
-                <BbFieldContent>
-                    <div class="flex items-center gap-2">
-                        <BbInput Value="@_prefix" ValueChanged="PrefixTyped" AriaLabel="Tag prefix" AriaInvalid="@(!IsValid)"
-                                 Class="@PrefixClass" UpdateTiming="UpdateTiming.Immediate"/>
-                        @if (IsChanged && !_confirming)
-                        {
-                            <BbButton Size="ButtonSize.Small" Disabled="@(!IsValid)" OnClick="() => _confirming = true">Save</BbButton>
-                        }
-                    </div>
-                    <p class="arr-tags-note">Every tag starts with this. Saving a new one asks you to confirm.</p>
-                </BbFieldContent>
-            </BbField>
-
-            @if (_confirming)
-            {
-                <BbAlert Variant="AlertVariant.Danger">
-                    <ChildContent>
-                        <BbAlertTitle>Change the prefix from @Scheme.Root to @Shown.Root?</BbAlertTitle>
-                        <BbAlertDescription>
-                            Radarr and Sonarr keep the old <code>@Scheme.Root</code> tags. Sammlarr stops recognising those titles, so the next sync takes them off every wantlist.
-                        </BbAlertDescription>
-                    </ChildContent>
-                    <Actions>
-                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="Cancel">Cancel</BbButton>
-                        <BbButton Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" OnClick="ChangePrefixAsync">Change prefix</BbButton>
-                    </Actions>
-                </BbAlert>
-            }
-
-            <div class="arr-tags-part">
-                <div class="arr-tags-line">
-                    <label class="arr-tags-check">
-                        <BbCheckbox Checked="Scheme.PerUser" CheckedChanged="PerUserChangedAsync" Disabled="Locked"/>
-                        A tag per user
-                    </label>
-                    <span class="arr-tags-from">
-                        from
-                        <BbSelect TValue="ArrUserTagSource" Value="Scheme.UserSource" ValueChanged="UserSourceChangedAsync" Options="UserSources"
-                                  Disabled="@(!Scheme.PerUser)" AriaLabel="User tag from" Class="w-32 [&_[role=combobox]]:h-8 [&_[role=combobox]]:text-xs"/>
-                    </span>
-                </div>
-                <p class="arr-tags-note">
-                    @if (Locked)
-                    {
-                        <LucideIcon Name="lock" Size="11" Class="mr-1 inline align-[-1px]"/>
-                        <span>Needed while @Users.Count users sync here: each one's sync reads only the titles carrying their tag.</span>
-                    }
-                    else
-                    {
-                        <span>Each user's sync reads only the titles carrying their tag. With one user this can be switched off.</span>
-                    }
-                </p>
-            </div>
-
-            <div class="arr-tags-line">
-                <label class="arr-tags-check">
-                    <BbCheckbox Checked="Scheme.PerFeed" CheckedChanged="PerFeedChangedAsync"/>
-                    A tag per feed
-                </label>
-                <span class="arr-tags-from">
-                    from
-                    <BbSelect TValue="ArrFeedTagSource" Value="Scheme.FeedSource" ValueChanged="FeedSourceChangedAsync" Options="FeedSources"
-                              Disabled="@(!Scheme.PerFeed)" AriaLabel="Feed tag from" Class="w-36 [&_[role=combobox]]:h-8 [&_[role=combobox]]:text-xs"/>
-                </span>
-            </div>
-
-            <div class="arr-tags-line">
-                <label class="arr-tags-check">
-                    <BbCheckbox Checked="Scheme.PlainPrefix" CheckedChanged="PlainPrefixChangedAsync"/>
-                    <span>Also add plain <code>@Shown.Root</code> to every title</span>
-                </label>
+    <div class="arr-tag-row">
+        <span><BbSwitch Checked="Scheme.PerUser" CheckedChanged="PerUserChangedAsync" Disabled="Locked" AriaLabel="Tag whose title it is"/></span>
+        <div>
+            <div class="arr-tag-name">Whose title it is</div>
+            <div class="arr-tag-note">
+                @if (Locked)
+                {
+                    <LucideIcon Name="lock" Size="11" Class="mr-1 inline align-[-1px]"/>
+                    <span>Needed while @Users.Count users sync here: each one's sync reads only the titles carrying their tag.</span>
+                }
+                else
+                {
+                    <span>Each user's sync reads only the titles carrying their tag. With one user this can be switched off.</span>
+                }
             </div>
         </div>
+        <div class="arr-tag-value">@Chip($"{Scheme.Root}-u-", UserPart)</div>
+        <div class="arr-tag-from">
+            from
+            <BbSelect TValue="ArrUserTagSource" Value="Scheme.UserSource" ValueChanged="UserSourceChangedAsync" Options="UserSources"
+                      Disabled="@(!Scheme.PerUser)" AriaLabel="User tag from" Class="w-32 [&_[role=combobox]]:h-8 [&_[role=combobox]]:text-xs"/>
+        </div>
+    </div>
 
-        <div class="arr-tags-preview" aria-label="Tag preview">
-            <div class="arr-tags-preview-head">
-                <LucideIcon Name="eye" Size="12"/>
-                Preview: the tags these would get
-            </div>
-            @foreach (var row in ArrTagPreview.Rows(Shown, Users, Feed))
-            {
-                <div class="arr-tags-preview-row">
-                    <div class="arr-tags-preview-title">
-                        <span class="truncate font-medium">@row.Title</span>
-                        <span class="text-xs text-muted-foreground">@row.Detail</span>
-                    </div>
-                    <div class="arr-tags-chips">
-                        @foreach (var label in row.Labels)
-                        {
-                            <code class="arr-tags-chip">@label</code>
-                        }
-                    </div>
-                </div>
-            }
+    <div class="arr-tag-row">
+        <span><BbSwitch Checked="Scheme.PerFeed" CheckedChanged="PerFeedChangedAsync" AriaLabel="Tag which feed added it"/></span>
+        <div>
+            <div class="arr-tag-name">Which feed added it</div>
+            <div class="arr-tag-note">A label for you; nothing reads it.</div>
+        </div>
+        <div class="arr-tag-value">@Chip($"{Scheme.Root}-", FeedPart)</div>
+        <div class="arr-tag-from">
+            from
+            <BbSelect TValue="ArrFeedTagSource" Value="Scheme.FeedSource" ValueChanged="FeedSourceChangedAsync" Options="FeedSources"
+                      Disabled="@(!Scheme.PerFeed)" AriaLabel="Feed tag from" Class="w-32 [&_[role=combobox]]:h-8 [&_[role=combobox]]:text-xs"/>
+        </div>
+    </div>
+
+    <div class="arr-tag-row">
+        <span><BbSwitch Checked="Scheme.PlainPrefix" CheckedChanged="PlainPrefixChangedAsync" AriaLabel="Tag every title"/></span>
+        <div>
+            <div class="arr-tag-name">Every title</div>
+            <div class="arr-tag-note">One filter in Radarr and Sonarr for everything Sammlarr added.</div>
+        </div>
+        <div class="arr-tag-value">@Chip(string.Empty, Scheme.Root)</div>
+        <div class="arr-tag-from"></div>
+    </div>
+
+    <div class="arr-tag-row">
+        <span class="arr-tag-always"><LucideIcon Name="lock" Size="12"/></span>
+        <div>
+            <div class="arr-tag-name">Titles that were there first</div>
+            <div class="arr-tag-note">Added when Radarr or Sonarr had the title before Sammlarr asked for it, so taking it off a wantlist never removes it from the app.</div>
+        </div>
+        <div class="arr-tag-value">
+            <span class="arr-tag-prefix">@($"{Scheme.Root}-")</span>
+            <span class="arr-tag-locked w-[150px]" data-locked="protection">
+                <span class="truncate">@Scheme.Guard</span>
+                <LucideIcon Name="lock" Size="12" Class="ml-auto shrink-0 text-muted-foreground"/>
+            </span>
+        </div>
+        <div class="arr-tag-from">
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => Open(TagChange.Protection)" AriaLabel="Change the protected tag">
+                <LucideIcon Name="pencil" Size="13" Class="mr-1.5"/>
+                Change…
+            </BbButton>
         </div>
     </div>
 </div>
+
+@if (_changing is { } changing)
+{
+    <BbDialog Open="true" OpenChanged="open => _changing = open ? _changing : null">
+        <BbDialogContent Class="sm:max-w-[480px]">
+            <BbDialogHeader>
+                <BbDialogTitle>@Title(changing)</BbDialogTitle>
+            </BbDialogHeader>
+            <BbField>
+                <BbFieldLabel For="arr-tag-change">@Label(changing)</BbFieldLabel>
+                <BbFieldContent>
+                    <div class="flex items-center gap-1.5">
+                        @if (changing == TagChange.Protection)
+                        {
+                            <span class="font-mono text-[13px] text-muted-foreground">@($"{Scheme.Root}-")</span>
+                        }
+                        <BbInput Id="arr-tag-change" Value="@_typed" ValueChanged="value => _typed = value ?? string.Empty" UpdateTiming="UpdateTiming.Immediate"
+                                 AriaInvalid="@(Slugged(changing).IsNone())" Class="h-9 bg-accent font-mono text-sm"/>
+                    </div>
+                </BbFieldContent>
+            </BbField>
+            <p class="text-sm text-muted-foreground">@Why(changing)</p>
+            <BbDialogFooter>
+                <BbDialogClose>
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Cancel</BbButton>
+                </BbDialogClose>
+                <BbButton Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" Disabled="@(!CanChange(changing))" OnClick="() => ChangeAsync(changing)">
+                    @Action(changing)
+                </BbButton>
+            </BbDialogFooter>
+        </BbDialogContent>
+    </BbDialog>
+}
 
 @code {
     [Parameter] [EditorRequired] public required ArrTagScheme Scheme { get; set; }
@@ -119,6 +133,12 @@
     [Parameter] public IReadOnlyList<ArrTagUser> Users { get; set; } = [];
 
     [Parameter] public Optional<ArrTagFeed> Feed { get; set; } = new None();
+
+    private enum TagChange
+    {
+        Prefix,
+        Protection,
+    }
 
     private static readonly SelectOption<ArrUserTagSource>[] UserSources =
     [
@@ -132,49 +152,94 @@
         new(ArrFeedTagSource.Id, "feed id"),
     ];
 
-    private string _prefix = string.Empty;
+    private TagChange? _changing;
 
-    private string? _saved;
-
-    private bool _confirming;
+    private string _typed = string.Empty;
 
     private bool Locked => Users.Count > 1;
 
-    private Optional<string> Typed => ArrTagScheme.Slug(_prefix);
+    private string UserPart => Users.FirstOrNone().Map(user => Scheme.UserTag(user)[$"{Scheme.Root}-u-".Length..]).GetValueOr(string.Empty);
 
-    private bool IsValid => Typed.IsSome();
+    private string FeedPart => Feed.Map(feed => Scheme.FeedTag(feed)[$"{Scheme.Root}-".Length..]).GetValueOr("your-list");
 
-    private bool IsChanged => Typed.Match(slug => slug != Scheme.Root, () => true);
+    private static RenderFragment Chip(string fixedPart, string changingPart) => @<code class="arr-tag-chip"><span class="arr-tag-fixed">@fixedPart</span>@changingPart</code>;
 
-    private ArrTagScheme Shown => Scheme with { Prefix = Typed.GetValueOr(Scheme.Root) };
-
-    private string PrefixClass => $"h-9 bg-accent font-mono text-sm {(IsValid ? null : "border-destructive")}".Trim();
-
-    protected override void OnParametersSet()
+    private void Open(TagChange change)
     {
-        if (_saved == Scheme.Root)
+        _typed = Current(change);
+        _changing = change;
+    }
+
+    private string Current(TagChange change)
+    {
+        return change switch
         {
-            return;
-        }
-
-        _saved = Scheme.Root;
-        _prefix = Scheme.Root;
-        _confirming = false;
+            TagChange.Prefix => Scheme.Root,
+            TagChange.Protection => Scheme.Guard,
+        };
     }
 
-    private void PrefixTyped(string prefix)
+    private Optional<string> Slugged(TagChange change)
     {
-        _prefix = prefix;
-        _confirming &= IsChanged && IsValid;
+        return change switch
+        {
+            TagChange.Prefix => ArrTagScheme.Slug(_typed),
+            TagChange.Protection => ArrTagScheme.ProtectionSlug(_typed),
+        };
     }
 
-    private void Cancel()
+    private bool CanChange(TagChange change) => Slugged(change).Match(slug => slug != Current(change), () => false);
+
+    private async Task ChangeAsync(TagChange change)
     {
-        _prefix = Scheme.Root;
-        _confirming = false;
+        await Slugged(change).Apply(slug => SchemeChanged.InvokeAsync(Changed(change, slug)));
+        _changing = null;
     }
 
-    private Task ChangePrefixAsync() => SchemeChanged.InvokeAsync(Shown);
+    private ArrTagScheme Changed(TagChange change, string slug)
+    {
+        return change switch
+        {
+            TagChange.Prefix => Scheme with { Prefix = slug },
+            TagChange.Protection => Scheme with { Protection = slug },
+        };
+    }
+
+    private static string Title(TagChange change)
+    {
+        return change switch
+        {
+            TagChange.Prefix => "Change the prefix",
+            TagChange.Protection => "Change the protected tag",
+        };
+    }
+
+    private static string Label(TagChange change)
+    {
+        return change switch
+        {
+            TagChange.Prefix => "Prefix",
+            TagChange.Protection => "Protected tag",
+        };
+    }
+
+    private static string Action(TagChange change)
+    {
+        return change switch
+        {
+            TagChange.Prefix => "Change prefix",
+            TagChange.Protection => "Change tag",
+        };
+    }
+
+    private string Why(TagChange change)
+    {
+        return change switch
+        {
+            TagChange.Prefix => $"Radarr and Sonarr keep the old {Scheme.Root} tags. Sammlarr stops recognising those titles, so the next sync takes them off every wantlist.",
+            TagChange.Protection => $"Titles carrying {Scheme.ProtectedTag} stop being protected: taking one off every wantlist then removes it from Radarr or Sonarr. Its files stay.",
+        };
+    }
 
     private Task PerUserChangedAsync(bool on) => SchemeChanged.InvokeAsync(Scheme with { PerUser = on });
 
