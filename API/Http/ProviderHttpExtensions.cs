@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Net;
+using System.Threading.RateLimiting;
 using Contracts.Providers;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,13 +42,13 @@ internal static class ProviderHttpExtensions
 		builder.AddHttpMessageHandler(sp =>
 		{
 			var http = Resolve(sp);
-			var gate = Optional.When(http.MaxConcurrency > 0, () => sp.GetRequiredService<ProviderConcurrencyGates>().Get(clientName, http.MaxConcurrency, provider));
+			var gate = Optional.When(http.MaxConcurrency > 0, () => sp.GetRequiredService<ProviderGates>().Concurrency(clientName, http.MaxConcurrency, provider));
 			return new ConcurrencyGateHandler(gate);
 		});
 
 		builder.ConfigurePrimaryHttpMessageHandler(sp => new SocketsHttpHandler { EnableMultipleHttp2Connections = Resolve(sp).EnableMultipleHttp2Connections });
 
-		builder.AddStandardResilienceHandler().Configure((options, sp) => ConfigureResilience(options, Resolve(sp), provider, sp));
+		builder.AddStandardResilienceHandler().Configure((options, sp) => ConfigureResilience(options, Resolve(sp), clientName, provider, sp));
 
 		provider
 			.Apply(measured => builder.AddHttpMessageHandler(sp => new CapacityHandler(measured, sp.GetRequiredService<ProviderCapacity>())))
@@ -64,10 +65,15 @@ internal static class ProviderHttpExtensions
 	private static void ConfigureResilience(
 		HttpStandardResilienceOptions options,
 		ProviderHttpOptions http,
+		string clientName,
 		Optional<MediaProvider> provider,
 		IServiceProvider services
 	)
 	{
+		var paced = provider.Map(owner => $"{owner}").GetValueOr(clientName);
+		Optional
+			.When(http.RequestsPerSecond > 0, () => services.GetRequiredService<ProviderGates>().Rate(paced, http.RequestsPerSecond, provider))
+			.Apply(limiter => options.RateLimiter.RateLimiter = args => limiter.AcquireAsync(1, args.Context.CancellationToken));
 		options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(http.AttemptTimeoutSeconds);
 		options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(http.TotalTimeoutSeconds);
 		options.Retry.MaxRetryAttempts = Math.Max(1, http.RetryAttempts);
@@ -125,22 +131,50 @@ internal static class ProviderHttpExtensions
 		};
 }
 
-internal sealed class ProviderConcurrencyGates
+internal sealed class ProviderGates
 {
 	private readonly ConcurrentDictionary<string, (SemaphoreSlim Gate, int Limit, Optional<MediaProvider> Provider)> _gates = new();
 
-	public SemaphoreSlim Get(string key, int limit, Optional<MediaProvider> provider)
+	private readonly ConcurrentDictionary<string, (SlidingWindowRateLimiter Window, int Limit, Optional<MediaProvider> Provider)> _windows = new();
+
+	public SemaphoreSlim Concurrency(string key, int limit, Optional<MediaProvider> provider)
 	{
 		return _gates.GetOrAdd(key, static (_, gate) => (new SemaphoreSlim(gate.limit, gate.limit), gate.limit, gate.provider), (limit, provider)).Gate;
 	}
 
+	public RateLimiter Rate(string key, int perSecond, Optional<MediaProvider> provider)
+	{
+		return _windows.GetOrAdd(key, static (_, rate) => (PerSecond(rate.perSecond), rate.perSecond, rate.provider), (perSecond, provider)).Window;
+	}
+
 	public double Busy(MediaProvider provider)
 	{
-		return _gates
-			.Where(pair => pair.Value.Provider.Match(owner => owner == provider, () => false))
-			.Select(pair => (pair.Value.Limit - pair.Value.Gate.CurrentCount) / (double)pair.Value.Limit)
-			.DefaultIfEmpty(0)
-			.Max();
+		var gates = _gates.Values.Where(gate => Owns(gate.Provider, provider)).Select(gate => (gate.Limit - gate.Gate.CurrentCount) / (double)gate.Limit);
+		var windows = _windows.Values.Where(window => Owns(window.Provider, provider)).Select(window => Used(window.Window, window.Limit));
+		return gates.Concat(windows).DefaultIfEmpty(0).Max();
+	}
+
+	private static bool Owns(Optional<MediaProvider> owner, MediaProvider provider) => owner.Match(found => found == provider, () => false);
+
+	private static double Used(SlidingWindowRateLimiter window, int limit)
+	{
+		return Optional
+			.Of(window.GetStatistics())
+			.Map(statistics => (limit - statistics.CurrentAvailablePermits + statistics.CurrentQueuedCount) / (double)limit)
+			.GetValueOr(0);
+	}
+
+	private static SlidingWindowRateLimiter PerSecond(int permits)
+	{
+		return new SlidingWindowRateLimiter(
+			new SlidingWindowRateLimiterOptions
+			{
+				PermitLimit = permits,
+				Window = TimeSpan.FromSeconds(1),
+				SegmentsPerWindow = 4,
+				QueueLimit = int.MaxValue,
+			}
+		);
 	}
 }
 

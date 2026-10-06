@@ -26,7 +26,7 @@ public class ProviderHttpExtensionsTests
 			.ConfigureServices(services =>
 			{
 				services.AddSingleton(new WebhookOptions());
-				services.AddSingleton<ProviderConcurrencyGates>();
+				services.AddSingleton<ProviderGates>();
 				services.AddHttpClient<WebhookClient>().AddProviderHttp<WebhookOptions>();
 			})
 			.Build();
@@ -90,6 +90,20 @@ public class ProviderHttpExtensionsTests
 		await Assert.That(load.EnrichWait).IsEqualTo(TimeSpan.FromSeconds(15));
 	}
 
+	[Test]
+	public async Task AddProviderHttp_WithARequestRate_HoldsTheRequestsBeyondItForTheNextWindow()
+	{
+		var handler = new AnsweringHandler(HttpStatusCode.OK);
+		using var host = Host(IProviderRateLimitReporter.Mock().Object, handler, requestsPerSecond: 2);
+
+		var sends = Enumerable.Range(0, 3).Select(_ => SendAsync(host, new HttpRequestMessage(HttpMethod.Get, "https://plex.test/library"))).ToList();
+
+		await Assert.That(async () => await Task.WhenAll(sends).WaitAsync(TimeSpan.FromMilliseconds(500))).Throws<TimeoutException>();
+		await Assert.That(handler.Answered).IsEqualTo(2);
+		await Task.WhenAll(sends);
+		await Assert.That(handler.Answered).IsEqualTo(3);
+	}
+
 	private static HttpRequestMessage Stamped()
 	{
 		var currentUser = ICurrentUser.Mock();
@@ -115,6 +129,18 @@ public class ProviderHttpExtensionsTests
 		int enrichWaitSeconds = 0
 	)
 	{
+		return Host(reporter, new AnsweringHandler(answer), minimumThroughput, maxWaitSeconds, enrichWaitSeconds);
+	}
+
+	private static IHost Host(
+		IProviderRateLimitReporter reporter,
+		AnsweringHandler handler,
+		int minimumThroughput = 20,
+		int maxWaitSeconds = 0,
+		int enrichWaitSeconds = 0,
+		int requestsPerSecond = 0
+	)
+	{
 		return new HostBuilder()
 			.ConfigureServices(services =>
 			{
@@ -129,22 +155,28 @@ public class ProviderHttpExtensionsTests
 							CircuitBreakerMinimumThroughput = minimumThroughput,
 							MaxWaitSeconds = maxWaitSeconds,
 							EnrichWaitSeconds = enrichWaitSeconds,
+							RequestsPerSecond = requestsPerSecond,
 						},
 					}
 				);
-				services.AddSingleton<ProviderConcurrencyGates>();
+				services.AddSingleton<ProviderGates>();
 				services.AddSingleton<ProviderCapacity>();
 				services.AddSingleton(IDateTimeProvider.Mock().Object);
 				services.AddSingleton(reporter);
-				services.AddHttpClient("plex").AddProviderHttp<PlexOptions>(MediaProvider.Plex).ConfigurePrimaryHttpMessageHandler(() => new AnsweringHandler(answer));
+				services.AddHttpClient("plex").AddProviderHttp<PlexOptions>(MediaProvider.Plex).ConfigurePrimaryHttpMessageHandler(() => handler);
 			})
 			.Build();
 	}
 
 	private sealed class AnsweringHandler(HttpStatusCode answer) : HttpMessageHandler
 	{
+		private int _answered;
+
+		public int Answered => _answered;
+
 		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 		{
+			Interlocked.Increment(ref _answered);
 			var response = new HttpResponseMessage(answer)
 			{
 				RequestMessage = request,

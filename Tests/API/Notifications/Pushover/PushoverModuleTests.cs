@@ -16,7 +16,7 @@ public class PushoverModuleTests
 		var services = new ServiceCollection();
 		services.AddLogging();
 		services.AddSingleton(new PushoverOptions { BaseUrl = "http://catcher.test/pushover/1" });
-		services.AddSingleton<ProviderConcurrencyGates>();
+		services.AddSingleton<ProviderGates>();
 		new PushoverModule().RegisterServices(services);
 		services.AddHttpClient<PushoverClient>().ConfigurePrimaryHttpMessageHandler(() => new AnsweringHandler(request => sentTo = request.RequestUri));
 		await using var provider = services.BuildServiceProvider();
