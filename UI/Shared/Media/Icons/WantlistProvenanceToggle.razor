@@ -40,8 +40,8 @@
     {
         return provenance switch
         {
-            SinkOrigin sink => Branding.SinkColor(sink.Provider),
-            FeedOrigin feed => Branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider()).BrandColor,
+            SinkOrigin sink => Branding.Color(sink.Provider.Service),
+            FeedOrigin feed => Branding.Color(feed.Feed.Provider.Service),
             OrphanedOrigin => "var(--muted-foreground)",
             ManualOrigin => null,
         };

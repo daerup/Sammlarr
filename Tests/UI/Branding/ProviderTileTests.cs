@@ -1,6 +1,5 @@
 using Bunit;
 using Domain.Providers;
-using Domain.Wantlist.Arr;
 using TUnit.Assertions.Enums;
 using UI.Shared.Branding;
 using UI.Shared.Services.Branding;
@@ -39,7 +38,9 @@ public class ProviderTileTests : BunitContext
 	public async Task PairTile_ForRadarrAndSonarr_DrawsBothMarksAtEighteenTwentyEighthsOfTheTile()
 	{
 		var cut = Render<ProviderPairTile>(parameters =>
-			parameters.Add(tile => tile.First, Branding.GetBrandingInfo(ArrApp.Radarr)).Add(tile => tile.Second, Branding.GetBrandingInfo(ArrApp.Sonarr))
+			parameters
+				.Add(tile => tile.First, Branding.GetBrandingInfo(RemoteService.Radarr))
+				.Add(tile => tile.Second, Branding.GetBrandingInfo(RemoteService.Sonarr))
 		);
 
 		var images = cut.FindAll(".provider-pair img.is-light");

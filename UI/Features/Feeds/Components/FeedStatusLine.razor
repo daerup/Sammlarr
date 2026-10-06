@@ -26,10 +26,13 @@
             <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-auto overflow-hidden p-0"
                               CloseOnClickOutside="!_runOpen" CloseOnEscape="!_runOpen">
                 <span class="next-details">
-                    <span class="next-rail" style="background: @Brand(next.Feed).BrandColor"></span>
+                    <span class="next-rail" style="background: @Branding.Color(next.Feed.Provider.Service)"></span>
                     <span class="next-body">
                         <span class="next-head">
-                            <ProviderTile Provider="@next.Feed.Provider.AsMediaProvider()" Size="16" Decorative="true"/>
+                            @foreach (var brand in Branding.Brands(next.Feed.Provider.Service))
+                            {
+                                <BrandedTile Brand="brand" Size="16" Decorative="true"/>
+                            }
                             <AppLink Href="@($"/feeds/edit/{UrlGuid.Encode(next.Feed.Id.Value)}")" Title="Open feed settings" Class="min-w-0">
                                 <span class="next-name">@next.Feed.Name</span>
                             </AppLink>
@@ -82,7 +85,6 @@
 
     private int Queued => FeedPulse.Queued(Rows);
 
-    private BrandingInfo Brand(Feed feed) => Branding.GetBrandingInfo(feed.Provider.AsMediaProvider());
 
     private string When(DateTimeOffset at) => at - Now < TimeSpan.FromDays(1) ? at.ToLocalTime().ToString("HH:mm") : at.ToLocalTime().ToString("d MMMM HH:mm");
 }

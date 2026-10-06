@@ -707,7 +707,7 @@
     private int AbsencesOf(MediaId id) => Math.Min(MirrorThreshold, _missedRuns.GetValueOrDefault(id));
 
     private string FeedBrandColor =>
-        (_appliedConfig ?? Config).Provider is { } provider ? Branding.GetBrandingInfo(provider.AsMediaProvider()).BrandColor : "currentColor";
+        (_appliedConfig ?? Config).Provider is { } provider ? Branding.Color(provider.Service) : "currentColor";
 
     private bool MatchesSearch(string? title)
     {

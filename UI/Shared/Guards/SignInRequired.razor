@@ -64,7 +64,7 @@
 
     [Parameter] public string? Error { get; set; }
 
-    private BrandingInfo Branding => BrandingService.GetBrandingInfo(Provider);
+    private BrandingInfo Branding => BrandingService.Brands(Provider.Service).Single();
 
     private string Target => string.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl;
 

@@ -164,7 +164,7 @@
     private string PageDescription =>
         Settings is null ? "Your saved movies and shows." : $"Your saved movies and shows, synced with {Settings.Sink.GetDescription()}.";
 
-    private string? SinkBrandColor => Settings is null ? null : BrandingService.SinkColor(Settings.Sink);
+    private string? SinkBrandColor => Settings is null ? null : BrandingService.Color(Settings.Sink.Service);
 
     private string SinkName => Settings is null ? "your media service" : Settings.Sink.GetDescription();
 

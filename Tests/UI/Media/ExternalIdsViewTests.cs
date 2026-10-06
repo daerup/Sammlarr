@@ -90,7 +90,7 @@ public class ExternalIdsViewTests
 			.That(cards[^1])
 			.IsEqualTo(
 				new ExternalIdCard(
-					new MediaProviderBrandingService().GetBrandingInfo(ArrApp.Radarr),
+					new MediaProviderBrandingService().GetBrandingInfo(RemoteService.Radarr),
 					"tmdb:603",
 					"http://radarr:7878/add/new?term=tmdb%3A603",
 					"Find tmdb:603 in Radarr (opens in new tab)"

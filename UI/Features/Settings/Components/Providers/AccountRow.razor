@@ -90,7 +90,7 @@
 
     [Parameter] public string ReturnUrl { get; set; } = SettingsLinks.Providers;
 
-    private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider);
+    private BrandingInfo Branding => MediaProviderBrandingService.Brands(Provider.Service).Single();
 
     private Service Key => Provider.Service;
 

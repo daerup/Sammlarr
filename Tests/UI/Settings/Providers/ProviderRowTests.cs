@@ -1,7 +1,6 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Providers;
-using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using TUnit.Assertions.Enums;
@@ -87,7 +86,7 @@ public class ProviderRowTests : BunitContext
 		var cut = Render<ProviderRow>(parameters =>
 			parameters
 				.Add(row => row.Key, AccountsRow)
-				.Add(row => row.Brand, Brands.GetBrandingInfo(AuthProvider.Local))
+				.Add(row => row.Brand, Brands.Brands(AuthProvider.Local.Service).Single())
 				.Add(row => row.Status, "<span>Signed in</span>")
 				.AddChildContent("<p>The form</p>")
 		);
@@ -102,7 +101,7 @@ public class ProviderRowTests : BunitContext
 		var cut = Render<ProviderRow>(parameters =>
 			parameters
 				.Add(row => row.Key, ArrRow)
-				.Add(row => row.Brand, Brands.GetBrandingInfo(ArrApp.Radarr))
+				.Add(row => row.Brand, Brands.GetBrandingInfo(RemoteService.Radarr))
 				.Add(row => row.Status, "<span>Connected</span>")
 				.AddChildContent("<p>The form</p>")
 		);

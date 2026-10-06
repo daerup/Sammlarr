@@ -5,7 +5,7 @@
 @inject MediaProviderBrandingService Branding
 
 <article class="feed-card @(Feed.Enabled ? null : "is-paused") @(IsSelecting ? "is-selecting" : null) @(IsSelected ? "is-selected" : null)"
-         style="--brand: @Brand.BrandColor"
+         style="--brand: @Branding.Color(Feed.Provider.Service)"
          aria-label="@Feed.Name">
     @if (IsSelecting)
     {
@@ -17,7 +17,10 @@
     }
 
     <div class="feed-card-head">
-        <ProviderTile Provider="@Feed.Provider.AsMediaProvider()" Size="36" Decorative="true"/>
+        @foreach (var brand in Branding.Brands(Feed.Provider.Service))
+        {
+            <BrandedTile Brand="brand" Size="36" Decorative="true"/>
+        }
         <div class="feed-card-title">
             <span class="feed-card-name" title="@Feed.Name">@Feed.Name</span>
             <span class="feed-card-control feed-card-source">
@@ -154,7 +157,6 @@
 
     private FeedRunHistory History => Row.Overview.History;
 
-    private BrandingInfo Brand => Branding.GetBrandingInfo(Feed.Provider.AsMediaProvider());
 
     private string EditHref => $"/feeds/edit/{UrlGuid.Encode(Feed.Id.Value)}";
 

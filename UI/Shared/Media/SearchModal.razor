@@ -92,7 +92,7 @@
                                         <LucideIcon Name="@app.Type.Icon" Size="14"/>
                                         <span>@app.Type.Plural</span>
                                         <span class="text-xs text-muted-foreground">@CountOf(app)</span>
-                                        <BrandedLogo Brand="Branding.GetBrandingInfo(app)" Form="ProviderLogoForm.Mark" Size="13" Decorative="true"/>
+                                        <BrandedLogo Brand="Branding.GetBrandingInfo(app.Remote)" Form="ProviderLogoForm.Mark" Size="13" Decorative="true"/>
                                     </BbTabsTrigger>
                                 }
                             </BbTabsList>
@@ -178,7 +178,7 @@
     private string SearchProviderName => SearchProvider.GetDescription();
     private string SearchModalTitle => Title ?? $"Search {SearchProviderName}";
     private string SearchModalDescription => Description ?? $"Find a movie or show from {SearchProviderName} and add it to your wantlist.";
-    private IReadOnlyList<BrandingInfo> Brands => Branding.Brands(SearchProvider);
+    private IReadOnlyList<BrandingInfo> Brands => Branding.Brands(SearchProvider.Service);
     private ProviderLogoForm FooterForm => Brands.Count == 1 ? ProviderLogoForm.Logo : ProviderLogoForm.Mark;
     private string ResultsSource => string.Join(" and ", Brands.Select(brand => brand.DisplayName));
 

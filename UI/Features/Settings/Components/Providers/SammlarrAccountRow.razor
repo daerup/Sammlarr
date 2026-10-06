@@ -62,7 +62,7 @@
 
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
 
-    private BrandingInfo Brand => Branding.GetBrandingInfo(AuthProvider.Local);
+    private BrandingInfo Brand => Branding.Brands(AuthProvider.Local.Service).Single();
 
     private bool IsAdmin => CurrentUser.Role == UserRole.Admin;
 

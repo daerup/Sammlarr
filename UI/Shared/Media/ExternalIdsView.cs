@@ -58,7 +58,7 @@ internal sealed class ExternalIdsView(
 
 	private ExternalIdCard ArrCard(ArrSearchLink link)
 	{
-		var brand = branding.GetBrandingInfo(link.App);
+		var brand = branding.GetBrandingInfo(link.App.Remote);
 		return new ExternalIdCard(brand, link.Term, link.Url, $"Find {link.Term} in {brand.DisplayName} (opens in new tab)");
 	}
 }

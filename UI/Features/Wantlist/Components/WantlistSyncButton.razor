@@ -40,7 +40,7 @@
             @foreach (var app in Enum.GetValues<ArrApp>())
             {
                 <span class="sync-app" data-app="@app.Name" title="@app.Name">
-                    <BrandedLogo Brand="Branding.GetBrandingInfo(app)" Form="ProviderLogoForm.Mark" Size="14" Decorative="true"/>
+                    <BrandedLogo Brand="Branding.GetBrandingInfo(app.Remote)" Form="ProviderLogoForm.Mark" Size="14" Decorative="true"/>
                     @if (_unreachable.Contains(app))
                     {
                         <LucideIcon Name="cloud-off" Size="13" Class="text-destructive"/>
