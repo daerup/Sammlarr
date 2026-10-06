@@ -8,61 +8,31 @@ internal static class StagingEnvironment
 {
 	internal const string Dockerfile = "Web/Dockerfile";
 
-	private const string Host = "staging.localhost";
-
-	private const string CatcherSession = "5a3a7a6e-0000-4000-8000-000000000001";
-
-	private const string SetupCode = "SAMM-LARR";
-
-	private const int MinimumPasswordLength = 5;
-
-	private const int SammlarrPort = 6789;
-
-	private const int CatcherPort = 6790;
-
-	private const int WireMockPort = 6791;
-
-	private const string DeadProxy = "http://127.0.0.1:9";
-
-	private static readonly string[] Reachable =
-	[
-		"api.themoviedb.org",
-		"image.tmdb.org",
-		"api.mdblist.com",
-		"query.wikidata.org",
-		"radarr",
-		"sonarr",
-		"wiremock",
-		"catcher",
-		"host.docker.internal",
-		"aspire.dev.internal",
-		"localhost",
-		"127.0.0.1",
-	];
-
 	internal static string RepositoryRoot(IDistributedApplicationBuilder builder) => Path.GetFullPath(Path.Combine(builder.AppHostDirectory, ".."));
 
 	internal static void AddStaging(this IDistributedApplicationBuilder builder)
 	{
+		var config = StagingConfig.Load(builder);
+		var sammlarrSettings = builder.Configuration.GetSection(StagingConfig.SammlarrSection);
 		var layout = StagingLayout.From(builder.Configuration["StagingRoot"]);
 		var scenario = new StagingScenarioChoice(builder.Configuration["StagingScenario"] ?? StagingScenarioChoice.Configured);
 		var tmdb = builder.AddParameter("tmdb-api-key", secret: true);
 
-		var radarr = builder.AddStagingArr(ArrContainers.Radarr, 7879, layout);
-		var sonarr = builder.AddStagingArr(ArrContainers.Sonarr, 8990, layout);
+		var radarr = builder.AddStagingArr(ArrContainers.Radarr, config.Ports.Radarr, layout);
+		var sonarr = builder.AddStagingArr(ArrContainers.Sonarr, config.Ports.Sonarr, layout);
 
 		var wiremock = builder
 			.AddContainer("wiremock", "wiremock/wiremock", "latest")
 			.WithContainerName("sammlarr-staging-wiremock")
 			.WithLifetime(ContainerLifetime.Persistent)
-			.WithHttpEndpoint(port: WireMockPort, targetPort: 8080, name: "http", isProxied: false)
+			.WithHttpEndpoint(port: config.Ports.WireMock, targetPort: 8080, name: "http", isProxied: false)
 			.WithHttpHealthCheck("/__admin/health")
 			.WithBindMount(Path.Combine(builder.AppHostDirectory, "Staging", "wiremock"), "/home/wiremock/mappings", isReadOnly: true)
 			.WithArgs("--global-response-templating", "--disable-banner");
 
 		var catcher = builder
 			.AddContainer("catcher", "ghcr.io/tarampampam/webhook-tester", "2")
-			.WithHttpEndpoint(port: CatcherPort, targetPort: 8080, name: "http", isProxied: false)
+			.WithHttpEndpoint(port: config.Ports.Catcher, targetPort: 8080, name: "http", isProxied: false)
 			.WithBindMount(layout.Catcher, "/data")
 			.WithEnvironment("AUTO_CREATE_SESSIONS", "true")
 			.WithEnvironment("STORAGE_DRIVER", "fs")
@@ -73,13 +43,13 @@ internal static class StagingEnvironment
 			.WithArgs("seed-staging")
 			.WithEnvironment((SammlarOptions options) => options.ConnectionString, $"Data Source={layout.Database};Pooling=False")
 			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", layout.KeyRing)
-			.WithEnvironment((AccountsOptions options) => options.SetupCode, SetupCode)
-			.WithEnvironment((AccountsOptions options) => options.MinimumPasswordLength, MinimumPasswordLength)
+			.WithConfiguration(sammlarrSettings)
+			.WithConfiguration(builder.Configuration.GetSection(StagingConfig.PersonasSection))
 			.WithEnvironment(context => context.EnvironmentVariables["Staging__Scenario"] = scenario.Value)
 			.WithEnvironment("Staging__TmdbKey", tmdb)
 			.WithEnvironment("Staging__ArrApiKey", ArrContainers.ApiKey)
 			.WithEnvironment("Staging__IndexerUrl", "http://wiremock:8080/newznab")
-			.WithEnvironment("Staging__CatcherUrl", $"http://catcher:8080/{CatcherSession}")
+			.WithEnvironment("Staging__CatcherUrl", $"http://catcher:8080/{config.CatcherSession}")
 			.WithArrEnvironment(ArrContainers.Radarr, radarr, layout)
 			.WithArrEnvironment(ArrContainers.Sonarr, sonarr, layout)
 			.WaitFor(radarr)
@@ -92,14 +62,13 @@ internal static class StagingEnvironment
 
 		var sammlarr = builder
 			.AddDockerfile("sammlarr", RepositoryRoot(builder), Dockerfile)
-			.WithHttpEndpoint(port: SammlarrPort, targetPort: 8080, name: "http", isProxied: false)
+			.WithHttpEndpoint(port: config.Ports.Sammlarr, targetPort: 8080, name: "http", isProxied: false)
 			.WithBindMount(layout.Sammlarr, "/data")
-			.WithEnvironment((AccountsOptions options) => options.SetupCode, SetupCode)
-			.WithEnvironment((AccountsOptions options) => options.MinimumPasswordLength, MinimumPasswordLength)
-			.WithEnvironment((PushoverOptions options) => options.BaseUrl, $"http://catcher:8080/{CatcherSession}/pushover/1")
-			.WithEnvironment("HTTP_PROXY", DeadProxy)
-			.WithEnvironment("HTTPS_PROXY", DeadProxy)
-			.WithEnvironment("NO_PROXY", string.Join(',', Reachable))
+			.WithConfiguration(sammlarrSettings)
+			.WithEnvironment((PushoverOptions options) => options.BaseUrl, $"http://catcher:8080/{config.CatcherSession}/pushover/1")
+			.WithEnvironment("HTTP_PROXY", config.Network.DeadProxy)
+			.WithEnvironment("HTTPS_PROXY", config.Network.DeadProxy)
+			.WithEnvironment("NO_PROXY", string.Join(',', config.Network.Reachable))
 			.WithOtlpExporter()
 			.WithHttpHealthCheck("/health")
 			.WaitFor(radarr)
@@ -110,7 +79,7 @@ internal static class StagingEnvironment
 			.WithUrls(context =>
 			{
 				context.Urls.Clear();
-				context.Urls.Add(new() { Url = $"http://{Host}:{SammlarrPort}", DisplayText = "Sammlarr" });
+				context.Urls.Add(new() { Url = $"http://{config.Host}:{config.Ports.Sammlarr}", DisplayText = "Sammlarr" });
 			});
 		foreach (var key in PlexOptions.UrlSettings)
 		{
@@ -121,7 +90,7 @@ internal static class StagingEnvironment
 		Label(radarr, "Radarr", "/");
 		Label(sonarr, "Sonarr", "/");
 		Label(wiremock, "WireMock journal", "/__admin/requests");
-		Label(catcher, "Catcher", $"/s/{CatcherSession}");
+		Label(catcher, "Catcher", $"/s/{config.CatcherSession}");
 		radarr.WithParentRelationship(sammlarr);
 		sonarr.WithParentRelationship(sammlarr);
 		wiremock.WithParentRelationship(sammlarr);

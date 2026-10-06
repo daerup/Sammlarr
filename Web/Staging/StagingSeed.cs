@@ -28,18 +28,7 @@ internal enum StagingScenario
 	Fresh,
 }
 
-internal sealed record StagingSettings(string TmdbKey, Optional<string> MdblistKey, ArrSinkConfig Arr, string CatcherUrl);
-
-internal static class StagingPersonas
-{
-	internal const string Admin = "admin";
-
-	internal const string AdminPassword = "admin";
-
-	internal const string Member = "member";
-
-	internal const string MemberPassword = "member";
-}
+internal sealed record StagingSettings(StagingPersonas Personas, string TmdbKey, Optional<string> MdblistKey, ArrSinkConfig Arr, string CatcherUrl);
 
 internal static class StagingSeed
 {
@@ -64,12 +53,8 @@ internal static class StagingSeed
 	private static async Task ConfigureAsync(IServiceProvider scoped, StagingSettings settings, CancellationToken cancellationToken)
 	{
 		var users = scoped.GetRequiredService<IUserScope>();
-		var claim = new AdminClaim(
-			scoped.GetRequiredService<AccountsOptions>().SetupCode,
-			StagingPersonas.Admin,
-			StagingPersonas.AdminPassword,
-			StagingPersonas.AdminPassword
-		);
+		var personas = settings.Personas;
+		var claim = new AdminClaim(scoped.GetRequiredService<AccountsOptions>().SetupCode, personas.Admin.Name, personas.Admin.Password, personas.Admin.Password);
 		var admin = Require(await scoped.GetRequiredService<IOnboardingService>().ClaimAsync(claim, cancellationToken));
 		IssuedLink invite;
 		using (users.As(admin))
@@ -80,14 +65,14 @@ internal static class StagingSeed
 			await AddTitlesAsync(scoped, cancellationToken);
 			await CreateFeedsAsync(scoped, settings.MdblistKey.IsSome(), cancellationToken);
 			await CreateTargetsAsync(scoped, settings.CatcherUrl, cancellationToken);
-			invite = Require(await scoped.GetRequiredService<IUserManagementService>().InviteAsync(StagingPersonas.Member, cancellationToken));
+			invite = Require(await scoped.GetRequiredService<IUserManagementService>().InviteAsync(personas.Member.Name, cancellationToken));
 			await scoped.GetRequiredService<IOnboardingService>().CompleteAsync(cancellationToken);
 			await scoped.GetRequiredService<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger()), cancellationToken);
 		}
 
 		var token = invite.Path[(invite.Path.LastIndexOf('/') + 1)..];
 		var member = Require(
-			await scoped.GetRequiredService<IAccountLinkService>().JoinAsync(token, StagingPersonas.MemberPassword, StagingPersonas.MemberPassword, cancellationToken)
+			await scoped.GetRequiredService<IAccountLinkService>().JoinAsync(token, personas.Member.Password, personas.Member.Password, cancellationToken)
 		);
 		using (users.As(member))
 		{

@@ -6,13 +6,11 @@ internal static class StagingLibrary
 {
 	private const string Quality = "WEBDL-1080p";
 
-	private static readonly string AdminTag = $"sammlarr-u-{StagingPersonas.Admin}";
-
 	private static readonly char[] Unsafe = [.. Path.GetInvalidFileNameChars(), ':'];
 
-	internal static async Task FillRadarrAsync(ArrClient radarr, ArrAppOptions options, int profileId, CancellationToken cancellationToken)
+	internal static async Task FillRadarrAsync(ArrClient radarr, ArrAppOptions options, int profileId, string adminName, CancellationToken cancellationToken)
 	{
-		var admin = await TagAsync(radarr, AdminTag, cancellationToken);
+		var admin = await TagAsync(radarr, $"sammlarr-u-{adminName}", cancellationToken);
 		var held = await HeldAsync(radarr, "movie", "tmdbId", cancellationToken);
 		Title[] titles = [new(693134, OnDisk: true, Tags: []), new(157336, OnDisk: false, Tags: []), new(286217, OnDisk: false, Tags: [admin])];
 		foreach (var title in titles.Where(title => !held.Contains(title.Id)))

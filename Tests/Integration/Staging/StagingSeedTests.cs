@@ -27,6 +27,14 @@ public class StagingSeedTests : IAsyncDisposable
 {
 	private const string Catcher = "http://catcher:8080/session";
 
+	private const string Admin = "ada";
+
+	private const string AdminPassword = "ada-staging";
+
+	private const string Member = "grace";
+
+	private const string MemberPassword = "grace-staging";
+
 	private static readonly ArrInstanceConfig Instance = new()
 	{
 		Url = Some.Of("http://radarr:7878"),
@@ -36,6 +44,11 @@ public class StagingSeedTests : IAsyncDisposable
 	};
 
 	private static readonly StagingSettings Settings = new(
+		new StagingPersonas
+		{
+			Admin = new StagingPersona { Name = Admin, Password = AdminPassword },
+			Member = new StagingPersona { Name = Member, Password = MemberPassword },
+		},
 		"staging-tmdb-key",
 		Some.Of("staging-mdblist-key"),
 		ArrSinkConfig.Empty with
@@ -83,14 +96,14 @@ public class StagingSeedTests : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Configured_LetsBothPeopleSignInWithTheirPasswords()
+	public async Task Configured_LetsBothConfiguredPeopleSignInWithTheirPasswords()
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
 
 		await using var scope = _services.CreateAsyncScope();
 		var signIn = scope.ServiceProvider.GetRequiredService<ISignInService>();
-		await Assert.That(await signIn.SignInWithPasswordAsync(StagingPersonas.Admin, StagingPersonas.AdminPassword)).IsSuccess();
-		await Assert.That(await signIn.SignInWithPasswordAsync(StagingPersonas.Member, StagingPersonas.MemberPassword)).IsSuccess();
+		await Assert.That(await signIn.SignInWithPasswordAsync(Admin, AdminPassword)).IsSuccess();
+		await Assert.That(await signIn.SignInWithPasswordAsync(Member, MemberPassword)).IsSuccess();
 	}
 
 	[Test]
@@ -99,8 +112,8 @@ public class StagingSeedTests : IAsyncDisposable
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
 
 		await AsAsync(
-			StagingPersonas.Admin,
-			StagingPersonas.AdminPassword,
+			Admin,
+			AdminPassword,
 			async services =>
 			{
 				await Assert.That((await services.GetRequiredService<IProviderConfigService>().GetAsync()).Sink).IsEqualTo(SinkKind.Arr);
@@ -116,8 +129,8 @@ public class StagingSeedTests : IAsyncDisposable
 	}
 
 	[Test]
-	[Arguments(StagingPersonas.Admin, StagingPersonas.AdminPassword)]
-	[Arguments(StagingPersonas.Member, StagingPersonas.MemberPassword)]
+	[Arguments(Admin, AdminPassword)]
+	[Arguments(Member, MemberPassword)]
 	public async Task Configured_StoresEachPersonsTmdbKey(string username, string password)
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
@@ -135,8 +148,8 @@ public class StagingSeedTests : IAsyncDisposable
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
 
 		await AsAsync(
-			StagingPersonas.Admin,
-			StagingPersonas.AdminPassword,
+			Admin,
+			AdminPassword,
 			async services =>
 			{
 				var targets = await services.GetRequiredService<INotificationTargetRepository>().GetAllAsync();
@@ -154,8 +167,8 @@ public class StagingSeedTests : IAsyncDisposable
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings with { MdblistKey = new None() }, CancellationToken.None);
 
 		await AsAsync(
-			StagingPersonas.Admin,
-			StagingPersonas.AdminPassword,
+			Admin,
+			AdminPassword,
 			async services =>
 			{
 				var feeds = (await services.GetRequiredService<IFeedService>().GetAsync()).Feeds;
