@@ -169,7 +169,7 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenAProviderFoundTitleCannotBeFetched_YieldsItUnmatched()
+	public async Task IdentifyWithDetailsAsync_WhenNoProviderKnowsTheDetailsOfAFoundTitle_YieldsItUnmatched()
 	{
 		var (testee, deps) = CreateTestee();
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
@@ -180,6 +180,28 @@ public class MediaServiceTests
 
 		await Assert.That(results.Single()).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task IdentifyWithDetailsAsync_WhenTheDetailsProviderIsUnavailable_YieldsTheFoundTitleMatchedAndDescribedByItsHints()
+	{
+		var external = TmdbId.From("550", MediaType.Movie);
+		var (testee, deps) = CreateTestee();
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From(new ProviderUnavailableException(MediaProvider.Plex)));
+		var hints = new IdentifyHints
+		{
+			Title = "Fight Club",
+			Year = 1999,
+			MediaType = MediaType.Movie,
+		};
+
+		var results = await testee.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([external], Some.Of(hints)) }.ToAsyncEnumerable()).ToListAsync();
+
+		var matched = await Assert.That(results.Single()).IsOfUnionType<MediaMatchResult, MatchedMedia>();
+		await Assert.That(matched!.Details).IsEqualTo(new MovieDetails { Title = "Fight Club", ReleaseDate = new DateOnly(1999, 1, 1) });
+		await Assert.That(matched.Identity.Externals).Contains(external);
+		deps.MediaRepo.UpsertIdentitiesAsync(Any(), Any()).WasCalled(Times.Once);
+		deps.MediaRepo.UpsertDetailsAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]

@@ -52,10 +52,10 @@ internal sealed class DetailsFetcher(
 		var now = clock.Now;
 		var reason = stored.Map(previous => Reason(previous, now)).GetValueOr(new Uncached());
 		var preferred = await PreferredAsync(cancellationToken);
-		var (enriched, answers) = await EnrichAsync(identity, reason, Backup(reason, identity.Type, now), connected, preferred, cancellationToken);
+		var (enriched, answers, unavailable) = await EnrichAsync(identity, reason, Backup(reason, identity.Type, now), connected, preferred, cancellationToken);
 		if (answers.Count == 0 && reason is not Gaps)
 		{
-			return Error.From("the details could not be fetched");
+			return unavailable.Match(provider => Error.From(new ProviderUnavailableException(provider)), () => Error.From("the details could not be fetched"));
 		}
 
 		var askedAt = clock.Now;
@@ -127,7 +127,7 @@ internal sealed class DetailsFetcher(
 		return config.SearchProvider.Provider();
 	}
 
-	private async Task<(MatchedMedia Enriched, List<ProviderAnswer> Answers)> EnrichAsync(
+	private async Task<(MatchedMedia Enriched, List<ProviderAnswer> Answers, Optional<MediaProvider> Unavailable)> EnrichAsync(
 		MediaIdentity identity,
 		FetchReason reason,
 		MediaDetails backup,
@@ -143,6 +143,7 @@ internal sealed class DetailsFetcher(
 		List<ProviderAnswer> answers = [];
 		var asked = AlreadyAnswered(reason).ToHashSet();
 		var waited = new HashSet<MediaProvider>();
+		Optional<MediaProvider> unavailable = new None();
 		while (current.Missing is var missing && !missing.IsEmpty)
 		{
 			var leftToAsk = EnrichersLeftToAsk(known, asked, connected);
@@ -150,6 +151,7 @@ internal sealed class DetailsFetcher(
 			{
 				if (await WaitForBlockedAsync(missing, leftToAsk, waited, now, cancellationToken) is not Some<DateTimeOffset>(var freeAt))
 				{
+					unavailable = unavailable.Or(() => EnricherChoice.Blocked(missing, leftToAsk, now).Map(blocked => blocked.Provider));
 					break;
 				}
 
@@ -159,6 +161,7 @@ internal sealed class DetailsFetcher(
 
 			asked.Add(next.Provider);
 			var answer = await AskAsync(next, known, cancellationToken);
+			answer.ApplyError(error => unavailable = unavailable.Or(() => error.CausedBy<ProviderUnavailableException>().Map(cause => cause.Provider)));
 			var fitting = answer.ToOptional().When(found => found.Fits(backup.Type));
 			fitting.Apply(found => known = known with { Externals = known.Externals + found.Externals });
 			fitting.Apply(found => fresh = fresh.FillFrom(found.Details));
@@ -166,7 +169,7 @@ internal sealed class DetailsFetcher(
 			current = Layered(reason, fresh, backup, answered: answers.Count > 0);
 		}
 
-		return (new MatchedMedia(known, current), answers);
+		return (new MatchedMedia(known, current), answers, unavailable);
 	}
 
 	private static MediaDetails Layered(FetchReason reason, MediaDetails fresh, MediaDetails backup, bool answered)
@@ -198,7 +201,7 @@ internal sealed class DetailsFetcher(
 		catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
 		{
 			logger.LogWarning(exception, "{Provider} could not fill the details of {MediaId}", candidate.Provider, identity.Id);
-			return Error.From(exception);
+			return Error.From(new ProviderUnavailableException(candidate.Provider, exception));
 		}
 	}
 

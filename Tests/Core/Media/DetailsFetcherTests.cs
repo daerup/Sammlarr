@@ -344,6 +344,44 @@ public class DetailsFetcherTests
 	}
 
 	[Test]
+	public async Task FetchAsync_WhenEveryEnricherIsBlockedPastItsWait_FailsAsUnavailable()
+	{
+		var deps = Dependencies.Create(capacity: TestCapacity.With(_ => new ProviderLoad(Some.Of(Now.AddMinutes(1)), 0)));
+		await using var buffer = deps.Buffer();
+
+		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer)).IsError();
+
+		await Assert.That(error!.CausedBy<ProviderUnavailableException>()).IsSome();
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenAnEnricherThrows_FailsAsUnavailable()
+	{
+		var deps = Dependencies.Create();
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).Throws(new HttpRequestException("Plex is down"));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
+		await using var buffer = deps.Buffer();
+
+		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer)).IsError();
+
+		await Assert.That(error!.CausedBy<ProviderUnavailableException>()).IsSome();
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenNoEnricherKnowsTheTitle_FailsWithoutBlamingAProvider()
+	{
+		var deps = Dependencies.Create();
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
+		await using var buffer = deps.Buffer();
+
+		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer)).IsError();
+
+		await Assert.That(error!.CausedBy<ProviderUnavailableException>()).IsNone();
+	}
+
+	[Test]
 	public async Task FetchAsync_ForATitleKnownOnlyByItsImdbId_AsksTmdbByThatId()
 	{
 		var imdb = ImdbId.From("tt1375666", MediaType.Movie);

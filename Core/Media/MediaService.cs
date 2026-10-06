@@ -366,7 +366,7 @@ internal sealed class MediaService(
 		{
 			return Error.From("identity not found");
 		}
-		return await LoadDetailsAsync(row.Identity, Some.Of(row), connected, buffer, cancellationToken);
+		return await LoadDetailsAsync(row.Identity, Some.Of(row), MediaDetails.Empty(row.Identity.Type), connected, buffer, cancellationToken);
 	}
 
 	private async ValueTask<MediaMatchResult> LoadRequestDetailsAsync(
@@ -378,7 +378,7 @@ internal sealed class MediaService(
 	)
 	{
 		var loaded = await handoff.Match(
-			match => LoadDetailsAsync(match.Identity, match.Stored, connected, buffer, cancellationToken),
+			match => LoadDetailsAsync(match.Identity, match.Stored, request.Described(), connected, buffer, cancellationToken),
 			error => ValueTask.FromResult<Result<MatchedMedia>>(error)
 		);
 		return loaded.Match(matched => matched, _ => request.Unmatched());
@@ -387,6 +387,7 @@ internal sealed class MediaService(
 	private async ValueTask<Result<MatchedMedia>> LoadDetailsAsync(
 		MediaIdentity identity,
 		Optional<StoredMedia> stored,
+		MediaDetails placeholder,
 		IReadOnlySet<MediaProvider> connected,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
@@ -397,7 +398,7 @@ internal sealed class MediaService(
 			.FindReusable(identity, cached, connected)
 			.Match(
 				reusable => ValueTask.FromResult<Result<MatchedMedia>>(Success.Of(new MatchedMedia(identity, reusable.Details))),
-				() => FetchAsync(identity, stored, cached, connected, buffer, cancellationToken)
+				() => FetchAsync(identity, stored, cached, placeholder, connected, buffer, cancellationToken)
 			);
 	}
 
@@ -405,6 +406,7 @@ internal sealed class MediaService(
 		MediaIdentity identity,
 		Optional<StoredMedia> stored,
 		Optional<CachedDetails> cached,
+		MediaDetails placeholder,
 		IReadOnlySet<MediaProvider> connected,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
@@ -413,20 +415,27 @@ internal sealed class MediaService(
 		try
 		{
 			var fetched = await detailsFetcher.FetchAsync(identity, cached, connected, buffer, cancellationToken);
-			return fetched.Match(_ => fetched, error => Fallback(identity, stored, cached, error));
+			return fetched.Match(_ => fetched, error => Fallback(identity, stored, cached, placeholder, error));
 		}
 		catch (Exception ex)
 		{
 			logger.Log(stored.Match(LogLevel.Warning, LogLevel.Error), ex, "Media details failed for {MediaId}", identity.Id);
-			return Fallback(identity, stored, cached, Error.From(ex));
+			return Fallback(identity, stored, cached, placeholder, Error.From(ex));
 		}
 	}
 
-	private static Result<MatchedMedia> Fallback(MediaIdentity identity, Optional<StoredMedia> stored, Optional<CachedDetails> cached, Error error)
+	private static Result<MatchedMedia> Fallback(
+		MediaIdentity identity,
+		Optional<StoredMedia> stored,
+		Optional<CachedDetails> cached,
+		MediaDetails placeholder,
+		Error error
+	)
 	{
 		return cached
 			.Map(stale => stale.Details)
-			.Or(() => stored.Map(_ => MediaDetails.Empty(identity.Type)))
+			.Or(() => stored.Map(_ => placeholder))
+			.Or(() => error.CausedBy<ProviderUnavailableException>().Map(_ => placeholder))
 			.Map(details => new MatchedMedia(identity, details))
 			.ToResult(error);
 	}
@@ -463,7 +472,12 @@ file static class IdentifyRequestExtensions
 	{
 		public MediaMatchResult Unmatched()
 		{
-			return new UnmatchedMedia([.. request.Candidates], request.Hints.Map(Hinted).GetValueOr(() => MediaDetails.Empty(request.Type)));
+			return new UnmatchedMedia([.. request.Candidates], request.Described());
+		}
+
+		public MediaDetails Described()
+		{
+			return request.Hints.Map(Hinted).GetValueOr(() => MediaDetails.Empty(request.Type));
 		}
 	}
 
