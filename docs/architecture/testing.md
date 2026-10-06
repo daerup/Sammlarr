@@ -126,7 +126,9 @@ dotnet run --project AppHost -c Staging --launch-profile staging
 ```
 
 The `Staging` configuration builds into `bin\Staging`, so a running staging session never locks the dev build, and dev and staging can run
-at the same time. The first start pulls the images and builds Sammlarr's (about half a minute once the layers are cached).
+at the same time. The first start pulls the images and builds Sammlarr's (about half a minute once the layers are cached). The profile opens
+the dashboard once the resources are up and Sammlarr once it answers its health check (`LaunchDashboard` and `LaunchSammlarr` in the
+profile; the staging smoke test does neither).
 
 | Resource | Where | Notes |
 |----------|-------|-------|
