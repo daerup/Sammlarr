@@ -58,6 +58,7 @@
         new("Cache", "database", typeof(CacheSection), UserRole.Admin),
         new("Diagnostics", "activity", typeof(DiagnosticsSection), UserRole.Admin),
         new("Users", "users", typeof(UsersSection), UserRole.Admin),
+        new("Account", "user-round", typeof(AccountSection), UserRole.Member),
 #if DEBUG
         new("Testing", "flask-conical", typeof(UI.Features.Settings.Components.Testing.TestingSection), UserRole.Admin),
 #endif
@@ -117,22 +118,9 @@
         }
     }
 
-    protected override void OnInitialized()
-    {
-        _activeSection = ResolveSection() ?? VisibleSections.First();
-    }
-
     protected override void OnParametersSet()
     {
-        var resolved = ResolveSection();
-        if (resolved is not null)
-        {
-            _activeSection = resolved;
-        }
-        else if (!VisibleSections.Contains(_activeSection))
-        {
-            _activeSection = VisibleSections.First();
-        }
+        _activeSection = ResolveSection() ?? VisibleSections.First();
     }
 
     private void Show(SettingsSection section) =>

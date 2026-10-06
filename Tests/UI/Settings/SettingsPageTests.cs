@@ -131,6 +131,32 @@ public class SettingsPageTests : BunitContext
 		cut.WaitForState(() => cut.FindComponents<RatingPipelineCard>().Count > 0);
 	}
 
+	[Test]
+	public async Task SectionNav_WhenTheBrowserGoesBackToSettingsWithoutASection_ShowsTheFirstSectionAgain()
+	{
+		var cut = RenderAt(SettingsLinks.Ratings);
+		cut.WaitForState(() => cut.FindComponents<RatingPipelineCard>().Count > 0);
+
+		Services.GetRequiredService<NavigationManager>().NavigateTo("/settings");
+		cut.Render();
+
+		await Assert.That(cut.FindComponents<ProvidersSection>()).HasSingleItem();
+	}
+
+	[Test]
+	public async Task SectionNav_ForAMember_OffersTheirAccountButNotTheUsers()
+	{
+		var member = ICurrentUser.Mock();
+		member.Role.Getter.Returns(UserRole.Member);
+		Services.AddSingleton(member.Object);
+
+		var cut = RenderAt("/settings?section=providers");
+
+		var offered = cut.FindAll("nav button").Select(button => button.TextContent.Trim()).ToList();
+		await Assert.That(offered).Contains("Account");
+		await Assert.That(offered).DoesNotContain("Users");
+	}
+
 	private static IEnumerable<ProviderRowKey> OpenRows(IRenderedComponent<SettingsPage> cut) =>
 		cut.FindComponents<ProviderRow>().Where(row => row.Instance.Open).Select(row => row.Instance.Key);
 
