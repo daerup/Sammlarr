@@ -8,6 +8,8 @@ internal sealed record StagingConfig(string Host, string CatcherSession, Staging
 
 	internal const string PersonasSection = "Staging:Personas";
 
+	internal const string SeedSection = "Staging:Seed";
+
 	internal const string SammlarrSection = "Sammlarr";
 
 	private const string FileName = "appsettings.Staging.json";

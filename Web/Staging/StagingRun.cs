@@ -12,6 +12,8 @@ internal sealed record StagingOptions
 
 	public required StagingPersonas Personas { get; init; }
 
+	public required StagingSeedData Seed { get; init; }
+
 	public required string TmdbKey { get; init; }
 
 	public string? MdblistKey { get; init; }
@@ -62,8 +64,8 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 		var sonarr = ArrClient.For(options.Sonarr.Url, options.ArrApiKey);
 		var movies = await ArrSetup.PrepareAsync(radarr, StagedApp.Radarr, options.Radarr, options.IndexerUrl, cancellationToken);
 		var shows = await ArrSetup.PrepareAsync(sonarr, StagedApp.Sonarr, options.Sonarr, options.IndexerUrl, cancellationToken);
-		await StagingLibrary.FillRadarrAsync(radarr, options.Radarr, movies, options.Personas.Admin.Name, cancellationToken);
-		await StagingLibrary.FillSonarrAsync(sonarr, options.Sonarr, shows, cancellationToken);
+		await StagingLibrary.FillRadarrAsync(radarr, options.Radarr, movies, options.Seed.Library.Radarr, cancellationToken);
+		await StagingLibrary.FillSonarrAsync(sonarr, options.Sonarr, shows, options.Seed.Library.Sonarr, cancellationToken);
 
 		var seeded = $"{database}.seeded";
 		if (File.Exists(seeded))
@@ -106,6 +108,7 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 		var sonarr = Instance(options.Sonarr, options.ArrApiKey, shows);
 		return new StagingSettings(
 			options.Personas,
+			options.Seed,
 			options.TmdbKey,
 			Optional.Of(options.MdblistKey),
 			ArrSinkConfig.Empty with

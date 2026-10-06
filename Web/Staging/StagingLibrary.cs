@@ -8,25 +8,39 @@ internal static class StagingLibrary
 
 	private static readonly char[] Unsafe = [.. Path.GetInvalidFileNameChars(), ':'];
 
-	internal static async Task FillRadarrAsync(ArrClient radarr, ArrAppOptions options, int profileId, string adminName, CancellationToken cancellationToken)
+	internal static async Task FillRadarrAsync(
+		ArrClient radarr,
+		ArrAppOptions options,
+		int profileId,
+		IReadOnlyList<LibraryTitle> titles,
+		CancellationToken cancellationToken
+	)
 	{
-		var admin = await TagAsync(radarr, $"sammlarr-u-{adminName}", cancellationToken);
 		var held = await HeldAsync(radarr, "movie", "tmdbId", cancellationToken);
-		Title[] titles = [new(693134, OnDisk: true, Tags: []), new(157336, OnDisk: false, Tags: []), new(286217, OnDisk: false, Tags: [admin])];
 		foreach (var title in titles.Where(title => !held.Contains(title.Id)))
 		{
-			await AddMovieAsync(radarr, title, options, profileId, cancellationToken);
+			await AddMovieAsync(radarr, title, await TagsAsync(radarr, title, cancellationToken), options, profileId, cancellationToken);
 		}
 	}
 
-	internal static async Task FillSonarrAsync(ArrClient sonarr, ArrAppOptions options, int profileId, CancellationToken cancellationToken)
+	internal static async Task FillSonarrAsync(
+		ArrClient sonarr,
+		ArrAppOptions options,
+		int profileId,
+		IReadOnlyList<LibraryTitle> titles,
+		CancellationToken cancellationToken
+	)
 	{
 		var held = await HeldAsync(sonarr, "series", "tvdbId", cancellationToken);
-		Title[] titles = [new(371980, OnDisk: true, Tags: []), new(403245, OnDisk: false, Tags: [])];
 		foreach (var title in titles.Where(title => !held.Contains(title.Id)))
 		{
-			await AddSeriesAsync(sonarr, title, options, profileId, cancellationToken);
+			await AddSeriesAsync(sonarr, title, await TagsAsync(sonarr, title, cancellationToken), options, profileId, cancellationToken);
 		}
+	}
+
+	private static async Task<int[]> TagsAsync(ArrClient arr, LibraryTitle title, CancellationToken cancellationToken)
+	{
+		return title.Owner is { } owner ? [await TagAsync(arr, $"sammlarr-u-{owner}", cancellationToken)] : [];
 	}
 
 	private static async Task<int> TagAsync(ArrClient arr, string label, CancellationToken cancellationToken)
@@ -41,7 +55,14 @@ internal static class StagingLibrary
 		return [.. (await arr.GetAsync(library, cancellationToken)).AsArray().Select(title => title![idProperty]!.GetValue<int>())];
 	}
 
-	private static async Task AddMovieAsync(ArrClient radarr, Title title, ArrAppOptions options, int profileId, CancellationToken cancellationToken)
+	private static async Task AddMovieAsync(
+		ArrClient radarr,
+		LibraryTitle title,
+		int[] tags,
+		ArrAppOptions options,
+		int profileId,
+		CancellationToken cancellationToken
+	)
 	{
 		var movie = (await radarr.GetAsync($"movie/lookup?term=tmdb:{title.Id}", cancellationToken))[0]!;
 		var folder = Folder(movie);
@@ -61,14 +82,21 @@ internal static class StagingLibrary
 				path = $"{options.RootFolder}/{folder}",
 				monitored = true,
 				minimumAvailability = "released",
-				tags = title.Tags,
+				tags,
 				addOptions = new { searchForMovie = false },
 			},
 			cancellationToken
 		);
 	}
 
-	private static async Task AddSeriesAsync(ArrClient sonarr, Title title, ArrAppOptions options, int profileId, CancellationToken cancellationToken)
+	private static async Task AddSeriesAsync(
+		ArrClient sonarr,
+		LibraryTitle title,
+		int[] tags,
+		ArrAppOptions options,
+		int profileId,
+		CancellationToken cancellationToken
+	)
 	{
 		var series = (await sonarr.GetAsync($"series/lookup?term=tvdb:{title.Id}", cancellationToken))[0]!;
 		var folder = Folder(series);
@@ -89,7 +117,7 @@ internal static class StagingLibrary
 				monitored = true,
 				seriesType = "standard",
 				seasons = series["seasons"]!.DeepClone(),
-				tags = title.Tags,
+				tags,
 				addOptions = new { monitor = "all", searchForMissingEpisodes = false },
 			},
 			cancellationToken
@@ -108,6 +136,4 @@ internal static class StagingLibrary
 	{
 		return string.Join(' ', new string([.. title.Where(character => !Unsafe.Contains(character))]).Split(' ', StringSplitOptions.RemoveEmptyEntries));
 	}
-
-	private sealed record Title(int Id, bool OnDisk, int[] Tags);
 }
