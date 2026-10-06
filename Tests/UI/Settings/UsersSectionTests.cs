@@ -83,6 +83,19 @@ public class UsersSectionTests : BunitContext
 	}
 
 	[Test]
+	public async Task People_OnASammlarrAccountsInstall_HeadTheirRowsWithInviteBesideTheHeading()
+	{
+		Installed(AuthProvider.Local);
+
+		var cut = Render<UsersSection>();
+
+		cut.WaitForElement(".person-row");
+		var heading = cut.FindAll("h4").Single(candidate => candidate.TextContent.Trim() == "People");
+		await Assert.That(heading.ParentElement!.TextContent).Contains("Invite member");
+		await Assert.That(heading.ParentElement.NextElementSibling!.QuerySelector(".person-row")).IsNotNull();
+	}
+
+	[Test]
 	public async Task Rows_SayWhatEachPersonHoldsAndWhereTheyStand()
 	{
 		Installed(AuthProvider.Local);

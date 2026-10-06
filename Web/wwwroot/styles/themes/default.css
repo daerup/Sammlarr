@@ -372,6 +372,10 @@ body:has(.error-dialog) .search-modal {
     border-radius: 0.75rem !important;
 }
 
+.avatar-rect .person-avatar {
+    border-radius: inherit !important;
+}
+
 /* MediaTitleLink popover — rendered via BbPopover portal, so cannot live in scoped CSS */
 .id-links-popover {
     background: var(--card);

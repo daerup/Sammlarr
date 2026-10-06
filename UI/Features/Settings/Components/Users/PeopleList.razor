@@ -8,16 +8,17 @@
 @inject ICurrentUser CurrentUser
 @inject PersonPainter Painter
 
+<div class="flex min-h-8 items-end justify-between gap-3 px-1">
+    <h4 class="text-sm font-semibold">People</h4>
+    @if (_config is { AuthProvider: AuthProvider.Local })
+    {
+        <InviteDialog Invited="LoadAsync"/>
+    }
+</div>
+
 @if (_config is { } config)
 {
-    @if (config.AuthProvider == AuthProvider.Local)
-    {
-        <div class="flex justify-end">
-            <InviteDialog Invited="LoadAsync"/>
-        </div>
-    }
-
-    <div class="overflow-hidden rounded-lg border bg-card" aria-label="People">
+    <div class="overflow-hidden rounded-lg border bg-card">
         @foreach (var person in _people)
         {
             var key = Key(person);
