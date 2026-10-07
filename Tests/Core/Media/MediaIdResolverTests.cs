@@ -196,6 +196,19 @@ public class MediaIdResolverTests
 	}
 
 	[Test]
+	public async Task ResolveAsync_NeverAsksALookupByAnIdItsOwnAnswerGave()
+	{
+		var anyId = new ById(Accepts: [MediaProvider.Imdb, MediaProvider.Trakt], Yields: [MediaProvider.Imdb, MediaProvider.Trakt, MediaProvider.Tvdb], Cost: 2);
+		var mdblist = Converter(RemoteService.Mdblist, anyId);
+		Answer(mdblist, new ByIdRequest(anyId, Imdb), Found(Imdb, TraktId.From("1388", MediaType.Show)));
+
+		var resolved = await Testee(mdblist).ResolveAsync(new IdentifyRequest([Imdb], new None()), MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsError();
+		mdblist.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
 	public async Task ResolveAsync_ForTwoLookupsOfEqualCost_KeepsTheirAnswersApart()
 	{
 		var first = new ById(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Tvdb], Cost: 1);

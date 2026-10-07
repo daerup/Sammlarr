@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using API.Mdblist.Types;
+using Contracts.Media.Conversions;
 using Domain.Media;
 
 namespace API.Mdblist;
@@ -19,6 +20,18 @@ internal static class MdblistIds
 			Optional.Of(ids.mal).Map(Mal).Map(value => Id(MalId.From(value, type))),
 		];
 		return [.. found.WhereSome()];
+	}
+
+	internal static IdLookupResult Found(MdblistTypes.Titles.Title title, MediaType type)
+	{
+		var hints = Text(title.Name)
+			.Map(name => new IdentifyHints
+			{
+				Title = name,
+				Year = title.Year ?? 0,
+				MediaType = type,
+			});
+		return new IdLookupResult(Of(title.Ids, type), hints);
 	}
 
 	private static Optional<string> Text(string? value) => Optional.Of(value).When(found => found.Length > 0);
