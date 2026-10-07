@@ -24,11 +24,17 @@ public class RatingSitePageLinkerTests
 	}
 
 	[Test]
-	[Arguments(MediaType.Movie, "https://trakt.tv/search/trakt/432?id_type=movie")]
-	[Arguments(MediaType.Show, "https://trakt.tv/search/trakt/432?id_type=show")]
-	public async Task Trakt_ForAnId_SearchesItUnderItsType(MediaType type, string page)
+	[Arguments(MediaType.Movie, "https://app.trakt.tv/movies/432")]
+	[Arguments(MediaType.Show, "https://app.trakt.tv/shows/432")]
+	public async Task Trakt_ForAnId_OpensItsPageUnderItsType(MediaType type, string page)
 	{
 		await Assert.That(new TraktPageLinker().PageOf([TraktId.From("432", type)], new None())).IsSome().And.IsEqualTo(page);
+	}
+
+	[Test]
+	public async Task Trakt_ForAnIdOfNoKnownType_IsNone()
+	{
+		await Assert.That(new TraktPageLinker().PageOf([TraktId.From("432", MediaType.Unknown)], new None())).IsNone();
 	}
 
 	[Test]

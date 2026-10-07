@@ -5,8 +5,15 @@ namespace UI.Shared.Services.Links;
 
 internal sealed class TraktPageLinker : IExternalPageLinker
 {
-	public Optional<string> PageOf(IReadOnlyCollection<IExternalMediaId> ids, Optional<string> title)
+	public Optional<string> PageOf(IReadOnlyCollection<IExternalMediaId> ids, Optional<string> title) => ids.OfProvider(MediaProvider.Trakt).Map(Page);
+
+	private static Optional<string> Page(IExternalMediaId id)
 	{
-		return ids.OfProvider(MediaProvider.Trakt).Map(id => $"https://trakt.tv/search/trakt/{id.Value}?id_type={(id.Type == MediaType.Show ? "show" : "movie")}");
+		return id.Type switch
+		{
+			MediaType.Movie => Some.Of($"https://app.trakt.tv/movies/{id.Value}"),
+			MediaType.Show => Some.Of($"https://app.trakt.tv/shows/{id.Value}"),
+			MediaType.Unknown => new None(),
+		};
 	}
 }
