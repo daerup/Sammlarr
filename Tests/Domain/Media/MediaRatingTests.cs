@@ -99,7 +99,10 @@ public class MediaRatingTests
 		await Assert
 			.That(RemoteService.Plex.SuppliedRatingSources())
 			.IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience]);
-		await Assert.That(RemoteService.Mdblist.SuppliedRatingSources()).IsEquivalentTo(Enum.GetValues<RatingSource>());
+		await Assert
+			.That(RemoteService.Mdblist.SuppliedRatingSources())
+			.IsEquivalentTo(Enum.GetValues<RatingSource>().Where(source => source is not RatingSource.AniList));
+		await Assert.That(RemoteService.AniList.SuppliedRatingSources()).IsEquivalentTo([RatingSource.AniList]);
 		await Assert.That(RemoteService.Wikidata.SuppliedRatingSources()).IsEmpty();
 		await Assert.That(new[] { RemoteService.Tmdb, RemoteService.Wikidata }.SuppliedRatingSources()).IsEquivalentTo([RatingSource.Tmdb]);
 	}

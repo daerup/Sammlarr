@@ -40,6 +40,7 @@ internal static class MediaFakes
 			new LetterboxdRating(faker.Random.Float(0.5f, 5), Some.Of(faker.Random.Int(1, 5_000_000))),
 			new TraktRating(faker.Random.Int(0, 100), Some.Of(faker.Random.Int(1, 100_000))),
 			new MyAnimeListRating(faker.Random.Float(1, 10), Some.Of(faker.Random.Int(1, 2_000_000))),
+			new AniListRating(faker.Random.Int(1, 100), Some.Of(faker.Random.Int(1, 2_000_000))),
 		]);
 	}
 

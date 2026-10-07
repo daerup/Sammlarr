@@ -29,6 +29,7 @@ internal static class RatingTexts
 			RatingSource.Letterboxd => "Letterboxd",
 			RatingSource.Trakt => "Trakt",
 			RatingSource.MyAnimeList => "MAL",
+			RatingSource.AniList => "AniList",
 		};
 	}
 
@@ -44,6 +45,7 @@ internal static class RatingTexts
 			RatingSource.Letterboxd => "Letterboxd: its users rate from half a star to five stars, counted twice (3.9 stars is 7.8).",
 			RatingSource.Trakt => "Trakt: its users' average as a share, 0 to 100%, counted as a tenth (84% is 8.4).",
 			RatingSource.MyAnimeList => "MyAnimeList: its users rate from 1 to 10, and the average counts as it reads (8.62 is 8.6).",
+			RatingSource.AniList => "AniList: the average of its users' scores out of 100, counted as a tenth (85% is 8.5).",
 		};
 	}
 
@@ -68,10 +70,8 @@ internal static class RatingTexts
 	{
 		return rating.Source switch
 		{
-			RatingSource.Tmdb or RatingSource.Imdb or RatingSource.Letterboxd or RatingSource.Trakt or RatingSource.MyAnimeList => rating.Votes.Match(
-				votes => $"{Count(votes)} votes",
-				() => "no vote count"
-			),
+			RatingSource.Tmdb or RatingSource.Imdb or RatingSource.Letterboxd or RatingSource.Trakt or RatingSource.MyAnimeList or RatingSource.AniList =>
+				rating.Votes.Match(votes => $"{Count(votes)} votes", () => "no vote count"),
 			RatingSource.Metacritic => $"a Metascore of {rating.Value}",
 			RatingSource.RottenTomatoesCritics => $"{rating.Value} of critics liked it",
 			RatingSource.RottenTomatoesAudience => $"{rating.Value} of users liked it",

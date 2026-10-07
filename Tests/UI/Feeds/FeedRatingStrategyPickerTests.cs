@@ -11,7 +11,14 @@ namespace UI.Tests.Feeds;
 
 public class FeedRatingStrategyPickerTests : BunitContext
 {
-	private static readonly RatingSource[] MdblistOnly = [RatingSource.Metacritic, RatingSource.Letterboxd, RatingSource.Trakt, RatingSource.MyAnimeList];
+	private static readonly RatingSource[] AfterRottenTomatoes =
+	[
+		RatingSource.Metacritic,
+		RatingSource.Letterboxd,
+		RatingSource.Trakt,
+		RatingSource.MyAnimeList,
+		RatingSource.AniList,
+	];
 
 	private static readonly ValueSet<RatingSource> Everything =
 	[
@@ -86,7 +93,7 @@ public class FeedRatingStrategyPickerTests : BunitContext
 				await Assert
 					.That(order.Order)
 					.IsEquivalentTo(
-						[RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience, .. MdblistOnly],
+						[RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience, .. AfterRottenTomatoes],
 						CollectionOrdering.Matching
 					)
 			);
@@ -128,7 +135,7 @@ public class FeedRatingStrategyPickerTests : BunitContext
 				await Assert
 					.That(order.Order)
 					.IsEquivalentTo(
-						[RatingSource.RottenTomatoesCritics, RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesAudience, .. MdblistOnly],
+						[RatingSource.RottenTomatoesCritics, RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesAudience, .. AfterRottenTomatoes],
 						CollectionOrdering.Matching
 					)
 			);

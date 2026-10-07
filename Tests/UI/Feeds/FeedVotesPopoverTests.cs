@@ -28,7 +28,7 @@ public class FeedVotesPopoverTests : BunitContext
 		var rows = cut.WaitForElements(".votes-pop-row");
 		await Assert
 			.That(rows.Select(row => row.TextContent.Trim()))
-			.IsEquivalentTo(["TMDB", "IMDb", "Rotten Tomatoesno votes", "Metacriticno votes", "Letterboxd", "Trakt", "MyAnimeList"]);
+			.IsEquivalentTo(["TMDB", "IMDb", "Rotten Tomatoesno votes", "Metacriticno votes", "Letterboxd", "Trakt", "MyAnimeList", "AniList"]);
 		await Assert.That(cut.Find(".votes-pop").TextContent).Contains("A title only Rotten Tomatoes or Metacritic rates has no votes and fails this rule.");
 	}
 

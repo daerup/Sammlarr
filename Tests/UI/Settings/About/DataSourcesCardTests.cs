@@ -34,6 +34,7 @@ public class DataSourcesCardTests : BunitContext
 					"Open TVmaze",
 					"Open Wikidata",
 					"Open Anime lists",
+					"Open AniList",
 				],
 				CollectionOrdering.Matching
 			);

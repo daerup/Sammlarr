@@ -227,7 +227,7 @@ Radarr or Sonarr, or none), never by calling the service. A key check answers `V
 `Spent`, and only `Rejected` is remembered, so an outage or a rate limit never disconnects anything. An enricher that was skipped because it was blocked, or that failed, stores no
 answer, so a later load asks it once the hour since the last ask has passed and it is open again. Ratings are fields per source:
 `MediaCompleteness` counts each `RatingSource` (TMDB, IMDb, Rotten Tomatoes critics and audience, Metacritic, Letterboxd,
-Trakt, MyAnimeList) the title has no
+Trakt, MyAnimeList, AniList) the title has no
 rating from as a missing field: `MediaFields` holds the `MediaField` detail flags and a set of `RatingSource`, and a provider's sources enter it through `MediaFields.Rated`, so a provider's rating fills come from its `[SuppliedBy]` sources. A rating
 from a source that publishes votes (TMDB, IMDb: `Card.PublishesVotes`) still counts as missing while it has
 none, so Plex's copy of TMDB's rating, which carries no votes, leaves TMDB asked for its own. Each rating is its own type behind

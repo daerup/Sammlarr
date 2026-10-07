@@ -11,7 +11,7 @@ public class RatingStrategyConverterTests
 	[Test]
 	[Arguments("averaged")]
 	[Arguments("averaged:Imdb,RottenTomatoesCritics")]
-	[Arguments("ordered:Imdb,Tmdb,RottenTomatoesCritics,RottenTomatoesAudience,Metacritic,Letterboxd,Trakt,MyAnimeList")]
+	[Arguments("ordered:Imdb,Tmdb,RottenTomatoesCritics,RottenTomatoesAudience,Metacritic,Letterboxd,Trakt,MyAnimeList,AniList")]
 	public async Task Convert_ForEachStoredForm_RoundTripsTheText(string stored)
 	{
 		var restored = _testee.ConvertToProvider(_testee.ConvertFromProvider(stored));
@@ -35,7 +35,7 @@ public class RatingStrategyConverterTests
 		await Assert.That(restored).IsOfUnionType<RatingStrategy, OrderedRating>();
 		await Assert
 			.That(_testee.ConvertToProvider(restored))
-			.IsEqualTo("ordered:Imdb,Tmdb,RottenTomatoesCritics,RottenTomatoesAudience,Metacritic,Letterboxd,Trakt,MyAnimeList");
+			.IsEqualTo("ordered:Imdb,Tmdb,RottenTomatoesCritics,RottenTomatoesAudience,Metacritic,Letterboxd,Trakt,MyAnimeList,AniList");
 	}
 
 	[Test]

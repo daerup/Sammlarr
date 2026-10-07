@@ -94,6 +94,7 @@ public class RatingStrategyTests
 					RatingSource.Letterboxd,
 					RatingSource.Trakt,
 					RatingSource.MyAnimeList,
+					RatingSource.AniList,
 				],
 				CollectionOrdering.Matching
 			);
@@ -228,6 +229,7 @@ public class RatingStrategyTests
 					RatingSource.Letterboxd,
 					RatingSource.Trakt,
 					RatingSource.MyAnimeList,
+					RatingSource.AniList,
 				],
 				CollectionOrdering.Matching
 			);

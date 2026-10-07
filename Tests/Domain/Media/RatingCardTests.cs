@@ -24,6 +24,7 @@ public class RatingCardTests
 					MediaProvider.Letterboxd,
 					MediaProvider.Trakt,
 					MediaProvider.Mal,
+					MediaProvider.AniList,
 				],
 				CollectionOrdering.Matching
 			);

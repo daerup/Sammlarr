@@ -28,6 +28,13 @@ internal static class FeedSources
 				),
 				identifier => $"https://www.themoviedb.org/list/{identifier}"
 			),
+			FeedProvider.AniList => new(
+				"e.g. https://anilist.co/user/yourname/animelist/Planning",
+				new MarkupString(
+					"Paste an AniList username, username/status (current, planning, completed, dropped, paused or repeating), or the list's anilist.co link. The list must be public."
+				),
+				identifier => $"https://anilist.co/user/{identifier.Split('/')[0]}/animelist"
+			),
 		};
 	}
 }

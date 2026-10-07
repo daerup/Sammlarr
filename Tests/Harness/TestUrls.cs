@@ -9,4 +9,5 @@ internal static class TestUrls
 	internal const string TvmazeApi = "tvmaze.test.com";
 	internal const string ImdbDatasets = "imdb-datasets.test.com";
 	internal const string AnimeLists = "anime-lists.test.com";
+	internal const string AniList = "anilist.test.com";
 }
