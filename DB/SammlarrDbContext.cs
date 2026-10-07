@@ -88,6 +88,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<RatingDefaultRow> RatingDefaults => Set<RatingDefaultRow>();
 	public DbSet<ImdbRatingRow> ImdbRatings => Set<ImdbRatingRow>();
 	public DbSet<DatasetLoadRow> DatasetLoads => Set<DatasetLoadRow>();
+	public DbSet<AnimeIdRow> AnimeIds => Set<AnimeIdRow>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{

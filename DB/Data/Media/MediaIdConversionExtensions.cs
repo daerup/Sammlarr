@@ -30,5 +30,6 @@ internal static class MediaIdConversionExtensions
 			MediaProvider.Trakt => TraktId.From(externalId, mediaType),
 			MediaProvider.Mal => MalId.From(externalId, mediaType),
 			MediaProvider.Tvmaze => TvmazeId.From(externalId, mediaType),
+			MediaProvider.AniList => AniListId.From(externalId, mediaType),
 		};
 }

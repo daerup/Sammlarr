@@ -136,7 +136,12 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 			return source switch
 			{
 				MediaProvider.Imdb or MediaProvider.Tmdb or MediaProvider.Tvdb or MediaProvider.Trakt or MediaProvider.Mal or MediaProvider.Mdblist => true,
-				MediaProvider.RottenTomatoes or MediaProvider.Plex or MediaProvider.Metacritic or MediaProvider.Letterboxd or MediaProvider.Tvmaze => false,
+				MediaProvider.RottenTomatoes
+				or MediaProvider.Plex
+				or MediaProvider.Metacritic
+				or MediaProvider.Letterboxd
+				or MediaProvider.Tvmaze
+				or MediaProvider.AniList => false,
 			};
 		}
 	}

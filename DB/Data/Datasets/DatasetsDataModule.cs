@@ -10,6 +10,8 @@ internal class DatasetsDataModule : IServiceModule
 	{
 		services.AddScoped<IImdbRatings, ImdbRatingRepository>();
 		services.AddScoped<IDatasetTable<ImdbRatingLine>>(provider => provider.GetRequiredService<IImdbRatings>());
+		services.AddScoped<IAnimeIds, AnimeIdRepository>();
+		services.AddScoped<IDatasetTable<AnimeIdMapping>>(provider => provider.GetRequiredService<IAnimeIds>());
 		services.AddScoped<IDatasetLoads, DatasetLoadRepository>();
 		services.AddScoped<IModelConfiguration, DatasetsConfiguration>();
 	}

@@ -1,3 +1,4 @@
+using API.Anime;
 using API.Arr;
 using API.Imdb;
 using API.Mdblist;
@@ -24,6 +25,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<WikidataModule>();
 		services.AddModule<TvmazeModule>();
 		services.AddModule<ImdbModule>();
+		services.AddModule<AnimeListsModule>();
 		services.AddModule<ArrModule>();
 		services.AddModule<PicturesModule>();
 		services.AddModule<TvdbModule>();

@@ -62,5 +62,6 @@ public class ExternalMediaIdProperties
 			MediaProvider.Trakt => TraktId.From(value, type),
 			MediaProvider.Mal => MalId.From(value, type),
 			MediaProvider.Tvmaze => TvmazeId.From(value, type),
+			MediaProvider.AniList => AniListId.From(value, type),
 		};
 }

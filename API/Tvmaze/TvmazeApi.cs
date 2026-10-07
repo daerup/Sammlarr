@@ -37,7 +37,8 @@ internal sealed class TvmazeApi(HttpClient http, ITypedMemoryCache<string, Tvmaz
 			or MediaProvider.Metacritic
 			or MediaProvider.Letterboxd
 			or MediaProvider.Trakt
-			or MediaProvider.Mal => new None(),
+			or MediaProvider.Mal
+			or MediaProvider.AniList => new None(),
 		};
 	}
 

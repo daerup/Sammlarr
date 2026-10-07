@@ -26,6 +26,7 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 		Build("wikidata", WikidataOptions.SectionName, "BaseUrl"),
 		Build("tvmaze", TvmazeOptions.SectionName, "BaseUrl"),
 		Build("imdb-datasets", ImdbDatasetsOptions.SectionName, "BaseUrl"),
+		Build("anime-lists", AnimeListsOptions.SectionName, "BaseUrl"),
 	];
 
 	internal static readonly IReadOnlyList<ProviderEndpoint> Apps =

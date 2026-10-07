@@ -45,12 +45,22 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 					"Wikidata Imdb>Tvdb (3)",
 					"Wikidata Imdb>Metacritic (3)",
 					"Wikidata Imdb>Letterboxd (3)",
+					"Wikidata Imdb>Mal (3)",
+					"Wikidata Imdb>AniList (3)",
 					"Tvmaze Imdb>Tvdb (2)",
 					"Tvmaze Imdb>Tvmaze (2)",
 					"Tvmaze Imdb>hints (2)",
 					"Tvmaze Tvdb>Imdb (2)",
 					"Tvmaze Tvdb>Tvmaze (2)",
 					"Tvmaze Tvdb>hints (2)",
+					"AnimeLists Mal>Tmdb (1)",
+					"AnimeLists Mal>Imdb (1)",
+					"AnimeLists Mal>Tvdb (1)",
+					"AnimeLists Mal>AniList (1)",
+					"AnimeLists AniList>Tmdb (1)",
+					"AnimeLists AniList>Imdb (1)",
+					"AnimeLists AniList>Tvdb (1)",
+					"AnimeLists AniList>Mal (1)",
 				],
 				CollectionOrdering.Matching
 			);
@@ -99,6 +109,7 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 					"Wikidata Imdb>Tmdb (3), Mdblist Tmdb>hints (2), Plex hints>Plex (4)",
 					"Wikidata Imdb>Tvdb (3), Mdblist Tvdb>hints (2), Plex hints>Plex (4)",
 					"Wikidata Imdb>Tvdb (3), Tvmaze Tvdb>hints (2), Plex hints>Plex (4)",
+					"Wikidata Imdb>Mal (3), Mdblist Mal>hints (2), Plex hints>Plex (4)",
 				],
 				CollectionOrdering.Matching
 			);

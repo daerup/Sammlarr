@@ -24,6 +24,9 @@ public enum RemoteService
 	[Description("IMDb datasets")]
 	ImdbDatasets,
 
+	[Description("Anime lists")]
+	AnimeLists,
+
 	[Description("Radarr")]
 	Radarr,
 
@@ -56,7 +59,7 @@ public static class RemoteServices
 					RemoteService.Plex => new UserSignIn(AuthProvider.Plex),
 					RemoteService.Radarr => new AppInstance(ArrApp.Radarr),
 					RemoteService.Sonarr => new AppInstance(ArrApp.Sonarr),
-					RemoteService.Wikidata or RemoteService.Tvmaze or RemoteService.ImdbDatasets => new Open(),
+					RemoteService.Wikidata or RemoteService.Tvmaze or RemoteService.ImdbDatasets or RemoteService.AnimeLists => new Open(),
 				};
 			}
 		}
@@ -72,7 +75,7 @@ public static class RemoteServices
 					RemoteService.Mdblist => Some.Of(MediaProvider.Mdblist),
 					RemoteService.Tvmaze => Some.Of(MediaProvider.Tvmaze),
 					RemoteService.ImdbDatasets => Some.Of(MediaProvider.Imdb),
-					RemoteService.Wikidata or RemoteService.Radarr or RemoteService.Sonarr => new None(),
+					RemoteService.Wikidata or RemoteService.AnimeLists or RemoteService.Radarr or RemoteService.Sonarr => new None(),
 				};
 			}
 		}

@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/anime-list-full.json"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "ETag": "\"e2e\""
+    },
+    "body": "[{\"type\":\"TV\",\"anidb_id\":1,\"anilist_id\":290,\"mal_id\":290,\"tvdb_id\":72025}]"
+  }
+}

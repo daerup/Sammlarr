@@ -33,6 +33,7 @@ public class DataSourcesCardTests : BunitContext
 					"Open Letterboxd",
 					"Open TVmaze",
 					"Open Wikidata",
+					"Open Anime lists",
 				],
 				CollectionOrdering.Matching
 			);
