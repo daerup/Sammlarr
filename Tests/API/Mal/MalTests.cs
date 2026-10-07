@@ -2,6 +2,7 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using API.Mal;
 using API.Tests.Anime;
+using API.Tests.Feeds;
 using Contracts.Auth;
 using Contracts.Datasets;
 using Contracts.Identity;
@@ -38,9 +39,69 @@ public class MalTests
 	[Arguments("someone", "someone")]
 	[Arguments("https://myanimelist.net/animelist/someone", "someone")]
 	[Arguments("https://myanimelist.net/animelist/someone?status=2", "someone")]
-	public async Task NormalizeAsync_ForAUserOrTheirListLink_StoresTheUser(string input, string user)
+	[Arguments("https://myanimelist.net/topanime.php?type=upcoming", "topanime.php?type=upcoming")]
+	[Arguments("https://myanimelist.net/topanime.php?_location=mal_h_m", "topanime.php")]
+	[Arguments("https://myanimelist.net/anime/season/2026/summer", "anime/season/2026/summer")]
+	public async Task NormalizeAsync_ForAUserTheirListLinkOrAPage_StoresItsForm(string input, string user)
 	{
 		await Assert.That(await Feed(Mock.HttpHandler()).NormalizeAsync(input)).IsSuccess().And.IsEqualTo(user);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForATopPage_ReadsFiveHundredTitlesInOneCall()
+	{
+		var handler = Mock.HttpHandler();
+		var titles = Enumerable
+			.Range(1, 500)
+			.Select(id => $$$"""{"node":{"id":{{{id}}},"title":"Anime {{{id}}}","media_type":"tv"},"ranking":{"rank":{{{id}}}}}""");
+		handler
+			.OnRequest(request => request.PathMatches(@"^/v2/anime/ranking\?ranking_type=upcoming&limit=500&offset=0"))
+			.RespondWithJson("{\"data\":[" + string.Join(",", titles) + "],\"paging\":{\"next\":\"https://api.myanimelist.net/v2/anime/ranking?offset=500\"}}");
+
+		await Feed(handler).GetFeedItemsAsync("topanime.php?type=upcoming").ToListAsync();
+
+		await Assert.That(_asked).Count().IsEqualTo(500);
+		handler.Verify(request => request.PathMatches(".*"), Times.Once);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForASeasonThatDoesNotExist_SaysThePageIsNotFound()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
+
+		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("anime/season/1800/fall").ToListAsync()).Throws<FeedIdentifierNotFoundException>();
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAPageAnswered403_SaysMyAnimeListRefusedThePage()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.Forbidden);
+
+		var failure = await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("topanime.php").ToListAsync()).Throws<InvalidOperationException>();
+
+		await Assert.That(failure!.Message).IsEqualTo("MyAnimeList refused the page (403).");
+	}
+
+	[Test]
+	[Arguments(HttpStatusCode.TooManyRequests)]
+	[Arguments(HttpStatusCode.InternalServerError)]
+	public async Task GetFeedItemsAsync_ForAPageItCannotRead_FailsTheLoad(HttpStatusCode status)
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(status);
+
+		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("anime/season").ToListAsync()).ThrowsException();
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAPageWithoutData_FailsTheLoad()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("""{"paging":{}}""");
+
+		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("anime/season").ToListAsync()).Throws<InvalidDataException>();
 	}
 
 	[Test]
@@ -165,7 +226,7 @@ public class MalTests
 		var keys = Keys();
 		var media = IMediaService.Mock();
 		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).Returns((requests, cancellation) => Identify(requests, cancellation));
-		return new MalFeedService(Client(handler, keys), media.Object, keys.Object, AnimeMaps.Seasons(map));
+		return new MalFeedService(Client(handler, keys), media.Object, keys.Object, AnimeMaps.Seasons(map), FeedClock.Today());
 	}
 
 	private async IAsyncEnumerable<MediaMatchResult> Identify(

@@ -33,22 +33,27 @@ internal static class FeedSources
 			FeedProvider.AniList => new(
 				"e.g. https://anilist.co/user/yourname/animelist/Planning",
 				Help(
-					"Paste an AniList username, username/status (current, planning, completed, dropped, paused or repeating), or the list's anilist.co link. The list must be public.",
+					"Paste an AniList username, username/status (current, planning, completed, dropped, paused or repeating), the list's anilist.co link, or an anilist.co/search/anime link. The list must be public. Sammlarr reads the first 500 titles of a page.",
 					"https://anilist.co/search/users",
 					"Find a user on AniList"
 				),
-				identifier => $"https://anilist.co/user/{identifier.Split('/')[0]}/animelist"
+				PageOr("anilist.co", ["search/anime"], identifier => $"https://anilist.co/user/{identifier.Split('/')[0]}/animelist")
 			),
 			FeedProvider.Mal => new(
 				"e.g. https://myanimelist.net/animelist/yourname",
 				Help(
-					"Paste a MyAnimeList username or the list's myanimelist.net/animelist link. The list must be public.",
+					"Paste a MyAnimeList username, the list's myanimelist.net/animelist link, or a myanimelist.net top anime or season link. The list must be public. Sammlarr reads the first 500 titles of a page.",
 					"https://myanimelist.net/users.php",
 					"Find a user on MyAnimeList"
 				),
-				identifier => $"https://myanimelist.net/animelist/{identifier}"
+				PageOr("myanimelist.net", ["topanime.php", "anime/season"], identifier => $"https://myanimelist.net/animelist/{identifier}")
 			),
 		};
+	}
+
+	private static Func<string, string> PageOr(string site, string[] pages, Func<string, string> list)
+	{
+		return identifier => pages.Any(page => identifier.StartsWith(page, StringComparison.Ordinal)) ? $"https://{site}/{identifier}" : list(identifier);
 	}
 
 	private static MarkupString Help(string text, string browse, string label)

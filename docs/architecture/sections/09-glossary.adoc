@@ -164,6 +164,10 @@ checked before any provider call, so a repeated miss skips the providers (`IUnma
 Feed:: A saved query over a provider list: the provider, the list `Identifier`, an add
 strategy, an optional filter, sort, and limit, and a schedule.
 
+Site page link:: A browse page of a feed source's own site (an AniList search, a MyAnimeList top anime or
+season page), stored as its path and query (`SiteLink`), read through the provider's API up to its first 500
+titles (`FeedPages.Titles`); a key or page the provider's table does not know is refused when the feed is tested.
+
 Add strategy:: How a feed's results reconcile into the wantlist. `Append` adds them and leaves
 them; `Mirror` keeps the items this feed added matching the feed, removing the ones that dropped
 out of it. Mirror only ever touches its own slice, never manual, remote, or other feeds' items.
