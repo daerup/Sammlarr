@@ -62,6 +62,11 @@ internal static class StagingEnvironment
 			seed.WithEnvironment("Staging__MdblistKey", mdblist);
 		}
 
+		if (builder.Configuration["Parameters:mal-client-id"] is { Length: > 0 } mal)
+		{
+			seed.WithEnvironment("Staging__MalClientId", mal);
+		}
+
 		var sammlarr = builder
 			.AddDockerfile("sammlarr", RepositoryRoot(builder), Dockerfile)
 			.WithHttpEndpoint(port: config.Ports.Sammlarr, targetPort: 8080, name: "http", isProxied: false)

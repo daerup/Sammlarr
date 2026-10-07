@@ -79,6 +79,9 @@ public class StagingSeedTests : IAsyncDisposable
 					Strategy = SeedStrategy.Mirror,
 					Limit = 10,
 				},
+				Feed("Marvel movies", FeedProvider.Tmdb, "1"),
+				Feed("This season on AniList", FeedProvider.AniList, "search/anime/this-season"),
+				Feed("This season on MyAnimeList", FeedProvider.Mal, "anime/season"),
 			],
 			Library = new SeedLibrary { Radarr = [], Sonarr = [] },
 			Notifications = new SeedNotifications
@@ -95,6 +98,7 @@ public class StagingSeedTests : IAsyncDisposable
 		},
 		"staging-tmdb-key",
 		Some.Of("staging-mdblist-key"),
+		Some.Of("staging-mal-client-id"),
 		ArrSinkConfig.Empty with
 		{
 			Radarr = Instance,
@@ -175,19 +179,26 @@ public class StagingSeedTests : IAsyncDisposable
 	[Test]
 	[Arguments(Admin, AdminPassword)]
 	[Arguments(Member, MemberPassword)]
-	public async Task Configured_StoresEachPersonsTmdbKey(string username, string password)
+	public async Task Configured_StoresEachPersonsKeys(string username, string password)
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
 
 		await AsAsync(
 			username,
 			password,
-			async services => await Assert.That(await services.GetRequiredService<IApiKeyService>().IsStoredAsync(ApiKeyProvider.Tmdb)).IsTrue()
+			async services =>
+			{
+				var keys = services.GetRequiredService<IApiKeyService>();
+				foreach (var slot in new[] { ApiKeyProvider.Tmdb, ApiKeyProvider.Mdblist, ApiKeyProvider.Mal })
+				{
+					await Assert.That(await keys.IsStoredAsync(slot)).IsTrue();
+				}
+			}
 		);
 	}
 
 	[Test]
-	public async Task Configured_PointsAWebhookAndPushoverAtTheCatcherAndFollowsTwoListsWithTheMdblistKey()
+	public async Task Configured_PointsAWebhookAndPushoverAtTheCatcherAndFollowsAListOnEveryFeedProviderWithEveryKey()
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
 
@@ -200,7 +211,8 @@ public class StagingSeedTests : IAsyncDisposable
 				await Assert.That(targets.Count(target => target.Config is WebhookConfig { Url: $"{Catcher}/webhook" })).IsEqualTo(1);
 				await Assert.That(targets.Count(target => target.Config is PushoverConfig)).IsEqualTo(1);
 				var feeds = (await services.GetRequiredService<IFeedService>().GetAsync()).Feeds;
-				await Assert.That(feeds.Select(feed => feed.Feed.Enabled)).IsEquivalentTo([true, true]);
+				await Assert.That(feeds.Select(feed => feed.Feed.Provider).Distinct()).IsEquivalentTo(Enum.GetValues<FeedProvider>());
+				await Assert.That(feeds.Select(feed => feed.Feed.Enabled)).IsEquivalentTo([true, true, true, true, true]);
 			}
 		);
 	}
@@ -228,9 +240,9 @@ public class StagingSeedTests : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Configured_WithoutAnMdblistKey_LeavesTheFeedsOff()
+	public async Task Configured_WithoutTheMdblistAndMalKeys_LeavesOnlyTheirFeedsOff()
 	{
-		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings with { MdblistKey = new None() }, CancellationToken.None);
+		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings with { MdblistKey = new None(), MalKey = new None() }, CancellationToken.None);
 
 		await AsAsync(
 			Admin,
@@ -238,7 +250,7 @@ public class StagingSeedTests : IAsyncDisposable
 			async services =>
 			{
 				var feeds = (await services.GetRequiredService<IFeedService>().GetAsync()).Feeds;
-				await Assert.That(feeds.Select(feed => feed.Feed.Enabled)).IsEquivalentTo([false, false]);
+				await Assert.That(feeds.Where(feed => feed.Feed.Enabled).Select(feed => feed.Feed.Provider)).IsEquivalentTo([FeedProvider.Tmdb, FeedProvider.AniList]);
 			}
 		);
 	}
@@ -260,5 +272,17 @@ public class StagingSeedTests : IAsyncDisposable
 		var signedIn = await scope.ServiceProvider.GetRequiredService<ISignInService>().SignInWithPasswordAsync(username, password);
 		using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(signedIn.GetOrThrow(error => new InvalidOperationException(error.Reason)));
 		await check(scope.ServiceProvider);
+	}
+
+	private static SeedFeed Feed(string name, FeedProvider provider, string identifier)
+	{
+		return new SeedFeed
+		{
+			Name = name,
+			Provider = provider,
+			Identifier = identifier,
+			Strategy = SeedStrategy.Append,
+			Limit = 10,
+		};
 	}
 }

@@ -4,6 +4,7 @@ using Contracts.Identity;
 using Contracts.Jobs;
 using Contracts.Media;
 using Contracts.Notifications;
+using Contracts.Providers;
 using Contracts.Settings;
 using Contracts.Setup;
 using Contracts.Wantlist;
@@ -32,6 +33,7 @@ internal sealed record StagingSettings(
 	StagingSeedData Seed,
 	string TmdbKey,
 	Optional<string> MdblistKey,
+	Optional<string> MalKey,
 	ArrSinkConfig Arr,
 	string CatcherUrl
 );
@@ -65,7 +67,7 @@ internal static class StagingSeed
 			await scoped.GetRequiredService<IArrSinkConfigService>().StoreAsync(settings.Arr, cancellationToken);
 			Require(await scoped.GetRequiredService<ISinkSwitch>().SwitchAsync(SinkKind.Arr, cancellationToken));
 			await AddTitlesAsync(scoped, settings.Seed.Wantlist, cancellationToken);
-			await CreateFeedsAsync(scoped, settings.Seed.Feeds, settings.MdblistKey.IsSome(), cancellationToken);
+			await CreateFeedsAsync(scoped, settings.Seed.Feeds, cancellationToken);
 			await CreateTargetsAsync(scoped, settings.Seed.Notifications, settings.CatcherUrl, cancellationToken);
 			invite = Require(await scoped.GetRequiredService<IUserManagementService>().InviteAsync(personas.Member.Name, cancellationToken));
 			await scoped.GetRequiredService<IOnboardingService>().CompleteAsync(cancellationToken);
@@ -87,6 +89,7 @@ internal static class StagingSeed
 		var keys = scoped.GetRequiredService<IApiKeyService>();
 		await keys.StoreAsync(new SeededKey(ApiKeyProvider.Tmdb, settings.TmdbKey), cancellationToken);
 		await settings.MdblistKey.Apply(key => keys.StoreAsync(new SeededKey(ApiKeyProvider.Mdblist, key), cancellationToken));
+		await settings.MalKey.Apply(key => keys.StoreAsync(new SeededKey(ApiKeyProvider.Mal, key), cancellationToken));
 	}
 
 	private static async Task AddTitlesAsync(IServiceProvider scoped, IReadOnlyList<SeedTitle> wantlist, CancellationToken cancellationToken)
@@ -95,9 +98,10 @@ internal static class StagingSeed
 		await scoped.GetRequiredService<IWantlistService>().AddAsync(titles.Select(title => title.Id), new ManualOrigin(ManualSource.Search), cancellationToken);
 	}
 
-	private static async Task CreateFeedsAsync(IServiceProvider scoped, IReadOnlyList<SeedFeed> seeded, bool enabled, CancellationToken cancellationToken)
+	private static async Task CreateFeedsAsync(IServiceProvider scoped, IReadOnlyList<SeedFeed> seeded, CancellationToken cancellationToken)
 	{
 		var feeds = scoped.GetRequiredService<IFeedService>();
+		var readiness = scoped.GetRequiredService<IServiceReadiness>();
 		foreach (var feed in seeded)
 		{
 			await feeds
@@ -105,7 +109,7 @@ internal static class StagingSeed
 					new FeedCreateData
 					{
 						Name = feed.Name,
-						IsEnabled = enabled,
+						IsEnabled = await readiness.ReadyAsync(feed.Provider.Service, cancellationToken),
 						Provider = feed.Provider,
 						Strategy = feed.FeedStrategy(),
 						Identifier = feed.Identifier,

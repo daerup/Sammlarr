@@ -95,7 +95,7 @@ public class StagingSmokeTests
 	{
 		using var timeout = new CancellationTokenSource(StackBoot.Timeout);
 		var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
-			["--Staging=true", $"--StagingRoot={root}", "--Parameters:tmdb-api-key=e2e-tmdb-key", "--Parameters:mdblist-api-key="],
+			["--Staging=true", $"--StagingRoot={root}", "--Parameters:tmdb-api-key=e2e-tmdb-key", "--Parameters:mdblist-api-key=", "--Parameters:mal-client-id="],
 			(options, _) => options.DisableDashboard = true
 		);
 		builder.Services.AddLogging(logging => logging.AddFilter("AppHost.Resources", LogLevel.Warning));

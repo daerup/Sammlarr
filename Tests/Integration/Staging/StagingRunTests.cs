@@ -25,7 +25,31 @@ public class StagingRunTests
 	[Test]
 	public async Task Settings_ConnectsEachAppAtItsAddressAndLinksToWhereTheHostReachesIt()
 	{
-		var options = new StagingOptions
+		var options = Options();
+
+		var arr = StagingRun.Settings(options, movies: 4, shows: 6).Arr;
+
+		await Assert.That(arr.Radarr.Url).IsSome().And.IsEqualTo("http://radarr:7878");
+		await Assert.That(arr.Radarr.ExternalUrl).IsSome().And.IsEqualTo("http://localhost:7879");
+		await Assert.That(arr.Sonarr.Url).IsSome().And.IsEqualTo("http://sonarr:8989");
+		await Assert.That(arr.Sonarr.ExternalUrl).IsSome().And.IsEqualTo("http://localhost:8990");
+	}
+
+	[Test]
+	public async Task Settings_PassesTheOptionalKeysOnOnlyWhenSet()
+	{
+		var set = StagingRun.Settings(Options() with { MdblistKey = "staging-mdblist-key", MalClientId = "staging-mal-client-id" }, movies: 4, shows: 6);
+		var unset = StagingRun.Settings(Options(), movies: 4, shows: 6);
+
+		await Assert.That(set.MdblistKey).IsSome().And.IsEqualTo("staging-mdblist-key");
+		await Assert.That(set.MalKey).IsSome().And.IsEqualTo("staging-mal-client-id");
+		await Assert.That(unset.MdblistKey).IsNone();
+		await Assert.That(unset.MalKey).IsNone();
+	}
+
+	private static StagingOptions Options()
+	{
+		return new StagingOptions
 		{
 			Scenario = StagingScenario.Configured,
 			Personas = new StagingPersonas
@@ -69,12 +93,5 @@ public class StagingRunTests
 				Library = "tv",
 			},
 		};
-
-		var arr = StagingRun.Settings(options, movies: 4, shows: 6).Arr;
-
-		await Assert.That(arr.Radarr.Url).IsSome().And.IsEqualTo("http://radarr:7878");
-		await Assert.That(arr.Radarr.ExternalUrl).IsSome().And.IsEqualTo("http://localhost:7879");
-		await Assert.That(arr.Sonarr.Url).IsSome().And.IsEqualTo("http://sonarr:8989");
-		await Assert.That(arr.Sonarr.ExternalUrl).IsSome().And.IsEqualTo("http://localhost:8990");
 	}
 }
