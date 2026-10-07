@@ -161,7 +161,7 @@ public class PlexApiTests
 					new TmdbRating(7.5f, new None()),
 				}
 			);
-		await Assert.That(ratings.All(rating => rating.Source.SuppliedBy().Contains(RemoteService.Plex))).IsTrue();
+		await Assert.That(ratings.Select(rating => rating.Source)).IsEquivalentTo(RemoteService.Plex.SuppliedRatingSources());
 	}
 
 	[Test]

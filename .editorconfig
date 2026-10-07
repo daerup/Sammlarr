@@ -24,7 +24,7 @@ generated_code = true
 [*.cs]
 # exhaustive csharp pattern matching
 dotnet_diagnostic.CS8524.severity = none
-dotnet_diagnostic.CS8509.severity = warning
+dotnet_diagnostic.CS8509.severity = error
 
 # New line preferences
 csharp_new_line_before_open_brace = all
