@@ -16,7 +16,7 @@ public class AnimeListsTests
 		[
 		{"type":"TV","anidb_id":1,"anilist_id":290,"imdb_id":["tt0286390"],"mal_id":290,"themoviedb_id":{"tv":26209},"tvdb_id":72025,"season":{"tvdb":1,"tmdb":1}},
 		{"type":"TV","anidb_id":2,"anilist_id":291,"mal_id":291,"tvdb_id":72025,"season":{"tvdb":2,"tmdb":2}},
-		{"type":"OVA","anidb_id":3,"anilist_id":292,"tvdb_id":72025,"season":{"tvdb":1},"episode_offset":12},
+		{"type":"OVA","anidb_id":3,"anilist_id":292,"tvdb_id":72025,"season":{"tvdb":1},"episode_offset":{"tvdb":12}},
 		{"type":"MOVIE","anidb_id":4,"anilist_id":199,"mal_id":199,"imdb_id":["tt0245429"],"themoviedb_id":{"movie":[129, 130]}},
 		{"type":"TV","anidb_id":5,"mal_id":5114,"tvdb_id":85249,"themoviedb_id":{"tv":31911}},
 		{"type":"SPECIAL","anidb_id":6}
@@ -40,6 +40,18 @@ public class AnimeListsTests
 
 		await Assert.That(entries[1]).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(291), Some.Of(291), new None(), new None(), new None()));
 		await Assert.That(entries[2]).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(292), new None(), new None(), new None(), new None()));
+	}
+
+	[Test]
+	public async Task Parse_ForAnEntryOffsetOnBothSites_KeepsOnlyItsOwnIds()
+	{
+		const string loveHinaAgain = """
+			[{"type":"OVA","anidb_id":49,"anilist_id":190,"imdb_id":["tt0279570"],"mal_id":190,"themoviedb_id":{"tv":30992},"tvdb_id":70861,"season":{"tvdb":0,"tmdb":0},"episode_offset":{"tvdb":2,"tmdb":2}}]
+			""";
+
+		var entries = await AnimeListsFile.Parse(Encoding.UTF8.GetBytes(loveHinaAgain)).ToListAsync();
+
+		await Assert.That(entries.Single()).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(190), Some.Of(190), new None(), new None(), new None()));
 	}
 
 	[Test]

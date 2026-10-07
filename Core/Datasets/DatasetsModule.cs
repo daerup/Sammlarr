@@ -8,6 +8,7 @@ internal sealed class DatasetsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddSingleton<DatasetGate>();
 		services.AddScoped<IDatasetLoader, DatasetLoader<ImdbRatingLine>>();
 		services.AddScoped<IDatasetLoader, DatasetLoader<AnimeIdMapping>>();
 		services.AddHostedService<DatasetSchedule>();
