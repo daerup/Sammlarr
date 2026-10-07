@@ -255,8 +255,9 @@ TMDB looks up a TMDB id's detail (its appended `external_ids` carry the IMDb and
 by an IMDb or TheTVDB id, so a title that carries a TMDB, IMDb or TheTVDB id can resolve without Plex; MDBList finds
 every id it holds for a title by any one of its IMDb, TMDB, TheTVDB, Trakt or MyAnimeList ids, at cost 2, so it is taken when
 TMDB is blocked, has no key or knows no TheTVDB id; Wikidata finds
-a Rotten Tomatoes id by an IMDb id, a `ById` lookup without hints (`GivesHints` false), so it never stands in for a
-search's hints and only a request for a Rotten Tomatoes id reaches it. A TMDB answer
+a title's Rotten Tomatoes, Metacritic and Letterboxd pages and its TMDB and TheTVDB ids by an IMDb id, at cost 3 so it is
+the last resort for TMDB and TheTVDB ids, a `ById` lookup without hints (`GivesHints` false), so it never stands in
+for a search's hints. A TMDB answer
 also carries the original title and its release year, which a following Plex search uses; Plex keeps a search's hits
 for 10 minutes per hints (title, year and type), shared by every user, so equal hints are searched once. Within one
 resolution each lookup is asked once per input, so paths that share a call make it once, and never by an id its own

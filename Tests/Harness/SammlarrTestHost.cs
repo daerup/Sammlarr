@@ -228,7 +228,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void WikidataHolds(string imdb, params string[] paths)
 	{
-		var bindings = string.Join(',', paths.Select(path => $$$"""{"path":{"type":"literal","value":"{{{path}}}"}}"""));
+		var bindings = string.Join(',', paths.Select(path => $$$"""{"rt":{"type":"literal","value":"{{{path}}}"}}"""));
 		HttpStub.RespondWithJsonForUrl(WikidataQueryFor(imdb), $$$"""{"results":{"bindings":[{{{bindings}}}]}}""");
 	}
 
