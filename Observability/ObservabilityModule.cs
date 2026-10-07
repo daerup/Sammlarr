@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Diagnostics;
 using Observability.Logging;
+using Observability.Metrics;
 using Observability.Tracing;
 using Shared.DI;
 
@@ -13,5 +14,6 @@ public class ObservabilityModule : IServiceModule
 		services.AddModule<DiagnosticsModule>();
 		services.AddModule<LoggingModule>();
 		services.AddModule<TracingModule>();
+		services.AddModule<MetricsModule>();
 	}
 }
