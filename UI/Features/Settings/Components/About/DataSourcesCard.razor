@@ -23,11 +23,14 @@
         (CC BY 4.0; the TVDB tile is modified from theirs) and
         <AppLink Href="https://simpleicons.org" External="true">Simple Icons</AppLink>
         (CC0); IMDb's square logo and Rotten Tomatoes' tomato and popcorn marks from Wikimedia Commons (public domain).
-        Rotten Tomatoes scores arrive through Plex; Rotten Tomatoes and its marks are trademarks of Fandango. Each logo belongs to its owner.
+        Rotten Tomatoes scores arrive through @RottenTomatoesSuppliers; Rotten Tomatoes and its marks are trademarks of Fandango. Each logo belongs to its owner.
     </p>
 </div>
 
 @code {
+    private string RottenTomatoesSuppliers =>
+        string.Join(" and ", (RatingSource.RottenTomatoesCritics.SuppliedBy() + RatingSource.RottenTomatoesAudience.SuppliedBy()).Order().Select(Branding.Name));
+
     private static readonly IReadOnlyList<DataSource> Sources =
     [
         new(MediaProvider.Tmdb, "Titles, artwork, trending and ratings", "This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.", "https://www.themoviedb.org"),
