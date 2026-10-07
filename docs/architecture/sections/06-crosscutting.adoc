@@ -333,6 +333,14 @@ A push to Plex is a step of the sync, not a message: pending changes wait in the
 and the sync drains it inline, retrying a failed item on the next sync
 (link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0007-push-watchlist-changes-inline-during-sync.md[ADR 0007]).
 
+A downloaded dataset (IMDb's ratings file) is app-wide, not a user's, so it does not go through the `Jobs` queue,
+whose rows each belong to a user: `DatasetSchedule` registers one daily TickerQ cron ticker per `IDatasetLoader`
+(and a one-off ticker on a start before the first load), and the `LoadDataset` ticker function runs the loader, one
+ticker at a time as TickerQ runs them. The loader asks with the last `ETag` (a 304 loads nothing), replaces the table in
+one transaction through the context's connection (a failed or empty file rolls back, so the last table stays) and
+records the load in `DatasetLoads`. Until a dataset's first load its enricher answers `Error`, so no title stores
+an empty answer for it.
+
 === Events and notifications
 
 Anything that reports "something happened" is one of two disjoint kinds, and each has exactly

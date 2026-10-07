@@ -5,6 +5,7 @@ using DB.Data;
 using DB.Data.Access;
 using DB.Data.Blocklist;
 using DB.Data.Config;
+using DB.Data.Datasets;
 using DB.Data.Feed;
 using DB.Data.Feed.Run;
 using DB.Data.Identity;
@@ -85,6 +86,8 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<NotificationSubscriptionRow> NotificationSubscriptions => Set<NotificationSubscriptionRow>();
 	public DbSet<NotificationDeliveryOutcomeRow> NotificationDeliveryOutcomes => Set<NotificationDeliveryOutcomeRow>();
 	public DbSet<RatingDefaultRow> RatingDefaults => Set<RatingDefaultRow>();
+	public DbSet<ImdbRatingRow> ImdbRatings => Set<ImdbRatingRow>();
+	public DbSet<DatasetLoadRow> DatasetLoads => Set<DatasetLoadRow>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{

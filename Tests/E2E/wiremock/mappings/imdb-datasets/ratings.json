@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/title.ratings.tsv.gz"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/octet-stream",
+      "ETag": "\"e2e\""
+    },
+    "base64Body": "H4sIAAAAAAAACitJzs8rLuFMLEstSkxPDUosycxL58wrzQ3LL0kt5iopMQADQ05TPXNOI0NDIy4AWnLCwjEAAAA="
+  }
+}

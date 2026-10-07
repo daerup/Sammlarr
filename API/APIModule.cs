@@ -1,4 +1,5 @@
 using API.Arr;
+using API.Imdb;
 using API.Mdblist;
 using API.Notifications;
 using API.Observability;
@@ -22,6 +23,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<MdblistModule>();
 		services.AddModule<WikidataModule>();
 		services.AddModule<TvmazeModule>();
+		services.AddModule<ImdbModule>();
 		services.AddModule<ArrModule>();
 		services.AddModule<PicturesModule>();
 		services.AddModule<TvdbModule>();

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using API.Http;
 using API.Notifications.Webhook;
 using Contracts;
@@ -33,6 +34,41 @@ public class RemoteHttpExtensionsTests
 
 		await host.StartAsync();
 		await host.StopAsync();
+	}
+
+	[Test]
+	[MethodDataSource(nameof(ProviderSections))]
+	public async Task AddClientHttp_WithEachProvidersShippedSettings_PassesStartupOptionsValidation(string section)
+	{
+		var http = AppSettings()
+			.GetProperty(section)
+			.GetProperty("Http")
+			.Deserialize<ProviderHttpOptions>(new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		using var host = new HostBuilder()
+			.ConfigureServices(services =>
+			{
+				services.AddSingleton(new WebhookOptions { Http = http });
+				services.AddSingleton<ProviderGates>();
+				services.AddHttpClient<WebhookClient>().AddClientHttp<WebhookOptions>();
+			})
+			.Build();
+
+		await host.StartAsync();
+		await host.StopAsync();
+	}
+
+	public static IEnumerable<string> ProviderSections()
+	{
+		return AppSettings()
+			.EnumerateObject()
+			.Where(section => section.Value.ValueKind is JsonValueKind.Object && section.Value.TryGetProperty("Http", out _))
+			.Select(section => section.Name);
+	}
+
+	private static JsonElement AppSettings()
+	{
+		var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "Web", "appsettings.json"));
+		return JsonDocument.Parse(File.ReadAllText(path)).RootElement;
 	}
 
 	[Test]

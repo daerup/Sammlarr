@@ -2,6 +2,7 @@ using DB.Data.Access;
 using DB.Data.Blocklist;
 using DB.Data.Cleanup;
 using DB.Data.Config;
+using DB.Data.Datasets;
 using DB.Data.Feed;
 using DB.Data.Identity;
 using DB.Data.Jobs;
@@ -23,6 +24,7 @@ internal class DataAccessModule : IServiceModule
 		services.AddModule<BlocklistModule>();
 		services.AddModule<CleanupModule>();
 		services.AddModule<ConfigModule>();
+		services.AddModule<DatasetsDataModule>();
 		services.AddModule<FeedModule>();
 		services.AddModule<IdentityDataModule>();
 		services.AddModule<JobModule>();

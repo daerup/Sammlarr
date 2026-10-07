@@ -1,8 +1,10 @@
+using Contracts.Datasets;
 using Contracts.Providers;
 using Contracts.Ratings;
 using Core.Ratings;
 using Domain.Media;
 using Domain.Providers;
+using TestInfrastructure;
 
 namespace Core.Tests.Ratings;
 
@@ -10,6 +12,7 @@ public class RatingServiceTests
 {
 	private readonly Mock<IRatingDefaultRepository> _defaults = IRatingDefaultRepository.Mock();
 	private readonly Mock<IServiceReadiness> _readiness = IServiceReadiness.Mock();
+	private readonly Mock<IDatasetLoads> _datasets = IDatasetLoads.Mock();
 	private readonly HashSet<RemoteService> _connected = [];
 
 	public RatingServiceTests()
@@ -17,7 +20,24 @@ public class RatingServiceTests
 		_readiness.ConnectedAsync(Any(), Any()).Returns((asked, _) => asked.Where(_connected.Contains).ToHashSet());
 	}
 
-	private RatingService Testee => new(_defaults.Object, _readiness.Object);
+	private RatingService Testee => new(_defaults.Object, _readiness.Object, _datasets.Object);
+
+	[Test]
+	public async Task GetImdbFileDateAsync_AfterALoad_IsWhenTheFileWasLoaded()
+	{
+		var loadedAt = new DateTimeOffset(2026, 10, 6, 4, 30, 0, TimeSpan.Zero);
+		_datasets.FindAsync(DatasetNames.ImdbRatings, Any()).Returns(Some.Of(new DatasetLoad(DatasetNames.ImdbRatings, loadedAt, new None(), 1_717_695)));
+
+		await Assert.That(await Testee.GetImdbFileDateAsync()).IsSome().And.IsEqualTo(loadedAt);
+	}
+
+	[Test]
+	public async Task GetImdbFileDateAsync_BeforeTheFirstLoad_IsNone()
+	{
+		_datasets.FindAsync(Any(), Any()).Returns(new None());
+
+		await Assert.That(await Testee.GetImdbFileDateAsync()).IsNone();
+	}
 
 	[Test]
 	public async Task GetAvailableAsync_WithOnlyTmdbConnected_OffersOnlyTmdb()

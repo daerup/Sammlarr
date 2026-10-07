@@ -10,7 +10,7 @@ public enum RatingSource
 	Tmdb,
 
 	[Description("IMDb")]
-	[SuppliedBy<RemoteService>(RemoteService.Plex, RemoteService.Mdblist)]
+	[SuppliedBy<RemoteService>(RemoteService.Plex, RemoteService.Mdblist, RemoteService.ImdbDatasets)]
 	Imdb,
 
 	[Description("Rotten Tomatoes critics")]
