@@ -65,6 +65,18 @@ public class AccountsAndKeysTests : BunitContext
 	}
 
 	[Test]
+	public async Task MalRow_AloneCarriesSetupSteps()
+	{
+		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));
+
+		var rows = cut.FindComponents<Stub<ApiKeyRow>>().Select(row => row.Instance.Parameters).ToList();
+
+		await Assert
+			.That(rows.Where(row => row.ContainsKey(nameof(ApiKeyRow.Setup))).Select(row => row.Get(key => key.Provider)))
+			.IsEquivalentTo([ApiKeyProvider.Mal]);
+	}
+
+	[Test]
 	public async Task Rows_OfferAKeyForTmdbMdblistAndMyAnimeList()
 	{
 		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));

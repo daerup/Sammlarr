@@ -6,6 +6,7 @@ using Domain.Auth;
 using Domain.Providers;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using UI.Features.Settings.Components.Providers;
 using UI.Shared.Common;
 
@@ -94,6 +95,43 @@ public class ApiKeyRowTests : BunitContext
 		await Assert.That(Status(cut)).IsEqualTo("Verified");
 		await Assert.That(Button(cut, "Save")).IsNotNull();
 		await Assert.That(cut.Markup).DoesNotContain("accepted the key");
+	}
+
+	[Test]
+	public async Task Layout_PutsTheButtonsOnTheFieldsLineWithTheDescriptionUnderIt()
+	{
+		var cut = RenderRow();
+
+		var line = cut.Find("[data-key-line]");
+		await Assert.That(line.QuerySelector("input")).IsNotNull();
+		await Assert.That(line.QuerySelectorAll("button").Select(button => button.TextContent.Trim())).Contains("Test");
+		await Assert.That(line.NextElementSibling!.TextContent).Contains("Your TMDB API key.");
+	}
+
+	[Test]
+	public async Task Layout_ForASavedKey_PutsDeleteKeyOnTheFieldsLine()
+	{
+		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of<IApiKey>(new TestApiKey(ApiKeyProvider.Tmdb, "saved-key")));
+
+		var cut = RenderRow();
+
+		await Assert.That(cut.Find("[data-key-line]").TextContent).Contains("Delete key");
+	}
+
+	[Test]
+	public async Task Layout_PutsTheSetupStepsBetweenTheFieldAndWhatItGetsYou()
+	{
+		var cut = Render<ApiKeyRow>(parameters =>
+			parameters
+				.Add(row => row.Provider, ApiKeyProvider.Mal)
+				.Add(row => row.Description, "<span>Your MyAnimeList client ID.</span>")
+				.Add(row => row.Uses, ["MyAnimeList anime lists as feeds"])
+				.Add(row => row.Setup, "<div data-setup>How to get a client ID</div>")
+		);
+
+		var markup = cut.Markup;
+		await Assert.That(markup.IndexOf("data-key-line", StringComparison.Ordinal)).IsLessThan(markup.IndexOf("data-setup", StringComparison.Ordinal));
+		await Assert.That(markup.IndexOf("data-setup", StringComparison.Ordinal)).IsLessThan(markup.IndexOf("data-uses", StringComparison.Ordinal));
 	}
 
 	private static string Status(IRenderedComponent<ApiKeyRow> cut) => cut.Find("button").Children.Last().TextContent.Trim();

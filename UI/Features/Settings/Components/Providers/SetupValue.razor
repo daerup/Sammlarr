@@ -1,0 +1,46 @@
+@inject IJSRuntime JS
+
+<span class="text-muted-foreground">@Name</span>
+<span class="flex min-w-0 flex-wrap items-center gap-1.5" data-setup-value>
+    @if (Copy)
+    {
+        <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-foreground select-all">@Value</code>
+        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.IconSmall" AriaLabel="@($"Copy {Name}")" OnClick="CopyAsync"
+                  Class="size-6 text-muted-foreground hover:text-foreground">
+            <LucideIcon Name="@(_copied ? "check" : "copy")" Size="12"/>
+        </BbButton>
+        @if (_manual)
+        {
+            <span class="text-muted-foreground" role="status">This browser only copies on https; select it and copy it by hand.</span>
+        }
+    }
+    else
+    {
+        <span class="text-muted-foreground">@Value</span>
+    }
+</span>
+
+@code {
+    [Parameter] [EditorRequired] public required string Name { get; set; }
+
+    [Parameter] [EditorRequired] public required string Value { get; set; }
+
+    [Parameter] public bool Copy { get; set; } = true;
+
+    private bool _copied;
+
+    private bool _manual;
+
+    private async Task CopyAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", Value);
+            _copied = true;
+        }
+        catch (JSException)
+        {
+            _manual = true;
+        }
+    }
+}

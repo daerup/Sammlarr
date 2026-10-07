@@ -3,41 +3,42 @@
 
 <div class="contents" data-slot="@Provider.ToString().ToLowerInvariant()">
 <BbField>
-    <BbFieldLabel>@Label</BbFieldLabel>
+    <BbFieldLabel Class="@(HideLabel ? "sr-only" : null)">@Label</BbFieldLabel>
     <BbFieldContent>
-        <SensitiveInput @bind-Value="ApiKey" Compact="true" Placeholder="@($"Enter {Noun}")" Label="@Label" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
+        <div class="flex flex-wrap items-center gap-2" data-key-line>
+            <div class="min-w-48 flex-1">
+                <SensitiveInput @bind-Value="ApiKey" Compact="true" Placeholder="@($"Enter {Noun}")" Label="@Label" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
+            </div>
+            <CredentialActions State="_state" HasChange="HasChange" OnTest="TestAsync" OnSave="SaveAsync" OnCancel="CancelAsync">
+                <Remove>
+                    <BbAlertDialog>
+                        <BbAlertDialogTrigger>
+                            <HoverButton Preset="HoverButtonPreset.Destructive" Size="ButtonSize.Small" Icon="trash-2" Text="@DeleteText"/>
+                        </BbAlertDialogTrigger>
+                        <BbAlertDialogContent>
+                            <BbAlertDialogHeader>
+                                <BbAlertDialogTitle>Delete @Noun?</BbAlertDialogTitle>
+                                <BbAlertDialogDescription>
+                                    This will permanently remove the saved @Noun for @Owner.
+                                    You will need to re-enter it to use @Uses again.
+                                </BbAlertDialogDescription>
+                            </BbAlertDialogHeader>
+                            <BbAlertDialogFooter>
+                                <BbAlertDialogCancel>
+                                    <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                                </BbAlertDialogCancel>
+                                <BbAlertDialogAction>
+                                    <HoverButton Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="@DeleteText" OnClick="DeleteAsync"/>
+                                </BbAlertDialogAction>
+                            </BbAlertDialogFooter>
+                        </BbAlertDialogContent>
+                    </BbAlertDialog>
+                </Remove>
+            </CredentialActions>
+        </div>
         <BbFieldDescription>@Description</BbFieldDescription>
     </BbFieldContent>
 </BbField>
-
-@BeforeActions
-
-<CredentialActions State="_state" HasChange="HasChange" OnTest="TestAsync" OnSave="SaveAsync" OnCancel="CancelAsync">
-    <Remove>
-        <BbAlertDialog>
-            <BbAlertDialogTrigger>
-                <HoverButton Preset="HoverButtonPreset.Destructive" Size="ButtonSize.Small" Icon="trash-2" Text="@DeleteText"/>
-            </BbAlertDialogTrigger>
-            <BbAlertDialogContent>
-                <BbAlertDialogHeader>
-                    <BbAlertDialogTitle>Delete @Noun?</BbAlertDialogTitle>
-                    <BbAlertDialogDescription>
-                        This will permanently remove the saved @Noun for @Owner.
-                        You will need to re-enter it to use @Uses again.
-                    </BbAlertDialogDescription>
-                </BbAlertDialogHeader>
-                <BbAlertDialogFooter>
-                    <BbAlertDialogCancel>
-                        <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                    </BbAlertDialogCancel>
-                    <BbAlertDialogAction>
-                        <HoverButton Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="@DeleteText" OnClick="DeleteAsync"/>
-                    </BbAlertDialogAction>
-                </BbAlertDialogFooter>
-            </BbAlertDialogContent>
-        </BbAlertDialog>
-    </Remove>
-</CredentialActions>
 </div>
 
 @code {
@@ -55,7 +56,7 @@
 
     [Parameter] public string Uses { get; set; } = "this provider";
 
-    [Parameter] public RenderFragment? BeforeActions { get; set; }
+    [Parameter] public bool HideLabel { get; set; }
 
     [Parameter] public EventCallback<ApiKeyFieldState> StateChanged { get; set; }
 

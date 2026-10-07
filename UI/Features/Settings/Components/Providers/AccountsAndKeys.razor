@@ -29,14 +29,20 @@
             (free, takes a minute).
         </Description>
         <Extra>
-            <ApiKeyField Provider="ApiKeyProvider.TmdbReadToken" Owner="TMDB" Label="Read access token (for v4 lists)" Noun="read access token" DeleteText="Delete token" Uses="lists only TMDB's v4 API serves" Changed="Changed">
+            <OptionalKey Provider="ApiKeyProvider.TmdbReadToken"
+                         Title="Read access token"
+                         Hint="for lists only TMDB's v4 API serves"
+                         Noun="read access token"
+                         DeleteText="Delete token"
+                         Uses="lists only TMDB's v4 API serves"
+                         Changed="Changed">
                 <Description>
-                    Optional. The API Read Access Token from the same
+                    The API Read Access Token from the same
                     <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer"
                        class="underline underline-offset-2 hover:text-foreground transition-colors">themoviedb.org › Settings › API</a>
-                    page, for list feeds only TMDB's v4 API serves. Everything else keeps using the key.
+                    page. Only lists TMDB's v4 API serves need it; everything else uses the key.
                 </Description>
-            </ApiKeyField>
+            </OptionalKey>
         </Extra>
     </ApiKeyRow>
     <ApiKeyRow Provider="ApiKeyProvider.Mdblist"
@@ -62,6 +68,36 @@
                class="underline underline-offset-2 hover:text-foreground transition-colors">myanimelist.net › API</a>
             (free) and paste its client ID.
         </Description>
+        <Setup>
+            <KeySetup Title="How to get a client ID" Time="about 3 minutes">
+                <KeySetupStep Number="1">
+                    Sign in at myanimelist.net and open
+                    <a href="https://myanimelist.net/apiconfig" target="_blank" rel="noopener noreferrer"
+                       class="underline underline-offset-2 hover:text-foreground transition-colors">API › Create ID</a>.
+                </KeySetupStep>
+                <KeySetupStep Number="2">
+                    Fill in the form. MyAnimeList asks for every field; Sammlarr only ever uses the client ID.
+                    <div class="mt-1.5 grid grid-cols-[max-content_1fr] items-center gap-x-3.5 gap-y-1 text-xs">
+                        <SetupValue Name="App Name" Value="Sammlarr"/>
+                        <SetupValue Name="App Type" Value="other"/>
+                        <SetupValue Name="App Description" Value="Anime lists and ratings for my Sammlarr"/>
+                        <SetupValue Name="App Redirect URL" Value="http://localhost/"/>
+                        <SetupValue Name="Homepage URL" Value="https://github.com/daerup/Sammlarr"/>
+                        <SetupValue Name="Commercial / Non-Commercial" Value="non-commercial"/>
+                        <SetupValue Name="Name / Company Name" Value="your name" Copy="false"/>
+                        <SetupValue Name="Purpose of Use" Value="hobbyist"/>
+                    </div>
+                </KeySetupStep>
+                <KeySetupStep Number="3">
+                    Agree to the API License and Developer Agreement and press <span class="font-medium text-foreground">Submit</span>.
+                </KeySetupStep>
+                <KeySetupStep Number="4">
+                    Press <span class="font-medium text-foreground">Return to list</span>, then
+                    <span class="font-medium text-foreground">Edit</span> next to Sammlarr, and copy its
+                    <span class="font-medium text-foreground">Client ID</span> into the field above.
+                </KeySetupStep>
+            </KeySetup>
+        </Setup>
     </ApiKeyRow>
 </div>
 
