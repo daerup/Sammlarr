@@ -23,12 +23,16 @@ internal static class FeedSources
 			FeedProvider.Tmdb => new(
 				"e.g. https://www.themoviedb.org/list/8231234",
 				Help(
-					"Paste the list's link from themoviedb.org, or its number, e.g. <code>8231234</code>. "
+					"Paste the list's link from themoviedb.org, or its number, e.g. <code>8231234</code>, or a themoviedb.org movie, TV or discover page. Sammlarr reads the first 500 titles of a page. "
 						+ "A list only TMDB's v4 API serves needs the read access token under TMDB's key in Settings › Providers.",
 					"https://www.themoviedb.org/list/new",
 					"Make a list on TMDB"
 				),
-				identifier => $"https://www.themoviedb.org/list/{identifier}"
+				PageOr(
+					"www.themoviedb.org",
+					["movie", "tv", "discover/", "keyword/", "company/", "network/"],
+					identifier => $"https://www.themoviedb.org/list/{identifier}"
+				)
 			),
 			FeedProvider.AniList => new(
 				"e.g. https://anilist.co/user/yourname/animelist/Planning",
