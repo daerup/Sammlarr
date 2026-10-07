@@ -36,6 +36,10 @@ public enum RatingSource
 	[Description("MyAnimeList")]
 	[SuppliedBy<RemoteService>(RemoteService.Mdblist)]
 	MyAnimeList,
+
+	[Description("AniList")]
+	[SuppliedBy<RemoteService>(RemoteService.AniList)]
+	AniList,
 }
 
 public readonly record struct RatingCard(MediaProvider Owner, bool PublishesVotes, Func<float, Optional<int>, IMediaRating> Rate)
@@ -65,6 +69,7 @@ public static class RatingSources
 					RatingSource.Letterboxd => RatingCard.Of<LetterboxdRating>(),
 					RatingSource.Trakt => RatingCard.Of<TraktRating>(),
 					RatingSource.MyAnimeList => RatingCard.Of<MyAnimeListRating>(),
+					RatingSource.AniList => RatingCard.Of<AniListRating>(),
 				};
 			}
 		}

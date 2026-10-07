@@ -190,6 +190,23 @@ public readonly record struct MyAnimeListRating(float Score, Optional<int> Votes
 	public Optional<RatingVerdict> Verdict => new None();
 }
 
+public readonly record struct AniListRating(int Score, Optional<int> Votes) : IOwnedRating<AniListRating>
+{
+	public static MediaProvider Owner => MediaProvider.AniList;
+
+	public static bool PublishesVotes => true;
+
+	public static AniListRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10), votes);
+
+	public RatingSource Source => RatingSource.AniList;
+
+	public string Value => $"{Score}%";
+
+	public float SammlarrValue => Score / 10f;
+
+	public Optional<RatingVerdict> Verdict => new None();
+}
+
 public readonly record struct MediaRatings(ValueSet<IMediaRating> All)
 {
 	public static readonly MediaRatings None = new([]);

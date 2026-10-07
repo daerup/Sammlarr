@@ -83,6 +83,7 @@ public class FeedRatingTests
 				new Regex("Letterboxd"),
 				new Regex("Trakt"),
 				new Regex("MyAnimeList"),
+				new Regex("AniList"),
 			]);
 		await Expect(popover).ToContainTextAsync("A title only Rotten Tomatoes or Metacritic rates has no votes and fails this rule.");
 	}

@@ -50,6 +50,7 @@ public class MediaCompletenessTests
 				new LetterboxdRating(3.9f, Some.Of(1_200_000)),
 				new TraktRating(84, Some.Of(5_000)),
 				new MyAnimeListRating(7.1f, Some.Of(40_000)),
+				new AniListRating(85, Some.Of(610_640)),
 			]),
 		};
 

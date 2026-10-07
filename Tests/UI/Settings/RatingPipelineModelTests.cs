@@ -40,6 +40,7 @@ public class RatingPipelineModelTests
 					(RatingSource.Letterboxd, false),
 					(RatingSource.Trakt, false),
 					(RatingSource.MyAnimeList, false),
+					(RatingSource.AniList, false),
 				],
 				CollectionOrdering.Matching
 			);

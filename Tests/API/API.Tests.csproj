@@ -28,5 +28,6 @@
 		<None Include="Wikidata\Recorded\*.json" CopyToOutputDirectory="PreserveNewest" />
 		<None Include="Mdblist\Recorded\*.json" CopyToOutputDirectory="PreserveNewest" />
 		<None Include="Tvmaze\Recorded\*.json" CopyToOutputDirectory="PreserveNewest" />
+		<None Include="AniList\Recorded\*.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

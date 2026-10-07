@@ -76,7 +76,7 @@ public class RatingServiceTests
 	{
 		_connected.Add(RemoteService.Mdblist);
 
-		await Assert.That(await Testee.GetAvailableAsync()).IsEquivalentTo(Enum.GetValues<RatingSource>());
+		await Assert.That(await Testee.GetAvailableAsync()).IsEquivalentTo(Enum.GetValues<RatingSource>().Where(source => source is not RatingSource.AniList));
 	}
 
 	[Test]

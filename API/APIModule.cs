@@ -1,3 +1,4 @@
+using API.AniList;
 using API.Anime;
 using API.Arr;
 using API.Imdb;
@@ -26,6 +27,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<TvmazeModule>();
 		services.AddModule<ImdbModule>();
 		services.AddModule<AnimeListsModule>();
+		services.AddModule<AniListModule>();
 		services.AddModule<ArrModule>();
 		services.AddModule<PicturesModule>();
 		services.AddModule<TvdbModule>();

@@ -17,7 +17,16 @@ public class VotesExplanationTests
 		await Assert
 			.That(explanation.Rows.Select(row => (row.Name, row.HasVotes)))
 			.IsEquivalentTo(
-				[("TMDB", true), ("IMDb", true), ("Rotten Tomatoes", false), ("Metacritic", false), ("Letterboxd", true), ("Trakt", true), ("MyAnimeList", true)],
+				[
+					("TMDB", true),
+					("IMDb", true),
+					("Rotten Tomatoes", false),
+					("Metacritic", false),
+					("Letterboxd", true),
+					("Trakt", true),
+					("MyAnimeList", true),
+					("AniList", true),
+				],
 				CollectionOrdering.Matching
 			);
 		await Assert.That(explanation.Note).IsEqualTo(VotesNote.UnvotedTitlesFail);
@@ -35,7 +44,7 @@ public class VotesExplanationTests
 		await Assert
 			.That(explanation.Rows.Select(row => (row.Rank.GetValueOr(0), row.Name)))
 			.IsEquivalentTo(
-				[(1, "Rotten Tomatoes"), (2, "TMDB"), (4, "IMDb"), (5, "Metacritic"), (6, "Letterboxd"), (7, "Trakt"), (8, "MyAnimeList")],
+				[(1, "Rotten Tomatoes"), (2, "TMDB"), (4, "IMDb"), (5, "Metacritic"), (6, "Letterboxd"), (7, "Trakt"), (8, "MyAnimeList"), (9, "AniList")],
 				CollectionOrdering.Matching
 			);
 		await Assert.That(explanation.Note).IsEqualTo(VotesNote.UnvotedTitlesFail);
