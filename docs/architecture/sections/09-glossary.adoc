@@ -220,8 +220,8 @@ Radarr, Sonarr). It answers its `Access` and its `OwnIds` (the media provider wh
 key check, converter and enricher registers through it (`ForRemote`), so it holds one capacity, one wait budget and one
 outage state.
 
-Access:: What a remote service needs before a person can use it: `Open` (Wikidata), `UserKey` (an API key in a slot,
-`ApiKeyProvider`: TMDB, MDBList), `UserSignIn` (an `AuthProvider` sign-in: Plex) or `AppInstance` (the install's
+Access:: What a remote service needs before a person can use it: `Open` (Wikidata, TVmaze, IMDb datasets), `UserKey` (an API key in a
+slot, `ApiKeyProvider`: TMDB, MDBList; TMDB's optional read access token is a slot no access names), `UserSignIn` (an `AuthProvider` sign-in: Plex) or `AppInstance` (the install's
 `ArrApp`: Radarr, Sonarr). `IServiceReadiness` reads it to say which remote services are connected.
 
 Service:: What serves a role: a remote service, the Radarr + Sonarr pair (`Arr`) or Sammlarr accounts (`SammlarrAccounts`).

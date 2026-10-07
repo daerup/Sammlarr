@@ -4,6 +4,7 @@ public enum ApiKeyProvider
 {
 	Tmdb,
 	Mdblist,
+	TmdbReadToken,
 }
 
 public static class ApiKeyProviders
@@ -16,7 +17,7 @@ public static class ApiKeyProviders
 			{
 				return slot switch
 				{
-					ApiKeyProvider.Tmdb => RemoteService.Tmdb,
+					ApiKeyProvider.Tmdb or ApiKeyProvider.TmdbReadToken => RemoteService.Tmdb,
 					ApiKeyProvider.Mdblist => RemoteService.Mdblist,
 				};
 			}

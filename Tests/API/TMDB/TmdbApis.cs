@@ -12,7 +12,12 @@ namespace API.Tests.TMDB;
 
 internal static class TmdbApis
 {
-	internal static readonly TmdbOptions Options = new() { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p" };
+	internal static readonly TmdbOptions Options = new()
+	{
+		BaseUrl = "https://api.themoviedb.org/3",
+		V4BaseUrl = "https://api.themoviedb.org/4",
+		ImageBaseUrl = "https://image.tmdb.org/t/p",
+	};
 
 	internal static TmdbApi Over(MockHttpHandler handler)
 	{

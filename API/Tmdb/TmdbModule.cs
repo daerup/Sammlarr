@@ -19,6 +19,8 @@ internal class TmdbModule : IServiceModule
 			.Client<TmdbClient>()
 			.Client(TmdbClient.Unauthenticated)
 			.ApiKey<TmdbKeyCheck>(ApiKeyProvider.Tmdb)
+			.ApiKey<TmdbReadTokenCheck>(ApiKeyProvider.TmdbReadToken)
+			.Feed<TmdbFeedService>(FeedProvider.Tmdb)
 			.Trending<TmdbTrendingService>(TrendingProvider.Tmdb)
 			.Search<TmdbSearch>(SearchProvider.Tmdb)
 			.Converter<TmdbIdConverter>()

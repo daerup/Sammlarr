@@ -693,23 +693,13 @@
         NotifyChange();
     }
 
-    private string GetIdentifierPlaceholder(FeedProvider? provider) =>
-        provider switch
-        {
-            FeedProvider.Mdblist => "e.g. https://mdblist.com/lists/snoak/trakt-s-trending-shows",
-            null => "Select a provider first",
-            _ => "Provider-specific list identifier",
-        };
+    private static string GetIdentifierPlaceholder(FeedProvider? provider) => provider is { } chosen ? FeedSources.Of(chosen).Placeholder : "Select a provider first";
 
     private MarkupString RenderIdentifierDescription() => _provider switch
     {
-        FeedProvider.Mdblist => new MarkupString(
-        "Paste the list's link from mdblist.com, or its owner/list, e.g. <code>snoak/trakt-s-trending-shows</code>. Its number works too. " +
-        "<a href=\"https://mdblist.com/toplists/\" target=\"_blank\" " +
-        "class=\"underline underline-offset-2 hover:text-foreground transition-colors\">Browse lists on MDBList</a>"),
-        null when Enum.GetValues<FeedProvider>().All(_disabledProviders.Contains) => new MarkupString("No provider is available until you add an MDBList key in Settings › Providers."),
+        { } chosen => FeedSources.Of(chosen).Help,
+        null when Enum.GetValues<FeedProvider>().All(_disabledProviders.Contains) => new MarkupString("No provider is available until you add an MDBList or TMDB key in Settings › Providers."),
         null => new MarkupString("Select a provider first."),
-        _ => new MarkupString("The provider-specific identifier for the list (slug, numeric ID, or URL segment)."),
     };
 
     private const string SlotScopeHelper = "Only affects items this feed did not add itself.";

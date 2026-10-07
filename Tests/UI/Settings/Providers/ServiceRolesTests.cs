@@ -11,7 +11,7 @@ public class ServiceRolesTests
 		return
 		[
 			() => (RemoteService.Plex, ["Sign-in", "Wantlist", "Search"]),
-			() => (RemoteService.Tmdb, ["Search", "Trending"]),
+			() => (RemoteService.Tmdb, ["Search", "Trending", "Feeds"]),
 			() => (RemoteService.Mdblist, ["Feeds"]),
 			() => (new Arr(), ["Wantlist", "Search"]),
 			() => (new SammlarrAccounts(), ["Sign-in"]),

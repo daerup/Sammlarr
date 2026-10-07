@@ -55,6 +55,7 @@ public class ServicesMapModelTests
 				"Wantlist > Plex at 596,78",
 				"Search > Plex at 596,86",
 				"Trending > Tmdb at 596,182",
+				"Feeds > Tmdb at 596,190",
 				"Feeds > Mdblist at 596,234",
 			]);
 	}
@@ -91,7 +92,7 @@ public class ServicesMapModelTests
 	{
 		var services = ServicesMapModel.For(Config).Services.Select(service => $"{service.Provider} {service.Y}: {string.Join(" ", service.Pins)}");
 
-		await Assert.That(services).IsEquivalentTo(["Plex 78: 70 78 86", "Tmdb 182: 182"]);
+		await Assert.That(services).IsEquivalentTo(["Plex 78: 70 78 86", "Tmdb 186: 182 190"]);
 	}
 
 	[Test]

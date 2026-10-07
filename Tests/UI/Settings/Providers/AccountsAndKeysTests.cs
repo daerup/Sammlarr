@@ -43,12 +43,24 @@ public class AccountsAndKeysTests : BunitContext
 	}
 
 	[Test]
-	public async Task TmdbRow_OffersNoListsAsFeeds()
+	public async Task TmdbRow_OffersItsListsAsFeeds()
 	{
 		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));
 
 		var tmdb = cut.FindComponents<Stub<ApiKeyRow>>().Select(row => row.Instance.Parameters).Single(row => row.Get(key => key.Provider) == ApiKeyProvider.Tmdb);
 
-		await Assert.That(tmdb.Get(key => key.Uses)).DoesNotContain(use => use.Contains("feeds"));
+		await Assert.That(tmdb.Get(key => key.Uses)).Contains(use => use.Contains("feeds"));
+	}
+
+	[Test]
+	public async Task TmdbRow_CarriesTheOptionalReadTokenFieldOnlyForTmdb()
+	{
+		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));
+
+		var rows = cut.FindComponents<Stub<ApiKeyRow>>().Select(row => row.Instance.Parameters).ToList();
+
+		await Assert
+			.That(rows.Where(row => row.ContainsKey(nameof(ApiKeyRow.Extra))).Select(row => row.Get(key => key.Provider)))
+			.IsEquivalentTo([ApiKeyProvider.Tmdb]);
 	}
 }

@@ -1,0 +1,153 @@
+@using Contracts.Auth
+@inject IApiKeyService ApiKeyService
+
+<div class="contents" data-slot="@Provider.ToString().ToLowerInvariant()">
+<BbField>
+    <BbFieldLabel>@Label</BbFieldLabel>
+    <BbFieldContent>
+        <SensitiveInput @bind-Value="ApiKey" Compact="true" Placeholder="@($"Enter {Noun}")" Label="@Label" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
+        <BbFieldDescription>@Description</BbFieldDescription>
+    </BbFieldContent>
+</BbField>
+
+@BeforeActions
+
+<CredentialActions State="_state" HasChange="HasChange" OnTest="TestAsync" OnSave="SaveAsync" OnCancel="CancelAsync">
+    <Remove>
+        <BbAlertDialog>
+            <BbAlertDialogTrigger>
+                <HoverButton Preset="HoverButtonPreset.Destructive" Size="ButtonSize.Small" Icon="trash-2" Text="@DeleteText"/>
+            </BbAlertDialogTrigger>
+            <BbAlertDialogContent>
+                <BbAlertDialogHeader>
+                    <BbAlertDialogTitle>Delete @Noun?</BbAlertDialogTitle>
+                    <BbAlertDialogDescription>
+                        This will permanently remove the saved @Noun for @Owner.
+                        You will need to re-enter it to use @Uses again.
+                    </BbAlertDialogDescription>
+                </BbAlertDialogHeader>
+                <BbAlertDialogFooter>
+                    <BbAlertDialogCancel>
+                        <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                    </BbAlertDialogCancel>
+                    <BbAlertDialogAction>
+                        <HoverButton Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="@DeleteText" OnClick="DeleteAsync"/>
+                    </BbAlertDialogAction>
+                </BbAlertDialogFooter>
+            </BbAlertDialogContent>
+        </BbAlertDialog>
+    </Remove>
+</CredentialActions>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required ApiKeyProvider Provider { get; set; }
+
+    [Parameter] [EditorRequired] public required string Owner { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment Description { get; set; }
+
+    [Parameter] public string Label { get; set; } = "API key";
+
+    [Parameter] public string Noun { get; set; } = "API key";
+
+    [Parameter] public string DeleteText { get; set; } = "Delete key";
+
+    [Parameter] public string Uses { get; set; } = "this provider";
+
+    [Parameter] public RenderFragment? BeforeActions { get; set; }
+
+    [Parameter] public EventCallback<ApiKeyFieldState> StateChanged { get; set; }
+
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private string _apiKeyInput = string.Empty;
+    private string _savedApiKey = string.Empty;
+    private IApiKey? _validatedKey;
+    private ApiKeyProvider? _loadedProvider;
+    private CredentialState _state = CredentialState.Idle;
+    private CredentialState _savedState = CredentialState.Idle;
+
+    private bool HasChange => !string.IsNullOrWhiteSpace(_apiKeyInput) && _apiKeyInput != _savedApiKey;
+
+    private string ApiKey
+    {
+        get => _apiKeyInput;
+        set
+        {
+            if (_apiKeyInput == value)
+            {
+                return;
+            }
+
+            _apiKeyInput = value;
+            _state = value == _savedApiKey ? _savedState : CredentialState.Idle;
+            _ = ReportAsync();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedProvider == Provider)
+        {
+            return;
+        }
+
+        _loadedProvider = Provider;
+        await Task.Yield();
+        _savedState = await ApiKeyService
+            .GetAsync(Provider)
+            .Apply(key => _savedApiKey = _apiKeyInput = key.Value)
+            .ApplyError(_ => _savedApiKey = _apiKeyInput = string.Empty)
+            .Match(CredentialState.Saved, CredentialState.Idle);
+        _state = _savedState;
+        await ReportAsync();
+    }
+
+    private async Task TestAsync()
+    {
+        _state = CredentialState.Testing;
+        await ReportAsync();
+
+        _state = await ApiKeyService
+            .TestAsync(Provider, _apiKeyInput)
+            .Apply(key => _validatedKey = key)
+            .ApplyError(_ => _validatedKey = null)
+            .Match(CredentialState.Success, CredentialState.Failed);
+        await ReportAsync();
+    }
+
+    private async Task SaveAsync()
+    {
+        _state = CredentialState.Saving;
+        await ReportAsync();
+
+        await ApiKeyService.StoreAsync(_validatedKey!);
+        _savedApiKey = _apiKeyInput;
+        _savedState = CredentialState.Saved;
+
+        _state = CredentialState.Saved;
+        await ReportAsync();
+        await Changed.InvokeAsync();
+    }
+
+    private async Task DeleteAsync()
+    {
+        await ApiKeyService.ClearAsync(Provider);
+        _savedApiKey = string.Empty;
+        _apiKeyInput = string.Empty;
+        _savedState = CredentialState.Idle;
+        _state = CredentialState.Idle;
+        await ReportAsync();
+        await Changed.InvokeAsync();
+    }
+
+    private async Task CancelAsync()
+    {
+        _apiKeyInput = _savedApiKey;
+        _state = _savedState;
+        await ReportAsync();
+    }
+
+    private Task ReportAsync() => StateChanged.InvokeAsync(new ApiKeyFieldState(_state, string.IsNullOrWhiteSpace(_apiKeyInput)));
+}

@@ -1,13 +1,11 @@
-@using Contracts.Auth
 @using UI.Shared.Services.Branding
-@inject IApiKeyService ApiKeyService
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
 <ProviderRow Key="@Provider.Remote" Brand="Branding" Open="Open" OpenChanged="OpenChanged">
     <Status>
-        @if (_loaded)
+        @if (_field is { } field)
         {
-            <CredentialStatus State="_state" IdleText="@(string.IsNullOrWhiteSpace(_apiKeyInput) ? "Not set" : "Not tested")" Required="@(Required && string.IsNullOrWhiteSpace(_apiKeyInput))"/>
+            <CredentialStatus State="field.State" IdleText="@(field.Empty ? "Not set" : "Not tested")" Required="@(Required && field.Empty)"/>
         }
         else
         {
@@ -15,53 +13,23 @@
         }
     </Status>
     <ChildContent>
-        <BbField>
-            <BbFieldLabel>API key</BbFieldLabel>
-            <BbFieldContent>
-                <SensitiveInput @bind-Value="ApiKey" Compact="true" Placeholder="Enter API key" Label="API key" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
-                <BbFieldDescription>@Description</BbFieldDescription>
-            </BbFieldContent>
-        </BbField>
-
-        @if (Uses.Count > 0)
-        {
-            <div class="text-sm text-muted-foreground">
-                <span class="font-medium text-foreground">What it gets you</span>
-                <ul class="mt-1 list-disc pl-5">
-                    @foreach (var use in Uses)
-                    {
-                        <li>@use</li>
-                    }
-                </ul>
-            </div>
-        }
-
-        <CredentialActions State="_state" HasChange="HasChange" OnTest="TestAsync" OnSave="SaveAsync" OnCancel="Cancel">
-            <Remove>
-                <BbAlertDialog>
-                    <BbAlertDialogTrigger>
-                        <HoverButton Preset="HoverButtonPreset.Destructive" Size="ButtonSize.Small" Icon="trash-2" Text="Delete key"/>
-                    </BbAlertDialogTrigger>
-                    <BbAlertDialogContent>
-                        <BbAlertDialogHeader>
-                            <BbAlertDialogTitle>Delete API key?</BbAlertDialogTitle>
-                            <BbAlertDialogDescription>
-                                This will permanently remove the saved API key for @Branding.DisplayName.
-                                You will need to re-enter it to use this provider again.
-                            </BbAlertDialogDescription>
-                        </BbAlertDialogHeader>
-                        <BbAlertDialogFooter>
-                            <BbAlertDialogCancel>
-                                <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                            </BbAlertDialogCancel>
-                            <BbAlertDialogAction>
-                                <HoverButton Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="Delete key" OnClick="DeleteAsync"/>
-                            </BbAlertDialogAction>
-                        </BbAlertDialogFooter>
-                    </BbAlertDialogContent>
-                </BbAlertDialog>
-            </Remove>
-        </CredentialActions>
+        <ApiKeyField Provider="Provider" Owner="@Branding.DisplayName" Description="Description" StateChanged="field => _field = field" Changed="Changed">
+            <BeforeActions>
+                @if (Uses.Count > 0)
+                {
+                    <div class="text-sm text-muted-foreground">
+                        <span class="font-medium text-foreground">What it gets you</span>
+                        <ul class="mt-1 list-disc pl-5">
+                            @foreach (var use in Uses)
+                            {
+                                <li>@use</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </BeforeActions>
+        </ApiKeyField>
+        @Extra
     </ChildContent>
 </ProviderRow>
 
@@ -80,87 +48,9 @@
 
     [Parameter] public EventCallback Changed { get; set; }
 
+    [Parameter] public RenderFragment? Extra { get; set; }
+
     private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider.Remote);
 
-    private string _apiKeyInput = string.Empty;
-    private string _savedApiKey = string.Empty;
-    private IApiKey? _validatedKey;
-    private ApiKeyProvider? _loadedProvider;
-    private bool _loaded;
-    private CredentialState _state = CredentialState.Idle;
-    private CredentialState _savedState = CredentialState.Idle;
-
-    private bool HasChange => !string.IsNullOrWhiteSpace(_apiKeyInput) && _apiKeyInput != _savedApiKey;
-
-    private string ApiKey
-    {
-        get => _apiKeyInput;
-        set
-        {
-            if (_apiKeyInput == value)
-            {
-                return;
-            }
-
-            _apiKeyInput = value;
-            _state = value == _savedApiKey ? _savedState : CredentialState.Idle;
-        }
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        if (_loadedProvider == Provider)
-        {
-            return;
-        }
-
-        _loadedProvider = Provider;
-        await Task.Yield();
-        _savedState = await ApiKeyService
-            .GetAsync(Provider)
-            .Apply(key => _savedApiKey = _apiKeyInput = key.Value)
-            .ApplyError(_ => _savedApiKey = _apiKeyInput = string.Empty)
-            .Match(CredentialState.Saved, CredentialState.Idle);
-        _state = _savedState;
-        _loaded = true;
-    }
-
-    private async Task TestAsync()
-    {
-        _state = CredentialState.Testing;
-
-        _state = await ApiKeyService
-            .TestAsync(Provider, _apiKeyInput)
-            .Apply(key => _validatedKey = key)
-            .ApplyError(_ => _validatedKey = null)
-            .Match(CredentialState.Success, CredentialState.Failed);
-    }
-
-    private async Task SaveAsync()
-    {
-        _state = CredentialState.Saving;
-
-        await ApiKeyService.StoreAsync(_validatedKey!);
-        _savedApiKey = _apiKeyInput;
-        _savedState = CredentialState.Saved;
-
-        _state = CredentialState.Saved;
-        await Changed.InvokeAsync();
-    }
-
-    private async Task DeleteAsync()
-    {
-        await ApiKeyService.ClearAsync(Provider);
-        _savedApiKey = string.Empty;
-        _apiKeyInput = string.Empty;
-        _savedState = CredentialState.Idle;
-        _state = CredentialState.Idle;
-        await Changed.InvokeAsync();
-    }
-
-    private void Cancel()
-    {
-        _apiKeyInput = _savedApiKey;
-        _state = _savedState;
-    }
+    private ApiKeyFieldState? _field;
 }

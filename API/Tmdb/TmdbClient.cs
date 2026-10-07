@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using API.Http;
 using Contracts.Auth;
 using Contracts.Identity;
@@ -24,5 +25,13 @@ internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyService
 		request.StampTriggeredBy(currentUser);
 		request.Content = content;
 		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.ReportRejected(ApiKeyProvider.Tmdb));
+	}
+
+	public async Task<HttpResponseMessage> SendWithTokenAsync(HttpMethod method, string url, IApiKey token, CancellationToken cancellationToken = default)
+	{
+		using var request = new HttpRequestMessage(method, url);
+		request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
+		request.StampTriggeredBy(currentUser);
+		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.ReportRejected(ApiKeyProvider.TmdbReadToken));
 	}
 }
