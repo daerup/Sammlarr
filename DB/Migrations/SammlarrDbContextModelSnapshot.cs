@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261006211715_AnimeIdsByShowIds";
+    public override string LastMigrationId => "20261006230147_ProviderUsage";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -909,6 +909,86 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.ToTable("RatingDefaults");
             });
 
+        modelBuilder.Entity("DB.Data.Usage.RemoteAttemptBucketRow", b =>
+            {
+                b.Property<long>("AttemptId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int>("UpToMs")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long>("Count")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("AttemptId", "UpToMs");
+
+                b.ToTable("RemoteAttemptBuckets");
+            });
+
+        modelBuilder.Entity("DB.Data.Usage.RemoteAttemptRow", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER");
+
+                b.Property<long>("Attempts")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Cause")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid?>("FeedId")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("Hour")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Service")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("Hour");
+
+                b.ToTable("RemoteAttempts");
+            });
+
+        modelBuilder.Entity("DB.Data.Usage.RemoteUsageRow", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER");
+
+                b.Property<long>("Calls")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Cause")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid?>("FeedId")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("Hour")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Outcome")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Service")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("Hour");
+
+                b.ToTable("RemoteUsage");
+            });
+
         modelBuilder.Entity("DB.Data.Wantlist.Outbox.WantlistOutboxRow", b =>
             {
                 b.Property<Guid>("UserId")
@@ -1466,6 +1546,15 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired();
             });
 
+        modelBuilder.Entity("DB.Data.Usage.RemoteAttemptBucketRow", b =>
+            {
+                b.HasOne("DB.Data.Usage.RemoteAttemptRow", null)
+                    .WithMany("Buckets")
+                    .HasForeignKey("AttemptId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
         modelBuilder.Entity("DB.Data.Wantlist.Outbox.WantlistOutboxRow", b =>
             {
                 b.HasOne("DB.Data.Media.MediaRow", "Media")
@@ -1552,6 +1641,11 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Details");
 
                 b.Navigation("ExternalIds");
+            });
+
+        modelBuilder.Entity("DB.Data.Usage.RemoteAttemptRow", b =>
+            {
+                b.Navigation("Buckets");
             });
 
         modelBuilder.Entity("TickerQ.Utilities.Entities.TimeTickerEntity", b =>

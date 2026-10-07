@@ -13,6 +13,7 @@ using DB.Data.Jobs;
 using DB.Data.Media;
 using DB.Data.Notifications;
 using DB.Data.Ratings;
+using DB.Data.Usage;
 using DB.Data.Wantlist;
 using DB.Data.Wantlist.Outbox;
 using Microsoft.EntityFrameworkCore;
@@ -89,6 +90,8 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<ImdbRatingRow> ImdbRatings => Set<ImdbRatingRow>();
 	public DbSet<DatasetLoadRow> DatasetLoads => Set<DatasetLoadRow>();
 	public DbSet<AnimeIdRow> AnimeIds => Set<AnimeIdRow>();
+	public DbSet<RemoteUsageRow> RemoteUsage => Set<RemoteUsageRow>();
+	public DbSet<RemoteAttemptRow> RemoteAttempts => Set<RemoteAttemptRow>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{

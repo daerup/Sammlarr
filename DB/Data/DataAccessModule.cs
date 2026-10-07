@@ -10,6 +10,7 @@ using DB.Data.Media;
 using DB.Data.Notifications;
 using DB.Data.Ratings;
 using DB.Data.Scheduler;
+using DB.Data.Usage;
 using DB.Data.Wantlist;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -32,6 +33,7 @@ internal class DataAccessModule : IServiceModule
 		services.AddModule<NotificationDataModule>();
 		services.AddModule<RatingsDataModule>();
 		services.AddModule<SchedulerDataModule>();
+		services.AddModule<UsageDataModule>();
 		services.AddModule<WantlistModule>();
 	}
 }
