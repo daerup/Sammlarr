@@ -15,6 +15,7 @@ internal class AniListModule : IServiceModule
 			.Client<AniListClient>(Configure)
 			.Feed<AniListFeedService>(FeedProvider.AniList)
 			.Enricher<AniListEnricher>();
+		services.AddScoped<AniListTitles>();
 	}
 
 	private static void Configure(IServiceProvider sp, HttpClient client)

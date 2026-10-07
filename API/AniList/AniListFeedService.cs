@@ -1,9 +1,10 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
-using System.Threading.Channels;
 using API.AniList.Types;
 using API.Anime;
+using API.Feeds;
+using Contracts;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Media.Conversions;
@@ -12,26 +13,28 @@ using Domain.Media;
 
 namespace API.AniList;
 
-internal sealed partial class AniListFeedService(AniListClient client, IMediaService media, LaterSeasons seasons) : IFeedProvider
+internal sealed partial class AniListFeedService(AniListClient client, IMediaService media, LaterSeasons seasons, AniListTitles titles, IDateTimeProvider clock)
+	: IFeedProvider
 {
 	private const string Query =
 		$"query ($user: String, $status: MediaListStatus) {{ MediaListCollection(userName: $user, type: ANIME, status: $status) {{ lists {{ entries {{ media {{ {AniListMedia.Fields} }} }} }} }} }}";
 
+	private const string SearchQuery =
+		"query ($page: Int = 1, $type: MediaType, $isAdult: Boolean = false, $search: String, $format: [MediaFormat], $status: MediaStatus, $countryOfOrigin: CountryCode, $source: MediaSource, $season: MediaSeason, $seasonYear: Int, $year: String, $yearLesser: FuzzyDateInt, $yearGreater: FuzzyDateInt, $genres: [String], $excludedGenres: [String], $tags: [String], $excludedTags: [String], $minimumTagRank: Int, $sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]) "
+		+ $"{{ Page(page: $page, perPage: 50) {{ pageInfo {{ hasNextPage }} media(type: $type, season: $season, format_in: $format, status: $status, countryOfOrigin: $countryOfOrigin, source: $source, search: $search, seasonYear: $seasonYear, startDate_like: $year, startDate_lesser: $yearLesser, startDate_greater: $yearGreater, genre_in: $genres, genre_not_in: $excludedGenres, tag_in: $tags, tag_not_in: $excludedTags, minimumTagRank: $minimumTagRank, sort: $sort, isAdult: $isAdult) {{ {AniListMedia.Fields} }} }} }}";
+
+	private const string GenresQuery = "query { GenreCollection }";
+
 	private static readonly string[] Statuses = ["current", "planning", "completed", "dropped", "paused", "repeating"];
 
 	private static readonly Error NotAList = Error.From(
-		"Paste an AniList username, username/status (current, planning, completed, dropped, paused or repeating), or the list's anilist.co link."
+		"Paste an AniList username, username/status (current, planning, completed, dropped, paused or repeating), the list's anilist.co link, or an anilist.co/search/anime link."
 	);
 
 	public Task<Result<string>> NormalizeAsync(string input, CancellationToken cancellationToken = default)
 	{
-		var match = ListPattern().Match(input.Trim());
-		var status = match.Groups["status"].Value.ToLowerInvariant();
-		var normalized = Optional.When(
-			match.Success && (status.Length == 0 || Statuses.Contains(status)),
-			() => status.Length == 0 ? match.Groups["user"].Value : $"{match.Groups["user"].Value}/{status}"
-		);
-		return Task.FromResult(normalized.ToResult(NotAList));
+		var userShaped = ListPattern().IsMatch(input.Trim());
+		return Task.FromResult(UserList(input).Match(list => Success.Of(list), () => Page(input).MapError(error => userShaped ? NotAList : error)));
 	}
 
 	public IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
@@ -39,7 +42,35 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 		return media.IdentifyWithDetailsAsync(seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken), cancellationToken);
 	}
 
+	private static Optional<string> UserList(string input)
+	{
+		var match = ListPattern().Match(input.Trim());
+		var status = match.Groups["status"].Value.ToLowerInvariant();
+		return Optional.When(
+			match.Success && (status.Length == 0 || Statuses.Contains(status)),
+			() => status.Length == 0 ? match.Groups["user"].Value : $"{match.Groups["user"].Value}/{status}"
+		);
+	}
+
+	private static Result<string> Page(string input)
+	{
+		return SiteLink.Parse(input, "anilist.co").ToResult(NotAList).Map(AniListPages.Of).Map(page => page.Stored());
+	}
+
 	private async IAsyncEnumerable<IdentifyRequest> RequestsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
+	{
+		var read = identifier.StartsWith(AniListPages.Search, StringComparison.Ordinal)
+			? SearchAsync(identifier, cancellationToken).Take(FeedPages.Titles)
+			: ListAsync(identifier, cancellationToken);
+		await foreach (var found in read.WithCancellation(cancellationToken))
+		{
+			titles.Remember(found);
+			var type = AniListMedia.TypeOf(found);
+			yield return new IdentifyRequest([.. AniListMedia.Ids(found, type)], AniListMedia.Hints(found, type));
+		}
+	}
+
+	private async IAsyncEnumerable<AniListTypes.Media> ListAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var parts = identifier.Split('/');
 		var variables = new JsonObject { ["user"] = parts[0] };
@@ -48,9 +79,53 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 		var collection = answer.GetOrThrow(error => Failure(identifier, error));
 		foreach (var found in (collection.Collection?.Lists ?? []).SelectMany(list => list.Entries ?? []).Select(entry => entry.Media).OfType<AniListTypes.Media>())
 		{
-			var type = AniListMedia.TypeOf(found);
-			yield return new IdentifyRequest([.. AniListMedia.Ids(found, type)], AniListMedia.Hints(found, type));
+			yield return found;
 		}
+	}
+
+	private async IAsyncEnumerable<AniListTypes.Media> SearchAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
+	{
+		var search = SiteLink
+			.Parse(identifier, "anilist.co")
+			.ToResult(NotAList)
+			.Map(AniListPages.Of)
+			.GetOrThrow(error => new InvalidOperationException(error.Reason));
+		var genres = AniListPages.NeedsGenres(search) ? await GenresAsync(cancellationToken) : new HashSet<string>();
+		var variables = AniListPages
+			.Variables(search, genres, DateOnly.FromDateTime(clock.Now.UtcDateTime))
+			.GetOrThrow(error => new InvalidOperationException(error.Reason));
+		var page = 1;
+		var more = true;
+		while (more)
+		{
+			var asked = variables.DeepClone().AsObject();
+			asked["page"] = page;
+			var answer = await client.AskAsync<AniListTypes.PageData>(SearchQuery, asked, cancellationToken);
+			var found = answer.GetOrThrow(Refused).Page ?? throw new InvalidDataException("AniList answered a search without a page.");
+			foreach (var title in found.Media ?? [])
+			{
+				yield return title;
+			}
+
+			more = found.PageInfo?.HasNextPage ?? false;
+			page++;
+		}
+	}
+
+	private async Task<IReadOnlySet<string>> GenresAsync(CancellationToken cancellationToken)
+	{
+		var answer = await client.AskAsync<AniListTypes.GenreData>(GenresQuery, new JsonObject(), cancellationToken);
+		return answer.GetOrThrow(Refused).Genres?.ToHashSet(StringComparer.Ordinal) ?? [];
+	}
+
+	private static Exception Refused(Error error)
+	{
+		return error
+			.CausedBy<AniListAnswerException>()
+			.Match<AniListAnswerException, Exception>(
+				problem => new InvalidOperationException($"AniList refused the search: {problem.Message}"),
+				() => error.Exception.GetValueOr(() => new InvalidOperationException(error.Reason))
+			);
 	}
 
 	private static Exception Failure(string identifier, Error error)
