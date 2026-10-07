@@ -13,22 +13,20 @@
         }
     </Status>
     <ChildContent>
-        <ApiKeyField Provider="Provider" Owner="@Branding.DisplayName" Description="Description" StateChanged="field => _field = field" Changed="Changed">
-            <BeforeActions>
-                @if (Uses.Count > 0)
-                {
-                    <div class="text-sm text-muted-foreground">
-                        <span class="font-medium text-foreground">What it gets you</span>
-                        <ul class="mt-1 list-disc pl-5">
-                            @foreach (var use in Uses)
-                            {
-                                <li>@use</li>
-                            }
-                        </ul>
-                    </div>
-                }
-            </BeforeActions>
-        </ApiKeyField>
+        <ApiKeyField Provider="Provider" Owner="@Branding.DisplayName" Description="Description" StateChanged="field => _field = field" Changed="Changed"/>
+        @Setup
+        @if (Uses.Count > 0)
+        {
+            <div class="text-sm text-muted-foreground" data-uses>
+                <span class="font-medium text-foreground">What it gets you</span>
+                <ul class="mt-1 list-disc pl-5">
+                    @foreach (var use in Uses)
+                    {
+                        <li>@use</li>
+                    }
+                </ul>
+            </div>
+        }
         @Extra
     </ChildContent>
 </ProviderRow>
@@ -47,6 +45,8 @@
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
 
     [Parameter] public EventCallback Changed { get; set; }
+
+    [Parameter] public RenderFragment? Setup { get; set; }
 
     [Parameter] public RenderFragment? Extra { get; set; }
 

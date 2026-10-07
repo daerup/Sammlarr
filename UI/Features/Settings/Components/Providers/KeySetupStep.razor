@@ -1,0 +1,10 @@
+<li class="flex gap-2.5">
+    <span class="mt-px flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-foreground">@Number</span>
+    <div class="min-w-0 flex-1">@ChildContent</div>
+</li>
+
+@code {
+    [Parameter] [EditorRequired] public required int Number { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
+}

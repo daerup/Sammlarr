@@ -1,0 +1,24 @@
+<div class="overflow-hidden rounded-md border bg-foreground/3" data-key-setup>
+    <BbCollapsible>
+        <BbCollapsibleTrigger AsChild="false"
+                              Class="group flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm font-medium hover:bg-foreground/5 transition-colors">
+            <LucideIcon Name="chevron-right" Size="15" Class="text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
+            <LucideIcon Name="list-checks" Size="15"/>
+            @Title
+            <span class="ml-auto text-xs font-normal text-muted-foreground">@Time</span>
+        </BbCollapsibleTrigger>
+        <BbCollapsibleContent>
+            <ol class="flex flex-col gap-2.5 border-t px-3.5 py-3 text-sm text-muted-foreground">
+                @ChildContent
+            </ol>
+        </BbCollapsibleContent>
+    </BbCollapsible>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required string Title { get; set; }
+
+    [Parameter] [EditorRequired] public required string Time { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
+}

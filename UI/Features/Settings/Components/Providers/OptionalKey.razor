@@ -1,0 +1,57 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService MediaProviderBrandingService
+
+<div class="border-t pt-3.5" data-optional-key>
+    <BbCollapsible>
+        <BbCollapsibleTrigger AsChild="false" Class="group flex w-full flex-wrap items-center gap-2 text-left text-sm">
+            <LucideIcon Name="chevron-right" Size="15" Class="text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
+            <span class="font-semibold">@Title</span>
+            <span class="rounded-full bg-muted px-2 py-px text-[11px] font-medium text-muted-foreground">optional</span>
+            <span class="text-xs text-muted-foreground">@Hint</span>
+            <span class="ml-auto">
+                @if (_field is { } field)
+                {
+                    <CredentialStatus State="field.State" IdleText="@(field.Empty ? "Not set" : "Not tested")"/>
+                }
+                else
+                {
+                    <BbSkeleton Class="h-6 w-24 rounded-full"/>
+                }
+            </span>
+        </BbCollapsibleTrigger>
+        <BbCollapsibleContent>
+            <div class="flex flex-col gap-4 pl-[23px] pt-3">
+                <ApiKeyField Provider="Provider"
+                             Owner="@MediaProviderBrandingService.GetBrandingInfo(Provider.Remote).DisplayName"
+                             Label="@Title"
+                             HideLabel="true"
+                             Noun="@Noun"
+                             DeleteText="@DeleteText"
+                             Uses="@Uses"
+                             Description="Description"
+                             StateChanged="field => _field = field"
+                             Changed="Changed"/>
+            </div>
+        </BbCollapsibleContent>
+    </BbCollapsible>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required ApiKeyProvider Provider { get; set; }
+
+    [Parameter] [EditorRequired] public required string Title { get; set; }
+
+    [Parameter] [EditorRequired] public required string Hint { get; set; }
+
+    [Parameter] [EditorRequired] public required string Noun { get; set; }
+
+    [Parameter] [EditorRequired] public required string DeleteText { get; set; }
+
+    [Parameter] [EditorRequired] public required string Uses { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment Description { get; set; }
+
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private ApiKeyFieldState? _field;
+}
