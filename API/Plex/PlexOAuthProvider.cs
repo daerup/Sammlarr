@@ -1,13 +1,15 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
+using API.Http;
 using API.Plex.Types;
 using Contracts.Auth;
+using Domain.Auth;
 using Microsoft.AspNetCore.WebUtilities;
 using Shared.Options;
 
 namespace API.Plex;
 
-internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options, PlexUrls urls) : IOAuthProvider
+internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options, PlexUrls urls) : IOAuthProvider, ICredentialValidator
 {
 	public async Task<Result<string>> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default)
 	{
@@ -68,11 +70,15 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 		return await FetchAccountAsync(authToken, clientId, pin.ExpiresAt, cancellationToken);
 	}
 
+	public async Task<AccessCheck> CheckAsync(Guid clientId, string accessToken, CancellationToken cancellationToken = default)
+	{
+		using var request = UserRequest(accessToken, clientId);
+		return await httpClientFactory.CreateClient(PlexClient.Unauthenticated).CheckAccessAsync(request, cancellationToken);
+	}
+
 	private async Task<Result<ExternalLogin>> FetchAccountAsync(string accessToken, Guid clientId, DateTimeOffset expiresAt, CancellationToken cancellationToken)
 	{
-		using var request = new HttpRequestMessage(HttpMethod.Get, urls.User);
-		request.Headers.Add("X-Plex-Token", accessToken);
-		request.Headers.AddClientId(clientId);
+		using var request = UserRequest(accessToken, clientId);
 		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
@@ -94,6 +100,14 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 		return Success.Of(
 			new ExternalLogin(user.Uuid ?? user.Username, displayName, user.Thumb ?? string.Empty, new OAuthTokenGrant(accessToken, expiresAt, clientId))
 		);
+	}
+
+	private HttpRequestMessage UserRequest(string accessToken, Guid clientId)
+	{
+		var request = new HttpRequestMessage(HttpMethod.Get, urls.User);
+		request.Headers.Add("X-Plex-Token", accessToken);
+		request.Headers.AddClientId(clientId);
+		return request;
 	}
 }
 

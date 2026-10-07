@@ -83,10 +83,10 @@ internal sealed class RemoteRegistration<TOptions>(IServiceCollection services, 
 		return this;
 	}
 
-	public RemoteRegistration<TOptions> SignIn<TSignIn>(AuthProvider signIn)
-		where TSignIn : class, IOAuthProvider
+	public RemoteRegistration<TOptions> Credential<TSignIn>(AuthProvider signIn)
+		where TSignIn : class, IOAuthProvider, ICredentialValidator
 	{
-		_roles.SignIn<TSignIn>(signIn);
+		_roles.Credential<TSignIn>(signIn);
 		return this;
 	}
 
@@ -94,14 +94,6 @@ internal sealed class RemoteRegistration<TOptions>(IServiceCollection services, 
 		where TValidator : class, IApiKeyValidator
 	{
 		_roles.ApiKey<TValidator>(slot);
-		return this;
-	}
-
-	public RemoteRegistration<TOptions> Credential<TValidator>(AuthProvider signIn)
-		where TValidator : class, ICredentialValidator
-	{
-		services.TryAddScoped<TValidator>();
-		services.AddScoped(provider => new Keyed<AuthProvider, ICredentialValidator>(signIn, provider.GetRequiredService<TValidator>()));
 		return this;
 	}
 

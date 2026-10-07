@@ -190,7 +190,8 @@ are facts of its rating type, read through `source.Card`.
 
 * *A new service* is a `RemoteService` member with its `Access` and `OwnIds` arms and its brand, an options record and its
   appsettings section, and a module under `API/<Service>` that registers everything through `ForRemote`; a key gets a slot in
-  `ApiKeyProvider` and a check through `ApiKey<T>`, and a keyless service is `Open`, always connected and never paused.
+  `ApiKeyProvider` and a check through `ApiKey<T>`, a sign-in an `AuthProvider` member and one class through `Credential<T>`
+  that both signs people in and checks their stored token, and a keyless service is `Open`, always connected and never paused.
 * *A new id source* is a `MediaProvider` member with its id type, its arm in the stored-id conversion, its brand and its page
   linker; a site that owns ids and is called is both.
 * *A new rating source* is a `RatingSource` member with `[SuppliedBy]`, a rating type behind `IOwnedRating<TSelf>` and its

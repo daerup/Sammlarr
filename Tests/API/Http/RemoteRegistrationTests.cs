@@ -1,9 +1,11 @@
 using API.Http;
+using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Media.Search;
+using Domain.Auth;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
@@ -70,6 +72,22 @@ public class RemoteRegistrationTests
 	}
 
 	[Test]
+	public async Task Credential_SignsInAndChecksTheCredentialWithOneInstanceAndRecordsWhoServesIt()
+	{
+		var services = new ServiceCollection();
+
+		services.ForRemote<PlexOptions>(RemoteService.Plex).Credential<Both>(AuthProvider.Plex);
+
+		await using var provider = services.BuildServiceProvider();
+		using var scope = provider.CreateScope();
+		object signIn = scope.ServiceProvider.GetRequiredKeyedService<IOAuthProvider>(AuthProvider.Plex);
+		var validator = scope.ServiceProvider.GetServices<Keyed<AuthProvider, ICredentialValidator>>().Single();
+		await Assert.That(validator.Key).IsEqualTo(AuthProvider.Plex);
+		await Assert.That(validator.Capability).IsSameReferenceAs(signIn);
+		await Assert.That(Singletons<Registered>(services)).IsEquivalentTo([new Registered(RemoteService.Plex, AuthProvider.Plex, AuthProvider.Plex.Service)]);
+	}
+
+	[Test]
 	public async Task ForService_RecordsTheCompositeAsWhoServesTheRole()
 	{
 		var services = new ServiceCollection();
@@ -91,7 +109,7 @@ public class RemoteRegistrationTests
 		public HttpClient Client { get; } = client;
 	}
 
-	private sealed class Both : IExternalIdConverter, IDetailsEnricher, IMediaSearchProvider, IFeedProvider
+	private sealed class Both : IExternalIdConverter, IDetailsEnricher, IMediaSearchProvider, IFeedProvider, IOAuthProvider, ICredentialValidator
 	{
 		public IReadOnlyList<IdLookup> Lookups => [];
 
@@ -118,5 +136,13 @@ public class RemoteRegistrationTests
 
 		public IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default) =>
 			AsyncEnumerable.Empty<MediaMatchResult>();
+
+		public Task<Result<string>> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default) =>
+			Task.FromResult<Result<string>>(Error.From("none"));
+
+		public Task<Result<ExternalLogin>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default) =>
+			Task.FromResult<Result<ExternalLogin>>(Error.From("none"));
+
+		public Task<AccessCheck> CheckAsync(Guid clientId, string accessToken, CancellationToken cancellationToken = default) => Task.FromResult(AccessCheck.Valid);
 	}
 }

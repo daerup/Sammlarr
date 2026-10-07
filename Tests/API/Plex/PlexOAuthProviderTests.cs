@@ -1,5 +1,6 @@
 using System.Net;
 using API.Plex;
+using Domain.Auth;
 using Shared.Options;
 using TestInfrastructure;
 using TUnit.Mocks.Http;
@@ -31,6 +32,23 @@ public class PlexOAuthProviderTests
 		var error = await Assert.That(await Testee(plex).BeginLoginAsync(Callback)).IsError();
 
 		await Assert.That(error!.Reason).Contains("Plex could not start the sign-in");
+	}
+
+	[Test]
+	public async Task CheckAsync_ForATokenPlexAccepts_IsValidAndSendsAToken()
+	{
+		var plex = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
+
+		await Assert.That(await Testee(plex).CheckAsync(Guid.NewGuid(), "plex-token")).IsEqualTo(AccessCheck.Valid);
+		plex.Verify(request => request.HasHeader("X-Plex-Token"), Times.Once);
+	}
+
+	[Test]
+	public async Task CheckAsync_ForATokenPlexRefuses_IsRejected()
+	{
+		var plex = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.Unauthorized);
+
+		await Assert.That(await Testee(plex).CheckAsync(Guid.NewGuid(), "plex-token")).IsEqualTo(AccessCheck.Rejected);
 	}
 
 	private static PlexOAuthProvider Testee(MockHttpHandler plex)
