@@ -43,10 +43,15 @@ internal sealed class CapacityHandler(RemoteService remote, RemoteCapacity capac
 	protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 	{
 		var response = await base.SendAsync(request, cancellationToken);
-		if (response.StatusCode is HttpStatusCode.TooManyRequests)
+		if (response.StatusCode is HttpStatusCode.TooManyRequests && !SpentItsOwnQuota(response))
 		{
 			capacity.Block(remote, response.Headers.RetryAfter);
 		}
 		return response;
+	}
+
+	private bool SpentItsOwnQuota(HttpResponseMessage response)
+	{
+		return remote.Access is UserKey && response.Headers.TryGetValues("x-ratelimit-remaining", out var left) && left.Contains("0");
 	}
 }

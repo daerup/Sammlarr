@@ -96,11 +96,33 @@ public class RemoteCapacityTests
 		using var third = await waiting;
 	}
 
-	private async Task SendAsync(HttpResponseMessage response)
+	[Test]
+	public async Task Of_AfterAKeysDailyQuotaIsSpent_StaysOpenForEveryOtherKey()
+	{
+		var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
+		response.Headers.Add("x-ratelimit-remaining", "0");
+
+		await SendAsync(response, RemoteService.Mdblist);
+
+		await Assert.That(Testee.Of(RemoteService.Mdblist).IsOpen(Now)).IsTrue();
+	}
+
+	[Test]
+	public async Task Of_AfterAQuotaAnswerFromAKeylessService_IsBlocked()
+	{
+		var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
+		response.Headers.Add("x-ratelimit-remaining", "0");
+
+		await SendAsync(response, RemoteService.Wikidata);
+
+		await Assert.That(Testee.Of(RemoteService.Wikidata).IsOpen(Now)).IsFalse();
+	}
+
+	private async Task SendAsync(HttpResponseMessage response, RemoteService remote = RemoteService.Tmdb)
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWith(response);
-		using var invoker = new HttpMessageInvoker(new CapacityHandler(RemoteService.Tmdb, Testee) { InnerHandler = handler });
+		using var invoker = new HttpMessageInvoker(new CapacityHandler(remote, Testee) { InnerHandler = handler });
 		await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https://api.themoviedb.org/3/movie/550"), CancellationToken.None);
 	}
 }
