@@ -390,5 +390,18 @@ rather than the wrapper, the other masks `[Sensitive]` members and those `Sensit
 in-memory ring buffer behind the admin `/diagnostics/export` zip, and OTLP when an endpoint is
 present. Tracing is OpenTelemetry over the `Sammlarr` activity source; services opt in via
 `AddTracedScoped`/`AddTracedKeyedScoped`, a proxy that spans each method call. OTLP export turns on
-only when Aspire injects an endpoint; otherwise console plus local errored-trace logging. Logs and
-traces only, no metrics.
+only when Aspire injects an endpoint; otherwise console plus local errored-trace logging.
+
+Metrics count every call Sammlarr makes to a service (ADR 0014). Nothing is counted by hand: Polly's standard resilience
+handler measures each call (`resilience.polly.pipeline.duration`) and HttpClient each attempt on the wire
+(`http.client.request.duration`). A client built with `AddRemoteHttp` stamps the request with its `RemoteService` and
+the current cause outside the retry (`UsageStampHandler`), and tags every attempt inside it (`UsageTagsHandler`,
+through `HttpMetricsEnrichmentContext`, since a retry sends a clone that keeps the stamp but not the callback); a
+`MeteringEnricher` adds the call's outcome: `Answered`, `AnsweredAfter429`, `GaveUpOn429`, `Failed` or `Cancelled`.
+A call the open circuit refuses is not counted. The cause (`FeedRun` with the feed's id, `WantlistSync`, `Dataset`,
+`Search`, `Browse`, `ShowingTitles`, `KeyTest`, else `Other`) is an ambient mark set by `UsageCauses.Mark` at each
+entry point; the outermost mark wins, so titles shown inside a feed run count for the run. A
+`PeriodicExportingMetricReader` hands `UsageExporter` each minute's deltas, which it folds into hourly rows
+(`RemoteUsage`, `RemoteAttempts` with their duration buckets) kept 90 days; with OTLP set, the same meters also go to
+the dashboard. The cost rules: tags stay bounded (service, cause, outcome, feed id; never a title, a URL, a user or a
+run id), delta temporality, the default buckets.
