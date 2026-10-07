@@ -66,7 +66,7 @@ public class AccountsAndKeysTests : BunitContext
 	}
 
 	[Test]
-	public async Task MalRow_AloneCarriesSetupSteps()
+	public async Task MalAndTraktRows_AloneCarrySetupSteps()
 	{
 		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));
 
@@ -74,7 +74,7 @@ public class AccountsAndKeysTests : BunitContext
 
 		await Assert
 			.That(rows.Where(row => row.ContainsKey(nameof(ApiKeyRow.Setup))).Select(row => row.Get(key => key.Provider)))
-			.IsEquivalentTo([ApiKeyProvider.Mal]);
+			.IsEquivalentTo([ApiKeyProvider.Mal, ApiKeyProvider.Trakt]);
 	}
 
 	[Test]
@@ -93,12 +93,12 @@ public class AccountsAndKeysTests : BunitContext
 	}
 
 	[Test]
-	public async Task Rows_OfferAKeyForTmdbMdblistAndMyAnimeList()
+	public async Task Rows_OfferAKeyForTmdbMdblistMyAnimeListAndTrakt()
 	{
 		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));
 
 		var keys = cut.FindComponents<Stub<ApiKeyRow>>().Select(row => row.Instance.Parameters.Get(key => key.Provider));
 
-		await Assert.That(keys).IsEquivalentTo([ApiKeyProvider.Tmdb, ApiKeyProvider.Mdblist, ApiKeyProvider.Mal]);
+		await Assert.That(keys).IsEquivalentTo([ApiKeyProvider.Tmdb, ApiKeyProvider.Mdblist, ApiKeyProvider.Mal, ApiKeyProvider.Trakt]);
 	}
 }

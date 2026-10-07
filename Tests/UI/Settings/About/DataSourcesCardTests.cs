@@ -36,6 +36,7 @@ public class DataSourcesCardTests : BunitContext
 					"Open Anime lists",
 					"Open AniList",
 					"Open MyAnimeList",
+					"Open Trakt",
 				],
 				CollectionOrdering.Matching
 			);
