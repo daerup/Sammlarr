@@ -41,7 +41,7 @@ internal static class SelfHostedSetup
 	internal static async Task AddTmdbKeyAsync(IPage page)
 	{
 		await Expect(page.Text("Add a TMDB key to continue")).ToBeVisibleAsync();
-		var row = page.Locator("#provider-row-tmdb");
+		var row = page.Locator("#provider-row-tmdb [data-slot=tmdb]");
 		await row.Locator("input[placeholder='Enter API key']").EnterAsync(TmdbKey);
 		await row.Button("Test").ClickAsync();
 		await row.Button("Save").ClickAsync();

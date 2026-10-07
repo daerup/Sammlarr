@@ -11,7 +11,13 @@ namespace API.Tests.TMDB;
 
 public class TmdbClientTests
 {
-	private static TmdbOptions CreateOptions() => new() { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p" };
+	private static TmdbOptions CreateOptions() =>
+		new()
+		{
+			BaseUrl = "https://api.themoviedb.org/3",
+			V4BaseUrl = "https://api.themoviedb.org/4",
+			ImageBaseUrl = "https://image.tmdb.org/t/p",
+		};
 
 	[Test]
 	public async Task SendAsync_AppendsApiKeyQueryParameter()

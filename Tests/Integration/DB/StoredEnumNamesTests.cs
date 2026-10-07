@@ -26,12 +26,12 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 			.IsEquivalentTo(
 				[
 					"AccountLinkKind: Invite, Reset",
-					"ApiKeyProvider: Tmdb, Mdblist",
+					"ApiKeyProvider: Tmdb, Mdblist, TmdbReadToken",
 					"ArrFeedTagSource: ListName, Id",
 					"ArrUserTagSource: Name, Id",
 					"AuthProvider: Plex, Local",
 					"Conclusiveness: Conclusive, StillLoading, NoItems, NoMatches, NoneAdmitted",
-					"FeedProvider: Mdblist",
+					"FeedProvider: Mdblist, Tmdb",
 					"FeedRunItemState: Added, Kept, Removed",
 					"JobKind: FeedRun, WantlistSync",
 					"JobState: Waiting, Queued, Running, Done, Failed, Cancelled",

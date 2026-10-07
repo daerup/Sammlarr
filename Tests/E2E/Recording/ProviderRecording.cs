@@ -21,7 +21,7 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 
 	internal static readonly IReadOnlyList<ProviderRecording> All =
 	[
-		.. Enum.GetValues<ApiKeyProvider>().Select(ForApiKey),
+		.. Enum.GetValues<ApiKeyProvider>().SelectMany(ForApiKey),
 		.. Enum.GetValues<AuthProvider>().SelectMany(ForAuth),
 		Build("wikidata", WikidataOptions.SectionName, "BaseUrl"),
 		Build("tvmaze", TvmazeOptions.SectionName, "BaseUrl"),
@@ -44,11 +44,12 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 		new("sonarr-metadata", string.Empty, "https://skyhook.sonarr.tv") { Host = "skyhook.sonarr.tv" },
 	];
 
-	private static ProviderRecording ForApiKey(ApiKeyProvider provider) =>
+	private static IReadOnlyList<ProviderRecording> ForApiKey(ApiKeyProvider provider) =>
 		provider switch
 		{
-			ApiKeyProvider.Tmdb => Build(Slug(provider), TmdbOptions.SectionName, "BaseUrl"),
-			ApiKeyProvider.Mdblist => Build(Slug(provider), MdblistOptions.SectionName, "BaseUrl"),
+			ApiKeyProvider.Tmdb => [Build(Slug(provider), TmdbOptions.SectionName, "BaseUrl", "V4BaseUrl")],
+			ApiKeyProvider.Mdblist => [Build(Slug(provider), MdblistOptions.SectionName, "BaseUrl")],
+			ApiKeyProvider.TmdbReadToken => [],
 		};
 
 	private static IReadOnlyList<ProviderRecording> ForAuth(AuthProvider provider) =>

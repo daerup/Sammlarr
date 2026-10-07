@@ -28,6 +28,16 @@
                class="underline underline-offset-2 hover:text-foreground transition-colors">themoviedb.org › Settings › API</a>
             (free, takes a minute).
         </Description>
+        <Extra>
+            <ApiKeyField Provider="ApiKeyProvider.TmdbReadToken" Owner="TMDB" Label="Read access token (for v4 lists)" Noun="read access token" DeleteText="Delete token" Uses="lists only TMDB's v4 API serves" Changed="Changed">
+                <Description>
+                    Optional. The API Read Access Token from the same
+                    <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer"
+                       class="underline underline-offset-2 hover:text-foreground transition-colors">themoviedb.org › Settings › API</a>
+                    page, for list feeds only TMDB's v4 API serves. Everything else keeps using the key.
+                </Description>
+            </ApiKeyField>
+        </Extra>
     </ApiKeyRow>
     <ApiKeyRow Provider="ApiKeyProvider.Mdblist"
                Uses="MdblistUses"
@@ -50,6 +60,7 @@
         "Trending titles in Browse",
         "the poster, summary and rating on every title",
         "the ids Radarr and Sonarr need to add a title",
+        "TMDB lists as feeds",
     ];
 
     private static readonly string[] MdblistUses =

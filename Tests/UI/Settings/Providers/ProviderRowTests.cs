@@ -62,7 +62,7 @@ public class ProviderRowTests : BunitContext
 		var cut = RenderRow();
 
 		var roles = cut.FindAll(".provider-role .sr-only").Select(role => role.TextContent.Trim());
-		await Assert.That(roles).IsEquivalentTo(["Search", "Trending"], CollectionOrdering.Matching);
+		await Assert.That(roles).IsEquivalentTo(["Search", "Trending", "Feeds"], CollectionOrdering.Matching);
 		await Assert.That(cut.Markup).DoesNotContain("API key ·");
 	}
 

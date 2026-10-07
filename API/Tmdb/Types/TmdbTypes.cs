@@ -12,6 +12,32 @@ internal static class TmdbTypes
 		return ProviderValues.Date(first) ?? ProviderValues.Date(second);
 	}
 
+	internal static class Lists
+	{
+		public record Item(
+			[property: JsonPropertyName("id")] int Id,
+			[property: JsonPropertyName("media_type")] string? Type,
+			[property: JsonPropertyName("title")] string? Title,
+			[property: JsonPropertyName("name")] string? Name,
+			[property: JsonPropertyName("release_date")] string? ReleaseDate,
+			[property: JsonPropertyName("first_air_date")] string? FirstAirDate
+		)
+		{
+			public string? DisplayTitle => ProviderValues.Text(Title) ?? ProviderValues.Text(Name);
+
+			public DateOnly? Released(MediaType type) => ReleasedOn(type, ReleaseDate, FirstAirDate);
+		}
+
+		public record Page(
+			[property: JsonPropertyName("items")] IReadOnlyList<Item>? Items,
+			[property: JsonPropertyName("results")] IReadOnlyList<Item>? Results,
+			[property: JsonPropertyName("total_pages")] int? TotalPages
+		)
+		{
+			public IReadOnlyList<Item> Entries => Results ?? Items ?? throw new InvalidDataException("TMDB answered a list without its items.");
+		}
+	}
+
 	internal static class Trending
 	{
 		public record Result(

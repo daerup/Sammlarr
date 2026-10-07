@@ -23,9 +23,21 @@ public class RemoteServiceTests
 	}
 
 	[Test]
-	public async Task EveryKeySlot_IsNamedByTheAccessOfItsOwnRemote()
+	public async Task EveryKeySlot_ButTmdbsReadToken_IsNamedByTheAccessOfItsOwnRemote()
 	{
-		await Assert.That(Enum.GetValues<ApiKeyProvider>().Where(slot => slot.Remote.Access is not UserKey(var named) || named != slot)).IsEmpty();
+		await Assert
+			.That(
+				Enum.GetValues<ApiKeyProvider>()
+					.Where(slot => slot is not ApiKeyProvider.TmdbReadToken && (slot.Remote.Access is not UserKey(var named) || named != slot))
+			)
+			.IsEmpty();
+	}
+
+	[Test]
+	public async Task TmdbReadToken_IsAnOptionalTmdbSlotThatNoAccessNames()
+	{
+		await Assert.That(ApiKeyProvider.TmdbReadToken.Remote).IsEqualTo(RemoteService.Tmdb);
+		await Assert.That(Enum.GetValues<RemoteService>().Where(remote => remote.Access is UserKey(ApiKeyProvider.TmdbReadToken))).IsEmpty();
 	}
 
 	[Test]

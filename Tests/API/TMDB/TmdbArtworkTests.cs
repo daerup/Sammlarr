@@ -7,7 +7,15 @@ namespace API.Tests.TMDB;
 
 public class TmdbArtworkTests
 {
-	private static TmdbArtwork Testee => new(new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://images.example.test/t/p" });
+	private static TmdbArtwork Testee =>
+		new(
+			new TmdbOptions
+			{
+				BaseUrl = "https://api.themoviedb.org/3",
+				V4BaseUrl = "https://api.themoviedb.org/4",
+				ImageBaseUrl = "https://images.example.test/t/p",
+			}
+		);
 
 	[Test]
 	public async Task Original_WhenGivenATmdbPath_ComposesItUnderTheConfiguredBase()

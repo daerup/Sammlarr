@@ -12,4 +12,8 @@ internal static class TmdbEndpoints
 	public const string Find = "find/{0}?external_source={1}";
 	public const string Trending = $"trending/all/week?{PageParam}={{0}}";
 	public const string Search = "search/multi?query={0}&include_adult=false";
+
+	public const string List = "list/{0}?page={1}";
+
+	public const string Authentication = "authentication";
 }
