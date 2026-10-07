@@ -137,10 +137,10 @@ hints), which providers' ids its answer may yield, its cost in calls, and for a 
 title hints (`GivesHints`; Wikidata's does not, so no path asks it for hints). The planner turns each into hops; a path
 through a blocked provider waits for it, capped by its `MaxWait`, or gives up.
 
-Enricher:: An `IDetailsEnricher`, keyed by provider, that fills details fields and declares the ids it accepts (TMDB takes its own,
+Enricher:: An `IDetailsEnricher`, stored with its remote service, that fills details fields and declares the ids it accepts (TMDB takes its own,
 TheTVDB's and IMDb's, finding a TMDB id first; Plex takes its own). Every details lookup is an enricher's: Sammlarr asks one open
-enricher at a time, the search setting's provider first, then the one filling the most missing detail fields, then the least busy, then
-`MediaProvider`'s order, until no open enricher can fill what is still missing.
+enricher at a time, the search setting's service first, then the one filling the most missing detail fields, then the least busy, then
+`RemoteService`'s order, until no open enricher can fill what is still missing.
 
 External URL:: An optional second address for Radarr or Sonarr (`ArrInstanceConfig.ExternalUrl`), for when a browser reaches the app
 somewhere other than the URL Sammlarr calls, such as a container name only Sammlarr resolves. Only links a person opens use it
@@ -207,17 +207,22 @@ Blocklist:: Titles excluded from curation so they never enter a list.
 
 === Providers and wiring
 
-Provider:: An external service (TMDB, MDBList, Plex) or an id namespace (IMDb, Rotten Tomatoes, TheTVDB),
-modelled as a `MediaProvider` enum value. Every one knows media by its own ids. A way to sign in is an `AuthProvider`
-(Plex, Sammlarr accounts), not a provider; `AuthProvider.Provider()` names the provider behind it, if any. Radarr and
-Sonarr are apps (`ArrApp`), not providers: Sammlarr holds none of their ids, and `SinkKind.Arr` and `SearchProvider.Arr`
-have no `Provider()`.
+Media provider:: An id namespace: `MediaProvider` (TMDB, IMDb, Rotten Tomatoes, TVDB, Plex, MDBList) names whose ids an
+`IExternalMediaId` holds, and nothing else. Who is called and who is asked are remote services.
 
-Capability:: What a provider can do: `Trending`, `Feed`, `ApiKey`, `Artwork` or
-`Enricher`. Declared per provider and used to generate the provider-subset enums.
+Remote service:: One external service Sammlarr calls, with one rate limit: `RemoteService` (TMDB, Plex, MDBList, Wikidata,
+Radarr, Sonarr). It answers its `Access` and its `OwnIds` (the media provider whose ids it owns, if any), and every client,
+key check, converter and enricher registers through it (`ForRemote`), so it holds one capacity, one wait budget and one
+outage state.
 
-Provider-subset enum:: A generated enum holding only the providers with a given capability,
-such as `FeedProvider` or `ApiKeyProvider`. See <<section-concepts>>.
+Access:: What a remote service needs before a person can use it: `Open` (Wikidata), `UserKey` (an API key in a slot,
+`ApiKeyProvider`: TMDB, MDBList), `UserSignIn` (an `AuthProvider` sign-in: Plex) or `AppInstance` (the install's
+`ArrApp`: Radarr, Sonarr). `IServiceReadiness` reads it to say which remote services are connected.
+
+Service:: What serves a role: a remote service, the Radarr + Sonarr pair (`Arr`) or Sammlarr accounts (`SammlarrAccounts`).
+Each role enum (`FeedProvider`, `TrendingProvider`, `SearchProvider`, `SinkKind`, `AuthProvider`) is written by hand and
+answers its `Service`; a service is ready when every remote service behind it (`Remotes`) is connected, so the pair needs
+both apps and Sammlarr accounts are always ready. The UI names and brands a choice through its service.
 
 Module:: An `IServiceModule`: a layer's or a provider's self-contained DI registration, added
 from `Web`'s `Program.cs` via `AddModule<T>()`.

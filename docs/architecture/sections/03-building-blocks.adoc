@@ -66,7 +66,7 @@ shape and never reference each other. Every project also references the `Shared`
 | UI | Blazor components as a Razor class library: the `Features/*` vertical slices and the `Shared` cross-feature components and services. References only `Contracts`, `Shared` and `Observability`, never an implementation.
 | Web | The Blazor host and composition root. Holds the root components (`App`, `Routes`) and, in `Program.cs`, the single `AddModule<T>()` wiring of every layer, plus the endpoints, health checks and host services. The one project that references every implementation and `UI`.
 | AppHost | The Aspire host that runs `Web` and its dependencies for local development.
-| Roslyn | Roslyn components, build-time only, wired from the root `Directory.Build.props` into every project but itself: source generators for the provider-subset enums and their conversions from the capability matrix, for the rating sources' suppliers (`[SuppliedBy]`), for the options-section registration and for the `Task` mirrors of the monad helpers, plus the analyzers: `SAM0001` (the test naming convention), `SAM0002` (an `Optional` or a `Result` read by hand instead of through its helpers) and `SAM0003` (a branch on one read as a `bool`). The generators inject nothing: they key off markers declared in `Shared` (`GenerateAsyncAttribute`, `IOptionsSection`) or `Domain` (`[Capabilities]`; `[SuppliedBy]` is declared in `Shared` and placed on `RatingSource`), so a project without them gets no generated code.
+| Roslyn | Roslyn components, build-time only, wired from the root `Directory.Build.props` into every project but itself: source generators for the rating sources' suppliers (`[SuppliedBy]`), for the options-section registration and for the `Task` mirrors of the monad helpers, plus the analyzers: `SAM0001` (the test naming convention), `SAM0002` (an `Optional` or a `Result` read by hand instead of through its helpers) and `SAM0003` (a branch on one read as a `bool`). The generators inject nothing: they key off markers declared in `Shared` (`GenerateAsyncAttribute`, `IOptionsSection`) or `Domain` (`[SuppliedBy]`, declared in `Shared` and placed on `RatingSource`), so a project without them gets no generated code.
 |===
 
 The load-bearing rule: `Core`, `DB` and `API` are siblings that never reference each other; when
@@ -94,7 +94,7 @@ all.
 | IMDb | nothing: `ImdbId` is reached through Plex and TMDB lookups, and its rating arrives in Plex's answer
 | TheTVDB | nothing: `TvdbId` is reached through Plex and TMDB lookups
 | Rotten Tomatoes | nothing of its own: `RottenTomatoesId` (the title's page) is found by Wikidata, and its ratings arrive in Plex's answer
-| Wikidata | `IExternalIdConverter` (`WikidataIdConverter`, its `Provider` and HTTP capacity `MediaProvider.RottenTomatoes`): a keyless SPARQL lookup of a title's Rotten Tomatoes page by its IMDb id
+| Wikidata | `IExternalIdConverter` (`WikidataIdConverter`, registered through `ForRemote(RemoteService.Wikidata)`, which owns no ids and has its own HTTP capacity): a keyless SPARQL lookup of a title's Rotten Tomatoes page by its IMDb id
 | Radarr, Sonarr | one `IMediaSink` together (`ArrSink`, keyed `SinkKind.Arr`): `RadarrApi` and `SonarrApi` over the shared `ArrApi`, each holding what is its own (paths, the id it adds by, its add options from `Arr:Radarr` or `Arr:Sonarr`), its address and key from the admin's `ArrSinkConfig`
 |===
 
@@ -135,15 +135,15 @@ services
 * `ForRemote` names the remote service the module calls, so every client after it shares MDBList's one rate limit, wait budget and outage state.
 * `MdblistClient` is a typed HTTP client. `Client` gives it the resilience pipeline, a concurrency gate and request rate sized from `MdblistOptions`, and records it as MDBList's client.
 * `MdblistKeyCheck` answers whether a key works, keyed to the `ApiKeyProvider.Mdblist` slot.
-* `MdblistService` implements `IFeedProvider`, keyed to `FeedProvider.Mdblist`. `FeedProvider` is a generated subset of `MediaProvider` holding only the providers with the `Feed` capability.
+* `MdblistService` implements `IFeedProvider`, keyed to `FeedProvider.Mdblist`. `FeedProvider` is a hand-written role enum whose members answer the `Service` that serves them, and the registration records that MDBList registered it.
 * Nothing outside the folder references `MdblistService`. The feed preview resolves `IFeedProvider` by the feed's `FeedProvider` key.
 
-Adding a provider is four steps, with no change to any consumer:
+Adding a provider is four steps:
 
-. Add an enum value and its `[Capabilities<…>]` to `MediaProvider`.
+. Add a `RemoteService` member with its `Access` and `OwnIds` arms (and a `MediaProvider` member if it brings ids of its own), and its options and appsettings section.
 . Create an `API/<Provider>` folder with an `IServiceModule`.
-. Register its clients and roles through `ForRemote` against the matching `Contracts` interface(s).
+. Register its clients and roles through `ForRemote` against the matching `Contracts` interface(s), adding a member to each role enum it serves.
 . Add `AddModule<…>()` in `ApiModule`.
 
-The capability attribute drives the generated subset enums, so the new provider shows up in the
-right keyed lookups on its own. See <<section-concepts>> for the generator.
+The compiler then names every switch the new members must join (CS8509 is an error), and the role tests fail until every
+role member is registered by the service it claims and the remote service has a client. See <<section-concepts>>.

@@ -10,8 +10,8 @@ building-block view (projects, dependency graph, per-layer roles) and the cross-
 (sections 3 and 6). Read those rather than duplicating them here.
 
 DI uses a module pattern: each layer and provider ships an `IServiceModule` registered from
-`UI/Program.cs` via `AddModule<T>()`; providers register as keyed services keyed off the
-`MediaProvider` enums in `Domain/Providers`.
+`Web/Program.cs` via `AddModule<T>()`; a provider module registers its clients and roles through
+`ForRemote<TOptions>(RemoteService)` (`API/Http`), keyed off the hand-written role enums in `Domain/Providers`.
 
 ## UI
 
