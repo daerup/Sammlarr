@@ -4,11 +4,12 @@ using System.Text;
 using API.Notifications;
 using API.Notifications.Webhook;
 using Contracts;
+using Contracts.Identity;
 using Contracts.Notifications;
+using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging.Abstractions;
-using Shared.Options;
 using TestInfrastructure;
 
 namespace API.Tests.Notifications.Webhook;
@@ -72,27 +73,27 @@ public class WebhookChannelTests
 	}
 
 	[Test]
-	public async Task SendAsync_WhenTheUrlIsNotHttps_IsUnrecoverableAndSendsNothing()
+	public async Task SendAsync_ToAnHttpUrl_SendsIt()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
 		var result = await Channel(handler)
-			.SendAsync(Context(), WebhookTarget("http://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
-
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
-		await Assert.That(handler.Request).IsNull();
-	}
-
-	[Test]
-	public async Task SendAsync_ToAnHttpUrlOnAListedPrivateHost_SendsIt()
-	{
-		var handler = new CapturingHandler(HttpStatusCode.OK);
-
-		var result = await Channel(handler, new WebhookOptions { PrivateHosts = ["catcher"] })
 			.SendAsync(Context(), WebhookTarget("http://catcher:8080/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliverySucceeded>();
 		await Assert.That(handler.Request!.RequestUri).IsEqualTo(new Uri("http://catcher:8080/hook"));
+	}
+
+	[Test]
+	public async Task SendAsync_ToAnFtpUrl_IsUnrecoverableAndSendsNothing()
+	{
+		var handler = new CapturingHandler(HttpStatusCode.OK);
+
+		var result = await Channel(handler)
+			.SendAsync(Context(), WebhookTarget("ftp://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
+
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
+		await Assert.That(handler.Request).IsNull();
 	}
 
 	[Test]
@@ -134,17 +135,15 @@ public class WebhookChannelTests
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryRetryable>();
 	}
 
-	private static WebhookChannel Channel(HttpMessageHandler handler, WebhookOptions? options = null)
+	private static WebhookChannel Channel(HttpMessageHandler handler)
 	{
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
-		return new WebhookChannel(
-			new WebhookClient(new HttpClient(handler)),
-			new FluidTemplateRenderer(),
-			clock.Object,
-			options ?? new WebhookOptions(),
-			NullLogger<WebhookChannel>.Instance
-		);
+		var clients = IHttpClientFactory.Mock();
+		clients.CreateClient(Any()).Returns(new HttpClient(handler));
+		var owner = ICurrentUser.Mock();
+		owner.Role.Returns(UserRole.Member);
+		return new WebhookChannel(new WebhookClient(clients.Object, owner.Object), new FluidTemplateRenderer(), clock.Object, NullLogger<WebhookChannel>.Instance);
 	}
 
 	private static NotificationContext Context() =>

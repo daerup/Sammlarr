@@ -1,15 +1,19 @@
 using System.Net;
+using Contracts.Identity;
 using Contracts.Notifications;
+using Domain.Identity;
 
 namespace API.Notifications.Webhook;
 
-internal sealed class WebhookClient(HttpClient client)
+internal sealed class WebhookClient(IHttpClientFactory factory, ICurrentUser owner)
 {
+	public static string Name(UserRole role) => $"Webhook{role}";
+
 	public async Task<DeliveryResult> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 	{
 		try
 		{
-			using var response = await client.SendAsync(request, cancellationToken);
+			using var response = await factory.CreateClient(Name(owner.Role)).SendAsync(request, cancellationToken);
 			return Map(response.StatusCode);
 		}
 		catch (HttpRequestException error) when (Blocked(error) is { } blocked)

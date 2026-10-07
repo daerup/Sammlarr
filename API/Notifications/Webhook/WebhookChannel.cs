@@ -6,17 +6,11 @@ using Contracts;
 using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging;
-using Shared.Options;
 
 namespace API.Notifications.Webhook;
 
-internal sealed class WebhookChannel(
-	WebhookClient client,
-	INotificationTemplateRenderer renderer,
-	IDateTimeProvider clock,
-	WebhookOptions options,
-	ILogger<WebhookChannel> logger
-) : INotificationChannel
+internal sealed class WebhookChannel(WebhookClient client, INotificationTemplateRenderer renderer, IDateTimeProvider clock, ILogger<WebhookChannel> logger)
+	: INotificationChannel
 {
 	private static readonly JsonSerializerOptions BodyJson = new()
 	{
@@ -36,12 +30,12 @@ internal sealed class WebhookChannel(
 		{
 			return new DeliveryUnrecoverable("The target is not a webhook.");
 		}
-		if (!Uri.TryCreate(config.Url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttps && !IsPrivateHost(uri)))
-		{
-			return new DeliveryUnrecoverable("The webhook URL must be an absolute https URI.");
-		}
-
-		return await RenderBody(context, template).Match(body => SendAsync(config, uri, context, body, cancellationToken), error => RenderFailure(error, uri));
+		return await config
+			.Endpoint()
+			.Match(
+				uri => RenderBody(context, template).Match(body => SendAsync(config, uri, context, body, cancellationToken), error => RenderFailure(error, uri)),
+				() => Task.FromResult<DeliveryResult>(new DeliveryUnrecoverable("The webhook URL must be an absolute http or https URI."))
+			);
 	}
 
 	private async Task<DeliveryResult> SendAsync(WebhookConfig config, Uri uri, NotificationContext context, string body, CancellationToken cancellationToken)
@@ -62,8 +56,6 @@ internal sealed class WebhookChannel(
 		}
 		return result;
 	}
-
-	private bool IsPrivateHost(Uri uri) => options.PrivateHosts.Contains(uri.Host, StringComparer.OrdinalIgnoreCase);
 
 	private Task<DeliveryResult> RenderFailure(Error error, Uri uri)
 	{

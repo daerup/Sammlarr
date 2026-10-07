@@ -1,21 +1,16 @@
 using System.Net;
 using System.Net.Sockets;
+using Domain.Identity;
 
 namespace API.Notifications.Webhook;
 
 internal static class WebhookConnect
 {
-	public static async ValueTask<Stream> ConnectAsync(
-		SocketsHttpConnectionContext context,
-		IReadOnlyCollection<string> privateHosts,
-		CancellationToken cancellationToken
-	)
+	public static async ValueTask<Stream> ConnectAsync(SocketsHttpConnectionContext context, UserRole owner, CancellationToken cancellationToken)
 	{
 		var host = context.DnsEndPoint.Host;
 		var addresses = await Dns.GetHostAddressesAsync(host, cancellationToken);
-		var target =
-			Array.Find(addresses, address => MayReach(host, address, privateHosts))
-			?? throw new WebhookBlockedException($"The webhook host '{host}' resolves only to blocked addresses.");
+		var target = Array.Find(addresses, address => MayReach(address, owner)) ?? throw new WebhookBlockedException(Refusal(host, owner));
 
 		var socket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
 		try
@@ -30,8 +25,28 @@ internal static class WebhookConnect
 		}
 	}
 
-	internal static bool MayReach(string host, IPAddress address, IReadOnlyCollection<string> privateHosts) =>
-		privateHosts.Contains(host, StringComparer.OrdinalIgnoreCase) || !IsBlocked(address);
+	internal static bool MayReach(IPAddress address, UserRole owner)
+	{
+		return owner switch
+		{
+			UserRole.Admin => !IsLinkLocal(address),
+			UserRole.Member => !IsBlocked(address),
+		};
+	}
+
+	internal static bool IsLinkLocal(IPAddress address)
+	{
+		return address.IsIPv4MappedToIPv6 ? IsLinkLocal(address.MapToIPv4()) : address.IsIPv6LinkLocal || address.GetAddressBytes() is [169, 254, _, _];
+	}
+
+	private static string Refusal(string host, UserRole owner)
+	{
+		return owner switch
+		{
+			UserRole.Admin => $"The webhook host '{host}' resolves only to link-local addresses, which no webhook may reach.",
+			UserRole.Member => $"The webhook host '{host}' resolves only to private addresses, which only an admin's webhook may reach.",
+		};
+	}
 
 	internal static bool IsBlocked(IPAddress address)
 	{

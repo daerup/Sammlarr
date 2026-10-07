@@ -1,7 +1,7 @@
 <BbField>
     <BbLabel>Webhook URL</BbLabel>
     <BbInput Value="@Url" ValueChanged="UrlChanged" Placeholder="https://example.com/hook" UpdateTiming="UpdateTiming.Immediate"/>
-    <BbFieldDescription>An absolute https URL.<br/>The body is HMAC-signed (Standard Webhooks).</BbFieldDescription>
+    <BbFieldDescription>An absolute http or https URL. Only an admin's webhook reaches a private address (another container, the LAN).<br/>The body is HMAC-signed (Standard Webhooks).</BbFieldDescription>
 </BbField>
 @if (ShowRegenerate)
 {
