@@ -34,6 +34,23 @@ public class AnimeIdsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task FindAsync_ByAShowsOrMoviesTmdbOrImdbId_FindsTheEntryOfThatTypeOnly()
+	{
+		var map = host.Resolve<IAnimeIds>();
+		var show = new AnimeIdMapping(MediaType.Show, Some.Of(16498), Some.Of(16498), Some.Of(267440), Some.Of(1429), Some.Of("tt2560140"), new None());
+		var movie = new AnimeIdMapping(MediaType.Movie, Some.Of(199), Some.Of(199), new None(), Some.Of(1429), Some.Of("tt0245429"), new None());
+
+		await map.ReplaceAsync(new[] { show, movie }.ToAsyncEnumerable());
+
+		await Assert.That(await map.FindAsync(TvdbId.From("267440", MediaType.Show))).IsSome().And.IsEqualTo(show);
+		await Assert.That(await map.FindAsync(TmdbId.From("1429", MediaType.Movie))).IsSome().And.IsEqualTo(movie);
+		await Assert.That(await map.FindAsync(TmdbId.From("1429", MediaType.Show))).IsSome().And.IsEqualTo(show);
+		await Assert.That(await map.FindAsync(ImdbId.From("tt2560140", MediaType.Show))).IsSome().And.IsEqualTo(show);
+		await Assert.That(await map.FindAsync(ImdbId.From("tt2560140", MediaType.Movie))).IsNone();
+		await Assert.That(await map.FindAsync(TmdbId.From("550", MediaType.Movie))).IsNone();
+	}
+
+	[Test]
 	public async Task FindAsync_ForALaterSeason_KeepsTheSeriesItBelongsTo()
 	{
 		var map = host.Resolve<IAnimeIds>();

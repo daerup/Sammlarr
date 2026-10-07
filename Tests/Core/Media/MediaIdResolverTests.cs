@@ -25,6 +25,15 @@ public class MediaIdResolverTests
 		Year = 0,
 		MediaType = MediaType.Show,
 	};
+	private static readonly AniListId AniList = AniListId.From("1535", MediaType.Show);
+	private static readonly MalId Mal = MalId.From("1535", MediaType.Show);
+	private static readonly ById ByShowId = new(
+		Accepts: [MediaProvider.Tvdb, MediaProvider.Tmdb, MediaProvider.Imdb],
+		Yields: [MediaProvider.AniList, MediaProvider.Mal],
+		Cost: 0,
+		GivesHints: false
+	);
+	private static readonly ById ByAnimeId = new(Accepts: [MediaProvider.AniList, MediaProvider.Mal], Yields: [MediaProvider.Tvdb], Cost: 0, GivesHints: false);
 	private static readonly ById Detail = new(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Imdb, MediaProvider.Tvdb], Cost: 1);
 	private static readonly ById PlexById = new(Accepts: [MediaProvider.Plex], Yields: [MediaProvider.Tvdb], Cost: 1);
 	private static readonly ByHints Search = new(Yields: [MediaProvider.Plex, MediaProvider.Tvdb], Cost: 4);
@@ -131,6 +140,65 @@ public class MediaIdResolverTests
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From("TMDB knows no TVDB id."));
 
 		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20)), _tmdb).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsError();
+		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ResolveAsync_ForATitleHoldingTheTarget_GainsTheIdsAFreeLookupAnswers()
+	{
+		var map = Converter(RemoteService.AnimeLists, ByShowId);
+		Answer(map, new ByIdRequest(ByShowId, Tvdb), Found(AniList, Mal));
+
+		var resolved = await Testee(map, _tmdb).ResolveAsync(new IdentifyRequest([Tvdb], new None()), MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).IsEquivalentTo(new IExternalMediaId[] { Tvdb, AniList, Mal }));
+		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_ForATitleHoldingSeveralIdsAFreeLookupAccepts_AsksItOnce()
+	{
+		var map = Converter(RemoteService.AnimeLists, ByShowId);
+		map.LookUpAsync(Any(), Any()).Returns(Found(AniList, Mal));
+
+		await Testee(map).ResolveAsync(new IdentifyRequest([Tvdb, Imdb, Tmdb], new None()), MediaProvider.Tvdb, Everyone);
+
+		map.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ResolveAsync_ForAProviderTheTitleAlreadyHolds_AddsNoSecondIdOfIt()
+	{
+		var map = Converter(RemoteService.AnimeLists, ByShowId);
+		var other = AniListId.From("99999", MediaType.Show);
+		Answer(map, new ByIdRequest(ByShowId, Tvdb), Found(other, Mal));
+
+		var resolved = await Testee(map).ResolveAsync(new IdentifyRequest([Tvdb, AniList], new None()), MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).IsEquivalentTo(new IExternalMediaId[] { Tvdb, AniList, Mal }));
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhileAFreeLookupThatYieldsTheTargetIsDown_DoesNotCacheTheTitleAsUnmatched()
+	{
+		var map = Converter(RemoteService.AnimeLists, ByAnimeId);
+		map.LookUpAsync(Any(), Any()).Returns(Error.From(new RemoteUnavailableException(RemoteService.AnimeLists)));
+
+		var resolved = await Testee(map).ResolveAsync(new IdentifyRequest([AniList], new None()), MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsError();
+		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhileOnlyAFreeLookupThatYieldsOtherIdsIsDown_CachesTheTitleAsUnmatched()
+	{
+		var map = Converter(RemoteService.AnimeLists, ByShowId);
+		map.LookUpAsync(Any(), Any()).Returns(Error.From(new RemoteUnavailableException(RemoteService.AnimeLists)));
+
+		var resolved = await Testee(map).ResolveAsync(new IdentifyRequest([Imdb], new None()), MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsError();
 		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);

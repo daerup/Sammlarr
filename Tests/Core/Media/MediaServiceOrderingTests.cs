@@ -177,7 +177,7 @@ public class MediaServiceOrderingTests
 			dateTimeProvider.Object,
 			NullLogger<DetailsFetcher>.Instance
 		);
-		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
+		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object, NullLogger<MediaIdentityCoordinator>.Instance);
 		return new MediaService(
 			new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), TestReadiness.Everything(), dateTimeProvider.Object),
 			detailsFetcher,

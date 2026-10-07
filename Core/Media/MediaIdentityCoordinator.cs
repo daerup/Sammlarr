@@ -1,9 +1,10 @@
 using Contracts.Media;
 using Domain.Media;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Media;
 
-internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
+internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository, ILogger<MediaIdentityCoordinator> logger)
 {
 	public Task<IReadOnlyList<MediaIdentity>> CoordinateAsync(
 		IReadOnlyList<MediaIdentity> preliminary,
@@ -55,12 +56,43 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		{
 			return handoffs;
 		}
-		var corrected = await CoordinateAsync(pendingPreliminary, building, buffer, cancellationToken);
-		for (var i = 0; i < corrected.Count; i++)
+
+		try
 		{
-			handoffs[pendingIndices[i]] = Success.Of(new IdentifyHandoff(corrected[i], new None()));
+			var corrected = await CoordinateAsync(pendingPreliminary, building, buffer, cancellationToken);
+			for (var i = 0; i < corrected.Count; i++)
+			{
+				handoffs[pendingIndices[i]] = Success.Of(new IdentifyHandoff(corrected[i], new None()));
+			}
 		}
+		catch (MediaIdentityConflictException)
+		{
+			for (var i = 0; i < pendingPreliminary.Count; i++)
+			{
+				handoffs[pendingIndices[i]] = await CoordinateOneAsync(pendingPreliminary[i], building, buffer, cancellationToken);
+			}
+		}
+
 		return handoffs;
+	}
+
+	private async Task<Result<IdentifyHandoff>> CoordinateOneAsync(
+		MediaIdentity preliminary,
+		Dictionary<IExternalMediaId, MediaIdentity> building,
+		MediaWriteBuffer buffer,
+		CancellationToken cancellationToken
+	)
+	{
+		try
+		{
+			var corrected = await CoordinateAsync([preliminary], building, buffer, cancellationToken);
+			return Success.Of(new IdentifyHandoff(corrected[0], new None()));
+		}
+		catch (MediaIdentityConflictException conflict)
+		{
+			logger.LogWarning(conflict, "A title's ids belong to more than one stored title, so it stays unmatched");
+			return Error.From(conflict);
+		}
 	}
 
 	private static void MergeIntoCanonical(

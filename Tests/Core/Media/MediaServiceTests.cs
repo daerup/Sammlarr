@@ -537,7 +537,7 @@ public class MediaServiceTests
 			dateTimeProvider.Object,
 			NullLogger<DetailsFetcher>.Instance
 		);
-		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
+		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object, NullLogger<MediaIdentityCoordinator>.Instance);
 		var testee = new MediaService(
 			new MediaIdResolver(
 				[new(RemoteService.Tmdb, converter.Object)],

@@ -165,6 +165,22 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task IdentifyWithDetailsAsync_WhenATitlesIdsSitOnTwoStoredTitles_LeavesItUnmatchedAndGoesOn()
+	{
+		await host.SeedMediaAsync(AniListId.From("16498", MediaType.Show));
+		await host.SeedMediaAsync(TvdbId.From("267440", MediaType.Show));
+		var conflicting = new IdentifyRequest([AniListId.From("16498", MediaType.Show), TvdbId.From("267440", MediaType.Show)], new None());
+		var other = new IdentifyRequest([Tvdb("81189").ToExternal(MediaType.Show)], new None());
+
+		var results = await Testee.IdentifyWithDetailsAsync(new[] { conflicting, other }.ToAsyncEnumerable()).ToListAsync();
+
+		await Assert.That(results).Count().IsEqualTo(2);
+		await Assert
+			.That(results.Count(result => result is UnmatchedMedia unmatched && unmatched.Externals.Contains(AniListId.From("16498", MediaType.Show))))
+			.IsEqualTo(1);
+	}
+
+	[Test]
 	public async Task IdentifyAsync_WhenNoProviderCanPlaceTheId_ResolvesToNothing()
 	{
 		await host.PlexFindsNothing("Unknown Movie");
@@ -224,25 +240,27 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task IdentifyAsync_WhenAResultBridgesTwoMediaRows_IsRejectedAsAConflict()
+	public async Task IdentifyAsync_WhenAResultBridgesTwoMediaRows_LeavesThatTitleUnresolved()
 	{
 		await host.Movie(Spec("Fight Club (TMDB)", Tmdb("550"))).SeedAsync();
 		await host.Movie(Spec("Fight Club (Plex)", Plex("550"))).SeedAsync();
 		await host.PlexSearchReturns("Fight Club", Spec("Fight Club (Plex)", Plex("550")));
 		host.PlexHolds(Spec("Fight Club Bridge", Tmdb("550"), Plex("550"), Imdb("tt0137523")));
 
-		await Assert
-			.That(async () => await Testee.IdentifyAsync([Request("Fight Club", Imdb("tt0137523"))]).ToListAsync())
-			.Throws<MediaIdentityConflictException>();
+		var results = await Testee.IdentifyAsync([Request("Fight Club", Imdb("tt0137523"))]).ToListAsync();
+
+		await Assert.That(results.Single()).IsError();
 	}
 
 	[Test]
-	public async Task IdentifyAsync_WhenCandidatesAreSplitAcrossRows_AreRejectedAsAConflict()
+	public async Task IdentifyAsync_WhenCandidatesAreSplitAcrossRows_LeavesThatTitleUnresolved()
 	{
 		await host.Movie(Spec("Fight Club (TMDB)", Tmdb("550"))).SeedAsync();
 		await host.Movie(Spec("Fight Club (Plex)", Plex("550"))).SeedAsync();
 
-		await Assert.That(async () => await Testee.IdentifyAsync([Request(null, Tmdb("550"), Plex("550"))]).ToListAsync()).Throws<MediaIdentityConflictException>();
+		var results = await Testee.IdentifyAsync([Request(null, Tmdb("550"), Plex("550"))]).ToListAsync();
+
+		await Assert.That(results.Single()).IsError();
 	}
 
 	[Test]
@@ -397,7 +415,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task IdentifyAsync_WhenTmdbsDetailNamesAnImdbIdAnotherRowHolds_IsRejectedAsAConflict()
+	public async Task IdentifyAsync_WhenTmdbsDetailNamesAnImdbIdAnotherRowHolds_LeavesThatTitleUnresolved()
 	{
 		await host.Movie(Spec("Fight Club (TMDB)", Tmdb("550"))).SeedAsync();
 		await host.Movie(Spec("Fight Club (IMDb)", Imdb("tt0137523"))).SeedAsync();
@@ -405,7 +423,9 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.PlexSearchReturns("Fight Club", Spec("Fight Club", Tmdb("550"), Plex("550")));
 		host.PlexHolds(Spec("Fight Club", Tmdb("550"), Plex("550")));
 
-		await Assert.That(async () => await Testee.IdentifyAsync([Request(null, Tmdb("550"))]).ToListAsync()).Throws<MediaIdentityConflictException>();
+		var results = await Testee.IdentifyAsync([Request(null, Tmdb("550"))]).ToListAsync();
+
+		await Assert.That(results.Single()).IsError();
 	}
 
 	[Test]

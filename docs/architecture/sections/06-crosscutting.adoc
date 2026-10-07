@@ -273,8 +273,12 @@ which providers' ids its answer may yield and what it costs in calls (a lookup i
 map's, costs 0). `IdLookupPlanner` turns them into hops (an id
 to an id, an id to the hints, the hints to an id), plans every path of up to three hops from the ids the title
 already has to the target, and orders them: the open paths cheapest first, weighting each hop's cost by how busy its
-provider is, then the paths through a blocked provider, the soonest free first. `MediaIdResolver` tries them in that
-order. Plex looks up a Plex id and searches by the hints;
+provider is, then the paths through a blocked provider, the soonest free first. Before planning, `MediaIdResolver` asks
+every lookup that costs 0 once from the ids the title holds, adding a provider's id only where the title has none, so a
+free answer (the anime id map's AniList and MyAnimeList ids for a show's TheTVDB, TMDB or IMDb id) reaches every title,
+and no path runs through such a lookup;
+then it tries the paths in that order. A title whose ids sit on two stored titles stays unmatched with a warning, and
+the rest of the batch goes on. Plex looks up a Plex id and searches by the hints;
 TMDB looks up a TMDB id's detail (its appended `external_ids` carry the IMDb and TheTVDB ids) and finds a TMDB id
 by an IMDb or TheTVDB id, so a title that carries a TMDB, IMDb or TheTVDB id can resolve without Plex; MDBList finds
 every id it holds for a title by any one of its IMDb, TMDB, TheTVDB, Trakt or MyAnimeList ids, at cost 2, so it is taken when

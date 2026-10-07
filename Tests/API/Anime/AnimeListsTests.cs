@@ -147,7 +147,7 @@ public class AnimeListsTests
 	}
 
 	[Test]
-	public async Task Lookups_TakeAniListAndMalIdsToTheirCrossIdsWithoutHintsAndWithoutACall()
+	public async Task Lookups_TakeAnimeIdsToEveryIdAndAShowsIdsToItsAnimeIdsWithoutHintsAndWithoutACall()
 	{
 		var testee = Converter(loaded: true, out _);
 
@@ -161,7 +161,34 @@ public class AnimeListsTests
 						0,
 						GivesHints: false
 					),
+				new Domain.Media.Conversions.ById(
+					[MediaProvider.Tvdb, MediaProvider.Tmdb, MediaProvider.Imdb],
+					[MediaProvider.AniList, MediaProvider.Mal],
+					0,
+					GivesHints: false
+				),
 			]);
+	}
+
+	[Test]
+	public async Task LookUpAsync_ByAShowsTvdbId_AnswersOnlyItsAniListAndMalIds()
+	{
+		var testee = Converter(loaded: true, out var map);
+		map.FindAsync(Any(), Any())
+			.Returns(Some.Of(new AnimeIdMapping(MediaType.Show, Some.Of(290), Some.Of(290), Some.Of(72025), Some.Of(26209), Some.Of("tt0286390"), new None())));
+		var byShowId = new Domain.Media.Conversions.ById(
+			[MediaProvider.Tvdb, MediaProvider.Tmdb, MediaProvider.Imdb],
+			[MediaProvider.AniList, MediaProvider.Mal],
+			0,
+			GivesHints: false
+		);
+
+		var result = await testee.LookUpAsync(new ByIdRequest(byShowId, TvdbId.From("72025", MediaType.Show)));
+
+		await Assert
+			.That(result)
+			.IsSuccess()
+			.And.Multiple(async found => await Assert.That(found.Ids.Select(id => $"{id}")).IsEquivalentTo(["AniList:Show:290", "Mal:Show:290"]));
 	}
 
 	private static AnimeListsIdConverter Converter(bool loaded, out Mock<IAnimeIds> map)
