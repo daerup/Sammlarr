@@ -11,17 +11,41 @@ internal interface IDatasetLoader
 	Task<Result<int>> LoadAsync(CancellationToken cancellationToken = default);
 }
 
+internal sealed class DatasetGate
+{
+	private readonly SemaphoreSlim _oneLoad = new(1, 1);
+
+	internal async Task<T> OneAtATimeAsync<T>(Func<Task<T>> load, CancellationToken cancellationToken)
+	{
+		await _oneLoad.WaitAsync(cancellationToken);
+		try
+		{
+			return await load();
+		}
+		finally
+		{
+			_oneLoad.Release();
+		}
+	}
+}
+
 internal sealed class DatasetLoader<TRow>(
 	IDataset<TRow> dataset,
 	IDatasetTable<TRow> table,
 	IDatasetLoads loads,
 	IDateTimeProvider clock,
+	DatasetGate gate,
 	ILogger<DatasetLoader<TRow>> logger
 ) : IDatasetLoader
 {
 	public string Name => dataset.Name;
 
-	public async Task<Result<int>> LoadAsync(CancellationToken cancellationToken = default)
+	public Task<Result<int>> LoadAsync(CancellationToken cancellationToken = default)
+	{
+		return gate.OneAtATimeAsync(() => LoadNowAsync(cancellationToken), cancellationToken);
+	}
+
+	private async Task<Result<int>> LoadNowAsync(CancellationToken cancellationToken)
 	{
 		var last = await loads.FindAsync(dataset.Name, cancellationToken);
 		var download = await dataset.DownloadAsync(last.Map(load => load.ETag), cancellationToken);

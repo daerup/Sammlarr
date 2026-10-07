@@ -59,7 +59,10 @@ internal sealed class AnimeListsFile(HttpClient http) : IDataset<AnimeIdMapping>
 
 	private static bool IsTheShowItself(AnimeListsTypes.Anime entry)
 	{
-		return entry.Season?.Tvdb is null or 1 && entry.Season?.Tmdb is null or 1 && entry.EpisodeOffset is null or 0;
+		return entry.Season?.Tvdb is null or 1
+			&& entry.Season?.Tmdb is null or 1
+			&& entry.EpisodeOffset?.Tvdb is null or 0
+			&& entry.EpisodeOffset?.Tmdb is null or 0;
 	}
 
 	private static Optional<int> FirstMovie(AnimeListsTypes.Tmdb? tmdb)

@@ -74,15 +74,39 @@ public class DatasetLoaderTests
 		_loads.RecordAsync(Any(), Any()).WasNeverCalled();
 	}
 
+	[Test]
+	public async Task LoadAsync_WhileAnotherLoadRuns_WaitsForItBeforeDownloading()
+	{
+		var replacing = new TaskCompletionSource<int>();
+		_dataset.DownloadAsync(Any(), Any()).Returns(Changed());
+		_table.ReplaceAsync(Any(), Any()).ReturnsAsync(replacing.Task);
+		var gate = new DatasetGate();
+
+		var first = Testee(gate).LoadAsync();
+		var second = Testee(gate).LoadAsync();
+
+		_dataset.DownloadAsync(Any(), Any()).WasCalled(Times.Once);
+		replacing.SetResult(2);
+		await Task.WhenAll(first, second);
+		_dataset.DownloadAsync(Any(), Any()).WasCalled(Times.Exactly(2));
+	}
+
 	private static Result<Optional<DatasetFile<ImdbRatingLine>>> Changed()
 	{
 		return Success.Of<Optional<DatasetFile<ImdbRatingLine>>>(Some.Of(new DatasetFile<ImdbRatingLine>(Some.Of("\"today\""), Lines.ToAsyncEnumerable())));
 	}
 
-	private DatasetLoader<ImdbRatingLine> Testee()
+	private DatasetLoader<ImdbRatingLine> Testee(DatasetGate? gate = null)
 	{
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(Now);
-		return new DatasetLoader<ImdbRatingLine>(_dataset.Object, _table.Object, _loads.Object, clock.Object, NullLogger<DatasetLoader<ImdbRatingLine>>.Instance);
+		return new DatasetLoader<ImdbRatingLine>(
+			_dataset.Object,
+			_table.Object,
+			_loads.Object,
+			clock.Object,
+			gate ?? new DatasetGate(),
+			NullLogger<DatasetLoader<ImdbRatingLine>>.Instance
+		);
 	}
 }
