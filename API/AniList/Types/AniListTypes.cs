@@ -8,8 +8,6 @@ internal static class AniListTypes
 
 	public sealed record Problem([property: JsonPropertyName("message")] string? Message, [property: JsonPropertyName("status")] int? Status);
 
-	public sealed record MediaData([property: JsonPropertyName("Media")] Media? Media);
-
 	public sealed record ListData([property: JsonPropertyName("MediaListCollection")] Collection? Collection);
 
 	public sealed record Collection([property: JsonPropertyName("lists")] IReadOnlyList<List>? Lists);
@@ -17,6 +15,14 @@ internal static class AniListTypes
 	public sealed record List([property: JsonPropertyName("entries")] IReadOnlyList<ListItem>? Entries);
 
 	public sealed record ListItem([property: JsonPropertyName("media")] Media? Media);
+
+	public sealed record PageData([property: JsonPropertyName("Page")] Page? Page);
+
+	public sealed record Page([property: JsonPropertyName("pageInfo")] PageInfo? PageInfo, [property: JsonPropertyName("media")] IReadOnlyList<Media>? Media);
+
+	public sealed record PageInfo([property: JsonPropertyName("hasNextPage")] bool HasNextPage);
+
+	public sealed record GenreData([property: JsonPropertyName("GenreCollection")] IReadOnlyList<string>? Genres);
 
 	public sealed record Media(
 		[property: JsonPropertyName("id")] int Id,
