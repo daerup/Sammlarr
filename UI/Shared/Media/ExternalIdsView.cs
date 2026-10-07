@@ -20,7 +20,13 @@ internal sealed class ExternalIdsView(
 	IArrSinkConfigService arrConfigs
 )
 {
-	private static readonly ValueSet<MediaProvider> ShownWithRatingsOnly = [MediaProvider.RottenTomatoes];
+	private static readonly ValueSet<MediaProvider> ShownWithRatingsOnly =
+	[
+		MediaProvider.RottenTomatoes,
+		MediaProvider.Metacritic,
+		MediaProvider.Letterboxd,
+		MediaProvider.Trakt,
+	];
 
 	private Task<ArrSinkConfig>? _arr;
 

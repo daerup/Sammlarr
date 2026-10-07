@@ -107,7 +107,7 @@ The rating breakdown's rows ask with the title's ids.
 
 External IDs view:: `ExternalIdsView` (UI, scoped) decides every card the External IDs popover shows, and `MediaTitleLink`
 only draws them: a card per id that has a page (each asked with that id alone, so two Plex ids link to two pages), none for
-Rotten Tomatoes (its page opens from the rating rows) or for an id without a page, and, for an admin whose wantlist syncs to
+Rotten Tomatoes, Metacritic, Letterboxd or Trakt (their pages open from the rating rows) or for an id without a page, and, for an admin whose wantlist syncs to
 Radarr + Sonarr, one card more: the title's Add New search in the app its type belongs to (`ArrSearchLinks`), by the first
 id that app searches by (`ArrApp.SearchableBy`), since neither app has a page for a title outside its library. The
 role and the sink are checked on each call (the provider config is cached app-wide), the Radarr + Sonarr config is read once

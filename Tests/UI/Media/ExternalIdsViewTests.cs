@@ -42,9 +42,19 @@ public class ExternalIdsViewTests
 	}
 
 	[Test]
-	public async Task Cards_ForARottenTomatoesId_LeaveItToTheRatingRows()
+	public async Task Cards_ForRatingSiteIds_LeaveThemToTheRatingRows()
 	{
-		var cards = await Testee().CardsAsync([RottenTomatoesId.From("m/the_matrix", MediaType.Movie), Tmdb], Title);
+		var cards = await Testee()
+			.CardsAsync(
+				[
+					RottenTomatoesId.From("m/the_matrix", MediaType.Movie),
+					MetacriticId.From("the-matrix", MediaType.Movie),
+					LetterboxdId.From("the-matrix", MediaType.Movie),
+					TraktId.From("481", MediaType.Movie),
+					Tmdb,
+				],
+				Title
+			);
 
 		await Assert.That(cards.Select(card => card.Brand.DisplayName)).IsEquivalentTo(["The Movie Database"]);
 	}
