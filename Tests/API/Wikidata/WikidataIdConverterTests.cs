@@ -188,7 +188,15 @@ public class WikidataIdConverterTests
 				(IdLookup)
 					new ById(
 						[MediaProvider.Imdb],
-						[MediaProvider.RottenTomatoes, MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Metacritic, MediaProvider.Letterboxd],
+						[
+							MediaProvider.RottenTomatoes,
+							MediaProvider.Tmdb,
+							MediaProvider.Tvdb,
+							MediaProvider.Metacritic,
+							MediaProvider.Letterboxd,
+							MediaProvider.AniList,
+							MediaProvider.Mal,
+						],
 						3,
 						GivesHints: false
 					),

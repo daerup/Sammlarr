@@ -27,6 +27,14 @@ public class MediaProviderBrandingService
 			RemoteService.Mdblist => GetBrandingInfo(MediaProvider.Mdblist),
 			RemoteService.Tvmaze => GetBrandingInfo(MediaProvider.Tvmaze),
 			RemoteService.ImdbDatasets => GetBrandingInfo(MediaProvider.Imdb),
+			RemoteService.AnimeLists => new(
+				"Anime lists",
+				"Anime lists",
+				"#7C6FCD",
+				new BrandArt("anime-lists-square.svg"),
+				new BrandArt("anime-lists-square.svg"),
+				new BrandTile(MutedTile, new BrandArt("anime-lists-square.svg"), 70)
+			),
 			RemoteService.Wikidata => new(
 				"Wikidata",
 				"Wikidata",
@@ -174,6 +182,14 @@ public class MediaProviderBrandingService
 				new BrandArt("tvmaze-square.svg"),
 				new BrandArt("tvmaze-square.svg"),
 				new BrandTile(OwnTile, new BrandArt("tvmaze-square.svg"), 100)
+			),
+			MediaProvider.AniList => new(
+				"AniList",
+				"AniList",
+				"#02A9FF",
+				new BrandArt("anilist-square.png"),
+				new BrandArt("anilist-logo-light.png", "anilist-logo-dark.png"),
+				new BrandTile(OwnTile, new BrandArt("anilist-square.png"), 100)
 			),
 		};
 }

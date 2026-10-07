@@ -16,7 +16,16 @@ internal sealed partial class WikidataIdConverter(HttpClient http) : IExternalId
 
 	private static readonly ById ByImdb = new(
 		Accepts: [MediaProvider.Imdb],
-		Yields: [MediaProvider.RottenTomatoes, MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Metacritic, MediaProvider.Letterboxd],
+		Yields:
+		[
+			MediaProvider.RottenTomatoes,
+			MediaProvider.Tmdb,
+			MediaProvider.Tvdb,
+			MediaProvider.Metacritic,
+			MediaProvider.Letterboxd,
+			MediaProvider.AniList,
+			MediaProvider.Mal,
+		],
 		Cost: 3,
 		GivesHints: false
 	);
@@ -40,7 +49,7 @@ internal sealed partial class WikidataIdConverter(HttpClient http) : IExternalId
 			MediaType.Show => "OPTIONAL { ?item wdt:P4983 ?tmdb . } OPTIONAL { ?item wdt:P4835 ?tvdb . } ",
 			MediaType.Unknown => string.Empty,
 		};
-		return $$"""SELECT ?rt ?tmdb ?tvdb ?metacritic ?letterboxd WHERE { ?item wdt:P345 "{{imdb.Value}}" . OPTIONAL { ?item wdt:P1258 ?rt . } {{typed}}OPTIONAL { ?item wdt:P1712 ?metacritic . } OPTIONAL { ?item wdt:P6127 ?letterboxd . } }""";
+		return $$"""SELECT ?rt ?tmdb ?tvdb ?metacritic ?letterboxd ?anilist ?mal WHERE { ?item wdt:P345 "{{imdb.Value}}" . OPTIONAL { ?item wdt:P1258 ?rt . } {{typed}}OPTIONAL { ?item wdt:P1712 ?metacritic . } OPTIONAL { ?item wdt:P6127 ?letterboxd . } OPTIONAL { ?item wdt:P8729 ?anilist . } OPTIONAL { ?item wdt:P4086 ?mal . } }""";
 	}
 
 	private async Task<Result<IdLookupResult>> IdsAsync(ImdbId imdb, CancellationToken cancellationToken)
@@ -77,6 +86,8 @@ internal sealed partial class WikidataIdConverter(HttpClient http) : IExternalId
 			First(rows, "tvdb", Number()).Map(value => Id(TvdbId.From(value, type))),
 			First(rows, "metacritic", MetacriticPage()).Map(page => Id(MetacriticId.From(page[(page.IndexOf('/') + 1)..], type))),
 			First(rows, "letterboxd", Slug()).Map(slug => Id(LetterboxdId.From(slug, type))),
+			First(rows, "anilist", Number()).Map(value => Id(AniListId.From(value, type))),
+			First(rows, "mal", Number()).Map(value => Id(MalId.From(value, type))),
 		];
 		return [.. found.WhereSome()];
 	}

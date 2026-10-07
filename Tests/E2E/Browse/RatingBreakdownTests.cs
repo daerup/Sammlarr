@@ -60,7 +60,7 @@ public partial class RatingBreakdownTests
 			Query = new Dictionary<string, string>
 			{
 				["query"] =
-					$$"""SELECT ?rt ?tmdb ?tvdb ?metacritic ?letterboxd WHERE { ?item wdt:P345 "{{imdb}}" . OPTIONAL { ?item wdt:P1258 ?rt . } OPTIONAL { ?item wdt:P4947 ?tmdb . } OPTIONAL { ?item wdt:P12196 ?tvdb . } OPTIONAL { ?item wdt:P1712 ?metacritic . } OPTIONAL { ?item wdt:P6127 ?letterboxd . } }""",
+					$$"""SELECT ?rt ?tmdb ?tvdb ?metacritic ?letterboxd ?anilist ?mal WHERE { ?item wdt:P345 "{{imdb}}" . OPTIONAL { ?item wdt:P1258 ?rt . } OPTIONAL { ?item wdt:P4947 ?tmdb . } OPTIONAL { ?item wdt:P12196 ?tvdb . } OPTIONAL { ?item wdt:P1712 ?metacritic . } OPTIONAL { ?item wdt:P6127 ?letterboxd . } OPTIONAL { ?item wdt:P8729 ?anilist . } OPTIONAL { ?item wdt:P4086 ?mal . } }""",
 			},
 		};
 	}

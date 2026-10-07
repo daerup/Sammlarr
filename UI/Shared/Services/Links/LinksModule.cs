@@ -18,5 +18,6 @@ internal class LinksModule : IServiceModule
 		services.AddKeyedSingleton<IExternalPageLinker, TraktPageLinker>(MediaProvider.Trakt);
 		services.AddKeyedSingleton<IExternalPageLinker, MalPageLinker>(MediaProvider.Mal);
 		services.AddKeyedSingleton<IExternalPageLinker, TvmazePageLinker>(MediaProvider.Tvmaze);
+		services.AddKeyedSingleton<IExternalPageLinker, AniListPageLinker>(MediaProvider.AniList);
 	}
 }

@@ -22,6 +22,7 @@ internal readonly record struct ProviderId(MediaProvider Provider, string Value)
 			MediaProvider.Trakt => TraktId.From(Value, type),
 			MediaProvider.Mal => MalId.From(Value, type),
 			MediaProvider.Tvmaze => TvmazeId.From(Value, type),
+			MediaProvider.AniList => AniListId.From(Value, type),
 		};
 }
 
