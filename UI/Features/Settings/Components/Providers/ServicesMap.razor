@@ -245,17 +245,7 @@
         };
     }
 
-    private string Readiness(RemoteService remote)
-    {
-        var ready = Ready.Contains(remote);
-        return remote.Access switch
-        {
-            UserSignIn => ready ? "Your account" : "Not connected",
-            UserKey => ready ? "Your key is set" : "No key yet",
-            AppInstance => ready ? "Connected" : "Not set up",
-            Open => "Ready",
-        };
-    }
+    private string Readiness(RemoteService remote) => ServiceStatus.Of(remote.Access, Ready.Contains(remote));
 
     private string TileLabel(MapTile tile) => $"{Name(tile.Provider)}: {Status(tile.Provider)}";
 

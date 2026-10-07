@@ -55,6 +55,14 @@ public class DataSourcesCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Credit_NamesTheServicesRottenTomatoesScoresArriveThrough()
+	{
+		var cut = Render<DataSourcesCard>();
+
+		await Assert.That(cut.Find(".source-credit").TextContent).Contains("Rotten Tomatoes scores arrive through Plex;");
+	}
+
+	[Test]
 	public async Task Links_EveryOneOpensInANewTab()
 	{
 		var cut = Render<DataSourcesCard>();

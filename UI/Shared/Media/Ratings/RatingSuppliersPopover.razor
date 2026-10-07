@@ -33,14 +33,5 @@
 
     private IEnumerable<RemoteService> Suppliers => Sources.SelectMany(source => source.SuppliedBy()).Distinct().Order();
 
-    private static string Status(RemoteService supplier)
-    {
-        return supplier.Access switch
-        {
-            UserSignIn => "Not connected",
-            UserKey => "No key yet",
-            AppInstance => "Not set up",
-            Open => "Ready",
-        };
-    }
+    private static string Status(RemoteService supplier) => ServiceStatus.Of(supplier.Access, connected: false);
 }
