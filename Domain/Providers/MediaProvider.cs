@@ -21,4 +21,16 @@ public enum MediaProvider
 
 	[Description("MDBList")]
 	Mdblist,
+
+	[Description("Metacritic")]
+	Metacritic,
+
+	[Description("Letterboxd")]
+	Letterboxd,
+
+	[Description("Trakt")]
+	Trakt,
+
+	[Description("MyAnimeList")]
+	Mal,
 }

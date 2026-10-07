@@ -13,5 +13,9 @@ internal class LinksModule : IServiceModule
 		services.AddKeyedSingleton<IExternalPageLinker, TvdbPageLinker>(MediaProvider.Tvdb);
 		services.AddKeyedSingleton<IExternalPageLinker, PlexPageLinker>(MediaProvider.Plex);
 		services.AddKeyedSingleton<IExternalPageLinker, MdblistPageLinker>(MediaProvider.Mdblist);
+		services.AddKeyedSingleton<IExternalPageLinker, MetacriticPageLinker>(MediaProvider.Metacritic);
+		services.AddKeyedSingleton<IExternalPageLinker, LetterboxdPageLinker>(MediaProvider.Letterboxd);
+		services.AddKeyedSingleton<IExternalPageLinker, TraktPageLinker>(MediaProvider.Trakt);
+		services.AddKeyedSingleton<IExternalPageLinker, MalPageLinker>(MediaProvider.Mal);
 	}
 }

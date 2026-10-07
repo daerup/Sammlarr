@@ -17,6 +17,10 @@ internal readonly record struct ProviderId(MediaProvider Provider, string Value)
 			MediaProvider.RottenTomatoes => RottenTomatoesId.From(Value, type),
 			MediaProvider.Tvdb => TvdbId.From(Value, type),
 			MediaProvider.Mdblist => MdblistId.From(Value, type),
+			MediaProvider.Metacritic => MetacriticId.From(Value, type),
+			MediaProvider.Letterboxd => LetterboxdId.From(Value, type),
+			MediaProvider.Trakt => TraktId.From(Value, type),
+			MediaProvider.Mal => MalId.From(Value, type),
 		};
 }
 

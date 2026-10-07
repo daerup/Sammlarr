@@ -25,5 +25,9 @@ internal static class MediaIdConversionExtensions
 			MediaProvider.Tvdb => TvdbId.From(externalId, mediaType),
 			MediaProvider.Plex => PlexId.From(externalId, mediaType),
 			MediaProvider.Mdblist => MdblistId.From(externalId, mediaType),
+			MediaProvider.Metacritic => MetacriticId.From(externalId, mediaType),
+			MediaProvider.Letterboxd => LetterboxdId.From(externalId, mediaType),
+			MediaProvider.Trakt => TraktId.From(externalId, mediaType),
+			MediaProvider.Mal => MalId.From(externalId, mediaType),
 		};
 }

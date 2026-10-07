@@ -57,5 +57,9 @@ public class ExternalMediaIdProperties
 			MediaProvider.Tvdb => TvdbId.From(value, type),
 			MediaProvider.Plex => PlexId.From(value, type),
 			MediaProvider.Mdblist => MdblistId.From(value, type),
+			MediaProvider.Metacritic => MetacriticId.From(value, type),
+			MediaProvider.Letterboxd => LetterboxdId.From(value, type),
+			MediaProvider.Trakt => TraktId.From(value, type),
+			MediaProvider.Mal => MalId.From(value, type),
 		};
 }

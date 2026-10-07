@@ -36,7 +36,7 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 					"JobKind: FeedRun, WantlistSync",
 					"JobState: Waiting, Queued, Running, Done, Failed, Cancelled",
 					"ManualSource: Unknown, Search, Browse, FeedPreview",
-					"MediaProvider: Tmdb, Imdb, RottenTomatoes, Tvdb, Plex, Mdblist",
+					"MediaProvider: Tmdb, Imdb, RottenTomatoes, Tvdb, Plex, Mdblist, Metacritic, Letterboxd, Trakt, Mal",
 					"MediaType: Movie, Show, Unknown",
 					"NotificationChannel: Webhook, Pushover, WebUi",
 					"NotificationEventType: WantlistSyncCompleted, WantlistSyncFailed, TestPing, FeedRunCompleted, FeedRunFailed, ProviderRateLimited",
