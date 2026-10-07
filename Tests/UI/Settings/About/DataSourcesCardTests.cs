@@ -70,6 +70,41 @@ public class DataSourcesCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Logos_ForTvmazeMetacriticAndLetterboxd_AreTheirOwnWordmarks()
+	{
+		var cut = Render<DataSourcesCard>();
+
+		var sources = cut.FindAll(".source-logo img").Select(image => image.GetAttribute("src") ?? string.Empty).ToList();
+		await Assert
+			.That(sources)
+			.Contains("_content/UI/providers/tvmaze-logo.png")
+			.And.Contains("_content/UI/providers/metacritic-logo-light.svg")
+			.And.Contains("_content/UI/providers/letterboxd-logo-dark.svg");
+	}
+
+	[Test]
+	public async Task Logos_ForWikidataAndTheAnimeIdMap_AreImagesWithTheirNameDrawnIn()
+	{
+		var cut = Render<DataSourcesCard>();
+
+		var sources = cut.FindAll(".source-logo img").Select(image => image.GetAttribute("src") ?? string.Empty).ToList();
+		await Assert.That(sources).Contains("_content/UI/providers/wikidata-logo-light.svg").And.Contains("_content/UI/providers/anime-lists-logo-dark.svg");
+		await Assert.That(cut.FindAll(".source-logo span span")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Credit_NamesWhereTheTvmazeMetacriticAndLetterboxdLogosComeFrom()
+	{
+		var cut = Render<DataSourcesCard>();
+
+		await Assert
+			.That(cut.Find(".source-credit").TextContent)
+			.Contains("Metacritic's and Wikidata's logos from Wikimedia Commons")
+			.And.Contains("TVmaze's and Letterboxd's logos from their own sites (TVmaze's TV face redrawn for the dark theme)")
+			.And.Contains("anime-lists set in Mona Sans (SIL OFL) beside GitHub's mark");
+	}
+
+	[Test]
 	public async Task Credit_ForTheCcByIcons_NamesTheOneWeModified()
 	{
 		var cut = Render<DataSourcesCard>();

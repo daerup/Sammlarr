@@ -33,16 +33,16 @@ public class MediaProviderBrandingService
 				"Anime lists",
 				"Anime lists",
 				"#7C6FCD",
-				new BrandArt("anime-lists-square.svg"),
-				new BrandArt("anime-lists-square.svg"),
-				new BrandTile(MutedTile, new BrandArt("anime-lists-square.svg"), 70)
+				new BrandArt("github-mark-light.svg", "github-mark-dark.svg"),
+				new BrandArt("anime-lists-logo-light.svg", "anime-lists-logo-dark.svg"),
+				new BrandTile(MutedTile, new BrandArt("github-mark-light.svg", "github-mark-dark.svg"), 65)
 			),
 			RemoteService.Wikidata => new(
 				"Wikidata",
 				"Wikidata",
 				"#006699",
 				new BrandArt("wikidata-square.svg"),
-				new BrandArt("wikidata-square.svg"),
+				new BrandArt("wikidata-logo-light.svg", "wikidata-logo-dark.svg"),
 				new BrandTile(MutedTile, new BrandArt("wikidata-square.svg"), 70)
 			),
 			RemoteService.Radarr => new(
@@ -148,9 +148,9 @@ public class MediaProviderBrandingService
 			MediaProvider.Metacritic => new(
 				"Metacritic",
 				"Metacritic",
-				"#FFCC34",
+				"#FFBD3F",
 				new BrandArt("metacritic-square.svg"),
-				new BrandArt("metacritic-square.svg"),
+				new BrandArt("metacritic-logo-light.svg", "metacritic-logo-dark.svg"),
 				new BrandTile(MutedTile, new BrandArt("metacritic-square.svg"), 70)
 			),
 			MediaProvider.Letterboxd => new(
@@ -158,7 +158,7 @@ public class MediaProviderBrandingService
 				"Letterboxd",
 				"#00E054",
 				new BrandArt("letterboxd-square.svg"),
-				new BrandArt("letterboxd-square.svg"),
+				new BrandArt("letterboxd-logo-light.svg", "letterboxd-logo-dark.svg"),
 				new BrandTile(MutedTile, new BrandArt("letterboxd-square.svg"), 70)
 			),
 			MediaProvider.Trakt => new(
@@ -181,9 +181,9 @@ public class MediaProviderBrandingService
 				"TVmaze",
 				"TVmaze",
 				"#3C948B",
-				new BrandArt("tvmaze-square.svg"),
-				new BrandArt("tvmaze-square.svg"),
-				new BrandTile(OwnTile, new BrandArt("tvmaze-square.svg"), 100)
+				new BrandArt("tvmaze-square-light.svg", "tvmaze-square-dark.svg"),
+				new BrandArt("tvmaze-logo.png"),
+				new BrandTile(MutedTile, new BrandArt("tvmaze-square-light.svg", "tvmaze-square-dark.svg"), 75)
 			),
 			MediaProvider.AniList => new(
 				"AniList",
