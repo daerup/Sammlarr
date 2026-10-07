@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Domain.Providers;
 using Microsoft.Extensions.Configuration;
 using Shared.Options;
 using TestInfrastructure;
@@ -54,6 +55,14 @@ public class StagingSettingsFileTests
 		var reachable = Settings.GetSection("Staging:Network:Reachable").Get<string[]>()!;
 
 		await Assert.That(reachable).Contains(new Uri(app[$"{section}:BaseUrl"]!).Host);
+	}
+
+	[Test]
+	public async Task Seed_InTheStagingSettings_FollowsAListOnEveryFeedProvider()
+	{
+		var feeds = Settings.GetSection("Staging:Seed:Feeds").Get<SeedFeed[]>()!;
+
+		await Assert.That(feeds.Select(feed => feed.Provider).Distinct()).IsEquivalentTo(Enum.GetValues<FeedProvider>());
 	}
 
 	[Test]

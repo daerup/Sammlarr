@@ -18,6 +18,8 @@ internal sealed record StagingOptions
 
 	public string? MdblistKey { get; init; }
 
+	public string? MalClientId { get; init; }
+
 	public required string ArrApiKey { get; init; }
 
 	public required string IndexerUrl { get; init; }
@@ -111,6 +113,7 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 			options.Seed,
 			options.TmdbKey,
 			Optional.Of(options.MdblistKey),
+			Optional.Of(options.MalClientId),
 			ArrSinkConfig.Empty with
 			{
 				Radarr = radarr,

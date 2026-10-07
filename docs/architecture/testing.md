@@ -121,7 +121,7 @@ Staging is a long-lived, seeded Sammlarr for clicking around by hand, next to th
 `AppHost`, running Sammlarr from the image `Web/Dockerfile` builds, with real Radarr and Sonarr already connected.
 
 ```powershell
-dotnet user-secrets set Parameters:tmdb-api-key <your key> --project AppHost      # once; Parameters:mdblist-api-key is optional
+dotnet user-secrets set Parameters:tmdb-api-key <your key> --project AppHost      # once; Parameters:mdblist-api-key and Parameters:mal-client-id are optional
 dotnet run --project AppHost -c Staging --launch-profile staging
 ```
 
@@ -154,7 +154,7 @@ so the pull-back path shows; each step skips what is already there) and, unless 
 
 | Scenario | State |
 |----------|-------|
-| `Configured` (default) | the personas `admin` / `admin` and `member` / `member` (staging lowers `Sammlarr:Accounts:MinimumPasswordLength` to 5), setup finished, the wantlist on Radarr + Sonarr (their External URLs on the published ports, so links open in your browser), both people's TMDB key (and the MDBList key when `Parameters:mdblist-api-key` is set), two manual MDBList feeds (switched off without that key), Project Hail Mary and Breaking Bad on the admin's wantlist with a sync queued, a webhook and a Pushover target pointing at the catcher |
+| `Configured` (default) | the personas `admin` / `admin` and `member` / `member` (staging lowers `Sammlarr:Accounts:MinimumPasswordLength` to 5), setup finished, the wantlist on Radarr + Sonarr (their External URLs on the published ports, so links open in your browser), both people's TMDB key (and the MDBList key and MyAnimeList client ID when `Parameters:mdblist-api-key` and `Parameters:mal-client-id` are set), a manual feed on every feed provider (two MDBList lists, TMDB list 1, this season on AniList and on MyAnimeList), each on while its service is ready for the admin, so the MDBList and MyAnimeList ones need their keys, Project Hail Mary and Breaking Bad on the admin's wantlist with a sync queued, a webhook and a Pushover target pointing at the catcher |
 | `Fresh` | migrations only: every page goes to `/setup`, which takes the setup code `SAMM-LARR` (the AppHost sets `Sammlarr:Accounts:SetupCode`; unset, Sammlarr makes one and logs it) |
 
 Appending `-- --StagingScenario=Fresh` to the run command picks the other one for a new data directory. The seeded feeds are manual because TickerQ only schedules inside a
@@ -164,7 +164,7 @@ running Sammlarr; switching one to a schedule in staging schedules it as usual.
 `reset-configured` (Reset to set up) and `reset-fresh` (Reset to fresh install) stop Sammlarr, Radarr and Sonarr, wipe their data, run the
 seeder again and start everything; `update-image` (Update to current code) rebuilds the image from the working tree and restarts Sammlarr.
 
-**What is real and what is caught.** TMDB, MDBList and Wikidata are real (with your keys). Radarr and Sonarr use their own metadata
+**What is real and what is caught.** TMDB, MDBList, Wikidata, TVmaze, IMDb's ratings file, AniList, MyAnimeList and the anime id map (`raw.githubusercontent.com`) are real (with your keys). Radarr and Sonarr use their own metadata
 services. Plex is read-only: its APIs (`Plex` in the settings) go through WireMock, which proxies sign-in, search, the watchlist and
 metadata to the real Plex (`AppHost/Staging/wiremock/plex.json`) but answers watchlist adds and removes itself, so they show in its journal and
 never reach your watchlist; Plex's images and sign-in page stay the real ones. Webhooks and Pushover (`Pushover:BaseUrl`) go to the catcher, and Sammlarr's
