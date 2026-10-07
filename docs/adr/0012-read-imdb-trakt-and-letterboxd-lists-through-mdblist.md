@@ -1,8 +1,9 @@
 # Read IMDb, Trakt and Letterboxd lists through MDBList
 
-| Status   | Date       |
-|----------|------------|
-| accepted | 2026-10-05 |
+| Status                         | Date       |
+|--------------------------------|------------|
+| accepted                       | 2026-10-05 |
+| superseded for Trakt (see end) | 2026-10-06 |
 
 ## Context
 
@@ -25,3 +26,6 @@ token storage for one more list source).
 
 * One feed provider, one key and one rate budget cover four list sites.
 * The external-list limits above are MDBList's, recorded in the risks, and a list site Sammlarr cannot reach through MDBList is not followed at all.
+
+## Superseded for Trakt
+ 2026-10-06 Trakt became a feed of its own (the provider expansion's Phase 21): a public watchlist, a public list or a trending, popular or anticipated chart, read with each person's own Trakt client ID, no OAuth. A watchlist is the gap MDBList could not close, and Trakt blocked MDBList's API app from 2026-09-14. IMDb and Letterboxd lists still come through MDBList.

@@ -99,6 +99,38 @@
             </KeySetup>
         </Setup>
     </ApiKeyRow>
+    <ApiKeyRow Provider="ApiKeyProvider.Trakt"
+               Uses="TraktUses"
+               Open="Open == RemoteService.Trakt"
+               OpenChanged="open => ToggleAsync(RemoteService.Trakt, open)"
+               Changed="Changed">
+        <Description>
+            Your Trakt client ID. Create an API app at
+            <a href="https://developer.trakt.tv/apps" target="_blank" rel="noopener noreferrer"
+               class="underline underline-offset-2 hover:text-foreground transition-colors">developer.trakt.tv › My Apps</a>
+            (free) and paste its client ID. Trakt deletes an app that goes unused for 30 days.
+        </Description>
+        <Setup>
+            <KeySetup Title="How to get a client ID" Time="about 3 minutes">
+                <KeySetupStep Number="1">
+                    Sign in at trakt.tv and open
+                    <a href="https://developer.trakt.tv/apps" target="_blank" rel="noopener noreferrer"
+                       class="underline underline-offset-2 hover:text-foreground transition-colors">developer.trakt.tv › My Apps</a>.
+                    Trakt asks you to connect a verified GitHub account once before your first app.
+                </KeySetupStep>
+                <KeySetupStep Number="2">
+                    Create a new app. Sammlarr only ever uses its client ID.
+                    <div class="mt-1.5 grid grid-cols-[max-content_1fr] items-center gap-x-3.5 gap-y-1 text-xs">
+                        <SetupValue Name="Name" Value="Sammlarr"/>
+                        <SetupValue Name="Redirect URI" Value="urn:ietf:wg:oauth:2.0:oob"/>
+                    </div>
+                </KeySetupStep>
+                <KeySetupStep Number="3">
+                    Save the app and copy its <span class="font-medium text-foreground">Client ID</span> into the field above.
+                </KeySetupStep>
+            </KeySetup>
+        </Setup>
+    </ApiKeyRow>
 </div>
 
 @code {
@@ -115,6 +147,13 @@
     [
         "MyAnimeList anime lists as feeds",
         "anime details and the MyAnimeList rating with its votes",
+    ];
+
+    private static readonly string[] TraktUses =
+    [
+        "Trakt watchlists, public lists and charts as feeds",
+        "the Trakt rating with its votes, without MDBList",
+        "Trakt, IMDb, TMDB and TheTVDB ids",
     ];
 
     private static readonly string[] MdblistUses =
