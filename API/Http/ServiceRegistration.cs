@@ -39,9 +39,10 @@ internal sealed class ServiceRegistration(IServiceCollection services, Service b
 		return Forward<IMediaSink, TSink>(sink).Claims(sink, sink.Service);
 	}
 
-	public ServiceRegistration SignIn<TSignIn>(AuthProvider signIn)
-		where TSignIn : class, IOAuthProvider
+	public ServiceRegistration Credential<TSignIn>(AuthProvider signIn)
+		where TSignIn : class, IOAuthProvider, ICredentialValidator
 	{
+		services.AddScoped(provider => new Keyed<AuthProvider, ICredentialValidator>(signIn, provider.GetRequiredService<TSignIn>()));
 		return Forward<IOAuthProvider, TSignIn>(signIn).Claims(signIn, signIn.Service);
 	}
 
