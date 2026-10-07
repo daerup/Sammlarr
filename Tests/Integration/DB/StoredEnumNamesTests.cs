@@ -43,7 +43,7 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 					"NotificationLevel: Info, Success, Warning, Error",
 					"OutcomeKind: Delivered, Retrying, Failed",
 					"PushoverPriority: Normal, High, Emergency, Lowest, Low",
-					"RatingSource: Tmdb, Imdb, RottenTomatoesCritics, RottenTomatoesAudience",
+					"RatingSource: Tmdb, Imdb, RottenTomatoesCritics, RottenTomatoesAudience, Metacritic, Letterboxd, Trakt, MyAnimeList",
 					"RegistrationMode: Open, Closed",
 					"RemoteService: Tmdb, Plex, Mdblist, Wikidata, Radarr, Sonarr",
 					"RunCondition: OnSuccess, OnFailure, OnCancelled, OnFailureOrCancelled, OnAnyCompletedStatus, InProgress",

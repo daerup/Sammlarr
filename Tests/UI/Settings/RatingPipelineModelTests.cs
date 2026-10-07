@@ -31,7 +31,16 @@ public class RatingPipelineModelTests
 		await Assert
 			.That(model.Tiles.Select(tile => (tile.Source, tile.On)))
 			.IsEquivalentTo(
-				[(RatingSource.Tmdb, false), (RatingSource.Imdb, true), (RatingSource.RottenTomatoesCritics, true), (RatingSource.RottenTomatoesAudience, false)],
+				[
+					(RatingSource.Tmdb, false),
+					(RatingSource.Imdb, true),
+					(RatingSource.RottenTomatoesCritics, true),
+					(RatingSource.RottenTomatoesAudience, false),
+					(RatingSource.Metacritic, false),
+					(RatingSource.Letterboxd, false),
+					(RatingSource.Trakt, false),
+					(RatingSource.MyAnimeList, false),
+				],
 				CollectionOrdering.Matching
 			);
 		await Assert.That(model.Traces.Select(trace => trace.Source)).IsEquivalentTo([RatingSource.Imdb, RatingSource.RottenTomatoesCritics]);

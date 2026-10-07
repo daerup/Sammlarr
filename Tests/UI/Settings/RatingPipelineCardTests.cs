@@ -47,7 +47,7 @@ public class RatingPipelineCardTests : BunitContext
 		await cut.Find("button[role=switch][aria-label='TMDB counts']").ClickAsync();
 		await _context.GetAsync();
 
-		var rest = new RatingStrategy(new AveragedRating([RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience]));
+		var rest = new RatingStrategy(new AveragedRating([.. Enum.GetValues<RatingSource>().Where(source => source != RatingSource.Tmdb)]));
 		_ratings.StoreDefaultAsync(rest, Any()).WasCalled(Times.Once);
 		_ratings.GetDefaultAsync(Any()).WasCalled(Times.Exactly(2));
 	}
@@ -120,7 +120,7 @@ public class RatingPipelineCardTests : BunitContext
 		await Radio(cut, "First available").ClickAsync();
 		await Radio(cut, "Average").ClickAsync();
 
-		var rest = new RatingStrategy(new AveragedRating([RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience]));
+		var rest = new RatingStrategy(new AveragedRating([.. Enum.GetValues<RatingSource>().Where(source => source != RatingSource.Tmdb)]));
 		_ratings.StoreDefaultAsync(rest, Any()).WasCalled(Times.Exactly(2));
 	}
 

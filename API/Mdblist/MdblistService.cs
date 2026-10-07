@@ -111,7 +111,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 			var pairs = page.shows.Select(FeedItemResolution.Show).Concat(page.movies.Select(FeedItemResolution.Movie));
 			foreach (var pair in pairs)
 			{
-				yield return new IdentifyRequest(ExtractIds(pair.ListItem.ids, pair.MediaType), BuildHints(pair));
+				yield return new IdentifyRequest(MdblistIds.Of(pair.ListItem.ids, pair.MediaType), BuildHints(pair));
 			}
 		}
 	}
@@ -161,23 +161,13 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 	private static MediaMatchResult BuildUnmatched(MdblistTypes.ListItems.UnmatchedListItem item)
 	{
 		return new UnmatchedMedia(
-			[.. ExtractIds(item.ids, item.MediaType)],
+			[.. MdblistIds.Of(item.ids, item.MediaType)],
 			MediaDetails.Empty(item.MediaType) with
 			{
 				Title = ProviderValues.Text(item.title),
 				ReleaseDate = ProviderValues.YearStart(item.release_year),
 			}
 		);
-	}
-
-	private static IExternalMediaId[] ExtractIds(MdblistTypes.ListItems.Ids ids, MediaType mediaType)
-	{
-		MdblistId? mdblistId = !string.IsNullOrEmpty(ids.mdblist) ? MdblistId.From(ids.mdblist, mediaType) : null;
-		TmdbId? tmdbId = ids.tmdb.HasValue ? TmdbId.From(ids.tmdb.Value.ToString(), mediaType) : null;
-		ImdbId? imdbId = !string.IsNullOrEmpty(ids.imdb) ? ImdbId.From(ids.imdb, mediaType) : null;
-		TvdbId? tvdbId = ids.tvdb.HasValue ? TvdbId.From(ids.tvdb.Value.ToString(), mediaType) : null;
-
-		return [.. new IExternalMediaId?[] { mdblistId, tmdbId, imdbId, tvdbId }.OfType<IExternalMediaId>()];
 	}
 
 	private readonly record struct FeedItemResolution

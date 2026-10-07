@@ -85,7 +85,16 @@ public class RatingStrategyTests
 		await Assert
 			.That(ordered.Order)
 			.IsEquivalentTo(
-				[RatingSource.Imdb, RatingSource.Tmdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience],
+				[
+					RatingSource.Imdb,
+					RatingSource.Tmdb,
+					RatingSource.RottenTomatoesCritics,
+					RatingSource.RottenTomatoesAudience,
+					RatingSource.Metacritic,
+					RatingSource.Letterboxd,
+					RatingSource.Trakt,
+					RatingSource.MyAnimeList,
+				],
 				CollectionOrdering.Matching
 			);
 	}
@@ -189,13 +198,15 @@ public class RatingStrategyTests
 	{
 		var averaged = AveragedRating.Everything.Without(RatingSource.RottenTomatoesAudience);
 
-		await Assert.That(averaged.Sources).IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics]);
+		await Assert.That(averaged.Sources).IsEquivalentTo(Enum.GetValues<RatingSource>().Where(source => source != RatingSource.RottenTomatoesAudience));
 	}
 
 	[Test]
 	public async Task With_WhenTheLastMissingSourceComesBack_AveragesEverySourceAgain()
 	{
-		var averaged = new AveragedRating([RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics]).With(RatingSource.RottenTomatoesAudience);
+		var averaged = new AveragedRating([.. Enum.GetValues<RatingSource>().Where(source => source != RatingSource.RottenTomatoesAudience)]).With(
+			RatingSource.RottenTomatoesAudience
+		);
 
 		await Assert.That(averaged).IsEqualTo(AveragedRating.Everything);
 	}
@@ -208,7 +219,16 @@ public class RatingStrategyTests
 		await Assert
 			.That(moved.Order)
 			.IsEquivalentTo(
-				[RatingSource.RottenTomatoesCritics, RatingSource.Imdb, RatingSource.Tmdb, RatingSource.RottenTomatoesAudience],
+				[
+					RatingSource.RottenTomatoesCritics,
+					RatingSource.Imdb,
+					RatingSource.Tmdb,
+					RatingSource.RottenTomatoesAudience,
+					RatingSource.Metacritic,
+					RatingSource.Letterboxd,
+					RatingSource.Trakt,
+					RatingSource.MyAnimeList,
+				],
 				CollectionOrdering.Matching
 			);
 	}

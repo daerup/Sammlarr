@@ -11,7 +11,7 @@ public class EnricherChoiceTests
 	private static readonly RemoteLoad Idle = new(new None(), 0);
 	private static readonly IReadOnlySet<RemoteService> NoneWaited = new HashSet<RemoteService>();
 	private static readonly IReadOnlySet<RemoteService> NoPreference = new HashSet<RemoteService>();
-	private static readonly MediaFields PlexFills = MediaField.Tagline | MediaFields.AllRatings;
+	private static readonly MediaFields PlexFills = MediaField.Tagline | MediaFields.Rated(RemoteService.Plex.SuppliedRatingSources());
 
 	private static readonly MovieDetails Complete = new()
 	{

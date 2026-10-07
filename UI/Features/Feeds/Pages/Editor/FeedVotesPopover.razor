@@ -23,11 +23,11 @@
             }
             @switch (_explanation.Note)
             {
-                case VotesNote.RottenTomatoesTitlesFail:
-                    <p class="votes-pop-lead">@VotesExplanation.RottenTomatoesLine</p>
+                case VotesNote.UnvotedTitlesFail:
+                    <p class="votes-pop-lead">@_explanation.UnvotedLine</p>
                     break;
                 case VotesNote.EveryTitleFails:
-                    <p class="votes-pop-warning">@VotesExplanation.Warning <span class="votes-pop-star"><MagpieStarIcon Size="12"/></span>.</p>
+                    <p class="votes-pop-warning">@_explanation.Warning <span class="votes-pop-star"><MagpieStarIcon Size="12"/></span>.</p>
                     break;
                 case VotesNote.Nothing:
                     break;

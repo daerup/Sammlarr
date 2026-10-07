@@ -11,6 +11,8 @@ namespace UI.Tests.Feeds;
 
 public class FeedRatingStrategyPickerTests : BunitContext
 {
+	private static readonly RatingSource[] MdblistOnly = [RatingSource.Metacritic, RatingSource.Letterboxd, RatingSource.Trakt, RatingSource.MyAnimeList];
+
 	private static readonly ValueSet<RatingSource> Everything =
 	[
 		RatingSource.Tmdb,
@@ -58,7 +60,7 @@ public class FeedRatingStrategyPickerTests : BunitContext
 		await Assert
 			.That(_changes.Last())
 			.IsSome()
-			.And.IsEqualTo(new RatingStrategy(new AveragedRating([RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience])));
+			.And.IsEqualTo(new RatingStrategy(new AveragedRating([.. Enum.GetValues<RatingSource>().Where(source => source != RatingSource.Tmdb)])));
 	}
 
 	[Test]
@@ -84,7 +86,7 @@ public class FeedRatingStrategyPickerTests : BunitContext
 				await Assert
 					.That(order.Order)
 					.IsEquivalentTo(
-						[RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience],
+						[RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience, .. MdblistOnly],
 						CollectionOrdering.Matching
 					)
 			);
@@ -126,7 +128,7 @@ public class FeedRatingStrategyPickerTests : BunitContext
 				await Assert
 					.That(order.Order)
 					.IsEquivalentTo(
-						[RatingSource.RottenTomatoesCritics, RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesAudience],
+						[RatingSource.RottenTomatoesCritics, RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesAudience, .. MdblistOnly],
 						CollectionOrdering.Matching
 					)
 			);

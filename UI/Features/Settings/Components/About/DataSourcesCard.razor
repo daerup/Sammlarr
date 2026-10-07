@@ -35,9 +35,11 @@
     [
         new(MediaProvider.Tmdb, "Titles, artwork, trending and ratings", "This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.", "https://www.themoviedb.org"),
         new(MediaProvider.Plex, "Sign-in, search, the wantlist sync, and the IMDb and Rotten Tomatoes ratings", "Plex and the Plex logo are trademarks of Plex and used under a license.", "https://www.plex.tv"),
-        new(MediaProvider.Mdblist, "The lists your feeds import", "Lists come from MDBList.", "https://mdblist.com"),
+        new(MediaProvider.Mdblist, "The lists your feeds import, and ratings from IMDb, TMDB, Rotten Tomatoes, Metacritic, Letterboxd, Trakt and MyAnimeList", "Lists and ratings come from MDBList.", "https://mdblist.com"),
         new(MediaProvider.Tvdb, "Series ids, linked from a title", "Series ids link to TheTVDB.", "https://thetvdb.com"),
         new(MediaProvider.Imdb, "Title ids and ratings, linked from a title", "IMDb and all related logos are trademarks of IMDb.com, Inc. or its affiliates.", "https://www.imdb.com"),
+        new(MediaProvider.Metacritic, "Metascores, through MDBList, linked from a title", "Metacritic is a trademark of Fandom, Inc.", "https://www.metacritic.com"),
+        new(MediaProvider.Letterboxd, "Ratings, through MDBList, linked from a title", "Letterboxd is a trademark of Letterboxd Limited.", "https://letterboxd.com"),
     ];
 
     private sealed record DataSource(MediaProvider Provider, string Gives, string Note, string Href);

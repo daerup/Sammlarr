@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Domain.Media;
 
@@ -8,6 +9,18 @@ internal static class MdblistTypes
 	public static class Lists
 	{
 		public record Info([property: JsonPropertyName("user_name")] string UserName, [property: JsonPropertyName("slug")] string Slug);
+	}
+
+	public static class Titles
+	{
+		public record Title([property: JsonPropertyName("ids")] ListItems.Ids Ids, [property: JsonPropertyName("ratings")] IReadOnlyList<Rating>? Ratings);
+
+		public record Rating(
+			[property: JsonPropertyName("source")] string Source,
+			[property: JsonPropertyName("score")] float? Score,
+			[property: JsonPropertyName("votes")] int? Votes,
+			[property: JsonPropertyName("url")] JsonElement Url
+		);
 	}
 
 	public static class ListItems
@@ -29,7 +42,8 @@ internal static class MdblistTypes
 			[property: JsonPropertyName("tmdb")] int? tmdb,
 			[property: JsonPropertyName("tvdb")] int? tvdb,
 			[property: JsonPropertyName("mdblist")] string? mdblist,
-			[property: JsonPropertyName("mal")] string? mal
+			[property: JsonPropertyName("mal")] JsonElement? mal,
+			[property: JsonPropertyName("trakt")] int? trakt = null
 		);
 
 		public record Movie(

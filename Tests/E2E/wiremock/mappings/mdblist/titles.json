@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/(imdb|tmdb|tvdb|trakt|mal|mdblist)/(movie|show|any)"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "mdblist/titles.verified.json"
+  }
+}

@@ -5,7 +5,7 @@ namespace UI.Features.Feeds.Pages.Editor;
 
 internal enum VotesNote
 {
-	RottenTomatoesTitlesFail,
+	UnvotedTitlesFail,
 	EveryTitleFails,
 	Nothing,
 }
@@ -21,9 +21,10 @@ internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Row
 {
 	internal const string Heading = "Votes: how many people rated a title";
 
-	internal const string RottenTomatoesLine = "A title only Rotten Tomatoes rates has no votes and fails this rule.";
+	internal string UnvotedLine => $"A title only {Unvoted(" or ")} rates has no votes and fails this rule.";
 
-	internal const string Warning = "Every title Rotten Tomatoes rates fails this rule, because it publishes no votes. Switch TMDB or IMDb on with the";
+	internal string Warning =>
+		$"Every title {Unvoted(" or ")} rates fails this rule, because none of them publishes votes. Switch a source with votes on with the";
 
 	internal static VotesExplanation For(RatingStrategy strategy, bool isOwn, ValueSet<RatingSource> available)
 	{
@@ -40,7 +41,7 @@ internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Row
 		List<VotesRow> rows = [.. averaged.Counted(available).Order().DistinctBy(source => source.Card.Owner).Select(source => new VotesRow(source, new None()))];
 		if (rows.Count > 0 && rows.All(row => !row.HasVotes))
 		{
-			return new("This feed's rating averages Rotten Tomatoes only:", rows, VotesNote.EveryTitleFails);
+			return new($"This feed's rating averages {string.Join(" and ", rows.Select(row => row.Name))} only:", rows, VotesNote.EveryTitleFails);
 		}
 
 		return new($"Added up from the providers this feed's rating averages ({whose}):", rows, Closing(rows));
@@ -55,5 +56,7 @@ internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Row
 		return new($"Taken from the first of these that rated it ({whose}):", rows, Closing(rows));
 	}
 
-	private static VotesNote Closing(IReadOnlyList<VotesRow> rows) => rows.Any(row => !row.HasVotes) ? VotesNote.RottenTomatoesTitlesFail : VotesNote.Nothing;
+	private static VotesNote Closing(IReadOnlyList<VotesRow> rows) => rows.Any(row => !row.HasVotes) ? VotesNote.UnvotedTitlesFail : VotesNote.Nothing;
+
+	private string Unvoted(string separator) => string.Join(separator, Rows.Where(row => !row.HasVotes).Select(row => row.Name));
 }

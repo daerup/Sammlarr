@@ -19,7 +19,9 @@ public class PlexApiTests
 	[Test]
 	public async Task Fills_RateWithEverySourcePlexCarries()
 	{
-		await Assert.That(CreatePlexApi("{}").Fills.Ratings).IsEquivalentTo(Enum.GetValues<RatingSource>());
+		await Assert
+			.That(CreatePlexApi("{}").Fills.Ratings)
+			.IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience]);
 	}
 
 	[Test]

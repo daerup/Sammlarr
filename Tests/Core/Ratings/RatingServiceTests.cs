@@ -48,7 +48,15 @@ public class RatingServiceTests
 	{
 		await Testee.GetAvailableAsync();
 
-		_readiness.ConnectedAsync(Is<IEnumerable<RemoteService>>(asked => asked!.Contains(RemoteService.Mdblist)), Any()).WasNeverCalled();
+		_readiness.ConnectedAsync(Is<IEnumerable<RemoteService>>(asked => asked!.Contains(RemoteService.Wikidata)), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task GetAvailableAsync_WithOnlyMdblistConnected_OffersEverySourceMdblistRates()
+	{
+		_connected.Add(RemoteService.Mdblist);
+
+		await Assert.That(await Testee.GetAvailableAsync()).IsEquivalentTo(Enum.GetValues<RatingSource>());
 	}
 
 	[Test]

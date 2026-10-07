@@ -89,15 +89,18 @@ public class MediaRatingTests
 	[Test]
 	public async Task SuppliedBy_NamesEveryRemoteServiceThatSuppliesTheSource()
 	{
-		await Assert.That(RatingSource.Tmdb.SuppliedBy()).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Plex]);
-		await Assert.That(RatingSource.RottenTomatoesAudience.SuppliedBy()).IsEquivalentTo([RemoteService.Plex]);
+		await Assert.That(RatingSource.Tmdb.SuppliedBy()).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Plex, RemoteService.Mdblist]);
+		await Assert.That(RatingSource.RottenTomatoesAudience.SuppliedBy()).IsEquivalentTo([RemoteService.Plex, RemoteService.Mdblist]);
 	}
 
 	[Test]
 	public async Task SuppliedRatingSources_ForTheConnectedRemoteServices_AreTheSourcesAnyOfThemSupplies()
 	{
-		await Assert.That(RemoteService.Plex.SuppliedRatingSources()).IsEquivalentTo(Enum.GetValues<RatingSource>());
-		await Assert.That(RemoteService.Mdblist.SuppliedRatingSources()).IsEmpty();
-		await Assert.That(new[] { RemoteService.Tmdb, RemoteService.Mdblist }.SuppliedRatingSources()).IsEquivalentTo([RatingSource.Tmdb]);
+		await Assert
+			.That(RemoteService.Plex.SuppliedRatingSources())
+			.IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience]);
+		await Assert.That(RemoteService.Mdblist.SuppliedRatingSources()).IsEquivalentTo(Enum.GetValues<RatingSource>());
+		await Assert.That(RemoteService.Wikidata.SuppliedRatingSources()).IsEmpty();
+		await Assert.That(new[] { RemoteService.Tmdb, RemoteService.Wikidata }.SuppliedRatingSources()).IsEquivalentTo([RatingSource.Tmdb]);
 	}
 }

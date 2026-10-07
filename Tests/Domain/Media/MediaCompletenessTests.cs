@@ -33,7 +33,7 @@ public class MediaCompletenessTests
 	{
 		var movie = MediaFakes.CompleteMovieDetails() with { Ratings = MediaRatings.From([new TmdbRating(7.4f, Some.Of(900))]) };
 
-		await Assert.That(movie.Missing).IsEqualTo(MediaFields.Rated([RatingSource.Imdb, RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience]));
+		await Assert.That(movie.Missing).IsEqualTo(MediaFields.Rated(Enum.GetValues<RatingSource>().Where(source => source != RatingSource.Tmdb)));
 	}
 
 	[Test]
@@ -46,6 +46,10 @@ public class MediaCompletenessTests
 				new ImdbRating(7.6f, Some.Of(303)),
 				new RottenTomatoesCriticsRating(87),
 				new RottenTomatoesAudienceRating(91),
+				new MetacriticRating(73),
+				new LetterboxdRating(3.9f, Some.Of(1_200_000)),
+				new TraktRating(84, Some.Of(5_000)),
+				new MyAnimeListRating(7.1f, Some.Of(40_000)),
 			]),
 		};
 

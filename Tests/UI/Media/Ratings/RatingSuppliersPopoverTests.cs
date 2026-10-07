@@ -36,7 +36,11 @@ public class RatingSuppliersPopoverTests : BunitContext
 
 		await Assert
 			.That(cut.FindAll("a.rating-supplier").Select(Href))
-			.IsEquivalentTo(["/settings?section=providers&provider=tmdb", "/settings?section=providers&provider=plex"]);
+			.IsEquivalentTo([
+				"/settings?section=providers&provider=tmdb",
+				"/settings?section=providers&provider=plex",
+				"/settings?section=providers&provider=mdblist",
+			]);
 		await Assert
 			.That(cut.FindAll("a.rating-supplier").Single(link => Href(link).EndsWith("=tmdb", StringComparison.Ordinal)).TextContent)
 			.Contains("No key yet");

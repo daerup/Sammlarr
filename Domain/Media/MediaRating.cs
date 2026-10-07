@@ -106,6 +106,90 @@ public readonly record struct RottenTomatoesAudienceRating(int Percent) : IOwned
 	public Optional<RatingVerdict> Verdict => Some.Of(Percent >= Upright ? RatingVerdict.Liked : RatingVerdict.Disliked);
 }
 
+public readonly record struct MetacriticRating(int Metascore) : IOwnedRating<MetacriticRating>
+{
+	private const int Favorable = 61;
+
+	private const int Unfavorable = 39;
+
+	public static MediaProvider Owner => MediaProvider.Metacritic;
+
+	public static bool PublishesVotes => false;
+
+	public static MetacriticRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10));
+
+	public RatingSource Source => RatingSource.Metacritic;
+
+	public string Value => Metascore.ToString(CultureInfo.InvariantCulture);
+
+	public float SammlarrValue => Metascore / 10f;
+
+	public Optional<int> Votes => new None();
+
+	public Optional<RatingVerdict> Verdict => VerdictOf(Metascore);
+
+	private static Optional<RatingVerdict> VerdictOf(int metascore)
+	{
+		return metascore switch
+		{
+			>= Favorable => Some.Of(RatingVerdict.Liked),
+			<= Unfavorable => Some.Of(RatingVerdict.Disliked),
+			_ => new None(),
+		};
+	}
+}
+
+public readonly record struct LetterboxdRating(float Stars, Optional<int> Votes) : IOwnedRating<LetterboxdRating>
+{
+	public static MediaProvider Owner => MediaProvider.Letterboxd;
+
+	public static bool PublishesVotes => true;
+
+	public static LetterboxdRating Rate(float sammlarrValue, Optional<int> votes) => new(sammlarrValue / 2, votes);
+
+	public RatingSource Source => RatingSource.Letterboxd;
+
+	public string Value => Stars.ToString("0.0", CultureInfo.InvariantCulture);
+
+	public float SammlarrValue => Stars * 2;
+
+	public Optional<RatingVerdict> Verdict => new None();
+}
+
+public readonly record struct TraktRating(int Percent, Optional<int> Votes) : IOwnedRating<TraktRating>
+{
+	public static MediaProvider Owner => MediaProvider.Trakt;
+
+	public static bool PublishesVotes => true;
+
+	public static TraktRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10), votes);
+
+	public RatingSource Source => RatingSource.Trakt;
+
+	public string Value => $"{Percent}%";
+
+	public float SammlarrValue => Percent / 10f;
+
+	public Optional<RatingVerdict> Verdict => new None();
+}
+
+public readonly record struct MyAnimeListRating(float Score, Optional<int> Votes) : IOwnedRating<MyAnimeListRating>
+{
+	public static MediaProvider Owner => MediaProvider.Mal;
+
+	public static bool PublishesVotes => true;
+
+	public static MyAnimeListRating Rate(float sammlarrValue, Optional<int> votes) => new(sammlarrValue, votes);
+
+	public RatingSource Source => RatingSource.MyAnimeList;
+
+	public string Value => Score.ToString("0.00", CultureInfo.InvariantCulture);
+
+	public float SammlarrValue => Score;
+
+	public Optional<RatingVerdict> Verdict => new None();
+}
+
 public readonly record struct MediaRatings(ValueSet<IMediaRating> All)
 {
 	public static readonly MediaRatings None = new([]);
