@@ -34,6 +34,26 @@ public class StagingSettingsFileTests
 		await Assert.That(plex[nameof(PlexOptions.VodUrl)]).StartsWith("http://wiremock:8080/plex/");
 	}
 
+	public static IEnumerable<string> DataSources() =>
+		[
+			TmdbOptions.SectionName,
+			MdblistOptions.SectionName,
+			WikidataOptions.SectionName,
+			TvmazeOptions.SectionName,
+			ImdbDatasetsOptions.SectionName,
+			AnimeListsOptions.SectionName,
+		];
+
+	[Test]
+	[MethodDataSource(nameof(DataSources))]
+	public async Task Network_InTheStagingSettings_LetsTheDataSourceThroughTheDeadProxy(string section)
+	{
+		var app = new ConfigurationBuilder().AddJsonFile(RepositoryRoot.Resolve("Web", "appsettings.json")).Build();
+		var reachable = Settings.GetSection("Staging:Network:Reachable").Get<string[]>()!;
+
+		await Assert.That(reachable).Contains(new Uri(app[$"{section}:BaseUrl"]!).Host);
+	}
+
 	[Test]
 	public async Task Seed_InTheStagingSettings_SignsWebhooksWithAStandardWebhooksSecret()
 	{
