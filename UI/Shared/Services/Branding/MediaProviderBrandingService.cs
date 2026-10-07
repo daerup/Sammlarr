@@ -28,6 +28,7 @@ public class MediaProviderBrandingService
 			RemoteService.Tvmaze => GetBrandingInfo(MediaProvider.Tvmaze),
 			RemoteService.AniList => GetBrandingInfo(MediaProvider.AniList),
 			RemoteService.Mal => GetBrandingInfo(MediaProvider.Mal),
+			RemoteService.Trakt => GetBrandingInfo(MediaProvider.Trakt),
 			RemoteService.ImdbDatasets => GetBrandingInfo(MediaProvider.Imdb),
 			RemoteService.AnimeLists => new(
 				"Anime lists",

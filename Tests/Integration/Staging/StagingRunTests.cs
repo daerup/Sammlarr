@@ -38,13 +38,24 @@ public class StagingRunTests
 	[Test]
 	public async Task Settings_PassesTheOptionalKeysOnOnlyWhenSet()
 	{
-		var set = StagingRun.Settings(Options() with { MdblistKey = "staging-mdblist-key", MalClientId = "staging-mal-client-id" }, movies: 4, shows: 6);
+		var set = StagingRun.Settings(
+			Options() with
+			{
+				MdblistKey = "staging-mdblist-key",
+				MalClientId = "staging-mal-client-id",
+				TraktClientId = "staging-trakt-client-id",
+			},
+			movies: 4,
+			shows: 6
+		);
 		var unset = StagingRun.Settings(Options(), movies: 4, shows: 6);
 
 		await Assert.That(set.MdblistKey).IsSome().And.IsEqualTo("staging-mdblist-key");
 		await Assert.That(set.MalKey).IsSome().And.IsEqualTo("staging-mal-client-id");
 		await Assert.That(unset.MdblistKey).IsNone();
+		await Assert.That(set.TraktKey).IsSome().And.IsEqualTo("staging-trakt-client-id");
 		await Assert.That(unset.MalKey).IsNone();
+		await Assert.That(unset.TraktKey).IsNone();
 	}
 
 	private static StagingOptions Options()

@@ -26,12 +26,12 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 			.IsEquivalentTo(
 				[
 					"AccountLinkKind: Invite, Reset",
-					"ApiKeyProvider: Tmdb, Mdblist, TmdbReadToken, Mal",
+					"ApiKeyProvider: Tmdb, Mdblist, TmdbReadToken, Mal, Trakt",
 					"ArrFeedTagSource: ListName, Id",
 					"ArrUserTagSource: Name, Id",
 					"AuthProvider: Plex, Local",
 					"Conclusiveness: Conclusive, StillLoading, NoItems, NoMatches, NoneAdmitted",
-					"FeedProvider: Mdblist, Tmdb, AniList, Mal",
+					"FeedProvider: Mdblist, Tmdb, AniList, Mal, Trakt",
 					"FeedRunItemState: Added, Kept, Removed",
 					"JobKind: FeedRun, WantlistSync",
 					"JobState: Waiting, Queued, Running, Done, Failed, Cancelled",
@@ -45,7 +45,7 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 					"PushoverPriority: Normal, High, Emergency, Lowest, Low",
 					"RatingSource: Tmdb, Imdb, RottenTomatoesCritics, RottenTomatoesAudience, Metacritic, Letterboxd, Trakt, MyAnimeList, AniList",
 					"RegistrationMode: Open, Closed",
-					"RemoteService: Tmdb, Plex, Mdblist, Wikidata, Tvmaze, ImdbDatasets, AnimeLists, AniList, Mal, Radarr, Sonarr",
+					"RemoteService: Tmdb, Plex, Mdblist, Wikidata, Tvmaze, ImdbDatasets, AnimeLists, AniList, Mal, Trakt, Radarr, Sonarr",
 					"RunCondition: OnSuccess, OnFailure, OnCancelled, OnFailureOrCancelled, OnAnyCompletedStatus, InProgress",
 					"SearchProvider: Tmdb, Arr, Plex",
 					"SinkKind: Plex, Arr",

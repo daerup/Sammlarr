@@ -11,4 +11,5 @@ internal static class TestUrls
 	internal const string AnimeLists = "anime-lists.test.com";
 	internal const string AniList = "anilist.test.com";
 	internal const string Mal = "mal.test.com";
+	internal const string Trakt = "trakt.test.com";
 }

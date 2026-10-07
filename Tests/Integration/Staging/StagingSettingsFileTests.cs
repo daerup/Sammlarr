@@ -45,6 +45,7 @@ public class StagingSettingsFileTests
 			AnimeListsOptions.SectionName,
 			AniListOptions.SectionName,
 			MalOptions.SectionName,
+			TraktOptions.SectionName,
 		];
 
 	[Test]

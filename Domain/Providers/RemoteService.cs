@@ -33,6 +33,9 @@ public enum RemoteService
 	[Description("MyAnimeList")]
 	Mal,
 
+	[Description("Trakt")]
+	Trakt,
+
 	[Description("Radarr")]
 	Radarr,
 
@@ -63,6 +66,7 @@ public static class RemoteServices
 					RemoteService.Tmdb => new UserKey(ApiKeyProvider.Tmdb),
 					RemoteService.Mdblist => new UserKey(ApiKeyProvider.Mdblist),
 					RemoteService.Mal => new UserKey(ApiKeyProvider.Mal),
+					RemoteService.Trakt => new UserKey(ApiKeyProvider.Trakt),
 					RemoteService.Plex => new UserSignIn(AuthProvider.Plex),
 					RemoteService.Radarr => new AppInstance(ArrApp.Radarr),
 					RemoteService.Sonarr => new AppInstance(ArrApp.Sonarr),
@@ -84,6 +88,7 @@ public static class RemoteServices
 					RemoteService.ImdbDatasets => Some.Of(MediaProvider.Imdb),
 					RemoteService.AniList => Some.Of(MediaProvider.AniList),
 					RemoteService.Mal => Some.Of(MediaProvider.Mal),
+					RemoteService.Trakt => Some.Of(MediaProvider.Trakt),
 					RemoteService.Wikidata or RemoteService.AnimeLists or RemoteService.Radarr or RemoteService.Sonarr => new None(),
 				};
 			}

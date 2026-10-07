@@ -27,6 +27,9 @@ public class FeedSourceLinkTests : BunitContext
 	[Arguments(FeedProvider.Mal, "yourname", "https://myanimelist.net/animelist/yourname")]
 	[Arguments(FeedProvider.Mal, "topanime.php?type=upcoming", "https://myanimelist.net/topanime.php?type=upcoming")]
 	[Arguments(FeedProvider.Mal, "anime/season/2026/fall", "https://myanimelist.net/anime/season/2026/fall")]
+	[Arguments(FeedProvider.Trakt, "users/ana/watchlist", "https://trakt.tv/users/ana/watchlist")]
+	[Arguments(FeedProvider.Trakt, "users/ana/lists/marvel", "https://trakt.tv/users/ana/lists/marvel")]
+	[Arguments(FeedProvider.Trakt, "movies/trending", "https://trakt.tv/movies/trending")]
 	public async Task Render_ForAProvider_LinksToItsListUrl(FeedProvider provider, string identifier, string expectedUrl)
 	{
 		var cut = Render<FeedSourceLink>(parameters => parameters.Add(link => link.Provider, provider).Add(link => link.Identifier, identifier));

@@ -67,6 +67,11 @@ internal static class StagingEnvironment
 			seed.WithEnvironment("Staging__MalClientId", mal);
 		}
 
+		if (builder.Configuration["Parameters:trakt-client-id"] is { Length: > 0 } trakt)
+		{
+			seed.WithEnvironment("Staging__TraktClientId", trakt);
+		}
+
 		var sammlarr = builder
 			.AddDockerfile("sammlarr", RepositoryRoot(builder), Dockerfile)
 			.WithHttpEndpoint(port: config.Ports.Sammlarr, targetPort: 8080, name: "http", isProxied: false)

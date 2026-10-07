@@ -52,6 +52,15 @@ internal static class FeedSources
 				),
 				PageOr("myanimelist.net", ["topanime.php", "anime/season"], identifier => $"https://myanimelist.net/animelist/{identifier}")
 			),
+			FeedProvider.Trakt => new(
+				"e.g. https://trakt.tv/users/yourname/watchlist",
+				Help(
+					"Paste a Trakt username, a trakt.tv watchlist or public list link, or a trending, popular or anticipated chart link. The profile must be public. Sammlarr reads the first 500 titles of a chart.",
+					"https://app.trakt.tv/discover",
+					"Browse charts on Trakt"
+				),
+				identifier => $"https://trakt.tv/{identifier}"
+			),
 		};
 	}
 
