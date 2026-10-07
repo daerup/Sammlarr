@@ -61,6 +61,12 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 					"AnimeLists AniList>Imdb (0)",
 					"AnimeLists AniList>Tvdb (0)",
 					"AnimeLists AniList>Mal (0)",
+					"AnimeLists Tmdb>Mal (0)",
+					"AnimeLists Tmdb>AniList (0)",
+					"AnimeLists Imdb>Mal (0)",
+					"AnimeLists Imdb>AniList (0)",
+					"AnimeLists Tvdb>Mal (0)",
+					"AnimeLists Tvdb>AniList (0)",
 				],
 				CollectionOrdering.Matching
 			);

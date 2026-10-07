@@ -52,13 +52,12 @@ internal sealed class MediaIdResolver(
 		CancellationToken cancellationToken
 	)
 	{
-		var candidates = request.Candidates;
 		IReadOnlyList<Hop> hops = [.. _hops.Where(hop => connected.Contains(hop.Remote))];
-		var plan = IdLookupPlanner.Plan(candidates.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, hops, capacity, clock.Now);
-		var unresolved = Error.From($"No lookup resolved the candidates to a {target} id.");
-		var transient = false;
 		var answers = new Dictionary<AnswerKey, LookupAnswer>();
 		var down = new HashSet<RemoteService>();
+		var (candidates, transient) = await FreeAsync(request.Candidates, target, hops, answers, down, cancellationToken);
+		var plan = IdLookupPlanner.Plan(candidates.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, hops, capacity, clock.Now);
+		var unresolved = Error.From($"No lookup resolved the candidates to a {target} id.");
 		var waited = new HashSet<RemoteService>();
 		foreach (var path in plan.Paths)
 		{
@@ -75,6 +74,42 @@ internal sealed class MediaIdResolver(
 			unmatchedCache.Set(key, true, unmatchedTtl);
 		}
 		return unresolved;
+	}
+
+	private static async Task<(IReadOnlyList<IExternalMediaId> Ids, bool Transient)> FreeAsync(
+		IReadOnlyList<IExternalMediaId> candidates,
+		MediaProvider target,
+		IReadOnlyList<Hop> hops,
+		Dictionary<AnswerKey, LookupAnswer> answers,
+		HashSet<RemoteService> down,
+		CancellationToken cancellationToken
+	)
+	{
+		var ids = candidates;
+		var transient = false;
+		foreach (var hop in hops.Where(hop => hop.Cost == 0))
+		{
+			foreach (
+				var request in hop switch
+				{
+					IdToId free when ids.All(id => id.Source != free.To) => ByIdRequests(free.Lookup, free.From, candidates),
+					IdToId or IdToHints or HintsToId => [],
+				}
+			)
+			{
+				var key = AnswerKey.Of(hop.Converter, request);
+				if (!answers.TryGetValue(key, out var answer))
+				{
+					answer = await AskAsync(hop.Converter, request, down, cancellationToken);
+					answers[key] = answer;
+				}
+
+				transient |= answer.Transient && hop is IdToId { To: var to } && to == target;
+				answer.Result.Apply(found => ids = [.. ids.Concat(found.Ids.Where(id => ids.All(held => held.Source != id.Source))).Distinct()]);
+			}
+		}
+
+		return (ids, transient);
 	}
 
 	private async Task<StepOutcome> FollowAsync(

@@ -16,21 +16,23 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 
 	public async Task<Optional<AnimeIdMapping>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
-		if (!int.TryParse(id.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var number))
+		var isNumber = int.TryParse(id.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var number);
+		if (!isNumber && id.Source is not MediaProvider.Imdb)
 		{
 			return new None();
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rows = ctx.AnimeIds.AsNoTracking();
+		var typed = rows.Where(entry => id.Type == MediaType.Unknown || entry.Type == id.Type);
 		var row = id.Source switch
 		{
 			MediaProvider.AniList => await rows.FirstOrDefaultAsync(entry => entry.AniListId == number, cancellationToken),
 			MediaProvider.Mal => await rows.FirstOrDefaultAsync(entry => entry.MalId == number, cancellationToken),
-			MediaProvider.Tvdb => await rows.FirstOrDefaultAsync(entry => entry.TvdbId == number, cancellationToken),
-			MediaProvider.Tmdb
-			or MediaProvider.Imdb
-			or MediaProvider.RottenTomatoes
+			MediaProvider.Tvdb => await typed.FirstOrDefaultAsync(entry => entry.TvdbId == number, cancellationToken),
+			MediaProvider.Tmdb => await typed.FirstOrDefaultAsync(entry => entry.TmdbId == number, cancellationToken),
+			MediaProvider.Imdb => await typed.FirstOrDefaultAsync(entry => entry.ImdbId == id.Value, cancellationToken),
+			MediaProvider.RottenTomatoes
 			or MediaProvider.Plex
 			or MediaProvider.Mdblist
 			or MediaProvider.Metacritic

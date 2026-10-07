@@ -26,12 +26,13 @@ internal static class IdLookupPlanner
 		DateTimeOffset now
 	)
 	{
+		IReadOnlyList<Hop> paid = [.. hops.Where(hop => hop.Cost > 0)];
 		if (have.Contains(target))
 		{
-			return PlanPresent(target, hops, capacity, now);
+			return PlanPresent(target, paid, capacity, now);
 		}
 
-		var paths = new PathSearch(hasHints, target, hops).From([], have).ToList();
+		var paths = new PathSearch(hasHints, target, paid).From([], have).ToList();
 		return new IdLookupPlan(Ordered(paths, capacity, now));
 	}
 

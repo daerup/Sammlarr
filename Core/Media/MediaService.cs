@@ -302,11 +302,19 @@ internal sealed class MediaService(
 		CancellationToken cancellationToken
 	)
 	{
-		return await addressedBy(request.Type)
-			.Match(
-				target => IdentifyForAsync(request, target, stored, connected, buffer, cancellationToken),
-				() => ValueTask.FromResult<Result<IdentifyHandoff>>(Error.From($"No provider addresses {request.Type} titles here."))
-			);
+		try
+		{
+			return await addressedBy(request.Type)
+				.Match(
+					target => IdentifyForAsync(request, target, stored, connected, buffer, cancellationToken),
+					() => ValueTask.FromResult<Result<IdentifyHandoff>>(Error.From($"No provider addresses {request.Type} titles here."))
+				);
+		}
+		catch (MediaIdentityConflictException conflict)
+		{
+			logger.LogWarning(conflict, "A title's ids belong to more than one stored title, so it stays unmatched");
+			return Error.From(conflict);
+		}
 	}
 
 	private ValueTask<Result<IdentifyHandoff>> IdentifyForAsync(
