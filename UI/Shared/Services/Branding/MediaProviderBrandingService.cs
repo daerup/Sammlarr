@@ -133,5 +133,37 @@ public class MediaProviderBrandingService
 				new BrandArt("mdblist-logo-light.svg", "mdblist-logo-dark.svg") { Scale = 1.25 },
 				new BrandTile(OwnTile, new BrandArt("mdblist-square.svg"), 100)
 			),
+			MediaProvider.Metacritic => new(
+				"Metacritic",
+				"Metacritic",
+				"#FFCC34",
+				new BrandArt("metacritic-square.svg"),
+				new BrandArt("metacritic-square.svg"),
+				new BrandTile(MutedTile, new BrandArt("metacritic-square.svg"), 70)
+			),
+			MediaProvider.Letterboxd => new(
+				"Letterboxd",
+				"Letterboxd",
+				"#00E054",
+				new BrandArt("letterboxd-square.svg"),
+				new BrandArt("letterboxd-square.svg"),
+				new BrandTile(MutedTile, new BrandArt("letterboxd-square.svg"), 70)
+			),
+			MediaProvider.Trakt => new(
+				"Trakt",
+				"Trakt",
+				"#9F42C6",
+				new BrandArt("trakt-square.svg"),
+				new BrandArt("trakt-logo-light.svg", "trakt-logo-dark.svg"),
+				new BrandTile(OwnTile, new BrandArt("trakt-square.svg"), 100)
+			),
+			MediaProvider.Mal => new(
+				"MyAnimeList",
+				"MyAnimeList",
+				"#2F52A2",
+				new BrandArt("myanimelist-square.svg"),
+				new BrandArt("myanimelist-logo.png"),
+				new BrandTile(OwnTile, new BrandArt("myanimelist-square.svg"), 100)
+			),
 		};
 }

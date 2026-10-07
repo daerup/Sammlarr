@@ -104,3 +104,47 @@ public readonly record struct RottenTomatoesId : IExternalMediaId
 
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
+
+public readonly record struct MetacriticId : IExternalMediaId
+{
+	public MediaProvider Source => MediaProvider.Metacritic;
+	public string Value { get; private init; }
+	public MediaType Type { get; private init; }
+
+	public static MetacriticId From(string slug, MediaType type) => new() { Value = slug, Type = type };
+
+	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
+}
+
+public readonly record struct LetterboxdId : IExternalMediaId
+{
+	public MediaProvider Source => MediaProvider.Letterboxd;
+	public string Value { get; private init; }
+	public MediaType Type { get; private init; }
+
+	public static LetterboxdId From(string slug, MediaType type) => new() { Value = slug, Type = type };
+
+	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
+}
+
+public readonly record struct TraktId : IExternalMediaId
+{
+	public MediaProvider Source => MediaProvider.Trakt;
+	public string Value { get; private init; }
+	public MediaType Type { get; private init; }
+
+	public static TraktId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
+}
+
+public readonly record struct MalId : IExternalMediaId
+{
+	public MediaProvider Source => MediaProvider.Mal;
+	public string Value { get; private init; }
+	public MediaType Type { get; private init; }
+
+	public static MalId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
+}
