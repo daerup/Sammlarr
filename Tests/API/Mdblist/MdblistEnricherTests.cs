@@ -106,9 +106,76 @@ public class MdblistEnricherTests
 	}
 
 	[Test]
+	public async Task LookUpAsync_ForATitleAskedAgain_AnswersFromTheFirstAnswer()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
+		var testee = Testee(handler);
+
+		await testee.LookUpAsync(FightClub);
+		var again = await testee.LookUpAsync(FightClub);
+
+		await Assert.That(again).IsSuccess();
+		handler.Verify(request => request.Method(HttpMethod.Post), Times.Once);
+	}
+
+	[Test]
+	public async Task LookUpAsync_ByAnotherIdOfAPrefetchedTitle_AnswersFromThePrefetch()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
+		var titles = MdblistApis.Titles(handler);
+		titles.Prefetch([
+			[MdblistId.From("a5as", MediaType.Movie), FightClub],
+		]);
+
+		var found = await Assert.That(await new MdblistEnricher(titles).LookUpAsync(FightClub)).IsSuccess();
+
+		await Assert.That(found!.Details.Ratings.All).IsNotEmpty();
+		handler.Verify(request => request.Method(HttpMethod.Post).PathMatches(@"^/mdblist/movie(\?.*)?$"), Times.Once);
+		handler.Verify(request => request.Method(HttpMethod.Post), Times.Once);
+	}
+
+	[Test]
+	public async Task Prefetch_ForMoreTitlesThanOneBatchHolds_AsksTwoHundredAtATime()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("[]");
+		var titles = MdblistApis.Titles(handler);
+		IReadOnlyCollection<IExternalMediaId>[] list =
+		[
+			.. Enumerable.Range(1, 250).Select(number => new[] { (IExternalMediaId)TmdbId.From($"{number}", MediaType.Movie) }),
+		];
+
+		titles.Prefetch(list);
+		await titles.FindAsync(TmdbId.From("1", MediaType.Movie));
+		await titles.FindAsync(TmdbId.From("250", MediaType.Movie));
+
+		handler.Verify(request => request.Method(HttpMethod.Post), Times.Exactly(2));
+	}
+
+	[Test]
+	public async Task LookUpAsync_AfterMdblistFailedToAnswer_AsksAgain()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWith(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable))
+			.Then()
+			.RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
+		var testee = Testee(handler);
+
+		await testee.LookUpAsync(FightClub);
+		var again = await testee.LookUpAsync(FightClub);
+
+		await Assert.That(again).IsSuccess();
+		handler.Verify(request => request.Method(HttpMethod.Post), Times.Exactly(2));
+	}
+
+	[Test]
 	public async Task LookUpAsync_OnceTheRequestsLeftReachTheFeedReserve_AsksNothing()
 	{
-		var budget = new MdblistBudget(MdblistApis.Clock(), MdblistApis.Options);
+		var budget = MdblistApis.Budget();
 		var answered = new HttpResponseMessage(HttpStatusCode.OK);
 		answered.Headers.Add("x-ratelimit-remaining", "120");
 		answered.Headers.Add("x-ratelimit-reset", $"{DateTimeOffset.UnixEpoch.AddDays(2).ToUnixTimeSeconds()}");
