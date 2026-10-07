@@ -5,7 +5,7 @@ public record ProviderHttpOptions
 	public string HttpVersion { get; set; } = "2.0";
 	public bool EnableMultipleHttp2Connections { get; set; } = true;
 	public int MaxConcurrency { get; set; }
-	public int RequestsPerSecond { get; set; }
+	public double RequestsPerSecond { get; set; }
 	public int AttemptTimeoutSeconds { get; set; } = 6;
 	public int TotalTimeoutSeconds { get; set; } = 15;
 	public int RetryAttempts { get; set; } = 2;
