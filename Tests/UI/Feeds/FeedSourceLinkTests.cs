@@ -18,6 +18,12 @@ public class FeedSourceLinkTests : BunitContext
 	[Test]
 	[Arguments(FeedProvider.Mdblist, "snoak/trakt-s-trending-shows", "https://mdblist.com/lists/snoak/trakt-s-trending-shows")]
 	[Arguments(FeedProvider.Mdblist, "chazlarson/external/2868", "https://mdblist.com/lists/chazlarson/external/2868")]
+	[Arguments(FeedProvider.AniList, "yourname/planning", "https://anilist.co/user/yourname/animelist")]
+	[Arguments(FeedProvider.AniList, "search/anime?airing%20status=RELEASING", "https://anilist.co/search/anime?airing%20status=RELEASING")]
+	[Arguments(FeedProvider.AniList, "search/anime/this-season", "https://anilist.co/search/anime/this-season")]
+	[Arguments(FeedProvider.Mal, "yourname", "https://myanimelist.net/animelist/yourname")]
+	[Arguments(FeedProvider.Mal, "topanime.php?type=upcoming", "https://myanimelist.net/topanime.php?type=upcoming")]
+	[Arguments(FeedProvider.Mal, "anime/season/2026/fall", "https://myanimelist.net/anime/season/2026/fall")]
 	public async Task Render_ForAProvider_LinksToItsListUrl(FeedProvider provider, string identifier, string expectedUrl)
 	{
 		var cut = Render<FeedSourceLink>(parameters => parameters.Add(link => link.Provider, provider).Add(link => link.Identifier, identifier));

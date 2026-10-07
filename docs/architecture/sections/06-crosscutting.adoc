@@ -201,7 +201,9 @@ are facts of its rating type, read through `source.Card`.
 * *A whole file* (IMDb's ratings, the anime id map) is an `IDataset` with an `IDatasetTable`, a row in `DatasetLoads` and a
   `DatasetLoader` registered in Core; it loads daily and answers `Error` until its first load (ADR 0013).
 * *A new feed source* is a `FeedProvider` member with its `Service`, a `Feed<T>` registration and its `FeedSources` entry
-  (placeholder, help and page link); it throws on a shape it cannot read and never skips an item it cannot parse.
+  (placeholder, help and page link); it throws on a shape it cannot read and never skips an item it cannot parse. A feed
+  source whose site has browse pages adds a page table on `SiteLink` (`AniListPages`, `MalPages`) and reads a page up to
+  `FeedPages.Titles`, its list forms tried first.
 
 The compiler, the role registration tests, the stored-enum-name test and the brand-art test catch a member that misses any of these.
 
