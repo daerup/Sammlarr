@@ -5,6 +5,7 @@ public enum ApiKeyProvider
 	Tmdb,
 	Mdblist,
 	TmdbReadToken,
+	Mal,
 }
 
 public static class ApiKeyProviders
@@ -19,6 +20,7 @@ public static class ApiKeyProviders
 				{
 					ApiKeyProvider.Tmdb or ApiKeyProvider.TmdbReadToken => RemoteService.Tmdb,
 					ApiKeyProvider.Mdblist => RemoteService.Mdblist,
+					ApiKeyProvider.Mal => RemoteService.Mal,
 				};
 			}
 		}

@@ -34,7 +34,7 @@ public enum RatingSource
 	Trakt,
 
 	[Description("MyAnimeList")]
-	[SuppliedBy<RemoteService>(RemoteService.Mdblist)]
+	[SuppliedBy<RemoteService>(RemoteService.Mdblist, RemoteService.Mal)]
 	MyAnimeList,
 
 	[Description("AniList")]

@@ -42,7 +42,7 @@ public class ServicesMapTests : BunitContext
 			);
 		var tiles = cut.FindAll(".map-tile").Select(tile => tile.QuerySelector(".sr-only")!.TextContent.Trim());
 		await Assert.That(boxes).IsEquivalentTo(["Plex: Your account", "TMDb: Your key is set"]);
-		await Assert.That(tiles).IsEquivalentTo(["MDBList: No key yet", "AniList: Ready"]);
+		await Assert.That(tiles).IsEquivalentTo(["MDBList: No key yet", "AniList: Ready", "MyAnimeList: No key yet"]);
 	}
 
 	[Test]
@@ -51,13 +51,13 @@ public class ServicesMapTests : BunitContext
 		var cut = RenderMap(canPick: false, RemoteService.Plex, RemoteService.Tmdb, RemoteService.Mdblist);
 
 		var starts = cut.FindAll(".map-traces path").Select(path => path.GetAttribute("d")!.Split(' ')[0]);
-		await Assert.That(starts).IsEquivalentTo(Enumerable.Repeat("M256", 7));
+		await Assert.That(starts).IsEquivalentTo(Enumerable.Repeat("M256", 8));
 	}
 
 	[Test]
-	[Arguments(new[] { RemoteService.Plex, RemoteService.Tmdb, RemoteService.Mdblist, RemoteService.AniList }, 0)]
-	[Arguments(new[] { RemoteService.Plex, RemoteService.Tmdb, RemoteService.AniList }, 1)]
-	[Arguments(new RemoteService[0], 7)]
+	[Arguments(new[] { RemoteService.Plex, RemoteService.Tmdb, RemoteService.Mdblist, RemoteService.AniList, RemoteService.Mal }, 0)]
+	[Arguments(new[] { RemoteService.Plex, RemoteService.Tmdb, RemoteService.AniList }, 2)]
+	[Arguments(new RemoteService[0], 8)]
 	public async Task Traces_ToAServiceTheViewerHasNotSetUp_AreDotted(RemoteService[] ready, int dotted)
 	{
 		var cut = RenderMap(false, ready);

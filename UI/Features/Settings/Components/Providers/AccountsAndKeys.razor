@@ -51,6 +51,18 @@
             (free).
         </Description>
     </ApiKeyRow>
+    <ApiKeyRow Provider="ApiKeyProvider.Mal"
+               Uses="MalUses"
+               Open="Open == RemoteService.Mal"
+               OpenChanged="open => ToggleAsync(RemoteService.Mal, open)"
+               Changed="Changed">
+        <Description>
+            Your MyAnimeList client ID. Create an API client at
+            <a href="https://myanimelist.net/apiconfig" target="_blank" rel="noopener noreferrer"
+               class="underline underline-offset-2 hover:text-foreground transition-colors">myanimelist.net › API</a>
+            (free) and paste its client ID.
+        </Description>
+    </ApiKeyRow>
 </div>
 
 @code {
@@ -61,6 +73,12 @@
         "the poster, summary and rating on every title",
         "the ids Radarr and Sonarr need to add a title",
         "TMDB lists as feeds",
+    ];
+
+    private static readonly string[] MalUses =
+    [
+        "MyAnimeList anime lists as feeds",
+        "anime details and the MyAnimeList rating with its votes",
     ];
 
     private static readonly string[] MdblistUses =

@@ -35,6 +35,11 @@ internal static class FeedSources
 				),
 				identifier => $"https://anilist.co/user/{identifier.Split('/')[0]}/animelist"
 			),
+			FeedProvider.Mal => new(
+				"e.g. https://myanimelist.net/animelist/yourname",
+				new MarkupString("Paste a MyAnimeList username or the list's myanimelist.net/animelist link. The list must be public."),
+				identifier => $"https://myanimelist.net/animelist/{identifier}"
+			),
 		};
 	}
 }
