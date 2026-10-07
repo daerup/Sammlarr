@@ -181,8 +181,10 @@
             return RatingTexts.Reason(row.State, _model.Sammlarr, Where);
         }
 
-        return row.Rating.Map(RatingTexts.Detail).Map(text => UsedInstead(row) ? $"{text} · used instead" : text).GetValueOr(string.Empty);
+        return row.Rating.Map(rating => RatingTexts.Detail(rating, Series)).Map(text => UsedInstead(row) ? $"{text} · used instead" : text).GetValueOr(string.Empty);
     }
+
+    private bool Series => Ids.Any(id => id.Type is MediaType.Show && id.Source is MediaProvider.Tvdb or MediaProvider.Tmdb);
 
     private bool UsedInstead(RatingRow row) => _model.UsedInstead && row.State is RatingRowState.Counts;
 

@@ -191,6 +191,45 @@ public class SammlarrRatingBadgeTests : BunitContext
 		_media.FindIdAsync(Any<MediaId>(), Any<MediaProvider>(), Any()).WasCalled(Times.Never);
 	}
 
+	[Test]
+	public async Task Breakdown_ForASeries_SaysAniListAndMalRateItsFirstSeason()
+	{
+		var cut = RenderAnime(TvdbId.From("267440", MediaType.Show), AniListId.From("16498", MediaType.Show));
+
+		await Assert.That(Subtitles(cut)).IsEquivalentTo(["season 1 · 2,826,539 votes", "season 1 · 610,640 votes"]);
+	}
+
+	[Test]
+	public async Task Breakdown_ForAMovie_GivesAniListAndMalNoSeason()
+	{
+		var cut = RenderAnime(TmdbId.From("129", MediaType.Movie), AniListId.From("199", MediaType.Movie));
+
+		await Assert.That(Subtitles(cut)).IsEquivalentTo(["2,826,539 votes", "610,640 votes"]);
+	}
+
+	[Test]
+	public async Task Breakdown_ForALaterSeasonStoredAsItsOwnTitle_GivesAniListAndMalNoSeason()
+	{
+		var cut = RenderAnime(AniListId.From("104578", MediaType.Show), MalId.From("38524", MediaType.Show));
+
+		await Assert.That(Subtitles(cut)).IsEquivalentTo(["2,826,539 votes", "610,640 votes"]);
+	}
+
+	private static IEnumerable<string> Subtitles(IRenderedComponent<SammlarrRatingBreakdown> cut) =>
+		cut.FindAll(".rating-row-name small").Select(line => line.TextContent.Trim());
+
+	private IRenderedComponent<SammlarrRatingBreakdown> RenderAnime(params IExternalMediaId[] ids)
+	{
+		return Render<SammlarrRatingBreakdown>(parameters =>
+			parameters
+				.Add(breakdown => breakdown.Ratings, MediaRatings.From([new AniListRating(85, Some.Of(610_640)), new MyAnimeListRating(8.54f, Some.Of(2_826_539))]))
+				.Add(breakdown => breakdown.Strategy, new RatingStrategy(new AveragedRating([RatingSource.MyAnimeList, RatingSource.AniList])))
+				.Add(breakdown => breakdown.Available, [RatingSource.MyAnimeList, RatingSource.AniList])
+				.Add(breakdown => breakdown.Where, "your default")
+				.Add(breakdown => breakdown.Ids, ids)
+		);
+	}
+
 	private IRenderedComponent<SammlarrRatingBreakdown> RenderBreakdown(MediaRatings ratings, RatingStrategy strategy, params IExternalMediaId[] known)
 	{
 		return RenderBreakdownWith(ratings, strategy, [TmdbId.From("1396", MediaType.Show), ImdbId.From("tt0903747", MediaType.Show), .. known]);

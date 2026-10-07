@@ -66,17 +66,21 @@ internal static class RatingTexts
 		};
 	}
 
-	public static string Detail(IMediaRating rating)
+	public static string Detail(IMediaRating rating, bool series)
 	{
 		return rating.Source switch
 		{
-			RatingSource.Tmdb or RatingSource.Imdb or RatingSource.Letterboxd or RatingSource.Trakt or RatingSource.MyAnimeList or RatingSource.AniList =>
-				rating.Votes.Match(votes => $"{Count(votes)} votes", () => "no vote count"),
+			RatingSource.MyAnimeList or RatingSource.AniList when series => $"season 1 · {Votes(rating)}",
+			RatingSource.Tmdb or RatingSource.Imdb or RatingSource.Letterboxd or RatingSource.Trakt or RatingSource.MyAnimeList or RatingSource.AniList => Votes(
+				rating
+			),
 			RatingSource.Metacritic => $"a Metascore of {rating.Value}",
 			RatingSource.RottenTomatoesCritics => $"{rating.Value} of critics liked it",
 			RatingSource.RottenTomatoesAudience => $"{rating.Value} of users liked it",
 		};
 	}
+
+	private static string Votes(IMediaRating rating) => rating.Votes.Match(votes => $"{Count(votes)} votes", () => "no vote count");
 
 	public static string Reason(RatingRowState state, Optional<SammlarrRating> sammlarr, string where)
 	{
