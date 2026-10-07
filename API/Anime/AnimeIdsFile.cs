@@ -52,7 +52,7 @@ internal sealed class AnimeIdsFile(HttpClient http) : IDataset<AnimeIdMapping>
 		var type = movie.Match(_ => MediaType.Movie, () => entry.Type == "MOVIE" ? MediaType.Movie : MediaType.Show);
 		var whole = type is MediaType.Movie || IsTheShowItself(entry);
 		var tvdb = Claim(claimed, "tvdb", Optional.Of(entry.Tvdb).When(_ => type is MediaType.Show && whole));
-		var tmdb = Claim(claimed, $"tmdb-{type}", movie.Or(() => Optional.Of(entry.Tmdb?.Tv)).When(_ => whole));
+		var tmdb = Claim(claimed, $"tmdb-{type}", type is MediaType.Movie ? movie : Optional.Of(entry.Tmdb?.Tv).When(_ => whole));
 		var imdb = Claim(claimed, "imdb", Optional.Of(entry.Imdb?.FirstOrDefault()).When(_ => whole));
 		return new AnimeIdMapping(type, Optional.Of(entry.AniList), Optional.Of(entry.Mal), tvdb, tmdb, imdb);
 	}
