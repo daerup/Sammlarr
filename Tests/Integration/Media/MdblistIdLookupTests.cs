@@ -60,16 +60,23 @@ public class MdblistIdLookupTests(SammlarrTestHost host) : IAsyncDisposable
 			$"{TestUrls.TmdbApi}/tv/1396",
 			"""{"id":1396,"original_name":"Breaking Bad","first_air_date":"2008-01-20","external_ids":{"imdb_id":"tt0903747","tvdb_id":null}}"""
 		);
+		host.WikidataHolds("tt0903747");
 		var show = await host.SeedMediaAsync(ImdbId.From("tt0903747", MediaType.Show));
 		var media = host.Resolve<IMediaService>();
 
 		var first = await media.FindIdAsync(show, MediaProvider.Tvdb);
-		var asked = (Mdblist: host.HttpStub.Requests(TestUrls.MdblistApi), Tmdb: host.HttpStub.Requests(TestUrls.TmdbApi));
+		var asked = (
+			Mdblist: host.HttpStub.Requests(TestUrls.MdblistApi),
+			Tmdb: host.HttpStub.Requests(TestUrls.TmdbApi),
+			Wikidata: host.WikidataAsked("tt0903747")
+		);
 		var again = await media.FindIdAsync(show, MediaProvider.Tvdb);
 
 		await Assert.That(first).IsNone();
 		await Assert.That(again).IsNone();
-		await Assert.That(asked).IsEqualTo((1, 2));
-		await Assert.That((host.HttpStub.Requests(TestUrls.MdblistApi), host.HttpStub.Requests(TestUrls.TmdbApi))).IsEqualTo(asked);
+		await Assert.That(asked).IsEqualTo((1, 2, 1));
+		await Assert
+			.That((host.HttpStub.Requests(TestUrls.MdblistApi), host.HttpStub.Requests(TestUrls.TmdbApi), host.WikidataAsked("tt0903747")))
+			.IsEqualTo(asked);
 	}
 }

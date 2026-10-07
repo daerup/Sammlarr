@@ -1,6 +1,6 @@
 {
   "head" : {
-    "vars" : [ "path" ]
+    "vars" : [ "rt", "tmdb", "tvdb", "metacritic", "letterboxd" ]
   },
   "results" : {
     "bindings" : [ ]

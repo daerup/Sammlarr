@@ -16,7 +16,7 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task Derive_OverTheRegisteredConverters_GivesPlexsHopsThenTmdbsThenWikidatasHintlessOne()
+	public async Task Derive_OverTheRegisteredConverters_GivesPlexsHopsThenTmdbsThenWikidatasHintlessOnes()
 	{
 		var hops = IdLookupPlanner.Derive(Converters);
 
@@ -40,7 +40,11 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 					"Tmdb Imdb>hints (1)",
 					"Tmdb Tvdb>Tmdb (1)",
 					"Tmdb Tvdb>hints (1)",
-					"Wikidata Imdb>RottenTomatoes (1)",
+					"Wikidata Imdb>Tmdb (3)",
+					"Wikidata Imdb>RottenTomatoes (3)",
+					"Wikidata Imdb>Tvdb (3)",
+					"Wikidata Imdb>Metacritic (3)",
+					"Wikidata Imdb>Letterboxd (3)",
 				],
 				CollectionOrdering.Matching
 			);
@@ -57,7 +61,7 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Plan_ForAnImdbIdWithHints_SearchesFirstThenThroughTmdbsTitleThenThroughMdblists()
+	public async Task Plan_ForAnImdbIdWithHints_SearchesFirstThenThroughTheCheapestTitleHints()
 	{
 		var hops = IdLookupPlanner.Derive(Converters);
 		var capacity = host.Resolve<IRemoteCapacity>();
@@ -79,6 +83,10 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 					"Mdblist Imdb>Tvdb (2), Mdblist Tvdb>hints (2), Plex hints>Plex (4)",
 					"Mdblist Imdb>Trakt (2), Mdblist Trakt>hints (2), Plex hints>Plex (4)",
 					"Mdblist Imdb>Mal (2), Mdblist Mal>hints (2), Plex hints>Plex (4)",
+					"Wikidata Imdb>Tmdb (3), Tmdb Tmdb>hints (1), Plex hints>Plex (4)",
+					"Wikidata Imdb>Tvdb (3), Tmdb Tvdb>hints (1), Plex hints>Plex (4)",
+					"Wikidata Imdb>Tmdb (3), Mdblist Tmdb>hints (2), Plex hints>Plex (4)",
+					"Wikidata Imdb>Tvdb (3), Mdblist Tvdb>hints (2), Plex hints>Plex (4)",
 				],
 				CollectionOrdering.Matching
 			);

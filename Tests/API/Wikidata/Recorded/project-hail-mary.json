@@ -1,12 +1,28 @@
 {
   "head" : {
-    "vars" : [ "path" ]
+    "vars" : [ "rt", "tmdb", "tvdb", "metacritic", "letterboxd" ]
   },
   "results" : {
     "bindings" : [ {
-      "path" : {
+      "rt" : {
         "type" : "literal",
         "value" : "m/project_hail_mary"
+      },
+      "tmdb" : {
+        "type" : "literal",
+        "value" : "687163"
+      },
+      "tvdb" : {
+        "type" : "literal",
+        "value" : "346729"
+      },
+      "metacritic" : {
+        "type" : "literal",
+        "value" : "movie/project-hail-mary"
+      },
+      "letterboxd" : {
+        "type" : "literal",
+        "value" : "project-hail-mary"
       }
     } ]
   }

@@ -5,14 +5,13 @@
     <CardHead Icon="database" Title="Data sources"/>
     @foreach (var source in Sources)
     {
-        var name = Branding.GetBrandingInfo(source.Provider).DisplayName;
         <div class="source-row">
             <span class="source-logo">
-                <ProviderLogo Provider="source.Provider" Form="ProviderLogoForm.Logo" Size="22"/>
+                <BrandedLogo Brand="source.Brand" Form="ProviderLogoForm.Logo" Size="22"/>
             </span>
             <span class="source-gives">@source.Gives</span>
             <span class="source-note">@source.Note</span>
-            <a class="source-open" href="@source.Href" target="_blank" rel="noopener noreferrer" aria-label="@($"Open {name}")">
+            <a class="source-open" href="@source.Href" target="_blank" rel="noopener noreferrer" aria-label="@($"Open {source.Brand.DisplayName}")">
                 <LucideIcon Name="external-link" Size="13"/>
             </a>
         </div>
@@ -31,16 +30,17 @@
     private string RottenTomatoesSuppliers =>
         string.Join(" and ", (RatingSource.RottenTomatoesCritics.SuppliedBy() + RatingSource.RottenTomatoesAudience.SuppliedBy()).Order().Select(Branding.Name));
 
-    private static readonly IReadOnlyList<DataSource> Sources =
+    private IReadOnlyList<DataSource> Sources =>
     [
-        new(MediaProvider.Tmdb, "Titles, artwork, trending and ratings", "This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.", "https://www.themoviedb.org"),
-        new(MediaProvider.Plex, "Sign-in, search, the wantlist sync, and the IMDb and Rotten Tomatoes ratings", "Plex and the Plex logo are trademarks of Plex and used under a license.", "https://www.plex.tv"),
-        new(MediaProvider.Mdblist, "The lists your feeds import, and ratings from IMDb, TMDB, Rotten Tomatoes, Metacritic, Letterboxd, Trakt and MyAnimeList", "Lists and ratings come from MDBList.", "https://mdblist.com"),
-        new(MediaProvider.Tvdb, "Series ids, linked from a title", "Series ids link to TheTVDB.", "https://thetvdb.com"),
-        new(MediaProvider.Imdb, "Title ids and ratings, linked from a title", "IMDb and all related logos are trademarks of IMDb.com, Inc. or its affiliates.", "https://www.imdb.com"),
-        new(MediaProvider.Metacritic, "Metascores, through MDBList, linked from a title", "Metacritic is a trademark of Fandom, Inc.", "https://www.metacritic.com"),
-        new(MediaProvider.Letterboxd, "Ratings, through MDBList, linked from a title", "Letterboxd is a trademark of Letterboxd Limited.", "https://letterboxd.com"),
+        new(Branding.GetBrandingInfo(MediaProvider.Tmdb), "Titles, artwork, trending and ratings", "This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.", "https://www.themoviedb.org"),
+        new(Branding.GetBrandingInfo(MediaProvider.Plex), "Sign-in, search, the wantlist sync, and the IMDb and Rotten Tomatoes ratings", "Plex and the Plex logo are trademarks of Plex and used under a license.", "https://www.plex.tv"),
+        new(Branding.GetBrandingInfo(MediaProvider.Mdblist), "The lists your feeds import, and ratings from IMDb, TMDB, Rotten Tomatoes, Metacritic, Letterboxd, Trakt and MyAnimeList", "Lists and ratings come from MDBList.", "https://mdblist.com"),
+        new(Branding.GetBrandingInfo(MediaProvider.Tvdb), "Series ids, linked from a title", "Series ids link to TheTVDB.", "https://thetvdb.com"),
+        new(Branding.GetBrandingInfo(MediaProvider.Imdb), "Title ids and ratings, linked from a title", "IMDb and all related logos are trademarks of IMDb.com, Inc. or its affiliates.", "https://www.imdb.com"),
+        new(Branding.GetBrandingInfo(MediaProvider.Metacritic), "Metascores, through MDBList, linked from a title", "Metacritic is a trademark of Fandom, Inc.", "https://www.metacritic.com"),
+        new(Branding.GetBrandingInfo(MediaProvider.Letterboxd), "Ratings, through MDBList, linked from a title", "Letterboxd is a trademark of Letterboxd Limited.", "https://letterboxd.com"),
+        new(Branding.GetBrandingInfo(RemoteService.Wikidata), "Rotten Tomatoes, Metacritic and Letterboxd pages, and TMDB and TVDB ids no other service knows, by IMDb id", "Wikidata's data is available under CC0.", "https://www.wikidata.org"),
     ];
 
-    private sealed record DataSource(MediaProvider Provider, string Gives, string Note, string Href);
+    private sealed record DataSource(BrandingInfo Brand, string Gives, string Note, string Href);
 }

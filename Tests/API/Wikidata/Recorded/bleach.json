@@ -1,17 +1,33 @@
 {
   "head" : {
-    "vars" : [ "path" ]
+    "vars" : [ "rt", "tmdb", "tvdb", "metacritic", "letterboxd" ]
   },
   "results" : {
     "bindings" : [ {
-      "path" : {
+      "rt" : {
         "type" : "literal",
         "value" : "tv/bleach"
+      },
+      "tmdb" : {
+        "type" : "literal",
+        "value" : "30984"
+      },
+      "tvdb" : {
+        "type" : "literal",
+        "value" : "74796"
       }
     }, {
-      "path" : {
+      "rt" : {
         "type" : "literal",
         "value" : "tv/bleach/s01"
+      },
+      "tmdb" : {
+        "type" : "literal",
+        "value" : "30984"
+      },
+      "tvdb" : {
+        "type" : "literal",
+        "value" : "74796"
       }
     } ]
   }

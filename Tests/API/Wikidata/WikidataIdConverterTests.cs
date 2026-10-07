@@ -1,6 +1,5 @@
 using System.Net;
 using API.Wikidata;
-using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
@@ -12,7 +11,7 @@ namespace API.Tests.Wikidata;
 public class WikidataIdConverterTests
 {
 	[Test]
-	public async Task LookUpAsync_ForAMovie_FindsItsRottenTomatoesId()
+	public async Task LookUpAsync_ForAMovie_FindsEveryIdWikidataHoldsAsAMovie()
 	{
 		var handler = await AnsweringAsync("project-hail-mary");
 		var testee = Testee(handler);
@@ -23,13 +22,37 @@ public class WikidataIdConverterTests
 			.That(result)
 			.IsSuccess()
 			.And.Multiple(async found =>
-				await Assert.That(found.Ids).IsEquivalentTo(new IExternalMediaId[] { RottenTomatoesId.From("m/project_hail_mary", MediaType.Movie) })
+				await Assert
+					.That(found.Ids)
+					.IsEquivalentTo(
+						new IExternalMediaId[]
+						{
+							RottenTomatoesId.From("m/project_hail_mary", MediaType.Movie),
+							TmdbId.From("687163", MediaType.Movie),
+							TvdbId.From("346729", MediaType.Movie),
+							MetacriticId.From("project-hail-mary", MediaType.Movie),
+							LetterboxdId.From("project-hail-mary", MediaType.Movie),
+						}
+					)
 			);
 		handler.Verify(request => request.Method(HttpMethod.Get).PathMatches(".*sparql\\?query=.*tt12042730.*"), Times.Once);
 	}
 
 	[Test]
-	public async Task LookUpAsync_ForAShowThatAlsoListsASeason_FindsTheShowsPage()
+	[Arguments(MediaType.Movie, "P4947", "P12196")]
+	[Arguments(MediaType.Show, "P4983", "P4835")]
+	public async Task LookUpAsync_ForEachType_AsksForThatTypesTmdbAndTvdbIds(MediaType type, string tmdb, string tvdb)
+	{
+		var handler = await AnsweringAsync("no-page");
+		var testee = Testee(handler);
+
+		await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt12042730", type)));
+
+		handler.Verify(request => request.PathMatches($".*wdt%3A{tmdb}%20%3Ftmdb.*wdt%3A{tvdb}%20%3Ftvdb.*"), Times.Once);
+	}
+
+	[Test]
+	public async Task LookUpAsync_ForAShowThatAlsoListsASeason_FindsTheShowsPageAndItsShowIds()
 	{
 		var testee = Testee(await AnsweringAsync("bleach"));
 
@@ -38,7 +61,34 @@ public class WikidataIdConverterTests
 		await Assert
 			.That(result)
 			.IsSuccess()
-			.And.Multiple(async found => await Assert.That(found.Ids).IsEquivalentTo(new IExternalMediaId[] { RottenTomatoesId.From("tv/bleach", MediaType.Show) }));
+			.And.Multiple(async found =>
+				await Assert
+					.That(found.Ids)
+					.IsEquivalentTo(
+						new IExternalMediaId[]
+						{
+							RottenTomatoesId.From("tv/bleach", MediaType.Show),
+							TmdbId.From("30984", MediaType.Show),
+							TvdbId.From("74796", MediaType.Show),
+						}
+					)
+			);
+	}
+
+	[Test]
+	public async Task LookUpAsync_ForValuesThatAreNoIds_IgnoresThem()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""{"results":{"bindings":[{"tmdb":{"type":"literal","value":"tt0848228"},"metacritic":{"type":"literal","value":"game/the-avengers"},"letterboxd":{"type":"literal","value":"film/the-avengers-2012"}}]}}"""
+			);
+		var testee = Testee(handler);
+
+		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0848228", MediaType.Movie)));
+
+		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
 	}
 
 	[Test]
@@ -48,7 +98,14 @@ public class WikidataIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0000001", MediaType.Movie)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found).IsEqualTo(new IdLookupResult([], new None())));
+		await Assert
+			.That(result)
+			.IsSuccess()
+			.And.Multiple(async found =>
+			{
+				await Assert.That(found.Ids).IsEmpty();
+				await Assert.That(found.Hints).IsNone();
+			});
 	}
 
 	[Test]
@@ -58,7 +115,7 @@ public class WikidataIdConverterTests
 		handler
 			.OnAnyRequest()
 			.RespondWithJson(
-				"""{"results":{"bindings":[{"path":{"type":"literal","value":"franchise/marvel"}},{"path":{"type":"literal","value":"m/the_avengers_2012"}}]}}"""
+				"""{"results":{"bindings":[{"rt":{"type":"literal","value":"franchise/marvel"}},{"rt":{"type":"literal","value":"m/the_avengers_2012"}}]}}"""
 			);
 		var testee = Testee(handler);
 
@@ -76,7 +133,7 @@ public class WikidataIdConverterTests
 	public async Task LookUpAsync_ForAnItemThatOnlyListsASeasonPage_FindsNoId()
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWithJson("""{"results":{"bindings":[{"path":{"type":"literal","value":"tv/small_axe/s02"}}]}}""");
+		handler.OnAnyRequest().RespondWithJson("""{"results":{"bindings":[{"rt":{"type":"literal","value":"tv/small_axe/s02"}}]}}""");
 		var testee = Testee(handler);
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt10551102", MediaType.Show)));
@@ -85,10 +142,12 @@ public class WikidataIdConverterTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_WhenWikidataIsUnavailable_SaysTheProviderIsUnavailable()
+	[Arguments(HttpStatusCode.ServiceUnavailable)]
+	[Arguments(HttpStatusCode.TooManyRequests)]
+	public async Task LookUpAsync_WhenWikidataIsUnavailable_SaysTheProviderIsUnavailable(HttpStatusCode status)
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().Respond(HttpStatusCode.ServiceUnavailable);
+		handler.OnAnyRequest().Respond(status);
 		var testee = Testee(handler);
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt12042730", MediaType.Movie)));
@@ -119,11 +178,21 @@ public class WikidataIdConverterTests
 	}
 
 	[Test]
-	public async Task Lookups_TurnAnImdbIdIntoARottenTomatoesIdWithoutHints()
+	public async Task Lookups_TurnAnImdbIdIntoItsPageAndCrossIdsAsTheLastResortWithoutHints()
 	{
 		var testee = Testee(Mock.HttpHandler());
 
-		await Assert.That(testee.Lookups).IsEquivalentTo([(IdLookup)new ById([MediaProvider.Imdb], [MediaProvider.RottenTomatoes], 1, GivesHints: false)]);
+		await Assert
+			.That(testee.Lookups)
+			.IsEquivalentTo([
+				(IdLookup)
+					new ById(
+						[MediaProvider.Imdb],
+						[MediaProvider.RottenTomatoes, MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Metacritic, MediaProvider.Letterboxd],
+						3,
+						GivesHints: false
+					),
+			]);
 	}
 
 	private static async Task<MockHttpHandler> AnsweringAsync(string recording)

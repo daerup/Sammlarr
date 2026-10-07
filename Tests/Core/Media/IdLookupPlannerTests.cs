@@ -111,6 +111,23 @@ public class IdLookupPlannerTests
 	}
 
 	[Test]
+	public async Task Plan_WhileTmdbAndMdblistAreBlocked_TakesAnImdbIdToTvdbThroughWikidataFirst()
+	{
+		IdLookup anyId = new ById(Accepts: [MediaProvider.Imdb, MediaProvider.Tmdb], Yields: [MediaProvider.Imdb, MediaProvider.Tmdb, MediaProvider.Tvdb], Cost: 2);
+		IdLookup byImdb = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb, MediaProvider.Tvdb], Cost: 3, GivesHints: false);
+		var hops = IdLookupPlanner.Derive([
+			Converter(RemoteService.Tmdb, [Detail, Find]),
+			Converter(RemoteService.Mdblist, [anyId]),
+			Converter(RemoteService.Wikidata, [byImdb]),
+		]);
+		var blocked = TestCapacity.With(remote => remote is RemoteService.Tmdb or RemoteService.Mdblist ? Blocked : Idle);
+
+		var plan = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Imdb }, false, MediaProvider.Tvdb, hops, blocked, Now);
+
+		await Assert.That(plan.Paths[0].Select(hop => hop.Remote)).IsEquivalentTo([RemoteService.Wikidata]);
+	}
+
+	[Test]
 	public async Task Plan_ForAPlexTitleWhilePlexIsBlocked_KeepsTheSelfHop()
 	{
 		var plexBlocked = TestCapacity.With(remote => remote is RemoteService.Plex ? Blocked : Idle);

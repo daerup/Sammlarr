@@ -23,12 +23,29 @@ public class DataSourcesCardTests : BunitContext
 		await Assert
 			.That(cut.FindAll(".source-open").Select(link => link.GetAttribute("aria-label") ?? string.Empty))
 			.IsEquivalentTo(
-				["Open The Movie Database", "Open Plex", "Open Movie Database List", "Open The TVDB", "Open IMDb", "Open Metacritic", "Open Letterboxd"],
+				[
+					"Open The Movie Database",
+					"Open Plex",
+					"Open Movie Database List",
+					"Open The TVDB",
+					"Open IMDb",
+					"Open Metacritic",
+					"Open Letterboxd",
+					"Open Wikidata",
+				],
 				CollectionOrdering.Matching
 			);
 		await Assert
 			.That(cut.FindAll(".source-note")[0].TextContent)
 			.IsEqualTo("This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.");
+	}
+
+	[Test]
+	public async Task Rows_CreditWikidatasIdLookupsAsCc0()
+	{
+		var cut = Render<DataSourcesCard>();
+
+		await Assert.That(cut.FindAll(".source-note").Select(note => note.TextContent)).Contains("Wikidata's data is available under CC0.");
 	}
 
 	[Test]

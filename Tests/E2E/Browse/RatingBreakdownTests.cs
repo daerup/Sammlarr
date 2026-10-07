@@ -54,10 +54,14 @@ public partial class RatingBreakdownTests
 
 	private static StubSpec Sparql(string imdb, params string[] paths)
 	{
-		var bindings = string.Join(',', paths.Select(path => $$$"""{"path":{"type":"literal","value":"{{{path}}}"}}"""));
+		var bindings = string.Join(',', paths.Select(path => $$$"""{"rt":{"type":"literal","value":"{{{path}}}"}}"""));
 		return new StubSpec("/sparql", 200, $$$"""{"results":{"bindings":[{{{bindings}}}]}}""")
 		{
-			Query = new Dictionary<string, string> { ["query"] = $$"""SELECT ?path WHERE { ?item wdt:P345 "{{imdb}}" ; wdt:P1258 ?path . }""" },
+			Query = new Dictionary<string, string>
+			{
+				["query"] =
+					$$"""SELECT ?rt ?tmdb ?tvdb ?metacritic ?letterboxd WHERE { ?item wdt:P345 "{{imdb}}" . OPTIONAL { ?item wdt:P1258 ?rt . } OPTIONAL { ?item wdt:P4947 ?tmdb . } OPTIONAL { ?item wdt:P12196 ?tvdb . } OPTIONAL { ?item wdt:P1712 ?metacritic . } OPTIONAL { ?item wdt:P6127 ?letterboxd . } }""",
+			},
 		};
 	}
 
