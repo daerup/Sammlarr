@@ -4,7 +4,9 @@ using Core.Auth;
 using Core.Caching;
 using Domain.Auth;
 using Domain.Providers;
+using Domain.Usage;
 using Microsoft.Extensions.Caching.Memory;
+using Observability.Usage;
 using TestInfrastructure;
 
 namespace Core.Tests.Auth;
@@ -34,6 +36,17 @@ public sealed class ApiKeyServiceTests : IDisposable
 	}
 
 	public void Dispose() => _memory.Dispose();
+
+	[Test]
+	public async Task TestAsync_ChecksTheKeyUnderTheKeyTestCause()
+	{
+		var cause = UsageCause.Other;
+		_tmdb.CheckAsync(Any(), Any()).Returns(AccessCheck.Valid).Callback(() => cause = UsageCauses.Current.Cause);
+
+		await Testee.TestAsync(ApiKeyProvider.Tmdb, "new-key");
+
+		await Assert.That(cause).IsEqualTo(UsageCause.KeyTest);
+	}
 
 	[Test]
 	public async Task GetAsync_WhenReadTwice_LoadsAndChecksTheStoredKeyOnce()

@@ -3,6 +3,8 @@ using Contracts.DI;
 using Contracts.Feed;
 using Domain.Auth;
 using Domain.Providers;
+using Domain.Usage;
+using Observability.Usage;
 
 namespace Core.Auth;
 
@@ -29,6 +31,7 @@ internal sealed class ApiKeyService(
 
 	public async Task<Result<IApiKey>> TestAsync(ApiKeyProvider provider, string value, CancellationToken cancellationToken = default)
 	{
+		using var marked = UsageCauses.Mark(UsageCause.KeyTest);
 		var check = await validators[provider].CheckAsync(value, cancellationToken);
 		return AccessChecks.Answer(check, KeyOf(provider, value), provider.Remote.GetDescription(), "API key");
 	}

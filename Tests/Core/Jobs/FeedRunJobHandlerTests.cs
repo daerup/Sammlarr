@@ -8,7 +8,9 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
 using Domain.Notifications;
+using Domain.Usage;
 using Domain.Wantlist.Sync;
+using Observability.Usage;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
@@ -49,6 +51,20 @@ public class FeedRunJobHandlerTests
 		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), Nightly));
 
 		await Assert.That(calls).IsEquivalentTo(["arm", "run"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task HandleAsync_RunsTheFeedUnderItsFeedRunCause()
+	{
+		var id = FeedId.From(Guid.NewGuid());
+		var (testee, _, _, engine) = Testee();
+		var mark = new UsageMark(UsageCause.Other, new None());
+		engine.RunAsync(Any<FeedId>(), Any<FeedRunTrigger>(), Any()).Returns(new FeedRunFailed("stubbed")).Callback(() => mark = UsageCauses.Current);
+
+		await testee.HandleAsync(new RunFeed(id, new Manual()));
+
+		await Assert.That(mark.Cause).IsEqualTo(UsageCause.FeedRun);
+		await Assert.That(mark.Feed).IsSome().And.IsEqualTo(id);
 	}
 
 	[Test]

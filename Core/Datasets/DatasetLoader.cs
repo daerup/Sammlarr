@@ -1,6 +1,8 @@
 using Contracts;
 using Contracts.Datasets;
+using Domain.Usage;
 using Microsoft.Extensions.Logging;
+using Observability.Usage;
 
 namespace Core.Datasets;
 
@@ -47,6 +49,7 @@ internal sealed class DatasetLoader<TRow>(
 
 	private async Task<Result<int>> LoadNowAsync(CancellationToken cancellationToken)
 	{
+		using var marked = UsageCauses.Mark(UsageCause.Dataset);
 		var last = await loads.FindAsync(dataset.Name, cancellationToken);
 		var download = await dataset.DownloadAsync(last.Map(load => load.ETag), cancellationToken);
 		return await download.Map(file => file.Match(changed => ReplaceAsync(changed, cancellationToken), () => Task.FromResult<Result<int>>(Success.Of(0))));

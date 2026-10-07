@@ -1,7 +1,9 @@
 using API.Arr.Types;
 using Contracts.Identity;
 using Contracts.Settings;
+using Domain.Usage;
 using Domain.Wantlist.Arr;
+using Observability.Usage;
 
 namespace API.Arr;
 
@@ -10,6 +12,7 @@ internal sealed class ArrConnectionTester(ArrApis apis, ICurrentUser currentUser
 	public async Task<Result<ArrInstanceChoices>> TestAsync(ArrApp app, ArrInstanceConfig instance, CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
+		using var marked = UsageCauses.Mark(UsageCause.KeyTest);
 		return await ArrSession
 			.Connect(app, instance)
 			.Match(connection => ChoicesAsync(apis.For(app), connection, cancellationToken), error => Task.FromResult<Result<ArrInstanceChoices>>(error));
