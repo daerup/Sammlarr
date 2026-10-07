@@ -533,6 +533,7 @@ public class MediaServiceTests
 			configRepo.Object,
 			TestCapacity.Open(),
 			TestReadiness.Everything(),
+			[TestArtwork.ResizesAnything()],
 			dateTimeProvider.Object,
 			NullLogger<DetailsFetcher>.Instance
 		);
