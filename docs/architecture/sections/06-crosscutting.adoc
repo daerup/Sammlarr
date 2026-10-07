@@ -176,16 +176,16 @@ Members say what they do; the type already says what to:
 
 === Provider extensibility and code generation
 
-Providers are declared, not hand-wired. Each `MediaProvider` value carries a `[Capabilities]`
-attribute; Roslyn source generators emit the provider-subset enums (`FeedProvider`,
-`ApiKeyProvider`, …) and their conversions from that matrix, plus the options-record
-registration. Each `RatingSource` member names the remote services that supply it (`[SuppliedBy<RemoteService>]`), from
+Providers are registered, not generated. A provider module names the remote service it calls (`ForRemote<TOptions>(RemoteService)`)
+and registers through it its clients, its key check, its roles and its converters and enrichers; the Radarr + Sonarr pair
+registers its sink and search through `ForService`. Each role registration records who registered it beside the service
+the role member claims (`Registered`), and the role tests hold the two together, cover every member of each role enum and
+give every remote service a client. The role enums and the key slots are written by hand, each member answering its
+`Service` or its `Remote`, and a switch that misses a member does not compile (CS8509 is an error). A Roslyn source
+generator emits the options-record registration. Each `RatingSource` member names the remote services that supply it (`[SuppliedBy<RemoteService>]`), from
 which a generator emits `SuppliedBy()` and the reverse, `SuppliedRatingSources()`; its owner and whether it publishes votes
-are facts of its rating type, read through `source.Card`. `SinkKind` and `SearchProvider` are hand-written, because their
-Radarr + Sonarr choice is no provider (`Provider()` answers `None`; the UI brands each `ArrApp` itself), and so is `AuthProvider`, because a sign-in is not a provider: Sammlarr accounts
-know no media, so `AuthProvider.Local` has no `MediaProvider` (`AuthProvider.Provider()` answers `None`), and the UI
-draws a sign-in with its own brand (`GetBrandingInfo(AuthProvider)`). Adding a provider is a folder, an enum value and a module (recipe in
-<<section-building-block-view>>).
+are facts of its rating type, read through `source.Card`. Adding a provider is a folder, a `RemoteService` member and a
+module (recipe in <<section-building-block-view>>).
 
 === HTTP resilience
 
@@ -213,8 +213,8 @@ budget (`MaxWait` for id lookups, `EnrichWait` for enrichment), at most once per
 instead of sending a request into the block. The request already in flight still honours `Retry-After` through the
 retry policy.
 
-Enrichment asks, one at a time, the open enricher (`EnricherProvider`, generated from `ProviderCapability.Enricher`)
-the search setting names, else the one whose `Fills` cover the most missing detail fields, the least busy first, among those that accept
+Enrichment asks, one at a time, the open enricher (the enrichers registered through `Enricher`, keyed by remote service)
+the search setting's service names, else the one whose `Fills` cover the most missing detail fields, the least busy first, among those that accept
 one of the title's ids (`Accepts`), until
 no open enricher can fill what is still missing; then it sleeps for the blocked enricher worth waiting for (one that
 fills a missing field, frees within its `EnrichWait` and has not been waited for yet, the soonest free first) and
