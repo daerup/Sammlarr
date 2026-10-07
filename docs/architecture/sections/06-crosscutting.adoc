@@ -239,7 +239,10 @@ remote services that supply it (`[SuppliedBy<RemoteService>]`, generated `Suppli
 declaration, its rating type, its `Card` arm,
 Plex's wire mapping and the UI copy names a source (the Settings › Testing demos aside). Merging keeps one rating per source, and a rating
 with votes wins over a copy without (TMDB's own rating over Plex's copy of it). An enricher that fills ratings and
-finds none answers like any other: the rating stays in what it could not give. No field and no provider is special: a
+finds none answers like any other: the rating stays in what it could not give. A fresh answer wins over the stored
+copy, and an earlier answer over a later one, except for what an enricher `Defers` (TVmaze its title, which it cannot
+vouch is English) and for a poster or backdrop no `IArtworkResizer` sizes (TVmaze's): those only fill a gap, after the
+stored copy and after every answer that may replace, so the grids keep their `srcset`. No field and no provider is special: a
 blocked TMDB is waited for within its 15 seconds for a missing rating, tagline or poster alike, and a TMDB blocked for
 longer, like a blocked Plex, stores no answer and is asked on the first load after its block lifts and an hour has
 passed since the last ask.

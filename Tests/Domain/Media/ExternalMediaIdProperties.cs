@@ -61,5 +61,6 @@ public class ExternalMediaIdProperties
 			MediaProvider.Letterboxd => LetterboxdId.From(value, type),
 			MediaProvider.Trakt => TraktId.From(value, type),
 			MediaProvider.Mal => MalId.From(value, type),
+			MediaProvider.Tvmaze => TvmazeId.From(value, type),
 		};
 }

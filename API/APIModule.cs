@@ -6,6 +6,7 @@ using API.Pictures;
 using API.Plex;
 using API.Tmdb;
 using API.Tvdb;
+using API.Tvmaze;
 using API.Wikidata;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -20,6 +21,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<TmdbModule>();
 		services.AddModule<MdblistModule>();
 		services.AddModule<WikidataModule>();
+		services.AddModule<TvmazeModule>();
 		services.AddModule<ArrModule>();
 		services.AddModule<PicturesModule>();
 		services.AddModule<TvdbModule>();

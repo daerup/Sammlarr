@@ -1,0 +1,10 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/(lookup/shows|shows/[0-9]+)"
+  },
+  "response": {
+    "status": 404
+  }
+}

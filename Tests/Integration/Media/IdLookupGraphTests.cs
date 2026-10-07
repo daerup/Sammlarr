@@ -16,7 +16,7 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task Derive_OverTheRegisteredConverters_GivesPlexsHopsThenTmdbsThenWikidatasHintlessOnes()
+	public async Task Derive_OverTheRegisteredConverters_GivesPlexsHopsThenTmdbsThenWikidatasHintlessOnesThenTvmazes()
 	{
 		var hops = IdLookupPlanner.Derive(Converters);
 
@@ -45,6 +45,12 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 					"Wikidata Imdb>Tvdb (3)",
 					"Wikidata Imdb>Metacritic (3)",
 					"Wikidata Imdb>Letterboxd (3)",
+					"Tvmaze Imdb>Tvdb (2)",
+					"Tvmaze Imdb>Tvmaze (2)",
+					"Tvmaze Imdb>hints (2)",
+					"Tvmaze Tvdb>Imdb (2)",
+					"Tvmaze Tvdb>Tvmaze (2)",
+					"Tvmaze Tvdb>hints (2)",
 				],
 				CollectionOrdering.Matching
 			);
@@ -75,18 +81,24 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 					"Plex hints>Plex (4)",
 					"Tmdb Imdb>hints (1), Plex hints>Plex (4)",
 					"Mdblist Imdb>hints (2), Plex hints>Plex (4)",
+					"Tvmaze Imdb>hints (2), Plex hints>Plex (4)",
 					"Tmdb Imdb>Tmdb (1), Tmdb Tmdb>hints (1), Plex hints>Plex (4)",
 					"Tmdb Imdb>Tmdb (1), Mdblist Tmdb>hints (2), Plex hints>Plex (4)",
 					"Mdblist Imdb>Tmdb (2), Tmdb Tmdb>hints (1), Plex hints>Plex (4)",
 					"Mdblist Imdb>Tvdb (2), Tmdb Tvdb>hints (1), Plex hints>Plex (4)",
+					"Tvmaze Imdb>Tvdb (2), Tmdb Tvdb>hints (1), Plex hints>Plex (4)",
 					"Mdblist Imdb>Tmdb (2), Mdblist Tmdb>hints (2), Plex hints>Plex (4)",
 					"Mdblist Imdb>Tvdb (2), Mdblist Tvdb>hints (2), Plex hints>Plex (4)",
+					"Mdblist Imdb>Tvdb (2), Tvmaze Tvdb>hints (2), Plex hints>Plex (4)",
 					"Mdblist Imdb>Trakt (2), Mdblist Trakt>hints (2), Plex hints>Plex (4)",
 					"Mdblist Imdb>Mal (2), Mdblist Mal>hints (2), Plex hints>Plex (4)",
 					"Wikidata Imdb>Tmdb (3), Tmdb Tmdb>hints (1), Plex hints>Plex (4)",
 					"Wikidata Imdb>Tvdb (3), Tmdb Tvdb>hints (1), Plex hints>Plex (4)",
+					"Tvmaze Imdb>Tvdb (2), Mdblist Tvdb>hints (2), Plex hints>Plex (4)",
+					"Tvmaze Imdb>Tvdb (2), Tvmaze Tvdb>hints (2), Plex hints>Plex (4)",
 					"Wikidata Imdb>Tmdb (3), Mdblist Tmdb>hints (2), Plex hints>Plex (4)",
 					"Wikidata Imdb>Tvdb (3), Mdblist Tvdb>hints (2), Plex hints>Plex (4)",
+					"Wikidata Imdb>Tvdb (3), Tvmaze Tvdb>hints (2), Plex hints>Plex (4)",
 				],
 				CollectionOrdering.Matching
 			);

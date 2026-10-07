@@ -1,3 +1,4 @@
+using System.Net;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -61,6 +62,7 @@ public class MdblistIdLookupTests(SammlarrTestHost host) : IAsyncDisposable
 			"""{"id":1396,"original_name":"Breaking Bad","first_air_date":"2008-01-20","external_ids":{"imdb_id":"tt0903747","tvdb_id":null}}"""
 		);
 		host.WikidataHolds("tt0903747");
+		host.HttpStub.RespondWithStatusForUrl($"{TestUrls.TvmazeApi}/lookup/shows", HttpStatusCode.NotFound);
 		var show = await host.SeedMediaAsync(ImdbId.From("tt0903747", MediaType.Show));
 		var media = host.Resolve<IMediaService>();
 
@@ -68,15 +70,23 @@ public class MdblistIdLookupTests(SammlarrTestHost host) : IAsyncDisposable
 		var asked = (
 			Mdblist: host.HttpStub.Requests(TestUrls.MdblistApi),
 			Tmdb: host.HttpStub.Requests(TestUrls.TmdbApi),
-			Wikidata: host.WikidataAsked("tt0903747")
+			Wikidata: host.WikidataAsked("tt0903747"),
+			Tvmaze: host.HttpStub.Requests(TestUrls.TvmazeApi)
 		);
 		var again = await media.FindIdAsync(show, MediaProvider.Tvdb);
 
 		await Assert.That(first).IsNone();
 		await Assert.That(again).IsNone();
-		await Assert.That(asked).IsEqualTo((1, 2, 1));
+		await Assert.That(asked).IsEqualTo((1, 2, 1, 1));
 		await Assert
-			.That((host.HttpStub.Requests(TestUrls.MdblistApi), host.HttpStub.Requests(TestUrls.TmdbApi), host.WikidataAsked("tt0903747")))
+			.That(
+				(
+					host.HttpStub.Requests(TestUrls.MdblistApi),
+					host.HttpStub.Requests(TestUrls.TmdbApi),
+					host.WikidataAsked("tt0903747"),
+					host.HttpStub.Requests(TestUrls.TvmazeApi)
+				)
+			)
 			.IsEqualTo(asked);
 	}
 }

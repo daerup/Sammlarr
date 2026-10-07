@@ -29,5 +29,6 @@ internal static class MediaIdConversionExtensions
 			MediaProvider.Letterboxd => LetterboxdId.From(externalId, mediaType),
 			MediaProvider.Trakt => TraktId.From(externalId, mediaType),
 			MediaProvider.Mal => MalId.From(externalId, mediaType),
+			MediaProvider.Tvmaze => TvmazeId.From(externalId, mediaType),
 		};
 }

@@ -148,3 +148,14 @@ public readonly record struct MalId : IExternalMediaId
 
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
+
+public readonly record struct TvmazeId : IExternalMediaId
+{
+	public MediaProvider Source => MediaProvider.Tvmaze;
+	public string Value { get; private init; }
+	public MediaType Type { get; private init; }
+
+	public static TvmazeId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
+}

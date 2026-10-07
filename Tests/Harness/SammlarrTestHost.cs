@@ -666,6 +666,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddSingleton(new TmdbOptions { BaseUrl = $"https://{TestUrls.TmdbApi}", ImageBaseUrl = "https://image.tmdb.org/t/p" });
 		services.AddSingleton(new MdblistOptions { BaseUrl = $"https://{TestUrls.MdblistApi}" });
 		services.AddSingleton(new WikidataOptions { BaseUrl = $"https://{TestUrls.WikidataApi}", UserAgent = "Sammlarr tests" });
+		services.AddSingleton(new TvmazeOptions { BaseUrl = $"https://{TestUrls.TvmazeApi}", UserAgent = "Sammlarr tests" });
 		services.AddSingleton(new RadarrOptions());
 		services.AddSingleton(new SonarrOptions());
 		services.AddSingleton(new PictureOptions());

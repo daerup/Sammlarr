@@ -33,4 +33,7 @@ public enum MediaProvider
 
 	[Description("MyAnimeList")]
 	Mal,
+
+	[Description("TVmaze")]
+	Tvmaze,
 }
