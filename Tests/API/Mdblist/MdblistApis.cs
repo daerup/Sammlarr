@@ -4,6 +4,7 @@ using Contracts.Auth;
 using Contracts.Identity;
 using Domain.Auth;
 using Domain.Providers;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
 using TestInfrastructure;
 using TUnit.Mocks.Http;
@@ -19,8 +20,10 @@ internal static class MdblistApis
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of<IApiKey>(new TestApiKey(ApiKeyProvider.Mdblist, "mdblist-key")));
 		var client = new MdblistClient(handler.CreateClient(Options.BaseUrl), Options, keys.Object, ICurrentUser.Mock().Object);
-		return new MdblistTitles(client, keys.Object, budget ?? new MdblistBudget(Clock(), Options));
+		return new MdblistTitles(client, keys.Object, budget ?? Budget(), NullLogger<MdblistTitles>.Instance);
 	}
+
+	internal static MdblistBudget Budget() => new(Clock(), Options, NullLogger<MdblistBudget>.Instance);
 
 	internal static IDateTimeProvider Clock()
 	{

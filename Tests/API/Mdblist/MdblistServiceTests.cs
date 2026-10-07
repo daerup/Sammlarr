@@ -181,10 +181,33 @@ public class MdblistServiceTests
 		handler.Verify(request => request.Method(HttpMethod.Get).PathMatches(@"^/external/lists/2868/items(\?.*)?$"), Times.Once);
 	}
 
+	[Test]
+	public async Task GetFeedItemsAsync_ForAListPage_LooksUpEveryTitleInOneBatchThatLaterLookupsReuse()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""{"movies":[{"id":1,"ids":{"imdb":"tt0137523","tmdb":550,"tvdb":null,"mdblist":"a5as","mal":null},"rank":1,"title":"Fight Club","release_year":1999},{"id":2,"ids":{"imdb":"tt0133093","tmdb":603,"tvdb":null,"mdblist":"m7rx","mal":null},"rank":2,"title":"The Matrix","release_year":1999}],"shows":[]}"""
+			);
+		var lookups = Mock.HttpHandler();
+		lookups.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
+		var titles = MdblistApis.Titles(lookups);
+		var testee = CreateTestee(handler, out _, titles: titles);
+
+		await testee.GetFeedItemsAsync("two-movies").ToListAsync();
+		await titles.FindAsync(ImdbId.From("tt0137523", MediaType.Movie));
+		await titles.FindAsync(TmdbId.From("603", MediaType.Movie));
+
+		lookups.Verify(request => request.Method(HttpMethod.Post).PathMatches(@"^/mdblist/movie(\?.*)?$"), Times.Once);
+		lookups.Verify(request => request.Method(HttpMethod.Post), Times.Once);
+	}
+
 	private static MdblistService CreateTestee(
 		HttpMessageHandler handler,
 		out Mock<IMediaService> media,
-		Func<IAsyncEnumerable<IdentifyRequest>, CancellationToken, IAsyncEnumerable<MediaMatchResult>>? identify = null
+		Func<IAsyncEnumerable<IdentifyRequest>, CancellationToken, IAsyncEnumerable<MediaMatchResult>>? identify = null,
+		MdblistTitles? titles = null
 	)
 	{
 		var apiKeyStore = IApiKeyService.Mock();
@@ -196,7 +219,14 @@ public class MdblistServiceTests
 		media
 			.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any())
 			.Returns((requests, token) => (identify ?? IdentifyWithDetails)(requests, token));
-		return new MdblistService(client, media.Object, apiKeyStore.Object);
+		return new MdblistService(client, media.Object, apiKeyStore.Object, titles ?? NoTitles());
+	}
+
+	private static MdblistTitles NoTitles()
+	{
+		var lookups = Mock.HttpHandler();
+		lookups.OnAnyRequest().RespondWithJson("[]");
+		return MdblistApis.Titles(lookups);
 	}
 
 	private sealed class StubHandler(HttpStatusCode status, int pages = 1) : HttpMessageHandler

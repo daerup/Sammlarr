@@ -16,7 +16,7 @@ using Domain.Providers;
 
 namespace API.Mdblist;
 
-internal sealed class MdblistService(MdblistClient client, IMediaService media, IApiKeyService apiKeys) : IFeedProvider
+internal sealed class MdblistService(MdblistClient client, IMediaService media, IApiKeyService apiKeys, MdblistTitles titles) : IFeedProvider
 {
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";
@@ -108,10 +108,15 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 				await unmatched.WriteAsync(BuildUnmatched(item), cancellationToken);
 			}
 
-			var pairs = page.shows.Select(FeedItemResolution.Show).Concat(page.movies.Select(FeedItemResolution.Movie));
-			foreach (var pair in pairs)
+			var requests = page
+				.shows.Select(FeedItemResolution.Show)
+				.Concat(page.movies.Select(FeedItemResolution.Movie))
+				.Select(pair => new IdentifyRequest(MdblistIds.Of(pair.ListItem.ids, pair.MediaType), BuildHints(pair)))
+				.ToList();
+			titles.Prefetch(requests.Select(request => request.Candidates));
+			foreach (var request in requests)
 			{
-				yield return new IdentifyRequest(MdblistIds.Of(pair.ListItem.ids, pair.MediaType), BuildHints(pair));
+				yield return request;
 			}
 		}
 	}

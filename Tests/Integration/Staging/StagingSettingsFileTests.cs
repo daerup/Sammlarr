@@ -42,6 +42,8 @@ public class StagingSettingsFileTests
 			TvmazeOptions.SectionName,
 			ImdbDatasetsOptions.SectionName,
 			AnimeListsOptions.SectionName,
+			AniListOptions.SectionName,
+			MalOptions.SectionName,
 		];
 
 	[Test]

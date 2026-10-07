@@ -2,13 +2,16 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Net.Http.Headers;
 using Contracts;
+using Microsoft.Extensions.Logging;
 using Shared.Options;
 
 namespace API.Mdblist;
 
-internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions options)
+internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions options, ILogger<MdblistBudget> logger)
 {
 	private readonly ConcurrentDictionary<string, Allowance> _byKey = new();
+
+	private readonly ConcurrentDictionary<(string ApiKey, DateTimeOffset ResetAt), byte> _warned = new();
 
 	public void Record(string apiKey, HttpResponseHeaders headers)
 	{
@@ -19,7 +22,23 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 
 	public bool LeavesReserve(string apiKey)
 	{
-		return _byKey.GetValueOrNone(apiKey).Match(allowance => allowance.Remaining > options.FeedReserve || clock.Now >= allowance.ResetAt, () => true);
+		return _byKey.GetValueOrNone(apiKey).Match(allowance => Leaves(apiKey, allowance), () => true);
+	}
+
+	private bool Leaves(string apiKey, Allowance allowance)
+	{
+		var leaves = allowance.Remaining > options.FeedReserve || clock.Now >= allowance.ResetAt;
+		if (!leaves && _warned.TryAdd((apiKey, allowance.ResetAt), 0))
+		{
+			logger.LogWarning(
+				"MDBList has {Remaining} requests left until {ResetAt}, so title lookups wait for the reset and the key's feeds keep the last {Reserve}",
+				allowance.Remaining,
+				allowance.ResetAt,
+				options.FeedReserve
+			);
+		}
+
+		return leaves;
 	}
 
 	private static Optional<long> Header(HttpResponseHeaders headers, string name)
