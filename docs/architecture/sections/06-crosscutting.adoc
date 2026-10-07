@@ -184,8 +184,25 @@ give every remote service a client. The role enums and the key slots are written
 `Service` or its `Remote`, and a switch that misses a member does not compile (CS8509 is an error). A Roslyn source
 generator emits the options-record registration. Each `RatingSource` member names the remote services that supply it (`[SuppliedBy<RemoteService>]`), from
 which a generator emits `SuppliedBy()` and the reverse, `SuppliedRatingSources()`; its owner and whether it publishes votes
-are facts of its rating type, read through `source.Card`. Adding a provider is a folder, a `RemoteService` member and a
-module (recipe in <<section-building-block-view>>).
+are facts of its rating type, read through `source.Card`.
+
+==== Adding a provider
+
+* *A new service* is a `RemoteService` member with its `Access` and `OwnIds` arms and its brand, an options record and its
+  appsettings section, and a module under `API/<Service>` that registers everything through `ForRemote`; a key gets a slot in
+  `ApiKeyProvider` and a check through `ApiKey<T>`, and a keyless service is `Open`, always connected and never paused.
+* *A new id source* is a `MediaProvider` member with its id type, its arm in the stored-id conversion, its brand and its page
+  linker; a site that owns ids and is called is both.
+* *A new rating source* is a `RatingSource` member with `[SuppliedBy]`, a rating type behind `IOwnedRating<TSelf>` and its
+  `Card` arm, parsed by each supplier's wire map and given its `RatingTexts`; it counts in every strategy the day it ships.
+* *An enricher that cannot vouch for a value* lists it in `Defers` (TVmaze, AniList and MyAnimeList their titles), and artwork
+  no `IArtworkResizer` sizes is deferred on its own: both only fill a gap after the stored copy and every answer that may replace.
+* *A whole file* (IMDb's ratings, the anime id map) is an `IDataset` with an `IDatasetTable`, a row in `DatasetLoads` and a
+  `DatasetLoader` registered in Core; it loads daily and answers `Error` until its first load (ADR 0013).
+* *A new feed source* is a `FeedProvider` member with its `Service`, a `Feed<T>` registration and its `FeedSources` entry
+  (placeholder, help and page link); it throws on a shape it cannot read and never skips an item it cannot parse.
+
+The compiler, the role registration tests, the stored-enum-name test and the brand-art test catch a member that misses any of these.
 
 === HTTP resilience
 
