@@ -4,5 +4,5 @@ public static class DatasetNames
 {
 	public const string ImdbRatings = "imdb-ratings";
 
-	public const string AnimeLists = "anime-lists";
+	public const string AnimeIds = "anime-ids";
 }
