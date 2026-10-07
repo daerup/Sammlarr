@@ -1,4 +1,3 @@
-using System.Text;
 using Contracts.Datasets;
 using Contracts.Media;
 using Core.Datasets;

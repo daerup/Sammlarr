@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Net;
-using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using API.Anime;
@@ -10,7 +9,6 @@ using Contracts;
 using Contracts.Auth;
 using Contracts.Feed;
 using Contracts.Media;
-using Contracts.Media.Conversions;
 using Domain.Auth;
 using Domain.Feed;
 using Domain.Media;

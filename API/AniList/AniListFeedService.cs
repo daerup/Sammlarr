@@ -7,7 +7,6 @@ using API.Feeds;
 using Contracts;
 using Contracts.Feed;
 using Contracts.Media;
-using Contracts.Media.Conversions;
 using Domain.Feed;
 using Domain.Media;
 
