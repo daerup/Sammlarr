@@ -13,6 +13,7 @@ internal class AnimeListsModule : IServiceModule
 	{
 		services.ForRemote<AnimeListsOptions>(RemoteService.AnimeLists).Client<AnimeIdsFile>(Configure).Converter<AnimeListsIdConverter>();
 		services.AddScoped<IDataset<AnimeIdMapping>>(provider => provider.GetRequiredService<AnimeIdsFile>());
+		services.AddScoped<LaterSeasons>();
 	}
 
 	private static void Configure(IServiceProvider sp, HttpClient client)

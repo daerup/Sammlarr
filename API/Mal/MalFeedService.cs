@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using API.Anime;
 using API.Mal.Types;
 using Contracts.Auth;
 using Contracts.Feed;
@@ -15,7 +16,7 @@ using Domain.Providers;
 
 namespace API.Mal;
 
-internal sealed partial class MalFeedService(MalClient client, IMediaService media, IApiKeyService apiKeys) : IFeedProvider
+internal sealed partial class MalFeedService(MalClient client, IMediaService media, IApiKeyService apiKeys, LaterSeasons seasons) : IFeedProvider
 {
 	private const string Fields = "list_status,media_type,start_date,alternative_titles";
 
@@ -29,7 +30,7 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 
 	public IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
 	{
-		return media.IdentifyWithDetailsAsync(RequestsAsync(identifier, cancellationToken), cancellationToken);
+		return media.IdentifyWithDetailsAsync(seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken), cancellationToken);
 	}
 
 	private async IAsyncEnumerable<IdentifyRequest> RequestsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)

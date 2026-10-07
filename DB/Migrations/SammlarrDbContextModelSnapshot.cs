@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261006070808_AnimeIds";
+    public override string LastMigrationId => "20261006203932_AnimeSeriesIds";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -188,6 +188,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Property<int?>("MalId")
                     .HasColumnType("INTEGER");
 
+                b.Property<int?>("SeriesTvdbId")
+                    .HasColumnType("INTEGER");
+
                 b.Property<int?>("TmdbId")
                     .HasColumnType("INTEGER");
 
@@ -203,6 +206,8 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("AniListId");
 
                 b.HasIndex("MalId");
+
+                b.HasIndex("TvdbId");
 
                 b.ToTable("AnimeIds");
             });

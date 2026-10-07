@@ -142,6 +142,29 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task IdentifyWithDetailsAsync_ForAShowNoProviderCanPlace_DescribesItsUnmatchedRowWithItsDescriptionWithoutSearchingByIt()
+	{
+		await host.EnsurePlexAccount();
+		var request = new IdentifyRequest([Tvdb("431162").ToExternal(MediaType.Show)], new None())
+		{
+			Description = Some.Of(
+				new IdentifyHints
+				{
+					Title = "Kusuriya no Hitorigoto 3rd Season",
+					Year = 2026,
+					MediaType = MediaType.Show,
+				}
+			),
+		};
+
+		var results = await Testee.IdentifyWithDetailsAsync(new[] { request }.ToAsyncEnumerable()).ToListAsync();
+
+		var unmatched = await Assert.That(results.Single()).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
+		await Assert.That(unmatched!.Details.Title).IsEqualTo("Kusuriya no Hitorigoto 3rd Season");
+		await Assert.That(host.HttpStub.Requests(PlexEndpoints.SearchPath)).IsEqualTo(0);
+	}
+
+	[Test]
 	public async Task IdentifyAsync_WhenNoProviderCanPlaceTheId_ResolvesToNothing()
 	{
 		await host.PlexFindsNothing("Unknown Movie");

@@ -54,7 +54,8 @@ internal sealed class AnimeIdsFile(HttpClient http) : IDataset<AnimeIdMapping>
 		var tvdb = Claim(claimed, "tvdb", Optional.Of(entry.Tvdb).When(_ => type is MediaType.Show && whole));
 		var tmdb = Claim(claimed, $"tmdb-{type}", type is MediaType.Movie ? movie : Optional.Of(entry.Tmdb?.Tv).When(_ => whole));
 		var imdb = Claim(claimed, "imdb", Optional.Of(entry.Imdb?.FirstOrDefault()).When(_ => whole));
-		return new AnimeIdMapping(type, Optional.Of(entry.AniList), Optional.Of(entry.Mal), tvdb, tmdb, imdb);
+		var series = Optional.Of(entry.Tvdb).When(_ => type is MediaType.Show && !whole && entry.Season?.Tvdb is not 0);
+		return new AnimeIdMapping(type, Optional.Of(entry.AniList), Optional.Of(entry.Mal), tvdb, tmdb, imdb, series);
 	}
 
 	private static bool IsTheShowItself(AnimeListsTypes.Anime entry)

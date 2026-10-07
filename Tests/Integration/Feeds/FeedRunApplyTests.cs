@@ -8,6 +8,7 @@ using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
+using Domain.Processing;
 using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
@@ -100,6 +101,27 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var plan = await Assert.That(result).IsOfUnionType<FeedPlanResult, MirrorPlan>();
 		await Assert.That(plan!.Delta.Drops).Count().IsEqualTo(1);
 		await Assert.That(await WantlistIdsAsync()).Contains(owned);
+	}
+
+	[Test]
+	public async Task PlanAsync_ForAListNamingOneTitleTwice_KeepsOneRowThatUsesOneSlotOfTheLimit()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("twice-list", new Append(), new QueryLimit { Count = 2 });
+		host.MdblistFeedContains(
+			"twice-list",
+			Item("Fight Club", MediaType.Movie, Tmdb("550")),
+			Item("Fight Club", MediaType.Movie, Tmdb("550")),
+			Item("Inception", MediaType.Movie, Tmdb("27205"))
+		);
+		await host.Movie(TestMedia.FightClub).SeedAsync();
+		await host.Movie(TestMedia.Inception).SeedAsync();
+
+		var result = await host.Resolve<IFeedRunPlanner>().PlanAsync(new SavedFeed(feedId));
+
+		var plan = await Assert.That(result).IsOfUnionType<FeedPlanResult, AppendPlan>();
+		await Assert.That(plan!.Verdicts.Select(verdict => verdict.Item.Details.Title)).IsEquivalentTo(["Fight Club", "Inception"]);
+		await Assert.That(plan.Verdicts.Select(verdict => verdict.Outcome)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified]);
 	}
 
 	[Test]
@@ -341,7 +363,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		return (feedId, fightClub, inception);
 	}
 
-	private async Task<FeedId> SeedFeedAsync(string identifier, FeedStrategy strategy)
+	private async Task<FeedId> SeedFeedAsync(string identifier, FeedStrategy strategy, QueryLimit? limit = null)
 	{
 		var entity = new FeedRow
 		{
@@ -350,6 +372,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 			Provider = FeedProvider.Mdblist,
 			Strategy = strategy,
 			Identifier = identifier,
+			Limit = limit,
 		};
 
 		host.Context.Feeds.Add(entity);

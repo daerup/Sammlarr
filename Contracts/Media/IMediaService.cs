@@ -33,4 +33,6 @@ public interface IMediaService
 public record IdentifyRequest(IReadOnlyList<IExternalMediaId> Candidates, Optional<IdentifyHints> Hints)
 {
 	public MediaType Type => Candidates.Count == 0 ? MediaType.Unknown : Candidates[0].Type;
+
+	public Optional<IdentifyHints> Description { get; init; } = new None();
 }

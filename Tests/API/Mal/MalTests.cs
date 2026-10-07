@@ -1,7 +1,9 @@
 using System.Net;
 using System.Runtime.CompilerServices;
 using API.Mal;
+using API.Tests.Anime;
 using Contracts.Auth;
+using Contracts.Datasets;
 using Contracts.Identity;
 using Contracts.Media;
 using Domain.Auth;
@@ -60,6 +62,25 @@ public class MalTests
 			.That(_asked.Select(request => $"{request.Candidates.Single()} {request.Hints.Map(hints => $"{hints.Title} {hints.Year}").GetValueOr("none")}"))
 			.IsEquivalentTo(["Mal:Show:16498 Attack on Titan 2013", "Mal:Movie:199 Sen to Chihiro no Kamikakushi 2001"]);
 		handler.Verify(request => request.Header("X-MAL-CLIENT-ID", "mal-client-id"), Times.Exactly(2));
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAListHoldingALaterSeason_AsksForThatSeasonByItsShowsIds()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""
+				{"data":[{"node":{"id":54492,"title":"Kusuriya no Hitorigoto","media_type":"tv","start_date":"2023-10-22"}},{"node":{"id":59130,"title":"Kusuriya no Hitorigoto 3rd Season","media_type":"tv","start_date":"2026-10-01"}}],"paging":{}}
+				"""
+			);
+
+		await Feed(handler, AnimeMaps.KnowingTheApothecaryDiaries()).GetFeedItemsAsync("someone").ToListAsync();
+
+		await Assert
+			.That(_asked.Select(request => string.Join(" ", request.Candidates)))
+			.IsEquivalentTo(["Mal:Show:54492", string.Join(" ", AnimeMaps.ApothecaryDiariesIds)]);
 	}
 
 	[Test]
@@ -137,12 +158,14 @@ public class MalTests
 	private static MalClient Client(MockHttpHandler handler, Mock<IApiKeyService> keys) =>
 		new(handler.CreateClient("https://api.myanimelist.net/v2/"), keys.Object, ICurrentUser.Mock().Object);
 
-	private MalFeedService Feed(MockHttpHandler handler)
+	private MalFeedService Feed(MockHttpHandler handler) => Feed(handler, AnimeMaps.Unknown());
+
+	private MalFeedService Feed(MockHttpHandler handler, Mock<IAnimeIds> map)
 	{
 		var keys = Keys();
 		var media = IMediaService.Mock();
 		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).Returns((requests, cancellation) => Identify(requests, cancellation));
-		return new MalFeedService(Client(handler, keys), media.Object, keys.Object);
+		return new MalFeedService(Client(handler, keys), media.Object, keys.Object, AnimeMaps.Seasons(map));
 	}
 
 	private async IAsyncEnumerable<MediaMatchResult> Identify(

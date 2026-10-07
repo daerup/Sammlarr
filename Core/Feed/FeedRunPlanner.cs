@@ -63,12 +63,15 @@ internal sealed class FeedRunPlanner(
 		var available = await ratings.GetAvailableAsync(cancellationToken);
 		var unmatchedItems = new List<UnmatchedMedia>();
 		var resolved = new List<MediaQueryRow>();
+		var seen = new HashSet<MediaId>();
 		foreach (var item in load.Items)
 		{
 			switch (item)
 			{
-				case MatchedMedia matched:
+				case MatchedMedia matched when seen.Add(matched.Identity.Id):
 					resolved.Add(MediaQueryRow.From(matched, strategy, available));
+					break;
+				case MatchedMedia:
 					break;
 				case UnmatchedMedia unmatched:
 					unmatchedItems.Add(unmatched);

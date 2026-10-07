@@ -20,16 +20,29 @@ public class AnimeIdsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task FindAsync_AfterAReplace_FindsAnEntryByItsAniListOrItsMalId()
+	public async Task FindAsync_AfterAReplace_FindsAnEntryByItsAniListMalOrTvdbId()
 	{
 		var map = host.Resolve<IAnimeIds>();
-		var entry = new AnimeIdMapping(MediaType.Show, Some.Of(290), Some.Of(290), Some.Of(72025), Some.Of(26209), Some.Of("tt0286390"));
+		var entry = new AnimeIdMapping(MediaType.Show, Some.Of(290), Some.Of(290), Some.Of(72025), Some.Of(26209), Some.Of("tt0286390"), new None());
 
 		await map.ReplaceAsync(new[] { entry }.ToAsyncEnumerable());
 
 		await Assert.That(await map.FindAsync(AniListId.From("290", MediaType.Show))).IsSome().And.IsEqualTo(entry);
 		await Assert.That(await map.FindAsync(MalId.From("290", MediaType.Show))).IsSome().And.IsEqualTo(entry);
+		await Assert.That(await map.FindAsync(TvdbId.From("72025", MediaType.Show))).IsSome().And.IsEqualTo(entry);
 		await Assert.That(await map.FindAsync(AniListId.From("1", MediaType.Show))).IsNone();
+	}
+
+	[Test]
+	public async Task FindAsync_ForALaterSeason_KeepsTheSeriesItBelongsTo()
+	{
+		var map = host.Resolve<IAnimeIds>();
+		var season = new AnimeIdMapping(MediaType.Show, Some.Of(291), Some.Of(291), new None(), new None(), new None(), Some.Of(72025));
+
+		await map.ReplaceAsync(new[] { season }.ToAsyncEnumerable());
+
+		await Assert.That(await map.FindAsync(AniListId.From("291", MediaType.Show))).IsSome().And.IsEqualTo(season);
+		await Assert.That(await map.FindAsync(TvdbId.From("72025", MediaType.Show))).IsNone();
 	}
 
 	[Test]
