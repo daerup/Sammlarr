@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261005234745_DropTmdbFeeds";
+    public override string LastMigrationId => "20261006060252_Datasets";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -171,6 +171,41 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasKey("Id");
 
                 b.ToTable("ProviderConfig");
+            });
+
+        modelBuilder.Entity("DB.Data.Datasets.DatasetLoadRow", b =>
+            {
+                b.Property<string>("Name")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ETag")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("LoadedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int>("Rows")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Name");
+
+                b.ToTable("DatasetLoads");
+            });
+
+        modelBuilder.Entity("DB.Data.Datasets.ImdbRatingRow", b =>
+            {
+                b.Property<string>("Tconst")
+                    .HasColumnType("TEXT");
+
+                b.Property<float>("Average")
+                    .HasColumnType("REAL");
+
+                b.Property<int>("Votes")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Tconst");
+
+                b.ToTable("ImdbRatings");
             });
 
         modelBuilder.Entity("DB.Data.Feed.FeedRow", b =>

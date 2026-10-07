@@ -45,7 +45,7 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 					"PushoverPriority: Normal, High, Emergency, Lowest, Low",
 					"RatingSource: Tmdb, Imdb, RottenTomatoesCritics, RottenTomatoesAudience, Metacritic, Letterboxd, Trakt, MyAnimeList",
 					"RegistrationMode: Open, Closed",
-					"RemoteService: Tmdb, Plex, Mdblist, Wikidata, Tvmaze, Radarr, Sonarr",
+					"RemoteService: Tmdb, Plex, Mdblist, Wikidata, Tvmaze, ImdbDatasets, Radarr, Sonarr",
 					"RunCondition: OnSuccess, OnFailure, OnCancelled, OnFailureOrCancelled, OnAnyCompletedStatus, InProgress",
 					"SearchProvider: Tmdb, Arr, Plex",
 					"SinkKind: Plex, Arr",

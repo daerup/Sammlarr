@@ -31,7 +31,7 @@
 
     private string Heading => $"{Names} ratings come from";
 
-    private IEnumerable<RemoteService> Suppliers => Sources.SelectMany(source => source.SuppliedBy()).Distinct().Order();
+    private IEnumerable<RemoteService> Suppliers => Sources.SelectMany(source => source.SuppliedBy()).Where(supplier => supplier.Access is not Open).Distinct().Order();
 
     private static string Status(RemoteService supplier) => ServiceStatus.Of(supplier.Access, connected: false);
 }

@@ -3,6 +3,7 @@ using Core.Announcing;
 using Core.Auth;
 using Core.Blocklist;
 using Core.Caching;
+using Core.Datasets;
 using Core.DI;
 using Core.Feed;
 using Core.Identity;
@@ -28,6 +29,7 @@ public class CoreModule : IServiceModule
 		services.AddModule<AuthModule>();
 		services.AddModule<BlocklistModule>();
 		services.AddModule<CachingModule>();
+		services.AddModule<DatasetsModule>();
 		services.AddModule<DiModule>();
 		services.AddModule<FeedModule>();
 		services.AddModule<IdentityModule>();

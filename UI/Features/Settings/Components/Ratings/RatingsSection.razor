@@ -1,4 +1,6 @@
+@using Contracts.Ratings
 @inject RatingContext RatingContext
+@inject IRatingService Ratings
 
 <div class="flex max-w-6xl flex-col gap-6">
     <div>
@@ -9,6 +11,7 @@
     @if (_view is { } view)
     {
         <RatingPipelineCard Strategy="view.Default" Available="view.Available"/>
+        <p class="imdb-file text-xs text-muted-foreground">@ImdbFileText</p>
     }
     else
     {
@@ -19,9 +22,17 @@
 @code {
     private RatingView? _view;
 
+    private Optional<DateTimeOffset> _imdbFile = new None();
+
+    private string ImdbFileText =>
+        _imdbFile.Match(
+            loaded => $"IMDb ratings come from IMDb's ratings file of {loaded.ToLocalTime().ToString("d MMMM yyyy, HH:mm")}.",
+            () => "IMDb's ratings file has not been loaded yet.");
+
     protected override async Task OnInitializedAsync()
     {
         await Task.Yield();
+        _imdbFile = await Ratings.GetImdbFileDateAsync();
         _view = await RatingContext.GetAsync();
     }
 }

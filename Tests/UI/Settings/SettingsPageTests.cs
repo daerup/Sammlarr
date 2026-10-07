@@ -27,7 +27,9 @@ public class SettingsPageTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton(RatingStub.Context());
-		Services.AddSingleton(IRatingService.Mock().Object);
+		var ratings = IRatingService.Mock();
+		ratings.GetImdbFileDateAsync(Any()).Returns(new None());
+		Services.AddSingleton(ratings.Object);
 		Services.AddProviderBranding();
 		Services.AddSingleton<ProfileDropdownService>();
 		Services.AddSingleton<AccountConnectionPrompt>();

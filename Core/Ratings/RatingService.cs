@@ -1,3 +1,4 @@
+using Contracts.Datasets;
 using Contracts.Providers;
 using Contracts.Ratings;
 using Domain.Media;
@@ -5,7 +6,7 @@ using Domain.Providers;
 
 namespace Core.Ratings;
 
-internal sealed class RatingService(IRatingDefaultRepository defaults, IServiceReadiness readiness) : IRatingService
+internal sealed class RatingService(IRatingDefaultRepository defaults, IServiceReadiness readiness, IDatasetLoads datasets) : IRatingService
 {
 	private static readonly RatingStrategy Fallback = new(AveragedRating.Everything);
 
@@ -20,5 +21,10 @@ internal sealed class RatingService(IRatingDefaultRepository defaults, IServiceR
 	{
 		var suppliers = Enum.GetValues<RemoteService>().Where(remote => remote.SuppliedRatingSources().Count > 0);
 		return (await readiness.ConnectedAsync(suppliers, cancellationToken)).SuppliedRatingSources();
+	}
+
+	public async Task<Optional<DateTimeOffset>> GetImdbFileDateAsync(CancellationToken cancellationToken = default)
+	{
+		return (await datasets.FindAsync(DatasetNames.ImdbRatings, cancellationToken)).Map(load => load.LoadedAt);
 	}
 }

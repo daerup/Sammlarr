@@ -46,6 +46,16 @@ public class RatingSuppliersPopoverTests : BunitContext
 			.Contains("No key yet");
 	}
 
+	[Test]
+	public async Task Popover_ForImdb_LeavesOutItsDatasetsWhichNeedNoConnecting()
+	{
+		var cut = await OpenAsync(RatingSource.Imdb);
+
+		await Assert
+			.That(cut.FindAll("a.rating-supplier").Select(Href))
+			.IsEquivalentTo(["/settings?section=providers&provider=plex", "/settings?section=providers&provider=mdblist"]);
+	}
+
 	private static string Href(IElement link) => link.GetAttribute("href") ?? string.Empty;
 
 	private async Task<IRenderedComponent<IComponent>> OpenAsync(params RatingSource[] sources)

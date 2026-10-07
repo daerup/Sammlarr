@@ -138,6 +138,9 @@ hints), which providers' ids its answer may yield, its cost in calls, and for a 
 title hints (`GivesHints`; Wikidata's does not, so no path asks it for hints). The planner turns each into hops; a path
 through a blocked provider waits for it, capped by its `MaxWait`, or gives up.
 
+Dataset:: A whole file Sammlarr downloads daily instead of asking per title (IMDb's ratings file): an `IDataset` that
+parses it, an `IDatasetTable` replaced in one transaction, and its load recorded in `DatasetLoads`.
+
 Enricher:: An `IDetailsEnricher`, stored with its remote service, that fills details fields and declares the ids it accepts (TMDB takes its own,
 TheTVDB's and IMDb's, finding a TMDB id first; Plex takes its own). Every details lookup is an enricher's: Sammlarr asks one open
 enricher at a time, the search setting's service first, then the one filling the most missing detail fields, then the least busy, then
@@ -212,7 +215,7 @@ Media provider:: An id namespace: `MediaProvider` (TMDB, IMDb, Rotten Tomatoes, 
 Letterboxd, Trakt, MyAnimeList, TVmaze) names whose ids an
 `IExternalMediaId` holds, and nothing else. Who is called and who is asked are remote services.
 
-Remote service:: One external service Sammlarr calls, with one rate limit: `RemoteService` (TMDB, Plex, MDBList, Wikidata, TVmaze,
+Remote service:: One external service Sammlarr calls, with one rate limit: `RemoteService` (TMDB, Plex, MDBList, Wikidata, TVmaze, IMDb datasets,
 Radarr, Sonarr). It answers its `Access` and its `OwnIds` (the media provider whose ids it owns, if any), and every client,
 key check, converter and enricher registers through it (`ForRemote`), so it holds one capacity, one wait budget and one
 outage state.
