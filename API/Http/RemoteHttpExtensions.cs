@@ -142,9 +142,10 @@ internal sealed class ProviderGates
 		return _gates.GetOrAdd(key, static (_, gate) => (new SemaphoreSlim(gate.limit, gate.limit), gate.limit, gate.remote), (limit, remote)).Gate;
 	}
 
-	public RateLimiter Rate(string key, int perSecond, Optional<RemoteService> remote)
+	public RateLimiter Rate(string key, double perSecond, Optional<RemoteService> remote)
 	{
-		return _windows.GetOrAdd(key, static (_, rate) => (PerSecond(rate.perSecond), rate.perSecond, rate.remote), (perSecond, remote)).Window;
+		var permits = Math.Max(1, (int)perSecond);
+		return _windows.GetOrAdd(key, static (_, rate) => (Paced(rate.permits, rate.perSecond), rate.permits, rate.remote), (permits, perSecond, remote)).Window;
 	}
 
 	public double Busy(RemoteService remote)
@@ -164,13 +165,13 @@ internal sealed class ProviderGates
 			.GetValueOr(0);
 	}
 
-	private static SlidingWindowRateLimiter PerSecond(int permits)
+	private static SlidingWindowRateLimiter Paced(int permits, double perSecond)
 	{
 		return new SlidingWindowRateLimiter(
 			new SlidingWindowRateLimiterOptions
 			{
 				PermitLimit = permits,
-				Window = TimeSpan.FromSeconds(1),
+				Window = TimeSpan.FromSeconds(permits / perSecond),
 				SegmentsPerWindow = 4,
 				QueueLimit = int.MaxValue,
 			}

@@ -140,6 +140,20 @@ public class RemoteHttpExtensionsTests
 		await Assert.That(handler.Answered).IsEqualTo(3);
 	}
 
+	[Test]
+	public async Task AddRemoteHttp_WithARateBelowOneASecond_SpacesTheRequestsFurtherThanASecondApart()
+	{
+		var handler = new AnsweringHandler(HttpStatusCode.OK);
+		using var host = Host(IProviderRateLimitReporter.Mock().Object, handler, requestsPerSecond: 0.5);
+
+		var sends = Enumerable.Range(0, 2).Select(_ => SendAsync(host, new HttpRequestMessage(HttpMethod.Get, "https://plex.test/library"))).ToList();
+
+		await Assert.That(async () => await Task.WhenAll(sends).WaitAsync(TimeSpan.FromMilliseconds(1200))).Throws<TimeoutException>();
+		await Assert.That(handler.Answered).IsEqualTo(1);
+		await Task.WhenAll(sends);
+		await Assert.That(handler.Answered).IsEqualTo(2);
+	}
+
 	private static HttpRequestMessage Stamped()
 	{
 		var currentUser = ICurrentUser.Mock();
@@ -174,7 +188,7 @@ public class RemoteHttpExtensionsTests
 		int minimumThroughput = 20,
 		int maxWaitSeconds = 0,
 		int enrichWaitSeconds = 0,
-		int requestsPerSecond = 0
+		double requestsPerSecond = 0
 	)
 	{
 		return new HostBuilder()
