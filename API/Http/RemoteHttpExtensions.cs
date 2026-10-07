@@ -39,6 +39,7 @@ internal static class RemoteHttpExtensions
 			}
 		);
 
+		remote.Apply(stamped => builder.AddHttpMessageHandler(() => new UsageStampHandler(stamped)));
 		builder.AddHttpMessageHandler(sp =>
 		{
 			var http = Resolve(sp);
@@ -52,6 +53,7 @@ internal static class RemoteHttpExtensions
 
 		remote
 			.Apply(measured => builder.AddHttpMessageHandler(sp => new CapacityHandler(measured, sp.GetRequiredService<RemoteCapacity>())))
+			.Apply(_ => builder.AddHttpMessageHandler(() => new UsageTagsHandler()))
 			.Apply(measured => builder.Services.AddSingleton(sp => Wait(measured, Resolve(sp))));
 
 		return builder;
@@ -102,8 +104,10 @@ internal static class RemoteHttpExtensions
 		var reporter = services.GetRequiredService<IProviderRateLimitReporter>();
 		options.Retry.OnRetry = async args =>
 		{
+			args.Context.Properties.Set(UsageStamp.Retried, args.Context.Properties.GetValue(UsageStamp.Retried, 0) + 1);
 			if (args.Outcome.Result?.StatusCode is HttpStatusCode.TooManyRequests)
 			{
+				args.Context.Properties.Set(UsageStamp.RateLimited, args.Context.Properties.GetValue(UsageStamp.RateLimited, 0) + 1);
 				await args
 					.Outcome.Result.TriggeredBy()
 					.Apply(triggeredBy => reporter.ReportAsync(remote, args.RetryDelay, triggeredBy, args.Context.CancellationToken));
