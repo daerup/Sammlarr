@@ -22,7 +22,10 @@ public class DataSourcesCardTests : BunitContext
 
 		await Assert
 			.That(cut.FindAll(".source-open").Select(link => link.GetAttribute("aria-label") ?? string.Empty))
-			.IsEquivalentTo(["Open The Movie Database", "Open Plex", "Open Movie Database List", "Open The TVDB", "Open IMDb"], CollectionOrdering.Matching);
+			.IsEquivalentTo(
+				["Open The Movie Database", "Open Plex", "Open Movie Database List", "Open The TVDB", "Open IMDb", "Open Metacritic", "Open Letterboxd"],
+				CollectionOrdering.Matching
+			);
 		await Assert
 			.That(cut.FindAll(".source-note")[0].TextContent)
 			.IsEqualTo("This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.");
@@ -59,7 +62,7 @@ public class DataSourcesCardTests : BunitContext
 	{
 		var cut = Render<DataSourcesCard>();
 
-		await Assert.That(cut.Find(".source-credit").TextContent).Contains("Rotten Tomatoes scores arrive through Plex;");
+		await Assert.That(cut.Find(".source-credit").TextContent).Contains("Rotten Tomatoes scores arrive through Plex and MDBList;");
 	}
 
 	[Test]

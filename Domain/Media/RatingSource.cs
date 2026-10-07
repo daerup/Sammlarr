@@ -6,20 +6,36 @@ namespace Domain.Media;
 public enum RatingSource
 {
 	[Description("TMDB")]
-	[SuppliedBy<RemoteService>(RemoteService.Tmdb, RemoteService.Plex)]
+	[SuppliedBy<RemoteService>(RemoteService.Tmdb, RemoteService.Plex, RemoteService.Mdblist)]
 	Tmdb,
 
 	[Description("IMDb")]
-	[SuppliedBy<RemoteService>(RemoteService.Plex)]
+	[SuppliedBy<RemoteService>(RemoteService.Plex, RemoteService.Mdblist)]
 	Imdb,
 
 	[Description("Rotten Tomatoes critics")]
-	[SuppliedBy<RemoteService>(RemoteService.Plex)]
+	[SuppliedBy<RemoteService>(RemoteService.Plex, RemoteService.Mdblist)]
 	RottenTomatoesCritics,
 
 	[Description("Rotten Tomatoes audience")]
-	[SuppliedBy<RemoteService>(RemoteService.Plex)]
+	[SuppliedBy<RemoteService>(RemoteService.Plex, RemoteService.Mdblist)]
 	RottenTomatoesAudience,
+
+	[Description("Metacritic")]
+	[SuppliedBy<RemoteService>(RemoteService.Mdblist)]
+	Metacritic,
+
+	[Description("Letterboxd")]
+	[SuppliedBy<RemoteService>(RemoteService.Mdblist)]
+	Letterboxd,
+
+	[Description("Trakt")]
+	[SuppliedBy<RemoteService>(RemoteService.Mdblist)]
+	Trakt,
+
+	[Description("MyAnimeList")]
+	[SuppliedBy<RemoteService>(RemoteService.Mdblist)]
+	MyAnimeList,
 }
 
 public readonly record struct RatingCard(MediaProvider Owner, bool PublishesVotes, Func<float, Optional<int>, IMediaRating> Rate)
@@ -45,6 +61,10 @@ public static class RatingSources
 					RatingSource.Imdb => RatingCard.Of<ImdbRating>(),
 					RatingSource.RottenTomatoesCritics => RatingCard.Of<RottenTomatoesCriticsRating>(),
 					RatingSource.RottenTomatoesAudience => RatingCard.Of<RottenTomatoesAudienceRating>(),
+					RatingSource.Metacritic => RatingCard.Of<MetacriticRating>(),
+					RatingSource.Letterboxd => RatingCard.Of<LetterboxdRating>(),
+					RatingSource.Trakt => RatingCard.Of<TraktRating>(),
+					RatingSource.MyAnimeList => RatingCard.Of<MyAnimeListRating>(),
 				};
 			}
 		}

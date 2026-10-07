@@ -25,6 +25,10 @@ internal static class RatingTexts
 			RatingSource.Imdb => "IMDb",
 			RatingSource.RottenTomatoesCritics => "RT critics",
 			RatingSource.RottenTomatoesAudience => "RT audience",
+			RatingSource.Metacritic => "Metacritic",
+			RatingSource.Letterboxd => "Letterboxd",
+			RatingSource.Trakt => "Trakt",
+			RatingSource.MyAnimeList => "MAL",
 		};
 	}
 
@@ -36,6 +40,10 @@ internal static class RatingTexts
 			RatingSource.Imdb => "IMDb: its users rate from 1 to 10, never 0, so an IMDb rating is at least 1.0. It counts as it reads (8.2 is 8.2).",
 			RatingSource.RottenTomatoesCritics => "Rotten Tomatoes critics: the share of critics who liked it, 0 to 100%, counted as a tenth (95% is 9.5).",
 			RatingSource.RottenTomatoesAudience => "Rotten Tomatoes audience: the share of users who liked it, 0 to 100%, counted as a tenth (95% is 9.5).",
+			RatingSource.Metacritic => "Metacritic: the Metascore, a weighted average of critics' reviews from 0 to 100, counted as a tenth (73 is 7.3).",
+			RatingSource.Letterboxd => "Letterboxd: its users rate from half a star to five stars, counted twice (3.9 stars is 7.8).",
+			RatingSource.Trakt => "Trakt: its users' average as a share, 0 to 100%, counted as a tenth (84% is 8.4).",
+			RatingSource.MyAnimeList => "MyAnimeList: its users rate from 1 to 10, and the average counts as it reads (8.62 is 8.6).",
 		};
 	}
 
@@ -60,7 +68,11 @@ internal static class RatingTexts
 	{
 		return rating.Source switch
 		{
-			RatingSource.Tmdb or RatingSource.Imdb => rating.Votes.Match(votes => $"{Count(votes)} votes", () => "no vote count"),
+			RatingSource.Tmdb or RatingSource.Imdb or RatingSource.Letterboxd or RatingSource.Trakt or RatingSource.MyAnimeList => rating.Votes.Match(
+				votes => $"{Count(votes)} votes",
+				() => "no vote count"
+			),
+			RatingSource.Metacritic => $"a Metascore of {rating.Value}",
 			RatingSource.RottenTomatoesCritics => $"{rating.Value} of critics liked it",
 			RatingSource.RottenTomatoesAudience => $"{rating.Value} of users liked it",
 		};

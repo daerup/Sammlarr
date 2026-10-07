@@ -27,7 +27,12 @@ public class ProviderAnswerTests
 	{
 		var answered = new MovieDetails { Title = "Dune", Ratings = MediaRatings.From([new TmdbRating(7.8f, Some.Of(12_000))]) };
 
-		var answer = ProviderAnswer.After(RemoteService.Plex, MediaField.Tagline | MediaField.Summary | MediaFields.AllRatings, answered, At);
+		var answer = ProviderAnswer.After(
+			RemoteService.Plex,
+			MediaField.Tagline | MediaField.Summary | MediaFields.Rated(RemoteService.Plex.SuppliedRatingSources()),
+			answered,
+			At
+		);
 
 		await Assert
 			.That(answer.Unfilled)

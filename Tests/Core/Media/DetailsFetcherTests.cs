@@ -22,7 +22,7 @@ public class DetailsFetcherTests
 	private static readonly IReadOnlySet<RemoteService> Everyone = new HashSet<RemoteService> { RemoteService.Tmdb, RemoteService.Plex };
 	private static readonly IReadOnlySet<RemoteService> OnlyPlex = new HashSet<RemoteService> { RemoteService.Plex };
 
-	private static readonly MediaFields Everything = ~MediaField.None | MediaFields.AllRatings;
+	private static readonly MediaFields Everything = ~MediaField.None | MediaFields.Rated(RemoteService.Plex.SuppliedRatingSources());
 	private static readonly MediaRatings TmdbOnly = MediaRatings.From([new TmdbRating(8f, Some.Of(500))]);
 	private static readonly MediaRatings EverySource = MediaRatings.From([
 		new TmdbRating(8f, Some.Of(500)),
@@ -47,7 +47,9 @@ public class DetailsFetcherTests
 
 		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
-		await Assert.That(buffer.NewDetails[Id].Answers).Contains(new ProviderAnswer(RemoteService.Tmdb, MediaFields.AllRatings, Now));
+		await Assert
+			.That(buffer.NewDetails[Id].Answers)
+			.Contains(new ProviderAnswer(RemoteService.Tmdb, MediaFields.Rated(RemoteService.Plex.SuppliedRatingSources()), Now));
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 

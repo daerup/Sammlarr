@@ -26,5 +26,6 @@
 			CopyToOutputDirectory="PreserveNewest"
 		/>
 		<None Include="Wikidata\Recorded\*.json" CopyToOutputDirectory="PreserveNewest" />
+		<None Include="Mdblist\Recorded\*.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

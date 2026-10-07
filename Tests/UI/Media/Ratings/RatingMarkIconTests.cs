@@ -56,7 +56,7 @@ public class RatingMarkIconTests : BunitContext
 			.Select(cut => cut.Find("img.rating-mark").GetAttribute("src") ?? string.Empty)
 			.ToList();
 
-		await Assert.That(shown).Count().IsEqualTo(4);
+		await Assert.That(shown).Count().IsEqualTo(6);
 		await Assert.That(shown.Where(src => !File.Exists(Path.Combine(ProvidersFolder, src.Replace("_content/UI/providers/", string.Empty))))).IsEmpty();
 	}
 }

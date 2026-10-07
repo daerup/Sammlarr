@@ -16,8 +16,12 @@ public class VotesExplanationTests
 		await Assert.That(explanation.Lead).IsEqualTo("Added up from the providers this feed's rating averages (your default, Average):");
 		await Assert
 			.That(explanation.Rows.Select(row => (row.Name, row.HasVotes)))
-			.IsEquivalentTo([("TMDB", true), ("IMDb", true), ("Rotten Tomatoes", false)], CollectionOrdering.Matching);
-		await Assert.That(explanation.Note).IsEqualTo(VotesNote.RottenTomatoesTitlesFail);
+			.IsEquivalentTo(
+				[("TMDB", true), ("IMDb", true), ("Rotten Tomatoes", false), ("Metacritic", false), ("Letterboxd", true), ("Trakt", true), ("MyAnimeList", true)],
+				CollectionOrdering.Matching
+			);
+		await Assert.That(explanation.Note).IsEqualTo(VotesNote.UnvotedTitlesFail);
+		await Assert.That(explanation.UnvotedLine).IsEqualTo("A title only Rotten Tomatoes or Metacritic rates has no votes and fails this rule.");
 	}
 
 	[Test]
@@ -30,8 +34,11 @@ public class VotesExplanationTests
 		await Assert.That(explanation.Lead).IsEqualTo("Taken from the first of these that rated it (this feed's own rating, First available):");
 		await Assert
 			.That(explanation.Rows.Select(row => (row.Rank.GetValueOr(0), row.Name)))
-			.IsEquivalentTo([(1, "Rotten Tomatoes"), (2, "TMDB"), (4, "IMDb")], CollectionOrdering.Matching);
-		await Assert.That(explanation.Note).IsEqualTo(VotesNote.RottenTomatoesTitlesFail);
+			.IsEquivalentTo(
+				[(1, "Rotten Tomatoes"), (2, "TMDB"), (4, "IMDb"), (5, "Metacritic"), (6, "Letterboxd"), (7, "Trakt"), (8, "MyAnimeList")],
+				CollectionOrdering.Matching
+			);
+		await Assert.That(explanation.Note).IsEqualTo(VotesNote.UnvotedTitlesFail);
 	}
 
 	[Test]

@@ -74,7 +74,16 @@ public class FeedRatingTests
 		await FeedEditor.VotesInfo(page).ClickAsync();
 
 		var popover = page.Locator(".votes-pop");
-		await Expect(popover.Locator(".votes-pop-row")).ToHaveTextAsync([new Regex("TMDB"), new Regex("IMDb"), new Regex("Rotten Tomatoes")]);
-		await Expect(popover).ToContainTextAsync("A title only Rotten Tomatoes rates has no votes and fails this rule.");
+		await Expect(popover.Locator(".votes-pop-row"))
+			.ToHaveTextAsync([
+				new Regex("TMDB"),
+				new Regex("IMDb"),
+				new Regex("Rotten Tomatoes"),
+				new Regex("Metacritic"),
+				new Regex("Letterboxd"),
+				new Regex("Trakt"),
+				new Regex("MyAnimeList"),
+			]);
+		await Expect(popover).ToContainTextAsync("A title only Rotten Tomatoes or Metacritic rates has no votes and fails this rule.");
 	}
 }

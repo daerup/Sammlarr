@@ -20,6 +20,6 @@ public class FeedRatingTextsTests
 
 		await Assert
 			.That(FeedRatingTexts.StarTip(Some.Of(ordered), Average))
-			.IsEqualTo("This feed's Sammlarr rating: First available · IMDb, TMDB, RT critics, RT audience. Click to change.");
+			.IsEqualTo("This feed's Sammlarr rating: First available · IMDb, TMDB, RT critics, RT audience, Metacritic, Letterboxd, Trakt, MAL. Click to change.");
 	}
 }

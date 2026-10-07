@@ -62,8 +62,9 @@ one of the title's ids, the current user has connected, has not answered, and is
 
 MediaRatings:: Every rating a title has (`All`), one `IMediaRating` per `RatingSource`, or `None` when it is unrated.
 
-RatingSource:: Where a rating comes from: TMDB, IMDb, Rotten Tomatoes critics or audience. Each member names who
-delivers it (`[SuppliedBy<RemoteService>]`: Plex supplies the IMDb and Rotten Tomatoes ratings), and its `Card` answers
+RatingSource:: Where a rating comes from: TMDB, IMDb, Rotten Tomatoes critics or audience, Metacritic, Letterboxd, Trakt
+or MyAnimeList. Each member names who delivers it (`[SuppliedBy<RemoteService>]`: Plex delivers the IMDb and Rotten
+Tomatoes ratings, MDBList every source, and only MDBList the last four), and its `Card` answers
 whose rating it is (`Owner`; both Rotten Tomatoes sources belong to `MediaProvider.RottenTomatoes`), whether it carries
 votes (`PublishesVotes`) and how a value becomes its rating (`Rate`), all read from its rating type. Its colour, its page
 link, the id the breakdown asks for and its row in the Votes popover all follow from the owner.
@@ -207,7 +208,8 @@ Blocklist:: Titles excluded from curation so they never enter a list.
 
 === Providers and wiring
 
-Media provider:: An id namespace: `MediaProvider` (TMDB, IMDb, Rotten Tomatoes, TVDB, Plex, MDBList) names whose ids an
+Media provider:: An id namespace: `MediaProvider` (TMDB, IMDb, Rotten Tomatoes, TVDB, Plex, MDBList, Metacritic,
+Letterboxd, Trakt, MyAnimeList) names whose ids an
 `IExternalMediaId` holds, and nothing else. Who is called and who is asked are remote services.
 
 Remote service:: One external service Sammlarr calls, with one rate limit: `RemoteService` (TMDB, Plex, MDBList, Wikidata,
