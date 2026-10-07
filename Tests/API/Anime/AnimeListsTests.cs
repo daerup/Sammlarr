@@ -6,7 +6,6 @@ using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Providers;
 using TestInfrastructure;
-using TUnit.Mocks.Http;
 
 namespace API.Tests.Anime;
 
