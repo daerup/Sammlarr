@@ -32,7 +32,7 @@ public class TmdbDetailsEnricherTests
 			{
 				var ratings = found.Details.Ratings;
 				await Assert.That(ratings.All.Any(rating => rating.Source == RatingSource.Tmdb)).IsTrue();
-				await Assert.That(ratings.All.All(rating => rating.Source.SuppliedBy().Contains(RemoteService.Tmdb))).IsTrue();
+				await Assert.That(ratings.All.Select(rating => rating.Source)).IsEquivalentTo(RemoteService.Tmdb.SuppliedRatingSources());
 				await Assert.That(ratings.Of(RatingSource.Tmdb).Map(tmdb => tmdb.SammlarrValue)).IsSome().And.IsEqualTo(7.5f);
 			});
 	}
