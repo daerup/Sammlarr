@@ -167,6 +167,7 @@
         try
         {
             var trendingService = TrendingServiceIndex[_providerConfig.TrendingProvider];
+            using var marked = UsageCauses.Mark(UsageCause.Browse);
             (_trendingMedia, _totalPages) = await trendingService.GetTrendingAsync(_currentPage, _cancellationTokenSource.Token);
         }
         finally

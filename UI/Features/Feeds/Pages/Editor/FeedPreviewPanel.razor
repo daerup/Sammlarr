@@ -509,6 +509,7 @@
         using var activity = Instrumentation.Source.StartActivity("FeedPreview", ActivityKind.Internal, default(ActivityContext));
         activity?.SetTag("sammlarr.feed.provider", Config.Provider?.ToString());
         activity?.SetTag("sammlarr.feed.identifier", Config.Identifier?.Trim());
+        using var marked = UsageCauses.Mark(UsageCause.ShowingTitles);
 
         ClearResults();
 
@@ -615,6 +616,7 @@
 
     private async Task<bool> ReprocessAsync(FeedLoadState state, CancellationToken cancellationToken)
     {
+        using var marked = UsageCauses.Mark(UsageCause.ShowingTitles);
         if (await Planner.PlanAsync(new DraftFeed(SynthesizeFeed(), new RawFeedLoad(_rawResults, state)), cancellationToken) is not IFeedPlan plan)
         {
             ClearResults();

@@ -4,6 +4,8 @@ using Contracts.Media.Search;
 using Contracts.Settings;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Usage;
+using Observability.Usage;
 
 namespace Core.Media;
 
@@ -19,6 +21,7 @@ internal sealed class MediaSearchService(
 		CancellationToken cancellationToken = default
 	)
 	{
+		using var marked = UsageCauses.Mark(UsageCause.Search);
 		var config = await providerConfig.GetAsync(cancellationToken);
 		var found = await providers[config.SearchProvider].SearchAsync(query, mediaTypes, cancellationToken);
 		var identities = await mediaService.RegisterAsync([.. found.Select(item => item.Externals.ToList())], cancellationToken);

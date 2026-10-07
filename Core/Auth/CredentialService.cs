@@ -2,6 +2,8 @@ using Contracts.Auth;
 using Contracts.DI;
 using Domain.Auth;
 using Domain.Providers;
+using Domain.Usage;
+using Observability.Usage;
 
 namespace Core.Auth;
 
@@ -27,6 +29,7 @@ internal sealed class CredentialService(
 
 	public async Task<Result<ICredential>> TestAsync(AuthProvider provider, StoredCredential credential, CancellationToken cancellationToken = default)
 	{
+		using var marked = UsageCauses.Mark(UsageCause.KeyTest);
 		var check = await CheckAsync(provider, credential.ClientId, credential.AccessToken, cancellationToken);
 		return AccessChecks.Answer(check, CredentialOf(provider, credential), $"{provider}", "token");
 	}

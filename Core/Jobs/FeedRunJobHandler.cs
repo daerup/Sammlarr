@@ -7,6 +7,7 @@ using Core.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
 using Domain.Wantlist.Sync;
+using Observability.Usage;
 
 namespace Core.Jobs;
 
@@ -15,6 +16,7 @@ internal sealed class FeedRunJobHandler(IFeedRunEngine engine, IJobQueue queue, 
 {
 	public async Task HandleAsync(RunFeed request, CancellationToken cancellationToken = default)
 	{
+		using var marked = UsageCauses.Mark(request.Id);
 		if (request.ArmsSync)
 		{
 			await queue.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()), cancellationToken);

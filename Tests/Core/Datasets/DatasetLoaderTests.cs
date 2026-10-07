@@ -1,7 +1,9 @@
 using Contracts;
 using Contracts.Datasets;
 using Core.Datasets;
+using Domain.Usage;
 using Microsoft.Extensions.Logging.Abstractions;
+using Observability.Usage;
 using TestInfrastructure;
 
 namespace Core.Tests.Datasets;
@@ -24,6 +26,20 @@ public class DatasetLoaderTests
 	{
 		_dataset.Name.Returns(DatasetNames.ImdbRatings);
 		_loads.FindAsync(DatasetNames.ImdbRatings, Any()).Returns(Some.Of(Yesterday));
+	}
+
+	[Test]
+	public async Task LoadAsync_DownloadsUnderTheDatasetCause()
+	{
+		var cause = UsageCause.Other;
+		_dataset
+			.DownloadAsync(Any(), Any())
+			.Returns(Success.Of<Optional<DatasetFile<ImdbRatingLine>>>(new None()))
+			.Callback(() => cause = UsageCauses.Current.Cause);
+
+		await Testee().LoadAsync();
+
+		await Assert.That(cause).IsEqualTo(UsageCause.Dataset);
 	}
 
 	[Test]
