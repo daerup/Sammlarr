@@ -63,6 +63,18 @@ public class AnimeListsTests
 	}
 
 	[Test]
+	public async Task Parse_ForAMovieWithOnlyItsShowsTmdbId_TakesNoTmdbId()
+	{
+		const string roarOfAwakening = """
+			[{"type":"MOVIE","anilist_id":100465,"themoviedb_id":{"tv":1429},"season":{"tvdb":0,"tmdb":0}}]
+			""";
+
+		var entries = await AnimeIdsFile.Parse(Encoding.UTF8.GetBytes(roarOfAwakening)).ToListAsync();
+
+		await Assert.That(entries.Single().Tmdb).IsNone();
+	}
+
+	[Test]
 	public async Task Parse_ForAnEntryWithoutAnAniListOrMalId_LeavesItOut()
 	{
 		var entries = await AnimeIdsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
