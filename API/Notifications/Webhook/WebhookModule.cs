@@ -1,5 +1,6 @@
 using API.Http;
 using Contracts.Notifications;
+using Domain.Identity;
 using Domain.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -11,20 +12,22 @@ internal sealed class WebhookModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services
-			.AddHttpClient<WebhookClient>()
-			.AddClientHttp<WebhookOptions>()
-			.ConfigurePrimaryHttpMessageHandler(provider =>
-			{
-				var privateHosts = provider.GetRequiredService<WebhookOptions>().PrivateHosts;
-				return new SocketsHttpHandler
-				{
-					EnableMultipleHttp2Connections = true,
-					AllowAutoRedirect = false,
-					ConnectCallback = (context, cancellationToken) => WebhookConnect.ConnectAsync(context, privateHosts, cancellationToken),
-				};
-			});
+		foreach (var role in Enum.GetValues<UserRole>())
+		{
+			services
+				.AddHttpClient(WebhookClient.Name(role))
+				.AddClientHttp<WebhookOptions>()
+				.ConfigurePrimaryHttpMessageHandler(() =>
+					new SocketsHttpHandler
+					{
+						EnableMultipleHttp2Connections = true,
+						AllowAutoRedirect = false,
+						ConnectCallback = (context, cancellationToken) => WebhookConnect.ConnectAsync(context, role, cancellationToken),
+					}
+				);
+		}
 
+		services.AddScoped<WebhookClient>();
 		services.AddKeyedScoped<INotificationChannel, WebhookChannel>(NotificationChannel.Webhook);
 	}
 }

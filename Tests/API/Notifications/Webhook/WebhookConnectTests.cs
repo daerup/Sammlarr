@@ -1,5 +1,6 @@
 using System.Net;
 using API.Notifications.Webhook;
+using Domain.Identity;
 
 namespace API.Tests.Notifications.Webhook;
 
@@ -34,11 +35,15 @@ public class WebhookConnectTests
 	}
 
 	[Test]
-	[Arguments("catcher", true)]
-	[Arguments("CATCHER", true)]
-	[Arguments("router", false)]
-	public async Task MayReach_APrivateAddress_OnlyForAListedHost(string host, bool reached)
+	[Arguments("172.18.0.7", UserRole.Admin, true)]
+	[Arguments("172.18.0.7", UserRole.Member, false)]
+	[Arguments("127.0.0.1", UserRole.Admin, true)]
+	[Arguments("169.254.169.254", UserRole.Admin, false)]
+	[Arguments("::ffff:169.254.169.254", UserRole.Admin, false)]
+	[Arguments("fe80::1", UserRole.Admin, false)]
+	[Arguments("8.8.8.8", UserRole.Member, true)]
+	public async Task MayReach_ForTheOwnersRole_LetsAnAdminReachAnythingButLinkLocalAndAMemberOnlyPublicAddresses(string address, UserRole owner, bool reached)
 	{
-		await Assert.That(WebhookConnect.MayReach(host, IPAddress.Parse("172.18.0.7"), ["catcher"])).IsEqualTo(reached);
+		await Assert.That(WebhookConnect.MayReach(IPAddress.Parse(address), owner)).IsEqualTo(reached);
 	}
 }

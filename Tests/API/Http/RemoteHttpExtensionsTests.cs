@@ -28,7 +28,7 @@ public class RemoteHttpExtensionsTests
 			{
 				services.AddSingleton(new WebhookOptions());
 				services.AddSingleton<ProviderGates>();
-				services.AddHttpClient<WebhookClient>().AddClientHttp<WebhookOptions>();
+				services.AddHttpClient(WebhookClient.Name(UserRole.Member)).AddClientHttp<WebhookOptions>();
 			})
 			.Build();
 
@@ -49,7 +49,7 @@ public class RemoteHttpExtensionsTests
 			{
 				services.AddSingleton(new WebhookOptions { Http = http });
 				services.AddSingleton<ProviderGates>();
-				services.AddHttpClient<WebhookClient>().AddClientHttp<WebhookOptions>();
+				services.AddHttpClient(WebhookClient.Name(UserRole.Member)).AddClientHttp<WebhookOptions>();
 			})
 			.Build();
 
