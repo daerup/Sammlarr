@@ -267,6 +267,20 @@ public class FeedConfigPanelTests : BunitContext
 		await Assert.That(cut.FindAll("[data-identifier-note]")).IsEmpty();
 	}
 
+	[Test]
+	[Arguments(FeedProvider.Mdblist, "Browse lists on MDBList", "https://mdblist.com/toplists/")]
+	[Arguments(FeedProvider.Tmdb, "Make a list on TMDB", "https://www.themoviedb.org/list/new")]
+	[Arguments(FeedProvider.AniList, "Find a user on AniList", "https://anilist.co/search/users")]
+	[Arguments(FeedProvider.Mal, "Find a user on MyAnimeList", "https://myanimelist.net/users.php")]
+	public async Task Identifier_ForEachProvider_LinksWhereItsListsAreFoundInANewTab(FeedProvider provider, string label, string url)
+	{
+		var cut = RenderPanel(provider);
+
+		var link = cut.FindAll("a").Single(anchor => anchor.TextContent == label);
+		await Assert.That(link.GetAttribute("href")).IsEqualTo(url);
+		await Assert.That(link.GetAttribute("target")).IsEqualTo("_blank");
+	}
+
 	private static IElement IdentifierField(IRenderedComponent<FeedConfigPanel> cut) => cut.Find("#list-identifier");
 
 	private static void Checked(IRenderedComponent<FeedConfigPanel> cut, IdentifierCheck check)
