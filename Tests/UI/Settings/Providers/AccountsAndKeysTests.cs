@@ -1,3 +1,4 @@
+using BlazorBlueprint.Components;
 using Bunit;
 using Bunit.TestDoubles;
 using Domain.Providers;
@@ -74,6 +75,21 @@ public class AccountsAndKeysTests : BunitContext
 		await Assert
 			.That(rows.Where(row => row.ContainsKey(nameof(ApiKeyRow.Setup))).Select(row => row.Get(key => key.Provider)))
 			.IsEquivalentTo([ApiKeyProvider.Mal]);
+	}
+
+	[Test]
+	public async Task MalRow_SuggestsAnAppDescriptionLongEnoughForMyAnimeListsForm()
+	{
+		Services.AddBlazorBlueprintComponents();
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));
+		var mal = cut.FindComponents<Stub<ApiKeyRow>>().Select(row => row.Instance.Parameters).Single(row => row.Get(key => key.Provider) == ApiKeyProvider.Mal);
+
+		var setup = Render(mal.Get(key => key.Setup) ?? (_ => { }));
+		await setup.Find("[data-key-setup] button").ClickAsync(new());
+
+		var description = setup.FindComponents<SetupValue>().Single(value => value.Instance.Name == "App Description").Instance.Value;
+		await Assert.That(description.Length).IsGreaterThanOrEqualTo(50);
 	}
 
 	[Test]
