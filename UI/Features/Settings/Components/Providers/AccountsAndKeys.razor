@@ -58,6 +58,7 @@
         </Description>
     </ApiKeyRow>
     <ApiKeyRow Provider="ApiKeyProvider.Mal"
+               Noun="client ID"
                Uses="MalUses"
                Open="Open == RemoteService.Mal"
                OpenChanged="open => ToggleAsync(RemoteService.Mal, open)"
@@ -100,6 +101,7 @@
         </Setup>
     </ApiKeyRow>
     <ApiKeyRow Provider="ApiKeyProvider.Trakt"
+               Noun="client ID"
                Uses="TraktUses"
                Open="Open == RemoteService.Trakt"
                OpenChanged="open => ToggleAsync(RemoteService.Trakt, open)"

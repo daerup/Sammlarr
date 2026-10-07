@@ -134,6 +134,29 @@ public class ApiKeyRowTests : BunitContext
 		await Assert.That(markup.IndexOf("data-setup", StringComparison.Ordinal)).IsLessThan(markup.IndexOf("data-uses", StringComparison.Ordinal));
 	}
 
+	[Test]
+	public async Task Field_ForAClientId_NamesItInItsLabelAndPlaceholder()
+	{
+		var cut = Render<ApiKeyRow>(parameters =>
+			parameters
+				.Add(row => row.Provider, ApiKeyProvider.Trakt)
+				.Add(row => row.Noun, "client ID")
+				.Add(row => row.Description, "<span>Your Trakt client ID.</span>")
+		);
+
+		await Assert.That(cut.Find("label").TextContent.Trim()).IsEqualTo("Client ID");
+		await Assert.That(cut.Find("input").GetAttribute("placeholder")).IsEqualTo("Enter client ID");
+	}
+
+	[Test]
+	public async Task Field_ByDefault_NamesAnApiKey()
+	{
+		var cut = RenderRow();
+
+		await Assert.That(cut.Find("label").TextContent.Trim()).IsEqualTo("API key");
+		await Assert.That(cut.Find("input").GetAttribute("placeholder")).IsEqualTo("Enter API key");
+	}
+
 	private static string Status(IRenderedComponent<ApiKeyRow> cut) => cut.Find("button").Children.Last().TextContent.Trim();
 
 	private static IElement Button(IRenderedComponent<ApiKeyRow> cut, string text) => cut.FindAll("button").Single(button => button.TextContent.Trim() == text);
