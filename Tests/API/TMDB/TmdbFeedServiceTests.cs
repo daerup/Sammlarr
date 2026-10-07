@@ -60,6 +60,84 @@ public class TmdbFeedServiceTests
 	}
 
 	[Test]
+	[Arguments("https://www.themoviedb.org/movie/top-rated", "movie/top-rated")]
+	[Arguments("https://www.themoviedb.org/movie/now-playing?view=calendar", "movie/now-playing")]
+	[Arguments("https://www.themoviedb.org/discover/tv?with_genres=16", "discover/tv?with_genres=16")]
+	[Arguments("https://www.themoviedb.org/keyword/9715-superhero/movie", "keyword/9715/movie")]
+	public async Task NormalizeAsync_ForASitePage_StoresItsPathAndQuery(string input, string stored)
+	{
+		await Assert.That(await Testee(Mock.HttpHandler()).NormalizeAsync(input)).IsSuccess().And.IsEqualTo(stored);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForACategoryPage_ReadsEveryPageAndAsksEachResultByThePagesType()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnRequest(request => request.PathMatches(@"^/3/tv/top_rated\?page=1&api_key=tmdb-key$"))
+			.RespondWithJson("""{"page":1,"total_pages":2,"results":[{"id":1396,"name":"Breaking Bad","first_air_date":"2008-01-20"}]}""");
+		handler
+			.OnRequest(request => request.PathMatches(@"^/3/tv/top_rated\?page=2&api_key=tmdb-key$"))
+			.RespondWithJson("""{"page":2,"total_pages":2,"results":[{"id":1399,"name":"Game of Thrones","first_air_date":"2011-04-17"}]}""");
+
+		await Testee(handler).GetFeedItemsAsync("tv/top-rated").ToListAsync();
+
+		await Assert.That(_asked.Select(request => $"{request.Candidates.Single()}")).IsEquivalentTo(["Tmdb:Show:1396", "Tmdb:Show:1399"]);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAPage_StopsAtFiveHundredTitles()
+	{
+		var handler = Mock.HttpHandler();
+		var asked = 0;
+		handler
+			.OnAnyRequest()
+			.RespondWith(_ =>
+			{
+				var page = Interlocked.Increment(ref asked);
+				var results = Enumerable.Range(((page - 1) * 20) + 1, 20).Select(id => $$$"""{"id":{{{id}}},"title":"Movie {{{id}}}"}""");
+				return new HttpResponseMessage(HttpStatusCode.OK)
+				{
+					Content = new StringContent("{\"total_pages\":500,\"results\":[" + string.Join(",", results) + "]}", System.Text.Encoding.UTF8, "application/json"),
+				};
+			});
+
+		await Testee(handler).GetFeedItemsAsync("movie").ToListAsync();
+
+		await Assert.That(_asked).Count().IsEqualTo(500);
+		await Assert.That(asked).IsEqualTo(25);
+	}
+
+	[Test]
+	[Arguments(HttpStatusCode.TooManyRequests)]
+	[Arguments(HttpStatusCode.InternalServerError)]
+	public async Task GetFeedItemsAsync_ForAPageItCannotRead_FailsTheLoad(HttpStatusCode status)
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(status);
+
+		await Assert.That(async () => await Testee(handler).GetFeedItemsAsync("discover/movie?with_genres=28").ToListAsync()).Throws<HttpRequestException>();
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAPageTmdbDoesNotHave_SaysItIsNotFound()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
+
+		await Assert.That(async () => await Testee(handler).GetFeedItemsAsync("keyword/999999999/movie").ToListAsync()).Throws<FeedIdentifierNotFoundException>();
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAPageWithoutResults_FailsTheLoad()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("""{"page":1,"total_pages":1}""");
+
+		await Assert.That(async () => await Testee(handler).GetFeedItemsAsync("movie").ToListAsync()).Throws<InvalidDataException>();
+	}
+
+	[Test]
 	public async Task GetFeedItemsAsync_ForAnEntryThatIsNoTitle_YieldsItUnmatched()
 	{
 		var handler = Mock.HttpHandler();
