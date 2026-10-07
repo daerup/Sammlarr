@@ -16,7 +16,8 @@ public class MdblistModule : IServiceModule
 			.Client(MdblistClient.Unauthenticated)
 			.ApiKey<MdblistKeyCheck>(ApiKeyProvider.Mdblist)
 			.Feed<MdblistService>(FeedProvider.Mdblist)
-			.Enricher<MdblistEnricher>();
+			.Enricher<MdblistEnricher>()
+			.Converter<MdblistIdConverter>();
 		services.AddScoped<MdblistTitles>();
 		services.AddSingleton<MdblistBudget>();
 	}

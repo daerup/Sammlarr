@@ -1,29 +1,21 @@
 using System.Net;
 using API.Mdblist;
 using Contracts;
-using Contracts.Auth;
-using Contracts.Identity;
-using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
-using Shared.Options;
 using TestInfrastructure;
 
 namespace API.Tests.Mdblist;
 
 public class MdblistEnricherTests
 {
-	private const string BaseUrl = "https://api.mdblist.com";
-
 	private static readonly ImdbId FightClub = ImdbId.From("tt0137523", MediaType.Movie);
-
-	private static readonly MdblistOptions Options = new() { BaseUrl = BaseUrl };
 
 	[Test]
 	public async Task LookUpAsync_ForARecordedAnswer_ReadsEverySourceMdblistRates()
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWithJson(await RecordedAsync("movies.json"));
+		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
 
 		var found = await Assert.That(await Testee(handler).LookUpAsync(FightClub)).IsSuccess();
 
@@ -47,7 +39,7 @@ public class MdblistEnricherTests
 	public async Task LookUpAsync_ForARecordedAnswer_ReadsItsIdsAndThePagesItsRatingsLinkTo()
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWithJson(await RecordedAsync("movies.json"));
+		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
 
 		var found = await Assert.That(await Testee(handler).LookUpAsync(FightClub)).IsSuccess();
 
@@ -69,7 +61,7 @@ public class MdblistEnricherTests
 	public async Task LookUpAsync_ForAShow_SkipsTheSourcesThatHaveNoScore()
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWithJson(await RecordedAsync("show.json"));
+		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("show.json"));
 
 		var found = await Assert.That(await Testee(handler).LookUpAsync(ImdbId.From("tt0903747", MediaType.Show))).IsSuccess();
 
@@ -104,7 +96,7 @@ public class MdblistEnricherTests
 	public async Task LookUpAsync_ForSeveralTitlesAtOnce_AsksInOneBatch()
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWithJson(await RecordedAsync("movies.json"));
+		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
 		var testee = Testee(handler);
 
 		var answers = await Task.WhenAll(testee.LookUpAsync(FightClub), testee.LookUpAsync(ImdbId.From("tt0133093", MediaType.Movie)));
@@ -116,7 +108,7 @@ public class MdblistEnricherTests
 	[Test]
 	public async Task LookUpAsync_OnceTheRequestsLeftReachTheFeedReserve_AsksNothing()
 	{
-		var budget = new MdblistBudget(Clock(), Options);
+		var budget = new MdblistBudget(MdblistApis.Clock(), MdblistApis.Options);
 		var answered = new HttpResponseMessage(HttpStatusCode.OK);
 		answered.Headers.Add("x-ratelimit-remaining", "120");
 		answered.Headers.Add("x-ratelimit-reset", $"{DateTimeOffset.UnixEpoch.AddDays(2).ToUnixTimeSeconds()}");
@@ -137,20 +129,5 @@ public class MdblistEnricherTests
 		await Assert.That(new MdblistEnricher(null!).Fills).IsEqualTo(MediaFields.Rated(RemoteService.Mdblist.SuppliedRatingSources()));
 	}
 
-	private static MdblistEnricher Testee(TUnit.Mocks.Http.MockHttpHandler handler, MdblistBudget? budget = null)
-	{
-		var keys = IApiKeyService.Mock();
-		keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of<IApiKey>(new TestApiKey(ApiKeyProvider.Mdblist, "mdblist-key")));
-		var client = new MdblistClient(handler.CreateClient(BaseUrl), Options, keys.Object, ICurrentUser.Mock().Object);
-		return new MdblistEnricher(new MdblistTitles(client, keys.Object, budget ?? new MdblistBudget(Clock(), Options)));
-	}
-
-	private static IDateTimeProvider Clock()
-	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(DateTimeOffset.UnixEpoch.AddDays(1));
-		return clock.Object;
-	}
-
-	private static Task<string> RecordedAsync(string name) => File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Mdblist", "Recorded", name));
+	private static MdblistEnricher Testee(TUnit.Mocks.Http.MockHttpHandler handler, MdblistBudget? budget = null) => new(MdblistApis.Titles(handler, budget));
 }

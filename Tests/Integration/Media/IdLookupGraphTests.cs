@@ -21,7 +21,7 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 		var hops = IdLookupPlanner.Derive(Converters);
 
 		await Assert
-			.That(hops.Select(Describe))
+			.That(hops.Where(hop => hop.Remote != RemoteService.Mdblist).Select(Describe))
 			.IsEquivalentTo(
 				[
 					"Plex Plex>Tmdb (1)",
@@ -47,7 +47,17 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Plan_ForAnImdbIdWithHints_SearchesFirstThenThroughTmdbsTitle()
+	public async Task Derive_OverTheRegisteredConverters_LetsMdblistReachATvdbIdFromEveryOtherIdItTakes()
+	{
+		var hops = IdLookupPlanner.Derive(Converters);
+
+		await Assert
+			.That(hops.Where(hop => hop.Remote == RemoteService.Mdblist && hop is IdToId { To: MediaProvider.Tvdb }).Select(Describe))
+			.IsEquivalentTo(["Mdblist Tmdb>Tvdb (2)", "Mdblist Imdb>Tvdb (2)", "Mdblist Trakt>Tvdb (2)", "Mdblist Mal>Tvdb (2)"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Plan_ForAnImdbIdWithHints_SearchesFirstThenThroughTmdbsTitleThenThroughMdblists()
 	{
 		var hops = IdLookupPlanner.Derive(Converters);
 		var capacity = host.Resolve<IRemoteCapacity>();
@@ -57,7 +67,19 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert
 			.That(plan.Paths.Select(path => string.Join(", ", path.Select(Describe))))
 			.IsEquivalentTo(
-				["Plex hints>Plex (4)", "Tmdb Imdb>hints (1), Plex hints>Plex (4)", "Tmdb Imdb>Tmdb (1), Tmdb Tmdb>hints (1), Plex hints>Plex (4)"],
+				[
+					"Plex hints>Plex (4)",
+					"Tmdb Imdb>hints (1), Plex hints>Plex (4)",
+					"Mdblist Imdb>hints (2), Plex hints>Plex (4)",
+					"Tmdb Imdb>Tmdb (1), Tmdb Tmdb>hints (1), Plex hints>Plex (4)",
+					"Tmdb Imdb>Tmdb (1), Mdblist Tmdb>hints (2), Plex hints>Plex (4)",
+					"Mdblist Imdb>Tmdb (2), Tmdb Tmdb>hints (1), Plex hints>Plex (4)",
+					"Mdblist Imdb>Tvdb (2), Tmdb Tvdb>hints (1), Plex hints>Plex (4)",
+					"Mdblist Imdb>Tmdb (2), Mdblist Tmdb>hints (2), Plex hints>Plex (4)",
+					"Mdblist Imdb>Tvdb (2), Mdblist Tvdb>hints (2), Plex hints>Plex (4)",
+					"Mdblist Imdb>Trakt (2), Mdblist Trakt>hints (2), Plex hints>Plex (4)",
+					"Mdblist Imdb>Mal (2), Mdblist Mal>hints (2), Plex hints>Plex (4)",
+				],
 				CollectionOrdering.Matching
 			);
 	}

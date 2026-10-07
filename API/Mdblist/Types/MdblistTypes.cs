@@ -13,7 +13,12 @@ internal static class MdblistTypes
 
 	public static class Titles
 	{
-		public record Title([property: JsonPropertyName("ids")] ListItems.Ids Ids, [property: JsonPropertyName("ratings")] IReadOnlyList<Rating>? Ratings);
+		public record Title(
+			[property: JsonPropertyName("ids")] ListItems.Ids Ids,
+			[property: JsonPropertyName("ratings")] IReadOnlyList<Rating>? Ratings,
+			[property: JsonPropertyName("title")] string? Name = null,
+			[property: JsonPropertyName("year")] int? Year = null
+		);
 
 		public record Rating(
 			[property: JsonPropertyName("source")] string Source,

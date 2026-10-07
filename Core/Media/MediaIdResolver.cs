@@ -121,6 +121,11 @@ internal sealed class MediaIdResolver(
 		foreach (var request in Requests(hop, ids, hints))
 		{
 			var key = AnswerKey.Of(hop.Converter, request);
+			if (Told(answers, key, request))
+			{
+				continue;
+			}
+
 			if (!answers.TryGetValue(key, out var answer))
 			{
 				answer = await AskAsync(hop.Converter, request, down, cancellationToken);
@@ -140,6 +145,20 @@ internal sealed class MediaIdResolver(
 		}
 
 		return new StepOutcome(new None(), false);
+	}
+
+	private static bool Told(Dictionary<AnswerKey, LookupAnswer> answers, AnswerKey key, IdLookupRequest request)
+	{
+		return request switch
+		{
+			ByIdRequest byId => answers.Any(answer =>
+				answer.Key != key
+				&& answer.Key.Converter == key.Converter
+				&& answer.Key.Lookup.Equals(key.Lookup)
+				&& answer.Value.Result.Match(found => found.Ids.Contains(byId.Id), _ => false)
+			),
+			ByHintsRequest => false,
+		};
 	}
 
 	private static IEnumerable<IdLookupRequest> Requests(Hop hop, IReadOnlyList<IExternalMediaId> ids, Optional<IdentifyHints> hints)
