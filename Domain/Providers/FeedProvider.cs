@@ -5,6 +5,7 @@ public enum FeedProvider
 	Mdblist,
 	Tmdb,
 	AniList,
+	Mal,
 }
 
 public static class FeedProviders
@@ -20,6 +21,7 @@ public static class FeedProviders
 					FeedProvider.Mdblist => RemoteService.Mdblist,
 					FeedProvider.Tmdb => RemoteService.Tmdb,
 					FeedProvider.AniList => RemoteService.AniList,
+					FeedProvider.Mal => RemoteService.Mal,
 				};
 			}
 		}

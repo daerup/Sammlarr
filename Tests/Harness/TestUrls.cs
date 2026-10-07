@@ -10,4 +10,5 @@ internal static class TestUrls
 	internal const string ImdbDatasets = "imdb-datasets.test.com";
 	internal const string AnimeLists = "anime-lists.test.com";
 	internal const string AniList = "anilist.test.com";
+	internal const string Mal = "mal.test.com";
 }

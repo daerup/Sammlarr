@@ -52,6 +52,7 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 			ApiKeyProvider.Tmdb => [Build(Slug(provider), TmdbOptions.SectionName, "BaseUrl", "V4BaseUrl")],
 			ApiKeyProvider.Mdblist => [Build(Slug(provider), MdblistOptions.SectionName, "BaseUrl")],
 			ApiKeyProvider.TmdbReadToken => [],
+			ApiKeyProvider.Mal => [Build(Slug(provider), MalOptions.SectionName, "BaseUrl")],
 		};
 
 	private static IReadOnlyList<ProviderRecording> ForAuth(AuthProvider provider) =>

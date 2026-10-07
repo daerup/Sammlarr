@@ -2,6 +2,7 @@ using API.AniList;
 using API.Anime;
 using API.Arr;
 using API.Imdb;
+using API.Mal;
 using API.Mdblist;
 using API.Notifications;
 using API.Observability;
@@ -28,6 +29,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<ImdbModule>();
 		services.AddModule<AnimeListsModule>();
 		services.AddModule<AniListModule>();
+		services.AddModule<MalModule>();
 		services.AddModule<ArrModule>();
 		services.AddModule<PicturesModule>();
 		services.AddModule<TvdbModule>();

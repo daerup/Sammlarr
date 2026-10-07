@@ -30,7 +30,7 @@ public class FeedProviderSelectTests : BunitContext
 	[Test]
 	public async Task Trigger_WithoutAProvider_StaysNeutral()
 	{
-		var cut = RenderSelect(null, FeedProvider.Mdblist, FeedProvider.Tmdb, FeedProvider.AniList);
+		var cut = RenderSelect(null, FeedProvider.Mdblist, FeedProvider.Tmdb, FeedProvider.AniList, FeedProvider.Mal);
 
 		var trigger = cut.Find("[role=combobox]");
 		await Assert.That(trigger.TextContent).Contains("No provider available");
@@ -65,7 +65,7 @@ public class FeedProviderSelectTests : BunitContext
 		var cut = await OpenAsync(FeedProvider.Mdblist);
 
 		var washes = cut.FindAll("[role=option] .provider-wash").Select(wash => wash.GetAttribute("style") ?? string.Empty).ToList();
-		await Assert.That(washes).IsEquivalentTo(["--brand: #4284CA", "--brand: #01B4E4", "--brand: #02A9FF"]);
+		await Assert.That(washes).IsEquivalentTo(["--brand: #4284CA", "--brand: #01B4E4", "--brand: #02A9FF", "--brand: #2F52A2"]);
 	}
 
 	[Test]

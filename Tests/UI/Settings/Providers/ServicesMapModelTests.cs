@@ -58,6 +58,7 @@ public class ServicesMapModelTests
 				"Feeds > Tmdb at 596,190",
 				"Feeds > Mdblist at 596,234",
 				"Feeds > AniList at 643,248",
+				"Feeds > Mal at 676,248",
 			]);
 	}
 
@@ -97,11 +98,11 @@ public class ServicesMapModelTests
 	}
 
 	[Test]
-	public async Task Tiles_ForTodaysProviders_PutMdblistAndAniListOnTheFeedsRow()
+	public async Task Tiles_ForTodaysProviders_PutTheThreeListSitesOnTheFeedsRow()
 	{
 		var tiles = ServicesMapModel.For(Config).Tiles.Select(tile => $"{tile.Provider} {tile.X},{tile.Y} {tile.Entry}");
 
-		await Assert.That(tiles).IsEquivalentTo(["Mdblist 596,220 Left", "AniList 629,220 Bottom"]);
+		await Assert.That(tiles).IsEquivalentTo(["Mdblist 596,220 Left", "AniList 629,220 Bottom", "Mal 662,220 Bottom"]);
 	}
 
 	[Test]

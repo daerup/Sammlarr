@@ -43,6 +43,7 @@
         new(Branding.GetBrandingInfo(RemoteService.Wikidata), "Rotten Tomatoes, Metacritic and Letterboxd pages, and TMDB and TVDB ids no other service knows, by IMDb id", "Wikidata's data is available under CC0.", "https://www.wikidata.org"),
         new(Branding.GetBrandingInfo(RemoteService.AnimeLists), "The map from AniList and MyAnimeList ids to TVDB, TMDB and IMDb ids, downloaded daily", "Fribb's anime-lists declares no licence; Sammlarr downloads it at runtime and never ships it.", "https://github.com/Fribb/anime-lists"),
         new(Branding.GetBrandingInfo(MediaProvider.AniList), "Public anime lists as feeds, and anime details and ratings", "Data from AniList, through its public API.", "https://anilist.co"),
+        new(Branding.GetBrandingInfo(MediaProvider.Mal), "Public anime lists as feeds, and anime details and ratings, with your client ID", "Data from MyAnimeList, through its API.", "https://myanimelist.net"),
     ];
 
     private sealed record DataSource(BrandingInfo Brand, string Gives, string Note, string Href);

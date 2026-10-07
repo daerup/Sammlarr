@@ -63,4 +63,14 @@ public class AccountsAndKeysTests : BunitContext
 			.That(rows.Where(row => row.ContainsKey(nameof(ApiKeyRow.Extra))).Select(row => row.Get(key => key.Provider)))
 			.IsEquivalentTo([ApiKeyProvider.Tmdb]);
 	}
+
+	[Test]
+	public async Task Rows_OfferAKeyForTmdbMdblistAndMyAnimeList()
+	{
+		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));
+
+		var keys = cut.FindComponents<Stub<ApiKeyRow>>().Select(row => row.Instance.Parameters.Get(key => key.Provider));
+
+		await Assert.That(keys).IsEquivalentTo([ApiKeyProvider.Tmdb, ApiKeyProvider.Mdblist, ApiKeyProvider.Mal]);
+	}
 }
