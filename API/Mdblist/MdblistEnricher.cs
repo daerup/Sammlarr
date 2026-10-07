@@ -8,6 +8,8 @@ internal sealed class MdblistEnricher(MdblistTitles titles) : IDetailsEnricher
 {
 	public MediaFields Fills { get; } = MediaFields.Rated(RemoteService.Mdblist.SuppliedRatingSources());
 
+	public MediaFields Defers => MediaFields.None;
+
 	public IReadOnlyList<MediaProvider> Accepts { get; } =
 	[MediaProvider.Imdb, MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Trakt, MediaProvider.Mal, MediaProvider.Mdblist];
 

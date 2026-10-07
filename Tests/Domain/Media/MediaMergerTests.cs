@@ -105,6 +105,23 @@ public class MediaMergerTests
 	}
 
 	[Test]
+	public async Task Without_ForAShow_DropsTheNamedDetailsAndKeepsEveryOtherOneAndEveryRating()
+	{
+		var show = new ShowDetails
+		{
+			Title = "Shingeki no Kyojin",
+			Summary = "Humans fight titans.",
+			PosterUrl = "poster",
+			Seasons = 4,
+			Ratings = MediaRatings.From([new ImdbRating(9.1f, Some.Of(500_000))]),
+		};
+
+		var kept = show.Without(MediaField.Title | MediaField.Poster);
+
+		await Assert.That(kept).IsEqualTo(show with { Title = null, PosterUrl = null });
+	}
+
+	[Test]
 	public async Task Only_ForAShow_KeepsTheNamedDetailsAndRatingSources()
 	{
 		var show = new ShowDetails

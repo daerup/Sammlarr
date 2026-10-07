@@ -97,6 +97,8 @@ public class RemoteRegistrationTests
 
 		public MediaFields Fills => MediaFields.None;
 
+		public MediaFields Defers => MediaFields.None;
+
 		public IReadOnlyList<MediaProvider> Accepts => [];
 
 		public Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default) =>

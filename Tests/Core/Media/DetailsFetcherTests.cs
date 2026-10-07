@@ -1,5 +1,6 @@
 using Contracts;
 using Contracts.Media;
+using Contracts.Media.Artwork;
 using Contracts.Providers;
 using Contracts.Settings;
 using Core.DI;
@@ -36,6 +37,101 @@ public class DetailsFetcherTests
 	private static readonly CancellationToken WaitingThrows = new(canceled: true);
 	private static readonly ProviderAnswer PlexLeftTheRatings = new(RemoteService.Plex, MediaFields.AllRatings, LastRefresh);
 	private static readonly CachedDetails UnratedByPlex = new(Unrated(), LastRefresh, LastRefresh, [PlexLeftTheRatings]);
+	private const string TmdbImages = "https://image.tmdb.org/t/p/original/inception.jpg";
+	private const string OtherImages = "https://static.tvmaze.com/uploads/images/original_untouched/inception.jpg";
+
+	[Test]
+	public async Task FetchAsync_WhenAnEnricherDefersTheTitle_KeepsTheStoredTitleAndTakesTheRest()
+	{
+		var deps = Dependencies.Create();
+		deps.Plex.Defers.Returns(MediaField.Title);
+		deps.PlexAnswers(Complete() with { Title = "インセプション" });
+		var stored = new CachedDetails(
+			Complete() with
+			{
+				Tagline = null,
+			},
+			LastRefresh,
+			LastRefresh,
+			[new ProviderAnswer(RemoteService.Tmdb, MediaField.Tagline, LastRefresh)]
+		);
+		await using var buffer = deps.Buffer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Everyone, buffer));
+
+		await Assert.That(fetched.Details.Title).IsEqualTo("Inception");
+		await Assert.That(fetched.Details.Tagline).IsEqualTo(Complete().Tagline);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenOnlyAnEnricherThatDefersTheTitleAnswers_FillsTheEmptyTitleWithIt()
+	{
+		var deps = Dependencies.Create();
+		deps.Plex.Defers.Returns(MediaField.Title);
+		deps.PlexAnswers(Complete() with { Title = "インセプション" });
+		await using var buffer = deps.Buffer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), OnlyPlex, buffer));
+
+		await Assert.That(fetched.Details.Title).IsEqualTo("インセプション");
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenAnAnswerBringsAPosterNoResizerSizes_KeepsTheStoredResizablePoster()
+	{
+		var deps = Dependencies.Create(resizer: TestArtwork.Resizing(url => url.StartsWith(TmdbImages, StringComparison.Ordinal)));
+		deps.PlexAnswers(Complete() with { PosterUrl = OtherImages });
+		var stored = new CachedDetails(
+			Complete() with
+			{
+				Tagline = null,
+				PosterUrl = TmdbImages,
+			},
+			LastRefresh,
+			LastRefresh,
+			[new ProviderAnswer(RemoteService.Tmdb, MediaField.Tagline, LastRefresh)]
+		);
+		await using var buffer = deps.Buffer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Everyone, buffer));
+
+		await Assert.That(fetched.Details.PosterUrl).IsEqualTo(TmdbImages);
+		await Assert.That(fetched.Details.Tagline).IsEqualTo(Complete().Tagline);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenOnlyAPosterNoResizerSizesArrives_FillsTheEmptyPosterWithIt()
+	{
+		var deps = Dependencies.Create(resizer: TestArtwork.Resizing(url => url.StartsWith(TmdbImages, StringComparison.Ordinal)));
+		deps.PlexAnswers(Complete() with { PosterUrl = OtherImages });
+		await using var buffer = deps.Buffer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), OnlyPlex, buffer));
+
+		await Assert.That(fetched.Details.PosterUrl).IsEqualTo(OtherImages);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenAResizablePosterArrives_ReplacesAStoredOneNoResizerSizes()
+	{
+		var deps = Dependencies.Create(resizer: TestArtwork.Resizing(url => url.StartsWith(TmdbImages, StringComparison.Ordinal)));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(Complete() with { PosterUrl = TmdbImages }));
+		var stored = new CachedDetails(
+			Complete() with
+			{
+				Tagline = null,
+				PosterUrl = OtherImages,
+			},
+			LastRefresh,
+			LastRefresh,
+			[new ProviderAnswer(RemoteService.Plex, MediaField.Tagline, LastRefresh)]
+		);
+		await using var buffer = deps.Buffer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Everyone, buffer));
+
+		await Assert.That(fetched.Details.PosterUrl).IsEqualTo(TmdbImages);
+	}
 
 	[Test]
 	public async Task FetchAsync_WhenTheEnricherThatRatesHasNoRating_AsksItOnceAndStoresThatItLeftTheRatingsUnfilled()
@@ -739,7 +835,12 @@ public class DetailsFetcherTests
 		DetailsFetcher Testee
 	)
 	{
-		public static Dependencies Create(MediaFields? tmdbFills = null, IRemoteCapacity? capacity = null, SearchProvider search = SearchProvider.Plex)
+		public static Dependencies Create(
+			MediaFields? tmdbFills = null,
+			IRemoteCapacity? capacity = null,
+			SearchProvider search = SearchProvider.Plex,
+			IArtworkResizer? resizer = null
+		)
 		{
 			var mediaRepository = IMediaRepository.Mock();
 			mediaRepository.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
@@ -770,6 +871,7 @@ public class DetailsFetcherTests
 				config.Object,
 				capacity ?? TestCapacity.Open(),
 				readiness.Object,
+				[resizer ?? TestArtwork.ResizesAnything()],
 				Clock(),
 				NullLogger<DetailsFetcher>.Instance
 			);

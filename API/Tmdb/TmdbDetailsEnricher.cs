@@ -22,6 +22,8 @@ internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDeta
 		| MediaField.RuntimePerEpisode
 		| MediaFields.Rated(RemoteService.Tmdb.SuppliedRatingSources());
 
+	public MediaFields Defers => MediaFields.None;
+
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Imdb];
 
 	public async Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)

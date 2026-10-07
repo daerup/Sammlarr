@@ -1,6 +1,7 @@
 using Contracts;
 using Contracts.DI;
 using Contracts.Media;
+using Contracts.Media.Artwork;
 using Contracts.Providers;
 using Contracts.Settings;
 using Domain.Media;
@@ -14,10 +15,13 @@ internal sealed class DetailsFetcher(
 	IProviderConfigService providerConfig,
 	IRemoteCapacity capacity,
 	IServiceReadiness readiness,
+	IEnumerable<IArtworkResizer> resizers,
 	IDateTimeProvider clock,
 	ILogger<DetailsFetcher> logger
 )
 {
+	private static readonly ArtworkSize AnySize = new(342, 513);
+
 	public Task<IReadOnlySet<RemoteService>> ConnectedAsync(CancellationToken cancellationToken) => readiness.ConnectedAsync(enrichers.Keys, cancellationToken);
 
 	public Optional<CachedDetails> FindReusable(MediaIdentity identity, Optional<CachedDetails> cached, IReadOnlySet<RemoteService> connected)
@@ -128,7 +132,8 @@ internal sealed class DetailsFetcher(
 		var now = clock.Now;
 		var known = identity;
 		var fresh = MediaDetails.Empty(backup.Type);
-		var current = Layered(reason, fresh, backup, answered: false);
+		var gapFills = MediaDetails.Empty(backup.Type);
+		var current = Layered(reason, fresh, backup, gapFills, answered: false);
 		List<ProviderAnswer> answers = [];
 		var asked = AlreadyAnswered(reason).ToHashSet();
 		var waited = new HashSet<RemoteService>();
@@ -153,17 +158,34 @@ internal sealed class DetailsFetcher(
 			answer.ApplyError(error => unavailable = unavailable.Or(() => error.CausedBy<RemoteUnavailableException>().Map(cause => cause.Remote)));
 			var fitting = answer.ToOptional().When(found => found.Fits(backup.Type));
 			fitting.Apply(found => known = known with { Externals = known.Externals + found.Externals });
-			fitting.Apply(found => fresh = fresh.FillFrom(found.Details));
+			var deferred = fitting.Map(found => Deferred(next.Remote, found.Details)).GetValueOr(MediaFields.None);
+			fitting.Apply(found => fresh = fresh.FillFrom(found.Details.Without(deferred)));
+			fitting.Apply(found => gapFills = gapFills.FillFrom(found.Details.Only(deferred)));
 			fitting.Apply(found => answers.Add(ProviderAnswer.After(next.Remote, next.Fills, found.Details, now)));
-			current = Layered(reason, fresh, backup, answered: answers.Count > 0);
+			current = Layered(reason, fresh, backup, gapFills, answered: answers.Count > 0);
 		}
 
 		return (new MatchedMedia(known, current), answers, unavailable);
 	}
 
-	private static MediaDetails Layered(FetchReason reason, MediaDetails fresh, MediaDetails backup, bool answered)
+	private static MediaDetails Layered(FetchReason reason, MediaDetails fresh, MediaDetails backup, MediaDetails gapFills, bool answered)
 	{
-		return reason is Stale && !answered ? fresh : fresh.FillFrom(backup);
+		return reason is Stale && !answered ? fresh.FillFrom(gapFills) : fresh.FillFrom(backup).FillFrom(gapFills);
+	}
+
+	private MediaFields Deferred(RemoteService remote, MediaDetails details)
+	{
+		var defers = enrichers.Find(remote).Map(enricher => enricher.Defers).GetValueOr(MediaFields.None);
+		return defers | Unresizable(details.PosterUrl, MediaField.Poster) | Unresizable(details.BackdropUrl, MediaField.Backdrop);
+	}
+
+	private MediaFields Unresizable(string? url, MediaField field)
+	{
+		return Optional
+			.Of(url)
+			.When(found => resizers.All(resizer => resizer.Resize(found, AnySize).IsNone()))
+			.Map(_ => (MediaFields)field)
+			.GetValueOr(MediaFields.None);
 	}
 
 	private async Task<Optional<DateTimeOffset>> WaitForBlockedAsync(

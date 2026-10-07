@@ -28,6 +28,8 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		| MediaField.RuntimePerEpisode
 		| MediaFields.Rated(RemoteService.Plex.SuppliedRatingSources());
 
+	public MediaFields Defers => MediaFields.None;
+
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Plex];
 
 	private readonly ConcurrentDictionary<string, Lazy<Task<Result<FoundMedia>>>> _byRatingKey = new();
