@@ -209,10 +209,10 @@ Blocklist:: Titles excluded from curation so they never enter a list.
 === Providers and wiring
 
 Media provider:: An id namespace: `MediaProvider` (TMDB, IMDb, Rotten Tomatoes, TVDB, Plex, MDBList, Metacritic,
-Letterboxd, Trakt, MyAnimeList) names whose ids an
+Letterboxd, Trakt, MyAnimeList, TVmaze) names whose ids an
 `IExternalMediaId` holds, and nothing else. Who is called and who is asked are remote services.
 
-Remote service:: One external service Sammlarr calls, with one rate limit: `RemoteService` (TMDB, Plex, MDBList, Wikidata,
+Remote service:: One external service Sammlarr calls, with one rate limit: `RemoteService` (TMDB, Plex, MDBList, Wikidata, TVmaze,
 Radarr, Sonarr). It answers its `Access` and its `OwnIds` (the media provider whose ids it owns, if any), and every client,
 key check, converter and enricher registers through it (`ForRemote`), so it holds one capacity, one wait budget and one
 outage state.

@@ -6,4 +6,5 @@ internal static class TestUrls
 	internal const string MdblistApi = "mdblist.test.com";
 	internal const string PlexApi = "plex.test.com";
 	internal const string WikidataApi = "wikidata.test.com";
+	internal const string TvmazeApi = "tvmaze.test.com";
 }

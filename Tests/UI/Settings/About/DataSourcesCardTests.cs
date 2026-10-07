@@ -31,6 +31,7 @@ public class DataSourcesCardTests : BunitContext
 					"Open IMDb",
 					"Open Metacritic",
 					"Open Letterboxd",
+					"Open TVmaze",
 					"Open Wikidata",
 				],
 				CollectionOrdering.Matching
@@ -38,6 +39,14 @@ public class DataSourcesCardTests : BunitContext
 		await Assert
 			.That(cut.FindAll(".source-note")[0].TextContent)
 			.IsEqualTo("This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.");
+	}
+
+	[Test]
+	public async Task Rows_CreditTvmazeUnderCcBySa()
+	{
+		var cut = Render<DataSourcesCard>();
+
+		await Assert.That(cut.FindAll(".source-note").Select(note => note.TextContent)).Contains("TVmaze's data is licensed under CC BY-SA 4.0.");
 	}
 
 	[Test]

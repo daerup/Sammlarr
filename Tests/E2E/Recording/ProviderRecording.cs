@@ -24,6 +24,7 @@ internal sealed record ProviderRecording(string Name, string Section, IReadOnlyL
 		.. Enum.GetValues<ApiKeyProvider>().Select(ForApiKey),
 		.. Enum.GetValues<AuthProvider>().SelectMany(ForAuth),
 		Build("wikidata", WikidataOptions.SectionName, "BaseUrl"),
+		Build("tvmaze", TvmazeOptions.SectionName, "BaseUrl"),
 	];
 
 	internal static readonly IReadOnlyList<ProviderEndpoint> Apps =
