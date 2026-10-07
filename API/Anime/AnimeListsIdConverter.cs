@@ -16,7 +16,7 @@ internal sealed class AnimeListsIdConverter(IAnimeIds map, IDatasetLoads loads) 
 		GivesHints: false
 	);
 
-	private static readonly Error NotLoaded = Error.From("The anime id map has not been loaded yet.", new RemoteUnavailableException(RemoteService.AnimeLists));
+	internal static readonly Error NotLoaded = Error.From("The anime id map has not been loaded yet.", new RemoteUnavailableException(RemoteService.AnimeLists));
 
 	public IReadOnlyList<IdLookup> Lookups { get; } = [ByAnimeId];
 
@@ -41,7 +41,7 @@ internal sealed class AnimeListsIdConverter(IAnimeIds map, IDatasetLoads loads) 
 		return new IdLookupResult(entry.Map(found => Ids(found, id.Type is MediaType.Unknown ? found.Type : id.Type)).GetValueOr([]), new None());
 	}
 
-	private static IReadOnlyList<IExternalMediaId> Ids(AnimeIdMapping entry, MediaType type)
+	internal static IReadOnlyList<IExternalMediaId> Ids(AnimeIdMapping entry, MediaType type)
 	{
 		Optional<IExternalMediaId>[] found =
 		[

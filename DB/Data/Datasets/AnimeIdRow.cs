@@ -19,4 +19,6 @@ internal sealed record AnimeIdRow
 	public int? TmdbId { get; init; }
 
 	public string? ImdbId { get; init; }
+
+	public int? SeriesTvdbId { get; init; }
 }

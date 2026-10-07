@@ -12,6 +12,7 @@ internal sealed class DatasetsConfiguration : IModelConfiguration
 		{
 			builder.HasIndex(row => row.AniListId);
 			builder.HasIndex(row => row.MalId);
+			builder.HasIndex(row => row.TvdbId);
 		});
 	}
 }

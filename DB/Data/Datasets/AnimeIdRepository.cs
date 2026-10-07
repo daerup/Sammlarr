@@ -11,7 +11,8 @@ namespace DB.Data.Datasets;
 
 internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IAnimeIds
 {
-	private const string Insert = "INSERT INTO AnimeIds (Type, AniListId, MalId, TvdbId, TmdbId, ImdbId) VALUES ($type, $anilist, $mal, $tvdb, $tmdb, $imdb)";
+	private const string Insert =
+		"INSERT INTO AnimeIds (Type, AniListId, MalId, TvdbId, TmdbId, ImdbId, SeriesTvdbId) VALUES ($type, $anilist, $mal, $tvdb, $tmdb, $imdb, $series)";
 
 	public async Task<Optional<AnimeIdMapping>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
@@ -26,10 +27,10 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 		{
 			MediaProvider.AniList => await rows.FirstOrDefaultAsync(entry => entry.AniListId == number, cancellationToken),
 			MediaProvider.Mal => await rows.FirstOrDefaultAsync(entry => entry.MalId == number, cancellationToken),
+			MediaProvider.Tvdb => await rows.FirstOrDefaultAsync(entry => entry.TvdbId == number, cancellationToken),
 			MediaProvider.Tmdb
 			or MediaProvider.Imdb
 			or MediaProvider.RottenTomatoes
-			or MediaProvider.Tvdb
 			or MediaProvider.Plex
 			or MediaProvider.Mdblist
 			or MediaProvider.Metacritic
@@ -54,6 +55,7 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 		var tvdb = Parameter(command, "$tvdb", DbType.Int32);
 		var tmdb = Parameter(command, "$tmdb", DbType.Int32);
 		var imdb = Parameter(command, "$imdb", DbType.String);
+		var series = Parameter(command, "$series", DbType.Int32);
 		await command.PrepareAsync(cancellationToken);
 		var count = 0;
 		await foreach (var row in rows.WithCancellation(cancellationToken))
@@ -64,6 +66,7 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 			tvdb.Value = Value(row.Tvdb);
 			tmdb.Value = Value(row.Tmdb);
 			imdb.Value = row.Imdb.Map(value => (object)value).GetValueOr(DBNull.Value);
+			series.Value = Value(row.SeriesTvdb);
 			await command.ExecuteNonQueryAsync(cancellationToken);
 			count++;
 		}
@@ -85,7 +88,8 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 			Optional.Of(row.MalId),
 			Optional.Of(row.TvdbId),
 			Optional.Of(row.TmdbId),
-			Optional.Of(row.ImdbId)
+			Optional.Of(row.ImdbId),
+			Optional.Of(row.SeriesTvdbId)
 		);
 	}
 

@@ -1,5 +1,7 @@
 using System.Net;
 using API.AniList;
+using API.Tests.Anime;
+using Contracts.Datasets;
 using Contracts.Media;
 using Domain.Feed;
 using Domain.Media;
@@ -50,6 +52,28 @@ public class AniListTests
 		await Assert
 			.That(_asked.Select(request => $"{string.Join(" ", request.Candidates)} {request.Hints.Map(hints => $"{hints.Title} {hints.Year}").GetValueOr("none")}"))
 			.IsEquivalentTo(["AniList:Show:16498 Mal:Show:16498 Attack on Titan 2013", "AniList:Movie:199 Mal:Movie:199 Sen to Chihiro no Kamikakushi 2001"]);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAListHoldingALaterSeason_AsksForThatSeasonByItsShowsIds()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""
+				{"data":{"MediaListCollection":{"lists":[{"entries":[
+				{"media":{"id":161645,"idMal":54492,"format":"TV","title":{"english":"The Apothecary Diaries","romaji":"Kusuriya no Hitorigoto"},"startDate":{"year":2023}}},
+				{"media":{"id":185407,"idMal":59130,"format":"TV","title":{"english":null,"romaji":"Kusuriya no Hitorigoto 3rd Season"},"startDate":{"year":2026}}}]}]}}}
+				"""
+			);
+		var testee = Feed(handler, AnimeMaps.KnowingTheApothecaryDiaries());
+
+		await testee.GetFeedItemsAsync("someone").ToListAsync();
+
+		await Assert
+			.That(_asked.Select(request => string.Join(" ", request.Candidates)))
+			.IsEquivalentTo(["AniList:Show:161645 Mal:Show:54492", string.Join(" ", AnimeMaps.ApothecaryDiariesIds)]);
 	}
 
 	[Test]
@@ -143,11 +167,13 @@ public class AniListTests
 
 	private static AniListClient Client(MockHttpHandler handler) => new(handler.CreateClient("https://graphql.anilist.co/"));
 
-	private AniListFeedService Feed(MockHttpHandler handler)
+	private AniListFeedService Feed(MockHttpHandler handler) => Feed(handler, AnimeMaps.Unknown());
+
+	private AniListFeedService Feed(MockHttpHandler handler, Mock<IAnimeIds> map)
 	{
 		var media = IMediaService.Mock();
 		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).Returns((requests, cancellation) => Identify(requests, cancellation));
-		return new AniListFeedService(Client(handler), media.Object);
+		return new AniListFeedService(Client(handler), media.Object, AnimeMaps.Seasons(map));
 	}
 
 	private async IAsyncEnumerable<MediaMatchResult> Identify(

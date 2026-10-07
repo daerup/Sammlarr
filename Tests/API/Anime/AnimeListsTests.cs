@@ -30,20 +30,20 @@ public class AnimeListsTests
 
 		await Assert
 			.That(entries[0])
-			.IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(290), Some.Of(290), Some.Of(72025), Some.Of(26209), Some.Of("tt0286390")));
+			.IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(290), Some.Of(290), Some.Of(72025), Some.Of(26209), Some.Of("tt0286390"), new None()));
 	}
 
 	[Test]
-	public async Task Parse_ForALaterSeasonOrAPartOfTheFirst_KeepsOnlyItsOwnIds()
+	public async Task Parse_ForALaterSeasonOrAPartOfTheFirst_KeepsOnlyItsOwnIdsAndItsSeries()
 	{
 		var entries = await AnimeIdsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
 
-		await Assert.That(entries[1]).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(291), Some.Of(291), new None(), new None(), new None()));
-		await Assert.That(entries[2]).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(292), new None(), new None(), new None(), new None()));
+		await Assert.That(entries[1]).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(291), Some.Of(291), new None(), new None(), new None(), Some.Of(72025)));
+		await Assert.That(entries[2]).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(292), new None(), new None(), new None(), new None(), Some.Of(72025)));
 	}
 
 	[Test]
-	public async Task Parse_ForAnEntryOffsetOnBothSites_KeepsOnlyItsOwnIds()
+	public async Task Parse_ForASpecialFiledAsSeasonZero_KeepsOnlyItsOwnIdsAndNoSeries()
 	{
 		const string loveHinaAgain = """
 			[{"type":"OVA","anidb_id":49,"anilist_id":190,"imdb_id":["tt0279570"],"mal_id":190,"themoviedb_id":{"tv":30992},"tvdb_id":70861,"season":{"tvdb":0,"tmdb":0},"episode_offset":{"tvdb":2,"tmdb":2}}]
@@ -51,7 +51,9 @@ public class AnimeListsTests
 
 		var entries = await AnimeIdsFile.Parse(Encoding.UTF8.GetBytes(loveHinaAgain)).ToListAsync();
 
-		await Assert.That(entries.Single()).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(190), Some.Of(190), new None(), new None(), new None()));
+		await Assert
+			.That(entries.Single())
+			.IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(190), Some.Of(190), new None(), new None(), new None(), new None()));
 	}
 
 	[Test]
@@ -59,7 +61,9 @@ public class AnimeListsTests
 	{
 		var entries = await AnimeIdsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
 
-		await Assert.That(entries[3]).IsEqualTo(new AnimeIdMapping(MediaType.Movie, Some.Of(199), Some.Of(199), new None(), Some.Of(129), Some.Of("tt0245429")));
+		await Assert
+			.That(entries[3])
+			.IsEqualTo(new AnimeIdMapping(MediaType.Movie, Some.Of(199), Some.Of(199), new None(), Some.Of(129), Some.Of("tt0245429"), new None()));
 	}
 
 	[Test]
@@ -117,7 +121,7 @@ public class AnimeListsTests
 		var testee = Converter(loaded: true, out var map);
 		var asked = MalId.From("290", MediaType.Show);
 		map.FindAsync(Any(), Any())
-			.Returns(Some.Of(new AnimeIdMapping(MediaType.Show, Some.Of(290), Some.Of(290), Some.Of(72025), Some.Of(26209), Some.Of("tt0286390"))));
+			.Returns(Some.Of(new AnimeIdMapping(MediaType.Show, Some.Of(290), Some.Of(290), Some.Of(72025), Some.Of(26209), Some.Of("tt0286390"), new None())));
 
 		var result = await testee.LookUpAsync(testee.RequestById(asked));
 

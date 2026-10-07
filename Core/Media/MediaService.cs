@@ -480,13 +480,18 @@ file static class IdentifyRequestExtensions
 	{
 		public MediaMatchResult Unmatched()
 		{
-			return new UnmatchedMedia([.. request.Candidates], request.Described());
+			return new UnmatchedMedia([.. request.Candidates], Details(request.Hints.Or(() => request.Description), request.Type));
 		}
 
 		public MediaDetails Described()
 		{
-			return request.Hints.Map(Hinted).GetValueOr(() => MediaDetails.Empty(request.Type));
+			return Details(request.Hints, request.Type);
 		}
+	}
+
+	private static MediaDetails Details(Optional<IdentifyHints> hints, MediaType type)
+	{
+		return hints.Map(Hinted).GetValueOr(() => MediaDetails.Empty(type));
 	}
 
 	private static MediaDetails Hinted(IdentifyHints hints)

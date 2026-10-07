@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
 using API.AniList.Types;
+using API.Anime;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Media.Conversions;
@@ -11,7 +12,7 @@ using Domain.Media;
 
 namespace API.AniList;
 
-internal sealed partial class AniListFeedService(AniListClient client, IMediaService media) : IFeedProvider
+internal sealed partial class AniListFeedService(AniListClient client, IMediaService media, LaterSeasons seasons) : IFeedProvider
 {
 	private const string Query =
 		$"query ($user: String, $status: MediaListStatus) {{ MediaListCollection(userName: $user, type: ANIME, status: $status) {{ lists {{ entries {{ media {{ {AniListMedia.Fields} }} }} }} }} }}";
@@ -35,7 +36,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 
 	public IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
 	{
-		return media.IdentifyWithDetailsAsync(RequestsAsync(identifier, cancellationToken), cancellationToken);
+		return media.IdentifyWithDetailsAsync(seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken), cancellationToken);
 	}
 
 	private async IAsyncEnumerable<IdentifyRequest> RequestsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
