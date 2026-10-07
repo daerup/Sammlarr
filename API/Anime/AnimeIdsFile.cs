@@ -10,9 +10,9 @@ using Domain.Providers;
 
 namespace API.Anime;
 
-internal sealed class AnimeListsFile(HttpClient http) : IDataset<AnimeIdMapping>
+internal sealed class AnimeIdsFile(HttpClient http) : IDataset<AnimeIdMapping>
 {
-	public string Name => DatasetNames.AnimeLists;
+	public string Name => DatasetNames.AnimeIds;
 
 	public async Task<Result<Optional<DatasetFile<AnimeIdMapping>>>> DownloadAsync(Optional<string> etag, CancellationToken cancellationToken = default)
 	{

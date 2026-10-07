@@ -267,7 +267,8 @@ passed since the last ask.
 
 Id resolution routes the same way. Each `IExternalIdConverter` announces its `Lookups`, the calls its own provider
 answers: a `ById` lookup accepts some providers' ids, a `ByHints` lookup accepts the title hints, and each says
-which providers' ids its answer may yield and what it costs in calls. `IdLookupPlanner` turns them into hops (an id
+which providers' ids its answer may yield and what it costs in calls (a lookup in a downloaded table, like the anime id
+map's, costs 0). `IdLookupPlanner` turns them into hops (an id
 to an id, an id to the hints, the hints to an id), plans every path of up to three hops from the ids the title
 already has to the target, and orders them: the open paths cheapest first, weighting each hop's cost by how busy its
 provider is, then the paths through a blocked provider, the soonest free first. `MediaIdResolver` tries them in that

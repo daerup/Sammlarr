@@ -11,8 +11,8 @@ internal class AnimeListsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.ForRemote<AnimeListsOptions>(RemoteService.AnimeLists).Client<AnimeListsFile>(Configure).Converter<AnimeListsIdConverter>();
-		services.AddScoped<IDataset<AnimeIdMapping>>(provider => provider.GetRequiredService<AnimeListsFile>());
+		services.ForRemote<AnimeListsOptions>(RemoteService.AnimeLists).Client<AnimeIdsFile>(Configure).Converter<AnimeListsIdConverter>();
+		services.AddScoped<IDataset<AnimeIdMapping>>(provider => provider.GetRequiredService<AnimeIdsFile>());
 	}
 
 	private static void Configure(IServiceProvider sp, HttpClient client)

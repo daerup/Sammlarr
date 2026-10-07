@@ -26,7 +26,7 @@ public class AnimeListsTests
 	[Test]
 	public async Task Parse_ForTheShowItself_KeepsEveryIdItMapsTo()
 	{
-		var entries = await AnimeListsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
+		var entries = await AnimeIdsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
 
 		await Assert
 			.That(entries[0])
@@ -36,7 +36,7 @@ public class AnimeListsTests
 	[Test]
 	public async Task Parse_ForALaterSeasonOrAPartOfTheFirst_KeepsOnlyItsOwnIds()
 	{
-		var entries = await AnimeListsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
+		var entries = await AnimeIdsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
 
 		await Assert.That(entries[1]).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(291), Some.Of(291), new None(), new None(), new None()));
 		await Assert.That(entries[2]).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(292), new None(), new None(), new None(), new None()));
@@ -49,7 +49,7 @@ public class AnimeListsTests
 			[{"type":"OVA","anidb_id":49,"anilist_id":190,"imdb_id":["tt0279570"],"mal_id":190,"themoviedb_id":{"tv":30992},"tvdb_id":70861,"season":{"tvdb":0,"tmdb":0},"episode_offset":{"tvdb":2,"tmdb":2}}]
 			""";
 
-		var entries = await AnimeListsFile.Parse(Encoding.UTF8.GetBytes(loveHinaAgain)).ToListAsync();
+		var entries = await AnimeIdsFile.Parse(Encoding.UTF8.GetBytes(loveHinaAgain)).ToListAsync();
 
 		await Assert.That(entries.Single()).IsEqualTo(new AnimeIdMapping(MediaType.Show, Some.Of(190), Some.Of(190), new None(), new None(), new None()));
 	}
@@ -57,7 +57,7 @@ public class AnimeListsTests
 	[Test]
 	public async Task Parse_ForAMovie_TakesItsFirstTmdbMovie()
 	{
-		var entries = await AnimeListsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
+		var entries = await AnimeIdsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
 
 		await Assert.That(entries[3]).IsEqualTo(new AnimeIdMapping(MediaType.Movie, Some.Of(199), Some.Of(199), new None(), Some.Of(129), Some.Of("tt0245429")));
 	}
@@ -65,7 +65,7 @@ public class AnimeListsTests
 	[Test]
 	public async Task Parse_ForAnEntryWithoutAnAniListOrMalId_LeavesItOut()
 	{
-		var entries = await AnimeListsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
+		var entries = await AnimeIdsFile.Parse(Encoding.UTF8.GetBytes(Recorded)).ToListAsync();
 
 		await Assert.That(entries).Count().IsEqualTo(5);
 		await Assert.That(entries[4].Mal).IsSome().And.IsEqualTo(5114);
@@ -76,7 +76,7 @@ public class AnimeListsTests
 	{
 		var cut = Encoding.UTF8.GetBytes(Recorded)[..120];
 
-		await Assert.That(async () => await AnimeListsFile.Parse(cut).ToListAsync()).Throws<System.Text.Json.JsonException>();
+		await Assert.That(async () => await AnimeIdsFile.Parse(cut).ToListAsync()).Throws<System.Text.Json.JsonException>();
 	}
 
 	[Test]
@@ -85,9 +85,7 @@ public class AnimeListsTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotModified);
 
-		var result = await new AnimeListsFile(handler.CreateClient("https://raw.githubusercontent.com/Fribb/anime-lists/master/")).DownloadAsync(
-			Some.Of("\"last\"")
-		);
+		var result = await new AnimeIdsFile(handler.CreateClient("https://raw.githubusercontent.com/Fribb/anime-lists/master/")).DownloadAsync(Some.Of("\"last\""));
 
 		await Assert.That(result).IsSuccess().And.Multiple(async file => await Assert.That(file).IsNone());
 		handler.Verify(request => request.PathMatches("/anime-list-full.json$").Header("If-None-Match", "\"last\""), Times.Once);
@@ -133,7 +131,7 @@ public class AnimeListsTests
 	}
 
 	[Test]
-	public async Task Lookups_TakeAniListAndMalIdsToTheirCrossIdsWithoutHints()
+	public async Task Lookups_TakeAniListAndMalIdsToTheirCrossIdsWithoutHintsAndWithoutACall()
 	{
 		var testee = Converter(loaded: true, out _);
 
@@ -144,7 +142,7 @@ public class AnimeListsTests
 					new Domain.Media.Conversions.ById(
 						[MediaProvider.AniList, MediaProvider.Mal],
 						[MediaProvider.AniList, MediaProvider.Mal, MediaProvider.Tvdb, MediaProvider.Tmdb, MediaProvider.Imdb],
-						1,
+						0,
 						GivesHints: false
 					),
 			]);
@@ -155,8 +153,8 @@ public class AnimeListsTests
 		map = IAnimeIds.Mock();
 		var loads = IDatasetLoads.Mock();
 		loads
-			.FindAsync(DatasetNames.AnimeLists, Any())
-			.Returns(Optional.When(loaded, () => new DatasetLoad(DatasetNames.AnimeLists, DateTimeOffset.UnixEpoch, new None(), 5)));
+			.FindAsync(DatasetNames.AnimeIds, Any())
+			.Returns(Optional.When(loaded, () => new DatasetLoad(DatasetNames.AnimeIds, DateTimeOffset.UnixEpoch, new None(), 5)));
 		return new AnimeListsIdConverter(map.Object, loads.Object);
 	}
 }

@@ -12,7 +12,7 @@ internal sealed class AnimeListsIdConverter(IAnimeIds map, IDatasetLoads loads) 
 	private static readonly ById ByAnimeId = new(
 		Accepts: [MediaProvider.AniList, MediaProvider.Mal],
 		Yields: [MediaProvider.AniList, MediaProvider.Mal, MediaProvider.Tvdb, MediaProvider.Tmdb, MediaProvider.Imdb],
-		Cost: 1,
+		Cost: 0,
 		GivesHints: false
 	);
 
@@ -31,7 +31,7 @@ internal sealed class AnimeListsIdConverter(IAnimeIds map, IDatasetLoads loads) 
 
 	private async Task<Result<IdLookupResult>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken)
 	{
-		var loaded = await loads.FindAsync(DatasetNames.AnimeLists, cancellationToken);
+		var loaded = await loads.FindAsync(DatasetNames.AnimeIds, cancellationToken);
 		return await loaded.ToResult(NotLoaded).Map(_ => AnswerAsync(id, cancellationToken));
 	}
 

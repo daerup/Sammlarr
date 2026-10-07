@@ -40,7 +40,7 @@ public class AnimeIdsTests(SammlarrTestHost host) : IAsyncDisposable
 		var media = host.Resolve<IMediaService>();
 
 		var before = await media.FindIdAsync(show, MediaProvider.Tvdb);
-		await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.AnimeLists).LoadAsync();
+		await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.AnimeIds).LoadAsync();
 		host.SetCurrentTime(new DateTimeOffset(2024, 6, 1, 2, 0, 0, TimeSpan.Zero));
 		var after = await media.FindIdAsync(show, MediaProvider.Tvdb);
 
@@ -52,7 +52,7 @@ public class AnimeIdsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task FindIdAsync_ForALaterSeason_FindsNoTvdbIdAndLeavesTheShowAlone()
 	{
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.AnimeLists}/anime-list-full.json", Map);
-		await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.AnimeLists).LoadAsync();
+		await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.AnimeIds).LoadAsync();
 		var first = await host.SeedMediaAsync(AniListId.From("290", MediaType.Show));
 		var second = await host.SeedMediaAsync(AniListId.From("291", MediaType.Show));
 		var media = host.Resolve<IMediaService>();
