@@ -9,6 +9,7 @@ using API.Observability;
 using API.Pictures;
 using API.Plex;
 using API.Tmdb;
+using API.Trakt;
 using API.Tvdb;
 using API.Tvmaze;
 using API.Wikidata;
@@ -30,6 +31,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<AnimeListsModule>();
 		services.AddModule<AniListModule>();
 		services.AddModule<MalModule>();
+		services.AddModule<TraktModule>();
 		services.AddModule<ArrModule>();
 		services.AddModule<PicturesModule>();
 		services.AddModule<TvdbModule>();

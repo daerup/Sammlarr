@@ -82,6 +82,7 @@ public class StagingSeedTests : IAsyncDisposable
 				Feed("Marvel movies", FeedProvider.Tmdb, "1"),
 				Feed("This season on AniList", FeedProvider.AniList, "search/anime/this-season"),
 				Feed("This season on MyAnimeList", FeedProvider.Mal, "anime/season"),
+				Feed("Trending on Trakt", FeedProvider.Trakt, "movies/trending"),
 			],
 			Library = new SeedLibrary { Radarr = [], Sonarr = [] },
 			Notifications = new SeedNotifications
@@ -99,6 +100,7 @@ public class StagingSeedTests : IAsyncDisposable
 		"staging-tmdb-key",
 		Some.Of("staging-mdblist-key"),
 		Some.Of("staging-mal-client-id"),
+		Some.Of("staging-trakt-client-id"),
 		ArrSinkConfig.Empty with
 		{
 			Radarr = Instance,
@@ -189,7 +191,7 @@ public class StagingSeedTests : IAsyncDisposable
 			async services =>
 			{
 				var keys = services.GetRequiredService<IApiKeyService>();
-				foreach (var slot in new[] { ApiKeyProvider.Tmdb, ApiKeyProvider.Mdblist, ApiKeyProvider.Mal })
+				foreach (var slot in new[] { ApiKeyProvider.Tmdb, ApiKeyProvider.Mdblist, ApiKeyProvider.Mal, ApiKeyProvider.Trakt })
 				{
 					await Assert.That(await keys.IsStoredAsync(slot)).IsTrue();
 				}
@@ -212,7 +214,7 @@ public class StagingSeedTests : IAsyncDisposable
 				await Assert.That(targets.Count(target => target.Config is PushoverConfig)).IsEqualTo(1);
 				var feeds = (await services.GetRequiredService<IFeedService>().GetAsync()).Feeds;
 				await Assert.That(feeds.Select(feed => feed.Feed.Provider).Distinct()).IsEquivalentTo(Enum.GetValues<FeedProvider>());
-				await Assert.That(feeds.Select(feed => feed.Feed.Enabled)).IsEquivalentTo([true, true, true, true, true]);
+				await Assert.That(feeds.Select(feed => feed.Feed.Enabled)).IsEquivalentTo([true, true, true, true, true, true]);
 			}
 		);
 	}
@@ -240,9 +242,19 @@ public class StagingSeedTests : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Configured_WithoutTheMdblistAndMalKeys_LeavesOnlyTheirFeedsOff()
+	public async Task Configured_WithoutTheMdblistMalAndTraktKeys_LeavesOnlyTheirFeedsOff()
 	{
-		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings with { MdblistKey = new None(), MalKey = new None() }, CancellationToken.None);
+		await StagingSeed.SeedAsync(
+			_services,
+			StagingScenario.Configured,
+			Settings with
+			{
+				MdblistKey = new None(),
+				MalKey = new None(),
+				TraktKey = new None(),
+			},
+			CancellationToken.None
+		);
 
 		await AsAsync(
 			Admin,

@@ -34,6 +34,7 @@ internal sealed record StagingSettings(
 	string TmdbKey,
 	Optional<string> MdblistKey,
 	Optional<string> MalKey,
+	Optional<string> TraktKey,
 	ArrSinkConfig Arr,
 	string CatcherUrl
 );
@@ -90,6 +91,7 @@ internal static class StagingSeed
 		await keys.StoreAsync(new SeededKey(ApiKeyProvider.Tmdb, settings.TmdbKey), cancellationToken);
 		await settings.MdblistKey.Apply(key => keys.StoreAsync(new SeededKey(ApiKeyProvider.Mdblist, key), cancellationToken));
 		await settings.MalKey.Apply(key => keys.StoreAsync(new SeededKey(ApiKeyProvider.Mal, key), cancellationToken));
+		await settings.TraktKey.Apply(key => keys.StoreAsync(new SeededKey(ApiKeyProvider.Trakt, key), cancellationToken));
 	}
 
 	private static async Task AddTitlesAsync(IServiceProvider scoped, IReadOnlyList<SeedTitle> wantlist, CancellationToken cancellationToken)

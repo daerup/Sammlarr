@@ -30,7 +30,7 @@ public enum RatingSource
 	Letterboxd,
 
 	[Description("Trakt")]
-	[SuppliedBy<RemoteService>(RemoteService.Mdblist)]
+	[SuppliedBy<RemoteService>(RemoteService.Mdblist, RemoteService.Trakt)]
 	Trakt,
 
 	[Description("MyAnimeList")]

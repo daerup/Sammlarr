@@ -678,6 +678,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddSingleton(new AnimeListsOptions { BaseUrl = $"https://{TestUrls.AnimeLists}", UserAgent = "Sammlarr tests" });
 		services.AddSingleton(new AniListOptions { BaseUrl = $"https://{TestUrls.AniList}", UserAgent = "Sammlarr tests" });
 		services.AddSingleton(new MalOptions { BaseUrl = $"https://{TestUrls.Mal}" });
+		services.AddSingleton(new TraktOptions { BaseUrl = $"https://{TestUrls.Trakt}", UserAgent = "Sammlarr-tests" });
 		services.AddSingleton(new RadarrOptions());
 		services.AddSingleton(new SonarrOptions());
 		services.AddSingleton(new PictureOptions());
