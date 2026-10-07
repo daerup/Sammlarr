@@ -26,3 +26,7 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0007 | [Push watchlist changes inline during sync](0007-push-watchlist-changes-inline-during-sync.md) | accepted | 2026-09-26 |
 | 0008 | [Separate events from notifications](0008-separate-events-from-notifications.md) | accepted | 2026-09-27 |
 | 0009 | [Model a title as an identity plus optional details](0009-model-a-title-as-an-identity-plus-optional-details.md) | accepted | 2026-10-03 |
+| 0010 | [Split the ids from the services Sammlarr calls](0010-split-the-ids-from-the-services-sammlarr-calls.md) | accepted | 2026-10-05 |
+| 0011 | [Give a service every role its API supports](0011-give-a-service-every-role-its-api-supports.md) | accepted | 2026-10-05 |
+| 0012 | [Read IMDb, Trakt and Letterboxd lists through MDBList](0012-read-imdb-trakt-and-letterboxd-lists-through-mdblist.md) | accepted | 2026-10-05 |
+| 0013 | [Load shared datasets outside the job queue](0013-load-shared-datasets-outside-the-job-queue.md) | accepted | 2026-10-06 |
