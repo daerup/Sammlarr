@@ -68,12 +68,13 @@
                         <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="18" Decorative="true"/>
                         @Branding.GetBrandingInfo(line.Service).NickName
                     </span>
-                    <span class="flex h-2.5 gap-0.5" style="@FormattableString.Invariant($"width: {Math.Max(1, tally.Total * 100.0 / Busiest)}%")">
-                        @foreach (var look in UsageView.Outcomes.Where(look => tally.Of(look.Outcome) > 0))
-                        {
-                            <span class="min-w-0.5 rounded-[2px]" style="@($"flex: {tally.Of(look.Outcome)}; background: {look.Color}")"
-                                  title="@($"{look.Name}: {UsageView.Count(tally.Of(look.Outcome))}")"></span>
-                        }
+                    <span>
+                        <UsageOutcomeBar Tally="tally" Width="tally.Total * 100.0 / Busiest">
+                            <Title>
+                                <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="14" Decorative="true"/>
+                                @Branding.GetBrandingInfo(line.Service).NickName
+                            </Title>
+                        </UsageOutcomeBar>
                     </span>
                     <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
                     <span class="@Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@UsageView.Share(tally.Errors, tally.Total)</span>

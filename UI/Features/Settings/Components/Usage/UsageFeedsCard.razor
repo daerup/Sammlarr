@@ -67,13 +67,16 @@
                     </span>
                     @if (stats.Calls > 0)
                     {
-                        var calls = Tally(line);
-                        <span class="flex h-2.5 gap-0.5" style="@FormattableString.Invariant($"width: {Math.Max(2, stats.Calls * 100.0 / Busiest)}%")">
-                            @foreach (var look in UsageView.Outcomes.Where(look => calls.Of(look.Outcome) > 0))
-                            {
-                                <span class="min-w-0.5 rounded-[2px]" style="@($"flex: {calls.Of(look.Outcome)}; background: {look.Color}")"
-                                      title="@($"{look.Name}: {UsageView.Count(calls.Of(look.Outcome))}")"></span>
-                            }
+                        <span>
+                            <UsageOutcomeBar Tally="Tally(line)" Width="Math.Max(2, stats.Calls * 100.0 / Busiest)">
+                                <Title>
+                                    @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
+                                    {
+                                        <BrandedLogo Brand="brand" Size="14" Decorative="true"/>
+                                    }
+                                    @line.Name
+                                </Title>
+                            </UsageOutcomeBar>
                         </span>
                     }
                     else
