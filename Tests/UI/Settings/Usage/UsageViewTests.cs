@@ -27,6 +27,33 @@ public class UsageViewTests
 	}
 
 	[Test]
+	[Arguments(0L, 140L, "0.0%")]
+	[Arguments(1L, 8287L, "<0.1%")]
+	[Arguments(43L, 14483L, "0.3%")]
+	[Arguments(5L, 0L, "0%")]
+	public async Task Share_OfAPart_ReadsLessThanATenthWhenItWouldRoundToNothing(long part, long total, string share)
+	{
+		await Assert.That(UsageView.Share(part, total)).IsEqualTo(share);
+	}
+
+	[Test]
+	[Arguments(UsageCause.Other, "Untagged", "circle-dashed")]
+	[Arguments(UsageCause.KeyTest, "Connection tests", "plug-zap")]
+	[Arguments(UsageCause.FeedEditor, "Feed editor", "square-pen")]
+	public async Task Cause_ForEachRenamedCause_HasItsNameAndIcon(UsageCause cause, string name, string icon)
+	{
+		await Assert.That(UsageView.Cause(cause)).IsEqualTo((name, icon));
+	}
+
+	[Test]
+	public async Task CauseHint_ForTheCausesThatNeedOne_ExplainsThemAndNoOther()
+	{
+		var hinted = Enum.GetValues<UsageCause>().Where(cause => UsageView.CauseHint(cause).IsSome());
+
+		await Assert.That(hinted).IsEquivalentTo([UsageCause.KeyTest, UsageCause.Other]);
+	}
+
+	[Test]
 	public async Task RightNow_PausedWhileFailing_SaysPausedFirst()
 	{
 		var at = new DateTimeOffset(2026, 10, 7, 9, 30, 0, TimeSpan.Zero);

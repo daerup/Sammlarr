@@ -285,7 +285,7 @@
             return check.Answer;
         }
 
-        var answer = await FeedProviders[_config.Provider!.Value].NormalizeAsync(typed, CancellationToken.None);
+        var answer = await FeedProviders[_config.Provider!.Value].CheckLinkAsync(typed);
         _identifierCheck = new IdentifierCheck(typed, answer);
         return answer;
     }

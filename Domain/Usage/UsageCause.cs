@@ -9,5 +9,6 @@ public enum UsageCause
 	Browse,
 	ShowingTitles,
 	KeyTest,
+	FeedEditor,
 	Other,
 }

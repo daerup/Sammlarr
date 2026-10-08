@@ -19,24 +19,14 @@
 
 .usage-outcome {
     display: grid;
-    grid-template-columns: 10px 14px minmax(0, 1fr) 50px 42px;
+    grid-template-columns: 10px 14px 182px 50px 44px;
     gap: 6px;
     align-items: center;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
 .usage-swatch {
     width: 10px;
     height: 10px;
     border-radius: 3px;
-}
-
-.usage-outcome-off .usage-strike {
-    text-decoration: line-through;
-    opacity: 0.5;
-}
-
-.usage-outcome-off .usage-swatch {
-    background: transparent !important;
-    box-shadow: inset 0 0 0 1.5px var(--muted-foreground);
 }
