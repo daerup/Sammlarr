@@ -10,6 +10,7 @@ internal sealed class UsageModule : IServiceModule
 	{
 		services.AddSingleton<IUsageLastCalls, UsageLastCalls>();
 		services.AddSingleton<IFeedRunUsage, FeedRunUsage>();
+		services.AddScoped<UsageFeedLines>();
 		services.AddScoped<IUsageReport, UsageReport>();
 	}
 }

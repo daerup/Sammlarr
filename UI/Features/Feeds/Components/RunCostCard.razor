@@ -1,0 +1,100 @@
+@using Contracts.Identity
+@using Domain.Feed.Run
+@using Domain.Identity
+@using UI.Features.Settings.Components.Usage
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+@inject ICurrentUser CurrentUser
+
+@if (Run.Calls.Count > 0)
+{
+    <BbCard Class="flex flex-col gap-2.5 rounded-xl px-[18px] pt-4 pb-3.5" data-testid="run-cost">
+        <div class="flex items-start gap-3">
+            <div>
+                <BbCardTitle As="h4" Class="flex items-center gap-2 text-sm font-semibold">
+                    <LucideIcon Name="arrow-up-right" Size="15"/>
+                    What this run cost
+                </BbCardTitle>
+                <BbCardDescription Class="mt-0.5 text-xs" data-testid="run-cost-summary">@Summary</BbCardDescription>
+            </div>
+            @if (CurrentUser.Role is UserRole.Admin)
+            {
+                <a class="ml-auto shrink-0 text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground" href="/settings?section=usage">Open in Usage</a>
+            }
+        </div>
+        <div>
+            @foreach (var (service, tally) in Services)
+            {
+                <div class="run-cost-row border-t text-[12.5px] first:border-t-0" data-testid="run-cost-service" data-service="@service">
+                    <span class="flex min-w-0 items-center gap-2 whitespace-nowrap font-medium">
+                        <BrandedLogo Brand="Branding.GetBrandingInfo(service)" Size="16" Decorative="true"/>
+                        @Branding.GetBrandingInfo(service).NickName
+                    </span>
+                    <span class="flex h-2.5 gap-0.5" style="@FormattableString.Invariant($"width: {tally.Total * 100.0 / Busiest}%")">
+                        @foreach (var look in UsageView.Outcomes.Where(look => tally.Of(look.Outcome) > 0))
+                        {
+                            <span class="min-w-0.5 rounded-[2px]" style="@($"flex: {tally.Of(look.Outcome)}; background: {look.Color}")"
+                                  title="@($"{look.Name}: {UsageView.Count(tally.Of(look.Outcome))}")"></span>
+                        }
+                    </span>
+                    <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
+                    <span class="flex items-center gap-1.5 text-xs text-[var(--usage-gave-up)]">
+                        @if (tally.RateLimited > 0)
+                        {
+                            <LucideIcon Name="rotate-cw" Size="12"/>
+                            @($"{UsageView.Count(tally.RateLimited)} rate-limited, {UsageView.Count(tally.Of(UsageOutcome.AnsweredAfter429))} answered")
+                        }
+                    </span>
+                </div>
+            }
+            <div class="flex items-start gap-3 border-t pt-2 text-[12.5px]" data-testid="run-cost-unmatched">
+                <span class="flex w-[120px] shrink-0 items-center gap-2 font-medium">
+                    <LucideIcon Name="circle-help" Size="16"/>
+                    Unmatched
+                </span>
+                <span class="text-xs text-muted-foreground">@Unmatched</span>
+            </div>
+        </div>
+    </BbCard>
+}
+
+@code {
+    [Parameter] [EditorRequired] public required FeedRun Run { get; set; }
+
+    private IReadOnlyList<(RemoteService Service, UsageTally Tally)> Services =>
+        [
+            .. Run
+                .Calls.GroupBy(call => call.Service)
+                .Select(group => (Service: group.Key, Tally: new UsageTally(group.ToDictionary(call => call.Outcome, call => call.Calls), new Dictionary<int, long>())))
+                .OrderByDescending(service => service.Tally.Total),
+        ];
+
+    private UsageTally All => UsageTally.Sum(Services.Select(service => service.Tally));
+
+    private long Busiest => Services.Select(service => service.Tally.Total).DefaultIfEmpty(1).Max();
+
+    private string Summary
+    {
+        get
+        {
+            var all = All;
+            var titles = Run.Counts.Total;
+            var perTitle = titles == 0 ? string.Empty : FormattableString.Invariant($" ({(double)all.Total / titles:0.##} per title)");
+            var limited = all.RateLimited == 0
+                ? string.Empty
+                : $" · {UsageView.Count(all.RateLimited)} rate-limited, {UsageView.Count(all.Of(UsageOutcome.AnsweredAfter429))} of them still answered";
+            return $"{UsageView.Count(all.Total)} calls to {Services.Count} {(Services.Count == 1 ? "service" : "services")} for {UsageView.Count(titles)} titles{perTitle} in {UsageView.Duration(Run.Duration.TotalMilliseconds)}{limited}";
+        }
+    }
+
+    private string Unmatched
+    {
+        get
+        {
+            var counts = Run.Counts;
+            return counts.Unmatched == 0
+                ? $"None of the {UsageView.Count(counts.Total)} titles"
+                : $"{UsageView.Count(counts.Unmatched)} of {UsageView.Count(counts.Total)} titles: {FeedRunView.UnmatchedSplit(counts)}";
+        }
+    }
+}

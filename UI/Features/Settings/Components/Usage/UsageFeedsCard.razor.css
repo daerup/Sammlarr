@@ -1,0 +1,17 @@
+.usage-feed {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 112px 60px 42px 62px 56px 88px 56px 106px 28px;
+    gap: 12px;
+    align-items: center;
+    padding: 7px 4px 7px 12px;
+}
+
+.usage-feed + .usage-feed {
+    border-top: 1px solid var(--border);
+}
+
+.usage-feed-picked {
+    background: color-mix(in oklch, var(--foreground) 6%, transparent);
+    box-shadow: inset 3px 0 0 var(--edge);
+    border-radius: 2px 6px 6px 2px;
+}
