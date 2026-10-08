@@ -1,0 +1,79 @@
+.usage-run {
+    display: flex;
+    width: auto;
+    max-width: 340px;
+}
+
+.usage-run-rail {
+    width: 3px;
+    flex: none;
+}
+
+.usage-run-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 11px 13px;
+}
+
+.usage-run-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.usage-run-name {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 0;
+    overflow-x: clip;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.usage-run-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+}
+
+.usage-run-meta div {
+    display: flex;
+    gap: 8px;
+}
+
+.usage-run-key {
+    width: 46px;
+    flex: none;
+}
+
+.usage-run-value {
+    color: var(--foreground);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.usage-run-value.is-limited {
+    color: var(--usage-after-429);
+}
+
+.usage-run-value .is-added {
+    color: var(--alert-success);
+    font-weight: 600;
+}
+
+.usage-run-value .is-removed {
+    color: var(--destructive);
+    font-weight: 600;
+}
+
+.usage-run-foot {
+    margin: 2px -13px -11px;
+    padding: 6px 13px;
+    border-top: 1px solid var(--border);
+}

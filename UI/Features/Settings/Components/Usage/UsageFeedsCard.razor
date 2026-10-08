@@ -3,7 +3,6 @@
 @using Domain.Feed.Run
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
-@inject NavigationManager Navigation
 @inject IDateTimeProvider Clock
 
 <UsageCard Title="Feeds" Subtitle="@Subtitle" TestId="usage-feeds">
@@ -11,189 +10,304 @@
         <UsageSegments TValue="FeedsTab" Value="_tab" Options="Tabs" OnChange="tab => _tab = tab" Label="Feeds card view"/>
     </Right>
     <ChildContent>
-        @if (Points.Count == 0)
-        {
-            <span class="text-[12.5px] text-muted-foreground" data-testid="usage-feeds-none">No runs in the @UsageView.Window(Range).</span>
-        }
-        else
-        {
-            <div class="flex flex-wrap justify-end gap-x-3.5 gap-y-1 text-xs text-muted-foreground" data-testid="usage-feeds-legend">
-                @foreach (var (name, icon, color) in Marks)
-                {
-                    <span class="inline-flex items-center gap-1.5">
-                        <span class="size-2.5 rounded-full" style="@($"background: {color}")"></span>
-                        <LucideIcon Name="@icon" Size="11"/>
-                        @name
-                    </span>
-                }
-            </div>
-            <BbScatterChart Data="Points" Height="190px" EnableAnimations="false" OnDataPointClick="OpenRun">
-                <BbGrid Left="4" Right="16" Top="10" Bottom="0"/>
-                <BbXAxis Type="AxisType.Time"/>
-                <BbYAxis Type="@(_tab is FeedsTab.Calls ? AxisType.Log : AxisType.Value)" Min="@(_tab is FeedsTab.Calls ? 1 : 0)"/>
-                <BbChartTooltip AppendToBody="true"/>
-                <BbScatter XDataKey="At" DataKey="Other" Name="Other feeds" Color="var(--muted-foreground)" SymbolSize="7"/>
-                <BbScatter XDataKey="At" DataKey="Picked" Name="@PickedName" Color="@PickedColor" SymbolSize="9"/>
-                <BbScatter XDataKey="At" DataKey="Limited" Name="Some calls rate-limited" Color="var(--usage-after-429)" SymbolSize="11"/>
-                <BbScatter XDataKey="At" DataKey="Trouble" Name="@TroubleName" Color="var(--usage-gave-up)" SymbolSize="11"/>
-            </BbScatterChart>
-        }
-        <div>
-            <div class="usage-feed text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                <span>Feed</span>
-                <span>Calls</span>
-                <span class="text-right">Total</span>
-                <span class="text-right">Runs</span>
-                <span class="text-right">Per run</span>
-                <span class="text-right">Per title</span>
-                <span class="text-right">Unmatched</span>
-                <span class="text-right">Took</span>
-                <span>Last run</span>
-                <span></span>
-            </div>
-            @foreach (var line in Feeds)
+        <div class="usage-feeds flex flex-col gap-2.5">
+            <style>@HoverRules</style>
+            @if (Plotted.Count == 0)
             {
-                var picked = Picked(line);
-                var stats = line.Stats;
-                <div class="@($"usage-feed rounded-md text-[12.5px] {(line.Runs.Count > 0 ? "cursor-pointer hover:bg-foreground/5" : string.Empty)} {(picked ? "usage-feed-picked" : string.Empty)}")"
-                     style="@($"--edge: {Branding.Color(line.Provider.Service)}")" data-testid="usage-feed" data-feed="@line.Name"
-                     @onclick="() => Pick(line)">
-                    <span class="flex min-w-0 items-center gap-2 font-medium">
-                        @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
-                        {
-                            <BrandedLogo Brand="brand" Size="18" Decorative="true"/>
-                        }
-                        <span class="truncate">@line.Name</span>
-                    </span>
-                    @if (stats.Calls > 0)
+                <span class="text-[12.5px] text-muted-foreground" data-testid="usage-feeds-none">No runs in the @UsageView.Window(Range).</span>
+            }
+            else
+            {
+                <div class="relative h-[192px]" data-testid="usage-feeds-chart" @onclick="() => _picked = new None()">
+                    @foreach (var (y, label) in YTicks)
                     {
-                        <span>
-                            <UsageOutcomeBar Tally="Tally(line)" Width="Math.Max(2, stats.Calls * 100.0 / Busiest)">
-                                <Title>
-                                    @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
-                                    {
-                                        <BrandedLogo Brand="brand" Size="14" Decorative="true"/>
-                                    }
-                                    @line.Name
-                                </Title>
-                            </UsageOutcomeBar>
+                        <span class="absolute left-0 w-[38px] text-right text-[10.5px] tabular-nums text-muted-foreground" style="@($"top: {UsageView.Number(y - 7)}px")">@label</span>
+                    }
+                    @foreach (var (at, label) in XTicks)
+                    {
+                        <span class="absolute top-[176px] text-[10.5px] whitespace-nowrap text-muted-foreground" style="@($"left: {AtX(at)}")">@label</span>
+                    }
+                    <svg class="absolute top-0 overflow-visible" style="@($"left: {PlotLeft}px; width: calc(100% - {PlotLeft}px); height: {PlotHeight}px")">
+                        @foreach (var (y, _) in YTicks)
+                        {
+                            <line x1="0" x2="100%" y1="@UsageView.Number(y)" y2="@UsageView.Number(y)" stroke="var(--border)"/>
+                        }
+                        @foreach (var plot in Plotted.OrderBy(plot => IsLit(plot.Line.Feed)))
+                        {
+                            var colour = Branding.Color(plot.Line.Provider.Service);
+                            <g class="@($"usage-feed-group {(IsLit(plot.Line.Feed) ? string.Empty : "usage-feed-dim")}")" data-f="@plot.Key" data-testid="usage-feed-group">
+                                @foreach (var (from, to) in plot.Dots.Zip(plot.Dots.Skip(1)))
+                                {
+                                    <line x1="@Percent(from.X)" y1="@UsageView.Number(from.Y)" x2="@Percent(to.X)" y2="@UsageView.Number(to.Y)"
+                                          stroke="@colour" stroke-width="1.8" opacity="0.7" pointer-events="none"/>
+                                    <line x1="@Percent(from.X)" y1="@UsageView.Number(from.Y)" x2="@Percent(to.X)" y2="@UsageView.Number(to.Y)"
+                                          stroke="transparent" stroke-width="12" class="cursor-pointer" data-testid="usage-feed-line"
+                                          @onclick="() => Pick(plot.Line)" @onclick:stopPropagation="true">
+                                        <title>@plot.Line.Name: click to show only its runs</title>
+                                    </line>
+                                }
+                                @foreach (var dot in plot.Dots)
+                                {
+                                    <g class="cursor-pointer" data-testid="usage-feed-dot" data-run="@dot.Run.Run" @onclick="() => Open(plot.Line, dot)" @onclick:stopPropagation="true">
+                                        @if (Ring(dot.Run) is Some<string>(var ring))
+                                        {
+                                            <circle cx="@Percent(dot.X)" cy="@UsageView.Number(dot.Y)" r="6.1" fill="none" stroke="@ring" stroke-width="1.8"
+                                                    data-testid="usage-feed-ring"/>
+                                        }
+                                        <circle cx="@Percent(dot.X)" cy="@UsageView.Number(dot.Y)" r="3.3" fill="@colour"/>
+                                        <circle cx="@Percent(dot.X)" cy="@UsageView.Number(dot.Y)" r="10" fill="transparent"/>
+                                    </g>
+                                }
+                            </g>
+                        }
+                    </svg>
+                    <BbPopover Open="_open" OpenChanged="open => _open = open">
+                        <BbPopoverTrigger AsChild="false" tabindex="-1" aria-hidden="true" class="pointer-events-none absolute size-0 p-0" style="@_anchor"/>
+                        <BbPopoverContent Side="PopoverSide.Right" Align="PopoverAlign.Center" Offset="12" Class="w-auto overflow-hidden p-0">
+                            @if (_shown is Some<(UsageFeedLine Line, UsageRun Run)>(var (line, run)))
+                            {
+                                <UsageRunDetails Line="line" Run="run"/>
+                            }
+                        </BbPopoverContent>
+                    </BbPopover>
+                </div>
+                <div class="flex flex-wrap gap-x-3.5 gap-y-1 text-xs text-muted-foreground" data-testid="usage-feeds-legend">
+                    @foreach (var (text, colour) in Rings)
+                    {
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg width="18" height="18" class="block shrink-0">
+                                <circle cx="9" cy="9" r="7.2" fill="none" stroke="@colour" stroke-width="2.2"/>
+                                <circle cx="9" cy="9" r="3.6" fill="var(--usage-shade)"/>
+                            </svg>
+                            @text
                         </span>
                     }
-                    else
-                    {
-                        <span class="text-xs text-muted-foreground">No runs</span>
-                    }
-                    <span class="text-right tabular-nums">@UsageView.Count(stats.Calls)</span>
-                    <span class="text-right tabular-nums text-muted-foreground">@line.Runs.Count</span>
-                    <span class="text-right font-semibold tabular-nums">@UsageView.Count(stats.CallsPerRun)</span>
-                    <span class="text-right tabular-nums">@FormattableString.Invariant($"{stats.CallsPerTitle:0.0}")</span>
-                    <span class="@($"text-right tabular-nums {(stats.CouldNotLookUp > 0 ? "font-medium text-[var(--usage-gave-up)]" : string.Empty)}")"
-                          title="@UnmatchedTitle(line)" data-testid="usage-feed-unmatched">
-                        @if (stats.CouldNotLookUp > 0)
-                        {
-                            <LucideIcon Name="rotate-cw" Size="11" Class="mr-0.5 inline"/>
-                        }
-                        @UsageView.Count(stats.Unmatched) <span class="text-muted-foreground">· @FormattableString.Invariant($"{stats.UnmatchedShare * 100:0.#}%")</span>
-                    </span>
-                    <span class="text-right tabular-nums text-muted-foreground">@(line.Runs.Count > 0 ? UsageView.Duration(stats.Took.TotalMilliseconds) : string.Empty)</span>
-                    <span class="flex min-w-0 items-center gap-1.5 truncate text-xs text-muted-foreground" data-testid="usage-feed-last">
-                        @if (!line.Enabled)
-                        {
-                            <LucideIcon Name="pause" Size="12"/>
-                        }
-                        @line.LastRun.Map(at => UsageView.Clock(at, Clock.Now)).GetValueOr("Never ran")
-                    </span>
-                    <a class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground" href="@RunsOf(line.Feed)"
-                       title="Open the run history" data-testid="usage-feed-runs" @onclick:stopPropagation="true">
-                        <LucideIcon Name="chevron-right" Size="15"/>
-                    </a>
                 </div>
             }
+            <div>
+                <div class="usage-feed text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <span>Feed</span>
+                    <span>Calls</span>
+                    <span class="text-right">Total</span>
+                    <span class="text-right">Runs</span>
+                    <span class="text-right">Per run</span>
+                    <span class="text-right">Per title</span>
+                    <span class="text-right">Unmatched</span>
+                    <span class="text-right">Took</span>
+                    <span>Last run</span>
+                    <span></span>
+                </div>
+                @foreach (var (line, key) in Feeds.Select((line, index) => (line, Key(index))))
+                {
+                    var picked = IsPicked(line.Feed);
+                    var stats = line.Stats;
+                    <div class="@($"usage-feed rounded-md text-[12.5px] {(line.Runs.Count > 0 ? "cursor-pointer hover:bg-foreground/5" : string.Empty)} {(picked ? "usage-feed-picked" : string.Empty)}")"
+                         style="@($"--edge: {Branding.Color(line.Provider.Service)}")" data-testid="usage-feed" data-feed="@line.Name"
+                         data-f="@(line.Runs.Count > 0 ? key : null)" @onclick="() => Pick(line)">
+                        <span class="flex min-w-0 items-center gap-2 font-medium">
+                            @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
+                            {
+                                <BrandedLogo Brand="brand" Size="18" Decorative="true"/>
+                            }
+                            <span class="truncate">@line.Name</span>
+                        </span>
+                        @if (stats.Calls > 0)
+                        {
+                            <span>
+                                <UsageOutcomeBar Tally="Tally(line)" Width="Math.Max(2, stats.Calls * 100.0 / Busiest)">
+                                    <Title>
+                                        @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
+                                        {
+                                            <BrandedLogo Brand="brand" Size="14" Decorative="true"/>
+                                        }
+                                        @line.Name
+                                    </Title>
+                                </UsageOutcomeBar>
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-xs text-muted-foreground">No runs</span>
+                        }
+                        <span class="text-right tabular-nums">@UsageView.Count(stats.Calls)</span>
+                        <span class="text-right tabular-nums text-muted-foreground">@line.Runs.Count</span>
+                        <span class="text-right font-semibold tabular-nums">@UsageView.Count(stats.CallsPerRun)</span>
+                        <span class="text-right tabular-nums">@FormattableString.Invariant($"{stats.CallsPerTitle:0.0}")</span>
+                        <span class="@($"text-right tabular-nums {(stats.CouldNotLookUp > 0 ? "font-medium text-[var(--usage-gave-up)]" : string.Empty)}")"
+                              title="@UnmatchedTitle(line)" data-testid="usage-feed-unmatched">
+                            @if (stats.CouldNotLookUp > 0)
+                            {
+                                <LucideIcon Name="rotate-cw" Size="11" Class="mr-0.5 inline"/>
+                            }
+                            @UsageView.Count(stats.Unmatched) <span class="text-muted-foreground">· @FormattableString.Invariant($"{stats.UnmatchedShare * 100:0.#}%")</span>
+                        </span>
+                        <span class="text-right tabular-nums text-muted-foreground">@(line.Runs.Count > 0 ? UsageView.Duration(stats.Took.TotalMilliseconds) : string.Empty)</span>
+                        <span class="flex min-w-0 items-center gap-1.5 truncate text-xs text-muted-foreground" data-testid="usage-feed-last">
+                            @if (!line.Enabled)
+                            {
+                                <LucideIcon Name="pause" Size="12"/>
+                            }
+                            @line.LastRun.Map(at => UsageView.Clock(at, Clock.Now)).GetValueOr("Never ran")
+                        </span>
+                        <a class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground" href="@RunsOf(line.Feed)"
+                           title="Open the run history" data-testid="usage-feed-runs" @onclick:stopPropagation="true">
+                            <LucideIcon Name="chevron-right" Size="15"/>
+                        </a>
+                    </div>
+                }
+            </div>
         </div>
     </ChildContent>
 </UsageCard>
 
 @code {
+    private const int PlotLeft = 46;
+
+    private const int PlotHeight = 170;
+
+    private const int PlotTop = 8;
+
     private static readonly IReadOnlyList<(FeedsTab Value, string Label)> Tabs = [(FeedsTab.Calls, "Calls per run"), (FeedsTab.Unmatched, "Unmatched per run")];
 
     [Parameter] [EditorRequired] public required IReadOnlyList<UsageFeedLine> Feeds { get; set; }
 
     [Parameter] [EditorRequired] public required UsageRange Range { get; set; }
 
+    [Parameter] [EditorRequired] public required UsageWindow Window { get; set; }
+
     private FeedsTab _tab = FeedsTab.Calls;
 
-    private FeedId? _picked;
+    private Optional<FeedId> _picked = new None();
+
+    private bool _open;
+
+    private Optional<(UsageFeedLine Line, UsageRun Run)> _shown = new None();
+
+    private string _anchor = string.Empty;
 
     private string Subtitle =>
-        $"Your feeds. Pick one to light up its runs; a dot opens that run, the arrow the feed's run history. Per run and per title are the typical run over the {UsageView.Window(Range)}.";
-
-    private IEnumerable<FeedId> Ran => Feeds.Where(line => line.Runs.Count > 0).OrderByDescending(line => line.Stats.Calls).Select(line => line.Feed);
-
-    private Optional<FeedId> Current => Ran.FirstOrNone(feed => feed == _picked).Or(() => Ran.FirstOrNone());
+        $"Point at a feed or its line to pick it out, click to keep only its runs, click again for all. A dot opens that run. Per run and per title are the typical run over the {UsageView.Window(Range)}.";
 
     private long Busiest => Feeds.Select(line => line.Stats.Calls).DefaultIfEmpty(1).Max();
 
-    private string PickedName => Feeds.FirstOrNone(line => IsCurrent(line.Feed)).Map(line => line.Name).GetValueOr("Picked feed");
-
-    private string PickedColor => Feeds.FirstOrNone(line => IsCurrent(line.Feed)).Map(line => Branding.Color(line.Provider.Service)).GetValueOr(UsageView.Accent);
-
-    private string TroubleName => _tab is FeedsTab.Calls ? "Some gave up" : "Some titles could not be looked up";
-
-    private IReadOnlyList<(string Name, string Icon, string Color)> Marks =>
-        _tab is FeedsTab.Calls
-            ? [("Some calls rate-limited", "rotate-cw", "var(--usage-after-429)"), ("Some gave up", "octagon-x", "var(--usage-gave-up)")]
-            : [("Some titles could not be looked up", "rotate-cw", "var(--usage-gave-up)")];
-
-    private IReadOnlyList<Point> Points => [.. Feeds.SelectMany(line => line.Runs.Select(run => Plot(line, run))).OrderBy(point => point.At)];
-
-    private Point Plot(UsageFeedLine line, UsageRun run)
+    private IReadOnlyList<Plot> Plotted
     {
-        var value = _tab is FeedsTab.Calls ? Math.Max(1, run.Calls.Total) : Share(run);
-        var kind = Kind(line, run);
-        return new Point(
-            run.StartedAt.ToUnixTimeMilliseconds(),
-            kind is DotKind.Other ? value : null,
-            kind is DotKind.Picked ? value : null,
-            kind is DotKind.Limited ? value : null,
-            kind is DotKind.Trouble ? value : null,
-            line.Feed,
-            run.Run
-        );
+        get
+        {
+            var top = Ceiling;
+            return
+            [
+                .. Feeds
+                    .Select((line, index) => (line, index))
+                    .Where(feed => feed.line.Runs.Count > 0)
+                    .Select(feed => new Plot(
+                        feed.line,
+                        Key(feed.index),
+                        [.. feed.line.Runs.OrderBy(run => run.StartedAt).Select(run => new Dot(run, Across(run.StartedAt), Down(Value(run), top)))]
+                    )),
+            ];
+        }
     }
 
-    private DotKind Kind(UsageFeedLine line, UsageRun run)
+    private double Ceiling
     {
-        return (_tab, run.Calls.Of(UsageOutcome.GaveUpOn429) > 0, run.Calls.RateLimited > 0, run.CouldNotLookUp > 0, IsCurrent(line.Feed)) switch
+        get
         {
-            (FeedsTab.Calls, true, _, _, _) => DotKind.Trouble,
-            (FeedsTab.Calls, false, true, _, _) => DotKind.Limited,
-            (FeedsTab.Unmatched, _, _, true, _) => DotKind.Trouble,
-            (_, _, _, _, true) => DotKind.Picked,
-            _ => DotKind.Other,
+            var highest = Feeds.SelectMany(line => line.Runs).Select(Value).DefaultIfEmpty(0).Max();
+            return _tab is FeedsTab.Calls ? Math.Max(1, Math.Ceiling(Math.Log10(Math.Max(1, highest)))) : Math.Max(20, Math.Ceiling(highest / 20) * 20);
+        }
+    }
+
+    private IReadOnlyList<(double Y, string Label)> YTicks
+    {
+        get
+        {
+            var top = Ceiling;
+            return _tab is FeedsTab.Calls
+                ? [.. Enumerable.Range(0, (int)top + 1).Select(decade => (Down(decade, top), UsageView.Count(Math.Pow(10, decade))))]
+                : [.. Enumerable.Range(0, (int)(top / 20) + 1).Select(step => (Down(step * 20, top), $"{step * 20}%"))];
+        }
+    }
+
+    private IReadOnlyList<(double At, string Label)> XTicks
+    {
+        get
+        {
+            var every = Range switch
+            {
+                UsageRange.Day => 3,
+                UsageRange.Week => 1,
+                UsageRange.Month => 4,
+            };
+            return [.. Enumerable.Range(0, Window.Slots).Where(slot => slot % every == 0).Select(slot => ((double)slot / Window.Slots, UsageView.Slot(Range, Window.SlotAt(slot))))];
+        }
+    }
+
+    private IReadOnlyList<(string Text, string Colour)> Rings =>
+        _tab is FeedsTab.Calls
+            ? [("A ring: some calls were rate-limited", "var(--usage-after-429)"), ("some gave up", "var(--usage-gave-up)")]
+            : [("A ring: some titles could not be looked up", "var(--usage-gave-up)")];
+
+    private string HoverRules =>
+        string.Concat(
+            Feeds
+                .Select((_, index) => Key(index))
+                .Select(key =>
+                    $".usage-feeds:has([data-f={key}]:hover) .usage-feed-group:not([data-f={key}]) {{ filter: grayscale(1); opacity: 0.3; }} "
+                    + $".usage-feeds:has([data-f={key}]:hover) .usage-feed-group[data-f={key}] {{ filter: none; opacity: 1; }} "
+                    + $".usage-feeds:has(.usage-feed-group[data-f={key}]:hover) .usage-feed[data-f={key}] {{ background: color-mix(in oklch, var(--foreground) 5%, transparent); }} "
+                )
+        );
+
+    private double Value(UsageRun run) => _tab is FeedsTab.Calls ? Math.Max(1, run.Calls.Total) : Unmatched(run);
+
+    private static double Unmatched(UsageRun run) => run.Titles == 0 ? 0 : (run.NotFound + run.CouldNotLookUp) * 100.0 / run.Titles;
+
+    private double Down(double value, double top)
+    {
+        var share = _tab is FeedsTab.Calls ? Math.Log10(Math.Max(1, value)) / top : value / top;
+        return PlotTop + ((PlotHeight - PlotTop) * (1 - share));
+    }
+
+    private double Across(DateTimeOffset at) => Math.Clamp((at - Window.From) / (Window.To - Window.From), 0, 1);
+
+    private Optional<string> Ring(UsageRun run)
+    {
+        return (_tab, run.Calls.Of(UsageOutcome.GaveUpOn429) > 0, run.Calls.RateLimited > 0, run.CouldNotLookUp > 0) switch
+        {
+            (FeedsTab.Calls, true, _, _) => Some.Of("var(--usage-gave-up)"),
+            (FeedsTab.Calls, false, true, _) => Some.Of("var(--usage-after-429)"),
+            (FeedsTab.Unmatched, _, _, true) => Some.Of("var(--usage-gave-up)"),
+            _ => new None(),
         };
     }
 
-    private static double Share(UsageRun run) => run.Titles == 0 ? 0 : (run.NotFound + run.CouldNotLookUp) * 100.0 / run.Titles;
+    private bool IsPicked(FeedId feed) => _picked.Match(picked => picked == feed, () => false);
 
-    private static UsageTally Tally(UsageFeedLine line) => UsageTally.Sum(line.Runs.Select(run => run.Calls));
-
-    private bool Picked(UsageFeedLine line) => line.Runs.Count > 0 && IsCurrent(line.Feed);
-
-    private bool IsCurrent(FeedId feed) => Current.Match(current => current == feed, () => false);
+    private bool IsLit(FeedId feed) => _picked.Match(picked => picked == feed, () => true);
 
     private void Pick(UsageFeedLine line)
     {
         if (line.Runs.Count > 0)
         {
-            _picked = line.Feed;
+            _picked = Optional.When(!IsPicked(line.Feed), () => line.Feed);
         }
     }
 
-    private void OpenRun(ChartClickEventArgs click)
+    private void Open(UsageFeedLine line, Dot dot)
     {
-        var points = Points;
-        Optional.When(click.DataIndex >= 0 && click.DataIndex < points.Count, () => points[click.DataIndex]).Apply(point => Navigation.NavigateTo(RunOf(point.Feed, point.Run)));
+        _anchor = $"left: {AtX(dot.X)}; top: {UsageView.Number(dot.Y)}px";
+        _shown = Some.Of((line, dot.Run));
+        _open = true;
     }
+
+    private static string Key(int index) => $"f{index}";
+
+    private static string Percent(double share) => FormattableString.Invariant($"{share * 100:0.###}%");
+
+    private static string AtX(double share) => FormattableString.Invariant($"calc({PlotLeft}px + (100% - {PlotLeft}px) * {share:0.####})");
+
+    private static UsageTally Tally(UsageFeedLine line) => UsageTally.Sum(line.Runs.Select(run => run.Calls));
 
     private string UnmatchedTitle(UsageFeedLine line)
     {
@@ -205,21 +319,13 @@
 
     private static string RunsOf(FeedId feed) => $"/feeds/{UrlGuid.Encode(feed.Value)}/runs";
 
-    private static string RunOf(FeedId feed, RunId run) => $"/feeds/{UrlGuid.Encode(feed.Value)}/runs/{UrlGuid.Encode(run.Value)}";
-
     private enum FeedsTab
     {
         Calls,
         Unmatched,
     }
 
-    private enum DotKind
-    {
-        Other,
-        Picked,
-        Limited,
-        Trouble,
-    }
+    private sealed record Dot(UsageRun Run, double X, double Y);
 
-    private sealed record Point(long At, double? Other, double? Picked, double? Limited, double? Trouble, FeedId Feed, RunId Run);
+    private sealed record Plot(UsageFeedLine Line, string Key, IReadOnlyList<Dot> Dots);
 }

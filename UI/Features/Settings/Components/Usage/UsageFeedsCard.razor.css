@@ -15,3 +15,12 @@
     box-shadow: inset 3px 0 0 var(--edge);
     border-radius: 2px 6px 6px 2px;
 }
+
+.usage-feed-group {
+    transition: opacity 0.12s, filter 0.12s;
+}
+
+.usage-feed-dim {
+    filter: grayscale(1);
+    opacity: 0.3;
+}
