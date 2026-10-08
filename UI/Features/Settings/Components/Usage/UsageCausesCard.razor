@@ -1,7 +1,8 @@
 @using Contracts.Usage
+@using Domain.Usage
 
 <UsageCard Title="Calls by cause" Subtitle="Pick a cause to see how its calls ended" TestId="usage-causes">
-    <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] items-stretch gap-[22px]">
+    <div class="grid grid-cols-[minmax(0,1fr)_max-content] items-start gap-7">
         <div>
             <div class="usage-cause pl-3 pr-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                 <span>Cause</span>
@@ -13,11 +14,24 @@
             {
                 var picked = cause == Current;
                 var (name, icon) = Describe(cause);
+                var hint = Optional.Of(cause).Map(found => UsageView.CauseHint(found));
                 <button type="button" class="@($"usage-cause w-full cursor-pointer rounded-md pl-3 pr-1 text-left text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-cause-picked" : string.Empty)}")"
                         aria-pressed="@(picked ? "true" : "false")" data-testid="usage-cause" @onclick="() => _picked = cause">
-                    <span class="@($"flex min-w-0 items-center gap-2 whitespace-nowrap {(cause is null ? "font-semibold" : "font-medium")}")">
+                    <span class="@($"flex min-w-0 items-center gap-2 whitespace-nowrap {Weight(cause)}")">
                         <LucideIcon Name="@icon" Size="14"/>
-                        @name
+                        @if (hint is Some<string>(var text))
+                        {
+                            <BbTooltip DelayDuration="200">
+                                <BbTooltipTrigger Focusable="false">
+                                    <span data-testid="usage-cause-hinted">@name</span>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent Class="max-w-72">@text</BbTooltipContent>
+                            </BbTooltip>
+                        }
+                        else
+                        {
+                            @name
+                        }
                     </span>
                     <span>
                         @if (cause is not null)
@@ -31,42 +45,41 @@
                 </button>
             }
         </div>
-        <div class="flex h-full flex-col gap-2.5">
-            <div class="text-[13px] font-semibold" data-testid="usage-cause-picked">
-                @Describe(Current).Name <span class="font-normal text-muted-foreground">· @UsageView.Count(Picked.Total) calls</span>
+        <div class="flex flex-col items-center gap-3.5">
+            <div class="flex items-center gap-2 text-[13px] font-semibold" data-testid="usage-cause-picked">
+                <LucideIcon Name="@Describe(Current).Icon" Size="14"/>
+                @Describe(Current).Name <span class="font-normal text-muted-foreground">· @UsageView.Calls(Picked.Total)</span>
             </div>
-            <div class="flex flex-1 items-center justify-center gap-6">
-                @if (Slices.Count > 0)
+            <UsageGauge Tally="Picked"/>
+            <div class="flex flex-col gap-1.5 text-[12.5px]" data-testid="usage-outcomes">
+                @if (Trouble(Picked) == 0)
                 {
-                    <div class="w-[170px]" style="@Palette" data-testid="usage-donut">
-                        <BbPieChart Data="Slices" Height="170px" EnableAnimations="false">
-                            <BbChartTooltip AppendToBody="true"/>
-                            <BbPie DataKey="Calls" NameKey="Name" InnerRadius="68" OuterRadius="92" PaddingAngle="1">
-                                <BbCenterLabel Value="@CentreValue" Title="@CentreTitle" FontSize="20"/>
-                            </BbPie>
-                        </BbPieChart>
+                    <div class="usage-outcome" data-testid="usage-outcome">
+                        <span class="usage-swatch" style="background: var(--usage-answered)"></span>
+                        <LucideIcon Name="check" Size="13"/>
+                        <span>Answered</span>
+                        <span class="text-right tabular-nums">@UsageView.Count(Picked.Total)</span>
+                        <span class="text-right tabular-nums text-muted-foreground">@UsageView.Share(Picked.Total, Picked.Total)</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-muted-foreground" data-testid="usage-no-trouble">
+                        <LucideIcon Name="circle-check" Size="14"/>
+                        <span><span class="font-medium text-foreground">No trouble:</span> all @UsageView.Calls(Picked.Total) were answered.</span>
                     </div>
                 }
                 else
                 {
-                    <div class="w-[156px] text-[12.5px] text-muted-foreground">Nothing to show: every outcome is struck out.</div>
-                }
-                <div class="flex w-[290px] flex-col gap-1.5 text-[12.5px]" data-testid="usage-outcomes">
                     @foreach (var look in UsageView.Outcomes)
                     {
-                        var off = _struck.Contains(look.Outcome);
-                        <button type="button" class="@($"usage-outcome cursor-pointer rounded text-left hover:bg-foreground/5 {(off ? "usage-outcome-off" : string.Empty)}")"
-                                aria-pressed="@(off ? "false" : "true")" title="@($"{(off ? "Show" : "Hide")} {look.Name} in the donut")"
-                                data-testid="usage-outcome" @onclick="() => Toggle(look.Outcome)">
+                        var count = Picked.Of(look.Outcome);
+                        <div class="@($"usage-outcome {(count == 0 ? "opacity-40" : string.Empty)}")" data-testid="usage-outcome" data-empty="@(count == 0 ? "true" : "false")">
                             <span class="usage-swatch" style="@($"background: {look.Color}")"></span>
                             <LucideIcon Name="@look.Icon" Size="13"/>
-                            <span class="usage-strike">@look.Name</span>
-                            <span class="usage-strike text-right tabular-nums">@UsageView.Count(Picked.Of(look.Outcome))</span>
-                            <span class="text-right tabular-nums text-muted-foreground">@(off ? string.Empty : UsageView.Share(Picked.Of(look.Outcome), ShownTotal))</span>
-                        </button>
+                            <span>@look.Name</span>
+                            <span class="text-right tabular-nums">@UsageView.Count(count)</span>
+                            <span class="text-right tabular-nums text-muted-foreground">@(count == 0 ? string.Empty : UsageView.Share(count, Picked.Total))</span>
+                        </div>
                     }
-                    <span class="mt-1 text-[11px] text-muted-foreground">Click an outcome to strike it out of the donut.</span>
-                </div>
+                }
             </div>
         </div>
     </div>
@@ -77,8 +90,6 @@
 
     private UsageCause? _picked;
 
-    private readonly HashSet<UsageOutcome> _struck = [];
-
     private IReadOnlyList<(UsageCause? Cause, UsageTally Tally)> Rows =>
         [(null, Period.Tally), .. Period.Causes.Select(line => ((UsageCause?)line.Cause, line.Tally))];
 
@@ -88,29 +99,19 @@
 
     private UsageTally Picked => Period.Causes.FirstOrNone(line => line.Cause == Current).Map(line => line.Tally).GetValueOr(Period.Tally);
 
-    private IReadOnlyList<OutcomeLook> Shown => [.. UsageView.Outcomes.Where(look => !_struck.Contains(look.Outcome))];
-
-    private long ShownTotal => Shown.Sum(look => Picked.Of(look.Outcome));
-
-    private IReadOnlyList<Slice> Slices => [.. Shown.Where(look => Picked.Of(look.Outcome) > 0).Select(look => new Slice(look.Name, Picked.Of(look.Outcome), look.Color))];
-
-    private string Palette => string.Join("; ", Slices.Select((slice, index) => $"--chart-{index + 1}: {slice.Color}"));
-
-    private string CentreValue => _struck.Count == 0 ? UsageView.Share(Picked.Answered, Picked.Total) : UsageView.Count(ShownTotal);
-
-    private string CentreTitle => _struck.Count == 0 ? "got an answer" : $"of {UsageView.Count(Picked.Total)} calls";
-
     private static long Trouble(UsageTally tally) => tally.Total - tally.Of(UsageOutcome.Answered);
 
-    private static (string Name, string Icon) Describe(UsageCause? cause) => Optional.Of(cause).Map(found => UsageView.Cause(found)).GetValueOr(("All causes", "layers"));
+    private static string Weight(UsageCause? cause) => Optional.Of(cause).Map(found => Weight(found)).GetValueOr("font-semibold");
 
-    private void Toggle(UsageOutcome outcome)
+    private static string Weight(UsageCause cause)
     {
-        if (!_struck.Remove(outcome))
+        return cause switch
         {
-            _struck.Add(outcome);
-        }
+            UsageCause.Other => "font-medium text-muted-foreground",
+            UsageCause.FeedRun or UsageCause.WantlistSync or UsageCause.Dataset or UsageCause.Search or UsageCause.Browse or UsageCause.ShowingTitles
+                or UsageCause.KeyTest or UsageCause.FeedEditor => "font-medium",
+        };
     }
 
-    private sealed record Slice(string Name, long Calls, string Color);
+    private static (string Name, string Icon) Describe(UsageCause? cause) => Optional.Of(cause).Map(found => UsageView.Cause(found)).GetValueOr(("All causes", "layers"));
 }

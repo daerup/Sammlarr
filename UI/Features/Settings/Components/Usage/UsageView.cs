@@ -29,7 +29,12 @@ internal static class UsageView
 
 	internal static string Share(long part, long total)
 	{
-		return total == 0 ? "0%" : FormattableString.Invariant($"{part * 100.0 / total:0.0}%");
+		return (total, part * 1000 < total && part > 0) switch
+		{
+			(0, _) => "0%",
+			(_, true) => "<0.1%",
+			_ => FormattableString.Invariant($"{part * 100.0 / total:0.0}%"),
+		};
 	}
 
 	internal static string Duration(double milliseconds)
@@ -104,8 +109,25 @@ internal static class UsageView
 			UsageCause.Search => ("Search", "search"),
 			UsageCause.Browse => ("Browse", "trending-up"),
 			UsageCause.ShowingTitles => ("Showing titles", "image"),
-			UsageCause.KeyTest => ("Key and sign-in tests", "key-round"),
-			UsageCause.Other => ("Other", "circle-question-mark"),
+			UsageCause.KeyTest => ("Connection tests", "plug-zap"),
+			UsageCause.FeedEditor => ("Feed editor", "square-pen"),
+			UsageCause.Other => ("Untagged", "circle-dashed"),
+		};
+	}
+
+	internal static Optional<string> CauseHint(UsageCause cause)
+	{
+		return cause switch
+		{
+			UsageCause.FeedRun
+			or UsageCause.WantlistSync
+			or UsageCause.Dataset
+			or UsageCause.Search
+			or UsageCause.Browse
+			or UsageCause.ShowingTitles
+			or UsageCause.FeedEditor => new None(),
+			UsageCause.KeyTest => Some.Of("The Test buttons in Settings: an API key, a sign-in, or a Radarr or Sonarr connection."),
+			UsageCause.Other => Some.Of("Calls made outside every flow that marks its cause. Which page made them is not recorded."),
 		};
 	}
 

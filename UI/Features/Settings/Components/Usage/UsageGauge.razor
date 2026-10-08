@@ -1,0 +1,79 @@
+@using Domain.Usage
+
+<svg width="@Size" height="@Height" viewBox="@ViewBox" class="block overflow-visible" role="img" aria-label="@($"{Centre} answered")" data-testid="usage-gauge">
+    <path d="@Arc" fill="none" stroke="var(--secondary)" stroke-width="@Thick"/>
+    @foreach (var segment in Segments)
+    {
+        <path d="@Arc" fill="none" stroke="@segment.Color" stroke-width="@Thick" stroke-dasharray="@segment.Dash" stroke-dashoffset="@segment.Offset"
+              data-testid="usage-gauge-segment" data-outcome="@segment.Outcome">
+            <title>@segment.Title</title>
+        </path>
+    }
+    <text x="@Mid" y="@Number(CentreY - 16)" text-anchor="middle" font-size="26" font-weight="600" fill="var(--foreground)" data-testid="usage-gauge-centre">@Centre</text>
+    <text x="@Mid" y="@Number(CentreY + 2)" text-anchor="middle" font-size="12" fill="var(--muted-foreground)">answered</text>
+</svg>
+
+@code {
+    private const int Thick = 20;
+
+    private const double Gap = 2.5;
+
+    private const double Smallest = 0.03;
+
+    [Parameter] [EditorRequired] public required UsageTally Tally { get; set; }
+
+    [Parameter] public int Size { get; set; } = 230;
+
+    private double Radius => (Size - Thick) / 2.0;
+
+    private double CentreY => Radius + (Thick / 2.0);
+
+    private double Length => Math.PI * Radius;
+
+    private string Height => Number(CentreY + 4);
+
+    private string ViewBox => $"0 0 {Size} {Height}";
+
+    private string Mid => Number(Size / 2.0);
+
+    private string Arc => $"M {Number(Thick / 2.0)},{Number(CentreY)} A {Number(Radius)} {Number(Radius)} 0 0 1 {Number(Size - (Thick / 2.0))},{Number(CentreY)}";
+
+    private string Centre => UsageView.Share(Tally.Of(UsageOutcome.Answered), Tally.Total).Replace(".0%", "%", StringComparison.Ordinal);
+
+    private IReadOnlyList<Segment> Segments
+    {
+        get
+        {
+            var looks = UsageView.Outcomes.Where(look => Tally.Of(look.Outcome) > 0).ToList();
+            var total = Math.Max(1, looks.Sum(look => Tally.Of(look.Outcome)));
+            var floor = Length * Smallest;
+            var raw = looks.Select(look => Tally.Of(look.Outcome) * Length / total).ToList();
+            var small = raw.Count(length => length < floor);
+            var large = Math.Max(1, raw.Where(length => length >= floor).Sum());
+            var lengths = raw.Select(length => length < floor ? floor : length * (Length - (small * floor)) / large).ToList();
+            var gap = looks.Count > 1 ? Gap : 0;
+            var start = 0.0;
+            var segments = new List<Segment>();
+            for (var index = 0; index < looks.Count; index++)
+            {
+                var look = looks[index];
+                segments.Add(
+                    new Segment(
+                        look.Outcome,
+                        look.Color,
+                        $"{Number(Math.Max(0.5, lengths[index] - gap))} {Number(Length * 2)}",
+                        Number(-start),
+                        $"{look.Name}: {UsageView.Count(Tally.Of(look.Outcome))}"
+                    )
+                );
+                start += lengths[index];
+            }
+
+            return segments;
+        }
+    }
+
+    private static string Number(double value) => FormattableString.Invariant($"{value:0.##}");
+
+    private sealed record Segment(UsageOutcome Outcome, string Color, string Dash, string Offset, string Title);
+}
