@@ -67,7 +67,7 @@ internal static class PreviewCopy
 		{
 			QueryOutcome.Culled => "filter-x",
 			QueryOutcome.Truncated => "scissors",
-			QueryOutcome.Qualified => "circle-help",
+			QueryOutcome.Qualified => "circle-question-mark",
 		};
 	}
 

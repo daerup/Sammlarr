@@ -412,7 +412,7 @@
     {
         var calls = run.Calls.Sum(call => call.Calls);
         var meta = $"{(run.Trigger is Scheduled ? "scheduled" : "manual")} · {StrategyLabel(run.Strategy)}";
-        return calls == 0 ? meta : $"{meta} · {UsageView.Count(calls)} calls";
+        return calls == 0 ? meta : $"{meta} · {UsageView.Calls(calls)}";
     }
 
     private static string DotClass(FeedRun run) =>

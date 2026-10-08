@@ -14,7 +14,7 @@ internal static class MediaTypeDisplay
 				{
 					MediaType.Movie => "film",
 					MediaType.Show => "tv",
-					MediaType.Unknown => "circle-help",
+					MediaType.Unknown => "circle-question-mark",
 				};
 			}
 		}
