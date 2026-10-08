@@ -1,0 +1,50 @@
+@using Domain.Usage
+
+<span class="inline-flex items-center gap-1.5 whitespace-nowrap">
+    Answer time
+    <BbTooltip DelayDuration="150" Placement="PopoverPlacement.BottomEnd">
+        <BbTooltipTrigger data-testid="usage-answer-time-info">
+            <LucideIcon Name="info" Size="12" Class="cursor-help text-muted-foreground"/>
+        </BbTooltipTrigger>
+        <BbTooltipContent Class="@($"{UsageView.Tip} w-[300px] leading-[1.45]")" data-testid="usage-answer-time-help">
+            Each square is a range of answer times, fastest at the left. The stronger its shade, the more of the service's calls took that long.
+            <svg width="@SampleWidth" height="26" class="mt-2 mb-0.5 block overflow-visible">
+                @for (var index = 0; index < DurationBuckets.UpToMs.Count; index++)
+                {
+                    <rect x="@UsageView.Number((index * Cell) + 0.5)" y="0" width="@UsageView.Number(Cell - 1)" height="12" rx="2" fill="@Sample(index)"/>
+                }
+                <text font-size="10" fill="var(--muted-foreground)">
+                    @foreach (var (x, label, anchor) in Labels)
+                    {
+                        <tspan x="@UsageView.Number(x)" y="24" text-anchor="@anchor">@label</tspan>
+                    }
+                </text>
+            </svg>
+            <div class="mt-1.5 flex items-center gap-3 border-t pt-1.5 text-muted-foreground">
+                <span class="inline-flex items-center gap-1.5"><span class="inline-block h-[11px] w-0.5 bg-foreground"></span>median</span>
+                <span class="inline-flex items-center gap-1.5"><span class="inline-block h-[11px] w-0.5" style="background: @UsageView.Accent"></span>p95</span>
+                <span>point at a square for its calls</span>
+            </div>
+        </BbTooltipContent>
+    </BbTooltip>
+</span>
+
+@code {
+    private const int SampleWidth = 278;
+
+    private static readonly double Cell = SampleWidth / (double)DurationBuckets.UpToMs.Count;
+
+    private static readonly IReadOnlyList<(double X, string Label, string Anchor)> Labels =
+    [
+        (0, "5 ms", "start"),
+        (6.5 * Cell, "250 ms", "middle"),
+        (9.5 * Cell, "1 s", "middle"),
+        (SampleWidth, ">10 s", "end"),
+    ];
+
+    private static string Sample(int index)
+    {
+        var strength = 15 + (Math.Sin(index / 14.0 * Math.PI) * 80);
+        return FormattableString.Invariant($"color-mix(in oklab, var(--usage-shade) {Math.Round(strength)}%, var(--card))");
+    }
+}

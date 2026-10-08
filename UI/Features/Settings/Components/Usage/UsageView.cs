@@ -21,9 +21,29 @@ internal static class UsageView
 
 	internal const string Grey = "var(--muted-foreground)";
 
+	internal const string Tip = "border bg-popover px-2.5 py-2 text-xs text-popover-foreground shadow-lg";
+
 	internal static readonly IReadOnlyList<OutcomeLook> Outcomes = [.. Enum.GetValues<UsageOutcome>().Select(Look)];
 
 	internal static string Count(double count) => Math.Round(count).ToString("N0", CultureInfo.InvariantCulture);
+
+	internal static string Number(double value) => FormattableString.Invariant($"{value:0.##}");
+
+	internal static double StripAt(double milliseconds)
+	{
+		var buckets = DurationBuckets.UpToMs;
+		var index = buckets.TakeWhile(upTo => milliseconds > upTo).Count();
+		var lower = index == 0 ? 0 : buckets[index - 1];
+		var upper = buckets[index] == DurationBuckets.Over ? lower * 1.5 : buckets[index];
+		return (index + ((milliseconds - lower) / (upper - lower))) / buckets.Count;
+	}
+
+	internal static string Shade(long count, long busiest)
+	{
+		return count == 0
+			? "color-mix(in oklab, var(--foreground) 4%, transparent)"
+			: FormattableString.Invariant($"color-mix(in oklab, var(--usage-shade) {Math.Round(12 + (count * 88.0 / busiest))}%, var(--card))");
+	}
 
 	internal static string Calls(long count) => count == 1 ? "1 call" : $"{Count(count)} calls";
 

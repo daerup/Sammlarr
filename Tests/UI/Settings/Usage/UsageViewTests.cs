@@ -18,6 +18,26 @@ public class UsageViewTests
 	}
 
 	[Test]
+	[Arguments(0d, 0d)]
+	[Arguments(5d, 1d)]
+	[Arguments(175d, 6.5)]
+	[Arguments(10000d, 14d)]
+	[Arguments(12500d, 14.5)]
+	public async Task StripAt_AnAnswerTime_SitsInItsSquareAsFarAsItIsIntoTheRange(double milliseconds, double squares)
+	{
+		await Assert.That(Math.Round(UsageView.StripAt(milliseconds) * DurationBuckets.UpToMs.Count, 6)).IsEqualTo(squares);
+	}
+
+	[Test]
+	[Arguments(0L, "color-mix(in oklab, var(--foreground) 4%, transparent)")]
+	[Arguments(5L, "color-mix(in oklab, var(--usage-shade) 17%, var(--card))")]
+	[Arguments(90L, "color-mix(in oklab, var(--usage-shade) 100%, var(--card))")]
+	public async Task Shade_OfASquare_GrowsWithItsShareOfTheBusiest(long count, string shade)
+	{
+		await Assert.That(UsageView.Shade(count, 90)).IsEqualTo(shade);
+	}
+
+	[Test]
 	[Arguments(1L, "1 call")]
 	[Arguments(0L, "0 calls")]
 	[Arguments(8287L, "8,287 calls")]
