@@ -5,7 +5,15 @@ namespace Contracts.Usage;
 
 public sealed record UsageSlot(DateTimeOffset At, UsageTally Tally);
 
-public sealed record UsageServiceLine(RemoteService Service, UsageTally Tally, Optional<DateTimeOffset> LastCall, Optional<DateTimeOffset> FailingSince);
+public sealed record UsageRightNow(
+	Optional<DateTimeOffset> LastCall,
+	Optional<DateTimeOffset> FailingSince,
+	Optional<DateTimeOffset> PausedUntil,
+	Optional<long> RequestsLeft,
+	Optional<DateTimeOffset> DownloadedAt
+);
+
+public sealed record UsageServiceLine(RemoteService Service, UsageTally Tally, UsageRightNow RightNow);
 
 public sealed record UsageCauseLine(UsageCause Cause, UsageTally Tally);
 

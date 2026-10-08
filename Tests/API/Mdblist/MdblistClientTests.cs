@@ -22,6 +22,7 @@ public class MdblistClientTests
 			handler.CreateClient(BaseUrl),
 			new MdblistOptions { BaseUrl = BaseUrl },
 			IApiKeyService.Mock().Object,
+			MdblistApis.Budget(),
 			ICurrentUser.Mock().Object
 		);
 
@@ -31,11 +32,40 @@ public class MdblistClientTests
 	}
 
 	[Test]
+	public async Task SendAsync_ForAnyRequest_RecordsTheRequestsMdblistHasLeft()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.Respond(HttpStatusCode.OK)
+			.WithHeader("x-ratelimit-remaining", "962")
+			.WithHeader("x-ratelimit-reset", $"{DateTimeOffset.UnixEpoch.AddDays(2).ToUnixTimeSeconds()}");
+		var budget = MdblistApis.Budget();
+		var testee = new MdblistClient(
+			handler.CreateClient(BaseUrl),
+			new MdblistOptions { BaseUrl = BaseUrl },
+			IApiKeyService.Mock().Object,
+			budget,
+			ICurrentUser.Mock().Object
+		);
+
+		await testee.SendAsync(HttpMethod.Get, "lists/1/items", new TestApiKey(ApiKeyProvider.Mdblist, "mdblist-key"));
+
+		await Assert.That(budget.Left("mdblist-key")).IsSome().And.IsEqualTo(962);
+	}
+
+	[Test]
 	public async Task SendAsync_WhenUnauthorized_InvalidatesCachedApiKey()
 	{
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.Unauthorized);
 		var apiKeys = IApiKeyService.Mock();
-		var testee = new MdblistClient(handler.CreateClient(BaseUrl), new MdblistOptions { BaseUrl = BaseUrl }, apiKeys.Object, ICurrentUser.Mock().Object);
+		var testee = new MdblistClient(
+			handler.CreateClient(BaseUrl),
+			new MdblistOptions { BaseUrl = BaseUrl },
+			apiKeys.Object,
+			MdblistApis.Budget(),
+			ICurrentUser.Mock().Object
+		);
 
 		await testee.SendAsync(HttpMethod.Get, "lists/1/items", new TestApiKey(ApiKeyProvider.Mdblist, new Faker().Random.AlphaNumeric(32)));
 

@@ -214,7 +214,13 @@ public class MdblistServiceTests
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Mdblist, "test-key");
 		apiKeyStore.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(apiKey));
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
-		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
+		var client = new MdblistClient(
+			new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) },
+			options,
+			apiKeyStore.Object,
+			MdblistApis.Budget(),
+			ICurrentUser.Mock().Object
+		);
 		media = IMediaService.Mock();
 		media
 			.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any())

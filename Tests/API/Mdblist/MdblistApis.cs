@@ -19,8 +19,9 @@ internal static class MdblistApis
 	{
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of<IApiKey>(new TestApiKey(ApiKeyProvider.Mdblist, "mdblist-key")));
-		var client = new MdblistClient(handler.CreateClient(Options.BaseUrl), Options, keys.Object, ICurrentUser.Mock().Object);
-		return new MdblistTitles(client, keys.Object, budget ?? Budget(), NullLogger<MdblistTitles>.Instance);
+		var spent = budget ?? Budget();
+		var client = new MdblistClient(handler.CreateClient(Options.BaseUrl), Options, keys.Object, spent, ICurrentUser.Mock().Object);
+		return new MdblistTitles(client, keys.Object, spent, NullLogger<MdblistTitles>.Instance);
 	}
 
 	internal static MdblistBudget Budget() => new(Clock(), Options, NullLogger<MdblistBudget>.Instance);

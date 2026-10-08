@@ -154,7 +154,6 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 			apiKey,
 			content: content
 		);
-		budget.Record(apiKey.Value, response.Headers);
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning("MDBList answered {Status} to a lookup of {Count} titles", (int)response.StatusCode, values.Count);

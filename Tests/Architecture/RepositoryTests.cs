@@ -76,7 +76,13 @@ public class RepositoryTests
 		yield return () =>
 			(
 				typeof(IApiKeyConfigRepository),
-				["DB.Data.Access.ApiKeyConfigRepository", "DB.Data.Access.AccessModule", "Core.Auth.ApiKeyService", "Core.Providers.ServiceReadiness"]
+				[
+					"DB.Data.Access.ApiKeyConfigRepository",
+					"DB.Data.Access.AccessModule",
+					"Core.Auth.ApiKeyService",
+					"Core.Providers.ServiceReadiness",
+					"API.Mdblist.MdblistRequestsLeft",
+				]
 			);
 		yield return () =>
 			(
