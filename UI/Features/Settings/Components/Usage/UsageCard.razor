@@ -1,0 +1,30 @@
+<BbCard Class="flex min-w-0 flex-col gap-2.5 rounded-xl px-[18px] pt-4 pb-3.5" style="@Style" data-testid="@TestId">
+    <div class="flex items-start gap-3">
+        <div>
+            <BbCardTitle As="h4" Class="text-sm font-semibold">@Title</BbCardTitle>
+            @if (Subtitle is not null)
+            {
+                <BbCardDescription Class="mt-0.5 text-xs">@Subtitle</BbCardDescription>
+            }
+        </div>
+        @if (Right is not null)
+        {
+            <div class="ml-auto shrink-0">@Right</div>
+        }
+    </div>
+    @ChildContent
+</BbCard>
+
+@code {
+    [Parameter] [EditorRequired] public required string Title { get; set; }
+
+    [Parameter] public string? Subtitle { get; set; }
+
+    [Parameter] public RenderFragment? Right { get; set; }
+
+    [Parameter] public string? Style { get; set; }
+
+    [Parameter] public string? TestId { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
+}

@@ -1,0 +1,136 @@
+@using Contracts.Datasets
+@using Contracts.Usage
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<UsageCard Title="@(_tab is CallsTab.Calls ? "Calls" : "Answer time")" Subtitle="@Subtitle" TestId="usage-calls">
+    <Right>
+        <UsageSegments TValue="CallsTab" Value="_tab" Options="Tabs" OnChange="tab => _tab = tab" Label="Calls card view"/>
+    </Right>
+    <ChildContent>
+        @if (_tab is CallsTab.Calls)
+        {
+            <div class="flex flex-wrap gap-x-3.5 gap-y-1 text-xs text-muted-foreground" data-testid="usage-outcome-legend">
+                @foreach (var look in UsageView.Outcomes)
+                {
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="size-2.5 rounded-[3px]" style="background: @look.Color"></span>
+                        <LucideIcon Name="@look.Icon" Size="11"/>
+                        @look.Name
+                    </span>
+                }
+            </div>
+            <BbBarChart Data="Columns" Height="180px">
+                <BbGrid Left="4" Right="4" Top="10" Bottom="0"/>
+                <BbXAxis DataKey="At"/>
+                <BbYAxis/>
+                <BbChartTooltip AppendToBody="true"/>
+                @foreach (var look in UsageView.Outcomes)
+                {
+                    <BbBar DataKey="@look.Outcome.ToString()" Name="@look.Name" Color="@look.Color" Stacked="true"/>
+                }
+            </BbBarChart>
+        }
+        else
+        {
+            <div class="flex flex-wrap gap-1.5" data-testid="usage-latency-services">
+                <BbButton Variant="@(AllPicked ? ButtonVariant.Secondary : ButtonVariant.Outline)" Size="ButtonSize.Small"
+                          Class="h-7 text-[12.5px]" OnClick="() => _service = new None()">
+                    All but datasets
+                </BbButton>
+                @foreach (var line in Timed)
+                {
+                    <BbButton Variant="@(Picked(line.Service) ? ButtonVariant.Secondary : ButtonVariant.Outline)" Size="ButtonSize.Small"
+                              Class="h-7 gap-1.5 text-[12.5px]" OnClick="() => _service = Some.Of(line.Service)">
+                        <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="14" Decorative="true"/>
+                        @Branding.GetBrandingInfo(line.Service).NickName
+                    </BbButton>
+                }
+            </div>
+            <div class="flex gap-4 text-xs font-semibold" style="color: @UsageView.Accent" data-testid="usage-latency-marks">
+                <span>median @Answers.Percentile(0.5).Map(median => UsageView.Duration(median)).GetValueOr("n/a")</span>
+                <span>p95 @Answers.Percentile(0.95).Map(p95 => UsageView.Duration(p95)).GetValueOr("n/a")</span>
+            </div>
+            <BbBarChart Data="Durations" Height="170px">
+                <BbGrid Left="4" Right="4" Top="10" Bottom="0"/>
+                <BbXAxis DataKey="Bucket"/>
+                <BbYAxis/>
+                <BbChartTooltip AppendToBody="true"/>
+                <BbBar DataKey="Calls" Name="Attempts" FillKey="Fill" BorderRadius="3"/>
+            </BbBarChart>
+        }
+    </ChildContent>
+</UsageCard>
+
+@code {
+    private static readonly IReadOnlyList<(CallsTab Value, string Label)> Tabs = [(CallsTab.Calls, "Calls"), (CallsTab.AnswerTime, "Answer time")];
+
+    [Parameter] [EditorRequired] public required UsageSnapshot Snapshot { get; set; }
+
+    [Parameter] [EditorRequired] public required UsageRange Range { get; set; }
+
+    private CallsTab _tab = CallsTab.Calls;
+
+    private Optional<RemoteService> _service = new None();
+
+    private Optional<RemoteService> Service => _service.When(service => Timed.Any(line => line.Service == service));
+
+    private IEnumerable<UsageServiceLine> Timed => Snapshot.Current.Services.Where(line => line.Tally.Durations.Count > 0);
+
+    private string Subtitle =>
+        _tab is CallsTab.Calls
+            ? $"{Capitalised(UsageView.Window(Range))}, each {UsageView.Each(Range)} split by how its calls ended"
+            : $"{Service.Map(service => Branding.GetBrandingInfo(service).NickName).GetValueOr("All but datasets")}: every attempt by how long it took, median and p95 marked";
+
+    private IReadOnlyList<Column> Columns =>
+        [
+            .. Snapshot.Current.Slots.Select(slot => new Column(
+                UsageView.Slot(Range, slot.At),
+                slot.Tally.Of(UsageOutcome.Answered),
+                slot.Tally.Of(UsageOutcome.AnsweredAfter429),
+                slot.Tally.Of(UsageOutcome.GaveUpOn429),
+                slot.Tally.Of(UsageOutcome.Failed),
+                slot.Tally.Of(UsageOutcome.Cancelled)
+            )),
+        ];
+
+    private UsageTally Answers =>
+        UsageTally.Sum(
+            Snapshot
+                .Current.Services.Where(line => Service.Match(service => line.Service == service, () => !DatasetNames.ByService.ContainsKey(line.Service)))
+                .Select(line => line.Tally)
+        );
+
+    private IReadOnlyList<DurationColumn> Durations
+    {
+        get
+        {
+            var answers = Answers;
+            var marked = new[] { 0.5, 0.95 }.Select(q => answers.BucketOf(q)).WhereSome().ToHashSet();
+            return
+            [
+                .. DurationBuckets.UpToMs.Select(upTo => new DurationColumn(
+                    UsageView.Bucket(upTo),
+                    answers.Durations.GetValueOrDefault(upTo),
+                    marked.Contains(upTo) ? UsageView.Accent : UsageView.Grey
+                )),
+            ];
+        }
+    }
+
+    private bool AllPicked => Service.Match(_ => false, () => true);
+
+    private bool Picked(RemoteService service) => Service.Match(picked => picked == service, () => false);
+
+    private static string Capitalised(string text) => string.Concat(text[..1].ToUpperInvariant(), text[1..]);
+
+    private enum CallsTab
+    {
+        Calls,
+        AnswerTime,
+    }
+
+    private sealed record Column(string At, long Answered, long AnsweredAfter429, long GaveUpOn429, long Failed, long Cancelled);
+
+    private sealed record DurationColumn(string Bucket, long Calls, string Fill);
+}

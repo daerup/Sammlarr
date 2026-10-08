@@ -1,0 +1,46 @@
+<BbCard Class="flex min-w-0 flex-col gap-0.5 rounded-xl px-3.5 pt-3 pb-2.5" data-testid="usage-stat">
+    <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <LucideIcon Name="@Icon" Size="13"/>
+        @Label
+    </div>
+    <div class="flex items-baseline gap-2 text-2xl font-semibold leading-tight tracking-tight">
+        <span data-testid="usage-stat-value">@Value</span>
+        @if (Unit is not null)
+        {
+            <small class="text-xs font-normal text-muted-foreground">@Unit</small>
+        }
+        @if (Change is Some<double>(var change))
+        {
+            <span class="@($"inline-flex items-center gap-0.5 text-[11.5px] font-medium {(Worse(change) ? "text-[var(--usage-failed)]" : "text-muted-foreground")}")" data-testid="usage-stat-change">
+                <LucideIcon Name="@(change >= 0 ? "arrow-up-right" : "arrow-down-right")" Size="12"/>
+                @FormattableString.Invariant($"{(change >= 0 ? "+" : string.Empty)}{Math.Round(change * 100)}%")
+            </span>
+        }
+    </div>
+    <div class="mb-1.5 text-[11.5px] text-muted-foreground">@Sub</div>
+    <UsageSparkline Points="Points" Name="@Label" Color="@Color"/>
+</BbCard>
+
+@code {
+    private const double Noticeable = 0.05;
+
+    [Parameter] [EditorRequired] public required string Label { get; set; }
+
+    [Parameter] [EditorRequired] public required string Icon { get; set; }
+
+    [Parameter] [EditorRequired] public required string Value { get; set; }
+
+    [Parameter] public string? Unit { get; set; }
+
+    [Parameter] public Optional<double> Change { get; set; } = new None();
+
+    [Parameter] public bool UpIsWorse { get; set; }
+
+    [Parameter] [EditorRequired] public required string Sub { get; set; }
+
+    [Parameter] [EditorRequired] public required IReadOnlyList<UsageSparkline.SparkPoint> Points { get; set; }
+
+    [Parameter] [EditorRequired] public required string Color { get; set; }
+
+    private bool Worse(double change) => UpIsWorse && change > Noticeable;
+}

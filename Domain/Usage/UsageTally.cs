@@ -16,6 +16,8 @@ public sealed record UsageTally(IReadOnlyDictionary<UsageOutcome, long> Calls, I
 
 	public Optional<double> Percentile(double q) => DurationBuckets.Percentile(Durations, q);
 
+	public Optional<int> BucketOf(double q) => DurationBuckets.BucketOf(Durations, q);
+
 	public static UsageTally Sum(IEnumerable<UsageTally> tallies)
 	{
 		var all = tallies.ToList();

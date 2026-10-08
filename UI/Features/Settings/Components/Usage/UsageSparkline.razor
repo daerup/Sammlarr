@@ -1,0 +1,24 @@
+<BbAreaChart Data="Points" Height="34px" EnableAnimations="false">
+    <BbXAxis DataKey="At" Show="false"/>
+    <BbYAxis Show="false"/>
+    <BbGrid Left="0" Right="0" Top="2" Bottom="0" ContainLabel="false"/>
+    <BbChartTooltip Indicator="TooltipIndicator.None" AppendToBody="true"/>
+    <BbArea DataKey="Value" Name="@Name" Color="@Color" StrokeWidth="2">
+        <BbFill>
+            <BbLinearGradient>
+                <BbGradientStop Offset="0" Color="@Color" Opacity="0.3"/>
+                <BbGradientStop Offset="1" Color="@Color" Opacity="0.02"/>
+            </BbLinearGradient>
+        </BbFill>
+    </BbArea>
+</BbAreaChart>
+
+@code {
+    [Parameter] [EditorRequired] public required IReadOnlyList<SparkPoint> Points { get; set; }
+
+    [Parameter] [EditorRequired] public required string Name { get; set; }
+
+    [Parameter] [EditorRequired] public required string Color { get; set; }
+
+    public sealed record SparkPoint(string At, double Value);
+}
