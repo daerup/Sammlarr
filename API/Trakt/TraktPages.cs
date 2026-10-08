@@ -34,6 +34,15 @@ internal static partial class TraktPages
 		};
 	}
 
+	internal static string[] Reads(string identifier)
+	{
+		return identifier.Split('/') switch
+		{
+			["discover", var chart] => [$"movies/{chart}", $"shows/{chart}"],
+			_ => [identifier],
+		};
+	}
+
 	internal static bool IsChart(string identifier)
 	{
 		return identifier.StartsWith("movies/", StringComparison.Ordinal) || identifier.StartsWith("shows/", StringComparison.Ordinal);
@@ -64,7 +73,7 @@ internal static partial class TraktPages
 		{
 			"movie" => Page($"movies/{chart}"),
 			"show" => Page($"shows/{chart}"),
-			_ => Error.From("Trakt's discover link names no mode, so Sammlarr cannot tell movies from shows. Paste it with mode=movie or mode=show."),
+			_ => Page($"discover/{chart}"),
 		};
 	}
 
