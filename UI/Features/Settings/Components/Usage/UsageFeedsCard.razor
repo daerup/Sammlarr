@@ -36,7 +36,8 @@
                         @foreach (var plot in Plotted.OrderBy(plot => IsLit(plot.Line.Feed)))
                         {
                             var colour = Branding.Color(plot.Line.Provider.Service);
-                            <g class="@($"usage-feed-group {(IsLit(plot.Line.Feed) ? string.Empty : "usage-feed-dim")}")" data-f="@plot.Key" data-testid="usage-feed-group">
+                            <g @key="plot.Key" class="@($"usage-feed-group {(IsLit(plot.Line.Feed) ? string.Empty : "usage-feed-dim")}")" data-f="@plot.Key" data-testid="usage-feed-group"
+                               @onmouseleave="Settle">
                                 @foreach (var (from, to) in plot.Dots.Zip(plot.Dots.Skip(1)))
                                 {
                                     <line x1="@Percent(from.X)" y1="@UsageView.Number(from.Y)" x2="@Percent(to.X)" y2="@UsageView.Number(to.Y)"
@@ -63,7 +64,9 @@
                         }
                     </svg>
                     <BbPopover Open="_open" OpenChanged="open => _open = open">
-                        <BbPopoverTrigger AsChild="false" tabindex="-1" aria-hidden="true" class="pointer-events-none absolute size-0 p-0" style="@_anchor"/>
+                        <span class="pointer-events-none absolute size-0" style="@_anchor" data-testid="usage-feed-anchor">
+                            <BbPopoverTrigger AsChild="false" tabindex="-1" aria-hidden="true" class="block size-0 p-0"/>
+                        </span>
                         <BbPopoverContent Side="PopoverSide.Right" Align="PopoverAlign.Center" Offset="12" Class="w-auto overflow-hidden p-0">
                             @if (_shown is Some<(UsageFeedLine Line, UsageRun Run)>(var (line, run)))
                             {
@@ -104,7 +107,7 @@
                     var stats = line.Stats;
                     <div class="@($"usage-feed rounded-md text-[12.5px] {(line.Runs.Count > 0 ? "cursor-pointer hover:bg-foreground/5" : string.Empty)} {(picked ? "usage-feed-picked" : string.Empty)}")"
                          style="@($"--edge: {Branding.Color(line.Provider.Service)}")" data-testid="usage-feed" data-feed="@line.Name"
-                         data-f="@(line.Runs.Count > 0 ? key : null)" @onclick="() => Pick(line)">
+                         data-f="@(line.Runs.Count > 0 ? key : null)" @onclick="() => Pick(line)" @onmouseleave="Settle">
                         <span class="flex min-w-0 items-center gap-2 font-medium">
                             @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
                             {
@@ -168,6 +171,8 @@
 
     private const int PlotTop = 8;
 
+    private const int MostTicks = 8;
+
     private static readonly IReadOnlyList<(FeedsTab Value, string Label)> Tabs = [(FeedsTab.Calls, "Calls per run"), (FeedsTab.Unmatched, "Unmatched per run")];
 
     [Parameter] [EditorRequired] public required IReadOnlyList<UsageFeedLine> Feeds { get; set; }
@@ -181,6 +186,8 @@
     private Optional<FeedId> _picked = new None();
 
     private bool _open;
+
+    private bool _quiet;
 
     private Optional<(UsageFeedLine Line, UsageRun Run)> _shown = new None();
 
@@ -196,6 +203,7 @@
         get
         {
             var top = Ceiling;
+            var span = Span;
             return
             [
                 .. Feeds
@@ -204,7 +212,7 @@
                     .Select(feed => new Plot(
                         feed.line,
                         Key(feed.index),
-                        [.. feed.line.Runs.OrderBy(run => run.StartedAt).Select(run => new Dot(run, Across(run.StartedAt), Down(Value(run), top)))]
+                        [.. feed.line.Runs.OrderBy(run => run.StartedAt).Select(run => new Dot(run, Across(run.StartedAt, span), Down(Value(run), top)))]
                     )),
             ];
         }
@@ -230,17 +238,23 @@
         }
     }
 
+    private int FirstSlot => Math.Max(0, Window.SlotOf(Feeds.SelectMany(line => line.Runs).Select(run => run.StartedAt).DefaultIfEmpty(Window.From).Min()));
+
     private IReadOnlyList<(double At, string Label)> XTicks
     {
         get
         {
-            var every = Range switch
-            {
-                UsageRange.Day => 3,
-                UsageRange.Week => 1,
-                UsageRange.Month => 4,
-            };
-            return [.. Enumerable.Range(0, Window.Slots).Where(slot => slot % every == 0).Select(slot => ((double)slot / Window.Slots, UsageView.Slot(Range, Window.SlotAt(slot))))];
+            var first = FirstSlot;
+            var span = Span;
+            var shown = Window.Slots - first;
+            var every = Math.Max(1, (int)Math.Ceiling(shown / (double)MostTicks));
+            return
+            [
+                .. Enumerable
+                    .Range(first, shown)
+                    .Where(slot => slot % every == 0)
+                    .Select(slot => (Across(Window.SlotAt(slot), span), UsageView.Slot(Range, Window.SlotAt(slot)))),
+            ];
         }
     }
 
@@ -249,16 +263,17 @@
             ? [("A ring: some calls were rate-limited", "var(--usage-after-429)"), ("some gave up", "var(--usage-gave-up)")]
             : [("A ring: some titles could not be looked up", "var(--usage-gave-up)")];
 
-    private string HoverRules =>
-        string.Concat(
-            Feeds
-                .Select((_, index) => Key(index))
-                .Select(key =>
-                    $".usage-feeds:has([data-f={key}]:hover) .usage-feed-group:not([data-f={key}]) {{ filter: grayscale(1); opacity: 0.3; }} "
-                    + $".usage-feeds:has([data-f={key}]:hover) .usage-feed-group[data-f={key}] {{ filter: none; opacity: 1; }} "
-                    + $".usage-feeds:has(.usage-feed-group[data-f={key}]:hover) .usage-feed[data-f={key}] {{ background: color-mix(in oklch, var(--foreground) 5%, transparent); }} "
-                )
-        );
+    private string HoverRules => string.Concat(Feeds.Select((_, index) => Rules(Key(index))));
+
+    private string Rules(string key)
+    {
+        var row = $".usage-feeds:has(.usage-feed-group[data-f={key}]:hover) .usage-feed[data-f={key}] {{ background: color-mix(in oklch, var(--foreground) 5%, transparent); }} ";
+        var traced = $".usage-feeds:has(.usage-feed[data-f={key}]:hover) .usage-feed-group[data-f={key}] {{ filter: none; opacity: 1; }} ";
+        var singled =
+            $".usage-feeds:has([data-f={key}]:hover) .usage-feed-group:not([data-f={key}]) {{ filter: grayscale(1); opacity: 0.3; }} "
+            + $".usage-feeds:has([data-f={key}]:hover) .usage-feed-group[data-f={key}] {{ filter: none; opacity: 1; }} ";
+        return _picked.Match(_ => $"{traced}{row}", () => _quiet ? row : $"{singled}{row}");
+    }
 
     private double Value(UsageRun run) => _tab is FeedsTab.Calls ? Math.Max(1, run.Calls.Total) : Unmatched(run);
 
@@ -270,7 +285,9 @@
         return PlotTop + ((PlotHeight - PlotTop) * (1 - share));
     }
 
-    private double Across(DateTimeOffset at) => Math.Clamp((at - Window.From) / (Window.To - Window.From), 0, 1);
+    private (DateTimeOffset From, DateTimeOffset To) Span => (Window.SlotAt(FirstSlot), Clock.Now < Window.To ? Clock.Now : Window.To);
+
+    private static double Across(DateTimeOffset at, (DateTimeOffset From, DateTimeOffset To) span) => Math.Clamp((at - span.From) / (span.To - span.From), 0, 1);
 
     private Optional<string> Ring(UsageRun run)
     {
@@ -291,9 +308,13 @@
     {
         if (line.Runs.Count > 0)
         {
-            _picked = Optional.When(!IsPicked(line.Feed), () => line.Feed);
+            var unpicking = IsPicked(line.Feed);
+            _quiet = unpicking;
+            _picked = Optional.When(!unpicking, () => line.Feed);
         }
     }
+
+    private void Settle() => _quiet = false;
 
     private void Open(UsageFeedLine line, Dot dot)
     {
