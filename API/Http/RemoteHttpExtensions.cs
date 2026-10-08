@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Threading.RateLimiting;
 using Contracts.Providers;
+using Contracts.Usage;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
@@ -53,7 +54,7 @@ internal static class RemoteHttpExtensions
 
 		remote
 			.Apply(measured => builder.AddHttpMessageHandler(sp => new CapacityHandler(measured, sp.GetRequiredService<RemoteCapacity>())))
-			.Apply(_ => builder.AddHttpMessageHandler(() => new UsageTagsHandler()))
+			.Apply(_ => builder.AddHttpMessageHandler(sp => new UsageTagsHandler(sp.GetRequiredService<IFeedRunUsage>())))
 			.Apply(measured => builder.Services.AddSingleton(sp => Wait(measured, Resolve(sp))));
 
 		return builder;

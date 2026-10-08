@@ -83,13 +83,15 @@ internal sealed class FeedRunEngine(
 		WarnOnDrift(feed, planned.Delta, added, removed);
 
 		var applied = planned.Delta with { Adds = added, Drops = removed };
+		var cost = usage.End(feed.Id);
 		var completed = run with
 		{
 			Duration = elapsed.Elapsed,
 			Conclusiveness = planned.Conclusiveness,
 			Counts = FeedRunCounts.From(planned, applied),
 			Items = Record(applied),
-			Calls = usage.End(feed.Id),
+			Calls = cost.Calls,
+			Times = cost.Times,
 		};
 		await feeds.CompleteRunAsync(completed, cancellationToken);
 

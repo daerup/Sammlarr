@@ -17,6 +17,7 @@ internal sealed class FeedRunRowConfiguration : IModelConfiguration
 			builder.HasOne<FeedRow>().WithMany().HasForeignKey(x => x.FeedId).OnDelete(DeleteBehavior.Cascade);
 			builder.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.FeedRunId).OnDelete(DeleteBehavior.Cascade);
 			builder.HasMany(x => x.Calls).WithOne().HasForeignKey(x => x.FeedRunId).OnDelete(DeleteBehavior.Cascade);
+			builder.HasMany(x => x.Times).WithOne().HasForeignKey(x => x.FeedRunId).OnDelete(DeleteBehavior.Cascade);
 		});
 
 		modelBuilder.Entity<FeedRunItemRow>(builder =>
@@ -36,6 +37,20 @@ internal sealed class FeedRunRowConfiguration : IModelConfiguration
 					x.FeedRunId,
 					x.Service,
 					x.Outcome,
+				})
+				.IsUnique();
+		});
+
+		modelBuilder.Entity<FeedRunTimesRow>(builder =>
+		{
+			builder.HasUserOwner();
+			builder.HasIndex(UserOwnedConfigurationExtensions.UserIdColumn);
+			builder
+				.HasIndex(x => new
+				{
+					x.FeedRunId,
+					x.Service,
+					x.UpToMs,
 				})
 				.IsUnique();
 		});

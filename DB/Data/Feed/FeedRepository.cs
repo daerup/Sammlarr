@@ -214,9 +214,10 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		var row = await ctx.FeedRuns.Include(r => r.Items).Include(r => r.Calls).FirstAsync(r => r.Id == run.Id.Value, cancellationToken);
+		var row = await ctx.FeedRuns.Include(r => r.Items).Include(r => r.Calls).Include(r => r.Times).FirstAsync(r => r.Id == run.Id.Value, cancellationToken);
 		row.Items.Clear();
 		row.Calls.Clear();
+		row.Times.Clear();
 		Fill(row, run);
 
 		await ctx.SaveChangesAsync(cancellationToken);
@@ -245,6 +246,14 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 				Service = call.Service,
 				Outcome = call.Outcome,
 				Calls = call.Calls,
+			})
+		);
+		row.Times.AddRange(
+			run.Times.Select(time => new FeedRunTimesRow
+			{
+				Service = time.Service,
+				UpToMs = time.UpToMs,
+				Attempts = time.Attempts,
 			})
 		);
 	}

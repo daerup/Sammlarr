@@ -55,6 +55,7 @@ public class UsageHandlersTests
 			.That(attempts.Select(tags => (tags[UsageTags.Service], tags[UsageTags.Cause])))
 			.IsEquivalentTo([("Plex", nameof(UsageCause.FeedRun)), ("Plex", nameof(UsageCause.FeedRun))]);
 		feedRuns.Credit(feed, RemoteService.Plex, UsageOutcome.AnsweredAfter429, 1).WasCalled(Times.Once);
+		feedRuns.Time(feed, RemoteService.Plex, Any()).WasCalled(Times.Exactly(2));
 	}
 
 	[Test]

@@ -6,6 +6,8 @@ public static class DurationBuckets
 
 	public static readonly IReadOnlyList<int> UpToMs = [5, 10, 25, 50, 75, 100, 250, 500, 750, 1000, 2500, 5000, 7500, 10000, Over];
 
+	public static int Of(double milliseconds) => UpToMs.FirstOrNone(upTo => upTo >= milliseconds).GetValueOr(Over);
+
 	public static Optional<double> Percentile(IReadOnlyDictionary<int, long> counts, double q) => Locate(counts, q).Map(spot => Interpolated(spot));
 
 	public static Optional<int> BucketOf(IReadOnlyDictionary<int, long> counts, double q) => Locate(counts, q).Map(spot => UpToMs[spot.Index]);

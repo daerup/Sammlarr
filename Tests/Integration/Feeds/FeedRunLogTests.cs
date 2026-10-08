@@ -115,22 +115,25 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task CompleteRunAsync_WithItsCallsAndTheUnmatchedSplit_ReadsThemBack()
+	public async Task CompleteRunAsync_WithItsCallsAnswerTimesAndTheUnmatchedSplit_ReadsThemBack()
 	{
 		var feedId = await SeedFeedAsync();
 		var run = Run(feedId, kept: [Held], 1);
 		await _testee.StartRunAsync(run);
 		FeedRunCalls[] calls = [new(RemoteService.Tmdb, UsageOutcome.Answered, 290), new(RemoteService.Plex, UsageOutcome.AnsweredAfter429, 37)];
+		FeedRunTimes[] times = [new(RemoteService.Tmdb, 100, 280), new(RemoteService.Tmdb, 500, 10), new(RemoteService.Plex, 250, 74)];
 
-		await _testee.CompleteRunAsync(run with { Calls = calls, Counts = run.Counts with { UnmatchedNotFound = 2, UnmatchedCouldNotLookUp = 1 } });
+		await _testee.CompleteRunAsync(run with { Calls = calls, Times = times, Counts = run.Counts with { UnmatchedNotFound = 2, UnmatchedCouldNotLookUp = 1 } });
 
 		var stored = (await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId) })).Single();
 		await Assert.That(stored.Calls).IsEquivalentTo(calls);
+		await Assert.That(stored.Times).IsEquivalentTo(times);
 		await Assert.That((stored.Counts.UnmatchedNotFound, stored.Counts.UnmatchedCouldNotLookUp, stored.Counts.Unmatched)).IsEqualTo((2, 1, 3));
 
 		var lean = (await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId), WithItems = false })).Single();
 		await Assert.That(lean.Items).IsEmpty();
 		await Assert.That(lean.Calls).IsEquivalentTo(calls);
+		await Assert.That(lean.Times).IsEquivalentTo(times);
 	}
 
 	[Test]
