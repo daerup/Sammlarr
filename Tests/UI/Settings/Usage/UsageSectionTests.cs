@@ -55,6 +55,6 @@ public class UsageSectionTests : BunitContext
 
 		cut.WaitForElement("[data-testid=usage-calls]");
 		_report.ReadAsync(UsageRange.Week, Any()).WasCalled(Times.Once);
-		await Assert.That(cut.Find("[data-testid=usage-calls]").TextContent).Contains("Last 7 days, each day split by how its calls ended");
+		await Assert.That(cut.Find("[data-testid=usage-calls]").TextContent).Contains("All services: last 7 days, each day split by how its calls ended");
 	}
 }

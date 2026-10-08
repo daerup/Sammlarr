@@ -15,7 +15,7 @@ public sealed record UsageRightNow(
 	Optional<DateTimeOffset> DownloadedAt
 );
 
-public sealed record UsageServiceLine(RemoteService Service, UsageTally Tally, UsageRightNow RightNow);
+public sealed record UsageServiceLine(RemoteService Service, UsageTally Tally, UsageRightNow RightNow, IReadOnlyList<UsageSlot> Slots);
 
 public sealed record UsageCauseLine(UsageCause Cause, UsageTally Tally);
 

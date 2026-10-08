@@ -33,14 +33,22 @@ internal static class UsageSamples
 		return clock.Object;
 	}
 
-	internal static UsageServiceLine Line(RemoteService service, UsageTally tally) => new(service, tally, Quiet);
+	private static readonly UsageWindow Window = new(To.AddHours(-24), To, TimeSpan.FromHours(1));
+
+	internal static UsageServiceLine Line(RemoteService service, UsageTally tally, UsageRightNow? rightNow = null)
+	{
+		return new(service, tally, rightNow ?? Quiet, Slots(tally));
+	}
 
 	internal static UsagePeriod Period(IReadOnlyList<UsageServiceLine> services, IReadOnlyList<UsageCauseLine> causes)
 	{
-		var window = new UsageWindow(To.AddHours(-24), To, TimeSpan.FromHours(1));
 		var tally = UsageTally.Sum(services.Select(line => line.Tally));
-		IReadOnlyList<UsageSlot> slots = [.. Enumerable.Range(0, 24).Select(slot => new UsageSlot(window.SlotAt(slot), slot == 23 ? tally : UsageTally.Empty))];
-		return new UsagePeriod(window, tally, slots, services, causes);
+		return new UsagePeriod(Window, tally, Slots(tally), services, causes);
+	}
+
+	private static IReadOnlyList<UsageSlot> Slots(UsageTally lastHour)
+	{
+		return [.. Enumerable.Range(0, 24).Select(slot => new UsageSlot(Window.SlotAt(slot), slot == 23 ? lastHour : UsageTally.Empty))];
 	}
 
 	internal static UsageSnapshot Snapshot()

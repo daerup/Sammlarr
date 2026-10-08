@@ -60,6 +60,25 @@ public class UsageReportTests
 	}
 
 	[Test]
+	public async Task ReadAsync_EachService_CountsOnlyItsOwnCallsOfEachHour()
+	{
+		Stored(
+			Calls(RemoteService.Tmdb, 11, UsageOutcome.Answered, 5),
+			Calls(RemoteService.Plex, 11, UsageOutcome.Answered, 4),
+			Calls(RemoteService.Plex, 12, UsageOutcome.Failed, 2)
+		);
+
+		var services = (await Testee().ReadAsync(UsageRange.Day)).Current.Services.ToDictionary(line => line.Service, line => line.Slots);
+
+		await Assert
+			.That(services[RemoteService.Tmdb].Select(slot => slot.Tally.Total))
+			.IsEquivalentTo([.. Enumerable.Repeat(0L, 22), 5L, 0L], CollectionOrdering.Matching);
+		await Assert
+			.That(services[RemoteService.Plex].Select(slot => slot.Tally.Total))
+			.IsEquivalentTo([.. Enumerable.Repeat(0L, 22), 4L, 2L], CollectionOrdering.Matching);
+	}
+
+	[Test]
 	public async Task ReadAsync_ManyCauses_ListsTheBusiestFirst()
 	{
 		Stored(
