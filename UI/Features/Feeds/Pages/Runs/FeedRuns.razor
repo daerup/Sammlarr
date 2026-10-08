@@ -184,6 +184,8 @@
                                 </div>
                             }
 
+                            <RunCostCard Run="run"/>
+
                             @if (_items.Count > 0)
                             {
                                 <ChangeList Items="_items"
@@ -406,7 +408,12 @@
         return $"{day}, {local:HH:mm}";
     }
 
-    private static string RunMeta(FeedRun run) => $"{(run.Trigger is Scheduled ? "scheduled" : "manual")} · {StrategyLabel(run.Strategy)}";
+    private static string RunMeta(FeedRun run)
+    {
+        var calls = run.Calls.Sum(call => call.Calls);
+        var meta = $"{(run.Trigger is Scheduled ? "scheduled" : "manual")} · {StrategyLabel(run.Strategy)}";
+        return calls == 0 ? meta : $"{meta} · {UsageView.Count(calls)} calls";
+    }
 
     private static string DotClass(FeedRun run) =>
         run.Failed ? "is-bad"

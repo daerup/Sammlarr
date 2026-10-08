@@ -54,6 +54,6 @@ internal static class UsageSamples
 				new UsageCauseLine(UsageCause.Search, Tally(answered: 10, cancelled: 4)),
 			]
 		);
-		return new UsageSnapshot(current, Period([Line(RemoteService.Tmdb, Tally(answered: 50))], []));
+		return new UsageSnapshot(current, Period([Line(RemoteService.Tmdb, Tally(answered: 50))], []), []);
 	}
 }

@@ -14,6 +14,7 @@ internal sealed class UsageReport(
 	IRemoteCapacity capacity,
 	IDatasetLoads loads,
 	IMdblistRequestsLeft mdblist,
+	UsageFeedLines feedLines,
 	IDateTimeProvider clock,
 	ICurrentUser currentUser
 ) : IUsageReport
@@ -28,7 +29,8 @@ internal sealed class UsageReport(
 		var before = window.Before();
 		var rows = await store.ReadAsync(before.From, window.To, cancellationToken);
 		var live = await LiveAsync(now, cancellationToken);
-		return new UsageSnapshot(Period(window, rows, live), Period(before, rows, _ => Unknown));
+		var feeds = await feedLines.ReadAsync(window, cancellationToken);
+		return new UsageSnapshot(Period(window, rows, live), Period(before, rows, _ => Unknown), feeds);
 	}
 
 	private async Task<Func<RemoteService, UsageRightNow>> LiveAsync(DateTimeOffset now, CancellationToken cancellationToken)

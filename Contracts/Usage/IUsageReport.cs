@@ -1,3 +1,5 @@
+using Domain.Feed;
+using Domain.Feed.Run;
 using Domain.Providers;
 using Domain.Usage;
 
@@ -25,7 +27,29 @@ public sealed record UsagePeriod(
 	IReadOnlyList<UsageCauseLine> Causes
 );
 
-public sealed record UsageSnapshot(UsagePeriod Current, UsagePeriod Previous);
+public sealed record UsageRun(RunId Run, DateTimeOffset StartedAt, TimeSpan Took, int Titles, int NotFound, int CouldNotLookUp, UsageTally Calls);
+
+public sealed record UsageFeedStats(
+	long Calls,
+	double CallsPerRun,
+	double CallsPerTitle,
+	double Unmatched,
+	double UnmatchedShare,
+	long CouldNotLookUp,
+	TimeSpan Took
+);
+
+public sealed record UsageFeedLine(
+	FeedId Feed,
+	string Name,
+	FeedProvider Provider,
+	bool Enabled,
+	Optional<DateTimeOffset> LastRun,
+	IReadOnlyList<UsageRun> Runs,
+	UsageFeedStats Stats
+);
+
+public sealed record UsageSnapshot(UsagePeriod Current, UsagePeriod Previous, IReadOnlyList<UsageFeedLine> Feeds);
 
 public interface IUsageReport
 {

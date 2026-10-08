@@ -1,8 +1,10 @@
 using Contracts;
 using Contracts.Datasets;
+using Contracts.Feed;
 using Contracts.Providers;
 using Contracts.Usage;
 using Core.Usage;
+using Domain.Feed;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Usage;
@@ -27,12 +29,16 @@ public class UsageReportTests
 
 	private readonly Mock<IMdblistRequestsLeft> _mdblist = IMdblistRequestsLeft.Mock();
 
+	private readonly Mock<IFeedService> _feeds = IFeedService.Mock();
+
 	public UsageReportTests()
 	{
 		_lastCalls.Of(Any()).Returns(new None());
 		_capacity.Of(Any()).Returns(new RemoteLoad(new None(), 0));
 		_loads.FindAsync(Any(), Any()).Returns(new None());
 		_mdblist.TodayAsync(Any()).Returns(new None());
+		_feeds.GetAsync(Any()).Returns(new FeedSnapshot([]));
+		_feeds.GetRunsAsync(Any(), Any()).Returns([]);
 	}
 
 	[Test]
@@ -164,6 +170,7 @@ public class UsageReportTests
 			_capacity.Object,
 			_loads.Object,
 			_mdblist.Object,
+			new UsageFeedLines(_feeds.Object),
 			clock.Object,
 			new TestCurrentUser { Role = role }
 		);

@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Blocklist;
 using Contracts.Feed;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;
@@ -10,6 +11,7 @@ using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using UI.Features.Feeds.Pages.Runs;
 using UI.Shared.Services;
 
@@ -81,6 +83,7 @@ public class FeedRunsTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
+		Services.AddSingleton<ICurrentUser>(new TestCurrentUser());
 
 		var feeds = IFeedService.Mock();
 		feeds
