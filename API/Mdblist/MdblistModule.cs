@@ -1,4 +1,5 @@
 using API.Http;
+using Contracts.Usage;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -20,5 +21,6 @@ public class MdblistModule : IServiceModule
 			.Converter<MdblistIdConverter>();
 		services.AddScoped<MdblistTitles>();
 		services.AddSingleton<MdblistBudget>();
+		services.AddScoped<IMdblistRequestsLeft, MdblistRequestsLeft>();
 	}
 }

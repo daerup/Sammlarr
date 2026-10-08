@@ -20,6 +20,11 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 			.Apply(allowance => _byKey[apiKey] = allowance);
 	}
 
+	public Optional<long> Left(string apiKey)
+	{
+		return _byKey.GetValueOrNone(apiKey).Map(allowance => Optional.When(clock.Now < allowance.ResetAt, () => allowance.Remaining));
+	}
+
 	public bool LeavesReserve(string apiKey)
 	{
 		return _byKey.GetValueOrNone(apiKey).Match(allowance => Leaves(apiKey, allowance), () => true);

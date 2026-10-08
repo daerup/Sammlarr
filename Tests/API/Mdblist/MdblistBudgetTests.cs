@@ -1,6 +1,7 @@
 using System.Net;
 using API.Mdblist;
 using Microsoft.Extensions.Logging;
+using TestInfrastructure;
 
 namespace API.Tests.Mdblist;
 
@@ -29,6 +30,28 @@ public class MdblistBudgetTests
 
 		await Assert.That(budget.LeavesReserve("mdblist-key")).IsTrue();
 		await Assert.That(logger.Warnings).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Left_BeforeTheReset_IsWhatMdblistLastSaid()
+	{
+		var budget = new MdblistBudget(MdblistApis.Clock(), MdblistApis.Options, new CountingLogger());
+		budget.Record("mdblist-key", Headers(remaining: 962));
+
+		await Assert.That(budget.Left("mdblist-key")).IsSome().And.IsEqualTo(962);
+		await Assert.That(budget.Left("another-key")).IsNone();
+	}
+
+	[Test]
+	public async Task Left_AfterTheReset_IsUnknown()
+	{
+		var budget = new MdblistBudget(MdblistApis.Clock(), MdblistApis.Options, new CountingLogger());
+		var response = new HttpResponseMessage(HttpStatusCode.OK);
+		response.Headers.Add("x-ratelimit-remaining", "12");
+		response.Headers.Add("x-ratelimit-reset", $"{DateTimeOffset.UnixEpoch.AddHours(12).ToUnixTimeSeconds()}");
+		budget.Record("mdblist-key", response.Headers);
+
+		await Assert.That(budget.Left("mdblist-key")).IsNone();
 	}
 
 	private static System.Net.Http.Headers.HttpResponseHeaders Headers(long remaining)

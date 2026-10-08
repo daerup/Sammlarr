@@ -1,4 +1,6 @@
 using Contracts;
+using Contracts.Datasets;
+using Contracts.Providers;
 using Contracts.Usage;
 using Core.Usage;
 using Domain.Identity;
@@ -19,9 +21,18 @@ public class UsageReportTests
 
 	private readonly Mock<IUsageLastCalls> _lastCalls = IUsageLastCalls.Mock();
 
+	private readonly Mock<IRemoteCapacity> _capacity = IRemoteCapacity.Mock();
+
+	private readonly Mock<IDatasetLoads> _loads = IDatasetLoads.Mock();
+
+	private readonly Mock<IMdblistRequestsLeft> _mdblist = IMdblistRequestsLeft.Mock();
+
 	public UsageReportTests()
 	{
 		_lastCalls.Of(Any()).Returns(new None());
+		_capacity.Of(Any()).Returns(new RemoteLoad(new None(), 0));
+		_loads.FindAsync(Any(), Any()).Returns(new None());
+		_mdblist.TodayAsync(Any()).Returns(new None());
 	}
 
 	[Test]
@@ -73,7 +84,7 @@ public class UsageReportTests
 
 		var plex = (await Testee().ReadAsync(UsageRange.Day)).Current.Services.Single();
 
-		await Assert.That(plex.FailingSince).IsSome().And.IsEqualTo(Midnight.AddHours(10));
+		await Assert.That(plex.RightNow.FailingSince).IsSome().And.IsEqualTo(Midnight.AddHours(10));
 	}
 
 	[Test]
@@ -83,7 +94,7 @@ public class UsageReportTests
 
 		var plex = (await Testee().ReadAsync(UsageRange.Day)).Current.Services.Single();
 
-		await Assert.That(plex.FailingSince).IsNone();
+		await Assert.That(plex.RightNow.FailingSince).IsNone();
 	}
 
 	[Test]
@@ -99,9 +110,32 @@ public class UsageReportTests
 		var report = await Testee().ReadAsync(UsageRange.Day);
 
 		var services = report.Current.Services;
-		await Assert.That(services.Single(line => line.Service == RemoteService.Plex).LastCall).IsSome().And.IsEqualTo(Now.AddMinutes(-9));
-		await Assert.That(services.Single(line => line.Service == RemoteService.Tmdb).LastCall).IsSome().And.IsEqualTo(Midnight.AddHours(9));
-		await Assert.That(report.Previous.Services.Single().LastCall).IsSome().And.IsEqualTo(Midnight.AddHours(-20));
+		await Assert.That(services.Single(line => line.Service == RemoteService.Plex).RightNow.LastCall).IsSome().And.IsEqualTo(Now.AddMinutes(-9));
+		await Assert.That(services.Single(line => line.Service == RemoteService.Tmdb).RightNow.LastCall).IsSome().And.IsEqualTo(Midnight.AddHours(9));
+		await Assert.That(report.Previous.Services.Single().RightNow.LastCall).IsSome().And.IsEqualTo(Midnight.AddHours(-20));
+	}
+
+	[Test]
+	public async Task ReadAsync_RightNow_NamesAPauseTheRequestsLeftAndADownload()
+	{
+		_capacity.Of(RemoteService.Plex).Returns(new RemoteLoad(Some.Of(Now.AddMinutes(16)), 0));
+		_capacity.Of(RemoteService.Tmdb).Returns(new RemoteLoad(Some.Of(Now.AddMinutes(-1)), 0));
+		_mdblist.TodayAsync(Any()).Returns(Some.Of(962L));
+		_loads.FindAsync(DatasetNames.ImdbRatings, Any()).Returns(Some.Of(new DatasetLoad(DatasetNames.ImdbRatings, Midnight.AddHours(4.5), new None(), 2)));
+		Stored(
+			Calls(RemoteService.Plex, 11, UsageOutcome.Answered, 1),
+			Calls(RemoteService.Tmdb, 11, UsageOutcome.Answered, 1),
+			Calls(RemoteService.Mdblist, 11, UsageOutcome.Answered, 1),
+			Calls(RemoteService.ImdbDatasets, 4, UsageOutcome.Answered, 1)
+		);
+
+		var services = (await Testee().ReadAsync(UsageRange.Day)).Current.Services.ToDictionary(line => line.Service, line => line.RightNow);
+
+		await Assert.That(services[RemoteService.Plex].PausedUntil).IsSome().And.IsEqualTo(Now.AddMinutes(16));
+		await Assert.That(services[RemoteService.Tmdb].PausedUntil).IsNone();
+		await Assert.That(services[RemoteService.Mdblist].RequestsLeft).IsSome().And.IsEqualTo(962);
+		await Assert.That(services[RemoteService.Tmdb].RequestsLeft).IsNone();
+		await Assert.That(services[RemoteService.ImdbDatasets].DownloadedAt).IsSome().And.IsEqualTo(Midnight.AddHours(4.5));
 	}
 
 	[Test]
@@ -124,6 +158,14 @@ public class UsageReportTests
 	{
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
-		return new UsageReport(_store.Object, _lastCalls.Object, clock.Object, new TestCurrentUser { Role = role });
+		return new UsageReport(
+			_store.Object,
+			_lastCalls.Object,
+			_capacity.Object,
+			_loads.Object,
+			_mdblist.Object,
+			clock.Object,
+			new TestCurrentUser { Role = role }
+		);
 	}
 }
