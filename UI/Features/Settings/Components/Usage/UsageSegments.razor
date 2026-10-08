@@ -1,0 +1,24 @@
+@typeparam TValue where TValue : struct, Enum
+
+<BbToggleGroup TValue="TValue?" Value="Value" ValueChanged="SelectAsync" Required="true"
+               Class="h-8 w-fit gap-0.5 rounded-lg bg-secondary p-[3px] text-muted-foreground" aria-label="@Label">
+    @foreach (var (option, text) in Options)
+    {
+        <BbToggleGroupItem TValue="TValue?" Value="@option"
+                           Class="h-full rounded-md px-3 text-[12.5px] font-medium hover:text-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-xs">
+            @text
+        </BbToggleGroupItem>
+    }
+</BbToggleGroup>
+
+@code {
+    [Parameter] [EditorRequired] public TValue Value { get; set; }
+
+    [Parameter] [EditorRequired] public required IReadOnlyList<(TValue Value, string Label)> Options { get; set; }
+
+    [Parameter] [EditorRequired] public required EventCallback<TValue> OnChange { get; set; }
+
+    [Parameter] [EditorRequired] public required string Label { get; set; }
+
+    private Task SelectAsync(TValue? value) => Optional.Of(value).Match(OnChange.InvokeAsync, () => Task.CompletedTask);
+}

@@ -1,0 +1,82 @@
+@using Contracts.Usage
+@inject IUsageReport Report
+
+<div class="flex flex-col gap-4">
+    <div class="flex items-start gap-4">
+        <div>
+            <h3 class="text-lg font-semibold">Usage</h3>
+            <p class="text-sm text-muted-foreground">How often Sammlarr calls each service, how those calls ended, and what made them.</p>
+        </div>
+        <div class="ml-auto">
+            <UsageSegments TValue="UsageRange" Value="_range" Options="Ranges" OnChange="SelectAsync" Label="Window"/>
+        </div>
+    </div>
+
+    @if (_shown is not { } shown)
+    {
+        <div class="grid grid-cols-4 gap-3" data-testid="usage-loading">
+            @for (var card = 0; card < 4; card++)
+            {
+                <BbSkeleton Class="h-[118px] rounded-xl"/>
+            }
+        </div>
+        <BbSkeleton Class="h-[260px] rounded-xl"/>
+        <BbSkeleton Class="h-[220px] rounded-xl"/>
+    }
+    else if (shown.Snapshot.Current.Tally.Total == 0 && shown.Snapshot.Previous.Tally.Total == 0)
+    {
+        <div class="flex flex-col items-center gap-2 rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground" data-testid="usage-empty">
+            <span class="mb-1 flex size-11 items-center justify-center rounded-xl bg-secondary">
+                <LucideIcon Name="chart-column" Size="22"/>
+            </span>
+            <span class="text-[15px] font-semibold text-foreground">No calls yet</span>
+            <span>
+                Sammlarr counts every call it makes to TMDB, Plex and the other services from here on.<br/>
+                Run a feed or search for a title to see the first numbers.
+            </span>
+        </div>
+    }
+    else
+    {
+        <div class="@($"flex flex-col gap-4 transition-opacity {(shown.Range == _range ? string.Empty : "opacity-60")}")" aria-busy="@(shown.Range == _range ? "false" : "true")">
+            <UsageStatCards Snapshot="shown.Snapshot" Range="shown.Range"/>
+            <UsageCallsCard Snapshot="shown.Snapshot" Range="shown.Range"/>
+            <UsageServicesTable Period="shown.Snapshot.Current" Range="shown.Range"/>
+            <UsageCausesCard Period="shown.Snapshot.Current"/>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly IReadOnlyList<(UsageRange Value, string Label)> Ranges = [(UsageRange.Day, "24h"), (UsageRange.Week, "7d"), (UsageRange.Month, "30d")];
+
+    private UsageRange _range = UsageRange.Day;
+
+    private (UsageRange Range, UsageSnapshot Snapshot)? _shown;
+
+    private int _asked;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        await LoadAsync();
+    }
+
+    private async Task SelectAsync(UsageRange range)
+    {
+        _range = range;
+        await Task.Yield();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var asked = ++_asked;
+        var range = _range;
+        var snapshot = await Report.ReadAsync(range);
+        if (asked == _asked)
+        {
+            _shown = (range, snapshot);
+        }
+    }
+}

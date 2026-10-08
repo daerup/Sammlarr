@@ -29,6 +29,15 @@ public class DurationBucketsTests
 	}
 
 	[Test]
+	public async Task BucketOf_AQuantileInTheLastBucket_IsTheLastBucket()
+	{
+		var counts = new Dictionary<int, long> { [50] = 1, [DurationBuckets.Over] = 9 };
+
+		await Assert.That(DurationBuckets.BucketOf(counts, 0.95)).IsSome().And.IsEqualTo(DurationBuckets.Over);
+		await Assert.That(DurationBuckets.BucketOf(counts, 0.05)).IsSome().And.IsEqualTo(50);
+	}
+
+	[Test]
 	public void Percentile_ForAnyHistogram_GrowsWithQ()
 	{
 		Gen.Select(Gen.Long[0, 50].Array[DurationBuckets.UpToMs.Count], Gen.Double[0, 1], Gen.Double[0, 1])

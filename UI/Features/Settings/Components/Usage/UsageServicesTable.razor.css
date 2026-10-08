@@ -1,0 +1,7 @@
+.usage-row {
+    display: grid;
+    grid-template-columns: 136px minmax(0, 1fr) 62px 58px 62px 84px 168px;
+    gap: 12px;
+    align-items: center;
+    padding: 7px 0;
+}
