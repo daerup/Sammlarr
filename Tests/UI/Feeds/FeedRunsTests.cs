@@ -10,6 +10,7 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Usage;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Feeds.Pages.Runs;
@@ -66,6 +67,18 @@ public class FeedRunsTests : BunitContext
 
 		await Assert.That(cut.Find(".runs-band").TextContent).Contains("The source could not be read");
 		await Assert.That(cut.Find(".runs-band").TextContent).Contains("No list found with identifier 'hdlists/comedy'.");
+	}
+
+	[Test]
+	public async Task Render_ARunThatMadeCalls_EndsItsSummaryWithTheCallCount()
+	{
+		var calling = Run(DateTimeOffset.UtcNow) with { Calls = [new FeedRunCalls(RemoteService.Tmdb, UsageOutcome.Answered, 8287)] };
+		RegisterServices([calling]);
+
+		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(calling)));
+		cut.WaitForState(() => cut.FindAll("[data-testid=run-calls]").Count == 1);
+
+		await Assert.That(cut.Find(".runs-detail-sub").TextContent).Contains("took 2.0 s · 8,287 calls");
 	}
 
 	[Test]

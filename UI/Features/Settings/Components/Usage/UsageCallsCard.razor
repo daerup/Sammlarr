@@ -82,11 +82,11 @@
                         </UsageOutcomeBar>
                     </span>
                     <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
-                    <span class="@Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@UsageView.Share(tally.Errors, tally.Total)</span>
+                    <span class="@UsageView.Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@UsageView.Share(tally.Errors, tally.Total)</span>
                     <span>
                         <UsageAnswerStrip Service="line.Service" Tally="tally"/>
                     </span>
-                    <span class="@Tone(tally.RateLimited, tally.Total, "text-[var(--usage-gave-up)] font-medium")">@UsageView.Share(tally.RateLimited, tally.Total)</span>
+                    <span class="@UsageView.Tone(tally.RateLimited, tally.Total, "text-[var(--usage-gave-up)] font-medium")">@UsageView.Share(tally.RateLimited, tally.Total)</span>
                     <span class="@($"flex min-w-0 items-center gap-1.5 overflow-hidden text-xs text-ellipsis whitespace-nowrap {NowColour(now.Tone)}")" data-testid="usage-right-now">
                         @if (now.Icon is Some<string>(var icon))
                         {
@@ -114,8 +114,6 @@
 </UsageCard>
 
 @code {
-    private const double Noticeable = 0.01;
-
     private const int PlotLeft = 48;
 
     private const int PlotRight = 4;
@@ -184,18 +182,6 @@
     private static string Left(double milliseconds)
     {
         return FormattableString.Invariant($"calc({PlotLeft}px + (100% - {PlotLeft + PlotRight}px) * {UsageView.StripAt(milliseconds):0.####})");
-    }
-
-    private static string Tone(long part, long total, string trouble)
-    {
-        var share = total == 0 ? 0 : (double)part / total;
-        var colour = (share > Noticeable, part) switch
-        {
-            (true, _) => trouble,
-            (false, 0) => "text-muted-foreground",
-            _ => string.Empty,
-        };
-        return $"text-right tabular-nums {colour}";
     }
 
     private static string NowColour(RightNowTone tone)
