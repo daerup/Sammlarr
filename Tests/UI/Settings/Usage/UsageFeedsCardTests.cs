@@ -1,6 +1,7 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
+using Contracts;
 using Contracts.Usage;
 using Domain.Feed;
 using Domain.Feed.Run;
@@ -8,6 +9,7 @@ using Domain.Providers;
 using Domain.Usage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Usage;
@@ -32,7 +34,7 @@ public class UsageFeedsCardTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
-		Services.AddSingleton(UsageSamples.Clock());
+		Services.AddSingleton(At(UsageSamples.To));
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -104,6 +106,59 @@ public class UsageFeedsCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Dot_Clicked_AnchorsThePopoverWhereTheDotSits()
+	{
+		var cut = Render<Harness>();
+
+		await Dot(cut, ShowsRun).ClickAsync();
+
+		var anchor = cut.Find("[data-testid=usage-feed-anchor]");
+		await Assert.That(anchor.GetAttribute("style")).StartsWith("left: calc(46px + (100% - 46px) * 0.6667); top: ");
+		await Assert.That(anchor.QuerySelector("button[aria-haspopup]")).IsNotNull();
+	}
+
+	[Test]
+	public async Task Render_RunsOfTheLastHoursOnly_StretchTheTimeScaleFromTheFirstRunToNow()
+	{
+		Services.AddSingleton(At(UsageSamples.To.AddHours(-1)));
+
+		var cut = Render<Harness>();
+
+		await Assert
+			.That(cut.FindAll("[data-testid=usage-feed-dot] circle:last-child").Select(dot => dot.GetAttribute("cx")))
+			.IsEquivalentTo(["0%", "80%", "20%"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Hover_WhileAFeedIsPicked_LightsUpAPointedRowsFeedButNothingPointedInTheChart()
+	{
+		var cut = Render<Harness>();
+		await Assert.That(HoverRules(cut)).Contains("grayscale");
+
+		await Row(cut, "Seasonal anime").ClickAsync();
+
+		var rules = HoverRules(cut);
+		await Assert.That(rules).DoesNotContain("grayscale");
+		await Assert.That(rules).Contains(".usage-feeds:has(.usage-feed[data-f=f0]:hover) .usage-feed-group[data-f=f0] { filter: none; opacity: 1; }");
+		await Assert.That(rules).DoesNotContain(":has([data-f=f0]:hover)");
+	}
+
+	[Test]
+	public async Task Hover_AfterUnpickingFromTheRow_WaitsForThePointerToLeaveIt()
+	{
+		var cut = Render<Harness>();
+		await Row(cut, "Seasonal anime").ClickAsync();
+
+		await Row(cut, "Seasonal anime").ClickAsync();
+
+		await Assert.That(HoverRules(cut)).DoesNotContain("grayscale");
+
+		await Row(cut, "Seasonal anime").TriggerEventAsync("onmouseleave", new MouseEventArgs());
+
+		await Assert.That(HoverRules(cut)).Contains("grayscale");
+	}
+
+	[Test]
 	public async Task Dot_OfARunThatHitA429_WearsARingInTheLimitedColour()
 	{
 		var cut = Render<Harness>();
@@ -162,6 +217,15 @@ public class UsageFeedsCardTests : BunitContext
 	private static AngleSharp.Dom.IElement Row(IRenderedComponent<Harness> cut, string name)
 	{
 		return cut.FindAll("[data-testid=usage-feed]").Single(row => row.GetAttribute("data-feed") == name);
+	}
+
+	private static string HoverRules(IRenderedComponent<Harness> cut) => cut.Find(".usage-feeds > style").TextContent;
+
+	private static IDateTimeProvider At(DateTimeOffset now)
+	{
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(now);
+		return clock.Object;
 	}
 
 	private static AngleSharp.Dom.IElement Dot(IRenderedComponent<Harness> cut, RunId run)
