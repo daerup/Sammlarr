@@ -34,6 +34,17 @@ public class UsageFeedLinesTests
 	}
 
 	[Test]
+	public async Task ReadAsync_ARun_CarriesHowItWasStartedAndWhatItChanged()
+	{
+		Stored(Run(-2, 30, 3, 0, 2) with { Trigger = new Scheduled("0 0 3 * * *"), Counts = FeedRunCounts.None with { Total = 100, Added = 4, Removed = 1 } });
+
+		var run = (await Testee().ReadAsync(Day, CancellationToken.None)).First().Runs.Single();
+
+		await Assert.That(run.Trigger).IsOfUnionType<FeedRunTrigger, Scheduled>();
+		await Assert.That((run.Added, run.Removed)).IsEqualTo((4, 1));
+	}
+
+	[Test]
 	public async Task ReadAsync_ForEveryFeed_ListsTheBusiestFirstAndAFeedThatNeverRan()
 	{
 		Stored(Run(-2, 30, 3, 0, 2));

@@ -27,7 +27,18 @@ public sealed record UsagePeriod(
 	IReadOnlyList<UsageCauseLine> Causes
 );
 
-public sealed record UsageRun(RunId Run, DateTimeOffset StartedAt, TimeSpan Took, int Titles, int NotFound, int CouldNotLookUp, UsageTally Calls);
+public sealed record UsageRun(
+	RunId Run,
+	DateTimeOffset StartedAt,
+	TimeSpan Took,
+	FeedRunTrigger Trigger,
+	int Titles,
+	int Added,
+	int Removed,
+	int NotFound,
+	int CouldNotLookUp,
+	UsageTally Calls
+);
 
 public sealed record UsageFeedStats(
 	long Calls,

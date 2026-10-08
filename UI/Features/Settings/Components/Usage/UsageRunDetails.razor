@@ -1,0 +1,70 @@
+@using System.Globalization
+@using Contracts.Usage
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<div class="usage-run" data-testid="usage-run-details">
+    <span class="usage-run-rail" style="background: @Branding.Color(Line.Provider.Service)"></span>
+    <div class="usage-run-body">
+        <div class="usage-run-head">
+            @foreach (var brand in Branding.Brands(Line.Provider.Service).Take(1))
+            {
+                <BrandedLogo Brand="brand" Size="16" Decorative="true"/>
+            }
+            <AppLink Href="@($"/feeds/edit/{UrlGuid.Encode(Line.Feed.Value)}")" Title="Open feed settings" Class="min-w-0">
+                <span class="usage-run-name">@Line.Name</span>
+            </AppLink>
+        </div>
+        <div class="usage-run-meta">
+            <div>
+                <span class="usage-run-key">Ran</span>
+                <span class="usage-run-value">@Run.StartedAt.ToLocalTime().ToString("MMMM d, HH:mm", CultureInfo.InvariantCulture) · @(Run.Trigger is Scheduled ? "scheduled" : "manual")</span>
+            </div>
+            <div data-testid="usage-run-change">
+                <span class="usage-run-key">Run</span>
+                <span class="usage-run-value">
+                    @if (Run.Added > 0)
+                    {
+                        <span class="is-added">+@Run.Added</span>
+                    }
+                    @if (Run is { Added: > 0, Removed: > 0 })
+                    {
+                        @(" ")
+                    }
+                    @if (Run.Removed > 0)
+                    {
+                        <span class="is-removed">−@Run.Removed</span>
+                    }
+                    @if (Run is { Added: 0, Removed: 0 })
+                    {
+                        <span>no change</span>
+                    }
+                </span>
+            </div>
+            <div data-testid="usage-run-calls">
+                <span class="usage-run-key">Calls</span>
+                <span class="usage-run-value">@UsageView.Count(Run.Calls.Total)@PerTitle</span>
+            </div>
+            @if (Run.Calls.RateLimited > 0)
+            {
+                <div data-testid="usage-run-limited">
+                    <span class="usage-run-key">Limited</span>
+                    <span class="usage-run-value is-limited">
+                        @UsageView.Count(Run.Calls.RateLimited) rate-limited, @UsageView.Count(Run.Calls.Of(UsageOutcome.AnsweredAfter429)) answered
+                    </span>
+                </div>
+            }
+        </div>
+        <div class="usage-run-foot">
+            <AppLink Href="@($"/feeds/{UrlGuid.Encode(Line.Feed.Value)}/runs/{UrlGuid.Encode(Run.Run.Value)}")" Class="text-xs">See this run</AppLink>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required UsageFeedLine Line { get; set; }
+
+    [Parameter] [EditorRequired] public required UsageRun Run { get; set; }
+
+    private string PerTitle => Run.Titles == 0 ? string.Empty : FormattableString.Invariant($" · {Run.Calls.Total / (double)Run.Titles:0.0} per title");
+}
