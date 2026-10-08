@@ -80,7 +80,8 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			.Values.SelectMany(e => e.ExternalIds.Select(x => (Key: x.ToExternalMediaId(), Owner: e)))
 			.ToDictionary(t => t.Key, t => t.Owner);
 
-		var result = identities.Select(identity => UpsertOne(ctx, identity, entities, ownerByExternal)).ToList();
+		var contested = new HashSet<IExternalMediaId>();
+		var result = identities.Select(identity => UpsertOne(ctx, identity, entities, ownerByExternal, contested)).ToList();
 
 		await ctx.SaveChangesAsync(cancellationToken);
 		await transaction.CommitAsync(cancellationToken);
@@ -194,16 +195,12 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		SammlarrDbContext ctx,
 		MediaIdentity identity,
 		Dictionary<Guid, MediaRow> entities,
-		Dictionary<IExternalMediaId, MediaRow> ownerByExternal
+		Dictionary<IExternalMediaId, MediaRow> ownerByExternal,
+		HashSet<IExternalMediaId> contested
 	)
 	{
 		var owners = identity.Externals.Select(ownerByExternal.GetValueOrDefault).Where(o => o is not null).Select(o => o!).DistinctBy(o => o.Id).ToList();
-		if (owners.Count > 1)
-		{
-			throw new MediaIdentityConflictException([.. owners.Select(o => MediaId.From(o.Id))], [.. identity.Externals]);
-		}
-
-		var entity = owners.FirstOrDefault() ?? entities.GetValueOrDefault(identity.Id.Value);
+		var entity = owners.Count > 1 ? OwnRow(identity, owners) : owners.FirstOrDefault() ?? entities.GetValueOrDefault(identity.Id.Value);
 		if (entity is null)
 		{
 			entity = new MediaRow { Id = identity.Id.Value };
@@ -211,13 +208,27 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			entities[entity.Id] = entity;
 		}
 
-		foreach (var external in identity.Externals.Where(e => !ownerByExternal.ContainsKey(e)))
+		foreach (var external in identity.Externals.Where(e => ownerByExternal.TryGetValue(e, out var holder) && holder.Id != entity.Id))
+		{
+			var holder = ownerByExternal[external];
+			holder.ExternalIds.Remove(holder.ExternalIds.First(row => row.ToExternalMediaId().Equals(external)));
+			ownerByExternal.Remove(external);
+			contested.Add(external);
+		}
+
+		foreach (var external in identity.Externals.Where(e => !ownerByExternal.ContainsKey(e) && !contested.Contains(e)))
 		{
 			entity.ExternalIds.Add(external.ToExternalIdEntity(entity));
 			ownerByExternal[external] = entity;
 		}
 
 		return ToIdentity(entity);
+	}
+
+	private static MediaRow OwnRow(MediaIdentity identity, List<MediaRow> owners)
+	{
+		return owners.Find(owner => owner.Id == identity.Id.Value)
+			?? throw new MediaIdentityConflictException([.. owners.Select(o => MediaId.From(o.Id))], [.. identity.Externals]);
 	}
 
 	private static MediaIdentity ToIdentity(MediaRow entity) => new(MediaId.From(entity.Id), [.. entity.ExternalIds.Select(e => e.ToExternalMediaId())]);

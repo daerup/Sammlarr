@@ -238,6 +238,24 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task UpsertManyAsync_WhenTwoStoredTitlesClaimOneId_KeepsEachOnItsRowAndTheIdOnNeither()
+	{
+		IExternalMediaId first = TmdbId.From("313", MediaType.Show);
+		IExternalMediaId second = TmdbId.From("314", MediaType.Show);
+		var shared = MetacriticId.From("shared-313", MediaType.Show);
+		var firstId = await SetUpMediaAsync([first]);
+		var secondId = await SetUpMediaAsync([second, shared]);
+
+		var identities = await _testee.UpsertIdentitiesAsync([new MediaIdentity(firstId, [first, shared]), new MediaIdentity(secondId, [second, shared])]);
+
+		await Assert.That(identities.Select(identity => identity.Id)).IsEquivalentTo([firstId, secondId]);
+		await Assert.That(identities[0].Externals).IsEquivalentTo([first]);
+		await Assert.That(identities[1].Externals).IsEquivalentTo([second]);
+		var stored = await fixture.Context.ExternalMediaIds.Select(row => row.Id).ToListAsync();
+		await Assert.That(stored).IsEquivalentTo(["313", "314"]);
+	}
+
+	[Test]
 	public async Task UpsertManyAsync_WhenEmptyInput_ReturnsEmptyList()
 	{
 		var identities = await _testee.UpsertIdentitiesAsync(Array.Empty<MediaIdentity>());

@@ -31,3 +31,4 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0012 | [Read IMDb, Trakt and Letterboxd lists through MDBList](0012-read-imdb-trakt-and-letterboxd-lists-through-mdblist.md) | accepted | 2026-10-05 |
 | 0013 | [Load shared datasets outside the job queue](0013-load-shared-datasets-outside-the-job-queue.md) | accepted | 2026-10-06 |
 | 0014 | [Count provider calls with the built-in instruments](0014-count-provider-calls-with-the-built-in-instruments.md) | accepted | 2026-10-07 |
+| 0015 | [Keep an id two stored titles claim on neither](0015-keep-an-id-two-stored-titles-claim-on-neither.md) | accepted | 2026-10-08 |
