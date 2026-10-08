@@ -45,6 +45,7 @@
 
     --usage-accent: #4A03FC;
     --usage-answered: oklch(0.84 0 0);
+    --usage-shade: oklch(0.56 0 0);
     --usage-after-429: #fab219;
     --usage-gave-up: #ec835a;
     --usage-failed: #d03b3b;
@@ -116,6 +117,7 @@
 
     --usage-accent: #6A3BFD;
     --usage-answered: oklch(0.40 0 0);
+    --usage-shade: oklch(0.70 0 0);
     --usage-cancelled: #7e848d;
 
     /* Sidebar variables */

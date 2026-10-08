@@ -53,7 +53,7 @@
                 <span>How they ended</span>
                 <span class="text-right">Calls</span>
                 <span class="text-right">Errors</span>
-                <span class="text-right">p95</span>
+                <UsageAnswerTimeHead/>
                 <span class="text-right">Limited</span>
                 <span>Right now</span>
             </div>
@@ -77,7 +77,9 @@
                     </span>
                     <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
                     <span class="@Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@UsageView.Share(tally.Errors, tally.Total)</span>
-                    <span class="text-right tabular-nums text-muted-foreground">@tally.Percentile(0.95).Map(p95 => UsageView.Duration(p95)).GetValueOr("n/a")</span>
+                    <span>
+                        <UsageAnswerStrip Service="line.Service" Tally="tally"/>
+                    </span>
                     <span class="@Tone(tally.RateLimited, tally.Total, "text-[var(--usage-gave-up)] font-medium")">@UsageView.Share(tally.RateLimited, tally.Total)</span>
                     <span class="@($"flex min-w-0 items-center gap-1.5 overflow-hidden text-xs text-ellipsis whitespace-nowrap {NowColour(now.Tone)}")" data-testid="usage-right-now">
                         @if (now.Icon is Some<string>(var icon))

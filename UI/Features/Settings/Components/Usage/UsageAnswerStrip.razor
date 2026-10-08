@@ -1,0 +1,75 @@
+@using Domain.Usage
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+@if (Answers > 0)
+{
+    <BbTooltip DelayDuration="150" Placement="PopoverPlacement.BottomStart">
+        <BbTooltipTrigger Focusable="false">
+            <svg width="@Width" height="14" class="block overflow-visible" data-testid="usage-strip" @onmouseleave="() => _at = new None()">
+                @for (var index = 0; index < DurationBuckets.UpToMs.Count; index++)
+                {
+                    var at = index;
+                    <rect x="@UsageView.Number((at * Cell) + 0.5)" y="0" width="@UsageView.Number(Cell - 1)" height="14" rx="2"
+                          fill="@UsageView.Shade(Count(at), Busiest)" stroke="@(IsAt(at) ? "var(--foreground)" : "none")" stroke-width="1.5"
+                          data-testid="usage-strip-square" @onmouseenter="() => _at = Some.Of(at)"/>
+                }
+                @foreach (var (tick, colour) in Ticks)
+                {
+                    <rect x="@UsageView.Number((UsageView.StripAt(tick) * Width) - 1)" y="-2" width="2" height="18" fill="@colour" pointer-events="none"
+                          data-testid="usage-strip-tick"/>
+                }
+            </svg>
+        </BbTooltipTrigger>
+        <BbTooltipContent Class="@UsageView.Tip" data-testid="usage-strip-tip">
+            <div class="mb-1.5 flex items-center gap-2 font-semibold">
+                <BrandedLogo Brand="Branding.GetBrandingInfo(Service)" Size="14" Decorative="true"/>
+                @Branding.GetBrandingInfo(Service).NickName
+                <span class="font-normal text-muted-foreground">· answer time</span>
+            </div>
+            @if (_at is Some<int>(var at))
+            {
+                <div class="grid grid-cols-[auto_auto_auto] items-baseline gap-x-3.5 tabular-nums">
+                    <b class="font-semibold">@UsageView.Bucket(DurationBuckets.UpToMs[at])</b>
+                    <span class="text-right"><b class="font-semibold">@UsageView.Count(Count(at))</b> <span class="text-muted-foreground">calls</span></span>
+                    <span class="text-right text-muted-foreground">@UsageView.Share(Count(at), Answers)</span>
+                </div>
+            }
+            <div class="mt-1.5 flex items-center gap-3 border-t pt-1.5 text-muted-foreground">
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="inline-block h-[11px] w-0.5 bg-foreground"></span>
+                    median <b class="font-medium text-foreground">@Quantile(0.5)</b>
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="inline-block h-[11px] w-0.5" style="background: @UsageView.Accent"></span>
+                    p95 <b class="font-medium text-foreground">@Quantile(0.95)</b>
+                </span>
+            </div>
+        </BbTooltipContent>
+    </BbTooltip>
+}
+
+@code {
+    [Parameter] [EditorRequired] public required RemoteService Service { get; set; }
+
+    [Parameter] [EditorRequired] public required UsageTally Tally { get; set; }
+
+    [Parameter] public int Width { get; set; } = 220;
+
+    private Optional<int> _at = new None();
+
+    private double Cell => Width / (double)DurationBuckets.UpToMs.Count;
+
+    private long Answers => Tally.Durations.Values.Sum();
+
+    private long Busiest => Tally.Durations.Values.DefaultIfEmpty(1).Max();
+
+    private IEnumerable<(double Tick, string Colour)> Ticks =>
+        new[] { (Q: 0.5, Colour: "var(--foreground)"), (Q: 0.95, Colour: UsageView.Accent) }.Select(mark => Tally.Percentile(mark.Q).Map(tick => (tick, mark.Colour))).WhereSome();
+
+    private long Count(int index) => Tally.Durations.GetValueOrDefault(DurationBuckets.UpToMs[index]);
+
+    private bool IsAt(int index) => _at.Match(at => at == index, () => false);
+
+    private string Quantile(double q) => Tally.Percentile(q).Map(found => UsageView.Duration(found)).GetValueOr("n/a");
+}

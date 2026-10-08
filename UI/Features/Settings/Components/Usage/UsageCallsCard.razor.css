@@ -1,6 +1,6 @@
 .usage-service {
     display: grid;
-    grid-template-columns: 128px minmax(0, 1fr) 58px 52px 62px 70px 150px;
+    grid-template-columns: 128px minmax(0, 1fr) 58px 52px 230px 70px 150px;
     gap: 12px;
     align-items: center;
     padding-top: 7px;
