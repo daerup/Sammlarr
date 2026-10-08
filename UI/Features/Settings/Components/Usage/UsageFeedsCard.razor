@@ -21,7 +21,8 @@
                 <div class="relative h-[192px]" data-testid="usage-feeds-chart" @onclick="() => _picked = new None()">
                     @foreach (var (y, label) in YTicks)
                     {
-                        <span class="absolute left-0 w-[38px] text-right text-[10.5px] tabular-nums text-muted-foreground" style="@($"top: {UsageView.Number(y - 7)}px")">@label</span>
+                        <span class="absolute left-0 w-[38px] text-right text-[10.5px] tabular-nums text-muted-foreground" style="@($"top: {UsageView.Number(y - 7)}px")"
+                              data-testid="usage-feeds-tick">@label</span>
                     }
                     @foreach (var (at, label) in XTicks)
                     {
@@ -224,7 +225,7 @@
         {
             var top = Ceiling;
             return _tab is FeedsTab.Calls
-                ? [.. Enumerable.Range(0, (int)top + 1).Select(decade => (Down(decade, top), UsageView.Count(Math.Pow(10, decade))))]
+                ? [.. Enumerable.Range(0, (int)top + 1).Select(decade => (Down(Math.Pow(10, decade), top), UsageView.Count(Math.Pow(10, decade))))]
                 : [.. Enumerable.Range(0, (int)(top / 20) + 1).Select(step => (Down(step * 20, top), $"{step * 20}%"))];
         }
     }

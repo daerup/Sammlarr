@@ -9,6 +9,7 @@ using Domain.Usage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
+using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Usage;
 using UI.Shared.Services.Branding;
 
@@ -123,6 +124,21 @@ public class UsageFeedsCardTests : BunitContext
 
 		await Assert.That(cut.FindAll("[data-testid=usage-feed-ring]")).Count().IsEqualTo(1);
 		await Assert.That(cut.Find("[data-testid=usage-feeds-legend]").TextContent).Contains("A ring: some titles could not be looked up");
+	}
+
+	[Test]
+	public async Task Render_TheCallsScale_SpreadsEachPowerOfTenFromTheBottomToTheTop()
+	{
+		var cut = Render<Harness>();
+
+		var ticks = cut.FindAll("[data-testid=usage-feeds-tick]").Select(tick => (tick.TextContent, tick.GetAttribute("style"))).ToList();
+
+		await Assert
+			.That(ticks)
+			.IsEquivalentTo(
+				[("1", "top: 163px"), ("10", "top: 122.5px"), ("100", "top: 82px"), ("1,000", "top: 41.5px"), ("10,000", "top: 1px")],
+				CollectionOrdering.Matching
+			);
 	}
 
 	[Test]
