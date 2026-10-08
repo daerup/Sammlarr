@@ -18,6 +18,15 @@ public class UsageViewTests
 	}
 
 	[Test]
+	[Arguments(1L, "1 call")]
+	[Arguments(0L, "0 calls")]
+	[Arguments(8287L, "8,287 calls")]
+	public async Task Calls_ByCount_IsSingularForOne(long count, string text)
+	{
+		await Assert.That(UsageView.Calls(count)).IsEqualTo(text);
+	}
+
+	[Test]
 	public async Task RightNow_PausedWhileFailing_SaysPausedFirst()
 	{
 		var at = new DateTimeOffset(2026, 10, 7, 9, 30, 0, TimeSpan.Zero);

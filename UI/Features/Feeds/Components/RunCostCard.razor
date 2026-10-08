@@ -49,7 +49,7 @@
             }
             <div class="flex items-start gap-3 border-t pt-2 text-[12.5px]" data-testid="run-cost-unmatched">
                 <span class="flex w-[120px] shrink-0 items-center gap-2 font-medium">
-                    <LucideIcon Name="circle-help" Size="16"/>
+                    <LucideIcon Name="circle-question-mark" Size="16"/>
                     Unmatched
                 </span>
                 <span class="text-xs text-muted-foreground">@Unmatched</span>
@@ -83,7 +83,7 @@
             var limited = all.RateLimited == 0
                 ? string.Empty
                 : $" · {UsageView.Count(all.RateLimited)} rate-limited, {UsageView.Count(all.Of(UsageOutcome.AnsweredAfter429))} of them still answered";
-            return $"{UsageView.Count(all.Total)} calls to {Services.Count} {(Services.Count == 1 ? "service" : "services")} for {UsageView.Count(titles)} titles{perTitle} in {UsageView.Duration(Run.Duration.TotalMilliseconds)}{limited}";
+            return $"{UsageView.Calls(all.Total)} to {Services.Count} {(Services.Count == 1 ? "service" : "services")} for {UsageView.Count(titles)} titles{perTitle} in {UsageView.Duration(Run.Duration.TotalMilliseconds)}{limited}";
         }
     }
 

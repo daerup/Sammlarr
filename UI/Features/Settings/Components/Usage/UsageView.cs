@@ -25,6 +25,8 @@ internal static class UsageView
 
 	internal static string Count(double count) => Math.Round(count).ToString("N0", CultureInfo.InvariantCulture);
 
+	internal static string Calls(long count) => count == 1 ? "1 call" : $"{Count(count)} calls";
+
 	internal static string Share(long part, long total)
 	{
 		return total == 0 ? "0%" : FormattableString.Invariant($"{part * 100.0 / total:0.0}%");
@@ -103,7 +105,7 @@ internal static class UsageView
 			UsageCause.Browse => ("Browse", "trending-up"),
 			UsageCause.ShowingTitles => ("Showing titles", "image"),
 			UsageCause.KeyTest => ("Key and sign-in tests", "key-round"),
-			UsageCause.Other => ("Other", "circle-help"),
+			UsageCause.Other => ("Other", "circle-question-mark"),
 		};
 	}
 
