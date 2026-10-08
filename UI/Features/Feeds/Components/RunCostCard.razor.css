@@ -1,7 +1,0 @@
-.run-cost-row {
-    display: grid;
-    grid-template-columns: 120px minmax(0, 1fr) 60px 210px;
-    gap: 12px;
-    align-items: center;
-    padding: 7px 0;
-}

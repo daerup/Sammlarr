@@ -21,6 +21,8 @@ internal static class UsageView
 
 	internal const string Grey = "var(--muted-foreground)";
 
+	private const double Noticeable = 0.01;
+
 	internal const string Tip = "border bg-popover px-2.5 py-2 text-xs text-popover-foreground shadow-lg";
 
 	internal static readonly IReadOnlyList<OutcomeLook> Outcomes = [.. Enum.GetValues<UsageOutcome>().Select(Look)];
@@ -55,6 +57,18 @@ internal static class UsageView
 			(_, true) => "<0.1%",
 			_ => FormattableString.Invariant($"{part * 100.0 / total:0.0}%"),
 		};
+	}
+
+	internal static string Tone(long part, long total, string trouble)
+	{
+		var share = total == 0 ? 0 : (double)part / total;
+		var colour = (share > Noticeable, part) switch
+		{
+			(true, _) => trouble,
+			(false, 0) => "text-muted-foreground",
+			_ => string.Empty,
+		};
+		return $"text-right tabular-nums {colour}";
 	}
 
 	internal static string Duration(double milliseconds)

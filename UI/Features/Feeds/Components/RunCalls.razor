@@ -1,0 +1,81 @@
+@using Domain.Feed.Run
+@using UI.Features.Settings.Components.Usage
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<BbPopover>
+    <BbPopoverTrigger AsChild="false" class="cursor-pointer hover:text-foreground" data-testid="run-calls">@UsageView.Calls(All.Total)</BbPopoverTrigger>
+    <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-[640px] max-w-[calc(100vw-2rem)] overflow-hidden p-0"
+                      data-testid="run-calls-panel">
+        <div class="run-calls-band" data-testid="run-calls-figures">
+            @foreach (var (label, value) in Figures)
+            {
+                <div class="flex flex-col gap-px">
+                    <span class="text-[11px] text-muted-foreground">@label</span>
+                    <span class="text-[15px] font-semibold tabular-nums">@value</span>
+                </div>
+            }
+        </div>
+        <div class="px-4 pt-1 pb-1.5">
+            <div class="run-calls-row text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">
+                <span>Service</span>
+                <span>How they ended</span>
+                <span class="text-right">Calls</span>
+                <span class="text-right">Errors</span>
+                <UsageAnswerTimeHead/>
+                <span class="text-right">Limited</span>
+            </div>
+            @foreach (var (service, tally) in Services)
+            {
+                <div class="run-calls-row text-[12.5px]" data-testid="run-calls-service" data-service="@service">
+                    <span class="flex min-w-0 items-center gap-2 whitespace-nowrap font-medium">
+                        <BrandedLogo Brand="Branding.GetBrandingInfo(service)" Size="16" Decorative="true"/>
+                        @Branding.GetBrandingInfo(service).NickName
+                    </span>
+                    <span>
+                        <UsageOutcomeBar Tally="tally" Width="Math.Max(2, tally.Total * 100.0 / Busiest)">
+                            <Title>
+                                <BrandedLogo Brand="Branding.GetBrandingInfo(service)" Size="14" Decorative="true"/>
+                                @Branding.GetBrandingInfo(service).NickName
+                            </Title>
+                        </UsageOutcomeBar>
+                    </span>
+                    <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
+                    <span class="@UsageView.Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@UsageView.Share(tally.Errors, tally.Total)</span>
+                    <span>
+                        <UsageAnswerStrip Service="service" Tally="tally" Width="150"/>
+                    </span>
+                    <span class="@UsageView.Tone(tally.RateLimited, tally.Total, "text-[var(--usage-after-429)] font-medium")">@UsageView.Share(tally.RateLimited, tally.Total)</span>
+                </div>
+            }
+        </div>
+        @if (Typical is Some<RunTypical>(var typical))
+        {
+            var (text, icon) = RunCallsView.Versus(All.Total, typical.Calls);
+            <div class="run-calls-foot" data-testid="run-calls-typical">
+                <LucideIcon Name="@icon" Size="13" Class="mt-0.5 shrink-0"/>
+                <span><b class="font-medium text-foreground">@text</b> @RunCallsView.Basis(typical)</span>
+            </div>
+        }
+    </BbPopoverContent>
+</BbPopover>
+
+@code {
+    [Parameter] [EditorRequired] public required FeedRun Run { get; set; }
+
+    [Parameter] public Optional<RunTypical> Typical { get; set; } = new None();
+
+    private IReadOnlyList<(RemoteService Service, UsageTally Tally)> Services => RunCallsView.Services(Run);
+
+    private UsageTally All => UsageTally.Sum(Services.Select(line => line.Tally));
+
+    private long Busiest => Services.Select(line => line.Tally.Total).DefaultIfEmpty(1).Max();
+
+    private IReadOnlyList<(string Label, string Value)> Figures =>
+        [
+            ("Calls", UsageView.Count(All.Total)),
+            ("Per title", Run.Counts.Total == 0 ? "n/a" : FormattableString.Invariant($"{All.Total / (double)Run.Counts.Total:0.0}")),
+            ("Answered", UsageView.Share(All.Of(UsageOutcome.Answered), All.Total)),
+            ("Took", UsageView.Duration(Run.Duration.TotalMilliseconds)),
+        ];
+}

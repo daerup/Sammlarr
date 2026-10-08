@@ -163,7 +163,12 @@
                         {
                             <div class="runs-detail-head">
                                 <h3>@Heading(run)</h3>
-                                <div class="runs-detail-sub">@FeedRunView.Summary(run)</div>
+                                <div class="runs-detail-sub">
+                                    @FeedRunView.Summary(run)@if (run.Calls.Count > 0)
+                                    {
+                                        @(" · ")<RunCalls Run="run" Typical="_typical"/>
+                                    }
+                                </div>
                                 <div class="runs-detail-badges">
                                     <FeedStrategyChip Strategy="run.Strategy"/>
                                     @if (run.Failed)
@@ -183,8 +188,6 @@
                                     <RunProblem Headline="@problem" Reason="@run.SourceFailure" Failed="run.Failed"/>
                                 </div>
                             }
-
-                            <RunCostCard Run="run"/>
 
                             @if (_items.Count > 0)
                             {
@@ -251,6 +254,8 @@
 
     private const int PageSize = 25;
 
+    private const int TypicalReach = 10_000;
+
     private enum RunFilter
     {
         All,
@@ -263,6 +268,7 @@
     private FeedRunHistory _history = FeedRunHistory.None;
     private int _onWantlist;
     private IReadOnlyList<FeedRun> _runs = [];
+    private Optional<RunTypical> _typical = new None();
     private const string SelectedAnchor = "run-selected";
 
     private bool _revealSelected;
@@ -289,6 +295,7 @@
             .ApplyNone(() => _feed = null)
             .Apply(overview => (_feed, _history, _onWantlist) = (overview.Feed, overview.History, overview.OnWantlist))
             .Apply(_ => LoadRunsAsync(feedId))
+            .Apply(_ => LoadTypicalAsync(feedId))
             .Apply(_ => RevealLinkedRunAsync());
     }
 
@@ -311,6 +318,12 @@
 
         _revealSelected = false;
         await ScrollService.IntoViewAsync(SelectedAnchor);
+    }
+
+    private async Task LoadTypicalAsync(FeedId feedId)
+    {
+        var recent = await FeedService.GetRunsAsync(RunQuery.Take(TypicalReach) with { Feed = Some.Of(feedId), Since = Some.Of(DateTimeOffset.UtcNow.AddDays(-30)), WithItems = false });
+        _typical = RunCallsView.Typical(recent);
     }
 
     private async Task LoadRunsAsync(FeedId feedId)
