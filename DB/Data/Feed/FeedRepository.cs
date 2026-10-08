@@ -144,6 +144,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 
 		return await runs.Where(row => newest.Contains(row.Id) || linkedStart.Any(start => row.StartedAt >= start))
 			.OrderByDescending(row => row.StartedAt)
+			.AsSplitQuery()
 			.Select(query.WithItems ? projectRun : projectRunCounts)
 			.ToListAsync(cancellationToken);
 	}
@@ -172,7 +173,12 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		}
 
 		var latestStamps = totals.Select(total => total.LatestAt).ToList();
-		var candidates = await ctx.FeedRuns.AsNoTracking().Where(row => latestStamps.Contains(row.StartedAt)).Select(projectRun).ToListAsync(cancellationToken);
+		var candidates = await ctx
+			.FeedRuns.AsNoTracking()
+			.Where(row => latestStamps.Contains(row.StartedAt))
+			.AsSplitQuery()
+			.Select(projectRun)
+			.ToListAsync(cancellationToken);
 
 		var latest = candidates.GroupBy(run => run.FeedId).ToDictionary(group => group.Key, group => group.OrderByDescending(run => run.StartedAt).First());
 
@@ -214,7 +220,12 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		var row = await ctx.FeedRuns.Include(r => r.Items).Include(r => r.Calls).Include(r => r.Times).FirstAsync(r => r.Id == run.Id.Value, cancellationToken);
+		var row = await ctx
+			.FeedRuns.Include(r => r.Items)
+			.Include(r => r.Calls)
+			.Include(r => r.Times)
+			.AsSplitQuery()
+			.FirstAsync(r => r.Id == run.Id.Value, cancellationToken);
 		row.Items.Clear();
 		row.Calls.Clear();
 		row.Times.Clear();
