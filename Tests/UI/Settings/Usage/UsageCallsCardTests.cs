@@ -63,7 +63,19 @@ public class UsageCallsCardTests : BunitContext
 		await Row(cut, "TMDb").ClickAsync();
 
 		await Assert.That(cut.Find("[data-testid=usage-calls]").TextContent).Contains("TMDb: every attempt by how long it took");
-		await Assert.That(cut.Find("[data-testid=usage-latency-marks]").TextContent).Contains("median").And.Contains("p95");
+		await Assert.That(Marks(cut).Select(mark => mark.TextContent.Trim())).IsEquivalentTo(["median 88 ms", "p95 262 ms"]);
+	}
+
+	[Test]
+	public async Task Tab_AnswerTime_DrawsTheMedianAndP95AsLinesWhereTheyFallInTheirSquares()
+	{
+		var cut = RenderCard(UsageSamples.Snapshot().Current);
+
+		await cut.FindAll("button").First(button => button.TextContent.Trim() == "Answer time").ClickAsync();
+
+		var marks = Marks(cut);
+		await Assert.That(marks.Select(mark => mark.TextContent.Trim())).IsEquivalentTo(["median 88 ms", "p95 100 ms"]);
+		await Assert.That(marks[0].GetAttribute("style")).Contains("left: calc(48px + (100% - 52px) * 0.3679)");
 	}
 
 	[Test]
@@ -118,6 +130,8 @@ public class UsageCallsCardTests : BunitContext
 	{
 		return cut.FindAll("[data-testid=usage-service]").Single(row => row.TextContent.Contains(name));
 	}
+
+	private static IReadOnlyList<AngleSharp.Dom.IElement> Marks(IRenderedComponent<UsageCallsCard> cut) => cut.FindAll("[data-testid=usage-latency-mark]");
 
 	private static long Answered(IRenderedComponent<UsageCallsCard> cut)
 	{
