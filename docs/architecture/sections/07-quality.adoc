@@ -25,6 +25,9 @@ canonical identity, its extra ids unioned in; the repository reuses the existing
 only new ids, so each title stays one library row across flushes. MediaType is part of id
 equality, so a movie and a show that share a number never merge, and a candidate that would bridge
 two already-stored, distinct rows throws `MediaIdentityConflictException` rather than merging them.
+At flush time a stored title that gained such an id (say from an enricher) keeps its own row and the
+id is dropped from both rows
+(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0015-keep-an-id-two-stored-titles-claim-on-neither.md[ADR 0015]).
 _Measure:_ the coordinator, repository and `MediaIdentity` feature tests pass. _Limit:_ one shared
 id is enough to merge, with no multi-id agreement check, so within a single flush two same-type
 titles a provider tags with the same or conflicting id coalesce silently; only collisions against
