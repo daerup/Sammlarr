@@ -1,0 +1,45 @@
+@using Domain.Usage
+
+<BbTooltip DelayDuration="150" Placement="PopoverPlacement.BottomStart">
+    <BbTooltipTrigger Focusable="false">
+        <span class="flex h-2.5 gap-0.5" style="@FormattableString.Invariant($"width: {Math.Max(1, Width)}%")" data-testid="usage-outcome-bar"
+              @onmouseleave="() => _at = new None()">
+            @foreach (var look in Present)
+            {
+                <span class="min-w-0.5 rounded-[2px]" style="@($"flex: {Tally.Of(look.Outcome)}; background: {look.Color}")"
+                      data-outcome="@look.Outcome" @onmouseenter="() => _at = Some.Of(look.Outcome)"></span>
+            }
+        </span>
+    </BbTooltipTrigger>
+    <BbTooltipContent Class="@UsageView.Tip" data-testid="usage-outcome-tip">
+        <div class="mb-1 flex items-center gap-2 font-semibold">
+            @Title
+            <span class="font-normal text-muted-foreground">· @UsageView.Calls(Tally.Total)</span>
+        </div>
+        @foreach (var look in Present)
+        {
+            <div class="@($"grid grid-cols-[10px_14px_186px_50px_46px] items-center gap-[7px] leading-[1.7] {(IsAt(look.Outcome) ? "font-semibold" : string.Empty)}")"
+                 data-testid="usage-outcome-tip-row" data-at="@(IsAt(look.Outcome) ? "true" : "false")">
+                <span class="size-2.5 rounded-[3px]" style="@($"background: {look.Color}")"></span>
+                <LucideIcon Name="@look.Icon" Size="12"/>
+                <span class="whitespace-nowrap">@look.Name</span>
+                <span class="text-right tabular-nums">@UsageView.Count(Tally.Of(look.Outcome))</span>
+                <span class="text-right tabular-nums text-muted-foreground">@UsageView.Share(Tally.Of(look.Outcome), Tally.Total)</span>
+            </div>
+        }
+    </BbTooltipContent>
+</BbTooltip>
+
+@code {
+    [Parameter] [EditorRequired] public required UsageTally Tally { get; set; }
+
+    [Parameter] [EditorRequired] public required double Width { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment Title { get; set; }
+
+    private Optional<UsageOutcome> _at = new None();
+
+    private IEnumerable<OutcomeLook> Present => UsageView.Outcomes.Where(look => Tally.Of(look.Outcome) > 0);
+
+    private bool IsAt(UsageOutcome outcome) => _at.Match(at => at == outcome, () => false);
+}
