@@ -35,17 +35,22 @@
         }
         else
         {
-            <div class="flex gap-4 text-xs font-semibold" style="color: @UsageView.Accent" data-testid="usage-latency-marks">
-                <span>median @Answers.Percentile(0.5).Map(median => UsageView.Duration(median)).GetValueOr("n/a")</span>
-                <span>p95 @Answers.Percentile(0.95).Map(p95 => UsageView.Duration(p95)).GetValueOr("n/a")</span>
+            <div class="relative">
+                <BbBarChart Data="Durations" Height="190px">
+                    <BbGrid Left="@($"{PlotLeft}")" Right="@($"{PlotRight}")" Top="@($"{PlotTop}")" Bottom="@($"{PlotBottom}")" ContainLabel="false"/>
+                    <BbXAxis DataKey="Bucket"/>
+                    <BbYAxis/>
+                    <BbChartTooltip AppendToBody="true"/>
+                    <BbBar DataKey="Calls" Name="Attempts" Color="var(--usage-shade)" BorderRadius="3"/>
+                </BbBarChart>
+                @foreach (var mark in Marks)
+                {
+                    <div class="pointer-events-none absolute border-l-[1.6px] border-dashed" data-testid="usage-latency-mark"
+                         style="@($"left: {mark.Left}; top: {PlotTop}px; bottom: {PlotBottom}px; border-color: {mark.Colour}")">
+                        <span class="absolute left-1.5 whitespace-nowrap text-[11px] font-semibold" style="@($"top: {mark.Row * 14}px; color: {mark.Colour}")">@mark.Label</span>
+                    </div>
+                }
             </div>
-            <BbBarChart Data="Durations" Height="170px">
-                <BbGrid Left="4" Right="4" Top="10" Bottom="0"/>
-                <BbXAxis DataKey="Bucket"/>
-                <BbYAxis/>
-                <BbChartTooltip AppendToBody="true"/>
-                <BbBar DataKey="Calls" Name="Attempts" FillKey="Fill" BorderRadius="3"/>
-            </BbBarChart>
         }
         <div class="mt-1.5">
             <div class="usage-service pl-3 pr-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -111,6 +116,14 @@
 @code {
     private const double Noticeable = 0.01;
 
+    private const int PlotLeft = 48;
+
+    private const int PlotRight = 4;
+
+    private const int PlotTop = 10;
+
+    private const int PlotBottom = 24;
+
     private static readonly IReadOnlyList<(CallsTab Value, string Label)> Tabs = [(CallsTab.Calls, "Calls"), (CallsTab.AnswerTime, "Answer time")];
 
     [Parameter] [EditorRequired] public required UsagePeriod Period { get; set; }
@@ -148,22 +161,15 @@
             .Map(line => line.Tally)
             .GetValueOr(() => UsageTally.Sum(Period.Services.Where(line => !DatasetNames.ByService.ContainsKey(line.Service)).Select(line => line.Tally)));
 
-    private IReadOnlyList<DurationColumn> Durations
-    {
-        get
-        {
-            var answers = Answers;
-            var marked = new[] { 0.5, 0.95 }.Select(q => answers.BucketOf(q)).WhereSome().ToHashSet();
-            return
-            [
-                .. DurationBuckets.UpToMs.Select(upTo => new DurationColumn(
-                    UsageView.Bucket(upTo),
-                    answers.Durations.GetValueOrDefault(upTo),
-                    marked.Contains(upTo) ? UsageView.Accent : UsageView.Grey
-                )),
-            ];
-        }
-    }
+    private IReadOnlyList<DurationColumn> Durations =>
+        [.. DurationBuckets.UpToMs.Select(upTo => new DurationColumn(UsageView.Bucket(upTo), Answers.Durations.GetValueOrDefault(upTo)))];
+
+    private IReadOnlyList<Mark> Marks =>
+        [
+            .. new[] { (Q: 0.5, Name: "median", Colour: "var(--foreground)"), (Q: 0.95, Name: "p95", Colour: UsageView.Accent) }
+                .Select((mark, row) => Answers.Percentile(mark.Q).Map(at => new Mark(Left(at), $"{mark.Name} {UsageView.Duration(at)}", mark.Colour, row)))
+                .WhereSome(),
+        ];
 
     private long Busiest => Period.Services.Select(line => line.Tally.Total).DefaultIfEmpty(1).Max();
 
@@ -174,6 +180,11 @@
     private void Pick(RemoteService service) => _picked = Optional.When(!IsPicked(service), () => service);
 
     private string Name(RemoteService service) => Branding.GetBrandingInfo(service).NickName;
+
+    private static string Left(double milliseconds)
+    {
+        return FormattableString.Invariant($"calc({PlotLeft}px + (100% - {PlotLeft + PlotRight}px) * {UsageView.StripAt(milliseconds):0.####})");
+    }
 
     private static string Tone(long part, long total, string trouble)
     {
@@ -205,5 +216,7 @@
 
     private sealed record Column(string At, long Answered, long AnsweredAfter429, long GaveUpOn429, long Failed, long Cancelled);
 
-    private sealed record DurationColumn(string Bucket, long Calls, string Fill);
+    private sealed record DurationColumn(string Bucket, long Calls);
+
+    private sealed record Mark(string Left, string Label, string Colour, int Row);
 }
