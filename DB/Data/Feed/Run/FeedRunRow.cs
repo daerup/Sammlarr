@@ -31,4 +31,6 @@ internal record FeedRunRow : Entity<Guid>, IUserOwned
 	public List<FeedRunItemRow> Items { get; set; } = [];
 
 	public List<FeedRunCallsRow> Calls { get; set; } = [];
+
+	public List<FeedRunTimesRow> Times { get; set; } = [];
 }

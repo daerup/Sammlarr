@@ -31,6 +31,7 @@ internal static class FeedRunProjection
 		Items = row.Items.Select(item => new FeedRunItem { MediaId = MediaId.From(item.MediaId), State = item.State }).ToList(),
 		SourceFailure = Optional.Of(row.SourceFailure),
 		Calls = row.Calls.Select(call => new FeedRunCalls(call.Service, call.Outcome, call.Calls)).ToList(),
+		Times = row.Times.Select(time => new FeedRunTimes(time.Service, time.UpToMs, time.Attempts)).ToList(),
 	};
 
 	public static readonly Expression<Func<FeedRunRow, FeedRun>> ProjectWithoutItems = row => new FeedRun
@@ -57,6 +58,7 @@ internal static class FeedRunProjection
 		Items = new List<FeedRunItem>(),
 		SourceFailure = Optional.Of(row.SourceFailure),
 		Calls = row.Calls.Select(call => new FeedRunCalls(call.Service, call.Outcome, call.Calls)).ToList(),
+		Times = row.Times.Select(time => new FeedRunTimes(time.Service, time.UpToMs, time.Attempts)).ToList(),
 	};
 
 	private static readonly Func<FeedRunRow, FeedRun> map = Project.Compile();

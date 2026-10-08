@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net.Http.Metrics;
 using Contracts.Usage;
 using Domain.Providers;
@@ -43,12 +44,22 @@ internal sealed class UsageStampHandler(RemoteService service) : DelegatingHandl
 	}
 }
 
-internal sealed class UsageTagsHandler : DelegatingHandler
+internal sealed class UsageTagsHandler(IFeedRunUsage feedRuns) : DelegatingHandler
 {
-	protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+	protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 	{
-		UsageStamp.Of(request).Apply(stamp => HttpMetricsEnrichmentContext.AddCallback(request, context => Tag(context, stamp)));
-		return base.SendAsync(request, cancellationToken);
+		var stamp = UsageStamp.Of(request);
+		stamp.Apply(found => HttpMetricsEnrichmentContext.AddCallback(request, context => Tag(context, found)));
+		var started = Stopwatch.GetTimestamp();
+		try
+		{
+			return await base.SendAsync(request, cancellationToken);
+		}
+		finally
+		{
+			var took = Stopwatch.GetElapsedTime(started);
+			stamp.Apply(found => found.Mark.Feed.Apply(feed => feedRuns.Time(feed, found.Service, DurationBuckets.Of(took.TotalMilliseconds))));
+		}
 	}
 
 	private static void Tag(HttpMetricsEnrichmentContext context, UsageStamp stamp)

@@ -9,18 +9,38 @@ namespace Core.Usage;
 
 internal sealed class FeedRunUsage : IFeedRunUsage
 {
-	private readonly ConcurrentDictionary<FeedId, ConcurrentDictionary<(RemoteService Service, UsageOutcome Outcome), long>> _running = new();
+	private readonly ConcurrentDictionary<FeedId, Running> _running = new();
 
-	public void Start(FeedId feed) => _running[feed] = new();
+	public void Start(FeedId feed) => _running[feed] = new Running();
 
 	public void Credit(FeedId feed, RemoteService service, UsageOutcome outcome, long calls)
 	{
-		_running.GetValueOrNone(feed).Apply(counts => counts.AddOrUpdate((service, outcome), calls, (_, seen) => seen + calls));
+		_running.GetValueOrNone(feed).Apply(running => running.Calls.AddOrUpdate((service, outcome), calls, (_, seen) => seen + calls));
 	}
 
-	public IReadOnlyList<FeedRunCalls> End(FeedId feed)
+	public void Time(FeedId feed, RemoteService service, int upToMs)
 	{
-		_running.TryRemove(feed, out var counts);
-		return [.. Optional.Of(counts).Map(found => found.Select(pair => new FeedRunCalls(pair.Key.Service, pair.Key.Outcome, pair.Value))).GetValueOr([])];
+		_running.GetValueOrNone(feed).Apply(running => running.Times.AddOrUpdate((service, upToMs), 1, (_, seen) => seen + 1));
+	}
+
+	public FeedRunCost End(FeedId feed)
+	{
+		_running.TryRemove(feed, out var running);
+		return Optional.Of(running).Map(found => found.Cost()).GetValueOr(FeedRunCost.None);
+	}
+
+	private sealed class Running
+	{
+		internal ConcurrentDictionary<(RemoteService Service, UsageOutcome Outcome), long> Calls { get; } = new();
+
+		internal ConcurrentDictionary<(RemoteService Service, int UpToMs), long> Times { get; } = new();
+
+		internal FeedRunCost Cost()
+		{
+			return new FeedRunCost(
+				[.. Calls.Select(pair => new FeedRunCalls(pair.Key.Service, pair.Key.Outcome, pair.Value))],
+				[.. Times.Select(pair => new FeedRunTimes(pair.Key.Service, pair.Key.UpToMs, pair.Value))]
+			);
+		}
 	}
 }

@@ -51,7 +51,7 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 					"SinkKind: Plex, Arr",
 					"TickerStatus: Idle, Queued, InProgress, Done, DueDone, Failed, Cancelled, Skipped",
 					"TrendingProvider: Tmdb",
-					"UsageCause: FeedRun, WantlistSync, Dataset, Search, Browse, ShowingTitles, KeyTest, Other",
+					"UsageCause: FeedRun, WantlistSync, Dataset, Search, Browse, ShowingTitles, KeyTest, FeedEditor, Other",
 					"UsageOutcome: Answered, AnsweredAfter429, GaveUpOn429, Failed, Cancelled",
 					"UserRole: Admin, Member",
 					"WantlistItemOrigin: Sink, Manual, Feed, Orphaned",

@@ -5,11 +5,18 @@ using Domain.Usage;
 
 namespace Contracts.Usage;
 
+public sealed record FeedRunCost(IReadOnlyList<FeedRunCalls> Calls, IReadOnlyList<FeedRunTimes> Times)
+{
+	public static readonly FeedRunCost None = new([], []);
+}
+
 public interface IFeedRunUsage
 {
 	void Start(FeedId feed);
 
 	void Credit(FeedId feed, RemoteService service, UsageOutcome outcome, long calls);
 
-	IReadOnlyList<FeedRunCalls> End(FeedId feed);
+	void Time(FeedId feed, RemoteService service, int upToMs);
+
+	FeedRunCost End(FeedId feed);
 }

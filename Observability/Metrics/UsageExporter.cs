@@ -87,15 +87,13 @@ internal sealed class UsageExporter(IServiceScopeFactory scopes, IUsageLastCalls
 		{
 			if (bucket.BucketCount > 0)
 			{
-				var key = Bucket(bucket.ExplicitBound * 1000);
+				var key = DurationBuckets.Of(bucket.ExplicitBound * 1000);
 				buckets[key] = buckets.GetValueOrDefault(key) + bucket.BucketCount;
 			}
 		}
 
 		return buckets;
 	}
-
-	private static int Bucket(double milliseconds) => DurationBuckets.UpToMs.FirstOrNone(upTo => upTo >= milliseconds).GetValueOr(DurationBuckets.Over);
 
 	private static Optional<TEnum> Parsed<TEnum>(Dictionary<string, string> tags, string key)
 		where TEnum : struct, Enum

@@ -6,6 +6,7 @@ using API.Notifications.Webhook;
 using Contracts;
 using Contracts.Identity;
 using Contracts.Providers;
+using Contracts.Usage;
 using Domain.Identity;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
@@ -213,6 +214,7 @@ public class RemoteHttpExtensionsTests
 				services.AddSingleton<RemoteCapacity>();
 				services.AddSingleton(IDateTimeProvider.Mock().Object);
 				services.AddSingleton(reporter);
+				services.AddSingleton(IFeedRunUsage.Mock().Object);
 				services.AddHttpClient("plex").AddRemoteHttp<PlexOptions>(RemoteService.Plex).ConfigurePrimaryHttpMessageHandler(() => handler);
 			})
 			.Build();

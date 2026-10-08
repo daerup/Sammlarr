@@ -23,8 +23,23 @@ public class FeedRunUsageTests
 		testee.Credit(Second, RemoteService.Plex, UsageOutcome.AnsweredAfter429, 3);
 		testee.Credit(First, RemoteService.Tmdb, UsageOutcome.Answered, 2);
 
-		await Assert.That(testee.End(First)).IsEquivalentTo([new FeedRunCalls(RemoteService.Tmdb, UsageOutcome.Answered, 42)]);
-		await Assert.That(testee.End(Second)).IsEquivalentTo([new FeedRunCalls(RemoteService.Plex, UsageOutcome.AnsweredAfter429, 3)]);
+		await Assert.That(testee.End(First).Calls).IsEquivalentTo([new FeedRunCalls(RemoteService.Tmdb, UsageOutcome.Answered, 42)]);
+		await Assert.That(testee.End(Second).Calls).IsEquivalentTo([new FeedRunCalls(RemoteService.Plex, UsageOutcome.AnsweredAfter429, 3)]);
+	}
+
+	[Test]
+	public async Task End_AfterTimedAttempts_CountsEachServicesAttemptsPerRange()
+	{
+		var testee = new FeedRunUsage();
+		testee.Start(First);
+		testee.Start(Second);
+
+		testee.Time(First, RemoteService.Tmdb, 100);
+		testee.Time(First, RemoteService.Tmdb, 100);
+		testee.Time(First, RemoteService.Plex, 500);
+		testee.Time(Second, RemoteService.Tmdb, 100);
+
+		await Assert.That(testee.End(First).Times).IsEquivalentTo([new FeedRunTimes(RemoteService.Tmdb, 100, 2), new FeedRunTimes(RemoteService.Plex, 500, 1)]);
 	}
 
 	[Test]
@@ -33,9 +48,12 @@ public class FeedRunUsageTests
 		var testee = new FeedRunUsage();
 
 		testee.Credit(First, RemoteService.Tmdb, UsageOutcome.Answered, 5);
+		testee.Time(First, RemoteService.Tmdb, 100);
 		testee.Start(First);
 
-		await Assert.That(testee.End(First)).IsEmpty();
-		await Assert.That(testee.End(First)).IsEmpty();
+		var cost = testee.End(First);
+		await Assert.That(cost.Calls).IsEmpty();
+		await Assert.That(cost.Times).IsEmpty();
+		await Assert.That(testee.End(First).Calls).IsEmpty();
 	}
 }
