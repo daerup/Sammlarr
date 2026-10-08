@@ -24,11 +24,39 @@ internal static class FeedRunProjection
 			Bypassed = row.Bypassed,
 			Filtered = row.Filtered,
 			Skipped = row.Skipped,
-			Unmatched = row.Unmatched,
+			UnmatchedNotFound = row.UnmatchedNotFound,
+			UnmatchedCouldNotLookUp = row.UnmatchedCouldNotLookUp,
 			Removed = row.Removed,
 		},
 		Items = row.Items.Select(item => new FeedRunItem { MediaId = MediaId.From(item.MediaId), State = item.State }).ToList(),
 		SourceFailure = Optional.Of(row.SourceFailure),
+		Calls = row.Calls.Select(call => new FeedRunCalls(call.Service, call.Outcome, call.Calls)).ToList(),
+	};
+
+	public static readonly Expression<Func<FeedRunRow, FeedRun>> ProjectWithoutItems = row => new FeedRun
+	{
+		Id = RunId.From(row.Id),
+		FeedId = FeedId.From(row.FeedId),
+		StartedAt = row.StartedAt,
+		Duration = TimeSpan.FromMilliseconds(row.DurationMs),
+		Strategy = row.Strategy,
+		Trigger = row.Trigger,
+		Conclusiveness = row.Conclusiveness,
+		Counts = new FeedRunCounts
+		{
+			Total = row.Total,
+			Added = row.Added,
+			Kept = row.Kept,
+			Bypassed = row.Bypassed,
+			Filtered = row.Filtered,
+			Skipped = row.Skipped,
+			UnmatchedNotFound = row.UnmatchedNotFound,
+			UnmatchedCouldNotLookUp = row.UnmatchedCouldNotLookUp,
+			Removed = row.Removed,
+		},
+		Items = new List<FeedRunItem>(),
+		SourceFailure = Optional.Of(row.SourceFailure),
+		Calls = row.Calls.Select(call => new FeedRunCalls(call.Service, call.Outcome, call.Calls)).ToList(),
 	};
 
 	private static readonly Func<FeedRunRow, FeedRun> map = Project.Compile();

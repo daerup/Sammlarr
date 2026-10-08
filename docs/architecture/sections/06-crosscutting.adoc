@@ -403,5 +403,7 @@ A call the open circuit refuses is not counted. The cause (`FeedRun` with the fe
 entry point; the outermost mark wins, so titles shown inside a feed run count for the run. A
 `PeriodicExportingMetricReader` hands `UsageExporter` each minute's deltas, which it folds into hourly rows
 (`RemoteUsage`, `RemoteAttempts` with their duration buckets) kept 90 days; with OTLP set, the same meters also go to
-the dashboard. The cost rules: tags stay bounded (service, cause, outcome, feed id; never a title, a URL, a user or a
+the dashboard. A feed run's calls are credited to the run through its feed id (a feed never runs twice at once, and a
+run id would be an unbounded tag): the enricher that classifies a call also credits it to the feed's running run in
+`IFeedRunUsage`, and the run is saved with its calls (`FeedRunCalls`). The cost rules: tags stay bounded (service, cause, outcome, feed id; never a title, a URL, a user or a
 run id), delta temporality, the default buckets.

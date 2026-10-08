@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261006230147_ProviderUsage";
+    public override string LastMigrationId => "20261006235744_FeedRunUsage";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -308,6 +308,45 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.ToTable("Feeds");
             });
 
+        modelBuilder.Entity("DB.Data.Feed.Run.FeedRunCallsRow", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("Calls")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long>("CreatedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid>("FeedRunId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Outcome")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Service")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("UpdatedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("UserId");
+
+                b.HasIndex("FeedRunId", "Service", "Outcome")
+                    .IsUnique();
+
+                b.ToTable("FeedRunCalls");
+            });
+
         modelBuilder.Entity("DB.Data.Feed.Run.FeedRunItemRow", b =>
             {
                 b.Property<Guid>("Id")
@@ -397,7 +436,10 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("TEXT");
 
-                b.Property<int>("Unmatched")
+                b.Property<int>("UnmatchedCouldNotLookUp")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int>("UnmatchedNotFound")
                     .HasColumnType("INTEGER");
 
                 b.Property<long>("UpdatedAt")
@@ -1407,6 +1449,21 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired();
             });
 
+        modelBuilder.Entity("DB.Data.Feed.Run.FeedRunCallsRow", b =>
+            {
+                b.HasOne("DB.Data.Feed.Run.FeedRunRow", null)
+                    .WithMany("Calls")
+                    .HasForeignKey("FeedRunId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
         modelBuilder.Entity("DB.Data.Feed.Run.FeedRunItemRow", b =>
             {
                 b.HasOne("DB.Data.Feed.Run.FeedRunRow", null)
@@ -1626,6 +1683,8 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("DB.Data.Feed.Run.FeedRunRow", b =>
             {
+                b.Navigation("Calls");
+
                 b.Navigation("Items");
             });
 

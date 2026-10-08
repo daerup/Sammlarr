@@ -69,10 +69,12 @@ internal sealed class MediaIdResolver(
 			transient |= outcome.Transient;
 		}
 
-		if (!transient)
+		if (transient)
 		{
-			unmatchedCache.Set(key, true, unmatchedTtl);
+			return Error.From(new LookupNotRunException(target));
 		}
+
+		unmatchedCache.Set(key, true, unmatchedTtl);
 		return unresolved;
 	}
 

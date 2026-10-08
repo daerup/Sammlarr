@@ -9,6 +9,7 @@ internal sealed class UsageModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddSingleton<IUsageLastCalls, UsageLastCalls>();
+		services.AddSingleton<IFeedRunUsage, FeedRunUsage>();
 		services.AddScoped<IUsageReport, UsageReport>();
 	}
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using Contracts.Blocklist;
 using Contracts.Feed;
 using Contracts.Ratings;
@@ -14,6 +15,7 @@ using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using Observability.Usage;
 using TestInfrastructure;
 using static Harness.Ids;
 
@@ -39,6 +41,31 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var completed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
 		await Assert.That(completed!.Delta.Drops).IsEmpty();
 		await Assert.That(await WantlistIdsAsync()).Contains(stale);
+	}
+
+	[Test]
+	public async Task RunAsync_WhileItsCallsAreMeasured_SavesTheRunWithTheCallsItMade()
+	{
+		using var listener = new MeterListener();
+		listener.InstrumentPublished = (instrument, meters) =>
+		{
+			if (instrument.Name == "resilience.polly.pipeline.duration")
+			{
+				meters.EnableMeasurementEvents(instrument);
+			}
+		};
+		listener.Start();
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("measured-list", new Append());
+		host.MdblistFeedContains("measured-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+
+		using (UsageCauses.Mark(feedId))
+		{
+			await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+		}
+
+		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(RunQuery.Take(1) with { Feed = Some.Of(feedId) })).Single();
+		await Assert.That(recorded.Calls.Where(call => call.Service == RemoteService.Mdblist).Sum(call => call.Calls)).IsGreaterThan(0);
 	}
 
 	[Test]
