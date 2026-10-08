@@ -34,11 +34,14 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 		var clientId = await apiKeys
 			.GetAsync(ApiKeyProvider.Trakt, cancellationToken)
 			.GetOrThrow(_ => new InvalidOperationException("No Trakt client ID is configured. Add one in Settings."));
-		var chart = TraktPages.ChartType(identifier);
-		var entries = EntriesAsync(identifier, clientId, cancellationToken);
-		await foreach (var entry in (TraktPages.IsChart(identifier) ? entries.Take(FeedPages.Titles) : entries).WithCancellation(cancellationToken))
+		foreach (var read in TraktPages.Reads(identifier))
 		{
-			yield return Request(entry, chart);
+			var chart = TraktPages.ChartType(read);
+			var entries = EntriesAsync(read, clientId, cancellationToken);
+			await foreach (var entry in (TraktPages.IsChart(read) ? entries.Take(FeedPages.Titles) : entries).WithCancellation(cancellationToken))
+			{
+				yield return Request(entry, chart);
+			}
 		}
 	}
 

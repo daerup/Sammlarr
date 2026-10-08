@@ -27,6 +27,7 @@ public class TraktFeedServiceTests
 	[Arguments("https://trakt.tv/lists/2142753", "lists/2142753")]
 	[Arguments("https://trakt.tv/movies/trending", "movies/trending")]
 	[Arguments("https://app.trakt.tv/discover/popular?mode=show", "shows/popular")]
+	[Arguments("https://app.trakt.tv/discover/trending", "discover/trending")]
 	[Arguments("https://trakt.tv/shows/anticipated", "shows/anticipated")]
 	public async Task NormalizeAsync_ForEveryForm_StoresThePathOnTrakt(string input, string stored)
 	{
@@ -37,7 +38,6 @@ public class TraktFeedServiceTests
 	[Arguments("https://trakt.tv/movies/boxoffice")]
 	[Arguments("https://trakt.tv/movies/watched/weekly")]
 	[Arguments("https://trakt.tv/people/keanu-reeves")]
-	[Arguments("https://app.trakt.tv/discover/trending")]
 	[Arguments("https://anilist.co/user/ana")]
 	public async Task NormalizeAsync_ForAPageItCannotFollow_IsAnError(string input)
 	{
@@ -102,6 +102,22 @@ public class TraktFeedServiceTests
 		await Assert.That(_asked).Count().IsEqualTo(500);
 		await Assert.That(_asked[0].Candidates.Single()).IsEqualTo<IExternalMediaId>(TraktId.From("1", MediaType.Show));
 		await Assert.That(calls).IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForADiscoverChartWithoutAMode_ReadsTheMovieAndTheShowChart()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnRequest(request => request.PathMatches(@"^/movies/popular\?page=1&limit=250$"))
+			.RespondWith(_ => Page("""[{"title":"Dune","year":2021,"ids":{"trakt":287071}}]""", pages: 1));
+		handler
+			.OnRequest(request => request.PathMatches(@"^/shows/popular\?page=1&limit=250$"))
+			.RespondWith(_ => Page("""[{"title":"Severance","year":2022,"ids":{"trakt":154997}}]""", pages: 1));
+
+		await Testee(handler).GetFeedItemsAsync("discover/popular").ToListAsync();
+
+		await Assert.That(_asked.Select(request => string.Join(" ", request.Candidates))).IsEquivalentTo(["Trakt:Movie:287071", "Trakt:Show:154997"]);
 	}
 
 	[Test]
