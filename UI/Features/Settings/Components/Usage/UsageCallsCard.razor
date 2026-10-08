@@ -1,7 +1,9 @@
+@using Contracts
 @using Contracts.Datasets
 @using Contracts.Usage
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
+@inject IDateTimeProvider Clock
 
 <UsageCard Title="@(_tab is CallsTab.Calls ? "Calls" : "Answer time")" Subtitle="@Subtitle" TestId="usage-calls">
     <Right>
@@ -33,20 +35,6 @@
         }
         else
         {
-            <div class="flex flex-wrap gap-1.5" data-testid="usage-latency-services">
-                <BbButton Variant="@(AllPicked ? ButtonVariant.Secondary : ButtonVariant.Outline)" Size="ButtonSize.Small"
-                          Class="h-7 text-[12.5px]" OnClick="() => _service = new None()">
-                    All but datasets
-                </BbButton>
-                @foreach (var line in Timed)
-                {
-                    <BbButton Variant="@(Picked(line.Service) ? ButtonVariant.Secondary : ButtonVariant.Outline)" Size="ButtonSize.Small"
-                              Class="h-7 gap-1.5 text-[12.5px]" OnClick="() => _service = Some.Of(line.Service)">
-                        <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="14" Decorative="true"/>
-                        @Branding.GetBrandingInfo(line.Service).NickName
-                    </BbButton>
-                }
-            </div>
             <div class="flex gap-4 text-xs font-semibold" style="color: @UsageView.Accent" data-testid="usage-latency-marks">
                 <span>median @Answers.Percentile(0.5).Map(median => UsageView.Duration(median)).GetValueOr("n/a")</span>
                 <span>p95 @Answers.Percentile(0.95).Map(p95 => UsageView.Duration(p95)).GetValueOr("n/a")</span>
@@ -59,47 +47,103 @@
                 <BbBar DataKey="Calls" Name="Attempts" FillKey="Fill" BorderRadius="3"/>
             </BbBarChart>
         }
+        <div class="mt-1.5">
+            <div class="usage-service pl-3 pr-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                <span>Service</span>
+                <span>How they ended</span>
+                <span class="text-right">Calls</span>
+                <span class="text-right">Errors</span>
+                <span class="text-right">p95</span>
+                <span class="text-right">Limited</span>
+                <span>Right now</span>
+            </div>
+            @foreach (var line in Period.Services)
+            {
+                var tally = line.Tally;
+                var now = UsageView.RightNow(line.RightNow, Clock.Now);
+                var picked = IsPicked(line.Service);
+                <div class="@($"usage-service cursor-pointer rounded-md pl-3 pr-1 text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-service-picked" : string.Empty)}")"
+                     data-testid="usage-service" data-service="@line.Service" data-picked="@(picked ? "true" : "false")" @onclick="() => Pick(line.Service)">
+                    <span class="flex min-w-0 items-center gap-2 whitespace-nowrap font-medium">
+                        <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="18" Decorative="true"/>
+                        @Branding.GetBrandingInfo(line.Service).NickName
+                    </span>
+                    <span class="flex h-2.5 gap-0.5" style="@FormattableString.Invariant($"width: {Math.Max(1, tally.Total * 100.0 / Busiest)}%")">
+                        @foreach (var look in UsageView.Outcomes.Where(look => tally.Of(look.Outcome) > 0))
+                        {
+                            <span class="min-w-0.5 rounded-[2px]" style="@($"flex: {tally.Of(look.Outcome)}; background: {look.Color}")"
+                                  title="@($"{look.Name}: {UsageView.Count(tally.Of(look.Outcome))}")"></span>
+                        }
+                    </span>
+                    <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
+                    <span class="@Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@UsageView.Share(tally.Errors, tally.Total)</span>
+                    <span class="text-right tabular-nums text-muted-foreground">@tally.Percentile(0.95).Map(p95 => UsageView.Duration(p95)).GetValueOr("n/a")</span>
+                    <span class="@Tone(tally.RateLimited, tally.Total, "text-[var(--usage-gave-up)] font-medium")">@UsageView.Share(tally.RateLimited, tally.Total)</span>
+                    <span class="@($"flex min-w-0 items-center gap-1.5 overflow-hidden text-xs text-ellipsis whitespace-nowrap {NowColour(now.Tone)}")" data-testid="usage-right-now">
+                        @if (now.Icon is Some<string>(var icon))
+                        {
+                            <LucideIcon Name="@icon" Size="12"/>
+                        }
+                        @now.Text
+                    </span>
+                </div>
+            }
+        </div>
+        @if (Silent.Count > 0)
+        {
+            <div class="flex flex-wrap items-center gap-2 border-t pt-2 text-xs text-muted-foreground" data-testid="usage-silent">
+                <span>No calls in the @UsageView.Window(Range):</span>
+                @foreach (var service in Silent)
+                {
+                    <span class="inline-flex items-center gap-1.5">
+                        <BrandedLogo Brand="Branding.GetBrandingInfo(service)" Size="16" Decorative="true"/>
+                        @Branding.GetBrandingInfo(service).NickName
+                    </span>
+                }
+            </div>
+        }
     </ChildContent>
 </UsageCard>
 
 @code {
+    private const double Noticeable = 0.01;
+
     private static readonly IReadOnlyList<(CallsTab Value, string Label)> Tabs = [(CallsTab.Calls, "Calls"), (CallsTab.AnswerTime, "Answer time")];
 
-    [Parameter] [EditorRequired] public required UsageSnapshot Snapshot { get; set; }
+    [Parameter] [EditorRequired] public required UsagePeriod Period { get; set; }
 
     [Parameter] [EditorRequired] public required UsageRange Range { get; set; }
 
     private CallsTab _tab = CallsTab.Calls;
 
-    private Optional<RemoteService> _service = new None();
+    private Optional<RemoteService> _picked = new None();
 
-    private Optional<RemoteService> Service => _service.When(service => Timed.Any(line => line.Service == service));
-
-    private IEnumerable<UsageServiceLine> Timed => Snapshot.Current.Services.Where(line => line.Tally.Durations.Count > 0);
+    private Optional<UsageServiceLine> Picked => _picked.Map(service => Period.Services.FirstOrNone(line => line.Service == service));
 
     private string Subtitle =>
         _tab is CallsTab.Calls
-            ? $"{Capitalised(UsageView.Window(Range))}, each {UsageView.Each(Range)} split by how its calls ended"
-            : $"{Service.Map(service => Branding.GetBrandingInfo(service).NickName).GetValueOr("All but datasets")}: every attempt by how long it took, median and p95 marked";
+            ? $"{Picked.Map(line => Name(line.Service)).GetValueOr("All services")}: {UsageView.Window(Range)}, each {UsageView.Each(Range)} split by how its calls ended. Click a service to show only its calls, click it again for all."
+            : $"{Picked.Map(line => Name(line.Service)).GetValueOr("All but datasets")}: every attempt by how long it took. Click a service to show only its answers.";
 
     private IReadOnlyList<Column> Columns =>
         [
-            .. Snapshot.Current.Slots.Select(slot => new Column(
-                UsageView.Slot(Range, slot.At),
-                slot.Tally.Of(UsageOutcome.Answered),
-                slot.Tally.Of(UsageOutcome.AnsweredAfter429),
-                slot.Tally.Of(UsageOutcome.GaveUpOn429),
-                slot.Tally.Of(UsageOutcome.Failed),
-                slot.Tally.Of(UsageOutcome.Cancelled)
-            )),
+            .. Picked
+                .Map(line => line.Slots)
+                .GetValueOr(Period.Slots)
+                .Select(slot => new Column(
+                    UsageView.Slot(Range, slot.At),
+                    slot.Tally.Of(UsageOutcome.Answered),
+                    slot.Tally.Of(UsageOutcome.AnsweredAfter429),
+                    slot.Tally.Of(UsageOutcome.GaveUpOn429),
+                    slot.Tally.Of(UsageOutcome.Failed),
+                    slot.Tally.Of(UsageOutcome.Cancelled)
+                )),
         ];
 
     private UsageTally Answers =>
-        UsageTally.Sum(
-            Snapshot
-                .Current.Services.Where(line => Service.Match(service => line.Service == service, () => !DatasetNames.ByService.ContainsKey(line.Service)))
-                .Select(line => line.Tally)
-        );
+        Picked
+            .Map(line => line.Tally)
+            .GetValueOr(() => UsageTally.Sum(Period.Services.Where(line => !DatasetNames.ByService.ContainsKey(line.Service)).Select(line => line.Tally)));
 
     private IReadOnlyList<DurationColumn> Durations
     {
@@ -118,11 +162,37 @@
         }
     }
 
-    private bool AllPicked => Service.Match(_ => false, () => true);
+    private long Busiest => Period.Services.Select(line => line.Tally.Total).DefaultIfEmpty(1).Max();
 
-    private bool Picked(RemoteService service) => Service.Match(picked => picked == service, () => false);
+    private IReadOnlyList<RemoteService> Silent => [.. Enum.GetValues<RemoteService>().Except(Period.Services.Select(line => line.Service))];
 
-    private static string Capitalised(string text) => string.Concat(text[..1].ToUpperInvariant(), text[1..]);
+    private bool IsPicked(RemoteService service) => Picked.Match(line => line.Service == service, () => false);
+
+    private void Pick(RemoteService service) => _picked = Optional.When(!IsPicked(service), () => service);
+
+    private string Name(RemoteService service) => Branding.GetBrandingInfo(service).NickName;
+
+    private static string Tone(long part, long total, string trouble)
+    {
+        var share = total == 0 ? 0 : (double)part / total;
+        var colour = (share > Noticeable, part) switch
+        {
+            (true, _) => trouble,
+            (false, 0) => "text-muted-foreground",
+            _ => string.Empty,
+        };
+        return $"text-right tabular-nums {colour}";
+    }
+
+    private static string NowColour(RightNowTone tone)
+    {
+        return tone switch
+        {
+            RightNowTone.Plain => "text-muted-foreground",
+            RightNowTone.Paused => "text-[var(--usage-gave-up)]",
+            RightNowTone.Down => "text-[var(--usage-failed)]",
+        };
+    }
 
     private enum CallsTab
     {

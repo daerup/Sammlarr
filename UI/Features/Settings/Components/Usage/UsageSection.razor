@@ -40,8 +40,7 @@
     {
         <div class="@($"flex flex-col gap-4 transition-opacity {(shown.Range == _range ? string.Empty : "opacity-60")}")" aria-busy="@(shown.Range == _range ? "false" : "true")">
             <UsageStatCards Snapshot="shown.Snapshot" Range="shown.Range"/>
-            <UsageCallsCard Snapshot="shown.Snapshot" Range="shown.Range"/>
-            <UsageServicesTable Period="shown.Snapshot.Current" Range="shown.Range"/>
+            <UsageCallsCard Period="shown.Snapshot.Current" Range="shown.Range"/>
             <UsageCausesCard Period="shown.Snapshot.Current"/>
             <UsageFeedsCard Feeds="shown.Snapshot.Feeds" Range="shown.Range"/>
         </div>

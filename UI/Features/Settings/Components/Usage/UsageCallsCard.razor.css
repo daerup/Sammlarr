@@ -1,0 +1,18 @@
+.usage-service {
+    display: grid;
+    grid-template-columns: 128px minmax(0, 1fr) 58px 52px 62px 70px 150px;
+    gap: 12px;
+    align-items: center;
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+.usage-service + .usage-service {
+    border-top: 1px solid var(--border);
+}
+
+.usage-service-picked {
+    background: color-mix(in oklch, var(--foreground) 6%, transparent);
+    box-shadow: inset 3px 0 0 var(--usage-accent);
+    border-radius: 2px 6px 6px 2px;
+}
