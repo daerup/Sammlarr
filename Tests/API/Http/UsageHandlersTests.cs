@@ -3,6 +3,7 @@ using System.Diagnostics.Metrics;
 using API.Http;
 using Contracts;
 using Contracts.Providers;
+using Contracts.Usage;
 using Domain.Feed;
 using Domain.Providers;
 using Domain.Usage;
@@ -40,7 +41,8 @@ public class UsageHandlersTests
 			return Task.CompletedTask;
 		});
 		using var measured = new Measured();
-		using var host = Host();
+		var feedRuns = IFeedRunUsage.Mock();
+		using var host = Host(feedRuns: feedRuns.Object);
 
 		await SendAsync(host, "plex", server, feed);
 
@@ -52,6 +54,7 @@ public class UsageHandlersTests
 		await Assert
 			.That(attempts.Select(tags => (tags[UsageTags.Service], tags[UsageTags.Cause])))
 			.IsEquivalentTo([("Plex", nameof(UsageCause.FeedRun)), ("Plex", nameof(UsageCause.FeedRun))]);
+		feedRuns.Credit(feed, RemoteService.Plex, UsageOutcome.AnsweredAfter429, 1).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -120,7 +123,7 @@ public class UsageHandlersTests
 		return server;
 	}
 
-	private static IHost Host(int retryAttempts = 1, int minimumThroughput = 20)
+	private static IHost Host(int retryAttempts = 1, int minimumThroughput = 20, IFeedRunUsage? feedRuns = null)
 	{
 		return new HostBuilder()
 			.ConfigureServices(services =>
@@ -135,6 +138,7 @@ public class UsageHandlersTests
 				);
 				services.AddSingleton(IDateTimeProvider.Mock().Object);
 				services.AddSingleton(IProviderRateLimitReporter.Mock().Object);
+				services.AddSingleton(feedRuns ?? IFeedRunUsage.Mock().Object);
 				services.AddModule<HttpModule>();
 				services.AddHttpClient("plex").AddRemoteHttp<PlexOptions>(RemoteService.Plex);
 				services.AddHttpClient("pictures").AddClientHttp<PlexOptions>();

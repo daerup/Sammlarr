@@ -397,7 +397,12 @@ internal sealed class MediaService(
 			match => LoadDetailsAsync(match.Identity, match.Stored, request.Described(), connected, buffer, cancellationToken),
 			error => ValueTask.FromResult<Result<MatchedMedia>>(error)
 		);
-		return loaded.Match(matched => matched, _ => request.Unmatched());
+		return loaded.Match(matched => matched, error => request.Unmatched(Reason(error)));
+	}
+
+	private static UnmatchedReason Reason(Error error)
+	{
+		return error.CausedBy<LookupNotRunException>().Map(_ => UnmatchedReason.CouldNotLookUp).GetValueOr(UnmatchedReason.NotFound);
 	}
 
 	private async ValueTask<Result<MatchedMedia>> LoadDetailsAsync(
@@ -486,9 +491,9 @@ file static class IdentifyRequestExtensions
 {
 	extension(IdentifyRequest request)
 	{
-		public MediaMatchResult Unmatched()
+		public MediaMatchResult Unmatched(UnmatchedReason reason)
 		{
-			return new UnmatchedMedia([.. request.Candidates], Details(request.Hints.Or(() => request.Description), request.Type));
+			return new UnmatchedMedia([.. request.Candidates], Details(request.Hints.Or(() => request.Description), request.Type), reason);
 		}
 
 		public MediaDetails Described()

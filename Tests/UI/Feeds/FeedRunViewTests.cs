@@ -20,6 +20,18 @@ public class FeedRunViewTests
 	}
 
 	[Test]
+	[Arguments(3, 0, "Not found by any service")]
+	[Arguments(2, 1, "2 not found by any service, 1 could not be looked up (tried again next run)")]
+	public async Task Chips_TheUnmatchedChip_SaysWhyTheTitlesStayedUnmatched(int notFound, int couldNotLookUp, string tooltip)
+	{
+		var counts = FeedRunCounts.None with { UnmatchedNotFound = notFound, UnmatchedCouldNotLookUp = couldNotLookUp };
+
+		var chip = FeedRunView.Chips(counts).Single(chip => chip.Icon == "circle-alert");
+
+		await Assert.That((chip.Count, chip.Tooltip)).IsEqualTo((notFound + couldNotLookUp, tooltip));
+	}
+
+	[Test]
 	public async Task Problem_WhenARunFailedWithoutASourceFailure_SaysTheSourceReturnedNothing()
 	{
 		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.NoItems);

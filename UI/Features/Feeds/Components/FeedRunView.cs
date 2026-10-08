@@ -117,9 +117,18 @@ internal static class FeedRunView
 			{
 				Icon = "circle-alert",
 				Count = counts.Unmatched,
-				Tooltip = "Could not be matched in your media provider",
+				Tooltip = UnmatchedTooltip(counts),
 			},
 		];
+
+	internal static string UnmatchedSplit(FeedRunCounts counts)
+	{
+		return counts.UnmatchedCouldNotLookUp == 0
+			? $"{counts.UnmatchedNotFound} not found by any service"
+			: $"{counts.UnmatchedNotFound} not found by any service, {counts.UnmatchedCouldNotLookUp} could not be looked up (tried again next run)";
+	}
+
+	private static string UnmatchedTooltip(FeedRunCounts counts) => counts.UnmatchedCouldNotLookUp == 0 ? "Not found by any service" : UnmatchedSplit(counts);
 
 	internal static string? Problem(FeedRun run)
 	{

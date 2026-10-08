@@ -13,6 +13,8 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	private static readonly Expression<Func<FeedRow, Domain.Feed.Feed>> project = FeedProjection.Project;
 	private static readonly Expression<Func<FeedRunRow, FeedRun>> projectRun = FeedRunProjection.Project;
 
+	private static readonly Expression<Func<FeedRunRow, FeedRun>> projectRunCounts = FeedRunProjection.ProjectWithoutItems;
+
 	public async Task<IReadOnlyList<Domain.Feed.Feed>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -142,7 +144,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 
 		return await runs.Where(row => newest.Contains(row.Id) || linkedStart.Any(start => row.StartedAt >= start))
 			.OrderByDescending(row => row.StartedAt)
-			.Select(projectRun)
+			.Select(query.WithItems ? projectRun : projectRunCounts)
 			.ToListAsync(cancellationToken);
 	}
 
@@ -212,8 +214,9 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		var row = await ctx.FeedRuns.Include(r => r.Items).FirstAsync(r => r.Id == run.Id.Value, cancellationToken);
+		var row = await ctx.FeedRuns.Include(r => r.Items).Include(r => r.Calls).FirstAsync(r => r.Id == run.Id.Value, cancellationToken);
 		row.Items.Clear();
+		row.Calls.Clear();
 		Fill(row, run);
 
 		await ctx.SaveChangesAsync(cancellationToken);
@@ -231,9 +234,18 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		row.Bypassed = run.Counts.Bypassed;
 		row.Filtered = run.Counts.Filtered;
 		row.Skipped = run.Counts.Skipped;
-		row.Unmatched = run.Counts.Unmatched;
+		row.UnmatchedNotFound = run.Counts.UnmatchedNotFound;
+		row.UnmatchedCouldNotLookUp = run.Counts.UnmatchedCouldNotLookUp;
 		row.Removed = run.Counts.Removed;
 		row.SourceFailure = run.SourceFailure.ToNullable();
 		row.Items.AddRange(run.Items.Select(item => new FeedRunItemRow { MediaId = item.MediaId.Value, State = item.State }));
+		row.Calls.AddRange(
+			run.Calls.Select(call => new FeedRunCallsRow
+			{
+				Service = call.Service,
+				Outcome = call.Outcome,
+				Calls = call.Calls,
+			})
+		);
 	}
 }

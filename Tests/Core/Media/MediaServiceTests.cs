@@ -294,6 +294,22 @@ public class MediaServiceTests
 	}
 
 	[Test]
+	public async Task IdentifyWithDetailsAsync_WhenTheLookupCouldNotRun_IsUnmatchedAsCouldNotLookUp()
+	{
+		var (testee, deps) = CreateTestee();
+		deps.Converter.LookUpAsync(Any(), Any()).Returns(Error.From(new RemoteUnavailableException(RemoteService.Tmdb)));
+
+		var results = await testee
+			.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([ImdbId.From("tt0137523", MediaType.Movie)], new None()) }.ToAsyncEnumerable())
+			.ToListAsync();
+
+		await Assert
+			.That(results.Single())
+			.IsOfUnionType<MediaMatchResult, UnmatchedMedia>()
+			.And.Multiple(async unmatched => await Assert.That(unmatched.Reason).IsEqualTo(UnmatchedReason.CouldNotLookUp));
+	}
+
+	[Test]
 	public async Task IdentifyWithDetailsAsync_WhenAHintedRequestWithoutAYearStaysUnmatched_LeavesTheReleaseDateOpen()
 	{
 		var (testee, deps) = CreateTestee();
@@ -312,7 +328,11 @@ public class MediaServiceTests
 		await Assert
 			.That(results.Single())
 			.IsOfUnionType<MediaMatchResult, UnmatchedMedia>()
-			.And.Multiple(async unmatched => await Assert.That(unmatched.Details).IsEqualTo(new MovieDetails { Title = "Fight Club" }));
+			.And.Multiple(async unmatched =>
+				await Assert
+					.That(unmatched)
+					.IsEqualTo(new UnmatchedMedia([TmdbId.From("999", MediaType.Movie)], new MovieDetails { Title = "Fight Club" }, UnmatchedReason.NotFound))
+			);
 	}
 
 	[Test]
@@ -553,10 +573,15 @@ public class MediaServiceTests
 			mediaRepo.Object,
 			NullLogger<MediaService>.Instance
 		);
-		return (testee, new Deps(mediaRepo, details, unmatchedCache));
+		return (testee, new Deps(mediaRepo, details, unmatchedCache, converter));
 	}
 
-	private record Deps(Mock<IMediaRepository> MediaRepo, Mock<IDetailsEnricher> Details, Mock<ITypedMemoryCache<string, bool>> UnmatchedCache);
+	private record Deps(
+		Mock<IMediaRepository> MediaRepo,
+		Mock<IDetailsEnricher> Details,
+		Mock<ITypedMemoryCache<string, bool>> UnmatchedCache,
+		Mock<IExternalIdConverter> Converter
+	);
 
 	private static Result<IdLookupResult> FoundByFind(IdLookupRequest request)
 	{

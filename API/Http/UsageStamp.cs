@@ -1,4 +1,5 @@
 using System.Net.Http.Metrics;
+using Contracts.Usage;
 using Domain.Providers;
 using Domain.Usage;
 using Observability.Usage;
@@ -59,7 +60,7 @@ internal sealed class UsageTagsHandler : DelegatingHandler
 	}
 }
 
-internal sealed class UsageMeteringEnricher : MeteringEnricher
+internal sealed class UsageMeteringEnricher(IFeedRunUsage feedRuns) : MeteringEnricher
 {
 	private const string PipelineExecuted = "PipelineExecuted";
 
@@ -76,12 +77,16 @@ internal sealed class UsageMeteringEnricher : MeteringEnricher
 
 		var status = Status(outcome);
 		var classified = UsageOutcomes.Classify(status, Fault(exception), resilience.Properties.GetValue(UsageStamp.RateLimited, 0));
-		var stamped = UsageStamp.Of(resilience.GetRequestMessage()).Map(stamp => stamp.Tags().Append(new(UsageTags.Outcome, classified.ToString()))).GetValueOr([]);
+		var stamp = UsageStamp.Of(resilience.GetRequestMessage());
+		stamp.Apply(found => Credit(found, classified));
+		var stamped = stamp.Map(found => found.Tags().Append(new(UsageTags.Outcome, classified.ToString()))).GetValueOr([]);
 		foreach (var tag in stamped)
 		{
 			context.Tags.Add(tag);
 		}
 	}
+
+	private void Credit(UsageStamp stamp, UsageOutcome outcome) => stamp.Mark.Feed.Apply(feed => feedRuns.Credit(feed, stamp.Service, outcome, 1));
 
 	private static UsageFault Fault(Exception? exception)
 	{

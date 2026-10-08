@@ -76,7 +76,7 @@ public class MediaIdResolverTests
 	{
 		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<LookupNotRunException>()).IsSome());
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
@@ -370,7 +370,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<LookupNotRunException>()).IsSome());
 		_tmdb.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
@@ -428,7 +428,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<LookupNotRunException>()).IsNone());
 		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
 	}
 
@@ -439,7 +439,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<LookupNotRunException>()).IsSome());
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
 

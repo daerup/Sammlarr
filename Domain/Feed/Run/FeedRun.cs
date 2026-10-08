@@ -12,6 +12,7 @@ public sealed record FeedRun
 	public required FeedRunCounts Counts { get; init; }
 	public required IReadOnlyList<FeedRunItem> Items { get; init; }
 	public Optional<string> SourceFailure { get; init; } = new None();
+	public IReadOnlyList<FeedRunCalls> Calls { get; init; } = [];
 
 	public bool HasChanges => Counts.Added + Counts.Removed > 0;
 

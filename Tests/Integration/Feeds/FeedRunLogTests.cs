@@ -4,6 +4,7 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Usage;
 using Harness;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
@@ -98,7 +99,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 					Bypassed = 2,
 					Filtered = 12,
 					Skipped = 4,
-					Unmatched = 2,
+					UnmatchedNotFound = 2,
+					UnmatchedCouldNotLookUp = 0,
 					Removed = 1,
 				},
 				Items = [Item(Held, FeedRunItemState.Kept), Item(Missing, FeedRunItemState.Removed)],
@@ -110,6 +112,25 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(run.Counts.Kept).IsEqualTo(178);
 		await Assert.That(run.Counts.Filtered).IsEqualTo(12);
 		await Assert.That(run.Items.Single(item => item.State is FeedRunItemState.Removed).MediaId).IsEqualTo(Missing);
+	}
+
+	[Test]
+	public async Task CompleteRunAsync_WithItsCallsAndTheUnmatchedSplit_ReadsThemBack()
+	{
+		var feedId = await SeedFeedAsync();
+		var run = Run(feedId, kept: [Held], 1);
+		await _testee.StartRunAsync(run);
+		FeedRunCalls[] calls = [new(RemoteService.Tmdb, UsageOutcome.Answered, 290), new(RemoteService.Plex, UsageOutcome.AnsweredAfter429, 37)];
+
+		await _testee.CompleteRunAsync(run with { Calls = calls, Counts = run.Counts with { UnmatchedNotFound = 2, UnmatchedCouldNotLookUp = 1 } });
+
+		var stored = (await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId) })).Single();
+		await Assert.That(stored.Calls).IsEquivalentTo(calls);
+		await Assert.That((stored.Counts.UnmatchedNotFound, stored.Counts.UnmatchedCouldNotLookUp, stored.Counts.Unmatched)).IsEqualTo((2, 1, 3));
+
+		var lean = (await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId), WithItems = false })).Single();
+		await Assert.That(lean.Items).IsEmpty();
+		await Assert.That(lean.Calls).IsEquivalentTo(calls);
 	}
 
 	[Test]
@@ -274,7 +295,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Bypassed = 0,
 			Filtered = 0,
 			Skipped = 0,
-			Unmatched = 0,
+			UnmatchedNotFound = 0,
+			UnmatchedCouldNotLookUp = 0,
 			Removed = removed,
 		};
 
@@ -296,7 +318,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 				Bypassed = 0,
 				Filtered = 0,
 				Skipped = 0,
-				Unmatched = 0,
+				UnmatchedNotFound = 0,
+				UnmatchedCouldNotLookUp = 0,
 				Removed = 0,
 			},
 			Items = [.. kept.Select(id => Item(id, FeedRunItemState.Kept))],

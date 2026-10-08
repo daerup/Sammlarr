@@ -1,4 +1,5 @@
 using Domain.Feed.Planning;
+using Domain.Media;
 
 namespace Domain.Feed.Run;
 
@@ -10,8 +11,11 @@ public readonly record struct FeedRunCounts
 	public required int Bypassed { get; init; }
 	public required int Filtered { get; init; }
 	public required int Skipped { get; init; }
-	public required int Unmatched { get; init; }
+	public required int UnmatchedNotFound { get; init; }
+	public required int UnmatchedCouldNotLookUp { get; init; }
 	public required int Removed { get; init; }
+
+	public int Unmatched => UnmatchedNotFound + UnmatchedCouldNotLookUp;
 
 	public static FeedRunCounts None { get; } =
 		new()
@@ -22,7 +26,8 @@ public readonly record struct FeedRunCounts
 			Bypassed = 0,
 			Filtered = 0,
 			Skipped = 0,
-			Unmatched = 0,
+			UnmatchedNotFound = 0,
+			UnmatchedCouldNotLookUp = 0,
 			Removed = 0,
 		};
 
@@ -40,7 +45,8 @@ public readonly record struct FeedRunCounts
 			Bypassed = buckets.GetValueOrDefault(ChangeBucket.Bypassed),
 			Filtered = buckets.GetValueOrDefault(ChangeBucket.Filtered),
 			Skipped = buckets.GetValueOrDefault(ChangeBucket.Skipped),
-			Unmatched = plan.Unmatched.Count,
+			UnmatchedNotFound = plan.Unmatched.Count(unmatched => unmatched.Reason is UnmatchedReason.NotFound),
+			UnmatchedCouldNotLookUp = plan.Unmatched.Count(unmatched => unmatched.Reason is UnmatchedReason.CouldNotLookUp),
 			Removed = delta.Drops.Count,
 		};
 	}

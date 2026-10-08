@@ -15,5 +15,7 @@ public sealed record RunQuery
 
 	public Optional<RunId> MustInclude { get; init; } = new None();
 
+	public bool WithItems { get; init; } = true;
+
 	public static RunQuery Take(int limit) => new(limit);
 }
