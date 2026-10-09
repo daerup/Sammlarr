@@ -1,3 +1,4 @@
+@using Contracts.Wantlist
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
 
@@ -7,6 +8,16 @@
             <BbDialogTitle>Switch the wantlist to @Branding.Name(Target.Service)?</BbDialogTitle>
             <BbDialogDescription>@What</BbDialogDescription>
         </BbDialogHeader>
+        <div class="space-y-2 text-sm text-muted-foreground" data-testid="switch-preview">
+            @if (Titles > 0)
+            {
+                <p data-testid="switch-readiness">@Readiness</p>
+            }
+            @if (WithoutPlex.Count > 0)
+            {
+                <p data-testid="switch-without-plex">@Waiting</p>
+            }
+        </div>
         <BbDialogFooter>
             <BbDialogClose>
                 <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Stay on @Branding.Name(From.Service)</BbButton>
@@ -28,7 +39,9 @@
 
     [Parameter] public int People { get; set; }
 
-    [Parameter] public int Titles { get; set; }
+    [Parameter] [EditorRequired] public required SinkSwitchPreview Preview { get; set; }
+
+    [Parameter] public IReadOnlyList<string> WithoutPlex { get; set; } = [];
 
     [Parameter] public bool Switching { get; set; }
 
@@ -36,7 +49,19 @@
 
     private SinkKind From => Target == SinkKind.Arr ? SinkKind.Plex : SinkKind.Arr;
 
+    private int Titles => Preview.Ready + Preview.ToLookUp;
+
     private string What => $"Every title on everyone's wantlist ({Counted(People, "person", "people")}, {Counted(Titles, "title", "titles")}) goes to {Branding.Name(Target.Service)} on their next sync. {Keeps}";
+
+    private string Readiness =>
+        Preview.ToLookUp == 0
+            ? $"{Counted(Preview.Ready, "title is", "titles are")} ready."
+            : $"{Counted(Preview.Ready, "title is", "titles are")} ready, {Preview.ToLookUp:N0} still {(Preview.ToLookUp == 1 ? "needs" : "need")} a lookup during the switch (any not found stay unmatched).";
+
+    private string Waiting =>
+        $"{Names} {(WithoutPlex.Count == 1 ? "has" : "have")} no Plex connected, so {(WithoutPlex.Count == 1 ? "their wantlist waits" : "their wantlists wait")} until they connect.";
+
+    private string Names => WithoutPlex.Count == 1 ? WithoutPlex[0] : $"{string.Join(", ", WithoutPlex.SkipLast(1))} and {WithoutPlex[^1]}";
 
     private string Keeps
     {

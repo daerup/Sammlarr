@@ -4,6 +4,7 @@ using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Identity;
+using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist.Arr;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,7 @@ internal sealed class SinkSwitch(
 	IProviderConfigService configs,
 	IArrSinkConfigService arr,
 	WantlistSyncGate gate,
+	IMediaService media,
 	ICurrentUser currentUser,
 	ILogger<SinkSwitch> logger
 ) : ISinkSwitch
@@ -36,6 +38,20 @@ internal sealed class SinkSwitch(
 		}
 
 		return await MoveAsync(SinkKind.Arr, config.IsSetUp, () => arr.StoreAsync(config, cancellationToken), cancellationToken);
+	}
+
+	public async Task<SinkSwitchPreview> PreviewAsync(SinkKind sink, CancellationToken cancellationToken = default)
+	{
+		currentUser.EnsureAdmin();
+		List<MediaId> wanted = [];
+		foreach (var user in await users.GetAllAsync(cancellationToken))
+		{
+			wanted.AddRange(await WantedAsync(user.Id, cancellationToken));
+		}
+
+		var stored = await media.GetSinkIdsAsync(wanted, sink, cancellationToken);
+		var ready = wanted.Count(stored.ContainsKey);
+		return new SinkSwitchPreview(ready, wanted.Count - ready);
 	}
 
 	private async Task<Result<SinkSwitched>> MoveAsync(SinkKind sink, bool ready, Func<Task> commit, CancellationToken cancellationToken)
@@ -101,6 +117,14 @@ internal sealed class SinkSwitch(
 			.ServiceProvider.GetRequiredService<IMediaService>()
 			.EnsureSinkIdsAsync([.. titles.Ids, .. outbox.Entries.Select(entry => entry.MediaId), .. blocked.Ids], sink, cancellationToken);
 		return missing.Count(titles.Contains);
+	}
+
+	private async Task<IReadOnlyList<MediaId>> WantedAsync(UserId user, CancellationToken cancellationToken)
+	{
+		await using var scope = scopes.CreateAsyncScope();
+		using var _ = await scope.ServiceProvider.GetRequiredService<IUserScope>().AsAsync(user, cancellationToken);
+		var items = await scope.ServiceProvider.GetRequiredService<IWantlistRepository>().GetAllAsync(cancellationToken);
+		return [.. items.Select(item => item.MediaId)];
 	}
 
 	private async Task<int> RequeueAsync(UserId user, CancellationToken cancellationToken)
