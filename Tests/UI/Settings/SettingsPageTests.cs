@@ -59,6 +59,7 @@ public class SettingsPageTests : BunitContext
 
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
+		keys.IsStoredAsync(Any(), Any()).Returns(false);
 		Services.AddSingleton(keys.Object);
 
 		var credentials = ICredentialService.Mock();
