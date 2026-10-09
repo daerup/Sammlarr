@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Contracts;
 using Contracts.Feed;
+using Contracts.Identity;
 using Contracts.Usage;
 using Contracts.Wantlist;
 using Domain.Feed;
@@ -17,6 +18,8 @@ internal sealed class FeedRunEngine(
 	IWantlistService wantlist,
 	IFeedRepository feeds,
 	IFeedRunUsage usage,
+	IFeedRunTrace trace,
+	ICurrentUser currentUser,
 	IDateTimeProvider clock,
 	ILogger<FeedRunEngine> logger
 ) : IFeedRunEngine
@@ -29,6 +32,13 @@ internal sealed class FeedRunEngine(
 		}
 
 		using var _ = lease;
+		var result = await GuardedAsync(feedId, trigger, cancellationToken);
+		trace.End(feedId, result);
+		return result;
+	}
+
+	private async Task<FeedRunResult> GuardedAsync(FeedId feedId, FeedRunTrigger trigger, CancellationToken cancellationToken)
+	{
 		try
 		{
 			return await feeds
@@ -46,6 +56,7 @@ internal sealed class FeedRunEngine(
 	private async Task<FeedRunResult> ExecuteAsync(Domain.Feed.Feed feed, FeedRunTrigger trigger, CancellationToken cancellationToken)
 	{
 		usage.Start(feed.Id);
+		using var run = trace.Start(feed.Id, currentUser.Id);
 		try
 		{
 			return await RecordAsync(feed, trigger, cancellationToken);

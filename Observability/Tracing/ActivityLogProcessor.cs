@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Observability.Feed;
 using OpenTelemetry;
 
 namespace Observability.Tracing;
@@ -12,7 +13,7 @@ internal sealed class ActivityLogProcessor : BaseProcessor<Activity>
 
 	public override void OnEnd(Activity data)
 	{
-		if (data.Source.Name != Instrumentation.ServiceName)
+		if (data.Source.Name is not (Instrumentation.ServiceName or FeedRunSpans.SourceName))
 		{
 			return;
 		}

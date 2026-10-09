@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Observability.Feed;
 using Observability.Tracing;
 
 namespace Shared.Tests.Observability;
@@ -26,6 +27,25 @@ public class ActivityLogProcessorTests
 		await Assert.That(sink.Entries).Count().IsGreaterThan(0);
 		await Assert.That(sink.Entries.Last().Message).Contains("TEST RUN");
 		await Assert.That(sink.Entries.Last().Message).Contains("boom");
+	}
+
+	[Test]
+	public async Task OnEnd_LogsAnErroredFeedRunSpan()
+	{
+		var sink = new CapturingLoggerProvider();
+		using var loggerFactory = LoggerFactory.Create(b => b.AddProvider(sink).SetMinimumLevel(LogLevel.Information));
+		var processor = new ActivityLogProcessor(loggerFactory);
+
+		using var listener = AllSourcesListener();
+		ActivitySource.AddActivityListener(listener);
+		using var source = new ActivitySource(FeedRunSpans.SourceName);
+		using var activity = source.StartActivity(FeedRunNames.Hop);
+		activity!.SetStatus(ActivityStatusCode.Error, "TMDB is down");
+		activity.Stop();
+
+		processor.OnEnd(activity);
+
+		await Assert.That(sink.Entries.Last().Message).Contains("TMDB is down");
 	}
 
 	[Test]

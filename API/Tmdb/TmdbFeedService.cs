@@ -13,6 +13,7 @@ using Domain.Auth;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
+using Observability.Feed;
 using Shared.Options;
 
 namespace API.Tmdb;
@@ -73,6 +74,7 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 				type => Task.FromResult<IReadOnlyList<IdentifyRequest>>([new IdentifyRequest([TmdbId.From(Number(item.Id), type)], Hints(item, type))]),
 				async () =>
 				{
+					FeedRunSpans.ListedWithoutIds();
 					await unmatched.WriteAsync(Unmatched(item), cancellationToken);
 					return (IReadOnlyList<IdentifyRequest>)[];
 				}

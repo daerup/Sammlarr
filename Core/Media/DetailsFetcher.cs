@@ -4,9 +4,11 @@ using Contracts.Media;
 using Contracts.Media.Artwork;
 using Contracts.Providers;
 using Contracts.Settings;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging;
+using Observability.Feed;
 
 namespace Core.Media;
 
@@ -145,7 +147,9 @@ internal sealed class DetailsFetcher(
 			{
 				if (await WaitForBlockedAsync(missing, leftToAsk, waited, now, cancellationToken) is not Some<DateTimeOffset>(var freeAt))
 				{
-					unavailable = unavailable.Or(() => EnricherChoice.Blocked(missing, leftToAsk, now).Map(blocked => blocked.Remote));
+					var stopped = EnricherChoice.Blocked(missing, leftToAsk, now).Map(blocked => blocked.Remote);
+					stopped.Apply(remote => FeedRunSpans.GaveUp(remote, TraceStage.Details));
+					unavailable = unavailable.Or(stopped);
 					break;
 				}
 
@@ -204,6 +208,16 @@ internal sealed class DetailsFetcher(
 	}
 
 	private async Task<Result<FoundMedia>> AskAsync(EnricherCandidate candidate, MediaIdentity identity, CancellationToken cancellationToken)
+	{
+		using var span = FeedRunSpans.Hop(candidate.Remote, TraceStage.Details);
+		var answer = await CallAsync(candidate, identity, cancellationToken);
+		span.Answered(
+			answer.Match(_ => HopOutcome.Answered, error => error.CausedBy<RemoteUnavailableException>().Match(_ => HopOutcome.Failed, () => HopOutcome.Answered))
+		);
+		return answer;
+	}
+
+	private async Task<Result<FoundMedia>> CallAsync(EnricherCandidate candidate, MediaIdentity identity, CancellationToken cancellationToken)
 	{
 		try
 		{

@@ -13,6 +13,7 @@ using Domain.Auth;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
+using Observability.Feed;
 
 namespace API.Mdblist;
 
@@ -105,6 +106,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		{
 			foreach (var item in page.unmatched)
 			{
+				FeedRunSpans.ListedWithoutIds();
 				await unmatched.WriteAsync(BuildUnmatched(item), cancellationToken);
 			}
 
