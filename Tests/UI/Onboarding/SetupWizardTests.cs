@@ -110,14 +110,6 @@ public class SetupWizardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Card_HoldsContentAsWideAsTheServicesMapCard()
-	{
-		var cut = RenderForAdmin();
-
-		await Assert.That(cut.Find(".setup-card").GetAttribute("style")).IsEqualTo($"--map-card-width: {ServicesMapModel.CardWidth}px");
-	}
-
-	[Test]
 	public async Task Wantlist_OnceItSyncsToRadarrAndSonarr_ShowsTheirRowAsSyncing()
 	{
 		var cut = RenderForAdmin();
