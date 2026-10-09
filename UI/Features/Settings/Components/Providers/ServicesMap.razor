@@ -226,7 +226,7 @@
         return service switch
         {
             RemoteService remote => () => ServiceOpened.InvokeAsync(remote),
-            Arr => CanPick && Config.Sink == SinkKind.Arr ? () => ArrOpened.InvokeAsync() : null,
+            Arr => CanPick ? () => ArrOpened.InvokeAsync() : null,
             SammlarrAccounts => () => AccountsOpened.InvokeAsync(),
         };
     }

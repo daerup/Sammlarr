@@ -303,8 +303,9 @@ public class ServicesMapTests : BunitContext
 	[Test]
 	[Arguments(SinkKind.Arr, true, "button")]
 	[Arguments(SinkKind.Arr, false, "div")]
-	[Arguments(SinkKind.Plex, true, "div")]
-	public async Task RadarrAndSonarr_OnlyForAnAdminWhoseWantlistSyncsThere_OpensTheWantlistSync(SinkKind sink, bool canPick, string element)
+	[Arguments(SinkKind.Plex, true, "button")]
+	[Arguments(SinkKind.Plex, false, "div")]
+	public async Task RadarrAndSonarr_ForAnAdmin_OpensTheirRowWhetherTheWantlistOrOnlySearchUsesThem(SinkKind sink, bool canPick, string element)
 	{
 		var cut = RenderMap(Config with { Sink = sink, SearchProvider = SearchProvider.Arr }, canPick);
 
