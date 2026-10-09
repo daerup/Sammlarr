@@ -181,6 +181,21 @@ records what started each run.
 Feed run:: One application of a feed to the wantlist by `FeedRunEngine`: plan (the same planner
 the preview uses), then apply the adds and the feed's owned drops. Always executed as a job.
 
+Live run trace:: The in-memory record of a feed run in progress (`FeedRunTrace`): numbered steps for each title, path,
+hop and give-up, read from the spans on the `Sammlarr.FeedRun` source, kept per feed until 30 seconds after the run
+ends and shown only to the feed's owner. The live view replays it; nothing saved is computed from it.
+
+Hop:: One ask of one service for one title, for its ids or for its details, with its outcome: answered, answered
+after a 429, gave up on a 429, or failed. A free lookup the service answers from data already loaded is a hop of zero
+milliseconds.
+
+Lane:: The dashed paths along the top and bottom of the live view that skip the services: a title already stored
+(known) goes straight to Matched, one the unmatched cache missed within the hour (not found earlier) straight to Not
+found.
+
+Run key:: The id of one trace (`TraceCursor.Run`). A reader's cursor carries it, so a read after the feed ran again
+gets a fresh snapshot instead of steps from the wrong run.
+
 Run log:: The recorded feed runs (`FeedRun` with its `FeedRunItem` rows): when, what triggered it,
 how conclusive the load was, and what was added, kept and removed. Mirror reads it to count how
 many conclusive runs an item has been missing.

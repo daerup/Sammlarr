@@ -66,6 +66,8 @@ the fixture set.
 
 Live runs genuinely mutate: they hit the real accounts. After any live run, scan the fixtures for real tokens and API keys before committing.
 
+A feed run's live view has one flow: `FeedLiveRunTests` creates a feed on the recorded MDBList list, runs it from its card and waits for the view and the card's running pill, then for the fold, five seconds after the run ends, and the card's last-run bar. The view stays until the fold however fast the replayed run is, so the test needs no slowed stub, and since pooled stacks keep their database it asserts the view and the card, not which services the run asked.
+
 ### Self-hosted stacks
 
 Tests marked `[SelfHosted]` (`Tests/E2E/SelfHosted`) run on a second pool: two stacks that each run the pinned Radarr and Sonarr images from
