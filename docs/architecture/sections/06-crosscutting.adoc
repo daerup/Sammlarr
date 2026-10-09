@@ -437,7 +437,10 @@ the feed's owner (`FeedRunTraces` compares the owner with `ICurrentUser`).
 Pages pull instead of subscribing. `IEventPublisher` calls every subscriber synchronously on the publishing thread, and
 hundreds of hops a second there would slow the run itself; a reader per circuit (`FeedRunProgress`) asks for the steps
 after its cursor four times a second while one of its owner's feeds runs, and the browser replays each batch at its
-recorded timing, 250 ms behind, so dots move smoothly without a render per hop. A late joiner or a view shown again
+recorded timing, 250 ms behind, so dots move smoothly without a render per hop. Each read also carries the run's progress for the
+view's footer: the source page being read (`feed.page`, with the total where the source reports one) and how many titles
+wait on a service; once the run is saved, `FeedRunEngine` hands its counts to the trace (`IFeedRunTrace.Counted`) and the
+footer shows what the feed's rules did with them. A late joiner or a view shown again
 after Hide starts from a snapshot (titles in flight, per-service counts, the fates so far). Telemetry may drop data and
 so may the view: the card's bar and every saved number come from the run that `FeedRunEngine` records (`FeedRunCounts`,
 with the titles already known and those not found earlier), never from spans

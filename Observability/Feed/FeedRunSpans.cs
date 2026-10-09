@@ -44,6 +44,13 @@ public static class FeedRunSpans
 
 	public static void ListedWithoutIds() => Nearest(FeedRunNames.Run).Apply(_ => Start(FeedRunNames.Listed, [])?.Stop());
 
+	public static void SourcePage(int page, Optional<int> pages)
+	{
+		List<KeyValuePair<string, object?>> tags = [new(FeedRunTags.Page, page)];
+		pages.Apply(total => tags.Add(new(FeedRunTags.Pages, total)));
+		Nearest(FeedRunNames.Run).Apply(_ => Start(FeedRunNames.Page, tags)?.Stop());
+	}
+
 	public static IDisposable Path() => Within(FeedRunNames.Title, FeedRunNames.Path, []);
 
 	public static FeedRunSpan Hop(RemoteService service, TraceStage stage) => Within(FeedRunNames.Title, FeedRunNames.Hop, Placed(service, stage));

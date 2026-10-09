@@ -60,6 +60,11 @@ internal sealed class FeedRunTrace : IFeedRunTrace, IDisposable
 		return new RunScope(_runSpans, run, FeedRunSpans.Run(feed, run.Key));
 	}
 
+	public void Counted(FeedId feed, FeedRunCounts counts)
+	{
+		_runs.GetValueOrNone(feed).When(run => run.Running).Apply(run => run.Counted(counts));
+	}
+
 	public void End(FeedId feed, FeedRunResult result)
 	{
 		_runs.GetValueOrNone(feed).When(run => run.Running).Apply(run => Finish(feed, run, Ending(result)));
@@ -128,6 +133,10 @@ internal sealed class FeedRunTrace : IFeedRunTrace, IDisposable
 				break;
 			case (FeedRunSpans.SourceName, FeedRunNames.Listed):
 				RunAbove(span.Parent).Apply(run => run.Add(new None(), new ListedWithoutIds()));
+				break;
+			case (FeedRunSpans.SourceName, FeedRunNames.Page):
+				RunAbove(span.Parent)
+					.Apply(run => Tag<int>(span, FeedRunTags.Page).Apply(page => run.Add(new None(), new SourcePage(page, Tag<int>(span, FeedRunTags.Pages)))));
 				break;
 		}
 	}

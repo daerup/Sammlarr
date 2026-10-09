@@ -210,6 +210,20 @@ public class FeedRunProgressTests
 		await Assert.That(batches[0].Capacity).IsEquivalentTo([new WireCapacity((byte)RemoteService.Tmdb, 3500, 0.5)]);
 	}
 
+	[Test]
+	public async Task Batch_WithASourcePage_CarriesItIntoTheTally()
+	{
+		Running(Documentaries);
+		Reads(Batch([], new None()) with { Progress = new RunProgress(Some.Of(new SourcePage(3, new None())), 2) });
+		using var testee = Progress();
+
+		await testee.StartAsync();
+
+		await EventuallyAsync(() => testee.Live.Match(run => run.Tally.Progress.Waiting == 2, () => false));
+		var live = (await Assert.That(testee.Live).IsSome())!;
+		await Assert.That(live.Tally.Progress.Page).IsSome().And.IsEqualTo(new SourcePage(3, new None()));
+	}
+
 	private void Reads(TraceRead read) => _traces.ReadAsync(Any<FeedId>(), Any<TraceCursor>(), Any()).Returns(read);
 
 	private void Running(Feed feed)

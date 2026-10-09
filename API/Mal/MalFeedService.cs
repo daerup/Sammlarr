@@ -13,6 +13,7 @@ using Domain.Auth;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
+using Observability.Feed;
 
 namespace API.Mal;
 
@@ -75,10 +76,13 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 	)
 	{
 		var page = first;
+		var number = 0;
 		while (page.Length > 0)
 		{
 			var answer = await PageAsync(identifier, page, isPage, clientId, cancellationToken);
 			var data = answer.Data ?? throw new InvalidDataException("MyAnimeList answered a page without data.");
+			number++;
+			FeedRunSpans.SourcePage(number, new None());
 			foreach (var anime in data.Select(item => item.Node).OfType<MalTypes.Anime>())
 			{
 				yield return anime;

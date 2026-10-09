@@ -2,7 +2,7 @@ using Domain.Providers;
 
 namespace Domain.Feed.Trace;
 
-public union TraceEvent(TitleStarted, SourceEnded, ListedWithoutIds, TitleKnown, TitleNotFoundEarlier, PathStarted, HopAsked, HopAnswered, GaveUp, TitleSettled);
+public union TraceEvent(TitleStarted, SourceEnded, ListedWithoutIds, TitleKnown, TitleNotFoundEarlier, PathStarted, HopAsked, HopAnswered, GaveUp, TitleSettled, SourcePage);
 
 public readonly record struct TitleStarted(string Name, Optional<int> Year);
 
@@ -23,3 +23,5 @@ public readonly record struct HopAnswered(RemoteService Service, TraceStage Stag
 public readonly record struct GaveUp(RemoteService Service, TraceStage Stage);
 
 public readonly record struct TitleSettled(TitleFate Fate);
+
+public readonly record struct SourcePage(int Page, Optional<int> Pages);

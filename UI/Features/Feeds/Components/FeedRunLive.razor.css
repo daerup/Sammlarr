@@ -154,6 +154,41 @@
     display: none;
 }
 
+.live-foot {
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 8px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted-foreground);
+    background: color-mix(in srgb, var(--foreground) 2.5%, transparent);
+}
+
+.live-foot[hidden] {
+    display: none;
+}
+
+.live-foot-main {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+}
+
+.live-foot-main > span {
+    white-space: nowrap;
+}
+
+.live-foot b {
+    color: var(--foreground);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.live-foot b.is-added {
+    color: var(--alert-success);
+}
+
 .live-flash {
     position: absolute;
     inset: 0;

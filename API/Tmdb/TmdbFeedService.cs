@@ -76,7 +76,7 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 				{
 					FeedRunSpans.ListedWithoutIds();
 					await unmatched.WriteAsync(Unmatched(item), cancellationToken);
-					return (IReadOnlyList<IdentifyRequest>)[];
+					return [];
 				}
 			);
 	}
@@ -90,11 +90,14 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 			.GetOrThrow(error => new InvalidOperationException(error.Reason));
 		var type = TmdbPages.Kind(page);
 		var apiKey = await KeyAsync(cancellationToken);
-		var pages = PagesAsync(async number =>
-		{
-			using var response = await client.SendAsync(HttpMethod.Get, TmdbPages.Request(page, number), apiKey, cancellationToken);
-			return await ReadAsync(response, () => new FeedIdentifierNotFoundException(identifier), cancellationToken);
-		});
+		var pages = PagesAsync(
+			async number =>
+			{
+				using var response = await client.SendAsync(HttpMethod.Get, TmdbPages.Request(page, number), apiKey, cancellationToken);
+				return await ReadAsync(response, () => new FeedIdentifierNotFoundException(identifier), cancellationToken);
+			},
+			_ => new None()
+		);
 		await foreach (var item in pages.WithCancellation(cancellationToken))
 		{
 			yield return item with
@@ -107,19 +110,26 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 	private async IAsyncEnumerable<TmdbTypes.Lists.Item> ItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var token = (await apiKeys.GetAsync(ApiKeyProvider.TmdbReadToken, cancellationToken)).ToOptional();
-		await foreach (var item in PagesAsync(page => PageAsync(identifier, page, token, cancellationToken)).WithCancellation(cancellationToken))
+		await foreach (
+			var item in PagesAsync(page => PageAsync(identifier, page, token, cancellationToken), answer => Optional.Of(answer.TotalPages).When(total => total > 0))
+				.WithCancellation(cancellationToken)
+		)
 		{
 			yield return item;
 		}
 	}
 
-	private static async IAsyncEnumerable<TmdbTypes.Lists.Item> PagesAsync(Func<int, Task<TmdbTypes.Lists.Page>> read)
+	private static async IAsyncEnumerable<TmdbTypes.Lists.Item> PagesAsync(
+		Func<int, Task<TmdbTypes.Lists.Page>> read,
+		Func<TmdbTypes.Lists.Page, Optional<int>> total
+	)
 	{
 		var pages = 1;
 		for (var page = 1; page <= pages; page++)
 		{
 			var answer = await read(page);
 			pages = answer.TotalPages ?? 1;
+			FeedRunSpans.SourcePage(page, total(answer));
 			foreach (var item in answer.Entries)
 			{
 				yield return item;

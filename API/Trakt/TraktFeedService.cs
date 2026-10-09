@@ -10,6 +10,7 @@ using Domain.Auth;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
+using Observability.Feed;
 
 namespace API.Trakt;
 
@@ -34,10 +35,11 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 		var clientId = await apiKeys
 			.GetAsync(ApiKeyProvider.Trakt, cancellationToken)
 			.GetOrThrow(_ => new InvalidOperationException("No Trakt client ID is configured. Add one in Settings."));
+		var count = new PageCount();
 		foreach (var read in TraktPages.Reads(identifier))
 		{
 			var chart = TraktPages.ChartType(read);
-			var entries = EntriesAsync(read, clientId, cancellationToken);
+			var entries = EntriesAsync(read, clientId, count, cancellationToken);
 			await foreach (var entry in (TraktPages.IsChart(read) ? entries.Take(FeedPages.Titles) : entries).WithCancellation(cancellationToken))
 			{
 				yield return Request(entry, chart);
@@ -60,6 +62,7 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 	private async IAsyncEnumerable<TraktTypes.Item> EntriesAsync(
 		string identifier,
 		IApiKey clientId,
+		PageCount count,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
@@ -68,9 +71,12 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 		{
 			using var response = await client.GetAsync(TraktPages.Request(identifier, page), clientId, cancellationToken);
 			Ensure(identifier, response);
-			pages = Header(response, "X-Pagination-Page-Count").GetValueOr(1);
+			var total = Header(response, "X-Pagination-Page-Count");
+			pages = total.GetValueOr(1);
 			var entries =
 				await response.Content.ReadFromJsonAsync<List<TraktTypes.Item>>(cancellationToken) ?? throw new InvalidDataException("Trakt answered an empty page.");
+			count.Read++;
+			FeedRunSpans.SourcePage(count.Read, total.When(_ => !TraktPages.IsChart(identifier)));
 			foreach (var entry in entries)
 			{
 				yield return entry;
@@ -109,5 +115,10 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 		return values
 			.FirstOrNone(value => int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out _))
 			.Map(value => int.Parse(value, NumberStyles.None, CultureInfo.InvariantCulture));
+	}
+
+	private sealed class PageCount
+	{
+		internal int Read { get; set; }
 	}
 }

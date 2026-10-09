@@ -16,6 +16,7 @@ internal enum WireKind : byte
 	Answered,
 	GaveUp,
 	Settled,
+	Page,
 }
 
 public readonly record struct WireStep(long Seq, int AtMs, int Title, byte Kind)
@@ -79,6 +80,7 @@ internal static class LiveWire
 			},
 			GaveUp gaveUp => at with { Kind = (byte)WireKind.GaveUp, Service = (byte)gaveUp.Service, Stage = (byte)gaveUp.Stage },
 			TitleSettled settled => at with { Kind = (byte)WireKind.Settled, Fate = (byte)settled.Fate },
+			SourcePage => at with { Kind = (byte)WireKind.Page },
 		};
 	}
 

@@ -1,7 +1,9 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Feed;
+using Domain.Feed.Run;
 using Domain.Feed.Trace;
+using Domain.Processing;
 using Domain.Providers;
 using Microsoft.JSInterop;
 using TUnit.Assertions.Enums;
@@ -193,6 +195,73 @@ public class FeedRunLiveTests : BunitContext
 		cut.WaitForState(() => _module.Invocations["mount"].Count == 2);
 		await Assert.That(_module.Invocations["dispose"].Count).IsEqualTo(1);
 		await Assert.That(_module.Invocations["push"]).IsEmpty();
+	}
+
+	[Test]
+	public async Task Footer_WhileRunning_ShowsThePageAndTheWaiting()
+	{
+		var progress = new RunProgress(Some.Of(new SourcePage(8, Some.Of(12))), 4);
+		_run.Tally.Getter.Returns(RunTally.Before(Some.Of(400)) with { Progress = progress });
+
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert.That(Segments(cut)).IsEquivalentTo(["Source page 8 of 12", "4 waiting on a service"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Footer_AfterTheRun_ShowsTheFeedsRules()
+	{
+		var counts = FeedRunCounts.None with { Total = 200, Added = 3, Filtered = 120, Skipped = 40 };
+		var ended = new FeedRunEnd(TraceEnding.Completed, 9000) { Counts = Some.Of(counts) };
+		_run.Tally.Getter.Returns(RunTally.Of(FateTally.None with { Started = 200, Matched = 200 }, Some.Of(200), 9000, Some.Of(ended), new None()));
+		_run.Feed.Getter.Returns(Documentaries with { Limit = Some.Of(new QueryLimit { Count = 5 }) });
+
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert
+			.That(Segments(cut))
+			.IsEquivalentTo(["Then the feed's rules: +3 to your wantlist", "120 filtered out", "40 past the limit of 5"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Footer_BeforeTheFirstPage_SaysItIsReadingTheList()
+	{
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert.That(Segments(cut)).IsEquivalentTo(["Reading the source list", "0 waiting on a service"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Footer_AfterARunThatAddedNothingWithoutALimit_SaysWhatItKept()
+	{
+		var counts = FeedRunCounts.None with { Total = 40, Kept = 31, Filtered = 9 };
+		var ended = new FeedRunEnd(TraceEnding.Completed, 3000) { Counts = Some.Of(counts) };
+		_run.Tally.Getter.Returns(RunTally.Of(FateTally.None with { Started = 40, Matched = 40 }, Some.Of(40), 3000, Some.Of(ended), new None()));
+
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert.That(Segments(cut)).IsEquivalentTo(["Then the feed's rules: 31 kept, nothing new", "9 filtered out"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Footer_AfterAFailedRun_KeepsTheRunningLine()
+	{
+		var ended = new FeedRunEnd(TraceEnding.Failed, 400) { Counts = Some.Of(FeedRunCounts.None) };
+		var tally = RunTally.Of(FateTally.None, new None(), 400, Some.Of(ended), new None());
+		_run.Tally.Getter.Returns(tally with { Progress = new RunProgress(Some.Of(new SourcePage(1, new None())), 0) });
+
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert.That(Segments(cut)).IsEquivalentTo(["Source page 1", "0 waiting on a service"], CollectionOrdering.Matching);
+	}
+
+	private static IReadOnlyList<string> Segments(IRenderedComponent<FeedRunLive> cut)
+	{
+		return
+		[
+			.. cut.FindAll("[data-testid=live-foot] .live-foot-main > span")
+				.Select(span => string.Join(' ', span.TextContent.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))),
+		];
 	}
 
 	private static TraceSnapshot Snapshot(Guid run)

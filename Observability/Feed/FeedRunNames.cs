@@ -8,6 +8,8 @@ public static class FeedRunNames
 
 	public const string Listed = "feed.listed";
 
+	public const string Page = "feed.page";
+
 	public const string Title = "feed.title";
 
 	public const string Path = "feed.path";

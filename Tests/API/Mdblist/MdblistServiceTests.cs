@@ -7,10 +7,12 @@ using Contracts.Identity;
 using Contracts.Media;
 using Domain.Auth;
 using Domain.Feed;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using Shared.Options;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 
 namespace API.Tests.Mdblist;
 
@@ -201,6 +203,17 @@ public class MdblistServiceTests
 
 		lookups.Verify(request => request.Method(HttpMethod.Post).PathMatches(@"^/mdblist/movie(\?.*)?$"), Times.Once);
 		lookups.Verify(request => request.Method(HttpMethod.Post), Times.Once);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_InsideARun_ReportsEachPageWithoutATotal()
+	{
+		var testee = CreateTestee(new StubHandler(HttpStatusCode.OK, pages: 2), out _);
+		using var spans = new PageSpans();
+
+		await testee.GetFeedItemsAsync("multi-page").ToListAsync();
+
+		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
 	}
 
 	private static MdblistService CreateTestee(

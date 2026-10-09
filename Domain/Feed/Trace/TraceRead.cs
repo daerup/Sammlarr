@@ -1,3 +1,4 @@
+using Domain.Feed.Run;
 using Domain.Providers;
 
 namespace Domain.Feed.Trace;
@@ -19,13 +20,27 @@ public sealed record TraceSnapshot(
 	FateTally Fates,
 	Optional<int> Requests,
 	Optional<FeedRunEnd> Ended
-);
+)
+{
+	public RunProgress Progress { get; init; } = RunProgress.None;
+}
 
-public sealed record TraceBatch(TraceCursor Cursor, int ElapsedMs, IReadOnlyList<TraceStep> Steps, FateTally Fates, Optional<int> Requests, Optional<FeedRunEnd> Ended);
+public sealed record TraceBatch(TraceCursor Cursor, int ElapsedMs, IReadOnlyList<TraceStep> Steps, FateTally Fates, Optional<int> Requests, Optional<FeedRunEnd> Ended)
+{
+	public RunProgress Progress { get; init; } = RunProgress.None;
+}
+
+public sealed record RunProgress(Optional<SourcePage> Page, int Waiting)
+{
+	public static RunProgress None { get; } = new(new None(), 0);
+}
 
 public readonly record struct NoTrace;
 
-public readonly record struct FeedRunEnd(TraceEnding Ending, int ElapsedMs);
+public sealed record FeedRunEnd(TraceEnding Ending, int ElapsedMs)
+{
+	public Optional<FeedRunCounts> Counts { get; init; } = new None();
+}
 
 public readonly record struct HopPlace(RemoteService Service, TraceStage Stage);
 
