@@ -188,6 +188,7 @@ sequenceDiagram
   R->>Q: a scheduled run starts: SyncWantlist(ScheduledFeedTrigger)
   Q->>J: one Waiting sync per owner, due after the grace period
   R->>E: dispatch in a fresh scope, as the job's owner
+  Note over E: opens the run's live trace;<br/>titles, hops and give-ups record into it
   E->>E: plan (the same planner as the preview)
   E->>W: apply adds and owned drops, recorded in the run log
   Note over W: outbox rows written, nothing sent to Plex yet
@@ -229,6 +230,12 @@ The engine plans through the same planner as the preview, before it records the 
 does what a preview taken at that moment would show. Mirror removals follow the preview's rule: a load that did not finish, or came back empty, is not
 conclusive and drops nothing, and an item is only removed after it has been missing for the
 feed's absence threshold of conclusive runs.
+
+While it runs, the engine holds the run's live trace open (`IFeedRunTrace.Start`, under the job owner's identity), and
+identifying a title, asking a service and giving up on one record into it as spans; the owner watches them on the Feeds
+page (<<section-concepts>>, Live run trace). The trace ends with the run's result and is dropped 30 seconds later;
+afterwards the card's bar and the run log read the saved `FeedRun`, whose counts include the titles already known and
+those not found earlier.
 
 === Wantlist sync and push to Plex
 

@@ -407,3 +407,38 @@ the dashboard. A feed run's calls are credited to the run through its feed id (a
 run id would be an unbounded tag): the enricher that classifies a call also credits it to the feed's running run in
 `IFeedRunUsage`, and the run is saved with its calls (`FeedRunCalls`). The cost rules: tags stay bounded (service, cause, outcome, feed id; never a title, a URL, a user or a
 run id), delta temporality, the default buckets.
+
+=== Live run trace
+
+While a feed runs, its owner can watch the titles move through Sammlarr, the services it asks and the three outcomes
+(the Feeds page's live view, the card's running pill and the dot on the Feeds link). The view observes the run and
+never steers it: a hook that records a step never awaits, never throws and changes nothing the run decides.
+
+[mermaid]
+....
+flowchart LR
+  R[MediaService, MediaIdResolver,<br/>DetailsFetcher, feed providers] -->|FeedRunSpans: start and stop| A[Sammlarr.FeedRun source<br/>+ System.Net.Http]
+  A -->|own ActivityListener, synchronous| T[FeedRunTrace singleton<br/>steps per run, owner, cursor]
+  A -.->|OTel SDK, same spans| O[OTLP, dashboard]
+  T -->|IFeedRunTraces.ReadAsync<br/>every 250 ms while a run is live| P[FeedRunProgress<br/>scoped per circuit]
+  P --> L[FeedRunLive] -->|push batch| J[feed-live.js<br/>replays at real timing]
+  P --> C[card running pill]
+  P --> N[Feeds nav dot]
+....
+
+A run's titles, paths, hops and give-ups are spans on the `Sammlarr.FeedRun` activity source, started through the
+static `FeedRunSpans` and only under the run span `FeedRunEngine` opens, so Browse, search and the editor preview record
+nothing. `FeedRunTrace` reads them with its own `ActivityListener`, not an exporter (exporters see ended spans in
+batches, after the sampler) and not an SDK processor (the view must survive sampling or `OTEL_SDK_DISABLED`), and turns
+each start and stop into a numbered step; the HTTP spans under a hop upgrade its outcome to answered after a 429 or gave
+up. The trace is in memory only: one per feed, kept 30 seconds after the run ends, capped at 50,000 steps, read only by
+the feed's owner (`FeedRunTraces` compares the owner with `ICurrentUser`).
+
+Pages pull instead of subscribing. `IEventPublisher` calls every subscriber synchronously on the publishing thread, and
+hundreds of hops a second there would slow the run itself; a reader per circuit (`FeedRunProgress`) asks for the steps
+after its cursor four times a second while one of its owner's feeds runs, and the browser replays each batch at its
+recorded timing, 250 ms behind, so dots move smoothly without a render per hop. A late joiner or a view shown again
+after Hide starts from a snapshot (titles in flight, per-service counts, the fates so far). Telemetry may drop data and
+so may the view: the card's bar and every saved number come from the run that `FeedRunEngine` records (`FeedRunCounts`,
+with the titles already known and those not found earlier), never from spans
+(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0016-live-runs-pull-from-an-in-memory-trace.md[ADR 0016]).
