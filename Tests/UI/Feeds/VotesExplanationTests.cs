@@ -51,6 +51,14 @@ public class VotesExplanationTests
 	}
 
 	[Test]
+	public async Task For_WhenFirstAvailable_SaysATitleWhoseFirstRatingHasNoVotesFails()
+	{
+		var explanation = VotesExplanation.For(new RatingStrategy(new OrderedRating()), isOwn: false, Everything);
+
+		await Assert.That(explanation.UnvotedLine).IsEqualTo("A title whose first rating is Rotten Tomatoes or Metacritic has no votes and fails this rule.");
+	}
+
+	[Test]
 	public async Task For_WhenAverageCountsRottenTomatoesAlone_WarnsThatEveryTitleFails()
 	{
 		var averaged = new AveragedRating([RatingSource.RottenTomatoesCritics, RatingSource.RottenTomatoesAudience]);
