@@ -161,20 +161,6 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		return Optional.Of(found).Map(session => new UserSession(session.Role, Optional.Of(session.SessionsRevokedAt)));
 	}
 
-	public async Task<bool> WasKeyPromptedAsync(UserId id, CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx.Users.AsNoTracking().AnyAsync(user => user.Id == id.Value && user.KeyPromptedAt != null, cancellationToken);
-	}
-
-	public async Task MarkKeyPromptedAsync(UserId id, DateTimeOffset promptedAt, CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var user = await ctx.Users.SingleAsync(row => row.Id == id.Value, cancellationToken);
-		user.KeyPromptedAt = promptedAt;
-		await ctx.SaveChangesAsync(cancellationToken);
-	}
-
 	private static async Task<Dictionary<Guid, int>> CountedAsync<T>(IQueryable<T> rows, CancellationToken cancellationToken)
 		where T : class
 	{

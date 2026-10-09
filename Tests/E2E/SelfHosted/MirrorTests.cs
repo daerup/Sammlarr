@@ -48,7 +48,7 @@ public class MirrorTests
 		var admin = await SelfHostedApp.OpenPageAsync();
 		var invite = await SelfHostedSetup.FinishAsync(admin, stack);
 		var member = await SelfHostedApp.OpenPageAsync();
-		await SelfHostedSetup.JoinWithTmdbKeyAsync(member, invite);
+		await SelfHostedSetup.JoinAsync(member, invite);
 		await SelfHostedWantlist.AddAsync(admin, Titles.ProjectHailMary);
 		await SelfHostedWantlist.SyncAsync(admin);
 		await SelfHostedWantlist.SearchWithRadarrAndSonarrAsync(admin);

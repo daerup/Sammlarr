@@ -28,8 +28,4 @@ public interface IUserRepository
 	Task DeleteAsync(UserId id, CancellationToken cancellationToken = default);
 
 	Task<Optional<UserSession>> FindSessionAsync(UserId id, CancellationToken cancellationToken = default);
-
-	Task<bool> WasKeyPromptedAsync(UserId id, CancellationToken cancellationToken = default);
-
-	Task MarkKeyPromptedAsync(UserId id, DateTimeOffset promptedAt, CancellationToken cancellationToken = default);
 }
