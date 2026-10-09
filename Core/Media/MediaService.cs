@@ -216,6 +216,12 @@ internal sealed class MediaService(
 		return [.. wanted.Where(id => !found.ContainsKey(id))];
 	}
 
+	public async Task<IReadOnlyDictionary<MediaId, MediaType>> GetTypesAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
+	{
+		var stored = await mediaRepository.GetAsync([.. ids.Distinct()], cancellationToken);
+		return stored.ToDictionary(media => media.Identity.Id, media => media.Identity.Type);
+	}
+
 	public async Task<Optional<IExternalMediaId>> FindIdAsync(MediaId id, MediaProvider provider, CancellationToken cancellationToken = default)
 	{
 		try
