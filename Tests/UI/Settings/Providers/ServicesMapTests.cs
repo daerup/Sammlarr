@@ -40,9 +40,9 @@ public class ServicesMapTests : BunitContext
 			.Select(service =>
 				$"{service.QuerySelector(".map-service-name")!.TextContent.Trim()}: {service.QuerySelector(".map-service-status")!.TextContent.Trim()}"
 			);
-		var tiles = cut.FindAll(".map-tile").Select(tile => tile.QuerySelector(".sr-only")!.TextContent.Trim());
+		var sources = cut.FindAll(".map-source").Select(source => source.GetAttribute("aria-label")!);
 		await Assert.That(boxes).IsEquivalentTo(["Plex: Your account", "TMDb: Your key is set"]);
-		await Assert.That(tiles).IsEquivalentTo(["MDBList: No key yet", "AniList: Ready", "MyAnimeList: No key yet", "Trakt: No key yet"]);
+		await Assert.That(sources).IsEquivalentTo(["MDBList: No key yet", "AniList: Ready", "MyAnimeList: No key yet", "Trakt: No key yet"]);
 	}
 
 	[Test]
@@ -52,6 +52,30 @@ public class ServicesMapTests : BunitContext
 
 		var starts = cut.FindAll(".map-traces path").Select(path => path.GetAttribute("d")!.Split(' ')[0]);
 		await Assert.That(starts).IsEquivalentTo(Enumerable.Repeat("M256", 9));
+	}
+
+	[Test]
+	public async Task Feeds_InsteadOfAViaDot_GetsAPinPerLineInTheLinesColour()
+	{
+		var cut = RenderMap(canPick: false);
+		var branding = Services.GetRequiredService<MediaProviderBrandingService>();
+		RemoteService[] feeds = [RemoteService.Tmdb, RemoteService.Mdblist, RemoteService.AniList, RemoteService.Mal, RemoteService.Trakt];
+
+		var pins = cut.FindAll(".map-feeds-pin").Select(pin => pin.GetAttribute("fill")!);
+		await Assert.That(cut.FindAll(".map-vias circle").Count).IsEqualTo(4);
+		await Assert.That(pins).IsEquivalentTo(feeds.Select(feed => branding.Color(feed)));
+	}
+
+	[Test]
+	public async Task Sources_WithRoomForTheirName_ShowItAndTheirStatusLikeAServiceBox()
+	{
+		var cut = RenderMap(canPick: false, RemoteService.AniList);
+
+		var sources = cut.FindAll(".map-source")
+			.Select(source => $"{source.QuerySelector(".map-service-name")!.TextContent.Trim()}: {source.QuerySelector(".map-service-status")!.TextContent.Trim()}");
+		await Assert
+			.That(sources)
+			.IsEquivalentTo(["MDBList: No key yet", "AniList: Ready", "MyAnimeList: No key yet", "Trakt: No key yet"], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -208,7 +232,7 @@ public class ServicesMapTests : BunitContext
 		);
 
 		await Service(cut, "TMDb").ClickAsync();
-		await cut.Find("button.map-tile").ClickAsync();
+		await cut.Find("button.map-source").ClickAsync();
 
 		await Assert.That(opened).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Mdblist], CollectionOrdering.Matching);
 	}
