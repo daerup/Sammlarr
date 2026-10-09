@@ -56,6 +56,13 @@
                                       ActiveFilters="_filter.ActiveCount"
                                       OnEnterEditMode="() => _isSelecting = true"
                                       OnToggleFilters="() => _showFilters = !_showFilters"/>
+                @if (_feeds.Count > 0 && !_isSelecting)
+                {
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="OpenRunFeeds">
+                        <LucideIcon Name="play" Size="16" Class="mr-2"/>
+                        Run feeds
+                    </BbButton>
+                }
                 <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/feeds/create"))">
                     <LucideIcon Name="plus" Size="15" Class="mr-2.5 shrink-0"/>
                     Add feed
@@ -221,7 +228,7 @@
                 Pending="PendingFeeds"
                 Now="_now"
                 ProviderName="@ProviderName"
-                Selection="_selection.Keys"
+                Selection="@(_runFromSelection ? _selection.Keys : null)"
                 OnRun="RunFeedsAsync"/>
 
 @if (_confirm is { } confirm)
@@ -290,6 +297,7 @@
     private bool _showFilters;
     private bool _isSelecting;
     private bool _isRunOpen;
+    private bool _runFromSelection;
     private FeedsConfirm? _confirm;
     private IReadOnlyList<FeedRow> _deleting = [];
 
@@ -392,10 +400,15 @@
         _isSelecting = false;
     }
 
-    private void OpenBulkRun()
+    private void OpenBulkRun() => OpenRun(fromSelection: true);
+
+    private void OpenRunFeeds() => OpenRun(fromSelection: false);
+
+    private void OpenRun(bool fromSelection)
     {
         _now = DateTimeOffset.Now;
         _candidates = RunPlan.Candidates(_feeds, _now, TimeZoneInfo.Local);
+        _runFromSelection = fromSelection;
         _isRunOpen = true;
     }
 
