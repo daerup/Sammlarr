@@ -163,8 +163,8 @@ Appending `-- --StagingScenario=Fresh` to the run command picks the other one fo
 running Sammlarr; switching one to a schedule in staging schedules it as usual.
 
 **Commands** on the `sammlarr` resource, from the dashboard (or `aspire resource sammlarr <command>` while staging is the only AppHost running), each confirming first, one at a time:
-`reset-configured` (Reset to set up) and `reset-fresh` (Reset to fresh install) stop Sammlarr, Radarr and Sonarr, wipe their data, run the
-seeder again and start everything; `update-image` (Update to current code) rebuilds the image from the working tree and restarts Sammlarr.
+`restage` (the `Configured` scenario) and `reset` (the `Fresh` one) stop Sammlarr, Radarr and Sonarr, wipe their data, run the
+seeder again and start everything; `rebuild` rebuilds the image from the working tree and restarts Sammlarr.
 
 **What is real and what is caught.** TMDB, MDBList, Wikidata, TVmaze, IMDb's ratings file, AniList, MyAnimeList, Trakt and the anime id map (`raw.githubusercontent.com`) are real (with your keys). Radarr and Sonarr use their own metadata
 services. Plex is read-only: its APIs (`Plex` in the settings) go through WireMock, which proxies sign-in, search, the watchlist and

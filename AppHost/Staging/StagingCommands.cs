@@ -20,21 +20,21 @@ internal static class StagingCommands
 	internal static void WithStagingCommands(this IResourceBuilder<ContainerResource> sammlarr, StagingResources staging)
 	{
 		sammlarr.WithCommand(
-			"reset-configured",
-			"Reset to set up",
+			"restage",
+			"Restage",
 			context => ExclusiveAsync(context, run => ResetAsync(run, sammlarr.Resource, staging, StagingScenarioChoice.Configured)),
 			new CommandOptions { ConfirmationMessage = "Wipe Sammlarr, Radarr and Sonarr and seed the set-up scenario again?", IconName = "ArrowCounterclockwise" }
 		);
 		sammlarr.WithCommand(
-			"reset-fresh",
-			"Reset to fresh install",
+			"reset",
+			"Reset",
 			context => ExclusiveAsync(context, run => ResetAsync(run, sammlarr.Resource, staging, StagingScenarioChoice.Fresh)),
 			new CommandOptions { ConfirmationMessage = "Wipe Sammlarr, Radarr and Sonarr and start Sammlarr with no admin?", IconName = "Delete" }
 		);
 		sammlarr.WithCommand(
-			"update-image",
-			"Update to current code",
-			context => ExclusiveAsync(context, run => UpdateAsync(run, sammlarr)),
+			"rebuild",
+			"Rebuild",
+			context => ExclusiveAsync(context, run => RebuildAsync(run, sammlarr)),
 			new CommandOptions { ConfirmationMessage = "Rebuild the Sammlarr image from the working tree and restart it?", IconName = "ArrowSync" }
 		);
 	}
@@ -103,7 +103,7 @@ internal static class StagingCommands
 		return await run.StartHealthyAsync(sammlarr);
 	}
 
-	private static async Task<ExecuteCommandResult> UpdateAsync(CommandRun run, IResourceBuilder<ContainerResource> sammlarr)
+	private static async Task<ExecuteCommandResult> RebuildAsync(CommandRun run, IResourceBuilder<ContainerResource> sammlarr)
 	{
 		sammlarr.Resource.TryGetContainerImageName(out var image);
 		using var build = Process.Start(
