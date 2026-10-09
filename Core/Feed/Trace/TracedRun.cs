@@ -188,7 +188,7 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 
 	private TraceCursor Cursor() => new(Some.Of(key), _steps.Count);
 
-	private TraceBatch Batch(long seq) => new(Cursor(), [.. _steps.Skip((int)seq)], _fates.Tally(), _requests, _ended);
+	private TraceBatch Batch(long seq) => new(Cursor(), Elapsed(), [.. _steps.Skip((int)seq)], _fates.Tally(), _requests, _ended);
 
 	private TraceSnapshot Snapshot()
 	{
