@@ -204,7 +204,7 @@
 
 <ChangeDialog Open="_confirmOpen"
               OnOpenChanged="HandleConfirmOpenChanged"
-              Title="@($"Run \"{_pendingFeed?.Name}\" now?")"
+              Title="@($"Run \"{_pendingFeed?.Name}\"?")"
               Subtitle="@(_pendingPlan is {} loaded ? FeedRunView.Pending(loaded) : null)"
               Loading="_isPreviewing"
               Items="_pendingItems"
@@ -227,9 +227,9 @@
     </Badges>
     <Actions>
         <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => _confirmOpen = false)">Cancel</BbButton>
-        <BbButton Size="ButtonSize.Small" Disabled="@(_pendingPlan is null)" OnClick="ConfirmRunAsync">
+        <BbButton Size="ButtonSize.Small" Disabled="@(_pendingFeed is null)" OnClick="ConfirmRunAsync">
             <LucideIcon Name="play" Size="13" Class="mr-1.5"/>
-            Run now
+            Run
         </BbButton>
     </Actions>
 </ChangeDialog>
@@ -321,6 +321,7 @@
     private bool _isPreviewing;
     private Feed? _pendingFeed;
     private IFeedPlan? _pendingPlan;
+    private CancellationTokenSource? _preview;
     private IReadOnlyList<ChangeItem> _pendingItems = [];
     private IReadOnlyList<ChangeChip> _pendingChips = [];
     private MediaMatchResult? _selected;
@@ -556,6 +557,7 @@
     {
         Events.Published -= OnEvent;
         Progress.Changed -= OnProgress;
+        StopPreview();
         _cancellation.Cancel();
         _cancellation.Dispose();
     }
@@ -609,21 +611,25 @@
         _pendingItems = [];
         _pendingChips = [];
         _isPreviewing = true;
+        StopPreview();
+        _preview = CancellationTokenSource.CreateLinkedTokenSource(_cancellation.Token);
+        var token = _preview.Token;
         StateHasChanged();
 
         try
         {
-            switch (await Planner.PlanAsync(new SavedFeed(feed.Id)))
+            switch (await Planner.PlanAsync(new SavedFeed(feed.Id), token))
             {
                 case IFeedPlan plan:
                     await FillConfirmAsync(plan);
                     break;
-                case FeedPlanFailed failed:
+                case FeedPlanFailed failed when !token.IsCancellationRequested:
                     _confirmOpen = false;
                     Notifier.Warning(failed.ToString(), null);
                     break;
             }
         }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
         catch (Exception ex)
         {
             _confirmOpen = false;
@@ -633,6 +639,13 @@
         {
             _isPreviewing = false;
         }
+    }
+
+    private void StopPreview()
+    {
+        _preview?.Cancel();
+        _preview?.Dispose();
+        _preview = null;
     }
 
     private async Task ReloadPreviewAsync()
@@ -677,6 +690,7 @@
         if (!open)
         {
             _selected = null;
+            StopPreview();
         }
     }
 
@@ -688,6 +702,7 @@
         }
 
         _confirmOpen = false;
+        StopPreview();
         try
         {
             switch (await JobQueue.EnqueueAsync(new RunFeed(feed.Id, new Manual())))

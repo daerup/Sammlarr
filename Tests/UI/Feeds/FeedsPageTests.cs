@@ -13,6 +13,7 @@ using Contracts.Providers;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Feed;
+using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Feed.Trace;
 using Domain.Jobs;
@@ -36,6 +37,10 @@ public class FeedsPageTests : BunitContext
 	private static readonly DateTimeOffset Start = new(2026, 10, 8, 18, 0, 0, TimeSpan.Zero);
 
 	private readonly Mock<IDateTimeProvider> _clock = IDateTimeProvider.Mock();
+
+	private readonly Mock<IJobQueue> _jobs = IJobQueue.Mock();
+
+	private readonly Mock<IFeedRunPlanner> _planner = IFeedRunPlanner.Mock();
 
 	[Test]
 	public async Task RunFeeds_FromThePageHeader_OpensTheDialogWithItsOwnPicks()
@@ -143,6 +148,25 @@ public class FeedsPageTests : BunitContext
 		await Assert.That(cut.FindAll("[data-testid=running-pill]")).IsEmpty();
 	}
 
+	[Test]
+	public async Task Run_WhileThePreviewIsStillLoading_QueuesTheFeed()
+	{
+		RegisterServices([Overview()]);
+		_planner.PlanAsync(Any<FeedPlanTarget>(), Any()).ReturnsAsync(new TaskCompletionSource<FeedPlanResult>().Task);
+		_jobs.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Queued));
+		var cut = RenderPage();
+		cut.WaitForState(() => cut.FindAll(".feed-card-run").Count == 1);
+		_ = cut.Find(".feed-card-run").ClickAsync(new());
+		cut.WaitForState(() => Buttons(cut, "Run").Any(button => button.TextContent.Trim() == "Run"));
+		var run = Buttons(cut, "Run").Single(button => button.TextContent.Trim() == "Run");
+		await Assert.That(run.HasAttribute("disabled")).IsFalse();
+		await Assert.That(cut.Find("[role=dialog]").TextContent).Contains("Run \"Comedy\"?");
+
+		await run.ClickAsync(new());
+
+		_jobs.EnqueueAsync(Any<IJobRequest>(), Any()).WasCalled(Times.Once);
+	}
+
 	private void RegisterServices(IReadOnlyList<FeedOverview> overviews)
 	{
 		RegisterServices(overviews, new None(), new NoTrace());
@@ -174,8 +198,8 @@ public class FeedsPageTests : BunitContext
 		media.GetDetailsAsync(Any(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());
 		Services.AddSingleton(media.Object);
 
-		Services.AddSingleton(IJobQueue.Mock().Object);
-		Services.AddSingleton(IFeedRunPlanner.Mock().Object);
+		Services.AddSingleton(_jobs.Object);
+		Services.AddSingleton(_planner.Object);
 		Services.AddSingleton(IWantlistService.Mock().Object);
 		Services.AddSingleton(IBlocklistService.Mock().Object);
 		Services.AddSingleton(IProviderConfigService.Mock().Object);

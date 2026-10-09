@@ -17,8 +17,8 @@ public class FeedLiveRunTests
 		var card = page.FeedCard(name);
 		await Expect(card).ToBeVisibleAsync(Wait.Settle);
 
-		await card.Labelled("Run now").ClickAsync();
-		var confirm = page.GetByRole(AriaRole.Dialog).Button("Run now");
+		await card.Labelled("Run").ClickAsync();
+		var confirm = page.GetByRole(AriaRole.Dialog).Button("Run");
 		await Expect(confirm).ToBeEnabledAsync(Wait.Preview);
 		await confirm.ClickAsync();
 
