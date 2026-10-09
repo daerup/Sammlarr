@@ -17,11 +17,14 @@ internal sealed record VotesRow(RatingSource Source, Optional<int> Rank)
 	internal bool HasVotes => Source.Card.PublishesVotes;
 }
 
-internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Rows, VotesNote Note)
+internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Rows, VotesNote Note, bool FirstAvailable)
 {
 	internal const string Heading = "Votes: how many people rated a title";
 
-	internal string UnvotedLine => $"A title only {Unvoted(" or ")} rates has no votes and fails this rule.";
+	internal string UnvotedLine =>
+		FirstAvailable
+			? $"A title whose first rating is {Unvoted(" or ")} has no votes and fails this rule."
+			: $"A title only {Unvoted(" or ")} rates has no votes and fails this rule.";
 
 	internal string Warning =>
 		$"Every title {Unvoted(" or ")} rates fails this rule, because none of them publishes votes. Switch a source with votes on with the";
@@ -41,10 +44,15 @@ internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Row
 		List<VotesRow> rows = [.. averaged.Counted(available).Order().DistinctBy(source => source.Card.Owner).Select(source => new VotesRow(source, new None()))];
 		if (rows.Count > 0 && rows.All(row => !row.HasVotes))
 		{
-			return new($"This feed's rating averages {string.Join(" and ", rows.Select(row => row.Name))} only:", rows, VotesNote.EveryTitleFails);
+			return new(
+				$"This feed's rating averages {string.Join(" and ", rows.Select(row => row.Name))} only:",
+				rows,
+				VotesNote.EveryTitleFails,
+				FirstAvailable: false
+			);
 		}
 
-		return new($"Added up from the providers this feed's rating averages ({whose}):", rows, Closing(rows));
+		return new($"Added up from the providers this feed's rating averages ({whose}):", rows, Closing(rows), FirstAvailable: false);
 	}
 
 	private static VotesExplanation Ordered(OrderedRating ordered, string whose, ValueSet<RatingSource> available)
@@ -53,7 +61,7 @@ internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Row
 		[
 			.. ordered.Order.Where(available.Contains).Select((source, index) => new VotesRow(source, Some.Of(index + 1))).DistinctBy(row => row.Source.Card.Owner),
 		];
-		return new($"Taken from the first of these that rated it ({whose}):", rows, Closing(rows));
+		return new($"Taken from the first of these that rated it ({whose}):", rows, Closing(rows), FirstAvailable: true);
 	}
 
 	private static VotesNote Closing(IReadOnlyList<VotesRow> rows) => rows.Any(row => !row.HasVotes) ? VotesNote.UnvotedTitlesFail : VotesNote.Nothing;
