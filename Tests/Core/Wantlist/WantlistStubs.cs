@@ -41,24 +41,22 @@ internal static class WantlistStubs
 		Mock<IWantlistOutbox> outbox,
 		ILogger<WantlistSyncPlanner>? logger = null,
 		Mock<IWantlistRepository>? repository = null,
-		Mock<IMediaRepository>? media = null
+		Mock<IMediaService>? media = null
 	)
 	{
 		return new WantlistSyncPlanner(
 			Active(sink),
 			(repository ?? EmptyRepository()).Object,
 			outbox.Object,
-			(media ?? IMediaRepository.Mock()).Object,
+			(media ?? IMediaService.Mock()).Object,
 			logger ?? NullLogger<WantlistSyncPlanner>.Instance
 		);
 	}
 
-	public static Mock<IMediaRepository> Typed(params (MediaId Id, MediaType Type)[] titles)
+	public static Mock<IMediaService> Typed(params (MediaId Id, MediaType Type)[] titles)
 	{
-		var media = IMediaRepository.Mock();
-		media
-			.GetAsync(Any(), Any())
-			.Returns([.. titles.Select(title => new StoredMedia(new MediaIdentity(title.Id, [TmdbId.From($"{title.Id}", title.Type)]), new None()))]);
+		var media = IMediaService.Mock();
+		media.GetTypesAsync(Any(), Any()).Returns(titles.ToDictionary(title => title.Id, title => title.Type));
 		return media;
 	}
 
@@ -96,7 +94,7 @@ internal static class WantlistStubs
 		ICurrentUser? user = null,
 		IMessagePublisher? publisher = null,
 		Mock<IWantlistRepository>? repository = null,
-		Mock<IMediaRepository>? media = null
+		Mock<IMediaService>? media = null
 	)
 	{
 		outbox ??= EmptyOutbox();

@@ -16,7 +16,7 @@ internal sealed class WantlistSyncPlanner(
 	ActiveSink activeSink,
 	IWantlistRepository repo,
 	IWantlistOutbox outbox,
-	IMediaRepository media,
+	IMediaService media,
 	ILogger<WantlistSyncPlanner> logger
 ) : IWantlistSyncPlanner
 {
@@ -58,8 +58,8 @@ internal sealed class WantlistSyncPlanner(
 			async unreachable =>
 			{
 				var answered = Enum.GetValues<ArrApp>().Except(unreachable.Apps).Select(app => app.Type).ToHashSet();
-				var stored = await media.GetAsync([.. ids.Distinct()], cancellationToken);
-				var planned = stored.Where(found => answered.Contains(found.Identity.Type)).Select(found => found.Identity.Id).ToHashSet();
+				var types = await media.GetTypesAsync(ids, cancellationToken);
+				var planned = types.Where(type => answered.Contains(type.Value)).Select(type => type.Key).ToHashSet();
 				return (IReadOnlySet<MediaId>)ids.Where(id => !planned.Contains(id)).ToHashSet();
 			},
 			() => Task.FromResult<IReadOnlySet<MediaId>>(new HashSet<MediaId>())

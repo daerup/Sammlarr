@@ -123,8 +123,8 @@ internal sealed class SinkSwitch(
 	{
 		await using var scope = scopes.CreateAsyncScope();
 		using var _ = await scope.ServiceProvider.GetRequiredService<IUserScope>().AsAsync(user, cancellationToken);
-		var items = await scope.ServiceProvider.GetRequiredService<IWantlistRepository>().GetAllAsync(cancellationToken);
-		return [.. items.Select(item => item.MediaId)];
+		var titles = await scope.ServiceProvider.GetRequiredService<IWantlistService>().GetAsync(cancellationToken);
+		return [.. titles.Ids];
 	}
 
 	private async Task<int> RequeueAsync(UserId user, CancellationToken cancellationToken)
