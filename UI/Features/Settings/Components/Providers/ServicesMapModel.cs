@@ -3,13 +3,6 @@ using Domain.Settings;
 
 namespace UI.Features.Settings.Components.Providers;
 
-internal enum TileEdge
-{
-	Bottom,
-	Top,
-	Left,
-}
-
 internal sealed record MapPoint(double X, double Y);
 
 internal enum MapChoice
@@ -24,7 +17,10 @@ internal sealed record MapRole(string Name, string Icon, string Description, dou
 
 internal sealed record MapService(Service Provider, double Y, IReadOnlyList<double> Pins);
 
-internal sealed record MapTile(Service Provider, double X, double Y, TileEdge Entry);
+internal sealed record MapSource(Service Provider, double X, double Y, double Width)
+{
+	internal bool Named => Width >= ServicesMapModel.NamedSourceWidth;
+}
 
 internal sealed record MapTrace(string Role, Service Provider, IReadOnlyList<MapPoint> Points)
 {
@@ -60,7 +56,7 @@ internal static class TracePath
 internal sealed record ServicesMapModel(
 	IReadOnlyList<MapRole> Roles,
 	IReadOnlyList<MapService> Services,
-	IReadOnlyList<MapTile> Tiles,
+	IReadOnlyList<MapSource> Sources,
 	IReadOnlyList<MapTrace> Traces,
 	double Height
 )
@@ -71,23 +67,23 @@ internal sealed record ServicesMapModel(
 	internal const double CardWidth = Width + 2 * CardPadding + 2;
 	private const double RowHeight = ServiceHeight + ServiceGap;
 	internal const double ServiceHeight = 44;
-	private const double TileSize = 28;
+	internal const double NamedSourceWidth = 150;
 	internal const double ChipX = RoleWidth + LineGap / 4;
-	private const double LineGap = 340;
+	private const double LineGap = 560;
 	private const double JogX = RoleWidth + LineGap / 2;
-	private const double ServiceWidth = 266;
+	internal const double ServiceWidth = 320;
 	private const double ServiceGap = 8;
 	private const double CardPadding = 16;
-	private const double TileGap = 5;
-	private const double TilePitch = TileSize + TileGap;
-	private const int RowCapacity = (int)((ServiceWidth + TileGap) / TilePitch);
 	private const double PinPitch = 8;
-	private const double RibbonPitch = 3.8;
-	private const double Clearance = 8;
-	private const double LaneMargin = 4;
-	private const double SplitLead = 18;
-	private const double RiseInset = 16;
-	private const double RiseLead = 10;
+	private const double SourceX = RoleWidth + 44;
+	private const double SourceGap = 16;
+	private const double MaxSourceWidth = 200;
+	private const double SourceDrop = 26;
+	private const double RiseX = ServiceX - 16;
+	private const double RisePitch = 6;
+	private const double FeedPinRise = 16;
+
+	internal IReadOnlyList<MapTrace> FeedLines => [.. Traces.Where(trace => trace.Role == ServiceRoles.Feeds.Name)];
 
 	internal static ServicesMapModel For(ProviderConfig config) => For(config, [.. Enum.GetValues<FeedProvider>().Select(feed => feed.Service).Distinct()]);
 
@@ -103,9 +99,11 @@ internal sealed record ServicesMapModel(
 			return services.Single(service => service.Provider == provider).Pins[arriving.IndexOf(role)];
 		}
 
-		var boxed = feeds.Where(feed => services.Any(service => service.Provider == feed)).ToList();
 		var feedsRole = roles.Single(role => role.Provider is null);
-		var tiles = PlaceTiles([.. feeds.Where(feed => !boxed.Contains(feed))], services[^1].Y + ServiceHeight / 2 + ServiceGap, feedsRole.Y, feeds.Count);
+		var boxed = feeds.Where(feed => services.Any(service => service.Provider == feed)).ToList();
+		var unboxed = feeds.Where(feed => !boxed.Contains(feed)).ToList();
+		var lines = feeds.Count;
+		var sources = PlaceSources(unboxed, FeedPin(feedsRole, lines - 1, lines));
 
 		List<MapTrace> traces =
 		[
@@ -120,43 +118,51 @@ internal sealed record ServicesMapModel(
 						[new(RoleWidth, landing.Role.Y), new(JogX, landing.Role.Y), new(JogX, pin), new(ServiceX, pin)]
 					);
 				}),
-			.. FeedTraces(feedsRole, [.. boxed.Select(provider => (provider, new MapPoint(ServiceX, Pin(feedsRole, provider))))], tiles),
+			.. BoxedTraces(feedsRole, [.. boxed.Select(provider => (provider, Pin(feedsRole, provider)))], lines),
+			.. SourceTraces(feedsRole, sources, lines),
 		];
 
 		var height = new[]
 		{
 			roles.Count * RowHeight,
 			services.Max(service => service.Y + ServiceHeight / 2),
-			tiles.Select(tile => tile.Y + TileSize + 2).DefaultIfEmpty().Max(),
+			sources.Select(source => source.Y + ServiceHeight + 2).DefaultIfEmpty().Max(),
 			traces.SelectMany(trace => trace.Points).Max(point => point.Y) + 6,
 		}.Max();
 
-		return new ServicesMapModel(roles, services, tiles, traces, height);
+		return new ServicesMapModel(roles, services, sources, traces, height);
 	}
 
-	internal static IReadOnlyList<MapTile> PlaceTiles(IReadOnlyList<Service> sources, double floor, double feedsRow, int lines)
+	internal static IReadOnlyList<MapSource> PlaceSources(IReadOnlyList<Service> sources, double lowestPin)
 	{
-		var top = Math.Max(floor, feedsRow - TileSize / 2);
-		var first = floor <= feedsRow - TileSize / 2 ? TileEdge.Left : TileEdge.Bottom;
-		TileEdge Upper(int index) => index == 0 ? first : TileEdge.Bottom;
+		var top = lowestPin + SourceDrop;
+		var width = Math.Min(MaxSourceWidth, (Width - SourceX - Math.Max(0, sources.Count - 1) * SourceGap) / Math.Max(1, sources.Count));
+		return [.. sources.Select((source, index) => new MapSource(source, SourceX + index * (width + SourceGap), top, width))];
+	}
 
-		if (sources.Count <= RowCapacity)
-		{
-			return [.. sources.Select((source, index) => new MapTile(source, ServiceX + index * TilePitch, top, Upper(index)))];
-		}
+	private static IEnumerable<MapTrace> BoxedTraces(MapRole feeds, IReadOnlyList<(Service Provider, double Pin)> boxed, int lines)
+	{
+		var ordered = boxed.OrderBy(box => box.Pin).ToList();
+		return ordered.Select(
+			(box, index) =>
+			{
+				var y = FeedPin(feeds, index, lines);
+				var rise = RiseX - (ordered.Count - 1 - index) * RisePitch;
+				return new MapTrace(feeds.Name, box.Provider, [new(RoleWidth, y), new(rise, y), new(rise, box.Pin), new(ServiceX, box.Pin)]);
+			}
+		);
+	}
 
-		var upper = (sources.Count + 1) / 2;
-		var left = upper <= RowCapacity ? ServiceX : Width - (upper * TilePitch - TileGap);
-		var lower = top + TileSize + (lines - 1) * RibbonPitch + 2 * Clearance + LaneMargin;
-		return
-		[
-			.. sources.Select(
-				(source, index) =>
-					index < upper
-						? new MapTile(source, left + index * TilePitch, top, Upper(index))
-						: new MapTile(source, left + (index - upper) * TilePitch, lower, TileEdge.Top)
-			),
-		];
+	private static IEnumerable<MapTrace> SourceTraces(MapRole feeds, IReadOnlyList<MapSource> sources, int lines)
+	{
+		return sources.Select(
+			(source, index) =>
+			{
+				var y = FeedPin(feeds, lines - 1 - index, lines);
+				var middle = source.X + source.Width / 2;
+				return new MapTrace(feeds.Name, source.Provider, [new(RoleWidth, y), new(middle, y), new(middle, source.Y)]);
+			}
+		);
 	}
 
 	private static List<MapRole> RolesFor(ProviderConfig config)
@@ -212,58 +218,5 @@ internal sealed record ServicesMapModel(
 
 	private static double PinOffset(int index, int count) => (index - (count - 1) / 2.0) * PinPitch;
 
-	private static IEnumerable<MapTrace> FeedTraces(MapRole feeds, IReadOnlyList<(Service Provider, MapPoint Pin)> boxed, IReadOnlyList<MapTile> tiles)
-	{
-		List<(Service Provider, MapPoint Entry, TileEdge Edge)> peels =
-		[
-			.. tiles.Where(tile => tile.Entry == TileEdge.Bottom).OrderBy(tile => tile.X).Select(Peel),
-			.. tiles.Where(tile => tile.Entry == TileEdge.Top).OrderByDescending(tile => tile.X).Select(Peel),
-		];
-		var centre = Centre(feeds.Y, peels);
-		var tracks = peels.Select((_, index) => centre + (index - (peels.Count - 1) / 2.0) * RibbonPitch).ToList();
-		var below = tracks.DefaultIfEmpty(double.PositiveInfinity).First();
-		List<(Service Provider, MapPoint Entry, bool Boxed, double Track)> lines =
-		[
-			.. boxed.Select((box, index) => (box.Provider, box.Pin, true, Math.Min(feeds.Y, below - (boxed.Count - index) * RibbonPitch))),
-			.. tiles.Where(tile => tile.Entry == TileEdge.Left).Select(tile => (tile.Provider, Entry(tile), false, feeds.Y)),
-			.. peels.Select((peel, index) => (peel.Provider, peel.Entry, false, tracks[index])),
-		];
-		var deepest = lines.Max(line => Math.Abs(line.Track - feeds.Y));
-		var rise = tiles.Select(tile => tile.X - RiseLead).Prepend(ServiceX - RiseInset).Min();
-		var split = lines.Select(line => line.Boxed ? rise : line.Entry.X).Min() - deepest - SplitLead;
-
-		return lines.Select(line =>
-		{
-			var turn = split + deepest - Math.Abs(line.Track - feeds.Y);
-			MapPoint[] strand = [new(RoleWidth, feeds.Y), new(turn, feeds.Y), new(turn, line.Track)];
-			MapPoint[] landing = line.Boxed ? [new(rise, line.Track), new(rise, line.Entry.Y), line.Entry] : [new(line.Entry.X, line.Track), line.Entry];
-			return new MapTrace(feeds.Name, line.Provider, [.. strand, .. landing]);
-		});
-	}
-
-	private static double Centre(double feedsY, List<(Service Provider, MapPoint Entry, TileEdge Edge)> peels)
-	{
-		var middle = (peels.Count - 1) / 2.0;
-		var floor = peels
-			.Select((peel, index) => peel.Edge == TileEdge.Bottom ? peel.Entry.Y + Clearance - (index - middle) * RibbonPitch : double.NegativeInfinity)
-			.DefaultIfEmpty(double.NegativeInfinity)
-			.Max();
-		var ceiling = peels
-			.Select((peel, index) => peel.Edge == TileEdge.Top ? peel.Entry.Y - Clearance - (index - middle) * RibbonPitch : double.PositiveInfinity)
-			.DefaultIfEmpty(double.PositiveInfinity)
-			.Min();
-		return Math.Min(Math.Max(feedsY, floor), ceiling);
-	}
-
-	private static (Service Provider, MapPoint Entry, TileEdge Edge) Peel(MapTile tile) => (tile.Provider, Entry(tile), tile.Entry);
-
-	private static MapPoint Entry(MapTile tile)
-	{
-		return tile.Entry switch
-		{
-			TileEdge.Bottom => new(tile.X + TileSize / 2, tile.Y + TileSize),
-			TileEdge.Top => new(tile.X + TileSize / 2, tile.Y),
-			TileEdge.Left => new(tile.X, tile.Y + TileSize / 2),
-		};
-	}
+	private static double FeedPin(MapRole feeds, int index, int lines) => feeds.Y + Math.Max(PinOffset(0, lines), -FeedPinRise) + index * PinPitch;
 }

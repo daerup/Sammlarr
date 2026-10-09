@@ -42,7 +42,7 @@
 
             @foreach (var service in _model.Services)
             {
-                var style = $"left: {Px(ServicesMapModel.ServiceX)}px; top: {Px(service.Y - ServicesMapModel.ServiceHeight / 2)}px; --brand: {Color(service.Provider)}";
+                var style = $"left: {Px(ServicesMapModel.ServiceX)}px; top: {Px(service.Y - ServicesMapModel.ServiceHeight / 2)}px; width: {Px(ServicesMapModel.ServiceWidth)}px; --brand: {Color(service.Provider)}";
                 @if (Opener(service.Provider) is { } open)
                 {
                     <button type="button" class="map-service is-openable" style="@style" @onclick="open">
@@ -59,30 +59,44 @@
                 }
             }
 
-            @foreach (var tile in _model.Tiles)
+            @foreach (var source in _model.Sources)
             {
                 <button type="button"
-                        class="map-tile @EdgeClass(tile) @(IsReady(tile.Provider) ? null : "is-off")"
-                        style="left: @Px(tile.X)px; top: @Px(tile.Y)px; --brand: @Color(tile.Provider)"
-                        title="@TileLabel(tile)"
-                        @onclick="() => Opener(tile.Provider)?.Invoke() ?? Task.CompletedTask">
-                    @foreach (var mark in Marks(tile.Provider))
+                        class="map-source @(IsReady(source.Provider) ? null : "is-off")"
+                        style="left: @Px(source.X)px; top: @Px(source.Y)px; width: @Px(source.Width)px; --brand: @Color(source.Provider)"
+                        title="@SourceLabel(source.Provider)"
+                        aria-label="@SourceLabel(source.Provider)"
+                        @onclick="() => Opener(source.Provider)?.Invoke() ?? Task.CompletedTask">
+                    @if (source.Named)
                     {
-                        <BrandedLogo Brand="mark" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+                        @ServiceBody(source.Provider)
                     }
-                    @if (!IsReady(tile.Provider))
+                    else
                     {
-                        <span class="map-dot bg-destructive"></span>
+                        @foreach (var mark in Marks(source.Provider))
+                        {
+                            <BrandedLogo Brand="mark" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
+                        }
+                        <span class="map-dot @DotClass(source.Provider)"></span>
                     }
-                    <span class="sr-only">@TileLabel(tile)</span>
                 </button>
             }
 
             <svg class="map-vias" width="@Px(ServicesMapModel.Width)" height="@Px(_model.Height)" viewBox="0 0 @Px(ServicesMapModel.Width) @Px(_model.Height)" aria-hidden="true">
                 @foreach (var role in _model.Roles)
                 {
-                    <circle class="@(role.Provider is null ? "is-feeds" : null)" cx="@Px(ServicesMapModel.RoleWidth)" cy="@Px(role.Y)" r="2.6"
-                            stroke="@(role.Provider is { } provider ? Color(provider) : null)"/>
+                    @if (role.Provider is { } provider)
+                    {
+                        <circle cx="@Px(ServicesMapModel.RoleWidth)" cy="@Px(role.Y)" r="2.6" stroke="@Color(provider)"/>
+                    }
+                }
+                @{
+                    var feedPins = _model.FeedLines.Select(line => line.Points[0].Y).ToList();
+                }
+                <rect class="map-feeds-strip" x="@Px(ServicesMapModel.RoleWidth - 2.5)" y="@Px(feedPins.Min() - 5)" width="2.5" height="@Px(feedPins.Max() - feedPins.Min() + 10)" rx="1.2"/>
+                @foreach (var line in _model.FeedLines)
+                {
+                    <rect class="map-feeds-pin" x="@Px(ServicesMapModel.RoleWidth)" y="@Px(line.Points[0].Y - 1.3)" width="5" height="2.6" rx="0.6" fill="@Color(line.Provider)"/>
                 }
             </svg>
 
@@ -247,15 +261,7 @@
 
     private string Readiness(RemoteService remote) => ServiceStatus.Of(remote.Access, Ready.Contains(remote));
 
-    private string TileLabel(MapTile tile) => $"{Name(tile.Provider)}: {Status(tile.Provider)}";
-
-    private static string EdgeClass(MapTile tile) =>
-        tile.Entry switch
-        {
-            TileEdge.Bottom => "is-bottom",
-            TileEdge.Top => "is-top",
-            TileEdge.Left => "is-left",
-        };
+    private string SourceLabel(Service source) => $"{Name(source)}: {Status(source)}";
 
     private static string Px(double value) => Math.Round(value, 2).ToString(CultureInfo.InvariantCulture);
 }

@@ -62,8 +62,8 @@
     stroke-width: 1.4;
 }
 
-.map-vias circle.is-feeds {
-    stroke: var(--muted-foreground);
+.map-feeds-strip {
+    fill: var(--muted-foreground);
 }
 
 .map-service {
@@ -71,7 +71,6 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    width: 266px;
     height: 44px;
     padding: 6px 10px 6px 8px;
     border: 1px solid var(--border);
@@ -124,66 +123,39 @@
     white-space: nowrap;
 }
 
-.map-tile {
+.map-source {
     position: absolute;
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
+    gap: 10px;
+    height: 44px;
+    padding: 6px 10px;
     border: 1px solid var(--border);
-    border-radius: 7px;
+    border-top: 3px solid var(--brand);
+    border-radius: 5px 5px 10px 10px;
     background: var(--card);
+    color: inherit;
+    font: inherit;
+    text-align: left;
     cursor: pointer;
-    transition: box-shadow 150ms ease;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
-.map-tile:hover,
-.map-tile:focus-visible {
+.map-source:hover,
+.map-source:focus-visible {
     outline: none;
+    border-color: var(--brand);
     box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand) 25%, transparent);
 }
 
-.map-tile.is-bottom {
-    border-bottom: 3px solid var(--brand);
-    border-radius: 7px 7px 4px 4px;
-}
-
-.map-tile.is-top {
-    border-top: 3px solid var(--brand);
-    border-radius: 4px 4px 7px 7px;
-}
-
-.map-tile.is-left {
-    border-left: 3px solid var(--brand);
-    border-radius: 4px 7px 7px 4px;
-}
-
-.map-tile.is-off {
+.map-source.is-off {
     border-style: dashed;
-}
-
-.map-tile.is-off.is-bottom {
-    border-bottom-style: solid;
-    border-bottom-color: color-mix(in oklch, var(--brand) 35%, transparent);
-}
-
-.map-tile.is-off.is-top {
     border-top-style: solid;
-    border-top-color: color-mix(in oklch, var(--brand) 35%, transparent);
+    border-top-color: color-mix(in oklch, var(--brand) 40%, transparent);
 }
 
-.map-tile.is-off.is-left {
-    border-left-style: solid;
-    border-left-color: color-mix(in oklch, var(--brand) 35%, transparent);
-}
-
-.map-tile .map-dot {
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    box-shadow: 0 0 0 2px var(--card);
+.map-source > .map-dot {
+    margin-left: auto;
 }
 
 .map-chip-slot {

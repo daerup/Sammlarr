@@ -51,15 +51,15 @@ public class ServicesMapModelTests
 		await Assert
 			.That(traces)
 			.IsEquivalentTo([
-				"Sign-in > Plex at 596,70",
-				"Wantlist > Plex at 596,78",
-				"Search > Plex at 596,86",
-				"Trending > Tmdb at 596,182",
-				"Feeds > Tmdb at 596,190",
-				"Feeds > Mdblist at 596,234",
-				"Feeds > AniList at 643,248",
-				"Feeds > Mal at 676,248",
-				"Feeds > Trakt at 709,248",
+				"Sign-in > Plex at 816,70",
+				"Wantlist > Plex at 816,78",
+				"Search > Plex at 816,86",
+				"Trending > Tmdb at 816,182",
+				"Feeds > Tmdb at 816,190",
+				"Feeds > Mdblist at 398.5,276",
+				"Feeds > AniList at 611.5,276",
+				"Feeds > Mal at 824.5,276",
+				"Feeds > Trakt at 1037.5,276",
 			]);
 	}
 
@@ -75,11 +75,11 @@ public class ServicesMapModelTests
 	}
 
 	[Test]
-	public async Task Traces_ForTheMiddleRoleOfEachServiceAndTheFirstFeedTile_RunStraight()
+	public async Task Traces_ForTheMiddleRoleOfEachService_RunStraight()
 	{
 		var straight = Straight(ServicesMapModel.For(Config));
 
-		await Assert.That(straight).IsEquivalentTo(["Wantlist", "Trending", "Feeds > Mdblist"]);
+		await Assert.That(straight).IsEquivalentTo(["Wantlist", "Trending"]);
 	}
 
 	[Test]
@@ -87,7 +87,7 @@ public class ServicesMapModelTests
 	{
 		var model = ServicesMapModel.For(Config with { AuthProvider = AuthProvider.Local, SearchProvider = SearchProvider.Tmdb });
 
-		await Assert.That(Straight(model)).IsEquivalentTo(["Sign-in", "Wantlist", "Search", "Feeds > Mdblist"]);
+		await Assert.That(Straight(model)).IsEquivalentTo(["Sign-in", "Wantlist", "Search"]);
 	}
 
 	[Test]
@@ -99,70 +99,78 @@ public class ServicesMapModelTests
 	}
 
 	[Test]
-	public async Task Tiles_ForTodaysProviders_PutTheFourListSitesOnTheFeedsRow()
+	public async Task Sources_ForTodaysProviders_SitInARowUnderTheFeedsWithTheirNames()
 	{
-		var tiles = ServicesMapModel.For(Config).Tiles.Select(tile => $"{tile.Provider} {tile.X},{tile.Y} {tile.Entry}");
-
-		await Assert.That(tiles).IsEquivalentTo(["Mdblist 596,220 Left", "AniList 629,220 Bottom", "Mal 662,220 Bottom", "Trakt 695,220 Bottom"]);
-	}
-
-	[Test]
-	public async Task PlaceTiles_WhenTheRowFitsOnTheFeedsRow_CentresItThereAndEntersTheFirstTileFromTheLeft()
-	{
-		var tiles = ServicesMapModel.PlaceTiles([RemoteService.Mdblist, RemoteService.Tmdb], 0, 100, 3);
-
-		await Assert.That(tiles.Select(tile => $"{tile.X},{tile.Y} {tile.Entry}")).IsEquivalentTo(["596,86 Left", "629,86 Bottom"], CollectionOrdering.Matching);
-	}
-
-	[Test]
-	public async Task PlaceTiles_ForEightSources_FillsTheTopRow()
-	{
-		var tiles = ServicesMapModel.PlaceTiles([.. Enumerable.Repeat<Service>(RemoteService.Mdblist, 8)], 0, 0, 9);
+		var sources = ServicesMapModel
+			.For(Config)
+			.Sources.Select(source => $"{source.Provider} {source.X},{source.Y} {source.Width} {(source.Named ? "named" : "logo")}");
 
 		await Assert
-			.That(tiles.Select(tile => $"{tile.X} {tile.Entry}"))
-			.IsEquivalentTo(["596 Bottom", "629 Bottom", "662 Bottom", "695 Bottom", "728 Bottom", "761 Bottom", "794 Bottom", "827 Bottom"]);
+			.That(sources)
+			.IsEquivalentTo(
+				["Mdblist 300,276 197 named", "AniList 513,276 197 named", "Mal 726,276 197 named", "Trakt 939,276 197 named"],
+				CollectionOrdering.Matching
+			);
 	}
 
 	[Test]
-	public async Task PlaceTiles_ForNineSources_RebalancesRowByRow()
+	public async Task PlaceSources_ForTwo_KeepsTheirWidthFromTheSameEdgeUnderTheLowestPin()
 	{
-		Service[] sources =
-		[
-			RemoteService.Tmdb,
-			RemoteService.Wikidata,
-			RemoteService.Radarr,
-			RemoteService.Plex,
-			RemoteService.Mdblist,
-			RemoteService.Tmdb,
-			RemoteService.Wikidata,
-			RemoteService.Radarr,
-			RemoteService.Plex,
-		];
-
-		var tiles = ServicesMapModel.PlaceTiles(sources, 0, 0, 10);
+		var sources = ServicesMapModel.PlaceSources([RemoteService.Mdblist, RemoteService.Trakt], 100);
 
 		await Assert
-			.That(tiles.Select(tile => $"{tile.Provider} {tile.X},{Math.Round(tile.Y, 2)} {tile.Entry}"))
-			.IsEquivalentTo([
-				"Tmdb 596,0 Bottom",
-				"Wikidata 629,0 Bottom",
-				"Radarr 662,0 Bottom",
-				"Plex 695,0 Bottom",
-				"Mdblist 728,0 Bottom",
-				"Tmdb 596,82.2 Top",
-				"Wikidata 629,82.2 Top",
-				"Radarr 662,82.2 Top",
-				"Plex 695,82.2 Top",
-			]);
+			.That(sources.Select(source => $"{source.X},{source.Y} {source.Width}"))
+			.IsEquivalentTo(["300,126 200", "516,126 200"], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task PlaceTiles_PastSixteenSources_GrowsLeftOfTheServiceColumn()
+	public async Task PlaceSources_ForSix_NarrowsThemToTheirLogos()
 	{
-		var tiles = ServicesMapModel.PlaceTiles([.. Enumerable.Repeat<Service>(RemoteService.Mdblist, 17)], 0, 0, 18);
+		var sources = ServicesMapModel.PlaceSources([.. Enumerable.Repeat<Service>(RemoteService.Mdblist, 6)], 100);
 
-		await Assert.That(tiles[0].X).IsEqualTo(570);
+		await Assert.That(sources.Select(source => source.Width).Distinct()).IsEquivalentTo([126d]);
+		await Assert.That(sources.Any(source => source.Named)).IsFalse();
+	}
+
+	[Test]
+	public async Task FeedLines_ForTodaysProviders_LeaveAPinEachWithTheBoxedLineOnTopAndTheLeftmostSourceAtTheBottom()
+	{
+		var pins = ServicesMapModel
+			.For(Config)
+			.FeedLines.OrderBy(line => line.Points[0].Y)
+			.Select(line => $"{line.Provider} {line.Points[0].X},{line.Points[0].Y}");
+
+		await Assert.That(pins).IsEquivalentTo(["Tmdb 256,218", "Trakt 256,226", "Mal 256,234", "AniList 256,242", "Mdblist 256,250"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Traces_ToEachSource_RunStraightFromTheirPinAndDropIntoTheMiddleOfTheirSource()
+	{
+		var model = ServicesMapModel.For(Config);
+
+		var trakt = model.Traces.Single(trace => trace.Provider == RemoteService.Trakt);
+		var source = model.Sources.Single(candidate => candidate.Provider == RemoteService.Trakt);
+		var middle = source.X + source.Width / 2;
+		await Assert
+			.That(trakt.Points)
+			.IsEquivalentTo([new MapPoint(256, 226), new MapPoint(middle, 226), new MapPoint(middle, source.Y)], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task FeedLines_BeyondWhatTheFeedsRowHolds_GrowDownwardAndPushTheSourcesLower()
+	{
+		var model = ServicesMapModel.For(Config, [RemoteService.Tmdb, .. Enumerable.Repeat<Service>(RemoteService.Mdblist, 8)]);
+
+		await Assert.That(model.FeedLines.Min(line => line.Points[0].Y)).IsEqualTo(218);
+		await Assert.That(model.Sources[0].Y).IsEqualTo(308);
+	}
+
+	[Test]
+	public async Task Traces_WhenSearchAlsoUsesTmdb_NeverCross()
+	{
+		var model = ServicesMapModel.For(Config with { SearchProvider = SearchProvider.Tmdb });
+
+		await Assert.That(Crossings(model)).IsEmpty();
 	}
 
 	[Test]
@@ -175,19 +183,9 @@ public class ServicesMapModelTests
 	[Arguments(17)]
 	public async Task Traces_ForAnyNumberOfFeedSources_NeverCross(int sources)
 	{
-		var runs = ServicesMapModel
-			.For(Config, [RemoteService.Tmdb, .. Enumerable.Repeat<Service>(RemoteService.Mdblist, sources)])
-			.Traces.Select(trace => trace.Points.Zip(trace.Points.Skip(1)).ToList())
-			.ToList();
+		var model = ServicesMapModel.For(Config, [RemoteService.Tmdb, .. Enumerable.Repeat<Service>(RemoteService.Mdblist, sources)]);
 
-		var crossings =
-			from first in Enumerable.Range(0, runs.Count)
-			from second in Enumerable.Range(first + 1, runs.Count - first - 1)
-			from a in runs[first]
-			from b in runs[second]
-			where Crosses(a, b) || Crosses(b, a)
-			select (first, second);
-		await Assert.That(crossings).IsEmpty();
+		await Assert.That(Crossings(model)).IsEmpty();
 	}
 
 	[Test]
@@ -222,6 +220,17 @@ public class ServicesMapModelTests
 		model
 			.Traces.Where(trace => trace.Points.Select(point => point.Y).Distinct().Count() == 1)
 			.Select(trace => trace.Role == "Feeds" ? $"{trace.Role} > {trace.Provider}" : trace.Role);
+
+	private static IEnumerable<(int First, int Second)> Crossings(ServicesMapModel model)
+	{
+		var runs = model.Traces.Select(trace => trace.Points.Zip(trace.Points.Skip(1)).ToList()).ToList();
+		return from first in Enumerable.Range(0, runs.Count)
+			from second in Enumerable.Range(first + 1, runs.Count - first - 1)
+			from a in runs[first]
+			from b in runs[second]
+			where Crosses(a, b) || Crosses(b, a)
+			select (first, second);
+	}
 
 	private static bool Crosses((MapPoint First, MapPoint Second) horizontal, (MapPoint First, MapPoint Second) vertical) =>
 		horizontal.First.Y == horizontal.Second.Y
