@@ -4,6 +4,7 @@ using Domain.Media;
 using Domain.Wantlist.Outbox;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 
 namespace Integration.Tests.Wantlist;
 
@@ -71,7 +72,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-700", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WantlistOperationAction.Add, [mediaId]);
-		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Pending);
+		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Pending, new None());
 
 		var entry = (await _testee.GetAllAsync()).Single();
 
@@ -107,12 +108,38 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-500", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WantlistOperationAction.Add, [mediaId]);
 
-		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Pending);
-		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Pending);
+		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Pending, new None());
+		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Pending, new None());
 
 		var entry = (await _testee.GetAllAsync()).Single();
 		await Assert.That(entry.Attempts).IsEqualTo(2);
 		await Assert.That(entry.Status).IsEqualTo(WantlistOutboxState.Pending);
+	}
+
+	[Test]
+	public async Task RecordFailedAttemptAsync_WithAReason_KeepsItAsTheLastErrorUntilTheTitleIsQueuedAgain()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-503", MediaType.Movie)]);
+		await _testee.EnqueueAsync(WantlistOperationAction.Add, [mediaId]);
+
+		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Pending, Some.Of("Plex answered 500 Internal Server Error."));
+		var failed = (await _testee.GetAllAsync()).Single();
+		await _testee.EnqueueAsync(WantlistOperationAction.Add, [mediaId]);
+
+		await Assert.That(failed.LastError).IsSome().And.IsEqualTo("Plex answered 500 Internal Server Error.");
+		await Assert.That((await _testee.GetAllAsync()).Single().LastError).IsNone();
+	}
+
+	[Test]
+	public async Task RecordFailedAttemptAsync_WithoutAReason_ClearsTheEarlierOne()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-504", MediaType.Movie)]);
+		await _testee.EnqueueAsync(WantlistOperationAction.Add, [mediaId]);
+		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Pending, Some.Of("Plex answered 500 Internal Server Error."));
+
+		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Pending, new None());
+
+		await Assert.That((await _testee.GetAllAsync()).Single().LastError).IsNone();
 	}
 
 	[Test]
@@ -121,7 +148,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-701", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WantlistOperationAction.Add, [mediaId]);
 
-		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Failed);
+		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Failed, new None());
 
 		var entry = (await _testee.GetAllAsync()).Single();
 		await Assert.That(entry.Status).IsEqualTo(WantlistOutboxState.Failed);
@@ -134,7 +161,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-502", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WantlistOperationAction.Add, [mediaId]);
 
-		await _testee.RecordFailedAttemptAsync([], WantlistOutboxState.Failed);
+		await _testee.RecordFailedAttemptAsync([], WantlistOutboxState.Failed, new None());
 
 		var entry = (await _testee.GetAllAsync()).Single();
 		await Assert.That(entry.Attempts).IsEqualTo(0);
@@ -146,7 +173,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-702", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WantlistOperationAction.Add, [mediaId]);
-		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Failed);
+		await _testee.RecordFailedAttemptAsync([mediaId], WantlistOutboxState.Failed, new None());
 
 		await _testee.EnqueueAsync(WantlistOperationAction.Add, [mediaId]);
 

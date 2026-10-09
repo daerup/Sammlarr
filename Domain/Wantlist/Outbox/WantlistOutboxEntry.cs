@@ -17,4 +17,6 @@ public enum WantlistOperationAction
 public record WantlistOutboxEntry(MediaId MediaId, WantlistOperationAction Action, WantlistOutboxState Status, int Attempts)
 {
 	public DateTimeOffset AddedAt { get; init; }
+
+	public Optional<string> LastError { get; init; } = new None();
 }

@@ -19,6 +19,9 @@
     public int Attempts { get; set; }
 
     [Parameter]
+    public Optional<string> LastError { get; set; } = new None();
+
+    [Parameter]
     public string ProviderName { get; set; } = "your media service";
 
     private string Icon =>
@@ -41,7 +44,9 @@
 
     private string AccentStyle => $"--wl-accent: {Accent};";
 
-    private string Label =>
+    private string Label => $"{StateLabel}{LastError.Map(reason => $": {reason}").GetValueOr(string.Empty)}";
+
+    private string StateLabel =>
         State switch
         {
             PushDotState.Pushed => $"Synced to {ProviderName}",

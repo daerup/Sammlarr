@@ -123,7 +123,31 @@ public class PlexSinkTests
 
 		var acks = await testee.ApplyAsync(action, [new SinkPush(Known, new None())]).ToListAsync();
 
-		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, expected)]);
+		await Assert.That(acks.Select(ack => (ack.MediaId, ack.Outcome))).IsEquivalentTo([(Known, expected)]);
+	}
+
+	[Test]
+	public async Task ApplyAsync_WhenPlexRefuses_AcksItFailedWithPlexsAnswer()
+	{
+		var testee = Sink(HttpStatusCode.Unauthorized, Addressing(Known, PlexId.From("plex-1", MediaType.Movie)));
+
+		var acks = await testee.ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Failed) { Reason = Some.Of("Plex answered 401 Unauthorized.") }]);
+	}
+
+	[Test]
+	public async Task ApplyAsync_WhenPlexCannotBeReached_AcksItFailedSayingWhy()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Throws(new HttpRequestException("No such host is known."));
+		var testee = Sink(handler, Addressing(Known, PlexId.From("plex-1", MediaType.Movie)));
+
+		var acks = await testee.ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert
+			.That(acks)
+			.IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Failed) { Reason = Some.Of("Plex could not be reached: No such host is known.") }]);
 	}
 
 	[Test]
@@ -136,7 +160,9 @@ public class PlexSinkTests
 
 		var acks = await testee.ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
-		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Unaddressable)]);
+		await Assert
+			.That(acks)
+			.IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Unaddressable) { Reason = Some.Of("Sammlarr found no Plex id for this title.") }]);
 		await Assert.That(handler.Requests).IsEmpty();
 	}
 

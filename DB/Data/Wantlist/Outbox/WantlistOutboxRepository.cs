@@ -18,10 +18,16 @@ internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbConte
 				Kind = outboxEntry.Action,
 				outboxEntry.Status,
 				outboxEntry.Attempts,
+				outboxEntry.LastError,
 				outboxEntry.AddedAt,
 			}
 		).ToListAsync(cancellationToken);
-		return rows.Select(row => new WantlistOutboxEntry(MediaId.From(row.MediaIdValue), row.Kind, row.Status, row.Attempts) { AddedAt = row.AddedAt }).ToList();
+		return rows.Select(row => new WantlistOutboxEntry(MediaId.From(row.MediaIdValue), row.Kind, row.Status, row.Attempts)
+			{
+				AddedAt = row.AddedAt,
+				LastError = Optional.Of(row.LastError),
+			})
+			.ToList();
 	}
 
 	public async Task EnqueueAsync(WantlistOperationAction action, IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
@@ -50,6 +56,7 @@ internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbConte
 				existing.Action = action;
 				existing.Status = WantlistOutboxState.Pending;
 				existing.Attempts = 0;
+				existing.LastError = null;
 				existing.AddedAt = addedAt;
 				continue;
 			}
@@ -79,7 +86,12 @@ internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbConte
 		await ctx.WantlistOutbox.Where(o => rawIds.Contains(o.Media.Id)).ExecuteDeleteAsync(cancellationToken);
 	}
 
-	public async Task RecordFailedAttemptAsync(IEnumerable<MediaId> ids, WantlistOutboxState resultingState, CancellationToken cancellationToken = default)
+	public async Task RecordFailedAttemptAsync(
+		IEnumerable<MediaId> ids,
+		WantlistOutboxState resultingState,
+		Optional<string> reason,
+		CancellationToken cancellationToken = default
+	)
 	{
 		var rawIds = ids.Select(id => id.Value).Distinct().ToList();
 		if (rawIds.Count == 0)
@@ -87,9 +99,13 @@ internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbConte
 			return;
 		}
 
+		var lastError = reason.ToNullable();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		await ctx
 			.WantlistOutbox.Where(o => rawIds.Contains(o.Media.Id))
-			.ExecuteUpdateAsync(s => s.SetProperty(o => o.Attempts, o => o.Attempts + 1).SetProperty(o => o.Status, resultingState), cancellationToken);
+			.ExecuteUpdateAsync(
+				s => s.SetProperty(o => o.Attempts, o => o.Attempts + 1).SetProperty(o => o.Status, resultingState).SetProperty(o => o.LastError, lastError),
+				cancellationToken
+			);
 	}
 }

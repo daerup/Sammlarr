@@ -323,8 +323,8 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		var unpushable = await host.SeedMediaAsync(TmdbId.From("55555", MediaType.Movie));
 		await host.RemoteWantlistEmpty();
 		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [unpushable]);
-		await Outbox.RecordFailedAttemptAsync([unpushable], WantlistOutboxState.Pending);
-		await Outbox.RecordFailedAttemptAsync([unpushable], WantlistOutboxState.Pending);
+		await Outbox.RecordFailedAttemptAsync([unpushable], WantlistOutboxState.Pending, new None());
+		await Outbox.RecordFailedAttemptAsync([unpushable], WantlistOutboxState.Pending, new None());
 
 		await Testee.SyncAsync(Trigger);
 

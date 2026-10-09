@@ -28,7 +28,7 @@ public class WantlistPushTests
 
 		sink.ApplyAsync(WantlistOperationAction.Add, Any(), Any()).WasCalled(Times.Once);
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
-		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), Any<WantlistOutboxState>(), Any()).WasCalled(Times.Never);
+		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), Any<WantlistOutboxState>(), Any(), Any()).WasCalled(Times.Never);
 		events.Publish(Event(mediaId, WantlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
 	}
 
@@ -65,7 +65,7 @@ public class WantlistPushTests
 
 		sink.ApplyAsync(Any(), Any(), Any()).WasCalled(Times.Never);
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Never);
-		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), Any<WantlistOutboxState>(), Any()).WasCalled(Times.Never);
+		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), Any<WantlistOutboxState>(), Any(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
@@ -89,7 +89,7 @@ public class WantlistPushTests
 
 		await testee.SyncAsync(Trigger);
 
-		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WantlistOutboxState.Failed, Any()).WasCalled(Times.Once);
+		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WantlistOutboxState.Failed, Any(), Any()).WasCalled(Times.Once);
 		events.Publish(Event(mediaId, WantlistOutboxEventKind.Abandoned)).WasCalled(Times.Once);
 	}
 
@@ -103,8 +103,28 @@ public class WantlistPushTests
 
 		await testee.SyncAsync(Trigger);
 
-		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WantlistOutboxState.Pending, Any()).WasCalled(Times.Once);
+		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WantlistOutboxState.Pending, Any(), Any()).WasCalled(Times.Once);
 		events.Publish(Event(mediaId, WantlistOutboxEventKind.Retrying)).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task SyncAsync_WhenAPushFailsWithAReason_StoresItAsTheLastErrorAndAnnouncesIt()
+	{
+		var mediaId = MediaId.New();
+		Optional<string> reason = Some.Of("Sonarr refused, series already exists.");
+		var outbox = OutboxWith(Pending(mediaId, WantlistOperationAction.Add));
+		var events = IEventPublisher.Mock();
+		var testee = WantlistStubs.Engine(
+			WantlistStubs.SinkAcking(new SinkSyncAck(mediaId, SinkSyncOutcome.Failed) { Reason = reason }),
+			outbox,
+			events,
+			user: Owner
+		);
+
+		await testee.SyncAsync(Trigger);
+
+		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WantlistOutboxState.Pending, reason, Any()).WasCalled(Times.Once);
+		events.Publish(Event(mediaId, WantlistOutboxEventKind.Retrying) with { Reason = reason }).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -117,7 +137,7 @@ public class WantlistPushTests
 
 		await testee.SyncAsync(Trigger);
 
-		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WantlistOutboxState.Failed, Any()).WasCalled(Times.Once);
+		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WantlistOutboxState.Failed, Any(), Any()).WasCalled(Times.Once);
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Never);
 		events.Publish(Event(mediaId, WantlistOutboxEventKind.Abandoned)).WasCalled(Times.Once);
 	}
