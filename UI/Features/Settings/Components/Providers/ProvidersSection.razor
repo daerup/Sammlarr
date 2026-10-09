@@ -1,4 +1,5 @@
 @using Contracts.Auth
+@using Contracts.Datasets
 @using Contracts.Providers
 @using Contracts.Identity
 @using Contracts.Settings
@@ -11,6 +12,7 @@
 @inject RatingContext RatingContext
 @inject IServiceReadiness Readiness
 @inject IApiKeyService ApiKeys
+@inject IDatasetLoads DatasetLoads
 @inject ICurrentUser CurrentUser
 @inject IUserManagementService UserManagement
 @inject IArrSinkConfigService ArrConfigs
@@ -62,7 +64,7 @@
     {
         <section class="flex flex-col gap-3" aria-label="Services">
             <h3 class="text-sm font-semibold">Services</h3>
-            <ServicesMap Config="MapConfig(config)" Ready="_ready" ArrReady="ArrReady(config)" CanPick="IsAdmin" People="_people" ReadTokenMissing="_readTokenMissing" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync" ServiceOpened="OpenService" ArrOpened="() => OpenRow(new Arr())" AccountsOpened="OpenAccounts"/>
+            <ServicesMap Config="MapConfig(config)" Ready="_ready" ArrReady="ArrReady(config)" CanPick="IsAdmin" People="_people" ReadTokenMissing="_readTokenMissing" Downloads="_downloads" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync" ServiceOpened="OpenService" ArrOpened="() => OpenRow(new Arr())" AccountsOpened="OpenAccounts"/>
         </section>
 
         @if (_confirming is { } target)
@@ -75,7 +77,7 @@
     {
         <section class="flex flex-col gap-3" aria-label="Services" aria-busy="true">
             <h3 class="text-sm font-semibold">Services</h3>
-            <BbSkeleton Class="h-[341px] w-full rounded-lg"/>
+            <BbSkeleton Class="h-[527px] w-full rounded-lg"/>
         </section>
     }
 </div>
@@ -106,6 +108,8 @@
     private bool _arrConnected;
 
     private bool _readTokenMissing;
+
+    private Dictionary<RemoteService, DateTimeOffset> _downloads = [];
 
     private Service? _open;
 
@@ -164,6 +168,18 @@
         var arr = await ArrConfigs.GetAsync();
         _arrConnected = arr.IsConnectable;
         _readTokenMissing = !await ApiKeys.IsStoredAsync(ApiKeyProvider.TmdbReadToken);
+        _downloads = await DownloadsAsync();
+    }
+
+    private async Task<Dictionary<RemoteService, DateTimeOffset>> DownloadsAsync()
+    {
+        var downloads = new Dictionary<RemoteService, DateTimeOffset>();
+        foreach (var (service, dataset) in DatasetNames.ByService)
+        {
+            (await DatasetLoads.FindAsync(dataset)).Apply(load => downloads[service] = load.LoadedAt);
+        }
+
+        return downloads;
     }
 
     private bool _settingUp;

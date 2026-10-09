@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Bunit.TestDoubles;
 using Contracts.Auth;
+using Contracts.Datasets;
 using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Wantlist;
@@ -43,6 +44,8 @@ public class ProvidersSectionTests : BunitContext
 
 	private readonly Mock<IApiKeyService> _keys = IApiKeyService.Mock();
 
+	private readonly Mock<IDatasetLoads> _loads = IDatasetLoads.Mock();
+
 	[Before(Test)]
 	public void Setup()
 	{
@@ -62,6 +65,8 @@ public class ProvidersSectionTests : BunitContext
 		Services.AddSingleton(ReadinessStub.Connected(_connected));
 		_keys.IsStoredAsync(Any(), Any()).Returns(true);
 		Services.AddSingleton(_keys.Object);
+		_loads.FindAsync(Any(), Any()).Returns(new None());
+		Services.AddSingleton(_loads.Object);
 		Services.AddScoped<ScrollService>();
 		ComponentFactories.AddStub<AccountRow>();
 		ComponentFactories.AddStub<SammlarrAccountRow>();
@@ -363,6 +368,21 @@ public class ProvidersSectionTests : BunitContext
 		await cut.InvokeAsync(() => cut.FindComponent<Stub<AccountRow>>().Instance.Parameters.Get(row => row.Changed).InvokeAsync());
 
 		_config.StoreAsync(OnPlex with { Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local }, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Map_WithoutTheReadTokenAndWithTheImdbFile_IsToldBoth()
+	{
+		var loadedAt = new DateTimeOffset(2026, 10, 8, 6, 31, 0, TimeSpan.Zero);
+		_keys.IsStoredAsync(ApiKeyProvider.TmdbReadToken, Any()).Returns(false);
+		_loads.FindAsync(DatasetNames.ImdbRatings, Any()).Returns(Some.Of(new DatasetLoad(DatasetNames.ImdbRatings, loadedAt, new None(), 1)));
+
+		var cut = RenderSection();
+
+		await Assert.That(Map(cut).Get(map => map.ReadTokenMissing)).IsTrue();
+		await Assert
+			.That(Map(cut).Get(map => map.Downloads))
+			.IsEquivalentTo(new Dictionary<RemoteService, DateTimeOffset> { [RemoteService.ImdbDatasets] = loadedAt });
 	}
 
 	[Test]

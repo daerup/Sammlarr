@@ -1,6 +1,8 @@
 using BlazorBlueprint.Components;
 using Bunit;
+using Contracts;
 using Contracts.Auth;
+using Contracts.Datasets;
 using Contracts.Identity;
 using Contracts.Ratings;
 using Contracts.Settings;
@@ -61,6 +63,12 @@ public class SettingsPageTests : BunitContext
 		keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
 		keys.IsStoredAsync(Any(), Any()).Returns(false);
 		Services.AddSingleton(keys.Object);
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(DateTimeOffset.UnixEpoch);
+		Services.AddSingleton(clock.Object);
+		var loads = IDatasetLoads.Mock();
+		loads.FindAsync(Any(), Any()).Returns(new None());
+		Services.AddSingleton(loads.Object);
 
 		var credentials = ICredentialService.Mock();
 		credentials.GetAsync(Any<AuthProvider>(), Any()).Returns(Error.From("No credential is stored for this provider."));
