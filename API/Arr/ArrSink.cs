@@ -73,10 +73,12 @@ internal sealed class ArrSink(
 		foreach (var push in pushes)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			var outcome = await sinkIds
+			yield return await sinkIds
 				.GetValueOrNone(push.MediaId)
-				.Match(id => PushAsync(action, push, id, setup, sessions, cancellationToken), () => Task.FromResult(SinkSyncOutcome.Unaddressable));
-			yield return new SinkSyncAck(push.MediaId, outcome);
+				.Match(
+					id => PushAsync(action, push, id, setup, sessions, cancellationToken),
+					() => Task.FromResult(Unaddressable(push.MediaId, "Sammlarr has no TMDB or TVDB id for this title, the ids Radarr and Sonarr add by."))
+				);
 		}
 	}
 
@@ -181,7 +183,7 @@ internal sealed class ArrSink(
 		];
 	}
 
-	private Task<SinkSyncOutcome> PushAsync(
+	private Task<SinkSyncAck> PushAsync(
 		WantlistOperationAction action,
 		SinkPush push,
 		IExternalMediaId id,
@@ -191,10 +193,23 @@ internal sealed class ArrSink(
 	)
 	{
 		return apis.Taking(id)
-			.Match(api => PushWithAsync(api, action, push, id, setup, sessions, cancellationToken), () => Task.FromResult(SinkSyncOutcome.Unaddressable));
+			.Match(
+				async api => Ack(push.MediaId, await PushWithAsync(api, action, push, id, setup, sessions, cancellationToken)),
+				() =>
+					Task.FromResult(
+						Unaddressable(push.MediaId, $"Neither Radarr nor Sonarr adds a {$"{id.Type}".ToLowerInvariant()} by its {id.Source.GetDescription()} id.")
+					)
+			);
 	}
 
-	private async Task<SinkSyncOutcome> PushWithAsync(
+	private static SinkSyncAck Ack(MediaId id, Result<SinkSyncOutcome> pushed)
+	{
+		return pushed.Match(outcome => new SinkSyncAck(id, outcome), error => new SinkSyncAck(id, SinkSyncOutcome.Failed) { Reason = Some.Of(error.Reason) });
+	}
+
+	private static SinkSyncAck Unaddressable(MediaId id, string reason) => new(id, SinkSyncOutcome.Unaddressable) { Reason = Some.Of(reason) };
+
+	private async Task<Result<SinkSyncOutcome>> PushWithAsync(
 		ArrApi api,
 		WantlistOperationAction action,
 		SinkPush push,
@@ -211,9 +226,7 @@ internal sealed class ArrSink(
 		}
 
 		var pushed = await session.Match(open => PushToAsync(open, action, push, id, setup, cancellationToken), Failed);
-		return pushed
-			.ApplyError(error => logger.LogWarning("Pushing {Action} for {ExternalId} to {App} failed: {Reason}", action, id, api.App.Name, error.Reason))
-			.GetValueOr(SinkSyncOutcome.Failed);
+		return pushed.ApplyError(error => logger.LogWarning("Pushing {Action} for {ExternalId} to {App} failed: {Reason}", action, id, api.App.Name, error.Reason));
 	}
 
 	private Task<Result<SinkSyncOutcome>> PushToAsync(

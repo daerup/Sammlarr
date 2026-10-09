@@ -113,7 +113,7 @@
                         @if (_removedIds.Contains(item.Media.Identity.Id))
                         {
                             <div class="absolute top-2 right-2 z-10">
-                                <PushStatusDot State="PushDotState.Removed" ProviderName="@SinkName"/>
+                                <PushStatusDot State="PushDotState.Removed" LastError="@LastErrorOf(item.Media.Identity.Id)" ProviderName="@SinkName"/>
                             </div>
                         }
                         else
@@ -124,7 +124,7 @@
                             @if (PushDotFor(item.Media.Identity.Id) is { } dot)
                             {
                                 <div class="absolute top-2 right-2 z-10">
-                                    <PushStatusDot State="dot.State" Attempts="dot.Attempts" ProviderName="@SinkName"/>
+                                    <PushStatusDot State="dot.State" Attempts="dot.Attempts" LastError="dot.LastError" ProviderName="@SinkName"/>
                                 </div>
                             }
                         }
@@ -347,19 +347,21 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private (PushDotState State, int Attempts)? PushDotFor(MediaId mediaId)
+    private (PushDotState State, int Attempts, Optional<string> LastError)? PushDotFor(MediaId mediaId)
     {
         if (_pushed.Contains(mediaId))
         {
-            return (PushDotState.Pushed, 0);
+            return (PushDotState.Pushed, 0, new None());
         }
         if (_outboxEntries.TryGetValue(mediaId, out var entry))
         {
             var state = entry.Status == WantlistOutboxState.Failed ? PushDotState.Failed : PushDotState.Pending;
-            return (state, entry.Attempts);
+            return (state, entry.Attempts, entry.LastError);
         }
         return null;
     }
+
+    private Optional<string> LastErrorOf(MediaId mediaId) => _outboxEntries.GetValueOrNone(mediaId).Map(entry => entry.LastError);
 
     private void OnEvent(IEvent raised)
     {
@@ -400,13 +402,13 @@
             case WantlistOutboxEventKind.Abandoned:
                 if (_outboxEntries.TryGetValue(outboxEvent.MediaId, out var failedRow))
                 {
-                    _outboxEntries[outboxEvent.MediaId] = failedRow with { Status = WantlistOutboxState.Failed };
+                    _outboxEntries[outboxEvent.MediaId] = failedRow with { Status = WantlistOutboxState.Failed, Attempts = failedRow.Attempts + 1, LastError = outboxEvent.Reason };
                 }
                 break;
             case WantlistOutboxEventKind.Retrying:
                 if (_outboxEntries.TryGetValue(outboxEvent.MediaId, out var retryRow))
                 {
-                    _outboxEntries[outboxEvent.MediaId] = retryRow with { Attempts = retryRow.Attempts + 1 };
+                    _outboxEntries[outboxEvent.MediaId] = retryRow with { Attempts = retryRow.Attempts + 1, LastError = outboxEvent.Reason };
                 }
                 break;
         }

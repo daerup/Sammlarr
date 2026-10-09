@@ -11,4 +11,7 @@ public enum WantlistOutboxEventKind
 	Abandoned,
 }
 
-public record WantlistOutboxEvent(UserId UserId, MediaId MediaId, WantlistOutboxEventKind Kind) : IEvent;
+public record WantlistOutboxEvent(UserId UserId, MediaId MediaId, WantlistOutboxEventKind Kind) : IEvent
+{
+	public Optional<string> Reason { get; init; } = new None();
+}

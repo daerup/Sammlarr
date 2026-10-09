@@ -25,4 +25,16 @@ public class PushStatusDotTests : BunitContext
 
 		await Assert.That(cut.Find("[aria-label]").GetAttribute("aria-label")).IsEqualTo(expected);
 	}
+
+	[Test]
+	[Arguments(PushDotState.Failed, 3, "Synchronization failed after 3 attempts: Sonarr refused, series already exists.")]
+	[Arguments(PushDotState.Pending, 1, "Synchronization pending (attempt 2): Sonarr refused, series already exists.")]
+	public async Task Render_AfterAFailedAttemptWithAReason_AppendsTheReason(PushDotState state, int attempts, string expected)
+	{
+		var cut = Render<PushStatusDot>(parameters =>
+			parameters.Add(dot => dot.State, state).Add(dot => dot.Attempts, attempts).Add(dot => dot.LastError, Some.Of("Sonarr refused, series already exists."))
+		);
+
+		await Assert.That(cut.Find("[aria-label]").GetAttribute("aria-label")).IsEqualTo(expected);
+	}
 }

@@ -134,18 +134,23 @@ internal sealed class WantlistSyncEngine(
 		{
 			var acked = awaiting[ack.MediaId];
 			awaiting.Remove(ack.MediaId);
-			outcomes.Add(await SettleAsync(acked, KindFor(acked, ack.Outcome), cancellationToken));
+			outcomes.Add(await SettleAsync(acked, KindFor(acked, ack.Outcome), ack.Reason, cancellationToken));
 		}
 
 		foreach (var unacked in awaiting.Values)
 		{
-			outcomes.Add(await SettleAsync(unacked, KindFor(unacked, SinkSyncOutcome.Failed), cancellationToken));
+			outcomes.Add(await SettleAsync(unacked, KindFor(unacked, SinkSyncOutcome.Failed), new None(), cancellationToken));
 		}
 
 		return outcomes;
 	}
 
-	private async Task<PushOutcome> SettleAsync(WantlistOutboxEntry entry, WantlistOutboxEventKind kind, CancellationToken cancellationToken)
+	private async Task<PushOutcome> SettleAsync(
+		WantlistOutboxEntry entry,
+		WantlistOutboxEventKind kind,
+		Optional<string> reason,
+		CancellationToken cancellationToken
+	)
 	{
 		if (kind is WantlistOutboxEventKind.Pushed)
 		{
@@ -156,12 +161,13 @@ internal sealed class WantlistSyncEngine(
 			await outbox.RecordFailedAttemptAsync(
 				[entry.MediaId],
 				kind is WantlistOutboxEventKind.Abandoned ? WantlistOutboxState.Failed : WantlistOutboxState.Pending,
+				reason,
 				cancellationToken
 			);
 		}
 
 		var outcome = new PushOutcome(entry.MediaId, entry.Action, kind);
-		announcer.Announce(new WantlistOutboxEvent(currentUser.Id, outcome.MediaId, outcome.Kind));
+		announcer.Announce(new WantlistOutboxEvent(currentUser.Id, outcome.MediaId, outcome.Kind) { Reason = reason });
 		return outcome;
 	}
 

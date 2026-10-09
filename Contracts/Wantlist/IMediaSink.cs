@@ -25,7 +25,10 @@ public readonly record struct SinkHoldings(int Sole, int Shared, string Tag);
 
 public readonly record struct SinkPush(MediaId MediaId, Optional<Domain.Feed.Feed> AddedBy);
 
-public readonly record struct SinkSyncAck(MediaId MediaId, SinkSyncOutcome Outcome);
+public readonly record struct SinkSyncAck(MediaId MediaId, SinkSyncOutcome Outcome)
+{
+	public Optional<string> Reason { get; init; } = new None();
+}
 
 public enum SinkSyncOutcome
 {

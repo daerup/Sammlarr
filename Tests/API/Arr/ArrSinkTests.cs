@@ -293,7 +293,14 @@ public class ArrSinkTests
 
 		var acks = await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
-		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Unaddressable)]);
+		await Assert
+			.That(acks)
+			.IsEquivalentTo([
+				new SinkSyncAck(Known, SinkSyncOutcome.Unaddressable)
+				{
+					Reason = Some.Of("Sammlarr has no TMDB or TVDB id for this title, the ids Radarr and Sonarr add by."),
+				},
+			]);
 		await Assert.That(_radarr.Requests).IsEmpty();
 		await Assert.That(_sonarr.Requests).IsEmpty();
 	}
@@ -305,7 +312,9 @@ public class ArrSinkTests
 
 		var acks = await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
-		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Unaddressable)]);
+		await Assert
+			.That(acks)
+			.IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Unaddressable) { Reason = Some.Of("Neither Radarr nor Sonarr adds a show by its TMDB id.") }]);
 		await Assert.That(_radarr.Requests).IsEmpty();
 		await Assert.That(_sonarr.Requests).IsEmpty();
 	}
@@ -319,7 +328,9 @@ public class ArrSinkTests
 			.ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())])
 			.ToListAsync();
 
-		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Failed)]);
+		await Assert
+			.That(acks)
+			.IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Failed) { Reason = Some.Of("Radarr is not set up: it needs an address and an API key.") }]);
 	}
 
 	[Test]
@@ -380,8 +391,37 @@ public class ArrSinkTests
 			.ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())])
 			.ToListAsync();
 
-		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Failed)]);
+		await Assert
+			.That(acks)
+			.IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Failed) { Reason = Some.Of("Radarr has no quality profile or root folder chosen yet.") }]);
 		_radarr.Verify(request => request.Method(HttpMethod.Post).Path("/api/v3/movie"), Times.Never);
+	}
+
+	[Test]
+	public async Task ApplyAsync_WhenRadarrRefusesTheAdd_AcksItFailedWithRadarrsMessage()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("[]");
+		_radarr
+			.OnRequest(request => request.Method(HttpMethod.Get).PathStartsWith("/api/v3/movie/lookup"))
+			.RespondWithJson("""[{"title":"Inception","tmdbId":27205}]""");
+		_radarr
+			.OnPost("/api/v3/movie")
+			.RespondWith(
+				new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = new StringContent("""[{"errorMessage":"This movie has already been added"}]""") }
+			);
+		Addressing(TmdbId.From("27205", MediaType.Movie));
+
+		var acks = await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert
+			.That(acks)
+			.IsEquivalentTo([
+				new SinkSyncAck(Known, SinkSyncOutcome.Failed)
+				{
+					Reason = Some.Of("Radarr answered 400 BadRequest at http://radarr:7878. This movie has already been added"),
+				},
+			]);
 	}
 
 	[Test]
@@ -395,7 +435,10 @@ public class ArrSinkTests
 
 		var acks = await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None()), new SinkPush(other, new None())]).ToListAsync();
 
-		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Failed), new SinkSyncAck(other, SinkSyncOutcome.Failed)]);
+		Optional<string> reason = Some.Of("Radarr answered 401 Unauthorized at http://radarr:7878. Check the API key under Settings › General in Radarr.");
+		await Assert
+			.That(acks)
+			.IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Failed) { Reason = reason }, new SinkSyncAck(other, SinkSyncOutcome.Failed) { Reason = reason }]);
 		_radarr.Verify(request => request.Path("/api/v3/tag"), Times.Once);
 	}
 

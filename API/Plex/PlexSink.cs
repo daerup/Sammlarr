@@ -52,8 +52,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		foreach (var id in ids)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			var outcome = plexIds.TryGetValue(id, out var plexId) ? await PushAsync(action, plexId, cancellationToken) : SinkSyncOutcome.Unaddressable;
-			yield return new SinkSyncAck(id, outcome);
+			yield return await plexIds.GetValueOrNone(id).Match(plexId => PushAsync(id, action, plexId, cancellationToken), () => Task.FromResult(Unaddressable(id)));
 		}
 	}
 
@@ -101,24 +100,31 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		}
 	}
 
-	private async Task<SinkSyncOutcome> PushAsync(WantlistOperationAction action, IExternalMediaId plexId, CancellationToken cancellationToken)
+	private async Task<SinkSyncAck> PushAsync(MediaId id, WantlistOperationAction action, IExternalMediaId plexId, CancellationToken cancellationToken)
 	{
 		var endpoint = Endpoint(action, plexId);
 		try
 		{
 			using var response = await plexClient.SendAsync(HttpMethod.Put, endpoint, cancellationToken, new StringContent(string.Empty));
-			if (!response.IsSuccessStatusCode)
+			if (response.IsSuccessStatusCode)
 			{
-				logger.LogWarning("Plex watchlist push failed ({StatusCode}) for {ExternalId} at {Endpoint}", (int)response.StatusCode, plexId.Value, endpoint);
+				return new SinkSyncAck(id, SinkSyncOutcome.Applied);
 			}
-			return response.IsSuccessStatusCode ? SinkSyncOutcome.Applied : SinkSyncOutcome.Failed;
+
+			logger.LogWarning("Plex watchlist push failed ({StatusCode}) for {ExternalId} at {Endpoint}", (int)response.StatusCode, plexId.Value, endpoint);
+			return Failed(id, $"Plex answered {(int)response.StatusCode} {response.StatusCode}.");
 		}
 		catch (Exception ex)
 		{
 			logger.LogWarning(ex, "Plex watchlist push threw for {ExternalId} at {Endpoint}", plexId.Value, endpoint);
-			return SinkSyncOutcome.Failed;
+			return Failed(id, $"Plex could not be reached: {ex.Message}");
 		}
 	}
+
+	private static SinkSyncAck Failed(MediaId id, string reason) => new(id, SinkSyncOutcome.Failed) { Reason = Some.Of(reason) };
+
+	private static SinkSyncAck Unaddressable(MediaId id) =>
+		new(id, SinkSyncOutcome.Unaddressable) { Reason = Some.Of("Sammlarr found no Plex id for this title.") };
 
 	private async Task<(List<FoundMedia>, int)> FetchPageAsync(int page, CancellationToken cancellationToken)
 	{

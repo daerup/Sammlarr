@@ -11,5 +11,10 @@ public interface IWantlistOutbox
 
 	Task DropAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
-	Task RecordFailedAttemptAsync(IEnumerable<MediaId> ids, WantlistOutboxState resultingState, CancellationToken cancellationToken = default);
+	Task RecordFailedAttemptAsync(
+		IEnumerable<MediaId> ids,
+		WantlistOutboxState resultingState,
+		Optional<string> reason,
+		CancellationToken cancellationToken = default
+	);
 }
