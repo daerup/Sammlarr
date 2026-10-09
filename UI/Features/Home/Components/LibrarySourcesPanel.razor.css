@@ -137,10 +137,6 @@
     --tone: var(--chart-2);
 }
 
-.tone-4 {
-    --tone: var(--chart-4);
-}
-
 .stack-part,
 .key-dot {
     --swatch: var(--tone);
