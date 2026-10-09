@@ -68,6 +68,14 @@ public class MediaGridTileTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_WhenThereIsNoArtworkAtAll_DrawsTheScrimOverThePlaceholder()
+	{
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie(backdrop: null, poster: null)));
+
+		await Assert.That(cut.FindAll(".media-card-failed + .media-card-scrim")).Count().IsEqualTo(1);
+	}
+
+	[Test]
 	public async Task Render_WhenArtworkArrivesLater_ShowsTheBackdrop()
 	{
 		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie(backdrop: null, poster: null)));
