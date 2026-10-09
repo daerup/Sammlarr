@@ -17,7 +17,7 @@ internal sealed record OutcomeLook(UsageOutcome Outcome, string Name, string Ico
 
 internal static class UsageView
 {
-	internal const string Accent = "var(--usage-accent)";
+	internal const string Accent = "var(--chart-1)";
 
 	internal const string Grey = "var(--muted-foreground)";
 

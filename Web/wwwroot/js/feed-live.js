@@ -32,7 +32,7 @@ const STATUS_CSS = {
     after429: 'var(--usage-after-429)',
     gaveup: 'var(--usage-gave-up)',
     failed: 'var(--usage-failed)',
-    det: 'var(--usage-accent)',
+    det: 'var(--chart-1)',
 };
 const GLYPH = {
     check: '<path d="M20 6 9 17l-5-5"/>',

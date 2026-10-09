@@ -5,6 +5,7 @@ using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
+using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
 
 namespace UI.Tests.Home;
@@ -35,6 +36,18 @@ public class LibrarySourcesPanelTests : BunitContext
 
 		await Assert.That(cut.FindAll(".stack-part").Select(Tone)).IsEquivalentTo(["tone-0", "tone-1"]);
 		await Assert.That(cut.FindAll(".key-dot").Select(Tone)).IsEquivalentTo(["tone-0", "tone-1"]);
+	}
+
+	[Test]
+	public async Task Render_ForMoreSourcesThanTones_GivesTheAccentToTheFirstSourceOnly()
+	{
+		IReadOnlyList<SourceShare> seven = [.. Enumerable.Range(1, 7).Select(rank => new SourceShare($"feed {rank}", 8 - rank))];
+
+		var cut = Render<LibrarySourcesPanel>(parameters => parameters.Add(panel => panel.Sources, seven).Add(panel => panel.Total, 28));
+
+		await Assert
+			.That(cut.FindAll(".key-dot").Select(Tone))
+			.IsEquivalentTo(["tone-0", "tone-1", "tone-2", "tone-3", "tone-4", "tone-1", "tone-2"], CollectionOrdering.Matching);
 	}
 
 	[Test]
