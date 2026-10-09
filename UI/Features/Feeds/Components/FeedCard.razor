@@ -117,8 +117,8 @@
     </div>
 
     <div class="feed-card-foot">
-        <span class="feed-card-control">
-            <LastRunCell @key="(Feed.Id, RunVersion)" Overview="@Row.Overview"/>
+        <span class="feed-card-control feed-card-last">
+            <LastRunCell @key="(Feed.Id, RunVersion)" Overview="@Row.Overview" Bar="true"/>
         </span>
         <div class="feed-card-actions">
             <a class="feed-card-control feed-card-icon" href="@EditHref" aria-label="Edit" title="Edit">

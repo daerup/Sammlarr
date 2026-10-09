@@ -14,6 +14,7 @@ using Domain.Settings;
 using Domain.Wantlist;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
@@ -81,6 +82,45 @@ public class LastRunCellTests : BunitContext
 		await Assert.That(cut.Find(".change-band").TextContent).Contains("No list found with identifier 'hdlists/comedy'.");
 	}
 
+	[Test]
+	public async Task Render_WithBar_ShowsTheBarAndBothTooltipSections()
+	{
+		RegisterServices();
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Bar, true));
+		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-bar]").Count == 1);
+		await cut.Find("[data-testid=last-run-bar]").ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
+		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-tip]").Count == 1);
+
+		await Assert.That(cut.FindAll("[data-testid=last-run-bar] i").Select(part => part.GetAttribute("data-part"))).IsEquivalentTo(["Matched"]);
+		await Assert.That(cut.Find("[data-testid=last-run-tip]").TextContent).Contains("Finding the titles").And.Contains("What the run did");
+		await Assert.That(cut.Find("[data-testid=last-run-tip-did]").TextContent).Contains("Added to your collection");
+	}
+
+	[Test]
+	public async Task Dialog_WhenTheBarIsClicked_Opens()
+	{
+		RegisterServices();
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Bar, true));
+		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-bar]").Count == 1);
+		await cut.Find("[data-testid=last-run-bar]").ClickAsync(new());
+
+		cut.WaitForState(() => cut.Instance.Opened.Count == 1);
+		await Assert.That(cut.Instance.Opened).IsEquivalentTo([true]);
+	}
+
+	[Test]
+	public async Task Render_WithoutBar_ShowsOnlyThePill()
+	{
+		RegisterServices();
+
+		var cut = Render<Harness>();
+		cut.WaitForState(() => cut.FindAll(".last-run").Count == 1);
+
+		await Assert.That(cut.FindAll("[data-testid=last-run-bar]")).IsEmpty();
+	}
+
 	private void RegisterServices()
 	{
 		Services.AddBlazorBlueprintComponents();
@@ -142,6 +182,8 @@ public class LastRunCellTests : BunitContext
 				UnmatchedNotFound = 0,
 				UnmatchedCouldNotLookUp = 0,
 				Removed = 0,
+				Known = 0,
+				NotFoundEarlier = 0,
 			},
 			Items = [new FeedRunItem { MediaId = Added, State = FeedRunItemState.Added }],
 		};
@@ -177,6 +219,9 @@ public class LastRunCellTests : BunitContext
 		[Parameter]
 		public FeedRun LastRun { get; set; } = Run();
 
+		[Parameter]
+		public bool Bar { get; set; }
+
 		protected override void BuildRenderTree(RenderTreeBuilder builder)
 		{
 			builder.OpenComponent<BbPortalHost>(0);
@@ -199,6 +244,7 @@ public class LastRunCellTests : BunitContext
 				)
 			);
 			builder.AddComponentParameter(3, nameof(LastRunCell.DialogOpenChanged), EventCallback.Factory.Create<bool>(this, Opened.Add));
+			builder.AddComponentParameter(4, nameof(LastRunCell.Bar), Bar);
 			builder.CloseComponent();
 		}
 	}

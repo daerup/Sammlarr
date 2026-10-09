@@ -228,6 +228,18 @@
     background: color-mix(in srgb, var(--foreground) 2.5%, transparent);
 }
 
+.feed-card-last {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+
+.feed-card-last ::deep button {
+    pointer-events: auto;
+}
+
 .feed-card-actions {
     display: flex;
     align-items: center;

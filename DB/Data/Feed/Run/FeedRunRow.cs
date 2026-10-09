@@ -25,6 +25,8 @@ internal record FeedRunRow : Entity<Guid>, IUserOwned
 	public int UnmatchedNotFound { get; set; }
 	public int UnmatchedCouldNotLookUp { get; set; }
 	public int Removed { get; set; }
+	public int Known { get; set; }
+	public int NotFoundEarlier { get; set; }
 
 	public string? SourceFailure { get; set; }
 

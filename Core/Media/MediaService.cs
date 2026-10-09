@@ -410,7 +410,8 @@ internal sealed class MediaService(
 			match => LoadDetailsAsync(match.Identity, match.Stored, request.Described(), connected, buffer, cancellationToken),
 			error => ValueTask.FromResult<Result<MatchedMedia>>(error)
 		);
-		var result = loaded.Match<MatchedMedia, MediaMatchResult>(matched => matched, error => request.Unmatched(Reason(error)));
+		var known = handoff.Match(match => match.Stored.IsSome(), _ => false);
+		var result = loaded.Match<MatchedMedia, MediaMatchResult>(matched => matched with { Known = known }, error => request.Unmatched(Reason(error)));
 		FeedRunSpans.Settle(traced.Title, Fate(result));
 		return result;
 	}
@@ -424,23 +425,32 @@ internal sealed class MediaService(
 		);
 	}
 
-	private static TitleFate Fate(MediaMatchResult result) =>
-		result switch
+	private static TitleFate Fate(MediaMatchResult result)
+	{
+		return result switch
 		{
 			MatchedMedia => TitleFate.Matched,
 			UnmatchedMedia unmatched => Fate(unmatched.Reason),
 		};
+	}
 
-	private static TitleFate Fate(UnmatchedReason reason) =>
-		reason switch
+	private static TitleFate Fate(UnmatchedReason reason)
+	{
+		return reason switch
 		{
 			UnmatchedReason.NotFound => TitleFate.NotFound,
+			UnmatchedReason.NotFoundEarlier => TitleFate.NotFound,
 			UnmatchedReason.CouldNotLookUp => TitleFate.CouldNotLookUp,
 		};
+	}
 
 	private static UnmatchedReason Reason(Error error)
 	{
-		return error.CausedBy<LookupNotRunException>().Map(_ => UnmatchedReason.CouldNotLookUp).GetValueOr(UnmatchedReason.NotFound);
+		return error
+			.CausedBy<LookupNotRunException>()
+			.Map(_ => UnmatchedReason.CouldNotLookUp)
+			.Or(() => error.CausedBy<NotFoundEarlierException>().Map(_ => UnmatchedReason.NotFoundEarlier))
+			.GetValueOr(UnmatchedReason.NotFound);
 	}
 
 	private async ValueTask<Result<MatchedMedia>> LoadDetailsAsync(

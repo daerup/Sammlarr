@@ -1,3 +1,4 @@
+@using System.Globalization
 @using Contracts.Media
 @using Domain.Feed.Run
 @using UI.Shared.Changes
@@ -6,38 +7,76 @@
 
 @if (Overview.LastRun is Some<FeedRun>(var run))
 {
-    <BbTooltip>
-    <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
-    <button type="button" class="last-run" @onclick="() => OpenAsync(run)">
-        <LucideIcon Name="history" Size="14"/>
-        <span>@ScheduleText.Ago(run.StartedAt, DateTimeOffset.UtcNow)</span>
-        @if (run.Conclusiveness is not Conclusiveness.Conclusive)
-        {
-            <span class="last-run-badge is-guarded">
-                <LucideIcon Name="shield" Size="11"/>
-            </span>
-        }
-        else
-        {
-            <span class="last-run-badge">
-                @if (run.Counts.Added > 0)
+    @if (Bar)
+    {
+        var segments = RunBar.Segments(run.Counts);
+        <BbTooltip DelayDuration="150" Placement="PopoverPlacement.TopStart">
+            <BbTooltipTrigger Focusable="false" Class="flex min-w-0 flex-1 items-center *:flex *:min-w-0 *:flex-1 *:items-center">
+                @Pill(run)
+                <button type="button" class="foot-bar" aria-label="See what this run changed" data-testid="last-run-bar" @onclick="() => OpenAsync(run)">
+                    <span class="foot-track">
+                        @foreach (var segment in segments)
+                        {
+                            <i class="block h-full" style="@segment.Style" data-part="@segment.Part"></i>
+                        }
+                    </span>
+                </button>
+            </BbTooltipTrigger>
+            <BbTooltipContent Class="w-[300px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg" data-testid="last-run-tip">
+                <div class="flex justify-between gap-2.5">
+                    <b class="font-semibold text-foreground">Run of @Heading(run)</b>
+                    <span class="tabular-nums">@FeedRunView.Took(run.Duration) · @Count(run.Counts.Total) @(run.Counts.Total == 1 ? "title" : "titles")</span>
+                </div>
+                @if (segments.Count > 0)
                 {
-                    <span class="is-added">+@run.Counts.Added</span>
+                <div class="mt-2 text-[10px] font-semibold uppercase tracking-[.07em]">Finding the titles</div>
+                <div class="mt-1 flex h-[7px] overflow-hidden rounded-full bg-secondary">
+                    @foreach (var segment in segments)
+                    {
+                        <i class="block h-full" style="@segment.Style"></i>
+                    }
+                </div>
+                <div class="mt-1.5 grid grid-cols-[1fr_auto] gap-x-4 gap-y-0.5" data-testid="last-run-tip-found">
+                    @foreach (var segment in RunBar.Legend(segments))
+                    {
+                        <span class="inline-flex items-center gap-[7px]">
+                            <i class="inline-block size-[9px] rounded-[2px]" style="@($"background: {RunBar.Color(segment.Part)}")"></i>@RunBar.Label(segment.Part)
+                        </span>
+                        <b class="text-right font-semibold tabular-nums text-foreground">@Count(segment.Count)</b>
+                    }
+                </div>
                 }
-                @if (run.Counts.Removed > 0)
-                {
-                    <span class="is-removed">−@run.Counts.Removed</span>
-                }
-                @if (!run.HasChanges)
-                {
-                    <LucideIcon Name="check" Size="11"/>
-                }
-            </span>
-        }
-    </button>
-    </BbTooltipTrigger>
-    <BbTooltipContent>See what this run changed</BbTooltipContent>
-    </BbTooltip>
+                <div class="mt-2 text-[10px] font-semibold uppercase tracking-[.07em]">What the run did</div>
+                <div class="mt-1 grid grid-cols-[1fr_auto] gap-x-4 gap-y-0.5" data-testid="last-run-tip-did">
+                    @foreach (var chip in FeedRunView.Did(run.Counts))
+                    {
+                        <span class="inline-flex items-center gap-[7px]">
+                            @if (chip.Glyph is { } glyph)
+                            {
+                                <span class="@($"inline-flex w-[13px] justify-center font-bold {Tone(chip.Tone)}")">@glyph</span>
+                            }
+                            else
+                            {
+                                <LucideIcon Name="@chip.Icon" Size="13"/>
+                            }
+                            @chip.Tooltip
+                        </span>
+                        <b class="@($"text-right font-semibold tabular-nums {(chip.Count > 0 ? Tone(chip.Tone) : "text-foreground")}")">@Count(chip.Count)</b>
+                    }
+                </div>
+                <div class="mt-2 text-[11px] opacity-80">Click for the titles it added and removed</div>
+            </BbTooltipContent>
+        </BbTooltip>
+    }
+    else
+    {
+        <BbTooltip>
+            <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+                @Pill(run)
+            </BbTooltipTrigger>
+            <BbTooltipContent>See what this run changed</BbTooltipContent>
+        </BbTooltip>
+    }
 
     <ChangeDialog Open="_open"
                   OnOpenChanged="SetOpenAsync"
@@ -82,6 +121,8 @@ else
 
     [Parameter] public EventCallback<bool> DialogOpenChanged { get; set; }
 
+    [Parameter] public bool Bar { get; set; }
+
     private int _runCount;
     private bool _open;
     private IReadOnlyList<ChangeItem> _items = [];
@@ -112,6 +153,48 @@ else
     }
 
     private static string Heading(FeedRun run) => run.StartedAt.ToLocalTime().ToString("MMMM d, HH:mm");
+
+    private static string Count(int count) => count.ToString("N0", CultureInfo.InvariantCulture);
+
+    private static string Tone(ChipTone tone)
+    {
+        return tone switch
+        {
+            ChipTone.Added => "text-[color:var(--alert-success)]",
+            ChipTone.Removed => "text-destructive",
+            ChipTone.Neutral => "text-foreground",
+            ChipTone.Unmatched => "text-foreground",
+        };
+    }
+
+    private RenderFragment Pill(FeedRun run) =>
+        @<button type="button" class="last-run" @onclick="() => OpenAsync(run)">
+            <LucideIcon Name="history" Size="14"/>
+            <span>@ScheduleText.Ago(run.StartedAt, DateTimeOffset.UtcNow)</span>
+            @if (run.Conclusiveness is not Conclusiveness.Conclusive)
+            {
+                <span class="last-run-badge is-guarded">
+                    <LucideIcon Name="shield" Size="11"/>
+                </span>
+            }
+            else
+            {
+                <span class="last-run-badge">
+                    @if (run.Counts.Added > 0)
+                    {
+                        <span class="is-added">+@run.Counts.Added</span>
+                    }
+                    @if (run.Counts.Removed > 0)
+                    {
+                        <span class="is-removed">−@run.Counts.Removed</span>
+                    }
+                    @if (!run.HasChanges)
+                    {
+                        <LucideIcon Name="check" Size="11"/>
+                    }
+                </span>
+            }
+        </button>;
 
     private static RenderFragment ProblemBand(FeedRun run, string problem) =>
         @<RunProblem Headline="@problem" Reason="@run.SourceFailure" Failed="run.Failed"/>;
