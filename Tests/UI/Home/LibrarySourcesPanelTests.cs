@@ -39,7 +39,7 @@ public class LibrarySourcesPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForMoreSourcesThanTones_GivesTheAccentToTheFirstSourceOnly()
+	public async Task Render_ForMoreSourcesThanTones_GivesTheAccentToTheFirstSourceOnlyAndCyclesTheRest()
 	{
 		IReadOnlyList<SourceShare> seven = [.. Enumerable.Range(1, 7).Select(rank => new SourceShare($"feed {rank}", 8 - rank))];
 
@@ -47,7 +47,7 @@ public class LibrarySourcesPanelTests : BunitContext
 
 		await Assert
 			.That(cut.FindAll(".key-dot").Select(Tone))
-			.IsEquivalentTo(["tone-0", "tone-1", "tone-2", "tone-3", "tone-4", "tone-1", "tone-2"], CollectionOrdering.Matching);
+			.IsEquivalentTo(["tone-0", "tone-1", "tone-2", "tone-3", "tone-1", "tone-2", "tone-3"], CollectionOrdering.Matching);
 	}
 
 	[Test]
