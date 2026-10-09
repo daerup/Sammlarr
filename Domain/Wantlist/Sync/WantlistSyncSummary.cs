@@ -7,6 +7,10 @@ public record WantlistSyncSummary(WantlistDelta Pull, WantlistDelta Push, IReadO
 {
 	public IReadOnlyList<UnmatchedMedia> Unmatched { get; init; } = [];
 
+	public Optional<WantlistSyncSinkUnreachable> Down { get; init; } = new None();
+
+	public IReadOnlyList<MediaId> Waiting { get; init; } = [];
+
 	private int Pulled => Pull.Adds.Count;
 	private int Removed => Pull.Removes.Count;
 	private int Queued => Push.Count;

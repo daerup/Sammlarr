@@ -1,6 +1,7 @@
 using Contracts;
 using Contracts.Announcing;
 using Contracts.Identity;
+using Contracts.Media;
 using Contracts.Messaging;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
@@ -35,9 +36,30 @@ internal static class WantlistStubs
 		return sink;
 	}
 
-	public static WantlistSyncPlanner Planner(Mock<IMediaSink> sink, Mock<IWantlistOutbox> outbox, ILogger<WantlistSyncPlanner>? logger = null)
+	public static WantlistSyncPlanner Planner(
+		Mock<IMediaSink> sink,
+		Mock<IWantlistOutbox> outbox,
+		ILogger<WantlistSyncPlanner>? logger = null,
+		Mock<IWantlistRepository>? repository = null,
+		Mock<IMediaRepository>? media = null
+	)
 	{
-		return new WantlistSyncPlanner(Active(sink), EmptyRepository().Object, outbox.Object, logger ?? NullLogger<WantlistSyncPlanner>.Instance);
+		return new WantlistSyncPlanner(
+			Active(sink),
+			(repository ?? EmptyRepository()).Object,
+			outbox.Object,
+			(media ?? IMediaRepository.Mock()).Object,
+			logger ?? NullLogger<WantlistSyncPlanner>.Instance
+		);
+	}
+
+	public static Mock<IMediaRepository> Typed(params (MediaId Id, MediaType Type)[] titles)
+	{
+		var media = IMediaRepository.Mock();
+		media
+			.GetAsync(Any(), Any())
+			.Returns([.. titles.Select(title => new StoredMedia(new MediaIdentity(title.Id, [TmdbId.From($"{title.Id}", title.Type)]), new None()))]);
+		return media;
 	}
 
 	public static WantlistSnapshot Wanted(IEnumerable<MediaId> ids) =>
@@ -73,7 +95,8 @@ internal static class WantlistStubs
 		WantlistSyncGate? gate = null,
 		ICurrentUser? user = null,
 		IMessagePublisher? publisher = null,
-		Mock<IWantlistRepository>? repository = null
+		Mock<IWantlistRepository>? repository = null,
+		Mock<IMediaRepository>? media = null
 	)
 	{
 		outbox ??= EmptyOutbox();
@@ -82,7 +105,7 @@ internal static class WantlistStubs
 
 		return new WantlistSyncEngine(
 			gate ?? new WantlistSyncGate(),
-			Planner(sink, outbox),
+			Planner(sink, outbox, media: media),
 			Active(sink),
 			(repository ?? EmptyRepository()).Object,
 			outbox.Object,

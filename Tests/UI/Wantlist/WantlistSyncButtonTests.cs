@@ -193,7 +193,7 @@ public class WantlistSyncButtonTests : BunitContext
 	public async Task Status_OnRadarrAndSonarrWhenSonarrIsUnreachable_SaysSoBesideRadarr()
 	{
 		var (_, planner) = RegisterServices();
-		planner.PlanAsync(Any()).Returns(new WantlistSyncSinkUnreachable("Sonarr answered 401 Unauthorized.", [ArrApp.Sonarr]));
+		planner.PlanAsync(Any()).Returns(Summary() with { Down = Some.Of(new WantlistSyncSinkUnreachable("Sonarr answered 401 Unauthorized.", [ArrApp.Sonarr])) });
 
 		var cut = Render<WantlistSyncButton>(parameters => parameters.Add(button => button.Sink, SinkKind.Arr));
 
@@ -202,6 +202,21 @@ public class WantlistSyncButtonTests : BunitContext
 			TimeSpan.FromSeconds(10)
 		);
 		await Assert.That(cut.Find("[data-app=Radarr]").TextContent.Trim()).IsEqualTo("in sync");
+	}
+
+	[Test]
+	public async Task Status_OnRadarrAndSonarrWhenBothAreUnreachable_SaysSoForBoth()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(new WantlistSyncSinkUnreachable("Radarr is down. Sonarr is down.", [ArrApp.Radarr, ArrApp.Sonarr]));
+
+		var cut = Render<WantlistSyncButton>(parameters => parameters.Add(button => button.Sink, SinkKind.Arr));
+
+		cut.WaitForState(
+			() => cut.FindAll(".sync-app").Count == 2 && cut.FindAll(".sync-app").All(app => app.TextContent.Contains("unreachable")),
+			TimeSpan.FromSeconds(10)
+		);
+		await Assert.That(cut.FindAll(".sync-app").Select(app => app.GetAttribute("data-app"))).IsEquivalentTo(["Radarr", "Sonarr"]);
 	}
 
 	[Test]
@@ -228,6 +243,31 @@ public class WantlistSyncButtonTests : BunitContext
 		cut.WaitForState(() => cut.FindAll(".change-row").Count == 1);
 
 		await Assert.That(cut.Markup).Contains("1 waiting to reach Radarr + Sonarr");
+	}
+
+	[Test]
+	public async Task Dialog_WhileSonarrIsDown_ShowsSonarrsReasonAndKeepsSyncNowEnabled()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary() with { Down = Some.Of(new WantlistSyncSinkUnreachable("Sonarr answered 401 Unauthorized.", [ArrApp.Sonarr])) });
+		var cut = Render(builder =>
+		{
+			builder.OpenComponent<BbPortalHost>(0);
+			builder.CloseComponent();
+			builder.OpenComponent<WantlistSyncButton>(1);
+			builder.AddComponentParameter(2, nameof(WantlistSyncButton.Sink), SinkKind.Arr);
+			builder.AddComponentParameter(
+				3,
+				nameof(WantlistSyncButton.OutboxEntries),
+				(IReadOnlyCollection<WantlistOutboxEntry>)[new WantlistOutboxEntry(Synced, WantlistOperationAction.Add, WantlistOutboxState.Pending, 0)]
+			);
+			builder.CloseComponent();
+		});
+
+		await cut.Find("button").ClickAsync(new());
+
+		cut.WaitForState(() => cut.Markup.Contains("Sonarr answered 401 Unauthorized."));
+		await Assert.That(cut.FindAll("button").Single(button => button.TextContent.Contains("Sync now")).HasAttribute("disabled")).IsFalse();
 	}
 
 	private static readonly PendingJob RunningSync = new(

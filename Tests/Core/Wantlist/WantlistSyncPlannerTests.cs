@@ -62,15 +62,70 @@ public class WantlistSyncPlannerTests
 	}
 
 	[Test]
-	public async Task PlanAsync_WhenOneArrAppCannotBeRead_ReportsWhichOne()
+	public async Task PlanAsync_WhenBothArrAppsCannotBeRead_ReportsBoth()
 	{
 		var sink = IMediaSink.Mock();
-		sink.GetAsync(Any()).Throws(new ArrAppsUnreachableException("Sonarr answered 401 Unauthorized.", [ArrApp.Sonarr]));
+		sink.GetAsync(Any()).Throws(new ArrAppsUnreachableException("Radarr is down. Sonarr is down.", [ArrApp.Radarr, ArrApp.Sonarr]));
 
 		var result = await WantlistStubs.Planner(sink, WantlistStubs.EmptyOutbox()).PlanAsync();
 
 		var unreachable = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSinkUnreachable>();
-		await Assert.That(unreachable.Apps).IsEquivalentTo([ArrApp.Sonarr]);
+		await Assert.That(unreachable.Apps).IsEquivalentTo([ArrApp.Radarr, ArrApp.Sonarr]);
+	}
+
+	[Test]
+	public async Task PlanAsync_WhenOnlySonarrCannotBeRead_PlansTheMoviesAndLeavesTheShowsWaiting()
+	{
+		var (movie, newMovie, show, newShow) = (MediaId.New(), MediaId.New(), MediaId.New(), MediaId.New());
+		var down = new WantlistSyncSinkUnreachable("Sonarr answered 401 Unauthorized.", [ArrApp.Sonarr]);
+		var sink = IMediaSink.Mock();
+		sink.GetAsync(Any()).Returns(new SinkSnapshot([movie], []) { Down = Some.Of(down) });
+		var repository = WantlistStubs.EmptyRepository();
+		repository.GetAllAsync(Any()).Returns([.. WantlistStubs.Wanted([movie, show]).Items]);
+		var outbox = WantlistStubs.OutboxPending([newMovie, newShow]);
+		var media = WantlistStubs.Typed((movie, MediaType.Movie), (newMovie, MediaType.Movie), (show, MediaType.Show), (newShow, MediaType.Show));
+
+		var result = await WantlistStubs.Planner(sink, outbox, repository: repository, media: media).PlanAsync();
+
+		var summary = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSummary>();
+		await Assert.That(summary!.Pull.Removes).IsEmpty();
+		await Assert.That(summary.Push.Adds).IsEquivalentTo([newMovie]);
+		await Assert.That(summary.Waiting).IsEquivalentTo([newShow]);
+		await Assert.That(summary.Down).IsSome().And.IsEqualTo(down);
+	}
+
+	[Test]
+	public async Task PlanAsync_WhenOnlySonarrCannotBeRead_NeitherDropsNorPlansAQueuedShowRemoval()
+	{
+		var show = MediaId.New();
+		var sink = IMediaSink.Mock();
+		sink.GetAsync(Any()).Returns(new SinkSnapshot([], []) { Down = Some.Of(new WantlistSyncSinkUnreachable("Sonarr is down.", [ArrApp.Sonarr])) });
+		var outbox = IWantlistOutbox.Mock();
+		outbox.GetAllAsync(Any()).Returns([new WantlistOutboxEntry(show, WantlistOperationAction.Remove, WantlistOutboxState.Pending, 0)]);
+
+		var result = await WantlistStubs.Planner(sink, outbox, media: WantlistStubs.Typed((show, MediaType.Show))).PlanAsync();
+
+		var summary = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSummary>();
+		await Assert.That(summary!.Push.Removes).IsEmpty();
+		await Assert.That(summary.Waiting).IsEquivalentTo([show]);
+		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task PlanAsync_WhenOnlySonarrCannotBeRead_HoldsBackATitleWhoseTypeIsUnknown()
+	{
+		var unknown = MediaId.New();
+		var sink = IMediaSink.Mock();
+		sink.GetAsync(Any()).Returns(new SinkSnapshot([], []) { Down = Some.Of(new WantlistSyncSinkUnreachable("Sonarr is down.", [ArrApp.Sonarr])) });
+		var repository = WantlistStubs.EmptyRepository();
+		repository.GetAllAsync(Any()).Returns([.. WantlistStubs.Wanted([unknown]).Items]);
+
+		var result = await WantlistStubs
+			.Planner(sink, WantlistStubs.EmptyOutbox(), repository: repository, media: WantlistStubs.Typed((unknown, MediaType.Unknown)))
+			.PlanAsync();
+
+		var summary = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSummary>();
+		await Assert.That(summary!.Pull.Removes).IsEmpty();
 	}
 
 	[Test]

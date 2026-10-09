@@ -5,6 +5,7 @@ using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Sync;
 using Domain.Media;
+using Domain.Notifications;
 using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Arr;
@@ -104,6 +105,27 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Resolve<IWantlistSyncEngine>().SyncAsync(Trigger);
 
 		await Assert.That((await host.Resolve<IWantlistService>().GetAsync()).Ids).IsEmpty();
+	}
+
+	[Test]
+	public async Task SyncAsync_WhileSonarrRefusesItsKey_AddsTheMovieToRadarrKeepsTheSyncedShowAndLeavesTheNewShowWaitingUntried()
+	{
+		host.HttpStub.RespondWithStatusForUrl("sonarr.test/api/v3/series", HttpStatusCode.Unauthorized);
+		var movie = await host.Movie(Inception).SeedAsync();
+		var show = await host.Movie(new MediaSpec("Breaking Bad", MediaType.Show, [Tvdb("81189")])).SeedAsync();
+		var synced = await host.Movie(new MediaSpec("The Wire", MediaType.Show, [Tvdb("79126")]))
+			.OnWantlist(new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
+		var wantlist = host.Resolve<IWantlistService>();
+		await wantlist.AddAsync([movie, show], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
+
+		await host.Resolve<IWantlistSyncEngine>().SyncAsync(Trigger);
+
+		await Assert.That(_added).Count().IsEqualTo(1);
+		var waiting = (await wantlist.GetOutboxAsync()).Entries.Single();
+		await Assert.That(waiting.MediaId).IsEqualTo(show);
+		await Assert.That(waiting.Attempts).IsEqualTo(0);
+		await Assert.That((await wantlist.GetAsync()).Find(synced)).IsSome();
+		await Assert.That(host.Published<WantlistSyncFailedNotification>().Single().Reason).Contains("Sonarr answered 401");
 	}
 
 	private HttpResponseMessage Movies(HttpRequestMessage request)

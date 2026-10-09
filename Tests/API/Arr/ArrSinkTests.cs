@@ -115,13 +115,19 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	public async Task GetAsync_WhenRadarrIsNotSetUp_FailsNamingRadarr()
+	public async Task GetAsync_WhenRadarrIsNotSetUp_ReadsSonarrAndNamesRadarrAsDown()
 	{
-		EmptySonarr();
+		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":3,"tvdbId":81189,"tags":[1]}]""");
+		Identifying();
 		var testee = Testee(Connected with { Radarr = ArrInstanceConfig.Empty });
 
-		var failed = await Assert.That(async () => await testee.GetAsync()).Throws<ArrAppsUnreachableException>().WithMessageContaining("Radarr is not set up");
-		await Assert.That(failed!.Apps).IsEquivalentTo([ArrApp.Radarr]);
+		var snapshot = await testee.GetAsync();
+
+		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
+		var down = await Assert.That(snapshot.Down).IsSome();
+		await Assert.That(down.Apps).IsEquivalentTo([ArrApp.Radarr]);
+		await Assert.That(down.Reason).Contains("Radarr is not set up");
 	}
 
 	[Test]
@@ -129,11 +135,14 @@ public class ArrSinkTests
 	{
 		_radarr.OnAnyRequest().Respond(HttpStatusCode.Unauthorized);
 		EmptySonarr();
+		Identifying();
+
+		var snapshot = await Testee().GetAsync();
 
 		await Assert
-			.That(async () => await Testee().GetAsync())
-			.Throws<ArrAppsUnreachableException>()
-			.WithMessage("Radarr answered 401 Unauthorized at http://radarr:7878. Check the API key under Settings › General in Radarr.");
+			.That(snapshot.Down.Map(down => down.Reason))
+			.IsSome()
+			.And.IsEqualTo("Radarr answered 401 Unauthorized at http://radarr:7878. Check the API key under Settings › General in Radarr.");
 	}
 
 	[Test]

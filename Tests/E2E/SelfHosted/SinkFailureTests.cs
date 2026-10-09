@@ -6,7 +6,7 @@ namespace E2E.Tests.SelfHosted;
 public class SinkFailureTests
 {
 	[Test]
-	public async Task SyncPreview_WhileSonarrRefusesItsKey_ShowsSonarrsReasonAndBlocksTheSync()
+	public async Task SyncPreview_WhileSonarrRefusesItsKey_ShowsSonarrsReasonAndStillLetsRadarrSync()
 	{
 		var stack = await SelfHostedApp.StackAsync();
 		var page = await SelfHostedApp.OpenPageAsync();
@@ -17,7 +17,7 @@ public class SinkFailureTests
 		var preview = await SelfHostedWantlist.OpenSyncAsync(page);
 
 		await Expect(preview.GetByText("Sonarr answered 401 Unauthorized")).ToBeVisibleAsync(Wait.Settle);
-		await Expect(preview.ButtonContaining("Sync now")).ToBeDisabledAsync();
+		await Expect(preview.ButtonContaining("Sync now")).ToBeEnabledAsync();
 		await page.Keyboard.PressAsync("Escape");
 		await Expect(page.Locator(".sync-app[data-app=Sonarr]")).ToContainTextAsync("unreachable");
 		await Expect(page.Locator(".sync-app[data-app=Radarr]")).Not.ToContainTextAsync("unreachable");

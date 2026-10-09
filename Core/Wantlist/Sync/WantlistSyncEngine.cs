@@ -49,13 +49,20 @@ internal sealed class WantlistSyncEngine(
 			WantlistSyncSinkUnreachable failed => failed,
 			WantlistSyncSummary plan => await ExecuteAsync(plan, sink, cancellationToken),
 		};
-		if (syncResult is WantlistSyncSinkUnreachable unreachable)
-		{
-			activity?.SetStatus(ActivityStatusCode.Error, unreachable.Reason);
-			await announcer.AnnounceAsync(new WantlistSyncFailedNotification(currentUser.Id, clock.Now, unreachable.Reason), cancellationToken);
-		}
+		var down = DownOf(planning);
+		down.Apply(unreachable => activity?.SetStatus(ActivityStatusCode.Error, unreachable.Reason));
+		await down.Apply(unreachable =>
+			announcer.AnnounceAsync(new WantlistSyncFailedNotification(currentUser.Id, clock.Now, unreachable.Reason), cancellationToken)
+		);
 		return syncResult;
 	}
+
+	private static Optional<WantlistSyncSinkUnreachable> DownOf(WantlistPlanResult planning) =>
+		planning switch
+		{
+			WantlistSyncSinkUnreachable failed => Some.Of(failed),
+			WantlistSyncSummary plan => plan.Down,
+		};
 
 	private async Task<WantlistSyncResult> ExecuteAsync(WantlistSyncSummary plan, IMediaSink sink, CancellationToken cancellationToken)
 	{
@@ -66,7 +73,7 @@ internal sealed class WantlistSyncEngine(
 			announcer.Announce(new WantlistChangedEvent(currentUser.Id, pulledAdds, pulledRemoves));
 		}
 
-		var pushed = await DrainAsync(sink, cancellationToken);
+		var pushed = await DrainAsync(sink, plan.Waiting.ToHashSet(), cancellationToken);
 		await SyncNotification
 			.For(currentUser.Id, clock.Now, pulledAdds, pulledRemoves, pushed)
 			.Apply(synced => announcer.AnnounceAsync(synced, cancellationToken));
@@ -82,9 +89,9 @@ internal sealed class WantlistSyncEngine(
 		return plan;
 	}
 
-	private async Task<IReadOnlyList<PushOutcome>> DrainAsync(IMediaSink sink, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<PushOutcome>> DrainAsync(IMediaSink sink, IReadOnlySet<MediaId> waiting, CancellationToken cancellationToken)
 	{
-		var pending = new OutboxSnapshot(await outbox.GetAllAsync(cancellationToken)).Pending;
+		var pending = new OutboxSnapshot(await outbox.GetAllAsync(cancellationToken)).Pending.Where(entry => !waiting.Contains(entry.MediaId)).ToList();
 		var addedBy = pending.Any(entry => entry.Action is WantlistOperationAction.Add) ? await AddingFeedsAsync(cancellationToken) : [];
 		List<PushOutcome> outcomes = [];
 		foreach (var batch in pending.GroupBy(entry => entry.Action))
