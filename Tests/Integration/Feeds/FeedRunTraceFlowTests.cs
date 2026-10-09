@@ -39,6 +39,21 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task Run_ThroughAListPage_RecordsThePageAndEndsWithTheRunsCounts()
+	{
+		var feedId = await SeedFeedAsync("paged-list");
+		host.MdblistFeedContains("paged-list", Item("Fight Club", Tmdb("550")), Item("Heat", Tmdb("949")));
+
+		await Engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		var snapshot = await SnapshotAsync(feedId);
+		await Assert.That(snapshot.Progress.Page).IsSome().And.IsEqualTo(new SourcePage(1, new None()));
+		var ended = await Assert.That(snapshot.Ended).IsSome();
+		var counts = await Assert.That(ended!.Counts).IsSome();
+		await Assert.That(counts.Total).IsEqualTo(2);
+	}
+
+	[Test]
 	public async Task EnsureSinkIds_InsideARun_RecordsNoTitle()
 	{
 		var feedId = await SeedFeedAsync("sink-ids-list");

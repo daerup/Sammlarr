@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using Domain.Feed;
+using Domain.Feed.Run;
 using Domain.Feed.Trace;
+using Domain.Processing;
 using Domain.Providers;
 using UI.Features.Feeds.Components;
 
@@ -11,6 +13,8 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 	private static readonly TimeSpan Tick = TimeSpan.FromMilliseconds(250);
 
 	private const int Linger = 5000;
+
+	private const int PageSize = 40;
 
 	private static readonly (string Name, int Year)[] Names =
 	[
@@ -146,12 +150,31 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 	private Optional<int> _requests = new None();
 	private Optional<FeedRunEnd> _ended = new None();
 
+	private Optional<SourcePage> _page = new None();
+
+	private int _waiting;
+
+	private static readonly FeedRunCounts Counts = new FeedRunCounts
+	{
+		Total = 120,
+		Added = 6,
+		Kept = 44,
+		Bypassed = 0,
+		Filtered = 30,
+		Skipped = 16,
+		UnmatchedNotFound = 20,
+		UnmatchedCouldNotLookUp = 4,
+		Removed = 0,
+		Known = 34,
+		NotFoundEarlier = 10,
+	};
+
 	public DemoLiveRun()
 	{
 		_ = PlayAsync();
 	}
 
-	public Feed Feed => DemoFeeds.DocumentariesFeed;
+	public Feed Feed { get; } = DemoFeeds.DocumentariesFeed with { Limit = Some.Of(new QueryLimit { Count = 50 }) };
 
 	public RunLayout Layout { get; } =
 		new RunLayout(
@@ -244,8 +267,8 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 				Count(_script.Steps[_sent++].Event);
 			}
 
-			_ended = Optional.When(elapsed >= _script.EndMs, () => new FeedRunEnd(TraceEnding.Completed, _script.EndMs));
-			Tally = RunTally.Of(_fates, _requests, Math.Min(elapsed, _script.EndMs), _ended, Some.Of(Names.Length));
+			_ended = Optional.When(elapsed >= _script.EndMs, () => new FeedRunEnd(TraceEnding.Completed, _script.EndMs) { Counts = Some.Of(Counts) });
+			Tally = RunTally.Of(_fates, _requests, Math.Min(elapsed, _script.EndMs), _ended, Some.Of(Names.Length)) with { Progress = Progress() };
 			var until = _script.Blocked.Where(window => window.From <= elapsed && elapsed < window.Until).Select(window => window.Until).DefaultIfEmpty(0).Max();
 			return new WireBatch(
 				[.. _script.Steps.Skip(from).Take(_sent - from).Select(LiveWire.Step)],
@@ -268,6 +291,17 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 			TitleSettled { Fate: TitleFate.NotFound } => _fates with { NotFound = _fates.NotFound + 1 },
 			_ => _fates,
 		};
+		_waiting += traced switch
+		{
+			HopAsked => 1,
+			HopAnswered => -1,
+			_ => 0,
+		};
+		if (traced is SourcePage page)
+		{
+			_page = Some.Of(page);
+		}
+
 		if (traced is SourceEnded ended)
 		{
 			_requests = Some.Of(ended.Requests);
@@ -335,8 +369,10 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 
 		IReadOnlyList<NodeTally> tallies = [.. nodes.Values.Select(node => node with { MeanMs = Mean(node.Node) })];
 		var cursor = new TraceCursor(Some.Of(_run), _sent);
-		return new TraceSnapshot(cursor, Math.Min(Elapsed, _script.EndMs), [.. flights.Values], tallies, _fates, _requests, _ended);
+		return new TraceSnapshot(cursor, Math.Min(Elapsed, _script.EndMs), [.. flights.Values], tallies, _fates, _requests, _ended) { Progress = Progress() };
 	}
+
+	private RunProgress Progress() => new(_page, _waiting);
 
 	private static NodeTally Node(Dictionary<HopPlace, NodeTally> nodes, HopPlace place)
 	{
@@ -350,6 +386,7 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 			var writer = new Writer();
 			for (var title = 0; title < names.Length; title++)
 			{
+				writer.Page(title, names.Length);
 				writer.Title(title, names[title].Name, names[title].Year);
 			}
 
@@ -373,6 +410,14 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 		internal List<(int From, int Until)> Blocked { get; } = [];
 
 		internal void Add(int at, int title, TraceEvent traced) => Events.Add((at, title, traced));
+
+		internal void Page(int title, int titles)
+		{
+			if (title % PageSize == 0)
+			{
+				Add(370 + title * 105, -1, new SourcePage(title / PageSize + 1, Some.Of((titles + PageSize - 1) / PageSize)));
+			}
+		}
 
 		internal void Title(int title, string name, int year)
 		{

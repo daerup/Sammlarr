@@ -255,6 +255,70 @@ public class FeedRunTraceTests
 		await Assert.That((await SnapshotAsync(testee)).Nodes.Single().GaveUp).IsEqualTo(2);
 	}
 
+	[Test]
+	public async Task Read_AfterAPage_ReportsItAndTheWaitingTitles()
+	{
+		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
+		using var run = testee.Start(_feed, Owner);
+		FeedRunSpans.SourcePage(2, Some.Of(5));
+		using var entered = FeedRunSpans.Enter(FeedRunSpans.Title("Heat", new None()));
+		using var hop = FeedRunSpans.Hop(RemoteService.Plex, TraceStage.Ids);
+
+		var progress = (await SnapshotAsync(testee)).Progress;
+
+		await Assert.That(progress.Page).IsSome().And.IsEqualTo(new SourcePage(2, Some.Of(5)));
+		await Assert.That(progress.Waiting).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task End_AfterCounted_CarriesTheCounts()
+	{
+		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
+		var counts = FeedRunCounts.None with { Total = 3, Added = 2, Filtered = 1 };
+		using (testee.Start(_feed, Owner))
+		{
+			Resolve("Heat", HopOutcome.Answered);
+		}
+
+		testee.Counted(_feed, counts);
+		testee.End(_feed, new FeedRunFailed("The source returned nothing."));
+
+		var ended = await Assert.That((await SnapshotAsync(testee)).Ended).IsSome();
+		await Assert.That(ended!.Counts).IsSome().And.IsEqualTo(counts);
+	}
+
+	[Test]
+	public async Task Read_WhileTitlesWaitAtTwoServices_SumsThem()
+	{
+		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
+		using var run = testee.Start(_feed, Owner);
+		using var heat = FeedRunSpans.Enter(FeedRunSpans.Title("Heat", new None()));
+		using var plex = FeedRunSpans.Hop(RemoteService.Plex, TraceStage.Ids);
+		using var tmdb = FeedRunSpans.Hop(RemoteService.Tmdb, TraceStage.Details);
+
+		var progress = (await SnapshotAsync(testee)).Progress;
+
+		await Assert.That(progress.Waiting).IsEqualTo(2);
+		await Assert.That(progress.Page).IsNone();
+	}
+
+	[Test]
+	public async Task End_WithTitlesStillWaiting_ReportsNoneWaiting()
+	{
+		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
+		using (testee.Start(_feed, Owner))
+		{
+			using (FeedRunSpans.Enter(FeedRunSpans.Title("Heat", new None())))
+			{
+				_ = FeedRunSpans.Hop(RemoteService.Plex, TraceStage.Ids);
+			}
+		}
+
+		testee.End(_feed, new FeedRunFailed("The source returned nothing."));
+
+		await Assert.That((await SnapshotAsync(testee)).Progress.Waiting).IsEqualTo(0);
+	}
+
 	private static void Resolve(string name, HopOutcome answer, params int[] statuses)
 	{
 		var title = FeedRunSpans.Title(name, new None());

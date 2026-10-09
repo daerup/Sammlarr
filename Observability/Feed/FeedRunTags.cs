@@ -19,4 +19,8 @@ public static class FeedRunTags
 	public const string Stage = "sammlarr.stage";
 
 	public const string Answer = "sammlarr.answer";
+
+	public const string Page = "sammlarr.page";
+
+	public const string Pages = "sammlarr.pages";
 }

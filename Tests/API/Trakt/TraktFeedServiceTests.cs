@@ -7,9 +7,11 @@ using Contracts.Identity;
 using Contracts.Media;
 using Domain.Auth;
 using Domain.Feed;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using TUnit.Mocks.Http;
 
 namespace API.Tests.Trakt;
@@ -226,6 +228,40 @@ public class TraktFeedServiceTests
 
 	internal static TraktClient Client(MockHttpHandler handler, Mock<IApiKeyService> keys) =>
 		new(handler.CreateClient("https://api.trakt.tv/"), keys.Object, ICurrentUser.Mock().Object);
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAWatchlistInsideARun_ReportsEachPageOfItsTotal()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnRequest(request => request.PathMatches(@"^/users/ana/watchlist\?page=1&limit=250$"))
+			.RespondWith(_ => Page("""[{"type":"movie","movie":{"title":"Inception","year":2010,"ids":{"trakt":16662}}}]""", pages: 2));
+		handler
+			.OnRequest(request => request.PathMatches(@"^/users/ana/watchlist\?page=2&limit=250$"))
+			.RespondWith(_ => Page("""[{"type":"movie","movie":{"title":"Heat","year":1995,"ids":{"trakt":1374}}}]""", pages: 2));
+		using var spans = new PageSpans();
+
+		await Testee(handler).GetFeedItemsAsync("users/ana/watchlist").ToListAsync();
+
+		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, Some.Of(2)), new SourcePage(2, Some.Of(2))], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForADiscoverChartInsideARun_CountsPagesAcrossBothCharts()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnRequest(request => request.PathMatches(@"^/movies/popular\?page=1&limit=250$"))
+			.RespondWith(_ => Page("""[{"title":"Dune","year":2021,"ids":{"trakt":287071}}]""", pages: 1));
+		handler
+			.OnRequest(request => request.PathMatches(@"^/shows/popular\?page=1&limit=250$"))
+			.RespondWith(_ => Page("""[{"title":"Severance","year":2022,"ids":{"trakt":154997}}]""", pages: 1));
+		using var spans = new PageSpans();
+
+		await Testee(handler).GetFeedItemsAsync("discover/popular").ToListAsync();
+
+		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
+	}
 
 	private TraktFeedService Testee(MockHttpHandler handler) => Testee(handler, Keys());
 

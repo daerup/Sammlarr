@@ -1,12 +1,9 @@
 const MIN_W = 1120;
 const MIN_H = 440;
 const DB_X = 345;
-const ID_X = 449;
 const NODE_R = 22;
 const NODE_GAP = 86;
 const COL_GAP = 130;
-const COL_MAX = 300;
-const DETAIL_GAP = 120;
 const DETAIL_ROWS = 4;
 const TOP = 64;
 const BOTTOM = 84;
@@ -19,7 +16,7 @@ const MAX_DOTS = 180;
 const RING = 2 * Math.PI * NODE_R;
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-const KIND = ['started', 'sourceEnded', 'listed', 'known', 'earlier', 'path', 'asked', 'answered', 'gaveUp', 'settled'];
+const KIND = ['started', 'sourceEnded', 'listed', 'known', 'earlier', 'path', 'asked', 'answered', 'gaveUp', 'settled', 'page'];
 const OUTCOME = ['answered', 'after429', 'gaveup', 'failed'];
 const FATE_KEY = ['matched', 'couldnot', 'notfound'];
 const FATE_NODE = { matched: 'sink', couldnot: 'cl', notfound: 'nf' };
@@ -414,18 +411,17 @@ class View {
         const detailRows = detailCols ? Math.ceil(details.length / detailCols) : 0;
         const rows = Math.max(3, detailRows, ...byColumn.map(c => c.length));
         const H = Math.max(MIN_H, TOP + BOTTOM + (rows - 1) * NODE_GAP);
-        const tail = detailCols ? 161 + (detailCols - 1) * DETAIL_GAP + 148 : 309;
-        const W = Math.max(MIN_W, ID_X + (columns - 1) * COL_GAP + tail + 80, Math.floor(width || 0));
+        const gaps = columns + detailCols + 1;
+        const W = Math.max(MIN_W, DB_X + gaps * COL_GAP + 80, Math.floor(width || 0));
         const outX = W - 80;
-        const detailX = c => outX - 148 - (detailCols - 1 - c) * DETAIL_GAP;
-        const idEnd = detailCols ? detailX(0) - 161 : outX - 309;
-        const step = columns > 1 ? Math.min((idEnd - ID_X) / (columns - 1), COL_MAX) : 0;
-        const first = columns > 1 ? ID_X + (idEnd - ID_X - step * (columns - 1)) / 2 : (ID_X + idEnd) / 2;
+        const step = (outX - DB_X) / gaps;
+        const idX = c => DB_X + (c + 1) * step;
+        const detailX = c => DB_X + (columns + c + 1) * step;
         const mid = H / 2;
         const L = { db: [DB_X, Math.round(mid - 15)], sink: [outX, Math.round(mid - 108)], cl: [outX, Math.round(mid + 2)], nf: [outX, Math.round(mid + 112)], pos: {} };
         byColumn.forEach((inColumn, c) => {
             inColumn.forEach((n, i) => {
-                L.pos[n.key] = [Math.round(first + c * step), Math.round(spread(inColumn.length, TOP, H - BOTTOM, i))];
+                L.pos[n.key] = [Math.round(idX(c)), Math.round(spread(inColumn.length, TOP, H - BOTTOM, i))];
             });
         });
         details.forEach((n, i) => {
@@ -436,7 +432,7 @@ class View {
         });
         this.W = W;
         this.H = H;
-        this.idX = Math.round(first);
+        this.idX = Math.round(idX(0));
         this.detailX = detailCols ? Math.round(detailX(0)) : null;
         this.slotN = Math.max(1, Math.floor((H - SLOT_TOP - 6) / SLOT_H));
         this.L = L;

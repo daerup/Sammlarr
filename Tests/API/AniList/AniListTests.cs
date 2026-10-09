@@ -7,9 +7,11 @@ using Contracts;
 using Contracts.Datasets;
 using Contracts.Media;
 using Domain.Feed;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using TUnit.Mocks.Http;
 
 namespace API.Tests.AniList;
@@ -315,6 +317,29 @@ public class AniListTests
 			.Select(id => $$$"""{"id":{{{id}}},"format":"TV","title":{"romaji":"Anime {{{id}}}"},"startDate":{"year":2026}}""");
 		var next = more ? "true" : "false";
 		return "{\"data\":{\"Page\":{\"pageInfo\":{\"hasNextPage\":" + next + "},\"media\":[" + string.Join(",", titles) + "]}}}";
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAPublicListInsideARun_ReportsItsOnePage()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson(PlanningList);
+		using var spans = new PageSpans();
+
+		await Feed(handler).GetFeedItemsAsync("someone/planning").ToListAsync();
+
+		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, Some.Of(1))]);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForASearchInsideARun_CountsItsPagesWithoutATotal()
+	{
+		var handler = Answering(out _, call => SearchPage(call, call == 1 ? 50 : 10, more: call == 1));
+		using var spans = new PageSpans();
+
+		await Feed(handler).GetFeedItemsAsync("search/anime?airing%20status=RELEASING").ToListAsync();
+
+		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
 	}
 
 	private AniListFeedService Feed(MockHttpHandler handler) => Feed(handler, AnimeMaps.Unknown());

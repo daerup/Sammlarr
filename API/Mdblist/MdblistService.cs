@@ -130,6 +130,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		while (hasMore)
 		{
 			(var page, hasMore) = await FetchPageAsync(identifier, offset, cancellationToken);
+			FeedRunSpans.SourcePage(offset / PageSize + 1, new None());
 			yield return page;
 			offset += PageSize;
 		}

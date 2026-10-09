@@ -9,9 +9,11 @@ using Contracts.Identity;
 using Contracts.Media;
 using Domain.Auth;
 using Domain.Feed;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using TUnit.Mocks.Http;
 
 namespace API.Tests.Mal;
@@ -218,6 +220,19 @@ public class MalTests
 
 	private static MalClient Client(MockHttpHandler handler, Mock<IApiKeyService> keys) =>
 		new(handler.CreateClient("https://api.myanimelist.net/v2/"), keys.Object, ICurrentUser.Mock().Object);
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForTwoPagesInsideARun_CountsThemWithoutATotal()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnRequest(request => request.PathMatches(@"^/v2/users/someone/animelist\?fields=")).RespondWithJson(PageOne);
+		handler.OnRequest(request => request.PathMatches(".*offset=1.*")).RespondWithJson(PageTwo);
+		using var spans = new PageSpans();
+
+		await Feed(handler).GetFeedItemsAsync("someone").ToListAsync();
+
+		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
+	}
 
 	private MalFeedService Feed(MockHttpHandler handler) => Feed(handler, AnimeMaps.Unknown());
 

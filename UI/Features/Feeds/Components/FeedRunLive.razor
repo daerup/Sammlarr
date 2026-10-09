@@ -1,5 +1,7 @@
 @using System.Globalization
+@using Domain.Feed.Run
 @using Domain.Feed.Trace
+@using Domain.Processing
 @using Microsoft.JSInterop
 @using UI.Shared.Services.Branding
 @using global::Shared
@@ -57,6 +59,9 @@
         </div>
     </div>
     <div class="live-body" @ref="_body" hidden="@Run.Hidden" data-testid="live-body"></div>
+    <div class="live-foot" hidden="@Run.Hidden" data-testid="live-foot">
+        @Tally.Ended.When(end => end.Ending is TraceEnding.Completed).Map(end => end.Counts).Match(Rules, () => Reading)
+    </div>
     @if (Flash > 0)
     {
         <span class="live-flash" @key="Flash" aria-hidden="true"></span>
@@ -268,6 +273,36 @@
     }
 
     private static string Count(int count) => count.ToString("N0", CultureInfo.InvariantCulture);
+
+    private static readonly RenderFragment Nothing = _ => { };
+
+    private RenderFragment Reading =>
+        @<span class="live-foot-main">
+            @Tally.Progress.Page.Match(PageRead, () => SourceList)
+            <span><b>@Count(Tally.Progress.Waiting)</b> waiting on a service</span>
+        </span>;
+
+    private static RenderFragment SourceList => @<span>Reading the source list</span>;
+
+    private static RenderFragment PageRead(SourcePage read) =>
+        @<span>Source page <b>@Count(read.Page)</b>@read.Pages.Match(total => $" of {Count(total)}", () => "")</span>;
+
+    private RenderFragment Rules(FeedRunCounts counts) =>
+        @<span class="live-foot-main">
+            @if (counts.Added > 0)
+            {
+                <span>Then the feed's rules: <b class="is-added">+@Count(counts.Added)</b> to your wantlist</span>
+            }
+            else
+            {
+                <span>Then the feed's rules: <b>@Count(counts.Kept)</b> kept, nothing new</span>
+            }
+            <span><b>@Count(counts.Filtered)</b> filtered out</span>
+            @Run.Feed.Limit.Match(limit => Past(counts, limit), () => Nothing)
+        </span>;
+
+    private static RenderFragment Past(FeedRunCounts counts, QueryLimit limit) =>
+        @<span><b>@Count(counts.Skipped)</b> past the limit of @Count(limit.Count)</span>;
 
     private RenderFragment Running => @<FeedChip Tone="FeedChipTone.Attention"><span class="feed-chip-dot"></span>Running</FeedChip>;
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Domain.Feed.Run;
 using Domain.Feed.Trace;
 using Domain.Identity;
 using Domain.Providers;
@@ -28,6 +29,10 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 	private Optional<int> _requests = new None();
 
 	private Optional<FeedRunEnd> _ended = new None();
+
+	private Optional<SourcePage> _page = new None();
+
+	private Optional<FeedRunCounts> _counts = new None();
 
 	private long _endedAt;
 
@@ -94,11 +99,19 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 		}
 	}
 
+	internal void Counted(FeedRunCounts counts)
+	{
+		lock (_gate)
+		{
+			_counts = Some.Of(counts);
+		}
+	}
+
 	internal TraceSummary End(TraceEnding ending)
 	{
 		lock (_gate)
 		{
-			_ended = Some.Of(new FeedRunEnd(ending, Elapsed()));
+			_ended = Some.Of(new FeedRunEnd(ending, Elapsed()) { Counts = _counts });
 			_endedAt = Stopwatch.GetTimestamp();
 			_requests = _requests.Or(Some.Of(_fates.Started));
 			_flights.Clear();
@@ -166,6 +179,9 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 			case GaveUp gaveUp:
 				Node(new HopPlace(gaveUp.Service, gaveUp.Stage)).GaveUp++;
 				break;
+			case SourcePage page:
+				_page = Some.Of(page);
+				break;
 			case TitleSettled settled:
 				title.Apply(index => _flights.Remove(index)).Apply(index => _gaveUp.RemoveWhere(entry => entry.Title == index));
 				_fates.Settle(settled.Fate);
@@ -188,7 +204,12 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 
 	private TraceCursor Cursor() => new(Some.Of(key), _steps.Count);
 
-	private TraceBatch Batch(long seq) => new(Cursor(), Elapsed(), [.. _steps.Skip((int)seq)], _fates.Tally(), _requests, _ended);
+	private RunProgress Progress() => new(_page, _nodes.Values.Sum(node => node.Waiting));
+
+	private TraceBatch Batch(long seq)
+	{
+		return new TraceBatch(Cursor(), Elapsed(), [.. _steps.Skip((int)seq)], _fates.Tally(), _requests, _ended) { Progress = Progress() };
+	}
 
 	private TraceSnapshot Snapshot()
 	{
@@ -200,7 +221,10 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 			_fates.Tally(),
 			_requests,
 			_ended
-		);
+		)
+		{
+			Progress = Progress(),
+		};
 	}
 
 	private sealed class Flight(string name, Optional<int> year)

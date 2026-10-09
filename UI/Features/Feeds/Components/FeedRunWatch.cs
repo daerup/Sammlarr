@@ -108,13 +108,21 @@ internal sealed class FeedRunWatch(
 		var read = await traces.ReadAsync(feed.Id, _cursor);
 		return read switch
 		{
-			TraceSnapshot snapshot => Took(snapshot.Cursor, snapshot.ElapsedMs, [], snapshot.Fates, snapshot.Requests, snapshot.Ended),
-			TraceBatch batch => Took(batch.Cursor, batch.ElapsedMs, batch.Steps, batch.Fates, batch.Requests, batch.Ended),
+			TraceSnapshot snapshot => Took(snapshot.Cursor, snapshot.ElapsedMs, [], snapshot.Fates, snapshot.Requests, snapshot.Ended, snapshot.Progress),
+			TraceBatch batch => Took(batch.Cursor, batch.ElapsedMs, batch.Steps, batch.Fates, batch.Requests, batch.Ended, batch.Progress),
 			NoTrace => _traced || _settled,
 		};
 	}
 
-	private bool Took(TraceCursor cursor, int elapsedMs, IReadOnlyList<TraceStep> steps, FateTally fates, Optional<int> requests, Optional<FeedRunEnd> ended)
+	private bool Took(
+		TraceCursor cursor,
+		int elapsedMs,
+		IReadOnlyList<TraceStep> steps,
+		FateTally fates,
+		Optional<int> requests,
+		Optional<FeedRunEnd> ended,
+		RunProgress progress
+	)
 	{
 		var now = clock.Now;
 		_traced = true;
@@ -124,7 +132,7 @@ internal sealed class FeedRunWatch(
 		}
 
 		_endedAt = ended.Map(_ => _endedAt.GetValueOr(now));
-		Tally = RunTally.Of(fates, requests, elapsedMs, ended, previous);
+		Tally = RunTally.Of(fates, requests, elapsedMs, ended, previous) with { Progress = progress };
 		IReadOnlyList<WireCapacity> load = [.. layout.Ids.Select(node => LiveWire.Capacity(node.Service, capacity.Of(node.Service), now, elapsedMs))];
 		Batch?.Invoke(new WireBatch([.. steps.Select(LiveWire.Step)], load, ended.IsSome()));
 		Changed?.Invoke();

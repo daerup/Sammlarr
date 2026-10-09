@@ -105,6 +105,7 @@ internal sealed class FeedRunEngine(
 			Times = cost.Times,
 		};
 		await feeds.CompleteRunAsync(completed, cancellationToken);
+		trace.Counted(feed.Id, completed.Counts);
 
 		return completed.Failed
 			? new FeedRunFailed(completed.SourceFailure.GetValueOr("The source returned nothing."))

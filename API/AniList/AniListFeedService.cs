@@ -9,6 +9,7 @@ using Contracts.Feed;
 using Contracts.Media;
 using Domain.Feed;
 using Domain.Media;
+using Observability.Feed;
 
 namespace API.AniList;
 
@@ -76,6 +77,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 		parts.Skip(1).FirstOrNone().Apply(status => variables["status"] = status.ToUpperInvariant());
 		var answer = await client.AskAsync<AniListTypes.ListData>(Query, variables, cancellationToken);
 		var collection = answer.GetOrThrow(error => Failure(identifier, error));
+		FeedRunSpans.SourcePage(1, Some.Of(1));
 		foreach (var found in (collection.Collection?.Lists ?? []).SelectMany(list => list.Entries ?? []).Select(entry => entry.Media).OfType<AniListTypes.Media>())
 		{
 			yield return found;
@@ -101,6 +103,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 			asked["page"] = page;
 			var answer = await client.AskAsync<AniListTypes.PageData>(SearchQuery, asked, cancellationToken);
 			var found = answer.GetOrThrow(Refused).Page ?? throw new InvalidDataException("AniList answered a search without a page.");
+			FeedRunSpans.SourcePage(page, new None());
 			foreach (var title in found.Media ?? [])
 			{
 				yield return title;

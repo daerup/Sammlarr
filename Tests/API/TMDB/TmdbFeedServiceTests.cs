@@ -6,9 +6,11 @@ using Contracts.Identity;
 using Contracts.Media;
 using Domain.Auth;
 using Domain.Feed;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using TUnit.Mocks.Http;
 
 namespace API.Tests.TMDB;
@@ -196,6 +198,36 @@ public class TmdbFeedServiceTests
 		var drain = async () => await Testee(handler).GetFeedItemsAsync("42").ToListAsync();
 
 		await Assert.That(drain).Throws<HttpRequestException>();
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAListInsideARun_ReportsEachPageOfItsTotal()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnRequest(request => request.PathMatches(@"^/3/list/42\?page=1&api_key=tmdb-key$")).RespondWithJson(PageOne);
+		handler.OnRequest(request => request.PathMatches(@"^/3/list/42\?page=2&api_key=tmdb-key$")).RespondWithJson(PageTwo);
+		using var spans = new PageSpans();
+
+		await Testee(handler).GetFeedItemsAsync("42").ToListAsync();
+
+		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, Some.Of(2)), new SourcePage(2, Some.Of(2))], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForACategoryPageInsideARun_ReportsPagesWithoutTheSourcesTotal()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnRequest(request => request.PathMatches(@"^/3/tv/top_rated\?page=1&api_key=tmdb-key$"))
+			.RespondWithJson("""{"page":1,"total_pages":2,"results":[{"id":1396,"name":"Breaking Bad","first_air_date":"2008-01-20"}]}""");
+		handler
+			.OnRequest(request => request.PathMatches(@"^/3/tv/top_rated\?page=2&api_key=tmdb-key$"))
+			.RespondWithJson("""{"page":2,"total_pages":2,"results":[{"id":1399,"name":"Game of Thrones","first_air_date":"2011-04-17"}]}""");
+		using var spans = new PageSpans();
+
+		await Testee(handler).GetFeedItemsAsync("tv/top-rated").ToListAsync();
+
+		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
 	}
 
 	private TmdbFeedService Testee(MockHttpHandler handler, bool token = false)
