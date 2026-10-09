@@ -14,7 +14,7 @@
 @if (_isAuthenticated && _branding is not null)
 {
     var brand = _branding.BrandColor;
-    var headerStyle = $"background: linear-gradient(180deg, {brand}1F 0%, {brand}08 60%, transparent 100%);";
+    var headerStyle = $"background: linear-gradient(180deg, color-mix(in oklch, {brand} 12%, transparent) 0%, color-mix(in oklch, {brand} 3%, transparent) 60%, transparent 100%);";
 
     <BbDropdownMenu @bind-Open="_isProfileDropdownOpen">
         <BbDropdownMenuTrigger>
