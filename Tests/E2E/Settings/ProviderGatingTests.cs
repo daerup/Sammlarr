@@ -26,7 +26,7 @@ public class ProviderGatingTests
 		var row = await SettingsPage.OpenProviderAsync(page, Mdblist);
 		await DeleteKeyAsync(page, row);
 		await Expect(row.Text("Not set")).ToBeVisibleAsync();
-		await Expect(SettingsPage.MapTile(page, "MDBList")).ToContainTextAsync("No key yet");
+		await Expect(SettingsPage.MapSource(page, "MDBList")).ToContainTextAsync("No key yet");
 
 		await page.VisitAsync(Routes.CreateFeed);
 
@@ -36,7 +36,7 @@ public class ProviderGatingTests
 
 		await SettingsPage.VisitSectionAsync(page, "providers");
 		await RestoreKeyAsync(await SettingsPage.OpenProviderAsync(page, Mdblist), saved);
-		await Expect(SettingsPage.MapTile(page, "MDBList")).ToContainTextAsync("Your key is set");
+		await Expect(SettingsPage.MapSource(page, "MDBList")).ToContainTextAsync("Your key is set");
 		await page.VisitAsync(Routes.CreateFeed);
 
 		await Expect(await FeedEditor.ProviderOptionAsync(page, "MDBList")).Not.ToHaveAttributeAsync(Disabled, "true");
