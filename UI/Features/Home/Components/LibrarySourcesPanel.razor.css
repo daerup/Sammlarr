@@ -122,15 +122,15 @@
 }
 
 .tone-0 {
-    --tone: var(--chart-3);
-}
-
-.tone-1 {
     --tone: var(--chart-1);
 }
 
+.tone-1 {
+    --tone: var(--chart-3);
+}
+
 .tone-2 {
-    --tone: var(--chart-4);
+    --tone: var(--chart-5);
 }
 
 .tone-3 {
@@ -138,7 +138,7 @@
 }
 
 .tone-4 {
-    --tone: var(--chart-5);
+    --tone: var(--chart-4);
 }
 
 .stack-part,

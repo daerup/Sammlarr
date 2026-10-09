@@ -77,7 +77,7 @@
         }
     }
 
-    private static string Tone(int index) => $"tone-{index % 5}";
+    private static string Tone(int index) => index == 0 ? "tone-0" : $"tone-{1 + (index - 1) % 4}";
 
     private static string Grow(SourceShare source) => $"flex: {source.Count}";
 
