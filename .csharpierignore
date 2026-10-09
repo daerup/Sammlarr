@@ -22,3 +22,5 @@ Contracts/Identity/Person.cs
 Core/Media/FetchReason.cs
 Domain/Providers/RemoteService.cs
 Domain/Providers/Service.cs
+Domain/Feed/Trace/TraceEvent.cs
+Domain/Feed/Trace/TraceRead.cs

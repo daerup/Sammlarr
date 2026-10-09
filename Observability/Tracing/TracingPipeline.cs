@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Diagnostics;
+using Observability.Feed;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -22,7 +23,7 @@ internal static class TracingPipeline
 			)
 			.WithTracing(tracing =>
 			{
-				tracing.AddSource(Instrumentation.ServiceName);
+				tracing.AddSource(Instrumentation.ServiceName, FeedRunSpans.SourceName);
 				tracing.AddProcessor(sp => sp.GetRequiredService<InMemoryActivityProcessor>());
 				if (context.OtlpEnabled)
 				{

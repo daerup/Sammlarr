@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Observability.Feed;
 using Observability.Tracing;
 using OpenTelemetry;
 
@@ -8,7 +9,7 @@ public sealed class InMemoryActivityProcessor(LogCaptureService capture) : BaseP
 {
 	public override void OnEnd(Activity data)
 	{
-		if (data.Source.Name != Instrumentation.ServiceName)
+		if (!Kept(data))
 		{
 			return;
 		}
@@ -49,5 +50,10 @@ public sealed class InMemoryActivityProcessor(LogCaptureService capture) : BaseP
 		);
 
 		capture.AppendSpan(entry);
+	}
+
+	private static bool Kept(Activity data)
+	{
+		return data.Source.Name == Instrumentation.ServiceName || (data.Source.Name == FeedRunSpans.SourceName && data.Status == ActivityStatusCode.Error);
 	}
 }

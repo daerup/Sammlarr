@@ -1,12 +1,15 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Wantlist;
 using Core.Wantlist.Sync;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging;
+using Observability.Feed;
 
 namespace Core.Media;
 
@@ -39,7 +42,7 @@ internal sealed class MediaService(
 		await using var buffer = bufferFactory.Create();
 		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
 		var sink = await activeSink.ResolveAsync(cancellationToken);
-		var handoffs = await IdentifyBatchAsync(materialized, sink.AddressedBy, building, buffer, cancellationToken);
+		var handoffs = await IdentifyBatchAsync([.. materialized.Select(TracedRequest.Untraced)], sink.AddressedBy, building, buffer, cancellationToken);
 		foreach (var (_, handoff) in materialized.Zip(handoffs))
 		{
 			yield return ToIdentityResult(handoff);
@@ -97,6 +100,8 @@ internal sealed class MediaService(
 		var batch = new List<IdentifyRequest>(size);
 		await using var source = requests.PrefetchAsync(PrefetchCapacity, cancellationToken).GetAsyncEnumerator(cancellationToken);
 		ExceptionDispatchInfo? failure = null;
+		var listing = FeedRunSpans.Source();
+		var pulled = 0;
 
 		while (true)
 		{
@@ -117,6 +122,7 @@ internal sealed class MediaService(
 			}
 
 			batch.Add(source.Current);
+			pulled++;
 			if (batch.Count < size)
 			{
 				continue;
@@ -131,6 +137,7 @@ internal sealed class MediaService(
 			batch = new List<IdentifyRequest>(size);
 		}
 
+		FeedRunSpans.SourceEnded(listing, pulled);
 		if (batch.Count > 0 && failure?.SourceException is not OperationCanceledException)
 		{
 			await foreach (var result in IdentifyAndLoadAsync(batch, sink, building, connected, buffer, cancellationToken))
@@ -151,8 +158,9 @@ internal sealed class MediaService(
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
-		var handoffs = await IdentifyBatchAsync(batch, sink.AddressedBy, building, buffer, cancellationToken);
-		var pipeline = batch
+		IReadOnlyList<TracedRequest> traced = [.. batch.Select(request => new TracedRequest(request, TitleSpan(request)))];
+		var handoffs = await IdentifyBatchAsync(traced, sink.AddressedBy, building, buffer, cancellationToken);
+		var pipeline = traced
 			.Zip(handoffs)
 			.SelectAwait(pair => LoadRequestDetailsAsync(pair.First, pair.Second, connected, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
 		await foreach (var result in pipeline)
@@ -233,7 +241,7 @@ internal sealed class MediaService(
 		IReadOnlyList<IdentifyRequest> requests = [.. stored.Select(media => new IdentifyRequest([.. media.Identity.Externals], HintsOf(media)))];
 		await using (var buffer = bufferFactory.Create())
 		{
-			await IdentifyBatchAsync(requests, addressedBy, [], buffer, cancellationToken);
+			await IdentifyBatchAsync([.. requests.Select(TracedRequest.Untraced)], addressedBy, [], buffer, cancellationToken);
 		}
 
 		var found = await IdsAsync(missing, addressedBy, cancellationToken);
@@ -277,14 +285,14 @@ internal sealed class MediaService(
 	}
 
 	private async Task<IReadOnlyList<Result<IdentifyHandoff>>> IdentifyBatchAsync(
-		IReadOnlyList<IdentifyRequest> requests,
+		IReadOnlyList<TracedRequest> requests,
 		Func<MediaType, Optional<MediaProvider>> addressedBy,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
-		var allCandidates = requests.SelectMany(r => r.Candidates).Distinct().ToList();
+		var allCandidates = requests.SelectMany(r => r.Request.Candidates).Distinct().ToList();
 		var stored = await LoadByExternalsAsync(allCandidates, cancellationToken);
 		var connected = await idResolver.ConnectedAsync(cancellationToken);
 		var preliminary = await requests
@@ -294,7 +302,7 @@ internal sealed class MediaService(
 	}
 
 	private async ValueTask<Result<IdentifyHandoff>> IdentifyOneAsync(
-		IdentifyRequest request,
+		TracedRequest traced,
 		Func<MediaType, Optional<MediaProvider>> addressedBy,
 		IReadOnlyDictionary<IExternalMediaId, StoredMedia> stored,
 		IReadOnlySet<RemoteService> connected,
@@ -302,6 +310,8 @@ internal sealed class MediaService(
 		CancellationToken cancellationToken
 	)
 	{
+		using var title = FeedRunSpans.Enter(traced.Title);
+		var request = traced.Request;
 		try
 		{
 			return await addressedBy(request.Type)
@@ -327,6 +337,7 @@ internal sealed class MediaService(
 	)
 	{
 		return FindStored(request, target, stored, buffer)
+			.Apply(_ => FeedRunSpans.Known())
 			.Match(found => ValueTask.FromResult<Result<IdentifyHandoff>>(Success.Of(found)), () => ResolveAsync(request, target, connected, cancellationToken));
 	}
 
@@ -386,19 +397,46 @@ internal sealed class MediaService(
 	}
 
 	private async ValueTask<MediaMatchResult> LoadRequestDetailsAsync(
-		IdentifyRequest request,
+		TracedRequest traced,
 		Result<IdentifyHandoff> handoff,
 		IReadOnlySet<RemoteService> connected,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
+		using var title = FeedRunSpans.Enter(traced.Title);
+		var request = traced.Request;
 		var loaded = await handoff.Match(
 			match => LoadDetailsAsync(match.Identity, match.Stored, request.Described(), connected, buffer, cancellationToken),
 			error => ValueTask.FromResult<Result<MatchedMedia>>(error)
 		);
-		return loaded.Match(matched => matched, error => request.Unmatched(Reason(error)));
+		var result = loaded.Match<MatchedMedia, MediaMatchResult>(matched => matched, error => request.Unmatched(Reason(error)));
+		FeedRunSpans.Settle(traced.Title, Fate(result));
+		return result;
 	}
+
+	private static Optional<Activity> TitleSpan(IdentifyRequest request)
+	{
+		var hints = request.Hints.Or(request.Description);
+		return FeedRunSpans.Title(
+			hints.Map(found => found.Title).GetValueOr(() => string.Join(", ", request.Candidates)),
+			hints.Map(found => found.Year).When(year => year > 0)
+		);
+	}
+
+	private static TitleFate Fate(MediaMatchResult result) =>
+		result switch
+		{
+			MatchedMedia => TitleFate.Matched,
+			UnmatchedMedia unmatched => Fate(unmatched.Reason),
+		};
+
+	private static TitleFate Fate(UnmatchedReason reason) =>
+		reason switch
+		{
+			UnmatchedReason.NotFound => TitleFate.NotFound,
+			UnmatchedReason.CouldNotLookUp => TitleFate.CouldNotLookUp,
+		};
 
 	private static UnmatchedReason Reason(Error error)
 	{

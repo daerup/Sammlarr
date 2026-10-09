@@ -5,9 +5,11 @@ using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Providers;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
+using Observability.Feed;
 
 namespace Core.Media;
 
@@ -38,6 +40,7 @@ internal sealed class MediaIdResolver(
 		var key = UnmatchedCacheKey.Build(request.Candidates, target, connected);
 		return await unmatchedCache
 			.GetValueOrNone(key)
+			.Apply(_ => FeedRunSpans.NotFoundEarlier())
 			.Match(
 				_ => Task.FromResult<Result<IReadOnlyList<IExternalMediaId>>>(Error.From("Candidates were previously resolved as unmatched.")),
 				() => LookUpAsync(request, target, connected, key, cancellationToken)
@@ -61,6 +64,7 @@ internal sealed class MediaIdResolver(
 		var waited = new HashSet<RemoteService>();
 		foreach (var path in plan.Paths)
 		{
+			using var traced = FeedRunSpans.Path();
 			var outcome = await FollowAsync(path, candidates, request.Hints, target, answers, down, waited, cancellationToken);
 			if (outcome.Found.IsSome())
 			{
@@ -107,7 +111,12 @@ internal sealed class MediaIdResolver(
 				}
 
 				transient |= answer.Transient && hop is IdToId { To: var to } && to == target;
-				answer.Result.Apply(found => ids = [.. ids.Concat(found.Ids.Where(id => ids.All(held => held.Source != id.Source))).Distinct()]);
+				var held = ids.Count;
+				answer.Result.Apply(found => ids = [.. ids.Concat(found.Ids.Where(id => ids.All(each => each.Source != id.Source))).Distinct()]);
+				if (ids.Count > held)
+				{
+					FeedRunSpans.FreeHop(hop.Remote);
+				}
 			}
 		}
 
@@ -165,7 +174,12 @@ internal sealed class MediaIdResolver(
 
 			if (!answers.TryGetValue(key, out var answer))
 			{
-				answer = await AskAsync(hop.Converter, request, down, cancellationToken);
+				using (var span = FeedRunSpans.Hop(hop.Remote, TraceStage.Ids))
+				{
+					answer = await AskAsync(hop.Converter, request, down, cancellationToken);
+					span.Answered(answer.Transient ? HopOutcome.Failed : HopOutcome.Answered);
+				}
+
 				answers[key] = answer;
 			}
 
@@ -280,6 +294,7 @@ internal sealed class MediaIdResolver(
 
 			if (waited.Contains(remote) || !load.FreesWithin(now, load.MaxWait))
 			{
+				FeedRunSpans.GaveUp(remote, TraceStage.Ids);
 				return false;
 			}
 
@@ -294,7 +309,13 @@ internal sealed class MediaIdResolver(
 		waited.UnionWith(blocked.Keys);
 		var freeAt = blocked.Values.Max();
 		await clock.WaitUntilAsync(freeAt, cancellationToken);
-		return blocked.Keys.All(remote => capacity.Of(remote).IsOpen(freeAt));
+		var stillBlocked = blocked.Keys.Where(remote => !capacity.Of(remote).IsOpen(freeAt)).ToList();
+		foreach (var remote in stillBlocked)
+		{
+			FeedRunSpans.GaveUp(remote, TraceStage.Ids);
+		}
+
+		return stillBlocked.Count == 0;
 	}
 
 	private readonly record struct StepOutcome(Optional<IdLookupResult> Found, bool Transient);

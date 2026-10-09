@@ -5,6 +5,8 @@ using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Providers;
 using Core.Media;
+using Core.Tests.Feed;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
@@ -483,6 +485,87 @@ public class MediaIdResolverTests
 
 		await Assert.That(resolved).IsError();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_ThroughABlockedPath_RecordsGaveUp()
+	{
+		using var trace = new TitleTrace();
+
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
+
+		await Assert.That(resolved).IsError();
+		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Ids)).GaveUp).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenStillBlockedAfterTheWait_RecordsGaveUp()
+	{
+		using var trace = new TitleTrace();
+		var pushes = 0;
+
+		await Testee(TmdbBlocked(() => Now.AddMilliseconds(20 + pushes++))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
+
+		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Ids)).GaveUp).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task ResolveAsync_ForAProviderThatWentDown_RecordsNoGaveUp()
+	{
+		using var trace = new TitleTrace();
+		var tmdbFreeAt = Now;
+		_tmdb
+			.LookUpAsync(Any(), Any())
+			.Returns(
+				(_, _) =>
+				{
+					tmdbFreeAt = Now.AddSeconds(5);
+					return Error.From(new RemoteUnavailableException(RemoteService.Tmdb));
+				}
+			);
+
+		await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
+
+		await Assert.That((await trace.NodesAsync()).Sum(node => node.GaveUp)).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenAFreeHopFindsNothing_RecordsNoHop()
+	{
+		using var trace = new TitleTrace();
+		var map = Converter(RemoteService.AnimeLists, ByShowId);
+		Answer(map, new ByIdRequest(ByShowId, Tvdb), Found());
+
+		await Testee(map).ResolveAsync(new IdentifyRequest([Tvdb], new None()), MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(await trace.NodesAsync()).IsEmpty();
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenAFreeHopAddsIds_RecordsItAnswered()
+	{
+		using var trace = new TitleTrace();
+		var map = Converter(RemoteService.AnimeLists, ByShowId);
+		Answer(map, new ByIdRequest(ByShowId, Tvdb), Found(AniList, Mal));
+
+		var resolved = await Testee(map).ResolveAsync(new IdentifyRequest([Tvdb], new None()), MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).IsEquivalentTo(new IExternalMediaId[] { Tvdb, AniList, Mal }));
+		await Assert.That((await trace.NodeAsync(RemoteService.AnimeLists, TraceStage.Ids)).Answered).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WithAnAnswerAnEarlierPathGot_RecordsOneHop()
+	{
+		using var trace = new TitleTrace();
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), HintsOnly());
+		_plex.LookUpAsync(Any(), Any()).Returns(Error.From("Plex found nothing."));
+
+		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsError();
+		_tmdb.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
+		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Ids)).Answered).IsEqualTo(1);
 	}
 
 	private MediaIdResolver Testee(IRemoteCapacity? capacity = null) => Testee(capacity ?? TestCapacity.Open(), _tmdb, _plex);

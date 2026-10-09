@@ -5,6 +5,8 @@ using Contracts.Providers;
 using Contracts.Settings;
 using Core.DI;
 using Core.Media;
+using Core.Tests.Feed;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
@@ -323,6 +325,32 @@ public class DetailsFetcherTests
 		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer, WaitingThrows));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task FetchAsync_DuringARun_RecordsADetailsHop()
+	{
+		using var trace = new TitleTrace();
+		var deps = Dependencies.Create();
+		deps.PlexAnswers(Complete());
+		await using var buffer = deps.Buffer();
+
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
+
+		await Assert.That((await trace.NodeAsync(RemoteService.Plex, TraceStage.Details)).Answered).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task FetchAsync_WhenTheEnricherIsBlocked_RecordsGaveUp()
+	{
+		using var trace = new TitleTrace();
+		var deps = Dependencies.Create(capacity: TmdbBlocked(() => Now.AddMinutes(1)));
+		deps.PlexAnswers(Unrated());
+		await using var buffer = deps.Buffer();
+
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer, WaitingThrows));
+
+		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Details)).GaveUp).IsEqualTo(1);
 	}
 
 	[Test]
