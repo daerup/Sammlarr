@@ -2,6 +2,7 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
+using Contracts;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
@@ -14,6 +15,8 @@ namespace UI.Tests.Settings.Providers;
 
 public class ServicesMapTests : BunitContext
 {
+	private static readonly DateTimeOffset Now = new(new DateTime(2026, 10, 8, 12, 0, 0), TimeZoneInfo.Local.GetUtcOffset(new DateTime(2026, 10, 8, 12, 0, 0)));
+
 	private static readonly ProviderConfig Config = new()
 	{
 		Sink = SinkKind.Plex,
@@ -28,6 +31,9 @@ public class ServicesMapTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(Now);
+		Services.AddSingleton(clock.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -185,6 +191,23 @@ public class ServicesMapTests : BunitContext
 		var cut = RenderMap(canPick: false, RemoteService.Tmdb);
 
 		await Assert.That(Service(cut, "TMDb").QuerySelector(".map-service-status")!.TextContent.Trim()).IsEqualTo("Your key is set");
+	}
+
+	[Test]
+	public async Task BehindTheScenes_ForTheServicesWithNothingToSetUp_SaysWhatEachDoesAndWhenItsFileCameIn()
+	{
+		var downloads = new Dictionary<RemoteService, DateTimeOffset> { [RemoteService.ImdbDatasets] = Now.AddHours(-3.5) };
+		var cut = Render<ServicesMap>(parameters =>
+			parameters.Add(map => map.Config, Config).Add(map => map.Ready, new HashSet<RemoteService>()).Add(map => map.Downloads, downloads)
+		);
+
+		var items = cut.FindAll("[data-testid=map-behind-item]")
+			.ToDictionary(item => item.GetAttribute("data-service")!, item => item.QuerySelector(".map-behind-status")!.TextContent.Trim());
+		await Assert.That(items.Keys).IsEquivalentTo(["Wikidata", "Tvmaze", "AnimeLists", "ImdbDatasets"], CollectionOrdering.Matching);
+		await Assert.That(items["Wikidata"]).IsEqualTo("Ready");
+		await Assert.That(items["ImdbDatasets"]).IsEqualTo("Downloaded at 08:30");
+		await Assert.That(items["AnimeLists"]).IsEqualTo("Not downloaded yet");
+		await Assert.That(cut.Find("[data-testid=map-behind]").NextElementSibling!.ClassList).Contains("map-legend");
 	}
 
 	[Test]

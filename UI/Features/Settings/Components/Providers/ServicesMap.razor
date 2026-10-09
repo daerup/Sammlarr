@@ -1,6 +1,8 @@
 @using System.Globalization
+@using Contracts
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
+@inject IDateTimeProvider Clock
 
 <div class="w-fit max-w-full overflow-hidden rounded-lg border bg-card">
     <CardHead Icon="network" Title="Which service does what">
@@ -144,6 +146,34 @@
         </div>
     </div>
 
+    <div class="map-behind bg-foreground/5" data-testid="map-behind">
+        <div class="map-behind-head">
+            <LucideIcon Name="sparkles" Size="13"/>
+            <span class="map-behind-title">Behind the scenes</span>
+            <span class="map-behind-note">Called with nothing to set up: matching ids and adding ratings</span>
+        </div>
+        <div class="map-behind-grid">
+            @foreach (var (service, does) in BehindTheScenes.Services)
+            {
+                var status = BehindTheScenes.Status(service, Downloads, Clock.Now);
+                <div class="map-behind-item" data-testid="map-behind-item" data-service="@service">
+                    <span class="map-behind-name">
+                        @foreach (var mark in Marks(service))
+                        {
+                            <BrandedLogo Brand="mark" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+                        }
+                        @Name(service)
+                    </span>
+                    <span class="map-behind-does">@does</span>
+                    <span class="map-behind-status">
+                        <span class="map-dot @(status.Ready ? "bg-success" : "bg-muted-foreground")"></span>
+                        @status.Text
+                    </span>
+                </div>
+            }
+        </div>
+    </div>
+
     <div class="map-legend">
         <span><svg width="26" height="8" aria-hidden="true"><line x1="0" y1="4" x2="26" y2="4"/></svg>Connected</span>
         <span><svg width="26" height="8" aria-hidden="true"><line x1="0" y1="4" x2="26" y2="4" stroke-dasharray="4 3"/></svg>Not connected or pending</span>
@@ -164,6 +194,8 @@
     [Parameter] public int People { get; set; }
 
     [Parameter] public bool ReadTokenMissing { get; set; }
+
+    [Parameter] public IReadOnlyDictionary<RemoteService, DateTimeOffset> Downloads { get; set; } = new Dictionary<RemoteService, DateTimeOffset>();
 
     [Parameter] public EventCallback<SinkKind> SinkPicked { get; set; }
 
