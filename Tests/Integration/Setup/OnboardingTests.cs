@@ -78,15 +78,15 @@ public class OnboardingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task NeedsKeyPromptAsync_ForANewMemberWithoutAKey_IsAskedOnce()
+	public async Task NeedsKeyPromptAsync_ForAMemberWhoDeletedTheirKey_IsAskedAgain()
 	{
 		await AsNewMemberAsync();
-		var before = await Testee.NeedsKeyPromptAsync();
+		var keys = host.Resolve<IApiKeyService>();
+		await keys.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "their-key"));
 
-		await Testee.DismissKeyPromptAsync();
+		await keys.ClearAsync(ApiKeyProvider.Tmdb);
 
-		await Assert.That(before).IsTrue();
-		await Assert.That(await Testee.NeedsKeyPromptAsync()).IsFalse();
+		await Assert.That(await Testee.NeedsKeyPromptAsync()).IsTrue();
 	}
 
 	[Test]

@@ -50,7 +50,7 @@ public class SetupTests
 	}
 
 	[Test]
-	public async Task Invite_WhenTheMemberJoins_AsksForTheirTmdbKeyAndSkipForNowLetsThemIn()
+	public async Task Invite_WhenTheMemberJoins_AsksForTheirTmdbKeyThenLetsThemIn()
 	{
 		var stack = await SelfHostedApp.StackAsync();
 		var invite = await SelfHostedSetup.FinishAsync(await SelfHostedApp.OpenPageAsync(), stack);

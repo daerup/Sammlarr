@@ -27,28 +27,23 @@ public class WelcomeTests : BunitContext
 	}
 
 	[Test]
-	public async Task SkipForNow_RemembersTheAnswerAndLetsThemIn()
+	public async Task TestAndContinue_BeforeAKeyIsTyped_IsDisabled()
 	{
 		var cut = Render<Welcome>();
 
-		await cut.FindAll("button").Single(button => button.TextContent.Contains("Skip for now")).ClickAsync(new());
-
-		_onboarding.DismissKeyPromptAsync(Any()).WasCalled(Times.Once);
-		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).IsEqualTo("http://localhost/");
+		await Assert.That(TestAndContinue(cut).HasAttribute("disabled")).IsTrue();
 	}
 
 	[Test]
 	public async Task TestAndContinue_WithAWorkingKey_StoresItAndLetsThemIn()
 	{
-		var key = new TestApiKey(ApiKeyProvider.Tmdb, "their-key");
-		_keys.TestAsync(ApiKeyProvider.Tmdb, "their-key", Any()).Returns(Success.Of<IApiKey>(key));
+		var key = WorkingKey();
 		var cut = Render<Welcome>();
 		await TypeAsync(cut, " their-key ");
 
 		await TestAndContinue(cut).ClickAsync(new());
 
 		_keys.StoreAsync(key, Any()).WasCalled(Times.Once);
-		_onboarding.DismissKeyPromptAsync(Any()).WasCalled(Times.Once);
 		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).IsEqualTo("http://localhost/");
 	}
 
@@ -62,29 +57,37 @@ public class WelcomeTests : BunitContext
 		await TestAndContinue(cut).ClickAsync(new());
 
 		await Assert.That(cut.Find("[role=alert]").TextContent).Contains("TMDB did not accept this key.");
-		_onboarding.DismissKeyPromptAsync(Any()).WasCalled(Times.Never);
+		_keys.StoreAsync(Any<IApiKey>(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
-	public async Task SkipForNow_ReturnsToWhereTheyWereGoing()
+	public async Task TestAndContinue_WithAWorkingKey_ReturnsToWhereTheyWereGoing()
 	{
+		WorkingKey();
 		Services.GetRequiredService<NavigationManager>().NavigateTo("/welcome?returnUrl=%2Ffeeds");
 		var cut = Render<Welcome>();
+		await TypeAsync(cut, "their-key");
 
-		await cut.FindAll("button").Single(button => button.TextContent.Contains("Skip for now")).ClickAsync(new());
+		await TestAndContinue(cut).ClickAsync(new());
 
 		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).IsEqualTo("http://localhost/feeds");
 	}
 
 	[Test]
-	public async Task Opening_WhenTheQuestionWasAlreadyAnswered_GoesStraightOn()
+	public async Task Opening_WhenTheyAlreadyHaveAKey_GoesStraightOn()
 	{
 		_onboarding.NeedsKeyPromptAsync(Any()).Returns(false);
 
 		Render<Welcome>();
 
 		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).IsEqualTo("http://localhost/");
-		_onboarding.DismissKeyPromptAsync(Any()).WasCalled(Times.Never);
+	}
+
+	private TestApiKey WorkingKey()
+	{
+		var key = new TestApiKey(ApiKeyProvider.Tmdb, "their-key");
+		_keys.TestAsync(ApiKeyProvider.Tmdb, "their-key", Any()).Returns(Success.Of<IApiKey>(key));
+		return key;
 	}
 
 	private static Task TypeAsync(IRenderedComponent<Welcome> cut, string key)

@@ -53,7 +53,7 @@ public class SetupRedirectTests : BunitContext
 	}
 
 	[Test]
-	public async Task Member_WithoutAKeyOnTheirFirstVisit_IsAskedForOne()
+	public async Task Member_WithoutAKey_IsAskedForOne()
 	{
 		_user.Role = UserRole.Member;
 		_onboarding.NeedsKeyPromptAsync(Any()).Returns(true);

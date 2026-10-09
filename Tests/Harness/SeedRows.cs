@@ -4,7 +4,6 @@ using DB.Data.Identity;
 using Domain.Identity;
 using Domain.Providers;
 using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 
 namespace Harness;
 
@@ -49,11 +48,6 @@ internal static class SeedRows
 			}
 		);
 		Save(context);
-	}
-
-	internal static void KeyPrompted(SammlarrDbContext context)
-	{
-		context.Users.ExecuteUpdate(rows => rows.SetProperty(row => row.KeyPromptedAt, DateTimeOffset.UnixEpoch));
 	}
 
 	internal static void SetupFinished(SammlarrDbContext context)

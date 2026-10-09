@@ -43,12 +43,6 @@
         }
         <span>Test and continue</span>
     </BbButton>
-    <div class="text-center">
-        <BbButton Variant="ButtonVariant.Link" Size="ButtonSize.Small" Class="h-auto p-0 font-normal text-muted-foreground underline underline-offset-3 hover:text-foreground"
-                  OnClick="ContinueAsync">
-            Skip for now
-        </BbButton>
-    </div>
 </div>
 
 @code {
@@ -83,12 +77,6 @@
     private async Task StoreAsync(IApiKey key)
     {
         await ApiKeys.StoreAsync(key);
-        await ContinueAsync();
-    }
-
-    private async Task ContinueAsync()
-    {
-        await Onboarding.DismissKeyPromptAsync();
         Navigation.NavigateTo(Target);
     }
 }

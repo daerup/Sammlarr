@@ -77,15 +77,7 @@ internal sealed class OnboardingService(
 
 	public async Task<bool> NeedsKeyPromptAsync(CancellationToken cancellationToken = default)
 	{
-		return currentUser.IsAuthenticated
-			&& currentUser.Role == UserRole.Member
-			&& !await users.WasKeyPromptedAsync(currentUser.Id, cancellationToken)
-			&& !await apiKeys.IsStoredAsync(ApiKeyProvider.Tmdb, cancellationToken);
-	}
-
-	public async Task DismissKeyPromptAsync(CancellationToken cancellationToken = default)
-	{
-		await users.MarkKeyPromptedAsync(currentUser.Id, clock.Now, cancellationToken);
+		return currentUser.IsAuthenticated && currentUser.Role == UserRole.Member && !await apiKeys.IsStoredAsync(ApiKeyProvider.Tmdb, cancellationToken);
 	}
 
 	private async Task<Result<User>> CreateAdminAsync(AdminClaim claim, CancellationToken cancellationToken)

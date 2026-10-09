@@ -705,7 +705,6 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		SeedRows.SearchWith(context, SearchProvider.Plex);
 		SeedRows.SetupFinished(context);
 		SeedUser(context, user);
-		SeedRows.KeyPrompted(context);
 		return connection;
 	}
 
@@ -713,6 +712,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		SeedFile(
 			path,
 			keyRingPath,
+			TmdbApiKey,
 			context =>
 			{
 				SeedRows.ApiKey(context, ApiKeyProvider.Tmdb, TmdbApiKey);
@@ -730,6 +730,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		SeedFile(
 			path,
 			keyRingPath,
+			apiKeys[ApiKeyProvider.Tmdb],
 			context =>
 			{
 				foreach (var (provider, apiKey) in apiKeys)
@@ -744,7 +745,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			}
 		);
 
-	private static SeededUser SeedFile(string path, string keyRingPath, Action<SammlarrDbContext> seed)
+	private static SeededUser SeedFile(string path, string keyRingPath, string memberTmdbKey, Action<SammlarrDbContext> seed)
 	{
 		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
 		connection.Open();
@@ -756,7 +757,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		SeedRows.SetupFinished(context);
 		SeedUser(context, user);
 		SeedSecondaryUsers(context);
-		SeedRows.KeyPrompted(context);
+		SeedMemberTmdbKey(context, user, memberTmdbKey);
 		seed(context);
 		SeedRows.WriteAheadLogging(connection);
 		return Project(user);
@@ -768,6 +769,14 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		{
 			SeedRows.PlexUser(context, id, displayName, role, string.Empty, hue);
 		}
+	}
+
+	private static void SeedMemberTmdbKey(SammlarrDbContext context, TestCurrentUser user, string apiKey)
+	{
+		var owner = user.Id;
+		user.Id = UserId.From(SeededMember.Id);
+		SeedRows.ApiKey(context, ApiKeyProvider.Tmdb, apiKey);
+		user.Id = owner;
 	}
 
 	private static void SeedUser(SammlarrDbContext context, TestCurrentUser user)

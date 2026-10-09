@@ -197,7 +197,7 @@ alone (`[NotInParallel]`).
 | `E2E_RESOURCE_LOG=<dir>` | Write each stack's application log to `<dir>/stack-<n>.log` (`self-hosted-<n>.log` for the self-hosted pool) |
 
 Live secrets come from `dotnet user-secrets` on `Tests/E2E`, named from the generated provider enums: `{PROVIDER}_API_KEY` and `{PROVIDER}_TOKEN`, for example
-`TMDB_API_KEY`, `PLEX_TOKEN`.
+`TMDB_API_KEY`, `PLEX_TOKEN`. `TMDB_API_KEY` is required: the seeded member gets the same TMDB key, since a member without one is sent to the key prompt.
 
 ## Mutation testing
 

@@ -81,13 +81,6 @@ internal static class SelfHostedSetup
 	internal static async Task JoinAsync(IPage member, string invite)
 	{
 		await OpenInviteAsync(member, invite);
-		await member.Button("Skip for now").ClickAsync();
-		await StaysHomeAsync(member);
-	}
-
-	internal static async Task JoinWithTmdbKeyAsync(IPage member, string invite)
-	{
-		await OpenInviteAsync(member, invite);
 		await member.Locator("#welcome-key").EnterAsync(TmdbKey);
 		await member.Button("Test and continue").ClickAsync();
 		await StaysHomeAsync(member);
