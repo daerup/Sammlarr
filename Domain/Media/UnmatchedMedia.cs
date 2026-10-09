@@ -4,6 +4,7 @@ public enum UnmatchedReason
 {
 	NotFound,
 	CouldNotLookUp,
+	NotFoundEarlier,
 }
 
 public sealed record UnmatchedMedia(ValueSet<IExternalMediaId> Externals, MediaDetails Details, UnmatchedReason Reason = UnmatchedReason.NotFound);

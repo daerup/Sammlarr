@@ -45,6 +45,8 @@ internal static class DemoFeeds
 			UnmatchedNotFound = 0,
 			UnmatchedCouldNotLookUp = 0,
 			Removed = 1,
+			Known = 40,
+			NotFoundEarlier = 0,
 		},
 		[
 			new FeedRunItem { MediaId = DemoMedia.Movie.Identity.Id, State = FeedRunItemState.Added },

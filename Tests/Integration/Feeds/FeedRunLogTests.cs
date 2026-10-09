@@ -102,6 +102,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 					UnmatchedNotFound = 2,
 					UnmatchedCouldNotLookUp = 0,
 					Removed = 1,
+					Known = 0,
+					NotFoundEarlier = 0,
 				},
 				Items = [Item(Held, FeedRunItemState.Kept), Item(Missing, FeedRunItemState.Removed)],
 			}
@@ -112,6 +114,21 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(run.Counts.Kept).IsEqualTo(178);
 		await Assert.That(run.Counts.Filtered).IsEqualTo(12);
 		await Assert.That(run.Items.Single(item => item.State is FeedRunItemState.Removed).MediaId).IsEqualTo(Missing);
+	}
+
+	[Test]
+	public async Task CompleteRunAsync_WithKnownCounts_ReadsThemBack()
+	{
+		var feedId = await SeedFeedAsync();
+		var run = Run(feedId, kept: [Held], 1);
+		await _testee.StartRunAsync(run);
+
+		await _testee.CompleteRunAsync(run with { Counts = run.Counts with { Known = 40, NotFoundEarlier = 3, UnmatchedNotFound = 5 } });
+
+		var stored = (await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId) })).Single();
+		var lean = (await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId), WithItems = false })).Single();
+		await Assert.That((stored.Counts.Known, stored.Counts.NotFoundEarlier, stored.Counts.UnmatchedNotFound)).IsEqualTo((40, 3, 5));
+		await Assert.That((lean.Counts.Known, lean.Counts.NotFoundEarlier)).IsEqualTo((40, 3));
 	}
 
 	[Test]
@@ -301,6 +318,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 			UnmatchedNotFound = 0,
 			UnmatchedCouldNotLookUp = 0,
 			Removed = removed,
+			Known = 0,
+			NotFoundEarlier = 0,
 		};
 
 	private static FeedRun Run(FeedId feedId, IReadOnlyList<MediaId> kept, int day) =>
@@ -324,6 +343,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 				UnmatchedNotFound = 0,
 				UnmatchedCouldNotLookUp = 0,
 				Removed = 0,
+				Known = 0,
+				NotFoundEarlier = 0,
 			},
 			Items = [.. kept.Select(id => Item(id, FeedRunItemState.Kept))],
 		};

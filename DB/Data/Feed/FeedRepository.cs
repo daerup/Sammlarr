@@ -249,6 +249,8 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		row.UnmatchedNotFound = run.Counts.UnmatchedNotFound;
 		row.UnmatchedCouldNotLookUp = run.Counts.UnmatchedCouldNotLookUp;
 		row.Removed = run.Counts.Removed;
+		row.Known = run.Counts.Known;
+		row.NotFoundEarlier = run.Counts.NotFoundEarlier;
 		row.SourceFailure = run.SourceFailure.ToNullable();
 		row.Items.AddRange(run.Items.Select(item => new FeedRunItemRow { MediaId = item.MediaId.Value, State = item.State }));
 		row.Calls.AddRange(

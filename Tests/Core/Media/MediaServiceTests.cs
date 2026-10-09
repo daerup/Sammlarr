@@ -163,8 +163,8 @@ public class MediaServiceTests
 			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
-		await Assert.That(results[0]).IsOfUnionType<MediaMatchResult, MatchedMedia>().And.IsEqualTo(firstDetail);
-		await Assert.That(results[1]).IsOfUnionType<MediaMatchResult, MatchedMedia>().And.IsEqualTo(secondDetail);
+		await Assert.That(results[0]).IsOfUnionType<MediaMatchResult, MatchedMedia>().And.IsEqualTo(firstDetail with { Known = true });
+		await Assert.That(results[1]).IsOfUnionType<MediaMatchResult, MatchedMedia>().And.IsEqualTo(secondDetail with { Known = true });
 	}
 
 	[Test]
@@ -199,6 +199,7 @@ public class MediaServiceTests
 		var matched = await Assert.That(results.Single()).IsOfUnionType<MediaMatchResult, MatchedMedia>();
 		await Assert.That(matched!.Details).IsEqualTo(new MovieDetails { Title = "Fight Club", ReleaseDate = new DateOnly(1999, 1, 1) });
 		await Assert.That(matched.Identity.Externals).Contains(external);
+		await Assert.That(matched.Known).IsFalse();
 		deps.MediaRepo.UpsertIdentitiesAsync(Any(), Any()).WasCalled(Times.Once);
 		deps.MediaRepo.UpsertDetailsAsync(Any(), Any()).WasNeverCalled();
 	}
@@ -310,6 +311,22 @@ public class MediaServiceTests
 	}
 
 	[Test]
+	public async Task IdentifyWithDetailsAsync_ForACachedMiss_ReportsNotFoundEarlier()
+	{
+		var (testee, deps) = CreateTestee();
+		deps.UnmatchedCache.GetValueOrNone(Any<string>()).Returns(Some.Of(true));
+
+		var results = await testee
+			.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([TmdbId.From("999", MediaType.Movie)], new None()) }.ToAsyncEnumerable())
+			.ToListAsync();
+
+		await Assert
+			.That(results.Single())
+			.IsOfUnionType<MediaMatchResult, UnmatchedMedia>()
+			.And.Multiple(async unmatched => await Assert.That(unmatched.Reason).IsEqualTo(UnmatchedReason.NotFoundEarlier));
+	}
+
+	[Test]
 	public async Task IdentifyWithDetailsAsync_WhenAHintedRequestWithoutAYearStaysUnmatched_LeavesTheReleaseDateOpen()
 	{
 		var (testee, deps) = CreateTestee();
@@ -331,7 +348,7 @@ public class MediaServiceTests
 			.And.Multiple(async unmatched =>
 				await Assert
 					.That(unmatched)
-					.IsEqualTo(new UnmatchedMedia([TmdbId.From("999", MediaType.Movie)], new MovieDetails { Title = "Fight Club" }, UnmatchedReason.NotFound))
+					.IsEqualTo(new UnmatchedMedia([TmdbId.From("999", MediaType.Movie)], new MovieDetails { Title = "Fight Club" }, UnmatchedReason.NotFoundEarlier))
 			);
 	}
 

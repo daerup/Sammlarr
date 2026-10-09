@@ -64,7 +64,9 @@ internal static class FeedRunView
 		return string.Join(" · ", parts);
 	}
 
-	internal static IReadOnlyList<ChangeChip> Chips(FeedRunCounts counts) =>
+	internal static IReadOnlyList<ChangeChip> Chips(FeedRunCounts counts)
+	{
+		return
 		[
 			new ChangeChip
 			{
@@ -72,6 +74,20 @@ internal static class FeedRunView
 				Count = counts.Total,
 				Tooltip = "Everything the source returned",
 			},
+			.. Did(counts),
+			new ChangeChip
+			{
+				Icon = "circle-alert",
+				Count = counts.Unmatched,
+				Tooltip = UnmatchedTooltip(counts),
+			},
+		];
+	}
+
+	internal static IReadOnlyList<ChangeChip> Did(FeedRunCounts counts)
+	{
+		return
+		[
 			new ChangeChip
 			{
 				Glyph = "+",
@@ -113,13 +129,8 @@ internal static class FeedRunView
 				Count = counts.Skipped,
 				Tooltip = "Excluded by your import limit",
 			},
-			new ChangeChip
-			{
-				Icon = "circle-alert",
-				Count = counts.Unmatched,
-				Tooltip = UnmatchedTooltip(counts),
-			},
 		];
+	}
 
 	internal static string UnmatchedSplit(FeedRunCounts counts)
 	{
@@ -167,10 +178,12 @@ internal static class FeedRunView
 			parts.Add($"{run.Counts.Total} fetched");
 		}
 
-		parts.Add($"took {run.Duration.TotalSeconds:0.0} s");
+		parts.Add($"took {Took(run.Duration)}");
 
 		return string.Join(" · ", parts);
 	}
+
+	internal static string Took(TimeSpan duration) => $"{duration.TotalSeconds:0.0} s";
 
 	private static string Subtitle(MatchedMedia media) => media.Details.Year?.ToString() ?? string.Empty;
 }

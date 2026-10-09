@@ -42,7 +42,7 @@ internal sealed class MediaIdResolver(
 			.GetValueOrNone(key)
 			.Apply(_ => FeedRunSpans.NotFoundEarlier())
 			.Match(
-				_ => Task.FromResult<Result<IReadOnlyList<IExternalMediaId>>>(Error.From("Candidates were previously resolved as unmatched.")),
+				_ => Task.FromResult<Result<IReadOnlyList<IExternalMediaId>>>(Error.From(new NotFoundEarlierException(target))),
 				() => LookUpAsync(request, target, connected, key, cancellationToken)
 			);
 	}
