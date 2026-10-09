@@ -7,21 +7,21 @@ namespace UI.Tests.Feeds;
 public class FeedJobChipTests : BunitContext
 {
 	[Test]
-	[Arguments(JobState.Running, "Running")]
-	[Arguments(JobState.Queued, "Queued")]
-	[Arguments(JobState.Waiting, "Queued")]
-	public async Task Render_ForAJobStillToFinish_NamesWhereItIs(JobState state, string expected)
+	[Arguments(JobState.Queued)]
+	[Arguments(JobState.Waiting)]
+	public async Task Render_ForAJobInTheQueue_SaysQueued(JobState state)
 	{
 		var cut = Render<FeedJobChip>(parameters => parameters.Add(chip => chip.Job, Some.Of(state)));
 
-		await Assert.That(cut.Find(".feed-chip").TextContent.Trim()).IsEqualTo(expected);
+		await Assert.That(cut.Find(".feed-chip").TextContent.Trim()).IsEqualTo("Queued");
 	}
 
 	[Test]
+	[Arguments(JobState.Running)]
 	[Arguments(JobState.Done)]
 	[Arguments(JobState.Failed)]
 	[Arguments(JobState.Cancelled)]
-	public async Task Render_ForASettledJob_ShowsNoChip(JobState state)
+	public async Task Render_ForAJobNotWaiting_ShowsNoChip(JobState state)
 	{
 		var cut = Render<FeedJobChip>(parameters => parameters.Add(chip => chip.Job, Some.Of(state)));
 

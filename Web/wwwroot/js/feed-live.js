@@ -1,13 +1,22 @@
-const W = 1120;
-const BODY_H = 440;
-const SLOT_N = 14;
+const MIN_W = 1120;
+const MIN_H = 440;
+const DB_X = 345;
+const ID_X = 449;
+const NODE_R = 22;
+const NODE_GAP = 86;
+const COL_GAP = 130;
+const COL_MAX = 300;
+const DETAIL_GAP = 120;
+const DETAIL_ROWS = 4;
+const TOP = 64;
+const BOTTOM = 84;
 const SLOT_TOP = 38;
 const SLOT_H = 28;
 const DELAY = 250;
 const LATE = 1000;
 const LINGER = 650;
 const MAX_DOTS = 180;
-const RING = 2 * Math.PI * 25;
+const RING = 2 * Math.PI * NODE_R;
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const KIND = ['started', 'sourceEnded', 'listed', 'known', 'earlier', 'path', 'asked', 'answered', 'gaveUp', 'settled'];
@@ -374,13 +383,15 @@ class View {
         this.lastDeliver = performance.now();
         this.hidden = document.hidden;
         this.reanchor = false;
-        this.place();
+        this.place(host.clientWidth);
         this.build();
         this.slots.fill(this.model);
         this.onVisibility = () => this.visibility();
         document.addEventListener('visibilitychange', this.onVisibility);
         this.resize = new ResizeObserver(() => {
-            this.inner.style.zoom = String(Math.min(1, this.host.clientWidth / W));
+            this.fit();
+            clearTimeout(this.reflowTimer);
+            this.reflowTimer = setTimeout(() => this.reflow(), 150);
         });
         this.resize.observe(this.host);
         this.loop = now => {
@@ -394,21 +405,57 @@ class View {
         this.raf = requestAnimationFrame(this.loop);
     }
 
-    place() {
-        const L = { db: [345, 205], sink: [1040, 112], cl: [1040, 222], nf: [1040, 332], pos: {} };
+    place(width) {
         const ids = this.layout.nodes;
+        const details = this.layout.details;
         const columns = Math.max(1, ...ids.map(n => n.column));
-        for (let c = 1; c <= columns; c++) {
-            const inColumn = ids.filter(n => n.column === c);
-            const x = columns === 1 ? 590 : 449 + ((c - 1) * (731 - 449)) / (columns - 1);
+        const byColumn = Array.from({ length: columns }, (_, c) => ids.filter(n => n.column === c + 1));
+        const detailCols = details.length ? Math.ceil(details.length / DETAIL_ROWS) : 0;
+        const detailRows = detailCols ? Math.ceil(details.length / detailCols) : 0;
+        const rows = Math.max(3, detailRows, ...byColumn.map(c => c.length));
+        const H = Math.max(MIN_H, TOP + BOTTOM + (rows - 1) * NODE_GAP);
+        const tail = detailCols ? 161 + (detailCols - 1) * DETAIL_GAP + 148 : 309;
+        const W = Math.max(MIN_W, ID_X + (columns - 1) * COL_GAP + tail + 80, Math.floor(width || 0));
+        const outX = W - 80;
+        const detailX = c => outX - 148 - (detailCols - 1 - c) * DETAIL_GAP;
+        const idEnd = detailCols ? detailX(0) - 161 : outX - 309;
+        const step = columns > 1 ? Math.min((idEnd - ID_X) / (columns - 1), COL_MAX) : 0;
+        const first = columns > 1 ? ID_X + (idEnd - ID_X - step * (columns - 1)) / 2 : (ID_X + idEnd) / 2;
+        const mid = H / 2;
+        const L = { db: [DB_X, Math.round(mid - 15)], sink: [outX, Math.round(mid - 108)], cl: [outX, Math.round(mid + 2)], nf: [outX, Math.round(mid + 112)], pos: {} };
+        byColumn.forEach((inColumn, c) => {
             inColumn.forEach((n, i) => {
-                L.pos[n.key] = [Math.round(x), Math.round(spread(inColumn.length, 64, 356, i))];
+                L.pos[n.key] = [Math.round(first + c * step), Math.round(spread(inColumn.length, TOP, H - BOTTOM, i))];
             });
-        }
-        this.layout.details.forEach((n, i) => {
-            L.pos['d:' + n.key] = [892, Math.round(spread(this.layout.details.length, 100, 310, i))];
         });
+        details.forEach((n, i) => {
+            const c = Math.floor(i / detailRows);
+            const inColumn = Math.min(detailRows, details.length - c * detailRows);
+            const span = Math.min(H - BOTTOM - TOP, (inColumn - 1) * NODE_GAP * 1.25);
+            L.pos['d:' + n.key] = [Math.round(detailX(c)), Math.round(spread(inColumn, mid - span / 2, mid + span / 2, i % detailRows))];
+        });
+        this.W = W;
+        this.H = H;
+        this.idX = Math.round(first);
+        this.detailX = detailCols ? Math.round(detailX(0)) : null;
+        this.slotN = Math.max(1, Math.floor((H - SLOT_TOP - 6) / SLOT_H));
         this.L = L;
+    }
+
+    fit() {
+        this.inner.style.zoom = String(Math.min(1, this.host.clientWidth / this.W || 1));
+    }
+
+    reflow() {
+        if (!this.host.isConnected) return;
+        const before = this.W;
+        this.place(this.host.clientWidth);
+        if (this.W === before) {
+            this.fit();
+            return;
+        }
+        this.build();
+        this.slots.fill(this.model);
     }
 
     pos(k) {
@@ -418,7 +465,7 @@ class View {
     }
 
     rad(k) {
-        return k === 'sink' || k === 'nf' || k === 'cl' ? 17 : 27;
+        return k === 'sink' || k === 'nf' || k === 'cl' ? 17 : NODE_R + 2;
     }
 
     geo(a, b, from) {
@@ -436,9 +483,9 @@ class View {
         const [x, y] = this.L.db;
         const [tx, ty] = this.pos(b);
         const top = b === 'sink';
-        const edge = top ? 8 : BODY_H - 8;
-        const turn = top ? 28 : BODY_H - 28;
-        const sy = top ? y - 27 : y + 27;
+        const edge = top ? 8 : this.H - 8;
+        const turn = top ? 28 : this.H - 28;
+        const sy = top ? y - NODE_R - 2 : y + NODE_R + 2;
         return `M${x},${sy} L${x},${turn} Q${x},${edge} ${x + 20},${edge} L${tx - 72},${edge} C${tx - 32},${edge} ${tx - 32},${ty} ${tx - 17},${ty}`;
     }
 
@@ -448,16 +495,18 @@ class View {
 
     build() {
         const L = this.L;
-        const detailsX = this.layout.details.length ? 892 : null;
+        const detailsX = this.detailX;
         this.host.innerHTML = `<div class="fl-fit"><div class="fl-view">
             <div class="fl-list"><div class="fl-lh">In flight <b class="fl-n">0</b><span class="fl-more"></span></div>
-            ${Array.from({ length: SLOT_N }, (_, i) => `<div class="fl-slot is-empty" data-i="${i}" style="top:${SLOT_TOP + i * SLOT_H}px"><span class="st"></span><span class="nm"></span><span class="yr"></span></div>`).join('')}</div>
-            <svg class="fl-svg" viewBox="0 0 ${W} ${BODY_H}" width="${W}" height="${BODY_H}">
-                <text class="fl-cap" x="400" y="26">Services</text>${detailsX ? `<text class="fl-cap" x="${detailsX - 28}" y="26">Details</text>` : ''}<text class="fl-cap" x="${L.sink[0] - 32}" y="26">Outcome</text>
+            ${Array.from({ length: this.slotN }, (_, i) => `<div class="fl-slot is-empty" data-i="${i}" style="top:${SLOT_TOP + i * SLOT_H}px"><span class="st"></span><span class="nm"></span><span class="yr"></span></div>`).join('')}</div>
+            <svg class="fl-svg" viewBox="0 0 ${this.W} ${this.H}" width="${this.W}" height="${this.H}">
+                <text class="fl-cap" x="${this.idX - 40}" y="26">Services</text>${detailsX ? `<text class="fl-cap" x="${detailsX - 28}" y="26">Details</text>` : ''}<text class="fl-cap" x="${L.sink[0] - 32}" y="26">Outcome</text>
                 <g class="g-static"></g><g class="g-edges"></g><path class="fl-hl"/><g class="g-parts"></g><g class="g-nodes"></g>
             </svg></div></div>`;
         this.inner = this.host.querySelector('.fl-fit');
-        this.inner.style.zoom = String(Math.min(1, this.host.clientWidth / W || 1));
+        this.inner.style.width = `${this.W}px`;
+        this.host.querySelector('.fl-view').style.height = `${this.H}px`;
+        this.fit();
         const svg = this.host.querySelector('svg');
         this.gEdges = svg.querySelector('.g-edges');
         this.gParts = svg.querySelector('.g-parts');
@@ -501,7 +550,7 @@ class View {
         this.parts = [];
         this.pool = [];
         this.entryEnd = new Map();
-        this.slots = new Slots(SLOT_N);
+        this.slots = new Slots(this.slotN);
         this.slotEls = [...this.host.querySelectorAll('.fl-slot')];
         for (const el of this.slotEls) {
             el.addEventListener('mouseenter', () => {
@@ -517,19 +566,19 @@ class View {
 
     nodeHtml(k, brand, [x, y], label) {
         return `<g class="fl-nd" data-k="${k}" transform="translate(${x},${y})">
-            <circle class="nd-halo" r="34" style="fill:${brand.color}"/><circle class="nd-bg" r="25"/><circle class="nd-track" r="25"/>
-            ${['answered', 'after429', 'gaveup', 'failed', 'det'].map(c => `<circle class="nd-seg" r="25" style="stroke:${STATUS_CSS[c]}" stroke-dasharray="0 ${RING}" transform="rotate(-90)"/>`).join('')}
-            ${svgTile(brand, 30)}
-            <text class="nd-name" y="44">${escape(label)}</text><text class="nd-stat" y="58"></text>
-            <text class="nd-flag" y="-34"></text>
-            <g class="nd-badge" transform="translate(23,-21)" style="display:none"><rect x="-13" y="-9" width="26" height="17" rx="8.5"/><text y="4"></text></g></g>`;
+            <circle class="nd-halo" r="${NODE_R + 9}" style="fill:${brand.color}"/><circle class="nd-bg" r="${NODE_R}"/><circle class="nd-track" r="${NODE_R}"/>
+            ${['answered', 'after429', 'gaveup', 'failed', 'det'].map(c => `<circle class="nd-seg" r="${NODE_R}" style="stroke:${STATUS_CSS[c]}" stroke-dasharray="0 ${RING}" transform="rotate(-90)"/>`).join('')}
+            ${svgTile(brand, 26)}
+            <text class="nd-name" y="${NODE_R + 19}">${escape(label)}</text><text class="nd-stat" y="${NODE_R + 33}"></text>
+            <text class="nd-flag" y="${-NODE_R - 10}"></text>
+            <g class="nd-badge" transform="translate(${NODE_R - 2},${-NODE_R + 4})" style="display:none"><rect x="-13" y="-9" width="26" height="17" rx="8.5"/><text y="4"></text></g></g>`;
     }
 
     dbHtml() {
         const [x, y] = this.L.db;
-        return `<g transform="translate(${x},${y})"><circle class="nd-bg" r="25"/><circle class="nd-track" r="25"/>
-            ${['var(--f-known)', 'var(--f-cached)', 'var(--sammlarr-gold)'].map(c => `<circle class="db-seg" r="25" fill="none" stroke-width="5" style="stroke:${c}" stroke-dasharray="0 ${RING}" transform="rotate(-90)"/>`).join('')}
-            ${svgTile(this.layout.sammlarr, 30)}<text class="nd-name" y="44">Sammlarr</text><text class="nd-stat db-stat" y="58"></text><text class="nd-stat db-new" y="72"></text></g>`;
+        return `<g transform="translate(${x},${y})"><circle class="nd-bg" r="${NODE_R}"/><circle class="nd-track" r="${NODE_R}"/>
+            ${['var(--f-known)', 'var(--f-cached)', 'var(--sammlarr-gold)'].map(c => `<circle class="db-seg" r="${NODE_R}" fill="none" stroke-width="5" style="stroke:${c}" stroke-dasharray="0 ${RING}" transform="rotate(-90)"/>`).join('')}
+            ${svgTile(this.layout.sammlarr, 26)}<text class="nd-name" y="${NODE_R + 19}">Sammlarr</text><text class="nd-stat db-stat" y="${NODE_R + 33}"></text><text class="nd-stat db-new" y="${NODE_R + 47}"></text></g>`;
     }
 
     edgeEl(e) {
@@ -756,7 +805,7 @@ class View {
         const keys = ['src', ...t.path];
         if (t.fate) keys.push(FATE_NODE[t.fate]);
         const a = this.slotAnchor(t.id);
-        let d = a ? `M${a[0]},${a[1]} L${this.L.db[0] - 27},${this.L.db[1]}` : '';
+        let d = a ? `M${a[0]},${a[1]} L${this.L.db[0] - NODE_R - 2},${this.L.db[1]}` : '';
         for (let i = 1; i < keys.length; i++) {
             const seg = this.pathD(this.geo(keys[i - 1], keys[i]));
             d += d ? seg.replace(/^M/, ' M') : seg;
@@ -796,6 +845,7 @@ class View {
 
     dispose() {
         cancelAnimationFrame(this.raf);
+        clearTimeout(this.reflowTimer);
         this.resize.disconnect();
         document.removeEventListener('visibilitychange', this.onVisibility);
         this.host.innerHTML = '';

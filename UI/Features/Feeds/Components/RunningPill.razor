@@ -1,0 +1,90 @@
+@using System.Globalization
+@using Domain.Feed.Trace
+@implements IDisposable
+
+<span class="run-live">
+    <button type="button" class="@($"run-pill {(Failed ? "is-failed" : null)}")" title="Open the live view" data-testid="running-pill" @onclick="OnOpen">
+        @Tally.Ended.Match(end => Icon(end.Ending), () => SpinnerIcon)
+        <span>@Tally.Ended.Match(end => Word(end.Ending), () => "Running") · <b>@Count(Tally.Done)</b>@Of</span>
+    </button>
+    @if (Bar)
+    {
+        <button type="button" class="run-bar" aria-label="Open the live view" data-testid="running-bar" @onclick="OnOpen">
+            <span class="run-track">
+                @foreach (var part in Tally.Bar)
+                {
+                    <i style="@Width(Tally.Count(part), RunBar.Color(part))"></i>
+                }
+                <i class="is-flight" style="@Width(Tally.InFlight, null)"></i>
+            </span>
+        </button>
+    }
+</span>
+
+@code {
+    [Parameter, EditorRequired] public required ILiveRun Run { get; set; }
+
+    [Parameter] public bool Bar { get; set; }
+
+    [Parameter] public EventCallback OnOpen { get; set; }
+
+    private ILiveRun? _subscribed;
+
+    private RunTally Tally => Run.Tally;
+
+    private string Of => Tally.Total.Match(total => $" / {(Tally.Estimated ? "~" : "")}{Count(total)}", () => Tally.Done == 1 ? " title" : " titles");
+
+    protected override void OnParametersSet()
+    {
+        if (_subscribed == Run)
+        {
+            return;
+        }
+
+        Unsubscribe();
+        Run.Batch += OnBatch;
+        _subscribed = Run;
+    }
+
+    private void OnBatch(WireBatch batch) => _ = InvokeAsync(StateHasChanged);
+
+    private void Unsubscribe()
+    {
+        if (_subscribed is not null)
+        {
+            _subscribed.Batch -= OnBatch;
+        }
+    }
+
+    public void Dispose() => Unsubscribe();
+
+    private string Width(int count, string? color)
+    {
+        var background = color is null ? "" : $"; background: {color}";
+        return string.Create(CultureInfo.InvariantCulture, $"width: {Tally.Percent(count):0.###}%{background}");
+    }
+
+    private static string Count(int count) => count.ToString("N0", CultureInfo.InvariantCulture);
+
+    private bool Failed => Tally.Ended.Match(end => end.Ending is TraceEnding.Failed, () => false);
+
+    private static string Word(TraceEnding ending)
+    {
+        return ending switch
+        {
+            TraceEnding.Completed => "Done",
+            TraceEnding.Failed => "Failed",
+        };
+    }
+
+    private static RenderFragment Icon(TraceEnding ending)
+    {
+        return ending switch
+        {
+            TraceEnding.Completed => @<LucideIcon Name="check" Size="14"/>,
+            TraceEnding.Failed => @<LucideIcon Name="cloud-off" Size="14"/>,
+        };
+    }
+
+    private RenderFragment SpinnerIcon => @<LucideIcon Name="loader-circle" Size="14" Class="animate-spin"/>;
+}

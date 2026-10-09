@@ -33,6 +33,8 @@ internal sealed class FeedRunWatch(
 
 	private volatile bool _hidden;
 
+	private volatile bool _folded;
+
 	public Feed Feed => feed;
 
 	public RunLayout Layout => layout;
@@ -40,6 +42,8 @@ internal sealed class FeedRunWatch(
 	public RunTally Tally { get; private set; } = RunTally.Before(previous);
 
 	public bool Hidden => _hidden;
+
+	public bool HasFolded => _folded;
 
 	public Optional<Guid> TraceKey
 	{
@@ -92,6 +96,7 @@ internal sealed class FeedRunWatch(
 			if (await ReadAsync())
 			{
 				Stop();
+				_folded = true;
 				Folded?.Invoke();
 				return;
 			}

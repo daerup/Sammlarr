@@ -1,0 +1,35 @@
+.nav-dot {
+    position: relative;
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 99px;
+    background: var(--alert-warning);
+}
+
+.nav-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 99px;
+    background: var(--alert-warning);
+    animation: nav-dot-pulse 1.6s ease-out infinite;
+}
+
+@keyframes nav-dot-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-dot::after {
+        animation: none;
+    }
+}

@@ -155,18 +155,40 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 
 	public RunLayout Layout { get; } =
 		new RunLayout(
-			[MediaProvider.Plex],
-			[new(RemoteService.Tmdb, 1, false), new(RemoteService.Wikidata, 1, false), new(RemoteService.Plex, 2, false)],
-			[RemoteService.Tmdb, RemoteService.Mdblist],
+			[MediaProvider.Tmdb, MediaProvider.Tvdb],
 			[
-				new(new None(), RemoteService.Tmdb),
-				new(new None(), RemoteService.Wikidata),
-				new(Some.Of(RemoteService.Tmdb), RemoteService.Plex),
-				new(Some.Of(RemoteService.Wikidata), RemoteService.Plex),
+				new(RemoteService.Plex, 1, false),
+				new(RemoteService.AnimeLists, 1, true),
+				new(RemoteService.Mdblist, 2, false),
+				new(RemoteService.Tmdb, 3, false),
+				new(RemoteService.Wikidata, 4, false),
+				new(RemoteService.Tvmaze, 4, false),
+				new(RemoteService.Trakt, 5, false),
+			],
+			[
+				RemoteService.Tmdb,
+				RemoteService.Plex,
+				RemoteService.Mdblist,
+				RemoteService.Tvmaze,
+				RemoteService.ImdbDatasets,
+				RemoteService.AniList,
+				RemoteService.Mal,
+				RemoteService.Trakt,
+			],
+			[
+				new(new None(), RemoteService.Plex),
+				new(new None(), RemoteService.Mdblist),
+				new(Some.Of(RemoteService.Plex), RemoteService.Mdblist),
+				new(Some.Of(RemoteService.Plex), RemoteService.Tmdb),
+				new(Some.Of(RemoteService.Mdblist), RemoteService.Tmdb),
+				new(Some.Of(RemoteService.Tmdb), RemoteService.Wikidata),
+				new(Some.Of(RemoteService.Tmdb), RemoteService.Tvmaze),
+				new(Some.Of(RemoteService.Wikidata), RemoteService.Trakt),
+				new(Some.Of(RemoteService.Tvmaze), RemoteService.Trakt),
 			]
 		)
 		{
-			Sink = SinkKind.Plex,
+			Sink = SinkKind.Arr,
 		};
 
 	public RunTally Tally { get; private set; } = RunTally.Before(Some.Of(Names.Length));
@@ -174,6 +196,8 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 	public bool Hidden { get; private set; }
 
 	public Optional<Guid> TraceKey => Some.Of(_run);
+
+	public bool HasFolded { get; private set; }
 
 	public event Action<WireBatch>? Batch;
 
@@ -203,6 +227,7 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 			if (Elapsed >= _script.EndMs + Linger)
 			{
 				_timer.Dispose();
+				HasFolded = true;
 				Folded?.Invoke();
 			}
 		}
@@ -369,16 +394,16 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 			}
 
 			Add(at + 4, title, new PathStarted());
-			at = Hop(title, at + 10, _random.NextDouble() < 0.2 ? RemoteService.Wikidata : RemoteService.Tmdb, TraceStage.Ids);
+			at = Hop(title, at + 10, RemoteService.Plex, TraceStage.Ids);
 			var fate = _random.NextDouble();
 			if (fate < 0.05)
 			{
-				Add(at + 900, title, new GaveUp(RemoteService.Plex, TraceStage.Ids));
+				Add(at + 900, title, new GaveUp(RemoteService.Tmdb, TraceStage.Ids));
 				Add(at + 905, title, new TitleSettled(TitleFate.CouldNotLookUp));
 				return;
 			}
 
-			at = Hop(title, at + 4, RemoteService.Plex, TraceStage.Ids);
+			at = Hop(title, at + 4, _random.NextDouble() < 0.2 ? RemoteService.Wikidata : RemoteService.Tmdb, TraceStage.Ids);
 			if (fate < 0.15)
 			{
 				Add(at + 5, title, new TitleSettled(TitleFate.NotFound));

@@ -27,6 +27,8 @@
 @inject IEventPublisher Events
 @inject IJobQueueView JobQueueView
 @inject MediaProviderBrandingService Branding
+@inject FeedRunProgress Progress
+@inject ScrollService ScrollService
 
 <PageTitle>Feeds</PageTitle>
 
@@ -74,6 +76,13 @@
         <ProtectedSection GuardState="IsSignedIn"
                           DeniedActionDescription="managing your feeds"
                           FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
+            @if (_live is Some<ILiveRun>(var live))
+            {
+                <div id="feed-run-live" class="scroll-mt-4">
+                    <FeedRunLive @key="live" Run="live" Flash="_flash" Class="mb-4" OnFolded="() => Folded(live)"/>
+                </div>
+            }
+
             @if (_isLoading)
             {
                 <div class="feeds-grid">
@@ -176,7 +185,10 @@
                                       IsSelected="_selection.Contains(row.Feed.Id)"
                                       OnToggleSelect="@(args => _selection.Click(row.Feed.Id, args.ShiftKey, [.. PageRows.Select(page => page.Feed.Id)]))"
                                       OnRun="() => RunFeedAsync(row.Feed)"
-                                      OnDelete="() => AskDelete([row])"/>
+                                      OnDelete="() => AskDelete([row])"
+                                      Running="RunningFor(row.Feed.Id)"
+                                      JustFinished="FinishedHere(row.Feed.Id)"
+                                      OnOpenLive="OpenLiveAsync"/>
                         }
                     </div>
 
@@ -276,6 +288,7 @@
     }
 
     private static readonly TimeSpan LastWeek = TimeSpan.FromDays(7);
+    private static readonly TimeSpan FinishFlash = TimeSpan.FromMilliseconds(1600);
     private const int RunCap = 1000;
 
     private readonly CancellationTokenSource _cancellation = new();
@@ -311,6 +324,9 @@
     private IReadOnlyList<ChangeItem> _pendingItems = [];
     private IReadOnlyList<ChangeChip> _pendingChips = [];
     private MediaMatchResult? _selected;
+    private Optional<ILiveRun> _live = new None();
+    private Optional<FeedId> _finished = new None();
+    private int _flash;
 
     private bool IsSignedIn() => _isSignedIn;
 
@@ -328,6 +344,7 @@
     {
         _previewReload = new(ReloadPreviewAsync);
         Events.Published += OnEvent;
+        Progress.Changed += OnProgress;
         await Task.Yield();
         _providerConfig = await ProviderConfigService.GetAsync();
         await LoadAsync();
@@ -378,12 +395,59 @@
         Rebuild();
     }
 
-    private Task HandleSignInChangedAsync(bool hasAccess)
+    private async Task HandleSignInChangedAsync(bool hasAccess)
     {
         _isSignedIn = hasAccess;
         _viewer = hasAccess ? CurrentUser.Id : null;
-        return Task.CompletedTask;
+        if (hasAccess)
+        {
+            await Progress.StartAsync();
+            ShowLive();
+        }
     }
+
+    private void OnProgress() => _ = InvokeAsync(ShowLive);
+
+    private void ShowLive()
+    {
+        Progress.Live.When(run => _live.Match(current => current != run, () => true)).Apply(Replace);
+    }
+
+    private void Replace(ILiveRun run)
+    {
+        _live.Map(current => current.Feed.Id).When(feed => feed != run.Feed.Id).Apply(Flash);
+        _live = Some.Of(run);
+        _flash = 0;
+        StateHasChanged();
+    }
+
+    private void Folded(ILiveRun run)
+    {
+        _live.When(current => current == run).Apply(_ => _live = new None()).Apply(_ => Flash(run.Feed.Id));
+    }
+
+    private void Flash(FeedId feed)
+    {
+        _finished = Some.Of(feed);
+        _ = UnflashAsync(feed);
+    }
+
+    private async Task UnflashAsync(FeedId feed)
+    {
+        await Task.Delay(FinishFlash);
+        await InvokeAsync(() => _finished.When(finished => finished == feed).Apply(_ => _finished = new None()).Apply(_ => StateHasChanged()));
+    }
+
+    private async Task OpenLiveAsync()
+    {
+        _live.Apply(run => run.Show());
+        _flash++;
+        await ScrollService.IntoViewAsync("feed-run-live");
+    }
+
+    private Optional<ILiveRun> RunningFor(FeedId feed) => _live.When(run => run.Feed.Id == feed);
+
+    private bool FinishedHere(FeedId feed) => _finished.Match(finished => finished == feed, () => false);
 
     private void ApplyFilter(FeedFilter filter)
     {
@@ -491,6 +555,7 @@
     public void Dispose()
     {
         Events.Published -= OnEvent;
+        Progress.Changed -= OnProgress;
         _cancellation.Cancel();
         _cancellation.Dispose();
     }

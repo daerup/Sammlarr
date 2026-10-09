@@ -8,6 +8,7 @@ using Contracts.Wantlist;
 using Domain.Blocklist;
 using Domain.Feed;
 using Domain.Feed.Run;
+using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
@@ -119,6 +120,23 @@ public class LastRunCellTests : BunitContext
 		cut.WaitForState(() => cut.FindAll(".last-run").Count == 1);
 
 		await Assert.That(cut.FindAll("[data-testid=last-run-bar]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Render_RunningWithoutALastRun_ShowsTheRunningPill()
+	{
+		RegisterServices();
+		var live = ILiveRun.Mock();
+		live.Tally.Getter.Returns(RunTally.Before(new None()));
+		var overview = new FeedOverview(TestFeeds.Feed(Feed.Value), new None(), FeedRunHistory.None, 0);
+
+		var cut = Render<LastRunCell>(parameters =>
+			parameters.Add(cell => cell.Overview, overview).Add(cell => cell.Running, Some.Of(live.Object)).Add(cell => cell.Bar, true)
+		);
+
+		await Assert.That(cut.Find("[data-testid=running-pill]").TextContent).Contains("titles");
+		await Assert.That(cut.FindAll("[data-testid=running-bar]")).Count().IsEqualTo(1);
+		await Assert.That(cut.Markup).DoesNotContain("Never");
 	}
 
 	private void RegisterServices()

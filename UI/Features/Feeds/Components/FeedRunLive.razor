@@ -7,7 +7,7 @@
 @inject IJSRuntime Js
 @inject MediaProviderBrandingService Branding
 
-<section class="live feed-live feed-live-fold" @ref="_root" data-testid="feed-run-live" aria-label="@($"Live run of {Run.Feed.Name}")">
+<section class="live feed-live feed-live-fold @Class" @ref="_root" data-testid="feed-run-live" aria-label="@($"Live run of {Run.Feed.Name}")">
     <div class="live-head">
         <div class="live-top">
             @foreach (var brand in Branding.Brands(Run.Feed.Provider.Service))
@@ -57,6 +57,10 @@
         </div>
     </div>
     <div class="live-body" @ref="_body" hidden="@Run.Hidden" data-testid="live-body"></div>
+    @if (Flash > 0)
+    {
+        <span class="live-flash" @key="Flash" aria-hidden="true"></span>
+    }
 </section>
 
 @code {
@@ -65,6 +69,10 @@
     [Parameter, EditorRequired] public required ILiveRun Run { get; set; }
 
     [Parameter] public EventCallback OnFolded { get; set; }
+
+    [Parameter] public int Flash { get; set; }
+
+    [Parameter] public string? Class { get; set; }
 
     private ElementReference _root;
     private ElementReference _body;
@@ -85,6 +93,10 @@
     {
         Run.Batch += OnBatch;
         Run.Folded += OnRunFolded;
+        if (Run.HasFolded)
+        {
+            OnRunFolded();
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

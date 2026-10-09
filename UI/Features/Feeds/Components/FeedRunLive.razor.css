@@ -154,6 +154,25 @@
     display: none;
 }
 
+.live-flash {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 2px var(--alert-warning);
+    animation: live-flash 1.6s ease forwards;
+}
+
+@keyframes live-flash {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .is-flight {
         animation: none;

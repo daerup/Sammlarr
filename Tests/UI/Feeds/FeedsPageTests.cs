@@ -2,21 +2,26 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
+using Contracts;
 using Contracts.Announcing;
 using Contracts.Blocklist;
 using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Jobs;
 using Contracts.Media;
+using Contracts.Providers;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Feed;
 using Domain.Feed.Run;
+using Domain.Feed.Trace;
+using Domain.Jobs;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
+using UI.Features.Feeds.Components;
 using UI.Shared.Services;
 using FeedsPage = UI.Features.Feeds.Pages.Feeds;
 
@@ -25,6 +30,12 @@ namespace UI.Tests.Feeds;
 public class FeedsPageTests : BunitContext
 {
 	private static readonly FeedId Comedy = FeedId.From(new Guid(31, 0, 0, new byte[8]));
+
+	private static readonly FeedId Drama = FeedId.From(new Guid(32, 0, 0, new byte[8]));
+
+	private static readonly DateTimeOffset Start = new(2026, 10, 8, 18, 0, 0, TimeSpan.Zero);
+
+	private readonly Mock<IDateTimeProvider> _clock = IDateTimeProvider.Mock();
 
 	[Test]
 	public async Task RunFeeds_FromThePageHeader_OpensTheDialogWithItsOwnPicks()
@@ -61,7 +72,83 @@ public class FeedsPageTests : BunitContext
 		await Assert.That(Buttons(cut, "Run feeds")).IsEmpty();
 	}
 
+	[Test]
+	public async Task Render_WhileYourFeedRuns_ShowsTheLiveView()
+	{
+		RegisterServices([Overview()], Some.Of(Comedy), Snapshot(new None()));
+		var cut = RenderPage();
+
+		cut.WaitForState(() => cut.FindAll("[data-testid=feed-run-live]").Count == 1);
+		cut.WaitForState(() => cut.FindAll("[data-testid=running-pill]").Count == 1);
+		await Assert.That(cut.Find("[data-testid=feed-run-live]").GetAttribute("aria-label")).IsEqualTo("Live run of Comedy");
+		await Assert.That(cut.Find(".feed-card-chips").TextContent).DoesNotContain("Running");
+	}
+
+	[Test]
+	public async Task Ended_BeforeTheFold_KeepsTheLiveView()
+	{
+		RegisterServices([Overview()], Some.Of(Comedy), Snapshot(Some.Of(new FeedRunEnd(TraceEnding.Completed, 900))));
+		var cut = RenderPage();
+		cut.WaitForState(() => cut.FindAll("[data-testid=live-done]").Count == 1);
+
+		await Task.Delay(700);
+
+		cut.WaitForState(() => cut.FindAll("[data-testid=feed-run-live]").Count == 1);
+		await Assert.That(cut.Find("[data-testid=running-pill]").TextContent).Contains("Done");
+	}
+
+	[Test]
+	public async Task Fold_WhenANextRunStarts_ShowsTheNextRun()
+	{
+		RegisterServices([Overview(), Overview(Drama, "Drama")], Some.Of(Comedy), Snapshot(Some.Of(new FeedRunEnd(TraceEnding.Completed, 900))));
+		var cut = RenderPage();
+		cut.WaitForState(() => cut.FindAll("[data-testid=live-done]").Count == 1);
+
+		Services
+			.GetRequiredService<IEventPublisher>()
+			.Publish(new JobStateChangedEvent(TestCurrentUser.DefaultId, JobKind.FeedRun, Drama.Value.ToString(), JobState.Running));
+
+		cut.WaitForState(() => cut.Find("[data-testid=feed-run-live]").GetAttribute("aria-label") == "Live run of Drama");
+		await Assert.That(cut.FindAll("[data-testid=running-pill]")).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task OpenLive_FromTheRunningPill_ScrollsToTheLiveView()
+	{
+		RegisterServices([Overview()], Some.Of(Comedy), Snapshot(new None()));
+		var cut = RenderPage();
+		cut.WaitForState(() => cut.FindAll("[data-testid=running-pill]").Count == 1);
+
+		await cut.Find("[data-testid=live-toggle]").ClickAsync(new());
+		cut.WaitForState(() => cut.Find("[data-testid=live-body]").HasAttribute("hidden"));
+
+		await cut.Find("[data-testid=running-pill]").ClickAsync(new());
+
+		cut.WaitForState(() => cut.FindAll(".live-flash").Count == 1);
+		await Assert.That(cut.Find("[data-testid=live-body]").HasAttribute("hidden")).IsFalse();
+		await Assert.That(JSInterop.Invocations["sammlarrScroll.intoView"].Single().Arguments.Single()).IsEqualTo("feed-run-live");
+	}
+
+	[Test]
+	public async Task Fold_AfterTheRun_RemovesTheViewAndFlashesTheCard()
+	{
+		RegisterServices([Overview()], Some.Of(Comedy), Snapshot(Some.Of(new FeedRunEnd(TraceEnding.Completed, 900))));
+		var cut = RenderPage();
+		cut.WaitForState(() => cut.FindAll("[data-testid=live-done]").Count == 1);
+
+		_clock.Now.Getter.Returns(Start.AddSeconds(6));
+
+		cut.WaitForState(() => cut.FindAll("[data-testid=feed-run-live]").Count == 0, TimeSpan.FromSeconds(3));
+		await Assert.That(cut.Find(".feed-card-foot").ClassList).Contains("is-new");
+		await Assert.That(cut.FindAll("[data-testid=running-pill]")).IsEmpty();
+	}
+
 	private void RegisterServices(IReadOnlyList<FeedOverview> overviews)
+	{
+		RegisterServices(overviews, new None(), new NoTrace());
+	}
+
+	private void RegisterServices(IReadOnlyList<FeedOverview> overviews, Optional<FeedId> running, TraceRead read)
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
@@ -74,7 +161,13 @@ public class FeedsPageTests : BunitContext
 		Services.AddSingleton(feeds.Object);
 
 		var queue = IJobQueueView.Mock();
-		queue.GetAsync(Any()).Returns(new QueueSnapshot([], 0));
+		IReadOnlyList<PendingJob> jobs =
+		[
+			.. new[] { running }
+				.WhereSome()
+				.Select(feed => new PendingJob(JobId.From(Guid.NewGuid()), new RunFeed(feed, new Manual()), JobState.Running, DateTimeOffset.UtcNow, 1)),
+		];
+		queue.GetAsync(Any()).Returns(new QueueSnapshot(jobs, 0));
 		Services.AddSingleton(queue.Object);
 
 		var media = IMediaService.Mock();
@@ -92,6 +185,19 @@ public class FeedsPageTests : BunitContext
 		Services.AddScoped<AccountConnectionPrompt>();
 		Services.AddProviderBranding();
 		Services.AddScoped<ScrollService>();
+
+		var traces = IFeedRunTraces.Mock();
+		traces.ReadAsync(Any<FeedId>(), Any<TraceCursor>(), Any()).Returns(read);
+		Services.AddSingleton(traces.Object);
+		var layouts = IFeedRunLayout.Mock();
+		layouts.GetAsync(Any<FeedId>(), Any()).Returns(RunLayout.Empty);
+		Services.AddSingleton(layouts.Object);
+		var capacity = IRemoteCapacity.Mock();
+		capacity.Of(Any<RemoteService>()).Returns(new RemoteLoad(new None(), 0));
+		Services.AddSingleton(capacity.Object);
+		_clock.Now.Getter.Returns(Start);
+		Services.AddSingleton(_clock.Object);
+		Services.AddScoped<FeedRunProgress>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -107,12 +213,21 @@ public class FeedsPageTests : BunitContext
 	private static List<IElement> Buttons(IRenderedComponent<IComponent> cut, string label) =>
 		[.. cut.FindAll("button").Where(button => button.TextContent.Contains(label))];
 
-	private static FeedOverview Overview() =>
-		new(
+	private static FeedOverview Overview() => Overview(Comedy, "Comedy");
+
+	private static TraceSnapshot Snapshot(Optional<FeedRunEnd> ended)
+	{
+		var fates = FateTally.None with { Started = 3, Matched = 2 };
+		return new TraceSnapshot(new TraceCursor(Some.Of(Guid.NewGuid()), 4), 900, [], [], fates, new None(), ended);
+	}
+
+	private static FeedOverview Overview(FeedId id, string name)
+	{
+		return new FeedOverview(
 			new Feed
 			{
-				Name = "Comedy",
-				Id = Comedy,
+				Name = name,
+				Id = id,
 				Enabled = true,
 				Provider = FeedProvider.Mdblist,
 				Strategy = new FeedStrategy(new Append()),
@@ -130,4 +245,5 @@ public class FeedsPageTests : BunitContext
 			},
 			0
 		);
+	}
 }

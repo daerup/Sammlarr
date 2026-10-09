@@ -2,10 +2,10 @@
 @implements IDisposable
 
 <DemoCard Title="Live run" Where="Feeds page"
-          Note="FeedRunLive playing a scripted run of 120 documentaries: ids through TMDB, Wikidata and Plex, details through TMDB and MDBList, a few answers after a 429 and a few titles that gave up waiting. Five seconds after it ends it folds away. Hide and Show remount it from a fresh snapshot.">
+          Note="FeedRunLive playing a scripted run of 120 documentaries: ids through TMDB, Wikidata and Plex, details through TMDB and MDBList, a few answers after a 429 and a few titles that gave up waiting. The card below shows the running pill and its live bar; clicking it brings the view back and flashes it. Five seconds after the run ends the view folds away and the card's footer flashes. Hide and Show remount it from a fresh snapshot.">
     @if (_run is { } run)
     {
-        <FeedRunLive @key="run" Run="run" OnFolded="Folded"/>
+        <FeedRunLive @key="run" Run="run" Flash="_flash" OnFolded="Folded"/>
     }
     else
     {
@@ -16,18 +16,35 @@
             </BbButton>
         </div>
     }
+    <div class="w-[340px] max-w-full">
+        <FeedCard Row="DemoFeeds.Rows[0]" Now="DemoFeeds.Now" Running="Optional.Of<ILiveRun>(_run)" JustFinished="_finished" OnOpenLive="Open"/>
+    </div>
 </DemoCard>
 
 @code {
     private DemoLiveRun? _run = new();
+    private bool _finished;
+    private int _flash;
 
     private void Folded()
     {
         _run?.Dispose();
         _run = null;
+        _finished = true;
     }
 
-    private void Replay() => _run = new DemoLiveRun();
+    private void Replay()
+    {
+        _run = new DemoLiveRun();
+        _finished = false;
+        _flash = 0;
+    }
+
+    private void Open()
+    {
+        _run?.Show();
+        _flash++;
+    }
 
     public void Dispose() => _run?.Dispose();
 }

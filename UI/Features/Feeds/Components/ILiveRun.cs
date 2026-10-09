@@ -15,6 +15,8 @@ public interface ILiveRun
 
 	Optional<Guid> TraceKey { get; }
 
+	bool HasFolded { get; }
+
 	event Action<WireBatch>? Batch;
 
 	event Action? Folded;

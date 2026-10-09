@@ -5,7 +5,11 @@
 @using global::Shared
 @inject IMediaService Media
 
-@if (Overview.LastRun is Some<FeedRun>(var run))
+@if (Running is Some<ILiveRun>(var live))
+{
+    <RunningPill Run="live" Bar="Bar" OnOpen="OnOpenLive"/>
+}
+else if (Overview.LastRun is Some<FeedRun>(var run))
 {
     @if (Bar)
     {
@@ -77,35 +81,6 @@
             <BbTooltipContent>See what this run changed</BbTooltipContent>
         </BbTooltip>
     }
-
-    <ChangeDialog Open="_open"
-                  OnOpenChanged="SetOpenAsync"
-                  Title="@Heading(run)"
-                  Subtitle="@FeedRunView.Summary(run)"
-                  Items="_items"
-                  Chips="@FeedRunView.Chips(run.Counts)"
-                  OnSelect="ShowDetailsAsync"
-                  EmptyMessage="Nothing was added or removed."
-                  Note="@($"{_runCount} {(_runCount == 1 ? "run" : "runs")}")"
-                  NoteHref="@($"/feeds/{UrlGuid.Encode(Overview.Feed.Id.Value)}/runs")"
-                  Band="@(FeedRunView.Problem(run) is { } problem ? ProblemBand(run, problem) : null)"
-                  BandTone="@(run.Failed ? ChangeBandTone.Bad : ChangeBandTone.Warn)">
-        <Badges>
-            <FeedStrategyChip Strategy="run.Strategy"/>
-            @if (run.Failed)
-            {
-                <FeedChip Tone="FeedChipTone.Failed" Icon="cloud-off">Failed</FeedChip>
-            }
-            else if (run.Conclusiveness is not Conclusiveness.Conclusive)
-            {
-                <FeedChip Tone="FeedChipTone.Attention" Icon="shield">Guarded</FeedChip>
-            }
-        </Badges>
-    </ChangeDialog>
-
-    <MediaDetailSheet Open="_selected is not null"
-                      OnOpenChanged="@(open => { if (!open) { _selected = null; } })"
-                      Media="_selected"/>
 }
 else
 {
@@ -116,12 +91,48 @@ else
     </span>
 }
 
+@if (Overview.LastRun is Some<FeedRun>(var last))
+{
+    <ChangeDialog Open="_open"
+                  OnOpenChanged="SetOpenAsync"
+                  Title="@Heading(last)"
+                  Subtitle="@FeedRunView.Summary(last)"
+                  Items="_items"
+                  Chips="@FeedRunView.Chips(last.Counts)"
+                  OnSelect="ShowDetailsAsync"
+                  EmptyMessage="Nothing was added or removed."
+                  Note="@($"{_runCount} {(_runCount == 1 ? "run" : "runs")}")"
+                  NoteHref="@($"/feeds/{UrlGuid.Encode(Overview.Feed.Id.Value)}/runs")"
+                  Band="@(FeedRunView.Problem(last) is { } problem ? ProblemBand(last, problem) : null)"
+                  BandTone="@(last.Failed ? ChangeBandTone.Bad : ChangeBandTone.Warn)">
+        <Badges>
+            <FeedStrategyChip Strategy="last.Strategy"/>
+            @if (last.Failed)
+            {
+                <FeedChip Tone="FeedChipTone.Failed" Icon="cloud-off">Failed</FeedChip>
+            }
+            else if (last.Conclusiveness is not Conclusiveness.Conclusive)
+            {
+                <FeedChip Tone="FeedChipTone.Attention" Icon="shield">Guarded</FeedChip>
+            }
+        </Badges>
+    </ChangeDialog>
+
+    <MediaDetailSheet Open="_selected is not null"
+                      OnOpenChanged="@(open => { if (!open) { _selected = null; } })"
+                      Media="_selected"/>
+}
+
 @code {
     [Parameter] [EditorRequired] public required FeedOverview Overview { get; set; }
 
     [Parameter] public EventCallback<bool> DialogOpenChanged { get; set; }
 
     [Parameter] public bool Bar { get; set; }
+
+    [Parameter] public Optional<ILiveRun> Running { get; set; } = new None();
+
+    [Parameter] public EventCallback OnOpenLive { get; set; }
 
     private int _runCount;
     private bool _open;
