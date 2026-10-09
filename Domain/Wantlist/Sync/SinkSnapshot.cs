@@ -10,5 +10,7 @@ public sealed class SinkSnapshot(IReadOnlyList<MediaId> ids, IReadOnlyList<Unmat
 
 	public IReadOnlyList<UnmatchedMedia> Unmatched { get; } = unmatched;
 
+	public Optional<WantlistSyncSinkUnreachable> Down { get; init; } = new None();
+
 	public bool Contains(MediaId id) => _ids.Contains(id);
 }

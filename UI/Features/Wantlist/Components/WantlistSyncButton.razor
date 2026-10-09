@@ -294,10 +294,10 @@
         {
             case WantlistSyncSummary changes:
                 _dryRun = changes;
-                _dryRunError = null;
+                _dryRunError = changes.Down.Match(down => (string?)down.Reason, () => null);
                 var ids = changes.Changes.Select(change => change.MediaId).Concat(changes.NoOps).Distinct();
                 _changedMedia = await Media.GetDetailsByIdAsync(ids, cancellationToken);
-                _unreachable = [];
+                _unreachable = changes.Down.Map(down => down.Apps).GetValueOr([]);
                 _items = WantlistSyncView.Items(changes, _changedMedia, ProviderName);
                 _chips = WantlistSyncView.Chips(changes);
                 break;

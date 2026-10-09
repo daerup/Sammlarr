@@ -288,6 +288,13 @@ reaches the open page as in-process events, and the sync ends with one notificat
 what actually reached Plex, not what was queued. The engine holds a per-user gate, so two syncs
 for one user never overlap.
 
+On Radarr + Sonarr each app is read on its own. When one cannot be read and the other can, the sync
+plans only the titles whose type the answering app holds: the down app's titles stay out of the pull
+(otherwise the plan would read them as removed in the app and pull them off the wantlist) and out of
+the drain (their outbox entries wait, with no attempt counted), and the sync announces the failure for
+the down app next to its usual notification. Only when neither app can be read does the whole sync
+stop.
+
 Switching the sink (Plex to Radarr + Sonarr or back, `ISinkSwitch`) holds every user's gate for the
 whole switch and refuses if a sync is running. Under each user it gives every wantlist, outbox and
 blocklist title the id the new sink addresses it by (re-identifying from the ids the title already

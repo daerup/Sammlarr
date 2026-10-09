@@ -5,6 +5,7 @@ using Core.Wantlist.Sync;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
+using Domain.Wantlist.Arr;
 using Domain.Wantlist.Sync;
 using TestInfrastructure;
 
@@ -72,6 +73,30 @@ public class WantlistSyncEngineTests
 		await Assert.That(events[0].PushedAdds).IsEquivalentTo([delivered]);
 		await Assert.That(events[0].FailedPushes).IsEquivalentTo([rejected, stranded]);
 		await Assert.That(published.Published<WantlistSyncFailedNotification>()).IsEmpty();
+	}
+
+	[Test]
+	public async Task SyncAsync_WhileSonarrIsDown_PushesTheMoviesAndStillReportsTheSyncFailedForSonarr()
+	{
+		var (movie, show) = (MediaId.New(), MediaId.New());
+		var sink = WantlistStubs.SinkAcking(new SinkSyncAck(movie, SinkSyncOutcome.Applied));
+		sink.GetAsync(Any()).Returns(new SinkSnapshot([], []) { Down = Some.Of(new WantlistSyncSinkUnreachable("Sonarr is down.", [ArrApp.Sonarr])) });
+		var published = new RecordingPublisher();
+		var engine = WantlistStubs.Engine(
+			sink,
+			WantlistStubs.OutboxPending([movie, show]),
+			user: User,
+			publisher: published,
+			media: WantlistStubs.Typed((movie, MediaType.Movie), (show, MediaType.Show))
+		);
+
+		await engine.SyncAsync(new WantlistSyncTrigger(new ManualTrigger()));
+
+		sink.ApplyAsync(Any(), Is<IReadOnlyList<SinkPush>>(pushes => pushes!.Select(push => push.MediaId).SequenceEqual(new[] { movie })), Any())
+			.WasCalled(Times.Once);
+		sink.ApplyAsync(Any(), Is<IReadOnlyList<SinkPush>>(pushes => pushes!.Any(push => push.MediaId == show)), Any()).WasCalled(Times.Never);
+		await Assert.That(published.Published<WantlistSyncFailedNotification>().Select(failed => failed.Reason)).IsEquivalentTo(["Sonarr is down."]);
+		await Assert.That(published.Published<WantlistSyncCompletedNotification>().Single().PushedAdds).IsEquivalentTo([movie]);
 	}
 
 	private static WantlistSyncEngine BuildEngine(

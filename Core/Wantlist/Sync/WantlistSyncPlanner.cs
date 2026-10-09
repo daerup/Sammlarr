@@ -1,6 +1,8 @@
+using Contracts.Media;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Contracts.Wantlist.Sync;
+using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Arr;
@@ -10,8 +12,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.Wantlist.Sync;
 
-internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistRepository repo, IWantlistOutbox outbox, ILogger<WantlistSyncPlanner> logger)
-	: IWantlistSyncPlanner
+internal sealed class WantlistSyncPlanner(
+	ActiveSink activeSink,
+	IWantlistRepository repo,
+	IWantlistOutbox outbox,
+	IMediaRepository media,
+	ILogger<WantlistSyncPlanner> logger
+) : IWantlistSyncPlanner
 {
 	public async Task<WantlistPlanResult> PlanAsync(CancellationToken cancellationToken = default)
 	{
@@ -19,22 +26,44 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 		return await PlanAsync(sink, cancellationToken)
 			.ApplyError(error => logger.LogWarning("Reading {Sink} failed: {Reason}", sink.Kind, error.Reason))
 			.Match(
-				Project,
+				summary => (WantlistPlanResult)summary,
 				error => new WantlistSyncSinkUnreachable(error.Reason, error.CausedBy<ArrAppsUnreachableException>().Map(failed => failed.Apps).GetValueOr([]))
 			);
 	}
 
-	private async Task<Result<WantlistSyncPlan>> PlanAsync(IMediaSink sink, CancellationToken cancellationToken)
+	private async Task<Result<WantlistSyncSummary>> PlanAsync(IMediaSink sink, CancellationToken cancellationToken)
 	{
 		return await TryGetAsync(sink, cancellationToken)
 			.Map(async snapshot =>
 			{
-				var wanted = new WantlistSnapshot(await repo.GetAllAsync(cancellationToken));
-				var queued = new OutboxSnapshot(await outbox.GetAllAsync(cancellationToken));
+				var items = await repo.GetAllAsync(cancellationToken);
+				var entries = await outbox.GetAllAsync(cancellationToken);
+				var waiting = await WaitingAsync(snapshot.Down, [.. items.Select(item => item.MediaId), .. entries.Select(entry => entry.MediaId)], cancellationToken);
+				var wanted = new WantlistSnapshot([.. items.Where(item => !waiting.Contains(item.MediaId))]);
+				var queued = new OutboxSnapshot([.. entries.Where(entry => !waiting.Contains(entry.MediaId))]);
 				var plan = WantlistSyncPlan.Compute(snapshot, wanted, queued);
 				await DropRedundantAsync(sink.Kind, plan, cancellationToken);
-				return Success.Of(plan);
+				var held = entries.Where(entry => entry.Status is WantlistOutboxState.Pending && waiting.Contains(entry.MediaId));
+				return Success.Of(Project(plan, snapshot.Down, [.. held.Select(entry => entry.MediaId)]));
 			});
+	}
+
+	private async Task<IReadOnlySet<MediaId>> WaitingAsync(
+		Optional<WantlistSyncSinkUnreachable> down,
+		IReadOnlyList<MediaId> ids,
+		CancellationToken cancellationToken
+	)
+	{
+		return await down.Match(
+			async unreachable =>
+			{
+				var answered = Enum.GetValues<ArrApp>().Except(unreachable.Apps).Select(app => app.Type).ToHashSet();
+				var stored = await media.GetAsync([.. ids.Distinct()], cancellationToken);
+				var planned = stored.Where(found => answered.Contains(found.Identity.Type)).Select(found => found.Identity.Id).ToHashSet();
+				return (IReadOnlySet<MediaId>)ids.Where(id => !planned.Contains(id)).ToHashSet();
+			},
+			() => Task.FromResult<IReadOnlySet<MediaId>>(new HashSet<MediaId>())
+		);
 	}
 
 	private static async Task<Result<SinkSnapshot>> TryGetAsync(IMediaSink sink, CancellationToken cancellationToken)
@@ -60,8 +89,13 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 		logger.LogInformation("Dropped {Count} wantlist outbox entries {Sink} already agrees with", plan.Redundant.Count, sink);
 	}
 
-	private static WantlistPlanResult Project(WantlistSyncPlan plan)
+	private static WantlistSyncSummary Project(WantlistSyncPlan plan, Optional<WantlistSyncSinkUnreachable> down, IReadOnlyList<MediaId> waiting)
 	{
-		return new WantlistSyncSummary(plan.Pull, plan.Push, [.. plan.NoOps, .. plan.Redundant]) { Unmatched = plan.Unmatched };
+		return new WantlistSyncSummary(plan.Pull, plan.Push, [.. plan.NoOps, .. plan.Redundant])
+		{
+			Unmatched = plan.Unmatched,
+			Down = down,
+			Waiting = waiting,
+		};
 	}
 }

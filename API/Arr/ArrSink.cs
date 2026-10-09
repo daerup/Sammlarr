@@ -41,10 +41,13 @@ internal sealed class ArrSink(
 			mine.Apply(items.AddRange).ApplyError(error => failed.Add((api.App, error.Reason)));
 		}
 
-		if (failed.Count > 0)
+		var reason = string.Join(" ", failed.Select(app => app.Reason));
+		if (failed.Count == apis.All.Count)
 		{
-			throw new ArrAppsUnreachableException(string.Join(" ", failed.Select(app => app.Reason)), [.. failed.Select(app => app.App)]);
+			throw new ArrAppsUnreachableException(reason, [.. failed.Select(app => app.App)]);
 		}
+
+		var down = Optional.When(failed.Count > 0, () => new WantlistSyncSinkUnreachable(reason, [.. failed.Select(app => app.App)]));
 
 		var requests = items.Select(item => new IdentifyRequest([.. item.Externals], new None()));
 		List<MediaId> matched = [];
@@ -54,7 +57,7 @@ internal sealed class ArrSink(
 			result.Apply(identity => matched.Add(identity.Id)).ApplyError(_ => unmatched.Add(item.Unmatched()));
 		}
 
-		return new SinkSnapshot(matched, unmatched);
+		return new SinkSnapshot(matched, unmatched) { Down = down };
 	}
 
 	public async IAsyncEnumerable<SinkSyncAck> ApplyAsync(
