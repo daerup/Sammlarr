@@ -108,8 +108,8 @@ public class FeedCardTests : BunitContext
 	[Arguments(JobState.Queued, true, "Waiting in the queue", "is-queued")]
 	[Arguments(JobState.Waiting, false, "Waiting in the queue", "is-queued")]
 	[Arguments(JobState.Done, false, "Paused: resume the feed to run it", "is-paused")]
-	[Arguments(JobState.Done, true, "Run now", "")]
-	[Arguments(null, true, "Run now", "")]
+	[Arguments(JobState.Done, true, "Run", "")]
+	[Arguments(null, true, "Run", "")]
 	public async Task Render_ForEachJobState_LabelsAndMarksTheRunButton(JobState? job, bool enabled, string label, string mark)
 	{
 		var cut = RenderCard(Row(enabled: enabled, job: job));

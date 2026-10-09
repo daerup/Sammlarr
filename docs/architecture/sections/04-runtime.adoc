@@ -173,7 +173,7 @@ one at a time.
 ....
 sequenceDiagram
   participant T as TickerQ (cron)
-  actor U as User (Run now / Sync)
+  actor U as User (Run / Sync)
   participant Q as IJobQueue
   participant J as Jobs table
   participant R as JobRunner
