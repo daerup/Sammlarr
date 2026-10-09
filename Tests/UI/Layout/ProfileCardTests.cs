@@ -52,17 +52,19 @@ public class ProfileCardTests : BunitContext
 		var cut = await RenderOpenCardAsync(OnArr);
 
 		await Assert.That(cut.WaitForElement("[aria-label='Open Plex account in new tab']")).IsNotNull();
-		await Assert.That(cut.Find("[style*='linear-gradient']").GetAttribute("style")).Contains($"{Brands.GetBrandingInfo(MediaProvider.Plex).BrandColor}1F");
+		await Assert
+			.That(cut.Find("[style*='linear-gradient']").GetAttribute("style"))
+			.Contains($"color-mix(in oklch, {Brands.GetBrandingInfo(MediaProvider.Plex).BrandColor} 12%, transparent)");
 	}
 
 	[Test]
-	public async Task Card_OnASammlarrAccountsInstall_WearsSammlarrsBrand()
+	public async Task Card_OnASammlarrAccountsInstall_WearsTheThemesTextColour()
 	{
 		var cut = await RenderOpenCardAsync(OnArr with { Sink = SinkKind.Plex, AuthProvider = AuthProvider.Local });
 
 		await Assert
 			.That(cut.WaitForElement("[style*='linear-gradient']").GetAttribute("style"))
-			.Contains($"{Brands.Brands(AuthProvider.Local.Service).Single().BrandColor}1F");
+			.Contains("color-mix(in oklch, var(--foreground) 12%, transparent)");
 	}
 
 	[Test]

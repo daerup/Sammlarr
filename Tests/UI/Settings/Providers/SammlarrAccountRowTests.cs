@@ -42,13 +42,13 @@ public class SammlarrAccountRowTests : BunitContext
 	}
 
 	[Test]
-	public async Task Row_WearsSammlarrsLogoAndColour()
+	public async Task Row_WearsSammlarrsLogoAndTheThemesTextColourRatherThanPlexsYellow()
 	{
 		var cut = Render<SammlarrAccountRow>();
 
 		await Assert.That(cut.FindAll(".provider-row svg.sammlarr-logo")).HasSingleItem();
 		await Assert.That(cut.Find(".provider-row .sr-only").TextContent).IsEqualTo("Sammlarr");
-		await Assert.That(cut.Find(".provider-row").GetAttribute("style")).Contains("#E3A008");
+		await Assert.That(cut.Find(".provider-row").GetAttribute("style")).IsEqualTo("--brand: var(--foreground)");
 	}
 
 	[Test]

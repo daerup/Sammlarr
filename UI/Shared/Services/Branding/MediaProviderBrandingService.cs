@@ -12,7 +12,7 @@ public class MediaProviderBrandingService
 	private static readonly BrandingInfo Sammlarr = new(
 		"Sammlarr accounts",
 		"Sammlarr",
-		"#E3A008",
+		"var(--foreground)",
 		new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"),
 		new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"),
 		new BrandTile(MutedTile, new BrandArt("sammlarr-square-light.svg", "sammlarr-square-dark.svg"), 70)
