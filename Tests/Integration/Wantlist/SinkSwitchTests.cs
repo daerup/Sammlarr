@@ -153,6 +153,31 @@ public class SinkSwitchTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task PreviewAsync_ToRadarrAndSonarr_CountsEveryonesTitlesWithAStoredIdAsReadyAndLooksNothingUp()
+	{
+		host.PlexHolds(TestMedia.FightClub);
+		await host.Movie(new MediaSpec("Inception", MediaType.Movie, [Tmdb("27205")])).OnWantlist(ByHand);
+		var convertible = await host.Movie(new MediaSpec("Fight Club", MediaType.Movie, [Plex("550")])).OnWantlist(ByHand);
+		host.CurrentUser.Id = await host.SeedExistingUser("daerup", UserRole.Member, "Daerup");
+		await host.Movie(new MediaSpec("The Matrix", MediaType.Movie, [Tmdb("603")])).OnWantlist(ByHand);
+		host.CurrentUser.Id = TestCurrentUser.DefaultId;
+
+		var preview = await Testee.PreviewAsync(SinkKind.Arr);
+
+		await Assert.That(preview).IsEqualTo(new SinkSwitchPreview(2, 1));
+		await Assert.That(await host.Resolve<IMediaService>().GetSinkIdsAsync([convertible], SinkKind.Arr)).IsEmpty();
+		await Assert.That((await host.Resolve<IProviderConfigService>().GetAsync()).Sink).IsEqualTo(SinkKind.Plex);
+	}
+
+	[Test]
+	public async Task PreviewAsync_AsAMember_Refuses()
+	{
+		host.CurrentUser.Role = UserRole.Member;
+
+		await Assert.That(async () => await Testee.PreviewAsync(SinkKind.Arr)).Throws<UnauthorizedAccessException>();
+	}
+
+	[Test]
 	public async Task SwitchAsync_AsAMember_Refuses()
 	{
 		host.CurrentUser.Role = UserRole.Member;

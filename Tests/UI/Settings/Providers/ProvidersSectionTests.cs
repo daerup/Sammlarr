@@ -58,7 +58,7 @@ public class ProvidersSectionTests : BunitContext
 		Services.AddSingleton(_switch.Object);
 		Services.AddSingleton<ICurrentUser>(_user);
 		var users = IUserManagementService.Mock();
-		users.GetPeopleAsync(Any()).Returns([Joined(30), Joined(12), new InvitedPerson("lena", "lena", DateTimeOffset.UnixEpoch)]);
+		users.GetPeopleAsync(Any()).Returns([Joined("Ada", RemoteService.Plex), Joined("Bob"), new InvitedPerson("lena", "lena", DateTimeOffset.UnixEpoch)]);
 		Services.AddSingleton(users.Object);
 		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
 		Services.AddSingleton(_arrConfigs.Object);
@@ -76,6 +76,7 @@ public class ProvidersSectionTests : BunitContext
 		ComponentFactories.AddStub<SinkSwitchDialog>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		_config.GetAsync(Any()).Returns(OnPlex);
+		_switch.PreviewAsync(Any(), Any()).Returns(new SinkSwitchPreview(0, 0));
 	}
 
 	[Test]
@@ -151,6 +152,7 @@ public class ProvidersSectionTests : BunitContext
 	public async Task SwitchRequested_DuringSetup_AsksWithEveryonesTitlesThenSwitches()
 	{
 		_switch.SwitchAsync(SinkKind.Arr, Any()).Returns(Success.Of(new SinkSwitched(12, 0)));
+		_switch.PreviewAsync(SinkKind.Arr, Any()).Returns(new SinkSwitchPreview(30, 12));
 		var cut = RenderSection();
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Arr));
 		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
@@ -159,7 +161,8 @@ public class ProvidersSectionTests : BunitContext
 		var dialog = cut.FindComponent<Stub<SinkSwitchDialog>>().Instance.Parameters;
 		await Assert.That(dialog.Get(asked => asked.Target)).IsEqualTo(SinkKind.Arr);
 		await Assert.That(dialog.Get(asked => asked.People)).IsEqualTo(2);
-		await Assert.That(dialog.Get(asked => asked.Titles)).IsEqualTo(42);
+		await Assert.That(dialog.Get(asked => asked.Preview)).IsEqualTo(new SinkSwitchPreview(30, 12));
+		await Assert.That(dialog.Get(asked => asked.WithoutPlex)).IsEmpty();
 		_switch.SwitchAsync(Any<SinkKind>(), Any()).WasCalled(Times.Never);
 
 		await cut.InvokeAsync(() => dialog.Get(asked => asked.Confirmed).InvokeAsync());
@@ -204,6 +207,8 @@ public class ProvidersSectionTests : BunitContext
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Plex));
 		var dialog = cut.FindComponent<Stub<SinkSwitchDialog>>().Instance.Parameters;
 		await Assert.That(dialog.Get(asked => asked.Target)).IsEqualTo(SinkKind.Plex);
+		await Assert.That(dialog.Get(asked => asked.WithoutPlex)).IsEquivalentTo(["Bob"]);
+		_switch.PreviewAsync(SinkKind.Plex, Any()).WasCalled(Times.Once);
 		_switch.SwitchAsync(Any<SinkKind>(), Any()).WasCalled(Times.Never);
 
 		await cut.InvokeAsync(() => dialog.Get(asked => asked.Confirmed).InvokeAsync());
@@ -404,10 +409,10 @@ public class ProvidersSectionTests : BunitContext
 		return cut.FindComponent<Stub<ServicesMap>>().Instance.Parameters;
 	}
 
-	private static JoinedPerson Joined(int wanted)
+	private static JoinedPerson Joined(string name, params RemoteService[] keys)
 	{
-		var user = new User(UserId.New(), "admin", string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch);
-		return new JoinedPerson(user, PersonHoldings.Empty with { Wanted = wanted }, new None(), new StoredColour(new None(), new None()));
+		var user = new User(UserId.New(), name, string.Empty, UserRole.Admin, DateTimeOffset.UnixEpoch);
+		return new JoinedPerson(user, PersonHoldings.Empty with { Keys = keys }, new None(), new StoredColour(new None(), new None()));
 	}
 
 	private IRenderedComponent<ProvidersSection> RenderSection()

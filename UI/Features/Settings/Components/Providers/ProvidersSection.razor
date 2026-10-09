@@ -69,7 +69,7 @@
 
         @if (_confirming is { } target)
         {
-            <SinkSwitchDialog Open="true" OpenChanged="open => _confirming = open ? _confirming : null" Target="target" People="_switchPeople" Titles="_switchTitles"
+            <SinkSwitchDialog Open="true" OpenChanged="open => _confirming = open ? _confirming : null" Target="target" People="_switchPeople" Preview="_switchPreview" WithoutPlex="_withoutPlex"
                               Switching="_switching" Confirmed="() => SwitchConfirmedAsync(target)"/>
         }
     }
@@ -190,7 +190,9 @@
 
     private int _switchPeople;
 
-    private int _switchTitles;
+    private SinkSwitchPreview _switchPreview = new(0, 0);
+
+    private IReadOnlyList<string> _withoutPlex = [];
 
     private bool IsAdmin => CurrentUser.Role == UserRole.Admin;
 
@@ -266,7 +268,8 @@
     {
         var joined = (await UserManagement.GetPeopleAsync()).Joined.ToList();
         _switchPeople = joined.Count;
-        _switchTitles = joined.Sum(person => person.Holdings.Wanted);
+        _switchPreview = await SinkSwitch.PreviewAsync(target);
+        _withoutPlex = target == SinkKind.Plex ? [.. joined.Where(person => !person.Holdings.Keys.Contains(RemoteService.Plex)).Select(person => person.User.DisplayName)] : [];
         _confirming = target;
     }
 

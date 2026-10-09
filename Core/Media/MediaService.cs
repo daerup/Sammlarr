@@ -203,6 +203,12 @@ internal sealed class MediaService(
 		return await IdsAsync([.. ids], sink.AddressedBy, cancellationToken);
 	}
 
+	public Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(
+		IEnumerable<MediaId> ids,
+		SinkKind sink,
+		CancellationToken cancellationToken = default
+	) => IdsAsync([.. ids], activeSink.Of(sink).AddressedBy, cancellationToken);
+
 	public async Task<IReadOnlyList<MediaId>> EnsureSinkIdsAsync(IEnumerable<MediaId> ids, SinkKind sink, CancellationToken cancellationToken = default)
 	{
 		var wanted = ids.Distinct().ToList();
