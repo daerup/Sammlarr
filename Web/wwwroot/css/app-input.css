@@ -466,13 +466,8 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         --f-flight: var(--alert-warning);
     }
 
-    .feed-live .fl-fit {
-        width: 1120px;
-    }
-
     .feed-live .fl-view {
         position: relative;
-        height: 440px;
     }
 
     .feed-live .fl-svg {

@@ -1,7 +1,7 @@
 @using UI.Features.Feeds.Components
 
 <DemoCard Title="Feed cards" Where="Feeds page" Span="4"
-          Note="FeedCard under the page's FeedStatusLine: an idle scheduled feed (its next run is the status line's Next popover), a running mirror, and a paused manual feed whose last run failed at the source.">
+          Note="FeedCard under the page's FeedStatusLine: an idle scheduled feed (its next run is the status line's Next popover), a running mirror (its run button spins; the live run demo shows the running pill a live run puts in the footer), and a paused manual feed whose last run failed at the source.">
     <FeedStatusLine Rows="DemoFeeds.Rows" Added="4" Removed="1" Now="DemoFeeds.Now"/>
     <div class="grid grid-cols-3 gap-3">
         @foreach (var row in DemoFeeds.Rows)

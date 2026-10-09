@@ -6,6 +6,7 @@ using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Feed;
 using Domain.Feed.Run;
+using Domain.Feed.Trace;
 using Domain.Jobs;
 using Domain.Media;
 using Domain.Providers;
@@ -116,6 +117,38 @@ public class FeedCardTests : BunitContext
 		var run = cut.Find(".feed-card-run");
 		await Assert.That(run.GetAttribute("aria-label")).IsEqualTo(label);
 		await Assert.That(string.Join(' ', run.ClassList.Where(name => name.StartsWith("is-", StringComparison.Ordinal)))).IsEqualTo(mark);
+	}
+
+	[Test]
+	public async Task Render_WhileRunning_ShowsTheRunningPillAndNoRunningChip()
+	{
+		var live = ILiveRun.Mock();
+		live.Tally.Getter.Returns(RunTally.Of(FateTally.None with { Started = 14, Matched = 12 }, new None(), 3000, new None(), Some.Of(400)));
+
+		var cut = Render<FeedCard>(parameters =>
+			parameters.Add(card => card.Row, Row(runs: 3, job: JobState.Running)).Add(card => card.Now, Now).Add(card => card.Running, Some.Of(live.Object))
+		);
+
+		await Assert.That(Normalized(cut.Find("[data-testid=running-pill]").TextContent)).IsEqualTo("Running · 12 / ~400");
+		await Assert.That(cut.FindAll(".last-run")).IsEmpty();
+		await Assert.That(cut.Find(".feed-card-chips").TextContent).DoesNotContain("Running");
+	}
+
+	[Test]
+	public async Task Render_JustFinished_FlashesTheFooter()
+	{
+		var cut = Render<FeedCard>(parameters => parameters.Add(card => card.Row, Row(runs: 3)).Add(card => card.Now, Now).Add(card => card.JustFinished, true));
+
+		await Assert.That(cut.Find(".feed-card-foot").ClassList).Contains("is-new");
+	}
+
+	[Test]
+	public async Task Render_WhileQueued_KeepsTheQueuedChip()
+	{
+		var cut = RenderCard(Row(runs: 3, job: JobState.Queued));
+
+		await Assert.That(cut.Find(".feed-card-chips").TextContent).Contains("Queued");
+		await Assert.That(cut.FindAll("[data-testid=running-pill]")).IsEmpty();
 	}
 
 	private IRenderedComponent<FeedCard> RenderCard(FeedRow row, bool selecting = false) =>

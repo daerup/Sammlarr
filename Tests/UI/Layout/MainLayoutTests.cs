@@ -28,6 +28,7 @@ public class MainLayoutTests : BunitContext
 		ComponentFactories.AddStub<SessionInvalidationListener>();
 		ComponentFactories.AddStub<WebUiToastListener>();
 		ComponentFactories.AddStub<SetupRedirect>();
+		ComponentFactories.AddStub<FeedsNavDot>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

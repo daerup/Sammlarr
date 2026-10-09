@@ -124,6 +124,18 @@ public class FeedRunLiveTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_AfterTheRunFolded_FoldsAtOnce()
+	{
+		var folded = false;
+		_run.HasFolded.Getter.Returns(true);
+
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object).Add(live => live.OnFolded, () => folded = true));
+
+		cut.WaitForState(() => folded);
+		await Assert.That(folded).IsTrue();
+	}
+
+	[Test]
 	public async Task Render_WhenTheModuleFailsToLoad_KeepsTheHeaderCounting()
 	{
 		JSInterop.TryGetInvokeHandler<IJSObjectReference>("import", "./js/feed-live.js")!.SetException(new JSException("feed-live.js did not load"));

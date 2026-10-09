@@ -228,6 +228,20 @@
     background: color-mix(in srgb, var(--foreground) 2.5%, transparent);
 }
 
+.feed-card-foot.is-new {
+    animation: feed-card-arrive 1.6s ease;
+}
+
+@keyframes feed-card-arrive {
+    0% {
+        background: color-mix(in oklch, var(--alert-success) 22%, transparent);
+    }
+
+    100% {
+        background: color-mix(in srgb, var(--foreground) 2.5%, transparent);
+    }
+}
+
 .feed-card-last {
     flex: 1;
     min-width: 0;

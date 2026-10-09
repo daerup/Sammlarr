@@ -1,10 +1,6 @@
 @using Domain.Jobs
 
-@if (Job.IsRunning)
-{
-    <FeedChip Tone="FeedChipTone.Attention"><span class="feed-chip-dot"></span>Running</FeedChip>
-}
-else if (Job.IsQueued)
+@if (Job.IsQueued)
 {
     <FeedChip Tone="FeedChipTone.Quiet" Icon="hourglass">Queued</FeedChip>
 }

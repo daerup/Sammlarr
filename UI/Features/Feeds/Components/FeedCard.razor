@@ -116,9 +116,9 @@
         </div>
     </div>
 
-    <div class="feed-card-foot">
+    <div class="feed-card-foot @(JustFinished ? "is-new" : null)">
         <span class="feed-card-control feed-card-last">
-            <LastRunCell @key="(Feed.Id, RunVersion)" Overview="@Row.Overview" Bar="true"/>
+            <LastRunCell @key="(Feed.Id, RunVersion)" Overview="@Row.Overview" Bar="true" Running="Running" OnOpenLive="OnOpenLive"/>
         </span>
         <div class="feed-card-actions">
             <a class="feed-card-control feed-card-icon" href="@EditHref" aria-label="Edit" title="Edit">
@@ -152,6 +152,12 @@
     [Parameter] public EventCallback OnRun { get; set; }
 
     [Parameter] public EventCallback OnDelete { get; set; }
+
+    [Parameter] public Optional<ILiveRun> Running { get; set; } = new None();
+
+    [Parameter] public bool JustFinished { get; set; }
+
+    [Parameter] public EventCallback OnOpenLive { get; set; }
 
     private Feed Feed => Row.Feed;
 
