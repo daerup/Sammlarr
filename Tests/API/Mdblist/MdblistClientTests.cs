@@ -1,17 +1,25 @@
 using System.Net;
+using API.Http;
 using API.Mdblist;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
+using Contracts.Providers;
+using Contracts.Usage;
 using Domain.Providers;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Shared.Options;
 using TestInfrastructure;
+using TUnit.Mocks.Http;
 
 namespace API.Tests.Mdblist;
 
 public class MdblistClientTests
 {
 	private const string BaseUrl = "https://api.mdblist.com";
+
+	private static readonly TestApiKey Key = new(ApiKeyProvider.Mdblist, "mdblist-key");
 
 	[Test]
 	public async Task SendAsync_AppendsApiKeyQueryParameter()
@@ -22,7 +30,6 @@ public class MdblistClientTests
 			handler.CreateClient(BaseUrl),
 			new MdblistOptions { BaseUrl = BaseUrl },
 			IApiKeyService.Mock().Object,
-			MdblistApis.Budget(),
 			ICurrentUser.Mock().Object
 		);
 
@@ -35,23 +42,30 @@ public class MdblistClientTests
 	public async Task SendAsync_ForAnyRequest_RecordsTheRequestsMdblistHasLeft()
 	{
 		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.OK).WithHeader("x-ratelimit-remaining", "962").WithHeader("x-ratelimit-reset", Reset);
+		using var host = Host(handler);
+
+		using var response = await host.Services.GetRequiredService<MdblistClient>().SendAsync(HttpMethod.Get, "lists/1/items", Key);
+
+		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().Left(Key.Value)).IsSome().And.IsEqualTo(962);
+	}
+
+	[Test]
+	public async Task SendAsync_WhenASpentKeysRetryOutlastsTheTimeout_RecordsTheKeyAsSpent()
+	{
+		var handler = Mock.HttpHandler();
 		handler
 			.OnAnyRequest()
-			.Respond(HttpStatusCode.OK)
-			.WithHeader("x-ratelimit-remaining", "962")
-			.WithHeader("x-ratelimit-reset", $"{DateTimeOffset.UnixEpoch.AddDays(2).ToUnixTimeSeconds()}");
-		var budget = MdblistApis.Budget();
-		var testee = new MdblistClient(
-			handler.CreateClient(BaseUrl),
-			new MdblistOptions { BaseUrl = BaseUrl },
-			IApiKeyService.Mock().Object,
-			budget,
-			ICurrentUser.Mock().Object
-		);
+			.Respond(HttpStatusCode.TooManyRequests)
+			.WithHeader("Retry-After", "3600")
+			.WithHeader("x-ratelimit-remaining", "0")
+			.WithHeader("x-ratelimit-reset", Reset);
+		using var host = Host(handler);
+		var testee = host.Services.GetRequiredService<MdblistClient>();
 
-		await testee.SendAsync(HttpMethod.Get, "lists/1/items", new TestApiKey(ApiKeyProvider.Mdblist, "mdblist-key"));
+		await Assert.That(async () => await testee.SendAsync(HttpMethod.Get, "lists/1/items", Key)).Throws<RemoteUnavailableException>();
 
-		await Assert.That(budget.Left("mdblist-key")).IsSome().And.IsEqualTo(962);
+		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().LeavesReserve(Key.Value)).IsFalse();
 	}
 
 	[Test]
@@ -59,16 +73,38 @@ public class MdblistClientTests
 	{
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.Unauthorized);
 		var apiKeys = IApiKeyService.Mock();
-		var testee = new MdblistClient(
-			handler.CreateClient(BaseUrl),
-			new MdblistOptions { BaseUrl = BaseUrl },
-			apiKeys.Object,
-			MdblistApis.Budget(),
-			ICurrentUser.Mock().Object
-		);
+		var testee = new MdblistClient(handler.CreateClient(BaseUrl), new MdblistOptions { BaseUrl = BaseUrl }, apiKeys.Object, ICurrentUser.Mock().Object);
 
 		await testee.SendAsync(HttpMethod.Get, "lists/1/items", new TestApiKey(ApiKeyProvider.Mdblist, new Faker().Random.AlphaNumeric(32)));
 
 		apiKeys.ReportRejected(ApiKeyProvider.Mdblist).WasCalled(Times.Once);
+	}
+
+	private static string Reset => $"{DateTimeOffset.UnixEpoch.AddDays(2).ToUnixTimeSeconds()}";
+
+	private static IHost Host(MockHttpHandler handler)
+	{
+		return new HostBuilder()
+			.ConfigureServices(services =>
+			{
+				services.AddLogging();
+				services.AddSingleton(
+					new MdblistOptions
+					{
+						BaseUrl = BaseUrl,
+						Http = new ProviderHttpOptions { AttemptTimeoutSeconds = 1, TotalTimeoutSeconds = 2 },
+					}
+				);
+				services.AddSingleton<ProviderGates>();
+				services.AddSingleton<RemoteCapacity>();
+				services.AddSingleton(MdblistApis.Clock());
+				services.AddSingleton(IProviderRateLimitReporter.Mock().Object);
+				services.AddSingleton(IFeedRunUsage.Mock().Object);
+				services.AddSingleton(IApiKeyService.Mock().Object);
+				services.AddSingleton(ICurrentUser.Mock().Object);
+				new MdblistModule().RegisterServices(services);
+				services.AddHttpClient<MdblistClient>().ConfigurePrimaryHttpMessageHandler(() => handler);
+			})
+			.Build();
 	}
 }

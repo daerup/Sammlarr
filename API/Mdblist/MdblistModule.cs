@@ -21,6 +21,7 @@ public class MdblistModule : IServiceModule
 			.Converter<MdblistIdConverter>();
 		services.AddScoped<MdblistTitles>();
 		services.AddSingleton<MdblistBudget>();
+		services.AddHttpClient<MdblistClient>().AddHttpMessageHandler(provider => new MdblistBudgetHandler(provider.GetRequiredService<MdblistBudget>()));
 		services.AddScoped<IMdblistRequestsLeft, MdblistRequestsLeft>();
 	}
 }

@@ -9,7 +9,7 @@ using Shared.Options;
 
 namespace API.Mdblist;
 
-internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyService apiKeys, MdblistBudget budget, ICurrentUser currentUser)
+internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyService apiKeys, ICurrentUser currentUser)
 {
 	public const string Unauthenticated = "Mdblist";
 	public const string QueryParam = "apikey";
@@ -24,12 +24,11 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyS
 	{
 		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value));
 		request.StampTriggeredBy(currentUser);
+		MdblistBudgetHandler.Stamp(request, apiKey.Value);
 		request.Content = content;
 		try
 		{
-			var response = await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.ReportRejected(ApiKeyProvider.Mdblist));
-			budget.Record(apiKey.Value, response.Headers);
-			return response;
+			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.ReportRejected(ApiKeyProvider.Mdblist));
 		}
 		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
 		{
