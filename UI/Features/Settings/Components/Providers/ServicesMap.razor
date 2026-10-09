@@ -163,6 +163,8 @@
 
     [Parameter] public int People { get; set; }
 
+    [Parameter] public bool ReadTokenMissing { get; set; }
+
     [Parameter] public EventCallback<SinkKind> SinkPicked { get; set; }
 
     [Parameter] public EventCallback<SearchProvider> SearchPicked { get; set; }
@@ -259,7 +261,11 @@
         };
     }
 
-    private string Readiness(RemoteService remote) => ServiceStatus.Of(remote.Access, Ready.Contains(remote));
+    private string Readiness(RemoteService remote)
+    {
+        var status = ServiceStatus.Of(remote.Access, Ready.Contains(remote));
+        return remote == RemoteService.Tmdb && Ready.Contains(remote) && ReadTokenMissing ? $"{status} · no read token" : status;
+    }
 
     private string SourceLabel(Service source) => $"{Name(source)}: {Status(source)}";
 

@@ -169,6 +169,25 @@ public class ServicesMapTests : BunitContext
 	}
 
 	[Test]
+	public async Task Tmdb_WithoutTheReadToken_SaysSoAndKeepsItsFeedsLineSolid()
+	{
+		var cut = Render<ServicesMap>(parameters =>
+			parameters.Add(map => map.Config, Config).Add(map => map.Ready, Enum.GetValues<RemoteService>().ToHashSet()).Add(map => map.ReadTokenMissing, true)
+		);
+
+		await Assert.That(Service(cut, "TMDb").QuerySelector(".map-service-status")!.TextContent.Trim()).IsEqualTo("Your key is set · no read token");
+		await Assert.That(cut.FindAll(".map-traces path[stroke-dasharray]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Tmdb_WithTheReadToken_SaysOnlyThatTheKeyIsSet()
+	{
+		var cut = RenderMap(canPick: false, RemoteService.Tmdb);
+
+		await Assert.That(Service(cut, "TMDb").QuerySelector(".map-service-status")!.TextContent.Trim()).IsEqualTo("Your key is set");
+	}
+
+	[Test]
 	public async Task Map_ForAMember_OffersNoControl()
 	{
 		var cut = RenderMap(canPick: false);

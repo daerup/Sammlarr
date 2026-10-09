@@ -1,6 +1,7 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Bunit.TestDoubles;
+using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Wantlist;
@@ -40,6 +41,8 @@ public class ProvidersSectionTests : BunitContext
 
 	private readonly HashSet<RemoteService> _connected = [];
 
+	private readonly Mock<IApiKeyService> _keys = IApiKeyService.Mock();
+
 	[Before(Test)]
 	public void Setup()
 	{
@@ -57,6 +60,8 @@ public class ProvidersSectionTests : BunitContext
 		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
 		Services.AddSingleton(_arrConfigs.Object);
 		Services.AddSingleton(ReadinessStub.Connected(_connected));
+		_keys.IsStoredAsync(Any(), Any()).Returns(true);
+		Services.AddSingleton(_keys.Object);
 		Services.AddScoped<ScrollService>();
 		ComponentFactories.AddStub<AccountRow>();
 		ComponentFactories.AddStub<SammlarrAccountRow>();

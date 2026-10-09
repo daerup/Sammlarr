@@ -1,3 +1,4 @@
+@using Contracts.Auth
 @using Contracts.Providers
 @using Contracts.Identity
 @using Contracts.Settings
@@ -9,6 +10,7 @@
 @inject IProviderConfigService ProviderConfigService
 @inject RatingContext RatingContext
 @inject IServiceReadiness Readiness
+@inject IApiKeyService ApiKeys
 @inject ICurrentUser CurrentUser
 @inject IUserManagementService UserManagement
 @inject IArrSinkConfigService ArrConfigs
@@ -60,7 +62,7 @@
     {
         <section class="flex flex-col gap-3" aria-label="Services">
             <h3 class="text-sm font-semibold">Services</h3>
-            <ServicesMap Config="MapConfig(config)" Ready="_ready" ArrReady="ArrReady(config)" CanPick="IsAdmin" People="_people" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync" ServiceOpened="OpenService" ArrOpened="() => OpenRow(new Arr())" AccountsOpened="OpenAccounts"/>
+            <ServicesMap Config="MapConfig(config)" Ready="_ready" ArrReady="ArrReady(config)" CanPick="IsAdmin" People="_people" ReadTokenMissing="_readTokenMissing" SinkPicked="SinkPickedAsync" SearchPicked="SearchPickedAsync" ServiceOpened="OpenService" ArrOpened="() => OpenRow(new Arr())" AccountsOpened="OpenAccounts"/>
         </section>
 
         @if (_confirming is { } target)
@@ -102,6 +104,8 @@
     private HashSet<RemoteService> _ready = [];
 
     private bool _arrConnected;
+
+    private bool _readTokenMissing;
 
     private Service? _open;
 
@@ -159,6 +163,7 @@
         _ready = [.. await Readiness.ConnectedAsync(Enum.GetValues<RemoteService>())];
         var arr = await ArrConfigs.GetAsync();
         _arrConnected = arr.IsConnectable;
+        _readTokenMissing = !await ApiKeys.IsStoredAsync(ApiKeyProvider.TmdbReadToken);
     }
 
     private bool _settingUp;
