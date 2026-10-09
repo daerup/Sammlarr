@@ -21,7 +21,7 @@ public sealed record TraceSnapshot(
 	Optional<FeedRunEnd> Ended
 );
 
-public sealed record TraceBatch(TraceCursor Cursor, IReadOnlyList<TraceStep> Steps, FateTally Fates, Optional<int> Requests, Optional<FeedRunEnd> Ended);
+public sealed record TraceBatch(TraceCursor Cursor, int ElapsedMs, IReadOnlyList<TraceStep> Steps, FateTally Fates, Optional<int> Requests, Optional<FeedRunEnd> Ended);
 
 public readonly record struct NoTrace;
 

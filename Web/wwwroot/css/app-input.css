@@ -456,6 +456,338 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
     }
 }
 
+@layer components {
+    .feed-live {
+        --f-matched: var(--alert-success);
+        --f-notfound: var(--destructive);
+        --f-couldnot: var(--usage-gave-up);
+        --f-known: var(--usage-answered);
+        --f-cached: var(--usage-shade);
+        --f-flight: var(--alert-warning);
+    }
+
+    .feed-live .fl-fit {
+        width: 1120px;
+    }
+
+    .feed-live .fl-view {
+        position: relative;
+        height: 440px;
+    }
+
+    .feed-live .fl-svg {
+        position: absolute;
+        inset: 0;
+        display: block;
+        overflow: visible;
+    }
+
+    .feed-live .fl-list {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 268px;
+        border-right: 1px solid var(--border);
+        background: color-mix(in srgb, var(--foreground) 1.8%, transparent);
+        z-index: 1;
+    }
+
+    .feed-live .fl-lh {
+        height: 34px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 14px;
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--muted-foreground);
+        font-weight: 600;
+    }
+
+    .feed-live .fl-lh b {
+        color: var(--foreground);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .feed-live .fl-more {
+        margin-left: auto;
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: 400;
+        font-size: 11px;
+    }
+
+    .feed-live .fl-slot {
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 6px;
+        border-radius: 6px;
+        font-size: 12px;
+        transition: opacity 0.18s, background-color 0.18s;
+    }
+
+    .feed-live .fl-slot .nm {
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .feed-live .fl-slot .yr {
+        color: var(--muted-foreground);
+        font-size: 11px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .feed-live .fl-slot .st {
+        width: 16px;
+        height: 16px;
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted-foreground);
+    }
+
+    .feed-live .fl-slot.is-empty {
+        opacity: 0;
+    }
+
+    .feed-live .fl-slot.is-matched {
+        background: color-mix(in oklch, var(--f-matched) 16%, transparent);
+    }
+
+    .feed-live .fl-slot.is-matched .st {
+        color: var(--f-matched);
+    }
+
+    .feed-live .fl-slot.is-notfound {
+        background: color-mix(in oklch, var(--f-notfound) 16%, transparent);
+    }
+
+    .feed-live .fl-slot.is-notfound .st {
+        color: var(--f-notfound);
+    }
+
+    .feed-live .fl-slot.is-couldnot {
+        background: color-mix(in oklch, var(--f-couldnot) 18%, transparent);
+    }
+
+    .feed-live .fl-slot.is-couldnot .st {
+        color: var(--f-couldnot);
+    }
+
+    .feed-live .fl-slot.is-known,
+    .feed-live .fl-slot.is-cached {
+        background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    }
+
+    .feed-live .fl-slot:hover {
+        outline: 1px solid var(--ring);
+    }
+
+    .feed-live .fl-slot.is-blocked .st {
+        color: var(--alert-warning);
+    }
+
+    .feed-live .fl-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 9px;
+        background: var(--muted-foreground);
+        display: block;
+    }
+
+    .feed-live .fl-tile {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+    }
+
+    .feed-live .fl-tile img.dk,
+    .feed-live image.dk,
+    .dark .feed-live .fl-tile img.lt,
+    .dark .feed-live image.lt {
+        display: none;
+    }
+
+    .dark .feed-live .fl-tile img.dk {
+        display: block;
+    }
+
+    .dark .feed-live image.dk {
+        display: inline;
+    }
+
+    .feed-live .nd-name,
+    .feed-live .fl-fate-name {
+        font-size: 12px;
+        font-weight: 600;
+        fill: var(--foreground);
+        text-anchor: middle;
+    }
+
+    .feed-live .nd-stat,
+    .feed-live .fl-fate-cap {
+        font-size: 11px;
+        fill: var(--muted-foreground);
+        text-anchor: middle;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .feed-live .nd-track {
+        fill: none;
+        stroke: var(--secondary);
+        stroke-width: 5;
+    }
+
+    .feed-live .nd-seg {
+        fill: none;
+        stroke-width: 5;
+    }
+
+    .feed-live .nd-bg {
+        fill: var(--card);
+    }
+
+    .feed-live .nd-halo {
+        opacity: 0;
+    }
+
+    .feed-live .fl-nd.is-idle {
+        opacity: 0.38;
+    }
+
+    .feed-live .fl-nd.is-blocked .nd-track {
+        stroke: var(--usage-after-429);
+        stroke-dasharray: 3 3;
+    }
+
+    .feed-live .nd-flag {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-anchor: middle;
+        fill: var(--usage-after-429);
+    }
+
+    .feed-live .nd-badge rect {
+        fill: var(--alert-warning);
+    }
+
+    .feed-live .nd-badge text {
+        fill: #111;
+        font-size: 10.5px;
+        font-weight: 700;
+        text-anchor: middle;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .feed-live .fl-ed {
+        fill: none;
+        stroke: var(--muted-foreground);
+        stroke-linecap: round;
+    }
+
+    .feed-live .fl-ed.is-fate-matched {
+        stroke: var(--f-matched);
+    }
+
+    .feed-live .fl-ed.is-fate-notfound {
+        stroke: var(--f-notfound);
+    }
+
+    .feed-live .fl-ed.is-fate-couldnot {
+        stroke: var(--f-couldnot);
+    }
+
+    .feed-live .fl-ed.is-bypass {
+        stroke-dasharray: 3 6;
+    }
+
+    .feed-live .fl-static {
+        fill: none;
+        stroke: var(--border);
+        stroke-dasharray: 2 5;
+        stroke-width: 1.3;
+    }
+
+    .feed-live .fl-hl {
+        fill: none;
+        stroke: var(--foreground);
+        stroke-width: 2.5;
+        stroke-dasharray: 6 4;
+        opacity: 0;
+    }
+
+    .feed-live .fl-cap {
+        font-size: 10.5px;
+        fill: var(--muted-foreground);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        font-weight: 600;
+    }
+
+    .feed-chip-dot {
+        position: relative;
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--alert-warning);
+        flex: none;
+    }
+
+    .feed-chip-dot::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        background: var(--alert-warning);
+        animation: feed-chip-pulse 1.6s ease-out infinite;
+    }
+
+    @keyframes feed-chip-pulse {
+        0% {
+            transform: scale(1);
+            opacity: 0.7;
+        }
+
+        100% {
+            transform: scale(3);
+            opacity: 0;
+        }
+    }
+
+    .feed-live .nd-name,
+    .feed-live .nd-stat,
+    .feed-live .fl-fate-name,
+    .feed-live .fl-fate-cap {
+        paint-order: stroke;
+        stroke: var(--card);
+        stroke-width: 4px;
+        stroke-linejoin: round;
+    }
+
+    .feed-live-fold {
+        transition: height 0.5s ease, opacity 0.4s ease, margin 0.5s ease;
+    }
+
+    .feed-live-fold.is-folded {
+        height: 0 !important;
+        opacity: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+        overflow: hidden;
+    }
+}
 @utility field-segment {
     display: inline-flex;
     flex: none;

@@ -15,6 +15,7 @@ internal class FeedModule : IServiceModule
 		services.AddSingleton<FeedRunTrace>();
 		services.AddSingleton<IFeedRunTrace>(provider => provider.GetRequiredService<FeedRunTrace>());
 		services.AddScoped<IFeedRunTraces, FeedRunTraces>();
+		services.AddScoped<IFeedRunLayout, FeedRunLayout>();
 		services.AddTracedScoped<IFeedRunPlanner, FeedRunPlanner>();
 		services.AddTracedScoped<IFeedRunEngine, FeedRunEngine>();
 		services.AddTracedScoped<IFeedService, FeedService>();

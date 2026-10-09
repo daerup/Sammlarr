@@ -1,0 +1,33 @@
+@using UI.Features.Feeds.Components
+@implements IDisposable
+
+<DemoCard Title="Live run" Where="Feeds page"
+          Note="FeedRunLive playing a scripted run of 120 documentaries: ids through TMDB, Wikidata and Plex, details through TMDB and MDBList, a few answers after a 429 and a few titles that gave up waiting. Five seconds after it ends it folds away. Hide and Show remount it from a fresh snapshot.">
+    @if (_run is { } run)
+    {
+        <FeedRunLive @key="run" Run="run" OnFolded="Folded"/>
+    }
+    else
+    {
+        <div>
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="Replay">
+                <LucideIcon Name="rotate-ccw" Size="14" Class="mr-1.5"/>
+                Run it again
+            </BbButton>
+        </div>
+    }
+</DemoCard>
+
+@code {
+    private DemoLiveRun? _run = new();
+
+    private void Folded()
+    {
+        _run?.Dispose();
+        _run = null;
+    }
+
+    private void Replay() => _run = new DemoLiveRun();
+
+    public void Dispose() => _run?.Dispose();
+}
