@@ -1,6 +1,7 @@
 const MIN_W = 1120;
 const MIN_H = 440;
-const DB_X = 345;
+const LIST_X = 327;
+const DB_X = 455;
 const NODE_R = 22;
 const NODE_GAP = 86;
 const COL_GAP = 130;
@@ -12,20 +13,29 @@ const SLOT_H = 28;
 const DELAY = 250;
 const LATE = 1000;
 const LINGER = 650;
+const FRESH = 2200;
+const QUEUE = 5;
 const MAX_DOTS = 180;
 const RING = 2 * Math.PI * NODE_R;
+const WAIT_RING = 2 * Math.PI * (NODE_R + 5);
 const SVG_NS = 'http://www.w3.org/2000/svg';
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)');
 
 const KIND = ['started', 'sourceEnded', 'listed', 'known', 'earlier', 'path', 'asked', 'answered', 'gaveUp', 'settled', 'page'];
 const OUTCOME = ['answered', 'after429', 'gaveup', 'failed'];
 const FATE_KEY = ['matched', 'couldnot', 'notfound'];
 const FATE_NODE = { matched: 'sink', couldnot: 'cl', notfound: 'nf' };
+const OUTCOMES = {
+    sink: { fate: 'matched', meaning: 'matched', also: { count: 'known', meaning: 'known', label: 'already known' } },
+    cl: { fate: 'couldnot', meaning: 'couldNotLookUp' },
+    nf: { fate: 'notfound', meaning: 'notFound', also: { count: 'cached', meaning: 'notFoundEarlier', label: 'not found earlier' } },
+};
 const FATE = {
     matched: { label: 'Matched', css: 'var(--f-matched)', glyph: 'check' },
     notfound: { label: 'Not found', css: 'var(--f-notfound)', glyph: 'x' },
     couldnot: { label: "Couldn't look up", css: 'var(--f-couldnot)', glyph: 'cloud-off' },
-    known: { css: 'var(--f-known)', glyph: 'database' },
-    cached: { css: 'var(--f-cached)', glyph: 'history' },
+    known: { glyph: 'database' },
+    cached: { glyph: 'history' },
 };
 const STATUS_CSS = {
     answered: 'var(--usage-answered)',
@@ -34,6 +44,12 @@ const STATUS_CSS = {
     failed: 'var(--usage-failed)',
     det: 'var(--chart-1)',
 };
+const ANSWERS = [
+    ['answered', 'answered'],
+    ['after429', 'after a 429'],
+    ['gaveup', 'gave up'],
+    ['failed', 'failed'],
+];
 const GLYPH = {
     check: '<path d="M20 6 9 17l-5-5"/>',
     x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
@@ -54,6 +70,7 @@ const fmt = n => Math.round(n).toLocaleString('en-US');
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const easeIO = u => (u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2);
 const escape = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const plural = (n, one, many) => `${fmt(n)} ${n === 1 ? one : many}`;
 
 function glyph(name, size) {
     return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block">${GLYPH[name]}</svg>`;
@@ -85,6 +102,12 @@ function svgTile(brand, size) {
     return `<rect x="${-size / 2}" y="${-size / 2}" width="${size}" height="${size}" rx="${size * 0.24}" style="fill:${brand.background}"/>${art}`;
 }
 
+function svgEl(name, cls) {
+    const el = document.createElementNS(SVG_NS, name);
+    el.setAttribute('class', cls);
+    return el;
+}
+
 class Model {
     constructor(keyOf) {
         this.keyOf = keyOf;
@@ -96,6 +119,9 @@ class Model {
         this.edges = new Map();
         this.t = 0;
         this.running = true;
+        this.sourceEnded = false;
+        this.page = 0;
+        this.reading = null;
     }
 
     node(key) {
@@ -124,6 +150,9 @@ class Model {
         this.running = !snapshot.ended;
         const f = snapshot.fates;
         this.started = f.started;
+        this.reading = snapshot.reading;
+        this.page = snapshot.pagesRead ?? 0;
+        this.sourceEnded = !!snapshot.sourceEnded;
         this.c = {
             matched: f.matched - f.known,
             notfound: f.notFound - f.earlier + f.listedWithoutIds,
@@ -166,6 +195,7 @@ class Model {
                 done: false,
             });
             this.active.add(t.title);
+            if (at) this.edge(last ?? 'src', at, 'hop');
         }
     }
 
@@ -195,6 +225,12 @@ class Model {
             case 'listed':
                 this.c.notfound++;
                 return null;
+            case 'sourceEnded':
+                this.sourceEnded = true;
+                return null;
+            case 'page':
+                this.page++;
+                return null;
             case 'known':
                 if (t) t.known = true;
                 return null;
@@ -220,7 +256,7 @@ class Model {
     asked(t, step) {
         const key = this.keyOf(step.service, step.stage);
         const s = this.node(key);
-        const from = t.prev;
+        const from = step.stage === 1 ? (t.last ?? 'src') : t.prev;
         if (step.stage === 0) {
             s.inflight++;
             t.state = 'asking';
@@ -231,7 +267,7 @@ class Model {
         t.svc = key.replace('d:', '');
         t.path.push(key);
         this.edge(from, key, 'hop');
-        return { from, to: key, kind: 'hop', key };
+        return { from, to: key, kind: 'hop' };
     }
 
     answered(t, step) {
@@ -258,12 +294,12 @@ class Model {
         const s = this.node(key);
         if (step.stage === 0) s.gaveup++;
         else s.det++;
-        const from = t.prev;
+        const from = step.stage === 1 ? (t.last ?? 'src') : t.prev;
         t.path.push(key);
         t.prev = key;
         if (step.stage === 0) t.last = key;
         this.edge(from, key, 'hop');
-        return { flash: key, status: 'gaveup', from, to: key, kind: 'hop', key };
+        return { flash: key, status: 'gaveup', from, to: key, kind: 'hop' };
     }
 
     settled(t, fate) {
@@ -272,13 +308,13 @@ class Model {
             this.c.known++;
             this.edge('src', 'sink', 'bypass');
             this.finish(t);
-            return { from: 'src', to: 'sink', kind: 'bypass', fate: 'known', finished: true };
+            return { to: 'sink', kind: 'bypass', finished: true };
         }
         if (fate === 'notfound' && t.earlier) {
             this.c.cached++;
             this.edge('src', 'nf', 'bypass');
             this.finish(t);
-            return { from: 'src', to: 'nf', kind: 'bypass', fate: 'cached', finished: true };
+            return { to: 'nf', kind: 'bypass', finished: true };
         }
         if (t.known) this.c.known++;
         else this.c[fate]++;
@@ -358,7 +394,10 @@ class Slots {
 }
 
 class View {
+    static count = 0;
+
     constructor(host, layout, snapshot) {
+        this.uid = ++View.count;
         this.host = host;
         this.layout = layout;
         this.brand = {};
@@ -371,13 +410,14 @@ class View {
             this.brand['d:' + n.key] = n.brand;
             this.keys[`${n.service}:1`] = 'd:' + n.key;
         }
+        this.inMemory = new Set(layout.nodes.filter(n => n.inMemory).map(n => n.key));
         this.model = new Model((service, stage) => this.keys[`${service}:${stage}`] ?? `${stage === 1 ? 'd:' : ''}svc${service}`);
         this.model.seed(snapshot);
         this.q = [];
         this.qi = 0;
+        this.ticks = new Set();
         this.anchor = performance.now() - snapshot.elapsedMs;
         this.lastSeq = snapshot.cursorSeq;
-        this.lastDeliver = performance.now();
         this.hidden = document.hidden;
         this.reanchor = false;
         this.place(host.clientWidth);
@@ -418,7 +458,8 @@ class View {
         const idX = c => DB_X + (c + 1) * step;
         const detailX = c => DB_X + (columns + c + 1) * step;
         const mid = H / 2;
-        const L = { db: [DB_X, Math.round(mid - 15)], sink: [outX, Math.round(mid - 108)], cl: [outX, Math.round(mid + 2)], nf: [outX, Math.round(mid + 112)], pos: {} };
+        const dbY = Math.round(mid - 15);
+        const L = { src: [LIST_X, dbY], db: [DB_X, dbY], sink: [outX, Math.round(mid - 108)], cl: [outX, Math.round(mid + 2)], nf: [outX, Math.round(mid + 112)], pos: {} };
         byColumn.forEach((inColumn, c) => {
             inColumn.forEach((n, i) => {
                 L.pos[n.key] = [Math.round(idX(c)), Math.round(spread(inColumn.length, TOP, H - BOTTOM, i))];
@@ -430,8 +471,12 @@ class View {
             const span = Math.min(H - BOTTOM - TOP, (inColumn - 1) * NODE_GAP * 1.25);
             L.pos['d:' + n.key] = [Math.round(detailX(c)), Math.round(spread(inColumn, mid - span / 2, mid + span / 2, i % detailRows))];
         });
+        const byX = new Map();
+        for (const [key, [x, y]] of Object.entries(L.pos)) byX.set(x, [...(byX.get(x) ?? []), [key, y]]);
+        this.cols = [...byX.entries()];
         this.W = W;
         this.H = H;
+        this.step = step;
         this.idX = Math.round(idX(0));
         this.detailX = detailCols ? Math.round(detailX(0)) : null;
         this.slotN = Math.max(1, Math.floor((H - SLOT_TOP - 6) / SLOT_H));
@@ -461,7 +506,7 @@ class View {
     }
 
     rad(k) {
-        return k === 'sink' || k === 'nf' || k === 'cl' ? 17 : NODE_R + 2;
+        return k === 'sink' || k === 'nf' || k === 'cl' ? 20 : NODE_R + 11;
     }
 
     geo(a, b, from) {
@@ -469,79 +514,158 @@ class View {
         const pb = this.pos(b);
         const ra = from ? 0 : this.rad(a);
         const rb = this.rad(b);
-        const p0 = [pa[0] + ra, pa[1]];
-        const p3 = [pb[0] - rb, pb[1]];
+        let p0 = [pa[0] + ra, pa[1]];
+        let p3 = [pb[0] - rb, pb[1]];
+        if (!from) {
+            const d0 = 12 * Math.tanh((pb[1] - pa[1]) / 120);
+            const d3 = 12 * Math.tanh((pa[1] - pb[1]) / 120);
+            p0 = [pa[0] + Math.sqrt(Math.max(0, ra * ra - d0 * d0)), pa[1] + d0];
+            p3 = [pb[0] - Math.sqrt(Math.max(0, rb * rb - d3 * d3)), pb[1] + d3];
+        }
         const dx = Math.max(40, (p3[0] - p0[0]) / 2);
         return [p0, [p0[0] + dx, p0[1]], [p3[0] - dx, p3[1]], p3];
-    }
-
-    lane(b) {
-        const [x, y] = this.L.db;
-        const [tx, ty] = this.pos(b);
-        const top = b === 'sink';
-        const edge = top ? 8 : this.H - 8;
-        const turn = top ? 28 : this.H - 28;
-        const sy = top ? y - NODE_R - 2 : y + NODE_R + 2;
-        return `M${x},${sy} L${x},${turn} Q${x},${edge} ${x + 20},${edge} L${tx - 72},${edge} C${tx - 32},${edge} ${tx - 32},${ty} ${tx - 17},${ty}`;
     }
 
     pathD(p) {
         return `M${p[0][0]},${p[0][1]} C${p[1][0]},${p[1][1]} ${p[2][0]},${p[2][1]} ${p[3][0]},${p[3][1]}`;
     }
 
+    used(key) {
+        const v = this.model.node(key);
+        return key.startsWith('d:') ? v.det + v.detInflight > 0 : v.answered + v.after429 + v.gaveup + v.failed + v.inflight > 0;
+    }
+
+    line(a, b) {
+        return this.route(a, b) ?? this.pathD(this.geo(a, b));
+    }
+
+    route(a, b) {
+        if ((b !== 'cl' && b !== 'nf') || a === 'src' || a.startsWith('d:')) return a !== b ? this.gatePath(a, b) : null;
+        const [x0, y0] = this.pos(a);
+        const [x3, y3] = this.pos(b);
+        const gx = x0 + this.step / 2 + (Math.round(y0 / NODE_GAP) % 3) * 7 - 7;
+        const fy = this.H - (b === 'cl' ? 15 : 6);
+        const ex = x3 - (b === 'cl' ? 58 : 40);
+        const r = 10;
+        return `M${x0 + this.rad(a)},${y0} H${gx - r} Q${gx},${y0} ${gx},${y0 + r} V${fy - r} Q${gx},${fy} ${gx + r},${fy} H${ex - r} Q${ex},${fy} ${ex},${fy - r} V${y3 + r} Q${ex},${y3} ${ex + r},${y3} H${x3 - this.rad(b)}`;
+    }
+
+    gatePath(a, b) {
+        const g = this.geo(a, b);
+        const [x0, y0] = g[0];
+        const [x3, y3] = g[3];
+        const curveY = x => {
+            let lo = 0;
+            let hi = 1;
+            for (let i = 0; i < 24; i++) {
+                const mid = (lo + hi) / 2;
+                if (bez(g, mid)[0] < x) lo = mid;
+                else hi = mid;
+            }
+            return bez(g, (lo + hi) / 2)[1];
+        };
+        const points = [[x0, y0]];
+        for (const [x, ys] of this.cols) {
+            if (x <= x0 + 30 || x >= x3 - 30) continue;
+            const boxes = ys.filter(([key]) => this.used(key)).map(([, y]) => [y - 36, y + 64]);
+            const want = curveY(x);
+            const inside = v => boxes.find(([top, bottom]) => v > top && v < bottom);
+            if (!inside(want)) continue;
+            let up = want;
+            while (inside(up)) up = inside(up)[0] - 4;
+            let down = want;
+            while (inside(down)) down = inside(down)[1] + 4;
+            const upFits = up > 14;
+            const downFits = down < this.H - 12;
+            points.push([x, upFits && (!downFits || want - up <= down - want) ? up : down]);
+        }
+        if (points.length === 1) return null;
+        points.push([x3, y3]);
+        const last = points.length - 1;
+        const tangent = i => {
+            if (i === 0) return [points[1][0] - points[0][0], 0];
+            if (i === last) return [points[last][0] - points[last - 1][0], 0];
+            return [(points[i + 1][0] - points[i - 1][0]) / 2, (points[i + 1][1] - points[i - 1][1]) / 2];
+        };
+        let d = `M${x0.toFixed(1)},${y0.toFixed(1)}`;
+        for (let i = 0; i < last; i++) {
+            const [xa, ya] = points[i];
+            const [xb, yb] = points[i + 1];
+            const [ta, ua] = tangent(i);
+            const [tb, ub] = tangent(i + 1);
+            d += ` C${(xa + ta / 3).toFixed(1)},${(ya + ua / 3).toFixed(1)} ${(xb - tb / 3).toFixed(1)},${(yb - ub / 3).toFixed(1)} ${xb.toFixed(1)},${yb.toFixed(1)}`;
+        }
+        return d;
+    }
+
+    reroute() {
+        const signature = Object.keys(this.nd)
+            .filter(key => this.used(key))
+            .join(',');
+        if (signature === this.usedSignature) return;
+        this.usedSignature = signature;
+        for (const { el, e } of this.E.values()) el.setAttribute('d', this.line(e.a, e.b));
+    }
+
     build() {
         const L = this.L;
+        const [sx] = L.src;
+        const [dbx, dby] = L.db;
         const detailsX = this.detailX;
         this.host.innerHTML = `<div class="fl-fit"><div class="fl-view">
             <div class="fl-list"><div class="fl-lh">In flight <b class="fl-n">0</b><span class="fl-more"></span></div>
             ${Array.from({ length: this.slotN }, (_, i) => `<div class="fl-slot is-empty" data-i="${i}" style="top:${SLOT_TOP + i * SLOT_H}px"><span class="st"></span><span class="nm"></span><span class="yr"></span></div>`).join('')}</div>
             <svg class="fl-svg" viewBox="0 0 ${this.W} ${this.H}" width="${this.W}" height="${this.H}">
-                <text class="fl-cap" x="${this.idX - 40}" y="26">Services</text>${detailsX ? `<text class="fl-cap" x="${detailsX - 28}" y="26">Details</text>` : ''}<text class="fl-cap" x="${L.sink[0] - 32}" y="26">Outcome</text>
-                <g class="g-static"></g><g class="g-edges"></g><path class="fl-hl"/><g class="g-parts"></g><g class="g-nodes"></g>
-            </svg></div></div>`;
+                <text class="fl-cap" x="${sx - 12}" y="26">List</text><text class="fl-cap" x="${this.idX - 40}" y="26">Services</text>${detailsX ? `<text class="fl-cap" x="${detailsX - 28}" y="26">Details</text>` : ''}<text class="fl-cap" x="${L.sink[0] - 32}" y="26">Outcome</text>
+                <defs><marker id="fla${this.uid}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" markerUnits="userSpaceOnUse" orient="auto"><path d="M0.5,0.5 L7.5,4 L0.5,7.5 Z" class="fl-arrow"/></marker></defs>
+                <g class="g-edges"></g><g class="g-wait"><path class="fl-entry" d="M${sx + NODE_R + 9},${dby} L${dbx - NODE_R - 9},${dby}" marker-end="url(#fla${this.uid})"/><text class="fl-entry-cap" x="${sx}" y="${dby - NODE_R - 12}"></text></g><path class="fl-hl"/><g class="g-parts"></g><g class="g-nodes"></g>
+            </svg><div class="fl-tip" hidden></div></div></div>`;
         this.inner = this.host.querySelector('.fl-fit');
         this.inner.style.width = `${this.W}px`;
-        this.host.querySelector('.fl-view').style.height = `${this.H}px`;
+        this.viewEl = this.host.querySelector('.fl-view');
+        this.viewEl.style.height = `${this.H}px`;
         this.fit();
         const svg = this.host.querySelector('svg');
         this.gEdges = svg.querySelector('.g-edges');
+        this.gWait = svg.querySelector('.g-wait');
         this.gParts = svg.querySelector('.g-parts');
         this.hl = svg.querySelector('.fl-hl');
+        this.tip = this.host.querySelector('.fl-tip');
+        this.entry = { path: svg.querySelector('.fl-entry'), cap: svg.querySelector('.fl-entry-cap') };
         const out = [];
         for (const n of this.layout.nodes) out.push(this.nodeHtml(n.key, n.brand, this.pos(n.key), n.brand.name));
         for (const n of this.layout.details) out.push(this.nodeHtml('d:' + n.key, n.brand, this.pos('d:' + n.key), n.brand.name + ' details'));
-        out.push(this.dbHtml());
-        for (const [k, f] of [['sink', 'matched'], ['cl', 'couldnot'], ['nf', 'notfound']]) {
-            out.push(`<g class="fl-fate" transform="translate(${L[k][0]},${L[k][1]})" style="stroke:${FATE[f].css};fill:${FATE[f].css}"><circle r="16" style="fill:color-mix(in oklch, ${FATE[f].css} 18%, var(--card))" stroke-width="2"/>${MARKS[f]}<text class="fl-fate-name" y="34">${FATE[f].label}</text><text class="fl-fate-cap fc-${k}" y="48"></text></g>`);
+        out.push(this.dbHtml(), this.srcHtml());
+        for (const [k, { fate: f }] of Object.entries(OUTCOMES)) {
+            out.push(`<g class="fl-fate" data-k="${k}" transform="translate(${L[k][0]},${L[k][1]})" style="stroke:${FATE[f].css};fill:${FATE[f].css}"><circle r="16" style="fill:color-mix(in oklch, ${FATE[f].css} 18%, var(--card))" stroke-width="2"/>${MARKS[f]}<text class="fl-fate-name" y="34">${FATE[f].label}</text><text class="fl-fate-cap" y="48"></text></g>`);
         }
         svg.querySelector('.g-nodes').innerHTML = out.join('');
         this.nd = {};
         for (const g of svg.querySelectorAll('.fl-nd')) {
             this.nd[g.dataset.k] = {
                 g,
-                segs: [...g.querySelectorAll('.nd-seg')],
                 stat: g.querySelector('.nd-stat'),
                 halo: g.querySelector('.nd-halo'),
-                badge: g.querySelector('.nd-badge'),
-                badgeT: g.querySelector('.nd-badge text'),
-                flag: g.querySelector('.nd-flag'),
+                wait: g.querySelector('.nd-wait'),
                 flash: 0,
                 flashColor: '',
             };
         }
+        this.dbG = svg.querySelector('.fl-db');
         this.dbSegs = [...svg.querySelectorAll('.db-seg')];
         this.dbStat = svg.querySelector('.db-stat');
-        this.dbNew = svg.querySelector('.db-new');
-        this.fc = { sink: svg.querySelector('.fc-sink'), nf: svg.querySelector('.fc-nf'), cl: svg.querySelector('.fc-cl') };
-        const gs = svg.querySelector('.g-static');
-        gs.innerHTML =
-            this.layout.edges.map(e => `<path class="fl-static" d="${this.pathD(this.geo(e.from ?? 'src', e.to))}"/>`).join('') +
-            `<path class="fl-static lane-sink" d="${this.lane('sink')}"/><path class="fl-static lane-nf" d="${this.lane('nf')}"/>`;
-        this.lanes = {};
-        for (const k of ['sink', 'nf']) {
-            const el = gs.querySelector('.lane-' + k);
-            this.lanes[k] = { path: el, len: el.getTotalLength() };
+        this.srcG = svg.querySelector('.fl-src');
+        this.srcStat = svg.querySelector('.src-stat');
+        this.fates = {};
+        for (const g of svg.querySelectorAll('.fl-fate')) this.fates[g.dataset.k] = { g, ring: g.querySelector('circle'), cap: g.querySelector('.fl-fate-cap') };
+        this.tipKey = null;
+        const hoverable = [...Object.values(this.nd), ...Object.values(this.fates)].map(({ g }) => [g, g.dataset.k]);
+        for (const [g, key] of [...hoverable, [this.dbG, 'src'], [this.srcG, 'source']]) {
+            g.addEventListener('mouseenter', () => (this.tipKey = key));
+            g.addEventListener('mouseleave', () => (this.tipKey = null));
         }
+        this.waitNow = new Map();
+        this.waitEls = new Map();
         this.E = new Map();
         this.parts = [];
         this.pool = [];
@@ -562,31 +686,154 @@ class View {
 
     nodeHtml(k, brand, [x, y], label) {
         return `<g class="fl-nd" data-k="${k}" transform="translate(${x},${y})">
-            <circle class="nd-halo" r="${NODE_R + 9}" style="fill:${brand.color}"/><circle class="nd-bg" r="${NODE_R}"/><circle class="nd-track" r="${NODE_R}"/>
-            ${['answered', 'after429', 'gaveup', 'failed', 'det'].map(c => `<circle class="nd-seg" r="${NODE_R}" style="stroke:${STATUS_CSS[c]}" stroke-dasharray="0 ${RING}" transform="rotate(-90)"/>`).join('')}
+            <circle class="nd-halo" r="${NODE_R + 9}" style="fill:${brand.color}"/><circle class="nd-wait" r="${NODE_R + 5}" transform="rotate(-90)" stroke-dasharray="0 ${WAIT_RING}"/><circle class="nd-bg" r="${NODE_R}"/><circle class="nd-track" r="${NODE_R}"/>
             ${svgTile(brand, 26)}
-            <text class="nd-name" y="${NODE_R + 19}">${escape(label)}</text><text class="nd-stat" y="${NODE_R + 33}"></text>
-            <text class="nd-flag" y="${-NODE_R - 10}"></text>
-            <g class="nd-badge" transform="translate(${NODE_R - 2},${-NODE_R + 4})" style="display:none"><rect x="-13" y="-9" width="26" height="17" rx="8.5"/><text y="4"></text></g></g>`;
+            <text class="nd-name" y="${NODE_R + 19}">${escape(label)}</text><text class="nd-stat" y="${NODE_R + 33}"></text></g>`;
     }
 
     dbHtml() {
         const [x, y] = this.L.db;
-        return `<g transform="translate(${x},${y})"><circle class="nd-bg" r="${NODE_R}"/><circle class="nd-track" r="${NODE_R}"/>
-            ${['var(--f-known)', 'var(--f-cached)', 'var(--sammlarr-gold)'].map(c => `<circle class="db-seg" r="${NODE_R}" fill="none" stroke-width="5" style="stroke:${c}" stroke-dasharray="0 ${RING}" transform="rotate(-90)"/>`).join('')}
-            ${svgTile(this.layout.sammlarr, 26)}<text class="nd-name" y="${NODE_R + 19}">Sammlarr</text><text class="nd-stat db-stat" y="${NODE_R + 33}"></text><text class="nd-stat db-new" y="${NODE_R + 47}"></text></g>`;
+        return `<g class="fl-db" transform="translate(${x},${y})"><circle class="nd-bg" r="${NODE_R}"/><circle class="nd-track" r="${NODE_R}"/>
+            ${['var(--f-known)', 'var(--f-cached)', 'var(--f-new)'].map(c => `<circle class="db-seg" r="${NODE_R}" style="stroke:${c}" stroke-dasharray="0 ${RING}" transform="rotate(-90)"/>`).join('')}
+            ${svgTile(this.layout.sammlarr, 26)}<text class="nd-name" y="${NODE_R + 19}">Sammlarr</text><text class="nd-stat db-stat" y="${NODE_R + 33}"></text></g>`;
+    }
+
+    srcHtml() {
+        const [x, y] = this.L.src;
+        return `<g class="fl-src" transform="translate(${x},${y})"><circle class="nd-orbit" r="${NODE_R + 5}"/><circle class="nd-bg" r="${NODE_R}"/><circle class="nd-track" r="${NODE_R}"/>
+            ${svgTile(this.layout.source, 26)}<text class="nd-name" y="${NODE_R + 19}">${escape(this.layout.source.name)} list</text><text class="nd-stat src-stat" y="${NODE_R + 33}"></text></g>`;
     }
 
     edgeEl(e) {
         let x = this.E.get(e.key);
         if (x) return x;
-        const el = document.createElementNS(SVG_NS, 'path');
-        el.setAttribute('class', 'fl-ed ' + (e.kind === 'bypass' ? 'is-bypass' : e.kind.startsWith('fate') ? 'is-' + e.kind : ''));
-        el.setAttribute('d', e.kind === 'bypass' ? this.lane(e.b) : this.pathD(this.geo(e.a, e.b)));
+        const el = svgEl('path', e.kind === 'hop' ? 'fl-ed' : `fl-ed is-${e.kind}`);
+        el.setAttribute('d', this.line(e.a, e.b));
+        el.setAttribute('marker-end', `url(#fla${this.uid})`);
         this.gEdges.appendChild(el);
         x = { el, e };
         this.E.set(e.key, x);
         return x;
+    }
+
+    tick(to) {
+        this.ticks.add(to);
+    }
+
+    flushTicks() {
+        if (!REDUCED.matches) for (const to of this.ticks) this.fates[to].ring.animate([{ strokeWidth: '6px' }, { strokeWidth: '2px' }], { duration: 450, easing: 'ease-out' });
+        this.ticks.clear();
+    }
+
+    along(path, from, spacing, count) {
+        const len = path.getTotalLength();
+        return Array.from({ length: count }, (_, i) => {
+            const at = Math.max(0, len - from - i * spacing);
+            const pt = path.getPointAtLength(at);
+            const back = path.getPointAtLength(Math.max(0, at - 1));
+            return [pt.x, pt.y, pt.x - back.x, pt.y - back.y];
+        });
+    }
+
+    track(a, b) {
+        const path = this.edgeEl(this.model.edges.get(`${a}>${b}|line`)).el;
+        return { path, len: path.getTotalLength() };
+    }
+
+    waitMark(e, into, hot) {
+        const all = into ? this.edgeWait.get(`${e.a}>${e.b}`) || 0 : 0;
+        let w = this.waitEls.get(e.key);
+        if (!w) {
+            if (!all) return;
+            const gate = svgEl('path', 'wt-gate');
+            const parked = Array.from({ length: QUEUE }, () => {
+                const dot = svgEl('circle', 'wt-park');
+                dot.setAttribute('r', '3.4');
+                return dot;
+            });
+            const more = svgEl('text', 'wt-more');
+            this.gWait.append(gate, ...parked, more);
+            w = { gate, parked, more };
+            this.waitEls.set(e.key, w);
+        }
+        for (const el of [w.gate, ...w.parked, w.more]) el.classList.toggle('is-hot', hot);
+        if (!all) {
+            if (w.sig === '') return;
+            w.parked.forEach(dot => (dot.style.display = 'none'));
+            w.more.textContent = '';
+            w.gate.style.display = 'none';
+            w.sig = '';
+            return;
+        }
+        const path = this.E.get(e.key).el;
+        const blocked = into === 'blocked';
+        const sig = `${all}|${blocked}|${path.getAttribute('d')}`;
+        if (w.sig === sig) return;
+        w.sig = sig;
+        const spots = this.along(path, blocked ? 18 : 10, 7.5, QUEUE + 1);
+        w.parked.forEach((dot, i) => {
+            dot.setAttribute('cx', spots[i][0].toFixed(1));
+            dot.setAttribute('cy', spots[i][1].toFixed(1));
+            dot.style.display = i < all ? '' : 'none';
+            dot.style.fill = blocked ? 'var(--usage-after-429)' : 'var(--f-flight)';
+        });
+        w.gate.style.display = blocked ? '' : 'none';
+        if (blocked) {
+            const [gx, gy, tx, ty] = this.along(path, 10, 0, 1)[0];
+            const tl = Math.hypot(tx, ty) || 1;
+            const nx = -ty / tl;
+            const ny = tx / tl;
+            w.gate.setAttribute('d', `M${(gx - nx * 7).toFixed(1)},${(gy - ny * 7).toFixed(1)} L${(gx + nx * 7).toFixed(1)},${(gy + ny * 7).toFixed(1)}`);
+        }
+        const [mx, my] = spots[QUEUE];
+        w.more.setAttribute('x', (mx + 3).toFixed(1));
+        w.more.setAttribute('y', (my + 3.5).toFixed(1));
+        w.more.textContent = all > QUEUE ? `+${fmt(all - QUEUE)}` : '';
+        w.more.style.fill = blocked ? 'var(--usage-after-429-text)' : 'var(--f-flight)';
+    }
+
+    paintTip(sim, reading) {
+        const k = this.tipKey;
+        this.tip.hidden = !k;
+        if (!k) return;
+        const m = this.model;
+        if (k === 'source') {
+            const state = reading ? `<div class="tw">Sending page ${fmt(m.reading)}</div>` : m.sourceEnded ? '<div>Whole list read</div>' : '';
+            this.tipHtml(`<b>${escape(this.layout.source.name)} list</b><div>${escape(this.layout.sourceName)}</div><div>${plural(m.page, 'page', 'pages')} read · ${fmt(m.started)} titles so far</div>${state}`);
+        } else if (k === 'src') {
+            this.tipHtml(`<b>Sammlarr</b><div>${fmt(m.c.known)} already known · ${fmt(m.c.cached)} not found earlier · ${fmt(Math.max(0, m.started - m.c.known - m.c.cached))} new</div>`);
+        } else if (OUTCOMES[k]) {
+            const { fate, meaning, also } = OUTCOMES[k];
+            const more = also && m.c[also.count] ? `<div class="tx"><b>+ ${fmt(m.c[also.count])} ${also.label}</b> ${escape(this.layout.meanings[also.meaning])}</div>` : '';
+            this.tipHtml(`<b>${FATE[fate].label}</b><div>${escape(this.layout.meanings[meaning])}</div>${more}`);
+        } else {
+            this.tipHtml(this.serviceTip(k, sim));
+        }
+        const [x, y] = k === 'source' ? this.L.src : this.pos(k);
+        this.tip.style.left = `${x + 260 > this.W ? x - 34 - 240 : x + 34}px`;
+        this.tip.style.top = `${y - 30}px`;
+    }
+
+    tipHtml(html) {
+        if (this.tipShown === html) return;
+        this.tipShown = html;
+        this.tip.innerHTML = html;
+    }
+
+    serviceTip(k, sim) {
+        const det = k.startsWith('d:');
+        const v = this.model.node(k);
+        const done = det ? v.det : v.answered + v.after429 + v.gaveup + v.failed;
+        const waiting = det ? v.detInflight : v.inflight;
+        const name = `<b>${escape(this.brand[k].name)}${det ? ' details' : ''}</b>`;
+        if (done + waiting === 0) return `${name}<div>Not asked yet</div>`;
+        const split = det
+            ? `<div>${fmt(v.det)} answered</div>`
+            : `<div class="ts">${ANSWERS.filter(([key]) => v[key])
+                  .map(([key, label]) => `<span><i style="background:${STATUS_CSS[key]}"></i>${fmt(v[key])} ${label}</span>`)
+                  .join('')}</div>`;
+        const blocked = this.model.running && v.blockedUntil > sim;
+        return `${name}<div>${fmt(done + waiting)} asked${v.ema ? ` · ${Math.round(v.ema)} ms on average` : ''}</div>${done ? split : ''}${waiting ? `<div class="tw">${fmt(waiting)} waiting for an answer</div>` : ''}${blocked ? `<div class="tb">Rate-limited (429): free again in ${Math.max(1, Math.ceil((v.blockedUntil - sim) / 1000))} s</div>` : ''}`;
     }
 
     slotAnchor(id) {
@@ -596,13 +843,17 @@ class View {
 
     push(batch) {
         const now = performance.now();
+        const sim = this.simNow(now);
         for (const c of batch.capacity) {
-            const key = this.keys[`${c.service}:0`];
-            if (!key) continue;
-            const s = this.model.node(key);
-            s.blockedUntil = c.blockedUntilMs;
-            s.busy = c.busy;
+            for (const key of [this.keys[`${c.service}:0`], this.keys[`${c.service}:1`]]) {
+                if (!key) continue;
+                const s = this.model.node(key);
+                if (c.blockedUntilMs && c.blockedUntilMs !== s.blockedUntil && !(s.blockedUntil > sim)) s.blockedFrom = sim;
+                s.blockedUntil = c.blockedUntilMs;
+                s.busy = c.busy;
+            }
         }
+        this.model.reading = batch.reading;
         const steps = batch.steps.filter(step => step.seq > this.lastSeq);
         if (steps.length) this.lastSeq = steps[steps.length - 1].seq;
         if (this.hidden) {
@@ -625,6 +876,7 @@ class View {
         while (this.qi < this.q.length) this.model.apply(this.q[this.qi++][1]);
         this.q = [];
         this.qi = 0;
+        this.ticks = new Set();
     }
 
     visibility() {
@@ -641,33 +893,29 @@ class View {
     }
 
     frame(now) {
-        let n = 0;
         while (this.qi < this.q.length && this.q[this.qi][0] <= now) {
             const step = this.q[this.qi++][1];
             this.onStep(step, now, this.model.apply(step));
-            n++;
         }
+        this.flushTicks();
         if (this.qi > 2000) {
             this.q = this.q.slice(this.qi);
             this.qi = 0;
         }
-        if (n) this.lastDeliver = now;
         if (this.endAt && now >= this.endAt && this.model.running) this.model.end();
         this.render(now);
     }
 
     simNow(now) {
-        return this.model.t + (this.model.running ? clamp(now - this.lastDeliver, 0, 400) : 0);
+        return this.model.running ? Math.max(this.model.t, now - this.anchor - DELAY) : this.model.t;
     }
 
     onStep(step, now, fx) {
         if (fx?.started) {
             this.slots.take(step.title, now);
-            const a = this.slotAnchor(step.title);
-            if (a) {
-                this.spawn(this.geo('src', 'src', a), 'var(--muted-foreground)', now, 240);
-                this.entryEnd.set(step.title, now + 240);
-            }
+            if (this.entryAt !== now) this.spawn(this.geo('src', 'src', [this.L.src[0] + NODE_R + 9, this.L.src[1]]), 'var(--muted-foreground)', now, 240);
+            this.entryAt = now;
+            this.entryEnd.set(step.title, now + 240);
             return;
         }
         if (!fx) return;
@@ -678,10 +926,10 @@ class View {
                 node.flashColor = STATUS_CSS[fx.status] || STATUS_CSS.answered;
             }
         }
-        if (fx.to) {
+        if (fx.kind === 'bypass') this.tick(fx.to);
+        else if (fx.to) {
             const t0 = fx.from === 'src' ? Math.max(now, this.entryEnd.get(step.title) || now) : now;
-            const color = fx.kind === 'hop' ? (this.brand[fx.key]?.color ?? 'var(--muted-foreground)') : FATE[fx.fate].css;
-            this.spawn(fx.kind === 'bypass' ? this.lanes[fx.to] : this.geo(fx.from, fx.to), color, t0, fx.kind === 'bypass' ? 620 : 300);
+            this.spawn(this.track(fx.from, fx.to), fx.kind === 'hop' ? 'var(--foreground)' : FATE[fx.fate].css, t0, 300);
         }
         if (fx.finished) {
             this.slots.release(step.title, now);
@@ -690,7 +938,7 @@ class View {
     }
 
     spawn(geo, color, t0, dur) {
-        if (this.parts.length > MAX_DOTS) return;
+        if (REDUCED.matches || this.parts.length > MAX_DOTS) return;
         let el = this.pool.pop();
         if (!el) {
             el = document.createElementNS(SVG_NS, 'circle');
@@ -705,41 +953,31 @@ class View {
     render(now) {
         const m = this.model;
         this.slots.sweep(now, m);
-        const keys = ['answered', 'after429', 'gaveup', 'failed', 'det'];
         const sim = this.simNow(now);
-        for (const k of Object.keys(this.nd)) {
-            const n = this.nd[k];
+        for (const [k, n] of Object.entries(this.nd)) {
             const det = k.startsWith('d:');
             const v = m.node(k);
-            const parts = det ? { det: v.det } : { answered: v.answered, after429: v.after429, gaveup: v.gaveup, failed: v.failed };
-            const total = Object.values(parts).reduce((a, b) => a + b, 0);
-            let off = 0;
-            n.segs.forEach((seg, i) => {
-                const len = total ? (RING * (parts[keys[i]] || 0)) / total : 0;
-                seg.setAttribute('stroke-dasharray', `${len} ${RING}`);
-                seg.setAttribute('stroke-dashoffset', `${-off}`);
-                off += len;
-            });
             const done = det ? v.det : v.answered + v.after429 + v.gaveup + v.failed;
-            const asked = done + (det ? v.detInflight : v.inflight);
-            const blocked = !det && m.running && v.blockedUntil > sim;
-            n.g.classList.toggle('is-idle', asked === 0);
-            n.g.classList.toggle('is-blocked', blocked);
-            const inMemory = !det && this.layout.nodes.find(x => x.key === k)?.inMemory;
-            n.stat.textContent = asked === 0 ? 'not asked' : inMemory ? `${fmt(asked)} lookups · in memory` : `${fmt(asked)} asked · ${Math.round(v.ema)} ms`;
-            n.flag.textContent = blocked ? `429 · free in ${Math.max(0, Math.ceil((v.blockedUntil - sim) / 1000))} s` : '';
             const w = det ? v.detInflight : v.inflight;
-            n.badge.style.display = w ? '' : 'none';
-            if (w) {
-                n.badgeT.textContent = fmt(w);
-                const wd = String(fmt(w)).length * 6.5 + 12;
-                n.badge.firstElementChild.setAttribute('width', wd);
-                n.badge.firstElementChild.setAttribute('x', -wd / 2);
-            }
+            const asked = done + w;
+            const blocked = m.running && v.blockedUntil > sim;
+            n.g.classList.toggle('is-idle', asked === 0);
+            n.stat.textContent = asked === 0 ? '' : this.inMemory.has(k) ? `${fmt(asked)} lookups · in memory` : `${fmt(asked)} asked · ${Math.round(v.ema)} ms`;
             const fl = n.flash ? Math.max(0, 1 - (now - n.flash) / 380) : 0;
-            n.halo.style.opacity = String(Math.min(0.42, (det ? v.detInflight / 14 : v.busy) * 0.3 + fl * 0.35));
+            const busy = blocked ? 0 : v.busy;
+            n.halo.style.opacity = String(Math.min(0.42, busy * 0.3 + fl * 0.35));
             n.halo.style.fill = fl > 0 ? n.flashColor : this.brand[k].color;
+            this.waitNow.set(k, !m.running ? '' : blocked ? 'blocked' : w > 0 ? 'wait' : '');
+            const span = Math.max(1, v.blockedUntil - (v.blockedFrom ?? sim));
+            const left = REDUCED.matches ? Math.ceil((v.blockedUntil - sim) / 1000) * 1000 : v.blockedUntil - sim;
+            const share = blocked ? clamp(left / span, 0, 1) : 0;
+            n.wait.setAttribute('stroke-dasharray', `${(share * WAIT_RING).toFixed(1)} ${WAIT_RING}`);
+            n.wait.style.display = share > 0 ? 'inline' : 'none';
         }
+        const reading = m.running && m.reading != null;
+        this.entry.cap.textContent = reading ? `reading page ${fmt(m.reading)}` : '';
+        this.srcG.classList.toggle('is-reading', reading);
+        this.srcStat.textContent = m.page ? `${plural(m.page, 'page', 'pages')} · ${fmt(m.started)} titles` : 'first page';
         const vals = [m.c.known, m.c.cached, Math.max(0, m.started - m.c.known - m.c.cached)];
         const dbTotal = vals.reduce((a, b) => a + b, 0);
         let off = 0;
@@ -749,17 +987,45 @@ class View {
             seg.setAttribute('stroke-dashoffset', `${-off}`);
             off += len;
         });
-        this.dbStat.textContent = `${fmt(m.c.known)} known · ${fmt(m.c.cached)} earlier`;
-        this.dbNew.textContent = `${fmt(vals[2])} new`;
-        this.fc.sink.textContent = fmt(m.c.matched) + (m.c.known ? ` + ${fmt(m.c.known)} known` : '');
-        this.fc.nf.textContent = fmt(m.c.notfound) + (m.c.cached ? ` + ${fmt(m.c.cached)} earlier` : '');
-        this.fc.cl.textContent = fmt(m.c.couldnot);
-        for (const e of m.edges.values()) {
-            const x = this.edgeEl(e);
-            const recent = Math.max(0, 1 - (m.t - e.last) / 900);
-            x.el.setAttribute('stroke-width', (1 + 2.4 * Math.log10(1 + e.n)).toFixed(2));
-            x.el.style.opacity = (m.running ? 0.22 + 0.6 * recent : 0.5).toFixed(2);
+        this.dbStat.textContent = `${fmt(vals[2])} new · ${fmt(m.c.known)} known · ${fmt(m.c.cached)} earlier`;
+        this.fates.sink.cap.textContent = fmt(m.c.matched) + (m.c.known ? ` + ${fmt(m.c.known)} known` : '');
+        this.fates.nf.cap.textContent = fmt(m.c.notfound) + (m.c.cached ? ` + ${fmt(m.c.cached)} earlier` : '');
+        this.fates.cl.cap.textContent = fmt(m.c.couldnot);
+        this.edgeWait = new Map();
+        for (const id of m.active) {
+            const t = m.titles.get(id);
+            if (!t || !t.svc || (t.state !== 'asking' && t.state !== 'details')) continue;
+            const key = (t.state === 'details' ? 'd:' : '') + t.svc;
+            const from = t.state === 'details' ? (t.last ?? 'src') : t.prev;
+            const edgeKey = `${from}>${key}`;
+            this.edgeWait.set(edgeKey, (this.edgeWait.get(edgeKey) || 0) + 1);
         }
+        this.reroute();
+        const focusKey = this.tipKey;
+        this.viewEl.classList.toggle('fl-focus', !!focusKey);
+        const hotNodes = new Set(focusKey ? [focusKey] : []);
+        for (const e of m.edges.values()) {
+            const hot = !!focusKey && (e.a === focusKey || e.b === focusKey);
+            if (hot) {
+                hotNodes.add(e.a);
+                hotNodes.add(e.b);
+            }
+            if (e.kind === 'bypass') continue;
+            const x = this.edgeEl(e);
+            x.el.classList.toggle('is-hot', hot);
+            this.waitMark(e, e.kind === 'hop' ? this.waitNow.get(e.b) || '' : '', hot);
+            x.el.setAttribute('stroke-width', (1 + 2.4 * Math.log10(1 + e.n)).toFixed(2));
+            const recent = Math.max(0, 1 - (sim - e.last) / FRESH);
+            const waiting = (this.edgeWait.get(`${e.a}>${e.b}`) || 0) > 0;
+            x.el.style.opacity = (m.running ? Math.max(waiting ? 0.7 : 0, 0.02 + 0.9 * recent) : 0.5).toFixed(2);
+        }
+        const listHot = focusKey === 'source' || focusKey === 'src';
+        for (const [k, n] of Object.entries(this.nd)) n.g.classList.toggle('is-hot', hotNodes.has(k));
+        for (const [k, f] of Object.entries(this.fates)) f.g.classList.toggle('is-hot', hotNodes.has(k));
+        this.dbG.classList.toggle('is-hot', hotNodes.has('src') || focusKey === 'source');
+        this.srcG.classList.toggle('is-hot', listHot);
+        this.entry.path.classList.toggle('is-hot', listHot);
+        this.entry.cap.classList.toggle('is-hot', listHot);
         for (let i = this.parts.length - 1; i >= 0; i--) {
             const p = this.parts[i];
             const u = (now - p.t0) / p.dur;
@@ -784,6 +1050,7 @@ class View {
             p.el.setAttribute('cx', x.toFixed(1));
             p.el.setAttribute('cy', y.toFixed(1));
         }
+        this.paintTip(sim, reading);
         this.listN.textContent = fmt(m.active.size);
         const shown = this.slots.s.filter(z => z.id !== null && !z.doneAt).length;
         const hidden = Math.max(0, m.active.size - shown);
@@ -803,7 +1070,7 @@ class View {
         const a = this.slotAnchor(t.id);
         let d = a ? `M${a[0]},${a[1]} L${this.L.db[0] - NODE_R - 2},${this.L.db[1]}` : '';
         for (let i = 1; i < keys.length; i++) {
-            const seg = this.pathD(this.geo(keys[i - 1], keys[i]));
+            const seg = this.line(keys[i - 1], keys[i]);
             d += d ? seg.replace(/^M/, ' M') : seg;
         }
         this.hl.setAttribute('d', d);

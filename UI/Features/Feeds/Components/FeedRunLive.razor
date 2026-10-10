@@ -59,8 +59,30 @@
         </div>
     </div>
     <div class="live-body" @ref="_body" hidden="@Run.Hidden" data-testid="live-body"></div>
+    <div class="live-key" hidden="@(Run.Hidden || !_keyOpen)" data-testid="live-key">
+        <span>
+            <svg width="22" height="22" viewBox="-11 -11 22 22" aria-hidden="true"><circle r="5.5" fill="var(--muted)" stroke="var(--border)"/><circle class="key-orbit" r="9" fill="none" stroke="var(--f-flight)" stroke-width="2" stroke-dasharray="5 4"/></svg>
+            <span><b>Turning orange ring</b> the list is sending its next page</span>
+        </span>
+        <span>
+            <svg width="40" height="12" aria-hidden="true"><path d="M1 6 H32" stroke="var(--muted-foreground)" stroke-width="1.5"/><circle cx="12" cy="6" r="3" fill="var(--f-flight)"/><circle cx="19.5" cy="6" r="3" fill="var(--f-flight)"/><circle cx="27" cy="6" r="3" fill="var(--f-flight)"/><path d="M32 2.5 L39 6 L32 9.5 Z" fill="var(--muted-foreground)"/></svg>
+            <span><b>Orange beads</b> titles waiting for an answer there</span>
+        </span>
+        <span>
+            <svg width="40" height="14" aria-hidden="true"><path d="M1 7 H24" stroke="var(--muted-foreground)" stroke-width="1.5"/><circle cx="8" cy="7" r="3" fill="var(--usage-after-429)"/><circle cx="15.5" cy="7" r="3" fill="var(--usage-after-429)"/><path d="M23 1.5 V12.5" stroke="var(--usage-after-429)" stroke-width="3" stroke-linecap="round"/><circle cx="33" cy="7" r="5" fill="none" stroke="var(--usage-after-429)" stroke-width="2" stroke-dasharray="20 40" transform="rotate(-90 33 7)"/></svg>
+            <span><b>Yellow</b> the service asked Sammlarr to slow down (429); the ring counts down</span>
+        </span>
+        <span>
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2 L3 13 L6 10 L8.5 15 L10.5 14 L8 9 L12 9 Z" fill="var(--foreground)"/></svg>
+            <span><b>Hover a service</b> for its answers, what waits there and the seconds left</span>
+        </span>
+    </div>
     <div class="live-foot" hidden="@Run.Hidden" data-testid="live-foot">
         @Tally.Ended.When(end => end.Ending is TraceEnding.Completed).Map(end => end.Counts).Match(Rules, () => Reading)
+        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="ToggleKey" Class="@(_keyOpen ? "ml-auto shrink-0 bg-secondary text-foreground" : "ml-auto shrink-0 text-muted-foreground")" aria-expanded="@(_keyOpen ? "true" : "false")" data-testid="live-key-toggle">
+            <LucideIcon Name="circle-question-mark" Size="14" Class="mr-1"/>
+            What the marks mean
+        </BbButton>
     </div>
     @if (Flash > 0)
     {
@@ -85,6 +107,7 @@
     private bool _mounted;
     private bool _mounting;
     private bool _disposed;
+    private bool _keyOpen;
     private Optional<Guid> _mountedKey = new None();
     private List<WireBatch>? _buffer;
 
@@ -168,7 +191,7 @@
 
     private async Task ShowAsync(TraceSnapshot snapshot)
     {
-        var layout = LiveWire.Layout(Run.Layout, Branding, file => Assets[$"_content/UI/providers/{file}"]);
+        var layout = LiveWire.Layout(Run.Layout, Run.Feed, Branding, file => Assets[$"_content/UI/providers/{file}"]);
         await CallAsync("mount", _body, layout, LiveWire.Snapshot(snapshot));
         _mounted = true;
         _mountedKey = snapshot.Cursor.Run;
@@ -226,6 +249,8 @@
 
         return Task.CompletedTask;
     }
+
+    private void ToggleKey() => _keyOpen = !_keyOpen;
 
     private async Task CallAsync(string identifier, params object[] args)
     {

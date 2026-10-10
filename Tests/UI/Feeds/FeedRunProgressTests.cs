@@ -239,6 +239,23 @@ public class FeedRunProgressTests
 	}
 
 	[Test]
+	public async Task Batch_SendsTheLoadOfEachServiceOnce_DetailsIncluded()
+	{
+		_layouts.GetAsync(Any<FeedId>(), Any()).Returns(Layout with { Details = [RemoteService.Tmdb, RemoteService.Mdblist] });
+		Running(Documentaries);
+		Reads(Batch([], new None()));
+		var batches = new List<WireBatch>();
+		using var testee = Progress();
+		await testee.StartAsync();
+		await EventuallyAsync(() => testee.Live.IsSome());
+
+		(await Assert.That(testee.Live).IsSome())!.Batch += batches.Add;
+
+		await EventuallyAsync(() => batches.Count > 0);
+		await Assert.That(batches[0].Capacity.Select(load => load.Service)).IsEquivalentTo([(byte)RemoteService.Tmdb, (byte)RemoteService.Mdblist]);
+	}
+
+	[Test]
 	public async Task Batch_WithASourcePage_CarriesItIntoTheTally()
 	{
 		Running(Documentaries);

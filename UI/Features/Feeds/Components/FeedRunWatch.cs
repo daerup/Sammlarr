@@ -137,7 +137,14 @@ internal sealed class FeedRunWatch(
 			Progress = progress,
 			RateLimited = progress.Busiest.Match(wait => !capacity.Of(wait.Service).IsOpen(now), () => false),
 		};
-		IReadOnlyList<WireCapacity> load = [.. layout.Ids.Select(node => LiveWire.Capacity(node.Service, capacity.Of(node.Service), now, elapsedMs))];
+		IReadOnlyList<WireCapacity> load =
+		[
+			.. layout
+				.Ids.Select(node => node.Service)
+				.Concat(layout.Details)
+				.Distinct()
+				.Select(service => LiveWire.Capacity(service, capacity.Of(service), now, elapsedMs)),
+		];
 		Batch?.Invoke(new WireBatch([.. steps.Select(LiveWire.Step)], load, ended.IsSome()) { Reading = progress.Reading.ToNullable() });
 		Changed?.Invoke();
 		return _endedAt.Match(at => now - at >= Linger, () => false);

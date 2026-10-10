@@ -464,6 +464,7 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         --f-known: var(--usage-answered);
         --f-cached: var(--fate-earlier);
         --f-flight: var(--alert-warning);
+        --f-new: color-mix(in oklch, var(--foreground) 70%, transparent);
     }
 
     .feed-live .fl-view {
@@ -590,7 +591,7 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
     }
 
     .feed-live .fl-slot.is-blocked .st {
-        color: var(--alert-warning);
+        color: var(--usage-after-429);
     }
 
     .feed-live .fl-dot {
@@ -631,23 +632,32 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         text-anchor: middle;
     }
 
-    .feed-live .nd-stat,
-    .feed-live .fl-fate-cap {
+    .feed-live .nd-stat {
         font-size: 11px;
         fill: var(--muted-foreground);
         text-anchor: middle;
         font-variant-numeric: tabular-nums;
     }
 
+    .feed-live .fl-fate-cap {
+        font-size: 12px;
+        font-weight: 700;
+        fill: var(--foreground);
+        text-anchor: middle;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .feed-live .fl-nd,
+    .feed-live .fl-db,
+    .feed-live .fl-src,
+    .feed-live .fl-fate {
+        cursor: default;
+    }
+
     .feed-live .nd-track {
         fill: none;
         stroke: var(--secondary);
-        stroke-width: 5;
-    }
-
-    .feed-live .nd-seg {
-        fill: none;
-        stroke-width: 5;
+        stroke-width: 2px;
     }
 
     .feed-live .nd-bg {
@@ -658,33 +668,38 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         opacity: 0;
     }
 
-    .feed-live .fl-nd.is-idle {
-        opacity: 0.38;
-    }
-
-    .feed-live .fl-nd.is-blocked .nd-track {
+    .feed-live .nd-wait {
+        display: none;
+        fill: none;
         stroke: var(--usage-after-429);
-        stroke-dasharray: 3 3;
+        stroke-width: 3;
+        stroke-linecap: round;
     }
 
-    .feed-live .nd-flag {
-        font-size: 10.5px;
-        font-weight: 700;
-        text-anchor: middle;
-        fill: var(--usage-after-429);
+    .feed-live .nd-orbit {
+        fill: none;
+        stroke: var(--f-flight);
+        stroke-width: 2;
+        stroke-dasharray: 9 7;
+        opacity: 0;
+        transition: opacity 0.35s;
+        transform-box: fill-box;
+        transform-origin: 50% 50%;
     }
 
-    .feed-live .nd-badge rect {
-        fill: var(--alert-warning);
+    .feed-live .fl-src.is-reading > .nd-orbit {
+        opacity: 0.85;
     }
 
-    .feed-live .nd-badge text {
-        fill: #111;
-        font-size: 10.5px;
-        font-weight: 700;
-        text-anchor: middle;
-        font-variant-numeric: tabular-nums;
+    .feed-live .db-seg {
+        fill: none;
+        stroke-width: 3.5px;
     }
+
+    .feed-live .fl-nd.is-idle {
+        opacity: 0.28;
+    }
+
 
     .feed-live .fl-ed {
         fill: none;
@@ -704,15 +719,36 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         stroke: var(--f-couldnot);
     }
 
-    .feed-live .fl-ed.is-bypass {
-        stroke-dasharray: 3 6;
+    .feed-live .fl-arrow {
+        fill: var(--muted-foreground);
+        opacity: 0.85;
     }
 
-    .feed-live .fl-static {
+    .feed-live .fl-entry {
         fill: none;
-        stroke: var(--border);
-        stroke-dasharray: 2 5;
-        stroke-width: 1.3;
+        stroke: var(--muted-foreground);
+        stroke-width: 1.5;
+        opacity: 0.6;
+    }
+
+    .feed-live .fl-entry-cap {
+        font-size: 10px;
+        font-weight: 700;
+        fill: var(--f-flight);
+        text-anchor: middle;
+    }
+
+
+    .feed-live .wt-gate {
+        stroke: var(--usage-after-429);
+        stroke-width: 3;
+        stroke-linecap: round;
+    }
+
+    .feed-live .wt-more {
+        font-size: 10px;
+        font-weight: 700;
+        text-anchor: end;
     }
 
     .feed-live .fl-hl {
@@ -730,6 +766,99 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         letter-spacing: 0.07em;
         font-weight: 600;
     }
+
+    .feed-live .fl-focus .fl-ed:not(.is-hot) {
+        opacity: 0.05 !important;
+    }
+
+    .feed-live .fl-focus .fl-ed.is-hot {
+        opacity: 1 !important;
+    }
+
+    .feed-live .fl-focus .fl-nd:not(.is-hot),
+    .feed-live .fl-focus .fl-fate:not(.is-hot),
+    .feed-live .fl-focus .fl-db:not(.is-hot),
+    .feed-live .fl-focus .fl-src:not(.is-hot) {
+        opacity: 0.25;
+    }
+
+    .feed-live .fl-focus .g-wait > :not(.is-hot) {
+        opacity: 0.08;
+    }
+
+    .feed-live .fl-focus .g-parts {
+        opacity: 0.3;
+    }
+
+    .feed-live .fl-tip {
+        position: absolute;
+        z-index: 6;
+        width: 240px;
+        padding: 9px 11px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--popover);
+        color: var(--popover-foreground);
+        @apply shadow-lg;
+        font-size: 11.5px;
+        line-height: 1.55;
+        pointer-events: none;
+    }
+
+    .feed-live .fl-tip b {
+        font-size: 12.5px;
+        font-weight: 600;
+    }
+
+    .feed-live .fl-tip div {
+        color: var(--muted-foreground);
+    }
+
+    .feed-live .fl-tip .ts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0 10px;
+    }
+
+    .feed-live .fl-tip .ts span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .feed-live .fl-tip .ts i {
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        display: inline-block;
+    }
+
+    .feed-live .fl-tip .tw {
+        color: var(--f-flight);
+        font-weight: 600;
+    }
+
+    .feed-live .fl-tip .tb {
+        color: var(--usage-after-429-text);
+        font-weight: 600;
+    }
+
+    .feed-live .fl-tip .tx {
+        margin-top: 4px;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .feed-live .fl-src.is-reading > .nd-orbit {
+            animation: fl-orbit 2.6s linear infinite;
+        }
+    }
+
+    @keyframes fl-orbit {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
 
     .feed-chip-dot {
         position: relative;
