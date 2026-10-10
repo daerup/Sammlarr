@@ -33,7 +33,9 @@ internal abstract class ArrApi(HttpClient http)
 
 	public abstract IReadOnlyList<IExternalMediaId> IdsOf(ArrTitle title);
 
-	protected abstract void AddOptions(JsonObject title, ArrInstanceConfig settings);
+	protected abstract void AddOptions(JsonObject title, ArrInstanceConfig settings, ArrRoute route);
+
+	public abstract bool IsAnime(JsonObject lookup);
 
 	public bool Takes(IExternalMediaId id) => id.Source == AddressedBy && id.Type == App.Type;
 
@@ -43,11 +45,16 @@ internal abstract class ArrApi(HttpClient http)
 		lookup["rootFolderPath"] = addition.RootFolderPath;
 		lookup["monitored"] = settings.Monitored;
 		lookup["tags"] = new JsonArray([.. addition.Tags.Select(tag => JsonValue.Create(tag))]);
-		AddOptions(lookup, settings);
+		AddOptions(lookup, settings, addition.Route);
 		return lookup;
 	}
 
 	protected static string Wire(Enum value) => JsonNamingPolicy.CamelCase.ConvertName(value.ToString());
+
+	protected static bool Lists(JsonObject lookup, string field, string label)
+	{
+		return (lookup[field]?.AsArray() ?? []).Any(entry => string.Equals(entry?.GetValue<string>(), label, StringComparison.OrdinalIgnoreCase));
+	}
 
 	public Task<Result<ArrSystemStatus>> StatusAsync(ArrConnection connection, CancellationToken cancellationToken)
 	{
@@ -214,4 +221,15 @@ internal enum ArrTagChange
 	Remove,
 }
 
-internal sealed record ArrAddition(int QualityProfileId, string RootFolderPath, IReadOnlyList<int> Tags);
+internal sealed record ArrAddition(int QualityProfileId, string RootFolderPath, IReadOnlyList<int> Tags, ArrRoute Route = ArrRoute.Default)
+{
+	public ArrAddition Routed(ArrRoute route, ArrInstanceConfig settings)
+	{
+		return this with
+		{
+			QualityProfileId = settings.ProfileFor(route).GetValueOr(QualityProfileId),
+			RootFolderPath = settings.FolderFor(route).GetValueOr(RootFolderPath),
+			Route = route,
+		};
+	}
+}

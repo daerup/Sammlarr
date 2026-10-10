@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json.Nodes;
 using API.Arr;
 using API.Arr.Radarr;
 using API.Arr.Sonarr;
@@ -41,6 +42,12 @@ public class ArrSinkTests
 		},
 		ArrTagScheme.Default
 	);
+
+	private static readonly ArrSinkConfig RoutingAnime = Connected with
+	{
+		Radarr = Connected.Radarr with { AnimeQualityProfileId = Some.Of(8), AnimeRootFolderPath = Some.Of("/anime-movies") },
+		Sonarr = Connected.Sonarr with { AnimeRootFolderPath = Some.Of("/anime") },
+	};
 
 	private readonly MockHttpHandler _radarr = Mock.HttpHandler();
 
@@ -255,6 +262,116 @@ public class ArrSinkTests
 			Times.Once
 		);
 		await Assert.That(_radarr.Requests).IsEmpty();
+	}
+
+	[Test]
+	public async Task ApplyAsync_ForANewShowSonarrTagsAnime_AddsItToTheAnimeFolderAsAnAnimeSeries()
+	{
+		SonarrLooksUp(424536, "Animation", "Anime", "Fantasy");
+		HoldingOnAnimeSites();
+
+		var acks = await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
+		_sonarr.Verify(
+			request =>
+				request
+					.Method(HttpMethod.Post)
+					.Path("/api/v3/series")
+					.BodyContains("\"rootFolderPath\":\"/anime\"")
+					.BodyContains("\"qualityProfileId\":4")
+					.BodyContains("\"seriesType\":\"anime\""),
+			Times.Once
+		);
+	}
+
+	[Test]
+	public async Task ApplyAsync_ForANewMovieRadarrTagsAnime_AddsItToTheAnimeFolderWithTheAnimeProfile()
+	{
+		RadarrLooksUp(372058, "anime", "body swap");
+		HoldingOnAnimeSites();
+
+		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_radarr.Verify(
+			request =>
+				request.Method(HttpMethod.Post).Path("/api/v3/movie").BodyContains("\"rootFolderPath\":\"/anime-movies\"").BodyContains("\"qualityProfileId\":8"),
+			Times.Once
+		);
+	}
+
+	[Test]
+	public async Task ApplyAsync_ForANewShowWithoutTheAnimeTag_AddsItToTheDefaultFolderAsAStandardSeries()
+	{
+		SonarrLooksUp(371028, "Action", "Animation", "Fantasy");
+		HoldingOnAnimeSites();
+
+		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_sonarr.Verify(
+			request => request.Method(HttpMethod.Post).Path("/api/v3/series").BodyContains("\"rootFolderPath\":\"/tv\"").BodyContains("\"seriesType\":\"standard\""),
+			Times.Once
+		);
+	}
+
+	public static IEnumerable<Func<IExternalMediaId>> AnimeSiteIds() =>
+		[() => AniListId.From("154587", MediaType.Show), () => MalId.From("52991", MediaType.Show)];
+
+	[Test]
+	[MethodDataSource(nameof(AnimeSiteIds))]
+	public async Task ApplyAsync_ForAnUntaggedShowWhoseTitleHoldsAnAnimeSiteId_AddsItToTheAnimeFolder(IExternalMediaId held)
+	{
+		SonarrLooksUp(424536);
+		HoldingOnAnimeSites(held);
+
+		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_sonarr.Verify(
+			request => request.Method(HttpMethod.Post).Path("/api/v3/series").BodyContains("\"rootFolderPath\":\"/anime\"").BodyContains("\"seriesType\":\"anime\""),
+			Times.Once
+		);
+	}
+
+	[Test]
+	public async Task ApplyAsync_WithoutAnAnimeFolder_NeverReadsTheStoredIds()
+	{
+		SonarrLooksUp(424536, "Anime");
+
+		await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_sonarr.Verify(
+			request => request.Method(HttpMethod.Post).Path("/api/v3/series").BodyContains("\"rootFolderPath\":\"/tv\"").BodyContains("\"seriesType\":\"standard\""),
+			Times.Once
+		);
+		_media.GetIdsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ApplyAsync_RemovingWhileRoutingAnime_NeverReadsTheStoredIds()
+	{
+		EmptySonarr();
+		Addressing(TvdbId.From("424536", MediaType.Show));
+
+		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_media.GetIdsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ApplyAsync_ForAnAnimeTitleAlreadyInTheApp_OnlyRetagsItWhereItIs()
+	{
+		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":3,"tvdbId":424536,"tags":[1]}]""");
+		_sonarr.OnPut("/api/v3/series/editor").Respond(HttpStatusCode.Accepted);
+		Addressing(TvdbId.From("424536", MediaType.Show));
+		HoldingOnAnimeSites(AniListId.From("154587", MediaType.Show));
+
+		var acks = await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
+		_sonarr.Verify(request => request.Method(HttpMethod.Put).Path("/api/v3/series/editor"), Times.Once);
+		_sonarr.Verify(request => request.Method(HttpMethod.Post).Path("/api/v3/series"), Times.Never);
+		_sonarr.Verify(request => request.PathStartsWith("/api/v3/series/lookup"), Times.Never);
 	}
 
 	[Test]
@@ -726,4 +843,33 @@ public class ArrSinkTests
 	{
 		_media.GetSinkIdsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new Dictionary<MediaId, IExternalMediaId> { [Known] = id });
 	}
+
+	private void SonarrLooksUp(int tvdb, params string[] genres)
+	{
+		var show = new JsonObject { ["tvdbId"] = tvdb, ["genres"] = new JsonArray([.. genres.Select(genre => JsonValue.Create(genre))]) };
+		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_sonarr.OnGet("/api/v3/series").RespondWithJson("[]");
+		_sonarr.OnRequest(request => request.Method(HttpMethod.Get).PathStartsWith("/api/v3/series/lookup")).RespondWithJson($"[{show.ToJsonString()}]");
+		_sonarr.OnPost("/api/v3/series").RespondWithJson($$"""{"id":3,"tvdbId":{{tvdb}},"tags":[1]}""");
+		Addressing(TvdbId.From($"{tvdb}", MediaType.Show));
+	}
+
+	private void RadarrLooksUp(int tmdb, params string[] keywords)
+	{
+		var movie = new JsonObject { ["tmdbId"] = tmdb, ["keywords"] = new JsonArray([.. keywords.Select(keyword => JsonValue.Create(keyword))]) };
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("[]");
+		_radarr.OnRequest(request => request.Method(HttpMethod.Get).PathStartsWith("/api/v3/movie/lookup")).RespondWithJson($"[{movie.ToJsonString()}]");
+		_radarr.OnPost("/api/v3/movie").RespondWithJson($$"""{"id":5,"tmdbId":{{tmdb}},"tags":[1]}""");
+		Addressing(TmdbId.From($"{tmdb}", MediaType.Movie));
+	}
+
+	private void HoldingOnAnimeSites(params IExternalMediaId[] held)
+	{
+		_media.GetIdsAsync(Any<IEnumerable<MediaId>>(), MediaProvider.AniList, Any()).Returns(Held(held, MediaProvider.AniList));
+		_media.GetIdsAsync(Any<IEnumerable<MediaId>>(), MediaProvider.Mal, Any()).Returns(Held(held, MediaProvider.Mal));
+	}
+
+	private static Dictionary<MediaId, IExternalMediaId> Held(IExternalMediaId[] held, MediaProvider site) =>
+		held.Where(id => id.Source == site).ToDictionary(_ => Known);
 }

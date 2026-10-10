@@ -86,5 +86,15 @@ public class SonarrApiTests
 		return VerifyJson(sonarr.Prepare(Lookup(), ArrInstanceConfig.Empty with { Monitored = false, SearchOnAdd = false }, Addition).ToJsonString());
 	}
 
+	[Test]
+	public async Task Prepare_ForTheAnimeRoute_SendsTheAnimeSeriesTypeWhateverTheOption()
+	{
+		var sonarr = new SonarrApi(new HttpClient(_sonarr), new SonarrOptions { SeriesType = SonarrSeriesType.Daily });
+
+		var prepared = sonarr.Prepare(Lookup(), ArrInstanceConfig.Empty, Addition with { Route = ArrRoute.Anime });
+
+		await Assert.That(prepared["seriesType"]!.GetValue<string>()).IsEqualTo("anime");
+	}
+
 	private static JsonObject Lookup() => new() { ["title"] = "Breaking Bad", ["tvdbId"] = 81189 };
 }

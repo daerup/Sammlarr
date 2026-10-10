@@ -27,10 +27,16 @@ internal sealed class SonarrApi(HttpClient http, SonarrOptions options) : ArrApi
 		return title.TmdbId > 0 ? [tvdb, TmdbId.From(title.TmdbId.ToString(), MediaType.Show)] : [tvdb];
 	}
 
-	protected override void AddOptions(JsonObject title, ArrInstanceConfig settings)
+	public override bool IsAnime(JsonObject lookup) => Lists(lookup, "genres", "Anime");
+
+	protected override void AddOptions(JsonObject title, ArrInstanceConfig settings, ArrRoute route)
 	{
 		title["seasonFolder"] = options.SeasonFolder;
-		title["seriesType"] = Wire(options.SeriesType);
+		title["seriesType"] = route switch
+		{
+			ArrRoute.Default => Wire(options.SeriesType),
+			ArrRoute.Anime => Wire(SonarrSeriesType.Anime),
+		};
 		title["addOptions"] = new JsonObject
 		{
 			["monitor"] = settings.Monitored ? "all" : "none",

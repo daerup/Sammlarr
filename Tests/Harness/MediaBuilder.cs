@@ -35,6 +35,8 @@ internal static class Ids
 	internal static ProviderId Imdb(string id) => new(MediaProvider.Imdb, id);
 
 	internal static ProviderId Tvdb(string id) => new(MediaProvider.Tvdb, id);
+
+	internal static ProviderId AniList(string id) => new(MediaProvider.AniList, id);
 }
 
 internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string title, IReadOnlyList<ProviderId> ids)

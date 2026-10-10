@@ -128,6 +128,32 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(host.Published<WantlistSyncFailedNotification>().Single().Reason).Contains("Sonarr answered 401");
 	}
 
+	[Test]
+	public async Task SyncAsync_ForAShowHoldingAnAniListId_PostsTheAnimeFolderAndSeriesType()
+	{
+		var config = await host.Resolve<IArrSinkConfigService>().GetAsync();
+		await host.Resolve<IArrSinkConfigService>().StoreAsync(config with { Sonarr = config.Sonarr with { AnimeRootFolderPath = Some.Of("/anime") } });
+		host.HttpStub.RespondWithJsonForUrl("sonarr.test/api/v3/tag", """[{"id":1,"label":"sammlarr-u-test-user"}]""");
+		host.HttpStub.RespondForUrl("sonarr.test/api/v3/series", Series);
+		var show = await host.Show(new MediaSpec("Frieren", MediaType.Show, [Tvdb("424536"), AniList("154587")])).SeedAsync();
+		await host.Resolve<IWantlistService>().AddAsync([show], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
+
+		await host.Resolve<IWantlistSyncEngine>().SyncAsync(Trigger);
+
+		await Assert.That(_added.Single()).Contains("\"rootFolderPath\":\"/anime\"").And.Contains("\"seriesType\":\"anime\"");
+	}
+
+	private HttpResponseMessage Series(HttpRequestMessage request)
+	{
+		if (request.Method != HttpMethod.Post)
+		{
+			return Json(request.RequestUri!.AbsolutePath.EndsWith("/lookup") ? """[{"title":"Frieren","tvdbId":424536}]""" : "[]");
+		}
+
+		_added.Add(request.Content!.ReadAsStringAsync().GetAwaiter().GetResult());
+		return Json("""{"id":3,"tvdbId":424536,"tags":[1]}""");
+	}
+
 	private HttpResponseMessage Movies(HttpRequestMessage request)
 	{
 		if (request.Method != HttpMethod.Post)

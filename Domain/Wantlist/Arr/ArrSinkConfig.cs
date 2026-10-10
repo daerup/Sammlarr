@@ -57,6 +57,8 @@ public sealed record ArrSinkConfig(ArrInstanceConfig Radarr, ArrInstanceConfig S
 
 	public bool IsSetUp => Radarr.IsSetUp && Sonarr.IsSetUp;
 
+	public bool RoutesAnime => Radarr.RoutesAnime || Sonarr.RoutesAnime;
+
 	public ArrInstanceConfig Of(ArrApp app)
 	{
 		return app switch

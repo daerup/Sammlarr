@@ -70,6 +70,16 @@ public class ArrSinkConfigTests
 	}
 
 	[Test]
+	public async Task RoutesAnime_ForTheSink_WhenEitherAppDoes()
+	{
+		var anime = SetUp with { AnimeRootFolderPath = Some.Of("/anime") };
+
+		await Assert.That(new ArrSinkConfig(SetUp, SetUp, ArrTagScheme.Default).RoutesAnime).IsFalse();
+		await Assert.That(new ArrSinkConfig(anime, SetUp, ArrTagScheme.Default).RoutesAnime).IsTrue();
+		await Assert.That(new ArrSinkConfig(SetUp, anime, ArrTagScheme.Default).RoutesAnime).IsTrue();
+	}
+
+	[Test]
 	public async Task FolderFor_Anime_WithoutAnAnimeFolder_IsTheDefaultFolder()
 	{
 		await Assert.That(SetUp.FolderFor(ArrRoute.Anime)).IsSome().And.IsEqualTo("/movies");
