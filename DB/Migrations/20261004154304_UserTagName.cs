@@ -12,7 +12,7 @@ public partial class _20261004154304_UserTagName : Migration
 	{
 		migrationBuilder.AddColumn<string>(name: "TagName", table: "Users", type: "TEXT", nullable: false, defaultValue: "");
 
-		migrationBuilder.Sql("UPDATE \"Users\" SET \"TagName\" = \"DisplayName\"");
+		migrationBuilder.Sql("UPDATE \"Users\" SET \"TagName\" = \"DisplayName\";");
 	}
 
 	/// <inheritdoc />

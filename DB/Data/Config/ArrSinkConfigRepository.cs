@@ -50,6 +50,8 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 			ApiKey = Optional.Of(row.ApiKey),
 			QualityProfileId = Optional.Of(row.QualityProfileId),
 			RootFolderPath = Optional.Of(row.RootFolderPath),
+			AnimeQualityProfileId = Optional.Of(row.AnimeQualityProfileId),
+			AnimeRootFolderPath = Optional.Of(row.AnimeRootFolderPath),
 			Monitored = row.Monitored,
 			SearchOnAdd = row.SearchOnAdd,
 		};
@@ -62,6 +64,8 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 		row.ApiKey = instance.ApiKey.ToNullable();
 		row.QualityProfileId = instance.QualityProfileId.ToNullable();
 		row.RootFolderPath = instance.RootFolderPath.ToNullable();
+		row.AnimeQualityProfileId = instance.AnimeQualityProfileId.ToNullable();
+		row.AnimeRootFolderPath = instance.AnimeRootFolderPath.ToNullable();
 		row.Monitored = instance.Monitored;
 		row.SearchOnAdd = instance.SearchOnAdd;
 	}

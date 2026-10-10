@@ -14,6 +14,10 @@ public sealed record ArrInstanceConfig
 
 	public Optional<string> RootFolderPath { get; init; } = new None();
 
+	public Optional<int> AnimeQualityProfileId { get; init; } = new None();
+
+	public Optional<string> AnimeRootFolderPath { get; init; } = new None();
+
 	public bool Monitored { get; init; } = true;
 
 	public bool SearchOnAdd { get; init; } = true;
@@ -23,6 +27,26 @@ public sealed record ArrInstanceConfig
 	public bool IsConnectable => Url.IsSome() && ApiKey.IsSome();
 
 	public bool IsSetUp => IsConnectable && QualityProfileId.IsSome() && RootFolderPath.IsSome();
+
+	public bool RoutesAnime => AnimeRootFolderPath.IsSome();
+
+	public Optional<string> FolderFor(ArrRoute route)
+	{
+		return route switch
+		{
+			ArrRoute.Default => RootFolderPath,
+			ArrRoute.Anime => AnimeRootFolderPath.Or(() => RootFolderPath),
+		};
+	}
+
+	public Optional<int> ProfileFor(ArrRoute route)
+	{
+		return route switch
+		{
+			ArrRoute.Default => QualityProfileId,
+			ArrRoute.Anime => AnimeQualityProfileId.Or(() => QualityProfileId),
+		};
+	}
 }
 
 public sealed record ArrSinkConfig(ArrInstanceConfig Radarr, ArrInstanceConfig Sonarr, ArrTagScheme Tags)

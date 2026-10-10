@@ -19,7 +19,7 @@ public class DropTmdbFeedsMigrationTests(SammlarrTestHost host) : IAsyncDisposab
 		await connection.OpenAsync();
 		await using var context = host.ContextOn(connection);
 		var migrator = context.GetService<IMigrator>();
-		await migrator.MigrateAsync(Before);
+		await ExecuteAsync(connection, migrator.GenerateScript(toMigration: Before));
 		var tmdb = Guid.NewGuid();
 		var mdblist = Guid.NewGuid();
 		await ExecuteAsync(connection, "PRAGMA foreign_keys = OFF;");
