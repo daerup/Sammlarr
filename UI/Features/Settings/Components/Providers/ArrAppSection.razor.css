@@ -25,11 +25,24 @@
     margin-top: 6px;
 }
 
-.arr-app-external-head {
+.arr-app-addon-head {
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 0.78rem;
+}
+
+.arr-app-anime {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.arr-app-anime-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 8px 24px;
 }
 
 .arr-app-switch {
@@ -57,7 +70,8 @@
 }
 
 @media (max-width: 640px) {
-    .arr-app {
+    .arr-app,
+    .arr-app-anime-pair {
         grid-template-columns: minmax(0, 1fr);
     }
 }

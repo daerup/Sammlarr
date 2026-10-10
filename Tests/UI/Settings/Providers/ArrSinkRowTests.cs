@@ -35,6 +35,8 @@ public class ArrSinkRowTests : BunitContext
 		ArrTagScheme.Default
 	);
 
+	private static readonly ArrInstanceConfig AnimeSonarr = Connected.Sonarr with { AnimeRootFolderPath = Some.Of("/anime"), AnimeQualityProfileId = Some.Of(6) };
+
 	private readonly Mock<IArrSinkConfigService> _configs = IArrSinkConfigService.Mock();
 
 	private readonly Mock<IArrConnectionTester> _tester = IArrConnectionTester.Mock();
@@ -114,6 +116,57 @@ public class ArrSinkRowTests : BunitContext
 	public async Task Test_WhenNothingIsChosenYet_StoresTheAppsFirstProfileAndFolder()
 	{
 		_configs.GetAsync(Any()).Returns(Connected with { Radarr = Connected.Radarr with { QualityProfileId = new None(), RootFolderPath = new None() } });
+
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => Badge(cut) == "Connected");
+		_configs.StoreAsync(Is<ArrSinkConfig>(config => config!.Radarr == Connected.Radarr), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Test_WhenTheAppNoLongerHasTheAnimeFolder_TurnsTheAnimeSlotOff()
+	{
+		_configs.GetAsync(Any()).Returns(Connected with { Sonarr = AnimeSonarr });
+
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => Badge(cut) == "Connected");
+		_configs.StoreAsync(Is<ArrSinkConfig>(config => config!.Sonarr == Connected.Sonarr), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Test_WhileTheAppStillHasTheAnimeFolderAndProfile_KeepsThem()
+	{
+		_configs.GetAsync(Any()).Returns(Connected with { Sonarr = AnimeSonarr });
+		SonarrAnswers(new ArrQualityProfile(4, "HD-1080p"), new ArrQualityProfile(6, "Anime"));
+
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => Badge(cut) == "Connected");
+		_configs.StoreAsync(Any<ArrSinkConfig>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task Test_WhenTheAppNoLongerHasTheAnimeProfile_KeepsTheAnimeFolderWithTheDefaultProfile()
+	{
+		_configs.GetAsync(Any()).Returns(Connected with { Sonarr = AnimeSonarr });
+		SonarrAnswers(new ArrQualityProfile(4, "HD-1080p"));
+
+		var cut = RenderRow(settingUp: false);
+
+		cut.WaitForState(() => Badge(cut) == "Connected");
+		_configs.StoreAsync(Is<ArrSinkConfig>(config => config!.Sonarr == AnimeSonarr with { AnimeQualityProfileId = new None() }), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Test_WithTwoFolders_PicksOnlyTheDefaultOne()
+	{
+		_configs.GetAsync(Any()).Returns(Connected with { Radarr = Connected.Radarr with { RootFolderPath = new None() } });
+		_tester
+			.TestAsync(ArrApp.Radarr, Any<ArrInstanceConfig>(), Any())
+			.Returns(
+				Success.Of(new ArrInstanceChoices([new ArrQualityProfile(4, "HD-1080p")], [new ArrRootFolder("/movies", 1), new ArrRootFolder("/anime-movies", 1)]))
+			);
 
 		var cut = RenderRow(settingUp: false);
 
@@ -286,6 +339,13 @@ public class ArrSinkRowTests : BunitContext
 			.Returns(
 				Success.Of(new ArrInstanceChoices([new ArrQualityProfile(4, "HD-1080p"), new ArrQualityProfile(6, "Ultra-HD")], [new ArrRootFolder(folder, 1)]))
 			);
+	}
+
+	private void SonarrAnswers(params ArrQualityProfile[] profiles)
+	{
+		_tester
+			.TestAsync(ArrApp.Sonarr, Any<ArrInstanceConfig>(), Any())
+			.Returns(Success.Of(new ArrInstanceChoices(profiles, [new ArrRootFolder("/tv", 1), new ArrRootFolder("/anime", 1)])));
 	}
 
 	private static string Badge(IRenderedComponent<ArrSinkRow> cut) => cut.Find(".arr-row-head > span:last-child").TextContent.Trim();

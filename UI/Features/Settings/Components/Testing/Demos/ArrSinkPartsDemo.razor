@@ -3,13 +3,16 @@
 @using UI.Features.Settings.Components.Providers
 
 <DemoCard Title="Radarr + Sonarr row" Where="Providers › Accounts and keys › Radarr + Sonarr" Span="2"
-          Note="The panels of ArrSinkRow's tabs, which test the real connection when the row opens: an app not set up, one that answered with its profiles and folders, one that refused the key, and the tags it writes.">
+          Note="The panels of ArrSinkRow's tabs, which test the real connection when the row opens: an app not set up, one that answered with its profiles and folders, the same with an anime folder, one that refused the key, and the tags it writes.">
     <div class="divide-y overflow-hidden rounded-lg border bg-card">
         <div class="px-5 py-4">
             <ArrAppSection App="ArrApp.Radarr" Instance="ArrInstanceConfig.Empty" State="ArrConnectionState.Empty"/>
         </div>
         <div class="px-5 py-4">
             <ArrAppSection App="ArrApp.Sonarr" Instance="Connected" State="ArrConnectionState.Connected" Choices="Choices"/>
+        </div>
+        <div class="px-5 py-4">
+            <ArrAppSection App="ArrApp.Sonarr" Instance="Connected with { AnimeRootFolderPath = Some.Of(Anime) }" State="ArrConnectionState.Connected" Choices="Choices"/>
         </div>
         <div class="px-5 py-4">
             <ArrAppSection App="ArrApp.Radarr" Instance="Connected with { Url = Some.Of(Radarr) }" State="ArrConnectionState.Failed"
@@ -24,6 +27,8 @@
 @code {
     private const string Radarr = "http://radarr:7878";
 
+    private const string Anime = "/anime";
+
     private static readonly ArrInstanceConfig Connected = new()
     {
         Url = Some.Of("http://sonarr:8989"),
@@ -32,7 +37,10 @@
         RootFolderPath = Some.Of("/tv"),
     };
 
-    private static readonly ArrInstanceChoices Choices = new([new ArrQualityProfile(4, "HD-1080p"), new ArrQualityProfile(6, "Ultra-HD")], [new ArrRootFolder("/tv", 1319413953331)]);
+    private static readonly ArrInstanceChoices Choices = new(
+        [new ArrQualityProfile(4, "HD-1080p"), new ArrQualityProfile(6, "Ultra-HD")],
+        [new ArrRootFolder("/tv", 1319413953331), new ArrRootFolder(Anime, 1319413953331)]
+    );
 
     private static readonly IReadOnlyList<ArrTagUser> Users = [new(Guid.Parse("8f14e45f-ceea-467a-9575-6c0f6e3b4c11"), "Guest"), new(Guid.Parse("1c5d7a4e-2f10-4b8e-9f3a-6d2e8c1b0a77"), "Mira")];
 
