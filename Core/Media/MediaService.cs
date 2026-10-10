@@ -40,9 +40,9 @@ internal sealed class MediaService(
 		}
 
 		await using var buffer = bufferFactory.Create();
-		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
+		var merge = new IdentityMerge();
 		var sink = await activeSink.ResolveAsync(cancellationToken);
-		var handoffs = await IdentifyBatchAsync([.. materialized.Select(TracedRequest.Untraced)], sink.AddressedBy, building, buffer, cancellationToken);
+		var handoffs = await IdentifyBatchAsync([.. materialized.Select(TracedRequest.Untraced)], sink.AddressedBy, merge, buffer, cancellationToken);
 		foreach (var (_, handoff) in materialized.Zip(handoffs))
 		{
 			yield return ToIdentityResult(handoff);
@@ -95,7 +95,7 @@ internal sealed class MediaService(
 		await using var buffer = bufferFactory.Create();
 		var sink = await activeSink.ResolveAsync(cancellationToken);
 		var connected = await detailsFetcher.ConnectedAsync(cancellationToken);
-		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
+		var merge = new IdentityMerge();
 		var size = FirstBatchSize;
 		var batch = new List<IdentifyRequest>(size);
 		await using var source = requests.PrefetchAsync(PrefetchCapacity, cancellationToken).GetAsyncEnumerator(cancellationToken);
@@ -128,7 +128,7 @@ internal sealed class MediaService(
 				continue;
 			}
 
-			await foreach (var result in IdentifyAndLoadAsync(batch, sink, building, connected, buffer, cancellationToken))
+			await foreach (var result in IdentifyAndLoadAsync(batch, sink, merge, connected, buffer, cancellationToken))
 			{
 				yield return result;
 			}
@@ -140,7 +140,7 @@ internal sealed class MediaService(
 		FeedRunSpans.SourceEnded(listing, pulled);
 		if (batch.Count > 0 && failure?.SourceException is not OperationCanceledException)
 		{
-			await foreach (var result in IdentifyAndLoadAsync(batch, sink, building, connected, buffer, cancellationToken))
+			await foreach (var result in IdentifyAndLoadAsync(batch, sink, merge, connected, buffer, cancellationToken))
 			{
 				yield return result;
 			}
@@ -152,14 +152,14 @@ internal sealed class MediaService(
 	private async IAsyncEnumerable<MediaMatchResult> IdentifyAndLoadAsync(
 		IReadOnlyList<IdentifyRequest> batch,
 		IMediaSink sink,
-		Dictionary<IExternalMediaId, MediaIdentity> building,
+		IdentityMerge merge,
 		IReadOnlySet<RemoteService> connected,
 		MediaWriteBuffer buffer,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
 		IReadOnlyList<TracedRequest> traced = [.. batch.Select(request => new TracedRequest(request, TitleSpan(request)))];
-		var handoffs = await IdentifyBatchAsync(traced, sink.AddressedBy, building, buffer, cancellationToken);
+		var handoffs = await IdentifyBatchAsync(traced, sink.AddressedBy, merge, buffer, cancellationToken);
 		var pipeline = traced
 			.Zip(handoffs)
 			.SelectAwait((pair, token) => LoadRequestDetailsAsync(pair.First, pair.Second, connected, buffer, token), RecommendedConcurrency, cancellationToken);
@@ -253,7 +253,7 @@ internal sealed class MediaService(
 		IReadOnlyList<IdentifyRequest> requests = [.. stored.Select(media => new IdentifyRequest([.. media.Identity.Externals], HintsOf(media)))];
 		await using (var buffer = bufferFactory.Create())
 		{
-			await IdentifyBatchAsync([.. requests.Select(TracedRequest.Untraced)], addressedBy, [], buffer, cancellationToken);
+			await IdentifyBatchAsync([.. requests.Select(TracedRequest.Untraced)], addressedBy, new IdentityMerge(), buffer, cancellationToken);
 		}
 
 		var found = await IdsAsync(missing, addressedBy, cancellationToken);
@@ -299,7 +299,7 @@ internal sealed class MediaService(
 	private async Task<IReadOnlyList<Result<IdentifyHandoff>>> IdentifyBatchAsync(
 		IReadOnlyList<TracedRequest> requests,
 		Func<MediaType, Optional<MediaProvider>> addressedBy,
-		Dictionary<IExternalMediaId, MediaIdentity> building,
+		IdentityMerge merge,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -310,7 +310,7 @@ internal sealed class MediaService(
 		var preliminary = await requests
 			.SelectAwait((req, token) => IdentifyOneAsync(req, addressedBy, stored, connected, buffer, token), RecommendedConcurrency, cancellationToken)
 			.ToListAsync(cancellationToken);
-		return await coordinator.CoordinateHandoffsAsync(preliminary, building, buffer, cancellationToken);
+		return await coordinator.CoordinateHandoffsAsync(preliminary, merge, buffer, cancellationToken);
 	}
 
 	private async ValueTask<Result<IdentifyHandoff>> IdentifyOneAsync(
