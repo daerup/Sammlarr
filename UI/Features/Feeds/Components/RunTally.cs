@@ -4,7 +4,7 @@ namespace UI.Features.Feeds.Components;
 
 public sealed record RunTally(FateTally Fates, Optional<int> Total, bool Estimated, int ElapsedMs, Optional<FeedRunEnd> Ended)
 {
-	private static readonly RunPart[] LegendOrder = [RunPart.Matched, RunPart.CouldNotLookUp, RunPart.NotFound, RunPart.Known, RunPart.NotFoundEarlier];
+	private static readonly RunPart[] LegendOrder = [RunPart.Matched, RunPart.Known, RunPart.NotFound, RunPart.NotFoundEarlier, RunPart.CouldNotLookUp];
 
 	internal static RunTally Before(Optional<int> previous) => new(FateTally.None, previous, previous.IsSome(), 0, new None());
 

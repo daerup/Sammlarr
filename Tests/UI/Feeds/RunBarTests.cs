@@ -16,13 +16,27 @@ public class RunBarTests
 		await Assert
 			.That(segments.Select(segment => (segment.Part, segment.Count)))
 			.IsEquivalentTo(
-				[(RunPart.Known, 6), (RunPart.NotFoundEarlier, 2), (RunPart.Matched, 8), (RunPart.NotFound, 3), (RunPart.CouldNotLookUp, 1)],
+				[(RunPart.Known, 6), (RunPart.Matched, 8), (RunPart.NotFound, 3), (RunPart.NotFoundEarlier, 2), (RunPart.CouldNotLookUp, 1)],
 				CollectionOrdering.Matching
 			);
 		await Assert
 			.That(RunBar.Legend(segments).Select(segment => segment.Part))
 			.IsEquivalentTo([RunPart.Matched, RunPart.Known, RunPart.NotFound, RunPart.NotFoundEarlier, RunPart.CouldNotLookUp], CollectionOrdering.Matching);
 		await Assert.That(segments.Sum(segment => segment.Percent)).IsEqualTo(100);
+	}
+
+	[Test]
+	public async Task Meaning_ForMatched_NamesTheSink()
+	{
+		await Assert
+			.That(RunBar.Meaning(RunPart.Matched, "Radarr + Sonarr"))
+			.IsEqualTo("Found this run: Sammlarr now has the ids it needs to add it to Radarr + Sonarr.");
+	}
+
+	[Test]
+	public async Task Meaning_ForEveryPart_SaysSomething()
+	{
+		await Assert.That(Enum.GetValues<RunPart>().Select(part => RunBar.Meaning(part, "Plex")).Distinct().Count()).IsEqualTo(Enum.GetValues<RunPart>().Length);
 	}
 
 	[Test]

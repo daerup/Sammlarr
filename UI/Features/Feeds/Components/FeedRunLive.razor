@@ -53,9 +53,9 @@
         <div class="live-legend" data-testid="live-legend">
             @foreach (var part in Tally.Legend)
             {
-                <span><i class="sq" style="@($"background: {RunBar.Color(part)}")"></i>@RunBar.Label(part) <b>@Count(Tally.Count(part))</b></span>
+                @LegendEntry(RunBar.Label(part), RunBar.Meaning(part, Branding.NickName(Run.Layout.Sink.Service)), Tally.Count(part), $"background: {RunBar.Color(part)}", null)
             }
-            <span><i class="sq is-flight"></i>In flight <b>@Count(Tally.InFlight)</b></span>
+            @LegendEntry("In flight", RunBar.InFlightMeaning, Tally.InFlight, null, "is-flight")
         </div>
     </div>
     <div class="live-body" @ref="_body" hidden="@Run.Hidden" data-testid="live-body"></div>
@@ -304,7 +304,18 @@
     private static RenderFragment Past(FeedRunCounts counts, QueryLimit limit) =>
         @<span><b>@Count(counts.Skipped)</b> past the limit of @Count(limit.Count)</span>;
 
-    private RenderFragment Running => @<FeedChip Tone="FeedChipTone.Attention"><span class="feed-chip-dot"></span>Running</FeedChip>;
+    private static RenderFragment LegendEntry(string label, string meaning, int count, string? style, string? swatch) =>
+        @<BbTooltip DelayDuration="150">
+            <BbTooltipTrigger AsChild="false">
+                <span data-testid="live-legend-entry"><i class="sq @swatch" style="@style"></i>@label <b>@Count(count)</b></span>
+            </BbTooltipTrigger>
+            <BbTooltipContent Class="w-[280px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
+                <b class="mb-0.5 block font-semibold text-foreground">@label</b>
+                @meaning
+            </BbTooltipContent>
+        </BbTooltip>;
+
+    private RenderFragment Running => @<FeedChip Tone="FeedChipTone.Running"><span class="feed-chip-dot"></span>Running</FeedChip>;
 
     private RenderFragment Ended(FeedRunEnd end)
     {

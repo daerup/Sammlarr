@@ -137,7 +137,7 @@
                         <span class="text-right tabular-nums text-muted-foreground">@line.Runs.Count</span>
                         <span class="text-right font-semibold tabular-nums">@UsageView.Count(stats.CallsPerRun)</span>
                         <span class="text-right tabular-nums">@FormattableString.Invariant($"{stats.CallsPerTitle:0.0}")</span>
-                        <span class="@($"text-right tabular-nums {(stats.CouldNotLookUp > 0 ? "font-medium text-[var(--usage-gave-up)]" : string.Empty)}")"
+                        <span class="@($"text-right tabular-nums {(stats.CouldNotLookUp > 0 ? "font-medium text-[var(--fate-couldnot)]" : string.Empty)}")"
                               title="@UnmatchedTitle(line)" data-testid="usage-feed-unmatched">
                             @if (stats.CouldNotLookUp > 0)
                             {
@@ -261,7 +261,7 @@
     private IReadOnlyList<(string Text, string Colour)> Rings =>
         _tab is FeedsTab.Calls
             ? [("A ring: some calls were rate-limited", "var(--usage-after-429)"), ("some gave up", "var(--usage-gave-up)")]
-            : [("A ring: some titles could not be looked up", "var(--usage-gave-up)")];
+            : [("A ring: some titles could not be looked up", "var(--fate-couldnot)")];
 
     private string HoverRules => string.Concat(Feeds.Select((_, index) => Rules(Key(index))));
 
@@ -295,7 +295,7 @@
         {
             (FeedsTab.Calls, true, _, _) => Some.Of("var(--usage-gave-up)"),
             (FeedsTab.Calls, false, true, _) => Some.Of("var(--usage-after-429)"),
-            (FeedsTab.Unmatched, _, _, true) => Some.Of("var(--usage-gave-up)"),
+            (FeedsTab.Unmatched, _, _, true) => Some.Of("var(--fate-couldnot)"),
             _ => new None(),
         };
     }

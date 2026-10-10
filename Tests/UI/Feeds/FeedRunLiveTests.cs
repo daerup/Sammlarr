@@ -1,10 +1,12 @@
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Primitives;
 using Bunit;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Feed.Trace;
 using Domain.Processing;
 using Domain.Providers;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
@@ -253,6 +255,63 @@ public class FeedRunLiveTests : BunitContext
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 
 		await Assert.That(Segments(cut)).IsEquivalentTo(["Source page 1", "0 waiting on a service"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task LegendEntry_OnHover_SaysWhatItMeans()
+	{
+		var cut = Render(builder =>
+		{
+			builder.OpenComponent<BbPortalHost>(0);
+			builder.CloseComponent();
+			builder.OpenComponent<FeedRunLive>(1);
+			builder.AddComponentParameter(2, nameof(FeedRunLive.Run), _run.Object);
+			builder.CloseComponent();
+		});
+		var couldNot = cut.FindAll("[data-testid=live-legend-entry]").Single(entry => entry.TextContent.Contains("Couldn't look up"));
+
+		var card = $"#{couldNot.ParentElement!.Id.Replace("-trigger", "-content", StringComparison.Ordinal)}";
+
+		await couldNot.ParentElement.TriggerEventAsync("onmouseenter", new MouseEventArgs());
+
+		cut.WaitForState(() => cut.FindAll(card).Count == 1);
+		await Assert.That(cut.Find(card).TextContent).Contains("Couldn't look up").And.Contains("so the lookup never finished");
+	}
+
+	[Test]
+	public async Task Header_WhileRunning_ShowsANeutralRunningChip()
+	{
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert.That(cut.Find(".feed-chip").ClassList).Contains("is-running");
+	}
+
+	[Test]
+	public async Task Bar_ForARun_PutsNotFoundEarlierBesideNotFound()
+	{
+		_run.Tally.Getter.Returns(
+			RunTally.Of(
+				FateTally.None with
+				{
+					Started = 30,
+					Matched = 12,
+					Known = 4,
+					NotFound = 9,
+					Earlier = 5,
+					CouldNotLookUp = 2,
+				},
+				new None(),
+				4000,
+				new None(),
+				Some.Of(400)
+			)
+		);
+
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert
+			.That(cut.FindAll("[data-testid=live-bar] i[data-part]").Select(part => part.GetAttribute("data-part")))
+			.IsEquivalentTo(["Known", "Matched", "NotFound", "NotFoundEarlier", "CouldNotLookUp"], CollectionOrdering.Matching);
 	}
 
 	private static IReadOnlyList<string> Segments(IRenderedComponent<FeedRunLive> cut)

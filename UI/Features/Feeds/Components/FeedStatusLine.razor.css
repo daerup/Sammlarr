@@ -19,7 +19,7 @@
 }
 
 .status-item.is-running {
-    color: var(--alert-warning);
+    color: var(--foreground);
     font-weight: 600;
 }
 
@@ -36,7 +36,7 @@
     width: 6px;
     height: 6px;
     border-radius: 999px;
-    background: var(--alert-warning);
+    background: var(--muted-foreground);
 }
 
 .status-dot::after {
@@ -44,7 +44,7 @@
     position: absolute;
     inset: 0;
     border-radius: 999px;
-    background: var(--alert-warning);
+    background: var(--muted-foreground);
     animation: status-dot-pulse 1.6s ease-out infinite;
 }
 

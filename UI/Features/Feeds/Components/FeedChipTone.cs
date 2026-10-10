@@ -7,5 +7,6 @@ public enum FeedChipTone
 	Scheduled,
 	Quiet,
 	Attention,
+	Running,
 	Failed,
 }
