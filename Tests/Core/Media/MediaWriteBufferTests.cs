@@ -44,6 +44,69 @@ public class MediaWriteBufferTests
 			.WasCalled(Times.Once);
 	}
 
+	[Test]
+	public async Task AddIdentity_AfterItsIdWasMerged_LandsOnTheSurvivor()
+	{
+		var learned = PlexId.From("plex-1", MediaType.Movie);
+		await using var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance);
+		testee.MergeIdentity(Absorbed.Id, Survivor with { Externals = Survivor.Externals + Absorbed.Externals });
+
+		testee.AddIdentity(Absorbed with { Externals = Absorbed.Externals + [learned] });
+
+		await Assert.That(testee.NewIdentities.Select(identity => identity.Id)).IsEquivalentTo([Survivor.Id]);
+		await Assert.That(testee.NewIdentities.Single().Externals).Contains(learned);
+	}
+
+	[Test]
+	public async Task Add_AfterItsIdWasMerged_KeepsTheDetailsOnTheSurvivor()
+	{
+		await using var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance);
+		testee.MergeIdentity(Absorbed.Id, Survivor with { Externals = Survivor.Externals + Absorbed.Externals });
+
+		testee.Add(new MatchedMedia(Absorbed, new MovieDetails { Title = "Late" }), Cached("Late"));
+
+		await Assert.That(testee.NewDetails.Keys).IsEquivalentTo([Survivor.Id]);
+		await Assert.That(testee.NewIdentities.Select(identity => identity.Id)).IsEquivalentTo([Survivor.Id]);
+	}
+
+	[Test]
+	public async Task MergeIdentity_BackAndForthBetweenTwoIds_KeepsOneIdentity()
+	{
+		var both = Survivor.Externals + Absorbed.Externals;
+		await using var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance);
+		testee.MergeIdentity(Absorbed.Id, Survivor with { Externals = both });
+
+		testee.MergeIdentity(Survivor.Id, Absorbed with { Externals = both });
+
+		var absorbedRoot = await Task.Run(() => testee.Survivor(Absorbed.Id)).WaitAsync(TimeSpan.FromSeconds(5));
+		var survivorRoot = await Task.Run(() => testee.Survivor(Survivor.Id)).WaitAsync(TimeSpan.FromSeconds(5));
+
+		await Assert.That(testee.NewIdentities).Count().IsEqualTo(1);
+		await Assert.That(absorbedRoot).IsEqualTo(survivorRoot);
+	}
+
+	[Test]
+	public async Task MergeIdentity_AfterTheAbsorbedIdLearnedAnId_KeepsItOnTheSurvivor()
+	{
+		var learned = PlexId.From("plex-2", MediaType.Movie);
+		await using var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance);
+		testee.AddIdentity(Absorbed with { Externals = Absorbed.Externals + [learned] });
+
+		testee.MergeIdentity(Absorbed.Id, Survivor with { Externals = Survivor.Externals + Absorbed.Externals });
+
+		await Assert.That(testee.NewIdentities.Single().Externals).Contains(learned);
+	}
+
+	[Test]
+	public async Task AddIdentity_FromManyThreadsAtOnce_KeepsEveryIdentity()
+	{
+		await using var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance);
+
+		Parallel.For(0, 2000, i => testee.AddIdentity(new MediaIdentity(MediaId.New(), [TmdbId.From($"{i}", MediaType.Movie)])));
+
+		await Assert.That(testee.NewIdentities).Count().IsEqualTo(2000);
+	}
+
 	private static CachedDetails Cached(string title) => new(new MovieDetails { Title = title }, RefreshedAt, RefreshedAt, []);
 
 	private static Mock<IMediaRepository> Repository()

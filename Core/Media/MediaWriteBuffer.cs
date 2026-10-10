@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using Contracts.Media;
 using Domain.Media;
 using Microsoft.Extensions.Logging;
@@ -9,12 +8,32 @@ internal sealed class MediaWriteBuffer : IAsyncDisposable
 {
 	private readonly IMediaRepository _mediaRepository;
 	private readonly ILogger<MediaWriteBuffer> _logger;
-	private readonly ConcurrentDictionary<MediaId, MediaIdentity> _identities = new();
-	private readonly ConcurrentDictionary<MediaId, MediaId> _absorbed = new();
-	private readonly ConcurrentDictionary<MediaId, CachedDetails> _details = new();
+	private readonly Lock _gate = new();
+	private readonly Dictionary<MediaId, MediaIdentity> _identities = [];
+	private readonly Dictionary<MediaId, MediaId> _absorbed = [];
+	private readonly Dictionary<MediaId, CachedDetails> _details = [];
 
-	public IReadOnlyCollection<MediaIdentity> NewIdentities => [.. _identities.Values];
-	public IReadOnlyDictionary<MediaId, CachedDetails> NewDetails => _details;
+	public IReadOnlyCollection<MediaIdentity> NewIdentities
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return [.. _identities.Values];
+			}
+		}
+	}
+
+	public IReadOnlyDictionary<MediaId, CachedDetails> NewDetails
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return new Dictionary<MediaId, CachedDetails>(_details);
+			}
+		}
+	}
 
 	public MediaWriteBuffer(IMediaRepository mediaRepository, ILogger<MediaWriteBuffer> logger)
 	{
@@ -22,26 +41,66 @@ internal sealed class MediaWriteBuffer : IAsyncDisposable
 		_logger = logger;
 	}
 
-	public void AddIdentity(MediaIdentity identity) =>
-		_identities.AddOrUpdate(identity.Id, identity, (_, existing) => existing with { Externals = existing.Externals + identity.Externals });
+	public void AddIdentity(MediaIdentity identity)
+	{
+		lock (_gate)
+		{
+			var survivor = Survivor(identity.Id);
+			_identities[survivor] = _identities
+				.GetValueOrNone(survivor)
+				.Map(existing => existing with { Externals = existing.Externals + identity.Externals })
+				.GetValueOr(() => identity with { Id = survivor });
+		}
+	}
 
 	public void MergeIdentity(MediaId absorbed, MediaIdentity survivor)
 	{
-		_identities.TryRemove(absorbed, out _);
-		_absorbed[absorbed] = survivor.Id;
-		AddIdentity(survivor);
+		lock (_gate)
+		{
+			var from = Survivor(absorbed);
+			var to = Survivor(survivor.Id);
+			var merged = survivor with { Id = to };
+			if (from != to)
+			{
+				merged = _identities.GetValueOrNone(from).Map(found => merged with { Externals = merged.Externals + found.Externals }).GetValueOr(merged);
+				_absorbed[from] = to;
+				_identities.Remove(from);
+			}
+
+			AddIdentity(merged);
+		}
 	}
 
 	public void Add(MatchedMedia media, CachedDetails cached)
 	{
-		AddIdentity(media.Identity);
-		_details[media.Identity.Id] = cached;
+		lock (_gate)
+		{
+			AddIdentity(media.Identity);
+			_details[Survivor(media.Identity.Id)] = cached;
+		}
+	}
+
+	internal MediaId Survivor(MediaId id)
+	{
+		lock (_gate)
+		{
+			while (_absorbed.TryGetValue(id, out var next))
+			{
+				id = next;
+			}
+			return id;
+		}
 	}
 
 	public async ValueTask DisposeAsync()
 	{
-		var identities = _identities.Values.ToList();
-		var details = new Dictionary<MediaId, CachedDetails>(_details);
+		List<MediaIdentity> identities;
+		Dictionary<MediaId, CachedDetails> details;
+		lock (_gate)
+		{
+			identities = [.. _identities.Values];
+			details = new Dictionary<MediaId, CachedDetails>(_details);
+		}
 		if (identities.Count > 0)
 		{
 			var canonical = await _mediaRepository.UpsertIdentitiesAsync(identities, CancellationToken.None);
@@ -71,17 +130,9 @@ internal sealed class MediaWriteBuffer : IAsyncDisposable
 		var remapped = new Dictionary<MediaId, CachedDetails>();
 		foreach (var (id, cached) in details)
 		{
-			remapped[Survivor(id, upserted)] = cached;
+			var survivor = Survivor(id);
+			remapped[upserted.GetValueOrDefault(survivor, survivor)] = cached;
 		}
 		return remapped;
-	}
-
-	private MediaId Survivor(MediaId id, IReadOnlyDictionary<MediaId, MediaId> upserted)
-	{
-		while (_absorbed.TryGetValue(id, out var next))
-		{
-			id = next;
-		}
-		return upserted.GetValueOrDefault(id, id);
 	}
 }
