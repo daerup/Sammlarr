@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 using Web.Staging;
 
-namespace Integration.Tests.Staging;
+namespace Web.Tests.Staging;
 
 public class StagingRunTests
 {

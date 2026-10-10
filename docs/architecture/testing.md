@@ -15,6 +15,7 @@ snapshots need the native runner).
 | Single-collaborator units | `Tests/Core`                   | A service with one dependency                           | one `IFoo.Mock()`                 |
 | Behaviour + repositories  | `Tests/Integration`            | The real Core+DB+API graph, EF queries, migration drift; the DB converters and conventions (`Tests/Integration/DB`) | `SammlarrTestHost` on real SQLite |
 | Components                | `Tests/UI`                     | Blazor render logic, event wiring, empty/error states   | bUnit, `.cs` only                 |
+| Host                      | `Tests/Web`                    | The Web host's own code: redirects, health checks, the staging seed and its settings (`Tests/Web/Staging`); the only non-E2E tier that builds Web, so the only one that needs Node | plain `[Test]`, mocks, a temporary SQLite file for the seed |
 | End to end                | `Tests/E2E`                    | Cross-feature flows through a real browser              | Playwright + Aspire + WireMock    |
 | Conventions               | `Tests/Architecture`           | Dependency direction, naming, design rules              | NetArchTest                       |
 | Roslyn components         | `Tests/Roslyn`                 | Source generators and analyzers                         | in-memory compilation             |
@@ -22,11 +23,11 @@ snapshots need the native runner).
 Rule of thumb: wiring more than one or two `.Mock()`s just to construct the subject means it belongs in `Tests/Integration` as a harness scenario, not a unit
 test.
 
-Current suite: **2942** non-E2E tests plus **159** E2E (17 of them on the self-hosted stacks, and the staging smoke test, skipped by default).
+Current suite: **3904** non-E2E tests plus **159** E2E (17 of them on the self-hosted stacks, and the staging smoke test, skipped by default).
 
 | Domain | Shared | Core | API | Architecture | Roslyn | Integration | UI   | Web |
 |--------|--------|------|-----|--------------|--------|-------------|------|-----|
-| 279    | 183    | 372  | 302 | 44           | 98     | 625         | 1011 | 28  |
+| 336    | 201    | 518  | 687 | 44           | 100    | 678         | 1273 | 67  |
 
 ## Running
 
