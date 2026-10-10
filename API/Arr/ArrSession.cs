@@ -82,6 +82,8 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, List<ArrT
 
 	public JsonObject Prepare(JsonObject lookup, ArrInstanceConfig settings, ArrAddition addition) => api.Prepare(lookup, settings, addition);
 
+	public bool IsAnime(JsonObject lookup) => api.IsAnime(lookup);
+
 	public Task<Result<Optional<JsonObject>>> LookupAsync(IExternalMediaId id, CancellationToken cancellationToken)
 	{
 		return api.LookupAsync(connection, id, cancellationToken);

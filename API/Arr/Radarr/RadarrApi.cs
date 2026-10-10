@@ -23,7 +23,9 @@ internal sealed class RadarrApi(HttpClient http, RadarrOptions options) : ArrApi
 
 	public override IReadOnlyList<IExternalMediaId> IdsOf(ArrTitle title) => [TmdbId.From(title.TmdbId.ToString(), MediaType.Movie)];
 
-	protected override void AddOptions(JsonObject title, ArrInstanceConfig settings)
+	public override bool IsAnime(JsonObject lookup) => Lists(lookup, "keywords", "anime");
+
+	protected override void AddOptions(JsonObject title, ArrInstanceConfig settings, ArrRoute route)
 	{
 		title["minimumAvailability"] = Wire(options.MinimumAvailability);
 		title["addOptions"] = new JsonObject { ["searchForMovie"] = settings.SearchOnAdd, ["monitor"] = settings.Monitored ? "movieOnly" : "none" };

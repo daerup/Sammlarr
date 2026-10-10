@@ -96,4 +96,18 @@ public class FindIdTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(found).IsSome().And.IsEqualTo(RottenTomatoesId.From("m/inception", MediaType.Movie));
 	}
+
+	[Test]
+	public async Task GetIdsAsync_ReturnsOnlyTheIdsATitleAlreadyHolds()
+	{
+		var inception = await host.Movie(Inception).SeedAsync();
+		host.WikidataHolds(ImdbTitle, "m/inception");
+
+		var imdb = await Testee.GetIdsAsync([inception], MediaProvider.Imdb);
+		var rottenTomatoes = await Testee.GetIdsAsync([inception], MediaProvider.RottenTomatoes);
+
+		await Assert.That(imdb[inception]).IsEqualTo(ImdbId.From(ImdbTitle, MediaType.Movie));
+		await Assert.That(rottenTomatoes).IsEmpty();
+		await Assert.That(host.WikidataAsked(ImdbTitle)).IsEqualTo(0);
+	}
 }

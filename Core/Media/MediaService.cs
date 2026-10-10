@@ -231,6 +231,12 @@ internal sealed class MediaService(
 		}
 	}
 
+	public Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetIdsAsync(
+		IEnumerable<MediaId> ids,
+		MediaProvider provider,
+		CancellationToken cancellationToken = default
+	) => mediaRepository.GetExternalsAsync(ids, provider, cancellationToken);
+
 	private async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> EnsureIdsAsync(
 		IReadOnlyList<MediaId> wanted,
 		Func<MediaType, Optional<MediaProvider>> addressedBy,
