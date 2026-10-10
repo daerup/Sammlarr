@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/v1/tvdb/search/en/",
+    "host": {
+      "equalTo": "skyhook.sonarr.tv"
+    },
+    "queryParameters": {
+      "term": {
+        "equalTo": "frieren: beyond journey's end"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "bodyFileName": "sonarr-metadata/v1-tvdb-search-en-frierenbeyondjourneysend.verified.json"
+  }
+}

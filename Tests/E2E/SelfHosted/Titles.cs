@@ -10,6 +10,10 @@ internal static class Titles
 
 	internal const int BreakingBadTvdb = 81189;
 
+	internal const string Frieren = "Frieren: Beyond Journey's End";
+
+	internal const int FrierenTvdb = 424536;
+
 	internal static readonly string AdminTag = $"sammlarr-u-{SelfHostedSetup.AdminName}";
 
 	internal static readonly string MemberTag = $"sammlarr-u-{SelfHostedSetup.MemberName}";

@@ -55,6 +55,8 @@ internal sealed record ArrAppOptions
 
 	public required string RootFolder { get; init; }
 
+	public required string AnimeRootFolder { get; init; }
+
 	public required string Library { get; init; }
 }
 
@@ -135,6 +137,7 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 			ApiKey = Some.Of(apiKey),
 			QualityProfileId = Some.Of(profileId),
 			RootFolderPath = Some.Of(app.RootFolder),
+			AnimeRootFolderPath = Some.Of(app.AnimeRootFolder),
 		};
 	}
 }
