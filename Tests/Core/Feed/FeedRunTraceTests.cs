@@ -303,6 +303,32 @@ public class FeedRunTraceTests
 	}
 
 	[Test]
+	public async Task Read_WhileTitlesWaitAtTwoServices_NamesTheOneMostWaitOn()
+	{
+		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
+		using var run = testee.Start(_feed, Owner);
+		using var heat = FeedRunSpans.Enter(FeedRunSpans.Title("Heat", new None()));
+		using var plex = FeedRunSpans.Hop(RemoteService.Plex, TraceStage.Ids);
+		using var ids = FeedRunSpans.Hop(RemoteService.Tmdb, TraceStage.Ids);
+		using var details = FeedRunSpans.Hop(RemoteService.Tmdb, TraceStage.Details);
+
+		var progress = (await SnapshotAsync(testee)).Progress;
+
+		await Assert.That(progress.Busiest).IsSome().And.IsEqualTo(new ServiceWait(RemoteService.Tmdb, 2));
+	}
+
+	[Test]
+	public async Task Read_WithNothingWaiting_NamesNoService()
+	{
+		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
+		using var run = testee.Start(_feed, Owner);
+
+		var progress = (await SnapshotAsync(testee)).Progress;
+
+		await Assert.That(progress.Busiest).IsNone();
+	}
+
+	[Test]
 	public async Task End_WithTitlesStillWaiting_ReportsNoneWaiting()
 	{
 		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
@@ -316,7 +342,26 @@ public class FeedRunTraceTests
 
 		testee.End(_feed, new FeedRunFailed("The source returned nothing."));
 
-		await Assert.That((await SnapshotAsync(testee)).Progress.Waiting).IsEqualTo(0);
+		var progress = (await SnapshotAsync(testee)).Progress;
+		await Assert.That(progress.Waiting).IsEqualTo(0);
+		await Assert.That(progress.Busiest).IsNone();
+	}
+
+	[Test]
+	public async Task Read_WhileTheListFetchesAPage_ReportsThePageUntilItArrives()
+	{
+		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
+		using var run = testee.Start(_feed, Owner);
+		var page = new TaskCompletionSource<int>();
+
+		var reading = FeedRunSpans.ReadingAsync(2, () => page.Task);
+		var during = (await SnapshotAsync(testee)).Progress.Reading;
+		page.SetResult(2);
+		await reading;
+		var after = (await SnapshotAsync(testee)).Progress.Reading;
+
+		await Assert.That(during).IsSome().And.IsEqualTo(2);
+		await Assert.That(after).IsNone();
 	}
 
 	private static void Resolve(string name, HopOutcome answer, params int[] statuses)

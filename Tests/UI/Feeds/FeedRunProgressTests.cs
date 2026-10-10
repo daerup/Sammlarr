@@ -252,6 +252,38 @@ public class FeedRunProgressTests
 		await Assert.That(live.Tally.Progress.Page).IsSome().And.IsEqualTo(new SourcePage(3, new None()));
 	}
 
+	[Test]
+	public async Task Batch_WithTitlesHeldAtARateLimitedService_MarksTheTallyRateLimited()
+	{
+		Running(Documentaries);
+		var progress = new RunProgress(Some.Of(new SourcePage(1, new None())), 3) { Busiest = Some.Of(new ServiceWait(RemoteService.Tmdb, 3)) };
+		Reads(Batch([], new None()) with { Progress = progress });
+		_capacity.Of(RemoteService.Tmdb).Returns(new RemoteLoad(Some.Of(Start.AddSeconds(9)), 0));
+		using var testee = Progress();
+
+		await testee.StartAsync();
+
+		await EventuallyAsync(() => testee.Live.Match(run => run.Tally.Progress.Waiting == 3, () => false));
+		await Assert.That((await Assert.That(testee.Live).IsSome())!.Tally.RateLimited).IsTrue();
+	}
+
+	[Test]
+	public async Task Batch_WhileTheListReadsAPage_SendsThePageToTheView()
+	{
+		Running(Documentaries);
+		Reads(Batch([], new None()) with { Progress = RunProgress.None with { Reading = Some.Of(2) } });
+		var batches = new List<WireBatch>();
+		using var testee = Progress();
+		await testee.StartAsync();
+		await EventuallyAsync(() => testee.Live.IsSome());
+
+		(await Assert.That(testee.Live).IsSome())!.Batch += batches.Add;
+
+		await EventuallyAsync(() => batches.Count > 0);
+		await Assert.That(batches[0].Reading).IsEqualTo(2);
+		await Assert.That((await Assert.That(testee.Live).IsSome())!.Tally.Progress.Reading).IsSome().And.IsEqualTo(2);
+	}
+
 	private void Reads(TraceRead read) => _traces.ReadAsync(Any<FeedId>(), Any<TraceCursor>(), Any()).Returns(read);
 
 	private void Running(Feed feed)

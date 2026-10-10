@@ -152,7 +152,11 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 
 	private Optional<SourcePage> _page = new None();
 
-	private int _waiting;
+	private readonly Dictionary<RemoteService, int> _waiting = [];
+
+	private const int ReadingAfterMs = 900;
+
+	private Optional<int> _lastStartMs = new None();
 
 	private static readonly FeedRunCounts Counts = new FeedRunCounts
 	{
@@ -264,22 +268,36 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 			var from = _sent;
 			while (_sent < _script.Steps.Count && _script.Steps[_sent].AtMs <= elapsed)
 			{
-				Count(_script.Steps[_sent++].Event);
+				Count(_script.Steps[_sent++]);
 			}
 
 			_ended = Optional.When(elapsed >= _script.EndMs, () => new FeedRunEnd(TraceEnding.Completed, _script.EndMs) { Counts = Some.Of(Counts) });
-			Tally = RunTally.Of(_fates, _requests, Math.Min(elapsed, _script.EndMs), _ended, Some.Of(Names.Length)) with { Progress = Progress() };
 			var until = _script.Blocked.Where(window => window.From <= elapsed && elapsed < window.Until).Select(window => window.Until).DefaultIfEmpty(0).Max();
+			var progress = Progress(elapsed);
+			Tally = RunTally.Of(_fates, _requests, Math.Min(elapsed, _script.EndMs), _ended, Some.Of(Names.Length)) with
+			{
+				Progress = progress,
+				RateLimited = progress.Busiest.Match(wait => wait.Service is RemoteService.Tmdb && until > elapsed, () => false),
+			};
 			return new WireBatch(
 				[.. _script.Steps.Skip(from).Take(_sent - from).Select(LiveWire.Step)],
 				[new WireCapacity((byte)RemoteService.Tmdb, until, 0)],
 				_ended.IsSome()
-			);
+			)
+			{
+				Reading = progress.Reading.ToNullable(),
+			};
 		}
 	}
 
-	private void Count(TraceEvent traced)
+	private void Count(TraceStep step)
 	{
+		var traced = step.Event;
+		if (traced is TitleStarted)
+		{
+			_lastStartMs = Some.Of(step.AtMs);
+		}
+
 		_fates = traced switch
 		{
 			TitleStarted => _fates with { Started = _fates.Started + 1 },
@@ -291,12 +309,15 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 			TitleSettled { Fate: TitleFate.NotFound } => _fates with { NotFound = _fates.NotFound + 1 },
 			_ => _fates,
 		};
-		_waiting += traced switch
+		switch (traced)
 		{
-			HopAsked => 1,
-			HopAnswered => -1,
-			_ => 0,
-		};
+			case HopAsked asked:
+				_waiting[asked.Service] = _waiting.GetValueOrDefault(asked.Service) + 1;
+				break;
+			case HopAnswered answered:
+				_waiting[answered.Service] = _waiting.GetValueOrDefault(answered.Service) - 1;
+				break;
+		}
 		if (traced is SourcePage page)
 		{
 			_page = Some.Of(page);
@@ -369,10 +390,26 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 
 		IReadOnlyList<NodeTally> tallies = [.. nodes.Values.Select(node => node with { MeanMs = Mean(node.Node) })];
 		var cursor = new TraceCursor(Some.Of(_run), _sent);
-		return new TraceSnapshot(cursor, Math.Min(Elapsed, _script.EndMs), [.. flights.Values], tallies, _fates, _requests, _ended) { Progress = Progress() };
+		return new TraceSnapshot(cursor, Math.Min(Elapsed, _script.EndMs), [.. flights.Values], tallies, _fates, _requests, _ended)
+		{
+			Progress = Progress(Elapsed),
+		};
 	}
 
-	private RunProgress Progress() => new(_page, _waiting);
+	private RunProgress Progress(int elapsed)
+	{
+		var reading = Optional.When(
+			_ended.IsNone() && _requests.IsNone() && _lastStartMs.Match(at => elapsed - at > ReadingAfterMs, () => _fates.Started == 0),
+			() => _page.Map(read => read.Page + 1).GetValueOr(1)
+		);
+		var busiest = _waiting
+			.Where(pair => pair.Value > 0)
+			.OrderByDescending(pair => pair.Value)
+			.ThenBy(pair => pair.Key)
+			.Select(pair => new ServiceWait(pair.Key, pair.Value))
+			.FirstOrNone();
+		return new RunProgress(_page, _waiting.Values.Sum()) { Busiest = busiest, Reading = reading };
+	}
 
 	private static NodeTally Node(Dictionary<HopPlace, NodeTally> nodes, HopPlace place)
 	{

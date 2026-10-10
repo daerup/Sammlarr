@@ -341,6 +341,7 @@ public class AniListTests
 		await Feed(handler).GetFeedItemsAsync("someone/planning").ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, Some.Of(1))]);
+		await Assert.That(spans.Read).IsEquivalentTo([1]);
 	}
 
 	[Test]
@@ -352,6 +353,7 @@ public class AniListTests
 		await Feed(handler).GetFeedItemsAsync("search/anime?airing%20status=RELEASING").ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
+		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
 	}
 
 	private AniListFeedService Feed(MockHttpHandler handler) => Feed(handler, AnimeMaps.Unknown());

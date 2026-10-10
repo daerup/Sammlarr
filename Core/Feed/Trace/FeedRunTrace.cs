@@ -109,6 +109,9 @@ internal sealed class FeedRunTrace : IFeedRunTrace, IDisposable
 			case (FeedRunSpans.SourceName, FeedRunNames.Hop):
 				TitleAbove(span.Parent).Apply(title => PlaceOf(span).Apply(place => StartHop(span, title, place)));
 				break;
+			case (FeedRunSpans.SourceName, FeedRunNames.Reading):
+				RunAbove(span.Parent).Apply(run => run.Reading(Tag<int>(span, FeedRunTags.Page)));
+				break;
 		}
 	}
 
@@ -133,6 +136,9 @@ internal sealed class FeedRunTrace : IFeedRunTrace, IDisposable
 				break;
 			case (FeedRunSpans.SourceName, FeedRunNames.Listed):
 				RunAbove(span.Parent).Apply(run => run.Add(new None(), new ListedWithoutIds()));
+				break;
+			case (FeedRunSpans.SourceName, FeedRunNames.Reading):
+				RunAbove(span.Parent).Apply(run => run.Reading(new None()));
 				break;
 			case (FeedRunSpans.SourceName, FeedRunNames.Page):
 				RunAbove(span.Parent)

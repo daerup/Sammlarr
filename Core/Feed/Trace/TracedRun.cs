@@ -32,6 +32,8 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 
 	private Optional<SourcePage> _page = new None();
 
+	private Optional<int> _reading = new None();
+
 	private Optional<FeedRunCounts> _counts = new None();
 
 	private long _endedAt;
@@ -99,6 +101,14 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 		}
 	}
 
+	internal void Reading(Optional<int> page)
+	{
+		lock (_gate)
+		{
+			_reading = page.When(_ => _running);
+		}
+	}
+
 	internal void Counted(FeedRunCounts counts)
 	{
 		lock (_gate)
@@ -115,6 +125,7 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 			_endedAt = Stopwatch.GetTimestamp();
 			_requests = _requests.Or(Some.Of(_fates.Started));
 			_flights.Clear();
+			_reading = new None();
 			foreach (var node in _nodes.Values)
 			{
 				node.Waiting = 0;
@@ -204,7 +215,17 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 
 	private TraceCursor Cursor() => new(Some.Of(key), _steps.Count);
 
-	private RunProgress Progress() => new(_page, _nodes.Values.Sum(node => node.Waiting));
+	private RunProgress Progress()
+	{
+		var busiest = _nodes
+			.GroupBy(pair => pair.Key.Service, pair => pair.Value.Waiting)
+			.Select(group => new ServiceWait(group.Key, group.Sum()))
+			.Where(wait => wait.Waiting > 0)
+			.OrderByDescending(wait => wait.Waiting)
+			.ThenBy(wait => wait.Service)
+			.FirstOrNone();
+		return new RunProgress(_page, _nodes.Values.Sum(node => node.Waiting)) { Busiest = busiest, Reading = _reading };
+	}
 
 	private TraceBatch Batch(long seq)
 	{

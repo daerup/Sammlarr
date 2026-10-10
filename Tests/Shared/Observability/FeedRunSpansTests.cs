@@ -61,6 +61,21 @@ public class FeedRunSpansTests
 		await Assert.That(stopped.Where(span => span.OperationName == FeedRunNames.Page && span.Parent is null)).IsEmpty();
 	}
 
+	[Test]
+	public async Task ReadingAsync_InsideARun_SpansTheFetchAndReturnsItsAnswer()
+	{
+		var stopped = new ConcurrentQueue<Activity>();
+		using var listener = Listen(stopped.Enqueue);
+		var run = FeedRunSpans.Run(FeedId.From(Guid.NewGuid()), Guid.NewGuid());
+
+		var answer = await FeedRunSpans.ReadingAsync(4, () => Task.FromResult("page four"));
+
+		var traceId = run.Match(span => span.TraceId, () => default);
+		var reading = stopped.Single(span => span.OperationName == FeedRunNames.Reading && span.TraceId == traceId);
+		await Assert.That(answer).IsEqualTo("page four");
+		await Assert.That(reading.GetTagItem(FeedRunTags.Page)).IsEqualTo(4);
+	}
+
 	private static ActivityListener Listen(Action<Activity>? stopped = null)
 	{
 		var listener = new ActivityListener
