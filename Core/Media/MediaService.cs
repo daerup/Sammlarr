@@ -22,7 +22,7 @@ internal sealed class MediaService(
 ) : IMediaService
 {
 	internal const int RecommendedConcurrency = 100;
-	private const int FirstBatchSize = 10;
+	internal const int FirstBatchSize = 10;
 	private const int MaxBatchSize = 200;
 	private const int PrefetchCapacity = 1000;
 
