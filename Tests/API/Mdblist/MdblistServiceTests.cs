@@ -214,6 +214,7 @@ public class MdblistServiceTests
 		await testee.GetFeedItemsAsync("multi-page").ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
+		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
 	}
 
 	private static MdblistService CreateTestee(

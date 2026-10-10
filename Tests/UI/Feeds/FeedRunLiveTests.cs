@@ -200,18 +200,43 @@ public class FeedRunLiveTests : BunitContext
 	}
 
 	[Test]
-	public async Task Footer_WhileRunning_ShowsThePageAndTheWaiting()
+	public async Task Footer_WhileReadingAPageWithTitlesHeldByA429_SaysBothInWords()
 	{
-		var progress = new RunProgress(Some.Of(new SourcePage(8, Some.Of(12))), 4);
+		var progress = new RunProgress(Some.Of(new SourcePage(2, new None())), 14)
+		{
+			Busiest = Some.Of(new ServiceWait(RemoteService.Tmdb, 14)),
+			Reading = Some.Of(3),
+		};
+		_run.Tally.Getter.Returns(RunTally.Before(Some.Of(400)) with { Progress = progress, RateLimited = true });
+
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert.That(Segments(cut)).IsEquivalentTo(["Reading page 3 of the list", "14 waiting on TMDB (rate-limited)"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Footer_WhileTitlesWaitWithoutA429_NamesTheServiceOnly()
+	{
+		var progress = new RunProgress(Some.Of(new SourcePage(1, new None())), 3) { Busiest = Some.Of(new ServiceWait(RemoteService.Plex, 3)) };
 		_run.Tally.Getter.Returns(RunTally.Before(Some.Of(400)) with { Progress = progress });
 
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 
-		await Assert.That(Segments(cut)).IsEquivalentTo(["Source page 8 of 12", "4 waiting on a service"], CollectionOrdering.Matching);
+		await Assert.That(Segments(cut)).IsEquivalentTo(["3 waiting on Plex"], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Footer_AfterTheRun_ShowsTheFeedsRules()
+	public async Task Footer_WhileTitlesFlowWithNothingWaiting_SaysTheyFlow()
+	{
+		_run.Tally.Getter.Returns(RunTally.Before(Some.Of(400)) with { Progress = new RunProgress(Some.Of(new SourcePage(1, new None())), 0) });
+
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert.That(Segments(cut)).IsEquivalentTo(["Titles flowing"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Footer_AfterTheRun_SaysWhatTheRulesDidInPlainWords()
 	{
 		var counts = FeedRunCounts.None with { Total = 200, Added = 3, Filtered = 120, Skipped = 40 };
 		var ended = new FeedRunEnd(TraceEnding.Completed, 9000) { Counts = Some.Of(counts) };
@@ -222,15 +247,18 @@ public class FeedRunLiveTests : BunitContext
 
 		await Assert
 			.That(Segments(cut))
-			.IsEquivalentTo(["Then the feed's rules: +3 to your wantlist", "120 filtered out", "40 past the limit of 5"], CollectionOrdering.Matching);
+			.IsEquivalentTo(["+3 added to your wantlist", "120 didn't pass the feed's filters", "40 over this run's limit of 5"], CollectionOrdering.Matching);
+		await Assert.That(cut.Find("[data-testid=live-added]").TextContent).IsEqualTo("+3 to your wantlist");
 	}
 
 	[Test]
-	public async Task Footer_BeforeTheFirstPage_SaysItIsReadingTheList()
+	public async Task Footer_BeforeTheFirstPage_SaysItIsReadingTheFirstPage()
 	{
+		_run.Tally.Getter.Returns(RunTally.Before(Some.Of(400)) with { Progress = RunProgress.None with { Reading = Some.Of(1) } });
+
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 
-		await Assert.That(Segments(cut)).IsEquivalentTo(["Reading the source list", "0 waiting on a service"], CollectionOrdering.Matching);
+		await Assert.That(Segments(cut)).IsEquivalentTo(["Reading page 1 of the list"], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -242,11 +270,12 @@ public class FeedRunLiveTests : BunitContext
 
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 
-		await Assert.That(Segments(cut)).IsEquivalentTo(["Then the feed's rules: 31 kept, nothing new", "9 filtered out"], CollectionOrdering.Matching);
+		await Assert.That(Segments(cut)).IsEquivalentTo(["31 kept, nothing new", "9 didn't pass the feed's filters"], CollectionOrdering.Matching);
+		await Assert.That(cut.FindAll("[data-testid=live-added]")).IsEmpty();
 	}
 
 	[Test]
-	public async Task Footer_AfterAFailedRun_KeepsTheRunningLine()
+	public async Task Footer_AfterAFailedRun_SaysNothingAboutTheRules()
 	{
 		var ended = new FeedRunEnd(TraceEnding.Failed, 400) { Counts = Some.Of(FeedRunCounts.None) };
 		var tally = RunTally.Of(FateTally.None, new None(), 400, Some.Of(ended), new None());
@@ -254,7 +283,7 @@ public class FeedRunLiveTests : BunitContext
 
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 
-		await Assert.That(Segments(cut)).IsEquivalentTo(["Source page 1", "0 waiting on a service"], CollectionOrdering.Matching);
+		await Assert.That(Segments(cut)).IsEmpty();
 	}
 
 	[Test]

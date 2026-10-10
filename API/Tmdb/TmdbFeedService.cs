@@ -127,7 +127,7 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 		var pages = 1;
 		for (var page = 1; page <= pages; page++)
 		{
-			var answer = await read(page);
+			var answer = await FeedRunSpans.ReadingAsync(page, () => read(page));
 			pages = answer.TotalPages ?? 1;
 			FeedRunSpans.SourcePage(page, total(answer));
 			foreach (var item in answer.Entries)

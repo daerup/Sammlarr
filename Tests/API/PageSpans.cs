@@ -26,7 +26,11 @@ internal sealed class PageSpans : IDisposable
 		_run = FeedRunSpans.Run(FeedId.From(Guid.NewGuid()), Guid.NewGuid());
 	}
 
+	private readonly ConcurrentQueue<int> _read = new();
+
 	internal IReadOnlyList<SourcePage> Pages => [.. _pages];
+
+	internal IReadOnlyList<int> Read => [.. _read];
 
 	public void Dispose()
 	{
@@ -40,6 +44,11 @@ internal sealed class PageSpans : IDisposable
 		if (mine && span.OperationName == FeedRunNames.Page && span.GetTagItem(FeedRunTags.Page) is int page)
 		{
 			_pages.Enqueue(new SourcePage(page, Optional.Of(span.GetTagItem(FeedRunTags.Pages) as int?)));
+		}
+
+		if (mine && span.OperationName == FeedRunNames.Reading && span.GetTagItem(FeedRunTags.Page) is int reading)
+		{
+			_read.Enqueue(reading);
 		}
 	}
 }

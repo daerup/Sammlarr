@@ -79,7 +79,7 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 		var number = 0;
 		while (page.Length > 0)
 		{
-			var answer = await PageAsync(identifier, page, isPage, clientId, cancellationToken);
+			var answer = await FeedRunSpans.ReadingAsync(number + 1, () => PageAsync(identifier, page, isPage, clientId, cancellationToken));
 			var data = answer.Data ?? throw new InvalidDataException("MyAnimeList answered a page without data.");
 			number++;
 			FeedRunSpans.SourcePage(number, new None());

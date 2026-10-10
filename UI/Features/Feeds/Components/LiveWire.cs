@@ -36,11 +36,17 @@ public readonly record struct WireStep(long Seq, int AtMs, int Title, byte Kind)
 	public string? Name { get; init; }
 }
 
-public sealed record WireBatch(IReadOnlyList<WireStep> Steps, IReadOnlyList<WireCapacity> Capacity, bool Ended);
+public sealed record WireBatch(IReadOnlyList<WireStep> Steps, IReadOnlyList<WireCapacity> Capacity, bool Ended)
+{
+	public int? Reading { get; init; }
+}
 
 public readonly record struct WireCapacity(byte Service, int BlockedUntilMs, double Busy);
 
-internal sealed record WireSnapshot(long CursorSeq, int ElapsedMs, bool Ended, FateTally Fates, IReadOnlyList<WireNode> Nodes, IReadOnlyList<WireTitle> Titles);
+internal sealed record WireSnapshot(long CursorSeq, int ElapsedMs, bool Ended, FateTally Fates, IReadOnlyList<WireNode> Nodes, IReadOnlyList<WireTitle> Titles)
+{
+	public int? Reading { get; init; }
+}
 
 internal readonly record struct WireNode(byte Service, byte Stage, int Answered, int AfterRateLimit, int GaveUp, int Failed, int Waiting, int MeanMs);
 
@@ -99,7 +105,10 @@ internal static class LiveWire
 			snapshot.Fates,
 			[.. snapshot.Nodes.Select(Node)],
 			[.. snapshot.Titles.Select(Title)]
-		);
+		)
+		{
+			Reading = snapshot.Progress.Reading.ToNullable(),
+		};
 	}
 
 	internal static WireLayout Layout(RunLayout layout, MediaProviderBrandingService branding, Func<string, string> asset)

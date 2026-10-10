@@ -51,6 +51,12 @@ public static class FeedRunSpans
 		Nearest(FeedRunNames.Run).Apply(_ => Start(FeedRunNames.Page, tags)?.Stop());
 	}
 
+	public static async Task<T> ReadingAsync<T>(int page, Func<Task<T>> read)
+	{
+		using var reading = Within(FeedRunNames.Run, FeedRunNames.Reading, [new(FeedRunTags.Page, page)]);
+		return await read();
+	}
+
 	public static IDisposable Path() => Within(FeedRunNames.Title, FeedRunNames.Path, []);
 
 	public static FeedRunSpan Hop(RemoteService service, TraceStage stage) => Within(FeedRunNames.Title, FeedRunNames.Hop, Placed(service, stage));

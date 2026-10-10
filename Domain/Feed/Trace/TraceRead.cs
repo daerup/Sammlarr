@@ -33,7 +33,13 @@ public sealed record TraceBatch(TraceCursor Cursor, int ElapsedMs, IReadOnlyList
 public sealed record RunProgress(Optional<SourcePage> Page, int Waiting)
 {
 	public static RunProgress None { get; } = new(new None(), 0);
+
+	public Optional<ServiceWait> Busiest { get; init; } = new None();
+
+	public Optional<int> Reading { get; init; } = new None();
 }
+
+public readonly record struct ServiceWait(RemoteService Service, int Waiting);
 
 public readonly record struct NoTrace;
 

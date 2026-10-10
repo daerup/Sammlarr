@@ -157,6 +157,7 @@
 .live-foot {
     display: flex;
     align-items: center;
+    gap: 12px;
     min-height: 38px;
     padding: 8px 16px;
     border-top: 1px solid var(--border);
@@ -212,4 +213,22 @@
     .is-flight {
         animation: none;
     }
+}
+
+.k429 {
+    color: var(--usage-after-429-text);
+    font-weight: 600;
+}
+
+.added-chip {
+    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--alert-success);
+    background: color-mix(in oklch, var(--alert-success) 12%, transparent);
 }

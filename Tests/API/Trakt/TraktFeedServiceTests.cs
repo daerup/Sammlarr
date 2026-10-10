@@ -244,6 +244,7 @@ public class TraktFeedServiceTests
 		await Testee(handler).GetFeedItemsAsync("users/ana/watchlist").ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, Some.Of(2)), new SourcePage(2, Some.Of(2))], CollectionOrdering.Matching);
+		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -261,6 +262,7 @@ public class TraktFeedServiceTests
 		await Testee(handler).GetFeedItemsAsync("discover/popular").ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
+		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
 	}
 
 	private TraktFeedService Testee(MockHttpHandler handler) => Testee(handler, Keys());

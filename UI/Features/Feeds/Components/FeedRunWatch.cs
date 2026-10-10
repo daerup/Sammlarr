@@ -132,9 +132,13 @@ internal sealed class FeedRunWatch(
 		}
 
 		_endedAt = ended.Map(_ => _endedAt.GetValueOr(now));
-		Tally = RunTally.Of(fates, requests, elapsedMs, ended, previous) with { Progress = progress };
+		Tally = RunTally.Of(fates, requests, elapsedMs, ended, previous) with
+		{
+			Progress = progress,
+			RateLimited = progress.Busiest.Match(wait => !capacity.Of(wait.Service).IsOpen(now), () => false),
+		};
 		IReadOnlyList<WireCapacity> load = [.. layout.Ids.Select(node => LiveWire.Capacity(node.Service, capacity.Of(node.Service), now, elapsedMs))];
-		Batch?.Invoke(new WireBatch([.. steps.Select(LiveWire.Step)], load, ended.IsSome()));
+		Batch?.Invoke(new WireBatch([.. steps.Select(LiveWire.Step)], load, ended.IsSome()) { Reading = progress.Reading.ToNullable() });
 		Changed?.Invoke();
 		return _endedAt.Match(at => now - at >= Linger, () => false);
 	}

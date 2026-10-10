@@ -69,7 +69,10 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 		var pages = 1;
 		for (var page = 1; page <= pages; page++)
 		{
-			using var response = await client.GetAsync(TraktPages.Request(identifier, page), clientId, cancellationToken);
+			using var response = await FeedRunSpans.ReadingAsync(
+				count.Read + 1,
+				() => client.GetAsync(TraktPages.Request(identifier, page), clientId, cancellationToken)
+			);
 			Ensure(identifier, response);
 			var total = Header(response, "X-Pagination-Page-Count");
 			pages = total.GetValueOr(1);

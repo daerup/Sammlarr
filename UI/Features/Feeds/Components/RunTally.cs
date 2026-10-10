@@ -16,6 +16,8 @@ public sealed record RunTally(FateTally Fates, Optional<int> Total, bool Estimat
 
 	internal RunProgress Progress { get; init; } = RunProgress.None;
 
+	internal bool RateLimited { get; init; }
+
 	internal int Done => Fates.Settled;
 
 	internal int InFlight => Math.Max(0, Fates.Started - Fates.Matched - Fates.CouldNotLookUp - Fates.NotFound);

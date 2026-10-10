@@ -232,6 +232,7 @@ public class MalTests
 		await Feed(handler).GetFeedItemsAsync("someone").ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
+		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
 	}
 
 	private MalFeedService Feed(MockHttpHandler handler) => Feed(handler, AnimeMaps.Unknown());

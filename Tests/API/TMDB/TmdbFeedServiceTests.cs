@@ -211,6 +211,7 @@ public class TmdbFeedServiceTests
 		await Testee(handler).GetFeedItemsAsync("42").ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, Some.Of(2)), new SourcePage(2, Some.Of(2))], CollectionOrdering.Matching);
+		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -228,6 +229,7 @@ public class TmdbFeedServiceTests
 		await Testee(handler).GetFeedItemsAsync("tv/top-rated").ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
+		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
 	}
 
 	private TmdbFeedService Testee(MockHttpHandler handler, bool token = false)
