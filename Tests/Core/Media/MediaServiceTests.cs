@@ -72,6 +72,34 @@ public class MediaServiceTests
 	}
 
 	[Test]
+	public async Task IdentifyWithDetailsAsync_WhenCancelledWhileFetchingDetails_StopsWithoutSettlingTheTitle()
+	{
+		using var cancellation = new CancellationTokenSource();
+		var lookup = new TaskCompletionSource<Result<FoundMedia>>();
+		var fetching = new TaskCompletionSource();
+		var (testee, deps) = CreateTestee();
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).ReturnsAsync(lookup.Task).Callback(() => fetching.TrySetResult());
+		var results = new List<MediaMatchResult>();
+		var requests = new List<IdentifyRequest> { new([TmdbId.From("550", MediaType.Movie)], new None()) };
+
+		async Task ConsumeAsync()
+		{
+			await foreach (var result in testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable(), cancellation.Token))
+			{
+				results.Add(result);
+			}
+		}
+
+		var consume = ConsumeAsync();
+		await fetching.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		await cancellation.CancelAsync();
+		lookup.SetCanceled(cancellation.Token);
+
+		await Assert.That(async () => await consume.WaitAsync(TimeSpan.FromSeconds(5))).Throws<OperationCanceledException>();
+		await Assert.That(results).IsEmpty();
+	}
+
+	[Test]
 	public async Task GetDetailsAsync_ById_WhenTheDetailsAreMissing_YieldsError()
 	{
 		var id = MediaId.New();

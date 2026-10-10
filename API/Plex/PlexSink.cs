@@ -89,7 +89,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		var rest = Enumerable
 			.Range(2, pages - 1)
 			.ToAsyncEnumerable()
-			.SelectAwait(async page => await FetchPageAsync(page, cancellationToken), PageConcurrency, cancellationToken);
+			.SelectAwait(async (page, token) => await FetchPageAsync(page, token), PageConcurrency, cancellationToken);
 
 		await foreach (var (remaining, _) in rest)
 		{

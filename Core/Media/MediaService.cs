@@ -64,7 +64,7 @@ internal sealed class MediaService(
 		var stored = await LoadByInternalsAsync(materialized, cancellationToken);
 		var connected = await detailsFetcher.ConnectedAsync(cancellationToken);
 		var pipeline = materialized.SelectAwait(
-			id => LoadStoredDetailsAsync(id, stored, connected, buffer, cancellationToken),
+			(id, token) => LoadStoredDetailsAsync(id, stored, connected, buffer, token),
 			RecommendedConcurrency,
 			cancellationToken
 		);
@@ -162,7 +162,7 @@ internal sealed class MediaService(
 		var handoffs = await IdentifyBatchAsync(traced, sink.AddressedBy, building, buffer, cancellationToken);
 		var pipeline = traced
 			.Zip(handoffs)
-			.SelectAwait(pair => LoadRequestDetailsAsync(pair.First, pair.Second, connected, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
+			.SelectAwait((pair, token) => LoadRequestDetailsAsync(pair.First, pair.Second, connected, buffer, token), RecommendedConcurrency, cancellationToken);
 		await foreach (var result in pipeline)
 		{
 			yield return result;
@@ -308,7 +308,7 @@ internal sealed class MediaService(
 		var stored = await LoadByExternalsAsync(allCandidates, cancellationToken);
 		var connected = await idResolver.ConnectedAsync(cancellationToken);
 		var preliminary = await requests
-			.SelectAwait(req => IdentifyOneAsync(req, addressedBy, stored, connected, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
+			.SelectAwait((req, token) => IdentifyOneAsync(req, addressedBy, stored, connected, buffer, token), RecommendedConcurrency, cancellationToken)
 			.ToListAsync(cancellationToken);
 		return await coordinator.CoordinateHandoffsAsync(preliminary, building, buffer, cancellationToken);
 	}
@@ -498,7 +498,7 @@ internal sealed class MediaService(
 			var fetched = await detailsFetcher.FetchAsync(identity, cached, connected, buffer, cancellationToken);
 			return fetched.Match(_ => fetched, error => Fallback(identity, stored, cached, placeholder, error));
 		}
-		catch (Exception ex)
+		catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
 		{
 			logger.Log(stored.Match(LogLevel.Warning, LogLevel.Error), ex, "Media details failed for {MediaId}", identity.Id);
 			return Fallback(identity, stored, cached, placeholder, Error.From(ex));
