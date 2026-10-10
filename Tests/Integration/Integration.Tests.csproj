@@ -11,8 +11,6 @@
 		<PackageReference Include="TUnit.Assertions" />
 		<PackageReference Include="TUnit.Core" />
 		<PackageReference Include="TUnit.Mocks" />
-		<PackageReference Include="TUnit.Mocks.Http" />
-		<PackageReference Include="Bogus" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" />
