@@ -1,7 +1,8 @@
-using System.Collections.Concurrent;
 using System.Net;
 using System.Text.Json;
+using API.Http;
 using API.Plex.Types;
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Domain.Media;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
-internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> logger) : IMediaSearchProvider, IDetailsEnricher
+internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider clock, ILogger<PlexApi> logger) : IMediaSearchProvider, IDetailsEnricher
 {
 	private const int SearchLimit = 30;
 
@@ -32,7 +33,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Plex];
 
-	private readonly ConcurrentDictionary<string, Lazy<Task<Result<FoundMedia>>>> _byRatingKey = new();
+	private readonly RecentAnswers<string, FoundMedia> _byRatingKey = new(clock);
 
 	private void EnsureUsable(HttpResponseMessage response, string endpoint)
 	{
@@ -81,20 +82,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 
 	internal Task<Result<FoundMedia>> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
-		return _byRatingKey.GetOrAdd(plexId.Value, key => new Lazy<Task<Result<FoundMedia>>>(() => FetchOnceAsync(key, plexId))).Value.WaitAsync(cancellationToken);
-	}
-
-	private async Task<Result<FoundMedia>> FetchOnceAsync(string key, PlexId plexId)
-	{
-		try
-		{
-			return await FetchByIdAsync(plexId, CancellationToken.None);
-		}
-		catch (Exception)
-		{
-			_byRatingKey.TryRemove(key, out _);
-			throw;
-		}
+		return _byRatingKey.AskAsync(plexId.Value, () => FetchByIdAsync(plexId, CancellationToken.None), cancellationToken);
 	}
 
 	private async Task<Result<FoundMedia>> FetchByIdAsync(PlexId plexId, CancellationToken cancellationToken)

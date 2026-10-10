@@ -1,6 +1,7 @@
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
+using API.Tests.Feeds;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
@@ -132,7 +133,7 @@ public class PlexIdConverterTests
 		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(handler.CreateClient(PlexBaseUrl), credentialStore, ICurrentUser.Mock().Object);
-		return new PlexApi(plexClient, PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
+		return new PlexApi(plexClient, PlexTestUrls.Instance, FeedClock.Today(), NullLogger<PlexApi>.Instance);
 	}
 
 	private record PlexByIdPayload(string Json, PlexId PlexId, IReadOnlyList<TmdbId> TmdbIds, ImdbId ImdbId, TvdbId? TvdbId);

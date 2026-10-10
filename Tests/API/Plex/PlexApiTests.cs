@@ -2,7 +2,9 @@ using System.Net;
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
+using API.Tests.Feeds;
 using Bogus;
+using Contracts;
 using Contracts.Auth;
 using Contracts.Identity;
 using Domain.Media;
@@ -99,14 +101,32 @@ public class PlexApiTests
 	public async Task ByIdAsync_ForATitleAlreadyFetched_AnswersFromTheFirstFetch()
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWithJson(BuildEmptyByIdPayload());
+		handler.OnAnyRequest().RespondWithJson(ByIdPayloadOf(ObsessionById()));
 		var testee = BuildPlexApi(handler.CreateClient(PlexBaseUrl));
-		var id = PlexId.From("plex-1", MediaType.Movie);
+		var id = PlexId.From(ObsessionById().RatingKey, MediaType.Movie);
 		await testee.ByIdAsync(id);
 
 		await testee.ByIdAsync(id);
 
 		await Assert.That(handler.Requests).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task ByIdAsync_TenMinutesAfterAFetch_AsksPlexAgain()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson(ByIdPayloadOf(ObsessionById()));
+		var now = FeedClock.Now;
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Returns(() => now);
+		var testee = BuildPlexApi(handler.CreateClient(PlexBaseUrl), clock.Object);
+		var id = PlexId.From(ObsessionById().RatingKey, MediaType.Movie);
+		await testee.ByIdAsync(id);
+		now = now.AddMinutes(10);
+
+		await testee.ByIdAsync(id);
+
+		await Assert.That(handler.Requests).Count().IsEqualTo(2);
 	}
 
 	[Test]
@@ -283,11 +303,13 @@ public class PlexApiTests
 		return BuildPlexApi(handler.CreateClient(PlexBaseUrl));
 	}
 
-	private static PlexApi BuildPlexApi(HttpClient httpClient)
+	private static PlexApi BuildPlexApi(HttpClient httpClient) => BuildPlexApi(httpClient, FeedClock.Today());
+
+	private static PlexApi BuildPlexApi(HttpClient httpClient, IDateTimeProvider clock)
 	{
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
-		return new PlexApi(new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object), PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
+		return new PlexApi(new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object), PlexTestUrls.Instance, clock, NullLogger<PlexApi>.Instance);
 	}
 }
