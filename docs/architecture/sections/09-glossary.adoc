@@ -111,7 +111,8 @@ Rotten Tomatoes, Metacritic, Letterboxd or Trakt (their pages open from the rati
 Radarr + Sonarr, one card more: the title's Add New search in the app its type belongs to (`ArrSearchLinks`), by the first
 id that app searches by (`ArrApp.SearchableBy`), since neither app has a page for a title outside its library. The
 role and the sink are checked on each call (the provider config is cached app-wide), the Radarr + Sonarr config is read once
-per circuit, and a title without a card shows no popover.
+per circuit, the id cards show without waiting for that read (the Radarr or Sonarr card joins once it finishes), and a title without a
+card shows no popover.
 
 === Identify and details
 

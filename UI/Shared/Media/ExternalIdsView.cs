@@ -30,15 +30,20 @@ internal sealed class ExternalIdsView(
 
 	private Task<ArrSinkConfig>? _arr;
 
-	public async Task<IReadOnlyList<ExternalIdCard>> CardsAsync(IReadOnlyList<IExternalMediaId> ids, Optional<string> title)
+	public IReadOnlyList<ExternalIdCard> IdCards(IReadOnlyList<IExternalMediaId> ids, Optional<string> title)
 	{
-		var arrCard = await ArrAsync().Map(config => ArrSearchLinks.For(config, ids)).Map(ArrCard);
-		return [.. IdCards(ids, title).Append(arrCard).WhereSome()];
+		return
+		[
+			.. ids.Where(id => !ShownWithRatingsOnly.Contains(id.Source))
+				.Select(id => linkers[id.Source].PageOf([id], title).Map(page => IdCard(id, page)))
+				.WhereSome(),
+		];
 	}
 
-	private IEnumerable<Optional<ExternalIdCard>> IdCards(IReadOnlyList<IExternalMediaId> ids, Optional<string> title)
+	public async Task<IReadOnlyList<ExternalIdCard>> WithArrCardAsync(IReadOnlyList<ExternalIdCard> idCards, IReadOnlyList<IExternalMediaId> ids)
 	{
-		return ids.Where(id => !ShownWithRatingsOnly.Contains(id.Source)).Select(id => linkers[id.Source].PageOf([id], title).Map(page => IdCard(id, page)));
+		var arrCard = await ArrAsync().Map(config => ArrSearchLinks.For(config, ids)).Map(ArrCard);
+		return arrCard.Match<ExternalIdCard, IReadOnlyList<ExternalIdCard>>(card => [.. idCards, card], () => idCards);
 	}
 
 	private async Task<Optional<ArrSinkConfig>> ArrAsync()
