@@ -35,7 +35,7 @@ internal static class ProviderBranding
 		}
 	}
 
-	private static readonly ProviderConfig OnPlex = new()
+	internal static readonly ProviderConfig OnPlex = new()
 	{
 		Sink = SinkKind.Plex,
 		TrendingProvider = TrendingProvider.Tmdb,

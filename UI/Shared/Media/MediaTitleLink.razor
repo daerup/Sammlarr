@@ -46,5 +46,9 @@ else
 
     private IReadOnlyList<ExternalIdCard> _cards = [];
 
-    protected override async Task OnParametersSetAsync() => _cards = await View.CardsAsync(Ids, Optional.Of(Title));
+    protected override async Task OnParametersSetAsync()
+    {
+        _cards = View.IdCards(Ids, Optional.Of(Title));
+        _cards = await View.WithArrCardAsync(_cards, Ids);
+    }
 }

@@ -1,9 +1,16 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
+using Contracts.Identity;
+using Contracts.Settings;
+using Domain.Identity;
 using Domain.Media;
+using Domain.Providers;
+using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Shared.Media;
 
@@ -47,6 +54,22 @@ public class MediaTitleLinkTests : BunitContext
 		await Assert
 			.That(cut.FindAll(".id-link-card").Select(row => row.GetAttribute("style") ?? string.Empty))
 			.IsEquivalentTo(["--brand: #01B4E4", "--brand: #F5DE50"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Title_ForAnAdminWhileTheRadarrAndSonarrSettingsLoad_IsAlreadyTheTrigger()
+	{
+		var providers = IProviderConfigService.Mock();
+		providers.GetAsync(Any()).Returns(ProviderBranding.OnPlex with { Sink = SinkKind.Arr });
+		var arr = IArrSinkConfigService.Mock();
+		arr.GetAsync(Any()).ReturnsAsync(new TaskCompletionSource<ArrSinkConfig>().Task);
+		Services.AddSingleton<ICurrentUser>(new TestCurrentUser { Role = UserRole.Admin });
+		Services.AddSingleton(providers.Object);
+		Services.AddSingleton(arr.Object);
+
+		var cut = Render<Harness>();
+
+		await Assert.That(cut.FindAll(".media-title-trigger")).Count().IsEqualTo(1);
 	}
 
 	[Test]
