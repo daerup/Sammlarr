@@ -25,7 +25,41 @@ internal static class RunLayouts
 			.. columns.Select(pair => new LayoutNode(pair.Key, pair.Value, false)),
 			.. free.Select(remote => new LayoutNode(remote, 1, true)),
 		];
-		return new RunLayout(targets, [.. nodes.OrderBy(node => node.Column).ThenBy(node => node.Service)], enrichers, edges);
+		var placed = new Dictionary<RemoteService, Placed>();
+		var ordered = new List<LayoutNode>();
+		foreach (var column in nodes.GroupBy(node => node.Column).OrderBy(group => group.Key))
+		{
+			var rows = column.OrderBy(node => Barycenter(node.Service, edges, placed)).ThenBy(node => node.Service).ToList();
+			foreach (var (index, node) in rows.Index())
+			{
+				placed[node.Service] = new Placed(node.Column, rows.Count == 1 ? 0.5 : (double)index / (rows.Count - 1));
+			}
+
+			ordered.AddRange(rows);
+		}
+
+		IReadOnlyList<RemoteService> details =
+		[
+			.. enrichers.OrderBy(enricher => placed.GetValueOrNone(enricher).GetValueOr(Placed.Unplaced)).ThenBy(enricher => enricher),
+		];
+		return new RunLayout(targets, ordered, details, edges);
+	}
+
+	private static double Barycenter(RemoteService service, IReadOnlyList<LayoutEdge> edges, IReadOnlyDictionary<RemoteService, Placed> placed)
+	{
+		return edges
+			.Where(edge => edge.To == service)
+			.Select(edge => edge.From.Match(from => placed.GetValueOrNone(from).Map(spot => spot.Row), () => Some.Of(0.5)))
+			.WhereSome()
+			.DefaultIfEmpty(0.5)
+			.Average();
+	}
+
+	private readonly record struct Placed(int Column, double Row) : IComparable<Placed>
+	{
+		internal static Placed Unplaced => new(int.MaxValue, 0);
+
+		public int CompareTo(Placed other) => (Column, Row).CompareTo((other.Column, other.Row));
 	}
 
 	private static Dictionary<RemoteService, int> Ranks(IEnumerable<IReadOnlyList<Hop>> paths)
