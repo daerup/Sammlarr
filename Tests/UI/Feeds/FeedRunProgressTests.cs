@@ -182,6 +182,34 @@ public class FeedRunProgressTests
 	}
 
 	[Test]
+	public async Task Start_ForAnotherUsersRun_ShowsNothing()
+	{
+		using var testee = Progress();
+		await testee.StartAsync();
+
+		_events.RaisePublished(new JobStateChangedEvent(UserId.From(Guid.NewGuid()), JobKind.FeedRun, Documentaries.Id.Value.ToString(), JobState.Running));
+		await Task.Delay(300);
+
+		await Assert.That(testee.Live).IsNone();
+		_traces.ReadAsync(Any<FeedId>(), Any<TraceCursor>(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task Start_WhenSignedOut_ShowsNothing()
+	{
+		_user.IsAuthenticated.Getter.Returns(false);
+		Running(Documentaries);
+		using var testee = Progress();
+		await testee.StartAsync();
+
+		_events.RaisePublished(Job(Documentaries, JobState.Running));
+		await Task.Delay(300);
+
+		await Assert.That(testee.Live).IsNone();
+		_traces.ReadAsync(Any<FeedId>(), Any<TraceCursor>(), Any()).WasNeverCalled();
+	}
+
+	[Test]
 	public async Task Batch_SendsFlatWireEntries()
 	{
 		var answered = new TraceStep(9, 1900, Some.Of(3), new HopAnswered(RemoteService.Tmdb, TraceStage.Ids, HopOutcome.AfterRateLimit, 820));
