@@ -17,6 +17,7 @@ Sammlarr uses **TUnit** (not xUnit/NUnit), run on Microsoft.Testing.Platform. Ge
 | A service needing the real graph / >2 collaborators | `Tests/Integration` | **`SammlarrTestHost` full-graph mode** + thin seed helpers + a real service call |
 | A repository / EF query / migration drift | `Tests/Integration` (repo tests) | `SammlarrTestHost` on real SQLite |
 | A Blazor component's render logic | `Tests/UI` | **bUnit** |
+| The Web host's own code (redirects, health checks, the staging seed) | `Tests/Web` | plain `[Test]`, mocks; builds Web, so needs Node |
 
 Rule of thumb: if you're wiring up more than one or two `.Mock()`s just to construct the subject, it belongs in the harness as an integration scenario, not a unit test. Each per-layer test project (`Domain`/`Shared`/`Core`/`API`) is **pure-unit organized by feature**; `Tests/Integration` is the only home for harness-based tests, organized by feature slice (Wantlist, Media, Feeds, Identity, Settings, Notifications, Auth, …). `Tests/TestInfrastructure` and `Tests/Harness` are helper projects — never put test cases there.
 
