@@ -2,6 +2,7 @@ using System.Globalization;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Domain.Media;
+using Domain.Providers;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
@@ -69,7 +70,7 @@ public class MediaServiceStreamingTests
 	public async Task IdentifyWithDetailsAsync_ForTwoEntriesOfOneMedia_GivesBothTheSameId()
 	{
 		var (testee, deps) = TestMediaService.Create();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(TestMediaService.CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
 		var requests = Imdb(20);
 		requests[15] = requests[2];
 
@@ -113,7 +114,7 @@ public class MediaServiceStreamingTests
 	{
 		var conflicting = ImdbId.From(Tt(1), MediaType.Movie);
 		var (testee, deps) = TestMediaService.Create();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(TestMediaService.CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
 		var owners = new[] { MediaId.New(), MediaId.New() };
 		deps.Claims.ClaimAsync(Any(), Any()).Returns((claim, _) => Outcome(claim, conflicting, owners));
 
@@ -150,7 +151,7 @@ public class MediaServiceStreamingTests
 					}
 
 					await all.Task.WaitAsync(token);
-					return Success.Of(TestMediaService.CompleteMovie(ext));
+					return new Found<FoundMedia>(TestMediaService.CompleteMovie(ext));
 				}
 			);
 		deps.Claims.ClaimAsync(Any(), Any()).Returns((claim, _) => Bridging(claim, first, second));
@@ -200,7 +201,7 @@ public class MediaServiceStreamingTests
 						others.TrySetResult();
 					}
 
-					return Success.Of(TestMediaService.CompleteMovie(ext));
+					return new Found<FoundMedia>(TestMediaService.CompleteMovie(ext));
 				}
 			);
 

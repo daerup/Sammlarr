@@ -1,3 +1,4 @@
+using API.Http;
 using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Media.Conversions;
@@ -15,7 +16,12 @@ internal sealed class TvmazeIdConverter(TvmazeApi tvmaze) : IExternalIdConverter
 
 	public IReadOnlyList<IdLookup> Lookups { get; } = [ByShowId];
 
-	public async Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	public Task<Answer<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	{
+		return LookUpResultAsync(request, cancellationToken).GuardedAsync(RemoteService.Tvmaze);
+	}
+
+	private async Task<Result<IdLookupResult>> LookUpResultAsync(IdLookupRequest request, CancellationToken cancellationToken)
 	{
 		return request switch
 		{

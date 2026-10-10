@@ -1,5 +1,6 @@
 using System.Net;
 using API.Wikidata;
+using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
@@ -20,7 +21,7 @@ public class WikidataIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 				await Assert
 					.That(found.Ids)
@@ -60,7 +61,7 @@ public class WikidataIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 				await Assert
 					.That(found.Ids)
@@ -88,7 +89,7 @@ public class WikidataIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0848228", MediaType.Movie)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
 	}
 
 	[Test]
@@ -100,7 +101,7 @@ public class WikidataIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 			{
 				await Assert.That(found.Ids).IsEmpty();
@@ -123,7 +124,7 @@ public class WikidataIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 				await Assert.That(found.Ids).IsEquivalentTo(new IExternalMediaId[] { RottenTomatoesId.From("m/the_avengers_2012", MediaType.Movie) })
 			);
@@ -138,7 +139,7 @@ public class WikidataIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt10551102", MediaType.Show)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
 	}
 
 	[Test]
@@ -152,11 +153,11 @@ public class WikidataIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt12042730", MediaType.Movie)));
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsSome());
+		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Wikidata, new None(), true));
 	}
 
 	[Test]
-	public async Task LookUpAsync_WhenWikidataRejectsTheQuery_FailsAsAnAnswer()
+	public async Task LookUpAsync_WhenWikidataRejectsTheQuery_IsNoMatch()
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.BadRequest);
@@ -164,7 +165,7 @@ public class WikidataIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt12042730", MediaType.Movie)));
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsNone());
+		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, NoMatch>();
 	}
 
 	[Test]
@@ -173,7 +174,9 @@ public class WikidataIdConverterTests
 		var handler = await AnsweringAsync("project-hail-mary");
 		var testee = Testee(handler);
 
-		await Assert.That(await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt1\" } SELECT", MediaType.Movie)))).IsError();
+		await Assert
+			.That(await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt1\" } SELECT", MediaType.Movie))))
+			.IsOfUnionType<Answer<IdLookupResult>, NoMatch>();
 		await Assert.That(handler.Requests).IsEmpty();
 	}
 

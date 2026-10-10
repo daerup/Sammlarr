@@ -32,7 +32,12 @@ internal sealed partial class WikidataIdConverter(HttpClient http) : IExternalId
 
 	public IReadOnlyList<IdLookup> Lookups { get; } = [ByImdb];
 
-	public async Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	public Task<Answer<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	{
+		return LookUpResultAsync(request, cancellationToken).GuardedAsync(RemoteService.Wikidata);
+	}
+
+	private async Task<Result<IdLookupResult>> LookUpResultAsync(IdLookupRequest request, CancellationToken cancellationToken)
 	{
 		return request switch
 		{

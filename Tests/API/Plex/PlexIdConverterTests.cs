@@ -26,7 +26,7 @@ public class PlexIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 			{
 				await Assert.That(found.Ids).Contains(payload.PlexId);
@@ -46,7 +46,7 @@ public class PlexIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 			{
 				await Assert.That(found.Ids).Contains(payload.TmdbIds[0]);
@@ -67,7 +67,7 @@ public class PlexIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 			{
 				await Assert.That(found.Ids).Contains(payload.PlexId);

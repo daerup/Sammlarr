@@ -122,7 +122,10 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task LookUpAsync_WhenTheTmdbKeyIsMissing_Fails() => await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsError();
+	public async Task LookUpAsync_WhenTheTmdbKeyIsMissing_IsNoMatch()
+	{
+		await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsOfUnionType<Answer<FoundMedia>, NoMatch>();
+	}
 
 	[Test]
 	public async Task LookUpAsync_WhenTheTmdbKeyIsConfigured_LoadsTheRating()
@@ -130,7 +133,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithTmdbAccount("valid-tmdb-key");
 		host.Movie("Test Movie", tmdb: "550").ServedByTmdb(rating: 7.8, votes: 5000);
 
-		var found = await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsSuccess();
+		var found = await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsFound();
 
 		await Assert.That(found!.Details.Ratings.All).IsNotEmpty();
 	}

@@ -1,4 +1,5 @@
 using System.Globalization;
+using API.Http;
 using API.Tmdb.Types;
 using Contracts.Media;
 using Domain.Media;
@@ -26,7 +27,12 @@ internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDeta
 
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Imdb];
 
-	public async Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	{
+		return LookUpResultAsync(id, cancellationToken).GuardedAsync(RemoteService.Tmdb);
+	}
+
+	private async Task<Result<FoundMedia>> LookUpResultAsync(IExternalMediaId id, CancellationToken cancellationToken)
 	{
 		var tmdbId = await TmdbIdOfAsync(id, cancellationToken);
 		return await tmdbId.Map(found => tmdbApi.GetDetailWithExternalIdsAsync(found, cancellationToken).Map(details => WithIds(details, found)));

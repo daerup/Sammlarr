@@ -33,7 +33,7 @@ public class TraktTitlesTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 			{
 				await Assert.That(found.Ids.Select(id => $"{id}")).IsEquivalentTo(["Trakt:Movie:16662", "Imdb:Movie:tt1375666", "Tmdb:Movie:27205"]);
@@ -53,7 +53,7 @@ public class TraktTitlesTests
 
 		var result = await Converter(handler).LookUpAsync(new ByIdRequest(ByAnyId, TvdbId.From("81189", MediaType.Show)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids.Select(id => $"{id}")).Contains("Tmdb:Show:1396"));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids.Select(id => $"{id}")).Contains("Tmdb:Show:1396"));
 	}
 
 	[Test]
@@ -64,11 +64,11 @@ public class TraktTitlesTests
 
 		var result = await Converter(handler).LookUpAsync(new ByIdRequest(ByAnyId, ImdbId.From("tt0000000", MediaType.Movie)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
 	}
 
 	[Test]
-	public async Task LookUpAsync_WhenTraktFails_IsAnErrorAndAsksAgainNextTime()
+	public async Task LookUpAsync_WhenTraktFails_IsUnavailableAndAsksAgainNextTime()
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.ServiceUnavailable);
@@ -78,8 +78,8 @@ public class TraktTitlesTests
 		var first = await testee.LookUpAsync(request);
 		var second = await testee.LookUpAsync(request);
 
-		await Assert.That(first).IsError();
-		await Assert.That(second).IsError();
+		await Assert.That(first).IsOfUnionType<Answer<IdLookupResult>, Unavailable>();
+		await Assert.That(second).IsOfUnionType<Answer<IdLookupResult>, Unavailable>();
 		handler.Verify(request => request.PathMatches(".*"), Times.Exactly(2));
 	}
 
@@ -90,7 +90,7 @@ public class TraktTitlesTests
 		handler.OnAnyRequest().RespondWithJson(Inception);
 		var enricher = new TraktEnricher(Titles(handler));
 
-		var found = await Assert.That(await enricher.LookUpAsync(TraktId.From("16662", MediaType.Movie))).IsSuccess();
+		var found = await Assert.That(await enricher.LookUpAsync(TraktId.From("16662", MediaType.Movie))).IsFound();
 
 		var movie = await Assert.That(found!.Details).IsTypeOf<MovieDetails>();
 		await Assert.That(movie!.Ratings.All).IsEquivalentTo(new IMediaRating[] { new TraktRating(84, Some.Of(71234)) });
@@ -125,12 +125,7 @@ public class TraktTitlesTests
 
 		var result = await Converter(handler).LookUpAsync(new ByIdRequest(ByAnyId, ImdbId.From("tt1375666", MediaType.Movie)));
 
-		await Assert
-			.That(result)
-			.IsError()
-			.And.Multiple(async error =>
-				await Assert.That(error.CausedBy<RemoteUnavailableException>().Map(cause => cause.Remote)).IsSome().And.IsEqualTo(RemoteService.Trakt)
-			);
+		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Trakt, new None(), true));
 	}
 
 	[Test]
@@ -139,7 +134,7 @@ public class TraktTitlesTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(Inception);
 
-		var found = await Assert.That(await new TraktEnricher(Titles(handler)).LookUpAsync(TraktId.From("16662", MediaType.Movie))).IsSuccess();
+		var found = await Assert.That(await new TraktEnricher(Titles(handler)).LookUpAsync(TraktId.From("16662", MediaType.Movie))).IsFound();
 
 		await Assert.That(found!.Details.Genres).IsEquivalentTo(["Action", "Science Fiction"]);
 	}

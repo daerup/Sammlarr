@@ -65,7 +65,7 @@ public class MdblistClientTests
 
 		await Assert.That(async () => await testee.SendAsync(HttpMethod.Get, "lists/1/items", Key)).Throws<RemoteUnavailableException>();
 
-		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().LeavesReserve(Key.Value)).IsFalse();
+		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().ReservedUntil(Key.Value)).IsSome();
 	}
 
 	[Test]

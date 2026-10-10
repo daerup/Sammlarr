@@ -1,4 +1,5 @@
 using System.Globalization;
+using API.Http;
 using Contracts.Datasets;
 using Contracts.Media.Conversions;
 using Domain.Media;
@@ -23,11 +24,19 @@ internal sealed class AnimeListsIdConverter(IAnimeIds map, IDatasetLoads loads) 
 		GivesHints: false
 	);
 
-	internal static readonly Error NotLoaded = Error.From("The anime id map has not been loaded yet.", new RemoteUnavailableException(RemoteService.AnimeLists));
+	internal static readonly Error NotLoaded = Error.From(
+		"The anime id map has not been loaded yet.",
+		new RemoteUnavailableException(RemoteService.AnimeLists, sent: false)
+	);
 
 	public IReadOnlyList<IdLookup> Lookups { get; } = [ByAnimeId, ByShowId];
 
-	public async Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	public Task<Answer<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	{
+		return LookUpResultAsync(request, cancellationToken).GuardedAsync(RemoteService.AnimeLists);
+	}
+
+	private async Task<Result<IdLookupResult>> LookUpResultAsync(IdLookupRequest request, CancellationToken cancellationToken)
 	{
 		return request switch
 		{

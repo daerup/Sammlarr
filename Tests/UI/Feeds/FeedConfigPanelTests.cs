@@ -247,7 +247,7 @@ public class FeedConfigPanelTests : BunitContext
 	{
 		var cut = RenderConfig(Documentaries with { Identifier = "88434" });
 
-		Checked(cut, new IdentifierCheck("88434", Error.From("MDBList didn't answer.", new RemoteUnavailableException(RemoteService.Mdblist))));
+		Checked(cut, new IdentifierCheck("88434", Error.From("MDBList didn't answer.", new RemoteUnavailableException(RemoteService.Mdblist, sent: true))));
 
 		await Assert.That(cut.Find("[data-identifier-warning]").TextContent.Trim()).IsEqualTo("MDBList didn't answer.");
 		await Assert.That(cut.FindAll("[data-identifier-error]")).IsEmpty();

@@ -1,3 +1,4 @@
+using API.Http;
 using Contracts.Caching;
 using Contracts.Media.Conversions;
 using Domain.Media;
@@ -21,7 +22,12 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 
 	public IReadOnlyList<IdLookup> Lookups { get; } = [ByRatingKey, Search];
 
-	public async Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	public Task<Answer<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	{
+		return LookUpResultAsync(request, cancellationToken).GuardedAsync(RemoteService.Plex);
+	}
+
+	private async Task<Result<IdLookupResult>> LookUpResultAsync(IdLookupRequest request, CancellationToken cancellationToken)
 	{
 		return request switch
 		{
@@ -75,13 +81,9 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 					{
 						return await plexApi.LookUpExternalsAsync(plexId, token).GetValueOr([]);
 					}
-					catch (RemoteUnavailableException)
-					{
-						unavailable = true;
-						return [];
-					}
 					catch (Exception ex) when (ex is not OperationCanceledException)
 					{
+						unavailable = true;
 						return [];
 					}
 				},
@@ -97,7 +99,7 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 	{
 		if (unavailable)
 		{
-			throw new RemoteUnavailableException(RemoteService.Plex);
+			throw new RemoteUnavailableException(RemoteService.Plex, sent: true);
 		}
 	}
 

@@ -9,7 +9,7 @@ internal static class HttpResponseExtensions
 	{
 		public Error Unanswered(RemoteService remote, string reason)
 		{
-			return IsTransient(status) ? Error.From(new RemoteUnavailableException(remote)) : Error.From(reason);
+			return IsTransient(status) ? Error.From(new RemoteUnavailableException(remote, sent: true)) : Error.From(reason);
 		}
 	}
 

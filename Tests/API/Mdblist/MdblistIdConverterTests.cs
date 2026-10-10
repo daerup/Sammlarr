@@ -22,7 +22,7 @@ public class MdblistIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ShowId(source, value)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(TvdbId.From("81189", MediaType.Show)));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).Contains(TvdbId.From("81189", MediaType.Show)));
 		handler.Verify(request => request.Method(HttpMethod.Post).PathMatches($"^/{source}/show(\\?.*)?$"), Times.Once);
 	}
 
@@ -39,7 +39,7 @@ public class MdblistIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(MalId.From("1", MediaType.Show)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(TvdbId.From("76885", MediaType.Show)));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).Contains(TvdbId.From("76885", MediaType.Show)));
 		handler.Verify(request => request.PathMatches("^/mal/show(\\?.*)?$"), Times.Once);
 	}
 
@@ -54,7 +54,7 @@ public class MdblistIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 				await Assert
 					.That(found.Hints)
@@ -79,7 +79,7 @@ public class MdblistIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0000001", MediaType.Show)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found).IsEqualTo(new IdLookupResult([], new None())));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found).IsEqualTo(new IdLookupResult([], new None())));
 	}
 
 	[Test]
@@ -91,7 +91,7 @@ public class MdblistIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0903747", MediaType.Show)));
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsSome());
+		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Mdblist, new None(), true));
 	}
 
 	[Test]

@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Domain.Providers;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Sources;
 
@@ -35,7 +36,12 @@ public class UnionAssertion<TOuter, TInner>(AssertionContext<TOuter> context) : 
 	}
 
 	private static bool IsWrapper(Type type) =>
-		type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Some<>) || type.GetGenericTypeDefinition() == typeof(Success<>));
+		type.IsGenericType
+		&& (
+			type.GetGenericTypeDefinition() == typeof(Some<>)
+			|| type.GetGenericTypeDefinition() == typeof(Success<>)
+			|| type.GetGenericTypeDefinition() == typeof(Found<>)
+		);
 
 	protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TInner> metadata) =>
 		Task.FromResult(metadata.Exception != null ? AssertionResult.Failed(metadata.Exception.Message) : AssertionResult.Passed);
