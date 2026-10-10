@@ -24,3 +24,4 @@ Domain/Providers/RemoteService.cs
 Domain/Providers/Service.cs
 Domain/Feed/Trace/TraceEvent.cs
 Domain/Feed/Trace/TraceRead.cs
+Domain/Media/ClaimOutcome.cs

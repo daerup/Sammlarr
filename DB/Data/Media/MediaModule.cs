@@ -12,6 +12,7 @@ internal class MediaModule : IServiceModule
 		services.AddScoped<IModelConfiguration, MediaDetailsRowConfiguration>();
 		services.AddSingleton<MediaWriteLock>();
 		services.AddScoped<IMediaRepository, MediaRepository>();
+		services.AddScoped<IIdentityClaims, IdentityClaims>();
 		services.AddScoped<IModelConfiguration, MediaRowConfiguration>();
 	}
 }
