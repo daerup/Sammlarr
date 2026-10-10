@@ -5,6 +5,7 @@ using Core.Media;
 using Domain.Feed.Trace;
 using Domain.Media.Conversions;
 using Domain.Providers;
+using TUnit.Assertions.Enums;
 
 namespace Core.Tests.Feed;
 
@@ -26,6 +27,13 @@ public class RunLayoutsTests
 		Converter(RemoteService.Plex, [PlexId, Search]),
 		Converter(RemoteService.Tmdb, [Detail, Find]),
 		Converter(RemoteService.AnimeLists, [AnimeMap]),
+	]);
+
+	private static readonly IReadOnlyList<Hop> Crossing = IdLookupPlanner.Derive([
+		Converter(RemoteService.Tmdb, [new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.AniList], Cost: 1)]),
+		Converter(RemoteService.Plex, [new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Mal], Cost: 1)]),
+		Converter(RemoteService.Mdblist, [new ById(Accepts: [MediaProvider.Mal], Yields: [MediaProvider.Tvdb], Cost: 1)]),
+		Converter(RemoteService.Wikidata, [new ById(Accepts: [MediaProvider.AniList], Yields: [MediaProvider.Tvdb], Cost: 1)]),
 	]);
 
 	[Test]
@@ -77,6 +85,42 @@ public class RunLayoutsTests
 		var layout = RunLayouts.Build(Hops, new HashSet<MediaProvider> { MediaProvider.Tmdb }, [MediaProvider.Tmdb], []);
 
 		await Assert.That(layout.Ids).IsEmpty();
+	}
+
+	[Test]
+	public async Task Build_WhereTheServiceOrderWouldCrossTwoLines_OrdersEachColumnByWhatFeedsIt()
+	{
+		var layout = RunLayouts.Build(Crossing, new HashSet<MediaProvider> { MediaProvider.Imdb }, [MediaProvider.Tvdb], []);
+
+		await Assert
+			.That(layout.Ids.Select(node => node.Service))
+			.IsEquivalentTo([RemoteService.Tmdb, RemoteService.Plex, RemoteService.Wikidata, RemoteService.Mdblist], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Build_WithDetailsServices_OrdersThemLikeTheirIdServicesAndTheRestLast()
+	{
+		var layout = RunLayouts.Build(
+			Crossing,
+			new HashSet<MediaProvider> { MediaProvider.Imdb },
+			[MediaProvider.Tvdb],
+			[RemoteService.Tvmaze, RemoteService.Wikidata, RemoteService.Tmdb]
+		);
+
+		await Assert.That(layout.Details).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Wikidata, RemoteService.Tvmaze], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Build_WithDetailsServicesOfOneColumn_OrdersThemByTheirRows()
+	{
+		var layout = RunLayouts.Build(
+			Crossing,
+			new HashSet<MediaProvider> { MediaProvider.Imdb },
+			[MediaProvider.Tvdb],
+			[RemoteService.Mdblist, RemoteService.Wikidata]
+		);
+
+		await Assert.That(layout.Details).IsEquivalentTo([RemoteService.Wikidata, RemoteService.Mdblist], CollectionOrdering.Matching);
 	}
 
 	private static int Column(RunLayout layout, RemoteService service) => layout.Ids.Single(node => node.Service == service).Column;
