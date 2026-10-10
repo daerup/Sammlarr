@@ -22,7 +22,7 @@ using Shared.DI;
 using TestInfrastructure;
 using Web.Staging;
 
-namespace Integration.Tests.Staging;
+namespace Web.Tests.Staging;
 
 public class StagingSeedTests : IAsyncDisposable
 {

@@ -38,7 +38,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<InternalsVisibleTo Include="Web.Tests" />
-		<InternalsVisibleTo Include="Integration.Tests" />
 		<InternalsVisibleTo Include="E2E.Tests" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
