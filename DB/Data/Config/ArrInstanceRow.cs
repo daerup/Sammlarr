@@ -20,6 +20,11 @@ internal sealed record ArrInstanceRow
 	[MaxLength(1024)]
 	public string? RootFolderPath { get; set; }
 
+	public int? AnimeQualityProfileId { get; set; }
+
+	[MaxLength(1024)]
+	public string? AnimeRootFolderPath { get; set; }
+
 	public bool Monitored { get; set; } = true;
 
 	public bool SearchOnAdd { get; set; } = true;

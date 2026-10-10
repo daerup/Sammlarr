@@ -62,6 +62,44 @@ public class ArrSinkConfigTests
 	}
 
 	[Test]
+	public async Task RoutesAnime_OnceAnAnimeFolderIsChosen()
+	{
+		await Assert.That(SetUp.RoutesAnime).IsFalse();
+		await Assert.That((SetUp with { AnimeQualityProfileId = Some.Of(7) }).RoutesAnime).IsFalse();
+		await Assert.That((SetUp with { AnimeRootFolderPath = Some.Of("/anime-movies") }).RoutesAnime).IsTrue();
+	}
+
+	[Test]
+	public async Task FolderFor_Anime_WithoutAnAnimeFolder_IsTheDefaultFolder()
+	{
+		await Assert.That(SetUp.FolderFor(ArrRoute.Anime)).IsSome().And.IsEqualTo("/movies");
+	}
+
+	[Test]
+	public async Task FolderFor_Anime_WithAnAnimeFolder_IsTheAnimeFolder()
+	{
+		var anime = SetUp with { AnimeRootFolderPath = Some.Of("/anime-movies") };
+
+		await Assert.That(anime.FolderFor(ArrRoute.Anime)).IsSome().And.IsEqualTo("/anime-movies");
+		await Assert.That(anime.FolderFor(ArrRoute.Default)).IsSome().And.IsEqualTo("/movies");
+	}
+
+	[Test]
+	public async Task ProfileFor_Anime_WithoutAnAnimeProfile_IsTheDefaultProfile()
+	{
+		await Assert.That(SetUp.ProfileFor(ArrRoute.Anime)).IsSome().And.IsEqualTo(4);
+	}
+
+	[Test]
+	public async Task ProfileFor_Anime_WithAnAnimeProfile_IsTheAnimeProfile()
+	{
+		var anime = SetUp with { AnimeQualityProfileId = Some.Of(7) };
+
+		await Assert.That(anime.ProfileFor(ArrRoute.Anime)).IsSome().And.IsEqualTo(7);
+		await Assert.That(anime.ProfileFor(ArrRoute.Default)).IsSome().And.IsEqualTo(4);
+	}
+
+	[Test]
 	[MethodDataSource(nameof(MissingAnAddressOrAKey))]
 	public async Task IsConnectable_ForAnInstanceMissingItsAddressOrKey_IsFalse(ArrInstanceConfig instance)
 	{

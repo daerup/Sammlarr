@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261008191206_OutboxLastError";
+    public override string LastMigrationId => "20261010172344_ArrAnimeFolders";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -1407,6 +1407,13 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                         b1.Property<int>("ProviderConfigRowId")
                             .HasColumnType("INTEGER");
 
+                        b1.Property<int?>("AnimeQualityProfileId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("AnimeRootFolderPath")
+                            .HasMaxLength(1024)
+                            .HasColumnType("TEXT");
+
                         b1.Property<string>("ApiKey")
                             .HasMaxLength(4096)
                             .HasColumnType("TEXT");
@@ -1444,6 +1451,13 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     {
                         b1.Property<int>("ProviderConfigRowId")
                             .HasColumnType("INTEGER");
+
+                        b1.Property<int?>("AnimeQualityProfileId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("AnimeRootFolderPath")
+                            .HasMaxLength(1024)
+                            .HasColumnType("TEXT");
 
                         b1.Property<string>("ApiKey")
                             .HasMaxLength(4096)

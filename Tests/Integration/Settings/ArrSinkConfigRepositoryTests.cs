@@ -30,6 +30,8 @@ public class ArrSinkConfigRepositoryTests(SammlarrTestHost host) : IAsyncDisposa
 			ApiKey = Some.Of(SonarrKey),
 			QualityProfileId = Some.Of(6),
 			RootFolderPath = Some.Of("/tv"),
+			AnimeQualityProfileId = Some.Of(8),
+			AnimeRootFolderPath = Some.Of("/anime"),
 			Monitored = false,
 			SearchOnAdd = true,
 		},
