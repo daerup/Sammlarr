@@ -14,9 +14,11 @@ internal static class ArrSetup
 	internal static async Task<int> PrepareAsync(ArrClient arr, StagedApp app, ArrAppOptions options, string indexerUrl, CancellationToken cancellationToken)
 	{
 		await arr.WaitUntilUpAsync(cancellationToken);
-		if (await arr.IsEmptyAsync("rootfolder", cancellationToken))
+		var folders = (await arr.GetAsync("rootfolder", cancellationToken)).AsArray().Select(folder => folder!["path"]!.GetValue<string>()).ToList();
+		string[] wanted = [options.RootFolder, options.AnimeRootFolder];
+		foreach (var path in wanted.Except(folders))
 		{
-			await arr.PostAsync("rootfolder", new { path = options.RootFolder }, cancellationToken);
+			await arr.PostAsync("rootfolder", new { path }, cancellationToken);
 		}
 
 		if (await arr.IsEmptyAsync("downloadclient", cancellationToken))

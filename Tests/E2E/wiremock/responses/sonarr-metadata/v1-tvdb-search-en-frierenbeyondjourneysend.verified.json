@@ -1,0 +1,2923 @@
+[
+  {
+    "tvdbId": 424536,
+    "title": "Frieren: Beyond Journey's End",
+    "overview": "Decades after her party defeated the Demon King, an old friend's funeral launches the elf wizard Frieren on a journey of self-discovery.",
+    "slug": "frieren-beyond-journeys-end",
+    "originalCountry": "jpn",
+    "originalLanguage": "jpn",
+    "language": "eng",
+    "firstAired": "2023-09-29",
+    "lastAired": "2026-03-27",
+    "tvMazeId": 69956,
+    "tmdbId": 209867,
+    "imdbId": "tt22248376",
+    "malIds": [
+      52991,
+      59978,
+      63816
+    ],
+    "anidbIds": [
+      17617,
+      18886,
+      19977
+    ],
+    "aniListIds": [
+      154587,
+      182255,
+      209939
+    ],
+    "lastUpdated": "2026-10-08T22:07:58Z",
+    "status": "Continuing",
+    "runtime": 25,
+    "timeOfDay": {
+      "hours": 23,
+      "minutes": 0
+    },
+    "originalNetwork": "Nippon TV",
+    "network": "Nippon TV",
+    "genres": [
+      "Adventure",
+      "Animation",
+      "Anime",
+      "Drama",
+      "Fantasy"
+    ],
+    "contentRating": "TV-14",
+    "rating": {
+      "count": 85779,
+      "value": "8.9"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Frieren of the Funeral"
+      },
+      {
+        "title": "Frieren"
+      },
+      {
+        "title": "Frieren: An Ageless Elegy"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Atsumi Tanezaki",
+        "character": "Frieren",
+        "image": "https://artworks.thetvdb.com/banners/person/7866747/61c865002721e.jpg"
+      },
+      {
+        "name": "Nobuhiko Okamoto",
+        "character": "Himmel",
+        "image": "https://artworks.thetvdb.com/banners/person/303207/5f6e1a73d949d.jpg"
+      },
+      {
+        "name": "Yoji Ueda",
+        "character": "Eisen",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/8085473/photo/62e235c6b46e3.jpg"
+      },
+      {
+        "name": "Hiroki Touchi",
+        "character": "Heiter",
+        "image": "https://artworks.thetvdb.com/banners/person/463716/61eb88fb49f52.jpg"
+      },
+      {
+        "name": "Chiaki Kobayashi",
+        "character": "Stark",
+        "image": "https://artworks.thetvdb.com/banners/person/7891643/primary.jpg"
+      },
+      {
+        "name": "Kana Ichinose",
+        "character": "Fern",
+        "image": "https://artworks.thetvdb.com/banners/person/7868437/primary.jpg"
+      },
+      {
+        "name": "Atsuko Tanaka",
+        "character": " Flamme",
+        "image": "https://artworks.thetvdb.com/banners/person/314895/primary.jpg"
+      },
+      {
+        "name": "Hiroki Yasumoto",
+        "character": "Qual",
+        "image": "https://artworks.thetvdb.com/banners/person/301118/primary.jpg"
+      },
+      {
+        "name": "Junichi Suwabe",
+        "character": "Lugner",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/309354/photo/62e22d918a92f.jpg"
+      },
+      {
+        "name": "Takehito Koyasu",
+        "character": "Kraft",
+        "image": "https://artworks.thetvdb.com/banners/person/277098/61a63f303ea4d.jpg"
+      },
+      {
+        "name": "Shunsuke Sakuya",
+        "character": "Granat",
+        "image": "https://artworks.thetvdb.com/banners/person/293448/primary.jpg"
+      },
+      {
+        "name": "Manaka Iwami",
+        "character": "Linie",
+        "image": "https://artworks.thetvdb.com/banners/person/465329/primary.jpg"
+      },
+      {
+        "name": "Ayana Taketatsu",
+        "character": "Aura",
+        "image": "https://artworks.thetvdb.com/banners/person/302377/61e1ac092d2ca.jpg"
+      },
+      {
+        "name": "Takuya Eguchi",
+        "character": "Stoltz",
+        "image": "https://artworks.thetvdb.com/banners/person/292647/primary.jpg"
+      },
+      {
+        "name": "Kouki Ohsuzu",
+        "character": "Draht",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9088969/photo/674b4fb066fc2.jpg"
+      },
+      {
+        "name": "Konomi Kohara",
+        "character": "Chief of the Village of the Sword",
+        "image": "https://artworks.thetvdb.com/banners/person/7891685/6223200d3d1eb.jpg"
+      },
+      {
+        "name": "Daisuke Hirakawa",
+        "character": "Sein's Older Brother",
+        "image": "https://artworks.thetvdb.com/banners/person/301120/primary.jpg"
+      },
+      {
+        "name": "Yuichi Nakamura",
+        "character": "Sein",
+        "image": "https://artworks.thetvdb.com/banners/person/7864375/61a4e29c56d7d.jpg"
+      },
+      {
+        "name": "Hiromichi Tezuka",
+        "character": "Warrior Gorilla",
+        "image": "https://artworks.thetvdb.com/banners/person/7896334/61fd08a8c31ed.jpg"
+      },
+      {
+        "name": "Azumi Waki",
+        "character": "Kanne",
+        "image": "https://artworks.thetvdb.com/banners/person/7881478/641eaaf522c55.jpg"
+      },
+      {
+        "name": "Sayumi Suzushiro",
+        "character": "Lawine",
+        "image": "https://artworks.thetvdb.com/banners/person/7937849/primary.jpg"
+      },
+      {
+        "name": "Kisho Taniyama",
+        "character": "Wirbel",
+        "image": "https://artworks.thetvdb.com/banners/person/302328/61f9045b57401.jpg"
+      },
+      {
+        "name": "Ikumi Hasegawa",
+        "character": "Übel",
+        "image": "https://artworks.thetvdb.com/banners/person/485406/61fe2aa3d2a05.jpg"
+      },
+      {
+        "name": "Jirou Saitou",
+        "character": "Denken",
+        "image": "https://artworks.thetvdb.com/banners/person/7891597/5e9c7fd884c60.jpg"
+      },
+      {
+        "name": "Shohei Komatsu",
+        "character": "Land",
+        "image": "https://artworks.thetvdb.com/banners/person/7912268/642e74345f45d.jpg"
+      },
+      {
+        "name": "Eiji Hanawa",
+        "character": "Richter",
+        "image": "https://artworks.thetvdb.com/banners/person/491377/primary.jpg"
+      },
+      {
+        "name": "Shizuka Ishigami",
+        "character": "Laufen",
+        "image": "https://artworks.thetvdb.com/banners/person/292640/61e18e969c7ac.jpg"
+      },
+      {
+        "name": "Kanae Itou",
+        "character": "Ehre",
+        "image": "https://artworks.thetvdb.com/banners/person/464298/primary.jpg"
+      },
+      {
+        "name": "Haruka Terui",
+        "character": "Sense",
+        "image": "https://artworks.thetvdb.com/banners/person/7915489/61e42b3625916.jpg"
+      },
+      {
+        "name": "Tarusuke Shingaki",
+        "character": "Genau",
+        "image": "https://artworks.thetvdb.com/banners/person/460216/61a4e667d4193.jpg"
+      },
+      {
+        "name": "Yuji Murai",
+        "character": "Scharf ",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9128619/photo/667d4b2810007.jpg"
+      },
+      {
+        "name": "Tomoyo Kurosawa",
+        "character": "Edel",
+        "image": "https://artworks.thetvdb.com/banners/person/469674/61c86de9b382d.jpg"
+      },
+      {
+        "name": "Mariya Ise",
+        "character": "Serie",
+        "image": "https://artworks.thetvdb.com/banners/person/447326/61a676ffcb24c.jpg"
+      },
+      {
+        "name": "Reina Ueda",
+        "character": "Methode",
+        "image": "https://artworks.thetvdb.com/banners/person/295192/primary.jpg"
+      },
+      {
+        "name": "Atsushi Miyauchi",
+        "character": "Lernen",
+        "image": "https://artworks.thetvdb.com/banners/person/450869/62011488c5fd0.jpg"
+      },
+      {
+        "name": "Yasuyuki Kase",
+        "character": "Stark's Father",
+        "image": "https://artworks.thetvdb.com/banners/person/447321/65086cab8d7f0.jpg"
+      },
+      {
+        "name": "Rie Kawamura",
+        "character": "Mazoku ",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/8172512/photo/674b55f198574.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/424536/banners/651dd688bd4d5.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/424536/posters/6516fe48e7a06.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/424536/backgrounds/64e6cbe29d9c0.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/424536/clearlogo/65d798fbd2f61.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/2018811/posters/66d606c50d07c.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/2018812/posters/66d606e1dd83b.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 2,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/2148708/posters/699dd12415f41.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 3,
+        "name": "The Golden Land Arc",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/2241887/posters/69c6951801eec.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 267141,
+    "title": "Beyond Boundaries",
+    "overview": "10 physically disabled teenagers cross the Andes, one of the highest mountain ranges in the world. Over a period of four weeks and 400 km, these young people will have to fight their way from the edge of the Amazon Basin, climb to over 5000m to reach the snowline on Cotopaxi, the highest active volcano in the world, and then descend to sea level, wading through miles of swamp before reaching the Pacific Ocean.They are led by ex-SAS commando Ken Hames.",
+    "slug": "beyond-boundaries",
+    "originalCountry": "gbr",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2005-10-11",
+    "lastAired": "2008-05-30",
+    "tvMazeId": 39932,
+    "imdbId": "tt0484796",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2019-11-13T13:01:20Z",
+    "status": "Ended",
+    "runtime": 55,
+    "originalNetwork": "BBC Two",
+    "network": "BBC Two",
+    "genres": [
+      "Documentary",
+      "Reality",
+      "Travel"
+    ],
+    "rating": {
+      "count": 14,
+      "value": "7.0"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Across The Andes: Beyond Boundaries"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/267141-g.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/267141-1.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/267141-1.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      },
+      {
+        "seasonNumber": 2
+      },
+      {
+        "seasonNumber": 3
+      }
+    ]
+  },
+  {
+    "tvdbId": 76703,
+    "title": "Pokémon",
+    "overview": "A young boy named Ash Ketchum embarks on a journey to become a \"Pokemon Master\" with his first Pokemon, Pikachu. Joining him on his travels are Brock, a girl-obsessed Rock Pokemon Trainer, and Misty, a tomboyish Water Pokemon Trainer who may have a crush on him. Ash and Co. end up traveling through various regions, including Kanto, the Orange Islands, and Johto, and then enter the Pokemon League competitions there. Along the way, they run into many confrontations with Jessie, James, and Meowth, a trio of Pokemon thieves who are apart of an evil organization called \"Team Rocket\". But everytime Team Rocket try to do their evil deeds, they fail thanks to Ash and his Pokemon.",
+    "slug": "pokemon",
+    "originalCountry": "jpn",
+    "originalLanguage": "jpn",
+    "language": "eng",
+    "firstAired": "1997-04-01",
+    "lastAired": "2026-10-30",
+    "tvRageId": 31,
+    "tvMazeId": 590,
+    "tmdbId": 60572,
+    "imdbId": "tt0168366",
+    "malIds": [
+      527,
+      1120,
+      528,
+      1119,
+      1118,
+      1117,
+      1564,
+      1121,
+      1122,
+      1526,
+      4874,
+      10916,
+      10917,
+      5845,
+      6877,
+      2201,
+      5844,
+      1565,
+      2847,
+      4026,
+      6178,
+      7550,
+      5526,
+      4792,
+      4793,
+      4794,
+      4795,
+      5529,
+      4910,
+      8709,
+      6555,
+      1709,
+      1525,
+      7695,
+      8438,
+      9107,
+      9917,
+      11069,
+      10740,
+      11019,
+      11009,
+      11853,
+      12671,
+      13799,
+      14093,
+      14935,
+      16680,
+      16678,
+      17115,
+      17873,
+      31750,
+      19099,
+      19291,
+      42138,
+      21569,
+      21571,
+      23301,
+      25365,
+      28853,
+      31592,
+      34034,
+      34540,
+      36927,
+      40351,
+      53876
+    ],
+    "anidbIds": [
+      230,
+      921,
+      990,
+      991,
+      992,
+      1020,
+      1041,
+      1804,
+      2371,
+      2848,
+      3491,
+      3492,
+      3493,
+      3510,
+      3983,
+      4199,
+      4553,
+      4728,
+      5048,
+      5772,
+      6316,
+      6792,
+      6796,
+      6797,
+      6798,
+      6799,
+      6800,
+      6801,
+      6802,
+      6803,
+      6804,
+      7109,
+      7117,
+      7257,
+      7481,
+      7891,
+      8012,
+      8139,
+      8269,
+      8671,
+      8672,
+      8735,
+      8826,
+      9021,
+      9216,
+      9289,
+      9564,
+      9565,
+      9653,
+      9764,
+      9871,
+      9926,
+      9956,
+      10053,
+      10318,
+      10319,
+      10563,
+      10746,
+      11050,
+      11585,
+      12407,
+      12646,
+      13649,
+      15067,
+      17777
+    ],
+    "aniListIds": [
+      527,
+      1120,
+      528,
+      1119,
+      1118,
+      1117,
+      1564,
+      1121,
+      1122,
+      1526,
+      4874,
+      10916,
+      10917,
+      5845,
+      6877,
+      2201,
+      5844,
+      1565,
+      2847,
+      4026,
+      6178,
+      7550,
+      5526,
+      4792,
+      4793,
+      4794,
+      4795,
+      5529,
+      4910,
+      8709,
+      6555,
+      1709,
+      1525,
+      7695,
+      8438,
+      9107,
+      9917,
+      11069,
+      10740,
+      11019,
+      11009,
+      11853,
+      12671,
+      13799,
+      14093,
+      14935,
+      16680,
+      16678,
+      17115,
+      17873,
+      19099,
+      19291,
+      20644,
+      21271,
+      20683,
+      20948,
+      21270,
+      21356,
+      97634,
+      98298,
+      100744,
+      112153,
+      158871
+    ],
+    "lastUpdated": "2026-10-09T05:26:52Z",
+    "status": "Continuing",
+    "runtime": 25,
+    "timeOfDay": {
+      "hours": 18,
+      "minutes": 45
+    },
+    "originalNetwork": "TV Tokyo",
+    "network": "TV Tokyo",
+    "genres": [
+      "Action",
+      "Adventure",
+      "Animation",
+      "Anime",
+      "Comedy",
+      "Family",
+      "Fantasy"
+    ],
+    "contentRating": "TV-PG",
+    "rating": {
+      "count": 57472,
+      "value": "7.6"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Pocket Monsters"
+      },
+      {
+        "title": "Pokémon: Indigo League"
+      },
+      {
+        "title": "Pokémon: Adventures in the Orange Islands"
+      },
+      {
+        "title": "Pokémon: The Johto Journeys"
+      },
+      {
+        "title": "Pokémon: Johto League Champions"
+      },
+      {
+        "title": "Pokémon: Master Quest"
+      },
+      {
+        "title": "Pokémon: Advanced"
+      },
+      {
+        "title": "Pokémon: Advanced Challenge"
+      },
+      {
+        "title": "Pokémon: Advanced Battle"
+      },
+      {
+        "title": "Pokémon: Battle Frontier"
+      },
+      {
+        "title": "Pokémon: Diamond & Pearl"
+      },
+      {
+        "title": "Pokémon DP: Battle Dimension"
+      },
+      {
+        "title": "Pokémon DP: Galactic Battles"
+      },
+      {
+        "title": "Pokémon DP: Sinnoh League Victors"
+      },
+      {
+        "title": "Pokémon: Black & White"
+      },
+      {
+        "title": "Pokémon BW: Rival Destinies"
+      },
+      {
+        "title": "Pokémon BW: Adventures in Unova and Beyond"
+      },
+      {
+        "title": "Pokémon the Series: XY"
+      },
+      {
+        "title": "Pokémon the Series: XY Kalos Quest"
+      },
+      {
+        "title": "Pokémon the Series: XYZ"
+      },
+      {
+        "title": "Pokémon the Series: Sun & Moon"
+      },
+      {
+        "title": "Pokémon the Series: Sun & Moon - Ultra Adventures"
+      },
+      {
+        "title": "Pokémon the Series: Sun & Moon - Ultra Legends"
+      },
+      {
+        "title": "Pokémon Journeys: The Series"
+      },
+      {
+        "title": "Pokémon Master Journeys: The Series"
+      },
+      {
+        "title": "Pokémon Ultimate Journeys: The Series"
+      },
+      {
+        "title": "Pokémon Horizons: The Series"
+      },
+      {
+        "title": "Pokémon Horizons: Season 2 - The Search for Laqua"
+      },
+      {
+        "title": "Pokémon Horizons: Season 3 - Rising Hope"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Rika Matsumoto",
+        "character": "Ash Ketchum",
+        "image": "https://artworks.thetvdb.com/banners/person/8017722/primary.jpg"
+      },
+      {
+        "name": "Minori Suzuki",
+        "character": "Liko",
+        "image": "https://artworks.thetvdb.com/banners/person/271015/61b1ee90e33c5.jpg"
+      },
+      {
+        "name": "Yuka Terasaki",
+        "character": "Roy",
+        "image": "https://artworks.thetvdb.com/banners/person/289881/primary.jpg"
+      },
+      {
+        "name": "Yoshino Aoyama",
+        "character": "Dot",
+        "image": "https://artworks.thetvdb.com/banners/person/306027/primary.jpg"
+      },
+      {
+        "name": "Ikue Otani",
+        "character": "Pikachu",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7930970/photo/62951f020748d.jpg"
+      },
+      {
+        "name": "Taku Yashiro",
+        "character": "Friede",
+        "image": "https://artworks.thetvdb.com/banners/person/460206/5f171a468d8e5.jpg"
+      },
+      {
+        "name": "Ayane Sakura",
+        "character": "Orla",
+        "image": "https://artworks.thetvdb.com/banners/person/307452/61a62ddf7c7ef.jpg"
+      },
+      {
+        "name": "Kenta Miyake",
+        "character": "Murdock",
+        "image": "https://artworks.thetvdb.com/banners/person/303226/primary.jpg"
+      },
+      {
+        "name": "Kei Shindou",
+        "character": "Mollie",
+        "image": "https://artworks.thetvdb.com/banners/person/294995/61b347a272e78.jpg"
+      },
+      {
+        "name": "Ikkyu Juku",
+        "character": "Ludlow",
+        "image": "https://artworks.thetvdb.com/banners/person/454492/primary.jpg"
+      },
+      {
+        "name": "Shin'ichirou Miki",
+        "character": "Charmander|Staryu",
+        "image": "https://artworks.thetvdb.com/banners/person/7874486/primary.jpg"
+      },
+      {
+        "name": "Yuuji Ueda",
+        "character": "Wobbuffet",
+        "image": "https://artworks.thetvdb.com/banners/person/279183/primary.jpg"
+      },
+      {
+        "name": "Unshou Ishizuka",
+        "character": "Muk",
+        "image": "https://artworks.thetvdb.com/banners/person/7878699/primary.jpg"
+      },
+      {
+        "name": "Rikako Aikawa",
+        "character": "Butterfree|Caterpie|Krabby|Dratini|Dragonair|Lapras|Psyduck|Tapu Koko",
+        "image": "https://artworks.thetvdb.com/banners/person/8052955/primary.jpg"
+      },
+      {
+        "name": "Megumi Hayashibara",
+        "character": "Pidgeotto",
+        "image": "https://artworks.thetvdb.com/banners/person/282368/61be2cb675f8d.jpg"
+      },
+      {
+        "name": "Koichi Sakaguchi",
+        "character": "Arbok",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7922192/photo/670bdd7d10ed0.jpg"
+      },
+      {
+        "name": "Satomi Koorogi",
+        "character": "Togepi",
+        "image": "https://artworks.thetvdb.com/banners/person/7873912/61efc94a7bf59.jpg"
+      },
+      {
+        "name": "Machiko Toyoshima",
+        "character": "Horsea"
+      },
+      {
+        "name": "Kei Shindou",
+        "character": "Lillie",
+        "image": "https://artworks.thetvdb.com/banners/person/294995/61b347a272e78.jpg"
+      },
+      {
+        "name": "Fumiko Takekuma",
+        "character": "Chrys"
+      },
+      {
+        "name": "Hitomi Kikuchi",
+        "character": "Cylan",
+        "image": "https://artworks.thetvdb.com/banners/person/7930978/primary.jpg"
+      },
+      {
+        "name": "Reina Ueda",
+        "character": "Mallow",
+        "image": "https://artworks.thetvdb.com/banners/person/295192/primary.jpg"
+      },
+      {
+        "name": "Kaito Ishikawa",
+        "character": "Kiawe",
+        "image": "https://artworks.thetvdb.com/banners/person/303231/5fc1fccb0ca8d.jpg"
+      },
+      {
+        "name": "Chinami Nishimura",
+        "character": "Litten",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/313283/photo/677a80fdedfbf.jpg"
+      },
+      {
+        "name": "Nobuhiko Okamoto",
+        "character": "Gladion",
+        "image": "https://artworks.thetvdb.com/banners/person/303207/5f6e1a73d949d.jpg"
+      },
+      {
+        "name": "Mika Kanai",
+        "character": "Togepi",
+        "image": "https://artworks.thetvdb.com/banners/person/319485/primary.jpg"
+      },
+      {
+        "name": "Miyuki Sawashiro",
+        "character": "Olivia ",
+        "image": "https://artworks.thetvdb.com/banners/person/292117/61b5c69902788.jpg"
+      },
+      {
+        "name": "Keiichi Nakagawa",
+        "character": "Professor Kukui"
+      },
+      {
+        "name": "Masami Toyoshima",
+        "character": "Delia Ketchum"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/76703-g2.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/76703-6.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/76703-8.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/76703/clearlogo/611b6cdf4830d.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/24161/posters/634469fcd8746.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 1,
+        "name": "Indigo League",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-1.jpg"
+          },
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/76703-1-2.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 2,
+        "name": "Adventures on the Orange Islands",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-2-2.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 3,
+        "name": "The Johto Journeys",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-3-3.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 4,
+        "name": "Johto League Champions",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-4.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 5,
+        "name": "Master Quest",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-5.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 6,
+        "name": "Advanced",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-6.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 7,
+        "name": "Advanced Challenge",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-7.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 8,
+        "name": "Advanced Battle",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-8.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 9,
+        "name": "Battle Frontier",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-9.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 10,
+        "name": "Diamond & Pearl",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-10-2.jpg"
+          },
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/76703-10.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 11,
+        "name": "Diamond & Pearl: Battle Dimension",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-11.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 12,
+        "name": "Diamond & Pearl: Galactic Battles",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-12-2.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 13,
+        "name": "Diamond & Pearl: Sinnoh League Victors",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-13-3.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 14,
+        "name": "Black & White",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/420211/posters/63d13c06d0470.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 15,
+        "name": "Black & White: Adventures in Unova",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/486185/posters/6763afba602f6.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 16,
+        "name": "XY",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-16-3.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 17,
+        "name": "XYZ",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-17.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 18,
+        "name": "Sun & Moon",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76703-18-4.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 19,
+        "name": "Journeys",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/series/76703/seasons/831524/posters/62001661.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 20,
+        "name": "Horizons",
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/2056492/posters/64b40976670db.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 371436,
+    "title": "Wandering Witch: The Journey of Elaina",
+    "overview": "Once upon a time, there was a witch named Elaina. Inspired by her favorite book, Elaina ventures out to see the world she's read so much about. Like a leaf on the wind, she travels from one country to another, looking to sate her inquisitiveness and searching for new experiences. Exploration and curiosity drive her journey. She's confronted by humanity in all its forms, whether strange, bizarre, or emotional and with each meeting, Elaina would become a small part of their story, and her own world would get a little bit bigger.",
+    "slug": "wandering-witch-the-journey-of-elaina",
+    "originalCountry": "jpn",
+    "originalLanguage": "jpn",
+    "language": "eng",
+    "firstAired": "2020-10-02",
+    "lastAired": "2020-12-18",
+    "tvMazeId": 50354,
+    "tmdbId": 94693,
+    "imdbId": "tt12457334",
+    "malIds": [
+      40571
+    ],
+    "anidbIds": [
+      15202
+    ],
+    "aniListIds": [
+      112609
+    ],
+    "lastUpdated": "2026-08-23T06:53:39Z",
+    "status": "Ended",
+    "runtime": 24,
+    "timeOfDay": {
+      "hours": 21,
+      "minutes": 0
+    },
+    "originalNetwork": "AT-X",
+    "network": "AT-X",
+    "genres": [
+      "Adventure",
+      "Animation",
+      "Anime",
+      "Fantasy",
+      "Travel"
+    ],
+    "contentRating": "TV-14",
+    "rating": {
+      "count": 1822,
+      "value": "7.0"
+    },
+    "alternativeTitles": [
+      {
+        "title": "The Witch's Journey"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Kaede Hondo",
+        "character": "Elaina",
+        "image": "https://artworks.thetvdb.com/banners/person/7868355/61ab3549384b0.jpg"
+      },
+      {
+        "name": "Kana Hanazawa",
+        "character": "Flan",
+        "image": "https://artworks.thetvdb.com/banners/person/300736/5fa7b78d1827d.jpg"
+      },
+      {
+        "name": "Tomoyo Kurosawa",
+        "character": "Saya",
+        "image": "https://artworks.thetvdb.com/banners/person/469674/61c86de9b382d.jpg"
+      },
+      {
+        "name": "Yoko Hikasa",
+        "character": "Sheila",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/294194/photo/62e22ea51361b.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/series/371436/banners/61997487.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/series/371436/posters/5f8ebceee219c.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/series/371436/backgrounds/5f0341e7b771b.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/371436/clearlogo/611e106da2bcf.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 343881,
+    "title": "Ainori Love Wagon: Asian Journey",
+    "overview": "Seven men and women board a pink bus in search of true love. On a journey through Asia with strangers, their goal is to return to Japan as a couple.",
+    "slug": "ainori-love-wagon-asian-journey",
+    "originalCountry": "jpn",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2017-10-26",
+    "lastAired": "2019-03-28",
+    "tvMazeId": 37462,
+    "tmdbId": 80513,
+    "imdbId": "tt7510930",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2024-01-24T17:01:53Z",
+    "status": "Ended",
+    "runtime": 30,
+    "timeOfDay": {
+      "hours": 17,
+      "minutes": 0
+    },
+    "originalNetwork": "Fuji TV",
+    "network": "Fuji TV",
+    "genres": [
+      "Reality"
+    ],
+    "rating": {
+      "count": 377,
+      "value": "7.1"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Ainori: Asian Journey"
+      },
+      {
+        "title": "Love Wagon: Asian Journey"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/5beafa14c529b.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/343881-1.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/5be8dc3902a66.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      },
+      {
+        "seasonNumber": 2
+      }
+    ]
+  },
+  {
+    "tvdbId": 334451,
+    "title": "Howards End",
+    "overview": "The social and class divisions in early 20th century England through the intersection of three families - the wealthy Wilcoxes, the gentle and idealistic Schlegels and the lower-middle class Basts.",
+    "slug": "howards-end",
+    "originalCountry": "gbr",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2017-11-12",
+    "lastAired": "2017-12-03",
+    "tvMazeId": 25396,
+    "tmdbId": 74630,
+    "imdbId": "tt2577192",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-09-22T21:22:39Z",
+    "status": "Ended",
+    "runtime": 60,
+    "timeOfDay": {
+      "hours": 21,
+      "minutes": 0
+    },
+    "originalNetwork": "BBC One",
+    "network": "BBC One",
+    "genres": [
+      "Drama",
+      "Mini-Series",
+      "Romance"
+    ],
+    "contentRating": "TV-PG",
+    "rating": {
+      "count": 7539,
+      "value": "7.2"
+    },
+    "actors": [
+      {
+        "name": "Hayley Atwell",
+        "character": "Margaret Schlegel",
+        "image": "https://artworks.thetvdb.com/banners/person/327500/5e8a1de784cef.jpg"
+      },
+      {
+        "name": "Matthew Macfadyen",
+        "character": "Henry Wilcox",
+        "image": "https://artworks.thetvdb.com/banners/person/449520/25870272.jpg"
+      },
+      {
+        "name": "Joseph Quinn",
+        "character": "Leonard Bast",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/482258/photo/68f34205cc32a.jpg"
+      },
+      {
+        "name": "Tracey Ullman",
+        "character": "Juley Mund",
+        "image": "https://artworks.thetvdb.com/banners/person/253462/primary.jpg"
+      },
+      {
+        "name": "Julia Ormond",
+        "character": "Mrs. Wilcox",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/360398/photo/65f08e58484c8.jpg"
+      },
+      {
+        "name": "Philippa Coulthard",
+        "character": "Helen Schlegel",
+        "image": "https://artworks.thetvdb.com/banners/person/481040/5f4a3a9b3068c.jpg"
+      },
+      {
+        "name": "Bessie Carter",
+        "character": "Evie Wilcox",
+        "image": "https://artworks.thetvdb.com/banners/person/7945895/62096210.jpg"
+      },
+      {
+        "name": "Rosalind Eleazar",
+        "character": "Jacky Bast",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/308480/photo/66f31a578a833.jpg"
+      },
+      {
+        "name": "Gavin Brocker",
+        "character": "Crane"
+      },
+      {
+        "name": "Jonah Hauer-King",
+        "character": " Paul Wilcox",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/621057/photo/68eaee765f57a.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/334451/banners/6801a110a236e.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/334451-3.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/334451-3.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/334451/clearlogo/611d9bc796920.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 403360,
+    "title": "Beyond the End",
+    "overview": "Set in the year 1985, an arson-murder case takes place at an apartment in Tokyo. The victim is novelist Kohei Kimizuka. Ritusko Ikematsu (Marika Matsumoto) is soon arrested for his death. Ritusko Ikematsu and Kohei Kimizuka were childhood friends.\r\n\r\nProsecutor Tsutaguchi takes charge of the murder case. He begins to contact people who knew Ritusko Ikematsu. Prosecutor Tsutaguchi learns of her unfortunate life and the men surrounding her. The men's impressions of Ritusko Ikematsu are all different. Prosecutor Tsutaguchi then learns of a case that took place in 1955 in Tsugaru, Aomori Prefecture, where Ritusko Ikematsu and Kohei Kimizuka grew up. He believes that case is the key to solve Kohei Kimizuka’s murder.",
+    "slug": "beyond-the-end",
+    "originalCountry": "jpn",
+    "originalLanguage": "jpn",
+    "language": "eng",
+    "firstAired": "2021-05-14",
+    "lastAired": "2021-07-02",
+    "tmdbId": 123576,
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2022-05-03T06:59:14Z",
+    "status": "Ended",
+    "timeOfDay": {
+      "hours": 0,
+      "minutes": 0
+    },
+    "originalNetwork": "WOWOW",
+    "network": "WOWOW",
+    "genres": [
+      "Crime",
+      "Drama",
+      "Mystery",
+      "Suspense"
+    ],
+    "alternativeTitles": [
+      {
+        "title": "The End of the Other Side"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Marika Matsumoto",
+        "character": "池松律子",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/448663/photo/6336db8feec4d.jpg"
+      },
+      {
+        "name": "Kouhei Matsushita",
+        "character": "君塚公平",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7884838/photo/6331d6484686f.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/403360/banners/6270d2c1901fb.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/403360/posters/6247b8300abfc.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/403360/backgrounds/6247b8242e8b9.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 81703,
+    "title": "Great Railway Journeys",
+    "overview": "Great Railway Journeys, originally titled Great Railway Journeys of the World, is a recurring series of travel documentaries produced by BBC Television. The premise of each programme is that the presenter, typically a well-known figure from the arts or media, would make a journey by train, usually through a country or to a destination to which they had a personal connection. There were four series broadcast on BBC Two between 1980 and 1999, with the shorter series title being used for all but the first. A new series entitled Great British Railway Journeys started on BBC Two in January 2010.",
+    "slug": "great-railway-journeys",
+    "originalCountry": "gbr",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "1980-10-30",
+    "lastAired": "1999-04-06",
+    "tvRageId": 21811,
+    "tvMazeId": 8876,
+    "tmdbId": 15492,
+    "imdbId": "tt1091365",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-04-07T04:49:33Z",
+    "status": "Ended",
+    "runtime": 36,
+    "originalNetwork": "BBC Two",
+    "network": "BBC Two",
+    "genres": [
+      "Documentary",
+      "Travel"
+    ],
+    "rating": {
+      "count": 113,
+      "value": "8.4"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Great Railway Journeys of the World"
+      },
+      {
+        "title": "Michael Palin's Great Railway Journeys"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Michael Palin",
+        "character": "Presenter",
+        "image": "https://artworks.thetvdb.com/banners/person/253896/5fe024347cf3c.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/81703/banners/662975ea0069c.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/81703-3.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/81703-1.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/31621/posters/61b9f3cc906d9.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 2,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/38655/posters/61b9f3f5ecc26.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 3,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/38656/posters/61b9f42cc194d.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 4,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/38657/posters/61b9f45645b20.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 425987,
+    "title": "World's Greatest Train Journeys from Above",
+    "overview": "This six-part series follows some of the world’s most extraordinary railway journeys from above and on the ground, taking the audience on an adventure of a lifetime. We fly above spectacular scenery and explore exceptional engineering; meeting the people who maintain and run these incredible railroads as well as those who live alongside them.",
+    "slug": "worlds-greatest-train-journeys-from-above",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2022-09-17",
+    "lastAired": "2022-10-22",
+    "tmdbId": 209034,
+    "imdbId": "tt25436306",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2024-09-23T12:39:49Z",
+    "status": "Ended",
+    "runtime": 45,
+    "timeOfDay": {
+      "hours": 0,
+      "minutes": 0
+    },
+    "originalNetwork": "SBS",
+    "network": "SBS",
+    "genres": [
+      "Documentary"
+    ],
+    "rating": {
+      "count": 42,
+      "value": "7.4"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Epic Train Journeys from Above"
+      },
+      {
+        "title": "Epic Train Journeys"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/425987/banners/634d26c041402.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/425987/posters/66a4ef906b3b1.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/425987/backgrounds/66a4efa02a4b1.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 76509,
+    "title": "Space: Above and Beyond",
+    "overview": "It’s the year 2063. After 50 years of deep space exploration, the people of Earth feel certain they are alone in the universe. Then word comes that two Earth outposts light-years away from home have been brutally attacked by an advanced alien civilization. Now the new young recruits of the United States Marine Corps Space Aviator Cavalry are heading for the front lines of space in the toughest battle the world has even faced. Thrust into an intergalactic war beyond imagination, these untested fighter pilots suddenly find themselves waging a life-and-death struggle to protect Earth and to save mankind from total annihilation.",
+    "slug": "space-above-and-beyond",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "1995-09-24",
+    "lastAired": "1996-06-02",
+    "tvRageId": 5272,
+    "tvMazeId": 5818,
+    "tmdbId": 3534,
+    "imdbId": "tt0112173",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-07-16T11:09:10Z",
+    "status": "Ended",
+    "runtime": 46,
+    "originalNetwork": "FOX",
+    "network": "FOX",
+    "genres": [
+      "Action",
+      "Adventure",
+      "Drama",
+      "Mystery",
+      "Science Fiction",
+      "Thriller"
+    ],
+    "contentRating": "TV-PG",
+    "rating": {
+      "count": 9365,
+      "value": "7.8"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Space Above and Beyond"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Morgan Weisser",
+        "character": "Lt. Nathan West"
+      },
+      {
+        "name": "Kristen Cloke",
+        "character": "Lt. Shane Vansen",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/291854/photo/67feff086631c.jpg"
+      },
+      {
+        "name": "Rodney Rowland",
+        "character": "Lt. Cooper Hawkes"
+      },
+      {
+        "name": "Joel de la Fuente",
+        "character": "Lt. Paul Wang",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/274839/photo/6531ed7dbd1a2.jpg"
+      },
+      {
+        "name": "Lanei Chapman",
+        "character": "Lt. Vanessa Damphousse",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/315215/photo/65ca7469777d1.jpg"
+      },
+      {
+        "name": "James Morrison",
+        "character": "Lt.Col. Tyrus Cassius 'T.C.' McQueen",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/281339/photo/653ff17050b2a.jpg"
+      },
+      {
+        "name": "Tucker Smallwood",
+        "character": "Commodore Glen van Ross",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/267068/photo/666704c96e469.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/76509-g4.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/76509-4.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/76509-6.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/76509/clearlogo/611bac1362743.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/76509-0.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/427-1.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 431237,
+    "title": "Kuromi's Pretty Journey",
+    "overview": "Story following Kuromi as she travels around the world in search of her missing sister, Romina, who makes her first appearance in this anime. In addition to Romina, a number of new characters will appear, including the friends who travel with Kuromi and a member of an evil organization that stands in the way of their journey.",
+    "slug": "kuromis-pretty-journey",
+    "originalCountry": "jpn",
+    "originalLanguage": "jpn",
+    "language": "eng",
+    "firstAired": "2023-02-17",
+    "lastAired": "2024-12-12",
+    "tmdbId": 220632,
+    "imdbId": "tt27724196",
+    "malIds": [
+      54535
+    ],
+    "anidbIds": [
+      17867
+    ],
+    "aniListIds": [
+      161632
+    ],
+    "lastUpdated": "2026-03-23T18:33:45Z",
+    "status": "Continuing",
+    "runtime": 1,
+    "timeOfDay": {
+      "hours": 0,
+      "minutes": 0
+    },
+    "originalNetwork": "YouTube",
+    "network": "YouTube",
+    "genres": [
+      "Animation",
+      "Anime"
+    ],
+    "rating": {
+      "count": 51,
+      "value": "7.5"
+    },
+    "actors": [
+      {
+        "name": "Junko Takeuchi",
+        "character": "Kuromi",
+        "image": "https://artworks.thetvdb.com/banners/person/7903091/primary.jpg"
+      },
+      {
+        "name": "Maika Yamamoto",
+        "character": "Romina",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/641589/photo/64f4922c1b8a8.jpg"
+      },
+      {
+        "name": "Noboru Maeda",
+        "character": "Baku"
+      },
+      {
+        "name": "Kotomi Aihara",
+        "character": "Gureco"
+      },
+      {
+        "name": "Ikue Otani",
+        "character": "Collimo",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7930970/photo/62951f020748d.jpg"
+      },
+      {
+        "name": "Misaki Watada",
+        "character": "Koni",
+        "image": "https://artworks.thetvdb.com/banners/person/7867801/primary.jpg"
+      },
+      {
+        "name": "Yuki Kaji",
+        "character": "Nico",
+        "image": "https://artworks.thetvdb.com/banners/person/293452/61e6e6287c8a8.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/431237/banners/640904d568c79.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/431237/posters/6751d5ade7f51.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      },
+      {
+        "seasonNumber": 2,
+        "name": "Kuromi’s Pretty Journey: Escape from the Multiverse!"
+      }
+    ]
+  },
+  {
+    "tvdbId": 333152,
+    "title": "Kino's Journey: The Beautiful World - The Animated Series",
+    "overview": "The story follows the travels of Kino, a young adventurer who rides a talking motorcycle named Hermes. They explore the people and cultures of different places throughout their adventures, spending only three days at each location.",
+    "slug": "kinos-journey-the-beautiful-world---the-animated-series",
+    "originalCountry": "jpn",
+    "originalLanguage": "jpn",
+    "language": "eng",
+    "firstAired": "2017-10-06",
+    "lastAired": "2017-12-22",
+    "tvMazeId": 31961,
+    "tmdbId": 74097,
+    "imdbId": "tt6638842",
+    "malIds": [
+      35079
+    ],
+    "anidbIds": [
+      12959
+    ],
+    "aniListIds": [
+      98448
+    ],
+    "lastUpdated": "2026-06-20T08:20:38Z",
+    "status": "Ended",
+    "runtime": 25,
+    "timeOfDay": {
+      "hours": 22,
+      "minutes": 0
+    },
+    "originalNetwork": "AT-X",
+    "network": "AT-X",
+    "genres": [
+      "Action",
+      "Adventure",
+      "Animation",
+      "Anime",
+      "Drama",
+      "Fantasy",
+      "Travel"
+    ],
+    "contentRating": "TV-MA",
+    "rating": {
+      "count": 948,
+      "value": "7.2"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Kino's Journey (2017)"
+      },
+      {
+        "title": "Kino's Journey -the Beautiful World- the Animated Series"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Ayane Sakura",
+        "character": "Ti",
+        "image": "https://artworks.thetvdb.com/banners/person/307452/61a62ddf7c7ef.jpg"
+      },
+      {
+        "name": "Yuichiro Umehara",
+        "character": "Shizu",
+        "image": "https://artworks.thetvdb.com/banners/person/7878653/618f7e22578ca.jpg"
+      },
+      {
+        "name": "Lynn",
+        "character": "Shishou",
+        "image": "https://artworks.thetvdb.com/banners/person/365222/61c5d229c48f7.jpg"
+      },
+      {
+        "name": "Ken'ichirou Matsuda",
+        "character": "Riku",
+        "image": "https://artworks.thetvdb.com/banners/person/7936481/primary.jpg"
+      },
+      {
+        "name": "Kazuyuki Okitsu",
+        "character": "Aibou",
+        "image": "https://artworks.thetvdb.com/banners/person/292929/61f7dd8e3f553.jpg"
+      },
+      {
+        "name": "Soma Saito",
+        "character": "Hermes",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7887122/photo/62f9d1d2f11c0.jpg"
+      },
+      {
+        "name": "Aoi Yuki",
+        "character": "Kino",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7864377/photo/619d0ed6bb40f.jpg"
+      },
+      {
+        "name": "Inori Minase",
+        "character": "Photo ",
+        "image": "https://artworks.thetvdb.com/banners/person/301623/5fa7b7eb423c1.jpg"
+      },
+      {
+        "name": "Megumi Ogata",
+        "character": "Sou ",
+        "image": "https://artworks.thetvdb.com/banners/person/271012/61eb92222522c.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/333152-g.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/333152-3.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/333152-3.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/333152/clearlogo/6120c3f40edb0.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/724465/posters/61a00d0dd713e.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 79179,
+    "title": "Kino's Journey",
+    "overview": "The story follows the travels of Kino, a young adventurer who rides a talking motorcycle named Hermes. They explore the people and cultures of different places throughout their adventures, spending only three days at each location.",
+    "slug": "kinos-journey",
+    "originalCountry": "jpn",
+    "originalLanguage": "jpn",
+    "language": "eng",
+    "firstAired": "2003-04-08",
+    "lastAired": "2003-07-08",
+    "tvRageId": 2125,
+    "tvMazeId": 11841,
+    "tmdbId": 34166,
+    "imdbId": "tt0433498",
+    "malIds": [
+      486,
+      1379,
+      2175
+    ],
+    "anidbIds": [
+      575,
+      2651,
+      4939
+    ],
+    "aniListIds": [
+      486,
+      1379,
+      2175
+    ],
+    "lastUpdated": "2026-04-19T15:59:55Z",
+    "status": "Ended",
+    "runtime": 25,
+    "timeOfDay": {
+      "hours": 18,
+      "minutes": 30
+    },
+    "originalNetwork": "WOWOW",
+    "network": "WOWOW",
+    "genres": [
+      "Adventure",
+      "Animation",
+      "Anime",
+      "Drama",
+      "Fantasy",
+      "Science Fiction",
+      "Travel"
+    ],
+    "rating": {
+      "count": 3801,
+      "value": "8.3"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Kino's Journey (2003)"
+      },
+      {
+        "title": "Kino's Travels: The Beautiful World"
+      },
+      {
+        "title": "Kino's Journey: the Beautiful World (2003)"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Kelli Cousins",
+        "character": "Kino"
+      },
+      {
+        "name": "Cynthia Martinez",
+        "character": "Hermes"
+      },
+      {
+        "name": "Clint Bickham",
+        "character": "Shizu"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/79179-g.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/79179-2.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/79179-2.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/79179/clearlogo/611ca234229c4.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/v4/season/26623/posters/61a00dc9c6fee.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/79179-1.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 267259,
+    "title": "Witches of East End",
+    "overview": "The series stars Julia Ormond as lead character Joanna Beauchamp, a witch and mother of Freya Beauchamp (Jenna Dewan Tatum) and Ingrid Beauchamp (Rachel Boston), who are part of the next generation of witches. Mädchen Amick co-stars as Joanna's mischievous witch sister Wendy Beauchamp. The series is loosely based on the book of the same name's plot, with one change being that Freya and Ingrid are unaware of their magical powers.",
+    "slug": "witches-of-east-end",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2013-10-06",
+    "lastAired": "2014-10-05",
+    "tvRageId": 32887,
+    "tvMazeId": 47,
+    "tmdbId": 60557,
+    "imdbId": "tt2288064",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-05-27T04:42:36Z",
+    "status": "Ended",
+    "runtime": 45,
+    "timeOfDay": {
+      "hours": 22,
+      "minutes": 0
+    },
+    "originalNetwork": "Lifetime",
+    "network": "Lifetime",
+    "genres": [
+      "Drama",
+      "Fantasy",
+      "Horror",
+      "Mystery",
+      "Suspense"
+    ],
+    "contentRating": "TV-14",
+    "rating": {
+      "count": 28898,
+      "value": "7.5"
+    },
+    "actors": [
+      {
+        "name": "Julia Ormond",
+        "character": "Joanna Beauchamp",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/360398/photo/65f08e58484c8.jpg"
+      },
+      {
+        "name": "Jenna Dewan",
+        "character": "Freya Beauchamp",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/253012/photo/64e7150945aaf.jpg"
+      },
+      {
+        "name": "Mädchen Amick",
+        "character": "Wendy",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/294153/photo/606199b428a7f.jpg"
+      },
+      {
+        "name": "Rachel Boston",
+        "character": "Ingrid Beauchamp",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/271142/photo/6312c1ccd4da6.jpg"
+      },
+      {
+        "name": "Daniel di Tomasso",
+        "character": "Killian Gardiner",
+        "image": "https://artworks.thetvdb.com/banners/person/346888/5fd4f7097e699.jpg"
+      },
+      {
+        "name": "Eric Winter",
+        "character": "Dash Gardiner"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/267259-g3.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/267259-4.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/267259-5.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/267259/clearlogo/611ba74582c24.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/267259-1.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 2,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/267259-2.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 269971,
+    "title": "Shane Delia's Spice Journey",
+    "overview": "Shane Delia’s Spice Journey takes us on a culinary pilgrimage to explore his heritage and discover food traditions that go back thousands of years.",
+    "slug": "shane-delias-spice-journey",
+    "originalCountry": "aus",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2013-05-02",
+    "lastAired": "2015-12-17",
+    "tvRageId": 22592,
+    "tvMazeId": 6455,
+    "tmdbId": 53168,
+    "imdbId": "tt3025968",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2024-04-24T22:16:19Z",
+    "status": "Ended",
+    "runtime": 25,
+    "timeOfDay": {
+      "hours": 19,
+      "minutes": 30
+    },
+    "originalNetwork": "SBS",
+    "network": "SBS",
+    "genres": [
+      "Documentary",
+      "Food"
+    ],
+    "rating": {
+      "count": 8,
+      "value": "7.8"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Shane Delia's Moorish Spice Journey"
+      },
+      {
+        "title": "Shane Delia's Spice Journey Turkey"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Shane Delia",
+        "character": "Host",
+        "image": "https://artworks.thetvdb.com/banners/person/8057617/5eaaca566a4cc.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/269971-g.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/269971-1.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/269971-1.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/269971-1.jpg"
+          },
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/269971-1.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 2,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/269971-2.jpg"
+          },
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/269971-2.jpg"
+          }
+        ]
+      },
+      {
+        "seasonNumber": 3,
+        "images": [
+          {
+            "coverType": "Banner",
+            "url": "https://artworks.thetvdb.com/banners/seasonswide/269971-3.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 289906,
+    "title": "Seraph of the End",
+    "overview": "One day, a mysterious virus appeared on Earth which killed every infected human over the age of 13. At the same time, vampires emerged from the world's dark recesses and enslaved mankind. Enter Hyakuya Yuuichirou, a young boy, who along with the rest of the children from his orphanage, are treated as livestock by the vampires. Even in captivity, Yuuichirou dreams big. He dreams of killing vampires. He dreams of killing them all.",
+    "slug": "seraph-of-the-end",
+    "originalCountry": "jpn",
+    "originalLanguage": "jpn",
+    "language": "eng",
+    "firstAired": "2015-04-04",
+    "lastAired": "2015-12-26",
+    "tvRageId": 30050,
+    "tvMazeId": 4092,
+    "tmdbId": 62255,
+    "imdbId": "tt4584326",
+    "malIds": [
+      26243,
+      28927,
+      31378
+    ],
+    "anidbIds": [
+      10813,
+      10984,
+      11809
+    ],
+    "aniListIds": [
+      20829,
+      20993,
+      21586
+    ],
+    "lastUpdated": "2026-01-12T08:06:50Z",
+    "status": "Ended",
+    "runtime": 25,
+    "timeOfDay": {
+      "hours": 22,
+      "minutes": 0
+    },
+    "originalNetwork": "Tokyo MX",
+    "network": "Tokyo MX",
+    "genres": [
+      "Action",
+      "Adventure",
+      "Animation",
+      "Anime",
+      "Drama",
+      "Fantasy",
+      "Science Fiction"
+    ],
+    "rating": {
+      "count": 9385,
+      "value": "7.4"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Owari no Seraph"
+      },
+      {
+        "title": "Owari no Seraph: Nagoya Kessen-hen"
+      },
+      {
+        "title": "Seraph of the End: Battle in Nagoya"
+      },
+      {
+        "title": "Seraph of the End: Vampire Reign"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Miyu Irino",
+        "character": "Yuuichirou Hyakuya",
+        "image": "https://artworks.thetvdb.com/banners/person/301128/61a64e3a2fce6.jpg"
+      },
+      {
+        "name": "Kensho Ono",
+        "character": "Mikaela Hyakuya",
+        "image": "https://artworks.thetvdb.com/banners/person/7875623/primary.jpg"
+      },
+      {
+        "name": "Yuichi Nakamura",
+        "character": "Guren Ichinose",
+        "image": "https://artworks.thetvdb.com/banners/person/7864375/61a4e29c56d7d.jpg"
+      },
+      {
+        "name": "Hibiku Yamamura",
+        "character": "Asuramaru",
+        "image": "https://artworks.thetvdb.com/banners/person/459128/5f170d6f33ae8.jpg"
+      },
+      {
+        "name": "Kaito Ishikawa",
+        "character": "Shihou Kimizuki",
+        "image": "https://artworks.thetvdb.com/banners/person/303231/5fc1fccb0ca8d.jpg"
+      },
+      {
+        "name": "Nobuhiko Okamoto",
+        "character": "Yoichi Saotome",
+        "image": "https://artworks.thetvdb.com/banners/person/303207/5f6e1a73d949d.jpg"
+      },
+      {
+        "name": "Saori Hayami",
+        "character": "Shinoa Hiiragi",
+        "image": "https://artworks.thetvdb.com/banners/person/7868605/61c86c09bab90.jpg"
+      },
+      {
+        "name": "Yuka Iguchi",
+        "character": "Mitsuba Sanguu ",
+        "image": "https://artworks.thetvdb.com/banners/person/294196/primary.jpg"
+      },
+      {
+        "name": "Takahiro Sakurai",
+        "character": "Ferid Bathory",
+        "image": "https://artworks.thetvdb.com/banners/person/277100/primary.jpg"
+      },
+      {
+        "name": "Aoi Yuki",
+        "character": "Krul Tepes",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7864377/photo/619d0ed6bb40f.jpg"
+      },
+      {
+        "name": "Tatsuhisa Suzuki",
+        "character": "Shinya Hiiragi",
+        "image": "https://artworks.thetvdb.com/banners/person/353404/61e6e6dce34a0.jpg"
+      },
+      {
+        "name": "Tomoaki Maeno",
+        "character": "Kureto Hiiragi",
+        "image": "https://artworks.thetvdb.com/banners/person/303150/6198a7dc62e7b.jpg"
+      },
+      {
+        "name": "Aya Endo",
+        "character": "Mahiru Hiiragi",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7873538/photo/62f73bd677ccb.jpg"
+      },
+      {
+        "name": "Takuma Nagatsuka",
+        "character": "Lacus Welt ",
+        "image": "https://artworks.thetvdb.com/banners/person/492013/primary.jpg"
+      },
+      {
+        "name": "Kenichi Suzumura",
+        "character": "Crowley Eusford",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/277079/photo/62f6917dcfebd.jpg"
+      },
+      {
+        "name": "Nozomi Furuki",
+        "character": "Belle Chess",
+        "image": "https://artworks.thetvdb.com/banners/person/487186/61f8fd3c1991e.jpg"
+      },
+      {
+        "name": "Yoko Hikasa",
+        "character": "Horn Skuld",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/294194/photo/62e22ea51361b.jpg"
+      },
+      {
+        "name": "Yuichiro Umehara",
+        "character": "Rene Simm",
+        "image": "https://artworks.thetvdb.com/banners/person/7878653/618f7e22578ca.jpg"
+      },
+      {
+        "name": "Emiri Katou",
+        "character": "Yayoi Endou",
+        "image": "https://artworks.thetvdb.com/banners/person/7873533/primary.jpg"
+      },
+      {
+        "name": "Daisuke Ono",
+        "character": "Norito Goshi",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/292931/photo/63159a62a6fa8.jpg"
+      },
+      {
+        "name": "Atsumi Tanezaki",
+        "character": "Sayuri Hanayori",
+        "image": "https://artworks.thetvdb.com/banners/person/7866747/61c865002721e.jpg"
+      },
+      {
+        "name": "Kaori Ishihara",
+        "character": "Rika Inoue",
+        "image": "https://artworks.thetvdb.com/banners/person/463814/primary.jpg"
+      },
+      {
+        "name": "Yu Shimamura",
+        "character": "Mito Juujou",
+        "image": "https://artworks.thetvdb.com/banners/person/7888640/primary.jpg"
+      },
+      {
+        "name": "Yoshimasa Hosoya",
+        "character": "Makoto Narumi",
+        "image": "https://artworks.thetvdb.com/banners/person/7868441/61b5c8eeae9a5.jpg"
+      },
+      {
+        "name": "Ayako Kawasumi",
+        "character": "Aoi Sanguu",
+        "image": "https://artworks.thetvdb.com/banners/person/280698/primary.jpg"
+      },
+      {
+        "name": "Yui Ishikawa",
+        "character": "Shigure Yukimi",
+        "image": "https://artworks.thetvdb.com/banners/person/307074/61e667a62a2cf.jpg"
+      },
+      {
+        "name": "Daisuke Hirakawa",
+        "character": "Shuusaku Iwasaki",
+        "image": "https://artworks.thetvdb.com/banners/person/301120/primary.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/graphical/289906-g.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/posters/289906-4.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/fanart/original/289906-4.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/289906/clearlogo/611c0c34587c0.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1,
+        "images": [
+          {
+            "coverType": "Poster",
+            "url": "https://artworks.thetvdb.com/banners/seasons/289906-1-3.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "tvdbId": 434144,
+    "title": "Boys' Journey mission to win hearts",
+    "overview": "Get to know the 12 actors of CHANGE2561's BL series \"Pit Babe The Series\".\r\n\r\n\r\nFrom iQIYI: Let's get to know all 12 boys who are going to be actors of Pit Babe the series. They will do activities through a variety of missions to present their natural charm and cuteness.\r\nRomantic, irritating, warm and gentle, including Moment that you will crazy till you fall in love with them unexpectedly.",
+    "slug": "boys-journey-mission-to-win-hearts",
+    "originalCountry": "tha",
+    "originalLanguage": "tha",
+    "language": "eng",
+    "firstAired": "2023-03-09",
+    "lastAired": "2025-04-25",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2025-10-21T22:09:57Z",
+    "status": "Continuing",
+    "runtime": 51,
+    "timeOfDay": {
+      "hours": 19,
+      "minutes": 0
+    },
+    "originalNetwork": "YouTube",
+    "network": "YouTube",
+    "genres": [
+      "Comedy",
+      "Game Show",
+      "Reality",
+      "Talk Show"
+    ],
+    "alternativeTitles": [
+      {
+        "title": "Boys' Journey"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Naret Promphaopun",
+        "character": "Pavel",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/8049841/photo/64985ec575330.jpg"
+      },
+      {
+        "name": "Krittin Kitjaruwannakul",
+        "character": "Pooh",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9111402/photo/689753886146a.jpg"
+      },
+      {
+        "name": "Pop Pattarapol Wallaphasiri",
+        "character": "Pop",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9094794/photo/67bf58b606094.jpg"
+      },
+      {
+        "name": "Pon Thanapon Aiemkumchai",
+        "character": "Pon",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/8174253/photo/65f4ede47fef0.jpg"
+      },
+      {
+        "name": "Kiettisak Scofield",
+        "character": "Michael",
+        "image": "https://artworks.thetvdb.com/banners/person/8281214/603e23ab3fae4.jpg"
+      },
+      {
+        "name": "Benz Atthanin Thaninpanuvivat",
+        "character": "Benz",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7900268/photo/64c706ba05bfa.jpg"
+      },
+      {
+        "name": "Garfield Pantach Kankham",
+        "character": "Garfield",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9086837/photo/65f4edabd1348.jpg"
+      },
+      {
+        "name": "Nut Supanut Lourhaphanich",
+        "character": "Nut",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/7995211/photo/65733c31e6794.jpg"
+      },
+      {
+        "name": "Sailub Hemmawich Kwanamphaiphan",
+        "character": "Sailub",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9113738/photo/65f4ed7b483c1.jpg"
+      },
+      {
+        "name": "Supakorn Saokhor",
+        "character": "TopTen",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9113743/photo/649758f12c9c5.jpg"
+      },
+      {
+        "name": "Asre Wattanayakul",
+        "character": "Lee",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9113745/photo/64975b164bd3e.jpg"
+      },
+      {
+        "name": "Ping Obrnithi Leelavetchbutr",
+        "character": "Ping",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9113744/photo/649759baa4402.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/434144/posters/6446cfe874981.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/434144/backgrounds/6446d28853e16.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      },
+      {
+        "seasonNumber": 2
+      }
+    ]
+  },
+  {
+    "tvdbId": 469202,
+    "title": "The End of an Era",
+    "overview": "\"The End of an Era\" is a six-episode behind-the-scenes docuseries event chronicling the develpment, impact, and inner workings that created the phenomenon that was Taylor Swift | The Eras Tour. The illuminating docuseries gives an intimate look at Taylor’s life as her tour made headlines and thrilled fans around the world. In addition, the series spotlights performers, family members, and friends — including Gracie Abrams, Sabrina Carpenter, Ed Sheeran, and Florence Welch — offering never-before-seen insight into what it took to create a phenomenon.",
+    "slug": "the-end-of-an-era",
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2025-12-12",
+    "lastAired": "2025-12-23",
+    "tvMazeId": 87608,
+    "tmdbId": 302919,
+    "imdbId": "tt38673133",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2026-07-16T08:34:13Z",
+    "status": "Ended",
+    "runtime": 47,
+    "timeOfDay": {
+      "hours": 5,
+      "minutes": 0
+    },
+    "originalNetwork": "Disney+",
+    "network": "Disney+",
+    "genres": [
+      "Documentary",
+      "Mini-Series"
+    ],
+    "contentRating": "TV-MA",
+    "rating": {
+      "count": 3567,
+      "value": "8.6"
+    },
+    "alternativeTitles": [
+      {
+        "title": "Taylor Swift | The End of an Era"
+      },
+      {
+        "title": "Taylor Swift | The Eras Tour: The End of an Era"
+      },
+      {
+        "title": "Taylor Swift: The End of an Era - The 6-Episode Docuseries"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Taylor Swift",
+        "character": "Taylor Swift",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/255185/photo/64d2dc1dee93f.jpg"
+      },
+      {
+        "name": "Andrea Swift",
+        "character": "Andrea Swift – Taylor's Mom & 13 Management"
+      },
+      {
+        "name": "Travis Kelce",
+        "character": "Travis Kelce – Taylor's Boyfriend",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9098142/photo/66d88a012c3b3.jpg"
+      },
+      {
+        "name": "Amanda Balen",
+        "character": "Amanda Balen – Dancer & Associate Choreographer"
+      },
+      {
+        "name": "Mandy Moore",
+        "character": "Mandy Moore – Choreographer",
+        "image": "https://artworks.thetvdb.com/banners/person/8164432/5e81f44872698.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/469202/banners/6917e98bec5e3.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/469202/posters/6917360b3cfe0.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/469202/backgrounds/6930ef6012d0b.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/469202/clearlogo/6917eb55a933b.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 417567,
+    "title": "Beyond The Veil",
+    "overview": "Six supernatural stories inspired by the Māori, Pasifika, Filipino, and Chinese people of Aotearoa. Made with the support of NZ On Air and Te Māngai Pāho.",
+    "slug": "beyond-the-veil",
+    "originalCountry": "nzl",
+    "originalLanguage": "eng",
+    "language": "eng",
+    "firstAired": "2022-03-07",
+    "lastAired": "2022-04-11",
+    "tvMazeId": 60908,
+    "tmdbId": 194717,
+    "imdbId": "tt18556330",
+    "malIds": [],
+    "anidbIds": [],
+    "aniListIds": [],
+    "lastUpdated": "2024-03-31T23:18:14Z",
+    "status": "Ended",
+    "runtime": 23,
+    "timeOfDay": {
+      "hours": 0,
+      "minutes": 0
+    },
+    "genres": [
+      "Mystery"
+    ],
+    "rating": {
+      "count": 33,
+      "value": "6.6"
+    },
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/417567/banners/6268bce8a6c31.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/417567/posters/6268bd047ab7a.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/417567/backgrounds/6268bcd306411.jpg"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  },
+  {
+    "tvdbId": 465214,
+    "title": "Dusk Beyond the End of the World",
+    "overview": "When tensions around AI spark civil unrest, Akira is caught in the crossfire when he protects his girlfriend from an assassin. Hundreds of years later, he awakens from cryogenic sleep to an unfamiliar world and bonds with the android Yuugure.",
+    "slug": "dusk-beyond-the-end-of-the-world",
+    "originalCountry": "jpn",
+    "originalLanguage": "jpn",
+    "language": "eng",
+    "firstAired": "2025-10-03",
+    "lastAired": "2025-12-19",
+    "tvMazeId": 85747,
+    "tmdbId": 294867,
+    "imdbId": "tt37532634",
+    "malIds": [
+      61917
+    ],
+    "anidbIds": [
+      19415
+    ],
+    "aniListIds": [
+      195153
+    ],
+    "lastUpdated": "2026-09-04T13:55:46Z",
+    "status": "Ended",
+    "runtime": 24,
+    "timeOfDay": {
+      "hours": 0,
+      "minutes": 30
+    },
+    "originalNetwork": "MBS",
+    "network": "MBS",
+    "genres": [
+      "Animation",
+      "Anime",
+      "Romance",
+      "Science Fiction"
+    ],
+    "contentRating": "TV-14",
+    "rating": {
+      "count": 593,
+      "value": "6.2"
+    },
+    "actors": [
+      {
+        "name": "Shuichiro Umeda",
+        "character": "姫神 アキラ / Akira Himegami",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9027117/photo/619a08133722d.jpg"
+      },
+      {
+        "name": "Yui Ishikawa",
+        "character": "ユウグレ / Yugure",
+        "image": "https://artworks.thetvdb.com/banners/person/307074/61e667a62a2cf.jpg"
+      },
+      {
+        "name": "Ai Kayano",
+        "character": "王真紀トワサ / Towasa Ōmaki",
+        "image": "https://artworks.thetvdb.com/banners/person/292641/5fa3f2947725e.jpg"
+      },
+      {
+        "name": "Miyu Tomita",
+        "character": "アモル / Amoru",
+        "image": "https://artworks.thetvdb.com/banners/person/464899/61a0c27b39a6e.jpg"
+      },
+      {
+        "name": "Miyuki Sawashiro",
+        "character": "ヨイヤミ / Yoiyami",
+        "image": "https://artworks.thetvdb.com/banners/person/292117/61b5c69902788.jpg"
+      },
+      {
+        "name": "Tomori Kusunoki",
+        "character": "ハクボ / Hakubo",
+        "image": "https://artworks.thetvdb.com/banners/person/7919007/61c2fb68b3600.jpg"
+      },
+      {
+        "name": "Yohei Azakami",
+        "character": "ヨクラータ / Yokurata",
+        "image": "https://artworks.thetvdb.com/banners/person/8140898/primary.jpg"
+      },
+      {
+        "name": "Saki Kobari",
+        "character": "イディ / Idhi",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/9138064/photo/67bdec7b7088c.jpg"
+      },
+      {
+        "name": "Toshiyuki Morikawa",
+        "character": "オボロ / Oboro",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/280728/photo/62e236fe09406.jpg"
+      },
+      {
+        "name": "Taito Ban",
+        "character": "カルクラム / Kalcrom",
+        "image": "https://artworks.thetvdb.com/banners/person/8158454/primary.jpg"
+      },
+      {
+        "name": "Ami Koshimizu",
+        "character": "フィーデス / Fides",
+        "image": "https://artworks.thetvdb.com/banners/person/307435/68cd10efc8c37.jpg"
+      },
+      {
+        "name": "Maki Kawase",
+        "character": "ハニヤマ / Haniyama",
+        "image": "https://artworks.thetvdb.com/banners/person/7882230/61fe2f09cb68c.jpg"
+      },
+      {
+        "name": "Haruka Shiraishi",
+        "character": "アジサイ / Ajisai",
+        "image": "https://artworks.thetvdb.com/banners/person/475464/61a7cfe611c90.jpg"
+      },
+      {
+        "name": "Tetsu Inada",
+        "character": "ヴァーレ / Vare",
+        "image": "https://artworks.thetvdb.com/banners/person/313258/primary.jpg"
+      },
+      {
+        "name": "Rina Satô",
+        "character": "キャスタ / Casuta",
+        "image": "https://artworks.thetvdb.com/banners/v4/actor/293450/photo/63089fe10e188.jpg"
+      },
+      {
+        "name": "Satoshi Tsuruoka",
+        "character": "カニス / Caniss",
+        "image": "https://artworks.thetvdb.com/banners/person/517615/primary.jpg"
+      },
+      {
+        "name": "Takehito Koyasu",
+        "character": "マールム / Marlum",
+        "image": "https://artworks.thetvdb.com/banners/person/277098/61a63f303ea4d.jpg"
+      },
+      {
+        "name": "Yutaka Nakano",
+        "character": "ウルス / Urus",
+        "image": "https://artworks.thetvdb.com/banners/person/300734/61e2dcafd2140.jpg"
+      },
+      {
+        "name": "Mariya Ise",
+        "character": "セシャト / Seshat",
+        "image": "https://artworks.thetvdb.com/banners/person/447326/61a676ffcb24c.jpg"
+      }
+    ],
+    "images": [
+      {
+        "coverType": "Banner",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/465214/banners/693388a62d964.jpg"
+      },
+      {
+        "coverType": "Poster",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/465214/posters/685e663785276.jpg"
+      },
+      {
+        "coverType": "Fanart",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/465214/backgrounds/68630d302b722.jpg"
+      },
+      {
+        "coverType": "Clearlogo",
+        "url": "https://artworks.thetvdb.com/banners/v4/series/465214/clearlogo/693388db4b014.png"
+      }
+    ],
+    "seasons": [
+      {
+        "seasonNumber": 0
+      },
+      {
+        "seasonNumber": 1
+      }
+    ]
+  }
+]

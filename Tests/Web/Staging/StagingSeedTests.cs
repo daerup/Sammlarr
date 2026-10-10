@@ -104,7 +104,7 @@ public class StagingSeedTests : IAsyncDisposable
 		ArrSinkConfig.Empty with
 		{
 			Radarr = Instance,
-			Sonarr = Instance with { Url = Some.Of("http://sonarr:8989"), RootFolderPath = Some.Of("/tv") },
+			Sonarr = Instance with { Url = Some.Of("http://sonarr:8989"), RootFolderPath = Some.Of("/tv"), AnimeRootFolderPath = Some.Of("/anime") },
 		},
 		Catcher
 	);
@@ -170,6 +170,7 @@ public class StagingSeedTests : IAsyncDisposable
 				var arr = await services.GetRequiredService<IArrSinkConfigService>().GetAsync();
 				await Assert.That(arr.Radarr.Url).IsSome().And.IsEqualTo("http://radarr:7878");
 				await Assert.That(arr.Sonarr.Url).IsSome().And.IsEqualTo("http://sonarr:8989");
+				await Assert.That(arr.Sonarr.AnimeRootFolderPath).IsSome().And.IsEqualTo("/anime");
 				await Assert.That((await services.GetRequiredService<IWantlistService>().GetAsync()).Ids).Count().IsEqualTo(2);
 				var queue = await services.GetRequiredService<IJobQueueView>().GetAsync();
 				await Assert.That(queue.Jobs.Count(job => job.Request is SyncWantlist)).IsEqualTo(1);

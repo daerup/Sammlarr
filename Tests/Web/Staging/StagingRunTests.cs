@@ -36,6 +36,17 @@ public class StagingRunTests
 	}
 
 	[Test]
+	public async Task Settings_GivesEachAppItsDefaultAndItsAnimeFolder()
+	{
+		var arr = StagingRun.Settings(Options(), movies: 4, shows: 6).Arr;
+
+		await Assert.That(arr.Radarr.RootFolderPath).IsSome().And.IsEqualTo("/movies");
+		await Assert.That(arr.Radarr.AnimeRootFolderPath).IsSome().And.IsEqualTo("/anime-movies");
+		await Assert.That(arr.Sonarr.RootFolderPath).IsSome().And.IsEqualTo("/tv");
+		await Assert.That(arr.Sonarr.AnimeRootFolderPath).IsSome().And.IsEqualTo("/anime");
+	}
+
+	[Test]
 	public async Task Settings_PassesTheOptionalKeysOnOnlyWhenSet()
 	{
 		var set = StagingRun.Settings(
@@ -94,6 +105,7 @@ public class StagingRunTests
 				Url = "http://localhost:7879",
 				Address = "http://radarr:7878",
 				RootFolder = "/movies",
+				AnimeRootFolder = "/anime-movies",
 				Library = "movies",
 			},
 			Sonarr = new ArrAppOptions
@@ -101,6 +113,7 @@ public class StagingRunTests
 				Url = "http://localhost:8990",
 				Address = "http://sonarr:8989",
 				RootFolder = "/tv",
+				AnimeRootFolder = "/anime",
 				Library = "tv",
 			},
 		};

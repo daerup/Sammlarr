@@ -132,7 +132,7 @@ internal static class StagingEnvironment
 		StagingLayout layout
 	)
 	{
-		return builder.AddPersistentArr(app, port, layout.ConfigOf(app), layout.LibraryOf(app), layout.DownloadsOf(app));
+		return builder.AddPersistentArr(app, port, layout.ConfigOf(app), layout.LibraryOf(app), layout.AnimeLibraryOf(app), layout.DownloadsOf(app));
 	}
 
 	private static IResourceBuilder<ProjectResource> WithArrEnvironment(
@@ -147,6 +147,7 @@ internal static class StagingEnvironment
 		return seed.WithEnvironment($"{section}__Url", container.GetEndpoint("http"))
 			.WithEnvironment($"{section}__Address", address)
 			.WithEnvironment($"{section}__RootFolder", app.Library)
+			.WithEnvironment($"{section}__AnimeRootFolder", app.AnimeLibrary)
 			.WithEnvironment($"{section}__Library", layout.LibraryOf(app));
 	}
 

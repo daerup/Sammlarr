@@ -1,0 +1,1156 @@
+{
+  "tvdbId": 424536,
+  "title": "Frieren: Beyond Journey's End",
+  "overview": "Decades after her party defeated the Demon King, an old friend's funeral launches the elf wizard Frieren on a journey of self-discovery.",
+  "slug": "frieren-beyond-journeys-end",
+  "originalCountry": "jpn",
+  "originalLanguage": "jpn",
+  "language": "eng",
+  "firstAired": "2023-09-29",
+  "lastAired": "2026-03-27",
+  "tvMazeId": 69956,
+  "tmdbId": 209867,
+  "imdbId": "tt22248376",
+  "malIds": [
+    52991,
+    59978,
+    63816
+  ],
+  "anidbIds": [
+    17617,
+    18886,
+    19977
+  ],
+  "aniListIds": [
+    154587,
+    182255,
+    209939
+  ],
+  "lastUpdated": "2026-10-08T22:07:58Z",
+  "status": "Continuing",
+  "runtime": 25,
+  "timeOfDay": {
+    "hours": 23,
+    "minutes": 0
+  },
+  "originalNetwork": "Nippon TV",
+  "network": "Nippon TV",
+  "genres": [
+    "Adventure",
+    "Animation",
+    "Anime",
+    "Drama",
+    "Fantasy"
+  ],
+  "contentRating": "TV-14",
+  "rating": {
+    "count": 85745,
+    "value": "8.9"
+  },
+  "alternativeTitles": [
+    {
+      "title": "Frieren of the Funeral"
+    },
+    {
+      "title": "Frieren"
+    },
+    {
+      "title": "Frieren: An Ageless Elegy"
+    }
+  ],
+  "actors": [
+    {
+      "name": "Atsumi Tanezaki",
+      "character": "Frieren",
+      "image": "https://artworks.thetvdb.com/banners/person/7866747/61c865002721e.jpg"
+    },
+    {
+      "name": "Nobuhiko Okamoto",
+      "character": "Himmel",
+      "image": "https://artworks.thetvdb.com/banners/person/303207/5f6e1a73d949d.jpg"
+    },
+    {
+      "name": "Yoji Ueda",
+      "character": "Eisen",
+      "image": "https://artworks.thetvdb.com/banners/v4/actor/8085473/photo/62e235c6b46e3.jpg"
+    },
+    {
+      "name": "Hiroki Touchi",
+      "character": "Heiter",
+      "image": "https://artworks.thetvdb.com/banners/person/463716/61eb88fb49f52.jpg"
+    },
+    {
+      "name": "Chiaki Kobayashi",
+      "character": "Stark",
+      "image": "https://artworks.thetvdb.com/banners/person/7891643/primary.jpg"
+    },
+    {
+      "name": "Kana Ichinose",
+      "character": "Fern",
+      "image": "https://artworks.thetvdb.com/banners/person/7868437/primary.jpg"
+    },
+    {
+      "name": "Atsuko Tanaka",
+      "character": " Flamme",
+      "image": "https://artworks.thetvdb.com/banners/person/314895/primary.jpg"
+    },
+    {
+      "name": "Hiroki Yasumoto",
+      "character": "Qual",
+      "image": "https://artworks.thetvdb.com/banners/person/301118/primary.jpg"
+    },
+    {
+      "name": "Junichi Suwabe",
+      "character": "Lugner",
+      "image": "https://artworks.thetvdb.com/banners/v4/actor/309354/photo/62e22d918a92f.jpg"
+    },
+    {
+      "name": "Takehito Koyasu",
+      "character": "Kraft",
+      "image": "https://artworks.thetvdb.com/banners/person/277098/61a63f303ea4d.jpg"
+    },
+    {
+      "name": "Shunsuke Sakuya",
+      "character": "Granat",
+      "image": "https://artworks.thetvdb.com/banners/person/293448/primary.jpg"
+    },
+    {
+      "name": "Manaka Iwami",
+      "character": "Linie",
+      "image": "https://artworks.thetvdb.com/banners/person/465329/primary.jpg"
+    },
+    {
+      "name": "Ayana Taketatsu",
+      "character": "Aura",
+      "image": "https://artworks.thetvdb.com/banners/person/302377/61e1ac092d2ca.jpg"
+    },
+    {
+      "name": "Takuya Eguchi",
+      "character": "Stoltz",
+      "image": "https://artworks.thetvdb.com/banners/person/292647/primary.jpg"
+    },
+    {
+      "name": "Kouki Ohsuzu",
+      "character": "Draht",
+      "image": "https://artworks.thetvdb.com/banners/v4/actor/9088969/photo/674b4fb066fc2.jpg"
+    },
+    {
+      "name": "Konomi Kohara",
+      "character": "Chief of the Village of the Sword",
+      "image": "https://artworks.thetvdb.com/banners/person/7891685/6223200d3d1eb.jpg"
+    },
+    {
+      "name": "Daisuke Hirakawa",
+      "character": "Sein's Older Brother",
+      "image": "https://artworks.thetvdb.com/banners/person/301120/primary.jpg"
+    },
+    {
+      "name": "Yuichi Nakamura",
+      "character": "Sein",
+      "image": "https://artworks.thetvdb.com/banners/person/7864375/61a4e29c56d7d.jpg"
+    },
+    {
+      "name": "Hiromichi Tezuka",
+      "character": "Warrior Gorilla",
+      "image": "https://artworks.thetvdb.com/banners/person/7896334/61fd08a8c31ed.jpg"
+    },
+    {
+      "name": "Azumi Waki",
+      "character": "Kanne",
+      "image": "https://artworks.thetvdb.com/banners/person/7881478/641eaaf522c55.jpg"
+    },
+    {
+      "name": "Sayumi Suzushiro",
+      "character": "Lawine",
+      "image": "https://artworks.thetvdb.com/banners/person/7937849/primary.jpg"
+    },
+    {
+      "name": "Kisho Taniyama",
+      "character": "Wirbel",
+      "image": "https://artworks.thetvdb.com/banners/person/302328/61f9045b57401.jpg"
+    },
+    {
+      "name": "Ikumi Hasegawa",
+      "character": "Übel",
+      "image": "https://artworks.thetvdb.com/banners/person/485406/61fe2aa3d2a05.jpg"
+    },
+    {
+      "name": "Jirou Saitou",
+      "character": "Denken",
+      "image": "https://artworks.thetvdb.com/banners/person/7891597/5e9c7fd884c60.jpg"
+    },
+    {
+      "name": "Shohei Komatsu",
+      "character": "Land",
+      "image": "https://artworks.thetvdb.com/banners/person/7912268/642e74345f45d.jpg"
+    },
+    {
+      "name": "Eiji Hanawa",
+      "character": "Richter",
+      "image": "https://artworks.thetvdb.com/banners/person/491377/primary.jpg"
+    },
+    {
+      "name": "Shizuka Ishigami",
+      "character": "Laufen",
+      "image": "https://artworks.thetvdb.com/banners/person/292640/61e18e969c7ac.jpg"
+    },
+    {
+      "name": "Kanae Itou",
+      "character": "Ehre",
+      "image": "https://artworks.thetvdb.com/banners/person/464298/primary.jpg"
+    },
+    {
+      "name": "Haruka Terui",
+      "character": "Sense",
+      "image": "https://artworks.thetvdb.com/banners/person/7915489/61e42b3625916.jpg"
+    },
+    {
+      "name": "Tarusuke Shingaki",
+      "character": "Genau",
+      "image": "https://artworks.thetvdb.com/banners/person/460216/61a4e667d4193.jpg"
+    },
+    {
+      "name": "Yuji Murai",
+      "character": "Scharf ",
+      "image": "https://artworks.thetvdb.com/banners/v4/actor/9128619/photo/667d4b2810007.jpg"
+    },
+    {
+      "name": "Tomoyo Kurosawa",
+      "character": "Edel",
+      "image": "https://artworks.thetvdb.com/banners/person/469674/61c86de9b382d.jpg"
+    },
+    {
+      "name": "Mariya Ise",
+      "character": "Serie",
+      "image": "https://artworks.thetvdb.com/banners/person/447326/61a676ffcb24c.jpg"
+    },
+    {
+      "name": "Reina Ueda",
+      "character": "Methode",
+      "image": "https://artworks.thetvdb.com/banners/person/295192/primary.jpg"
+    },
+    {
+      "name": "Atsushi Miyauchi",
+      "character": "Lernen",
+      "image": "https://artworks.thetvdb.com/banners/person/450869/62011488c5fd0.jpg"
+    },
+    {
+      "name": "Yasuyuki Kase",
+      "character": "Stark's Father",
+      "image": "https://artworks.thetvdb.com/banners/person/447321/65086cab8d7f0.jpg"
+    },
+    {
+      "name": "Rie Kawamura",
+      "character": "Mazoku ",
+      "image": "https://artworks.thetvdb.com/banners/v4/actor/8172512/photo/674b55f198574.jpg"
+    }
+  ],
+  "images": [
+    {
+      "coverType": "Banner",
+      "url": "https://artworks.thetvdb.com/banners/v4/series/424536/banners/651dd688bd4d5.jpg"
+    },
+    {
+      "coverType": "Poster",
+      "url": "https://artworks.thetvdb.com/banners/v4/series/424536/posters/6516fe48e7a06.jpg"
+    },
+    {
+      "coverType": "Fanart",
+      "url": "https://artworks.thetvdb.com/banners/v4/series/424536/backgrounds/64e6cbe29d9c0.jpg"
+    },
+    {
+      "coverType": "Clearlogo",
+      "url": "https://artworks.thetvdb.com/banners/v4/series/424536/clearlogo/65d798fbd2f61.png"
+    }
+  ],
+  "seasons": [
+    {
+      "seasonNumber": 0,
+      "images": [
+        {
+          "coverType": "Poster",
+          "url": "https://artworks.thetvdb.com/banners/v4/season/2018811/posters/66d606c50d07c.jpg"
+        }
+      ]
+    },
+    {
+      "seasonNumber": 1,
+      "images": [
+        {
+          "coverType": "Poster",
+          "url": "https://artworks.thetvdb.com/banners/v4/season/2018812/posters/66d606e1dd83b.jpg"
+        }
+      ]
+    },
+    {
+      "seasonNumber": 2,
+      "images": [
+        {
+          "coverType": "Poster",
+          "url": "https://artworks.thetvdb.com/banners/v4/season/2148708/posters/699dd12415f41.jpg"
+        }
+      ]
+    }
+  ],
+  "episodes": [
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10117637,
+      "seasonNumber": 0,
+      "episodeNumber": 1,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 6,
+      "title": "Mini Anime \"Magic of ??\" / Vol.1: Magic to Say What You Are Thinking",
+      "airDate": "2023-10-11",
+      "airDateUtc": "2023-10-11T14:00:00Z",
+      "runtime": 1,
+      "overview": "Frieren, Heiter, and Eisen test the spell that causes the user to say whatever they are thinking on Himmel, who begins to wax-poetic about his looks aloud. The three of them agree that it would be unbearable to listen to it long term.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10117637/screencap/6555d83a87b95.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10117638,
+      "seasonNumber": 0,
+      "episodeNumber": 2,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 8,
+      "title": "Mini Anime \"Magic of ??\" / Vol.2: Magic to Remove Only Alcohol From Booze",
+      "airDate": "2023-10-25",
+      "airDateUtc": "2023-10-25T14:00:00Z",
+      "runtime": 1,
+      "overview": "After using the spell that removes just the alcohol from an alcoholic drink, Frieren, Himmel, and Eisen taste the drink and can't tell the difference. They then urge Heiter to try the drink, but he immediately guesses that the drink isn't alcoholic, to which the party all call him a Corrupt Priest.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10117638/screencap/6555d85c161b7.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10147845,
+      "seasonNumber": 0,
+      "episodeNumber": 3,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 11,
+      "title": "Mini Anime \"Magic of ??\" / Vol.3: Magic to Wake Up at the Right Time in the Morning",
+      "airDate": "2023-11-15",
+      "airDateUtc": "2023-11-15T14:00:00Z",
+      "runtime": 1,
+      "overview": "Fern is excited to try the spell because of Frieren's oversleeping habits. She sets the specified time to 6 AM. The next day, Frieren wakes up at the correct time, but the spell is unable to keep her from falling back asleep.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10147845/screencap/6555d80106ca3.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10168248,
+      "seasonNumber": 0,
+      "episodeNumber": 4,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 13,
+      "title": "Mini Anime \"Magic of ??\" / Vol.4: Magic to Make a Good Scent Come From the Body",
+      "airDate": "2023-11-29",
+      "airDateUtc": "2023-11-29T14:00:00Z",
+      "runtime": 1,
+      "overview": "Frieren and Fern wonder what type of good smell the spell produces. They try it on Stark, and find that he smells like grilled meat. The two conclude that the smell is based on the user's definition of a good smell. Stark asks what's for dinner, and both Frieren and Fern exclaim that they want meat, scaring Stark.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10168248/screencap/6568fed36e7ce.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10191390,
+      "seasonNumber": 0,
+      "episodeNumber": 5,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 15,
+      "title": "Mini Anime \"Magic of ??\" / Special Edition: Magic to Make the Dining Table Happy",
+      "airDate": "2023-12-14",
+      "airDateUtc": "2023-12-14T14:00:00Z",
+      "runtime": 1,
+      "overview": "Frieren's Party test the spell, which produces a bottle of Ajipon. They try the sauce with meat and find that it is delicious. Stark wonders if the sauce would taste good with dragon meat, and Frieren and Fern tell him to go defeat a dragon on his own so they can see. \r\n\r\nMizkan Ajipon collaboration (advertisement)",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10191390/screencap/657ae24f854a2.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10213762,
+      "seasonNumber": 0,
+      "episodeNumber": 6,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 17,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 5: Magic That Brings Good Luck",
+      "airDate": "2023-12-27",
+      "airDateUtc": "2023-12-27T14:00:00Z",
+      "runtime": 1,
+      "overview": "Frieren's Party test the spell on Stark, who proceeds to have exceptional luck. The path they pick has no monsters and he wins a grand prize. Seeing this, Sein asks Frieren to cast the spell on him. He then goes gambling, but later returns with no clothes. Stark wonders if the spell didn't work, but Frieren says that Sein is just bad.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10213762/screencap/658d36ecdee4d.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10242956,
+      "seasonNumber": 0,
+      "episodeNumber": 7,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 18,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 6: Magic to Remove Stubborn Oil Stains",
+      "airDate": "2024-01-10",
+      "airDateUtc": "2024-01-10T14:00:00Z",
+      "runtime": 1,
+      "overview": "Sein has the idea of using the spell for profit by charging people who need tough oil stains removed from their pots and pans. However, because they offer to clean the first pot or pan for free, everyone only brings one pot or pan, and it ends up being volunteer work for Frieren.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10242956/screencap/65a14e6ee918b.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10268632,
+      "seasonNumber": 0,
+      "episodeNumber": 8,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 20,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 7: Magic to Speak Extremely Fast Without Faltering",
+      "airDate": "2024-01-24",
+      "airDateUtc": "2024-01-24T14:00:00Z",
+      "runtime": 1,
+      "overview": "Frieren and Heiter try the spell out on the taciturn Eisen. At first the spell doesn't seem to have worked, but when they ask him about a recent battle, both his speech and his movements increase in speed. Frieren and Heiter conclude that it's good for people to have their own manner of speech.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10268632/screencap/65b2227e6fdf8.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10302411,
+      "seasonNumber": 0,
+      "episodeNumber": 9,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 22,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 8: Magic to Understand a Fish's Feelings",
+      "airDate": "2024-02-07",
+      "airDateUtc": "2024-02-07T14:00:00Z",
+      "runtime": 1,
+      "overview": "Frieren and Fern decide to test the spell on fish that Stark has caught while he gathers firewood. The fish speak pitifully and bemoan their family's bad luck, as their father was caught the day before. They wonder if they will be roasted or simmered. Frieren and Fern lose the appetite for fish and ask Stark to release them to his shock.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10302411/screencap/65c6a50deaa01.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10320088,
+      "seasonNumber": 0,
+      "episodeNumber": 10,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 24,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 9: Magic That Brings Good Luck - Part 2",
+      "airDate": "2024-02-19",
+      "airDateUtc": "2024-02-19T14:00:00Z",
+      "runtime": 1,
+      "overview": "Frieren's Party encounter three treasure chests. Fern cautions that at least one of them must be a mimic, so Stark suggests using the magic that brings good luck. The first chest contains gold and treasure, and the second chest contains a rare grimoire. To their dismay, Frieren insists on opening the third chest, which is a mimic. She gets caught and yells that it is dark and scary inside, and Fern wonders if Frieren did this on purpose.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10320088/screencap/65d47b34954e8.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10372696,
+      "seasonNumber": 0,
+      "episodeNumber": 11,
+      "airedBeforeSeasonNumber": 1,
+      "airedBeforeEpisodeNumber": 27,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 10: Magic That Makes Sentences End Strangely",
+      "airDate": "2024-03-10",
+      "airDateUtc": "2024-03-10T14:00:00Z",
+      "runtime": 2,
+      "overview": "Frieren tests a spell on the Hero Party that makes their sentences end strangely. They decide to have a contest - use the spell on everyone, and whoever laughs first must use the spell for a week. Himmel's sentences end in \"nyan,\" Frieren's ends in \"zoi,\" and Heiter's ends in \"po.\" All three are able to hold in their laughter, but when Eisen speaks, his sentences end in \"datcha\" and the rest of the party are sent flying.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10372696/screencap/65f4214f8458b.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10408134,
+      "seasonNumber": 0,
+      "episodeNumber": 12,
+      "airedAfterSeasonNumber": 1,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 11: Magic That Completely Cleans Dirty Clothes",
+      "airDate": "2024-03-24",
+      "airDateUtc": "2024-03-24T14:00:00Z",
+      "runtime": 1,
+      "overview": "After praising Fern for receiving the legendary spell that makes clothes clean and spotless from Serie, Frieren accidentally spills food on herself. Fern uses the spell to remove the stain, which amazes Frieren and Stark. Stark dirties his clothes in the forest and tells Fern to perform the spell on him, but much to his dismay, Fern refuses to use the magic on someone that purposefully gets dirty.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10408134/screencap/660352da9eff3.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10422277,
+      "seasonNumber": 0,
+      "episodeNumber": 13,
+      "airedAfterSeasonNumber": 1,
+      "title": "Fan Appreciation Event: A Journey to Understanding the Human Heart",
+      "airDate": "2024-03-29",
+      "airDateUtc": "2024-03-29T14:00:00Z",
+      "runtime": 25,
+      "overview": "Based on the survey of \"scenes you want to see again\" conducted on the official website, we look back on the protagonist Frieren's journey to understand the human heart, with a focus on three themes: \"famous lines\" that resonate with the heart, intense \"battle scenes\", and \"humorous scenes\" that make you laugh unintentionally.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10422277/screencap/660c9bf5f1a40.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10997617,
+      "seasonNumber": 0,
+      "episodeNumber": 14,
+      "airedAfterSeasonNumber": 1,
+      "airedBeforeSeasonNumber": 2,
+      "airedBeforeEpisodeNumber": 28,
+      "title": "Yorushika \"Haru\" × \"Funeral of Frieren\" SPECIAL MUSIC VIDEO / Frieren OP Theme anime MV",
+      "airDate": "2024-03-29",
+      "airDateUtc": "2024-03-29T14:00:00Z",
+      "runtime": 5
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10997618,
+      "seasonNumber": 0,
+      "episodeNumber": 15,
+      "title": "Frieren: Journey's Memory Special Video",
+      "airDate": "2024-03-23",
+      "airDateUtc": "2024-03-23T14:00:00Z",
+      "runtime": 2,
+      "overview": "Thank you for all of fan! A special video depicting the memories of Frieren's journey."
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11066776,
+      "seasonNumber": 0,
+      "episodeNumber": 16,
+      "airedAfterSeasonNumber": 1,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 12: Magic to Grow Taller",
+      "airDate": "2025-04-02",
+      "airDateUtc": "2025-04-02T14:00:00Z",
+      "runtime": 1,
+      "overview": "After feeling patronised by Heiter patting her on the head, Frieren recalls finding a tome with a spell to make people grow taller.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11066776/screencap/67f020b509001.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11129349,
+      "seasonNumber": 0,
+      "episodeNumber": 17,
+      "airedAfterSeasonNumber": 1,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 13: Magic to Have a Full Stomach",
+      "airDate": "2025-05-07",
+      "airDateUtc": "2025-05-07T14:00:00Z",
+      "runtime": 1,
+      "overview": "Stark complains of hunger and Frieren uses a spell to make him feel full, despite her disapproval.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11129349/screencap/681be163acf98.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11165468,
+      "seasonNumber": 0,
+      "episodeNumber": 18,
+      "airedAfterSeasonNumber": 1,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 14: The Magic That Can Cut Almost Anything",
+      "airDate": "2025-06-04",
+      "airDateUtc": "2025-06-04T14:00:00Z",
+      "runtime": 2,
+      "overview": "Übel and Land test Reelseiden's cooking use outside of combat, preparing lunch for the kitchen owner and Land. Despite her culinary prowess cutting the ingredients to perfection, she fails miserably at actually cooking. Still, she urges the owner and Land to eat the food.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11165468/screencap/68655ed3d0bc4.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11224647,
+      "seasonNumber": 0,
+      "episodeNumber": 19,
+      "airedAfterSeasonNumber": 1,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 15: Magic to Move at High Speeds",
+      "airDate": "2025-07-02",
+      "airDateUtc": "2025-07-02T14:00:00Z",
+      "runtime": 2,
+      "overview": "Denken and Laofen visit Richter's magic shop for no specific reason, and Laofen showcases her specialty magic, Erfasen (high-speed magic).",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11224647/screencap/68655e7b6e882.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11268427,
+      "seasonNumber": 0,
+      "episodeNumber": 20,
+      "airedAfterSeasonNumber": 1,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 16: Magic to Make Your Surroundings Cool",
+      "airDate": "2025-08-06",
+      "airDateUtc": "2025-08-06T14:00:00Z",
+      "runtime": 2,
+      "overview": "Frieren, Fern, and Stark are journeying through the warm and sticky climate of the Northern Lands. Frieren shares a rather insignificant spell she has acquired, known as \"Magic to Make the Area Around Your Body Cool.\" She employs this spell to remain comfortably cool, although its effect is very limited, creating a \"cool zone\" that extends only a few inches from her skin.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11268427/screencap/6893eef0e4f43.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11323584,
+      "seasonNumber": 0,
+      "episodeNumber": 21,
+      "airedAfterSeasonNumber": 1,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 17: Magic to Seal Special Techniques",
+      "airDate": "2025-09-05",
+      "airDateUtc": "2025-09-05T14:00:00Z",
+      "runtime": 2,
+      "overview": "During their decade-long journey, the Hero Party comes across a challenge or a lesser enemy. Frieren boldly proposes to utilize a unique spell she discovered that \"restricts specialized techniques.\" True to Frieren's assortment of unusual spells, the incantation is remarkably ineffective. It only restricts actions that are very particular or bizarre, making it of little value in genuine battle situations.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11323584/screencap/68bb396415aee.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11323588,
+      "seasonNumber": 0,
+      "episodeNumber": 22,
+      "airedAfterSeasonNumber": 1,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 18: Magic That Binds Those Who See It",
+      "airDate": "2026-01-19",
+      "airDateUtc": "2026-01-19T14:00:00Z",
+      "runtime": 2,
+      "overview": "The Northern Magic Corps captain Warrior-mage, Wirbel demonstrates his signature binding spell \"Sorganeil\" on Frieren, Fern, and Stark.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11323588/screencap/697cb63985f9e.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11599484,
+      "seasonNumber": 0,
+      "episodeNumber": 23,
+      "airedAfterSeasonNumber": 2,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 19: Magic to Return to Childhood",
+      "airDate": "2026-02-02",
+      "airDateUtc": "2026-02-02T14:00:00Z",
+      "runtime": 2,
+      "overview": "Frieren experiments with a spell designed to revert someone to their childhood self, specifically aiming to turn Himmel back to a time before he became a narcissist.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11599484/screencap/69877918cf7fb.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11622957,
+      "seasonNumber": 0,
+      "episodeNumber": 24,
+      "airedBeforeSeasonNumber": 2,
+      "airedBeforeEpisodeNumber": 6,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 20: Magic to Swap Souls and Bodies",
+      "airDate": "2026-02-17",
+      "airDateUtc": "2026-02-17T14:00:00Z",
+      "runtime": 2,
+      "overview": "Frieren, Fern, and Stark obtain a spell that swaps the hearts and bodies of two targets as a reward for a quest.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11622957/screencap/699483e4c151f.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11651781,
+      "seasonNumber": 0,
+      "episodeNumber": 25,
+      "airedBeforeSeasonNumber": 2,
+      "airedBeforeEpisodeNumber": 7,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 21: Magic to Clean Clothes",
+      "airDate": "2026-03-02",
+      "airDateUtc": "2026-03-02T14:00:00Z",
+      "runtime": 2,
+      "overview": "Following the events of the First-Class Mage Exam, Fern is granted a single \"privilege\" (a spell of her choice) by the great mage Serie. While other mages typically ask for legendary combat spells or ancient lost knowledge, Fern requests a seemingly mundane spell: the ability to make clothes clean and spotless.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11651781/screencap/69a5e05a6800c.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11679869,
+      "seasonNumber": 0,
+      "episodeNumber": 26,
+      "airedBeforeSeasonNumber": 2,
+      "airedBeforeEpisodeNumber": 9,
+      "title": "Mini Anime \"Magic of ??\" / Vol. 22: Magic to Say What You Are Thinking Part 2",
+      "airDate": "2026-03-16",
+      "airDateUtc": "2026-03-16T14:00:00Z",
+      "runtime": 2,
+      "overview": "Fern uses Frieren's spell “The Magic That Makes You Say What You're Thinking” to peek into Methode's mind, but the result ends up shocking her.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11679869/screencap/69b7ebdcc088d.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11807696,
+      "seasonNumber": 0,
+      "episodeNumber": 27,
+      "airedAfterSeasonNumber": 2,
+      "title": "OO Magic Episode USJ Special Edition: The Magic to Admiration",
+      "airDate": "2026-05-22",
+      "airDateUtc": "2026-05-22T14:00:00Z",
+      "runtime": 2,
+      "overview": "2026/5/30 (Fri) Universal Studios Japan collaboration starts",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11807696/screencap/6a196e2ab6770.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9350138,
+      "seasonNumber": 1,
+      "episodeNumber": 1,
+      "absoluteEpisodeNumber": 1,
+      "title": "The Journey's End",
+      "airDate": "2023-09-29",
+      "airDateUtc": "2023-09-29T14:00:00Z",
+      "runtime": 26,
+      "overview": "The world celebrates the Demon King's defeat at the hands of the Hero and his companions. Now that their great adventure is over, what will Frieren the mage do next?",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9350138/screencap/6516db4c3a389.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993737,
+      "seasonNumber": 1,
+      "episodeNumber": 2,
+      "absoluteEpisodeNumber": 2,
+      "title": "It Didn't Have to Be Magic...",
+      "airDate": "2023-09-29",
+      "airDateUtc": "2023-09-29T14:00:00Z",
+      "runtime": 26,
+      "overview": "Frieren instructs Fern in the use of magic while deciphering a grimoire for Heiter.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993737/screencap/6516dba58b3fb.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993738,
+      "seasonNumber": 1,
+      "episodeNumber": 3,
+      "absoluteEpisodeNumber": 3,
+      "title": "Killing Magic",
+      "airDate": "2023-09-29",
+      "airDateUtc": "2023-09-29T14:00:00Z",
+      "runtime": 25,
+      "overview": "While retracing the path she took on her adventure with her former traveling companions, Frieren confronts an old enemy.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993738/screencap/6516dbf654876.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993739,
+      "seasonNumber": 1,
+      "episodeNumber": 4,
+      "absoluteEpisodeNumber": 4,
+      "title": "The Land Where Souls Rest",
+      "airDate": "2023-09-29",
+      "airDateUtc": "2023-09-29T14:00:00Z",
+      "runtime": 26,
+      "overview": "Frieren and Fern pay a visit to Eisen, who requests their help in finding the notes of Flamme the Legendary Mage.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993739/screencap/6516dc5905a4d.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993740,
+      "seasonNumber": 1,
+      "episodeNumber": 5,
+      "absoluteEpisodeNumber": 5,
+      "title": "Phantoms of the Dead",
+      "airDate": "2023-10-06",
+      "airDateUtc": "2023-10-06T14:00:00Z",
+      "runtime": 25,
+      "overview": "Frieren and Fern investigate ghost sightings at a village where people have started going missing.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993740/screencap/651c1d2bb51d0.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993741,
+      "seasonNumber": 1,
+      "episodeNumber": 6,
+      "absoluteEpisodeNumber": 6,
+      "title": "The Hero of the Village",
+      "airDate": "2023-10-13",
+      "airDateUtc": "2023-10-13T14:00:00Z",
+      "runtime": 25,
+      "overview": "Frieren and Fern enlist Stark's help to fight the solar dragon - but is he up to the task?",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993741/screencap/6525543a01309.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993742,
+      "seasonNumber": 1,
+      "episodeNumber": 7,
+      "absoluteEpisodeNumber": 7,
+      "title": "Like a Fairy Tale",
+      "airDate": "2023-10-20",
+      "airDateUtc": "2023-10-20T14:00:00Z",
+      "runtime": 25,
+      "overview": "After reflecting on the transient nature of the past as it exists in people's collective memories, Frieren unexpectedly runs into a sworn enemy.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993742/screencap/652efc320885c.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993743,
+      "seasonNumber": 1,
+      "episodeNumber": 8,
+      "absoluteEpisodeNumber": 8,
+      "title": "Frieren the Slayer",
+      "airDate": "2023-10-27",
+      "airDateUtc": "2023-10-27T14:00:00Z",
+      "runtime": 25,
+      "overview": "As tensions in Graf Granat's domain reach a breaking point, Fern and Stark find their own resolve - and Frieren resumes an old duty.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993743/screencap/6537f02d13812.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993744,
+      "seasonNumber": 1,
+      "episodeNumber": 9,
+      "absoluteEpisodeNumber": 9,
+      "title": "Aura the Guillotine",
+      "airDate": "2023-11-03",
+      "airDateUtc": "2023-11-03T14:00:00Z",
+      "runtime": 25,
+      "overview": "While Fern and Stark make a temporary retreat with Graf Granat, Frieren's true foe awaits her outside the city.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993744/screencap/654120a437854.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993745,
+      "seasonNumber": 1,
+      "episodeNumber": 10,
+      "absoluteEpisodeNumber": 10,
+      "title": "A Powerful Mage",
+      "airDate": "2023-11-10",
+      "airDateUtc": "2023-11-10T14:00:00Z",
+      "runtime": 25,
+      "overview": "Frieren's many years of training under her teacher Flamme are tested in her confrontation with Aura the Guillotine. Will Aura's scales find her wanting?",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993745/screencap/654a84b7ce6ed.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993746,
+      "seasonNumber": 1,
+      "episodeNumber": 11,
+      "absoluteEpisodeNumber": 11,
+      "title": "Winter in the Northern Lands",
+      "airDate": "2023-11-17",
+      "airDateUtc": "2023-11-17T14:00:00Z",
+      "runtime": 25,
+      "overview": "Frieren and her companions continue their journey through the northern lands, but obstacles both natural and manmade still stand in their way.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993746/screencap/655384b0cb330.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 9993747,
+      "seasonNumber": 1,
+      "episodeNumber": 12,
+      "absoluteEpisodeNumber": 12,
+      "title": "A Real Hero",
+      "airDate": "2023-11-24",
+      "airDateUtc": "2023-11-24T14:00:00Z",
+      "runtime": 25,
+      "overview": "Deep in the mountains of the northern lands, Frieren and her party arrive at the Village of the Sword, where they have another job to do.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/9993747/screencap/655ccc7b3af99.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057050,
+      "seasonNumber": 1,
+      "episodeNumber": 13,
+      "absoluteEpisodeNumber": 13,
+      "title": "Aversion to One's Own Kind",
+      "airDate": "2023-12-01",
+      "airDateUtc": "2023-12-01T14:00:00Z",
+      "runtime": 25,
+      "overview": "While passing by a village in the woods of the northern lands, Frieren and party meet Sein, a gifted priest who is nonetheless corrupt enough to give even Heiter a run for his money. But what happened in his past?",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057050/screencap/6566533a28a09.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057051,
+      "seasonNumber": 1,
+      "episodeNumber": 14,
+      "absoluteEpisodeNumber": 14,
+      "title": "Privilege of the Young",
+      "airDate": "2023-12-08",
+      "airDateUtc": "2023-12-08T14:00:00Z",
+      "runtime": 25,
+      "overview": "The party arrives in a large and lively town with a bustling shopping district that Frieren once visited with Himmel, but something seems to have come up between Fern and Stark.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057051/screencap/656f4338bce78.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057052,
+      "seasonNumber": 1,
+      "episodeNumber": 15,
+      "absoluteEpisodeNumber": 15,
+      "title": "Smells Like Trouble",
+      "airDate": "2023-12-15",
+      "airDateUtc": "2023-12-15T14:00:00Z",
+      "runtime": 25,
+      "overview": "When the party happens upon a town whose inhabitants are all mysteriously asleep, it's time for their newest traveling companion to prove his mettle.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057052/screencap/6578681405dfa.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057054,
+      "seasonNumber": 1,
+      "episodeNumber": 16,
+      "absoluteEpisodeNumber": 16,
+      "title": "Long-Lived Friends",
+      "airDate": "2023-12-22",
+      "airDateUtc": "2023-12-22T14:00:00Z",
+      "runtime": 24,
+      "overview": "Frieren pays a visit to Old Man Voll, a long-lived friend of hers, with traveling companions in tow.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057054/screencap/658b5526a03f5.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057056,
+      "seasonNumber": 1,
+      "episodeNumber": 17,
+      "absoluteEpisodeNumber": 17,
+      "title": "Take Care",
+      "airDate": "2024-01-05",
+      "airDateUtc": "2024-01-05T14:00:00Z",
+      "runtime": 25,
+      "overview": "Now that Sein finally has a lead on the whereabouts of his long-lost friend, is it time for him and Frieren's party to part ways?",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057056/screencap/659adba284e6d.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057058,
+      "seasonNumber": 1,
+      "episodeNumber": 18,
+      "absoluteEpisodeNumber": 18,
+      "title": "First-Class Mage Exam",
+      "airDate": "2024-01-12",
+      "airDateUtc": "2024-01-12T14:00:00Z",
+      "runtime": 25,
+      "overview": "Frieren and party finally arrive in Äußerst, ready to undergo the first-class mage exam, and meet a number of colorful characters who are there to do the same.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057058/screencap/659d4cf65c4aa.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057061,
+      "seasonNumber": 1,
+      "episodeNumber": 19,
+      "absoluteEpisodeNumber": 19,
+      "title": "Well-Laid Plans",
+      "airDate": "2024-01-19",
+      "airDateUtc": "2024-01-19T14:00:00Z",
+      "runtime": 25,
+      "overview": "Frieren and her new teammates hatch a plan to capture a Stille - but are the other teams just going to stand by and let it happen?",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057061/screencap/65a69070d4e1f.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057064,
+      "seasonNumber": 1,
+      "episodeNumber": 20,
+      "absoluteEpisodeNumber": 20,
+      "title": "Necessary Killing",
+      "airDate": "2024-01-26",
+      "airDateUtc": "2024-01-26T14:00:00Z",
+      "runtime": 25,
+      "overview": "The first-class mage exam intensifies as fighting breaks out between the participants - and what's at stake might even be worth killing for.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057064/screencap/65afb9c87c277.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057067,
+      "seasonNumber": 1,
+      "episodeNumber": 21,
+      "absoluteEpisodeNumber": 21,
+      "title": "The World of Magic",
+      "airDate": "2024-02-02",
+      "airDateUtc": "2024-02-02T14:00:00Z",
+      "runtime": 25,
+      "overview": "Frieren, Kanne, and Lawine struggle with the 13th party over possession of the Stille, but there'll be more surprises in store before their battle, and the first test, reach their conclusion.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057067/screencap/65b971031f20c.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057069,
+      "seasonNumber": 1,
+      "episodeNumber": 22,
+      "absoluteEpisodeNumber": 22,
+      "title": "Future Enemies",
+      "airDate": "2024-02-09",
+      "airDateUtc": "2024-02-09T14:00:00Z",
+      "runtime": 25,
+      "overview": "After the conclusion of the first test, the exam participants have some time to kill in town. What do mages get up to on their days off?",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057069/screencap/65c329e26d027.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057071,
+      "seasonNumber": 1,
+      "episodeNumber": 23,
+      "absoluteEpisodeNumber": 23,
+      "title": "Conquering the Labyrinth",
+      "airDate": "2024-02-16",
+      "airDateUtc": "2024-02-16T14:00:00Z",
+      "runtime": 25,
+      "overview": "The aspiring first-class mages now face their second test: conquering the Ruins of the King's Tomb. A simple task, or so the proctor claims, but there's a reason this particular dungeon remains unexplored.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057071/screencap/65cb96020dbab.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057072,
+      "seasonNumber": 1,
+      "episodeNumber": 24,
+      "absoluteEpisodeNumber": 24,
+      "title": "Perfect Replicas",
+      "airDate": "2024-02-23",
+      "airDateUtc": "2024-02-23T14:00:00Z",
+      "runtime": 25,
+      "overview": "Due to the Spiegel, a legendary monster that can create perfect replicas of others, the test-takers who would conquer the Ruins of the King's Tomb must first face the ultimate enemy: themselves.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057072/screencap/65d4bfcc5a74c.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10057073,
+      "seasonNumber": 1,
+      "episodeNumber": 25,
+      "absoluteEpisodeNumber": 25,
+      "title": "A Fatal Vulnerability",
+      "airDate": "2024-03-01",
+      "airDateUtc": "2024-03-01T14:00:00Z",
+      "runtime": 25,
+      "overview": "A perfect imitation of Frieren stands between the test-takers and victory, but Fern believes she knows how to win. Is it time for the student to surpass the master?",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10057073/screencap/65ddf33f9c6ae.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10086091,
+      "seasonNumber": 1,
+      "episodeNumber": 26,
+      "absoluteEpisodeNumber": 26,
+      "title": "The Height of Magic",
+      "airDate": "2024-03-08",
+      "airDateUtc": "2024-03-08T14:00:00Z",
+      "runtime": 25,
+      "overview": "To defeat Spiegel, Frieren and Fern fight against Frieren's replica, but have a tough time. Meanwhile, Denken, Lavine, and the others fight against the replicas, but the magic of Sense, a first-class mage and the exam's proctor, rages.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10086091/screencap/65e750eb8cbe8.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10086092,
+      "seasonNumber": 1,
+      "episodeNumber": 27,
+      "absoluteEpisodeNumber": 27,
+      "title": "An Era of Humans",
+      "airDate": "2024-03-15",
+      "airDateUtc": "2024-03-15T14:00:00Z",
+      "runtime": 25,
+      "overview": "With the second test behind them, only one remains - but first, Frieren and Fern need to settle an important matter in town. What awaits them in the third test?",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10086092/screencap/65f468dd5a039.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10086093,
+      "seasonNumber": 1,
+      "episodeNumber": 28,
+      "absoluteEpisodeNumber": 28,
+      "title": "It Would Be Embarrassing When We Met Again",
+      "airDate": "2024-03-22",
+      "airDateUtc": "2024-03-22T14:00:00Z",
+      "runtime": 24,
+      "finaleType": "season",
+      "overview": "As the first-class mage exam concludes and the test-takers go their separate ways, farewell leads to departure - but the next stage of Frieren's journey has only just begun.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10086093/screencap/65f95e7dcf03d.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 10719109,
+      "seasonNumber": 2,
+      "episodeNumber": 1,
+      "absoluteEpisodeNumber": 29,
+      "title": "Shall We Go, Then?",
+      "airDate": "2026-01-16",
+      "airDateUtc": "2026-01-16T14:00:00Z",
+      "runtime": 24,
+      "overview": "Frieren, Fern, and Stark leave the magic city of Äußerst behind and travel along a road in the northern lands.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/10719109/screencap/6966236a8a113.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11447765,
+      "seasonNumber": 2,
+      "episodeNumber": 2,
+      "absoluteEpisodeNumber": 30,
+      "title": "The Hero of the South",
+      "airDate": "2026-01-23",
+      "airDateUtc": "2026-01-23T14:00:00Z",
+      "runtime": 24,
+      "overview": "In a village in the northern lands, Frieren's party are hired to polish a statue of a hero.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11447765/screencap/696f60a4eb1b0.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11447766,
+      "seasonNumber": 2,
+      "episodeNumber": 3,
+      "absoluteEpisodeNumber": 31,
+      "title": "Somewhere She'd Like",
+      "airDate": "2026-01-30",
+      "airDateUtc": "2026-01-30T14:00:00Z",
+      "runtime": 24,
+      "overview": "Frieren's party dream of hot springs as they reach Etwas, but the village is abandoned.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11447766/screencap/69789ca997b6e.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11447767,
+      "seasonNumber": 2,
+      "episodeNumber": 4,
+      "absoluteEpisodeNumber": 32,
+      "title": "Other People's Homes",
+      "airDate": "2026-02-06",
+      "airDateUtc": "2026-02-06T14:00:00Z",
+      "runtime": 24,
+      "overview": "Stark only asked Fern out as a joke, but the two end up going on a date.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11447767/screencap/6981cbe484ace.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11447768,
+      "seasonNumber": 2,
+      "episodeNumber": 5,
+      "absoluteEpisodeNumber": 33,
+      "title": "Logistics in the Northern Plateau",
+      "airDate": "2026-02-13",
+      "airDateUtc": "2026-02-13T14:00:00Z",
+      "runtime": 24,
+      "overview": "Frieren is reunited with Fass the dwarf, who has been searching for the Boshaft liquor for over 200 years.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11447768/screencap/698b19040caea.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11447769,
+      "seasonNumber": 2,
+      "episodeNumber": 6,
+      "absoluteEpisodeNumber": 34,
+      "title": "A Demon-Slaying Request",
+      "airDate": "2026-02-27",
+      "airDateUtc": "2026-02-27T14:00:00Z",
+      "runtime": 24,
+      "overview": "A village on the Northern Plateau is wiped out, and the victims' distinctive wounds point to a certain demon.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11447769/screencap/699d8cf5b1b0b.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11447770,
+      "seasonNumber": 2,
+      "episodeNumber": 7,
+      "absoluteEpisodeNumber": 35,
+      "title": "The Divine Revolte",
+      "airDate": "2026-03-06",
+      "airDateUtc": "2026-03-06T14:00:00Z",
+      "runtime": 24,
+      "overview": "Frieren, Fern, and Methode enter the woods to look for the four-armed Divine Revolte.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11447770/screencap/69a6f20c83e9e.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11447771,
+      "seasonNumber": 2,
+      "episodeNumber": 8,
+      "absoluteEpisodeNumber": 36,
+      "title": "A Magnificent End",
+      "airDate": "2026-03-13",
+      "airDateUtc": "2026-03-13T14:00:00Z",
+      "runtime": 24,
+      "overview": "The Divine Revolte appears at the village, while Frieren, Fern, and Methode battle Solide and Hemmung.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11447771/screencap/69aff6e8ac804.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11447772,
+      "seasonNumber": 2,
+      "episodeNumber": 9,
+      "absoluteEpisodeNumber": 37,
+      "title": "Himmel's Memoirs",
+      "airDate": "2026-03-20",
+      "airDateUtc": "2026-03-20T14:00:00Z",
+      "runtime": 24,
+      "overview": "When Frieren's party cannot afford the fare to cross Lake Korridor, the captain proposes a trade.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11447772/screencap/69ba70acf348f.jpg"
+    },
+    {
+      "tvdbShowId": 424536,
+      "tvdbId": 11447773,
+      "seasonNumber": 2,
+      "episodeNumber": 10,
+      "absoluteEpisodeNumber": 38,
+      "title": "A Beautiful Sight",
+      "airDate": "2026-03-27",
+      "airDateUtc": "2026-03-27T14:00:00Z",
+      "runtime": 24,
+      "finaleType": "season",
+      "overview": "Hidden within the massive bridge spanning the Great Canyon Tor is a secret story of Himmel and Gehen.",
+      "image": "https://artworks.thetvdb.com/banners/v4/episode/11447773/screencap/69c3c29147412.jpg"
+    }
+  ]
+}

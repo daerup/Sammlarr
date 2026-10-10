@@ -4,9 +4,9 @@ internal static class ArrContainers
 {
 	internal const string ApiKey = "0123456789abcdef0123456789abcdef";
 
-	internal static readonly ArrContainer Radarr = new("radarr", "Radarr", "lscr.io/linuxserver/radarr", "6.4.4.10685-ls318", 7878, "/movies");
+	internal static readonly ArrContainer Radarr = new("radarr", "Radarr", "lscr.io/linuxserver/radarr", "6.4.4.10685-ls318", 7878, "/movies", "/anime-movies");
 
-	internal static readonly ArrContainer Sonarr = new("sonarr", "Sonarr", "lscr.io/linuxserver/sonarr", "4.0.20.3014-ls326", 8989, "/tv");
+	internal static readonly ArrContainer Sonarr = new("sonarr", "Sonarr", "lscr.io/linuxserver/sonarr", "4.0.20.3014-ls326", 8989, "/tv", "/anime");
 
 	public static void AddRadarrAndSonarr(this IDistributedApplicationBuilder builder)
 	{
@@ -23,6 +23,7 @@ internal static class ArrContainers
 		int port,
 		string config,
 		string library,
+		string animeLibrary,
 		string downloads
 	)
 	{
@@ -34,6 +35,7 @@ internal static class ArrContainers
 			.WithHttpEndpoint(port: port, targetPort: app.Port, name: "http", isProxied: false)
 			.WithBindMount(config, "/config")
 			.WithBindMount(library, app.Library)
+			.WithBindMount(animeLibrary, app.AnimeLibrary)
 			.WithBindMount(downloads, "/downloads")
 			.WithEnvironment($"{prefix}__AUTH__APIKEY", ApiKey)
 			.WithEnvironment($"{prefix}__AUTH__METHOD", "External")
@@ -52,6 +54,7 @@ internal static class ArrContainers
 
 		var config = Directory.CreateDirectory(Path.Combine(root, "config")).FullName;
 		var library = Directory.CreateDirectory(Path.Combine(root, "library")).FullName;
+		var animeLibrary = Directory.CreateDirectory(Path.Combine(root, "anime")).FullName;
 		File.Copy(Path.Combine(builder.AppHostDirectory, "arr", app.Name, "config.xml"), Path.Combine(config, "config.xml"));
 
 		builder
@@ -59,25 +62,25 @@ internal static class ArrContainers
 			.WithHttpEndpoint(port: app.Port, targetPort: app.Port, name: "http")
 			.WithBindMount(config, "/config")
 			.WithBindMount(library, app.Library)
+			.WithBindMount(animeLibrary, app.AnimeLibrary)
 			.WithHttpHealthCheck("/ping")
-			.OnResourceReady((resource, _, cancellationToken) => AddRootFolderAsync(resource.GetEndpoint("http"), app.Library, cancellationToken));
+			.OnResourceReady((resource, _, cancellationToken) => AddRootFoldersAsync(resource.GetEndpoint("http"), app, cancellationToken));
 	}
 
-	private static async Task AddRootFolderAsync(EndpointReference endpoint, string library, CancellationToken cancellationToken)
+	private static async Task AddRootFoldersAsync(EndpointReference endpoint, ArrContainer app, CancellationToken cancellationToken)
 	{
 		using var http = new HttpClient { BaseAddress = new Uri($"{endpoint.Url}/api/v3/") };
 		http.DefaultRequestHeaders.Add("X-Api-Key", ApiKey);
 		var folders = await http.GetFromJsonAsync<RootFolder[]>("rootfolder", cancellationToken);
-		if (folders!.Any(folder => folder.Path == library))
+		string[] libraries = [app.Library, app.AnimeLibrary];
+		foreach (var library in libraries.Except(folders!.Select(folder => folder.Path)))
 		{
-			return;
+			using var response = await http.PostAsJsonAsync("rootfolder", new { path = library }, cancellationToken);
+			response.EnsureSuccessStatusCode();
 		}
-
-		using var response = await http.PostAsJsonAsync("rootfolder", new { path = library }, cancellationToken);
-		response.EnsureSuccessStatusCode();
 	}
 
-	internal sealed record ArrContainer(string Name, string DisplayName, string Image, string Tag, int Port, string Library);
+	internal sealed record ArrContainer(string Name, string DisplayName, string Image, string Tag, int Port, string Library, string AnimeLibrary);
 
 	private sealed record RootFolder(string Path);
 }

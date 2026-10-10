@@ -16,6 +16,8 @@ internal sealed record StagingLayout(string Root)
 
 	internal string LibraryOf(ArrContainers.ArrContainer app) => Path.Combine(Root, app.Name, app.Library.TrimStart('/'));
 
+	internal string AnimeLibraryOf(ArrContainers.ArrContainer app) => Path.Combine(Root, app.Name, app.AnimeLibrary.TrimStart('/'));
+
 	internal string DownloadsOf(ArrContainers.ArrContainer app) => Path.Combine(Downloads, app.Name);
 
 	internal static StagingLayout From(string? configured)
@@ -45,6 +47,7 @@ internal sealed record StagingLayout(string Root)
 		{
 			Directory.CreateDirectory(ConfigOf(app));
 			Directory.CreateDirectory(LibraryOf(app));
+			Directory.CreateDirectory(AnimeLibraryOf(app));
 			Directory.CreateDirectory(Path.Combine(DownloadsOf(app), "nzb"));
 			Directory.CreateDirectory(Path.Combine(DownloadsOf(app), "watch"));
 		}
