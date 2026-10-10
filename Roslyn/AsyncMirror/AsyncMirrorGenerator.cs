@@ -100,6 +100,11 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 			}
 		}
 
+		if (allSignatures.Count == 0)
+		{
+			yield break;
+		}
+
 		if (asyncDefinitions.Count > 0)
 		{
 			yield return ExtensionBlock(blockTypeParams, $"{receiverType} {receiverName}", blockConstraints, asyncDefinitions);

@@ -46,6 +46,11 @@ public class AsyncMirrorGeneratorTests
 					[GenerateAsync]
 					public int Add(Func<int> step) => counter.Value + step();
 				}
+
+				extension(string text)
+				{
+					internal int Width() => text.Length;
+				}
 			}
 		}
 		""";
