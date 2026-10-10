@@ -24,6 +24,8 @@ internal readonly record struct ProviderId(MediaProvider Provider, string Value)
 			MediaProvider.Tvmaze => TvmazeId.From(Value, type),
 			MediaProvider.AniList => AniListId.From(Value, type),
 		};
+
+	internal IIdentityKey ToKey(MediaType type) => (IIdentityKey)ToExternal(type);
 }
 
 internal static class Ids
@@ -91,7 +93,7 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 			await host.EnsureTmdbAccount();
 		}
 
-		var id = await host.SeedMediaAsync([.. ids.Select(providerId => providerId.ToExternal(type))]);
+		var id = await host.SeedMediaAsync([.. ids.Select(providerId => providerId.ToKey(type))]);
 		_seeded = id;
 		return id;
 	}

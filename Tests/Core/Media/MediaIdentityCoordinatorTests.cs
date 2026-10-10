@@ -23,9 +23,9 @@ public class MediaIdentityCoordinatorTests
 		);
 
 		await Assert.That(corrected[0].Id).IsEqualTo(corrected[1].Id);
-		await Assert.That(corrected[0].Externals).Contains(tmdbA);
-		await Assert.That(corrected[0].Externals).Contains(tmdbB);
-		await Assert.That(corrected[0].Externals).Contains(sharedImdb);
+		await Assert.That(corrected[0].Keys).Contains(tmdbA);
+		await Assert.That(corrected[0].Keys).Contains(tmdbB);
+		await Assert.That(corrected[0].Keys).Contains(sharedImdb);
 	}
 
 	[Test]
@@ -73,7 +73,7 @@ public class MediaIdentityCoordinatorTests
 		var corrected = await coordinator.CoordinateAsync(preliminary, buffer, CancellationToken.None);
 
 		await Assert.That(corrected.Count).IsEqualTo(1);
-		await Assert.That(corrected[0].Externals).Contains(external);
+		await Assert.That(corrected[0].Keys).Contains(external);
 		await Assert.That(buffer.NewIdentities.Count).IsEqualTo(1);
 	}
 
@@ -107,9 +107,9 @@ public class MediaIdentityCoordinatorTests
 		var corrected = await coordinator.CoordinateAsync([new(MediaId.New(), [sharedTmdb, freshPlex])], buffer, CancellationToken.None);
 
 		await Assert.That(corrected[0].Id).IsEqualTo(existingId);
-		await Assert.That(corrected[0].Externals).Contains(sharedTmdb);
-		await Assert.That(corrected[0].Externals).Contains(dbImdb);
-		await Assert.That(corrected[0].Externals).Contains(freshPlex);
+		await Assert.That(corrected[0].Keys).Contains(sharedTmdb);
+		await Assert.That(corrected[0].Keys).Contains(dbImdb);
+		await Assert.That(corrected[0].Keys).Contains(freshPlex);
 	}
 
 	[Test]
@@ -199,7 +199,7 @@ public class MediaIdentityCoordinatorTests
 
 	private static Result<IdentifyHandoff> Handoff(params IExternalMediaId[] externals)
 	{
-		return Success.Of(new IdentifyHandoff(new MediaIdentity(MediaId.New(), [.. externals]), new None()));
+		return Success.Of(new IdentifyHandoff(new MediaIdentity(MediaId.New(), [.. externals.OfType<IIdentityKey>()]), new None()));
 	}
 
 	private static (MediaIdentityCoordinator Coordinator, MediaWriteBuffer Buffer) CreateCoordinator(Action<Mock<IMediaRepository>>? setup = null)

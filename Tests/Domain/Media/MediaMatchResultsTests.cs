@@ -31,7 +31,28 @@ public class MediaMatchResultsTests
 		var movie = MediaFakes.CompleteMovie();
 		MediaMatchResult match = movie;
 
-		await Assert.That(match.Externals).IsEquivalentTo(movie.Identity.Externals);
+		await Assert.That(match.Externals).IsEquivalentTo(movie.Identity.Keys);
+	}
+
+	[Test]
+	public async Task Externals_WhenMatchedWithPageLinks_AddTheLinksToTheKeys()
+	{
+		var movie = MediaFakes.CompleteMovie();
+		var page = RottenTomatoesId.From("m/fight_club", MediaType.Movie);
+		MediaMatchResult match = movie with { Details = movie.Details with { PageLinks = [page] } };
+
+		IExternalMediaId[] expected = [.. movie.Identity.Keys, page];
+		await Assert.That(match.Externals).IsEquivalentTo(expected);
+	}
+
+	[Test]
+	public async Task Externals_WhenUnmatchedWithPageLinks_AddTheLinksToTheExternals()
+	{
+		var page = MetacriticId.From("fight-club", MediaType.Movie);
+		MediaMatchResult match = new UnmatchedMedia([Imdb], new MovieDetails { PageLinks = [page] });
+
+		IExternalMediaId[] expected = [Imdb, page];
+		await Assert.That(match.Externals).IsEquivalentTo(expected);
 	}
 
 	[Test]

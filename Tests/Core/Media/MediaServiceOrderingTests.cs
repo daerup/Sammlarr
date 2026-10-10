@@ -122,7 +122,7 @@ public class MediaServiceOrderingTests
 		var mediaRepo = IMediaRepository.Mock();
 		var unmatchedCache = TestUnmatchedCache.Empty();
 
-		var externalToId = builder.Items.Where(i => i.Identifies).ToDictionary(i => i.External, i => i.MediaId.Value);
+		var externalToId = builder.Items.Where(i => i.Identifies).ToDictionary(i => (IExternalMediaId)i.External, i => i.MediaId.Value);
 
 		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => [.. Enumerable.Repeat<Optional<MediaIdentity>>(new None(), groups.Count)]);
 		mediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
@@ -194,10 +194,7 @@ internal static class OrderingAssertionExtensions
 {
 	public static List<int> ExtractTargetExternals(this IEnumerable<Result<MediaIdentity>> results)
 	{
-		return
-		[
-			.. results.Select(r => r.ToOptional()).WhereSome().Select(identity => int.Parse(identity.Externals.First(id => id.Source == MediaProvider.Tmdb).Value)),
-		];
+		return [.. results.Select(r => r.ToOptional()).WhereSome().Select(identity => int.Parse(identity.Keys.First(id => id.Source == MediaProvider.Tmdb).Value))];
 	}
 
 	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<MatchedMedia>> results)
@@ -214,7 +211,7 @@ internal static class OrderingAssertionExtensions
 internal sealed record TestItem
 {
 	public required int Index { get; init; }
-	public required IExternalMediaId External { get; init; }
+	public required IIdentityKey External { get; init; }
 	public required MediaId MediaId { get; init; }
 	public required MatchedMedia Detail { get; init; }
 	public bool Identifies { get; init; } = true;

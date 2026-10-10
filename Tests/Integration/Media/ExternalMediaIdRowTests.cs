@@ -69,7 +69,7 @@ public class ExternalMediaIdRowTests(SammlarrTestHost fixture) : IAsyncDisposabl
 	public async Task WhereMatchingAny_TranslatesAtScale()
 	{
 		const int count = 2000;
-		var ids = Enumerable.Range(0, count).Select(i => (IExternalMediaId)TvdbId.From($"tvdb-{i}", MediaType.Movie)).ToList();
+		var ids = Enumerable.Range(0, count).Select(i => (IIdentityKey)TvdbId.From($"tvdb-{i}", MediaType.Movie)).ToList();
 		var media = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(ids.Select(id => id.ToExternalIdEntity(media)));
 		await fixture.Context.SaveChangesAsync();

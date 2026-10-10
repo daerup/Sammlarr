@@ -10,10 +10,11 @@ internal static class MdblistFound
 	{
 		var ratings = title.Ratings ?? [];
 		return new FoundMedia(
-			[.. MdblistIds.Of(title.Ids, type), .. ratings.Select(rating => PageId(rating, type)).WhereSome()],
+			[.. MdblistIds.Of(title.Ids, type)],
 			MediaDetails.Empty(type) with
 			{
 				Ratings = MediaRatings.From(ratings.Select(Rate).WhereSome()),
+				PageLinks = [.. ratings.Select(rating => PageLink(rating, type)).WhereSome().DistinctBy(link => link.Source)],
 			}
 		);
 	}
@@ -25,17 +26,17 @@ internal static class MdblistFound
 			.Map(source => Optional.Of(rating.Score).Map(score => source.Card.Rate(score / 10f, Optional.Of(rating.Votes))));
 	}
 
-	private static Optional<IExternalMediaId> PageId(MdblistTypes.Titles.Rating rating, MediaType type)
+	private static Optional<IPageLink> PageLink(MdblistTypes.Titles.Rating rating, MediaType type)
 	{
 		var path = Optional
 			.When(rating.Url.ValueKind == JsonValueKind.String, () => rating.Url.GetString() ?? string.Empty)
 			.Map(url => url.Trim('/'))
-			.When(url => url.Length > 0);
+			.When(url => url.Length > 0 && url != "-");
 		return rating.Source switch
 		{
-			"tomatoes" or "popcorn" => path.Map(found => (IExternalMediaId)RottenTomatoesId.From(found, type)),
-			"metacritic" => path.Map(found => (IExternalMediaId)MetacriticId.From(found, type)),
-			"letterboxd" => path.Map(found => (IExternalMediaId)LetterboxdId.From(found.Split('/')[^1], type)),
+			"tomatoes" or "popcorn" => path.Map(found => (IPageLink)RottenTomatoesId.From(found, type)),
+			"metacritic" => path.Map(found => (IPageLink)MetacriticId.From(found, type)),
+			"letterboxd" => path.Map(found => (IPageLink)LetterboxdId.From(found.Split('/')[^1], type)),
 			_ => new None(),
 		};
 	}

@@ -11,6 +11,7 @@ internal class MediaDetailsFactory
 		ApplyCommonFields(row, cached, mediaId);
 		row.Ratings = [.. cached.Details.Ratings.All.Select(rating => BuildRating(rating, row))];
 		row.Answers = [.. cached.Answers.Select(answer => BuildAnswer(answer, row))];
+		row.PageLinks = [.. cached.Details.PageLinks.Select(link => link.ToPageLinkRow(row))];
 		return row;
 	}
 
@@ -32,6 +33,7 @@ internal class MediaDetailsFactory
 		ApplyCommonFields(existing, cached, existing.MediaId);
 		ReplaceRatings(existing, cached.Details.Ratings.All);
 		ReplaceAnswers(existing, cached.Answers);
+		ReplacePageLinks(existing, cached.Details.PageLinks);
 	}
 
 	public CachedDetails ToCached(MediaDetailsRow row)
@@ -56,6 +58,7 @@ internal class MediaDetailsFactory
 			ReleaseDate = row.ReleaseDate,
 			Genres = [.. row.Genres],
 			Ratings = MediaRatings.From(ToRatings(row.Ratings)),
+			PageLinks = [.. row.PageLinks.Select(link => link.ToPageLink(row.MediaType))],
 		};
 	}
 
@@ -114,6 +117,12 @@ internal class MediaDetailsFactory
 	{
 		row.Answers.Clear();
 		row.Answers.AddRange(answers.Select(answer => BuildAnswer(answer, row)));
+	}
+
+	private static void ReplacePageLinks(MediaDetailsRow row, IEnumerable<IPageLink> links)
+	{
+		row.PageLinks.Clear();
+		row.PageLinks.AddRange(links.Select(link => link.ToPageLinkRow(row)));
 	}
 
 	private static ProviderAnswerRow BuildAnswer(ProviderAnswer answer, MediaDetailsRow parent)

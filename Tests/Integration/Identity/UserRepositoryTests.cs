@@ -93,7 +93,7 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await using (var seed = fixture.ContextFactory.CreateDbContext())
 		{
 			var media = new MediaRow();
-			IExternalMediaId[] externalIds = [TmdbId.From("9100", MediaType.Movie), ImdbId.From("tt9100", MediaType.Movie)];
+			IIdentityKey[] externalIds = [TmdbId.From("9100", MediaType.Movie), ImdbId.From("tt9100", MediaType.Movie)];
 			await seed.ExternalMediaIds.AddRangeAsync(externalIds.Select(id => id.ToExternalIdEntity(media)));
 
 			seed.Feeds.Add(

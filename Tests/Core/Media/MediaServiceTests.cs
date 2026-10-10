@@ -228,7 +228,7 @@ public class MediaServiceTests
 
 		var matched = await Assert.That(results.Single()).IsOfUnionType<MediaMatchResult, MatchedMedia>();
 		await Assert.That(matched!.Details).IsEqualTo(new MovieDetails { Title = "Fight Club", ReleaseDate = new DateOnly(1999, 1, 1) });
-		await Assert.That(matched.Identity.Externals).Contains(external);
+		await Assert.That(matched.Identity.Keys).Contains(external);
 		await Assert.That(matched.Known).IsFalse();
 		deps.MediaRepo.UpsertIdentitiesAsync(Any(), Any()).WasCalled(Times.Once);
 		deps.MediaRepo.UpsertDetailsAsync(Any(), Any()).WasNeverCalled();
@@ -531,7 +531,7 @@ public class MediaServiceTests
 	}
 
 	private static IEnumerable<MediaId> Bridged(IEnumerable<MediaIdentity> upserted, params IExternalMediaId[] externals) =>
-		upserted.Where(identity => externals.Any(identity.Externals.Contains)).Select(identity => identity.Id).Distinct();
+		upserted.Where(identity => externals.Any(identity.Keys.Contains)).Select(identity => identity.Id).Distinct();
 
 	private static List<int> RecordBatchSizes(TestMediaService.Deps deps)
 	{
@@ -547,7 +547,7 @@ public class MediaServiceTests
 		return batches;
 	}
 
-	private static StoredMedia FreshCached(MediaId id, IExternalMediaId external)
+	private static StoredMedia FreshCached(MediaId id, IIdentityKey external)
 	{
 		return Stored(new MatchedMedia(new MediaIdentity(id, [external]), new MovieDetails()));
 	}
@@ -561,7 +561,7 @@ public class MediaServiceTests
 		return new(id, new DateTimeOffset(2026, 1, day, 0, 0, 0, TimeSpan.Zero), new ManualOrigin(ManualSource.Search));
 	}
 
-	private static MatchedMedia BuildDetail(MediaId id, IExternalMediaId? extra = null)
+	private static MatchedMedia BuildDetail(MediaId id, IIdentityKey? extra = null)
 	{
 		var plex = PlexId.From($"plex-{id}", MediaType.Movie);
 		return new(

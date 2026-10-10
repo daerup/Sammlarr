@@ -7,7 +7,7 @@ internal static class MediaIdConversionExtensions
 {
 	public static IExternalMediaId ToExternalMediaId(this ExternalMediaIdRow externalId) => Create(externalId.Source, externalId.MediaType, externalId.Id);
 
-	public static ExternalMediaIdRow ToExternalIdEntity(this IExternalMediaId mediaId, MediaRow media) =>
+	public static ExternalMediaIdRow ToExternalIdEntity(this IIdentityKey mediaId, MediaRow media) =>
 		new()
 		{
 			Source = mediaId.Source,
@@ -15,6 +15,18 @@ internal static class MediaIdConversionExtensions
 			Id = mediaId.Value,
 			Media = media,
 		};
+
+	public static IPageLink ToPageLink(this MediaPageLinkRow link, MediaType mediaType) => (IPageLink)Create(link.Site, mediaType, link.Path);
+
+	public static MediaPageLinkRow ToPageLinkRow(this IPageLink link, MediaDetailsRow details)
+	{
+		return new()
+		{
+			Site = link.Source,
+			Path = link.Value,
+			Details = details,
+		};
+	}
 
 	private static IExternalMediaId Create(MediaProvider source, MediaType mediaType, string externalId) =>
 		source switch

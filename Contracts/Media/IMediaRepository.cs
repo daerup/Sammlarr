@@ -18,6 +18,8 @@ public interface IMediaRepository
 
 	Task UpsertDetailsAsync(IReadOnlyDictionary<MediaId, CachedDetails> details, CancellationToken cancellationToken = default);
 
+	Task SavePageLinksAsync(MediaId id, IReadOnlyCollection<IPageLink> links, CancellationToken cancellationToken = default);
+
 	Task RemoveDetailsAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(

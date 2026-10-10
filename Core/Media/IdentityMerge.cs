@@ -13,9 +13,9 @@ internal sealed class IdentityMerge
 		{
 			var touching = Matches(preliminary, persisted).Concat(Matches(preliminary, _building)).DistinctBy(match => match.Id).ToList();
 			var anchor = touching.Append(preliminary).First();
-			var canonical = anchor with { Externals = touching.Aggregate(preliminary.Externals, (all, match) => all + match.Externals) };
+			var canonical = anchor with { Keys = touching.Aggregate(preliminary.Keys, (all, match) => all + match.Keys) };
 
-			foreach (var external in canonical.Externals)
+			foreach (var external in canonical.Keys)
 			{
 				_building[external] = canonical;
 			}
@@ -33,12 +33,12 @@ internal sealed class IdentityMerge
 	{
 		lock (_gate)
 		{
-			return preliminary.Externals.FirstOrNone().Map(external => _building[external]).GetValueOr(preliminary);
+			return preliminary.Keys.FirstOrNone().Map(external => _building[external]).GetValueOr(preliminary);
 		}
 	}
 
 	private static IEnumerable<MediaIdentity> Matches(MediaIdentity preliminary, IReadOnlyDictionary<IExternalMediaId, MediaIdentity> index)
 	{
-		return preliminary.Externals.Select(index.GetValueOrNone).WhereSome();
+		return preliminary.Keys.Select(index.GetValueOrNone).WhereSome();
 	}
 }

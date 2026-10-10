@@ -34,8 +34,8 @@ public static class MediaMatchResults
 			{
 				return match switch
 				{
-					MatchedMedia matched => matched.Identity.Externals,
-					UnmatchedMedia unmatched => unmatched.Externals,
+					MatchedMedia matched => [.. matched.Identity.Keys, .. matched.Details.PageLinks],
+					UnmatchedMedia unmatched => [.. unmatched.Externals, .. unmatched.Details.PageLinks],
 				};
 			}
 		}

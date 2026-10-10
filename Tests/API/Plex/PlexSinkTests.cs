@@ -180,7 +180,10 @@ public class PlexSinkTests
 		return new PlexSink(Client(handler), PlexTestUrls.Instance, media.Object, logger ?? NullLogger<PlexSink>.Instance);
 	}
 
-	private static Mock<IMediaService> MatchingAs(MediaId mediaId) => Identifying(request => Success.Of(new MediaIdentity(mediaId, [.. request.Candidates])));
+	private static Mock<IMediaService> MatchingAs(MediaId mediaId)
+	{
+		return Identifying(request => Success.Of(new MediaIdentity(mediaId, [.. request.Candidates.OfType<IIdentityKey>()])));
+	}
 
 	private static Mock<IMediaService> MatchingNothing() => Identifying(_ => Error.From("unmatched"));
 

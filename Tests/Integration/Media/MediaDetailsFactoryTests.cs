@@ -21,7 +21,7 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
-	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
+	private async Task<MediaId> SeedMediaAsync(IEnumerable<IIdentityKey> ids)
 	{
 		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
@@ -135,6 +135,20 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		await Assert.That(stored.Source).IsEqualTo(RatingSource.Tmdb);
 		await Assert.That(stored.NormalizedValue).IsEqualTo(9.0f);
 		await Assert.That(stored.VoteCount).IsEqualTo(9999);
+	}
+
+	[Test]
+	public async Task Update_WhenSameType_ReplacesPageLinks()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-312", MediaType.Movie)]);
+		var existing = await PersistAsync(Cached(MovieDetails() with { PageLinks = [RottenTomatoesId.From("m/old", MediaType.Movie)] }), mediaId);
+
+		_testee.Update(existing, Cached(MovieDetails() with { PageLinks = [MetacriticId.From("new-page", MediaType.Movie)] }));
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+
+		var stored = await fixture.Context.Set<MediaPageLinkRow>().AsNoTracking().SingleAsync();
+		await Assert.That(stored.Site).IsEqualTo(MediaProvider.Metacritic);
 	}
 
 	[Test]
@@ -279,7 +293,11 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
-		return await fixture.Context.MediaDetails.Include(m => m.Ratings).Include(m => m.Answers).SingleAsync(m => m.MediaId == mediaId.Value);
+		return await fixture
+			.Context.MediaDetails.Include(m => m.Ratings)
+			.Include(m => m.Answers)
+			.Include(m => m.PageLinks)
+			.SingleAsync(m => m.MediaId == mediaId.Value);
 	}
 
 	private static CachedDetails Cached(MediaDetails details) => new(details, RefreshedAt, RefreshedAt, []);

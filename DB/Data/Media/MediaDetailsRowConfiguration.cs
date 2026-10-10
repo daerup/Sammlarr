@@ -21,6 +21,14 @@ internal sealed class MediaDetailsRowConfiguration : IModelConfiguration
 			builder.HasIndex(r => r.Source);
 		});
 
+		modelBuilder.Entity<MediaPageLinkRow>(builder =>
+		{
+			builder.Property<Guid>("MediaId");
+			builder.ToTable("MediaPageLinks");
+			builder.HasKey("MediaId", nameof(MediaPageLinkRow.Site));
+			builder.HasOne(link => link.Details).WithMany(details => details.PageLinks).HasForeignKey("MediaId").OnDelete(DeleteBehavior.Cascade);
+		});
+
 		modelBuilder.Entity<ProviderAnswerRow>(builder =>
 		{
 			builder.Property<Guid>("MediaId");

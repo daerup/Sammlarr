@@ -21,7 +21,7 @@ public class MediaValueEqualityTests
 		var first = MediaFakes.CompleteMovie();
 		var second = first with
 		{
-			Identity = first.Identity with { Externals = [.. first.Identity.Externals] },
+			Identity = first.Identity with { Keys = [.. first.Identity.Keys] },
 			Details = first.Details with { Genres = [.. first.Details.Genres], Ratings = MediaRatings.From([.. first.Details.Ratings.All]) },
 		};
 

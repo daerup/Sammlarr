@@ -5,7 +5,7 @@
 </DemoCard>
 
 @code {
-    private static readonly IReadOnlyList<IExternalMediaId> MovieIds = [.. DemoMedia.Movie.Identity.Externals];
+    private static readonly IReadOnlyList<IExternalMediaId> MovieIds = [.. DemoMedia.Movie.Identity.Keys];
 
-    private static readonly IReadOnlyList<IExternalMediaId> ShowIds = [.. DemoMedia.Show.Identity.Externals];
+    private static readonly IReadOnlyList<IExternalMediaId> ShowIds = [.. DemoMedia.Show.Identity.Keys];
 }

@@ -20,7 +20,7 @@ public class MediaWriteBufferTests
 		{
 			testee.Add(new MatchedMedia(Survivor, new MovieDetails { Title = "Survivor" }), Cached("Survivor"));
 			testee.Add(new MatchedMedia(Absorbed, new MovieDetails { Title = "Absorbed" }), Cached("Absorbed"));
-			testee.MergeIdentity(Absorbed.Id, Survivor with { Externals = Survivor.Externals + Absorbed.Externals });
+			testee.MergeIdentity(Absorbed.Id, Survivor with { Keys = Survivor.Keys + Absorbed.Keys });
 		}
 
 		_repository
@@ -36,11 +36,11 @@ public class MediaWriteBufferTests
 
 		await using (var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance))
 		{
-			testee.Add(new MatchedMedia(plexOnly with { Externals = plexOnly.Externals + [learned] }, new MovieDetails()), Cached("Inception"));
+			testee.Add(new MatchedMedia(plexOnly with { Keys = plexOnly.Keys + [learned] }, new MovieDetails()), Cached("Inception"));
 		}
 
 		_repository
-			.UpsertIdentitiesAsync(Is<IReadOnlyList<MediaIdentity>>(identities => identities is [var only] && only.Externals.Contains(learned)), Any())
+			.UpsertIdentitiesAsync(Is<IReadOnlyList<MediaIdentity>>(identities => identities is [var only] && only.Keys.Contains(learned)), Any())
 			.WasCalled(Times.Once);
 	}
 
@@ -49,19 +49,19 @@ public class MediaWriteBufferTests
 	{
 		var learned = PlexId.From("plex-1", MediaType.Movie);
 		await using var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance);
-		testee.MergeIdentity(Absorbed.Id, Survivor with { Externals = Survivor.Externals + Absorbed.Externals });
+		testee.MergeIdentity(Absorbed.Id, Survivor with { Keys = Survivor.Keys + Absorbed.Keys });
 
-		testee.AddIdentity(Absorbed with { Externals = Absorbed.Externals + [learned] });
+		testee.AddIdentity(Absorbed with { Keys = Absorbed.Keys + [learned] });
 
 		await Assert.That(testee.NewIdentities.Select(identity => identity.Id)).IsEquivalentTo([Survivor.Id]);
-		await Assert.That(testee.NewIdentities.Single().Externals).Contains(learned);
+		await Assert.That(testee.NewIdentities.Single().Keys).Contains(learned);
 	}
 
 	[Test]
 	public async Task Add_AfterItsIdWasMerged_KeepsTheDetailsOnTheSurvivor()
 	{
 		await using var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance);
-		testee.MergeIdentity(Absorbed.Id, Survivor with { Externals = Survivor.Externals + Absorbed.Externals });
+		testee.MergeIdentity(Absorbed.Id, Survivor with { Keys = Survivor.Keys + Absorbed.Keys });
 
 		testee.Add(new MatchedMedia(Absorbed, new MovieDetails { Title = "Late" }), Cached("Late"));
 
@@ -72,11 +72,11 @@ public class MediaWriteBufferTests
 	[Test]
 	public async Task MergeIdentity_BackAndForthBetweenTwoIds_KeepsOneIdentity()
 	{
-		var both = Survivor.Externals + Absorbed.Externals;
+		var both = Survivor.Keys + Absorbed.Keys;
 		await using var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance);
-		testee.MergeIdentity(Absorbed.Id, Survivor with { Externals = both });
+		testee.MergeIdentity(Absorbed.Id, Survivor with { Keys = both });
 
-		testee.MergeIdentity(Survivor.Id, Absorbed with { Externals = both });
+		testee.MergeIdentity(Survivor.Id, Absorbed with { Keys = both });
 
 		var absorbedRoot = await Task.Run(() => testee.Survivor(Absorbed.Id)).WaitAsync(TimeSpan.FromSeconds(5));
 		var survivorRoot = await Task.Run(() => testee.Survivor(Survivor.Id)).WaitAsync(TimeSpan.FromSeconds(5));
@@ -90,11 +90,11 @@ public class MediaWriteBufferTests
 	{
 		var learned = PlexId.From("plex-2", MediaType.Movie);
 		await using var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance);
-		testee.AddIdentity(Absorbed with { Externals = Absorbed.Externals + [learned] });
+		testee.AddIdentity(Absorbed with { Keys = Absorbed.Keys + [learned] });
 
-		testee.MergeIdentity(Absorbed.Id, Survivor with { Externals = Survivor.Externals + Absorbed.Externals });
+		testee.MergeIdentity(Absorbed.Id, Survivor with { Keys = Survivor.Keys + Absorbed.Keys });
 
-		await Assert.That(testee.NewIdentities.Single().Externals).Contains(learned);
+		await Assert.That(testee.NewIdentities.Single().Keys).Contains(learned);
 	}
 
 	[Test]

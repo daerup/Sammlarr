@@ -174,7 +174,7 @@ internal sealed class MediaService(
 			return [];
 		}
 		await using var buffer = bufferFactory.Create();
-		var preliminary = candidateGroups.Select(g => new MediaIdentity(MediaId.New(), [.. g])).ToList();
+		var preliminary = candidateGroups.Select(g => new MediaIdentity(MediaId.New(), [.. g.OfType<IIdentityKey>()])).ToList();
 		return await coordinator.CoordinateAsync(preliminary, buffer, cancellationToken);
 	}
 
@@ -219,6 +219,51 @@ internal sealed class MediaService(
 
 	public async Task<Optional<IExternalMediaId>> FindIdAsync(MediaId id, MediaProvider provider, CancellationToken cancellationToken = default)
 	{
+		return provider.Role switch
+		{
+			ExternalIdRole.IdentityKey => await FindKeyAsync(id, provider, cancellationToken),
+			ExternalIdRole.PageLink => await FindPageLinkAsync(id, provider, cancellationToken),
+		};
+	}
+
+	private async Task<Optional<IExternalMediaId>> FindPageLinkAsync(MediaId id, MediaProvider site, CancellationToken cancellationToken)
+	{
+		var stored = await mediaRepository.GetAsync([id], cancellationToken);
+		return await stored
+			.FirstOrNone()
+			.Match(media => HeldOrAskedAsync(media, site, cancellationToken), () => Task.FromResult<Optional<IExternalMediaId>>(new None()));
+	}
+
+	private Task<Optional<IExternalMediaId>> HeldOrAskedAsync(StoredMedia media, MediaProvider site, CancellationToken cancellationToken)
+	{
+		return media
+			.Cached.Map(cached => cached.Details.PageLinks.FirstOrNone(link => link.Source == site))
+			.Match(held => Task.FromResult<Optional<IExternalMediaId>>(Some.Of<IExternalMediaId>(held)), () => AskPageLinkAsync(media, site, cancellationToken));
+	}
+
+	private async Task<Optional<IExternalMediaId>> AskPageLinkAsync(StoredMedia media, MediaProvider site, CancellationToken cancellationToken)
+	{
+		var connected = await idResolver.ConnectedAsync(cancellationToken);
+		var resolved = await idResolver.ResolveAsync(new IdentifyRequest([.. media.Identity.Keys], HintsOf(media)), site, connected, cancellationToken);
+		var found = resolved.GetValueOr([]);
+		List<IPageLink> links = [.. found.OfType<IPageLink>()];
+		List<IIdentityKey> learned = [.. found.OfType<IIdentityKey>().Where(key => !media.Identity.Keys.Contains(key))];
+		if (links.Count > 0)
+		{
+			await mediaRepository.SavePageLinksAsync(media.Identity.Id, links, cancellationToken);
+		}
+
+		if (learned.Count > 0)
+		{
+			await using var buffer = bufferFactory.Create();
+			buffer.AddIdentity(media.Identity with { Keys = [.. learned] });
+		}
+
+		return links.FirstOrNone(link => link.Source == site).Map(link => (IExternalMediaId)link);
+	}
+
+	private async Task<Optional<IExternalMediaId>> FindKeyAsync(MediaId id, MediaProvider provider, CancellationToken cancellationToken)
+	{
 		try
 		{
 			var found = await EnsureIdsAsync([id], _ => Some.Of(provider), cancellationToken);
@@ -251,7 +296,7 @@ internal sealed class MediaService(
 		}
 
 		var stored = await mediaRepository.GetAsync(missing, cancellationToken);
-		IReadOnlyList<IdentifyRequest> requests = [.. stored.Select(media => new IdentifyRequest([.. media.Identity.Externals], HintsOf(media)))];
+		IReadOnlyList<IdentifyRequest> requests = [.. stored.Select(media => new IdentifyRequest([.. media.Identity.Keys], HintsOf(media)))];
 		await using (var buffer = bufferFactory.Create())
 		{
 			var run = await TitleRun.ForIdsAsync(addressedBy, idResolver, buffer, cancellationToken);
@@ -364,18 +409,18 @@ internal sealed class MediaService(
 		{
 			throw new MediaIdentityConflictException([.. matches.Select(m => m.Identity.Id)], [.. request.Candidates]);
 		}
-		return matches.FirstOrNone(match => match.Identity.Externals.OfProvider(target).IsSome()).Map(match => Matched(request, match, buffer));
+		return matches.FirstOrNone(match => match.Identity.Keys.OfProvider(target).IsSome()).Map(match => Matched(request, match, buffer));
 	}
 
 	private static IdentifyHandoff Matched(IdentifyRequest request, StoredMedia match, MediaWriteBuffer buffer)
 	{
 		var matched = match.Identity;
-		var missing = request.Candidates.Where(c => !matched.Externals.Contains(c)).ToList();
+		var missing = request.Candidates.OfType<IIdentityKey>().Where(c => !matched.Keys.Contains(c)).ToList();
 		if (missing.Count == 0)
 		{
 			return new IdentifyHandoff(matched, Some.Of(match));
 		}
-		var merged = matched with { Externals = matched.Externals + missing };
+		var merged = matched with { Keys = matched.Keys + missing };
 		buffer.AddIdentity(merged);
 		return new IdentifyHandoff(merged, Some.Of(match));
 	}
@@ -389,7 +434,7 @@ internal sealed class MediaService(
 	{
 		return await idResolver
 			.ResolveAsync(request, target, connected, cancellationToken)
-			.Map(externals => new IdentifyHandoff(new MediaIdentity(MediaId.New(), [.. externals]), new None()));
+			.Map(externals => new IdentifyHandoff(new MediaIdentity(MediaId.New(), [.. externals.OfType<IIdentityKey>()]), new None()));
 	}
 
 	private async ValueTask<Result<MatchedMedia>> LoadStoredDetailsAsync(
@@ -533,7 +578,7 @@ internal sealed class MediaService(
 			return new Dictionary<IExternalMediaId, StoredMedia>();
 		}
 		var rows = await mediaRepository.GetByExternalsAsync(ids, cancellationToken);
-		return rows.SelectMany(r => r.Identity.Externals.Select(e => (External: e, Row: r))).ToDictionary(t => t.External, t => t.Row);
+		return rows.SelectMany(r => r.Identity.Keys.Select(e => (External: (IExternalMediaId)e, Row: r))).ToDictionary(t => t.External, t => t.Row);
 	}
 }
 

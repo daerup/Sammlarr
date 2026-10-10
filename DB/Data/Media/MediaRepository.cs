@@ -32,7 +32,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		foreach (var entity in matched)
 		{
 			var identity = ToIdentity(entity);
-			foreach (var external in identity.Externals)
+			foreach (var external in identity.Keys)
 			{
 				identityByExternal[external] = identity;
 			}
@@ -64,11 +64,11 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 
 		foreach (var identity in identities)
 		{
-			identity.Externals.EnsureSingleMediaType();
+			identity.Keys.EnsureSingleMediaType();
 		}
 
 		var rawIds = identities.Select(i => i.Id.Value).ToList();
-		var allExternals = identities.SelectMany(i => i.Externals).Distinct().ToList();
+		var allExternals = identities.SelectMany(i => i.Keys).Distinct().ToList();
 		using var _ = await writeLock.AcquireAsync(cancellationToken);
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		await using var transaction = await ctx.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
@@ -96,7 +96,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		}
 		var rawIds = ids.Select(id => id.Value).ToList();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await QueryStoredAsync(ctx.Media.Where(m => rawIds.Contains(m.Id)), cancellationToken);
+		return await QueryStoredAsync(ctx, ctx.Media.Where(m => rawIds.Contains(m.Id)), cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<StoredMedia>> GetByExternalsAsync(IReadOnlyList<IExternalMediaId> candidates, CancellationToken cancellationToken = default)
@@ -107,10 +107,10 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		}
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var mediaIds = ctx.ExternalMediaIds.WhereMatchingAny(candidates).Select(e => e.Media.Id).Distinct();
-		return await QueryStoredAsync(ctx.Media.Where(m => mediaIds.Contains(m.Id)), cancellationToken);
+		return await QueryStoredAsync(ctx, ctx.Media.Where(m => mediaIds.Contains(m.Id)), cancellationToken);
 	}
 
-	private async Task<IReadOnlyList<StoredMedia>> QueryStoredAsync(IQueryable<MediaRow> media, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<StoredMedia>> QueryStoredAsync(SammlarrDbContext ctx, IQueryable<MediaRow> media, CancellationToken cancellationToken)
 	{
 		var rows = await media
 			.AsNoTracking()
@@ -121,8 +121,23 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 				.ThenInclude(details => details.Answers)
 			.AsSingleQuery()
 			.ToListAsync(cancellationToken);
+		var links = await PageLinksAsync(ctx, [.. rows.Select(row => row.Id)], cancellationToken);
+		foreach (var row in rows)
+		{
+			Optional.Of(row.Details).Apply(details => details.PageLinks = [.. links[row.Id]]);
+		}
 
 		return [.. rows.Select(row => new StoredMedia(ToIdentity(row), Optional.Of(row.Details).Map(detailsFactory.ToCached)))];
+	}
+
+	private static async Task<ILookup<Guid, MediaPageLinkRow>> PageLinksAsync(SammlarrDbContext ctx, List<Guid> mediaIds, CancellationToken cancellationToken)
+	{
+		var links = await ctx.Set<MediaPageLinkRow>()
+			.AsNoTracking()
+			.Where(link => mediaIds.Contains(EF.Property<Guid>(link, "MediaId")))
+			.Select(link => new { MediaId = EF.Property<Guid>(link, "MediaId"), Link = link })
+			.ToListAsync(cancellationToken);
+		return links.ToLookup(found => found.MediaId, found => found.Link);
 	}
 
 	public async Task UpsertDetailsAsync(IReadOnlyDictionary<MediaId, CachedDetails> details, CancellationToken cancellationToken = default)
@@ -138,6 +153,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		var existing = await ctx
 			.MediaDetails.Include(m => m.Ratings)
 			.Include(m => m.Answers)
+			.Include(m => m.PageLinks)
 			.AsSingleQuery()
 			.Where(m => rawIds.Contains(m.MediaId))
 			.ToDictionaryAsync(m => m.MediaId, cancellationToken);
@@ -152,6 +168,23 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			{
 				ctx.MediaDetails.Add(detailsFactory.BuildFrom(cached, id.Value));
 			}
+		}
+
+		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task SavePageLinksAsync(MediaId id, IReadOnlyCollection<IPageLink> links, CancellationToken cancellationToken = default)
+	{
+		using var _ = await writeLock.AcquireAsync(cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var details = await ctx.MediaDetails.Include(m => m.PageLinks).Where(m => m.MediaId == id.Value).ToListAsync(cancellationToken);
+		foreach (var row in details)
+		{
+			List<MediaPageLinkRow> added =
+			[
+				.. links.DistinctBy(link => link.Source).Where(link => row.PageLinks.All(held => held.Site != link.Source)).Select(link => link.ToPageLinkRow(row)),
+			];
+			row.PageLinks.AddRange(added);
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
@@ -199,7 +232,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		HashSet<IExternalMediaId> contested
 	)
 	{
-		var owners = identity.Externals.Select(ownerByExternal.GetValueOrDefault).Where(o => o is not null).Select(o => o!).DistinctBy(o => o.Id).ToList();
+		var owners = identity.Keys.Select(ownerByExternal.GetValueOrDefault).Where(o => o is not null).Select(o => o!).DistinctBy(o => o.Id).ToList();
 		var entity = owners.Count > 1 ? OwnRow(identity, owners) : owners.FirstOrDefault() ?? entities.GetValueOrDefault(identity.Id.Value);
 		if (entity is null)
 		{
@@ -208,7 +241,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			entities[entity.Id] = entity;
 		}
 
-		foreach (var external in identity.Externals.Where(e => ownerByExternal.TryGetValue(e, out var holder) && holder.Id != entity.Id))
+		foreach (var external in identity.Keys.Where(e => ownerByExternal.TryGetValue(e, out var holder) && holder.Id != entity.Id))
 		{
 			var holder = ownerByExternal[external];
 			holder.ExternalIds.Remove(holder.ExternalIds.First(row => row.ToExternalMediaId().Equals(external)));
@@ -216,7 +249,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			contested.Add(external);
 		}
 
-		foreach (var external in identity.Externals.Where(e => !ownerByExternal.ContainsKey(e) && !contested.Contains(e)))
+		foreach (var external in identity.Keys.Where(e => !ownerByExternal.ContainsKey(e) && !contested.Contains(e)))
 		{
 			entity.ExternalIds.Add(external.ToExternalIdEntity(entity));
 			ownerByExternal[external] = entity;
@@ -228,8 +261,9 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 	private static MediaRow OwnRow(MediaIdentity identity, List<MediaRow> owners)
 	{
 		return owners.Find(owner => owner.Id == identity.Id.Value)
-			?? throw new MediaIdentityConflictException([.. owners.Select(o => MediaId.From(o.Id))], [.. identity.Externals]);
+			?? throw new MediaIdentityConflictException([.. owners.Select(o => MediaId.From(o.Id))], [.. identity.Keys]);
 	}
 
-	private static MediaIdentity ToIdentity(MediaRow entity) => new(MediaId.From(entity.Id), [.. entity.ExternalIds.Select(e => e.ToExternalMediaId())]);
+	private static MediaIdentity ToIdentity(MediaRow entity) =>
+		new(MediaId.From(entity.Id), [.. entity.ExternalIds.Select(e => (IIdentityKey)e.ToExternalMediaId())]);
 }

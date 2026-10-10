@@ -19,13 +19,13 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository,
 		CancellationToken cancellationToken
 	)
 	{
-		var groups = preliminary.Select(p => p.Externals.ToList()).ToList();
+		var groups = preliminary.Select(p => p.Keys.ToList()).ToList();
 		var found = await mediaRepository.FindIdentitiesAsync(groups, cancellationToken);
 
 		var persisted = new Dictionary<IExternalMediaId, MediaIdentity>();
 		foreach (var match in found.WhereSome())
 		{
-			foreach (var external in match.Externals)
+			foreach (var external in match.Keys)
 			{
 				persisted[external] = match;
 			}
