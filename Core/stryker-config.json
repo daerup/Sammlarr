@@ -4,8 +4,7 @@
 		"mutate": [
 			"Processing/FilterEvaluator.cs",
 			"Processing/QueryProcessor.cs",
-			"Wantlist/Sync/WantlistSyncPlan.cs",
-			"Media/MediaIdentityCoordinator.cs"
+			"Wantlist/Sync/WantlistSyncPlan.cs"
 		],
 		"test-runner": "mtp",
 		"reporters": ["progress", "html", "json"],

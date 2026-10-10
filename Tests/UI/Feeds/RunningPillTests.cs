@@ -23,7 +23,7 @@ public class RunningPillTests : BunitContext
 		var cut = Render<RunningPill>(parameters => parameters.Add(pill => pill.Run, _run.Object).Add(pill => pill.Bar, true));
 
 		await Assert.That(Text(cut)).IsEqualTo("Running · 812 / ~2,000");
-		await Assert.That(cut.FindAll("[data-testid=running-bar] i")).Count().IsEqualTo(6);
+		await Assert.That(cut.FindAll("[data-testid=running-bar] i")).Count().IsEqualTo(7);
 	}
 
 	[Test]

@@ -96,8 +96,10 @@ internal static class StagingSeed
 
 	private static async Task AddTitlesAsync(IServiceProvider scoped, IReadOnlyList<SeedTitle> wantlist, CancellationToken cancellationToken)
 	{
-		var titles = await scoped.GetRequiredService<IMediaService>().RegisterAsync([.. wantlist.Select(title => title.Ids())], cancellationToken);
-		await scoped.GetRequiredService<IWantlistService>().AddAsync(titles.Select(title => title.Id), new ManualOrigin(ManualSource.Search), cancellationToken);
+		var titles = await scoped.GetRequiredService<IMediaService>().RegisterAsync([.. wantlist.Select(title => title.Ids())], [], cancellationToken);
+		await scoped
+			.GetRequiredService<IWantlistService>()
+			.AddAsync(titles.WhereSome().Select(title => title.Id), new ManualOrigin(ManualSource.Search), cancellationToken);
 	}
 
 	private static async Task CreateFeedsAsync(IServiceProvider scoped, IReadOnlyList<SeedFeed> seeded, CancellationToken cancellationToken)

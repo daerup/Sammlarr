@@ -134,12 +134,24 @@ internal static class FeedRunView
 
 	internal static string UnmatchedSplit(FeedRunCounts counts)
 	{
-		return counts.UnmatchedCouldNotLookUp == 0
-			? $"{counts.UnmatchedNotFound} not found by any service"
-			: $"{counts.UnmatchedNotFound} not found by any service, {counts.UnmatchedCouldNotLookUp} could not be looked up (tried again next run)";
+		List<string> parts = [$"{counts.UnmatchedNotFound} not found by any service"];
+		if (counts.UnmatchedCouldNotLookUp > 0)
+		{
+			parts.Add($"{counts.UnmatchedCouldNotLookUp} could not be looked up (tried again next run)");
+		}
+
+		if (counts.UnmatchedConflict > 0)
+		{
+			parts.Add($"{counts.UnmatchedConflict} whose ids disagree with stored titles");
+		}
+
+		return string.Join(", ", parts);
 	}
 
-	private static string UnmatchedTooltip(FeedRunCounts counts) => counts.UnmatchedCouldNotLookUp == 0 ? "Not found by any service" : UnmatchedSplit(counts);
+	private static string UnmatchedTooltip(FeedRunCounts counts)
+	{
+		return counts.UnmatchedCouldNotLookUp == 0 && counts.UnmatchedConflict == 0 ? "Not found by any service" : UnmatchedSplit(counts);
+	}
 
 	internal static string? Problem(FeedRun run)
 	{

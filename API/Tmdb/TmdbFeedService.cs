@@ -71,7 +71,10 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 	{
 		return TypeOf(item)
 			.Match(
-				type => Task.FromResult<IReadOnlyList<IdentifyRequest>>([new IdentifyRequest([TmdbId.From(Number(item.Id), type)], Hints(item, type))]),
+				type =>
+					Task.FromResult<IReadOnlyList<IdentifyRequest>>([
+						new IdentifyRequest([TmdbId.From(Number(item.Id), type)], Hints(item, type)) { Sources = [RemoteService.Tmdb] },
+					]),
 				async () =>
 				{
 					FeedRunSpans.ListedWithoutIds();

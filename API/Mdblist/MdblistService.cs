@@ -113,7 +113,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 			var requests = page
 				.shows.Select(FeedItemResolution.Show)
 				.Concat(page.movies.Select(FeedItemResolution.Movie))
-				.Select(pair => new IdentifyRequest(MdblistIds.Of(pair.ListItem.ids, pair.MediaType), BuildHints(pair)))
+				.Select(pair => new IdentifyRequest(MdblistIds.Of(pair.ListItem.ids, pair.MediaType), BuildHints(pair)) { Sources = [RemoteService.Mdblist] })
 				.ToList();
 			titles.Prefetch(requests.Select(request => request.Candidates));
 			foreach (var request in requests)

@@ -3,6 +3,7 @@ using API.Trakt.Types;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Domain.Media;
+using Domain.Providers;
 
 namespace API.Trakt;
 
@@ -10,7 +11,8 @@ internal static class TraktTitle
 {
 	internal static string Kind(MediaType type) => type is MediaType.Show ? "shows" : "movies";
 
-	internal static IdentifyRequest Request(TraktTypes.Title title, MediaType type) => new([.. Ids(title, type)], Hints(title, type));
+	internal static IdentifyRequest Request(TraktTypes.Title title, MediaType type) =>
+		new([.. Ids(title, type)], Hints(title, type)) { Sources = [RemoteService.Trakt] };
 
 	internal static IReadOnlyList<IExternalMediaId> Ids(TraktTypes.Title title, MediaType type)
 	{

@@ -13,11 +13,12 @@ public readonly record struct FeedRunCounts
 	public required int Skipped { get; init; }
 	public required int UnmatchedNotFound { get; init; }
 	public required int UnmatchedCouldNotLookUp { get; init; }
+	public required int UnmatchedConflict { get; init; }
 	public required int Removed { get; init; }
 	public required int Known { get; init; }
 	public required int NotFoundEarlier { get; init; }
 
-	public int Unmatched => UnmatchedNotFound + UnmatchedCouldNotLookUp;
+	public int Unmatched => UnmatchedNotFound + UnmatchedCouldNotLookUp + UnmatchedConflict;
 
 	public static FeedRunCounts None { get; } =
 		new()
@@ -30,6 +31,7 @@ public readonly record struct FeedRunCounts
 			Skipped = 0,
 			UnmatchedNotFound = 0,
 			UnmatchedCouldNotLookUp = 0,
+			UnmatchedConflict = 0,
 			Removed = 0,
 			Known = 0,
 			NotFoundEarlier = 0,
@@ -51,6 +53,7 @@ public readonly record struct FeedRunCounts
 			Skipped = buckets.GetValueOrDefault(ChangeBucket.Skipped),
 			UnmatchedNotFound = plan.Unmatched.Count(unmatched => unmatched.Reason is UnmatchedReason.NotFound or UnmatchedReason.NotFoundEarlier),
 			UnmatchedCouldNotLookUp = plan.Unmatched.Count(unmatched => unmatched.Reason is UnmatchedReason.CouldNotLookUp),
+			UnmatchedConflict = plan.Unmatched.Count(unmatched => unmatched.Reason is UnmatchedReason.Conflict),
 			Removed = delta.Drops.Count,
 			Known = plan.Verdicts.Count(verdict => verdict.Item.Known),
 			NotFoundEarlier = plan.Unmatched.Count(unmatched => unmatched.Reason is UnmatchedReason.NotFoundEarlier),

@@ -47,14 +47,6 @@ public class MediaServiceBenchmark
 					return [];
 				}
 			);
-		deps.MediaRepo.FindIdentitiesAsync(Any(), Any())
-			.Returns(
-				(groups, _) =>
-				{
-					Interlocked.Increment(ref repository);
-					return [.. Enumerable.Repeat<Optional<MediaIdentity>>(new None(), groups.Count)];
-				}
-			);
 		var clock = Stopwatch.StartNew();
 		var first = TimeSpan.Zero;
 		var half = TimeSpan.Zero;

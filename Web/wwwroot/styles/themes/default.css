@@ -50,6 +50,7 @@
     --usage-failed: #d03b3b;
     --usage-cancelled: #a3a8b0;
     --fate-couldnot: oklch(0.62 0.18 2);
+    --fate-conflict: oklch(0.66 0.15 55);
     --fate-earlier: color-mix(in oklch, var(--destructive) 45%, white);
     --usage-after-429-text: oklch(0.55 0.12 75);
 
@@ -121,6 +122,7 @@
     --usage-shade: oklch(0.70 0 0);
     --usage-cancelled: #7e848d;
     --fate-couldnot: oklch(0.68 0.17 2);
+    --fate-conflict: oklch(0.73 0.14 55);
     --fate-earlier: color-mix(in oklch, var(--destructive) 62%, var(--card));
     --usage-after-429-text: var(--usage-after-429);
 

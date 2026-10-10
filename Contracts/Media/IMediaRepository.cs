@@ -5,13 +5,6 @@ namespace Contracts.Media;
 
 public interface IMediaRepository
 {
-	Task<IReadOnlyList<Optional<MediaIdentity>>> FindIdentitiesAsync(
-		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
-		CancellationToken cancellationToken = default
-	);
-
-	Task<IReadOnlyList<MediaIdentity>> UpsertIdentitiesAsync(IReadOnlyList<MediaIdentity> identities, CancellationToken cancellationToken = default);
-
 	Task<IReadOnlyList<StoredMedia>> GetAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<StoredMedia>> GetByExternalsAsync(IReadOnlyList<IExternalMediaId> candidates, CancellationToken cancellationToken = default);

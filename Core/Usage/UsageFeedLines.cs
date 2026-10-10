@@ -40,7 +40,7 @@ internal sealed class UsageFeedLines(IFeedService feeds)
 			run.Counts.Total,
 			run.Counts.Added,
 			run.Counts.Removed,
-			run.Counts.UnmatchedNotFound,
+			run.Counts.UnmatchedNotFound + run.Counts.UnmatchedConflict,
 			run.Counts.UnmatchedCouldNotLookUp,
 			new UsageTally(calls, new Dictionary<int, long>())
 		);

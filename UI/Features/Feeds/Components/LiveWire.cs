@@ -68,7 +68,7 @@ internal sealed record WireLayout(
 	WireMeanings Meanings
 );
 
-internal sealed record WireMeanings(string Matched, string Known, string CouldNotLookUp, string NotFound, string NotFoundEarlier);
+internal sealed record WireMeanings(string Matched, string Known, string CouldNotLookUp, string NotFound, string NotFoundEarlier, string Conflict);
 
 internal sealed record WireSpot(string Key, byte Service, int Column, bool InMemory, WireBrand Brand);
 
@@ -155,7 +155,8 @@ internal static class LiveWire
 			RunBar.Meaning(RunPart.Known, sink),
 			RunBar.Meaning(RunPart.CouldNotLookUp, sink),
 			RunBar.Meaning(RunPart.NotFound, sink),
-			RunBar.Meaning(RunPart.NotFoundEarlier, sink)
+			RunBar.Meaning(RunPart.NotFoundEarlier, sink),
+			RunBar.Meaning(RunPart.Conflict, sink)
 		);
 	}
 

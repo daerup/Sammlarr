@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261010212700_PageLinks";
+    public override string LastMigrationId => "20261010222928_IdentityKeyPerSource";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -442,6 +442,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("TEXT");
 
+                b.Property<int>("UnmatchedConflict")
+                    .HasColumnType("INTEGER");
+
                 b.Property<int>("UnmatchedCouldNotLookUp")
                     .HasColumnType("INTEGER");
 
@@ -702,7 +705,8 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
 
                 b.HasKey("Source", "MediaType", "Id");
 
-                b.HasIndex("MediaId");
+                b.HasIndex("MediaId", "Source")
+                    .IsUnique();
 
                 b.ToTable("ExternalMediaIds");
             });

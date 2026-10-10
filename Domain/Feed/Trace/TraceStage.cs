@@ -19,6 +19,7 @@ public enum TitleFate
 	Matched,
 	CouldNotLookUp,
 	NotFound,
+	Conflict,
 }
 
 public enum TraceEnding

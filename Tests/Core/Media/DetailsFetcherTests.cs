@@ -871,7 +871,6 @@ public class DetailsFetcherTests
 		)
 		{
 			var mediaRepository = IMediaRepository.Mock();
-			mediaRepository.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
 			var plex = IDetailsEnricher.Mock();
 			plex.Fills.Returns(Everything);
 			plex.Accepts.Returns([MediaProvider.Plex]);
@@ -896,6 +895,7 @@ public class DetailsFetcherTests
 
 			var testee = new DetailsFetcher(
 				new KeyedServiceSet<RemoteService, IDetailsEnricher>([new(RemoteService.Plex, plex.Object), new(RemoteService.Tmdb, tmdb.Object)]),
+				TestClaims.Granting().Object,
 				config.Object,
 				capacity ?? TestCapacity.Open(),
 				readiness.Object,

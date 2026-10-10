@@ -461,6 +461,7 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         --f-matched: var(--alert-success);
         --f-notfound: var(--destructive);
         --f-couldnot: var(--fate-couldnot);
+        --f-conflict: var(--fate-conflict);
         --f-known: var(--usage-answered);
         --f-cached: var(--fate-earlier);
         --f-flight: var(--alert-warning);
@@ -579,6 +580,14 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
 
     .feed-live .fl-slot.is-couldnot .st {
         color: var(--f-couldnot);
+    }
+
+    .feed-live .fl-slot.is-conflict {
+        background: color-mix(in oklch, var(--f-conflict) 18%, transparent);
+    }
+
+    .feed-live .fl-slot.is-conflict .st {
+        color: var(--f-conflict);
     }
 
     .feed-live .fl-slot.is-known,
@@ -717,6 +726,10 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
 
     .feed-live .fl-ed.is-fate-couldnot {
         stroke: var(--f-couldnot);
+    }
+
+    .feed-live .fl-ed.is-fate-conflict {
+        stroke: var(--f-conflict);
     }
 
     .feed-live .fl-arrow {

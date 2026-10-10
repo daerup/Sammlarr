@@ -9,85 +9,6 @@ namespace DB.Data.Media;
 internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, MediaDetailsFactory detailsFactory, MediaWriteLock writeLock)
 	: IMediaRepository
 {
-	public async Task<IReadOnlyList<Optional<MediaIdentity>>> FindIdentitiesAsync(
-		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
-		CancellationToken cancellationToken = default
-	)
-	{
-		if (candidateGroups.Count == 0)
-		{
-			return [];
-		}
-
-		var union = candidateGroups.SelectMany(group => group).Distinct().ToList();
-		if (union.Count == 0)
-		{
-			return [.. candidateGroups.Select(_ => (Optional<MediaIdentity>)new None())];
-		}
-
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var matched = await ctx.MediaMatchingAny(union).AsNoTracking().Include(m => m.ExternalIds).ToListAsync(cancellationToken);
-
-		var identityByExternal = new Dictionary<IExternalMediaId, MediaIdentity>();
-		foreach (var entity in matched)
-		{
-			var identity = ToIdentity(entity);
-			foreach (var external in identity.Keys)
-			{
-				identityByExternal[external] = identity;
-			}
-		}
-
-		return [.. candidateGroups.Select(group => Identify(group, identityByExternal))];
-	}
-
-	private static Optional<MediaIdentity> Identify(
-		IReadOnlyList<IExternalMediaId> group,
-		IReadOnlyDictionary<IExternalMediaId, MediaIdentity> identityByExternal
-	)
-	{
-		var matches = group.Select(identityByExternal.GetValueOrNone).WhereSome().ToHashSet();
-		return matches.Count switch
-		{
-			0 => new None(),
-			1 => Some.Of(matches.First()),
-			_ => throw new MediaIdentityConflictException([.. matches.Select(m => m.Id)], [.. group]),
-		};
-	}
-
-	public async Task<IReadOnlyList<MediaIdentity>> UpsertIdentitiesAsync(IReadOnlyList<MediaIdentity> identities, CancellationToken cancellationToken = default)
-	{
-		if (identities.Count == 0)
-		{
-			return [];
-		}
-
-		foreach (var identity in identities)
-		{
-			identity.Keys.EnsureSingleMediaType();
-		}
-
-		var rawIds = identities.Select(i => i.Id.Value).ToList();
-		var allExternals = identities.SelectMany(i => i.Keys).Distinct().ToList();
-		using var _ = await writeLock.AcquireAsync(cancellationToken);
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await using var transaction = await ctx.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
-
-		var byId = await ctx.Media.Include(m => m.ExternalIds).Where(m => rawIds.Contains(m.Id)).ToListAsync(cancellationToken);
-		var byExternal = await ctx.MediaMatchingAny(allExternals).Include(m => m.ExternalIds).ToListAsync(cancellationToken);
-		var entities = byId.Concat(byExternal).DistinctBy(m => m.Id).ToDictionary(m => m.Id);
-		var ownerByExternal = entities
-			.Values.SelectMany(e => e.ExternalIds.Select(x => (Key: x.ToExternalMediaId(), Owner: e)))
-			.ToDictionary(t => t.Key, t => t.Owner);
-
-		var contested = new HashSet<IExternalMediaId>();
-		var result = identities.Select(identity => UpsertOne(ctx, identity, entities, ownerByExternal, contested)).ToList();
-
-		await ctx.SaveChangesAsync(cancellationToken);
-		await transaction.CommitAsync(cancellationToken);
-		return result;
-	}
-
 	public async Task<IReadOnlyList<StoredMedia>> GetAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default)
 	{
 		if (ids.Count == 0)
@@ -222,46 +143,6 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			.ToListAsync(cancellationToken);
 		return rows.GroupBy(r => r.MediaId)
 			.ToDictionary(group => MediaId.From(group.Key), group => group.MinBy(r => r.External.Id, StringComparer.Ordinal)!.External.ToExternalMediaId());
-	}
-
-	private static MediaIdentity UpsertOne(
-		SammlarrDbContext ctx,
-		MediaIdentity identity,
-		Dictionary<Guid, MediaRow> entities,
-		Dictionary<IExternalMediaId, MediaRow> ownerByExternal,
-		HashSet<IExternalMediaId> contested
-	)
-	{
-		var owners = identity.Keys.Select(ownerByExternal.GetValueOrDefault).Where(o => o is not null).Select(o => o!).DistinctBy(o => o.Id).ToList();
-		var entity = owners.Count > 1 ? OwnRow(identity, owners) : owners.FirstOrDefault() ?? entities.GetValueOrDefault(identity.Id.Value);
-		if (entity is null)
-		{
-			entity = new MediaRow { Id = identity.Id.Value };
-			ctx.Media.Add(entity);
-			entities[entity.Id] = entity;
-		}
-
-		foreach (var external in identity.Keys.Where(e => ownerByExternal.TryGetValue(e, out var holder) && holder.Id != entity.Id))
-		{
-			var holder = ownerByExternal[external];
-			holder.ExternalIds.Remove(holder.ExternalIds.First(row => row.ToExternalMediaId().Equals(external)));
-			ownerByExternal.Remove(external);
-			contested.Add(external);
-		}
-
-		foreach (var external in identity.Keys.Where(e => !ownerByExternal.ContainsKey(e) && !contested.Contains(e)))
-		{
-			entity.ExternalIds.Add(external.ToExternalIdEntity(entity));
-			ownerByExternal[external] = entity;
-		}
-
-		return ToIdentity(entity);
-	}
-
-	private static MediaRow OwnRow(MediaIdentity identity, List<MediaRow> owners)
-	{
-		return owners.Find(owner => owner.Id == identity.Id.Value)
-			?? throw new MediaIdentityConflictException([.. owners.Select(o => MediaId.From(o.Id))], [.. identity.Keys]);
 	}
 
 	private static MediaIdentity ToIdentity(MediaRow entity) =>

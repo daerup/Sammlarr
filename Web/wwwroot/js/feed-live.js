@@ -23,17 +23,18 @@ const REDUCED = matchMedia('(prefers-reduced-motion: reduce)');
 
 const KIND = ['started', 'sourceEnded', 'listed', 'known', 'earlier', 'path', 'asked', 'answered', 'gaveUp', 'settled', 'page'];
 const OUTCOME = ['answered', 'after429', 'gaveup', 'failed'];
-const FATE_KEY = ['matched', 'couldnot', 'notfound'];
-const FATE_NODE = { matched: 'sink', couldnot: 'cl', notfound: 'nf' };
+const FATE_KEY = ['matched', 'couldnot', 'notfound', 'conflict'];
+const FATE_NODE = { matched: 'sink', couldnot: 'cl', notfound: 'nf', conflict: 'cl' };
 const OUTCOMES = {
     sink: { fate: 'matched', meaning: 'matched', also: { count: 'known', meaning: 'known', label: 'already known' } },
-    cl: { fate: 'couldnot', meaning: 'couldNotLookUp' },
+    cl: { fate: 'couldnot', meaning: 'couldNotLookUp', also: { count: 'conflict', meaning: 'conflict', label: 'in conflict' } },
     nf: { fate: 'notfound', meaning: 'notFound', also: { count: 'cached', meaning: 'notFoundEarlier', label: 'not found earlier' } },
 };
 const FATE = {
     matched: { label: 'Matched', css: 'var(--f-matched)', glyph: 'check' },
     notfound: { label: 'Not found', css: 'var(--f-notfound)', glyph: 'x' },
     couldnot: { label: "Couldn't look up", css: 'var(--f-couldnot)', glyph: 'cloud-off' },
+    conflict: { label: 'Conflict', css: 'var(--f-conflict)', glyph: 'split' },
     known: { glyph: 'database' },
     cached: { glyph: 'history' },
 };
@@ -55,6 +56,7 @@ const GLYPH = {
     x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     'cloud-off': '<path d="m2 2 20 20"/><path d="M5.782 5.782A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.307-.193"/><path d="M21.532 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.008 7.008 0 0 0 10 5.07"/>',
     database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+    split: '<path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/>',
     history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
     hourglass: '<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/>',
 };
@@ -114,7 +116,7 @@ class Model {
         this.titles = new Map();
         this.active = new Set();
         this.started = 0;
-        this.c = { matched: 0, notfound: 0, couldnot: 0, known: 0, cached: 0 };
+        this.c = { matched: 0, notfound: 0, couldnot: 0, conflict: 0, known: 0, cached: 0 };
         this.svc = {};
         this.edges = new Map();
         this.t = 0;
@@ -157,6 +159,7 @@ class Model {
             matched: f.matched - f.known,
             notfound: f.notFound - f.earlier + f.listedWithoutIds,
             couldnot: f.couldNotLookUp,
+            conflict: f.conflicted,
             known: f.known,
             cached: f.earlier,
         };
@@ -993,7 +996,7 @@ class View {
         this.dbStat.textContent = `${fmt(vals[2])} new · ${fmt(m.c.known)} known · ${fmt(m.c.cached)} earlier`;
         this.fates.sink.cap.textContent = fmt(m.c.matched) + (m.c.known ? ` + ${fmt(m.c.known)} known` : '');
         this.fates.nf.cap.textContent = fmt(m.c.notfound) + (m.c.cached ? ` + ${fmt(m.c.cached)} earlier` : '');
-        this.fates.cl.cap.textContent = fmt(m.c.couldnot);
+        this.fates.cl.cap.textContent = fmt(m.c.couldnot) + (m.c.conflict ? ` + ${fmt(m.c.conflict)} in conflict` : '');
         this.edgeWait = new Map();
         for (const id of m.active) {
             const t = m.titles.get(id);

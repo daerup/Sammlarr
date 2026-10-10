@@ -124,9 +124,6 @@ public class MediaServiceOrderingTests
 
 		var externalToId = builder.Items.Where(i => i.Identifies).ToDictionary(i => (IExternalMediaId)i.External, i => i.MediaId.Value);
 
-		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => [.. Enumerable.Repeat<Optional<MediaIdentity>>(new None(), groups.Count)]);
-		mediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
-
 		var storedMap = builder
 			.Items.Where(i => i.HasDetails)
 			.ToDictionary(
@@ -168,8 +165,10 @@ public class MediaServiceOrderingTests
 
 		var enrichers = new KeyedServiceSet<RemoteService, IDetailsEnricher>([new(RemoteService.Plex, enricher.Object), new(RemoteService.Tmdb, enricher.Object)]);
 
+		var claims = TestClaims.Granting();
 		var detailsFetcher = new DetailsFetcher(
 			enrichers,
+			claims.Object,
 			configRepository.Object,
 			TestCapacity.Open(),
 			TestReadiness.Everything(),
@@ -177,11 +176,10 @@ public class MediaServiceOrderingTests
 			dateTimeProvider.Object,
 			NullLogger<DetailsFetcher>.Instance
 		);
-		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object, NullLogger<MediaIdentityCoordinator>.Instance);
 		return new MediaService(
 			new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), TestReadiness.Everything(), dateTimeProvider.Object),
 			detailsFetcher,
-			coordinator,
+			claims.Object,
 			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),
 			TestSinks.AddressingBy(MediaProvider.Tmdb, configRepository.Object),
 			mediaRepo.Object,

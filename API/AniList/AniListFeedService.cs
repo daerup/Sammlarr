@@ -9,6 +9,7 @@ using Contracts.Feed;
 using Contracts.Media;
 using Domain.Feed;
 using Domain.Media;
+using Domain.Providers;
 using Observability.Feed;
 
 namespace API.AniList;
@@ -66,7 +67,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 		{
 			titles.Remember(found);
 			var type = AniListMedia.TypeOf(found);
-			yield return new IdentifyRequest([.. AniListMedia.Ids(found, type)], AniListMedia.Hints(found, type));
+			yield return new IdentifyRequest([.. AniListMedia.Ids(found, type)], AniListMedia.Hints(found, type)) { Sources = [RemoteService.AniList] };
 		}
 	}
 

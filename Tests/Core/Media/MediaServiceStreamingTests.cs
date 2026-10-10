@@ -114,23 +114,25 @@ public class MediaServiceStreamingTests
 		var conflicting = ImdbId.From(Tt(1), MediaType.Movie);
 		var (testee, deps) = TestMediaService.Create();
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(TestMediaService.CompleteMovie(ext)));
-		deps.MediaRepo.FindIdentitiesAsync(Any(), Any())
-			.Returns(
-				(groups, _) =>
-					groups.Any(group => group.Contains(conflicting))
-						? throw new MediaIdentityConflictException([MediaId.New(), MediaId.New()], [conflicting])
-						: [.. Enumerable.Repeat<Optional<MediaIdentity>>(new None(), groups.Count)]
-			);
+		var owners = new[] { MediaId.New(), MediaId.New() };
+		deps.Claims.ClaimAsync(Any(), Any()).Returns((claim, _) => Outcome(claim, conflicting, owners));
 
 		var results = await testee.IdentifyWithDetailsAsync(Imdb(3).ToAsyncEnumerable()).ToListAsync();
 
 		await Assert.That(results[0]).IsOfUnionType<MediaMatchResult, MatchedMedia>();
-		await Assert.That(results[1]).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
+		var unmatched = await Assert.That(results[1]).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
+		await Assert.That(unmatched!.Reason).IsEqualTo(UnmatchedReason.Conflict);
+		await Assert.That(unmatched.ConflictsWith).IsEquivalentTo(owners);
 		await Assert.That(results[2]).IsOfUnionType<MediaMatchResult, MatchedMedia>();
 	}
 
+	private static ClaimOutcome Outcome(IdentityClaim claim, IIdentityKey conflicting, MediaId[] owners)
+	{
+		return claim.Keys.Contains(conflicting) ? new Conflicted([.. owners], [conflicting]) : new Claimed(MediaId.New(), claim.Keys);
+	}
+
 	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenALaterEntryBridgesTwoTitles_HandsOutTheSurvivingId()
+	public async Task IdentifyWithDetailsAsync_WhenALaterEntryBridgesTwoTitles_SettlesItAsAConflict()
 	{
 		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 		var first = ImdbId.From("tt-bridge-a", MediaType.Movie);
@@ -142,7 +144,7 @@ public class MediaServiceStreamingTests
 			.ReturnsAsync(
 				async (ext, token) =>
 				{
-					if (Interlocked.Increment(ref detailCalls) == 3)
+					if (Interlocked.Increment(ref detailCalls) == 2)
 					{
 						all.TrySetResult();
 					}
@@ -151,12 +153,21 @@ public class MediaServiceStreamingTests
 					return Success.Of(TestMediaService.CompleteMovie(ext));
 				}
 			);
+		deps.Claims.ClaimAsync(Any(), Any()).Returns((claim, _) => Bridging(claim, first, second));
 		List<IdentifyRequest> requests = [new([first], new None()), new([second], new None()), new([first, second], new None())];
 
-		var results = (await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable(), timeout.Token).ToListAsync()).Matched().ToList();
+		var results = await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable(), timeout.Token).ToListAsync();
 
-		await Assert.That(results).Count().IsEqualTo(3);
-		await Assert.That(results.Select(result => result.Identity.Id).Distinct()).Count().IsEqualTo(1);
+		await Assert.That(results.Matched()).Count().IsEqualTo(2);
+		var unmatched = await Assert.That(results[2]).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
+		await Assert.That(unmatched!.Reason).IsEqualTo(UnmatchedReason.Conflict);
+	}
+
+	private static ClaimOutcome Bridging(IdentityClaim claim, IIdentityKey first, IIdentityKey second)
+	{
+		return claim.Keys.Contains(first) && claim.Keys.Contains(second)
+			? new Conflicted([MediaId.New(), MediaId.New()], claim.Keys)
+			: new Claimed(MediaId.New(), claim.Keys);
 	}
 
 	[Test]

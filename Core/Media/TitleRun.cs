@@ -10,44 +10,26 @@ namespace Core.Media;
 internal sealed record TitleRun(
 	Func<MediaType, Optional<MediaProvider>> AddressedBy,
 	IReadOnlySet<RemoteService> IdServices,
-	IReadOnlySet<RemoteService> DetailServices,
-	IdentityMerge Merge,
-	MediaWriteBuffer Buffer
+	IReadOnlySet<RemoteService> DetailServices
 )
 {
-	internal static async Task<TitleRun> StartAsync(
-		ActiveSink sink,
-		MediaIdResolver ids,
-		DetailsFetcher details,
-		MediaWriteBuffer buffer,
-		CancellationToken cancellationToken
-	)
+	internal static async Task<TitleRun> StartAsync(ActiveSink sink, MediaIdResolver ids, DetailsFetcher details, CancellationToken cancellationToken)
 	{
 		var active = await sink.ResolveAsync(cancellationToken);
-		var run = await ForIdsAsync(active.AddressedBy, ids, buffer, cancellationToken);
+		var run = await ForIdsAsync(active.AddressedBy, ids, cancellationToken);
 		return run with { DetailServices = await details.ConnectedAsync(cancellationToken) };
 	}
 
 	internal static async Task<TitleRun> ForIdsAsync(
 		Func<MediaType, Optional<MediaProvider>> addressedBy,
 		MediaIdResolver ids,
-		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
-		return new TitleRun(addressedBy, await ids.ConnectedAsync(cancellationToken), new HashSet<RemoteService>(), new IdentityMerge(), buffer);
+		return new TitleRun(addressedBy, await ids.ConnectedAsync(cancellationToken), new HashSet<RemoteService>());
 	}
 
 	internal static TracedRequest Traced(IdentifyRequest request) => new(request, TitleSpan(request));
-
-	internal MediaMatchResult HandOut(MediaMatchResult result)
-	{
-		return result switch
-		{
-			MatchedMedia matched => matched with { Identity = matched.Identity with { Id = Buffer.Survivor(matched.Identity.Id) } },
-			UnmatchedMedia unmatched => unmatched,
-		};
-	}
 
 	private static Optional<Activity> TitleSpan(IdentifyRequest request)
 	{
