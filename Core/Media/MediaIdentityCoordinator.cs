@@ -10,11 +10,11 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository,
 		IReadOnlyList<MediaIdentity> preliminary,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
-	) => CoordinateAsync(preliminary, [], buffer, cancellationToken);
+	) => CoordinateAsync(preliminary, new IdentityMerge(), buffer, cancellationToken);
 
 	public async Task<IReadOnlyList<MediaIdentity>> CoordinateAsync(
 		IReadOnlyList<MediaIdentity> preliminary,
-		Dictionary<IExternalMediaId, MediaIdentity> building,
+		IdentityMerge merge,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -33,15 +33,15 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository,
 
 		foreach (var identity in preliminary)
 		{
-			MergeIntoCanonical(identity, persisted, building, buffer);
+			merge.Merge(identity, persisted, buffer);
 		}
 
-		return preliminary.Select(p => p.Externals.Count > 0 ? building[p.Externals.First()] : p).ToArray();
+		return [.. preliminary.Select(merge.Canonical)];
 	}
 
 	public async Task<IReadOnlyList<Result<IdentifyHandoff>>> CoordinateHandoffsAsync(
 		List<Result<IdentifyHandoff>> handoffs,
-		Dictionary<IExternalMediaId, MediaIdentity> building,
+		IdentityMerge merge,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -50,7 +50,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository,
 		var pendingPreliminary = new List<MediaIdentity>();
 		foreach (var (idx, handoff) in handoffs.Index())
 		{
-			handoff.ToOptional().When(match => match.Stored.IsNone()).Apply(_ => pendingIndices.Add(idx)).Apply(match => pendingPreliminary.Add(match.Identity));
+			Pending(handoff).Apply(_ => pendingIndices.Add(idx)).Apply(match => pendingPreliminary.Add(match.Identity));
 		}
 		if (pendingPreliminary.Count == 0)
 		{
@@ -59,7 +59,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository,
 
 		try
 		{
-			var corrected = await CoordinateAsync(pendingPreliminary, building, buffer, cancellationToken);
+			var corrected = await CoordinateAsync(pendingPreliminary, merge, buffer, cancellationToken);
 			for (var i = 0; i < corrected.Count; i++)
 			{
 				handoffs[pendingIndices[i]] = Success.Of(new IdentifyHandoff(corrected[i], new None()));
@@ -69,23 +69,35 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository,
 		{
 			for (var i = 0; i < pendingPreliminary.Count; i++)
 			{
-				handoffs[pendingIndices[i]] = await CoordinateOneAsync(pendingPreliminary[i], building, buffer, cancellationToken);
+				handoffs[pendingIndices[i]] = await CoordinateOneAsync(pendingPreliminary[i], merge, buffer, cancellationToken);
 			}
 		}
 
 		return handoffs;
 	}
 
+	public Task<Result<IdentifyHandoff>> CoordinateHandoffAsync(
+		Result<IdentifyHandoff> handoff,
+		IdentityMerge merge,
+		MediaWriteBuffer buffer,
+		CancellationToken cancellationToken
+	)
+	{
+		return Pending(handoff).Match(match => CoordinateOneAsync(match.Identity, merge, buffer, cancellationToken), () => Task.FromResult(handoff));
+	}
+
+	private static Optional<IdentifyHandoff> Pending(Result<IdentifyHandoff> handoff) => handoff.ToOptional().When(match => match.Stored.IsNone());
+
 	private async Task<Result<IdentifyHandoff>> CoordinateOneAsync(
 		MediaIdentity preliminary,
-		Dictionary<IExternalMediaId, MediaIdentity> building,
+		IdentityMerge merge,
 		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
 		try
 		{
-			var corrected = await CoordinateAsync([preliminary], building, buffer, cancellationToken);
+			var corrected = await CoordinateAsync([preliminary], merge, buffer, cancellationToken);
 			return Success.Of(new IdentifyHandoff(corrected[0], new None()));
 		}
 		catch (MediaIdentityConflictException conflict)
@@ -94,31 +106,4 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository,
 			return Error.From(conflict);
 		}
 	}
-
-	private static void MergeIntoCanonical(
-		MediaIdentity preliminary,
-		IReadOnlyDictionary<IExternalMediaId, MediaIdentity> persisted,
-		Dictionary<IExternalMediaId, MediaIdentity> building,
-		MediaWriteBuffer buffer
-	)
-	{
-		var touching = Matches(preliminary, persisted).Concat(Matches(preliminary, building)).DistinctBy(match => match.Id).ToList();
-		var anchor = touching.Append(preliminary).First();
-		var canonical = anchor with { Externals = touching.Aggregate(preliminary.Externals, (all, match) => all + match.Externals) };
-
-		foreach (var external in canonical.Externals)
-		{
-			building[external] = canonical;
-		}
-
-		foreach (var absorbed in touching.Where(match => match.Id != canonical.Id))
-		{
-			buffer.MergeIdentity(absorbed.Id, canonical);
-		}
-
-		buffer.AddIdentity(canonical);
-	}
-
-	private static IEnumerable<MediaIdentity> Matches(MediaIdentity preliminary, IReadOnlyDictionary<IExternalMediaId, MediaIdentity> index) =>
-		preliminary.Externals.Where(index.ContainsKey).Select(external => index[external]);
 }

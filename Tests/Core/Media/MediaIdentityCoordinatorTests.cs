@@ -126,16 +126,80 @@ public class MediaIdentityCoordinatorTests
 							: Unknown(groups.Count)
 				)
 		);
-		List<Result<IdentifyHandoff>> handoffs =
-		[
-			Success.Of(new IdentifyHandoff(new MediaIdentity(MediaId.New(), [conflicting]), new None())),
-			Success.Of(new IdentifyHandoff(new MediaIdentity(MediaId.New(), [fine]), new None())),
-		];
+		List<Result<IdentifyHandoff>> handoffs = [Handoff(conflicting), Handoff(fine)];
 
-		var coordinated = await coordinator.CoordinateHandoffsAsync(handoffs, [], buffer, CancellationToken.None);
+		var coordinated = await coordinator.CoordinateHandoffsAsync(handoffs, new IdentityMerge(), buffer, CancellationToken.None);
 
 		await Assert.That(coordinated[0]).IsError();
 		await Assert.That(coordinated[1]).IsSuccess();
+	}
+
+	[Test]
+	public async Task CoordinateHandoffAsync_ForTwoTitlesOfOneMediaAtOnce_GivesBothTheSameId()
+	{
+		var shared = ImdbId.From("tt0042", MediaType.Movie);
+		using var bothReading = new Barrier(2);
+		var together = 0;
+		var (coordinator, buffer) = CreateCoordinator(repo =>
+			repo.FindIdentitiesAsync(Any(), Any())
+				.Returns(
+					(groups, _) =>
+					{
+						if (bothReading.SignalAndWait(TimeSpan.FromSeconds(5)))
+						{
+							Interlocked.Increment(ref together);
+						}
+						return Unknown(groups.Count);
+					}
+				)
+		);
+		var merge = new IdentityMerge();
+
+		var coordinated = await Task.WhenAll(
+			Task.Run(() => coordinator.CoordinateHandoffAsync(Handoff(TmdbId.From("42", MediaType.Movie), shared), merge, buffer, CancellationToken.None)),
+			Task.Run(() => coordinator.CoordinateHandoffAsync(Handoff(PlexId.From("plex-42", MediaType.Movie), shared), merge, buffer, CancellationToken.None))
+		);
+
+		var ids = coordinated.Select(handoff => handoff.ToOptional().Map(match => match.Identity.Id)).WhereSome().Distinct().ToList();
+		await Assert.That(together).IsEqualTo(2);
+		await Assert.That(coordinated[0]).IsSuccess();
+		await Assert.That(coordinated[1]).IsSuccess();
+		await Assert.That(ids).Count().IsEqualTo(1);
+		await Assert.That(buffer.NewIdentities.Select(identity => identity.Id)).IsEquivalentTo(ids);
+	}
+
+	[Test]
+	public async Task CoordinateHandoffAsync_ForAStoredMatchOrAnError_PassesItThrough()
+	{
+		var stored = new MediaIdentity(MediaId.New(), [TmdbId.From("7", MediaType.Movie)]);
+		var (coordinator, buffer) = CreateCoordinator();
+		Result<IdentifyHandoff> known = Success.Of(new IdentifyHandoff(stored, Some.Of(new StoredMedia(stored, new None()))));
+		Result<IdentifyHandoff> failed = Error.From("no provider addresses this title");
+
+		var fromStore = await coordinator.CoordinateHandoffAsync(known, new IdentityMerge(), buffer, CancellationToken.None);
+		var fromError = await coordinator.CoordinateHandoffAsync(failed, new IdentityMerge(), buffer, CancellationToken.None);
+
+		await Assert.That(fromStore).IsEqualTo(known);
+		await Assert.That(fromError).IsEqualTo(failed);
+		await Assert.That(buffer.NewIdentities).IsEmpty();
+	}
+
+	[Test]
+	public async Task CoordinateHandoffAsync_WhenTheIdsBelongToTwoStoredTitles_ReturnsTheConflictAsTheTitlesError()
+	{
+		var conflicting = AniListId.From("16498", MediaType.Show);
+		var (coordinator, buffer) = CreateCoordinator(repo =>
+			repo.FindIdentitiesAsync(Any(), Any()).Returns((_, _) => throw new MediaIdentityConflictException([MediaId.New(), MediaId.New()], [conflicting]))
+		);
+
+		var coordinated = await coordinator.CoordinateHandoffAsync(Handoff(conflicting), new IdentityMerge(), buffer, CancellationToken.None);
+
+		await Assert.That(coordinated).IsError();
+	}
+
+	private static Result<IdentifyHandoff> Handoff(params IExternalMediaId[] externals)
+	{
+		return Success.Of(new IdentifyHandoff(new MediaIdentity(MediaId.New(), [.. externals]), new None()));
 	}
 
 	private static (MediaIdentityCoordinator Coordinator, MediaWriteBuffer Buffer) CreateCoordinator(Action<Mock<IMediaRepository>>? setup = null)
