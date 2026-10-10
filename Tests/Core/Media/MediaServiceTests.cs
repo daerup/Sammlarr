@@ -77,7 +77,7 @@ public class MediaServiceTests
 	public async Task IdentifyWithDetailsAsync_WhenCancelledWhileFetchingDetails_StopsWithoutSettlingTheTitle()
 	{
 		using var cancellation = new CancellationTokenSource();
-		var lookup = new TaskCompletionSource<Result<FoundMedia>>();
+		var lookup = new TaskCompletionSource<Answer<FoundMedia>>();
 		var fetching = new TaskCompletionSource();
 		var (testee, deps) = TestMediaService.Create();
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).ReturnsAsync(lookup.Task).Callback(() => fetching.TrySetResult());
@@ -169,7 +169,7 @@ public class MediaServiceTests
 		var thirdId = MediaId.New();
 		var (testee, deps) = TestMediaService.Create();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([StaleCached(firstId), StaleCached(secondId), StaleCached(thirdId)]);
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(TestMediaService.CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
 
 		await testee.GetDetailsAsync([firstId, secondId, thirdId]).ToListAsync();
 
@@ -201,7 +201,7 @@ public class MediaServiceTests
 	public async Task IdentifyWithDetailsAsync_WhenNoProviderKnowsTheDetailsOfAFoundTitle_YieldsItUnmatched()
 	{
 		var (testee, deps) = TestMediaService.Create();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new NoMatch(RemoteService.Plex));
 
 		var results = await testee
 			.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([TmdbId.From("404", MediaType.Movie)], new None()) }.ToAsyncEnumerable())
@@ -216,7 +216,7 @@ public class MediaServiceTests
 	{
 		var external = TmdbId.From("550", MediaType.Movie);
 		var (testee, deps) = TestMediaService.Create();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From(new RemoteUnavailableException(RemoteService.Plex)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Unavailable(RemoteService.Plex, new None(), true));
 		var hints = new IdentifyHints
 		{
 			Title = "Fight Club",
@@ -240,7 +240,7 @@ public class MediaServiceTests
 		var id = MediaId.New();
 		var (testee, deps) = TestMediaService.Create();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([StaleCached(id)]);
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Throws(new HttpRequestException("plex is down"));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Unavailable(RemoteService.Plex, new None(), true));
 
 		var results = await testee.GetDetailsAsync([id]).ToListAsync();
 
@@ -258,7 +258,7 @@ public class MediaServiceTests
 		var (testee, deps) = TestMediaService.Create();
 		deps.MediaRepo.GetAsync(Any(), Any())
 			.Returns([new StoredMedia(detail.Identity, Some.Of(new CachedDetails(detail.Details, _now - TimeSpan.FromDays(15), _now - TimeSpan.FromDays(15), [])))]);
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("not found"));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new NoMatch(RemoteService.Plex));
 
 		var results = await testee.GetDetailsAsync([id]).ToListAsync();
 
@@ -279,7 +279,7 @@ public class MediaServiceTests
 					Some.Of(new CachedDetails(stale.Details with { Title = "Stale" }, _now - TimeSpan.FromDays(15), _now - TimeSpan.FromDays(15), []))
 				),
 			]);
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(TestMediaService.CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
 
 		var results = await testee.GetDetailsAsync([id]).ToListAsync();
 
@@ -325,10 +325,39 @@ public class MediaServiceTests
 	}
 
 	[Test]
+	public async Task IdentifyWithDetailsAsync_WhenFetchingTheDetailsOfANewTitleThrows_IsUnmatchedAsCouldNotLookUp()
+	{
+		var (testee, deps) = TestMediaService.Create();
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Throws(new InvalidOperationException("The library is locked."));
+
+		var results = await testee
+			.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([TmdbId.From("550", MediaType.Movie)], new None()) }.ToAsyncEnumerable())
+			.ToListAsync();
+
+		await Assert
+			.That(results.Single())
+			.IsOfUnionType<MediaMatchResult, UnmatchedMedia>()
+			.And.Multiple(async unmatched => await Assert.That(unmatched.Reason).IsEqualTo(UnmatchedReason.CouldNotLookUp));
+	}
+
+	[Test]
+	public async Task IdentifyWithDetailsAsync_ForATitleAConverterResolved_ClaimsItWithThatConverterAsASource()
+	{
+		var (testee, deps) = TestMediaService.Create();
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
+
+		await testee
+			.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([ImdbId.From("tt0137523", MediaType.Movie)], new None()) }.ToAsyncEnumerable())
+			.ToListAsync();
+
+		deps.Claims.ClaimAsync(Is<IdentityClaim>(claim => claim.Sources.Contains(RemoteService.Tmdb)), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
 	public async Task IdentifyWithDetailsAsync_WhenTheLookupCouldNotRun_IsUnmatchedAsCouldNotLookUp()
 	{
 		var (testee, deps) = TestMediaService.Create();
-		deps.Converter.LookUpAsync(Any(), Any()).Returns(Error.From(new RemoteUnavailableException(RemoteService.Tmdb)));
+		deps.Converter.LookUpAsync(Any(), Any()).Returns(new Unavailable(RemoteService.Tmdb, new None(), true));
 
 		var results = await testee
 			.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([ImdbId.From("tt0137523", MediaType.Movie)], new None()) }.ToAsyncEnumerable())

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using API.Http;
 using API.Mdblist.Types;
@@ -140,9 +141,13 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 	private async Task<Result<IReadOnlyList<MdblistTypes.Titles.Title>>> AskAsync(BatchKey key, IReadOnlyList<string> values)
 	{
 		var apiKey = await apiKeys.GetAsync(ApiKeyProvider.Mdblist);
-		return await apiKey
-			.When(found => budget.LeavesReserve(found.Value), Error.From("MDBList's requests left today are kept for feeds."))
-			.Map(found => PostAsync(found, key, values));
+		return await apiKey.Map(found => budget.ReservedUntil(found.Value).Match(Reserved, () => PostAsync(found, key, values)));
+	}
+
+	private static Task<Result<IReadOnlyList<MdblistTypes.Titles.Title>>> Reserved(DateTimeOffset until)
+	{
+		var reserved = new RemoteUnavailableException(RemoteService.Mdblist, sent: false) { Until = Some.Of(until) };
+		return Task.FromResult<Result<IReadOnlyList<MdblistTypes.Titles.Title>>>(Error.From("MDBList's requests left today are kept for feeds.", reserved));
 	}
 
 	private async Task<Result<IReadOnlyList<MdblistTypes.Titles.Title>>> PostAsync(IApiKey apiKey, BatchKey key, IReadOnlyList<string> values)
@@ -160,7 +165,15 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 			return response.StatusCode.Unanswered(RemoteService.Mdblist, $"MDBList answered {(int)response.StatusCode} for {values.Count} titles.");
 		}
 
-		return Success.Of<IReadOnlyList<MdblistTypes.Titles.Title>>(await response.Content.ReadFromJsonAsync<List<MdblistTypes.Titles.Title>>() ?? []);
+		try
+		{
+			return Success.Of<IReadOnlyList<MdblistTypes.Titles.Title>>(await response.Content.ReadFromJsonAsync<List<MdblistTypes.Titles.Title>>() ?? []);
+		}
+		catch (JsonException exception)
+		{
+			logger.LogWarning(exception, "MDBList answered a lookup of {Count} titles with a body Sammlarr can't read", values.Count);
+			return Error.From("MDBList's answer could not be read.", exception);
+		}
 	}
 
 	private readonly record struct TitleKey(MediaProvider Source, MediaType Type, string Value)

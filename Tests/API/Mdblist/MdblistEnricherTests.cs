@@ -16,7 +16,7 @@ public class MdblistEnricherTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
 
-		var found = await Assert.That(await Testee(handler).LookUpAsync(FightClub)).IsSuccess();
+		var found = await Assert.That(await Testee(handler).LookUpAsync(FightClub)).IsFound();
 
 		await Assert
 			.That(found!.Details.Ratings.All)
@@ -40,7 +40,7 @@ public class MdblistEnricherTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
 
-		var found = await Assert.That(await Testee(handler).LookUpAsync(FightClub)).IsSuccess();
+		var found = await Assert.That(await Testee(handler).LookUpAsync(FightClub)).IsFound();
 
 		await Assert
 			.That(found!.Externals.Select(id => $"{id}"))
@@ -56,7 +56,7 @@ public class MdblistEnricherTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("show.json"));
 
-		var found = await Assert.That(await Testee(handler).LookUpAsync(ImdbId.From("tt0903747", MediaType.Show))).IsSuccess();
+		var found = await Assert.That(await Testee(handler).LookUpAsync(ImdbId.From("tt0903747", MediaType.Show))).IsFound();
 
 		await Assert.That(found!.Details.Ratings.All.Select(rating => rating.Source)).DoesNotContain(RatingSource.Letterboxd);
 		await Assert.That(found.Details.Type).IsEqualTo(MediaType.Show);
@@ -68,7 +68,7 @@ public class MdblistEnricherTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("[]");
 
-		var found = await Assert.That(await Testee(handler).LookUpAsync(FightClub)).IsSuccess();
+		var found = await Assert.That(await Testee(handler).LookUpAsync(FightClub)).IsFound();
 
 		await Assert.That(found!.Details.Ratings.All).IsEmpty();
 		await Assert.That(found.Details.Type).IsEqualTo(MediaType.Movie);
@@ -82,7 +82,7 @@ public class MdblistEnricherTests
 
 		var result = await Testee(handler).LookUpAsync(FightClub);
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsSome());
+		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Mdblist, new None(), true));
 	}
 
 	[Test]
@@ -94,7 +94,9 @@ public class MdblistEnricherTests
 
 		var answers = await Task.WhenAll(testee.LookUpAsync(FightClub), testee.LookUpAsync(ImdbId.From("tt0133093", MediaType.Movie)));
 
-		await Assert.That(answers.All(answer => answer.IsSuccess())).IsTrue();
+		await Assert
+			.That(answers.AsEnumerable())
+			.AreOfUnionType<IEnumerable<Answer<FoundMedia>>, Answer<FoundMedia>>(typeof(Found<FoundMedia>), typeof(Found<FoundMedia>));
 		handler.Verify(request => request.PathMatches(@"^/imdb/movie(\?.*)?$"), Times.Once);
 	}
 
@@ -108,7 +110,7 @@ public class MdblistEnricherTests
 		await testee.LookUpAsync(FightClub);
 		var again = await testee.LookUpAsync(FightClub);
 
-		await Assert.That(again).IsSuccess();
+		await Assert.That(again).IsFound();
 		handler.Verify(request => request.Method(HttpMethod.Post), Times.Once);
 	}
 
@@ -122,7 +124,7 @@ public class MdblistEnricherTests
 			[MdblistId.From("a5as", MediaType.Movie), FightClub],
 		]);
 
-		var found = await Assert.That(await new MdblistEnricher(titles).LookUpAsync(FightClub)).IsSuccess();
+		var found = await Assert.That(await new MdblistEnricher(titles).LookUpAsync(FightClub)).IsFound();
 
 		await Assert.That(found!.Details.Ratings.All).IsNotEmpty();
 		handler.Verify(request => request.Method(HttpMethod.Post).PathMatches(@"^/mdblist/movie(\?.*)?$"), Times.Once);
@@ -161,12 +163,25 @@ public class MdblistEnricherTests
 		await testee.LookUpAsync(FightClub);
 		var again = await testee.LookUpAsync(FightClub);
 
-		await Assert.That(again).IsSuccess();
+		await Assert.That(again).IsFound();
 		handler.Verify(request => request.Method(HttpMethod.Post), Times.Exactly(2));
 	}
 
 	[Test]
-	public async Task LookUpAsync_OnceTheRequestsLeftReachTheFeedReserve_AsksNothing()
+	public async Task LookUpAsync_ForAnErrorBodyWithStatus200_IsFaultedAndLogged()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("""{"error":"Invalid API key!"}""");
+		var logger = new CountingLogger<MdblistTitles>();
+
+		var result = await new MdblistEnricher(MdblistApis.Titles(handler, logger: logger)).LookUpAsync(FightClub);
+
+		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, Faulted>();
+		await Assert.That(logger.Warnings).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task LookUpAsync_AtTheQuotaReserve_IsUnavailableUntilTheResetAndAsksNothing()
 	{
 		var budget = MdblistApis.Budget();
 		var answered = new HttpResponseMessage(HttpStatusCode.OK);
@@ -178,7 +193,10 @@ public class MdblistEnricherTests
 
 		var result = await Testee(handler, budget).LookUpAsync(FightClub);
 
-		await Assert.That(result).IsError();
+		await Assert
+			.That(result)
+			.IsOfUnionType<Answer<FoundMedia>, Unavailable>()
+			.And.IsEqualTo(new Unavailable(RemoteService.Mdblist, Some.Of(DateTimeOffset.UnixEpoch.AddDays(2)), false));
 		handler.Verify(request => request.PathMatches(".*"), Times.Never);
 	}
 

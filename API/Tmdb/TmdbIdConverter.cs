@@ -1,4 +1,5 @@
 using System.Globalization;
+using API.Http;
 using API.Tmdb.Types;
 using Contracts.Media.Conversions;
 using Domain.Media;
@@ -15,7 +16,12 @@ internal class TmdbIdConverter(TmdbApi tmdbApi) : IExternalIdConverter
 
 	public IReadOnlyList<IdLookup> Lookups { get; } = [ByTmdbId, Find];
 
-	public async Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	public Task<Answer<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	{
+		return LookUpResultAsync(request, cancellationToken).GuardedAsync(RemoteService.Tmdb);
+	}
+
+	private async Task<Result<IdLookupResult>> LookUpResultAsync(IdLookupRequest request, CancellationToken cancellationToken)
 	{
 		return request switch
 		{

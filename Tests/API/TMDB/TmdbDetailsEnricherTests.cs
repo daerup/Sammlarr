@@ -27,7 +27,7 @@ public class TmdbDetailsEnricherTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 			{
 				var ratings = found.Details.Ratings;
@@ -47,18 +47,18 @@ public class TmdbDetailsEnricherTests
 
 		var result = await CreateTestee(handler).LookUpAsync(Id);
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsSome());
+		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Tmdb, new None(), true));
 	}
 
 	[Test]
-	public async Task LookUpAsync_WhenTmdbDoesNotKnowTheTitle_FailsAsAnAnswer()
+	public async Task LookUpAsync_WhenTmdbDoesNotKnowTheTitle_IsNoMatch()
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
 
 		var result = await CreateTestee(handler).LookUpAsync(Id);
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsNone());
+		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, NoMatch>();
 	}
 
 	[Test]
@@ -73,7 +73,7 @@ public class TmdbDetailsEnricherTests
 
 		var result = await CreateTestee(handler).LookUpAsync(Id);
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Details).IsEqualTo(new MovieDetails()));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Details).IsEqualTo(new MovieDetails()));
 	}
 
 	[Test]
@@ -90,7 +90,7 @@ public class TmdbDetailsEnricherTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 				await Assert.That(found.Details).IsEqualTo(new ShowDetails { Title = "Breaking Bad", ReleaseDate = new DateOnly(2008, 1, 20) })
 			);
@@ -111,7 +111,7 @@ public class TmdbDetailsEnricherTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 			{
 				await Assert.That(found.Details.Title).IsEqualTo("Inception");
@@ -140,7 +140,7 @@ public class TmdbDetailsEnricherTests
 
 		var result = await CreateTestee(handler).LookUpAsync(ImdbId.From("tt0000000", MediaType.Movie));
 
-		await Assert.That(result).IsError();
+		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, NoMatch>();
 		handler.Verify(request => request.PathMatches(".*/movie/.*"), Times.Never);
 	}
 

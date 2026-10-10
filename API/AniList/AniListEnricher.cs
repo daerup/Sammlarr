@@ -1,5 +1,6 @@
 using System.Globalization;
 using API.AniList.Types;
+using API.Http;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -23,7 +24,12 @@ internal sealed class AniListEnricher(AniListTitles titles) : IDetailsEnricher
 
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.AniList];
 
-	public async Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	{
+		return LookUpResultAsync(id, cancellationToken).GuardedAsync(RemoteService.AniList);
+	}
+
+	private async Task<Result<FoundMedia>> LookUpResultAsync(IExternalMediaId id, CancellationToken cancellationToken)
 	{
 		if (!int.TryParse(id.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var number))
 		{

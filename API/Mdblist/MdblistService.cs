@@ -79,7 +79,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 
 	private static Error NotReached(long number, Exception cause)
 	{
-		var unavailable = cause as RemoteUnavailableException ?? new RemoteUnavailableException(RemoteService.Mdblist, cause);
+		var unavailable = cause as RemoteUnavailableException ?? new RemoteUnavailableException(RemoteService.Mdblist, sent: true, cause);
 		return Error.From($"MDBList didn't answer, so {number} can't be looked up yet. Paste the list's link instead; it needs no request.", unavailable);
 	}
 

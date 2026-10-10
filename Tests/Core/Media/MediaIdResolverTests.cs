@@ -61,7 +61,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>().And.Multiple(async found => await Assert.That(found.Ids).Contains(Tvdb));
 	}
 
 	[Test]
@@ -78,7 +78,7 @@ public class MediaIdResolverTests
 	{
 		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
 
-		await Assert.That(resolved).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<LookupNotRunException>()).IsSome());
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
@@ -90,7 +90,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20 + pushes++))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
@@ -111,7 +111,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
@@ -126,24 +126,24 @@ public class MediaIdResolverTests
 				(_, _) =>
 				{
 					tmdbFreeAt = Now.AddSeconds(5);
-					return Error.From(new RemoteUnavailableException(RemoteService.Tmdb));
+					return Down(RemoteService.Tmdb);
 				}
 			);
 
 		var resolved = await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]
 	public async Task ResolveAsync_AfterASuccessfulWait_CachesAnAnsweredMissAsUnmatched()
 	{
-		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From("TMDB knows no TVDB id."));
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), new NoMatch(RemoteService.Tmdb));
 
 		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20)), _tmdb).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NoMatchAnywhere>();
 		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
 	}
 
@@ -155,7 +155,10 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(map, _tmdb).ResolveAsync(new IdentifyRequest([Tvdb], new None()), MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).IsEquivalentTo(new IExternalMediaId[] { Tvdb, AniList, Mal }));
+		await Assert
+			.That(resolved)
+			.IsOfUnionType<Resolution, Resolved>()
+			.And.Multiple(async found => await Assert.That(found.Ids).IsEquivalentTo(new IExternalMediaId[] { Tvdb, AniList, Mal }));
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 	}
 
@@ -179,18 +182,21 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(map).ResolveAsync(new IdentifyRequest([Tvdb, AniList], new None()), MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).IsEquivalentTo(new IExternalMediaId[] { Tvdb, AniList, Mal }));
+		await Assert
+			.That(resolved)
+			.IsOfUnionType<Resolution, Resolved>()
+			.And.Multiple(async found => await Assert.That(found.Ids).IsEquivalentTo(new IExternalMediaId[] { Tvdb, AniList, Mal }));
 	}
 
 	[Test]
 	public async Task ResolveAsync_WhileAFreeLookupThatYieldsTheTargetIsDown_DoesNotCacheTheTitleAsUnmatched()
 	{
 		var map = Converter(RemoteService.AnimeLists, ByAnimeId);
-		map.LookUpAsync(Any(), Any()).Returns(Error.From(new RemoteUnavailableException(RemoteService.AnimeLists)));
+		map.LookUpAsync(Any(), Any()).Returns(Down(RemoteService.AnimeLists));
 
 		var resolved = await Testee(map).ResolveAsync(new IdentifyRequest([AniList], new None()), MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
 
@@ -198,11 +204,11 @@ public class MediaIdResolverTests
 	public async Task ResolveAsync_WhileOnlyAFreeLookupThatYieldsOtherIdsIsDown_CachesTheTitleAsUnmatched()
 	{
 		var map = Converter(RemoteService.AnimeLists, ByShowId);
-		map.LookUpAsync(Any(), Any()).Returns(Error.From(new RemoteUnavailableException(RemoteService.AnimeLists)));
+		map.LookUpAsync(Any(), Any()).Returns(Down(RemoteService.AnimeLists));
 
 		var resolved = await Testee(map).ResolveAsync(new IdentifyRequest([Imdb], new None()), MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NoMatchAnywhere>();
 		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
 	}
 
@@ -213,7 +219,10 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).IsEquivalentTo(new IExternalMediaId[] { Tmdb, Tvdb }));
+		await Assert
+			.That(resolved)
+			.IsOfUnionType<Resolution, Resolved>()
+			.And.Multiple(async found => await Assert.That(found.Ids).IsEquivalentTo(new IExternalMediaId[] { Tmdb, Tvdb }));
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
 	}
 
@@ -223,13 +232,11 @@ public class MediaIdResolverTests
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), HintsOnly());
 		_plex
 			.LookUpAsync(Any(), Any())
-			.Returns(
-				(request, _) => request is ByHintsRequest { Known: var known } && known.Contains(Tmdb) ? Found(Plex, Tvdb) : Error.From("The TMDB id never arrived.")
-			);
+			.Returns((request, _) => request is ByHintsRequest { Known: var known } && known.Contains(Tmdb) ? Found(Plex, Tvdb) : new NoMatch(RemoteService.Plex));
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>().And.Multiple(async found => await Assert.That(found.Ids).Contains(Tvdb));
 	}
 
 	[Test]
@@ -237,7 +244,7 @@ public class MediaIdResolverTests
 	{
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, new HashSet<RemoteService> { RemoteService.Plex });
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NoMatchAnywhere>();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 	}
 
@@ -247,18 +254,18 @@ public class MediaIdResolverTests
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), HintsOnly());
 		_plex
 			.LookUpAsync(Any(), Any())
-			.Returns((request, _) => request is ByHintsRequest { Hints: var given } && given == FromTmdb ? Found(Plex) : Error.From("TMDB's hints never arrived."));
+			.Returns((request, _) => request is ByHintsRequest { Hints: var given } && given == FromTmdb ? Found(Plex) : new NoMatch(RemoteService.Plex));
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Plex, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Plex));
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>().And.Multiple(async found => await Assert.That(found.Ids).Contains(Plex));
 	}
 
 	[Test]
 	public async Task ResolveAsync_WhenTwoHopsAskTheSameLookupForTheSameId_CallsItOnce()
 	{
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), HintsOnly());
-		_plex.LookUpAsync(Any(), Any()).Returns(Error.From("Plex found nothing."));
+		_plex.LookUpAsync(Any(), Any()).Returns(new NoMatch(RemoteService.Plex));
 
 		await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
@@ -274,7 +281,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(mdblist).ResolveAsync(new IdentifyRequest([Imdb], new None()), MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NoMatchAnywhere>();
 		mdblist.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
 	}
 
@@ -284,32 +291,32 @@ public class MediaIdResolverTests
 		var first = new ById(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Tvdb], Cost: 1);
 		var second = new ById(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Imdb, MediaProvider.Tvdb], Cost: 1);
 		var tmdb = Converter(RemoteService.Tmdb, first, second);
-		Answer(tmdb, new ByIdRequest(first, Tmdb), Error.From("The first lookup knows no TVDB id."));
+		Answer(tmdb, new ByIdRequest(first, Tmdb), new NoMatch(RemoteService.Tmdb));
 		Answer(tmdb, new ByIdRequest(second, Tmdb), Found(Tvdb));
 
 		var resolved = await Testee(tmdb).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>().And.Multiple(async found => await Assert.That(found.Ids).Contains(Tvdb));
 	}
 
 	[Test]
 	public async Task ResolveAsync_ForEqualLookupsOfTwoConverters_KeepsTheirAnswersApart()
 	{
 		var other = Converter(RemoteService.Wikidata, Detail);
-		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From("TMDB knows no TVDB id."));
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), new NoMatch(RemoteService.Tmdb));
 		Answer(other, new ByIdRequest(Detail, Tmdb), Found(Tvdb));
 
 		var resolved = await Testee(_tmdb, other).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>().And.Multiple(async found => await Assert.That(found.Ids).Contains(Tvdb));
 		other.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
 	public async Task ResolveAsync_ForASearchWithOtherKnownIds_AsksPlexAgain()
 	{
-		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Success.Of(new IdLookupResult([Imdb], Some.Of(FromTmdb))));
-		_plex.LookUpAsync(Any(), Any()).Returns(Error.From("Plex found nothing."));
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), new Found<IdLookupResult>(new IdLookupResult([Imdb], Some.Of(FromTmdb))));
+		_plex.LookUpAsync(Any(), Any()).Returns(new NoMatch(RemoteService.Plex));
 
 		await Testee().ResolveAsync(new IdentifyRequest([Tmdb], Some.Of(FromTmdb)), MediaProvider.Tvdb, Everyone);
 
@@ -325,7 +332,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Plex, second], new None()), MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>().And.Multiple(async found => await Assert.That(found.Ids).Contains(Tvdb));
 	}
 
 	[Test]
@@ -334,12 +341,12 @@ public class MediaIdResolverTests
 		var find = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb], Cost: 1);
 		var tmdb = Converter(RemoteService.Tmdb, find);
 		var unknown = ImdbId.From("tt0000001", MediaType.Show);
-		Answer(tmdb, new ByIdRequest(find, unknown), Error.From("TMDB has no match for tt0000001."));
+		Answer(tmdb, new ByIdRequest(find, unknown), new NoMatch(RemoteService.Tmdb));
 		Answer(tmdb, new ByIdRequest(find, Imdb), Found(Tmdb));
 
 		var resolved = await Testee(tmdb).ResolveAsync(new IdentifyRequest([unknown, Imdb], new None()), MediaProvider.Tmdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tmdb));
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>().And.Multiple(async found => await Assert.That(found.Ids).Contains(Tmdb));
 	}
 
 	[Test]
@@ -350,32 +357,60 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Tmdb, Plex], new None()), MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>().And.Multiple(async found => await Assert.That(found.Ids).Contains(Tvdb));
 	}
 
 	[Test]
 	public async Task ResolveAsync_WhenTheCheapestPathIsRateLimited_FallsThroughToAPathAroundIt()
 	{
-		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From(new RemoteUnavailableException(RemoteService.Tmdb)));
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Down(RemoteService.Tmdb));
 		Answer(_plex, new ByIdRequest(PlexById, Plex), Found(Tvdb));
 
 		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Tmdb, Plex], new None()), MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).Contains(Tvdb));
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>().And.Multiple(async found => await Assert.That(found.Ids).Contains(Tvdb));
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]
 	public async Task ResolveAsync_WhenAProviderIsUnavailable_SkipsTheRemainingPathsThroughItAndCachesNothing()
 	{
-		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Error.From(new RemoteUnavailableException(RemoteService.Tmdb)));
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Down(RemoteService.Tmdb));
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<LookupNotRunException>()).IsSome());
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_tmdb.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenAnyRouteIsUnavailable_IsNotRunAndCachesNothing()
+	{
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Down(RemoteService.Tmdb));
+		Answer(_plex, new ByIdRequest(PlexById, Plex), new NoMatch(RemoteService.Plex));
+
+		var resolved = await Testee().ResolveAsync(new IdentifyRequest([Tmdb, Plex], new None()), MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
+		_plex.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
+		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_ForAResolvedTitle_NamesTheConvertersThatAnswered()
+	{
+		var map = Converter(RemoteService.AnimeLists, ByShowId);
+		Answer(map, new ByIdRequest(ByShowId, Tmdb), Found(AniList));
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Found(Tvdb));
+
+		var resolved = await Testee(map, _tmdb).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
+
+		await Assert
+			.That(resolved)
+			.IsOfUnionType<Resolution, Resolved>()
+			.And.Multiple(async found => await Assert.That(found.Sources).IsEquivalentTo([RemoteService.AnimeLists, RemoteService.Tmdb]));
 	}
 
 	[Test]
@@ -395,7 +430,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(capacity).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
@@ -417,7 +452,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(capacity).ResolveAsync(Request, MediaProvider.Plex, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
@@ -426,22 +461,22 @@ public class MediaIdResolverTests
 	public async Task ResolveAsync_WhenEveryPathFindsNothing_CachesTheTitleAsUnmatched()
 	{
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), HintsOnly());
-		_plex.LookUpAsync(Any(), Any()).Returns(Error.From("Plex found nothing."));
+		_plex.LookUpAsync(Any(), Any()).Returns(new NoMatch(RemoteService.Plex));
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<LookupNotRunException>()).IsNone());
+		await Assert.That(resolved).IsOfUnionType<Resolution, NoMatchAnywhere>();
 		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenAConverterThrows_TreatsItAsTransient()
+	public async Task ResolveAsync_WhenAConverterFaults_TreatsItAsTransient()
 	{
-		_tmdb.LookUpAsync(Any(), Any()).Throws(new InvalidOperationException("transient"));
+		_tmdb.LookUpAsync(Any(), Any()).Returns(new Faulted(RemoteService.Tmdb, Error.From(new InvalidOperationException("unreadable"))));
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<LookupNotRunException>()).IsSome());
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
 
@@ -452,7 +487,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(blocked).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
@@ -462,7 +497,10 @@ public class MediaIdResolverTests
 	{
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tmdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).IsEquivalentTo(new IExternalMediaId[] { Tmdb }));
+		await Assert
+			.That(resolved)
+			.IsOfUnionType<Resolution, Resolved>()
+			.And.Multiple(async found => await Assert.That(found.Ids).IsEquivalentTo(new IExternalMediaId[] { Tmdb }));
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
@@ -472,7 +510,7 @@ public class MediaIdResolverTests
 	{
 		var resolved = await Testee().ResolveAsync(new IdentifyRequest([MdblistId.From("42", MediaType.Show)], new None()), MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NoMatchAnywhere>();
 		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
 	}
 
@@ -483,7 +521,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotFoundEarlier>();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
 	}
 
@@ -494,7 +532,7 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Ids)).GaveUp).IsEqualTo(1);
 	}
 
@@ -520,7 +558,7 @@ public class MediaIdResolverTests
 				(_, _) =>
 				{
 					tmdbFreeAt = Now.AddSeconds(5);
-					return Error.From(new RemoteUnavailableException(RemoteService.Tmdb));
+					return Down(RemoteService.Tmdb);
 				}
 			);
 
@@ -550,7 +588,10 @@ public class MediaIdResolverTests
 
 		var resolved = await Testee(map).ResolveAsync(new IdentifyRequest([Tvdb], new None()), MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsSuccess().And.Multiple(async ids => await Assert.That(ids).IsEquivalentTo(new IExternalMediaId[] { Tvdb, AniList, Mal }));
+		await Assert
+			.That(resolved)
+			.IsOfUnionType<Resolution, Resolved>()
+			.And.Multiple(async found => await Assert.That(found.Ids).IsEquivalentTo(new IExternalMediaId[] { Tvdb, AniList, Mal }));
 		await Assert.That((await trace.NodeAsync(RemoteService.AnimeLists, TraceStage.Ids)).Answered).IsEqualTo(1);
 	}
 
@@ -559,11 +600,11 @@ public class MediaIdResolverTests
 	{
 		using var trace = new TitleTrace();
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), HintsOnly());
-		_plex.LookUpAsync(Any(), Any()).Returns(Error.From("Plex found nothing."));
+		_plex.LookUpAsync(Any(), Any()).Returns(new NoMatch(RemoteService.Plex));
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
-		await Assert.That(resolved).IsError();
+		await Assert.That(resolved).IsOfUnionType<Resolution, NoMatchAnywhere>();
 		_tmdb.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
 		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Ids)).Answered).IsEqualTo(1);
 	}
@@ -599,12 +640,14 @@ public class MediaIdResolverTests
 		return converter;
 	}
 
-	private static void Answer(Mock<IExternalIdConverter> converter, IdLookupRequest request, Result<IdLookupResult> answer)
+	private static void Answer(Mock<IExternalIdConverter> converter, IdLookupRequest request, Answer<IdLookupResult> answer)
 	{
 		converter.LookUpAsync(request, Any()).Returns(answer);
 	}
 
-	private static Result<IdLookupResult> Found(params IExternalMediaId[] ids) => Success.Of(new IdLookupResult(ids, new None()));
+	private static Answer<IdLookupResult> Found(params IExternalMediaId[] ids) => new Found<IdLookupResult>(new IdLookupResult(ids, new None()));
 
-	private static Result<IdLookupResult> HintsOnly() => Success.Of(new IdLookupResult([], Some.Of(FromTmdb)));
+	private static Answer<IdLookupResult> HintsOnly() => new Found<IdLookupResult>(new IdLookupResult([], Some.Of(FromTmdb)));
+
+	private static Answer<IdLookupResult> Down(RemoteService remote) => new Unavailable(remote, new None(), true);
 }

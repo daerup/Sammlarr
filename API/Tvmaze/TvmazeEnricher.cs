@@ -1,3 +1,4 @@
+using API.Http;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -13,9 +14,14 @@ internal sealed class TvmazeEnricher(TvmazeApi tvmaze) : IDetailsEnricher
 
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Tvmaze, MediaProvider.Imdb, MediaProvider.Tvdb];
 
-	public Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
-		return tvmaze
+		return LookUpResultAsync(id, cancellationToken).GuardedAsync(RemoteService.Tvmaze);
+	}
+
+	private async Task<Result<FoundMedia>> LookUpResultAsync(IExternalMediaId id, CancellationToken cancellationToken)
+	{
+		return await tvmaze
 			.LookUpAsync(id, cancellationToken)
 			.Map(show =>
 				show.Match(found => new FoundMedia([.. TvmazeFound.Ids(found)], TvmazeFound.Details(found)), () => new FoundMedia([id], MediaDetails.Empty(id.Type)))

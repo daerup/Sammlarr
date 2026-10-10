@@ -101,7 +101,7 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 
 		if (TraktClient.IsBlocked(response) || response.StatusCode is HttpStatusCode.TooManyRequests)
 		{
-			throw new RemoteUnavailableException(RemoteService.Trakt);
+			throw new RemoteUnavailableException(RemoteService.Trakt, sent: true);
 		}
 
 		if (TraktClient.IsRejected(response))

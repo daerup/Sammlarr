@@ -23,7 +23,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0137523", MediaType.Movie)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(FightClub));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).Contains(FightClub));
 	}
 
 	[Test]
@@ -39,7 +39,7 @@ public class TmdbIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 				await Assert
 					.That(found.Hints)
@@ -64,7 +64,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0137523", MediaType.Movie)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Hints.Map(hints => hints.Year)).IsSome().And.IsEqualTo(0));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Hints.Map(hints => hints.Year)).IsSome().And.IsEqualTo(0));
 	}
 
 	[Test]
@@ -82,7 +82,7 @@ public class TmdbIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 				await Assert
 					.That(found.Hints)
@@ -109,7 +109,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(TvdbId.From("81189", MediaType.Show)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(BreakingBad));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).Contains(BreakingBad));
 	}
 
 	[Test]
@@ -121,7 +121,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(TvdbId.From("81189", MediaType.Show)));
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsSome());
+		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Tmdb, new None(), true));
 	}
 
 	[Test]
@@ -135,7 +135,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(FightClub));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(ImdbId.From("tt0137523", MediaType.Movie)));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).Contains(ImdbId.From("tt0137523", MediaType.Movie)));
 	}
 
 	[Test]
@@ -149,7 +149,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(BreakingBad));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(TvdbId.From("81189", MediaType.Show)));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).Contains(TvdbId.From("81189", MediaType.Show)));
 	}
 
 	[Test]
@@ -161,7 +161,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(BreakingBad));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
 	}
 
 	[Test]
@@ -175,7 +175,7 @@ public class TmdbIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 			{
 				await Assert.That(found.Ids).Contains(TvdbId.From("81189", MediaType.Show));
@@ -192,7 +192,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(BreakingBad));
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<RemoteUnavailableException>()).IsSome());
+		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Tmdb, new None(), true));
 	}
 
 	[Test]
@@ -204,6 +204,6 @@ public class TmdbIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(BreakingBad));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
 	}
 }

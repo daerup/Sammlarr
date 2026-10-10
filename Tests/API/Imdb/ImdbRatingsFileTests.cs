@@ -84,11 +84,14 @@ public class ImdbRatingsFileTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_BeforeTheFirstLoad_IsAnErrorSoNoEmptyAnswerIsStored()
+	public async Task LookUpAsync_BeforeTheFirstLoad_IsUnavailableSoNoEmptyAnswerIsStored()
 	{
 		var (testee, _) = Enricher(loaded: false);
 
-		await Assert.That(await testee.LookUpAsync(FightClub)).IsError();
+		await Assert
+			.That(await testee.LookUpAsync(FightClub))
+			.IsOfUnionType<Answer<FoundMedia>, Unavailable>()
+			.And.IsEqualTo(new Unavailable(RemoteService.ImdbDatasets, new None(), false));
 	}
 
 	[Test]
@@ -97,7 +100,7 @@ public class ImdbRatingsFileTests
 		var (testee, ratings) = Enricher(loaded: true);
 		ratings.FindAsync("tt0137523", Any()).Returns(Some.Of(new ImdbRating(8.8f, Some.Of(2_669_240))));
 
-		var found = await Assert.That(await testee.LookUpAsync(FightClub)).IsSuccess();
+		var found = await Assert.That(await testee.LookUpAsync(FightClub)).IsFound();
 
 		await Assert.That(found!.Details.Ratings.All).IsEquivalentTo(new IMediaRating[] { new ImdbRating(8.8f, Some.Of(2_669_240)) });
 	}
@@ -108,7 +111,7 @@ public class ImdbRatingsFileTests
 		var (testee, ratings) = Enricher(loaded: true);
 		ratings.FindAsync(Any(), Any()).Returns(new None());
 
-		var found = await Assert.That(await testee.LookUpAsync(FightClub)).IsSuccess();
+		var found = await Assert.That(await testee.LookUpAsync(FightClub)).IsFound();
 
 		await Assert.That(found!.Details.Ratings.All).IsEmpty();
 		await Assert.That(found.Details.Type).IsEqualTo(MediaType.Movie);

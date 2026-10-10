@@ -67,7 +67,7 @@ internal sealed class TraktTitles(TraktClient client, IApiKeyService apiKeys, ID
 
 		if (TraktClient.IsBlocked(response))
 		{
-			return Error.From(new RemoteUnavailableException(RemoteService.Trakt));
+			return Error.From(new RemoteUnavailableException(RemoteService.Trakt, sent: true));
 		}
 
 		if (!response.IsSuccessStatusCode)

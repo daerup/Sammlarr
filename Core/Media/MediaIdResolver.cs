@@ -30,7 +30,7 @@ internal sealed class MediaIdResolver(
 		return readiness.ConnectedAsync(_hops.Select(hop => hop.Remote), cancellationToken);
 	}
 
-	public async Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveAsync(
+	public async Task<Resolution> ResolveAsync(
 		IdentifyRequest request,
 		MediaProvider target,
 		IReadOnlySet<RemoteService> connected,
@@ -41,13 +41,10 @@ internal sealed class MediaIdResolver(
 		return await unmatchedCache
 			.GetValueOrNone(key)
 			.Apply(_ => FeedRunSpans.NotFoundEarlier())
-			.Match(
-				_ => Task.FromResult<Result<IReadOnlyList<IExternalMediaId>>>(Error.From(new NotFoundEarlierException(target))),
-				() => LookUpAsync(request, target, connected, key, cancellationToken)
-			);
+			.Match(_ => Task.FromResult<Resolution>(new NotFoundEarlier()), () => LookUpAsync(request, target, connected, key, cancellationToken));
 	}
 
-	private async Task<Result<IReadOnlyList<IExternalMediaId>>> LookUpAsync(
+	private async Task<Resolution> LookUpAsync(
 		IdentifyRequest request,
 		MediaProvider target,
 		IReadOnlySet<RemoteService> connected,
@@ -56,43 +53,46 @@ internal sealed class MediaIdResolver(
 	)
 	{
 		IReadOnlyList<Hop> hops = [.. _hops.Where(hop => connected.Contains(hop.Remote))];
-		var answers = new Dictionary<AnswerKey, LookupAnswer>();
+		var answers = new Dictionary<AnswerKey, Answer<IdLookupResult>>();
 		var down = new HashSet<RemoteService>();
-		var (candidates, transient) = await FreeAsync(request.Candidates, target, hops, answers, down, cancellationToken);
-		var plan = IdLookupPlanner.Plan(candidates.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, hops, capacity, clock.Now);
-		var unresolved = Error.From($"No lookup resolved the candidates to a {target} id.");
+		var free = await FreeAsync(request.Candidates, target, hops, answers, down, cancellationToken);
+		var plan = IdLookupPlanner.Plan(free.Ids.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, hops, capacity, clock.Now);
+		var transient = free.Transient;
 		var waited = new HashSet<RemoteService>();
 		foreach (var path in plan.Paths)
 		{
 			using var traced = FeedRunSpans.Path();
-			var outcome = await FollowAsync(path, candidates, request.Hints, target, answers, down, waited, cancellationToken);
-			if (outcome.Found.IsSome())
+			var outcome = await FollowAsync(path, free.Ids, request.Hints, target, answers, down, waited, cancellationToken);
+			if (outcome.Found is not Some<IdLookupResult>(var found))
 			{
-				return outcome.Found.Map(found => found.Ids).ToResult(unresolved);
+				transient |= outcome.Transient;
+				continue;
 			}
-			transient |= outcome.Transient;
+
+			return new Resolved(found.Ids, [.. free.Sources, .. path.Select(hop => hop.Remote)]);
 		}
 
 		if (transient)
 		{
-			return Error.From(new LookupNotRunException(target));
+			return new NotRun();
 		}
 
 		unmatchedCache.Set(key, true, unmatchedTtl);
-		return unresolved;
+		return new NoMatchAnywhere();
 	}
 
-	private static async Task<(IReadOnlyList<IExternalMediaId> Ids, bool Transient)> FreeAsync(
+	private static async Task<(IReadOnlyList<IExternalMediaId> Ids, bool Transient, IReadOnlySet<RemoteService> Sources)> FreeAsync(
 		IReadOnlyList<IExternalMediaId> candidates,
 		MediaProvider target,
 		IReadOnlyList<Hop> hops,
-		Dictionary<AnswerKey, LookupAnswer> answers,
+		Dictionary<AnswerKey, Answer<IdLookupResult>> answers,
 		HashSet<RemoteService> down,
 		CancellationToken cancellationToken
 	)
 	{
 		var ids = candidates;
 		var transient = false;
+		var sources = new HashSet<RemoteService>();
 		foreach (var hop in hops.Where(hop => hop.Cost == 0))
 		{
 			foreach (
@@ -110,17 +110,18 @@ internal sealed class MediaIdResolver(
 					answers[key] = answer;
 				}
 
-				transient |= answer.Transient && hop is IdToId { To: var to } && to == target;
+				transient |= !answer.IsDefinitive && hop is IdToId { To: var to } && to == target;
 				var held = ids.Count;
-				answer.Result.Apply(found => ids = [.. ids.Concat(found.Ids.Where(id => ids.All(each => each.Source != id.Source))).Distinct()]);
+				answer.ToOptional().Apply(found => ids = [.. ids.Concat(found.Ids.Where(id => ids.All(each => each.Source != id.Source))).Distinct()]);
 				if (ids.Count > held)
 				{
 					FeedRunSpans.FreeHop(hop.Remote);
+					sources.Add(hop.Remote);
 				}
 			}
 		}
 
-		return (ids, transient);
+		return (ids, transient, sources);
 	}
 
 	private async Task<StepOutcome> FollowAsync(
@@ -128,7 +129,7 @@ internal sealed class MediaIdResolver(
 		IReadOnlyList<IExternalMediaId> candidates,
 		Optional<IdentifyHints> hints,
 		MediaProvider target,
-		Dictionary<AnswerKey, LookupAnswer> answers,
+		Dictionary<AnswerKey, Answer<IdLookupResult>> answers,
 		HashSet<RemoteService> down,
 		HashSet<RemoteService> waited,
 		CancellationToken cancellationToken
@@ -159,7 +160,7 @@ internal sealed class MediaIdResolver(
 		Hop hop,
 		IReadOnlyList<IExternalMediaId> ids,
 		Optional<IdentifyHints> hints,
-		Dictionary<AnswerKey, LookupAnswer> answers,
+		Dictionary<AnswerKey, Answer<IdLookupResult>> answers,
 		HashSet<RemoteService> down,
 		CancellationToken cancellationToken
 	)
@@ -177,18 +178,18 @@ internal sealed class MediaIdResolver(
 				using (var span = FeedRunSpans.Hop(hop.Remote, TraceStage.Ids))
 				{
 					answer = await AskAsync(hop.Converter, request, down, cancellationToken);
-					span.Answered(answer.Transient ? HopOutcome.Failed : HopOutcome.Answered);
+					span.Answered(answer.IsDefinitive ? HopOutcome.Answered : HopOutcome.Failed);
 				}
 
 				answers[key] = answer;
 			}
 
-			if (answer.Transient)
+			if (!answer.IsDefinitive)
 			{
 				return new StepOutcome(new None(), true);
 			}
 
-			var found = answer.Result.ToOptional().When(result => Holds(hop, result));
+			var found = answer.ToOptional().When(result => Holds(hop, result));
 			if (found.IsSome())
 			{
 				return new StepOutcome(found, false);
@@ -198,15 +199,15 @@ internal sealed class MediaIdResolver(
 		return new StepOutcome(new None(), false);
 	}
 
-	private static bool Told(Dictionary<AnswerKey, LookupAnswer> answers, AnswerKey key, IdLookupRequest request)
+	private static bool Told(Dictionary<AnswerKey, Answer<IdLookupResult>> answers, AnswerKey key, IdLookupRequest request)
 	{
 		return request switch
 		{
-			ByIdRequest byId => answers.Any(answer =>
-				answer.Key != key
-				&& answer.Key.Converter == key.Converter
-				&& answer.Key.Lookup.Equals(key.Lookup)
-				&& answer.Value.Result.Match(found => found.Ids.Contains(byId.Id), _ => false)
+			ByIdRequest byId => answers.Any(told =>
+				told.Key != key
+				&& told.Key.Converter == key.Converter
+				&& told.Key.Lookup.Equals(key.Lookup)
+				&& told.Value.ToOptional().Match(found => found.Ids.Contains(byId.Id), () => false)
 			),
 			ByHintsRequest => false,
 		};
@@ -237,37 +238,25 @@ internal sealed class MediaIdResolver(
 		};
 	}
 
-	private static async Task<LookupAnswer> AskAsync(
+	private static async Task<Answer<IdLookupResult>> AskAsync(
 		IExternalIdConverter converter,
 		IdLookupRequest request,
 		HashSet<RemoteService> down,
 		CancellationToken cancellationToken
 	)
 	{
-		try
+		var answer = await converter.LookUpAsync(request, cancellationToken);
+		switch (answer)
 		{
-			var answer = await converter.LookUpAsync(request, cancellationToken);
-			return answer.Match(
-				_ => new LookupAnswer(answer, false),
-				error => error.CausedBy<RemoteUnavailableException>().Match(unavailable => Unavailable(unavailable, down), () => new LookupAnswer(answer, false))
-			);
+			case Unavailable unavailable:
+				down.Add(unavailable.Remote);
+				break;
+			case Faulted faulted:
+				faulted.Error.Exception.Apply(exception => Activity.Current?.AddException(exception));
+				break;
 		}
-		catch (RemoteUnavailableException unavailable)
-		{
-			Activity.Current?.AddException(unavailable);
-			return Unavailable(unavailable, down);
-		}
-		catch (Exception ex) when (ex is not OperationCanceledException)
-		{
-			Activity.Current?.AddException(ex);
-			return new LookupAnswer(Error.From(ex), true);
-		}
-	}
 
-	private static LookupAnswer Unavailable(RemoteUnavailableException unavailable, HashSet<RemoteService> down)
-	{
-		down.Add(unavailable.Remote);
-		return new LookupAnswer(Error.From(unavailable), true);
+		return answer;
 	}
 
 	private async Task<bool> WaitForAsync(
@@ -319,8 +308,6 @@ internal sealed class MediaIdResolver(
 	}
 
 	private readonly record struct StepOutcome(Optional<IdLookupResult> Found, bool Transient);
-
-	private readonly record struct LookupAnswer(Result<IdLookupResult> Result, bool Transient);
 
 	private readonly record struct AnswerKey(IExternalIdConverter Converter, IdLookup Lookup, string Request)
 	{

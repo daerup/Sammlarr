@@ -40,15 +40,20 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 		if (response.StatusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.RequestTimeout || (int)response.StatusCode >= 500)
 		{
 			logger.LogWarning("Plex lookup was rate limited or unavailable ({StatusCode}) on {Endpoint}", (int)response.StatusCode, endpoint);
-			throw new RemoteUnavailableException(RemoteService.Plex);
+			throw new RemoteUnavailableException(RemoteService.Plex, sent: true);
 		}
 
 		response.EnsureSuccessStatusCode();
 	}
 
-	public Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
+	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
 	{
-		return mediaId.Require<PlexId>($"PlexApi only supports {nameof(PlexId)} lookups.").Map(plexId => ByIdAsync(plexId, cancellationToken));
+		return LookUpResultAsync(mediaId, cancellationToken).GuardedAsync(RemoteService.Plex);
+	}
+
+	private async Task<Result<FoundMedia>> LookUpResultAsync(IExternalMediaId mediaId, CancellationToken cancellationToken)
+	{
+		return await mediaId.Require<PlexId>($"PlexApi only supports {nameof(PlexId)} lookups.").Map(plexId => ByIdAsync(plexId, cancellationToken));
 	}
 
 	public async Task<IReadOnlyList<FoundMedia>> SearchAsync(

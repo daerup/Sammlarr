@@ -88,12 +88,12 @@ internal static class TestMediaService
 		Mock<IIdentityClaims> Claims
 	);
 
-	internal static Result<IdLookupResult> FoundByFind(IdLookupRequest request)
+	internal static Answer<IdLookupResult> FoundByFind(IdLookupRequest request)
 	{
 		return request switch
 		{
-			ByIdRequest(_, var id) => Success.Of(new IdLookupResult([TmdbId.From($"found-{id.Value}", id.Type)], new None())),
-			ByHintsRequest => Error.From("The test converter offers no search."),
+			ByIdRequest(_, var id) => new Found<IdLookupResult>(new IdLookupResult([TmdbId.From($"found-{id.Value}", id.Type)], new None())),
+			ByHintsRequest => new NoMatch(RemoteService.Tmdb),
 		};
 	}
 

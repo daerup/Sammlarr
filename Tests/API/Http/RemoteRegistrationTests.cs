@@ -119,11 +119,11 @@ public class RemoteRegistrationTests
 
 		public IReadOnlyList<MediaProvider> Accepts => [];
 
-		public Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default) =>
-			Task.FromResult<Result<IdLookupResult>>(Error.From("none"));
+		public Task<Answer<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default) =>
+			Task.FromResult<Answer<IdLookupResult>>(new NoMatch(RemoteService.Tmdb));
 
-		public Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default) =>
-			Task.FromResult<Result<FoundMedia>>(Error.From("none"));
+		public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default) =>
+			Task.FromResult<Answer<FoundMedia>>(new NoMatch(RemoteService.Tmdb));
 
 		public Task<IReadOnlyList<FoundMedia>> SearchAsync(
 			string query,

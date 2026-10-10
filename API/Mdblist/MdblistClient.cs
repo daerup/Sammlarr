@@ -32,7 +32,7 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyS
 		}
 		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
 		{
-			throw new RemoteUnavailableException(RemoteService.Mdblist, ex);
+			throw new RemoteUnavailableException(RemoteService.Mdblist, sent: ex is TimeoutRejectedException, ex);
 		}
 	}
 }

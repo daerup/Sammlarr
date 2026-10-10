@@ -10,7 +10,7 @@ attributes that make them concrete and where each is enforced.
 |===
 | Goal | Refined into | Enforced by
 
-| Correctness of list building | Identify matches the right title (a title search is confirmed by id); one title yields one library row whether duplicates arrive in one flush or across flushes (identity dedup); a cross-identity collision fails loud, not silent; a bad or empty load never evicts the wrong items | The identity coordinator and media repository (<<section-runtime-view>>, scenario C), keyed by the composite external-id constraint and surfacing collisions as `MediaIdentityConflictException`; the Mirror conclusiveness rule, under which a load that did not finish or came back empty drops nothing (<<section-runtime-view>>)
+| Correctness of list building | Identify matches the right title (a title search is confirmed by id); one title yields one library row whether duplicates arrive in one flush or across flushes (identity dedup); a cross-identity collision fails loud, not silent; a bad or empty load never evicts the wrong items | The identity claim lane and media repository (<<section-runtime-view>>, scenario C), keyed by the one-key-per-source index and settling collisions as an unmatched conflict; the Mirror conclusiveness rule, under which a load that did not finish or came back empty drops nothing (<<section-runtime-view>>)
 | Resilience of provider calls | A 429 storm or outage degrades to partial results, never a failed run; outbound concurrency is bounded; transient faults retry, sustained ones trip a breaker | The shared HTTP pipeline (<<section-concepts>>); scenario R
 | Per-user data isolation | Reads are filtered to the current user; writes are stamped to the owner; the filter fails closed; background work runs under the right user | EF query filters, the ownership stamper and `IUserScope` (<<section-concepts>>); scenario I
 | Maintainability | Strong typing and unions over primitives; strict layer dependencies; provider wiring generated, not hand-written; least visibility; one test naming convention | Architecture tests; the module and generator patterns (<<section-concepts>>); the `SAM0001`, `SAM0002` and `SAM0003` analyzers and `AbsenceTests`; the tiers in `testing.md`
@@ -24,7 +24,7 @@ entry that shares any one external id `(Source, MediaType, Value)` is anchored o
 canonical identity, its extra ids unioned in; the repository reuses the existing row and appends
 only new ids, so each title stays one library row across flushes. MediaType is part of id
 equality, so a movie and a show that share a number never merge, and a candidate that would bridge
-two already-stored, distinct rows throws `MediaIdentityConflictException` rather than merging them.
+two already-stored, distinct rows settles unmatched as a conflict rather than merging them.
 At flush time a stored title that gained such an id (say from an enricher) keeps its own row and the
 id is dropped from both rows
 (link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0015-keep-an-id-two-stored-titles-claim-on-neither.md[ADR 0015]).

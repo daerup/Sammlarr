@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Domain.Media;
+using Domain.Providers;
 
 namespace Core.Tests.Media;
 
@@ -36,7 +37,7 @@ public class MediaServiceBenchmark
 				{
 					using var _ = details.Enter();
 					await Task.Delay(Call, token);
-					return Success.Of(TestMediaService.CompleteMovie(ext));
+					return new Found<FoundMedia>(TestMediaService.CompleteMovie(ext));
 				}
 			);
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any())

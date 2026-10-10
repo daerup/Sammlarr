@@ -12,6 +12,7 @@ using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
+using Polly.CircuitBreaker;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;
@@ -27,6 +28,7 @@ internal sealed class PlexStub : HttpMessageHandler
 	private readonly Dictionary<string, PlexCandidate> _candidates = [];
 	private readonly List<string> _searchOrder = [];
 	private readonly Dictionary<string, HttpStatusCode> _failures = [];
+	private readonly HashSet<string> _broken = [];
 
 	public TaskCompletionSource? MetadataGate { get; set; }
 
@@ -57,6 +59,12 @@ internal sealed class PlexStub : HttpMessageHandler
 	public PlexStub Fails(PlexCandidate candidate, HttpStatusCode status)
 	{
 		_failures[candidate.PlexId.Value] = status;
+		return this;
+	}
+
+	public PlexStub Breaks(PlexCandidate candidate)
+	{
+		_broken.Add(candidate.PlexId.Value);
 		return this;
 	}
 
@@ -94,6 +102,11 @@ internal sealed class PlexStub : HttpMessageHandler
 		}
 
 		var ratingKey = path[MetadataPath.Length..];
+		if (_broken.Contains(ratingKey))
+		{
+			throw new BrokenCircuitException();
+		}
+
 		if (_failures.TryGetValue(ratingKey, out var status))
 		{
 			return new HttpResponseMessage(status);

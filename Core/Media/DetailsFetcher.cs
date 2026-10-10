@@ -46,7 +46,7 @@ internal sealed class DetailsFetcher(
 		var (enriched, answers, unavailable) = await EnrichAsync(identity, reason, Backup(reason, identity.Type, now), connected, preferred, cancellationToken);
 		if (answers.Count == 0 && reason is not Gaps)
 		{
-			return unavailable.Match(remote => Error.From(new RemoteUnavailableException(remote)), () => Error.From("the details could not be fetched"));
+			return unavailable.Match(remote => Error.From(new RemoteUnavailableException(remote, sent: false)), () => Error.From("the details could not be fetched"));
 		}
 
 		var identified = await KeepNewKeysAsync(identity, enriched.Identity, answers, cancellationToken);
@@ -185,7 +185,7 @@ internal sealed class DetailsFetcher(
 
 			asked.Add(next.Remote);
 			var answer = await AskAsync(next, known, cancellationToken);
-			answer.ApplyError(error => unavailable = unavailable.Or(() => error.CausedBy<RemoteUnavailableException>().Map(cause => cause.Remote)));
+			unavailable = unavailable.Or(() => Optional.When(!answer.IsDefinitive, () => next.Remote));
 			var fitting = answer.ToOptional().When(found => found.Fits(backup.Type));
 			fitting.Apply(found => known = known with { Keys = known.Keys + found.Externals.OfType<IIdentityKey>() });
 			var deferred = fitting.Map(found => Deferred(next.Remote, found.Details)).GetValueOr(MediaFields.None);
@@ -233,30 +233,26 @@ internal sealed class DetailsFetcher(
 		return freeAt;
 	}
 
-	private async Task<Result<FoundMedia>> AskAsync(EnricherCandidate candidate, MediaIdentity identity, CancellationToken cancellationToken)
+	private async Task<Answer<FoundMedia>> AskAsync(EnricherCandidate candidate, MediaIdentity identity, CancellationToken cancellationToken)
 	{
 		using var span = FeedRunSpans.Hop(candidate.Remote, TraceStage.Details);
-		var answer = await CallAsync(candidate, identity, cancellationToken);
-		span.Answered(
-			answer.Match(_ => HopOutcome.Answered, error => error.CausedBy<RemoteUnavailableException>().Match(_ => HopOutcome.Failed, () => HopOutcome.Answered))
-		);
+		var answer = await CallAsync(candidate, cancellationToken);
+		span.Answered(answer.IsDefinitive ? HopOutcome.Answered : HopOutcome.Failed);
+		if (answer is Faulted faulted)
+		{
+			faulted.Error.Exception.Apply(exception =>
+				logger.LogWarning(exception, "{Remote} could not fill the details of {MediaId}", candidate.Remote, identity.Id)
+			);
+		}
+
 		return answer;
 	}
 
-	private async Task<Result<FoundMedia>> CallAsync(EnricherCandidate candidate, MediaIdentity identity, CancellationToken cancellationToken)
+	private Task<Answer<FoundMedia>> CallAsync(EnricherCandidate candidate, CancellationToken cancellationToken)
 	{
-		try
-		{
-			return await enrichers
-				.Find(candidate.Remote)
-				.ToResult($"{candidate.Remote} fills no details")
-				.Map(enricher => enricher.LookUpAsync(candidate.Id, cancellationToken));
-		}
-		catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
-		{
-			logger.LogWarning(exception, "{Remote} could not fill the details of {MediaId}", candidate.Remote, identity.Id);
-			return Error.From(new RemoteUnavailableException(candidate.Remote, exception));
-		}
+		return enrichers
+			.Find(candidate.Remote)
+			.Match(enricher => enricher.LookUpAsync(candidate.Id, cancellationToken), () => Task.FromResult<Answer<FoundMedia>>(new NoMatch(candidate.Remote)));
 	}
 
 	private List<EnricherCandidate> EnrichersLeftToAsk(MediaIdentity identity, IReadOnlySet<RemoteService> asked, IReadOnlySet<RemoteService> connected)

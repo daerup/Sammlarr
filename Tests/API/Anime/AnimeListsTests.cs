@@ -107,11 +107,14 @@ public class AnimeListsTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_BeforeTheFirstLoad_IsAnError()
+	public async Task LookUpAsync_BeforeTheFirstLoad_IsUnavailableWithoutAsking()
 	{
 		var testee = Converter(loaded: false, out _);
 
-		await Assert.That(await testee.LookUpAsync(testee.RequestById(AniListId.From("290", MediaType.Show)))).IsError();
+		await Assert
+			.That(await testee.LookUpAsync(testee.RequestById(AniListId.From("290", MediaType.Show))))
+			.IsOfUnionType<Answer<IdLookupResult>, Unavailable>()
+			.And.IsEqualTo(new Unavailable(RemoteService.AnimeLists, new None(), false));
 	}
 
 	[Test]
@@ -126,7 +129,7 @@ public class AnimeListsTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 				await Assert
 					.That(found.Ids.Select(id => $"{id}"))
@@ -142,7 +145,7 @@ public class AnimeListsTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(AniListId.From("999999", MediaType.Show)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
 	}
 
 	[Test]
@@ -186,7 +189,7 @@ public class AnimeListsTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found => await Assert.That(found.Ids.Select(id => $"{id}")).IsEquivalentTo(["AniList:Show:290", "Mal:Show:290"]));
 	}
 

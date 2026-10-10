@@ -24,7 +24,7 @@ public class TvmazeTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 			{
 				await Assert
@@ -53,7 +53,7 @@ public class TvmazeTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(TvdbId.From("81189", MediaType.Show)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(BreakingBad));
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).Contains(BreakingBad));
 		handler.Verify(request => request.PathMatches(@"^/lookup/shows\?thetvdb=81189$"), Times.Once);
 	}
 
@@ -68,7 +68,7 @@ public class TvmazeTests
 
 		await Assert
 			.That(result)
-			.IsSuccess()
+			.IsFound()
 			.And.Multiple(async found =>
 			{
 				await Assert.That(found.Ids).IsEmpty();
@@ -84,7 +84,7 @@ public class TvmazeTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0137523", MediaType.Movie)));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
+		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
 		await Assert.That(handler.Requests).IsEmpty();
 	}
 
@@ -99,12 +99,7 @@ public class TvmazeTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(BreakingBad));
 
-		await Assert
-			.That(result)
-			.IsError()
-			.And.Multiple(async error =>
-				await Assert.That(error.CausedBy<RemoteUnavailableException>().Map(cause => cause.Remote)).IsSome().And.IsEqualTo(RemoteService.Tvmaze)
-			);
+		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Tvmaze, new None(), true));
 	}
 
 	[Test]
@@ -112,7 +107,7 @@ public class TvmazeTests
 	{
 		var testee = new TvmazeEnricher(Api(await AnsweringAsync()));
 
-		var found = await Assert.That(await testee.LookUpAsync(BreakingBad)).IsSuccess();
+		var found = await Assert.That(await testee.LookUpAsync(BreakingBad)).IsFound();
 
 		var details = await Assert.That(found!.Details).IsTypeOf<ShowDetails>();
 		await Assert.That(details!.Title).IsEqualTo("Breaking Bad");

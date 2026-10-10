@@ -25,3 +25,6 @@ Domain/Providers/Service.cs
 Domain/Feed/Trace/TraceEvent.cs
 Domain/Feed/Trace/TraceRead.cs
 Domain/Media/ClaimOutcome.cs
+Domain/Providers/Answer.cs
+Core/Media/Resolution.cs
+Core/Media/Identification.cs

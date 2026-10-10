@@ -185,7 +185,7 @@ public class MalTests
 		handler.OnAnyRequest().RespondWithJson(FullAnime);
 		var keys = Keys();
 
-		var found = await Assert.That(await new MalEnricher(Client(handler, keys), keys.Object).LookUpAsync(MalId.From("16498", MediaType.Show))).IsSuccess();
+		var found = await Assert.That(await new MalEnricher(Client(handler, keys), keys.Object).LookUpAsync(MalId.From("16498", MediaType.Show))).IsFound();
 
 		var show = await Assert.That(found!.Details).IsTypeOf<ShowDetails>();
 		await Assert.That(show!.Title).IsEqualTo("Attack on Titan");
@@ -200,7 +200,7 @@ public class MalTests
 		handler.OnAnyRequest().RespondWithJson("""{"id":199,"title":"Sen to Chihiro no Kamikakushi","alternative_titles":{"en":""},"media_type":"movie"}""");
 		var keys = Keys();
 
-		var found = await Assert.That(await new MalEnricher(Client(handler, keys), keys.Object).LookUpAsync(MalId.From("199", MediaType.Movie))).IsSuccess();
+		var found = await Assert.That(await new MalEnricher(Client(handler, keys), keys.Object).LookUpAsync(MalId.From("199", MediaType.Movie))).IsFound();
 
 		await Assert.That(found!.Details.Title).IsEqualTo("Sen to Chihiro no Kamikakushi");
 	}

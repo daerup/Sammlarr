@@ -4,6 +4,7 @@ using Contracts.Auth;
 using Contracts.Identity;
 using Domain.Auth;
 using Domain.Providers;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
 using TestInfrastructure;
@@ -15,13 +16,13 @@ internal static class MdblistApis
 {
 	internal static readonly MdblistOptions Options = new() { BaseUrl = "https://api.mdblist.com" };
 
-	internal static MdblistTitles Titles(MockHttpHandler handler, MdblistBudget? budget = null)
+	internal static MdblistTitles Titles(MockHttpHandler handler, MdblistBudget? budget = null, ILogger<MdblistTitles>? logger = null)
 	{
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of<IApiKey>(new TestApiKey(ApiKeyProvider.Mdblist, "mdblist-key")));
 		var spent = budget ?? Budget();
 		var client = new MdblistClient(handler.CreateClient(Options.BaseUrl), Options, keys.Object, ICurrentUser.Mock().Object);
-		return new MdblistTitles(client, keys.Object, spent, NullLogger<MdblistTitles>.Instance);
+		return new MdblistTitles(client, keys.Object, spent, logger ?? NullLogger<MdblistTitles>.Instance);
 	}
 
 	internal static MdblistBudget Budget() => new(Clock(), Options, NullLogger<MdblistBudget>.Instance);
