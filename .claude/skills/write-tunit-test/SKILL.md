@@ -130,7 +130,7 @@ public class WantlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 
 Patterns:
 - **Seed media** with `host.Movie(spec)` / `host.Show(spec)`, chaining `.ServedByPlex(...)`, `.ServedByTmdb(rating, votes)`, then `.SeedAsync()`, `.OnWantlist(origin)`, `.OnBlocklist()`, or `.SeedWithMetadataAsync(title, fetched)` for pre-cached metadata.
-- **Stub providers** at the edge with the host helpers (`PlexSearchReturns`, `RemoteWantlistHas`, `TmdbTrendingPage`, `MdblistFeedContains`, `ProviderRejectsPushes`, …). Accounts via `EnsurePlexAccount`/`WithTmdbAccount` (chaining `ServedBy*` ensures them for you).
+- **Stub providers** at the edge with the host helpers (`PlexSearchReturns`, `RemoteWantlistHas`, `TmdbTrendingPage`, `MdblistFeedContains`, `ProviderRejectsPushes`, …). Accounts via `EnsurePlexAccount`/`WithTmdbAccount` (chaining `ServedBy*` ensures them for you). Stub every call the test makes: an unstubbed URL answers 501, and disposing the host fails the test with the URLs it saw. When a title must not be found, say so (`PlexHasNoMetadataFor`, `WikidataHolds(imdb)` with no paths, a 404 via `HttpStub.RespondWithStatusForUrl`).
 - **Resolve the SUT** with `host.Resolve<IService>()`; assert on real DB state via `host.ScopedDbContext`, or on emitted messages/events via `host.Published<TEvent>()`.
 - **Time** is a fixed audit clock (2024-06-01); `host.SetCurrentTime(...)` moves the app-logic clock (metadata freshness), NOT the DB `CreatedAt` audit stamp — behaviors that depend on distinct persisted timestamps stay unit tests.
 - **Repository tests** live in `Tests/Integration` too, using the same `[ClassDataSource<SammlarrTestHost>]` fixture against a real DbContext.

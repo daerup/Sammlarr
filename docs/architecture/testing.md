@@ -23,11 +23,19 @@ snapshots need the native runner).
 Rule of thumb: wiring more than one or two `.Mock()`s just to construct the subject means it belongs in `Tests/Integration` as a harness scenario, not a unit
 test.
 
-Current suite: **3934** non-E2E tests plus **159** E2E (17 of them on the self-hosted stacks, and the staging smoke test, skipped by default).
+`SammlarrTestHost` gives each test its own SQLite file in WAL mode, copied on first use from a template migrated once
+per test process, and every context opens its own pooled connection to it, as production does; the file goes when the
+host is disposed, and the scratch folder when the test session ends. Its `HttpStub` answers a URL no test stubbed with
+**501**, and disposing the host then fails the test with every such URL: stub every call a test makes. The account
+helpers stub what an account brings with it: `WithPlexAccount` accepts the token check, and `WithMdblistAccount`
+answers title lookups with `[]`. The stub answers with the first pattern registered that matches, so a test overrides
+a default by stubbing the same key (`$"{TestUrls.MdblistApi}/tmdb/movie"`), not a shorter one.
+
+Current suite: **3994** non-E2E tests plus **159** E2E (17 of them on the self-hosted stacks, and the staging smoke test, skipped by default).
 
 | Domain | Shared | Core | API | Architecture | Roslyn | Integration | UI   | Web |
 |--------|--------|------|-----|--------------|--------|-------------|------|-----|
-| 336    | 203    | 525  | 687 | 44           | 100    | 678         | 1294 | 67  |
+| 342    | 210    | 543  | 696 | 44           | 100    | 681         | 1308 | 70  |
 
 ## Running
 

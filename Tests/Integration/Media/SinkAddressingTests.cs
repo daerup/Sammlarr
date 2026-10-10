@@ -80,7 +80,9 @@ public class SinkAddressingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnsureSinkIdsAsync_ForATitleNoProviderCanConvert_ReturnsIt()
 	{
-		var movie = await host.Movie(new MediaSpec("Lost", MediaType.Movie, [Plex("999")])).SeedAsync();
+		var lost = new MediaSpec("Lost", MediaType.Movie, [Plex("999")]);
+		host.PlexHasNoMetadataFor(lost);
+		var movie = await host.Movie(lost).SeedAsync();
 
 		await Assert.That(await Testee.EnsureSinkIdsAsync([movie], SinkKind.Plex)).IsEquivalentTo([movie]);
 	}
@@ -88,7 +90,9 @@ public class SinkAddressingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task AddAsync_ForAShowWithoutTheIdTheSinkAddressesShowsBy_RefusesIt()
 	{
-		var show = await host.Show(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Plex("1396")])).SeedAsync();
+		var breakingBad = new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Plex("1396")]);
+		host.PlexHasNoMetadataFor(breakingBad);
+		var show = await host.Show(breakingBad).SeedAsync();
 
 		await Assert
 			.That(async () => await host.Resolve<IWantlistService>().AddAsync([show], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search))))

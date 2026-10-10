@@ -1,3 +1,7 @@
+using System.Net;
+using API.Mdblist;
+using API.Plex;
+using API.Tmdb;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Wantlist;
@@ -73,6 +77,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task TestAsync_WhenTmdbAcceptsTheKey_ReportsItValid()
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
+		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.TmdbApi}/{TmdbEndpoints.Configuration}", "{}");
 
 		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, "valid-tmdb-key")).IsSuccess();
 	}
@@ -89,6 +94,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task TestAsync_WhenMdblistAcceptsTheKey_ReportsItValid()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
+		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/{MdblistEndpoints.User}", "{}");
 
 		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Mdblist, "valid-mdblist-key")).IsSuccess();
 	}
@@ -143,6 +149,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task ApplyAsync_WhenThePlexTokenIsConfigured_Succeeds()
 	{
 		await host.WithPlexAccount("plex-access-token");
+		host.HttpStub.RespondWithStatusForUrl(PlexEndpoints.AddToWatchlistPath, HttpStatusCode.OK);
 		var solaris = await host.Movie("Solaris", plex: "plex-100").SeedAsync();
 
 		var acks = await PlexSink.ApplyAsync(WantlistOperationAction.Add, [new SinkPush(solaris, new None())]).ToListAsync();
