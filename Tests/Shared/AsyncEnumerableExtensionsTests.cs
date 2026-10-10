@@ -240,6 +240,133 @@ public class AsyncEnumerableExtensionsTests
 		await Assert.That(tracker.Max).IsEqualTo(10);
 	}
 
+	[Test]
+	public async Task SelectAwait_WhenConsumerStopsEarly_StopsPullingTheSource()
+	{
+		var pulled = 0;
+		var gate = new TaskCompletionSource();
+		var source = Counting(1000, () => Interlocked.Increment(ref pulled));
+
+		await foreach (var _ in source.SelectAwait(async (value, token) => await Gated(value, gate.Task, token), maxConcurrency: 4))
+		{
+			break;
+		}
+
+		var afterBreak = Volatile.Read(ref pulled);
+		gate.SetResult();
+		await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+		await Assert.That(Volatile.Read(ref pulled)).IsEqualTo(afterBreak);
+		await Assert.That(afterBreak).IsLessThan(1000);
+	}
+
+	[Test]
+	public async Task SelectAwait_WhenConsumerStopsEarly_CancelsAndAwaitsRunningSelectors()
+	{
+		var waiting = new TaskCompletionSource();
+		var cancelled = new TaskCompletionSource();
+
+		async ValueTask<int> Hold(int value, CancellationToken token)
+		{
+			if (value == 0)
+			{
+				return value;
+			}
+
+			waiting.TrySetResult();
+			await Task.Delay(Timeout.Infinite, token).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+			cancelled.TrySetResult();
+			token.ThrowIfCancellationRequested();
+			return value;
+		}
+
+		async Task ConsumeAsync()
+		{
+			await foreach (var _ in CreateAsyncEnumerable(0, 1, 2).SelectAwait(Hold, maxConcurrency: 3))
+			{
+				await waiting.Task;
+				break;
+			}
+		}
+
+		await ConsumeAsync().WaitAsync(TimeSpan.FromSeconds(5));
+		await Assert.That(cancelled.Task.IsCompleted).IsTrue();
+	}
+
+	[Test]
+	public async Task SelectAwait_WhenASelectorThrows_ThrowsAfterTheResultsBeforeIt()
+	{
+		var seen = new List<int>();
+
+		var act = async () =>
+		{
+			await foreach (
+				var item in CreateAsyncEnumerable(0, 1, 2, 3)
+					.SelectAwait(
+						(value, _) => value == 2 ? ValueTask.FromException<int>(new InvalidOperationException("selector failed")) : ValueTask.FromResult(value),
+						maxConcurrency: 3
+					)
+			)
+			{
+				seen.Add(item);
+			}
+		};
+
+		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("selector failed");
+		await Assert.That(seen).IsEquivalentTo([0, 1], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task SelectAwait_WhenTheTokenIsCancelled_ThrowsAndCancelsRunningSelectors()
+	{
+		using var cancellation = new CancellationTokenSource();
+		var waiting = new TaskCompletionSource();
+		var cancelled = new TaskCompletionSource();
+
+		async ValueTask<int> Hold(int value, CancellationToken token)
+		{
+			waiting.TrySetResult();
+			await Task.Delay(Timeout.Infinite, token).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+			cancelled.TrySetResult();
+			token.ThrowIfCancellationRequested();
+			return value;
+		}
+
+		var consume = CreateAsyncEnumerable(0, 1).SelectAwait(Hold, maxConcurrency: 2, cancellation.Token).ToListAsync().AsTask();
+		await waiting.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		await cancellation.CancelAsync();
+
+		await Assert.That(async () => await consume.WaitAsync(TimeSpan.FromSeconds(5))).Throws<OperationCanceledException>();
+		await Assert.That(cancelled.Task.IsCompleted).IsTrue();
+	}
+
+	[Test]
+	public async Task SelectAwait_WhenSourceThrowsAfterItems_YieldsThemThenThrows()
+	{
+		var seen = new List<int>();
+
+		var act = async () =>
+		{
+			await foreach (var item in ThrowsAfter(3).SelectAwait((value, _) => ValueTask.FromResult(value), maxConcurrency: 2))
+			{
+				seen.Add(item);
+			}
+		};
+
+		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("source failed");
+		await Assert.That(seen).IsEquivalentTo([0, 1, 2], CollectionOrdering.Matching);
+	}
+
+	private static async Task<int> Gated(int value, Task gate, CancellationToken token)
+	{
+		if (value > 0)
+		{
+			await gate.WaitAsync(token);
+		}
+
+		return value;
+	}
+
 	private static async IAsyncEnumerable<T> CreateAsyncEnumerable<T>(params IEnumerable<T> values)
 	{
 		foreach (var value in values)

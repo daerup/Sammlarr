@@ -69,11 +69,11 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 			.Select(result => result.Externals.OfType<PlexId>().FirstOrDefault())
 			.Where(plexId => plexId != default)
 			.SelectAwait(
-				async plexId =>
+				async (plexId, token) =>
 				{
 					try
 					{
-						return await plexApi.LookUpExternalsAsync(plexId, cancellationToken).GetValueOr([]);
+						return await plexApi.LookUpExternalsAsync(plexId, token).GetValueOr([]);
 					}
 					catch (RemoteUnavailableException)
 					{
