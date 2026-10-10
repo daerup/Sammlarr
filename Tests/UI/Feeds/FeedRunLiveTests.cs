@@ -228,11 +228,20 @@ public class FeedRunLiveTests : BunitContext
 	[Test]
 	public async Task Footer_WhileTitlesFlowWithNothingWaiting_SaysTheyFlow()
 	{
-		_run.Tally.Getter.Returns(RunTally.Before(Some.Of(400)) with { Progress = new RunProgress(Some.Of(new SourcePage(1, new None())), 0) });
+		var tally = RunTally.Of(FateTally.None with { Started = 5, Matched = 2 }, new None(), 2000, new None(), Some.Of(400));
+		_run.Tally.Getter.Returns(tally with { Progress = new RunProgress(Some.Of(new SourcePage(1, new None())), 0) });
 
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 
 		await Assert.That(Segments(cut)).IsEquivalentTo(["Titles flowing"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Footer_BeforeAnyTitleStartedOrPageIsFetched_SaysNothing()
+	{
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert.That(Segments(cut)).IsEmpty();
 	}
 
 	[Test]

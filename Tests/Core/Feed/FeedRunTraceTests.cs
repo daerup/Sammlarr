@@ -364,6 +364,17 @@ public class FeedRunTraceTests
 		await Assert.That(after).IsNone();
 	}
 
+	[Test]
+	public async Task Read_AfterAPageFetchFailed_ReportsNoPageBeingRead()
+	{
+		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
+		using var run = testee.Start(_feed, Owner);
+
+		await Assert.That(() => FeedRunSpans.ReadingAsync<int>(3, () => throw new HttpRequestException("MDBList is down"))).Throws<HttpRequestException>();
+
+		await Assert.That((await SnapshotAsync(testee)).Progress.Reading).IsNone();
+	}
+
 	private static void Resolve(string name, HopOutcome answer, params int[] statuses)
 	{
 		var title = FeedRunSpans.Title(name, new None());

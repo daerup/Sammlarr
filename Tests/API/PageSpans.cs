@@ -10,6 +10,8 @@ internal sealed class PageSpans : IDisposable
 {
 	private readonly ConcurrentQueue<SourcePage> _pages = new();
 
+	private readonly ConcurrentQueue<int> _read = new();
+
 	private readonly ActivityListener _listener;
 
 	private readonly Optional<Activity> _run;
@@ -25,8 +27,6 @@ internal sealed class PageSpans : IDisposable
 		ActivitySource.AddActivityListener(_listener);
 		_run = FeedRunSpans.Run(FeedId.From(Guid.NewGuid()), Guid.NewGuid());
 	}
-
-	private readonly ConcurrentQueue<int> _read = new();
 
 	internal IReadOnlyList<SourcePage> Pages => [.. _pages];
 

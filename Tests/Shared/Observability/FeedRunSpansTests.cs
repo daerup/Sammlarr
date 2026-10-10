@@ -76,6 +76,18 @@ public class FeedRunSpansTests
 		await Assert.That(reading.GetTagItem(FeedRunTags.Page)).IsEqualTo(4);
 	}
 
+	[Test]
+	public async Task ReadingAsync_OutsideARun_RecordsNothingAndStillReads()
+	{
+		var stopped = new ConcurrentQueue<Activity>();
+		using var listener = Listen(stopped.Enqueue);
+
+		var answer = await FeedRunSpans.ReadingAsync(1, () => Task.FromResult(7));
+
+		await Assert.That(answer).IsEqualTo(7);
+		await Assert.That(stopped.Where(span => span.OperationName == FeedRunNames.Reading && span.Parent is null)).IsEmpty();
+	}
+
 	private static ActivityListener Listen(Action<Activity>? stopped = null)
 	{
 		var listener = new ActivityListener
