@@ -106,6 +106,56 @@ public class ArrAppSectionTests : BunitContext
 	}
 
 	[Test]
+	public async Task Anime_WhileOff_OffersToAddItInsteadOfItsFields()
+	{
+		var cut = RenderWithChanges(Stored, []);
+
+		await Assert.That(AddAnime(cut).TextContent.Trim()).IsEqualTo("Add anime folder and profile");
+		await Assert.That(cut.FindAll("[aria-label='Sonarr anime root folder']")).IsEmpty();
+		await Assert.That(cut.FindAll("[aria-label='Sonarr anime quality profile']")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Anime_WhenAddedAndAFolderIsChosen_StoresTheFolderWithTheDefaultProfile()
+	{
+		List<ArrInstanceConfig> changes = [];
+		var cut = RenderWithChanges(Stored, changes);
+
+		await AddAnime(cut).ClickAsync();
+		await Assert.That(AnimeFolder(cut).Options!.Select(option => option.Text)).Contains("/tv · 1.2 TB free · the default");
+		await cut.InvokeAsync(() => AnimeFolder(cut).ValueChanged.InvokeAsync("/anime"));
+
+		await Assert.That(changes.Single()).IsEqualTo(Stored with { AnimeRootFolderPath = Some.Of("/anime") });
+		await Assert.That(cut.FindAll("[aria-label='Sonarr anime quality profile']")).IsNotEmpty();
+	}
+
+	[Test]
+	public async Task Anime_WhenAProfileIsPickedAndThenSameAsDefault_StoresItAndThenNone()
+	{
+		List<ArrInstanceConfig> changes = [];
+		var anime = Stored with { AnimeRootFolderPath = Some.Of("/anime") };
+		var cut = RenderWithChanges(anime, changes);
+		var profiles = cut.FindComponents<BbSelect<int?>>().Single(select => select.Instance.AriaLabel == "Sonarr anime quality profile").Instance;
+
+		await cut.InvokeAsync(() => profiles.ValueChanged.InvokeAsync(4));
+		await cut.InvokeAsync(() => profiles.ValueChanged.InvokeAsync(null));
+
+		await Assert.That(changes[0]).IsEqualTo(anime with { AnimeQualityProfileId = Some.Of(4) });
+		await Assert.That(changes[1]).IsEqualTo(anime);
+	}
+
+	[Test]
+	public async Task Anime_WhenRemoved_ClearsTheFolderAndTheProfile()
+	{
+		List<ArrInstanceConfig> changes = [];
+		var cut = RenderWithChanges(Stored with { AnimeRootFolderPath = Some.Of("/anime"), AnimeQualityProfileId = Some.Of(4) }, changes);
+
+		await cut.Find("button[aria-label='Remove the anime folder and profile']").ClickAsync();
+
+		await Assert.That(changes.Single()).IsEqualTo(Stored);
+	}
+
+	[Test]
 	public async Task Test_AfterANewAddressIsTyped_TestsWhatWasTyped()
 	{
 		var cut = RenderSection(Stored, ArrConnectionState.Connected);
@@ -221,6 +271,16 @@ public class ArrAppSectionTests : BunitContext
 	}
 
 	private static AngleSharp.Dom.IElement Switch(IRenderedComponent<ArrAppSection> cut, string label) => cut.Find($"button[role=switch][aria-label='{label}']");
+
+	private static AngleSharp.Dom.IElement AddAnime(IRenderedComponent<ArrAppSection> cut)
+	{
+		return cut.FindAll("button").Single(button => button.TextContent.Contains("Add anime folder and profile"));
+	}
+
+	private static BbSelect<string> AnimeFolder(IRenderedComponent<ArrAppSection> cut)
+	{
+		return cut.FindComponents<BbSelect<string>>().Single(select => select.Instance.AriaLabel == "Sonarr anime root folder").Instance;
+	}
 
 	private static string Description(IRenderedComponent<ArrAppSection> cut, string label)
 	{

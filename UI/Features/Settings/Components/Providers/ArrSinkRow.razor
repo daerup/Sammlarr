@@ -265,6 +265,7 @@
     private async Task ConnectedAsync(ArrApp app, ArrInstanceConfig typed, ArrInstanceChoices choices)
     {
         _apps[app] = new AppStatus(ArrConnectionState.Connected, string.Empty, choices);
+        var anime = typed.AnimeRootFolderPath.When(path => choices.Folders.Any(folder => folder.Path == path));
         var chosen = typed with
         {
             QualityProfileId = typed
@@ -273,6 +274,8 @@
             RootFolderPath = typed
                 .RootFolderPath.When(path => choices.Folders.Any(folder => folder.Path == path))
                 .Or(() => choices.Folders.FirstOrNone().Map(folder => folder.Path)),
+            AnimeQualityProfileId = anime.Map(_ => typed.AnimeQualityProfileId.When(id => choices.Profiles.Any(profile => profile.Id == id))),
+            AnimeRootFolderPath = anime,
         };
         var current = _config ?? ArrSinkConfig.Empty;
         var moved = Syncs && current.Of(app).Url.Match(stored => chosen.Url.Match(url => url != stored, () => true), () => false);
