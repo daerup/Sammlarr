@@ -32,17 +32,11 @@
     font-size: 0.78rem;
 }
 
-.arr-app-anime {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
 .arr-app-anime-pair {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
-    gap: 8px 24px;
+    gap: 16px 24px;
 }
 
 .arr-app-switch {

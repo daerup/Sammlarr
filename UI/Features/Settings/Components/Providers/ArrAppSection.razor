@@ -116,42 +116,40 @@
             </BbFieldContent>
         </BbField>
 
-        <div class="arr-app-wide">
-            @if (ShowsAnime)
-            {
-                <div class="arr-app-anime">
-                    <span class="arr-app-addon-head">
-                        <span class="font-medium">Anime folder and profile</span>
-                        <BbTooltip DelayDuration="150" Placement="PopoverPlacement.BottomStart">
-                            <BbTooltipTrigger AsChild="false" Class="inline-flex text-muted-foreground" role="button" aria-label="What counts as anime">
-                                <LucideIcon Name="info" Size="13"/>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent Class="w-[min(400px,calc(100vw-2rem))] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
-                                <b class="mb-1 block font-semibold text-foreground">What counts as anime</b>
-                                @AnimeLead(App)
-                                <ul class="my-1.5 list-disc space-y-0.5 pl-4">
-                                    <li>@App.Name tags it as anime: @AnimeTag(App), or</li>
-                                    <li>Sammlarr already holds an <b class="font-medium text-foreground">AniList or MyAnimeList id</b> for it, for example because it came from an AniList or MyAnimeList feed.</li>
-                                </ul>
-                                <span class="block">Western animation such as <i>Arcane</i> and live-action adaptations such as <i>One Piece</i> (2023) are not anime here. @Titles(App) already in @App.Name never move.</span>
-                            </BbTooltipContent>
-                        </BbTooltip>
-                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="ml-auto h-6 px-2 text-xs text-muted-foreground" OnClick="RemoveAnimeAsync"
-                                  aria-label="Remove the anime folder and profile">
-                            <LucideIcon Name="x" Size="12" Class="mr-1"/>
-                            Remove
-                        </BbButton>
-                    </span>
-                    <div class="arr-app-anime-pair">
+        <div class="arr-app-wide overflow-hidden rounded-md border" data-arr-anime>
+            <BbCollapsible>
+                <div class="flex items-center gap-2 bg-foreground/5 pr-3 transition-colors hover:bg-foreground/8">
+                    <BbCollapsibleTrigger AsChild="false" Class="group flex min-w-0 flex-1 items-center gap-2 py-2.5 pl-3 text-left text-sm">
+                        <LucideIcon Name="chevron-right" Size="15" Class="shrink-0 text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
+                        <span class="shrink-0 font-medium">Anime folder and profile</span>
+                        <span class="truncate text-muted-foreground group-data-[state=open]:hidden">@AnimeSummary</span>
+                    </BbCollapsibleTrigger>
+                    <BbTooltip DelayDuration="150" Placement="PopoverPlacement.BottomEnd">
+                        <BbTooltipTrigger AsChild="false" Class="inline-flex text-muted-foreground" role="button" aria-label="What counts as anime">
+                            <LucideIcon Name="info" Size="13"/>
+                        </BbTooltipTrigger>
+                        <BbTooltipContent Class="w-[min(400px,calc(100vw-2rem))] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
+                            <b class="mb-1 block font-semibold text-foreground">What counts as anime</b>
+                            @AnimeLead(App)
+                            <ul class="my-1.5 list-disc space-y-0.5 pl-4">
+                                <li>@App.Name tags it as anime: @AnimeTag(App), or</li>
+                                <li>Sammlarr already holds an <b class="font-medium text-foreground">AniList or MyAnimeList id</b> for it, for example because it came from an AniList or MyAnimeList feed.</li>
+                            </ul>
+                            <span class="block">Western animation such as <i>Arcane</i> and live-action adaptations such as <i>One Piece</i> (2023) are not anime here. @Titles(App) already in @App.Name never move.</span>
+                        </BbTooltipContent>
+                    </BbTooltip>
+                </div>
+                <BbCollapsibleContent>
+                    <div class="arr-app-anime-pair border-t p-3">
                         <BbField>
-                            <BbFieldLabel Class="text-xs font-normal text-muted-foreground">Root folder</BbFieldLabel>
+                            <BbFieldLabel>Anime root folder</BbFieldLabel>
                             <BbFieldContent>
                                 <BbSelect TValue="string" Value="@Instance.AnimeRootFolderPath.GetValueOr(string.Empty)" ValueChanged="AnimeFolderChangedAsync"
-                                          Options="AnimeFolderOptions" Placeholder="Choose a folder" AriaLabel="@($"{App.Name} anime root folder")" Class="w-full [&_[role=combobox]]:h-9"/>
+                                          Options="AnimeFolderOptions" Placeholder="@Off" AriaLabel="@($"{App.Name} anime root folder")" Class="w-full [&_[role=combobox]]:h-9"/>
                             </BbFieldContent>
                         </BbField>
                         <BbField>
-                            <BbFieldLabel Class="text-xs font-normal text-muted-foreground">Quality profile</BbFieldLabel>
+                            <BbFieldLabel>Anime quality profile</BbFieldLabel>
                             <BbFieldContent>
                                 <BbSelect TValue="int?" Value="@Instance.AnimeQualityProfileId.ToNullable()" ValueChanged="AnimeProfileChangedAsync"
                                           Options="AnimeProfileOptions" Placeholder="@SameAsDefault" Disabled="@(!Instance.RoutesAnime)"
@@ -159,15 +157,8 @@
                             </BbFieldContent>
                         </BbField>
                     </div>
-                </div>
-            }
-            else
-            {
-                <BbButton Variant="ButtonVariant.Link" Size="ButtonSize.Small" Class="h-auto p-0 text-xs text-muted-foreground" OnClick="() => _addingAnime = true">
-                    <LucideIcon Name="plus" Size="12" Class="mr-1"/>
-                    Add anime folder and profile
-                </BbButton>
-            }
+                </BbCollapsibleContent>
+            </BbCollapsible>
         </div>
 
         <label class="arr-app-switch">
@@ -230,16 +221,36 @@
 
     private const string SameAsDefault = "Same as default";
 
-    private IEnumerable<SelectOption<string>> AnimeFolderOptions =>
-        Choices.Folders.Select(folder => new SelectOption<string>(folder.Path, $"{folder.Path} · {Free(folder.FreeSpace)} free{DefaultMark(folder.Path)}"));
+    private const string Off = "Off";
+
+    private IEnumerable<SelectOption<string>> AnimeFolderOptions
+    {
+        get
+        {
+            return
+            [
+                new SelectOption<string>(string.Empty, Off),
+                .. Choices.Folders.Select(folder => new SelectOption<string>(folder.Path, $"{folder.Path} · {Free(folder.FreeSpace)} free{DefaultMark(folder.Path)}")),
+            ];
+        }
+    }
 
     private IEnumerable<SelectOption<int?>> AnimeProfileOptions => [new SelectOption<int?>(null, SameAsDefault), .. ProfileOptions];
 
     private string DefaultMark(string path) => Instance.RootFolderPath.When(folder => folder == path).Match(" · the default", string.Empty);
 
-    private bool _addingAnime;
+    private string AnimeSummary => Instance.AnimeRootFolderPath.Map(folder => $"{folder}{AnimeProfileMark}").GetValueOr(Off);
 
-    private bool ShowsAnime => _addingAnime || Instance.RoutesAnime;
+    private string AnimeProfileMark
+    {
+        get
+        {
+            return Instance
+                .AnimeQualityProfileId.Map(id => Choices.Profiles.FirstOrNone(profile => profile.Id == id))
+                .Map(profile => $" · {profile.Name}")
+                .GetValueOr(string.Empty);
+        }
+    }
 
     private static RenderFragment AnimeLead(ArrApp app)
     {
@@ -329,15 +340,13 @@
 
     private Task FolderChangedAsync(string? folder) => InstanceChanged.InvokeAsync(Instance with { RootFolderPath = Optional.Of(folder) });
 
-    private Task AnimeFolderChangedAsync(string? folder) => InstanceChanged.InvokeAsync(Instance with { AnimeRootFolderPath = Optional.Of(folder) });
+    private Task AnimeFolderChangedAsync(string? folder)
+    {
+        var anime = Optional.Of(folder).When(path => path.Length > 0);
+        return InstanceChanged.InvokeAsync(Instance with { AnimeRootFolderPath = anime, AnimeQualityProfileId = anime.Map(_ => Instance.AnimeQualityProfileId) });
+    }
 
     private Task AnimeProfileChangedAsync(int? profile) => InstanceChanged.InvokeAsync(Instance with { AnimeQualityProfileId = Optional.Of(profile) });
-
-    private Task RemoveAnimeAsync()
-    {
-        _addingAnime = false;
-        return InstanceChanged.InvokeAsync(Instance with { AnimeQualityProfileId = new None(), AnimeRootFolderPath = new None() });
-    }
 
     private Task MonitoredChangedAsync(bool monitored) => InstanceChanged.InvokeAsync(Instance with { Monitored = monitored });
 
