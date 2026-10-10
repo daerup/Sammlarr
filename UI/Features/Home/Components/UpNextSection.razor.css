@@ -56,7 +56,7 @@
     width: 5px;
     height: 5px;
     border-radius: 999px;
-    background: var(--alert-warning);
+    background: var(--muted-foreground);
     flex: 0 0 auto;
 }
 
@@ -65,7 +65,7 @@
     position: absolute;
     inset: 0;
     border-radius: 999px;
-    background: var(--alert-warning);
+    background: var(--muted-foreground);
     animation: row-dot-pulse 1.6s ease-out infinite;
 }
 
@@ -112,7 +112,7 @@
 }
 
 .row.is-running .row-when {
-    color: var(--alert-warning);
+    color: var(--foreground);
     font-weight: 600;
 }
 
@@ -127,7 +127,7 @@
     right: 0;
     bottom: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, var(--alert-warning), transparent) no-repeat;
+    background: linear-gradient(90deg, transparent, var(--muted-foreground), transparent) no-repeat;
     background-size: 40% 100%;
     animation: row-sweep 1.4s linear infinite;
 }

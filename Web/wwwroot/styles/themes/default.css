@@ -49,6 +49,8 @@
     --usage-gave-up: #ec835a;
     --usage-failed: #d03b3b;
     --usage-cancelled: #a3a8b0;
+    --fate-couldnot: oklch(0.62 0.18 2);
+    --fate-earlier: color-mix(in oklch, var(--destructive) 45%, white);
 
     /* Sidebar variables */
     --sidebar-background: oklch(0.985 0 0);
@@ -117,6 +119,8 @@
     --usage-answered: oklch(0.40 0 0);
     --usage-shade: oklch(0.70 0 0);
     --usage-cancelled: #7e848d;
+    --fate-couldnot: oklch(0.68 0.17 2);
+    --fate-earlier: color-mix(in oklch, var(--destructive) 62%, var(--card));
 
     /* Sidebar variables */
     --sidebar-background: oklch(0.205 0 0);

@@ -112,11 +112,6 @@
     cursor: default;
 }
 
-.feed-card-run.is-running {
-    color: var(--alert-warning);
-    border-color: color-mix(in oklch, var(--alert-warning) 45%, transparent);
-}
-
 .feed-card-run.is-queued {
     color: var(--muted-foreground);
 }

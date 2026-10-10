@@ -38,6 +38,11 @@
     font-weight: 600;
 }
 
+.feed-chip.is-running {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
 .feed-chip.is-failed {
     color: var(--destructive);
     font-weight: 600;

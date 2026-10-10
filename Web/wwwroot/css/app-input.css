@@ -460,9 +460,9 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
     .feed-live {
         --f-matched: var(--alert-success);
         --f-notfound: var(--destructive);
-        --f-couldnot: var(--usage-gave-up);
+        --f-couldnot: var(--fate-couldnot);
         --f-known: var(--usage-answered);
-        --f-cached: var(--usage-shade);
+        --f-cached: var(--fate-earlier);
         --f-flight: var(--alert-warning);
     }
 
@@ -736,7 +736,7 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         width: 6px;
         height: 6px;
         border-radius: 999px;
-        background: var(--alert-warning);
+        background: var(--muted-foreground);
         flex: none;
     }
 
@@ -745,7 +745,7 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         position: absolute;
         inset: 0;
         border-radius: 999px;
-        background: var(--alert-warning);
+        background: var(--muted-foreground);
         animation: feed-chip-pulse 1.6s ease-out infinite;
     }
 
