@@ -69,6 +69,39 @@ public class FeedRunLiveTests : BunitContext
 		await Assert.That(_module.Invocations["mount"].Count).IsEqualTo(1);
 		await Assert.That(snapshot.CursorSeq).IsEqualTo(12);
 		await Assert.That(snapshot.Titles.Select(title => title.Name)).IsEquivalentTo(["Senna"]);
+		await Assert.That(snapshot.PagesRead).IsEqualTo(0);
+		await Assert.That(snapshot.Reading).IsNull();
+		await Assert.That(snapshot.SourceEnded).IsFalse();
+	}
+
+	[Test]
+	public async Task Mount_SendsTheListAndWhatEachOutcomeMeans()
+	{
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+		cut.WaitForState(() => _module.Invocations["mount"].Count == 1);
+
+		var layout = (WireLayout)_module.Invocations["mount"].Single().Arguments[1]!;
+		await Assert.That(layout.Source.Name).IsEqualTo("MDBList");
+		await Assert.That(layout.SourceName).IsEqualTo(Documentaries.Name);
+		await Assert.That(layout.Meanings.CouldNotLookUp).Contains("the lookup never finished");
+		await Assert.That(layout.Meanings.Known).Contains("from an earlier run");
+		await Assert.That(layout.Meanings.NotFoundEarlier).Contains("found nothing");
+	}
+
+	[Test]
+	public async Task Mount_MidRun_SendsThePagesReadAndThePageBeingRead()
+	{
+		var snapshot = Snapshot(FirstRun) with { Requests = Some.Of(120) };
+		_run.SnapshotAsync(Any())
+			.Returns(Some.Of(snapshot with { Progress = new RunProgress(Some.Of(new SourcePage(2, new None())), 0) { Reading = Some.Of(3) } }));
+
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+		cut.WaitForState(() => _module.Invocations["mount"].Count == 1);
+
+		var sent = (WireSnapshot)_module.Invocations["mount"].Single().Arguments[2]!;
+		await Assert.That(sent.PagesRead).IsEqualTo(2);
+		await Assert.That(sent.Reading).IsEqualTo(3);
+		await Assert.That(sent.SourceEnded).IsTrue();
 	}
 
 	[Test]
@@ -79,7 +112,6 @@ public class FeedRunLiveTests : BunitContext
 		cut.WaitForState(() => _module.Invocations["mount"].Count == 1);
 		var layout = (WireLayout)_module.Invocations["mount"].Single().Arguments[1]!;
 		await Assert.That(layout.Nodes.Select(node => (node.Key, node.Column))).IsEquivalentTo([("tmdb", 1), ("plex", 2)]);
-		await Assert.That(layout.Edges).IsEquivalentTo([new WireEdge(null, "tmdb"), new WireEdge("tmdb", "plex")]);
 		await Assert.That(layout.Details.Single().Brand.Name).IsEqualTo("TMDB");
 	}
 
@@ -296,6 +328,18 @@ public class FeedRunLiveTests : BunitContext
 	}
 
 	[Test]
+	public async Task KeyToggle_OpensTheLegendOfTheMarks()
+	{
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+		await Assert.That(cut.Find("[data-testid=live-key]").HasAttribute("hidden")).IsTrue();
+
+		await cut.Find("[data-testid=live-key-toggle]").ClickAsync(new());
+
+		await Assert.That(cut.Find("[data-testid=live-key]").HasAttribute("hidden")).IsFalse();
+		await Assert.That(cut.FindAll("[data-testid=live-key] > span").Count).IsEqualTo(4);
+	}
+
+	[Test]
 	public async Task LegendEntry_OnHover_SaysWhatItMeans()
 	{
 		var cut = Render(builder =>
@@ -308,7 +352,7 @@ public class FeedRunLiveTests : BunitContext
 		});
 		var couldNot = cut.FindAll("[data-testid=live-legend-entry]").Single(entry => entry.TextContent.Contains("Couldn't look up"));
 
-		var card = $"#{couldNot.ParentElement!.Id.Replace("-trigger", "-content", StringComparison.Ordinal)}";
+		var card = $"#{couldNot.ParentElement!.Id!.Replace("-trigger", "-content", StringComparison.Ordinal)}";
 
 		await couldNot.ParentElement.TriggerEventAsync("onmouseenter", new MouseEventArgs());
 
@@ -348,7 +392,7 @@ public class FeedRunLiveTests : BunitContext
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 
 		await Assert
-			.That(cut.FindAll("[data-testid=live-bar] i[data-part]").Select(part => part.GetAttribute("data-part")))
+			.That(cut.FindAll("[data-testid=live-bar] i[data-part]").Select(part => part.GetAttribute("data-part") ?? ""))
 			.IsEquivalentTo(["Known", "Matched", "NotFound", "NotFoundEarlier", "CouldNotLookUp"], CollectionOrdering.Matching);
 	}
 

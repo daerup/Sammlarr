@@ -1,3 +1,4 @@
+using Domain.Feed;
 using Domain.Feed.Trace;
 using Domain.Providers;
 using UI.Shared.Services.Branding;
@@ -46,6 +47,10 @@ public readonly record struct WireCapacity(byte Service, int BlockedUntilMs, dou
 internal sealed record WireSnapshot(long CursorSeq, int ElapsedMs, bool Ended, FateTally Fates, IReadOnlyList<WireNode> Nodes, IReadOnlyList<WireTitle> Titles)
 {
 	public int? Reading { get; init; }
+
+	public int PagesRead { get; init; }
+
+	public bool SourceEnded { get; init; }
 }
 
 internal readonly record struct WireNode(byte Service, byte Stage, int Answered, int AfterRateLimit, int GaveUp, int Failed, int Waiting, int MeanMs);
@@ -54,11 +59,18 @@ internal readonly record struct WirePlace(byte Service, byte Stage);
 
 internal readonly record struct WireTitle(int Title, string Name, int? Year, WirePlace? At, byte? LastIds, byte? LastDetails);
 
-internal sealed record WireLayout(IReadOnlyList<WireSpot> Nodes, IReadOnlyList<WireSpot> Details, IReadOnlyList<WireEdge> Edges, WireBrand Sammlarr);
+internal sealed record WireLayout(
+	IReadOnlyList<WireSpot> Nodes,
+	IReadOnlyList<WireSpot> Details,
+	WireBrand Sammlarr,
+	WireBrand Source,
+	string SourceName,
+	WireMeanings Meanings
+);
+
+internal sealed record WireMeanings(string Matched, string Known, string CouldNotLookUp, string NotFound, string NotFoundEarlier);
 
 internal sealed record WireSpot(string Key, byte Service, int Column, bool InMemory, WireBrand Brand);
-
-internal readonly record struct WireEdge(string? From, string To);
 
 internal sealed record WireBrand(string Name, string Color, string Background, string Light, string Dark, double Pct);
 
@@ -108,10 +120,12 @@ internal static class LiveWire
 		)
 		{
 			Reading = snapshot.Progress.Reading.ToNullable(),
+			PagesRead = snapshot.Progress.Page.Map(read => read.Page).GetValueOr(0),
+			SourceEnded = snapshot.Requests.IsSome(),
 		};
 	}
 
-	internal static WireLayout Layout(RunLayout layout, MediaProviderBrandingService branding, Func<string, string> asset)
+	internal static WireLayout Layout(RunLayout layout, Feed feed, MediaProviderBrandingService branding, Func<string, string> asset)
 	{
 		WireBrand Brand(BrandingInfo brand, string name)
 		{
@@ -127,8 +141,21 @@ internal static class LiveWire
 		return new WireLayout(
 			[.. layout.Ids.Select(node => Spot(node.Service, node.Column, node.InMemory))],
 			[.. layout.Details.Select(service => Spot(service, 0, false))],
-			[.. layout.Edges.Select(edge => new WireEdge(edge.From.Map(Key).ToNullable(), Key(edge.To)))],
-			Brand(branding.Brands(new SammlarrAccounts())[0], "Sammlarr")
+			Brand(branding.Brands(new SammlarrAccounts())[0], "Sammlarr"),
+			Brand(branding.Brands(feed.Provider.Service)[0], branding.Name(feed.Provider.Service)),
+			feed.Name,
+			Meanings(branding.NickName(layout.Sink.Service))
+		);
+	}
+
+	private static WireMeanings Meanings(string sink)
+	{
+		return new WireMeanings(
+			RunBar.Meaning(RunPart.Matched, sink),
+			RunBar.Meaning(RunPart.Known, sink),
+			RunBar.Meaning(RunPart.CouldNotLookUp, sink),
+			RunBar.Meaning(RunPart.NotFound, sink),
+			RunBar.Meaning(RunPart.NotFoundEarlier, sink)
 		);
 	}
 

@@ -232,3 +232,52 @@
     color: var(--alert-success);
     background: color-mix(in oklch, var(--alert-success) 12%, transparent);
 }
+
+.live-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    padding: 9px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+}
+
+.live-key[hidden] {
+    display: none;
+}
+
+.live-key > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+}
+
+.live-key svg {
+    display: block;
+    flex: none;
+    overflow: visible;
+}
+
+.live-key b {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.key-orbit {
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .key-orbit {
+        animation: key-orbit 2.6s linear infinite;
+    }
+}
+
+@keyframes key-orbit {
+    to {
+        transform: rotate(360deg);
+    }
+}
