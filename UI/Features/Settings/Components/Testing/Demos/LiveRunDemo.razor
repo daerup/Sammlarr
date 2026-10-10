@@ -2,7 +2,7 @@
 @implements IDisposable
 
 <DemoCard Title="Live run" Where="Feeds page"
-          Note="FeedRunLive playing a scripted run of 120 documentaries: ids through TMDB, Wikidata and Plex, details through TMDB and MDBList, a few answers after a 429 and a few titles that gave up waiting. The card below shows the running pill and its live bar; clicking it brings the view back and flashes it. Five seconds after the run ends the view folds away and the card's footer flashes. Hide and Show remount it from a fresh snapshot.">
+          Note="FeedRunLive playing a scripted run of 120 documentaries: ids through TMDB, Wikidata and Plex, details through TMDB and MDBList, a few answers after a 429 and a few titles that gave up waiting. The card below shows the running pill and its live bar; clicking it brings the view back and flashes it. When the run ends the header says Done for a beat, then the diagram folds up and the card's footer flashes. Hide and Show remount it from a fresh snapshot.">
     @if (_run is { } run)
     {
         <FeedRunLive @key="run" Run="run" Flash="_flash" OnFolded="Folded"/>

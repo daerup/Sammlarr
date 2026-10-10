@@ -76,10 +76,18 @@
         <ProtectedSection GuardState="IsSignedIn"
                           DeniedActionDescription="managing your feeds"
                           FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
-            @if (_live is Some<ILiveRun>(var live))
+            @if (ShowsLiveView)
             {
-                <div id="feed-run-live" class="scroll-mt-4">
-                    <FeedRunLive @key="live" Run="live" Flash="_flash" Class="mb-4" OnFolded="() => Folded(live)"/>
+                <div id="feed-run-live" class="live-view scroll-mt-4">
+                    <div class="live-view-label"><LucideIcon Name="radio" Size="12"/>Live view</div>
+                    @if (_live is Some<ILiveRun>(var live))
+                    {
+                        <FeedRunLive @key="live" Run="live" Flash="_flash" OnFolded="() => Folded(live)"/>
+                    }
+                    else
+                    {
+                        <FeedRunIdle/>
+                    }
                 </div>
             }
 
@@ -326,10 +334,13 @@
     private IReadOnlyList<ChangeChip> _pendingChips = [];
     private MediaMatchResult? _selected;
     private Optional<ILiveRun> _live = new None();
+    private bool _watching;
     private Optional<FeedId> _finished = new None();
     private int _flash;
 
     private bool IsSignedIn() => _isSignedIn;
+
+    private bool ShowsLiveView => _live.Match(_ => true, () => !_isLoading && _watching && _feeds.Count > 0);
 
     private IReadOnlyList<FeedRow> PageRows => FeedPaging.Slice(_visible, FeedPaging.PageWithin(_currentPage, _visible.Count));
 
@@ -403,6 +414,7 @@
         if (hasAccess)
         {
             await Progress.StartAsync();
+            _watching = true;
             ShowLive();
         }
     }

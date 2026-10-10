@@ -23,11 +23,11 @@ snapshots need the native runner).
 Rule of thumb: wiring more than one or two `.Mock()`s just to construct the subject means it belongs in `Tests/Integration` as a harness scenario, not a unit
 test.
 
-Current suite: **3904** non-E2E tests plus **159** E2E (17 of them on the self-hosted stacks, and the staging smoke test, skipped by default).
+Current suite: **3934** non-E2E tests plus **159** E2E (17 of them on the self-hosted stacks, and the staging smoke test, skipped by default).
 
 | Domain | Shared | Core | API | Architecture | Roslyn | Integration | UI   | Web |
 |--------|--------|------|-----|--------------|--------|-------------|------|-----|
-| 336    | 201    | 518  | 687 | 44           | 100    | 678         | 1273 | 67  |
+| 336    | 203    | 525  | 687 | 44           | 100    | 678         | 1294 | 67  |
 
 ## Running
 
@@ -67,7 +67,7 @@ the fixture set.
 
 Live runs genuinely mutate: they hit the real accounts. After any live run, scan the fixtures for real tokens and API keys before committing.
 
-A feed run's live view has one flow: `FeedLiveRunTests` creates a feed on the recorded MDBList list, runs it from its card and waits for the view and the card's running pill, then for the fold, five seconds after the run ends, and the card's last-run bar. The view stays until the fold however fast the replayed run is, so the test needs no slowed stub, and since pooled stacks keep their database it asserts the view and the card, not which services the run asked.
+A feed run's live view has one flow: `FeedLiveRunTests` creates a feed on the recorded MDBList list, runs it from its card and waits for the view and the card's running pill, then for the fold, a second and a half after the run ends, back to the "Nothing is running" line, and the card's last-run bar. The view stays until the fold however fast the replayed run is, so the test needs no slowed stub, and since pooled stacks keep their database it asserts the view and the card, not which services the run asked.
 
 ### Self-hosted stacks
 

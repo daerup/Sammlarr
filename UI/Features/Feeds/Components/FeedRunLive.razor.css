@@ -7,10 +7,34 @@
 }
 
 .live-head {
+    position: relative;
+    padding: 13px 16px 9px;
+}
+
+.live-head:has(.live-line) {
+    padding-bottom: 13px;
+}
+
+.live-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+}
+
+.live-line > i {
+    display: block;
+    height: 100%;
+    background: var(--muted-foreground);
+    transition: width 0.25s linear;
+}
+
+.live-sum {
     display: flex;
     flex-direction: column;
     gap: 9px;
-    padding: 13px 16px 11px;
+    padding: 0 16px 11px;
 }
 
 .live-top {
@@ -150,10 +174,6 @@
     overflow: hidden;
 }
 
-.live-body[hidden] {
-    display: none;
-}
-
 .live-foot {
     display: flex;
     align-items: center;
@@ -164,10 +184,6 @@
     font-size: 12px;
     color: var(--muted-foreground);
     background: color-mix(in srgb, var(--foreground) 2.5%, transparent);
-}
-
-.live-foot[hidden] {
-    display: none;
 }
 
 .live-foot-main {

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Contracts;
 using Contracts.Feed;
 using Contracts.Providers;
@@ -12,12 +13,13 @@ internal sealed class FeedRunWatch(
 	Optional<int> previous,
 	IFeedRunTraces traces,
 	IRemoteCapacity capacity,
-	IDateTimeProvider clock
+	IDateTimeProvider clock,
+	StrongBox<bool> hidden
 ) : ILiveRun
 {
 	private static readonly TimeSpan Tick = TimeSpan.FromMilliseconds(250);
 
-	private static readonly TimeSpan Linger = TimeSpan.FromSeconds(5);
+	private static readonly TimeSpan Linger = TimeSpan.FromSeconds(1.5);
 
 	private readonly PeriodicTimer _timer = new(Tick);
 
@@ -31,8 +33,6 @@ internal sealed class FeedRunWatch(
 
 	private volatile bool _settled;
 
-	private volatile bool _hidden;
-
 	private volatile bool _folded;
 
 	public Feed Feed => feed;
@@ -41,7 +41,7 @@ internal sealed class FeedRunWatch(
 
 	public RunTally Tally { get; private set; } = RunTally.Before(previous);
 
-	public bool Hidden => _hidden;
+	public bool Hidden => hidden.Value;
 
 	public bool HasFolded => _folded;
 
@@ -75,13 +75,13 @@ internal sealed class FeedRunWatch(
 
 	public void Hide()
 	{
-		_hidden = true;
+		hidden.Value = true;
 		Changed?.Invoke();
 	}
 
 	public void Show()
 	{
-		_hidden = false;
+		hidden.Value = false;
 		Changed?.Invoke();
 	}
 
