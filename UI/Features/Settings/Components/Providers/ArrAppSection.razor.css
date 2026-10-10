@@ -33,21 +33,31 @@
 }
 
 .arr-app-switch {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
     gap: 12px;
-    min-height: 36px;
-    margin-top: 22px;
-    font-size: 0.8125rem;
+}
+
+.arr-app-switch-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.arr-app-switch-name {
+    font-size: 0.84375rem;
+    font-weight: 500;
+    line-height: 1.5rem;
+}
+
+.arr-app-switch-note {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--muted-foreground);
 }
 
 @media (max-width: 640px) {
     .arr-app {
         grid-template-columns: minmax(0, 1fr);
-    }
-
-    .arr-app-switch {
-        margin-top: 0;
     }
 }

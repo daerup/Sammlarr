@@ -85,9 +85,24 @@ public class ArrAppSectionTests : BunitContext
 		List<ArrInstanceConfig> changes = [];
 		var cut = RenderWithChanges(Stored, changes);
 
-		await cut.Find("button[role=switch][aria-label='Sonarr monitors new titles']").ClickAsync();
+		await Switch(cut, "Sonarr monitors new titles").ClickAsync();
 
 		await Assert.That(changes.Single().Monitored).IsFalse();
+	}
+
+	[Test]
+	[Arguments(
+		ArrApp.Radarr,
+		"Radarr grabs a movie Sammlarr adds once it is released.",
+		"Radarr searches right after adding a movie instead of waiting for its next RSS sync."
+	)]
+	[Arguments(ArrApp.Sonarr, "Sonarr grabs new episodes of the shows Sammlarr adds.", "Sonarr searches for what is already out right after adding a show.")]
+	public async Task Switches_ForAnApp_AreDescribedByWhatEachMakesTheAppDo(ArrApp app, string monitor, string search)
+	{
+		var cut = RenderSection(Stored, ArrConnectionState.Connected, app: app);
+
+		await Assert.That(Description(cut, $"{app} monitors new titles")).IsEqualTo(monitor);
+		await Assert.That(Description(cut, $"{app} searches when a title is added")).IsEqualTo(search);
 	}
 
 	[Test]
@@ -203,6 +218,13 @@ public class ArrAppSectionTests : BunitContext
 		await cut.FindAll("button").Single(button => button.TextContent.Trim() == "Remove").ClickAsync();
 
 		await Assert.That(changes.Single()).IsEqualTo(Stored);
+	}
+
+	private static AngleSharp.Dom.IElement Switch(IRenderedComponent<ArrAppSection> cut, string label) => cut.Find($"button[role=switch][aria-label='{label}']");
+
+	private static string Description(IRenderedComponent<ArrAppSection> cut, string label)
+	{
+		return cut.Find($"#{Switch(cut, label).GetAttribute("aria-describedby")}").TextContent.Trim();
 	}
 
 	private static AngleSharp.Dom.IElement AddExternalUrl(IRenderedComponent<ArrAppSection> cut)
