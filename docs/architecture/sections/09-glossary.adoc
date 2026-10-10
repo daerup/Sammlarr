@@ -215,13 +215,19 @@ Wantlist:: The set of titles Sammlarr keeps in sync with the sink.
 
 Sink:: The service the wantlist syncs to, an `IMediaSink` keyed by the hand-written `SinkKind`:
 Plex, or Radarr + Sonarr as one target (`ArrSink`: movies to Radarr by their TMDB id, shows to Sonarr by
-their TVDB id). A sync reads the sink, pulls in what was added there, and pushes queued changes. Each push
-carries the feed that added the title, if any, as a `SinkPush`.
+their TVDB id, new anime into the app's anime slot when it has one). A sync reads the sink, pulls in what was
+added there, and pushes queued changes. Each push carries the feed that added the title, if any, as a `SinkPush`.
 
 Tag scheme:: How Radarr + Sonarr knows a title is Sammlarr's (`ArrTagScheme`): a user tag
 `{prefix}-u-{user}`, a feed tag `{prefix}-{feed}` and an optional plain `{prefix}`, each slugged to
 `a-z0-9-`. A sync reads only the titles carrying the user's tag; removing a title another user still tags
 only takes this user's tag off.
+
+Anime slot:: An optional second root folder and quality profile for Radarr or Sonarr (`ArrInstanceConfig.AnimeRootFolderPath`,
+`AnimeQualityProfileId`; `RoutesAnime` once a folder is chosen). A new title goes there, and into Sonarr as an Anime series, when the
+app's own lookup marks it anime (`ArrApi.IsAnime`: Radarr's `keywords` hold `anime`, Sonarr's `genres` hold `Anime`) or Sammlarr already
+holds an AniList or MyAnimeList id for it; otherwise it goes to the default folder and profile. The anime profile falls back to the
+default one (`ProfileFor`), and a title already in the app is only retagged, never moved.
 
 Provenance:: Where a wantlist item came from: `SinkOrigin` (added on the sink and pulled in),
 `ManualOrigin` (search, browse, or feed preview), `FeedOrigin` (a feed put it there), or
