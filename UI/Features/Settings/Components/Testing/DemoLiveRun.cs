@@ -166,6 +166,7 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 		Skipped = 16,
 		UnmatchedNotFound = 20,
 		UnmatchedCouldNotLookUp = 4,
+		UnmatchedConflict = 0,
 		Removed = 0,
 		Known = 34,
 		NotFoundEarlier = 10,
@@ -300,6 +301,7 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 			TitleSettled { Fate: TitleFate.Matched } => _fates with { Matched = _fates.Matched + 1 },
 			TitleSettled { Fate: TitleFate.CouldNotLookUp } => _fates with { CouldNotLookUp = _fates.CouldNotLookUp + 1 },
 			TitleSettled { Fate: TitleFate.NotFound } => _fates with { NotFound = _fates.NotFound + 1 },
+			TitleSettled { Fate: TitleFate.Conflict } => _fates with { Conflicted = _fates.Conflicted + 1 },
 			_ => _fates,
 		};
 		switch (traced)

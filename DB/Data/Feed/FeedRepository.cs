@@ -248,6 +248,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		row.Skipped = run.Counts.Skipped;
 		row.UnmatchedNotFound = run.Counts.UnmatchedNotFound;
 		row.UnmatchedCouldNotLookUp = run.Counts.UnmatchedCouldNotLookUp;
+		row.UnmatchedConflict = run.Counts.UnmatchedConflict;
 		row.Removed = run.Counts.Removed;
 		row.Known = run.Counts.Known;
 		row.NotFoundEarlier = run.Counts.NotFoundEarlier;

@@ -26,7 +26,6 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	[Explicit]
 	public async Task RunAsync_ForTwoRemakesSharingAMetacriticSlug_AddsBothAndSavesTheRun()
 	{
 		await StubRemakesAsync();
@@ -39,7 +38,6 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	[Explicit]
 	public async Task IdentifyWithDetailsAsync_ForTwoRemakesSharingAMetacriticSlug_HandsOutOnlyIdsThatAreStored()
 	{
 		await StubRemakesAsync();
@@ -54,7 +52,6 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	[Explicit]
 	public async Task IdentifyWithDetailsAsync_WhenALaterTitleTiesAnEarlierOneToAStoredRow_HandsOutOnlyIdsThatAreStored()
 	{
 		host.SinkAddresses(MediaProvider.Tmdb);

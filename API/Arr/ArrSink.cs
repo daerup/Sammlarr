@@ -49,7 +49,10 @@ internal sealed class ArrSink(
 
 		var down = Optional.When(failed.Count > 0, () => new WantlistSyncSinkUnreachable(reason, [.. failed.Select(app => app.App)]));
 
-		var requests = items.Select(item => new IdentifyRequest([.. item.Externals], new None()));
+		var requests = items.Select(item => new IdentifyRequest([.. item.Externals], new None())
+		{
+			Sources = [item.Details.Type is MediaType.Show ? RemoteService.Sonarr : RemoteService.Radarr],
+		});
 		List<MediaId> matched = [];
 		List<UnmatchedMedia> unmatched = [];
 		await foreach (var (result, item) in mediaService.IdentifyAsync(requests, cancellationToken).ZipAwait(items, cancellationToken))

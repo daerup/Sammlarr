@@ -31,10 +31,6 @@ internal static class TestMediaService
 		idle.Accepts.Returns([]);
 		var unmatchedCache = TestUnmatchedCache.Empty();
 
-		mediaRepo
-			.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
-			.Returns((groups, _) => [.. Enumerable.Repeat<Optional<MediaIdentity>>(new None(), groups.Count)]);
-		mediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
 		mediaRepo.GetAsync(Any(), Any()).Returns(Array.Empty<StoredMedia>());
 		mediaRepo.GetByExternalsAsync(Any(), Any()).Returns(Array.Empty<StoredMedia>());
 
@@ -60,8 +56,10 @@ internal static class TestMediaService
 		converter.Lookups.Returns([new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb], Cost: 1)]);
 		converter.LookUpAsync(Any(), Any()).Returns((request, _) => FoundByFind(request));
 
+		var claims = TestClaims.Granting();
 		var detailsFetcher = new DetailsFetcher(
 			enrichers,
+			claims.Object,
 			configRepo.Object,
 			TestCapacity.Open(),
 			TestReadiness.Everything(),
@@ -69,17 +67,16 @@ internal static class TestMediaService
 			dateTimeProvider.Object,
 			NullLogger<DetailsFetcher>.Instance
 		);
-		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object, NullLogger<MediaIdentityCoordinator>.Instance);
 		var testee = new MediaService(
 			new MediaIdResolver([new(RemoteService.Tmdb, converter.Object)], unmatchedCache.Object, TestCapacity.Open(), idReadiness.Object, dateTimeProvider.Object),
 			detailsFetcher,
-			coordinator,
+			claims.Object,
 			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),
 			TestSinks.AddressingBy(MediaProvider.Tmdb, configRepo.Object),
 			mediaRepo.Object,
 			NullLogger<MediaService>.Instance
 		);
-		return (testee, new Deps(mediaRepo, details, unmatchedCache, converter, idReadiness));
+		return (testee, new Deps(mediaRepo, details, unmatchedCache, converter, idReadiness, claims));
 	}
 
 	internal sealed record Deps(
@@ -87,7 +84,8 @@ internal static class TestMediaService
 		Mock<IDetailsEnricher> Details,
 		Mock<ITypedMemoryCache<string, bool>> UnmatchedCache,
 		Mock<IExternalIdConverter> Converter,
-		Mock<IServiceReadiness> IdReadiness
+		Mock<IServiceReadiness> IdReadiness,
+		Mock<IIdentityClaims> Claims
 	);
 
 	internal static Result<IdLookupResult> FoundByFind(IdLookupRequest request)

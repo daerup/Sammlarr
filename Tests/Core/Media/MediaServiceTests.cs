@@ -230,7 +230,7 @@ public class MediaServiceTests
 		await Assert.That(matched!.Details).IsEqualTo(new MovieDetails { Title = "Fight Club", ReleaseDate = new DateOnly(1999, 1, 1) });
 		await Assert.That(matched.Identity.Keys).Contains(external);
 		await Assert.That(matched.Known).IsFalse();
-		deps.MediaRepo.UpsertIdentitiesAsync(Any(), Any()).WasCalled(Times.Once);
+		deps.Claims.ClaimAsync(Any(), Any()).WasCalled(Times.Once);
 		deps.MediaRepo.UpsertDetailsAsync(Any(), Any()).WasNeverCalled();
 	}
 
@@ -428,110 +428,15 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenTwoBatchesShareAnExternalId_YieldsBothUnderOneIdentity()
-	{
-		var shared = TmdbId.From("shared", MediaType.Movie);
-		var (testee, deps) = TestMediaService.Create();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(TestMediaService.CompleteMovie(ext)));
-		var requests = await TestMediaService.Requests(60).ToListAsync();
-		requests[0] = new IdentifyRequest([shared], new None());
-		requests[55] = new IdentifyRequest([shared], new None());
-
-		var results = (await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync()).Matched().ToList();
-
-		await Assert.That(results).Count().IsEqualTo(requests.Count);
-		await Assert.That(results[0].Identity.Id).IsEqualTo(results[55].Identity.Id);
-	}
-
-	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenALaterRequestBridgesTwoIdentities_PersistsOnlyTheSurvivingIdentity()
-	{
-		var first = TmdbId.From("bridge-a", MediaType.Movie);
-		var second = ImdbId.From("tt7777777", MediaType.Movie);
-		var (testee, deps) = TestMediaService.Create();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(TestMediaService.CompleteMovie(ext)));
-		var upserted = RecordUpsertedIdentities(deps);
-
-		var requests = new List<IdentifyRequest> { new([first], new None()), new([second], new None()), new([first, second], new None()) };
-
-		var results = (await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync()).Matched().ToList();
-
-		await Assert.That(results).Count().IsEqualTo(requests.Count);
-		var survivor = results[0].Identity.Id;
-		await Assert.That(results[1].Identity.Id).IsEqualTo(survivor);
-		await Assert.That(results[2].Identity.Id).IsEqualTo(survivor);
-		await Assert.That(upserted.Select(identity => identity.Id).Distinct()).IsEquivalentTo([survivor]);
-	}
-
-	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenALaterBatchBridgesTwoIdentities_PersistsOnlyTheSurvivingIdentity()
-	{
-		var first = TmdbId.From("batch-bridge-a", MediaType.Movie);
-		var second = ImdbId.From("tt8888888", MediaType.Movie);
-		var (testee, deps) = TestMediaService.Create();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(TestMediaService.CompleteMovie(ext)));
-		var upserted = RecordUpsertedIdentities(deps);
-		var requests = await TestMediaService.Requests(60).ToListAsync();
-		requests[0] = new IdentifyRequest([first], new None());
-		requests[1] = new IdentifyRequest([second], new None());
-		requests[55] = new IdentifyRequest([first, second], new None());
-
-		var results = (await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync()).Matched().ToList();
-
-		await Assert.That(results).Count().IsEqualTo(requests.Count);
-		var survivor = results[55].Identity.Id;
-		await Assert.That(Bridged(upserted, first, second)).IsEquivalentTo([survivor]);
-	}
-
-	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenALaterBatchMatchesAPersistedIdentity_KeepsThePersistedMediaId()
-	{
-		var minted = TmdbId.From("batch-persisted-a", MediaType.Movie);
-		var known = ImdbId.From("tt6666666", MediaType.Movie);
-		var persisted = new MediaIdentity(MediaId.New(), [known]);
-		var (testee, deps) = TestMediaService.Create();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(TestMediaService.CompleteMovie(ext)));
-		deps.MediaRepo.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
-			.Returns((groups, _) => [.. groups.Select(group => Optional.When(group.Contains(known), () => persisted))]);
-		var upserted = RecordUpsertedIdentities(deps);
-		var requests = await TestMediaService.Requests(60).ToListAsync();
-		requests[0] = new IdentifyRequest([minted], new None());
-		requests[55] = new IdentifyRequest([minted, known], new None());
-
-		var results = (await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync()).Matched().ToList();
-
-		await Assert.That(results).Count().IsEqualTo(requests.Count);
-		await Assert.That(results[55].Identity.Id).IsEqualTo(persisted.Id);
-		await Assert.That(Bridged(upserted, minted, known)).IsEquivalentTo([persisted.Id]);
-	}
-
-	[Test]
 	public async Task RegisterAsync_WhenEmpty_DoesNotWriteToRepository()
 	{
 		var (testee, deps) = TestMediaService.Create();
 
-		var identities = await testee.RegisterAsync([]);
+		var identities = await testee.RegisterAsync([], []);
 
 		await Assert.That(identities).IsEmpty();
-		deps.MediaRepo.UpsertIdentitiesAsync(Any(), Any()).WasNeverCalled();
+		deps.Claims.ClaimAsync(Any(), Any()).WasNeverCalled();
 	}
-
-	private static List<MediaIdentity> RecordUpsertedIdentities(TestMediaService.Deps deps)
-	{
-		var upserted = new List<MediaIdentity>();
-		deps.MediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any())
-			.Returns(
-				(identities, _) =>
-				{
-					upserted.AddRange(identities);
-					return [.. identities];
-				}
-			);
-		return upserted;
-	}
-
-	private static IEnumerable<MediaId> Bridged(IEnumerable<MediaIdentity> upserted, params IExternalMediaId[] externals) =>
-		upserted.Where(identity => externals.Any(identity.Keys.Contains)).Select(identity => identity.Id).Distinct();
 
 	private static List<int> RecordBatchSizes(TestMediaService.Deps deps)
 	{

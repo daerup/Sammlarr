@@ -69,9 +69,9 @@ public readonly record struct NodeTally(
 	int MeanMs
 );
 
-public readonly record struct FateTally(int Started, int Known, int Earlier, int Matched, int CouldNotLookUp, int NotFound, int ListedWithoutIds)
+public readonly record struct FateTally(int Started, int Known, int Earlier, int Matched, int CouldNotLookUp, int NotFound, int ListedWithoutIds, int Conflicted)
 {
-	public static FateTally None => new(0, 0, 0, 0, 0, 0, 0);
+	public static FateTally None => new(0, 0, 0, 0, 0, 0, 0, 0);
 
-	public int Settled => Matched + CouldNotLookUp + NotFound + ListedWithoutIds;
+	public int Settled => Matched + CouldNotLookUp + NotFound + ListedWithoutIds + Conflicted;
 }

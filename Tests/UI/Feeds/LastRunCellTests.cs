@@ -199,6 +199,7 @@ public class LastRunCellTests : BunitContext
 				Skipped = 0,
 				UnmatchedNotFound = 0,
 				UnmatchedCouldNotLookUp = 0,
+				UnmatchedConflict = 0,
 				Removed = 0,
 				Known = 0,
 				NotFoundEarlier = 0,

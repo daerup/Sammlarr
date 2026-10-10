@@ -20,7 +20,7 @@ public sealed record RunTally(FateTally Fates, Optional<int> Total, bool Estimat
 
 	internal int Done => Fates.Settled;
 
-	internal int InFlight => Math.Max(0, Fates.Started - Fates.Matched - Fates.CouldNotLookUp - Fates.NotFound);
+	internal int InFlight => Math.Max(0, Fates.Started - Fates.Matched - Fates.CouldNotLookUp - Fates.NotFound - Fates.Conflicted);
 
 	internal int Count(RunPart part)
 	{
@@ -31,6 +31,7 @@ public sealed record RunTally(FateTally Fates, Optional<int> Total, bool Estimat
 			RunPart.Matched => Fates.Matched - Fates.Known,
 			RunPart.NotFound => Fates.NotFound - Fates.Earlier + Fates.ListedWithoutIds,
 			RunPart.CouldNotLookUp => Fates.CouldNotLookUp,
+			RunPart.Conflict => Fates.Conflicted,
 		};
 	}
 

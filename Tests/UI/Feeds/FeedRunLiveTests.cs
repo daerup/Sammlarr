@@ -427,7 +427,7 @@ public class FeedRunLiveTests : BunitContext
 
 		await Assert
 			.That(cut.FindAll("[data-testid=live-bar] i[data-part]").Select(part => part.GetAttribute("data-part") ?? ""))
-			.IsEquivalentTo(["Known", "Matched", "NotFound", "NotFoundEarlier", "CouldNotLookUp"], CollectionOrdering.Matching);
+			.IsEquivalentTo(["Known", "Matched", "NotFound", "NotFoundEarlier", "CouldNotLookUp", "Conflict"], CollectionOrdering.Matching);
 	}
 
 	private static IReadOnlyList<string> Segments(IRenderedComponent<FeedRunLive> cut)

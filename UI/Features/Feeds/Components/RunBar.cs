@@ -10,6 +10,7 @@ internal enum RunPart
 	NotFound,
 	NotFoundEarlier,
 	CouldNotLookUp,
+	Conflict,
 }
 
 internal readonly record struct RunSegment(RunPart Part, int Count, double Percent)
@@ -19,7 +20,15 @@ internal readonly record struct RunSegment(RunPart Part, int Count, double Perce
 
 internal static class RunBar
 {
-	private static readonly RunPart[] LegendOrder = [RunPart.Matched, RunPart.Known, RunPart.NotFound, RunPart.NotFoundEarlier, RunPart.CouldNotLookUp];
+	private static readonly RunPart[] LegendOrder =
+	[
+		RunPart.Matched,
+		RunPart.Known,
+		RunPart.NotFound,
+		RunPart.NotFoundEarlier,
+		RunPart.CouldNotLookUp,
+		RunPart.Conflict,
+	];
 
 	internal static IReadOnlyList<RunSegment> Segments(FeedRunCounts counts)
 	{
@@ -31,6 +40,7 @@ internal static class RunBar
 			(RunPart.NotFound, counts.UnmatchedNotFound - counts.NotFoundEarlier),
 			(RunPart.NotFoundEarlier, counts.NotFoundEarlier),
 			(RunPart.CouldNotLookUp, counts.UnmatchedCouldNotLookUp),
+			(RunPart.Conflict, counts.UnmatchedConflict),
 		];
 		return [.. parts.Where(part => part.Count > 0).Select(part => new RunSegment(part.Part, part.Count, 100.0 * part.Count / counts.Total))];
 	}
@@ -47,6 +57,7 @@ internal static class RunBar
 			RunPart.Matched => "Matched",
 			RunPart.NotFound => "Not found",
 			RunPart.CouldNotLookUp => "Couldn't look up",
+			RunPart.Conflict => "Conflict",
 		};
 	}
 
@@ -61,6 +72,7 @@ internal static class RunBar
 			RunPart.NotFound => "Every service that could know this title was asked and none had it, or the list gave no id to look it up by.",
 			RunPart.NotFoundEarlier => "A lookup in the last hour found nothing, so Sammlarr did not ask again. After the hour it is looked up again.",
 			RunPart.CouldNotLookUp => "A service this title needed was down, rate-limited or failing, so the lookup never finished. The next run tries again.",
+			RunPart.Conflict => "Its ids disagree with titles Sammlarr already holds, so it was kept apart and not added. The titles stay as they are.",
 		};
 	}
 
@@ -73,6 +85,7 @@ internal static class RunBar
 			RunPart.Matched => "var(--alert-success)",
 			RunPart.NotFound => "var(--destructive)",
 			RunPart.CouldNotLookUp => "var(--fate-couldnot)",
+			RunPart.Conflict => "var(--fate-conflict)",
 		};
 	}
 }

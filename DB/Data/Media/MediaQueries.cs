@@ -11,12 +11,6 @@ internal static class MediaQueries
 		public IQueryable<ExternalMediaIdRow> WhereMatchingAny(IEnumerable<IExternalMediaId> mediaIds) => source.Where(BuildAnyMatchPredicate(mediaIds));
 	}
 
-	extension(SammlarrDbContext ctx)
-	{
-		public IQueryable<MediaRow> MediaMatchingAny(IEnumerable<IExternalMediaId> mediaIds) =>
-			ctx.ExternalMediaIds.WhereMatchingAny(mediaIds).Select(e => e.Media).Distinct();
-	}
-
 	private static readonly MethodInfo ContainsMethod = typeof(Enumerable)
 		.GetMethods()
 		.First(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2)

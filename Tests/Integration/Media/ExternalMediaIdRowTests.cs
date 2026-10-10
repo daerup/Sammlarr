@@ -70,8 +70,7 @@ public class ExternalMediaIdRowTests(SammlarrTestHost fixture) : IAsyncDisposabl
 	{
 		const int count = 2000;
 		var ids = Enumerable.Range(0, count).Select(i => (IIdentityKey)TvdbId.From($"tvdb-{i}", MediaType.Movie)).ToList();
-		var media = new MediaRow();
-		fixture.Context.ExternalMediaIds.AddRange(ids.Select(id => id.ToExternalIdEntity(media)));
+		fixture.Context.ExternalMediaIds.AddRange(ids.Select(id => id.ToExternalIdEntity(new MediaRow())));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 

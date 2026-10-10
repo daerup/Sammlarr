@@ -11,7 +11,13 @@ public class FeedRunCountsTests
 	[Test]
 	public async Task From_APlanWithUnmatchedTitles_SplitsThemByWhyTheyStayedUnmatched()
 	{
-		UnmatchedMedia[] unmatched = [Unmatched(1, UnmatchedReason.NotFound), Unmatched(2, UnmatchedReason.NotFound), Unmatched(3, UnmatchedReason.CouldNotLookUp)];
+		UnmatchedMedia[] unmatched =
+		[
+			Unmatched(1, UnmatchedReason.NotFound),
+			Unmatched(2, UnmatchedReason.NotFound),
+			Unmatched(3, UnmatchedReason.CouldNotLookUp),
+			Unmatched(4, UnmatchedReason.Conflict),
+		];
 		var plan = FeedPlans.Compute(
 			new ClassifiedFeedLoad([], unmatched, FeedLoadState.Finished),
 			new HashSet<MediaId>(),
@@ -21,7 +27,9 @@ public class FeedRunCountsTests
 
 		var counts = FeedRunCounts.From(plan);
 
-		await Assert.That((counts.UnmatchedNotFound, counts.UnmatchedCouldNotLookUp, counts.Unmatched, counts.Total)).IsEqualTo((2, 1, 3, 3));
+		await Assert
+			.That((counts.UnmatchedNotFound, counts.UnmatchedCouldNotLookUp, counts.UnmatchedConflict, counts.Unmatched, counts.Total))
+			.IsEqualTo((2, 1, 1, 4, 4));
 	}
 
 	[Test]

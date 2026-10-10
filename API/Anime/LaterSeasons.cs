@@ -34,7 +34,7 @@ internal sealed class LaterSeasons(IAnimeIds map, IDatasetLoads loads)
 		var seriesId = TvdbId.From(series.ToString(CultureInfo.InvariantCulture), MediaType.Show);
 		var show = await map.FindAsync(seriesId, cancellationToken);
 		var ids = show.Map(entry => AnimeListsIdConverter.Ids(entry, MediaType.Show)).GetValueOr(() => [seriesId]);
-		return new IdentifyRequest(ids, new None()) { Description = request.Hints };
+		return new IdentifyRequest(ids, new None()) { Description = request.Hints, Sources = [RemoteService.AnimeLists] };
 	}
 
 	private static bool IsAnimeId(IExternalMediaId id) => id.Source is MediaProvider.AniList or MediaProvider.Mal;

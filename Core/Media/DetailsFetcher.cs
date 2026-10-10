@@ -14,6 +14,7 @@ namespace Core.Media;
 
 internal sealed class DetailsFetcher(
 	IKeyedServiceSet<RemoteService, IDetailsEnricher> enrichers,
+	IIdentityClaims claims,
 	IProviderConfigService providerConfig,
 	IRemoteCapacity capacity,
 	IServiceReadiness readiness,
@@ -48,10 +49,35 @@ internal sealed class DetailsFetcher(
 			return unavailable.Match(remote => Error.From(new RemoteUnavailableException(remote)), () => Error.From("the details could not be fetched"));
 		}
 
+		var identified = await KeepNewKeysAsync(identity, enriched.Identity, answers, cancellationToken);
 		var askedAt = clock.Now;
 		var cached = new CachedDetails(enriched.Details, RefreshedAt(reason, askedAt), askedAt, Answers(reason, answers, now));
-		buffer.Add(enriched, cached);
-		return Success.Of(enriched);
+		buffer.Add(identity.Id, cached);
+		return Success.Of(enriched with { Identity = identified });
+	}
+
+	private async Task<MediaIdentity> KeepNewKeysAsync(
+		MediaIdentity identity,
+		MediaIdentity enriched,
+		IEnumerable<ProviderAnswer> answers,
+		CancellationToken cancellationToken
+	)
+	{
+		List<IIdentityKey> learned = [.. enriched.Keys.Where(key => !identity.Keys.Contains(key))];
+		if (learned.Count == 0)
+		{
+			return identity;
+		}
+
+		var outcome = await claims.ClaimAsync(
+			new IdentityClaim([.. learned], Some.Of(identity.Id), [.. answers.Select(answer => answer.Provider)]),
+			cancellationToken
+		);
+		return outcome switch
+		{
+			Claimed claimed => new MediaIdentity(claimed.Id, identity.Keys + claimed.Keys),
+			Conflicted => identity,
+		};
 	}
 
 	private static FetchReason Reason(CachedDetails stored, DateTimeOffset now)

@@ -44,6 +44,7 @@ internal static class DemoFeeds
 			Skipped = 0,
 			UnmatchedNotFound = 0,
 			UnmatchedCouldNotLookUp = 0,
+			UnmatchedConflict = 0,
 			Removed = 1,
 			Known = 40,
 			NotFoundEarlier = 0,

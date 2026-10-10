@@ -228,16 +228,21 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task IdentifyAsync_WhenTwoUnknownIdsResolveAlike_CollapseIntoOneMedia()
+	public async Task IdentifyAsync_WhenTwoUnknownIdsResolveAlike_KeepsTheFirstAndLeavesTheSecondInConflict()
 	{
 		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.EnsurePlexAccount();
 		host.PlexHolds(TestMedia.FightClub);
 		host.PlexHolds(Spec("Fight Club Dup", Tmdb("550"), Plex("999")));
 
-		await Testee.IdentifyAsync([Request(null, Plex("550")), Request(null, Plex("999"))]).ToListAsync();
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550")), Request(null, Plex("999"))]).ToListAsync();
 
-		await AssertStored(Tmdb("550"), Plex("550"), Plex("999"));
+		await Assert.That(results.Count(result => result.IsSuccess())).IsEqualTo(1);
+		host.ScopedDbContext.ChangeTracker.Clear();
+		List<string> stored = [.. await host.ScopedDbContext.ExternalMediaIds.Select(row => row.Source + ":" + row.Id).ToListAsync()];
+		await Assert.That(stored).Count().IsEqualTo(2);
+		await Assert.That(stored).Contains("Tmdb:550");
+		await Assert.That(stored.Count(id => id is "Plex:550" or "Plex:999")).IsEqualTo(1);
 	}
 
 	[Test]
@@ -417,17 +422,21 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task IdentifyAsync_WhenTmdbsDetailNamesAnImdbIdAnotherRowHolds_LeavesThatTitleUnresolved()
+	public async Task IdentifyAsync_WhenTmdbsDetailNamesAnImdbIdAnotherRowHolds_IdentifiesTheStoredTitleWithoutThatId()
 	{
-		await host.Movie(Spec("Fight Club (TMDB)", Tmdb("550"))).SeedAsync();
-		await host.Movie(Spec("Fight Club (IMDb)", Imdb("tt0137523"))).SeedAsync();
+		var stored = await host.Movie(Spec("Fight Club (TMDB)", Tmdb("550"))).SeedAsync();
+		var other = await host.Movie(Spec("Fight Club (IMDb)", Imdb("tt0137523"))).SeedAsync();
 		await host.TmdbKnowsTheExternalIdsOf(Spec("Fight Club", Tmdb("550"), Imdb("tt0137523")));
 		await host.PlexSearchReturns("Fight Club", Spec("Fight Club", Tmdb("550"), Plex("550")));
 		host.PlexHolds(Spec("Fight Club", Tmdb("550"), Plex("550")));
 
 		var results = await Testee.IdentifyAsync([Request(null, Tmdb("550"))]).ToListAsync();
 
-		await Assert.That(results.Single()).IsError();
+		var identity = await Assert.That(results.Single()).IsSuccess();
+		await Assert.That(identity!.Id).IsEqualTo(stored);
+		await Assert.That(identity.Keys.OfProvider(MediaProvider.Imdb)).IsNone();
+		var rows = await host.Resolve<IMediaRepository>().GetAsync([other]);
+		await Assert.That(rows.Single().Identity.Keys.OfProvider(MediaProvider.Imdb)).IsSome();
 	}
 
 	[Test]

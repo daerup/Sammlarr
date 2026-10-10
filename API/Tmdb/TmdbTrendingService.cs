@@ -33,7 +33,7 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		unresolvable.ForEach(r => finalItems[r.Index] = Found(r.Item).Unmatched());
 
 		var resolvable = indexed.Except(unresolvable).ToList();
-		var requests = resolvable.Select(x => new IdentifyRequest([x.Item.TmdbId], BuildHints(x.Item)));
+		var requests = resolvable.Select(x => new IdentifyRequest([x.Item.TmdbId], BuildHints(x.Item)) { Sources = [RemoteService.Tmdb] });
 		var pipeline = media.IdentifyAsync(requests, cancellationToken);
 
 		await foreach (var (identity, entry) in pipeline.ZipAwait(resolvable, cancellationToken))

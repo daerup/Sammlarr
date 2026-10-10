@@ -14,8 +14,9 @@ public interface IMediaService
 
 	IAsyncEnumerable<MediaMatchResult> IdentifyWithDetailsAsync(IAsyncEnumerable<IdentifyRequest> requests, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyList<MediaIdentity>> RegisterAsync(
+	Task<IReadOnlyList<Optional<MediaIdentity>>> RegisterAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
+		ValueSet<RemoteService> sources,
 		CancellationToken cancellationToken = default
 	);
 
@@ -45,4 +46,6 @@ public record IdentifyRequest(IReadOnlyList<IExternalMediaId> Candidates, Option
 	public MediaType Type => Candidates.Count == 0 ? MediaType.Unknown : Candidates[0].Type;
 
 	public Optional<IdentifyHints> Description { get; init; } = new None();
+
+	public ValueSet<RemoteService> Sources { get; init; } = [];
 }

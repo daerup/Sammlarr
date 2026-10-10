@@ -53,7 +53,7 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 		await foreach (var anime in (isPage ? read.Take(FeedPages.Titles) : read).WithCancellation(cancellationToken))
 		{
 			var type = MalAnime.TypeOf(anime);
-			yield return new IdentifyRequest([MalAnime.Id(anime, type)], MalAnime.Hints(anime, type));
+			yield return new IdentifyRequest([MalAnime.Id(anime, type)], MalAnime.Hints(anime, type)) { Sources = [RemoteService.Mal] };
 		}
 	}
 

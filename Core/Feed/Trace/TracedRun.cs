@@ -326,6 +326,8 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 
 		private int _notFound;
 
+		private int _conflicted;
+
 		internal int Started { get; set; }
 
 		internal int Known { get; set; }
@@ -347,9 +349,12 @@ internal sealed class TracedRun(Guid key, UserId owner, int cap)
 				case TitleFate.NotFound:
 					_notFound++;
 					break;
+				case TitleFate.Conflict:
+					_conflicted++;
+					break;
 			}
 		}
 
-		internal FateTally Tally() => new(Started, Known, Earlier, _matched, _couldNotLookUp, _notFound, ListedWithoutIds);
+		internal FateTally Tally() => new(Started, Known, Earlier, _matched, _couldNotLookUp, _notFound, ListedWithoutIds, _conflicted);
 	}
 }

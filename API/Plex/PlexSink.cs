@@ -25,7 +25,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 	public async Task<SinkSnapshot> GetAsync(CancellationToken cancellationToken = default)
 	{
 		var items = await WatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
-		var requests = items.Select(item => new IdentifyRequest([.. item.Externals], new None()));
+		var requests = items.Select(item => new IdentifyRequest([.. item.Externals], new None()) { Sources = [RemoteService.Plex] });
 		List<MediaId> matched = [];
 		List<UnmatchedMedia> unmatched = [];
 		await foreach (var (result, item) in mediaService.IdentifyAsync(requests, cancellationToken).ZipAwait(items, cancellationToken))
