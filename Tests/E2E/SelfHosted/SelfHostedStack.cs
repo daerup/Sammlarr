@@ -241,7 +241,9 @@ internal sealed partial class SelfHostedStack
 			foreach (var file in Directory.Exists(folder) ? Directory.EnumerateFiles(folder, "*.json") : [])
 			{
 				var mapping = JsonNode.Parse(await File.ReadAllTextAsync(file))!;
-				mapping["request"]!["urlPath"] = $"{endpoint.Prefix}{mapping["request"]!["urlPath"]!.GetValue<string>()}";
+				var request = mapping["request"]!;
+				request["urlPath"]?.ReplaceWith($"{endpoint.Prefix}{request["urlPath"]!.GetValue<string>()}");
+				request["urlPathPattern"]?.ReplaceWith($"{Regex.Escape(endpoint.Prefix)}{request["urlPathPattern"]!.GetValue<string>()}");
 				(await _wireMock.PostAsJsonAsync("/__admin/mappings", mapping)).EnsureSuccessStatusCode();
 			}
 		}
