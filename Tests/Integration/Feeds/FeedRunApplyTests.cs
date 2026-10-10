@@ -24,6 +24,8 @@ namespace Integration.Tests.Feeds;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 {
+	private static readonly DateTimeOffset Fetched = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
+
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	private IFeedRunEngine Testee => host.Resolve<IFeedRunEngine>();
@@ -141,13 +143,14 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 			Item("Fight Club", MediaType.Movie, Tmdb("550")),
 			Item("Inception", MediaType.Movie, Tmdb("27205"))
 		);
-		await host.Movie(TestMedia.FightClub).SeedAsync();
-		await host.Movie(TestMedia.Inception).SeedAsync();
+		await host.Movie(TestMedia.FightClub).SeedWithDetailsAsync("Fight Club", Fetched);
+		await host.Movie(TestMedia.Inception).SeedWithDetailsAsync("Inception", Fetched);
 
 		var result = await host.Resolve<IFeedRunPlanner>().PlanAsync(new SavedFeed(feedId));
 
 		var plan = await Assert.That(result).IsOfUnionType<FeedPlanResult, AppendPlan>();
-		await Assert.That(plan!.Verdicts.Select(verdict => verdict.Item.Details.Title)).IsEquivalentTo(["Fight Club", "Inception"]);
+		string?[] titles = ["Fight Club", "Inception"];
+		await Assert.That(plan!.Verdicts.Select(verdict => verdict.Item.Details.Title)).IsEquivalentTo(titles);
 		await Assert.That(plan.Verdicts.Select(verdict => verdict.Outcome)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified]);
 	}
 

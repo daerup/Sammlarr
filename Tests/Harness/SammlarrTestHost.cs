@@ -56,12 +56,14 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal const int DefaultYear = 2024;
 
-	private static readonly SqliteConnection Template = BuildTemplate();
-	private static readonly Lock BackupGate = new();
+	private static readonly string Scratch = Path.Combine(Path.GetTempPath(), "sammlarr-tests", Guid.NewGuid().ToString("N"));
+	private static readonly Lazy<string> Template = new(BuildTemplate);
 
 	private const string DataProtectionApplicationName = "Sammlarr";
 
-	private readonly SqliteConnection _connection = RestoreFromTemplate();
+	private readonly string _path = Path.Combine(Scratch, $"{Guid.NewGuid():N}.db");
+	private string? _connectionString;
+	private SqliteConnection? _connection;
 	private ServiceProvider? _dbOnlyProvider;
 	private ServiceProvider? _fullGraphProvider;
 	private IServiceScope? _fullGraphScope;
@@ -79,17 +81,19 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal TestCurrentUser CurrentUser { get; } = new();
 
-	internal SqliteConnection Connection => _connection;
+	private string ConnectionString => _connectionString ??= CopiedTemplate(_path);
+
+	internal SqliteConnection Connection => _connection ??= Opened(ConnectionString);
 
 	internal HttpStub HttpStub { get; } = new();
 
 	private ServiceProvider DbOnlyProvider => _dbOnlyProvider ??= BuildDbOnlyProvider();
 
-	internal SammlarrDbContext Context => _context ??= BuildContext(DbOnlyProvider, CurrentUser, _connection);
+	internal SammlarrDbContext Context => _context ??= BuildContext(DbOnlyProvider, CurrentUser, ConnectionString);
 
 	internal SammlarrDbContext ContextOn(SqliteConnection connection) => BuildContext(DbOnlyProvider, CurrentUser, connection);
 
-	internal IDbContextFactory<SammlarrDbContext> ContextFactory => _contextFactory ??= new SharedConnectionFactory(DbOnlyProvider, _connection, CurrentUser);
+	internal IDbContextFactory<SammlarrDbContext> ContextFactory => _contextFactory ??= new FileContextFactory(DbOnlyProvider, ConnectionString, CurrentUser);
 
 	internal RawDbContext RawContext => _rawContext ??= new RawDbContext(Context);
 
@@ -212,6 +216,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	{
 		await Resolve<ICredentialService>().StoreAsync(AuthProvider.Plex, new StoredCredential(token, DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid()));
 		HttpStub.RequireHeader(TestUrls.PlexApi, "X-Plex-Token", token);
+		HttpStub.RespondWithStatusForUrl($"{TestUrls.PlexApi}/{PlexEndpoints.UserPath}", HttpStatusCode.OK);
 	}
 
 	internal async Task WithTmdbAccount(string apiKey)
@@ -224,6 +229,13 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	{
 		await Resolve<IApiKeyService>().StoreAsync(new TestApiKey(ApiKeyProvider.Mdblist, apiKey));
 		HttpStub.RequireQueryParam(TestUrls.MdblistApi, "apikey", apiKey);
+		foreach (var source in new[] { "imdb", "tmdb", "tvdb", "trakt", "mal", "mdblist" })
+		{
+			foreach (var type in new[] { "movie", "show", "any" })
+			{
+				HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/{source}/{type}", "[]");
+			}
+		}
 	}
 
 	internal void WikidataHolds(string imdb, params string[] paths)
@@ -588,24 +600,63 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			await _dbOnlyProvider.DisposeAsync();
 		}
 
-		await _connection.DisposeAsync();
-	}
-
-	private static SqliteConnection RestoreFromTemplate()
-	{
-		var connection = new SqliteConnection("Data Source=:memory:");
-		connection.Open();
-		lock (BackupGate)
+		if (_connection is not null)
 		{
-			Template.BackupDatabase(connection);
+			await _connection.DisposeAsync();
 		}
 
+		if (_connectionString is not null)
+		{
+			SqliteConnection.ClearPool(new SqliteConnection(_connectionString));
+			File.Delete(_path);
+		}
+
+		if (HttpStub.Unexpected.Count > 0)
+		{
+			throw new InvalidOperationException($"Unstubbed calls: {string.Join(", ", HttpStub.Unexpected.Distinct())}");
+		}
+	}
+
+	internal static void RemoveScratch()
+	{
+		if (Template.IsValueCreated)
+		{
+			SqliteConnection.ClearAllPools();
+			Directory.Delete(Scratch, recursive: true);
+		}
+	}
+
+	private static string CopiedTemplate(string path)
+	{
+		File.Copy(Template.Value, path);
+		return $"Data Source={path}";
+	}
+
+	private static SqliteConnection Opened(string connectionString)
+	{
+		var connection = new SqliteConnection(connectionString);
+		connection.Open();
 		return connection;
 	}
 
-	private static SammlarrDbContext BuildContext(IServiceProvider provider, ICurrentUser user, SqliteConnection connection) =>
-		new(
-			new DbContextOptionsBuilder<SammlarrDbContext>().UseSqlite(connection).Options,
+	private static SammlarrDbContext BuildContext(IServiceProvider provider, ICurrentUser user, string connectionString)
+	{
+		return BuildContext(
+			provider,
+			user,
+			new DbContextOptionsBuilder<SammlarrDbContext>().UseSqlite(connectionString).AddInterceptors(new SqlitePragmaInterceptor()).Options
+		);
+	}
+
+	private static SammlarrDbContext BuildContext(IServiceProvider provider, ICurrentUser user, SqliteConnection connection)
+	{
+		return BuildContext(provider, user, new DbContextOptionsBuilder<SammlarrDbContext>().UseSqlite(connection).Options);
+	}
+
+	private static SammlarrDbContext BuildContext(IServiceProvider provider, ICurrentUser user, DbContextOptions<SammlarrDbContext> options)
+	{
+		return new(
+			options,
 			new EntityAuditer(),
 			new UserOwnershipStamper(),
 			user,
@@ -613,6 +664,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			provider.GetRequiredService<IEnumerable<IModelConfiguration>>(),
 			new FixedClock()
 		);
+	}
 
 	private static ServiceProvider BuildDbOnlyProvider(string? keyRingPath = null)
 	{
@@ -640,9 +692,9 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddScoped(sp => new OverrideAwareCurrentUser(sp.GetRequiredService<CurrentUserOverride>(), CurrentUser));
 		services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<OverrideAwareCurrentUser>());
 
-		services.AddScoped<IDbContextFactory<SammlarrDbContext>>(sp => new SharedConnectionFactory(
+		services.AddScoped<IDbContextFactory<SammlarrDbContext>>(sp => new FileContextFactory(
 			sp,
-			_connection,
+			ConnectionString,
 			sp.GetRequiredService<OverrideAwareCurrentUser>()
 		));
 		services.AddScoped(sp => sp.GetRequiredService<IDbContextFactory<SammlarrDbContext>>().CreateDbContext());
@@ -694,9 +746,10 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return services.BuildServiceProvider();
 	}
 
-	private static SqliteConnection BuildTemplate()
+	private static string BuildTemplate()
 	{
-		var connection = new SqliteConnection("Data Source=:memory:");
+		var path = Path.Combine(Directory.CreateDirectory(Scratch).FullName, "template.db");
+		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
 		connection.Open();
 		using var provider = BuildDbOnlyProvider();
 		var user = new TestCurrentUser();
@@ -705,7 +758,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		SeedRows.SearchWith(context, SearchProvider.Plex);
 		SeedRows.SetupFinished(context);
 		SeedUser(context, user);
-		return connection;
+		SeedRows.WriteAheadLogging(connection);
+		return path;
 	}
 
 	public static SeededUser SeedDatabaseFile(string path, string keyRingPath) =>
@@ -794,8 +848,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		public DateTimeOffset Now { get; set; } = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
 	}
 
-	private sealed class SharedConnectionFactory(IServiceProvider provider, SqliteConnection connection, ICurrentUser user) : IDbContextFactory<SammlarrDbContext>
+	private sealed class FileContextFactory(IServiceProvider provider, string connectionString, ICurrentUser user) : IDbContextFactory<SammlarrDbContext>
 	{
-		public SammlarrDbContext CreateDbContext() => BuildContext(provider, user, connection);
+		public SammlarrDbContext CreateDbContext() => BuildContext(provider, user, connectionString);
 	}
 }

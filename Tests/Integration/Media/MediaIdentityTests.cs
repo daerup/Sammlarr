@@ -145,6 +145,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task IdentifyWithDetailsAsync_ForAShowNoProviderCanPlace_DescribesItsUnmatchedRowWithItsDescriptionWithoutSearchingByIt()
 	{
 		await host.EnsurePlexAccount();
+		host.HttpStub.RespondWithStatusForUrl($"{TestUrls.TvmazeApi}/lookup/shows", HttpStatusCode.NotFound);
 		var request = new IdentifyRequest([Tvdb("431162").ToExternal(MediaType.Show)], new None())
 		{
 			Description = Some.Of(
@@ -337,6 +338,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.TmdbFinds(fightClub);
 		await host.TmdbDescribes(fightClub);
 		await host.PlexFindsNothing("Fight Club");
+		host.WikidataHolds("tt0137523");
 
 		var results = await Testee.IdentifyAsync([Request("Fight Club", SammlarrTestHost.DefaultYear, Imdb("tt0137523"))]).ToListAsync();
 

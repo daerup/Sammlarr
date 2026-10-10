@@ -1,3 +1,4 @@
+using System.Net;
 using Contracts;
 using Contracts.Media;
 using Contracts.Media.Trending;
@@ -76,6 +77,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception);
 		await host.PlexFindsNothing("Inception");
+		host.TmdbDetailFails(TestMedia.Inception, HttpStatusCode.NotFound);
 
 		var items = (await FetchTrending(1)).Items;
 

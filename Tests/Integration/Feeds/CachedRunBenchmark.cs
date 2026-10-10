@@ -45,7 +45,6 @@ public class CachedRunBenchmark(SammlarrTestHost host) : IAsyncDisposable
 	{
 		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/mdblist/movie", "[]");
 		await SeedLibraryAsync();
 		StubList();
 		var feedId = await SeedFeedAsync();

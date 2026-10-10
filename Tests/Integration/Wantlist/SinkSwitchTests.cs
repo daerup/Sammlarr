@@ -54,7 +54,9 @@ public class SinkSwitchTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task SwitchAsync_ForATitleNoProviderCanConvert_CountsItAndStillSwitches()
 	{
-		await host.Movie(new MediaSpec("Lost", MediaType.Movie, [Plex("999")])).OnWantlist(ByHand);
+		var lost = new MediaSpec("Lost", MediaType.Movie, [Plex("999")]);
+		host.PlexHasNoMetadataFor(lost);
+		await host.Movie(lost).OnWantlist(ByHand);
 
 		var switched = await Testee.SwitchAsync(SinkKind.Arr);
 

@@ -7,13 +7,15 @@ namespace Harness;
 
 internal sealed class HttpStub : HttpMessageHandler
 {
-	private readonly Func<HttpRequestMessage, Task<HttpResponseMessage>> _respond = _ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
-
 	private readonly List<(string UrlContains, Func<HttpRequestMessage, bool> Validator)> _credentialValidators = [];
 
 	private readonly Dictionary<string, Func<HttpRequestMessage, Task<HttpResponseMessage>>> _urlResponders = new();
 
 	private readonly ConcurrentQueue<string> _requested = new();
+
+	private readonly ConcurrentQueue<string> _unexpected = new();
+
+	public IReadOnlyCollection<string> Unexpected => _unexpected;
 
 	public int Requests(string urlContains) => _requested.Count(url => url.Contains(urlContains, StringComparison.OrdinalIgnoreCase));
 
@@ -71,7 +73,8 @@ internal sealed class HttpStub : HttpMessageHandler
 				return responder(request);
 		}
 
-		return _respond(request);
+		_unexpected.Enqueue(url);
+		return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotImplemented));
 	}
 
 	private static bool MatchesPattern(string url, string pattern)
