@@ -65,7 +65,7 @@ public class SyncTests
 		await SelfHostedSetup.FinishAsync(page, stack);
 		await SettingsPage.OpenWantlistSyncAsync(page);
 		var sonarr = await ArrSections.OpenAsync(page, "Sonarr");
-		await sonarr.ButtonContaining("Add anime folder and profile").ClickAsync();
+		await sonarr.ButtonContaining("Anime folder and profile").ClickAsync();
 		var folders = sonarr.GetByRole(AriaRole.Combobox, new LocatorGetByRoleOptions { Name = "Sonarr anime root folder" });
 		await folders.ClickAsync();
 		await page.OptionContaining("/anime").ClickAsync();
