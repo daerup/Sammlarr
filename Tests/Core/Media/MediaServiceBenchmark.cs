@@ -57,18 +57,26 @@ public class MediaServiceBenchmark
 			);
 		var clock = Stopwatch.StartNew();
 		var first = TimeSpan.Zero;
+		var half = TimeSpan.Zero;
 		var handed = 0;
 
 		await foreach (var _ in testee.IdentifyWithDetailsAsync(PagedAsync()))
 		{
-			if (handed++ == 0)
+			handed++;
+			if (handed == 1)
 			{
 				first = clock.Elapsed;
+			}
+
+			if (handed == Titles / 2)
+			{
+				half = clock.Elapsed;
 			}
 		}
 
 		Console.WriteLine($"wall: {clock.Elapsed.TotalMilliseconds:F0} ms");
 		Console.WriteLine($"first result: {first.TotalMilliseconds:F0} ms");
+		Console.WriteLine($"half out: {half.TotalMilliseconds:F0} ms");
 		Console.WriteLine($"peak lookups: {lookups.Peak}");
 		Console.WriteLine($"peak details calls: {details.Peak}");
 		Console.WriteLine($"repository calls: {Volatile.Read(ref repository)}");
