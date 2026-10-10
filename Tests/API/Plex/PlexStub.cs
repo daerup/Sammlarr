@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
+using API.Tests.Feeds;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Caching;
@@ -71,7 +72,7 @@ internal sealed class PlexStub : HttpMessageHandler
 		var client = new HttpClient(this) { BaseAddress = new Uri(PlexBaseUrl) };
 		var credentials = ICredentialService.Mock();
 		credentials.GetAsync(AuthProvider.Plex, Any()).Returns(new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "token", DateTimeOffset.MaxValue));
-		return new PlexApi(new PlexClient(client, credentials, ICurrentUser.Mock().Object), PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
+		return new PlexApi(new PlexClient(client, credentials, ICurrentUser.Mock().Object), PlexTestUrls.Instance, FeedClock.Today(), NullLogger<PlexApi>.Instance);
 	}
 
 	protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
