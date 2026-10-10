@@ -411,7 +411,7 @@ run id), delta temporality, the default buckets.
 === Live run trace
 
 While a feed runs, its owner can watch the titles move through Sammlarr, the services it asks and the three outcomes
-(the Feeds page's live view, the card's running pill and the dot on the Feeds link). The view observes the run and
+(the Feeds page's live view and the card's running pill). The view observes the run and
 never steers it: a hook that records a step never awaits, never throws and changes nothing the run decides.
 
 [mermaid]
@@ -423,7 +423,6 @@ flowchart LR
   T -->|IFeedRunTraces.ReadAsync<br/>every 250 ms while a run is live| P[FeedRunProgress<br/>scoped per circuit]
   P --> L[FeedRunLive] -->|push batch| J[feed-live.js<br/>replays at real timing]
   P --> C[card running pill]
-  P --> N[Feeds nav dot]
 ....
 
 A run's titles, paths, hops and give-ups are spans on the `Sammlarr.FeedRun` activity source, started through the
