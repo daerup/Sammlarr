@@ -11,56 +11,18 @@ namespace API.Trakt;
 
 internal sealed class TraktTitles(TraktClient client, IApiKeyService apiKeys, IDateTimeProvider clock)
 {
-	private static readonly TimeSpan Kept = TimeSpan.FromMinutes(10);
-
-	private readonly Lock _gate = new();
-
-	private readonly Dictionary<string, Found> _found = [];
+	private readonly RecentAnswers<string, Optional<TraktTypes.Title>> _found = new(clock);
 
 	internal Task<Result<Optional<TraktTypes.Title>>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
-		var key = Key(id);
-		lock (_gate)
+		return _found.AskAsync(Key(id), () => AskAsync(id), cancellationToken);
+	}
+
+	private void Remember(TraktTypes.Title title, MediaType type)
+	{
+		foreach (var id in TraktTitle.Ids(title, type))
 		{
-			return _found
-				.GetValueOrNone(key)
-				.When(found => clock.Now - found.At < Kept)
-				.Match(found => found.Answer, () => Start(key, id))
-				.WaitAsync(cancellationToken);
-		}
-	}
-
-	private Task<Result<Optional<TraktTypes.Title>>> Start(string key, IExternalMediaId id)
-	{
-		var answer = AskAsync(id);
-		_found[key] = new Found(answer, clock.Now);
-		_ = SettleAsync(key, id.Type, answer);
-		return answer;
-	}
-
-	private async Task SettleAsync(string key, MediaType type, Task<Result<Optional<TraktTypes.Title>>> answer)
-	{
-		await ((Task)answer).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-		Result<Optional<TraktTypes.Title>> settled = answer.IsCompletedSuccessfully ? answer.Result : Error.From("Trakt's lookup threw.");
-		settled.Apply(title => title.Apply(found => Remember(found, type, answer))).ApplyError(_ => Forget(key));
-	}
-
-	private void Remember(TraktTypes.Title title, MediaType type, Task<Result<Optional<TraktTypes.Title>>> answer)
-	{
-		lock (_gate)
-		{
-			foreach (var id in TraktTitle.Ids(title, type))
-			{
-				_found[Key(id)] = new Found(answer, clock.Now);
-			}
-		}
-	}
-
-	private void Forget(string key)
-	{
-		lock (_gate)
-		{
-			_found.Remove(key);
+			_found.Remember(Key(id), Some.Of(title));
 		}
 	}
 
@@ -69,7 +31,8 @@ internal sealed class TraktTitles(TraktClient client, IApiKeyService apiKeys, ID
 	private async Task<Result<Optional<TraktTypes.Title>>> AskAsync(IExternalMediaId id)
 	{
 		var clientId = await apiKeys.GetAsync(ApiKeyProvider.Trakt);
-		return await clientId.Map(found => Endpoint(id).Map(endpoint => ReadAsync(id, endpoint, found)));
+		var answer = await clientId.Map(found => Endpoint(id).Map(endpoint => ReadAsync(id, endpoint, found)));
+		return answer.Apply(title => title.Apply(found => Remember(found, id.Type)));
 	}
 
 	private static Result<string> Endpoint(IExternalMediaId id)
@@ -122,6 +85,4 @@ internal sealed class TraktTitles(TraktClient client, IApiKeyService apiKeys, ID
 		var entries = await response.Content.ReadFromJsonAsync<List<TraktTypes.Item>>() ?? throw new InvalidDataException("Trakt answered an empty search.");
 		return entries.Select(entry => Optional.Of(type is MediaType.Show ? entry.Show : entry.Movie)).WhereSome().FirstOrNone();
 	}
-
-	private readonly record struct Found(Task<Result<Optional<TraktTypes.Title>>> Answer, DateTimeOffset At);
 }
