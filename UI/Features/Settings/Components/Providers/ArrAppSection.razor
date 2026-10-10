@@ -94,19 +94,6 @@
     @if (State == ArrConnectionState.Connected)
     {
         <BbField>
-            <BbFieldLabel>Quality profile</BbFieldLabel>
-            <BbFieldContent>
-                <BbSelect TValue="int?" Value="@Instance.QualityProfileId.ToNullable()" ValueChanged="ProfileChangedAsync"
-                          Options="ProfileOptions" Placeholder="Choose a profile" AriaLabel="@($"{App.Name} quality profile")" Class="w-full [&_[role=combobox]]:h-9"/>
-            </BbFieldContent>
-        </BbField>
-
-        <label class="arr-app-switch">
-            Monitor new titles
-            <BbSwitch Checked="Instance.Monitored" CheckedChanged="MonitoredChangedAsync" AriaLabel="@($"{App.Name} monitors new titles")"/>
-        </label>
-
-        <BbField>
             <BbFieldLabel>Root folder</BbFieldLabel>
             <BbFieldContent>
                 <BbSelect TValue="string" Value="@Instance.RootFolderPath.GetValueOr(string.Empty)" ValueChanged="FolderChangedAsync"
@@ -121,9 +108,30 @@
             </BbFieldContent>
         </BbField>
 
+        <BbField>
+            <BbFieldLabel>Quality profile</BbFieldLabel>
+            <BbFieldContent>
+                <BbSelect TValue="int?" Value="@Instance.QualityProfileId.ToNullable()" ValueChanged="ProfileChangedAsync"
+                          Options="ProfileOptions" Placeholder="Choose a profile" AriaLabel="@($"{App.Name} quality profile")" Class="w-full [&_[role=combobox]]:h-9"/>
+            </BbFieldContent>
+        </BbField>
+
         <label class="arr-app-switch">
-            Search when added
-            <BbSwitch Checked="Instance.SearchOnAdd" CheckedChanged="SearchChangedAsync" AriaLabel="@($"{App.Name} searches when a title is added")"/>
+            <BbSwitch Checked="Instance.Monitored" CheckedChanged="MonitoredChangedAsync" AriaLabel="@($"{App.Name} monitors new titles")"
+                      AriaDescribedBy="@($"{App.Name}-monitor-note")"/>
+            <span class="arr-app-switch-text">
+                <span class="arr-app-switch-name">Monitor new titles</span>
+                <span id="@($"{App.Name}-monitor-note")" class="arr-app-switch-note">@MonitorNote(App)</span>
+            </span>
+        </label>
+
+        <label class="arr-app-switch">
+            <BbSwitch Checked="Instance.SearchOnAdd" CheckedChanged="SearchChangedAsync" AriaLabel="@($"{App.Name} searches when a title is added")"
+                      AriaDescribedBy="@($"{App.Name}-search-note")"/>
+            <span class="arr-app-switch-text">
+                <span class="arr-app-switch-name">Search when added</span>
+                <span id="@($"{App.Name}-search-note")" class="arr-app-switch-note">@SearchNote(App)</span>
+            </span>
         </label>
     }
     else if (State != ArrConnectionState.Failed)
@@ -165,6 +173,24 @@
     private IEnumerable<SelectOption<int?>> ProfileOptions => Choices.Profiles.Select(profile => new SelectOption<int?>(profile.Id, profile.Name));
 
     private IEnumerable<SelectOption<string>> FolderOptions => Choices.Folders.Select(folder => new SelectOption<string>(folder.Path, $"{folder.Path} · {Free(folder.FreeSpace)} free"));
+
+    private static string MonitorNote(ArrApp app)
+    {
+        return app switch
+        {
+            ArrApp.Radarr => "Radarr grabs a movie Sammlarr adds once it is released.",
+            ArrApp.Sonarr => "Sonarr grabs new episodes of the shows Sammlarr adds.",
+        };
+    }
+
+    private static string SearchNote(ArrApp app)
+    {
+        return app switch
+        {
+            ArrApp.Radarr => "Radarr searches right after adding a movie instead of waiting for its next RSS sync.",
+            ArrApp.Sonarr => "Sonarr searches for what is already out right after adding a show.",
+        };
+    }
 
     protected override void OnParametersSet()
     {
