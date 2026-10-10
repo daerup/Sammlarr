@@ -37,7 +37,7 @@ public class ArrSetupTests
 		await ArrSetup.PrepareAsync(Testee(), StagedApp.Sonarr, Sonarr, "http://wiremock:8080/newznab", CancellationToken.None);
 
 		var posted = _sonarr.Requests.Where(request => request.Method == HttpMethod.Post && request.RequestUri!.AbsolutePath == "/api/v3/rootfolder");
-		await Assert.That(posted.Select(request => request.Body)).IsEquivalentTo(["""{"path":"/tv"}""", """{"path":"/anime"}"""], CollectionOrdering.Matching);
+		await Assert.That(posted.Select(request => request.Body!)).IsEquivalentTo(["""{"path":"/tv"}""", """{"path":"/anime"}"""], CollectionOrdering.Matching);
 	}
 
 	private void Holds(string folders)
