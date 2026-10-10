@@ -134,7 +134,7 @@ class Model {
     }
 
     edge(a, b, kind) {
-        const key = `${a}>${b}|${kind === 'bypass' ? 'lane' : 'line'}`;
+        const key = `${a}>${b}`;
         let e = this.edges.get(key);
         if (!e) {
             e = { key, a, b, n: 0, kind, last: -1e9 };
@@ -304,25 +304,16 @@ class Model {
 
     settled(t, fate) {
         t.fate = fate;
-        if (fate === 'matched' && t.known && !t.path.length) {
-            this.c.known++;
-            this.edge('src', 'sink', 'bypass');
-            this.finish(t);
-            return { to: 'sink', kind: 'bypass', finished: true };
-        }
-        if (fate === 'notfound' && t.earlier) {
-            this.c.cached++;
-            this.edge('src', 'nf', 'bypass');
-            this.finish(t);
-            return { to: 'nf', kind: 'bypass', finished: true };
-        }
-        if (t.known) this.c.known++;
+        const earlier = fate === 'notfound' && t.earlier;
+        const tick = earlier || (fate === 'matched' && t.known && !t.path.length);
+        if (earlier) this.c.cached++;
+        else if (t.known) this.c.known++;
         else this.c[fate]++;
         const from = fate === 'matched' ? (t.lastDet ?? t.last ?? 'src') : (t.last ?? 'src');
         const to = FATE_NODE[fate];
         this.edge(from, to, 'fate-' + fate);
         this.finish(t);
-        return { from, to, kind: 'fate', fate, finished: true };
+        return { from, to, kind: 'fate', fate, tick, finished: true };
     }
 
     finish(t) {
@@ -514,14 +505,8 @@ class View {
         const pb = this.pos(b);
         const ra = from ? 0 : this.rad(a);
         const rb = this.rad(b);
-        let p0 = [pa[0] + ra, pa[1]];
-        let p3 = [pb[0] - rb, pb[1]];
-        if (!from) {
-            const d0 = 12 * Math.tanh((pb[1] - pa[1]) / 120);
-            const d3 = 12 * Math.tanh((pa[1] - pb[1]) / 120);
-            p0 = [pa[0] + Math.sqrt(Math.max(0, ra * ra - d0 * d0)), pa[1] + d0];
-            p3 = [pb[0] - Math.sqrt(Math.max(0, rb * rb - d3 * d3)), pb[1] + d3];
-        }
+        const p0 = [pa[0] + ra, pa[1]];
+        const p3 = [pb[0] - rb, pb[1]];
         const dx = Math.max(40, (p3[0] - p0[0]) / 2);
         return [p0, [p0[0] + dx, p0[1]], [p3[0] - dx, p3[1]], p3];
     }
@@ -540,14 +525,32 @@ class View {
     }
 
     route(a, b) {
-        if ((b !== 'cl' && b !== 'nf') || a === 'src' || a.startsWith('d:')) return a !== b ? this.gatePath(a, b) : null;
+        if (a === 'src' ? b in OUTCOMES : (b === 'cl' || b === 'nf') && !a.startsWith('d:')) return this.lane(a, b);
+        return a !== b ? this.gatePath(a, b) : null;
+    }
+
+    lane(a, b) {
         const [x0, y0] = this.pos(a);
         const [x3, y3] = this.pos(b);
-        const gx = x0 + this.step / 2 + (Math.round(y0 / NODE_GAP) % 3) * 7 - 7;
-        const fy = this.H - (b === 'cl' ? 15 : 6);
-        const ex = x3 - (b === 'cl' ? 58 : 40);
+        const [ex, fy] = this.dock(b);
+        const s = Math.sign(fy - y0);
         const r = 10;
-        return `M${x0 + this.rad(a)},${y0} H${gx - r} Q${gx},${y0} ${gx},${y0 + r} V${fy - r} Q${gx},${fy} ${gx + r},${fy} H${ex - r} Q${ex},${fy} ${ex},${fy - r} V${y3 + r} Q${ex},${y3} ${ex + r},${y3} H${x3 - this.rad(b)}`;
+        const side = this.blocked(a);
+        const gx = side ? x0 + this.step / 2 + (Math.round(y0 / NODE_GAP) % 3) * 7 - 7 : x0;
+        const out = side ? `M${x0 + this.rad(a)},${y0} H${gx - r} Q${gx},${y0} ${gx},${y0 + r}` : `M${x0},${y0 + s * this.rad(a)}`;
+        const run = `${out} V${fy - s * r} Q${gx},${fy} ${gx + r},${fy} H${ex - r} Q${ex},${fy} ${ex},${fy - s * r}`;
+        return b === 'cl' ? `${run} V${y3 + r} Q${ex},${y3} ${ex + r},${y3} H${x3 - this.rad(b)}` : `${run} V${y3 + s * this.rad(b)}`;
+    }
+
+    blocked(a) {
+        const [x0, y0] = this.pos(a);
+        return this.cols.some(([x, ys]) => x === x0 && ys.some(([, y]) => y > y0));
+    }
+
+    dock(b) {
+        const [x3] = this.pos(b);
+        if (b === 'cl') return [x3 - 58, this.H - 15];
+        return [x3, b === 'sink' ? 6 : this.H - 6];
     }
 
     gatePath(a, b) {
@@ -616,7 +619,7 @@ class View {
             <div class="fl-list"><div class="fl-lh">In flight <b class="fl-n">0</b><span class="fl-more"></span></div>
             ${Array.from({ length: this.slotN }, (_, i) => `<div class="fl-slot is-empty" data-i="${i}" style="top:${SLOT_TOP + i * SLOT_H}px"><span class="st"></span><span class="nm"></span><span class="yr"></span></div>`).join('')}</div>
             <svg class="fl-svg" viewBox="0 0 ${this.W} ${this.H}" width="${this.W}" height="${this.H}">
-                <text class="fl-cap" x="${sx - 12}" y="26">List</text><text class="fl-cap" x="${this.idX - 40}" y="26">Services</text>${detailsX ? `<text class="fl-cap" x="${detailsX - 28}" y="26">Details</text>` : ''}<text class="fl-cap" x="${L.sink[0] - 32}" y="26">Outcome</text>
+                <text class="fl-cap" x="${sx - 12}" y="26">List</text><text class="fl-cap" x="${this.idX - 40}" y="26">Services</text>${detailsX ? `<text class="fl-cap" x="${detailsX - 28}" y="26">Details</text>` : ''}<text class="fl-cap" x="${L.sink[0] - 10}" y="26" text-anchor="end">Outcome</text>
                 <defs><marker id="fla${this.uid}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" markerUnits="userSpaceOnUse" orient="auto"><path d="M0.5,0.5 L7.5,4 L0.5,7.5 Z" class="fl-arrow"/></marker></defs>
                 <g class="g-edges"></g><g class="g-wait"><path class="fl-entry" d="M${sx + NODE_R + 9},${dby} L${dbx - NODE_R - 9},${dby}" marker-end="url(#fla${this.uid})"/><text class="fl-entry-cap" x="${sx}" y="${dby - NODE_R - 12}"></text></g><path class="fl-hl"/><g class="g-parts"></g><g class="g-nodes"></g>
             </svg><div class="fl-tip" hidden></div></div></div>`;
@@ -736,7 +739,7 @@ class View {
     }
 
     track(a, b) {
-        const path = this.edgeEl(this.model.edges.get(`${a}>${b}|line`)).el;
+        const path = this.edgeEl(this.model.edges.get(`${a}>${b}`)).el;
         return { path, len: path.getTotalLength() };
     }
 
@@ -926,8 +929,8 @@ class View {
                 node.flashColor = STATUS_CSS[fx.status] || STATUS_CSS.answered;
             }
         }
-        if (fx.kind === 'bypass') this.tick(fx.to);
-        else if (fx.to) {
+        if (fx.tick) this.tick(fx.to);
+        if (fx.to) {
             const t0 = fx.from === 'src' ? Math.max(now, this.entryEnd.get(step.title) || now) : now;
             this.spawn(this.track(fx.from, fx.to), fx.kind === 'hop' ? 'var(--foreground)' : FATE[fx.fate].css, t0, 300);
         }
@@ -1010,7 +1013,6 @@ class View {
                 hotNodes.add(e.a);
                 hotNodes.add(e.b);
             }
-            if (e.kind === 'bypass') continue;
             const x = this.edgeEl(e);
             x.el.classList.toggle('is-hot', hot);
             this.waitMark(e, e.kind === 'hop' ? this.waitNow.get(e.b) || '' : '', hot);
@@ -1061,7 +1063,7 @@ class View {
 
     paintHover() {
         const t = this.hover != null ? this.model.titles.get(this.hover) : null;
-        if (!t || !t.path.length) {
+        if (!t || (!t.path.length && !t.fate)) {
             this.hl.style.opacity = '0';
             return;
         }
