@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Contracts;
 using Contracts.Announcing;
 using Contracts.Feed;
@@ -31,6 +32,8 @@ internal sealed class FeedRunProgress(
 	private Request? _request;
 
 	private UserId? _viewer;
+
+	private readonly StrongBox<bool> _hidden = new();
 
 	private bool _disposed;
 
@@ -121,7 +124,7 @@ internal sealed class FeedRunProgress(
 				return;
 			}
 
-			watch = new FeedRunWatch(overview.Feed, layout, overview.LastRun.Map(run => run.Counts.Total), traces, capacity, clock);
+			watch = new FeedRunWatch(overview.Feed, layout, overview.LastRun.Map(run => run.Counts.Total), traces, capacity, clock, _hidden);
 			if (request.Settled)
 			{
 				watch.Settle();

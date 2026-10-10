@@ -9,7 +9,7 @@
 @inject IJSRuntime Js
 @inject MediaProviderBrandingService Branding
 
-<section class="live feed-live feed-live-fold @Class" @ref="_root" data-testid="feed-run-live" aria-label="@($"Live run of {Run.Feed.Name}")">
+<section class="live feed-live" data-testid="feed-run-live" aria-label="@($"Live run of {Run.Feed.Name}")">
     <div class="live-head">
         <div class="live-top">
             @foreach (var brand in Branding.Brands(Run.Feed.Provider.Service))
@@ -43,46 +43,54 @@
                 </BbButton>
             </div>
         </div>
-        <div class="live-bar" data-testid="live-bar">
-            @foreach (var part in Tally.Bar)
-            {
-                <i style="@Width(Tally.Count(part), RunBar.Color(part))" data-part="@part"></i>
-            }
-            <i class="is-flight" style="@Width(Tally.InFlight, null)"></i>
-        </div>
-        <div class="live-legend" data-testid="live-legend">
-            @foreach (var part in Tally.Legend)
-            {
-                @LegendEntry(RunBar.Label(part), RunBar.Meaning(part, Branding.NickName(Run.Layout.Sink.Service)), Tally.Count(part), $"background: {RunBar.Color(part)}", null)
-            }
-            @LegendEntry("In flight", RunBar.InFlightMeaning, Tally.InFlight, null, "is-flight")
-        </div>
+        @if (Run.Hidden)
+        {
+            <div class="live-line" data-testid="live-line"><i style="@Width(Tally.Done, null)"></i></div>
+        }
     </div>
-    <div class="live-body" @ref="_body" hidden="@Run.Hidden" data-testid="live-body"></div>
-    <div class="live-key" hidden="@(Run.Hidden || !_keyOpen)" data-testid="live-key">
-        <span>
-            <svg width="22" height="22" viewBox="-11 -11 22 22" aria-hidden="true"><circle r="5.5" fill="var(--muted)" stroke="var(--border)"/><circle class="key-orbit" r="9" fill="none" stroke="var(--f-flight)" stroke-width="2" stroke-dasharray="5 4"/></svg>
-            <span><b>Turning orange ring</b> the list is sending its next page</span>
-        </span>
-        <span>
-            <svg width="40" height="12" aria-hidden="true"><path d="M1 6 H32" stroke="var(--muted-foreground)" stroke-width="1.5"/><circle cx="12" cy="6" r="3" fill="var(--f-flight)"/><circle cx="19.5" cy="6" r="3" fill="var(--f-flight)"/><circle cx="27" cy="6" r="3" fill="var(--f-flight)"/><path d="M32 2.5 L39 6 L32 9.5 Z" fill="var(--muted-foreground)"/></svg>
-            <span><b>Orange beads</b> titles waiting for an answer there</span>
-        </span>
-        <span>
-            <svg width="40" height="14" aria-hidden="true"><path d="M1 7 H24" stroke="var(--muted-foreground)" stroke-width="1.5"/><circle cx="8" cy="7" r="3" fill="var(--usage-after-429)"/><circle cx="15.5" cy="7" r="3" fill="var(--usage-after-429)"/><path d="M23 1.5 V12.5" stroke="var(--usage-after-429)" stroke-width="3" stroke-linecap="round"/><circle cx="33" cy="7" r="5" fill="none" stroke="var(--usage-after-429)" stroke-width="2" stroke-dasharray="20 40" transform="rotate(-90 33 7)"/></svg>
-            <span><b>Yellow</b> the service asked Sammlarr to slow down (429); the ring counts down</span>
-        </span>
-        <span>
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2 L3 13 L6 10 L8.5 15 L10.5 14 L8 9 L12 9 Z" fill="var(--foreground)"/></svg>
-            <span><b>Hover a service</b> for its answers, what waits there and the seconds left</span>
-        </span>
-    </div>
-    <div class="live-foot" hidden="@Run.Hidden" data-testid="live-foot">
-        @Tally.Ended.When(end => end.Ending is TraceEnding.Completed).Map(end => end.Counts).Match(Rules, () => Reading)
-        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="ToggleKey" Class="@(_keyOpen ? "ml-auto shrink-0 bg-secondary text-foreground" : "ml-auto shrink-0 text-muted-foreground")" aria-expanded="@(_keyOpen ? "true" : "false")" data-testid="live-key-toggle">
-            <LucideIcon Name="circle-question-mark" Size="14" Class="mr-1"/>
-            What the marks mean
-        </BbButton>
+    <div class="live-more feed-live-fold" @ref="_more" hidden="@Run.Hidden" data-testid="live-more">
+        <div class="live-sum">
+            <div class="live-bar" data-testid="live-bar">
+                @foreach (var part in Tally.Bar)
+                {
+                    <i style="@Width(Tally.Count(part), RunBar.Color(part))" data-part="@part"></i>
+                }
+                <i class="is-flight" style="@Width(Tally.InFlight, null)"></i>
+            </div>
+            <div class="live-legend" data-testid="live-legend">
+                @foreach (var part in Tally.Legend)
+                {
+                    @LegendEntry(RunBar.Label(part), RunBar.Meaning(part, Branding.NickName(Run.Layout.Sink.Service)), Tally.Count(part), $"background: {RunBar.Color(part)}", null)
+                }
+                @LegendEntry("In flight", RunBar.InFlightMeaning, Tally.InFlight, null, "is-flight")
+            </div>
+        </div>
+        <div class="live-body" @ref="_body" data-testid="live-body"></div>
+        <div class="live-key" hidden="@(!_keyOpen)" data-testid="live-key">
+            <span>
+                <svg width="22" height="22" viewBox="-11 -11 22 22" aria-hidden="true"><circle r="5.5" fill="var(--muted)" stroke="var(--border)"/><circle class="key-orbit" r="9" fill="none" stroke="var(--f-flight)" stroke-width="2" stroke-dasharray="5 4"/></svg>
+                <span><b>Turning orange ring</b> the list is sending its next page</span>
+            </span>
+            <span>
+                <svg width="40" height="12" aria-hidden="true"><path d="M1 6 H32" stroke="var(--muted-foreground)" stroke-width="1.5"/><circle cx="12" cy="6" r="3" fill="var(--f-flight)"/><circle cx="19.5" cy="6" r="3" fill="var(--f-flight)"/><circle cx="27" cy="6" r="3" fill="var(--f-flight)"/><path d="M32 2.5 L39 6 L32 9.5 Z" fill="var(--muted-foreground)"/></svg>
+                <span><b>Orange beads</b> titles waiting for an answer there</span>
+            </span>
+            <span>
+                <svg width="40" height="14" aria-hidden="true"><path d="M1 7 H24" stroke="var(--muted-foreground)" stroke-width="1.5"/><circle cx="8" cy="7" r="3" fill="var(--usage-after-429)"/><circle cx="15.5" cy="7" r="3" fill="var(--usage-after-429)"/><path d="M23 1.5 V12.5" stroke="var(--usage-after-429)" stroke-width="3" stroke-linecap="round"/><circle cx="33" cy="7" r="5" fill="none" stroke="var(--usage-after-429)" stroke-width="2" stroke-dasharray="20 40" transform="rotate(-90 33 7)"/></svg>
+                <span><b>Yellow</b> the service asked Sammlarr to slow down (429); the ring counts down</span>
+            </span>
+            <span>
+                <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2 L3 13 L6 10 L8.5 15 L10.5 14 L8 9 L12 9 Z" fill="var(--foreground)"/></svg>
+                <span><b>Hover a service</b> for its answers, what waits there and the seconds left</span>
+            </span>
+        </div>
+        <div class="live-foot" data-testid="live-foot">
+            @Tally.Ended.When(end => end.Ending is TraceEnding.Completed).Map(end => end.Counts).Match(Rules, () => Reading)
+            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="ToggleKey" Class="@(_keyOpen ? "ml-auto shrink-0 bg-secondary text-foreground" : "ml-auto shrink-0 text-muted-foreground")" aria-expanded="@(_keyOpen ? "true" : "false")" data-testid="live-key-toggle">
+                <LucideIcon Name="circle-question-mark" Size="14" Class="mr-1"/>
+                What the marks mean
+            </BbButton>
+        </div>
     </div>
     @if (Flash > 0)
     {
@@ -99,9 +107,8 @@
 
     [Parameter] public int Flash { get; set; }
 
-    [Parameter] public string? Class { get; set; }
 
-    private ElementReference _root;
+    private ElementReference _more;
     private ElementReference _body;
     private IJSObjectReference? _module;
     private bool _mounted;
@@ -230,7 +237,7 @@
     {
         if (_module is not null && !_disposed)
         {
-            await CallAsync("fold", _root);
+            await CallAsync("fold", _more);
         }
 
         await OnFolded.InvokeAsync();

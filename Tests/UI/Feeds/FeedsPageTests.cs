@@ -125,12 +125,12 @@ public class FeedsPageTests : BunitContext
 		cut.WaitForState(() => cut.FindAll("[data-testid=running-pill]").Count == 1);
 
 		await cut.Find("[data-testid=live-toggle]").ClickAsync(new());
-		cut.WaitForState(() => cut.Find("[data-testid=live-body]").HasAttribute("hidden"));
+		cut.WaitForState(() => cut.Find("[data-testid=live-more]").HasAttribute("hidden"));
 
 		await cut.Find("[data-testid=running-pill]").ClickAsync(new());
 
 		cut.WaitForState(() => cut.FindAll(".live-flash").Count == 1);
-		await Assert.That(cut.Find("[data-testid=live-body]").HasAttribute("hidden")).IsFalse();
+		await Assert.That(cut.Find("[data-testid=live-more]").HasAttribute("hidden")).IsFalse();
 		await Assert.That(JSInterop.Invocations["sammlarrScroll.intoView"].Single().Arguments.Single()).IsEqualTo("feed-run-live");
 	}
 
@@ -146,6 +146,44 @@ public class FeedsPageTests : BunitContext
 		cut.WaitForState(() => cut.FindAll("[data-testid=feed-run-live]").Count == 0, TimeSpan.FromSeconds(3));
 		await Assert.That(cut.Find(".feed-card-foot").ClassList).Contains("is-new");
 		await Assert.That(cut.FindAll("[data-testid=running-pill]")).IsEmpty();
+		await Assert.That(cut.Find("[data-testid=feed-run-idle]").TextContent).Contains("Nothing is running");
+	}
+
+	[Test]
+	public async Task Render_WithFeedsAndNothingRunning_ShowsTheLiveViewSayingNothingIsRunning()
+	{
+		RegisterServices([Overview()]);
+
+		var cut = RenderPage();
+
+		cut.WaitForState(() => cut.FindAll("[data-testid=feed-run-idle]").Count == 1);
+		await Assert.That(cut.Find("#feed-run-live").TextContent).Contains("Live view").And.Contains("Nothing is running");
+		await Assert.That(cut.FindAll("[data-testid=feed-run-live]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Render_WhileTheRunningFeedStillLoads_ShowsNoIdleLine()
+	{
+		RegisterServices([Overview()], Some.Of(Comedy), Snapshot(new None()));
+		var layouts = IFeedRunLayout.Mock();
+		layouts.GetAsync(Any<FeedId>(), Any()).ReturnsAsync(new TaskCompletionSource<RunLayout>().Task);
+		Services.AddSingleton(layouts.Object);
+
+		var cut = RenderPage();
+
+		cut.WaitForState(() => cut.FindAll(".feed-card-foot").Count == 1);
+		await Assert.That(cut.FindAll("#feed-run-live")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Render_WithoutFeeds_ShowsNoLiveView()
+	{
+		RegisterServices([]);
+
+		var cut = RenderPage();
+
+		cut.WaitForState(() => cut.Markup.Contains("No feeds yet."));
+		await Assert.That(cut.FindAll("#feed-run-live")).IsEmpty();
 	}
 
 	[Test]

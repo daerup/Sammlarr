@@ -6,6 +6,7 @@ using Domain.Feed.Run;
 using Domain.Feed.Trace;
 using Domain.Processing;
 using Domain.Providers;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using TUnit.Assertions.Enums;
@@ -142,12 +143,44 @@ public class FeedRunLiveTests : BunitContext
 
 		cut.WaitForState(() => cut.Find("[data-testid=live-count]").TextContent.Contains("32"));
 		await Assert.That(_module.Invocations["push"]).IsEmpty();
-		await Assert.That(cut.Find("[data-testid=live-body]").HasAttribute("hidden")).IsTrue();
+		await Assert.That(cut.Find("[data-testid=live-more]").HasAttribute("hidden")).IsTrue();
 		await Assert.That(cut.Find("[data-testid=live-count]").TextContent).IsEqualTo("32 of ~400");
 	}
 
 	[Test]
-	public async Task Folded_FoldsTheView()
+	public async Task Hide_KeepsTheHeaderWithALineThatFills()
+	{
+		_run.Tally.Getter.Returns(RunTally.Of(FateTally.None with { Started = 120, Matched = 100 }, new None(), 4000, new None(), Some.Of(400)));
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await cut.Find("[data-testid=live-toggle]").ClickAsync(new());
+
+		await Assert.That(cut.Find("[data-testid=live-line] i").GetAttribute("style")).IsEqualTo("width: 25%");
+		await Assert.That(cut.Find("[data-testid=live-toggle]").TextContent).Contains("Show");
+	}
+
+	[Test]
+	public async Task Render_ForARunThatStartsHidden_DrawsTheLineAndMountsNothing()
+	{
+		_run.Object.Hide();
+
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		cut.WaitForState(() => JSInterop.Invocations["import"].Any(import => Equals(import.Arguments[0], "./js/feed-live.js")));
+		await Assert.That(cut.FindAll("[data-testid=live-line]")).Count().IsEqualTo(1);
+		await Assert.That(_module.Invocations["mount"]).IsEmpty();
+	}
+
+	[Test]
+	public async Task Render_WhileShown_DrawsNoLine()
+	{
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		await Assert.That(cut.FindAll("[data-testid=live-line]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Folded_FoldsWhatIsBelowTheHeader()
 	{
 		var folded = false;
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object).Add(live => live.OnFolded, () => folded = true));
@@ -156,7 +189,8 @@ public class FeedRunLiveTests : BunitContext
 		_run.RaiseFolded();
 
 		cut.WaitForState(() => folded);
-		await Assert.That(_module.Invocations["fold"].Count).IsEqualTo(1);
+		var target = (ElementReference)_module.Invocations["fold"].Single().Arguments[0]!;
+		await Assert.That(cut.Find("[data-testid=live-more]").GetAttribute("blazor:elementReference")).IsEqualTo(target.Id);
 	}
 
 	[Test]
@@ -212,7 +246,7 @@ public class FeedRunLiveTests : BunitContext
 		await cut.Find("[data-testid=live-toggle]").ClickAsync(new());
 
 		cut.WaitForState(() => _module.Invocations["mount"].Count == 2);
-		await Assert.That(cut.Find("[data-testid=live-body]").HasAttribute("hidden")).IsFalse();
+		await Assert.That(cut.Find("[data-testid=live-more]").HasAttribute("hidden")).IsFalse();
 		_run.SnapshotAsync(Any()).WasCalled(Times.Exactly(2));
 	}
 

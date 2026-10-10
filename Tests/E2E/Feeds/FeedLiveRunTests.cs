@@ -27,6 +27,7 @@ public class FeedLiveRunTests
 		await Expect(live).ToHaveAttributeAsync("aria-label", $"Live run of {name}");
 		await Expect(card.GetByTestId("running-pill")).ToBeVisibleAsync(Wait.Settle);
 		await Expect(live).ToBeHiddenAsync(Wait.Preview);
+		await Expect(page.GetByTestId("feed-run-idle")).ToBeVisibleAsync(Wait.Settle);
 		await Expect(card.GetByTestId("last-run-bar")).ToBeVisibleAsync(Wait.Settle);
 	}
 }

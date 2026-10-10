@@ -108,6 +108,69 @@ public class FeedRunProgressTests
 	}
 
 	[Test]
+	public async Task Hide_HoldsForARunThatTakesOver()
+	{
+		Running(Documentaries);
+		using var testee = Progress();
+		await testee.StartAsync();
+		await EventuallyAsync(() => testee.Live.IsSome());
+		(await Assert.That(testee.Live).IsSome())!.Hide();
+
+		_events.RaisePublished(Job(Comedy, JobState.Running));
+
+		await EventuallyAsync(() => testee.Live.Match(run => run.Feed == Comedy, () => false));
+		await Assert.That((await Assert.That(testee.Live).IsSome())!.Hidden).IsTrue();
+	}
+
+	[Test]
+	public async Task Hide_HoldsForTheNextRunAfterAFold()
+	{
+		Running(Documentaries);
+		using var testee = Progress();
+		await testee.StartAsync();
+		await EventuallyAsync(() => testee.Live.IsSome());
+		(await Assert.That(testee.Live).IsSome())!.Hide();
+		_events.RaisePublished(Job(Documentaries, JobState.Done));
+		await EventuallyAsync(() => testee.Live.IsNone());
+
+		_events.RaisePublished(Job(Comedy, JobState.Running));
+
+		await EventuallyAsync(() => testee.Live.IsSome());
+		await Assert.That((await Assert.That(testee.Live).IsSome())!.Hidden).IsTrue();
+	}
+
+	[Test]
+	public async Task Show_ReleasesTheHoldForTheNextRun()
+	{
+		Running(Documentaries);
+		using var testee = Progress();
+		await testee.StartAsync();
+		await EventuallyAsync(() => testee.Live.IsSome());
+		var first = (await Assert.That(testee.Live).IsSome())!;
+		first.Hide();
+		first.Show();
+		_events.RaisePublished(Job(Documentaries, JobState.Done));
+		await EventuallyAsync(() => testee.Live.IsNone());
+
+		_events.RaisePublished(Job(Comedy, JobState.Running));
+
+		await EventuallyAsync(() => testee.Live.IsSome());
+		await Assert.That((await Assert.That(testee.Live).IsSome())!.Hidden).IsFalse();
+	}
+
+	[Test]
+	public async Task Begin_WithNothingHidden_ShowsTheRun()
+	{
+		Running(Documentaries);
+		using var testee = Progress();
+
+		await testee.StartAsync();
+
+		await EventuallyAsync(() => testee.Live.IsSome());
+		await Assert.That((await Assert.That(testee.Live).IsSome())!.Hidden).IsFalse();
+	}
+
+	[Test]
 	public async Task Settle_BeforeTheWatchStarts_StillFoldsAtOnce()
 	{
 		using var entered = new ManualResetEventSlim();
@@ -147,7 +210,7 @@ public class FeedRunProgressTests
 	}
 
 	[Test]
-	public async Task Ended_FoldsFiveSecondsLater()
+	public async Task Ended_HoldsForASecondAndAHalf_ThenFolds()
 	{
 		Running(Documentaries);
 		Reads(Batch([], Some.Of(new FeedRunEnd(TraceEnding.Completed, 2000))));
@@ -155,30 +218,13 @@ public class FeedRunProgressTests
 		await testee.StartAsync();
 		await EventuallyAsync(() => testee.Live.Match(run => run.Tally.Ended.IsSome(), () => false));
 
+		_clock.Now.Getter.Returns(Start.AddSeconds(1));
 		await Task.Delay(600);
-		var lingering = testee.Live;
-		_clock.Now.Getter.Returns(Start.AddSeconds(5));
+		var holding = testee.Live;
+		_clock.Now.Getter.Returns(Start.AddSeconds(1.5));
 
 		await EventuallyAsync(() => testee.Live.IsNone());
-		await Assert.That(lingering).IsSome();
-	}
-
-	[Test]
-	public async Task Hide_KeepsUntilTheNextRun()
-	{
-		Running(Documentaries);
-		using var testee = Progress();
-		await testee.StartAsync();
-		await EventuallyAsync(() => testee.Live.IsSome());
-		var first = (await Assert.That(testee.Live).IsSome())!;
-
-		first.Hide();
-		_events.RaisePublished(Job(Documentaries, JobState.Running));
-
-		await EventuallyAsync(() => testee.Live.Match(run => run != first, () => false));
-		var next = (await Assert.That(testee.Live).IsSome())!;
-		await Assert.That(first.Hidden).IsTrue();
-		await Assert.That(next.Hidden).IsFalse();
+		await Assert.That(holding).IsSome();
 	}
 
 	[Test]

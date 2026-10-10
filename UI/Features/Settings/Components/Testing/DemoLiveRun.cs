@@ -12,7 +12,7 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 {
 	private static readonly TimeSpan Tick = TimeSpan.FromMilliseconds(250);
 
-	private const int Linger = 5000;
+	private const int Linger = 1500;
 
 	private const int PageSize = 40;
 
