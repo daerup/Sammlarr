@@ -16,6 +16,8 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 
 	private const int PageSize = 40;
 
+	private const int FetchMs = 900;
+
 	private static readonly (string Name, int Year)[] Names =
 	[
 		("Free Solo", 2018),
@@ -154,10 +156,6 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 
 	private readonly Dictionary<RemoteService, int> _waiting = [];
 
-	private const int ReadingAfterMs = 900;
-
-	private Optional<int> _lastStartMs = new None();
-
 	private static readonly FeedRunCounts Counts = new FeedRunCounts
 	{
 		Total = 120,
@@ -293,11 +291,6 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 	private void Count(TraceStep step)
 	{
 		var traced = step.Event;
-		if (traced is TitleStarted)
-		{
-			_lastStartMs = Some.Of(step.AtMs);
-		}
-
 		_fates = traced switch
 		{
 			TitleStarted => _fates with { Started = _fates.Started + 1 },
@@ -398,10 +391,7 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 
 	private RunProgress Progress(int elapsed)
 	{
-		var reading = Optional.When(
-			_ended.IsNone() && _requests.IsNone() && _lastStartMs.Match(at => elapsed - at > ReadingAfterMs, () => _fates.Started == 0),
-			() => _page.Map(read => read.Page + 1).GetValueOr(1)
-		);
+		var reading = _script.Reading.FirstOrNone(window => window.From <= elapsed && elapsed < window.Until).Map(window => window.Page);
 		var busiest = _waiting
 			.Where(pair => pair.Value > 0)
 			.OrderByDescending(pair => pair.Value)
@@ -416,7 +406,12 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 		return nodes.GetValueOrDefault(place, new NodeTally(place, 0, 0, 0, 0, 0, 0));
 	}
 
-	private sealed record Script(IReadOnlyList<TraceStep> Steps, int EndMs, IReadOnlyList<(int From, int Until)> Blocked)
+	private sealed record Script(
+		IReadOnlyList<TraceStep> Steps,
+		int EndMs,
+		IReadOnlyList<(int From, int Until)> Blocked,
+		IReadOnlyList<(int From, int Until, int Page)> Reading
+	)
 	{
 		internal static Script Write((string Name, int Year)[] names)
 		{
@@ -434,7 +429,7 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 					.Events.OrderBy(entry => entry.At)
 					.Select((entry, index) => new TraceStep(index + 1, entry.At, Optional.When(entry.Title >= 0, () => entry.Title), entry.Event)),
 			];
-			return new Script(steps, steps[^1].AtMs + 120, writer.Blocked);
+			return new Script(steps, steps[^1].AtMs + 120, writer.Blocked, writer.Reading);
 		}
 	}
 
@@ -446,13 +441,17 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 
 		internal List<(int From, int Until)> Blocked { get; } = [];
 
+		internal List<(int From, int Until, int Page)> Reading { get; } = [];
+
 		internal void Add(int at, int title, TraceEvent traced) => Events.Add((at, title, traced));
 
 		internal void Page(int title, int titles)
 		{
 			if (title % PageSize == 0)
 			{
-				Add(370 + title * 105, -1, new SourcePage(title / PageSize + 1, Some.Of((titles + PageSize - 1) / PageSize)));
+				var at = 370 + title * 105;
+				Reading.Add((Math.Max(0, at - FetchMs), at, title / PageSize + 1));
+				Add(at, -1, new SourcePage(title / PageSize + 1, Some.Of((titles + PageSize - 1) / PageSize)));
 			}
 		}
 

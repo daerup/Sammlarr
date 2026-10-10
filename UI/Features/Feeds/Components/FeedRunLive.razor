@@ -284,7 +284,7 @@
 
     private static RenderFragment ReadingPage(int page) => @<span>Reading page <b>@Count(page)</b> of the list</span>;
 
-    private RenderFragment Idle => Tally.Ended.Match(_ => Nothing, () => Tally.Progress.Reading.Match(_ => Nothing, () => Flowing));
+    private RenderFragment Idle => Tally.Ended.Match(_ => Nothing, () => Tally.Progress.Reading.Match(_ => Nothing, () => Tally.Fates.Started > 0 ? Flowing : Nothing));
 
     private static RenderFragment Flowing => @<span>Titles flowing</span>;
 
