@@ -25,7 +25,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task FindManyAsync_WhenMediaExists_ReturnsMediaIdForSlot()
 	{
 		var imdbId = ImdbId.From("tt0101", MediaType.Movie);
-		IExternalMediaId[] seededIds = [TmdbId.From("101", MediaType.Movie), imdbId, TvdbId.From("201", MediaType.Movie)];
+		IIdentityKey[] seededIds = [TmdbId.From("101", MediaType.Movie), imdbId, TvdbId.From("201", MediaType.Movie)];
 
 		var seededMediaId = await SetUpMediaAsync(seededIds);
 
@@ -42,7 +42,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var imdbId = ImdbId.From("tt0102", MediaType.Movie);
 		var tmdbId = TmdbId.From("102", MediaType.Movie);
-		IExternalMediaId[] seededIds = [tmdbId, imdbId, TvdbId.From("202", MediaType.Movie)];
+		IIdentityKey[] seededIds = [tmdbId, imdbId, TvdbId.From("202", MediaType.Movie)];
 
 		var seededMediaId = await SetUpMediaAsync(seededIds);
 
@@ -124,7 +124,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetExternalsAsync_WhenMediaExists_ReturnsExternalForRequestedSource()
 	{
-		var ids = new IExternalMediaId[] { TmdbId.From("210", MediaType.Movie), PlexId.From("plex-210", MediaType.Movie) };
+		var ids = new IIdentityKey[] { TmdbId.From("210", MediaType.Movie), PlexId.From("plex-210", MediaType.Movie) };
 		var mediaId = await SetUpMediaAsync(ids);
 
 		var result = await _testee.GetExternalsAsync([mediaId], MediaProvider.Plex);
@@ -136,7 +136,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetExternalsAsync_WhenATitleCarriesTwoIdsFromTheSource_ReturnsOneOfThem()
 	{
-		var ids = new IExternalMediaId[] { TmdbId.From("1341215", MediaType.Movie), TmdbId.From("1312572", MediaType.Movie) };
+		var ids = new IIdentityKey[] { TmdbId.From("1341215", MediaType.Movie), TmdbId.From("1312572", MediaType.Movie) };
 		var mediaId = await SetUpMediaAsync(ids);
 
 		var result = await _testee.GetExternalsAsync([mediaId], MediaProvider.Tmdb);
@@ -240,17 +240,17 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task UpsertManyAsync_WhenTwoStoredTitlesClaimOneId_KeepsEachOnItsRowAndTheIdOnNeither()
 	{
-		IExternalMediaId first = TmdbId.From("313", MediaType.Show);
-		IExternalMediaId second = TmdbId.From("314", MediaType.Show);
-		var shared = MetacriticId.From("shared-313", MediaType.Show);
+		IIdentityKey first = TmdbId.From("313", MediaType.Show);
+		IIdentityKey second = TmdbId.From("314", MediaType.Show);
+		var shared = ImdbId.From("tt0000313", MediaType.Show);
 		var firstId = await SetUpMediaAsync([first]);
 		var secondId = await SetUpMediaAsync([second, shared]);
 
 		var identities = await _testee.UpsertIdentitiesAsync([new MediaIdentity(firstId, [first, shared]), new MediaIdentity(secondId, [second, shared])]);
 
 		await Assert.That(identities.Select(identity => identity.Id)).IsEquivalentTo([firstId, secondId]);
-		await Assert.That(identities[0].Externals).IsEquivalentTo([first]);
-		await Assert.That(identities[1].Externals).IsEquivalentTo([second]);
+		await Assert.That(identities[0].Keys).IsEquivalentTo([first]);
+		await Assert.That(identities[1].Keys).IsEquivalentTo([second]);
 		var stored = await fixture.Context.ExternalMediaIds.Select(row => row.Id).ToListAsync();
 		await Assert.That(stored).IsEquivalentTo(["313", "314"]);
 	}
@@ -287,7 +287,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(rows[0].Identity.Id).IsEqualTo(seededMediaId);
 	}
 
-	private async Task<MediaId> SetUpMediaAsync(IEnumerable<IExternalMediaId> ids)
+	private async Task<MediaId> SetUpMediaAsync(IEnumerable<IIdentityKey> ids)
 	{
 		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));

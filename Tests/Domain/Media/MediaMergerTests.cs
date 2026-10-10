@@ -29,6 +29,27 @@ public class MediaMergerTests
 	}
 
 	[Test]
+	public async Task FillFrom_WhenBothSidesLinkTheSameSite_KeepsMineAndAddsTheOtherSites()
+	{
+		var first = new MovieDetails { PageLinks = [RottenTomatoesId.From("m/dune_2021", MediaType.Movie)] };
+		var second = new MovieDetails { PageLinks = [RottenTomatoesId.From("m/dune", MediaType.Movie), MetacriticId.From("dune", MediaType.Movie)] };
+
+		var merged = first.FillFrom(second);
+
+		await Assert.That(merged.PageLinks.Select(link => $"{link}")).IsEquivalentTo(["RottenTomatoes:Movie:m/dune_2021", "Metacritic:Movie:dune"]);
+	}
+
+	[Test]
+	public async Task Only_ForNoFields_KeepsThePageLinks()
+	{
+		var details = new MovieDetails { Title = "Dune", PageLinks = [MetacriticId.From("dune", MediaType.Movie)] };
+
+		var kept = details.Only(MediaFields.None);
+
+		await Assert.That(kept.PageLinks.Select(link => $"{link}")).IsEquivalentTo(["Metacritic:Movie:dune"]);
+	}
+
+	[Test]
 	public async Task FillFrom_WhenBothSidesLackAField_KeepsTheGap()
 	{
 		var first = new MovieDetails { Title = "Dune" };

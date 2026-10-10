@@ -48,7 +48,7 @@ internal sealed class MediaWriteBuffer : IAsyncDisposable
 			var survivor = Survivor(identity.Id);
 			_identities[survivor] = _identities
 				.GetValueOrNone(survivor)
-				.Map(existing => existing with { Externals = existing.Externals + identity.Externals })
+				.Map(existing => existing with { Keys = existing.Keys + identity.Keys })
 				.GetValueOr(() => identity with { Id = survivor });
 		}
 	}
@@ -62,7 +62,7 @@ internal sealed class MediaWriteBuffer : IAsyncDisposable
 			var merged = survivor with { Id = to };
 			if (from != to)
 			{
-				merged = _identities.GetValueOrNone(from).Map(found => merged with { Externals = merged.Externals + found.Externals }).GetValueOr(merged);
+				merged = _identities.GetValueOrNone(from).Map(found => merged with { Keys = merged.Keys + found.Keys }).GetValueOr(merged);
 				_absorbed[from] = to;
 				_identities.Remove(from);
 			}

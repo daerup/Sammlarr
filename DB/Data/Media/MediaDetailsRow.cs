@@ -39,6 +39,8 @@ internal abstract record MediaDetailsRow : IAuditable
 	public List<MediaRatingRow> Ratings { get; set; } = [];
 
 	public List<ProviderAnswerRow> Answers { get; set; } = [];
+
+	public List<MediaPageLinkRow> PageLinks { get; set; } = [];
 }
 
 internal record MovieDetailsRow : MediaDetailsRow

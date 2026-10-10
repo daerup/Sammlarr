@@ -17,7 +17,7 @@ public class TitleRunTests
 	{
 		await using var buffer = new MediaWriteBuffer(IMediaRepository.Mock().Object, NullLogger<MediaWriteBuffer>.Instance);
 		var testee = Run(buffer);
-		buffer.MergeIdentity(Absorbed.Id, Survivor with { Externals = Survivor.Externals + Absorbed.Externals });
+		buffer.MergeIdentity(Absorbed.Id, Survivor with { Keys = Survivor.Keys + Absorbed.Keys });
 
 		var handed = testee.HandOut(new MatchedMedia(Absorbed, new MovieDetails { Title = "Heat" }) { Known = true });
 

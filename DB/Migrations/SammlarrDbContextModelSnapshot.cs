@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261010172344_ArrAnimeFolders";
+    public override string LastMigrationId => "20261010212700_PageLinks";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -758,6 +758,24 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasDiscriminator<string>("MediaType");
 
                 b.UseTphMappingStrategy();
+            });
+
+        modelBuilder.Entity("DB.Data.Media.MediaPageLinkRow", b =>
+            {
+                b.Property<Guid>("MediaId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Site")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Path")
+                    .IsRequired()
+                    .HasMaxLength(300)
+                    .HasColumnType("TEXT");
+
+                b.HasKey("MediaId", "Site");
+
+                b.ToTable("MediaPageLinks");
             });
 
         modelBuilder.Entity("DB.Data.Media.MediaRatingRow", b =>
@@ -1607,6 +1625,17 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Media");
             });
 
+        modelBuilder.Entity("DB.Data.Media.MediaPageLinkRow", b =>
+            {
+                b.HasOne("DB.Data.Media.MediaDetailsRow", "Details")
+                    .WithMany("PageLinks")
+                    .HasForeignKey("MediaId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Details");
+            });
+
         modelBuilder.Entity("DB.Data.Media.MediaRatingRow", b =>
             {
                 b.HasOne("DB.Data.Media.MediaDetailsRow", "Details")
@@ -1767,6 +1796,8 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>
             {
                 b.Navigation("Answers");
+
+                b.Navigation("PageLinks");
 
                 b.Navigation("Ratings");
             });

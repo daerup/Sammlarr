@@ -161,7 +161,7 @@ internal sealed class DetailsFetcher(
 			var answer = await AskAsync(next, known, cancellationToken);
 			answer.ApplyError(error => unavailable = unavailable.Or(() => error.CausedBy<RemoteUnavailableException>().Map(cause => cause.Remote)));
 			var fitting = answer.ToOptional().When(found => found.Fits(backup.Type));
-			fitting.Apply(found => known = known with { Externals = known.Externals + found.Externals });
+			fitting.Apply(found => known = known with { Keys = known.Keys + found.Externals.OfType<IIdentityKey>() });
 			var deferred = fitting.Map(found => Deferred(next.Remote, found.Details)).GetValueOr(MediaFields.None);
 			fitting.Apply(found => fresh = fresh.FillFrom(found.Details.Without(deferred)));
 			fitting.Apply(found => gapFills = gapFills.FillFrom(found.Details.Only(deferred)));
@@ -247,7 +247,7 @@ internal sealed class DetailsFetcher(
 	private Optional<EnricherCandidate> Candidate(MediaIdentity identity, RemoteService remote, IDetailsEnricher enricher)
 	{
 		return enricher
-			.Accepts.Select(source => identity.Externals.OfProvider(source))
+			.Accepts.Select(source => identity.Keys.OfProvider(source))
 			.WhereSome()
 			.FirstOrNone()
 			.Map(id => new EnricherCandidate(remote, id, enricher.Fills, capacity.Of(remote)));

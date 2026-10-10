@@ -1,6 +1,7 @@
 using Contracts.Media;
 using Contracts.Ratings;
 using Domain.Media;
+using Domain.Providers;
 using Harness;
 using TestInfrastructure;
 
@@ -40,6 +41,22 @@ public class MdblistRatingTests(SammlarrTestHost host) : IAsyncDisposable
 				RatingSource.Metacritic,
 				RatingSource.Letterboxd,
 			]);
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_WithOnlyAnMdblistKey_StoresItsRatingPagesAsPageLinks()
+	{
+		await host.WithMdblistAccount("valid-mdblist-key");
+		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/imdb/movie", FightClub);
+		var fightClub = await host.SeedMediaAsync(ImdbId.From("tt0137523", MediaType.Movie));
+
+		await host.Resolve<IMediaService>().GetDetailsAsync([fightClub]).ToListAsync();
+
+		var stored = (await host.Resolve<IMediaRepository>().GetAsync([fightClub])).Single();
+		await Assert
+			.That(stored.Cached.Map(cached => cached.Details.PageLinks.Select(link => $"{link}")).GetValueOr([]))
+			.IsEquivalentTo(["RottenTomatoes:Movie:m/fight_club", "Metacritic:Movie:fight-club", "Letterboxd:Movie:fight-club"]);
+		await Assert.That(stored.Identity.Keys.Select(key => key.Source)).DoesNotContain(MediaProvider.Metacritic);
 	}
 
 	[Test]

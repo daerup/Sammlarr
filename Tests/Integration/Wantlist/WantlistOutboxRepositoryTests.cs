@@ -18,7 +18,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Before(Test)]
 	public void Setup() => _testee = new WantlistOutboxRepository(fixture.ContextFactory);
 
-	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
+	private async Task<MediaId> SeedMediaAsync(IEnumerable<IIdentityKey> ids)
 	{
 		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));

@@ -432,7 +432,7 @@ public class DetailsFetcherTests
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Identity.Id).IsEqualTo(Id);
-		await Assert.That(fetched.Identity.Externals).IsEquivalentTo(new IExternalMediaId[] { Plex, Tmdb, imdb });
+		await Assert.That(fetched.Identity.Keys).IsEquivalentTo(new IExternalMediaId[] { Plex, Tmdb, imdb });
 	}
 
 	[Test]
@@ -754,7 +754,7 @@ public class DetailsFetcherTests
 	public async Task FetchAsync_WhenSearchIsNotPlex_AsksTmdbFirstByItsTmdbId(SearchProvider search)
 	{
 		var deps = Dependencies.Create(search: search);
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia(Identity.Externals, Complete())));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia([.. Identity.Keys], Complete())));
 		await using var buffer = deps.Buffer();
 
 		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
@@ -783,7 +783,7 @@ public class DetailsFetcherTests
 			search: SearchProvider.Tmdb,
 			capacity: TestCapacity.With(remote => new RemoteLoad(Optional.When(remote is RemoteService.Plex, () => Now.AddMilliseconds(20)), 0))
 		);
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia(Identity.Externals, Unrated())));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia([.. Identity.Keys], Unrated())));
 		await using var buffer = deps.Buffer();
 
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer, WaitingThrows));
@@ -908,7 +908,7 @@ public class DetailsFetcherTests
 
 		public void PlexAnswers(MovieDetails details, MediaIdentity? identity = null)
 		{
-			Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia((identity ?? Identity).Externals, details)));
+			Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(new FoundMedia([.. (identity ?? Identity).Keys], details)));
 		}
 
 		private static IDateTimeProvider Clock()

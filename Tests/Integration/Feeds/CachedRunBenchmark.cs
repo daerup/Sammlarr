@@ -114,6 +114,11 @@ public class CachedRunBenchmark(SammlarrTestHost host) : IAsyncDisposable
 						VoteCount = 1000 + index,
 					}),
 				],
+				PageLinks =
+				[
+					new MediaPageLinkRow { Site = MediaProvider.RottenTomatoes, Path = $"m/title_{index}" },
+					new MediaPageLinkRow { Site = MediaProvider.Metacritic, Path = $"title-{index}" },
+				],
 			};
 			var seeded = new MediaDetailsFactory().ToCached(details).Details;
 			details.Answers =
@@ -135,7 +140,7 @@ public class CachedRunBenchmark(SammlarrTestHost host) : IAsyncDisposable
 		await context.SaveChangesAsync();
 	}
 
-	private static IReadOnlyList<IExternalMediaId> Keys(int index) =>
+	private static IReadOnlyList<IIdentityKey> Keys(int index) =>
 		[
 			MdblistId.From($"mdb{index}", MediaType.Movie),
 			TmdbId.From($"{100000 + index}", MediaType.Movie),

@@ -68,6 +68,7 @@ public static class MediaMerger
 			ReleaseDate = mine.ReleaseDate ?? theirs.ReleaseDate,
 			Genres = Coalesce(mine.Genres, theirs.Genres),
 			Ratings = mine.Ratings.FillFrom(theirs.Ratings),
+			PageLinks = mine.PageLinks + theirs.PageLinks.Where(link => mine.PageLinks.All(held => held.Source != link.Source)),
 		};
 	}
 }

@@ -28,7 +28,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 		_testee = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock());
 	}
 
-	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
+	private async Task<MediaId> SeedMediaAsync(IEnumerable<IIdentityKey> ids)
 	{
 		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
@@ -51,6 +51,56 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
 		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.AskedAt).IsEqualTo(secondAsk));
+	}
+
+	[Test]
+	public async Task UpsertDetailsAsync_WithPageLinks_ReadsThemBackAsLinksOfTheTitle()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-800", MediaType.Movie)]);
+		IPageLink[] links = [RottenTomatoesId.From("m/fight_club", MediaType.Movie), MetacriticId.From("fight-club", MediaType.Movie)];
+
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete() with { PageLinks = [.. links] })));
+		fixture.Context.ChangeTracker.Clear();
+
+		var stored = (await _testee.GetAsync([mediaId])).Single();
+		await Assert
+			.That(stored.Cached)
+			.IsSome()
+			.And.Multiple(async cached => await Assert.That(cached.Details.PageLinks.Select(link => $"{link}")).IsEquivalentTo(links.Select(link => $"{link}")));
+	}
+
+	[Test]
+	public async Task GetAsync_ForTwoTitlesWithDifferentLinks_GivesEachItsOwn()
+	{
+		var first = await SeedMediaAsync([PlexId.From("plex-820", MediaType.Movie)]);
+		var second = await SeedMediaAsync([PlexId.From("plex-821", MediaType.Movie)]);
+		await _testee.UpsertDetailsAsync(Details(first, Cached(Complete() with { PageLinks = [RottenTomatoesId.From("m/first", MediaType.Movie)] })));
+		await _testee.UpsertDetailsAsync(Details(second, Cached(Complete() with { PageLinks = [MetacriticId.From("second", MediaType.Movie)] })));
+		fixture.Context.ChangeTracker.Clear();
+
+		var stored = await _testee.GetAsync([first, second]);
+
+		var links = stored.ToDictionary(media => media.Identity.Id, media => media.Cached.Map(cached => string.Join(",", cached.Details.PageLinks)).GetValueOr(""));
+		await Assert.That(links[first]).IsEqualTo("RottenTomatoes:Movie:m/first");
+		await Assert.That(links[second]).IsEqualTo("Metacritic:Movie:second");
+	}
+
+	[Test]
+	public async Task SavePageLinksAsync_ForASiteTheTitleHolds_KeepsTheHeldLinkAndAddsTheOthers()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-810", MediaType.Movie)]);
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete() with { PageLinks = [RottenTomatoesId.From("m/held", MediaType.Movie)] })));
+		fixture.Context.ChangeTracker.Clear();
+
+		await _testee.SavePageLinksAsync(mediaId, [RottenTomatoesId.From("m/other", MediaType.Movie), MetacriticId.From("movie-page", MediaType.Movie)]);
+
+		var stored = (await _testee.GetAsync([mediaId])).Single();
+		await Assert
+			.That(stored.Cached)
+			.IsSome()
+			.And.Multiple(async cached =>
+				await Assert.That(cached.Details.PageLinks.Select(link => $"{link}")).IsEquivalentTo(["RottenTomatoes:Movie:m/held", "Metacritic:Movie:movie-page"])
+			);
 	}
 
 	[Test]
@@ -180,7 +230,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
 
-		await Assert.That(stored.Identity.Externals).Count().IsEqualTo(3);
+		await Assert.That(stored.Identity.Keys).Count().IsEqualTo(3);
 		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.Details.Ratings.All).Count().IsEqualTo(2));
 	}
 

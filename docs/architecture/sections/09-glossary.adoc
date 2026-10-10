@@ -18,14 +18,14 @@ placeholder. `MediaId.New()` mints one, `MediaId.From` reads a stored one.
 `IExternalMediaId`:: One provider's id for a title, with source provider, media type, and value.
 Cases: `TmdbId`, `ImdbId`, `TvdbId`, `PlexId`, `MdblistId`.
 
-`MediaIdentity`:: A `MediaId` plus the external ids identified as that title. Only titles Sammlarr stores
-have one.
+`MediaIdentity`:: A `MediaId` plus the identity keys (`IIdentityKey`: TMDB, IMDb, TVDB, Plex, MDBList, Trakt, MAL, TVmaze,
+AniList) identified as that title. Only titles Sammlarr stores have one. Rating pages are not keys (see Page link).
 
 `MediaDetails`:: What is known about a title: title, tagline, summary, artwork, release date,
 genres and ratings, plus the runtime (`MovieDetails`) or seasons, episodes and runtime per episode
 (`ShowDetails`); `UnknownDetails` carries the common fields only. Every field is optional: a
 missing value is `null` (never `""`, `0` or a sentinel date), missing genres are an empty set and
-missing ratings are `MediaRatings.None`.
+missing ratings are `MediaRatings.None`. `PageLinks` holds the title's rating-site pages, at most one per site.
 
 `FoundMedia`:: A provider's answer: external ids plus details, no `MediaId`. `MatchTo(identity)`
 turns it into a match result.
@@ -92,13 +92,17 @@ falls back to every available source, so disconnecting the provider behind a kep
 another provider still supplies ratings. Availability is read from the stored keys and accounts, never from a live
 check, so a provider that is briefly unreachable still counts.
 
-Rotten Tomatoes page:: Where a breakdown's Rotten Tomatoes rows link: the title's `RottenTomatoesId` (a path such as
-`m/dune_part_two`), an external id like any other in `ExternalMediaIds`. A breakdown with a Rotten Tomatoes rating whose title has
-no such id yet asks `IMediaService.FindIdAsync` for it the first time it opens; the resolver finds it through `WikidataIdConverter`
-(Wikidata's "Rotten Tomatoes ID", P1258, by the title's IMDb id, P345, which TMDB supplies first when the title lacks it)
-and stores it with the title's other ids. "No page" is remembered by the resolver's one-hour miss cache; a failed lookup
-is not. A page Wikidata gives two titles stays with the first; the second finds none. Without an id the rows link to
-Rotten Tomatoes' search.
+Page link:: An `IPageLink` (`RottenTomatoesId`, `MetacriticId`, `LetterboxdId`): the path of a rating site's page for a title,
+such as `m/dune_part_two`. It is stored on the title's details (`MediaPageLinks`), never with its identity keys, so two
+titles may share one (remakes share a Metacritic slug) and a link never merges titles. `MediaProvider.Role` says which
+providers give keys and which give page links.
+
+Rotten Tomatoes page:: Where a breakdown's Rotten Tomatoes rows link: the title's Rotten Tomatoes page link. MDBList's
+rating answer carries it; a breakdown whose title has none yet asks `IMediaService.FindIdAsync` for it the first time it
+opens, which finds it through `WikidataIdConverter` (Wikidata's "Rotten Tomatoes ID", P1258, by the title's IMDb id, P345,
+which TMDB supplies first when the title lacks it) and stores every page link and key in that answer. "No page" is
+remembered by the resolver's one-hour miss cache; a failed lookup is not. A title with no details row can't keep a link
+and asks again. Without a link the rows link to Rotten Tomatoes' search.
 
 Page linker:: An `IExternalPageLinker`, registered in the UI keyed by `MediaProvider`, one class per provider, that turns a
 title's ids (and its title) into that provider's page, by its own id: TMDB, TheTVDB and MDBList by media type too (TheTVDB and

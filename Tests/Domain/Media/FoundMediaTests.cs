@@ -19,7 +19,7 @@ public class FoundMediaTests
 			.And.Multiple(async matched =>
 			{
 				await Assert.That(matched.Identity.Id).IsEqualTo(Movie.Id);
-				await Assert.That(matched.Identity.Externals).IsEquivalentTo([.. Movie.Externals, tmdb]);
+				await Assert.That(matched.Identity.Keys).IsEquivalentTo([.. Movie.Keys, tmdb]);
 				await Assert.That(matched.Details).IsEqualTo(new MovieDetails { Title = "Inception" });
 			});
 	}

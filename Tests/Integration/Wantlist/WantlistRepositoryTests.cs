@@ -229,7 +229,7 @@ public class WantlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposabl
 			.And.Multiple(async manual => await Assert.That(manual.Source).IsEqualTo(ManualSource.Browse));
 	}
 
-	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
+	private async Task<MediaId> SeedMediaAsync(IEnumerable<IIdentityKey> ids)
 	{
 		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
@@ -238,7 +238,7 @@ public class WantlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposabl
 		return MediaId.From(media.Id);
 	}
 
-	private async Task<MediaId> SeedWantlistItemAsync(IExternalMediaId id, WantlistItemOrigin origin)
+	private async Task<MediaId> SeedWantlistItemAsync(IIdentityKey id, WantlistItemOrigin origin)
 	{
 		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddAsync(id.ToExternalIdEntity(media));

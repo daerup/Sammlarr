@@ -3,12 +3,12 @@ using Vogen;
 
 namespace Domain.Media;
 
-public readonly record struct MediaIdentity(MediaId Id, ValueSet<IExternalMediaId> Externals)
+public readonly record struct MediaIdentity(MediaId Id, ValueSet<IIdentityKey> Keys)
 {
 	public MediaId Id { get; init; } =
 		Id.IsInitialized() ? Id : throw new ArgumentException("An identity needs a MediaId; a provider's answer is FoundMedia.", nameof(Id));
 
-	public MediaType Type => Externals.FirstOrDefault()?.Type ?? MediaType.Unknown;
+	public MediaType Type => Keys.FirstOrDefault()?.Type ?? MediaType.Unknown;
 }
 
 [ValueObject<Guid>]
@@ -28,6 +28,10 @@ public interface IExternalMediaId
 	string Value { get; }
 }
 
+public interface IIdentityKey : IExternalMediaId;
+
+public interface IPageLink : IExternalMediaId;
+
 file static class ExternalMediaIdExtensions
 {
 	public static string ToString(this IExternalMediaId id) => $"{id.Source}:{id.Type}:{id.Value}";
@@ -39,7 +43,7 @@ public static class ExternalMediaId
 		where T : struct, IExternalMediaId => id is T typed ? Success.Of(typed) : Error.From(reason);
 }
 
-public readonly record struct TmdbId : IExternalMediaId
+public readonly record struct TmdbId : IIdentityKey
 {
 	public MediaProvider Source => MediaProvider.Tmdb;
 	public string Value { get; private init; }
@@ -50,7 +54,7 @@ public readonly record struct TmdbId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct PlexId : IExternalMediaId
+public readonly record struct PlexId : IIdentityKey
 {
 	public MediaProvider Source => MediaProvider.Plex;
 	public string Value { get; private init; }
@@ -61,7 +65,7 @@ public readonly record struct PlexId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct ImdbId : IExternalMediaId
+public readonly record struct ImdbId : IIdentityKey
 {
 	public MediaProvider Source => MediaProvider.Imdb;
 	public string Value { get; private init; }
@@ -72,7 +76,7 @@ public readonly record struct ImdbId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct TvdbId : IExternalMediaId
+public readonly record struct TvdbId : IIdentityKey
 {
 	public MediaProvider Source => MediaProvider.Tvdb;
 	public string Value { get; private init; }
@@ -83,7 +87,7 @@ public readonly record struct TvdbId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct MdblistId : IExternalMediaId
+public readonly record struct MdblistId : IIdentityKey
 {
 	public MediaProvider Source => MediaProvider.Mdblist;
 	public string Value { get; private init; }
@@ -94,7 +98,7 @@ public readonly record struct MdblistId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct RottenTomatoesId : IExternalMediaId
+public readonly record struct RottenTomatoesId : IPageLink
 {
 	public MediaProvider Source => MediaProvider.RottenTomatoes;
 	public string Value { get; private init; }
@@ -105,7 +109,7 @@ public readonly record struct RottenTomatoesId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct MetacriticId : IExternalMediaId
+public readonly record struct MetacriticId : IPageLink
 {
 	public MediaProvider Source => MediaProvider.Metacritic;
 	public string Value { get; private init; }
@@ -116,7 +120,7 @@ public readonly record struct MetacriticId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct LetterboxdId : IExternalMediaId
+public readonly record struct LetterboxdId : IPageLink
 {
 	public MediaProvider Source => MediaProvider.Letterboxd;
 	public string Value { get; private init; }
@@ -127,7 +131,7 @@ public readonly record struct LetterboxdId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct TraktId : IExternalMediaId
+public readonly record struct TraktId : IIdentityKey
 {
 	public MediaProvider Source => MediaProvider.Trakt;
 	public string Value { get; private init; }
@@ -138,7 +142,7 @@ public readonly record struct TraktId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct MalId : IExternalMediaId
+public readonly record struct MalId : IIdentityKey
 {
 	public MediaProvider Source => MediaProvider.Mal;
 	public string Value { get; private init; }
@@ -149,7 +153,7 @@ public readonly record struct MalId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct TvmazeId : IExternalMediaId
+public readonly record struct TvmazeId : IIdentityKey
 {
 	public MediaProvider Source => MediaProvider.Tvmaze;
 	public string Value { get; private init; }
@@ -160,7 +164,7 @@ public readonly record struct TvmazeId : IExternalMediaId
 	public override string ToString() => ExternalMediaIdExtensions.ToString(this);
 }
 
-public readonly record struct AniListId : IExternalMediaId
+public readonly record struct AniListId : IIdentityKey
 {
 	public MediaProvider Source => MediaProvider.AniList;
 	public string Value { get; private init; }

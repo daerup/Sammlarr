@@ -11,6 +11,7 @@ public closed record MediaDetails
 	public DateOnly? ReleaseDate { get; init; }
 	public ValueSet<string> Genres { get; init; } = [];
 	public MediaRatings Ratings { get; init; } = MediaRatings.None;
+	public ValueSet<IPageLink> PageLinks { get; init; } = [];
 
 	public static MediaDetails Empty(MediaType type)
 	{

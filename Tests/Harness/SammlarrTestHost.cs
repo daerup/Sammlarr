@@ -128,7 +128,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return heard;
 	}
 
-	internal async Task<MediaId> SeedMediaAsync(params IExternalMediaId[] externals)
+	internal async Task<MediaId> SeedMediaAsync(params IIdentityKey[] externals)
 	{
 		var context = ScopedDbContext;
 		var media = new MediaRow();
@@ -154,7 +154,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		var media = new MediaRow();
 		foreach (var (provider, id) in resolved.Ids)
 		{
-			await context.ExternalMediaIds.AddAsync(new ProviderId(provider, id).ToExternal(resolved.Type).ToExternalIdEntity(media));
+			await context.ExternalMediaIds.AddAsync(new ProviderId(provider, id).ToKey(resolved.Type).ToExternalIdEntity(media));
 		}
 
 		await context.SaveChangesAsync();
@@ -242,6 +242,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	{
 		var bindings = string.Join(',', paths.Select(path => $$$"""{"rt":{"type":"literal","value":"{{{path}}}"}}"""));
 		HttpStub.RespondWithJsonForUrl(WikidataQueryFor(imdb), $$$"""{"results":{"bindings":[{{{bindings}}}]}}""");
+	}
+
+	internal void WikidataHoldsPages(string imdb, string rottenTomatoes, string metacritic)
+	{
+		var binding = $$$"""{"rt":{"type":"literal","value":"{{{rottenTomatoes}}}"},"metacritic":{"type":"literal","value":"{{{metacritic}}}"}}""";
+		HttpStub.RespondWithJsonForUrl(WikidataQueryFor(imdb), $$$"""{"results":{"bindings":[{{{binding}}}]}}""");
 	}
 
 	internal void WikidataFails(string imdb) => HttpStub.RespondWithStatusForUrl(WikidataQueryFor(imdb), HttpStatusCode.ServiceUnavailable);

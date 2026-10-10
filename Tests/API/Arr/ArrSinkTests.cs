@@ -835,7 +835,10 @@ public class ArrSinkTests
 		_media
 			.IdentifyAsync(Any<IEnumerable<IdentifyRequest>>(), Any())
 			.Returns(
-				(requests, _) => requests.Select(request => (Result<MediaIdentity>)Success.Of(new MediaIdentity(Known, [.. request.Candidates]))).ToAsyncEnumerable()
+				(requests, _) =>
+					requests
+						.Select(request => (Result<MediaIdentity>)Success.Of(new MediaIdentity(Known, [.. request.Candidates.OfType<IIdentityKey>()])))
+						.ToAsyncEnumerable()
 			);
 	}
 

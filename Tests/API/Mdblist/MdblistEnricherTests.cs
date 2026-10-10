@@ -1,6 +1,5 @@
 using System.Net;
 using API.Mdblist;
-using Contracts;
 using Domain.Media;
 using Domain.Providers;
 using TestInfrastructure;
@@ -45,16 +44,10 @@ public class MdblistEnricherTests
 
 		await Assert
 			.That(found!.Externals.Select(id => $"{id}"))
-			.IsEquivalentTo([
-				"Mdblist:Movie:a5as",
-				"Tmdb:Movie:550",
-				"Imdb:Movie:tt0137523",
-				"Tvdb:Movie:247",
-				"Trakt:Movie:432",
-				"RottenTomatoes:Movie:m/fight_club",
-				"Metacritic:Movie:fight-club",
-				"Letterboxd:Movie:fight-club",
-			]);
+			.IsEquivalentTo(["Mdblist:Movie:a5as", "Tmdb:Movie:550", "Imdb:Movie:tt0137523", "Tvdb:Movie:247", "Trakt:Movie:432"]);
+		await Assert
+			.That(found.Details.PageLinks.Select(link => $"{link}"))
+			.IsEquivalentTo(["RottenTomatoes:Movie:m/fight_club", "Metacritic:Movie:fight-club", "Letterboxd:Movie:fight-club"]);
 	}
 
 	[Test]
