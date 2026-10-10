@@ -202,6 +202,18 @@ public class AniListTests
 	}
 
 	[Test]
+	public async Task LookUpAsync_ForAnIdAniListLeftOutBefore_AnswersWithoutAskingAniListAgain()
+	{
+		var handler = Answering(out var calls, _ => """{"data":{"Page":{"media":[]}}}""");
+		var enricher = new AniListEnricher(Titles(handler));
+		await enricher.LookUpAsync(AttackOnTitan);
+
+		await enricher.LookUpAsync(AttackOnTitan);
+
+		await Assert.That(calls()).IsEqualTo(1);
+	}
+
+	[Test]
 	public async Task GetFeedItemsAsync_ForAPrivateList_FailsSayingItIsPrivate()
 	{
 		var handler = Mock.HttpHandler();
