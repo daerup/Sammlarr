@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Domain.Feed;
 using Domain.Feed.Trace;
 using Domain.Providers;
@@ -35,11 +36,22 @@ public static class FeedRunSpans
 
 	public static void Settle(Optional<Activity> title, TitleFate fate) => title.Apply(span => span.SetTag(FeedRunTags.Fate, fate)).Apply(span => span.Stop());
 
-	public static Optional<Activity> Source() => Detached(FeedRunNames.Source, []);
-
-	public static void SourceEnded(Optional<Activity> source, int requests)
+	public static async IAsyncEnumerable<T> SourceAsync<T>(IAsyncEnumerable<T> source, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		source.Apply(span => span.SetTag(FeedRunTags.Requests, requests)).Apply(span => span.Stop());
+		var span = Detached(FeedRunNames.Source, []);
+		var taken = 0;
+		try
+		{
+			await foreach (var item in source.WithCancellation(cancellationToken))
+			{
+				taken++;
+				yield return item;
+			}
+		}
+		finally
+		{
+			span.Apply(found => found.SetTag(FeedRunTags.Requests, taken)).Apply(found => found.Stop());
+		}
 	}
 
 	public static void ListedWithoutIds() => Nearest(FeedRunNames.Run).Apply(_ => Start(FeedRunNames.Listed, [])?.Stop());

@@ -1,9 +1,7 @@
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using Contracts.Media;
 using Contracts.Media.Conversions;
-using Contracts.Wantlist;
 using Core.Wantlist.Sync;
 using Domain.Feed.Trace;
 using Domain.Media;
@@ -40,9 +38,9 @@ internal sealed class MediaService(
 		}
 
 		await using var buffer = bufferFactory.Create();
-		var merge = new IdentityMerge();
 		var sink = await activeSink.ResolveAsync(cancellationToken);
-		var handoffs = await IdentifyBatchAsync([.. materialized.Select(TracedRequest.Untraced)], sink.AddressedBy, merge, buffer, cancellationToken);
+		var run = await TitleRun.ForIdsAsync(sink.AddressedBy, idResolver, buffer, cancellationToken);
+		var handoffs = await IdentifyBatchAsync([.. materialized.Select(TracedRequest.Untraced)], run, cancellationToken);
 		foreach (var (_, handoff) in materialized.Zip(handoffs))
 		{
 			yield return ToIdentityResult(handoff);
@@ -93,15 +91,13 @@ internal sealed class MediaService(
 	)
 	{
 		await using var buffer = bufferFactory.Create();
-		var sink = await activeSink.ResolveAsync(cancellationToken);
-		var connected = await detailsFetcher.ConnectedAsync(cancellationToken);
-		var merge = new IdentityMerge();
+		var run = await TitleRun.StartAsync(activeSink, idResolver, detailsFetcher, buffer, cancellationToken);
 		var size = FirstBatchSize;
 		var batch = new List<IdentifyRequest>(size);
-		await using var source = requests.PrefetchAsync(PrefetchCapacity, cancellationToken).GetAsyncEnumerator(cancellationToken);
+		await using var source = FeedRunSpans
+			.SourceAsync(requests.PrefetchAsync(PrefetchCapacity, cancellationToken), cancellationToken)
+			.GetAsyncEnumerator(cancellationToken);
 		ExceptionDispatchInfo? failure = null;
-		var listing = FeedRunSpans.Source();
-		var pulled = 0;
 
 		while (true)
 		{
@@ -122,27 +118,25 @@ internal sealed class MediaService(
 			}
 
 			batch.Add(source.Current);
-			pulled++;
 			if (batch.Count < size)
 			{
 				continue;
 			}
 
-			await foreach (var result in IdentifyAndLoadAsync(batch, sink, merge, connected, buffer, cancellationToken))
+			await foreach (var result in IdentifyAndLoadAsync(batch, run, cancellationToken))
 			{
-				yield return result;
+				yield return run.HandOut(result);
 			}
 
 			size = Math.Min(size * 2, MaxBatchSize);
 			batch = new List<IdentifyRequest>(size);
 		}
 
-		FeedRunSpans.SourceEnded(listing, pulled);
 		if (batch.Count > 0 && failure?.SourceException is not OperationCanceledException)
 		{
-			await foreach (var result in IdentifyAndLoadAsync(batch, sink, merge, connected, buffer, cancellationToken))
+			await foreach (var result in IdentifyAndLoadAsync(batch, run, cancellationToken))
 			{
-				yield return result;
+				yield return run.HandOut(result);
 			}
 		}
 
@@ -151,18 +145,19 @@ internal sealed class MediaService(
 
 	private async IAsyncEnumerable<MediaMatchResult> IdentifyAndLoadAsync(
 		IReadOnlyList<IdentifyRequest> batch,
-		IMediaSink sink,
-		IdentityMerge merge,
-		IReadOnlySet<RemoteService> connected,
-		MediaWriteBuffer buffer,
+		TitleRun run,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
-		IReadOnlyList<TracedRequest> traced = [.. batch.Select(request => new TracedRequest(request, TitleSpan(request)))];
-		var handoffs = await IdentifyBatchAsync(traced, sink.AddressedBy, merge, buffer, cancellationToken);
+		IReadOnlyList<TracedRequest> traced = [.. batch.Select(TitleRun.Traced)];
+		var handoffs = await IdentifyBatchAsync(traced, run, cancellationToken);
 		var pipeline = traced
 			.Zip(handoffs)
-			.SelectAwait((pair, token) => LoadRequestDetailsAsync(pair.First, pair.Second, connected, buffer, token), RecommendedConcurrency, cancellationToken);
+			.SelectAwait(
+				(pair, token) => LoadRequestDetailsAsync(pair.First, pair.Second, run.DetailServices, run.Buffer, token),
+				RecommendedConcurrency,
+				cancellationToken
+			);
 		await foreach (var result in pipeline)
 		{
 			yield return result;
@@ -253,7 +248,8 @@ internal sealed class MediaService(
 		IReadOnlyList<IdentifyRequest> requests = [.. stored.Select(media => new IdentifyRequest([.. media.Identity.Externals], HintsOf(media)))];
 		await using (var buffer = bufferFactory.Create())
 		{
-			await IdentifyBatchAsync([.. requests.Select(TracedRequest.Untraced)], addressedBy, new IdentityMerge(), buffer, cancellationToken);
+			var run = await TitleRun.ForIdsAsync(addressedBy, idResolver, buffer, cancellationToken);
+			await IdentifyBatchAsync([.. requests.Select(TracedRequest.Untraced)], run, cancellationToken);
 		}
 
 		var found = await IdsAsync(missing, addressedBy, cancellationToken);
@@ -298,19 +294,16 @@ internal sealed class MediaService(
 
 	private async Task<IReadOnlyList<Result<IdentifyHandoff>>> IdentifyBatchAsync(
 		IReadOnlyList<TracedRequest> requests,
-		Func<MediaType, Optional<MediaProvider>> addressedBy,
-		IdentityMerge merge,
-		MediaWriteBuffer buffer,
+		TitleRun run,
 		CancellationToken cancellationToken
 	)
 	{
 		var allCandidates = requests.SelectMany(r => r.Request.Candidates).Distinct().ToList();
 		var stored = await LoadByExternalsAsync(allCandidates, cancellationToken);
-		var connected = await idResolver.ConnectedAsync(cancellationToken);
 		var preliminary = await requests
-			.SelectAwait((req, token) => IdentifyOneAsync(req, addressedBy, stored, connected, buffer, token), RecommendedConcurrency, cancellationToken)
+			.SelectAwait((req, token) => IdentifyOneAsync(req, run.AddressedBy, stored, run.IdServices, run.Buffer, token), RecommendedConcurrency, cancellationToken)
 			.ToListAsync(cancellationToken);
-		return await coordinator.CoordinateHandoffsAsync(preliminary, merge, buffer, cancellationToken);
+		return await coordinator.CoordinateHandoffsAsync(preliminary, run.Merge, run.Buffer, cancellationToken);
 	}
 
 	private async ValueTask<Result<IdentifyHandoff>> IdentifyOneAsync(
@@ -426,15 +419,6 @@ internal sealed class MediaService(
 		var result = loaded.Match<MatchedMedia, MediaMatchResult>(matched => matched with { Known = known }, error => request.Unmatched(Reason(error)));
 		FeedRunSpans.Settle(traced.Title, Fate(result));
 		return result;
-	}
-
-	private static Optional<Activity> TitleSpan(IdentifyRequest request)
-	{
-		var hints = request.Hints.Or(request.Description);
-		return FeedRunSpans.Title(
-			hints.Map(found => found.Title).GetValueOr(() => string.Join(", ", request.Candidates)),
-			hints.Map(found => found.Year).When(year => year > 0)
-		);
 	}
 
 	private static TitleFate Fate(MediaMatchResult result)

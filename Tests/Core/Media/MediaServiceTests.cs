@@ -2,6 +2,7 @@ using Contracts;
 using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;
+using Contracts.Providers;
 using Contracts.Settings;
 using Core.DI;
 using Core.Media;
@@ -69,6 +70,16 @@ public class MediaServiceTests
 		await Assert.That(results.Count).IsEqualTo(2);
 		await Assert.That(results[0]).IsOfUnionType<Result<MatchedMedia>, MatchedMedia>().And.IsEqualTo(firstDetail);
 		await Assert.That(results[1]).IsOfUnionType<Result<MatchedMedia>, MatchedMedia>().And.IsEqualTo(secondDetail);
+	}
+
+	[Test]
+	public async Task IdentifyWithDetailsAsync_ForManyBatches_ReadsTheConnectedIdServicesOnce()
+	{
+		var (testee, deps) = CreateTestee();
+
+		await testee.IdentifyWithDetailsAsync(BuildRequests(600)).ToListAsync();
+
+		deps.IdReadiness.ConnectedAsync(Any(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -589,6 +600,8 @@ public class MediaServiceTests
 
 		var enrichers = new KeyedServiceSet<RemoteService, IDetailsEnricher>([new(RemoteService.Plex, details.Object), new(RemoteService.Tmdb, idle.Object)]);
 
+		var idReadiness = TestReadiness.EverythingMock();
+
 		var converter = IExternalIdConverter.Mock();
 		converter.Lookups.Returns([new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb], Cost: 1)]);
 		converter.LookUpAsync(Any(), Any()).Returns((request, _) => FoundByFind(request));
@@ -604,13 +617,7 @@ public class MediaServiceTests
 		);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object, NullLogger<MediaIdentityCoordinator>.Instance);
 		var testee = new MediaService(
-			new MediaIdResolver(
-				[new(RemoteService.Tmdb, converter.Object)],
-				unmatchedCache.Object,
-				TestCapacity.Open(),
-				TestReadiness.Everything(),
-				dateTimeProvider.Object
-			),
+			new MediaIdResolver([new(RemoteService.Tmdb, converter.Object)], unmatchedCache.Object, TestCapacity.Open(), idReadiness.Object, dateTimeProvider.Object),
 			detailsFetcher,
 			coordinator,
 			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),
@@ -618,14 +625,15 @@ public class MediaServiceTests
 			mediaRepo.Object,
 			NullLogger<MediaService>.Instance
 		);
-		return (testee, new Deps(mediaRepo, details, unmatchedCache, converter));
+		return (testee, new Deps(mediaRepo, details, unmatchedCache, converter, idReadiness));
 	}
 
 	private record Deps(
 		Mock<IMediaRepository> MediaRepo,
 		Mock<IDetailsEnricher> Details,
 		Mock<ITypedMemoryCache<string, bool>> UnmatchedCache,
-		Mock<IExternalIdConverter> Converter
+		Mock<IExternalIdConverter> Converter,
+		Mock<IServiceReadiness> IdReadiness
 	);
 
 	private static Result<IdLookupResult> FoundByFind(IdLookupRequest request)

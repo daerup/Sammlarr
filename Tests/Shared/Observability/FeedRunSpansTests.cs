@@ -88,6 +88,48 @@ public class FeedRunSpansTests
 		await Assert.That(stopped.Where(span => span.OperationName == FeedRunNames.Reading && span.Parent is null)).IsEmpty();
 	}
 
+	[Test]
+	public async Task SourceAsync_WhenTheConsumerStopsEarly_EndsTheSourceSpanWithTheCountTaken()
+	{
+		var stopped = new ConcurrentQueue<Activity>();
+		using var listener = Listen(stopped.Enqueue);
+		var run = FeedRunSpans.Run(FeedId.From(Guid.NewGuid()), Guid.NewGuid());
+
+		await foreach (var item in FeedRunSpans.SourceAsync(Enumerable.Range(0, 100).ToAsyncEnumerable()))
+		{
+			if (item == 2)
+			{
+				break;
+			}
+		}
+
+		var traceId = run.Match(span => span.TraceId, () => default);
+		var source = stopped.Single(span => span.OperationName == FeedRunNames.Source && span.TraceId == traceId);
+		await Assert.That(source.GetTagItem(FeedRunTags.Requests)).IsEqualTo(3);
+	}
+
+	[Test]
+	public async Task SourceAsync_WhenTheSourceThrows_EndsTheSourceSpan()
+	{
+		var stopped = new ConcurrentQueue<Activity>();
+		using var listener = Listen(stopped.Enqueue);
+		var run = FeedRunSpans.Run(FeedId.From(Guid.NewGuid()), Guid.NewGuid());
+
+		var act = async () => await FeedRunSpans.SourceAsync(Failing()).ToListAsync();
+
+		await Assert.That(act).Throws<InvalidOperationException>();
+		var traceId = run.Match(span => span.TraceId, () => default);
+		var source = stopped.Single(span => span.OperationName == FeedRunNames.Source && span.TraceId == traceId);
+		await Assert.That(source.GetTagItem(FeedRunTags.Requests)).IsEqualTo(1);
+	}
+
+	private static async IAsyncEnumerable<int> Failing()
+	{
+		yield return 1;
+		await Task.Yield();
+		throw new InvalidOperationException("the list failed");
+	}
+
 	private static ActivityListener Listen(Action<Activity>? stopped = null)
 	{
 		var listener = new ActivityListener
