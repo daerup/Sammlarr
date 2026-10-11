@@ -409,6 +409,21 @@ TheTVDB's for a show from Radarr + Sonarr), and is not addable when no stored ti
 stored titles
 (link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0018-claim-identity-before-hand-out-from-identity-keys-only.md[ADR 0018]).
 
+Two stored titles become one only through `IMediaMerge`, in one transaction under the media write lock. It checks
+again that no source has an id on both and that both are one media type (`IdentityConflict.Contradicts`), and refuses
+the pair otherwise. The survivor is the title a wantlist or blocklist entry points at, else the older one (the older one
+too when both have entries). Every id of the other title moves to the survivor. The survivor's details win field by
+field and take what they lack from the other's, and its ratings, page links and provider answers win per source; when
+it has no details, the other's move over whole. The merged details count as refreshed when the earlier of the two
+was, so they go stale, and are fetched again with the fuller ids, no later than either half would have. Wantlist and
+blocklist entries move for every user, the older entry staying where a user holds both; where a user has an outbox
+action queued on both, the one that agrees with their wantlist after the move stays. Run items move one per run. An
+absence stays only where both titles missed the feed's latest run, with the lower count (the title as one was last
+seen when the fresher row was); an absence only one of them has goes, since the other was seen. The other title is
+then deleted, and its stored-twice notes with it. Other users' entries point at both titles through
+restricting foreign keys, so every table moves set-based across users (`IgnoreQueryFilters`), never through one user's
+tracked rows.
+
 === Persistence and migrations
 
 State is one SQLite database via EF Core. Repositories create a context per operation from
