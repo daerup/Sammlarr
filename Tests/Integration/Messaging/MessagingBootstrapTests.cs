@@ -15,6 +15,8 @@ using Microsoft.Extensions.Hosting;
 using Shared.DI;
 using Shared.Options;
 using Wolverine;
+using Wolverine.Persistence.Durability;
+using Wolverine.RDBMS;
 using Wolverine.Tracking;
 
 namespace Integration.Tests.Messaging;
@@ -55,6 +57,20 @@ public class MessagingBootstrapTests
 			},
 			services => DispatchCollaborators(services, userScope)
 		);
+	}
+
+	[Test]
+	public async Task Start_ForTheSqliteStore_OpensConnectionsThatDoNotMemoryMapTheFileSoACompactionCanShrinkIt()
+	{
+		await WithHostAsync(async host =>
+		{
+			var store = (IMessageDatabase)host.Services.GetRequiredService<IMessageStore>();
+			await using var connection = await store.DataSource.OpenConnectionAsync();
+			await using var command = connection.CreateCommand();
+			command.CommandText = "PRAGMA mmap_size";
+
+			await Assert.That(Convert.ToInt64(await command.ExecuteScalarAsync())).IsEqualTo(0);
+		});
 	}
 
 	private static Mock<IUserScope> DispatchingUserScope()

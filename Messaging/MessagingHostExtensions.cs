@@ -3,6 +3,7 @@ using Messaging.Notifications;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Shared.Options;
+using Weasel.Sqlite;
 using Wolverine;
 using Wolverine.ErrorHandling;
 using Wolverine.Sqlite;
@@ -27,7 +28,7 @@ public static class MessagingHostExtensions
 	{
 		options.ServiceLocationPolicy = ServiceLocationPolicy.AlwaysAllowed;
 		options.UseSystemTextJsonForSerialization(json => json.Converters.Add(new OptionalJsonConverterFactory()));
-		options.PersistMessagesWithSqlite(connectionString);
+		options.PersistMessagesWithSqlite(new SqliteDataSource(connectionString, new SqlitePragmaSettings { MmapSize = 0 }));
 		options.Durability.DeadLetterQueueExpirationEnabled = true;
 		options.Policies.UseDurableLocalQueues();
 		options.Discovery.IncludeAssembly(typeof(MessagingModule).Assembly);

@@ -430,6 +430,8 @@ a kept run (`ProtectedMediaIds`) never loses its details or ids to the pass; the
 Wolverine expires dead letters after its default 10 days. Settings › Housekeeping sizes the two cache layers from the
 titles they hold times a per-title average measured on the dev file (1.63 KiB of details, 1.21 KiB of ids), since the
 bundled SQLite has no `dbstat`.
+Wolverine's connections to the same file do not memory-map it (`mmap_size` 0): on Windows a mapped file cannot be
+truncated, so a checkpoint after a `VACUUM` would leave the file at its old size.
 Schema is applied at startup by a hosted
 `DbInitializer` calling `Database.Migrate()`, never `EnsureCreated`; migrations live in
 `DB/Migrations`, and a test asserts `HasPendingModelChanges()` is false. The singleton
