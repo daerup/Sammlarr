@@ -20,9 +20,7 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 			return new DeliveryUnrecoverable("The target is not a Pushover target.");
 		}
 
-		return await renderer.Render(template, context).Match(RenderSuccess, RenderFailure);
-
-		async Task<DeliveryResult> RenderSuccess(RenderedNotification content) => await SendAsync(config, context, template, content, cancellationToken);
+		return await renderer.Render(template, context).Match(content => SendAsync(config, context, template, content, cancellationToken), RenderFailure);
 	}
 
 	private async Task<DeliveryResult> SendAsync(
@@ -45,9 +43,9 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		return result;
 	}
 
-	private Task<DeliveryResult> RenderFailure(Error error)
+	private DeliveryResult RenderFailure(Error error)
 	{
 		logger.LogWarning("Pushover template could not be rendered: {Reason}", error.Reason);
-		return Task.FromResult<DeliveryResult>(new DeliveryUnrecoverable(error.Reason));
+		return new DeliveryUnrecoverable(error.Reason);
 	}
 }

@@ -36,7 +36,7 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 		var apiKey = await apiKeys.GetAsync(ApiKeyProvider.Mdblist, cancellationToken);
 		return await apiKey.Match(
 			usable => AskedAsync(usable, Keys(ids), cancellationToken),
-			error => Task.FromResult(LaneAnswers.Failed<MdblistTypes.Titles.Title>(error, RemoteService.Mdblist))
+			error => LaneAnswers.Failed<MdblistTypes.Titles.Title>(error, RemoteService.Mdblist)
 		);
 	}
 

@@ -34,7 +34,7 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 			.Endpoint()
 			.Match(
 				uri => RenderBody(context, template).Match(body => SendAsync(config, uri, context, body, cancellationToken), error => RenderFailure(error, uri)),
-				() => Task.FromResult<DeliveryResult>(new DeliveryUnrecoverable("The webhook URL must be an absolute http or https URI."))
+				() => new DeliveryUnrecoverable("The webhook URL must be an absolute http or https URI.")
 			);
 	}
 
@@ -57,10 +57,10 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 		return result;
 	}
 
-	private Task<DeliveryResult> RenderFailure(Error error, Uri uri)
+	private DeliveryResult RenderFailure(Error error, Uri uri)
 	{
 		logger.LogWarning("Webhook body for {Url} could not be rendered: {Reason}", uri, error.Reason);
-		return Task.FromResult<DeliveryResult>(new DeliveryUnrecoverable(error.Reason));
+		return new DeliveryUnrecoverable(error.Reason);
 	}
 
 	private Result<string> RenderBody(NotificationContext context, NotificationTemplate template) =>

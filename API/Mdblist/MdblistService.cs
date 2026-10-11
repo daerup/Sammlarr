@@ -34,7 +34,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 					long.TryParse(list, NumberStyles.None, CultureInfo.InvariantCulture, out var number)
 						? PathOfAsync(number, cancellationToken)
 						: Task.FromResult<Result<string>>(Success.Of(list)),
-				() => Task.FromResult<Result<string>>(NotAList)
+				() => NotAList
 			);
 	}
 

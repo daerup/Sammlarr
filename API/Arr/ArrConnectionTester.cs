@@ -13,17 +13,13 @@ internal sealed class ArrConnectionTester(ArrApis apis, ICurrentUser currentUser
 	{
 		currentUser.EnsureAdmin();
 		using var marked = UsageCauses.Mark(UsageCause.KeyTest);
-		return await ArrSession
-			.Connect(app, instance)
-			.Match(connection => ChoicesAsync(apis.For(app), connection, cancellationToken), error => Task.FromResult<Result<ArrInstanceChoices>>(error));
+		return await ArrSession.Connect(app, instance).Map(connection => ChoicesAsync(apis.For(app), connection, cancellationToken));
 	}
 
 	private static async Task<Result<ArrInstanceChoices>> ChoicesAsync(ArrApi api, ArrConnection connection, CancellationToken cancellationToken)
 	{
 		var status = await api.StatusAsync(connection, cancellationToken);
-		return await status
-			.Map(answered => Answers(connection, answered))
-			.Match(_ => ReadChoicesAsync(api, connection, cancellationToken), error => Task.FromResult<Result<ArrInstanceChoices>>(error));
+		return await status.Map(answered => Answers(connection, answered)).Map(_ => ReadChoicesAsync(api, connection, cancellationToken));
 	}
 
 	private static Result<ArrSystemStatus> Answers(ArrConnection connection, ArrSystemStatus status)

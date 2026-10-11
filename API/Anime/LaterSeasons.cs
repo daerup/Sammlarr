@@ -44,7 +44,7 @@ internal sealed class LaterSeasons(AnimeIdsInRun map, IDatasetLoads loads)
 		List<IdentifyRequest> shows = [];
 		foreach (var (request, show) in page.Zip(series))
 		{
-			shows.Add(await show.Match(found => ShowAsync(request, found, cancellationToken), () => Task.FromResult(request)));
+			shows.Add(await show.Match(found => ShowAsync(request, found, cancellationToken), () => request));
 		}
 
 		return shows;

@@ -86,7 +86,7 @@ internal sealed class ArrSink(
 				.GetValueOrNone(push.MediaId)
 				.Match(
 					id => PushAsync(action, push, id, setup, sessions, cancellationToken),
-					() => Task.FromResult(Unaddressable(push.MediaId, "Sammlarr has no TMDB or TVDB id for this title, the ids Radarr and Sonarr add by."))
+					() => Unaddressable(push.MediaId, "Sammlarr has no TMDB or TVDB id for this title, the ids Radarr and Sonarr add by.")
 				);
 		}
 	}
@@ -103,7 +103,7 @@ internal sealed class ArrSink(
 	{
 		var config = await configs.GetAsync(cancellationToken);
 		var held = await HeldAsync(config, Owner(person), cancellationToken);
-		return await held.Match(apps => ClearAllAsync(apps, cancellationToken), error => Task.FromResult<Result<int>>(error));
+		return await held.Map(apps => ClearAllAsync(apps, cancellationToken));
 	}
 
 	private static ArrTagUser Owner(User person) => new(person.Id.Value, person.TagName);
@@ -145,7 +145,7 @@ internal sealed class ArrSink(
 		Result<int> deleted = Success.Of(0);
 		foreach (var app in apps)
 		{
-			deleted = await deleted.Match(count => ClearAsync(app, count, cancellationToken), error => Task.FromResult<Result<int>>(error));
+			deleted = await deleted.Map(count => ClearAsync(app, count, cancellationToken));
 		}
 
 		return deleted;
@@ -154,7 +154,7 @@ internal sealed class ArrSink(
 	private static async Task<Result<int>> ClearAsync(Held app, int before, CancellationToken cancellationToken)
 	{
 		Result<int> deleted = app.Sole.Count == 0 ? Success.Of(0) : await app.Session.DeleteAsync(app.Sole, cancellationToken);
-		return await deleted.Match(gone => UntagAsync(app, before + gone, cancellationToken), error => Task.FromResult<Result<int>>(AlreadyDeleted(error, before)));
+		return await deleted.Match(gone => UntagAsync(app, before + gone, cancellationToken), error => AlreadyDeleted(error, before));
 	}
 
 	private static async Task<Result<int>> UntagAsync(Held app, int deleted, CancellationToken cancellationToken)
@@ -204,10 +204,7 @@ internal sealed class ArrSink(
 		return apis.Taking(id)
 			.Match(
 				async api => Ack(push.MediaId, await PushWithAsync(api, action, push, id, setup, sessions, cancellationToken)),
-				() =>
-					Task.FromResult(
-						Unaddressable(push.MediaId, $"Neither Radarr nor Sonarr adds a {$"{id.Type}".ToLowerInvariant()} by its {id.Source.GetDescription()} id.")
-					)
+				() => Unaddressable(push.MediaId, $"Neither Radarr nor Sonarr adds a {$"{id.Type}".ToLowerInvariant()} by its {id.Source.GetDescription()} id.")
 			);
 	}
 
@@ -234,7 +231,7 @@ internal sealed class ArrSink(
 			sessions[api.App] = session;
 		}
 
-		var pushed = await session.Match(open => PushToAsync(open, action, push, id, setup, cancellationToken), Failed);
+		var pushed = await session.Map(open => PushToAsync(open, action, push, id, setup, cancellationToken));
 		return pushed.ApplyError(error => logger.LogWarning("Pushing {Action} for {ExternalId} to {App} failed: {Reason}", action, id, api.App.Name, error.Reason));
 	}
 
@@ -287,7 +284,7 @@ internal sealed class ArrSink(
 	)
 	{
 		var tags = await session.EnsureTagsAsync(labels, cancellationToken);
-		return await tags.Match(ids => RetaggedAsync(session, title, ids, cancellationToken), Failed);
+		return await tags.Map(ids => RetaggedAsync(session, title, ids, cancellationToken));
 	}
 
 	private static async Task<Result<SinkSyncOutcome>> RetaggedAsync(
@@ -311,15 +308,13 @@ internal sealed class ArrSink(
 	)
 	{
 		var tags = await session.EnsureTagsAsync(labels, cancellationToken);
-		return await tags.Match(
-			ids =>
-				settings
-					.QualityProfileId.Map(profile => settings.RootFolderPath.Map(folder => new ArrAddition(profile, folder, ids)))
-					.Match(
-						addition => LookUpAndAddAsync(session, id, settings, addition, holdsAnimeId, cancellationToken),
-						() => Failed(Error.From($"{session.App.Name} has no quality profile or root folder chosen yet."))
-					),
-			Failed
+		return await tags.Map(ids =>
+			settings
+				.QualityProfileId.Map(profile => settings.RootFolderPath.Map(folder => new ArrAddition(profile, folder, ids)))
+				.Match(
+					addition => LookUpAndAddAsync(session, id, settings, addition, holdsAnimeId, cancellationToken),
+					() => Error.From($"{session.App.Name} has no quality profile or root folder chosen yet.")
+				)
 		);
 	}
 
@@ -333,13 +328,11 @@ internal sealed class ArrSink(
 	)
 	{
 		var looked = await session.LookupAsync(id, cancellationToken);
-		return await looked.Match(
-			found =>
-				found.Match(
-					title => AddedAsync(session, Prepared(session, title, settings, addition, holdsAnimeId), cancellationToken),
-					() => Done(SinkSyncOutcome.Unaddressable)
-				),
-			Failed
+		return await looked.Map(found =>
+			found.Match(
+				title => AddedAsync(session, Prepared(session, title, settings, addition, holdsAnimeId), cancellationToken),
+				() => Success.Of(SinkSyncOutcome.Unaddressable)
+			)
 		);
 	}
 
@@ -357,7 +350,7 @@ internal sealed class ArrSink(
 
 	private Task<Result<SinkSyncOutcome>> RemoveAsync(ArrSession session, IExternalMediaId id, Setup setup, CancellationToken cancellationToken)
 	{
-		return session.Find(id).Match(title => UntagAsync(session, title, setup, cancellationToken), () => Done(SinkSyncOutcome.Applied));
+		return session.Find(id).Match(title => UntagAsync(session, title, setup, cancellationToken), () => Success.Of(SinkSyncOutcome.Applied));
 	}
 
 	private async Task<Result<SinkSyncOutcome>> UntagAsync(ArrSession session, ArrTitle title, Setup setup, CancellationToken cancellationToken)
@@ -398,10 +391,6 @@ internal sealed class ArrSink(
 		var everyone = await users.GetAllAsync(cancellationToken);
 		return everyone.OrderBy(user => user.JoinedAt).FirstOrNone().When(_ => scheme.PerUser).Map(Owner);
 	}
-
-	private static Task<Result<SinkSyncOutcome>> Done(SinkSyncOutcome outcome) => Task.FromResult<Result<SinkSyncOutcome>>(Success.Of(outcome));
-
-	private static Task<Result<SinkSyncOutcome>> Failed(Error error) => Task.FromResult<Result<SinkSyncOutcome>>(error);
 
 	private sealed record Setup(ArrSinkConfig Config, Optional<ArrTagUser> Claimant, ArrTagUser Viewer, IReadOnlySet<MediaId> OnAnimeSites);
 

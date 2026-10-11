@@ -47,7 +47,7 @@ internal sealed class AnimeIdsInRun(IAnimeIds map, IDatasetLoads loads) : IBurst
 			return AnimeListsIdConverter.NotLoaded;
 		}
 
-		return Success.Of(await Known(id).Match(Task.FromResult, () => ReadAsync(id, cancellationToken)));
+		return Success.Of(await Known(id).GetValueOr(() => ReadAsync(id, cancellationToken)));
 	}
 
 	private async Task<Optional<AnimeIdMapping>> ReadAsync(IExternalMediaId id, CancellationToken cancellationToken)

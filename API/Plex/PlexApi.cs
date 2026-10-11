@@ -15,6 +15,8 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 {
 	private const int SearchLimit = 30;
 
+	private static readonly Result<Optional<PlexId>> NotInPlex = Success.Of<Optional<PlexId>>(new None());
+
 	public MediaFields Fills { get; } =
 		MediaField.Title
 		| MediaField.Tagline
@@ -82,8 +84,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 
 	internal async Task<Result<Optional<PlexId>>> MatchAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
-		return await PlexType(id.Type)
-			.Match(type => AskMatchAsync(type, id, cancellationToken), () => Task.FromResult<Result<Optional<PlexId>>>(Success.Of<Optional<PlexId>>(new None())));
+		return await PlexType(id.Type).Match(type => AskMatchAsync(type, id, cancellationToken), () => NotInPlex);
 	}
 
 	private async Task<Result<Optional<PlexId>>> AskMatchAsync(int type, IExternalMediaId id, CancellationToken cancellationToken)
@@ -92,7 +93,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
 		if (response.StatusCode is HttpStatusCode.NotFound)
 		{
-			return Success.Of<Optional<PlexId>>(new None());
+			return NotInPlex;
 		}
 
 		EnsureUsable(response, endpoint);

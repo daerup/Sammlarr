@@ -15,10 +15,7 @@ internal sealed class TvmazeApi(HttpClient http, ITypedMemoryCache<string, Tvmaz
 	public Task<Result<Optional<TvmazeTypes.Show>>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
 		return Query(id)
-			.Match(
-				query => shows.GetValueOrNone(query).Match(show => Task.FromResult(Found(Some.Of(show))), () => FetchAsync(query, cancellationToken)),
-				() => Task.FromResult(Found(new None()))
-			);
+			.Match(query => shows.GetValueOrNone(query).Match(show => Found(Some.Of(show)), () => FetchAsync(query, cancellationToken)), () => Found(new None()));
 	}
 
 	private static Optional<string> Query(IExternalMediaId id) => Optional.When(id.Type is not MediaType.Movie, () => id).Map(Path);

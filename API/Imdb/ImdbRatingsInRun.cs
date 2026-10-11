@@ -43,7 +43,7 @@ internal sealed class ImdbRatingsInRun(IImdbRatings ratings, IDatasetLoads loads
 			return new None();
 		}
 
-		return Some.Of(await Known(tconst).Match(Task.FromResult, () => ReadAsync(tconst, cancellationToken)));
+		return Some.Of(await Known(tconst).GetValueOr(() => ReadAsync(tconst, cancellationToken)));
 	}
 
 	private async Task<Optional<ImdbRating>> ReadAsync(string tconst, CancellationToken cancellationToken)
