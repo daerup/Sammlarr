@@ -1,6 +1,7 @@
 using System.Data.Common;
 using System.Text.Json;
 using Domain.Media;
+using Domain.Providers;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,6 +38,56 @@ internal static class MediaQueries
 				.ToListAsync(cancellationToken);
 		}
 
+		public async Task<IReadOnlyDictionary<IIdentityKey, MediaId>> KeyOwnersAsync(IReadOnlyList<IIdentityKey> keys, CancellationToken cancellationToken)
+		{
+			var triples = JsonSerializer.Serialize(keys.Select(key => new[] { $"{key.Source}", $"{key.Type}", key.Value }));
+			var owned = await ctx
+				.Database.SqlQuery<KeyOwner>(
+					$"""
+					SELECT e."Source", e."MediaType", e."Id", e."MediaId"
+					FROM json_each({triples}) AS k
+					JOIN "ExternalMediaIds" AS e
+					  ON e."Source" = json_extract(k.value, '$[0]')
+					 AND e."MediaType" = json_extract(k.value, '$[1]')
+					 AND e."Id" = json_extract(k.value, '$[2]')
+					"""
+				)
+				.ToListAsync(cancellationToken);
+			return owned.ToDictionary(
+				owner => MediaIdConversionExtensions.Key(Enum.Parse<MediaProvider>(owner.Source), Enum.Parse<MediaType>(owner.MediaType), owner.Id),
+				owner => MediaId.From(owner.MediaId)
+			);
+		}
+
+		public async Task NoteConflictAsync(IdentityConflict note, CancellationToken cancellationToken)
+		{
+			var (held, other) = (note.Held.Value, note.Other.Value);
+			var seen = note.SeenAt.ToUniversalTime();
+			var stored = await ctx.IdentityConflicts.SingleOrDefaultAsync(
+				row => (row.HeldId == held && row.OtherId == other) || (row.HeldId == other && row.OtherId == held),
+				cancellationToken
+			);
+			Optional
+				.Of(stored)
+				.Apply(row => row.SeenAt = seen)
+				.ApplyNone(() =>
+					ctx.IdentityConflicts.Add(
+						new IdentityConflictRow
+						{
+							HeldId = held,
+							OtherId = other,
+							ClaimedSource = note.Claimed.Source,
+							ClaimedType = note.Claimed.Type,
+							ClaimedId = note.Claimed.Value,
+							SeenAt = seen,
+							AskAfter = note.AskAfter.ToUniversalTime(),
+							Sources = [.. note.Sources.Select(service => new IdentityConflictSourceRow { Service = service })],
+						}
+					)
+				);
+			await ctx.SaveChangesAsync(cancellationToken);
+		}
+
 		public IQueryable<Guid> ProtectedMediaIds()
 		{
 			return ctx
@@ -60,3 +111,5 @@ internal static class MediaQueries
 		}
 	}
 }
+
+file sealed record KeyOwner(string Source, string MediaType, string Id, Guid MediaId);

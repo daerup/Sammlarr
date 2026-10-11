@@ -100,6 +100,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<RemoteUsageRow> RemoteUsage => Set<RemoteUsageRow>();
 	public DbSet<RemoteAttemptRow> RemoteAttempts => Set<RemoteAttemptRow>();
 	public DbSet<HousekeepingReportRow> HousekeepingReports => Set<HousekeepingReportRow>();
+	public DbSet<IdentityConflictRow> IdentityConflicts => Set<IdentityConflictRow>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{

@@ -53,8 +53,8 @@ FillDetails job), so the per-load memos (`MdblistTitles`, `TmdbApi`, `AniListTit
 
 ==== Ids and the claim
 
-`TitleIdentifier` starts from the stored titles the entry's ids hit. Ids on two stored titles settle the title as a
-conflict at once. A stored title that holds the id the sink adds by is known: new ids from the list are added to it
+`TitleIdentifier` starts from the stored titles the entry's ids hit. Ids on two stored titles go straight to an
+unpinned claim, which conflicts and notes the pair (below). A stored title that holds the id the sink adds by is known: new ids from the list are added to it
 through a pinned claim, and the chain goes on to its details. Any other title is resolved by `MediaIdResolver`, from
 the list's ids plus the stored title's keys and hints, along the cheapest open path of id lookups to the target (see
 Provider routing in <<section-concepts>>). The target is the provider the active sink addresses that title's type by
@@ -113,6 +113,11 @@ title a second key of one source or a key of another media type, or that the one
 back `Conflicted` with the titles that hold its keys: the title settles
 unmatched as a conflict (`UnmatchedReason.Conflict`, with `ConflictsWith`), and both stored titles stay as they are. A
 claimed title is handed out only with its stored `MediaId`.
+
+Every claim that meets two stored titles leaves a note in the same transaction (`IIdentityConflicts`, one row per
+pair): a conflicted claim notes its first title against each other one, and a pinned claim notes its title against
+each title holding a key it dropped (`Claimed.Disputed`). The note keeps the key that joined them and the services
+behind the claim; it is due at once, and a pair met again only moves its `SeenAt`.
 
 A title settles not found, and its ids are cached as unmatched for an hour, only when every route answered that it
 has no such title. A route that was unavailable, refused by its lane or answered with something unusable settles the

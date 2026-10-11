@@ -152,6 +152,14 @@ and never merges two. The outcome is `Claimed`, with the stored `MediaId`, or `C
 keys; a conflicted title settles unmatched as a conflict (`UnmatchedReason.Conflict`, `ConflictsWith`), and a Mirror
 feed counts the titles it owns among those as seen.
 
+Stored twice:: Two stored titles a claim says are one (`IdentityConflict`, kept in `IdentityConflicts`): the held
+title, the other, the one claimed id that sits on the other, and the services that claimed it. The claim lane writes
+one in its transaction wherever a claim meets two rows: a pinned claim's key another row owns (`Claimed.Disputed`),
+an unpinned claim on two rows, a request whose ids already point at two rows, and a write race. A pair is noted once
+in either order; meeting it again only moves `SeenAt`. It stays `Undecided` until a second source or an admin settles
+it, or `Distinct` with its reason: the rows contradict each other (a source on both, or a film and a show), a source
+answered with another id, or an admin kept them apart.
+
 Answer:: What a converter's or enricher's call ends in (`Answer<T>`): `Found`; `NoMatch`, the service has no such title;
 `Unavailable`, blocked, down, refused by a lane, at a quota reserve or failed in transit, with whether the request left
 (`Sent`); or `Faulted`, an answer that could not be used. `Answering.GuardedAsync` turns exceptions into answers. Only

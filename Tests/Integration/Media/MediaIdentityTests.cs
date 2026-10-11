@@ -275,6 +275,19 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task IdentifyAsync_WhenCandidatesAreSplitAcrossRows_NotesThePairForTheNightlyPass()
+	{
+		var tmdb = await host.Movie(Spec("Fight Club (TMDB)", Tmdb("550"))).SeedAsync();
+		var plex = await host.Movie(Spec("Fight Club (Plex)", Plex("550"))).SeedAsync();
+
+		await Testee.IdentifyAsync([Request(null, Tmdb("550"), Plex("550"))]).ToListAsync();
+
+		var note = (await host.Resolve<IIdentityConflicts>().AllAsync()).Single();
+		MediaId[] pair = [note.Held, note.Other];
+		await Assert.That(pair).IsEquivalentTo([tmdb, plex]);
+	}
+
+	[Test]
 	public async Task IdentifyAsync_ForThePlexSink_StoresEveryIdPlexReportsForAPlexId()
 	{
 		await host.EnsurePlexAccount();

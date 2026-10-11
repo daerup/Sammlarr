@@ -23,6 +23,29 @@ public class ClaimRuleLaws
 		Gen.Select(Libraries, Claims).Sample((owners, claim) => HoldsOneKeyPerSource(ClaimRule.Decide(claim, owners, Held(owners), Fresh)));
 	}
 
+	[Test]
+	public void Decide_ForAnyClaim_DisputesExactlyTheKeysAPinnedClaimLeavesToAnotherRow()
+	{
+		Gen.Select(Libraries, Claims).Sample((owners, claim) => DisputesWhatOthersOwn(owners, claim, ClaimRule.Decide(claim, owners, Held(owners), Fresh)));
+	}
+
+	private static bool DisputesWhatOthersOwn(Dictionary<IIdentityKey, MediaId> owners, IdentityClaim claim, ClaimOutcome outcome)
+	{
+		return outcome switch
+		{
+			Claimed claimed => claimed.Disputed.SetEquals(LeftOut(owners, claim, claimed)),
+			Conflicted => true,
+		};
+	}
+
+	private static IEnumerable<Disputed> LeftOut(Dictionary<IIdentityKey, MediaId> owners, IdentityClaim claim, Claimed claimed)
+	{
+		return claim.Pinned.Match(
+			_ => claim.Keys.Where(key => !claimed.Keys.Contains(key)).Select(key => owners.GetValueOrNone(key).Map(owner => new Disputed(key, owner))).WhereSome(),
+			() => []
+		);
+	}
+
 	private static bool GivesEachKeyOneRow(Dictionary<IIdentityKey, MediaId> owners, ClaimOutcome outcome)
 	{
 		return outcome switch
