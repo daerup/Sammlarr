@@ -62,11 +62,12 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task OverviewAsync_BeforeAnythingRan_ListsEveryDatasetWithItsNextLoadInLocalTimeAndNoLastRun()
+	public async Task OverviewAsync_BeforeAnythingRan_ListsThePassAndEveryDatasetWithTheirNextRunInLocalTimeAndNoLastRun()
 	{
 		var overview = await Testee.OverviewAsync();
 
 		await Assert.That(overview.Pass.Last).IsNone();
+		await Assert.That(overview.Pass.NextRun).IsSome().And.IsEqualTo(new DateTimeOffset(new DateTime(2026, 10, 12, 3, 0, 0, DateTimeKind.Local)));
 		await Assert.That(overview.Datasets.Select(dataset => dataset.Service)).IsEquivalentTo([RemoteService.ImdbDatasets, RemoteService.AnimeLists]);
 		await Assert.That(overview.Datasets[0].Last).IsNone();
 		await Assert.That(overview.Datasets[1].Last).IsNone();

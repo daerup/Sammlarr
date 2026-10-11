@@ -11,5 +11,6 @@ internal sealed class HousekeepingModule : IServiceModule
 		services.AddScoped<HousekeepingPass>();
 		services.AddScoped<IHousekeepingTasks, HousekeepingTasks>();
 		services.AddScoped<IHousekeepingStep, UsageTrim>();
+		services.AddHostedService<HousekeepingSchedule>();
 	}
 }
