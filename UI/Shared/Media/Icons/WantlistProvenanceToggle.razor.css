@@ -4,9 +4,33 @@
     align-items: center;
 }
 
-::deep .provenance-anchor {
+.provenance-trigger ::deep .provenance-dot {
     position: absolute;
-    inset: 0;
-    opacity: 0;
+    top: 7.5px;
+    right: 7.5px;
+    width: var(--dot-hit);
+    height: var(--dot-hit);
+    translate: 50% -50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 9999px;
+    background: transparent;
+    cursor: pointer;
+    pointer-events: auto !important;
+}
+
+.toggle-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 2px solid var(--card);
     pointer-events: none;
+    transition: transform 0.15s ease;
+}
+
+.provenance-trigger ::deep .provenance-dot:is(:hover, :focus-visible) .toggle-dot {
+    transform: scale(1.25);
 }

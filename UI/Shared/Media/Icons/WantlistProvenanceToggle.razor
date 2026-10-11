@@ -2,22 +2,23 @@
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
 
-<span class="provenance-trigger" @oncontextmenu="Reveal" @oncontextmenu:preventDefault="CanReveal">
+<span class="provenance-trigger" style="--dot-hit: @(Size * 2 / 3)px" @oncontextmenu="Reveal" @oncontextmenu:preventDefault="CanReveal" @onkeydown:stopPropagation="_open">
     <WantlistToggleIcon Result="Result"
                          Size="Size"
                          IsToggled="IsToggled"
                          IsToggling="IsToggling"
-                         DotColor="@DotColor"
                          OnToggle="OnToggle"/>
-    <BbPopover Open="_open" OpenChanged="@(open => _open = open)">
-        <BbPopoverTrigger AsChild="false" tabindex="-1" aria-hidden="true" class="provenance-anchor"/>
-        <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-auto p-0 overflow-hidden">
-            @if (Item is Some<WantlistItem>(var item))
-            {
+    @if (IsToggled && !IsToggling && Item is Some<WantlistItem>(var item))
+    {
+        <BbPopover Open="_open" OpenChanged="@(open => _open = open)">
+            <BbPopoverTrigger AsChild="false" class="provenance-dot" aria-label="Where it came from" title="Where it came from">
+                <span class="toggle-dot" style="background: @ColorOf(item.Provenance)"></span>
+            </BbPopoverTrigger>
+            <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-auto p-0 overflow-hidden">
                 <ProvenanceDetails Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="Result.Identity.Id" Type="Result.Identity.Type"/>
-            }
-        </BbPopoverContent>
-    </BbPopover>
+            </BbPopoverContent>
+        </BbPopover>
+    }
 </span>
 
 @code {
@@ -30,20 +31,19 @@
 
     private bool _open;
 
-    private bool CanReveal => IsToggled && Item.IsSome();
+    private bool CanReveal => IsToggled && !IsToggling && Item.IsSome();
+
+    protected override void OnParametersSet() => _open &= CanReveal;
 
     private void Reveal() => _open = CanReveal;
 
-    private string? DotColor => Item.Match(item => ColorOf(item.Provenance), () => null);
-
-    private string? ColorOf(WantlistItemProvenance provenance)
+    private string ColorOf(WantlistItemProvenance provenance)
     {
         return provenance switch
         {
             SinkOrigin sink => Branding.Color(sink.Provider.Service),
             FeedOrigin feed => Branding.Color(feed.Feed.Provider.Service),
-            OrphanedOrigin => "var(--muted-foreground)",
-            ManualOrigin => null,
+            OrphanedOrigin or ManualOrigin => "var(--muted-foreground)",
         };
     }
 }
