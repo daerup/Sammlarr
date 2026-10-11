@@ -144,6 +144,66 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(await RunAfterAsync()).IsEqualTo(pressedAt);
 	}
 
+	[Test]
+	public async Task TakeNextAsync_ForAFillDetailsWhileAFeedRunIsQueued_TakesTheFeedRun()
+	{
+		var (run, dueAt) = await FillThenRunAsync();
+
+		var taken = await host.Resolve<IJobRepository>().TakeNextAsync(dueAt + TimeSpan.FromMinutes(1));
+
+		await Assert.That(taken.Map(job => job.Request)).IsSome().And.IsEqualTo(run);
+	}
+
+	[Test]
+	public async Task TakeNextAsync_ForAFillDetailsWhileAFeedRunIsQueued_AfterMaxWait_TakesTheFill()
+	{
+		var (_, dueAt) = await FillThenRunAsync();
+
+		var taken = await host.Resolve<IJobRepository>().TakeNextAsync(dueAt + Options.FillDetailsMaxWait);
+
+		await Assert.That(taken.Map(job => job.Request)).IsSome().And.IsEqualTo(new FillDetails());
+	}
+
+	[Test]
+	public async Task RequeueRunningAsync_ForARunningJobWithAPendingTwin_CancelsItAndRequeuesTheRest()
+	{
+		var jobs = host.Resolve<IJobRepository>();
+		var now = host.Resolve<IDateTimeProvider>().Now;
+		var (run, _) = await FillThenRunAsync();
+		var later = now + Options.FillDetailsGrace + TimeSpan.FromMinutes(1);
+		var fill = await jobs.TakeNextAsync(later + Options.FillDetailsMaxWait);
+		var feed = await jobs.TakeNextAsync(later + Options.FillDetailsMaxWait);
+		await Testee.EnqueueAsync(new FillDetails());
+
+		var requeued = await jobs.RequeueRunningAsync(later);
+
+		await Assert.That(fill.Map(job => job.Request)).IsSome().And.IsEqualTo(new FillDetails());
+		await Assert.That(feed.Map(job => job.Request)).IsSome().And.IsEqualTo(run);
+		await Assert.That(requeued).IsEqualTo(1);
+		await Assert
+			.That(await StatesAsync())
+			.IsEquivalentTo([(JobKind.DetailsFill, JobState.Cancelled), (JobKind.DetailsFill, JobState.Waiting), (JobKind.FeedRun, JobState.Queued)]);
+	}
+
+	private async Task<IReadOnlyList<(JobKind Kind, JobState State)>> StatesAsync()
+	{
+		await using var context = await host.ContextFactory.CreateDbContextAsync();
+		return [.. (await context.Jobs.AsNoTracking().ToListAsync()).Select(row => (row.Kind, row.State))];
+	}
+
+	private async Task<(IJobRequest Run, DateTimeOffset DueAt)> FillThenRunAsync()
+	{
+		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		await Testee.EnqueueAsync(new FillDetails());
+		var dueAt = armedAt + Options.FillDetailsGrace;
+		host.SetCurrentTime(dueAt);
+		await host.Resolve<IJobRepository>().ReleaseDueAsync(dueAt);
+		host.SetCurrentTime(dueAt + TimeSpan.FromMinutes(1));
+		IJobRequest run = new RunFeed(FeedId.From(Guid.NewGuid()), new Manual());
+		await Testee.EnqueueAsync(run);
+		return (run, dueAt);
+	}
+
 	private SchedulerOptions Options => host.Resolve<SchedulerOptions>();
 
 	private async Task<DateTimeOffset> RunAfterAsync()

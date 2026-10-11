@@ -122,6 +122,7 @@ internal sealed partial class SelfHostedStack
 			.WithEndpoint("http", endpoint => endpoint.Port = null)
 			.WithEnvironment("Sammlarr__Observability__LogLevel", nameof(LogVerbosity.Quiet))
 			.WithEnvironment("Sammlarr__ConnectionString", $"Data Source={DatabasePath(workDir)}")
+			.WithEnvironment("Sammlarr__Scheduler__FillDetailsGrace", "1.00:00:00")
 			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", keyRing)
 			.WaitFor(wiremock);
 		foreach (var provider in ProviderRecording.SelfHosted)

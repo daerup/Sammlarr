@@ -17,6 +17,8 @@ public interface IJobRepository
 
 	Task<IReadOnlyList<IJobRequest>> QueuedAsync(UserId owner, JobKind kind, CancellationToken cancellationToken = default);
 
+	Task<bool> AnyQueuedAsync(JobKind except, CancellationToken cancellationToken = default);
+
 	Task<int> QueueWaitingAsync(UserId owner, JobKind kind, DateTimeOffset now, CancellationToken cancellationToken = default);
 
 	Task<Optional<IJobRequest>> CancelAsync(JobId id, UserId owner, DateTimeOffset cancelledAt, CancellationToken cancellationToken = default);

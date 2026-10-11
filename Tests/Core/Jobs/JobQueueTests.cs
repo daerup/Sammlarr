@@ -41,6 +41,30 @@ public class JobQueueTests
 			.WasCalled(Times.Once);
 	}
 
+	[Test]
+	public async Task EnqueueAsync_ForAFillDetails_WaitsItsGraceWithItsMaxWait()
+	{
+		var (testee, jobs, _) = BuildTestee();
+
+		await testee.EnqueueAsync(new FillDetails());
+
+		jobs.EnqueueAsync(new QueuedJob(new FillDetails(), TestCurrentUser.DefaultId, Now + Options.FillDetailsGrace, Options.FillDetailsMaxWait), Now, Any())
+			.WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task CancelAsync_ForAJobThatHasNotStarted_WakesTheRunner()
+	{
+		var signal = new JobSignal();
+		var (testee, jobs, _) = BuildTestee(signal);
+		jobs.CancelAsync(Any<JobId>(), Any<UserId>(), Any<DateTimeOffset>(), Any()).Returns(Some.Of<IJobRequest>(new FillDetails()));
+
+		await testee.CancelAsync(JobId.From(Guid.NewGuid()));
+
+		signal.Complete();
+		await Assert.That(await signal.NudgesAsync().CountAsync()).IsEqualTo(1);
+	}
+
 	private static SchedulerOptions Options => new();
 
 	[Test]
@@ -161,7 +185,7 @@ public class JobQueueTests
 
 	private static readonly FeedRunTrigger Nightly = new Scheduled("0 0 3 * * *");
 
-	private static (JobQueue Testee, Mock<IJobRepository> Jobs, EventPublisher Events) BuildTestee()
+	private static (JobQueue Testee, Mock<IJobRepository> Jobs, EventPublisher Events) BuildTestee(JobSignal? signal = null)
 	{
 		var jobs = IJobRepository.Mock();
 		jobs.EnqueueAsync(Any<QueuedJob>(), Any<DateTimeOffset>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Queued));
@@ -173,12 +197,12 @@ public class JobQueueTests
 
 		var services = new ServiceCollection();
 		services.AddSingleton(jobs.Object);
-		var signal = new JobSignal();
-		var alarm = new JobAlarm(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(), signal, clock.Object, NullLogger<JobAlarm>.Instance);
+		var raised = signal ?? new JobSignal();
+		var alarm = new JobAlarm(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(), raised, clock.Object, NullLogger<JobAlarm>.Instance);
 
 		var events = new EventPublisher();
 		return (
-			new JobQueue(jobs.Object, signal, alarm, new TestCurrentUser(), clock.Object, Options, new Announcer(events, new RecordingPublisher())),
+			new JobQueue(jobs.Object, raised, alarm, new TestCurrentUser(), clock.Object, Options, new Announcer(events, new RecordingPublisher())),
 			jobs,
 			events
 		);

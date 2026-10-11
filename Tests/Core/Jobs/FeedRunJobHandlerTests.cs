@@ -50,7 +50,7 @@ public class FeedRunJobHandlerTests
 
 		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), Nightly));
 
-		await Assert.That(calls).IsEquivalentTo(["arm", "run"], CollectionOrdering.Matching);
+		await Assert.That(calls.Take(2)).IsEquivalentTo(["arm", "run"], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -68,13 +68,27 @@ public class FeedRunJobHandlerTests
 	}
 
 	[Test]
-	public async Task HandleAsync_ForAPlainManualRun_ArmsNothing()
+	public async Task HandleAsync_ForAPlainManualRun_ArmsNoSync()
 	{
 		var (testee, queue, _, _) = Testee();
 
 		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
 
-		queue.EnqueueAsync(Any<IJobRequest>(), Any()).WasCalled(Times.Never);
+		queue.EnqueueAsync(Is<IJobRequest>(request => request is SyncWantlist), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task HandleAsync_AfterTheRun_QueuesAFillOfMissingDetails()
+	{
+		var (testee, queue, _, engine) = Testee();
+		List<string> calls = [];
+		queue.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Waiting)).Callback(() => calls.Add("queue"));
+		engine.RunAsync(Any<FeedId>(), Any<FeedRunTrigger>(), Any()).Returns(new FeedRunFailed("stubbed")).Callback(() => calls.Add("run"));
+
+		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
+
+		await Assert.That(calls).IsEquivalentTo(["run", "queue"], CollectionOrdering.Matching);
+		queue.EnqueueAsync(Is<IJobRequest>(request => request is FillDetails), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
