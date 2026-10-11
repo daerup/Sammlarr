@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Shared.Media;
 using UI.Shared.Services;
+using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Media;
 
@@ -76,19 +77,20 @@ public class MediaDetailSheetTests : BunitContext
 		var cut = RenderSheet();
 		cut.WaitForState(() => cut.FindAll(".toggle-dot").Count > 0);
 
-		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsNotNull();
+		var brand = Services.GetRequiredService<MediaProviderBrandingService>().GetBrandingInfo(MediaProvider.Mdblist).BrandColor;
+		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsEqualTo($"background: {brand}");
 	}
 
 	[Test]
-	public async Task Dot_WhenTheItemWasAddedByHand_IsNotShown()
+	public async Task Dot_WhenTheItemWasAddedByHand_ShowsANeutralDot()
 	{
 		Register();
 		_wantlist.GetAsync(Any()).Returns(Wantlisted(new ManualOrigin(ManualSource.Search)));
 
 		var cut = RenderSheet();
-		cut.WaitForState(() => Toggle(cut) is not null);
+		cut.WaitForState(() => cut.FindAll(".toggle-dot").Count > 0);
 
-		await Assert.That(cut.FindAll(".toggle-dot")).IsEmpty();
+		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsEqualTo("background: var(--muted-foreground)");
 	}
 
 	[Test]
