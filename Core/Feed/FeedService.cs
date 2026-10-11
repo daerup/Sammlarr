@@ -36,10 +36,7 @@ internal sealed class FeedService(
 		var stored = await repository.FindAsync(id, cancellationToken);
 		return await stored
 			.When(feed => feed.Provider == data.Provider && feed.Identifier == data.Identifier)
-			.Match(
-				feed => Task.FromResult<Result<string>>(Success.Of(feed.Identifier)),
-				() => providers[data.Provider].NormalizeAsync(data.Identifier, cancellationToken)
-			)
+			.Match(feed => Success.Of(feed.Identifier), () => providers[data.Provider].NormalizeAsync(data.Identifier, cancellationToken))
 			.Map(normalized => UpdatedAsync(id, data with { Identifier = normalized }, cancellationToken));
 	}
 

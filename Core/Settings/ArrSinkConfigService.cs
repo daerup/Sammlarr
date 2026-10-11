@@ -16,7 +16,7 @@ internal sealed class ArrSinkConfigService(
 
 	public async Task<ArrSinkConfig> GetAsync(CancellationToken cancellationToken = default)
 	{
-		var config = await cache.GetValueOrNone(CacheKey).Match(Task.FromResult, () => LoadAsync(cancellationToken));
+		var config = await cache.GetValueOrNone(CacheKey).GetValueOr(() => LoadAsync(cancellationToken));
 		var syncing = await users.GetAllAsync(cancellationToken);
 		return config with { Tags = config.Tags with { PerUser = config.Tags.PerUser || syncing.Count > 1 } };
 	}

@@ -43,7 +43,7 @@ internal sealed class MediaIdResolver(
 		return await unmatchedCache
 			.GetValueOrNone(key)
 			.Apply(_ => FeedRunSpans.NotFoundEarlier())
-			.Match(_ => Task.FromResult<Resolution>(new NotFoundEarlier()), () => LookUpAsync(request, target, connected, key, cancellationToken));
+			.Match(_ => new NotFoundEarlier(), () => LookUpAsync(request, target, connected, key, cancellationToken));
 	}
 
 	private async Task<Resolution> LookUpAsync(

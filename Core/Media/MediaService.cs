@@ -166,16 +166,14 @@ internal sealed class MediaService(
 	private async Task<Optional<IExternalMediaId>> FindPageLinkAsync(MediaId id, MediaProvider site, CancellationToken cancellationToken)
 	{
 		var stored = await mediaRepository.GetAsync([id], cancellationToken);
-		return await stored
-			.FirstOrNone()
-			.Match(media => HeldOrAskedAsync(media, site, cancellationToken), () => Task.FromResult<Optional<IExternalMediaId>>(new None()));
+		return await stored.FirstOrNone().Map(media => HeldOrAskedAsync(media, site, cancellationToken));
 	}
 
 	private Task<Optional<IExternalMediaId>> HeldOrAskedAsync(StoredMedia media, MediaProvider site, CancellationToken cancellationToken)
 	{
 		return media
 			.Cached.Map(cached => cached.Details.PageLinks.FirstOrNone(link => link.Source == site))
-			.Match(held => Task.FromResult<Optional<IExternalMediaId>>(Some.Of<IExternalMediaId>(held)), () => AskPageLinkAsync(media, site, cancellationToken));
+			.Match(held => Some.Of<IExternalMediaId>(held), () => AskPageLinkAsync(media, site, cancellationToken));
 	}
 
 	private async Task<Optional<IExternalMediaId>> AskPageLinkAsync(StoredMedia media, MediaProvider site, CancellationToken cancellationToken)
@@ -275,10 +273,7 @@ internal sealed class MediaService(
 	{
 		IReadOnlyList<StoredMedia> rows = [.. request.Candidates.Select(stored.GetValueOrNone).WhereSome().DistinctBy(row => row.Identity.Id)];
 		return addressedBy(request.Type)
-			.Match(
-				target => identifier.IdentifyAsync(request, target, rows, connected, cancellationToken),
-				() => Task.FromResult<Identification>(new Unidentified(UnmatchedReason.NotFound, []))
-			);
+			.Match(target => identifier.IdentifyAsync(request, target, rows, connected, cancellationToken), () => new Unidentified(UnmatchedReason.NotFound, []));
 	}
 
 	private Task<Result<MatchedMedia>> LoadStoredDetailsAsync(
@@ -292,7 +287,7 @@ internal sealed class MediaService(
 			.GetValueOrNone(id)
 			.Match(
 				row => detailsFetcher.LoadAsync(new IdentifyHandoff(row.Identity, Some.Of(row)), MediaDetails.Empty(row.Identity.Type), run, cancellationToken),
-				() => Task.FromResult<Result<MatchedMedia>>(Error.From("identity not found"))
+				() => Error.From("identity not found")
 			);
 	}
 

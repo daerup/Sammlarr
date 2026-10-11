@@ -33,19 +33,13 @@ internal sealed class AccountLinkService(
 	public async Task<Result<User>> JoinAsync(string token, string password, string confirmation, CancellationToken cancellationToken = default)
 	{
 		var found = await FindAsync(AccountLinkKind.Invite, token, cancellationToken);
-		return await found.Match(
-			invite => Checked(password, confirmation, () => JoinAsync(invite, token, password, cancellationToken)),
-			() => Task.FromResult<Result<User>>(Unusable)
-		);
+		return await found.Match(invite => Checked(password, confirmation, () => JoinAsync(invite, token, password, cancellationToken)), () => Unusable);
 	}
 
 	public async Task<Result<User>> ResetPasswordAsync(string token, string password, string confirmation, CancellationToken cancellationToken = default)
 	{
 		var found = await FindAsync(AccountLinkKind.Reset, token, cancellationToken);
-		return await found.Match(
-			reset => Checked(password, confirmation, () => ResetAsync(reset, token, password, cancellationToken)),
-			() => Task.FromResult<Result<User>>(Unusable)
-		);
+		return await found.Match(reset => Checked(password, confirmation, () => ResetAsync(reset, token, password, cancellationToken)), () => Unusable);
 	}
 
 	private async Task<Optional<AccountLink>> FindAsync(AccountLinkKind kind, string token, CancellationToken cancellationToken)
@@ -58,7 +52,7 @@ internal sealed class AccountLinkService(
 
 	private Task<Result<User>> Checked(string password, string confirmation, Func<Task<Result<User>>> next)
 	{
-		return Passwords.Problem(password, confirmation, options.MinimumPasswordLength).Match(problem => Task.FromResult<Result<User>>(problem), next);
+		return Passwords.Problem(password, confirmation, options.MinimumPasswordLength).Match(problem => problem, next);
 	}
 
 	private async Task<Result<User>> JoinAsync(AccountLink invite, string token, string password, CancellationToken cancellationToken)
@@ -86,7 +80,7 @@ internal sealed class AccountLinkService(
 			return Unusable;
 		}
 
-		return await reset.User.Match(id => StoreAsync(id, password, cancellationToken), () => Task.FromResult<Result<User>>(Unusable));
+		return await reset.User.Match(id => StoreAsync(id, password, cancellationToken), () => Unusable);
 	}
 
 	private async Task<Result<User>> StoreAsync(UserId id, string password, CancellationToken cancellationToken)

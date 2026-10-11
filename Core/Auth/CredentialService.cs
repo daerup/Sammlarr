@@ -57,9 +57,7 @@ internal sealed class CredentialService(
 
 	private Task<AccessCheck> CheckAsync(AuthProvider provider, Guid clientId, string accessToken, CancellationToken cancellationToken)
 	{
-		return validators
-			.Find(provider)
-			.Match(validator => validator.CheckAsync(clientId, accessToken, cancellationToken), () => Task.FromResult(AccessCheck.Valid));
+		return validators.Find(provider).Match(validator => validator.CheckAsync(clientId, accessToken, cancellationToken), () => AccessCheck.Valid);
 	}
 
 	private static ICredential CredentialOf(AuthProvider provider, StoredCredential stored)

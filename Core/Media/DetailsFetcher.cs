@@ -51,7 +51,7 @@ internal sealed class DetailsFetcher(
 		var cached = handoff.Stored.Map(row => row.Cached);
 		return FindReusable(handoff.Identity, cached, run.Connected, run.Needs)
 			.Match(
-				reusable => Task.FromResult<Result<MatchedMedia>>(Success.Of(new MatchedMedia(handoff.Identity, reusable.Details))),
+				reusable => Success.Of(new MatchedMedia(handoff.Identity, reusable.Details)),
 				() => FetchOrFallBackAsync(handoff, cached, placeholder, run, cancellationToken)
 			);
 	}
@@ -358,10 +358,7 @@ internal sealed class DetailsFetcher(
 	{
 		return enrichers
 			.Find(candidate.Remote)
-			.Match(
-				enricher => enricher.LookUpAsync(candidate.Id, identity.Keys, cancellationToken),
-				() => Task.FromResult<Answer<FoundMedia>>(new NoMatch(candidate.Remote))
-			);
+			.Match(enricher => enricher.LookUpAsync(candidate.Id, identity.Keys, cancellationToken), () => new NoMatch(candidate.Remote));
 	}
 
 	private List<EnricherCandidate> EnrichersLeftToAsk(MediaIdentity identity, IReadOnlySet<RemoteService> asked, IReadOnlySet<RemoteService> connected)
