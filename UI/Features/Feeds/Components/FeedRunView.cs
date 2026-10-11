@@ -9,6 +9,10 @@ namespace UI.Features.Feeds.Components;
 
 internal static class FeedRunView
 {
+	internal const string TitlesGone = "Older runs keep their counts; the titles they added and removed are no longer listed.";
+
+	internal static bool LostItsTitles(FeedRun run) => run.Items.Count == 0 && run.Counts.Added + run.Counts.Removed > 0;
+
 	internal static IReadOnlyList<ChangeItem> Items(FeedRun run, IReadOnlyDictionary<MediaId, MatchedMedia> media)
 	{
 		return

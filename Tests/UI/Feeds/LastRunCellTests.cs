@@ -83,6 +83,19 @@ public class LastRunCellTests : BunitContext
 	}
 
 	[Test]
+	public async Task Dialog_ForARunWhoseTitlesThePassRemoved_SaysTheyAreNoLongerListed()
+	{
+		RegisterServices();
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.LastRun, Run() with { Items = [] }));
+		cut.WaitForState(() => cut.FindAll(".last-run").Count == 1);
+		await cut.Find(".last-run").ClickAsync(new());
+		cut.WaitForState(() => cut.FindAll(".change-empty").Count == 1);
+
+		await Assert.That(cut.Find(".change-empty").TextContent).IsEqualTo(FeedRunView.TitlesGone);
+	}
+
+	[Test]
 	public async Task Render_WithBar_ShowsTheBarAndBothTooltipSections()
 	{
 		RegisterServices();
