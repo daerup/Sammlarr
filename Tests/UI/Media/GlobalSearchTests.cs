@@ -75,7 +75,7 @@ public class GlobalSearchTests : BunitContext
 		_blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
 		Services.AddSingleton(_blocklist.Object);
 
-		_search.SearchAsync(Any(), Any(), Any()).Returns([Matched, Unmatched]);
+		_search.SearchAsync(Any(), Any(), Any()).Returns(new SearchResults([Matched, Unmatched], []));
 		Services.AddSingleton(_search.Object);
 
 		JSInterop.Mode = JSRuntimeMode.Loose;
@@ -127,7 +127,7 @@ public class GlobalSearchTests : BunitContext
 		SearchWith(SearchProvider.Arr);
 		_search
 			.SearchAsync(Any(), Any(), Any())
-			.Returns([Found("Dune: Prophecy", MediaType.Show), Found("Dune", MediaType.Movie), Found("Dune: Part Two", MediaType.Movie)]);
+			.Returns(new SearchResults([Found("Dune: Prophecy", MediaType.Show), Found("Dune", MediaType.Movie), Found("Dune: Part Two", MediaType.Movie)], []));
 		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
 		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = "dune" });
 		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
@@ -140,6 +140,21 @@ public class GlobalSearchTests : BunitContext
 		await cut.Find("[role=tab][aria-selected=false]").ClickAsync(new MouseEventArgs());
 
 		await Assert.That(cut.FindAll(".search-result-row").Single().TextContent).Contains("Dune: Prophecy");
+	}
+
+	[Test]
+	public async Task Search_WhenSonarrMissed_SaysItsShowsAreMissing()
+	{
+		SearchWith(SearchProvider.Arr);
+		_search
+			.SearchAsync(Any(), Any(), Any())
+			.Returns(new SearchResults([Found("Dune", MediaType.Movie)], [new SearchMiss(RemoteService.Sonarr, "connection refused")]));
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = "dune" });
+		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
+
+		await Assert.That(cut.Find("[data-testid=search-miss]").TextContent).Contains("Sonarr did not answer, so its shows are missing.");
+		await Assert.That(cut.Find("[data-testid=search-miss-reason]").TextContent).IsEqualTo("connection refused");
 	}
 
 	[Test]

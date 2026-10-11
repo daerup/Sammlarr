@@ -34,7 +34,7 @@ public class PlexApiTests
 		var json = BuildSearchPayload(plexValue, faker.Lorem.Sentence(2));
 		var testee = CreatePlexApi(json);
 
-		var results = await testee.SearchAsync("anything", [MediaType.Movie]);
+		var results = (await testee.SearchAsync("anything", [MediaType.Movie])).Found;
 
 		using var _ = Assert.Multiple();
 		await Assert.That(results).IsNotEmpty();
@@ -147,7 +147,7 @@ public class PlexApiTests
 		);
 		var testee = CreatePlexApi(SearchPayloadOf(metadata));
 
-		var results = await testee.SearchAsync("anything", [MediaType.Show]);
+		var results = (await testee.SearchAsync("anything", [MediaType.Show])).Found;
 
 		await Assert.That(results.Single().Details).IsEqualTo(new ShowDetails());
 	}
@@ -221,7 +221,7 @@ public class PlexApiTests
 		var json = BuildEmptySearchPayload();
 		var testee = CreatePlexApi(json);
 
-		var results = await testee.SearchAsync("anything", [MediaType.Movie]);
+		var results = (await testee.SearchAsync("anything", [MediaType.Movie])).Found;
 
 		await Assert.That(results).IsEmpty();
 	}

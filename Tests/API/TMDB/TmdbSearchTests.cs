@@ -22,7 +22,7 @@ public class TmdbSearchTests
 	{
 		_tmdb.OnAnyRequest().RespondWithJson(Results);
 
-		var found = await Testee.SearchAsync("project hail", [MediaType.Movie, MediaType.Show]);
+		var found = (await Testee.SearchAsync("project hail", [MediaType.Movie, MediaType.Show])).Found;
 
 		IExternalMediaId[] expected = [TmdbId.From("687163", MediaType.Movie), TmdbId.From("95557", MediaType.Show)];
 		await Assert.That(found.Select(item => item.Externals.Single())).IsEquivalentTo(expected);
@@ -36,7 +36,7 @@ public class TmdbSearchTests
 	{
 		_tmdb.OnAnyRequest().RespondWithJson(Results);
 
-		var found = await Testee.SearchAsync("project hail", [MediaType.Movie]);
+		var found = (await Testee.SearchAsync("project hail", [MediaType.Movie])).Found;
 
 		string?[] expected = ["Project Hail Mary"];
 		await Assert.That(found.Select(item => item.Details.Title)).IsEquivalentTo(expected);

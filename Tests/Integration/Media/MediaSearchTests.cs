@@ -18,7 +18,7 @@ public class MediaSearchTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		await host.PlexSearchReturns("Fight Club", TestMedia.FightClub);
 
-		var results = await Testee.SearchAsync("Fight Club", [MediaType.Movie]);
+		var results = (await Testee.SearchAsync("Fight Club", [MediaType.Movie])).Results;
 
 		await Assert.That(results).Count().IsEqualTo(1);
 		await AssertResolvedAs(results[0], TestMedia.FightClub);
@@ -29,7 +29,7 @@ public class MediaSearchTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.PlexFindsNothing("Nonexistent");
 
-		await Assert.That(await Testee.SearchAsync("Nonexistent", [MediaType.Movie])).IsEmpty();
+		await Assert.That((await Testee.SearchAsync("Nonexistent", [MediaType.Movie])).Results).IsEmpty();
 	}
 
 	[Test]
@@ -39,7 +39,7 @@ public class MediaSearchTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Show(TestMedia.BreakingBad).SeedAsync();
 		await host.PlexSearchReturns("thriller", TestMedia.FightClub, TestMedia.BreakingBad);
 
-		var results = await Testee.SearchAsync("thriller", [MediaType.Movie, MediaType.Show]);
+		var results = (await Testee.SearchAsync("thriller", [MediaType.Movie, MediaType.Show])).Results;
 
 		await Assert.That(results).Count().IsEqualTo(2);
 		await AssertResolvedAs(results.Single(item => item.Details.Title == "Fight Club"), TestMedia.FightClub);

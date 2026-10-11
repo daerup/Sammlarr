@@ -20,6 +20,9 @@ public class MediaModelTests
 			.Where(method => Signature(method).SelectMany(Unfold).Any(matches.Contains))
 			.Select(Methods.Describe);
 
+		await Assert
+			.That(Signature(typeof(IMediaSearchProvider).GetMethod(nameof(IMediaSearchProvider.SearchAsync))!).SelectMany(Unfold))
+			.Contains(typeof(FoundMedia));
 		await offenders.AssertNone();
 	}
 
@@ -67,8 +70,23 @@ public class MediaModelTests
 
 	private static IEnumerable<Type> Signature(MethodInfo method) => [method.ReturnType, .. method.GetParameters().Select(parameter => parameter.ParameterType)];
 
-	private static IEnumerable<Type> Unfold(Type type)
+	private static IEnumerable<Type> Unfold(Type type) => Unfold(type, []);
+
+	private static IEnumerable<Type> Unfold(Type type, HashSet<Type> seen)
 	{
-		return [type, .. type.GetGenericArguments().SelectMany(Unfold), .. type.HasElementType ? Unfold(type.GetElementType()!) : []];
+		if (!seen.Add(type))
+		{
+			return [];
+		}
+
+		IEnumerable<Type> inside = [.. type.GetGenericArguments(), .. type.HasElementType ? [type.GetElementType()!] : Type.EmptyTypes, .. Members(type)];
+		return [type, .. inside.SelectMany(each => Unfold(each, seen))];
+	}
+
+	private static IEnumerable<Type> Members(Type type)
+	{
+		return type.Assembly == Projects.Domain || type.Assembly == Projects.Contracts
+			? type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Select(property => property.PropertyType)
+			: [];
 	}
 }
