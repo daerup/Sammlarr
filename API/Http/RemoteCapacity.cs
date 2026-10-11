@@ -18,6 +18,9 @@ internal sealed class RemoteCapacity(Lanes.Lanes lanes, ICurrentUser user) : IRe
 			loads.Sum(load => load.Waiting),
 			settings.Map(found => found.MaxWait).GetValueOr(TimeSpan.Zero),
 			settings.Map(found => found.EnrichWait).GetValueOr(TimeSpan.Zero)
-		);
+		)
+		{
+			Paced = loads.Select(load => load.Paced).WhereSome().OrderByDescending(pace => pace.OpensAt).FirstOrNone(),
+		};
 	}
 }

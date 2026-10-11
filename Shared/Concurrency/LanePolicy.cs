@@ -49,6 +49,11 @@ public interface ILaneQuota
 	Optional<DateTimeOffset> BlockedUntil(string owner, LaneClass asking, DateTimeOffset now);
 }
 
-public readonly record struct LaneLoad(Optional<DateTimeOffset> BlockedUntil, TimeSpan EstimatedWait, bool Down, int Waiting);
+public readonly record struct LanePace(DateTimeOffset OpensAt, int Requests, TimeSpan Per);
+
+public readonly record struct LaneLoad(Optional<DateTimeOffset> BlockedUntil, TimeSpan EstimatedWait, bool Down, int Waiting)
+{
+	public Optional<LanePace> Paced { get; init; } = new None();
+}
 
 public sealed class LaneRefusedException(string reason) : Exception(reason);

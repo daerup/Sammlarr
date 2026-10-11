@@ -641,7 +641,8 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         text-anchor: middle;
     }
 
-    .feed-live .nd-stat {
+    .feed-live .nd-stat,
+    .feed-live .nd-pace {
         font-size: 11px;
         fill: var(--muted-foreground);
         text-anchor: middle;
@@ -683,6 +684,10 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
         stroke: var(--usage-after-429);
         stroke-width: 3;
         stroke-linecap: round;
+    }
+
+    .feed-live .nd-wait.is-paced {
+        stroke: var(--muted-foreground);
     }
 
     .feed-live .nd-orbit {
@@ -905,6 +910,7 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
 
     .feed-live .nd-name,
     .feed-live .nd-stat,
+    .feed-live .nd-pace,
     .feed-live .fl-fate-name,
     .feed-live .fl-fate-cap {
         paint-order: stroke;

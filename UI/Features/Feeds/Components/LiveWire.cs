@@ -42,7 +42,14 @@ public sealed record WireBatch(IReadOnlyList<WireStep> Steps, IReadOnlyList<Wire
 	public int? Reading { get; init; }
 }
 
-public readonly record struct WireCapacity(byte Service, int BlockedUntilMs, double Busy);
+public readonly record struct WireCapacity(byte Service, int BlockedUntilMs, double Busy)
+{
+	public int PacedUntilMs { get; init; }
+
+	public int PacedRequests { get; init; }
+
+	public int PacedPerMs { get; init; }
+}
 
 internal sealed record WireSnapshot(long CursorSeq, int ElapsedMs, bool Ended, FateTally Fates, IReadOnlyList<WireNode> Nodes, IReadOnlyList<WireTitle> Titles)
 {
@@ -104,8 +111,16 @@ internal static class LiveWire
 
 	internal static WireCapacity Capacity(RemoteService service, RemoteLoad load, DateTimeOffset now, int elapsedMs)
 	{
-		var blockedUntil = load.BlockedUntil.When(until => until > now).Map(until => elapsedMs + (int)(until - now).TotalMilliseconds);
-		return new WireCapacity((byte)service, blockedUntil.GetValueOr(0), Busy(load));
+		int Elapsed(DateTimeOffset at) => elapsedMs + (int)(at - now).TotalMilliseconds;
+
+		var blockedUntil = load.BlockedUntil.When(until => until > now).Map(Elapsed);
+		var paced = load.Paced.When(pace => pace.OpensAt > now);
+		return new WireCapacity((byte)service, blockedUntil.GetValueOr(0), Busy(load))
+		{
+			PacedUntilMs = paced.Map(pace => Elapsed(pace.OpensAt)).GetValueOr(0),
+			PacedRequests = paced.Map(pace => pace.Requests).GetValueOr(0),
+			PacedPerMs = paced.Map(pace => (int)pace.Per.TotalMilliseconds).GetValueOr(0),
+		};
 	}
 
 	private static double Busy(RemoteLoad load) => load.Waiting == 0 ? 0 : 1 - 1 / (1 + load.Waiting + load.EstimatedWait.TotalSeconds);

@@ -307,6 +307,67 @@ public class LaneGateTests
 		await Assert.That(await next.WaitAsync(Patience)).IsSuccess();
 	}
 
+	[Test]
+	public async Task Load_WhileTheWindowIsFull_SaysWhenItOpensAndHowManyItAdmits()
+	{
+		var time = new FakeTimeProvider();
+		var opens = time.GetUtcNow().AddSeconds(1);
+		using var testee = new LaneGate(Policy(FourPerSecond), time, new None(), "");
+		var first = await GrantedAsync(testee);
+		var second = await GrantedAsync(testee);
+		first.Release(new AttemptThrottled(new None()));
+		second.Release(new AttemptThrottled(new None()));
+		time.Advance(TimeSpan.FromMilliseconds(400));
+
+		var waiting = Enter(testee, LanePriority.Interactive);
+
+		await Assert.That(waiting.IsCompleted).IsFalse();
+		await Assert.That(testee.Load(LaneClass.Interactive).Paced).IsSome().And.IsEqualTo(new LanePace(opens, 2, TimeSpan.FromSeconds(1)));
+	}
+
+	[Test]
+	public async Task Load_WithACallInFlight_IsNotPaced()
+	{
+		var time = new FakeTimeProvider();
+		using var testee = new LaneGate(Policy(TwoPerSecond), time, new None(), "");
+		(await GrantedAsync(testee)).Release(new AttemptAnswered());
+		await GrantedAsync(testee);
+
+		var waiting = Enter(testee, LanePriority.Interactive);
+
+		await Assert.That(waiting.IsCompleted).IsFalse();
+		await Assert.That(testee.Load(LaneClass.Interactive).Paced).IsNone();
+	}
+
+	[Test]
+	public async Task Load_WhileATitleWaitsOnlyForItsReserve_IsNotPaced()
+	{
+		var time = new FakeTimeProvider();
+		var quota = ILaneQuota.Mock();
+		quota.BlockedUntil(Any(), Any(), Any()).Returns(new None());
+		quota.BlockedUntil(Any(), LaneClass.Title, Any()).Returns(Some.Of(time.GetUtcNow().AddSeconds(30)));
+		using var testee = new LaneGate(Policy(TwoPerSecond), time, Some.Of(quota.Object), "mdblist-key");
+
+		var waiting = Enter(testee, new LanePriority(LaneClass.Title, 1));
+
+		await Assert.That(waiting.IsCompleted).IsFalse();
+		await Assert.That(testee.Load(LaneClass.Interactive).Paced).IsNone();
+	}
+
+	[Test]
+	public async Task Load_WhileBlocked_IsNotPaced()
+	{
+		var time = new FakeTimeProvider();
+		using var testee = new LaneGate(Policy(TwoPerSecond), time, new None(), "");
+		(await GrantedAsync(testee)).Release(new AttemptAnswered());
+		(await GrantedAsync(testee)).Release(new AttemptThrottled(Some.Of(time.GetUtcNow().AddSeconds(10))));
+
+		var waiting = Enter(testee, LanePriority.Interactive);
+
+		await Assert.That(waiting.IsCompleted).IsFalse();
+		await Assert.That(testee.Load(LaneClass.Interactive).Paced).IsNone();
+	}
+
 	private static LanePolicy Policy(params RateWindow[] limits) => new(limits, int.MaxValue, 2, TimeSpan.FromSeconds(30));
 
 	private static Task<Result<LanePermit>> Enter(LaneGate gate, LanePriority priority)

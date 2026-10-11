@@ -92,6 +92,20 @@ public class RemoteCapacityTests : IDisposable
 	}
 
 	[Test]
+	public async Task Of_ForAPacedLane_CarriesItsOpening()
+	{
+		await ReleaseAsync(new LaneName(RemoteService.Plex, "api"), new AttemptAnswered());
+		var waiting = _lanes
+			.Gate(new LaneName(RemoteService.Plex, "api"), new None())
+			.EnterAsync(LanePriority.Interactive, TimeSpan.FromMinutes(1), CancellationToken.None);
+
+		var load = Testee.Of(RemoteService.Plex);
+
+		await Assert.That(waiting.IsCompleted).IsFalse();
+		await Assert.That(load.Paced).IsSome().And.IsEqualTo(new LanePace(Now.AddSeconds(1), 1, TimeSpan.FromSeconds(1)));
+	}
+
+	[Test]
 	public async Task Of_ForAThrottledGateOfAKeyTheUserNeverSentThrough_StaysOpen()
 	{
 		await ReleaseAsync(new LaneName(RemoteService.Plex, "api", "plex-token"), new AttemptThrottled(Some.Of(Now.AddMinutes(5))));

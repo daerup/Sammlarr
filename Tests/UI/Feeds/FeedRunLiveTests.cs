@@ -370,7 +370,19 @@ public class FeedRunLiveTests : BunitContext
 		await cut.Find("[data-testid=live-key-toggle]").ClickAsync(new());
 
 		await Assert.That(cut.Find("[data-testid=live-key]").HasAttribute("hidden")).IsFalse();
-		await Assert.That(cut.FindAll("[data-testid=live-key] > span").Count).IsEqualTo(4);
+		await Assert.That(cut.FindAll("[data-testid=live-key] > span").Count).IsEqualTo(5);
+	}
+
+	[Test]
+	public async Task Key_ListsTheGreyRing()
+	{
+		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
+
+		var entries = cut.FindAll("[data-testid=live-key] > span").Select(entry => Words(entry.TextContent)).ToList();
+
+		await Assert
+			.That(entries[entries.FindIndex(entry => entry.StartsWith("Yellow", StringComparison.Ordinal)) + 1])
+			.IsEqualTo("Grey ring Sammlarr is pacing itself to stay under the service's limit; the ring counts to the next send");
 	}
 
 	[Test]
@@ -432,12 +444,10 @@ public class FeedRunLiveTests : BunitContext
 
 	private static IReadOnlyList<string> Segments(IRenderedComponent<FeedRunLive> cut)
 	{
-		return
-		[
-			.. cut.FindAll("[data-testid=live-foot] .live-foot-main > span")
-				.Select(span => string.Join(' ', span.TextContent.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))),
-		];
+		return [.. cut.FindAll("[data-testid=live-foot] .live-foot-main > span").Select(span => Words(span.TextContent))];
 	}
+
+	private static string Words(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
 	private static TraceSnapshot Snapshot(Guid run)
 	{

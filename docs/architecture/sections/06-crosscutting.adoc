@@ -251,7 +251,7 @@ flight (`MaxInFlight`) and batch (`MaxBatch`, below).
 | AniList | 30 per minute (as published while AniList runs degraded), 1 in flight; title and prequel lookups batch up to 50 ids
 | MyAnimeList | 30 per second, 1 in flight
 | TVmaze | 20 per 10 seconds
-| Plex | `match` 200 per minute with 5 in flight; `api` and `metadata` 50 per second with 25 in flight each (Plex publishes no limit); `watchlist` 4 in flight
+| Plex | `match` 300 per minute with 5 in flight; `api` and `metadata` 50 per second with 25 in flight each (Plex publishes no limit); `watchlist` 4 in flight
 | Wikidata | 5 in flight; SPARQL lookups batch up to 100 IMDb ids
 | Radarr, Sonarr | 4 in flight
 | IMDb datasets, anime lists | 2 in flight
@@ -556,7 +556,10 @@ after its cursor four times a second while one of its owner's feeds runs, and th
 recorded timing, 250 ms behind, so dots move smoothly without a render per hop. Each read also carries the run's progress for the
 view's footer: the source page being read (`feed.page`, with the total where the source reports one) and how many titles
 wait on a service; once the run is saved, `FeedRunEngine` hands its counts to the trace (`IFeedRunTrace.Counted`) and the
-footer shows what the feed's rules did with them. A late joiner or a view shown again
+footer shows what the feed's rules did with them. With the steps comes each service's load (`IRemoteCapacity`): a
+blocked lane (a 429, a quota reserve, a down lane) draws a yellow ring around the service that counts down, and a lane
+that holds titles back to stay inside its own window draws a grey one that counts down to when the window opens
+(`LaneLoad.Paced`), so the quiet stretch between two bursts does not look stuck. A late joiner or a view shown again
 after Hide starts from a snapshot (titles in flight, per-service counts, the fates so far). Telemetry may drop data and
 so may the view: the card's bar and every saved number come from the run that `FeedRunEngine` records (`FeedRunCounts`,
 with the titles already known and those not found earlier), never from spans

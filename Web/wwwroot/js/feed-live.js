@@ -73,6 +73,12 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const easeIO = u => (u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2);
 const escape = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const plural = (n, one, many) => `${fmt(n)} ${n === 1 ? one : many}`;
+const secs = ms => Math.max(1, Math.ceil(ms / 1000));
+
+function per(ms) {
+    if (ms % 60000 === 0) return ms === 60000 ? 'a minute' : `per ${ms / 60000} minutes`;
+    return ms === 1000 ? 'a second' : `per ${ms / 1000} seconds`;
+}
 
 function glyph(name, size) {
     return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block">${GLYPH[name]}</svg>`;
@@ -129,7 +135,7 @@ class Model {
     node(key) {
         let s = this.svc[key];
         if (!s) {
-            s = { answered: 0, after429: 0, gaveup: 0, failed: 0, inflight: 0, ema: 0, det: 0, detInflight: 0, blockedUntil: 0, busy: 0 };
+            s = { answered: 0, after429: 0, gaveup: 0, failed: 0, inflight: 0, ema: 0, det: 0, detInflight: 0, blockedUntil: 0, busy: 0, pacing: false, pacedUntil: 0, pacedRequests: 0, pacedPer: 0 };
             this.svc[key] = s;
         }
         return s;
@@ -573,7 +579,7 @@ class View {
         const points = [[x0, y0]];
         for (const [x, ys] of this.cols) {
             if (x <= x0 + 30 || x >= x3 - 30) continue;
-            const boxes = ys.filter(([key]) => this.used(key)).map(([, y]) => [y - 36, y + 64]);
+            const boxes = ys.filter(([key]) => this.used(key)).map(([, y]) => [y - 36, y + 76]);
             const want = curveY(x);
             const inside = v => boxes.find(([top, bottom]) => v > top && v < bottom);
             if (!inside(want)) continue;
@@ -651,6 +657,7 @@ class View {
             this.nd[g.dataset.k] = {
                 g,
                 stat: g.querySelector('.nd-stat'),
+                pace: g.querySelector('.nd-pace'),
                 halo: g.querySelector('.nd-halo'),
                 wait: g.querySelector('.nd-wait'),
                 flash: 0,
@@ -694,7 +701,7 @@ class View {
         return `<g class="fl-nd" data-k="${k}" transform="translate(${x},${y})">
             <circle class="nd-halo" r="${NODE_R + 9}" style="fill:${brand.color}"/><circle class="nd-wait" r="${NODE_R + 5}" transform="rotate(-90)" stroke-dasharray="0 ${WAIT_RING}"/><circle class="nd-bg" r="${NODE_R}"/><circle class="nd-track" r="${NODE_R}"/>
             ${svgTile(brand, 26)}
-            <text class="nd-name" y="${NODE_R + 19}">${escape(label)}</text><text class="nd-stat" y="${NODE_R + 33}"></text></g>`;
+            <text class="nd-name" y="${NODE_R + 19}">${escape(label)}</text><text class="nd-stat" y="${NODE_R + 33}"></text><text class="nd-pace" y="${NODE_R + 47}"></text></g>`;
     }
 
     dbHtml() {
@@ -839,7 +846,16 @@ class View {
                   .map(([key, label]) => `<span><i style="background:${STATUS_CSS[key]}"></i>${fmt(v[key])} ${label}</span>`)
                   .join('')}</div>`;
         const blocked = this.model.running && v.blockedUntil > sim;
-        return `${name}<div>${fmt(done + waiting)} asked${v.ema ? ` · ${Math.round(v.ema)} ms on average` : ''}</div>${done ? split : ''}${waiting ? `<div class="tw">${fmt(waiting)} waiting for an answer</div>` : ''}${blocked ? `<div class="tb">Rate-limited (429): free again in ${Math.max(1, Math.ceil((v.blockedUntil - sim) / 1000))} s</div>` : ''}`;
+        const pace = this.pacing(v, sim) ? `<div class="tx">Paced at ${fmt(v.pacedRequests)} ${per(v.pacedPer)} · ${this.nextSend(v, sim)}</div>` : '';
+        return `${name}<div>${fmt(done + waiting)} asked${v.ema ? ` · ${Math.round(v.ema)} ms on average` : ''}</div>${done ? split : ''}${waiting ? `<div class="tw">${fmt(waiting)} waiting for an answer</div>` : ''}${pace}${blocked ? `<div class="tb">Rate-limited (429): free again in ${secs(v.blockedUntil - sim)} s</div>` : ''}`;
+    }
+
+    pacing(v, sim) {
+        return this.model.running && v.pacing && !(v.blockedUntil > sim);
+    }
+
+    nextSend(v, sim) {
+        return v.pacedUntil > sim ? `next ${fmt(v.pacedRequests)} in ${secs(v.pacedUntil - sim)} s` : 'sending';
     }
 
     slotAnchor(id) {
@@ -857,6 +873,13 @@ class View {
                 if (c.blockedUntilMs && c.blockedUntilMs !== s.blockedUntil && !(s.blockedUntil > sim)) s.blockedFrom = sim;
                 s.blockedUntil = c.blockedUntilMs;
                 s.busy = c.busy;
+                if (c.pacedUntilMs && c.pacedUntilMs !== s.pacedUntil && !(s.pacedUntil > sim)) s.pacedFrom = sim;
+                s.pacedUntil = c.pacedUntilMs;
+                if (c.pacedUntilMs) {
+                    s.pacing = true;
+                    s.pacedRequests = c.pacedRequests;
+                    s.pacedPer = c.pacedPerMs;
+                }
             }
         }
         this.model.reading = batch.reading;
@@ -967,16 +990,22 @@ class View {
             const w = det ? v.detInflight : v.inflight;
             const asked = done + w;
             const blocked = m.running && v.blockedUntil > sim;
+            if (!w) v.pacing = false;
+            const pacing = this.pacing(v, sim);
+            const paced = pacing && v.pacedUntil > sim;
             n.g.classList.toggle('is-idle', asked === 0);
             n.stat.textContent = asked === 0 ? '' : this.inMemory.has(k) ? `${fmt(asked)} lookups · in memory` : `${fmt(asked)} asked · ${Math.round(v.ema)} ms`;
+            n.pace.textContent = pacing ? `${fmt(w)} queued · ${this.nextSend(v, sim)}` : '';
             const fl = n.flash ? Math.max(0, 1 - (now - n.flash) / 380) : 0;
             const busy = blocked ? 0 : v.busy;
-            n.halo.style.opacity = String(Math.min(0.42, busy * 0.3 + fl * 0.35));
+            n.halo.style.opacity = String(Math.min(0.42, (pacing ? 0.06 : busy * 0.3) + fl * 0.35));
             n.halo.style.fill = fl > 0 ? n.flashColor : this.brand[k].color;
             this.waitNow.set(k, !m.running ? '' : blocked ? 'blocked' : w > 0 ? 'wait' : '');
-            const span = Math.max(1, v.blockedUntil - (v.blockedFrom ?? sim));
-            const left = REDUCED.matches ? Math.ceil((v.blockedUntil - sim) / 1000) * 1000 : v.blockedUntil - sim;
-            const share = blocked ? clamp(left / span, 0, 1) : 0;
+            const until = paced ? v.pacedUntil : v.blockedUntil;
+            const span = Math.max(1, until - ((paced ? v.pacedFrom : v.blockedFrom) ?? sim));
+            const left = REDUCED.matches ? Math.ceil((until - sim) / 1000) * 1000 : until - sim;
+            const share = blocked || paced ? clamp(left / span, 0, 1) : 0;
+            n.wait.classList.toggle('is-paced', paced);
             n.wait.setAttribute('stroke-dasharray', `${(share * WAIT_RING).toFixed(1)} ${WAIT_RING}`);
             n.wait.style.display = share > 0 ? 'inline' : 'none';
         }

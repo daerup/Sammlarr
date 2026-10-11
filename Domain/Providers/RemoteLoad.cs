@@ -1,3 +1,5 @@
+using Shared.Concurrency;
+
 namespace Domain.Providers;
 
 public readonly record struct RemoteLoad(
@@ -10,6 +12,8 @@ public readonly record struct RemoteLoad(
 )
 {
 	public static RemoteLoad Idle { get; } = new(new None(), TimeSpan.Zero, false, 0);
+
+	public Optional<LanePace> Paced { get; init; } = new None();
 
 	public bool IsOpen(DateTimeOffset now) => !Down && BlockedUntil.Match(until => until <= now, () => true);
 
