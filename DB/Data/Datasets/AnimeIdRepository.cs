@@ -11,6 +11,8 @@ namespace DB.Data.Datasets;
 
 internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IAnimeIds
 {
+	private const int SliceSize = 1000;
+
 	private const string Insert =
 		"INSERT INTO AnimeIds (Type, AniListId, MalId, TvdbId, TmdbId, ImdbId, SeriesTvdbId) VALUES ($type, $anilist, $mal, $tvdb, $tmdb, $imdb, $series)";
 
@@ -23,7 +25,7 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var rows = ctx.AnimeIds.AsNoTracking();
+		var rows = ctx.AnimeIds.AsNoTracking().OrderBy(entry => entry.Id);
 		var typed = rows.Where(entry => id.Type == MediaType.Unknown || entry.Type == id.Type);
 		var row = id.Source switch
 		{
@@ -41,6 +43,52 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 			or MediaProvider.Tvmaze => null,
 		};
 		return Optional.Of(row).Map(Entry);
+	}
+
+	public async Task<IReadOnlyDictionary<IExternalMediaId, AnimeIdMapping>> FindManyAsync(
+		IReadOnlyCollection<IExternalMediaId> ids,
+		CancellationToken cancellationToken = default
+	)
+	{
+		List<IExternalMediaId> asked = [.. ids.Distinct()];
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		List<AnimeIdRow> rows = [];
+		foreach (var slice in asked.Chunk(SliceSize))
+		{
+			rows.AddRange(await RowsAsync(ctx, slice, cancellationToken));
+		}
+
+		var columns = new Columns([.. rows.DistinctBy(row => row.Id).OrderBy(row => row.Id)]);
+		return asked.Select(id => columns.Find(id).Map(row => (Id: id, Entry: Entry(row)))).WhereSome().ToDictionary(found => found.Id, found => found.Entry);
+	}
+
+	private static Task<List<AnimeIdRow>> RowsAsync(SammlarrDbContext ctx, IReadOnlyCollection<IExternalMediaId> ids, CancellationToken cancellationToken)
+	{
+		var anilist = Numbers(ids, MediaProvider.AniList);
+		var mal = Numbers(ids, MediaProvider.Mal);
+		var tvdb = Numbers(ids, MediaProvider.Tvdb);
+		var tmdb = Numbers(ids, MediaProvider.Tmdb);
+		List<string?> imdb = [.. ids.Where(id => id.Source is MediaProvider.Imdb).Select(id => id.Value)];
+		return ctx
+			.AnimeIds.AsNoTracking()
+			.Where(entry =>
+				anilist.Contains(entry.AniListId)
+				|| mal.Contains(entry.MalId)
+				|| tvdb.Contains(entry.TvdbId)
+				|| tmdb.Contains(entry.TmdbId)
+				|| imdb.Contains(entry.ImdbId)
+			)
+			.ToListAsync(cancellationToken);
+	}
+
+	private static List<int?> Numbers(IEnumerable<IExternalMediaId> ids, MediaProvider source)
+	{
+		return [.. ids.Where(id => id.Source == source).Select(Number).WhereSome().Select(number => (int?)number)];
+	}
+
+	private static Optional<int> Number(IExternalMediaId id)
+	{
+		return Optional.When(int.TryParse(id.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var number), () => number);
 	}
 
 	public async Task<int> ReplaceAsync(IAsyncEnumerable<AnimeIdMapping> rows, CancellationToken cancellationToken = default)
@@ -93,6 +141,45 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 			Optional.Of(row.ImdbId),
 			Optional.Of(row.SeriesTvdbId)
 		);
+	}
+
+	private sealed class Columns(IReadOnlyList<AnimeIdRow> rows)
+	{
+		private readonly ILookup<int?, AnimeIdRow> _aniList = rows.ToLookup(row => row.AniListId);
+
+		private readonly ILookup<int?, AnimeIdRow> _mal = rows.ToLookup(row => row.MalId);
+
+		private readonly ILookup<int?, AnimeIdRow> _tvdb = rows.ToLookup(row => row.TvdbId);
+
+		private readonly ILookup<int?, AnimeIdRow> _tmdb = rows.ToLookup(row => row.TmdbId);
+
+		private readonly ILookup<string?, AnimeIdRow> _imdb = rows.ToLookup(row => row.ImdbId);
+
+		public Optional<AnimeIdRow> Find(IExternalMediaId id)
+		{
+			return id.Source switch
+			{
+				MediaProvider.AniList => Numbered(_aniList, id).FirstOrNone(),
+				MediaProvider.Mal => Numbered(_mal, id).FirstOrNone(),
+				MediaProvider.Tvdb => Numbered(_tvdb, id).FirstOrNone(row => Typed(row, id)),
+				MediaProvider.Tmdb => Numbered(_tmdb, id).FirstOrNone(row => Typed(row, id)),
+				MediaProvider.Imdb => _imdb[id.Value].FirstOrNone(row => Typed(row, id)),
+				MediaProvider.RottenTomatoes
+				or MediaProvider.Plex
+				or MediaProvider.Mdblist
+				or MediaProvider.Metacritic
+				or MediaProvider.Letterboxd
+				or MediaProvider.Trakt
+				or MediaProvider.Tvmaze => new None(),
+			};
+		}
+
+		private static IEnumerable<AnimeIdRow> Numbered(ILookup<int?, AnimeIdRow> column, IExternalMediaId id)
+		{
+			return Number(id).Match(number => column[number], Enumerable.Empty<AnimeIdRow>);
+		}
+
+		private static bool Typed(AnimeIdRow row, IExternalMediaId id) => id.Type == MediaType.Unknown || row.Type == id.Type;
 	}
 
 	private static object Value(Optional<int> value) => value.Map(found => (object)found).GetValueOr(DBNull.Value);

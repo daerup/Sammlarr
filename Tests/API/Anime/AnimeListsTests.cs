@@ -200,6 +200,6 @@ public class AnimeListsTests
 		loads
 			.FindAsync(DatasetNames.AnimeIds, Any())
 			.Returns(Optional.When(loaded, () => new DatasetLoad(DatasetNames.AnimeIds, DateTimeOffset.UnixEpoch, new None(), 5)));
-		return new AnimeListsIdConverter(map.Object, loads.Object);
+		return new AnimeListsIdConverter(new AnimeIdsInRun(map.Object, loads.Object));
 	}
 }

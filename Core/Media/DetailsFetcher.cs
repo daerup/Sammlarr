@@ -34,6 +34,8 @@ internal sealed class DetailsFetcher(
 		return cached.When(details => !NeedsRefetch(identity, details, connected, needs));
 	}
 
+	public bool Enriches(RemoteService remote) => enrichers.Find(remote).IsSome();
+
 	public FieldNeeds FillsFor(RemoteService remote, FieldNeeds needs, Optional<CachedDetails> stored)
 	{
 		var now = clock.Now;

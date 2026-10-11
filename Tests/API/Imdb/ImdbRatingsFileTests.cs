@@ -124,7 +124,7 @@ public class ImdbRatingsFileTests
 		loads
 			.FindAsync(DatasetNames.ImdbRatings, Any())
 			.Returns(Optional.When(loaded, () => new DatasetLoad(DatasetNames.ImdbRatings, DateTimeOffset.UnixEpoch, new None(), 2)));
-		return (new ImdbFileEnricher(ratings.Object, loads.Object), ratings);
+		return (new ImdbFileEnricher(new ImdbRatingsInRun(ratings.Object, loads.Object)), ratings);
 	}
 
 	private static async Task<DatasetFile<ImdbRatingLine>> DownloadAsync(MockHttpHandler handler, Optional<string> etag)

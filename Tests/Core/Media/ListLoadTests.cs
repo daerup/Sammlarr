@@ -5,6 +5,7 @@ using Contracts.Media;
 using Contracts.Media.Conversions;
 using Domain.Feed;
 using Domain.Media;
+using Domain.Media.Conversions;
 using Domain.Providers;
 using Observability.Feed;
 using TestInfrastructure;
@@ -164,6 +165,25 @@ public class ListLoadTests
 			.Where(span => span.TraceId == traceId && span.OperationName == FeedRunNames.Title)
 			.Select(span => $"{span.GetTagItem(FeedRunTags.Name)}");
 		await Assert.That(titles).IsEquivalentTo([.. Imdb(3).Select(request => string.Join(", ", request.Candidates))], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task LoadListAsync_ForAnimeMissesWithoutAFieldNeed_PrimesAnimeListsWithTheirIds()
+	{
+		var primer = IBurstPrimer.Mock();
+		primer.Remote.Returns(RemoteService.AnimeLists);
+		var anime = IExternalIdConverter.Mock();
+		anime.Lookups.Returns([new ById(Accepts: [MediaProvider.AniList], Yields: [MediaProvider.Tmdb], Cost: 0, GivesHints: false)]);
+		anime.LookUpAsync(Any(), Any()).Returns(new NoMatch(RemoteService.AnimeLists));
+		var (testee, _) = TestMediaService.Create([primer.Object], [new(RemoteService.AnimeLists, anime.Object)]);
+		var frieren = AniListId.From("154587", MediaType.Show);
+
+		await testee
+			.LoadListAsync(new[] { new IdentifyRequest([frieren], new None()) }.ToAsyncEnumerable().AsListTitles(), FieldNeeds.None)
+			.InListOrderAsync()
+			.ToListAsync();
+
+		primer.PrimeAsync(Is<IReadOnlyCollection<IReadOnlyList<IExternalMediaId>>>(titles => titles!.Single().Contains(frieren)), Any()).WasCalled(Times.Once);
 	}
 
 	private static UnmatchedMedia Idless() => new([], new MovieDetails { Title = "No Ids" });

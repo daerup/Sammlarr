@@ -8,7 +8,7 @@ using Domain.Providers;
 
 namespace API.Anime;
 
-internal sealed class AnimeListsIdConverter(IAnimeIds map, IDatasetLoads loads) : IExternalIdConverter
+internal sealed class AnimeListsIdConverter(AnimeIdsInRun map) : IExternalIdConverter
 {
 	private static readonly ById ByAnimeId = new(
 		Accepts: [MediaProvider.AniList, MediaProvider.Mal],
@@ -47,13 +47,12 @@ internal sealed class AnimeListsIdConverter(IAnimeIds map, IDatasetLoads loads) 
 
 	private async Task<Result<IdLookupResult>> FindAsync(ById lookup, IExternalMediaId id, CancellationToken cancellationToken)
 	{
-		var loaded = await loads.FindAsync(DatasetNames.AnimeIds, cancellationToken);
-		return await loaded.ToResult(NotLoaded).Map(_ => AnswerAsync(lookup, id, cancellationToken));
+		var entry = await map.FindAsync(id, cancellationToken);
+		return entry.Map(found => Answer(lookup, id, found));
 	}
 
-	private async Task<IdLookupResult> AnswerAsync(ById lookup, IExternalMediaId id, CancellationToken cancellationToken)
+	private static IdLookupResult Answer(ById lookup, IExternalMediaId id, Optional<AnimeIdMapping> entry)
 	{
-		var entry = await map.FindAsync(id, cancellationToken);
 		var ids = entry.Map(found => Ids(found, id.Type is MediaType.Unknown ? found.Type : id.Type)).GetValueOr([]);
 		return new IdLookupResult([.. ids.Where(each => lookup.Yields.Contains(each.Source))], new None());
 	}

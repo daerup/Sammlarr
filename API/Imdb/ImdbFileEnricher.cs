@@ -1,12 +1,11 @@
 using API.Http;
-using Contracts.Datasets;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
 
 namespace API.Imdb;
 
-internal sealed class ImdbFileEnricher(IImdbRatings ratings, IDatasetLoads loads) : IDetailsEnricher
+internal sealed class ImdbFileEnricher(ImdbRatingsInRun ratings) : IDetailsEnricher
 {
 	private static readonly Error NotLoaded = Error.From(
 		"IMDb's ratings file has not been loaded yet.",
@@ -26,13 +25,12 @@ internal sealed class ImdbFileEnricher(IImdbRatings ratings, IDatasetLoads loads
 
 	private async Task<Result<FoundMedia>> LookUpResultAsync(IExternalMediaId id, CancellationToken cancellationToken)
 	{
-		var loaded = await loads.FindAsync(DatasetNames.ImdbRatings, cancellationToken);
-		return await loaded.ToResult(NotLoaded).Map(_ => FindAsync(id, cancellationToken));
+		var rating = await ratings.FindAsync(id.Value, cancellationToken);
+		return rating.ToResult(NotLoaded).Map(found => Found(id, found));
 	}
 
-	private async Task<FoundMedia> FindAsync(IExternalMediaId id, CancellationToken cancellationToken)
+	private static FoundMedia Found(IExternalMediaId id, Optional<ImdbRating> rating)
 	{
-		var rating = await ratings.FindAsync(id.Value, cancellationToken);
 		return new FoundMedia([id], MediaDetails.Empty(id.Type) with { Ratings = rating.Map(found => MediaRatings.From([found])).GetValueOr(MediaRatings.None) });
 	}
 }
