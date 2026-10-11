@@ -6,7 +6,6 @@ using Domain.Usage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Settings.Components.Usage;
 
 namespace UI.Tests.Settings.Usage;
@@ -17,7 +16,6 @@ public class UsageQuotaLineTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton(UsageSamples.At(UsageSamples.Morning));
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -26,7 +24,7 @@ public class UsageQuotaLineTests : BunitContext
 	{
 		var cut = RenderLine(UsageSamples.Quota(UsageSamples.Allowance(191)));
 
-		await Assert.That(cut.FindAll("[data-testid=usage-quota-floor]").Select(floor => floor.GetAttribute("data-left"))).IsEquivalentTo(["500", "50"]);
+		await Assert.That(cut.FindAll("[data-testid=usage-quota-floor]").Select(floor => floor.GetAttribute("data-left")!)).IsEquivalentTo(["500", "50"]);
 		await Assert.That(cut.Markup).Contains("Filling details stops at 500 left").And.Contains("Title lookups wait at 50 left, feed list pages may use the rest");
 	}
 
@@ -35,7 +33,7 @@ public class UsageQuotaLineTests : BunitContext
 	{
 		var cut = RenderLine(UsageSamples.Quota(UsageSamples.Allowance(191) with { Allowance = new None() }));
 
-		await Assert.That(cut.FindAll("[data-testid=usage-quota-floor]").Select(floor => floor.GetAttribute("data-left"))).IsEquivalentTo(["50"]);
+		await Assert.That(cut.FindAll("[data-testid=usage-quota-floor]").Select(floor => floor.GetAttribute("data-left")!)).IsEquivalentTo(["50"]);
 		await Assert.That(cut.Markup).DoesNotContain("Filling details stops");
 	}
 

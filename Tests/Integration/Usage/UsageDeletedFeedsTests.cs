@@ -27,7 +27,7 @@ public class UsageDeletedFeedsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task PruneAsync_PastTheDeletion_ForgetsTheDeletedFeedWithTheUsageRows()
+	public async Task PruneAsync_PastTheDeletion_ForgetsTheDeletedFeed()
 	{
 		host.SetCurrentTime(Now);
 		await host.Resolve<IFeedService>().DeleteAsync(await SeedFeedAsync());

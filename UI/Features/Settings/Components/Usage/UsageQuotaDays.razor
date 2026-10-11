@@ -97,8 +97,13 @@
 
     private Optional<long> Allowance => Answered.Map(allowance => allowance.Allowance);
 
-    private Optional<(long Half, long Reserve)> Floors =>
-        Answered.Map(allowance => allowance.Allowance.Map(daily => (daily - (long)Math.Round(daily * allowance.BackgroundShare), daily - allowance.Reserve)));
+    private Optional<(long Half, long Reserve)> Floors
+    {
+        get
+        {
+            return Answered.Map(allowance => allowance.Allowance.Map(daily => (daily - (long)Math.Round(daily * allowance.BackgroundShare), daily - allowance.Reserve)));
+        }
+    }
 
     private double Top => Allowance.Match(daily => daily, () => Math.Max(1, Quota.Days.Select(day => day.Total).DefaultIfEmpty(0).Max()));
 

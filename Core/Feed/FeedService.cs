@@ -67,8 +67,8 @@ internal sealed class FeedService(
 			.FindAsync(id, cancellationToken)
 			.Apply(_ => scheduler.UnscheduleAsync(id, cancellationToken))
 			.Apply(feed => wantlist.OrphanAsync(feed, cancellationToken))
-			.Apply(feed => deleted.AddAsync(new DeletedFeed(feed.Id, feed.Name, feed.Provider, clock.Now), cancellationToken))
-			.Apply(_ => repository.DeleteAsync(id, cancellationToken));
+			.Apply(_ => repository.DeleteAsync(id, cancellationToken))
+			.Apply(feed => deleted.AddAsync(new DeletedFeed(feed.Id, feed.Name, feed.Provider, clock.Now), cancellationToken));
 	}
 
 	public async Task<IReadOnlyList<FeedId>> PauseAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default)

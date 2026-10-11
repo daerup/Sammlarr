@@ -14,7 +14,7 @@
         {
             <span>@Branding.GetBrandingInfo(Quota.Service).NickName resets at @UsageView.Time(Quota.Today.NextReset)</span>
             <span class="opacity-50">·</span>
-            <span>its daily allowance shows after its next answer</span>
+            <span>@Quota.Today.Answered.Match(_ => "the day's allowance shows after the next reset", () => "its daily allowance shows after its next answer")</span>
         }
     }
     else if (Quota.Today.Answered is Some<QuotaAllowance>(var allowance))

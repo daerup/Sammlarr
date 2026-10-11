@@ -163,16 +163,31 @@
 
     private Optional<RemoteService> Missing => Picked.When(service => Period.Services.All(line => line.Service != service));
 
-    private string Subtitle =>
-        Picked.Match(service => $"{Name(service)}: {Described}. Click {Name(service)} again, or the × on its chip, for every service.", () => Everyone);
+    private string Subtitle
+    {
+        get
+        {
+            return Picked.Match(service => $"{Name(service)}: {Described}. Click {Name(service)} again, or the × on its chip, for every service.", () => Everyone);
+        }
+    }
 
-    private string Described =>
-        _tab is CallsTab.Calls ? $"{UsageView.Window(Range)}, each {UsageView.Each(Range)} split by how its calls ended" : "every attempt by how long it took";
+    private string Described
+    {
+        get
+        {
+            return _tab is CallsTab.Calls ? $"{UsageView.Window(Range)}, each {UsageView.Each(Range)} split by how its calls ended" : "every attempt by how long it took";
+        }
+    }
 
-    private string Everyone =>
-        _tab is CallsTab.Calls
-            ? $"All services: {Described}. Click a service to show only its calls, click it again for all."
-            : $"All but datasets: {Described}. Click a service to show only its answers.";
+    private string Everyone
+    {
+        get
+        {
+            return _tab is CallsTab.Calls
+                ? $"All services: {Described}. Click a service to show only its calls, click it again for all."
+                : $"All but datasets: {Described}. Click a service to show only its answers.";
+        }
+    }
 
     private IReadOnlyList<Column> Columns =>
         [

@@ -89,6 +89,14 @@ public partial class UsageQuotaSummaryTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_ForSevenDaysAnsweredWithoutTheAllowance_SaysItShowsAfterTheNextReset()
+	{
+		var cut = RenderSummary(UsageSamples.Quota(UsageSamples.Allowance(191) with { Allowance = new None() }), UsageRange.Week);
+
+		await Assert.That(Text(cut)).IsEqualTo($"MDBList resets at {Resets} · the day's allowance shows after the next reset");
+	}
+
+	[Test]
 	public async Task Render_ForThirtyDaysWithoutAnAnswer_SaysWhenTheAllowanceShows()
 	{
 		var cut = RenderSummary(UsageSamples.Unanswered(), UsageRange.Month);

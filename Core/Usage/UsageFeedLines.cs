@@ -52,7 +52,7 @@ internal sealed class UsageFeedLines(IFeedService feeds, IDeletedFeeds deleted)
 			Stats(runs),
 			services.ToDictionary(
 				service => service,
-				service => Stats([.. runs.Select(run => run with { Calls = run.Services.GetValueOrNone(service).GetValueOr(UsageTally.Empty) })])
+				service => Stats([.. runs.Where(run => run.Services.ContainsKey(service)).Select(run => run with { Calls = run.Services[service] })])
 			)
 		);
 	}
