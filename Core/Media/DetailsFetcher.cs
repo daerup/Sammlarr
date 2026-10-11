@@ -32,6 +32,60 @@ internal sealed class DetailsFetcher(
 		return cached.When(details => !NeedsRefetch(identity, details, connected));
 	}
 
+	public Task<Result<MatchedMedia>> LoadAsync(
+		IdentifyHandoff handoff,
+		MediaDetails placeholder,
+		IReadOnlySet<RemoteService> connected,
+		MediaWriteBuffer buffer,
+		CancellationToken cancellationToken
+	)
+	{
+		var cached = handoff.Stored.Map(row => row.Cached);
+		return FindReusable(handoff.Identity, cached, connected)
+			.Match(
+				reusable => Task.FromResult<Result<MatchedMedia>>(Success.Of(new MatchedMedia(handoff.Identity, reusable.Details))),
+				() => FetchOrFallBackAsync(handoff.Identity, handoff.Stored, cached, placeholder, connected, buffer, cancellationToken)
+			);
+	}
+
+	private async Task<Result<MatchedMedia>> FetchOrFallBackAsync(
+		MediaIdentity identity,
+		Optional<StoredMedia> stored,
+		Optional<CachedDetails> cached,
+		MediaDetails placeholder,
+		IReadOnlySet<RemoteService> connected,
+		MediaWriteBuffer buffer,
+		CancellationToken cancellationToken
+	)
+	{
+		try
+		{
+			var fetched = await FetchAsync(identity, cached, connected, buffer, cancellationToken);
+			return fetched.Match(_ => fetched, error => Fallback(identity, stored, cached, placeholder, error));
+		}
+		catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+		{
+			logger.Log(stored.Match(LogLevel.Warning, LogLevel.Error), ex, "Media details failed for {MediaId}", identity.Id);
+			return Fallback(identity, stored, cached, placeholder, Error.From(ex));
+		}
+	}
+
+	private static Result<MatchedMedia> Fallback(
+		MediaIdentity identity,
+		Optional<StoredMedia> stored,
+		Optional<CachedDetails> cached,
+		MediaDetails placeholder,
+		Error error
+	)
+	{
+		return cached
+			.Map(stale => stale.Details)
+			.Or(() => stored.Map(_ => placeholder))
+			.Or(() => error.CausedBy<RemoteUnavailableException>().Map(_ => placeholder))
+			.Map(details => new MatchedMedia(identity, details))
+			.ToResult(error);
+	}
+
 	public async Task<Result<MatchedMedia>> FetchAsync(
 		MediaIdentity identity,
 		Optional<CachedDetails> stored,

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using TUnit.Assertions.Enums;
 
@@ -6,57 +7,81 @@ namespace Shared.Tests;
 public class AsyncEnumerableExtensionsTests
 {
 	[Test]
-	public async Task PrefetchAsync_WhenFullyEnumerated_PreservesEveryItemInOrder()
+	public async Task BurstsAsync_ForPagesYieldedWithoutWaiting_YieldsOneBurstPerPage()
 	{
-		var results = await CreateAsyncEnumerable(1, 2, 3, 4, 5).PrefetchAsync(2).ToListAsync();
+		var bursts = await Paged([3, 2, 4]).BurstsAsync().ToListAsync();
 
-		await Assert.That(results).IsEquivalentTo([1, 2, 3, 4, 5], CollectionOrdering.Matching);
+		await Assert.That(bursts.Select(burst => burst.Count)).IsEquivalentTo([3, 2, 4], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task PrefetchAsync_WhenTheConsumerStopsEarly_StopsTheProducer()
-	{
-		var produced = 0;
-		var source = Counting(1000, () => Interlocked.Increment(ref produced));
-
-		await foreach (var _ in source.PrefetchAsync(4))
-		{
-			break;
-		}
-
-		var afterBreak = produced;
-		await Task.Delay(TimeSpan.FromMilliseconds(200));
-
-		await Assert.That(produced).IsEqualTo(afterBreak);
-		await Assert.That(produced).IsLessThan(1000);
-	}
-
-	[Test]
-	public async Task PrefetchAsync_WhenTheSourceThrows_SurfacesTheOriginalExceptionAfterBufferedItems()
+	public async Task BurstsAsync_WhenTheSourceFailsWithoutWaiting_YieldsThePendingBurstThenThrows()
 	{
 		var seen = new List<int>();
 
 		var act = async () =>
 		{
-			await foreach (var item in ThrowsAfter(3).PrefetchAsync(8))
+			await foreach (var burst in FailsAtOnceAfter(3).BurstsAsync())
 			{
-				seen.Add(item);
+				seen.AddRange(burst);
 			}
 		};
 
-		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("source failed");
+		await Assert.That(act).Throws<InvalidOperationException>();
 		await Assert.That(seen).IsEquivalentTo([0, 1, 2], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task PrefetchAsync_WhenTheTokenIsAlreadyCancelled_SurfacesTheCancellationFromTheConsumer()
+	public async Task BurstsAsync_WhenCancelled_HandsTheTokenToTheSource()
 	{
-		using var cancellation = new CancellationTokenSource();
-		await cancellation.CancelAsync();
+		using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(50));
 
-		var act = async () => await Counting(1000, () => { }).PrefetchAsync(4, cancellation.Token).ToListAsync();
+		var act = async () => await Endless().BurstsAsync(cancellation.Token).ToListAsync();
 
 		await Assert.That(act).Throws<OperationCanceledException>();
+	}
+
+	[Test]
+	public async Task InListOrderAsync_ForResultsSettledOutOfOrder_YieldsThemByPosition()
+	{
+		var listed = new[] { new Listed<string>(2, "c"), new Listed<string>(0, "a"), new Listed<string>(1, "b") }.ToAsyncEnumerable();
+
+		var ordered = await listed.InListOrderAsync().ToListAsync();
+
+		await Assert.That(ordered).IsEquivalentTo(["a", "b", "c"], CollectionOrdering.Matching);
+	}
+
+	private static async IAsyncEnumerable<int> Paged(int[] pages)
+	{
+		var next = 0;
+		foreach (var size in pages)
+		{
+			await Task.Delay(TimeSpan.FromMilliseconds(20));
+			foreach (var _ in Enumerable.Range(0, size))
+			{
+				yield return next++;
+			}
+		}
+	}
+
+	private static async IAsyncEnumerable<int> Endless([EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		while (true)
+		{
+			await Task.Delay(1, cancellationToken);
+			yield return 0;
+		}
+	}
+
+	private static async IAsyncEnumerable<int> FailsAtOnceAfter(int count)
+	{
+		await Task.Yield();
+		foreach (var i in Enumerable.Range(0, count))
+		{
+			yield return i;
+		}
+
+		throw new InvalidOperationException("source failed");
 	}
 
 	[Test]

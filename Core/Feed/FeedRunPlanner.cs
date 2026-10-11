@@ -1,6 +1,7 @@
 using Contracts.Blocklist;
 using Contracts.DI;
 using Contracts.Feed;
+using Contracts.Identity;
 using Contracts.Processing;
 using Contracts.Ratings;
 using Contracts.Wantlist;
@@ -11,6 +12,7 @@ using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
 using Domain.Wantlist;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Feed;
@@ -20,7 +22,8 @@ internal sealed class FeedRunPlanner(
 	IBlocklistService blocklist,
 	QueryProcessor<MediaQueryRow> processor,
 	IFeedRepository feeds,
-	IKeyedServiceIndex<FeedProvider, IFeedProvider> providers,
+	IServiceScopeFactory scopes,
+	ICurrentUser currentUser,
 	IRatingService ratings,
 	ILogger<FeedRunPlanner> logger
 ) : IFeedRunPlanner
@@ -64,7 +67,7 @@ internal sealed class FeedRunPlanner(
 		var unmatchedItems = new List<UnmatchedMedia>();
 		var resolved = new List<MediaQueryRow>();
 		var seen = new HashSet<MediaId>();
-		foreach (var item in load.Items)
+		foreach (var item in load.Items.OrderBy(listed => listed.Position).Select(listed => listed.Item))
 		{
 			switch (item)
 			{
@@ -107,10 +110,13 @@ internal sealed class FeedRunPlanner(
 
 	private async Task<RawFeedLoad> FetchAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken)
 	{
-		var items = new List<MediaMatchResult>();
+		var items = new List<Listed<MediaMatchResult>>();
+		await using var scope = scopes.CreateAsyncScope();
+		using var user = scope.ServiceProvider.GetRequiredService<IUserScope>().As(currentUser);
 		try
 		{
-			await foreach (var item in providers[feed.Provider].GetFeedItemsAsync(feed.Identifier, cancellationToken))
+			var provider = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<FeedProvider, IFeedProvider>>()[feed.Provider];
+			await foreach (var item in provider.GetFeedItemsAsync(feed.Identifier, cancellationToken))
 			{
 				items.Add(item);
 			}

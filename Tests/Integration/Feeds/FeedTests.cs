@@ -20,7 +20,10 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		host.MdblistFeedContains("top-250", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 
-		await Assert.That(async () => await Testee.GetFeedItemsAsync("top-250").ToListAsync()).Throws<Exception>().WithMessageContaining("No MDBList API key");
+		await Assert
+			.That(async () => await Testee.GetFeedItemsAsync("top-250").InListOrderAsync().ToListAsync())
+			.Throws<Exception>()
+			.WithMessageContaining("No MDBList API key");
 	}
 
 	[Test]
@@ -29,7 +32,10 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedReturnsStatus("broken-list", System.Net.HttpStatusCode.InternalServerError);
 
-		await Assert.That(async () => await Testee.GetFeedItemsAsync("broken-list").ToListAsync()).Throws<Exception>().WithMessageContaining("500");
+		await Assert
+			.That(async () => await Testee.GetFeedItemsAsync("broken-list").InListOrderAsync().ToListAsync())
+			.Throws<Exception>()
+			.WithMessageContaining("500");
 	}
 
 	[Test]
@@ -38,7 +44,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedReturnsInvalidJson("corrupt-list");
 
-		await Assert.That(async () => await Testee.GetFeedItemsAsync("corrupt-list").ToListAsync()).Throws<JsonException>();
+		await Assert.That(async () => await Testee.GetFeedItemsAsync("corrupt-list").InListOrderAsync().ToListAsync()).Throws<JsonException>();
 	}
 
 	[Test]
@@ -47,7 +53,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedUnavailable("storm-list");
 
-		await Assert.That(async () => await Testee.GetFeedItemsAsync("storm-list").ToListAsync()).Throws<RemoteUnavailableException>();
+		await Assert.That(async () => await Testee.GetFeedItemsAsync("storm-list").InListOrderAsync().ToListAsync()).Throws<RemoteUnavailableException>();
 	}
 
 	[Test]
@@ -60,7 +66,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert
 			.That(async () =>
 			{
-				await foreach (var item in Testee.GetFeedItemsAsync("partial-list"))
+				await foreach (var item in Testee.GetFeedItemsAsync("partial-list").InListOrderAsync())
 				{
 					items.Add(item);
 				}
@@ -75,7 +81,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedEmpty("empty-list");
 
-		await Assert.That(await Testee.GetFeedItemsAsync("empty-list").ToListAsync()).IsEmpty();
+		await Assert.That(await Testee.GetFeedItemsAsync("empty-list").InListOrderAsync().ToListAsync()).IsEmpty();
 	}
 
 	[Test]
@@ -84,7 +90,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedPaginated("big-list", Page(0, hasMore: true, "Item1", "Item2"), Page(1000, hasMore: false, "Item3"));
 
-		await Assert.That(await Testee.GetFeedItemsAsync("big-list").ToListAsync()).Count().IsEqualTo(3);
+		await Assert.That(await Testee.GetFeedItemsAsync("big-list").InListOrderAsync().ToListAsync()).Count().IsEqualTo(3);
 	}
 
 	[Test]
@@ -94,7 +100,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().SeedAsync();
 		host.MdblistFeedContains("dupes-list", Item("Fight Club", MediaType.Movie, Tmdb("550")), Item("Fight Club", MediaType.Movie, Tmdb("550")));
 
-		await Assert.That(await Testee.GetFeedItemsAsync("dupes-list").ToListAsync()).Count().IsEqualTo(2);
+		await Assert.That(await Testee.GetFeedItemsAsync("dupes-list").InListOrderAsync().ToListAsync()).Count().IsEqualTo(2);
 	}
 
 	[Test]
@@ -103,7 +109,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedContains("loose-list", Item("No Ids One", MediaType.Movie), Item("No Ids Two", MediaType.Movie));
 
-		var items = await Testee.GetFeedItemsAsync("loose-list").ToListAsync();
+		var items = await Testee.GetFeedItemsAsync("loose-list").InListOrderAsync().ToListAsync();
 
 		await Assert.That(items).Count().IsEqualTo(2);
 		await AssertNoneComplete(items);
@@ -118,7 +124,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		host.PlexLookupFails(TestMedia.FightClub);
 		host.MdblistFeedContains("failing-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 
-		var items = await Testee.GetFeedItemsAsync("failing-list").ToListAsync();
+		var items = await Testee.GetFeedItemsAsync("failing-list").InListOrderAsync().ToListAsync();
 
 		await Assert.That(items).Count().IsEqualTo(1);
 		await AssertNoneComplete(items);
@@ -130,7 +136,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedContains("mystery-list", Item("Unknown Movie", MediaType.Movie));
 
-		var items = await Testee.GetFeedItemsAsync("mystery-list").ToListAsync();
+		var items = await Testee.GetFeedItemsAsync("mystery-list").InListOrderAsync().ToListAsync();
 
 		await AssertItems(items, ("Unknown Movie", Poster: false, Rating: null));
 	}
@@ -141,7 +147,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedContains("no-year-list", Item("Orphaned", MediaType.Movie));
 
-		var items = await Testee.GetFeedItemsAsync("no-year-list").ToListAsync();
+		var items = await Testee.GetFeedItemsAsync("no-year-list").InListOrderAsync().ToListAsync();
 
 		await AssertItems(items, ("Orphaned", Poster: false, Rating: null));
 	}
@@ -152,7 +158,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedContains("null-title-list", Item(null, MediaType.Movie, Tmdb("4242")));
 
-		await Assert.That(await Testee.GetFeedItemsAsync("null-title-list").ToListAsync()).Count().IsEqualTo(1);
+		await Assert.That(await Testee.GetFeedItemsAsync("null-title-list").InListOrderAsync().ToListAsync()).Count().IsEqualTo(1);
 	}
 
 	[Test]
@@ -163,7 +169,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.PlexSearchReturns("Inception", Spec("Inception", Plex("27205")));
 		host.MdblistFeedContains("imdb-only-list", Item("Inception", MediaType.Movie, Imdb("tt1375666")));
 
-		var items = await Testee.GetFeedItemsAsync("imdb-only-list").ToListAsync();
+		var items = await Testee.GetFeedItemsAsync("imdb-only-list").InListOrderAsync().ToListAsync();
 
 		await AssertItems(items, ("Inception", Poster: true, Rating: null));
 	}
@@ -175,7 +181,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).SeedAsync();
 		host.MdblistFeedContains("top-250", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 
-		var items = await Testee.GetFeedItemsAsync("top-250").ToListAsync();
+		var items = await Testee.GetFeedItemsAsync("top-250").InListOrderAsync().ToListAsync();
 
 		await AssertItems(items, ("Fight Club", Poster: true, RatingSource.Tmdb));
 	}
@@ -188,7 +194,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205"))).ServedByPlex().ServedByTmdb(rating: 7.8, votes: 15000).SeedAsync();
 		host.MdblistFeedContains("top-250", Item("Fight Club", MediaType.Movie, Tmdb("550")), Item("Inception", MediaType.Movie, Tmdb("27205")));
 
-		var items = await Testee.GetFeedItemsAsync("top-250").ToListAsync();
+		var items = await Testee.GetFeedItemsAsync("top-250").InListOrderAsync().ToListAsync();
 
 		await AssertItems(items, ("Fight Club", Poster: false, RatingSource.Tmdb), ("Inception", Poster: false, RatingSource.Tmdb));
 	}
@@ -200,7 +206,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().SeedAsync();
 		host.MdblistFeedContains("top-250", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 
-		await Testee.GetFeedItemsAsync("top-250").ToListAsync();
+		await Testee.GetFeedItemsAsync("top-250").InListOrderAsync().ToListAsync();
 
 		host.ScopedDbContext.ChangeTracker.Clear();
 		var details = await host.ScopedDbContext.MediaDetails.AsNoTracking().FirstAsync(entry => entry.MediaId == fightClub.Value);
@@ -214,7 +220,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().SeedAsync();
 		host.MdblistFeedContains("top-250", Item("Fight Club", MediaType.Movie, Tmdb("550"), Imdb("tt0137523")));
 
-		await Testee.GetFeedItemsAsync("top-250").ToListAsync();
+		await Testee.GetFeedItemsAsync("top-250").InListOrderAsync().ToListAsync();
 
 		await AssertExternalIdStored(fightClub, MediaProvider.Imdb, "tt0137523");
 	}
@@ -228,7 +234,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.PlexSearchReturns("Inception", Spec("Inception", Plex("27205")));
 		host.MdblistFeedContains("conflict-list", Item("Inception", MediaType.Movie, Tmdb("99999")));
 
-		await Testee.GetFeedItemsAsync("conflict-list").ToListAsync();
+		await Testee.GetFeedItemsAsync("conflict-list").InListOrderAsync().ToListAsync();
 
 		await AssertExternalIdStored(inception, MediaProvider.Tmdb, "27205");
 	}
@@ -241,7 +247,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Show(TestMedia.BreakingBad).ServedByPlex().ServedByTmdb().SeedAsync();
 		host.MdblistFeedContains("mixed-list", Item("Inception", MediaType.Movie, Tmdb("27205")), Item("Breaking Bad", MediaType.Show, Tmdb("1396")));
 
-		await Assert.That(await Testee.GetFeedItemsAsync("mixed-list").ToListAsync()).Count().IsEqualTo(2);
+		await Assert.That(await Testee.GetFeedItemsAsync("mixed-list").InListOrderAsync().ToListAsync()).Count().IsEqualTo(2);
 	}
 
 	[Test]
@@ -251,7 +257,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205"))).ServedByPlex().ServedByTmdb().SeedAsync();
 		host.MdblistFeedContains("fuzzy-list", Item("INCEPTION (2010)", MediaType.Movie, Tmdb("27205")));
 
-		await Testee.GetFeedItemsAsync("fuzzy-list").ToListAsync();
+		await Testee.GetFeedItemsAsync("fuzzy-list").InListOrderAsync().ToListAsync();
 
 		await AssertExternalIdStored(inception, MediaProvider.Tmdb, "27205");
 	}

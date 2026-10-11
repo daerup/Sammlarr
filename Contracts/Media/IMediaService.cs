@@ -14,6 +14,8 @@ public interface IMediaService
 
 	IAsyncEnumerable<MediaMatchResult> IdentifyWithDetailsAsync(IAsyncEnumerable<IdentifyRequest> requests, CancellationToken cancellationToken = default);
 
+	IAsyncEnumerable<Listed<MediaMatchResult>> LoadListAsync(IAsyncEnumerable<ListTitle> entries, CancellationToken cancellationToken = default);
+
 	Task<IReadOnlyList<Optional<MediaIdentity>>> RegisterAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
 		ValueSet<RemoteService> sources,

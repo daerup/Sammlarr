@@ -32,7 +32,7 @@ public class TmdbFeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Show(TestMedia.BreakingBad).ServedByTmdb().SeedAsync();
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.TmdbApi}/list/42", MixedList);
 
-		var items = await Testee.GetFeedItemsAsync("42").ToListAsync();
+		var items = await Testee.GetFeedItemsAsync("42").InListOrderAsync().ToListAsync();
 
 		await Assert.That(items.Select(item => item.Details.Title)).IsEquivalentTo(["Inception", "Breaking Bad"]);
 	}
@@ -40,7 +40,10 @@ public class TmdbFeedTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task GetFeedItemsAsync_WithoutAKey_FailsNamingTheKey()
 	{
-		await Assert.That(async () => await Testee.GetFeedItemsAsync("42").ToListAsync()).Throws<Exception>().WithMessageContaining("No TMDB API key");
+		await Assert
+			.That(async () => await Testee.GetFeedItemsAsync("42").InListOrderAsync().ToListAsync())
+			.Throws<Exception>()
+			.WithMessageContaining("No TMDB API key");
 	}
 
 	[Test]

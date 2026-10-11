@@ -296,6 +296,32 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task PlanAsync_ForResultsSettledOutOfListOrder_LimitsByListPosition()
+	{
+		var feed = await DraftAsync("ordered-list", new QueryLimit { Count = 2 });
+		var (first, second, third) = (Titled("First"), Titled("Second"), Titled("Third"));
+		var load = new RawFeedLoad([new(2, third), new(0, first), new(1, second)], FeedLoadState.Finished);
+
+		var plan = await Assert.That(await host.Resolve<IFeedRunPlanner>().PlanAsync(new DraftFeed(feed, load))).IsOfUnionType<FeedPlanResult, AppendPlan>();
+
+		await Assert.That(plan!.Delta.Adds).IsEquivalentTo([Id(first), Id(second)]);
+	}
+
+	[Test]
+	public async Task PlanAsync_ForATitleListedTwice_KeepsTheEarlierPosition()
+	{
+		var feed = await DraftAsync("twice-listed", new QueryLimit { Count = 5 });
+		var early = Titled("Early");
+		var late = early with { Details = early.Details with { Title = "Late" } };
+		var load = new RawFeedLoad([new(2, late), new(1, Titled("Between")), new(0, early)], FeedLoadState.Finished);
+
+		var plan = await Assert.That(await host.Resolve<IFeedRunPlanner>().PlanAsync(new DraftFeed(feed, load))).IsOfUnionType<FeedPlanResult, AppendPlan>();
+
+		string?[] titles = ["Early", "Between"];
+		await Assert.That(plan!.Verdicts.Select(verdict => verdict.Item.Details.Title)).IsEquivalentTo(titles);
+	}
+
+	[Test]
 	public async Task PlanAsync_WithoutAnMdblistKey_ReturnsAPlanThatSaysWhyTheSourceFailed()
 	{
 		var feedId = await SeedFeedAsync("keyless-list", new Mirror(1));
@@ -559,6 +585,28 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.Interstellar).ServedByPlex().ServedByTmdb(rating: 6.5, votes: 1000).SeedAsync();
 		return (feedId, fightClub, inception);
 	}
+
+	private async Task<Domain.Feed.Feed> DraftAsync(string identifier, QueryLimit limit)
+	{
+		var feedId = await SeedFeedAsync(identifier, new Append(), limit);
+		return (await Assert.That(await host.Resolve<IFeedRepository>().FindAsync(feedId)).IsSome())!;
+	}
+
+	private static MatchedMedia Titled(string title)
+	{
+		var id = MediaId.New();
+		return new MatchedMedia(
+			new MediaIdentity(id, [TmdbId.From($"{id.Value}", MediaType.Movie)]),
+			new MovieDetails
+			{
+				Title = title,
+				ReleaseDate = new DateOnly(2020, 1, 1),
+				Runtime = TimeSpan.FromMinutes(90),
+			}
+		);
+	}
+
+	private static MediaId Id(MatchedMedia matched) => matched.Identity.Id;
 
 	private async Task<FeedId> SeedFeedAsync(string identifier, FeedStrategy strategy, QueryLimit? limit = null)
 	{

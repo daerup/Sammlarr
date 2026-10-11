@@ -3,9 +3,9 @@ using Domain.Processing;
 
 namespace Domain.Feed.Planning;
 
-public readonly record struct RawFeedLoad(IReadOnlyList<MediaMatchResult> Items, FeedLoadState State, Optional<string> SourceFailure)
+public readonly record struct RawFeedLoad(IReadOnlyList<Listed<MediaMatchResult>> Items, FeedLoadState State, Optional<string> SourceFailure)
 {
-	public RawFeedLoad(IReadOnlyList<MediaMatchResult> items, FeedLoadState state)
+	public RawFeedLoad(IReadOnlyList<Listed<MediaMatchResult>> items, FeedLoadState state)
 		: this(items, state, new None()) { }
 }
 

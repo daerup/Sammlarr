@@ -26,9 +26,9 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 		return Task.FromResult(TraktPages.Parse(input).ToResult(NotAPage).Map(TraktPages.Of).Map(page => page.Stored()));
 	}
 
-	public IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
 	{
-		return media.IdentifyWithDetailsAsync(RequestsAsync(identifier, cancellationToken), cancellationToken);
+		return media.LoadListAsync(RequestsAsync(identifier, cancellationToken).Select(ListTitle (request) => request), cancellationToken);
 	}
 
 	private async IAsyncEnumerable<IdentifyRequest> RequestsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)

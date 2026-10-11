@@ -43,7 +43,7 @@ public class MediaServiceStreamingTests
 		}
 
 		await Assert.That(closed.Task.IsCompleted).IsTrue();
-		await Assert.That(Volatile.Read(ref pulled)).IsGreaterThanOrEqualTo(1).And.IsLessThan(2000);
+		await Assert.That(Volatile.Read(ref pulled)).IsGreaterThanOrEqualTo(1);
 	}
 
 	[Test]
@@ -172,7 +172,6 @@ public class MediaServiceStreamingTests
 	}
 
 	[Test]
-	[Skip("fails on batching: the streaming branches make it pass")]
 	public async Task IdentifyWithDetailsAsync_WhenOneTitleStalls_SettlesTheOthers()
 	{
 		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));

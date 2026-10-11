@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Threading.Channels;
 using API.Feeds;
 using API.Http;
 using API.Tmdb.Types;
@@ -35,53 +34,26 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 		return SiteLink.Parse(input, "themoviedb.org").ToResult(NotAList).Map(TmdbPages.Of).Map(page => page.Stored());
 	}
 
-	public IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
 	{
-		return Channel.CreateUnbounded<MediaMatchResult>().StreamAsync((items, token) => ResolveIntoAsync(identifier, items, token), cancellationToken);
+		return media.LoadListAsync(EntriesAsync(identifier, cancellationToken), cancellationToken);
 	}
 
-	private async Task ResolveIntoAsync(string identifier, ChannelWriter<MediaMatchResult> items, CancellationToken cancellationToken)
-	{
-		await foreach (var result in media.IdentifyWithDetailsAsync(BuildRequestsAsync(identifier, items, cancellationToken), cancellationToken))
-		{
-			await items.WriteAsync(result, cancellationToken);
-		}
-	}
-
-	private async IAsyncEnumerable<IdentifyRequest> BuildRequestsAsync(
-		string identifier,
-		ChannelWriter<MediaMatchResult> unmatched,
-		[EnumeratorCancellation] CancellationToken cancellationToken
-	)
+	private async IAsyncEnumerable<ListTitle> EntriesAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var items = TmdbPages.IsPage(identifier) ? PageItemsAsync(identifier, cancellationToken).Take(FeedPages.Titles) : ItemsAsync(identifier, cancellationToken);
 		await foreach (var item in items.WithCancellation(cancellationToken))
 		{
-			foreach (var request in await RequestOrUnmatchedAsync(item, unmatched, cancellationToken))
-			{
-				yield return request;
-			}
+			yield return Entry(item);
 		}
 	}
 
-	private static Task<IReadOnlyList<IdentifyRequest>> RequestOrUnmatchedAsync(
-		TmdbTypes.Lists.Item item,
-		ChannelWriter<MediaMatchResult> unmatched,
-		CancellationToken cancellationToken
-	)
+	private static ListTitle Entry(TmdbTypes.Lists.Item item)
 	{
 		return TypeOf(item)
-			.Match(
-				type =>
-					Task.FromResult<IReadOnlyList<IdentifyRequest>>([
-						new IdentifyRequest([TmdbId.From(Number(item.Id), type)], Hints(item, type)) { Sources = [RemoteService.Tmdb] },
-					]),
-				async () =>
-				{
-					FeedRunSpans.ListedWithoutIds();
-					await unmatched.WriteAsync(Unmatched(item), cancellationToken);
-					return [];
-				}
+			.Match<MediaType, ListTitle>(
+				type => new IdentifyRequest([TmdbId.From(Number(item.Id), type)], Hints(item, type)) { Sources = [RemoteService.Tmdb] },
+				() => Unmatched(item)
 			);
 	}
 
@@ -214,7 +186,7 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 			});
 	}
 
-	private static MediaMatchResult Unmatched(TmdbTypes.Lists.Item item)
+	private static UnmatchedMedia Unmatched(TmdbTypes.Lists.Item item)
 	{
 		return new UnmatchedMedia([TmdbId.From(Number(item.Id), MediaType.Unknown)], MediaDetails.Empty(MediaType.Unknown) with { Title = item.DisplayTitle });
 	}

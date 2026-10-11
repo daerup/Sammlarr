@@ -1,5 +1,5 @@
 using System.Net;
-using System.Runtime.CompilerServices;
+using API.Tests.Feeds;
 using API.Tmdb;
 using Contracts.Auth;
 using Contracts.Identity;
@@ -54,7 +54,7 @@ public class TmdbFeedServiceTests
 		handler.OnRequest(request => request.PathMatches(@"^/3/list/42\?page=1&api_key=tmdb-key$")).RespondWithJson(PageOne);
 		handler.OnRequest(request => request.PathMatches(@"^/3/list/42\?page=2&api_key=tmdb-key$")).RespondWithJson(PageTwo);
 
-		await Testee(handler).GetFeedItemsAsync("42").ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("42").InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(_asked.Select(request => $"{request.Candidates.Single()} {request.Hints.Map(hints => $"{hints.Title} {hints.Year}").GetValueOr("none")}"))
@@ -82,7 +82,7 @@ public class TmdbFeedServiceTests
 			.OnRequest(request => request.PathMatches(@"^/3/tv/top_rated\?page=2&api_key=tmdb-key$"))
 			.RespondWithJson("""{"page":2,"total_pages":2,"results":[{"id":1399,"name":"Game of Thrones","first_air_date":"2011-04-17"}]}""");
 
-		await Testee(handler).GetFeedItemsAsync("tv/top-rated").ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("tv/top-rated").InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked.Select(request => $"{request.Candidates.Single()}")).IsEquivalentTo(["Tmdb:Show:1396", "Tmdb:Show:1399"]);
 	}
@@ -104,7 +104,7 @@ public class TmdbFeedServiceTests
 				};
 			});
 
-		await Testee(handler).GetFeedItemsAsync("movie").ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("movie").InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked).Count().IsEqualTo(500);
 		await Assert.That(asked).IsEqualTo(25);
@@ -118,7 +118,9 @@ public class TmdbFeedServiceTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(status);
 
-		await Assert.That(async () => await Testee(handler).GetFeedItemsAsync("discover/movie?with_genres=28").ToListAsync()).Throws<HttpRequestException>();
+		await Assert
+			.That(async () => await Testee(handler).GetFeedItemsAsync("discover/movie?with_genres=28").InListOrderAsync().ToListAsync())
+			.Throws<HttpRequestException>();
 	}
 
 	[Test]
@@ -127,7 +129,9 @@ public class TmdbFeedServiceTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
 
-		await Assert.That(async () => await Testee(handler).GetFeedItemsAsync("keyword/999999999/movie").ToListAsync()).Throws<FeedIdentifierNotFoundException>();
+		await Assert
+			.That(async () => await Testee(handler).GetFeedItemsAsync("keyword/999999999/movie").InListOrderAsync().ToListAsync())
+			.Throws<FeedIdentifierNotFoundException>();
 	}
 
 	[Test]
@@ -136,7 +140,7 @@ public class TmdbFeedServiceTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"page":1,"total_pages":1}""");
 
-		await Assert.That(async () => await Testee(handler).GetFeedItemsAsync("movie").ToListAsync()).Throws<InvalidDataException>();
+		await Assert.That(async () => await Testee(handler).GetFeedItemsAsync("movie").InListOrderAsync().ToListAsync()).Throws<InvalidDataException>();
 	}
 
 	[Test]
@@ -145,7 +149,7 @@ public class TmdbFeedServiceTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"page":1,"total_pages":1,"items":[{"id":287,"media_type":"person","name":"Brad Pitt"}]}""");
 
-		var results = await Testee(handler).GetFeedItemsAsync("42").ToListAsync();
+		var results = await Testee(handler).GetFeedItemsAsync("42").InListOrderAsync().ToListAsync();
 
 		await Assert.That(results.Single()).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
 		await Assert.That(_asked).IsEmpty();
@@ -159,7 +163,7 @@ public class TmdbFeedServiceTests
 			.OnAnyRequest()
 			.RespondWithJson("""{"page":1,"total_pages":1,"results":[{"id":550,"media_type":"movie","title":"Fight Club","release_date":"1999-10-15"}]}""");
 
-		await Testee(handler, token: true).GetFeedItemsAsync("42").ToListAsync();
+		await Testee(handler, token: true).GetFeedItemsAsync("42").InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked).Count().IsEqualTo(1);
 		handler.Verify(request => request.PathMatches(@"^/4/list/42\?page=1$").Header("Authorization", "Bearer tmdb-token"), Times.Once);
@@ -171,7 +175,7 @@ public class TmdbFeedServiceTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
 
-		var drain = async () => await Testee(handler, token: true).GetFeedItemsAsync("42").ToListAsync();
+		var drain = async () => await Testee(handler, token: true).GetFeedItemsAsync("42").InListOrderAsync().ToListAsync();
 
 		await Assert.That(drain).Throws<FeedIdentifierNotFoundException>();
 	}
@@ -182,7 +186,7 @@ public class TmdbFeedServiceTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
 
-		var drain = async () => await Testee(handler).GetFeedItemsAsync("42").ToListAsync();
+		var drain = async () => await Testee(handler).GetFeedItemsAsync("42").InListOrderAsync().ToListAsync();
 
 		var failure = await Assert.That(drain).Throws<InvalidOperationException>();
 		await Assert.That(failure!.Message).Contains("read access token");
@@ -195,7 +199,7 @@ public class TmdbFeedServiceTests
 		handler.OnRequest(request => request.PathMatches(@"^/3/list/42\?page=1&")).RespondWithJson(PageOne);
 		handler.OnRequest(request => request.PathMatches(@"^/3/list/42\?page=2&")).Respond(HttpStatusCode.BadGateway);
 
-		var drain = async () => await Testee(handler).GetFeedItemsAsync("42").ToListAsync();
+		var drain = async () => await Testee(handler).GetFeedItemsAsync("42").InListOrderAsync().ToListAsync();
 
 		await Assert.That(drain).Throws<HttpRequestException>();
 	}
@@ -208,7 +212,7 @@ public class TmdbFeedServiceTests
 		handler.OnRequest(request => request.PathMatches(@"^/3/list/42\?page=2&api_key=tmdb-key$")).RespondWithJson(PageTwo);
 		using var spans = new PageSpans();
 
-		await Testee(handler).GetFeedItemsAsync("42").ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("42").InListOrderAsync().ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, Some.Of(2)), new SourcePage(2, Some.Of(2))], CollectionOrdering.Matching);
 		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
@@ -226,7 +230,7 @@ public class TmdbFeedServiceTests
 			.RespondWithJson("""{"page":2,"total_pages":2,"results":[{"id":1399,"name":"Game of Thrones","first_air_date":"2011-04-17"}]}""");
 		using var spans = new PageSpans();
 
-		await Testee(handler).GetFeedItemsAsync("tv/top-rated").ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("tv/top-rated").InListOrderAsync().ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
 		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
@@ -243,19 +247,9 @@ public class TmdbFeedServiceTests
 		var options = TmdbApis.Options;
 		var client = new TmdbClient(handler.CreateClient("https://api.themoviedb.org/3"), options, keys.Object, ICurrentUser.Mock().Object);
 		var media = IMediaService.Mock();
-		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).Returns((requests, cancellation) => Identify(requests, cancellation));
+		media
+			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any())
+			.Returns((entries, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
 		return new TmdbFeedService(client, options, media.Object, keys.Object);
-	}
-
-	private async IAsyncEnumerable<MediaMatchResult> Identify(
-		IAsyncEnumerable<IdentifyRequest> requests,
-		[EnumeratorCancellation] CancellationToken cancellationToken
-	)
-	{
-		await foreach (var request in requests.WithCancellation(cancellationToken))
-		{
-			_asked.Add(request);
-			yield return new UnmatchedMedia([.. request.Candidates], MediaDetails.Empty(request.Candidates[0].Type));
-		}
 	}
 }

@@ -77,19 +77,35 @@ public static class AsyncEnumerableExtensions
 			}
 		}
 
-		public IAsyncEnumerable<TIn> PrefetchAsync(int capacity, CancellationToken cancellationToken = default) =>
-			Channel
-				.CreateBounded<TIn>(capacity)
-				.StreamAsync(
-					async (writer, token) =>
+		public async IAsyncEnumerable<IReadOnlyList<TIn>> BurstsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+		{
+			await using var items = source.GetAsyncEnumerator(cancellationToken);
+			List<TIn> burst = [];
+			var moving = items.MoveNextAsync().AsTask();
+			try
+			{
+				while (true)
+				{
+					if (burst.Count > 0 && !(moving.IsCompletedSuccessfully && moving.Result))
 					{
-						await foreach (var item in source.WithCancellation(token))
-						{
-							await writer.WriteAsync(item, token);
-						}
-					},
-					cancellationToken
-				);
+						yield return burst;
+						burst = [];
+					}
+
+					if (!await moving)
+					{
+						break;
+					}
+
+					burst.Add(items.Current);
+					moving = items.MoveNextAsync().AsTask();
+				}
+			}
+			finally
+			{
+				await ((Task)moving).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+			}
+		}
 
 		public async IAsyncEnumerable<(TIn First, TOther Second)> ZipAwait<TOther>(
 			IEnumerable<TOther> other,
@@ -108,8 +124,28 @@ public static class AsyncEnumerableExtensions
 		}
 	}
 
+	extension<TIn>(IAsyncEnumerable<Listed<TIn>> listed)
+	{
+		public async IAsyncEnumerable<TIn> InListOrderAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+		{
+			var held = new Dictionary<int, TIn>();
+			var next = 0;
+			await foreach (var (position, item) in listed.WithCancellation(cancellationToken))
+			{
+				held[position] = item;
+				while (held.Remove(next, out var ready))
+				{
+					next++;
+					yield return ready;
+				}
+			}
+		}
+	}
+
 	extension<TIn>(IEnumerable<TIn> source)
 	{
+		public IReadOnlyList<Listed<TIn>> Numbered(int from = 0) => [.. source.Select((item, index) => new Listed<TIn>(from + index, item))];
+
 		public IAsyncEnumerable<TOut> SelectAwait<TOut>(
 			Func<TIn, CancellationToken, ValueTask<TOut>> selector,
 			int maxConcurrency,
