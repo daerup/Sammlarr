@@ -158,7 +158,9 @@ internal static class UsageView
 			UsageCause.WantlistSync => Some.Of(
 				"The sync with Radarr, Sonarr or Plex, and what reads them for it: the sync dialog, a title added from a page, a sink switch, removing a person."
 			),
-			UsageCause.FeedEditor => Some.Of("Previews in the feed editor and before Run now on the Feeds list, the link check, and saving a feed."),
+			UsageCause.FeedEditor => Some.Of(
+				"Previews in the feed editor and before Run now on the Feeds list, the link check, and saving a feed. A preview and a run can share one MDBList call; it counts for whichever load started first."
+			),
 			UsageCause.KeyTest => Some.Of(
 				"Checks of an API key, a sign-in, or a Radarr or Sonarr connection: the Test buttons in Settings, and the check of a stored one when it is used again."
 			),

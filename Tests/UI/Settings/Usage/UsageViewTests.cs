@@ -1,5 +1,6 @@
 using System.Globalization;
 using Domain.Usage;
+using TestInfrastructure;
 using UI.Features.Settings.Components.Usage;
 
 namespace UI.Tests.Settings.Usage;
@@ -72,6 +73,15 @@ public class UsageViewTests
 		var hinted = Enum.GetValues<UsageCause>().Where(cause => UsageView.CauseHint(cause).IsSome());
 
 		await Assert.That(hinted).IsEquivalentTo([UsageCause.WantlistSync, UsageCause.KeyTest, UsageCause.FeedEditor, UsageCause.DetailsFill, UsageCause.Other]);
+	}
+
+	[Test]
+	public async Task CauseHint_ForTheFeedEditor_SaysAPreviewAndARunCanShareOneCall()
+	{
+		await Assert
+			.That(UsageView.CauseHint(UsageCause.FeedEditor))
+			.IsSome()
+			.And.EndsWith("A preview and a run can share one MDBList call; it counts for whichever load started first.");
 	}
 
 	[Test]
