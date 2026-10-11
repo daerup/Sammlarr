@@ -95,7 +95,8 @@ internal static class PlexStub
 
 	private static string MatchJson(string plexId, ResolvedVersion v)
 	{
-		return $$"""{ "MediaContainer": { "size": 1, "Metadata": [ { "ratingKey": "{{plexId}}", "type": "{{TypeString(v.Type)}}", "title": "{{v.Title}}", "year": {{v.Year}} } ] } }""";
+		var guids = string.Join(", ", Guids(v).Select(guid => $$"""{ "id": "{{guid}}" }"""));
+		return $$"""{ "MediaContainer": { "librarySectionID": "home", "size": 1, "Metadata": [ { "guid": "plex://{{TypeString(v.Type)}}/{{plexId}}", "ratingKey": "{{plexId}}", "type": "{{TypeString(v.Type)}}", "title": "{{v.Title}}", "year": {{v.Year}}, "Guid": [ {{guids}} ] } ] } }""";
 	}
 
 	public static void Search(HttpStub http, string term, IReadOnlyList<ResolvedVersion> results) =>

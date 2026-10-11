@@ -20,13 +20,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d77682eeb5d26001f1df4fe",
                 "ratingKey": "5d77682eeb5d26001f1df4fe",
                 "type": "movie",
                 "title": "Obsession",
-                "year": 1943
+                "year": 1943,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0035160"
+                  },
+                  {
+                    "id": "tmdb://5155"
+                  },
+                  {
+                    "id": "tvdb://11192"
+                  }
+                ]
               }
             ]
           }
@@ -53,13 +66,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d77682eeb5d26001f1df4fe",
                 "ratingKey": "5d77682eeb5d26001f1df4fe",
                 "type": "movie",
                 "title": "Obsession",
-                "year": 1943
+                "year": 1943,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0035160"
+                  },
+                  {
+                    "id": "tmdb://5155"
+                  },
+                  {
+                    "id": "tvdb://11192"
+                  }
+                ]
               }
             ]
           }
@@ -86,13 +112,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d77682eeb5d26001f1df4fe",
                 "ratingKey": "5d77682eeb5d26001f1df4fe",
                 "type": "movie",
                 "title": "Obsession",
-                "year": 1943
+                "year": 1943,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0035160"
+                  },
+                  {
+                    "id": "tmdb://5155"
+                  },
+                  {
+                    "id": "tvdb://11192"
+                  }
+                ]
               }
             ]
           }
@@ -119,13 +158,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d77683085719b001f3a2a24",
                 "ratingKey": "5d77683085719b001f3a2a24",
                 "type": "movie",
                 "title": "Practical Magic",
-                "year": 1998
+                "year": 1998,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0120791"
+                  },
+                  {
+                    "id": "tmdb://6435"
+                  },
+                  {
+                    "id": "tvdb://1946"
+                  }
+                ]
               }
             ]
           }
@@ -152,13 +204,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d77683085719b001f3a2a24",
                 "ratingKey": "5d77683085719b001f3a2a24",
                 "type": "movie",
                 "title": "Practical Magic",
-                "year": 1998
+                "year": 1998,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0120791"
+                  },
+                  {
+                    "id": "tmdb://6435"
+                  },
+                  {
+                    "id": "tvdb://1946"
+                  }
+                ]
               }
             ]
           }
@@ -185,13 +250,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d77683085719b001f3a2a24",
                 "ratingKey": "5d77683085719b001f3a2a24",
                 "type": "movie",
                 "title": "Practical Magic",
-                "year": 1998
+                "year": 1998,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0120791"
+                  },
+                  {
+                    "id": "tmdb://6435"
+                  },
+                  {
+                    "id": "tvdb://1946"
+                  }
+                ]
               }
             ]
           }
@@ -218,13 +296,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768692e80df001ebe3425",
                 "ratingKey": "5d7768692e80df001ebe3425",
                 "type": "movie",
                 "title": "The Drawn Together Movie: The Movie!",
-                "year": 2010
+                "year": 2010,
+                "Guid": [
+                  {
+                    "id": "imdb://tt1546036"
+                  },
+                  {
+                    "id": "tmdb://36736"
+                  },
+                  {
+                    "id": "tvdb://15816"
+                  }
+                ]
               }
             ]
           }
@@ -251,13 +342,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768692e80df001ebe3425",
                 "ratingKey": "5d7768692e80df001ebe3425",
                 "type": "movie",
                 "title": "The Drawn Together Movie: The Movie!",
-                "year": 2010
+                "year": 2010,
+                "Guid": [
+                  {
+                    "id": "imdb://tt1546036"
+                  },
+                  {
+                    "id": "tmdb://36736"
+                  },
+                  {
+                    "id": "tvdb://15816"
+                  }
+                ]
               }
             ]
           }
@@ -284,13 +388,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768692e80df001ebe3425",
                 "ratingKey": "5d7768692e80df001ebe3425",
                 "type": "movie",
                 "title": "The Drawn Together Movie: The Movie!",
-                "year": 2010
+                "year": 2010,
+                "Guid": [
+                  {
+                    "id": "imdb://tt1546036"
+                  },
+                  {
+                    "id": "tmdb://36736"
+                  },
+                  {
+                    "id": "tvdb://15816"
+                  }
+                ]
               }
             ]
           }
@@ -317,13 +434,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768a71999bc0020dcca1b",
                 "ratingKey": "5d7768a71999bc0020dcca1b",
                 "type": "movie",
                 "title": "Mutiny",
-                "year": 1999
+                "year": 1999,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0181769"
+                  },
+                  {
+                    "id": "tmdb://65278"
+                  },
+                  {
+                    "id": "tvdb://55034"
+                  }
+                ]
               }
             ]
           }
@@ -350,13 +480,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768a71999bc0020dcca1b",
                 "ratingKey": "5d7768a71999bc0020dcca1b",
                 "type": "movie",
                 "title": "Mutiny",
-                "year": 1999
+                "year": 1999,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0181769"
+                  },
+                  {
+                    "id": "tmdb://65278"
+                  },
+                  {
+                    "id": "tvdb://55034"
+                  }
+                ]
               }
             ]
           }
@@ -383,13 +526,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768a71999bc0020dcca1b",
                 "ratingKey": "5d7768a71999bc0020dcca1b",
                 "type": "movie",
                 "title": "Mutiny",
-                "year": 1999
+                "year": 1999,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0181769"
+                  },
+                  {
+                    "id": "tmdb://65278"
+                  },
+                  {
+                    "id": "tvdb://55034"
+                  }
+                ]
               }
             ]
           }
@@ -416,13 +572,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768e2fb0d55001f51bc9d",
                 "ratingKey": "5d7768e2fb0d55001f51bc9d",
                 "type": "movie",
                 "title": "Motor City",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt2012616"
+                  },
+                  {
+                    "id": "tmdb://87513"
+                  },
+                  {
+                    "id": "tvdb://83519"
+                  }
+                ]
               }
             ]
           }
@@ -449,13 +618,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768e2fb0d55001f51bc9d",
                 "ratingKey": "5d7768e2fb0d55001f51bc9d",
                 "type": "movie",
                 "title": "Motor City",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt2012616"
+                  },
+                  {
+                    "id": "tmdb://87513"
+                  },
+                  {
+                    "id": "tvdb://83519"
+                  }
+                ]
               }
             ]
           }
@@ -482,13 +664,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768e2fb0d55001f51bc9d",
                 "ratingKey": "5d7768e2fb0d55001f51bc9d",
                 "type": "movie",
                 "title": "Motor City",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt2012616"
+                  },
+                  {
+                    "id": "tmdb://87513"
+                  },
+                  {
+                    "id": "tvdb://83519"
+                  }
+                ]
               }
             ]
           }
@@ -515,13 +710,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768f6ad5437001f75426f",
                 "ratingKey": "5d7768f6ad5437001f75426f",
                 "type": "movie",
                 "title": "Moana",
-                "year": 1926
+                "year": 1926,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0017162"
+                  },
+                  {
+                    "id": "tmdb://94727"
+                  },
+                  {
+                    "id": "tvdb://68425"
+                  }
+                ]
               }
             ]
           }
@@ -548,13 +756,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768f6ad5437001f75426f",
                 "ratingKey": "5d7768f6ad5437001f75426f",
                 "type": "movie",
                 "title": "Moana",
-                "year": 1926
+                "year": 1926,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0017162"
+                  },
+                  {
+                    "id": "tmdb://94727"
+                  },
+                  {
+                    "id": "tvdb://68425"
+                  }
+                ]
               }
             ]
           }
@@ -581,13 +802,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d7768f6ad5437001f75426f",
                 "ratingKey": "5d7768f6ad5437001f75426f",
                 "type": "movie",
                 "title": "Moana",
-                "year": 1926
+                "year": 1926,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0017162"
+                  },
+                  {
+                    "id": "tmdb://94727"
+                  },
+                  {
+                    "id": "tvdb://68425"
+                  }
+                ]
               }
             ]
           }
@@ -614,13 +848,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776a60fb0d55001f5445c4",
                 "ratingKey": "5d776a60fb0d55001f5445c4",
                 "type": "movie",
                 "title": "Mutiny",
-                "year": 1952
+                "year": 1952,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0044936"
+                  },
+                  {
+                    "id": "tmdb://227296"
+                  },
+                  {
+                    "id": "tvdb://50931"
+                  }
+                ]
               }
             ]
           }
@@ -647,13 +894,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776a60fb0d55001f5445c4",
                 "ratingKey": "5d776a60fb0d55001f5445c4",
                 "type": "movie",
                 "title": "Mutiny",
-                "year": 1952
+                "year": 1952,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0044936"
+                  },
+                  {
+                    "id": "tmdb://227296"
+                  },
+                  {
+                    "id": "tvdb://50931"
+                  }
+                ]
               }
             ]
           }
@@ -680,13 +940,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776a60fb0d55001f5445c4",
                 "ratingKey": "5d776a60fb0d55001f5445c4",
                 "type": "movie",
                 "title": "Mutiny",
-                "year": 1952
+                "year": 1952,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0044936"
+                  },
+                  {
+                    "id": "tmdb://227296"
+                  },
+                  {
+                    "id": "tvdb://50931"
+                  }
+                ]
               }
             ]
           }
@@ -713,13 +986,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776af2ad5437001f78dad6",
                 "ratingKey": "5d776af2ad5437001f78dad6",
                 "type": "movie",
                 "title": "Moana",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt3521164"
+                  },
+                  {
+                    "id": "tmdb://277834"
+                  },
+                  {
+                    "id": "tvdb://9210"
+                  }
+                ]
               }
             ]
           }
@@ -746,13 +1032,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776af2ad5437001f78dad6",
                 "ratingKey": "5d776af2ad5437001f78dad6",
                 "type": "movie",
                 "title": "Moana",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt3521164"
+                  },
+                  {
+                    "id": "tmdb://277834"
+                  },
+                  {
+                    "id": "tvdb://9210"
+                  }
+                ]
               }
             ]
           }
@@ -779,13 +1078,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776af2ad5437001f78dad6",
                 "ratingKey": "5d776af2ad5437001f78dad6",
                 "type": "movie",
                 "title": "Moana",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt3521164"
+                  },
+                  {
+                    "id": "tmdb://277834"
+                  },
+                  {
+                    "id": "tvdb://9210"
+                  }
+                ]
               }
             ]
           }
@@ -812,13 +1124,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776b8c51dd69001fe31672",
                 "ratingKey": "5d776b8c51dd69001fe31672",
                 "type": "movie",
                 "title": "Obsession",
-                "year": 2015
+                "year": 2015,
+                "Guid": [
+                  {
+                    "id": "imdb://tt3755362"
+                  },
+                  {
+                    "id": "tmdb://332672"
+                  },
+                  {
+                    "id": "tvdb://39040"
+                  }
+                ]
               }
             ]
           }
@@ -845,13 +1170,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776b8c51dd69001fe31672",
                 "ratingKey": "5d776b8c51dd69001fe31672",
                 "type": "movie",
                 "title": "Obsession",
-                "year": 2015
+                "year": 2015,
+                "Guid": [
+                  {
+                    "id": "imdb://tt3755362"
+                  },
+                  {
+                    "id": "tmdb://332672"
+                  },
+                  {
+                    "id": "tvdb://39040"
+                  }
+                ]
               }
             ]
           }
@@ -878,13 +1216,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776b8c51dd69001fe31672",
                 "ratingKey": "5d776b8c51dd69001fe31672",
                 "type": "movie",
                 "title": "Obsession",
-                "year": 2015
+                "year": 2015,
+                "Guid": [
+                  {
+                    "id": "imdb://tt3755362"
+                  },
+                  {
+                    "id": "tmdb://332672"
+                  },
+                  {
+                    "id": "tvdb://39040"
+                  }
+                ]
               }
             ]
           }
@@ -911,13 +1262,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776c6c594b2b001e6f3623",
                 "ratingKey": "5d776c6c594b2b001e6f3623",
                 "type": "movie",
                 "title": "One Night Only",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt5843056"
+                  },
+                  {
+                    "id": "tmdb://413745"
+                  },
+                  {
+                    "id": "tvdb://41851"
+                  }
+                ]
               }
             ]
           }
@@ -944,13 +1308,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776c6c594b2b001e6f3623",
                 "ratingKey": "5d776c6c594b2b001e6f3623",
                 "type": "movie",
                 "title": "One Night Only",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt5843056"
+                  },
+                  {
+                    "id": "tmdb://413745"
+                  },
+                  {
+                    "id": "tvdb://41851"
+                  }
+                ]
               }
             ]
           }
@@ -977,13 +1354,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776c6c594b2b001e6f3623",
                 "ratingKey": "5d776c6c594b2b001e6f3623",
                 "type": "movie",
                 "title": "One Night Only",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt5843056"
+                  },
+                  {
+                    "id": "tmdb://413745"
+                  },
+                  {
+                    "id": "tvdb://41851"
+                  }
+                ]
               }
             ]
           }
@@ -1010,13 +1400,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776d1923d5a3001f52079d",
                 "ratingKey": "5d776d1923d5a3001f52079d",
                 "type": "movie",
                 "title": "Spider-Man",
-                "year": 2002
+                "year": 2002,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0145487"
+                  },
+                  {
+                    "id": "tmdb://557"
+                  },
+                  {
+                    "id": "tvdb://301"
+                  }
+                ]
               }
             ]
           }
@@ -1043,13 +1446,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776d1923d5a3001f52079d",
                 "ratingKey": "5d776d1923d5a3001f52079d",
                 "type": "movie",
                 "title": "Spider-Man",
-                "year": 2002
+                "year": 2002,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0145487"
+                  },
+                  {
+                    "id": "tmdb://557"
+                  },
+                  {
+                    "id": "tvdb://301"
+                  }
+                ]
               }
             ]
           }
@@ -1076,13 +1492,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776d1923d5a3001f52079d",
                 "ratingKey": "5d776d1923d5a3001f52079d",
                 "type": "movie",
                 "title": "Spider-Man",
-                "year": 2002
+                "year": 2002,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0145487"
+                  },
+                  {
+                    "id": "tmdb://557"
+                  },
+                  {
+                    "id": "tvdb://301"
+                  }
+                ]
               }
             ]
           }
@@ -1109,13 +1538,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d776ec9594b2b001e72e638",
                 "ratingKey": "5d776ec9594b2b001e72e638",
                 "type": "movie",
                 "title": "Acme & Co.",
-                "year": null
+                "year": null,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0786910"
+                  }
+                ]
               }
             ]
           }
@@ -1142,13 +1578,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d77707b81ba41001faf1629",
                 "ratingKey": "5d77707b81ba41001faf1629",
                 "type": "movie",
                 "title": "Coyote vs. Acme",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt1756855"
+                  },
+                  {
+                    "id": "tmdb://1204680"
+                  },
+                  {
+                    "id": "tvdb://365739"
+                  }
+                ]
               }
             ]
           }
@@ -1175,13 +1624,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d77707b81ba41001faf1629",
                 "ratingKey": "5d77707b81ba41001faf1629",
                 "type": "movie",
                 "title": "Coyote vs. Acme",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt1756855"
+                  },
+                  {
+                    "id": "tmdb://1204680"
+                  },
+                  {
+                    "id": "tvdb://365739"
+                  }
+                ]
               }
             ]
           }
@@ -1208,13 +1670,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5d77707b81ba41001faf1629",
                 "ratingKey": "5d77707b81ba41001faf1629",
                 "type": "movie",
                 "title": "Coyote vs. Acme",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt1756855"
+                  },
+                  {
+                    "id": "tmdb://1204680"
+                  },
+                  {
+                    "id": "tvdb://365739"
+                  }
+                ]
               }
             ]
           }
@@ -1241,13 +1716,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c0816ba6eb9001fb9b71b",
                 "ratingKey": "5d9c0816ba6eb9001fb9b71b",
                 "type": "show",
                 "title": "Gentlemen & Gangsters",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt4600502"
+                  },
+                  {
+                    "id": "tmdb://65117"
+                  },
+                  {
+                    "id": "tvdb://314483"
+                  }
+                ]
               }
             ]
           }
@@ -1274,13 +1762,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c0816ba6eb9001fb9b71b",
                 "ratingKey": "5d9c0816ba6eb9001fb9b71b",
                 "type": "show",
                 "title": "Gentlemen & Gangsters",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt4600502"
+                  },
+                  {
+                    "id": "tmdb://65117"
+                  },
+                  {
+                    "id": "tvdb://314483"
+                  }
+                ]
               }
             ]
           }
@@ -1307,13 +1808,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c0816ba6eb9001fb9b71b",
                 "ratingKey": "5d9c0816ba6eb9001fb9b71b",
                 "type": "show",
                 "title": "Gentlemen & Gangsters",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt4600502"
+                  },
+                  {
+                    "id": "tmdb://65117"
+                  },
+                  {
+                    "id": "tvdb://314483"
+                  }
+                ]
               }
             ]
           }
@@ -1340,13 +1854,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c084902391c001f58594b",
                 "ratingKey": "5d9c084902391c001f58594b",
                 "type": "show",
                 "title": "Bleach",
-                "year": 2004
+                "year": 2004,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0434665"
+                  },
+                  {
+                    "id": "tmdb://30984"
+                  },
+                  {
+                    "id": "tvdb://74796"
+                  }
+                ]
               }
             ]
           }
@@ -1373,13 +1900,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c084902391c001f58594b",
                 "ratingKey": "5d9c084902391c001f58594b",
                 "type": "show",
                 "title": "Bleach",
-                "year": 2004
+                "year": 2004,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0434665"
+                  },
+                  {
+                    "id": "tmdb://30984"
+                  },
+                  {
+                    "id": "tvdb://74796"
+                  }
+                ]
               }
             ]
           }
@@ -1406,13 +1946,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c084902391c001f58594b",
                 "ratingKey": "5d9c084902391c001f58594b",
                 "type": "show",
                 "title": "Bleach",
-                "year": 2004
+                "year": 2004,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0434665"
+                  },
+                  {
+                    "id": "tmdb://30984"
+                  },
+                  {
+                    "id": "tvdb://74796"
+                  }
+                ]
               }
             ]
           }
@@ -1439,13 +1992,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c0849ba6eb9001fba0171",
                 "ratingKey": "5d9c0849ba6eb9001fba0171",
                 "type": "show",
                 "title": "Nathan for You",
-                "year": 2013
+                "year": 2013,
+                "Guid": [
+                  {
+                    "id": "imdb://tt2297757"
+                  },
+                  {
+                    "id": "tmdb://58957"
+                  },
+                  {
+                    "id": "tvdb://267002"
+                  }
+                ]
               }
             ]
           }
@@ -1472,13 +2038,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c0849ba6eb9001fba0171",
                 "ratingKey": "5d9c0849ba6eb9001fba0171",
                 "type": "show",
                 "title": "Nathan for You",
-                "year": 2013
+                "year": 2013,
+                "Guid": [
+                  {
+                    "id": "imdb://tt2297757"
+                  },
+                  {
+                    "id": "tmdb://58957"
+                  },
+                  {
+                    "id": "tvdb://267002"
+                  }
+                ]
               }
             ]
           }
@@ -1505,13 +2084,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c0849ba6eb9001fba0171",
                 "ratingKey": "5d9c0849ba6eb9001fba0171",
                 "type": "show",
                 "title": "Nathan for You",
-                "year": 2013
+                "year": 2013,
+                "Guid": [
+                  {
+                    "id": "imdb://tt2297757"
+                  },
+                  {
+                    "id": "tmdb://58957"
+                  },
+                  {
+                    "id": "tvdb://267002"
+                  }
+                ]
               }
             ]
           }
@@ -1538,13 +2130,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c084fec357c001f9ab4d8",
                 "ratingKey": "5d9c084fec357c001f9ab4d8",
                 "type": "show",
                 "title": "One Piece",
-                "year": 1999
+                "year": 1999,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0388629"
+                  },
+                  {
+                    "id": "tmdb://37854"
+                  },
+                  {
+                    "id": "tvdb://81797"
+                  }
+                ]
               }
             ]
           }
@@ -1571,13 +2176,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c084fec357c001f9ab4d8",
                 "ratingKey": "5d9c084fec357c001f9ab4d8",
                 "type": "show",
                 "title": "One Piece",
-                "year": 1999
+                "year": 1999,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0388629"
+                  },
+                  {
+                    "id": "tmdb://37854"
+                  },
+                  {
+                    "id": "tvdb://81797"
+                  }
+                ]
               }
             ]
           }
@@ -1604,13 +2222,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c084fec357c001f9ab4d8",
                 "ratingKey": "5d9c084fec357c001f9ab4d8",
                 "type": "show",
                 "title": "One Piece",
-                "year": 1999
+                "year": 1999,
+                "Guid": [
+                  {
+                    "id": "imdb://tt0388629"
+                  },
+                  {
+                    "id": "tmdb://37854"
+                  },
+                  {
+                    "id": "tvdb://81797"
+                  }
+                ]
               }
             ]
           }
@@ -1637,13 +2268,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c086eba6eb9001fba3d37",
                 "ratingKey": "5d9c086eba6eb9001fba3d37",
                 "type": "show",
                 "title": "2 Broke Girls",
-                "year": 2011
+                "year": 2011,
+                "Guid": [
+                  {
+                    "id": "imdb://tt1845307"
+                  },
+                  {
+                    "id": "tmdb://39340"
+                  },
+                  {
+                    "id": "tvdb://248741"
+                  }
+                ]
               }
             ]
           }
@@ -1670,13 +2314,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c086eba6eb9001fba3d37",
                 "ratingKey": "5d9c086eba6eb9001fba3d37",
                 "type": "show",
                 "title": "2 Broke Girls",
-                "year": 2011
+                "year": 2011,
+                "Guid": [
+                  {
+                    "id": "imdb://tt1845307"
+                  },
+                  {
+                    "id": "tmdb://39340"
+                  },
+                  {
+                    "id": "tvdb://248741"
+                  }
+                ]
               }
             ]
           }
@@ -1703,13 +2360,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c086eba6eb9001fba3d37",
                 "ratingKey": "5d9c086eba6eb9001fba3d37",
                 "type": "show",
                 "title": "2 Broke Girls",
-                "year": 2011
+                "year": 2011,
+                "Guid": [
+                  {
+                    "id": "imdb://tt1845307"
+                  },
+                  {
+                    "id": "tmdb://39340"
+                  },
+                  {
+                    "id": "tvdb://248741"
+                  }
+                ]
               }
             ]
           }
@@ -1736,13 +2406,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c08a9705e7a001e6e1883",
                 "ratingKey": "5d9c08a9705e7a001e6e1883",
                 "type": "show",
                 "title": "Last Seen Alive",
-                "year": 2014
+                "year": 2014,
+                "Guid": [
+                  {
+                    "id": "imdb://tt3729784"
+                  },
+                  {
+                    "id": "tmdb://295455"
+                  },
+                  {
+                    "id": "tvdb://282128"
+                  }
+                ]
               }
             ]
           }
@@ -1769,13 +2452,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c08a9705e7a001e6e1883",
                 "ratingKey": "5d9c08a9705e7a001e6e1883",
                 "type": "show",
                 "title": "Last Seen Alive",
-                "year": 2014
+                "year": 2014,
+                "Guid": [
+                  {
+                    "id": "imdb://tt3729784"
+                  },
+                  {
+                    "id": "tmdb://295455"
+                  },
+                  {
+                    "id": "tvdb://282128"
+                  }
+                ]
               }
             ]
           }
@@ -1802,13 +2498,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c08a9705e7a001e6e1883",
                 "ratingKey": "5d9c08a9705e7a001e6e1883",
                 "type": "show",
                 "title": "Last Seen Alive",
-                "year": 2014
+                "year": 2014,
+                "Guid": [
+                  {
+                    "id": "imdb://tt3729784"
+                  },
+                  {
+                    "id": "tmdb://295455"
+                  },
+                  {
+                    "id": "tvdb://282128"
+                  }
+                ]
               }
             ]
           }
@@ -1835,13 +2544,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c09190aaccd001f8f42f0",
                 "ratingKey": "5d9c09190aaccd001f8f42f0",
                 "type": "show",
                 "title": "Reacher",
-                "year": 2022
+                "year": 2022,
+                "Guid": [
+                  {
+                    "id": "imdb://tt9288030"
+                  },
+                  {
+                    "id": "tmdb://108978"
+                  },
+                  {
+                    "id": "tvdb://366924"
+                  }
+                ]
               }
             ]
           }
@@ -1868,13 +2590,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c09190aaccd001f8f42f0",
                 "ratingKey": "5d9c09190aaccd001f8f42f0",
                 "type": "show",
                 "title": "Reacher",
-                "year": 2022
+                "year": 2022,
+                "Guid": [
+                  {
+                    "id": "imdb://tt9288030"
+                  },
+                  {
+                    "id": "tmdb://108978"
+                  },
+                  {
+                    "id": "tvdb://366924"
+                  }
+                ]
               }
             ]
           }
@@ -1901,13 +2636,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c09190aaccd001f8f42f0",
                 "ratingKey": "5d9c09190aaccd001f8f42f0",
                 "type": "show",
                 "title": "Reacher",
-                "year": 2022
+                "year": 2022,
+                "Guid": [
+                  {
+                    "id": "imdb://tt9288030"
+                  },
+                  {
+                    "id": "tmdb://108978"
+                  },
+                  {
+                    "id": "tvdb://366924"
+                  }
+                ]
               }
             ]
           }
@@ -1934,13 +2682,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5d9c091ce9d5a1001f4de854",
                 "ratingKey": "5d9c091ce9d5a1001f4de854",
                 "type": "show",
                 "title": "Bleach (S) Abridged",
-                "year": 2014
+                "year": 2014,
+                "Guid": [
+                  {
+                    "id": "tvdb://360846"
+                  }
+                ]
               }
             ]
           }
@@ -1967,13 +2722,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5e16333f61c6140040d67eb3",
                 "ratingKey": "5e16333f61c6140040d67eb3",
                 "type": "movie",
                 "title": "Mayday",
-                "year": 2019
+                "year": 2019,
+                "Guid": [
+                  {
+                    "id": "imdb://tt6977470"
+                  },
+                  {
+                    "id": "tmdb://626576"
+                  }
+                ]
               }
             ]
           }
@@ -2000,13 +2765,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5e16333f61c6140040d67eb3",
                 "ratingKey": "5e16333f61c6140040d67eb3",
                 "type": "movie",
                 "title": "Mayday",
-                "year": 2019
+                "year": 2019,
+                "Guid": [
+                  {
+                    "id": "imdb://tt6977470"
+                  },
+                  {
+                    "id": "tmdb://626576"
+                  }
+                ]
               }
             ]
           }
@@ -2033,13 +2808,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5e4d25497e245a003e3c5c2e",
                 "ratingKey": "5e4d25497e245a003e3c5c2e",
                 "type": "movie",
                 "title": "Mayday",
-                "year": 2021
+                "year": 2021,
+                "Guid": [
+                  {
+                    "id": "imdb://tt11271800"
+                  },
+                  {
+                    "id": "tmdb://672521"
+                  },
+                  {
+                    "id": "tvdb://287416"
+                  }
+                ]
               }
             ]
           }
@@ -2066,13 +2854,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5e4d25497e245a003e3c5c2e",
                 "ratingKey": "5e4d25497e245a003e3c5c2e",
                 "type": "movie",
                 "title": "Mayday",
-                "year": 2021
+                "year": 2021,
+                "Guid": [
+                  {
+                    "id": "imdb://tt11271800"
+                  },
+                  {
+                    "id": "tmdb://672521"
+                  },
+                  {
+                    "id": "tvdb://287416"
+                  }
+                ]
               }
             ]
           }
@@ -2099,13 +2900,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5e4d25497e245a003e3c5c2e",
                 "ratingKey": "5e4d25497e245a003e3c5c2e",
                 "type": "movie",
                 "title": "Mayday",
-                "year": 2021
+                "year": 2021,
+                "Guid": [
+                  {
+                    "id": "imdb://tt11271800"
+                  },
+                  {
+                    "id": "tmdb://672521"
+                  },
+                  {
+                    "id": "tvdb://287416"
+                  }
+                ]
               }
             ]
           }
@@ -2132,13 +2946,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5e91843e9bec79003fe50ffb",
                 "ratingKey": "5e91843e9bec79003fe50ffb",
                 "type": "movie",
                 "title": "Project Hail Mary",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt12042730"
+                  },
+                  {
+                    "id": "tmdb://687163"
+                  },
+                  {
+                    "id": "tvdb://346729"
+                  }
+                ]
               }
             ]
           }
@@ -2165,13 +2992,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5e91843e9bec79003fe50ffb",
                 "ratingKey": "5e91843e9bec79003fe50ffb",
                 "type": "movie",
                 "title": "Project Hail Mary",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt12042730"
+                  },
+                  {
+                    "id": "tmdb://687163"
+                  },
+                  {
+                    "id": "tvdb://346729"
+                  }
+                ]
               }
             ]
           }
@@ -2198,13 +3038,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5e91843e9bec79003fe50ffb",
                 "ratingKey": "5e91843e9bec79003fe50ffb",
                 "type": "movie",
                 "title": "Project Hail Mary",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt12042730"
+                  },
+                  {
+                    "id": "tmdb://687163"
+                  },
+                  {
+                    "id": "tvdb://346729"
+                  }
+                ]
               }
             ]
           }
@@ -2231,13 +3084,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5f40c5ba9774a2003a180377",
                 "ratingKey": "5f40c5ba9774a2003a180377",
                 "type": "movie",
                 "title": "Motor City Living",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt5564448"
+                  },
+                  {
+                    "id": "tmdb://980070"
+                  }
+                ]
               }
             ]
           }
@@ -2264,13 +3127,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5f40c5ba9774a2003a180377",
                 "ratingKey": "5f40c5ba9774a2003a180377",
                 "type": "movie",
                 "title": "Motor City Living",
-                "year": 2016
+                "year": 2016,
+                "Guid": [
+                  {
+                    "id": "imdb://tt5564448"
+                  },
+                  {
+                    "id": "tmdb://980070"
+                  }
+                ]
               }
             ]
           }
@@ -2297,13 +3170,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/5f40d549c63b480040f9198e",
                 "ratingKey": "5f40d549c63b480040f9198e",
                 "type": "movie",
                 "title": "Batman and the Pizza Time part 1",
-                "year": 2017
+                "year": 2017,
+                "Guid": [
+                  {
+                    "id": "imdb://tt7959470"
+                  }
+                ]
               }
             ]
           }
@@ -2330,13 +3210,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5f7c9b1c9b958e00415de6bb",
                 "ratingKey": "5f7c9b1c9b958e00415de6bb",
                 "type": "show",
                 "title": "ONE PIECE (2023)",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt11737520"
+                  },
+                  {
+                    "id": "tmdb://111110"
+                  },
+                  {
+                    "id": "tvdb://392276"
+                  }
+                ]
               }
             ]
           }
@@ -2363,13 +3256,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5f7c9b1c9b958e00415de6bb",
                 "ratingKey": "5f7c9b1c9b958e00415de6bb",
                 "type": "show",
                 "title": "ONE PIECE (2023)",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt11737520"
+                  },
+                  {
+                    "id": "tmdb://111110"
+                  },
+                  {
+                    "id": "tvdb://392276"
+                  }
+                ]
               }
             ]
           }
@@ -2396,13 +3302,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/5f7c9b1c9b958e00415de6bb",
                 "ratingKey": "5f7c9b1c9b958e00415de6bb",
                 "type": "show",
                 "title": "ONE PIECE (2023)",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt11737520"
+                  },
+                  {
+                    "id": "tmdb://111110"
+                  },
+                  {
+                    "id": "tvdb://392276"
+                  }
+                ]
               }
             ]
           }
@@ -2429,13 +3348,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/60448df6bd881e002cb9471e",
                 "ratingKey": "60448df6bd881e002cb9471e",
                 "type": "movie",
                 "title": "The Invite",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt14173636"
+                  },
+                  {
+                    "id": "tmdb://950028"
+                  },
+                  {
+                    "id": "tvdb://356147"
+                  }
+                ]
               }
             ]
           }
@@ -2462,13 +3394,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/60448df6bd881e002cb9471e",
                 "ratingKey": "60448df6bd881e002cb9471e",
                 "type": "movie",
                 "title": "The Invite",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt14173636"
+                  },
+                  {
+                    "id": "tmdb://950028"
+                  },
+                  {
+                    "id": "tvdb://356147"
+                  }
+                ]
               }
             ]
           }
@@ -2495,13 +3440,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/60448df6bd881e002cb9471e",
                 "ratingKey": "60448df6bd881e002cb9471e",
                 "type": "movie",
                 "title": "The Invite",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt14173636"
+                  },
+                  {
+                    "id": "tmdb://950028"
+                  },
+                  {
+                    "id": "tvdb://356147"
+                  }
+                ]
               }
             ]
           }
@@ -2528,13 +3486,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/60547a1bda7fb6002c1cf49a",
                 "ratingKey": "60547a1bda7fb6002c1cf49a",
                 "type": "show",
                 "title": "Lioness (2021)",
-                "year": 2021
+                "year": 2021,
+                "Guid": [
+                  {
+                    "id": "imdb://tt13760268"
+                  },
+                  {
+                    "id": "tmdb://232553"
+                  },
+                  {
+                    "id": "tvdb://397991"
+                  }
+                ]
               }
             ]
           }
@@ -2561,13 +3532,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/60547a1bda7fb6002c1cf49a",
                 "ratingKey": "60547a1bda7fb6002c1cf49a",
                 "type": "show",
                 "title": "Lioness (2021)",
-                "year": 2021
+                "year": 2021,
+                "Guid": [
+                  {
+                    "id": "imdb://tt13760268"
+                  },
+                  {
+                    "id": "tmdb://232553"
+                  },
+                  {
+                    "id": "tvdb://397991"
+                  }
+                ]
               }
             ]
           }
@@ -2594,13 +3578,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/60547a1bda7fb6002c1cf49a",
                 "ratingKey": "60547a1bda7fb6002c1cf49a",
                 "type": "show",
                 "title": "Lioness (2021)",
-                "year": 2021
+                "year": 2021,
+                "Guid": [
+                  {
+                    "id": "imdb://tt13760268"
+                  },
+                  {
+                    "id": "tmdb://232553"
+                  },
+                  {
+                    "id": "tvdb://397991"
+                  }
+                ]
               }
             ]
           }
@@ -2627,13 +3624,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6079b716b9b3140035a86894",
                 "ratingKey": "6079b716b9b3140035a86894",
                 "type": "show",
                 "title": "Lantern's Tales",
-                "year": 2021
+                "year": 2021,
+                "Guid": [
+                  {
+                    "id": "tmdb://123323"
+                  }
+                ]
               }
             ]
           }
@@ -2660,13 +3664,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/619a3851c7f1117e4f0003e9",
                 "ratingKey": "619a3851c7f1117e4f0003e9",
                 "type": "movie",
                 "title": "The Invite",
-                "year": 2022
+                "year": 2022,
+                "Guid": [
+                  {
+                    "id": "imdb://tt16159038"
+                  },
+                  {
+                    "id": "tmdb://1011436"
+                  }
+                ]
               }
             ]
           }
@@ -2693,13 +3707,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/619a3851c7f1117e4f0003e9",
                 "ratingKey": "619a3851c7f1117e4f0003e9",
                 "type": "movie",
                 "title": "The Invite",
-                "year": 2022
+                "year": 2022,
+                "Guid": [
+                  {
+                    "id": "imdb://tt16159038"
+                  },
+                  {
+                    "id": "tmdb://1011436"
+                  }
+                ]
               }
             ]
           }
@@ -2726,13 +3750,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/61b180686bfb4feb48515e07",
                 "ratingKey": "61b180686bfb4feb48515e07",
                 "type": "show",
                 "title": "Silo",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt14688458"
+                  },
+                  {
+                    "id": "tmdb://125988"
+                  },
+                  {
+                    "id": "tvdb://403245"
+                  }
+                ]
               }
             ]
           }
@@ -2759,13 +3796,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/61b180686bfb4feb48515e07",
                 "ratingKey": "61b180686bfb4feb48515e07",
                 "type": "show",
                 "title": "Silo",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt14688458"
+                  },
+                  {
+                    "id": "tmdb://125988"
+                  },
+                  {
+                    "id": "tvdb://403245"
+                  }
+                ]
               }
             ]
           }
@@ -2792,13 +3842,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/61b180686bfb4feb48515e07",
                 "ratingKey": "61b180686bfb4feb48515e07",
                 "type": "show",
                 "title": "Silo",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt14688458"
+                  },
+                  {
+                    "id": "tmdb://125988"
+                  },
+                  {
+                    "id": "tvdb://403245"
+                  }
+                ]
               }
             ]
           }
@@ -2825,13 +3888,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/62ac863c44b73ea95829962c",
                 "ratingKey": "62ac863c44b73ea95829962c",
                 "type": "show",
                 "title": "Lioness",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt13111078"
+                  },
+                  {
+                    "id": "tmdb://113962"
+                  },
+                  {
+                    "id": "tvdb://388589"
+                  }
+                ]
               }
             ]
           }
@@ -2858,13 +3934,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/62ac863c44b73ea95829962c",
                 "ratingKey": "62ac863c44b73ea95829962c",
                 "type": "show",
                 "title": "Lioness",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt13111078"
+                  },
+                  {
+                    "id": "tmdb://113962"
+                  },
+                  {
+                    "id": "tvdb://388589"
+                  }
+                ]
               }
             ]
           }
@@ -2891,13 +3980,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/62ac863c44b73ea95829962c",
                 "ratingKey": "62ac863c44b73ea95829962c",
                 "type": "show",
                 "title": "Lioness",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt13111078"
+                  },
+                  {
+                    "id": "tmdb://113962"
+                  },
+                  {
+                    "id": "tvdb://388589"
+                  }
+                ]
               }
             ]
           }
@@ -2924,13 +4026,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6328b12fe57cbf75cce17c02",
                 "ratingKey": "6328b12fe57cbf75cce17c02",
                 "type": "movie",
                 "title": "Spider-Man: Brand New Day",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt22084616"
+                  },
+                  {
+                    "id": "tmdb://969681"
+                  },
+                  {
+                    "id": "tvdb://135896"
+                  }
+                ]
               }
             ]
           }
@@ -2957,13 +4072,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6328b12fe57cbf75cce17c02",
                 "ratingKey": "6328b12fe57cbf75cce17c02",
                 "type": "movie",
                 "title": "Spider-Man: Brand New Day",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt22084616"
+                  },
+                  {
+                    "id": "tmdb://969681"
+                  },
+                  {
+                    "id": "tvdb://135896"
+                  }
+                ]
               }
             ]
           }
@@ -2990,13 +4118,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6328b12fe57cbf75cce17c02",
                 "ratingKey": "6328b12fe57cbf75cce17c02",
                 "type": "movie",
                 "title": "Spider-Man: Brand New Day",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt22084616"
+                  },
+                  {
+                    "id": "tmdb://969681"
+                  },
+                  {
+                    "id": "tvdb://135896"
+                  }
+                ]
               }
             ]
           }
@@ -3023,13 +4164,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/633a669ad63535b131f732e0",
                 "ratingKey": "633a669ad63535b131f732e0",
                 "type": "show",
                 "title": "Silos Baking Competition",
-                "year": 2022
+                "year": 2022,
+                "Guid": [
+                  {
+                    "id": "imdb://tt21613984"
+                  },
+                  {
+                    "id": "tmdb://228726"
+                  },
+                  {
+                    "id": "tvdb://427836"
+                  }
+                ]
               }
             ]
           }
@@ -3056,13 +4210,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/633a669ad63535b131f732e0",
                 "ratingKey": "633a669ad63535b131f732e0",
                 "type": "show",
                 "title": "Silos Baking Competition",
-                "year": 2022
+                "year": 2022,
+                "Guid": [
+                  {
+                    "id": "imdb://tt21613984"
+                  },
+                  {
+                    "id": "tmdb://228726"
+                  },
+                  {
+                    "id": "tvdb://427836"
+                  }
+                ]
               }
             ]
           }
@@ -3089,13 +4256,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/633a669ad63535b131f732e0",
                 "ratingKey": "633a669ad63535b131f732e0",
                 "type": "show",
                 "title": "Silos Baking Competition",
-                "year": 2022
+                "year": 2022,
+                "Guid": [
+                  {
+                    "id": "imdb://tt21613984"
+                  },
+                  {
+                    "id": "tmdb://228726"
+                  },
+                  {
+                    "id": "tvdb://427836"
+                  }
+                ]
               }
             ]
           }
@@ -3122,13 +4302,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6365f4db354ca0d2edfad043",
                 "ratingKey": "6365f4db354ca0d2edfad043",
                 "type": "show",
                 "title": "The Gentlemen",
-                "year": 2024
+                "year": 2024,
+                "Guid": [
+                  {
+                    "id": "imdb://tt13210838"
+                  },
+                  {
+                    "id": "tmdb://236235"
+                  },
+                  {
+                    "id": "tvdb://426845"
+                  }
+                ]
               }
             ]
           }
@@ -3155,13 +4348,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6365f4db354ca0d2edfad043",
                 "ratingKey": "6365f4db354ca0d2edfad043",
                 "type": "show",
                 "title": "The Gentlemen",
-                "year": 2024
+                "year": 2024,
+                "Guid": [
+                  {
+                    "id": "imdb://tt13210838"
+                  },
+                  {
+                    "id": "tmdb://236235"
+                  },
+                  {
+                    "id": "tvdb://426845"
+                  }
+                ]
               }
             ]
           }
@@ -3188,13 +4394,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6365f4db354ca0d2edfad043",
                 "ratingKey": "6365f4db354ca0d2edfad043",
                 "type": "show",
                 "title": "The Gentlemen",
-                "year": 2024
+                "year": 2024,
+                "Guid": [
+                  {
+                    "id": "imdb://tt13210838"
+                  },
+                  {
+                    "id": "tmdb://236235"
+                  },
+                  {
+                    "id": "tvdb://426845"
+                  }
+                ]
               }
             ]
           }
@@ -3221,13 +4440,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/642d485ce8b269a4b9c8a4a8",
                 "ratingKey": "642d485ce8b269a4b9c8a4a8",
                 "type": "movie",
                 "title": "Moana",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt27419466"
+                  },
+                  {
+                    "id": "tmdb://1108427"
+                  },
+                  {
+                    "id": "tvdb://345498"
+                  }
+                ]
               }
             ]
           }
@@ -3254,13 +4486,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/642d485ce8b269a4b9c8a4a8",
                 "ratingKey": "642d485ce8b269a4b9c8a4a8",
                 "type": "movie",
                 "title": "Moana",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt27419466"
+                  },
+                  {
+                    "id": "tmdb://1108427"
+                  },
+                  {
+                    "id": "tvdb://345498"
+                  }
+                ]
               }
             ]
           }
@@ -3287,13 +4532,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/642d485ce8b269a4b9c8a4a8",
                 "ratingKey": "642d485ce8b269a4b9c8a4a8",
                 "type": "movie",
                 "title": "Moana",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt27419466"
+                  },
+                  {
+                    "id": "tmdb://1108427"
+                  },
+                  {
+                    "id": "tvdb://345498"
+                  }
+                ]
               }
             ]
           }
@@ -3320,13 +4578,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6475f4e274668225adb2c0e0",
                 "ratingKey": "6475f4e274668225adb2c0e0",
                 "type": "show",
                 "title": "Lanterns",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt26545992"
+                  },
+                  {
+                    "id": "tmdb://95350"
+                  },
+                  {
+                    "id": "tvdb://376098"
+                  }
+                ]
               }
             ]
           }
@@ -3353,13 +4624,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6475f4e274668225adb2c0e0",
                 "ratingKey": "6475f4e274668225adb2c0e0",
                 "type": "show",
                 "title": "Lanterns",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt26545992"
+                  },
+                  {
+                    "id": "tmdb://95350"
+                  },
+                  {
+                    "id": "tvdb://376098"
+                  }
+                ]
               }
             ]
           }
@@ -3386,13 +4670,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6475f4e274668225adb2c0e0",
                 "ratingKey": "6475f4e274668225adb2c0e0",
                 "type": "show",
                 "title": "Lanterns",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt26545992"
+                  },
+                  {
+                    "id": "tmdb://95350"
+                  },
+                  {
+                    "id": "tvdb://376098"
+                  }
+                ]
               }
             ]
           }
@@ -3419,13 +4716,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6488a8b8f542e5c273e5ae08",
                 "ratingKey": "6488a8b8f542e5c273e5ae08",
                 "type": "movie",
                 "title": "Mayday",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt28014327"
+                  },
+                  {
+                    "id": "tmdb://1137844"
+                  },
+                  {
+                    "id": "tvdb://358754"
+                  }
+                ]
               }
             ]
           }
@@ -3452,13 +4762,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6488a8b8f542e5c273e5ae08",
                 "ratingKey": "6488a8b8f542e5c273e5ae08",
                 "type": "movie",
                 "title": "Mayday",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt28014327"
+                  },
+                  {
+                    "id": "tmdb://1137844"
+                  },
+                  {
+                    "id": "tvdb://358754"
+                  }
+                ]
               }
             ]
           }
@@ -3485,13 +4808,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6488a8b8f542e5c273e5ae08",
                 "ratingKey": "6488a8b8f542e5c273e5ae08",
                 "type": "movie",
                 "title": "Mayday",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt28014327"
+                  },
+                  {
+                    "id": "tmdb://1137844"
+                  },
+                  {
+                    "id": "tvdb://358754"
+                  }
+                ]
               }
             ]
           }
@@ -3518,13 +4854,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/649ec50d2907cafed5d37636",
                 "ratingKey": "649ec50d2907cafed5d37636",
                 "type": "movie",
                 "title": "Knightfall",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt28224861"
+                  },
+                  {
+                    "id": "tmdb://1377900"
+                  },
+                  {
+                    "id": "tvdb://376535"
+                  }
+                ]
               }
             ]
           }
@@ -3551,13 +4900,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/649ec50d2907cafed5d37636",
                 "ratingKey": "649ec50d2907cafed5d37636",
                 "type": "movie",
                 "title": "Knightfall",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt28224861"
+                  },
+                  {
+                    "id": "tmdb://1377900"
+                  },
+                  {
+                    "id": "tvdb://376535"
+                  }
+                ]
               }
             ]
           }
@@ -3584,13 +4946,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/649ec50d2907cafed5d37636",
                 "ratingKey": "649ec50d2907cafed5d37636",
                 "type": "movie",
                 "title": "Knightfall",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt28224861"
+                  },
+                  {
+                    "id": "tmdb://1377900"
+                  },
+                  {
+                    "id": "tvdb://376535"
+                  }
+                ]
               }
             ]
           }
@@ -3617,13 +4992,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/64c539151e89149bdafda1f1",
                 "ratingKey": "64c539151e89149bdafda1f1",
                 "type": "show",
                 "title": "Gentlemen",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt27704253"
+                  },
+                  {
+                    "id": "tvdb://437692"
+                  }
+                ]
               }
             ]
           }
@@ -3650,13 +5035,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/64c539151e89149bdafda1f1",
                 "ratingKey": "64c539151e89149bdafda1f1",
                 "type": "show",
                 "title": "Gentlemen",
-                "year": 2023
+                "year": 2023,
+                "Guid": [
+                  {
+                    "id": "imdb://tt27704253"
+                  },
+                  {
+                    "id": "tvdb://437692"
+                  }
+                ]
               }
             ]
           }
@@ -3683,13 +5078,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/651cb98b7279fbfb2b853dbd",
                 "ratingKey": "651cb98b7279fbfb2b853dbd",
                 "type": "movie",
                 "title": "Toy Story 5",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt29355505"
+                  },
+                  {
+                    "id": "tmdb://1084244"
+                  },
+                  {
+                    "id": "tvdb://344106"
+                  }
+                ]
               }
             ]
           }
@@ -3716,13 +5124,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/651cb98b7279fbfb2b853dbd",
                 "ratingKey": "651cb98b7279fbfb2b853dbd",
                 "type": "movie",
                 "title": "Toy Story 5",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt29355505"
+                  },
+                  {
+                    "id": "tmdb://1084244"
+                  },
+                  {
+                    "id": "tvdb://344106"
+                  }
+                ]
               }
             ]
           }
@@ -3749,13 +5170,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/651cb98b7279fbfb2b853dbd",
                 "ratingKey": "651cb98b7279fbfb2b853dbd",
                 "type": "movie",
                 "title": "Toy Story 5",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt29355505"
+                  },
+                  {
+                    "id": "tmdb://1084244"
+                  },
+                  {
+                    "id": "tvdb://344106"
+                  }
+                ]
               }
             ]
           }
@@ -3782,13 +5216,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/657ecccaa698374a7a524274",
                 "ratingKey": "657ecccaa698374a7a524274",
                 "type": "show",
                 "title": "The One Piece",
-                "year": null
+                "year": null,
+                "Guid": [
+                  {
+                    "id": "imdb://tt30476502"
+                  },
+                  {
+                    "id": "tmdb://241709"
+                  },
+                  {
+                    "id": "tvdb://464521"
+                  }
+                ]
               }
             ]
           }
@@ -3815,13 +5262,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/657ecccaa698374a7a524274",
                 "ratingKey": "657ecccaa698374a7a524274",
                 "type": "show",
                 "title": "The One Piece",
-                "year": null
+                "year": null,
+                "Guid": [
+                  {
+                    "id": "imdb://tt30476502"
+                  },
+                  {
+                    "id": "tmdb://241709"
+                  },
+                  {
+                    "id": "tvdb://464521"
+                  }
+                ]
               }
             ]
           }
@@ -3848,13 +5308,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/657ecccaa698374a7a524274",
                 "ratingKey": "657ecccaa698374a7a524274",
                 "type": "show",
                 "title": "The One Piece",
-                "year": null
+                "year": null,
+                "Guid": [
+                  {
+                    "id": "imdb://tt30476502"
+                  },
+                  {
+                    "id": "tmdb://241709"
+                  },
+                  {
+                    "id": "tvdb://464521"
+                  }
+                ]
               }
             ]
           }
@@ -3881,13 +5354,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/65cc295216bb4db33e2cfef6",
                 "ratingKey": "65cc295216bb4db33e2cfef6",
                 "type": "movie",
                 "title": "Together",
-                "year": 2025
+                "year": 2025,
+                "Guid": [
+                  {
+                    "id": "imdb://tt31184028"
+                  },
+                  {
+                    "id": "tmdb://1242011"
+                  },
+                  {
+                    "id": "tvdb://362634"
+                  }
+                ]
               }
             ]
           }
@@ -3914,13 +5400,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/65cc295216bb4db33e2cfef6",
                 "ratingKey": "65cc295216bb4db33e2cfef6",
                 "type": "movie",
                 "title": "Together",
-                "year": 2025
+                "year": 2025,
+                "Guid": [
+                  {
+                    "id": "imdb://tt31184028"
+                  },
+                  {
+                    "id": "tmdb://1242011"
+                  },
+                  {
+                    "id": "tvdb://362634"
+                  }
+                ]
               }
             ]
           }
@@ -3947,13 +5446,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/65cc295216bb4db33e2cfef6",
                 "ratingKey": "65cc295216bb4db33e2cfef6",
                 "type": "movie",
                 "title": "Together",
-                "year": 2025
+                "year": 2025,
+                "Guid": [
+                  {
+                    "id": "imdb://tt31184028"
+                  },
+                  {
+                    "id": "tmdb://1242011"
+                  },
+                  {
+                    "id": "tvdb://362634"
+                  }
+                ]
               }
             ]
           }
@@ -3980,13 +5492,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/65d2daf3359932bcaa86b538",
                 "ratingKey": "65d2daf3359932bcaa86b538",
                 "type": "movie",
                 "title": "Runner",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt31349844"
+                  },
+                  {
+                    "id": "tmdb://1377237"
+                  },
+                  {
+                    "id": "tvdb://364261"
+                  }
+                ]
               }
             ]
           }
@@ -4013,13 +5538,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/65d2daf3359932bcaa86b538",
                 "ratingKey": "65d2daf3359932bcaa86b538",
                 "type": "movie",
                 "title": "Runner",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt31349844"
+                  },
+                  {
+                    "id": "tmdb://1377237"
+                  },
+                  {
+                    "id": "tvdb://364261"
+                  }
+                ]
               }
             ]
           }
@@ -4046,13 +5584,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/65d2daf3359932bcaa86b538",
                 "ratingKey": "65d2daf3359932bcaa86b538",
                 "type": "movie",
                 "title": "Runner",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt31349844"
+                  },
+                  {
+                    "id": "tmdb://1377237"
+                  },
+                  {
+                    "id": "tvdb://364261"
+                  }
+                ]
               }
             ]
           }
@@ -4079,13 +5630,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/66405eced4e4bace15d4a05a",
                 "ratingKey": "66405eced4e4bace15d4a05a",
                 "type": "movie",
                 "title": "Mutiny",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt32338669"
+                  },
+                  {
+                    "id": "tmdb://1288445"
+                  },
+                  {
+                    "id": "tvdb://356666"
+                  }
+                ]
               }
             ]
           }
@@ -4112,13 +5676,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/66405eced4e4bace15d4a05a",
                 "ratingKey": "66405eced4e4bace15d4a05a",
                 "type": "movie",
                 "title": "Mutiny",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt32338669"
+                  },
+                  {
+                    "id": "tmdb://1288445"
+                  },
+                  {
+                    "id": "tvdb://356666"
+                  }
+                ]
               }
             ]
           }
@@ -4145,13 +5722,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/66405eced4e4bace15d4a05a",
                 "ratingKey": "66405eced4e4bace15d4a05a",
                 "type": "movie",
                 "title": "Mutiny",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt32338669"
+                  },
+                  {
+                    "id": "tmdb://1288445"
+                  },
+                  {
+                    "id": "tvdb://356666"
+                  }
+                ]
               }
             ]
           }
@@ -4178,13 +5768,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/664081d9987087a6b1b31b63",
                 "ratingKey": "664081d9987087a6b1b31b63",
                 "type": "movie",
                 "title": "Batman: Knightfall - Part 1: Knightfall",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt32333324"
+                  },
+                  {
+                    "id": "tmdb://1560520"
+                  },
+                  {
+                    "id": "tvdb://373216"
+                  }
+                ]
               }
             ]
           }
@@ -4211,13 +5814,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/664081d9987087a6b1b31b63",
                 "ratingKey": "664081d9987087a6b1b31b63",
                 "type": "movie",
                 "title": "Batman: Knightfall - Part 1: Knightfall",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt32333324"
+                  },
+                  {
+                    "id": "tmdb://1560520"
+                  },
+                  {
+                    "id": "tvdb://373216"
+                  }
+                ]
               }
             ]
           }
@@ -4244,13 +5860,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/664081d9987087a6b1b31b63",
                 "ratingKey": "664081d9987087a6b1b31b63",
                 "type": "movie",
                 "title": "Batman: Knightfall - Part 1: Knightfall",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt32333324"
+                  },
+                  {
+                    "id": "tmdb://1560520"
+                  },
+                  {
+                    "id": "tvdb://373216"
+                  }
+                ]
               }
             ]
           }
@@ -4277,13 +5906,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/66696dfc15c356a548795164",
                 "ratingKey": "66696dfc15c356a548795164",
                 "type": "movie",
                 "title": "Practical Magic 2",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt32588798"
+                  },
+                  {
+                    "id": "tmdb://1302904"
+                  },
+                  {
+                    "id": "tvdb://357469"
+                  }
+                ]
               }
             ]
           }
@@ -4310,13 +5952,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/66696dfc15c356a548795164",
                 "ratingKey": "66696dfc15c356a548795164",
                 "type": "movie",
                 "title": "Practical Magic 2",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt32588798"
+                  },
+                  {
+                    "id": "tmdb://1302904"
+                  },
+                  {
+                    "id": "tvdb://357469"
+                  }
+                ]
               }
             ]
           }
@@ -4343,13 +5998,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/66696dfc15c356a548795164",
                 "ratingKey": "66696dfc15c356a548795164",
                 "type": "movie",
                 "title": "Practical Magic 2",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt32588798"
+                  },
+                  {
+                    "id": "tmdb://1302904"
+                  },
+                  {
+                    "id": "tvdb://357469"
+                  }
+                ]
               }
             ]
           }
@@ -4376,13 +6044,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/66c479ce34f7a5fb641c17f4",
                 "ratingKey": "66c479ce34f7a5fb641c17f4",
                 "type": "show",
                 "title": "Last Seen",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt6037988"
+                  },
+                  {
+                    "id": "tmdb://258230"
+                  },
+                  {
+                    "id": "tvdb://451782"
+                  }
+                ]
               }
             ]
           }
@@ -4409,13 +6090,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/66c479ce34f7a5fb641c17f4",
                 "ratingKey": "66c479ce34f7a5fb641c17f4",
                 "type": "show",
                 "title": "Last Seen",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt6037988"
+                  },
+                  {
+                    "id": "tmdb://258230"
+                  },
+                  {
+                    "id": "tvdb://451782"
+                  }
+                ]
               }
             ]
           }
@@ -4442,13 +6136,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/66c479ce34f7a5fb641c17f4",
                 "ratingKey": "66c479ce34f7a5fb641c17f4",
                 "type": "show",
                 "title": "Last Seen",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt6037988"
+                  },
+                  {
+                    "id": "tmdb://258230"
+                  },
+                  {
+                    "id": "tvdb://451782"
+                  }
+                ]
               }
             ]
           }
@@ -4475,13 +6182,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/670cb74204e43056959bd4b3",
                 "ratingKey": "670cb74204e43056959bd4b3",
                 "type": "movie",
                 "title": "The Odyssey",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt33764258"
+                  },
+                  {
+                    "id": "tmdb://1368337"
+                  },
+                  {
+                    "id": "tvdb://362547"
+                  }
+                ]
               }
             ]
           }
@@ -4508,13 +6228,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/670cb74204e43056959bd4b3",
                 "ratingKey": "670cb74204e43056959bd4b3",
                 "type": "movie",
                 "title": "The Odyssey",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt33764258"
+                  },
+                  {
+                    "id": "tmdb://1368337"
+                  },
+                  {
+                    "id": "tvdb://362547"
+                  }
+                ]
               }
             ]
           }
@@ -4541,13 +6274,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/670cb74204e43056959bd4b3",
                 "ratingKey": "670cb74204e43056959bd4b3",
                 "type": "movie",
                 "title": "The Odyssey",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt33764258"
+                  },
+                  {
+                    "id": "tmdb://1368337"
+                  },
+                  {
+                    "id": "tvdb://362547"
+                  }
+                ]
               }
             ]
           }
@@ -4574,13 +6320,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6738e193d70f01a8cec05ff0",
                 "ratingKey": "6738e193d70f01a8cec05ff0",
                 "type": "movie",
                 "title": "The Runner",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt34564059"
+                  },
+                  {
+                    "id": "tmdb://1386315"
+                  },
+                  {
+                    "id": "tvdb://368344"
+                  }
+                ]
               }
             ]
           }
@@ -4607,13 +6366,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6738e193d70f01a8cec05ff0",
                 "ratingKey": "6738e193d70f01a8cec05ff0",
                 "type": "movie",
                 "title": "The Runner",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt34564059"
+                  },
+                  {
+                    "id": "tmdb://1386315"
+                  },
+                  {
+                    "id": "tvdb://368344"
+                  }
+                ]
               }
             ]
           }
@@ -4640,13 +6412,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6738e193d70f01a8cec05ff0",
                 "ratingKey": "6738e193d70f01a8cec05ff0",
                 "type": "movie",
                 "title": "The Runner",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt34564059"
+                  },
+                  {
+                    "id": "tmdb://1386315"
+                  },
+                  {
+                    "id": "tvdb://368344"
+                  }
+                ]
               }
             ]
           }
@@ -4673,13 +6458,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/67532bafcd26edcc810aea48",
                 "ratingKey": "67532bafcd26edcc810aea48",
                 "type": "show",
                 "title": "Love of Silom",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt38856645"
+                  },
+                  {
+                    "id": "tmdb://278850"
+                  },
+                  {
+                    "id": "tvdb://457516"
+                  }
+                ]
               }
             ]
           }
@@ -4706,13 +6504,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/67532bafcd26edcc810aea48",
                 "ratingKey": "67532bafcd26edcc810aea48",
                 "type": "show",
                 "title": "Love of Silom",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt38856645"
+                  },
+                  {
+                    "id": "tmdb://278850"
+                  },
+                  {
+                    "id": "tvdb://457516"
+                  }
+                ]
               }
             ]
           }
@@ -4739,13 +6550,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/67532bafcd26edcc810aea48",
                 "ratingKey": "67532bafcd26edcc810aea48",
                 "type": "show",
                 "title": "Love of Silom",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt38856645"
+                  },
+                  {
+                    "id": "tmdb://278850"
+                  },
+                  {
+                    "id": "tvdb://457516"
+                  }
+                ]
               }
             ]
           }
@@ -4772,13 +6596,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/67ae386f3c22b1734388d86c",
                 "ratingKey": "67ae386f3c22b1734388d86c",
                 "type": "movie",
                 "title": "One Night Only",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt37853455"
+                  },
+                  {
+                    "id": "tmdb://1433367"
+                  },
+                  {
+                    "id": "tvdb://364391"
+                  }
+                ]
               }
             ]
           }
@@ -4805,13 +6642,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/67ae386f3c22b1734388d86c",
                 "ratingKey": "67ae386f3c22b1734388d86c",
                 "type": "movie",
                 "title": "One Night Only",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt37853455"
+                  },
+                  {
+                    "id": "tmdb://1433367"
+                  },
+                  {
+                    "id": "tvdb://364391"
+                  }
+                ]
               }
             ]
           }
@@ -4838,13 +6688,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/67ae386f3c22b1734388d86c",
                 "ratingKey": "67ae386f3c22b1734388d86c",
                 "type": "movie",
                 "title": "One Night Only",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt37853455"
+                  },
+                  {
+                    "id": "tmdb://1433367"
+                  },
+                  {
+                    "id": "tvdb://364391"
+                  }
+                ]
               }
             ]
           }
@@ -4871,13 +6734,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/67f728f097f5a99d6f6ca577",
                 "ratingKey": "67f728f097f5a99d6f6ca577",
                 "type": "movie",
                 "title": "Drawn Together",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt36073210"
+                  },
+                  {
+                    "id": "tmdb://1440098"
+                  },
+                  {
+                    "id": "tvdb://368076"
+                  }
+                ]
               }
             ]
           }
@@ -4904,13 +6780,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/67f728f097f5a99d6f6ca577",
                 "ratingKey": "67f728f097f5a99d6f6ca577",
                 "type": "movie",
                 "title": "Drawn Together",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt36073210"
+                  },
+                  {
+                    "id": "tmdb://1440098"
+                  },
+                  {
+                    "id": "tvdb://368076"
+                  }
+                ]
               }
             ]
           }
@@ -4937,13 +6826,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/67f728f097f5a99d6f6ca577",
                 "ratingKey": "67f728f097f5a99d6f6ca577",
                 "type": "movie",
                 "title": "Drawn Together",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt36073210"
+                  },
+                  {
+                    "id": "tmdb://1440098"
+                  },
+                  {
+                    "id": "tvdb://368076"
+                  }
+                ]
               }
             ]
           }
@@ -4970,13 +6872,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/682324b73e6bdf304c6137d4",
                 "ratingKey": "682324b73e6bdf304c6137d4",
                 "type": "movie",
                 "title": "Motor City Waves",
-                "year": 2025
+                "year": 2025,
+                "Guid": [
+                  {
+                    "id": "imdb://tt36839800"
+                  },
+                  {
+                    "id": "tmdb://1565882"
+                  }
+                ]
               }
             ]
           }
@@ -5003,13 +6915,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/682324b73e6bdf304c6137d4",
                 "ratingKey": "682324b73e6bdf304c6137d4",
                 "type": "movie",
                 "title": "Motor City Waves",
-                "year": 2025
+                "year": 2025,
+                "Guid": [
+                  {
+                    "id": "imdb://tt36839800"
+                  },
+                  {
+                    "id": "tmdb://1565882"
+                  }
+                ]
               }
             ]
           }
@@ -5036,13 +6958,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6856893830a4aaafd5c4291d",
                 "ratingKey": "6856893830a4aaafd5c4291d",
                 "type": "movie",
                 "title": "Obsession",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt37287335"
+                  },
+                  {
+                    "id": "tmdb://1339713"
+                  },
+                  {
+                    "id": "tvdb://369536"
+                  }
+                ]
               }
             ]
           }
@@ -5069,13 +7004,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6856893830a4aaafd5c4291d",
                 "ratingKey": "6856893830a4aaafd5c4291d",
                 "type": "movie",
                 "title": "Obsession",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt37287335"
+                  },
+                  {
+                    "id": "tmdb://1339713"
+                  },
+                  {
+                    "id": "tvdb://369536"
+                  }
+                ]
               }
             ]
           }
@@ -5102,13 +7050,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6856893830a4aaafd5c4291d",
                 "ratingKey": "6856893830a4aaafd5c4291d",
                 "type": "movie",
                 "title": "Obsession",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt37287335"
+                  },
+                  {
+                    "id": "tmdb://1339713"
+                  },
+                  {
+                    "id": "tvdb://369536"
+                  }
+                ]
               }
             ]
           }
@@ -5135,13 +7096,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/68c603d838abf280042fcdb8",
                 "ratingKey": "68c603d838abf280042fcdb8",
                 "type": "movie",
                 "title": "Stairways to Heaven: The Practical Magic of Sacred Space",
-                "year": null
+                "year": null,
+                "Guid": [
+                  {
+                    "id": "imdb://tt37986099"
+                  }
+                ]
               }
             ]
           }
@@ -5168,13 +7136,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/68cfce1b0b4018f67c550e1d",
                 "ratingKey": "68cfce1b0b4018f67c550e1d",
                 "type": "show",
                 "title": "Crew Girl",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt38218082"
+                  },
+                  {
+                    "id": "tmdb://300507"
+                  },
+                  {
+                    "id": "tvdb://467896"
+                  }
+                ]
               }
             ]
           }
@@ -5201,13 +7182,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/68cfce1b0b4018f67c550e1d",
                 "ratingKey": "68cfce1b0b4018f67c550e1d",
                 "type": "show",
                 "title": "Crew Girl",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt38218082"
+                  },
+                  {
+                    "id": "tmdb://300507"
+                  },
+                  {
+                    "id": "tvdb://467896"
+                  }
+                ]
               }
             ]
           }
@@ -5234,13 +7228,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/68cfce1b0b4018f67c550e1d",
                 "ratingKey": "68cfce1b0b4018f67c550e1d",
                 "type": "show",
                 "title": "Crew Girl",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt38218082"
+                  },
+                  {
+                    "id": "tmdb://300507"
+                  },
+                  {
+                    "id": "tvdb://467896"
+                  }
+                ]
               }
             ]
           }
@@ -5267,13 +7274,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/694c84339383ca4163c4ba38",
                 "ratingKey": "694c84339383ca4163c4ba38",
                 "type": "show",
                 "title": "KAIJU GIRL CARAMELISE",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt39246964"
+                  },
+                  {
+                    "id": "tmdb://308874"
+                  },
+                  {
+                    "id": "tvdb://471878"
+                  }
+                ]
               }
             ]
           }
@@ -5300,13 +7320,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/694c84339383ca4163c4ba38",
                 "ratingKey": "694c84339383ca4163c4ba38",
                 "type": "show",
                 "title": "KAIJU GIRL CARAMELISE",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt39246964"
+                  },
+                  {
+                    "id": "tmdb://308874"
+                  },
+                  {
+                    "id": "tvdb://471878"
+                  }
+                ]
               }
             ]
           }
@@ -5333,13 +7366,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/694c84339383ca4163c4ba38",
                 "ratingKey": "694c84339383ca4163c4ba38",
                 "type": "show",
                 "title": "KAIJU GIRL CARAMELISE",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt39246964"
+                  },
+                  {
+                    "id": "tmdb://308874"
+                  },
+                  {
+                    "id": "tvdb://471878"
+                  }
+                ]
               }
             ]
           }
@@ -5366,13 +7412,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6995dd6b96c7221de9313980",
                 "ratingKey": "6995dd6b96c7221de9313980",
                 "type": "show",
                 "title": "Neagley",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt33539520"
+                  },
+                  {
+                    "id": "tmdb://273207"
+                  },
+                  {
+                    "id": "tvdb://455064"
+                  }
+                ]
               }
             ]
           }
@@ -5399,13 +7458,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6995dd6b96c7221de9313980",
                 "ratingKey": "6995dd6b96c7221de9313980",
                 "type": "show",
                 "title": "Neagley",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt33539520"
+                  },
+                  {
+                    "id": "tmdb://273207"
+                  },
+                  {
+                    "id": "tvdb://455064"
+                  }
+                ]
               }
             ]
           }
@@ -5432,13 +7504,26 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6995dd6b96c7221de9313980",
                 "ratingKey": "6995dd6b96c7221de9313980",
                 "type": "show",
                 "title": "Neagley",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt33539520"
+                  },
+                  {
+                    "id": "tmdb://273207"
+                  },
+                  {
+                    "id": "tvdb://455064"
+                  }
+                ]
               }
             ]
           }
@@ -5465,13 +7550,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/69c44e8318d72691506564e1",
                 "ratingKey": "69c44e8318d72691506564e1",
                 "type": "movie",
                 "title": "The Odyssey",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt40188305"
+                  },
+                  {
+                    "id": "tmdb://1756234"
+                  }
+                ]
               }
             ]
           }
@@ -5498,13 +7593,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/69c44e8318d72691506564e1",
                 "ratingKey": "69c44e8318d72691506564e1",
                 "type": "movie",
                 "title": "The Odyssey",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt40188305"
+                  },
+                  {
+                    "id": "tmdb://1756234"
+                  }
+                ]
               }
             ]
           }
@@ -5531,13 +7636,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/69e19c662fe74a9a4164be53",
                 "ratingKey": "69e19c662fe74a9a4164be53",
                 "type": "movie",
                 "title": "The Odyssey",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt41605854"
+                  },
+                  {
+                    "id": "tmdb://1698863"
+                  }
+                ]
               }
             ]
           }
@@ -5564,13 +7679,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/69e19c662fe74a9a4164be53",
                 "ratingKey": "69e19c662fe74a9a4164be53",
                 "type": "movie",
                 "title": "The Odyssey",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt41605854"
+                  },
+                  {
+                    "id": "tmdb://1698863"
+                  }
+                ]
               }
             ]
           }
@@ -5597,13 +7722,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/69e305ee317ecf07393f1a9b",
                 "ratingKey": "69e305ee317ecf07393f1a9b",
                 "type": "movie",
                 "title": "New Toy Story",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt41635253"
+                  },
+                  {
+                    "id": "tmdb://1698874"
+                  }
+                ]
               }
             ]
           }
@@ -5630,13 +7765,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/69e305ee317ecf07393f1a9b",
                 "ratingKey": "69e305ee317ecf07393f1a9b",
                 "type": "movie",
                 "title": "New Toy Story",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt41635253"
+                  },
+                  {
+                    "id": "tmdb://1698874"
+                  }
+                ]
               }
             ]
           }
@@ -5663,13 +7808,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/69e45c61d0388daa90568313",
                 "ratingKey": "69e45c61d0388daa90568313",
                 "type": "movie",
                 "title": "Toy Story 9",
-                "year": null
+                "year": null,
+                "Guid": [
+                  {
+                    "id": "imdb://tt41669569"
+                  }
+                ]
               }
             ]
           }
@@ -5696,13 +7848,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/69fc7f0fb4af52ecd2f9a428",
                 "ratingKey": "69fc7f0fb4af52ecd2f9a428",
                 "type": "movie",
                 "title": "One Night Only",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "tmdb://1689666"
+                  }
+                ]
               }
             ]
           }
@@ -5729,13 +7888,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6a1f441fdbb49df8ce04e9c5",
                 "ratingKey": "6a1f441fdbb49df8ce04e9c5",
                 "type": "movie",
                 "title": "Acme Air",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "tmdb://1706198"
+                  }
+                ]
               }
             ]
           }
@@ -5762,13 +7928,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6a2aa39861dd0be111f9c07d",
                 "ratingKey": "6a2aa39861dd0be111f9c07d",
                 "type": "movie",
                 "title": "Runner",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "tmdb://1712475"
+                  }
+                ]
               }
             ]
           }
@@ -5795,13 +7968,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6a4e0f79c2a91e123e4d9198",
                 "ratingKey": "6a4e0f79c2a91e123e4d9198",
                 "type": "movie",
                 "title": "Spider-Man Brand New Day: Messi Super Fan",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt43633533"
+                  }
+                ]
               }
             ]
           }
@@ -5828,13 +8008,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6a730c3634d046baa57c0361",
                 "ratingKey": "6a730c3634d046baa57c0361",
                 "type": "show",
                 "title": "Last Seen On Holiday",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "tmdb://331729"
+                  },
+                  {
+                    "id": "tvdb://480980"
+                  }
+                ]
               }
             ]
           }
@@ -5861,13 +8051,23 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6a730c3634d046baa57c0361",
                 "ratingKey": "6a730c3634d046baa57c0361",
                 "type": "show",
                 "title": "Last Seen On Holiday",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "tmdb://331729"
+                  },
+                  {
+                    "id": "tvdb://480980"
+                  }
+                ]
               }
             ]
           }
@@ -5894,13 +8094,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://show/6a7db70db0692347657f5079",
                 "ratingKey": "6a7db70db0692347657f5079",
                 "type": "show",
                 "title": "Lanterns: The Official Podcast",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "tmdb://331555"
+                  }
+                ]
               }
             ]
           }
@@ -5927,13 +8134,20 @@
         },
         "jsonBody": {
           "MediaContainer": {
+            "librarySectionID": "home",
             "size": 1,
             "Metadata": [
               {
+                "guid": "plex://movie/6a8187774f1303dbcfa4a5fa",
                 "ratingKey": "6a8187774f1303dbcfa4a5fa",
                 "type": "movie",
                 "title": "Invite the Devil to Come and Play",
-                "year": 2026
+                "year": 2026,
+                "Guid": [
+                  {
+                    "id": "imdb://tt44119876"
+                  }
+                ]
               }
             ]
           }

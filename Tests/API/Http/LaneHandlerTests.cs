@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using API.Http.Lanes;
 using Domain.Providers;
+using Microsoft.Extensions.Logging;
 using Shared.Concurrency;
 using Shared.Options;
 
@@ -32,7 +33,7 @@ public class LaneHandlerTests
 	public async Task SendAsync_On429WithRetryAfter_BlocksTheRouteForEveryClient()
 	{
 		var wire = new Scripted(HttpStatusCode.TooManyRequests);
-		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions { RetryAttempts = 0 }), RemoteService.Plex, wire, null, "plex", "plex-sink");
+		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions { RetryAttempts = 0 }), RemoteService.Plex, wire, null, null, "plex", "plex-sink");
 		using var throttled = await host.Client("plex").GetAsync("https://plex.test/library");
 
 		await Assert.That(async () => await host.Client("plex-sink").GetAsync("https://plex.test/api/v2/user")).Throws<LaneRefusedException>();
@@ -88,6 +89,28 @@ public class LaneHandlerTests
 		await Assert.That(async () => await third.WaitAsync(TimeSpan.FromMilliseconds(300))).Throws<TimeoutException>();
 		await stop.CancelAsync();
 		await Assert.That(async () => await third).Throws<OperationCanceledException>();
+	}
+
+	[Test]
+	public async Task SendAsync_On429_WarnsWithTheLaneAndTheResponseHeaders()
+	{
+		var logger = ILogger<LaneHandler>.Mock();
+		var wire = new Scripted(HttpStatusCode.TooManyRequests);
+		var http = new ProviderHttpOptions
+		{
+			RetryAttempts = 0,
+			Lanes = new() { ["match"] = Routed("discover", "library/metadata/matches") },
+		};
+		using var host = LanedHosts.Host(LanedHosts.Plex(http), RemoteService.Plex, wire, logger: logger.Object);
+
+		using var throttled = await host.Client().GetAsync("https://discover.plex.test/library/metadata/matches?type=1&guid=tmdb%3A%2F%2F550");
+
+		await Assert.That(Warnings(logger).Single()).Contains("Plex answered 429 on its match lane").And.Contains("Retry-After: 60");
+	}
+
+	private static IEnumerable<string> Warnings(Mock<ILogger<LaneHandler>> logger)
+	{
+		return Mock.Invocations(logger).Where(call => call.Arguments[0] is LogLevel.Warning).Select(call => $"{call.Arguments[2]}");
 	}
 
 	private static LaneOptions Window(int requests, TimeSpan per) => new() { Limits = [new RateWindowOptions { Requests = requests, Per = per }] };

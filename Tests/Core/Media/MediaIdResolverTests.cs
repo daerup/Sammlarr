@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Contracts;
 using Contracts.Caching;
 using Contracts.DI;
@@ -10,6 +11,7 @@ using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
+using Microsoft.Extensions.Logging;
 using TestInfrastructure;
 
 namespace Core.Tests.Media;
@@ -54,10 +56,25 @@ public class MediaIdResolverTests
 	private readonly Mock<IExternalIdConverter> _plex;
 	private readonly Mock<ITypedMemoryCache<string, bool>> _cache = TestUnmatchedCache.Empty();
 
+	private readonly Mock<ILogger<MediaIdResolver>> _logger = ILogger<MediaIdResolver>.Mock();
+
 	public MediaIdResolverTests()
 	{
 		_tmdb = Converter(RemoteService.Tmdb, Detail);
 		_plex = Converter(RemoteService.Plex, PlexById, Search);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenAConverterFaults_WarnsWithItsException()
+	{
+		var broken = new JsonException("The JSON value could not be converted.");
+		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), new Faulted(RemoteService.Tmdb, Error.From(broken)));
+
+		await Testee(TestCapacity.Open(), _tmdb).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
+
+		var warning = Mock.Invocations(_logger).Single(call => call.Arguments[0] is LogLevel.Warning);
+		await Assert.That($"{warning.Arguments[2]}").IsEqualTo("Tmdb could not answer an id lookup");
+		await Assert.That(warning.Arguments[3]).IsSameReferenceAs(broken);
 	}
 
 	[Test]
@@ -643,7 +660,8 @@ public class MediaIdResolverTests
 			_cache.Object,
 			capacity,
 			IServiceReadiness.Mock().Object,
-			clock.Object
+			clock.Object,
+			_logger.Object
 		);
 	}
 

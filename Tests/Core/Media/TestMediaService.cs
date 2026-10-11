@@ -80,7 +80,8 @@ internal static class TestMediaService
 			unmatchedCache.Object,
 			TestCapacity.Open(),
 			idReadiness.Object,
-			dateTimeProvider.Object
+			dateTimeProvider.Object,
+			NullLogger<MediaIdResolver>.Instance
 		);
 		var identifier = new TitleIdentifier(resolver, claims.Object);
 		var writers = new LibraryWriterFactory(mediaRepo.Object, NullLogger<LibraryWriter>.Instance);

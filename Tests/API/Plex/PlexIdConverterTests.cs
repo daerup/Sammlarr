@@ -20,7 +20,7 @@ public class PlexIdConverterTests
 	private const string PlexBaseUrl = "https://plex.tv";
 
 	private const string FightClubMatch =
-		"""{"MediaContainer":{"size":1,"Metadata":[{"ratingKey":"5d776b59ad5437001f79c6f8","type":"movie","title":"Fight Club","year":1999}]}}""";
+		"""{"MediaContainer":{"librarySectionID":"home","librarySectionTitle":"Discover","offset":0,"totalSize":1,"identifier":"tv.plex.provider.discover","size":1,"Metadata":[{"guid":"plex://movie/5d776b59ad5437001f79c6f8","ratingKey":"5d776b59ad5437001f79c6f8","type":"movie","title":"Fight Club","year":1999,"Guid":[{"id":"imdb://tt0137523"},{"id":"tmdb://550"},{"id":"tvdb://247"}]}]}}""";
 
 	private static readonly TmdbId FightClub = TmdbId.From("550", MediaType.Movie);
 
