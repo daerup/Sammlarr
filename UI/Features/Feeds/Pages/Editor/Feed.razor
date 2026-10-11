@@ -1,6 +1,7 @@
 @page "/feeds/create"
 @page "/feeds/edit/{EditFeedId}"
 @page "/feeds/clone/{CloneFeedId}"
+@implements IDisposable
 @using Contracts.Providers
 @using Contracts.DI
 @using Contracts.Feed
@@ -23,27 +24,20 @@
                Description="@PageDescriptionText"
                HeaderClass="@(IsSignedIn() ? "border-b" : "")">
     <HeaderActions>
-        @if (_previewStatus.IsLoading || _isApplying)
+        @if (IsSettling)
         {
-            @if (_previewStatus.EarlySaveAllowed && CanSave)
-            {
-                <BbTooltip>
-                    <BbTooltipTrigger AsChild="true">
-                        <HoverButton Preset="HoverButtonPreset.Success" OnClick="QuickSaveAsync" Disabled="_isSaving">
-                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                            <span>Quick save</span>
-                        </HoverButton>
-                    </BbTooltipTrigger>
-                    <BbTooltipContent>Saves the feed now without waiting for the preview to finish</BbTooltipContent>
-                </BbTooltip>
-            }
-            else
-            {
-                <BbButton Variant="ButtonVariant.Default" Disabled="true">
-                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                    <span>@(_isApplying && !_previewStatus.IsLoading ? "Applying…" : "Testing…")</span>
-                </BbButton>
-            }
+            <BbButton Variant="ButtonVariant.Default" Disabled="true">
+                <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                <span>@(_previewStatus.HasResults ? "Applying…" : "Testing…")</span>
+            </BbButton>
+        }
+        else if (_isSaving || IsBusy)
+        {
+            <HoverButton Preset="HoverButtonPreset.Success"
+                         Icon="save"
+                         Text="Save"
+                         OnClick="HandleSaveAsync"
+                         Disabled="@(_isSaving || !CanSave)"/>
         }
         else if (ShowApplyButton)
         {
@@ -69,6 +63,14 @@
                          Text="Retry"
                          OnClick="() => ApplyAsync()"
                          Disabled="!_config.IsTestable"/>
+            @if (HasChanged)
+            {
+                <HoverButton Preset="HoverButtonPreset.Success"
+                             Icon="save"
+                             Text="Save"
+                             OnClick="HandleSaveAsync"
+                             Disabled="!CanSave"/>
+            }
         }
         else if (ShowTestButton)
         {
@@ -83,7 +85,7 @@
         <HoverButton Preset="HoverButtonPreset.Destructive"
                      Text="Cancel"
                      OnClick="ReturnAsync"
-                     Disabled="@(_previewStatus.IsLoading || _isSaving || _isApplying)"/>
+                     Disabled="_isSaving"/>
     </HeaderActions>
     <ChildContent>
         <ProtectedSection GuardState="IsSignedIn"
@@ -102,7 +104,7 @@
 
                     <FeedConfigPanel @key="_configKey"
                                      Value="@_config"
-                                     IsLoading="@(_previewStatus.IsLoading || _isApplying)"
+                                     IsLoading="IsBusy"
                                      Check="@_identifierCheck"
                                      OnChange="@OnConfigChanged"/>
 
@@ -139,6 +141,7 @@
 
     private FeedConfig _config = new();
     private int? _storedHash;
+    private int? _storedPreviewHash;
     private int _appliedHash;
     private FeedId? _savedFeedId;
     private FeedStrategy _storedStrategy = new(new Append());
@@ -152,10 +155,19 @@
 
     private int _configKey;
 
+    private const string WaitForThePreview = "Wait for the preview";
+
+    private readonly CancellationTokenSource _visit = new();
+
     private bool HasChanged => _storedHash is null || _config.GetSaveHash() != _storedHash;
     private bool HasPendingChanges => _config.GetPreviewHash() != _appliedHash;
 
-    private bool CanSave => _config.IsValid && (_previewStatus.HasResults || _previewStatus.EarlySaveAllowed) && HasChanged;
+    private bool ChangesWhatItImports => _storedPreviewHash != _config.GetPreviewHash();
+    private bool PreviewShowsIt => _previewStatus.HasResults && !HasPendingChanges;
+    private bool IsBusy => _previewStatus.IsLoading || _isApplying;
+    private bool IsSettling => _isApplying && !_previewStatus.IsLoading && !_isSaving;
+
+    private bool CanSave => _config.IsValid && HasChanged;
 
     private bool ShowTestButton => !_previewStatus.HasResults && !_previewStatus.IsLoading && !_isSaving;
     private bool ShowApplyButton => _previewStatus.HasResults && HasPendingChanges && !_isSaving;
@@ -217,6 +229,7 @@
         if (EditFeedId is not null)
         {
             _savedFeedId = feed.Id;
+            _storedPreviewHash = _config.GetPreviewHash();
         }
         _configKey++;
         _pendingAutoApply = true;
@@ -237,12 +250,12 @@
 
     private async Task OnShortcutActivatedAsync()
     {
-        if (_previewStatus.IsLoading || _isSaving)
+        if (_isSaving || IsSettling)
         {
             return;
         }
 
-        if (ShowSaveButton && CanSave)
+        if (IsBusy || (ShowSaveButton && CanSave))
         {
             await HandleSaveAsync();
         }
@@ -267,6 +280,9 @@
             var identifier = await CheckIdentifierAsync(_config.Identifier.Trim());
             await identifier.Apply(PreviewAsync);
         }
+        catch (OperationCanceledException) when (_visit.IsCancellationRequested)
+        {
+        }
         catch (Exception ex)
         {
             Notifier.Error(ex, "Failed to test the feed");
@@ -285,7 +301,7 @@
             return check.Answer;
         }
 
-        var answer = await FeedProviders[_config.Provider!.Value].CheckLinkAsync(typed);
+        var answer = await FeedProviders[_config.Provider!.Value].CheckLinkAsync(typed, _visit.Token);
         _identifierCheck = new IdentifierCheck(typed, answer);
         return answer;
     }
@@ -294,7 +310,7 @@
     {
         _config = _config with { Identifier = identifier };
         var applied = _config;
-        await _previewPanel.ApplyAsync(applied);
+        await _previewPanel.ApplyAsync(applied, _visit.Token);
         _appliedHash = applied.GetPreviewHash();
     }
 
@@ -304,37 +320,65 @@
         return Task.CompletedTask;
     }
 
-    private Task HandleSaveAsync() => CanSave ? SaveAsync() : Task.CompletedTask;
-
-    private async Task<bool> ConfirmMirrorSwitchAsync()
+    private async Task HandleSaveAsync()
     {
-        if (!MirrorSwitch.NeedsConfirmation(_storedStrategy, _config.Strategy, _previewStatus.MirrorExposure) || _config.Strategy is not Mirror mirror)
+        if (!CanSave || _isSaving || !await ConfirmSaveAsync() || _isSaving || _visit.IsCancellationRequested)
         {
-            return true;
+            return;
         }
 
+        await SaveAsync();
+    }
+
+    private Task<bool> ConfirmSaveAsync()
+    {
+        if (_savedFeedId is not null && _config.Strategy is Mirror mirror && MirrorSwitch.NeedsConfirmation(_storedStrategy, _config.Strategy, _previewStatus.MirrorExposure))
+        {
+            return ConfirmMirrorSwitchAsync(mirror);
+        }
+
+        return ChangesWhatItImports && !PreviewShowsIt ? ConfirmSaveBeforeThePreviewAsync() : Task.FromResult(true);
+    }
+
+    private async Task<bool> ConfirmMirrorSwitchAsync(Mirror mirror)
+    {
         var result = await DialogService.ConfirmAsync(
             MirrorSwitch.Heading,
             MirrorSwitch.Warning(_previewStatus.MirrorExposure, mirror.AbsenceThreshold),
-            new ConfirmDialogOptions { ConfirmText = MirrorSwitch.Confirm, Destructive = true }
+            new ConfirmDialogOptions
+            {
+                ConfirmText = MirrorSwitch.Confirm,
+                CancelText = _previewStatus.IsLoading ? WaitForThePreview : "Cancel",
+                Destructive = true,
+            }
+        );
+        return result.Confirmed;
+    }
+
+    private async Task<bool> ConfirmSaveBeforeThePreviewAsync()
+    {
+        var result = await DialogService.ConfirmAsync(
+            "Save before the preview has finished?",
+            _previewStatus.HasFailed
+                ? "Your changes decide what this feed imports, and the preview didn't finish. The next run applies them as saved."
+                : "Your changes decide what this feed imports, and the preview is still loading. The next run applies them as saved.",
+            new ConfirmDialogOptions { ConfirmText = "Save anyway", CancelText = _previewStatus.HasFailed ? "Cancel" : WaitForThePreview }
         );
         return result.Confirmed;
     }
 
     private async Task SaveAsync()
     {
-        if (!await ConfirmMirrorSwitchAsync())
-        {
-            return;
-        }
-
         _isSaving = true;
 
         try
         {
-            _isSaving = await PersistAsync(navigate: true);
+            _isSaving = await PersistAsync();
         }
-        catch (OperationCanceledException) {}
+        catch (OperationCanceledException)
+        {
+            _isSaving = false;
+        }
         catch (Exception ex)
         {
             Notifier.Error(ex, "Failed to save feed");
@@ -342,36 +386,10 @@
         }
     }
 
-    private async Task QuickSaveAsync()
-    {
-        if (!CanSave || _isSaving || !await ConfirmMirrorSwitchAsync())
-        {
-            return;
-        }
-
-        _isSaving = true;
-        try
-        {
-            if (await PersistAsync(navigate: false))
-            {
-                Notifier.Info("Feed saved.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Notifier.Error(ex, "Failed to save feed");
-        }
-        finally
-        {
-            _isSaving = false;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private async Task<bool> PersistAsync(bool navigate)
+    private async Task<bool> PersistAsync()
     {
         var saved = await SaveFeedAsync();
-        return saved.Match(id => Saved(id, navigate), Refused);
+        return saved.Match(Saved, Refused);
     }
 
     private Task<Result<FeedId>> SaveFeedAsync()
@@ -381,11 +399,12 @@
             : FeedService.CreateAsync(BuildCreateData(), CancellationToken.None);
     }
 
-    private bool Saved(FeedId id, bool navigate)
+    private bool Saved(FeedId id)
     {
         _savedFeedId = id;
         _storedHash = _config.GetSaveHash();
-        if (navigate)
+        _storedPreviewHash = _config.GetPreviewHash();
+        if (!_visit.IsCancellationRequested)
         {
             NavigationManager.NavigateTo("/feeds");
         }
@@ -428,6 +447,8 @@
             Schedule = _config.Schedule,
             RatingStrategy = _config.RatingStrategy,
         };
+
+    public void Dispose() => _visit.Cancel();
 
     private Task HandleContainerKeyDownAsync(KeyboardEventArgs args)
     {

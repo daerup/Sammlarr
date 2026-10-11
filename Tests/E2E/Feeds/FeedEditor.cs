@@ -54,7 +54,11 @@ internal static class FeedEditor
 
 	internal static Task ApplyAsync(IPage page) => ApplyButton(page).ClickAsync();
 
-	internal static async Task PreviewLoadedAsync(IPage page) => await Expect(SaveButton(page)).ToBeEnabledAsync(Wait.Preview);
+	internal static async Task PreviewLoadedAsync(IPage page)
+	{
+		await Expect(SaveButton(page)).ToBeEnabledAsync(Wait.Preview);
+		await Expect(page.Locator("[data-preview-state='success']")).ToBeVisibleAsync(Wait.Preview);
+	}
 
 	internal static async Task SaveAsync(IPage page)
 	{

@@ -199,6 +199,74 @@ public class FeedPreviewPanelTests : BunitContext
 		provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Once);
 	}
 
+	[Test]
+	public async Task ApplyAsync_AfterTheVisitEnded_DoesNothing()
+	{
+		var (planner, provider) = Loading(FieldNeeds.None);
+		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
+		using var visit = new CancellationTokenSource();
+		await visit.CancelAsync();
+
+		await ApplyAsync(cut, new Append(), visit: visit.Token);
+
+		provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Never);
+		planner.NeedsAsync(Any(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task Retry_AfterTheVisitEnded_LoadsNothing()
+	{
+		var (planner, provider) = Loading(FieldNeeds.None, FieldNeeds.None);
+		provider.GetFeedItemsAsync(Any(), Any(), Any()).Returns((_, _, _) => throw new RemoteUnavailableException(RemoteService.Mdblist, sent: true));
+		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
+		using var visit = new CancellationTokenSource();
+		await ApplyAsync(cut, new Append(), visit: visit.Token);
+		cut.WaitForState(() => Retry(cut).Count > 0);
+		await visit.CancelAsync();
+
+		await Retry(cut)[0].ClickAsync(new MouseEventArgs());
+
+		provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ApplyAsync_WhenTheVisitEndsMidLoad_CancelsTheStreamWithoutAToast()
+	{
+		var (planner, provider) = Loading(FieldNeeds.None);
+		var streaming = CancellationToken.None;
+		var loaded = new TaskCompletionSource();
+		provider
+			.GetFeedItemsAsync(Any(), Any(), Any())
+			.Returns(
+				(_, _, token) =>
+				{
+					streaming = token;
+					return HeldAsync(loaded.Task, token);
+				}
+			);
+		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
+		using var visit = new CancellationTokenSource();
+		var applying = ApplyAsync(cut, new Append(), visit: visit.Token);
+		cut.WaitForAssertion(() => provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Once));
+
+		await visit.CancelAsync();
+		await applying.WaitAsync(TimeSpan.FromSeconds(10));
+
+		await Assert.That(streaming.IsCancellationRequested).IsTrue();
+		await Assert.That(Services.GetRequiredService<ToastService>().Toasts).IsEmpty();
+	}
+
+	private static async IAsyncEnumerable<Listed<MediaMatchResult>> HeldAsync(Task loaded, [EnumeratorCancellation] CancellationToken cancellationToken)
+	{
+		await loaded.WaitAsync(cancellationToken);
+		yield break;
+	}
+
+	private static List<IElement> Retry(IRenderedComponent<FeedPreviewPanel> cut)
+	{
+		return [.. cut.FindAll("button").Where(button => button.TextContent.Contains("Retry"))];
+	}
+
 	private static (Mock<IFeedRunPlanner> Planner, Mock<IFeedProvider> Provider) Loading(params FieldNeeds[] needs)
 	{
 		var planner = IFeedRunPlanner.Mock();
@@ -209,7 +277,13 @@ public class FeedPreviewPanelTests : BunitContext
 		return (planner, provider);
 	}
 
-	private static Task ApplyAsync(IRenderedComponent<FeedPreviewPanel> cut, FeedStrategy strategy, QuerySort? sort = null, QueryLimit? limit = null)
+	private static Task ApplyAsync(
+		IRenderedComponent<FeedPreviewPanel> cut,
+		FeedStrategy strategy,
+		QuerySort? sort = null,
+		QueryLimit? limit = null,
+		CancellationToken visit = default
+	)
 	{
 		return cut.InvokeAsync(() =>
 			cut.Instance.ApplyAsync(
@@ -221,7 +295,8 @@ public class FeedPreviewPanelTests : BunitContext
 					Strategy = strategy,
 					Sort = sort,
 					Limit = limit,
-				}
+				},
+				visit
 			)
 		);
 	}

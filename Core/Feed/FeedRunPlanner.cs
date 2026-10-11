@@ -41,6 +41,10 @@ internal sealed class FeedRunPlanner(
 					.GetValueOr(new FeedPlanFailed("The feed no longer exists.")),
 			};
 		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+			throw;
+		}
 		catch (Exception ex)
 		{
 			logger.LogWarning(ex, "Feed plan failed for {FeedId}", Identify(target));
