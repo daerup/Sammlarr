@@ -53,6 +53,13 @@ neither case (an unconfigured mock of an `Optional`-returning member returns it)
 * An `Optional` is never a sort key and never sits inside an operator EF translates; `Optional.Of(row.X)` in a final
 `Select` projection runs client-side and is fine.
 * `GetValueOr(value)` and `Match(value, value)` evaluate eagerly; pass a `Func` when the fallback throws or costs.
+* A branch that is async beside a plain one uses the mixed `Match` (`+.Match(x => FindAsync(x), () => Unusable)+`), a
+cached-or-load read the async `GetValueOr` (`+.GetValueOr(() => ReadAsync(id))+`), and a `None` or an error passed
+through the async `Map`. Give the plain branch a type: a bare `() => default` or `() => null` binds the non-mixed
+overload instead. `Task.FromResult` is left for a synchronous body behind an async contract, or where the task itself is
+the value (a ternary arm, a stored delegate, a task handed back as is). The mixed overloads have a lower
+`OverloadResolutionPriority`, so a branch that only throws keeps the non-mixed overload; the async mirror carries the
+priority onto `Task` and `ValueTask` receivers.
 
 Build and read an `Optional` or a `Result` by chaining its helpers: values move through `Map`, `When` and `Or`; side
 effects go in `Apply`, `ApplyNone` and `ApplyError`, one step each (a step that needs more than one statement is a named

@@ -28,6 +28,87 @@ public class OptionalExtensionsTests
 	}
 
 	[Test]
+	public async Task Match_WithAnAsyncSomeAndAPlainNone_AwaitsSomeOnlyWhenSome()
+	{
+		Optional<int> optional = Some.Of(5);
+		var noneCalls = 0;
+
+		var result = await optional.Match(DoubledAsync, () => ++noneCalls);
+
+		await Assert.That(result).IsEqualTo(10);
+		await Assert.That(noneCalls).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Match_WithAnAsyncSomeAndAPlainNone_CallsNoneOnlyWhenNone()
+	{
+		Optional<int> optional = new None();
+		var someCalls = 0;
+
+		var result = await optional.Match(
+			value =>
+			{
+				someCalls++;
+				return DoubledAsync(value);
+			},
+			() => -1
+		);
+
+		await Assert.That(result).IsEqualTo(-1);
+		await Assert.That(someCalls).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Match_WithAPlainSomeAndAnAsyncNone_AwaitsNoneOnlyWhenNone()
+	{
+		Optional<int> optional = new None();
+		var someCalls = 0;
+
+		var result = await optional.Match(_ => ++someCalls, () => DoubledAsync(-1));
+
+		await Assert.That(result).IsEqualTo(-2);
+		await Assert.That(someCalls).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Match_WithAPlainSomeAndAnAsyncNone_CallsSomeOnlyWhenSome()
+	{
+		Optional<int> optional = Some.Of(5);
+		var noneCalls = 0;
+
+		var result = await optional.Match(
+			value => value * 2,
+			() =>
+			{
+				noneCalls++;
+				return DoubledAsync(-1);
+			}
+		);
+
+		await Assert.That(result).IsEqualTo(10);
+		await Assert.That(noneCalls).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task GetValueOr_WithAnAsyncFallback_AwaitsItOnlyWhenNone()
+	{
+		Optional<int> some = Some.Of(5);
+		Optional<int> none = new None();
+		var fallbacks = 0;
+
+		var kept = await some.GetValueOr(() =>
+		{
+			fallbacks++;
+			return DoubledAsync(21);
+		});
+		var fallen = await none.GetValueOr(() => DoubledAsync(21));
+
+		await Assert.That(kept).IsEqualTo(5);
+		await Assert.That(fallen).IsEqualTo(42);
+		await Assert.That(fallbacks).IsEqualTo(0);
+	}
+
+	[Test]
 	public async Task Map_WhenSome_TransformsValue()
 	{
 		Optional<int> optional = Some.Of(5);
@@ -611,6 +692,12 @@ public class OptionalExtensionsTests
 	}
 
 	private static Optional<string> ToLabel(int value) => Optional.When(value > 0, () => $"n{value}");
+
+	private static async Task<int> DoubledAsync(int value)
+	{
+		await Task.Yield();
+		return value * 2;
+	}
 
 	private static string Shown(Optional<int> first)
 	{

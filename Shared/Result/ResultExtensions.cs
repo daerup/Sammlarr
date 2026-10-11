@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Shared;
 
 public static partial class ResultExtensions
@@ -10,6 +12,15 @@ public static partial class ResultExtensions
 			result switch
 			{
 				Success<T>(var value) => success(value),
+				Error err => error(err),
+			};
+
+		[SuppressArchTest]
+		[OverloadResolutionPriority(-1)]
+		public async Task<TResult> Match<TResult>(Func<T, Task<TResult>> success, Func<Error, TResult> error) =>
+			result switch
+			{
+				Success<T>(var value) => await success(value),
 				Error err => error(err),
 			};
 

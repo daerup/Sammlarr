@@ -55,9 +55,54 @@ public class AsyncMirrorGeneratorTests
 		}
 		""";
 
+	private const string PrioritySample = """
+		using System;
+		using System.Runtime.CompilerServices;
+		using System.Threading.Tasks;
+		using Shared;
+
+		namespace Shared
+		{
+			[AttributeUsage(AttributeTargets.Method)]
+			internal sealed class GenerateAsyncAttribute : Attribute;
+		}
+
+		namespace Sample
+		{
+			public sealed record Box<T>(T Item)
+				where T : notnull;
+
+			public static partial class BoxExtensions
+			{
+				extension<T>(Box<T> box)
+					where T : notnull
+				{
+					public T Or(Func<T> fallback) => box.Item;
+
+					[OverloadResolutionPriority(-1)]
+					public Task<T> Or(Func<Task<T>> fallback) => Task.FromResult(box.Item);
+
+					[GenerateAsync]
+					[System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+					public Box<T> Visit(Action<T> visit)
+					{
+						visit(box.Item);
+						return box;
+					}
+				}
+			}
+		}
+		""";
+
 	[Test]
 	public async Task Generate_ForAnExtensionBlock_EmitsTheAsyncMethodsAndTheTaskMirrors()
 	{
 		await Verify(await GeneratorRun.OutputAsync(new AsyncMirrorGenerator(), Sample));
+	}
+
+	[Test]
+	public async Task Generate_ForAMethodWithAnOverloadPriority_CarriesItOntoItsAsyncFormAndMirrors()
+	{
+		await Verify(await GeneratorRun.OutputAsync(new AsyncMirrorGenerator(), PrioritySample));
 	}
 }
