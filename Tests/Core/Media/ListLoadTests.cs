@@ -19,7 +19,7 @@ public class ListLoadTests
 	{
 		var (testee, deps) = TestMediaService.Create();
 
-		await testee.LoadListAsync(Paged([3, 2])).ToListAsync();
+		await testee.LoadListAsync(Paged([3, 2]), FieldNeeds.Everything).ToListAsync();
 
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any()).WasCalled(Times.Exactly(2));
 	}
@@ -31,7 +31,7 @@ public class ListLoadTests
 		var (testee, deps) = TestMediaService.Create();
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any()).Returns([Stored(MediaId.New(), heat)]);
 
-		var results = await testee.LoadListAsync(ListTitles.Of(new IdentifyRequest([heat], new None()))).ToListAsync();
+		var results = await testee.LoadListAsync(ListTitles.Of(new IdentifyRequest([heat], new None())), FieldNeeds.None).ToListAsync();
 
 		await Assert
 			.That(results.Single().Item)
@@ -51,7 +51,7 @@ public class ListLoadTests
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any()).Returns([Stored(MediaId.New(), tvdb, imdb)]);
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((external, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(external)));
 
-		var results = await testee.LoadListAsync(ListTitles.Of(new IdentifyRequest([tvdb], new None()))).ToListAsync();
+		var results = await testee.LoadListAsync(ListTitles.Of(new IdentifyRequest([tvdb], new None())), FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.Single().Item).IsOfUnionType<MediaMatchResult, MatchedMedia>();
 		deps.Converter.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
@@ -66,7 +66,7 @@ public class ListLoadTests
 
 		var act = async () =>
 		{
-			await foreach (var result in testee.LoadListAsync(ListTitles.Of(Imdb(3))))
+			await foreach (var result in testee.LoadListAsync(ListTitles.Of(Imdb(3)), FieldNeeds.Everything))
 			{
 				settled.Add(result);
 			}
@@ -92,7 +92,7 @@ public class ListLoadTests
 
 		var act = async () =>
 		{
-			await foreach (var result in testee.LoadListAsync(ListTitles.Of(Imdb(3))))
+			await foreach (var result in testee.LoadListAsync(ListTitles.Of(Imdb(3)), FieldNeeds.Everything))
 			{
 				settled.Add(result);
 			}
@@ -110,7 +110,7 @@ public class ListLoadTests
 		var idless = Idless();
 		ListTitle[] entries = [.. Imdb(3).Select(ListTitle (request) => request), idless, idless];
 
-		var results = await testee.LoadListAsync(entries.ToAsyncEnumerable()).ToListAsync();
+		var results = await testee.LoadListAsync(entries.ToAsyncEnumerable(), FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.Select(result => result.Position)).IsEquivalentTo([0, 1, 2, 3, 4]);
 		await Assert.That(results.Where(result => result.Position >= 3).Select(result => result.Item)).IsEquivalentTo([Settled(idless), Settled(idless)]);
@@ -125,7 +125,7 @@ public class ListLoadTests
 		var idless = Idless();
 		ListTitle[] entries = [.. Imdb(1).Select(ListTitle (request) => request), idless];
 		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-		await using var results = testee.LoadListAsync(entries.ToAsyncEnumerable(), timeout.Token).GetAsyncEnumerator(timeout.Token);
+		await using var results = testee.LoadListAsync(entries.ToAsyncEnumerable(), FieldNeeds.Everything, timeout.Token).GetAsyncEnumerator(timeout.Token);
 
 		await results.MoveNextAsync();
 		stalled.SetResult(new NoMatch(RemoteService.Tmdb));
@@ -156,7 +156,7 @@ public class ListLoadTests
 		var run = FeedRunSpans.Run(FeedId.From(Guid.NewGuid()), Guid.NewGuid());
 		using var entered = FeedRunSpans.Enter(run);
 
-		await testee.LoadListAsync(ListTitles.Of(Imdb(3))).ToListAsync();
+		await testee.LoadListAsync(ListTitles.Of(Imdb(3)), FieldNeeds.Everything).ToListAsync();
 
 		var traceId = run.Match(span => span.TraceId, () => default);
 		var titles = started
@@ -217,7 +217,7 @@ public class ListLoadTests
 				}
 			);
 
-		var results = await testee.LoadListAsync(ListTitles.Of(Imdb(30))).ToListAsync();
+		var results = await testee.LoadListAsync(ListTitles.Of(Imdb(30)), FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results[0].Position).IsNotEqualTo(0);
 		await Assert
@@ -232,7 +232,9 @@ public class ListLoadTests
 		var pulled = 0;
 		var closed = new TaskCompletionSource();
 
-		await foreach (var _ in testee.LoadListAsync(Counting(4000, () => Interlocked.Increment(ref pulled), closed).AsListTitles()).InListOrderAsync())
+		await foreach (
+			var _ in testee.LoadListAsync(Counting(4000, () => Interlocked.Increment(ref pulled), closed).AsListTitles(), FieldNeeds.Everything).InListOrderAsync()
+		)
 		{
 			break;
 		}
@@ -249,7 +251,7 @@ public class ListLoadTests
 
 		var act = async () =>
 		{
-			await foreach (var result in testee.LoadListAsync(FailsAfter(25).AsListTitles()).InListOrderAsync())
+			await foreach (var result in testee.LoadListAsync(FailsAfter(25).AsListTitles(), FieldNeeds.Everything).InListOrderAsync())
 			{
 				seen.Add(result);
 			}
@@ -269,7 +271,9 @@ public class ListLoadTests
 		var requests = Imdb(20);
 		requests[15] = requests[2];
 
-		var results = (await testee.LoadListAsync(requests.ToAsyncEnumerable().AsListTitles()).InListOrderAsync().ToListAsync()).Matched().ToList();
+		var results = (await testee.LoadListAsync(requests.ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything).InListOrderAsync().ToListAsync())
+			.Matched()
+			.ToList();
 
 		await Assert.That(results).Count().IsEqualTo(20);
 		await Assert.That(results[15].Identity.Id).IsEqualTo(results[2].Identity.Id);
@@ -297,7 +301,7 @@ public class ListLoadTests
 			);
 
 		var consume = testee
-			.LoadListAsync(Imdb(50).ToAsyncEnumerable().AsListTitles(), cancellation.Token)
+			.LoadListAsync(Imdb(50).ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything, cancellation.Token)
 			.InListOrderAsync(cancellation.Token)
 			.ToListAsync()
 			.AsTask();
@@ -317,7 +321,7 @@ public class ListLoadTests
 		var owners = new[] { MediaId.New(), MediaId.New() };
 		deps.Claims.ClaimAsync(Any(), Any()).Returns((claim, _) => Outcome(claim, conflicting, owners));
 
-		var results = await testee.LoadListAsync(Imdb(3).ToAsyncEnumerable().AsListTitles()).InListOrderAsync().ToListAsync();
+		var results = await testee.LoadListAsync(Imdb(3).ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything).InListOrderAsync().ToListAsync();
 
 		await Assert.That(results[0]).IsOfUnionType<MediaMatchResult, MatchedMedia>();
 		var unmatched = await Assert.That(results[1]).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
@@ -356,7 +360,10 @@ public class ListLoadTests
 		deps.Claims.ClaimAsync(Any(), Any()).Returns((claim, _) => Bridging(claim, first, second));
 		List<IdentifyRequest> requests = [new([first], new None()), new([second], new None()), new([first, second], new None())];
 
-		var results = await testee.LoadListAsync(requests.ToAsyncEnumerable().AsListTitles(), timeout.Token).InListOrderAsync(timeout.Token).ToListAsync();
+		var results = await testee
+			.LoadListAsync(requests.ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything, timeout.Token)
+			.InListOrderAsync(timeout.Token)
+			.ToListAsync();
 
 		await Assert.That(results.Matched()).Count().IsEqualTo(2);
 		var unmatched = await Assert.That(results[2]).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
@@ -403,7 +410,11 @@ public class ListLoadTests
 				}
 			);
 
-		var consume = testee.LoadListAsync(Imdb(150).ToAsyncEnumerable().AsListTitles(), timeout.Token).InListOrderAsync(timeout.Token).ToListAsync().AsTask();
+		var consume = testee
+			.LoadListAsync(Imdb(150).ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything, timeout.Token)
+			.InListOrderAsync(timeout.Token)
+			.ToListAsync()
+			.AsTask();
 		await others.Task.WaitAsync(timeout.Token);
 		gate.SetResult();
 		var results = await consume;

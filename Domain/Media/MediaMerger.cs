@@ -48,11 +48,8 @@ public static class MediaMerger
 			};
 		}
 
-		public MediaDetails Without(MediaFields dropped) => details.Only(Everything.Except(dropped));
+		public MediaDetails Without(MediaFields dropped) => details.Only(MediaFields.Everything.Except(dropped));
 	}
-
-	private static readonly MediaFields Everything =
-		Enum.GetValues<MediaField>().Aggregate(MediaField.None, (all, field) => all | field) | MediaFields.AllRatings;
 
 	private static T? Kept<T>(MediaFields kept, MediaField field, T? value) => kept.Details.Overlaps(field) ? value : default;
 

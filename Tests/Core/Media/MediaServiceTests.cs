@@ -57,7 +57,7 @@ public class MediaServiceTests
 		var (testee, deps) = TestMediaService.Create();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([Stored(firstDetail), Stored(secondDetail)]);
 
-		var results = await testee.GetDetailsAsync([firstId, secondId]).ToListAsync();
+		var results = await testee.GetDetailsAsync([firstId, secondId], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
 		await Assert.That(results[0]).IsOfUnionType<Result<MatchedMedia>, MatchedMedia>().And.IsEqualTo(firstDetail);
@@ -69,7 +69,7 @@ public class MediaServiceTests
 	{
 		var (testee, deps) = TestMediaService.Create();
 
-		await testee.LoadListAsync(TestMediaService.Paged(300, 300).AsListTitles()).ToListAsync();
+		await testee.LoadListAsync(TestMediaService.Paged(300, 300).AsListTitles(), FieldNeeds.Everything).ToListAsync();
 
 		deps.IdReadiness.ConnectedAsync(Any(), Any()).WasCalled(Times.Once);
 	}
@@ -87,7 +87,11 @@ public class MediaServiceTests
 
 		async Task ConsumeAsync()
 		{
-			await foreach (var result in testee.LoadListAsync(requests.ToAsyncEnumerable().AsListTitles(), cancellation.Token).InListOrderAsync(cancellation.Token))
+			await foreach (
+				var result in testee
+					.LoadListAsync(requests.ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything, cancellation.Token)
+					.InListOrderAsync(cancellation.Token)
+			)
 			{
 				results.Add(result);
 			}
@@ -117,7 +121,7 @@ public class MediaServiceTests
 			);
 
 		await testee
-			.LoadListAsync(new[] { new IdentifyRequest([TmdbId.From("550", MediaType.Movie)], new None()) }.ToAsyncEnumerable().AsListTitles())
+			.LoadListAsync(new[] { new IdentifyRequest([TmdbId.From("550", MediaType.Movie)], new None()) }.ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything)
 			.InListOrderAsync()
 			.ToListAsync();
 
@@ -130,7 +134,7 @@ public class MediaServiceTests
 		var id = MediaId.New();
 		var (testee, _) = TestMediaService.Create();
 
-		var results = await testee.GetDetailsAsync([id]).ToListAsync();
+		var results = await testee.GetDetailsAsync([id], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(1);
 		await Assert.That(results[0]).IsError();
@@ -147,7 +151,7 @@ public class MediaServiceTests
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([Stored(secondDetail), Stored(firstDetail)]);
 		WantlistItem[] items = [WantlistItemFor(firstId, 1), WantlistItemFor(secondId, 2)];
 
-		var results = await testee.GetDetailsAsync(items).ToListAsync();
+		var results = await testee.GetDetailsAsync(items, FieldNeeds.Everything).ToListAsync();
 
 		await Assert
 			.That(results)
@@ -166,7 +170,7 @@ public class MediaServiceTests
 		var (testee, deps) = TestMediaService.Create();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([Stored(cachedDetail)]);
 
-		var results = await testee.GetDetailsAsync([WantlistItemFor(missingId, 1), WantlistItemFor(cachedId, 2)]).ToListAsync();
+		var results = await testee.GetDetailsAsync([WantlistItemFor(missingId, 1), WantlistItemFor(cachedId, 2)], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.Select(result => result.Media)).IsEquivalentTo([cachedDetail]);
 	}
@@ -179,7 +183,7 @@ public class MediaServiceTests
 		var (testee, deps) = TestMediaService.Create();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([Stored(BuildDetail(firstId)), Stored(BuildDetail(secondId))]);
 
-		await testee.GetDetailsAsync([firstId, secondId]).ToListAsync();
+		await testee.GetDetailsAsync([firstId, secondId], FieldNeeds.Everything).ToListAsync();
 
 		deps.MediaRepo.GetAsync(Any(), Any()).WasCalled(Times.Once);
 	}
@@ -194,7 +198,7 @@ public class MediaServiceTests
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([StaleCached(firstId), StaleCached(secondId), StaleCached(thirdId)]);
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
 
-		await testee.GetDetailsAsync([firstId, secondId, thirdId]).ToListAsync();
+		await testee.GetDetailsAsync([firstId, secondId, thirdId], FieldNeeds.Everything).ToListAsync();
 
 		var saved = Mock.Invocations(deps.MediaRepo).Select(call => call.Arguments[0]).OfType<IReadOnlyList<DetailsChange>>().SelectMany(changes => changes);
 		await Assert.That(saved.Select(change => change.Id)).IsEquivalentTo([firstId, secondId, thirdId]);
@@ -213,7 +217,7 @@ public class MediaServiceTests
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any()).Returns([Stored(firstDetail), Stored(secondDetail)]);
 
 		var results = await testee
-			.LoadListAsync(ListTitles.Of(new IdentifyRequest([firstExternal], new None()), new([secondExternal], new None())))
+			.LoadListAsync(ListTitles.Of(new IdentifyRequest([firstExternal], new None()), new([secondExternal], new None())), FieldNeeds.Everything)
 			.InListOrderAsync()
 			.ToListAsync();
 
@@ -229,7 +233,7 @@ public class MediaServiceTests
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new NoMatch(RemoteService.Plex));
 
 		var results = await testee
-			.LoadListAsync(ListTitles.Of(new IdentifyRequest([TmdbId.From("404", MediaType.Movie)], new None())))
+			.LoadListAsync(ListTitles.Of(new IdentifyRequest([TmdbId.From("404", MediaType.Movie)], new None())), FieldNeeds.Everything)
 			.InListOrderAsync()
 			.ToListAsync();
 
@@ -250,7 +254,10 @@ public class MediaServiceTests
 			MediaType = MediaType.Movie,
 		};
 
-		var results = await testee.LoadListAsync(ListTitles.Of(new IdentifyRequest([external], Some.Of(hints)))).InListOrderAsync().ToListAsync();
+		var results = await testee
+			.LoadListAsync(ListTitles.Of(new IdentifyRequest([external], Some.Of(hints))), FieldNeeds.Everything)
+			.InListOrderAsync()
+			.ToListAsync();
 
 		var matched = await Assert.That(results.Single()).IsOfUnionType<MediaMatchResult, MatchedMedia>();
 		await Assert.That(matched!.Details).IsEqualTo(new MovieDetails { Title = "Fight Club", ReleaseDate = new DateOnly(1999, 1, 1) });
@@ -268,7 +275,7 @@ public class MediaServiceTests
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([StaleCached(id)]);
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Unavailable(RemoteService.Plex, new None(), true));
 
-		var results = await testee.GetDetailsAsync([id]).ToListAsync();
+		var results = await testee.GetDetailsAsync([id], FieldNeeds.Everything).ToListAsync();
 
 		await Assert
 			.That(results.Single())
@@ -277,7 +284,7 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ById_WhenStaleDetailsCannotBeRefreshed_AnswersTheStaleDetails()
+	public async Task GetDetailsAsync_ById_WhenNoServiceFindsAStaleTitle_AnswersTheStaleDetailsUnmarked()
 	{
 		var id = MediaId.New();
 		var detail = BuildDetail(id);
@@ -286,7 +293,7 @@ public class MediaServiceTests
 			.Returns([new StoredMedia(detail.Identity, Some.Of(new CachedDetails(detail.Details, _now - TimeSpan.FromDays(15), _now - TimeSpan.FromDays(15), [])))]);
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new NoMatch(RemoteService.Plex));
 
-		var results = await testee.GetDetailsAsync([id]).ToListAsync();
+		var results = await testee.GetDetailsAsync([id], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.Single()).IsSuccess().And.Multiple(async media => await Assert.That(media).IsEqualTo(detail));
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
@@ -307,7 +314,7 @@ public class MediaServiceTests
 			]);
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
 
-		var results = await testee.GetDetailsAsync([id]).ToListAsync();
+		var results = await testee.GetDetailsAsync([id], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.Single()).IsSuccess().And.Multiple(async media => await Assert.That(media.Details.Title).IsEqualTo("T"));
 	}
@@ -319,7 +326,10 @@ public class MediaServiceTests
 		var (testee, deps) = TestMediaService.Create();
 		deps.UnmatchedCache.GetValueOrNone(Any<string>()).Returns(Some.Of(true));
 
-		var results = await testee.LoadListAsync(ListTitles.Of(new IdentifyRequest([external], new None()))).InListOrderAsync().ToListAsync();
+		var results = await testee
+			.LoadListAsync(ListTitles.Of(new IdentifyRequest([external], new None())), FieldNeeds.Everything)
+			.InListOrderAsync()
+			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(1);
 		await Assert.That(results[0]).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
@@ -339,7 +349,7 @@ public class MediaServiceTests
 		};
 
 		var results = await testee
-			.LoadListAsync(ListTitles.Of(new IdentifyRequest([TmdbId.From("999", MediaType.Movie)], Some.Of(hints))))
+			.LoadListAsync(ListTitles.Of(new IdentifyRequest([TmdbId.From("999", MediaType.Movie)], Some.Of(hints))), FieldNeeds.Everything)
 			.InListOrderAsync()
 			.ToListAsync();
 
@@ -358,7 +368,7 @@ public class MediaServiceTests
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Throws(new InvalidOperationException("The library is locked."));
 
 		var results = await testee
-			.LoadListAsync(ListTitles.Of(new IdentifyRequest([TmdbId.From("550", MediaType.Movie)], new None())))
+			.LoadListAsync(ListTitles.Of(new IdentifyRequest([TmdbId.From("550", MediaType.Movie)], new None())), FieldNeeds.Everything)
 			.InListOrderAsync()
 			.ToListAsync();
 
@@ -374,7 +384,10 @@ public class MediaServiceTests
 		var (testee, deps) = TestMediaService.Create();
 		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
 
-		await testee.LoadListAsync(ListTitles.Of(new IdentifyRequest([ImdbId.From("tt0137523", MediaType.Movie)], new None()))).InListOrderAsync().ToListAsync();
+		await testee
+			.LoadListAsync(ListTitles.Of(new IdentifyRequest([ImdbId.From("tt0137523", MediaType.Movie)], new None())), FieldNeeds.Everything)
+			.InListOrderAsync()
+			.ToListAsync();
 
 		deps.Claims.ClaimAsync(Is<IdentityClaim>(claim => claim.Sources.Contains(RemoteService.Tmdb)), Any()).WasCalled(Times.Once);
 	}
@@ -386,7 +399,7 @@ public class MediaServiceTests
 		deps.Converter.LookUpAsync(Any(), Any()).Returns(new Unavailable(RemoteService.Tmdb, new None(), true));
 
 		var results = await testee
-			.LoadListAsync(ListTitles.Of(new IdentifyRequest([ImdbId.From("tt0137523", MediaType.Movie)], new None())))
+			.LoadListAsync(ListTitles.Of(new IdentifyRequest([ImdbId.From("tt0137523", MediaType.Movie)], new None())), FieldNeeds.Everything)
 			.InListOrderAsync()
 			.ToListAsync();
 
@@ -403,7 +416,7 @@ public class MediaServiceTests
 		deps.UnmatchedCache.GetValueOrNone(Any<string>()).Returns(Some.Of(true));
 
 		var results = await testee
-			.LoadListAsync(ListTitles.Of(new IdentifyRequest([TmdbId.From("999", MediaType.Movie)], new None())))
+			.LoadListAsync(ListTitles.Of(new IdentifyRequest([TmdbId.From("999", MediaType.Movie)], new None())), FieldNeeds.Everything)
 			.InListOrderAsync()
 			.ToListAsync();
 
@@ -426,7 +439,7 @@ public class MediaServiceTests
 		};
 
 		var results = await testee
-			.LoadListAsync(ListTitles.Of(new IdentifyRequest([TmdbId.From("999", MediaType.Movie)], Some.Of(hints))))
+			.LoadListAsync(ListTitles.Of(new IdentifyRequest([TmdbId.From("999", MediaType.Movie)], Some.Of(hints))), FieldNeeds.Everything)
 			.InListOrderAsync()
 			.ToListAsync();
 
@@ -445,7 +458,7 @@ public class MediaServiceTests
 	{
 		var (testee, _) = TestMediaService.Create();
 
-		var results = await testee.LoadListAsync(TestMediaService.Paged(40, 35).AsListTitles()).ToListAsync();
+		var results = await testee.LoadListAsync(TestMediaService.Paged(40, 35).AsListTitles(), FieldNeeds.Everything).ToListAsync();
 
 		var numbered = results.OrderBy(result => result.Position).Select(result => (result.Position, result.Item.Externals.OfType<TmdbId>().Single().Value));
 		await Assert.That(numbered).IsEquivalentTo([.. Enumerable.Range(0, 75).Select(i => (i, i.ToString()))], CollectionOrdering.Matching);

@@ -146,7 +146,7 @@ public class LastRunCellTests : BunitContext
 		Services.AddLogging();
 
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(Added))));
+		media.GetDetailsAsync(Any(), Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(Added))));
 		Services.AddSingleton(media.Object);
 
 		var wantlist = IWantlistService.Mock();

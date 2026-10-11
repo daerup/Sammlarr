@@ -13,7 +13,7 @@ internal static class MediaDetailsLoading
 		{
 			using var marked = UsageCauses.Mark(UsageCause.ShowingTitles);
 			var found = new Dictionary<MediaId, MatchedMedia>();
-			await foreach (var item in media.GetDetailsAsync(ids, cancellationToken).WhereSuccessAwait())
+			await foreach (var item in media.GetDetailsAsync(ids, FieldNeeds.None, cancellationToken).WhereSuccessAwait())
 			{
 				found[item.Identity.Id] = item;
 			}

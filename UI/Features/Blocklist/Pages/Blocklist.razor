@@ -142,7 +142,7 @@
         {
             var blocklist = await BlocklistService.GetAsync(Cancellation.Token);
             using var marked = UsageCauses.Mark(UsageCause.ShowingTitles);
-            _items = await Media.GetDetailsAsync(blocklist.Items, Cancellation.Token).ToListAsync(Cancellation.Token);
+            _items = await Media.GetDetailsAsync(blocklist.Items, FieldNeeds.None, Cancellation.Token).ToListAsync(Cancellation.Token);
             _wantlist = await WantlistService.GetAsync(Cancellation.Token);
 
             if (_selectedItem is not null)

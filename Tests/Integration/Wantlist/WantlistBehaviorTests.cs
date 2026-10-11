@@ -133,7 +133,7 @@ public class WantlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).OnWantlist(origin: Remote);
 		var wantlist = await host.Resolve<IWantlistService>().GetAsync();
 
-		var items = await host.Resolve<IMediaService>().GetDetailsAsync(wantlist.Items).ToListAsync();
+		var items = await host.Resolve<IMediaService>().GetDetailsAsync(wantlist.Items, FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(items).Count().IsEqualTo(1);
 		await Assert

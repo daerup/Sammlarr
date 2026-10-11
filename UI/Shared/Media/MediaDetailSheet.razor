@@ -143,7 +143,7 @@
     private async Task LoadRatingsAsync(MediaId id)
     {
         using var marked = UsageCauses.Mark(UsageCause.ShowingTitles);
-        await foreach (var loaded in MediaService.GetDetailsAsync([id]))
+        await foreach (var loaded in MediaService.GetDetailsAsync([id], FieldNeeds.Everything))
         {
             loaded.Apply(found => _loadedRatings = Some.Of(found.Details.Ratings));
         }

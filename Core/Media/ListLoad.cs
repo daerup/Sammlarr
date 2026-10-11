@@ -23,15 +23,20 @@ internal sealed class ListLoad(
 	TimeProvider time
 )
 {
-	public IAsyncEnumerable<Listed<MediaMatchResult>> LoadAsync(IAsyncEnumerable<ListTitle> entries, CancellationToken cancellationToken)
+	public IAsyncEnumerable<Listed<MediaMatchResult>> LoadAsync(IAsyncEnumerable<ListTitle> entries, FieldNeeds needs, CancellationToken cancellationToken)
 	{
-		return Channel.CreateUnbounded<Listed<MediaMatchResult>>().StreamAsync((settled, token) => RunAsync(entries, settled, token), cancellationToken);
+		return Channel.CreateUnbounded<Listed<MediaMatchResult>>().StreamAsync((settled, token) => RunAsync(entries, needs, settled, token), cancellationToken);
 	}
 
-	private async Task RunAsync(IAsyncEnumerable<ListTitle> entries, ChannelWriter<Listed<MediaMatchResult>> settled, CancellationToken cancellationToken)
+	private async Task RunAsync(
+		IAsyncEnumerable<ListTitle> entries,
+		FieldNeeds needs,
+		ChannelWriter<Listed<MediaMatchResult>> settled,
+		CancellationToken cancellationToken
+	)
 	{
 		await using var writer = writersFactory.Create();
-		var context = await LoadContext.StartAsync(activeSink, idResolver, detailsFetcher, writer, cancellationToken);
+		var context = await LoadContext.StartAsync(activeSink, idResolver, detailsFetcher, needs, writer, cancellationToken);
 		await using var watchdog = new RunWatchdog(time, options.StallAfter, cancellationToken);
 		var titles = new List<Task>();
 		try
@@ -126,7 +131,7 @@ internal sealed class ListLoad(
 
 	private async Task<MediaMatchResult> DetailsAsync(IdentifyRequest request, IdentifyHandoff handoff, LoadContext context, CancellationToken cancellationToken)
 	{
-		var loaded = await detailsFetcher.LoadAsync(handoff, request.Described(), context.DetailServices, context.Writer, cancellationToken);
+		var loaded = await detailsFetcher.LoadAsync(handoff, request.Described(), context.Details, cancellationToken);
 		return loaded.Match<MatchedMedia, MediaMatchResult>(
 			matched => matched with { Known = handoff.Stored.IsSome() },
 			error => request.Unmatched(error.Exception.Map(_ => UnmatchedReason.CouldNotLookUp).GetValueOr(UnmatchedReason.NotFound))

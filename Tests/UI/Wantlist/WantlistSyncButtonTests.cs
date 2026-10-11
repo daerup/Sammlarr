@@ -178,8 +178,8 @@ public class WantlistSyncButtonTests : BunitContext
 		planner.PlanAsync(Any()).Returns(Summary(new WantlistDelta([movie, shows[0], shows[1]], []), new WantlistDelta([], [shows[2]])));
 		var media = IMediaService.Mock();
 		media
-			.GetDetailsAsync(Any(), Any())
-			.Returns((ids, _) => Async([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, id == movie ? MediaType.Movie : MediaType.Show)))]));
+			.GetDetailsAsync(Any(), Any(), Any())
+			.Returns((ids, _, _) => Async([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, id == movie ? MediaType.Movie : MediaType.Show)))]));
 		Services.AddSingleton(media.Object);
 
 		var cut = Render<WantlistSyncButton>(parameters => parameters.Add(button => button.Sink, SinkKind.Arr));
@@ -298,7 +298,7 @@ public class WantlistSyncButtonTests : BunitContext
 		Services.AddSingleton(planner.Object);
 
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(Synced))));
+		media.GetDetailsAsync(Any(), Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(Synced))));
 		Services.AddSingleton(media.Object);
 
 		var wantlist = IWantlistService.Mock();

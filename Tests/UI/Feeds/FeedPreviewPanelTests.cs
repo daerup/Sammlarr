@@ -163,6 +163,52 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private static IElement TotalBadge(IRenderedComponent<FeedPreviewPanel> cut) => cut.FindAll(".stat-badges-row .preview-filter-badge")[0];
 
+	[Test]
+	public async Task Apply_LoadsTheListWithTheDraftsNeeds()
+	{
+		var needs = new FieldNeeds(MediaField.Genres, MediaFields.AllRatings);
+		var (planner, provider) = Loading(needs);
+		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
+
+		await ApplyAsync(cut, new Append());
+
+		provider.GetFeedItemsAsync(Any(), needs, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Apply_WhenTheDraftNowRequiresAFieldTheLoadDidNotNeed_LoadsTheListAgain()
+	{
+		var (planner, provider) = Loading(FieldNeeds.None, new FieldNeeds(MediaField.Genres, MediaFields.None));
+		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
+		await ApplyAsync(cut, new Append());
+
+		await ApplyAsync(cut, new Append(), new QuerySort { Property = nameof(MediaQueryRow.Genres), Direction = ListSortDirection.Ascending });
+
+		provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Exactly(2));
+	}
+
+	[Test]
+	public async Task Apply_WhenTheNewSortReadsNoNewField_KeepsTheLoadedList()
+	{
+		var (planner, provider) = Loading(new FieldNeeds(MediaField.Genres, MediaFields.None));
+		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
+		await ApplyAsync(cut, new Append());
+
+		await ApplyAsync(cut, new Append(), new QuerySort { Property = nameof(MediaQueryRow.Genres), Direction = ListSortDirection.Ascending });
+
+		provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Once);
+	}
+
+	private static (Mock<IFeedRunPlanner> Planner, Mock<IFeedProvider> Provider) Loading(params FieldNeeds[] needs)
+	{
+		var planner = IFeedRunPlanner.Mock();
+		planner.NeedsAsync(Any(), Any()).ReturnsSequentially(needs);
+		planner.PlanAsync(Any(), Any()).Returns(new AppendPlan([], [], FeedDelta.None, Conclusiveness.NoItems));
+		var provider = IFeedProvider.Mock();
+		provider.GetFeedItemsAsync(Any(), Any(), Any()).Returns(Async(new Listed<MediaMatchResult>(0, Detail(MediaId.New()))));
+		return (planner, provider);
+	}
+
 	private static Task ApplyAsync(IRenderedComponent<FeedPreviewPanel> cut, FeedStrategy strategy, QuerySort? sort = null, QueryLimit? limit = null)
 	{
 		return cut.InvokeAsync(() =>
@@ -183,7 +229,13 @@ public class FeedPreviewPanelTests : BunitContext
 	private static List<int> BadgeCounts(IRenderedComponent<FeedPreviewPanel> cut) =>
 		[.. cut.FindAll(".stat-badges-row .preview-filter-badge span").Select(badge => int.Parse(badge.TextContent))];
 
-	private IRenderedComponent<FeedPreviewPanel> RenderPanel(IFeedRunPlanner planner, int resolved, int unmatched, MediaId? gone = null)
+	private IRenderedComponent<FeedPreviewPanel> RenderPanel(
+		IFeedRunPlanner planner,
+		int resolved,
+		int unmatched,
+		MediaId? gone = null,
+		IFeedProvider? provider = null
+	)
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton(RatingStub.Context());
@@ -200,11 +252,11 @@ public class FeedPreviewPanelTests : BunitContext
 		var media = IMediaService.Mock();
 		if (gone is { } id)
 		{
-			media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(id))));
+			media.GetDetailsAsync(Any(), Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(id))));
 		}
 		Services.AddSingleton(media.Object);
 		Services.AddSingleton<IKeyedServiceIndex<FeedProvider, IFeedProvider>>(
-			new FakeKeyedServiceIndex<FeedProvider, IFeedProvider>().Register(FeedProvider.Mdblist, new StubFeedService(resolved, unmatched))
+			new FakeKeyedServiceIndex<FeedProvider, IFeedProvider>().Register(FeedProvider.Mdblist, provider ?? new StubFeedService(resolved, unmatched))
 		);
 		Services.AddScoped<Notifier>();
 		Services.AddProviderBranding();
@@ -228,6 +280,8 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private sealed class OwnedPlanner : IFeedRunPlanner
 	{
+		public Task<FieldNeeds> NeedsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default) => Task.FromResult(FieldNeeds.None);
+
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
 			var verdicts = Items(target).Matched().Select(Owned).ToList();
@@ -269,6 +323,8 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private sealed class GonePlanner(MediaId gone) : IFeedRunPlanner
 	{
+		public Task<FieldNeeds> NeedsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default) => Task.FromResult(FieldNeeds.None);
+
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
 			var verdicts = Items(target)
@@ -322,6 +378,8 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private sealed class SpreadPlanner : IFeedRunPlanner
 	{
+		public Task<FieldNeeds> NeedsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default) => Task.FromResult(FieldNeeds.None);
+
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
 			var items = Items(target);
@@ -361,6 +419,7 @@ public class FeedPreviewPanelTests : BunitContext
 
 		public async IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(
 			string identifier,
+			FieldNeeds needs,
 			[EnumeratorCancellation] CancellationToken cancellationToken = default
 		)
 		{

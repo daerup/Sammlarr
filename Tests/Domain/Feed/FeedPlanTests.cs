@@ -156,6 +156,17 @@ public class FeedPlanTests
 		await Assert.That(plan.Delta.Drops).IsEmpty();
 	}
 
+	[Test]
+	public async Task Compute_ForAStaleOwnedTitleThatNoLongerQualifies_CountsNoAbsence()
+	{
+		var stale = Verdict(Dropped, QueryOutcome.Culled, owned: true) with { Item = Row(Dropped) with { Stale = true } };
+
+		var plan = Mirrored([Verdict(Kept, QueryOutcome.Qualified, owned: true), stale], owned: [Kept, Dropped], absences: [(Dropped, 2)]);
+
+		await Assert.That(plan.MissedRuns).DoesNotContainKey(Dropped);
+		await Assert.That(plan.Delta.Drops).IsEmpty();
+	}
+
 	private static IFeedPlan Compute(
 		IReadOnlyList<QueryVerdict<MatchedMedia>> verdicts,
 		IReadOnlyList<MediaId> owned,

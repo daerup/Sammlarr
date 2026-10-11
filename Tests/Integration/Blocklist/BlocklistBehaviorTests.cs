@@ -62,7 +62,7 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).OnBlocklist();
 		var blocklist = await host.Resolve<IBlocklistService>().GetAsync();
 
-		var items = await host.Resolve<IMediaService>().GetDetailsAsync(blocklist.Items).ToListAsync();
+		var items = await host.Resolve<IMediaService>().GetDetailsAsync(blocklist.Items, FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(items).Count().IsEqualTo(1);
 		await Assert

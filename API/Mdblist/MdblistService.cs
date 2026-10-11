@@ -82,9 +82,9 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		return Error.From($"MDBList didn't answer, so {number} can't be looked up yet. Paste the list's link instead; it needs no request.", unavailable);
 	}
 
-	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, FieldNeeds needs, CancellationToken cancellationToken = default)
 	{
-		return media.LoadListAsync(EntriesAsync(identifier, cancellationToken), cancellationToken);
+		return media.LoadListAsync(EntriesAsync(identifier, cancellationToken), needs, cancellationToken);
 	}
 
 	private async IAsyncEnumerable<ListTitle> EntriesAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)

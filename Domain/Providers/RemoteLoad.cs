@@ -15,5 +15,7 @@ public readonly record struct RemoteLoad(
 
 	public bool Takes(DateTimeOffset now, TimeSpan budget) => !Down && BlockedUntil.Match(until => until - now <= budget, () => true);
 
+	public bool AnswersWithin(DateTimeOffset now, TimeSpan budget) => Takes(now, budget) && EstimatedWait <= budget;
+
 	public double Weight(int cost) => cost * (1 + EstimatedWait.TotalSeconds);
 }

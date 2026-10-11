@@ -8,11 +8,15 @@ public interface IMediaService
 {
 	IAsyncEnumerable<Result<MediaIdentity>> IdentifyAsync(IEnumerable<IdentifyRequest> requests, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<Result<MatchedMedia>> GetDetailsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<Result<MatchedMedia>> GetDetailsAsync(IEnumerable<MediaId> ids, FieldNeeds needs, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<TMedia> GetDetailsAsync<TMedia>(IEnumerable<IListItem<TMedia>> items, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<TMedia> GetDetailsAsync<TMedia>(IEnumerable<IListItem<TMedia>> items, FieldNeeds needs, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<Listed<MediaMatchResult>> LoadListAsync(IAsyncEnumerable<ListTitle> entries, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<Listed<MediaMatchResult>> LoadListAsync(
+		IAsyncEnumerable<ListTitle> entries,
+		FieldNeeds needs,
+		CancellationToken cancellationToken = default
+	);
 
 	Task<IReadOnlyList<Optional<MediaIdentity>>> RegisterAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,

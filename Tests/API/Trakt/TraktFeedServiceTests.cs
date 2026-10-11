@@ -64,7 +64,7 @@ public class TraktFeedServiceTests
 				)
 			);
 
-		await Testee(handler).GetFeedItemsAsync("users/ana/watchlist").InListOrderAsync().ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("users/ana/watchlist", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(_asked.Select(request => string.Join(" ", request.Candidates)))
@@ -80,7 +80,7 @@ public class TraktFeedServiceTests
 			.OnRequest(request => request.PathMatches(@"^/users/ana/lists/marvel/items/movie,show,season,episode\?page=1&limit=250$"))
 			.RespondWith(_ => Page("""[{"type":"movie","movie":{"title":"Iron Man","year":2008,"ids":{"trakt":1,"tmdb":1726}}}]""", pages: 1));
 
-		await Testee(handler).GetFeedItemsAsync("users/ana/lists/marvel").InListOrderAsync().ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("users/ana/lists/marvel", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked.Select(request => string.Join(" ", request.Candidates))).IsEquivalentTo(["Trakt:Movie:1 Tmdb:Movie:1726"]);
 	}
@@ -99,7 +99,7 @@ public class TraktFeedServiceTests
 				return Page("[" + string.Join(",", titles) + "]", pages: 10);
 			});
 
-		await Testee(handler).GetFeedItemsAsync("shows/popular").InListOrderAsync().ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("shows/popular", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked).Count().IsEqualTo(500);
 		await Assert.That(_asked[0].Candidates.Single()).IsEqualTo<IExternalMediaId>(TraktId.From("1", MediaType.Show));
@@ -117,7 +117,7 @@ public class TraktFeedServiceTests
 			.OnRequest(request => request.PathMatches(@"^/shows/popular\?page=1&limit=250$"))
 			.RespondWith(_ => Page("""[{"title":"Severance","year":2022,"ids":{"trakt":154997}}]""", pages: 1));
 
-		await Testee(handler).GetFeedItemsAsync("discover/popular").InListOrderAsync().ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("discover/popular", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked.Select(request => string.Join(" ", request.Candidates))).IsEquivalentTo(["Trakt:Movie:287071", "Trakt:Show:154997"]);
 	}
@@ -138,8 +138,8 @@ public class TraktFeedServiceTests
 			.OnRequest(request => request.PathMatches(@"^/movies/trending"))
 			.RespondWith(_ => Page("""[{"watchers":31,"movie":{"title":"Dune","year":2021,"ids":{"trakt":287071,"tmdb":438631}}}]""", pages: 1));
 
-		await Testee(handler).GetFeedItemsAsync("users/ana/watchlist").InListOrderAsync().ToListAsync();
-		await Testee(handler).GetFeedItemsAsync("movies/trending").InListOrderAsync().ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("users/ana/watchlist", FieldNeeds.None).InListOrderAsync().ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("movies/trending", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(_asked.Select(request => string.Join(" ", request.Candidates)))
@@ -160,7 +160,7 @@ public class TraktFeedServiceTests
 			});
 
 		var failure = await Assert
-			.That(async () => await Testee(handler).GetFeedItemsAsync("users/ana/watchlist").InListOrderAsync().ToListAsync())
+			.That(async () => await Testee(handler).GetFeedItemsAsync("users/ana/watchlist", FieldNeeds.None).InListOrderAsync().ToListAsync())
 			.Throws<InvalidOperationException>();
 
 		await Assert.That(failure!.Message).Contains("private");
@@ -173,7 +173,7 @@ public class TraktFeedServiceTests
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
 
 		await Assert
-			.That(async () => await Testee(handler).GetFeedItemsAsync("users/nobody/watchlist").InListOrderAsync().ToListAsync())
+			.That(async () => await Testee(handler).GetFeedItemsAsync("users/nobody/watchlist", FieldNeeds.None).InListOrderAsync().ToListAsync())
 			.Throws<FeedIdentifierNotFoundException>();
 	}
 
@@ -185,7 +185,7 @@ public class TraktFeedServiceTests
 		var keys = Keys();
 
 		await Assert
-			.That(async () => await Testee(handler, keys).GetFeedItemsAsync("movies/trending").InListOrderAsync().ToListAsync())
+			.That(async () => await Testee(handler, keys).GetFeedItemsAsync("movies/trending", FieldNeeds.None).InListOrderAsync().ToListAsync())
 			.Throws<InvalidOperationException>();
 
 		keys.ReportRejected(ApiKeyProvider.Trakt).WasCalled(Times.Once);
@@ -203,10 +203,10 @@ public class TraktFeedServiceTests
 		var keys = Keys();
 
 		await Assert
-			.That(async () => await Testee(blocked, keys).GetFeedItemsAsync("movies/trending").InListOrderAsync().ToListAsync())
+			.That(async () => await Testee(blocked, keys).GetFeedItemsAsync("movies/trending", FieldNeeds.None).InListOrderAsync().ToListAsync())
 			.Throws<RemoteUnavailableException>();
 		await Assert
-			.That(async () => await Testee(limited, keys).GetFeedItemsAsync("movies/trending").InListOrderAsync().ToListAsync())
+			.That(async () => await Testee(limited, keys).GetFeedItemsAsync("movies/trending", FieldNeeds.None).InListOrderAsync().ToListAsync())
 			.Throws<RemoteUnavailableException>();
 		keys.ReportRejected(ApiKeyProvider.Trakt).WasNeverCalled();
 	}
@@ -218,7 +218,7 @@ public class TraktFeedServiceTests
 		handler.OnAnyRequest().RespondWith(_ => Page("""[{"type":"person","person":{"name":"Keanu Reeves"}}]""", pages: 1));
 
 		await Assert
-			.That(async () => await Testee(handler).GetFeedItemsAsync("users/ana/watchlist").InListOrderAsync().ToListAsync())
+			.That(async () => await Testee(handler).GetFeedItemsAsync("users/ana/watchlist", FieldNeeds.None).InListOrderAsync().ToListAsync())
 			.Throws<InvalidDataException>();
 	}
 
@@ -251,7 +251,7 @@ public class TraktFeedServiceTests
 			.RespondWith(_ => Page("""[{"type":"movie","movie":{"title":"Heat","year":1995,"ids":{"trakt":1374}}}]""", pages: 2));
 		using var spans = new PageSpans();
 
-		await Testee(handler).GetFeedItemsAsync("users/ana/watchlist").InListOrderAsync().ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("users/ana/watchlist", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, Some.Of(2)), new SourcePage(2, Some.Of(2))], CollectionOrdering.Matching);
 		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
@@ -269,7 +269,7 @@ public class TraktFeedServiceTests
 			.RespondWith(_ => Page("""[{"title":"Severance","year":2022,"ids":{"trakt":154997}}]""", pages: 1));
 		using var spans = new PageSpans();
 
-		await Testee(handler).GetFeedItemsAsync("discover/popular").InListOrderAsync().ToListAsync();
+		await Testee(handler).GetFeedItemsAsync("discover/popular", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
 		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
@@ -281,8 +281,8 @@ public class TraktFeedServiceTests
 	{
 		var media = IMediaService.Mock();
 		media
-			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any())
-			.Returns((entries, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
+			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any())
+			.Returns((entries, _, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
 		return new TraktFeedService(Client(handler, keys), media.Object, keys.Object);
 	}
 }

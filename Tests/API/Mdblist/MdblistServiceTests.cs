@@ -28,7 +28,7 @@ public class MdblistServiceTests
 
 		var act = async () =>
 		{
-			await foreach (var _ in testee.GetFeedItemsAsync(identifier)) { }
+			await foreach (var _ in testee.GetFeedItemsAsync(identifier, FieldNeeds.None)) { }
 		};
 
 		var exception = await Assert.That(act).Throws<FeedIdentifierNotFoundException>();
@@ -40,10 +40,10 @@ public class MdblistServiceTests
 	{
 		var testee = CreateTestee(new StubHandler(HttpStatusCode.OK, pages: 2), out var media);
 
-		var results = await testee.GetFeedItemsAsync("multi-page").InListOrderAsync().ToListAsync();
+		var results = await testee.GetFeedItemsAsync("multi-page", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
-		media.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any()).WasCalled(Times.Once);
+		media.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -53,7 +53,7 @@ public class MdblistServiceTests
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[{"title":"No Ids","release_year":2024}]}""");
 		var testee = CreateTestee(handler, out _);
 
-		var results = await testee.GetFeedItemsAsync("id-less").InListOrderAsync().ToListAsync();
+		var results = await testee.GetFeedItemsAsync("id-less", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(results.Single())
@@ -70,7 +70,7 @@ public class MdblistServiceTests
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[{"title":" ","release_year":0}],"shows":[]}""");
 		var testee = CreateTestee(handler, out _);
 
-		var results = await testee.GetFeedItemsAsync("blank").InListOrderAsync().ToListAsync();
+		var results = await testee.GetFeedItemsAsync("blank", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(results.Single())
@@ -161,7 +161,7 @@ public class MdblistServiceTests
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[]}""");
 		var testee = CreateTestee(handler, out _);
 
-		await testee.GetFeedItemsAsync("chazlarson/external/2868").InListOrderAsync().ToListAsync();
+		await testee.GetFeedItemsAsync("chazlarson/external/2868", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		handler.Verify(request => request.Method(HttpMethod.Get).PathMatches(@"^/external/lists/2868/items(\?.*)?$"), Times.Once);
 	}
@@ -180,7 +180,7 @@ public class MdblistServiceTests
 		var titles = MdblistApis.Titles(lookups);
 		var testee = CreateTestee(handler, out _, titles: titles);
 
-		await testee.GetFeedItemsAsync("two-movies").InListOrderAsync().ToListAsync();
+		await testee.GetFeedItemsAsync("two-movies", FieldNeeds.None).InListOrderAsync().ToListAsync();
 		await titles.FindAsync(ImdbId.From("tt0137523", MediaType.Movie));
 		await titles.FindAsync(TmdbId.From("603", MediaType.Movie));
 
@@ -194,7 +194,7 @@ public class MdblistServiceTests
 		var testee = CreateTestee(new StubHandler(HttpStatusCode.OK, pages: 2), out _);
 		using var spans = new PageSpans();
 
-		await testee.GetFeedItemsAsync("multi-page").InListOrderAsync().ToListAsync();
+		await testee.GetFeedItemsAsync("multi-page", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
 		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
@@ -208,7 +208,7 @@ public class MdblistServiceTests
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();
-		media.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any()).Returns((entries, token) => ListLoads.UnresolvedAsync(entries, _ => { }, token));
+		media.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any()).Returns((entries, _, token) => ListLoads.UnresolvedAsync(entries, _ => { }, token));
 		return new MdblistService(client, media.Object, apiKeyStore.Object, titles ?? NoTitles());
 	}
 

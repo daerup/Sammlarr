@@ -54,7 +54,7 @@ public class ListLoadBenchmark
 		var half = TimeSpan.Zero;
 		var handed = 0;
 
-		await foreach (var _ in testee.LoadListAsync(PagedAsync().AsListTitles()))
+		await foreach (var _ in testee.LoadListAsync(PagedAsync().AsListTitles(), FieldNeeds.Everything))
 		{
 			handed++;
 			if (handed == 1)
