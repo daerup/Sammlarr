@@ -6,6 +6,8 @@ namespace UI.Features.Home.Components;
 
 public sealed record ActivityRun(FeedRun Run, string FeedName)
 {
+	public bool Gone { get; init; }
+
 	internal bool Inconclusive => Run.Conclusiveness is not (Conclusiveness.Conclusive or Conclusiveness.Pending);
 
 	internal string Outcome =>
@@ -33,7 +35,7 @@ public sealed record ActivityRun(FeedRun Run, string FeedName)
 	}
 }
 
-public sealed record FeedContribution(FeedId FeedId, string Name, int Added, int Removed, int Runs, RunId LatestRunId);
+public sealed record FeedContribution(FeedId FeedId, string Name, int Added, int Removed, int Runs, RunId LatestRunId, bool Gone);
 
 public sealed record ActivityDay(
 	DateOnly Date,
@@ -52,7 +54,7 @@ internal static class ActivityLog
 {
 	internal static IReadOnlyList<ActivityDay> Days(IEnumerable<FeedRun> runs, IReadOnlyDictionary<FeedId, string> feedNames, TimeZoneInfo zone) =>
 		[
-			.. runs.Select(run => new ActivityRun(run, FeedLabel.Of(run.FeedId, feedNames)))
+			.. runs.Select(run => new ActivityRun(run, FeedLabel.Of(run.FeedId, feedNames)) { Gone = !feedNames.ContainsKey(run.FeedId) })
 				.GroupBy(entry => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(entry.Run.StartedAt, zone).DateTime))
 				.OrderByDescending(group => group.Key)
 				.Select(Day)
@@ -85,7 +87,8 @@ internal static class ActivityLog
 					group.Sum(entry => entry.Run.Counts.Added),
 					group.Sum(entry => entry.Run.Counts.Removed),
 					group.Count(),
-					group.First().Run.Id
+					group.First().Run.Id,
+					group.First().Gone
 				))
 				.OrderByDescending(contribution => contribution.Added + contribution.Removed),
 		];

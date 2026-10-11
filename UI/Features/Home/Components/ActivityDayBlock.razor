@@ -23,22 +23,14 @@
             <div class="chips">
                 @foreach (var feed in Day.Feeds)
                 {
-                    <a class="chip" href="@FeedHref(feed)">
-                        <LucideIcon Name="rss" Size="11"/>
-                        <span class="chip-name">@feed.Name</span>
-                        @if (feed.Added > 0)
-                        {
-                            <b>+@feed.Added.ToString("N0")</b>
-                        }
-                        @if (feed.Removed > 0)
-                        {
-                            <span class="chip-rm">&minus;@feed.Removed.ToString("N0")</span>
-                        }
-                        @if (feed.Runs > 1)
-                        {
-                            <span class="chip-runs">&times;@feed.Runs</span>
-                        }
-                    </a>
+                    @if (feed.Gone)
+                    {
+                        <span class="chip" data-gone="true">@Chip(feed)</span>
+                    }
+                    else
+                    {
+                        <a class="chip" href="@FeedHref(feed)">@Chip(feed)</a>
+                    }
                 }
             </div>
         }
@@ -131,6 +123,24 @@
         entry.Run.Failed ? $"failed at {At(entry)}: {entry.Reason}"
         : entry.Reason is { } reason ? $"ran at {At(entry)} but {entry.Outcome}. {reason}"
         : $"ran at {At(entry)} but {entry.Outcome}.";
+
+    private static RenderFragment Chip(FeedContribution feed) =>
+        @<text>
+            <LucideIcon Name="@(feed.Gone ? "ghost" : "rss")" Size="11"/>
+            <span class="chip-name">@feed.Name</span>
+            @if (feed.Added > 0)
+            {
+                <b>+@feed.Added.ToString("N0")</b>
+            }
+            @if (feed.Removed > 0)
+            {
+                <span class="chip-rm">&minus;@feed.Removed.ToString("N0")</span>
+            }
+            @if (feed.Runs > 1)
+            {
+                <span class="chip-runs">&times;@feed.Runs</span>
+            }
+        </text>;
 
     private static string FeedHref(FeedContribution feed) =>
         $"/feeds/{UrlGuid.Encode(feed.FeedId.Value)}/runs/{UrlGuid.Encode(feed.LatestRunId.Value)}";

@@ -1,5 +1,6 @@
 using System.Globalization;
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Icons.Lucide.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
 using Contracts;
@@ -231,6 +232,8 @@ public class UsageFeedsCardTests : BunitContext
 		await Assert.That(row.Children[2].TextContent.Trim()).IsEqualTo("58");
 		await Assert.That(row.QuerySelector("[data-testid=usage-feed-runs]")).IsNull();
 		await Assert.That(row.QuerySelector("[data-testid=usage-feed-last]")).IsNull();
+		await Assert.That(row.Children[0].QuerySelector("img")).IsNull();
+		await Assert.That(row.Children[0].QuerySelector("path")!.GetAttribute("d")).IsEqualTo(Ghost());
 	}
 
 	[Test]
@@ -306,6 +309,9 @@ public class UsageFeedsCardTests : BunitContext
 		await Assert.That(cut.FindAll(".usage-feed-picked")).IsEmpty();
 		await Assert.That(cut.FindAll(".usage-feed-dim")).IsEmpty();
 	}
+
+	private string? Ghost() =>
+		Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 18)).Find("path").GetAttribute("d");
 
 	private static AngleSharp.Dom.IElement Row(IRenderedComponent<Harness> cut, string name)
 	{

@@ -109,7 +109,7 @@
     text-decoration: none;
 }
 
-.chip:hover {
+a.chip:hover {
     border-color: var(--muted-foreground);
     color: var(--foreground);
 }

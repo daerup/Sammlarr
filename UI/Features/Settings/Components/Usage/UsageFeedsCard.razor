@@ -121,9 +121,16 @@
                              style="@($"--edge: {Branding.Color(line.Provider.Service)}")" data-testid="usage-feed" data-feed="@line.Name"
                              data-f="@(line.Runs.Count > 0 ? key : null)" @onclick="() => Pick(line)" @onmouseleave="Settle">
                             <span class="flex min-w-0 items-center gap-2 font-medium">
-                                @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
+                                @if (line.Gone is Some<UsageFeedGone>)
                                 {
-                                    <BrandedLogo Brand="brand" Size="18" Decorative="true"/>
+                                    <LucideIcon Name="ghost" Size="18" Class="shrink-0 text-muted-foreground"/>
+                                }
+                                else
+                                {
+                                    @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
+                                    {
+                                        <BrandedLogo Brand="brand" Size="18" Decorative="true"/>
+                                    }
                                 }
                                 <span class="@($"truncate {line.Gone.Match(_ => "text-muted-foreground line-through", () => string.Empty)}")">@line.Name</span>
                             </span>

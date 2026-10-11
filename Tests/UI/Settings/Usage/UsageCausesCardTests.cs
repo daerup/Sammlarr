@@ -1,4 +1,5 @@
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
 using Contracts.Usage;
 using Domain.Feed;
@@ -149,6 +150,13 @@ public class UsageCausesCardTests : BunitContext
 			)
 			.IsEquivalentTo(["Trending shows|41", "Horror movies|5", "New feed, not saved yet, or deleted|12"], CollectionOrdering.Matching);
 		await Assert.That(cut.FindAll("[data-testid=usage-cause-feed-deleted]")).Count().IsEqualTo(1);
+		var ghost = Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 16)).Find("path").GetAttribute("d");
+		await Assert
+			.That(
+				cut.FindAll("[data-testid=usage-cause-feed]")
+					.Select(row => row.Children[0].QuerySelector("img") is null ? row.Children[0].QuerySelector("path")!.GetAttribute("d") : "logo")
+			)
+			.IsEquivalentTo(["logo", ghost, ghost], CollectionOrdering.Matching);
 		await Assert
 			.That(cut.FindAll("[data-testid=usage-cause]").Single(row => row.TextContent.Contains("Feed editor")).NextElementSibling!.GetAttribute("data-testid"))
 			.IsEqualTo("usage-cause-feed");
