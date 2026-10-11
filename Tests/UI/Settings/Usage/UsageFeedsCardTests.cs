@@ -1,3 +1,4 @@
+using System.Globalization;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
@@ -25,6 +26,8 @@ public class UsageFeedsCardTests : BunitContext
 	private static readonly FeedId Anime = FeedId.From(Guid.NewGuid());
 
 	private static readonly FeedId Paused = FeedId.From(Guid.NewGuid());
+
+	private static readonly FeedId Horror = FeedId.From(Guid.NewGuid());
 
 	private static readonly RunId ShowsRun = RunId.From(Guid.NewGuid());
 
@@ -216,6 +219,29 @@ public class UsageFeedsCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_ADeletedFeed_StrikesItsNameThroughAndSaysWhenItWent()
+	{
+		var cut = Render<Harness>();
+
+		var row = Row(cut, "Horror movies");
+		await Assert.That(row.QuerySelector(".line-through")!.TextContent).IsEqualTo("Horror movies");
+		await Assert
+			.That(row.QuerySelector("[data-testid=usage-feed-deleted]")!.TextContent)
+			.IsEqualTo($"deleted {UsageSamples.To.AddHours(-5).ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture)}");
+		await Assert.That(row.Children[2].TextContent.Trim()).IsEqualTo("58");
+		await Assert.That(row.QuerySelector("[data-testid=usage-feed-runs]")).IsNull();
+		await Assert.That(row.QuerySelector("[data-testid=usage-feed-last]")).IsNull();
+	}
+
+	[Test]
+	public async Task Picked_AServiceADeletedFeedCalled_KeepsTheDeletedFeed()
+	{
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Tmdb)));
+
+		await Assert.That(cut.FindAll("[data-testid=usage-feed]").Select(row => row.GetAttribute("data-feed"))).IsEquivalentTo(["Latest shows", "Horror movies"]);
+	}
+
+	[Test]
 	public async Task Picked_AService_KeepsOnlyTheFeedsThatCalledItAndCountsItsCalls()
 	{
 		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Mdblist)));
@@ -371,6 +397,21 @@ public class UsageFeedsCardTests : BunitContext
 				new UsageFeedStats(0, 0, 0, 0, 0, 0, TimeSpan.Zero),
 				new Dictionary<RemoteService, UsageFeedStats>()
 			),
+			new UsageFeedLine(
+				Horror,
+				"Horror movies",
+				FeedProvider.Mdblist,
+				false,
+				new None(),
+				[],
+				Stats(58),
+				new Dictionary<RemoteService, UsageFeedStats> { [RemoteService.Tmdb] = Stats(58) }
+			)
+			{
+				Gone = Some.Of(
+					new UsageFeedGone(UsageSamples.To.AddHours(-5), new Dictionary<RemoteService, UsageTally> { [RemoteService.Tmdb] = UsageSamples.Tally(answered: 58) })
+				),
+			},
 		];
 
 		[Parameter]

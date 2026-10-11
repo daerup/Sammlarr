@@ -1,20 +1,26 @@
 using Contracts.Feed;
 using Contracts.Usage;
+using Domain.Feed;
 using Domain.Feed.Run;
+using Domain.Providers;
 using Domain.Usage;
 
 namespace Core.Usage;
 
-internal sealed class UsageFeedLines(IFeedService feeds)
+internal sealed record UsageFeeds(IReadOnlyList<UsageFeedLine> Lines, IReadOnlyDictionary<FeedId, UsageFeedName> Names);
+
+internal sealed class UsageFeedLines(IFeedService feeds, IDeletedFeeds deleted)
 {
 	private const int MostRuns = 10_000;
 
-	public async Task<IReadOnlyList<UsageFeedLine>> ReadAsync(UsageWindow window, CancellationToken cancellationToken)
+	public async Task<UsageFeeds> ReadAsync(UsageWindow window, UsageRows rows, CancellationToken cancellationToken)
 	{
 		var snapshot = await feeds.GetAsync(cancellationToken);
 		var runs = await feeds.GetRunsAsync(RunQuery.Take(MostRuns) with { Since = Some.Of(window.From), WithItems = false }, cancellationToken);
+		var gone = await deleted.ReadAsync(cancellationToken);
 		var runsByFeed = runs.Where(run => window.Contains(run.StartedAt)).ToLookup(run => run.FeedId);
-		return
+		var callsByFeed = rows.Calls.Where(row => row.Cause == UsageCause.FeedRun && window.Contains(row.Hour)).ToLookup(row => row.Feed.ToNullable());
+		IReadOnlyList<UsageFeedLine> live =
 		[
 			.. snapshot
 				.Feeds.Select(overview =>
@@ -22,6 +28,15 @@ internal sealed class UsageFeedLines(IFeedService feeds)
 				)
 				.OrderByDescending(line => line.Stats.Calls),
 		];
+		IEnumerable<UsageFeedLine> ended = gone.Where(feed => callsByFeed.Contains(feed.Feed))
+			.Select(feed => Ended(feed, [.. callsByFeed[feed.Feed]]))
+			.OrderByDescending(line => line.Stats.Calls);
+		IEnumerable<UsageFeedName> names =
+		[
+			.. live.Select(line => new UsageFeedName(line.Feed, line.Name, line.Provider, new None())),
+			.. gone.Select(feed => new UsageFeedName(feed.Feed, feed.Name, feed.Provider, Some.Of(feed.DeletedAt))),
+		];
+		return new UsageFeeds([.. live, .. ended], names.ToDictionary(name => name.Feed));
 	}
 
 	private static UsageFeedLine Line(Domain.Feed.Feed feed, Optional<DateTimeOffset> lastRun, IReadOnlyList<UsageRun> runs)
@@ -42,6 +57,26 @@ internal sealed class UsageFeedLines(IFeedService feeds)
 		);
 	}
 
+	private static UsageFeedLine Ended(DeletedFeed feed, IReadOnlyList<UsageCalls> calls)
+	{
+		var byService = calls.GroupBy(row => row.Service).ToDictionary(service => service.Key, service => Outcomes(service));
+		return new UsageFeedLine(
+			feed.Feed,
+			feed.Name,
+			feed.Provider,
+			false,
+			new None(),
+			[],
+			Called(calls.Sum(row => row.Calls)),
+			byService.ToDictionary(service => service.Key, service => Called(service.Value.Total))
+		)
+		{
+			Gone = Some.Of(new UsageFeedGone(feed.DeletedAt, byService)),
+		};
+	}
+
+	private static UsageFeedStats Called(long calls) => new(calls, 0, 0, 0, 0, 0, TimeSpan.Zero);
+
 	private static UsageRun Run(FeedRun run)
 	{
 		var calls = Tally(run.Calls);
@@ -61,6 +96,14 @@ internal sealed class UsageFeedLines(IFeedService feeds)
 	}
 
 	private static UsageTally Tally(IEnumerable<FeedRunCalls> calls)
+	{
+		return new UsageTally(
+			calls.GroupBy(call => call.Outcome).ToDictionary(group => group.Key, group => group.Sum(call => call.Calls)),
+			new Dictionary<int, long>()
+		);
+	}
+
+	private static UsageTally Outcomes(IEnumerable<UsageCalls> calls)
 	{
 		return new UsageTally(
 			calls.GroupBy(call => call.Outcome).ToDictionary(group => group.Key, group => group.Sum(call => call.Calls)),

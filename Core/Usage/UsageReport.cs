@@ -31,10 +31,9 @@ internal sealed class UsageReport(
 		var rows = await store.ReadAsync(before.From, window.To, cancellationToken);
 		var today = await mdblist.TodayAsync(cancellationToken);
 		var live = await LiveAsync(now, today, cancellationToken);
-		var feeds = await feedLines.ReadAsync(window, cancellationToken);
-		var names = feeds.ToDictionary(line => line.Feed, line => new UsageFeedName(line.Feed, line.Name, line.Provider));
+		var feeds = await feedLines.ReadAsync(window, rows, cancellationToken);
 		IReadOnlyList<UsageQuota> quotas = [.. new[] { today }.WhereSome().Select(found => Quota(found, rows, window, now))];
-		return new UsageSnapshot(Period(window, rows, live, names), Period(before, rows, _ => Unknown, names), feeds, quotas);
+		return new UsageSnapshot(Period(window, rows, live, feeds.Names), Period(before, rows, _ => Unknown, feeds.Names), feeds.Lines, quotas);
 	}
 
 	private static UsageQuota Quota(QuotaToday today, UsageRows rows, UsageWindow window, DateTimeOffset now)

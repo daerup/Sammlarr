@@ -54,6 +54,7 @@ internal sealed class UsageStore(IDbContextFactory<SammlarrDbContext> dbContextF
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		await ctx.RemoteUsage.Where(row => row.Hour < cutOff).ExecuteDeleteAsync(cancellationToken);
 		await ctx.RemoteAttempts.Where(row => row.Hour < cutOff).ExecuteDeleteAsync(cancellationToken);
+		await ctx.DeletedFeeds.IgnoreQueryFilters().Where(row => row.DeletedAt < cutOff).ExecuteDeleteAsync(cancellationToken);
 	}
 
 	private static bool Holds(RemoteUsageRow row, UsageCalls calls)

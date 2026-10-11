@@ -31,6 +31,8 @@ public class UsageReportTests
 
 	private readonly Mock<IFeedService> _feeds = IFeedService.Mock();
 
+	private readonly Mock<IDeletedFeeds> _deleted = IDeletedFeeds.Mock();
+
 	public UsageReportTests()
 	{
 		_lastCalls.Of(Any()).Returns(new None());
@@ -39,6 +41,7 @@ public class UsageReportTests
 		_mdblist.TodayAsync(Any()).Returns(new None());
 		_feeds.GetAsync(Any()).Returns(new FeedSnapshot([]));
 		_feeds.GetRunsAsync(Any(), Any()).Returns([]);
+		_deleted.ReadAsync(Any()).Returns([]);
 	}
 
 	[Test]
@@ -261,6 +264,32 @@ public class UsageReportTests
 	}
 
 	[Test]
+	public async Task ReadAsync_ADeletedFeed_KeepsItsRunCallsAndNamesItsEditorCallsApart()
+	{
+		var gone = new DeletedFeed(FeedId.From(Guid.NewGuid()), "Horror movies", FeedProvider.Mdblist, Now.AddHours(-4));
+		_deleted.ReadAsync(Any()).Returns([gone]);
+		Stored(
+			new UsageCalls(RemoteService.Mdblist, Midnight.AddHours(3), UsageCause.FeedRun, UsageOutcome.Answered, Some.Of(gone.Feed), 58),
+			Edited(RemoteService.Mdblist, Some.Of(gone.Feed), 5),
+			Edited(RemoteService.Mdblist, new None(), 7)
+		);
+
+		var report = await Testee().ReadAsync(UsageRange.Day);
+
+		var line = report.Feeds.Single();
+		await Assert.That((line.Name, line.Stats.Calls)).IsEqualTo(("Horror movies", 58L));
+		await Assert.That(line.Gone).IsSome();
+		var editor = report.Current.Causes.Single(cause => cause.Cause == UsageCause.FeedEditor);
+		await Assert
+			.That(
+				editor.Feeds.Select(feed =>
+					(feed.Feed.Map(name => name.Name).GetValueOr("unknown"), feed.Feed.Map(name => name.DeletedAt.IsSome()).GetValueOr(false), feed.Calls)
+				)
+			)
+			.IsEquivalentTo([("Horror movies", true, 5L), ("unknown", false, 7L)], CollectionOrdering.Matching);
+	}
+
+	[Test]
 	public async Task ReadAsync_AsAMember_IsRefused()
 	{
 		await Assert.ThrowsAsync<UnauthorizedAccessException>(() => Testee(UserRole.Member).ReadAsync(UsageRange.Day));
@@ -303,7 +332,7 @@ public class UsageReportTests
 			_capacity.Object,
 			_loads.Object,
 			_mdblist.Object,
-			new UsageFeedLines(_feeds.Object),
+			new UsageFeedLines(_feeds.Object, _deleted.Object),
 			clock.Object,
 			new TestCurrentUser { Role = role }
 		);
