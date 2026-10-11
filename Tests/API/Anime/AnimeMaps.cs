@@ -39,6 +39,7 @@ internal static class AnimeMaps
 	{
 		var map = IAnimeIds.Mock();
 		map.FindAsync(Any(), Any()).Returns(new None());
+		map.FindManyAsync(Any(), Any()).Returns(new Dictionary<IExternalMediaId, AnimeIdMapping>());
 		return map;
 	}
 
@@ -46,16 +47,26 @@ internal static class AnimeMaps
 	{
 		var map = IAnimeIds.Mock();
 		map.FindAsync(Any(), Any()).Returns((id, _) => Find(id));
+		map.FindManyAsync(Any(), Any()).Returns((ids, _) => FindMany(ids));
 		return map;
 	}
 
 	internal static LaterSeasons Seasons(Mock<IAnimeIds> map, bool loaded = true)
 	{
+		var loads = Loads(DatasetNames.AnimeIds, loaded);
+		return new LaterSeasons(new AnimeIdsInRun(map.Object, loads.Object), loads.Object);
+	}
+
+	internal static Mock<IDatasetLoads> Loads(string dataset, bool loaded = true)
+	{
 		var loads = IDatasetLoads.Mock();
-		loads
-			.FindAsync(DatasetNames.AnimeIds, Any())
-			.Returns(Optional.When(loaded, () => new DatasetLoad(DatasetNames.AnimeIds, DateTimeOffset.UnixEpoch, new None(), 1)));
-		return new LaterSeasons(map.Object, loads.Object);
+		loads.FindAsync(dataset, Any()).Returns(Optional.When(loaded, () => new DatasetLoad(dataset, DateTimeOffset.UnixEpoch, new None(), 1)));
+		return loads;
+	}
+
+	internal static IReadOnlyDictionary<IExternalMediaId, AnimeIdMapping> FindMany(IEnumerable<IExternalMediaId> ids)
+	{
+		return ids.Distinct().Select(id => Find(id).Map(entry => (Id: id, Entry: entry))).WhereSome().ToDictionary(found => found.Id, found => found.Entry);
 	}
 
 	private static Optional<AnimeIdMapping> Find(IExternalMediaId id)

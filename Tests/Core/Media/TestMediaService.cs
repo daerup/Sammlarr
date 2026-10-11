@@ -1,5 +1,6 @@
 using Contracts;
 using Contracts.Caching;
+using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Providers;
@@ -19,7 +20,12 @@ internal static class TestMediaService
 {
 	internal static readonly DateTimeOffset Now = new(2026, 5, 6, 12, 0, 0, TimeSpan.Zero);
 
-	internal static (IMediaService Testee, Deps Deps) Create()
+	internal static (IMediaService Testee, Deps Deps) Create() => Create([], []);
+
+	internal static (IMediaService Testee, Deps Deps) Create(
+		IReadOnlyList<IBurstPrimer> burstPrimers,
+		IReadOnlyList<Keyed<RemoteService, IExternalIdConverter>> converters
+	)
 	{
 		var dateTimeProvider = IDateTimeProvider.Mock();
 		dateTimeProvider.Now.Returns(Now);
@@ -70,7 +76,7 @@ internal static class TestMediaService
 			NullLogger<DetailsFetcher>.Instance
 		);
 		var resolver = new MediaIdResolver(
-			[new(RemoteService.Tmdb, converter.Object)],
+			[new(RemoteService.Tmdb, converter.Object), .. converters],
 			unmatchedCache.Object,
 			TestCapacity.Open(),
 			idReadiness.Object,
@@ -78,7 +84,7 @@ internal static class TestMediaService
 		);
 		var identifier = new TitleIdentifier(resolver, claims.Object);
 		var writers = new LibraryWriterFactory(mediaRepo.Object, NullLogger<LibraryWriter>.Instance);
-		var primers = new BurstPrimers([], detailsFetcher, TestCapacity.Open(), dateTimeProvider.Object, new FeedLoadOptions());
+		var primers = new BurstPrimers(burstPrimers, detailsFetcher, TestCapacity.Open(), dateTimeProvider.Object, new FeedLoadOptions());
 		var sink = TestSinks.AddressingBy(MediaProvider.Tmdb, configRepo.Object);
 		var testee = new MediaService(
 			resolver,

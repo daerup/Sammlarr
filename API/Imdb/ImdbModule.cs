@@ -1,5 +1,6 @@
 using API.Http;
 using Contracts.Datasets;
+using Contracts.Media;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -13,6 +14,8 @@ internal class ImdbModule : IServiceModule
 	{
 		services.ForRemote<ImdbDatasetsOptions>(RemoteService.ImdbDatasets).Client<ImdbRatingsFile>(Configure).Enricher<ImdbFileEnricher>();
 		services.AddScoped<IDataset<ImdbRatingLine>>(provider => provider.GetRequiredService<ImdbRatingsFile>());
+		services.AddScoped<ImdbRatingsInRun>();
+		services.AddScoped<IBurstPrimer>(provider => provider.GetRequiredService<ImdbRatingsInRun>());
 	}
 
 	private static void Configure(IServiceProvider sp, HttpClient client)

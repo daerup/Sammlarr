@@ -5,6 +5,11 @@ namespace Contracts.Datasets;
 public interface IAnimeIds : IDatasetTable<AnimeIdMapping>
 {
 	Task<Optional<AnimeIdMapping>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default);
+
+	Task<IReadOnlyDictionary<IExternalMediaId, AnimeIdMapping>> FindManyAsync(
+		IReadOnlyCollection<IExternalMediaId> ids,
+		CancellationToken cancellationToken = default
+	);
 }
 
 public sealed record AnimeIdMapping(

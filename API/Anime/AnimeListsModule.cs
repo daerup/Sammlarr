@@ -1,5 +1,6 @@
 using API.Http;
 using Contracts.Datasets;
+using Contracts.Media;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -14,6 +15,8 @@ internal class AnimeListsModule : IServiceModule
 		services.ForRemote<AnimeListsOptions>(RemoteService.AnimeLists).Client<AnimeIdsFile>(Configure).Converter<AnimeListsIdConverter>();
 		services.AddScoped<IDataset<AnimeIdMapping>>(provider => provider.GetRequiredService<AnimeIdsFile>());
 		services.AddScoped<LaterSeasons>();
+		services.AddScoped<AnimeIdsInRun>();
+		services.AddScoped<IBurstPrimer>(provider => provider.GetRequiredService<AnimeIdsInRun>());
 	}
 
 	private static void Configure(IServiceProvider sp, HttpClient client)

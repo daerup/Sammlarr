@@ -31,6 +31,18 @@ public class ImdbRatingsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task FindManyAsync_ForSeveralTconsts_AnswersTheOnesItHolds()
+	{
+		var ratings = host.Resolve<IImdbRatings>();
+		await ratings.ReplaceAsync(Yesterday.ToAsyncEnumerable());
+
+		var found = await ratings.FindManyAsync(["tt0137523", "tt0903747", "tt0000001"]);
+
+		await Assert.That(found.Keys).IsEquivalentTo(["tt0137523", "tt0903747"]);
+		await Assert.That(found["tt0137523"]).IsEqualTo(new ImdbRating(8.8f, Some.Of(2_669_240)));
+	}
+
+	[Test]
 	public async Task ReplaceAsync_WhenTheRowsFailHalfway_LeavesTheLastTable()
 	{
 		var ratings = host.Resolve<IImdbRatings>();

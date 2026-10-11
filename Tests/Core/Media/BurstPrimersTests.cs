@@ -18,13 +18,14 @@ public class BurstPrimersTests
 	private static readonly IReadOnlySet<RemoteService> Mdblist = new HashSet<RemoteService> { RemoteService.Mdblist };
 	private static readonly FieldNeeds ShownRatings = new(MediaFields.None, MediaFields.AllRatings);
 	private static readonly FieldNeeds RequiredRatings = new(MediaFields.AllRatings, MediaFields.None);
+	private static readonly IReadOnlySet<RemoteService> NoIdServices = new HashSet<RemoteService>();
 
 	[Test]
 	public async Task PrimeAsync_ForAnUncachedTitle_PrimesItsIds()
 	{
 		var (testee, primer) = Testee(RemoteLoad.Idle);
 
-		await testee.PrimeAsync([new PrimedTitle(FightClub, new None())], Run(Mdblist, ShownRatings), CancellationToken.None);
+		await testee.PrimeAsync([new PrimedTitle(FightClub, new None())], Run(Mdblist, ShownRatings), NoIdServices, CancellationToken.None);
 
 		primer
 			.PrimeAsync(Is<IReadOnlyCollection<IReadOnlyList<IExternalMediaId>>>(titles => titles!.Single().SequenceEqual(FightClub)), Any())
@@ -42,7 +43,7 @@ public class BurstPrimersTests
 			[new ProviderAnswer(RemoteService.Mdblist, MediaFields.AllRatings, Now)]
 		);
 
-		await testee.PrimeAsync([new PrimedTitle(FightClub, Some.Of(answered))], Run(Mdblist, ShownRatings), CancellationToken.None);
+		await testee.PrimeAsync([new PrimedTitle(FightClub, Some.Of(answered))], Run(Mdblist, ShownRatings), NoIdServices, CancellationToken.None);
 
 		primer.PrimeAsync(Any(), Any()).WasCalled(Times.Never);
 	}
@@ -52,7 +53,7 @@ public class BurstPrimersTests
 	{
 		var (testee, primer) = Testee(RemoteLoad.Idle);
 
-		await testee.PrimeAsync([new PrimedTitle(FightClub, new None())], Run(new HashSet<RemoteService>(), ShownRatings), CancellationToken.None);
+		await testee.PrimeAsync([new PrimedTitle(FightClub, new None())], Run(new HashSet<RemoteService>(), ShownRatings), NoIdServices, CancellationToken.None);
 
 		primer.PrimeAsync(Any(), Any()).WasCalled(Times.Never);
 	}
@@ -63,7 +64,7 @@ public class BurstPrimersTests
 		var (testee, primer) = Testee(RemoteLoad.Idle);
 		var stored = new CachedDetails(new MovieDetails { Title = "Fight Club" }, Now, Now, []);
 
-		await testee.PrimeAsync([new PrimedTitle(FightClub, Some.Of(stored))], Run(Mdblist, FieldNeeds.None), CancellationToken.None);
+		await testee.PrimeAsync([new PrimedTitle(FightClub, Some.Of(stored))], Run(Mdblist, FieldNeeds.None), NoIdServices, CancellationToken.None);
 
 		primer.PrimeAsync(Any(), Any()).WasCalled(Times.Never);
 	}
@@ -75,7 +76,12 @@ public class BurstPrimersTests
 	{
 		var (testee, primer) = Testee(RemoteLoad.Idle with { EstimatedWait = TimeSpan.FromSeconds(6) });
 
-		await testee.PrimeAsync([new PrimedTitle(FightClub, new None())], Run(Mdblist, required ? RequiredRatings : ShownRatings), CancellationToken.None);
+		await testee.PrimeAsync(
+			[new PrimedTitle(FightClub, new None())],
+			Run(Mdblist, required ? RequiredRatings : ShownRatings),
+			NoIdServices,
+			CancellationToken.None
+		);
 
 		primer.PrimeAsync(Any(), Any()).WasCalled(Times.Exactly(primes));
 	}
@@ -95,6 +101,7 @@ public class BurstPrimersTests
 		await testee.PrimeAsync(
 			[new PrimedTitle(FightClub, new None()), new PrimedTitle(answeredLately, Some.Of(answered))],
 			Run(Mdblist, ShownRatings),
+			NoIdServices,
 			CancellationToken.None
 		);
 
@@ -114,7 +121,7 @@ public class BurstPrimersTests
 			[new ProviderAnswer(RemoteService.Mdblist, MediaFields.None, Now.AddDays(-20))]
 		);
 
-		await testee.PrimeAsync([new PrimedTitle(FightClub, Some.Of(stale))], Run(Mdblist, FieldNeeds.None), CancellationToken.None);
+		await testee.PrimeAsync([new PrimedTitle(FightClub, Some.Of(stale))], Run(Mdblist, FieldNeeds.None), NoIdServices, CancellationToken.None);
 
 		primer.PrimeAsync(Any(), Any()).WasCalled(Times.Once);
 	}
@@ -124,9 +131,59 @@ public class BurstPrimersTests
 	{
 		var (testee, primer) = Testee(RemoteLoad.Idle with { BlockedUntil = Some.Of(Now.AddSeconds(10)) });
 
-		await testee.PrimeAsync([new PrimedTitle(FightClub, new None())], Run(Mdblist, RequiredRatings), CancellationToken.None);
+		await testee.PrimeAsync([new PrimedTitle(FightClub, new None())], Run(Mdblist, RequiredRatings), NoIdServices, CancellationToken.None);
 
 		primer.PrimeAsync(Any(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task PrimeAsync_ForAConnectedIdService_PrimesEveryTitleWithoutStoredDetails()
+	{
+		var anime = IBurstPrimer.Mock();
+		anime.Remote.Returns(RemoteService.AnimeLists);
+		var (testee, _) = Testee(RemoteLoad.Idle, MediaFields.AllRatings, anime.Object);
+		var answered = new CachedDetails(new MovieDetails { Title = "Fight Club" }, Now, Now, []);
+
+		await testee.PrimeAsync(
+			[new PrimedTitle(FightClub, new None()), new PrimedTitle([ImdbId.From("tt0133093", MediaType.Movie)], Some.Of(answered))],
+			Run(Mdblist, FieldNeeds.None),
+			new HashSet<RemoteService> { RemoteService.AnimeLists },
+			CancellationToken.None
+		);
+
+		anime
+			.PrimeAsync(Is<IReadOnlyCollection<IReadOnlyList<IExternalMediaId>>>(titles => titles!.Single().SequenceEqual(FightClub)), Any())
+			.WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task PrimeAsync_ForAnIdServiceThatIsNotConnected_PrimesNothing()
+	{
+		var anime = IBurstPrimer.Mock();
+		anime.Remote.Returns(RemoteService.AnimeLists);
+		var (testee, _) = Testee(RemoteLoad.Idle, MediaFields.AllRatings, anime.Object);
+
+		await testee.PrimeAsync([new PrimedTitle(FightClub, new None())], Run(Mdblist, FieldNeeds.None), NoIdServices, CancellationToken.None);
+
+		anime.PrimeAsync(Any(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task PrimeAsync_WhenOnePrimerFails_StillPrimesTheOthers()
+	{
+		var anime = IBurstPrimer.Mock();
+		anime.Remote.Returns(RemoteService.AnimeLists);
+		anime.PrimeAsync(Any(), Any()).Returns(() => Task.FromException(new InvalidOperationException("the map is locked")));
+		var (testee, primer) = Testee(RemoteLoad.Idle, MediaFields.AllRatings, anime.Object);
+
+		await testee.PrimeAsync(
+			[new PrimedTitle(FightClub, new None())],
+			Run(Mdblist, ShownRatings),
+			new HashSet<RemoteService> { RemoteService.AnimeLists },
+			CancellationToken.None
+		);
+
+		primer.PrimeAsync(Any(), Any()).WasCalled(Times.Once);
 	}
 
 	private static DetailsRun Run(IReadOnlySet<RemoteService> connected, FieldNeeds needs)
@@ -136,7 +193,7 @@ public class BurstPrimersTests
 
 	private static (BurstPrimers Testee, Mock<IBurstPrimer> Primer) Testee(RemoteLoad load) => Testee(load, MediaFields.AllRatings);
 
-	private static (BurstPrimers Testee, Mock<IBurstPrimer> Primer) Testee(RemoteLoad load, MediaFields fills)
+	private static (BurstPrimers Testee, Mock<IBurstPrimer> Primer) Testee(RemoteLoad load, MediaFields fills, params IBurstPrimer[] others)
 	{
 		var enricher = IDetailsEnricher.Mock();
 		enricher.Fills.Returns(fills);
@@ -157,6 +214,6 @@ public class BurstPrimersTests
 		);
 		var primer = IBurstPrimer.Mock();
 		primer.Remote.Returns(RemoteService.Mdblist);
-		return (new BurstPrimers([primer.Object], details, capacity, clock.Object, new FeedLoadOptions()), primer);
+		return (new BurstPrimers([.. others, primer.Object], details, capacity, clock.Object, new FeedLoadOptions()), primer);
 	}
 }

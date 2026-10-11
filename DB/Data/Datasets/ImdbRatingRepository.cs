@@ -9,6 +9,8 @@ namespace DB.Data.Datasets;
 
 internal sealed class ImdbRatingRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IImdbRatings
 {
+	private const int SliceSize = 1000;
+
 	private const string Insert = "INSERT INTO ImdbRatings (Tconst, Average, Votes) VALUES ($tconst, $average, $votes)";
 
 	public async Task<Optional<ImdbRating>> FindAsync(string tconst, CancellationToken cancellationToken = default)
@@ -16,6 +18,19 @@ internal sealed class ImdbRatingRepository(IDbContextFactory<SammlarrDbContext> 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var row = await ctx.ImdbRatings.AsNoTracking().SingleOrDefaultAsync(rating => rating.Tconst == tconst, cancellationToken);
 		return Optional.Of(row).Map(found => new ImdbRating(found.Average, Some.Of(found.Votes)));
+	}
+
+	public async Task<IReadOnlyDictionary<string, ImdbRating>> FindManyAsync(IReadOnlyCollection<string> tconsts, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var found = new Dictionary<string, ImdbRating>();
+		foreach (var slice in tconsts.Distinct().Chunk(SliceSize))
+		{
+			var rows = await ctx.ImdbRatings.AsNoTracking().Where(rating => slice.Contains(rating.Tconst)).ToListAsync(cancellationToken);
+			rows.ForEach(row => found[row.Tconst] = new ImdbRating(row.Average, Some.Of(row.Votes)));
+		}
+
+		return found;
 	}
 
 	public async Task<int> ReplaceAsync(IAsyncEnumerable<ImdbRatingLine> rows, CancellationToken cancellationToken = default)

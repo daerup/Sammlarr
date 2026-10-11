@@ -7,8 +7,10 @@ using Domain.Providers;
 
 namespace API.Anime;
 
-internal sealed class LaterSeasons(IAnimeIds map, IDatasetLoads loads)
+internal sealed class LaterSeasons(AnimeIdsInRun map, IDatasetLoads loads)
 {
+	private const int PageSize = 50;
+
 	internal async IAsyncEnumerable<IdentifyRequest> ShowsOf(
 		IAsyncEnumerable<IdentifyRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken
@@ -17,25 +19,58 @@ internal sealed class LaterSeasons(IAnimeIds map, IDatasetLoads loads)
 		var loaded = await loads.FindAsync(DatasetNames.AnimeIds, cancellationToken);
 		_ = loaded.ToResult(AnimeListsIdConverter.NotLoaded).GetOrThrow(error => new InvalidOperationException(error.Reason));
 
-		await foreach (var request in requests.WithCancellation(cancellationToken))
+		await foreach (var burst in requests.BurstsAsync(cancellationToken))
 		{
-			yield return await ShowOfAsync(request, cancellationToken);
+			foreach (var page in burst.Chunk(PageSize))
+			{
+				foreach (var show in await ShowsOfAsync(page, cancellationToken))
+				{
+					yield return show;
+				}
+			}
 		}
 	}
 
-	private async Task<IdentifyRequest> ShowOfAsync(IdentifyRequest request, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<IdentifyRequest>> ShowsOfAsync(IReadOnlyList<IdentifyRequest> page, CancellationToken cancellationToken)
 	{
-		var season = await request.Candidates.Where(IsAnimeId).FirstSomeAsync(id => map.FindAsync(id, cancellationToken));
-		return await season.Map(entry => entry.SeriesTvdb).Match(series => ShowAsync(request, series, cancellationToken), () => Task.FromResult(request));
+		await map.PrimeIdsAsync([.. page.SelectMany(request => request.Candidates.Where(IsAnimeId))], cancellationToken);
+		List<Optional<int>> series = [];
+		foreach (var request in page)
+		{
+			series.Add(await SeriesOfAsync(request, cancellationToken));
+		}
+
+		await map.PrimeIdsAsync([.. series.WhereSome().Select(SeriesId)], cancellationToken);
+		List<IdentifyRequest> shows = [];
+		foreach (var (request, show) in page.Zip(series))
+		{
+			shows.Add(await show.Match(found => ShowAsync(request, found, cancellationToken), () => Task.FromResult(request)));
+		}
+
+		return shows;
+	}
+
+	private async Task<Optional<int>> SeriesOfAsync(IdentifyRequest request, CancellationToken cancellationToken)
+	{
+		var season = await request.Candidates.Where(IsAnimeId).FirstSomeAsync(id => EntryAsync(id, cancellationToken));
+		return season.Map(entry => entry.SeriesTvdb);
 	}
 
 	private async Task<IdentifyRequest> ShowAsync(IdentifyRequest request, int series, CancellationToken cancellationToken)
 	{
-		var seriesId = TvdbId.From(series.ToString(CultureInfo.InvariantCulture), MediaType.Show);
-		var show = await map.FindAsync(seriesId, cancellationToken);
+		var seriesId = SeriesId(series);
+		var show = await EntryAsync(seriesId, cancellationToken);
 		var ids = show.Map(entry => AnimeListsIdConverter.Ids(entry, MediaType.Show)).GetValueOr(() => [seriesId]);
 		return new IdentifyRequest(ids, new None()) { Description = request.Hints, Sources = [RemoteService.AnimeLists] };
 	}
+
+	private async Task<Optional<AnimeIdMapping>> EntryAsync(IExternalMediaId id, CancellationToken cancellationToken)
+	{
+		var entry = await map.FindAsync(id, cancellationToken);
+		return entry.GetValueOr(new None());
+	}
+
+	private static IExternalMediaId SeriesId(int series) => TvdbId.From(series.ToString(CultureInfo.InvariantCulture), MediaType.Show);
 
 	private static bool IsAnimeId(IExternalMediaId id) => id.Source is MediaProvider.AniList or MediaProvider.Mal;
 }
