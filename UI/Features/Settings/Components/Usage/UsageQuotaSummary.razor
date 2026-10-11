@@ -1,0 +1,72 @@
+@using Contracts.Usage
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<div class="usage-quota-summary flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground" data-testid="usage-quota-summary">
+    @if (Quota.Today.Answered is Some<QuotaAllowance>(var allowance))
+    {
+        @if (allowance.Remaining <= allowance.Reserve)
+        {
+            <LucideIcon Name="pause" Size="15"/>
+            <span><b class="text-[15px] font-semibold text-foreground">@UsageView.Count(allowance.Remaining)</b>@Of(allowance) left</span>
+            <span class="opacity-50">·</span>
+            <span class="font-medium text-[var(--usage-gave-up)]">title lookups wait@(Since(allowance)), until the reset at @UsageView.Time(Quota.Today.NextReset)</span>
+            <span class="opacity-50">·</span>
+            <span>feed list pages may use the last @UsageView.Count(allowance.Remaining)</span>
+        }
+        else
+        {
+            <LucideIcon Name="gauge" Size="15"/>
+            <span><b class="text-[15px] font-semibold text-foreground">@UsageView.Count(allowance.Remaining)</b>@Of(allowance) left today</span>
+            <span class="opacity-50">·</span>
+            <span>resets at @UsageView.Time(Quota.Today.NextReset)</span>
+            @if (allowance.Allowance is None)
+            {
+                <span class="opacity-50">·</span>
+                <span>the day's allowance shows after the next reset</span>
+            }
+            @if (allowance.Outside is Some<long>(var outside))
+            {
+                <span class="opacity-50">·</span>
+                <span class="font-medium text-[var(--usage-gave-up)]">@UsageView.Count(outside) used outside Sammlarr today</span>
+            }
+            @if (Quota.Day is Some<QuotaDay>(var day))
+            {
+                <span class="opacity-50">·</span>
+                <span>@Pace(day)</span>
+            }
+        }
+    }
+    else
+    {
+        <LucideIcon Name="gauge" Size="15"/>
+        <span>@Branding.GetBrandingInfo(Quota.Service).NickName resets at @UsageView.Time(Quota.Today.NextReset)</span>
+        <span class="opacity-50">·</span>
+        <span>no answer since, so what is left shows after its next call</span>
+    }
+</div>
+
+@code {
+    private static readonly TimeSpan Rounding = TimeSpan.FromMinutes(5);
+
+    [Parameter] [EditorRequired] public required UsageQuota Quota { get; set; }
+
+    private static string Of(QuotaAllowance allowance) => allowance.Allowance.Map(daily => $" of {UsageView.Count(daily)}").GetValueOr(string.Empty);
+
+    private string Since(QuotaAllowance allowance)
+    {
+        return allowance
+            .ReserveReachedAt.Or(() => Quota.Day.Map(day => day.Waits.Select(wait => wait.From).Reverse().FirstOrNone()))
+            .Map(from => $" since {UsageView.Time(from)}")
+            .GetValueOr(string.Empty);
+    }
+
+    private static string Pace(QuotaDay day)
+    {
+        return day
+            .ReserveAt.Map(at => $"at the pace of the last 3 hours, title lookups wait from about {UsageView.Time(About(at))}")
+            .GetValueOr("at this pace it lasts until the reset");
+    }
+
+    private static DateTimeOffset About(DateTimeOffset at) => new((at.UtcTicks + (Rounding.Ticks / 2)) / Rounding.Ticks * Rounding.Ticks, TimeSpan.Zero);
+}

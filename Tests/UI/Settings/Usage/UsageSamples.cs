@@ -1,3 +1,4 @@
+using System.Globalization;
 using Contracts;
 using Contracts.Usage;
 using Domain.Providers;
@@ -55,6 +56,47 @@ internal static class UsageSamples
 				.Select(slot => new UsageSlot(Window.SlotAt(slot), slot == 23 ? lastHour : UsageTally.Empty, new Dictionary<UsageCause, long>())),
 		];
 	}
+
+	internal static readonly DateTimeOffset Reset = new(2026, 10, 7, 0, 0, 0, TimeSpan.Zero);
+
+	internal static readonly DateTimeOffset Morning = Reset.AddHours(9).AddMinutes(40);
+
+	internal static readonly UsageWindow Hours = new(Reset.AddHours(-14), Reset.AddHours(10), TimeSpan.FromHours(1));
+
+	internal static readonly long[] Today = [2, 419, 79, 1, 0, 4, 17, 65, 104, 118];
+
+	private static readonly long[] Yesterday = [24, 19, 9, 37, 40, 31, 48, 58, 60, 4, 0, 0, 0, 0];
+
+	internal static IDateTimeProvider At(DateTimeOffset now)
+	{
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(now);
+		return clock.Object;
+	}
+
+	internal static QuotaAllowance Allowance(long remaining)
+	{
+		return new QuotaAllowance(remaining, Reset.AddDays(1), Some.Of(1000L), new None(), new None(), 50, 0.5)
+		{
+			DayBefore = Some.Of(new DayEnd(50, Reset, Some.Of(Reset.AddHours(-4).AddMinutes(-56)))),
+		};
+	}
+
+	internal static UsageQuota Quota(QuotaAllowance allowance) => Quota(allowance, Today);
+
+	internal static UsageQuota Quota(QuotaAllowance allowance, long[] today)
+	{
+		IReadOnlyList<(DateTimeOffset Hour, long Spent)> spent =
+		[
+			.. Yesterday.Select((calls, hour) => (Reset.AddHours(hour - Yesterday.Length), calls)),
+			.. today.Select((calls, hour) => (Reset.AddHours(hour), calls)),
+		];
+		return new UsageQuota(RemoteService.Mdblist, new QuotaToday(Reset.AddDays(1), Some.Of(allowance)), Some.Of(QuotaDay.Of(spent, allowance, Morning)));
+	}
+
+	internal static UsageQuota Unanswered() => new(RemoteService.Mdblist, new QuotaToday(Reset.AddDays(1), new None()), new None());
+
+	internal static string Local(DateTimeOffset at) => at.ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture);
 
 	internal static UsageSnapshot Snapshot()
 	{

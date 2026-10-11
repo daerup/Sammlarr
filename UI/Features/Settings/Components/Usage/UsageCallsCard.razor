@@ -19,6 +19,10 @@
         @if (Missing is Some<RemoteService>(var missing))
         {
             <span class="text-[12.5px] text-muted-foreground" data-testid="usage-calls-none">No @Name(missing) calls in the @UsageView.Window(Range).</span>
+            @if (Panel(missing) is Some<UsageQuota>(var quota))
+            {
+                @QuotaPanel((quota, []))
+            }
         }
         else if (_tab is CallsTab.Calls)
         {
@@ -77,11 +81,16 @@
                 var tally = line.Tally;
                 var now = UsageView.RightNow(line.RightNow, Clock.Now);
                 var picked = IsPicked(line.Service);
+                var open = Panel(line.Service).When(_ => picked);
                 <div class="@($"usage-service cursor-pointer rounded-md pl-3 pr-1 text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-service-picked" : string.Empty)}")"
                      data-testid="usage-service" data-service="@line.Service" data-picked="@(picked ? "true" : "false")" @onclick="() => PickAsync(line.Service)">
                     <span class="flex min-w-0 items-center gap-2 whitespace-nowrap font-medium">
                         <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="18" Decorative="true"/>
                         @Branding.GetBrandingInfo(line.Service).NickName
+                        @if (open is Some<UsageQuota>)
+                        {
+                            <LucideIcon Name="chevron-up" Size="14" Class="ml-auto text-muted-foreground"/>
+                        }
                     </span>
                     <span>
                         <UsageOutcomeBar Tally="tally" Width="tally.Total * 100.0 / Busiest">
@@ -105,6 +114,10 @@
                         @now.Text
                     </span>
                 </div>
+                @if (open is Some<UsageQuota>(var quota))
+                {
+                    @QuotaPanel((quota, line.Slots))
+                }
             }
         </div>
         @if (Silent.Count > 0)
@@ -137,6 +150,8 @@
     [Parameter] [EditorRequired] public required UsagePeriod Period { get; set; }
 
     [Parameter] [EditorRequired] public required UsageRange Range { get; set; }
+
+    [Parameter] public IReadOnlyList<UsageQuota> Quotas { get; set; } = [];
 
     [Parameter] public Optional<RemoteService> Picked { get; set; } = new None();
 
@@ -198,6 +213,15 @@
     private Task PickAsync(RemoteService service) => PickedChanged.InvokeAsync(Optional.When(!IsPicked(service), () => service));
 
     private string Name(RemoteService service) => Branding.GetBrandingInfo(service).NickName;
+
+    private Optional<UsageQuota> Panel(RemoteService service) => Quotas.FirstOrNone(quota => quota.Service == service).When(_ => Range is UsageRange.Day);
+
+    private RenderFragment<(UsageQuota Quota, IReadOnlyList<UsageSlot> Slots)> QuotaPanel =>
+        shown =>
+            @<div class="usage-service-panel" data-testid="usage-quota-panel">
+                <UsageQuotaSummary Quota="shown.Quota"/>
+                <UsageQuotaLine Quota="shown.Quota" Window="Period.Window" Slots="shown.Slots"/>
+            </div>;
 
     private static string Left(double milliseconds)
     {

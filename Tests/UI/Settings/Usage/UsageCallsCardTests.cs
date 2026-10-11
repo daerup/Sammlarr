@@ -134,6 +134,39 @@ public class UsageCallsCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Picked_AServiceWithADailyQuota_OpensItsSummaryAndLineUnderItsRow()
+	{
+		var period = UsageSamples.Period(
+			[UsageSamples.Line(RemoteService.Tmdb, UsageSamples.Tally(answered: 90)), UsageSamples.Line(RemoteService.Mdblist, UsageSamples.Tally(answered: 40))],
+			[]
+		);
+
+		var cut = RenderCard(period, Some.Of(RemoteService.Mdblist), quotas: [UsageSamples.Quota(UsageSamples.Allowance(191))]);
+
+		var panel = cut.Find("[data-testid=usage-quota-panel]");
+		await Assert.That(panel.PreviousElementSibling!.GetAttribute("data-service")).IsEqualTo("Mdblist");
+		await Assert.That(panel.QuerySelector("[data-testid=usage-quota-summary]")!.TextContent).Contains("191").And.Contains("of 1,000 left today");
+		await Assert.That(panel.QuerySelector("[data-testid=usage-quota-line]")).IsNotNull();
+	}
+
+	[Test]
+	public async Task Picked_AServiceWithoutADailyQuota_OpensNothing()
+	{
+		var cut = RenderCard(UsageSamples.Snapshot().Current, Some.Of(RemoteService.Tmdb), quotas: [UsageSamples.Quota(UsageSamples.Allowance(191))]);
+
+		await Assert.That(cut.FindAll("[data-testid=usage-quota-panel]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Picked_AServiceWithADailyQuotaButNoCallsInTheWindow_StillOpensItsSummary()
+	{
+		var cut = RenderCard(UsageSamples.Snapshot().Current, Some.Of(RemoteService.Mdblist), quotas: [UsageSamples.Unanswered()]);
+
+		await Assert.That(cut.Find("[data-testid=usage-calls-none]").NextElementSibling!.GetAttribute("data-testid")).IsEqualTo("usage-quota-panel");
+		await Assert.That(cut.Find("[data-testid=usage-quota-summary]").TextContent).Contains("no answer since");
+	}
+
+	[Test]
 	public async Task RightNow_ForEachState_SaysWhatIsHappeningWithTheService()
 	{
 		var tally = UsageSamples.Tally(answered: 10);
@@ -185,13 +218,15 @@ public class UsageCallsCardTests : BunitContext
 	private IRenderedComponent<UsageCallsCard> RenderCard(
 		UsagePeriod period,
 		Optional<RemoteService>? picked = null,
-		Action<Optional<RemoteService>>? changed = null
+		Action<Optional<RemoteService>>? changed = null,
+		IReadOnlyList<UsageQuota>? quotas = null
 	)
 	{
 		return Render<UsageCallsCard>(parameters =>
 			parameters
 				.Add(card => card.Period, period)
 				.Add(card => card.Range, UsageRange.Day)
+				.Add(card => card.Quotas, quotas ?? [])
 				.Add(card => card.Picked, picked ?? new None())
 				.Add(card => card.PickedChanged, changed ?? (_ => { }))
 		);
