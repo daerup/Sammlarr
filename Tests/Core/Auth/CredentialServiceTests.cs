@@ -1,8 +1,10 @@
 using Contracts.Auth;
+using Contracts.Jobs;
 using Core.Auth;
 using Core.Caching;
 using Core.DI;
 using Domain.Auth;
+using Domain.Jobs;
 using Domain.Providers;
 using Microsoft.Extensions.Caching.Memory;
 using TestInfrastructure;
@@ -16,6 +18,7 @@ public sealed class CredentialServiceTests : IDisposable
 	private readonly MemoryCache _memory = new(new MemoryCacheOptions());
 	private readonly Mock<ICredentialRepository> _credentials = ICredentialRepository.Mock();
 	private readonly Mock<ICredentialValidator> _plex = ICredentialValidator.Mock();
+	private readonly Mock<IJobQueue> _queue = IJobQueue.Mock();
 
 	private readonly CredentialService Testee;
 
@@ -30,11 +33,20 @@ public sealed class CredentialServiceTests : IDisposable
 				new TypedMemoryCache<(Guid User, AuthProvider Provider), ICredential>(_memory),
 				new TypedMemoryCache<(Guid User, AuthProvider Provider), AccessCheck>(_memory),
 				new TestCurrentUser()
-			)
+			),
+			_queue.Object
 		);
 	}
 
 	public void Dispose() => _memory.Dispose();
+
+	[Test]
+	public async Task StoreAsync_QueuesAFillOfMissingDetails()
+	{
+		await Testee.StoreAsync(AuthProvider.Plex, Stored);
+
+		_queue.EnqueueAsync(Is<IJobRequest>(request => request is FillDetails), Any()).WasCalled(Times.Once);
+	}
 
 	[Test]
 	public async Task GetAsync_WhenReadTwice_LoadsTheStoredCredentialOnce()

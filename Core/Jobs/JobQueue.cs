@@ -56,6 +56,7 @@ internal sealed class JobQueue(
 	{
 		return await jobs.CancelAsync(id, currentUser.Id, clock.Now, cancellationToken)
 			.Apply(_ => alarm.ArmAsync(cancellationToken))
+			.Apply(_ => signal.Raise())
 			.Apply(request => announcer.Announce(new JobStateChangedEvent(currentUser.Id, request.Kind, request.Key, JobState.Cancelled)));
 	}
 
@@ -87,6 +88,7 @@ internal sealed class JobQueue(
 		request switch
 		{
 			SyncWantlist(ScheduledFeedTrigger) => (options.Grace, options.MaxWait, false),
+			FillDetails => (options.FillDetailsGrace, options.FillDetailsMaxWait, false),
 			RunFeed => (TimeSpan.Zero, TimeSpan.Zero, true),
 			_ => (TimeSpan.Zero, TimeSpan.Zero, false),
 		};

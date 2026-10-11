@@ -1,8 +1,10 @@
 using Contracts.Auth;
 using Contracts.Feed;
+using Contracts.Jobs;
 using Core.Auth;
 using Core.Caching;
 using Domain.Auth;
+using Domain.Jobs;
 using Domain.Providers;
 using Domain.Usage;
 using Microsoft.Extensions.Caching.Memory;
@@ -16,6 +18,7 @@ public sealed class ApiKeyServiceTests : IDisposable
 	private readonly MemoryCache _memory = new(new MemoryCacheOptions());
 	private readonly Mock<IApiKeyConfigRepository> _keys = IApiKeyConfigRepository.Mock();
 	private readonly Mock<IApiKeyValidator> _tmdb = IApiKeyValidator.Mock();
+	private readonly Mock<IJobQueue> _queue = IJobQueue.Mock();
 
 	private readonly ApiKeyService Testee;
 
@@ -31,11 +34,20 @@ public sealed class ApiKeyServiceTests : IDisposable
 				new TypedMemoryCache<(Guid User, ApiKeyProvider Provider), IApiKey>(_memory),
 				new TypedMemoryCache<(Guid User, ApiKeyProvider Provider), AccessCheck>(_memory),
 				new TestCurrentUser()
-			)
+			),
+			_queue.Object
 		);
 	}
 
 	public void Dispose() => _memory.Dispose();
+
+	[Test]
+	public async Task StoreAsync_QueuesAFillOfMissingDetails()
+	{
+		await Testee.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "new-key"));
+
+		_queue.EnqueueAsync(Is<IJobRequest>(request => request is FillDetails), Any()).WasCalled(Times.Once);
+	}
 
 	[Test]
 	public async Task TestAsync_ChecksTheKeyUnderTheKeyTestCause()

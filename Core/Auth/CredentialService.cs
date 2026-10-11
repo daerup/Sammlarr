@@ -1,6 +1,8 @@
 using Contracts.Auth;
 using Contracts.DI;
+using Contracts.Jobs;
 using Domain.Auth;
+using Domain.Jobs;
 using Domain.Providers;
 using Domain.Usage;
 using Observability.Usage;
@@ -10,7 +12,8 @@ namespace Core.Auth;
 internal sealed class CredentialService(
 	ICredentialRepository credentials,
 	IKeyedServiceSet<AuthProvider, ICredentialValidator> validators,
-	SecretCache<AuthProvider, ICredential> cache
+	SecretCache<AuthProvider, ICredential> cache,
+	IJobQueue queue
 ) : ICredentialService
 {
 	public ValueTask<Result<ICredential>> GetAsync(AuthProvider provider, CancellationToken cancellationToken = default)
@@ -38,6 +41,7 @@ internal sealed class CredentialService(
 	{
 		await credentials.StoreAsync(provider, credential.AccessToken, credential.ExpiresAt, credential.ClientId, cancellationToken);
 		cache.Evict(provider);
+		await queue.EnqueueAsync(new FillDetails(), cancellationToken);
 	}
 
 	public async Task ClearAsync(AuthProvider provider, CancellationToken cancellationToken = default)

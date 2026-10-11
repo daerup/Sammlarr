@@ -145,6 +145,7 @@ internal static class UsageView
 			UsageCause.ShowingTitles => ("Showing titles", "image"),
 			UsageCause.KeyTest => ("Connection tests", "plug-zap"),
 			UsageCause.FeedEditor => ("Feed editor", "square-pen"),
+			UsageCause.DetailsFill => ("Filling details", "list-plus"),
 			UsageCause.Other => ("Untagged", "circle-dashed"),
 		};
 	}
@@ -161,6 +162,9 @@ internal static class UsageView
 			or UsageCause.ShowingTitles
 			or UsageCause.FeedEditor => new None(),
 			UsageCause.KeyTest => Some.Of("The Test buttons in Settings: an API key, a sign-in, or a Radarr or Sonarr connection."),
+			UsageCause.DetailsFill => Some.Of(
+				"Fills missing details of wantlisted and blocklisted titles in the background, a few minutes after a run, a new key or a sign-in."
+			),
 			UsageCause.Other => Some.Of("Calls made outside every flow that marks its cause. Which page made them is not recorded."),
 		};
 	}

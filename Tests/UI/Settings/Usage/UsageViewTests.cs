@@ -60,6 +60,7 @@ public class UsageViewTests
 	[Arguments(UsageCause.Other, "Untagged", "circle-dashed")]
 	[Arguments(UsageCause.KeyTest, "Connection tests", "plug-zap")]
 	[Arguments(UsageCause.FeedEditor, "Feed editor", "square-pen")]
+	[Arguments(UsageCause.DetailsFill, "Filling details", "list-plus")]
 	public async Task Cause_ForEachRenamedCause_HasItsNameAndIcon(UsageCause cause, string name, string icon)
 	{
 		await Assert.That(UsageView.Cause(cause)).IsEqualTo((name, icon));
@@ -70,7 +71,7 @@ public class UsageViewTests
 	{
 		var hinted = Enum.GetValues<UsageCause>().Where(cause => UsageView.CauseHint(cause).IsSome());
 
-		await Assert.That(hinted).IsEquivalentTo([UsageCause.KeyTest, UsageCause.Other]);
+		await Assert.That(hinted).IsEquivalentTo([UsageCause.KeyTest, UsageCause.DetailsFill, UsageCause.Other]);
 	}
 
 	[Test]

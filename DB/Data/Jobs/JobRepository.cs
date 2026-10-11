@@ -47,6 +47,17 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 	public async Task<int> RequeueRunningAsync(DateTimeOffset requeuedAt, CancellationToken cancellationToken = default)
 	{
 		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await context
+			.Jobs.Where(row =>
+				row.State == JobState.Running
+				&& context.Jobs.Any(other =>
+					other.Kind == row.Kind && other.Key == row.Key && other.OwnerId == row.OwnerId && (other.State == JobState.Queued || other.State == JobState.Waiting)
+				)
+			)
+			.ExecuteUpdateAsync(
+				setters => setters.SetProperty(row => row.State, JobState.Cancelled).SetProperty(row => row.UpdatedAt, requeuedAt),
+				cancellationToken
+			);
 		return await context
 			.Jobs.Where(row => row.State == JobState.Running)
 			.ExecuteUpdateAsync(
@@ -62,9 +73,13 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 	public async Task<Optional<RunningJob>> TakeNextAsync(DateTimeOffset now, CancellationToken cancellationToken = default)
 	{
 		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var runsPending = await context.Jobs.AnyAsync(
+			row => (row.Kind == JobKind.FeedRun || row.Kind == JobKind.WantlistSync) && (row.State == JobState.Queued || row.State == JobState.Waiting),
+			cancellationToken
+		);
 		var candidate = await context
 			.Jobs.AsNoTracking()
-			.Where(row => row.State == JobState.Queued)
+			.Where(row => row.State == JobState.Queued && (row.Kind != JobKind.DetailsFill || !runsPending || row.Deadline <= now))
 			.OrderBy(row => row.RunAfter)
 			.Select(row => new
 			{
@@ -114,6 +129,12 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			.Where(row => row.OwnerId == raw && row.Kind == kind && row.State == JobState.Queued)
 			.Select(row => row.Request)
 			.ToListAsync(cancellationToken);
+	}
+
+	public async Task<bool> AnyQueuedAsync(JobKind except, CancellationToken cancellationToken = default)
+	{
+		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await context.Jobs.AnyAsync(row => row.State == JobState.Queued && row.Kind != except, cancellationToken);
 	}
 
 	public async Task<int> QueueWaitingAsync(UserId owner, JobKind kind, DateTimeOffset now, CancellationToken cancellationToken = default)

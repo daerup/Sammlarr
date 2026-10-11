@@ -1,7 +1,9 @@
 using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Feed;
+using Contracts.Jobs;
 using Domain.Auth;
+using Domain.Jobs;
 using Domain.Providers;
 using Domain.Usage;
 using Observability.Usage;
@@ -12,7 +14,8 @@ internal sealed class ApiKeyService(
 	IApiKeyConfigRepository keys,
 	IKeyedServiceIndex<ApiKeyProvider, IApiKeyValidator> validators,
 	IFeedService feeds,
-	SecretCache<ApiKeyProvider, IApiKey> cache
+	SecretCache<ApiKeyProvider, IApiKey> cache,
+	IJobQueue queue
 ) : IApiKeyService
 {
 	public ValueTask<Result<IApiKey>> GetAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
@@ -40,6 +43,7 @@ internal sealed class ApiKeyService(
 	{
 		await keys.StoreAsync(key.Provider, key.Value, cancellationToken);
 		cache.Put(key.Provider, key);
+		await queue.EnqueueAsync(new FillDetails(), cancellationToken);
 	}
 
 	public async Task ClearAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)

@@ -22,3 +22,9 @@ public readonly record struct SyncWantlist(WantlistSyncTrigger Trigger) : IJobRe
 	public JobKind Kind => JobKind.WantlistSync;
 	public string Key => string.Empty;
 }
+
+public readonly record struct FillDetails : IJobRequest
+{
+	public JobKind Kind => JobKind.DetailsFill;
+	public string Key => string.Empty;
+}

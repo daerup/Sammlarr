@@ -10,5 +10,6 @@ public enum UsageCause
 	ShowingTitles,
 	KeyTest,
 	FeedEditor,
+	DetailsFill,
 	Other,
 }

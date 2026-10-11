@@ -32,6 +32,15 @@ public class JobRequestConverterTests
 	}
 
 	[Test]
+	public async Task RoundTrip_ForFillDetails_KeepsIt()
+	{
+		var stored = _testee.ConvertToProvider(new FillDetails());
+
+		await Assert.That(stored).IsEqualTo("details-fill");
+		await Assert.That(_testee.ConvertFromProvider(stored)).IsEqualTo(new FillDetails());
+	}
+
+	[Test]
 	public async Task Convert_WhenAManualSync_RoundTripsTheTrigger()
 	{
 		var restored = (SyncWantlist)_testee.ConvertFromProvider(_testee.ConvertToProvider(new SyncWantlist(new ManualTrigger())))!;

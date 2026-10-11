@@ -43,6 +43,10 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RemoteWantlistEmpty();
 		_documentaries = await FeedAsync("Documentaries", "0 0 3 * * *");
 		_anime = await FeedAsync("Anime", "0 1 3 * * *");
+		foreach (var fill in (await host.Resolve<IJobQueueView>().GetAsync()).Jobs.Where(job => job.Request is FillDetails))
+		{
+			await Testee.CancelAsync(fill.Id);
+		}
 	}
 
 	[Test]
@@ -405,7 +409,10 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 			AlreadyQueued kept => kept.Id,
 		};
 
-	private async Task<IReadOnlyList<PendingJob>> QueueAsync() => (await host.Resolve<IJobQueueView>().GetAsync()).Jobs;
+	private async Task<IReadOnlyList<PendingJob>> QueueAsync()
+	{
+		return [.. (await host.Resolve<IJobQueueView>().GetAsync()).Jobs.Where(job => job.Request is not FillDetails)];
+	}
 }
 
 file static class PendingJobDeconstruction
