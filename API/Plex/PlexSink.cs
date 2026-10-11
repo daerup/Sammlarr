@@ -52,7 +52,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		foreach (var id in ids)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			yield return await plexIds.GetValueOrNone(id).Match(plexId => PushAsync(id, action, plexId, cancellationToken), () => Task.FromResult(Unaddressable(id)));
+			yield return await plexIds.GetValueOrNone(id).Match(plexId => PushAsync(id, action, plexId, cancellationToken), () => Unaddressable(id));
 		}
 	}
 

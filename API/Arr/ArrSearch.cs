@@ -36,8 +36,6 @@ internal sealed class ArrSearch(ArrApis apis, IArrSinkConfigService configs, ILo
 
 	private static Task<Result<IReadOnlyList<ArrTitle>>> SearchAsync(ArrApi api, ArrSinkConfig config, string term, CancellationToken cancellationToken)
 	{
-		return ArrSession
-			.Connect(api.App, config.Of(api.App))
-			.Match(connection => api.SearchAsync(connection, term, cancellationToken), error => Task.FromResult<Result<IReadOnlyList<ArrTitle>>>(error));
+		return ArrSession.Connect(api.App, config.Of(api.App)).Map(connection => api.SearchAsync(connection, term, cancellationToken));
 	}
 }

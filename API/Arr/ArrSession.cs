@@ -13,7 +13,7 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, List<ArrT
 
 	public static async Task<Result<ArrSession>> OpenAsync(ArrApi api, Result<ArrConnection> connection, CancellationToken cancellationToken)
 	{
-		return await connection.Match(open => OpenAsync(api, open, cancellationToken), error => Task.FromResult<Result<ArrSession>>(error));
+		return await connection.Map(open => OpenAsync(api, open, cancellationToken));
 	}
 
 	public static Result<ArrConnection> Connect(ArrApp app, ArrInstanceConfig settings)
@@ -67,7 +67,7 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, List<ArrT
 		Result<IReadOnlyList<int>> ids = Success.Of<IReadOnlyList<int>>([]);
 		foreach (var label in labels)
 		{
-			var id = await TagId(label).Match(known => Task.FromResult<Result<int>>(Success.Of(known)), () => CreateTagAsync(label, cancellationToken));
+			var id = await TagId(label).Match(known => Success.Of(known), () => CreateTagAsync(label, cancellationToken));
 			ids = ids.Map(found => id.Map(next => (IReadOnlyList<int>)[.. found, next]));
 		}
 
