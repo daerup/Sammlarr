@@ -6,7 +6,7 @@ namespace E2E.Tests.Settings;
 public class RoleGatingTests
 {
 	[Test]
-	[Arguments("Cache")]
+	[Arguments("Housekeeping")]
 	[Arguments("Diagnostics")]
 	[Arguments("Users")]
 	[Arguments("Testing")]

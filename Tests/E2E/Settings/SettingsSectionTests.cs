@@ -7,7 +7,7 @@ public class SettingsSectionTests
 	[Test]
 	[Arguments("providers", "Which service does what, and the account, keys and connections behind it.")]
 	[Arguments("notifications", "Webhook or Pushover connections to deliver to.")]
-	[Arguments("cache", "Id groups.")]
+	[Arguments("housekeeping", "Runs by itself")]
 	[Arguments("diagnostics", "Live log stream")]
 	[Arguments("users", "People with access to this Sammlarr. Everyone signs in with Plex.")]
 #if DEBUG
@@ -22,7 +22,7 @@ public class SettingsSectionTests
 	}
 
 	[Test]
-	[Arguments("Cache")]
+	[Arguments("Housekeeping")]
 	[Arguments("Diagnostics")]
 	[Arguments("Users")]
 #if DEBUG
