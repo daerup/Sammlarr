@@ -9,7 +9,7 @@ public class CacheTests
 	private const string DetailsRequests = "/movie/";
 
 	[Test]
-	public async Task PurgeCache_WhenConfirmed_IdentifiesTheTitlesAgain()
+	public async Task ClearTitleIds_WhenConfirmed_IdentifiesTheTitlesAgain()
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);
 		await PreviewAsync(page);
@@ -19,8 +19,8 @@ public class CacheTests
 
 		await Assert.That(await E2EApp.RequestCountAsync(DetailsRequests)).IsEqualTo(warm);
 
-		await SettingsPage.VisitSectionAsync(page, "cache");
-		await PurgeAsync(page);
+		await SettingsPage.VisitSectionAsync(page, "housekeeping");
+		await ClearIdsAsync(page);
 		await PreviewAsync(page);
 
 		await Assert.That(await E2EApp.RequestCountAsync(DetailsRequests)).IsGreaterThan(warm);
@@ -34,10 +34,10 @@ public class CacheTests
 		await FeedEditor.PreviewLoadedAsync(page);
 	}
 
-	private static async Task PurgeAsync(IPage page)
+	private static async Task ClearIdsAsync(IPage page)
 	{
-		await page.Button("Purge cache").ClickAsync();
-		await page.Button("Yes, purge everything").ClickAsync();
-		await Expect(page.Text("Media cache purged.")).ToBeVisibleAsync();
+		await page.GetByTestId("housekeeping-clear-ids").Button("Clear…").ClickAsync();
+		await page.Button("Clear title ids and details").ClickAsync();
+		await Expect(page.Text("Title ids and details cleared.")).ToBeVisibleAsync();
 	}
 }

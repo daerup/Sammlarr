@@ -1,0 +1,125 @@
+<tr class="border-b last:border-b-0" data-testid="housekeeping-task" data-task="@TestId">
+    <td class="py-2.5 pr-3 pl-[18px] align-top">
+        <div class="flex items-center gap-2.5 font-medium whitespace-nowrap">
+            @Tile
+            <div>
+                @if (Href is Some<string>(var href))
+                {
+                    <AppLink Href="@href" External="true" Class="font-semibold text-foreground">@Name</AppLink>
+                }
+                else
+                {
+                    <span class="font-semibold">@Name</span>
+                }
+                <div class="text-xs font-normal text-muted-foreground">@What</div>
+            </div>
+        </div>
+    </td>
+    <td class="px-3 py-2.5 align-top text-xs whitespace-nowrap text-muted-foreground">@Runs</td>
+    <td class="px-3 py-2.5 align-top whitespace-nowrap">
+        <span class="@($"inline-flex items-center gap-[7px] {WhenClass}")" data-testid="housekeeping-when">
+            @if (Line.Tone is TaskTone.Running)
+            {
+                <LucideIcon Name="loader-circle" Size="12" Class="animate-spin"/>
+            }
+            else
+            {
+                <span class="@($"inline-block size-[7px] shrink-0 rounded-full {DotClass}")"></span>
+            }
+            @Line.When
+        </span>
+    </td>
+    <td class="max-w-[48ch] px-3 py-2.5 align-top text-muted-foreground" data-testid="housekeeping-did">
+        @if (Breakdown is Some<RenderFragment>(var breakdown))
+        {
+            <BbTooltip DelayDuration="150">
+                <BbTooltipTrigger AsChild="false">
+                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap">@Result<LucideIcon Name="info" Size="13" Class="opacity-70"/></span>
+                </BbTooltipTrigger>
+                <BbTooltipContent Class="w-[340px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
+                    @breakdown
+                </BbTooltipContent>
+            </BbTooltip>
+        }
+        else
+        {
+            <span class="whitespace-nowrap">@Result</span>
+        }
+        @if (Line.Error is Some<string>(var error))
+        {
+            <div class="mt-0.5 text-xs text-destructive" data-testid="housekeeping-error">@error</div>
+        }
+    </td>
+    <td class="px-3 py-2.5 align-top text-xs whitespace-nowrap text-muted-foreground">@Next</td>
+    <td class="py-2.5 pr-[18px] pl-3 text-right align-top">
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="@(Line.Tone is TaskTone.Running)" OnClick="OnRun" data-testid="housekeeping-run">
+            @if (Line.Tone is TaskTone.Running)
+            {
+                <LucideIcon Name="loader-circle" Size="13" Class="mr-1.5 animate-spin"/>
+                <span>Running…</span>
+            }
+            else
+            {
+                <LucideIcon Name="play" Size="13" Class="mr-1.5"/>
+                <span>Run now</span>
+            }
+        </BbButton>
+    </td>
+</tr>
+
+@code {
+    [Parameter] [EditorRequired] public required RenderFragment Tile { get; set; }
+
+    [Parameter] [EditorRequired] public required string Name { get; set; }
+
+    [Parameter] public Optional<string> Href { get; set; } = new None();
+
+    [Parameter] [EditorRequired] public required string What { get; set; }
+
+    [Parameter] [EditorRequired] public required string Runs { get; set; }
+
+    [Parameter] [EditorRequired] public required TaskLine Line { get; set; }
+
+    [Parameter] public Optional<RenderFragment> Breakdown { get; set; } = new None();
+
+    [Parameter] [EditorRequired] public required string Next { get; set; }
+
+    [Parameter] [EditorRequired] public required string TestId { get; set; }
+
+    [Parameter] public EventCallback OnRun { get; set; }
+
+    private RenderFragment Result =>
+        @<span>
+            @if (Line.Count is Some<string>(var count))
+            {
+                <b class="font-medium text-foreground">@count</b>
+                @(" ")
+            }
+            @Line.Did
+        </span>;
+
+    private string WhenClass
+    {
+        get
+        {
+            return Line.Tone switch
+            {
+                TaskTone.Bad => "text-destructive",
+                TaskTone.Quiet or TaskTone.Ok or TaskTone.Running => string.Empty,
+            };
+        }
+    }
+
+    private string DotClass
+    {
+        get
+        {
+            return Line.Tone switch
+            {
+                TaskTone.Ok => "bg-[color:var(--alert-success)]",
+                TaskTone.Bad => "bg-destructive",
+                TaskTone.Quiet or TaskTone.Running => "bg-muted-foreground",
+            };
+        }
+    }
+}

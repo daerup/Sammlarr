@@ -1,0 +1,276 @@
+@using Contracts
+@using Contracts.Housekeeping
+@using Contracts.Media
+@using global::Shared.Options
+@using UI.Shared.Announcing
+@using UI.Shared.Services.Branding
+@implements IDisposable
+@inject IHousekeepingTasks Tasks
+@inject IMediaCachePurger CachePurger
+@inject IUnmatchedMediaCache UnmatchedCache
+@inject HousekeepingOptions Options
+@inject MediaProviderBrandingService Branding
+@inject IDateTimeProvider Clock
+@inject Notifier Notifier
+
+@if (_overview is not { } overview)
+{
+    <BbSkeleton Class="h-[440px] w-full rounded-xl"/>
+}
+else
+{
+    var now = Clock.Now;
+    var cache = overview.Cache;
+    <div class="overflow-hidden rounded-xl border bg-card">
+        <div class="px-[18px] py-3.5">
+            <h4 class="text-sm font-semibold">Housekeeping</h4>
+            <p class="mt-0.5 text-xs text-muted-foreground" data-testid="housekeeping-size" data-bloated="@(HousekeepingView.Bloated(overview.Size) ? "true" : "false")">
+                <b class="@SizeClass(overview.Size)">@HousekeepingView.Size(overview.Size.OnDisk)</b> on disk,
+                <b class="@SizeClass(overview.Size)">@HousekeepingView.Size(overview.Size.Data)</b> of it data@(Compacted(overview, now)).
+                Nobody starts the tasks; each row is its last run.
+            </p>
+        </div>
+
+        <div class="@GroupHead">Runs by itself</div>
+        <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-[13px]">
+            <thead>
+                <tr class="border-b text-left text-[11.5px] font-medium whitespace-nowrap text-muted-foreground">
+                    <th class="py-2 pr-3 pl-[18px] font-medium">Task</th>
+                    <th class="px-3 py-2 font-medium">Runs</th>
+                    <th class="px-3 py-2 font-medium">Last run</th>
+                    <th class="px-3 py-2 font-medium">What it did</th>
+                    <th class="px-3 py-2 font-medium">Next</th>
+                    <th class="py-2 pr-[18px] pl-3"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <HousekeepingTaskRow Tile="PassTile"
+                                     Name="Housekeeping"
+                                     What="trims history and the cache"
+                                     Runs="@HousekeepingView.Runs(overview.Pass.NextRun)"
+                                     Line="HousekeepingView.Pass(overview.Pass, now)"
+                                     Breakdown="Breakdown(overview.Pass, now)"
+                                     Next="@HousekeepingView.Next(overview.Pass.NextRun, now)"
+                                     TestId="pass"
+                                     OnRun="() => RunAsync(() => Tasks.RunPassAsync())"/>
+                @foreach (var dataset in overview.Datasets)
+                {
+                    var look = HousekeepingView.Datasets[dataset.Service];
+                    <HousekeepingTaskRow Tile="DatasetTile(dataset)"
+                                         Name="@look.Name"
+                                         Href="Some.Of(look.Href)"
+                                         What="@look.What"
+                                         Runs="@HousekeepingView.Runs(dataset.NextRun)"
+                                         Line="HousekeepingView.Dataset(dataset, now)"
+                                         Next="@HousekeepingView.Next(dataset.NextRun, now)"
+                                         TestId="@dataset.Service.ToString()"
+                                         OnRun="() => RunAsync(() => Tasks.LoadDatasetAsync(dataset.Service))"/>
+                }
+            </tbody>
+        </table>
+        </div>
+
+        <div class="@GroupHead">Clear by hand</div>
+        <div class="@ClearRow" data-testid="housekeeping-clear-details">
+            <LucideIcon Name="film" Size="18" Class="text-muted-foreground"/>
+            <div>
+                <div class="text-sm font-medium">Cached details</div>
+                <div class="max-w-[80ch] text-[12.5px] text-muted-foreground">
+                    Posters, summaries and ratings of @HousekeepingView.Titles(cache.Detailed). Each is fetched from its providers again the next time it is shown; the titles stay matched.
+                </div>
+                <div class="mt-[3px] flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <LucideIcon Name="moon" Size="12" Class="opacity-80"/>
+                    Nightly: details nobody opened for @HousekeepingView.Days(Options.DetailsUnusedDays)
+                </div>
+            </div>
+            <span class="text-right text-[13px] whitespace-nowrap text-muted-foreground">@HousekeepingView.Size(cache.DetailsBytes)</span>
+            <BbAlertDialog>
+                <BbAlertDialogTrigger>
+                    <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear…" Size="ButtonSize.Small" Disabled="_clearing"/>
+                </BbAlertDialogTrigger>
+                <BbAlertDialogContent>
+                    <BbAlertDialogHeader>
+                        <BbAlertDialogTitle>Clear cached details?</BbAlertDialogTitle>
+                        <BbAlertDialogDescription>
+                            This frees about <b class="font-medium text-foreground">@HousekeepingView.Size(cache.DetailsBytes)</b> of the @HousekeepingView.Size(overview.Size.OnDisk) database.
+                            Every one of these <b class="font-medium text-foreground">@HousekeepingView.Titles(cache.Detailed)</b> is fetched from its providers again the next time it is shown,
+                            so the next feed runs and previews make up to <b class="font-medium text-foreground">@HousekeepingView.Number(cache.Detailed) lookups</b>, and a busy provider may answer 429 for a while.
+                        </BbAlertDialogDescription>
+                    </BbAlertDialogHeader>
+                    <p class="text-[13px] text-muted-foreground">
+                        The nightly pass already clears details nobody opened for @HousekeepingView.Days(Options.DetailsUnusedDays). Clear by hand only when artwork or ratings look wrong now.
+                    </p>
+                    <BbAlertDialogFooter>
+                        <BbAlertDialogCancel>
+                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                        </BbAlertDialogCancel>
+                        <BbAlertDialogAction>
+                            <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear cached details" OnClick="ClearDetailsAsync"/>
+                        </BbAlertDialogAction>
+                    </BbAlertDialogFooter>
+                </BbAlertDialogContent>
+            </BbAlertDialog>
+        </div>
+        <div class="@($"{ClearRow} border-t")" data-testid="housekeeping-clear-ids">
+            <LucideIcon Name="link" Size="18" Class="text-muted-foreground"/>
+            <div>
+                <div class="text-sm font-medium">Title ids and details</div>
+                <div class="max-w-[80ch] text-[12.5px] text-muted-foreground">
+                    The ids tying @HousekeepingView.Titles(cache.Matched) together, with their details. Each title is matched from scratch the next time it is needed; wantlisted, blocklisted and queued titles keep their ids.
+                </div>
+                <div class="mt-[3px] flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <LucideIcon Name="moon" Size="12" Class="opacity-80"/>
+                    Nightly: ids of titles nobody used for @HousekeepingView.Days(Options.IdsUnusedDays)
+                </div>
+            </div>
+            <span class="text-right text-[13px] whitespace-nowrap text-muted-foreground">@HousekeepingView.Size(cache.DetailsBytes + cache.IdsBytes)</span>
+            <BbAlertDialog>
+                <BbAlertDialogTrigger>
+                    <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear…" Size="ButtonSize.Small" Disabled="_clearing"/>
+                </BbAlertDialogTrigger>
+                <BbAlertDialogContent>
+                    <BbAlertDialogHeader>
+                        <BbAlertDialogTitle>Clear title ids and details?</BbAlertDialogTitle>
+                        <BbAlertDialogDescription>
+                            This frees about <b class="font-medium text-foreground">@HousekeepingView.Size(cache.DetailsBytes + cache.IdsBytes)</b> of the @HousekeepingView.Size(overview.Size.OnDisk) database.
+                            Every one of these <b class="font-medium text-foreground">@HousekeepingView.Titles(cache.Matched)</b> is matched against the providers from scratch the next time it is needed:
+                            the slowest to rebuild, with up to <b class="font-medium text-foreground">@HousekeepingView.Number(cache.Matched) lookups</b> and their details on top.
+                            Wantlisted, blocklisted and queued titles keep their ids.
+                        </BbAlertDialogDescription>
+                    </BbAlertDialogHeader>
+                    <p class="text-[13px] text-muted-foreground">
+                        The nightly pass already clears the ids of titles nobody used for @HousekeepingView.Days(Options.IdsUnusedDays). Clear by hand only when titles are matched wrongly.
+                    </p>
+                    <BbAlertDialogFooter>
+                        <BbAlertDialogCancel>
+                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                        </BbAlertDialogCancel>
+                        <BbAlertDialogAction>
+                            <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear title ids and details" OnClick="ClearIdsAsync"/>
+                        </BbAlertDialogAction>
+                    </BbAlertDialogFooter>
+                </BbAlertDialogContent>
+            </BbAlertDialog>
+        </div>
+        <div class="@($"{ClearRow} border-t")" data-testid="housekeeping-clear-unmatched">
+            <LucideIcon Name="circle-alert" Size="18" Class="text-muted-foreground"/>
+            <div>
+                <div class="text-sm font-medium">Unmatched lookups</div>
+                <div class="max-w-[80ch] text-[12.5px] text-muted-foreground">
+                    Titles no provider could match, skipped for an hour. Cleared, they are tried again on the next run.
+                </div>
+            </div>
+            <span class="text-right text-[13px] whitespace-nowrap text-muted-foreground">in memory</span>
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="ClearUnmatched">
+                <LucideIcon Name="eraser" Size="13" Class="mr-1.5"/>
+                <span>Clear</span>
+            </BbButton>
+        </div>
+    </div>
+}
+
+@code {
+    private const string GroupHead = "border-t bg-foreground/[0.03] px-[18px] pt-2.5 pb-1.5 text-[11px] font-semibold tracking-[.07em] text-muted-foreground uppercase";
+
+    private const string ClearRow = "grid grid-cols-[22px_minmax(0,1fr)_76px_120px] items-center gap-3.5 px-[18px] py-3.5 [&>:last-child]:justify-self-end";
+
+    private HousekeepingOverview? _overview;
+
+    private CoalescedReload _reload = null!;
+
+    private bool _clearing;
+
+    private static readonly RenderFragment PassTile =
+        @<span class="inline-flex size-[26px] shrink-0 items-center justify-center rounded-md bg-secondary text-foreground">
+            <LucideIcon Name="brush" Size="14"/>
+        </span>;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _reload = new(LoadAsync);
+        Tasks.Changed += OnChanged;
+        await Task.Yield();
+        await _reload.RunAsync();
+    }
+
+    public void Dispose() => Tasks.Changed -= OnChanged;
+
+    private async Task LoadAsync()
+    {
+        _overview = await Tasks.OverviewAsync();
+        StateHasChanged();
+    }
+
+    private void OnChanged() => _ = InvokeAsync(_reload.RunAsync);
+
+    private async Task RunAsync(Func<Task<bool>> start)
+    {
+        try
+        {
+            if (!await start())
+            {
+                Notifier.Info("It is already running.");
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            Notifier.Error(ex, "Could not start it");
+        }
+    }
+
+    private async Task ClearDetailsAsync() => await ClearAsync(() => CachePurger.PurgeDetailsAsync(), "Cached details cleared.");
+
+    private async Task ClearIdsAsync() => await ClearAsync(() => CachePurger.PurgeAsync(), "Title ids and details cleared.");
+
+    private async Task ClearAsync(Func<Task> clear, string done)
+    {
+        _clearing = true;
+        try
+        {
+            await clear();
+            Notifier.Success(done);
+            await _reload.RunAsync();
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Could not clear the cache");
+        }
+        finally
+        {
+            _clearing = false;
+        }
+    }
+
+    private void ClearUnmatched()
+    {
+        UnmatchedCache.Clear();
+        Notifier.Success("Unmatched titles will be tried again on the next run.");
+    }
+
+    private RenderFragment DatasetTile(DatasetTask dataset) => @<BrandedTile Brand="Branding.GetBrandingInfo(dataset.Service)" Size="26" Decorative="true"/>;
+
+    private Optional<RenderFragment> Breakdown(PassTask pass, DateTimeOffset now)
+    {
+        return pass.Last.When(report => pass.Running.IsNone() && report.Steps.Any(step => step.Removed > 0)).Map(report => Removed(report, now));
+    }
+
+    private RenderFragment Removed(HousekeepingReport report, DateTimeOffset now) =>
+        @<div data-testid="housekeeping-breakdown">
+            <b class="mb-1.5 block font-semibold text-foreground">@HousekeepingView.Removed(report, now)</b>
+            <div class="grid grid-cols-[1fr_auto] gap-x-3.5 gap-y-0.5">
+                @foreach (var (label, removed) in HousekeepingView.Breakdown(report, Options))
+                {
+                    <span>@label</span>
+                    <b class="text-right font-medium text-foreground tabular-nums">@HousekeepingView.Number(removed)</b>
+                }
+            </div>
+        </div>;
+
+    private static string Compacted(HousekeepingOverview overview, DateTimeOffset now)
+    {
+        return HousekeepingView.CompactedAt(overview).Map(at => $" · compacted {HousekeepingView.Day(at, now)}").GetValueOr(string.Empty);
+    }
+
+    private static string SizeClass(DatabaseSize size) => HousekeepingView.Bloated(size) ? "font-semibold text-[color:var(--alert-warning)]" : "font-semibold text-foreground";
+}
