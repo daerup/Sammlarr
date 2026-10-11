@@ -27,7 +27,8 @@ stored titles settles unmatched as a conflict, carrying both titles (`ConflictsW
 two rows stay as they are. An enricher's key that would join two titles is dropped from the title it was found for.
 MediaType is part of a key, so a movie and a show that share a number never meet. Rating page links (Rotten Tomatoes,
 Metacritic, Letterboxd) are no keys: remakes that share a slug stay two titles. _Measure:_ `ClaimRuleTests`, the
-`ClaimRuleLaws` property test (no key on two rows, no row with two keys of a source), `IdentityClaimsTests` and
+`ClaimRuleLaws` property test (no key on two rows, no row with two keys of a source, a pinned claim names exactly the
+keys it leaves to another row), `IdentityClaimsTests` and
 `FeedRunIdentityTests` pass. _Limit:_ one shared key is enough to extend a row, with no multi-id agreement check, so a
 provider that tags two titles with the same key folds the second into the first; and a title stored twice stays
 twice until something merges it (<<section-technical-risks>>).

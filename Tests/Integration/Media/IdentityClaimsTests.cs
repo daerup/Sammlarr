@@ -11,7 +11,11 @@ namespace Integration.Tests.Media;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class IdentityClaimsTests(SammlarrTestHost host) : IAsyncDisposable
 {
+	private static readonly DateTimeOffset Now = new(2026, 10, 11, 3, 0, 0, TimeSpan.Zero);
+
 	private IIdentityClaims Testee => host.Resolve<IIdentityClaims>();
+
+	private IIdentityConflicts Conflicts => host.Resolve<IIdentityConflicts>();
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
@@ -76,6 +80,57 @@ public class IdentityClaimsTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(claimed!.Id).IsEqualTo(annie);
 		await Assert.That(owners.Single(owner => owner.Id == "tt0207972").Owner).IsEqualTo(remake.Value);
 		await Assert.That(owners.Single(owner => owner.Id == "9600").Owner).IsEqualTo(annie.Value);
+	}
+
+	[Test]
+	public async Task ClaimAsync_ForAPinnedTitleWhoseEnricherNamesAnotherRowsKey_NotesThePairWithWhoClaimedIt()
+	{
+		var annie = await host.SeedMediaAsync(Tmdb("15739"));
+		var remake = await host.SeedMediaAsync(Imdb("tt0207972"));
+
+		await Testee.ClaimAsync(new IdentityClaim([Imdb("tt0207972"), Trakt("9600")], Some.Of(annie), [RemoteService.Tmdb]));
+
+		var note = (await Conflicts.AllAsync()).Single();
+		await Assert.That(note.Held).IsEqualTo(annie);
+		await Assert.That(note.Other).IsEqualTo(remake);
+		await Assert.That(note.Claimed).IsEqualTo(Imdb("tt0207972"));
+		await Assert.That(note.Sources).IsEquivalentTo([RemoteService.Tmdb]);
+		await Assert.That(note.State).IsOfUnionType<ConflictState, Undecided>();
+	}
+
+	[Test]
+	public async Task ClaimAsync_ForKeysOnTwoRows_NotesThePairDueAtOnce()
+	{
+		host.SetCurrentTime(Now);
+		var first = await host.SeedMediaAsync(Tmdb("15739"));
+		var second = await host.SeedMediaAsync(Imdb("tt0207972"));
+
+		await Testee.ClaimAsync(Claim([Tmdb("15739"), Imdb("tt0207972")]));
+
+		Dictionary<MediaId, IIdentityKey> keyOf = new() { [first] = Tmdb("15739"), [second] = Imdb("tt0207972") };
+		var note = (await Conflicts.DueAsync(Now)).Single();
+		MediaId[] pair = [note.Held, note.Other];
+		await Assert.That(pair).IsEquivalentTo([first, second]);
+		await Assert.That(note.Claimed).IsEqualTo(keyOf[note.Other]);
+		await Assert.That(note.Attempts).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task ClaimAsync_ForAPairNotedBefore_InEitherOrder_OnlyMovesWhenItWasLastSeen()
+	{
+		host.SetCurrentTime(Now);
+		var first = await host.SeedMediaAsync(Tmdb("15739"));
+		await host.SeedMediaAsync(Imdb("tt0207972"));
+		await Testee.ClaimAsync(Claim([Tmdb("15739"), Imdb("tt0207972")]));
+		host.SetCurrentTime(Now.AddHours(5));
+
+		await Testee.ClaimAsync(Claim([Imdb("tt0207972"), Tmdb("15739")]));
+		await Testee.ClaimAsync(new IdentityClaim([Imdb("tt0207972")], Some.Of(first), [RemoteService.Tmdb]));
+
+		var note = (await Conflicts.AllAsync()).Single();
+		await Assert.That(note.SeenAt).IsEqualTo(Now.AddHours(5));
+		await Assert.That(note.AskAfter).IsEqualTo(Now);
+		await Assert.That(note.Sources).IsEquivalentTo([RemoteService.Mdblist]);
 	}
 
 	[Test]

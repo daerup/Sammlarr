@@ -56,7 +56,8 @@ public static class ClaimRule
 		var kept = keys.Where(key =>
 			owners.GetValueOrNone(key).Match(owner => owner == pinned, () => true) && !Clashes(key, keys, existing) && OfRowType(key, existing)
 		);
-		return new Claimed(pinned, existing + kept);
+		var disputed = keys.Select(key => owners.GetValueOrNone(key).When(owner => owner != pinned).Map(owner => new Disputed(key, owner))).WhereSome();
+		return new Claimed(pinned, existing + kept) { Disputed = [.. disputed] };
 	}
 
 	private static bool OfRowType(IIdentityKey key, ValueSet<IIdentityKey> existing)

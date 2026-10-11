@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261011194729_DatasetChecks";
+    public override string LastMigrationId => "20261011205458_IdentityConflicts";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -831,6 +831,95 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsUnique();
 
                 b.ToTable("ExternalMediaIds");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.IdentityConflictRow", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("AnswerId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("AnswerSource")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("AnswerType")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("AnsweredBy")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("AskAfter")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long?>("AskedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("AskedOutcome")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("AskedService")
+                    .HasColumnType("TEXT");
+
+                b.Property<int>("Attempts")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("ClaimedId")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ClaimedSource")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ClaimedType")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ContradictedBy")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Distinct")
+                    .HasColumnType("TEXT");
+
+                b.Property<long?>("DistinctAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid>("HeldId")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid?>("KeptApartBy")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("OtherId")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("SeenAt")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Id");
+
+                b.HasIndex("OtherId");
+
+                b.HasIndex("HeldId", "OtherId")
+                    .IsUnique();
+
+                b.ToTable("IdentityConflicts");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.IdentityConflictSourceRow", b =>
+            {
+                b.Property<Guid>("ConflictId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Service")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("ConflictId", "Service");
+
+                b.ToTable("IdentityConflictSources");
             });
 
         modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>
@@ -1785,6 +1874,30 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Media");
             });
 
+        modelBuilder.Entity("DB.Data.Media.IdentityConflictRow", b =>
+            {
+                b.HasOne("DB.Data.Media.MediaRow", null)
+                    .WithMany()
+                    .HasForeignKey("HeldId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("DB.Data.Media.MediaRow", null)
+                    .WithMany()
+                    .HasForeignKey("OtherId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Media.IdentityConflictSourceRow", b =>
+            {
+                b.HasOne("DB.Data.Media.IdentityConflictRow", null)
+                    .WithMany("Sources")
+                    .HasForeignKey("ConflictId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
         modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>
             {
                 b.HasOne("DB.Data.Media.MediaRow", "Media")
@@ -1967,6 +2080,11 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("DB.Data.Housekeeping.HousekeepingReportRow", b =>
             {
                 b.Navigation("Steps");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.IdentityConflictRow", b =>
+            {
+                b.Navigation("Sources");
             });
 
         modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>

@@ -17,7 +17,7 @@ internal sealed class TitleIdentifier(MediaIdResolver idResolver, IIdentityClaim
 	{
 		if (rows.Count > 1)
 		{
-			return Conflict([.. rows.Select(row => row.Identity.Id)]);
+			return await ClaimAsync(new IdentityClaim([.. request.Candidates.OfType<IIdentityKey>()], new None(), request.Sources), new None(), cancellationToken);
 		}
 
 		var row = rows.FirstOrNone();

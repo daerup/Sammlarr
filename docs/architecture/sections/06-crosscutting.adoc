@@ -401,8 +401,9 @@ to (if any) and the services whose answers produced its keys (`IdentityClaim.Sou
 queued meanwhile in one transaction under the media write lock; a constraint error conflicts that claim only. The rule,
 `ClaimRule.Decide`, is pure and held by `ClaimRuleTests` and the `ClaimRuleLaws` property test: a claim extends at most
 one stored title and never merges two, never adds a second key of one source or a key of another media type, and a
-pinned claim drops what it cannot take. A claim that would join two stored titles conflicts: the title settles
-unmatched as a conflict and both stored titles keep their keys. A search hit whose claim conflicts uses the stored title
+pinned claim drops what it cannot take, naming each key another title holds. A claim that would join two stored
+titles conflicts: the title settles unmatched as a conflict and both stored titles keep their keys. Either way the
+pair is noted as stored twice (`IIdentityConflicts`). A search hit whose claim conflicts uses the stored title
 that holds the search provider's own key (TMDB's for a TMDB search, Plex's for a Plex search, TMDB's for a movie and
 TheTVDB's for a show from Radarr + Sonarr), and is not addable when no stored title holds it. Feed runs never merge two
 stored titles

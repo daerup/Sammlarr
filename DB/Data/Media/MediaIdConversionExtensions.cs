@@ -18,6 +18,8 @@ internal static class MediaIdConversionExtensions
 
 	public static IPageLink ToPageLink(this MediaPageLinkRow link, MediaType mediaType) => (IPageLink)Create(link.Site, mediaType, link.Path);
 
+	public static IIdentityKey Key(MediaProvider source, MediaType mediaType, string externalId) => (IIdentityKey)Create(source, mediaType, externalId);
+
 	public static MediaPageLinkRow ToPageLinkRow(this IPageLink link, MediaDetailsRow details)
 	{
 		return new()

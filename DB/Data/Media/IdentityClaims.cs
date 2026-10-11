@@ -1,12 +1,14 @@
 using System.Collections.Concurrent;
+using Contracts;
 using Contracts.Media;
 using Domain.Media;
+using Domain.Providers;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Media;
 
-internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contexts, MediaWriteLock writeLock) : IIdentityClaims
+internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contexts, MediaWriteLock writeLock, IDateTimeProvider clock) : IIdentityClaims
 {
 	private const int ConstraintFailed = 19;
 
@@ -77,14 +79,38 @@ internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contex
 		List<ClaimOutcome> outcomes = [];
 		foreach (var claim in claims)
 		{
-			outcomes.Add(await WriteAsync(ctx, library, ClaimRule.Decide(claim, library.Owners, library.Held, MediaId.New())));
+			var decided = ClaimRule.Decide(claim, library.Owners, library.Held, MediaId.New());
+			outcomes.Add(await WriteAsync(ctx, library, claim, decided));
+			foreach (var note in Notes(library, claim, decided))
+			{
+				await ctx.NoteConflictAsync(note, CancellationToken.None);
+			}
 		}
 
 		await transaction.CommitAsync();
 		return outcomes;
 	}
 
-	private static async Task<ClaimOutcome> WriteAsync(SammlarrDbContext ctx, Library library, ClaimOutcome decided)
+	private IEnumerable<IdentityConflict> Notes(Library library, IdentityClaim claim, ClaimOutcome decided)
+	{
+		return decided switch
+		{
+			Claimed claimed => claimed.Disputed.Select(disputed => Note(claimed.Id, disputed.Owner, disputed.Key, claim.Sources)),
+			Conflicted conflicted => conflicted.Owners.Skip(1).Select(other => Note(conflicted.Owners.First(), other, OwnedBy(library, claim, other), claim.Sources)),
+		};
+	}
+
+	private IdentityConflict Note(MediaId held, MediaId other, IIdentityKey claimed, ValueSet<RemoteService> sources)
+	{
+		return new IdentityConflict(held, other, claimed, sources, clock.Now, 0, clock.Now, new None(), new Undecided());
+	}
+
+	private static IIdentityKey OwnedBy(Library library, IdentityClaim claim, MediaId owner)
+	{
+		return claim.Keys.First(key => library.Owners.GetValueOrNone(key).Match(found => found == owner, () => false));
+	}
+
+	private async Task<ClaimOutcome> WriteAsync(SammlarrDbContext ctx, Library library, IdentityClaim claim, ClaimOutcome decided)
 	{
 		if (decided is not Claimed claimed)
 		{
@@ -106,12 +132,22 @@ internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contex
 		}
 		catch (DbUpdateException exception) when (exception.InnerException is SqliteException { SqliteErrorCode: ConstraintFailed })
 		{
-			var owners = await ctx.OwnersAsync(added, CancellationToken.None);
-			return new Conflicted([.. owners.Select(MediaId.From)], [.. added]);
+			ctx.ChangeTracker.Clear();
+			var owners = await ctx.KeyOwnersAsync(added, CancellationToken.None);
+			await held.Apply(_ => NoteRaceAsync(ctx, claimed.Id, owners, claim.Sources));
+			return new Conflicted([.. owners.Values], [.. added]);
 		}
 		finally
 		{
 			ctx.ChangeTracker.Clear();
+		}
+	}
+
+	private async Task NoteRaceAsync(SammlarrDbContext ctx, MediaId held, IReadOnlyDictionary<IIdentityKey, MediaId> owners, ValueSet<RemoteService> sources)
+	{
+		foreach (var owner in owners.Where(entry => entry.Value != held).GroupBy(entry => entry.Value))
+		{
+			await ctx.NoteConflictAsync(Note(held, owner.Key, owner.First().Key, sources), CancellationToken.None);
 		}
 	}
 
