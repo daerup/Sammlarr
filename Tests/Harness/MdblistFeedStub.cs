@@ -4,7 +4,7 @@ using System.Web;
 using API.Mdblist;
 using Domain.Media;
 using Domain.Providers;
-using Polly.CircuitBreaker;
+using Shared.Concurrency;
 
 namespace Harness;
 
@@ -30,7 +30,7 @@ internal static class MdblistFeedStub
 	internal static void Empty(HttpStub http, string identifier) => http.RespondWithJsonForUrl(Url(identifier), """{ "movies": [], "shows": [] }""");
 
 	internal static void Unavailable(HttpStub http, string identifier) =>
-		http.RespondForUrl(Url(identifier), _ => throw new BrokenCircuitException("The circuit is now open and is not allowing calls."));
+		http.RespondForUrl(Url(identifier), _ => throw new LaneRefusedException("MDBList is down."));
 
 	internal static void PartialThenUnavailable(HttpStub http, string identifier, IReadOnlyList<FeedItemSpec> items) =>
 		http.RespondForUrl(
@@ -39,7 +39,7 @@ internal static class MdblistFeedStub
 			{
 				if (Offset(request) > 0)
 				{
-					throw new BrokenCircuitException("The circuit is now open and is not allowing calls.");
+					throw new LaneRefusedException("MDBList is down.");
 				}
 
 				var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Build(items), Encoding.UTF8, "application/json") };

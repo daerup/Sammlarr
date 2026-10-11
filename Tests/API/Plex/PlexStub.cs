@@ -12,7 +12,7 @@ using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
-using Polly.CircuitBreaker;
+using Shared.Concurrency;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;
@@ -28,7 +28,7 @@ internal sealed class PlexStub : HttpMessageHandler
 	private readonly Dictionary<string, PlexCandidate> _candidates = [];
 	private readonly List<string> _searchOrder = [];
 	private readonly Dictionary<string, HttpStatusCode> _failures = [];
-	private readonly HashSet<string> _broken = [];
+	private readonly HashSet<string> _refused = [];
 
 	public TaskCompletionSource? MetadataGate { get; set; }
 
@@ -62,9 +62,9 @@ internal sealed class PlexStub : HttpMessageHandler
 		return this;
 	}
 
-	public PlexStub Breaks(PlexCandidate candidate)
+	public PlexStub Refuses(PlexCandidate candidate)
 	{
-		_broken.Add(candidate.PlexId.Value);
+		_refused.Add(candidate.PlexId.Value);
 		return this;
 	}
 
@@ -102,9 +102,9 @@ internal sealed class PlexStub : HttpMessageHandler
 		}
 
 		var ratingKey = path[MetadataPath.Length..];
-		if (_broken.Contains(ratingKey))
+		if (_refused.Contains(ratingKey))
 		{
-			throw new BrokenCircuitException();
+			throw new LaneRefusedException("Plex is down.");
 		}
 
 		if (_failures.TryGetValue(ratingKey, out var status))

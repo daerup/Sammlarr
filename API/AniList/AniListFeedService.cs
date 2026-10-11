@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using API.AniList.Types;
 using API.Anime;
 using API.Feeds;
+using API.Http;
 using Contracts;
 using Contracts.Feed;
 using Contracts.Media;
@@ -76,7 +77,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 		var parts = identifier.Split('/');
 		var variables = new JsonObject { ["user"] = parts[0] };
 		parts.Skip(1).FirstOrNone().Apply(status => variables["status"] = status.ToUpperInvariant());
-		var answer = await FeedRunSpans.ReadingAsync(1, () => client.AskAsync<AniListTypes.ListData>(Query, variables, cancellationToken));
+		var answer = await SourcePages.ReadAsync(1, () => client.AskAsync<AniListTypes.ListData>(Query, variables, cancellationToken));
 		var collection = answer.GetOrThrow(error => Failure(identifier, error));
 		FeedRunSpans.SourcePage(1, Some.Of(1));
 		foreach (var found in (collection.Collection?.Lists ?? []).SelectMany(list => list.Entries ?? []).Select(entry => entry.Media).OfType<AniListTypes.Media>())
@@ -102,7 +103,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 		{
 			var asked = variables.DeepClone().AsObject();
 			asked["page"] = page;
-			var answer = await FeedRunSpans.ReadingAsync(page, () => client.AskAsync<AniListTypes.PageData>(SearchQuery, asked, cancellationToken));
+			var answer = await SourcePages.ReadAsync(page, () => client.AskAsync<AniListTypes.PageData>(SearchQuery, asked, cancellationToken));
 			var found = answer.GetOrThrow(Refused).Page ?? throw new InvalidDataException("AniList answered a search without a page.");
 			FeedRunSpans.SourcePage(page, new None());
 			foreach (var title in found.Media ?? [])

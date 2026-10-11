@@ -17,7 +17,7 @@ internal sealed class PicturesModule : IServiceModule
 
 	private static void Configure(IServiceProvider sp, HttpClient client)
 	{
-		client.Timeout = TimeSpan.FromSeconds(sp.GetRequiredService<PictureOptions>().Http.TotalTimeoutSeconds);
+		client.Timeout = TimeSpan.FromSeconds(sp.GetRequiredService<PictureOptions>().Http.TimeoutSeconds);
 		client.MaxResponseContentBufferSize = MostBytes;
 	}
 }

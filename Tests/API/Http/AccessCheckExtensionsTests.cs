@@ -1,8 +1,8 @@
 using System.Net;
 using API.Http;
 using Domain.Auth;
-using Polly.CircuitBreaker;
 using Polly.Timeout;
+using Shared.Concurrency;
 
 namespace API.Tests.Http;
 
@@ -14,7 +14,7 @@ public class AccessCheckExtensionsTests
 	{
 		yield return () => new HttpRequestException("network");
 		yield return () => new TimeoutRejectedException();
-		yield return () => new BrokenCircuitException();
+		yield return () => new LaneRefusedException("blocked until 2026-10-11T12:05:00Z");
 	}
 
 	[Test]

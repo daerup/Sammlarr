@@ -68,10 +68,10 @@ public class PlexIdConverterResilienceTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_WhenACandidateReadHitsAnOpenCircuit_IsUnavailable()
+	public async Task LookUpAsync_WhenTheLaneRefusesACandidateRead_IsUnavailable()
 	{
-		var broken = PlexCandidate.Create();
-		var stub = new PlexStub().Returns(broken).Returns(PlexCandidate.Create()).Breaks(broken);
+		var refused = PlexCandidate.Create();
+		var stub = new PlexStub().Returns(refused).Returns(PlexCandidate.Create()).Refuses(refused);
 		var testee = new PlexIdConverter(stub.CreateApi(), PlexStub.NoSearchCache());
 
 		var result = await testee.LookUpAsync(testee.RequestByHints(Hints, PlexCandidate.Create().TmdbId));

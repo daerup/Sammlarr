@@ -4,6 +4,7 @@ using Core.Wantlist.Sync;
 using Domain.Media;
 using Domain.Providers;
 using Observability.Feed;
+using Shared.Concurrency;
 
 namespace Core.Media;
 
@@ -29,7 +30,7 @@ internal sealed record TitleRun(
 		return new TitleRun(addressedBy, await ids.ConnectedAsync(cancellationToken), new HashSet<RemoteService>());
 	}
 
-	internal static TracedRequest Traced(IdentifyRequest request) => new(request, TitleSpan(request));
+	internal static TracedRequest Traced(IdentifyRequest request) => new(request, TitleSpan(request), LanePriority.Next(LaneClass.Title));
 
 	private static Optional<Activity> TitleSpan(IdentifyRequest request)
 	{

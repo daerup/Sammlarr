@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Runtime.CompilerServices;
 using API.Feeds;
+using API.Http;
 using API.Trakt.Types;
 using Contracts.Auth;
 using Contracts.Feed;
@@ -69,7 +70,7 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 		var pages = 1;
 		for (var page = 1; page <= pages; page++)
 		{
-			using var response = await FeedRunSpans.ReadingAsync(
+			using var response = await SourcePages.ReadAsync(
 				count.Read + 1,
 				() => client.GetAsync(TraktPages.Request(identifier, page), clientId, cancellationToken)
 			);

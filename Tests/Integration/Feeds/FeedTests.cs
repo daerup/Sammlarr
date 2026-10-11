@@ -42,7 +42,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetFeedItemsAsync_WhenTheProviderCircuitIsOpen_SurfacesATypedFailure()
+	public async Task GetFeedItemsAsync_WhenTheLaneRefuses_SurfacesATypedFailure()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedUnavailable("storm-list");

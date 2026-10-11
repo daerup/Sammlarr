@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using API.Anime;
 using API.Feeds;
+using API.Http;
 using API.Mal.Types;
 using Contracts;
 using Contracts.Auth;
@@ -79,7 +80,7 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 		var number = 0;
 		while (page.Length > 0)
 		{
-			var answer = await FeedRunSpans.ReadingAsync(number + 1, () => PageAsync(identifier, page, isPage, clientId, cancellationToken));
+			var answer = await SourcePages.ReadAsync(number + 1, () => PageAsync(identifier, page, isPage, clientId, cancellationToken));
 			var data = answer.Data ?? throw new InvalidDataException("MyAnimeList answered a page without data.");
 			number++;
 			FeedRunSpans.SourcePage(number, new None());

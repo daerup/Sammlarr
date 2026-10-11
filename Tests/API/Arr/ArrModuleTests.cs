@@ -25,8 +25,7 @@ public class ArrModuleTests
 	[Arguments("Arr:Radarr:MinimumAvailability", "Soon")]
 	[Arguments("Arr:Sonarr:SeriesType", "Weekly")]
 	[Arguments("Arr:Sonarr:SeasonFolder", "sometimes")]
-	[Arguments("Arr:Radarr:Http:TotalTimeoutSeconds", "forever")]
-	[Arguments("Arr:Sonarr:Http:AttemptTimeoutSeconds", "90")]
+	[Arguments("Arr:Radarr:Http:AttemptTimeoutSeconds", "forever")]
 	public async Task StartAsync_WithAnArrSettingThatCannotBeBoundOrFailsValidation_RefusesToStart(string key, string value)
 	{
 		using var host = Host(new KeyValuePair<string, string?>(key, value));

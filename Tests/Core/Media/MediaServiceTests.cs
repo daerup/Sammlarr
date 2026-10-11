@@ -3,6 +3,7 @@ using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;
+using Shared.Concurrency;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
@@ -99,6 +100,25 @@ public class MediaServiceTests
 
 		await Assert.That(async () => await consume.WaitAsync(TimeSpan.FromSeconds(5))).Throws<OperationCanceledException>();
 		await Assert.That(results).IsEmpty();
+	}
+
+	[Test]
+	public async Task IdentifyWithDetailsAsync_ForATitle_AsksItsProvidersAtTitlePriority()
+	{
+		var asked = new List<LaneClass>();
+		var (testee, deps) = TestMediaService.Create();
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any())
+			.Returns(
+				(ext, _) =>
+				{
+					asked.Add(LanePriority.Current.Class);
+					return new Found<FoundMedia>(TestMediaService.CompleteMovie(ext));
+				}
+			);
+
+		await testee.IdentifyWithDetailsAsync(new[] { new IdentifyRequest([TmdbId.From("550", MediaType.Movie)], new None()) }.ToAsyncEnumerable()).ToListAsync();
+
+		await Assert.That(asked).IsEquivalentTo([LaneClass.Title]);
 	}
 
 	[Test]

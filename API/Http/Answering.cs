@@ -1,6 +1,6 @@
 using Domain.Providers;
-using Polly.CircuitBreaker;
 using Polly.Timeout;
+using Shared.Concurrency;
 
 namespace API.Http;
 
@@ -42,7 +42,7 @@ internal static class Answering
 			RemoteUnavailableException unavailable => new Unavailable(remote, unavailable.Until, unavailable.Sent),
 			HttpRequestException or TimeoutRejectedException => new Unavailable(remote, new None(), true),
 			OperationCanceledException { InnerException: TimeoutException } => new Unavailable(remote, new None(), true),
-			BrokenCircuitException => new Unavailable(remote, new None(), false),
+			LaneRefusedException => new Unavailable(remote, new None(), false),
 			_ => new Faulted(remote, error),
 		};
 	}

@@ -1,6 +1,7 @@
 using System.Net;
 using Domain.Auth;
 using Polly;
+using Shared.Concurrency;
 
 namespace API.Http;
 
@@ -16,7 +17,9 @@ internal static class AccessCheckExtensions
 				return response.IsSuccessStatusCode ? AccessCheck.Valid : Refused(response.StatusCode);
 			}
 			catch (Exception exception)
-				when (exception is HttpRequestException or ExecutionRejectedException or TaskCanceledException && !cancellationToken.IsCancellationRequested)
+				when (exception is HttpRequestException or ExecutionRejectedException or LaneRefusedException or TaskCanceledException
+					&& !cancellationToken.IsCancellationRequested
+				)
 			{
 				return AccessCheck.Unreachable;
 			}

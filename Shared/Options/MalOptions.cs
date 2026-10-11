@@ -4,5 +4,6 @@ public record MalOptions : IOptionsSection, IProviderHttpOptions
 {
 	public required string BaseUrl { get; set; }
 	public ProviderHttpOptions Http { get; set; } = new();
+	public IReadOnlyDictionary<string, string> Urls => new Dictionary<string, string> { ["api"] = BaseUrl };
 	public static string SectionName => "MyAnimeList";
 }

@@ -9,6 +9,7 @@ using Contracts.Usage;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Shared.DI;
 using Shared.Options;
 using TestInfrastructure;
 using TUnit.Mocks.Http;
@@ -51,7 +52,7 @@ public class MdblistClientTests
 	}
 
 	[Test]
-	public async Task SendAsync_WhenASpentKeysRetryOutlastsTheTimeout_RecordsTheKeyAsSpent()
+	public async Task SendAsync_WhenASpentKeysRetryAfterOutlastsTheMaxWait_HandsBackThe429AndRecordsTheKeyAsSpent()
 	{
 		var handler = Mock.HttpHandler();
 		handler
@@ -63,8 +64,9 @@ public class MdblistClientTests
 		using var host = Host(handler);
 		var testee = host.Services.GetRequiredService<MdblistClient>();
 
-		await Assert.That(async () => await testee.SendAsync(HttpMethod.Get, "lists/1/items", Key)).Throws<RemoteUnavailableException>();
+		using var response = await testee.SendAsync(HttpMethod.Get, "lists/1/items", Key);
 
+		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
 		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().ReservedUntil(Key.Value)).IsSome();
 	}
 
@@ -92,11 +94,10 @@ public class MdblistClientTests
 					new MdblistOptions
 					{
 						BaseUrl = BaseUrl,
-						Http = new ProviderHttpOptions { AttemptTimeoutSeconds = 1, TotalTimeoutSeconds = 2 },
+						Http = new ProviderHttpOptions { AttemptTimeoutSeconds = 1 },
 					}
 				);
-				services.AddSingleton<ProviderGates>();
-				services.AddSingleton<RemoteCapacity>();
+				services.AddModule<HttpModule>();
 				services.AddSingleton(MdblistApis.Clock());
 				services.AddSingleton(IProviderRateLimitReporter.Mock().Object);
 				services.AddSingleton(IFeedRunUsage.Mock().Object);

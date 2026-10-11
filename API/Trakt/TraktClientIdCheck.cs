@@ -2,6 +2,7 @@ using System.Net;
 using Contracts.Auth;
 using Domain.Auth;
 using Polly;
+using Shared.Concurrency;
 using Shared.Options;
 
 namespace API.Trakt;
@@ -26,7 +27,9 @@ internal sealed class TraktClientIdCheck(IHttpClientFactory httpClientFactory, T
 			};
 		}
 		catch (Exception exception)
-			when (exception is HttpRequestException or ExecutionRejectedException or TaskCanceledException && !cancellationToken.IsCancellationRequested)
+			when (exception is HttpRequestException or ExecutionRejectedException or LaneRefusedException or TaskCanceledException
+				&& !cancellationToken.IsCancellationRequested
+			)
 		{
 			return AccessCheck.Unreachable;
 		}

@@ -2,7 +2,6 @@ using System.Buffers.Binary;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
-using API.Http;
 using API.Pictures;
 using Contracts.Identity;
 using Microsoft.AspNetCore.Builder;
@@ -137,7 +136,6 @@ public class PictureGridsTests
 			.ConfigureServices(services =>
 			{
 				services.AddSingleton(new PictureOptions());
-				services.AddSingleton<ProviderGates>();
 				services.AddModule<PicturesModule>();
 			})
 			.Build();

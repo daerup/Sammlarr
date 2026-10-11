@@ -1,8 +1,8 @@
 using System.Text.Json;
 using API.Http;
 using Domain.Providers;
-using Polly.CircuitBreaker;
 using Polly.Timeout;
+using Shared.Concurrency;
 using TestInfrastructure;
 
 namespace API.Tests.Http;
@@ -70,9 +70,9 @@ public class AnsweringTests
 	}
 
 	[Test]
-	public async Task GuardedAsync_ForAnOpenCircuit_IsUnavailableAndNotSent()
+	public async Task GuardedAsync_ForALaneRefusal_IsUnavailableAndNotSent()
 	{
-		var answer = await Thrown(new BrokenCircuitException());
+		var answer = await Thrown(new LaneRefusedException("blocked until 2026-10-11T12:05:00Z"));
 
 		await Assert.That(answer).IsOfUnionType<Answer<string>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Plex, new None(), false));
 	}

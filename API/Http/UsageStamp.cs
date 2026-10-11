@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using System.Net.Http.Metrics;
+using API.Http.Lanes;
 using Contracts.Usage;
 using Domain.Providers;
 using Domain.Usage;
 using Observability.Usage;
 using Polly;
-using Polly.CircuitBreaker;
 using Polly.Telemetry;
 using Polly.Timeout;
 
@@ -18,6 +18,8 @@ internal sealed record UsageStamp(RemoteService Service, UsageMark Mark)
 	internal static readonly ResiliencePropertyKey<int> RateLimited = new("sammlarr.rate-limited");
 
 	internal static readonly ResiliencePropertyKey<int> Retried = new("sammlarr.retried");
+
+	internal static readonly ResiliencePropertyKey<bool> Sent = new("sammlarr.sent");
 
 	internal IReadOnlyList<KeyValuePair<string, object?>> Tags()
 	{
@@ -80,8 +82,8 @@ internal sealed class UsageMeteringEnricher(IFeedRunUsage feedRuns) : MeteringEn
 		var outcome = context.TelemetryEvent.Outcome;
 		var exception = outcome?.Exception;
 		var resilience = context.TelemetryEvent.Context;
-		var neverSent = exception is BrokenCircuitException && resilience.Properties.GetValue(UsageStamp.Retried, 0) == 0;
-		if (context.TelemetryEvent.Event.EventName != PipelineExecuted || neverSent)
+		var neverSent = !resilience.Properties.GetValue(UsageStamp.Sent, false);
+		if (context.TelemetryEvent.Event.EventName != PipelineExecuted || !IsRetryPipeline(context.TelemetryEvent.Source.PipelineName) || neverSent)
 		{
 			return;
 		}
@@ -96,6 +98,8 @@ internal sealed class UsageMeteringEnricher(IFeedRunUsage feedRuns) : MeteringEn
 			context.Tags.Add(tag);
 		}
 	}
+
+	private static bool IsRetryPipeline(string? pipeline) => pipeline?.EndsWith($"-{LanedPipeline.RetryPipeline}", StringComparison.Ordinal) ?? false;
 
 	private void Credit(UsageStamp stamp, UsageOutcome outcome) => stamp.Mark.Feed.Apply(feed => feedRuns.Credit(feed, stamp.Service, outcome, 1));
 

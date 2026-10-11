@@ -2,8 +2,8 @@ using API.Http;
 using Contracts.Auth;
 using Contracts.Identity;
 using Domain.Providers;
-using Polly.CircuitBreaker;
 using Polly.Timeout;
+using Shared.Concurrency;
 
 namespace API.Plex;
 
@@ -35,7 +35,7 @@ internal class PlexClient(HttpClient client, ICredentialService credentials, ICu
 		{
 			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => credentials.ReportRejected(AuthProvider.Plex));
 		}
-		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
+		catch (Exception ex) when (ex is LaneRefusedException or TimeoutRejectedException)
 		{
 			throw new RemoteUnavailableException(RemoteService.Plex, sent: ex is TimeoutRejectedException, ex);
 		}

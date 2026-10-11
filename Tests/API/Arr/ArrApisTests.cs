@@ -1,6 +1,8 @@
+using System.Net;
 using API.Arr;
 using API.Arr.Radarr;
 using API.Arr.Sonarr;
+using API.Http.Lanes;
 using Domain.Media;
 using Domain.Wantlist.Arr;
 using Shared.Options;
@@ -34,6 +36,26 @@ public class ArrApisTests
 	public async Task Taking_AnImdbId_IsNobody()
 	{
 		await Assert.That(Testee.Taking(ImdbId.From("tt0133093", MediaType.Movie))).IsNone();
+	}
+
+	[Test]
+	public async Task StatusAsync_ForAConnection_SendsInTheLaneOfItsAddress()
+	{
+		var radarr = Mock.HttpHandler();
+		var owners = new List<string>();
+		radarr
+			.OnAnyRequest()
+			.RespondWith(request =>
+			{
+				request.Options.TryGetValue(LaneHandler.Owner, out var owner);
+				owners.Add(owner ?? "");
+				return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("""{"appName":"Radarr","version":"6.4.4"}""") };
+			});
+		var api = new RadarrApi(new HttpClient(radarr), new RadarrOptions());
+
+		await api.StatusAsync(new ArrConnection(ArrApp.Radarr, new Uri("http://radarr:7878/"), "0123456789abcdef0123456789abcdef"), CancellationToken.None);
+
+		await Assert.That(owners).IsEquivalentTo(["http://radarr:7878"]);
 	}
 
 	[Test]
