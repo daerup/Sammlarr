@@ -54,7 +54,7 @@ public class LibraryWriterTests
 		var (first, broken, last) = (New(), New(), New());
 		var held = Held(repository);
 		repository
-			.SaveDetailsAsync(Is<IReadOnlyList<DetailsChange>>(changes => changes.Contains(broken)), Any())
+			.SaveDetailsAsync(Is<IReadOnlyList<DetailsChange>>(changes => changes!.Contains(broken)), Any())
 			.Throws(new InvalidOperationException("broken row"));
 
 		await using (var testee = new LibraryWriter(repository.Object, logger.Object))
@@ -82,7 +82,7 @@ public class LibraryWriterTests
 	{
 		var held = new HeldCommit(New(), new TaskCompletionSource(), new TaskCompletionSource());
 		repository
-			.SaveDetailsAsync(Is<IReadOnlyList<DetailsChange>>(changes => changes.Contains(held.Change)), Any())
+			.SaveDetailsAsync(Is<IReadOnlyList<DetailsChange>>(changes => changes!.Contains(held.Change)), Any())
 			.Returns(() =>
 			{
 				held.Entered.TrySetResult();

@@ -57,4 +57,31 @@ public class ProviderAnswerTests
 		Gen.Select(MediaFieldsGen.Fields, Titles)
 			.Sample((fills, answered) => ProviderAnswer.After(RemoteService.Tmdb, fills, answered, At).Unfilled.Except(answered.Missing).IsEmpty);
 	}
+
+	[Test]
+	public async Task AskableAt_ForAnAnswer_IsTwoWeeksLater()
+	{
+		await Assert.That(new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, At).AskableAt).IsEqualTo(At.AddDays(14));
+	}
+
+	[Test]
+	public async Task Failed_AfterAnAnswer_StartsTheBackoffAtAnHour()
+	{
+		var failed = ProviderAnswer.Failed(RemoteService.Tmdb, Some.Of(new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, At.AddDays(-1))), At);
+
+		await Assert.That(failed.Failures).IsEqualTo(1);
+		await Assert.That(failed.AskableAt).IsEqualTo(At.AddHours(1));
+	}
+
+	[Test]
+	public async Task Failed_ForTheThirdTimeAndLater_WaitsADay()
+	{
+		var second = ProviderAnswer.Failed(RemoteService.Tmdb, Some.Of(ProviderAnswer.Failed(RemoteService.Tmdb, new None(), At)), At);
+		var third = ProviderAnswer.Failed(RemoteService.Tmdb, Some.Of(second), At);
+		var fifth = ProviderAnswer.Failed(RemoteService.Tmdb, Some.Of(ProviderAnswer.Failed(RemoteService.Tmdb, Some.Of(third), At)), At);
+
+		await Assert.That(second.AskableAt).IsEqualTo(At.AddHours(6));
+		await Assert.That(third.AskableAt).IsEqualTo(At.AddHours(24));
+		await Assert.That(fifth.AskableAt).IsEqualTo(At.AddHours(24));
+	}
 }

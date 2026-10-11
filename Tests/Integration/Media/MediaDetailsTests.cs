@@ -43,7 +43,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_WhenEveryProviderIsUnreachable_ServesTheStaleCache()
+	public async Task GetDetailsAsync_WhenEveryProviderIsUnreachable_ServesTheStaleCacheKeepsItsRefreshTimeAndMovesItsAskTime()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
@@ -55,7 +55,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
 		await AssertTitle(results[0], "Cached Title");
-		await AssertCachedAs(fightClub, "Cached Title", At(5, 17));
+		await AssertCachedAs(fightClub, "Cached Title", At(5, 17), asked: At(6, 1));
 	}
 
 	[Test]

@@ -3,6 +3,7 @@ using API.Plex;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
+using Domain.Auth;
 using Domain.Providers;
 using Shared.Concurrency;
 using TestInfrastructure;
@@ -33,6 +34,19 @@ public class PlexClientTests
 			.That(async () => await testee.SendAsync(HttpMethod.Get, PlexBaseUrl))
 			.Throws<InvalidOperationException>()
 			.WithMessageContaining("No valid Plex credentials are stored");
+	}
+
+	[Test]
+	public async Task SendAsync_WhenTheCredentialWasRejected_ThrowsItAsRejected()
+	{
+		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
+		using var httpClient = handler.CreateClient(PlexBaseUrl);
+		var credentialStore = ICredentialService.Mock();
+		var rejected = new SecretRejectedException("The stored Plex secret was rejected.");
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(Error.From(rejected.Message, rejected));
+		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
+
+		await Assert.That(async () => await testee.SendAsync(HttpMethod.Get, PlexBaseUrl)).Throws<SecretRejectedException>();
 	}
 
 	[Test]

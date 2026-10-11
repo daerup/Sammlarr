@@ -97,15 +97,27 @@ internal sealed class DetailsFetcher(
 		var now = clock.Now;
 		var reason = stored.Map(previous => Reason(previous, now)).GetValueOr(new Uncached());
 		var preferred = await PreferredAsync(cancellationToken);
-		var (enriched, answers, unavailable) = await EnrichAsync(identity, reason, Backup(reason, identity.Type, now), connected, preferred, cancellationToken);
-		if (answers.Count == 0 && reason is not Gaps)
+		var (enriched, answered, outcomes, unavailable) = await EnrichAsync(
+			identity,
+			reason,
+			Backup(reason, identity.Type, now),
+			connected,
+			preferred,
+			cancellationToken
+		);
+		if (answered.Count == 0 && reason is not Gaps)
 		{
+			stored
+				.When(_ => outcomes.Count > 0)
+				.Apply(previous =>
+					writer.Save(new DetailsChange(identity.Id, stored, previous with { AskedAt = clock.Now, Answers = Answers(reason, outcomes, now) }))
+				);
 			return unavailable.Match(remote => Error.From(new RemoteUnavailableException(remote, sent: false)), () => Error.From("the details could not be fetched"));
 		}
 
-		var identified = await KeepNewKeysAsync(identity, enriched.Identity, answers, cancellationToken);
+		var identified = await KeepNewKeysAsync(identity, enriched.Identity, answered, cancellationToken);
 		var askedAt = clock.Now;
-		var cached = new CachedDetails(enriched.Details, RefreshedAt(reason, askedAt), askedAt, Answers(reason, answers, now));
+		var cached = new CachedDetails(enriched.Details, RefreshedAt(reason, askedAt), askedAt, Answers(reason, outcomes, now));
 		writer.Save(new DetailsChange(identity.Id, stored, cached));
 		return Success.Of(enriched with { Identity = identified });
 	}
@@ -113,7 +125,7 @@ internal sealed class DetailsFetcher(
 	private async Task<MediaIdentity> KeepNewKeysAsync(
 		MediaIdentity identity,
 		MediaIdentity enriched,
-		IEnumerable<ProviderAnswer> answers,
+		IEnumerable<RemoteService> answered,
 		CancellationToken cancellationToken
 	)
 	{
@@ -123,10 +135,7 @@ internal sealed class DetailsFetcher(
 			return identity;
 		}
 
-		var outcome = await claims.ClaimAsync(
-			new IdentityClaim([.. learned], Some.Of(identity.Id), [.. answers.Select(answer => answer.Provider)]),
-			cancellationToken
-		);
+		var outcome = await claims.ClaimAsync(new IdentityClaim([.. learned], Some.Of(identity.Id), [.. answered]), cancellationToken);
 		return outcome switch
 		{
 			Claimed claimed => new MediaIdentity(claimed.Id, identity.Keys + claimed.Keys),
@@ -141,7 +150,7 @@ internal sealed class DetailsFetcher(
 
 	private bool NeedsRefetch(MediaIdentity identity, CachedDetails cached, IReadOnlySet<RemoteService> connected)
 	{
-		var leftToAsk = EnrichersLeftToAsk(identity, cached.Answered, connected);
+		var leftToAsk = EnrichersLeftToAsk(identity, cached.Resting(clock.Now), connected);
 		return EnricherChoice.NeedsRefetch(cached, leftToAsk, clock.Now);
 	}
 
@@ -158,7 +167,7 @@ internal sealed class DetailsFetcher(
 	private MediaFields GivenWithin(CachedDetails stored, DateTimeOffset now)
 	{
 		return stored
-			.Answers.Where(answer => now - answer.AnsweredAt < CachedDetails.StaleAfter)
+			.Answers.Where(answer => answer.Failures == 0 && now - answer.AnsweredAt < CachedDetails.StaleAfter)
 			.Aggregate(MediaFields.None, (given, answer) => given | Given(answer));
 	}
 
@@ -167,12 +176,35 @@ internal sealed class DetailsFetcher(
 		return enrichers.Find(answer.Provider).Map(enricher => enricher.Fills.Except(answer.Unfilled)).GetValueOr(MediaFields.None);
 	}
 
-	private static IReadOnlySet<RemoteService> AlreadyAnswered(FetchReason reason)
+	private static Optional<CachedDetails> Stored(FetchReason reason)
 	{
 		return reason switch
 		{
-			Gaps gaps => gaps.Stored.Answered,
-			Uncached or Stale => [],
+			Gaps gaps => Some.Of(gaps.Stored),
+			Stale stale => Some.Of(stale.Stored),
+			Uncached => new None(),
+		};
+	}
+
+	private static Optional<ProviderAnswer> Previous(FetchReason reason, RemoteService remote)
+	{
+		return Stored(reason).Map(stored => stored.Answers.FirstOrNone(answer => answer.Provider == remote));
+	}
+
+	private static Optional<ProviderAnswer> Outcome(
+		Answer<FoundMedia> answer,
+		EnricherCandidate asked,
+		Optional<ProviderAnswer> previous,
+		MediaType type,
+		DateTimeOffset now
+	)
+	{
+		return answer switch
+		{
+			Found<FoundMedia> found => Optional.When(found.Value.Fits(type), () => ProviderAnswer.After(asked.Remote, asked.Fills, found.Value.Details, now)),
+			NoMatch => Some.Of(new ProviderAnswer(asked.Remote, asked.Fills, now)),
+			Unavailable { Sent: true } or Faulted => Some.Of(ProviderAnswer.Failed(asked.Remote, previous, now)),
+			Unavailable => new None(),
 		};
 	}
 
@@ -190,7 +222,7 @@ internal sealed class DetailsFetcher(
 		IEnumerable<ProviderAnswer> previous = reason switch
 		{
 			Gaps gaps => gaps.Stored.Answers,
-			Stale stale => stale.Stored.Answers.Where(answer => now - answer.AnsweredAt < CachedDetails.StaleAfter),
+			Stale stale => stale.Stored.Answers.Where(answer => answer.Failures > 0 || answer.AskableAt > now),
 			Uncached => [],
 		};
 		return [.. fresh.UnionBy(previous, answer => answer.Provider)];
@@ -202,7 +234,7 @@ internal sealed class DetailsFetcher(
 		return config.SearchProvider.Service.Remotes;
 	}
 
-	private async Task<(MatchedMedia Enriched, List<ProviderAnswer> Answers, Optional<RemoteService> Unavailable)> EnrichAsync(
+	private async Task<(MatchedMedia Enriched, List<RemoteService> Answered, List<ProviderAnswer> Outcomes, Optional<RemoteService> Unavailable)> EnrichAsync(
 		MediaIdentity identity,
 		FetchReason reason,
 		MediaDetails backup,
@@ -216,8 +248,9 @@ internal sealed class DetailsFetcher(
 		var fresh = MediaDetails.Empty(backup.Type);
 		var gapFills = MediaDetails.Empty(backup.Type);
 		var current = Layered(reason, fresh, backup, gapFills, answered: false);
-		List<ProviderAnswer> answers = [];
-		var asked = AlreadyAnswered(reason).ToHashSet();
+		List<RemoteService> answered = [];
+		List<ProviderAnswer> outcomes = [];
+		var asked = Stored(reason).Map(stored => stored.Resting(now)).GetValueOr([]).ToHashSet();
 		Optional<RemoteService> unavailable = new None();
 		while (current.Missing is var missing && !missing.IsEmpty)
 		{
@@ -233,17 +266,18 @@ internal sealed class DetailsFetcher(
 
 			asked.Add(next.Remote);
 			var answer = await AskAsync(next, known, cancellationToken);
+			Outcome(answer, next, Previous(reason, next.Remote), backup.Type, now).Apply(outcomes.Add);
 			unavailable = unavailable.Or(() => Optional.When(!answer.IsDefinitive, () => next.Remote));
 			var fitting = answer.ToOptional().When(found => found.Fits(backup.Type));
 			fitting.Apply(found => known = known with { Keys = known.Keys + found.Externals.OfType<IIdentityKey>() });
 			var deferred = fitting.Map(found => Deferred(next.Remote, found.Details)).GetValueOr(MediaFields.None);
 			fitting.Apply(found => fresh = fresh.FillFrom(found.Details.Without(deferred)));
 			fitting.Apply(found => gapFills = gapFills.FillFrom(found.Details.Only(deferred)));
-			fitting.Apply(found => answers.Add(ProviderAnswer.After(next.Remote, next.Fills, found.Details, now)));
-			current = Layered(reason, fresh, backup, gapFills, answered: answers.Count > 0);
+			fitting.Apply(_ => answered.Add(next.Remote));
+			current = Layered(reason, fresh, backup, gapFills, answered: answered.Count > 0);
 		}
 
-		return (new MatchedMedia(known, current), answers, unavailable);
+		return (new MatchedMedia(known, current), answered, outcomes, unavailable);
 	}
 
 	private static MediaDetails Layered(FetchReason reason, MediaDetails fresh, MediaDetails backup, MediaDetails gapFills, bool answered)

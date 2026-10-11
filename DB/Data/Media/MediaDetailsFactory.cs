@@ -21,7 +21,7 @@ internal class MediaDetailsFactory
 			Details(row),
 			row.RefreshedAt,
 			row.AskedAt,
-			[.. row.Answers.Select(answer => new ProviderAnswer(answer.Provider, answer.Unfilled, answer.AnsweredAt))]
+			[.. row.Answers.Select(answer => new ProviderAnswer(answer.Provider, answer.Unfilled, answer.AnsweredAt, answer.Failures))]
 		);
 	}
 
@@ -93,6 +93,7 @@ internal class MediaDetailsFactory
 			Provider = answer.Provider,
 			Unfilled = answer.Unfilled,
 			AnsweredAt = answer.AnsweredAt,
+			Failures = answer.Failures,
 			Details = parent,
 		};
 	}

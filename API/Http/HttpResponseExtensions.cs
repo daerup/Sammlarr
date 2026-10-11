@@ -9,11 +9,16 @@ internal static class HttpResponseExtensions
 	{
 		public Error Unanswered(RemoteService remote, string reason)
 		{
-			return IsTransient(status) ? Error.From(new RemoteUnavailableException(remote, sent: true)) : Error.From(reason);
+			return status switch
+			{
+				HttpStatusCode.NotFound => Error.From(reason),
+				HttpStatusCode.TooManyRequests or HttpStatusCode.RequestTimeout or >= HttpStatusCode.InternalServerError => Error.From(
+					new RemoteUnavailableException(remote, sent: true)
+				),
+				_ => Error.From(reason, new HttpRequestException(reason, null, status)),
+			};
 		}
 	}
-
-	private static bool IsTransient(HttpStatusCode status) => status is HttpStatusCode.TooManyRequests or HttpStatusCode.RequestTimeout || (int)status >= 500;
 
 	extension(Task<HttpResponseMessage> send)
 	{

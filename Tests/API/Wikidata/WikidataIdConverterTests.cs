@@ -157,7 +157,7 @@ public class WikidataIdConverterTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_WhenWikidataRejectsTheQuery_IsNoMatch()
+	public async Task LookUpAsync_WhenWikidataRejectsTheQuery_IsUnavailableAndSent()
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.BadRequest);
@@ -165,7 +165,7 @@ public class WikidataIdConverterTests
 
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt12042730", MediaType.Movie)));
 
-		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, NoMatch>();
+		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Wikidata, new None(), true));
 	}
 
 	[Test]
