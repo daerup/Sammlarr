@@ -5,6 +5,7 @@ using Bunit;
 using Contracts.Usage;
 using Domain.Providers;
 using Domain.Usage;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Usage;
@@ -34,6 +35,19 @@ public class UsageCallsCardTests : BunitContext
 
 		await Assert.That(swatches.First()).IsEqualTo("Answered|background: var(--usage-answered)");
 		await Assert.That(swatches).Count().IsEqualTo(5);
+	}
+
+	[Test]
+	[Arguments("Enter")]
+	[Arguments(" ")]
+	public async Task Row_WhenEnterOrSpaceIsPressed_PicksItsService(string key)
+	{
+		Optional<RemoteService> raised = new None();
+		var cut = RenderCard(UsageSamples.Snapshot().Current, changed: picked => raised = picked);
+
+		await Row(cut, "Plex").KeyDownAsync(new KeyboardEventArgs { Key = key });
+
+		await Assert.That(raised).IsSome().And.IsEqualTo(RemoteService.Plex);
 	}
 
 	[Test]

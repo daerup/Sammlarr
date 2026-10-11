@@ -91,6 +91,17 @@ public class UsageFeedLinesTests
 	}
 
 	[Test]
+	public async Task ReadAsync_ForAFeedIdThatIsBothLiveAndDeleted_NamesTheLiveFeed()
+	{
+		Stored(Run(-2, 30, 3, 0, 2));
+		_deleted.ReadAsync(Any()).Returns([new DeletedFeed(Busy.Id, "Old name", FeedProvider.Mdblist, To.AddHours(-5))]);
+
+		var feeds = await Testee().ReadAsync(Day, NoRows, CancellationToken.None);
+
+		await Assert.That(feeds.Names[Busy.Id].DeletedAt).IsNone();
+	}
+
+	[Test]
 	public async Task ReadAsync_ADeletedFeedThatRanInTheWindow_KeepsItsNameAndItsCallsPerService()
 	{
 		Stored(Run(-2, 30, 3, 0, 2));

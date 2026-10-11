@@ -36,7 +36,7 @@ internal sealed class UsageFeedLines(IFeedService feeds, IDeletedFeeds deleted)
 			.. live.Select(line => new UsageFeedName(line.Feed, line.Name, line.Provider, new None())),
 			.. gone.Select(feed => new UsageFeedName(feed.Feed, feed.Name, feed.Provider, Some.Of(feed.DeletedAt))),
 		];
-		return new UsageFeeds([.. live, .. ended], names.ToDictionary(name => name.Feed));
+		return new UsageFeeds([.. live, .. ended], names.DistinctBy(name => name.Feed).ToDictionary(name => name.Feed));
 	}
 
 	private static UsageFeedLine Line(Domain.Feed.Feed feed, Optional<DateTimeOffset> lastRun, IReadOnlyList<UsageRun> runs)
