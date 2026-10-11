@@ -83,7 +83,8 @@
                 var picked = IsPicked(line.Service);
                 var open = Panel(line.Service).When(_ => picked);
                 <div class="@($"usage-service cursor-pointer rounded-md pl-3 pr-1 text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-service-picked" : string.Empty)}")"
-                     data-testid="usage-service" data-service="@line.Service" data-picked="@(picked ? "true" : "false")" @onclick="() => PickAsync(line.Service)">
+                     data-testid="usage-service" data-service="@line.Service" data-picked="@(picked ? "true" : "false")" role="button" tabindex="0" aria-pressed="@(picked ? "true" : "false")"
+                     @onclick="() => PickAsync(line.Service)" @onkeydown="args => KeyAsync(args, line.Service)">
                     <span class="flex min-w-0 items-center gap-2 whitespace-nowrap font-medium">
                         <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="18" Decorative="true"/>
                         @Branding.GetBrandingInfo(line.Service).NickName
@@ -226,6 +227,8 @@
     private bool IsPicked(RemoteService service) => Picked.Match(picked => picked == service, () => false);
 
     private Task PickAsync(RemoteService service) => PickedChanged.InvokeAsync(Optional.When(!IsPicked(service), () => service));
+
+    private Task KeyAsync(KeyboardEventArgs args, RemoteService service) => args.Key is "Enter" or " " ? PickAsync(service) : Task.CompletedTask;
 
     private string Name(RemoteService service) => Branding.GetBrandingInfo(service).NickName;
 

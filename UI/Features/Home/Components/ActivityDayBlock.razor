@@ -69,7 +69,7 @@
             <div class="druns">
                 @foreach (var entry in Day.Runs)
                 {
-                    <a class="drun" href="@RunHref(entry)" @key="entry.Run.Id">
+                    <a class="drun" href="@(entry.Gone ? null : RunHref(entry))" @key="entry.Run.Id">
                         <span class="drun-at">@At(entry)</span>
                         <span class="drun-feed">@entry.FeedName</span>
                         <span class="drun-delta">

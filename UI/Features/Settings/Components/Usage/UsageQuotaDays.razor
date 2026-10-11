@@ -1,7 +1,7 @@
 @using Contracts.Usage
 
 <div class="relative h-[184px] text-[10.5px] leading-none text-muted-foreground" data-testid="usage-quota-days">
-    <svg class="absolute top-0 overflow-visible" style="@($"left: {PlotLeft}px; width: calc(100% - {PlotLeft + PlotRight}px); height: {Height}px")">
+    <svg class="absolute top-0 overflow-visible" aria-hidden="true" style="@($"left: {PlotLeft}px; width: calc(100% - {PlotLeft + PlotRight}px); height: {Height}px")">
         <line x1="0" x2="100%" y1="@UsageView.Number(Y(0))" y2="@UsageView.Number(Y(0))" stroke="var(--border)"/>
         @if (Allowance is Some<long>(var daily))
         {

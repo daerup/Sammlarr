@@ -68,6 +68,15 @@ public class UsageQuotaLineTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_WithoutTheDayBeforeAndAResetSecondsPastTheHour_StillSaysWhy()
+	{
+		var allowance = UsageSamples.Allowance(191) with { DayBefore = new None() };
+		var cut = RenderLine(UsageSamples.Quota(allowance with { ResetAt = allowance.ResetAt.AddSeconds(23) }));
+
+		await Assert.That(cut.FindAll("[data-testid=usage-quota-unknown]")).Count().IsEqualTo(1);
+	}
+
+	[Test]
 	public async Task Render_WithoutTheDayBefore_StartsAtTheResetAndSaysWhy()
 	{
 		var cut = RenderLine(UsageSamples.Quota(UsageSamples.Allowance(191) with { DayBefore = new None() }));
@@ -75,7 +84,7 @@ public class UsageQuotaLineTests : BunitContext
 		await Assert.That(cut.Find("[data-testid=usage-quota-path]").GetAttribute("d")).StartsWith("M583.33,0 ");
 		await Assert
 			.That(cut.Find("[data-testid=usage-quota-unknown]").TextContent)
-			.IsEqualTo("Sammlarr did not see the day before end: before the reset it shows after tonight");
+			.IsEqualTo("Sammlarr did not see how the day before ended: its hours show after the next reset");
 	}
 
 	[Test]
