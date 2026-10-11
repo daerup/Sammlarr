@@ -1,8 +1,11 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Media;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Changes;
+using UI.Tests.Media;
 
 namespace UI.Tests.Changes;
 
@@ -26,7 +29,7 @@ public class ChangeListTests : BunitContext
 
 		var cut = RenderList(item);
 
-		await Assert.That(cut.FindAll(".change-context")).HasCount(1);
+		await Assert.That(cut.FindAll(".change-context")).Count().IsEqualTo(1);
 		await Assert.That(cut.Find(".change-row").TextContent).DoesNotContain("Absent from");
 	}
 
@@ -35,7 +38,7 @@ public class ChangeListTests : BunitContext
 	{
 		var cut = RenderList(new ChangeItem { Title = "Nowhere", Kind = ChangeKind.Unmatched });
 
-		await Assert.That(cut.FindAll(".change-poster.is-missing")).HasCount(1);
+		await Assert.That(cut.FindAll(".change-poster.is-missing")).Count().IsEqualTo(1);
 		await Assert.That(cut.FindAll("img.change-poster")).IsEmpty();
 	}
 
@@ -68,7 +71,7 @@ public class ChangeListTests : BunitContext
 		await Assert.That(chips[0].TagName).IsEqualTo("BUTTON");
 		await Assert.That(chips[1].TagName).IsNotEqualTo("BUTTON");
 		await Assert.That(chips[1].ClassList).Contains("is-count");
-		await Assert.That(cut.FindAll(".change-chip-sep")).HasCount(1);
+		await Assert.That(cut.FindAll(".change-chip-sep")).Count().IsEqualTo(1);
 	}
 
 	[Test]
@@ -122,7 +125,7 @@ public class ChangeListTests : BunitContext
 
 		await cut.Find(".change-chip").ClickAsync(new MouseEventArgs());
 
-		await Assert.That(cut.FindAll(".change-row")).HasCount(1);
+		await Assert.That(cut.FindAll(".change-row")).Count().IsEqualTo(1);
 		await Assert.That(cut.Find(".change-row").TextContent).Contains("Gone");
 	}
 
@@ -143,6 +146,7 @@ public class ChangeListTests : BunitContext
 	public async Task Dialog_WhenGivenEverySlotItsCallersUse_RendersWithoutAnUnknownParameter()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(ArtworkStub.Sizing());
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		var cut = Render<ChangeDialog>(parameters =>
@@ -152,6 +156,7 @@ public class ChangeListTests : BunitContext
 				.Add(dialog => dialog.Subtitle, "7 titles compared")
 				.Add(dialog => dialog.Items, [Removed("Gone"), Added("Fresh"), Unchanged("Held")])
 				.Add(dialog => dialog.Chips, [])
+				.Add(dialog => dialog.Fold, Fold(1))
 				.Add(dialog => dialog.RemovedLabel, "Removing")
 				.Add(dialog => dialog.AddedLabel, "Adding")
 				.Add(dialog => dialog.UnchangedLabel, "Already in sync")
@@ -164,7 +169,7 @@ public class ChangeListTests : BunitContext
 		);
 
 		await Assert.That(cut.Instance.UnchangedLabel).IsEqualTo("Already in sync");
-		await Assert.That(cut.Instance.Items).HasCount(3);
+		await Assert.That(cut.Instance.Items).Count().IsEqualTo(3);
 	}
 
 	[Test]
@@ -174,7 +179,7 @@ public class ChangeListTests : BunitContext
 
 		var groups = cut.FindAll(".change-group").Select(group => group.TextContent.Trim()).ToList();
 
-		await Assert.That(groups).HasCount(3);
+		await Assert.That(groups).Count().IsEqualTo(3);
 		await Assert.That(groups[0]).Contains("Removed");
 		await Assert.That(groups[2]).Contains("Already in sync");
 	}
@@ -242,7 +247,7 @@ public class ChangeListTests : BunitContext
 
 		var highlighted = cut.FindAll(".change-row").Where(row => row.ClassList.Contains("is-highlight")).ToList();
 
-		await Assert.That(highlighted).HasCount(1);
+		await Assert.That(highlighted).Count().IsEqualTo(1);
 		await Assert.That(highlighted[0].TextContent).Contains("Wanted");
 	}
 
@@ -265,6 +270,148 @@ public class ChangeListTests : BunitContext
 		await Assert.That(cut.FindAll(".change-row.is-highlight")).IsEmpty();
 	}
 
+	[Test]
+	public async Task Highlight_ForARowFurtherDown_ScrollsTheListToItsSectionAndIndex()
+	{
+		var module = JSInterop.SetupModule("./js/change-list.js");
+		var wanted = MediaId.New();
+
+		RenderList([Removed("Gone"), Added("First"), Added("Second"), Added("Wanted") with { Id = wanted }], [], highlight: wanted);
+
+		var scroll = module.VerifyInvoke("scrollToSection");
+		await Assert.That(scroll.Arguments[1]).IsEqualTo("Added");
+		await Assert.That(scroll.Arguments[2]).IsEqualTo(2 * 74f);
+	}
+
+	[Test]
+	public async Task Highlight_WhenItsRowIsRenderedAgain_FocusesItOnlyOnce()
+	{
+		var wanted = MediaId.New();
+		var cut = RenderList([Added("Wanted") with { Id = wanted }, Added("Other")], [], highlight: wanted);
+
+		await cut.Find(".change-search input").InputAsync(new ChangeEventArgs { Value = "Other" });
+		await cut.Find(".change-search input").InputAsync(new ChangeEventArgs { Value = string.Empty });
+
+		await Assert.That(cut.FindAll(".change-row.is-highlight")).Count().IsEqualTo(1);
+		await Assert.That(JSInterop.Invocations.Count(invocation => invocation.Identifier == "Blazor._internal.domWrapper.focus")).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Render_WhenAKindIsFolded_ShowsOneLineAtTheFootInsteadOfItsGroup()
+	{
+		var cut = RenderList([Added("Fresh"), Unchanged("Held")], [], fold: Fold(2614), unchangedLabel: "Already in sync");
+
+		var groups = cut.FindAll(".change-group").Select(group => group.TextContent.Trim()).ToList();
+
+		await Assert.That(groups).Count().IsEqualTo(1);
+		await Assert.That(groups[0]).Contains("Added");
+		await Assert.That(cut.Find(".change-body").LastElementChild!.ClassList).Contains("change-pin");
+		await Assert.That(cut.Find(".change-pin").TextContent).Contains($"{2614:N0} titles already in sync, nothing to do");
+	}
+
+	[Test]
+	public async Task Fold_WhenShowThemIsClicked_AsksForItsRowsAndListsThemLast()
+	{
+		var module = JSInterop.SetupModule("./js/change-list.js");
+		var asked = 0;
+		var cut = RenderList([Unchanged("Held"), Added("Fresh"), Unmatched("Nowhere")], [], fold: Fold(1, () => asked++), unchangedLabel: "Already in sync");
+
+		await cut.Find(".change-pin .change-fold").ClickAsync(new MouseEventArgs());
+
+		var groups = cut.FindAll(".change-group").Select(group => group.TextContent.Trim()).ToList();
+		await Assert.That(asked).IsEqualTo(1);
+		await Assert.That(groups).Count().IsEqualTo(3);
+		await Assert.That(groups[1]).Contains("Could not be matched");
+		await Assert.That(groups[2]).Contains("Already in sync");
+		await Assert.That(cut.FindAll(".change-pin")).IsEmpty();
+		await Assert.That(module.VerifyInvoke("scrollToSection").Arguments[1]).IsEqualTo("Unchanged");
+	}
+
+	[Test]
+	public async Task Fold_WhenHideIsClicked_FoldsBackWithoutAskingAgain()
+	{
+		var asked = 0;
+		var cut = RenderList([Unchanged("Held"), Added("Fresh")], [], fold: Fold(1, () => asked++), unchangedLabel: "Already in sync");
+		await cut.Find(".change-pin .change-fold").ClickAsync(new MouseEventArgs());
+
+		await cut.Find(".change-group .change-fold").ClickAsync(new MouseEventArgs());
+
+		await Assert.That(cut.FindAll(".change-group")).Count().IsEqualTo(1);
+		await Assert.That(cut.FindAll(".change-pin")).Count().IsEqualTo(1);
+		await cut.Find(".change-pin .change-fold").ClickAsync(new MouseEventArgs());
+		await Assert.That(cut.FindAll(".change-group")).Count().IsEqualTo(2);
+		await Assert.That(asked).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Fold_WhileASearchIsTyped_SaysItsTitlesWereNotSearched()
+	{
+		var cut = RenderList([Added("Fresh")], [], fold: Fold(2614));
+
+		await cut.Find(".change-search input").InputAsync(new ChangeEventArgs { Value = "christmas" });
+
+		await Assert.That(cut.Find(".change-pin").TextContent).Contains($"{2614:N0} already in sync were not searched");
+	}
+
+	[Test]
+	public async Task Chips_WhenAFoldedKindsChipIsPicked_UnfoldsIt()
+	{
+		var asked = 0;
+		var cut = RenderList(
+			[Unchanged("Held"), Added("Fresh")],
+			[Chip("bookmark-check", 1, ChangeKind.Unchanged)],
+			fold: Fold(1, () => asked++),
+			unchangedLabel: "Already in sync"
+		);
+
+		await cut.Find("button.change-chip").ClickAsync(new MouseEventArgs());
+
+		await Assert.That(asked).IsEqualTo(1);
+		await Assert.That(cut.FindAll(".change-row").Select(row => row.TextContent.Trim())).IsEquivalentTo(["Held"]);
+		await Assert.That(cut.FindAll(".change-pin")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Render_ForAPoster_AsksForASizedLazyImage()
+	{
+		var cut = RenderList(Added("Fresh"));
+
+		var poster = cut.Find("img.change-poster");
+
+		await Assert.That(poster.GetAttribute("loading")).IsEqualTo("lazy");
+		await Assert.That(poster.GetAttribute("decoding")).IsEqualTo("async");
+		await Assert
+			.That(poster.GetAttribute("srcset"))
+			.IsEqualTo("https://example.invalid/poster.jpg?width=40 1x, https://example.invalid/poster.jpg?width=80 2x");
+	}
+
+	[Test]
+	public async Task Render_ForCountsOverAThousand_WritesThemInTheServersNumberFormat()
+	{
+		var cut = RenderList(
+			[.. Enumerable.Range(0, 1200).Select(index => new ChangeItem { Title = $"Fresh {index}", Kind = ChangeKind.Added })],
+			[Chip("plus", 2614, ChangeKind.Added)],
+			fold: Fold(2614)
+		);
+
+		await Assert.That(cut.Find(".change-chip-count").TextContent.Trim()).IsEqualTo(2614.ToString("N0"));
+		await Assert.That(cut.Find(".change-group-count").TextContent.Trim()).IsEqualTo(1200.ToString("N0"));
+		await Assert.That(cut.Find(".change-pin b").TextContent).IsEqualTo(2614.ToString("N0"));
+	}
+
+	private static ChangeFold Fold(int count, Action? unfolding = null)
+	{
+		return new ChangeFold(
+			ChangeKind.Unchanged,
+			count,
+			() =>
+			{
+				unfolding?.Invoke();
+				return Task.CompletedTask;
+			}
+		);
+	}
+
 	private static ChangeChip Chip(string icon, int count, ChangeKind? filters = null) =>
 		new()
 		{
@@ -273,6 +420,8 @@ public class ChangeListTests : BunitContext
 			Tooltip = icon,
 			Filters = filters,
 		};
+
+	private static ChangeItem Unmatched(string title) => new() { Title = title, Kind = ChangeKind.Unmatched };
 
 	private static ChangeItem Unchanged(string title) =>
 		new()
@@ -305,10 +454,12 @@ public class ChangeListTests : BunitContext
 		IReadOnlyList<ChangeChip> chips,
 		Action<MatchedMedia>? onSelect = null,
 		string? unchangedLabel = null,
-		MediaId? highlight = null
+		MediaId? highlight = null,
+		ChangeFold? fold = null
 	)
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(ArtworkStub.Sizing());
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		return Render<ChangeList>(parameters =>
@@ -318,6 +469,10 @@ public class ChangeListTests : BunitContext
 			if (highlight is not null)
 			{
 				parameters.Add(list => list.Highlight, highlight);
+			}
+			if (fold is not null)
+			{
+				parameters.Add(list => list.Fold, fold);
 			}
 			if (onSelect is not null)
 			{

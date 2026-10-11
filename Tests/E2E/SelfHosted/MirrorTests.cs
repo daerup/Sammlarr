@@ -1,3 +1,4 @@
+using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.SelfHosted;
@@ -60,9 +61,9 @@ public class MirrorTests
 		var movie = await stack.Radarr.WaitForMovieAsync(Titles.ProjectHailMaryTmdb);
 		await Assert.That(ArrApi.TagsOf(series)).IsEquivalentTo([await stack.Sonarr.TagIdAsync(Titles.MemberTag)]);
 		await Assert.That(ArrApi.TagsOf(movie)).IsEquivalentTo([await stack.Radarr.TagIdAsync(Titles.AdminTag)]);
-		var groups = (await SelfHostedWantlist.OpenSyncAsync(admin)).Locator(".change-group");
-		await Expect(groups).ToHaveCountAsync(1, Wait.Settle);
-		await Expect(groups).ToContainTextAsync("Already in sync");
+		var preview = await SelfHostedWantlist.OpenSyncAsync(admin);
+		await Expect(preview.Locator(".change-pin").Filter(new LocatorFilterOptions { HasText = "1 title already in sync" })).ToBeVisibleAsync(Wait.Settle);
+		await Expect(preview.Locator(".change-group")).ToHaveCountAsync(0);
 		await admin.Keyboard.PressAsync("Escape");
 		await Expect(SelfHostedWantlist.Tile(admin, Titles.ProjectHailMary)).ToBeVisibleAsync();
 		await Expect(SelfHostedWantlist.Tile(admin, Titles.BreakingBad)).ToHaveCountAsync(0);

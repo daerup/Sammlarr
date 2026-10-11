@@ -98,6 +98,7 @@
                   Loading="_isLoadingDryRun"
                   Items="_items"
                   Chips="_chips"
+                  Fold="InSync"
                   OnSelect="ShowDetailsAsync"
                   RemovedLabel="Removing"
                   AddedLabel="Adding"
@@ -108,9 +109,9 @@
                   Band="@(_dryRunError is not null ? ErrorBand : null)">
         <Actions>
             <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CloseAsync">Cancel</BbButton>
-            <BbButton Size="ButtonSize.Small" Disabled="@(_dryRun is null || (_dryRun.TotalChanges == 0 && OutboxEntries.Count == 0))" OnClick="ConfirmAsync">
+            <BbButton Size="ButtonSize.Small" Disabled="@(_dryRun is { TotalChanges: 0 } && OutboxEntries.Count == 0)" OnClick="ConfirmAsync">
                 <LucideIcon Name="refresh-cw" Size="13" Class="mr-1.5"/>
-                Sync now
+                Sync
             </BbButton>
         </Actions>
     </ChangeDialog>
@@ -154,6 +155,10 @@
     private ValueSet<ArrApp> _unreachable = [];
 
     private IReadOnlyDictionary<MediaId, MatchedMedia> _changedMedia = new Dictionary<MediaId, MatchedMedia>();
+
+    private readonly Dictionary<MediaId, MatchedMedia> _unchangedMedia = [];
+
+    private bool _unfolded;
 
     private RenderFragment SyncLabel =>
         @<text>
@@ -208,17 +213,19 @@
             var parts = new List<string>(2);
             if (inFlight > 0)
             {
-                parts.Add($"{inFlight} waiting to reach {ProviderName}");
+                parts.Add($"{inFlight:N0} waiting to reach {ProviderName}");
             }
             if (failed > 0)
             {
-                parts.Add($"{failed} could not be delivered");
+                parts.Add($"{failed:N0} could not be delivered");
             }
             return string.Join(" · ", parts);
         }
     }
 
-    private string Subtitle => _dryRun is { } report ? $"{report.NoOps.Count + report.TotalChanges} titles compared" : $"Comparing with {ProviderName}…";
+    private string Subtitle => _dryRun is { } report ? $"{report.NoOps.Count + report.TotalChanges:N0} titles compared" : $"Comparing with {ProviderName}…";
+
+    private ChangeFold? InSync => _dryRun is { NoOps.Count: > 0 } plan ? new ChangeFold(ChangeKind.Unchanged, plan.NoOps.Count, () => UnfoldAsync(plan)) : null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -259,24 +266,12 @@
     private async Task LoadDryRunAsync()
     {
         _isLoadingDryRun = true;
-        _dryRun = null;
-        _dryRunError = null;
-        _items = [];
-        _chips = [];
         StateHasChanged();
 
         var token = _cts.Token;
         try
         {
-            for (var attempt = 1; attempt <= DryRunAttempts && _dryRun is null; attempt++)
-            {
-                if (attempt > 1)
-                {
-                    await Task.Delay(DryRunRetryDelay, token);
-                }
-
-                await AttemptDryRunAsync(token);
-            }
+            await ShowAsync(await PlanAsync(token), token);
         }
         catch (OperationCanceledException)
         {
@@ -287,24 +282,63 @@
         StateHasChanged();
     }
 
-    private async Task AttemptDryRunAsync(CancellationToken cancellationToken)
+    private async Task<WantlistPlanResult> PlanAsync(CancellationToken cancellationToken)
     {
         var result = await Planner.PlanAsync(cancellationToken);
+        for (var attempt = 2; attempt <= DryRunAttempts && result is WantlistSyncSinkUnreachable; attempt++)
+        {
+            await Task.Delay(DryRunRetryDelay, cancellationToken);
+            result = await Planner.PlanAsync(cancellationToken);
+        }
+
+        return result;
+    }
+
+    private async Task ShowAsync(WantlistPlanResult result, CancellationToken cancellationToken)
+    {
         switch (result)
         {
             case WantlistSyncSummary changes:
+                var changed = await Media.GetDetailsByIdAsync(changes.Changes.Select(change => change.MediaId).Distinct(), cancellationToken);
+                if (_unfolded)
+                {
+                    await ReadUnchangedAsync(changes, cancellationToken);
+                }
                 _dryRun = changes;
                 _dryRunError = changes.Down.Match(down => (string?)down.Reason, () => null);
-                var ids = changes.Changes.Select(change => change.MediaId).Concat(changes.NoOps).Distinct();
-                _changedMedia = await Media.GetDetailsByIdAsync(ids, cancellationToken);
+                _changedMedia = changed;
                 _unreachable = changes.Down.Map(down => down.Apps).GetValueOr([]);
-                _items = WantlistSyncView.Items(changes, _changedMedia, ProviderName);
+                _items = WantlistSyncView.Items(changes, _changedMedia, _unchangedMedia, ProviderName);
                 _chips = WantlistSyncView.Chips(changes);
                 break;
             case WantlistSyncSinkUnreachable failed:
+                _dryRun = null;
                 _dryRunError = failed.Reason;
                 _unreachable = failed.Apps;
+                _items = [];
+                _chips = [];
                 break;
+        }
+    }
+
+    private async Task UnfoldAsync(WantlistSyncSummary plan)
+    {
+        _unfolded = true;
+        await ReadUnchangedAsync(plan, _cts.Token);
+        if (_dryRun is { } current)
+        {
+            _items = WantlistSyncView.Items(current, _changedMedia, _unchangedMedia, ProviderName);
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task ReadUnchangedAsync(WantlistSyncSummary plan, CancellationToken cancellationToken)
+    {
+        var unread = plan.NoOps.Where(id => !_unchangedMedia.ContainsKey(id)).ToList();
+        foreach (var (id, media) in await Media.GetDetailsByIdAsync(unread, cancellationToken))
+        {
+            _unchangedMedia[id] = media;
         }
     }
 

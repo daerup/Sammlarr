@@ -17,6 +17,7 @@ public class WantlistSyncViewTests
 		var items = WantlistSyncView.Items(
 			summary,
 			new Dictionary<MediaId, MatchedMedia> { [Pulled] = Matched(Pulled), [Pushed] = Matched(Pushed) },
+			new Dictionary<MediaId, MatchedMedia>(),
 			"Radarr + Sonarr"
 		);
 

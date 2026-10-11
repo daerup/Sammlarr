@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
@@ -240,13 +241,13 @@ public class WantlistSyncButtonTests : BunitContext
 
 		await cut.Find("button").ClickAsync(new());
 
-		cut.WaitForState(() => cut.FindAll(".change-row").Count == 1);
+		cut.WaitForState(() => cut.FindAll(".change-pin").Count == 1);
 
 		await Assert.That(cut.Markup).Contains("1 waiting to reach Radarr + Sonarr");
 	}
 
 	[Test]
-	public async Task Dialog_WhileSonarrIsDown_ShowsSonarrsReasonAndKeepsSyncNowEnabled()
+	public async Task Dialog_WhileSonarrIsDown_ShowsSonarrsReasonAndKeepsSyncEnabled()
 	{
 		var (_, planner) = RegisterServices();
 		planner.PlanAsync(Any()).Returns(Summary() with { Down = Some.Of(new WantlistSyncSinkUnreachable("Sonarr answered 401 Unauthorized.", [ArrApp.Sonarr])) });
@@ -267,7 +268,124 @@ public class WantlistSyncButtonTests : BunitContext
 		await cut.Find("button").ClickAsync(new());
 
 		cut.WaitForState(() => cut.Markup.Contains("Sonarr answered 401 Unauthorized."));
-		await Assert.That(cut.FindAll("button").Single(button => button.TextContent.Contains("Sync now")).HasAttribute("disabled")).IsFalse();
+		await Assert.That(SyncButton(cut).HasAttribute("disabled")).IsFalse();
+	}
+
+	[Test]
+	public async Task Dialog_WhenReopened_ShowsTheLastPlanWhileItPlansAgain()
+	{
+		var (_, planner) = RegisterServices();
+		var added = MediaId.New();
+		planner.PlanAsync(Any()).Returns(Summary(push: new WantlistDelta([added], [])));
+		Services.AddSingleton(MediaOf(MediaType.Movie));
+		var cut = Render<Harness>();
+		await Opener(cut).ClickAsync(new());
+		cut.WaitForState(() => cut.FindAll(".change-row").Count == 1 && cut.FindAll(".change-head-spin").Count == 0);
+		await cut.FindAll(".change-actions button").Single(button => button.TextContent.Trim() == "Cancel").ClickAsync(new());
+		planner.PlanAsync(Any()).ReturnsAsync(new TaskCompletionSource<WantlistPlanResult>().Task);
+
+		_ = Opener(cut).ClickAsync(new());
+
+		cut.WaitForState(() => cut.FindAll(".change-head-spin").Count == 1);
+		await Assert.That(cut.FindAll(".change-row")).Count().IsEqualTo(1);
+		await Assert.That(cut.FindAll(".change-loading")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Sync_WhilePlanning_IsEnabled()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).ReturnsAsync(new TaskCompletionSource<WantlistPlanResult>().Task);
+		var cut = Render<Harness>();
+
+		_ = Opener(cut).ClickAsync(new());
+
+		cut.WaitForState(() => cut.FindAll(".change-loading").Count == 1);
+		await Assert.That(SyncButton(cut).HasAttribute("disabled")).IsFalse();
+	}
+
+	[Test]
+	public async Task Dialog_ForTitlesAlreadyInSync_ReadsTheirDetailsOnlyWhenShown()
+	{
+		var (_, planner) = RegisterServices();
+		var added = MediaId.New();
+		planner.PlanAsync(Any()).Returns(Summary(push: new WantlistDelta([added], [])));
+		var read = new List<MediaId>();
+		var media = IMediaService.Mock();
+		media
+			.GetDetailsAsync(Any(), Any(), Any())
+			.Returns(
+				(ids, _, _) =>
+				{
+					var asked = ids.ToList();
+					read.AddRange(asked);
+					return Async([.. asked.Select(id => (Result<MatchedMedia>)Success.Of(id == Synced ? Detail(id) : Typed(id, MediaType.Movie)))]);
+				}
+			);
+		Services.AddSingleton(media.Object);
+		var cut = Render<Harness>();
+		await Opener(cut).ClickAsync(new());
+		cut.WaitForState(() => cut.FindAll(".change-pin").Count == 1 && cut.FindAll(".change-head-spin").Count == 0);
+		await Assert.That(read).Contains(added);
+		await Assert.That(read).DoesNotContain(Synced);
+
+		await cut.Find(".change-pin button").ClickAsync(new());
+
+		cut.WaitForState(() => cut.FindAll(".change-row").Count == 2);
+		await Assert.That(read).Contains(Synced);
+		await Assert.That(cut.FindAll(".change-group").Last().TextContent).Contains("Already in sync");
+	}
+
+	[Test]
+	public async Task Dialog_WhenItComparesAgainAfterShowingThem_ReadsOnlyTheTitlesNotReadYet()
+	{
+		var (_, planner) = RegisterServices();
+		var newlySynced = MediaId.New();
+		planner.PlanAsync(Any()).Returns(Summary());
+		var read = new List<MediaId>();
+		var media = IMediaService.Mock();
+		media
+			.GetDetailsAsync(Any(), Any(), Any())
+			.Returns(
+				(ids, _, _) =>
+				{
+					var asked = ids.ToList();
+					read.AddRange(asked);
+					return Async([.. asked.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, MediaType.Movie)))]);
+				}
+			);
+		Services.AddSingleton(media.Object);
+		var cut = Render<Harness>();
+		await Opener(cut).ClickAsync(new());
+		cut.WaitForState(() => cut.FindAll(".change-pin").Count == 1 && cut.FindAll(".change-head-spin").Count == 0);
+		await cut.Find(".change-pin button").ClickAsync(new());
+		cut.WaitForState(() => cut.FindAll(".change-row").Count == 1);
+		await cut.FindAll(".change-actions button").Single(button => button.TextContent.Trim() == "Cancel").ClickAsync(new());
+		planner.PlanAsync(Any()).Returns(new WantlistSyncSummary(NoChanges, NoChanges, [Synced, newlySynced]));
+
+		await Opener(cut).ClickAsync(new());
+
+		cut.WaitForState(() => read.Contains(newlySynced) && cut.FindAll(".change-head-spin").Count == 0);
+		await Assert.That(read.Count(id => id == Synced)).IsEqualTo(1);
+	}
+
+	private static IElement Opener<T>(IRenderedComponent<T> cut)
+		where T : IComponent
+	{
+		return cut.Find("[aria-label='Wantlist sync'] button");
+	}
+
+	private static IElement SyncButton<T>(IRenderedComponent<T> cut)
+		where T : IComponent
+	{
+		return cut.FindAll(".change-actions button").Single(button => button.TextContent.Trim() == "Sync");
+	}
+
+	private static IMediaService MediaOf(MediaType type)
+	{
+		var media = IMediaService.Mock();
+		media.GetDetailsAsync(Any(), Any(), Any()).Returns((ids, _, _) => Async([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, type)))]));
+		return media.Object;
 	}
 
 	private static readonly PendingJob RunningSync = new(
@@ -329,6 +447,7 @@ public class WantlistSyncButtonTests : BunitContext
 		Services.AddSingleton(currentUser.Object);
 		Services.AddScoped<Notifier>();
 		Services.AddProviderBranding();
+		Services.AddSingleton(ArtworkStub.Sizing());
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 

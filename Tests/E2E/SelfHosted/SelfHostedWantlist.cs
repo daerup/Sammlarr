@@ -41,9 +41,9 @@ internal static class SelfHostedWantlist
 	internal static async Task SyncAsync(IPage page)
 	{
 		var dialog = await OpenSyncAsync(page);
-		var syncNow = dialog.ButtonContaining("Sync now");
-		await Expect(syncNow).ToBeEnabledAsync(Wait.Settle);
-		await syncNow.ClickAsync();
+		var sync = dialog.Button("Sync");
+		await Expect(sync).ToBeEnabledAsync(Wait.Settle);
+		await sync.ClickAsync();
 		await Expect(page.Text("Sync has been queued")).ToBeVisibleAsync();
 		await Expect(SyncGroup(page).Locator(".sync-app").Filter(new LocatorFilterOptions { HasText = "in sync" }))
 			.ToHaveCountAsync(2, new LocatorAssertionsToHaveCountOptions { Timeout = Wait.Preview });

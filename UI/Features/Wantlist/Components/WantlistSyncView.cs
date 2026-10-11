@@ -8,29 +8,34 @@ namespace UI.Features.Wantlist.Components;
 
 internal static class WantlistSyncView
 {
-	internal static IReadOnlyList<ChangeItem> Items(WantlistSyncSummary dryRun, IReadOnlyDictionary<MediaId, MatchedMedia> media, string sink)
+	internal static IReadOnlyList<ChangeItem> Items(
+		WantlistSyncSummary dryRun,
+		IReadOnlyDictionary<MediaId, MatchedMedia> changed,
+		IReadOnlyDictionary<MediaId, MatchedMedia> unchanged,
+		string sink
+	)
 	{
 		return
 		[
 			.. dryRun
-				.Changes.Where(change => media.ContainsKey(change.MediaId))
+				.Changes.Where(change => changed.ContainsKey(change.MediaId))
 				.Select(change => new ChangeItem
 				{
-					Title = media[change.MediaId].Details.Title ?? string.Empty,
-					Media = media[change.MediaId],
+					Title = changed[change.MediaId].Details.Title ?? string.Empty,
+					Media = changed[change.MediaId],
 					Kind = change.Action is WantlistOperationAction.Add ? ChangeKind.Added : ChangeKind.Removed,
-					Subtitle = Subtitle(media[change.MediaId]),
+					Subtitle = Subtitle(changed[change.MediaId]),
 					ContextIcon = change.Direction is WantlistSyncDirection.Pull ? "arrow-down-left" : "arrow-up-right",
 					ContextTooltip = change.Direction is WantlistSyncDirection.Pull ? $"Pulled from {sink}" : $"Pushed to {sink}",
 				}),
 			.. dryRun
-				.NoOps.Where(media.ContainsKey)
+				.NoOps.Where(unchanged.ContainsKey)
 				.Select(id => new ChangeItem
 				{
-					Title = media[id].Details.Title ?? string.Empty,
-					Media = media[id],
+					Title = unchanged[id].Details.Title ?? string.Empty,
+					Media = unchanged[id],
 					Kind = ChangeKind.Unchanged,
-					Subtitle = Subtitle(media[id]),
+					Subtitle = Subtitle(unchanged[id]),
 				}),
 			.. dryRun.Unmatched.Select(unmatched => new ChangeItem
 			{
