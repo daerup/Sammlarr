@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.DI;
 using Contracts.Feed;
 using Contracts.Providers;
@@ -15,7 +16,9 @@ internal sealed class FeedService(
 	IWantlistRepository wantlist,
 	IFeedScheduler scheduler,
 	IKeyedServiceIndex<FeedProvider, IFeedProvider> providers,
-	IServiceReadiness readiness
+	IServiceReadiness readiness,
+	IDeletedFeeds deleted,
+	IDateTimeProvider clock
 ) : IFeedService
 {
 	public async Task<FeedSnapshot> GetAsync(CancellationToken cancellationToken = default)
@@ -64,6 +67,7 @@ internal sealed class FeedService(
 			.FindAsync(id, cancellationToken)
 			.Apply(_ => scheduler.UnscheduleAsync(id, cancellationToken))
 			.Apply(feed => wantlist.OrphanAsync(feed, cancellationToken))
+			.Apply(feed => deleted.AddAsync(new DeletedFeed(feed.Id, feed.Name, feed.Provider, clock.Now), cancellationToken))
 			.Apply(_ => repository.DeleteAsync(id, cancellationToken));
 	}
 

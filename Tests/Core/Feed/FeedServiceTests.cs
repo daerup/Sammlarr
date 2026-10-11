@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Feed;
 using Contracts.Providers;
 using Contracts.Wantlist;
@@ -22,6 +23,10 @@ public class FeedServiceTests
 
 	private readonly Mock<IServiceReadiness> _readiness = IServiceReadiness.Mock();
 
+	private readonly Mock<IDeletedFeeds> _deleted = IDeletedFeeds.Mock();
+
+	private static readonly DateTimeOffset Now = new(2026, 10, 11, 8, 10, 0, TimeSpan.Zero);
+
 	private IFeedService Testee
 	{
 		get
@@ -31,7 +36,9 @@ public class FeedServiceTests
 				IWantlistRepository.Mock().Object,
 				IFeedScheduler.Mock().Object,
 				new FakeKeyedServiceIndex<FeedProvider, IFeedProvider>().Register(FeedProvider.Mdblist, _mdblist.Object),
-				_readiness.Object
+				_readiness.Object,
+				_deleted.Object,
+				Clock()
 			);
 		}
 	}
@@ -43,6 +50,25 @@ public class FeedServiceTests
 		_repository.FindAsync(Id, Any()).Returns(Some.Of(StoredFeed()));
 		_repository.GetAllAsync(Any()).Returns([StoredFeed()]);
 		_repository.PauseAsync(Any(), Any()).Returns((ids, _) => [.. ids]);
+	}
+
+	[Test]
+	public async Task DeleteAsync_AStoredFeed_KeepsItsNameBeforeItGoes()
+	{
+		await Testee.DeleteAsync(Id);
+
+		_deleted.AddAsync(new DeletedFeed(Id, "Trending shows", FeedProvider.Mdblist, Now), Any()).WasCalled(Times.Once);
+		_repository.DeleteAsync(Id, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task DeleteAsync_AFeedThatIsGone_KeepsNoName()
+	{
+		_repository.FindAsync(Id, Any()).Returns(new None());
+
+		await Testee.DeleteAsync(Id);
+
+		_deleted.AddAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -144,6 +170,13 @@ public class FeedServiceTests
 
 		await Assert.That(updated).IsError();
 		_repository.UpdateAsync(Any<FeedId>(), Any<FeedUpdateData>(), Any()).WasNeverCalled();
+	}
+
+	private static IDateTimeProvider Clock()
+	{
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(Now);
+		return clock.Object;
 	}
 
 	private static FeedCreateData CreateData(string identifier)

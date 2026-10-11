@@ -23,7 +23,7 @@ public sealed record UsageServiceLine(
 	IReadOnlyList<UsageCauseLine> Causes
 );
 
-public sealed record UsageFeedName(FeedId Feed, string Name, FeedProvider Provider);
+public sealed record UsageFeedName(FeedId Feed, string Name, FeedProvider Provider, Optional<DateTimeOffset> DeletedAt);
 
 public sealed record UsageCauseFeed(Optional<UsageFeedName> Feed, long Calls);
 
@@ -70,7 +70,12 @@ public sealed record UsageFeedLine(
 	IReadOnlyList<UsageRun> Runs,
 	UsageFeedStats Stats,
 	IReadOnlyDictionary<RemoteService, UsageFeedStats> Services
-);
+)
+{
+	public Optional<UsageFeedGone> Gone { get; init; } = new None();
+}
+
+public sealed record UsageFeedGone(DateTimeOffset DeletedAt, IReadOnlyDictionary<RemoteService, UsageTally> Calls);
 
 public sealed record UsageQuota(RemoteService Service, QuotaToday Today, Optional<QuotaDay> Day, IReadOnlyList<QuotaDayUse> Days);
 

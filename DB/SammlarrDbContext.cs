@@ -81,6 +81,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<FeedRunCallsRow> FeedRunCalls => Set<FeedRunCallsRow>();
 
 	public DbSet<FeedRunTimesRow> FeedRunTimes => Set<FeedRunTimesRow>();
+	public DbSet<DeletedFeedRow> DeletedFeeds => Set<DeletedFeedRow>();
 	public DbSet<BlocklistRow> Blocklist => Set<BlocklistRow>();
 	public DbSet<WantlistRow> Wantlist => Set<WantlistRow>();
 	public DbSet<WantlistOutboxRow> WantlistOutbox => Set<WantlistOutboxRow>();

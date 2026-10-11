@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261011043612_AnswerFailures";
+    public override string LastMigrationId => "20261011165556_DeletedFeeds";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -249,6 +249,35 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasKey("Tconst");
 
                 b.ToTable("ImdbRatings");
+            });
+
+        modelBuilder.Entity("DB.Data.Feed.DeletedFeedRow", b =>
+            {
+                b.Property<Guid>("FeedId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("DeletedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Provider")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("FeedId");
+
+                b.HasIndex("DeletedAt");
+
+                b.HasIndex("UserId");
+
+                b.ToTable("DeletedFeeds");
             });
 
         modelBuilder.Entity("DB.Data.Feed.FeedAbsenceRow", b =>
@@ -1544,6 +1573,15 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired();
 
                 b.Navigation("Sonarr")
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Feed.DeletedFeedRow", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
             });
 

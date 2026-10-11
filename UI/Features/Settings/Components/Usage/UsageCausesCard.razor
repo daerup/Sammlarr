@@ -75,7 +75,12 @@
                                             {
                                                 <BrandedLogo Brand="brand" Size="16" Decorative="true"/>
                                             }
-                                            <span class="truncate">@named.Name</span>
+                                            <span class="@($"truncate {named.DeletedAt.Match(_ => "text-muted-foreground line-through", () => string.Empty)}")">@named.Name</span>
+                                            @if (named.DeletedAt is Some<DateTimeOffset>)
+                                            {
+                                                <span class="shrink-0 rounded-full border px-1.5 text-[10.5px] whitespace-nowrap text-muted-foreground"
+                                                      data-testid="usage-cause-feed-deleted">deleted</span>
+                                            }
                                         }
                                         else
                                         {

@@ -127,14 +127,15 @@ public class UsageCausesCardTests : BunitContext
 	[Test]
 	public async Task FeedEditor_Picked_OpensItsFeedsUnderItsRow()
 	{
-		var trending = new UsageFeedName(FeedId.From(Guid.NewGuid()), "Trending shows", FeedProvider.Mdblist);
+		var trending = new UsageFeedName(FeedId.From(Guid.NewGuid()), "Trending shows", FeedProvider.Mdblist, new None());
+		var horror = new UsageFeedName(FeedId.From(Guid.NewGuid()), "Horror movies", FeedProvider.Mdblist, Some.Of(UsageSamples.To.AddHours(-5)));
 		var cut = RenderCard(
 			Period(
 				new UsageCauseLine(UsageCause.FeedRun, UsageSamples.Tally(answered: 300), []),
 				new UsageCauseLine(
 					UsageCause.FeedEditor,
 					UsageSamples.Tally(answered: 53),
-					[new UsageCauseFeed(Some.Of(trending), 41), new UsageCauseFeed(new None(), 12)]
+					[new UsageCauseFeed(Some.Of(trending), 41), new UsageCauseFeed(Some.Of(horror), 5), new UsageCauseFeed(new None(), 12)]
 				)
 			)
 		);
@@ -142,8 +143,12 @@ public class UsageCausesCardTests : BunitContext
 		await cut.FindAll("[data-testid=usage-cause]").Single(row => row.TextContent.Contains("Feed editor")).ClickAsync();
 
 		await Assert
-			.That(cut.FindAll("[data-testid=usage-cause-feed]").Select(row => string.Join("|", row.Children.Select(cell => cell.TextContent.Trim()))))
-			.IsEquivalentTo(["Trending shows||41|", "New feed, not saved yet, or deleted||12|"], CollectionOrdering.Matching);
+			.That(
+				cut.FindAll("[data-testid=usage-cause-feed]")
+					.Select(row => $"{row.QuerySelector(".truncate")!.TextContent.Trim()}|{row.Children[2].TextContent.Trim()}")
+			)
+			.IsEquivalentTo(["Trending shows|41", "Horror movies|5", "New feed, not saved yet, or deleted|12"], CollectionOrdering.Matching);
+		await Assert.That(cut.FindAll("[data-testid=usage-cause-feed-deleted]")).Count().IsEqualTo(1);
 		await Assert
 			.That(cut.FindAll("[data-testid=usage-cause]").Single(row => row.TextContent.Contains("Feed editor")).NextElementSibling!.GetAttribute("data-testid"))
 			.IsEqualTo("usage-cause-feed");

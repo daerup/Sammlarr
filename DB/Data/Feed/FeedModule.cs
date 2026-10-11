@@ -12,5 +12,7 @@ internal class FeedModule : IServiceModule
 		services.AddScoped<IFeedRepository, FeedRepository>();
 		services.AddScoped<IModelConfiguration, FeedRowConfiguration>();
 		services.AddScoped<IModelConfiguration, FeedAbsenceRowConfiguration>();
+		services.AddScoped<IDeletedFeeds, DeletedFeedStore>();
+		services.AddScoped<IModelConfiguration, DeletedFeedRowConfiguration>();
 	}
 }
