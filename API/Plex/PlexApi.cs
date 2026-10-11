@@ -96,7 +96,8 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 		}
 
 		EnsureUsable(response, endpoint);
-		var result = await response.Content.ReadFromJsonAsync<PlexTypes.ById.Root>(cancellationToken);
+		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
 		var first = Optional.Of(result?.MediaContainer?.Metadata).Map(metadata => metadata.FirstOrNone());
 		return Success.Of(first.Map(found => PlexId.From(found.RatingKey, id.Type)));
 	}

@@ -1,11 +1,13 @@
 using System.Net;
 using Contracts.Providers;
 using Domain.Providers;
+using Microsoft.Extensions.Logging;
 using Shared.Concurrency;
 
 namespace API.Http.Lanes;
 
-internal sealed class LaneHandler(RemoteService remote, Lanes lanes, IProviderRateLimitReporter reporter, TimeProvider time) : DelegatingHandler
+internal sealed class LaneHandler(RemoteService remote, Lanes lanes, IProviderRateLimitReporter reporter, TimeProvider time, ILogger<LaneHandler> logger)
+	: DelegatingHandler
 {
 	internal static readonly HttpRequestOptionsKey<string> Owner = new("sammlarr.lane-owner");
 
@@ -51,7 +53,19 @@ internal sealed class LaneHandler(RemoteService remote, Lanes lanes, IProviderRa
 		if (outcome is AttemptThrottled throttled)
 		{
 			var wait = throttled.RetryAt.Map(until => until - time.GetUtcNow()).GetValueOr(() => lanes.Backoff(name));
+			logger.LogWarning("{Remote} answered 429 on its {Route} lane, which waits {Wait}; headers: {Headers}", remote, name.Route, wait, Headers(sending.Result));
 			await sending.Result.TriggeredBy().Apply(user => reporter.ReportAsync(remote, wait, user, cancellationToken));
 		}
+	}
+
+	private static string Headers(HttpResponseMessage response)
+	{
+		return string.Join(
+			"; ",
+			response
+				.Headers.Concat(response.Content.Headers)
+				.Where(header => !header.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase))
+				.Select(header => $"{header.Key}: {string.Join(", ", header.Value)}")
+		);
 	}
 }

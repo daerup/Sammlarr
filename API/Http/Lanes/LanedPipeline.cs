@@ -3,6 +3,7 @@ using Contracts.Providers;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Timeout;
 using Shared.Options;
@@ -25,7 +26,8 @@ internal static class LanedPipeline
 			remote,
 			services.GetRequiredService<Lanes>(),
 			services.GetRequiredService<IProviderRateLimitReporter>(),
-			services.GetRequiredService<TimeProvider>()
+			services.GetRequiredService<TimeProvider>(),
+			services.GetRequiredService<ILogger<LaneHandler>>()
 		));
 		builder.AddResilienceHandler(
 			"attempt",

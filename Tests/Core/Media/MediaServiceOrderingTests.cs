@@ -149,7 +149,14 @@ public class MediaServiceOrderingTests
 			new FeedLoadOptions(),
 			NullLogger<DetailsFetcher>.Instance
 		);
-		var resolver = new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), TestReadiness.Everything(), dateTimeProvider.Object);
+		var resolver = new MediaIdResolver(
+			[],
+			unmatchedCache.Object,
+			TestCapacity.Open(),
+			TestReadiness.Everything(),
+			dateTimeProvider.Object,
+			NullLogger<MediaIdResolver>.Instance
+		);
 		var identifier = new TitleIdentifier(resolver, claims.Object);
 		var writers = new LibraryWriterFactory(mediaRepo.Object, NullLogger<LibraryWriter>.Instance);
 		var primers = new BurstPrimers([], detailsFetcher, TestCapacity.Open(), dateTimeProvider.Object, new FeedLoadOptions());

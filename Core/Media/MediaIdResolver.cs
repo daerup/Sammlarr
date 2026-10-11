@@ -9,6 +9,7 @@ using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
+using Microsoft.Extensions.Logging;
 using Observability.Feed;
 
 namespace Core.Media;
@@ -18,7 +19,8 @@ internal sealed class MediaIdResolver(
 	ITypedMemoryCache<string, bool> unmatchedCache,
 	IRemoteCapacity capacity,
 	IServiceReadiness readiness,
-	IDateTimeProvider clock
+	IDateTimeProvider clock,
+	ILogger<MediaIdResolver> logger
 )
 {
 	private static readonly TimeSpan unmatchedTtl = TimeSpan.FromHours(1);
@@ -88,7 +90,7 @@ internal sealed class MediaIdResolver(
 		);
 	}
 
-	private static async Task<(IReadOnlyList<IExternalMediaId> Ids, bool Transient, IReadOnlySet<RemoteService> Sources)> FreeAsync(
+	private async Task<(IReadOnlyList<IExternalMediaId> Ids, bool Transient, IReadOnlySet<RemoteService> Sources)> FreeAsync(
 		IReadOnlyList<IExternalMediaId> candidates,
 		MediaProvider target,
 		IReadOnlyList<Hop> hops,
@@ -162,7 +164,7 @@ internal sealed class MediaIdResolver(
 		return new StepOutcome(Optional.When(ids.Any(id => id.Source == target), () => new IdLookupResult(ids, current)), false);
 	}
 
-	private static async Task<StepOutcome> TakeAsync(
+	private async Task<StepOutcome> TakeAsync(
 		Hop hop,
 		IReadOnlyList<IExternalMediaId> ids,
 		Optional<IdentifyHints> hints,
@@ -251,7 +253,7 @@ internal sealed class MediaIdResolver(
 		};
 	}
 
-	private static async Task<Answer<IdLookupResult>> AskAsync(
+	private async Task<Answer<IdLookupResult>> AskAsync(
 		IExternalIdConverter converter,
 		IdLookupRequest request,
 		HashSet<RemoteService> down,
@@ -266,6 +268,7 @@ internal sealed class MediaIdResolver(
 				break;
 			case Faulted faulted:
 				faulted.Error.Exception.Apply(exception => Activity.Current?.AddException(exception));
+				faulted.Error.Exception.Apply(exception => logger.LogWarning(exception, "{Remote} could not answer an id lookup", faulted.Remote));
 				break;
 		}
 

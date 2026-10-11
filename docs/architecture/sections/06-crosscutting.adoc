@@ -244,7 +244,7 @@ flight (`MaxInFlight`) and batch (`MaxBatch`, below).
 | AniList | 30 per minute (as published while AniList runs degraded), 1 in flight; title lookups batch up to 50 ids
 | MyAnimeList | 30 per second, 1 in flight
 | TVmaze | 20 per 10 seconds
-| Plex | `api`, `match` and `metadata` 50 per second with 25 in flight each (Plex publishes no limit); `watchlist` 4 in flight
+| Plex | `match` 200 per minute with 5 in flight; `api` and `metadata` 50 per second with 25 in flight each (Plex publishes no limit); `watchlist` 4 in flight
 | Wikidata | 5 in flight; SPARQL lookups batch up to 100 IMDb ids
 | Radarr, Sonarr | 4 in flight
 | IMDb datasets, anime lists | 2 in flight

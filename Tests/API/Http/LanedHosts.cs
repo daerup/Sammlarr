@@ -1,10 +1,12 @@
 using API.Http;
+using API.Http.Lanes;
 using Contracts.Identity;
 using Contracts.Providers;
 using Contracts.Usage;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Shared.DI;
 using Shared.Options;
 
@@ -30,6 +32,7 @@ internal static class LanedHosts
 		RemoteService remote,
 		HttpMessageHandler wire,
 		IProviderRateLimitReporter? reporter = null,
+		ILogger<LaneHandler>? logger = null,
 		params string[] clients
 	)
 		where TOptions : class, IProviderHttpOptions
@@ -41,6 +44,7 @@ internal static class LanedHosts
 				services.AddSingleton(ICurrentUser.Mock().Object);
 				services.AddSingleton(reporter ?? IProviderRateLimitReporter.Mock().Object);
 				services.AddSingleton(IFeedRunUsage.Mock().Object);
+				Optional.Of(logger).Apply(given => services.AddSingleton(given));
 				services.AddModule<HttpModule>();
 				foreach (var client in clients.DefaultIfEmpty("plex"))
 				{
