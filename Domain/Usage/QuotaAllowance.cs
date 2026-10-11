@@ -8,6 +8,9 @@ public sealed record QuotaAllowance(
 	Optional<DateTimeOffset> ReserveReachedAt,
 	long Reserve,
 	double BackgroundShare
-);
+)
+{
+	public Optional<DayEnd> DayBefore { get; init; } = new None();
+}
 
 public sealed record QuotaToday(DateTimeOffset NextReset, Optional<QuotaAllowance> Answered);

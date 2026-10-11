@@ -59,6 +59,42 @@ public class QuotaDayTests
 	}
 
 	[Test]
+	public async Task Of_WithTheDayBefore_DrawsItsHoursUpToTheResetAndItsWait()
+	{
+		var reached = Reset.AddHours(-4).AddMinutes(-56);
+		IReadOnlyList<(DateTimeOffset Hour, long Spent)> yesterday = [.. Enumerable.Range(1, 14).Select(hours => (Reset.AddHours(-hours), 25L))];
+		var allowance = Allowance(191) with { DayBefore = Some.Of(new DayEnd(30, Reset, Some.Of(reached))) };
+
+		var day = QuotaDay.Of([.. yesterday, .. Spent(SpentPerHour)], allowance, Now);
+
+		await Assert.That(day.Points[0]).IsEqualTo(new QuotaPoint(Reset.AddHours(-14), 380));
+		await Assert.That(day.Points[14]).IsEqualTo(new QuotaPoint(Reset, 30));
+		await Assert.That(day.Points[15]).IsEqualTo(new QuotaPoint(Reset, 1000));
+		await Assert.That(day.Waits).IsEquivalentTo([new QuotaWait(reached, Reset)]);
+	}
+
+	[Test]
+	public async Task Of_WithADayBeforeThatEndedBelowTheReserveWithoutTheMinute_WaitsFromItsFirstHourBelow()
+	{
+		IReadOnlyList<(DateTimeOffset Hour, long Spent)> yesterday = [.. Enumerable.Range(1, 14).Select(hours => (Reset.AddHours(-hours), 5L))];
+		var allowance = Allowance(191) with { DayBefore = Some.Of(new DayEnd(30, Reset, new None())) };
+
+		var day = QuotaDay.Of([.. yesterday, .. Spent(SpentPerHour)], allowance, Now);
+
+		await Assert.That(day.Waits).IsEquivalentTo([new QuotaWait(Reset.AddHours(-4), Reset)]);
+	}
+
+	[Test]
+	public async Task Of_WithAnEndedDayOlderThanTheLastReset_StartsAtTheReset()
+	{
+		var allowance = Allowance(191) with { DayBefore = Some.Of(new DayEnd(30, Reset.AddDays(-1), new None())) };
+
+		var day = QuotaDay.Of(Spent(SpentPerHour), allowance, Now);
+
+		await Assert.That(day.Points[0]).IsEqualTo(new QuotaPoint(Reset, 1000));
+	}
+
+	[Test]
 	public async Task Of_WhenThePaceLastsUntilTheReset_SaysNoTimeForTheReserve()
 	{
 		var day = QuotaDay.Of(Spent([2, 0, 0, 0, 0, 0, 0, 1, 1, 1]), Allowance(995), Now);

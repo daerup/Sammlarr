@@ -50,7 +50,10 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 			allowance.ReserveReachedAt,
 			options.FeedReserve,
 			options.BackgroundReserveShare
-		);
+		)
+		{
+			DayBefore = allowance.Ended,
+		};
 	}
 
 	private static DateTimeOffset Ahead(DateTimeOffset reset, DateTimeOffset now)
@@ -114,6 +117,8 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 	{
 		private static readonly TimeSpan Drift = TimeSpan.FromMinutes(1);
 
+		public Optional<DayEnd> Ended { get; init; } = new None();
+
 		public Optional<long> Daily => Limit.Or(() => Highest.Map(highest => highest + 1));
 
 		public Optional<long> Outside
@@ -132,18 +137,22 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 
 			if (seen.ResetAt > ResetAt + Drift)
 			{
-				return new Allowance(seen.Remaining, seen.ResetAt, Some.Of(seen.Remaining), seen.Limit.Or(Limit), seen.Counted, new None());
+				return new Allowance(seen.Remaining, seen.ResetAt, Some.Of(seen.Remaining), seen.Limit.Or(Limit), seen.Counted, new None())
+				{
+					Ended = Some.Of(new DayEnd(Remaining, ResetAt, ReserveReachedAt)),
+				};
 			}
 
 			var crossed = Remaining > reserve && seen.Remaining <= reserve;
-			return new Allowance(
-				Math.Min(Remaining, seen.Remaining),
-				seen.ResetAt > ResetAt ? seen.ResetAt : ResetAt,
-				Highest.Map(highest => Math.Max(highest, seen.Remaining)),
-				seen.Limit.Or(Limit),
-				Answers + seen.Counted,
-				ReserveReachedAt.Or(() => Optional.When(crossed, () => now))
-			);
+			return this with
+			{
+				Remaining = Math.Min(Remaining, seen.Remaining),
+				ResetAt = seen.ResetAt > ResetAt ? seen.ResetAt : ResetAt,
+				Highest = Highest.Map(highest => Math.Max(highest, seen.Remaining)),
+				Limit = seen.Limit.Or(Limit),
+				Answers = Answers + seen.Counted,
+				ReserveReachedAt = ReserveReachedAt.Or(() => Optional.When(crossed, () => now)),
+			};
 		}
 	}
 }
