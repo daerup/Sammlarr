@@ -28,3 +28,5 @@ Domain/Media/ClaimOutcome.cs
 Domain/Providers/Answer.cs
 Core/Media/Resolution.cs
 Core/Media/Identification.cs
+Shared/Concurrency/AttemptOutcome.cs
+Shared/Concurrency/LaneAnswer.cs
