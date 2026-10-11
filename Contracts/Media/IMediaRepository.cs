@@ -9,7 +9,7 @@ public interface IMediaRepository
 
 	Task<IReadOnlyList<StoredMedia>> GetByExternalsAsync(IReadOnlyList<IExternalMediaId> candidates, CancellationToken cancellationToken = default);
 
-	Task UpsertDetailsAsync(IReadOnlyDictionary<MediaId, CachedDetails> details, CancellationToken cancellationToken = default);
+	Task SaveDetailsAsync(IReadOnlyList<DetailsChange> changes, CancellationToken cancellationToken = default);
 
 	Task SavePageLinksAsync(MediaId id, IReadOnlyCollection<IPageLink> links, CancellationToken cancellationToken = default);
 

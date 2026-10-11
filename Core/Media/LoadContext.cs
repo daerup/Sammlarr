@@ -8,18 +8,18 @@ internal sealed record LoadContext(
 	Func<MediaType, Optional<MediaProvider>> AddressedBy,
 	IReadOnlySet<RemoteService> IdServices,
 	IReadOnlySet<RemoteService> DetailServices,
-	MediaWriteBuffer Writes
+	LibraryWriter Writer
 )
 {
 	internal static async Task<LoadContext> StartAsync(
 		ActiveSink sink,
 		MediaIdResolver ids,
 		DetailsFetcher details,
-		MediaWriteBuffer writes,
+		LibraryWriter writer,
 		CancellationToken cancellationToken
 	)
 	{
 		var active = await sink.ResolveAsync(cancellationToken);
-		return new LoadContext(active.AddressedBy, await ids.ConnectedAsync(cancellationToken), await details.ConnectedAsync(cancellationToken), writes);
+		return new LoadContext(active.AddressedBy, await ids.ConnectedAsync(cancellationToken), await details.ConnectedAsync(cancellationToken), writer);
 	}
 }

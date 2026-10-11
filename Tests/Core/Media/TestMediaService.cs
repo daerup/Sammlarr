@@ -76,15 +76,15 @@ internal static class TestMediaService
 			dateTimeProvider.Object
 		);
 		var identifier = new TitleIdentifier(resolver, claims.Object);
-		var buffers = new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance);
+		var writers = new LibraryWriterFactory(mediaRepo.Object, NullLogger<LibraryWriter>.Instance);
 		var sink = TestSinks.AddressingBy(MediaProvider.Tmdb, configRepo.Object);
 		var testee = new MediaService(
 			resolver,
 			identifier,
 			detailsFetcher,
-			new ListLoad(identifier, resolver, detailsFetcher, buffers, sink, mediaRepo.Object, new FeedLoadOptions(), TimeProvider.System),
+			new ListLoad(identifier, resolver, detailsFetcher, writers, sink, mediaRepo.Object, new FeedLoadOptions(), TimeProvider.System),
 			claims.Object,
-			buffers,
+			writers,
 			sink,
 			mediaRepo.Object
 		);

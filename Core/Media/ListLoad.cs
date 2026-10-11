@@ -16,7 +16,7 @@ internal sealed class ListLoad(
 	TitleIdentifier identifier,
 	MediaIdResolver idResolver,
 	DetailsFetcher detailsFetcher,
-	MediaWriteBufferFactory writesFactory,
+	LibraryWriterFactory writersFactory,
 	ActiveSink activeSink,
 	IMediaRepository mediaRepository,
 	FeedLoadOptions options,
@@ -30,8 +30,8 @@ internal sealed class ListLoad(
 
 	private async Task RunAsync(IAsyncEnumerable<ListTitle> entries, ChannelWriter<Listed<MediaMatchResult>> settled, CancellationToken cancellationToken)
 	{
-		await using var writes = writesFactory.Create();
-		var context = await LoadContext.StartAsync(activeSink, idResolver, detailsFetcher, writes, cancellationToken);
+		await using var writer = writersFactory.Create();
+		var context = await LoadContext.StartAsync(activeSink, idResolver, detailsFetcher, writer, cancellationToken);
 		await using var watchdog = new RunWatchdog(time, options.StallAfter, cancellationToken);
 		var titles = new List<Task>();
 		try
@@ -126,7 +126,7 @@ internal sealed class ListLoad(
 
 	private async Task<MediaMatchResult> DetailsAsync(IdentifyRequest request, IdentifyHandoff handoff, LoadContext context, CancellationToken cancellationToken)
 	{
-		var loaded = await detailsFetcher.LoadAsync(handoff, request.Described(), context.DetailServices, context.Writes, cancellationToken);
+		var loaded = await detailsFetcher.LoadAsync(handoff, request.Described(), context.DetailServices, context.Writer, cancellationToken);
 		return loaded.Match<MatchedMedia, MediaMatchResult>(
 			matched => matched with { Known = handoff.Stored.IsSome() },
 			error => request.Unmatched(error.Exception.Map(_ => UnmatchedReason.CouldNotLookUp).GetValueOr(UnmatchedReason.NotFound))

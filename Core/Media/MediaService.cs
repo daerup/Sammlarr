@@ -12,7 +12,7 @@ internal sealed class MediaService(
 	DetailsFetcher detailsFetcher,
 	ListLoad listLoad,
 	IIdentityClaims claims,
-	MediaWriteBufferFactory bufferFactory,
+	LibraryWriterFactory writersFactory,
 	ActiveSink activeSink,
 	IMediaRepository mediaRepository
 ) : IMediaService
@@ -46,12 +46,12 @@ internal sealed class MediaService(
 			yield break;
 		}
 
-		await using var buffer = bufferFactory.Create();
+		await using var writer = writersFactory.Create();
 		var stored = await LoadByInternalsAsync(materialized, cancellationToken);
 		var connected = await detailsFetcher.ConnectedAsync(cancellationToken);
 		using var abandon = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		await Task.CompletedTask.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
-		List<Task<Result<MatchedMedia>>> started = [.. materialized.Select(id => LoadStoredDetailsAsync(id, stored, connected, buffer, abandon.Token))];
+		List<Task<Result<MatchedMedia>>> started = [.. materialized.Select(id => LoadStoredDetailsAsync(id, stored, connected, writer, abandon.Token))];
 		try
 		{
 			foreach (var loading in started)
@@ -275,7 +275,7 @@ internal sealed class MediaService(
 		MediaId id,
 		IReadOnlyDictionary<MediaId, StoredMedia> stored,
 		IReadOnlySet<RemoteService> connected,
-		MediaWriteBuffer buffer,
+		LibraryWriter writer,
 		CancellationToken cancellationToken
 	)
 	{
@@ -287,7 +287,7 @@ internal sealed class MediaService(
 						new IdentifyHandoff(row.Identity, Some.Of(row)),
 						MediaDetails.Empty(row.Identity.Type),
 						connected,
-						buffer,
+						writer,
 						cancellationToken
 					),
 				() => Task.FromResult<Result<MatchedMedia>>(Error.From("identity not found"))

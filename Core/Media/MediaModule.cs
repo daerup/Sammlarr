@@ -14,7 +14,7 @@ internal class MediaModule : IServiceModule
 		services.AddScoped<MediaIdResolver>();
 		services.AddScoped<IUnmatchedMediaCache, UnmatchedMediaCache>();
 		services.AddScoped<DetailsFetcher>();
-		services.AddScoped<MediaWriteBufferFactory>();
+		services.AddScoped<LibraryWriterFactory>();
 		services.AddScoped<TitleIdentifier>();
 		services.AddScoped<ListLoad>();
 		services.TryAddSingleton(TimeProvider.System);

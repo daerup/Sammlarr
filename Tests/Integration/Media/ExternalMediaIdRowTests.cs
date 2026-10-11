@@ -1,3 +1,4 @@
+using Contracts.Media;
 using DB.Data.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -99,9 +100,9 @@ public class ExternalMediaIdRowTests(SammlarrTestHost fixture) : IAsyncDisposabl
 		await using var snapshot = await reading.SnapshotAsync(CancellationToken.None);
 		var before = await reading.MediaRatings.CountAsync();
 
-		await new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock()).UpsertDetailsAsync(
-			new Dictionary<MediaId, CachedDetails> { [MediaId.From(media.Id)] = Rated() }
-		);
+		await new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock()).SaveDetailsAsync([
+			new DetailsChange(MediaId.From(media.Id), new None(), Rated()),
+		]);
 
 		await Assert.That(await reading.MediaRatings.CountAsync()).IsEqualTo(before);
 	}

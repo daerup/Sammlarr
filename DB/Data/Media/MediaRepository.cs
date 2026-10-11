@@ -79,37 +79,42 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		];
 	}
 
-	public async Task UpsertDetailsAsync(IReadOnlyDictionary<MediaId, CachedDetails> details, CancellationToken cancellationToken = default)
+	public async Task SaveDetailsAsync(IReadOnlyList<DetailsChange> changes, CancellationToken cancellationToken = default)
 	{
-		if (details.Count == 0)
+		var changed = changes.Where(change => change.Changed).GroupBy(change => change.Id).Select(group => group.Last()).ToList();
+		if (changed.Count == 0)
 		{
 			return;
 		}
 
+		var ids = changed.Select(change => change.Id.Value).ToList();
 		using var _ = await writeLock.AcquireAsync(cancellationToken);
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var rawIds = details.Keys.Select(id => id.Value).ToList();
-		var existing = await ctx
-			.MediaDetails.Include(m => m.Ratings)
-			.Include(m => m.Answers)
-			.Include(m => m.PageLinks)
-			.AsSingleQuery()
-			.Where(m => rawIds.Contains(m.MediaId))
-			.ToDictionaryAsync(m => m.MediaId, cancellationToken);
-
-		foreach (var (id, cached) in details)
+		await using var transaction = await ctx.Database.BeginTransactionAsync(cancellationToken);
+		var stored = await ctx
+			.MediaDetails.Where(details => EF.Parameter(ids).Contains(details.MediaId))
+			.Select(details => details.MediaId)
+			.ToHashSetAsync(cancellationToken);
+		await ctx
+			.MediaRatings.Where(rating => EF.Parameter(ids).Contains(EF.Property<Guid>(rating, MediaQueries.MediaIdColumn)))
+			.ExecuteDeleteAsync(cancellationToken);
+		await ctx
+			.ProviderAnswers.Where(answer => EF.Parameter(ids).Contains(EF.Property<Guid>(answer, MediaQueries.MediaIdColumn)))
+			.ExecuteDeleteAsync(cancellationToken);
+		await ctx.Set<MediaPageLinkRow>()
+			.Where(link => EF.Parameter(ids).Contains(EF.Property<Guid>(link, MediaQueries.MediaIdColumn)))
+			.ExecuteDeleteAsync(cancellationToken);
+		foreach (var change in changed)
 		{
-			if (existing.TryGetValue(id.Value, out var entity))
-			{
-				detailsFactory.Update(entity, cached);
-			}
-			else
-			{
-				ctx.MediaDetails.Add(detailsFactory.BuildFrom(cached, id.Value));
-			}
+			var row = detailsFactory.BuildFrom(change.After, change.Id.Value);
+			ctx.Entry(row).State = stored.Contains(row.MediaId) ? EntityState.Modified : EntityState.Added;
+			ctx.AddRange(row.Ratings);
+			ctx.AddRange(row.Answers);
+			ctx.AddRange(row.PageLinks);
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
+		await transaction.CommitAsync(cancellationToken);
 	}
 
 	public async Task SavePageLinksAsync(MediaId id, IReadOnlyCollection<IPageLink> links, CancellationToken cancellationToken = default)

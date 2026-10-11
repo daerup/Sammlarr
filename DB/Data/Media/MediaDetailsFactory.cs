@@ -15,27 +15,6 @@ internal class MediaDetailsFactory
 		return row;
 	}
 
-	public void Update(MediaDetailsRow existing, CachedDetails cached)
-	{
-		switch (existing, cached.Details)
-		{
-			case (MovieDetailsRow movie, MovieDetails details):
-				movie.Runtime = details.Runtime;
-				break;
-			case (ShowDetailsRow show, ShowDetails details):
-				show.Seasons = details.Seasons;
-				show.Episodes = details.Episodes;
-				show.RuntimePerEpisode = details.RuntimePerEpisode;
-				break;
-			default:
-				throw new InvalidOperationException($"Cannot update existing {existing.GetType().Name}.");
-		}
-		ApplyCommonFields(existing, cached, existing.MediaId);
-		ReplaceRatings(existing, cached.Details.Ratings.All);
-		ReplaceAnswers(existing, cached.Answers);
-		ReplacePageLinks(existing, cached.Details.PageLinks);
-	}
-
 	public CachedDetails ToCached(MediaDetailsRow row)
 	{
 		return new(
@@ -105,24 +84,6 @@ internal class MediaDetailsFactory
 		row.Genres = [.. details.Genres];
 		row.RefreshedAt = cached.RefreshedAt;
 		row.AskedAt = cached.AskedAt;
-	}
-
-	private static void ReplaceRatings(MediaDetailsRow row, IEnumerable<IMediaRating> ratings)
-	{
-		row.Ratings.Clear();
-		row.Ratings.AddRange(ratings.Select(rating => BuildRating(rating, row)));
-	}
-
-	private static void ReplaceAnswers(MediaDetailsRow row, IEnumerable<ProviderAnswer> answers)
-	{
-		row.Answers.Clear();
-		row.Answers.AddRange(answers.Select(answer => BuildAnswer(answer, row)));
-	}
-
-	private static void ReplacePageLinks(MediaDetailsRow row, IEnumerable<IPageLink> links)
-	{
-		row.PageLinks.Clear();
-		row.PageLinks.AddRange(links.Select(link => link.ToPageLinkRow(row)));
 	}
 
 	private static ProviderAnswerRow BuildAnswer(ProviderAnswer answer, MediaDetailsRow parent)
