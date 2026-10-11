@@ -79,11 +79,6 @@ internal sealed class MediaService(
 		}
 	}
 
-	public IAsyncEnumerable<MediaMatchResult> IdentifyWithDetailsAsync(IAsyncEnumerable<IdentifyRequest> requests, CancellationToken cancellationToken = default)
-	{
-		return LoadListAsync(requests.Select(ListTitle (request) => request), cancellationToken).InListOrderAsync(cancellationToken);
-	}
-
 	public IAsyncEnumerable<Listed<MediaMatchResult>> LoadListAsync(IAsyncEnumerable<ListTitle> entries, CancellationToken cancellationToken = default)
 	{
 		return listLoad.LoadAsync(entries, cancellationToken);

@@ -142,7 +142,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task IdentifyWithDetailsAsync_ForAShowNoProviderCanPlace_DescribesItsUnmatchedRowWithItsDescriptionWithoutSearchingByIt()
+	public async Task LoadListAsync_ForAShowNoProviderCanPlace_DescribesItsUnmatchedRowWithItsDescriptionWithoutSearchingByIt()
 	{
 		await host.EnsurePlexAccount();
 		host.HttpStub.RespondWithStatusForUrl($"{TestUrls.TvmazeApi}/lookup/shows", HttpStatusCode.NotFound);
@@ -158,7 +158,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 			),
 		};
 
-		var results = await Testee.IdentifyWithDetailsAsync(new[] { request }.ToAsyncEnumerable()).ToListAsync();
+		var results = await Testee.LoadListAsync(new[] { request }.ToAsyncEnumerable().AsListTitles()).InListOrderAsync().ToListAsync();
 
 		var unmatched = await Assert.That(results.Single()).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
 		await Assert.That(unmatched!.Details.Title).IsEqualTo("Kusuriya no Hitorigoto 3rd Season");
@@ -166,14 +166,14 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenATitlesIdsSitOnTwoStoredTitles_LeavesItUnmatchedAndGoesOn()
+	public async Task LoadListAsync_WhenATitlesIdsSitOnTwoStoredTitles_LeavesItUnmatchedAndGoesOn()
 	{
 		await host.SeedMediaAsync(AniListId.From("16498", MediaType.Show));
 		await host.SeedMediaAsync(TvdbId.From("267440", MediaType.Show));
 		var conflicting = new IdentifyRequest([AniListId.From("16498", MediaType.Show), TvdbId.From("267440", MediaType.Show)], new None());
 		var other = new IdentifyRequest([Tvdb("81189").ToExternal(MediaType.Show)], new None());
 
-		var results = await Testee.IdentifyWithDetailsAsync(new[] { conflicting, other }.ToAsyncEnumerable()).ToListAsync();
+		var results = await Testee.LoadListAsync(new[] { conflicting, other }.ToAsyncEnumerable().AsListTitles()).InListOrderAsync().ToListAsync();
 
 		await Assert.That(results).Count().IsEqualTo(2);
 		await Assert

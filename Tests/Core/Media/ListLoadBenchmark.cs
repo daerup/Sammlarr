@@ -3,10 +3,11 @@ using Contracts.Media;
 using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Providers;
+using TestInfrastructure;
 
 namespace Core.Tests.Media;
 
-public class MediaServiceBenchmark
+public class ListLoadBenchmark
 {
 	private const int Titles = 2000;
 	private const int PageSize = 100;
@@ -16,7 +17,7 @@ public class MediaServiceBenchmark
 
 	[Test]
 	[Explicit]
-	public async Task IdentifyWithDetailsAsync_ForAPagedListWithStallingTitles_ReportsItsMeasures()
+	public async Task LoadListAsync_ForAPagedListWithStallingTitles_ReportsItsMeasures()
 	{
 		var (testee, deps) = TestMediaService.Create();
 		var lookups = new Concurrency();
@@ -53,7 +54,7 @@ public class MediaServiceBenchmark
 		var half = TimeSpan.Zero;
 		var handed = 0;
 
-		await foreach (var _ in testee.IdentifyWithDetailsAsync(PagedAsync()))
+		await foreach (var _ in testee.LoadListAsync(PagedAsync().AsListTitles()))
 		{
 			handed++;
 			if (handed == 1)

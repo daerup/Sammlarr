@@ -37,12 +37,12 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task IdentifyWithDetailsAsync_ForTwoRemakesSharingAMetacriticSlug_HandsOutOnlyIdsThatAreStored()
+	public async Task LoadListAsync_ForTwoRemakesSharingAMetacriticSlug_HandsOutOnlyIdsThatAreStored()
 	{
 		await StubRemakesAsync();
 		var requests = new[] { Request(TmdbId.From("15739", MediaType.Movie)), Request(TmdbId.From("26177", MediaType.Movie)) };
 
-		var results = await host.Resolve<IMediaService>().IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+		var results = await host.Resolve<IMediaService>().LoadListAsync(requests.ToAsyncEnumerable().AsListTitles()).InListOrderAsync().ToListAsync();
 
 		await Assert.That(results.AsEnumerable()).AreOfUnionType<IEnumerable<MediaMatchResult>, MediaMatchResult>(typeof(MatchedMedia), typeof(MatchedMedia));
 		var handedOut = HandedOut(results);
@@ -51,7 +51,7 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenALaterTitleTiesAnEarlierOneToAStoredRow_HandsOutOnlyIdsThatAreStored()
+	public async Task LoadListAsync_WhenALaterTitleTiesAnEarlierOneToAStoredRow_HandsOutOnlyIdsThatAreStored()
 	{
 		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
@@ -67,7 +67,7 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 			.Append(Request(TmdbId.From("1", MediaType.Movie), ImdbId.From("tt9", MediaType.Movie)))
 			.ToList();
 
-		var results = await host.Resolve<IMediaService>().IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+		var results = await host.Resolve<IMediaService>().LoadListAsync(requests.ToAsyncEnumerable().AsListTitles()).InListOrderAsync().ToListAsync();
 
 		var handedOut = HandedOut(results);
 		await Assert.That(await StoredAsync(handedOut)).IsEqualTo(handedOut.Count);
