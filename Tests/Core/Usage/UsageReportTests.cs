@@ -98,6 +98,28 @@ public class UsageReportTests
 	}
 
 	[Test]
+	public async Task ReadAsync_EachService_CountsItsOwnCausesAndEachHoursCauses()
+	{
+		Stored(
+			[
+				Calls(RemoteService.Tmdb, 11, UsageOutcome.Answered, 1, UsageCause.Search),
+				Calls(RemoteService.Tmdb, 11, UsageOutcome.Answered, 3),
+				Calls(RemoteService.Plex, 12, UsageOutcome.Answered, 7),
+			],
+			[Attempts(RemoteService.Tmdb, 11, 4, 250), Attempts(RemoteService.Plex, 12, 9, 1000)]
+		);
+
+		var tmdb = (await Testee().ReadAsync(UsageRange.Day)).Current.Services.Single(line => line.Service == RemoteService.Tmdb);
+
+		await Assert
+			.That(tmdb.Causes.Select(line => (line.Cause, line.Tally.Total)))
+			.IsEquivalentTo([(UsageCause.FeedRun, 3L), (UsageCause.Search, 1L)], CollectionOrdering.Matching);
+		await Assert.That(tmdb.Slots[22].Causes).IsEquivalentTo([KeyValuePair.Create(UsageCause.FeedRun, 3L), KeyValuePair.Create(UsageCause.Search, 1L)]);
+		await Assert.That(tmdb.Slots[23].Causes).IsEmpty();
+		await Assert.That(tmdb.Causes.Single(line => line.Cause == UsageCause.FeedRun).Tally.Durations).IsEquivalentTo([KeyValuePair.Create(250, 4L)]);
+	}
+
+	[Test]
 	public async Task ReadAsync_AServiceThatStoppedAnswering_SaysSinceWhichHour()
 	{
 		Stored(
@@ -169,9 +191,16 @@ public class UsageReportTests
 		await Assert.ThrowsAsync<UnauthorizedAccessException>(() => Testee(UserRole.Member).ReadAsync(UsageRange.Day));
 	}
 
-	private void Stored(params UsageCalls[] calls)
+	private void Stored(params UsageCalls[] calls) => Stored(calls, []);
+
+	private void Stored(IReadOnlyList<UsageCalls> calls, IReadOnlyList<UsageAttempts> attempts)
 	{
-		_store.ReadAsync(Any(), Any(), Any()).Returns(new UsageRows(calls, []));
+		_store.ReadAsync(Any(), Any(), Any()).Returns(new UsageRows(calls, attempts));
+	}
+
+	private static UsageAttempts Attempts(RemoteService service, int hour, long attempts, int bucket)
+	{
+		return new(service, Midnight.AddHours(hour), UsageCause.FeedRun, new None(), attempts, new Dictionary<int, long> { [bucket] = attempts });
 	}
 
 	private static UsageCalls Calls(RemoteService service, int hour, UsageOutcome outcome, long calls, UsageCause cause = UsageCause.FeedRun)

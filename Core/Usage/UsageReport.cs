@@ -66,22 +66,36 @@ internal sealed class UsageReport(
 				.Select(service => Line(window, service, [.. callsByService[service]], [.. attemptsByService[service]], live(service)))
 				.OrderByDescending(line => line.Tally.Total),
 		];
+		return new UsagePeriod(window, Tally(calls, attempts), Slots(window, calls, attempts), services, Causes(calls, attempts));
+	}
+
+	private static IReadOnlyList<UsageCauseLine> Causes(IReadOnlyList<UsageCalls> calls, IReadOnlyList<UsageAttempts> attempts)
+	{
 		var attemptsByCause = attempts.ToLookup(row => row.Cause);
-		IReadOnlyList<UsageCauseLine> causes =
+		return
 		[
 			.. calls
 				.GroupBy(row => row.Cause)
 				.Select(group => new UsageCauseLine(group.Key, Tally(group, attemptsByCause[group.Key])))
 				.OrderByDescending(line => line.Tally.Total),
 		];
-		return new UsagePeriod(window, Tally(calls, attempts), Slots(window, calls, attempts), services, causes);
 	}
 
 	private static IReadOnlyList<UsageSlot> Slots(UsageWindow window, IReadOnlyList<UsageCalls> calls, IReadOnlyList<UsageAttempts> attempts)
 	{
 		var callsBySlot = calls.ToLookup(row => window.SlotOf(row.Hour));
 		var attemptsBySlot = attempts.ToLookup(row => window.SlotOf(row.Hour));
-		return [.. Enumerable.Range(0, window.Slots).Select(slot => new UsageSlot(window.SlotAt(slot), Tally(callsBySlot[slot], attemptsBySlot[slot])))];
+		return
+		[
+			.. Enumerable
+				.Range(0, window.Slots)
+				.Select(slot => new UsageSlot(window.SlotAt(slot), Tally(callsBySlot[slot], attemptsBySlot[slot]), CallsByCause(callsBySlot[slot]))),
+		];
+	}
+
+	private static IReadOnlyDictionary<UsageCause, long> CallsByCause(IEnumerable<UsageCalls> calls)
+	{
+		return calls.GroupBy(row => row.Cause).ToDictionary(group => group.Key, group => group.Sum(row => row.Calls));
 	}
 
 	private static UsageServiceLine Line(
@@ -103,7 +117,7 @@ internal sealed class UsageReport(
 			LastCall = live.LastCall.Or(() => hours.Select(hour => hour.Hour).FirstOrNone()),
 			FailingSince = hours.TakeWhile(hour => hour.Tally.Answered == 0).Select(hour => hour.Hour).Order().FirstOrNone(),
 		};
-		return new UsageServiceLine(service, Tally(calls, attempts), rightNow, Slots(window, calls, attempts));
+		return new UsageServiceLine(service, Tally(calls, attempts), rightNow, Slots(window, calls, attempts), Causes(calls, attempts));
 	}
 
 	private static UsageTally Tally(IEnumerable<UsageCalls> calls, IEnumerable<UsageAttempts> attempts)
