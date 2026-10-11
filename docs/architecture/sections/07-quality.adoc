@@ -10,42 +10,47 @@ attributes that make them concrete and where each is enforced.
 |===
 | Goal | Refined into | Enforced by
 
-| Correctness of list building | Identify matches the right title (a title search is confirmed by id); one title yields one library row whether duplicates arrive in one flush or across flushes (identity dedup); a cross-identity collision fails loud, not silent; a bad or empty load never evicts the wrong items | The identity claim lane and media repository (<<section-runtime-view>>, scenario C), keyed by the one-key-per-source index and settling collisions as an unmatched conflict; the Mirror conclusiveness rule, under which a load that did not finish or came back empty drops nothing (<<section-runtime-view>>)
-| Resilience of provider calls | A 429 storm or outage degrades to partial results, never a failed run; outbound concurrency is bounded; transient faults retry, sustained ones trip a breaker | The shared HTTP pipeline (<<section-concepts>>); scenario R
+| Correctness of list building | Identify matches the right title, from identity keys only (a rating page link never matches or merges); one title is one library row, its identity written before it is handed out; ids that would join two stored titles settle the title unmatched as a conflict, never a silent merge and never a failed run; a bad, unfinished or empty load never evicts the wrong items | The identity claim lane and its pure rule (<<section-runtime-view>>, scenario C), keyed by the one-key-per-source index; the Mirror conclusiveness rule, under which a load that did not finish, came back empty or left a title Sammlarr couldn't look up drops nothing (<<section-runtime-view>>)
+| Resilience of provider calls | A 429 storm or outage degrades to partial results, never a failed run; each service is paced by its own published limits, so a blocked service slows only the titles that need it; transient faults retry through the lane, sustained ones take the lane down | The lanes and the HTTP pipeline (<<section-concepts>>); scenario R
 | Per-user data isolation | Reads are filtered to the current user; writes are stamped to the owner; the filter fails closed; background work runs under the right user | EF query filters, the ownership stamper and `IUserScope` (<<section-concepts>>); scenario I
 | Maintainability | Strong typing and unions over primitives; strict layer dependencies; provider wiring generated, not hand-written; least visibility; one test naming convention | Architecture tests; the module and generator patterns (<<section-concepts>>); the `SAM0001`, `SAM0002` and `SAM0003` analyzers and `AbsenceTests`; the tiers in `testing.md`
 |===
 
 === Quality Scenarios
 
-Scenario C (identity dedup):: A list yields entries with overlapping ids: two in one flush (both
-carry TMDB 5, one also IMDb tt9) and one already stored by an earlier flush. _Response:_ every
-entry that shares any one external id `(Source, MediaType, Value)` is anchored onto a single
-canonical identity, its extra ids unioned in; the repository reuses the existing row and appends
-only new ids, so each title stays one library row across flushes. MediaType is part of id
-equality, so a movie and a show that share a number never merge, and a candidate that would bridge
-two already-stored, distinct rows settles unmatched as a conflict rather than merging them.
-At flush time a stored title that gained such an id (say from an enricher) keeps its own row and the
-id is dropped from both rows
-(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0015-keep-an-id-two-stored-titles-claim-on-neither.md[ADR 0015]).
-_Measure:_ the coordinator, repository and `MediaIdentity` feature tests pass. _Limit:_ one shared
-id is enough to merge, with no multi-id agreement check, so within a single flush two same-type
-titles a provider tags with the same or conflicting id coalesce silently; only collisions against
-already-persisted rows are surfaced (<<section-technical-risks>>).
+Scenario C (identity claims):: A list yields entries with overlapping ids: two that both carry TMDB 5, one of them also
+IMDb tt9, and one whose ids sit on two titles already stored. _Response:_ each entry is claimed before it is handed out,
+from its identity keys only. The first claim for TMDB 5 creates or extends one row; the second finds that row and
+extends it with tt9, so both entries hand out the same `MediaId`. A claim extends at most one stored row, never adds a
+second key of one source or a key of another media type, and never merges two rows, so the entry whose ids sit on two
+stored titles settles unmatched as a conflict, carrying both titles (`ConflictsWith`), while the run completes and the
+two rows stay as they are. An enricher's key that would join two titles is dropped from the title it was found for.
+MediaType is part of a key, so a movie and a show that share a number never meet. Rating page links (Rotten Tomatoes,
+Metacritic, Letterboxd) are no keys: remakes that share a slug stay two titles. _Measure:_ `ClaimRuleTests`, the
+`ClaimRuleLaws` property test (no key on two rows, no row with two keys of a source), `IdentityClaimsTests` and
+`FeedRunIdentityTests` pass. _Limit:_ one shared key is enough to extend a row, with no multi-id agreement check, so a
+provider that tags two titles with the same key folds the second into the first; and a title stored twice stays
+twice until something merges it (<<section-technical-risks>>).
 
 Scenario I (isolation):: User B requests feeds/wantlist/blocklist while User A's rows exist.
 _Response:_ B sees only B's rows; a query with no authenticated user throws rather than returning
 everyone's. _Measure:_ the isolation integration tests pass; the current-user lookup is fail-closed.
 
-Scenario R (resilience):: A feed loads while Plex returns 429 or is unreachable. _Response:_
-affected ids become `UnmatchedMedia` ("not found"), the run completes and no exception escapes.
-A provider blocked by a 429 or an open circuit breaker is never sent a request into the block: a title waits for it at
-most once and only within its budget (`MaxWait` for ids, `EnrichWait` for details), else skips it, and one that answered
-as unavailable is not asked again by the same title's other routes, so the storm is not amplified; the
-ids are not cached unmatched, so the next run retries them. _Measure:_ partial results are returned;
-`ProviderUnavailableException` is handled, not propagated.
+Scenario R (resilience):: A feed loads while Plex returns 429 or is unreachable. _Response:_ the run completes and no
+exception escapes. A 429 blocks only the Plex lane it came from, for its `Retry-After`, or halves that lane's rate
+without one; repeated failures take the lane down for a while. A title asks a blocked Plex only while the block ends within its `MaxWait` (90
+seconds) and then waits in the lane; a longer block, a down lane or an unavailable answer settles the
+title couldn't look up, and its other routes skip Plex for the rest of its resolution, so the storm is not amplified.
+Titles that need nothing from Plex settle meanwhile. Nothing is cached as unmatched, so the next run retries them, and
+a Mirror run with such a title drops nothing. If nothing settles for `StallAfter` (3 minutes), the watchdog settles the
+rest couldn't look up and the run is recorded. _Measure:_ `FeedRunApplyTests.RunAsync_WithTmdbBlocked_SettlesTheTitlesThatDontNeedTmdb`,
+`FeedRunTests.Run_WithAServiceBlockedForever_EndsAfterStallAfterWithEveryTitleSettled`, `AnsweringTests` and the lane
+tests in `Tests/Shared/Concurrency` pass.
 
-Scenario P (performance):: A feed of N items is previewed. _Response:_ identify reuses fresh
-library rows and the negative cache and calls providers at the recommended concurrency, so a
-repeat preview does little I/O. _Measure:_ the resilience concurrency limit stays at or above the
-recommended concurrency; an eight-wide cap slows a large feed by roughly an order of magnitude.
+Scenario P (performance):: A feed of N items is loaded again. _Response:_ the library is read once per burst; a stored,
+fresh title settles at once with no call; only misses are routed, and only the fields the feed needs are asked. No
+count of titles is capped: every title runs its own chain, and each service is paced only by its own lanes, so a
+fully cached run is bound by its list pages and the library reads. _Measure:_
+`CachedRunTests.RunAsync_ForAFullyCachedList_SendsOnlyItsPage` passes; `CachedRunBenchmark` reports the time and the
+remote calls of a cached run of 4,000 titles, and `ListLoadBenchmark` how soon half of a list with stalling titles is
+out.

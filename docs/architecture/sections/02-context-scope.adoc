@@ -47,14 +47,14 @@ across providers.
 |===
 | System | Integration | Direction
 
-| Plex | Plex OAuth (PIN flow) for sign-in; HTTPS/JSON for search and the wantlist; additions and removals via HTTP `PUT` to the Plex watchlist endpoints | Read + Write
+| Plex | Plex OAuth (PIN flow) for sign-in; HTTPS/JSON for search, ids (its match and metadata endpoints) and the wantlist; additions and removals via HTTP `PUT` to the Plex watchlist endpoints | Read + Write
 | TMDB | REST API, authenticated with an API key | Read only
 | MDBList | REST API with an API key; list entries are paged and resolved to media | Read only
 | IMDb, Rotten Tomatoes, TheTVDB | No HTTP client of their own; `ImdbId` / `TvdbId` value objects reached through Plex or TMDB lookups, `RottenTomatoesId` (a page path) through Wikidata | Reference only
 |===
 
 Provider credentials and API keys are held as `[Sensitive]` secrets and redacted from logs.
-Every outbound provider call goes through a shared resilience pipeline: a per-provider concurrency
-gate, then retry with jitter that honours `Retry-After`, a circuit breaker, and attempt and total
-timeouts. A slow or rate-limiting provider therefore cannot overwhelm the app. See
-<<section-concepts>>.
+Every outbound provider call passes a lane: one per remote service, route and owner, pacing its requests by the
+limits the provider publishes, holding back on a 429 and closing for a while after repeated
+failures, with one retry layer and an attempt timeout. A slow or rate-limiting provider therefore
+slows only the titles that need it and cannot overwhelm the app. See <<section-concepts>>.

@@ -105,7 +105,7 @@ _state = await ApiKeyService
 | keep the successes of a stream | `await foreach (var media in stream.WhereSuccessAwait())` | `if (result is Success<T>(var v))` inside the loop
 | a value or a fallback | `+loaded.Match(matched => (MediaMatchResult)matched, _ => request.Unmatched())+` | `loaded is Success<MatchedMedia>(var matched) ? matched : …`
 | keep a success that passes a test | `+handoff.ToOptional().When(match => match.Stored.IsNone())+` | `is Success<IdentifyHandoff>(var match) && …`
-| read the cause of an error | `+error.CausedBy<ProviderUnavailableException>().Match(next.Fills, MediaFields.None)+` | `Error { Exception: ProviderUnavailableException }`
+| read the cause of an error | `+error.CausedBy<RemoteUnavailableException>().Match(next.Fills, MediaFields.None)+` | `Error { Exception: RemoteUnavailableException }`
 | chain a fallible step | `.Map(next)` (flattens a `Result`-returning step), `.MapError(…)` | a guard that returns the error by hand
 | leave the monad at a boundary | `+.GetOrThrow(error => new …Exception(error.Reason))+`, `.ToOptional()` | `is Error e ? throw … : …`
 |===
@@ -199,7 +199,7 @@ are facts of its rating type, read through `source.Card`.
 * *An enricher that cannot vouch for a value* lists it in `Defers` (TVmaze, AniList and MyAnimeList their titles), and artwork
   no `IArtworkResizer` sizes is deferred on its own: both only fill a gap after the stored copy and every answer that may replace.
 * *A whole file* (IMDb's ratings, the anime id map) is an `IDataset` with an `IDatasetTable`, a row in `DatasetLoads` and a
-  `DatasetLoader` registered in Core; it loads daily and answers `Error` until its first load (ADR 0013).
+  `DatasetLoader` registered in Core; it loads daily and answers `Unavailable` until its first load (ADR 0013).
 * *A new feed source* is a `FeedProvider` member with its `Service`, a `Feed<T>` registration and its `FeedSources` entry
   (placeholder, help and page link); it throws on a shape it cannot read and never skips an item it cannot parse. A feed
   source whose site has browse pages adds a page table on `SiteLink` (`AniListPages`, `MalPages`) and reads a page up to
@@ -207,31 +207,109 @@ are facts of its rating type, read through `source.Card`.
 
 The compiler, the role registration tests, the stored-enum-name test and the brand-art test catch a member that misses any of these.
 
-=== HTTP resilience
+=== Lanes and HTTP resilience
 
-Every outbound provider call goes through one pipeline, `AddRemoteHttp<TOptions>` (`API/Http`), which every client of a
-remote service gets through `ForRemote(...).Client`: a per-service concurrency gate and request rate, then the standard
-resilience handler (retry with jitter honouring `Retry-After`, a circuit breaker, per-attempt and total timeouts), all
-from the service's options. Clients that call no remote service (Pushover, the webhook, the picture grids) get the same
-pipeline without a service through `AddClientHttp<TOptions>`.
-On breaker-open or timeout the client raises `RemoteUnavailableException`, which callers degrade
-on rather than fail a whole run. Per-provider numbers are in configuration
-(<<section-deployment-view>>); the rate-limit-storm interaction is in <<section-runtime-view>>.
-`MediaService.RecommendedConcurrency` (100) is how many titles `MediaService` identifies or fetches
-details for at once, so each provider's concurrency gate must stay at or above it: a gate of 8 slows a large feed
-by roughly an order of magnitude.
+Every call to a remote service passes a _lane_ (`LaneGate`, `Shared/Concurrency`): one per remote service, route and
+owner, which admits that route's requests by the limits its provider publishes. Nothing in Core sleeps or caps how many
+titles run; the lanes pace each service, so a blocked or slow service holds back only the titles that need it. Every
+client of a remote service gets its pipeline through `ForRemote(...).Client`, built by `AddRemoteHttp<TOptions>`
+(`API/Http`), from outermost to innermost:
+
+. `UsageStampHandler` stamps the request with its service and cause;
+. a Polly retry (`LanedPipeline`), the only retry layer;
+. `LaneHandler`, which takes one lane permit per attempt, so a retry queues for a new permit like any other request;
+. the attempt timeout (`Http.AttemptTimeoutSeconds`);
+. `UsageTagsHandler` tags each attempt.
+
+A request belongs to the lane whose route, one of the provider's configured URLs (`IProviderHttpOptions.Urls`) plus a
+path, is the longest prefix of its address; anything else takes the provider's `api` lane. The URL comes from the
+provider's options, never from a client's base address, so staging and the E2E stack, which override the URLs, route
+the same way, and start-up fails on a route that names a URL the provider does not have (`LaneSettingsCheck`). Plex has
+four lanes: `match` and `watchlist` on its discover host (the watchlist's adds and removes go to the vod host),
+`metadata`, and `api` for plex.tv and every other Plex call. MDBList stamps each request with its API key and Radarr
+and Sonarr with their address as the lane's owner, so each key and each app has lanes of its own.
+
+Each limit is written the way the provider publishes it, as requests per window (`Http.Lanes` in `appsettings.json`,
+read as `RateWindow(Requests, Per, Aligned)`), never flattened to requests per second: a run that stays inside the
+window goes at full speed, and pacing starts only when it would exceed it. A lane may also cap the requests it has in
+flight (`MaxInFlight`) and batch (`MaxBatch`, below).
+
+[cols="1,3", options="header"]
+|===
+| Service | Lanes
+
+| TMDB | 40 per second
+| Trakt | 1,000 per 5 minutes
+| MDBList | 1,000 per 5 minutes, on fixed windows that start at :00, :05 and so on; title lookups batch up to 200 ids
+| AniList | 30 per minute (as published while AniList runs degraded), 1 in flight; title lookups batch up to 50 ids
+| MyAnimeList | 30 per second, 1 in flight
+| TVmaze | 20 per 10 seconds
+| Plex | `api`, `match` and `metadata` 50 per second with 25 in flight each (Plex publishes no limit); `watchlist` 4 in flight
+| Wikidata | 5 in flight; SPARQL lookups batch up to 100 IMDb ids
+| Radarr, Sonarr | 4 in flight
+| IMDb datasets, anime lists | 2 in flight
+|===
+
+A lane admits its waiting attempts by class, then by order within the class:
+
+[cols="1,2,1", options="header"]
+|===
+| Class | Set by | Order inside
+
+| `Interactive` | anything unset: a search, a click | arrival
+| `Source` | every feed service's list pages (`SourcePages.ReadAsync`) | page order
+| `Title` | each title's chain in a list load | list position, oldest first
+| `Background` | the FillDetails job | oldest first
+|===
+
+A 429 with `Retry-After` blocks the lane until then; a 429 without one halves the lane's rate, at most once per window,
+and each window without a 429 gives one request back (a lane with no window pauses for a second). `FailuresToDown`
+failed attempts in a row (a 5xx, a 408, a timeout, a broken connection; 4 by default) take the lane down for
+`DownSeconds` (30 by default), and then one probe decides. Waiting for room in a window is never refused. A down lane refuses every attempt at once,
+and a block or a quota reserve that outlasts the attempt's patience, its service's `MaxWait`, refuses it at once; either
+way the attempt fails with `LaneRefusedException` and nothing is sent. A quota is a lane's `ILaneQuota`, asked for the class that asks: MDBList's
+budget (`MdblistBudget`) lets list pages through, stops title lookups at the last `MDBList:FeedReserve` requests of the
+day, and stops the FillDetails job once less than half the day's allowance is left, so the job never spends what feed
+runs need.
+
+The retry retries only what the lane would admit now (`LaneGate.Admits`): a 429 whose block outlasts the wait, or a
+lane that has just gone down, hands the caller the real response. A 429 is retried with no delay of its own, since the
+lane paces it. Lane clients carry no rate limiter, no concurrency gate, no circuit breaker and no total timeout of
+their own; their `HttpClient.Timeout` of 10 minutes is only a safety net for a stalled body. Clients that call no
+remote service (Pushover, the webhook, the picture grids) get no lanes: `AddClientHttp<TOptions>` gives them the
+standard resilience handler (retry, attempt timeout, circuit breaker) and a total timeout from `Http.TimeoutSeconds`.
+
+A service that takes many ids in one request also gets a keyed lane (`Lane<TKey, TOut>`): asks queue per batch key and
+asking class, one batch per batch key and class is out at a time, and whatever arrives while it is out rides the next one, up to
+`MaxBatch`. No timer gathers a batch, so a slow or throttled service gets bigger batches, not more of them, and a
+`Background` key never rides in a `Title` batch. The batch's request takes its permit like any other; a lane never
+retries a batch, and a failed batch fails every key it carried. MDBList's title lookups (per API key, id kind and media
+type), AniList's titles (one `id_in` query) and Wikidata's SPARQL lookups (one `VALUES` query per media type) ride
+keyed lanes. A load primes MDBList's lane with each burst's titles that still need a field it fills (<<section-runtime-view>>), so its batches fill
+even though a title reaches MDBList only after its TMDB step.
+
+A call's failure reaches its caller as an answer. `Answering.GuardedAsync` is the one place where a converter's or
+enricher's exception becomes an `Answer<T>`: `Found`, `NoMatch`, `Unavailable` or `Faulted`. A lane refusal or a
+rejected key is `Unavailable` and not sent; an HTTP error or a timeout is `Unavailable` and sent; a
+`RemoteUnavailableException` (a 429, 408 or 5xx that outlasted the retries, a dataset not loaded yet) says itself
+whether its request left (`Sent`); anything unexpected is `Faulted`; a cancellation is rethrown. Only `NoMatch` from every route settles a title as not found and
+fills the negative cache; `Unavailable` and `Faulted` never do. Per-provider numbers
+are in the table above and under `Http.Lanes` in `Web/appsettings.json`; how a load meets a blocked lane is in <<section-runtime-view>> and
+under Provider routing below
+(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0017-pace-remote-calls-on-lanes-with-limits-as-published.md[ADR 0017]).
 
 === Provider routing
 
-Which remote service is asked depends on its load. `IRemoteCapacity.Of(remote)` gives a `RemoteLoad`:
-`BlockedUntil` (set by a 429's `Retry-After`, 30 seconds without one, or an open circuit breaker's break), `Busy`
-(in-flight requests over the concurrency gate's limit), `MaxWait` (the provider's `Http.MaxWaitSeconds`: Plex 90,
-TMDB 15, 0 never waits) and `EnrichWait` (`Http.EnrichWaitSeconds`: TMDB 15, Plex unset, so never). It lives in
-`API/Http` next to the gates and handlers that feed it; Core reads only the contract. Both id resolution and
-enrichment take a blocked provider the same way, through `RemoteLoad.Takes`: only while its block ends within its
-budget (`MaxWait` for id lookups, `EnrichWait` for enrichment), and then the ask goes to the provider's lane, which
-holds it until the block ends; Core never sleeps. The request already in flight still honours `Retry-After` through the
-retry policy.
+Which remote service is asked depends on its lanes. `IRemoteCapacity.Of(remote)` (scoped, in `API/Http`) folds every
+lane of the remote into a `RemoteLoad`, read for the asking class (`LanePriority.Current`) and counting a key's lanes
+only for the signed-in user who sent through them: `BlockedUntil` (a 429's `Retry-After`, a quota reserve for that
+class, or the end of a down period), `EstimatedWait` (the block left plus the time its queue takes to drain at the
+window's rate), `Down`, `Waiting`, `MaxWait` (the provider's `Http.MaxWaitSeconds`: Plex 90, TMDB 15, 0 never waits)
+and `EnrichWait` (`Http.EnrichWaitSeconds`: TMDB 15, Plex unset, so never). So the FillDetails job sees MDBList blocked
+at its floor while a feed run still sees it open. Core reads only the contract. Both id resolution and enrichment take a
+blocked provider the same way, through `RemoteLoad.Takes`: only while it is not down and its block ends within its
+budget (`MaxWait` for id lookups, `EnrichWait` for enrichment); then the ask goes to the provider's lane, which holds it
+for at most the service's `MaxWait` and refuses it beyond that. Core never sleeps.
 
 Enrichment asks, one at a time, the open enricher (the enrichers registered through `Enricher`, keyed by remote service)
 the search setting's service names while a detail field is missing, else the one whose `Fills` cover the most missing detail fields, then the most missing rating sources, the least busy first, among those that accept
@@ -268,32 +346,58 @@ field. A stale refresh that skips a service keeps the stored values of the field
 and, if it kept any, keeps `RefreshedAt`, so the title stays stale, is served as `Stale`, and the next load retries it.
 
 Id resolution routes the same way. Each `IExternalIdConverter` announces its `Lookups`, the calls its own provider
-answers: a `ById` lookup accepts some providers' ids, a `ByHints` lookup accepts the title hints, and each says
-which providers' ids its answer may yield and what it costs in calls (a lookup in a downloaded table, like the anime id
-map's, costs 0). `IdLookupPlanner` turns them into hops (an id
-to an id, an id to the hints, the hints to an id), plans every path of up to three hops from the ids the title
-already has to the target, and orders them: the open paths cheapest first, weighting each hop's cost by how busy its
-provider is, then the paths through a blocked provider, the soonest free first. Before planning, `MediaIdResolver` asks
-every lookup that costs 0 once from the ids the title holds, adding a provider's id only where the title has none, so a
-free answer (the anime id map's AniList and MyAnimeList ids for a show's TheTVDB, TMDB or IMDb id) reaches every title,
-and no path runs through such a lookup;
-then it tries the paths in that order. A title whose ids sit on two stored titles stays unmatched with a warning, and
-the rest of the batch goes on. Plex looks up a Plex id and searches by the hints;
-TMDB looks up a TMDB id's detail (its appended `external_ids` carry the IMDb and TheTVDB ids) and finds a TMDB id
-by an IMDb or TheTVDB id, so a title that carries a TMDB, IMDb or TheTVDB id can resolve without Plex; MDBList finds
-every id it holds for a title by any one of its IMDb, TMDB, TheTVDB, Trakt or MyAnimeList ids, at cost 2, so it is taken when
-TMDB is blocked, has no key or knows no TheTVDB id; Wikidata finds
-a title's Rotten Tomatoes, Metacritic and Letterboxd pages and its TMDB and TheTVDB ids by an IMDb id, at cost 3 so it is
-the last resort for TMDB and TheTVDB ids, a `ById` lookup without hints (`GivesHints` false), so it never stands in
-for a search's hints. A TMDB answer
-also carries the original title and its release year, which a following Plex search uses; Plex keeps a search's hits
-for 10 minutes per hints (title, year and type), shared by every user, so equal hints are searched once. Within one
-resolution each lookup is asked once per input, so paths that share a call make it once, and never by an id its own
-earlier answer gave: that answer already told everything the lookup knows about the title. Before every hop the resolver
-checks the providers of the hops left: a blocked one is waited for until it frees, once per provider per title and at
-most its `MaxWait`; a longer block, a second block of a provider already waited for, or a provider that answered as
-unavailable makes the path give up. A title is cached as unmatched only when no path gave up; a path that waited and
-was answered counts as tried.
+answers: a `ById` lookup accepts some providers' ids, a `ByHints` lookup accepts the title hints (no converter
+announces one), and each says which providers' ids its answer may yield and what it costs in calls (a lookup in a
+downloaded table, like the anime id map's, costs 0). `IdLookupPlanner` turns them into hops (an id to an id, an id to
+the hints, the hints to an id), plans every path of up to three hops from the ids the title already has to the target,
+and orders them by weight: each hop's cost times one plus its provider's estimated wait in seconds
+(`RemoteLoad.Weight`), so an idle two-hop detour goes before a direct hop blocked for ten seconds. Before planning,
+`MediaIdResolver` asks every lookup that costs 0 once from the ids the title holds, adding a provider's id only where
+the title has none, so a free answer (the anime id map's AniList and MyAnimeList ids for a show's TheTVDB, TMDB or IMDb
+id) reaches every title, and no path runs through such a lookup; then it tries the paths in that order. Plex finds a
+Plex id by a TMDB, IMDb or TheTVDB id through its match endpoint and reads a Plex id's other ids through its metadata
+endpoint; the match is an `AsksOnce` lookup, so a definitive answer by one of the title's ids answers it for the others,
+and a path through a match that already answered no is skipped. TMDB looks up a TMDB id's detail (its appended
+`external_ids` carry the IMDb and TheTVDB ids) and finds a TMDB id by an IMDb or TheTVDB id, so a title that carries a
+TMDB, IMDb or TheTVDB id can resolve without Plex; MDBList finds every id it holds for a title by any one of its IMDb,
+TMDB, TheTVDB, Trakt or MyAnimeList ids, at cost 2, so it is taken when TMDB is blocked, has no key or knows no TheTVDB
+id; Wikidata finds a title's Rotten Tomatoes, Metacritic and Letterboxd pages, its TMDB and TheTVDB ids and its AniList
+and MyAnimeList ids by an IMDb id, at cost 3 so it is the last resort for TMDB and TheTVDB ids, a `ById` lookup without
+hints (`GivesHints` false). Within one resolution each lookup is asked once per input, so paths that share a call make
+it once, and never by an id its own earlier answer gave: that answer already told everything the lookup knows about the
+title. Before every hop the resolver checks the providers of the hops left: one that is down, blocked past its
+`MaxWait`, or that answered as unavailable earlier in the resolution makes the path give up; one blocked within its
+`MaxWait` is asked, and its lane does the waiting. A title is cached as unmatched only when no path gave up.
+
+=== Identity keys, page links and claims
+
+A title's identity is its `MediaId` plus its identity keys. Every external id type is one of two kinds, and the
+exhaustive `MediaProvider.Role` switch (`Domain/Providers/ExternalIdRole.cs`) makes a new provider fail the build until
+it is classified:
+
+* An _identity key_ (`IIdentityKey`: TMDB, IMDb, TheTVDB, Plex, MDBList, Trakt, MyAnimeList, TVmaze, AniList) names one
+title. Matching, claims and the library's unique ids use keys only, stored in `ExternalMediaIds`: a key belongs to one
+title (the table's key is source, media type and value), and a title holds at most one key per source (a unique index
+on the title and the source).
+* A _page link_ (`IPageLink`: Rotten Tomatoes, Metacritic, Letterboxd) is the path of a rating site's page. It hangs off
+the title's details (`MediaDetails.PageLinks`, the `MediaPageLinks` table, at most one per site), never off its
+identity: remakes share a Metacritic slug, and MDBList's `-` placeholder is dropped. Two titles may show the same link,
+and a link never merges them.
+
+Identity is written before a title is handed out, through the claim lane (`IIdentityClaims`, one `IdentityClaims` per
+scope; the walk-through is in <<section-runtime-view>>). Every path that identifies a title claims: a list load,
+`IdentifyAsync` and the sink-id lookups, a search hit being registered, a rating breakdown asking for a page link
+(`FindIdAsync`), and the details step for the keys its enrichers found. A claim carries the keys, the title it is pinned
+to (if any) and the services whose answers produced its keys (`IdentityClaim.Sources`). The lane commits every claim
+queued meanwhile in one transaction under the media write lock; a constraint error conflicts that claim only. The rule,
+`ClaimRule.Decide`, is pure and held by `ClaimRuleTests` and the `ClaimRuleLaws` property test: a claim extends at most
+one stored title and never merges two, never adds a second key of one source or a key of another media type, and a
+pinned claim drops what it cannot take. A claim that would join two stored titles conflicts: the title settles
+unmatched as a conflict and both stored titles keep their keys. A search hit whose claim conflicts uses the stored title
+that holds the search provider's own key (TMDB's for a TMDB search, Plex's for a Plex search, TMDB's for a movie and
+TheTVDB's for a show from Radarr + Sonarr), and is not addable when no stored title holds it. Feed runs never merge two
+stored titles
+(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0018-claim-identity-before-hand-out-from-identity-keys-only.md[ADR 0018]).
 
 === Persistence and migrations
 
@@ -346,12 +450,14 @@ every scheduled feed carries its owner. Isolation tests are noted in
 
 === Background work and scheduling
 
-Background work that users start or schedule (feed runs and wantlist syncs) goes through one
+Background work that users start or schedule (feed runs, wantlist syncs and the FillDetails job) goes through one
 queue of record, the `Jobs` table (`IJobQueue`), and one hosted `JobRunner` that executes a row at
 a time in a fresh DI scope, as the row's owner. Running one job at a time is deliberate: it keeps
 SQLite to one writer and each provider to one caller. TickerQ holds the cron schedule and only
 enqueues; enqueueing coalesces by kind, key and owner; a deferred row waits in `Waiting` until a
-timer releases it. The walk-through is in <<section-runtime-view>>, the reasoning in
+timer releases it. The FillDetails job, queued after a run and when a key or sign-in is stored, steps aside: the
+runner takes it only while no feed run or sync is queued or waiting, or once it has waited 30 minutes, and between its
+pages of 500 it requeues itself whenever another job is queued. The walk-through is in <<section-runtime-view>>, the reasoning in
 link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0006-run-background-work-through-one-job-queue.md[ADR 0006].
 
 A push to Plex is a step of the sync, not a message: pending changes wait in the wantlist outbox
@@ -363,8 +469,9 @@ whose rows each belong to a user: `DatasetSchedule` registers one daily TickerQ 
 (and a one-off ticker on a start before the first load), and the `LoadDataset` ticker function runs the loader, one
 ticker at a time as TickerQ runs them. The loader asks with the last `ETag` (a 304 loads nothing), replaces the table in
 one transaction through the context's connection (a failed or empty file rolls back, so the last table stays) and
-records the load in `DatasetLoads`. Until a dataset's first load its enricher answers `Error`, so no title stores
-an empty answer for it.
+records the load in `DatasetLoads`. Until a dataset's first load its enricher and its converter answer `Unavailable`,
+so no title stores an empty answer for it. During a list load each dataset is read once per burst, through a scoped
+memo that is also the burst's primer (`ImdbRatingsInRun`, `AnimeIdsInRun`).
 
 === Events and notifications
 
@@ -392,14 +499,15 @@ present. Tracing is OpenTelemetry over the `Sammlarr` activity source; services 
 `AddTracedScoped`/`AddTracedKeyedScoped`, a proxy that spans each method call. OTLP export turns on
 only when Aspire injects an endpoint; otherwise console plus local errored-trace logging.
 
-Metrics count every call Sammlarr makes to a service (ADR 0014). Nothing is counted by hand: Polly's standard resilience
-handler measures each call (`resilience.polly.pipeline.duration`) and HttpClient each attempt on the wire
+Metrics count every call Sammlarr makes to a service (ADR 0014). Nothing is counted by hand: the Polly retry pipeline
+of a lane client measures each call (`resilience.polly.pipeline.duration`) and HttpClient each attempt on the wire
 (`http.client.request.duration`). A client built with `AddRemoteHttp` stamps the request with its `RemoteService` and
 the current cause outside the retry (`UsageStampHandler`), and tags every attempt inside it (`UsageTagsHandler`,
 through `HttpMetricsEnrichmentContext`, since a retry sends a clone that keeps the stamp but not the callback); a
 `MeteringEnricher` adds the call's outcome: `Answered`, `AnsweredAfter429`, `GaveUpOn429`, `Failed` or `Cancelled`.
-A call the open circuit refuses is not counted. The cause (`FeedRun` with the feed's id, `WantlistSync`, `Dataset`,
-`Search`, `Browse`, `ShowingTitles`, `KeyTest`, else `Other`) is an ambient mark set by `UsageCauses.Mark` at each
+A call none of whose attempts got a lane permit (refused, or cancelled while it waited) is not counted. The cause (`FeedRun`
+with the feed's id, `WantlistSync`, `Dataset`, `Search`, `Browse`, `ShowingTitles`, `KeyTest`, `FeedEditor`,
+`DetailsFill`, else `Other`) is an ambient mark set by `UsageCauses.Mark` at each
 entry point; the outermost mark wins, so titles shown inside a feed run count for the run. A
 `PeriodicExportingMetricReader` hands `UsageExporter` each minute's deltas, which it folds into hourly rows
 (`RemoteUsage`, `RemoteAttempts` with their duration buckets) kept 90 days; with OTLP set, the same meters also go to
@@ -417,7 +525,7 @@ never steers it: a hook that records a step never awaits, never throws and chang
 [mermaid]
 ....
 flowchart LR
-  R[MediaService, MediaIdResolver,<br/>DetailsFetcher, feed providers] -->|FeedRunSpans: start and stop| A[Sammlarr.FeedRun source<br/>+ System.Net.Http]
+  R[ListLoad, MediaIdResolver,<br/>DetailsFetcher, feed providers] -->|FeedRunSpans: start and stop| A[Sammlarr.FeedRun source<br/>+ System.Net.Http]
   A -->|own ActivityListener, synchronous| T[FeedRunTrace singleton<br/>steps per run, owner, cursor]
   A -.->|OTel SDK, same spans| O[OTLP, dashboard]
   T -->|IFeedRunTraces.ReadAsync<br/>every 250 ms while a run is live| P[FeedRunProgress<br/>scoped per circuit]

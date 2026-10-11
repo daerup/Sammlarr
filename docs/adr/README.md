@@ -31,5 +31,7 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0012 | [Read IMDb, Trakt and Letterboxd lists through MDBList](0012-read-imdb-trakt-and-letterboxd-lists-through-mdblist.md) | accepted | 2026-10-05 |
 | 0013 | [Load shared datasets outside the job queue](0013-load-shared-datasets-outside-the-job-queue.md) | accepted | 2026-10-06 |
 | 0014 | [Count provider calls with the built-in instruments](0014-count-provider-calls-with-the-built-in-instruments.md) | accepted | 2026-10-07 |
-| 0015 | [Keep an id two stored titles claim on neither](0015-keep-an-id-two-stored-titles-claim-on-neither.md) | accepted | 2026-10-08 |
+| 0015 | [Keep an id two stored titles claim on neither](0015-keep-an-id-two-stored-titles-claim-on-neither.md) | superseded by [0018](0018-claim-identity-before-hand-out-from-identity-keys-only.md) | 2026-10-08 |
 | 0016 | [Live runs pull from an in-memory trace](0016-live-runs-pull-from-an-in-memory-trace.md) | accepted | 2026-10-08 |
+| 0017 | [Pace remote calls on lanes with limits as published](0017-pace-remote-calls-on-lanes-with-limits-as-published.md) | accepted | 2026-10-10 |
+| 0018 | [Claim identity before hand-out from identity keys only](0018-claim-identity-before-hand-out-from-identity-keys-only.md) | accepted | 2026-10-10 |
