@@ -18,7 +18,7 @@ internal static class Answering
 			}
 			catch (Exception exception) when (exception is not OperationCanceledException || exception.InnerException is TimeoutException)
 			{
-				return Of<T>(remote, exception, Error.From(exception));
+				return Thrown<T>(remote, exception, Error.From(exception));
 			}
 		}
 	}
@@ -32,10 +32,10 @@ internal static class Answering
 	private static Answer<T> Of<T>(RemoteService remote, Error error)
 		where T : notnull
 	{
-		return error.Exception.Match<Exception, Answer<T>>(exception => Of<T>(remote, exception, error), () => new NoMatch(remote));
+		return error.Exception.Match<Exception, Answer<T>>(exception => Thrown<T>(remote, exception, error), () => new NoMatch(remote));
 	}
 
-	private static Answer<T> Of<T>(RemoteService remote, Exception exception, Error error)
+	internal static Answer<T> Thrown<T>(RemoteService remote, Exception exception, Error error)
 		where T : notnull
 	{
 		return exception switch

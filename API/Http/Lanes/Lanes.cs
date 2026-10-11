@@ -22,12 +22,20 @@ internal sealed class Lanes(TimeProvider time, IEnumerable<RemoteSettings> setti
 
 	private readonly IReadOnlyDictionary<RemoteService, RemoteSettings> _settings = settings.DistinctBy(each => each.Remote).ToDictionary(each => each.Remote);
 	private readonly ConcurrentDictionary<LaneName, LaneGate> _gates = new();
+	private readonly ConcurrentDictionary<LaneName, object> _keyed = new();
 	private readonly ConcurrentDictionary<(LaneName Gate, UserId User), byte> _usedBy = new();
 
 	public LaneGate Gate(LaneName name, Optional<UserId> user)
 	{
 		user.Apply(found => _usedBy.TryAdd((name, found), 0));
 		return _gates.GetOrAdd(name, found => new LaneGate(Policy(found), time, Optional.Of(services.GetKeyedService<ILaneQuota>(found.Remote)), found.Owner));
+	}
+
+	public ILane<TKey, TOut> Of<TKey, TOut>(LaneName name)
+		where TKey : notnull
+		where TOut : notnull
+	{
+		return (ILane<TKey, TOut>)_keyed.GetOrAdd(name, found => new Lane<TKey, TOut>(MaxBatch(found)));
 	}
 
 	public LaneName Name(RemoteService remote, HttpRequestMessage request)
@@ -84,6 +92,11 @@ internal sealed class Lanes(TimeProvider time, IEnumerable<RemoteSettings> setti
 	private static Optional<string> Prefix(IProviderHttpOptions options, LaneRouteOptions route)
 	{
 		return options.Urls.GetValueOrNone(route.Url).Map(url => $"{url.TrimEnd('/')}/{route.Path.Trim('/')}".TrimEnd('/'));
+	}
+
+	private int MaxBatch(LaneName name)
+	{
+		return _settings[name.Remote].Options.Http.Lanes.GetValueOrNone(name.Route).Map(lane => lane.MaxBatch).GetValueOr(1);
 	}
 
 	private LanePolicy Policy(LaneName name)

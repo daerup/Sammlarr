@@ -6,5 +6,6 @@ public record MdblistOptions : IOptionsSection, IProviderHttpOptions
 	public ProviderHttpOptions Http { get; set; } = new();
 	public IReadOnlyDictionary<string, string> Urls => new Dictionary<string, string> { ["api"] = BaseUrl };
 	public int FeedReserve { get; set; } = 120;
+	public double BackgroundReserveShare { get; set; } = 0.5;
 	public static string SectionName => "MDBList";
 }

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Contracts.Feed;
 using Domain.Media;
 using Domain.Providers;
@@ -44,7 +43,9 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedReturnsInvalidJson("corrupt-list");
 
-		await Assert.That(async () => await Testee.GetFeedItemsAsync("corrupt-list", FieldNeeds.None).InListOrderAsync().ToListAsync()).Throws<JsonException>();
+		await Assert
+			.That(async () => await Testee.GetFeedItemsAsync("corrupt-list", FieldNeeds.None).InListOrderAsync().ToListAsync())
+			.Throws<HttpRequestException>();
 	}
 
 	[Test]

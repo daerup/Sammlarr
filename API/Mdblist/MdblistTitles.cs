@@ -1,256 +1,131 @@
-using System.Globalization;
-using System.Text.Json;
+using System.Net;
 using System.Text.Json.Nodes;
 using API.Http;
+using API.Http.Lanes;
 using API.Mdblist.Types;
 using Contracts.Auth;
 using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
-using Microsoft.Extensions.Logging;
+using Shared.Concurrency;
 
 namespace API.Mdblist;
 
-internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys, MdblistBudget budget, ILogger<MdblistTitles> logger)
+internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys, Lanes lanes)
 {
-	private const int MostPerBatch = 200;
-
-	private static readonly TimeSpan Gather = TimeSpan.FromMilliseconds(50);
-
-	private static readonly MediaProvider[] AskedFirst =
-	[
-		MediaProvider.Mdblist,
-		MediaProvider.Imdb,
-		MediaProvider.Tmdb,
-		MediaProvider.Tvdb,
-		MediaProvider.Trakt,
-		MediaProvider.Mal,
-	];
+	private const string TitlesLane = "titles";
 
 	private readonly Lock _gate = new();
 
-	private readonly Dictionary<BatchKey, Batch> _open = [];
+	private readonly Dictionary<MdblistKey, Asked> _asked = [];
 
-	private readonly Dictionary<TitleKey, Task<Result<Optional<MdblistTypes.Titles.Title>>>> _known = [];
-
-	public Task<Result<Optional<MdblistTypes.Titles.Title>>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public async Task<Answer<MdblistTypes.Titles.Title>> FindAsync(IReadOnlyCollection<IExternalMediaId> ids, CancellationToken cancellationToken = default)
 	{
-		return BatchKey.Of(id).ToResult($"MDBList looks up no {id.Source} ids.").Map(key => Ask(key, id, [id]).WaitAsync(cancellationToken));
-	}
-
-	public void Prefetch(IEnumerable<IReadOnlyCollection<IExternalMediaId>> titles)
-	{
-		foreach (var ids in titles)
-		{
-			AskedFirst.Select(ids.OfProvider).WhereSome().FirstOrNone().Apply(id => BatchKey.Of(id).Apply(key => Ask(key, id, ids)));
-		}
-	}
-
-	private Task<Result<Optional<MdblistTypes.Titles.Title>>> Ask(BatchKey key, IExternalMediaId id, IReadOnlyCollection<IExternalMediaId> sameTitle)
-	{
-		lock (_gate)
-		{
-			return sameTitle.Select(each => _known.GetValueOrNone(TitleKey.Of(each))).WhereSome().FirstOrNone().GetValueOr(() => Join(key, id.Value, sameTitle));
-		}
-	}
-
-	private Task<Result<Optional<MdblistTypes.Titles.Title>>> Join(BatchKey key, string value, IReadOnlyCollection<IExternalMediaId> sameTitle)
-	{
-		var batch = _open.GetValueOrNone(key).GetValueOr(() => Open(key));
-		batch.Add(value);
-		if (batch.Count >= MostPerBatch)
-		{
-			Close(key, batch);
-		}
-
-		var answer = MatchAsync(batch, key, value);
-		foreach (var id in sameTitle)
-		{
-			_known[TitleKey.Of(id)] = answer;
-		}
-
-		_ = RememberAsync(answer, key.Type, sameTitle);
-		return answer;
-	}
-
-	private static async Task<Result<Optional<MdblistTypes.Titles.Title>>> MatchAsync(Batch batch, BatchKey key, string value)
-	{
-		var titles = await batch.Answer;
-		return titles.Map(found => found.FirstOrNone(title => MdblistIds.Of(title.Ids, key.Type).Any(id => id.Source == key.Source && id.Value == value)));
-	}
-
-	private async Task RememberAsync(Task<Result<Optional<MdblistTypes.Titles.Title>>> answer, MediaType type, IReadOnlyCollection<IExternalMediaId> asked)
-	{
-		await ((Task)answer).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-		Result<Optional<MdblistTypes.Titles.Title>> settled = answer.IsCompletedSuccessfully ? answer.Result : Error.From("MDBList's lookup threw.");
-		lock (_gate)
-		{
-			settled.Apply(title => title.Apply(found => Remember(found, type, answer))).ApplyError(_ => Forget(asked, answer));
-		}
-	}
-
-	private void Remember(MdblistTypes.Titles.Title title, MediaType type, Task<Result<Optional<MdblistTypes.Titles.Title>>> answer)
-	{
-		foreach (var id in MdblistIds.Of(title.Ids, type))
-		{
-			_known.TryAdd(TitleKey.Of(id), answer);
-		}
-	}
-
-	private void Forget(IReadOnlyCollection<IExternalMediaId> asked, Task<Result<Optional<MdblistTypes.Titles.Title>>> answer)
-	{
-		foreach (var key in asked.Select(TitleKey.Of).Where(key => _known.GetValueOrNone(key).Match(held => held == answer, () => false)).ToList())
-		{
-			_known.Remove(key);
-		}
-	}
-
-	private Batch Open(BatchKey key)
-	{
-		var batch = new Batch();
-		_open[key] = batch;
-		_ = CloseLaterAsync(key, batch);
-		return batch;
-	}
-
-	private async Task CloseLaterAsync(BatchKey key, Batch batch)
-	{
-		await Task.Delay(Gather);
-		lock (_gate)
-		{
-			Close(key, batch);
-		}
-	}
-
-	private void Close(BatchKey key, Batch batch)
-	{
-		if (batch.Close())
-		{
-			_open.Remove(key);
-			_ = SendAsync(key, batch);
-		}
-	}
-
-	private async Task SendAsync(BatchKey key, Batch batch)
-	{
-		var asking = AskAsync(key, batch.Values);
-		await ((Task)asking).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-		batch.Settle(asking);
-	}
-
-	private async Task<Result<IReadOnlyList<MdblistTypes.Titles.Title>>> AskAsync(BatchKey key, IReadOnlyList<string> values)
-	{
-		var apiKey = await apiKeys.GetAsync(ApiKeyProvider.Mdblist);
-		return await apiKey.Map(found => budget.ReservedUntil(found.Value).Match(Reserved, () => PostAsync(found, key, values)));
-	}
-
-	private static Task<Result<IReadOnlyList<MdblistTypes.Titles.Title>>> Reserved(DateTimeOffset until)
-	{
-		var reserved = new RemoteUnavailableException(RemoteService.Mdblist, sent: false) { Until = Some.Of(until) };
-		return Task.FromResult<Result<IReadOnlyList<MdblistTypes.Titles.Title>>>(Error.From("MDBList's requests left today are kept for feeds.", reserved));
-	}
-
-	private async Task<Result<IReadOnlyList<MdblistTypes.Titles.Title>>> PostAsync(IApiKey apiKey, BatchKey key, IReadOnlyList<string> values)
-	{
-		using var content = JsonContent.Create(new JsonObject { ["ids"] = new JsonArray([.. values.Select(key.Encode)]) });
-		using var response = await client.SendAsync(
-			HttpMethod.Post,
-			string.Format(CultureInfo.InvariantCulture, MdblistEndpoints.Titles, key.Segment, key.TypeSegment),
-			apiKey,
-			content: content
+		var apiKey = await apiKeys.GetAsync(ApiKeyProvider.Mdblist, cancellationToken);
+		return await apiKey.Match(
+			usable => AskedAsync(usable, Keys(ids), cancellationToken),
+			error => Task.FromResult(LaneAnswers.Failed<MdblistTypes.Titles.Title>(error, RemoteService.Mdblist))
 		);
+	}
+
+	private async Task<Answer<MdblistTypes.Titles.Title>> AskedAsync(IApiKey apiKey, IReadOnlyList<MdblistKey> keys, CancellationToken cancellationToken)
+	{
+		if (keys.Count == 0)
+		{
+			return new NoMatch(RemoteService.Mdblist);
+		}
+
+		var answer = await Ask(apiKey, keys, cancellationToken);
+		Alias(answer, keys[0].Type);
+		return answer.ToAnswer(RemoteService.Mdblist);
+	}
+
+	private static List<MdblistKey> Keys(IReadOnlyCollection<IExternalMediaId> ids)
+	{
+		return [.. MdblistKey.Order.Select(source => ids.FirstOrNone(id => id.Source == source)).WhereSome().Select(MdblistKey.Of).WhereSome()];
+	}
+
+	private Task<LaneAnswer<MdblistTypes.Titles.Title>> Ask(IApiKey apiKey, IReadOnlyList<MdblistKey> keys, CancellationToken cancellationToken)
+	{
+		lock (_gate)
+		{
+			var held = keys.Select(_asked.GetValueOrNone).WhereSome().FirstOrNone(asked => asked.Usable);
+			var asked = held.GetValueOr(() => new Asked(keys[0], Lane(apiKey).AskAsync(keys[0], Call(apiKey), cancellationToken)));
+			Remember(keys, asked);
+			return held.Match(found => Joined(apiKey, found, cancellationToken), () => asked.Answer);
+		}
+	}
+
+	private Task<LaneAnswer<MdblistTypes.Titles.Title>> Joined(IApiKey apiKey, Asked found, CancellationToken cancellationToken)
+	{
+		return found.Answer.IsCompleted ? found.Answer : Lane(apiKey).AskAsync(found.Key, Call(apiKey), cancellationToken);
+	}
+
+	private void Remember(IEnumerable<MdblistKey> keys, Asked asked)
+	{
+		foreach (var key in keys.Where(key => _asked.GetValueOrNone(key).Match(held => !held.Usable, () => true)))
+		{
+			_asked[key] = asked;
+		}
+	}
+
+	private void Alias(LaneAnswer<MdblistTypes.Titles.Title> answer, MediaType type)
+	{
+		if (answer is not LaneHit<MdblistTypes.Titles.Title> hit)
+		{
+			return;
+		}
+
+		lock (_gate)
+		{
+			var keys = MdblistKey.All(hit.Value, type).ToList();
+			keys.FirstOrNone().Apply(first => Remember(keys, new Asked(first, Task.FromResult(answer))));
+		}
+	}
+
+	private ILane<MdblistKey, MdblistTypes.Titles.Title> Lane(IApiKey apiKey)
+	{
+		return lanes.Of<MdblistKey, MdblistTypes.Titles.Title>(new LaneName(RemoteService.Mdblist, TitlesLane, apiKey.Value));
+	}
+
+	private LaneCall<MdblistKey, MdblistTypes.Titles.Title> Call(IApiKey apiKey)
+	{
+		return new LaneCall<MdblistKey, MdblistTypes.Titles.Title>(key => key.Batch, (batch, token) => PostAsync(apiKey, batch, token));
+	}
+
+	private async Task<Result<IReadOnlyDictionary<MdblistKey, MdblistTypes.Titles.Title>>> PostAsync(
+		IApiKey apiKey,
+		IReadOnlyList<MdblistKey> keys,
+		CancellationToken cancellationToken
+	)
+	{
+		var batch = keys[0];
+		using var content = JsonContent.Create(new JsonObject { ["ids"] = new JsonArray([.. keys.Select(key => key.Encoded())]) });
+		using var response = await client.SendAsync(HttpMethod.Post, batch.Endpoint, apiKey, cancellationToken, content);
+		if (response.StatusCode is HttpStatusCode.NotFound)
+		{
+			return Success.Of<IReadOnlyDictionary<MdblistKey, MdblistTypes.Titles.Title>>(new Dictionary<MdblistKey, MdblistTypes.Titles.Title>());
+		}
+
 		if (!response.IsSuccessStatusCode)
 		{
-			logger.LogWarning("MDBList answered {Status} to a lookup of {Count} titles", (int)response.StatusCode, values.Count);
-			return response.StatusCode.Unanswered(RemoteService.Mdblist, $"MDBList answered {(int)response.StatusCode} for {values.Count} titles.");
+			return response.StatusCode.Unanswered(RemoteService.Mdblist, $"MDBList answered {(int)response.StatusCode} for {keys.Count} titles.");
 		}
 
-		try
-		{
-			return Success.Of<IReadOnlyList<MdblistTypes.Titles.Title>>(await response.Content.ReadFromJsonAsync<List<MdblistTypes.Titles.Title>>() ?? []);
-		}
-		catch (JsonException exception)
-		{
-			logger.LogWarning(exception, "MDBList answered a lookup of {Count} titles with a body Sammlarr can't read", values.Count);
-			return Error.From("MDBList's answer could not be read.", exception);
-		}
+		var titles = await response.Content.ReadFromJsonAsync<List<MdblistTypes.Titles.Title>>(cancellationToken) ?? [];
+		return Success.Of<IReadOnlyDictionary<MdblistKey, MdblistTypes.Titles.Title>>(Answered(titles, batch));
 	}
 
-	private readonly record struct TitleKey(MediaProvider Source, MediaType Type, string Value)
+	private static Dictionary<MdblistKey, MdblistTypes.Titles.Title> Answered(IEnumerable<MdblistTypes.Titles.Title> titles, MdblistKey batch)
 	{
-		public static TitleKey Of(IExternalMediaId id) => new(id.Source, id.Type, id.Value);
+		return titles
+			.SelectMany(title => MdblistKey.All(title, batch.Type).Where(key => key.Batch == batch.Batch).Select(key => (Key: key, Title: title)))
+			.DistinctBy(pair => pair.Key)
+			.ToDictionary(pair => pair.Key, pair => pair.Title);
 	}
 
-	private readonly record struct BatchKey(MediaProvider Source, MediaType Type)
+	private sealed record Asked(MdblistKey Key, Task<LaneAnswer<MdblistTypes.Titles.Title>> Answer)
 	{
-		public static Optional<BatchKey> Of(IExternalMediaId id) => Optional.When(IsLookedUp(id.Source), () => new BatchKey(id.Source, id.Type));
-
-		public string Segment => Source.ToString().ToLowerInvariant();
-
-		public string TypeSegment
-		{
-			get
-			{
-				return Type switch
-				{
-					MediaType.Movie => "movie",
-					MediaType.Show => "show",
-					MediaType.Unknown => "any",
-				};
-			}
-		}
-
-		public JsonNode Encode(string value)
-		{
-			return Source is MediaProvider.Imdb or MediaProvider.Mdblist || !long.TryParse(value, out var number)
-				? JsonValue.Create(value)
-				: JsonValue.Create(number);
-		}
-
-		private static bool IsLookedUp(MediaProvider source)
-		{
-			return source switch
-			{
-				MediaProvider.Imdb or MediaProvider.Tmdb or MediaProvider.Tvdb or MediaProvider.Trakt or MediaProvider.Mal or MediaProvider.Mdblist => true,
-				MediaProvider.RottenTomatoes
-				or MediaProvider.Plex
-				or MediaProvider.Metacritic
-				or MediaProvider.Letterboxd
-				or MediaProvider.Tvmaze
-				or MediaProvider.AniList => false,
-			};
-		}
-	}
-
-	private sealed class Batch
-	{
-		private readonly List<string> _values = [];
-
-		private readonly TaskCompletionSource<Result<IReadOnlyList<MdblistTypes.Titles.Title>>> _answer = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-		private bool _closed;
-
-		public int Count => _values.Count;
-
-		public IReadOnlyList<string> Values => _values;
-
-		public Task<Result<IReadOnlyList<MdblistTypes.Titles.Title>>> Answer => _answer.Task;
-
-		public void Add(string value)
-		{
-			if (!_values.Contains(value))
-			{
-				_values.Add(value);
-			}
-		}
-
-		public bool Close()
-		{
-			var closing = !_closed;
-			_closed = true;
-			return closing;
-		}
-
-		public void Settle(Task<Result<IReadOnlyList<MdblistTypes.Titles.Title>>> asked) => _answer.SetFromTask(asked);
+		public bool Usable => !Answer.IsCanceled && !Answer.IsFaulted && !(Answer.IsCompletedSuccessfully && Answer.Result is LaneFailed);
 	}
 }

@@ -751,7 +751,13 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				Http = Unretried(),
 			}
 		);
-		services.AddSingleton(new MdblistOptions { BaseUrl = $"https://{TestUrls.MdblistApi}", Http = Unretried() });
+		services.AddSingleton(
+			new MdblistOptions
+			{
+				BaseUrl = $"https://{TestUrls.MdblistApi}",
+				Http = Unretried() with { Lanes = new() { ["titles"] = new LaneOptions { MaxBatch = 200 } } },
+			}
+		);
 		services.AddSingleton(
 			new WikidataOptions
 			{

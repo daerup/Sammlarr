@@ -9,6 +9,7 @@ using Contracts.Usage;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Shared.Concurrency;
 using Shared.DI;
 using Shared.Options;
 using TestInfrastructure;
@@ -67,7 +68,46 @@ public class MdblistClientTests
 		using var response = await testee.SendAsync(HttpMethod.Get, "lists/1/items", Key);
 
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
-		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().ReservedUntil(Key.Value)).IsSome();
+		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().BlockedUntil(Key.Value, LaneClass.Title, MdblistApis.Clock().Now)).IsSome();
+	}
+
+	[Test]
+	public async Task SendAsync_ForATitleLookupAtTheFeedReserve_RefusesBeforeSending()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.OK);
+		using var host = Host(handler);
+		host.Services.GetRequiredService<MdblistBudget>().Record(Key.Value, Spent());
+		using var title = LanePriority.Next(LaneClass.Title).Enter();
+
+		var refused = await Assert
+			.That(async () => await host.Services.GetRequiredService<MdblistClient>().SendAsync(HttpMethod.Post, "imdb/movie", Key))
+			.Throws<RemoteUnavailableException>();
+
+		await Assert.That(refused!.Sent).IsFalse();
+		handler.Verify(request => request.PathMatches(".*"), Times.Never);
+	}
+
+	[Test]
+	public async Task SendAsync_ForAListPageAtTheFeedReserve_StillSends()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[]}""");
+		using var host = Host(handler);
+		host.Services.GetRequiredService<MdblistBudget>().Record(Key.Value, Spent());
+		using var page = LanePriority.Next(LaneClass.Source).Enter();
+
+		using var response = await host.Services.GetRequiredService<MdblistClient>().SendAsync(HttpMethod.Get, "lists/1/items", Key);
+
+		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+	}
+
+	private static System.Net.Http.Headers.HttpResponseHeaders Spent()
+	{
+		var answered = new HttpResponseMessage(HttpStatusCode.OK);
+		answered.Headers.Add("x-ratelimit-remaining", "10");
+		answered.Headers.Add("x-ratelimit-reset", $"{DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeSeconds()}");
+		return answered.Headers;
 	}
 
 	[Test]

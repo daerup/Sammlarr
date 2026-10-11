@@ -63,15 +63,14 @@ public class MdblistEnricherTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_ForATitleTheAnswerLacks_IsAnEmptyAnswerOfItsType()
+	public async Task LookUpAsync_ForATitleTheAnswerLacks_IsNoMatch()
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("[]");
 
-		var found = await Assert.That(await Testee(handler).LookUpAsync(FightClub)).IsFound();
+		var answer = await Testee(handler).LookUpAsync(FightClub);
 
-		await Assert.That(found!.Details.Ratings.All).IsEmpty();
-		await Assert.That(found.Details.Type).IsEqualTo(MediaType.Movie);
+		await Assert.That(answer).IsOfUnionType<Answer<FoundMedia>, NoMatch>();
 	}
 
 	[Test]
@@ -83,21 +82,6 @@ public class MdblistEnricherTests
 		var result = await Testee(handler).LookUpAsync(FightClub);
 
 		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Mdblist, new None(), true));
-	}
-
-	[Test]
-	public async Task LookUpAsync_ForSeveralTitlesAtOnce_AsksInOneBatch()
-	{
-		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
-		var testee = Testee(handler);
-
-		var answers = await Task.WhenAll(testee.LookUpAsync(FightClub), testee.LookUpAsync(ImdbId.From("tt0133093", MediaType.Movie)));
-
-		await Assert
-			.That(answers.AsEnumerable())
-			.AreOfUnionType<IEnumerable<Answer<FoundMedia>>, Answer<FoundMedia>>(typeof(Found<FoundMedia>), typeof(Found<FoundMedia>));
-		handler.Verify(request => request.PathMatches(@"^/imdb/movie(\?.*)?$"), Times.Once);
 	}
 
 	[Test]
@@ -115,36 +99,23 @@ public class MdblistEnricherTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_ByAnotherIdOfAPrefetchedTitle_AnswersFromThePrefetch()
+	public async Task LookUpAsync_ForTitlesAskedWhileARequestIsOut_SendsThemInOneBatch()
 	{
+		using var release = new ManualResetEventSlim();
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
-		var titles = MdblistApis.Titles(handler);
-		titles.Prefetch([
-			[MdblistId.From("a5as", MediaType.Movie), FightClub],
-		]);
+		handler
+			.OnAnyRequest()
+			.RespondWith(_ =>
+			{
+				release.Wait(TimeSpan.FromSeconds(10));
+				return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("[]") };
+			});
+		var testee = Testee(handler);
 
-		var found = await Assert.That(await new MdblistEnricher(titles).LookUpAsync(FightClub)).IsFound();
-
-		await Assert.That(found!.Details.Ratings.All).IsNotEmpty();
-		handler.Verify(request => request.Method(HttpMethod.Post).PathMatches(@"^/mdblist/movie(\?.*)?$"), Times.Once);
-		handler.Verify(request => request.Method(HttpMethod.Post), Times.Once);
-	}
-
-	[Test]
-	public async Task Prefetch_ForMoreTitlesThanOneBatchHolds_AsksTwoHundredAtATime()
-	{
-		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWithJson("[]");
-		var titles = MdblistApis.Titles(handler);
-		IReadOnlyCollection<IExternalMediaId>[] list =
-		[
-			.. Enumerable.Range(1, 250).Select(number => new[] { (IExternalMediaId)TmdbId.From($"{number}", MediaType.Movie) }),
-		];
-
-		titles.Prefetch(list);
-		await titles.FindAsync(TmdbId.From("1", MediaType.Movie));
-		await titles.FindAsync(TmdbId.From("250", MediaType.Movie));
+		var first = testee.LookUpAsync(FightClub);
+		var waiting = Enumerable.Range(1, 3).Select(number => testee.LookUpAsync(ImdbId.From($"tt000000{number}", MediaType.Movie))).ToList();
+		release.Set();
+		await Task.WhenAll([first, .. waiting]);
 
 		handler.Verify(request => request.Method(HttpMethod.Post), Times.Exactly(2));
 	}
@@ -168,36 +139,14 @@ public class MdblistEnricherTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_ForAnErrorBodyWithStatus200_IsFaultedAndLogged()
+	public async Task LookUpAsync_ForAnAnswerThatIsNoListOfTitles_IsFaulted()
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"error":"Invalid API key!"}""");
-		var logger = new CountingLogger<MdblistTitles>();
 
-		var result = await new MdblistEnricher(MdblistApis.Titles(handler, logger: logger)).LookUpAsync(FightClub);
+		var result = await Testee(handler).LookUpAsync(FightClub);
 
 		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, Faulted>();
-		await Assert.That(logger.Warnings).IsEqualTo(1);
-	}
-
-	[Test]
-	public async Task LookUpAsync_AtTheQuotaReserve_IsUnavailableUntilTheResetAndAsksNothing()
-	{
-		var budget = MdblistApis.Budget();
-		var answered = new HttpResponseMessage(HttpStatusCode.OK);
-		answered.Headers.Add("x-ratelimit-remaining", "120");
-		answered.Headers.Add("x-ratelimit-reset", $"{DateTimeOffset.UnixEpoch.AddDays(2).ToUnixTimeSeconds()}");
-		budget.Record("mdblist-key", answered.Headers);
-		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWithJson("[]");
-
-		var result = await Testee(handler, budget).LookUpAsync(FightClub);
-
-		await Assert
-			.That(result)
-			.IsOfUnionType<Answer<FoundMedia>, Unavailable>()
-			.And.IsEqualTo(new Unavailable(RemoteService.Mdblist, Some.Of(DateTimeOffset.UnixEpoch.AddDays(2)), false));
-		handler.Verify(request => request.PathMatches(".*"), Times.Never);
 	}
 
 	[Test]
@@ -207,5 +156,5 @@ public class MdblistEnricherTests
 		await Assert.That(new MdblistEnricher(null!).Fills).IsEqualTo(MediaFields.Rated(RemoteService.Mdblist.SuppliedRatingSources()));
 	}
 
-	private static MdblistEnricher Testee(TUnit.Mocks.Http.MockHttpHandler handler, MdblistBudget? budget = null) => new(MdblistApis.Titles(handler, budget));
+	private static MdblistEnricher Testee(TUnit.Mocks.Http.MockHttpHandler handler) => new(MdblistApis.Titles(handler));
 }

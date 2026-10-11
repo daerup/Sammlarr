@@ -2,6 +2,8 @@ using API.Http;
 using Contracts.Usage;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Shared.Concurrency;
 using Shared.DI;
 using Shared.Options;
 
@@ -21,7 +23,11 @@ public class MdblistModule : IServiceModule
 			.Converter<MdblistIdConverter>();
 		services.AddScoped<MdblistTitles>();
 		services.AddSingleton<MdblistBudget>();
-		services.AddHttpClient<MdblistClient>().AddHttpMessageHandler(provider => new MdblistBudgetHandler(provider.GetRequiredService<MdblistBudget>()));
+		services.AddKeyedSingleton<ILaneQuota>(RemoteService.Mdblist, (provider, _) => provider.GetRequiredService<MdblistBudget>());
+		services
+			.AddHttpClient<MdblistClient>()
+			.AddHttpMessageHandler(provider => new MdblistBudgetHandler(provider.GetRequiredService<MdblistBudget>()))
+			.AddHttpMessageHandler(provider => new MdblistAnswerCheck(provider.GetRequiredService<ILogger<MdblistAnswerCheck>>()));
 		services.AddScoped<IMdblistRequestsLeft, MdblistRequestsLeft>();
 	}
 }

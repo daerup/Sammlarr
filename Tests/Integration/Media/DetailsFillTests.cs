@@ -1,4 +1,5 @@
 using System.Net;
+using API.Mdblist;
 using API.Tmdb;
 using Contracts;
 using Contracts.Jobs;
@@ -86,6 +87,45 @@ public class DetailsFillTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(host.HttpStub.Requests(TmdbDetail(TestMedia.FightClub))).IsEqualTo(0);
 		await Assert.That((await StoredAsync(fightClub)).Answers).IsEmpty();
+	}
+
+	[Test]
+	public async Task RunAsync_AtTheBackgroundFloor_LeavesTheTitlesWithoutABackoff()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var fightClub = await WantlistedAsync(TestMedia.FightClub, Complete("Fight Club"));
+		var budget = host.Resolve<MdblistBudget>();
+		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 30, reset: Now.AddHours(-1)));
+		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 1000, reset: Now.AddDays(1)));
+		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 400, reset: Now.AddDays(1)));
+
+		await FillAsync();
+
+		await Assert.That(host.HttpStub.Requests($"{TestUrls.MdblistApi}/tmdb/movie")).IsEqualTo(0);
+		await Assert.That((await StoredAsync(fightClub)).Answers).IsEmpty();
+	}
+
+	[Test]
+	public async Task RunAsync_AboveTheBackgroundFloor_AsksMdblist()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		await WantlistedAsync(TestMedia.FightClub, Complete("Fight Club"));
+		var budget = host.Resolve<MdblistBudget>();
+		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 30, reset: Now.AddHours(-1)));
+		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 1000, reset: Now.AddDays(1)));
+		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 600, reset: Now.AddDays(1)));
+
+		await FillAsync();
+
+		await Assert.That(host.HttpStub.Requests($"{TestUrls.MdblistApi}/tmdb/movie")).IsEqualTo(1);
+	}
+
+	private static System.Net.Http.Headers.HttpResponseHeaders Allowance(long remaining, DateTimeOffset reset)
+	{
+		var answered = new HttpResponseMessage(HttpStatusCode.OK);
+		answered.Headers.Add("x-ratelimit-remaining", $"{remaining}");
+		answered.Headers.Add("x-ratelimit-reset", $"{reset.ToUnixTimeSeconds()}");
+		return answered.Headers;
 	}
 
 	[Test]
