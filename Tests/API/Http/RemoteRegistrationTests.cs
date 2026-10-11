@@ -134,7 +134,7 @@ public class RemoteRegistrationTests
 		public Task<Result<string>> NormalizeAsync(string input, CancellationToken cancellationToken = default) =>
 			Task.FromResult<Result<string>>(Success.Of(input));
 
-		public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default) =>
+		public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, FieldNeeds needs, CancellationToken cancellationToken = default) =>
 			AsyncEnumerable.Empty<Listed<MediaMatchResult>>();
 
 		public Task<Result<string>> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default) =>

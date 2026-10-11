@@ -45,7 +45,7 @@ public class MediaServiceOrderingTests
 		var builder = RequestBuilder.Requests(5);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.GetDetailsAsync(builder.AsMediaIds()).ToListAsync();
+		var results = await testee.GetDetailsAsync(builder.AsMediaIds(), FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
 	}
@@ -56,7 +56,7 @@ public class MediaServiceOrderingTests
 		var builder = RequestBuilder.Requests(6).FailDetailsAt(2, 4, 6);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.GetDetailsAsync(builder.AsMediaIds()).ToListAsync();
+		var results = await testee.GetDetailsAsync(builder.AsMediaIds(), FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
 	}
@@ -67,7 +67,7 @@ public class MediaServiceOrderingTests
 		var builder = RequestBuilder.Requests(5);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.LoadListAsync(builder.AsRequests().ToAsyncEnumerable().AsListTitles()).ToListAsync();
+		var results = await testee.LoadListAsync(builder.AsRequests().ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything).ToListAsync();
 
 		await Assert
 			.That(results.OrderBy(result => result.Position).Select(result => result.Item).ExtractMediaIds())
@@ -81,7 +81,7 @@ public class MediaServiceOrderingTests
 		var builder = RequestBuilder.Requests(6).FailIdentifyAt(2, 4, 6);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.LoadListAsync(builder.AsRequests().ToAsyncEnumerable().AsListTitles()).ToListAsync();
+		var results = await testee.LoadListAsync(builder.AsRequests().ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything).ToListAsync();
 
 		await Assert
 			.That(results.OrderBy(result => result.Position).Select(result => result.Item).ExtractMediaIds())
@@ -146,6 +146,7 @@ public class MediaServiceOrderingTests
 			TestReadiness.Everything(),
 			[TestArtwork.ResizesAnything()],
 			dateTimeProvider.Object,
+			new FeedLoadOptions(),
 			NullLogger<DetailsFetcher>.Instance
 		);
 		var resolver = new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), TestReadiness.Everything(), dateTimeProvider.Object);

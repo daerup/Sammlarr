@@ -42,7 +42,10 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		await StubRemakesAsync();
 		var requests = new[] { Request(TmdbId.From("15739", MediaType.Movie)), Request(TmdbId.From("26177", MediaType.Movie)) };
 
-		var results = await host.Resolve<IMediaService>().LoadListAsync(requests.ToAsyncEnumerable().AsListTitles()).InListOrderAsync().ToListAsync();
+		var results = await host.Resolve<IMediaService>()
+			.LoadListAsync(requests.ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything)
+			.InListOrderAsync()
+			.ToListAsync();
 
 		await Assert.That(results.AsEnumerable()).AreOfUnionType<IEnumerable<MediaMatchResult>, MediaMatchResult>(typeof(MatchedMedia), typeof(MatchedMedia));
 		var handedOut = HandedOut(results);
@@ -67,7 +70,10 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 			.Append(Request(TmdbId.From("1", MediaType.Movie), ImdbId.From("tt9", MediaType.Movie)))
 			.ToList();
 
-		var results = await host.Resolve<IMediaService>().LoadListAsync(requests.ToAsyncEnumerable().AsListTitles()).InListOrderAsync().ToListAsync();
+		var results = await host.Resolve<IMediaService>()
+			.LoadListAsync(requests.ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything)
+			.InListOrderAsync()
+			.ToListAsync();
 
 		var handedOut = HandedOut(results);
 		await Assert.That(await StoredAsync(handedOut)).IsEqualTo(handedOut.Count);

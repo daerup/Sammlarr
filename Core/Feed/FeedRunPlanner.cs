@@ -34,7 +34,7 @@ internal sealed class FeedRunPlanner(
 		{
 			return target switch
 			{
-				DraftFeed(var definition, var load) => await PlanAsync(definition, load, cancellationToken),
+				DraftFeed(var definition, var load) => await PlanAsync(definition, load, await RatingAsync(definition, cancellationToken), cancellationToken),
 				SavedFeed(var id) => await feeds
 					.FindAsync(id, cancellationToken)
 					.Map(async feed => (FeedPlanResult)await PlanAsync(feed, cancellationToken))
@@ -48,9 +48,23 @@ internal sealed class FeedRunPlanner(
 		}
 	}
 
+	public async Task<FieldNeeds> NeedsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default)
+	{
+		var rating = await RatingAsync(feed, cancellationToken);
+		return feed.Needs(rating.Strategy, rating.Available);
+	}
+
 	internal async Task<IFeedPlan> PlanAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default)
 	{
-		return await PlanAsync(feed, await FetchAsync(feed, cancellationToken), cancellationToken);
+		var rating = await RatingAsync(feed, cancellationToken);
+		var load = await FetchAsync(feed, feed.Needs(rating.Strategy, rating.Available), cancellationToken);
+		return await PlanAsync(feed, load, rating, cancellationToken);
+	}
+
+	private async Task<FeedRating> RatingAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken)
+	{
+		var strategy = await feed.RatingStrategy.Match(Task.FromResult, () => ratings.GetDefaultAsync(cancellationToken));
+		return new FeedRating(strategy, await ratings.GetAvailableAsync(cancellationToken));
 	}
 
 	private static FeedId Identify(FeedPlanTarget target) =>
@@ -60,10 +74,9 @@ internal sealed class FeedRunPlanner(
 			DraftFeed(var definition, _) => definition.Id,
 		};
 
-	private async Task<IFeedPlan> PlanAsync(Domain.Feed.Feed feed, RawFeedLoad load, CancellationToken cancellationToken = default)
+	private async Task<IFeedPlan> PlanAsync(Domain.Feed.Feed feed, RawFeedLoad load, FeedRating rating, CancellationToken cancellationToken)
 	{
-		var strategy = await feed.RatingStrategy.Match(Task.FromResult, () => ratings.GetDefaultAsync(cancellationToken));
-		var available = await ratings.GetAvailableAsync(cancellationToken);
+		var (strategy, available) = rating;
 		var unmatchedItems = new List<UnmatchedMedia>();
 		var resolved = new List<MediaQueryRow>();
 		var seen = new HashSet<MediaId>();
@@ -108,7 +121,7 @@ internal sealed class FeedRunPlanner(
 		return FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatchedItems, load.State, load.SourceFailure), owned, absences, feed.Strategy);
 	}
 
-	private async Task<RawFeedLoad> FetchAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken)
+	private async Task<RawFeedLoad> FetchAsync(Domain.Feed.Feed feed, FieldNeeds needs, CancellationToken cancellationToken)
 	{
 		var items = new List<Listed<MediaMatchResult>>();
 		await using var scope = scopes.CreateAsyncScope();
@@ -116,7 +129,7 @@ internal sealed class FeedRunPlanner(
 		try
 		{
 			var provider = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<FeedProvider, IFeedProvider>>()[feed.Provider];
-			await foreach (var item in provider.GetFeedItemsAsync(feed.Identifier, cancellationToken))
+			await foreach (var item in provider.GetFeedItemsAsync(feed.Identifier, needs, cancellationToken))
 			{
 				items.Add(item);
 			}
@@ -128,4 +141,6 @@ internal sealed class FeedRunPlanner(
 			return new RawFeedLoad(items, FeedLoadState.Unfinished, Some.Of(ex.Message));
 		}
 	}
+
+	private readonly record struct FeedRating(RatingStrategy Strategy, ValueSet<RatingSource> Available);
 }

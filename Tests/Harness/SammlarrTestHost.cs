@@ -317,13 +317,15 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	internal IDetailsEnricher Enricher(RemoteService remote) =>
 		Resolve<IEnumerable<Keyed<RemoteService, IDetailsEnricher>>>().Single(enricher => enricher.Key == remote).Capability;
 
-	internal async Task RateLimitedAsync(RemoteService remote, int minutes = 1)
+	internal Task RateLimitedAsync(RemoteService remote, int minutes = 1) => RateLimitedAsync(remote, TimeSpan.FromMinutes(minutes));
+
+	internal async Task RateLimitedAsync(RemoteService remote, TimeSpan block)
 	{
 		var gate = Resolve<Lanes>().Gate(new LaneName(remote, Lanes.Rest), new None());
 		var entered = await gate.EnterAsync(LanePriority.Interactive, TimeSpan.Zero, CancellationToken.None);
 		entered
 			.GetOrThrow(_ => new InvalidOperationException($"{remote}'s lane refused the permit that throttles it."))
-			.Release(new AttemptThrottled(Some.Of(_clock.Now.AddMinutes(minutes))));
+			.Release(new AttemptThrottled(Some.Of(_clock.Now + block)));
 	}
 
 	internal void TmdbHasNoDetail(MediaSpec spec)

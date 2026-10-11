@@ -164,7 +164,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task ClearAsync_WhenTheTmdbKeyIsCleared_LeavesTheCachedRatingsToTheCachePurger()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).SeedAsync();
-		await host.Resolve<IMediaService>().GetDetailsAsync([fightClub]).ToListAsync();
+		await host.Resolve<IMediaService>().GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await ApiKeys.ClearAsync(ApiKeyProvider.Tmdb);
 

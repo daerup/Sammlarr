@@ -10,6 +10,8 @@ public readonly record struct MediaFields(MediaField Details, ValueSet<RatingSou
 
 	public static MediaFields AllRatings { get; } = Rated(Enum.GetValues<RatingSource>());
 
+	public static MediaFields Everything { get; } = Enum.GetValues<MediaField>().Aggregate(MediaField.None, (all, field) => all | field) | AllRatings;
+
 	public bool IsEmpty => Details is MediaField.None && Ratings.Count == 0;
 
 	public int Count => Details.Count + Ratings.Count;

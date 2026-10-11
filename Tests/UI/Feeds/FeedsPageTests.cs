@@ -233,7 +233,7 @@ public class FeedsPageTests : BunitContext
 		Services.AddSingleton(queue.Object);
 
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());
+		media.GetDetailsAsync(Any(), Any(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());
 		Services.AddSingleton(media.Object);
 
 		Services.AddSingleton(_jobs.Object);

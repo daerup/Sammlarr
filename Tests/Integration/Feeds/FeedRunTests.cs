@@ -1,12 +1,15 @@
+using System.ComponentModel;
 using API.Http.Lanes;
 using Contracts.Feed;
 using Contracts.Identity;
+using Contracts.Processing;
 using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Identity;
 using Domain.Media;
+using Domain.Processing;
 using Domain.Providers;
 using Harness;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +45,20 @@ public class FeedRunTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var completed = await Assert.That(await running.WaitAsync(Patience)).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
 		await Assert.That(completed!.Conclusiveness).IsEqualTo(Conclusiveness.Unresolved);
+	}
+
+	[Test]
+	public async Task NeedsAsync_ForASortOnGenres_RequiresGenresAndAsksForWhatACardShows()
+	{
+		var feed = TestFeeds.Feed(Guid.NewGuid()) with
+		{
+			Sort = Some.Of(new QuerySort { Property = nameof(MediaQueryRow.Genres), Direction = ListSortDirection.Ascending }),
+		};
+
+		var needs = await host.Resolve<IFeedRunPlanner>().NeedsAsync(feed);
+
+		await Assert.That(needs.Required).IsEqualTo(MediaField.Genres);
+		await Assert.That(needs.Shown.Overlaps(MediaField.Poster)).IsTrue();
 	}
 
 	[Test]

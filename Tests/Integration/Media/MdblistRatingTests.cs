@@ -29,7 +29,7 @@ public class MdblistRatingTests(SammlarrTestHost host) : IAsyncDisposable
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/imdb/movie", FightClub);
 		var fightClub = await host.SeedMediaAsync(ImdbId.From("tt0137523", MediaType.Movie));
 
-		var loaded = await host.Resolve<IMediaService>().GetDetailsAsync([fightClub]).ToListAsync();
+		var loaded = await host.Resolve<IMediaService>().GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		var matched = await Assert.That(loaded.Single()).IsSuccess();
 		await Assert
@@ -50,7 +50,7 @@ public class MdblistRatingTests(SammlarrTestHost host) : IAsyncDisposable
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/imdb/movie", FightClub);
 		var fightClub = await host.SeedMediaAsync(ImdbId.From("tt0137523", MediaType.Movie));
 
-		await host.Resolve<IMediaService>().GetDetailsAsync([fightClub]).ToListAsync();
+		await host.Resolve<IMediaService>().GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		var stored = (await host.Resolve<IMediaRepository>().GetAsync([fightClub])).Single();
 		await Assert
@@ -66,7 +66,7 @@ public class MdblistRatingTests(SammlarrTestHost host) : IAsyncDisposable
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/imdb/movie", FightClub);
 		var fightClub = await host.SeedMediaAsync(ImdbId.From("tt0137523", MediaType.Movie));
 
-		var loaded = await host.Resolve<IMediaService>().GetDetailsAsync([fightClub]).ToListAsync();
+		var loaded = await host.Resolve<IMediaService>().GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 		var available = await host.Resolve<IRatingService>().GetAvailableAsync();
 
 		var matched = await Assert.That(loaded.Single()).IsSuccess();

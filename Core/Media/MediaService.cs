@@ -37,6 +37,7 @@ internal sealed class MediaService(
 
 	public async IAsyncEnumerable<Result<MatchedMedia>> GetDetailsAsync(
 		IEnumerable<MediaId> ids,
+		FieldNeeds needs,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
@@ -48,10 +49,10 @@ internal sealed class MediaService(
 
 		await using var writer = writersFactory.Create();
 		var stored = await LoadByInternalsAsync(materialized, cancellationToken);
-		var connected = await detailsFetcher.ConnectedAsync(cancellationToken);
+		var run = new DetailsRun(await detailsFetcher.ConnectedAsync(cancellationToken), needs, writer);
 		using var abandon = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		await Task.CompletedTask.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
-		List<Task<Result<MatchedMedia>>> started = [.. materialized.Select(id => LoadStoredDetailsAsync(id, stored, connected, writer, abandon.Token))];
+		List<Task<Result<MatchedMedia>>> started = [.. materialized.Select(id => LoadStoredDetailsAsync(id, stored, run, abandon.Token))];
 		try
 		{
 			foreach (var loading in started)
@@ -68,20 +69,25 @@ internal sealed class MediaService(
 
 	public async IAsyncEnumerable<TMedia> GetDetailsAsync<TMedia>(
 		IEnumerable<IListItem<TMedia>> items,
+		FieldNeeds needs,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
 		var listed = items.ToList();
-		var pipeline = GetDetailsAsync(listed.Select(item => item.MediaId), cancellationToken).ZipAwait(listed, cancellationToken);
+		var pipeline = GetDetailsAsync(listed.Select(item => item.MediaId), needs, cancellationToken).ZipAwait(listed, cancellationToken);
 		await foreach (var (media, item) in pipeline.WhereSuccessAwait().WithCancellation(cancellationToken))
 		{
 			yield return item.With(media);
 		}
 	}
 
-	public IAsyncEnumerable<Listed<MediaMatchResult>> LoadListAsync(IAsyncEnumerable<ListTitle> entries, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<Listed<MediaMatchResult>> LoadListAsync(
+		IAsyncEnumerable<ListTitle> entries,
+		FieldNeeds needs,
+		CancellationToken cancellationToken = default
+	)
 	{
-		return listLoad.LoadAsync(entries, cancellationToken);
+		return listLoad.LoadAsync(entries, needs, cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<Optional<MediaIdentity>>> RegisterAsync(
@@ -274,22 +280,14 @@ internal sealed class MediaService(
 	private Task<Result<MatchedMedia>> LoadStoredDetailsAsync(
 		MediaId id,
 		IReadOnlyDictionary<MediaId, StoredMedia> stored,
-		IReadOnlySet<RemoteService> connected,
-		LibraryWriter writer,
+		DetailsRun run,
 		CancellationToken cancellationToken
 	)
 	{
 		return stored
 			.GetValueOrNone(id)
 			.Match(
-				row =>
-					detailsFetcher.LoadAsync(
-						new IdentifyHandoff(row.Identity, Some.Of(row)),
-						MediaDetails.Empty(row.Identity.Type),
-						connected,
-						writer,
-						cancellationToken
-					),
+				row => detailsFetcher.LoadAsync(new IdentifyHandoff(row.Identity, Some.Of(row)), MediaDetails.Empty(row.Identity.Type), run, cancellationToken),
 				() => Task.FromResult<Result<MatchedMedia>>(Error.From("identity not found"))
 			);
 	}

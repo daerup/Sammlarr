@@ -158,7 +158,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 			),
 		};
 
-		var results = await Testee.LoadListAsync(new[] { request }.ToAsyncEnumerable().AsListTitles()).InListOrderAsync().ToListAsync();
+		var results = await Testee.LoadListAsync(new[] { request }.ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything).InListOrderAsync().ToListAsync();
 
 		var unmatched = await Assert.That(results.Single()).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
 		await Assert.That(unmatched!.Details.Title).IsEqualTo("Kusuriya no Hitorigoto 3rd Season");
@@ -173,7 +173,10 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		var conflicting = new IdentifyRequest([AniListId.From("16498", MediaType.Show), TvdbId.From("267440", MediaType.Show)], new None());
 		var other = new IdentifyRequest([Tvdb("81189").ToExternal(MediaType.Show)], new None());
 
-		var results = await Testee.LoadListAsync(new[] { conflicting, other }.ToAsyncEnumerable().AsListTitles()).InListOrderAsync().ToListAsync();
+		var results = await Testee
+			.LoadListAsync(new[] { conflicting, other }.ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything)
+			.InListOrderAsync()
+			.ToListAsync();
 
 		await Assert.That(results).Count().IsEqualTo(2);
 		await Assert

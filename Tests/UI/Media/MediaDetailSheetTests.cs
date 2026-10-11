@@ -49,12 +49,22 @@ public class MediaDetailSheetTests : BunitContext
 			new MediaIdentity(Id, []),
 			new MovieDetails { Title = "Futurama", Ratings = MediaRatings.From([new TmdbRating(7.4f, Some.Of(900))]) }
 		);
-		_media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new[] { (Result<MatchedMedia>)Success.Of(loaded) }.ToAsyncEnumerable());
+		_media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), Any(), Any()).Returns(new[] { (Result<MatchedMedia>)Success.Of(loaded) }.ToAsyncEnumerable());
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => cut.FindAll(".rating-badge").Count > 0);
 
 		await Assert.That(cut.Find(".rating-badge").TextContent.Trim()).IsEqualTo("7.4");
+	}
+
+	[Test]
+	public void Open_AsksWithEverything()
+	{
+		Register();
+
+		var cut = RenderSheet();
+
+		cut.WaitForAssertion(() => _media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), FieldNeeds.Everything, Any()).WasCalled(Times.Once));
 	}
 
 	[Test]
@@ -142,7 +152,7 @@ public class MediaDetailSheetTests : BunitContext
 		Services.AddSingleton(blocklist.Object);
 
 		_media = IMediaService.Mock();
-		_media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());
+		_media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), Any(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());
 		Services.AddSingleton(_media.Object);
 
 		var providerConfig = IProviderConfigService.Mock();

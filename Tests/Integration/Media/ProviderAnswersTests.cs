@@ -26,10 +26,10 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task GetDetailsAsync_OnATmdbOnlyInstall_KeepsUsingWhatTmdbAnswered()
 	{
 		var dune = await TmdbOnlyDuneAsync();
-		await Testee.GetDetailsAsync([dune]).ToListAsync();
+		await Testee.GetDetailsAsync([dune], FieldNeeds.Everything).ToListAsync();
 		host.SetCurrentTime(At(6, 2));
 
-		await Testee.GetDetailsAsync([dune]).ToListAsync();
+		await Testee.GetDetailsAsync([dune], FieldNeeds.Everything).ToListAsync();
 
 		await AssertCached(dune, refreshed: At(6, 1), asked: At(6, 1), (RemoteService.Tmdb, 0));
 		await Assert.That(host.HttpStub.Requests(TmdbDetail(Dune))).IsEqualTo(1);
@@ -39,13 +39,13 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task GetDetailsAsync_OncePlexIsConnected_AsksOnlyPlexForWhatTmdbCouldNotGiveAndThenUsesTheCache()
 	{
 		var dune = await TmdbOnlyDuneAsync();
-		await Testee.GetDetailsAsync([dune]).ToListAsync();
+		await Testee.GetDetailsAsync([dune], FieldNeeds.Everything).ToListAsync();
 		await host.WithPlexAccount("plex-token");
 		host.SetCurrentTime(At(6, 2));
 
-		var filled = await Testee.GetDetailsAsync([dune]).ToListAsync();
+		var filled = await Testee.GetDetailsAsync([dune], FieldNeeds.Everything).ToListAsync();
 		host.SetCurrentTime(At(6, 3));
-		await Testee.GetDetailsAsync([dune]).ToListAsync();
+		await Testee.GetDetailsAsync([dune], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(await Sources(filled[0])).IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb]);
 		await AssertCached(dune, refreshed: At(6, 1), asked: At(6, 2), (RemoteService.Tmdb, 0), (RemoteService.Plex, 0));
@@ -58,7 +58,7 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var arrival = await PlexOnlyArrivalAsync();
 
-		await Testee.GetDetailsAsync([arrival]).ToListAsync();
+		await Testee.GetDetailsAsync([arrival], FieldNeeds.Everything).ToListAsync();
 
 		await AssertCached(arrival, refreshed: At(6, 1), asked: At(6, 1), (RemoteService.Plex, 0));
 		await Assert.That(host.HttpStub.Requests(TmdbDetail(Arrival))).IsEqualTo(0);
@@ -68,15 +68,15 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task GetDetailsAsync_WhileTmdbIsRateLimited_UsesTheCacheAndAsksTmdbOnceTheBlockLifts()
 	{
 		var arrival = await PlexOnlyArrivalAsync();
-		await Testee.GetDetailsAsync([arrival]).ToListAsync();
+		await Testee.GetDetailsAsync([arrival], FieldNeeds.Everything).ToListAsync();
 		await host.WithTmdbAccount("tmdb-key");
 		host.SetCurrentTime(At(6, 1, 2));
 		await host.RateLimitedAsync(RemoteService.Tmdb);
 
-		await Testee.GetDetailsAsync([arrival]).ToListAsync();
+		await Testee.GetDetailsAsync([arrival], FieldNeeds.Everything).ToListAsync();
 		await AssertCached(arrival, refreshed: At(6, 1), asked: At(6, 1), (RemoteService.Plex, 0));
 		host.SetCurrentTime(At(6, 1, 2, 5));
-		var filled = await Testee.GetDetailsAsync([arrival]).ToListAsync();
+		var filled = await Testee.GetDetailsAsync([arrival], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(await Sources(filled[0])).IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb]);
 		await AssertCached(arrival, refreshed: At(6, 1), asked: At(6, 1, 2, 5), (RemoteService.Plex, 0), (RemoteService.Tmdb, 0));
@@ -90,7 +90,7 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 		host.PlexLookupFails(Dune);
 		host.SetCurrentTime(At(6, 15));
 
-		var refreshed = await Testee.GetDetailsAsync([dune]).ToListAsync();
+		var refreshed = await Testee.GetDetailsAsync([dune], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(await Sources(refreshed[0])).IsEquivalentTo([RatingSource.Tmdb]);
 		await AssertCached(dune, refreshed: At(6, 15), asked: At(6, 15), (RemoteService.Tmdb, 0), (RemoteService.Plex, 1));
@@ -104,7 +104,7 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 		host.PlexLookupFails(Dune);
 		host.SetCurrentTime(At(6, 15));
 
-		var refreshed = await Testee.GetDetailsAsync([dune]).ToListAsync();
+		var refreshed = await Testee.GetDetailsAsync([dune], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(await Sources(refreshed[0])).IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb, RatingSource.RottenTomatoesCritics]);
 		await AssertCached(dune, refreshed: At(6, 15), asked: At(6, 15), (RemoteService.Tmdb, 0), (RemoteService.Plex, 0));
@@ -119,7 +119,7 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 		host.Movie(Dune).ServedByPlex();
 		host.SetCurrentTime(At(6, 15));
 
-		var refreshed = await Testee.GetDetailsAsync([dune]).ToListAsync();
+		var refreshed = await Testee.GetDetailsAsync([dune], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(await Sources(refreshed[0])).IsEquivalentTo([RatingSource.Tmdb]);
 	}

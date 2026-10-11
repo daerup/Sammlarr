@@ -131,7 +131,7 @@ public class FeedRunsTests : BunitContext
 		Services.AddSingleton(feeds.Object);
 
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());
+		media.GetDetailsAsync(Any(), Any(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());
 		Services.AddSingleton(media.Object);
 
 		Services.AddSingleton(IWantlistService.Mock().Object);

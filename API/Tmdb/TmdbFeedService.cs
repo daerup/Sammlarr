@@ -34,9 +34,9 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 		return SiteLink.Parse(input, "themoviedb.org").ToResult(NotAList).Map(TmdbPages.Of).Map(page => page.Stored());
 	}
 
-	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, FieldNeeds needs, CancellationToken cancellationToken = default)
 	{
-		return media.LoadListAsync(EntriesAsync(identifier, cancellationToken), cancellationToken);
+		return media.LoadListAsync(EntriesAsync(identifier, cancellationToken), needs, cancellationToken);
 	}
 
 	private async IAsyncEnumerable<ListTitle> EntriesAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)

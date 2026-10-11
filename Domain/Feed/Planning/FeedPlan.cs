@@ -41,7 +41,8 @@ public static class FeedPlans
 		var verdicts = load.Verdicts;
 		var qualifying = verdicts.Where(verdict => verdict.Outcome is QueryOutcome.Qualified).Select(verdict => verdict.Item.Identity.Id).ToHashSet();
 		var seen = qualifying.Union(load.Unmatched.SelectMany(title => title.ConflictsWith)).ToHashSet();
-		var missing = owned.Where(id => !seen.Contains(id)).ToList();
+		var unsure = verdicts.Where(verdict => verdict.Item.Stale).Select(verdict => verdict.Item.Identity.Id).ToHashSet();
+		var missing = owned.Where(id => !seen.Contains(id) && !unsure.Contains(id)).ToList();
 		var missedRuns = missing.ToDictionary(id => id, id => absences.GetValueOrDefault(id) + 1);
 
 		var conclusiveness = Assess(qualifying.Count, verdicts.Count, load.Unmatched, load.State);

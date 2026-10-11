@@ -1,4 +1,5 @@
 using System.Net;
+using API.Tmdb;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -23,7 +24,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(title: "Live Title")
 			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 31));
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertTitle(results[0], "Cached Title");
 	}
@@ -36,7 +37,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(title: "Live Title")
 			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 17));
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertTitle(results[0], "Live Title");
 		await AssertCachedAs(fightClub, "Live Title", At(6, 1));
@@ -52,7 +53,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		host.PlexLookupFails(TestMedia.FightClub);
 		host.TmdbDetailFails(TestMedia.FightClub, HttpStatusCode.ServiceUnavailable);
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertTitle(results[0], "Cached Title");
 		await AssertCachedAs(fightClub, "Cached Title", At(5, 17), asked: At(6, 1));
@@ -67,7 +68,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 17));
 		host.PlexLookupFails(TestMedia.FightClub);
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertTitle(results[0], "Live Title");
 	}
@@ -77,14 +78,14 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex(title: "").ServedByTmdb(title: "Live Title").SeedAsync();
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertTitle(results[0], "Live Title");
 		await AssertCachedAs(fightClub, "Live Title", At(6, 1));
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_WhenAProviderThatHasNotAnsweredCouldFillAGapWithinTheHour_ServesFromCache()
+	public async Task GetDetailsAsync_ForAGridWhenAProviderThatHasNotAnsweredCouldFillAGap_ServesFromCache()
 	{
 		host.SetCurrentTime(At(6, 1, 11, 30));
 		var fightClub = await host.Movie(TestMedia.FightClub)
@@ -92,14 +93,14 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(title: "Live Title")
 			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 11, 0), genres: [], answeredBy: [RemoteService.Tmdb]);
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.None).ToListAsync();
 
 		await AssertTitle(results[0], "Cached Title");
 		await AssertCachedAs(fightClub, "Cached Title", At(6, 1, 11, 0));
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_WhenAProviderThatHasNotAnsweredCanFillAGapPastTheHour_FillsOnlyTheGap()
+	public async Task GetDetailsAsync_ForTheDetailSheetWhenAProviderThatHasNotAnsweredCanFillAGap_FillsOnlyTheGap()
 	{
 		host.SetCurrentTime(At(6, 1, 11, 30));
 		var fightClub = await host.Movie(TestMedia.FightClub)
@@ -107,7 +108,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(title: "Live Title")
 			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 9, 0), genres: [], answeredBy: [RemoteService.Tmdb]);
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertDetail(results[0], "Cached Title", genres: ["Drama"]);
 		await AssertCachedAs(fightClub, "Cached Title", At(6, 1, 9, 0), asked: At(6, 1, 11, 30));
@@ -125,7 +126,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(title: "Live Matrix")
 			.SeedWithDetailsAsync(title: "Old Matrix", fetched: At(5, 17));
 
-		var results = await Testee.GetDetailsAsync([fightClub, matrix]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub, matrix], FieldNeeds.Everything).ToListAsync();
 
 		await AssertTitle(results[0], "Fresh Title");
 		await AssertTitle(results[1], "Live Matrix");
@@ -139,7 +140,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(title: "TMDB Fight Club", summary: "TMDB plot synopsis", genres: ["Drama", "Thriller"], rating: 8.4, votes: 23000)
 			.SeedAsync();
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertDetail(results[0], "Fight Club", summary: "An insomniac office worker", genres: ["Drama", "Thriller"], rating: RatingSource.Tmdb);
 		await AssertDetailCachedAs(Detail(results[0]), fightClub, At(6, 1));
@@ -153,7 +154,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(title: "TMDB Fight Club", summary: "TMDB plot synopsis", genres: ["Drama", "Thriller"], rating: 8.4, votes: 23000)
 			.SeedWithDetailsAsync(title: "Stale Title", summary: "Stale summary", genres: ["Stale"], fetched: At(5, 17));
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertDetail(results[0], "Fight Club", summary: "An insomniac office worker", genres: ["Drama", "Thriller"], rating: RatingSource.Tmdb);
 		await AssertDetailCachedAs(Detail(results[0]), fightClub, At(6, 1));
@@ -164,7 +165,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var matrix = await host.Movie(Spec("The Matrix", Plex("603"))).ServedByPlex().SeedAsync();
 
-		var results = await Testee.GetDetailsAsync([matrix]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([matrix], FieldNeeds.Everything).ToListAsync();
 
 		await AssertDetail(results[0], "The Matrix", noRating: true);
 	}
@@ -177,7 +178,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(title: "TMDB Fight Club", summary: "TMDB plot synopsis", genres: ["Drama", "Thriller"], rating: 0, votes: 0)
 			.SeedAsync();
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertDetail(results[0], "Fight Club", summary: "An insomniac office worker", genres: ["Drama", "Thriller"], noRating: true);
 	}
@@ -188,7 +189,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex(title: "Fight Club", summary: "An insomniac office worker").SeedAsync();
 		host.TmdbHasNoDetail(TestMedia.FightClub);
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertDetail(results[0], "Fight Club", summary: "An insomniac office worker", noRating: true);
 		await AssertDetailCachedAs(Detail(results[0]), fightClub, At(6, 1));
@@ -202,7 +203,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(title: "TMDB Fight Club", summary: "TMDB summary", genres: ["Drama", "Thriller"], rating: 8.4, votes: 23000)
 			.SeedAsync();
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertDetail(results[0], "Fight Club", summary: "Plex summary", genres: ["Action", "Crime"], rating: RatingSource.Tmdb);
 	}
@@ -215,7 +216,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(summary: "TMDB summary", genres: ["Drama", "Thriller"], rating: 8.4, votes: 23000)
 			.SeedAsync();
 
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertDetail(results[0], "Fight Club", summary: "TMDB summary", genres: ["Drama", "Thriller"], rating: RatingSource.Tmdb);
 	}
@@ -227,24 +228,29 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByPlex(title: "Fight Club", summary: "Plex summary")
 			.ServedByTmdb(rating: 8.4, votes: 23000)
 			.SeedAsync();
-		await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 		host.SetCurrentTime(At(6, 13));
 
-		await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertCachedAs(fightClub, "Fight Club", At(6, 1));
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_WhenTheEnricherWasUnavailable_RetriesTheGapAfterTheCooldown()
+	public async Task GetDetailsAsync_WhenTheEnricherFailed_RetriesTheGapOnceItsBackoffEnds()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex(title: "Fight Club", summary: "Plex summary").SeedAsync();
 		host.TmdbDetailFails(TestMedia.FightClub, HttpStatusCode.ServiceUnavailable);
-		await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
+		host.SetCurrentTime(At(6, 1, 0, 30));
+		await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
+		var askedWithinTheHour = host.HttpStub.Requests(TmdbDetail(TestMedia.FightClub));
 		host.SetCurrentTime(At(6, 1, 2));
 
-		await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
+		await Assert.That(askedWithinTheHour).IsEqualTo(1);
+		await Assert.That(host.HttpStub.Requests(TmdbDetail(TestMedia.FightClub))).IsEqualTo(2);
 		await AssertCachedAs(fightClub, "Fight Club", At(6, 1), asked: At(6, 1, 2));
 	}
 
@@ -256,11 +262,11 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.ServedByTmdb(title: "Live Title")
 			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 31));
 
-		var first = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var first = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 		await AssertTitle(first[0], "Cached Title");
 
 		await Testee.InvalidateAsync([fightClub]);
-		var second = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var second = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 		await AssertTitle(second[0], "Live Title");
 	}
 
@@ -283,7 +289,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1));
 
 		await Testee.InvalidateAsync([fightClub]);
-		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertTitle(results[0], "Live Title");
 	}
@@ -302,8 +308,8 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.InvalidateAsync([fightClub, matrix]);
 
-		await AssertTitle((await Testee.GetDetailsAsync([fightClub]).ToListAsync())[0], "Live Title");
-		await AssertTitle((await Testee.GetDetailsAsync([matrix]).ToListAsync())[0], "Live Matrix");
+		await AssertTitle((await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync())[0], "Live Title");
+		await AssertTitle((await Testee.GetDetailsAsync([matrix], FieldNeeds.Everything).ToListAsync())[0], "Live Matrix");
 	}
 
 	[Before(Test)]
@@ -385,4 +391,6 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 			await Assert.That(exists).IsTrue();
 		}
 	}
+
+	private static string TmdbDetail(MediaSpec spec) => string.Format(TmdbEndpoints.Detail, TmdbEndpoints.MovieType, spec.Ids[0].Value);
 }

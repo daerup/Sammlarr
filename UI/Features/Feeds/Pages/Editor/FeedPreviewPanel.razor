@@ -386,6 +386,7 @@
     private bool _refreshDialogOpen;
     private bool _providerUnavailable;
     private readonly Stopwatch _fetchTimer = new();
+    private FieldNeeds _fetchedNeeds = FieldNeeds.None;
 
     private static readonly TimeSpan EarlySaveDelay = TimeSpan.FromSeconds(10);
     private const int EarlySaveMinItems = 100;
@@ -441,6 +442,7 @@
                          !string.Equals(Config.Identifier?.Trim(), _appliedConfig?.Identifier?.Trim(), StringComparison.Ordinal);
 
         _appliedConfig = Config;
+        needsFetch = needsFetch || await ReadsNewFieldsAsync();
 
         if (needsFetch)
         {
@@ -450,7 +452,7 @@
             _processedResults = [];
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
-            await FetchAsync();
+            await FetchAsync(AsTheFeedReads);
         }
         else
         {
@@ -460,6 +462,16 @@
         await EmitStatusIfChangedAsync();
         await InvokeAsync(StateHasChanged);
     }
+
+    private async Task<bool> ReadsNewFieldsAsync()
+    {
+        var needs = await Planner.NeedsAsync(SynthesizeFeed());
+        return !needs.Required.Except(_fetchedNeeds.Required).IsEmpty;
+    }
+
+    private static FieldNeeds AsTheFeedReads(FieldNeeds needs) => needs;
+
+    private static FieldNeeds Patiently(FieldNeeds needs) => new(needs.All, MediaFields.None);
 
     private async Task RetryAsync()
     {
@@ -493,7 +505,7 @@
 
             await Media.InvalidateAsync(staleIds);
 
-            await FetchAsync();
+            await FetchAsync(Patiently);
             await EmitStatusIfChangedAsync();
         }
         finally
@@ -502,7 +514,7 @@
         }
     }
 
-    private async Task FetchAsync()
+    private async Task FetchAsync(Func<FieldNeeds, FieldNeeds> asking)
     {
         _cts?.Cancel();
         _cts?.Dispose();
@@ -526,9 +538,10 @@
             using var user = scope.ServiceProvider.GetRequiredService<IUserScope>().As(CurrentUser);
             var service = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<FeedProvider, IFeedProvider>>()[Config.Provider!.Value];
             _fetchTimer.Restart();
+            _fetchedNeeds = asking(await Planner.NeedsAsync(SynthesizeFeed(), ct));
             var reprocessAt = 1;
             var sinceRender = Stopwatch.StartNew();
-            await foreach (var item in service.GetFeedItemsAsync(Config.Identifier.Trim(), ct).WithCancellation(ct))
+            await foreach (var item in service.GetFeedItemsAsync(Config.Identifier.Trim(), _fetchedNeeds, ct).WithCancellation(ct))
             {
                 _rawResults.Add(item);
                 var reprocessed = _rawResults.Count >= reprocessAt;

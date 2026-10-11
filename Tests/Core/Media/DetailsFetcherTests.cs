@@ -11,6 +11,7 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shared.Options;
 using TestInfrastructure;
 
 namespace Core.Tests.Media;
@@ -58,7 +59,7 @@ public class DetailsFetcherTests
 		);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Title).IsEqualTo("Inception");
 		await Assert.That(fetched.Details.Tagline).IsEqualTo(Complete().Tagline);
@@ -72,7 +73,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Complete() with { Title = "インセプション" });
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), OnlyPlex, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), Run(OnlyPlex, writer)));
 
 		await Assert.That(fetched.Details.Title).IsEqualTo("インセプション");
 	}
@@ -94,7 +95,7 @@ public class DetailsFetcherTests
 		);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.PosterUrl).IsEqualTo(TmdbImages);
 		await Assert.That(fetched.Details.Tagline).IsEqualTo(Complete().Tagline);
@@ -107,7 +108,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Complete() with { PosterUrl = OtherImages });
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), OnlyPlex, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), Run(OnlyPlex, writer)));
 
 		await Assert.That(fetched.Details.PosterUrl).IsEqualTo(OtherImages);
 	}
@@ -129,7 +130,7 @@ public class DetailsFetcherTests
 		);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.PosterUrl).IsEqualTo(TmdbImages);
 	}
@@ -142,7 +143,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(Unrated()));
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert
 			.That((await deps.WrittenAsync(writer))[Id].Answers)
@@ -158,7 +159,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Down);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Missing).IsEqualTo(MediaFields.AllRatings);
 		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0), (RemoteService.Tmdb, 1)]);
@@ -172,7 +173,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Faulted(RemoteService.Tmdb, Error.From(new InvalidOperationException("unreadable"))));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details).IsEqualTo(Complete() with { Tagline = null });
 		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0), (RemoteService.Tmdb, 1)]);
@@ -185,7 +186,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Complete() with { Tagline = null });
 		await using var writer = deps.Writer();
 
-		await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer);
+		await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
@@ -198,7 +199,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Tagline = "Your mind is the scene of the crime." }));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Tagline).IsEqualTo("Your mind is the scene of the crime.");
 		await Assert.That((await deps.WrittenAsync(writer))[Id].Answers).Contains(new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, Now));
@@ -212,7 +213,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Ratings).IsEqualTo(TmdbOnly);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
@@ -225,7 +226,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Complete());
 		await using var writer = deps.Writer();
 
-		await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer);
+		await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 		await Assert.That((await deps.WrittenAsync(writer))[Id].Answers).IsEquivalentTo([new ProviderAnswer(RemoteService.Plex, MediaFields.None, Now)]);
@@ -238,7 +239,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Unrated());
 		await using var writer = deps.Writer();
 
-		await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer);
+		await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
@@ -251,7 +252,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(Complete() with { Tagline = null }));
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert
 			.That((await deps.WrittenAsync(writer))[Id].Answers)
@@ -259,7 +260,7 @@ public class DetailsFetcherTests
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenTheEnricherAnswersAnotherType_IgnoresTheAnswerAndStoresNoAnswerForIt()
+	public async Task FetchAsync_WhenTheEnricherAnswersAnotherType_IgnoresTheAnswerAndStoresItAsFillingNothing()
 	{
 		var deps = Dependencies.Create();
 		deps.PlexAnswers(Complete() with { Tagline = null });
@@ -267,11 +268,11 @@ public class DetailsFetcherTests
 			.Returns(new Found<FoundMedia>(new FoundMedia([TvdbId.From("81189", MediaType.Show)], new ShowDetails { Tagline = "Say my name." })));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Identity).IsEqualTo(Identity);
 		await Assert.That(fetched.Details).IsEqualTo(Complete() with { Tagline = null });
-		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0)]);
+		await Assert.That((await deps.WrittenAsync(writer))[Id].Answers).Contains(new ProviderAnswer(RemoteService.Tmdb, Everything, Now));
 	}
 
 	[Test]
@@ -281,7 +282,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Complete() with { Tagline = null }, PlexOnly);
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), Run(Everyone, writer)));
 
 		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0)]);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -294,7 +295,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Complete() with { Tagline = null });
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), OnlyPlex, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(OnlyPlex, writer)));
 
 		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0)]);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -308,7 +309,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Tagline = "A dream within a dream." }));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Tagline).IsEqualTo("A dream within a dream.");
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
@@ -321,7 +322,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Unrated());
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
@@ -334,7 +335,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Complete());
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That((await trace.NodeAsync(RemoteService.Plex, TraceStage.Details)).Answered).IsEqualTo(1);
 	}
@@ -347,7 +348,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Unrated());
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Details)).GaveUp).IsEqualTo(1);
 	}
@@ -361,7 +362,7 @@ public class DetailsFetcherTests
 			.Returns(Answer(new MovieDetails { Ratings = MediaRatings.From([new ImdbRating(8.8f, Some.Of(2_500_000))]) }));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Ratings.All.Select(rating => rating.Source)).IsEquivalentTo([RatingSource.Tmdb, RatingSource.Imdb]);
 	}
@@ -374,7 +375,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Ratings.Of(RatingSource.Tmdb).Map(rating => rating.Votes)).IsSome().And.IsEqualTo(500);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
@@ -389,7 +390,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Complete() with { Tagline = null });
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0)]);
@@ -404,7 +405,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([Tmdb, imdb], Complete())));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Identity.Id).IsEqualTo(Id);
 		await Assert.That(fetched.Identity.Keys).IsEquivalentTo(new IExternalMediaId[] { Plex, Tmdb, imdb });
@@ -419,10 +420,10 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(Complete()));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details).IsEqualTo(Complete());
-		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Tmdb, 0)]);
+		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0), (RemoteService.Tmdb, 0)]);
 	}
 
 	[Test]
@@ -433,7 +434,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Down);
 		await using var writer = deps.Writer();
 
-		var fetched = await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer);
+		var fetched = await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer));
 
 		await Assert.That(fetched).IsError();
 		await Assert.That(await deps.WrittenAsync(writer)).IsEmpty();
@@ -448,7 +449,7 @@ public class DetailsFetcherTests
 		await using var writer = deps.Writer();
 		var stale = new CachedDetails(Complete(), Now.AddDays(-14), Now.AddDays(-14), [PlexLeftTheRatings with { AnsweredAt = Now.AddDays(-14) }]);
 
-		var fetched = await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, writer);
+		var fetched = await deps.Testee.FetchAsync(Identity, Some.Of(stale), Run(Everyone, writer));
 
 		await Assert.That(fetched).IsError();
 		var written = (await deps.WrittenAsync(writer))[Id];
@@ -464,7 +465,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Down);
 		await using var writer = deps.Writer();
 
-		await deps.Testee.LoadAsync(Stored(UnratedByPlex), MediaDetails.Empty(MediaType.Movie), Everyone, writer, CancellationToken.None);
+		await deps.Testee.LoadAsync(Stored(UnratedByPlex), MediaDetails.Empty(MediaType.Movie), Run(Everyone, writer), CancellationToken.None);
 
 		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0), (RemoteService.Tmdb, 1)]);
 	}
@@ -476,9 +477,9 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Unavailable(RemoteService.Tmdb, new None(), false));
 		await using var writer = deps.Writer();
 
-		await deps.Testee.LoadAsync(Stored(UnratedByPlex), MediaDetails.Empty(MediaType.Movie), Everyone, writer, CancellationToken.None);
+		await deps.Testee.LoadAsync(Stored(UnratedByPlex), MediaDetails.Empty(MediaType.Movie), Run(Everyone, writer), CancellationToken.None);
 
-		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0)]);
+		await Assert.That(await deps.WrittenAsync(writer)).IsEmpty();
 	}
 
 	[Test]
@@ -491,7 +492,7 @@ public class DetailsFetcherTests
 		var stale = new CachedDetails(Unrated(), Now.AddDays(-14), Now.AddDays(-14), []);
 		await using var writer = deps.Writer();
 
-		await deps.Testee.LoadAsync(Stored(stale), MediaDetails.Empty(MediaType.Movie), Everyone, writer, CancellationToken.None);
+		await deps.Testee.LoadAsync(Stored(stale), MediaDetails.Empty(MediaType.Movie), Run(Everyone, writer), CancellationToken.None);
 
 		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0)]);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -505,7 +506,7 @@ public class DetailsFetcherTests
 		var failedBefore = UnratedByPlex with { Answers = [PlexLeftTheRatings, ProviderAnswer.Failed(RemoteService.Tmdb, new None(), Now.AddHours(-2))] };
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(failedBefore), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(failedBefore), Run(Everyone, writer)));
 
 		var tmdb = (await deps.WrittenAsync(writer))[Id].Answers.Single(answer => answer.Provider == RemoteService.Tmdb);
 		await Assert.That(tmdb.Failures).IsEqualTo(2);
@@ -519,7 +520,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new NoMatch(RemoteService.Tmdb));
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Run(Everyone, writer)));
 
 		await Assert
 			.That((await deps.WrittenAsync(writer))[Id].Answers)
@@ -535,10 +536,41 @@ public class DetailsFetcherTests
 		var stale = new CachedDetails(Complete(), Now.AddDays(-20), Now.AddDays(-2), [failedThrice]);
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Run(Everyone, writer)));
 
 		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0), (RemoteService.Tmdb, 3)]);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task FetchAsync_ForAStaleCopyWhenPlexsLaneRefusesBeforeSending_KeepsItsRatingsAndStaysStale()
+	{
+		var deps = Dependencies.Create(tmdbFills: ~MediaField.None | MediaFields.Rated([RatingSource.Tmdb]));
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Unavailable(RemoteService.Plex, new None(), false));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(Unrated() with { Ratings = TmdbOnly }));
+		var stale = new CachedDetails(Complete(), Now.AddDays(-20), Now.AddDays(-20), []);
+		await using var writer = deps.Writer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Run(Everyone, writer)));
+
+		await Assert.That(fetched.Details.Ratings).IsEqualTo(EverySource);
+		await Assert.That(fetched.Stale).IsTrue();
+		await Assert.That((await deps.WrittenAsync(writer))[Id].RefreshedAt).IsEqualTo(stale.RefreshedAt);
+	}
+
+	[Test]
+	public async Task FetchAsync_ForAStaleCopyWhenASkippedServiceHadGivenNothing_RefreshesIt()
+	{
+		var deps = Dependencies.Create(tmdbFills: ~MediaField.None | MediaFields.Rated([RatingSource.Tmdb]));
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Unavailable(RemoteService.Plex, new None(), false));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(Complete() with { Ratings = TmdbOnly }));
+		var stale = new CachedDetails(Complete() with { Ratings = TmdbOnly }, Now.AddDays(-20), Now.AddDays(-20), []);
+		await using var writer = deps.Writer();
+
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Run(Everyone, writer)));
+
+		await Assert.That(fetched.Stale).IsFalse();
+		await Assert.That((await deps.WrittenAsync(writer))[Id].RefreshedAt).IsEqualTo(Now);
 	}
 
 	[Test]
@@ -554,7 +586,7 @@ public class DetailsFetcherTests
 		);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Ratings).IsEqualTo(TmdbOnly);
 		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -566,7 +598,7 @@ public class DetailsFetcherTests
 		var deps = Dependencies.Create(capacity: TestCapacity.With(_ => RemoteLoad.Idle with { BlockedUntil = Some.Of(Now.AddMinutes(1)) }));
 		await using var writer = deps.Writer();
 
-		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer)).IsError();
+		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer))).IsError();
 
 		await Assert.That(error!.CausedBy<RemoteUnavailableException>()).IsSome();
 		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -580,7 +612,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new NoMatch(RemoteService.Tmdb));
 		await using var writer = deps.Writer();
 
-		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer)).IsError();
+		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer))).IsError();
 
 		await Assert.That(error!.CausedBy<RemoteUnavailableException>()).IsSome();
 	}
@@ -593,7 +625,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new NoMatch(RemoteService.Tmdb));
 		await using var writer = deps.Writer();
 
-		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer)).IsError();
+		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer))).IsError();
 
 		await Assert.That(error!.CausedBy<RemoteUnavailableException>()).IsNone();
 	}
@@ -606,7 +638,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([Tmdb, imdb], Complete())));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(new MediaIdentity(Id, [imdb]), new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(new MediaIdentity(Id, [imdb]), new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details).IsEqualTo(Complete());
 		deps.Tmdb.LookUpAsync(imdb, Any()).WasCalled(Times.Once);
@@ -620,7 +652,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(Complete()));
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(new MediaIdentity(Id, [ImdbId.From("tt1375666", MediaType.Movie), tvdb]), new None(), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(new MediaIdentity(Id, [ImdbId.From("tt1375666", MediaType.Movie), tvdb]), new None(), Run(Everyone, writer)));
 
 		deps.Tmdb.LookUpAsync(tvdb, Any()).WasCalled(Times.Once);
 	}
@@ -633,7 +665,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(new MediaIdentity(Id, [imdb]), Some.Of(UnratedByPlex), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(new MediaIdentity(Id, [imdb]), Some.Of(UnratedByPlex), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Ratings).IsEqualTo(TmdbOnly);
 		deps.Tmdb.LookUpAsync(imdb, Any()).WasCalled(Times.Once);
@@ -646,7 +678,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Complete());
 		await using var writer = deps.Writer();
 
-		await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer);
+		await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer));
 
 		await Assert.That((await deps.WrittenAsync(writer))[Id].RefreshedAt).IsEqualTo(Now);
 		await Assert.That((await deps.WrittenAsync(writer))[Id].AskedAt).IsEqualTo(Now);
@@ -668,7 +700,7 @@ public class DetailsFetcherTests
 		);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Title).IsEqualTo("Inception");
 		await Assert.That((await deps.WrittenAsync(writer))[Id].RefreshedAt).IsEqualTo(Now);
@@ -682,7 +714,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Title = "Other", Ratings = TmdbOnly }));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details).IsEqualTo(Unrated() with { Title = "Other", Ratings = TmdbOnly });
 		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -696,7 +728,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(Unrated() with { Ratings = TmdbOnly }));
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Run(Everyone, writer)));
 
 		var filled = (await deps.WrittenAsync(writer))[Id];
 		await Assert.That(filled.RefreshedAt).IsEqualTo(LastRefresh);
@@ -720,7 +752,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Down);
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Run(Everyone, writer)));
 
 		var filled = (await deps.WrittenAsync(writer))[Id];
 		await Assert.That(filled.RefreshedAt).IsEqualTo(LastRefresh);
@@ -738,7 +770,7 @@ public class DetailsFetcherTests
 		var stored = new CachedDetails(Complete() with { Tagline = null, PosterUrl = "stored-poster" }, LastRefresh, LastRefresh, []);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stored), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.PosterUrl).IsEqualTo("tmdb-poster");
 	}
@@ -750,7 +782,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(Unrated() with { Tagline = null, Ratings = TmdbOnly }));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(UnratedByPlex), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Tagline).IsEqualTo("A dream within a dream.");
 		await Assert
@@ -774,7 +806,7 @@ public class DetailsFetcherTests
 		);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Tagline).IsEqualTo(tagline);
 	}
@@ -793,7 +825,7 @@ public class DetailsFetcherTests
 		);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Tagline).IsNull();
 	}
@@ -817,7 +849,7 @@ public class DetailsFetcherTests
 		);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Run(Everyone, writer)));
 
 		var written = (await deps.WrittenAsync(writer))[Id];
 		await Assert.That(fetched.Details.Ratings).IsEqualTo(kept ? EverySource : TmdbOnly);
@@ -839,7 +871,7 @@ public class DetailsFetcherTests
 		);
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), OnlyPlex, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, Some.Of(stale), Run(OnlyPlex, writer)));
 
 		await Assert.That(fetched.Details).IsEqualTo(Unrated());
 	}
@@ -853,7 +885,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([.. Identity.Keys], Complete())));
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		deps.Tmdb.LookUpAsync(Tmdb, Any()).WasCalled(Times.Once);
 		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -866,7 +898,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Complete(), PlexOnly);
 		await using var writer = deps.Writer();
 
-		await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), Everyone, writer));
+		await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), Run(Everyone, writer)));
 
 		deps.Plex.LookUpAsync(Plex, Any()).WasCalled(Times.Once);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -882,7 +914,7 @@ public class DetailsFetcherTests
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([.. Identity.Keys], Unrated())));
 		await using var writer = deps.Writer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, writer));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Details.Missing).IsEqualTo(MediaFields.AllRatings);
 		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -893,14 +925,155 @@ public class DetailsFetcherTests
 	public async Task FindReusable_WhenAnEnricherTheUserHasConnectedCanFillAGap_IsNone()
 	{
 		var deps = Dependencies.Create();
-		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(UnratedByPlex), Everyone)).IsNone();
+		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(UnratedByPlex), Everyone, FieldNeeds.Everything)).IsNone();
 	}
 
 	[Test]
 	public async Task FindReusable_WhenTheOnlyEnricherThatCanFillAGapIsNotConnected_IsTheStoredCopy()
 	{
 		var deps = Dependencies.Create();
-		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(UnratedByPlex), OnlyPlex)).IsSome().And.IsEqualTo(UnratedByPlex);
+		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(UnratedByPlex), OnlyPlex, FieldNeeds.Everything)).IsSome().And.IsEqualTo(UnratedByPlex);
+	}
+
+	[Test]
+	public async Task FindReusable_WhenTheFeedReadsNoneOfTheGaps_IsTheStoredCopy()
+	{
+		var deps = Dependencies.Create();
+		var readsTheTitle = new FieldNeeds(MediaField.Title, MediaField.Poster);
+
+		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(UnratedByPlex), Everyone, readsTheTitle)).IsSome().And.IsEqualTo(UnratedByPlex);
+	}
+
+	[Test]
+	public async Task FindReusable_ForAGapOnlyAServiceQueuedPastFiveSecondsFills_ReusesTheCopyOnlyWhenTheGapIsShownOnly()
+	{
+		var deps = Dependencies.Create(capacity: TmdbQueued(seconds: 6));
+
+		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(UnratedByPlex), Everyone, new FieldNeeds(MediaFields.None, MediaFields.AllRatings))).IsSome();
+		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(UnratedByPlex), Everyone, new FieldNeeds(MediaFields.AllRatings, MediaFields.None))).IsNone();
+	}
+
+	[Test]
+	public async Task LoadAsync_ForAnUncachedTitleWhoseServicesQueuePastFiveSeconds_SettlesWithThePlaceholderAndRecordsNothing()
+	{
+		var deps = Dependencies.Create(capacity: TestCapacity.With(_ => RemoteLoad.Idle with { EstimatedWait = TimeSpan.FromSeconds(6) }));
+		var placeholder = new MovieDetails { Title = "Inception" };
+		await using var writer = deps.Writer();
+
+		var loaded = await deps.Testee.LoadAsync(
+			new IdentifyHandoff(Identity, new None()),
+			placeholder,
+			new DetailsRun(Everyone, new FieldNeeds(MediaFields.None, MediaFields.AllRatings), writer),
+			CancellationToken.None
+		);
+
+		await Assert.That((await Matched(loaded)).Details).IsEqualTo(placeholder);
+		await Assert.That(await deps.WrittenAsync(writer)).IsEmpty();
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task LoadAsync_ForAFieldTheFeedFiltersOn_AsksAServiceQueuedPastFiveSeconds()
+	{
+		var deps = Dependencies.Create(capacity: TestCapacity.With(_ => RemoteLoad.Idle with { EstimatedWait = TimeSpan.FromSeconds(6) }));
+		deps.PlexAnswers(Complete());
+		await using var writer = deps.Writer();
+
+		var loaded = await deps.Testee.LoadAsync(
+			new IdentifyHandoff(Identity, new None()),
+			MediaDetails.Empty(MediaType.Movie),
+			new DetailsRun(Everyone, new FieldNeeds(MediaFields.AllRatings, MediaFields.None), writer),
+			CancellationToken.None
+		);
+
+		await Assert.That((await Matched(loaded)).Details).IsEqualTo(Complete());
+	}
+
+	[Test]
+	public async Task LoadAsync_ForAStaleTitleOnAGrid_StillRefreshesIt()
+	{
+		var deps = Dependencies.Create();
+		deps.PlexAnswers(Complete());
+		var stale = new CachedDetails(Complete() with { Title = "Old" }, Now.AddDays(-14), Now.AddDays(-14), []);
+		await using var writer = deps.Writer();
+
+		var loaded = await deps.Testee.LoadAsync(
+			Stored(stale),
+			MediaDetails.Empty(MediaType.Movie),
+			new DetailsRun(Everyone, FieldNeeds.None, writer),
+			CancellationToken.None
+		);
+
+		await Assert.That((await Matched(loaded)).Details.Title).IsEqualTo("Inception");
+	}
+
+	[Test]
+	public async Task LoadAsync_WhenAStaleTitlesRefreshCannotRun_FallsBackToItMarkedStale()
+	{
+		var deps = Dependencies.Create();
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Down);
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Down);
+		var stale = new CachedDetails(Complete(), Now.AddDays(-14), Now.AddDays(-14), []);
+		await using var writer = deps.Writer();
+
+		var loaded = await Matched(await deps.Testee.LoadAsync(Stored(stale), MediaDetails.Empty(MediaType.Movie), Run(Everyone, writer), CancellationToken.None));
+
+		await Assert.That(loaded.Stale).IsTrue();
+		await Assert.That(loaded.Details).IsEqualTo(Complete());
+	}
+
+	[Test]
+	public async Task LoadAsync_ForAStaleTitleWhoseServicesAreBackingOff_FallsBackToItMarkedStale()
+	{
+		var deps = Dependencies.Create();
+		var failedLately = Now.AddMinutes(-30);
+		var stale = new CachedDetails(
+			Complete(),
+			Now.AddDays(-20),
+			failedLately,
+			[ProviderAnswer.Failed(RemoteService.Plex, new None(), failedLately), ProviderAnswer.Failed(RemoteService.Tmdb, new None(), failedLately)]
+		);
+		await using var writer = deps.Writer();
+
+		var loaded = await Matched(await deps.Testee.LoadAsync(Stored(stale), MediaDetails.Empty(MediaType.Movie), Run(Everyone, writer), CancellationToken.None));
+
+		await Assert.That(loaded.Stale).IsTrue();
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task LoadAsync_WhenAGapFillThrows_FallsBackToTheCopyUnmarked()
+	{
+		var deps = Dependencies.Create();
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Throws(new InvalidOperationException("broken enricher"));
+		await using var writer = deps.Writer();
+
+		var loaded = await Matched(
+			await deps.Testee.LoadAsync(Stored(UnratedByPlex), MediaDetails.Empty(MediaType.Movie), Run(Everyone, writer), CancellationToken.None)
+		);
+
+		await Assert.That(loaded.Details).IsEqualTo(UnratedByPlex.Details);
+		await Assert.That(loaded.Stale).IsFalse();
+	}
+
+	[Test]
+	public async Task LoadAsync_ForAStaleTitleWhoseDetailServiceQueuesPastFiveSeconds_KeepsItsStoredFieldsAndStaysStale()
+	{
+		var deps = Dependencies.Create(capacity: TmdbQueued(seconds: 6));
+		deps.PlexAnswers(new MovieDetails { Ratings = EverySource });
+		var stale = new CachedDetails(Complete(), Now.AddDays(-20), Now.AddDays(-20), []);
+		await using var writer = deps.Writer();
+
+		var loaded = await Matched(
+			await deps.Testee.LoadAsync(Stored(stale), MediaDetails.Empty(MediaType.Movie), new DetailsRun(Everyone, FieldNeeds.None, writer), CancellationToken.None)
+		);
+
+		await Assert.That(loaded.Details).IsEqualTo(Complete());
+		await Assert.That(loaded.Stale).IsTrue();
+		await Assert.That((await deps.WrittenAsync(writer))[Id].RefreshedAt).IsEqualTo(stale.RefreshedAt);
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
@@ -909,7 +1082,7 @@ public class DetailsFetcherTests
 		var deps = Dependencies.Create();
 		var backingOff = BackingOff(failures: 2);
 
-		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(backingOff), OnlyPlex)).IsSome().And.IsEqualTo(backingOff);
+		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(backingOff), OnlyPlex, FieldNeeds.Everything)).IsSome().And.IsEqualTo(backingOff);
 	}
 
 	[Test]
@@ -917,7 +1090,7 @@ public class DetailsFetcherTests
 	{
 		var deps = Dependencies.Create();
 
-		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(BackingOff(failures: 1)), OnlyPlex)).IsNone();
+		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(BackingOff(failures: 1)), OnlyPlex, FieldNeeds.Everything)).IsNone();
 	}
 
 	[Test]
@@ -933,6 +1106,8 @@ public class DetailsFetcherTests
 			)
 			.WasCalled(Times.Once);
 	}
+
+	private static DetailsRun Run(IReadOnlySet<RemoteService> connected, LibraryWriter writer) => new(connected, FieldNeeds.Everything, writer);
 
 	private static IdentifyHandoff Stored(CachedDetails cached) => new(Identity, Some.Of(new StoredMedia(Identity, Some.Of(cached))));
 
@@ -951,6 +1126,11 @@ public class DetailsFetcherTests
 	{
 		var matched = await Assert.That(result).IsSuccess();
 		return matched!;
+	}
+
+	private static IRemoteCapacity TmdbQueued(int seconds)
+	{
+		return TestCapacity.With(remote => RemoteLoad.Idle with { EstimatedWait = remote is RemoteService.Tmdb ? TimeSpan.FromSeconds(seconds) : TimeSpan.Zero });
 	}
 
 	private static IRemoteCapacity TmdbBlocked(Func<DateTimeOffset> until)
@@ -1033,6 +1213,7 @@ public class DetailsFetcherTests
 				readiness.Object,
 				[resizer ?? TestArtwork.ResizesAnything()],
 				Clock(),
+				new FeedLoadOptions(),
 				NullLogger<DetailsFetcher>.Instance
 			);
 			return new Dependencies(mediaRepository, plex, tmdb, readiness, testee);
