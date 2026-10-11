@@ -16,28 +16,27 @@ internal sealed class MediaSearchService(
 	IProviderConfigService providerConfig
 ) : IMediaSearchService
 {
-	public async Task<IReadOnlyList<MediaMatchResult>> SearchAsync(
-		string query,
-		IReadOnlyCollection<MediaType> mediaTypes,
-		CancellationToken cancellationToken = default
-	)
+	public async Task<SearchResults> SearchAsync(string query, IReadOnlyCollection<MediaType> mediaTypes, CancellationToken cancellationToken = default)
 	{
 		using var marked = UsageCauses.Mark(UsageCause.Search);
 		var config = await providerConfig.GetAsync(cancellationToken);
 		var provider = config.SearchProvider;
-		var found = await providers[provider].SearchAsync(query, mediaTypes, cancellationToken);
+		var answer = await providers[provider].SearchAsync(query, mediaTypes, cancellationToken);
+		var found = answer.Found;
 		var registered = await mediaService.RegisterAsync([.. found.Select(item => item.Externals.ToList())], [.. provider.Service.Remotes], cancellationToken);
 		var owners = await OwnersOfAsync(
 			[.. found.Zip(registered).Where(hit => hit.Second.IsNone()).Select(hit => OwnKey(provider, hit.First)).WhereSome()],
 			cancellationToken
 		);
-		return
-		[
-			.. found.Zip(
-				registered,
-				(item, identity) => identity.Match(claimed => item.MatchTo(claimed), () => Owned(item, OwnKey(provider, item).Map(key => owners.GetValueOrNone(key))))
-			),
-		];
+		return new SearchResults(
+			[
+				.. found.Zip(
+					registered,
+					(item, identity) => identity.Match(claimed => item.MatchTo(claimed), () => Owned(item, OwnKey(provider, item).Map(key => owners.GetValueOrNone(key))))
+				),
+			],
+			answer.Missed
+		);
 	}
 
 	private static MediaMatchResult Owned(FoundMedia item, Optional<MediaIdentity> owner)

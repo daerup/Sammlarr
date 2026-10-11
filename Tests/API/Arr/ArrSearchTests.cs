@@ -4,6 +4,7 @@ using API.Arr.Radarr;
 using API.Arr.Sonarr;
 using Contracts.Settings;
 using Domain.Media;
+using Domain.Providers;
 using Domain.Wantlist.Arr;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
@@ -35,7 +36,7 @@ public class ArrSearchTests
 			.OnRequest(request => request.Method(HttpMethod.Get).PathStartsWith("/api/v3/series/lookup"))
 			.RespondWithJson("""[{"id":0,"title":"Hail Mary","year":2023,"tvdbId":424242,"tmdbId":95557,"imdbId":"","tags":[]}]""");
 
-		var found = await Testee.SearchAsync("project hail", [MediaType.Movie, MediaType.Show]);
+		var found = (await Testee().SearchAsync("project hail", [MediaType.Movie, MediaType.Show])).Found;
 
 		string?[] titles = ["Project Hail Mary", "Hail Mary"];
 		await Assert.That(found.Select(item => item.Details.Title)).IsEquivalentTo(titles);
@@ -52,7 +53,7 @@ public class ArrSearchTests
 	{
 		_sonarr.OnAnyRequest().RespondWithJson("[]");
 
-		await Testee.SearchAsync("hail", [MediaType.Show]);
+		await Testee().SearchAsync("hail", [MediaType.Show]);
 
 		_radarr.Verify(request => request.Method(HttpMethod.Get), Times.Never);
 	}
@@ -63,21 +64,35 @@ public class ArrSearchTests
 		_radarr.OnAnyRequest().Respond(HttpStatusCode.Unauthorized);
 
 		await Assert
-			.That(async () => await Testee.SearchAsync("hail", [MediaType.Movie]))
+			.That(async () => await Testee().SearchAsync("hail", [MediaType.Movie]))
 			.Throws<InvalidOperationException>()
 			.WithMessageContaining("Check the API key under Settings › General in Radarr.");
 	}
 
 	[Test]
-	public async Task SearchAsync_WhenSonarrIsDown_StillReturnsRadarrsMovies()
+	public async Task SearchAsync_WhenSonarrIsDown_ReturnsRadarrsMoviesAndNamesSonarr()
 	{
 		_radarr.OnAnyRequest().RespondWithJson("""[{"id":0,"title":"Project Hail Mary","year":2026,"tmdbId":687163,"tags":[]}]""");
 		_sonarr.OnAnyRequest().Respond(HttpStatusCode.ServiceUnavailable);
 
-		var found = await Testee.SearchAsync("project hail", [MediaType.Movie, MediaType.Show]);
+		var answer = await Testee().SearchAsync("project hail", [MediaType.Movie, MediaType.Show]);
 
 		string?[] titles = ["Project Hail Mary"];
-		await Assert.That(found.Select(item => item.Details.Title)).IsEquivalentTo(titles);
+		await Assert.That(answer.Found.Select(item => item.Details.Title)).IsEquivalentTo(titles);
+		await Assert.That(answer.Missed.Select(miss => miss.Service)).IsEquivalentTo([RemoteService.Sonarr]);
+		await Assert.That(answer.Missed.Single().Reason).Contains("Sonarr answered 503");
+	}
+
+	[Test]
+	public async Task SearchAsync_WhenSonarrIsNotSetUp_NamesNoMiss()
+	{
+		_radarr.OnAnyRequest().RespondWithJson("""[{"id":0,"title":"Project Hail Mary","year":2026,"tmdbId":687163,"tags":[]}]""");
+		var radarrOnly = Connected with { Sonarr = ArrInstanceConfig.Empty };
+
+		var answer = await Testee(radarrOnly).SearchAsync("project hail", [MediaType.Movie, MediaType.Show]);
+
+		await Assert.That(answer.Found).Count().IsEqualTo(1);
+		await Assert.That(answer.Missed).IsEmpty();
 	}
 
 	[Test]
@@ -86,17 +101,16 @@ public class ArrSearchTests
 		_radarr.OnAnyRequest().Respond(HttpStatusCode.ServiceUnavailable);
 		_sonarr.OnAnyRequest().Respond(HttpStatusCode.ServiceUnavailable);
 
-		await Assert.That(async () => await Testee.SearchAsync("project hail", [MediaType.Movie, MediaType.Show])).Throws<InvalidOperationException>();
+		await Assert.That(async () => await Testee().SearchAsync("project hail", [MediaType.Movie, MediaType.Show])).Throws<InvalidOperationException>();
 	}
 
-	private ArrSearch Testee
+	private ArrSearch Testee() => Testee(Connected);
+
+	private ArrSearch Testee(ArrSinkConfig config)
 	{
-		get
-		{
-			var configs = IArrSinkConfigService.Mock();
-			configs.GetAsync(Any()).Returns(Connected);
-			var apis = new ArrApis(new RadarrApi(new HttpClient(_radarr), new RadarrOptions()), new SonarrApi(new HttpClient(_sonarr), new SonarrOptions()));
-			return new ArrSearch(apis, configs.Object, NullLogger<ArrSearch>.Instance);
-		}
+		var configs = IArrSinkConfigService.Mock();
+		configs.GetAsync(Any()).Returns(config);
+		var apis = new ArrApis(new RadarrApi(new HttpClient(_radarr), new RadarrOptions()), new SonarrApi(new HttpClient(_sonarr), new SonarrOptions()));
+		return new ArrSearch(apis, configs.Object, NullLogger<ArrSearch>.Instance);
 	}
 }

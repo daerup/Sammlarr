@@ -58,11 +58,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 		return await mediaId.Require<PlexId>($"PlexApi only supports {nameof(PlexId)} lookups.").Map(plexId => ByIdAsync(plexId, cancellationToken));
 	}
 
-	public async Task<IReadOnlyList<FoundMedia>> SearchAsync(
-		string title,
-		IReadOnlyCollection<MediaType> mediaTypes,
-		CancellationToken cancellationToken = default
-	)
+	public async Task<SearchAnswer> SearchAsync(string title, IReadOnlyCollection<MediaType> mediaTypes, CancellationToken cancellationToken = default)
 	{
 		var searchTypes = string.Join(",", mediaTypes.Select(ToPlexMediaType));
 		var endpoint = urls.Search(searchTypes, title, SearchLimit);
@@ -72,14 +68,18 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 		var result = (await JsonSerializer.DeserializeAsync<PlexTypes.Search.Root>(stream, cancellationToken: cancellationToken))!;
 		if (result.MediaContainer.Size is 1 && result.MediaContainer.SearchResults[0].Size is 0)
 		{
-			return [];
+			return new SearchAnswer([], []);
 		}
 
-		return result
-			.MediaContainer.SearchResults.SelectMany(c => c.NestedSearchResult)
-			.Select(s => s.Metadata.ToFound())
-			.DistinctBy(r => r.Externals.OfType<PlexId>().FirstOrDefault())
-			.ToList();
+		return new SearchAnswer(
+			[
+				.. result
+					.MediaContainer.SearchResults.SelectMany(c => c.NestedSearchResult)
+					.Select(s => s.Metadata.ToFound())
+					.DistinctBy(r => r.Externals.OfType<PlexId>().FirstOrDefault()),
+			],
+			[]
+		);
 	}
 
 	internal async Task<Result<Optional<PlexId>>> MatchAsync(IExternalMediaId id, CancellationToken cancellationToken = default)

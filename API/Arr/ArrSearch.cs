@@ -9,21 +9,21 @@ namespace API.Arr;
 
 internal sealed class ArrSearch(ArrApis apis, IArrSinkConfigService configs, ILogger<ArrSearch> logger) : IMediaSearchProvider
 {
-	public async Task<IReadOnlyList<FoundMedia>> SearchAsync(
-		string query,
-		IReadOnlyCollection<MediaType> mediaTypes,
-		CancellationToken cancellationToken = default
-	)
+	public async Task<SearchAnswer> SearchAsync(string query, IReadOnlyCollection<MediaType> mediaTypes, CancellationToken cancellationToken = default)
 	{
 		var config = await configs.GetAsync(cancellationToken);
-		var asked = apis.All.Where(api => mediaTypes.Contains(api.App.Type));
+		List<ArrApi> asked = [.. apis.All.Where(api => mediaTypes.Contains(api.App.Type))];
 		var answers = await Task.WhenAll(asked.Select(api => FoundAsync(api, config, query, cancellationToken)));
 		if (answers.Length > 0 && answers.All(answer => answer.IsError()))
 		{
 			throw new InvalidOperationException(string.Join(" ", answers.Select(answer => answer.Match(_ => string.Empty, error => error.Reason))));
 		}
 
-		return [.. answers.SelectMany(answer => answer.GetValueOr([]))];
+		var missed = asked
+			.Zip(answers)
+			.Where(pair => config.Of(pair.First.App).IsConnectable)
+			.SelectMany(pair => pair.Second.Match(_ => [], error => new[] { new SearchMiss(pair.First.App.Remote, error.Reason) }));
+		return new SearchAnswer([.. answers.SelectMany(answer => answer.GetValueOr([]))], [.. missed]);
 	}
 
 	private async Task<Result<List<FoundMedia>>> FoundAsync(ArrApi api, ArrSinkConfig config, string query, CancellationToken cancellationToken)

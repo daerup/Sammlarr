@@ -66,6 +66,17 @@
                     </div>
                 }
 
+                @foreach (var miss in _missed)
+                {
+                    <div class="rounded-lg border bg-muted/40 px-4 py-3 flex items-start gap-2 text-sm text-muted-foreground" data-testid="search-miss">
+                        <LucideIcon Name="info" Size="16" Class="shrink-0 mt-0.5"/>
+                        <span class="min-w-0 break-words">
+                            <span class="text-foreground font-medium">@Branding.Name(miss.Service)</span> did not answer, so its @KindOf(miss.Service) are missing.
+                            <span class="block text-xs" data-testid="search-miss-reason">@miss.Reason</span>
+                        </span>
+                    </div>
+                }
+
                 @if (_isSearching)
                 {
                     <div class="search-modal-results scrollbar-thin space-y-2 pr-1" aria-hidden="true" tabindex="-1">
@@ -167,6 +178,7 @@
     private string? _searchQuery = string.Empty;
     private string? _searchHint;
     private string? _searchError;
+    private IReadOnlyList<SearchMiss> _missed = [];
     private MediaId? _activeToggledSourceId;
     private List<MediaMatchResult> _searchResults = [];
 
@@ -179,6 +191,12 @@
     private ArrApp TabApp => Enum.GetValues<ArrApp>().First(app => app.Name == _tab);
 
     private int CountOf(ArrApp app) => _searchResults.Count(result => result.Details.Type == app.Type);
+
+    private static string KindOf(RemoteService service)
+    {
+        return Enum.GetValues<ArrApp>().First(app => app.Remote == service).Type.Plural.ToLowerInvariant();
+    }
+
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
     private bool _wasOpen;
@@ -258,6 +276,7 @@
         var query = _searchQuery?.Trim();
         _searchHint = null;
         _searchError = null;
+        _missed = [];
 
         if (string.IsNullOrWhiteSpace(query))
         {
@@ -271,7 +290,9 @@
 
         try
         {
-            _searchResults = [.. await SearchService.SearchAsync(query, [MediaType.Movie, MediaType.Show])];
+            var searched = await SearchService.SearchAsync(query, [MediaType.Movie, MediaType.Show]);
+            _searchResults = [.. searched.Results];
+            _missed = searched.Missed;
             _tab = Enum.GetValues<ArrApp>().OrderByDescending(CountOf).First().Name;
 
             _hasSearched = true;
