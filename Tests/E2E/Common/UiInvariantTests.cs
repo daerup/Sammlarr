@@ -97,6 +97,45 @@ public class UiInvariantTests
 		await Expect(page.GetByText("System.InvalidOperationException")).ToBeVisibleAsync();
 		await Expect(page.GetByText("Stack Trace")).ToBeVisibleAsync();
 	}
+
+	[Test]
+	public async Task UnmatchedTile_InTheLightTheme_KeepsItsTitleReadable()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("testing"));
+		await Expect(page.Locator("html")).Not.ToHaveClassAsync(new Regex("dark"));
+		var tile = page.Locator("[data-testid=media-tile]", new PageLocatorOptions { HasText = "Unmatched Title" });
+		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
+
+		var contrast = await tile.EvaluateAsync<double>(
+			"""
+			tile => {
+				const rgb = color => {
+					const canvas = document.createElement("canvas");
+					canvas.width = canvas.height = 1;
+					const context = canvas.getContext("2d");
+					context.fillStyle = color;
+					context.fillRect(0, 0, 1, 1);
+					return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3);
+				};
+				const luminance = color => rgb(color)
+					.map(value => value / 255)
+					.map(value => value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+					.reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0);
+				const placeholder = tile.querySelector(".media-card-failed");
+				const title = tile.querySelector("h3");
+				const layers = [];
+				for (let element = placeholder; element !== tile.parentElement; element = element.parentElement) layers.push(element);
+				const covered = [...layers, title].some(element => getComputedStyle(element).filter !== "none" || getComputedStyle(element).opacity !== "1")
+					|| getComputedStyle(tile.querySelector(".media-card-scrim")).display !== "none";
+				const ink = luminance(getComputedStyle(title).color);
+				const ground = luminance(getComputedStyle(placeholder).backgroundColor);
+				return covered ? 0 : (Math.max(ink, ground) + 0.05) / (Math.min(ink, ground) + 0.05);
+			}
+			"""
+		);
+
+		await Assert.That(contrast).IsGreaterThanOrEqualTo(4.5);
+	}
 #endif
 
 	[Test]
