@@ -223,6 +223,18 @@ public class UsageReportTests
 	}
 
 	[Test]
+	public async Task ReadAsync_AWeekForAKeyWithNoAnswerYet_CountsEachQuotaDaysRequests()
+	{
+		_mdblist.TodayAsync(Any()).Returns(Some.Of(new QuotaToday(Midnight.AddDays(1), new None())));
+		Stored([], [Attempts(RemoteService.Mdblist, 10, 60, 250), Attempts(RemoteService.Mdblist, -1, 40, 250), Attempts(RemoteService.Tmdb, 10, 9, 250)]);
+
+		var quota = (await Testee().ReadAsync(UsageRange.Week)).Quotas.Single();
+
+		await Assert.That(quota.Days.Select(day => day.Total)).IsEquivalentTo([0L, 0, 0, 0, 0, 40, 60], CollectionOrdering.Matching);
+		await Assert.That(quota.Days[^1].Start).IsEqualTo(Midnight);
+	}
+
+	[Test]
 	public async Task ReadAsync_AsAMember_IsRefused()
 	{
 		await Assert.ThrowsAsync<UnauthorizedAccessException>(() => Testee(UserRole.Member).ReadAsync(UsageRange.Day));

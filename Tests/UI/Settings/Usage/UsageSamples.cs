@@ -91,10 +91,39 @@ internal static class UsageSamples
 			.. Yesterday.Select((calls, hour) => (Reset.AddHours(hour - Yesterday.Length), calls)),
 			.. today.Select((calls, hour) => (Reset.AddHours(hour), calls)),
 		];
-		return new UsageQuota(RemoteService.Mdblist, new QuotaToday(Reset.AddDays(1), Some.Of(allowance)), Some.Of(QuotaDay.Of(spent, allowance, Morning)));
+		return new UsageQuota(RemoteService.Mdblist, new QuotaToday(Reset.AddDays(1), Some.Of(allowance)), Some.Of(QuotaDay.Of(spent, allowance, Morning)), []);
 	}
 
-	internal static UsageQuota Unanswered() => new(RemoteService.Mdblist, new QuotaToday(Reset.AddDays(1), new None()), new None());
+	internal static UsageQuota Unanswered() => new(RemoteService.Mdblist, new QuotaToday(Reset.AddDays(1), new None()), new None(), []);
+
+	internal static UsageQuota Week(UsageQuota quota)
+	{
+		IReadOnlyList<IReadOnlyDictionary<UsageCause, long>> days =
+		[
+			Spent(290, 120, 205, 20, 10, 0, 9),
+			Spent(301, 180, 195, 0, 14, 0, 6),
+			Spent(296, 95, 160, 64, 5, 3, 4),
+			Spent(410, 260, 85, 82, 16, 0, 12),
+			Spent(299, 205, 140, 30, 9, 0, 8),
+			Spent(330, 412, 140, 26, 12, 0, 30),
+			Spent(382, 139, 199, 65, 12, 1, 11),
+		];
+		return quota with { Days = [.. days.Select((spent, day) => new QuotaDayUse(Reset.AddDays(day - days.Count + 1), spent))] };
+	}
+
+	private static Dictionary<UsageCause, long> Spent(long feedRuns, long showing, long filling, long editing, long search, long tests, long untagged)
+	{
+		return new Dictionary<UsageCause, long>
+		{
+			[UsageCause.FeedRun] = feedRuns,
+			[UsageCause.ShowingTitles] = showing,
+			[UsageCause.DetailsFill] = filling,
+			[UsageCause.FeedEditor] = editing,
+			[UsageCause.Search] = search,
+			[UsageCause.KeyTest] = tests,
+			[UsageCause.Other] = untagged,
+		};
+	}
 
 	internal static string Local(DateTimeOffset at) => at.ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture);
 

@@ -150,6 +150,23 @@ public class UsageCallsCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Picked_AServiceWithADailyQuotaOnSevenDays_OpensItsQuotaDays()
+	{
+		var cut = Render<UsageCallsCard>(parameters =>
+			parameters
+				.Add(card => card.Period, UsageSamples.Snapshot().Current)
+				.Add(card => card.Range, UsageRange.Week)
+				.Add(card => card.Quotas, [UsageSamples.Week(UsageSamples.Quota(UsageSamples.Allowance(191)))])
+				.Add(card => card.Picked, Some.Of(RemoteService.Mdblist))
+		);
+
+		var panel = cut.Find("[data-testid=usage-quota-panel]");
+		await Assert.That(panel.QuerySelector("[data-testid=usage-quota-days]")).IsNotNull();
+		await Assert.That(panel.QuerySelector("[data-testid=usage-quota-line]")).IsNull();
+		await Assert.That(panel.QuerySelector("[data-testid=usage-quota-summary]")!.TextContent).Contains("a day, resets at");
+	}
+
+	[Test]
 	public async Task Picked_AServiceWithoutADailyQuota_OpensNothing()
 	{
 		var cut = RenderCard(UsageSamples.Snapshot().Current, Some.Of(RemoteService.Tmdb), quotas: [UsageSamples.Quota(UsageSamples.Allowance(191))]);
