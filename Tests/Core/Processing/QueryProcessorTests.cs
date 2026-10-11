@@ -322,8 +322,77 @@ public class QueryProcessorTests
 		await Assert.That(culled[0].AtRisk).IsTrue();
 	}
 
+	[Test]
+	public async Task Execute_WhenThePickIsRandom_QualifiesAsManyAsTheLimit()
+	{
+		var items = Numbered(10);
+
+		var results = await _testee.ExecuteAsync(items, AtRandom(3, Seed), Enrolled()).ToListAsync();
+
+		await Assert.That(Items(results, QueryOutcome.Qualified).Count()).IsEqualTo(3);
+		await Assert.That(Items(results, QueryOutcome.Truncated).Count()).IsEqualTo(7);
+	}
+
+	[Test]
+	public async Task Execute_WhenThePickIsRandom_TheSameSeedPicksTheSameTitles()
+	{
+		var items = Numbered(20);
+
+		var first = await _testee.ExecuteAsync(items, AtRandom(5, Seed), Enrolled()).ToListAsync();
+		var again = await _testee.ExecuteAsync(items, AtRandom(5, Seed), Enrolled()).ToListAsync();
+		var other = await _testee.ExecuteAsync(items, AtRandom(5, OtherSeed), Enrolled()).ToListAsync();
+
+		await Assert.That(Items(again, QueryOutcome.Qualified)).IsEquivalentTo(Items(first, QueryOutcome.Qualified));
+		await Assert.That(Items(other, QueryOutcome.Qualified)).IsNotEquivalentTo(Items(first, QueryOutcome.Qualified));
+	}
+
+	[Test]
+	public async Task Execute_WhenThePickIsRandom_TitlesTheFeedHoldsKeepTheirSlots()
+	{
+		var items = Numbered(10);
+		var unpicked = await _testee.ExecuteAsync(items, AtRandom(1, Seed), Enrolled()).ToListAsync();
+		var held = Items(unpicked, QueryOutcome.Truncated).Last();
+
+		var results = await _testee.ExecuteAsync(items, AtRandom(1, Seed), Enrolled(owned: held)).ToListAsync();
+
+		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([held]);
+	}
+
+	[Test]
+	public async Task Execute_WhenThePickIsRandom_NeverPicksACulledTitle()
+	{
+		var items = Numbered(12);
+		var options = AtRandom(4, Seed) with { Filter = Some.Of(Filter(Group(Number(nameof(Item.Year), FilterPredicateOperator.GreaterOrEqual, 2006)))) };
+
+		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
+
+		await Assert.That(Items(results, QueryOutcome.Qualified).Count()).IsEqualTo(4);
+		await Assert.That(Items(results, QueryOutcome.Qualified).All(item => item.Year >= 2006)).IsTrue();
+	}
+
+	[Test]
+	public async Task Execute_WhenThePickIsRandom_KeepsTheVerdictsInTheSortOrder()
+	{
+		var items = Numbered(10);
+		var options = AtRandom(3, Seed) with { Sort = Some.Of(new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Descending }) };
+
+		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
+
+		await Assert.That(results.Select(row => row.Item)).IsEquivalentTo(items.OrderByDescending(item => item.Year), CollectionOrdering.Matching);
+	}
+
+	private static readonly Guid Seed = new("7c9e6679-7425-40de-944b-e07fc1f90ae7");
+
+	private static readonly Guid OtherSeed = new("e4eaaaf2-d142-11e1-b3e4-080027620cdd");
+
+	private static Item[] Numbered(int count) =>
+		[.. Enumerable.Range(0, count).Select(index => new Item($"Title {index}", 2000 + index) { Id = new Guid(index + 1, 0, 0, new byte[8]) })];
+
+	private static QueryOptions AtRandom(int count, Guid seed) =>
+		new() { Limit = Some.Of(new QueryLimit { Count = count, Pick = LimitPick.Random }), ShuffleSeed = seed };
+
 	private static QueryPredicates<Item> Enrolled(Item? wantlisted = null, Item? blocklisted = null, Item? owned = null) =>
-		new(IsWantlisted: item => item == wantlisted, IsBlocklisted: item => item == blocklisted, IsOwned: item => item == owned);
+		new(IsWantlisted: item => item == wantlisted, IsBlocklisted: item => item == blocklisted, IsOwned: item => item == owned, Identity: item => item.Id);
 
 	private static IEnumerable<QueryOutcome> Outcomes(IEnumerable<QueryVerdict<Item>> rows) => rows.Select(row => row.Outcome);
 
@@ -395,7 +464,8 @@ public class QueryProcessorRatingTests
 		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([few, unvoted]);
 	}
 
-	private static QueryPredicates<MediaQueryRow> NoEnrollment => new(IsWantlisted: _ => false, IsBlocklisted: _ => false, IsOwned: _ => false);
+	private static QueryPredicates<MediaQueryRow> NoEnrollment =>
+		new(IsWantlisted: _ => false, IsBlocklisted: _ => false, IsOwned: _ => false, Identity: row => row.Media.Identity.Id.Value);
 
 	private static IEnumerable<MediaQueryRow> Items(IEnumerable<QueryVerdict<MediaQueryRow>> rows, QueryOutcome outcome) =>
 		rows.Where(row => row.Outcome == outcome).Select(row => row.Item);
@@ -419,4 +489,7 @@ public class QueryProcessorRatingTests
 	}
 }
 
-internal record Item(string Name, int Year, string Genre = "Unknown");
+internal record Item(string Name, int Year, string Genre = "Unknown")
+{
+	public Guid Id { get; init; } = Guid.NewGuid();
+}

@@ -64,3 +64,10 @@
     width: 9px;
     height: 9px;
 }
+
+.pick-help-icon {
+    display: inline-flex;
+    flex: none;
+    margin-top: 3px;
+    color: var(--sammlarr-gold);
+}

@@ -354,9 +354,8 @@
 
     [Parameter] public required FeedConfig Config { get; set; }
     [Parameter] public FeedId? SavedFeedId { get; set; }
+    [Parameter] public required FeedId DraftFeedId { get; set; }
     [Parameter] public EventCallback<PreviewStatus> OnStatusChanged { get; set; }
-
-    private static readonly FeedId UnsavedFeedId = FeedId.From(new Guid("00000000-0000-0000-0000-0000000000ff"));
 
     private enum FetchState { Idle, Loading, Success, Failed }
 
@@ -695,7 +694,7 @@
         var applied = _appliedConfig ?? Config;
         return new Domain.Feed.Feed
         {
-            Id = SavedFeedId ?? UnsavedFeedId,
+            Id = SavedFeedId ?? DraftFeedId,
             Name = applied.Name,
             Enabled = applied.IsEnabled,
             Provider = applied.Provider!.Value,

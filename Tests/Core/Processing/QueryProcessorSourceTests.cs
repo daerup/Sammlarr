@@ -14,7 +14,7 @@ public class QueryProcessorSourceTests
 	{
 		var lazy = new[] { "Keep", "Drop" }.Select(name => new LazyRow(name));
 		var options = new QueryOptions { Filter = Some.Of(Filter(Group(String(nameof(LazyRow.Name), FilterPredicateOperator.Equals, "Keep")))) };
-		var predicates = new QueryPredicates<LazyRow>(IsWantlisted: _ => false, IsBlocklisted: _ => false, IsOwned: _ => false);
+		var predicates = new QueryPredicates<LazyRow>(IsWantlisted: _ => false, IsBlocklisted: _ => false, IsOwned: _ => false, Identity: _ => Guid.Empty);
 
 		var results = await _testee.ExecuteAsync(lazy, options, predicates).ToListAsync();
 

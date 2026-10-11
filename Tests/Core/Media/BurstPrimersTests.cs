@@ -7,7 +7,6 @@ using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
-using TestInfrastructure;
 
 namespace Core.Tests.Media;
 

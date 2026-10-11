@@ -84,7 +84,7 @@ internal sealed class MediaIdResolver(
 	{
 		return path.Any(hop =>
 			hop is IdToId { Lookup.AsksOnce: true } once
-			&& answers.Any(told => told.Key.Converter == once.Converter && told.Key.Lookup.Equals((IdLookup)once.Lookup) && Missed(told.Value, once.Lookup))
+			&& answers.Any(told => told.Key.Converter == once.Converter && told.Key.Lookup is ById asked && asked == once.Lookup && Missed(told.Value, once.Lookup))
 		);
 	}
 
