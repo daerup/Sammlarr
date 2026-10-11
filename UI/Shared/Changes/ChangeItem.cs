@@ -29,6 +29,8 @@ public sealed record ChangeItem
 	public string? ContextTooltip { get; init; }
 }
 
+public sealed record ChangeFold(ChangeKind Kind, int Count, Func<Task> UnfoldAsync);
+
 public sealed record ChangeChip
 {
 	public string? Icon { get; init; }

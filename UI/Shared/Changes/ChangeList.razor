@@ -1,3 +1,5 @@
+@implements IAsyncDisposable
+@inject IJSRuntime Js
 
 <div class="change-list @(Fill ? "is-fill" : null)">
     <div class="change-chips">
@@ -36,43 +38,97 @@
         </span>
     </div>
 
-    <div class="change-body">
+    <div class="change-body" @ref="_body">
         @foreach (var group in Groups())
         {
-            <div class="change-group @ToneClass(GroupTone(group.Key))">
-                @if (GroupGlyph(group.Key) is { } glyph)
+            <section class="change-section" data-kind="@group.Kind">
+                <div class="change-group @ToneClass(GroupTone(group.Kind))">
+                    @if (GroupGlyph(group.Kind) is { } glyph)
+                    {
+                        <span class="change-glyph">@glyph</span>
+                    }
+                    else
+                    {
+                        <LucideIcon Name="@GroupIcon(group.Kind)" Size="14"/>
+                    }
+                    <span>@GroupLabel(group.Kind)</span>
+                    <span class="change-group-count">@group.Items.Length.ToString("N0")</span>
+                    @if (group.Kind == Fold?.Kind)
+                    {
+                        <button type="button" class="change-fold" @onclick="Hide">
+                            <LucideIcon Name="chevron-up" Size="13"/>
+                            Hide
+                        </button>
+                    }
+                </div>
+                <Virtualize Items="group.Items" Context="item" ItemSize="RowHeight" OverscanCount="8">
+                    <ChangeRow @key="item" Item="item" OnSelect="SelectAsync" Highlighted="@IsHighlighted(item)" Reveal="@Reveals(item)" OnRevealed="Revealed"/>
+                </Virtualize>
+            </section>
+        }
+        @if (Fold is { Count: > 0 } fold && _fold is not FoldState.Open && Shows(fold.Kind))
+        {
+            <div class="change-pin">
+                @if (_fold is FoldState.Loading)
                 {
-                    <span class="change-glyph">@glyph</span>
+                    <BbSpinner Size="SpinnerSize.Small"/>
+                    <span>Loading the <b>@fold.Count.ToString("N0")</b> @Titles(fold.Count) already in sync</span>
                 }
                 else
                 {
-                    <LucideIcon Name="@GroupIcon(group.Key)" Size="14"/>
+                    <LucideIcon Name="@GroupIcon(fold.Kind)" Size="14"/>
+                    @if (string.IsNullOrWhiteSpace(_search))
+                    {
+                        <span><b>@fold.Count.ToString("N0")</b> @Titles(fold.Count) already in sync, nothing to do</span>
+                    }
+                    else
+                    {
+                        <span><b>@fold.Count.ToString("N0")</b> already in sync were not searched</span>
+                    }
+                    <button type="button" class="change-fold" @onclick="() => UnfoldAsync(fold)">
+                        <LucideIcon Name="chevron-down" Size="13"/>
+                        Show them
+                    </button>
                 }
-                <span>@GroupLabel(group.Key)</span>
-                <span class="change-group-count">@group.Count()</span>
             </div>
-            @foreach (var item in group)
-            {
-                <ChangeRow @key="item" Item="item" OnSelect="SelectAsync" Highlighted="@IsHighlighted(item)"/>
-            }
         }
     </div>
 </div>
 
 @code {
+    private const float RowHeight = 74;
+
     [Parameter] [EditorRequired] public required IReadOnlyList<ChangeItem> Items { get; set; }
     [Parameter] [EditorRequired] public required IReadOnlyList<ChangeChip> Chips { get; set; }
     [Parameter] public EventCallback<MatchedMedia> OnSelect { get; set; }
     [Parameter] public MediaId? Highlight { get; set; }
+    [Parameter] public ChangeFold? Fold { get; set; }
     [Parameter] public bool Fill { get; set; }
     [Parameter] public string RemovedLabel { get; set; } = "Removed";
     [Parameter] public string AddedLabel { get; set; } = "Added";
     [Parameter] public string UnchangedLabel { get; set; } = "Already yours";
 
     private readonly HashSet<ChangeKind> _active = [];
+    private ElementReference _body;
+    private IJSObjectReference? _module;
     private string _search = string.Empty;
     private MediaId? _pointedAt;
     private bool _dismissed;
+    private bool _revealed;
+    private FoldState _fold = FoldState.Folded;
+    private bool _read;
+    private Scroll? _scroll;
+
+    private enum FoldState
+    {
+        Folded,
+        Loading,
+        Open,
+    }
+
+    private sealed record Group(ChangeKind Kind, ChangeItem[] Items);
+
+    private readonly record struct Scroll(ChangeKind Kind, float Offset);
 
     protected override void OnParametersSet()
     {
@@ -83,9 +139,43 @@
 
         _pointedAt = Highlight;
         _dismissed = false;
+        _revealed = false;
+        if (Highlight is { } wanted)
+        {
+            ScrollTo(wanted);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_scroll is not { } scroll)
+        {
+            return;
+        }
+
+        _scroll = null;
+        _module ??= await Js.InvokeAsync<IJSObjectReference>("import", "./js/change-list.js");
+        await _module.InvokeVoidAsync("scrollToSection", _body, scroll.Kind.ToString(), scroll.Offset);
+    }
+
+    private void ScrollTo(MediaId wanted)
+    {
+        foreach (var group in Groups())
+        {
+            var index = Array.FindIndex(group.Items, item => item.Id == wanted);
+            if (index >= 0)
+            {
+                _scroll = new Scroll(group.Kind, index * RowHeight);
+                return;
+            }
+        }
     }
 
     private bool IsHighlighted(ChangeItem item) => !_dismissed && Highlight is { } wanted && item.Id == wanted;
+
+    private bool Reveals(ChangeItem item) => !_revealed && IsHighlighted(item);
+
+    private void Revealed() => _revealed = true;
 
     private async Task SelectAsync(MatchedMedia media)
     {
@@ -93,12 +183,42 @@
         await OnSelect.InvokeAsync(media);
     }
 
-    private IEnumerable<IGrouping<ChangeKind, ChangeItem>> Groups() =>
-        Items
-            .Where(item => _active.Count == 0 || _active.Contains(item.Kind))
+    private IEnumerable<Group> Groups()
+    {
+        return Items
+            .Where(item => Shows(item.Kind) && !IsFolded(item.Kind))
             .Where(item => string.IsNullOrWhiteSpace(_search) || item.Title.Contains(_search, StringComparison.OrdinalIgnoreCase))
             .GroupBy(item => item.Kind)
-            .OrderBy(group => group.Key);
+            .OrderBy(group => group.Key == Fold?.Kind)
+            .ThenBy(group => group.Key)
+            .Select(group => new Group(group.Key, [.. group]));
+    }
+
+    private bool Shows(ChangeKind kind) => _active.Count == 0 || _active.Contains(kind);
+
+    private bool IsFolded(ChangeKind kind) => kind == Fold?.Kind && _fold is not FoldState.Open;
+
+    private async Task UnfoldAsync(ChangeFold fold)
+    {
+        if (_fold is not FoldState.Folded)
+        {
+            return;
+        }
+
+        _fold = FoldState.Loading;
+        if (!_read)
+        {
+            await fold.UnfoldAsync();
+            _read = true;
+        }
+
+        _fold = FoldState.Open;
+        _scroll = new Scroll(fold.Kind, 0);
+    }
+
+    private void Hide() => _fold = FoldState.Folded;
+
+    private static string Titles(int count) => count == 1 ? "title" : "titles";
 
     private RenderFragment ChipFace(ChangeChip chip) =>
         @<text>
@@ -110,7 +230,7 @@
             {
                 <LucideIcon Name="@icon" Size="16"/>
             }
-            <span class="change-chip-count">@chip.Count</span>
+            <span class="change-chip-count">@chip.Count.ToString("N0")</span>
         </text>;
 
     private IEnumerable<(ChangeChip Chip, bool Separator, bool CountsOnly)> ChipRow()
@@ -139,20 +259,24 @@
 
     private bool IsActive(ChangeChip chip) => chip.Filters is { } kind ? _active.Contains(kind) : _active.Count == 0;
 
-    private Task ToggleAsync(ChangeChip chip)
+    private async Task ToggleAsync(ChangeChip chip)
     {
         if (chip.Filters is not { } kind)
         {
             _active.Clear();
-            return Task.CompletedTask;
+            return;
         }
 
         if (!_active.Add(kind))
         {
             _active.Remove(kind);
+            return;
         }
 
-        return Task.CompletedTask;
+        if (Fold is { } fold && fold.Kind == kind)
+        {
+            await UnfoldAsync(fold);
+        }
     }
 
     private void OnSearchChanged(ChangeEventArgs args) => _search = args.Value?.ToString() ?? string.Empty;
@@ -201,4 +325,16 @@
             ChipTone.Removed => "tone-removed",
             ChipTone.Unmatched => "tone-unmatched",
         };
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException) { }
+    }
 }

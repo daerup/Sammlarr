@@ -31,6 +31,19 @@
     min-width: 0;
 }
 
+.change-title-line {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+}
+
+.change-head-spin {
+    display: inline-flex;
+    flex: none;
+    color: var(--muted-foreground);
+}
+
 .change-title-text {
     margin: 0;
     font-size: 15.5px;

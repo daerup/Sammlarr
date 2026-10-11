@@ -8,7 +8,6 @@ using Contracts.Wantlist;
 using Domain.Blocklist;
 using Domain.Feed;
 using Domain.Feed.Run;
-using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
@@ -174,6 +173,7 @@ public class LastRunCellTests : BunitContext
 
 		Services.AddScoped<Notifier>();
 		Services.AddProviderBranding();
+		Services.AddSingleton(ArtworkStub.Sizing());
 		Services.AddMediaTitleLink();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;

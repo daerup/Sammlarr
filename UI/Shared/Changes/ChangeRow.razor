@@ -1,3 +1,5 @@
+@using Contracts.Media.Artwork
+@inject ArtworkSources Artwork
 
 <div @ref="_root"
      class="change-row @(Item.Kind is ChangeKind.Removed ? "is-leaving" : null) @(Highlighted ? "is-highlight" : null)"
@@ -5,7 +7,7 @@
      @onclick="HandleClickAsync">
     @if (Item.Media?.Details.PosterUrl is { } poster)
     {
-        <img class="change-poster" src="@poster" alt=""/>
+        <img class="change-poster" src="@poster" srcset="@(_unsized ? null : Artwork.ByDensity(poster, Thumb))" alt="" loading="lazy" decoding="async" @onerror="() => _unsized = true"/>
     }
     else
     {
@@ -36,21 +38,26 @@
 </div>
 
 @code {
+    private static readonly ArtworkSize Thumb = new(40, 60);
+
     [Parameter] [EditorRequired] public required ChangeItem Item { get; set; }
     [Parameter] public EventCallback<MatchedMedia> OnSelect { get; set; }
     [Parameter] public bool Highlighted { get; set; }
+    [Parameter] public bool Reveal { get; set; }
+    [Parameter] public EventCallback OnRevealed { get; set; }
 
     private ElementReference _root;
-    private bool _revealed;
+
+    private bool _unsized;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!Highlighted || _revealed)
+        if (!Reveal)
         {
             return;
         }
 
-        _revealed = true;
+        await OnRevealed.InvokeAsync();
         await _root.FocusAsync();
     }
 
