@@ -1,4 +1,5 @@
 using Domain.Feed;
+using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 
@@ -20,12 +21,7 @@ public interface IFeedRepository
 
 	Task<IReadOnlyList<FeedId>> ResumeAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyDictionary<MediaId, int>> GetAbsencesAsync(
-		FeedId feedId,
-		IReadOnlySet<MediaId> owned,
-		int window,
-		CancellationToken cancellationToken = default
-	);
+	Task<IReadOnlyDictionary<MediaId, int>> GetAbsencesAsync(FeedId feedId, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<FeedRun>> GetRunsAsync(RunQuery query, CancellationToken cancellationToken = default);
 
@@ -33,5 +29,5 @@ public interface IFeedRepository
 
 	Task StartRunAsync(FeedRun run, CancellationToken cancellationToken = default);
 
-	Task CompleteRunAsync(FeedRun run, CancellationToken cancellationToken = default);
+	Task CompleteRunAsync(FeedRun run, Optional<AbsenceChanges> absences, CancellationToken cancellationToken = default);
 }

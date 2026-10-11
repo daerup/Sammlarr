@@ -10,6 +10,7 @@ using DB;
 using DB.Data.Feed;
 using DB.Data.Media;
 using Domain.Feed;
+using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
@@ -74,7 +75,7 @@ public class CachedRunBenchmark(SammlarrTestHost host) : IAsyncDisposable
 		var copy = latest with { Id = RunId.From(Guid.NewGuid()) };
 		var clock = Stopwatch.StartNew();
 		await feeds.StartRunAsync(copy);
-		await feeds.CompleteRunAsync(copy);
+		await feeds.CompleteRunAsync(copy, Some.Of(new AbsenceChanges(new HashSet<MediaId>())));
 		return clock.ElapsedMilliseconds;
 	}
 

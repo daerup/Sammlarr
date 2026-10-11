@@ -39,20 +39,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 			var summary = await Assert.That(await planner.PlanAsync(new DraftFeed(feed, load))).IsOfUnionType<FeedPlanResult, MirrorPlan>();
 			drops.Add(summary!.Delta.Drops.Count);
 
-			await log.StartRunAsync(
-				new FeedRun
-				{
-					Id = RunId.From(Guid.NewGuid()),
-					FeedId = feedId,
-					StartedAt = new DateTimeOffset(2026, 03, run, 4, 0, 0, TimeSpan.Zero),
-					Duration = TimeSpan.FromSeconds(1),
-					Strategy = feed.Strategy,
-					Trigger = new FeedRunTrigger(new Manual()),
-					Conclusiveness = summary.Conclusiveness,
-					Counts = FeedRunCounts.From(summary),
-					Items = [new FeedRunItem { MediaId = kept, State = FeedRunItemState.Kept }],
-				}
-			);
+			await RecordAsync(log, feed, run, summary);
 		}
 
 		await Assert.That(drops).IsEquivalentTo([0, 0, 1], CollectionOrdering.Matching);
@@ -69,7 +56,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var feed = (await Assert.That(await fixture.Resolve<IFeedRepository>().FindAsync(feedId)).IsSome())!;
 		var origin = await fixture.SeedFeedOriginAsync(feedId);
 
-		var owned = await fixture.Movie(TestMedia.FightClub).OnWantlist(origin);
+		await fixture.Movie(TestMedia.FightClub).OnWantlist(origin);
 
 		var planner = fixture.Resolve<IFeedRunPlanner>();
 		var log = fixture.Resolve<IFeedRepository>();
@@ -80,25 +67,28 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 				.That(await planner.PlanAsync(new DraftFeed(feed, new RawFeedLoad([], FeedLoadState.Finished))))
 				.IsOfUnionType<FeedPlanResult, MirrorPlan>();
 
-			await log.StartRunAsync(
-				new FeedRun
-				{
-					Id = RunId.From(Guid.NewGuid()),
-					FeedId = feedId,
-					StartedAt = new DateTimeOffset(2026, 03, run, 4, 0, 0, TimeSpan.Zero),
-					Duration = TimeSpan.FromSeconds(1),
-					Strategy = feed.Strategy,
-					Trigger = new FeedRunTrigger(new Manual()),
-					Conclusiveness = summary!.Conclusiveness,
-					Counts = FeedRunCounts.From(summary),
-					Items = [],
-				}
-			);
+			await RecordAsync(log, feed, run, summary!);
 		}
 
-		var absences = await log.GetAbsencesAsync(feedId, new HashSet<MediaId> { owned }, Threshold);
+		await Assert.That(await log.GetAbsencesAsync(feedId)).IsEmpty();
+	}
 
-		await Assert.That(absences).IsEmpty();
+	private static async Task RecordAsync(IFeedRepository log, Domain.Feed.Feed feed, int day, MirrorPlan summary)
+	{
+		var run = new FeedRun
+		{
+			Id = RunId.From(Guid.NewGuid()),
+			FeedId = feed.Id,
+			StartedAt = new DateTimeOffset(2026, 03, day, 4, 0, 0, TimeSpan.Zero),
+			Duration = TimeSpan.FromSeconds(1),
+			Strategy = feed.Strategy,
+			Trigger = new FeedRunTrigger(new Manual()),
+			Conclusiveness = summary.Conclusiveness,
+			Counts = FeedRunCounts.From(summary),
+			Items = [],
+		};
+		await log.StartRunAsync(run);
+		await log.CompleteRunAsync(run, AbsenceChanges.Of(summary, []));
 	}
 
 	private static MediaMatchResult Matched(MediaId id)

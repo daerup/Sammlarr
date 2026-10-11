@@ -1,6 +1,7 @@
 using Contracts.Feed;
 using DB.Data.Feed;
 using Domain.Feed;
+using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
@@ -20,7 +21,6 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 	private static readonly MediaId Missing = MediaId.From(new Guid(1, 0, 0, new byte[8]));
 	private static readonly MediaId Held = MediaId.From(new Guid(2, 0, 0, new byte[8]));
-	private static readonly IReadOnlySet<MediaId> Owned = new HashSet<MediaId> { Missing, Held };
 
 	private IFeedRepository _testee = null!;
 
@@ -28,59 +28,76 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public void Setup() => _testee = new FeedRepository(fixture.ContextFactory);
 
 	[Test]
-	public async Task GetAbsencesAsync_WhenAnItemIsMissingAcrossRuns_CountsTheConsecutiveRuns()
+	public async Task CompleteRunAsync_ForATitleMissingAcrossRuns_CountsTheConsecutiveRuns()
 	{
 		var feedId = await SeedFeedAsync();
+		var missing = await fixture.SeedMediaAsync(TmdbId.From("550", MediaType.Movie));
 
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
+		await CompleteAsync(feedId, 1, Some.Of(Missed(missing)));
+		await CompleteAsync(feedId, 2, Some.Of(Missed(missing)));
 
-		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
-
-		await Assert.That(absences[Missing]).IsEqualTo(2);
-		await Assert.That(absences).DoesNotContainKey(Held);
+		await Assert.That(await _testee.GetAbsencesAsync(feedId)).IsEquivalentTo(new Dictionary<MediaId, int> { [missing] = 2 });
 	}
 
 	[Test]
-	public async Task GetAbsencesAsync_WhenAMissingItemComesBack_RestartsTheCountFromScratch()
+	public async Task CompleteRunAsync_WhenAMissingTitleComesBack_RestartsItsCount()
 	{
 		var feedId = await SeedFeedAsync();
+		var missing = await fixture.SeedMediaAsync(TmdbId.From("550", MediaType.Movie));
 
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held, Missing], 3));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 4));
+		await CompleteAsync(feedId, 1, Some.Of(Missed(missing)));
+		await CompleteAsync(feedId, 2, Some.Of(Missed()));
+		await CompleteAsync(feedId, 3, Some.Of(Missed(missing)));
 
-		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
-
-		await Assert.That(absences[Missing]).IsEqualTo(1);
+		await Assert.That(await _testee.GetAbsencesAsync(feedId)).IsEquivalentTo(new Dictionary<MediaId, int> { [missing] = 1 });
 	}
 
 	[Test]
-	public async Task GetAbsencesAsync_WhenARunWasInconclusive_SkipsItRatherThanCountingIt()
+	public async Task CompleteRunAsync_WithoutAbsenceChanges_LeavesTheCountsAlone()
 	{
 		var feedId = await SeedFeedAsync();
+		var missing = await fixture.SeedMediaAsync(TmdbId.From("550", MediaType.Movie));
 
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held, Missing], 2) with { Conclusiveness = Conclusiveness.NoItems });
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 3));
+		await CompleteAsync(feedId, 1, Some.Of(Missed(missing)));
+		await CompleteAsync(feedId, 2, new None());
 
-		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
-
-		await Assert.That(absences[Missing]).IsEqualTo(2);
+		await Assert.That(await _testee.GetAbsencesAsync(feedId)).IsEquivalentTo(new Dictionary<MediaId, int> { [missing] = 1 });
 	}
 
 	[Test]
-	public async Task GetAbsencesAsync_WhenAnItemWasAddedThisRun_ReportsNoAbsence()
+	public async Task CompleteRunAsync_ForATitleNoLongerOwned_DeletesItsRow()
 	{
 		var feedId = await SeedFeedAsync();
+		var dropped = await fixture.SeedMediaAsync(TmdbId.From("550", MediaType.Movie));
+		var stillMissing = await fixture.SeedMediaAsync(TmdbId.From("27205", MediaType.Movie));
 
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2) with { Items = [Item(Held, FeedRunItemState.Kept), Item(Missing, FeedRunItemState.Added)] });
+		await CompleteAsync(feedId, 1, Some.Of(Missed(dropped, stillMissing)));
+		await CompleteAsync(feedId, 2, Some.Of(Missed(stillMissing)));
 
-		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
+		await Assert.That(await _testee.GetAbsencesAsync(feedId)).IsEquivalentTo(new Dictionary<MediaId, int> { [stillMissing] = 2 });
+	}
 
-		await Assert.That(absences).DoesNotContainKey(Missing);
+	[Test]
+	public async Task UpdateAsync_ForAMirrorFeedSwitchedToAppend_StartsItsCountsAgain()
+	{
+		var feedId = await SeedFeedAsync();
+		var missing = await fixture.SeedMediaAsync(TmdbId.From("550", MediaType.Movie));
+		await CompleteAsync(feedId, 1, Some.Of(Missed(missing)));
+
+		await _testee.UpdateAsync(
+			feedId,
+			new FeedUpdateData
+			{
+				Name = "Comedy",
+				IsEnabled = true,
+				Provider = FeedProvider.Mdblist,
+				Strategy = new FeedStrategy(new Append()),
+				Identifier = "hdlists/comedy",
+				Schedule = new FeedRunTrigger(new Manual()),
+			}
+		);
+
+		await Assert.That(await _testee.GetAbsencesAsync(feedId)).IsEmpty();
 	}
 
 	[Test]
@@ -89,7 +106,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var feedId = await SeedFeedAsync();
 
 		await _testee.StartRunAsync(
-			Run(feedId, kept: [Held], 1) with
+			Run(feedId, 1) with
 			{
 				Counts = new FeedRunCounts
 				{
@@ -106,7 +123,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 					Known = 0,
 					NotFoundEarlier = 0,
 				},
-				Items = [Item(Held, FeedRunItemState.Kept), Item(Missing, FeedRunItemState.Removed)],
+				Items = [Item(Held, FeedRunItemState.Added), Item(Missing, FeedRunItemState.Removed)],
 			}
 		);
 
@@ -121,10 +138,10 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task CompleteRunAsync_WithKnownCounts_ReadsThemBack()
 	{
 		var feedId = await SeedFeedAsync();
-		var run = Run(feedId, kept: [Held], 1);
+		var run = Run(feedId, 1);
 		await _testee.StartRunAsync(run);
 
-		await _testee.CompleteRunAsync(run with { Counts = run.Counts with { Known = 40, NotFoundEarlier = 3, UnmatchedNotFound = 5 } });
+		await _testee.CompleteRunAsync(run with { Counts = run.Counts with { Known = 40, NotFoundEarlier = 3, UnmatchedNotFound = 5 } }, new None());
 
 		var stored = (await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId) })).Single();
 		var lean = (await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId), WithItems = false })).Single();
@@ -136,12 +153,20 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task CompleteRunAsync_WithItsCallsAnswerTimesAndTheUnmatchedSplit_ReadsThemBack()
 	{
 		var feedId = await SeedFeedAsync();
-		var run = Run(feedId, kept: [Held], 1);
+		var run = Run(feedId, 1);
 		await _testee.StartRunAsync(run);
 		FeedRunCalls[] calls = [new(RemoteService.Tmdb, UsageOutcome.Answered, 290), new(RemoteService.Plex, UsageOutcome.AnsweredAfter429, 37)];
 		FeedRunTimes[] times = [new(RemoteService.Tmdb, 100, 280), new(RemoteService.Tmdb, 500, 10), new(RemoteService.Plex, 250, 74)];
 
-		await _testee.CompleteRunAsync(run with { Calls = calls, Times = times, Counts = run.Counts with { UnmatchedNotFound = 2, UnmatchedCouldNotLookUp = 1 } });
+		await _testee.CompleteRunAsync(
+			run with
+			{
+				Calls = calls,
+				Times = times,
+				Counts = run.Counts with { UnmatchedNotFound = 2, UnmatchedCouldNotLookUp = 1 },
+			},
+			new None()
+		);
 
 		var stored = (await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId) })).Single();
 		await Assert.That(stored.Calls).IsEquivalentTo(calls);
@@ -158,8 +183,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task GetRunsAsync_ForRunsWithAndWithoutASourceFailure_ReadsBothBack()
 	{
 		var feedId = await SeedFeedAsync();
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1) with { SourceFailure = Some.Of("No list found.") });
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(feedId, 1) with { SourceFailure = Some.Of("No list found.") });
+		await _testee.StartRunAsync(Run(feedId, 2));
 
 		var runs = await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId) });
 
@@ -173,10 +198,10 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var comedy = await SeedFeedAsync();
 		var horror = await SeedFeedAsync();
 
-		await _testee.StartRunAsync(Run(comedy, kept: [Held], 1));
-		await _testee.StartRunAsync(Run(comedy, kept: [Held], 2));
-		await _testee.StartRunAsync(Run(comedy, kept: [Held], 3));
-		await _testee.StartRunAsync(Run(horror, kept: [Held], 4));
+		await _testee.StartRunAsync(Run(comedy, 1));
+		await _testee.StartRunAsync(Run(comedy, 2));
+		await _testee.StartRunAsync(Run(comedy, 3));
+		await _testee.StartRunAsync(Run(horror, 4));
 
 		var runs = await _testee.GetRunsAsync(RunQuery.Take(2) with { Feed = Some.Of(comedy) });
 
@@ -189,9 +214,9 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var comedy = await SeedFeedAsync();
 		var horror = await SeedFeedAsync();
 
-		await _testee.StartRunAsync(Run(comedy, kept: [Held], 1));
-		await _testee.StartRunAsync(Run(comedy, kept: [Held], 3));
-		await _testee.StartRunAsync(Run(horror, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(comedy, 1));
+		await _testee.StartRunAsync(Run(comedy, 3));
+		await _testee.StartRunAsync(Run(horror, 2));
 
 		var runs = await _testee.GetRunsAsync(RunQuery.Take(10) with { Since = Some.Of(Day(2)) });
 
@@ -203,7 +228,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(feedId, 2));
 
 		var runs = await _testee.GetRunsAsync(RunQuery.Take(10) with { Since = Some.Of(Day(2).ToOffset(TimeSpan.FromHours(2))) });
 
@@ -214,12 +239,12 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task GetRunsAsync_WhenTheRunToIncludeIsOlderThanTheLimit_KeepsGoingUntilItIsInTheList()
 	{
 		var feedId = await SeedFeedAsync();
-		var oldest = Run(feedId, kept: [Held], 1);
+		var oldest = Run(feedId, 1);
 
 		await _testee.StartRunAsync(oldest);
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 3));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 4));
+		await _testee.StartRunAsync(Run(feedId, 2));
+		await _testee.StartRunAsync(Run(feedId, 3));
+		await _testee.StartRunAsync(Run(feedId, 4));
 
 		var runs = await _testee.GetRunsAsync(RunQuery.Take(2) with { Feed = Some.Of(feedId), MustInclude = Some.Of(oldest.Id) });
 
@@ -231,9 +256,9 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 3));
+		await _testee.StartRunAsync(Run(feedId, 1));
+		await _testee.StartRunAsync(Run(feedId, 2));
+		await _testee.StartRunAsync(Run(feedId, 3));
 
 		var runs = await _testee.GetRunsAsync(RunQuery.Take(2) with { MustInclude = Some.Of(RunId.From(Guid.NewGuid())) });
 
@@ -245,12 +270,12 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var comedy = await SeedFeedAsync();
 		var horror = await SeedFeedAsync();
-		var elsewhere = Run(horror, kept: [Held], 1);
+		var elsewhere = Run(horror, 1);
 
 		await _testee.StartRunAsync(elsewhere);
-		await _testee.StartRunAsync(Run(comedy, kept: [Held], 2));
-		await _testee.StartRunAsync(Run(comedy, kept: [Held], 3));
-		await _testee.StartRunAsync(Run(comedy, kept: [Held], 4));
+		await _testee.StartRunAsync(Run(comedy, 2));
+		await _testee.StartRunAsync(Run(comedy, 3));
+		await _testee.StartRunAsync(Run(comedy, 4));
 
 		var runs = await _testee.GetRunsAsync(RunQuery.Take(2) with { Feed = Some.Of(comedy), MustInclude = Some.Of(elsewhere.Id) });
 
@@ -260,13 +285,13 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunsAsync_ForAnotherUsersRuns_NeverReturnsThemEvenWhenAskedToIncludeOne()
 	{
-		var theirs = Run(await SeedFeedAsync(), kept: [Held], 1);
+		var theirs = Run(await SeedFeedAsync(), 1);
 		await _testee.StartRunAsync(theirs);
 		await fixture.SignInAs("Member");
 		var mine = await SeedFeedAsync();
-		await _testee.StartRunAsync(Run(mine, kept: [Held], 2));
-		await _testee.StartRunAsync(Run(mine, kept: [Held], 3));
-		await _testee.StartRunAsync(Run(mine, kept: [Held], 4));
+		await _testee.StartRunAsync(Run(mine, 2));
+		await _testee.StartRunAsync(Run(mine, 3));
+		await _testee.StartRunAsync(Run(mine, 4));
 
 		var runs = await _testee.GetRunsAsync(RunQuery.Take(1) with { MustInclude = Some.Of(theirs.Id) });
 
@@ -279,7 +304,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var ran = await SeedFeedAsync();
 		var neverRan = await SeedFeedAsync();
 
-		await _testee.StartRunAsync(Run(ran, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(ran, 1));
 
 		var everRan = await _testee.GetRunTotalsAsync();
 
@@ -289,6 +314,15 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 	private static FeedRunItem Item(MediaId mediaId, FeedRunItemState state) => new() { MediaId = mediaId, State = state };
 
+	private static AbsenceChanges Missed(params MediaId[] missed) => new(missed.ToHashSet());
+
+	private async Task CompleteAsync(FeedId feedId, int day, Optional<AbsenceChanges> absences)
+	{
+		var run = Run(feedId, day);
+		await _testee.StartRunAsync(run);
+		await _testee.CompleteRunAsync(run, absences);
+	}
+
 	private static DateTimeOffset Day(int day) => new(2026, 03, day, 4, 0, 0, TimeSpan.Zero);
 
 	[Test]
@@ -296,8 +330,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1) with { Counts = Counts(added: 3, removed: 1) });
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2) with { Counts = Counts(added: 2, removed: 0) });
+		await _testee.StartRunAsync(Run(feedId, 1) with { Counts = Counts(added: 3, removed: 1) });
+		await _testee.StartRunAsync(Run(feedId, 2) with { Counts = Counts(added: 2, removed: 0) });
 
 		var history = (await _testee.GetRunTotalsAsync())[feedId].History;
 
@@ -324,7 +358,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 			NotFoundEarlier = 0,
 		};
 
-	private static FeedRun Run(FeedId feedId, IReadOnlyList<MediaId> kept, int day) =>
+	private static FeedRun Run(FeedId feedId, int day) =>
 		new()
 		{
 			Id = RunId.From(Guid.NewGuid()),
@@ -349,7 +383,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 				Known = 0,
 				NotFoundEarlier = 0,
 			},
-			Items = [.. kept.Select(id => Item(id, FeedRunItemState.Kept))],
+			Items = [],
 		};
 
 	private async Task<FeedId> SeedFeedAsync()

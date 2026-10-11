@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Contracts.Feed;
 using DB.Data.Feed.Run;
 using Domain.Feed;
+using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using Microsoft.EntityFrameworkCore;
@@ -68,6 +69,10 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		entity.Limit = data.Limit.ToNullable();
 		entity.Trigger = data.Schedule;
 		entity.RatingStrategy = data.RatingStrategy.ToNullable();
+		if (data.Strategy is not Mirror)
+		{
+			ctx.FeedAbsences.RemoveRange(await ctx.FeedAbsences.Where(row => row.FeedId == id.Value).ToListAsync(cancellationToken));
+		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
@@ -105,29 +110,13 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		return feeds.Select(feed => FeedId.From(feed.Id)).ToList();
 	}
 
-	public async Task<IReadOnlyDictionary<MediaId, int>> GetAbsencesAsync(
-		FeedId feedId,
-		IReadOnlySet<MediaId> owned,
-		int window,
-		CancellationToken cancellationToken = default
-	)
+	public async Task<IReadOnlyDictionary<MediaId, int>> GetAbsencesAsync(FeedId feedId, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-		var recent = await ctx
-			.FeedRuns.AsNoTracking()
-			.Where(row => row.FeedId == feedId.Value && row.Conclusiveness == Conclusiveness.Conclusive)
-			.OrderByDescending(row => row.StartedAt)
-			.Take(window)
-			.Select(row => row.Items.Select(item => item.MediaId).ToList())
-			.ToListAsync(cancellationToken);
-
-		var seen = recent.Select(ids => ids.ToHashSet()).ToList();
-
-		return owned
-			.Select(id => (Id: id, Absences: seen.TakeWhile(ids => !ids.Contains(id.Value)).Count()))
-			.Where(entry => entry.Absences > 0)
-			.ToDictionary(entry => entry.Id, entry => entry.Absences);
+		return await ctx
+			.FeedAbsences.AsNoTracking()
+			.Where(row => row.FeedId == feedId.Value)
+			.ToDictionaryAsync(row => MediaId.From(row.MediaId), row => row.MissedRuns, cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<FeedRun>> GetRunsAsync(RunQuery query, CancellationToken cancellationToken = default)
@@ -216,7 +205,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task CompleteRunAsync(FeedRun run, CancellationToken cancellationToken = default)
+	public async Task CompleteRunAsync(FeedRun run, Optional<AbsenceChanges> absences, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -230,8 +219,33 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		row.Calls.Clear();
 		row.Times.Clear();
 		Fill(row, run);
+		await absences.Apply(changes => CountAbsencesAsync(ctx, run.FeedId, changes, cancellationToken));
 
 		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	private static async Task CountAbsencesAsync(SammlarrDbContext ctx, FeedId feedId, AbsenceChanges changes, CancellationToken cancellationToken)
+	{
+		var held = await ctx.FeedAbsences.Where(row => row.FeedId == feedId.Value).ToDictionaryAsync(row => MediaId.From(row.MediaId), cancellationToken);
+		ctx.FeedAbsences.RemoveRange(held.Where(entry => !changes.Missed.Contains(entry.Key)).Select(entry => entry.Value));
+		foreach (var missed in changes.Missed)
+		{
+			if (held.TryGetValue(missed, out var row))
+			{
+				row.MissedRuns++;
+			}
+			else
+			{
+				ctx.FeedAbsences.Add(
+					new FeedAbsenceRow
+					{
+						FeedId = feedId.Value,
+						MediaId = missed.Value,
+						MissedRuns = 1,
+					}
+				);
+			}
+		}
 	}
 
 	private static void Fill(FeedRunRow row, FeedRun run)
