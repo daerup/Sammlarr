@@ -6,6 +6,7 @@ using Contracts.Media;
 using Core.Datasets;
 using Core.Jobs;
 using Domain.Feed;
+using Domain.Media;
 using Domain.Providers;
 using TickerQ.Utilities.Entities;
 using TickerQ.Utilities.Interfaces.Managers;
@@ -18,6 +19,7 @@ internal sealed class HousekeepingTasks(
 	IDatasetLoads loads,
 	IDatabaseFile database,
 	IMediaCachePurger cache,
+	IIdentityConflicts conflicts,
 	ITimeTickerManager<TimeTickerEntity> once,
 	TaskActivity activity,
 	ICurrentUser currentUser,
@@ -42,7 +44,9 @@ internal sealed class HousekeepingTasks(
 			datasets.Add(new DatasetTask(service, Next(DatasetSchedule.Daily), activity.Running(name), last, loaded));
 		}
 
-		return new HousekeepingOverview(await database.SizeAsync(cancellationToken), pass, datasets, await cache.CountAsync(cancellationToken));
+		var notes = await conflicts.AllAsync(cancellationToken);
+		var storedTwice = new StoredTwiceCount(notes.Count(note => note.State is Undecided), notes.Count(note => note.State is Distinct));
+		return new HousekeepingOverview(await database.SizeAsync(cancellationToken), pass, datasets, await cache.CountAsync(cancellationToken), storedTwice);
 	}
 
 	public Task<bool> RunPassAsync(CancellationToken cancellationToken = default)

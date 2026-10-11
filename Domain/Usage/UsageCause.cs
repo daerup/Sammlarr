@@ -11,5 +11,6 @@ public enum UsageCause
 	KeyTest,
 	FeedEditor,
 	DetailsFill,
+	Housekeeping,
 	Other,
 }

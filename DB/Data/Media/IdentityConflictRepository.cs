@@ -1,4 +1,5 @@
 using Contracts.Media;
+using Domain.Feed.Run;
 using Domain.Identity;
 using Domain.Media;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,29 @@ internal sealed class IdentityConflictRepository(IDbContextFactory<SammlarrDbCon
 		);
 		Optional.Of(row).Apply(stored => Settle(stored, conflict));
 		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task<IReadOnlyDictionary<MediaId, TitleUses>> UsesAsync(IReadOnlyCollection<MediaId> titles, CancellationToken cancellationToken = default)
+	{
+		List<Guid> ids = [.. titles.Select(title => title.Value)];
+		await using var ctx = await contexts.CreateDbContextAsync(cancellationToken);
+		var wanted = await ctx
+			.Wantlist.IgnoreQueryFilters()
+			.Where(row => ids.Contains(row.Media.Id))
+			.GroupBy(row => row.Media.Id)
+			.Select(title => new { Id = title.Key, Count = title.Count() })
+			.ToDictionaryAsync(title => title.Id, title => title.Count, cancellationToken);
+		var fed = await (
+			from item in ctx.FeedRunItems.IgnoreQueryFilters()
+			join run in ctx.FeedRuns.IgnoreQueryFilters() on item.FeedRunId equals run.Id
+			where ids.Contains(item.MediaId) && item.State != FeedRunItemState.Removed
+			select new { item.MediaId, run.FeedId }
+		)
+			.Distinct()
+			.GroupBy(use => use.MediaId)
+			.Select(title => new { Id = title.Key, Count = title.Count() })
+			.ToDictionaryAsync(title => title.Id, title => title.Count, cancellationToken);
+		return titles.Distinct().ToDictionary(title => title, title => new TitleUses(wanted.GetValueOrDefault(title.Value), fed.GetValueOrDefault(title.Value)));
 	}
 
 	private static IdentityConflict Conflict(IdentityConflictRow row)

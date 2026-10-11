@@ -1,3 +1,4 @@
+using Contracts.Housekeeping;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,9 @@ internal class MediaModule : IServiceModule
 		services.AddScoped<ListLoad>();
 		services.AddScoped<DetailsFill>();
 		services.AddScoped<BurstPrimers>();
+		services.AddScoped<IIdentityConfirmation, IdentityConfirmation>();
+		services.AddScoped<IHousekeepingStep, DuplicateTitles>();
+		services.AddScoped<IConflictReview, ConflictReview>();
 		services.TryAddSingleton(TimeProvider.System);
 		services.AddTracedScoped<IMediaService, MediaService>();
 		services.AddTracedScoped<IMediaSearchService, MediaSearchService>();

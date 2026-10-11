@@ -31,7 +31,8 @@ Metacritic, Letterboxd) are no keys: remakes that share a slug stay two titles. 
 keys it leaves to another row), `IdentityClaimsTests` and
 `FeedRunIdentityTests` pass. _Limit:_ one shared key is enough to extend a row, with no multi-id agreement check, so a
 provider that tags two titles with the same key folds the second into the first; and a title stored twice stays
-twice until something merges it (<<section-technical-risks>>).
+twice until the nightly pass merges it on a second source's word (`DuplicateTitlesTests`, `MediaMergeTests`;
+<<section-technical-risks>>).
 
 Scenario I (isolation):: User B requests feeds/wantlist/blocklist while User A's rows exist.
 _Response:_ B sees only B's rows; a query with no authenticated user throws rather than returning

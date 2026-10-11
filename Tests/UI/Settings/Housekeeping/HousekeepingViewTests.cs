@@ -118,7 +118,7 @@ public class HousekeepingViewTests
 
 		var line = HousekeepingView.Pass(new PassTask(new None(), Some.Of(new TaskRun(since, true)), Some.Of(report)), Now);
 
-		await Assert.That(line.Did).IsEqualTo("1 of 6 steps done");
+		await Assert.That(line.Did).IsEqualTo("1 of 7 steps done");
 	}
 
 	[Test]
@@ -148,6 +148,12 @@ public class HousekeepingViewTests
 
 	private static HousekeepingOverview Overview(HousekeepingReport pass, DatasetTask imdb)
 	{
-		return new HousekeepingOverview(new DatabaseSize(2, 1), new PassTask(new None(), new None(), Some.Of(pass)), [imdb], new CachedTitles(0, 0, 0, 0));
+		return new HousekeepingOverview(
+			new DatabaseSize(2, 1),
+			new PassTask(new None(), new None(), Some.Of(pass)),
+			[imdb],
+			new CachedTitles(0, 0, 0, 0),
+			new StoredTwiceCount(0, 0)
+		);
 	}
 }
