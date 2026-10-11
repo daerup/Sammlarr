@@ -17,6 +17,8 @@ internal sealed class SonarrApi(HttpClient http, SonarrOptions options) : ArrApi
 
 	protected override string TitleIds => "seriesIds";
 
+	protected override string AddressField => "tvdbId";
+
 	protected override string ExclusionFlag => "addImportListExclusion";
 
 	public override int AddressOf(ArrTitle title) => title.TvdbId;

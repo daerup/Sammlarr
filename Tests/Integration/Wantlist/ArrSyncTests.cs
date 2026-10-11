@@ -25,6 +25,8 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private static readonly WantlistSyncTrigger Trigger = new(new ManualTrigger());
 
+	private static readonly DateTimeOffset Fetched = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
+
 	private static readonly ArrInstanceConfig Instance = ArrInstanceConfig.Empty with
 	{
 		Url = Some.Of($"http://{Radarr}"),
@@ -67,6 +69,18 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(_added.Single()).Contains("\"tags\":[1]");
 		await Assert.That(_added.Single()).Contains("\"rootFolderPath\":\"/movies\"");
 		await Assert.That((await host.Resolve<IWantlistService>().GetOutboxAsync()).Entries).IsEmpty();
+	}
+
+	[Test]
+	public async Task SyncAsync_ForATitleWithStoredDetails_AddsItToRadarrByItsTmdbIdWithoutALookup()
+	{
+		var movie = await host.Movie(Inception).SeedWithDetailsAsync("Inception", Fetched, genres: ["Science Fiction"]);
+		await host.Resolve<IWantlistService>().AddAsync([movie], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
+
+		await host.Resolve<IWantlistSyncEngine>().SyncAsync(Trigger);
+
+		await Assert.That(_added.Single()).Contains("\"tmdbId\":27205").And.Contains("\"title\":\"Inception\"");
+		await Assert.That(host.HttpStub.Requests($"{Radarr}/api/v3/movie/lookup")).IsEqualTo(0);
 	}
 
 	[Test]

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -28,6 +29,8 @@ internal abstract class ArrApi(HttpClient http)
 
 	protected abstract string TitleIds { get; }
 
+	protected abstract string AddressField { get; }
+
 	protected abstract string ExclusionFlag { get; }
 
 	public abstract int AddressOf(ArrTitle title);
@@ -40,14 +43,16 @@ internal abstract class ArrApi(HttpClient http)
 
 	public bool Takes(IExternalMediaId id) => id.Source == AddressedBy && id.Type == App.Type;
 
-	public JsonObject Prepare(JsonObject lookup, ArrInstanceConfig settings, ArrAddition addition)
+	public JsonObject Body(IExternalMediaId id, string title) => new() { [AddressField] = int.Parse(id.Value, CultureInfo.InvariantCulture), ["title"] = title };
+
+	public JsonObject Prepare(JsonObject title, ArrInstanceConfig settings, ArrAddition addition)
 	{
-		lookup["qualityProfileId"] = addition.QualityProfileId;
-		lookup["rootFolderPath"] = addition.RootFolderPath;
-		lookup["monitored"] = settings.Monitored;
-		lookup["tags"] = new JsonArray([.. addition.Tags.Select(tag => JsonValue.Create(tag))]);
-		AddOptions(lookup, settings, addition.Route);
-		return lookup;
+		title["qualityProfileId"] = addition.QualityProfileId;
+		title["rootFolderPath"] = addition.RootFolderPath;
+		title["monitored"] = settings.Monitored;
+		title["tags"] = new JsonArray([.. addition.Tags.Select(tag => JsonValue.Create(tag))]);
+		AddOptions(title, settings, addition.Route);
+		return title;
 	}
 
 	protected static string Wire(Enum value) => JsonNamingPolicy.CamelCase.ConvertName(value.ToString());
@@ -98,9 +103,10 @@ internal abstract class ArrApi(HttpClient http)
 		return ReadAsync<IReadOnlyList<ArrTitle>>(connection, HttpMethod.Get, $"{Titles}/lookup?term={Uri.EscapeDataString(term)}", new None(), cancellationToken);
 	}
 
-	public Task<Result<ArrTitle>> AddAsync(ArrConnection connection, JsonObject title, CancellationToken cancellationToken)
+	public async Task<Result<Optional<ArrTitle>>> AddAsync(ArrConnection connection, JsonObject title, CancellationToken cancellationToken)
 	{
-		return ReadAsync<ArrTitle>(connection, HttpMethod.Post, Titles, Some.Of<object>(title), cancellationToken);
+		var answered = await ExchangeAsync(connection, HttpMethod.Post, Titles, Some.Of<object>(title), cancellationToken);
+		return answered.Map(answer => Added(connection, answer));
 	}
 
 	public async Task<Result<int>> RetagAsync(
@@ -166,7 +172,35 @@ internal abstract class ArrApi(HttpClient http)
 		}
 	}
 
+	private Result<Optional<ArrTitle>> Added(ArrConnection connection, ArrAnswer answer)
+	{
+		if (answer.Status is HttpStatusCode.BadRequest && Failures(answer.Text).Any(NamesAnUnknownId))
+		{
+			return Success.Of<Optional<ArrTitle>>(new None());
+		}
+
+		return Accepted(connection, answer).Map(text => Parse<ArrTitle>(connection, text)).Map(added => Optional.Of(added));
+	}
+
+	private bool NamesAnUnknownId(ArrValidationFailure failure)
+	{
+		return string.Equals(failure.PropertyName, AddressField, StringComparison.OrdinalIgnoreCase)
+			&& failure.ErrorMessage?.Contains("was not found", StringComparison.OrdinalIgnoreCase) is true;
+	}
+
 	private async Task<Result<string>> SendAsync(
+		ArrConnection connection,
+		HttpMethod method,
+		string path,
+		Optional<object> body,
+		CancellationToken cancellationToken
+	)
+	{
+		var answered = await ExchangeAsync(connection, method, path, body, cancellationToken);
+		return answered.Map(answer => Accepted(connection, answer));
+	}
+
+	private async Task<Result<ArrAnswer>> ExchangeAsync(
 		ArrConnection connection,
 		HttpMethod method,
 		string path,
@@ -181,13 +215,17 @@ internal abstract class ArrApi(HttpClient http)
 			request.Options.Set(LaneHandler.Owner, connection.Address);
 			body.Apply(content => request.Content = JsonContent.Create(content, options: Json));
 			using var response = await http.SendAsync(request, cancellationToken);
-			var text = await response.Content.ReadAsStringAsync(cancellationToken);
-			return response.IsSuccessStatusCode ? Success.Of(text) : Error.From(Refusal(connection, response.StatusCode, text));
+			return Success.Of(new ArrAnswer(response.IsSuccessStatusCode, response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken)));
 		}
 		catch (Exception ex) when (ex is HttpRequestException or LaneRefusedException or TimeoutRejectedException)
 		{
 			return Error.From($"{App.Name} could not be reached at {connection.Address}: {ex.Message}");
 		}
+	}
+
+	private Result<string> Accepted(ArrConnection connection, ArrAnswer answer)
+	{
+		return answer.Succeeded ? Success.Of(answer.Text) : Error.From(Refusal(connection, answer.Status, answer.Text));
 	}
 
 	private string Refusal(ArrConnection connection, HttpStatusCode status, string body)
@@ -201,20 +239,21 @@ internal abstract class ArrApi(HttpClient http)
 		};
 	}
 
-	private static string Validation(string body)
+	private static string Validation(string body) => string.Join(" ", Failures(body).Select(failure => failure.ErrorMessage).OfType<string>());
+
+	private static IReadOnlyList<ArrValidationFailure> Failures(string body)
 	{
 		try
 		{
-			return string.Join(
-				" ",
-				(JsonSerializer.Deserialize<List<ArrValidationFailure>>(body, Json) ?? []).Select(failure => failure.ErrorMessage).OfType<string>()
-			);
+			return JsonSerializer.Deserialize<List<ArrValidationFailure>>(body, Json) ?? [];
 		}
 		catch (JsonException)
 		{
-			return string.Empty;
+			return [];
 		}
 	}
+
+	private sealed record ArrAnswer(bool Succeeded, HttpStatusCode Status, string Text);
 }
 
 internal enum ArrTagChange

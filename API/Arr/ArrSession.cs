@@ -74,13 +74,15 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, List<ArrT
 		return ids;
 	}
 
-	public async Task<Result<ArrTitle>> AddAsync(JsonObject title, CancellationToken cancellationToken)
+	public async Task<Result<Optional<ArrTitle>>> AddAsync(JsonObject title, CancellationToken cancellationToken)
 	{
 		var added = await api.AddAsync(connection, title, cancellationToken);
-		return added.Apply(titles.Add);
+		return added.Apply(found => found.Apply(titles.Add));
 	}
 
-	public JsonObject Prepare(JsonObject lookup, ArrInstanceConfig settings, ArrAddition addition) => api.Prepare(lookup, settings, addition);
+	public JsonObject Body(IExternalMediaId id, string title) => api.Body(id, title);
+
+	public JsonObject Prepare(JsonObject title, ArrInstanceConfig settings, ArrAddition addition) => api.Prepare(title, settings, addition);
 
 	public bool IsAnime(JsonObject lookup) => api.IsAnime(lookup);
 

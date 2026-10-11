@@ -465,6 +465,25 @@ public class MediaServiceTests
 	}
 
 	[Test]
+	public async Task GetStoredDetailsAsync_ForAStaleTitleAndOneWithoutDetails_AnswersWhatIsStoredWithoutAskingAnyService()
+	{
+		var stale = BuildDetail(MediaId.New());
+		var bare = StaleCached(MediaId.New());
+		var (testee, deps) = TestMediaService.Create();
+		deps.MediaRepo.GetAsync(Any(), Any())
+			.Returns([
+				new StoredMedia(stale.Identity, Some.Of(new CachedDetails(stale.Details, _now - TimeSpan.FromDays(15), _now - TimeSpan.FromDays(15), []))),
+				bare,
+			]);
+
+		var stored = await testee.GetStoredDetailsAsync([stale.Identity.Id, bare.Identity.Id]);
+
+		await Assert.That(stored.Keys).IsEquivalentTo([stale.Identity.Id]);
+		await Assert.That(stored[stale.Identity.Id]).IsEqualTo(stale.Details);
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
 	public async Task RegisterAsync_WhenEmpty_DoesNotWriteToRepository()
 	{
 		var (testee, deps) = TestMediaService.Create();
