@@ -1,6 +1,7 @@
 using System.Text.Json;
 using API.Http;
 using API.Tmdb.Types;
+using Contracts;
 using Contracts.Auth;
 using Domain.Auth;
 using Domain.Media;
@@ -9,11 +10,13 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Tmdb;
 
-internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<TmdbApi> logger)
+internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDateTimeProvider clock, ILogger<TmdbApi> logger)
 {
-	public async Task<Result<TmdbTypes.Details>> GetDetailWithExternalIdsAsync(TmdbId id, CancellationToken cancellationToken = default)
+	private readonly RecentAnswers<TmdbId, TmdbTypes.Details> _details = new(clock);
+
+	public Task<Result<TmdbTypes.Details>> GetDetailWithExternalIdsAsync(TmdbId id, CancellationToken cancellationToken = default)
 	{
-		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
+		return _details.AskAsync(id, token => DetailAsync(id, token), cancellationToken);
 	}
 
 	public async Task<Result<TmdbTypes.FindItem>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
@@ -24,6 +27,11 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 	public async Task<Result<IReadOnlyList<TmdbTypes.Trending.Result>>> SearchAsync(string query, CancellationToken cancellationToken = default)
 	{
 		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchSearchAsync(query, apiKey, cancellationToken));
+	}
+
+	private async Task<Result<TmdbTypes.Details>> DetailAsync(TmdbId id, CancellationToken cancellationToken)
+	{
+		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
 	}
 
 	private async Task<Result<IReadOnlyList<TmdbTypes.Trending.Result>>> FetchSearchAsync(string query, IApiKey apiKey, CancellationToken cancellationToken)

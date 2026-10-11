@@ -1,3 +1,4 @@
+using API.Tests.Feeds;
 using API.Tmdb;
 using Contracts.Auth;
 using Contracts.Identity;
@@ -26,6 +27,7 @@ internal static class TmdbApis
 		return new TmdbApi(
 			new TmdbClient(handler.CreateClient(Options.BaseUrl), Options, apiKeys.Object, ICurrentUser.Mock().Object),
 			apiKeys.Object,
+			FeedClock.Today(),
 			NullLogger<TmdbApi>.Instance
 		);
 	}
