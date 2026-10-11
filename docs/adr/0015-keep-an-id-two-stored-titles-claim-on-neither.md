@@ -1,8 +1,9 @@
 # Keep an id two stored titles claim on neither
 
-| Status   | Date       |
-|----------|------------|
-| accepted | 2026-10-08 |
+| Status                                                                               | Date       |
+|--------------------------------------------------------------------------------------|------------|
+| accepted                                                                             | 2026-10-08 |
+| superseded by [0018](0018-claim-identity-before-hand-out-from-identity-keys-only.md) | 2026-10-10 |
 
 ## Context
 

@@ -1,113 +1,149 @@
 [[section-runtime-view]]
 == Runtime View
 
-Four scenarios: identifying a title (the one the others build on), feed preview, a feed run through
+Four scenarios: loading a list (the one the others build on), feed preview, a feed run through
 the job queue, and wantlist sync/push. Each runs across the layers through `Contracts`, with
 providers resolved by keyed DI.
 
-=== Identifying a title
+=== Loading a list
 
-Turning an external reference (a TMDB/IMDb id or a bare title) into the right library row, and the
-Plex id it can be pushed under, is where correctness hinges: a wrong match corrupts every list the
-title appears in. Two phases: A settles _identity_ (which library row), B loads its _details_.
+Turning a list's entries (TMDB, IMDb or other ids, with title hints) into the right library rows, and the id the
+sink adds each title by, is where correctness hinges: a wrong match corrupts every list the title appears in. A feed
+service streams its entries into `IMediaService.LoadListAsync`, which hands each title back with its list position
+(`Listed<MediaMatchResult>`) as soon as it settles. Four ideas carry the load: bursts, chains, lanes and claims.
+
+[mermaid]
+....
+flowchart LR
+  SRC[List source<br/>pages as they arrive] --> BURST[Burst<br/>what the source has ready]
+  BURST --> LIB[(Library read<br/>once per burst)]
+  BURST -.->|misses| PRIME[Primers<br/>MDBList lane, datasets]
+  LIB --> CHAIN{{one chain per title}}
+  CHAIN -->|partly stored or unknown| IDS[Resolve ids]
+  IDS --> CLAIM[(Claim the identity)]
+  CLAIM -->|claimed| DET[Details<br/>reused while fresh]
+  CLAIM -->|conflicted| CON[Settle: conflict]
+  CHAIN -->|stored with the sink's id| DET
+  DET --> OUT[Settle with<br/>its list position]
+  IDS -.->|ask| LANES[[Lanes<br/>one per service route]]
+  DET -.->|ask| LANES
+....
+
+A _burst_ is everything the source yields without waiting (`BurstsAsync`): one page of an MDBList list, one page of
+TMDB results. `ListLoad` reads the library once per burst (`IMediaRepository.GetByExternalsAsync`: one flat,
+parameterized query per table inside one read snapshot). It then hands the burst's titles, each with its stored copy, to
+the primers (`BurstPrimers`), and each primer primes the ones it can help. MDBList's primer queues each title that needs a field MDBList fills on its batching lane and returns
+at once; the anime id map's and IMDb ratings file's primers (`AnimeIdsInRun`, `ImdbRatingsInRun`) read their table once
+for the whole burst. A primer is asked only for a service the user has connected, and a lane primer only while its lane
+would take the ask in time. Every title of the burst waits for that read and those primes; MDBList's primer only
+queues, so a blocked MDBList never holds a burst up.
+
+Each title then runs its own _chain_ (`ListLoad.SettleAsync`) under `LaneClass.Title`, numbered by list position, so
+earlier titles go first at every lane. Nothing caps how many chains run: the lanes pace each service, and a title that
+needs nothing from a slow service settles without waiting for it. A chain settles exactly once, in its `finally`:
+matched, not found, not found earlier, couldn't look up or conflict; a chain that throws settles couldn't look up, and
+the load rethrows its exception once every chain has settled, so a feed run records the load as unfinished.
+Titles leave as they settle, out of order, and the planner sorts them by position once. A `RunWatchdog` watches the
+load: when no title has settled for `Sammlarr:FeedLoad:StallAfter` (3 minutes), it cancels the open chains, which settle
+couldn't look up.
+
+Each load runs in its own DI scope entered as its caller (`FeedRunPlanner`, the feed preview, each page of the
+FillDetails job), so the per-load memos (`MdblistTitles`, `TmdbApi`, `AniListTitles`, `TraktTitles`, `AnimeIdsInRun`,
+`ImdbRatingsInRun`) start empty for every load and are shared by the feed service and its chains.
+
+==== Ids and the claim
+
+`TitleIdentifier` starts from the stored titles the entry's ids hit. Ids on two stored titles settle the title as a
+conflict at once. A stored title that holds the id the sink adds by is known: new ids from the list are added to it
+through a pinned claim, and the chain goes on to its details. Any other title is resolved by `MediaIdResolver`, from
+the list's ids plus the stored title's keys and hints, along the cheapest open path of id lookups to the target (see
+Provider routing in <<section-concepts>>). The target is the provider the active sink addresses that title's type by
+(`IMediaSink.AddressedBy`): Plex for every type when the wantlist syncs to Plex, so an MDBList or TMDB reference is
+converted to a Plex id; TMDB for movies and TheTVDB for shows when it syncs to Radarr + Sonarr, the ids those apps add
+by. A type the sink cannot address settles not found.
+
+Plex finds its own id by the title's TMDB, IMDb or TheTVDB id through its match endpoint
+(`library/metadata/matches?type=1|2&guid=tmdb://603` on the discover host), one call per title. A definitive answer by
+one id answers that lookup for the title's other ids too (`ById.AsksOnce`), so a miss costs one Plex call and no
+detour. A Plex id is read back through Plex's metadata endpoint for the title's other ids. TMDB answers a TMDB id with
+its detail, whose appended `external_ids` carry the IMDb and TheTVDB ids, and an IMDb or TheTVDB id through `find`;
+within a load, the id lookup and the details step share one read of a title's TMDB details.
 
 [mermaid]
 ....
 sequenceDiagram
-  actor C as Caller (feed / sync / trending)
-  participant MS as IMediaService
-  participant DB as Library (IMediaRepository)
-  participant IC as Id converter
-  participant MR as Details fetcher
-
-  C->>MS: IdentifyWithDetailsAsync(external ids + hints)
-  MS->>DB: GetByExternalsAsync (one batched read)
-  alt in library and reusable
-    DB-->>MS: stored title
-  else missing, stale, or a gap the load needs that a service can fill
-    MS->>IC: Phase A, identify the ids
-    IC-->>MS: canonical identity (or unmatched)
-    MS->>MR: Phase B, fetch the details
-    MR->>DB: upsert (write-behind, on flush)
-    MR-->>MS: MatchedMedia
-  end
-  MS-->>C: MediaMatchResult
-....
-
-The first lookup is the library itself (one batched `GetByExternalsAsync`); a stored row is
-returned as is unless the details fetcher would ask again: 14 days after its last refresh, or when a field the
-load needs is missing and a service that is not resting could fill it (see Freshness in
-<<section-glossary>>). A stored title only refetches its details (Phase B); a title not yet in the
-library runs both phases.
-
-==== Phase A: ids to a Plex identity
-
-`MediaIdResolver` resolves the ids along the cheapest open path of id lookups to the target
-(see Provider routing in <<section-concepts>>). The target is the provider the active sink addresses
-that title's type by (`IMediaSink.AddressedBy`): Plex for every type when the wantlist syncs to Plex, so an
-MDBList or TMDB reference is converted to a Plex id; TMDB for movies and TheTVDB for shows when it syncs to
-Radarr + Sonarr, the ids those apps add by. A type the sink cannot address
-fails as unmatched. Plex looks up a Plex id and searches by the title hints. TMDB answers a TMDB id with its
-detail, whose appended `external_ids` carry the IMDb and TheTVDB ids, and an IMDb or TheTVDB id through `find`.
-Every TMDB answer also carries the original title and its release year, so a Plex search can follow it. Plex keeps
-a search's hits for 10 minutes per hints (title, year and type), shared by every user, so equal hints are searched once.
-
-[mermaid]
-....
-sequenceDiagram
-  participant MS as IMediaService
+  participant T as Title chain
   participant NC as Unmatched cache
-  participant IC as Plex converter
-  participant PX as Plex
+  participant R as MediaIdResolver
+  participant PX as Plex (match lane)
+  participant IC as IIdentityClaims
+  participant DB as Library
 
-  MS->>NC: known unmatched? (skip providers if cached)
-  MS->>IC: LookUpAsync(a Plex id, or the hints and known ids)
-  alt candidate already has a Plex id
-    IC->>PX: look up externals by that id
-    PX-->>IC: external ids
-  else only foreign ids (TMDB / IMDb)
-    IC->>PX: search by title hint
-    PX-->>IC: search hits
-    loop each hit
-      IC->>PX: look up the hit's externals
-      PX-->>IC: its external ids
+  T->>R: ResolveAsync(ids, target Plex)
+  R->>NC: a miss cached within the hour?
+  alt cached miss
+    R-->>T: not found earlier
+  else not cached
+    R->>PX: library/metadata/matches?guid=tmdb://ID
+    alt Plex id found
+      PX-->>R: Plex id
+      R-->>T: resolved ids and the services that gave them
+      T->>IC: claim the identity keys
+      IC->>DB: one transaction for every claim queued
+      alt extends at most one stored title
+        IC-->>T: Claimed(MediaId)
+      else keys on two titles, or a second key of one source
+        IC-->>T: Conflicted(owners)
+      end
+    else every route answered no match
+      R->>NC: cache the miss (1 h)
+      R-->>T: not found
+    else a route unavailable, refused or faulted
+      R-->>T: couldn't look up, nothing cached
     end
-    Note over IC,PX: keep the hit whose externals<br/>contain one of the known ids
-  end
-  alt a hit matched
-    IC-->>MS: canonical identity
-  else nothing matched
-    IC-->>MS: unmatched
-    MS->>NC: cache unmatched (1h), unless a path gave up (blocked past its wait, or unavailable)
   end
 ....
 
-A title match is confirmed by id, never trusted on the title alone: Plex is searched by the hint,
-each hit's externals are looked up, and the first hit whose externals contain an original id wins
-(if the hint finds nothing, it retries with TMDB's title). A negative cache of known-unmatched ids
-(kept an hour) short-circuits repeats before any provider call. Identified ids pass through the
-coordinator (not shown), which merges them against existing rows so one title can't become two
-library ids.
+A resolved title is claimed before it is handed out (`IIdentityClaims.ClaimAsync`), from its identity keys only; page
+links never take part. The claim lane (`IdentityClaims`, one per scope) commits every claim queued meanwhile in one
+transaction under the media write lock and decides each by the pure `ClaimRule`. A claim extends at most one stored
+title and never merges two. It never adds a second key of one source or a key of another media type. A claim pinned to
+a title drops the keys it cannot take instead of failing. Any other claim that would touch two stored titles, give a
+title a second key of one source or a key of another media type, or that the one-key-per-source index refuses, comes
+back `Conflicted` with the titles that hold its keys: the title settles
+unmatched as a conflict (`UnmatchedReason.Conflict`, with `ConflictsWith`), and both stored titles stay as they are. A
+claimed title is handed out only with its stored `MediaId`.
 
-==== Phase B: details
+A title settles not found, and its ids are cached as unmatched for an hour, only when every route answered that it
+has no such title. A route that was unavailable, refused by its lane or answered with something unusable settles the
+title couldn't look up, and nothing is cached (see <<section-technical-risks>>). The cache short-circuits a repeat
+before any provider call; the library is read before it, so a title stored within the hour is never hidden by it.
 
-A refresh asks the search setting's enricher first, then the open enricher that fills the
+==== Details
+
+A stored title is reused as it is unless the details fetcher would ask again: 14 days after its last refresh, or when a
+field the load needs is missing and a service that is not resting could fill it (see Freshness in
+<<section-glossary>>). A refresh asks the search setting's enricher first, then the open enricher that fills the
 most missing detail fields, one at a time, until no open enricher can fill what is still missing; a blocked enricher whose
-block ends within its `EnrichWait` (TMDB 15 s) is slept for once and then asked (see Provider routing in
-<<section-concepts>>). A gap fill starts from the
+block ends within its `EnrichWait` (TMDB 15 s) is asked, and its lane holds the ask for at most the service's `MaxWait`
+(TMDB 15 s) before it refuses it (see Provider routing in <<section-concepts>>). A gap fill starts from the
 stored copy and its answers and asks only the enrichers that have not answered. The cache stores who answered and
-what each could not give (`ProviderAnswer`); only a successful answer is stored, so a provider that failed, was
-blocked, or was never asked (no id for it, or the user has no key or sign-in for it) still counts as not having
-answered. Every answer wins over the stored copy and each answer over the later ones (`first ?? second ?? ... ?? stored`),
+what each could not give (`ProviderAnswer`), and a failure after sending as a failure with its backoff; a provider
+that refused before sending, was skipped, or was never asked (no id for it, or the user has no key or sign-in for it)
+still counts as not having answered. Every answer wins over the stored copy and each answer over the later ones (`first ?? second ?? ... ?? stored`),
 so the stored copy only fills what no answer has; the next enricher is asked only while that still leaves a gap. A refresh
 asks from scratch until its first answer and keeps a stored value only while a provider gave it within the last 14 days
 (`ProviderAnswer.AnsweredAt`), so a value removed upstream, or one whose provider is down or not connected, goes with
 the first refresh 14 or more days after a provider last gave it. Each rating source counts as one of
-those fields (`MediaFields` pairs the detail flags with a set of `RatingSource`): TMDB fills its own, Plex fills IMDb, Rotten Tomatoes and its copy of TMDB's. Writes are
-batched write-behind through the `MediaWriteBuffer` (one identity and one details upsert per run). Two failure behaviours matter: an
-unmatched candidate becomes `UnmatchedMedia` (surfaced, never persisted); and when a provider is down
-or rate-limiting the title shows as "not found" for that run but is not cached unmatched, so the next
-run retries it (see <<section-technical-risks>>).
+those fields (`MediaFields` pairs the detail flags with a set of `RatingSource`): TMDB fills its own, Plex fills IMDb, Rotten Tomatoes and its copy of TMDB's.
+
+Keys an enricher's answer adds are claimed for the title, pinned to it, after its details; a key the claim refuses is
+dropped from the title. Changed details go to the load's `LibraryWriter`, which writes them as the run goes, at most
+256 titles per transaction, and writes a failed group one title at a time. Two failure behaviours matter: an unmatched
+title becomes `UnmatchedMedia` (surfaced, never persisted); and when no enricher can answer (down, blocked past its
+wait or answering with errors), the title keeps its stored copy, marked `Stale` when the copy is due and its service
+couldn't be reached, or, when nothing is stored and the service was unreachable, goes out with the list's own title.
+Nothing is cached as not found, so the next load asks again.
 
 === Feed preview
 
@@ -126,12 +162,12 @@ sequenceDiagram
   participant W as Wantlist + blocklist
 
   U->>P: edit feed, preview
-  P->>F: GetFeedItemsAsync, keyed by FeedProvider
+  P->>F: GetFeedItemsAsync(identifier, the draft's field needs), keyed by FeedProvider
   loop each page, while X-Has-More
-    F->>M: GET list items (resilience pipeline)
+    F->>M: GET list items (lane class Source)
     M-->>F: entries
-    F->>R: IdentifyWithDetailsAsync(externals)
-    R-->>F: MediaMatchResult (matched or unmatched)
+    F->>R: LoadListAsync (the entries join the load's stream)
+    R-->>F: each title with its list position, as it settles
     F-->>P: stream items
   end
   loop as items arrive, then once more when settled
@@ -143,10 +179,12 @@ sequenceDiagram
   P-->>U: tiles, stat badges, unmatched list
 ....
 
-`IFeedProvider` is resolved by the feed's `FeedProvider` key. Each entry is identified as a
-`MediaMatchResult` by the pipeline above, so a preview reuses cached rows and rarely hits every
-provider. On a circuit-breaker trip or timeout the client raises `ProviderUnavailableException`;
-the panel shows partial results and a retry rather than failing the whole preview.
+`IFeedProvider` is resolved by the feed's `FeedProvider` key, inside a scope the panel opens as the signed-in user.
+Each entry is loaded as a `MediaMatchResult` by the list load above, so a preview reuses stored rows and rarely asks
+every provider. List pages read at `LaneClass.Source`, ahead of every title at the same lanes. When a list page cannot
+be read because its service is unavailable, the feed service raises `RemoteUnavailableException`; the panel shows
+partial results and a retry rather than failing the whole preview. Leaving the editor cancels the load, its replans
+and its toasts.
 
 The preview does not classify for itself. It goes through `IFeedRunPlanner`, which reads the
 enrollment collections, classifies the rows and hands them to the pure `FeedPlans.Compute`. Each row
@@ -226,10 +264,21 @@ states, so a job the runner claims at the same moment runs instead, and the owne
 already started. Cancelling a feed run leaves a sync queued behind it in place, and a schedule
 still fires as usual.
 
-The engine plans through the same planner as the preview, before it records the run, so a run
-does what a preview taken at that moment would show. Mirror removals follow the preview's rule: a load that did not finish, or came back empty, is not
-conclusive and drops nothing, and an item is only removed after it has been missing for the
-feed's absence threshold of conclusive runs.
+The engine first saves the run as `Pending`, which run history shows as running. It then plans through the same
+planner as the preview, so a run does what a preview taken at that moment would show, and applies the plan: each title
+the sink can address is added, and one it cannot is recorded as unaddressable instead of failing the run. The run row
+is completed in every case, with its calls; a run that throws or is cancelled ends `Stopped` with its reason, and
+startup sweeps a `Pending` run that a crash left behind to `Stopped`. Mirror removals follow the preview's rule: a load
+that did not finish, came back empty, or left a title Sammlarr couldn't look up is not conclusive and drops nothing. An
+owned title missing from a conclusive run counts one more miss in `FeedAbsences`, and it is removed once it has been
+missing for the feed's absence threshold of conclusive runs; an owned title in conflict, or served stale, counts as
+seen.
+
+A run also queues its owner's `FillDetails` job, as storing a key or a sign-in does. The job waits `FillDetailsGrace`
+(5 minutes), stays behind any queued or waiting feed run or sync until it has waited `FillDetailsMaxWait` (30
+minutes), and fills the missing fields of the owner's wantlisted and blocklisted titles 500 at a time at
+`LaneClass.Background`. It asks only services that answer within `ShownWait` (5 seconds), and between pages it requeues
+itself whenever another job is queued, so it never holds up a run or a sync.
 
 While it runs, the engine holds the run's live trace open (`IFeedRunTrace.Start`, under the job owner's identity), and
 identifying a title, asking a service and giving up on one record into it as spans; the owner watches them on the Feeds
