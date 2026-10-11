@@ -134,8 +134,8 @@ internal static class UsageSamples
 		var current = Period(
 			[Line(RemoteService.Tmdb, tmdb), Line(RemoteService.Plex, plex)],
 			[
-				new UsageCauseLine(UsageCause.FeedRun, Tally(answered: 120, after: 3, gaveUp: 1, failed: 2)),
-				new UsageCauseLine(UsageCause.Search, Tally(answered: 10, cancelled: 4)),
+				new UsageCauseLine(UsageCause.FeedRun, Tally(answered: 120, after: 3, gaveUp: 1, failed: 2), []),
+				new UsageCauseLine(UsageCause.Search, Tally(answered: 10, cancelled: 4), []),
 			]
 		);
 		return new UsageSnapshot(current, Period([Line(RemoteService.Tmdb, Tally(answered: 50))], []), [], []);

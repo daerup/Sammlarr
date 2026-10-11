@@ -2,7 +2,6 @@ using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
 using Contracts.Usage;
-using Domain.Providers;
 using Domain.Usage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;

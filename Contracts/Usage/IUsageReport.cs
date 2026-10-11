@@ -23,7 +23,11 @@ public sealed record UsageServiceLine(
 	IReadOnlyList<UsageCauseLine> Causes
 );
 
-public sealed record UsageCauseLine(UsageCause Cause, UsageTally Tally);
+public sealed record UsageFeedName(FeedId Feed, string Name, FeedProvider Provider);
+
+public sealed record UsageCauseFeed(Optional<UsageFeedName> Feed, long Calls);
+
+public sealed record UsageCauseLine(UsageCause Cause, UsageTally Tally, IReadOnlyList<UsageCauseFeed> Feeds);
 
 public sealed record UsagePeriod(
 	UsageWindow Window,

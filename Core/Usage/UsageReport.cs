@@ -3,6 +3,7 @@ using Contracts.Datasets;
 using Contracts.Identity;
 using Contracts.Providers;
 using Contracts.Usage;
+using Domain.Feed;
 using Domain.Providers;
 using Domain.Usage;
 
@@ -31,8 +32,9 @@ internal sealed class UsageReport(
 		var today = await mdblist.TodayAsync(cancellationToken);
 		var live = await LiveAsync(now, today, cancellationToken);
 		var feeds = await feedLines.ReadAsync(window, cancellationToken);
+		var names = feeds.ToDictionary(line => line.Feed, line => new UsageFeedName(line.Feed, line.Name, line.Provider));
 		IReadOnlyList<UsageQuota> quotas = [.. new[] { today }.WhereSome().Select(found => Quota(found, rows, window, now))];
-		return new UsageSnapshot(Period(window, rows, live), Period(before, rows, _ => Unknown), feeds, quotas);
+		return new UsageSnapshot(Period(window, rows, live, names), Period(before, rows, _ => Unknown, names), feeds, quotas);
 	}
 
 	private static UsageQuota Quota(QuotaToday today, UsageRows rows, UsageWindow window, DateTimeOffset now)
@@ -72,7 +74,12 @@ internal sealed class UsageReport(
 		);
 	}
 
-	private static UsagePeriod Period(UsageWindow window, UsageRows rows, Func<RemoteService, UsageRightNow> live)
+	private static UsagePeriod Period(
+		UsageWindow window,
+		UsageRows rows,
+		Func<RemoteService, UsageRightNow> live,
+		IReadOnlyDictionary<FeedId, UsageFeedName> names
+	)
 	{
 		var calls = rows.Calls.Where(row => window.Contains(row.Hour)).ToList();
 		var attempts = rows.Attempts.Where(row => window.Contains(row.Hour)).ToList();
@@ -84,21 +91,39 @@ internal sealed class UsageReport(
 				.Select(row => row.Service)
 				.Concat(attempts.Select(row => row.Service))
 				.Distinct()
-				.Select(service => Line(window, service, [.. callsByService[service]], [.. attemptsByService[service]], live(service)))
+				.Select(service => Line(window, service, [.. callsByService[service]], [.. attemptsByService[service]], live(service), names))
 				.OrderByDescending(line => line.Tally.Total),
 		];
-		return new UsagePeriod(window, Tally(calls, attempts), Slots(window, calls, attempts), services, Causes(calls, attempts));
+		return new UsagePeriod(window, Tally(calls, attempts), Slots(window, calls, attempts), services, Causes(calls, attempts, names));
 	}
 
-	private static IReadOnlyList<UsageCauseLine> Causes(IReadOnlyList<UsageCalls> calls, IReadOnlyList<UsageAttempts> attempts)
+	private static IReadOnlyList<UsageCauseLine> Causes(
+		IReadOnlyList<UsageCalls> calls,
+		IReadOnlyList<UsageAttempts> attempts,
+		IReadOnlyDictionary<FeedId, UsageFeedName> names
+	)
 	{
 		var attemptsByCause = attempts.ToLookup(row => row.Cause);
 		return
 		[
 			.. calls
 				.GroupBy(row => row.Cause)
-				.Select(group => new UsageCauseLine(group.Key, Tally(group, attemptsByCause[group.Key])))
+				.Select(group => new UsageCauseLine(group.Key, Tally(group, attemptsByCause[group.Key]), group.Key is UsageCause.FeedEditor ? Feeds(group, names) : []))
 				.OrderByDescending(line => line.Tally.Total),
+		];
+	}
+
+	private static IReadOnlyList<UsageCauseFeed> Feeds(IEnumerable<UsageCalls> calls, IReadOnlyDictionary<FeedId, UsageFeedName> names)
+	{
+		var byFeed = calls.ToLookup(row => row.Feed.Map(feed => names.GetValueOrNone(feed)).Map(name => name.Feed).ToNullable());
+		var unknown = Optional.When(byFeed.Contains(null), () => new UsageCauseFeed(new None(), byFeed[null].Sum(row => row.Calls)));
+		return
+		[
+			.. byFeed
+				.Where(feed => feed.Key is not null)
+				.Select(feed => new UsageCauseFeed(Some.Of(names[feed.Key!.Value]), feed.Sum(row => row.Calls)))
+				.OrderByDescending(feed => feed.Calls),
+			.. new[] { unknown }.WhereSome(),
 		];
 	}
 
@@ -124,7 +149,8 @@ internal sealed class UsageReport(
 		RemoteService service,
 		IReadOnlyList<UsageCalls> calls,
 		IReadOnlyList<UsageAttempts> attempts,
-		UsageRightNow live
+		UsageRightNow live,
+		IReadOnlyDictionary<FeedId, UsageFeedName> names
 	)
 	{
 		var hours = calls
@@ -138,7 +164,7 @@ internal sealed class UsageReport(
 			LastCall = live.LastCall.Or(() => hours.Select(hour => hour.Hour).FirstOrNone()),
 			FailingSince = hours.TakeWhile(hour => hour.Tally.Answered == 0).Select(hour => hour.Hour).Order().FirstOrNone(),
 		};
-		return new UsageServiceLine(service, Tally(calls, attempts), rightNow, Slots(window, calls, attempts), Causes(calls, attempts));
+		return new UsageServiceLine(service, Tally(calls, attempts), rightNow, Slots(window, calls, attempts), Causes(calls, attempts, names));
 	}
 
 	private static UsageTally Tally(IEnumerable<UsageCalls> calls, IEnumerable<UsageAttempts> attempts)
