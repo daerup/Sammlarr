@@ -420,8 +420,8 @@ first armed (`SchedulerOptions`). While one of the owner's scheduled or _sync wh
 queued, the sync is `Queued` behind it instead of `Waiting`. A manual Sync moves the deadline to
 now, so nothing pushes it back.
 
-Cron ticker:: TickerQ's persisted per-feed cron entry. When it fires it only enqueues a `RunFeed`
-job; it never runs the feed itself.
+Cron ticker:: TickerQ's persisted cron entry. A feed's only enqueues a `RunFeed` job and never runs the
+feed itself; the dataset loads' and the nightly housekeeping pass's run their work directly, one at a time.
 
 === Naming vocabulary
 

@@ -33,7 +33,7 @@ internal sealed class HousekeepingTasks(
 	public async Task<HousekeepingOverview> OverviewAsync(CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
-		var pass = new PassTask(new None(), activity.Running(HousekeepingTicker.FunctionName), await reports.LastAsync(cancellationToken));
+		var pass = new PassTask(Next(HousekeepingSchedule.Nightly), activity.Running(HousekeepingTicker.FunctionName), await reports.LastAsync(cancellationToken));
 		List<DatasetTask> datasets = [];
 		foreach (var (service, name) in DatasetNames.ByService)
 		{

@@ -415,7 +415,8 @@ State is one SQLite database via EF Core. Repositories create a context per oper
 sets WAL, `synchronous=NORMAL`, a busy timeout and an 8 MB `journal_size_limit`, the size a write-ahead
 log is cut back to once it restarts. After a dataset replace commits, `IDatabaseFile.CompactAsync`
 truncates the log and vacuums the file when a tenth of its pages are free, so the file stays about the
-size of its data. The ownerless `Housekeeping` ticker runs `HousekeepingPass`: it takes the job runner's turn
+size of its data. The ownerless `Housekeeping` ticker runs `HousekeepingPass` nightly at 03:00 server time, before the dataset
+loads at 04:30 (a cron ticker `HousekeepingSchedule` adds on every start), or by hand: it takes the job runner's turn
 (`JobTurn`, which `JobRunner` holds while it runs a job, so the pass never overlaps a feed run, a sync or a details fill),
 runs each `IHousekeepingStep` in the order of `HousekeepingStep`, compacts the file and keeps its last report
 (`HousekeepingReports`, saved after every step so a running pass shows how far it got); a step that fails stops the

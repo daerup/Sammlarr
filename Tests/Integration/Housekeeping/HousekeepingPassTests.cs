@@ -7,6 +7,7 @@ using Domain.Usage;
 using Harness;
 using TestInfrastructure;
 using TickerQ.Utilities.Enums;
+using TUnit.Assertions.Enums;
 
 namespace Integration.Tests.Housekeeping;
 
@@ -37,7 +38,7 @@ public class HousekeepingPassTests(SammlarrTestHost host) : IAsyncDisposable
 		var second = await Testee.RunAsync();
 
 		await Assert.That(first.Failure).IsNone();
-		await Assert.That(first.Steps.Select(step => step.Step)).IsEquivalentTo(Enum.GetValues<HousekeepingStep>());
+		await Assert.That(first.Steps.Select(step => step.Step)).IsEquivalentTo(Enum.GetValues<HousekeepingStep>(), CollectionOrdering.Matching);
 		await Assert.That(first.Steps.Where(step => step.Removed == 0)).IsEmpty();
 		await Assert.That(second.Steps.Sum(step => step.Removed)).IsEqualTo(0);
 		await Assert.That(second.File).IsSome();
