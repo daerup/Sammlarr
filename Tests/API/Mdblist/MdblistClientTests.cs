@@ -49,7 +49,10 @@ public class MdblistClientTests
 
 		using var response = await host.Services.GetRequiredService<MdblistClient>().SendAsync(HttpMethod.Get, "lists/1/items", Key);
 
-		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().Left(Key.Value)).IsSome().And.IsEqualTo(962);
+		await Assert
+			.That(host.Services.GetRequiredService<MdblistBudget>().Today(Key.Value).Answered.Map(answered => answered.Remaining))
+			.IsSome()
+			.And.IsEqualTo(962);
 	}
 
 	[Test]
@@ -102,13 +105,7 @@ public class MdblistClientTests
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 	}
 
-	private static System.Net.Http.Headers.HttpResponseHeaders Spent()
-	{
-		var answered = new HttpResponseMessage(HttpStatusCode.OK);
-		answered.Headers.Add("x-ratelimit-remaining", "10");
-		answered.Headers.Add("x-ratelimit-reset", $"{DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeSeconds()}");
-		return answered.Headers;
-	}
+	private static HttpResponseMessage Spent() => MdblistApis.RateLimited(10, DateTimeOffset.UtcNow.AddDays(1));
 
 	[Test]
 	public async Task SendAsync_WhenUnauthorized_InvalidatesCachedApiKey()

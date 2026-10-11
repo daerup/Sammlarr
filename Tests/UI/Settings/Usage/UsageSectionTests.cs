@@ -36,7 +36,7 @@ public class UsageSectionTests : BunitContext
 	[Test]
 	public async Task Render_ForAnInstallThatCalledNothing_SaysNoCallsYet()
 	{
-		_report.ReadAsync(Any(), Any()).Returns(new UsageSnapshot(UsageSamples.Period([], []), UsageSamples.Period([], []), []));
+		_report.ReadAsync(Any(), Any()).Returns(new UsageSnapshot(UsageSamples.Period([], []), UsageSamples.Period([], []), [], []));
 
 		var cut = Render<UsageSection>();
 

@@ -1,7 +1,9 @@
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
 using Contracts;
+using Domain.Usage;
 using Microsoft.Extensions.Logging;
 using Shared.Concurrency;
 using Shared.Options;
@@ -14,18 +16,47 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 
 	private readonly ConcurrentDictionary<(string ApiKey, DateTimeOffset ResetAt), byte> _warned = new();
 
-	public void Record(string apiKey, HttpResponseHeaders headers)
+	private static readonly TimeSpan Day = TimeSpan.FromDays(1);
+
+	public void Record(string apiKey, HttpResponseMessage answer)
 	{
+		var headers = answer.Headers;
+		var spent = answer.StatusCode is not HttpStatusCode.TooManyRequests;
 		Header(headers, "x-ratelimit-remaining")
-			.Map(remaining => Header(headers, "x-ratelimit-reset").Map(reset => (Remaining: remaining, ResetAt: DateTimeOffset.FromUnixTimeSeconds(reset))))
-			.Apply(seen =>
-				_byKey.AddOrUpdate(apiKey, _ => new Allowance(seen.Remaining, seen.ResetAt, new None()), (_, before) => before.After(seen.Remaining, seen.ResetAt))
-			);
+			.Map(remaining =>
+				Header(headers, "x-ratelimit-reset")
+					.Map(reset => new Reading(remaining, DateTimeOffset.FromUnixTimeSeconds(reset), Header(headers, "x-ratelimit-limit"), spent))
+			)
+			.Apply(seen => _byKey.AddOrUpdate(apiKey, _ => Allowance.First(seen), (_, before) => before.After(seen, options.FeedReserve, clock.Now)));
 	}
 
-	public Optional<long> Left(string apiKey)
+	public QuotaToday Today(string apiKey)
 	{
-		return _byKey.GetValueOrNone(apiKey).Map(allowance => Optional.When(clock.Now < allowance.ResetAt, () => allowance.Remaining));
+		var now = clock.Now;
+		var known = _byKey.GetValueOrNone(apiKey);
+		var nextReset = known
+			.Map(allowance => Ahead(allowance.ResetAt, now))
+			.GetValueOr(() => Ahead(now.UtcDateTime.Date.Add(options.DailyResetUtc.ToTimeSpan()), now));
+		return new QuotaToday(nextReset, known.When(allowance => now < allowance.ResetAt).Map(Answered));
+	}
+
+	private QuotaAllowance Answered(Allowance allowance)
+	{
+		return new QuotaAllowance(
+			allowance.Remaining,
+			allowance.ResetAt,
+			allowance.Daily,
+			allowance.Outside,
+			allowance.ReserveReachedAt,
+			options.FeedReserve,
+			options.BackgroundReserveShare
+		);
+	}
+
+	private static DateTimeOffset Ahead(DateTimeOffset reset, DateTimeOffset now)
+	{
+		var behind = Math.Max(0, Math.Floor((now - reset) / Day) + 1);
+		return reset + (Day * behind);
 	}
 
 	public Optional<DateTimeOffset> BlockedUntil(string owner, LaneClass asking, DateTimeOffset now)
@@ -40,7 +71,7 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 			LaneClass.Source => true,
 			LaneClass.Title or LaneClass.Interactive => AboveReserve(apiKey, allowance),
 			LaneClass.Background => AboveReserve(apiKey, allowance)
-				&& allowance.Highest.Match(highest => allowance.Remaining >= highest * options.BackgroundReserveShare, () => true),
+				&& allowance.Limit.Or(allowance.Highest).Match(daily => allowance.Remaining >= daily * options.BackgroundReserveShare, () => true),
 		};
 	}
 
@@ -67,18 +98,52 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 			.Map(value => Optional.When(long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var number), () => number));
 	}
 
-	private readonly record struct Allowance(long Remaining, DateTimeOffset ResetAt, Optional<long> Highest)
+	private readonly record struct Reading(long Remaining, DateTimeOffset ResetAt, Optional<long> Limit, bool Spent)
+	{
+		public long Counted => Spent ? 1 : 0;
+	}
+
+	private sealed record Allowance(
+		long Remaining,
+		DateTimeOffset ResetAt,
+		Optional<long> Highest,
+		Optional<long> Limit,
+		long Answers,
+		Optional<DateTimeOffset> ReserveReachedAt
+	)
 	{
 		private static readonly TimeSpan Drift = TimeSpan.FromMinutes(1);
 
-		public Allowance After(long remaining, DateTimeOffset resetAt)
+		public Optional<long> Daily => Limit.Or(() => Highest.Map(highest => highest + 1));
+
+		public Optional<long> Outside
 		{
-			if (resetAt > ResetAt + Drift)
+			get { return Highest.Map(highest => Limit.GetValueOr(highest + 1) - Remaining - Answers).When(outside => outside > 0); }
+		}
+
+		public static Allowance First(Reading seen) => new(seen.Remaining, seen.ResetAt, new None(), seen.Limit, seen.Counted, new None());
+
+		public Allowance After(Reading seen, long reserve, DateTimeOffset now)
+		{
+			if (seen.ResetAt < ResetAt - Drift)
 			{
-				return new Allowance(remaining, resetAt, Some.Of(remaining));
+				return this;
 			}
 
-			return new Allowance(remaining, resetAt > ResetAt ? resetAt : ResetAt, Highest.Map(seen => Math.Max(seen, remaining)));
+			if (seen.ResetAt > ResetAt + Drift)
+			{
+				return new Allowance(seen.Remaining, seen.ResetAt, Some.Of(seen.Remaining), seen.Limit.Or(Limit), seen.Counted, new None());
+			}
+
+			var crossed = Remaining > reserve && seen.Remaining <= reserve;
+			return new Allowance(
+				Math.Min(Remaining, seen.Remaining),
+				seen.ResetAt > ResetAt ? seen.ResetAt : ResetAt,
+				Highest.Map(highest => Math.Max(highest, seen.Remaining)),
+				seen.Limit.Or(Limit),
+				Answers + seen.Counted,
+				ReserveReachedAt.Or(() => Optional.When(crossed, () => now))
+			);
 		}
 	}
 }

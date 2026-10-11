@@ -68,7 +68,9 @@ public sealed record UsageFeedLine(
 	IReadOnlyDictionary<RemoteService, UsageFeedStats> Services
 );
 
-public sealed record UsageSnapshot(UsagePeriod Current, UsagePeriod Previous, IReadOnlyList<UsageFeedLine> Feeds);
+public sealed record UsageQuota(RemoteService Service, QuotaToday Today, Optional<QuotaDay> Day);
+
+public sealed record UsageSnapshot(UsagePeriod Current, UsagePeriod Previous, IReadOnlyList<UsageFeedLine> Feeds, IReadOnlyList<UsageQuota> Quotas);
 
 public interface IUsageReport
 {
