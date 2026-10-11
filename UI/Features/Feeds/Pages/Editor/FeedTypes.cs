@@ -91,8 +91,7 @@ public record PreviewStatus
 	public bool IsLoading { get; init; }
 	public bool HasResults { get; init; }
 	public bool HasFailed { get; init; }
-	public bool EarlySaveAllowed { get; init; }
-	public int MirrorExposure { get; init; }
+	public Optional<int> MirrorExposure { get; init; } = new None();
 }
 
 internal static class MirrorSwitch
@@ -101,15 +100,28 @@ internal static class MirrorSwitch
 
 	internal const string Confirm = "Switch to Mirror";
 
-	public static bool NeedsConfirmation(FeedStrategy stored, FeedStrategy pending, int exposure) => stored is Append && pending is Mirror && exposure > 0;
+	public static bool NeedsConfirmation(FeedStrategy stored, FeedStrategy pending, Optional<int> exposure)
+	{
+		return stored is Append && pending is Mirror && exposure.Map(count => count > 0).GetValueOr(true);
+	}
 
-	public static string Warning(int exposure, int threshold)
+	public static string Warning(Optional<int> exposure, int threshold)
+	{
+		return exposure.Match(
+			count => Known(count, threshold),
+			() =>
+				$"The preview hasn't finished, so it can't tell yet how many titles have already left the list. Those are deleted {Timing(threshold, single: false)}."
+		);
+	}
+
+	private static string Known(int exposure, int threshold)
 	{
 		var single = exposure == 1;
 		var left = single ? "1 has already left the list" : $"{exposure} have already left the list";
-		var timing = threshold == 1 ? "on the next run" : $"after {threshold} runs without {(single ? "it" : "them")}";
-		return $"{left}, and {(single ? "is" : "are")} deleted {timing}.";
+		return $"{left}, and {(single ? "is" : "are")} deleted {Timing(threshold, single)}.";
 	}
+
+	private static string Timing(int threshold, bool single) => threshold == 1 ? "on the next run" : $"after {threshold} runs without {(single ? "it" : "them")}";
 }
 
 public sealed record IdentifierCheck(string Typed, Result<string> Answer);
