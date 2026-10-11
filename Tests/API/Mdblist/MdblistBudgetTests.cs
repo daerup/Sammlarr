@@ -2,6 +2,7 @@ using System.Net;
 using API.Http.Lanes;
 using API.Mdblist;
 using Contracts;
+using Domain.Usage;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Concurrency;
 using TestInfrastructure;
@@ -277,6 +278,32 @@ public class MdblistBudgetTests
 		var answered = await Assert.That(budget.Today("mdblist-key").Answered).IsSome();
 
 		await Assert.That(answered!.Allowance).IsNone();
+	}
+
+	[Test]
+	public async Task Today_AfterANewReset_KeepsHowTheDayBeforeEnded()
+	{
+		var budget = MdblistApis.Budget();
+		budget.Record("mdblist-key", Answer(remaining: 200, LastReset));
+		budget.Record("mdblist-key", Answer(remaining: 100, LastReset));
+		budget.Record("mdblist-key", Answer(remaining: 999, Reset));
+		budget.Record("mdblist-key", Answer(remaining: 998, Reset));
+		budget.Record("mdblist-key", Answer(remaining: 20, LastReset));
+
+		var answered = await Assert.That(budget.Today("mdblist-key").Answered).IsSome();
+
+		await Assert.That(answered!.DayBefore).IsSome().And.IsEqualTo(new DayEnd(100, LastReset, Some.Of(Now)));
+	}
+
+	[Test]
+	public async Task Today_AfterARestart_KnowsNoDayBefore()
+	{
+		var budget = MdblistApis.Budget();
+		budget.Record("mdblist-key", Answer(remaining: 999, Reset));
+
+		var answered = await Assert.That(budget.Today("mdblist-key").Answered).IsSome();
+
+		await Assert.That(answered!.DayBefore).IsNone();
 	}
 
 	[Test]
