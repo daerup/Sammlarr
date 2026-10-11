@@ -7,4 +7,7 @@ public enum Conclusiveness
 	NoItems,
 	NoMatches,
 	NoneAdmitted,
+	Pending,
+	Unresolved,
+	Stopped,
 }

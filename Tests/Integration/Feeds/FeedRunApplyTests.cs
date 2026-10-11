@@ -2,6 +2,7 @@ using System.Diagnostics.Metrics;
 using Contracts.Blocklist;
 using Contracts.Feed;
 using Contracts.Ratings;
+using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using DB.Data.Feed;
@@ -48,15 +49,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task RunAsync_WhileItsCallsAreMeasured_SavesTheRunWithTheCallsItMade()
 	{
-		using var listener = new MeterListener();
-		listener.InstrumentPublished = (instrument, meters) =>
-		{
-			if (instrument.Name == "resilience.polly.pipeline.duration")
-			{
-				meters.EnableMeasurementEvents(instrument);
-			}
-		};
-		listener.Start();
+		using var listener = MeasuringCalls();
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
 		var feedId = await SeedFeedAsync("measured-list", new Append());
 		host.MdblistFeedContains("measured-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
@@ -66,8 +59,115 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 			await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 		}
 
-		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(RunQuery.Take(1) with { Feed = Some.Of(feedId) })).Single();
+		var recorded = await LastRunAsync(feedId);
 		await Assert.That(recorded.Calls.Where(call => call.Service == RemoteService.Mdblist).Sum(call => call.Calls)).IsGreaterThan(0);
+	}
+
+	[Test]
+	public async Task RunAsync_ForATitleWithoutASinkId_CompletesAndAddsTheRest()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("switched-list", new Append());
+		host.MdblistFeedContains("switched-list", Item("Fight Club", MediaType.Movie, Tmdb("550")), Item("Breaking Bad", MediaType.Show, Tmdb("1396")));
+		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
+		var breakingBad = await host.Show(TestMedia.BreakingBad).SeedAsync();
+		host.PlexHasNoMetadataFor(TestMedia.BreakingBad);
+		var feedRead = host.HoldMdblistFeed("switched-list");
+
+		var running = Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+		await feedRead.Arrived;
+		await SwitchSinkAsync(SinkKind.Arr);
+		feedRead.Release();
+
+		await Assert.That(await running).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
+		await Assert.That(await WantlistIdsAsync()).IsEquivalentTo([fightClub]);
+		var recorded = await LastRunAsync(feedId);
+		await Assert.That(recorded.Items.Where(item => item.State is FeedRunItemState.Unaddressable).Select(item => item.MediaId)).IsEquivalentTo([breakingBad]);
+	}
+
+	[Test]
+	public async Task RunAsync_WhenTheApplyThrows_SavesTheRunAsStoppedWithItsCalls()
+	{
+		using var listener = MeasuringCalls();
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("rejected-list", new Append());
+		host.MdblistFeedContains("rejected-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		await host.Movie(TestMedia.FightClub).SeedAsync();
+		await host.Context.Database.ExecuteSqlRawAsync("""CREATE TRIGGER "RejectAdds" BEFORE INSERT ON "Wantlist" BEGIN SELECT RAISE(ABORT, 'locked'); END;""");
+
+		using (UsageCauses.Mark(feedId))
+		{
+			await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+		}
+
+		var recorded = await LastRunAsync(feedId);
+		await Assert.That(recorded.Conclusiveness).IsEqualTo(Conclusiveness.Stopped);
+		await Assert.That(recorded.SourceFailure).IsSome();
+		await Assert.That(recorded.Calls.Where(call => call.Service == RemoteService.Mdblist).Sum(call => call.Calls)).IsGreaterThan(0);
+	}
+
+	[Test]
+	public async Task RunAsync_WhenCancelled_SavesTheRunAsEnded()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("cancelled-list", new Append());
+		host.MdblistFeedContains("cancelled-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		var feedRead = host.HoldMdblistFeed("cancelled-list");
+		using var cancellation = new CancellationTokenSource();
+
+		var running = Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), cancellation.Token);
+		await feedRead.Arrived;
+		await cancellation.CancelAsync();
+		feedRead.Release();
+		await running;
+
+		var recorded = await LastRunAsync(feedId);
+		await Assert.That(recorded.Conclusiveness).IsEqualTo(Conclusiveness.Stopped);
+		await Assert.That(recorded.SourceFailure).IsSome().And.IsEqualTo(FeedRun.Cancelled);
+	}
+
+	[Test]
+	public async Task RunAsync_WhileItRuns_ShowsPendingInRunHistory()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("pending-list", new Append());
+		host.MdblistFeedContains("pending-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		await host.Movie(TestMedia.FightClub).SeedAsync();
+		var feedRead = host.HoldMdblistFeed("pending-list");
+
+		var running = Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+		await feedRead.Arrived;
+		var during = await LastRunAsync(feedId);
+		feedRead.Release();
+		await running;
+
+		await Assert.That(during.Conclusiveness).IsEqualTo(Conclusiveness.Pending);
+		await Assert.That((await LastRunAsync(feedId)).Conclusiveness).IsEqualTo(Conclusiveness.Conclusive);
+	}
+
+	[Test]
+	public async Task RunAsync_ForAMirrorFeedWithACouldNotLookUpTitle_RemovesNothing()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("unresolved-list", new Mirror(1));
+		host.MdblistFeedContains(
+			"unresolved-list",
+			Item("Fight Club", MediaType.Movie, Tmdb("550")),
+			Item("Heat", MediaType.Movie, Tmdb("949")) with
+			{
+				Year = 1995,
+			}
+		);
+		await host.Movie(TestMedia.FightClub).SeedAsync();
+		var ownedButGone = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
+		await host.WithPlexAccount("plex-token");
+		host.RateLimited(RemoteService.Plex);
+
+		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		var completed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
+		await Assert.That(completed!.Conclusiveness).IsEqualTo(Conclusiveness.Unresolved);
+		await Assert.That(await WantlistIdsAsync()).Contains(ownedButGone);
 	}
 
 	[Test]
@@ -365,6 +465,32 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		new(title, type, null, ids.ToDictionary(id => id.Provider, id => id.Value));
 
 	private async Task<IReadOnlyList<MediaId>> WantlistIdsAsync() => [.. (await host.Resolve<IWantlistRepository>().GetAllAsync()).Select(item => item.MediaId)];
+
+	private async Task<FeedRun> LastRunAsync(FeedId feedId)
+	{
+		var runs = await host.Resolve<IFeedRepository>().GetRunsAsync(RunQuery.Take(1) with { Feed = Some.Of(feedId) });
+		return runs.Single();
+	}
+
+	private async Task SwitchSinkAsync(SinkKind sink)
+	{
+		var config = host.Resolve<IProviderConfigService>();
+		await config.StoreAsync((await config.GetAsync()) with { Sink = sink });
+	}
+
+	private static MeterListener MeasuringCalls()
+	{
+		var listener = new MeterListener();
+		listener.InstrumentPublished = (instrument, meters) =>
+		{
+			if (instrument.Name == "resilience.polly.pipeline.duration")
+			{
+				meters.EnableMeasurementEvents(instrument);
+			}
+		};
+		listener.Start();
+		return listener;
+	}
 
 	private async Task<(FeedId Feed, MediaId FightClub, MediaId Inception)> SeedRatedFeedAsync(string? ratingStrategy)
 	{

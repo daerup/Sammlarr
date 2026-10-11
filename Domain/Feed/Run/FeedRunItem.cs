@@ -7,6 +7,7 @@ public enum FeedRunItemState
 	Added,
 	Kept,
 	Removed,
+	Unaddressable,
 }
 
 public sealed record FeedRunItem

@@ -128,17 +128,46 @@ public class FeedPlanTests
 		await Assert.That(plan.Delta.Keeps).IsEquivalentTo([Kept]);
 	}
 
+	[Test]
+	public async Task Compute_WhenATitleCouldNotBeLookedUp_IsUnresolvedAndDropsNothing()
+	{
+		var plan = Compute(
+			[Verdict(Kept, QueryOutcome.Qualified, owned: true)],
+			owned: [Kept, Dropped],
+			unmatched: [Unmatched(1) with { Reason = UnmatchedReason.CouldNotLookUp }]
+		);
+
+		await Assert.That(plan.Conclusiveness).IsEqualTo(Conclusiveness.Unresolved);
+		await Assert.That(plan.Delta.Drops).IsEmpty();
+	}
+
+	[Test]
+	public async Task Compute_ForAnOwnedTitleInConflict_CountsNoAbsence()
+	{
+		var plan = Mirrored(
+			[Verdict(Kept, QueryOutcome.Qualified, owned: true)],
+			owned: [Kept, Dropped],
+			absences: [(Dropped, 2)],
+			unmatched: [Unmatched(1) with { Reason = UnmatchedReason.Conflict, ConflictsWith = [Dropped] }]
+		);
+
+		await Assert.That(plan.MissedRuns).DoesNotContainKey(Dropped);
+		await Assert.That(plan.Delta.Keeps).Contains(Dropped);
+		await Assert.That(plan.Delta.Drops).IsEmpty();
+	}
+
 	private static IFeedPlan Compute(
 		IReadOnlyList<QueryVerdict<MatchedMedia>> verdicts,
 		IReadOnlyList<MediaId> owned,
 		FeedStrategy? strategy = null,
 		FeedLoadState state = FeedLoadState.Finished,
 		int unmatchedCount = 0,
-		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
+		IReadOnlyList<(MediaId Id, int Absences)>? absences = null,
+		IReadOnlyList<UnmatchedMedia>? unmatched = null
 	)
 	{
 		return FeedPlans.Compute(
-			new ClassifiedFeedLoad(verdicts, [.. Enumerable.Range(0, unmatchedCount).Select(Unmatched)], state),
+			new ClassifiedFeedLoad(verdicts, unmatched ?? [.. Enumerable.Range(0, unmatchedCount).Select(Unmatched)], state),
 			owned.ToHashSet(),
 			(absences ?? [.. owned.Select(id => (Id: id, Absences: 10))]).ToDictionary(entry => entry.Id, entry => entry.Absences),
 			strategy ?? new Mirror(3)
@@ -148,10 +177,11 @@ public class FeedPlanTests
 	private static MirrorPlan Mirrored(
 		IReadOnlyList<QueryVerdict<MatchedMedia>> verdicts,
 		IReadOnlyList<MediaId> owned,
-		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
+		IReadOnlyList<(MediaId Id, int Absences)>? absences = null,
+		IReadOnlyList<UnmatchedMedia>? unmatched = null
 	)
 	{
-		return (MirrorPlan)Compute(verdicts, owned, absences: absences);
+		return (MirrorPlan)Compute(verdicts, owned, absences: absences, unmatched: unmatched);
 	}
 
 	private static QueryVerdict<MatchedMedia> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlocklist = false)

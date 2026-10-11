@@ -55,61 +55,68 @@ internal sealed class FeedRunEngine(
 
 	private async Task<FeedRunResult> ExecuteAsync(Domain.Feed.Feed feed, FeedRunTrigger trigger, CancellationToken cancellationToken)
 	{
-		usage.Start(feed.Id);
 		using var run = trace.Start(feed.Id, currentUser.Id);
-		try
-		{
-			return await RecordAsync(feed, trigger, cancellationToken);
-		}
-		finally
-		{
-			usage.End(feed.Id);
-		}
+		return await RecordAsync(feed, trigger, cancellationToken);
 	}
 
 	private async Task<FeedRunResult> RecordAsync(Domain.Feed.Feed feed, FeedRunTrigger trigger, CancellationToken cancellationToken)
 	{
-		var startedAt = clock.Now;
 		var elapsed = Stopwatch.StartNew();
+		var run = Started(feed, trigger, clock.Now);
+		await feeds.StartRunAsync(run, cancellationToken);
+		usage.Start(feed.Id);
+		try
+		{
+			var planned = await planner.PlanAsync(feed, cancellationToken);
+			var added = await wantlist.AddAsync(planned.Delta.Adds, new FeedOrigin(feed, run), cancellationToken);
+			var removed = await wantlist.RemoveAsync(planned.Delta.Drops, addedBy: feed.Id, cancellationToken);
+			WarnOnDrift(feed, planned.Delta, [.. added.Added, .. added.Unaddressable], removed);
 
-		var planned = await planner.PlanAsync(feed, cancellationToken);
+			var applied = planned.Delta with { Adds = added.Added, Drops = removed };
+			run = run with
+			{
+				Conclusiveness = planned.Conclusiveness,
+				Counts = FeedRunCounts.From(planned, applied),
+				Items = Record(applied, added.Unaddressable),
+				SourceFailure = planned.SourceFailure,
+			};
+			trace.Counted(feed.Id, run.Counts);
+			return run.Failed
+				? new FeedRunFailed(run.SourceFailure.GetValueOr("The source returned nothing."))
+				: new FeedRunCompleted(applied, planned.Conclusiveness);
+		}
+		catch (Exception exception)
+		{
+			run = Ended(run, exception, cancellationToken);
+			throw;
+		}
+		finally
+		{
+			var cost = usage.End(feed.Id);
+			await feeds.CompleteRunAsync(run with { Duration = elapsed.Elapsed, Calls = cost.Calls, Times = cost.Times }, CancellationToken.None);
+		}
+	}
 
-		var run = new FeedRun
+	private static FeedRun Started(Domain.Feed.Feed feed, FeedRunTrigger trigger, DateTimeOffset startedAt)
+	{
+		return new FeedRun
 		{
 			Id = RunId.From(Guid.NewGuid()),
 			FeedId = feed.Id,
 			StartedAt = startedAt,
-			Duration = elapsed.Elapsed,
+			Duration = TimeSpan.Zero,
 			Strategy = feed.Strategy,
 			Trigger = trigger,
-			Conclusiveness = planned.Conclusiveness,
-			Counts = FeedRunCounts.From(planned),
-			Items = Record(planned.Delta),
-			SourceFailure = planned.SourceFailure,
+			Conclusiveness = Conclusiveness.Pending,
+			Counts = FeedRunCounts.None,
+			Items = [],
 		};
-		await feeds.StartRunAsync(run, cancellationToken);
+	}
 
-		var added = await wantlist.AddAsync(planned.Delta.Adds, new FeedOrigin(feed, run), cancellationToken);
-		var removed = await wantlist.RemoveAsync(planned.Delta.Drops, addedBy: feed.Id, cancellationToken);
-		WarnOnDrift(feed, planned.Delta, added, removed);
-
-		var applied = planned.Delta with { Adds = added, Drops = removed };
-		var cost = usage.End(feed.Id);
-		var completed = run with
-		{
-			Duration = elapsed.Elapsed,
-			Conclusiveness = planned.Conclusiveness,
-			Counts = FeedRunCounts.From(planned, applied),
-			Items = Record(applied),
-			Calls = cost.Calls,
-			Times = cost.Times,
-		};
-		await feeds.CompleteRunAsync(completed, cancellationToken);
-		trace.Counted(feed.Id, completed.Counts);
-
-		return completed.Failed
-			? new FeedRunFailed(completed.SourceFailure.GetValueOr("The source returned nothing."))
-			: new FeedRunCompleted(applied, planned.Conclusiveness);
+	private static FeedRun Ended(FeedRun run, Exception exception, CancellationToken cancellationToken)
+	{
+		var reason = exception is OperationCanceledException && cancellationToken.IsCancellationRequested ? FeedRun.Cancelled : exception.Message;
+		return run with { Conclusiveness = Conclusiveness.Stopped, SourceFailure = Some.Of(reason) };
 	}
 
 	private void WarnOnDrift(Domain.Feed.Feed feed, FeedDelta planned, IReadOnlyList<MediaId> added, IReadOnlyList<MediaId> removed)
@@ -129,10 +136,11 @@ internal sealed class FeedRunEngine(
 		);
 	}
 
-	private static IReadOnlyList<FeedRunItem> Record(FeedDelta delta) =>
+	private static IReadOnlyList<FeedRunItem> Record(FeedDelta delta, IReadOnlyList<MediaId> unaddressable) =>
 		[
 			.. delta.Adds.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Added }),
 			.. delta.Keeps.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Kept }),
 			.. delta.Drops.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Removed }),
+			.. unaddressable.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Unaddressable }),
 		];
 }

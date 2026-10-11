@@ -111,7 +111,7 @@ else
             {
                 <FeedChip Tone="FeedChipTone.Failed" Icon="cloud-off">Failed</FeedChip>
             }
-            else if (last.Conclusiveness is not Conclusiveness.Conclusive)
+            else if (last.Conclusiveness is not (Conclusiveness.Conclusive or Conclusiveness.Pending))
             {
                 <FeedChip Tone="FeedChipTone.Attention" Icon="shield">Guarded</FeedChip>
             }
@@ -152,7 +152,7 @@ else
 
     private async Task OpenAsync(FeedRun run)
     {
-        var wanted = run.Items.Where(item => item.State is not FeedRunItemState.Kept).Select(item => item.MediaId).ToList();
+        var wanted = run.Items.Where(item => item.State is FeedRunItemState.Added or FeedRunItemState.Removed).Select(item => item.MediaId).ToList();
         _items = FeedRunView.Items(run, await Media.GetDetailsByIdAsync(wanted));
         await SetOpenAsync(true);
     }
@@ -182,7 +182,13 @@ else
         @<button type="button" class="last-run" @onclick="() => OpenAsync(run)">
             <LucideIcon Name="history" Size="14"/>
             <span>@ScheduleText.Ago(run.StartedAt, DateTimeOffset.UtcNow)</span>
-            @if (run.Conclusiveness is not Conclusiveness.Conclusive)
+            @if (run.Conclusiveness is Conclusiveness.Pending)
+            {
+                <span class="last-run-badge">
+                    <LucideIcon Name="loader-circle" Size="11"/>
+                </span>
+            }
+            else if (run.Conclusiveness is not Conclusiveness.Conclusive)
             {
                 <span class="last-run-badge is-guarded">
                     <LucideIcon Name="shield" Size="11"/>

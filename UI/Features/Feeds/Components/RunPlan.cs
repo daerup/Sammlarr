@@ -83,7 +83,7 @@ internal static class RunPlan
 	{
 		var feed = overview.Feed;
 		var next = feed.Schedule.NextRun(from, zone);
-		var stalled = overview.LastRun.Match(run => run.Conclusiveness is not Conclusiveness.Conclusive, () => false);
+		var stalled = overview.LastRun.Match(run => run.Conclusiveness is not (Conclusiveness.Conclusive or Conclusiveness.Pending), () => false);
 		var dueSoon = next.Match(at => at - from <= Soon, () => false);
 		var group = Group(feed.Schedule, stalled, dueSoon);
 		return new RunCandidate(

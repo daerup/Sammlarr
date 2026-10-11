@@ -33,6 +33,32 @@ public class FeedRunViewTests
 	}
 
 	[Test]
+	[Arguments(FeedRun.Interrupted)]
+	[Arguments(FeedRun.Cancelled)]
+	public async Task Problem_ForARunThatStoppedBeforeItFinished_SaysSoRatherThanBlamingTheSource(string reason)
+	{
+		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.Stopped) with { SourceFailure = Some.Of(reason) };
+
+		await Assert.That(FeedRunView.Problem(run)).IsEqualTo("The run stopped before it finished, so some of its changes may be missing.");
+	}
+
+	[Test]
+	public async Task Problem_ForARunStillGoing_IsNull()
+	{
+		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.Pending);
+
+		await Assert.That(FeedRunView.Problem(run)).IsNull();
+	}
+
+	[Test]
+	public async Task Problem_ForARunWithTitlesItCouldNotLookUp_SaysNoRemovalsWereApplied()
+	{
+		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.Unresolved) with { Counts = FeedRunCounts.None with { Total = 3 } };
+
+		await Assert.That(FeedRunView.Problem(run)).IsEqualTo("Some titles couldn't be looked up, so no removals were applied.");
+	}
+
+	[Test]
 	public async Task Problem_WhenARunFailedWithoutASourceFailure_SaysTheSourceReturnedNothing()
 	{
 		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.NoItems);

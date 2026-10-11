@@ -40,10 +40,11 @@ public static class FeedPlans
 	{
 		var verdicts = load.Verdicts;
 		var qualifying = verdicts.Where(verdict => verdict.Outcome is QueryOutcome.Qualified).Select(verdict => verdict.Item.Identity.Id).ToHashSet();
-		var missing = owned.Where(id => !qualifying.Contains(id)).ToList();
+		var seen = qualifying.Union(load.Unmatched.SelectMany(title => title.ConflictsWith)).ToHashSet();
+		var missing = owned.Where(id => !seen.Contains(id)).ToList();
 		var missedRuns = missing.ToDictionary(id => id, id => absences.GetValueOrDefault(id) + 1);
 
-		var conclusiveness = Assess(qualifying.Count, verdicts.Count, load.Unmatched.Count, load.State);
+		var conclusiveness = Assess(qualifying.Count, verdicts.Count, load.Unmatched, load.State);
 		var conclusive = conclusiveness is Conclusiveness.Conclusive;
 
 		var delta = new FeedDelta(
@@ -51,7 +52,7 @@ public static class FeedPlans
 			[
 				.. verdicts.Where(verdict => verdict.WillImport && !owned.Contains(verdict.Item.Identity.Id)).Select(verdict => verdict.Item.Identity.Id).Distinct(),
 			],
-			Keeps: [.. owned.Where(qualifying.Contains)],
+			Keeps: [.. owned.Where(seen.Contains)],
 			Drops: strategy is Mirror mirror && conclusive ? [.. missing.Where(id => missedRuns[id] >= mirror.AbsenceThreshold)] : []
 		);
 
@@ -62,12 +63,13 @@ public static class FeedPlans
 		};
 	}
 
-	private static Conclusiveness Assess(int qualifying, int resolved, int unmatched, FeedLoadState state)
+	private static Conclusiveness Assess(int qualifying, int resolved, IReadOnlyList<UnmatchedMedia> unmatched, FeedLoadState state)
 	{
 		return state switch
 		{
 			FeedLoadState.Unfinished => Conclusiveness.StillLoading,
-			FeedLoadState.Finished => Settled(qualifying, resolved, unmatched),
+			FeedLoadState.Finished when unmatched.Any(title => title.Reason is UnmatchedReason.CouldNotLookUp) => Conclusiveness.Unresolved,
+			FeedLoadState.Finished => Settled(qualifying, resolved, unmatched.Count),
 		};
 	}
 

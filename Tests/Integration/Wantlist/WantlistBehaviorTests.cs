@@ -102,19 +102,29 @@ public class WantlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task AddAsync_WhenTheSinkIdIsMissing_IsRejected()
+	public async Task AddAsync_WhenTheSinkIdIsMissing_ReturnsItAsUnaddressable()
 	{
 		var solaris = await host.Movie("Solaris", tmdb: "11321").SeedAsync();
+		var wantlist = host.Resolve<IWantlistService>();
 
-		await Assert.That(async () => await host.Resolve<IWantlistService>().AddAsync([solaris], Manual)).Throws<MissingSinkIdException>();
+		var added = await wantlist.AddAsync([solaris], Manual);
+
+		await Assert.That(added.Unaddressable).IsEquivalentTo([solaris]);
+		await Assert.That(added.Added).IsEmpty();
+		await Assert.That((await wantlist.GetAsync()).Ids).DoesNotContain(solaris);
 	}
 
 	[Test]
-	public async Task RemoveAsync_WhenTheSinkIdIsMissing_IsRejected()
+	public async Task RemoveAsync_WhenTheSinkIdIsMissing_RemovesItLocallyAndQueuesNothing()
 	{
 		var solaris = await host.Movie("Solaris", tmdb: "11321").OnWantlist(origin: Manual);
+		var wantlist = host.Resolve<IWantlistService>();
 
-		await Assert.That(async () => await host.Resolve<IWantlistService>().RemoveAsync([solaris])).Throws<MissingSinkIdException>();
+		var removed = await wantlist.RemoveAsync([solaris]);
+
+		await Assert.That(removed).IsEquivalentTo([solaris]);
+		await Assert.That((await wantlist.GetAsync()).Ids).DoesNotContain(solaris);
+		await Assert.That((await wantlist.GetOutboxAsync()).Removes).IsEmpty();
 	}
 
 	[Test]
