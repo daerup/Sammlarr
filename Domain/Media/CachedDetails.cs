@@ -6,7 +6,7 @@ public sealed record CachedDetails(MediaDetails Details, DateTimeOffset Refreshe
 {
 	public static readonly TimeSpan StaleAfter = TimeSpan.FromDays(14);
 
-	public ValueSet<RemoteService> Answered => [.. Answers.Select(answer => answer.Provider)];
-
 	public bool IsStale(DateTimeOffset now) => now - RefreshedAt >= StaleAfter;
+
+	public ValueSet<RemoteService> Resting(DateTimeOffset now) => [.. Answers.Where(answer => answer.AskableAt > now).Select(answer => answer.Provider)];
 }

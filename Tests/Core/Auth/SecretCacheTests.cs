@@ -88,10 +88,11 @@ public sealed class SecretCacheTests : IDisposable
 	}
 
 	[Test]
-	public async Task GetOrLoadAsync_WhenTheCheckRejectsTheSecret_FailsAndRemembersItWithoutLoadingAgain()
+	public async Task GetOrLoadAsync_WhenTheCheckRejectsTheSecret_FailsAsRejectedAndRemembersItWithoutLoadingAgain()
 	{
-		await Assert.That(await Testee.GetOrLoadAsync(ApiKeyProvider.Tmdb, Load, Answering(AccessCheck.Rejected))).IsError();
+		var rejected = await Assert.That(await Testee.GetOrLoadAsync(ApiKeyProvider.Tmdb, Load, Answering(AccessCheck.Rejected))).IsError();
 
+		await Assert.That(rejected!.CausedBy<SecretRejectedException>()).IsSome();
 		await Assert.That(await Testee.GetOrLoadAsync(ApiKeyProvider.Tmdb, Load, Check)).IsError();
 		await Assert.That(_loads).IsEqualTo(1);
 	}
@@ -116,6 +117,17 @@ public sealed class SecretCacheTests : IDisposable
 
 		await Assert.That(await Testee.GetOrLoadAsync(ApiKeyProvider.Tmdb, Load, Check)).IsError();
 		await Assert.That(Testee.IsRejected(ApiKeyProvider.Tmdb)).IsTrue();
+	}
+
+	[Test]
+	public async Task GetOrLoadAsync_AfterARejection_FailsAsARejectedSecret()
+	{
+		Testee.Reject(ApiKeyProvider.Tmdb);
+
+		var read = await Testee.GetOrLoadAsync(ApiKeyProvider.Tmdb, Load, Check);
+
+		var error = await Assert.That(read).IsError();
+		await Assert.That(error!.CausedBy<SecretRejectedException>()).IsSome();
 	}
 
 	[Test]

@@ -1,3 +1,4 @@
+using Domain.Auth;
 using Domain.Providers;
 using Polly.Timeout;
 using Shared.Concurrency;
@@ -42,7 +43,7 @@ internal static class Answering
 			RemoteUnavailableException unavailable => new Unavailable(remote, unavailable.Until, unavailable.Sent),
 			HttpRequestException or TimeoutRejectedException => new Unavailable(remote, new None(), true),
 			OperationCanceledException { InnerException: TimeoutException } => new Unavailable(remote, new None(), true),
-			LaneRefusedException => new Unavailable(remote, new None(), false),
+			LaneRefusedException or SecretRejectedException => new Unavailable(remote, new None(), false),
 			_ => new Faulted(remote, error),
 		};
 	}

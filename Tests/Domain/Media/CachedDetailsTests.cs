@@ -37,9 +37,26 @@ public class CachedDetailsTests
 	}
 
 	[Test]
-	public async Task Answered_NamesEveryProviderThatAnswered()
+	public async Task Resting_WithinTwoWeeksOfTheAnswers_NamesEveryProviderThatAnswered()
 	{
-		await Assert.That(Cached(Stored, Now, TmdbFilledEverything, PlexLackedTheAudience).Answered).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Plex]);
+		var cached = Cached(Stored, Now, TmdbFilledEverything, PlexLackedTheAudience);
+
+		await Assert.That(cached.Resting(Now.AddDays(14).AddMinutes(-1))).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Plex]);
+	}
+
+	[Test]
+	public async Task Resting_TwoWeeksAfterTheAnswers_NamesNobody()
+	{
+		await Assert.That(Cached(Stored, Now, TmdbFilledEverything, PlexLackedTheAudience).Resting(Now.AddDays(14))).IsEmpty();
+	}
+
+	[Test]
+	public async Task Resting_ForAFailure_LastsOnlyItsBackoff()
+	{
+		var cached = Cached(Stored, Now, TmdbFilledEverything, ProviderAnswer.Failed(RemoteService.Plex, new None(), Now));
+
+		await Assert.That(cached.Resting(Now.AddMinutes(59))).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Plex]);
+		await Assert.That(cached.Resting(Now.AddHours(1))).IsEquivalentTo([RemoteService.Tmdb]);
 	}
 
 	private static CachedDetails Cached(MediaDetails details, DateTimeOffset refreshedAt, params ProviderAnswer[] answers) =>

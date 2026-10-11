@@ -15,6 +15,8 @@ internal record ProviderAnswerRow
 	[Required]
 	public required DateTimeOffset AnsweredAt { get; set; }
 
+	public int Failures { get; set; }
+
 #pragma warning disable CS8618
 	public MediaDetailsRow Details { get; set; }
 #pragma warning restore CS8618

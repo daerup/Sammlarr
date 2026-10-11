@@ -22,7 +22,9 @@ internal class PlexClient(HttpClient client, ICredentialService credentials, ICu
 	{
 		var credential = await credentials
 			.GetAsync(AuthProvider.Plex, cancellationToken)
-			.GetOrThrow(_ => new InvalidOperationException("No valid Plex credentials are stored. Use Plex auth to sign in first."));
+			.GetOrThrow(error =>
+				error.Exception.GetValueOr(() => new InvalidOperationException("No valid Plex credentials are stored. Use Plex auth to sign in first."))
+			);
 
 		var request = new HttpRequestMessage(method, uri);
 		request.Headers.Add("X-Plex-Token", credential.AccessToken);

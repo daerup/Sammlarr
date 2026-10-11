@@ -184,6 +184,21 @@ public class MalTests
 	}
 
 	[Test]
+	[Arguments(HttpStatusCode.Unauthorized)]
+	[Arguments(HttpStatusCode.Forbidden)]
+	[Arguments(HttpStatusCode.BadRequest)]
+	public async Task LookUpAsync_WhenMalRefusesTheRequest_IsUnavailableAndSent(HttpStatusCode status)
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(status);
+		var keys = Keys();
+
+		var answer = await new MalEnricher(Client(handler, keys), keys.Object).LookUpAsync(MalId.From("16498", MediaType.Show));
+
+		await Assert.That(answer).IsOfUnionType<Answer<FoundMedia>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Mal, new None(), true));
+	}
+
+	[Test]
 	public async Task LookUpAsync_ForAnAnime_RatesItWithItsVotesAndPrefersTheEnglishTitle()
 	{
 		var handler = Mock.HttpHandler();

@@ -18,7 +18,7 @@ internal sealed class SecretCache<TProvider, TSecret>(
 	{
 		if (IsRejected(provider))
 		{
-			return Error.From($"The stored {provider} secret was rejected.");
+			return Refused($"The stored {provider} secret was rejected.");
 		}
 
 		return await cache
@@ -66,8 +66,10 @@ internal sealed class SecretCache<TProvider, TSecret>(
 	private Result<TSecret> Rejected(TProvider provider)
 	{
 		Reject(provider);
-		return Error.From($"{provider} rejected the stored secret.");
+		return Refused($"{provider} rejected the stored secret.");
 	}
+
+	private static Error Refused(string reason) => Error.From(reason, new SecretRejectedException(reason));
 
 	private (Guid User, TProvider Provider) Key(TProvider provider)
 	{

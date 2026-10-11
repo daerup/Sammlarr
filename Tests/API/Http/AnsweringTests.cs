@@ -1,5 +1,6 @@
 using System.Text.Json;
 using API.Http;
+using Domain.Auth;
 using Domain.Providers;
 using Polly.Timeout;
 using Shared.Concurrency;
@@ -75,6 +76,16 @@ public class AnsweringTests
 		var answer = await Thrown(new LaneRefusedException("blocked until 2026-10-11T12:05:00Z"));
 
 		await Assert.That(answer).IsOfUnionType<Answer<string>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Plex, new None(), false));
+	}
+
+	[Test]
+	public async Task GuardedAsync_ForARejectedKey_IsUnavailableAndNotSent()
+	{
+		var rejected = new SecretRejectedException("The stored Tmdb secret was rejected.");
+
+		var answer = await Task.FromResult<Result<string>>(Error.From(rejected.Message, rejected)).GuardedAsync(RemoteService.Tmdb);
+
+		await Assert.That(answer).IsOfUnionType<Answer<string>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Tmdb, new None(), false));
 	}
 
 	[Test]
