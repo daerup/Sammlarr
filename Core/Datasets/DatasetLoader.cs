@@ -1,5 +1,6 @@
 using Contracts;
 using Contracts.Datasets;
+using Contracts.Housekeeping;
 using Domain.Usage;
 using Microsoft.Extensions.Logging;
 using Observability.Usage;
@@ -35,6 +36,7 @@ internal sealed class DatasetLoader<TRow>(
 	IDataset<TRow> dataset,
 	IDatasetTable<TRow> table,
 	IDatasetLoads loads,
+	IDatabaseFile database,
 	IDateTimeProvider clock,
 	DatasetGate gate,
 	ILogger<DatasetLoader<TRow>> logger
@@ -55,7 +57,12 @@ internal sealed class DatasetLoader<TRow>(
 		return await download.Map(file => file.Match(changed => ReplaceAsync(changed, cancellationToken), () => Success.Of(0)));
 	}
 
-	private async Task<Result<int>> ReplaceAsync(DatasetFile<TRow> file, CancellationToken cancellationToken)
+	private Task<Result<int>> ReplaceAsync(DatasetFile<TRow> file, CancellationToken cancellationToken)
+	{
+		return ReplaceTableAsync(file, cancellationToken).Apply(_ => database.CompactAsync(cancellationToken));
+	}
+
+	private async Task<Result<int>> ReplaceTableAsync(DatasetFile<TRow> file, CancellationToken cancellationToken)
 	{
 		try
 		{

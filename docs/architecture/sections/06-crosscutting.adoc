@@ -412,7 +412,10 @@ stored titles
 
 State is one SQLite database via EF Core. Repositories create a context per operation from
 `IDbContextFactory<SammlarrDbContext>` (the context is `internal`). A `SqlitePragmaInterceptor`
-sets WAL, `synchronous=NORMAL` and a busy timeout. Schema is applied at startup by a hosted
+sets WAL, `synchronous=NORMAL`, a busy timeout and an 8 MB `journal_size_limit`, the size a write-ahead
+log is cut back to once it restarts. After a dataset replace commits, `IDatabaseFile.CompactAsync`
+truncates the log and vacuums the file when a tenth of its pages are free, so the file stays about the
+size of its data. Schema is applied at startup by a hosted
 `DbInitializer` calling `Database.Migrate()`, never `EnsureCreated`; migrations live in
 `DB/Migrations`, and a test asserts `HasPendingModelChanges()` is false. The singleton
 provider-config row comes from the context's `UseSeeding` and `UseAsyncSeeding` hooks, which insert

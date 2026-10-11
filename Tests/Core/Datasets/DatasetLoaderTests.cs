@@ -1,5 +1,6 @@
 using Contracts;
 using Contracts.Datasets;
+using Contracts.Housekeeping;
 using Core.Datasets;
 using Domain.Usage;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -22,10 +23,13 @@ public class DatasetLoaderTests
 
 	private readonly Mock<IDatasetLoads> _loads = IDatasetLoads.Mock();
 
+	private readonly Mock<IDatabaseFile> _database = IDatabaseFile.Mock();
+
 	public DatasetLoaderTests()
 	{
 		_dataset.Name.Returns(DatasetNames.ImdbRatings);
 		_loads.FindAsync(DatasetNames.ImdbRatings, Any()).Returns(Some.Of(Yesterday));
+		_database.CompactAsync(Any()).Returns(new Compaction(100, 50, true));
 	}
 
 	[Test]
@@ -43,7 +47,7 @@ public class DatasetLoaderTests
 	}
 
 	[Test]
-	public async Task LoadAsync_WhenTheFileIsUnchanged_LoadsAndRecordsNothing()
+	public async Task LoadAsync_WhenTheFileIsUnchanged_LoadsRecordsAndCompactsNothing()
 	{
 		_dataset.DownloadAsync(Any(), Any()).Returns(Success.Of<Optional<DatasetFile<ImdbRatingLine>>>(new None()));
 
@@ -52,6 +56,7 @@ public class DatasetLoaderTests
 		await Assert.That(loaded).IsSuccess().And.IsEqualTo(0);
 		_table.ReplaceAsync(Any(), Any()).WasNeverCalled();
 		_loads.RecordAsync(Any(), Any()).WasNeverCalled();
+		_database.CompactAsync(Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -67,7 +72,23 @@ public class DatasetLoaderTests
 	}
 
 	[Test]
-	public async Task LoadAsync_WhenTheTableCannotTakeTheRows_RecordsNothing()
+	public async Task LoadAsync_ForAChangedFile_CompactsTheDatabaseFileOnceTheLoadIsRecorded()
+	{
+		var recorded = false;
+		var compactedAfterRecord = false;
+		_dataset.DownloadAsync(Any(), Any()).Returns(Changed());
+		_table.ReplaceAsync(Any(), Any()).Returns(2);
+		_loads.RecordAsync(Any(), Any()).Callback(() => recorded = true);
+		_database.CompactAsync(Any()).Returns(new Compaction(100, 50, true)).Callback(() => compactedAfterRecord = recorded);
+
+		await Testee().LoadAsync();
+
+		_database.CompactAsync(Any()).WasCalled(Times.Once);
+		await Assert.That(compactedAfterRecord).IsTrue();
+	}
+
+	[Test]
+	public async Task LoadAsync_WhenTheTableCannotTakeTheRows_RecordsAndCompactsNothing()
 	{
 		_dataset.DownloadAsync(Any(), Any()).Returns(Changed());
 		_table.ReplaceAsync(Any(), Any()).Throws(new InvalidDataException("The file is cut short."));
@@ -76,6 +97,7 @@ public class DatasetLoaderTests
 
 		await Assert.That(loaded).IsError();
 		_loads.RecordAsync(Any(), Any()).WasNeverCalled();
+		_database.CompactAsync(Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -120,6 +142,7 @@ public class DatasetLoaderTests
 			_dataset.Object,
 			_table.Object,
 			_loads.Object,
+			_database.Object,
 			clock.Object,
 			gate ?? new DatasetGate(),
 			NullLogger<DatasetLoader<ImdbRatingLine>>.Instance
