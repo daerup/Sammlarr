@@ -31,6 +31,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 				signal,
 				new JobAlarm(scopes, signal, clock, NullLogger<JobAlarm>.Instance),
 				new JobRunnerStatus(),
+				host.Resolve<JobTurn>(),
 				clock,
 				NullLogger<JobRunner>.Instance
 			);
@@ -52,6 +53,24 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(await Testee.TryRunNextAsync(CancellationToken.None)).IsTrue();
 
+		await Assert.That(await StateOfAsync(queued.Id)).IsEqualTo(JobState.Done);
+	}
+
+	[Test]
+	public async Task RunNextAsync_WhileTheTurnIsHeld_StartsTheJobOnlyOnceItIsReleased()
+	{
+		await host.RemoteWantlistEmpty();
+		var queued = await Assert.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger()))).IsOfUnionType<EnqueueResult, Queued>();
+		PastTheGrace();
+		var held = await host.Resolve<JobTurn>().TakeAsync(CancellationToken.None);
+
+		var running = Testee.TryRunNextAsync(CancellationToken.None);
+		await Task.Delay(TimeSpan.FromMilliseconds(200));
+		var stateWhileHeld = await StateOfAsync(queued.Id);
+		held.Dispose();
+
+		await Assert.That(await running).IsTrue();
+		await Assert.That(stateWhileHeld).IsEqualTo(JobState.Queued);
 		await Assert.That(await StateOfAsync(queued.Id)).IsEqualTo(JobState.Done);
 	}
 

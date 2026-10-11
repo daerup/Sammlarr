@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261011175712_SmallerImdbRatings";
+    public override string LastMigrationId => "20261011183220_HousekeepingReports";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -554,6 +554,53 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsUnique();
 
                 b.ToTable("FeedRunTimes");
+            });
+
+        modelBuilder.Entity("DB.Data.Housekeeping.HousekeepingReportRow", b =>
+            {
+                b.Property<int>("Id")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long?>("BytesAfter")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long?>("BytesBefore")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("FailedStep")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("FailureReason")
+                    .HasColumnType("TEXT");
+
+                b.Property<long?>("FinishedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long>("StartedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<bool?>("Vacuumed")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Id");
+
+                b.ToTable("HousekeepingReports");
+            });
+
+        modelBuilder.Entity("DB.Data.Housekeeping.HousekeepingStepRow", b =>
+            {
+                b.Property<int>("ReportId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Step")
+                    .HasColumnType("TEXT");
+
+                b.Property<int>("Removed")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("ReportId", "Step");
+
+                b.ToTable("HousekeepingReportSteps");
             });
 
         modelBuilder.Entity("DB.Data.Identity.AccountLinkRow", b =>
@@ -1675,6 +1722,15 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired();
             });
 
+        modelBuilder.Entity("DB.Data.Housekeeping.HousekeepingStepRow", b =>
+            {
+                b.HasOne("DB.Data.Housekeeping.HousekeepingReportRow", null)
+                    .WithMany("Steps")
+                    .HasForeignKey("ReportId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
         modelBuilder.Entity("DB.Data.Identity.AccountLinkRow", b =>
             {
                 b.HasOne("DB.Data.Identity.UserRow", null)
@@ -1880,6 +1936,11 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Items");
 
                 b.Navigation("Times");
+            });
+
+        modelBuilder.Entity("DB.Data.Housekeeping.HousekeepingReportRow", b =>
+            {
+                b.Navigation("Steps");
             });
 
         modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>

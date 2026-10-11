@@ -15,6 +15,7 @@ internal sealed class JobRunner(
 	JobSignal signal,
 	JobAlarm alarm,
 	JobRunnerStatus status,
+	JobTurn turn,
 	IDateTimeProvider clock,
 	ILogger<JobRunner> logger
 ) : BackgroundService
@@ -87,6 +88,7 @@ internal sealed class JobRunner(
 
 	internal async Task<bool> TryRunNextAsync(CancellationToken cancellationToken)
 	{
+		using var held = await turn.TakeAsync(cancellationToken);
 		await using var scope = scopes.CreateAsyncScope();
 		var jobs = scope.ServiceProvider.GetRequiredService<IJobRepository>();
 		if (await jobs.TakeNextAsync(clock.Now, cancellationToken) is not Some<RunningJob>(var job))

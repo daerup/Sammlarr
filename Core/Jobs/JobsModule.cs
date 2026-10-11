@@ -13,6 +13,7 @@ internal class JobsModule : IServiceModule
 		services.AddSingleton<JobSignal>();
 		services.AddSingleton<JobAlarm>();
 		services.AddSingleton<JobRunnerStatus>();
+		services.AddSingleton<JobTurn>();
 		services.AddSingleton<IJobRunnerStatus>(sp => sp.GetRequiredService<JobRunnerStatus>());
 		services.AddScoped<IJobHandler<RunFeed>, FeedRunJobHandler>();
 		services.AddScoped<IJobHandler<SyncWantlist>, WantlistSyncJobHandler>();

@@ -68,7 +68,6 @@ public class UsageExporterTests
 		}
 
 		await Assert.That(added.Values).IsEmpty();
-		store.PruneAsync(Now - TimeSpan.FromDays(90), Any()).WasCalled(Times.Once);
 	}
 
 	private static MeterProvider Provider(Meter meter, UsageExporter exporter)

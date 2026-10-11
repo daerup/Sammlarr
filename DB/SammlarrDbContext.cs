@@ -8,6 +8,7 @@ using DB.Data.Config;
 using DB.Data.Datasets;
 using DB.Data.Feed;
 using DB.Data.Feed.Run;
+using DB.Data.Housekeeping;
 using DB.Data.Identity;
 using DB.Data.Jobs;
 using DB.Data.Media;
@@ -97,6 +98,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<AnimeIdRow> AnimeIds => Set<AnimeIdRow>();
 	public DbSet<RemoteUsageRow> RemoteUsage => Set<RemoteUsageRow>();
 	public DbSet<RemoteAttemptRow> RemoteAttempts => Set<RemoteAttemptRow>();
+	public DbSet<HousekeepingReportRow> HousekeepingReports => Set<HousekeepingReportRow>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{

@@ -48,13 +48,14 @@ internal sealed class UsageStore(IDbContextFactory<SammlarrDbContext> dbContextF
 		return new UsageRows([.. calls.Select(Calls)], [.. attempts.Select(Attempts)]);
 	}
 
-	public async Task PruneAsync(DateTimeOffset before, CancellationToken cancellationToken = default)
+	public async Task<int> PruneAsync(DateTimeOffset before, CancellationToken cancellationToken = default)
 	{
 		var cutOff = before.ToUniversalTime();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await ctx.RemoteUsage.Where(row => row.Hour < cutOff).ExecuteDeleteAsync(cancellationToken);
-		await ctx.RemoteAttempts.Where(row => row.Hour < cutOff).ExecuteDeleteAsync(cancellationToken);
-		await ctx.DeletedFeeds.IgnoreQueryFilters().Where(row => row.DeletedAt < cutOff).ExecuteDeleteAsync(cancellationToken);
+		var calls = await ctx.RemoteUsage.Where(row => row.Hour < cutOff).ExecuteDeleteAsync(cancellationToken);
+		var attempts = await ctx.RemoteAttempts.Where(row => row.Hour < cutOff).ExecuteDeleteAsync(cancellationToken);
+		var feeds = await ctx.DeletedFeeds.IgnoreQueryFilters().Where(row => row.DeletedAt < cutOff).ExecuteDeleteAsync(cancellationToken);
+		return calls + attempts + feeds;
 	}
 
 	private static bool Holds(RemoteUsageRow row, UsageCalls calls)

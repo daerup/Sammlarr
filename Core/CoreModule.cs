@@ -6,6 +6,7 @@ using Core.Caching;
 using Core.Datasets;
 using Core.DI;
 using Core.Feed;
+using Core.Housekeeping;
 using Core.Identity;
 using Core.Jobs;
 using Core.Media;
@@ -33,6 +34,7 @@ public class CoreModule : IServiceModule
 		services.AddModule<DatasetsModule>();
 		services.AddModule<DiModule>();
 		services.AddModule<FeedModule>();
+		services.AddModule<HousekeepingModule>();
 		services.AddModule<IdentityModule>();
 		services.AddModule<JobsModule>();
 		services.AddModule<MediaModule>();
