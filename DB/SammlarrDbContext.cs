@@ -76,6 +76,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<ProviderConfigRow> ProviderSettings => Set<ProviderConfigRow>();
 	public DbSet<FeedRow> Feeds => Set<FeedRow>();
 	public DbSet<FeedRunRow> FeedRuns => Set<FeedRunRow>();
+	public DbSet<FeedAbsenceRow> FeedAbsences => Set<FeedAbsenceRow>();
 	public DbSet<FeedRunItemRow> FeedRunItems => Set<FeedRunItemRow>();
 	public DbSet<FeedRunCallsRow> FeedRunCalls => Set<FeedRunCallsRow>();
 

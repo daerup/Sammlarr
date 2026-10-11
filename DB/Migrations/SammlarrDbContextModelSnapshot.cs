@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261010222928_IdentityKeyPerSource";
+    public override string LastMigrationId => "20261011001913_FeedAbsences";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -249,6 +249,29 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasKey("Tconst");
 
                 b.ToTable("ImdbRatings");
+            });
+
+        modelBuilder.Entity("DB.Data.Feed.FeedAbsenceRow", b =>
+            {
+                b.Property<Guid>("FeedId")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("MediaId")
+                    .HasColumnType("TEXT");
+
+                b.Property<int>("MissedRuns")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("FeedId", "MediaId");
+
+                b.HasIndex("MediaId");
+
+                b.HasIndex("UserId");
+
+                b.ToTable("FeedAbsences");
             });
 
         modelBuilder.Entity("DB.Data.Feed.FeedRow", b =>
@@ -1518,6 +1541,27 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired();
 
                 b.Navigation("Sonarr")
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Feed.FeedAbsenceRow", b =>
+            {
+                b.HasOne("DB.Data.Feed.FeedRow", null)
+                    .WithMany()
+                    .HasForeignKey("FeedId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("DB.Data.Media.MediaRow", null)
+                    .WithMany()
+                    .HasForeignKey("MediaId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
             });
 

@@ -100,9 +100,7 @@ internal sealed class FeedRunPlanner(
 			.Select(verdict => new QueryVerdict<MatchedMedia>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot))
 			.ToList();
 
-		var absences = feed.Strategy is Mirror mirror
-			? await feeds.GetAbsencesAsync(feed.Id, owned, mirror.AbsenceThreshold, cancellationToken)
-			: new Dictionary<MediaId, int>();
+		var absences = feed.Strategy is Mirror ? await feeds.GetAbsencesAsync(feed.Id, cancellationToken) : new Dictionary<MediaId, int>();
 
 		return FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatchedItems, load.State, load.SourceFailure), owned, absences, feed.Strategy);
 	}

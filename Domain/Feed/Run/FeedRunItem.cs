@@ -5,7 +5,6 @@ namespace Domain.Feed.Run;
 public enum FeedRunItemState
 {
 	Added,
-	Kept,
 	Removed,
 	Unaddressable,
 }

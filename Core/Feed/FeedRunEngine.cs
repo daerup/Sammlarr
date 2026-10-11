@@ -5,6 +5,7 @@ using Contracts.Identity;
 using Contracts.Usage;
 using Contracts.Wantlist;
 using Domain.Feed;
+using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Wantlist;
@@ -65,6 +66,7 @@ internal sealed class FeedRunEngine(
 		var run = Started(feed, trigger, clock.Now);
 		await feeds.StartRunAsync(run, cancellationToken);
 		usage.Start(feed.Id);
+		Optional<AbsenceChanges> absences = new None();
 		try
 		{
 			var planned = await planner.PlanAsync(feed, cancellationToken);
@@ -81,6 +83,7 @@ internal sealed class FeedRunEngine(
 				SourceFailure = planned.SourceFailure,
 			};
 			trace.Counted(feed.Id, run.Counts);
+			absences = AbsenceChanges.Of(planned, removed);
 			return run.Failed
 				? new FeedRunFailed(run.SourceFailure.GetValueOr("The source returned nothing."))
 				: new FeedRunCompleted(applied, planned.Conclusiveness);
@@ -93,7 +96,7 @@ internal sealed class FeedRunEngine(
 		finally
 		{
 			var cost = usage.End(feed.Id);
-			await feeds.CompleteRunAsync(run with { Duration = elapsed.Elapsed, Calls = cost.Calls, Times = cost.Times }, CancellationToken.None);
+			await feeds.CompleteRunAsync(run with { Duration = elapsed.Elapsed, Calls = cost.Calls, Times = cost.Times }, absences, CancellationToken.None);
 		}
 	}
 
@@ -139,7 +142,6 @@ internal sealed class FeedRunEngine(
 	private static IReadOnlyList<FeedRunItem> Record(FeedDelta delta, IReadOnlyList<MediaId> unaddressable) =>
 		[
 			.. delta.Adds.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Added }),
-			.. delta.Keeps.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Kept }),
 			.. delta.Drops.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Removed }),
 			.. unaddressable.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Unaddressable }),
 		];

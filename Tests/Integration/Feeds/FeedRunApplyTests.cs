@@ -146,6 +146,20 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task RunAsync_ForAMirrorFeedMissingAnOwnedTitle_CountsItsAbsence()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("absent-list", new Mirror(3));
+		host.MdblistFeedContains("absent-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		await host.Movie(TestMedia.FightClub).SeedAsync();
+		var gone = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		await Assert.That(await host.Resolve<IFeedRepository>().GetAbsencesAsync(feedId)).IsEquivalentTo(new Dictionary<MediaId, int> { [gone] = 1 });
+	}
+
+	[Test]
 	public async Task RunAsync_ForAMirrorFeedWithACouldNotLookUpTitle_RemovesNothing()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
