@@ -7,6 +7,63 @@ namespace E2E.Tests.Common;
 
 public class UiInvariantTests
 {
+	private const string NameTooltipTrigger = "[id^=\"tooltip-\"][id$=\"-trigger\"]:has(.pipeline-name)";
+	private const string OpenTooltip = "[role=tooltip][data-state=open]";
+
+	[Test]
+	public async Task Tooltip_WhenItsTriggerTakesFocusWithoutTab_StaysClosed()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("ratings"));
+		var trigger = page.Locator(NameTooltipTrigger).First;
+		await Expect(trigger).ToBeVisibleAsync(Wait.Settle);
+
+		await trigger.FocusAsync();
+		await Expect(trigger).ToBeFocusedAsync();
+		await page.WaitForTimeoutAsync(600);
+
+		await Expect(page.Locator(OpenTooltip)).ToHaveCountAsync(0);
+	}
+
+	[Test]
+	public async Task Tooltip_WhenTabbedTo_Opens()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("ratings"));
+		var trigger = page.Locator(NameTooltipTrigger).First;
+		await Expect(trigger).ToBeVisibleAsync(Wait.Settle);
+
+		await trigger.FocusAsync();
+		await page.Keyboard.PressAsync("Shift+Tab");
+		await page.Keyboard.PressAsync("Tab");
+
+		await Expect(trigger).ToBeFocusedAsync();
+		await Expect(trigger).ToHaveAttributeAsync("aria-describedby", new Regex("."), new LocatorAssertionsToHaveAttributeOptions { Timeout = Wait.Settle });
+		await Expect(page.Locator($"#{await trigger.GetAttributeAsync("aria-describedby")}")).ToBeVisibleAsync(Wait.Settle);
+	}
+
+	[Test]
+	public async Task Tooltip_WhenItsCloseWasAbandoned_Hides()
+	{
+		var page = await E2EApp.AdminAt(SettingsPage.Section("ratings"));
+		var trigger = page.Locator(NameTooltipTrigger).First;
+		await Expect(trigger).ToBeVisibleAsync(Wait.Settle);
+		await trigger.HoverAsync();
+		var portal = page.Locator($"[data-bb-portal]:has({OpenTooltip})");
+		await Expect(portal).ToBeVisibleAsync(Wait.Settle);
+
+		await portal.EvaluateAsync(
+			"""
+			portal => {
+				portal.style.setProperty('pointer-events', 'none', 'important');
+				portal.style.setProperty('visibility', 'visible', 'important');
+				portal.dataset.state = 'closed';
+			}
+			"""
+		);
+		await Expect(page.Locator(OpenTooltip)).ToHaveCountAsync(1);
+
+		await Expect(portal).ToBeHiddenAsync(1500);
+	}
+
 	[Test]
 	public async Task CtrlK_WhenPressed_OpensSearch()
 	{
