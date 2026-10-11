@@ -29,11 +29,16 @@ internal sealed class RatingStrategyConverter : ValueConverter<RatingStrategy, s
 	private static RatingStrategy FromText(string text)
 	{
 		var parts = text.Split(':');
-		var sources = parts.Skip(1).SelectMany(list => list.Split(',')).Select(Enum.Parse<RatingSource>).ToList();
+		var sources = parts.Skip(1).SelectMany(list => list.Split(',')).Select(Known).WhereSome().ToList();
 		return parts[0] switch
 		{
 			OrderedLiteral => new RatingStrategy(new OrderedRating(sources)),
 			_ => new RatingStrategy(new AveragedRating([.. sources])),
 		};
+	}
+
+	private static Optional<RatingSource> Known(string name)
+	{
+		return Optional.When(Enum.TryParse<RatingSource>(name, out var source) && Enum.IsDefined(source), () => source);
 	}
 }

@@ -39,6 +39,17 @@ public class RatingStrategyConverterTests
 	}
 
 	[Test]
+	[Arguments("averaged:Imdb,Rottenness,42,Tmdb", "averaged:Tmdb,Imdb")]
+	[Arguments("averaged:Rottenness", "averaged")]
+	[Arguments("ordered:Rottenness,Imdb", "ordered:Imdb,Tmdb,RottenTomatoesCritics,RottenTomatoesAudience,Metacritic,Letterboxd,Trakt,MyAnimeList,AniList")]
+	public async Task ConvertFromProvider_WhenAStoredSourceIsUnknown_DropsIt(string stored, string kept)
+	{
+		var restored = _testee.ConvertToProvider(_testee.ConvertFromProvider(stored));
+
+		await Assert.That(restored).IsEqualTo(kept);
+	}
+
+	[Test]
 	public async Task Convert_WhenAveragingSomeSources_RoundTripsTheStrategy()
 	{
 		var original = new RatingStrategy(new AveragedRating([RatingSource.RottenTomatoesAudience, RatingSource.Tmdb]));
