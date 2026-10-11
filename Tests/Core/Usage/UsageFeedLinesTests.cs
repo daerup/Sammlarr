@@ -54,7 +54,7 @@ public class UsageFeedLinesTests
 	}
 
 	[Test]
-	public async Task ReadAsync_ARunAcrossServices_CountsEachServicesCallsAndTheirStats()
+	public async Task ReadAsync_ARunAcrossServices_CountsEachServicesCallsAndTheStatsOfTheRunsThatCalledIt()
 	{
 		Stored(
 			Run(-3, 0, 1, 0, 1) with
@@ -74,7 +74,7 @@ public class UsageFeedLinesTests
 		var mixed = busy.Runs.Single(run => run.Services.ContainsKey(RemoteService.Plex));
 		await Assert.That((mixed.Services[RemoteService.Tmdb].Total, mixed.Services[RemoteService.Plex].Total)).IsEqualTo((10L, 5L));
 		await Assert.That((busy.Services[RemoteService.Tmdb].Calls, busy.Services[RemoteService.Plex].Calls)).IsEqualTo((40L, 5L));
-		await Assert.That(busy.Services[RemoteService.Plex]).IsEqualTo(new UsageFeedStats(5, 2.5, 0.025, 2, 0.02, 0, TimeSpan.FromSeconds(1.5)));
+		await Assert.That(busy.Services[RemoteService.Plex]).IsEqualTo(new UsageFeedStats(5, 5, 0.05, 1, 0.01, 0, TimeSpan.FromSeconds(1)));
 	}
 
 	[Test]

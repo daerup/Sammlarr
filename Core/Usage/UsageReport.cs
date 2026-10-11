@@ -114,7 +114,7 @@ internal sealed class UsageReport(
 
 	private static IReadOnlyList<UsageCauseFeed> Feeds(IEnumerable<UsageCalls> calls, IReadOnlyDictionary<FeedId, UsageFeedName> names)
 	{
-		var byFeed = calls.ToLookup(row => row.Feed.Map(feed => names.GetValueOrNone(feed)).Map(name => name.Feed).ToNullable());
+		var byFeed = calls.ToLookup(row => row.Feed.When(names.ContainsKey).ToNullable());
 		var unknown = Optional.When(byFeed.Contains(null), () => new UsageCauseFeed(new None(), byFeed[null].Sum(row => row.Calls)));
 		return
 		[

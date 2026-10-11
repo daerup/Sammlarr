@@ -165,7 +165,7 @@
                             }
                             else
                             {
-                                <span class="text-right tabular-nums text-muted-foreground">@line.Runs.Count</span>
+                                <span class="text-right tabular-nums text-muted-foreground">@line.Runs.Count(Called)</span>
                                 <span class="text-right font-semibold tabular-nums">@UsageView.Count(stats.CallsPerRun)</span>
                                 <span class="text-right tabular-nums">@FormattableString.Invariant($"{stats.CallsPerTitle:0.0}")</span>
                                 <span class="@($"text-right tabular-nums {(line.Stats.CouldNotLookUp > 0 ? "font-medium text-[var(--fate-couldnot)]" : string.Empty)}")"
@@ -232,9 +232,14 @@
 
     private static readonly UsageFeedStats Silent = new(0, 0, 0, 0, 0, 0, TimeSpan.Zero);
 
-    private string Subtitle =>
-        Picked.Match(service => $"{Name(service)} calls only, picked in the Calls table. ", () => string.Empty)
-        + $"Point at a feed or its line to pick it out, click to keep only its runs, click again for all. A dot opens that run. Per run and per title are the typical run over the {UsageView.Window(Range)}.";
+    private string Subtitle
+    {
+        get
+        {
+            return Picked.Match(service => $"{Name(service)} calls only, picked in the Calls table. ", () => string.Empty)
+                + $"Point at a feed or its line to pick it out, click to keep only its runs, click again for all. A dot opens that run. Per run and per title are the typical run over the {UsageView.Window(Range)}.";
+        }
+    }
 
     protected override void OnParametersSet()
     {
@@ -293,8 +298,13 @@
         }
     }
 
-    private int FirstSlot =>
-        Math.Max(0, Window.SlotOf(Shown.SelectMany(line => line.Runs).Where(Called).Select(run => run.StartedAt).DefaultIfEmpty(Window.From).Min()));
+    private int FirstSlot
+    {
+        get
+        {
+            return Math.Max(0, Window.SlotOf(Shown.SelectMany(line => line.Runs).Where(Called).Select(run => run.StartedAt).DefaultIfEmpty(Window.From).Min()));
+        }
+    }
 
     private IReadOnlyList<(double At, string Label)> XTicks
     {

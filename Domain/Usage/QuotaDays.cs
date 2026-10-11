@@ -11,8 +11,9 @@ public static class QuotaDays
 
 	public static IReadOnlyList<QuotaDayUse> Of(IEnumerable<(DateTimeOffset Hour, UsageCause Cause, long Spent)> rows, DateTimeOffset nextReset, int days)
 	{
-		var first = nextReset - (Day * days);
-		var byDay = rows.Where(row => row.Hour >= first && row.Hour < nextReset).ToLookup(row => (int)Math.Floor((row.Hour - first) / Day));
+		var last = nextReset.AddTicks(-(nextReset.UtcTicks % TimeSpan.TicksPerHour));
+		var first = last - (Day * days);
+		var byDay = rows.Where(row => row.Hour >= first && row.Hour < last).ToLookup(row => (int)Math.Floor((row.Hour - first) / Day));
 		return
 		[
 			.. Enumerable

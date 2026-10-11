@@ -17,6 +17,15 @@ public class QuotaDaysTests
 	}
 
 	[Test]
+	public async Task Of_AResetPastTheHour_CutsAtItsHourLikeTheDaysLine()
+	{
+		var testee = QuotaDays.Of([(NextReset.AddDays(-1), UsageCause.FeedRun, 7)], NextReset.AddSeconds(23), 7);
+
+		await Assert.That(testee[^1].Start).IsEqualTo(NextReset.AddDays(-1));
+		await Assert.That(testee[^1].Total).IsEqualTo(7);
+	}
+
+	[Test]
 	public async Task Of_SevenDays_StartsEachDayAtTheResetAndEndsWithToday()
 	{
 		var testee = QuotaDays.Of([], NextReset, 7);

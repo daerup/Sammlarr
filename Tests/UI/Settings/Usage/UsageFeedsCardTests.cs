@@ -1,4 +1,3 @@
-using System.Globalization;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Icons.Lucide.Components;
 using BlazorBlueprint.Primitives;
@@ -228,7 +227,8 @@ public class UsageFeedsCardTests : BunitContext
 		await Assert.That(row.QuerySelector(".line-through")!.TextContent).IsEqualTo("Horror movies");
 		await Assert
 			.That(row.QuerySelector("[data-testid=usage-feed-deleted]")!.TextContent)
-			.IsEqualTo($"deleted {UsageSamples.To.AddHours(-5).ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture)}");
+			.StartsWith("deleted ")
+			.And.EndsWith(UsageSamples.Local(UsageSamples.To.AddHours(-5)));
 		await Assert.That(row.Children[2].TextContent.Trim()).IsEqualTo("58");
 		await Assert.That(row.QuerySelector("[data-testid=usage-feed-runs]")).IsNull();
 		await Assert.That(row.QuerySelector("[data-testid=usage-feed-last]")).IsNull();
@@ -241,7 +241,7 @@ public class UsageFeedsCardTests : BunitContext
 	{
 		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Tmdb)));
 
-		await Assert.That(cut.FindAll("[data-testid=usage-feed]").Select(row => row.GetAttribute("data-feed"))).IsEquivalentTo(["Latest shows", "Horror movies"]);
+		await Assert.That(cut.FindAll("[data-testid=usage-feed]").Select(row => row.GetAttribute("data-feed")!)).IsEquivalentTo(["Latest shows", "Horror movies"]);
 	}
 
 	[Test]
@@ -249,7 +249,7 @@ public class UsageFeedsCardTests : BunitContext
 	{
 		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Mdblist)));
 
-		await Assert.That(cut.FindAll("[data-testid=usage-feed]").Select(row => row.GetAttribute("data-feed"))).IsEquivalentTo(["Latest shows"]);
+		await Assert.That(cut.FindAll("[data-testid=usage-feed]").Select(row => row.GetAttribute("data-feed")!)).IsEquivalentTo(["Latest shows"]);
 		await Assert.That(Row(cut, "Latest shows").Children[2].TextContent.Trim()).IsEqualTo("1,103");
 		await Assert.That(cut.FindAll("[data-testid=usage-feed-group]")).Count().IsEqualTo(1);
 		await Assert.That(cut.Find("[data-testid=usage-pick-chip]").GetAttribute("data-service")).IsEqualTo("Mdblist");
@@ -261,7 +261,8 @@ public class UsageFeedsCardTests : BunitContext
 	{
 		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Tmdb)));
 
-		await Assert.That(cut.FindAll("[data-testid=usage-feed-dot]").Select(dot => dot.GetAttribute("data-run"))).IsEquivalentTo([ShowsRun.ToString()]);
+		await Assert.That(cut.FindAll("[data-testid=usage-feed-dot]").Select(dot => dot.GetAttribute("data-run")!)).IsEquivalentTo([ShowsRun.ToString()]);
+		await Assert.That(Row(cut, "Latest shows").Children[3].TextContent.Trim()).IsEqualTo("1");
 	}
 
 	[Test]

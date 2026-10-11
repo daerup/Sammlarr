@@ -1,6 +1,4 @@
-@using Contracts
 @using Contracts.Usage
-@inject IDateTimeProvider Clock
 
 @if (Drawn is Some<(QuotaAllowance Allowance, QuotaDay Day)>(var (allowance, day)))
 {
@@ -134,12 +132,17 @@
 
     private Optional<(QuotaAllowance Allowance, QuotaDay Day)> Drawn => Quota.Today.Answered.Map(allowance => Quota.Day.Map(day => (allowance, day)));
 
-    private DateTimeOffset Now => Clock.Now;
+    private DateTimeOffset Now => Quota.Day.Map(day => day.Points[^1].At).GetValueOr(Quota.Today.NextReset);
 
     private DateTimeOffset Reset => Quota.Today.NextReset.AddDays(-1);
 
-    private IEnumerable<(int Slot, string Label)> Hours =>
-        Enumerable.Range(0, Window.Slots).Where(slot => slot % 3 == 0).Select(slot => (slot, UsageView.Slot(UsageRange.Day, Window.SlotAt(slot))));
+    private IEnumerable<(int Slot, string Label)> Hours
+    {
+        get
+        {
+            return Enumerable.Range(0, Window.Slots).Where(slot => slot % 3 == 0).Select(slot => (slot, UsageView.Slot(UsageRange.Day, Window.SlotAt(slot))));
+        }
+    }
 
     private static double Ceiling(QuotaAllowance allowance, QuotaDay day)
     {
@@ -172,7 +175,7 @@
 
     private static Optional<double> Floor(QuotaAllowance allowance) => allowance.Allowance.Map(daily => daily * allowance.BackgroundShare);
 
-    private static Optional<long> Gap(QuotaAllowance allowance) => allowance.Outside.When(_ => allowance.Allowance.IsSome());
+    private static Optional<long> Gap(QuotaAllowance allowance) => allowance.Allowance.Map(_ => allowance.Outside);
 
     private Optional<double> Unknown(QuotaDay day) => Optional.When(day.Points.All(point => point.At >= Reset) && Share(Reset) >= 0.25, () => Share(Reset));
 

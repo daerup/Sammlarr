@@ -63,7 +63,7 @@ internal static class UsageSamples
 
 	internal static readonly UsageWindow Hours = new(Reset.AddHours(-14), Reset.AddHours(10), TimeSpan.FromHours(1));
 
-	internal static readonly long[] Today = [2, 419, 79, 1, 0, 4, 17, 65, 104, 118];
+	private static readonly long[] Today = [2, 419, 79, 1, 0, 4, 17, 65, 104, 118];
 
 	private static readonly long[] Yesterday = [24, 19, 9, 37, 40, 31, 48, 58, 60, 4, 0, 0, 0, 0];
 

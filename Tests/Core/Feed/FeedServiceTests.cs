@@ -53,7 +53,7 @@ public class FeedServiceTests
 	}
 
 	[Test]
-	public async Task DeleteAsync_AStoredFeed_KeepsItsNameBeforeItGoes()
+	public async Task DeleteAsync_AStoredFeed_KeepsItsNameOnceItIsGone()
 	{
 		await Testee.DeleteAsync(Id);
 

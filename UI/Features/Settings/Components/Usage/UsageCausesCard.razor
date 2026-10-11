@@ -167,11 +167,21 @@
 
     private UsageTally Total => PickedLine.Map(line => line.Tally).GetValueOr(Period.Tally);
 
-    private string Subtitle =>
-        Picked.Match(service => $"{Name(service)}, picked in the Calls table. Pick a cause to see how its calls ended.", () => "Pick a cause to see how its calls ended");
+    private string Subtitle
+    {
+        get
+        {
+            return Picked.Match(service => $"{Name(service)}, picked in the Calls table. Pick a cause to see how its calls ended.", () => "Pick a cause to see how its calls ended");
+        }
+    }
 
-    private IReadOnlyList<(UsageCause? Cause, UsageTally Tally, IReadOnlyList<UsageCauseFeed> Feeds)> Rows =>
-        [(null, Total, []), .. Lines.Select(line => ((UsageCause?)line.Cause, line.Tally, line.Feeds))];
+    private IReadOnlyList<(UsageCause? Cause, UsageTally Tally, IReadOnlyList<UsageCauseFeed> Feeds)> Rows
+    {
+        get
+        {
+            return [(null, Total, []), .. Lines.Select(line => ((UsageCause?)line.Cause, line.Tally, line.Feeds))];
+        }
+    }
 
     private long Busiest => Lines.Select(line => line.Tally.Total).DefaultIfEmpty(1).Max();
 
