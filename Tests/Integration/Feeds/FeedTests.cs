@@ -169,7 +169,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.WithMdblistAccount("test-key");
 		host.PlexHolds(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205")));
-		await host.PlexSearchReturns("Inception", Spec("Inception", Plex("27205")));
+		await host.PlexMatches(Spec("Inception", Imdb("tt1375666"), Plex("27205")));
 		host.MdblistFeedContains("imdb-only-list", Item("Inception", MediaType.Movie, Imdb("tt1375666")));
 
 		var items = await Testee.GetFeedItemsAsync("imdb-only-list", FieldNeeds.None).InListOrderAsync().ToListAsync();
@@ -234,7 +234,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("test-key");
 		var inception = await host.Movie(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205"))).SeedAsync();
 		host.PlexHolds(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205")));
-		await host.PlexSearchReturns("Inception", Spec("Inception", Plex("27205")));
+		await host.PlexMatches(Spec("Inception", Tmdb("99999"), Plex("27205")));
 		host.MdblistFeedContains("conflict-list", Item("Inception", MediaType.Movie, Tmdb("99999")));
 
 		await Testee.GetFeedItemsAsync("conflict-list", FieldNeeds.None).InListOrderAsync().ToListAsync();

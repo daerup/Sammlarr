@@ -12,45 +12,77 @@ internal sealed class RecentAnswers<TKey, TValue>(IDateTimeProvider clock)
 
 	private readonly Dictionary<TKey, Filed> _answers = [];
 
-	public Task<Result<TValue>> AskAsync(TKey key, Func<Task<Result<TValue>>> ask, CancellationToken cancellationToken = default)
+	public Task<Result<TValue>> AskAsync(TKey key, Func<CancellationToken, Task<Result<TValue>>> ask, CancellationToken cancellationToken = default)
 	{
-		Lazy<Task<Result<TValue>>> answer;
-		lock (_gate)
+		if (cancellationToken.IsCancellationRequested)
 		{
-			answer = _answers.GetValueOrNone(key).When(Fresh).Match(filed => filed.Answer, () => Start(key, ask));
+			return Task.FromCanceled<Result<TValue>>(cancellationToken);
 		}
 
-		return answer.Value.WaitAsync(cancellationToken);
+		Filed filed;
+		lock (_gate)
+		{
+			filed = _answers.GetValueOrNone(key).When(Fresh).GetValueOr(() => Start(key, ask));
+			filed.Join(cancellationToken, () => Leave(key, filed));
+		}
+
+		return filed.Fetching.IsCancellationRequested ? Task.FromCanceled<Result<TValue>>(filed.Fetching) : filed.Answer.Value.WaitAsync(cancellationToken);
 	}
 
 	public void Remember(TKey key, TValue value)
 	{
 		lock (_gate)
 		{
-			_answers[key] = new Filed(new Lazy<Task<Result<TValue>>>(Task.FromResult<Result<TValue>>(Success.Of(value))), clock.Now);
+			var filed = new Filed(clock.Now, _ => Task.FromResult<Result<TValue>>(Success.Of(value)));
+			filed.Settle();
+			_answers[key] = filed;
 		}
 	}
 
 	private bool Fresh(Filed filed) => clock.Now - filed.At < Kept;
 
-	private Lazy<Task<Result<TValue>>> Start(TKey key, Func<Task<Result<TValue>>> ask)
+	private Filed Start(TKey key, Func<CancellationToken, Task<Result<TValue>>> ask)
 	{
-		Filed filed = default;
-		filed = new Filed(new Lazy<Task<Result<TValue>>>(() => KeepAsync(key, filed, ask)), clock.Now);
+		var filed = new Filed(clock.Now, started => KeepAsync(key, started, ask));
 		_answers[key] = filed;
-		return filed.Answer;
+		return filed;
 	}
 
-	private async Task<Result<TValue>> KeepAsync(TKey key, Filed filed, Func<Task<Result<TValue>>> ask)
+	private async Task<Result<TValue>> KeepAsync(TKey key, Filed filed, Func<CancellationToken, Task<Result<TValue>>> ask)
 	{
 		try
 		{
-			return (await ask()).ApplyError(_ => Forget(key, filed));
+			return (await ask(filed.Fetching)).ApplyError(_ => Forget(key, filed));
 		}
 		catch (Exception)
 		{
 			Forget(key, filed);
 			throw;
+		}
+		finally
+		{
+			lock (_gate)
+			{
+				filed.Settle();
+			}
+		}
+	}
+
+	private void Leave(TKey key, Filed filed)
+	{
+		bool last;
+		lock (_gate)
+		{
+			last = filed.LeaveLast();
+			if (last)
+			{
+				Forget(key, filed);
+			}
+		}
+
+		if (last)
+		{
+			filed.Cancel();
 		}
 	}
 
@@ -62,5 +94,52 @@ internal sealed class RecentAnswers<TKey, TValue>(IDateTimeProvider clock)
 		}
 	}
 
-	private readonly record struct Filed(Lazy<Task<Result<TValue>>> Answer, DateTimeOffset At);
+	private sealed class Filed
+	{
+		private readonly CancellationTokenSource _fetching = new();
+
+		private readonly List<CancellationTokenRegistration> _waiters = [];
+
+		private int _waiting;
+
+		private bool _settled;
+
+		public Filed(DateTimeOffset at, Func<Filed, Task<Result<TValue>>> start)
+		{
+			At = at;
+			Answer = new Lazy<Task<Result<TValue>>>(() => start(this));
+		}
+
+		public DateTimeOffset At { get; }
+
+		public Lazy<Task<Result<TValue>>> Answer { get; }
+
+		public CancellationToken Fetching => _fetching.Token;
+
+		public void Join(CancellationToken waiter, Action leave)
+		{
+			if (_settled)
+			{
+				return;
+			}
+
+			_waiting++;
+			_waiters.Add(waiter.Register(leave));
+		}
+
+		public bool LeaveLast()
+		{
+			_waiting--;
+			return _waiting == 0 && !_settled;
+		}
+
+		public void Cancel() => _fetching.Cancel();
+
+		public void Settle()
+		{
+			_settled = true;
+			_waiters.ForEach(waiter => waiter.Unregister());
+			_waiters.Clear();
+		}
+	}
 }

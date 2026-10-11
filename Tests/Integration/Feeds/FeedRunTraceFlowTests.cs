@@ -131,7 +131,7 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync("plex-list");
 		host.PlexHolds(TestMedia.Inception);
-		await host.PlexSearchReturns("Inception", TestMedia.Inception);
+		await host.PlexMatches(TestMedia.Inception);
 		host.MdblistFeedContains("plex-list", Item("Inception", Tmdb("27205")));
 
 		await Engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
@@ -147,8 +147,8 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 		var feedId = await SeedFeedAsync("pair-list");
 		host.PlexHolds(TestMedia.Inception);
 		host.PlexHolds(TestMedia.Interstellar);
-		await host.PlexSearchReturns("Inception", TestMedia.Inception);
-		await host.PlexSearchReturns("Interstellar", TestMedia.Interstellar);
+		await host.PlexMatches(TestMedia.Inception);
+		await host.PlexMatches(TestMedia.Interstellar);
 		host.MdblistFeedContains("pair-list", Item("Inception", Tmdb("27205")), Item("Interstellar", Tmdb("157336")));
 
 		await Engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));

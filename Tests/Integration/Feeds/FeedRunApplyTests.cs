@@ -192,15 +192,17 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		host.MdblistFeedContains(
 			"tmdb-blocked-list",
 			Item("Fight Club", MediaType.Movie, Tmdb("550")),
-			Item("Heat", MediaType.Movie, Tmdb("949")) with
+			Item("Heat", MediaType.Movie, Imdb("tt0113277")) with
 			{
 				Year = 1995,
 			}
 		);
+		host.SinkAddresses(MediaProvider.Tmdb);
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 		await host.WithPlexAccount("plex-token");
 		host.PlexHolds(TestMedia.FightClub);
-		await host.PlexFindsNothing("Heat");
+		await host.PlexMatchesNothing(new MediaSpec("Heat", MediaType.Movie, [Imdb("tt0113277")]));
+		host.WikidataHolds("tt0113277");
 		await host.EnsureTmdbAccount();
 		await host.RateLimitedAsync(RemoteService.Tmdb);
 

@@ -29,9 +29,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Time.Testing;
 using Shared.Concurrency;
 using Shared.DI;
@@ -79,6 +81,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private readonly RemoteWantlistState _remote = new();
 	private readonly MutableClock _clock = new();
 	private Optional<TimeProvider> _time = new None();
+	private bool _cachesOnTheClock;
 	private readonly OAuthStub _oauth = new();
 	private readonly SessionInvalidatorStub _sessionInvalidator = new();
 
@@ -146,6 +149,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	}
 
 	internal void SetCurrentTime(DateTimeOffset now) => _clock.Now = now;
+
+	internal void ExpireCachesOnTheClock() => _cachesOnTheClock = true;
 
 	internal FakeTimeProvider UseFakeTime()
 	{
@@ -348,16 +353,34 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		HttpStub.RespondWithJsonForUrl($"{TmdbEndpoints.PageParam}={page}", TmdbStub.TrendingJson([.. items.Select(FullVersion)], page));
 	}
 
+	internal async Task PlexMatches(MediaSpec spec)
+	{
+		await EnsurePlexAccount();
+		PlexStub.Match(HttpStub, FullVersion(spec));
+	}
+
+	internal async Task PlexMatchesNothing(MediaSpec spec)
+	{
+		await EnsurePlexAccount();
+		PlexStub.MatchNothing(HttpStub, FullVersion(spec));
+	}
+
+	internal async Task PlexMatchFails(MediaSpec spec, HttpStatusCode status)
+	{
+		await EnsurePlexAccount();
+		PlexStub.MatchFails(HttpStub, FullVersion(spec), status);
+	}
+
+	internal async Task PlexMatchFailsOnceThenFinds(MediaSpec spec)
+	{
+		await EnsurePlexAccount();
+		PlexStub.MatchFailsOnce(HttpStub, FullVersion(spec));
+	}
+
 	internal async Task PlexSearchReturns(string term, params MediaSpec[] hits)
 	{
 		await EnsurePlexAccount();
 		PlexStub.Search(HttpStub, term, [.. hits.Select(PlexHit)]);
-	}
-
-	internal async Task PlexSearchFailsOnceThenReturns(string term, params MediaSpec[] hits)
-	{
-		await EnsurePlexAccount();
-		PlexStub.SearchFailsOnce(HttpStub, term, [.. hits.Select(PlexHit)]);
 	}
 
 	internal async Task PlexFindsNothing(string term)
@@ -741,6 +764,10 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddLogging();
 		services.AddSingleton<IDateTimeProvider>(_clock);
 		services.AddSingleton(_time.GetValueOr(() => new ClockTime(_clock)));
+		if (_cachesOnTheClock)
+		{
+			services.Configure<MemoryCacheOptions>(options => options.Clock = new CacheClock(_clock));
+		}
 
 		services.ConfigureAll<HttpClientFactoryOptions>(options => options.HttpMessageHandlerBuilderActions.Add(builder => builder.PrimaryHandler = HttpStub));
 
@@ -932,6 +959,11 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private sealed class ClockTime(IDateTimeProvider clock) : TimeProvider
 	{
 		public override DateTimeOffset GetUtcNow() => clock.Now;
+	}
+
+	private sealed class CacheClock(IDateTimeProvider clock) : ISystemClock
+	{
+		public DateTimeOffset UtcNow => clock.Now;
 	}
 
 	private sealed class FileContextFactory(IServiceProvider provider, string connectionString, ICurrentUser user) : IDbContextFactory<SammlarrDbContext>

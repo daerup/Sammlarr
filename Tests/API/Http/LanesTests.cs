@@ -10,6 +10,7 @@ public class LanesTests
 	private static readonly Dictionary<string, LaneOptions> PlexLanes = new()
 	{
 		["api"] = new LaneOptions(),
+		["match"] = new LaneOptions { Routes = [new LaneRouteOptions { Url = "discover", Path = "library/metadata/matches" }] },
 		["metadata"] = new LaneOptions { Routes = [new LaneRouteOptions { Url = "metadata", Path = "library/metadata" }] },
 		["watchlist"] = new LaneOptions
 		{
@@ -38,6 +39,14 @@ public class LanesTests
 			.Route(RemoteService.Plex, new Uri("https://metadata.provider.plex.tv/library/metadata/5d776be17a53e9001e732ab9?includeGuids=1"));
 
 		await Assert.That(route).IsEqualTo("metadata");
+	}
+
+	[Test]
+	public async Task Route_ForAPlexMatchOnTheDiscoverUrl_PicksTheMatchLane()
+	{
+		var route = Testee(Shipped()).Route(RemoteService.Plex, new Uri("https://discover.provider.plex.tv/library/metadata/matches?type=1&guid=tmdb%3A%2F%2F550"));
+
+		await Assert.That(route).IsEqualTo("match");
 	}
 
 	[Test]
@@ -84,6 +93,9 @@ public class LanesTests
 
 		await Assert.That(testee.Route(RemoteService.Plex, new Uri("http://localhost:9090/plex-metadata/library/metadata/1"))).IsEqualTo("metadata");
 		await Assert.That(testee.Route(RemoteService.Plex, new Uri("http://localhost:9090/plex-discover/library/sections/watchlist/all"))).IsEqualTo("watchlist");
+		await Assert
+			.That(testee.Route(RemoteService.Plex, new Uri("http://localhost:9090/plex-discover/library/metadata/matches?type=1&guid=tmdb%3A%2F%2F550")))
+			.IsEqualTo("match");
 		await Assert.That(testee.Route(RemoteService.Plex, new Uri("http://localhost:9090/plex-discover/library/search?query=heat"))).IsEqualTo(Lanes.Rest);
 	}
 

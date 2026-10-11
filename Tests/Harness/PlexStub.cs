@@ -39,26 +39,67 @@ internal static class PlexStub
 		}
 		""";
 
+	public static void Match(HttpStub http, ResolvedVersion v)
+	{
+		var plexId = v.Ids.GetValueOrDefault(MediaProvider.Plex, "0");
+		foreach (var guid in Guids(v))
+		{
+			http.RespondWithJsonForUrl(MatchUrl(v.Type, guid), MatchJson(plexId, v));
+		}
+	}
+
+	public static void MatchNothing(HttpStub http, ResolvedVersion v)
+	{
+		foreach (var guid in Guids(v))
+		{
+			http.RespondWithJsonForUrl(MatchUrl(v.Type, guid), EmptyMatchJson);
+		}
+	}
+
+	public static void MatchFails(HttpStub http, ResolvedVersion v, HttpStatusCode status)
+	{
+		foreach (var guid in Guids(v))
+		{
+			http.RespondWithStatusForUrl(MatchUrl(v.Type, guid), status);
+		}
+	}
+
+	public static void MatchFailsOnce(HttpStub http, ResolvedVersion v)
+	{
+		var plexId = v.Ids.GetValueOrDefault(MediaProvider.Plex, "0");
+		var failed = false;
+		foreach (var guid in Guids(v))
+		{
+			http.RespondForUrl(
+				MatchUrl(v.Type, guid),
+				_ =>
+				{
+					if (!failed)
+					{
+						failed = true;
+						return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+					}
+
+					return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(MatchJson(plexId, v), Encoding.UTF8, "application/json") };
+				}
+			);
+		}
+	}
+
+	private const string EmptyMatchJson = """{ "MediaContainer": { "size": 0 } }""";
+
+	private static string MatchUrl(MediaType type, string guid)
+	{
+		return $"{PlexEndpoints.MatchesPath}?type={(type == MediaType.Show ? 2 : 1)}&guid={Uri.EscapeDataString(guid)}";
+	}
+
+	private static string MatchJson(string plexId, ResolvedVersion v)
+	{
+		return $$"""{ "MediaContainer": { "size": 1, "Metadata": [ { "ratingKey": "{{plexId}}", "type": "{{TypeString(v.Type)}}", "title": "{{v.Title}}", "year": {{v.Year}} } ] } }""";
+	}
+
 	public static void Search(HttpStub http, string term, IReadOnlyList<ResolvedVersion> results) =>
 		http.RespondWithJsonForUrl($"{PlexEndpoints.SearchQueryParam}={Uri.EscapeDataString(term)}", results.Count == 0 ? EmptySearchJson : SearchJson(results));
-
-	public static void SearchFailsOnce(HttpStub http, string term, IReadOnlyList<ResolvedVersion> results)
-	{
-		var failed = false;
-		http.RespondForUrl(
-			$"{PlexEndpoints.SearchQueryParam}={Uri.EscapeDataString(term)}",
-			_ =>
-			{
-				if (!failed)
-				{
-					failed = true;
-					return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
-				}
-
-				return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(SearchJson(results), Encoding.UTF8, "application/json") };
-			}
-		);
-	}
 
 	private const string EmptySearchJson = """
 		{
@@ -146,9 +187,10 @@ internal static class PlexStub
 	private static string GenresJson(ResolvedVersion v) =>
 		v.Genres is null ? string.Empty : string.Join(",", v.Genres.Select(genre => $$"""{ "tag": "{{genre}}" }"""));
 
-	private static string GuidsJson(ResolvedVersion v)
+	private static string GuidsJson(ResolvedVersion v) => string.Join(",", Guids(v).Select(guid => $$"""{ "id": "{{guid}}" }"""));
+
+	private static IEnumerable<string> Guids(ResolvedVersion v)
 	{
-		var guids = new List<string>();
 		foreach (var (provider, id) in v.Ids)
 		{
 			var prefix = provider switch
@@ -159,9 +201,10 @@ internal static class PlexStub
 				_ => null,
 			};
 			if (prefix is not null)
-				guids.Add($$"""{ "id": "{{prefix}}://{{id}}" }""");
+			{
+				yield return $"{prefix}://{id}";
+			}
 		}
-		return string.Join(",", guids);
 	}
 
 	private static string TypeString(MediaType type) => type == MediaType.Show ? "show" : "movie";

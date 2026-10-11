@@ -97,7 +97,7 @@ public class SinkSwitchTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		host.PlexHolds(TestMedia.FightClub);
 		await host.TmdbDescribes(TestMedia.FightClub);
-		await host.PlexSearchReturns("Fight Club", TestMedia.FightClub);
+		await host.PlexMatches(TestMedia.FightClub);
 		var movie = await host.Movie(new MediaSpec("Fight Club", MediaType.Movie, [Tmdb("550")])).OnWantlist(ByHand);
 		await Testee.SwitchAsync(SinkKind.Arr);
 

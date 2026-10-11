@@ -64,7 +64,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception);
 		host.PlexHolds(TestMedia.Inception);
-		await host.PlexSearchReturns("Inception", TestMedia.Inception);
+		await host.PlexMatches(TestMedia.Inception);
 
 		var items = (await FetchTrending(1)).Items;
 
@@ -76,7 +76,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task GetTrendingAsync_WhenPlexCannotResolveTheMovie_LeavesItUnmatched()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception);
-		await host.PlexFindsNothing("Inception");
+		await host.PlexMatchesNothing(TestMedia.Inception);
 		host.TmdbDetailFails(TestMedia.Inception, HttpStatusCode.NotFound);
 
 		var items = (await FetchTrending(1)).Items;
@@ -110,7 +110,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.TmdbTrendingPage(1, TestMedia.Inception, TestMedia.Person("Christopher Nolan"), TestMedia.Interstellar);
 		await host.Movie(TestMedia.Inception).SeedAsync();
 		host.PlexHolds(TestMedia.Interstellar);
-		await host.PlexSearchReturns("Interstellar", TestMedia.Interstellar);
+		await host.PlexMatches(TestMedia.Interstellar);
 
 		var items = (await FetchTrending(1)).Items;
 

@@ -23,7 +23,7 @@ internal sealed class AniListTitles(AniListClient client, IDateTimeProvider cloc
 
 	internal Task<Result<Optional<AniListTypes.Media>>> FindAsync(int id, CancellationToken cancellationToken = default)
 	{
-		return _read.AskAsync(id, () => Enter(id), cancellationToken);
+		return _read.AskAsync(id, _ => Enter(id), cancellationToken);
 	}
 
 	private Task<Result<Optional<AniListTypes.Media>>> Enter(int id)

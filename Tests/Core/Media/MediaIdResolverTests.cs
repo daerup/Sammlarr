@@ -39,6 +39,13 @@ public class MediaIdResolverTests
 	private static readonly ById Detail = new(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Imdb, MediaProvider.Tvdb], Cost: 1);
 	private static readonly ById PlexById = new(Accepts: [MediaProvider.Plex], Yields: [MediaProvider.Tvdb], Cost: 1);
 	private static readonly ByHints Search = new(Yields: [MediaProvider.Plex, MediaProvider.Tvdb], Cost: 4);
+	private static readonly ById ByGuid = new(
+		Accepts: [MediaProvider.Tmdb, MediaProvider.Imdb, MediaProvider.Tvdb],
+		Yields: [MediaProvider.Plex],
+		Cost: 1,
+		GivesHints: false,
+		AsksOnce: true
+	);
 	private static readonly IdentifyRequest Request = new([Tmdb], new None());
 	private static readonly IReadOnlySet<RemoteService> Everyone = Enum.GetValues<RemoteService>().ToHashSet();
 
@@ -220,6 +227,71 @@ public class MediaIdResolverTests
 		await Testee().ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		_tmdb.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenTheMatchMissesByTmdb_DoesNotAskByImdb()
+	{
+		var plex = Converter(RemoteService.Plex, ByGuid);
+		plex.LookUpAsync(Any(), Any()).Returns(Found());
+
+		await Testee(plex).ResolveAsync(new IdentifyRequest([Tmdb, Imdb], new None()), MediaProvider.Plex, Everyone);
+
+		plex.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenTheMatchMisses_AsksNothingAlongThePathsThatEndInIt()
+	{
+		var find = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb], Cost: 1);
+		var tmdb = Converter(RemoteService.Tmdb, find);
+		var plex = Converter(RemoteService.Plex, ByGuid);
+		plex.LookUpAsync(Any(), Any()).Returns(Found());
+
+		await Testee(tmdb, plex).ResolveAsync(new IdentifyRequest([Imdb], new None()), MediaProvider.Plex, Everyone);
+
+		tmdb.LookUpAsync(Any(), Any()).WasCalled(Times.Never);
+		plex.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenTheMatchMissesByOneTmdbId_DoesNotAskByTheOther()
+	{
+		var plex = Converter(RemoteService.Plex, ByGuid);
+		plex.LookUpAsync(Any(), Any()).Returns(Found());
+
+		await Testee(plex).ResolveAsync(new IdentifyRequest([Tmdb, TmdbId.From("1397", MediaType.Show)], new None()), MediaProvider.Plex, Everyone);
+
+		plex.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenTheMatchFindsTheTitleButALaterHopFails_StillTakesAnotherPathThroughTheMatch()
+	{
+		var byPlex = new ById(Accepts: [MediaProvider.Plex], Yields: [MediaProvider.Imdb, MediaProvider.Tvdb], Cost: 1, GivesHints: false);
+		var toTvdb = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tvdb], Cost: 2, GivesHints: false);
+		var plex = Converter(RemoteService.Plex, ByGuid, byPlex);
+		var tvmaze = Converter(RemoteService.Tvmaze, toTvdb);
+		Answer(plex, new ByIdRequest(ByGuid, Tmdb), Found(Plex, Tmdb));
+		Answer(plex, new ByIdRequest(byPlex, Plex), Found(Plex, Imdb));
+		Answer(tvmaze, new ByIdRequest(toTvdb, Imdb), Found(Imdb, Tvdb));
+
+		var resolved = await Testee(plex, tvmaze).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>();
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenTheMatchFailsByTmdb_StillAsksByImdb()
+	{
+		var plex = Converter(RemoteService.Plex, ByGuid);
+		Answer(plex, new ByIdRequest(ByGuid, Tmdb), new Faulted(RemoteService.Plex, Error.From(new InvalidOperationException("unreadable"))));
+		Answer(plex, new ByIdRequest(ByGuid, Imdb), Found(Plex, Imdb));
+
+		var resolved = await Testee(plex).ResolveAsync(new IdentifyRequest([Tmdb, Imdb], new None()), MediaProvider.Plex, Everyone);
+
+		await Assert.That(resolved).IsOfUnionType<Resolution, Resolved>();
+		plex.LookUpAsync(Any(), Any()).WasCalled(Times.Exactly(2));
 	}
 
 	[Test]
