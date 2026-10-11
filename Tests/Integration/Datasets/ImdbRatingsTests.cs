@@ -43,6 +43,35 @@ public class ImdbRatingsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task FindManyAsync_ForSevenAndEightDigitIdsAndTheEdgeScores_AnswersEachAsLoaded()
+	{
+		var ratings = host.Resolve<IImdbRatings>();
+		ImdbRatingLine[] lines =
+		[
+			new("tt0111161", 9.3f, 3_046_418),
+			new("tt10872600", 7.6f, 1_034_752),
+			new("tt0000001", 10f, 7),
+			new("tt0000002", 1f, 12),
+			new("tt0000003", 5.7f, 2_500),
+		];
+		await ratings.ReplaceAsync(lines.ToAsyncEnumerable());
+
+		var found = await ratings.FindManyAsync([.. lines.Select(line => line.Tconst)]);
+
+		await Assert.That(found).IsEquivalentTo(lines.ToDictionary(line => line.Tconst, line => new ImdbRating(line.Average, Some.Of(line.Votes))));
+	}
+
+	[Test]
+	public async Task FindAsync_ForAnIdThatIsNoTitleId_FindsNothing()
+	{
+		var ratings = host.Resolve<IImdbRatings>();
+		await ratings.ReplaceAsync(Yesterday.ToAsyncEnumerable());
+
+		await Assert.That(await ratings.FindAsync("nm0000138")).IsNone();
+		await Assert.That(await ratings.FindAsync("0137523")).IsNone();
+	}
+
+	[Test]
 	public async Task ReplaceAsync_WhenTheRowsFailHalfway_LeavesTheLastTable()
 	{
 		var ratings = host.Resolve<IImdbRatings>();
@@ -52,6 +81,20 @@ public class ImdbRatingsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(await ratings.FindAsync("tt0137523")).IsSome();
 		await Assert.That(await ratings.FindAsync("tt9999999")).IsNone();
+	}
+
+	[Test]
+	public async Task ReplaceAsync_ForAnIdItCannotRead_LeavesTheLastTable()
+	{
+		var ratings = host.Resolve<IImdbRatings>();
+		await ratings.ReplaceAsync(Yesterday.ToAsyncEnumerable());
+
+		await Assert
+			.That(async () => await ratings.ReplaceAsync(new[] { new ImdbRatingLine("tt0000009", 6f, 3), new ImdbRatingLine("x9", 6f, 3) }.ToAsyncEnumerable()))
+			.Throws<InvalidDataException>();
+
+		await Assert.That(await ratings.FindAsync("tt0137523")).IsSome();
+		await Assert.That(await ratings.FindAsync("tt0000009")).IsNone();
 	}
 
 	[Test]

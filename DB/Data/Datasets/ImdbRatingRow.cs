@@ -5,9 +5,9 @@ namespace DB.Data.Datasets;
 [Table("ImdbRatings")]
 internal sealed record ImdbRatingRow
 {
-	public required string Tconst { get; init; }
+	public required int Id { get; init; }
 
-	public required float Average { get; init; }
+	public required byte Score { get; init; }
 
 	public required int Votes { get; init; }
 }
