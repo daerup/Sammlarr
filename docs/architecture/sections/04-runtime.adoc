@@ -24,7 +24,7 @@ sequenceDiagram
   MS->>DB: GetByExternalsAsync (one batched read)
   alt in library and reusable
     DB-->>MS: stored title
-  else missing, stale, or a gap someone new can fill
+  else missing, stale, or a gap the load needs that a service can fill
     MS->>IC: Phase A, identify the ids
     IC-->>MS: canonical identity (or unmatched)
     MS->>MR: Phase B, fetch the details
@@ -35,9 +35,9 @@ sequenceDiagram
 ....
 
 The first lookup is the library itself (one batched `GetByExternalsAsync`); a stored row is
-returned as is unless the details fetcher would ask again: 14 days after its last refresh, or when a field is
-missing, an hour has passed since anyone was asked, and an enricher that has not answered could fill it (see
-Freshness in <<section-glossary>>). A stored title only refetches its details (Phase B); a title not yet in the
+returned as is unless the details fetcher would ask again: 14 days after its last refresh, or when a field the
+load needs is missing and a service that is not resting could fill it (see Freshness in
+<<section-glossary>>). A stored title only refetches its details (Phase B); a title not yet in the
 library runs both phases.
 
 ==== Phase A: ids to a Plex identity

@@ -228,24 +228,22 @@ Which remote service is asked depends on its load. `IRemoteCapacity.Of(remote)` 
 (in-flight requests over the concurrency gate's limit), `MaxWait` (the provider's `Http.MaxWaitSeconds`: Plex 90,
 TMDB 15, 0 never waits) and `EnrichWait` (`Http.EnrichWaitSeconds`: TMDB 15, Plex unset, so never). It lives in
 `API/Http` next to the gates and handlers that feed it; Core reads only the contract. Both id resolution and
-enrichment wait for a blocked provider the same way, asking `FreesWithin`: only while its block ends within its
-budget (`MaxWait` for id lookups, `EnrichWait` for enrichment), at most once per title, sleeping until it is free
-instead of sending a request into the block. The request already in flight still honours `Retry-After` through the
+enrichment take a blocked provider the same way, through `RemoteLoad.Takes`: only while its block ends within its
+budget (`MaxWait` for id lookups, `EnrichWait` for enrichment), and then the ask goes to the provider's lane, which
+holds it until the block ends; Core never sleeps. The request already in flight still honours `Retry-After` through the
 retry policy.
 
 Enrichment asks, one at a time, the open enricher (the enrichers registered through `Enricher`, keyed by remote service)
-the search setting's service names, else the one whose `Fills` cover the most missing detail fields, the least busy first, among those that accept
+the search setting's service names while a detail field is missing, else the one whose `Fills` cover the most missing detail fields, then the most missing rating sources, the least busy first, among those that accept
 one of the title's ids (`Accepts`), until
-no open enricher can fill what is still missing; then it sleeps for the blocked enricher worth waiting for (one that
-fills a missing field, frees within its `EnrichWait` and has not been waited for yet, the soonest free first) and
-carries on, else it stops. A feed run loads about 100 titles in parallel and they sleep through the same block, so the
-sleep adds at most one budget per provider to a title, though the request after it can still wait out a new
-`Retry-After` within its timeout. Only the enrichers the current user has connected are asked, and id lookups take only paths through
+no enricher that takes the ask can fill what is still missing, open ones first; a blocked enricher whose block ends
+within its `EnrichWait` takes the ask, and its lane does the waiting. Only the enrichers the current user has connected are asked, and id lookups take only paths through
 connected services: `IServiceReadiness` answers it once per call to the media service, so once per feed run,
 from the access each remote service needs (a stored key or sign-in that was never rejected, a reachable
 Radarr or Sonarr, or none), never by calling the service. A key check answers `Valid`, `Rejected`, `Unreachable` or
-`Spent`, and only `Rejected` is remembered, so an outage or a rate limit never disconnects anything. An enricher that was skipped because it was blocked, or that failed, stores no
-answer, so a later load asks it once the hour since the last ask has passed and it is open again. Ratings are fields per source:
+`Spent`, and only `Rejected` is remembered, so an outage or a rate limit never disconnects anything. An enricher skipped because it was blocked, busy or down, or refused before
+sending, records nothing and is asked on a later load that needs the field; one that answered rests 14 days, and one
+that failed after sending rests 1, 6, then 24 hours. Ratings are fields per source:
 `MediaCompleteness` counts each `RatingSource` (TMDB, IMDb, Rotten Tomatoes critics and audience, Metacritic, Letterboxd,
 Trakt, MyAnimeList, AniList) the title has no
 rating from as a missing field: `MediaFields` holds the `MediaField` detail flags and a set of `RatingSource`, and a provider's sources enter it through `MediaFields.Rated`, so a provider's rating fills come from its `[SuppliedBy]` sources. A rating
@@ -262,10 +260,12 @@ with votes wins over a copy without (TMDB's own rating over Plex's copy of it). 
 finds none answers like any other: the rating stays in what it could not give. A fresh answer wins over the stored
 copy, and an earlier answer over a later one, except for what an enricher `Defers` (TVmaze its title, which it cannot
 vouch is English) and for a poster or backdrop no `IArtworkResizer` sizes (TVmaze's): those only fill a gap, after the
-stored copy and after every answer that may replace, so the grids keep their `srcset`. No field and no provider is special: a
-blocked TMDB is waited for within its 15 seconds for a missing rating, tagline or poster alike, and a TMDB blocked for
-longer, like a blocked Plex, stores no answer and is asked on the first load after its block lifts and an hour has
-passed since the last ask.
+stored copy and after every answer that may replace, so the grids keep their `srcset`. No provider is special, but the
+fields a load needs are: a field the feed filters or sorts on is asked from a service whose block ends within its
+`EnrichWait` (TMDB's 15 seconds, Plex none), a field a card only shows only from one that also answers within
+`ShownWait` (5 seconds); a service skipped either way records nothing and is asked again on a load that needs the
+field. A stale refresh that skips a service keeps the stored values of the fields it could give that no answer filled
+and, if it kept any, keeps `RefreshedAt`, so the title stays stale, is served as `Stale`, and the next load retries it.
 
 Id resolution routes the same way. Each `IExternalIdConverter` announces its `Lookups`, the calls its own provider
 answers: a `ById` lookup accepts some providers' ids, a `ByHints` lookup accepts the title hints, and each says
