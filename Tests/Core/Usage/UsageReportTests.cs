@@ -235,6 +235,32 @@ public class UsageReportTests
 	}
 
 	[Test]
+	public async Task ReadAsync_FeedEditorCalls_ListsTheirFeedsAndFoldsTheUnknownOnes()
+	{
+		var trending = TestFeeds.Feed(Guid.NewGuid(), "Trending shows");
+		var weekly = TestFeeds.Feed(Guid.NewGuid(), "Top movies of the week");
+		_feeds.GetAsync(Any()).Returns(new FeedSnapshot([FeedOverview.Of(trending, new None(), 0), FeedOverview.Of(weekly, new None(), 0)]));
+		Stored(
+			Edited(RemoteService.Mdblist, Some.Of(weekly.Id), 26),
+			Edited(RemoteService.Mdblist, Some.Of(trending.Id), 30),
+			Edited(RemoteService.Tmdb, Some.Of(trending.Id), 11),
+			Edited(RemoteService.Mdblist, Some.Of(FeedId.From(Guid.NewGuid())), 5),
+			Edited(RemoteService.Mdblist, new None(), 7),
+			Calls(RemoteService.Mdblist, 11, UsageOutcome.Answered, 3)
+		);
+
+		var report = await Testee().ReadAsync(UsageRange.Day);
+
+		var editor = report.Current.Causes.Single(line => line.Cause == UsageCause.FeedEditor);
+		await Assert
+			.That(editor.Feeds.Select(feed => (feed.Feed.Map(name => name.Name).GetValueOr("unknown"), feed.Calls)))
+			.IsEquivalentTo([("Trending shows", 41L), ("Top movies of the week", 26L), ("unknown", 12L)], CollectionOrdering.Matching);
+		var mdblist = report.Current.Services.Single(line => line.Service == RemoteService.Mdblist).Causes.Single(line => line.Cause == UsageCause.FeedEditor);
+		await Assert.That(mdblist.Feeds.Select(feed => feed.Calls)).IsEquivalentTo([30L, 26L, 12L], CollectionOrdering.Matching);
+		await Assert.That(report.Current.Causes.Single(line => line.Cause == UsageCause.FeedRun).Feeds).IsEmpty();
+	}
+
+	[Test]
 	public async Task ReadAsync_AsAMember_IsRefused()
 	{
 		await Assert.ThrowsAsync<UnauthorizedAccessException>(() => Testee(UserRole.Member).ReadAsync(UsageRange.Day));
@@ -255,6 +281,11 @@ public class UsageReportTests
 	private static UsageAttempts Attempts(RemoteService service, int hour, long attempts, int bucket)
 	{
 		return new(service, Midnight.AddHours(hour), UsageCause.FeedRun, new None(), attempts, new Dictionary<int, long> { [bucket] = attempts });
+	}
+
+	private static UsageCalls Edited(RemoteService service, Optional<FeedId> feed, long calls)
+	{
+		return new(service, Midnight.AddHours(11), UsageCause.FeedEditor, UsageOutcome.Answered, feed, calls);
 	}
 
 	private static UsageCalls Calls(RemoteService service, int hour, UsageOutcome outcome, long calls, UsageCause cause = UsageCause.FeedRun)

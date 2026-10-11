@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Usage;
 using UI.Shared.Services.Branding;
@@ -214,6 +215,72 @@ public class UsageFeedsCardTests : BunitContext
 		await Assert.That(Row(cut, "Old list").QuerySelector("[data-testid=usage-feed-last]")!.TextContent.Trim()).IsEqualTo("Never ran");
 	}
 
+	[Test]
+	public async Task Picked_AService_KeepsOnlyTheFeedsThatCalledItAndCountsItsCalls()
+	{
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Mdblist)));
+
+		await Assert.That(cut.FindAll("[data-testid=usage-feed]").Select(row => row.GetAttribute("data-feed"))).IsEquivalentTo(["Latest shows"]);
+		await Assert.That(Row(cut, "Latest shows").Children[2].TextContent.Trim()).IsEqualTo("1,103");
+		await Assert.That(cut.FindAll("[data-testid=usage-feed-group]")).Count().IsEqualTo(1);
+		await Assert.That(cut.Find("[data-testid=usage-pick-chip]").GetAttribute("data-service")).IsEqualTo("Mdblist");
+		await Assert.That(cut.Find("[data-testid=usage-feeds]").TextContent).Contains("MDBList calls only, picked in the Calls table.");
+	}
+
+	[Test]
+	public async Task Picked_AService_LeavesOutTheRunsThatNeverCalledIt()
+	{
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Tmdb)));
+
+		await Assert.That(cut.FindAll("[data-testid=usage-feed-dot]").Select(dot => dot.GetAttribute("data-run"))).IsEquivalentTo([ShowsRun.ToString()]);
+	}
+
+	[Test]
+	public async Task Dot_ClickedWhileAServiceIsPicked_OpensTheRunWithItsCallsOnly()
+	{
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Mdblist)));
+
+		await Dot(cut, ShowsRun).ClickAsync();
+
+		var details = cut.WaitForElement("[data-portal-content] [data-testid=usage-run-details]");
+		await Assert.That(details.QuerySelector("[data-testid=usage-run-calls]")!.TextContent).Contains("200 · 2.0 per title");
+	}
+
+	[Test]
+	public async Task Chip_Cleared_ShowsEveryServiceAgain()
+	{
+		Optional<RemoteService> raised = Some.Of(RemoteService.Mdblist);
+		var cut = Render<Harness>(parameters =>
+			parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Mdblist)).Add(harness => harness.PickedChanged, picked => raised = picked)
+		);
+
+		await cut.Find("[data-testid=usage-pick-chip] button[aria-label='Show every service']").ClickAsync();
+
+		await Assert.That(raised).IsNone();
+	}
+
+	[Test]
+	public async Task Picked_AServiceNoFeedCalled_SaysSo()
+	{
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Plex)));
+
+		await Assert.That(cut.Find("[data-testid=usage-feeds-none]").TextContent).IsEqualTo("No feed called Plex in the last 24 hours.");
+		await Assert.That(cut.FindAll("[data-testid=usage-feed]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Picked_AServiceThePickedFeedNeverCalled_DropsTheFeedsPick()
+	{
+		var cut = Render<Harness>();
+		await Row(cut, "Seasonal anime").ClickAsync();
+
+		cut.Render(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Mdblist)));
+		cut.Render(parameters => parameters.Add(harness => harness.Picked, new None()));
+
+		await Assert.That(cut.FindAll(".usage-feed-picked")).IsEmpty();
+		await Assert.That(cut.FindAll(".usage-feed-dim")).IsEmpty();
+	}
+
 	private static AngleSharp.Dom.IElement Row(IRenderedComponent<Harness> cut, string name)
 	{
 		return cut.FindAll("[data-testid=usage-feed]").Single(row => row.GetAttribute("data-feed") == name);
@@ -233,21 +300,9 @@ public class UsageFeedsCardTests : BunitContext
 		return cut.FindAll("[data-testid=usage-feed-dot]").Single(dot => dot.GetAttribute("data-run") == run.ToString());
 	}
 
-	private static UsageRun Run(RunId id, int hours, UsageTally calls, int couldNotLookUp = 0)
+	private static UsageRun Run(RunId id, int hours, UsageTally calls, IReadOnlyDictionary<RemoteService, UsageTally> services, int couldNotLookUp = 0)
 	{
-		return new UsageRun(
-			id,
-			UsageSamples.To.AddHours(hours),
-			TimeSpan.FromSeconds(4),
-			new Manual(),
-			100,
-			2,
-			1,
-			2,
-			couldNotLookUp,
-			calls,
-			new Dictionary<RemoteService, UsageTally>()
-		);
+		return new UsageRun(id, UsageSamples.To.AddHours(hours), TimeSpan.FromSeconds(4), new Manual(), 100, 2, 1, 2, couldNotLookUp, calls, services);
 	}
 
 	private static UsageFeedLine Line(FeedId feed, string name, FeedProvider provider, params UsageRun[] runs)
@@ -260,10 +315,14 @@ public class UsageFeedsCardTests : BunitContext
 			true,
 			Some.Of(runs[^1].StartedAt),
 			runs,
-			new UsageFeedStats(calls, calls, calls / 100.0, 3, 0.03, 1, TimeSpan.FromSeconds(4)),
-			new Dictionary<RemoteService, UsageFeedStats>()
+			Stats(calls),
+			runs.SelectMany(run => run.Services.Keys)
+				.Distinct()
+				.ToDictionary(service => service, service => Stats(runs.Sum(run => run.Services.GetValueOrNone(service).Map(tally => tally.Total).GetValueOr(0))))
 		);
 	}
+
+	private static UsageFeedStats Stats(long calls) => new(calls, calls, calls / 100.0, 3, 0.03, 1, TimeSpan.FromSeconds(4));
 
 	private sealed class Harness : ComponentBase
 	{
@@ -273,10 +332,35 @@ public class UsageFeedsCardTests : BunitContext
 				Shows,
 				"Latest shows",
 				FeedProvider.Mdblist,
-				Run(LimitedRun, -6, UsageSamples.Tally(answered: 900, after: 3)),
-				Run(ShowsRun, -2, UsageSamples.Tally(answered: 1200))
+				Run(
+					LimitedRun,
+					-6,
+					UsageSamples.Tally(answered: 900, after: 3),
+					new Dictionary<RemoteService, UsageTally> { [RemoteService.Mdblist] = UsageSamples.Tally(answered: 900, after: 3) }
+				),
+				Run(
+					ShowsRun,
+					-2,
+					UsageSamples.Tally(answered: 1200),
+					new Dictionary<RemoteService, UsageTally>
+					{
+						[RemoteService.Mdblist] = UsageSamples.Tally(answered: 200),
+						[RemoteService.Tmdb] = UsageSamples.Tally(answered: 1000),
+					}
+				)
 			),
-			Line(Anime, "Seasonal anime", FeedProvider.AniList, Run(RunId.From(Guid.NewGuid()), -5, UsageSamples.Tally(answered: 300), couldNotLookUp: 4)),
+			Line(
+				Anime,
+				"Seasonal anime",
+				FeedProvider.AniList,
+				Run(
+					RunId.From(Guid.NewGuid()),
+					-5,
+					UsageSamples.Tally(answered: 300),
+					new Dictionary<RemoteService, UsageTally> { [RemoteService.AniList] = UsageSamples.Tally(answered: 300) },
+					couldNotLookUp: 4
+				)
+			),
 			new(
 				Paused,
 				"Old list",
@@ -289,6 +373,12 @@ public class UsageFeedsCardTests : BunitContext
 			),
 		];
 
+		[Parameter]
+		public Optional<RemoteService> Picked { get; set; } = new None();
+
+		[Parameter]
+		public EventCallback<Optional<RemoteService>> PickedChanged { get; set; }
+
 		protected override void BuildRenderTree(RenderTreeBuilder builder)
 		{
 			builder.OpenComponent<BbPortalHost>(0);
@@ -297,6 +387,8 @@ public class UsageFeedsCardTests : BunitContext
 			builder.AddComponentParameter(2, nameof(UsageFeedsCard.Feeds), Feeds);
 			builder.AddComponentParameter(3, nameof(UsageFeedsCard.Range), UsageRange.Day);
 			builder.AddComponentParameter(4, nameof(UsageFeedsCard.Window), new UsageWindow(UsageSamples.To.AddHours(-24), UsageSamples.To, TimeSpan.FromHours(1)));
+			builder.AddComponentParameter(5, nameof(UsageFeedsCard.Picked), Picked);
+			builder.AddComponentParameter(6, nameof(UsageFeedsCard.PickedChanged), PickedChanged);
 			builder.CloseComponent();
 		}
 	}

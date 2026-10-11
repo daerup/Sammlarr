@@ -1,92 +1,145 @@
 @using Contracts.Usage
 @using Domain.Usage
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
 
-<UsageCard Title="Calls by cause" Subtitle="Pick a cause to see how its calls ended" TestId="usage-causes">
-    <div class="grid grid-cols-[minmax(0,1fr)_max-content] items-start gap-7">
-        <div>
-            <div class="usage-cause pl-3 pr-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                <span>Cause</span>
-                <span></span>
-                <span class="text-right">Calls</span>
-                <span class="text-right">Trouble</span>
-            </div>
-            @foreach (var (cause, tally) in Rows)
-            {
-                var picked = cause == Current;
-                var (name, icon) = Describe(cause);
-                var hint = Optional.Of(cause).Map(found => UsageView.CauseHint(found));
-                <button type="button" class="@($"usage-cause w-full cursor-pointer rounded-md pl-3 pr-1 text-left text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-cause-picked" : string.Empty)}")"
-                        aria-pressed="@(picked ? "true" : "false")" data-testid="usage-cause" @onclick="() => _cause = cause">
-                    <span class="@($"flex min-w-0 items-center gap-2 whitespace-nowrap {Weight(cause)}")">
-                        <LucideIcon Name="@icon" Size="14"/>
-                        @if (hint is Some<string>(var text))
+<UsageCard Title="Calls by cause" Subtitle="@Subtitle" TestId="usage-causes">
+    <Chip>
+        @if (Picked is Some<RemoteService>(var service))
+        {
+            <UsagePickChip Service="service" OnClear="() => PickedChanged.InvokeAsync(new None())"/>
+        }
+    </Chip>
+    <ChildContent>
+        @if (Missing is Some<RemoteService>(var missing))
+        {
+            <span class="text-[12.5px] text-muted-foreground" data-testid="usage-causes-none">No @Name(missing) calls in the @UsageView.Window(Range).</span>
+        }
+        else
+        {
+            <div class="grid grid-cols-[minmax(0,1fr)_max-content] items-start gap-7">
+                <div>
+                    <div class="usage-cause pl-3 pr-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                        <span>Cause</span>
+                        <span></span>
+                        <span class="text-right">Calls</span>
+                        <span class="text-right">Trouble</span>
+                    </div>
+                    @foreach (var (cause, tally, feeds) in Rows)
+                    {
+                        var picked = cause == Current;
+                        var opened = picked && feeds.Count > 0;
+                        var (name, icon) = Describe(cause);
+                        var hint = Optional.Of(cause).Map(found => UsageView.CauseHint(found));
+                        <button type="button" class="@($"usage-cause w-full cursor-pointer rounded-md pl-3 pr-1 text-left text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-cause-picked" : string.Empty)}")"
+                                aria-pressed="@(picked ? "true" : "false")" data-testid="usage-cause" @onclick="() => _cause = cause">
+                            <span class="@($"flex min-w-0 items-center gap-2 whitespace-nowrap {Weight(cause)}")">
+                                <LucideIcon Name="@icon" Size="14"/>
+                                @if (hint is Some<string>(var text))
+                                {
+                                    <BbTooltip DelayDuration="200">
+                                        <BbTooltipTrigger Focusable="false">
+                                            <span data-testid="usage-cause-hinted">@name</span>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent Class="max-w-72">@text</BbTooltipContent>
+                                    </BbTooltip>
+                                }
+                                else
+                                {
+                                    @name
+                                }
+                                @if (opened)
+                                {
+                                    <LucideIcon Name="chevron-up" Size="13" Class="text-muted-foreground"/>
+                                }
+                            </span>
+                            <span>
+                                @if (cause is not null)
+                                {
+                                    <span class="block h-2 rounded-[3px]" style="@FormattableString.Invariant($"width: {Math.Max(2, tally.Total * 100.0 / Busiest)}%; background: {(picked ? UsageView.Accent : "var(--usage-answered)")}")"></span>
+                                }
+                            </span>
+                            <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
+                            <span class="@($"text-right tabular-nums {(Trouble(tally) * 100 > tally.Total ? "font-medium text-[var(--usage-gave-up)]" : "text-muted-foreground")}")"
+                                  title="Hit trouble">@UsageView.Share(Trouble(tally), tally.Total)</span>
+                        </button>
+                        @if (opened)
                         {
-                            <BbTooltip DelayDuration="200">
-                                <BbTooltipTrigger Focusable="false">
-                                    <span data-testid="usage-cause-hinted">@name</span>
-                                </BbTooltipTrigger>
-                                <BbTooltipContent Class="max-w-72">@text</BbTooltipContent>
-                            </BbTooltip>
+                            @foreach (var feed in feeds)
+                            {
+                                <div class="usage-cause usage-cause-feed pl-3 pr-1 text-[12.5px]" data-testid="usage-cause-feed">
+                                    <span class="flex min-w-0 items-center gap-2 pl-[26px]">
+                                        @if (feed.Feed is Some<UsageFeedName>(var named))
+                                        {
+                                            @foreach (var brand in Branding.Brands(named.Provider.Service).Take(1))
+                                            {
+                                                <BrandedLogo Brand="brand" Size="16" Decorative="true"/>
+                                            }
+                                            <span class="truncate">@named.Name</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="size-4 shrink-0 rounded border border-dashed border-muted-foreground"></span>
+                                            <span class="truncate">New feed, not saved yet, or deleted</span>
+                                        }
+                                    </span>
+                                    <span>
+                                        <span class="block h-2 rounded-[3px]"
+                                              style="@FormattableString.Invariant($"width: {Math.Max(2, feed.Calls * 100.0 / Busiest)}%; background: color-mix(in oklab, var(--usage-answered) 65%, transparent)")"></span>
+                                    </span>
+                                    <span class="text-right tabular-nums">@UsageView.Count(feed.Calls)</span>
+                                    <span></span>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+                <div class="flex flex-col items-center gap-3.5">
+                    <div class="flex items-center gap-2 text-[13px] font-semibold" data-testid="usage-cause-picked">
+                        <LucideIcon Name="@Describe(Current).Icon" Size="14"/>
+                        @Describe(Current).Name <span class="font-normal text-muted-foreground">· @UsageView.Calls(CauseTally.Total)</span>
+                    </div>
+                    <UsageGauge Tally="CauseTally"/>
+                    <div class="flex flex-col gap-1.5 text-[12.5px]" data-testid="usage-outcomes">
+                        @if (Trouble(CauseTally) == 0)
+                        {
+                            <div class="usage-outcome" data-testid="usage-outcome">
+                                <span class="usage-swatch" style="background: var(--usage-answered)"></span>
+                                <LucideIcon Name="check" Size="13"/>
+                                <span>Answered</span>
+                                <span class="text-right tabular-nums">@UsageView.Count(CauseTally.Total)</span>
+                                <span class="text-right tabular-nums text-muted-foreground">@UsageView.Share(CauseTally.Total, CauseTally.Total)</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-muted-foreground" data-testid="usage-no-trouble">
+                                <LucideIcon Name="circle-check" Size="14"/>
+                                <span><span class="font-medium text-foreground">No trouble:</span> all @UsageView.Calls(CauseTally.Total) were answered.</span>
+                            </div>
                         }
                         else
                         {
-                            @name
+                            @foreach (var look in UsageView.Outcomes)
+                            {
+                                var count = CauseTally.Of(look.Outcome);
+                                <div class="@($"usage-outcome {(count == 0 ? "opacity-40" : string.Empty)}")" data-testid="usage-outcome" data-empty="@(count == 0 ? "true" : "false")">
+                                    <span class="usage-swatch" style="@($"background: {look.Color}")"></span>
+                                    <LucideIcon Name="@look.Icon" Size="13"/>
+                                    <span>@look.Name</span>
+                                    <span class="text-right tabular-nums">@UsageView.Count(count)</span>
+                                    <span class="text-right tabular-nums text-muted-foreground">@(count == 0 ? string.Empty : UsageView.Share(count, CauseTally.Total))</span>
+                                </div>
+                            }
                         }
-                    </span>
-                    <span>
-                        @if (cause is not null)
-                        {
-                            <span class="block h-2 rounded-[3px]" style="@FormattableString.Invariant($"width: {Math.Max(2, tally.Total * 100.0 / Busiest)}%; background: {(picked ? UsageView.Accent : "var(--usage-answered)")}")"></span>
-                        }
-                    </span>
-                    <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
-                    <span class="@($"text-right tabular-nums {(Trouble(tally) * 100 > tally.Total ? "font-medium text-[var(--usage-gave-up)]" : "text-muted-foreground")}")"
-                          title="Hit trouble">@UsageView.Share(Trouble(tally), tally.Total)</span>
-                </button>
-            }
-        </div>
-        <div class="flex flex-col items-center gap-3.5">
-            <div class="flex items-center gap-2 text-[13px] font-semibold" data-testid="usage-cause-picked">
-                <LucideIcon Name="@Describe(Current).Icon" Size="14"/>
-                @Describe(Current).Name <span class="font-normal text-muted-foreground">· @UsageView.Calls(CauseTally.Total)</span>
-            </div>
-            <UsageGauge Tally="CauseTally"/>
-            <div class="flex flex-col gap-1.5 text-[12.5px]" data-testid="usage-outcomes">
-                @if (Trouble(CauseTally) == 0)
-                {
-                    <div class="usage-outcome" data-testid="usage-outcome">
-                        <span class="usage-swatch" style="background: var(--usage-answered)"></span>
-                        <LucideIcon Name="check" Size="13"/>
-                        <span>Answered</span>
-                        <span class="text-right tabular-nums">@UsageView.Count(CauseTally.Total)</span>
-                        <span class="text-right tabular-nums text-muted-foreground">@UsageView.Share(CauseTally.Total, CauseTally.Total)</span>
                     </div>
-                    <div class="flex items-center gap-2 text-muted-foreground" data-testid="usage-no-trouble">
-                        <LucideIcon Name="circle-check" Size="14"/>
-                        <span><span class="font-medium text-foreground">No trouble:</span> all @UsageView.Calls(CauseTally.Total) were answered.</span>
-                    </div>
-                }
-                else
-                {
-                    @foreach (var look in UsageView.Outcomes)
-                    {
-                        var count = CauseTally.Of(look.Outcome);
-                        <div class="@($"usage-outcome {(count == 0 ? "opacity-40" : string.Empty)}")" data-testid="usage-outcome" data-empty="@(count == 0 ? "true" : "false")">
-                            <span class="usage-swatch" style="@($"background: {look.Color}")"></span>
-                            <LucideIcon Name="@look.Icon" Size="13"/>
-                            <span>@look.Name</span>
-                            <span class="text-right tabular-nums">@UsageView.Count(count)</span>
-                            <span class="text-right tabular-nums text-muted-foreground">@(count == 0 ? string.Empty : UsageView.Share(count, CauseTally.Total))</span>
-                        </div>
-                    }
-                }
+                </div>
             </div>
-        </div>
-    </div>
+        }
+    </ChildContent>
 </UsageCard>
 
 @code {
     [Parameter] [EditorRequired] public required UsagePeriod Period { get; set; }
+
+    [Parameter] public UsageRange Range { get; set; } = UsageRange.Day;
 
     [Parameter] public Optional<RemoteService> Picked { get; set; } = new None();
 
@@ -94,14 +147,27 @@
 
     private UsageCause? _cause;
 
-    private IReadOnlyList<(UsageCause? Cause, UsageTally Tally)> Rows =>
-        [(null, Period.Tally), .. Period.Causes.Select(line => ((UsageCause?)line.Cause, line.Tally))];
+    private Optional<UsageServiceLine> PickedLine => Picked.Map(service => Period.Services.FirstOrNone(line => line.Service == service));
 
-    private long Busiest => Period.Causes.Select(line => line.Tally.Total).DefaultIfEmpty(1).Max();
+    private Optional<RemoteService> Missing => Picked.When(service => Period.Services.All(line => line.Service != service));
 
-    private UsageCause? Current => Period.Causes.Any(line => line.Cause == _cause) ? _cause : null;
+    private IReadOnlyList<UsageCauseLine> Lines => PickedLine.Map(line => line.Causes).GetValueOr(Period.Causes);
 
-    private UsageTally CauseTally => Period.Causes.FirstOrNone(line => line.Cause == Current).Map(line => line.Tally).GetValueOr(Period.Tally);
+    private UsageTally Total => PickedLine.Map(line => line.Tally).GetValueOr(Period.Tally);
+
+    private string Subtitle =>
+        Picked.Match(service => $"{Name(service)}, picked in the Calls table. Pick a cause to see how its calls ended.", () => "Pick a cause to see how its calls ended");
+
+    private IReadOnlyList<(UsageCause? Cause, UsageTally Tally, IReadOnlyList<UsageCauseFeed> Feeds)> Rows =>
+        [(null, Total, []), .. Lines.Select(line => ((UsageCause?)line.Cause, line.Tally, line.Feeds))];
+
+    private long Busiest => Lines.Select(line => line.Tally.Total).DefaultIfEmpty(1).Max();
+
+    private UsageCause? Current => Lines.Any(line => line.Cause == _cause) ? _cause : null;
+
+    private UsageTally CauseTally => Lines.FirstOrNone(line => line.Cause == Current).Map(line => line.Tally).GetValueOr(Total);
+
+    private string Name(RemoteService service) => Branding.GetBrandingInfo(service).NickName;
 
     private static long Trouble(UsageTally tally) => tally.Total - tally.Of(UsageOutcome.Answered);
 
