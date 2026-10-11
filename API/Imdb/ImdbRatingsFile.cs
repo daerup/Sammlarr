@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 using API.Http;
 using Contracts.Datasets;
 using Domain.Providers;
+using Polly.Timeout;
+using Shared.Concurrency;
 
 namespace API.Imdb;
 
@@ -17,6 +19,19 @@ internal sealed class ImdbRatingsFile(HttpClient http) : IDataset<ImdbRatingLine
 	public string Name => DatasetNames.ImdbRatings;
 
 	public async Task<Result<Optional<DatasetFile<ImdbRatingLine>>>> DownloadAsync(Optional<string> etag, CancellationToken cancellationToken = default)
+	{
+		try
+		{
+			return await FetchAsync(etag, cancellationToken);
+		}
+		catch (Exception ex)
+			when (ex is HttpRequestException or LaneRefusedException or TimeoutRejectedException or OperationCanceledException { InnerException: TimeoutException })
+		{
+			return Error.From($"IMDb's datasets could not be reached: {ex.Message}");
+		}
+	}
+
+	private async Task<Result<Optional<DatasetFile<ImdbRatingLine>>>> FetchAsync(Optional<string> etag, CancellationToken cancellationToken)
 	{
 		using var request = new HttpRequestMessage(HttpMethod.Get, "title.ratings.tsv.gz");
 		etag.Apply(tag => request.Headers.IfNoneMatch.Add(EntityTagHeaderValue.Parse(tag)));

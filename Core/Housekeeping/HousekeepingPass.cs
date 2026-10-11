@@ -10,6 +10,7 @@ internal sealed class HousekeepingPass(
 	IDatabaseFile database,
 	IHousekeepingReports reports,
 	JobTurn turn,
+	TaskActivity activity,
 	IDateTimeProvider clock,
 	ILogger<HousekeepingPass> logger
 )
@@ -19,6 +20,7 @@ internal sealed class HousekeepingPass(
 		using var held = await turn.TakeAsync(cancellationToken);
 		var running = new HousekeepingReport(clock.Now, new None(), [], new None(), new None());
 		await reports.SaveAsync(running, cancellationToken);
+		activity.Progressed();
 		var finished = await RunStepsAsync(running, cancellationToken);
 		await reports.SaveAsync(finished, cancellationToken);
 		return finished;
@@ -36,6 +38,8 @@ internal sealed class HousekeepingPass(
 				var removed = await step.RunAsync(running.StartedAt, cancellationToken);
 				logger.LogInformation("Housekeeping removed {Removed} rows in {Step}", removed, step.Step);
 				counts.Add(new StepCount(step.Step, removed));
+				await reports.SaveAsync(running with { Steps = [.. counts] }, cancellationToken);
+				activity.Progressed();
 			}
 
 			at = new None();

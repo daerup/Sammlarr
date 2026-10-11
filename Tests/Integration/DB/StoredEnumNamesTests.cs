@@ -31,6 +31,7 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 					"ArrUserTagSource: Name, Id",
 					"AuthProvider: Plex, Local",
 					"Conclusiveness: Conclusive, StillLoading, NoItems, NoMatches, NoneAdmitted, Pending, Unresolved, Stopped",
+					"DatasetOutcome: Loaded, Unchanged, Failed",
 					"FeedProvider: Mdblist, Tmdb, AniList, Mal, Trakt",
 					"FeedRunItemState: Added, Removed, Unaddressable",
 					"HousekeepingStep: RunHistory, UsageStats, CachedDetails, TitleIds, SettledJobs, ScheduleEntries",

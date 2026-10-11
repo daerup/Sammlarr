@@ -17,8 +17,14 @@ internal sealed class ScheduleEntriesTrim(IDbContextFactory<SammlarrDbContext> c
 	{
 		var cutoff = (now - Kept).UtcDateTime;
 		await using var ctx = await contexts.CreateDbContextAsync(cancellationToken);
-		return await ctx.Set<CronTickerOccurrenceEntity<CronTickerEntity>>()
+		var occurrences = await ctx.Set<CronTickerOccurrenceEntity<CronTickerEntity>>()
 			.Where(occurrence => Settled.Contains(occurrence.Status) && occurrence.ExecutionTime < cutoff)
 			.ExecuteDeleteAsync(cancellationToken);
+		var once = await ctx.Set<TimeTickerEntity>()
+			.Where(ticker =>
+				Settled.Contains(ticker.Status) && ticker.ExecutionTime < cutoff && !ctx.Set<TimeTickerEntity>().Any(child => child.ParentId == ticker.Id)
+			)
+			.ExecuteDeleteAsync(cancellationToken);
+		return occurrences + once;
 	}
 }

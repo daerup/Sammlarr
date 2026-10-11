@@ -41,6 +41,21 @@ public class DatabaseFileTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(Length(WriteAheadLog)).IsEqualTo(0);
 	}
 
+	[Test]
+	public async Task SizeAsync_AfterALoadReplacedByASmallerOne_CountsTheFileAndItsLogAndOnlyTheUsedPagesAsData()
+	{
+		var ratings = host.Resolve<IImdbRatings>();
+		await ratings.ReplaceAsync(Ratings(300_000));
+		await ratings.ReplaceAsync(Ratings(3_000));
+
+		var size = await Testee.SizeAsync();
+
+		var compacted = await VacuumedCopyLengthAsync();
+		await Assert.That(size.OnDisk).IsEqualTo(Length(DatabasePath) + Length(WriteAheadLog));
+		await Assert.That(size.Data).IsBetween((long)(compacted * 0.95), (long)(compacted * 1.05));
+		await Assert.That(size.Data).IsLessThan(size.OnDisk);
+	}
+
 	private string DatabasePath => host.Connection.DataSource;
 
 	private string WriteAheadLog => $"{DatabasePath}-wal";

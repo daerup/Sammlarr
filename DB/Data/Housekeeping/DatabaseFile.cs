@@ -32,6 +32,17 @@ internal sealed class DatabaseFile(IDbContextFactory<SammlarrDbContext> contexts
 		return new Compaction(before, after, vacuumed);
 	}
 
+	public async Task<DatabaseSize> SizeAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await contexts.CreateDbContextAsync(cancellationToken);
+		await ctx.Database.OpenConnectionAsync(cancellationToken);
+		var connection = ctx.Database.GetDbConnection();
+		var pages = await PragmaAsync(connection, "page_count", cancellationToken);
+		var free = await PragmaAsync(connection, "freelist_count", cancellationToken);
+		var pageSize = await PragmaAsync(connection, "page_size", cancellationToken);
+		return new DatabaseSize(OnDisk(connection), (pages - free) * pageSize);
+	}
+
 	private async Task<bool> VacuumAsync(DbConnection connection, CancellationToken cancellationToken)
 	{
 		try

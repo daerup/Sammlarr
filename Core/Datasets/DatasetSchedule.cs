@@ -44,7 +44,7 @@ internal sealed class DatasetSchedule(IServiceProvider services, IDateTimeProvid
 
 	private async Task FirstLoadAsync(ITimeTickerManager<TimeTickerEntity> once, string name, CancellationToken cancellationToken)
 	{
-		var added = await once.AddAsync(Now(name), cancellationToken);
+		var added = await once.AddAsync(DatasetTicker.Once(name, clock.Now), cancellationToken);
 		Warn(name, "first", added.IsSucceeded, added.Exception);
 	}
 
@@ -65,16 +65,6 @@ internal sealed class DatasetSchedule(IServiceProvider services, IDateTimeProvid
 			Expression = Daily,
 			Request = TickerHelper.CreateTickerRequest(new DatasetRequest(name)),
 			IsEnabled = true,
-		};
-	}
-
-	private TimeTickerEntity Now(string name)
-	{
-		return new TimeTickerEntity
-		{
-			Function = DatasetTicker.FunctionName,
-			ExecutionTime = clock.Now.UtcDateTime,
-			Request = TickerHelper.CreateTickerRequest(new DatasetRequest(name)),
 		};
 	}
 }

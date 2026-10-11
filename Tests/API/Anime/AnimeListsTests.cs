@@ -107,6 +107,17 @@ public class AnimeListsTests
 	}
 
 	[Test]
+	public async Task DownloadAsync_WhenTheHostCannotBeReached_FailsWithWhy()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Throws(new HttpRequestException("No such host is known."));
+
+		var result = await new AnimeIdsFile(handler.CreateClient("https://raw.githubusercontent.com/Fribb/anime-lists/master/")).DownloadAsync(new None());
+
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Reason).Contains("No such host is known."));
+	}
+
+	[Test]
 	public async Task LookUpAsync_BeforeTheFirstLoad_IsUnavailableWithoutAsking()
 	{
 		var testee = Converter(loaded: false, out _);

@@ -95,6 +95,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<RatingDefaultRow> RatingDefaults => Set<RatingDefaultRow>();
 	public DbSet<ImdbRatingRow> ImdbRatings => Set<ImdbRatingRow>();
 	public DbSet<DatasetLoadRow> DatasetLoads => Set<DatasetLoadRow>();
+	public DbSet<DatasetCheckRow> DatasetChecks => Set<DatasetCheckRow>();
 	public DbSet<AnimeIdRow> AnimeIds => Set<AnimeIdRow>();
 	public DbSet<RemoteUsageRow> RemoteUsage => Set<RemoteUsageRow>();
 	public DbSet<RemoteAttemptRow> RemoteAttempts => Set<RemoteAttemptRow>();
