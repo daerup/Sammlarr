@@ -27,7 +27,7 @@ internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDeta
 
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Imdb];
 
-	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, ValueSet<IIdentityKey> keys, CancellationToken cancellationToken = default)
 	{
 		return LookUpResultAsync(id, cancellationToken).GuardedAsync(RemoteService.Tmdb);
 	}

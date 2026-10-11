@@ -23,6 +23,38 @@ public sealed class Lane<TKey, TOut>(int maxBatch) : ILane<TKey, TOut>
 		}
 	}
 
+	public IReadOnlyList<Task<LaneAnswer<TOut>>> AskMany(IReadOnlyList<TKey> keys, LaneCall<TKey, TOut> call, CancellationToken cancellationToken)
+	{
+		var priority = LanePriority.Current;
+		lock (_gate)
+		{
+			List<Task<LaneAnswer<TOut>>> answers =
+			[
+				.. keys.Select(key => _pending.GetValueOrNone((key, priority.Class)).GetValueOr(() => Queue(key, call, priority)).JoinAsync(cancellationToken)),
+			];
+			foreach (var batch in keys.Select(key => (call.BatchKey(key), priority.Class)).Distinct().ToList())
+			{
+				Drain(batch);
+			}
+
+			return answers;
+		}
+	}
+
+	public Optional<Task<LaneAnswer<TOut>>> Join(TKey key, CancellationToken cancellationToken)
+	{
+		var asking = LanePriority.Current.Class;
+		lock (_gate)
+		{
+			return Enum.GetValues<LaneClass>()
+				.OrderByDescending(each => each == asking)
+				.Select(each => _pending.GetValueOrNone((key, each)))
+				.WhereSome()
+				.FirstOrNone()
+				.Map(pending => new Some<Task<LaneAnswer<TOut>>>(pending.JoinAsync(cancellationToken)));
+		}
+	}
+
 	private Pending Queue(TKey key, LaneCall<TKey, TOut> call, LanePriority priority)
 	{
 		var pending = new Pending(key, call, priority, Optional.Of(ExecutionContext.Capture()));

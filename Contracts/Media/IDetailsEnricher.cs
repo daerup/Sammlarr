@@ -11,5 +11,5 @@ public interface IDetailsEnricher
 
 	IReadOnlyList<MediaProvider> Accepts { get; }
 
-	Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default);
+	Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, ValueSet<IIdentityKey> keys, CancellationToken cancellationToken = default);
 }

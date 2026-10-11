@@ -4,6 +4,7 @@ using API.Tmdb;
 using Contracts;
 using Contracts.Jobs;
 using Contracts.Media;
+using Contracts.Wantlist;
 using Core.Jobs;
 using Core.Media;
 using Domain.Jobs;
@@ -87,6 +88,26 @@ public class DetailsFillTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(host.HttpStub.Requests(TmdbDetail(TestMedia.FightClub))).IsEqualTo(0);
 		await Assert.That((await StoredAsync(fightClub)).Answers).IsEmpty();
+	}
+
+	[Test]
+	public async Task RunAsync_ForAPageOf500TitlesMissingMdblistRatings_SendsThreeBatches()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/tmdb/movie", "[]");
+		List<MediaId> titles = [];
+		foreach (var index in Enumerable.Range(0, 500))
+		{
+			titles.Add(await host.SeedMediaAsync(TmdbId.From($"{200000 + index}", MediaType.Movie)));
+		}
+
+		await host.Resolve<IWantlistRepository>().AddAsync(titles, new ManualOrigin(ManualSource.Search));
+		await host.Resolve<IMediaRepository>()
+			.SaveDetailsAsync([.. titles.Select(id => new DetailsChange(id, new None(), new CachedDetails(Complete("Title"), Now, Now, [])))]);
+
+		await FillAsync();
+
+		await Assert.That(host.HttpStub.Requests($"{TestUrls.MdblistApi}/tmdb/movie")).IsEqualTo(3);
 	}
 
 	[Test]

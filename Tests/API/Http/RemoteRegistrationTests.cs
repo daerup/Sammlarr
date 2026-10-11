@@ -122,7 +122,7 @@ public class RemoteRegistrationTests
 		public Task<Answer<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default) =>
 			Task.FromResult<Answer<IdLookupResult>>(new NoMatch(RemoteService.Tmdb));
 
-		public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default) =>
+		public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, ValueSet<IIdentityKey> keys, CancellationToken cancellationToken = default) =>
 			Task.FromResult<Answer<FoundMedia>>(new NoMatch(RemoteService.Tmdb));
 
 		public Task<IReadOnlyList<FoundMedia>> SearchAsync(

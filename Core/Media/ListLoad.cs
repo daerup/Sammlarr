@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Channels;
 using Contracts.Media;
@@ -19,6 +20,7 @@ internal sealed class ListLoad(
 	LibraryWriterFactory writersFactory,
 	ActiveSink activeSink,
 	IMediaRepository mediaRepository,
+	BurstPrimers primers,
 	FeedLoadOptions options,
 	TimeProvider time
 )
@@ -38,22 +40,53 @@ internal sealed class ListLoad(
 		await using var writer = writersFactory.Create();
 		var context = await LoadContext.StartAsync(activeSink, idResolver, detailsFetcher, needs, writer, cancellationToken);
 		await using var watchdog = new RunWatchdog(time, options.StallAfter, cancellationToken);
+		using var primes = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		var primings = new ConcurrentBag<Task>();
 		var titles = new List<Task>();
 		try
 		{
 			await foreach (var burst in FeedRunSpans.SourceAsync(entries, entry => entry is IdentifyRequest, cancellationToken).BurstsAsync(cancellationToken))
 			{
 				var listed = burst.Select(Traced).Numbered(titles.Count);
-				var shelf = ShelveAsync(listed, cancellationToken);
+				var shelf = ShelveAndPrimeAsync(listed, context, primings, (primes.Token, cancellationToken));
 				titles.AddRange(listed.Select(title => SettleAsync(title, shelf, context, settled, watchdog)));
 			}
 		}
 		finally
 		{
 			await Task.WhenAll(titles).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+			await primes.CancelAsync();
+			await Task.WhenAll(primings).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 		}
 
 		await Task.WhenAll(titles);
+	}
+
+	private async Task<Shelf> ShelveAndPrimeAsync(
+		IReadOnlyList<Listed<TitleWork>> listed,
+		LoadContext context,
+		ConcurrentBag<Task> primings,
+		(CancellationToken Primes, CancellationToken Load) tokens
+	)
+	{
+		var shelf = await ShelveAsync(listed, tokens.Load);
+		using var priority = LanePriority.Next(LaneClass.Title).Enter();
+		List<PrimedTitle> titles =
+		[
+			.. listed
+				.Select(title => title.Item.Request)
+				.WhereSome()
+				.Where(request => context.AddressedBy(request.Type).IsSome())
+				.Select(request => Primed(request, shelf.Rows(request))),
+		];
+		primings.Add(primers.PrimeAsync(titles, context.Details, tokens.Primes));
+		return shelf;
+	}
+
+	private static PrimedTitle Primed(IdentifyRequest request, IReadOnlyList<StoredMedia> rows)
+	{
+		IReadOnlyList<IExternalMediaId> ids = [.. request.Candidates.Concat(rows.SelectMany(row => row.Identity.Keys)).Distinct()];
+		return new PrimedTitle(ids, rows.FirstOrNone().Map(row => row.Cached));
 	}
 
 	private async Task<Shelf> ShelveAsync(IReadOnlyList<Listed<TitleWork>> listed, CancellationToken cancellationToken)
@@ -192,6 +225,18 @@ internal sealed class ListLoad(
 				{
 					IdentifyRequest request => request.Candidates,
 					UnmatchedMedia => [],
+				};
+			}
+		}
+
+		internal Optional<IdentifyRequest> Request
+		{
+			get
+			{
+				return Entry switch
+				{
+					IdentifyRequest request => Some.Of(request),
+					UnmatchedMedia => new None(),
 				};
 			}
 		}

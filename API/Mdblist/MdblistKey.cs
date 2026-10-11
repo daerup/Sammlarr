@@ -31,6 +31,11 @@ internal readonly record struct MdblistKey(MediaProvider Source, MediaType Type,
 
 	internal static IEnumerable<MdblistKey> All(MdblistTypes.Titles.Title title, MediaType type) => MdblistIds.Of(title.Ids, type).Select(Of).WhereSome();
 
+	internal bool Outranks(MdblistKey other)
+	{
+		return Array.IndexOf(AskedFirst, Source) < Array.IndexOf(AskedFirst, other.Source);
+	}
+
 	internal JsonNode Encoded()
 	{
 		return Source is MediaProvider.Imdb or MediaProvider.Mdblist || !long.TryParse(Value, CultureInfo.InvariantCulture, out var number)

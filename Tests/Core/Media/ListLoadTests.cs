@@ -38,7 +38,7 @@ public class ListLoadTests
 			.IsOfUnionType<MediaMatchResult, MatchedMedia>()
 			.And.Multiple(async matched => await Assert.That(matched.Known).IsTrue());
 		deps.Converter.LookUpAsync(Any(), Any()).WasNeverCalled();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).WasNeverCalled();
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).WasNeverCalled();
 		deps.Claims.ClaimAsync(Any(), Any()).WasNeverCalled();
 	}
 
@@ -49,7 +49,8 @@ public class ListLoadTests
 		var imdb = ImdbId.From("tt0137523", MediaType.Movie);
 		var (testee, deps) = TestMediaService.Create();
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any()).Returns([Stored(MediaId.New(), tvdb, imdb)]);
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((external, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(external)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any(), Any())
+			.Returns((external, _, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(external)));
 
 		var results = await testee.LoadListAsync(ListTitles.Of(new IdentifyRequest([tvdb], new None())), FieldNeeds.Everything).ToListAsync();
 
@@ -267,7 +268,7 @@ public class ListLoadTests
 	public async Task LoadListAsync_ForTwoEntriesOfOneMedia_GivesBothTheSameId()
 	{
 		var (testee, deps) = TestMediaService.Create();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns((ext, _, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
 		var requests = Imdb(20);
 		requests[15] = requests[2];
 
@@ -317,7 +318,7 @@ public class ListLoadTests
 	{
 		var conflicting = ImdbId.From(Tt(1), MediaType.Movie);
 		var (testee, deps) = TestMediaService.Create();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns((ext, _, _) => new Found<FoundMedia>(TestMediaService.CompleteMovie(ext)));
 		var owners = new[] { MediaId.New(), MediaId.New() };
 		deps.Claims.ClaimAsync(Any(), Any()).Returns((claim, _) => Outcome(claim, conflicting, owners));
 
@@ -344,9 +345,9 @@ public class ListLoadTests
 		var (testee, deps) = TestMediaService.Create();
 		var detailCalls = 0;
 		var all = new TaskCompletionSource();
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any())
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any(), Any())
 			.ReturnsAsync(
-				async (ext, token) =>
+				async (ext, _, token) =>
 				{
 					if (Interlocked.Increment(ref detailCalls) == 2)
 					{
@@ -397,9 +398,9 @@ public class ListLoadTests
 					return TestMediaService.FoundByFind(request);
 				}
 			);
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any())
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any(), Any())
 			.Returns(
-				(ext, _) =>
+				(ext, _, _) =>
 				{
 					if (Interlocked.Increment(ref settled) == 149)
 					{

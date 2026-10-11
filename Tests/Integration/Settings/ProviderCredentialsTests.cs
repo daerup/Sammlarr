@@ -114,7 +114,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 		host.Movie("Test Movie", tmdb: "550").ServedByTmdb(rating: 7.8, votes: 5000);
 		host.HttpStub.RequireQueryParam(TestUrls.TmdbApi, "api_key", "rotated-tmdb-key");
 
-		await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie));
+		await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie), []);
 
 		await Assert.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb)).IsError();
 		await ApiKeys.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "rotated-tmdb-key"));
@@ -124,7 +124,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task LookUpAsync_WhenTheTmdbKeyIsMissing_IsNoMatch()
 	{
-		await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsOfUnionType<Answer<FoundMedia>, NoMatch>();
+		await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie), [])).IsOfUnionType<Answer<FoundMedia>, NoMatch>();
 	}
 
 	[Test]
@@ -133,7 +133,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithTmdbAccount("valid-tmdb-key");
 		host.Movie("Test Movie", tmdb: "550").ServedByTmdb(rating: 7.8, votes: 5000);
 
-		var found = await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsFound();
+		var found = await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie), [])).IsFound();
 
 		await Assert.That(found!.Details.Ratings.All).IsNotEmpty();
 	}

@@ -28,7 +28,7 @@ internal sealed class MalEnricher(MalClient client, IApiKeyService apiKeys) : ID
 
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Mal];
 
-	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, ValueSet<IIdentityKey> keys, CancellationToken cancellationToken = default)
 	{
 		return LookUpResultAsync(id, cancellationToken).GuardedAsync(RemoteService.Mal);
 	}

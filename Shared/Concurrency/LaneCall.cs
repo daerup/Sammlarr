@@ -12,4 +12,8 @@ public interface ILane<TKey, TOut>
 	where TOut : notnull
 {
 	Task<LaneAnswer<TOut>> AskAsync(TKey key, LaneCall<TKey, TOut> call, CancellationToken cancellationToken);
+
+	IReadOnlyList<Task<LaneAnswer<TOut>>> AskMany(IReadOnlyList<TKey> keys, LaneCall<TKey, TOut> call, CancellationToken cancellationToken);
+
+	Optional<Task<LaneAnswer<TOut>>> Join(TKey key, CancellationToken cancellationToken);
 }

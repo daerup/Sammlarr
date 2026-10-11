@@ -14,7 +14,8 @@ internal sealed class MediaService(
 	IIdentityClaims claims,
 	LibraryWriterFactory writersFactory,
 	ActiveSink activeSink,
-	IMediaRepository mediaRepository
+	IMediaRepository mediaRepository,
+	BurstPrimers primers
 ) : IMediaService
 {
 	public async IAsyncEnumerable<Result<MediaIdentity>> IdentifyAsync(
@@ -51,6 +52,7 @@ internal sealed class MediaService(
 		var stored = await LoadByInternalsAsync(materialized, cancellationToken);
 		var run = new DetailsRun(await detailsFetcher.ConnectedAsync(cancellationToken), needs, writer);
 		using var abandon = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		var priming = primers.PrimeAsync([.. stored.Values.Select(row => new PrimedTitle([.. row.Identity.Keys], row.Cached))], run, abandon.Token);
 		await Task.CompletedTask.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
 		List<Task<Result<MatchedMedia>>> started = [.. materialized.Select(id => LoadStoredDetailsAsync(id, stored, run, abandon.Token))];
 		try
@@ -64,6 +66,7 @@ internal sealed class MediaService(
 		{
 			await abandon.CancelAsync();
 			await ((Task)Task.WhenAll(started)).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+			await priming.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 		}
 	}
 

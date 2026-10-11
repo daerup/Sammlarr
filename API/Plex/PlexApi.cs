@@ -46,7 +46,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 		response.EnsureSuccessStatusCode();
 	}
 
-	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
+	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId mediaId, ValueSet<IIdentityKey> keys, CancellationToken cancellationToken = default)
 	{
 		return LookUpResultAsync(mediaId, cancellationToken).GuardedAsync(RemoteService.Plex);
 	}

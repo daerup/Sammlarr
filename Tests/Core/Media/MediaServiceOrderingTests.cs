@@ -152,16 +152,18 @@ public class MediaServiceOrderingTests
 		var resolver = new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), TestReadiness.Everything(), dateTimeProvider.Object);
 		var identifier = new TitleIdentifier(resolver, claims.Object);
 		var writers = new LibraryWriterFactory(mediaRepo.Object, NullLogger<LibraryWriter>.Instance);
+		var primers = new BurstPrimers([], detailsFetcher, TestCapacity.Open(), dateTimeProvider.Object, new FeedLoadOptions());
 		var sink = TestSinks.AddressingBy(MediaProvider.Tmdb, configRepository.Object);
 		return new MediaService(
 			resolver,
 			identifier,
 			detailsFetcher,
-			new ListLoad(identifier, resolver, detailsFetcher, writers, sink, mediaRepo.Object, new FeedLoadOptions(), TimeProvider.System),
+			new ListLoad(identifier, resolver, detailsFetcher, writers, sink, mediaRepo.Object, primers, new FeedLoadOptions(), TimeProvider.System),
 			claims.Object,
 			writers,
 			sink,
-			mediaRepo.Object
+			mediaRepo.Object,
+			primers
 		);
 	}
 }

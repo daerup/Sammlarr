@@ -158,7 +158,7 @@ public class AniListTests
 		var feed = new AniListFeedService(Client(handler), media.Object, AnimeMaps.Seasons(AnimeMaps.Unknown()), titles, FeedClock.Today());
 		await feed.GetFeedItemsAsync("someone", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
-		var found = await new AniListEnricher(titles).LookUpAsync(AttackOnTitan);
+		var found = await new AniListEnricher(titles).LookUpAsync(AttackOnTitan, []);
 
 		await Assert.That(found).IsFound();
 		handler.Verify(request => request.Method(HttpMethod.Post), Times.Once);
@@ -181,7 +181,7 @@ public class AniListTests
 			.ToListAsync();
 		now = now.AddMinutes(11);
 
-		await new AniListEnricher(titles).LookUpAsync(AttackOnTitan);
+		await new AniListEnricher(titles).LookUpAsync(AttackOnTitan, []);
 
 		await Assert.That(calls()).IsEqualTo(2);
 	}
@@ -192,7 +192,7 @@ public class AniListTests
 		var handler = Answering(out var calls, _ => """{"data":{"Page":{"media":[]}}}""");
 		var enricher = new AniListEnricher(Titles(handler));
 
-		await Task.WhenAll(Enumerable.Range(1, 120).Select(id => enricher.LookUpAsync(AniListId.From($"{id}", MediaType.Show))));
+		await Task.WhenAll(Enumerable.Range(1, 120).Select(id => enricher.LookUpAsync(AniListId.From($"{id}", MediaType.Show), [])));
 
 		await Assert.That(calls()).IsEqualTo(3);
 	}
@@ -202,7 +202,7 @@ public class AniListTests
 	{
 		var handler = Answering(out _, _ => """{"data":{"Page":{"media":[]}}}""");
 
-		var found = await new AniListEnricher(Titles(handler)).LookUpAsync(AttackOnTitan);
+		var found = await new AniListEnricher(Titles(handler)).LookUpAsync(AttackOnTitan, []);
 
 		await Assert.That(found).IsFound().And.Multiple(async media => await Assert.That(media.Details.Title).IsNull());
 	}
@@ -212,9 +212,9 @@ public class AniListTests
 	{
 		var handler = Answering(out var calls, _ => """{"data":{"Page":{"media":[]}}}""");
 		var enricher = new AniListEnricher(Titles(handler));
-		await enricher.LookUpAsync(AttackOnTitan);
+		await enricher.LookUpAsync(AttackOnTitan, []);
 
-		await enricher.LookUpAsync(AttackOnTitan);
+		await enricher.LookUpAsync(AttackOnTitan, []);
 
 		await Assert.That(calls()).IsEqualTo(1);
 	}
@@ -252,7 +252,7 @@ public class AniListTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.TooManyRequests);
 
-		var result = await new AniListEnricher(Titles(handler)).LookUpAsync(AttackOnTitan);
+		var result = await new AniListEnricher(Titles(handler)).LookUpAsync(AttackOnTitan, []);
 
 		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.AniList, new None(), true));
 	}
@@ -263,7 +263,7 @@ public class AniListTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"errors":[{"message":"Validation error","status":400}],"data":null}""", HttpStatusCode.BadRequest);
 
-		await Assert.That(await new AniListEnricher(Titles(handler)).LookUpAsync(AttackOnTitan)).IsOfUnionType<Answer<FoundMedia>, Faulted>();
+		await Assert.That(await new AniListEnricher(Titles(handler)).LookUpAsync(AttackOnTitan, [])).IsOfUnionType<Answer<FoundMedia>, Faulted>();
 	}
 
 	[Test]
@@ -272,7 +272,7 @@ public class AniListTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "AniList", "Recorded", "attack-on-titan.json")));
 
-		var found = await Assert.That(await new AniListEnricher(Titles(handler)).LookUpAsync(AttackOnTitan)).IsFound();
+		var found = await Assert.That(await new AniListEnricher(Titles(handler)).LookUpAsync(AttackOnTitan, [])).IsFound();
 
 		var show = await Assert.That(found!.Details).IsTypeOf<ShowDetails>();
 		await Assert.That(show!.Title).IsEqualTo("Attack on Titan");
@@ -292,7 +292,7 @@ public class AniListTests
 				"""{"data":{"Page":{"media":[{"id":199,"format":"MOVIE","title":{"english":null,"romaji":"Sen to Chihiro no Kamikakushi"},"duration":125}]}}}"""
 			);
 
-		var found = await Assert.That(await new AniListEnricher(Titles(handler)).LookUpAsync(AniListId.From("199", MediaType.Movie))).IsFound();
+		var found = await Assert.That(await new AniListEnricher(Titles(handler)).LookUpAsync(AniListId.From("199", MediaType.Movie), [])).IsFound();
 
 		var movie = await Assert.That(found!.Details).IsTypeOf<MovieDetails>();
 		await Assert.That(movie!.Title).IsEqualTo("Sen to Chihiro no Kamikakushi");

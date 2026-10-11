@@ -25,6 +25,124 @@ public class KeyedLaneTests
 	}
 
 	[Test]
+	public async Task AskMany_ForMoreKeysThanABatchHolds_SendsOnlyFullBatches()
+	{
+		var open = new TaskCompletionSource();
+		var sent = new List<SentBatch>();
+		var testee = new Lane<int, int>(200);
+		var call = Echo(sent, _ => "imdb/movie", _ => open.Task);
+
+		var answers = testee.AskMany([.. Enumerable.Range(0, 1000)], call, CancellationToken.None);
+		open.SetResult();
+		await Task.WhenAll(answers).WaitAsync(Patience);
+
+		await Assert.That(sent.Select(batch => batch.Keys.Count)).IsEquivalentTo([200, 200, 200, 200, 200]);
+	}
+
+	[Test]
+	public async Task AskMany_ForAKeyAlreadyAskedAndADuplicate_JoinsTheirAsks()
+	{
+		var open = new TaskCompletionSource();
+		var sent = new List<SentBatch>();
+		var testee = new Lane<int, int>(200);
+		var call = Echo(sent, _ => "imdb/movie", _ => open.Task);
+		var first = testee.AskAsync(0, call, CancellationToken.None);
+
+		var answers = testee.AskMany([0, 1, 1, 2], call, CancellationToken.None);
+		open.SetResult();
+		await Task.WhenAll([first, .. answers]).WaitAsync(Patience);
+
+		await Assert.That(sent.Select(batch => batch.Keys.Count)).IsEquivalentTo([1, 2]);
+	}
+
+	[Test]
+	public async Task AskMany_WhenItsTokenIsCancelledBeforeItsBatchIsTaken_SendsNothingForIt()
+	{
+		var open = new TaskCompletionSource();
+		var sent = new List<SentBatch>();
+		var testee = new Lane<int, int>(200);
+		var call = Echo(sent, _ => "imdb/movie", _ => open.Task);
+		var first = testee.AskAsync(0, call, CancellationToken.None);
+		using var leaving = new CancellationTokenSource();
+
+		var primed = testee.AskMany([1, 2, 3], call, leaving.Token);
+		await leaving.CancelAsync();
+		open.SetResult();
+		await first.WaitAsync(Patience);
+		await ((Task)Task.WhenAll(primed)).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+		await testee.AskAsync(9, call, CancellationToken.None).WaitAsync(Patience);
+
+		await Assert.That(sent.SelectMany(batch => batch.Keys)).IsEquivalentTo([0, 9]);
+	}
+
+	[Test]
+	public async Task AskMany_WithAnAlreadyCancelledToken_SendsNothing()
+	{
+		var sent = new List<SentBatch>();
+		var testee = new Lane<int, int>(200);
+		using var left = new CancellationTokenSource();
+		await left.CancelAsync();
+
+		var call = Echo(sent, _ => "imdb/movie", _ => Task.CompletedTask);
+
+		var primed = testee.AskMany([1, 2], call, left.Token);
+		await ((Task)Task.WhenAll(primed)).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+		await testee.AskAsync(9, call, CancellationToken.None).WaitAsync(Patience);
+
+		await Assert.That(sent.SelectMany(batch => batch.Keys)).IsEquivalentTo([9]);
+	}
+
+	[Test]
+	public async Task Join_ForAKeyWaitingToBeSent_JoinsItsAsk()
+	{
+		var open = new TaskCompletionSource();
+		var sent = new List<SentBatch>();
+		var testee = new Lane<int, int>(200);
+		var call = Echo(sent, _ => "imdb/movie", _ => open.Task);
+		var first = testee.AskAsync(0, call, CancellationToken.None);
+		var waiting = testee.AskAsync(1, call, CancellationToken.None);
+
+		var joined = testee.Join(1, CancellationToken.None);
+		open.SetResult();
+
+		var answer = await Assert.That(joined).IsSome();
+		await Task.WhenAll(first, waiting, answer!).WaitAsync(Patience);
+		await Assert.That(sent.Select(batch => string.Join(',', batch.Keys))).IsEquivalentTo(["0", "1"]);
+	}
+
+	[Test]
+	public async Task Join_ForAKeyAnotherClassIsAsking_JoinsItsAsk()
+	{
+		var open = new TaskCompletionSource();
+		var sent = new List<SentBatch>();
+		var testee = new Lane<int, int>(200);
+		var call = Echo(sent, _ => "imdb/movie", _ => open.Task);
+		Task<LaneAnswer<int>> first;
+		using (LanePriority.Next(LaneClass.Title).Enter())
+		{
+			first = testee.AskAsync(1, call, CancellationToken.None);
+		}
+
+		var joined = testee.Join(1, CancellationToken.None);
+		open.SetResult();
+
+		var answer = await Assert.That(joined).IsSome();
+		await Task.WhenAll(first, answer!).WaitAsync(Patience);
+		await Assert.That(sent).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Join_ForAKeyAlreadyAnswered_IsNone()
+	{
+		var sent = new List<SentBatch>();
+		var testee = new Lane<int, int>(200);
+		var call = Echo(sent, _ => "imdb/movie", _ => Task.CompletedTask);
+		await testee.AskAsync(1, call, CancellationToken.None).WaitAsync(Patience);
+
+		await Assert.That(testee.Join(1, CancellationToken.None)).IsNone();
+	}
+
+	[Test]
 	public async Task AskAsync_WhenTheBatchFails_SettlesEveryKeyAsFailedOnce()
 	{
 		var open = new TaskCompletionSource();

@@ -287,6 +287,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void MdblistFeedPaginated(string identifier, params FeedPage[] pages) => MdblistFeedStub.Paginated(HttpStub, identifier, pages);
 
+	internal void MdblistFeedPages(string identifier, params IReadOnlyList<FeedItemSpec>[] pages) => MdblistFeedStub.Pages(HttpStub, identifier, pages);
+
 	internal void PlexHolds(ResolvedVersion version, double? imdbRating = null, int imdbVotes = 0) => PlexStub.Lookup(HttpStub, version, imdbRating, imdbVotes);
 
 	internal void PlexHolds(MediaSpec spec) => PlexStub.Lookup(HttpStub, FullVersion(spec));
