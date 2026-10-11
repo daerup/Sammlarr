@@ -80,6 +80,6 @@ public class DatasetScheduleTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		public string Name => name;
 
-		public Task<Result<int>> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult<Result<int>>(Error.From("Never loaded here."));
+		public Task<DatasetCheck> LoadAsync(CancellationToken cancellationToken = default) => throw new InvalidOperationException("Never loaded here.");
 	}
 }

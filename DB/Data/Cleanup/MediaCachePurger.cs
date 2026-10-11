@@ -21,6 +21,19 @@ internal class MediaCachePurger(
 	ILogger<MediaCachePurger> logger
 ) : IMediaCachePurger
 {
+	private const long DetailsBytesPerTitle = 1_669;
+
+	private const long IdsBytesPerTitle = 1_239;
+
+	public async Task<CachedTitles> CountAsync(CancellationToken cancellationToken = default)
+	{
+		currentUser.EnsureAdmin();
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var detailed = await ctx.MediaDetails.CountAsync(cancellationToken);
+		var matched = await ctx.Media.CountAsync(media => !ctx.ProtectedMediaIds().Contains(media.Id), cancellationToken);
+		return new CachedTitles(detailed, detailed * DetailsBytesPerTitle, matched, matched * IdsBytesPerTitle);
+	}
+
 	public async Task PurgeAsync(CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();

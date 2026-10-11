@@ -12,6 +12,7 @@ internal sealed class DatasetsConfiguration : IModelConfiguration
 			builder.Property(row => row.Id).ValueGeneratedNever();
 		});
 		modelBuilder.Entity<DatasetLoadRow>(builder => builder.HasKey(row => row.Name));
+		modelBuilder.Entity<DatasetCheckRow>(builder => builder.HasKey(row => row.Name));
 		modelBuilder.Entity<AnimeIdRow>(builder =>
 		{
 			builder.HasIndex(row => row.AniListId);

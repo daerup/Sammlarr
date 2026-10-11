@@ -7,6 +7,8 @@ using API.Http;
 using Contracts.Datasets;
 using Domain.Media;
 using Domain.Providers;
+using Polly.Timeout;
+using Shared.Concurrency;
 
 namespace API.Anime;
 
@@ -15,6 +17,19 @@ internal sealed class AnimeIdsFile(HttpClient http) : IDataset<AnimeIdMapping>
 	public string Name => DatasetNames.AnimeIds;
 
 	public async Task<Result<Optional<DatasetFile<AnimeIdMapping>>>> DownloadAsync(Optional<string> etag, CancellationToken cancellationToken = default)
+	{
+		try
+		{
+			return await FetchAsync(etag, cancellationToken);
+		}
+		catch (Exception ex)
+			when (ex is HttpRequestException or LaneRefusedException or TimeoutRejectedException or OperationCanceledException { InnerException: TimeoutException })
+		{
+			return Error.From($"The anime id map could not be reached: {ex.Message}");
+		}
+	}
+
+	private async Task<Result<Optional<DatasetFile<AnimeIdMapping>>>> FetchAsync(Optional<string> etag, CancellationToken cancellationToken)
 	{
 		using var request = new HttpRequestMessage(HttpMethod.Get, "anime-list-full.json");
 		etag.Apply(tag => request.Headers.IfNoneMatch.Add(EntityTagHeaderValue.Parse(tag)));

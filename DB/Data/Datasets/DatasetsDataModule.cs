@@ -13,6 +13,7 @@ internal class DatasetsDataModule : IServiceModule
 		services.AddScoped<IAnimeIds, AnimeIdRepository>();
 		services.AddScoped<IDatasetTable<AnimeIdMapping>>(provider => provider.GetRequiredService<IAnimeIds>());
 		services.AddScoped<IDatasetLoads, DatasetLoadRepository>();
+		services.AddScoped<IDatasetChecks, DatasetCheckRepository>();
 		services.AddScoped<IModelConfiguration, DatasetsConfiguration>();
 	}
 }

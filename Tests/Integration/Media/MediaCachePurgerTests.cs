@@ -114,6 +114,27 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task CountAsync_CountsEveryDetailedTitleButOnlyTheIdsAFullPurgeWouldDrop()
+	{
+		var wanted = new MediaRow();
+		var detailed = new MediaRow();
+		var bare = new MediaRow();
+		fixture.Context.ExternalMediaIds.AddRange(
+			PlexId.From("3600", MediaType.Movie).ToExternalIdEntity(wanted),
+			PlexId.From("3601", MediaType.Movie).ToExternalIdEntity(detailed),
+			PlexId.From("3602", MediaType.Movie).ToExternalIdEntity(bare)
+		);
+		fixture.Context.MediaDetails.AddRange(BuildDetails(wanted, "Wantlisted"), BuildDetails(detailed, "Detailed"));
+		fixture.Context.Wantlist.Add(new WantlistRow { Media = wanted, Origin = WantlistItemOrigin.Manual });
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+
+		var counted = await _testee.CountAsync();
+
+		await Assert.That(counted).IsEqualTo(new CachedTitles(2, 2 * 1_669, 2, 2 * 1_239));
+	}
+
+	[Test]
 	public async Task PurgeAsync_ForAWantlistedTitle_StampsWhenItLostItsDetails()
 	{
 		var purgedAt = new DateTimeOffset(2026, 10, 11, 12, 0, 0, TimeSpan.Zero);

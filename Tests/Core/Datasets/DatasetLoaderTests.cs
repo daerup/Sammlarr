@@ -47,13 +47,13 @@ public class DatasetLoaderTests
 	}
 
 	[Test]
-	public async Task LoadAsync_WhenTheFileIsUnchanged_LoadsRecordsAndCompactsNothing()
+	public async Task LoadAsync_WhenTheFileIsUnchanged_SaysSoAndLoadsRecordsAndCompactsNothing()
 	{
 		_dataset.DownloadAsync(Any(), Any()).Returns(Success.Of<Optional<DatasetFile<ImdbRatingLine>>>(new None()));
 
 		var loaded = await Testee().LoadAsync();
 
-		await Assert.That(loaded).IsSuccess().And.IsEqualTo(0);
+		await Assert.That(loaded).IsEqualTo(new DatasetCheck(DatasetNames.ImdbRatings, Now, Now, DatasetOutcome.Unchanged, new None()));
 		_table.ReplaceAsync(Any(), Any()).WasNeverCalled();
 		_loads.RecordAsync(Any(), Any()).WasNeverCalled();
 		_database.CompactAsync(Any()).WasNeverCalled();
@@ -67,7 +67,7 @@ public class DatasetLoaderTests
 
 		var loaded = await Testee().LoadAsync();
 
-		await Assert.That(loaded).IsSuccess().And.IsEqualTo(2);
+		await Assert.That(loaded).IsEqualTo(new DatasetCheck(DatasetNames.ImdbRatings, Now, Now, DatasetOutcome.Loaded, new None()));
 		_loads.RecordAsync(new DatasetLoad(DatasetNames.ImdbRatings, Now, Some.Of("\"today\""), 2), Any()).WasCalled(Times.Once);
 	}
 
@@ -88,26 +88,28 @@ public class DatasetLoaderTests
 	}
 
 	[Test]
-	public async Task LoadAsync_WhenTheTableCannotTakeTheRows_RecordsAndCompactsNothing()
+	public async Task LoadAsync_WhenTheTableCannotTakeTheRows_FailsWithWhyAndRecordsAndCompactsNothing()
 	{
 		_dataset.DownloadAsync(Any(), Any()).Returns(Changed());
 		_table.ReplaceAsync(Any(), Any()).Throws(new InvalidDataException("The file is cut short."));
 
 		var loaded = await Testee().LoadAsync();
 
-		await Assert.That(loaded).IsError();
+		await Assert.That(loaded.Outcome).IsEqualTo(DatasetOutcome.Failed);
+		await Assert.That(loaded.Failure).IsSome().And.IsEqualTo("The file is cut short.");
 		_loads.RecordAsync(Any(), Any()).WasNeverCalled();
 		_database.CompactAsync(Any()).WasNeverCalled();
 	}
 
 	[Test]
-	public async Task LoadAsync_WhenTheDownloadFails_RecordsNothing()
+	public async Task LoadAsync_WhenTheDownloadFails_FailsWithWhyAndRecordsNothing()
 	{
 		_dataset.DownloadAsync(Any(), Any()).Returns(Error.From("IMDb's datasets answered 500 for the ratings file."));
 
 		var loaded = await Testee().LoadAsync();
 
-		await Assert.That(loaded).IsError();
+		await Assert.That(loaded.Outcome).IsEqualTo(DatasetOutcome.Failed);
+		await Assert.That(loaded.Failure).IsSome().And.IsEqualTo("IMDb's datasets answered 500 for the ratings file.");
 		_table.ReplaceAsync(Any(), Any()).WasNeverCalled();
 		_loads.RecordAsync(Any(), Any()).WasNeverCalled();
 	}

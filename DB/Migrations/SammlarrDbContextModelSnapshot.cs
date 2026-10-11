@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261011183516_MediaDetailsTrimmedAt";
+    public override string LastMigrationId => "20261011194729_DatasetChecks";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -214,6 +214,29 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("TmdbId", "Type");
 
                 b.ToTable("AnimeIds");
+            });
+
+        modelBuilder.Entity("DB.Data.Datasets.DatasetCheckRow", b =>
+            {
+                b.Property<string>("Name")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Failure")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("FinishedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Outcome")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("StartedAt")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Name");
+
+                b.ToTable("DatasetChecks");
             });
 
         modelBuilder.Entity("DB.Data.Datasets.DatasetLoadRow", b =>

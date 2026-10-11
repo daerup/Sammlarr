@@ -22,10 +22,18 @@ public class HousekeepingPassTests
 
 	private readonly List<string> _ran = [];
 
+	private readonly TaskActivity _activity;
+
+	private int _progress;
+
 	public HousekeepingPassTests()
 	{
 		_database.CompactAsync(Any()).Returns(new Compaction(200, 100, true)).Callback(() => _ran.Add("compaction"));
 		_reports.SaveAsync(_saved, Any()).Returns(() => Task.CompletedTask);
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(Now);
+		_activity = new TaskActivity(clock.Object);
+		_activity.Changed += () => _progress++;
 	}
 
 	[Test]
@@ -47,16 +55,18 @@ public class HousekeepingPassTests
 	}
 
 	[Test]
-	public async Task RunAsync_SavesARunningReportFirstThenTheFinishedOne()
+	public async Task RunAsync_ForTwoSteps_SavesAndAnnouncesARunningReportAtTheStartAndAfterEachStepThenTheFinishedOne()
 	{
-		await Testee(Step(HousekeepingStep.RunHistory, 5)).RunAsync();
+		await Testee(Step(HousekeepingStep.RunHistory, 5), Step(HousekeepingStep.UsageStats, 2)).RunAsync();
 
 		var saved = _saved.Values.OfType<HousekeepingReport>().ToList();
-		await Assert.That(saved).Count().IsEqualTo(2);
+		await Assert.That(saved.Select(report => report.Steps.Count)).IsEquivalentTo([0, 1, 2, 2], CollectionOrdering.Matching);
 		await Assert.That(saved[0].FinishedAt).IsNone();
-		await Assert.That(saved[0].Steps).IsEmpty();
-		await Assert.That(saved[1].FinishedAt).IsSome().And.IsEqualTo(Now);
-		await Assert.That(saved[1].StartedAt).IsEqualTo(Now);
+		await Assert.That(saved[1].FinishedAt).IsNone();
+		await Assert.That(saved[2].FinishedAt).IsNone();
+		await Assert.That(saved[^1].FinishedAt).IsSome().And.IsEqualTo(Now);
+		await Assert.That(saved[^1].StartedAt).IsEqualTo(Now);
+		await Assert.That(_progress).IsEqualTo(3);
 	}
 
 	[Test]
@@ -110,6 +120,6 @@ public class HousekeepingPassTests
 	{
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
-		return new HousekeepingPass(steps, _database.Object, _reports.Object, _turn, clock.Object, NullLogger<HousekeepingPass>.Instance);
+		return new HousekeepingPass(steps, _database.Object, _reports.Object, _turn, _activity, clock.Object, NullLogger<HousekeepingPass>.Instance);
 	}
 }
