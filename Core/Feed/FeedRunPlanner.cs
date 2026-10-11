@@ -108,11 +108,13 @@ internal sealed class FeedRunPlanner(
 			Sort = feed.Sort,
 			Limit = feed.Limit,
 			Filter = feed.Filter,
+			ShuffleSeed = feed.Id.Value,
 		};
 		var predicates = new QueryPredicates<MediaQueryRow>(
 			IsWantlisted: row => wanted.Contains(row.Media.Identity.Id),
 			IsBlocklisted: row => blocked.Contains(row.Media.Identity.Id),
-			IsOwned: row => owned.Contains(row.Media.Identity.Id)
+			IsOwned: row => owned.Contains(row.Media.Identity.Id),
+			Identity: row => row.Media.Identity.Id.Value
 		);
 
 		var classified = resolved.Count > 0 ? await processor.ExecuteAsync(resolved, options, predicates, cancellationToken).ToListAsync(cancellationToken) : [];

@@ -80,7 +80,7 @@ public class FeedConfigPanelTests : BunitContext
 	{
 		var cut = RenderPanel(FeedProvider.Mdblist);
 
-		await StrategyRadio(cut, "Mirror").ClickAsync();
+		await Radio(cut, "Mirror").ClickAsync();
 
 		await Assert.That(RunLine(cut).TextContent).Contains("Removes an item after").And.Contains("missed runs.");
 		await Assert.That(cut.Find("input[aria-label='Runs missing before removal']").GetAttribute("value")).IsEqualTo("3");
@@ -126,7 +126,7 @@ public class FeedConfigPanelTests : BunitContext
 		var ordered = new RatingStrategy(new OrderedRating([RatingSource.Imdb]));
 		var cut = RenderPanel(FeedProvider.Mdblist, new Append(), ordered);
 
-		await StrategyRadio(cut, "Mirror").ClickAsync();
+		await Radio(cut, "Mirror").ClickAsync();
 
 		await Assert.That(_changes.Last().RatingStrategy).IsSome().And.IsEqualTo(ordered);
 	}
@@ -281,6 +281,18 @@ public class FeedConfigPanelTests : BunitContext
 		await Assert.That(link.GetAttribute("target")).IsEqualTo("_blank");
 	}
 
+	[Test]
+	public async Task Limit_PickingAtRandom_EmitsPickRandomAndShowsTheHelper()
+	{
+		var cut = RenderConfig(Documentaries with { Limit = new QueryLimit { Count = 5 } });
+		await Assert.That(cut.Markup).DoesNotContain("at random from what passes your filters");
+
+		await Radio(cut, "At random").ClickAsync();
+
+		await Assert.That(_changes.Last().Limit?.Pick).IsEqualTo(LimitPick.Random);
+		await Assert.That(cut.Markup).Contains("Picks 5 at random from what passes your filters. Sorting only orders the preview.");
+	}
+
 	private static IElement IdentifierField(IRenderedComponent<FeedConfigPanel> cut) => cut.Find("#list-identifier");
 
 	private static void Checked(IRenderedComponent<FeedConfigPanel> cut, IdentifierCheck check)
@@ -293,7 +305,7 @@ public class FeedConfigPanelTests : BunitContext
 		return cut.FindAll("label").First(label => label.TextContent.Trim().StartsWith("Provider"));
 	}
 
-	private static IElement StrategyRadio(IRenderedComponent<FeedConfigPanel> cut, string name)
+	private static IElement Radio(IRenderedComponent<FeedConfigPanel> cut, string name)
 	{
 		return cut.FindAll("[role=radio]").First(radio => radio.TextContent.Trim() == name);
 	}

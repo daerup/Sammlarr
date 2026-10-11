@@ -250,14 +250,32 @@
                         <BbField IsInvalid="@LimitIsInvalid">
                             <BbFieldLabel For="limit" Class="flex items-center leading-none">
                                 Maximum items
+                                <BbTooltipProvider>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                            <LucideIcon Name="info" Size="14"/>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>@PickTooltip</BbTooltipContent>
+                                    </BbTooltip>
+                                </BbTooltipProvider>
                             </BbFieldLabel>
                             <BbFieldContent>
-                                <BbInput id="limit"
-                                         Placeholder="e.g. 100"
-                                         Value="@_limitRaw" ValueChanged="@ChangeLimitRaw"
-                                         Class="bg-accent w-40"
-                                         AriaInvalid="@LimitIsInvalid"
-                                         UpdateTiming="UpdateTiming.Immediate"/>
+                                <div class="flex items-center gap-4">
+                                    <BbInput id="limit"
+                                             Placeholder="e.g. 100"
+                                             Value="@_limitRaw" ValueChanged="@ChangeLimitRaw"
+                                             Class="bg-accent w-40"
+                                             AriaInvalid="@LimitIsInvalid"
+                                             UpdateTiming="UpdateTiming.Immediate"/>
+                                    <EnumToggleGroup TEnum="LimitPick" Value="@_limit.Pick" OnChange="@ChangeLimitPick" TooltipProvider="null"/>
+                                </div>
+                                @if (_limit.Pick is LimitPick.Random && ParsedLimit is { } count)
+                                {
+                                    <p class="mt-1.5 flex items-start gap-1.5 text-sm text-muted-foreground">
+                                        <span class="pick-help-icon"><LucideIcon Name="shuffle" Size="14"/></span>
+                                        <span>Picks @count at random from what passes your filters. Sorting only orders the preview.</span>
+                                    </p>
+                                }
                             </BbFieldContent>
                             @if (LimitIsInvalid)
                             {
@@ -681,6 +699,12 @@
         NotifyChange();
     }
 
+    private void ChangeLimitPick(LimitPick v)
+    {
+        _limit = _limit with { Pick = v };
+        NotifyChange();
+    }
+
     private void ChangeWantlistedBehavior(SlotPolicy v)
     {
         _limit = _limit with { Wantlisted = v };
@@ -703,6 +727,9 @@
     };
 
     private const string SlotScopeHelper = "Only affects items this feed did not add itself.";
+
+    private const string PickTooltip =
+        "From the top takes the first items in your sort order. At random picks them in an order fixed for this feed, and the titles it already added keep their slots.";
 
     private static string GetSlotPolicyTooltip(SlotPolicy behavior) =>
         behavior switch

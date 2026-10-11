@@ -341,15 +341,17 @@ public class FeedPreviewPanelTests : BunitContext
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		return Render<FeedPreviewPanel>(parameters =>
-			parameters.Add(
-				panel => panel.Config,
-				new FeedConfig
-				{
-					Name = "counted",
-					Provider = FeedProvider.Mdblist,
-					Identifier = "list",
-				}
-			)
+			parameters
+				.Add(
+					panel => panel.Config,
+					new FeedConfig
+					{
+						Name = "counted",
+						Provider = FeedProvider.Mdblist,
+						Identifier = "list",
+					}
+				)
+				.Add(panel => panel.DraftFeedId, FeedId.From(Guid.NewGuid()))
 		);
 	}
 

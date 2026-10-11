@@ -10,7 +10,7 @@ internal sealed class QueryProcessor<T>
 {
 	private static readonly ParsingConfig FilterConfig = new() { EvaluateGroupByAtDatabase = true, AllowEqualsAndToStringMethodsOnObject = true };
 
-	private static readonly IEqualityComparer<T> Identity = ReferenceEqualityComparer.Instance;
+	private static readonly IEqualityComparer<T> ByReference = ReferenceEqualityComparer.Instance;
 
 	private CompiledFilter? _compiled;
 
@@ -22,11 +22,12 @@ internal sealed class QueryProcessor<T>
 	)
 	{
 		var all = options.Sort.Map(sort => Sort(source, sort)).GetValueOr(() => [.. source]);
-		var qualifying = options.Filter.Map(filter => new HashSet<T>(all.Where(Compile(filter)), Identity));
+		var qualifying = options.Filter.Map(filter => new HashSet<T>(all.Where(Compile(filter)), ByReference));
+		var verdicts = new QueryVerdict<T>[all.Count];
 
 		var taken = 0;
 		const int cooperativeYieldInterval = 32;
-		foreach (var (i, item) in all.Index())
+		foreach (var (i, position) in Slotted(all, options, predicates).Index())
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			if (i % cooperativeYieldInterval == 0)
@@ -34,6 +35,7 @@ internal sealed class QueryProcessor<T>
 				await Task.Yield();
 			}
 
+			var item = all[position];
 			var enrollment = new Enrollment
 			{
 				InWantlist = predicates.IsWantlisted(item),
@@ -43,20 +45,39 @@ internal sealed class QueryProcessor<T>
 
 			if (qualifying.Match(set => !set.Contains(item), () => false))
 			{
-				yield return new QueryVerdict<T>(item, QueryOutcome.Culled, enrollment, false);
+				verdicts[position] = new QueryVerdict<T>(item, QueryOutcome.Culled, enrollment, false);
 			}
 			else if (options.Limit.Match(limit => taken >= limit.Count, () => false))
 			{
-				yield return new QueryVerdict<T>(item, QueryOutcome.Truncated, enrollment, false);
+				verdicts[position] = new QueryVerdict<T>(item, QueryOutcome.Truncated, enrollment, false);
 			}
 			else
 			{
 				var consumesSlot = options.Limit.Match(limit => ConsumesSlot(enrollment, limit), () => true);
 				if (consumesSlot)
 					taken++;
-				yield return new QueryVerdict<T>(item, QueryOutcome.Qualified, enrollment, consumesSlot);
+				verdicts[position] = new QueryVerdict<T>(item, QueryOutcome.Qualified, enrollment, consumesSlot);
 			}
 		}
+
+		foreach (var verdict in verdicts)
+		{
+			yield return verdict;
+		}
+	}
+
+	private static IEnumerable<int> Slotted(List<T> all, QueryOptions options, QueryPredicates<T> predicates)
+	{
+		var positions = Enumerable.Range(0, all.Count);
+		if (!options.Limit.Match(limit => limit.Pick is LimitPick.Random, () => false))
+		{
+			return positions;
+		}
+
+		return positions
+			.OrderByDescending(position => predicates.IsOwned(all[position]))
+			.ThenBy(position => ShuffleRank.Of(options.ShuffleSeed, predicates.Identity(all[position])))
+			.ThenBy(position => predicates.Identity(all[position]));
 	}
 
 	private static List<T> Sort(IEnumerable<T> source, QuerySort sort)

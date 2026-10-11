@@ -111,6 +111,7 @@
                     <FeedPreviewPanel @ref="_previewPanel"
                                       Config="@_config"
                                       SavedFeedId="@_savedFeedId"
+                                      DraftFeedId="@_draftId"
                                       OnStatusChanged="@OnPreviewStatusChanged"/>
 
                 </div>
@@ -144,6 +145,7 @@
     private int? _storedPreviewHash;
     private int _appliedHash;
     private FeedId? _savedFeedId;
+    private readonly FeedId _draftId = FeedId.From(Guid.NewGuid());
     private FeedStrategy _storedStrategy = new(new Append());
 
     private bool _isSaving;
@@ -436,6 +438,7 @@
     private FeedCreateData BuildCreateData() =>
         new()
         {
+            Id = Some.Of(_draftId),
             Name = _config.Name.Trim(),
             IsEnabled = _config.IsEnabled,
             Provider = _config.Provider!.Value,

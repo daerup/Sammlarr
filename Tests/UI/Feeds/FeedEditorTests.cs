@@ -40,6 +40,8 @@ public class FeedEditorTests : BunitContext
 
 	private readonly TaskCompletionSource _listLoaded = new();
 
+	private readonly Mock<IFeedRunPlanner> _planner = IFeedRunPlanner.Mock();
+
 	private CancellationToken _loading;
 
 	public FeedEditorTests()
@@ -194,6 +196,27 @@ public class FeedEditorTests : BunitContext
 		cut.WaitForAssertion(() => _feeds.UpdateAsync(Any(), Any(), Any()).WasCalled(Times.Once));
 	}
 
+	[Test]
+	public async Task Save_ForANewFeed_CreatesItWithTheDraftId()
+	{
+		var cut = RenderEditor(edit: false);
+		await ChangeAsync(cut, config => config with { Name = "Comedy", Provider = FeedProvider.Mdblist, Identifier = "hdlists/comedy" });
+		_ = ClickAsync(cut, "Test");
+		WhileLoading(cut);
+
+		var saving = SaveAsync(cut);
+		cut.WaitForState(() => Dialogs(cut).Count > 0);
+		await ClickAsync(cut, "Save anyway");
+		await saving;
+
+		cut.WaitForAssertion(() => _feeds.CreateAsync(Any(), Any()).WasCalled(Times.Once));
+		var created = Mock.Invocations(_feeds).Select(call => call.Arguments[0]).OfType<FeedCreateData>().Single();
+		var draft = await Assert.That(created.Id).IsSome();
+		await Assert
+			.That(Mock.Invocations(_planner).Select(call => call.Arguments[0]).OfType<Domain.Feed.Feed>().Select(feed => feed.Id).Distinct())
+			.IsEquivalentTo([draft]);
+	}
+
 	private IReadOnlyList<ToastData> Toasts => Services.GetRequiredService<ToastService>().Toasts;
 
 	private IRenderedComponent<IComponent> RenderEditor(bool edit = true)
@@ -211,10 +234,9 @@ public class FeedEditorTests : BunitContext
 		var readiness = IServiceReadiness.Mock();
 		readiness.ReadyAsync(Any(), Any()).Returns(true);
 		Services.AddSingleton(readiness.Object);
-		var planner = IFeedRunPlanner.Mock();
-		planner.NeedsAsync(Any(), Any()).Returns(FieldNeeds.None);
-		planner.PlanAsync(Any(), Any()).Returns(new AppendPlan([], [], FeedDelta.None, Conclusiveness.NoItems));
-		Services.AddSingleton(planner.Object);
+		_planner.NeedsAsync(Any(), Any()).Returns(FieldNeeds.None);
+		_planner.PlanAsync(Any(), Any()).Returns(new AppendPlan([], [], FeedDelta.None, Conclusiveness.NoItems));
+		Services.AddSingleton(_planner.Object);
 		var wantlist = IWantlistService.Mock();
 		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
 		var blocklist = IBlocklistService.Mock();

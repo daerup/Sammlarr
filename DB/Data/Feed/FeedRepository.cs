@@ -32,6 +32,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	{
 		var entity = new FeedRow
 		{
+			Id = data.Id.Map(id => id.Value).GetValueOr(Guid.Empty),
 			Name = data.Name,
 			IsEnabled = data.IsEnabled,
 			Provider = data.Provider,
