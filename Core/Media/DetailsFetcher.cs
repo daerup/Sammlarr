@@ -36,7 +36,7 @@ internal sealed class DetailsFetcher(
 		IdentifyHandoff handoff,
 		MediaDetails placeholder,
 		IReadOnlySet<RemoteService> connected,
-		MediaWriteBuffer buffer,
+		LibraryWriter writer,
 		CancellationToken cancellationToken
 	)
 	{
@@ -44,7 +44,7 @@ internal sealed class DetailsFetcher(
 		return FindReusable(handoff.Identity, cached, connected)
 			.Match(
 				reusable => Task.FromResult<Result<MatchedMedia>>(Success.Of(new MatchedMedia(handoff.Identity, reusable.Details))),
-				() => FetchOrFallBackAsync(handoff.Identity, handoff.Stored, cached, placeholder, connected, buffer, cancellationToken)
+				() => FetchOrFallBackAsync(handoff.Identity, handoff.Stored, cached, placeholder, connected, writer, cancellationToken)
 			);
 	}
 
@@ -54,13 +54,13 @@ internal sealed class DetailsFetcher(
 		Optional<CachedDetails> cached,
 		MediaDetails placeholder,
 		IReadOnlySet<RemoteService> connected,
-		MediaWriteBuffer buffer,
+		LibraryWriter writer,
 		CancellationToken cancellationToken
 	)
 	{
 		try
 		{
-			var fetched = await FetchAsync(identity, cached, connected, buffer, cancellationToken);
+			var fetched = await FetchAsync(identity, cached, connected, writer, cancellationToken);
 			return fetched.Match(_ => fetched, error => Fallback(identity, stored, cached, placeholder, error));
 		}
 		catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
@@ -90,7 +90,7 @@ internal sealed class DetailsFetcher(
 		MediaIdentity identity,
 		Optional<CachedDetails> stored,
 		IReadOnlySet<RemoteService> connected,
-		MediaWriteBuffer buffer,
+		LibraryWriter writer,
 		CancellationToken cancellationToken = default
 	)
 	{
@@ -106,7 +106,7 @@ internal sealed class DetailsFetcher(
 		var identified = await KeepNewKeysAsync(identity, enriched.Identity, answers, cancellationToken);
 		var askedAt = clock.Now;
 		var cached = new CachedDetails(enriched.Details, RefreshedAt(reason, askedAt), askedAt, Answers(reason, answers, now));
-		buffer.Add(identity.Id, cached);
+		writer.Save(new DetailsChange(identity.Id, stored, cached));
 		return Success.Of(enriched with { Identity = identified });
 	}
 

@@ -142,7 +142,7 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 			new(RemoteService.Tmdb, MediaFields.None, At(6, 1)),
 			new(RemoteService.Plex, MediaFields.Rated([RatingSource.RottenTomatoesAudience]), plexAnsweredAt),
 		];
-		await host.Resolve<IMediaRepository>().UpsertDetailsAsync(new Dictionary<MediaId, CachedDetails> { [dune] = new(details, At(6, 1), At(6, 1), answers) });
+		await host.Resolve<IMediaRepository>().SaveDetailsAsync([new DetailsChange(dune, new None(), new CachedDetails(details, At(6, 1), At(6, 1), answers))]);
 	}
 
 	private async Task<MediaId> TmdbOnlyDuneAsync()

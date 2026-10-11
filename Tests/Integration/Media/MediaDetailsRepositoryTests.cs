@@ -1,3 +1,4 @@
+using Contracts.Media;
 using DB.Data.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -38,15 +39,15 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task UpsertDetailsAsync_WhenAskedAgain_AdvancesAskedAtEvenWhenThePayloadIsIdentical()
+	public async Task SaveDetailsAsync_WhenAskedAgain_AdvancesAskedAtEvenWhenThePayloadIsIdentical()
 	{
 		var plexId = PlexId.From("plex-700", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
 		var secondAsk = RefreshedAt.AddHours(2);
 
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete())));
+		await _testee.SaveDetailsAsync(Details(mediaId, Cached(Complete())));
 		fixture.Context.ChangeTracker.Clear();
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete()) with { AskedAt = secondAsk }));
+		await _testee.SaveDetailsAsync(Details(mediaId, Cached(Complete()) with { AskedAt = secondAsk }));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
@@ -54,12 +55,12 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task UpsertDetailsAsync_WithPageLinks_ReadsThemBackAsLinksOfTheTitle()
+	public async Task SaveDetailsAsync_WithPageLinks_ReadsThemBackAsLinksOfTheTitle()
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-800", MediaType.Movie)]);
 		IPageLink[] links = [RottenTomatoesId.From("m/fight_club", MediaType.Movie), MetacriticId.From("fight-club", MediaType.Movie)];
 
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete() with { PageLinks = [.. links] })));
+		await _testee.SaveDetailsAsync(Details(mediaId, Cached(Complete() with { PageLinks = [.. links] })));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
@@ -74,8 +75,8 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	{
 		var first = await SeedMediaAsync([PlexId.From("plex-820", MediaType.Movie)]);
 		var second = await SeedMediaAsync([PlexId.From("plex-821", MediaType.Movie)]);
-		await _testee.UpsertDetailsAsync(Details(first, Cached(Complete() with { PageLinks = [RottenTomatoesId.From("m/first", MediaType.Movie)] })));
-		await _testee.UpsertDetailsAsync(Details(second, Cached(Complete() with { PageLinks = [MetacriticId.From("second", MediaType.Movie)] })));
+		await _testee.SaveDetailsAsync(Details(first, Cached(Complete() with { PageLinks = [RottenTomatoesId.From("m/first", MediaType.Movie)] })));
+		await _testee.SaveDetailsAsync(Details(second, Cached(Complete() with { PageLinks = [MetacriticId.From("second", MediaType.Movie)] })));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await _testee.GetAsync([first, second]);
@@ -89,7 +90,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	public async Task SavePageLinksAsync_ForASiteTheTitleHolds_KeepsTheHeldLinkAndAddsTheOthers()
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-810", MediaType.Movie)]);
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete() with { PageLinks = [RottenTomatoesId.From("m/held", MediaType.Movie)] })));
+		await _testee.SaveDetailsAsync(Details(mediaId, Cached(Complete() with { PageLinks = [RottenTomatoesId.From("m/held", MediaType.Movie)] })));
 		fixture.Context.ChangeTracker.Clear();
 
 		await _testee.SavePageLinksAsync(mediaId, [RottenTomatoesId.From("m/other", MediaType.Movie), MetacriticId.From("movie-page", MediaType.Movie)]);
@@ -104,17 +105,17 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task UpsertDetailsAsync_WhenEntryExists_PreservesCreatedAt()
+	public async Task SaveDetailsAsync_WhenEntryExists_PreservesCreatedAt()
 	{
 		var plexId = PlexId.From("plex-500", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete())));
+		await _testee.SaveDetailsAsync(Details(mediaId, Cached(Complete())));
 		fixture.Context.ChangeTracker.Clear();
 
 		var marker = new DateTimeOffset(2020, 6, 15, 0, 0, 0, TimeSpan.Zero);
 		await fixture.Context.MediaDetails.ExecuteUpdateAsync(s => s.SetProperty(m => m.CreatedAt, marker));
 
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete() with { Title = "Updated" })));
+		await _testee.SaveDetailsAsync(Details(mediaId, Cached(Complete() with { Title = "Updated" })));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await fixture.Context.MediaDetails.AsNoTracking().SingleAsync();
@@ -128,7 +129,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	{
 		var plexId = PlexId.From("plex-810", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete())));
+		await _testee.SaveDetailsAsync(Details(mediaId, Cached(Complete())));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
@@ -138,16 +139,100 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task UpsertDetailsAsync_ForAPartial_KeepsWhoAnsweredWhenAndWhatEachLeftUnfilled()
+	public async Task SaveDetailsAsync_ForAPartial_KeepsWhoAnsweredWhenAndWhatEachLeftUnfilled()
 	{
 		var plexId = PlexId.From("plex-812", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
 
-		await _testee.UpsertDetailsAsync(Details(mediaId, new CachedDetails(new MovieDetails { Title = "Solaris" }, RefreshedAt, RefreshedAt, [.. Answers])));
+		await _testee.SaveDetailsAsync(Details(mediaId, new CachedDetails(new MovieDetails { Title = "Solaris" }, RefreshedAt, RefreshedAt, [.. Answers])));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
 		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.Answers).IsEquivalentTo(Answers));
+	}
+
+	[Test]
+	public async Task SaveDetailsAsync_ForAChangedTitle_ReplacesOnlyItsRatingsAndAnswers()
+	{
+		var changedId = await SeedMediaAsync([PlexId.From("plex-820", MediaType.Movie)]);
+		var keptId = await SeedMediaAsync([PlexId.From("plex-821", MediaType.Movie)]);
+		var first = new CachedDetails(
+			Complete() with
+			{
+				Ratings = MediaRatings.From([new TmdbRating(7.0f, Some.Of(100))]),
+			},
+			RefreshedAt,
+			RefreshedAt,
+			[.. Answers]
+		);
+		await _testee.SaveDetailsAsync([new DetailsChange(changedId, new None(), first), new DetailsChange(keptId, new None(), first)]);
+		var answer = new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, RefreshedAt.AddDays(1));
+		var second = new CachedDetails(
+			Complete() with
+			{
+				Ratings = MediaRatings.From([new ImdbRating(8.5f, Some.Of(2_000))]),
+			},
+			RefreshedAt,
+			RefreshedAt.AddDays(1),
+			[answer]
+		);
+
+		await _testee.SaveDetailsAsync([new DetailsChange(changedId, Some.Of(first), second)]);
+
+		var stored = (await _testee.GetAsync([changedId, keptId])).ToDictionary(media => media.Identity.Id);
+		await Assert
+			.That(stored[changedId].Cached)
+			.IsSome()
+			.And.Multiple(async cached =>
+			{
+				await Assert.That(cached.Details.Ratings.All.Select(rating => rating.Source)).IsEquivalentTo([RatingSource.Imdb]);
+				await Assert.That(cached.Answers).IsEquivalentTo([answer]);
+			});
+		await Assert
+			.That(stored[keptId].Cached)
+			.IsSome()
+			.And.Multiple(async cached =>
+			{
+				await Assert.That(cached.Details.Ratings.All.Select(rating => rating.Source)).IsEquivalentTo([RatingSource.Tmdb]);
+				await Assert.That(cached.Answers).IsEquivalentTo(Answers);
+			});
+	}
+
+	[Test]
+	public async Task SaveDetailsAsync_ForAChangedTitle_ReplacesOnlyItsPageLinks()
+	{
+		var changedId = await SeedMediaAsync([PlexId.From("plex-822", MediaType.Movie)]);
+		var keptId = await SeedMediaAsync([PlexId.From("plex-823", MediaType.Movie)]);
+		var first = Cached(Complete() with { PageLinks = [RottenTomatoesId.From("m/heat", MediaType.Movie)] });
+		await _testee.SaveDetailsAsync([new DetailsChange(changedId, new None(), first), new DetailsChange(keptId, new None(), first)]);
+
+		await _testee.SaveDetailsAsync([
+			new DetailsChange(changedId, Some.Of(first), Cached(Complete() with { PageLinks = [MetacriticId.From("heat", MediaType.Movie)] })),
+		]);
+
+		var stored = (await _testee.GetAsync([changedId, keptId])).ToDictionary(media => media.Identity.Id);
+		await Assert
+			.That(stored[changedId].Cached)
+			.IsSome()
+			.And.Multiple(async cached => await Assert.That(cached.Details.PageLinks.Select(link => link.Source)).IsEquivalentTo([MediaProvider.Metacritic]));
+		await Assert
+			.That(stored[keptId].Cached)
+			.IsSome()
+			.And.Multiple(async cached => await Assert.That(cached.Details.PageLinks.Select(link => link.Source)).IsEquivalentTo([MediaProvider.RottenTomatoes]));
+	}
+
+	[Test]
+	public async Task SaveDetailsAsync_ForTwoChangesOfOneTitleInOneCall_KeepsTheLast()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-824", MediaType.Movie)]);
+
+		await _testee.SaveDetailsAsync([
+			new DetailsChange(mediaId, new None(), Cached(Complete() with { Title = "Early" })),
+			new DetailsChange(mediaId, new None(), Cached(Complete() with { Title = "Late" })),
+		]);
+
+		var stored = (await _testee.GetAsync([mediaId])).Single();
+		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.Details.Title).IsEqualTo("Late"));
 	}
 
 	[Test]
@@ -169,7 +254,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 		var secondPlex = PlexId.From("plex-813", MediaType.Movie);
 		var firstId = await SeedMediaAsync([firstPlex]);
 		var secondId = await SeedMediaAsync([secondPlex]);
-		await _testee.UpsertDetailsAsync(Details(firstId, Cached(Complete())));
+		await _testee.SaveDetailsAsync(Details(firstId, Cached(Complete())));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await _testee.GetAsync([firstId, secondId]);
@@ -185,7 +270,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 		var plexId = PlexId.From("plex-814", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
 		var rated = Complete() with { Ratings = MediaRatings.From([new TmdbRating(8.5f, Some.Of(1200))]) };
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(rated)));
+		await _testee.SaveDetailsAsync(Details(mediaId, Cached(rated)));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
@@ -212,7 +297,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 			new RottenTomatoesCriticsRating(64),
 			new RottenTomatoesAudienceRating(95),
 		]);
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete() with { Ratings = ratings })));
+		await _testee.SaveDetailsAsync(Details(mediaId, Cached(Complete() with { Ratings = ratings })));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = (await _testee.GetAsync([mediaId])).Single();
@@ -230,7 +315,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 			Ratings = MediaRatings.From([new TmdbRating(8.5f, Some.Of(1200)), new ImdbRating(7.0f, new None())]),
 			PageLinks = [RottenTomatoesId.From("m/the_matrix", MediaType.Movie), MetacriticId.From("movie/the-matrix", MediaType.Movie)],
 		};
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(rated) with { Answers = [.. Answers] }));
+		await _testee.SaveDetailsAsync(Details(mediaId, Cached(rated) with { Answers = [.. Answers] }));
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = (await _testee.GetByExternalsAsync([keys[0], keys[1]])).Single();
@@ -243,17 +328,17 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task UpsertDetailsAsync_WhenConcurrentFlushesShareAMediaId_DoesNotViolateTheUniqueConstraint()
+	public async Task SaveDetailsAsync_WhenConcurrentSavesShareAMediaId_DoesNotViolateTheUniqueConstraint()
 	{
 		var plexId = PlexId.From("plex-race", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
 
-		var flushes = Enumerable.Range(0, 8).Select(_ => Task.Run(() => _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete())))));
+		var saves = Enumerable.Range(0, 8).Select(_ => Task.Run(() => _testee.SaveDetailsAsync(Details(mediaId, Cached(Complete())))));
 
-		await Assert.That(async () => await Task.WhenAll(flushes)).ThrowsNothing();
+		await Assert.That(async () => await Task.WhenAll(saves)).ThrowsNothing();
 	}
 
-	private static Dictionary<MediaId, CachedDetails> Details(MediaId id, CachedDetails cached) => new() { [id] = cached };
+	private static IReadOnlyList<DetailsChange> Details(MediaId id, CachedDetails cached) => [new DetailsChange(id, new None(), cached)];
 
 	private static CachedDetails Cached(MediaDetails details) => new(details, RefreshedAt, RefreshedAt, []);
 

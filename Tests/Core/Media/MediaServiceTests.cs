@@ -185,7 +185,7 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ById_OnMisses_FlushesTheDetailsUpsertOnceAtTheEnd()
+	public async Task GetDetailsAsync_ById_OnMisses_SavesEachFetchedTitle()
 	{
 		var firstId = MediaId.New();
 		var secondId = MediaId.New();
@@ -196,7 +196,8 @@ public class MediaServiceTests
 
 		await testee.GetDetailsAsync([firstId, secondId, thirdId]).ToListAsync();
 
-		deps.MediaRepo.UpsertDetailsAsync(Any(), Any()).WasCalled(Times.Once);
+		var saved = Mock.Invocations(deps.MediaRepo).Select(call => call.Arguments[0]).OfType<IReadOnlyList<DetailsChange>>().SelectMany(changes => changes);
+		await Assert.That(saved.Select(change => change.Id)).IsEquivalentTo([firstId, secondId, thirdId]);
 	}
 
 	[Test]
@@ -256,7 +257,7 @@ public class MediaServiceTests
 		await Assert.That(matched.Identity.Keys).Contains(external);
 		await Assert.That(matched.Known).IsFalse();
 		deps.Claims.ClaimAsync(Any(), Any()).WasCalled(Times.Once);
-		deps.MediaRepo.UpsertDetailsAsync(Any(), Any()).WasNeverCalled();
+		deps.MediaRepo.SaveDetailsAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -322,7 +323,7 @@ public class MediaServiceTests
 
 		await Assert.That(results.Count).IsEqualTo(1);
 		await Assert.That(results[0]).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
-		deps.MediaRepo.UpsertDetailsAsync(Any(), Any()).WasNeverCalled();
+		deps.MediaRepo.SaveDetailsAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]
