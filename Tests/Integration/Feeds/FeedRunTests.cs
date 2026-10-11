@@ -35,7 +35,7 @@ public class FeedRunTests(SammlarrTestHost host) : IAsyncDisposable
 		var feedId = await SeedFeedAsync("stalled-list");
 		host.MdblistFeedContains("stalled-list", Item("Heat", MediaType.Movie, Tmdb("949")) with { Year = 1995 });
 		await host.WithPlexAccount("plex-token");
-		await host.PlexFindsNothing("Heat");
+		await host.PlexMatchesNothing(new MediaSpec("Heat", MediaType.Movie, [Tmdb("949")]));
 		host.Resolve<PlexOptions>().Http.MaxWaitSeconds = (int)TimeSpan.FromHours(2).TotalSeconds;
 		await host.RateLimitedAsync(RemoteService.Plex, minutes: 60);
 

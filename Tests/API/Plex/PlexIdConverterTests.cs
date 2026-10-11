@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
@@ -5,9 +6,11 @@ using API.Tests.Feeds;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
+using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shared.Concurrency;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;
@@ -16,11 +19,16 @@ public class PlexIdConverterTests
 {
 	private const string PlexBaseUrl = "https://plex.tv";
 
+	private const string FightClubMatch =
+		"""{"MediaContainer":{"size":1,"Metadata":[{"ratingKey":"5d776b59ad5437001f79c6f8","type":"movie","title":"Fight Club","year":1999}]}}""";
+
+	private static readonly TmdbId FightClub = TmdbId.From("550", MediaType.Movie);
+
 	[Test]
 	public async Task LookUpAsync_ForAPlexId_ReturnsEveryGuidPlexHolds()
 	{
 		var payload = CreatePlexByIdPayload(true, false, true);
-		var testee = new PlexIdConverter(CreatePlexApi(payload.Json), PlexStub.NoSearchCache());
+		var testee = new PlexIdConverter(CreatePlexApi(payload.Json));
 
 		var result = await testee.LookUpAsync(testee.RequestById(payload.PlexId));
 
@@ -40,7 +48,7 @@ public class PlexIdConverterTests
 	public async Task LookUpAsync_ForAPlexIdWithTwoTmdbGuids_ReturnsBothAndTheOtherGuids()
 	{
 		var payload = CreatePlexByIdPayload(true, true, true);
-		var testee = new PlexIdConverter(CreatePlexApi(payload.Json), PlexStub.NoSearchCache());
+		var testee = new PlexIdConverter(CreatePlexApi(payload.Json));
 
 		var result = await testee.LookUpAsync(testee.RequestById(payload.PlexId));
 
@@ -61,7 +69,7 @@ public class PlexIdConverterTests
 	public async Task LookUpAsync_ForAPlexIdWithoutATmdbGuid_StillReturnsTheOtherGuids()
 	{
 		var payload = CreatePlexByIdPayload(false, false, false);
-		var testee = new PlexIdConverter(CreatePlexApi(payload.Json), PlexStub.NoSearchCache());
+		var testee = new PlexIdConverter(CreatePlexApi(payload.Json));
 
 		var result = await testee.LookUpAsync(testee.RequestById(payload.PlexId));
 
@@ -74,6 +82,78 @@ public class PlexIdConverterTests
 				await Assert.That(found.Ids).Contains(payload.ImdbId);
 				await Assert.That(found.Ids.Any(id => id.Source == MediaProvider.Tmdb)).IsFalse();
 			});
+	}
+
+	[Test]
+	public async Task LookUpAsync_ByTmdbId_AsksTheMatchEndpoint()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson(FightClubMatch);
+		var testee = new PlexIdConverter(CreatePlexApi(handler));
+
+		var result = await testee.LookUpAsync(testee.RequestById(FightClub));
+
+		await Assert
+			.That(result)
+			.IsFound()
+			.And.Multiple(async found =>
+			{
+				await Assert.That(found.Ids).Contains(PlexId.From("5d776b59ad5437001f79c6f8", MediaType.Movie));
+				await Assert.That(found.Ids).Contains(FightClub);
+			});
+		handler.Verify(request => request.Method(HttpMethod.Get).PathMatches(@"^/library/metadata/matches\?type=1&guid=tmdb"), Times.Once);
+	}
+
+	[Test]
+	public async Task LookUpAsync_WhenTheMatchIsEmpty_FindsNothing()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("""{"MediaContainer":{"size":0}}""");
+		var testee = new PlexIdConverter(CreatePlexApi(handler));
+
+		var result = await testee.LookUpAsync(testee.RequestById(FightClub));
+
+		var found = await Assert.That(result).IsFound();
+		await Assert.That(found!.Ids).IsEmpty();
+	}
+
+	[Test]
+	public async Task LookUpAsync_WhenTheMatchIs404_FindsNothing()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
+		var testee = new PlexIdConverter(CreatePlexApi(handler));
+
+		var result = await testee.LookUpAsync(testee.RequestById(FightClub));
+
+		var found = await Assert.That(result).IsFound();
+		await Assert.That(found!.Ids).IsEmpty();
+	}
+
+	[Test]
+	[Arguments(HttpStatusCode.TooManyRequests)]
+	[Arguments(HttpStatusCode.ServiceUnavailable)]
+	public async Task LookUpAsync_WhenTheMatchIsUnavailable_IsUnavailable(HttpStatusCode status)
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(status);
+		var testee = new PlexIdConverter(CreatePlexApi(handler));
+
+		var result = await testee.LookUpAsync(testee.RequestById(FightClub));
+
+		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, Unavailable>();
+	}
+
+	[Test]
+	public async Task LookUpAsync_WhenTheLaneRefusesTheMatch_IsUnavailable()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWith(_ => throw new LaneRefusedException("Plex is down."));
+		var testee = new PlexIdConverter(CreatePlexApi(handler));
+
+		var result = await testee.LookUpAsync(testee.RequestById(FightClub));
+
+		await Assert.That(result).IsOfUnionType<Answer<IdLookupResult>, Unavailable>();
 	}
 
 	private static PlexByIdPayload CreatePlexByIdPayload(bool includeTmdbId, bool includeExtraTmdbId, bool includeTvdbId)
@@ -129,6 +209,11 @@ public class PlexIdConverterTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(json);
+		return CreatePlexApi(handler);
+	}
+
+	private static PlexApi CreatePlexApi(TUnit.Mocks.Http.MockHttpHandler handler)
+	{
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);

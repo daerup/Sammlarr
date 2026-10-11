@@ -1,0 +1,5944 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt0035160"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d77682eeb5d26001f1df4fe",
+                "type": "movie",
+                "title": "Obsession",
+                "year": 1943
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://5155"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d77682eeb5d26001f1df4fe",
+                "type": "movie",
+                "title": "Obsession",
+                "year": 1943
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://11192"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d77682eeb5d26001f1df4fe",
+                "type": "movie",
+                "title": "Obsession",
+                "year": 1943
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt0120791"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d77683085719b001f3a2a24",
+                "type": "movie",
+                "title": "Practical Magic",
+                "year": 1998
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://6435"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d77683085719b001f3a2a24",
+                "type": "movie",
+                "title": "Practical Magic",
+                "year": 1998
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://1946"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d77683085719b001f3a2a24",
+                "type": "movie",
+                "title": "Practical Magic",
+                "year": 1998
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt1546036"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768692e80df001ebe3425",
+                "type": "movie",
+                "title": "The Drawn Together Movie: The Movie!",
+                "year": 2010
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://36736"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768692e80df001ebe3425",
+                "type": "movie",
+                "title": "The Drawn Together Movie: The Movie!",
+                "year": 2010
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://15816"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768692e80df001ebe3425",
+                "type": "movie",
+                "title": "The Drawn Together Movie: The Movie!",
+                "year": 2010
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt0181769"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768a71999bc0020dcca1b",
+                "type": "movie",
+                "title": "Mutiny",
+                "year": 1999
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://65278"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768a71999bc0020dcca1b",
+                "type": "movie",
+                "title": "Mutiny",
+                "year": 1999
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://55034"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768a71999bc0020dcca1b",
+                "type": "movie",
+                "title": "Mutiny",
+                "year": 1999
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt2012616"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768e2fb0d55001f51bc9d",
+                "type": "movie",
+                "title": "Motor City",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://87513"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768e2fb0d55001f51bc9d",
+                "type": "movie",
+                "title": "Motor City",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://83519"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768e2fb0d55001f51bc9d",
+                "type": "movie",
+                "title": "Motor City",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt0017162"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768f6ad5437001f75426f",
+                "type": "movie",
+                "title": "Moana",
+                "year": 1926
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://94727"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768f6ad5437001f75426f",
+                "type": "movie",
+                "title": "Moana",
+                "year": 1926
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://68425"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d7768f6ad5437001f75426f",
+                "type": "movie",
+                "title": "Moana",
+                "year": 1926
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt0044936"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776a60fb0d55001f5445c4",
+                "type": "movie",
+                "title": "Mutiny",
+                "year": 1952
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://227296"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776a60fb0d55001f5445c4",
+                "type": "movie",
+                "title": "Mutiny",
+                "year": 1952
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://50931"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776a60fb0d55001f5445c4",
+                "type": "movie",
+                "title": "Mutiny",
+                "year": 1952
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt3521164"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776af2ad5437001f78dad6",
+                "type": "movie",
+                "title": "Moana",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://277834"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776af2ad5437001f78dad6",
+                "type": "movie",
+                "title": "Moana",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://9210"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776af2ad5437001f78dad6",
+                "type": "movie",
+                "title": "Moana",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt3755362"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776b8c51dd69001fe31672",
+                "type": "movie",
+                "title": "Obsession",
+                "year": 2015
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://332672"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776b8c51dd69001fe31672",
+                "type": "movie",
+                "title": "Obsession",
+                "year": 2015
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://39040"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776b8c51dd69001fe31672",
+                "type": "movie",
+                "title": "Obsession",
+                "year": 2015
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt5843056"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776c6c594b2b001e6f3623",
+                "type": "movie",
+                "title": "One Night Only",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://413745"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776c6c594b2b001e6f3623",
+                "type": "movie",
+                "title": "One Night Only",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://41851"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776c6c594b2b001e6f3623",
+                "type": "movie",
+                "title": "One Night Only",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt0145487"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776d1923d5a3001f52079d",
+                "type": "movie",
+                "title": "Spider-Man",
+                "year": 2002
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://557"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776d1923d5a3001f52079d",
+                "type": "movie",
+                "title": "Spider-Man",
+                "year": 2002
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://301"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776d1923d5a3001f52079d",
+                "type": "movie",
+                "title": "Spider-Man",
+                "year": 2002
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt0786910"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d776ec9594b2b001e72e638",
+                "type": "movie",
+                "title": "Acme & Co.",
+                "year": null
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt1756855"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d77707b81ba41001faf1629",
+                "type": "movie",
+                "title": "Coyote vs. Acme",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1204680"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d77707b81ba41001faf1629",
+                "type": "movie",
+                "title": "Coyote vs. Acme",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://365739"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d77707b81ba41001faf1629",
+                "type": "movie",
+                "title": "Coyote vs. Acme",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt4600502"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c0816ba6eb9001fb9b71b",
+                "type": "show",
+                "title": "Gentlemen & Gangsters",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://65117"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c0816ba6eb9001fb9b71b",
+                "type": "show",
+                "title": "Gentlemen & Gangsters",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://314483"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c0816ba6eb9001fb9b71b",
+                "type": "show",
+                "title": "Gentlemen & Gangsters",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt0434665"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c084902391c001f58594b",
+                "type": "show",
+                "title": "Bleach",
+                "year": 2004
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://30984"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c084902391c001f58594b",
+                "type": "show",
+                "title": "Bleach",
+                "year": 2004
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://74796"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c084902391c001f58594b",
+                "type": "show",
+                "title": "Bleach",
+                "year": 2004
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt2297757"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c0849ba6eb9001fba0171",
+                "type": "show",
+                "title": "Nathan for You",
+                "year": 2013
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://58957"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c0849ba6eb9001fba0171",
+                "type": "show",
+                "title": "Nathan for You",
+                "year": 2013
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://267002"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c0849ba6eb9001fba0171",
+                "type": "show",
+                "title": "Nathan for You",
+                "year": 2013
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt0388629"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c084fec357c001f9ab4d8",
+                "type": "show",
+                "title": "One Piece",
+                "year": 1999
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://37854"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c084fec357c001f9ab4d8",
+                "type": "show",
+                "title": "One Piece",
+                "year": 1999
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://81797"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c084fec357c001f9ab4d8",
+                "type": "show",
+                "title": "One Piece",
+                "year": 1999
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt1845307"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c086eba6eb9001fba3d37",
+                "type": "show",
+                "title": "2 Broke Girls",
+                "year": 2011
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://39340"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c086eba6eb9001fba3d37",
+                "type": "show",
+                "title": "2 Broke Girls",
+                "year": 2011
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://248741"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c086eba6eb9001fba3d37",
+                "type": "show",
+                "title": "2 Broke Girls",
+                "year": 2011
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt3729784"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c08a9705e7a001e6e1883",
+                "type": "show",
+                "title": "Last Seen Alive",
+                "year": 2014
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://295455"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c08a9705e7a001e6e1883",
+                "type": "show",
+                "title": "Last Seen Alive",
+                "year": 2014
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://282128"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c08a9705e7a001e6e1883",
+                "type": "show",
+                "title": "Last Seen Alive",
+                "year": 2014
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt9288030"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c09190aaccd001f8f42f0",
+                "type": "show",
+                "title": "Reacher",
+                "year": 2022
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://108978"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c09190aaccd001f8f42f0",
+                "type": "show",
+                "title": "Reacher",
+                "year": 2022
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://366924"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c09190aaccd001f8f42f0",
+                "type": "show",
+                "title": "Reacher",
+                "year": 2022
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://360846"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5d9c091ce9d5a1001f4de854",
+                "type": "show",
+                "title": "Bleach (S) Abridged",
+                "year": 2014
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt6977470"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5e16333f61c6140040d67eb3",
+                "type": "movie",
+                "title": "Mayday",
+                "year": 2019
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://626576"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5e16333f61c6140040d67eb3",
+                "type": "movie",
+                "title": "Mayday",
+                "year": 2019
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt11271800"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5e4d25497e245a003e3c5c2e",
+                "type": "movie",
+                "title": "Mayday",
+                "year": 2021
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://672521"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5e4d25497e245a003e3c5c2e",
+                "type": "movie",
+                "title": "Mayday",
+                "year": 2021
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://287416"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5e4d25497e245a003e3c5c2e",
+                "type": "movie",
+                "title": "Mayday",
+                "year": 2021
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt12042730"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5e91843e9bec79003fe50ffb",
+                "type": "movie",
+                "title": "Project Hail Mary",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://687163"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5e91843e9bec79003fe50ffb",
+                "type": "movie",
+                "title": "Project Hail Mary",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://346729"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5e91843e9bec79003fe50ffb",
+                "type": "movie",
+                "title": "Project Hail Mary",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt5564448"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5f40c5ba9774a2003a180377",
+                "type": "movie",
+                "title": "Motor City Living",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://980070"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5f40c5ba9774a2003a180377",
+                "type": "movie",
+                "title": "Motor City Living",
+                "year": 2016
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt7959470"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5f40d549c63b480040f9198e",
+                "type": "movie",
+                "title": "Batman and the Pizza Time part 1",
+                "year": 2017
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt11737520"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5f7c9b1c9b958e00415de6bb",
+                "type": "show",
+                "title": "ONE PIECE (2023)",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://111110"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5f7c9b1c9b958e00415de6bb",
+                "type": "show",
+                "title": "ONE PIECE (2023)",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://392276"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "5f7c9b1c9b958e00415de6bb",
+                "type": "show",
+                "title": "ONE PIECE (2023)",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt14173636"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "60448df6bd881e002cb9471e",
+                "type": "movie",
+                "title": "The Invite",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://950028"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "60448df6bd881e002cb9471e",
+                "type": "movie",
+                "title": "The Invite",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://356147"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "60448df6bd881e002cb9471e",
+                "type": "movie",
+                "title": "The Invite",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt13760268"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "60547a1bda7fb6002c1cf49a",
+                "type": "show",
+                "title": "Lioness (2021)",
+                "year": 2021
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://232553"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "60547a1bda7fb6002c1cf49a",
+                "type": "show",
+                "title": "Lioness (2021)",
+                "year": 2021
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://397991"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "60547a1bda7fb6002c1cf49a",
+                "type": "show",
+                "title": "Lioness (2021)",
+                "year": 2021
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://123323"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6079b716b9b3140035a86894",
+                "type": "show",
+                "title": "Lantern's Tales",
+                "year": 2021
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt16159038"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "619a3851c7f1117e4f0003e9",
+                "type": "movie",
+                "title": "The Invite",
+                "year": 2022
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1011436"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "619a3851c7f1117e4f0003e9",
+                "type": "movie",
+                "title": "The Invite",
+                "year": 2022
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt14688458"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "61b180686bfb4feb48515e07",
+                "type": "show",
+                "title": "Silo",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://125988"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "61b180686bfb4feb48515e07",
+                "type": "show",
+                "title": "Silo",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://403245"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "61b180686bfb4feb48515e07",
+                "type": "show",
+                "title": "Silo",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt13111078"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "62ac863c44b73ea95829962c",
+                "type": "show",
+                "title": "Lioness",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://113962"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "62ac863c44b73ea95829962c",
+                "type": "show",
+                "title": "Lioness",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://388589"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "62ac863c44b73ea95829962c",
+                "type": "show",
+                "title": "Lioness",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt22084616"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6328b12fe57cbf75cce17c02",
+                "type": "movie",
+                "title": "Spider-Man: Brand New Day",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://969681"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6328b12fe57cbf75cce17c02",
+                "type": "movie",
+                "title": "Spider-Man: Brand New Day",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://135896"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6328b12fe57cbf75cce17c02",
+                "type": "movie",
+                "title": "Spider-Man: Brand New Day",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt21613984"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "633a669ad63535b131f732e0",
+                "type": "show",
+                "title": "Silos Baking Competition",
+                "year": 2022
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://228726"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "633a669ad63535b131f732e0",
+                "type": "show",
+                "title": "Silos Baking Competition",
+                "year": 2022
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://427836"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "633a669ad63535b131f732e0",
+                "type": "show",
+                "title": "Silos Baking Competition",
+                "year": 2022
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt13210838"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6365f4db354ca0d2edfad043",
+                "type": "show",
+                "title": "The Gentlemen",
+                "year": 2024
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://236235"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6365f4db354ca0d2edfad043",
+                "type": "show",
+                "title": "The Gentlemen",
+                "year": 2024
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://426845"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6365f4db354ca0d2edfad043",
+                "type": "show",
+                "title": "The Gentlemen",
+                "year": 2024
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt27419466"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "642d485ce8b269a4b9c8a4a8",
+                "type": "movie",
+                "title": "Moana",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1108427"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "642d485ce8b269a4b9c8a4a8",
+                "type": "movie",
+                "title": "Moana",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://345498"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "642d485ce8b269a4b9c8a4a8",
+                "type": "movie",
+                "title": "Moana",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt26545992"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6475f4e274668225adb2c0e0",
+                "type": "show",
+                "title": "Lanterns",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://95350"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6475f4e274668225adb2c0e0",
+                "type": "show",
+                "title": "Lanterns",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://376098"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6475f4e274668225adb2c0e0",
+                "type": "show",
+                "title": "Lanterns",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt28014327"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6488a8b8f542e5c273e5ae08",
+                "type": "movie",
+                "title": "Mayday",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1137844"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6488a8b8f542e5c273e5ae08",
+                "type": "movie",
+                "title": "Mayday",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://358754"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6488a8b8f542e5c273e5ae08",
+                "type": "movie",
+                "title": "Mayday",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt28224861"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "649ec50d2907cafed5d37636",
+                "type": "movie",
+                "title": "Knightfall",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1377900"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "649ec50d2907cafed5d37636",
+                "type": "movie",
+                "title": "Knightfall",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://376535"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "649ec50d2907cafed5d37636",
+                "type": "movie",
+                "title": "Knightfall",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt27704253"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "64c539151e89149bdafda1f1",
+                "type": "show",
+                "title": "Gentlemen",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://437692"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "64c539151e89149bdafda1f1",
+                "type": "show",
+                "title": "Gentlemen",
+                "year": 2023
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt29355505"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "651cb98b7279fbfb2b853dbd",
+                "type": "movie",
+                "title": "Toy Story 5",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1084244"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "651cb98b7279fbfb2b853dbd",
+                "type": "movie",
+                "title": "Toy Story 5",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://344106"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "651cb98b7279fbfb2b853dbd",
+                "type": "movie",
+                "title": "Toy Story 5",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt30476502"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "657ecccaa698374a7a524274",
+                "type": "show",
+                "title": "The One Piece",
+                "year": null
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://241709"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "657ecccaa698374a7a524274",
+                "type": "show",
+                "title": "The One Piece",
+                "year": null
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://464521"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "657ecccaa698374a7a524274",
+                "type": "show",
+                "title": "The One Piece",
+                "year": null
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt31184028"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "65cc295216bb4db33e2cfef6",
+                "type": "movie",
+                "title": "Together",
+                "year": 2025
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1242011"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "65cc295216bb4db33e2cfef6",
+                "type": "movie",
+                "title": "Together",
+                "year": 2025
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://362634"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "65cc295216bb4db33e2cfef6",
+                "type": "movie",
+                "title": "Together",
+                "year": 2025
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt31349844"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "65d2daf3359932bcaa86b538",
+                "type": "movie",
+                "title": "Runner",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1377237"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "65d2daf3359932bcaa86b538",
+                "type": "movie",
+                "title": "Runner",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://364261"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "65d2daf3359932bcaa86b538",
+                "type": "movie",
+                "title": "Runner",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt32338669"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "66405eced4e4bace15d4a05a",
+                "type": "movie",
+                "title": "Mutiny",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1288445"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "66405eced4e4bace15d4a05a",
+                "type": "movie",
+                "title": "Mutiny",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://356666"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "66405eced4e4bace15d4a05a",
+                "type": "movie",
+                "title": "Mutiny",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt32333324"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "664081d9987087a6b1b31b63",
+                "type": "movie",
+                "title": "Batman: Knightfall - Part 1: Knightfall",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1560520"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "664081d9987087a6b1b31b63",
+                "type": "movie",
+                "title": "Batman: Knightfall - Part 1: Knightfall",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://373216"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "664081d9987087a6b1b31b63",
+                "type": "movie",
+                "title": "Batman: Knightfall - Part 1: Knightfall",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt32588798"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "66696dfc15c356a548795164",
+                "type": "movie",
+                "title": "Practical Magic 2",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1302904"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "66696dfc15c356a548795164",
+                "type": "movie",
+                "title": "Practical Magic 2",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://357469"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "66696dfc15c356a548795164",
+                "type": "movie",
+                "title": "Practical Magic 2",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt6037988"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "66c479ce34f7a5fb641c17f4",
+                "type": "show",
+                "title": "Last Seen",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://258230"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "66c479ce34f7a5fb641c17f4",
+                "type": "show",
+                "title": "Last Seen",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://451782"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "66c479ce34f7a5fb641c17f4",
+                "type": "show",
+                "title": "Last Seen",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt33764258"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "670cb74204e43056959bd4b3",
+                "type": "movie",
+                "title": "The Odyssey",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1368337"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "670cb74204e43056959bd4b3",
+                "type": "movie",
+                "title": "The Odyssey",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://362547"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "670cb74204e43056959bd4b3",
+                "type": "movie",
+                "title": "The Odyssey",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt34564059"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6738e193d70f01a8cec05ff0",
+                "type": "movie",
+                "title": "The Runner",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1386315"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6738e193d70f01a8cec05ff0",
+                "type": "movie",
+                "title": "The Runner",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://368344"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6738e193d70f01a8cec05ff0",
+                "type": "movie",
+                "title": "The Runner",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt38856645"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "67532bafcd26edcc810aea48",
+                "type": "show",
+                "title": "Love of Silom",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://278850"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "67532bafcd26edcc810aea48",
+                "type": "show",
+                "title": "Love of Silom",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://457516"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "67532bafcd26edcc810aea48",
+                "type": "show",
+                "title": "Love of Silom",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt37853455"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "67ae386f3c22b1734388d86c",
+                "type": "movie",
+                "title": "One Night Only",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1433367"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "67ae386f3c22b1734388d86c",
+                "type": "movie",
+                "title": "One Night Only",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://364391"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "67ae386f3c22b1734388d86c",
+                "type": "movie",
+                "title": "One Night Only",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt36073210"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "67f728f097f5a99d6f6ca577",
+                "type": "movie",
+                "title": "Drawn Together",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1440098"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "67f728f097f5a99d6f6ca577",
+                "type": "movie",
+                "title": "Drawn Together",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://368076"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "67f728f097f5a99d6f6ca577",
+                "type": "movie",
+                "title": "Drawn Together",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt36839800"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "682324b73e6bdf304c6137d4",
+                "type": "movie",
+                "title": "Motor City Waves",
+                "year": 2025
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1565882"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "682324b73e6bdf304c6137d4",
+                "type": "movie",
+                "title": "Motor City Waves",
+                "year": 2025
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt37287335"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6856893830a4aaafd5c4291d",
+                "type": "movie",
+                "title": "Obsession",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1339713"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6856893830a4aaafd5c4291d",
+                "type": "movie",
+                "title": "Obsession",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tvdb://369536"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6856893830a4aaafd5c4291d",
+                "type": "movie",
+                "title": "Obsession",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt37986099"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "68c603d838abf280042fcdb8",
+                "type": "movie",
+                "title": "Stairways to Heaven: The Practical Magic of Sacred Space",
+                "year": null
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt38218082"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "68cfce1b0b4018f67c550e1d",
+                "type": "show",
+                "title": "Crew Girl",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://300507"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "68cfce1b0b4018f67c550e1d",
+                "type": "show",
+                "title": "Crew Girl",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://467896"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "68cfce1b0b4018f67c550e1d",
+                "type": "show",
+                "title": "Crew Girl",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt39246964"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "694c84339383ca4163c4ba38",
+                "type": "show",
+                "title": "KAIJU GIRL CARAMELISE",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://308874"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "694c84339383ca4163c4ba38",
+                "type": "show",
+                "title": "KAIJU GIRL CARAMELISE",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://471878"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "694c84339383ca4163c4ba38",
+                "type": "show",
+                "title": "KAIJU GIRL CARAMELISE",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "imdb://tt33539520"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6995dd6b96c7221de9313980",
+                "type": "show",
+                "title": "Neagley",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://273207"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6995dd6b96c7221de9313980",
+                "type": "show",
+                "title": "Neagley",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://455064"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6995dd6b96c7221de9313980",
+                "type": "show",
+                "title": "Neagley",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt40188305"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "69c44e8318d72691506564e1",
+                "type": "movie",
+                "title": "The Odyssey",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1756234"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "69c44e8318d72691506564e1",
+                "type": "movie",
+                "title": "The Odyssey",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt41605854"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "69e19c662fe74a9a4164be53",
+                "type": "movie",
+                "title": "The Odyssey",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1698863"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "69e19c662fe74a9a4164be53",
+                "type": "movie",
+                "title": "The Odyssey",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt41635253"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "69e305ee317ecf07393f1a9b",
+                "type": "movie",
+                "title": "New Toy Story",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1698874"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "69e305ee317ecf07393f1a9b",
+                "type": "movie",
+                "title": "New Toy Story",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt41669569"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "69e45c61d0388daa90568313",
+                "type": "movie",
+                "title": "Toy Story 9",
+                "year": null
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1689666"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "69fc7f0fb4af52ecd2f9a428",
+                "type": "movie",
+                "title": "One Night Only",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1706198"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6a1f441fdbb49df8ce04e9c5",
+                "type": "movie",
+                "title": "Acme Air",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "tmdb://1712475"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6a2aa39861dd0be111f9c07d",
+                "type": "movie",
+                "title": "Runner",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt43633533"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6a4e0f79c2a91e123e4d9198",
+                "type": "movie",
+                "title": "Spider-Man Brand New Day: Messi Super Fan",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://331729"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6a730c3634d046baa57c0361",
+                "type": "show",
+                "title": "Last Seen On Holiday",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tvdb://480980"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6a730c3634d046baa57c0361",
+                "type": "show",
+                "title": "Last Seen On Holiday",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "2"
+          },
+          "guid": {
+            "equalTo": "tmdb://331555"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6a7db70db0692347657f5079",
+                "type": "show",
+                "title": "Lanterns: The Official Podcast",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/library/metadata/matches",
+        "queryParameters": {
+          "type": {
+            "equalTo": "1"
+          },
+          "guid": {
+            "equalTo": "imdb://tt44119876"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+          "MediaContainer": {
+            "size": 1,
+            "Metadata": [
+              {
+                "ratingKey": "6a8187774f1303dbcfa4a5fa",
+                "type": "movie",
+                "title": "Invite the Devil to Come and Play",
+                "year": 2026
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

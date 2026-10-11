@@ -58,7 +58,7 @@ internal sealed class MediaIdResolver(
 		var free = await FreeAsync(request.Candidates, target, hops, answers, down, cancellationToken);
 		var plan = IdLookupPlanner.Plan(free.Ids.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, hops, capacity);
 		var transient = free.Transient;
-		foreach (var path in plan.Paths)
+		foreach (var path in plan.Paths.Where(path => !AnsweredOnce(path, answers)))
 		{
 			using var traced = FeedRunSpans.Path();
 			var outcome = await FollowAsync(path, free.Ids, request.Hints, target, answers, down, cancellationToken);
@@ -78,6 +78,14 @@ internal sealed class MediaIdResolver(
 
 		unmatchedCache.Set(key, true, unmatchedTtl);
 		return new NoMatchAnywhere();
+	}
+
+	private static bool AnsweredOnce(IReadOnlyList<Hop> path, Dictionary<AnswerKey, Answer<IdLookupResult>> answers)
+	{
+		return path.Any(hop =>
+			hop is IdToId { Lookup.AsksOnce: true } once
+			&& answers.Any(told => told.Key.Converter == once.Converter && told.Key.Lookup.Equals((IdLookup)once.Lookup) && Missed(told.Value, once.Lookup))
+		);
 	}
 
 	private static async Task<(IReadOnlyList<IExternalMediaId> Ids, bool Transient, IReadOnlySet<RemoteService> Sources)> FreeAsync(
@@ -202,13 +210,20 @@ internal sealed class MediaIdResolver(
 		return request switch
 		{
 			ByIdRequest byId => answers.Any(told =>
-				told.Key != key
-				&& told.Key.Converter == key.Converter
-				&& told.Key.Lookup.Equals(key.Lookup)
-				&& told.Value.ToOptional().Match(found => found.Ids.Contains(byId.Id), () => false)
+				told.Key != key && told.Key.Converter == key.Converter && told.Key.Lookup.Equals(key.Lookup) && Covers(told.Value, byId)
 			),
 			ByHintsRequest => false,
 		};
+	}
+
+	private static bool Covers(Answer<IdLookupResult> answer, ByIdRequest request)
+	{
+		return (request.Lookup.AsksOnce && answer.IsDefinitive) || answer.ToOptional().Match(found => found.Ids.Contains(request.Id), () => false);
+	}
+
+	private static bool Missed(Answer<IdLookupResult> answer, ById lookup)
+	{
+		return answer.IsDefinitive && !answer.ToOptional().Match(found => found.Ids.Any(id => lookup.Yields.Contains(id.Source)), () => false);
 	}
 
 	private static IEnumerable<IdLookupRequest> Requests(Hop hop, IReadOnlyList<IExternalMediaId> ids, Optional<IdentifyHints> hints)

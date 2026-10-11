@@ -12,7 +12,7 @@ public class RecentAnswersTests
 	{
 		var asked = 0;
 		var answer = new TaskCompletionSource<Result<string>>();
-		var ask = () =>
+		Func<CancellationToken, Task<Result<string>>> ask = _ =>
 		{
 			asked++;
 			return answer.Task;
@@ -35,7 +35,7 @@ public class RecentAnswersTests
 	{
 		var asked = 0;
 		var now = FeedClock.Now;
-		var ask = () =>
+		Func<CancellationToken, Task<Result<string>>> ask = _ =>
 		{
 			asked++;
 			return Task.FromResult<Result<string>>(Success.Of("Dune"));
@@ -55,7 +55,7 @@ public class RecentAnswersTests
 	public async Task AskAsync_AfterAFailedAnswer_AsksAgain()
 	{
 		var asked = 0;
-		var ask = () => Task.FromResult<Result<string>>(++asked == 1 ? Error.From("Plex is down.") : Success.Of("Dune"));
+		Func<CancellationToken, Task<Result<string>>> ask = _ => Task.FromResult<Result<string>>(++asked == 1 ? Error.From("Plex is down.") : Success.Of("Dune"));
 		var testee = Testee();
 		await testee.AskAsync("dune", ask);
 
@@ -69,7 +69,7 @@ public class RecentAnswersTests
 	public async Task AskAsync_AfterAnAskThatThrew_AsksAgain()
 	{
 		var asked = 0;
-		var ask = () =>
+		Func<CancellationToken, Task<Result<string>>> ask = _ =>
 			++asked == 1 ? Task.FromException<Result<string>>(new HttpRequestException("Plex is down.")) : Task.FromResult<Result<string>>(Success.Of("Dune"));
 		var testee = Testee();
 		await Assert.That(async () => await testee.AskAsync("dune", ask)).Throws<HttpRequestException>();
@@ -83,7 +83,8 @@ public class RecentAnswersTests
 	public async Task AskAsync_AfterAnAskThatThrewBeforeItsFirstAwait_AsksAgain()
 	{
 		var asked = 0;
-		var ask = () => ++asked == 1 ? throw new HttpRequestException("Plex is down.") : Task.FromResult<Result<string>>(Success.Of("Dune"));
+		Func<CancellationToken, Task<Result<string>>> ask = _ =>
+			++asked == 1 ? throw new HttpRequestException("Plex is down.") : Task.FromResult<Result<string>>(Success.Of("Dune"));
 		var testee = Testee();
 		await Assert.That(async () => await testee.AskAsync("dune", ask)).Throws<HttpRequestException>();
 
@@ -97,12 +98,12 @@ public class RecentAnswersTests
 	{
 		var answer = new TaskCompletionSource<Result<string>>();
 		var testee = Testee();
-		var failing = testee.AskAsync("tt1160419", () => answer.Task);
+		var failing = testee.AskAsync("tt1160419", _ => answer.Task);
 		testee.Remember("tt1160419", "Dune");
 		answer.SetResult(Error.From("Trakt is down."));
 		await failing;
 
-		var remembered = await testee.AskAsync("tt1160419", () => throw new InvalidOperationException("Asked although the answer was remembered."));
+		var remembered = await testee.AskAsync("tt1160419", _ => throw new InvalidOperationException("Asked although the answer was remembered."));
 
 		await Assert.That(remembered).IsSuccess().And.IsEqualTo("Dune");
 	}
@@ -110,17 +111,27 @@ public class RecentAnswersTests
 	[Test]
 	public async Task AskAsync_WhenOneWaiterCancels_TheOthersStillGetTheAnswer()
 	{
+		var fetching = CancellationToken.None;
 		var answer = new TaskCompletionSource<Result<string>>();
 		using var cancellation = new CancellationTokenSource();
 		var testee = Testee();
-		var cancelled = testee.AskAsync("dune", () => answer.Task, cancellation.Token);
-		var waiting = testee.AskAsync("dune", () => answer.Task);
+		var cancelled = testee.AskAsync(
+			"dune",
+			token =>
+			{
+				fetching = token;
+				return answer.Task;
+			},
+			cancellation.Token
+		);
+		var waiting = testee.AskAsync("dune", _ => answer.Task);
 
 		await cancellation.CancelAsync();
 		answer.SetResult(Success.Of("Dune"));
 
 		await Assert.That(async () => await cancelled).Throws<OperationCanceledException>();
 		await Assert.That(await waiting).IsSuccess().And.IsEqualTo("Dune");
+		await Assert.That(fetching.IsCancellationRequested).IsFalse();
 	}
 
 	[Test]
@@ -129,9 +140,66 @@ public class RecentAnswersTests
 		var testee = Testee();
 		testee.Remember("tt1160419", "Dune");
 
-		var answer = await testee.AskAsync("tt1160419", () => throw new InvalidOperationException("Asked although the answer was remembered."));
+		var answer = await testee.AskAsync("tt1160419", _ => throw new InvalidOperationException("Asked although the answer was remembered."));
 
 		await Assert.That(answer).IsSuccess().And.IsEqualTo("Dune");
+	}
+
+	[Test]
+	public async Task AskAsync_WhenTheLastWaiterCancels_CancelsTheFetch()
+	{
+		var fetching = CancellationToken.None;
+		var answer = new TaskCompletionSource<Result<string>>();
+		using var leaving = new CancellationTokenSource();
+		var testee = Testee();
+		var waiting = testee.AskAsync(
+			"dune",
+			token =>
+			{
+				fetching = token;
+				return answer.Task;
+			},
+			leaving.Token
+		);
+
+		await leaving.CancelAsync();
+
+		await Assert.That(fetching.IsCancellationRequested).IsTrue();
+		await Assert.That(async () => await waiting).Throws<OperationCanceledException>();
+	}
+
+	[Test]
+	public async Task AskAsync_AfterTheLastWaiterCancelled_StartsAFreshFetch()
+	{
+		var asked = 0;
+		var answer = new TaskCompletionSource<Result<string>>();
+		using var leaving = new CancellationTokenSource();
+		var testee = Testee();
+		var left = testee.AskAsync(
+			"dune",
+			_ =>
+			{
+				asked++;
+				return answer.Task;
+			},
+			leaving.Token
+		);
+		await leaving.CancelAsync();
+
+		var fresh = await testee
+			.AskAsync(
+				"dune",
+				_ =>
+				{
+					asked++;
+					return Task.FromResult<Result<string>>(Success.Of("Dune"));
+				}
+			)
+			.WaitAsync(TimeSpan.FromSeconds(5));
+
+		await Assert.That(fresh).IsSuccess().And.IsEqualTo("Dune");
+		await Assert.That(asked).IsEqualTo(2);
+		await Assert.That(async () => await left).Throws<OperationCanceledException>();
 	}
 
 	private static RecentAnswers<string, string> Testee() => new(FeedClock.Today());

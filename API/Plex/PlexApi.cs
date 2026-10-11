@@ -80,6 +80,37 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 			.ToList();
 	}
 
+	internal async Task<Result<Optional<PlexId>>> MatchAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	{
+		return await PlexType(id.Type)
+			.Match(type => AskMatchAsync(type, id, cancellationToken), () => Task.FromResult<Result<Optional<PlexId>>>(Success.Of<Optional<PlexId>>(new None())));
+	}
+
+	private async Task<Result<Optional<PlexId>>> AskMatchAsync(int type, IExternalMediaId id, CancellationToken cancellationToken)
+	{
+		var endpoint = urls.Match(type, $"{id.Source.ToString().ToLowerInvariant()}://{id.Value}");
+		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
+		if (response.StatusCode is HttpStatusCode.NotFound)
+		{
+			return Success.Of<Optional<PlexId>>(new None());
+		}
+
+		EnsureUsable(response, endpoint);
+		var result = await response.Content.ReadFromJsonAsync<PlexTypes.ById.Root>(cancellationToken);
+		var first = Optional.Of(result?.MediaContainer?.Metadata).Map(metadata => metadata.FirstOrNone());
+		return Success.Of(first.Map(found => PlexId.From(found.RatingKey, id.Type)));
+	}
+
+	private static Optional<int> PlexType(MediaType type)
+	{
+		return type switch
+		{
+			MediaType.Movie => Some.Of(1),
+			MediaType.Show => Some.Of(2),
+			MediaType.Unknown => new None(),
+		};
+	}
+
 	internal Task<Result<IReadOnlyList<IExternalMediaId>>> LookUpExternalsAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
 		return ByIdAsync(plexId, cancellationToken).Map<FoundMedia, IReadOnlyList<IExternalMediaId>>(found => [.. found.Externals]);
@@ -87,7 +118,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 
 	internal Task<Result<FoundMedia>> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
-		return _byRatingKey.AskAsync(plexId.Value, () => FetchByIdAsync(plexId, CancellationToken.None), cancellationToken);
+		return _byRatingKey.AskAsync(plexId.Value, token => FetchByIdAsync(plexId, token), cancellationToken);
 	}
 
 	private async Task<Result<FoundMedia>> FetchByIdAsync(PlexId plexId, CancellationToken cancellationToken)

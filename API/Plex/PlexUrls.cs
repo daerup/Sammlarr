@@ -22,6 +22,11 @@ internal sealed class PlexUrls(PlexOptions options)
 			string.Format(CultureInfo.InvariantCulture, PlexEndpoints.SearchQuery, Uri.EscapeDataString(searchTypes), Uri.EscapeDataString(title), limit)
 		);
 
+	public string Match(int type, string guid)
+	{
+		return Compose(options.DiscoverUrl, string.Format(CultureInfo.InvariantCulture, PlexEndpoints.MatchQuery, type, Uri.EscapeDataString(guid)));
+	}
+
 	public string RatingKeyMetadata(string plexId) =>
 		Compose(options.MetadataUrl, string.Format(CultureInfo.InvariantCulture, PlexEndpoints.RatingKeyMetadataQuery, Uri.EscapeDataString(plexId)));
 
