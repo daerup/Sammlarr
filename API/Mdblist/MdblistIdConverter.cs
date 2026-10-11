@@ -1,4 +1,3 @@
-using API.Http;
 using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Media.Conversions;
@@ -18,22 +17,16 @@ internal sealed class MdblistIdConverter(MdblistTitles titles) : IExternalIdConv
 
 	public Task<Answer<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
 	{
-		return LookUpResultAsync(request, cancellationToken).GuardedAsync(RemoteService.Mdblist);
-	}
-
-	private async Task<Result<IdLookupResult>> LookUpResultAsync(IdLookupRequest request, CancellationToken cancellationToken)
-	{
 		return request switch
 		{
-			ByIdRequest(var lookup, var id) when lookup == ByAnyId => await FindAsync(id, cancellationToken),
-			_ => Error.From("MDBList does not offer this lookup."),
+			ByIdRequest(var lookup, var id) when lookup == ByAnyId => FindAsync(id, cancellationToken),
+			_ => Task.FromResult<Answer<IdLookupResult>>(new NoMatch(RemoteService.Mdblist)),
 		};
 	}
 
-	private Task<Result<IdLookupResult>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken)
+	private async Task<Answer<IdLookupResult>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken)
 	{
-		return titles
-			.FindAsync(id, cancellationToken)
-			.Map(title => title.Match(found => MdblistIds.Found(found, id.Type), () => new IdLookupResult([], new None())));
+		var answer = await titles.FindAsync([id], cancellationToken);
+		return answer is NoMatch ? new Found<IdLookupResult>(new IdLookupResult([], new None())) : answer.Map(title => MdblistIds.Found(title, id.Type));
 	}
 }

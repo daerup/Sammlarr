@@ -167,28 +167,6 @@ public class MdblistServiceTests
 	}
 
 	[Test]
-	public async Task GetFeedItemsAsync_ForAListPage_LooksUpEveryTitleInOneBatchThatLaterLookupsReuse()
-	{
-		var handler = Mock.HttpHandler();
-		handler
-			.OnAnyRequest()
-			.RespondWithJson(
-				"""{"movies":[{"id":1,"ids":{"imdb":"tt0137523","tmdb":550,"tvdb":null,"mdblist":"a5as","mal":null},"rank":1,"title":"Fight Club","release_year":1999},{"id":2,"ids":{"imdb":"tt0133093","tmdb":603,"tvdb":null,"mdblist":"m7rx","mal":null},"rank":2,"title":"The Matrix","release_year":1999}],"shows":[]}"""
-			);
-		var lookups = Mock.HttpHandler();
-		lookups.OnAnyRequest().RespondWithJson(await MdblistApis.RecordedAsync("movies.json"));
-		var titles = MdblistApis.Titles(lookups);
-		var testee = CreateTestee(handler, out _, titles: titles);
-
-		await testee.GetFeedItemsAsync("two-movies", FieldNeeds.None).InListOrderAsync().ToListAsync();
-		await titles.FindAsync(ImdbId.From("tt0137523", MediaType.Movie));
-		await titles.FindAsync(TmdbId.From("603", MediaType.Movie));
-
-		lookups.Verify(request => request.Method(HttpMethod.Post).PathMatches(@"^/mdblist/movie(\?.*)?$"), Times.Once);
-		lookups.Verify(request => request.Method(HttpMethod.Post), Times.Once);
-	}
-
-	[Test]
 	public async Task GetFeedItemsAsync_InsideARun_ReportsEachPageWithoutATotal()
 	{
 		var testee = CreateTestee(new StubHandler(HttpStatusCode.OK, pages: 2), out _);
@@ -200,7 +178,7 @@ public class MdblistServiceTests
 		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
 	}
 
-	private static MdblistService CreateTestee(HttpMessageHandler handler, out Mock<IMediaService> media, MdblistTitles? titles = null)
+	private static MdblistService CreateTestee(HttpMessageHandler handler, out Mock<IMediaService> media)
 	{
 		var apiKeyStore = IApiKeyService.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Mdblist, "test-key");
@@ -209,14 +187,7 @@ public class MdblistServiceTests
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();
 		media.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any()).Returns((entries, _, token) => ListLoads.UnresolvedAsync(entries, _ => { }, token));
-		return new MdblistService(client, media.Object, apiKeyStore.Object, titles ?? NoTitles());
-	}
-
-	private static MdblistTitles NoTitles()
-	{
-		var lookups = Mock.HttpHandler();
-		lookups.OnAnyRequest().RespondWithJson("[]");
-		return MdblistApis.Titles(lookups);
+		return new MdblistService(client, media.Object, apiKeyStore.Object);
 	}
 
 	private sealed class StubHandler(HttpStatusCode status, int pages = 1) : HttpMessageHandler

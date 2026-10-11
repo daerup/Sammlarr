@@ -1,5 +1,6 @@
 using System.Net;
 using API.Http.Lanes;
+using API.Mdblist;
 using API.Plex;
 using API.Tmdb;
 using Contracts.Feed;
@@ -80,7 +81,7 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task RunAsync_AfterConnectingANewRatingService_AsksItOncePerTitleBatched()
+	public async Task RunAsync_AfterConnectingANewRatingService_AsksItOncePerTitle()
 	{
 		await ConnectTmdbAndPlexAsync();
 		var fightClub = await StoreAsync(TestMedia.FightClub, Complete("Fight Club"), RemoteService.Tmdb, RemoteService.Plex);
@@ -93,7 +94,7 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 		host.SetCurrentTime(NextDay);
 		await RunAsync(feedId);
 
-		await Assert.That(host.HttpStub.Requests(MdblistTitles)).IsEqualTo(1);
+		await Assert.That(host.HttpStub.Requests(MdblistTitles)).IsEqualTo(2);
 		await Assert.That((await StoredAsync(fightClub)).Details.Ratings.Of(RatingSource.Metacritic)).IsSome();
 		await Assert.That((await StoredAsync(inception)).Details.Ratings.Of(RatingSource.Metacritic)).IsSome();
 		await Assert.That(host.HttpStub.Requests(TmdbDetail(TestMedia.FightClub))).IsEqualTo(0);
@@ -151,6 +152,41 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task RunAsync_ForAFullyCachedList_SendsOnlyItsPage()
+	{
+		host.SinkAddresses(MediaProvider.Tmdb);
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		await StoreAsync(TestMedia.FightClub, Complete("Fight Club"), RemoteService.Mdblist);
+		await StoreAsync(TestMedia.Inception, Complete("Inception"), RemoteService.Mdblist);
+		var feedId = await SeedFeedAsync("cached-list");
+		host.MdblistFeedContains("cached-list", Item("Fight Club", MediaType.Movie, Tmdb("550")), Item("Inception", MediaType.Movie, Tmdb("27205")));
+		await RunAsync(feedId);
+		host.SetCurrentTime(NextDay);
+		var before = host.HttpStub.Requests("");
+
+		await RunAsync(feedId);
+
+		await Assert.That(host.HttpStub.Requests("") - before).IsEqualTo(1);
+		await Assert.That(host.HttpStub.Requests(MdblistTitles)).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task RunAsync_AtTheFeedReserve_SendsNoTitleRequestAndRecordsNoAnswer()
+	{
+		host.SinkAddresses(MediaProvider.Tmdb);
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var fightClub = await StoreAsync(TestMedia.FightClub, Complete("Fight Club"));
+		var feedId = await SeedFeedAsync("cached-list");
+		host.MdblistFeedContains("cached-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		host.Resolve<MdblistBudget>().Record(SammlarrTestHost.MdblistApiKey, Spent(Now.AddDays(1)));
+
+		await RunAsync(feedId);
+
+		await Assert.That(host.HttpStub.Requests(MdblistTitles)).IsEqualTo(0);
+		await Assert.That((await StoredAsync(fightClub)).Answers.Select(answer => answer.Provider)).DoesNotContain(RemoteService.Mdblist);
+	}
+
+	[Test]
 	public async Task RunAsync_WhenAFilteredFieldsServiceIsBlocked_Waits()
 	{
 		var time = host.UseFakeTime();
@@ -175,6 +211,14 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 	private static readonly TimeSpan Patience = TimeSpan.FromSeconds(10);
 
 	private const string MdblistTitles = $"{TestUrls.MdblistApi}/tmdb/movie";
+
+	private static System.Net.Http.Headers.HttpResponseHeaders Spent(DateTimeOffset reset)
+	{
+		var answered = new HttpResponseMessage(HttpStatusCode.OK);
+		answered.Headers.Add("x-ratelimit-remaining", "10");
+		answered.Headers.Add("x-ratelimit-reset", $"{reset.ToUnixTimeSeconds()}");
+		return answered.Headers;
+	}
 
 	private static MovieDetails Complete(string title)
 	{

@@ -16,7 +16,7 @@ using Observability.Feed;
 
 namespace API.Mdblist;
 
-internal sealed class MdblistService(MdblistClient client, IMediaService media, IApiKeyService apiKeys, MdblistTitles titles) : IFeedProvider
+internal sealed class MdblistService(MdblistClient client, IMediaService media, IApiKeyService apiKeys) : IFeedProvider
 {
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";
@@ -101,7 +101,6 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 				.Concat(page.movies.Select(FeedItemResolution.Movie))
 				.Select(pair => new IdentifyRequest(MdblistIds.Of(pair.ListItem.ids, pair.MediaType), BuildHints(pair)) { Sources = [RemoteService.Mdblist] })
 				.ToList();
-			titles.Prefetch(requests.Select(request => request.Candidates));
 			foreach (var request in requests)
 			{
 				yield return request;
