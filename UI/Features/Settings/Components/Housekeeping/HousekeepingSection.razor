@@ -71,6 +71,25 @@ else
         </table>
         </div>
 
+        @if (overview.StoredTwice.Undecided + overview.StoredTwice.KeptApart > 0)
+        {
+            var twice = overview.StoredTwice;
+            <div class="@GroupHead">Waiting for you</div>
+            <div class="@ClearRow" data-testid="housekeeping-stored-twice">
+                <LucideIcon Name="copy" Size="18" Class="text-muted-foreground"/>
+                <div>
+                    <div class="text-sm font-medium">Titles stored twice</div>
+                    <div class="max-w-[80ch] text-[12.5px] text-muted-foreground">@TitlesStoredTwiceView.Waiting(twice.Undecided, twice.KeptApart)</div>
+                </div>
+                <span class="@ToDecideClass(twice)">@twice.Undecided to decide</span>
+                <BbButton Variant="@(twice.Undecided > 0 ? ButtonVariant.Default : ButtonVariant.Outline)" Size="ButtonSize.Small" OnClick="() => _reviewing = true">
+                    <LucideIcon Name="list-checks" Size="13" Class="mr-1.5"/>
+                    <span>Review…</span>
+                </BbButton>
+            </div>
+        }
+        <TitlesStoredTwiceDialog Open="_reviewing" OpenChanged="ReviewChangedAsync"/>
+
         <div class="@GroupHead">Clear by hand</div>
         <div class="@ClearRow" data-testid="housekeeping-clear-details">
             <LucideIcon Name="film" Size="18" Class="text-muted-foreground"/>
@@ -181,6 +200,8 @@ else
 
     private bool _clearing;
 
+    private bool _reviewing;
+
     private static readonly RenderFragment PassTile =
         @<span class="inline-flex size-[26px] shrink-0 items-center justify-center rounded-md bg-secondary text-foreground">
             <LucideIcon Name="brush" Size="14"/>
@@ -240,6 +261,19 @@ else
         {
             _clearing = false;
         }
+    }
+
+    private async Task ReviewChangedAsync(bool open)
+    {
+        _reviewing = open;
+        await _reload.RunAsync();
+    }
+
+    private static string ToDecideClass(StoredTwiceCount twice)
+    {
+        return twice.Undecided > 0
+            ? "text-right text-[13px] whitespace-nowrap font-semibold text-[color:var(--alert-warning)]"
+            : "text-right text-[13px] whitespace-nowrap text-muted-foreground";
     }
 
     private void ClearUnmatched()
