@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Channels;
 using API.Feeds;
+using API.Http;
 using API.Tmdb.Types;
 using Contracts.Auth;
 using Contracts.Feed;
@@ -130,7 +131,7 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 		var pages = 1;
 		for (var page = 1; page <= pages; page++)
 		{
-			var answer = await FeedRunSpans.ReadingAsync(page, () => read(page));
+			var answer = await SourcePages.ReadAsync(page, () => read(page));
 			pages = answer.TotalPages ?? 1;
 			FeedRunSpans.SourcePage(page, total(answer));
 			foreach (var item in answer.Entries)

@@ -111,6 +111,27 @@ public class LaneGateTests
 	}
 
 	[Test]
+	public async Task Load_WhileDown_IsBlockedUntilTheDownEnds()
+	{
+		var time = new FakeTimeProvider();
+		using var testee = new LaneGate(Policy(TwoPerSecond), time, new None(), "");
+		await FailTwiceAsync(testee);
+
+		await Assert.That(testee.Load.BlockedUntil).IsSome().And.IsEqualTo(time.GetUtcNow().AddSeconds(30));
+	}
+
+	[Test]
+	public async Task Admits_WhileBlockedPastThePatience_IsFalseAndWithinItTrue()
+	{
+		var time = new FakeTimeProvider();
+		using var testee = new LaneGate(Policy(TwoPerSecond), time, new None(), "");
+		(await GrantedAsync(testee)).Release(new AttemptThrottled(Some.Of(time.GetUtcNow().AddSeconds(10))));
+
+		await Assert.That(testee.Admits(LanePriority.Interactive, TimeSpan.FromSeconds(5))).IsFalse();
+		await Assert.That(testee.Admits(LanePriority.Interactive, TimeSpan.FromSeconds(15))).IsTrue();
+	}
+
+	[Test]
 	public async Task Release_WhenTheProbeIsAnswered_OpensTheGateAgain()
 	{
 		var time = new FakeTimeProvider();

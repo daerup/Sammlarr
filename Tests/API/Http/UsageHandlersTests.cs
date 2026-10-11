@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Observability.Usage;
-using Polly.CircuitBreaker;
+using Shared.Concurrency;
 using Shared.DI;
 using Shared.Options;
 
@@ -73,7 +73,7 @@ public class UsageHandlersTests
 	}
 
 	[Test]
-	public async Task SendAsync_CutOffByTheBreakerAfterItsAttempts_IsAFailedCallWhileTheNextOneIsNeverSent()
+	public async Task SendAsync_UntilItsRouteGoesDown_IsAFailedCallWhileTheNextOneIsNeverSent()
 	{
 		var tried = FeedId.From(Guid.NewGuid());
 		var refused = FeedId.From(Guid.NewGuid());
@@ -84,13 +84,51 @@ public class UsageHandlersTests
 			return Task.CompletedTask;
 		});
 		using var measured = new Measured();
-		using var host = Host(retryAttempts: 2, minimumThroughput: 2);
+		using var host = Host(retryAttempts: 2, failuresToDown: 2);
 
-		await Assert.ThrowsAsync<BrokenCircuitException>(() => SendAsync(host, "plex", server, tried));
-		await Assert.ThrowsAsync<BrokenCircuitException>(() => SendAsync(host, "plex", server, refused));
+		await SendAsync(host, "plex", server, tried);
+		await Assert.ThrowsAsync<LaneRefusedException>(() => SendAsync(host, "plex", server, refused));
 
 		await Assert.That(measured.Of(PipelineDuration, tried).Select(tags => tags[UsageTags.Outcome])).IsEquivalentTo([nameof(UsageOutcome.Failed)]);
 		await Assert.That(measured.Of(PipelineDuration, refused)).IsEmpty();
+	}
+
+	[Test]
+	public async Task SendAsync_On429BeyondItsMaxWait_IsOneCallThatGaveUpOn429()
+	{
+		var feed = FeedId.From(Guid.NewGuid());
+		await using var server = await ServerAsync(context =>
+		{
+			context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+			context.Response.Headers.RetryAfter = "60";
+			return Task.CompletedTask;
+		});
+		using var measured = new Measured();
+		using var host = Host();
+
+		await SendAsync(host, "plex", server, feed);
+
+		await Assert.That(measured.Of(PipelineDuration, feed).Select(tags => tags[UsageTags.Outcome])).IsEquivalentTo([nameof(UsageOutcome.GaveUpOn429)]);
+	}
+
+	[Test]
+	public async Task SendAsync_CancelledWhileQueuedInItsLane_IsNoCall()
+	{
+		var held = FeedId.From(Guid.NewGuid());
+		var queued = FeedId.From(Guid.NewGuid());
+		var release = new TaskCompletionSource();
+		await using var server = await ServerAsync(_ => release.Task);
+		using var measured = new Measured();
+		using var host = Host(maxInFlight: 1);
+		var holding = SendAsync(host, "plex", server, held);
+		using var cancel = new CancellationTokenSource(TimeSpan.FromMilliseconds(300));
+
+		await Assert.ThrowsAsync<OperationCanceledException>(() => SendAsync(host, "plex", server, queued, cancel.Token));
+		release.SetResult();
+		await holding;
+
+		await Assert.That(measured.Of(PipelineDuration, queued)).IsEmpty();
+		await Assert.That(measured.Of(PipelineDuration, held).Select(tags => tags[UsageTags.Outcome])).IsEquivalentTo([nameof(UsageOutcome.Answered)]);
 	}
 
 	[Test]
@@ -124,7 +162,7 @@ public class UsageHandlersTests
 		return server;
 	}
 
-	private static IHost Host(int retryAttempts = 1, int minimumThroughput = 20, IFeedRunUsage? feedRuns = null)
+	private static IHost Host(int retryAttempts = 1, int failuresToDown = 4, int maxInFlight = int.MaxValue, IFeedRunUsage? feedRuns = null)
 	{
 		return new HostBuilder()
 			.ConfigureServices(services =>
@@ -134,7 +172,15 @@ public class UsageHandlersTests
 					{
 						BaseUrl = "https://plex.test",
 						Authentication = new OAuthenticationOptions { ProductName = "Sammlarr" },
-						Http = new ProviderHttpOptions { RetryAttempts = retryAttempts, CircuitBreakerMinimumThroughput = minimumThroughput },
+						Http = new ProviderHttpOptions
+						{
+							RetryAttempts = retryAttempts,
+							MaxWaitSeconds = 5,
+							Lanes = new()
+							{
+								["api"] = new LaneOptions { FailuresToDown = failuresToDown, MaxInFlight = maxInFlight },
+							},
+						},
 					}
 				);
 				services.AddSingleton(IDateTimeProvider.Mock().Object);

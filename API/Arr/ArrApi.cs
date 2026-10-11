@@ -2,11 +2,12 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using API.Arr.Types;
+using API.Http.Lanes;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist.Arr;
-using Polly.CircuitBreaker;
 using Polly.Timeout;
+using Shared.Concurrency;
 
 namespace API.Arr;
 
@@ -177,12 +178,13 @@ internal abstract class ArrApi(HttpClient http)
 		{
 			using var request = new HttpRequestMessage(method, new Uri(connection.BaseUri, $"api/v3/{path}"));
 			request.Headers.Add("X-Api-Key", connection.ApiKey);
+			request.Options.Set(LaneHandler.Owner, connection.Address);
 			body.Apply(content => request.Content = JsonContent.Create(content, options: Json));
 			using var response = await http.SendAsync(request, cancellationToken);
 			var text = await response.Content.ReadAsStringAsync(cancellationToken);
 			return response.IsSuccessStatusCode ? Success.Of(text) : Error.From(Refusal(connection, response.StatusCode, text));
 		}
-		catch (Exception ex) when (ex is HttpRequestException or BrokenCircuitException or TimeoutRejectedException)
+		catch (Exception ex) when (ex is HttpRequestException or LaneRefusedException or TimeoutRejectedException)
 		{
 			return Error.From($"{App.Name} could not be reached at {connection.Address}: {ex.Message}");
 		}

@@ -3,15 +3,15 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using API.Http;
 using API.Notifications.Webhook;
-using Contracts;
 using Contracts.Identity;
 using Contracts.Providers;
-using Contracts.Usage;
 using Domain.Identity;
 using Domain.Providers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Polly.CircuitBreaker;
+using Polly.Timeout;
+using Shared.Concurrency;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -24,14 +24,7 @@ public class RemoteHttpExtensionsTests
 	[Test]
 	public async Task AddClientHttp_WithZeroRetries_PassesStartupOptionsValidation()
 	{
-		using var host = new HostBuilder()
-			.ConfigureServices(services =>
-			{
-				services.AddSingleton(new WebhookOptions());
-				services.AddSingleton<ProviderGates>();
-				services.AddHttpClient(WebhookClient.Name(UserRole.Member)).AddClientHttp<WebhookOptions>();
-			})
-			.Build();
+		using var host = ClientHost(new WebhookOptions());
 
 		await host.StartAsync();
 		await host.StopAsync();
@@ -41,21 +34,133 @@ public class RemoteHttpExtensionsTests
 	[MethodDataSource(nameof(ProviderSections))]
 	public async Task AddClientHttp_WithEachProvidersShippedSettings_PassesStartupOptionsValidation(string section)
 	{
-		var http = AppSettings()
-			.GetProperty(section)
-			.GetProperty("Http")
-			.Deserialize<ProviderHttpOptions>(new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
-		using var host = new HostBuilder()
-			.ConfigureServices(services =>
-			{
-				services.AddSingleton(new WebhookOptions { Http = http });
-				services.AddSingleton<ProviderGates>();
-				services.AddHttpClient(WebhookClient.Name(UserRole.Member)).AddClientHttp<WebhookOptions>();
-			})
-			.Build();
+		using var host = ClientHost(new WebhookOptions { Http = ShippedHttp(section) });
 
 		await host.StartAsync();
 		await host.StopAsync();
+	}
+
+	[Test]
+	[MethodDataSource(nameof(LanedSections))]
+	public async Task Bind_ForEachProvidersShippedLanes_ReadsEveryLaneAndItsLimits(string section)
+	{
+		var shipped = AppSettings().GetProperty(section).GetProperty("Http").GetProperty("Lanes");
+
+		var bound = ShippedHttp(section).Lanes;
+
+		await Assert.That(bound.Keys).IsEquivalentTo(shipped.EnumerateObject().Select(lane => lane.Name));
+		await Assert.That(bound.Values.SelectMany(lane => lane.Limits).Where(limit => limit.Requests <= 0 || limit.Per <= TimeSpan.Zero)).IsEmpty();
+		await Assert.That(bound.Values.SelectMany(lane => lane.Routes).Where(route => string.IsNullOrEmpty(route.Url))).IsEmpty();
+	}
+
+	[Test]
+	public async Task AddClientHttp_ForPictures_TimesOutAfterItsTimeoutSeconds()
+	{
+		using var host = ClientHost(
+			new PictureOptions
+			{
+				Http = new ProviderHttpOptions
+				{
+					RetryAttempts = 3,
+					AttemptTimeoutSeconds = 1,
+					TimeoutSeconds = 1,
+				},
+			},
+			new Failing()
+		);
+
+		await Assert.That(async () => await host.Client("pictures").GetAsync("https://images.test/poster.jpg")).Throws<TimeoutRejectedException>();
+	}
+
+	[Test]
+	public async Task AddRemoteHttp_ForALaneClient_AllowsTenMinutesInsteadOfTheDefaultHundredSeconds()
+	{
+		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions()), RemoteService.Plex, new Counting());
+
+		await Assert.That(host.Client().Timeout).IsEqualTo(TimeSpan.FromMinutes(10));
+	}
+
+	[Test]
+	public async Task AddRemoteHttp_WhenAStampedRequestIsThrottled_ReportsTheRateLimit()
+	{
+		var reporter = IProviderRateLimitReporter.Mock();
+		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions { RetryAttempts = 0 }), RemoteService.Plex, new Throttling(), reporter.Object);
+
+		using var response = await host.Client().SendAsync(Stamped());
+
+		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
+		reporter.ReportAsync(RemoteService.Plex, Any(), user, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task AddRemoteHttp_WhenThrottledWithoutRetryAfter_ReportsTheLanesWindowAsTheWait()
+	{
+		var reporter = IProviderRateLimitReporter.Mock();
+		var http = new ProviderHttpOptions
+		{
+			RetryAttempts = 0,
+			Lanes = new() { ["api"] = new LaneOptions { Limits = [new RateWindowOptions { Requests = 10, Per = TimeSpan.FromMinutes(1) }] } },
+		};
+		using var host = LanedHosts.Host(LanedHosts.Plex(http), RemoteService.Plex, new Throttling(retryAfter: false), reporter.Object);
+
+		using var response = await host.Client().SendAsync(Stamped());
+
+		reporter.ReportAsync(RemoteService.Plex, TimeSpan.FromMinutes(1), user, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task AddRemoteHttp_WhenTheRequestHasNoUser_ReportsNothing()
+	{
+		var reporter = IProviderRateLimitReporter.Mock();
+		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions { RetryAttempts = 0 }), RemoteService.Plex, new Throttling(), reporter.Object);
+
+		using var response = await host.Client().GetAsync("https://plex.test/library");
+
+		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
+		reporter.ReportAsync(Any<RemoteService>(), Any(), Any<UserId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task AddRemoteHttp_WhenThrottled_BlocksTheRemoteServiceInItsCapacity()
+	{
+		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions { RetryAttempts = 0 }), RemoteService.Plex, new Throttling());
+
+		using var response = await host.Client().SendAsync(Stamped());
+
+		await Assert.That(host.Services.GetRequiredService<RemoteCapacity>().Of(RemoteService.Plex).BlockedUntil).IsSome();
+	}
+
+	[Test]
+	public async Task AddRemoteHttp_WhenTheRouteGoesDown_RefusesTheNextRequestAndBlocksTheRemoteServiceInItsCapacity()
+	{
+		var http = new ProviderHttpOptions
+		{
+			RetryAttempts = 0,
+			Lanes = new() { ["api"] = new LaneOptions { FailuresToDown = 1 } },
+		};
+		using var host = LanedHosts.Host(LanedHosts.Plex(http), RemoteService.Plex, new Failing());
+		using var failed = await host.Client().GetAsync("https://plex.test/library");
+
+		await Assert.That(async () => await host.Client().GetAsync("https://plex.test/library")).Throws<LaneRefusedException>();
+		await Assert.That(host.Services.GetRequiredService<RemoteCapacity>().Of(RemoteService.Plex).BlockedUntil).IsSome();
+	}
+
+	[Test]
+	public async Task AddRemoteHttp_WithAWindow_HoldsTheRequestsBeyondItForTheNextWindow()
+	{
+		var answering = new Counting();
+		var http = new ProviderHttpOptions
+		{
+			Lanes = new() { ["api"] = new LaneOptions { Limits = [new RateWindowOptions { Requests = 2, Per = TimeSpan.FromSeconds(1) }] } },
+		};
+		using var host = LanedHosts.Host(LanedHosts.Plex(http), RemoteService.Plex, answering);
+
+		var sends = Enumerable.Range(0, 3).Select(_ => host.Client().GetAsync("https://plex.test/library")).ToList();
+
+		await Assert.That(async () => await Task.WhenAll(sends).WaitAsync(TimeSpan.FromMilliseconds(500))).Throws<TimeoutException>();
+		await Assert.That(answering.Answered).IsEqualTo(2);
+		await Task.WhenAll(sends).WaitAsync(TimeSpan.FromSeconds(5));
+		await Assert.That(answering.Answered).IsEqualTo(3);
 	}
 
 	public static IEnumerable<string> ProviderSections()
@@ -66,93 +171,32 @@ public class RemoteHttpExtensionsTests
 			.Select(section => section.Name);
 	}
 
-	private static JsonElement AppSettings()
+	public static IEnumerable<string> LanedSections()
 	{
-		var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "Web", "appsettings.json"));
-		return JsonDocument.Parse(File.ReadAllText(path)).RootElement;
+		return ProviderSections().Where(section => AppSettings().GetProperty(section).GetProperty("Http").TryGetProperty("Lanes", out _));
 	}
 
-	[Test]
-	public async Task AddRemoteHttp_WhenAStampedRequestIsThrottled_ReportsTheRateLimit()
+	private static string AppSettingsPath() => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "Web", "appsettings.json"));
+
+	private static JsonElement AppSettings() => JsonDocument.Parse(File.ReadAllText(AppSettingsPath())).RootElement;
+
+	private static ProviderHttpOptions ShippedHttp(string section)
 	{
-		var reporter = IProviderRateLimitReporter.Mock();
-		using var host = Host(reporter.Object);
-
-		using var response = await SendAsync(host, Stamped());
-
-		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
-		reporter.ReportAsync(RemoteService.Plex, Any(), user, Any()).WasCalled(Times.Once);
+		var configuration = new ConfigurationBuilder().AddJsonFile(AppSettingsPath()).Build();
+		return configuration.GetSection(section).GetSection("Http").Get<ProviderHttpOptions>() ?? new ProviderHttpOptions();
 	}
 
-	[Test]
-	public async Task AddRemoteHttp_WhenTheRequestHasNoUser_ReportsNothing()
+	private static IHost ClientHost<TOptions>(TOptions options, HttpMessageHandler? wire = null)
+		where TOptions : class, IProviderHttpOptions
 	{
-		var reporter = IProviderRateLimitReporter.Mock();
-		using var host = Host(reporter.Object);
-
-		using var response = await SendAsync(host, new HttpRequestMessage(HttpMethod.Get, "https://plex.test/library"));
-
-		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
-		reporter.ReportAsync(Any<RemoteService>(), Any(), Any<UserId>(), Any()).WasCalled(Times.Never);
-	}
-
-	[Test]
-	public async Task AddRemoteHttp_WhenThrottled_BlocksTheRemoteServiceInItsCapacity()
-	{
-		using var host = Host(IProviderRateLimitReporter.Mock().Object);
-
-		using var response = await SendAsync(host, Stamped());
-
-		await Assert.That(host.Services.GetRequiredService<RemoteCapacity>().Of(RemoteService.Plex).BlockedUntil).IsSome();
-	}
-
-	[Test]
-	public async Task AddRemoteHttp_WhenTheCircuitBreakerOpens_BlocksTheRemoteServiceInItsCapacity()
-	{
-		using var host = Host(IProviderRateLimitReporter.Mock().Object, HttpStatusCode.ServiceUnavailable, minimumThroughput: 2);
-		using var failed = await SendAsync(host, Stamped());
-
-		await Assert.That(async () => await SendAsync(host, Stamped())).Throws<BrokenCircuitException>();
-		await Assert.That(host.Services.GetRequiredService<RemoteCapacity>().Of(RemoteService.Plex).BlockedUntil).IsSome();
-	}
-
-	[Test]
-	public async Task AddRemoteHttp_ForARemoteServiceWithWaitBudgets_ReportsBothInItsCapacity()
-	{
-		using var host = Host(IProviderRateLimitReporter.Mock().Object, maxWaitSeconds: 90, enrichWaitSeconds: 15);
-
-		var load = host.Services.GetRequiredService<RemoteCapacity>().Of(RemoteService.Plex);
-
-		await Assert.That(load.MaxWait).IsEqualTo(TimeSpan.FromSeconds(90));
-		await Assert.That(load.EnrichWait).IsEqualTo(TimeSpan.FromSeconds(15));
-	}
-
-	[Test]
-	public async Task AddRemoteHttp_WithARequestRate_HoldsTheRequestsBeyondItForTheNextWindow()
-	{
-		var handler = new AnsweringHandler(HttpStatusCode.OK);
-		using var host = Host(IProviderRateLimitReporter.Mock().Object, handler, requestsPerSecond: 2);
-
-		var sends = Enumerable.Range(0, 3).Select(_ => SendAsync(host, new HttpRequestMessage(HttpMethod.Get, "https://plex.test/library"))).ToList();
-
-		await Assert.That(async () => await Task.WhenAll(sends).WaitAsync(TimeSpan.FromMilliseconds(500))).Throws<TimeoutException>();
-		await Assert.That(handler.Answered).IsEqualTo(2);
-		await Task.WhenAll(sends);
-		await Assert.That(handler.Answered).IsEqualTo(3);
-	}
-
-	[Test]
-	public async Task AddRemoteHttp_WithARateBelowOneASecond_SpacesTheRequestsFurtherThanASecondApart()
-	{
-		var handler = new AnsweringHandler(HttpStatusCode.OK);
-		using var host = Host(IProviderRateLimitReporter.Mock().Object, handler, requestsPerSecond: 0.5);
-
-		var sends = Enumerable.Range(0, 2).Select(_ => SendAsync(host, new HttpRequestMessage(HttpMethod.Get, "https://plex.test/library"))).ToList();
-
-		await Assert.That(async () => await Task.WhenAll(sends).WaitAsync(TimeSpan.FromMilliseconds(1200))).Throws<TimeoutException>();
-		await Assert.That(handler.Answered).IsEqualTo(1);
-		await Task.WhenAll(sends);
-		await Assert.That(handler.Answered).IsEqualTo(2);
+		return new HostBuilder()
+			.ConfigureServices(services =>
+			{
+				services.AddSingleton(options);
+				var client = services.AddHttpClient(options is PictureOptions ? "pictures" : WebhookClient.Name(UserRole.Member)).AddClientHttp<TOptions>();
+				Optional.Of(wire).Apply(found => client.ConfigurePrimaryHttpMessageHandler(() => found));
+			})
+			.Build();
 	}
 
 	private static HttpRequestMessage Stamped()
@@ -160,67 +204,34 @@ public class RemoteHttpExtensionsTests
 		var currentUser = ICurrentUser.Mock();
 		currentUser.IsAuthenticated.Returns(true);
 		currentUser.Id.Returns(user);
-
 		var request = new HttpRequestMessage(HttpMethod.Get, "https://plex.test/library");
 		request.StampTriggeredBy(currentUser.Object);
 		return request;
 	}
 
-	private static async Task<HttpResponseMessage> SendAsync(IHost host, HttpRequestMessage request)
+	private sealed class Throttling(bool retryAfter = true) : HttpMessageHandler
 	{
-		var client = host.Services.GetRequiredService<IHttpClientFactory>().CreateClient("plex");
-		return await client.SendAsync(request);
-	}
-
-	private static IHost Host(
-		IProviderRateLimitReporter reporter,
-		HttpStatusCode answer = HttpStatusCode.TooManyRequests,
-		int minimumThroughput = 20,
-		int maxWaitSeconds = 0,
-		int enrichWaitSeconds = 0
-	)
-	{
-		return Host(reporter, new AnsweringHandler(answer), minimumThroughput, maxWaitSeconds, enrichWaitSeconds);
-	}
-
-	private static IHost Host(
-		IProviderRateLimitReporter reporter,
-		AnsweringHandler handler,
-		int minimumThroughput = 20,
-		int maxWaitSeconds = 0,
-		int enrichWaitSeconds = 0,
-		double requestsPerSecond = 0
-	)
-	{
-		return new HostBuilder()
-			.ConfigureServices(services =>
+		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+		{
+			var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests) { RequestMessage = request };
+			if (retryAfter)
 			{
-				services.AddSingleton(
-					new PlexOptions
-					{
-						BaseUrl = "https://plex.test",
-						Authentication = new OAuthenticationOptions { ProductName = "Sammlarr" },
-						Http = new ProviderHttpOptions
-						{
-							RetryAttempts = 1,
-							CircuitBreakerMinimumThroughput = minimumThroughput,
-							MaxWaitSeconds = maxWaitSeconds,
-							EnrichWaitSeconds = enrichWaitSeconds,
-							RequestsPerSecond = requestsPerSecond,
-						},
-					}
-				);
-				services.AddSingleton<ProviderGates>();
-				services.AddSingleton<RemoteCapacity>();
-				services.AddSingleton(IDateTimeProvider.Mock().Object);
-				services.AddSingleton(reporter);
-				services.AddSingleton(IFeedRunUsage.Mock().Object);
-				services.AddHttpClient("plex").AddRemoteHttp<PlexOptions>(RemoteService.Plex).ConfigurePrimaryHttpMessageHandler(() => handler);
-			})
-			.Build();
+				response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(60));
+			}
+
+			return Task.FromResult(response);
+		}
 	}
 
-	private sealed class AnsweringHandler(HttpStatusCode answer) : HttpMessageHandler
+	private sealed class Failing : HttpMessageHandler
+	{
+		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+		{
+			return Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable) { RequestMessage = request });
+		}
+	}
+
+	private sealed class Counting : HttpMessageHandler
 	{
 		private int _answered;
 
@@ -229,12 +240,7 @@ public class RemoteHttpExtensionsTests
 		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 		{
 			Interlocked.Increment(ref _answered);
-			var response = new HttpResponseMessage(answer)
-			{
-				RequestMessage = request,
-				Headers = { RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(1)) },
-			};
-			return Task.FromResult(response);
+			return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { RequestMessage = request });
 		}
 	}
 }

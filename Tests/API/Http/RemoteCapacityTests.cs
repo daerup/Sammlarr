@@ -1,128 +1,116 @@
-using System.Net;
-using System.Net.Http.Headers;
 using API.Http;
+using API.Http.Lanes;
 using Contracts;
 using Domain.Providers;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
+using Shared.Concurrency;
+using Shared.Options;
 
 namespace API.Tests.Http;
 
-public class RemoteCapacityTests
+public class RemoteCapacityTests : IDisposable
 {
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 
-	private readonly ProviderGates _gates = new();
+	private readonly FakeTimeProvider _time = new(Now);
+	private readonly Lanes _lanes;
 	private readonly RemoteCapacity Testee;
 
 	public RemoteCapacityTests()
 	{
+		var http = new ProviderHttpOptions
+		{
+			MaxWaitSeconds = 90,
+			EnrichWaitSeconds = 15,
+			Lanes = new Dictionary<string, LaneOptions>
+			{
+				["api"] = new() { Limits = [new RateWindowOptions { Requests = 1, Per = TimeSpan.FromSeconds(1) }], FailuresToDown = 1 },
+			},
+		};
+		_lanes = new Lanes(_time, [new RemoteSettings(RemoteService.Plex, LanedHosts.Plex(http))], new ServiceCollection().BuildServiceProvider());
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(Now);
-		Testee = new RemoteCapacity(_gates, clock.Object, []);
+		Testee = new RemoteCapacity(_lanes, clock.Object);
 	}
 
+	public void Dispose() => _lanes.Dispose();
+
 	[Test]
-	public async Task Of_AfterATooManyRequestsAnswer_StaysBlockedForTheRetryAfterDelay()
+	public async Task Of_AfterAThrottleWithRetryAfter_StaysBlockedUntilThen()
 	{
-		var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
-		response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(20));
+		await ReleaseAsync(new AttemptThrottled(Some.Of(Now.AddSeconds(20))));
 
-		await SendAsync(response);
+		var load = Testee.Of(RemoteService.Plex);
 
-		var load = Testee.Of(RemoteService.Tmdb);
 		await Assert.That(load.IsOpen(Now)).IsFalse();
 		await Assert.That(load.IsOpen(Now.AddSeconds(20))).IsTrue();
 	}
 
 	[Test]
-	public async Task Of_AfterATooManyRequestsAnswerWithoutADelay_StaysBlockedForHalfAMinute()
+	public async Task Of_AfterAnAnswer_IsOpen()
 	{
-		await SendAsync(new HttpResponseMessage(HttpStatusCode.TooManyRequests));
+		await ReleaseAsync(new AttemptAnswered());
 
-		var load = Testee.Of(RemoteService.Tmdb);
+		await Assert.That(Testee.Of(RemoteService.Plex).IsOpen(Now)).IsTrue();
+	}
+
+	[Test]
+	public async Task Of_WhileARouteIsDown_IsBlockedUntilTheDownEnds()
+	{
+		await ReleaseAsync(new AttemptFailed());
+
+		var load = Testee.Of(RemoteService.Plex);
+
 		await Assert.That(load.IsOpen(Now.AddSeconds(29))).IsFalse();
 		await Assert.That(load.IsOpen(Now.AddSeconds(30))).IsTrue();
 	}
 
 	[Test]
-	public async Task Of_AfterATooManyRequestsAnswerThatSaysRetryNow_IsOpen()
+	public async Task Of_WhileAskersWaitForTheWindow_ReportsTheRemoteBusy()
 	{
-		var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
-		response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.Zero);
+		var gate = _lanes.Gate(new LaneName(RemoteService.Plex, "api"), new None());
+		await gate.EnterAsync(LanePriority.Interactive, TimeSpan.FromMinutes(1), CancellationToken.None);
+		var waiting = gate.EnterAsync(LanePriority.Interactive, TimeSpan.FromMinutes(1), CancellationToken.None);
 
-		await SendAsync(response);
-
-		await Assert.That(Testee.Of(RemoteService.Tmdb).IsOpen(Now)).IsTrue();
+		await Assert.That(Testee.Of(RemoteService.Plex).Busy).IsEqualTo(0.5);
+		await Assert.That(waiting.IsCompleted).IsFalse();
 	}
 
 	[Test]
-	public async Task Of_AfterASuccessfulAnswer_IsOpen()
+	public async Task Of_ForAThrottledGateOfOneKey_StaysOpen()
 	{
-		await SendAsync(new HttpResponseMessage(HttpStatusCode.OK));
+		var gate = _lanes.Gate(new LaneName(RemoteService.Plex, "api", "plex-token"), new None());
+		var permit = (await gate.EnterAsync(LanePriority.Interactive, TimeSpan.Zero, CancellationToken.None)).GetOrThrow(_ => new InvalidOperationException(
+			"refused"
+		));
 
-		await Assert.That(Testee.Of(RemoteService.Tmdb).IsOpen(Now)).IsTrue();
+		permit.Release(new AttemptThrottled(Some.Of(Now.AddMinutes(5))));
+
+		await Assert.That(Testee.Of(RemoteService.Plex).IsOpen(Now)).IsTrue();
 	}
 
 	[Test]
-	public async Task Of_WhileHalfTheGateIsInUse_ReportsTheRemoteServiceHalfBusy()
+	public async Task Of_WhenBlockedByHand_IsBlockedForThatLong()
 	{
-		var gate = _gates.Concurrency("tmdb", 4, Some.Of(RemoteService.Tmdb));
-		await gate.WaitAsync();
-		await gate.WaitAsync();
+		Testee.Block(RemoteService.Plex, TimeSpan.FromMinutes(1));
 
-		await Assert.That(Testee.Of(RemoteService.Tmdb).Busy).IsEqualTo(0.5);
-		await Assert.That(Testee.Of(RemoteService.Plex).Busy).IsEqualTo(0);
+		await Assert.That(Testee.Of(RemoteService.Plex).IsOpen(Now.AddSeconds(59))).IsFalse();
 	}
 
 	[Test]
-	public async Task Of_WhileAGateWithoutARemoteServiceIsInUse_CountsItForNone()
+	public async Task Of_ForARemoteWithWaitBudgets_ReportsBoth()
 	{
-		var gate = _gates.Concurrency("webhook", 2, new None());
-		await gate.WaitAsync();
+		var load = Testee.Of(RemoteService.Plex);
 
-		await Assert.That(Testee.Of(RemoteService.Tmdb).Busy).IsEqualTo(0);
+		await Assert.That(load.MaxWait).IsEqualTo(TimeSpan.FromSeconds(90));
+		await Assert.That(load.EnrichWait).IsEqualTo(TimeSpan.FromSeconds(15));
 	}
 
-	[Test]
-	public async Task Of_WhileARequestWaitsBehindAUsedUpRateWindow_ReportsTheRemoteServiceBusierThanFull()
+	private async Task ReleaseAsync(AttemptOutcome outcome)
 	{
-		var window = _gates.Rate("Tmdb", 2, Some.Of(RemoteService.Tmdb));
-		using var first = await window.AcquireAsync();
-		using var second = await window.AcquireAsync();
-
-		var waiting = window.AcquireAsync().AsTask();
-
-		await Assert.That(Testee.Of(RemoteService.Tmdb).Busy).IsEqualTo(1.5);
-		await Assert.That(Testee.Of(RemoteService.Plex).Busy).IsEqualTo(0);
-		using var third = await waiting;
-	}
-
-	[Test]
-	public async Task Of_AfterAKeysDailyQuotaIsSpent_StaysOpenForEveryOtherKey()
-	{
-		var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
-		response.Headers.Add("x-ratelimit-remaining", "0");
-
-		await SendAsync(response, RemoteService.Mdblist);
-
-		await Assert.That(Testee.Of(RemoteService.Mdblist).IsOpen(Now)).IsTrue();
-	}
-
-	[Test]
-	public async Task Of_AfterAQuotaAnswerFromAKeylessService_IsBlocked()
-	{
-		var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
-		response.Headers.Add("x-ratelimit-remaining", "0");
-
-		await SendAsync(response, RemoteService.Wikidata);
-
-		await Assert.That(Testee.Of(RemoteService.Wikidata).IsOpen(Now)).IsFalse();
-	}
-
-	private async Task SendAsync(HttpResponseMessage response, RemoteService remote = RemoteService.Tmdb)
-	{
-		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().RespondWith(response);
-		using var invoker = new HttpMessageInvoker(new CapacityHandler(remote, Testee) { InnerHandler = handler });
-		await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https://api.themoviedb.org/3/movie/550"), CancellationToken.None);
+		var gate = _lanes.Gate(new LaneName(RemoteService.Plex, "api"), new None());
+		var entered = await gate.EnterAsync(LanePriority.Interactive, TimeSpan.Zero, CancellationToken.None);
+		entered.GetOrThrow(_ => new InvalidOperationException("The gate refused a permit it should grant.")).Release(outcome);
 	}
 }

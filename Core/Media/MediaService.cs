@@ -360,6 +360,7 @@ internal sealed class MediaService(
 	)
 	{
 		using var title = FeedRunSpans.Enter(traced.Title);
+		using var priority = traced.Priority.Enter();
 		var request = traced.Request;
 		return await addressedBy(request.Type)
 			.Match(
@@ -463,6 +464,7 @@ internal sealed class MediaService(
 	)
 	{
 		using var title = FeedRunSpans.Enter(traced.Title);
+		using var priority = traced.Priority.Enter();
 		var request = traced.Request;
 		MediaMatchResult result = identification switch
 		{

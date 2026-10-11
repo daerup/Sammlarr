@@ -12,6 +12,14 @@ public record PlexOptions : IOptionsSection, IProviderHttpOptions
 	public string AuthAppUrl { get; set; } = "https://app.plex.tv/auth";
 	public required OAuthenticationOptions Authentication { get; set; }
 	public ProviderHttpOptions Http { get; set; } = new();
+	public IReadOnlyDictionary<string, string> Urls =>
+		new Dictionary<string, string>
+		{
+			["plex"] = BaseUrl,
+			["discover"] = DiscoverUrl,
+			["metadata"] = MetadataUrl,
+			["vod"] = VodUrl,
+		};
 	public static string SectionName => "Plex";
 
 	public static IReadOnlyList<string> UrlSettings { get; } =

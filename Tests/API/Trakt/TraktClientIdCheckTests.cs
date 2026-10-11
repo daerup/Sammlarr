@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using API.Trakt;
 using Domain.Auth;
+using Shared.Concurrency;
 using Shared.Options;
 using TUnit.Mocks.Http;
 
@@ -46,6 +47,15 @@ public class TraktClientIdCheckTests
 		handler.OnAnyRequest().Respond(HttpStatusCode.TooManyRequests);
 
 		await Assert.That(await Testee(handler).CheckAsync("trakt-client-id")).IsEqualTo(AccessCheck.Spent);
+	}
+
+	[Test]
+	public async Task CheckAsync_WhenTheLaneRefuses_IsUnreachable()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Throws(new LaneRefusedException("down"));
+
+		await Assert.That(await Testee(handler).CheckAsync("trakt-client-id")).IsEqualTo(AccessCheck.Unreachable);
 	}
 
 	private static TraktClientIdCheck Testee(MockHttpHandler handler)

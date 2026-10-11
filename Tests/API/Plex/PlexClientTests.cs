@@ -4,7 +4,7 @@ using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
 using Domain.Providers;
-using Polly.CircuitBreaker;
+using Shared.Concurrency;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;
@@ -36,10 +36,10 @@ public class PlexClientTests
 	}
 
 	[Test]
-	public async Task SendAsync_WhenTheResiliencePipelineGivesUp_ThrowsProviderUnavailable()
+	public async Task SendAsync_WhenTheLaneRefuses_ThrowsProviderUnavailable()
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().Throws(new BrokenCircuitException("plex circuit is open"));
+		handler.OnAnyRequest().Throws(new LaneRefusedException("down"));
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credentialFaker.Generate());

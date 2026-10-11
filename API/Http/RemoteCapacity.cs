@@ -1,57 +1,30 @@
 using System.Collections.Concurrent;
-using System.Net;
-using System.Net.Http.Headers;
 using Contracts;
 using Contracts.Providers;
 using Domain.Providers;
 
 namespace API.Http;
 
-internal sealed record RemoteWait(RemoteService Remote, TimeSpan MaxWait, TimeSpan EnrichWait);
-
-internal sealed class RemoteCapacity(ProviderGates gates, IDateTimeProvider clock, IEnumerable<RemoteWait> waits) : IRemoteCapacity
+internal sealed class RemoteCapacity(Lanes.Lanes lanes, IDateTimeProvider clock) : IRemoteCapacity
 {
-	private static readonly TimeSpan DefaultBlock = TimeSpan.FromSeconds(30);
-
 	private readonly ConcurrentDictionary<RemoteService, DateTimeOffset> _blockedUntil = new();
-
-	private readonly IReadOnlyDictionary<RemoteService, RemoteWait> _waits = waits.DistinctBy(wait => wait.Remote).ToDictionary(wait => wait.Remote);
 
 	public RemoteLoad Of(RemoteService remote)
 	{
-		var blockedUntil = _blockedUntil.GetValueOrNone(remote);
-		var wait = _waits.GetValueOrNone(remote);
+		var loads = lanes.Loads(remote, new None()).ToList();
+		var settings = lanes.Settings(remote);
+		var blocked = loads.Select(load => load.BlockedUntil).Append(_blockedUntil.GetValueOrNone(remote)).WhereSome().OrderDescending().FirstOrNone();
 		return new RemoteLoad(
-			blockedUntil,
-			gates.Busy(remote),
-			wait.Map(found => found.MaxWait).GetValueOr(TimeSpan.Zero),
-			wait.Map(found => found.EnrichWait).GetValueOr(TimeSpan.Zero)
+			blocked,
+			loads.Select(load => load.Waiting / (double)Math.Max(1, load.InFlight + load.Waiting)).DefaultIfEmpty(0).Max(),
+			settings.Map(found => found.MaxWait).GetValueOr(TimeSpan.Zero),
+			settings.Map(found => found.EnrichWait).GetValueOr(TimeSpan.Zero)
 		);
 	}
 
-	internal void Block(RemoteService remote, RetryConditionHeaderValue? retryAfter) =>
-		BlockUntil(remote, retryAfter?.Date ?? clock.Now + (retryAfter?.Delta ?? DefaultBlock));
-
-	internal void Block(RemoteService remote, TimeSpan duration) => BlockUntil(remote, clock.Now + duration);
-
-	private void BlockUntil(RemoteService remote, DateTimeOffset until) =>
+	internal void Block(RemoteService remote, TimeSpan duration)
+	{
+		var until = clock.Now + duration;
 		_blockedUntil.AddOrUpdate(remote, until, (_, current) => current > until ? current : until);
-}
-
-internal sealed class CapacityHandler(RemoteService remote, RemoteCapacity capacity) : DelegatingHandler
-{
-	protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-	{
-		var response = await base.SendAsync(request, cancellationToken);
-		if (response.StatusCode is HttpStatusCode.TooManyRequests && !SpentItsOwnQuota(response))
-		{
-			capacity.Block(remote, response.Headers.RetryAfter);
-		}
-		return response;
-	}
-
-	private bool SpentItsOwnQuota(HttpResponseMessage response)
-	{
-		return remote.Access is UserKey && response.Headers.TryGetValues("x-ratelimit-remaining", out var left) && left.Contains("0");
 	}
 }

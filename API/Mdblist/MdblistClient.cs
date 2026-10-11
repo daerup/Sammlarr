@@ -1,10 +1,11 @@
 using API.Http;
+using API.Http.Lanes;
 using Contracts.Auth;
 using Contracts.Identity;
 using Domain.Auth;
 using Domain.Providers;
-using Polly.CircuitBreaker;
 using Polly.Timeout;
+using Shared.Concurrency;
 using Shared.Options;
 
 namespace API.Mdblist;
@@ -24,13 +25,13 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyS
 	{
 		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value));
 		request.StampTriggeredBy(currentUser);
-		MdblistBudgetHandler.Stamp(request, apiKey.Value);
+		request.Options.Set(LaneHandler.Owner, apiKey.Value);
 		request.Content = content;
 		try
 		{
 			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.ReportRejected(ApiKeyProvider.Mdblist));
 		}
-		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
+		catch (Exception ex) when (ex is LaneRefusedException or TimeoutRejectedException)
 		{
 			throw new RemoteUnavailableException(RemoteService.Mdblist, sent: ex is TimeoutRejectedException, ex);
 		}

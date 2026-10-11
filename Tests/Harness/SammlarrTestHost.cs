@@ -727,16 +727,59 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				BaseUrl = $"https://{TestUrls.TmdbApi}",
 				V4BaseUrl = $"https://{TestUrls.TmdbApi}/4",
 				ImageBaseUrl = "https://image.tmdb.org/t/p",
+				Http = Unretried(),
 			}
 		);
-		services.AddSingleton(new MdblistOptions { BaseUrl = $"https://{TestUrls.MdblistApi}" });
-		services.AddSingleton(new WikidataOptions { BaseUrl = $"https://{TestUrls.WikidataApi}", UserAgent = "Sammlarr tests" });
-		services.AddSingleton(new TvmazeOptions { BaseUrl = $"https://{TestUrls.TvmazeApi}", UserAgent = "Sammlarr tests" });
-		services.AddSingleton(new ImdbDatasetsOptions { BaseUrl = $"https://{TestUrls.ImdbDatasets}", UserAgent = "Sammlarr tests" });
-		services.AddSingleton(new AnimeListsOptions { BaseUrl = $"https://{TestUrls.AnimeLists}", UserAgent = "Sammlarr tests" });
-		services.AddSingleton(new AniListOptions { BaseUrl = $"https://{TestUrls.AniList}", UserAgent = "Sammlarr tests" });
-		services.AddSingleton(new MalOptions { BaseUrl = $"https://{TestUrls.Mal}" });
-		services.AddSingleton(new TraktOptions { BaseUrl = $"https://{TestUrls.Trakt}", UserAgent = "Sammlarr-tests" });
+		services.AddSingleton(new MdblistOptions { BaseUrl = $"https://{TestUrls.MdblistApi}", Http = Unretried() });
+		services.AddSingleton(
+			new WikidataOptions
+			{
+				BaseUrl = $"https://{TestUrls.WikidataApi}",
+				UserAgent = "Sammlarr tests",
+				Http = Unretried(),
+			}
+		);
+		services.AddSingleton(
+			new TvmazeOptions
+			{
+				BaseUrl = $"https://{TestUrls.TvmazeApi}",
+				UserAgent = "Sammlarr tests",
+				Http = Unretried(),
+			}
+		);
+		services.AddSingleton(
+			new ImdbDatasetsOptions
+			{
+				BaseUrl = $"https://{TestUrls.ImdbDatasets}",
+				UserAgent = "Sammlarr tests",
+				Http = Unretried(),
+			}
+		);
+		services.AddSingleton(
+			new AnimeListsOptions
+			{
+				BaseUrl = $"https://{TestUrls.AnimeLists}",
+				UserAgent = "Sammlarr tests",
+				Http = Unretried(),
+			}
+		);
+		services.AddSingleton(
+			new AniListOptions
+			{
+				BaseUrl = $"https://{TestUrls.AniList}",
+				UserAgent = "Sammlarr tests",
+				Http = Unretried(),
+			}
+		);
+		services.AddSingleton(new MalOptions { BaseUrl = $"https://{TestUrls.Mal}", Http = Unretried() });
+		services.AddSingleton(
+			new TraktOptions
+			{
+				BaseUrl = $"https://{TestUrls.Trakt}",
+				UserAgent = "Sammlarr-tests",
+				Http = Unretried(),
+			}
+		);
 		services.AddSingleton(new RadarrOptions());
 		services.AddSingleton(new SonarrOptions());
 		services.AddSingleton(new PictureOptions());
@@ -745,12 +788,15 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			{
 				BaseUrl = $"https://{TestUrls.PlexApi}",
 				Authentication = new OAuthenticationOptions { ProductName = "Sammlarr" },
+				Http = Unretried(),
 			}
 		);
 		services.AddSingleton<PublishedMessages>();
 		services.AddScoped<IMessagePublisher, RecordingMessagePublisher>();
 		return services.BuildServiceProvider();
 	}
+
+	private static ProviderHttpOptions Unretried() => new() { RetryAttempts = 0 };
 
 	private static string BuildTemplate()
 	{

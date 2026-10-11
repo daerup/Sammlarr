@@ -40,7 +40,7 @@ public sealed class LaneGate : IDisposable
 			lock (_gate)
 			{
 				var now = _time.GetUtcNow();
-				var blocked = _blockedUntil.When(until => until > now);
+				var blocked = new[] { _blockedUntil, _downUntil }.WhereSome().Where(until => until > now).OrderDescending().FirstOrNone();
 				var queued = _windows.Select(window => window.Drain(_waiting.Count, _scale)).DefaultIfEmpty(TimeSpan.Zero).Max();
 				return new LaneLoad(blocked, blocked.Map(until => until - now).GetValueOr(TimeSpan.Zero) + queued, IsDown(now), _inFlight, _waiting.Count);
 			}
@@ -57,6 +57,15 @@ public sealed class LaneGate : IDisposable
 					reason => Task.FromResult<Result<LanePermit>>(Error.From(new LaneRefusedException(reason))),
 					() => Enqueue(new Ticket(priority, now + patience), cancellationToken)
 				);
+		}
+	}
+
+	public bool Admits(LanePriority priority, TimeSpan patience)
+	{
+		lock (_gate)
+		{
+			var now = _time.GetUtcNow();
+			return Refusal(priority, now + patience, now).IsNone();
 		}
 	}
 
