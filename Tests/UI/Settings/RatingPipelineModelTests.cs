@@ -55,12 +55,6 @@ public class RatingPipelineModelTests
 	}
 
 	[Test]
-	public void For_WhenAveraging_CentresTheRatingOnEveryRow()
-	{
-		Gen.Select(Sets, Orders, Sets.Where(available => available.Count > 0)).Sample(CentresOnEveryRow);
-	}
-
-	[Test]
 	public async Task For_WhenNoneOfTheAveragedSourcesIsAvailable_CountsTheRestOnDashedTraces()
 	{
 		var model = RatingPipelineModel.For(
@@ -69,21 +63,20 @@ public class RatingPipelineModelTests
 			[RatingSource.Tmdb]
 		);
 
-		await Assert.That(model.Tiles.Select(tile => (tile.Source, tile.On))).IsEquivalentTo([(RatingSource.Tmdb, false)]);
+		await Assert.That(model.Tiles.Where(tile => tile.Supplied).Select(tile => (tile.Source, tile.On))).IsEquivalentTo([(RatingSource.Tmdb, false)]);
 		await Assert.That(model.Traces.Select(trace => trace.Source)).IsEquivalentTo([RatingSource.Tmdb]);
 		await Assert.That(model.Dashed).IsTrue();
 	}
 
 	[Test]
-	public async Task For_WhenFirstAvailable_RanksEveryAvailableSourceAndFeedsThemAll()
+	public async Task For_WhenFirstAvailable_RanksEverySourceAndFeedsTheSuppliedOnes()
 	{
 		var ordered = new OrderedRating([RatingSource.Imdb]);
 		var model = RatingPipelineModel.For(new RatingStrategy(ordered), ordered, [RatingSource.Tmdb, RatingSource.Imdb]);
 
-		await Assert
-			.That(model.Tiles.Select(tile => (tile.Source, tile.Rank.GetValueOr(0))))
-			.IsEquivalentTo([(RatingSource.Imdb, 1), (RatingSource.Tmdb, 2)], CollectionOrdering.Matching);
-		await Assert.That(model.Traces.Count).IsEqualTo(2);
+		await Assert.That(model.Tiles.Select(tile => tile.Rank.GetValueOr(0))).IsEquivalentTo(Enumerable.Range(1, Sources.Length), CollectionOrdering.Matching);
+		await Assert.That(model.Tiles.Take(2).Select(tile => tile.Source)).IsEquivalentTo([RatingSource.Imdb, RatingSource.Tmdb], CollectionOrdering.Matching);
+		await Assert.That(model.Traces.Select(trace => trace.Source)).IsEquivalentTo([RatingSource.Imdb, RatingSource.Tmdb]);
 	}
 
 	[Test]
@@ -98,13 +91,34 @@ public class RatingPipelineModelTests
 	}
 
 	[Test]
-	public async Task For_WhenOneSourceCounts_FitsTheRatingInsideTheCard()
+	public async Task For_WhenOneSourceCounts_PinsItOnTheCardsMiddle()
 	{
 		var model = RatingPipelineModel.For(new RatingStrategy(AveragedRating.Everything), SourceOrder, [RatingSource.Tmdb]);
 
-		await Assert.That(model.OutputY).IsGreaterThanOrEqualTo(0);
-		await Assert.That(model.Height).IsGreaterThanOrEqualTo(RatingPipelineModel.OutputHeight);
-		await Assert.That(model.Traces.Single().Pin).IsEqualTo(model.Tiles.Single().Y);
+		await Assert.That(model.Traces.Single().Pin).IsEqualTo(model.OutputY + RatingPipelineModel.OutputHeight / 2).Within(0.001);
+	}
+
+	[Test]
+	public async Task For_WhenEverySourceCounts_LandsEveryPinOnTheCardsStraightEdge()
+	{
+		var model = RatingPipelineModel.For(new RatingStrategy(AveragedRating.Everything), SourceOrder, Everything);
+
+		await Assert.That(model.Traces.Count).IsEqualTo(Sources.Length);
+		await Assert.That(model.Traces.Min(trace => trace.Pin)).IsGreaterThanOrEqualTo(model.OutputY + RatingPipelineModel.PinInset - 0.001);
+		await Assert
+			.That(model.Traces.Max(trace => trace.Pin))
+			.IsLessThanOrEqualTo(model.OutputY + RatingPipelineModel.OutputHeight - RatingPipelineModel.PinInset + 0.001);
+	}
+
+	[Test]
+	public async Task For_WhenASourceHasNoSupplier_KeepsItsTileInPlaceWithoutATrace()
+	{
+		ValueSet<RatingSource> withoutMdblist = [.. Sources.Where(source => source is not (RatingSource.Metacritic or RatingSource.Letterboxd))];
+		var model = RatingPipelineModel.For(new RatingStrategy(AveragedRating.Everything), SourceOrder, withoutMdblist);
+
+		await Assert.That(model.Tiles.Select(tile => tile.Source)).IsEquivalentTo(SourceOrder.Order, CollectionOrdering.Matching);
+		await Assert.That(model.Tiles.Where(tile => !tile.Supplied).Select(tile => tile.Source)).IsEquivalentTo([RatingSource.Metacritic, RatingSource.Letterboxd]);
+		await Assert.That(model.Traces.Select(trace => trace.Source)).DoesNotContain(RatingSource.Letterboxd).And.DoesNotContain(RatingSource.Metacritic);
 	}
 
 	private static bool PlacesRowsAsFirstAvailable(ValueSet<RatingSource> switchedOn, OrderedRating order, ValueSet<RatingSource> available)
@@ -112,11 +126,5 @@ public class RatingPipelineModelTests
 		var averaged = RatingPipelineModel.For(new RatingStrategy(new AveragedRating(switchedOn)), order, available);
 		var ranked = RatingPipelineModel.For(new RatingStrategy(order), order, available);
 		return averaged.Tiles.Select(tile => (tile.Source, tile.Y)).SequenceEqual(ranked.Tiles.Select(tile => (tile.Source, tile.Y)));
-	}
-
-	private static bool CentresOnEveryRow(ValueSet<RatingSource> switchedOn, OrderedRating order, ValueSet<RatingSource> available)
-	{
-		var model = RatingPipelineModel.For(new RatingStrategy(new AveragedRating(switchedOn)), order, available);
-		return Math.Abs(model.OutputY + RatingPipelineModel.OutputHeight / 2 - model.Tiles.Average(tile => tile.Y)) < 0.001;
 	}
 }
