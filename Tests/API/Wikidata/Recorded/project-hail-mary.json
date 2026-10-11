@@ -3,7 +3,7 @@
     "vars" : [ "rt", "tmdb", "tvdb", "metacritic", "letterboxd" ]
   },
   "results" : {
-    "bindings" : [ {
+    "bindings" : [ { "imdb" : { "type" : "literal", "value" : "tt12042730" }, 
       "rt" : {
         "type" : "literal",
         "value" : "m/project_hail_mary"

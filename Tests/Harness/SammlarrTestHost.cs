@@ -82,6 +82,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private readonly MutableClock _clock = new();
 	private Optional<TimeProvider> _time = new None();
 	private bool _cachesOnTheClock;
+	private WikidataStub? _wikidata;
 	private readonly OAuthStub _oauth = new();
 	private readonly SessionInvalidatorStub _sessionInvalidator = new();
 
@@ -255,21 +256,19 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void WikidataHolds(string imdb, params string[] paths)
 	{
-		var bindings = string.Join(',', paths.Select(path => $$$"""{"rt":{"type":"literal","value":"{{{path}}}"}}"""));
-		HttpStub.RespondWithJsonForUrl(WikidataQueryFor(imdb), $$$"""{"results":{"bindings":[{{{bindings}}}]}}""");
+		Wikidata.Holds(imdb, [.. paths.Select(path => $$$"""{"rt":{"type":"literal","value":"{{{path}}}"}}""")]);
 	}
 
 	internal void WikidataHoldsPages(string imdb, string rottenTomatoes, string metacritic)
 	{
-		var binding = $$$"""{"rt":{"type":"literal","value":"{{{rottenTomatoes}}}"},"metacritic":{"type":"literal","value":"{{{metacritic}}}"}}""";
-		HttpStub.RespondWithJsonForUrl(WikidataQueryFor(imdb), $$$"""{"results":{"bindings":[{{{binding}}}]}}""");
+		Wikidata.Holds(imdb, [$$$"""{"rt":{"type":"literal","value":"{{{rottenTomatoes}}}"},"metacritic":{"type":"literal","value":"{{{metacritic}}}"}}"""]);
 	}
 
-	internal void WikidataFails(string imdb) => HttpStub.RespondWithStatusForUrl(WikidataQueryFor(imdb), HttpStatusCode.ServiceUnavailable);
+	internal void WikidataFails(string imdb) => Wikidata.Fails(imdb);
 
-	internal int WikidataAsked(string imdb) => HttpStub.Requests(WikidataQueryFor(imdb));
+	internal int WikidataAsked(string imdb) => Wikidata.Asked(imdb);
 
-	private static string WikidataQueryFor(string imdb) => Uri.EscapeDataString($"\"{imdb}\"");
+	private WikidataStub Wikidata => _wikidata ??= new WikidataStub(HttpStub);
 
 	internal void TmdbUnreachable() => HttpStub.RespondForUrl(TestUrls.TmdbApi, _ => throw new HttpRequestException("The TMDB API is unreachable."));
 
@@ -792,7 +791,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			{
 				BaseUrl = $"https://{TestUrls.WikidataApi}",
 				UserAgent = "Sammlarr tests",
-				Http = Unretried(),
+				Http = Unretried() with { Lanes = new() { ["sparql"] = new LaneOptions { MaxBatch = 100 } } },
 			}
 		);
 		services.AddSingleton(
@@ -824,7 +823,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			{
 				BaseUrl = $"https://{TestUrls.AniList}",
 				UserAgent = "Sammlarr tests",
-				Http = Unretried(),
+				Http = Unretried() with { Lanes = new() { ["titles"] = new LaneOptions { MaxBatch = 50 } } },
 			}
 		);
 		services.AddSingleton(new MalOptions { BaseUrl = $"https://{TestUrls.Mal}", Http = Unretried() });

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using API.AniList;
+using API.Http.Lanes;
 using API.Tests.Anime;
 using API.Tests.Feeds;
 using Contracts;
@@ -10,6 +11,8 @@ using Domain.Feed;
 using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
+using Microsoft.Extensions.DependencyInjection;
+using Shared.Options;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using TUnit.Mocks.Http;
@@ -171,7 +174,7 @@ public class AniListTests
 		var now = FeedClock.Now;
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(() => now);
-		var titles = new AniListTitles(Client(handler), clock.Object);
+		var titles = new AniListTitles(Client(handler), Lanes(), clock.Object);
 		var media = IMediaService.Mock();
 		media
 			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any())
@@ -187,14 +190,33 @@ public class AniListTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_ForManyTitlesAskedTogether_AsksInBatchesOfFifty()
+	public async Task LookUpAsync_ForSixtyTitlesAskedTogether_SendsTheOnesWaitingBehindTheFirstInOneQuery()
 	{
-		var handler = Answering(out var calls, _ => """{"data":{"Page":{"media":[]}}}""");
+		using var release = new ManualResetEventSlim();
+		var calls = 0;
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWith(_ =>
+			{
+				if (Interlocked.Increment(ref calls) == 1)
+				{
+					release.Wait(TimeSpan.FromSeconds(10));
+				}
+
+				return new HttpResponseMessage(HttpStatusCode.OK)
+				{
+					Content = new StringContent("""{"data":{"Page":{"media":[]}}}""", Encoding.UTF8, "application/json"),
+				};
+			});
 		var enricher = new AniListEnricher(Titles(handler));
+		var first = enricher.LookUpAsync(AniListId.From("1", MediaType.Show), []);
+		List<Task<Answer<FoundMedia>>> waiting = [.. Enumerable.Range(2, 59).Select(id => enricher.LookUpAsync(AniListId.From($"{id}", MediaType.Show), []))];
 
-		await Task.WhenAll(Enumerable.Range(1, 120).Select(id => enricher.LookUpAsync(AniListId.From($"{id}", MediaType.Show), [])));
+		release.Set();
+		await Task.WhenAll([first, .. waiting]);
 
-		await Assert.That(calls()).IsEqualTo(3);
+		await Assert.That(calls).IsEqualTo(3);
 	}
 
 	[Test]
@@ -307,7 +329,18 @@ public class AniListTests
 
 	private static AniListClient Client(MockHttpHandler handler) => new(handler.CreateClient("https://graphql.anilist.co/"));
 
-	private static AniListTitles Titles(MockHttpHandler handler) => new(Client(handler), FeedClock.Today());
+	private static AniListTitles Titles(MockHttpHandler handler) => new(Client(handler), Lanes(), FeedClock.Today());
+
+	private static Lanes Lanes()
+	{
+		var options = new AniListOptions
+		{
+			BaseUrl = "https://graphql.anilist.co",
+			UserAgent = "Sammlarr tests",
+			Http = new ProviderHttpOptions { Lanes = new() { ["titles"] = new LaneOptions { MaxBatch = 50 } } },
+		};
+		return new(TimeProvider.System, [new RemoteSettings(RemoteService.AniList, options)], new ServiceCollection().BuildServiceProvider());
+	}
 
 	private static MockHttpHandler Answering(out Func<int> calls, Func<int, string> body)
 	{

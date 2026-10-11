@@ -3,7 +3,7 @@
     "vars" : [ "rt", "tmdb", "tvdb", "metacritic", "letterboxd" ]
   },
   "results" : {
-    "bindings" : [ {
+    "bindings" : [ { "imdb" : { "type" : "literal", "value" : "tt0434665" }, 
       "rt" : {
         "type" : "literal",
         "value" : "tv/bleach"
@@ -16,7 +16,7 @@
         "type" : "literal",
         "value" : "74796"
       }
-    }, {
+    }, { "imdb" : { "type" : "literal", "value" : "tt0434665" }, 
       "rt" : {
         "type" : "literal",
         "value" : "tv/bleach/s01"

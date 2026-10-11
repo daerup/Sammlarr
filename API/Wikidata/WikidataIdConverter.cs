@@ -3,16 +3,20 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using API.Http;
+using API.Http.Lanes;
 using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
+using Shared.Concurrency;
 
 namespace API.Wikidata;
 
-internal sealed partial class WikidataIdConverter(HttpClient http) : IExternalIdConverter
+internal sealed partial class WikidataIdConverter(HttpClient http, Lanes lanes) : IExternalIdConverter
 {
 	private const string Accept = "application/sparql-results+json";
+
+	private static readonly LaneName Sparql = new(RemoteService.Wikidata, "sparql");
 
 	private static readonly ById ByImdb = new(
 		Accepts: [MediaProvider.Imdb],
@@ -46,15 +50,16 @@ internal sealed partial class WikidataIdConverter(HttpClient http) : IExternalId
 		};
 	}
 
-	private static string Query(ImdbId imdb)
+	private static string Query(MediaType type, IReadOnlyList<ImdbId> ids)
 	{
-		var typed = imdb.Type switch
+		var typed = type switch
 		{
 			MediaType.Movie => "OPTIONAL { ?item wdt:P4947 ?tmdb . } OPTIONAL { ?item wdt:P12196 ?tvdb . } ",
 			MediaType.Show => "OPTIONAL { ?item wdt:P4983 ?tmdb . } OPTIONAL { ?item wdt:P4835 ?tvdb . } ",
 			MediaType.Unknown => string.Empty,
 		};
-		return $$"""SELECT ?rt ?tmdb ?tvdb ?metacritic ?letterboxd ?anilist ?mal WHERE { ?item wdt:P345 "{{imdb.Value}}" . OPTIONAL { ?item wdt:P1258 ?rt . } {{typed}}OPTIONAL { ?item wdt:P1712 ?metacritic . } OPTIONAL { ?item wdt:P6127 ?letterboxd . } OPTIONAL { ?item wdt:P8729 ?anilist . } OPTIONAL { ?item wdt:P4086 ?mal . } }""";
+		var values = string.Join(' ', ids.Select(id => $"\"{id.Value}\""));
+		return $$"""SELECT ?imdb ?rt ?tmdb ?tvdb ?metacritic ?letterboxd ?anilist ?mal WHERE { VALUES ?imdb { {{values}} } ?item wdt:P345 ?imdb . OPTIONAL { ?item wdt:P1258 ?rt . } {{typed}}OPTIONAL { ?item wdt:P1712 ?metacritic . } OPTIONAL { ?item wdt:P6127 ?letterboxd . } OPTIONAL { ?item wdt:P8729 ?anilist . } OPTIONAL { ?item wdt:P4086 ?mal . } }""";
 	}
 
 	private async Task<Result<IdLookupResult>> IdsAsync(ImdbId imdb, CancellationToken cancellationToken)
@@ -64,22 +69,36 @@ internal sealed partial class WikidataIdConverter(HttpClient http) : IExternalId
 			return Error.From($"'{imdb.Value}' is not an IMDb title id.");
 		}
 
-		return await AskAsync(imdb, cancellationToken).Map(rows => new IdLookupResult(Ids(rows, imdb.Type), new None()));
+		var lane = lanes.Of<ImdbId, IReadOnlyList<IExternalMediaId>>(Sparql);
+		var answer = await lane.AskAsync(imdb, new LaneCall<ImdbId, IReadOnlyList<IExternalMediaId>>(id => $"{id.Type}", AskAsync), cancellationToken);
+		return answer switch
+		{
+			LaneHit<IReadOnlyList<IExternalMediaId>> hit => Success.Of(new IdLookupResult(hit.Value, new None())),
+			LaneMiss => Success.Of(new IdLookupResult([], new None())),
+			LaneFailed failed => failed.Cause,
+		};
 	}
 
-	private async Task<Result<IReadOnlyList<Dictionary<string, SparqlValue>>>> AskAsync(ImdbId imdb, CancellationToken cancellationToken)
+	private async Task<Result<IReadOnlyDictionary<ImdbId, IReadOnlyList<IExternalMediaId>>>> AskAsync(
+		IReadOnlyList<ImdbId> ids,
+		CancellationToken cancellationToken
+	)
 	{
-		using var request = new HttpRequestMessage(HttpMethod.Get, $"sparql?query={Uri.EscapeDataString(Query(imdb))}");
+		var type = ids[0].Type;
+		using var request = new HttpRequestMessage(HttpMethod.Post, "sparql") { Content = new FormUrlEncodedContent([new("query", Query(type, ids))]) };
 		request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(Accept));
 		using var response = await http.SendAsync(request, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(RemoteService.Wikidata, $"Wikidata answered {(int)response.StatusCode} for {imdb.Value}.");
+			return response.StatusCode.Unanswered(RemoteService.Wikidata, $"Wikidata answered {(int)response.StatusCode} for {ids.Count} titles.");
 		}
 
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var answer = await JsonSerializer.DeserializeAsync<SparqlAnswer>(stream, cancellationToken: cancellationToken);
-		return Success.Of(answer?.Results?.Bindings ?? []);
+		var byImdb = (answer?.Results?.Bindings ?? []).ToLookup(row => row.GetValueOrNone("imdb").Map(value => value.Value).GetValueOr(string.Empty));
+		return Success.Of<IReadOnlyDictionary<ImdbId, IReadOnlyList<IExternalMediaId>>>(
+			ids.Where(id => byImdb.Contains(id.Value)).ToDictionary(id => id, id => Ids([.. byImdb[id.Value]], type))
+		);
 	}
 
 	private static IReadOnlyList<IExternalMediaId> Ids(IReadOnlyList<Dictionary<string, SparqlValue>> rows, MediaType type)

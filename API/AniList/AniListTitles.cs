@@ -1,114 +1,49 @@
 using System.Text.Json.Nodes;
 using API.AniList.Types;
 using API.Http;
+using API.Http.Lanes;
 using Contracts;
+using Domain.Providers;
+using Shared.Concurrency;
 
 namespace API.AniList;
 
-internal sealed class AniListTitles(AniListClient client, IDateTimeProvider clock)
+internal sealed class AniListTitles(AniListClient client, Lanes lanes, IDateTimeProvider clock)
 {
-	private const int MostPerBatch = 50;
-
 	private const string Query = $"query ($ids: [Int]) {{ Page(perPage: 50) {{ media(id_in: $ids, type: ANIME) {{ {AniListMedia.Fields} }} }} }}";
 
-	private static readonly TimeSpan Gather = TimeSpan.FromMilliseconds(50);
-
-	private readonly Lock _gate = new();
+	private static readonly LaneName Titles = new(RemoteService.AniList, "titles");
 
 	private readonly RecentAnswers<int, Optional<AniListTypes.Media>> _read = new(clock);
-
-	private Optional<Batch> _open = new None();
 
 	internal void Remember(AniListTypes.Media media) => _read.Remember(media.Id, Some.Of(media));
 
 	internal Task<Result<Optional<AniListTypes.Media>>> FindAsync(int id, CancellationToken cancellationToken = default)
 	{
-		return _read.AskAsync(id, _ => Enter(id), cancellationToken);
+		return _read.AskAsync(id, token => AskAsync(id, token), cancellationToken);
 	}
 
-	private Task<Result<Optional<AniListTypes.Media>>> Enter(int id)
+	private async Task<Result<Optional<AniListTypes.Media>>> AskAsync(int id, CancellationToken cancellationToken)
 	{
-		lock (_gate)
+		var lane = lanes.Of<int, AniListTypes.Media>(Titles);
+		var answer = await lane.AskAsync(id, new LaneCall<int, AniListTypes.Media>(_ => "anime", SendAsync), cancellationToken);
+		return answer switch
 		{
-			var batch = _open.GetValueOr(Open);
-			batch.Add(id);
-			if (batch.Count >= MostPerBatch)
-			{
-				Close(batch);
-			}
-
-			return MatchAsync(batch, id);
-		}
+			LaneHit<AniListTypes.Media> hit => Success.Of<Optional<AniListTypes.Media>>(Some.Of(hit.Value)),
+			LaneMiss => Success.Of<Optional<AniListTypes.Media>>(new None()),
+			LaneFailed failed => failed.Cause,
+		};
 	}
 
-	private static async Task<Result<Optional<AniListTypes.Media>>> MatchAsync(Batch batch, int id)
+	private async Task<Result<IReadOnlyDictionary<int, AniListTypes.Media>>> SendAsync(IReadOnlyList<int> ids, CancellationToken cancellationToken)
 	{
-		var answer = await batch.Answer;
-		return answer.Map(found => found.FirstOrNone(media => media.Id == id));
-	}
-
-	private Batch Open()
-	{
-		var batch = new Batch();
-		_open = Some.Of(batch);
-		_ = CloseLaterAsync(batch);
-		return batch;
-	}
-
-	private async Task CloseLaterAsync(Batch batch)
-	{
-		await Task.Delay(Gather);
-		lock (_gate)
-		{
-			Close(batch);
-		}
-	}
-
-	private void Close(Batch batch)
-	{
-		if (batch.Close())
-		{
-			_open = new None();
-			_ = SendAsync(batch);
-		}
-	}
-
-	private async Task SendAsync(Batch batch)
-	{
-		var asking = AskAsync(batch.Ids);
-		await ((Task)asking).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-		batch.Settle(asking);
-	}
-
-	private async Task<Result<IReadOnlyList<AniListTypes.Media>>> AskAsync(IReadOnlyList<int> ids)
-	{
-		var answer = await client.AskAsync<AniListTypes.PageData>(Query, new JsonObject { ["ids"] = new JsonArray([.. ids.Select(id => (JsonNode)id)]) });
-		return answer.Map(data => (IReadOnlyList<AniListTypes.Media>)[.. data.Page?.Media ?? []]);
-	}
-
-	private sealed class Batch
-	{
-		private readonly List<int> _ids = [];
-
-		private readonly TaskCompletionSource<Result<IReadOnlyList<AniListTypes.Media>>> _answer = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-		private bool _closed;
-
-		public int Count => _ids.Count;
-
-		public IReadOnlyList<int> Ids => _ids;
-
-		public Task<Result<IReadOnlyList<AniListTypes.Media>>> Answer => _answer.Task;
-
-		public void Add(int id) => _ids.Add(id);
-
-		public bool Close()
-		{
-			var closing = !_closed;
-			_closed = true;
-			return closing;
-		}
-
-		public void Settle(Task<Result<IReadOnlyList<AniListTypes.Media>>> asked) => _answer.SetFromTask(asked);
+		var answer = await client.AskAsync<AniListTypes.PageData>(
+			Query,
+			new JsonObject { ["ids"] = new JsonArray([.. ids.Select(id => (JsonNode)id)]) },
+			cancellationToken
+		);
+		return answer.Map(data =>
+			(IReadOnlyDictionary<int, AniListTypes.Media>)(data.Page?.Media ?? []).DistinctBy(media => media.Id).ToDictionary(media => media.Id)
+		);
 	}
 }

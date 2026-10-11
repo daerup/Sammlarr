@@ -8,5 +8,7 @@ internal sealed record StubSpec(string UrlPath, int Status, string Body)
 
 	internal IReadOnlyDictionary<string, string> Headers { get; init; } = new Dictionary<string, string>();
 
+	internal IReadOnlyList<string> BodyContains { get; init; } = [];
+
 	internal int DelayMs { get; init; }
 }
