@@ -514,16 +514,34 @@ of a lane client measures each call (`resilience.polly.pipeline.duration`) and H
 the current cause outside the retry (`UsageStampHandler`), and tags every attempt inside it (`UsageTagsHandler`,
 through `HttpMetricsEnrichmentContext`, since a retry sends a clone that keeps the stamp but not the callback); a
 `MeteringEnricher` adds the call's outcome: `Answered`, `AnsweredAfter429`, `GaveUpOn429`, `Failed` or `Cancelled`.
-A call none of whose attempts got a lane permit (refused, or cancelled while it waited) is not counted. The cause (`FeedRun`
-with the feed's id, `WantlistSync`, `Dataset`, `Search`, `Browse`, `ShowingTitles`, `KeyTest`, `FeedEditor`,
-`DetailsFill`, else `Other`) is an ambient mark set by `UsageCauses.Mark` at each
-entry point; the outermost mark wins, so titles shown inside a feed run count for the run. A
-`PeriodicExportingMetricReader` hands `UsageExporter` each minute's deltas, which it folds into hourly rows
-(`RemoteUsage`, `RemoteAttempts` with their duration buckets) kept 90 days; with OTLP set, the same meters also go to
-the dashboard. A feed run's calls are credited to the run through its feed id (a feed never runs twice at once, and a
-run id would be an unbounded tag): the enricher that classifies a call also credits it to the feed's running run in
-`IFeedRunUsage`, and the run is saved with its calls (`FeedRunCalls`). The cost rules: tags stay bounded (service, cause, outcome, feed id; never a title, a URL, a user or a
-run id), delta temporality, the default buckets.
+A call none of whose attempts got a lane permit (refused, or cancelled while it waited) is not counted. The cause is an
+ambient mark set by `UsageCauses.Mark` at each entry point; the outermost mark wins, so titles shown inside a feed run
+count for the run. The causes: `FeedRun` (a run, with its feed's id), `WantlistSync` (the sync with Radarr, Sonarr or
+Plex and what reads them for it: the sync dialog, a title added from a page, a sink switch, removing a person),
+`Dataset` (a dataset download), `Search`, `Browse`, `ShowingTitles` (titles a page shows, the rating breakdown's id
+lookups), `KeyTest` (the check of a key, a sign-in or a Radarr or Sonarr connection), `FeedEditor` (the editor's
+previews, its link check, saving a feed and the dry run before Run now, with the feed's id), `DetailsFill` (the
+background fill of missing details), else `Other`. A `PeriodicExportingMetricReader` hands `UsageExporter` each
+minute's deltas, which it folds into hourly rows (`RemoteUsage`, `RemoteAttempts` with their duration buckets) kept 90
+days; with OTLP set, the same meters also go to the dashboard. A feed run's calls are credited to the run through its
+feed id (a feed never runs twice at once, and a run id would be an unbounded tag): the enricher that classifies a call
+credits it to the feed's running run in `IFeedRunUsage` only when its mark is `FeedRun` (`UsageMark.Run`), so a preview
+of a feed that is running never joins the run, and the run is saved with its calls (`FeedRunCalls`). The cost rules:
+tags stay bounded (service, cause, outcome, feed id; never a title, a URL, a user or a run id), delta temporality, the
+default buckets. One bounded exception: a new feed's previews carry the draft id the feed will be saved under, so each
+editor visit to a feed that is never saved adds one feed id no feed ever gets (Settings › Usage folds those into one
+row).
+
+Settings › Usage (`UsageReport`) reads the hourly rows per service, per cause and per feed. Picking a service in the
+Calls table narrows the page to it: the Calls chart, Calls by cause (that service's causes; Feed editor opens the feeds
+its calls went to) and Feeds (the feeds and runs that called it). A feed's name outlives the feed: deleting it records
+its name in `DeletedFeeds`, pruned with the usage rows, so its runs' calls and its editor calls stay named. For MDBList,
+whose key has a daily allowance, the picked row opens what is left today: `MdblistBudget` keeps per key the allowance
+from `x-ratelimit-limit`, the answers Sammlarr got since the reset, the minute the feed reserve was reached and how the
+day before ended (in memory, so a restart forgets the day before until the next reset), and the pure `QuotaDay.Of`
+draws the requests left hour by hour, counted back from what MDBList says is left now plus the attempts Sammlarr sent
+after each hour (retries included); requests another app spent on the same key show as one figure without an hour. On
+7 and 30 days `QuotaDays.Of` groups the hourly attempts by quota day, cut at the reset rather than at midnight.
 
 === Live run trace
 

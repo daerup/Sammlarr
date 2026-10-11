@@ -27,6 +27,6 @@ our own handler into our own counters (a second count of what the instruments al
 ## Consequences
 
 * About three measurements per call at roughly 0.3 µs each; the busiest hour costs a few milliseconds of CPU.
-* Tags must stay bounded: a run id or a title as a tag would grow the SDK's tag combinations without limit, so a run's calls are credited through its feed id.
+* Tags must stay bounded: a run id or a title as a tag would grow the SDK's tag combinations without limit, so a run's calls are credited through its feed id, and only calls marked `FeedRun` are credited: the feed editor marks its calls with the feed too, but a preview never joins that feed's running run.
 * A retry sends a clone of the request, so the attempt tags are registered inside the retry; the stamp rides the request's options, which the clone keeps.
 * With OTLP set, the dashboard shows the same meters.
