@@ -63,7 +63,7 @@ internal sealed class UserManagementService(
 		var last = role == UserRole.Member && await IsLastAdminAsync(id, cancellationToken);
 		return await Optional
 			.When(last, () => Error.From("The last admin can't be made a member."))
-			.Match(refused => Task.FromResult<Result<UserRole>>(refused), () => StoreRoleAsync(id, role, cancellationToken));
+			.Match(refused => refused, () => StoreRoleAsync(id, role, cancellationToken));
 	}
 
 	public async Task<Result<SinkHoldings>> SinkHoldingsAsync(UserId id, CancellationToken cancellationToken = default)
@@ -98,10 +98,7 @@ internal sealed class UserManagementService(
 		await EnsureCallerIsAdminAsync(cancellationToken);
 		var name = username.Trim();
 		var problem = await InviteProblemAsync(name, cancellationToken);
-		return await problem.Match(
-			refused => Task.FromResult<Result<IssuedLink>>(refused),
-			() => IssueAsync(AccountLinkKind.Invite, name, name, new None(), cancellationToken)
-		);
+		return await problem.Match(refused => refused, () => IssueAsync(AccountLinkKind.Invite, name, name, new None(), cancellationToken));
 	}
 
 	public async Task<Result<IssuedLink>> RenewInviteAsync(string username, CancellationToken cancellationToken = default)
@@ -111,7 +108,7 @@ internal sealed class UserManagementService(
 		var invite = (await links.GetAllAsync(AccountLinkKind.Invite, cancellationToken)).FirstOrNone(found => found.Username == normalized);
 		return await invite.Match(
 			found => IssueAsync(AccountLinkKind.Invite, found.Username, found.DisplayName, new None(), cancellationToken),
-			() => Task.FromResult<Result<IssuedLink>>(Error.From($"{username} has no invite to renew."))
+			() => Error.From($"{username} has no invite to renew.")
 		);
 	}
 
@@ -127,7 +124,7 @@ internal sealed class UserManagementService(
 		var account = await accounts.GetAsync(id, cancellationToken);
 		return await account.Match(
 			found => IssueAsync(AccountLinkKind.Reset, found.Username, found.User.DisplayName, Some.Of(id), cancellationToken),
-			() => Task.FromResult<Result<IssuedLink>>(Error.From("Only a Sammlarr account has a password to reset."))
+			() => Error.From("Only a Sammlarr account has a password to reset.")
 		);
 	}
 
@@ -210,7 +207,7 @@ internal sealed class UserManagementService(
 	private async Task<Result<int>> UnlessLastAdminAsync(UserId id, Func<Task<Result<int>>> remove, CancellationToken cancellationToken)
 	{
 		var last = await IsLastAdminAsync(id, cancellationToken);
-		return await Optional.When(last, () => Error.From("The last admin can't be removed.")).Match(refused => Task.FromResult<Result<int>>(refused), remove);
+		return await Optional.When(last, () => Error.From("The last admin can't be removed.")).Match(refused => refused, remove);
 	}
 
 	private async Task<Result<int>> ClearAndRemoveAsync(UserId id, CancellationToken cancellationToken)
@@ -218,7 +215,7 @@ internal sealed class UserManagementService(
 		var person = await users.GetAsync(id, cancellationToken);
 		var sink = await sinks.ResolveAsync(cancellationToken);
 		var cleared = await sink.DeleteTitlesOfAsync(person, cancellationToken);
-		return await cleared.Match(count => RemoveAsync(id, count, cancellationToken), error => Task.FromResult<Result<int>>(error));
+		return await cleared.Map(count => RemoveAsync(id, count, cancellationToken));
 	}
 
 	private async Task<Result<UserRole>> StoreRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken)

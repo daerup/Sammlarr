@@ -60,7 +60,7 @@ internal sealed class OnboardingService(
 		var problem = (await CodeProblemAsync(claim.SetupCode, cancellationToken))
 			.Or(() => Usernames.Problem(claim.Username))
 			.Or(() => Passwords.Problem(claim.Password, claim.Confirmation, options.MinimumPasswordLength));
-		return await problem.Match(error => Task.FromResult<Result<User>>(error), () => CreateAdminAsync(claim, cancellationToken));
+		return await problem.Match(error => error, () => CreateAdminAsync(claim, cancellationToken));
 	}
 
 	public async Task<bool> IsCompleteAsync(CancellationToken cancellationToken = default)

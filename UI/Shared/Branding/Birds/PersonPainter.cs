@@ -15,7 +15,7 @@ internal sealed class PersonPainter(IPictureGrids pictures, IUserManagementServi
 	{
 		var repainted = (await FetchAsync(person, cancellationToken)).Map(picture => new StoredColour(Some.Of(golden), Some.Of(picture)));
 		var gilded = Optional.When(person.Colour.GoldenHue.IsNone(), () => person.Colour with { GoldenHue = Some.Of(golden) });
-		return await repainted.Or(() => gilded).Match(colour => StoreAsync(person, colour, cancellationToken), () => Task.FromResult(false));
+		return await repainted.Or(() => gilded).Match(colour => StoreAsync(person, colour, cancellationToken), () => false);
 	}
 
 	private async Task<bool> StoreAsync(JoinedPerson person, StoredColour colour, CancellationToken cancellationToken)

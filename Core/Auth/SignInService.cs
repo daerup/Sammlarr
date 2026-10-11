@@ -96,7 +96,7 @@ internal sealed class SignInService(
 		}
 
 		var found = await localAccounts.FindAsync(username, cancellationToken);
-		return await found.Match(account => GatedCheckAsync(account.User.Id, password, cancellationToken), () => Task.FromResult(Unknown(password)));
+		return await found.Match(account => GatedCheckAsync(account.User.Id, password, cancellationToken), () => Unknown(password));
 	}
 
 	private static Result<User> Unknown(string password)
@@ -109,7 +109,7 @@ internal sealed class SignInService(
 	{
 		using var lease = await gate.EnterAsync(id, cancellationToken);
 		var current = await localAccounts.GetAsync(id, cancellationToken);
-		return await current.Match(account => CheckPasswordAsync(account, password, cancellationToken), () => Task.FromResult<Result<User>>(WrongPassword));
+		return await current.Match(account => CheckPasswordAsync(account, password, cancellationToken), () => WrongPassword);
 	}
 
 	private async Task<Result<User>> CheckPasswordAsync(LocalAccount account, string password, CancellationToken cancellationToken)
@@ -117,7 +117,7 @@ internal sealed class SignInService(
 		var now = dateTimeProvider.Now;
 		return await account
 			.LockedUntil.When(until => until > now)
-			.Match(until => Task.FromResult(Locked(until, now)), () => AttemptAsync(account, password, now, cancellationToken));
+			.Match(until => Locked(until, now), () => AttemptAsync(account, password, now, cancellationToken));
 	}
 
 	private async Task<Result<User>> AttemptAsync(LocalAccount account, string password, DateTimeOffset now, CancellationToken cancellationToken)

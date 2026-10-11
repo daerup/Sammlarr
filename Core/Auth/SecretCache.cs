@@ -21,9 +21,7 @@ internal sealed class SecretCache<TProvider, TSecret>(
 			return Refused($"The stored {provider} secret was rejected.");
 		}
 
-		return await cache
-			.GetValueOrNone(Key(provider))
-			.Match(cached => Task.FromResult<Result<TSecret>>(Success.Of(cached)), () => load().Map(secret => CheckedAsync(provider, secret, check)));
+		return await cache.GetValueOrNone(Key(provider)).Match(cached => Success.Of(cached), () => load().Map(secret => CheckedAsync(provider, secret, check)));
 	}
 
 	public bool IsRejected(TProvider provider) => rejections.GetValueOrNone(Key(provider)).IsSome();

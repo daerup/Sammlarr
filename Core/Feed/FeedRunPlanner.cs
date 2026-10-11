@@ -67,7 +67,7 @@ internal sealed class FeedRunPlanner(
 
 	private async Task<FeedRating> RatingAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken)
 	{
-		var strategy = await feed.RatingStrategy.Match(Task.FromResult, () => ratings.GetDefaultAsync(cancellationToken));
+		var strategy = await feed.RatingStrategy.GetValueOr(() => ratings.GetDefaultAsync(cancellationToken));
 		return new FeedRating(strategy, await ratings.GetAvailableAsync(cancellationToken));
 	}
 

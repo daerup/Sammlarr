@@ -129,7 +129,7 @@
         if (!_askedForIds && missing.Count > 0)
         {
             _askedForIds = true;
-            _found = await Media.Match(id => FindAsync(id, missing), () => Task.FromResult<IReadOnlyList<IExternalMediaId>>([]));
+            _found = await Media.Match(id => FindAsync(id, missing), () => []);
         }
     }
 

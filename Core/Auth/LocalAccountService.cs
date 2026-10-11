@@ -18,7 +18,7 @@ internal sealed class LocalAccountService(
 		var found = await accounts.GetAsync(currentUser.Id, cancellationToken);
 		return await found.Match(
 			account => ChangeAsync(account, current, next, cancellationToken),
-			() => Task.FromResult<Result<User>>(Error.From("Only a Sammlarr account has a password to change."))
+			() => Error.From("Only a Sammlarr account has a password to change.")
 		);
 	}
 
@@ -29,9 +29,7 @@ internal sealed class LocalAccountService(
 			return Error.From("The current password is not right.");
 		}
 
-		return await Passwords
-			.Weakness(next, options.MinimumPasswordLength)
-			.Match(weak => Task.FromResult<Result<User>>(weak), () => StoreAsync(account, next, cancellationToken));
+		return await Passwords.Weakness(next, options.MinimumPasswordLength).Match(weak => weak, () => StoreAsync(account, next, cancellationToken));
 	}
 
 	private async Task<Result<User>> StoreAsync(LocalAccount account, string next, CancellationToken cancellationToken)

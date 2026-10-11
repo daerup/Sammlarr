@@ -60,9 +60,9 @@ internal sealed class WantlistSyncPlanner(
 				var answered = Enum.GetValues<ArrApp>().Except(unreachable.Apps).Select(app => app.Type).ToHashSet();
 				var types = await media.GetTypesAsync(ids, cancellationToken);
 				var planned = types.Where(type => answered.Contains(type.Value)).Select(type => type.Key).ToHashSet();
-				return (IReadOnlySet<MediaId>)ids.Where(id => !planned.Contains(id)).ToHashSet();
+				return ids.Where(id => !planned.Contains(id)).ToHashSet();
 			},
-			() => Task.FromResult<IReadOnlySet<MediaId>>(new HashSet<MediaId>())
+			() => new HashSet<MediaId>()
 		);
 	}
 

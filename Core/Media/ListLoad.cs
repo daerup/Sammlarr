@@ -134,10 +134,7 @@ internal sealed class ListLoad(
 		{
 			IdentifyRequest request => await context
 				.AddressedBy(request.Type)
-				.Match(
-					target => TitleAsync(request, target, shelf.Rows(request), context, cancellationToken),
-					() => Task.FromResult<MediaMatchResult>(request.Unmatched(UnmatchedReason.NotFound))
-				),
+				.Match(target => TitleAsync(request, target, shelf.Rows(request), context, cancellationToken), () => request.Unmatched(UnmatchedReason.NotFound)),
 			UnmatchedMedia unmatched => unmatched,
 		};
 	}

@@ -52,7 +52,7 @@ internal sealed class DatasetLoader<TRow>(
 		using var marked = UsageCauses.Mark(UsageCause.Dataset);
 		var last = await loads.FindAsync(dataset.Name, cancellationToken);
 		var download = await dataset.DownloadAsync(last.Map(load => load.ETag), cancellationToken);
-		return await download.Map(file => file.Match(changed => ReplaceAsync(changed, cancellationToken), () => Task.FromResult<Result<int>>(Success.Of(0))));
+		return await download.Map(file => file.Match(changed => ReplaceAsync(changed, cancellationToken), () => Success.Of(0)));
 	}
 
 	private async Task<Result<int>> ReplaceAsync(DatasetFile<TRow> file, CancellationToken cancellationToken)
