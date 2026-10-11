@@ -24,6 +24,26 @@ internal static class AniListTypes
 
 	public sealed record GenreData([property: JsonPropertyName("GenreCollection")] IReadOnlyList<string>? Genres);
 
+	public sealed record RelatedData([property: JsonPropertyName("Page")] RelatedPage? Page);
+
+	public sealed record RelatedPage([property: JsonPropertyName("media")] IReadOnlyList<Related>? Media);
+
+	public sealed record Related(
+		[property: JsonPropertyName("idMal")] int? IdMal,
+		[property: JsonPropertyName("format")] string? Format,
+		[property: JsonPropertyName("relations")] Relations? Relations
+	);
+
+	public sealed record Relations([property: JsonPropertyName("edges")] IReadOnlyList<Edge>? Edges);
+
+	public sealed record Edge([property: JsonPropertyName("relationType")] string? RelationType, [property: JsonPropertyName("node")] Node? Node);
+
+	public sealed record Node(
+		[property: JsonPropertyName("idMal")] int? IdMal,
+		[property: JsonPropertyName("type")] string? Type,
+		[property: JsonPropertyName("format")] string? Format
+	);
+
 	public sealed record Media(
 		[property: JsonPropertyName("id")] int Id,
 		[property: JsonPropertyName("idMal")] int? IdMal,

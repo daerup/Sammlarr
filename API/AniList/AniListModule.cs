@@ -1,3 +1,4 @@
+using API.Anime;
 using API.Http;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +17,7 @@ internal class AniListModule : IServiceModule
 			.Feed<AniListFeedService>(FeedProvider.AniList)
 			.Enricher<AniListEnricher>();
 		services.AddScoped<AniListTitles>();
+		services.AddScoped<IAnimePrequels, AniListPrequels>();
 	}
 
 	private static void Configure(IServiceProvider sp, HttpClient client)

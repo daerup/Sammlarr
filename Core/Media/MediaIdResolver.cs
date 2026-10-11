@@ -147,6 +147,11 @@ internal sealed class MediaIdResolver(
 		var current = hints;
 		for (var index = 0; index < path.Count; index++)
 		{
+			if (AnsweredNo(path[index], ids, current, answers))
+			{
+				return new StepOutcome(new None(), false);
+			}
+
 			if (!Takes(path.Skip(index), down))
 			{
 				return new StepOutcome(new None(), true);
@@ -205,6 +210,22 @@ internal sealed class MediaIdResolver(
 		}
 
 		return new StepOutcome(new None(), false);
+	}
+
+	private static bool AnsweredNo(
+		Hop hop,
+		IReadOnlyList<IExternalMediaId> ids,
+		Optional<IdentifyHints> hints,
+		Dictionary<AnswerKey, Answer<IdLookupResult>> answers
+	)
+	{
+		var requests = Requests(hop, ids, hints).ToList();
+		return requests.Count > 0
+			&& requests.All(request =>
+				answers.TryGetValue(AnswerKey.Of(hop.Converter, request), out var answer)
+				&& answer.IsDefinitive
+				&& answer.ToOptional().When(result => Holds(hop, result)).IsNone()
+			);
 	}
 
 	private static bool Told(Dictionary<AnswerKey, Answer<IdLookupResult>> answers, AnswerKey key, IdLookupRequest request)

@@ -122,6 +122,32 @@ public class MediaIdResolverTests
 	}
 
 	[Test]
+	public async Task ResolveAsync_WhenTheFirstHopMissesAndThePathsBehindItCrossABlockedProvider_SettlesNoMatchAndCachesIt()
+	{
+		var (mdblist, byMal, trakt) = AnimePaths();
+		Answer(mdblist, new ByIdRequest(byMal, Mal), new NoMatch(RemoteService.Mdblist));
+
+		var resolved = await Testee(TraktBlocked(), mdblist, trakt).ResolveAsync(new IdentifyRequest([Mal], new None()), MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsOfUnionType<Resolution, NoMatchAnywhere>();
+		_cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled(Times.Once);
+		trakt.LookUpAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenTheFirstHopFindsAnImdbIdAndTheOnlyHopOnIsBlocked_IsNotRun()
+	{
+		var (mdblist, byMal, trakt) = AnimePaths();
+		Answer(mdblist, new ByIdRequest(byMal, Mal), Found(Mal, Imdb));
+
+		var resolved = await Testee(TraktBlocked(), mdblist, trakt).ResolveAsync(new IdentifyRequest([Mal], new None()), MediaProvider.Tvdb, Everyone);
+
+		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
+		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
+		trakt.LookUpAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
 	public async Task ResolveAsync_ForATitleHoldingTheTarget_GainsTheIdsAFreeLookupAnswers()
 	{
 		var map = Converter(RemoteService.AnimeLists, ByShowId);
@@ -670,6 +696,18 @@ public class MediaIdResolverTests
 		return TestCapacity.With(remote =>
 			remote is RemoteService.Tmdb ? RemoteLoad.Idle with { BlockedUntil = Some.Of(until()), MaxWait = TimeSpan.FromSeconds(15) } : RemoteLoad.Idle
 		);
+	}
+
+	private static IRemoteCapacity TraktBlocked()
+	{
+		return TestCapacity.With(remote => remote is RemoteService.Trakt ? RemoteLoad.Idle with { BlockedUntil = Some.Of(Now.AddMinutes(1)) } : RemoteLoad.Idle);
+	}
+
+	private (Mock<IExternalIdConverter> Mdblist, ById ByMal, Mock<IExternalIdConverter> Trakt) AnimePaths()
+	{
+		var byMal = new ById(Accepts: [MediaProvider.Mal], Yields: [MediaProvider.Imdb, MediaProvider.Tvdb], Cost: 1, GivesHints: false);
+		var toTvdb = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tvdb], Cost: 1, GivesHints: false);
+		return (Converter(RemoteService.Mdblist, byMal), byMal, Converter(RemoteService.Trakt, toTvdb));
 	}
 
 	private Mock<IExternalIdConverter> Converter(RemoteService remote, params IdLookup[] lookups)
