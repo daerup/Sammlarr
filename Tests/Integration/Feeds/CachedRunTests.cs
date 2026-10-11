@@ -81,7 +81,7 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task RunAsync_AfterConnectingANewRatingService_AsksItOncePerTitle()
+	public async Task RunAsync_AfterConnectingANewRatingService_AsksItOncePerTitleBatched()
 	{
 		await ConnectTmdbAndPlexAsync();
 		var fightClub = await StoreAsync(TestMedia.FightClub, Complete("Fight Club"), RemoteService.Tmdb, RemoteService.Plex);
@@ -94,7 +94,7 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 		host.SetCurrentTime(NextDay);
 		await RunAsync(feedId);
 
-		await Assert.That(host.HttpStub.Requests(MdblistTitles)).IsEqualTo(2);
+		await Assert.That(host.HttpStub.Requests(MdblistTitles)).IsEqualTo(1);
 		await Assert.That((await StoredAsync(fightClub)).Details.Ratings.Of(RatingSource.Metacritic)).IsSome();
 		await Assert.That((await StoredAsync(inception)).Details.Ratings.Of(RatingSource.Metacritic)).IsSome();
 		await Assert.That(host.HttpStub.Requests(TmdbDetail(TestMedia.FightClub))).IsEqualTo(0);

@@ -14,7 +14,7 @@ internal sealed class TvmazeEnricher(TvmazeApi tvmaze) : IDetailsEnricher
 
 	public IReadOnlyList<MediaProvider> Accepts { get; } = [MediaProvider.Tvmaze, MediaProvider.Imdb, MediaProvider.Tvdb];
 
-	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public Task<Answer<FoundMedia>> LookUpAsync(IExternalMediaId id, ValueSet<IIdentityKey> keys, CancellationToken cancellationToken = default)
 	{
 		return LookUpResultAsync(id, cancellationToken).GuardedAsync(RemoteService.Tvmaze);
 	}

@@ -90,7 +90,7 @@ public class TraktTitlesTests
 		handler.OnAnyRequest().RespondWithJson(Inception);
 		var enricher = new TraktEnricher(Titles(handler));
 
-		var found = await Assert.That(await enricher.LookUpAsync(TraktId.From("16662", MediaType.Movie))).IsFound();
+		var found = await Assert.That(await enricher.LookUpAsync(TraktId.From("16662", MediaType.Movie), [])).IsFound();
 
 		var movie = await Assert.That(found!.Details).IsTypeOf<MovieDetails>();
 		await Assert.That(movie!.Ratings.All).IsEquivalentTo(new IMediaRating[] { new TraktRating(84, Some.Of(71234)) });
@@ -107,7 +107,7 @@ public class TraktTitlesTests
 		var titles = Titles(handler);
 
 		await new TraktIdConverter(titles).LookUpAsync(new ByIdRequest(ByAnyId, ImdbId.From("tt1375666", MediaType.Movie)));
-		await new TraktEnricher(titles).LookUpAsync(TraktId.From("16662", MediaType.Movie));
+		await new TraktEnricher(titles).LookUpAsync(TraktId.From("16662", MediaType.Movie), []);
 
 		handler.Verify(request => request.PathMatches(".*"), Times.Once);
 	}
@@ -134,7 +134,7 @@ public class TraktTitlesTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(Inception);
 
-		var found = await Assert.That(await new TraktEnricher(Titles(handler)).LookUpAsync(TraktId.From("16662", MediaType.Movie))).IsFound();
+		var found = await Assert.That(await new TraktEnricher(Titles(handler)).LookUpAsync(TraktId.From("16662", MediaType.Movie), [])).IsFound();
 
 		await Assert.That(found!.Details.Genres).IsEquivalentTo(["Action", "Science Fiction"]);
 	}

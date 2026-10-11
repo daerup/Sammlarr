@@ -32,9 +32,9 @@ public class ListLoadBenchmark
 					return TestMediaService.FoundByFind(request);
 				}
 			);
-		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any())
+		deps.Details.LookUpAsync(Any<IExternalMediaId>(), Any(), Any())
 			.ReturnsAsync(
-				async (ext, token) =>
+				async (ext, keys, token) =>
 				{
 					using var _ = details.Enter();
 					await Task.Delay(Call, token);

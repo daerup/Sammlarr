@@ -23,7 +23,7 @@ public class TmdbDetailsEnricherTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("{\"id\":123,\"title\":\"Example\",\"vote_average\":7.5,\"vote_count\":1000}");
 
-		var result = await CreateTestee(handler).LookUpAsync(Id);
+		var result = await CreateTestee(handler).LookUpAsync(Id, []);
 
 		await Assert
 			.That(result)
@@ -45,7 +45,7 @@ public class TmdbDetailsEnricherTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(status);
 
-		var result = await CreateTestee(handler).LookUpAsync(Id);
+		var result = await CreateTestee(handler).LookUpAsync(Id, []);
 
 		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, Unavailable>().And.IsEqualTo(new Unavailable(RemoteService.Tmdb, new None(), true));
 	}
@@ -56,7 +56,7 @@ public class TmdbDetailsEnricherTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
 
-		var result = await CreateTestee(handler).LookUpAsync(Id);
+		var result = await CreateTestee(handler).LookUpAsync(Id, []);
 
 		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, NoMatch>();
 	}
@@ -71,7 +71,7 @@ public class TmdbDetailsEnricherTests
 				"""{"id":123,"title":" ","tagline":"","overview":"  ","poster_path":null,"backdrop_path":"","release_date":"","runtime":0,"genres":[{"id":1,"name":" "}],"vote_average":0}"""
 			);
 
-		var result = await CreateTestee(handler).LookUpAsync(Id);
+		var result = await CreateTestee(handler).LookUpAsync(Id, []);
 
 		await Assert.That(result).IsFound().And.Multiple(async found => await Assert.That(found.Details).IsEqualTo(new MovieDetails()));
 	}
@@ -86,7 +86,7 @@ public class TmdbDetailsEnricherTests
 				"""{"id":1396,"name":"Breaking Bad","first_air_date":"2008-01-20","release_date":"1999-01-01","number_of_seasons":0,"number_of_episodes":0,"episode_run_time":[0]}"""
 			);
 
-		var result = await CreateTestee(handler).LookUpAsync(TmdbId.From("1396", MediaType.Show));
+		var result = await CreateTestee(handler).LookUpAsync(TmdbId.From("1396", MediaType.Show), []);
 
 		await Assert
 			.That(result)
@@ -107,7 +107,7 @@ public class TmdbDetailsEnricherTests
 			.OnRequest(request => request.PathMatches(".*/movie/27205\\?append_to_response=external_ids&.*"))
 			.RespondWithJson("""{"id":27205,"title":"Inception","external_ids":{"imdb_id":"tt1375666"}}""");
 
-		var result = await CreateTestee(handler).LookUpAsync(ImdbId.From("tt1375666", MediaType.Movie));
+		var result = await CreateTestee(handler).LookUpAsync(ImdbId.From("tt1375666", MediaType.Movie), []);
 
 		await Assert
 			.That(result)
@@ -126,7 +126,7 @@ public class TmdbDetailsEnricherTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"id":123,"title":"Example"}""");
 
-		await CreateTestee(handler).LookUpAsync(Id);
+		await CreateTestee(handler).LookUpAsync(Id, []);
 
 		handler.Verify(request => request.PathMatches(".*/find/.*"), Times.Never);
 		handler.Verify(request => request.PathMatches(".*/movie/123\\?append_to_response=external_ids&.*"), Times.Once);
@@ -138,7 +138,7 @@ public class TmdbDetailsEnricherTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"movie_results":[],"tv_results":[]}""");
 
-		var result = await CreateTestee(handler).LookUpAsync(ImdbId.From("tt0000000", MediaType.Movie));
+		var result = await CreateTestee(handler).LookUpAsync(ImdbId.From("tt0000000", MediaType.Movie), []);
 
 		await Assert.That(result).IsOfUnionType<Answer<FoundMedia>, NoMatch>();
 		handler.Verify(request => request.PathMatches(".*/movie/.*"), Times.Never);

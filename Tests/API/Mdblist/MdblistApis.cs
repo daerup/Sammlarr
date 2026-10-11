@@ -21,12 +21,12 @@ internal static class MdblistApis
 		Http = new ProviderHttpOptions { Lanes = new() { ["titles"] = new LaneOptions { MaxBatch = 200 } } },
 	};
 
-	internal static MdblistTitles Titles(MockHttpHandler handler)
+	internal static MdblistTitles Titles(MockHttpHandler handler, IDateTimeProvider? clock = null)
 	{
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of<IApiKey>(new TestApiKey(ApiKeyProvider.Mdblist, "mdblist-key")));
 		var client = new MdblistClient(handler.CreateClient(Options.BaseUrl), Options, keys.Object, ICurrentUser.Mock().Object);
-		return new MdblistTitles(client, keys.Object, Lanes());
+		return new MdblistTitles(client, keys.Object, Lanes(), clock ?? Clock());
 	}
 
 	internal static Lanes Lanes()

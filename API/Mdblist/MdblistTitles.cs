@@ -3,7 +3,9 @@ using System.Text.Json.Nodes;
 using API.Http;
 using API.Http.Lanes;
 using API.Mdblist.Types;
+using Contracts;
 using Contracts.Auth;
+using Contracts.Media;
 using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
@@ -11,13 +13,23 @@ using Shared.Concurrency;
 
 namespace API.Mdblist;
 
-internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys, Lanes lanes)
+internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys, Lanes lanes, IDateTimeProvider clock) : IBurstPrimer
 {
 	private const string TitlesLane = "titles";
+
+	private static readonly TimeSpan FailureKept = TimeSpan.FromMinutes(1);
 
 	private readonly Lock _gate = new();
 
 	private readonly Dictionary<MdblistKey, Asked> _asked = [];
+
+	public RemoteService Remote => RemoteService.Mdblist;
+
+	public async Task PrimeAsync(IReadOnlyCollection<IReadOnlyList<IExternalMediaId>> titles, CancellationToken cancellationToken)
+	{
+		var apiKey = await apiKeys.GetAsync(ApiKeyProvider.Mdblist, cancellationToken);
+		apiKey.Apply(usable => Prime(usable, [.. titles.Select(Keys).Where(keys => keys.Count > 0)], cancellationToken));
+	}
 
 	public async Task<Answer<MdblistTypes.Titles.Title>> FindAsync(IReadOnlyCollection<IExternalMediaId> ids, CancellationToken cancellationToken = default)
 	{
@@ -28,6 +40,19 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 		);
 	}
 
+	private void Prime(IApiKey apiKey, IReadOnlyList<List<MdblistKey>> titles, CancellationToken cancellationToken)
+	{
+		lock (_gate)
+		{
+			List<List<MdblistKey>> fresh = [.. titles.Where(keys => keys.All(Open))];
+			var answers = Lane(apiKey).AskMany([.. fresh.Select(keys => keys[0])], Call(apiKey), cancellationToken);
+			foreach (var (keys, answer) in fresh.Zip(answers))
+			{
+				Remember(keys, Asking(keys[0], answer));
+			}
+		}
+	}
+
 	private async Task<Answer<MdblistTypes.Titles.Title>> AskedAsync(IApiKey apiKey, IReadOnlyList<MdblistKey> keys, CancellationToken cancellationToken)
 	{
 		if (keys.Count == 0)
@@ -35,8 +60,14 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 			return new NoMatch(RemoteService.Mdblist);
 		}
 
-		var answer = await Ask(apiKey, keys, cancellationToken);
-		Alias(answer, keys[0].Type);
+		var (asked, asking) = Ask(apiKey, keys, cancellationToken);
+		var answer = await asking;
+		if (answer is LaneMiss && keys[0].Outranks(asked.Key))
+		{
+			answer = await AskByBest(apiKey, keys[0], asked, cancellationToken);
+		}
+
+		Alias(answer, keys);
 		return answer.ToAnswer(RemoteService.Mdblist);
 	}
 
@@ -45,31 +76,73 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 		return [.. MdblistKey.Order.Select(source => ids.FirstOrNone(id => id.Source == source)).WhereSome().Select(MdblistKey.Of).WhereSome()];
 	}
 
-	private Task<LaneAnswer<MdblistTypes.Titles.Title>> Ask(IApiKey apiKey, IReadOnlyList<MdblistKey> keys, CancellationToken cancellationToken)
+	private (Asked Asked, Task<LaneAnswer<MdblistTypes.Titles.Title>> Answer) Ask(
+		IApiKey apiKey,
+		IReadOnlyList<MdblistKey> keys,
+		CancellationToken cancellationToken
+	)
 	{
 		lock (_gate)
 		{
-			var held = keys.Select(_asked.GetValueOrNone).WhereSome().FirstOrNone(asked => asked.Usable);
-			var asked = held.GetValueOr(() => new Asked(keys[0], Lane(apiKey).AskAsync(keys[0], Call(apiKey), cancellationToken)));
-			Remember(keys, asked);
-			return held.Match(found => Joined(apiKey, found, cancellationToken), () => asked.Answer);
+			var (asked, answer) = Share(apiKey, keys.Select(_asked.GetValueOrNone).WhereSome().FirstOrNone(Usable), keys[0], cancellationToken);
+			Remember(keys.Where(Open), asked);
+			return (asked, answer);
 		}
+	}
+
+	private Task<LaneAnswer<MdblistTypes.Titles.Title>> AskByBest(IApiKey apiKey, MdblistKey best, Asked missed, CancellationToken cancellationToken)
+	{
+		lock (_gate)
+		{
+			var (asked, answer) = Share(apiKey, _asked.GetValueOrNone(best).When(held => held != missed && Usable(held)), best, cancellationToken);
+			Remember([best], asked);
+			return answer;
+		}
+	}
+
+	private (Asked Asked, Task<LaneAnswer<MdblistTypes.Titles.Title>> Answer) Share(
+		IApiKey apiKey,
+		Optional<Asked> held,
+		MdblistKey key,
+		CancellationToken cancellationToken
+	)
+	{
+		var asked = held.GetValueOr(() => Asking(key, Lane(apiKey).AskAsync(key, Call(apiKey), cancellationToken)));
+		return (asked, held.Match(found => Joined(apiKey, found, cancellationToken), () => asked.Answer));
 	}
 
 	private Task<LaneAnswer<MdblistTypes.Titles.Title>> Joined(IApiKey apiKey, Asked found, CancellationToken cancellationToken)
 	{
-		return found.Answer.IsCompleted ? found.Answer : Lane(apiKey).AskAsync(found.Key, Call(apiKey), cancellationToken);
+		return found.Answer.IsCompletedSuccessfully
+			? found.Answer
+			: Lane(apiKey).Join(found.Key, cancellationToken).GetValueOr(() => SettledOrAskedAsync(apiKey, found, cancellationToken));
+	}
+
+	private async Task<LaneAnswer<MdblistTypes.Titles.Title>> SettledOrAskedAsync(IApiKey apiKey, Asked found, CancellationToken cancellationToken)
+	{
+		await ((Task)found.Answer).WaitAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+		return found.Answer.IsCompletedSuccessfully ? found.Answer.Result : await Lane(apiKey).AskAsync(found.Key, Call(apiKey), cancellationToken);
 	}
 
 	private void Remember(IEnumerable<MdblistKey> keys, Asked asked)
 	{
-		foreach (var key in keys.Where(key => _asked.GetValueOrNone(key).Match(held => !held.Usable, () => true)))
+		foreach (var key in keys)
 		{
 			_asked[key] = asked;
 		}
 	}
 
-	private void Alias(LaneAnswer<MdblistTypes.Titles.Title> answer, MediaType type)
+	private bool Open(MdblistKey key)
+	{
+		return _asked.GetValueOrNone(key).Match(held => !Usable(held), () => true);
+	}
+
+	private bool Missed(MdblistKey key)
+	{
+		return _asked.GetValueOrNone(key).Match(held => held.Answer.IsCompletedSuccessfully && held.Answer.Result is LaneMiss, () => false);
+	}
+
+	private void Alias(LaneAnswer<MdblistTypes.Titles.Title> answer, IReadOnlyList<MdblistKey> keys)
 	{
 		if (answer is not LaneHit<MdblistTypes.Titles.Title> hit)
 		{
@@ -78,8 +151,8 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 
 		lock (_gate)
 		{
-			var keys = MdblistKey.All(hit.Value, type).ToList();
-			keys.FirstOrNone().Apply(first => Remember(keys, new Asked(first, Task.FromResult(answer))));
+			List<MdblistKey> known = [.. keys.Concat(MdblistKey.All(hit.Value, keys[0].Type)).Distinct().Where(key => Open(key) || Missed(key))];
+			Remember(known, Asking(keys[0], Task.FromResult(answer)));
 		}
 	}
 
@@ -124,8 +197,46 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 			.ToDictionary(pair => pair.Key, pair => pair.Title);
 	}
 
-	private sealed record Asked(MdblistKey Key, Task<LaneAnswer<MdblistTypes.Titles.Title>> Answer)
+	private bool Usable(Asked asked)
 	{
-		public bool Usable => !Answer.IsCanceled && !Answer.IsFaulted && !(Answer.IsCompletedSuccessfully && Answer.Result is LaneFailed);
+		if (asked.Answer.IsCanceled || asked.Answer.IsFaulted)
+		{
+			return false;
+		}
+
+		if (!asked.Answer.IsCompletedSuccessfully || asked.Answer.Result is not LaneFailed failed)
+		{
+			return true;
+		}
+
+		var sent = failed.Cause.CausedBy<RemoteUnavailableException>().Map(unavailable => unavailable.Sent).GetValueOr(true);
+		return sent && clock.Now - asked.SettledAt < FailureKept;
+	}
+
+	private Asked Asking(MdblistKey key, Task<LaneAnswer<MdblistTypes.Titles.Title>> answer)
+	{
+		return new Asked(key, answer, clock);
+	}
+
+	private sealed class Asked
+	{
+		public Asked(MdblistKey key, Task<LaneAnswer<MdblistTypes.Titles.Title>> answer, IDateTimeProvider clock)
+		{
+			Key = key;
+			Answer = SettledAsync(answer, clock);
+		}
+
+		public MdblistKey Key { get; }
+
+		public Task<LaneAnswer<MdblistTypes.Titles.Title>> Answer { get; }
+
+		public DateTimeOffset SettledAt { get; private set; }
+
+		private async Task<LaneAnswer<MdblistTypes.Titles.Title>> SettledAsync(Task<LaneAnswer<MdblistTypes.Titles.Title>> answer, IDateTimeProvider clock)
+		{
+			await ((Task)answer).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+			SettledAt = clock.Now;
+			return await answer;
+		}
 	}
 }

@@ -103,7 +103,7 @@ public class MdblistIdConverterTests
 		var testee = new MdblistIdConverter(titles);
 		var breakingBad = ImdbId.From("tt0903747", MediaType.Show);
 
-		await Task.WhenAll(testee.LookUpAsync(testee.RequestById(breakingBad)), new MdblistEnricher(titles).LookUpAsync(breakingBad));
+		await Task.WhenAll(testee.LookUpAsync(testee.RequestById(breakingBad)), new MdblistEnricher(titles).LookUpAsync(breakingBad, []));
 
 		handler.Verify(request => request.PathMatches(".*"), Times.Once);
 	}

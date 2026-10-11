@@ -68,6 +68,24 @@ internal static class MdblistFeedStub
 		);
 	}
 
+	internal static void Pages(HttpStub http, string identifier, IReadOnlyList<IReadOnlyList<FeedItemSpec>> pages)
+	{
+		http.RespondForUrl(
+			Url(identifier),
+			request =>
+			{
+				var index = Offset(request) / 1000;
+				var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Build(pages[index]), Encoding.UTF8, "application/json") };
+				if (index < pages.Count - 1)
+				{
+					response.Headers.TryAddWithoutValidation("X-Has-More", "true");
+				}
+
+				return response;
+			}
+		);
+	}
+
 	private static string Url(string identifier) => MdblistLists.ItemsPath(identifier);
 
 	private static int Offset(HttpRequestMessage request) => int.Parse(HttpUtility.ParseQueryString(request.RequestUri?.Query ?? string.Empty)["offset"] ?? "0");

@@ -18,6 +18,7 @@ internal class MediaModule : IServiceModule
 		services.AddScoped<TitleIdentifier>();
 		services.AddScoped<ListLoad>();
 		services.AddScoped<DetailsFill>();
+		services.AddScoped<BurstPrimers>();
 		services.TryAddSingleton(TimeProvider.System);
 		services.AddTracedScoped<IMediaService, MediaService>();
 		services.AddTracedScoped<IMediaSearchService, MediaSearchService>();

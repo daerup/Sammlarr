@@ -1,4 +1,5 @@
 using API.Http;
+using Contracts.Media;
 using Contracts.Usage;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,7 @@ public class MdblistModule : IServiceModule
 			.Enricher<MdblistEnricher>()
 			.Converter<MdblistIdConverter>();
 		services.AddScoped<MdblistTitles>();
+		services.AddScoped<IBurstPrimer>(provider => provider.GetRequiredService<MdblistTitles>());
 		services.AddSingleton<MdblistBudget>();
 		services.AddKeyedSingleton<ILaneQuota>(RemoteService.Mdblist, (provider, _) => provider.GetRequiredService<MdblistBudget>());
 		services

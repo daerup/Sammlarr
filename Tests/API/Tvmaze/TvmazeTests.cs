@@ -107,7 +107,7 @@ public class TvmazeTests
 	{
 		var testee = new TvmazeEnricher(Api(await AnsweringAsync()));
 
-		var found = await Assert.That(await testee.LookUpAsync(BreakingBad)).IsFound();
+		var found = await Assert.That(await testee.LookUpAsync(BreakingBad, [])).IsFound();
 
 		var details = await Assert.That(found!.Details).IsTypeOf<ShowDetails>();
 		await Assert.That(details!.Title).IsEqualTo("Breaking Bad");

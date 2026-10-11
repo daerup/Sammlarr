@@ -34,6 +34,16 @@ internal sealed class DetailsFetcher(
 		return cached.When(details => !NeedsRefetch(identity, details, connected, needs));
 	}
 
+	public FieldNeeds FillsFor(RemoteService remote, FieldNeeds needs, Optional<CachedDetails> stored)
+	{
+		var now = clock.Now;
+		var fills = enrichers.Find(remote).Map(enricher => enricher.Fills).GetValueOr(MediaFields.None);
+		return stored.Match(
+			cached => cached.Resting(now).Contains(remote) ? FieldNeeds.None : Target(Reason(cached, now), needs).Of(Unknown(cached, now) & fills),
+			() => Target(new Uncached(), needs).Of(fills)
+		);
+	}
+
 	public Task<Result<MatchedMedia>> LoadAsync(IdentifyHandoff handoff, MediaDetails placeholder, DetailsRun run, CancellationToken cancellationToken)
 	{
 		var cached = handoff.Stored.Map(row => row.Cached);
@@ -140,6 +150,8 @@ internal sealed class DetailsFetcher(
 			Conflicted => identity,
 		};
 	}
+
+	private static MediaFields Unknown(CachedDetails cached, DateTimeOffset now) => cached.IsStale(now) ? MediaFields.Everything : cached.Details.Missing;
 
 	private static FetchReason Reason(CachedDetails stored, DateTimeOffset now)
 	{
@@ -328,7 +340,7 @@ internal sealed class DetailsFetcher(
 	private async Task<Answer<FoundMedia>> AskAsync(EnricherCandidate candidate, MediaIdentity identity, CancellationToken cancellationToken)
 	{
 		using var span = FeedRunSpans.Hop(candidate.Remote, TraceStage.Details);
-		var answer = await CallAsync(candidate, cancellationToken);
+		var answer = await CallAsync(candidate, identity, cancellationToken);
 		span.Answered(answer.IsDefinitive ? HopOutcome.Answered : HopOutcome.Failed);
 		if (answer is Faulted faulted)
 		{
@@ -340,11 +352,14 @@ internal sealed class DetailsFetcher(
 		return answer;
 	}
 
-	private Task<Answer<FoundMedia>> CallAsync(EnricherCandidate candidate, CancellationToken cancellationToken)
+	private Task<Answer<FoundMedia>> CallAsync(EnricherCandidate candidate, MediaIdentity identity, CancellationToken cancellationToken)
 	{
 		return enrichers
 			.Find(candidate.Remote)
-			.Match(enricher => enricher.LookUpAsync(candidate.Id, cancellationToken), () => Task.FromResult<Answer<FoundMedia>>(new NoMatch(candidate.Remote)));
+			.Match(
+				enricher => enricher.LookUpAsync(candidate.Id, identity.Keys, cancellationToken),
+				() => Task.FromResult<Answer<FoundMedia>>(new NoMatch(candidate.Remote))
+			);
 	}
 
 	private List<EnricherCandidate> EnrichersLeftToAsk(MediaIdentity identity, IReadOnlySet<RemoteService> asked, IReadOnlySet<RemoteService> connected)
