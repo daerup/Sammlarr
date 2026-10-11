@@ -43,7 +43,11 @@ internal sealed class ListLoad(
 		var titles = new List<Task>();
 		try
 		{
-			await foreach (var burst in FeedRunSpans.SourceAsync(entries, entry => entry is IdentifyRequest, cancellationToken).BurstsAsync(cancellationToken))
+			await foreach (
+				var burst in FeedRunSpans
+					.SourceAsync(entries, entry => entry is not UnmatchedMedia { Reason: UnmatchedReason.NotFound }, cancellationToken)
+					.BurstsAsync(cancellationToken)
+			)
 			{
 				var listed = burst.Select(Traced).Numbered(titles.Count);
 				var shelf = ShelveAndPrimeAsync(listed, context, (primes.Token, cancellationToken));
@@ -169,7 +173,8 @@ internal sealed class ListLoad(
 		return entry switch
 		{
 			IdentifyRequest request => new TitleWork(entry, TitleSpan(request)),
-			UnmatchedMedia => Unlisted(entry),
+			UnmatchedMedia { Reason: UnmatchedReason.NotFound } => Unlisted(entry),
+			UnmatchedMedia unmatched => new TitleWork(entry, UnlistedSpan(unmatched)),
 		};
 	}
 
@@ -177,6 +182,14 @@ internal sealed class ListLoad(
 	{
 		FeedRunSpans.ListedWithoutIds();
 		return new TitleWork(entry, new None());
+	}
+
+	private static Optional<Activity> UnlistedSpan(UnmatchedMedia unmatched)
+	{
+		return FeedRunSpans.Title(
+			unmatched.Details.Title ?? string.Join(", ", unmatched.Externals),
+			Optional.Of(unmatched.Details.ReleaseDate).Map(date => date.Year)
+		);
 	}
 
 	private static Optional<Activity> TitleSpan(IdentifyRequest request)

@@ -179,8 +179,8 @@ Id lookup:: An `IdLookup`: what one provider call accepts (`ById`: some provider
 hints), which providers' ids its answer may yield, its cost in calls, and for a `ById` whether its answer carries
 title hints (`GivesHints`; Wikidata's does not, so no path asks it for hints) and whether a definitive answer by one of
 a title's ids answers it for all of them (`AsksOnce`, Plex's match). The planner turns each into hops; a path through a
-provider that is down or blocked past its `MaxWait` gives up, and one blocked within it is asked and waits in the
-provider's lane.
+provider that is down or blocked past its `MaxWait` gives up, unless an earlier answer in the same resolution already said
+no to every request of the hop before it, and one blocked within it is asked and waits in the provider's lane.
 
 Dataset:: A whole file Sammlarr downloads daily instead of asking per title (IMDb's ratings file, the anime id map): an `IDataset` that
 parses it, an `IDatasetTable` replaced in one transaction, and its load recorded in `DatasetLoads`.

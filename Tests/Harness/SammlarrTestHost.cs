@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using API;
 using API.Http.Lanes;
+using API.Mal;
 using API.Plex;
 using API.Tmdb;
 using Contracts;
@@ -254,6 +255,18 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		}
 	}
 
+	internal async Task WithMalAccount(string clientId)
+	{
+		await Resolve<IApiKeyService>().StoreAsync(new TestApiKey(ApiKeyProvider.Mal, clientId));
+		HttpStub.RequireHeader(TestUrls.Mal, MalClient.ClientIdHeader, clientId);
+	}
+
+	internal async Task WithTraktAccount(string clientId)
+	{
+		await Resolve<IApiKeyService>().StoreAsync(new TestApiKey(ApiKeyProvider.Trakt, clientId));
+		HttpStub.RequireHeader(TestUrls.Trakt, "trakt-api-key", clientId);
+	}
+
 	internal void WikidataHolds(string imdb, params string[] paths)
 	{
 		Wikidata.Holds(imdb, [.. paths.Select(path => $$$"""{"rt":{"type":"literal","value":"{{{path}}}"}}""")]);
@@ -292,6 +305,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	internal void MdblistFeedPaginated(string identifier, params FeedPage[] pages) => MdblistFeedStub.Paginated(HttpStub, identifier, pages);
 
 	internal void MdblistFeedPages(string identifier, params IReadOnlyList<FeedItemSpec>[] pages) => MdblistFeedStub.Pages(HttpStub, identifier, pages);
+
+	internal void MalSeasonHolds(string identifier, params FeedItemSpec[] items) => MalFeedStub.Season(HttpStub, identifier, items);
 
 	internal void PlexHolds(ResolvedVersion version, double? imdbRating = null, int imdbVotes = 0) => PlexStub.Lookup(HttpStub, version, imdbRating, imdbVotes);
 
@@ -823,7 +838,14 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			{
 				BaseUrl = $"https://{TestUrls.AniList}",
 				UserAgent = "Sammlarr tests",
-				Http = Unretried() with { Lanes = new() { ["titles"] = new LaneOptions { MaxBatch = 50 } } },
+				Http = Unretried() with
+				{
+					Lanes = new()
+					{
+						["titles"] = new LaneOptions { MaxBatch = 50 },
+						["prequels"] = new LaneOptions { MaxBatch = 50 },
+					},
+				},
 			}
 		);
 		services.AddSingleton(new MalOptions { BaseUrl = $"https://{TestUrls.Mal}", Http = Unretried() });

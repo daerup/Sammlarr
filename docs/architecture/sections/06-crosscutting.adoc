@@ -248,7 +248,7 @@ flight (`MaxInFlight`) and batch (`MaxBatch`, below).
 | TMDB | 40 per second
 | Trakt | 1,000 per 5 minutes
 | MDBList | 1,000 per 5 minutes, on fixed windows that start at :00, :05 and so on; title lookups batch up to 200 ids
-| AniList | 30 per minute (as published while AniList runs degraded), 1 in flight; title lookups batch up to 50 ids
+| AniList | 30 per minute (as published while AniList runs degraded), 1 in flight; title and prequel lookups batch up to 50 ids
 | MyAnimeList | 30 per second, 1 in flight
 | TVmaze | 20 per 10 seconds
 | Plex | `match` 200 per minute with 5 in flight; `api` and `metadata` 50 per second with 25 in flight each (Plex publishes no limit); `watchlist` 4 in flight
@@ -291,7 +291,7 @@ asking class, one batch per batch key and class is out at a time, and whatever a
 `MaxBatch`. No timer gathers a batch, so a slow or throttled service gets bigger batches, not more of them, and a
 `Background` key never rides in a `Title` batch. The batch's request takes its permit like any other; a lane never
 retries a batch, and a failed batch fails every key it carried. MDBList's title lookups (per API key, id kind and media
-type), AniList's titles (one `id_in` query) and Wikidata's SPARQL lookups (one `VALUES` query per media type) ride
+type), AniList's titles (one `id_in` query) and prequels (one `idMal_in` query) and Wikidata's SPARQL lookups (one `VALUES` query per media type) ride
 keyed lanes. A load primes MDBList's lane with each burst's titles that still need a field it fills (<<section-runtime-view>>), so its batches fill
 even though a title reaches MDBList only after its TMDB step.
 
@@ -374,7 +374,9 @@ hints (`GivesHints` false). Within one resolution each lookup is asked once per 
 it once, and never by an id its own earlier answer gave: that answer already told everything the lookup knows about the
 title. Before every hop the resolver checks the providers of the hops left: one that is down, blocked past its
 `MaxWait`, or that answered as unavailable earlier in the resolution makes the path give up; one blocked within its
-`MaxWait` is asked, and its lane does the waiting. A title is cached as unmatched only when no path gave up.
+`MaxWait` is asked, and its lane does the waiting. A hop whose every request was already answered with no match earlier
+in the resolution ends its path as a no-match before that check, even when a later hop's provider is blocked. A title is
+cached as unmatched only when no path gave up.
 
 === Identity keys, page links and claims
 

@@ -41,11 +41,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 
 	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, FieldNeeds needs, CancellationToken cancellationToken = default)
 	{
-		return media.LoadListAsync(
-			seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken).Select(ListTitle (request) => request),
-			needs,
-			cancellationToken
-		);
+		return media.LoadListAsync(seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken), needs, cancellationToken);
 	}
 
 	private static Optional<string> UserList(string input)
@@ -67,7 +63,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 	{
 		var read = identifier.StartsWith(AniListPages.Search, StringComparison.Ordinal)
 			? SearchAsync(identifier, cancellationToken).Take(FeedPages.Titles)
-			: ListAsync(identifier, cancellationToken);
+			: ListAsync(identifier, cancellationToken).Where(AniListMedia.IsTitle);
 		await foreach (var found in read.WithCancellation(cancellationToken))
 		{
 			titles.Remember(found);
@@ -98,6 +94,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 			.Map(AniListPages.Of)
 			.GetOrThrow(error => new InvalidOperationException(error.Reason));
 		var genres = AniListPages.NeedsGenres(search) ? await GenresAsync(cancellationToken) : new HashSet<string>();
+		var music = AniListPages.AsksForMusic(search);
 		var variables = AniListPages
 			.Variables(search, genres, DateOnly.FromDateTime(clock.Now.UtcDateTime))
 			.GetOrThrow(error => new InvalidOperationException(error.Reason));
@@ -110,7 +107,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 			var answer = await SourcePages.ReadAsync(page, () => client.AskAsync<AniListTypes.PageData>(SearchQuery, asked, cancellationToken));
 			var found = answer.GetOrThrow(Refused).Page ?? throw new InvalidDataException("AniList answered a search without a page.");
 			FeedRunSpans.SourcePage(page, new None());
-			foreach (var title in found.Media ?? [])
+			foreach (var title in (found.Media ?? []).Where(title => music || AniListMedia.IsTitle(title)))
 			{
 				yield return title;
 			}

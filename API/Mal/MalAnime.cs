@@ -10,6 +10,8 @@ internal static class MalAnime
 	internal const string Fields =
 		"id,title,alternative_titles,media_type,start_date,synopsis,main_picture,genres,num_episodes,average_episode_duration,mean,num_scoring_users";
 
+	internal static bool IsTitle(MalTypes.Anime anime) => anime.MediaType is not ("music" or "pv" or "cm");
+
 	internal static MediaType TypeOf(MalTypes.Anime anime) => anime.MediaType == "movie" ? MediaType.Movie : MediaType.Show;
 
 	internal static MalId Id(MalTypes.Anime anime, MediaType type) => MalId.From(anime.Id.ToString(CultureInfo.InvariantCulture), type);

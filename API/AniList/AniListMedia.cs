@@ -12,6 +12,8 @@ internal static partial class AniListMedia
 	internal const string Fields =
 		"id idMal format title { english romaji } description(asHtml: false) coverImage { extraLarge } startDate { year month day } genres episodes duration averageScore stats { scoreDistribution { score amount } }";
 
+	internal static bool IsTitle(AniListTypes.Media media) => media.Format is not "MUSIC";
+
 	internal static MediaType TypeOf(AniListTypes.Media media) => media.Format == "MOVIE" ? MediaType.Movie : MediaType.Show;
 
 	internal static IReadOnlyList<IExternalMediaId> Ids(AniListTypes.Media media, MediaType type)

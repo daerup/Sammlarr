@@ -41,11 +41,7 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 
 	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, FieldNeeds needs, CancellationToken cancellationToken = default)
 	{
-		return media.LoadListAsync(
-			seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken).Select(ListTitle (request) => request),
-			needs,
-			cancellationToken
-		);
+		return media.LoadListAsync(seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken), needs, cancellationToken);
 	}
 
 	private async IAsyncEnumerable<IdentifyRequest> RequestsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
@@ -54,7 +50,7 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 			.GetAsync(ApiKeyProvider.Mal, cancellationToken)
 			.GetOrThrow(_ => new InvalidOperationException("No MyAnimeList client ID is configured. Add one in Settings."));
 		var isPage = MalPages.IsPage(identifier);
-		var read = AnimeAsync(identifier, First(identifier, isPage), isPage, clientId, cancellationToken);
+		var read = AnimeAsync(identifier, First(identifier, isPage), isPage, clientId, cancellationToken).Where(MalAnime.IsTitle);
 		await foreach (var anime in (isPage ? read.Take(FeedPages.Titles) : read).WithCancellation(cancellationToken))
 		{
 			var type = MalAnime.TypeOf(anime);

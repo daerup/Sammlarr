@@ -26,6 +26,10 @@ internal static class AnimeMaps
 		Some.Of(431162)
 	);
 
+	internal static readonly AnimeIdMapping BareSeason = new(MediaType.Show, Some.Of(200001), Some.Of(60001), new None(), new None(), new None(), new None());
+
+	internal static readonly AnimeIdMapping BareMovie = new(MediaType.Movie, Some.Of(200003), Some.Of(60003), new None(), new None(), new None(), new None());
+
 	internal static readonly string[] ApothecaryDiariesIds =
 	[
 		"AniList:Show:161645",
@@ -51,10 +55,17 @@ internal static class AnimeMaps
 		return map;
 	}
 
-	internal static LaterSeasons Seasons(Mock<IAnimeIds> map, bool loaded = true)
+	internal static LaterSeasons Seasons(Mock<IAnimeIds> map, bool loaded = true, IAnimePrequels? prequels = null)
 	{
 		var loads = Loads(DatasetNames.AnimeIds, loaded);
-		return new LaterSeasons(new AnimeIdsInRun(map.Object, loads.Object), loads.Object);
+		return new LaterSeasons(new AnimeIdsInRun(map.Object, loads.Object), loads.Object, prequels ?? NoPrequels().Object);
+	}
+
+	internal static Mock<IAnimePrequels> NoPrequels()
+	{
+		var prequels = IAnimePrequels.Mock();
+		prequels.PrequelsOfAsync(Any(), Any()).Returns(new Dictionary<int, Result<Optional<int>>>());
+		return prequels;
 	}
 
 	internal static Mock<IDatasetLoads> Loads(string dataset, bool loaded = true)
@@ -75,6 +86,8 @@ internal static class AnimeMaps
 		{
 			TvdbId { Value: "431162" } or AniListId { Value: "161645" } or MalId { Value: "54492" } => Some.Of(ApothecaryDiaries),
 			AniListId { Value: "185407" } or MalId { Value: "59130" } => Some.Of(ThirdSeason),
+			AniListId { Value: "200001" } or MalId { Value: "60001" or "60002" } => Some.Of(BareSeason),
+			AniListId { Value: "200003" } or MalId { Value: "60003" } => Some.Of(BareMovie),
 			_ => new None(),
 		};
 	}

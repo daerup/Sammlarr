@@ -337,7 +337,14 @@ public class AniListTests
 		{
 			BaseUrl = "https://graphql.anilist.co",
 			UserAgent = "Sammlarr tests",
-			Http = new ProviderHttpOptions { Lanes = new() { ["titles"] = new LaneOptions { MaxBatch = 50 } } },
+			Http = new ProviderHttpOptions
+			{
+				Lanes = new()
+				{
+					["titles"] = new LaneOptions { MaxBatch = 50 },
+					["prequels"] = new LaneOptions { MaxBatch = 50 },
+				},
+			},
 		};
 		return new(TimeProvider.System, [new RemoteSettings(RemoteService.AniList, options)], new ServiceCollection().BuildServiceProvider());
 	}
@@ -363,6 +370,122 @@ public class AniListTests
 			.Select(id => $$$"""{"id":{{{id}}},"format":"TV","title":{"romaji":"Anime {{{id}}}"},"startDate":{"year":2026}}""");
 		var next = more ? "true" : "false";
 		return "{\"data\":{\"Page\":{\"pageInfo\":{\"hasNextPage\":" + next + "},\"media\":[" + string.Join(",", titles) + "]}}}";
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAMusicEntry_LeavesItOut()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""
+				{"data":{"MediaListCollection":{"lists":[{"entries":[
+				{"media":{"id":16498,"idMal":16498,"format":"TV","title":{"romaji":"Shingeki no Kyojin"},"startDate":{"year":2013}}},
+				{"media":{"id":170000,"idMal":59000,"format":"MUSIC","title":{"romaji":"Respawn!!"},"startDate":{"year":2026}}}]}]}}}
+				"""
+			);
+
+		await Feed(handler).GetFeedItemsAsync("someone", FieldNeeds.None).InListOrderAsync().ToListAsync();
+
+		await Assert.That(_asked.Select(request => request.Hints.Map(hints => hints.Title).GetValueOr(string.Empty))).IsEquivalentTo(["Shingeki no Kyojin"]);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAPageAskingForMusic_KeepsItsEntries()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""{"data":{"Page":{"pageInfo":{"hasNextPage":false},"media":[{"id":170000,"idMal":59000,"format":"MUSIC","title":{"romaji":"Respawn!!"},"startDate":{"year":2026}}]}}}"""
+			);
+
+		await Feed(handler).GetFeedItemsAsync("search/anime?format=MUSIC", FieldNeeds.None).InListOrderAsync().ToListAsync();
+
+		await Assert.That(_asked).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_ForAMusicEntryOnASearchPage_LeavesItOut()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""
+				{"data":{"Page":{"pageInfo":{"hasNextPage":false},"media":[
+				{"id":16498,"idMal":16498,"format":"TV","title":{"romaji":"Shingeki no Kyojin"},"startDate":{"year":2013}},
+				{"id":170000,"idMal":59000,"format":"MUSIC","title":{"romaji":"Respawn!!"},"startDate":{"year":2026}}]}}}
+				"""
+			);
+
+		await Feed(handler).GetFeedItemsAsync("search/anime/trending", FieldNeeds.None).InListOrderAsync().ToListAsync();
+
+		await Assert.That(_asked.Select(request => request.Hints.Map(hints => hints.Title).GetValueOr(string.Empty))).IsEquivalentTo(["Shingeki no Kyojin"]);
+	}
+
+	[Test]
+	public async Task PrequelsOfAsync_ForASeasonWithAPrequel_FindsTheSeasonBeforeIt()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""
+				{"data":{"Page":{"media":[{"idMal":59130,"format":"TV","relations":{"edges":[
+				{"relationType":"PREQUEL","node":{"idMal":12345,"type":"MANGA","format":"MANGA"}},
+				{"relationType":"PREQUEL","node":{"idMal":60400,"type":"ANIME","format":"MOVIE"}},
+				{"relationType":"SEQUEL","node":{"idMal":60500,"type":"ANIME","format":"TV"}},
+				{"relationType":"PREQUEL","node":{"idMal":54492,"type":"ANIME","format":"TV"}}]}}]}}}
+				"""
+			);
+
+		var prequels = await new AniListPrequels(Client(handler), Lanes()).PrequelsOfAsync([59130]);
+
+		await Assert.That(prequels[59130]).IsSuccess().And.IsSome().And.IsEqualTo(54492);
+	}
+
+	[Test]
+	public async Task PrequelsOfAsync_ForASpecial_FollowsNoPrequel()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""
+				{"data":{"Page":{"media":[{"idMal":60001,"format":"SPECIAL","relations":{"edges":[
+				{"relationType":"PREQUEL","node":{"idMal":54492,"type":"ANIME","format":"TV"}}]}}]}}}
+				"""
+			);
+
+		var prequels = await new AniListPrequels(Client(handler), Lanes()).PrequelsOfAsync([60001]);
+
+		await Assert.That(prequels[60001]).IsSuccess().And.IsNone();
+	}
+
+	[Test]
+	public async Task PrequelsOfAsync_ForSeveralSeasons_AsksAniListOnce()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("""{"data":{"Page":{"media":[]}}}""");
+
+		var prequels = await new AniListPrequels(Client(handler), Lanes()).PrequelsOfAsync([59130, 60001, 60002]);
+
+		handler.Verify(request => request.Method(HttpMethod.Post), Times.Once);
+		await Assert.That(prequels.Keys).IsEquivalentTo([59130, 60001, 60002]);
+	}
+
+	[Test]
+	public async Task PrequelsOfAsync_WhenAniListFails_FailsEverySeason()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.InternalServerError);
+
+		var prequels = await new AniListPrequels(Client(handler), Lanes()).PrequelsOfAsync([59130, 60001]);
+
+		await Assert.That(prequels[59130]).IsError();
+		await Assert.That(prequels[60001]).IsError();
 	}
 
 	[Test]

@@ -66,6 +66,28 @@ public class MalTests
 	}
 
 	[Test]
+	public async Task GetFeedItemsAsync_ForASeasonListingMusicVideos_LeavesThemOut()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""
+				{"data":[{"node":{"id":59130,"title":"Kusuriya no Hitorigoto 3rd Season","media_type":"tv"}},
+				{"node":{"id":61001,"title":"Respawn!!","media_type":"music"}},
+				{"node":{"id":61002,"title":"Ghost","media_type":"pv"}},
+				{"node":{"id":61003,"title":"My Bad","media_type":"cm"}}],"paging":{}}
+				"""
+			);
+
+		await Feed(handler).GetFeedItemsAsync("anime/season/2026/fall", FieldNeeds.None).InListOrderAsync().ToListAsync();
+
+		await Assert
+			.That(_asked.Select(request => request.Hints.Map(hints => hints.Title).GetValueOr(string.Empty)))
+			.IsEquivalentTo(["Kusuriya no Hitorigoto 3rd Season"]);
+	}
+
+	[Test]
 	public async Task GetFeedItemsAsync_ForASeasonThatDoesNotExist_SaysThePageIsNotFound()
 	{
 		var handler = Mock.HttpHandler();

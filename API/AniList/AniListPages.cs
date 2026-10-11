@@ -53,6 +53,8 @@ internal static class AniListPages
 
 	internal static bool NeedsGenres(SiteLink search) => search.Values("genres").Count > 0 || search.Values("excludeGenres").Count > 0;
 
+	internal static bool AsksForMusic(SiteLink search) => search.Values("format").Any(format => format.Equals("MUSIC", StringComparison.OrdinalIgnoreCase));
+
 	internal static Result<JsonObject> Variables(SiteLink search, IReadOnlySet<string> genres, DateOnly today)
 	{
 		var labels = LabelsOf(search, today);
