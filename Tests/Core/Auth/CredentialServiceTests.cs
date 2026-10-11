@@ -6,7 +6,9 @@ using Core.DI;
 using Domain.Auth;
 using Domain.Jobs;
 using Domain.Providers;
+using Domain.Usage;
 using Microsoft.Extensions.Caching.Memory;
+using Observability.Usage;
 using TestInfrastructure;
 
 namespace Core.Tests.Auth;
@@ -46,6 +48,17 @@ public sealed class CredentialServiceTests : IDisposable
 		await Testee.StoreAsync(AuthProvider.Plex, Stored);
 
 		_queue.EnqueueAsync(Is<IJobRequest>(request => request is FillDetails), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task GetAsync_WithoutACallersCause_ChecksTheStoredTokenUnderTheKeyTestCause()
+	{
+		var cause = UsageCause.Other;
+		_plex.CheckAsync(Any(), Any(), Any()).Returns(AccessCheck.Valid).Callback(() => cause = UsageCauses.Current.Cause);
+
+		await Testee.GetAsync(AuthProvider.Plex);
+
+		await Assert.That(cause).IsEqualTo(UsageCause.KeyTest);
 	}
 
 	[Test]

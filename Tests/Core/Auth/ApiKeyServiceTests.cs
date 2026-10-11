@@ -4,6 +4,7 @@ using Contracts.Jobs;
 using Core.Auth;
 using Core.Caching;
 using Domain.Auth;
+using Domain.Feed;
 using Domain.Jobs;
 using Domain.Providers;
 using Domain.Usage;
@@ -47,6 +48,29 @@ public sealed class ApiKeyServiceTests : IDisposable
 		await Testee.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "new-key"));
 
 		_queue.EnqueueAsync(Is<IJobRequest>(request => request is FillDetails), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task GetAsync_WithoutACallersCause_ChecksTheStoredKeyUnderTheKeyTestCause()
+	{
+		var cause = UsageCause.Other;
+		_tmdb.CheckAsync(Any(), Any()).Returns(AccessCheck.Valid).Callback(() => cause = UsageCauses.Current.Cause);
+
+		await Testee.GetAsync(ApiKeyProvider.Tmdb);
+
+		await Assert.That(cause).IsEqualTo(UsageCause.KeyTest);
+	}
+
+	[Test]
+	public async Task GetAsync_InsideAFeedRun_ChecksTheStoredKeyUnderTheRunsCause()
+	{
+		var cause = UsageCause.Other;
+		_tmdb.CheckAsync(Any(), Any()).Returns(AccessCheck.Valid).Callback(() => cause = UsageCauses.Current.Cause);
+		using var run = UsageCauses.Mark(FeedId.From(Guid.NewGuid()));
+
+		await Testee.GetAsync(ApiKeyProvider.Tmdb);
+
+		await Assert.That(cause).IsEqualTo(UsageCause.FeedRun);
 	}
 
 	[Test]

@@ -71,7 +71,7 @@ public class UsageViewTests
 	{
 		var hinted = Enum.GetValues<UsageCause>().Where(cause => UsageView.CauseHint(cause).IsSome());
 
-		await Assert.That(hinted).IsEquivalentTo([UsageCause.KeyTest, UsageCause.DetailsFill, UsageCause.Other]);
+		await Assert.That(hinted).IsEquivalentTo([UsageCause.WantlistSync, UsageCause.KeyTest, UsageCause.FeedEditor, UsageCause.DetailsFill, UsageCause.Other]);
 	}
 
 	[Test]

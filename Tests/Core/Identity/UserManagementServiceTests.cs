@@ -7,6 +7,8 @@ using Core.Wantlist.Sync;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
+using Domain.Usage;
+using Observability.Usage;
 using TestInfrastructure;
 
 namespace Core.Tests.Identity;
@@ -64,6 +66,28 @@ public class UserManagementServiceTests
 
 		await Assert.That(removed).IsSuccess().And.IsEqualTo(3);
 		_users.DeleteAsync(Mira.Id, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task DeleteWithSinkTitlesAsync_ClearsTheSinkUnderTheWantlistSyncCause()
+	{
+		var cause = UsageCause.Other;
+		_sink.DeleteTitlesOfAsync(Any(), Any()).Returns(Success.Of(3)).Callback(() => cause = UsageCauses.Current.Cause);
+
+		await Testee.DeleteWithSinkTitlesAsync(Mira.Id);
+
+		await Assert.That(cause).IsEqualTo(UsageCause.WantlistSync);
+	}
+
+	[Test]
+	public async Task SinkHoldingsAsync_ReadsTheSinkUnderTheWantlistSyncCause()
+	{
+		var cause = UsageCause.Other;
+		_sink.HoldingsOfAsync(Any(), Any()).Returns(Error.From("Radarr answered 500.")).Callback(() => cause = UsageCauses.Current.Cause);
+
+		await Testee.SinkHoldingsAsync(Mira.Id);
+
+		await Assert.That(cause).IsEqualTo(UsageCause.WantlistSync);
 	}
 
 	[Test]

@@ -19,8 +19,10 @@ using Domain.Feed.Trace;
 using Domain.Jobs;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Usage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Observability.Usage;
 using TestInfrastructure;
 using UI.Features.Feeds.Components;
 using UI.Shared.Services;
@@ -184,6 +186,22 @@ public class FeedsPageTests : BunitContext
 
 		cut.WaitForState(() => cut.Markup.Contains("No feeds yet."));
 		await Assert.That(cut.FindAll("#feed-run-live")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Run_WhenItsDialogOpens_PlansThePreviewAsTheFeedEditorForThatFeed()
+	{
+		var overview = Overview();
+		RegisterServices([overview]);
+		UsageMark mark = default;
+		_planner.PlanAsync(Any<FeedPlanTarget>(), Any()).ReturnsAsync(new TaskCompletionSource<FeedPlanResult>().Task).Callback(() => mark = UsageCauses.Current);
+		var cut = RenderPage();
+		cut.WaitForState(() => cut.FindAll(".feed-card-run").Count == 1);
+
+		_ = cut.Find(".feed-card-run").ClickAsync(new());
+
+		cut.WaitForAssertion(() => _planner.PlanAsync(Any<FeedPlanTarget>(), Any()).WasCalled(Times.Once));
+		await Assert.That(mark).IsEqualTo(new UsageMark(UsageCause.FeedEditor, Some.Of(overview.Feed.Id)));
 	}
 
 	[Test]

@@ -6,9 +6,11 @@ using Contracts.Wantlist;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Usage;
 using Domain.Wantlist.Arr;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Observability.Usage;
 
 namespace Core.Wantlist.Sync;
 
@@ -26,12 +28,14 @@ internal sealed class SinkSwitch(
 	public async Task<Result<SinkSwitched>> SwitchAsync(SinkKind sink, CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
+		using var marked = UsageCauses.Mark(UsageCause.WantlistSync);
 		return await MoveAsync(sink, await IsReadyAsync(sink, cancellationToken), () => StoreSinkAsync(sink, cancellationToken), cancellationToken);
 	}
 
 	public async Task<Result<SinkSwitched>> MoveAsync(ArrSinkConfig config, CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
+		using var marked = UsageCauses.Mark(UsageCause.WantlistSync);
 		if ((await configs.GetAsync(cancellationToken)).Sink != SinkKind.Arr)
 		{
 			return Error.From("The wantlist does not sync to Radarr + Sonarr, so there is nothing to move.");

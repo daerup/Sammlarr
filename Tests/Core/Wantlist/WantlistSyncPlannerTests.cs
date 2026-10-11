@@ -2,16 +2,32 @@ using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Core.Wantlist.Sync;
 using Domain.Media;
+using Domain.Usage;
 using Domain.Wantlist.Arr;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using Microsoft.Extensions.Logging;
+using Observability.Usage;
 using TestInfrastructure;
 
 namespace Core.Tests.Wantlist;
 
 public class WantlistSyncPlannerTests
 {
+	[Test]
+	public async Task PlanAsync_ReadsTheSinkUnderTheWantlistSyncCause()
+	{
+		var cause = UsageCause.Other;
+		var sink = WantlistStubs.EmptySink();
+		sink.GetAsync(Any()).Returns(WantlistStubs.NothingOnTheSink).Callback(() => cause = UsageCauses.Current.Cause);
+		var outbox = IWantlistOutbox.Mock();
+		outbox.GetAllAsync(Any()).Returns([]);
+
+		await WantlistStubs.Planner(sink, outbox).PlanAsync();
+
+		await Assert.That(cause).IsEqualTo(UsageCause.WantlistSync);
+	}
+
 	[Test]
 	public async Task PlanAsync_WhenAQueuedRemovalTheSinkAlreadyAgreesWith_DropsItWithoutRunningASync()
 	{

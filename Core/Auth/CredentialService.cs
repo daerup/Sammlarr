@@ -21,8 +21,14 @@ internal sealed class CredentialService(
 		return cache.GetOrLoadAsync(
 			provider,
 			() => credentials.GetAsync(provider, cancellationToken).Map(stored => CredentialOf(provider, stored)),
-			credential => CheckAsync(provider, credential.ClientId, credential.AccessToken, cancellationToken)
+			credential => CheckStoredAsync(provider, credential, cancellationToken)
 		);
+	}
+
+	private async Task<AccessCheck> CheckStoredAsync(AuthProvider provider, ICredential credential, CancellationToken cancellationToken)
+	{
+		using var marked = UsageCauses.Mark(UsageCause.KeyTest);
+		return await CheckAsync(provider, credential.ClientId, credential.AccessToken, cancellationToken);
 	}
 
 	public Task<bool> IsStoredAsync(AuthProvider provider, CancellationToken cancellationToken = default)

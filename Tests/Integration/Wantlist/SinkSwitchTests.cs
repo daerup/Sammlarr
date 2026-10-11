@@ -5,6 +5,7 @@ using Core.Wantlist.Sync;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Usage;
 using Domain.Wantlist;
 using Domain.Wantlist.Arr;
 using Harness;
@@ -49,6 +50,8 @@ public class SinkSwitchTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That((await host.Resolve<IProviderConfigService>().GetAsync()).Sink).IsEqualTo(SinkKind.Arr);
 		await Assert.That((await host.Resolve<IMediaService>().GetSinkIdsAsync([movie]))[movie]).IsEqualTo(TmdbId.From("550", MediaType.Movie));
 		await Assert.That((await host.Resolve<IWantlistService>().GetOutboxAsync()).Adds).ContainsKey(movie);
+		await Assert.That(host.HttpStub.Causes(string.Empty)).IsNotEmpty();
+		await Assert.That(host.HttpStub.Causes(string.Empty).Distinct()).IsEquivalentTo([UsageCause.WantlistSync]);
 	}
 
 	[Test]

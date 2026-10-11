@@ -30,6 +30,27 @@ public class UsageCausesTests
 	}
 
 	[Test]
+	public async Task Mark_ForTheFeedEditorWithAFeed_CarriesTheFeedButNoRun()
+	{
+		var feed = FeedId.From(Guid.NewGuid());
+
+		using var marked = UsageCauses.Mark(UsageCause.FeedEditor, Some.Of(feed));
+
+		await Assert.That(UsageCauses.Current).IsEqualTo(new UsageMark(UsageCause.FeedEditor, Some.Of(feed)));
+		await Assert.That(UsageCauses.Current.Run).IsNone();
+	}
+
+	[Test]
+	public async Task Mark_ForAFeedRun_NamesItsRun()
+	{
+		var feed = FeedId.From(Guid.NewGuid());
+
+		using var marked = UsageCauses.Mark(feed);
+
+		await Assert.That(UsageCauses.Current.Run).IsSome().And.IsEqualTo(feed);
+	}
+
+	[Test]
 	public async Task Mark_OnceDisposed_LeavesNoCause()
 	{
 		using (UsageCauses.Mark(UsageCause.Search))

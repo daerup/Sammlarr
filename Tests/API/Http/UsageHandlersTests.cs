@@ -59,6 +59,23 @@ public class UsageHandlersTests
 	}
 
 	[Test]
+	public async Task SendAsync_ForAFeedEditorCallOfAFeed_IsNotCreditedToThatFeedsRun()
+	{
+		var feed = FeedId.From(Guid.NewGuid());
+		await using var server = await ServerAsync(_ => Task.CompletedTask);
+		var feedRuns = IFeedRunUsage.Mock();
+		using var host = Host(feedRuns: feedRuns.Object);
+
+		using (UsageCauses.Mark(UsageCause.FeedEditor, Some.Of(feed)))
+		{
+			using var response = await host.Services.GetRequiredService<IHttpClientFactory>().CreateClient("plex").GetAsync(server.Urls.Single());
+		}
+
+		feedRuns.Credit(Any(), Any(), Any(), Any()).WasNeverCalled();
+		feedRuns.Time(Any(), Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
 	public async Task SendAsync_CancelledByTheCaller_IsOneCancelledCall()
 	{
 		var feed = FeedId.From(Guid.NewGuid());

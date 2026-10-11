@@ -355,6 +355,8 @@
     [Parameter] public required FeedConfig Config { get; set; }
     [Parameter] public FeedId? SavedFeedId { get; set; }
     [Parameter] public required FeedId DraftFeedId { get; set; }
+
+    private FeedId PreviewFeedId => SavedFeedId ?? DraftFeedId;
     [Parameter] public EventCallback<PreviewStatus> OnStatusChanged { get; set; }
 
     private enum FetchState { Idle, Loading, Success, Failed }
@@ -541,7 +543,7 @@
         using var activity = Instrumentation.Source.StartActivity("FeedPreview", ActivityKind.Internal, default(ActivityContext));
         activity?.SetTag("sammlarr.feed.provider", Config.Provider?.ToString());
         activity?.SetTag("sammlarr.feed.identifier", Config.Identifier?.Trim());
-        using var marked = UsageCauses.Mark(UsageCause.ShowingTitles);
+        using var marked = UsageCauses.Mark(UsageCause.FeedEditor, Some.Of(PreviewFeedId));
 
         ClearResults();
 
@@ -651,7 +653,7 @@
 
     private async Task<bool> ReprocessAsync(FeedLoadState state, CancellationToken cancellationToken)
     {
-        using var marked = UsageCauses.Mark(UsageCause.ShowingTitles);
+        using var marked = UsageCauses.Mark(UsageCause.FeedEditor, Some.Of(PreviewFeedId));
         if (await Planner.PlanAsync(new DraftFeed(SynthesizeFeed(), new RawFeedLoad(_rawResults, state)), cancellationToken) is not IFeedPlan plan)
         {
             ClearResults();
@@ -694,7 +696,7 @@
         var applied = _appliedConfig ?? Config;
         return new Domain.Feed.Feed
         {
-            Id = SavedFeedId ?? DraftFeedId,
+            Id = PreviewFeedId,
             Name = applied.Name,
             Enabled = applied.IsEnabled,
             Provider = applied.Provider!.Value,

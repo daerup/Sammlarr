@@ -4,7 +4,9 @@ using Contracts.Media;
 using Contracts.Ratings;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Usage;
 using Microsoft.Extensions.DependencyInjection;
+using Observability.Usage;
 using TUnit.Assertions.Enums;
 using UI.Shared.Media.Ratings;
 using UI.Shared.Services;
@@ -174,6 +176,17 @@ public class SammlarrRatingBadgeTests : BunitContext
 			.That(cut.FindAll(".rating-row-link").Select(link => link.GetAttribute("href") ?? string.Empty))
 			.Contains("https://www.rottentomatoes.com/tv/last_seen");
 		_media.FindIdAsync(Any<MediaId>(), MediaProvider.RottenTomatoes, Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Breakdown_WhenItLooksUpAnOwnersId_AsksUnderTheShowingTitlesCause()
+	{
+		var cause = UsageCause.Other;
+		_media.FindIdAsync(Any<MediaId>(), Any<MediaProvider>(), Any()).Returns(new None()).Callback(() => cause = UsageCauses.Current.Cause);
+
+		RenderBreakdownWith(LastSeen, new RatingStrategy(AveragedRating.Everything), [ImdbId.From("tt0903747", MediaType.Show)]);
+
+		await Assert.That(cause).IsEqualTo(UsageCause.ShowingTitles);
 	}
 
 	[Test]

@@ -6,8 +6,10 @@ using Contracts.Wantlist.Outbox;
 using Core.Announcing;
 using Domain.Feed;
 using Domain.Media;
+using Domain.Usage;
 using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
+using Observability.Usage;
 
 namespace Core.Wantlist;
 
@@ -121,6 +123,7 @@ internal sealed class WantlistService(
 		{
 			return [];
 		}
+		using var marked = UsageCauses.Mark(UsageCause.WantlistSync);
 		var config = await providerConfig.GetAsync(cancellationToken);
 		return await media.EnsureSinkIdsAsync(ids, config.Sink, cancellationToken);
 	}

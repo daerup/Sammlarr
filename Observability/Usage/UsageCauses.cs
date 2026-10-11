@@ -4,7 +4,10 @@ using Domain.Usage;
 
 namespace Observability.Usage;
 
-public readonly record struct UsageMark(UsageCause Cause, Optional<FeedId> Feed);
+public readonly record struct UsageMark(UsageCause Cause, Optional<FeedId> Feed)
+{
+	public Optional<FeedId> Run => Feed.When(Cause == UsageCause.FeedRun);
+}
 
 public static class UsageCauses
 {
@@ -15,6 +18,8 @@ public static class UsageCauses
 	public static IDisposable Mark(UsageCause cause) => Mark(new UsageMark(cause, new None()));
 
 	public static IDisposable Mark(FeedId feed) => Mark(new UsageMark(UsageCause.FeedRun, Some.Of(feed)));
+
+	public static IDisposable Mark(UsageCause cause, Optional<FeedId> feed) => Mark(new UsageMark(cause, feed));
 
 	private static IDisposable Mark(UsageMark mark)
 	{
