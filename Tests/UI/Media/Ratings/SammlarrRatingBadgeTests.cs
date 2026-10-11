@@ -87,7 +87,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 	}
 
 	[Test]
-	public async Task Breakdown_ForAChosenSourceWithoutAProvider_LinksTheWordProvider()
+	public async Task Breakdown_ForAChosenSourceWithoutAProvider_ListsNoRowForIt()
 	{
 		var cut = Render<SammlarrRatingBreakdown>(parameters =>
 			parameters
@@ -97,9 +97,8 @@ public class SammlarrRatingBadgeTests : BunitContext
 				.Add(breakdown => breakdown.Where, "your default")
 		);
 
-		var reason = cut.FindAll(".rating-row-name small").First();
-		await Assert.That(reason.TextContent.Trim()).IsEqualTo("needs a provider");
-		await Assert.That(reason.QuerySelector(".rating-suppliers-link")).IsNotNull();
+		await Assert.That(string.Concat(cut.FindAll(".rating-row-name").Select(name => name.TextContent))).DoesNotContain("IMDb");
+		await Assert.That(cut.FindAll(".rating-suppliers-link")).IsEmpty();
 	}
 
 	[Test]
@@ -130,7 +129,24 @@ public class SammlarrRatingBadgeTests : BunitContext
 	}
 
 	[Test]
-	public async Task Breakdown_RowsWithARatingLink_ARowWithoutOneDoesNot()
+	public async Task Breakdown_UnderFirstAvailable_SaysTheEmptyRowAboveThePickWasSkipped()
+	{
+		var cut = RenderBreakdown(LastSeen, new RatingStrategy(new OrderedRating([RatingSource.RottenTomatoesAudience, RatingSource.Imdb])));
+
+		await Assert.That(cut.FindAll(".rating-row-name small").Select(line => line.TextContent.Trim())).Contains("no rating, skipped");
+	}
+
+	[Test]
+	public async Task Breakdown_WhenNoSourceRatesTheTitle_ShowsOnlyTheHeaderAndTheUnratedFooter()
+	{
+		var cut = RenderBreakdown(MediaRatings.None, new RatingStrategy(AveragedRating.Everything));
+
+		await Assert.That(cut.FindAll(".rating-row")).IsEmpty();
+		await Assert.That(cut.Markup).Contains(RatingTexts.UnratedFooter);
+	}
+
+	[Test]
+	public async Task Breakdown_ForEachRatedRow_LinksItsPage()
 	{
 		var cut = RenderBreakdown(LastSeen, new RatingStrategy(AveragedRating.Everything));
 
@@ -142,7 +158,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 				"https://www.imdb.com/title/tt0903747",
 				"https://www.rottentomatoes.com/search?search=Last%20Seen",
 			]);
-		await Assert.That(cut.FindAll(".rating-row").Last().QuerySelector(".rating-row-link")).IsNull();
+		await Assert.That(cut.FindAll(".rating-row").Count).IsEqualTo(links.Count);
 	}
 
 	[Test]
@@ -177,7 +193,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 
 		await Assert
 			.That(cut.FindAll(".rating-row").Select(row => row.GetAttribute("style") ?? string.Empty))
-			.IsEquivalentTo(["--brand: #01B4E4", "--brand: #F5DE50", "--brand: #FA320A", "--brand: #FA320A"], CollectionOrdering.Matching);
+			.IsEquivalentTo(["--brand: #01B4E4", "--brand: #F5DE50", "--brand: #FA320A"], CollectionOrdering.Matching);
 	}
 
 	[Test]

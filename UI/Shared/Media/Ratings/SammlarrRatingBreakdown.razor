@@ -60,16 +60,7 @@
             <RatingMarkIcon Source="row.Source" Rating="row.Rating"/>
             <span class="rating-row-name">
                 @RatingTexts.Name(row.Source)
-                <small>
-                    @if (row.State is RatingRowState.NeedsProvider)
-                    {
-                        <text>needs a </text><RatingSuppliersPopover Sources="[row.Source]"/>
-                    }
-                    else
-                    {
-                        @Detail(row)
-                    }
-                </small>
+                <small>@Detail(row)</small>
             </span>
             <span class="rating-row-value">
                 @if (row.Rating.ToNullable() is { } rating)
