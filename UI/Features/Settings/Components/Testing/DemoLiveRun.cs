@@ -4,6 +4,7 @@ using Domain.Feed.Run;
 using Domain.Feed.Trace;
 using Domain.Processing;
 using Domain.Providers;
+using Shared.Concurrency;
 using UI.Features.Feeds.Components;
 
 namespace UI.Features.Settings.Components.Testing;
@@ -17,6 +18,16 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 	private const int PageSize = 40;
 
 	private const int FetchMs = 900;
+
+	private const int PlexWindow = 15;
+
+	private const int PlexPerMs = 4000;
+
+	private const int PlexInFlight = 5;
+
+	private const int PlexThrottledAt = 12000;
+
+	private const int PlexRetryAfterMs = 2500;
 
 	private static readonly (string Name, int Year)[] Names =
 	[
@@ -271,22 +282,40 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 			}
 
 			_ended = Optional.When(elapsed >= _script.EndMs, () => new FeedRunEnd(TraceEnding.Completed, _script.EndMs) { Counts = Some.Of(Counts) });
-			var until = _script.Blocked.Where(window => window.From <= elapsed && elapsed < window.Until).Select(window => window.Until).DefaultIfEmpty(0).Max();
 			var progress = Progress(elapsed);
 			Tally = RunTally.Of(_fates, _requests, Math.Min(elapsed, _script.EndMs), _ended, Some.Of(Names.Length)) with
 			{
 				Progress = progress,
-				RateLimited = progress.Busiest.Match(wait => wait.Service is RemoteService.Tmdb && until > elapsed, () => false),
+				RateLimited = progress.Busiest.Match(wait => _script.BlockedUntil(wait.Service, elapsed) > elapsed, () => false),
 			};
 			return new WireBatch(
 				[.. _script.Steps.Skip(from).Take(_sent - from).Select(LiveWire.Step)],
-				[new WireCapacity((byte)RemoteService.Tmdb, until, 0)],
+				[new WireCapacity((byte)RemoteService.Tmdb, _script.BlockedUntil(RemoteService.Tmdb, elapsed), 0), PlexCapacity(elapsed)],
 				_ended.IsSome()
 			)
 			{
 				Reading = progress.Reading.ToNullable(),
 			};
 		}
+	}
+
+	private WireCapacity PlexCapacity(int elapsed)
+	{
+		var now = DateTimeOffset.UnixEpoch.AddMilliseconds(elapsed);
+		var blocked = _script.BlockedUntil(RemoteService.Plex, elapsed);
+		var queued = _script.PlexCalls.Where(call => call.Asked <= elapsed && elapsed < call.Granted).ToList();
+		var flying = _script.PlexCalls.Count(call => call.Granted <= elapsed && elapsed < call.Answered);
+		var load = RemoteLoad.Idle with
+		{
+			BlockedUntil = Optional.When(blocked > elapsed, () => now.AddMilliseconds(blocked - elapsed)),
+			EstimatedWait = TimeSpan.FromMilliseconds(Math.Max(0, blocked - elapsed) + queued.Count * PlexPerMs / PlexWindow),
+			Waiting = queued.Count + flying,
+			Paced = Optional.When(
+				blocked == 0 && flying == 0 && queued.Count > 0,
+				() => new LanePace(now.AddMilliseconds(queued.Min(call => call.Granted) - elapsed), PlexWindow, TimeSpan.FromMilliseconds(PlexPerMs))
+			),
+		};
+		return LiveWire.Capacity(RemoteService.Plex, load, now, elapsed);
 	}
 
 	private void Count(TraceStep step)
@@ -411,10 +440,20 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 	private sealed record Script(
 		IReadOnlyList<TraceStep> Steps,
 		int EndMs,
-		IReadOnlyList<(int From, int Until)> Blocked,
-		IReadOnlyList<(int From, int Until, int Page)> Reading
+		IReadOnlyList<(RemoteService Service, int From, int Until)> Blocked,
+		IReadOnlyList<(int From, int Until, int Page)> Reading,
+		IReadOnlyList<(int Asked, int Granted, int Answered)> PlexCalls
 	)
 	{
+		internal int BlockedUntil(RemoteService service, int elapsed)
+		{
+			return Blocked
+				.Where(window => window.Service == service && window.From <= elapsed && elapsed < window.Until)
+				.Select(window => window.Until)
+				.DefaultIfEmpty(0)
+				.Max();
+		}
+
 		internal static Script Write((string Name, int Year)[] names)
 		{
 			var writer = new Writer();
@@ -431,19 +470,25 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 					.Events.OrderBy(entry => entry.At)
 					.Select((entry, index) => new TraceStep(index + 1, entry.At, Optional.When(entry.Title >= 0, () => entry.Title), entry.Event)),
 			];
-			return new Script(steps, steps[^1].AtMs + 120, writer.Blocked, writer.Reading);
+			return new Script(steps, steps[^1].AtMs + 120, writer.Blocked, writer.Reading, writer.PlexCalls);
 		}
 	}
 
 	private sealed class Writer
 	{
 		private readonly Random _random = new(7);
+		private readonly int[] _plexFree = new int[PlexInFlight];
+		private int _plexWindow = -1;
+		private int _plexSent;
+		private int _plexLast;
 
 		internal List<(int At, int Title, TraceEvent Event)> Events { get; } = [];
 
-		internal List<(int From, int Until)> Blocked { get; } = [];
+		internal List<(RemoteService Service, int From, int Until)> Blocked { get; } = [];
 
 		internal List<(int From, int Until, int Page)> Reading { get; } = [];
+
+		internal List<(int Asked, int Granted, int Answered)> PlexCalls { get; } = [];
 
 		internal void Add(int at, int title, TraceEvent traced) => Events.Add((at, title, traced));
 
@@ -507,13 +552,54 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 			var limited = service is RemoteService.Tmdb && stage is TraceStage.Ids && _random.NextDouble() < 0.07;
 			var ms = limited ? 1200 + _random.Next(600) : 60 + _random.Next(service is RemoteService.Plex ? 220 : 160);
 			Add(at, title, new HopAsked(service, stage));
+			if (service is RemoteService.Plex && stage is TraceStage.Ids)
+			{
+				return PlexHop(title, at, ms);
+			}
+
 			Add(at + ms, title, new HopAnswered(service, stage, limited ? HopOutcome.AfterRateLimit : HopOutcome.Answered, ms));
 			if (limited)
 			{
-				Blocked.Add((at + 100, at + ms));
+				Blocked.Add((service, at + 100, at + ms));
 			}
 
 			return at + ms;
+		}
+
+		private int PlexHop(int title, int at, int ms)
+		{
+			var answered = SendToPlex(at, ms);
+			var throttled = answered - ms >= PlexThrottledAt && Blocked.TrueForAll(window => window.Service is not RemoteService.Plex);
+			if (throttled)
+			{
+				Blocked.Add((RemoteService.Plex, answered, answered + PlexRetryAfterMs));
+				answered = SendToPlex(answered + PlexRetryAfterMs, ms);
+			}
+
+			Add(answered, title, new HopAnswered(RemoteService.Plex, TraceStage.Ids, throttled ? HopOutcome.AfterRateLimit : HopOutcome.Answered, ms));
+			return answered;
+		}
+
+		private int SendToPlex(int asked, int ms)
+		{
+			var slot = Array.IndexOf(_plexFree, _plexFree.Min());
+			var granted = Math.Max(Math.Max(asked, _plexLast), _plexFree[slot]);
+			if (granted / PlexPerMs == _plexWindow && _plexSent >= PlexWindow)
+			{
+				granted = (_plexWindow + 1) * PlexPerMs;
+			}
+
+			if (granted / PlexPerMs != _plexWindow)
+			{
+				_plexWindow = granted / PlexPerMs;
+				_plexSent = 0;
+			}
+
+			_plexSent++;
+			_plexLast = granted;
+			_plexFree[slot] = granted + ms;
+			PlexCalls.Add((asked, granted, granted + ms));
+			return granted + ms;
 		}
 	}
 }

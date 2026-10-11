@@ -40,7 +40,10 @@ public sealed class LaneGate : IDisposable
 			var now = _time.GetUtcNow();
 			var blocked = new[] { _blockedUntil, _downUntil, ReservedUntil(asking, now) }.WhereSome().Where(until => until > now).OrderDescending().FirstOrNone();
 			var queued = _windows.Select(window => window.Drain(_waiting.Count, _scale)).DefaultIfEmpty(TimeSpan.Zero).Max();
-			return new LaneLoad(blocked, blocked.Map(until => until - now).GetValueOr(TimeSpan.Zero) + queued, IsDown(now), _waiting.Count);
+			return new LaneLoad(blocked, blocked.Map(until => until - now).GetValueOr(TimeSpan.Zero) + queued, IsDown(now), _waiting.Count)
+			{
+				Paced = Pace(now).When(_waiting.Count > 0 && _inFlight == 0 && blocked.IsNone()),
+			};
 		}
 	}
 
@@ -161,6 +164,11 @@ public sealed class LaneGate : IDisposable
 		return new[] { _blockedUntil.GetValueOr(now), ReservedUntil(priority.Class, now).GetValueOr(now) }
 			.Concat(_windows.Select(window => window.NextFree(now, _scale)))
 			.Max();
+	}
+
+	private Optional<LanePace> Pace(DateTimeOffset now)
+	{
+		return _windows.Select(window => window.Pace(now, _scale)).Where(pace => pace.OpensAt > now).OrderByDescending(pace => pace.OpensAt).FirstOrNone();
 	}
 
 	private Optional<string> Refusal(LanePriority priority, DateTimeOffset deadline, DateTimeOffset now)
@@ -297,6 +305,8 @@ public sealed class LaneGate : IDisposable
 		}
 
 		public TimeSpan Drain(int waiting, double scale) => TimeSpan.FromTicks(window.Per.Ticks * waiting / Limit(scale));
+
+		public LanePace Pace(DateTimeOffset now, double scale) => new(NextFree(now, scale), Limit(scale), window.Per);
 
 		private DateTimeOffset SlidingFree(DateTimeOffset now, int limit)
 		{
