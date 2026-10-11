@@ -17,6 +17,8 @@ internal sealed class RadarrApi(HttpClient http, RadarrOptions options) : ArrApi
 
 	protected override string TitleIds => "movieIds";
 
+	protected override string AddressField => "tmdbId";
+
 	protected override string ExclusionFlag => "addImportExclusion";
 
 	public override int AddressOf(ArrTitle title) => title.TmdbId;

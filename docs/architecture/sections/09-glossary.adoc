@@ -270,9 +270,12 @@ Tag scheme:: How Radarr + Sonarr knows a title is Sammlarr's (`ArrTagScheme`): a
 only takes this user's tag off.
 
 Anime slot:: An optional second root folder and quality profile for Radarr or Sonarr (`ArrInstanceConfig.AnimeRootFolderPath`,
-`AnimeQualityProfileId`; `RoutesAnime` once a folder is chosen). A new title goes there, and into Sonarr as an Anime series, when the
-app's own lookup marks it anime (`ArrApi.IsAnime`: Radarr's `keywords` hold `anime`, Sonarr's `genres` hold `Anime`) or Sammlarr already
-holds an AniList or MyAnimeList id for it; otherwise it goes to the default folder and profile. The anime profile falls back to the
+`AnimeQualityProfileId`; `RoutesAnime` once a folder is chosen). A new title goes there, and into Sonarr as an Anime series, when it
+is anime by Sammlarr's own data (it holds an AniList or MyAnimeList id for it, or finds its TMDB or TheTVDB id in the anime id map,
+`IAnimeIds.FindManyAsync`) or, for a title whose stored genres hold Animation or are empty, when the app's lookup marks it anime
+(`ArrApi.IsAnime`: Radarr's `keywords` hold `anime`, Sonarr's `genres` hold `Anime`); otherwise it goes to the default folder and
+profile. Every add the app is not asked about posts a small body built from the stored title (`ArrApi.Body`), and an add the app
+answers "not found" settles as unaddressable. The anime profile falls back to the
 default one (`ProfileFor`), and a title already in the app is only retagged, never moved.
 
 Provenance:: Where a wantlist item came from: `SinkOrigin` (added on the sink and pulled in),

@@ -1,8 +1,10 @@
 using System.Text.RegularExpressions;
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Primitives;
 using Bunit;
 using Contracts.Settings;
 using Domain.Wantlist.Arr;
+using Microsoft.AspNetCore.Components.Web;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
@@ -181,6 +183,36 @@ public class ArrAppSectionTests : BunitContext
 	}
 
 	[Test]
+	public async Task AnimeHint_ForRadarr_SaysOnlyAnimatedMoviesAreAskedAbout()
+	{
+		var portal = Render<BbPortalHost>();
+		var cut = RenderSection(Stored, ArrConnectionState.Connected, app: ArrApp.Radarr);
+
+		await cut.Find("[aria-label='What counts as anime']").TriggerEventAsync("onmouseenter", new MouseEventArgs());
+
+		await Assert
+			.That(Hint(portal))
+			.IsEqualTo(
+				"What counts as anime A new movie goes to the anime folder when it is anime by: Sammlarr's own anime data: Sammlarr holds an AniList or MyAnimeList id for it, or finds its TMDB id in the anime id map from anime-lists. Radarr, for animated movies only: when it is animated (genre Animation) and Sammlarr's data does not call it anime, Sammlarr asks Radarr, which counts it as anime when TMDB gives it the keyword anime. Everything else goes to the normal folder, for example Western animation such as Cars 3 (Radarr is asked and says no) and live-action adaptations such as Ghost in the Shell (2017) (not animated, so never asked). Movies already in Radarr never move."
+			);
+	}
+
+	[Test]
+	public async Task AnimeHint_ForSonarr_SaysOnlyAnimatedShowsAreAskedAbout()
+	{
+		var portal = Render<BbPortalHost>();
+		var cut = RenderSection(Stored, ArrConnectionState.Connected, app: ArrApp.Sonarr);
+
+		await cut.Find("[aria-label='What counts as anime']").TriggerEventAsync("onmouseenter", new MouseEventArgs());
+
+		await Assert
+			.That(Hint(portal))
+			.IsEqualTo(
+				"What counts as anime A new show goes to the anime folder, as an Anime series, when it is anime by: Sammlarr's own anime data: Sammlarr holds an AniList or MyAnimeList id for it, or finds its TVDB id in the anime id map from anime-lists. Sonarr, for animated shows only: when it is animated (genre Animation) and Sammlarr's data does not call it anime, Sammlarr asks Sonarr, which counts it as anime when TheTVDB gives it the genre Anime. Everything else goes to the normal folder, for example Western animation such as Arcane (Sonarr is asked and says no) and live-action adaptations such as One Piece (2023) (not animated, so never asked). Shows already in Sonarr never move."
+			);
+	}
+
+	[Test]
 	public async Task Test_AfterANewAddressIsTyped_TestsWhatWasTyped()
 	{
 		var cut = RenderSection(Stored, ArrConnectionState.Connected);
@@ -300,6 +332,11 @@ public class ArrAppSectionTests : BunitContext
 	private static string AnimeHeader(IRenderedComponent<ArrAppSection> cut)
 	{
 		return Regex.Replace(cut.Find("[data-arr-anime] button").TextContent, @"\s+", " ").Trim();
+	}
+
+	private static string Hint(IRenderedComponent<BbPortalHost> portal)
+	{
+		return Regex.Replace(portal.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]").TextContent, @"\s+", " ").Trim();
 	}
 
 	private static BbSelect<string> AnimeFolder(IRenderedComponent<ArrAppSection> cut)

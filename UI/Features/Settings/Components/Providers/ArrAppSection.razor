@@ -131,11 +131,11 @@
                         <BbTooltipContent Class="w-[min(400px,calc(100vw-2rem))] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
                             <b class="mb-1 block font-semibold text-foreground">What counts as anime</b>
                             @AnimeLead(App)
-                            <ul class="my-1.5 list-disc space-y-0.5 pl-4">
-                                <li>@App.Name tags it as anime: @AnimeTag(App), or</li>
-                                <li>Sammlarr already holds an <b class="font-medium text-foreground">AniList or MyAnimeList id</b> for it, for example because it came from an AniList or MyAnimeList feed.</li>
-                            </ul>
-                            <span class="block">Western animation such as <i>Arcane</i> and live-action adaptations such as <i>One Piece</i> (2023) are not anime here. @Titles(App) already in @App.Name never move.</span>
+                            <ol class="my-1.5 list-decimal space-y-0.5 pl-4">
+                                <li><b class="font-medium text-foreground">Sammlarr's own anime data</b>: Sammlarr holds an AniList or MyAnimeList id for it, or finds its @AnimeMapId(App) id in the anime id map from anime-lists.</li>
+                                <li><b class="font-medium text-foreground">@App.Name, for animated @Titles(App).ToLowerInvariant() only</b>: when it is animated (genre Animation) and Sammlarr's data does not call it anime, Sammlarr asks @App.Name, which counts it as anime when @AnimeTag(App).</li>
+                            </ol>
+                            <span class="block">Everything else goes to the normal folder, for example @AnimeExamples(App). @Titles(App) already in @App.Name never move.</span>
                         </BbTooltipContent>
                     </BbTooltip>
                 </div>
@@ -256,8 +256,17 @@
     {
         return app switch
         {
-            ArrApp.Radarr => @<span class="block">A new movie goes to the anime folder when:</span>,
-            ArrApp.Sonarr => @<span class="block">A new show goes to the anime folder, as an <b class="font-medium text-foreground">Anime series</b>, when:</span>,
+            ArrApp.Radarr => @<span class="block">A new movie goes to the anime folder when it is anime by:</span>,
+            ArrApp.Sonarr => @<span class="block">A new show goes to the anime folder, as an <b class="font-medium text-foreground">Anime series</b>, when it is anime by:</span>,
+        };
+    }
+
+    private static string AnimeMapId(ArrApp app)
+    {
+        return app switch
+        {
+            ArrApp.Radarr => "TMDB",
+            ArrApp.Sonarr => "TVDB",
         };
     }
 
@@ -265,8 +274,17 @@
     {
         return app switch
         {
-            ArrApp.Radarr => @<span>the keyword <b class="font-medium text-foreground">anime</b>, which it takes from TMDB</span>,
-            ArrApp.Sonarr => @<span>the genre <b class="font-medium text-foreground">Anime</b>, which it takes from TheTVDB</span>,
+            ArrApp.Radarr => @<span>TMDB gives it the keyword <b class="font-medium text-foreground">anime</b></span>,
+            ArrApp.Sonarr => @<span>TheTVDB gives it the genre <b class="font-medium text-foreground">Anime</b></span>,
+        };
+    }
+
+    private static RenderFragment AnimeExamples(ArrApp app)
+    {
+        return app switch
+        {
+            ArrApp.Radarr => @<span>Western animation such as <i>Cars 3</i> (Radarr is asked and says no) and live-action adaptations such as <i>Ghost in the Shell</i> (2017) (not animated, so never asked)</span>,
+            ArrApp.Sonarr => @<span>Western animation such as <i>Arcane</i> (Sonarr is asked and says no) and live-action adaptations such as <i>One Piece</i> (2023) (not animated, so never asked)</span>,
         };
     }
 

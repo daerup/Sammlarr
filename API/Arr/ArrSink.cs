@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
 using API.Arr.Types;
+using Contracts.Datasets;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;
@@ -20,10 +21,13 @@ internal sealed class ArrSink(
 	IArrSinkConfigService configs,
 	IUserRepository users,
 	IMediaService mediaService,
+	IAnimeIds animeIds,
 	ICurrentUser currentUser,
 	ILogger<ArrSink> logger
 ) : IMediaSink
 {
+	private const string Animation = "Animation";
+
 	public SinkKind Kind => SinkKind.Arr;
 
 	public Optional<MediaProvider> AddressedBy(MediaType type) => apis.All.FirstOrNone(api => api.App.Type == type).Map(api => api.AddressedBy);
@@ -71,13 +75,14 @@ internal sealed class ArrSink(
 	{
 		var config = await configs.GetAsync(cancellationToken);
 		List<MediaId> ids = [.. pushes.Select(push => push.MediaId)];
+		var sinkIds = await mediaService.GetSinkIdsAsync(ids, cancellationToken);
 		var setup = new Setup(
 			config,
 			await ClaimantAsync(config.Tags, cancellationToken),
 			await ViewerAsync(cancellationToken),
-			await OnAnimeSitesAsync(action, config, ids, cancellationToken)
+			await AnimeAsync(action, config, sinkIds, cancellationToken),
+			await StoredAsync(action, sinkIds, cancellationToken)
 		);
-		var sinkIds = await mediaService.GetSinkIdsAsync(ids, cancellationToken);
 		var sessions = new Dictionary<ArrApp, Result<ArrSession>>();
 		foreach (var push in pushes)
 		{
@@ -259,7 +264,7 @@ internal sealed class ArrSink(
 			.Find(id)
 			.Match(
 				existing => TagAsync(session, existing, Labeling(session, existing, setup, labels), cancellationToken),
-				() => CreateAsync(session, id, setup.Config.Of(session.App), labels, setup.OnAnimeSites.Contains(push.MediaId), cancellationToken)
+				() => CreateAsync(session, id, setup.Config.Of(session.App), labels, setup.About(push.MediaId), cancellationToken)
 			);
 	}
 
@@ -303,7 +308,7 @@ internal sealed class ArrSink(
 		IExternalMediaId id,
 		ArrInstanceConfig settings,
 		IReadOnlyList<string> labels,
-		bool holdsAnimeId,
+		Known known,
 		CancellationToken cancellationToken
 	)
 	{
@@ -312,10 +317,28 @@ internal sealed class ArrSink(
 			settings
 				.QualityProfileId.Map(profile => settings.RootFolderPath.Map(folder => new ArrAddition(profile, folder, ids)))
 				.Match(
-					addition => LookUpAndAddAsync(session, id, settings, addition, holdsAnimeId, cancellationToken),
+					addition => AddNewAsync(session, id, settings, addition, known, cancellationToken),
 					() => Error.From($"{session.App.Name} has no quality profile or root folder chosen yet.")
 				)
 		);
+	}
+
+	private static Task<Result<SinkSyncOutcome>> AddNewAsync(
+		ArrSession session,
+		IExternalMediaId id,
+		ArrInstanceConfig settings,
+		ArrAddition addition,
+		Known known,
+		CancellationToken cancellationToken
+	)
+	{
+		var asks = settings.RoutesAnime && !known.Anime && known.MayBeAnimated;
+		return known
+			.Title.When(_ => !asks)
+			.Match(
+				title => AddedAsync(session, session.Body(id, title), settings, addition, known.Anime, cancellationToken),
+				() => LookUpAndAddAsync(session, id, settings, addition, known.Anime, cancellationToken)
+			);
 	}
 
 	private static async Task<Result<SinkSyncOutcome>> LookUpAndAddAsync(
@@ -323,29 +346,31 @@ internal sealed class ArrSink(
 		IExternalMediaId id,
 		ArrInstanceConfig settings,
 		ArrAddition addition,
-		bool holdsAnimeId,
+		bool anime,
 		CancellationToken cancellationToken
 	)
 	{
 		var looked = await session.LookupAsync(id, cancellationToken);
 		return await looked.Map(found =>
 			found.Match(
-				title => AddedAsync(session, Prepared(session, title, settings, addition, holdsAnimeId), cancellationToken),
+				title => AddedAsync(session, title, settings, addition, anime || session.IsAnime(title), cancellationToken),
 				() => Success.Of(SinkSyncOutcome.Unaddressable)
 			)
 		);
 	}
 
-	private static JsonObject Prepared(ArrSession session, JsonObject title, ArrInstanceConfig settings, ArrAddition addition, bool holdsAnimeId)
+	private static async Task<Result<SinkSyncOutcome>> AddedAsync(
+		ArrSession session,
+		JsonObject title,
+		ArrInstanceConfig settings,
+		ArrAddition addition,
+		bool anime,
+		CancellationToken cancellationToken
+	)
 	{
-		var route = settings.RoutesAnime && (holdsAnimeId || session.IsAnime(title)) ? ArrRoute.Anime : ArrRoute.Default;
-		return session.Prepare(title, settings, addition.Routed(route, settings));
-	}
-
-	private static async Task<Result<SinkSyncOutcome>> AddedAsync(ArrSession session, JsonObject title, CancellationToken cancellationToken)
-	{
-		var added = await session.AddAsync(title, cancellationToken);
-		return added.Map(_ => SinkSyncOutcome.Applied);
+		var route = settings.RoutesAnime && anime ? ArrRoute.Anime : ArrRoute.Default;
+		var added = await session.AddAsync(session.Prepare(title, settings, addition.Routed(route, settings)), cancellationToken);
+		return added.Map(found => found.Match(SinkSyncOutcome.Applied, SinkSyncOutcome.Unaddressable));
 	}
 
 	private Task<Result<SinkSyncOutcome>> RemoveAsync(ArrSession session, IExternalMediaId id, Setup setup, CancellationToken cancellationToken)
@@ -369,10 +394,10 @@ internal sealed class ArrSink(
 		return removed.Map(_ => SinkSyncOutcome.Applied);
 	}
 
-	private async Task<IReadOnlySet<MediaId>> OnAnimeSitesAsync(
+	private async Task<IReadOnlySet<MediaId>> AnimeAsync(
 		WantlistOperationAction action,
 		ArrSinkConfig config,
-		IReadOnlyList<MediaId> ids,
+		IReadOnlyDictionary<MediaId, IExternalMediaId> addressed,
 		CancellationToken cancellationToken
 	)
 	{
@@ -381,9 +406,21 @@ internal sealed class ArrSink(
 			return new HashSet<MediaId>();
 		}
 
-		var aniList = await mediaService.GetIdsAsync(ids, MediaProvider.AniList, cancellationToken);
-		var mal = await mediaService.GetIdsAsync(ids, MediaProvider.Mal, cancellationToken);
-		return aniList.Keys.Concat(mal.Keys).ToHashSet();
+		var aniList = await mediaService.GetIdsAsync(addressed.Keys, MediaProvider.AniList, cancellationToken);
+		var mal = await mediaService.GetIdsAsync(addressed.Keys, MediaProvider.Mal, cancellationToken);
+		var mapped = await animeIds.FindManyAsync([.. addressed.Values], cancellationToken);
+		return aniList.Keys.Concat(mal.Keys).Concat(addressed.Where(entry => mapped.ContainsKey(entry.Value)).Select(entry => entry.Key)).ToHashSet();
+	}
+
+	private async Task<IReadOnlyDictionary<MediaId, MediaDetails>> StoredAsync(
+		WantlistOperationAction action,
+		IReadOnlyDictionary<MediaId, IExternalMediaId> addressed,
+		CancellationToken cancellationToken
+	)
+	{
+		return action is WantlistOperationAction.Add
+			? await mediaService.GetStoredDetailsAsync(addressed.Keys, cancellationToken)
+			: new Dictionary<MediaId, MediaDetails>();
 	}
 
 	private async Task<Optional<ArrTagUser>> ClaimantAsync(ArrTagScheme scheme, CancellationToken cancellationToken)
@@ -392,7 +429,30 @@ internal sealed class ArrSink(
 		return everyone.OrderBy(user => user.JoinedAt).FirstOrNone().When(_ => scheme.PerUser).Map(Owner);
 	}
 
-	private sealed record Setup(ArrSinkConfig Config, Optional<ArrTagUser> Claimant, ArrTagUser Viewer, IReadOnlySet<MediaId> OnAnimeSites);
+	private sealed record Setup(
+		ArrSinkConfig Config,
+		Optional<ArrTagUser> Claimant,
+		ArrTagUser Viewer,
+		IReadOnlySet<MediaId> Anime,
+		IReadOnlyDictionary<MediaId, MediaDetails> Stored
+	)
+	{
+		public Known About(MediaId id) => new(Anime.Contains(id), Stored.GetValueOrNone(id));
+	}
+
+	private sealed record Known(bool Anime, Optional<MediaDetails> Details)
+	{
+		public Optional<string> Title => Details.Map(details => Optional.Of(details.Title));
+
+		public bool MayBeAnimated
+		{
+			get
+			{
+				var genres = Details.Map(details => details.Genres).GetValueOr([]);
+				return genres.Count == 0 || genres.Contains(Animation, StringComparer.OrdinalIgnoreCase);
+			}
+		}
+	}
 
 	private sealed record Held(ArrSession Session, IReadOnlyList<ArrTitle> Sole, IReadOnlyList<ArrTitle> Staying, ValueSet<int> Only);
 }

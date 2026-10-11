@@ -28,6 +28,8 @@ public interface IMediaService
 
 	Task<IReadOnlyDictionary<MediaId, MediaRatings>> GetStoredRatingsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
+	Task<IReadOnlyDictionary<MediaId, MediaDetails>> GetStoredDetailsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
+
 	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, SinkKind sink, CancellationToken cancellationToken = default);

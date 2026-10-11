@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using API.Arr;
 using API.Arr.Radarr;
 using API.Arr.Sonarr;
+using Contracts.Datasets;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;
@@ -55,6 +56,8 @@ public class ArrSinkTests
 
 	private readonly Mock<IMediaService> _media = IMediaService.Mock();
 
+	private readonly Mock<IAnimeIds> _animeIds = IAnimeIds.Mock();
+
 	private readonly Mock<IUserRepository> _users = IUserRepository.Mock();
 
 	private readonly Mock<ICurrentUser> _viewer = ICurrentUser.Mock();
@@ -69,6 +72,8 @@ public class ArrSinkTests
 		_users.GetAllAsync(Any()).Returns([GuestUser]);
 		_users.GetAsync(Guest, Any()).Returns(GuestUser);
 		_viewer.Id.Getter.Returns(Guest);
+		_media.GetStoredDetailsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new Dictionary<MediaId, MediaDetails>());
+		_animeIds.FindManyAsync(Any(), Any()).Returns(new Dictionary<IExternalMediaId, AnimeIdMapping>());
 	}
 
 	[Test]
@@ -164,26 +169,25 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	public async Task ApplyAsync_ForANewMovie_LooksItUpAndAddsItTaggedWithTheProfileAndFolder()
+	public async Task ApplyAsync_ForANewMovie_AddsItByItsTmdbIdAndStoredTitleTaggedWithTheProfileAndFolder()
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("[]");
 		_radarr.OnPost("/api/v3/tag").RespondWithJson("""{"id":1,"label":"sammlarr-u-guest"}""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("[]");
-		_radarr
-			.OnRequest(request => request.Method(HttpMethod.Get).PathStartsWith("/api/v3/movie/lookup"))
-			.RespondWithJson("""[{"title":"Inception","tmdbId":27205}]""");
 		_radarr.OnPost("/api/v3/movie").RespondWithJson("""{"id":5,"tmdbId":27205,"tags":[1]}""");
 		Addressing(TmdbId.From("27205", MediaType.Movie));
+		Storing(MediaType.Movie, "Inception", "Action", "Science Fiction");
 
 		var acks = await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
 		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
-		_radarr.Verify(request => request.Method(HttpMethod.Get).PathMatches(".*/movie/lookup\\?term=tmdb:27205$"), Times.Once);
 		_radarr.Verify(
 			request =>
 				request
 					.Method(HttpMethod.Post)
 					.Path("/api/v3/movie")
+					.BodyContains("\"tmdbId\":27205")
+					.BodyContains("\"title\":\"Inception\"")
 					.BodyContains("\"qualityProfileId\":1")
 					.BodyContains("\"rootFolderPath\":\"/movies\"")
 					.BodyContains("\"tags\":[1]")
@@ -193,16 +197,142 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	public async Task ApplyAsync_ForAViewerRenamedSinceTheyJoined_TagsTheTitleWithTheirFirstName()
+	public async Task ApplyAsync_ForANewMovieWithoutAStoredTitle_LooksItUpAndAddsItFromTheLookup()
 	{
-		Renamed();
+		RadarrAdds(27205);
+		_radarr
+			.OnRequest(request => request.Method(HttpMethod.Get).PathStartsWith("/api/v3/movie/lookup"))
+			.RespondWithJson("""[{"title":"Inception","tmdbId":27205,"year":2010}]""");
+
+		await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_radarr.Verify(request => request.Method(HttpMethod.Get).PathMatches(".*/movie/lookup\\?term=tmdb:27205$"), Times.Once);
+		_radarr.Verify(request => request.Method(HttpMethod.Post).Path("/api/v3/movie").BodyContains("\"year\":2010"), Times.Once);
+	}
+
+	[Test]
+	public async Task ApplyAsync_ForAMovieThatIsNotAnimated_AddsItWithoutALookup()
+	{
+		RadarrAdds(27205);
+		Storing(MediaType.Movie, "Inception", "Action", "Science Fiction");
+		HoldingOnAnimeSites();
+
+		var acks = await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
+		_radarr.Verify(request => request.PathStartsWith("/api/v3/movie/lookup"), Times.Never);
+		_radarr.Verify(
+			request => request.Method(HttpMethod.Post).Path("/api/v3/movie").BodyContains("\"rootFolderPath\":\"/movies\"").BodyContains("\"qualityProfileId\":1"),
+			Times.Once
+		);
+	}
+
+	[Test]
+	[Arguments("anime", "/anime-movies")]
+	[Arguments("sequel", "/movies")]
+	public async Task ApplyAsync_ForAnAnimatedMovieTheMapDoesNotKnow_LooksItUpAndRoutesByRadarrsKeyword(string keyword, string folder)
+	{
+		RadarrLooksUp(260514, keyword);
+		Storing(MediaType.Movie, "Cars 3", "Animation", "Family");
+		HoldingOnAnimeSites();
+
+		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_radarr.Verify(request => request.Method(HttpMethod.Get).PathMatches(".*/movie/lookup\\?term=tmdb:260514$"), Times.Once);
+		_radarr.Verify(request => request.Method(HttpMethod.Post).Path("/api/v3/movie").BodyContains($"\"rootFolderPath\":\"{folder}\""), Times.Once);
+		_animeIds
+			.FindManyAsync(Is<IReadOnlyCollection<IExternalMediaId>>(ids => ids!.Single().Equals(TmdbId.From("260514", MediaType.Movie))), Any())
+			.WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ApplyAsync_ForAMovieWithoutStoredGenres_LooksItUp()
+	{
+		RadarrLooksUp(260514, "sequel");
+		Storing(MediaType.Movie, "Cars 3");
+		HoldingOnAnimeSites();
+
+		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_radarr.Verify(request => request.Method(HttpMethod.Get).PathMatches(".*/movie/lookup\\?term=tmdb:260514$"), Times.Once);
+	}
+
+	[Test]
+	public async Task ApplyAsync_ForAShowInTheAnimeMap_AddsItAsAnimeWithoutALookup()
+	{
+		SonarrAdds(424536);
+		Storing(MediaType.Show, "Frieren", "Animation", "Fantasy");
+		HoldingOnAnimeSites();
+		_animeIds
+			.FindManyAsync(Any(), Any())
+			.Returns(
+				new Dictionary<IExternalMediaId, AnimeIdMapping>
+				{
+					[TvdbId.From("424536", MediaType.Show)] = new(MediaType.Show, Some.Of(154587), Some.Of(52991), Some.Of(424536), new None(), new None(), new None()),
+				}
+			);
+
+		var acks = await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
+		_sonarr.Verify(request => request.PathStartsWith("/api/v3/series/lookup"), Times.Never);
+		_sonarr.Verify(
+			request =>
+				request
+					.Method(HttpMethod.Post)
+					.Path("/api/v3/series")
+					.BodyContains("\"tvdbId\":424536")
+					.BodyContains("\"title\":\"Frieren\"")
+					.BodyContains("\"rootFolderPath\":\"/anime\"")
+					.BodyContains("\"seriesType\":\"anime\""),
+			Times.Once
+		);
+	}
+
+	[Test]
+	public async Task ApplyAsync_WithoutAnAnimeFolder_NeverLooksUp()
+	{
+		SonarrAdds(371028);
+		Storing(MediaType.Show, "Arcane", "Animation", "Action");
+
+		await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_sonarr.Verify(request => request.PathStartsWith("/api/v3/series/lookup"), Times.Never);
+		_sonarr.Verify(
+			request => request.Method(HttpMethod.Post).Path("/api/v3/series").BodyContains("\"rootFolderPath\":\"/tv\"").BodyContains("\"seriesType\":\"standard\""),
+			Times.Once
+		);
+	}
+
+	[Test]
+	public async Task ApplyAsync_WhenRadarrDoesNotKnowTheId_MarksItUnaddressable()
+	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("[]");
 		_radarr
-			.OnRequest(request => request.Method(HttpMethod.Get).PathStartsWith("/api/v3/movie/lookup"))
-			.RespondWithJson("""[{"title":"Inception","tmdbId":27205}]""");
-		_radarr.OnPost("/api/v3/movie").RespondWithJson("""{"id":5,"tmdbId":27205,"tags":[1]}""");
-		Addressing(TmdbId.From("27205", MediaType.Movie));
+			.OnPost("/api/v3/movie")
+			.RespondWith(
+				new HttpResponseMessage(HttpStatusCode.BadRequest)
+				{
+					Content = new StringContent(
+						"""[{"propertyName":"TmdbId","errorMessage":"A movie with this ID was not found. Path: ","attemptedValue":999999999,"severity":"error"}]"""
+					),
+				}
+			);
+		Addressing(TmdbId.From("999999999", MediaType.Movie));
+		Storing(MediaType.Movie, "Gone from TMDB", "Drama");
+
+		var acks = await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Unaddressable)]);
+	}
+
+	[Test]
+	public async Task ApplyAsync_ForAViewerRenamedSinceTheyJoined_TagsTheTitleWithTheirFirstName()
+	{
+		Renamed();
+		RadarrAdds(27205);
+		Storing(MediaType.Movie, "Inception");
 
 		await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
@@ -230,7 +360,7 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	public async Task ApplyAsync_WhenTheAppCannotFindTheTitle_AcksItUnaddressable()
+	public async Task ApplyAsync_WhenTheLookupFindsNothing_AcksItUnaddressable()
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("[]");
@@ -243,22 +373,24 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	public async Task ApplyAsync_ForAShow_AddsItToSonarrByItsTvdbId()
+	public async Task ApplyAsync_ForAShow_AddsItToSonarrByItsTvdbIdAndStoredTitle()
 	{
-		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
-		_sonarr.OnGet("/api/v3/series").RespondWithJson("[]");
-		_sonarr
-			.OnRequest(request => request.Method(HttpMethod.Get).PathStartsWith("/api/v3/series/lookup"))
-			.RespondWithJson("""[{"title":"Breaking Bad","tvdbId":81189}]""");
-		_sonarr.OnPost("/api/v3/series").RespondWithJson("""{"id":3,"tvdbId":81189,"tags":[1]}""");
-		Addressing(TvdbId.From("81189", MediaType.Show));
+		SonarrAdds(81189);
+		Storing(MediaType.Show, "Breaking Bad", "Crime", "Drama");
 
 		var acks = await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
 		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
-		_sonarr.Verify(request => request.Method(HttpMethod.Get).PathMatches(".*/series/lookup\\?term=tvdb:81189$"), Times.Once);
+		_sonarr.Verify(request => request.PathStartsWith("/api/v3/series/lookup"), Times.Never);
 		_sonarr.Verify(
-			request => request.Method(HttpMethod.Post).Path("/api/v3/series").BodyContains("\"rootFolderPath\":\"/tv\"").BodyContains("\"seasonFolder\":true"),
+			request =>
+				request
+					.Method(HttpMethod.Post)
+					.Path("/api/v3/series")
+					.BodyContains("\"tvdbId\":81189")
+					.BodyContains("\"title\":\"Breaking Bad\"")
+					.BodyContains("\"rootFolderPath\":\"/tv\"")
+					.BodyContains("\"seasonFolder\":true"),
 			Times.Once
 		);
 		await Assert.That(_radarr.Requests).IsEmpty();
@@ -268,6 +400,7 @@ public class ArrSinkTests
 	public async Task ApplyAsync_ForANewShowSonarrTagsAnime_AddsItToTheAnimeFolderAsAnAnimeSeries()
 	{
 		SonarrLooksUp(424536, "Animation", "Anime", "Fantasy");
+		Storing(MediaType.Show, "Frieren", "Animation", "Fantasy");
 		HoldingOnAnimeSites();
 
 		var acks = await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
@@ -289,6 +422,7 @@ public class ArrSinkTests
 	public async Task ApplyAsync_ForANewMovieRadarrTagsAnime_AddsItToTheAnimeFolderWithTheAnimeProfile()
 	{
 		RadarrLooksUp(372058, "anime", "body swap");
+		Storing(MediaType.Movie, "Your Name.", "Animation", "Romance");
 		HoldingOnAnimeSites();
 
 		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
@@ -304,6 +438,7 @@ public class ArrSinkTests
 	public async Task ApplyAsync_ForANewShowWithoutTheAnimeTag_AddsItToTheDefaultFolderAsAStandardSeries()
 	{
 		SonarrLooksUp(371028, "Action", "Animation", "Fantasy");
+		Storing(MediaType.Show, "Arcane", "Animation", "Action");
 		HoldingOnAnimeSites();
 
 		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
@@ -319,13 +454,15 @@ public class ArrSinkTests
 
 	[Test]
 	[MethodDataSource(nameof(AnimeSiteIds))]
-	public async Task ApplyAsync_ForAnUntaggedShowWhoseTitleHoldsAnAnimeSiteId_AddsItToTheAnimeFolder(IExternalMediaId held)
+	public async Task ApplyAsync_ForAShowWhoseTitleHoldsAnAnimeSiteId_AddsItToTheAnimeFolderWithoutALookup(IExternalMediaId held)
 	{
-		SonarrLooksUp(424536);
+		SonarrAdds(424536);
+		Storing(MediaType.Show, "Frieren", "Animation", "Fantasy");
 		HoldingOnAnimeSites(held);
 
 		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
+		_sonarr.Verify(request => request.PathStartsWith("/api/v3/series/lookup"), Times.Never);
 		_sonarr.Verify(
 			request => request.Method(HttpMethod.Post).Path("/api/v3/series").BodyContains("\"rootFolderPath\":\"/anime\"").BodyContains("\"seriesType\":\"anime\""),
 			Times.Once
@@ -333,7 +470,7 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	public async Task ApplyAsync_WithoutAnAnimeFolder_NeverReadsTheStoredIds()
+	public async Task ApplyAsync_WithoutAnAnimeFolder_NeverReadsTheStoredIdsOrTheAnimeMap()
 	{
 		SonarrLooksUp(424536, "Anime");
 
@@ -344,10 +481,11 @@ public class ArrSinkTests
 			Times.Once
 		);
 		_media.GetIdsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any()).WasNeverCalled();
+		_animeIds.FindManyAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]
-	public async Task ApplyAsync_RemovingWhileRoutingAnime_NeverReadsTheStoredIds()
+	public async Task ApplyAsync_RemovingWhileRoutingAnime_NeverReadsTheStoredIdsDetailsOrTheAnimeMap()
 	{
 		EmptySonarr();
 		Addressing(TvdbId.From("424536", MediaType.Show));
@@ -355,6 +493,8 @@ public class ArrSinkTests
 		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
 
 		_media.GetIdsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any()).WasNeverCalled();
+		_media.GetStoredDetailsAsync(Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
+		_animeIds.FindManyAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -520,14 +660,15 @@ public class ArrSinkTests
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("[]");
 		_radarr
-			.OnRequest(request => request.Method(HttpMethod.Get).PathStartsWith("/api/v3/movie/lookup"))
-			.RespondWithJson("""[{"title":"Inception","tmdbId":27205}]""");
-		_radarr
 			.OnPost("/api/v3/movie")
 			.RespondWith(
-				new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = new StringContent("""[{"errorMessage":"This movie has already been added"}]""") }
+				new HttpResponseMessage(HttpStatusCode.BadRequest)
+				{
+					Content = new StringContent("""[{"propertyName":"TmdbId","errorMessage":"This movie has already been added"}]"""),
+				}
 			);
 		Addressing(TmdbId.From("27205", MediaType.Movie));
+		Storing(MediaType.Movie, "Inception");
 
 		var acks = await Testee().ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
@@ -813,6 +954,7 @@ public class ArrSinkTests
 			configs.Object,
 			_users.Object,
 			_media.Object,
+			_animeIds.Object,
 			_viewer.Object,
 			NullLogger<ArrSink>.Instance
 		);
@@ -845,6 +987,29 @@ public class ArrSinkTests
 	private void Addressing(IExternalMediaId id)
 	{
 		_media.GetSinkIdsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new Dictionary<MediaId, IExternalMediaId> { [Known] = id });
+	}
+
+	private void Storing(MediaType type, string title, params string[] genres)
+	{
+		_media
+			.GetStoredDetailsAsync(Any<IEnumerable<MediaId>>(), Any())
+			.Returns(new Dictionary<MediaId, MediaDetails> { [Known] = MediaDetails.Empty(type) with { Title = title, Genres = [.. genres] } });
+	}
+
+	private void RadarrAdds(int tmdb)
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("[]");
+		_radarr.OnPost("/api/v3/movie").RespondWithJson($$"""{"id":5,"tmdbId":{{tmdb}},"tags":[1]}""");
+		Addressing(TmdbId.From($"{tmdb}", MediaType.Movie));
+	}
+
+	private void SonarrAdds(int tvdb)
+	{
+		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_sonarr.OnGet("/api/v3/series").RespondWithJson("[]");
+		_sonarr.OnPost("/api/v3/series").RespondWithJson($$"""{"id":3,"tvdbId":{{tvdb}},"tags":[1]}""");
+		Addressing(TvdbId.From($"{tvdb}", MediaType.Show));
 	}
 
 	private void SonarrLooksUp(int tvdb, params string[] genres)
