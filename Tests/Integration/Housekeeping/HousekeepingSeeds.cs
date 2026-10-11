@@ -1,4 +1,5 @@
 using Contracts.Housekeeping;
+using Contracts.Media;
 using DB.Data.Feed;
 using DB.Data.Feed.Run;
 using DB.Data.Jobs;
@@ -17,6 +18,8 @@ namespace Integration.Tests.Housekeeping;
 
 internal static class HousekeepingSeeds
 {
+	internal const string MdblistTitles = $"{TestUrls.MdblistApi}/tmdb/movie";
+
 	extension(SammlarrTestHost host)
 	{
 		public IHousekeepingStep Step(HousekeepingStep step) => host.Resolve<IEnumerable<IHousekeepingStep>>().Single(registered => registered.Step == step);
@@ -128,6 +131,22 @@ internal static class HousekeepingSeeds
 			ctx.Set<CronTickerOccurrenceEntity<CronTickerEntity>>().Add(occurrence);
 			await ctx.SaveChangesAsync();
 			return occurrence.Id;
+		}
+
+		public async Task<(MediaId Held, MediaId Other)> StoredTwiceAsync(string tmdb, string imdb, RemoteService claimedBy = RemoteService.Tmdb)
+		{
+			var held = await host.SeedMediaAsync(TmdbId.From(tmdb, MediaType.Movie));
+			var other = await host.SeedMediaAsync(ImdbId.From(imdb, MediaType.Movie));
+			await host.Resolve<IIdentityClaims>().ClaimAsync(new IdentityClaim([ImdbId.From(imdb, MediaType.Movie)], Some.Of(held), [claimedBy]));
+			return (held, other);
+		}
+
+		public void MdblistMaps(params (string Tmdb, string Imdb)[] titles)
+		{
+			var found = titles.Select(title =>
+				$$"""{"title":"Annie","year":1982,"type":"movie","ids":{"imdb":"{{title.Imdb}}","trakt":null,"tmdb":{{title.Tmdb}},"tvdb":null,"mal":null,"mdblist":"m{{title.Tmdb}}"},"ratings":[]}"""
+			);
+			host.HttpStub.RespondWithJsonForUrl(MdblistTitles, $"[{string.Join(",", found)}]");
 		}
 
 		public async Task AddedAsync(MediaId id, DateTimeOffset at)

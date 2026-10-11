@@ -146,6 +146,7 @@ internal static class UsageView
 			UsageCause.KeyTest => ("Connection tests", "plug-zap"),
 			UsageCause.FeedEditor => ("Feed editor", "square-pen"),
 			UsageCause.DetailsFill => ("Filling details", "list-plus"),
+			UsageCause.Housekeeping => ("Housekeeping", "brush"),
 			UsageCause.Other => ("Untagged", "circle-dashed"),
 		};
 	}
@@ -167,6 +168,7 @@ internal static class UsageView
 			UsageCause.DetailsFill => Some.Of(
 				"Fills missing details of wantlisted and blocklisted titles in the background, a few minutes after a run, a new key or a sign-in."
 			),
+			UsageCause.Housekeeping => Some.Of("The nightly housekeeping pass asking a second source whether two stored titles are one."),
 			UsageCause.Other => Some.Of("Calls made outside every flow that marks its cause. Which page made them is not recorded."),
 		};
 	}

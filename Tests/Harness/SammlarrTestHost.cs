@@ -272,6 +272,11 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		Wikidata.Holds(imdb, [.. paths.Select(path => $$$"""{"rt":{"type":"literal","value":"{{{path}}}"}}""")]);
 	}
 
+	internal void WikidataMaps(string imdb, string tmdb)
+	{
+		Wikidata.Holds(imdb, [$$$"""{"tmdb":{"type":"literal","value":"{{{tmdb}}}"}}"""]);
+	}
+
 	internal void WikidataHoldsPages(string imdb, string rottenTomatoes, string metacritic)
 	{
 		Wikidata.Holds(imdb, [$$$"""{"rt":{"type":"literal","value":"{{{rottenTomatoes}}}"},"metacritic":{"type":"literal","value":"{{{metacritic}}}"}}"""]);

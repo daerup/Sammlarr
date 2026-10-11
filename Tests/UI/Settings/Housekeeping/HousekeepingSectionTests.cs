@@ -64,7 +64,7 @@ public class HousekeepingSectionTests : BunitContext
 
 		var cut = RenderLoaded();
 
-		await Assert.That(Row(cut, "pass").TextContent).Contains("running since 03:00").And.Contains("2 of 6 steps done");
+		await Assert.That(Row(cut, "pass").TextContent).Contains("running since 03:00").And.Contains("2 of 7 steps done");
 		await Assert.That(RunNow(cut).Select(button => button.HasAttribute("disabled"))).IsEquivalentTo([true, false, false], CollectionOrdering.Matching);
 	}
 
@@ -250,6 +250,12 @@ public class HousekeepingSectionTests : BunitContext
 	private static HousekeepingOverview Overview(PassTask pass, DatasetTask imdb)
 	{
 		var anime = new DatasetTask(RemoteService.AnimeLists, Some.Of(EarlierToday.AddHours(25.5)), new None(), new None(), new None());
-		return new HousekeepingOverview(new DatabaseSize(34_300_000, 32_100_000), pass, [imdb, anime], new CachedTitles(2_132, 3_475_160, 2_153, 2_605_130));
+		return new HousekeepingOverview(
+			new DatabaseSize(34_300_000, 32_100_000),
+			pass,
+			[imdb, anime],
+			new CachedTitles(2_132, 3_475_160, 2_153, 2_605_130),
+			new StoredTwiceCount(0, 0)
+		);
 	}
 }

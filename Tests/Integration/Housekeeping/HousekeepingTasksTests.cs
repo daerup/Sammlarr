@@ -7,6 +7,7 @@ using Core.Datasets;
 using Core.Housekeeping;
 using Core.Jobs;
 using DB.Scheduling;
+using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,7 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 				host.Resolve<IDatasetLoads>(),
 				host.Resolve<IDatabaseFile>(),
 				host.Resolve<IMediaCachePurger>(),
+				host.Resolve<IIdentityConflicts>(),
 				_scheduling.GetRequiredService<ITimeTickerManager<TimeTickerEntity>>(),
 				Activity,
 				host.CurrentUser,
@@ -59,6 +61,20 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 		}
 
 		await host.DisposeAsync();
+	}
+
+	[Test]
+	public async Task OverviewAsync_WithTitlesStoredTwice_CountsThePairsToDecideAndThoseKeptApart()
+	{
+		await host.StoredTwiceAsync("15739", "tt0083564");
+		var (club, _) = await host.StoredTwiceAsync("550", "tt0137523");
+		var notes = host.Resolve<IIdentityConflicts>();
+		var kept = (await notes.AllAsync()).First(note => note.Held == club);
+		await notes.SaveAsync(kept with { State = new Distinct(new TypesDiffer(), Now) });
+
+		var overview = await Testee.OverviewAsync();
+
+		await Assert.That(overview.StoredTwice).IsEqualTo(new StoredTwiceCount(1, 1));
 	}
 
 	[Test]

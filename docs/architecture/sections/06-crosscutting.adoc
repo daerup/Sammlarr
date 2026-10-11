@@ -433,7 +433,8 @@ log is cut back to once it restarts. After a dataset replace commits, `IDatabase
 truncates the log and vacuums the file when a tenth of its pages are free, so the file stays about the
 size of its data. The ownerless `Housekeeping` ticker runs `HousekeepingPass` nightly at 03:00 server time, before the dataset
 loads at 04:30 (a cron ticker `HousekeepingSchedule` adds on every start), or by hand: it takes the job runner's turn
-(`JobTurn`, which `JobRunner` holds while it runs a job, so the pass never overlaps a feed run, a sync or a details fill),
+(`JobTurn`, which `JobRunner` holds while it runs a job, so the pass never overlaps a feed run, a sync or a details fill;
+an admin's merges and keep-aparts from Settings › Housekeeping take it too),
 runs each `IHousekeepingStep` in the order of `HousekeepingStep`, compacts the file and keeps its last report
 (`HousekeepingReports`, saved after every step so a running pass shows how far it got); a step that fails stops the
 pass and is recorded with what the earlier steps removed. The
@@ -441,7 +442,16 @@ steps and their windows (`Sammlarr:Housekeeping`): a feed run's titles, calls an
 (90; the run keeps its header and counts), usage stats after `UsageDays` (180), cached details whose `RefreshedAt` is
 older than `FreshDays + DetailsUnusedDays` (194 days, so unopened for 180), a title's ids once it has no details and
 they went `IdsUnusedDays - DetailsUnusedDays` ago (185; a title that never had details goes `IdsUnusedDays`, 365, after
-it was added), then settled jobs, TickerQ occurrences and finished one-off runs after 30 days. Whatever removes a title's details (the pass,
+it was added), titles stored twice (`DuplicateTitles`, below), then settled jobs, TickerQ occurrences and finished
+one-off runs after 30 days. `DuplicateTitles` reads the due stored-twice notes: a pair whose rows contradict each other
+is kept apart without a lookup; every other pair is asked at once through `IIdentityConfirmation`, so the lanes batch
+(the burst primers first, then one lookup each). Each user in turn, in a scope of their own, under their keys and at
+the background lane class, asks the cheapest connected converter outside the note's own sources that maps one of the
+held title's ids to the claimed id's source; a lane that refuses without sending (a floor, a dataset not loaded)
+passes the note to the next converter, then to the next user. The claimed id merges the pair (`IMediaMerge`, one log
+line naming who claimed and who confirmed it), another id keeps it apart, and an answer that says nothing either way
+asks again after 1, 7, then 30 days. A note no converter could be asked about is left as it is, with no attempt
+counted. Its calls count as `UsageCause.Housekeeping`, and the step reports the titles it merged. Whatever removes a title's details (the pass,
 a clear by hand, an invalidation) stamps `Media.DetailsTrimmedAt`. A title on a wantlist, a blocklist, the outbox or in
 a kept run (`ProtectedMediaIds`) never loses its details or ids to the pass; the media trims hold `MediaWriteLock`.
 Wolverine expires dead letters after its default 10 days. Settings › Housekeeping sizes the two cache layers from the

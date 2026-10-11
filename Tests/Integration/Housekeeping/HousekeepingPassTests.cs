@@ -32,6 +32,9 @@ public class HousekeepingPassTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.SeedRunAsync(await host.SeedFeedAsync(), Now.AddDays(-91), Guid.NewGuid());
 		await host.SeedJobAsync(JobState.Done, Now.AddDays(-31));
 		await host.SeedOccurrenceAsync(await host.SeedTickerAsync(), TickerStatus.Done, Now.AddDays(-31));
+		await host.WithMdblistAccount("valid-mdblist-key");
+		host.MdblistMaps(("15739", "tt0083564"));
+		await host.StoredTwiceAsync("15739", "tt0083564");
 		host.SignOut();
 
 		var first = await Testee.RunAsync();
