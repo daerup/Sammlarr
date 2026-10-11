@@ -44,18 +44,26 @@ without votes still counts as missing.
 
 Provider answer:: Which provider answered a fetch of a title and what it could not give
 (`ProviderAnswer`: `Provider`, `Unfilled`, the fields it fills that its own answer lacked, and `AnsweredAt`). A provider
-gave a field when the field is among its `Fills` and not among its `Unfilled`. Only a
-successful answer is stored; a provider that failed, was blocked, or was never asked has no answer. An enricher is only
-asked when its `Fills` overlap a missing field.
+gave a field when the field is among its `Fills` and not among its `Unfilled`. Every ask records an outcome except a
+refusal before sending: an answer (found, no match, or a title of the wrong type) with what it could not give, or a
+failure (`Failures`). An enricher is only asked when its `Fills` overlap a missing field the load needs.
 
 `CachedDetails`:: Stored details with two times and the provider answers: `RefreshedAt` (the last refresh) and
-`AskedAt` (the last time anyone was asked; a gap fill moves only this one).
+`AskedAt` (the last ask that recorded an outcome; a gap fill moves only this one). Each `ProviderAnswer` is either an answer,
+which rests 14 days, or a failure (`Failures`), which rests 1, 6, then 24 hours.
+
+`FieldNeeds`:: The fields a load asks for: `Required` (what a feed filters or sorts on, everything on the detail
+sheet) and `Shown` (what a card shows, asked only within `ShownWait`). Grids ask for none.
 
 Freshness:: Whether a stored title is used as it is (`DetailsFetcher.FindReusable`). It is refreshed 14 days after
-`RefreshedAt` (`CachedDetails.IsStale`), starting over and asking until nothing is missing, with the stored value of a
-field kept only while a provider gave it within the 14 days before the refresh. Before that its gaps are
-filled when a field is missing, an hour has passed since `AskedAt`, and an enricher could fill it that accepts
-one of the title's ids, the current user has connected, has not answered, and is not blocked (`EnricherChoice.NeedsRefetch`).
+`RefreshedAt` (`CachedDetails.IsStale`), asking every service no longer resting, with the stored value of a field kept
+while a provider gave it within the 14 days before the refresh, or while the service that gives it was skipped. Before
+that a gap is filled when the load needs the field and an enricher could fill it that accepts one of the title's ids,
+the current user has connected, is not resting, and takes the ask (`EnricherChoice.NeedsRefetch`). A refresh that
+skips a service whose stored fields it keeps holds `RefreshedAt`, so the title stays stale and is retried.
+
+Stale title:: A title served from its stale copy because a service its refresh needed could not be reached
+(`MatchedMedia.Stale`). A Mirror feed counts no absence for it.
 
 `StoredMedia`:: A stored title as the repository returns it: its `MediaIdentity` and its
 `CachedDetails`, if it has any.
