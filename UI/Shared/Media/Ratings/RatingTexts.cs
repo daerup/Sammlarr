@@ -88,9 +88,8 @@ internal static class RatingTexts
 		{
 			RatingRowState.NotNeeded => $"not needed, {sammlarr.Map(rating => Name(rating.Counted[0].Source)).GetValueOr(string.Empty)} came first",
 			RatingRowState.SwitchedOff => $"switched off in {where}",
-			RatingRowState.NoRating => "no rating for this title",
-			RatingRowState.NeedsProvider => "needs a provider",
-			RatingRowState.Counts => string.Empty,
+			RatingRowState.Skipped => "no rating, skipped",
+			RatingRowState.NoRating or RatingRowState.Counts => string.Empty,
 		};
 	}
 
