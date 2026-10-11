@@ -15,7 +15,7 @@
             <span class="pipeline-hint">@Hint</span>
         </div>
 
-        @if (Missing.Count > 0)
+        @if (!Ordered && _averaged.FallsBack(Available))
         {
             <div class="pipeline-notice" role="note">
                 <LucideIcon Name="unplug" Size="14"/>
@@ -31,13 +31,18 @@
                         <path d="@trace.Path" stroke-dasharray="@(_model.Dashed ? "5 4" : null)"/>
                         <rect x="@Px(RatingPipelineModel.OutputX - 5)" y="@Px(trace.Pin - 1.3)" width="5" height="2.6" rx="0.6"/>
                     }
+                    @foreach (var tile in _model.Tiles.Where(tile => !tile.Supplied))
+                    {
+                        <path class="pipeline-stub" d="M@(Px(RatingPipelineModel.TileWidth)) @(Px(tile.Y)) H@(Px(RatingPipelineModel.TileWidth + StubLength))"/>
+                        <circle class="pipeline-stub-end" cx="@Px(RatingPipelineModel.TileWidth + StubLength + 4)" cy="@Px(tile.Y)" r="3"/>
+                    }
                 </svg>
 
                 <div class="pipeline-tiles" role="@(Ordered ? "list" : null)">
                     @foreach (var tile in _model.Tiles)
                     {
                         <div @key="tile.Source"
-                             class="pipeline-tile @(tile.On ? null : "is-off") @(Ordered ? "is-sortable" : null) @(_dragged == tile.Source ? "is-dragged" : null)"
+                             class="pipeline-tile @(tile.On ? null : "is-off") @(tile.Supplied ? null : "is-unsupplied") @(Ordered ? "is-sortable" : null) @(_dragged == tile.Source ? "is-dragged" : null)"
                              style="top: @Px(tile.Y - RatingPipelineModel.TileHeight / 2)px"
                              role="@(Ordered ? "listitem" : null)"
                              draggable="@(Ordered ? "true" : null)"
@@ -57,11 +62,22 @@
                                 <span class="pipeline-rank">@rank</span>
                             }
                             <RatingMarkIcon Source="tile.Source"/>
-                            <BbTooltip DelayDuration="150">
-                                <BbTooltipTrigger AsChild="false"><span class="pipeline-name">@RatingTexts.Name(tile.Source)</span></BbTooltipTrigger>
-                                <BbTooltipContent Class="max-w-xs">@RatingTexts.Scale(tile.Source)</BbTooltipContent>
-                            </BbTooltip>
-                            @if (!Ordered)
+                            @if (!tile.Supplied)
+                            {
+                                <span class="pipeline-name">@RatingTexts.Short(tile.Source)</span>
+                                <span class="pipeline-unsupplied">
+                                    <LucideIcon Name="unplug" Size="13"/>
+                                    <span>needs a <RatingSuppliersPopover Sources="[tile.Source]"/></span>
+                                </span>
+                            }
+                            else
+                            {
+                                <BbTooltip DelayDuration="150">
+                                    <BbTooltipTrigger AsChild="false"><span class="pipeline-name">@RatingTexts.Name(tile.Source)</span></BbTooltipTrigger>
+                                    <BbTooltipContent Class="max-w-xs">@RatingTexts.Scale(tile.Source)</BbTooltipContent>
+                                </BbTooltip>
+                            }
+                            @if (!Ordered && tile.Supplied)
                             {
                                 <span class="pipeline-switch">
                                     @if (tile.On && SwitchedOnCount == 1)
@@ -128,33 +144,18 @@
 
     private string Hint => Ordered ? "Every provider, in the order below: a title gets the first rating it has." : "The ratings a title has from the providers switched on, averaged. At least one stays on.";
 
-    private int SwitchedOnCount => _model.Tiles.Count(tile => tile.On);
+    private const double StubLength = 50;
 
-    private IReadOnlyList<RatingSource> Missing => Ordered ? [] : _averaged.Missing(Available);
+    private int SwitchedOnCount => _model.Tiles.Count(tile => tile.On && tile.Supplied);
 
-    private string NoticeLead
-    {
-        get
-        {
-            var missing = string.Join(", ", Missing.Select(RatingTexts.Short));
-            if (_averaged.FallsBack(Available))
-            {
-                return $"Your choice ({missing}) needs a ";
-            }
+    private IReadOnlyList<RatingSource> Missing => _averaged.Missing(Available);
 
-            return Missing.Count == 1 ? $"{missing} needs a " : $"{missing} need a ";
-        }
-    }
+    private string NoticeLead => $"Your choice ({string.Join(", ", Missing.Select(RatingTexts.Short))}) needs a ";
 
     private string NoticeTail
     {
         get
         {
-            if (!_averaged.FallsBack(Available))
-            {
-                return ".";
-            }
-
             var used = _averaged.Counted(Available).Order().Select(RatingTexts.Short).ToList();
             return $"; {string.Join(", ", used)} {(used.Count == 1 ? "is" : "are")} used instead.";
         }

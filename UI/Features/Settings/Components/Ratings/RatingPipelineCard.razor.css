@@ -103,6 +103,45 @@
     opacity: 0.45;
 }
 
+.pipeline-tile.is-unsupplied {
+    border-style: dashed;
+    background: transparent;
+}
+
+.pipeline-tile.is-unsupplied ::deep .provider-tile {
+    opacity: 0.45;
+    filter: grayscale(1);
+}
+
+.pipeline-tile.is-unsupplied .pipeline-name {
+    opacity: 0.45;
+    text-decoration: none;
+    cursor: default;
+}
+
+.pipeline-unsupplied {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+}
+
+.pipeline-traces .pipeline-stub {
+    stroke: var(--muted-foreground);
+    stroke-dasharray: 3 3;
+    opacity: 0.6;
+}
+
+.pipeline-traces .pipeline-stub-end {
+    fill: none;
+    stroke: var(--muted-foreground);
+    stroke-width: 1.2;
+    opacity: 0.6;
+}
+
 .pipeline-grip {
     display: inline-flex;
     padding: 0;
