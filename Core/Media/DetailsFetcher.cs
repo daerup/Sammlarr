@@ -164,23 +164,17 @@ internal sealed class DetailsFetcher(
 		var current = Layered(reason, fresh, backup, gapFills, answered: false);
 		List<ProviderAnswer> answers = [];
 		var asked = AlreadyAnswered(reason).ToHashSet();
-		var waited = new HashSet<RemoteService>();
 		Optional<RemoteService> unavailable = new None();
 		while (current.Missing is var missing && !missing.IsEmpty)
 		{
 			var leftToAsk = EnrichersLeftToAsk(known, asked, connected);
-			if (EnricherChoice.Next(missing, leftToAsk, preferred, now) is not Some<EnricherCandidate>(var next))
+			var at = clock.Now;
+			if (EnricherChoice.Next(missing, leftToAsk, preferred, at) is not Some<EnricherCandidate>(var next))
 			{
-				if (await WaitForBlockedAsync(missing, leftToAsk, waited, now, cancellationToken) is not Some<DateTimeOffset>(var freeAt))
-				{
-					var stopped = EnricherChoice.Blocked(missing, leftToAsk, now).Map(blocked => blocked.Remote);
-					stopped.Apply(remote => FeedRunSpans.GaveUp(remote, TraceStage.Details));
-					unavailable = unavailable.Or(stopped);
-					break;
-				}
-
-				now = freeAt;
-				continue;
+				var stopped = EnricherChoice.Blocked(missing, leftToAsk, at).Map(blocked => blocked.Remote);
+				stopped.Apply(remote => FeedRunSpans.GaveUp(remote, TraceStage.Details));
+				unavailable = unavailable.Or(stopped);
+				break;
 			}
 
 			asked.Add(next.Remote);
@@ -216,21 +210,6 @@ internal sealed class DetailsFetcher(
 			.When(found => resizers.All(resizer => resizer.Resize(found, AnySize).IsNone()))
 			.Map(_ => (MediaFields)field)
 			.GetValueOr(MediaFields.None);
-	}
-
-	private async Task<Optional<DateTimeOffset>> WaitForBlockedAsync(
-		MediaFields missing,
-		IEnumerable<EnricherCandidate> leftToAsk,
-		HashSet<RemoteService> waited,
-		DateTimeOffset now,
-		CancellationToken cancellationToken
-	)
-	{
-		var blocked = EnricherChoice.WorthWaitingFor(missing, leftToAsk, waited, now);
-		blocked.Apply(candidate => waited.Add(candidate.Remote));
-		var freeAt = blocked.Map(candidate => candidate.Load.FreeAt(now));
-		await freeAt.Apply(until => clock.WaitUntilAsync(until, cancellationToken));
-		return freeAt;
 	}
 
 	private async Task<Answer<FoundMedia>> AskAsync(EnricherCandidate candidate, MediaIdentity identity, CancellationToken cancellationToken)

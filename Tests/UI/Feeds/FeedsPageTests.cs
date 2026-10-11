@@ -255,7 +255,7 @@ public class FeedsPageTests : BunitContext
 		layouts.GetAsync(Any<FeedId>(), Any()).Returns(RunLayout.Empty);
 		Services.AddSingleton(layouts.Object);
 		var capacity = IRemoteCapacity.Mock();
-		capacity.Of(Any<RemoteService>()).Returns(new RemoteLoad(new None(), 0));
+		capacity.Of(Any<RemoteService>()).Returns(RemoteLoad.Idle);
 		Services.AddSingleton(capacity.Object);
 		_clock.Now.Getter.Returns(Start);
 		Services.AddSingleton(_clock.Object);

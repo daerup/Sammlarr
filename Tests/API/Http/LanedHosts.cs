@@ -1,5 +1,5 @@
 using API.Http;
-using Contracts;
+using Contracts.Identity;
 using Contracts.Providers;
 using Contracts.Usage;
 using Domain.Providers;
@@ -38,7 +38,7 @@ internal static class LanedHosts
 			.ConfigureServices(services =>
 			{
 				services.AddSingleton(options);
-				services.AddSingleton(IDateTimeProvider.Mock().Object);
+				services.AddSingleton(ICurrentUser.Mock().Object);
 				services.AddSingleton(reporter ?? IProviderRateLimitReporter.Mock().Object);
 				services.AddSingleton(IFeedRunUsage.Mock().Object);
 				services.AddModule<HttpModule>();
@@ -51,4 +51,10 @@ internal static class LanedHosts
 	}
 
 	internal static HttpClient Client(this IHost host, string name = "plex") => host.Services.GetRequiredService<IHttpClientFactory>().CreateClient(name);
+
+	internal static RemoteLoad Load(this IHost host, RemoteService remote)
+	{
+		using var scope = host.Services.CreateScope();
+		return scope.ServiceProvider.GetRequiredService<IRemoteCapacity>().Of(remote);
+	}
 }

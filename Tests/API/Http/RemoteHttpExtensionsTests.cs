@@ -127,7 +127,7 @@ public class RemoteHttpExtensionsTests
 
 		using var response = await host.Client().SendAsync(Stamped());
 
-		await Assert.That(host.Services.GetRequiredService<RemoteCapacity>().Of(RemoteService.Plex).BlockedUntil).IsSome();
+		await Assert.That(host.Load(RemoteService.Plex).BlockedUntil).IsSome();
 	}
 
 	[Test]
@@ -142,7 +142,7 @@ public class RemoteHttpExtensionsTests
 		using var failed = await host.Client().GetAsync("https://plex.test/library");
 
 		await Assert.That(async () => await host.Client().GetAsync("https://plex.test/library")).Throws<LaneRefusedException>();
-		await Assert.That(host.Services.GetRequiredService<RemoteCapacity>().Of(RemoteService.Plex).BlockedUntil).IsSome();
+		await Assert.That(host.Load(RemoteService.Plex).BlockedUntil).IsSome();
 	}
 
 	[Test]

@@ -105,8 +105,10 @@ internal static class LiveWire
 	internal static WireCapacity Capacity(RemoteService service, RemoteLoad load, DateTimeOffset now, int elapsedMs)
 	{
 		var blockedUntil = load.BlockedUntil.When(until => until > now).Map(until => elapsedMs + (int)(until - now).TotalMilliseconds);
-		return new WireCapacity((byte)service, blockedUntil.GetValueOr(0), load.Busy);
+		return new WireCapacity((byte)service, blockedUntil.GetValueOr(0), Busy(load));
 	}
+
+	private static double Busy(RemoteLoad load) => load.Waiting == 0 ? 0 : 1 - 1 / (1 + load.Waiting + load.EstimatedWait.TotalSeconds);
 
 	internal static WireSnapshot Snapshot(TraceSnapshot snapshot)
 	{

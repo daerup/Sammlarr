@@ -37,7 +37,7 @@ public class MdblistIdLookupTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
 		await host.WithMdblistAccount("valid-mdblist-key");
-		host.RateLimited(RemoteService.Tmdb);
+		await host.RateLimitedAsync(RemoteService.Tmdb);
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/imdb/show", BreakingBad);
 		var show = await host.SeedMediaAsync(ImdbId.From("tt0903747", MediaType.Show));
 

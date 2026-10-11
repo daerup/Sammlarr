@@ -1,11 +1,13 @@
 using API.Http;
 using API.Http.Lanes;
-using Contracts;
+using Contracts.Identity;
+using Domain.Identity;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using Shared.Concurrency;
 using Shared.Options;
+using TestInfrastructure;
 
 namespace API.Tests.Http;
 
@@ -13,7 +15,10 @@ public class RemoteCapacityTests : IDisposable
 {
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 
+	private static readonly DateTimeOffset Reset = Now.AddHours(1);
+
 	private readonly FakeTimeProvider _time = new(Now);
+	private readonly UserId _user = UserId.New();
 	private readonly Lanes _lanes;
 	private readonly RemoteCapacity Testee;
 
@@ -28,10 +33,15 @@ public class RemoteCapacityTests : IDisposable
 				["api"] = new() { Limits = [new RateWindowOptions { Requests = 1, Per = TimeSpan.FromSeconds(1) }], FailuresToDown = 1 },
 			},
 		};
-		_lanes = new Lanes(_time, [new RemoteSettings(RemoteService.Plex, LanedHosts.Plex(http))], new ServiceCollection().BuildServiceProvider());
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(Now);
-		Testee = new RemoteCapacity(_lanes, clock.Object);
+		var quota = ILaneQuota.Mock();
+		quota.BlockedUntil(Any(), Any(), Any()).Returns(new None());
+		quota.BlockedUntil(Any(), LaneClass.Background, Any()).Returns(Some.Of(Reset));
+		var services = new ServiceCollection().AddKeyedSingleton(RemoteService.Plex, quota.Object).BuildServiceProvider();
+		_lanes = new Lanes(_time, [new RemoteSettings(RemoteService.Plex, LanedHosts.Plex(http))], services);
+		var currentUser = ICurrentUser.Mock();
+		currentUser.IsAuthenticated.Returns(true);
+		currentUser.Id.Returns(_user);
+		Testee = new RemoteCapacity(_lanes, currentUser.Object);
 	}
 
 	public void Dispose() => _lanes.Dispose();
@@ -39,63 +49,92 @@ public class RemoteCapacityTests : IDisposable
 	[Test]
 	public async Task Of_AfterAThrottleWithRetryAfter_StaysBlockedUntilThen()
 	{
-		await ReleaseAsync(new AttemptThrottled(Some.Of(Now.AddSeconds(20))));
+		await ReleaseAsync(new LaneName(RemoteService.Plex, "api"), new AttemptThrottled(Some.Of(Now.AddSeconds(20))));
 
 		var load = Testee.Of(RemoteService.Plex);
 
 		await Assert.That(load.IsOpen(Now)).IsFalse();
 		await Assert.That(load.IsOpen(Now.AddSeconds(20))).IsTrue();
+		await Assert.That(load.EstimatedWait).IsGreaterThanOrEqualTo(TimeSpan.FromSeconds(20));
 	}
 
 	[Test]
 	public async Task Of_AfterAnAnswer_IsOpen()
 	{
-		await ReleaseAsync(new AttemptAnswered());
+		await ReleaseAsync(new LaneName(RemoteService.Plex, "api"), new AttemptAnswered());
 
 		await Assert.That(Testee.Of(RemoteService.Plex).IsOpen(Now)).IsTrue();
 	}
 
 	[Test]
-	public async Task Of_WhileARouteIsDown_IsBlockedUntilTheDownEnds()
+	public async Task Of_WhileARouteIsDown_IsDownAndBlockedUntilTheDownEnds()
 	{
-		await ReleaseAsync(new AttemptFailed());
+		await ReleaseAsync(new LaneName(RemoteService.Plex, "api"), new AttemptFailed());
 
 		var load = Testee.Of(RemoteService.Plex);
 
-		await Assert.That(load.IsOpen(Now.AddSeconds(29))).IsFalse();
-		await Assert.That(load.IsOpen(Now.AddSeconds(30))).IsTrue();
+		await Assert.That(load.Down).IsTrue();
+		await Assert.That(load.BlockedUntil).IsSome().And.IsEqualTo(Now.AddSeconds(30));
 	}
 
 	[Test]
-	public async Task Of_WhileAskersWaitForTheWindow_ReportsTheRemoteBusy()
+	public async Task Of_WhileAskersWaitForTheWindow_CountsThemAndTheirWait()
 	{
 		var gate = _lanes.Gate(new LaneName(RemoteService.Plex, "api"), new None());
 		await gate.EnterAsync(LanePriority.Interactive, TimeSpan.FromMinutes(1), CancellationToken.None);
 		var waiting = gate.EnterAsync(LanePriority.Interactive, TimeSpan.FromMinutes(1), CancellationToken.None);
 
-		await Assert.That(Testee.Of(RemoteService.Plex).Busy).IsEqualTo(0.5);
+		var load = Testee.Of(RemoteService.Plex);
+
+		await Assert.That(load.Waiting).IsEqualTo(1);
+		await Assert.That(load.EstimatedWait).IsGreaterThan(TimeSpan.Zero);
 		await Assert.That(waiting.IsCompleted).IsFalse();
 	}
 
 	[Test]
-	public async Task Of_ForAThrottledGateOfOneKey_StaysOpen()
+	public async Task Of_ForAThrottledGateOfAKeyTheUserNeverSentThrough_StaysOpen()
 	{
-		var gate = _lanes.Gate(new LaneName(RemoteService.Plex, "api", "plex-token"), new None());
-		var permit = (await gate.EnterAsync(LanePriority.Interactive, TimeSpan.Zero, CancellationToken.None)).GetOrThrow(_ => new InvalidOperationException(
-			"refused"
-		));
-
-		permit.Release(new AttemptThrottled(Some.Of(Now.AddMinutes(5))));
+		await ReleaseAsync(new LaneName(RemoteService.Plex, "api", "plex-token"), new AttemptThrottled(Some.Of(Now.AddMinutes(5))));
 
 		await Assert.That(Testee.Of(RemoteService.Plex).IsOpen(Now)).IsTrue();
 	}
 
 	[Test]
-	public async Task Of_WhenBlockedByHand_IsBlockedForThatLong()
+	public async Task Of_ForAThrottledGateOfTheCurrentUsersKey_IsBlocked()
 	{
-		Testee.Block(RemoteService.Plex, TimeSpan.FromMinutes(1));
+		var name = new LaneName(RemoteService.Plex, "api", "plex-token");
+		_lanes.Gate(name, Some.Of(_user));
 
-		await Assert.That(Testee.Of(RemoteService.Plex).IsOpen(Now.AddSeconds(59))).IsFalse();
+		await ReleaseAsync(name, new AttemptThrottled(Some.Of(Now.AddMinutes(5))));
+
+		await Assert.That(Testee.Of(RemoteService.Plex).IsOpen(Now)).IsFalse();
+	}
+
+	[Test]
+	public async Task Of_WithNobodySignedIn_LeavesOutTheGatesOfEveryKey()
+	{
+		var name = new LaneName(RemoteService.Plex, "api", "plex-token");
+		_lanes.Gate(name, Some.Of(_user));
+		await ReleaseAsync(name, new AttemptThrottled(Some.Of(Now.AddMinutes(5))));
+
+		var anonymous = new RemoteCapacity(_lanes, ICurrentUser.Mock().Object);
+
+		await Assert.That(anonymous.Of(RemoteService.Plex).IsOpen(Now)).IsTrue();
+	}
+
+	[Test]
+	public async Task Of_UnderBackgroundPriority_ReportsTheBackgroundFloor()
+	{
+		_lanes.Gate(new LaneName(RemoteService.Plex, "api"), new None());
+
+		RemoteLoad background;
+		using (LanePriority.Next(LaneClass.Background).Enter())
+		{
+			background = Testee.Of(RemoteService.Plex);
+		}
+
+		await Assert.That(background.BlockedUntil).IsSome().And.IsEqualTo(Reset);
+		await Assert.That(Testee.Of(RemoteService.Plex).BlockedUntil).IsNone();
 	}
 
 	[Test]
@@ -107,10 +146,9 @@ public class RemoteCapacityTests : IDisposable
 		await Assert.That(load.EnrichWait).IsEqualTo(TimeSpan.FromSeconds(15));
 	}
 
-	private async Task ReleaseAsync(AttemptOutcome outcome)
+	private async Task ReleaseAsync(LaneName name, AttemptOutcome outcome)
 	{
-		var gate = _lanes.Gate(new LaneName(RemoteService.Plex, "api"), new None());
-		var entered = await gate.EnterAsync(LanePriority.Interactive, TimeSpan.Zero, CancellationToken.None);
+		var entered = await _lanes.Gate(name, new None()).EnterAsync(LanePriority.Interactive, TimeSpan.Zero, CancellationToken.None);
 		entered.GetOrThrow(_ => new InvalidOperationException("The gate refused a permit it should grant.")).Release(outcome);
 	}
 }

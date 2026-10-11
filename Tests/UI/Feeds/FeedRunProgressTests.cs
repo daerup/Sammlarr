@@ -43,7 +43,7 @@ public class FeedRunProgressTests
 		_feeds.GetAsync(Any()).Returns(new FeedSnapshot([Overview(Documentaries), Overview(Comedy)]));
 		_layouts.GetAsync(Any<FeedId>(), Any()).Returns(Layout);
 		Reads(new NoTrace());
-		_capacity.Of(Any<RemoteService>()).Returns(new RemoteLoad(new None(), 0));
+		_capacity.Of(Any<RemoteService>()).Returns(RemoteLoad.Idle);
 	}
 
 	[Test]
@@ -261,7 +261,7 @@ public class FeedRunProgressTests
 		var answered = new TraceStep(9, 1900, Some.Of(3), new HopAnswered(RemoteService.Tmdb, TraceStage.Ids, HopOutcome.AfterRateLimit, 820));
 		Running(Documentaries);
 		Reads(Batch([answered], new None()));
-		_capacity.Of(Any<RemoteService>()).Returns(new RemoteLoad(Some.Of(Start.AddMilliseconds(1500)), 0.5));
+		_capacity.Of(Any<RemoteService>()).Returns(RemoteLoad.Idle with { BlockedUntil = Some.Of(Start.AddMilliseconds(1500)), Waiting = 1 });
 		var batches = new List<WireBatch>();
 		using var testee = Progress();
 		await testee.StartAsync();
@@ -321,7 +321,7 @@ public class FeedRunProgressTests
 		Running(Documentaries);
 		var progress = new RunProgress(Some.Of(new SourcePage(1, new None())), 3) { Busiest = Some.Of(new ServiceWait(RemoteService.Tmdb, 3)) };
 		Reads(Batch([], new None()) with { Progress = progress });
-		_capacity.Of(RemoteService.Tmdb).Returns(new RemoteLoad(Some.Of(Start.AddSeconds(9)), 0));
+		_capacity.Of(RemoteService.Tmdb).Returns(RemoteLoad.Idle with { BlockedUntil = Some.Of(Start.AddSeconds(9)) });
 		using var testee = Progress();
 
 		await testee.StartAsync();

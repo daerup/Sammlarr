@@ -40,7 +40,6 @@ public class MediaIdResolverTests
 	private static readonly ById PlexById = new(Accepts: [MediaProvider.Plex], Yields: [MediaProvider.Tvdb], Cost: 1);
 	private static readonly ByHints Search = new(Yields: [MediaProvider.Plex, MediaProvider.Tvdb], Cost: 4);
 	private static readonly IdentifyRequest Request = new([Tmdb], new None());
-	private static readonly CancellationToken WaitingThrows = new(canceled: true);
 	private static readonly IReadOnlySet<RemoteService> Everyone = Enum.GetValues<RemoteService>().ToHashSet();
 
 	private readonly Dictionary<Mock<IExternalIdConverter>, RemoteService> _remotes = [];
@@ -55,7 +54,7 @@ public class MediaIdResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenAProviderIsBlockedWithinItsMaxWait_WaitsThenTakesThePath()
+	public async Task ResolveAsync_WhenAProviderIsBlockedWithinItsMaxWait_TakesThePathAndLeavesTheWaitToItsLane()
 	{
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), Found(Tvdb));
 
@@ -65,18 +64,9 @@ public class MediaIdResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhileWaitingForABlockedProvider_HonoursCancellation()
+	public async Task ResolveAsync_WhenTheOnlyRouteIsBlockedPastMaxWait_SettlesCouldNotLookUpWithoutCaching()
 	{
-		var testee = Testee(TmdbBlocked(() => Now.AddMilliseconds(20)));
-
-		await Assert.That(async () => await testee.ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows)).Throws<OperationCanceledException>();
-		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
-	}
-
-	[Test]
-	public async Task ResolveAsync_WhenABlockOutlastsTheMaxWait_GivesUpWithoutCachingTheTitle()
-	{
-		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
 		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
@@ -84,60 +74,20 @@ public class MediaIdResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenTheBlockIsExtendedDuringTheWait_GivesUpWithoutCachingTheTitle()
+	public async Task ResolveAsync_WhenAProviderWentDown_TakesNoOtherPathThroughIt()
 	{
-		var pushes = 0;
+		var find = new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tvdb], Cost: 2);
+		var tmdb = Converter(RemoteService.Tmdb, Detail, find);
+		Answer(tmdb, new ByIdRequest(Detail, Tmdb), Down(RemoteService.Tmdb));
 
-		var resolved = await Testee(TmdbBlocked(() => Now.AddMilliseconds(20 + pushes++))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
+		var resolved = await Testee(TestCapacity.Open(), tmdb, _plex).ResolveAsync(new IdentifyRequest([Tmdb, Imdb], new None()), MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
-		_tmdb.LookUpAsync(Any(), Any()).WasNeverCalled();
-		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
+		tmdb.LookUpAsync((IdLookupRequest)new ByIdRequest(find, Imdb), Any()).WasNeverCalled();
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenAProviderIsBlockedAgainAfterTheWait_DoesNotWaitTwice()
-	{
-		var tmdbFreeAt = Now.AddMilliseconds(20);
-		_tmdb
-			.LookUpAsync(Any(), Any())
-			.Returns(
-				(_, _) =>
-				{
-					tmdbFreeAt = Now.AddMilliseconds(40);
-					return HintsOnly();
-				}
-			);
-
-		var resolved = await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
-
-		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
-		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
-		_cache.Set(Any(), Any(), Any()).WasNeverCalled();
-	}
-
-	[Test]
-	public async Task ResolveAsync_WhenAProviderThatWentDownIsBlocked_NeverWaitsForIt()
-	{
-		var tmdbFreeAt = Now;
-		_tmdb
-			.LookUpAsync(Any(), Any())
-			.Returns(
-				(_, _) =>
-				{
-					tmdbFreeAt = Now.AddSeconds(5);
-					return Down(RemoteService.Tmdb);
-				}
-			);
-
-		var resolved = await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
-
-		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
-		_plex.LookUpAsync(Any(), Any()).WasNeverCalled();
-	}
-
-	[Test]
-	public async Task ResolveAsync_AfterASuccessfulWait_CachesAnAnsweredMissAsUnmatched()
+	public async Task ResolveAsync_WhenAProviderBlockedWithinItsMaxWaitAnswersAMiss_CachesTheTitleAsUnmatched()
 	{
 		Answer(_tmdb, new ByIdRequest(Detail, Tmdb), new NoMatch(RemoteService.Tmdb));
 
@@ -417,7 +367,12 @@ public class MediaIdResolverTests
 	public async Task ResolveAsync_WhenAProviderGetsBlockedWhileResolving_SkipsTheRemainingPathsThroughIt()
 	{
 		var tmdbBlocked = false;
-		var capacity = TestCapacity.With(remote => new RemoteLoad(Optional.When(tmdbBlocked && remote is RemoteService.Tmdb, () => Now.AddMinutes(1)), 0));
+		var capacity = TestCapacity.With(remote =>
+			RemoteLoad.Idle with
+			{
+				BlockedUntil = Optional.When(tmdbBlocked && remote is RemoteService.Tmdb, () => Now.AddMinutes(1)),
+			}
+		);
 		_tmdb
 			.LookUpAsync(Any(), Any())
 			.Returns(
@@ -439,7 +394,12 @@ public class MediaIdResolverTests
 	public async Task ResolveAsync_WhenAProviderGetsBlockedMidPath_StopsBeforeTheHopThroughIt()
 	{
 		var plexBlocked = false;
-		var capacity = TestCapacity.With(remote => new RemoteLoad(Optional.When(plexBlocked && remote is RemoteService.Plex, () => Now.AddMinutes(1)), 0));
+		var capacity = TestCapacity.With(remote =>
+			RemoteLoad.Idle with
+			{
+				BlockedUntil = Optional.When(plexBlocked && remote is RemoteService.Plex, () => Now.AddMinutes(1)),
+			}
+		);
 		_tmdb
 			.LookUpAsync(Any(), Any())
 			.Returns(
@@ -483,7 +443,7 @@ public class MediaIdResolverTests
 	[Test]
 	public async Task ResolveAsync_WhenEveryPathRunsThroughABlockedProvider_AsksNobodyAndCachesNothing()
 	{
-		var blocked = TestCapacity.With(_ => new RemoteLoad(Some.Of(Now.AddMinutes(1)), 0));
+		var blocked = TestCapacity.With(_ => RemoteLoad.Idle with { BlockedUntil = Some.Of(Now.AddMinutes(1)) });
 
 		var resolved = await Testee(blocked).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
@@ -530,20 +490,9 @@ public class MediaIdResolverTests
 	{
 		using var trace = new TitleTrace();
 
-		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
+		var resolved = await Testee(TmdbBlocked(() => Now.AddMinutes(1))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That(resolved).IsOfUnionType<Resolution, NotRun>();
-		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Ids)).GaveUp).IsEqualTo(1);
-	}
-
-	[Test]
-	public async Task ResolveAsync_WhenStillBlockedAfterTheWait_RecordsGaveUp()
-	{
-		using var trace = new TitleTrace();
-		var pushes = 0;
-
-		await Testee(TmdbBlocked(() => Now.AddMilliseconds(20 + pushes++))).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
-
 		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Ids)).GaveUp).IsEqualTo(1);
 	}
 
@@ -562,7 +511,7 @@ public class MediaIdResolverTests
 				}
 			);
 
-		await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, Everyone, WaitingThrows);
+		await Testee(TmdbBlocked(() => tmdbFreeAt)).ResolveAsync(Request, MediaProvider.Tvdb, Everyone);
 
 		await Assert.That((await trace.NodesAsync()).Sum(node => node.GaveUp)).IsEqualTo(0);
 	}
@@ -628,8 +577,9 @@ public class MediaIdResolverTests
 
 	private static IRemoteCapacity TmdbBlocked(Func<DateTimeOffset> until)
 	{
-		var maxWait = TimeSpan.FromSeconds(15);
-		return TestCapacity.With(remote => remote is RemoteService.Tmdb ? new RemoteLoad(Some.Of(until()), 0, maxWait) : new RemoteLoad(new None(), 0));
+		return TestCapacity.With(remote =>
+			remote is RemoteService.Tmdb ? RemoteLoad.Idle with { BlockedUntil = Some.Of(until()), MaxWait = TimeSpan.FromSeconds(15) } : RemoteLoad.Idle
+		);
 	}
 
 	private Mock<IExternalIdConverter> Converter(RemoteService remote, params IdLookup[] lookups)

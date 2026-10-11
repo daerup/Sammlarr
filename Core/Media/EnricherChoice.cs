@@ -5,7 +5,7 @@ namespace Core.Media;
 
 internal readonly record struct EnricherCandidate(RemoteService Remote, IExternalMediaId Id, MediaFields Fills, RemoteLoad Load)
 {
-	public bool CanHelp(MediaFields needed, DateTimeOffset now) => needed.Overlaps(Fills) && Load.IsOpen(now);
+	public bool CanHelp(MediaFields needed, DateTimeOffset now) => needed.Overlaps(Fills) && Load.Takes(now, Load.EnrichWait);
 }
 
 internal static class EnricherChoice
@@ -21,30 +21,17 @@ internal static class EnricherChoice
 	{
 		return leftToAsk
 			.Where(candidate => candidate.CanHelp(needed, now))
-			.OrderByDescending(candidate => preferred.Contains(candidate.Remote))
+			.OrderByDescending(candidate => candidate.Load.IsOpen(now))
+			.ThenByDescending(candidate => preferred.Contains(candidate.Remote))
 			.ThenByDescending(candidate => (needed & candidate.Fills).DetailCount)
-			.ThenBy(candidate => candidate.Load.Busy)
+			.ThenBy(candidate => candidate.Load.EstimatedWait)
 			.ThenBy(candidate => candidate.Remote)
-			.FirstOrNone();
-	}
-
-	internal static Optional<EnricherCandidate> WorthWaitingFor(
-		MediaFields needed,
-		IEnumerable<EnricherCandidate> leftToAsk,
-		IReadOnlySet<RemoteService> waited,
-		DateTimeOffset now
-	)
-	{
-		return leftToAsk
-			.Where(candidate => needed.Overlaps(candidate.Fills) && !waited.Contains(candidate.Remote))
-			.Where(candidate => candidate.Load.FreesWithin(now, candidate.Load.EnrichWait))
-			.OrderBy(candidate => candidate.Load.FreeAt(now))
 			.FirstOrNone();
 	}
 
 	internal static Optional<EnricherCandidate> Blocked(MediaFields needed, IEnumerable<EnricherCandidate> leftToAsk, DateTimeOffset now)
 	{
-		return leftToAsk.Where(candidate => needed.Overlaps(candidate.Fills) && !candidate.Load.IsOpen(now)).FirstOrNone();
+		return leftToAsk.Where(candidate => needed.Overlaps(candidate.Fills) && !candidate.Load.Takes(now, candidate.Load.EnrichWait)).FirstOrNone();
 	}
 
 	internal static bool NeedsRefetch(CachedDetails cached, IReadOnlyList<EnricherCandidate> leftToAsk, DateTimeOffset now)

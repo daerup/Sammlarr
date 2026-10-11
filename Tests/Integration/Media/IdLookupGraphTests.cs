@@ -105,7 +105,7 @@ public class IdLookupGraphTests(SammlarrTestHost host) : IAsyncDisposable
 		var hops = IdLookupPlanner.Derive(Converters);
 		var capacity = host.Resolve<IRemoteCapacity>();
 
-		var plan = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Imdb }, true, MediaProvider.Plex, hops, capacity, DateTimeOffset.UnixEpoch);
+		var plan = IdLookupPlanner.Plan(new HashSet<MediaProvider> { MediaProvider.Imdb }, true, MediaProvider.Plex, hops, capacity);
 
 		await Assert
 			.That(plan.Paths.Select(path => string.Join(", ", path.Select(Describe))))

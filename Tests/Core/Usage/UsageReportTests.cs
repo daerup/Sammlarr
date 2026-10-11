@@ -34,7 +34,7 @@ public class UsageReportTests
 	public UsageReportTests()
 	{
 		_lastCalls.Of(Any()).Returns(new None());
-		_capacity.Of(Any()).Returns(new RemoteLoad(new None(), 0));
+		_capacity.Of(Any()).Returns(RemoteLoad.Idle);
 		_loads.FindAsync(Any(), Any()).Returns(new None());
 		_mdblist.TodayAsync(Any()).Returns(new None());
 		_feeds.GetAsync(Any()).Returns(new FeedSnapshot([]));
@@ -143,8 +143,8 @@ public class UsageReportTests
 	[Test]
 	public async Task ReadAsync_RightNow_NamesAPauseTheRequestsLeftAndADownload()
 	{
-		_capacity.Of(RemoteService.Plex).Returns(new RemoteLoad(Some.Of(Now.AddMinutes(16)), 0));
-		_capacity.Of(RemoteService.Tmdb).Returns(new RemoteLoad(Some.Of(Now.AddMinutes(-1)), 0));
+		_capacity.Of(RemoteService.Plex).Returns(RemoteLoad.Idle with { BlockedUntil = Some.Of(Now.AddMinutes(16)) });
+		_capacity.Of(RemoteService.Tmdb).Returns(RemoteLoad.Idle with { BlockedUntil = Some.Of(Now.AddMinutes(-1)) });
 		_mdblist.TodayAsync(Any()).Returns(Some.Of(962L));
 		_loads.FindAsync(DatasetNames.ImdbRatings, Any()).Returns(Some.Of(new DatasetLoad(DatasetNames.ImdbRatings, Midnight.AddHours(4.5), new None(), 2)));
 		Stored(
