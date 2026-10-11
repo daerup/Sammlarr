@@ -32,3 +32,4 @@ Shared/Concurrency/AttemptOutcome.cs
 Shared/Concurrency/LaneAnswer.cs
 Contracts/Media/ListTitle.cs
 Domain/Media/ConflictState.cs
+Domain/Media/MergeOutcome.cs

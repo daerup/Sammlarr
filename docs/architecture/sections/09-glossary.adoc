@@ -160,6 +160,10 @@ in either order; meeting it again only moves `SeenAt`. It stays `Undecided` unti
 it, or `Distinct` with its reason: the rows contradict each other (a source on both, or a film and a show), a source
 answered with another id, or an admin kept them apart.
 
+Merge:: Making two stored titles one (`IMediaMerge.MergeAsync`): `Merged` with the survivor and the removed title,
+`Contradicted` when the two contradict each other by then, or `NotStored` when one of them is gone (merged before, or
+trimmed) or both ids name one title.
+
 Answer:: What a converter's or enricher's call ends in (`Answer<T>`): `Found`; `NoMatch`, the service has no such title;
 `Unavailable`, blocked, down, refused by a lane, at a quota reserve or failed in transit, with whether the request left
 (`Sent`); or `Faulted`, an answer that could not be used. `Answering.GuardedAsync` turns exceptions into answers. Only
