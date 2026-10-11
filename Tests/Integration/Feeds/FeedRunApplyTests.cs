@@ -175,13 +175,40 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		var ownedButGone = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
 		await host.WithPlexAccount("plex-token");
-		host.RateLimited(RemoteService.Plex);
+		await host.RateLimitedAsync(RemoteService.Plex);
 
 		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var completed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
 		await Assert.That(completed!.Conclusiveness).IsEqualTo(Conclusiveness.Unresolved);
 		await Assert.That(await WantlistIdsAsync()).Contains(ownedButGone);
+	}
+
+	[Test]
+	public async Task RunAsync_WithTmdbBlocked_SettlesTheTitlesThatDontNeedTmdb()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("tmdb-blocked-list", new Append());
+		host.MdblistFeedContains(
+			"tmdb-blocked-list",
+			Item("Fight Club", MediaType.Movie, Tmdb("550")),
+			Item("Heat", MediaType.Movie, Tmdb("949")) with
+			{
+				Year = 1995,
+			}
+		);
+		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
+		await host.WithPlexAccount("plex-token");
+		host.PlexHolds(TestMedia.FightClub);
+		await host.PlexFindsNothing("Heat");
+		await host.EnsureTmdbAccount();
+		await host.RateLimitedAsync(RemoteService.Tmdb);
+
+		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		var completed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
+		await Assert.That(completed!.Conclusiveness).IsEqualTo(Conclusiveness.Unresolved);
+		await Assert.That(await WantlistIdsAsync()).IsEquivalentTo([fightClub]);
 	}
 
 	[Test]

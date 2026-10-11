@@ -36,7 +36,6 @@ public class DetailsFetcherTests
 	private static readonly Answer<FoundMedia> Down = new Unavailable(RemoteService.Tmdb, new None(), true);
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 	private static readonly DateTimeOffset LastRefresh = Now.AddDays(-3);
-	private static readonly CancellationToken WaitingThrows = new(canceled: true);
 	private static readonly ProviderAnswer PlexLeftTheRatings = new(RemoteService.Plex, MediaFields.AllRatings, LastRefresh);
 	private static readonly CachedDetails UnratedByPlex = new(Unrated(), LastRefresh, LastRefresh, [PlexLeftTheRatings]);
 	private const string TmdbImages = "https://image.tmdb.org/t/p/original/inception.jpg";
@@ -302,7 +301,7 @@ public class DetailsFetcherTests
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenTheEnricherThatFillsAGapIsBlockedWithinItsEnrichWait_WaitsAndAsksIt()
+	public async Task FetchAsync_WhenTheEnricherThatFillsAGapIsBlockedWithinItsEnrichWait_AsksItAndLeavesTheWaitToItsLane()
 	{
 		var deps = Dependencies.Create(capacity: TmdbBlocked(() => Now.AddMilliseconds(20)));
 		deps.PlexAnswers(Complete() with { Tagline = null });
@@ -322,7 +321,7 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Unrated());
 		await using var buffer = deps.Buffer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer, WaitingThrows));
+		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
@@ -348,33 +347,9 @@ public class DetailsFetcherTests
 		deps.PlexAnswers(Unrated());
 		await using var buffer = deps.Buffer();
 
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer, WaitingThrows));
-
-		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Details)).GaveUp).IsEqualTo(1);
-	}
-
-	[Test]
-	public async Task FetchAsync_WhileWaitingForABlockedEnricher_HonoursCancellation()
-	{
-		var deps = Dependencies.Create(capacity: TmdbBlocked(() => Now.AddMilliseconds(20)));
-		deps.PlexAnswers(Complete() with { Tagline = null });
-		await using var buffer = deps.Buffer();
-
-		await Assert.That(async () => await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer, WaitingThrows)).Throws<OperationCanceledException>();
-	}
-
-	[Test]
-	public async Task FetchAsync_WhenTheBlockIsExtendedWhileWaiting_WaitsForTheEnricherOnlyOnce()
-	{
-		var pushes = 0;
-		var deps = Dependencies.Create(capacity: TmdbBlocked(() => Now.AddMilliseconds(20 + pushes++)));
-		deps.PlexAnswers(Complete() with { Tagline = null });
-		await using var buffer = deps.Buffer();
-
 		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
-		await Assert.That(pushes).IsEqualTo(3);
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Details)).GaveUp).IsEqualTo(1);
 	}
 
 	[Test]
@@ -409,7 +384,7 @@ public class DetailsFetcherTests
 	public async Task FetchAsync_WhenTheEnricherIsRateLimited_SkipsItAndStoresNoAnswerForIt()
 	{
 		var deps = Dependencies.Create(
-			capacity: TestCapacity.With(remote => new RemoteLoad(Optional.When(remote is RemoteService.Tmdb, () => Now.AddMinutes(1)), 0))
+			capacity: TestCapacity.With(remote => RemoteLoad.Idle with { BlockedUntil = Optional.When(remote is RemoteService.Tmdb, () => Now.AddMinutes(1)) })
 		);
 		deps.PlexAnswers(Complete() with { Tagline = null });
 		await using var buffer = deps.Buffer();
@@ -471,7 +446,7 @@ public class DetailsFetcherTests
 	[Test]
 	public async Task FetchAsync_WhenEveryEnricherIsBlockedPastItsWait_FailsAsUnavailable()
 	{
-		var deps = Dependencies.Create(capacity: TestCapacity.With(_ => new RemoteLoad(Some.Of(Now.AddMinutes(1)), 0)));
+		var deps = Dependencies.Create(capacity: TestCapacity.With(_ => RemoteLoad.Idle with { BlockedUntil = Some.Of(Now.AddMinutes(1)) }));
 		await using var buffer = deps.Buffer();
 
 		var error = await Assert.That(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer)).IsError();
@@ -781,12 +756,12 @@ public class DetailsFetcherTests
 	{
 		var deps = Dependencies.Create(
 			search: SearchProvider.Tmdb,
-			capacity: TestCapacity.With(remote => new RemoteLoad(Optional.When(remote is RemoteService.Plex, () => Now.AddMilliseconds(20)), 0))
+			capacity: TestCapacity.With(remote => RemoteLoad.Idle with { BlockedUntil = Optional.When(remote is RemoteService.Plex, () => Now.AddMilliseconds(20)) })
 		);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([.. Identity.Keys], Unrated())));
 		await using var buffer = deps.Buffer();
 
-		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer, WaitingThrows));
+		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Everyone, buffer));
 
 		await Assert.That(fetched.Details.Missing).IsEqualTo(MediaFields.AllRatings);
 		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
@@ -829,7 +804,13 @@ public class DetailsFetcherTests
 
 	private static IRemoteCapacity TmdbBlocked(Func<DateTimeOffset> until)
 	{
-		return TestCapacity.With(remote => new RemoteLoad(Optional.When(remote is RemoteService.Tmdb, until), 0, EnrichWait: TimeSpan.FromSeconds(1)));
+		return TestCapacity.With(remote =>
+			RemoteLoad.Idle with
+			{
+				BlockedUntil = Optional.When(remote is RemoteService.Tmdb, until),
+				EnrichWait = TimeSpan.FromSeconds(1),
+			}
+		);
 	}
 
 	private static Answer<FoundMedia> Answer(MediaDetails details)

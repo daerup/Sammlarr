@@ -117,7 +117,7 @@ public class LaneGateTests
 		using var testee = new LaneGate(Policy(TwoPerSecond), time, new None(), "");
 		await FailTwiceAsync(testee);
 
-		await Assert.That(testee.Load.BlockedUntil).IsSome().And.IsEqualTo(time.GetUtcNow().AddSeconds(30));
+		await Assert.That(testee.Load(LaneClass.Interactive).BlockedUntil).IsSome().And.IsEqualTo(time.GetUtcNow().AddSeconds(30));
 	}
 
 	[Test]
@@ -144,7 +144,7 @@ public class LaneGateTests
 		probe.Release(new AttemptAnswered());
 
 		await Assert.That(await second.WaitAsync(Patience)).IsSuccess();
-		await Assert.That(testee.Load.Down).IsFalse();
+		await Assert.That(testee.Load(LaneClass.Interactive).Down).IsFalse();
 	}
 
 	[Test]
@@ -158,7 +158,7 @@ public class LaneGateTests
 
 		probe.Release(new AttemptFailed());
 
-		await Assert.That(testee.Load.Down).IsTrue();
+		await Assert.That(testee.Load(LaneClass.Interactive).Down).IsTrue();
 		await Assert.That(await testee.EnterAsync(LanePriority.Interactive, TimeSpan.Zero, CancellationToken.None)).IsError();
 	}
 
@@ -247,6 +247,20 @@ public class LaneGateTests
 	}
 
 	[Test]
+	public async Task Load_ForAClassAtTheQuotaReserve_IsBlockedUntilTheReserveEnds()
+	{
+		var time = new FakeTimeProvider();
+		var reset = time.GetUtcNow().AddHours(1);
+		var quota = ILaneQuota.Mock();
+		quota.BlockedUntil(Any(), Any(), Any()).Returns(new None());
+		quota.BlockedUntil(Any(), LaneClass.Background, Any()).Returns(Some.Of(reset));
+		using var testee = new LaneGate(Policy(TwoPerSecond), time, Some.Of(quota.Object), "mdblist-key");
+
+		await Assert.That(testee.Load(LaneClass.Background).BlockedUntil).IsSome().And.IsEqualTo(reset);
+		await Assert.That(testee.Load(LaneClass.Title).BlockedUntil).IsNone();
+	}
+
+	[Test]
 	public async Task EnterAsync_WhenAReserveStartsWhileATitleWaits_RefusesItOnceItOutlastsItsPatience()
 	{
 		var time = new FakeTimeProvider();
@@ -275,7 +289,7 @@ public class LaneGateTests
 		await cancellation.CancelAsync();
 
 		await Assert.That(async () => await cancelled).Throws<OperationCanceledException>();
-		await Assert.That(testee.Load.Waiting).IsEqualTo(0);
+		await Assert.That(testee.Load(LaneClass.Interactive).Waiting).IsEqualTo(0);
 	}
 
 	[Test]

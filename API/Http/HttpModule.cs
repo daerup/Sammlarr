@@ -14,8 +14,7 @@ internal class HttpModule : IServiceModule
 		services.TryAddSingleton(TimeProvider.System);
 		services.AddSingleton<Lanes.Lanes>();
 		services.AddHostedService<Lanes.LaneSettingsCheck>();
-		services.AddSingleton<RemoteCapacity>();
-		services.AddSingleton<IRemoteCapacity>(sp => sp.GetRequiredService<RemoteCapacity>());
+		services.AddScoped<IRemoteCapacity, RemoteCapacity>();
 		services.AddOptions<TelemetryOptions>().Configure<IFeedRunUsage>((options, feedRuns) => options.MeteringEnrichers.Add(new UsageMeteringEnricher(feedRuns)));
 	}
 }

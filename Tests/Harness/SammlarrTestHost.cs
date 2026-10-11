@@ -2,7 +2,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using API;
-using API.Http;
+using API.Http.Lanes;
 using API.Plex;
 using API.Tmdb;
 using Contracts;
@@ -32,6 +32,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
+using Shared.Concurrency;
 using Shared.DI;
 using Shared.Options;
 using TestInfrastructure;
@@ -307,7 +308,14 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	internal IDetailsEnricher Enricher(RemoteService remote) =>
 		Resolve<IEnumerable<Keyed<RemoteService, IDetailsEnricher>>>().Single(enricher => enricher.Key == remote).Capability;
 
-	internal void RateLimited(RemoteService remote) => Resolve<RemoteCapacity>().Block(remote, TimeSpan.FromMinutes(1));
+	internal async Task RateLimitedAsync(RemoteService remote)
+	{
+		var gate = Resolve<Lanes>().Gate(new LaneName(remote, Lanes.Rest), new None());
+		var entered = await gate.EnterAsync(LanePriority.Interactive, TimeSpan.Zero, CancellationToken.None);
+		entered
+			.GetOrThrow(_ => new InvalidOperationException($"{remote}'s lane refused the permit that throttles it."))
+			.Release(new AttemptThrottled(Some.Of(_clock.Now.AddMinutes(1))));
+	}
 
 	internal void TmdbHasNoDetail(MediaSpec spec)
 	{
@@ -718,6 +726,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.ConfigureAll<HttpStandardResilienceOptions>(options => options.Retry.ShouldHandle = _ => ValueTask.FromResult(false));
 		services.AddLogging();
 		services.AddSingleton<IDateTimeProvider>(_clock);
+		services.AddSingleton<TimeProvider>(new ClockTime(_clock));
 
 		services.ConfigureAll<HttpClientFactoryOptions>(options => options.HttpMessageHandlerBuilderActions.Add(builder => builder.PrimaryHandler = HttpStub));
 
@@ -898,6 +907,11 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private sealed class MutableClock : IDateTimeProvider
 	{
 		public DateTimeOffset Now { get; set; } = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
+	}
+
+	private sealed class ClockTime(IDateTimeProvider clock) : TimeProvider
+	{
+		public override DateTimeOffset GetUtcNow() => clock.Now;
 	}
 
 	private sealed class FileContextFactory(IServiceProvider provider, string connectionString, ICurrentUser user) : IDbContextFactory<SammlarrDbContext>

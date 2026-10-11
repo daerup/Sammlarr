@@ -56,13 +56,12 @@ internal sealed class MediaIdResolver(
 		var answers = new Dictionary<AnswerKey, Answer<IdLookupResult>>();
 		var down = new HashSet<RemoteService>();
 		var free = await FreeAsync(request.Candidates, target, hops, answers, down, cancellationToken);
-		var plan = IdLookupPlanner.Plan(free.Ids.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, hops, capacity, clock.Now);
+		var plan = IdLookupPlanner.Plan(free.Ids.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, hops, capacity);
 		var transient = free.Transient;
-		var waited = new HashSet<RemoteService>();
 		foreach (var path in plan.Paths)
 		{
 			using var traced = FeedRunSpans.Path();
-			var outcome = await FollowAsync(path, free.Ids, request.Hints, target, answers, down, waited, cancellationToken);
+			var outcome = await FollowAsync(path, free.Ids, request.Hints, target, answers, down, cancellationToken);
 			if (outcome.Found is not Some<IdLookupResult>(var found))
 			{
 				transient |= outcome.Transient;
@@ -131,7 +130,6 @@ internal sealed class MediaIdResolver(
 		MediaProvider target,
 		Dictionary<AnswerKey, Answer<IdLookupResult>> answers,
 		HashSet<RemoteService> down,
-		HashSet<RemoteService> waited,
 		CancellationToken cancellationToken
 	)
 	{
@@ -139,7 +137,7 @@ internal sealed class MediaIdResolver(
 		var current = hints;
 		for (var index = 0; index < path.Count; index++)
 		{
-			if (!await WaitForAsync(path.Skip(index), waited, down, cancellationToken))
+			if (!Takes(path.Skip(index), down))
 			{
 				return new StepOutcome(new None(), true);
 			}
@@ -259,53 +257,15 @@ internal sealed class MediaIdResolver(
 		return answer;
 	}
 
-	private async Task<bool> WaitForAsync(
-		IEnumerable<Hop> remaining,
-		HashSet<RemoteService> waited,
-		HashSet<RemoteService> down,
-		CancellationToken cancellationToken
-	)
+	private bool Takes(IEnumerable<Hop> remaining, HashSet<RemoteService> down)
 	{
 		var now = clock.Now;
-		var blocked = new Dictionary<RemoteService, DateTimeOffset>();
-		foreach (var remote in remaining.Select(hop => hop.Remote).Distinct())
-		{
-			if (down.Contains(remote))
-			{
-				return false;
-			}
-
-			var load = capacity.Of(remote);
-			if (load.IsOpen(now))
-			{
-				continue;
-			}
-
-			if (waited.Contains(remote) || !load.FreesWithin(now, load.MaxWait))
-			{
-				FeedRunSpans.GaveUp(remote, TraceStage.Ids);
-				return false;
-			}
-
-			blocked[remote] = load.FreeAt(now);
-		}
-
-		if (blocked.Count == 0)
-		{
-			return true;
-		}
-
-		waited.UnionWith(blocked.Keys);
-		var freeAt = blocked.Values.Max();
-		await clock.WaitUntilAsync(freeAt, cancellationToken);
-		var stillBlocked = blocked.Keys.Where(remote => !capacity.Of(remote).IsOpen(freeAt)).ToList();
-		foreach (var remote in stillBlocked)
-		{
-			FeedRunSpans.GaveUp(remote, TraceStage.Ids);
-		}
-
-		return stillBlocked.Count == 0;
+		var refused = remaining.Select(hop => hop.Remote).Distinct().FirstOrNone(remote => down.Contains(remote) || !WithinMaxWait(capacity.Of(remote), now));
+		refused.When(remote => !down.Contains(remote)).Apply(remote => FeedRunSpans.GaveUp(remote, TraceStage.Ids));
+		return refused.IsNone();
 	}
+
+	private static bool WithinMaxWait(RemoteLoad load, DateTimeOffset now) => load.Takes(now, load.MaxWait);
 
 	private readonly record struct StepOutcome(Optional<IdLookupResult> Found, bool Transient);
 

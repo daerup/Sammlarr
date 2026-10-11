@@ -33,17 +33,14 @@ public sealed class LaneGate : IDisposable
 		_wake = time.CreateTimer(_ => Pump(), null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
 	}
 
-	public LaneLoad Load
+	public LaneLoad Load(LaneClass asking)
 	{
-		get
+		lock (_gate)
 		{
-			lock (_gate)
-			{
-				var now = _time.GetUtcNow();
-				var blocked = new[] { _blockedUntil, _downUntil }.WhereSome().Where(until => until > now).OrderDescending().FirstOrNone();
-				var queued = _windows.Select(window => window.Drain(_waiting.Count, _scale)).DefaultIfEmpty(TimeSpan.Zero).Max();
-				return new LaneLoad(blocked, blocked.Map(until => until - now).GetValueOr(TimeSpan.Zero) + queued, IsDown(now), _inFlight, _waiting.Count);
-			}
+			var now = _time.GetUtcNow();
+			var blocked = new[] { _blockedUntil, _downUntil, ReservedUntil(asking, now) }.WhereSome().Where(until => until > now).OrderDescending().FirstOrNone();
+			var queued = _windows.Select(window => window.Drain(_waiting.Count, _scale)).DefaultIfEmpty(TimeSpan.Zero).Max();
+			return new LaneLoad(blocked, blocked.Map(until => until - now).GetValueOr(TimeSpan.Zero) + queued, IsDown(now), _waiting.Count);
 		}
 	}
 
@@ -161,7 +158,7 @@ public sealed class LaneGate : IDisposable
 
 	private DateTimeOffset OpenAt(LanePriority priority, DateTimeOffset now)
 	{
-		return new[] { _blockedUntil.GetValueOr(now), ReservedUntil(priority, now).GetValueOr(now) }
+		return new[] { _blockedUntil.GetValueOr(now), ReservedUntil(priority.Class, now).GetValueOr(now) }
 			.Concat(_windows.Select(window => window.NextFree(now, _scale)))
 			.Max();
 	}
@@ -171,14 +168,14 @@ public sealed class LaneGate : IDisposable
 		return Optional
 			.When(IsDown(now), () => "down")
 			.Or(() => _blockedUntil.When(until => until > deadline).Map(until => $"blocked until {until:O}"))
-			.Or(() => ReservedUntil(priority, now).When(until => until > deadline).Map(until => $"quota reserve until {until:O}"));
+			.Or(() => ReservedUntil(priority.Class, now).When(until => until > deadline).Map(until => $"quota reserve until {until:O}"));
 	}
 
 	private bool IsDown(DateTimeOffset now) => _downUntil.Match(until => until > now, () => false);
 
-	private Optional<DateTimeOffset> ReservedUntil(LanePriority priority, DateTimeOffset now)
+	private Optional<DateTimeOffset> ReservedUntil(LaneClass asking, DateTimeOffset now)
 	{
-		return _quota.Map(quota => quota.BlockedUntil(_owner, priority.Class, now));
+		return _quota.Map(quota => quota.BlockedUntil(_owner, asking, now));
 	}
 
 	private void Answered(DateTimeOffset now)

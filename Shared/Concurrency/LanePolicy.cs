@@ -49,6 +49,6 @@ public interface ILaneQuota
 	Optional<DateTimeOffset> BlockedUntil(string owner, LaneClass asking, DateTimeOffset now);
 }
 
-public readonly record struct LaneLoad(Optional<DateTimeOffset> BlockedUntil, TimeSpan EstimatedWait, bool Down, int InFlight, int Waiting);
+public readonly record struct LaneLoad(Optional<DateTimeOffset> BlockedUntil, TimeSpan EstimatedWait, bool Down, int Waiting);
 
 public sealed class LaneRefusedException(string reason) : Exception(reason);

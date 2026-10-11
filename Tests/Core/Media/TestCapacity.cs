@@ -5,7 +5,7 @@ namespace Core.Tests.Media;
 
 internal static class TestCapacity
 {
-	internal static IRemoteCapacity Open() => With(_ => new RemoteLoad(new None(), 0));
+	internal static IRemoteCapacity Open() => With(_ => RemoteLoad.Idle);
 
 	internal static IRemoteCapacity With(Func<RemoteService, RemoteLoad> load)
 	{

@@ -63,12 +63,12 @@ internal sealed class Lanes(TimeProvider time, IEnumerable<RemoteSettings> setti
 			.GetValueOr(Rest);
 	}
 
-	public IEnumerable<LaneLoad> Loads(RemoteService remote, Optional<UserId> user)
+	public IEnumerable<LaneLoad> Loads(RemoteService remote, Optional<UserId> user, LaneClass asking)
 	{
 		return _gates
 			.Where(gate => gate.Key.Remote == remote)
 			.Where(gate => gate.Key.Owner == "" || user.Match(found => _usedBy.ContainsKey((gate.Key, found)), () => false))
-			.Select(gate => gate.Value.Load);
+			.Select(gate => gate.Value.Load(asking));
 	}
 
 	public Optional<RemoteSettings> Settings(RemoteService remote) => _settings.GetValueOrNone(remote);

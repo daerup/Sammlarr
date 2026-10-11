@@ -16,7 +16,7 @@ internal static class RunLayouts
 		IReadOnlyList<RemoteService> enrichers
 	)
 	{
-		var paths = targets.SelectMany(target => IdLookupPlanner.Plan(sources, true, target, hops, Unlimited, DateTimeOffset.UnixEpoch).Paths).ToList();
+		var paths = targets.SelectMany(target => IdLookupPlanner.Plan(sources, true, target, hops, Unlimited).Paths).ToList();
 		IReadOnlyList<LayoutEdge> edges = [.. paths.SelectMany(Edges).Distinct()];
 		var columns = Columns(Ranks(paths), edges);
 		var free = hops.Where(hop => hop.Cost == 0 && Accepts(hop, sources)).Select(hop => hop.Remote).Distinct().Where(remote => !columns.ContainsKey(remote));
@@ -98,6 +98,6 @@ internal static class RunLayouts
 
 	private sealed class Open : IRemoteCapacity
 	{
-		public RemoteLoad Of(RemoteService remote) => new(new None(), 0);
+		public RemoteLoad Of(RemoteService remote) => RemoteLoad.Idle;
 	}
 }

@@ -71,7 +71,7 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 		await Testee.GetDetailsAsync([arrival]).ToListAsync();
 		await host.WithTmdbAccount("tmdb-key");
 		host.SetCurrentTime(At(6, 1, 2));
-		host.RateLimited(RemoteService.Tmdb);
+		await host.RateLimitedAsync(RemoteService.Tmdb);
 
 		await Testee.GetDetailsAsync([arrival]).ToListAsync();
 		await AssertCached(arrival, refreshed: At(6, 1), asked: At(6, 1), RemoteService.Plex);
