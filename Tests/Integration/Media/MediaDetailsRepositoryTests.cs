@@ -163,7 +163,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task GetAsync_WhenOneTitleHasDetailsAndOneHasNone_YieldsBothInOneRoundTrip()
+	public async Task GetAsync_WhenOneTitleHasDetailsAndOneHasNone_YieldsBoth()
 	{
 		var firstPlex = PlexId.From("plex-812", MediaType.Movie);
 		var secondPlex = PlexId.From("plex-813", MediaType.Movie);
@@ -180,7 +180,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task GetAsync_WhenRatingsExist_RoundTripsRatingsThroughInclude()
+	public async Task GetAsync_WhenRatingsExist_ReadsThemBack()
 	{
 		var plexId = PlexId.From("plex-814", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
@@ -221,17 +221,25 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task GetAsync_WhenAMediaHasSeveralIdsAndRatings_ReadsEachOnce()
+	public async Task GetByExternalsAsync_ForATitleWithManyIdsRatingsAndAnswers_ReadsEachChildRowOnce()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-815", MediaType.Movie), TmdbId.From("815", MediaType.Movie), ImdbId.From("tt0815", MediaType.Movie)]);
-		var rated = Complete() with { Ratings = MediaRatings.From([new TmdbRating(8.5f, Some.Of(1200)), new ImdbRating(7.0f, new None())]) };
-		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(rated)));
+		IIdentityKey[] keys = [PlexId.From("plex-815", MediaType.Movie), TmdbId.From("815", MediaType.Movie), ImdbId.From("tt0815", MediaType.Movie)];
+		var mediaId = await SeedMediaAsync(keys);
+		var rated = Complete() with
+		{
+			Ratings = MediaRatings.From([new TmdbRating(8.5f, Some.Of(1200)), new ImdbRating(7.0f, new None())]),
+			PageLinks = [RottenTomatoesId.From("m/the_matrix", MediaType.Movie), MetacriticId.From("movie/the-matrix", MediaType.Movie)],
+		};
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(rated) with { Answers = [.. Answers] }));
 		fixture.Context.ChangeTracker.Clear();
 
-		var stored = (await _testee.GetAsync([mediaId])).Single();
+		var stored = (await _testee.GetByExternalsAsync([keys[0], keys[1]])).Single();
 
 		await Assert.That(stored.Identity.Keys).Count().IsEqualTo(3);
-		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.Details.Ratings.All).Count().IsEqualTo(2));
+		var cached = await Assert.That(stored.Cached).IsSome();
+		await Assert.That(cached!.Details.Ratings.All).Count().IsEqualTo(2);
+		await Assert.That(cached.Details.PageLinks).Count().IsEqualTo(2);
+		await Assert.That(cached.Answers).Count().IsEqualTo(2);
 	}
 
 	[Test]

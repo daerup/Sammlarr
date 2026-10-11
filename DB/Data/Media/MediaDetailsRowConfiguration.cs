@@ -15,25 +15,25 @@ internal sealed class MediaDetailsRowConfiguration : IModelConfiguration
 
 		modelBuilder.Entity<MediaRatingRow>(builder =>
 		{
-			builder.Property<Guid>("MediaId");
-			builder.HasKey("MediaId", nameof(MediaRatingRow.Source));
-			builder.HasOne(r => r.Details).WithMany(m => m.Ratings).HasForeignKey("MediaId").OnDelete(DeleteBehavior.Cascade);
+			builder.Property<Guid>(MediaQueries.MediaIdColumn);
+			builder.HasKey(MediaQueries.MediaIdColumn, nameof(MediaRatingRow.Source));
+			builder.HasOne(r => r.Details).WithMany(m => m.Ratings).HasForeignKey(MediaQueries.MediaIdColumn).OnDelete(DeleteBehavior.Cascade);
 			builder.HasIndex(r => r.Source);
 		});
 
 		modelBuilder.Entity<MediaPageLinkRow>(builder =>
 		{
-			builder.Property<Guid>("MediaId");
+			builder.Property<Guid>(MediaQueries.MediaIdColumn);
 			builder.ToTable("MediaPageLinks");
-			builder.HasKey("MediaId", nameof(MediaPageLinkRow.Site));
-			builder.HasOne(link => link.Details).WithMany(details => details.PageLinks).HasForeignKey("MediaId").OnDelete(DeleteBehavior.Cascade);
+			builder.HasKey(MediaQueries.MediaIdColumn, nameof(MediaPageLinkRow.Site));
+			builder.HasOne(link => link.Details).WithMany(details => details.PageLinks).HasForeignKey(MediaQueries.MediaIdColumn).OnDelete(DeleteBehavior.Cascade);
 		});
 
 		modelBuilder.Entity<ProviderAnswerRow>(builder =>
 		{
-			builder.Property<Guid>("MediaId");
-			builder.HasKey("MediaId", nameof(ProviderAnswerRow.Provider));
-			builder.HasOne(answer => answer.Details).WithMany(details => details.Answers).HasForeignKey("MediaId").OnDelete(DeleteBehavior.Cascade);
+			builder.Property<Guid>(MediaQueries.MediaIdColumn);
+			builder.HasKey(MediaQueries.MediaIdColumn, nameof(ProviderAnswerRow.Provider));
+			builder.HasOne(answer => answer.Details).WithMany(details => details.Answers).HasForeignKey(MediaQueries.MediaIdColumn).OnDelete(DeleteBehavior.Cascade);
 			builder.Property(answer => answer.Unfilled).HasConversion(fields => fields.ToString(), text => MediaFields.Parse(text));
 		});
 	}
