@@ -20,6 +20,18 @@ public class ActivityLogTests
 	private static readonly DateTimeOffset Today = new(2026, 9, 27, 14, 32, 0, TimeSpan.Zero);
 
 	[Test]
+	public async Task Days_ARunOfAFeedThatIsGone_NamesItADeletedFeedAndMarksItGone()
+	{
+		var gone = FeedId.From(Guid.NewGuid());
+
+		var days = ActivityLog.Days([Run(gone, Today, added: 2), Run(Docs, Today.AddHours(-1), added: 1)], Names, TimeZoneInfo.Utc);
+
+		await Assert
+			.That(days[0].Feeds.Select(feed => (feed.Name, feed.Gone)))
+			.IsEquivalentTo([("A deleted feed", true), ("hdlists/latest-hd-documentary-movies", false)]);
+	}
+
+	[Test]
 	public async Task Days_CountsQuietRunsInTheDayTotalWithoutGivingThemAnEntry()
 	{
 		var runs = new[] { Run(Docs, Today, added: 2), Run(Trending, Today.AddHours(-1)), Run(Trending, Today.AddHours(-2)) };

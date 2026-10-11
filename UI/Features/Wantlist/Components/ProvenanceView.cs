@@ -16,7 +16,7 @@ internal static class ProvenanceView
 			SinkOrigin => "cloud",
 			ManualOrigin manual => ManualIcon(manual.Source),
 			FeedOrigin => "rss",
-			OrphanedOrigin => "unlink",
+			OrphanedOrigin => "ghost",
 			_ => "circle",
 		};
 

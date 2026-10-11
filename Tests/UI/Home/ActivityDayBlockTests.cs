@@ -1,4 +1,5 @@
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
 using Domain.Feed;
 using Domain.Feed.Run;
@@ -71,6 +72,30 @@ public class ActivityDayBlockTests : BunitContext
 		await Assert.That(cut.Find(".dproblem").TextContent).Contains("failed at").And.Contains("No MDBList API key is configured.");
 		await Assert.That(cut.Find(".drun-delta").TextContent.Trim()).IsEqualTo("failed");
 	}
+
+	[Test]
+	public async Task Chip_OfAFeedThatIsGone_WearsTheGhostAndLinksNowhere()
+	{
+		var cut = Render(ActivityLog.Days([Run(2, 0)], new Dictionary<FeedId, string>(), TimeZoneInfo.Utc)[0]);
+
+		var chip = cut.Find(".chip");
+		await Assert.That(chip.TagName).IsEqualTo("SPAN");
+		await Assert.That(chip.TextContent).Contains("A deleted feed");
+		await Assert.That(chip.QuerySelector("path")!.GetAttribute("d")).IsEqualTo(FirstPath("ghost"));
+	}
+
+	[Test]
+	public async Task Chip_OfAFeedThatExists_LinksToItsLatestRunWithTheFeedIcon()
+	{
+		var cut = Render(Day(added: 2));
+
+		var chip = cut.Find(".chip");
+		await Assert.That(chip.TagName).IsEqualTo("A");
+		await Assert.That(chip.QuerySelector("path")!.GetAttribute("d")).IsEqualTo(FirstPath("rss"));
+	}
+
+	private string? FirstPath(string icon) =>
+		Render<LucideIcon>(parameters => parameters.Add(lucide => lucide.Name, icon).Add(lucide => lucide.Size, 11)).Find("path").GetAttribute("d");
 
 	private IRenderedComponent<ActivityDayBlock> Render(ActivityDay day) =>
 		Render<ActivityDayBlock>(parameters =>

@@ -71,9 +71,16 @@
                                     <span class="flex min-w-0 items-center gap-2 pl-[26px]">
                                         @if (feed.Feed is Some<UsageFeedName>(var named))
                                         {
-                                            @foreach (var brand in Branding.Brands(named.Provider.Service).Take(1))
+                                            @if (named.DeletedAt is Some<DateTimeOffset>)
                                             {
-                                                <BrandedLogo Brand="brand" Size="16" Decorative="true"/>
+                                                <LucideIcon Name="ghost" Size="16" Class="shrink-0 text-muted-foreground"/>
+                                            }
+                                            else
+                                            {
+                                                @foreach (var brand in Branding.Brands(named.Provider.Service).Take(1))
+                                                {
+                                                    <BrandedLogo Brand="brand" Size="16" Decorative="true"/>
+                                                }
                                             }
                                             <span class="@($"truncate {named.DeletedAt.Match(_ => "text-muted-foreground line-through", () => string.Empty)}")">@named.Name</span>
                                             @if (named.DeletedAt is Some<DateTimeOffset>)
@@ -84,7 +91,7 @@
                                         }
                                         else
                                         {
-                                            <span class="size-4 shrink-0 rounded border border-dashed border-muted-foreground"></span>
+                                            <LucideIcon Name="ghost" Size="16" Class="shrink-0 text-muted-foreground"/>
                                             <span class="truncate">New feed, not saved yet, or deleted</span>
                                         }
                                     </span>
