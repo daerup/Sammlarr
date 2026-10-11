@@ -26,6 +26,10 @@ internal sealed class HttpStub : HttpMessageHandler
 	public void RespondForUrl(string urlContains, Func<HttpRequestMessage, HttpResponseMessage> responder) =>
 		_urlResponders[urlContains] = req => Task.FromResult(responder(req));
 
+	public void RespondForUrlAsync(string urlContains, Func<HttpRequestMessage, Task<HttpResponseMessage>> responder) => _urlResponders[urlContains] = responder;
+
+	public void Unexpect(string what) => _unexpected.Enqueue(what);
+
 	public void RespondWithStatusForUrl(string urlContains, HttpStatusCode statusCode) =>
 		_urlResponders[urlContains] = _ => Task.FromResult(new HttpResponseMessage(statusCode));
 

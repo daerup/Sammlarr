@@ -54,15 +54,11 @@ public partial class RatingBreakdownTests
 
 	private static StubSpec Sparql(string imdb, params string[] paths)
 	{
-		var bindings = string.Join(',', paths.Select(path => $$$"""{"rt":{"type":"literal","value":"{{{path}}}"}}"""));
-		return new StubSpec("/sparql", 200, $$$"""{"results":{"bindings":[{{{bindings}}}]}}""")
-		{
-			Query = new Dictionary<string, string>
-			{
-				["query"] =
-					$$"""SELECT ?rt ?tmdb ?tvdb ?metacritic ?letterboxd ?anilist ?mal WHERE { ?item wdt:P345 "{{imdb}}" . OPTIONAL { ?item wdt:P1258 ?rt . } OPTIONAL { ?item wdt:P4947 ?tmdb . } OPTIONAL { ?item wdt:P12196 ?tvdb . } OPTIONAL { ?item wdt:P1712 ?metacritic . } OPTIONAL { ?item wdt:P6127 ?letterboxd . } OPTIONAL { ?item wdt:P8729 ?anilist . } OPTIONAL { ?item wdt:P4086 ?mal . } }""",
-			},
-		};
+		var bindings = string.Join(
+			',',
+			paths.Select(path => $$$"""{"imdb":{"type":"literal","value":"{{{imdb}}}"},"rt":{"type":"literal","value":"{{{path}}}"}}""")
+		);
+		return new StubSpec("/sparql", 200, $$$"""{"results":{"bindings":[{{{bindings}}}]}}""") { Method = "POST", BodyContains = [$"%22{imdb}%22"] };
 	}
 
 	[GeneratedRegex(@"^https://www\.themoviedb\.org/movie/\d+$")]

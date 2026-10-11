@@ -103,6 +103,11 @@ public static class E2EApp
 			request["queryParameters"] = matchers;
 		}
 
+		if (spec.BodyContains.Count > 0)
+		{
+			request["bodyPatterns"] = new JsonArray([.. spec.BodyContains.Select(text => (JsonNode)new JsonObject { ["contains"] = text })]);
+		}
+
 		var headers = new JsonObject { ["Content-Type"] = "application/json" };
 		foreach (var (key, value) in spec.Headers)
 		{
@@ -161,6 +166,7 @@ public static class E2EApp
 	internal static async Task<int> RequestCountAsync(string urlPathSegment) =>
 		(JsonNode.Parse(await RequestJournalAsync())?["requests"]?.AsArray() ?? []).Count(entry =>
 			entry?["request"]?["url"]?.GetValue<string>()?.Contains(urlPathSegment, StringComparison.Ordinal) is true
+			|| entry?["request"]?["body"]?.GetValue<string>()?.Contains(urlPathSegment, StringComparison.Ordinal) is true
 		);
 
 	internal static async Task<string> ServedBodyAsync(string urlPath)
