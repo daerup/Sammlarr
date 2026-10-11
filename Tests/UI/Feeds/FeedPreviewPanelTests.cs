@@ -16,9 +16,11 @@ using Domain.Feed.Planning;
 using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
+using Domain.Usage;
 using Domain.Wantlist;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using Observability.Usage;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
@@ -162,6 +164,27 @@ public class FeedPreviewPanelTests : BunitContext
 		int.Parse(cut.Find(".leaving-badge-slot .preview-filter-badge span").TextContent);
 
 	private static IElement TotalBadge(IRenderedComponent<FeedPreviewPanel> cut) => cut.FindAll(".stat-badges-row .preview-filter-badge")[0];
+
+	[Test]
+	public async Task Apply_AsksTheProviderAsTheFeedEditorForTheDraftsFeed()
+	{
+		var (planner, provider) = Loading(FieldNeeds.None);
+		UsageMark mark = default;
+		provider
+			.GetFeedItemsAsync(Any(), Any(), Any())
+			.Returns(
+				(_, _, _) =>
+				{
+					mark = UsageCauses.Current;
+					return Async(new Listed<MediaMatchResult>(0, Detail(MediaId.New())));
+				}
+			);
+		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
+
+		await ApplyAsync(cut, new Append());
+
+		await Assert.That(mark).IsEqualTo(new UsageMark(UsageCause.FeedEditor, Some.Of(cut.Instance.DraftFeedId)));
+	}
 
 	[Test]
 	public async Task Apply_LoadsTheListWithTheDraftsNeeds()

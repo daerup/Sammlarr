@@ -5,6 +5,8 @@ using Contracts.Wantlist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Providers;
+using Domain.Usage;
+using Observability.Usage;
 
 namespace Core.Feed;
 
@@ -26,6 +28,7 @@ internal sealed class FeedService(
 
 	public async Task<Result<FeedId>> CreateAsync(FeedCreateData data, CancellationToken cancellationToken = default)
 	{
+		using var marked = UsageCauses.Mark(UsageCause.FeedEditor, data.Id);
 		return await providers[data.Provider]
 			.NormalizeAsync(data.Identifier, cancellationToken)
 			.Map(normalized => CreatedAsync(data with { Identifier = normalized }, cancellationToken));
@@ -33,6 +36,7 @@ internal sealed class FeedService(
 
 	public async Task<Result<FeedId>> UpdateAsync(FeedId id, FeedUpdateData data, CancellationToken cancellationToken = default)
 	{
+		using var marked = UsageCauses.Mark(UsageCause.FeedEditor, Some.Of(id));
 		var stored = await repository.FindAsync(id, cancellationToken);
 		return await stored
 			.When(feed => feed.Provider == data.Provider && feed.Identifier == data.Identifier)

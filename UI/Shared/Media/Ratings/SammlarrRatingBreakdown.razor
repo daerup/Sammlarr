@@ -131,6 +131,7 @@
 
     private async Task<IReadOnlyList<IExternalMediaId>> FindAsync(MediaId id, IReadOnlyList<MediaProvider> owners)
     {
+        using var marked = UsageCauses.Mark(UsageCause.ShowingTitles);
         var found = new List<IExternalMediaId>();
         foreach (var owner in owners)
         {

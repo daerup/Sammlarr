@@ -4,11 +4,13 @@ using Contracts.Wantlist.Outbox;
 using Contracts.Wantlist.Sync;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Usage;
 using Domain.Wantlist;
 using Domain.Wantlist.Arr;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using Microsoft.Extensions.Logging;
+using Observability.Usage;
 
 namespace Core.Wantlist.Sync;
 
@@ -22,6 +24,7 @@ internal sealed class WantlistSyncPlanner(
 {
 	public async Task<WantlistPlanResult> PlanAsync(CancellationToken cancellationToken = default)
 	{
+		using var marked = UsageCauses.Mark(UsageCause.WantlistSync);
 		var sink = await activeSink.ResolveAsync(cancellationToken);
 		return await PlanAsync(sink, cancellationToken)
 			.ApplyError(error => logger.LogWarning("Reading {Sink} failed: {Reason}", sink.Kind, error.Reason))

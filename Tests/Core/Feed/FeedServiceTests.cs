@@ -4,6 +4,8 @@ using Contracts.Wantlist;
 using Core.Feed;
 using Domain.Feed;
 using Domain.Providers;
+using Domain.Usage;
+using Observability.Usage;
 using TestInfrastructure;
 
 namespace Core.Tests.Feed;
@@ -76,6 +78,28 @@ public class FeedServiceTests
 
 		await Assert.That(created).IsSuccess().And.IsEqualTo(Id);
 		_repository.CreateAsync(Is<FeedCreateData>(data => data!.Identifier == Stored), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task CreateAsync_AsksTheProviderAsTheFeedEditorForTheNewFeed()
+	{
+		UsageMark mark = default;
+		_mdblist.NormalizeAsync("88434", Any()).Returns(Success.Of(Stored)).Callback(() => mark = UsageCauses.Current);
+
+		await Testee.CreateAsync(CreateData("88434") with { Id = Some.Of(Id) });
+
+		await Assert.That(mark).IsEqualTo(new UsageMark(UsageCause.FeedEditor, Some.Of(Id)));
+	}
+
+	[Test]
+	public async Task UpdateAsync_ThatChangesTheIdentifier_AsksTheProviderAsTheFeedEditorForTheFeed()
+	{
+		UsageMark mark = default;
+		_mdblist.NormalizeAsync(Any<string>(), Any()).Returns(Success.Of(Stored)).Callback(() => mark = UsageCauses.Current);
+
+		await Testee.UpdateAsync(Id, UpdateData("88434"));
+
+		await Assert.That(mark).IsEqualTo(new UsageMark(UsageCause.FeedEditor, Some.Of(Id)));
 	}
 
 	[Test]

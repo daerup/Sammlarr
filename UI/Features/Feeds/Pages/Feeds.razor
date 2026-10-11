@@ -627,6 +627,7 @@
         _preview = CancellationTokenSource.CreateLinkedTokenSource(_cancellation.Token);
         var token = _preview.Token;
         StateHasChanged();
+        using var marked = UsageCauses.Mark(UsageCause.FeedEditor, Some.Of(feed.Id));
 
         try
         {

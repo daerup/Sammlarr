@@ -154,14 +154,14 @@ internal static class UsageView
 	{
 		return cause switch
 		{
-			UsageCause.FeedRun
-			or UsageCause.WantlistSync
-			or UsageCause.Dataset
-			or UsageCause.Search
-			or UsageCause.Browse
-			or UsageCause.ShowingTitles
-			or UsageCause.FeedEditor => new None(),
-			UsageCause.KeyTest => Some.Of("The Test buttons in Settings: an API key, a sign-in, or a Radarr or Sonarr connection."),
+			UsageCause.FeedRun or UsageCause.Dataset or UsageCause.Search or UsageCause.Browse or UsageCause.ShowingTitles => new None(),
+			UsageCause.WantlistSync => Some.Of(
+				"The sync with Radarr, Sonarr or Plex, and what reads them for it: the sync dialog, a title added from a page, a sink switch, removing a person."
+			),
+			UsageCause.FeedEditor => Some.Of("Previews in the feed editor and before Run now on the Feeds list, the link check, and saving a feed."),
+			UsageCause.KeyTest => Some.Of(
+				"Checks of an API key, a sign-in, or a Radarr or Sonarr connection: the Test buttons in Settings, and the check of a stored one when it is used again."
+			),
 			UsageCause.DetailsFill => Some.Of(
 				"Fills missing details of wantlisted and blocklisted titles in the background, a few minutes after a run, a new key or a sign-in."
 			),

@@ -7,6 +7,8 @@ using Core.Wantlist.Sync;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
+using Domain.Usage;
+using Observability.Usage;
 
 namespace Core.Identity;
 
@@ -69,6 +71,7 @@ internal sealed class UserManagementService(
 	public async Task<Result<SinkHoldings>> SinkHoldingsAsync(UserId id, CancellationToken cancellationToken = default)
 	{
 		await EnsureCallerIsAdminAsync(cancellationToken);
+		using var marked = UsageCauses.Mark(UsageCause.WantlistSync);
 		var person = await users.GetAsync(id, cancellationToken);
 		var sink = await sinks.ResolveAsync(cancellationToken);
 		return await sink.HoldingsOfAsync(person, cancellationToken);
@@ -212,6 +215,7 @@ internal sealed class UserManagementService(
 
 	private async Task<Result<int>> ClearAndRemoveAsync(UserId id, CancellationToken cancellationToken)
 	{
+		using var marked = UsageCauses.Mark(UsageCause.WantlistSync);
 		var person = await users.GetAsync(id, cancellationToken);
 		var sink = await sinks.ResolveAsync(cancellationToken);
 		var cleared = await sink.DeleteTitlesOfAsync(person, cancellationToken);

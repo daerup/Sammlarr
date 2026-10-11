@@ -60,7 +60,7 @@ internal sealed class UsageTagsHandler(IFeedRunUsage feedRuns) : DelegatingHandl
 		finally
 		{
 			var took = Stopwatch.GetElapsedTime(started);
-			stamp.Apply(found => found.Mark.Feed.Apply(feed => feedRuns.Time(feed, found.Service, DurationBuckets.Of(took.TotalMilliseconds))));
+			stamp.Apply(found => found.Mark.Run.Apply(feed => feedRuns.Time(feed, found.Service, DurationBuckets.Of(took.TotalMilliseconds))));
 		}
 	}
 
@@ -101,7 +101,7 @@ internal sealed class UsageMeteringEnricher(IFeedRunUsage feedRuns) : MeteringEn
 
 	private static bool IsRetryPipeline(string? pipeline) => pipeline?.EndsWith($"-{LanedPipeline.RetryPipeline}", StringComparison.Ordinal) ?? false;
 
-	private void Credit(UsageStamp stamp, UsageOutcome outcome) => stamp.Mark.Feed.Apply(feed => feedRuns.Credit(feed, stamp.Service, outcome, 1));
+	private void Credit(UsageStamp stamp, UsageOutcome outcome) => stamp.Mark.Run.Apply(feed => feedRuns.Credit(feed, stamp.Service, outcome, 1));
 
 	private static UsageFault Fault(Exception? exception)
 	{

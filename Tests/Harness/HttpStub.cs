@@ -2,6 +2,8 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Text;
 using System.Web;
+using API.Http;
+using Domain.Usage;
 
 namespace Harness;
 
@@ -13,11 +15,18 @@ internal sealed class HttpStub : HttpMessageHandler
 
 	private readonly ConcurrentQueue<string> _requested = new();
 
+	private readonly ConcurrentQueue<(string Url, UsageCause Cause)> _causes = new();
+
 	private readonly ConcurrentQueue<string> _unexpected = new();
 
 	public IReadOnlyCollection<string> Unexpected => _unexpected;
 
 	public int Requests(string urlContains) => _requested.Count(url => url.Contains(urlContains, StringComparison.OrdinalIgnoreCase));
+
+	public IReadOnlyList<UsageCause> Causes(string urlContains)
+	{
+		return [.. _causes.Where(sent => sent.Url.Contains(urlContains, StringComparison.OrdinalIgnoreCase)).Select(sent => sent.Cause)];
+	}
 
 	public void RespondWithJsonForUrl(string urlContains, string json) =>
 		_urlResponders[urlContains] = _ =>
@@ -64,6 +73,7 @@ internal sealed class HttpStub : HttpMessageHandler
 	{
 		var url = request.RequestUri?.AbsoluteUri ?? string.Empty;
 		_requested.Enqueue(url);
+		_causes.Enqueue((url, UsageStamp.Of(request).Map(stamp => stamp.Mark.Cause).GetValueOr(UsageCause.Other)));
 
 		foreach (var (urlContains, validator) in _credentialValidators)
 		{

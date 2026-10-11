@@ -23,8 +23,14 @@ internal sealed class ApiKeyService(
 		return cache.GetOrLoadAsync(
 			provider,
 			() => keys.GetAsync(provider, cancellationToken).Map(value => KeyOf(provider, value)),
-			key => validators[provider].CheckAsync(key.Value, cancellationToken)
+			key => CheckStoredAsync(provider, key, cancellationToken)
 		);
+	}
+
+	private async Task<AccessCheck> CheckStoredAsync(ApiKeyProvider provider, IApiKey key, CancellationToken cancellationToken)
+	{
+		using var marked = UsageCauses.Mark(UsageCause.KeyTest);
+		return await validators[provider].CheckAsync(key.Value, cancellationToken);
 	}
 
 	public Task<bool> IsStoredAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)

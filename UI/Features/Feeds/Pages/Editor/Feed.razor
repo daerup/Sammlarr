@@ -303,7 +303,7 @@
             return check.Answer;
         }
 
-        var answer = await FeedProviders[_config.Provider!.Value].CheckLinkAsync(typed, _visit.Token);
+        var answer = await FeedProviders[_config.Provider!.Value].CheckLinkAsync(typed, _savedFeedId ?? _draftId, _visit.Token);
         _identifierCheck = new IdentifierCheck(typed, answer);
         return answer;
     }
