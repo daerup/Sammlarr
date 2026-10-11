@@ -1,0 +1,382 @@
+@using Contracts.Identity
+@using Contracts.Media
+@using Contracts.Media.Artwork
+@using UI.Shared.Services.Branding
+@inject IConflictReview Review
+@inject ICurrentUser CurrentUser
+@inject MediaProviderBrandingService Branding
+@inject ExternalIdsView Ids
+@inject ArtworkSources Artwork
+@inject Notifier Notifier
+
+<BbDialog Open="Open" OpenChanged="OnOpenChanged">
+    <BbDialogContent Class="gap-0 overflow-hidden bg-card p-0 sm:max-w-[960px]" ShowClose="false" InitialFocus="FocusTrapInitialFocus.Container">
+        <div class="st-head">
+            <BbDialogTitle As="h4" Class="m-0 text-lg font-semibold">Titles stored twice</BbDialogTitle>
+            <span class="st-progress" data-testid="stored-twice-progress">@Progress</span>
+            <BbDialogClose AsChild="false" class="inline-flex rounded-md p-1 text-muted-foreground hover:bg-foreground/5 hover:text-foreground" aria-label="Close" data-testid="stored-twice-close">
+                <LucideIcon Name="x" Size="16"/>
+            </BbDialogClose>
+        </div>
+        @if (_pairs is not { } pairs)
+        {
+            <BbSkeleton Class="h-[420px] w-full rounded-none"/>
+        }
+        else
+        {
+            <div class="st-body">
+                <div class="st-rail scrollbar-thin" data-testid="stored-twice-rail">
+                    <h6>To decide</h6>
+                    @foreach (var (item, index) in _toDecide.Select((item, index) => (item, index)))
+                    {
+                        @RailItem(item, false, index)
+                    }
+                    <h6>Kept apart</h6>
+                    @foreach (var (item, index) in _keptApart.Select((item, index) => (item, index)))
+                    {
+                        @RailItem(item, true, index)
+                    }
+                </div>
+                <div class="st-main">
+                    @if (Current is { } pair)
+                    {
+                        <div class="st-pair" data-testid="stored-twice-pair">
+                            @Column(pair, pair.Held)
+                            <div class="st-divider">
+                                <span class="st-seam" title="@TitlesStoredTwiceView.Claim(pair.Note, Branding)">
+                                    @Claimant(pair.Note, 18)
+                                    <LucideIcon Name="arrow-left-right" Size="13"/>
+                                </span>
+                            </div>
+                            @Column(pair, pair.Other)
+                        </div>
+                        <div class="st-claim" data-testid="stored-twice-claim">
+                            <span class="st-says">
+                                @Claimant(pair.Note, 16)
+                                @TitlesStoredTwiceView.Claim(pair.Note, Branding)
+                            </span>
+                            <span class="text-muted-foreground">@TitlesStoredTwiceView.Reason(pair, CurrentUser.Id, Branding)</span>
+                        </div>
+                        <div class="st-foot" data-testid="stored-twice-actions">
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_index == 0" OnClick="Back">
+                                <LucideIcon Name="chevron-left" Size="13" Class="mr-1"/>Back
+                            </BbButton>
+                            @if (Mark(pair) is Some<ConflictChoice>(var chosen))
+                            {
+                                <span class="st-chosen">
+                                    <LucideIcon Name="check" Size="12"/>@TitlesStoredTwiceView.Staged(chosen)
+                                </span>
+                            }
+                            <span class="flex-1"></span>
+                            @if (!_inKept)
+                            {
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => Choose(ConflictChoice.KeepApart)">
+                                    <LucideIcon Name="split" Size="13" Class="mr-1.5"/>Keep apart
+                                </BbButton>
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => Choose(ConflictChoice.Leave)">
+                                    <LucideIcon Name="moon" Size="13" Class="mr-1.5"/>Leave to the nightly pass
+                                </BbButton>
+                                <BbButton Size="ButtonSize.Small" OnClick="() => Choose(ConflictChoice.Merge)">
+                                    <LucideIcon Name="merge" Size="13" Class="mr-1.5"/>Merge
+                                </BbButton>
+                            }
+                            else if (TitlesStoredTwiceView.Contradicts(pair))
+                            {
+                                <span class="st-cant">can't be merged</span>
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="Next">
+                                    Next<LucideIcon Name="chevron-right" Size="13" Class="ml-1"/>
+                                </BbButton>
+                            }
+                            else
+                            {
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => Choose(ConflictChoice.Merge)">
+                                    <LucideIcon Name="merge" Size="13" Class="mr-1.5"/>Merge anyway
+                                </BbButton>
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="Next">
+                                    Next<LucideIcon Name="chevron-right" Size="13" Class="ml-1"/>
+                                </BbButton>
+                            }
+                        </div>
+                    }
+                    else if (_applied is Some<IReadOnlyList<Refused>>(var refused))
+                    {
+                        <div class="st-summary" data-testid="stored-twice-applied">
+                            <LucideIcon Name="circle-check" Size="28" Class="text-[color:var(--alert-success)]"/>
+                            <h5>Applied</h5>
+                            <span class="text-muted-foreground">@AppliedLine(refused)</span>
+                            @foreach (var one in refused)
+                            {
+                                <span class="st-refused">Not merged: @TitlesStoredTwiceView.Plain(pairs.Single(candidate => SamePair(candidate.Note, one.Note))), the two now contradict each other.</span>
+                            }
+                        </div>
+                        <div class="st-foot">
+                            <span class="flex-1"></span>
+                            <BbDialogClose>
+                                <BbButton Size="ButtonSize.Small">Close</BbButton>
+                            </BbDialogClose>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="st-summary" data-testid="stored-twice-summary">
+                            <h5>@TitlesStoredTwiceView.ApplyTitle(Changes)</h5>
+                            <div class="st-staged scrollbar-thin">
+                                @foreach (var staged in _toDecide.Concat(_keptApart))
+                                {
+                                    var (label, icon) = Mark(staged).Map(choice => (TitlesStoredTwiceView.Staged(choice), TitlesStoredTwiceView.StagedIcon(choice))).GetValueOr(() => TitlesStoredTwiceView.Unmarked(staged.Note));
+                                    <div>
+                                        <LucideIcon Name="@icon" Size="14"/>
+                                        <span><b>@label</b> · @TitlesStoredTwiceView.Plain(staged)</span>
+                                    </div>
+                                }
+                            </div>
+                            <span class="text-muted-foreground">Nothing has changed yet. A merge can't be undone; closing now discards these choices.</span>
+                        </div>
+                        <div class="st-foot">
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_applying" OnClick="Back">
+                                <LucideIcon Name="chevron-left" Size="13" Class="mr-1"/>Back
+                            </BbButton>
+                            @if (_applying && _waits)
+                            {
+                                <span class="st-cant">Waits for the job that is running…</span>
+                            }
+                            <span class="flex-1"></span>
+                            <BbDialogClose>
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Close</BbButton>
+                            </BbDialogClose>
+                            <BbButton Size="ButtonSize.Small" Disabled="Changes == 0 || _applying" OnClick="ApplyAsync">
+                                <LucideIcon Name="check" Size="13" Class="mr-1.5"/>Apply @Changes
+                            </BbButton>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </BbDialogContent>
+</BbDialog>
+
+@code {
+    private static readonly ArtworkSize Thumb = new(30, 45);
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    private IReadOnlyList<StoredTwice>? _pairs;
+
+    private IReadOnlyList<StoredTwice> _toDecide = [];
+
+    private IReadOnlyList<StoredTwice> _keptApart = [];
+
+    private readonly Dictionary<(MediaId Held, MediaId Other), ConflictChoice> _marks = [];
+
+    private bool _inKept;
+
+    private int _index;
+
+    private bool _applying;
+
+    private bool _waits;
+
+    private Optional<IReadOnlyList<Refused>> _applied = new None();
+
+    private bool _wasOpen;
+
+    private IReadOnlyList<StoredTwice> Queue => _inKept ? _keptApart : _toDecide;
+
+    private StoredTwice? Current => _applied.Match<IReadOnlyList<Refused>, StoredTwice?>(_ => null, () => Queue.ElementAtOrDefault(_index));
+
+    private bool Applied => _applied.Match(_ => true, () => false);
+
+    private int Changes => _marks.Values.Count(choice => choice != ConflictChoice.Leave);
+
+    private string Progress
+    {
+        get
+        {
+            if (Current is null)
+            {
+                return "Done";
+            }
+
+            var queue = _inKept ? "Kept apart" : "Pair";
+            return $"{queue} {_index + 1} of {Queue.Count}";
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Open && !_wasOpen)
+        {
+            _wasOpen = true;
+            await LoadAsync();
+        }
+
+        _wasOpen = Open;
+    }
+
+    private async Task LoadAsync()
+    {
+        _pairs = null;
+        _marks.Clear();
+        _applied = new None();
+        await Task.Yield();
+        var pairs = await Review.PairsAsync();
+        _toDecide = TitlesStoredTwiceView.ToDecide(pairs);
+        _keptApart = TitlesStoredTwiceView.KeptApart(pairs);
+        _inKept = _toDecide.Count == 0 && _keptApart.Count > 0;
+        _index = 0;
+        _pairs = pairs;
+    }
+
+    private Task OnOpenChanged(bool open) => OpenChanged.InvokeAsync(open);
+
+    private Optional<ConflictChoice> Mark(StoredTwice pair) => _marks.GetValueOrNone(Key(pair.Note));
+
+    private static (MediaId Held, MediaId Other) Key(IdentityConflict note) => (note.Held, note.Other);
+
+    private static bool SamePair(IdentityConflict first, IdentityConflict second) => Key(first) == Key(second);
+
+    private void Choose(ConflictChoice choice)
+    {
+        _marks[Key(Queue[_index].Note)] = choice;
+        Next();
+    }
+
+    private void Next() => _index++;
+
+    private void Back() => _index = Math.Max(0, Math.Min(_index, Queue.Count) - 1);
+
+    private void Go(bool kept, int index)
+    {
+        _inKept = kept;
+        _index = index;
+    }
+
+    private async Task ApplyAsync()
+    {
+        _applying = true;
+        _waits = Review.WaitsForAJob;
+        try
+        {
+            List<ReviewChoice> choices = [.. _toDecide.Concat(_keptApart).Select(pair => Mark(pair).Map(choice => new ReviewChoice(pair.Note, choice))).WhereSome()];
+            _applied = Some.Of(await Review.ApplyAsync(choices));
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Could not apply the choices");
+        }
+        finally
+        {
+            _applying = false;
+        }
+    }
+
+    private string AppliedLine(IReadOnlyList<Refused> refused)
+    {
+        var merged = _marks.Values.Count(choice => choice == ConflictChoice.Merge) - refused.Count;
+        var kept = _marks.Values.Count(choice => choice == ConflictChoice.KeepApart);
+        var left = _toDecide.Count(pair => Mark(pair).Match(choice => choice == ConflictChoice.Leave, () => true));
+        return $"Merged {merged} · kept apart {kept} · left to the nightly pass {left}";
+    }
+
+    private string Dot(StoredTwice pair) => Mark(pair).Map(_ => "is-chosen").GetValueOr(() => TitlesStoredTwiceView.Tried(pair.Note) ? "is-tried" : string.Empty);
+
+    private bool IsOn(bool kept, int index) => _applied.Match(_ => false, () => kept == _inKept && index == _index);
+
+    private RenderFragment Claimant(IdentityConflict note, int size)
+    {
+        return note.Sources.Order().FirstOrNone().Match<RemoteService, RenderFragment>(
+            source => @<BrandedTile Brand="Branding.GetBrandingInfo(source)" Size="size" Decorative="true"/>,
+            () => @<span></span>
+        );
+    }
+
+    private RenderFragment RailItem(StoredTwice pair, bool kept, int index) =>
+        @<button type="button" class="@($"st-item {(IsOn(kept, index) ? "is-on" : null)}")" aria-current="@(IsOn(kept, index) ? "true" : null)" disabled="@(Applied || _applying)" data-testid="stored-twice-item" @onclick="() => Go(kept, index)">
+            @Thumbnail(pair)
+            <span class="st-item-text">
+                <b>@TitlesStoredTwiceView.Name(TitlesStoredTwiceView.Shown(pair))</b>
+                <span class="st-item-sub">
+                    <span class="st-dot @Dot(pair)"></span>@Mark(pair).Map(TitlesStoredTwiceView.Staged).GetValueOr(() => TitlesStoredTwiceView.Short(pair.Note, CurrentUser.Id, Branding))
+                </span>
+            </span>
+        </button>;
+
+    private RenderFragment Thumbnail(StoredTwice pair)
+    {
+        return TitlesStoredTwiceView.Poster(pair).Match<string, RenderFragment>(
+            src => @<img class="st-thumb" src="@src" srcset="@Artwork.ByDensity(src, Thumb)" alt="" loading="lazy" decoding="async"/>,
+            () => @<span class="st-thumb"><LucideIcon Name="image-off" Size="12"/></span>
+        );
+    }
+
+    private static RenderFragment IdLink(ExternalIdLink link) =>
+        @<span class="contents">
+            <BrandedTile Brand="link.Brand" Size="14" Decorative="true"/>@link.Id.Value
+        </span>;
+
+    private RenderFragment Column(StoredTwice pair, StoredTitle title) =>
+        @<div class="st-col" data-testid="stored-twice-title">
+            @if (TitlesStoredTwiceView.Details(title) is Some<MediaDetails>(var details))
+            {
+                <div class="st-poster">
+                    @if (details.PosterUrl is { } poster)
+                    {
+                        <PosterFade Src="@poster" Alt="@details.Title"/>
+                    }
+                    else
+                    {
+                        <div class="st-poster-empty"><LucideIcon Name="@details.Type.Icon" Size="32"/></div>
+                    }
+                </div>
+                <div class="st-name">@TitlesStoredTwiceView.Name(title)</div>
+                <div class="st-meta">
+                    <LucideIcon Name="@details.Type.Icon" Size="13"/>
+                    @if (TitlesStoredTwiceView.Year(title) is Some<int>(var year))
+                    {
+                        <span class="@(TitlesStoredTwiceView.YearsDiffer(pair) ? "st-year-differs" : null)" data-testid="stored-twice-year">@year</span>
+                    }
+                    @foreach (var fact in MediaFacts.GetDisplayFacts(details))
+                    {
+                        <span aria-hidden="true">•</span>
+                        <span>@fact</span>
+                    }
+                    <span aria-hidden="true">•</span>
+                    <SammlarrRatingBadge Ratings="details.Ratings" Ids="@(title.Media.Identity.Keys.ToList<IExternalMediaId>())" Title="@details.Title" Size="13" StoredOnly="true" Align="PopoverAlign.Center"/>
+                </div>
+                @if (details.Genres.Count > 0)
+                {
+                    <div class="st-genres">
+                        @foreach (var genre in details.Genres)
+                        {
+                            <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5 text-[11px]">@genre</BbBadge>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="st-poster"><div class="st-poster-empty is-trimmed"><LucideIcon Name="image-off" Size="22"/></div></div>
+                <div class="st-name is-dim">@TitlesStoredTwiceView.Name(title)</div>
+                <div class="st-meta">No details stored, only its ids</div>
+            }
+            <div class="st-ids">
+                @foreach (var link in Ids.IdLinks(title.Media.Identity.Keys, TitlesStoredTwiceView.DetailsTitle(title)))
+                {
+                    var clash = TitlesStoredTwiceView.Clashing(pair).Contains(link.Id.Source) ? "is-clash" : null;
+                    @if (link.Page is Some<string>(var url))
+                    {
+                        <a class="st-id @clash" href="@url" target="_blank" rel="noopener noreferrer" aria-label="@link.Label" data-testid="stored-twice-id">@IdLink(link)</a>
+                    }
+                    else
+                    {
+                        <span class="st-id @clash" title="@($"{link.Brand.DisplayName} {link.Id.Value}")" data-testid="stored-twice-id">@IdLink(link)</span>
+                    }
+                }
+            </div>
+            <div class="st-uses">@TitlesStoredTwiceView.Uses(title.Uses)</div>
+        </div>;
+}

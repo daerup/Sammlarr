@@ -14,6 +14,7 @@ using Shared.Options;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Housekeeping;
 using UI.Shared.Services;
+using UI.Tests.Media;
 
 namespace UI.Tests.Settings.Housekeeping;
 
@@ -42,7 +43,48 @@ public class HousekeepingSectionTests : BunitContext
 		Services.AddSingleton(_tasks.Object);
 		Services.AddSingleton(_purger.Object);
 		Services.AddSingleton(_unmatched.Object);
+		Services.AddMediaTitleLink();
+		Services.AddSingleton(ArtworkStub.Sizing());
+		Services.AddSingleton(IConflictReview.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	[Test]
+	public async Task Render_WithTitlesStoredTwice_AsksToReviewThoseToDecide()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())) with { StoredTwice = new StoredTwiceCount(2, 1) });
+
+		var cut = RenderLoaded();
+
+		await Assert
+			.That(cut.Find("[data-testid=housekeeping-stored-twice]").TextContent)
+			.Contains("2 to decide")
+			.And.Contains("2 pairs that may be one title")
+			.And.Contains("1 pair is kept apart.");
+	}
+
+	[Test]
+	public async Task Render_WithOnlyPairsKeptApart_SaysThereIsNothingToDecide()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())) with { StoredTwice = new StoredTwiceCount(0, 2) });
+
+		var cut = RenderLoaded();
+
+		await Assert
+			.That(cut.Find("[data-testid=housekeeping-stored-twice]").TextContent)
+			.Contains("0 to decide")
+			.And.Contains("Nothing to decide")
+			.And.Contains("2 pairs are kept apart.");
+	}
+
+	[Test]
+	public async Task Render_WithNoTitleStoredTwice_LeavesTheRowOut()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
+
+		var cut = RenderLoaded();
+
+		await Assert.That(cut.FindAll("[data-testid=housekeeping-stored-twice]")).IsEmpty();
 	}
 
 	[Test]

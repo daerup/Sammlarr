@@ -12,6 +12,11 @@ namespace UI.Shared.Media;
 
 internal sealed record ExternalIdCard(BrandingInfo Brand, string Subtext, string Page, string Label);
 
+internal sealed record ExternalIdLink(BrandingInfo Brand, IExternalMediaId Id, Optional<string> Page)
+{
+	public string Label => $"View {Id.Value} on {Brand.DisplayName} (opens in new tab)";
+}
+
 internal sealed class ExternalIdsView(
 	IKeyedServiceIndex<MediaProvider, IExternalPageLinker> linkers,
 	MediaProviderBrandingService branding,
@@ -38,6 +43,11 @@ internal sealed class ExternalIdsView(
 				.Select(id => linkers[id.Source].PageOf([id], title).Map(page => IdCard(id, page)))
 				.WhereSome(),
 		];
+	}
+
+	public IReadOnlyList<ExternalIdLink> IdLinks(IEnumerable<IExternalMediaId> ids, Optional<string> title)
+	{
+		return [.. ids.OrderBy(id => id.Source).Select(id => new ExternalIdLink(branding.GetBrandingInfo(id.Source), id, linkers[id.Source].PageOf([id], title)))];
 	}
 
 	public async Task<IReadOnlyList<ExternalIdCard>> WithArrCardAsync(IReadOnlyList<ExternalIdCard> idCards, IReadOnlyList<IExternalMediaId> ids)

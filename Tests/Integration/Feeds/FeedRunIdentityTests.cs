@@ -37,6 +37,26 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task RunAsync_AfterTheMerge_AddsTheTitleItConflictedOn()
+	{
+		await StubRemakesAsync();
+		var held = await host.SeedMediaAsync(TmdbId.From("15739", MediaType.Movie));
+		var other = await host.SeedMediaAsync(ImdbId.From("tt0083564", MediaType.Movie));
+		var annie = new Dictionary<MediaProvider, string> { [MediaProvider.Tmdb] = "15739", [MediaProvider.Imdb] = "tt0083564" };
+		var feedId = await SeedFeedAsync("annie-list", new FeedItemSpec("Annie", MediaType.Movie, 1982, annie));
+		var engine = host.Resolve<IFeedRunEngine>();
+		var wantlist = host.Resolve<IWantlistRepository>();
+
+		await engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+		var before = await wantlist.GetAllAsync();
+		await host.Resolve<IMediaMerge>().MergeAsync(held, other);
+		await engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		await Assert.That(before).IsEmpty();
+		await Assert.That((await wantlist.GetAllAsync()).Single().MediaId).IsEqualTo(held);
+	}
+
+	[Test]
 	public async Task LoadListAsync_ForTwoRemakesSharingAMetacriticSlug_HandsOutOnlyIdsThatAreStored()
 	{
 		await StubRemakesAsync();
@@ -97,7 +117,16 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/tmdb/movie", Remakes);
 	}
 
-	private async Task<FeedId> SeedRemakesFeedAsync()
+	private Task<FeedId> SeedRemakesFeedAsync()
+	{
+		return SeedFeedAsync(
+			"remakes-list",
+			new FeedItemSpec("Annie", MediaType.Movie, 1982, new Dictionary<MediaProvider, string> { [MediaProvider.Tmdb] = "15739" }),
+			new FeedItemSpec("Annie", MediaType.Movie, 1999, new Dictionary<MediaProvider, string> { [MediaProvider.Tmdb] = "26177" })
+		);
+	}
+
+	private async Task<FeedId> SeedFeedAsync(string list, params FeedItemSpec[] items)
 	{
 		var entity = new FeedRow
 		{
@@ -105,16 +134,12 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 			IsEnabled = true,
 			Provider = FeedProvider.Mdblist,
 			Strategy = new Append(),
-			Identifier = "remakes-list",
+			Identifier = list,
 		};
 		host.Context.Feeds.Add(entity);
 		await host.Context.SaveChangesAsync();
 		host.Context.ChangeTracker.Clear();
-		host.MdblistFeedContains(
-			"remakes-list",
-			new FeedItemSpec("Annie", MediaType.Movie, 1982, new Dictionary<MediaProvider, string> { [MediaProvider.Tmdb] = "15739" }),
-			new FeedItemSpec("Annie", MediaType.Movie, 1999, new Dictionary<MediaProvider, string> { [MediaProvider.Tmdb] = "26177" })
-		);
+		host.MdblistFeedContains(list, items);
 		return FeedId.From(entity.Id);
 	}
 }
