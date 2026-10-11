@@ -124,9 +124,12 @@ public class UiInvariantTests
 		var page = await E2EApp.AdminAt(Routes.Feeds);
 		await Expect(page.Locator("html")).Not.ToHaveClassAsync(new Regex("dark"));
 
+		await Expect(page.Locator("html"))
+			.ToHaveAttributeAsync("data-base-color", new Regex("."), new LocatorAssertionsToHaveAttributeOptions { Timeout = Wait.Settle });
 		await page.GetByLabel("Switch to dark mode").ClickAsync();
 
 		await ShouldBeDarkAsync(page);
+		await page.WaitForFunctionAsync("JSON.parse(localStorage.getItem('bb-theme') ?? '{}').isDarkMode === true");
 
 		await page.VisitAsync(Routes.Browse);
 
