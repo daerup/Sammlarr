@@ -30,3 +30,4 @@ Core/Media/Resolution.cs
 Core/Media/Identification.cs
 Shared/Concurrency/AttemptOutcome.cs
 Shared/Concurrency/LaneAnswer.cs
+Contracts/Media/ListTitle.cs

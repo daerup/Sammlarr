@@ -1,5 +1,4 @@
 using System.Net;
-using System.Runtime.CompilerServices;
 using API.Mal;
 using API.Tests.Anime;
 using API.Tests.Feeds;
@@ -60,7 +59,7 @@ public class MalTests
 			.OnRequest(request => request.PathMatches(@"^/v2/anime/ranking\?ranking_type=upcoming&limit=500&offset=0"))
 			.RespondWithJson("{\"data\":[" + string.Join(",", titles) + "],\"paging\":{\"next\":\"https://api.myanimelist.net/v2/anime/ranking?offset=500\"}}");
 
-		await Feed(handler).GetFeedItemsAsync("topanime.php?type=upcoming").ToListAsync();
+		await Feed(handler).GetFeedItemsAsync("topanime.php?type=upcoming").InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked).Count().IsEqualTo(500);
 		handler.Verify(request => request.PathMatches(".*"), Times.Once);
@@ -72,7 +71,9 @@ public class MalTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
 
-		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("anime/season/1800/fall").ToListAsync()).Throws<FeedIdentifierNotFoundException>();
+		await Assert
+			.That(async () => await Feed(handler).GetFeedItemsAsync("anime/season/1800/fall").InListOrderAsync().ToListAsync())
+			.Throws<FeedIdentifierNotFoundException>();
 	}
 
 	[Test]
@@ -81,7 +82,9 @@ public class MalTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.Forbidden);
 
-		var failure = await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("topanime.php").ToListAsync()).Throws<InvalidOperationException>();
+		var failure = await Assert
+			.That(async () => await Feed(handler).GetFeedItemsAsync("topanime.php").InListOrderAsync().ToListAsync())
+			.Throws<InvalidOperationException>();
 
 		await Assert.That(failure!.Message).IsEqualTo("MyAnimeList refused the page (403).");
 	}
@@ -94,7 +97,7 @@ public class MalTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(status);
 
-		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("anime/season").ToListAsync()).ThrowsException();
+		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("anime/season").InListOrderAsync().ToListAsync()).ThrowsException();
 	}
 
 	[Test]
@@ -103,7 +106,7 @@ public class MalTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"paging":{}}""");
 
-		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("anime/season").ToListAsync()).Throws<InvalidDataException>();
+		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("anime/season").InListOrderAsync().ToListAsync()).Throws<InvalidDataException>();
 	}
 
 	[Test]
@@ -119,7 +122,7 @@ public class MalTests
 		handler.OnRequest(request => request.PathMatches(@"^/v2/users/someone/animelist\?fields=")).RespondWithJson(PageOne);
 		handler.OnRequest(request => request.PathMatches(".*offset=1.*")).RespondWithJson(PageTwo);
 
-		await Feed(handler).GetFeedItemsAsync("someone").ToListAsync();
+		await Feed(handler).GetFeedItemsAsync("someone").InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(_asked.Select(request => $"{request.Candidates.Single()} {request.Hints.Map(hints => $"{hints.Title} {hints.Year}").GetValueOr("none")}"))
@@ -139,7 +142,7 @@ public class MalTests
 				"""
 			);
 
-		await Feed(handler, AnimeMaps.KnowingTheApothecaryDiaries()).GetFeedItemsAsync("someone").ToListAsync();
+		await Feed(handler, AnimeMaps.KnowingTheApothecaryDiaries()).GetFeedItemsAsync("someone").InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(_asked.Select(request => string.Join(" ", request.Candidates)))
@@ -152,7 +155,9 @@ public class MalTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.Forbidden);
 
-		var failure = await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("someone").ToListAsync()).Throws<InvalidOperationException>();
+		var failure = await Assert
+			.That(async () => await Feed(handler).GetFeedItemsAsync("someone").InListOrderAsync().ToListAsync())
+			.Throws<InvalidOperationException>();
 
 		await Assert.That(failure!.Message).Contains("private");
 	}
@@ -163,7 +168,7 @@ public class MalTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
 
-		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("nobody").ToListAsync()).Throws<FeedIdentifierNotFoundException>();
+		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("nobody").InListOrderAsync().ToListAsync()).Throws<FeedIdentifierNotFoundException>();
 	}
 
 	[Test]
@@ -229,7 +234,7 @@ public class MalTests
 		handler.OnRequest(request => request.PathMatches(".*offset=1.*")).RespondWithJson(PageTwo);
 		using var spans = new PageSpans();
 
-		await Feed(handler).GetFeedItemsAsync("someone").ToListAsync();
+		await Feed(handler).GetFeedItemsAsync("someone").InListOrderAsync().ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
 		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
@@ -241,19 +246,9 @@ public class MalTests
 	{
 		var keys = Keys();
 		var media = IMediaService.Mock();
-		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).Returns((requests, cancellation) => Identify(requests, cancellation));
+		media
+			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any())
+			.Returns((entries, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
 		return new MalFeedService(Client(handler, keys), media.Object, keys.Object, AnimeMaps.Seasons(map), FeedClock.Today());
-	}
-
-	private async IAsyncEnumerable<MediaMatchResult> Identify(
-		IAsyncEnumerable<IdentifyRequest> requests,
-		[EnumeratorCancellation] CancellationToken cancellationToken
-	)
-	{
-		await foreach (var request in requests.WithCancellation(cancellationToken))
-		{
-			_asked.Add(request);
-			yield return new UnmatchedMedia([.. request.Candidates], MediaDetails.Empty(request.Candidates[0].Type));
-		}
 	}
 }

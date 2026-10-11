@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Threading.Channels;
 using API.Http;
 using API.Mdblist.Types;
 using Contracts.Auth;
@@ -83,31 +82,18 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		return Error.From($"MDBList didn't answer, so {number} can't be looked up yet. Paste the list's link instead; it needs no request.", unavailable);
 	}
 
-	public IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
 	{
-		return Channel.CreateUnbounded<MediaMatchResult>().StreamAsync((items, token) => ResolveIntoAsync(identifier, items, token), cancellationToken);
+		return media.LoadListAsync(EntriesAsync(identifier, cancellationToken), cancellationToken);
 	}
 
-	private async Task ResolveIntoAsync(string identifier, ChannelWriter<MediaMatchResult> items, CancellationToken cancellationToken)
-	{
-		await foreach (var result in media.IdentifyWithDetailsAsync(BuildRequestsAsync(identifier, items, cancellationToken), cancellationToken))
-		{
-			await items.WriteAsync(result, cancellationToken);
-		}
-	}
-
-	private async IAsyncEnumerable<IdentifyRequest> BuildRequestsAsync(
-		string identifier,
-		ChannelWriter<MediaMatchResult> unmatched,
-		[EnumeratorCancellation] CancellationToken cancellationToken
-	)
+	private async IAsyncEnumerable<ListTitle> EntriesAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		await foreach (var page in FetchPagesAsync(identifier, cancellationToken))
 		{
 			foreach (var item in page.unmatched)
 			{
-				FeedRunSpans.ListedWithoutIds();
-				await unmatched.WriteAsync(BuildUnmatched(item), cancellationToken);
+				yield return BuildUnmatched(item);
 			}
 
 			var requests = page
@@ -166,7 +152,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 			});
 	}
 
-	private static MediaMatchResult BuildUnmatched(MdblistTypes.ListItems.UnmatchedListItem item)
+	private static UnmatchedMedia BuildUnmatched(MdblistTypes.ListItems.UnmatchedListItem item)
 	{
 		return new UnmatchedMedia(
 			[.. MdblistIds.Of(item.ids, item.MediaType)],

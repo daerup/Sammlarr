@@ -15,7 +15,8 @@
 @inject IProviderConfigService ProviderConfig
 @inject IBlocklistService BlocklistService
 @inject IMediaService Media
-@inject IKeyedServiceIndex<FeedProvider, IFeedProvider> FeedServiceIndex
+@inject IServiceScopeFactory Scopes
+@inject ICurrentUser CurrentUser
 @inject IFeedRunPlanner Planner
 @inject MediaProviderBrandingService Branding
 @inject Notifier Notifier
@@ -360,7 +361,7 @@
     private enum FetchState { Idle, Loading, Success, Failed }
 
     private FetchState _fetchState = FetchState.Idle;
-    private List<MediaMatchResult> _rawResults = [];
+    private List<Listed<MediaMatchResult>> _rawResults = [];
     private IReadOnlyList<UnmatchedMedia> _unmatchedResults = [];
     private IReadOnlyList<QueryVerdict<MatchedMedia>> _processedResults = [];
     private List<QueryVerdict<MatchedMedia>> _filteredResults = [];
@@ -473,7 +474,7 @@
             return;
         }
 
-        var staleIds = _rawResults.Matched().Select(media => media.Identity.Id).ToList();
+        var staleIds = _rawResults.Select(listed => listed.Item).Matched().Select(media => media.Identity.Id).ToList();
         _refreshDialogOpen = false;
         _fetchState = FetchState.Loading;
         ClearResults();
@@ -521,7 +522,9 @@
             _blocklistIds.Clear();
             await LoadWantlistAndBlocklistAsync();
 
-            var service = FeedServiceIndex[Config.Provider!.Value];
+            await using var scope = Scopes.CreateAsyncScope();
+            using var user = scope.ServiceProvider.GetRequiredService<IUserScope>().As(CurrentUser);
+            var service = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<FeedProvider, IFeedProvider>>()[Config.Provider!.Value];
             _fetchTimer.Restart();
             var reprocessAt = 1;
             var sinceRender = Stopwatch.StartNew();

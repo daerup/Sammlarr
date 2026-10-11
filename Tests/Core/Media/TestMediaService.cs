@@ -11,6 +11,7 @@ using Domain.Media.Conversions;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shared.Options;
 
 namespace Core.Tests.Media;
 
@@ -67,14 +68,25 @@ internal static class TestMediaService
 			dateTimeProvider.Object,
 			NullLogger<DetailsFetcher>.Instance
 		);
+		var resolver = new MediaIdResolver(
+			[new(RemoteService.Tmdb, converter.Object)],
+			unmatchedCache.Object,
+			TestCapacity.Open(),
+			idReadiness.Object,
+			dateTimeProvider.Object
+		);
+		var identifier = new TitleIdentifier(resolver, claims.Object);
+		var buffers = new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance);
+		var sink = TestSinks.AddressingBy(MediaProvider.Tmdb, configRepo.Object);
 		var testee = new MediaService(
-			new MediaIdResolver([new(RemoteService.Tmdb, converter.Object)], unmatchedCache.Object, TestCapacity.Open(), idReadiness.Object, dateTimeProvider.Object),
+			resolver,
+			identifier,
 			detailsFetcher,
+			new ListLoad(identifier, resolver, detailsFetcher, buffers, sink, mediaRepo.Object, new FeedLoadOptions(), TimeProvider.System),
 			claims.Object,
-			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),
-			TestSinks.AddressingBy(MediaProvider.Tmdb, configRepo.Object),
-			mediaRepo.Object,
-			NullLogger<MediaService>.Instance
+			buffers,
+			sink,
+			mediaRepo.Object
 		);
 		return (testee, new Deps(mediaRepo, details, unmatchedCache, converter, idReadiness, claims));
 	}

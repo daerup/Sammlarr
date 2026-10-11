@@ -196,6 +196,7 @@ public class FeedPreviewPanelTests : BunitContext
 		Services.AddSingleton(wantlist.Object);
 		Services.AddSingleton(blocklist.Object);
 		Services.AddSingleton(ICurrentUser.Mock().Object);
+		Services.AddSingleton(IUserScope.Mock().Object);
 		var media = IMediaService.Mock();
 		if (gone is { } id)
 		{
@@ -229,7 +230,7 @@ public class FeedPreviewPanelTests : BunitContext
 	{
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
-			var verdicts = Load(target).Items.Matched().Select(Owned).ToList();
+			var verdicts = Items(target).Matched().Select(Owned).ToList();
 
 			return Task.FromResult<FeedPlanResult>(
 				target is DraftFeed(var definition, _) && definition.Strategy is Mirror
@@ -270,8 +271,8 @@ public class FeedPreviewPanelTests : BunitContext
 	{
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
-			var verdicts = Load(target)
-				.Items.Matched()
+			var verdicts = Items(target)
+				.Matched()
 				.Select(item => new QueryVerdict<MatchedMedia>(
 					item,
 					QueryOutcome.Qualified,
@@ -292,6 +293,8 @@ public class FeedPreviewPanelTests : BunitContext
 	}
 
 	private static RawFeedLoad Load(FeedPlanTarget target) => target is DraftFeed(_, var load) ? load : new RawFeedLoad([], FeedLoadState.Finished);
+
+	private static IReadOnlyList<MediaMatchResult> Items(FeedPlanTarget target) => [.. Load(target).Items.Select(listed => listed.Item)];
 
 	private static async IAsyncEnumerable<T> Async<T>(params T[] items)
 	{
@@ -321,9 +324,9 @@ public class FeedPreviewPanelTests : BunitContext
 	{
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
-			var load = Load(target);
-			var unmatchedItems = load.Items.Select(item => item is UnmatchedMedia unmatched ? unmatched : null).OfType<UnmatchedMedia>().ToList();
-			var verdicts = load.Items.Matched().Select(Spread).ToList();
+			var items = Items(target);
+			var unmatchedItems = items.Select(item => item is UnmatchedMedia unmatched ? unmatched : null).OfType<UnmatchedMedia>().ToList();
+			var verdicts = items.Matched().Select(Spread).ToList();
 
 			return Task.FromResult<FeedPlanResult>(new AppendPlan(verdicts, unmatchedItems, FeedDelta.None, Conclusiveness.Conclusive));
 		}
@@ -356,18 +359,21 @@ public class FeedPreviewPanelTests : BunitContext
 			return Task.FromResult<Result<string>>(Success.Of(input));
 		}
 
-		public async IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+		public async IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(
+			string identifier,
+			[EnumeratorCancellation] CancellationToken cancellationToken = default
+		)
 		{
 			for (var i = 0; i < resolved; i++)
 			{
 				await Task.Yield();
-				yield return Movie(i);
+				yield return new Listed<MediaMatchResult>(i, Movie(i));
 			}
 
 			for (var i = 0; i < unmatched; i++)
 			{
 				await Task.Yield();
-				yield return Unknown(i);
+				yield return new Listed<MediaMatchResult>(resolved + i, Unknown(i));
 			}
 		}
 

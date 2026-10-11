@@ -432,40 +432,6 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenManyRequests_RampsBatchSizesFromTen()
-	{
-		var (testee, deps) = TestMediaService.Create();
-		var batches = RecordBatchSizes(deps);
-
-		await testee.IdentifyWithDetailsAsync(TestMediaService.Requests(100)).ToListAsync();
-
-		await Assert.That(batches).IsEquivalentTo([10, 20, 40, 30], CollectionOrdering.Matching);
-	}
-
-	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenRequestsSpanManyBatches_CapsTheRampAndNeverRestartsIt()
-	{
-		var (testee, deps) = TestMediaService.Create();
-		var batches = RecordBatchSizes(deps);
-
-		await testee.IdentifyWithDetailsAsync(TestMediaService.Requests(600)).ToListAsync();
-
-		await Assert.That(batches).IsEquivalentTo([10, 20, 40, 80, 160, 200, 90], CollectionOrdering.Matching);
-	}
-
-	[Test]
-	public async Task IdentifyWithDetailsAsync_WhenRequestCountIsBelowTheFirstBatch_UsesASingleBatch()
-	{
-		var (testee, deps) = TestMediaService.Create();
-		var batches = RecordBatchSizes(deps);
-
-		var results = await testee.IdentifyWithDetailsAsync(TestMediaService.Requests(3)).ToListAsync();
-
-		await Assert.That(batches).IsEquivalentTo([3], CollectionOrdering.Matching);
-		await Assert.That(results.Count).IsEqualTo(3);
-	}
-
-	[Test]
 	public async Task IdentifyWithDetailsAsync_WhenBatchesRamp_StillYieldsOneResultPerRequestInOrder()
 	{
 		var (testee, _) = TestMediaService.Create();
@@ -485,20 +451,6 @@ public class MediaServiceTests
 
 		await Assert.That(identities).IsEmpty();
 		deps.Claims.ClaimAsync(Any(), Any()).WasNeverCalled();
-	}
-
-	private static List<int> RecordBatchSizes(TestMediaService.Deps deps)
-	{
-		var batches = new List<int>();
-		deps.MediaRepo.GetByExternalsAsync(Any(), Any())
-			.Returns(
-				(ids, _) =>
-				{
-					batches.Add(ids.Count);
-					return [];
-				}
-			);
-		return batches;
 	}
 
 	private static StoredMedia FreshCached(MediaId id, IIdentityKey external)

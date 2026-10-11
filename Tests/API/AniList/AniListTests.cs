@@ -59,7 +59,7 @@ public class AniListTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(PlanningList);
 
-		await Feed(handler).GetFeedItemsAsync("someone/planning").ToListAsync();
+		await Feed(handler).GetFeedItemsAsync("someone/planning").InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(_asked.Select(request => $"{string.Join(" ", request.Candidates)} {request.Hints.Map(hints => $"{hints.Title} {hints.Year}").GetValueOr("none")}"))
@@ -81,7 +81,7 @@ public class AniListTests
 			);
 		var testee = Feed(handler, AnimeMaps.KnowingTheApothecaryDiaries());
 
-		await testee.GetFeedItemsAsync("someone").ToListAsync();
+		await testee.GetFeedItemsAsync("someone").InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(_asked.Select(request => string.Join(" ", request.Candidates)))
@@ -93,7 +93,7 @@ public class AniListTests
 	{
 		var handler = Answering(out var calls, call => SearchPage(call, call == 1 ? 50 : 10, more: call == 1));
 
-		await Feed(handler).GetFeedItemsAsync("search/anime?airing%20status=RELEASING").ToListAsync();
+		await Feed(handler).GetFeedItemsAsync("search/anime?airing%20status=RELEASING").InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked).Count().IsEqualTo(60);
 		await Assert.That(calls()).IsEqualTo(2);
@@ -104,7 +104,7 @@ public class AniListTests
 	{
 		var handler = Answering(out var calls, call => SearchPage(call, 50, more: true));
 
-		await Feed(handler).GetFeedItemsAsync("search/anime/trending").ToListAsync();
+		await Feed(handler).GetFeedItemsAsync("search/anime/trending").InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked).Count().IsEqualTo(500);
 		await Assert.That(calls()).IsEqualTo(10);
@@ -115,7 +115,7 @@ public class AniListTests
 	{
 		var handler = Answering(out var calls, call => call == 1 ? """{"data":{"GenreCollection":["Action","Comedy"]}}""" : SearchPage(1, 3, more: false));
 
-		await Feed(handler).GetFeedItemsAsync("search/anime?genres=Action&genres=Isekai").ToListAsync();
+		await Feed(handler).GetFeedItemsAsync("search/anime?genres=Action&genres=Isekai").InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked).Count().IsEqualTo(3);
 		await Assert.That(calls()).IsEqualTo(2);
@@ -128,7 +128,7 @@ public class AniListTests
 		handler.OnAnyRequest().RespondWithJson("""{"errors":[{"message":"Invalid sort","status":400}],"data":null}""", HttpStatusCode.BadRequest);
 
 		var failure = await Assert
-			.That(async () => await Feed(handler).GetFeedItemsAsync("search/anime?sort=NOPE").ToListAsync())
+			.That(async () => await Feed(handler).GetFeedItemsAsync("search/anime?sort=NOPE").InListOrderAsync().ToListAsync())
 			.Throws<InvalidOperationException>();
 
 		await Assert.That(failure!.Message).IsEqualTo("AniList refused the search: Invalid sort");
@@ -140,7 +140,9 @@ public class AniListTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.TooManyRequests);
 
-		await Assert.That(async () => await Feed(handler).GetFeedItemsAsync("search/anime/popular").ToListAsync()).Throws<RemoteUnavailableException>();
+		await Assert
+			.That(async () => await Feed(handler).GetFeedItemsAsync("search/anime/popular").InListOrderAsync().ToListAsync())
+			.Throws<RemoteUnavailableException>();
 	}
 
 	[Test]
@@ -150,9 +152,11 @@ public class AniListTests
 		handler.OnAnyRequest().RespondWithJson(PlanningList);
 		var titles = Titles(handler);
 		var media = IMediaService.Mock();
-		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).Returns((requests, cancellation) => Identify(requests, cancellation));
+		media
+			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any())
+			.Returns((entries, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
 		var feed = new AniListFeedService(Client(handler), media.Object, AnimeMaps.Seasons(AnimeMaps.Unknown()), titles, FeedClock.Today());
-		await feed.GetFeedItemsAsync("someone").ToListAsync();
+		await feed.GetFeedItemsAsync("someone").InListOrderAsync().ToListAsync();
 
 		var found = await new AniListEnricher(titles).LookUpAsync(AttackOnTitan);
 
@@ -169,7 +173,9 @@ public class AniListTests
 		clock.Now.Returns(() => now);
 		var titles = new AniListTitles(Client(handler), clock.Object);
 		var media = IMediaService.Mock();
-		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).Returns((requests, cancellation) => Identify(requests, cancellation));
+		media
+			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any())
+			.Returns((entries, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
 		await new AniListFeedService(Client(handler), media.Object, AnimeMaps.Seasons(AnimeMaps.Unknown()), titles, clock.Object)
 			.GetFeedItemsAsync("someone")
 			.ToListAsync();
@@ -221,7 +227,7 @@ public class AniListTests
 			.OnAnyRequest()
 			.RespondWithJson("""{"errors":[{"message":"Private User","status":404}],"data":{"MediaListCollection":null}}""", HttpStatusCode.NotFound);
 
-		var drain = async () => await Feed(handler).GetFeedItemsAsync("someone").ToListAsync();
+		var drain = async () => await Feed(handler).GetFeedItemsAsync("someone").InListOrderAsync().ToListAsync();
 
 		var failure = await Assert.That(drain).Throws<InvalidOperationException>();
 		await Assert.That(failure!.Message).Contains("private");
@@ -235,7 +241,7 @@ public class AniListTests
 			.OnAnyRequest()
 			.RespondWithJson("""{"errors":[{"message":"User not found","status":404}],"data":{"MediaListCollection":null}}""", HttpStatusCode.NotFound);
 
-		var drain = async () => await Feed(handler).GetFeedItemsAsync("nobody-at-all").ToListAsync();
+		var drain = async () => await Feed(handler).GetFeedItemsAsync("nobody-at-all").InListOrderAsync().ToListAsync();
 
 		await Assert.That(drain).Throws<FeedIdentifierNotFoundException>();
 	}
@@ -333,7 +339,7 @@ public class AniListTests
 		handler.OnAnyRequest().RespondWithJson(PlanningList);
 		using var spans = new PageSpans();
 
-		await Feed(handler).GetFeedItemsAsync("someone/planning").ToListAsync();
+		await Feed(handler).GetFeedItemsAsync("someone/planning").InListOrderAsync().ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, Some.Of(1))]);
 		await Assert.That(spans.Read).IsEquivalentTo([1]);
@@ -345,7 +351,7 @@ public class AniListTests
 		var handler = Answering(out _, call => SearchPage(call, call == 1 ? 50 : 10, more: call == 1));
 		using var spans = new PageSpans();
 
-		await Feed(handler).GetFeedItemsAsync("search/anime?airing%20status=RELEASING").ToListAsync();
+		await Feed(handler).GetFeedItemsAsync("search/anime?airing%20status=RELEASING").InListOrderAsync().ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
 		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
@@ -356,19 +362,9 @@ public class AniListTests
 	private AniListFeedService Feed(MockHttpHandler handler, Mock<IAnimeIds> map)
 	{
 		var media = IMediaService.Mock();
-		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).Returns((requests, cancellation) => Identify(requests, cancellation));
+		media
+			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any())
+			.Returns((entries, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
 		return new AniListFeedService(Client(handler), media.Object, AnimeMaps.Seasons(map), Titles(handler), FeedClock.Today());
-	}
-
-	private async IAsyncEnumerable<MediaMatchResult> Identify(
-		IAsyncEnumerable<IdentifyRequest> requests,
-		[System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken
-	)
-	{
-		await foreach (var request in requests.WithCancellation(cancellationToken))
-		{
-			_asked.Add(request);
-			yield return new UnmatchedMedia([.. request.Candidates], MediaDetails.Empty(request.Candidates[0].Type));
-		}
 	}
 }

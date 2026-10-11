@@ -39,9 +39,12 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 		return Task.FromResult(UserList(input).Match(list => Success.Of(list), () => Page(input).MapError(error => userShaped ? NotAList : error)));
 	}
 
-	public IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
 	{
-		return media.IdentifyWithDetailsAsync(seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken), cancellationToken);
+		return media.LoadListAsync(
+			seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken).Select(ListTitle (request) => request),
+			cancellationToken
+		);
 	}
 
 	private static Optional<string> UserList(string input)

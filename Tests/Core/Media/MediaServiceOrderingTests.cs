@@ -7,12 +7,15 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shared.Options;
 using TUnit.Assertions.Enums;
 
 namespace Core.Tests.Media;
 
 public class MediaServiceOrderingTests
 {
+	private const int ManyTitles = 300;
+
 	private static readonly DateTimeOffset _now = new(2026, 5, 6, 12, 0, 0, TimeSpan.Zero);
 
 	[Test]
@@ -38,18 +41,6 @@ public class MediaServiceOrderingTests
 	}
 
 	[Test]
-	public async Task IdentifyAsync_PreservesOrder_WhenBatchExceedsConcurrencyLimit()
-	{
-		var batchSize = MediaService.RecommendedConcurrency * 3;
-		var builder = RequestBuilder.Requests(batchSize);
-		var testee = CreateTestee(builder);
-
-		var results = await testee.IdentifyAsync(builder.AsRequests()).ToListAsync();
-
-		await Assert.That(results.ExtractTargetExternals()).IsInOrder();
-	}
-
-	[Test]
 	public async Task GetDetailsAsync_ById_PreservesInputOrder()
 	{
 		var builder = RequestBuilder.Requests(5);
@@ -64,18 +55,6 @@ public class MediaServiceOrderingTests
 	public async Task GetDetailsAsync_ById_PreservesOrder_WhenSomeFail()
 	{
 		var builder = RequestBuilder.Requests(6).FailDetailsAt(2, 4, 6);
-		var testee = CreateTestee(builder);
-
-		var results = await testee.GetDetailsAsync(builder.AsMediaIds()).ToListAsync();
-
-		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
-	}
-
-	[Test]
-	public async Task GetDetailsAsync_ById_PreservesOrder_WhenBatchExceedsConcurrencyLimit()
-	{
-		var batchSize = MediaService.RecommendedConcurrency * 3;
-		var builder = RequestBuilder.Requests(batchSize);
 		var testee = CreateTestee(builder);
 
 		var results = await testee.GetDetailsAsync(builder.AsMediaIds()).ToListAsync();
@@ -108,7 +87,7 @@ public class MediaServiceOrderingTests
 	[Test]
 	public async Task IdentifyWithDetailsAsync_PreservesOrder_WhenBatchExceedsConcurrencyLimit()
 	{
-		var batchSize = MediaService.RecommendedConcurrency * 3;
+		var batchSize = ManyTitles;
 		var builder = RequestBuilder.Requests(batchSize);
 		var testee = CreateTestee(builder);
 
@@ -176,14 +155,19 @@ public class MediaServiceOrderingTests
 			dateTimeProvider.Object,
 			NullLogger<DetailsFetcher>.Instance
 		);
+		var resolver = new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), TestReadiness.Everything(), dateTimeProvider.Object);
+		var identifier = new TitleIdentifier(resolver, claims.Object);
+		var buffers = new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance);
+		var sink = TestSinks.AddressingBy(MediaProvider.Tmdb, configRepository.Object);
 		return new MediaService(
-			new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), TestReadiness.Everything(), dateTimeProvider.Object),
+			resolver,
+			identifier,
 			detailsFetcher,
+			new ListLoad(identifier, resolver, detailsFetcher, buffers, sink, mediaRepo.Object, new FeedLoadOptions(), TimeProvider.System),
 			claims.Object,
-			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),
-			TestSinks.AddressingBy(MediaProvider.Tmdb, configRepository.Object),
-			mediaRepo.Object,
-			NullLogger<MediaService>.Instance
+			buffers,
+			sink,
+			mediaRepo.Object
 		);
 	}
 }

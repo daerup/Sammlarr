@@ -1,7 +1,7 @@
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Text;
 using API.Mdblist;
+using API.Tests.Feeds;
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Media;
@@ -40,27 +40,10 @@ public class MdblistServiceTests
 	{
 		var testee = CreateTestee(new StubHandler(HttpStatusCode.OK, pages: 2), out var media);
 
-		var results = await testee.GetFeedItemsAsync("multi-page").ToListAsync();
+		var results = await testee.GetFeedItemsAsync("multi-page").InListOrderAsync().ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
-		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).WasCalled(Times.Once);
-	}
-
-	[Test]
-	public async Task GetFeedItemsAsync_WhileThePageIsStillResolving_YieldsItsItemsWithoutIdsRightAway()
-	{
-		var handler = Mock.HttpHandler();
-		handler
-			.OnAnyRequest()
-			.RespondWithJson(
-				"""{"movies":[{"id":1,"ids":{"imdb":null,"tmdb":550,"tvdb":null,"mdblist":null,"mal":null},"rank":1,"title":"Fight Club","release_year":1999},{"title":"No Ids","release_year":2024}],"shows":[]}"""
-			);
-		var testee = CreateTestee(handler, out _, identify: Stall);
-		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-
-		var first = await testee.GetFeedItemsAsync("slow-list", timeout.Token).FirstAsync(timeout.Token);
-
-		await Assert.That(first).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
+		media.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -70,7 +53,7 @@ public class MdblistServiceTests
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[{"title":"No Ids","release_year":2024}]}""");
 		var testee = CreateTestee(handler, out _);
 
-		var results = await testee.GetFeedItemsAsync("id-less").ToListAsync();
+		var results = await testee.GetFeedItemsAsync("id-less").InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(results.Single())
@@ -87,7 +70,7 @@ public class MdblistServiceTests
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[{"title":" ","release_year":0}],"shows":[]}""");
 		var testee = CreateTestee(handler, out _);
 
-		var results = await testee.GetFeedItemsAsync("blank").ToListAsync();
+		var results = await testee.GetFeedItemsAsync("blank").InListOrderAsync().ToListAsync();
 
 		await Assert
 			.That(results.Single())
@@ -178,7 +161,7 @@ public class MdblistServiceTests
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[]}""");
 		var testee = CreateTestee(handler, out _);
 
-		await testee.GetFeedItemsAsync("chazlarson/external/2868").ToListAsync();
+		await testee.GetFeedItemsAsync("chazlarson/external/2868").InListOrderAsync().ToListAsync();
 
 		handler.Verify(request => request.Method(HttpMethod.Get).PathMatches(@"^/external/lists/2868/items(\?.*)?$"), Times.Once);
 	}
@@ -197,7 +180,7 @@ public class MdblistServiceTests
 		var titles = MdblistApis.Titles(lookups);
 		var testee = CreateTestee(handler, out _, titles: titles);
 
-		await testee.GetFeedItemsAsync("two-movies").ToListAsync();
+		await testee.GetFeedItemsAsync("two-movies").InListOrderAsync().ToListAsync();
 		await titles.FindAsync(ImdbId.From("tt0137523", MediaType.Movie));
 		await titles.FindAsync(TmdbId.From("603", MediaType.Movie));
 
@@ -211,18 +194,13 @@ public class MdblistServiceTests
 		var testee = CreateTestee(new StubHandler(HttpStatusCode.OK, pages: 2), out _);
 		using var spans = new PageSpans();
 
-		await testee.GetFeedItemsAsync("multi-page").ToListAsync();
+		await testee.GetFeedItemsAsync("multi-page").InListOrderAsync().ToListAsync();
 
 		await Assert.That(spans.Pages).IsEquivalentTo([new SourcePage(1, new None()), new SourcePage(2, new None())], CollectionOrdering.Matching);
 		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
 	}
 
-	private static MdblistService CreateTestee(
-		HttpMessageHandler handler,
-		out Mock<IMediaService> media,
-		Func<IAsyncEnumerable<IdentifyRequest>, CancellationToken, IAsyncEnumerable<MediaMatchResult>>? identify = null,
-		MdblistTitles? titles = null
-	)
+	private static MdblistService CreateTestee(HttpMessageHandler handler, out Mock<IMediaService> media, MdblistTitles? titles = null)
 	{
 		var apiKeyStore = IApiKeyService.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Mdblist, "test-key");
@@ -230,9 +208,7 @@ public class MdblistServiceTests
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();
-		media
-			.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any())
-			.Returns((requests, token) => (identify ?? IdentifyWithDetails)(requests, token));
+		media.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any()).Returns((entries, token) => ListLoads.UnresolvedAsync(entries, _ => { }, token));
 		return new MdblistService(client, media.Object, apiKeyStore.Object, titles ?? NoTitles());
 	}
 
@@ -266,26 +242,5 @@ public class MdblistServiceTests
 
 		private static string Page(string title) =>
 			$$"""{"movies":[{"id":1,"ids":{"imdb":null,"tmdb":{{title.GetHashCode(StringComparison.Ordinal) & 0xffff}},"tvdb":null,"mdblist":null,"mal":null},"rank":1,"title":"{{title}}","release_year":2020}],"shows":[]}""";
-	}
-
-	private static async IAsyncEnumerable<MediaMatchResult> IdentifyWithDetails(
-		IAsyncEnumerable<IdentifyRequest> requests,
-		[EnumeratorCancellation] CancellationToken cancellationToken
-	)
-	{
-		await foreach (var request in requests.WithCancellation(cancellationToken))
-		{
-			yield return new UnmatchedMedia([.. request.Candidates], new UnknownDetails());
-		}
-	}
-
-	private static async IAsyncEnumerable<MediaMatchResult> Stall(
-		IAsyncEnumerable<IdentifyRequest> requests,
-		[EnumeratorCancellation] CancellationToken cancellationToken
-	)
-	{
-		await foreach (var _ in requests.WithCancellation(cancellationToken)) { }
-		await Task.Delay(Timeout.Infinite, cancellationToken);
-		yield break;
 	}
 }

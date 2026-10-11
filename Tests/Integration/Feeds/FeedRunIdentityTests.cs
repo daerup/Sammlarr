@@ -1,7 +1,6 @@
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Wantlist;
-using Core.Media;
 using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Feed.Run;
@@ -56,7 +55,7 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var tmdbIds = new[] { "1" }.Concat(Enumerable.Range(101, MediaService.FirstBatchSize - 1).Select(n => $"{n}")).ToList();
+		var tmdbIds = new[] { "1" }.Concat(Enumerable.Range(101, 9).Select(n => $"{n}")).ToList();
 		var titles = string.Join(
 			",",
 			tmdbIds.Select(id => $$"""{"title":"T{{id}}","year":2000,"type":"movie","ids":{"imdb":"tt{{id}}","tmdb":{{id}}},"ratings":[]}""")

@@ -32,6 +32,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Time.Testing;
 using Shared.Concurrency;
 using Shared.DI;
 using Shared.Options;
@@ -77,6 +78,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	private readonly RemoteWantlistState _remote = new();
 	private readonly MutableClock _clock = new();
+	private Optional<TimeProvider> _time = new None();
 	private readonly OAuthStub _oauth = new();
 	private readonly SessionInvalidatorStub _sessionInvalidator = new();
 
@@ -144,6 +146,13 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	}
 
 	internal void SetCurrentTime(DateTimeOffset now) => _clock.Now = now;
+
+	internal FakeTimeProvider UseFakeTime()
+	{
+		var time = new FakeTimeProvider(_clock.Now);
+		_time = Some.Of<TimeProvider>(time);
+		return time;
+	}
 
 	internal void SinkAddresses(Func<MediaType, Optional<MediaProvider>> addressing) => _sinkAddressing = addressing;
 
@@ -308,13 +317,13 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	internal IDetailsEnricher Enricher(RemoteService remote) =>
 		Resolve<IEnumerable<Keyed<RemoteService, IDetailsEnricher>>>().Single(enricher => enricher.Key == remote).Capability;
 
-	internal async Task RateLimitedAsync(RemoteService remote)
+	internal async Task RateLimitedAsync(RemoteService remote, int minutes = 1)
 	{
 		var gate = Resolve<Lanes>().Gate(new LaneName(remote, Lanes.Rest), new None());
 		var entered = await gate.EnterAsync(LanePriority.Interactive, TimeSpan.Zero, CancellationToken.None);
 		entered
 			.GetOrThrow(_ => new InvalidOperationException($"{remote}'s lane refused the permit that throttles it."))
-			.Release(new AttemptThrottled(Some.Of(_clock.Now.AddMinutes(1))));
+			.Release(new AttemptThrottled(Some.Of(_clock.Now.AddMinutes(minutes))));
 	}
 
 	internal void TmdbHasNoDetail(MediaSpec spec)
@@ -714,6 +723,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddScoped(sp => sp.GetRequiredService<IDbContextFactory<SammlarrDbContext>>().CreateDbContext());
 
 		services.AddSingleton(new SchedulerOptions());
+		services.AddSingleton(new FeedLoadOptions());
 		services.AddSingleton(new AccountsOptions());
 		services.AddModule<CoreModule>();
 		services.AddModule<DbModule>();
@@ -726,7 +736,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.ConfigureAll<HttpStandardResilienceOptions>(options => options.Retry.ShouldHandle = _ => ValueTask.FromResult(false));
 		services.AddLogging();
 		services.AddSingleton<IDateTimeProvider>(_clock);
-		services.AddSingleton<TimeProvider>(new ClockTime(_clock));
+		services.AddSingleton(_time.GetValueOr(() => new ClockTime(_clock)));
 
 		services.ConfigureAll<HttpClientFactoryOptions>(options => options.HttpMessageHandlerBuilderActions.Add(builder => builder.PrimaryHandler = HttpStub));
 

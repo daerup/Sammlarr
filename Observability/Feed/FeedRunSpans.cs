@@ -36,7 +36,11 @@ public static class FeedRunSpans
 
 	public static void Settle(Optional<Activity> title, TitleFate fate) => title.Apply(span => span.SetTag(FeedRunTags.Fate, fate)).Apply(span => span.Stop());
 
-	public static async IAsyncEnumerable<T> SourceAsync<T>(IAsyncEnumerable<T> source, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public static async IAsyncEnumerable<T> SourceAsync<T>(
+		IAsyncEnumerable<T> source,
+		Func<T, bool> requested,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default
+	)
 	{
 		var span = Detached(FeedRunNames.Source, []);
 		var taken = 0;
@@ -44,7 +48,11 @@ public static class FeedRunSpans
 		{
 			await foreach (var item in source.WithCancellation(cancellationToken))
 			{
-				taken++;
+				if (requested(item))
+				{
+					taken++;
+				}
+
 				yield return item;
 			}
 		}

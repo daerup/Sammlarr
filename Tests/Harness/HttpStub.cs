@@ -70,7 +70,7 @@ internal sealed class HttpStub : HttpMessageHandler
 		foreach (var (pattern, responder) in _urlResponders)
 		{
 			if (MatchesPattern(url, pattern))
-				return responder(request);
+				return responder(request).WaitAsync(cancellationToken);
 		}
 
 		_unexpected.Enqueue(url);

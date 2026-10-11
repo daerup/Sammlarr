@@ -30,7 +30,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var planner = fixture.Resolve<IFeedRunPlanner>();
 		var log = fixture.Resolve<IFeedRepository>();
-		var load = new RawFeedLoad([Matched(kept)], FeedLoadState.Finished);
+		var load = new RawFeedLoad([new Listed<MediaMatchResult>(0, Matched(kept))], FeedLoadState.Finished);
 
 		var drops = new List<int>();
 

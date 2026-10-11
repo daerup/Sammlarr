@@ -39,9 +39,12 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 		return SiteLink.Parse(input, "myanimelist.net").ToResult(NotAList).Map(MalPages.Of).Map(page => page.Stored());
 	}
 
-	public IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
 	{
-		return media.IdentifyWithDetailsAsync(seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken), cancellationToken);
+		return media.LoadListAsync(
+			seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken).Select(ListTitle (request) => request),
+			cancellationToken
+		);
 	}
 
 	private async IAsyncEnumerable<IdentifyRequest> RequestsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
