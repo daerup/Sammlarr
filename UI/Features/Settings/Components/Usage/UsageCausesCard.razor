@@ -16,7 +16,7 @@
                 var (name, icon) = Describe(cause);
                 var hint = Optional.Of(cause).Map(found => UsageView.CauseHint(found));
                 <button type="button" class="@($"usage-cause w-full cursor-pointer rounded-md pl-3 pr-1 text-left text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-cause-picked" : string.Empty)}")"
-                        aria-pressed="@(picked ? "true" : "false")" data-testid="usage-cause" @onclick="() => _picked = cause">
+                        aria-pressed="@(picked ? "true" : "false")" data-testid="usage-cause" @onclick="() => _cause = cause">
                     <span class="@($"flex min-w-0 items-center gap-2 whitespace-nowrap {Weight(cause)}")">
                         <LucideIcon Name="@icon" Size="14"/>
                         @if (hint is Some<string>(var text))
@@ -48,35 +48,35 @@
         <div class="flex flex-col items-center gap-3.5">
             <div class="flex items-center gap-2 text-[13px] font-semibold" data-testid="usage-cause-picked">
                 <LucideIcon Name="@Describe(Current).Icon" Size="14"/>
-                @Describe(Current).Name <span class="font-normal text-muted-foreground">· @UsageView.Calls(Picked.Total)</span>
+                @Describe(Current).Name <span class="font-normal text-muted-foreground">· @UsageView.Calls(CauseTally.Total)</span>
             </div>
-            <UsageGauge Tally="Picked"/>
+            <UsageGauge Tally="CauseTally"/>
             <div class="flex flex-col gap-1.5 text-[12.5px]" data-testid="usage-outcomes">
-                @if (Trouble(Picked) == 0)
+                @if (Trouble(CauseTally) == 0)
                 {
                     <div class="usage-outcome" data-testid="usage-outcome">
                         <span class="usage-swatch" style="background: var(--usage-answered)"></span>
                         <LucideIcon Name="check" Size="13"/>
                         <span>Answered</span>
-                        <span class="text-right tabular-nums">@UsageView.Count(Picked.Total)</span>
-                        <span class="text-right tabular-nums text-muted-foreground">@UsageView.Share(Picked.Total, Picked.Total)</span>
+                        <span class="text-right tabular-nums">@UsageView.Count(CauseTally.Total)</span>
+                        <span class="text-right tabular-nums text-muted-foreground">@UsageView.Share(CauseTally.Total, CauseTally.Total)</span>
                     </div>
                     <div class="flex items-center gap-2 text-muted-foreground" data-testid="usage-no-trouble">
                         <LucideIcon Name="circle-check" Size="14"/>
-                        <span><span class="font-medium text-foreground">No trouble:</span> all @UsageView.Calls(Picked.Total) were answered.</span>
+                        <span><span class="font-medium text-foreground">No trouble:</span> all @UsageView.Calls(CauseTally.Total) were answered.</span>
                     </div>
                 }
                 else
                 {
                     @foreach (var look in UsageView.Outcomes)
                     {
-                        var count = Picked.Of(look.Outcome);
+                        var count = CauseTally.Of(look.Outcome);
                         <div class="@($"usage-outcome {(count == 0 ? "opacity-40" : string.Empty)}")" data-testid="usage-outcome" data-empty="@(count == 0 ? "true" : "false")">
                             <span class="usage-swatch" style="@($"background: {look.Color}")"></span>
                             <LucideIcon Name="@look.Icon" Size="13"/>
                             <span>@look.Name</span>
                             <span class="text-right tabular-nums">@UsageView.Count(count)</span>
-                            <span class="text-right tabular-nums text-muted-foreground">@(count == 0 ? string.Empty : UsageView.Share(count, Picked.Total))</span>
+                            <span class="text-right tabular-nums text-muted-foreground">@(count == 0 ? string.Empty : UsageView.Share(count, CauseTally.Total))</span>
                         </div>
                     }
                 }
@@ -88,16 +88,20 @@
 @code {
     [Parameter] [EditorRequired] public required UsagePeriod Period { get; set; }
 
-    private UsageCause? _picked;
+    [Parameter] public Optional<RemoteService> Picked { get; set; } = new None();
+
+    [Parameter] public EventCallback<Optional<RemoteService>> PickedChanged { get; set; }
+
+    private UsageCause? _cause;
 
     private IReadOnlyList<(UsageCause? Cause, UsageTally Tally)> Rows =>
         [(null, Period.Tally), .. Period.Causes.Select(line => ((UsageCause?)line.Cause, line.Tally))];
 
     private long Busiest => Period.Causes.Select(line => line.Tally.Total).DefaultIfEmpty(1).Max();
 
-    private UsageCause? Current => Period.Causes.Any(line => line.Cause == _picked) ? _picked : null;
+    private UsageCause? Current => Period.Causes.Any(line => line.Cause == _cause) ? _cause : null;
 
-    private UsageTally Picked => Period.Causes.FirstOrNone(line => line.Cause == Current).Map(line => line.Tally).GetValueOr(Period.Tally);
+    private UsageTally CauseTally => Period.Causes.FirstOrNone(line => line.Cause == Current).Map(line => line.Tally).GetValueOr(Period.Tally);
 
     private static long Trouble(UsageTally tally) => tally.Total - tally.Of(UsageOutcome.Answered);
 

@@ -40,9 +40,9 @@
     {
         <div class="@($"flex flex-col gap-4 transition-opacity {(shown.Range == _range ? string.Empty : "opacity-60")}")" aria-busy="@(shown.Range == _range ? "false" : "true")">
             <UsageStatCards Snapshot="shown.Snapshot" Range="shown.Range"/>
-            <UsageCallsCard Period="shown.Snapshot.Current" Range="shown.Range"/>
-            <UsageCausesCard Period="shown.Snapshot.Current"/>
-            <UsageFeedsCard Feeds="shown.Snapshot.Feeds" Range="shown.Range" Window="shown.Snapshot.Current.Window"/>
+            <UsageCallsCard Period="shown.Snapshot.Current" Range="shown.Range" @bind-Picked="_picked"/>
+            <UsageCausesCard Period="shown.Snapshot.Current" @bind-Picked="_picked"/>
+            <UsageFeedsCard Feeds="shown.Snapshot.Feeds" Range="shown.Range" Window="shown.Snapshot.Current.Window" @bind-Picked="_picked"/>
         </div>
     }
 </div>
@@ -51,6 +51,8 @@
     private static readonly IReadOnlyList<(UsageRange Value, string Label)> Ranges = [(UsageRange.Day, "24h"), (UsageRange.Week, "7d"), (UsageRange.Month, "30d")];
 
     private UsageRange _range = UsageRange.Day;
+
+    private Optional<RemoteService> _picked = new None();
 
     private (UsageRange Range, UsageSnapshot Snapshot)? _shown;
 

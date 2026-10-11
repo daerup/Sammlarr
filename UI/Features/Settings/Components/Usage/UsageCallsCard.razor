@@ -6,11 +6,21 @@
 @inject IDateTimeProvider Clock
 
 <UsageCard Title="@(_tab is CallsTab.Calls ? "Calls" : "Answer time")" Subtitle="@Subtitle" TestId="usage-calls">
+    <Chip>
+        @if (Picked is Some<RemoteService>(var service))
+        {
+            <UsagePickChip Service="service" OnClear="() => PickedChanged.InvokeAsync(new None())"/>
+        }
+    </Chip>
     <Right>
         <UsageSegments TValue="CallsTab" Value="_tab" Options="Tabs" OnChange="tab => _tab = tab" Label="Calls card view"/>
     </Right>
     <ChildContent>
-        @if (_tab is CallsTab.Calls)
+        @if (Missing is Some<RemoteService>(var missing))
+        {
+            <span class="text-[12.5px] text-muted-foreground" data-testid="usage-calls-none">No @Name(missing) calls in the @UsageView.Window(Range).</span>
+        }
+        else if (_tab is CallsTab.Calls)
         {
             <div class="flex flex-wrap gap-x-3.5 gap-y-1 text-xs text-muted-foreground" data-testid="usage-outcome-legend">
                 @foreach (var look in UsageView.Outcomes)
@@ -68,7 +78,7 @@
                 var now = UsageView.RightNow(line.RightNow, Clock.Now);
                 var picked = IsPicked(line.Service);
                 <div class="@($"usage-service cursor-pointer rounded-md pl-3 pr-1 text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-service-picked" : string.Empty)}")"
-                     data-testid="usage-service" data-service="@line.Service" data-picked="@(picked ? "true" : "false")" @onclick="() => Pick(line.Service)">
+                     data-testid="usage-service" data-service="@line.Service" data-picked="@(picked ? "true" : "false")" @onclick="() => PickAsync(line.Service)">
                     <span class="flex min-w-0 items-center gap-2 whitespace-nowrap font-medium">
                         <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="18" Decorative="true"/>
                         @Branding.GetBrandingInfo(line.Service).NickName
@@ -128,20 +138,30 @@
 
     [Parameter] [EditorRequired] public required UsageRange Range { get; set; }
 
+    [Parameter] public Optional<RemoteService> Picked { get; set; } = new None();
+
+    [Parameter] public EventCallback<Optional<RemoteService>> PickedChanged { get; set; }
+
     private CallsTab _tab = CallsTab.Calls;
 
-    private Optional<RemoteService> _picked = new None();
+    private Optional<UsageServiceLine> PickedLine => Picked.Map(service => Period.Services.FirstOrNone(line => line.Service == service));
 
-    private Optional<UsageServiceLine> Picked => _picked.Map(service => Period.Services.FirstOrNone(line => line.Service == service));
+    private Optional<RemoteService> Missing => Picked.When(service => Period.Services.All(line => line.Service != service));
 
     private string Subtitle =>
+        Picked.Match(service => $"{Name(service)}: {Described}. Click {Name(service)} again, or the × on its chip, for every service.", () => Everyone);
+
+    private string Described =>
+        _tab is CallsTab.Calls ? $"{UsageView.Window(Range)}, each {UsageView.Each(Range)} split by how its calls ended" : "every attempt by how long it took";
+
+    private string Everyone =>
         _tab is CallsTab.Calls
-            ? $"{Picked.Map(line => Name(line.Service)).GetValueOr("All services")}: {UsageView.Window(Range)}, each {UsageView.Each(Range)} split by how its calls ended. Click a service to show only its calls, click it again for all."
-            : $"{Picked.Map(line => Name(line.Service)).GetValueOr("All but datasets")}: every attempt by how long it took. Click a service to show only its answers.";
+            ? $"All services: {Described}. Click a service to show only its calls, click it again for all."
+            : $"All but datasets: {Described}. Click a service to show only its answers.";
 
     private IReadOnlyList<Column> Columns =>
         [
-            .. Picked
+            .. PickedLine
                 .Map(line => line.Slots)
                 .GetValueOr(Period.Slots)
                 .Select(slot => new Column(
@@ -155,7 +175,7 @@
         ];
 
     private UsageTally Answers =>
-        Picked
+        PickedLine
             .Map(line => line.Tally)
             .GetValueOr(() => UsageTally.Sum(Period.Services.Where(line => !DatasetNames.ByService.ContainsKey(line.Service)).Select(line => line.Tally)));
 
@@ -173,9 +193,9 @@
 
     private IReadOnlyList<RemoteService> Silent => [.. Enum.GetValues<RemoteService>().Except(Period.Services.Select(line => line.Service))];
 
-    private bool IsPicked(RemoteService service) => Picked.Match(line => line.Service == service, () => false);
+    private bool IsPicked(RemoteService service) => Picked.Match(picked => picked == service, () => false);
 
-    private void Pick(RemoteService service) => _picked = Optional.When(!IsPicked(service), () => service);
+    private Task PickAsync(RemoteService service) => PickedChanged.InvokeAsync(Optional.When(!IsPicked(service), () => service));
 
     private string Name(RemoteService service) => Branding.GetBrandingInfo(service).NickName;
 
