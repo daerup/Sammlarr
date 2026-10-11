@@ -126,8 +126,17 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 			method.TypeParameterList?.ToString() ?? "",
 			method.ParameterList.ToString(),
 			string.Join(" ", method.ConstraintClauses.Select(static c => c.ToString())),
-			ArgNames(method)
+			ArgNames(method),
+			Priority(method)
 		);
+
+	private static string Priority(MethodDeclarationSyntax method)
+	{
+		var priorities = method
+			.AttributeLists.SelectMany(static list => list.Attributes)
+			.Where(static a => a.Name.ToString().Split('.', ':').Last() is "OverloadResolutionPriority" or "OverloadResolutionPriorityAttribute");
+		return string.Concat(priorities.Select(static a => $"[{a}] "));
+	}
 
 	private static (string Definition, MethodInfo Signature) DeriveAsync(MethodDeclarationSyntax method)
 	{
@@ -173,10 +182,11 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 		}
 
 		var constraintSuffix = string.IsNullOrEmpty(constraints) ? "" : " " + constraints;
+		var priority = Priority(method);
 		var definition = expressionBodied
-			? $"[CompilerGenerated] public async {returnType} {name}{typeParams}({parameters}){constraintSuffix} => {body};"
-			: $"[CompilerGenerated] public async {returnType} {name}{typeParams}({parameters}){constraintSuffix} {body}";
-		var signature = new MethodInfo(name, returnType, typeParams, $"({parameters})", constraints, ArgNames(method));
+			? $"[CompilerGenerated] {priority}public async {returnType} {name}{typeParams}({parameters}){constraintSuffix} => {body};"
+			: $"[CompilerGenerated] {priority}public async {returnType} {name}{typeParams}({parameters}){constraintSuffix} {body}";
+		var signature = new MethodInfo(name, returnType, typeParams, $"({parameters})", constraints, ArgNames(method), priority);
 		return (definition, signature);
 	}
 
@@ -197,7 +207,7 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 		var call = $"(await source).{signature.Name}({signature.ArgNames})";
 		var invocation = returnsTask ? $"await {call}" : call;
 		var constraintSuffix = string.IsNullOrEmpty(signature.Constraints) ? "" : " " + signature.Constraints;
-		return $"[CompilerGenerated] public async {wrapper}<{returned}> {signature.Name}{signature.TypeParams}{signature.Params}{constraintSuffix} => {invocation};";
+		return $"[CompilerGenerated] {signature.Priority}public async {wrapper}<{returned}> {signature.Name}{signature.TypeParams}{signature.Params}{constraintSuffix} => {invocation};";
 	}
 
 	private static string ExtensionBlock(string blockTypeParams, string receiver, string blockConstraints, IEnumerable<string> members)
@@ -216,7 +226,7 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 
 	private readonly struct MethodInfo
 	{
-		public MethodInfo(string name, string returnType, string typeParams, string parameters, string constraints, string argNames)
+		public MethodInfo(string name, string returnType, string typeParams, string parameters, string constraints, string argNames, string priority)
 		{
 			Name = name;
 			ReturnType = returnType;
@@ -224,6 +234,7 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 			Params = parameters;
 			Constraints = constraints;
 			ArgNames = argNames;
+			Priority = priority;
 		}
 
 		public string Name { get; }
@@ -232,5 +243,6 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 		public string Params { get; }
 		public string Constraints { get; }
 		public string ArgNames { get; }
+		public string Priority { get; }
 	}
 }

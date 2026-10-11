@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Shared;
 
 public static partial class OptionalExtensions
@@ -15,6 +17,24 @@ public static partial class OptionalExtensions
 			{
 				Some<T>(var value) => some(value),
 				None => none(),
+			};
+
+		[SuppressArchTest]
+		[OverloadResolutionPriority(-1)]
+		public async Task<TResult> Match<TResult>(Func<T, Task<TResult>> some, Func<TResult> none) =>
+			optional switch
+			{
+				Some<T>(var value) => await some(value),
+				None => none(),
+			};
+
+		[SuppressArchTest]
+		[OverloadResolutionPriority(-1)]
+		public async Task<TResult> Match<TResult>(Func<T, TResult> some, Func<Task<TResult>> none) =>
+			optional switch
+			{
+				Some<T>(var value) => some(value),
+				None => await none(),
 			};
 
 		public TResult Match<TResult>(TResult some, TResult none) =>
@@ -63,6 +83,15 @@ public static partial class OptionalExtensions
 			{
 				Some<T>(var value) => value,
 				None => fallback(),
+			};
+
+		[SuppressArchTest]
+		[OverloadResolutionPriority(-1)]
+		public async Task<T> GetValueOr(Func<Task<T>> fallback) =>
+			optional switch
+			{
+				Some<T>(var value) => value,
+				None => await fallback(),
 			};
 
 		public Optional<T> Or(Optional<T> fallback) =>

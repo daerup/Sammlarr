@@ -25,6 +25,37 @@ public class ResultExtensionsTests
 	}
 
 	[Test]
+	public async Task Match_WithAnAsyncSuccessAndAPlainError_AwaitsSuccessOnlyOnSuccess()
+	{
+		Result<int> result = Success.Of(5);
+		var errorCalls = 0;
+
+		var mapped = await result.Match(LabelledAsync, _ => $"failed {++errorCalls}");
+
+		await Assert.That(mapped).IsEqualTo("n5");
+		await Assert.That(errorCalls).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Match_WithAnAsyncSuccessAndAPlainError_CallsErrorOnlyOnError()
+	{
+		Result<int> result = Error.From("boom");
+		var successCalls = 0;
+
+		var mapped = await result.Match(
+			value =>
+			{
+				successCalls++;
+				return LabelledAsync(value);
+			},
+			error => error.Reason
+		);
+
+		await Assert.That(mapped).IsEqualTo("boom");
+		await Assert.That(successCalls).IsEqualTo(0);
+	}
+
+	[Test]
 	public async Task Map_WhenSuccess_TransformsValue()
 	{
 		Result<int> result = Success.Of(5);
@@ -465,4 +496,10 @@ public class ResultExtensionsTests
 	}
 
 	private static Result<int> Halve(int value) => value % 2 == 0 ? Success.Of(value / 2) : Error.From("odd");
+
+	private static async Task<string> LabelledAsync(int value)
+	{
+		await Task.Yield();
+		return $"n{value}";
+	}
 }
