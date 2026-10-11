@@ -1,7 +1,10 @@
 <BbCard Class="flex min-w-0 flex-col gap-2.5 rounded-xl px-[18px] pt-4 pb-3.5" style="@Style" data-testid="@TestId">
     <div class="flex items-start gap-3">
         <div>
-            <BbCardTitle As="h4" Class="text-sm font-semibold">@Title</BbCardTitle>
+            <div class="flex items-center gap-2">
+                <BbCardTitle As="h4" Class="text-sm font-semibold">@Title</BbCardTitle>
+                @Chip
+            </div>
             @if (Subtitle is not null)
             {
                 <BbCardDescription Class="mt-0.5 text-xs">@Subtitle</BbCardDescription>
@@ -17,6 +20,8 @@
 
 @code {
     [Parameter] [EditorRequired] public required string Title { get; set; }
+
+    [Parameter] public RenderFragment? Chip { get; set; }
 
     [Parameter] public string? Subtitle { get; set; }
 

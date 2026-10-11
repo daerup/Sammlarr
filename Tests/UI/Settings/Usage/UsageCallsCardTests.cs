@@ -6,6 +6,7 @@ using Contracts.Usage;
 using Domain.Providers;
 using Domain.Usage;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using UI.Features.Settings.Components.Usage;
 
 namespace UI.Tests.Settings.Usage;
@@ -36,20 +37,59 @@ public class UsageCallsCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Service_Picked_NarrowsTheCallsChartToItAndAClickAgainShowsAll()
+	public async Task Row_Clicked_PicksItsService()
 	{
-		var cut = RenderCard(UsageSamples.Snapshot().Current);
+		Optional<RemoteService> raised = new None();
+		var cut = RenderCard(UsageSamples.Snapshot().Current, changed: picked => raised = picked);
 
 		await Row(cut, "Plex").ClickAsync();
+
+		await Assert.That(raised).IsSome().And.IsEqualTo(RemoteService.Plex);
+	}
+
+	[Test]
+	public async Task Row_ClickedWhileItsServiceIsPicked_ShowsEveryServiceAgain()
+	{
+		Optional<RemoteService> raised = Some.Of(RemoteService.Plex);
+		var cut = RenderCard(UsageSamples.Snapshot().Current, Some.Of(RemoteService.Plex), picked => raised = picked);
+
+		await Row(cut, "Plex").ClickAsync();
+
+		await Assert.That(raised).IsNone();
+	}
+
+	[Test]
+	public async Task Picked_AService_ShowsItsChipAndNarrowsTheChartToItsCalls()
+	{
+		var cut = RenderCard(UsageSamples.Snapshot().Current, Some.Of(RemoteService.Plex));
 
 		await Assert.That(Answered(cut)).IsEqualTo(40);
 		await Assert.That(Row(cut, "Plex").GetAttribute("data-picked")).IsEqualTo("true");
-		await Assert.That(cut.Find("[data-testid=usage-calls]").TextContent).Contains("Plex: last 24 hours, each hour split by how its calls ended");
+		await Assert.That(cut.Find("[data-testid=usage-pick-chip]").GetAttribute("data-service")).IsEqualTo("Plex");
+		await Assert
+			.That(cut.Find("[data-testid=usage-calls]").TextContent)
+			.Contains("Plex: last 24 hours, each hour split by how its calls ended. Click Plex again, or the × on its chip, for every service.");
+	}
 
-		await Row(cut, "Plex").ClickAsync();
+	[Test]
+	public async Task Picked_Nothing_ShowsEveryServiceWithoutAChip()
+	{
+		var cut = RenderCard(UsageSamples.Snapshot().Current);
 
 		await Assert.That(Answered(cut)).IsEqualTo(130);
+		await Assert.That(cut.FindAll("[data-testid=usage-pick-chip]")).IsEmpty();
 		await Assert.That(cut.Find("[data-testid=usage-calls]").TextContent).Contains("All services: last 24 hours");
+	}
+
+	[Test]
+	public async Task Chip_Cleared_ShowsEveryServiceAgain()
+	{
+		Optional<RemoteService> raised = Some.Of(RemoteService.Plex);
+		var cut = RenderCard(UsageSamples.Snapshot().Current, Some.Of(RemoteService.Plex), picked => raised = picked);
+
+		await cut.Find("[data-testid=usage-pick-chip] button[aria-label='Show every service']").ClickAsync();
+
+		await Assert.That(raised).IsNone();
 	}
 
 	[Test]
@@ -60,7 +100,7 @@ public class UsageCallsCardTests : BunitContext
 
 		await Assert.That(cut.Find("[data-testid=usage-calls]").TextContent).Contains("All but datasets: every attempt by how long it took");
 
-		await Row(cut, "TMDb").ClickAsync();
+		cut.Render(parameters => parameters.Add(card => card.Picked, Some.Of(RemoteService.Tmdb)));
 
 		await Assert.That(cut.Find("[data-testid=usage-calls]").TextContent).Contains("TMDb: every attempt by how long it took");
 		await Assert.That(Marks(cut).Select(mark => mark.TextContent.Trim())).IsEquivalentTo(["median 88 ms", "p95 262 ms"]);
@@ -79,15 +119,18 @@ public class UsageCallsCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Service_PickedButAbsentFromTheNextWindow_FallsBackToAll()
+	public async Task Picked_AServiceWithoutCallsInTheWindow_KeepsItsChipAndSaysSo()
 	{
-		var cut = RenderCard(UsageSamples.Snapshot().Current);
-		await Row(cut, "Plex").ClickAsync();
+		var cut = Render<UsageCallsCard>(parameters =>
+			parameters
+				.Add(card => card.Period, UsageSamples.Snapshot().Current)
+				.Add(card => card.Range, UsageRange.Week)
+				.Add(card => card.Picked, Some.Of(RemoteService.Mdblist))
+		);
 
-		cut.Render(parameters => parameters.Add(card => card.Period, UsageSamples.Snapshot().Previous));
-
-		await Assert.That(Answered(cut)).IsEqualTo(50);
-		await Assert.That(cut.Find("[data-testid=usage-calls]").TextContent).Contains("All services:");
+		await Assert.That(cut.Find("[data-testid=usage-calls-none]").TextContent).IsEqualTo("No MDBList calls in the last 7 days.");
+		await Assert.That(cut.Find("[data-testid=usage-pick-chip]").GetAttribute("data-service")).IsEqualTo("Mdblist");
+		await Assert.That(cut.FindAll(".usage-service-picked")).IsEmpty();
 	}
 
 	[Test]
@@ -139,8 +182,18 @@ public class UsageCallsCardTests : BunitContext
 		return columns.EnumerateArray().Sum(column => column.GetProperty("Answered").GetInt64());
 	}
 
-	private IRenderedComponent<UsageCallsCard> RenderCard(UsagePeriod period)
+	private IRenderedComponent<UsageCallsCard> RenderCard(
+		UsagePeriod period,
+		Optional<RemoteService>? picked = null,
+		Action<Optional<RemoteService>>? changed = null
+	)
 	{
-		return Render<UsageCallsCard>(parameters => parameters.Add(card => card.Period, period).Add(card => card.Range, UsageRange.Day));
+		return Render<UsageCallsCard>(parameters =>
+			parameters
+				.Add(card => card.Period, period)
+				.Add(card => card.Range, UsageRange.Day)
+				.Add(card => card.Picked, picked ?? new None())
+				.Add(card => card.PickedChanged, changed ?? (_ => { }))
+		);
 	}
 }

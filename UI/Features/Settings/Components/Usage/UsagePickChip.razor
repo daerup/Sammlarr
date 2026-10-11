@@ -1,0 +1,18 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<BbBadge Variant="BadgeVariant.Outline" Class="h-6 gap-1.5 bg-secondary py-0 pr-[3px] pl-2 text-xs font-medium whitespace-nowrap" data-testid="usage-pick-chip"
+         data-service="@Service">
+    <BrandedLogo Brand="Branding.GetBrandingInfo(Service)" Size="14" Decorative="true"/>
+    @Branding.GetBrandingInfo(Service).NickName
+    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.IconSmall" AriaLabel="Show every service" Class="size-[18px] rounded-full text-muted-foreground"
+              OnClick="OnClear">
+        <LucideIcon Name="x" Size="12"/>
+    </BbButton>
+</BbBadge>
+
+@code {
+    [Parameter] [EditorRequired] public required RemoteService Service { get; set; }
+
+    [Parameter] public EventCallback OnClear { get; set; }
+}

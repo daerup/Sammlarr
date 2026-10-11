@@ -18,7 +18,7 @@
             }
             else
             {
-                <div class="relative h-[192px]" data-testid="usage-feeds-chart" @onclick="() => _picked = new None()">
+                <div class="relative h-[192px]" data-testid="usage-feeds-chart" @onclick="() => _feed = new None()">
                     @foreach (var (y, label) in YTicks)
                     {
                         <span class="absolute left-0 w-[38px] text-right text-[10.5px] tabular-nums text-muted-foreground" style="@($"top: {UsageView.Number(y - 7)}px")"
@@ -181,9 +181,13 @@
 
     [Parameter] [EditorRequired] public required UsageWindow Window { get; set; }
 
+    [Parameter] public Optional<RemoteService> Picked { get; set; } = new None();
+
+    [Parameter] public EventCallback<Optional<RemoteService>> PickedChanged { get; set; }
+
     private FeedsTab _tab = FeedsTab.Calls;
 
-    private Optional<FeedId> _picked = new None();
+    private Optional<FeedId> _feed = new None();
 
     private bool _open;
 
@@ -272,7 +276,7 @@
         var singled =
             $".usage-feeds:has([data-f={key}]:hover) .usage-feed-group:not([data-f={key}]) {{ filter: grayscale(1); opacity: 0.3; }} "
             + $".usage-feeds:has([data-f={key}]:hover) .usage-feed-group[data-f={key}] {{ filter: none; opacity: 1; }} ";
-        return _picked.Match(_ => $"{traced}{row}", () => _quiet ? row : $"{singled}{row}");
+        return _feed.Match(_ => $"{traced}{row}", () => _quiet ? row : $"{singled}{row}");
     }
 
     private double Value(UsageRun run) => _tab is FeedsTab.Calls ? Math.Max(1, run.Calls.Total) : Unmatched(run);
@@ -300,9 +304,9 @@
         };
     }
 
-    private bool IsPicked(FeedId feed) => _picked.Match(picked => picked == feed, () => false);
+    private bool IsPicked(FeedId feed) => _feed.Match(picked => picked == feed, () => false);
 
-    private bool IsLit(FeedId feed) => _picked.Match(picked => picked == feed, () => true);
+    private bool IsLit(FeedId feed) => _feed.Match(picked => picked == feed, () => true);
 
     private void Pick(UsageFeedLine line)
     {
@@ -310,7 +314,7 @@
         {
             var unpicking = IsPicked(line.Feed);
             _quiet = unpicking;
-            _picked = Optional.When(!unpicking, () => line.Feed);
+            _feed = Optional.When(!unpicking, () => line.Feed);
         }
     }
 

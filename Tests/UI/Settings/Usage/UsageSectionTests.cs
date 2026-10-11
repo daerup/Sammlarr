@@ -1,8 +1,10 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Usage;
+using Domain.Providers;
 using Domain.Usage;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using UI.Features.Settings.Components.Usage;
 
 namespace UI.Tests.Settings.Usage;
@@ -56,5 +58,31 @@ public class UsageSectionTests : BunitContext
 		cut.WaitForElement("[data-testid=usage-calls]");
 		_report.ReadAsync(UsageRange.Week, Any()).WasCalled(Times.Once);
 		await Assert.That(cut.Find("[data-testid=usage-calls]").TextContent).Contains("All services: last 7 days, each day split by how its calls ended");
+	}
+
+	[Test]
+	public async Task Row_Clicked_PicksTheServiceForEveryCard()
+	{
+		var cut = Render<UsageSection>();
+		cut.WaitForElement("[data-testid=usage-calls]");
+
+		await cut.FindAll("[data-testid=usage-service]").Single(row => row.GetAttribute("data-service") == "Plex").ClickAsync();
+
+		await Assert.That(cut.FindComponent<UsageCallsCard>().Instance.Picked).IsSome().And.IsEqualTo(RemoteService.Plex);
+		await Assert.That(cut.FindComponent<UsageCausesCard>().Instance.Picked).IsSome().And.IsEqualTo(RemoteService.Plex);
+		await Assert.That(cut.FindComponent<UsageFeedsCard>().Instance.Picked).IsSome().And.IsEqualTo(RemoteService.Plex);
+	}
+
+	[Test]
+	public async Task Range_ChangedWhileAServiceIsPicked_KeepsThePick()
+	{
+		var cut = Render<UsageSection>();
+		cut.WaitForElement("[data-testid=usage-calls]");
+		await cut.FindAll("[data-testid=usage-service]").Single(row => row.GetAttribute("data-service") == "Plex").ClickAsync();
+
+		await cut.FindAll("[role=radio], button").First(button => button.TextContent.Trim() == "7d").ClickAsync();
+
+		cut.WaitForState(() => cut.Find("[data-testid=usage-calls]").TextContent.Contains("Plex: last 7 days"));
+		await Assert.That(cut.Find("[data-testid=usage-calls] [data-testid=usage-pick-chip]").GetAttribute("data-service")).IsEqualTo("Plex");
 	}
 }
