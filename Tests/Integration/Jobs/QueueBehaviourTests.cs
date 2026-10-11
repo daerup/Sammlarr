@@ -359,6 +359,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 			host.Resolve<JobSignal>(),
 			host.Resolve<JobAlarm>(),
 			host.Resolve<JobRunnerStatus>(),
+			host.Resolve<JobTurn>(),
 			host.Resolve<IDateTimeProvider>(),
 			NullLogger<JobRunner>.Instance
 		).TryRunNextAsync(CancellationToken.None);

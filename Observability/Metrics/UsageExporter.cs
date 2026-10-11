@@ -16,10 +16,6 @@ internal sealed class UsageExporter(IServiceScopeFactory scopes, IUsageLastCalls
 
 	internal const string RequestDuration = "http.client.request.duration";
 
-	private static readonly TimeSpan Kept = TimeSpan.FromDays(90);
-
-	private DateTimeOffset _pruned = DateTimeOffset.MinValue;
-
 	public override ExportResult Export(in Batch<Metric> batch)
 	{
 		var calls = new List<UsageCalls>();
@@ -103,25 +99,12 @@ internal sealed class UsageExporter(IServiceScopeFactory scopes, IUsageLastCalls
 
 	private void Write(UsageRows rows)
 	{
-		var now = clock.Now;
-		var stored = rows.Calls.Count > 0 || rows.Attempts.Count > 0;
-		var prune = now - _pruned > TimeSpan.FromDays(1);
-		if (!stored && !prune)
+		if (rows.Calls.Count == 0 && rows.Attempts.Count == 0)
 		{
 			return;
 		}
 
 		using var scope = scopes.CreateScope();
-		var store = scope.ServiceProvider.GetRequiredService<IUsageStore>();
-		if (stored)
-		{
-			store.AddAsync(rows).GetAwaiter().GetResult();
-		}
-
-		if (prune)
-		{
-			store.PruneAsync(now - Kept).GetAwaiter().GetResult();
-			_pruned = now;
-		}
+		scope.ServiceProvider.GetRequiredService<IUsageStore>().AddAsync(rows).GetAwaiter().GetResult();
 	}
 }

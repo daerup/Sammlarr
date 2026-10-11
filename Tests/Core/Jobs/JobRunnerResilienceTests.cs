@@ -151,6 +151,7 @@ public class JobRunnerResilienceTests
 			signal,
 			new JobAlarm(scopes, signal, clock.Object, NullLogger<JobAlarm>.Instance),
 			status,
+			new JobTurn(),
 			clock.Object,
 			NullLogger<JobRunner>.Instance
 		);

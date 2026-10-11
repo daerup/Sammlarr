@@ -50,9 +50,10 @@ public class UsageStoreTests(SammlarrTestHost host) : IAsyncDisposable
 		await store.AddAsync(Rows(Hour.AddDays(-91), calls: 1));
 		await store.AddAsync(Rows(Hour, calls: 1));
 
-		await store.PruneAsync(Hour.AddDays(-90));
+		var removed = await store.PruneAsync(Hour.AddDays(-90));
 
 		var read = await store.ReadAsync(Hour.AddDays(-100), Hour.AddHours(1));
+		await Assert.That(removed).IsEqualTo(2);
 		await Assert.That(read.Calls.Select(row => row.Hour)).IsEquivalentTo([Hour]);
 		await Assert.That(read.Attempts.Select(row => row.Hour)).IsEquivalentTo([Hour]);
 	}

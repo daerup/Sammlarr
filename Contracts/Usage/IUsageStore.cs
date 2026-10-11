@@ -23,7 +23,7 @@ public interface IUsageStore
 
 	Task<UsageRows> ReadAsync(DateTimeOffset from, DateTimeOffset to, CancellationToken cancellationToken = default);
 
-	Task PruneAsync(DateTimeOffset before, CancellationToken cancellationToken = default);
+	Task<int> PruneAsync(DateTimeOffset before, CancellationToken cancellationToken = default);
 }
 
 public interface IUsageLastCalls

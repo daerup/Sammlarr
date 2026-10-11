@@ -415,7 +415,11 @@ State is one SQLite database via EF Core. Repositories create a context per oper
 sets WAL, `synchronous=NORMAL`, a busy timeout and an 8 MB `journal_size_limit`, the size a write-ahead
 log is cut back to once it restarts. After a dataset replace commits, `IDatabaseFile.CompactAsync`
 truncates the log and vacuums the file when a tenth of its pages are free, so the file stays about the
-size of its data. Schema is applied at startup by a hosted
+size of its data. The ownerless `Housekeeping` ticker runs `HousekeepingPass`: it takes the job runner's turn
+(`JobTurn`, which `JobRunner` holds while it runs a job, so the pass never overlaps a feed run, a sync or a details fill),
+runs each `IHousekeepingStep` in the order of `HousekeepingStep`, compacts the file and keeps its last report
+(`HousekeepingReports`); a step that fails stops the pass and is recorded with what the earlier steps removed. Wolverine
+expires dead letters after its default 10 days. Schema is applied at startup by a hosted
 `DbInitializer` calling `Database.Migrate()`, never `EnsureCreated`; migrations live in
 `DB/Migrations`, and a test asserts `HasPendingModelChanges()` is false. The singleton
 provider-config row comes from the context's `UseSeeding` and `UseAsyncSeeding` hooks, which insert
@@ -525,8 +529,9 @@ Plex and what reads them for it: the sync dialog, a title added from a page, a s
 lookups), `KeyTest` (the check of a key, a sign-in or a Radarr or Sonarr connection), `FeedEditor` (the editor's
 previews, its link check, saving a feed and the dry run before Run now, with the feed's id), `DetailsFill` (the
 background fill of missing details), else `Other`. A `PeriodicExportingMetricReader` hands `UsageExporter` each
-minute's deltas, which it folds into hourly rows (`RemoteUsage`, `RemoteAttempts` with their duration buckets) kept 90
-days; with OTLP set, the same meters also go to the dashboard. A feed run's calls are credited to the run through its
+minute's deltas, which it folds into hourly rows (`RemoteUsage`, `RemoteAttempts` with their duration buckets) kept
+`Sammlarr:Housekeeping:UsageDays` (180 days); with OTLP set, the same meters also go to the dashboard. A feed run's
+calls are credited to the run through its
 feed id (a feed never runs twice at once, and a run id would be an unbounded tag): the enricher that classifies a call
 credits it to the feed's running run in `IFeedRunUsage` only when its mark is `FeedRun` (`UsageMark.Run`), so a preview
 of a feed that is running never joins the run, and the run is saved with its calls (`FeedRunCalls`). The cost rules:
@@ -538,7 +543,8 @@ row).
 Settings › Usage (`UsageReport`) reads the hourly rows per service, per cause and per feed. Picking a service in the
 Calls table narrows the page to it: the Calls chart, Calls by cause (that service's causes; Feed editor opens the feeds
 its calls went to) and Feeds (the feeds and runs that called it). A feed's name outlives the feed: deleting it records
-its name in `DeletedFeeds`, pruned with the usage rows, so its runs' calls and its editor calls stay named. For MDBList,
+its name in `DeletedFeeds`, pruned with the usage rows, so its runs' calls and its editor calls stay named. The
+housekeeping pass prunes both once they are older than `UsageDays`; the metrics exporter only writes. For MDBList,
 whose key has a daily allowance, the picked row opens what is left today: `MdblistBudget` keeps per key the allowance
 from `x-ratelimit-limit`, the answers Sammlarr got since the reset, the minute the feed reserve was reached and how the
 day before ended (in memory, so a restart forgets the day before until the next reset), and the pure `QuotaDay.Of`

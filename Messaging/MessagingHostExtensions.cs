@@ -28,6 +28,7 @@ public static class MessagingHostExtensions
 		options.ServiceLocationPolicy = ServiceLocationPolicy.AlwaysAllowed;
 		options.UseSystemTextJsonForSerialization(json => json.Converters.Add(new OptionalJsonConverterFactory()));
 		options.PersistMessagesWithSqlite(connectionString);
+		options.Durability.DeadLetterQueueExpirationEnabled = true;
 		options.Policies.UseDurableLocalQueues();
 		options.Discovery.IncludeAssembly(typeof(MessagingModule).Assembly);
 		options.Policies.OnException<NotificationDeliveryFailedException>().RetryWithCooldown(NotificationDeliveryRetry.Cooldowns);
