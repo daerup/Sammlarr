@@ -94,9 +94,9 @@ public class SinkAddressingTests(SammlarrTestHost host) : IAsyncDisposable
 		host.PlexHasNoMetadataFor(breakingBad);
 		var show = await host.Show(breakingBad).SeedAsync();
 
-		await Assert
-			.That(async () => await host.Resolve<IWantlistService>().AddAsync([show], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search))))
-			.Throws<MissingSinkIdException>();
+		var added = await host.Resolve<IWantlistService>().AddAsync([show], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
+
+		await Assert.That(added.Unaddressable).IsEquivalentTo([show]);
 	}
 
 	[Test]

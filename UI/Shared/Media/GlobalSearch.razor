@@ -137,23 +137,21 @@
 
     private async Task<bool> ToggleWantlistAsync(MediaId id, string title, bool isMarked)
     {
-        try
+        if (isMarked)
         {
-            if (isMarked)
-            {
-                await WantlistService.RemoveAsync([id], _cancellation.Token);
-                Notifier.Success($"'{title}' has been removed from your wantlist.");
-            }
-            else
-            {
-                await WantlistService.AddAsync([id], new ManualOrigin(ManualSource.Search), _cancellation.Token);
-                Notifier.Success($"'{title}' has been added to your wantlist.");
-            }
+            await WantlistService.RemoveAsync([id], _cancellation.Token);
+            Notifier.Success($"'{title}' has been removed from your wantlist.");
         }
-        catch (MissingSinkIdException)
+        else
         {
-            Notifier.Warning($"{Branding.Name(_settings!.Sink.Service)} has no match for '{title}', so it can't go on your wantlist.", "Can't update wantlist");
-            return false;
+            var added = await WantlistService.AddAsync([id], new ManualOrigin(ManualSource.Search), _cancellation.Token);
+            if (added.Unaddressable.Count > 0)
+            {
+                Notifier.Warning(WantlistNotices.NoMatch(Branding.Name(_settings!.Sink.Service), title), WantlistNotices.CantUpdate);
+                return false;
+            }
+
+            Notifier.Success($"'{title}' has been added to your wantlist.");
         }
 
         await RefreshAsync();

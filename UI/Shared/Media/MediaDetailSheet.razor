@@ -1,9 +1,12 @@
 @using Contracts.Media
 @using Contracts.Blocklist
 @using Contracts.Settings
+@using UI.Shared.Services.Branding
 @using Contracts.Wantlist
 @inject IMediaService MediaService
 @inject IWantlistService WantlistService
+@inject IProviderConfigService ProviderConfig
+@inject MediaProviderBrandingService Branding
 @inject IBlocklistService BlocklistService
 @inject Notifier Notifier
 @if (Open)
@@ -169,7 +172,12 @@
             }
             else
             {
-                await WantlistService.AddAsync([media.Identity.Id], new ManualOrigin(Source));
+                var added = await WantlistService.AddAsync([media.Identity.Id], new ManualOrigin(Source));
+                if (added.Unaddressable.Count > 0)
+                {
+                    var config = await ProviderConfig.GetAsync();
+                    Notifier.Warning(WantlistNotices.NoMatch(Branding.Name(config.Sink.Service), media.Details.Title), WantlistNotices.CantUpdate);
+                }
             }
 
             await LoadEnrollmentAsync(media.Identity.Id);

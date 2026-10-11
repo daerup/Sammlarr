@@ -14,7 +14,7 @@ internal static class FeedRunView
 		return
 		[
 			.. run
-				.Items.Where(item => item.State is not FeedRunItemState.Kept)
+				.Items.Where(item => item.State is FeedRunItemState.Added or FeedRunItemState.Removed)
 				.Where(item => media.ContainsKey(item.MediaId))
 				.Select(item => new ChangeItem
 				{
@@ -155,13 +155,15 @@ internal static class FeedRunView
 
 	internal static string? Problem(FeedRun run)
 	{
-		if (run.Failed)
+		if (run.Failed && run.Conclusiveness is not Conclusiveness.Stopped)
 		{
 			return run.SourceFailure.Match("The source could not be read, so nothing was applied.", "The source returned nothing, so nothing was applied.");
 		}
 		return run.Conclusiveness switch
 		{
-			Conclusiveness.Conclusive => null,
+			Conclusiveness.Conclusive or Conclusiveness.Pending => null,
+			Conclusiveness.Unresolved => "Some titles couldn't be looked up, so no removals were applied.",
+			Conclusiveness.Stopped => "The run stopped before it finished, so some of its changes may be missing.",
 			Conclusiveness.NoItems => "The source returned nothing, so no removals were applied.",
 			Conclusiveness.NoMatches => "Nothing the source returned could be matched, so no removals were applied.",
 			Conclusiveness.NoneAdmitted => "Nothing the source returned was admitted, so no removals were applied.",
@@ -190,7 +192,10 @@ internal static class FeedRunView
 			parts.Add($"{run.Counts.Total} fetched");
 		}
 
-		parts.Add($"took {Took(run.Duration)}");
+		if (run.Conclusiveness is not Conclusiveness.Pending)
+		{
+			parts.Add($"took {Took(run.Duration)}");
+		}
 
 		return string.Join(" · ", parts);
 	}

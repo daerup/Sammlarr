@@ -126,6 +126,10 @@
                                             {
                                                 <span class="is-removed">failed</span>
                                             }
+                                            else if (item.Conclusiveness is Conclusiveness.Pending)
+                                            {
+                                                <span>running</span>
+                                            }
                                             else if (item.Conclusiveness is not Conclusiveness.Conclusive)
                                             {
                                                 <span class="is-guarded">guarded</span>
@@ -175,6 +179,10 @@
                                     {
                                         <FeedChip Tone="FeedChipTone.Failed" Icon="cloud-off">Failed</FeedChip>
                                     }
+                                    else if (run.Conclusiveness is Conclusiveness.Pending)
+                                    {
+                                        <FeedChip Tone="FeedChipTone.Running"><span class="feed-chip-dot"></span>Running</FeedChip>
+                                    }
                                     else if (run.Conclusiveness is not Conclusiveness.Conclusive)
                                     {
                                         <FeedChip Tone="FeedChipTone.Attention" Icon="shield">Guarded</FeedChip>
@@ -205,6 +213,10 @@
                                     <LucideIcon Name="check-check" Size="24" Class="is-clean"/>
                                     <div>The list matched your collection exactly.</div>
                                 </div>
+                            }
+                            else if (run.Conclusiveness is Conclusiveness.Pending)
+                            {
+                                <div class="runs-empty">This run is still going.</div>
                             }
                             else
                             {
@@ -348,7 +360,7 @@
     private async Task ShowRunAsync(FeedRun run)
     {
         _selected = run;
-        var wanted = run.Items.Where(item => item.State is not FeedRunItemState.Kept).Select(item => item.MediaId).ToList();
+        var wanted = run.Items.Where(item => item.State is FeedRunItemState.Added or FeedRunItemState.Removed).Select(item => item.MediaId).ToList();
         _items = FeedRunView.Items(run, await Media.GetDetailsByIdAsync(wanted));
     }
 
@@ -364,7 +376,7 @@
             {
                 RunFilter.All => true,
                 RunFilter.Changed => run.HasChanges,
-                RunFilter.Guarded => run.Conclusiveness is not Conclusiveness.Conclusive && !run.Failed,
+                RunFilter.Guarded => Guarded(run),
                 RunFilter.Failed => run.Failed,
             }
         );
@@ -374,9 +386,11 @@
         {
             RunFilter.All => _runs.Count,
             RunFilter.Changed => _runs.Count(run => run.HasChanges),
-            RunFilter.Guarded => _runs.Count(run => run.Conclusiveness is not Conclusiveness.Conclusive && !run.Failed),
+            RunFilter.Guarded => _runs.Count(Guarded),
             RunFilter.Failed => _runs.Count(run => run.Failed),
         };
+
+    private static bool Guarded(FeedRun run) => run.Conclusiveness is not (Conclusiveness.Conclusive or Conclusiveness.Pending) && !run.Failed;
 
     private static string FilterLabel(RunFilter filter) =>
         filter switch
@@ -430,7 +444,7 @@
 
     private static string DotClass(FeedRun run) =>
         run.Failed ? "is-bad"
-        : run.Conclusiveness is not Conclusiveness.Conclusive ? "is-warn"
+        : run.Conclusiveness is not (Conclusiveness.Conclusive or Conclusiveness.Pending) ? "is-warn"
         : run.HasChanges ? "is-ok"
         : "is-idle";
 

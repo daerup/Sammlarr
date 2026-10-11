@@ -6,7 +6,7 @@ namespace UI.Features.Home.Components;
 
 public sealed record ActivityRun(FeedRun Run, string FeedName)
 {
-	internal bool Inconclusive => Run.Conclusiveness is not Conclusiveness.Conclusive;
+	internal bool Inconclusive => Run.Conclusiveness is not (Conclusiveness.Conclusive or Conclusiveness.Pending);
 
 	internal string Outcome =>
 		Run.Conclusiveness switch
@@ -16,6 +16,9 @@ public sealed record ActivityRun(FeedRun Run, string FeedName)
 			Conclusiveness.NoItems => "the list came back empty",
 			Conclusiveness.NoMatches => $"none of the {Run.Counts.Total} titles could be matched",
 			Conclusiveness.NoneAdmitted => $"all {Run.Counts.Total} titles were filtered out",
+			Conclusiveness.Pending => "still running",
+			Conclusiveness.Unresolved => "some titles couldn't be looked up, so nothing was removed",
+			Conclusiveness.Stopped => "the run stopped before it finished",
 		};
 
 	internal string? Reason => Run.SourceFailure.Match(failure => failure, UnrecordedReason);

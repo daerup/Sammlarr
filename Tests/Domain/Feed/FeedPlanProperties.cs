@@ -26,7 +26,7 @@ public class FeedPlanProperties
 			Gen.Select(
 				Gen.OneOfConst<FeedStrategy>(new Append(), new Mirror(Threshold), new Mirror(Threshold)),
 				Gen.OneOfConst(FeedLoadState.Finished, FeedLoadState.Finished, FeedLoadState.Finished, FeedLoadState.Unfinished),
-				Gen.Int[0, 3],
+				Gen.Select(Gen.OneOfConst(UnmatchedReason.NotFound, UnmatchedReason.CouldNotLookUp, UnmatchedReason.Conflict), Gen.Int[0, 5]).Array[0, 3],
 				(strategy, state, unmatched) => Build(situations, strategy, state, unmatched)
 			)
 		);
@@ -81,7 +81,7 @@ public class FeedPlanProperties
 		(QueryOutcome Outcome, bool Owned, bool InWantlist, bool InBlocklist, bool InSource, int Absences)[] situations,
 		FeedStrategy strategy,
 		FeedLoadState state,
-		int unmatchedCount
+		(UnmatchedReason Reason, int ConflictsWith)[] unmatchedTitles
 	)
 	{
 		var verdicts = new List<QueryVerdict<MatchedMedia>>();
@@ -90,7 +90,7 @@ public class FeedPlanProperties
 
 		for (var index = 0; index < situations.Length; index++)
 		{
-			var id = MediaId.From(new Guid(index + 1, 0, 0, new byte[8]));
+			var id = Id(index);
 			var (outcome, isOwned, inWantlist, inBlocklist, inSource, absenceCount) = situations[index];
 
 			if (isOwned)
@@ -111,12 +111,18 @@ public class FeedPlanProperties
 			}
 		}
 
-		var unmatched = Enumerable
-			.Range(0, unmatchedCount)
-			.Select(index => new UnmatchedMedia([TmdbId.From($"unmatched-{index}", MediaType.Movie)], new MovieDetails()))
+		var unmatched = unmatchedTitles
+			.Select((title, index) => Unmatched(index, title.Reason, title.Reason is UnmatchedReason.Conflict ? [Id(title.ConflictsWith)] : []))
 			.ToList();
 
 		return new Scenario(FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatched, state), owned, absences, strategy), owned, strategy, absences);
+	}
+
+	private static MediaId Id(int index) => MediaId.From(new Guid(index + 1, 0, 0, new byte[8]));
+
+	private static UnmatchedMedia Unmatched(int index, UnmatchedReason reason, ValueSet<MediaId> conflictsWith)
+	{
+		return new UnmatchedMedia([TmdbId.From($"unmatched-{index}", MediaType.Movie)], new MovieDetails(), reason) { ConflictsWith = conflictsWith };
 	}
 
 	private static MatchedMedia Row(MediaId id)

@@ -208,8 +208,17 @@
 
     private async Task WantlistBulkAsync(IReadOnlyList<BlocklistedMedia> toMark)
     {
-        await WantlistService.AddAsync(toMark.Select(item => item.Media.Identity.Id), new ManualOrigin(ManualSource.Search), Cancellation.Token);
-        ToastService.Success($"Added {toMark.Count} title{(toMark.Count == 1 ? "" : "s")} to your wantlist.");
+        var added = await WantlistService.AddAsync(toMark.Select(item => item.Media.Identity.Id), new ManualOrigin(ManualSource.Search), Cancellation.Token);
+        var addable = toMark.Count - added.Unaddressable.Count;
+        if (addable > 0)
+        {
+            ToastService.Success($"Added {Titles(addable)} to your wantlist.");
+        }
+
+        if (added.Unaddressable.Count > 0)
+        {
+            ToastService.Warning(WantlistNotices.NoMatch(BrandingService.Name(Settings!.Sink.Service), added.Unaddressable.Count));
+        }
     }
 
     private string? SinkBrandColor =>

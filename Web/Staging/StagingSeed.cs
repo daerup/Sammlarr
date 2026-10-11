@@ -97,9 +97,13 @@ internal static class StagingSeed
 	private static async Task AddTitlesAsync(IServiceProvider scoped, IReadOnlyList<SeedTitle> wantlist, CancellationToken cancellationToken)
 	{
 		var titles = await scoped.GetRequiredService<IMediaService>().RegisterAsync([.. wantlist.Select(title => title.Ids())], [], cancellationToken);
-		await scoped
+		var added = await scoped
 			.GetRequiredService<IWantlistService>()
 			.AddAsync(titles.WhereSome().Select(title => title.Id), new ManualOrigin(ManualSource.Search), cancellationToken);
+		if (added.Unaddressable.Count > 0)
+		{
+			throw new InvalidOperationException($"{added.Unaddressable.Count} seeded wantlist titles have no id the sink can use.");
+		}
 	}
 
 	private static async Task CreateFeedsAsync(IServiceProvider scoped, IReadOnlyList<SeedFeed> seeded, CancellationToken cancellationToken)

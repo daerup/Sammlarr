@@ -196,7 +196,7 @@ public class GlobalSearchTests : BunitContext
 	[Test]
 	public async Task Adding_ATitleTheSinkHasNoMatchFor_WarnsInsteadOfFailing()
 	{
-		_wantlist.AddAsync(Any(), Any(), Any()).Throws(new MissingSinkIdException(nameof(SinkKind.Plex)));
+		_wantlist.AddAsync(Any(), Any(), Any()).Returns(new WantlistAdded([], [Matched.Identity.Id]));
 		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
 		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
 		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });

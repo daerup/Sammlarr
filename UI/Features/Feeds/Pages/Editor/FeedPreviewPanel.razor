@@ -4,6 +4,7 @@
 @using Contracts.Feed
 @using Contracts.Identity
 @using Contracts.Media
+@using Contracts.Settings
 @using Contracts.Wantlist
 @using Domain.Feed.Run
 @using UI.Features.Feeds.Components
@@ -11,6 +12,7 @@
 @using global::Observability.Tracing
 @implements IDisposable
 @inject IWantlistService WantlistService
+@inject IProviderConfigService ProviderConfig
 @inject IBlocklistService BlocklistService
 @inject IMediaService Media
 @inject IKeyedServiceIndex<FeedProvider, IFeedProvider> FeedServiceIndex
@@ -880,13 +882,17 @@
             }
             else
             {
-                await WantlistService.AddAsync([item.Identity.Id], new ManualOrigin(ManualSource.FeedPreview));
-                _wantlisted.Add(item.Identity.Id);
+                var added = await WantlistService.AddAsync([item.Identity.Id], new ManualOrigin(ManualSource.FeedPreview));
+                if (added.Unaddressable.Count > 0)
+                {
+                    var config = await ProviderConfig.GetAsync();
+                    Notifier.Warning(WantlistNotices.NoMatch(Branding.Name(config.Sink.Service), item.Details.Title), WantlistNotices.CantUpdate);
+                }
+                else
+                {
+                    _wantlisted.Add(item.Identity.Id);
+                }
             }
-        }
-        catch (MissingSinkIdException)
-        {
-            Notifier.Warning($"'{item.Details.Title}' isn't ready yet — still loading.", "Can't update wantlist");
         }
         catch (Exception ex)
         {
