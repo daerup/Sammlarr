@@ -167,7 +167,7 @@ public class UsageReportTests
 	{
 		_capacity.Of(RemoteService.Plex).Returns(RemoteLoad.Idle with { BlockedUntil = Some.Of(Now.AddMinutes(16)) });
 		_capacity.Of(RemoteService.Tmdb).Returns(RemoteLoad.Idle with { BlockedUntil = Some.Of(Now.AddMinutes(-1)) });
-		_mdblist.TodayAsync(Any()).Returns(Some.Of(962L));
+		_mdblist.TodayAsync(Any()).Returns(Some.Of(new QuotaToday(Midnight.AddDays(1), Some.Of(Allowance(962)))));
 		_loads.FindAsync(DatasetNames.ImdbRatings, Any()).Returns(Some.Of(new DatasetLoad(DatasetNames.ImdbRatings, Midnight.AddHours(4.5), new None(), 2)));
 		Stored(
 			Calls(RemoteService.Plex, 11, UsageOutcome.Answered, 1),
@@ -186,6 +186,43 @@ public class UsageReportTests
 	}
 
 	[Test]
+	public async Task ReadAsync_WithoutAnMdblistKey_ListsNoQuota()
+	{
+		Stored(Calls(RemoteService.Tmdb, 11, UsageOutcome.Answered, 1));
+
+		var report = await Testee().ReadAsync(UsageRange.Day);
+
+		await Assert.That(report.Quotas).IsEmpty();
+	}
+
+	[Test]
+	public async Task ReadAsync_ForAKeyWithNoAnswerSinceTheReset_ListsItsQuotaWithoutADay()
+	{
+		_mdblist.TodayAsync(Any()).Returns(Some.Of(new QuotaToday(Midnight.AddDays(1), new None())));
+		Stored(Calls(RemoteService.Tmdb, 11, UsageOutcome.Answered, 1));
+
+		var quota = (await Testee().ReadAsync(UsageRange.Day)).Quotas.Single();
+
+		await Assert.That(quota.Service).IsEqualTo(RemoteService.Mdblist);
+		await Assert.That(quota.Day).IsNone();
+	}
+
+	[Test]
+	public async Task ReadAsync_ForAnAnsweredKey_DrawsTheDayFromTheRequestsSentSinceTheReset()
+	{
+		_mdblist.TodayAsync(Any()).Returns(Some.Of(new QuotaToday(Midnight.AddDays(1), Some.Of(Allowance(900)))));
+		Stored(
+			[Calls(RemoteService.Mdblist, 10, UsageOutcome.Answered, 60), Calls(RemoteService.Mdblist, 11, UsageOutcome.Answered, 40)],
+			[Attempts(RemoteService.Mdblist, 10, 60, 250), Attempts(RemoteService.Mdblist, 11, 40, 250), Attempts(RemoteService.Mdblist, -3, 500, 250)]
+		);
+
+		var quota = (await Testee().ReadAsync(UsageRange.Day)).Quotas.Single();
+
+		var day = await Assert.That(quota.Day).IsSome();
+		await Assert.That((day!.Points[0].Left, day.Points[11].Left, day.Points[^1].Left)).IsEqualTo((1000L, 940L, 900L));
+	}
+
+	[Test]
 	public async Task ReadAsync_AsAMember_IsRefused()
 	{
 		await Assert.ThrowsAsync<UnauthorizedAccessException>(() => Testee(UserRole.Member).ReadAsync(UsageRange.Day));
@@ -196,6 +233,11 @@ public class UsageReportTests
 	private void Stored(IReadOnlyList<UsageCalls> calls, IReadOnlyList<UsageAttempts> attempts)
 	{
 		_store.ReadAsync(Any(), Any(), Any()).Returns(new UsageRows(calls, attempts));
+	}
+
+	private static QuotaAllowance Allowance(long remaining)
+	{
+		return new QuotaAllowance(remaining, Midnight.AddDays(1), Some.Of(1000L), new None(), new None(), 50, 0.5);
 	}
 
 	private static UsageAttempts Attempts(RemoteService service, int hour, long attempts, int bucket)

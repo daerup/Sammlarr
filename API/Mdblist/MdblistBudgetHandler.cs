@@ -9,7 +9,7 @@ internal sealed class MdblistBudgetHandler(MdblistBudget budget) : DelegatingHan
 		var response = await base.SendAsync(request, cancellationToken);
 		if (request.Options.TryGetValue(LaneHandler.Owner, out var apiKey))
 		{
-			budget.Record(apiKey, response.Headers);
+			budget.Record(apiKey, response);
 		}
 
 		return response;

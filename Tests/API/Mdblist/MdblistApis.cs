@@ -1,3 +1,4 @@
+using System.Net;
 using API.Http.Lanes;
 using API.Mdblist;
 using Contracts;
@@ -44,4 +45,13 @@ internal static class MdblistApis
 	}
 
 	internal static Task<string> RecordedAsync(string name) => File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Mdblist", "Recorded", name));
+
+	internal static HttpResponseMessage RateLimited(long remaining, DateTimeOffset reset, long? limit = null, HttpStatusCode status = HttpStatusCode.OK)
+	{
+		var response = new HttpResponseMessage(status);
+		response.Headers.Add("x-ratelimit-remaining", $"{remaining}");
+		response.Headers.Add("x-ratelimit-reset", $"{reset.ToUnixTimeSeconds()}");
+		Optional.Of(limit).Apply(value => response.Headers.Add("x-ratelimit-limit", $"{value}"));
+		return response;
+	}
 }

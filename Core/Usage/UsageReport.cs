@@ -28,14 +28,29 @@ internal sealed class UsageReport(
 		var window = UsageWindow.Of(range, now.ToLocalTime());
 		var before = window.Before();
 		var rows = await store.ReadAsync(before.From, window.To, cancellationToken);
-		var live = await LiveAsync(now, cancellationToken);
+		var today = await mdblist.TodayAsync(cancellationToken);
+		var live = await LiveAsync(now, today, cancellationToken);
 		var feeds = await feedLines.ReadAsync(window, cancellationToken);
-		return new UsageSnapshot(Period(window, rows, live), Period(before, rows, _ => Unknown), feeds);
+		IReadOnlyList<UsageQuota> quotas = [.. new[] { today }.WhereSome().Select(found => Quota(found, rows, now))];
+		return new UsageSnapshot(Period(window, rows, live), Period(before, rows, _ => Unknown), feeds, quotas);
 	}
 
-	private async Task<Func<RemoteService, UsageRightNow>> LiveAsync(DateTimeOffset now, CancellationToken cancellationToken)
+	private static UsageQuota Quota(QuotaToday today, UsageRows rows, DateTimeOffset now)
 	{
-		var left = await mdblist.TodayAsync(cancellationToken);
+		return new UsageQuota(RemoteService.Mdblist, today, today.Answered.Map(allowance => QuotaDay.Of(Spent(rows), allowance, now)));
+	}
+
+	private static IReadOnlyList<(DateTimeOffset Hour, long Spent)> Spent(UsageRows rows)
+	{
+		return
+		[
+			.. rows.Attempts.Where(row => row.Service == RemoteService.Mdblist).GroupBy(row => row.Hour).Select(hour => (hour.Key, hour.Sum(row => row.Attempts))),
+		];
+	}
+
+	private async Task<Func<RemoteService, UsageRightNow>> LiveAsync(DateTimeOffset now, Optional<QuotaToday> today, CancellationToken cancellationToken)
+	{
+		var left = today.Map(found => found.Answered.Map(allowance => allowance.Remaining));
 		var downloads = new Dictionary<RemoteService, DateTimeOffset>();
 		foreach (var (service, dataset) in DatasetNames.ByService)
 		{

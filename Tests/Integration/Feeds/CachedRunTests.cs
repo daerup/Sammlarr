@@ -212,12 +212,12 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private const string MdblistTitles = $"{TestUrls.MdblistApi}/tmdb/movie";
 
-	private static System.Net.Http.Headers.HttpResponseHeaders Spent(DateTimeOffset reset)
+	private static HttpResponseMessage Spent(DateTimeOffset reset)
 	{
 		var answered = new HttpResponseMessage(HttpStatusCode.OK);
 		answered.Headers.Add("x-ratelimit-remaining", "10");
 		answered.Headers.Add("x-ratelimit-reset", $"{reset.ToUnixTimeSeconds()}");
-		return answered.Headers;
+		return answered;
 	}
 
 	private static MovieDetails Complete(string title)

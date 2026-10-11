@@ -141,12 +141,12 @@ public class DetailsFillTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(host.HttpStub.Requests($"{TestUrls.MdblistApi}/tmdb/movie")).IsEqualTo(1);
 	}
 
-	private static System.Net.Http.Headers.HttpResponseHeaders Allowance(long remaining, DateTimeOffset reset)
+	private static HttpResponseMessage Allowance(long remaining, DateTimeOffset reset)
 	{
 		var answered = new HttpResponseMessage(HttpStatusCode.OK);
 		answered.Headers.Add("x-ratelimit-remaining", $"{remaining}");
 		answered.Headers.Add("x-ratelimit-reset", $"{reset.ToUnixTimeSeconds()}");
-		return answered.Headers;
+		return answered;
 	}
 
 	[Test]
