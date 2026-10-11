@@ -1,10 +1,12 @@
 using Contracts.Housekeeping;
 using Contracts.Usage;
 using Core.Housekeeping;
+using Domain.Jobs;
 using Domain.Providers;
 using Domain.Usage;
 using Harness;
 using TestInfrastructure;
+using TickerQ.Utilities.Enums;
 
 namespace Integration.Tests.Housekeeping;
 
@@ -18,17 +20,25 @@ public class HousekeepingPassTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task RunAsync_Twice_RemovesOnceThenReportsZero()
+	public async Task RunAsync_WithNobodySignedIn_RemovesFromEveryStepOnceThenReportsZero()
 	{
 		host.SetCurrentTime(Now);
 		var usage = host.Resolve<IUsageStore>();
 		await usage.AddAsync(Calls(Now.AddDays(-181)));
 		await usage.AddAsync(Calls(Now.AddDays(-1)));
+		await host.Movie(TestMedia.Inception).SeedWithDetailsAsync("Inception", Now.AddDays(-200));
+		await host.AddedAsync(await host.Movie(TestMedia.FightClub).SeedAsync(), Now.AddDays(-400));
+		await host.SeedRunAsync(await host.SeedFeedAsync(), Now.AddDays(-91), Guid.NewGuid());
+		await host.SeedJobAsync(JobState.Done, Now.AddDays(-31));
+		await host.SeedOccurrenceAsync(await host.SeedTickerAsync(), TickerStatus.Done, Now.AddDays(-31));
+		host.SignOut();
 
 		var first = await Testee.RunAsync();
 		var second = await Testee.RunAsync();
 
-		await Assert.That(Removed(first, HousekeepingStep.UsageStats)).IsEqualTo(1);
+		await Assert.That(first.Failure).IsNone();
+		await Assert.That(first.Steps.Select(step => step.Step)).IsEquivalentTo(Enum.GetValues<HousekeepingStep>());
+		await Assert.That(first.Steps.Where(step => step.Removed == 0)).IsEmpty();
 		await Assert.That(second.Steps.Sum(step => step.Removed)).IsEqualTo(0);
 		await Assert.That(second.File).IsSome();
 		var kept = await usage.ReadAsync(Now.AddDays(-200), Now);
@@ -44,8 +54,6 @@ public class HousekeepingPassTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(await host.Resolve<IHousekeepingReports>().LastAsync()).IsSome().And.IsEquivalentTo(report);
 	}
-
-	private static int Removed(HousekeepingReport report, HousekeepingStep step) => report.Steps.Single(count => count.Step == step).Removed;
 
 	private static UsageRows Calls(DateTimeOffset hour)
 	{
