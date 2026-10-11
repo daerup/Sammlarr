@@ -100,7 +100,7 @@ else
                   Items="_items"
                   Chips="@FeedRunView.Chips(last.Counts)"
                   OnSelect="ShowDetailsAsync"
-                  EmptyMessage="Nothing was added or removed."
+                  EmptyMessage="@(FeedRunView.LostItsTitles(last) ? FeedRunView.TitlesGone : "Nothing was added or removed.")"
                   Note="@($"{_runCount} {(_runCount == 1 ? "run" : "runs")}")"
                   NoteHref="@($"/feeds/{UrlGuid.Encode(Overview.Feed.Id.Value)}/runs")"
                   Band="@(FeedRunView.Problem(last) is { } problem ? ProblemBand(last, problem) : null)"

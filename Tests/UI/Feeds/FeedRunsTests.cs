@@ -13,6 +13,7 @@ using Domain.Providers;
 using Domain.Usage;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
+using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages.Runs;
 using UI.Shared.Services;
 
@@ -79,6 +80,19 @@ public class FeedRunsTests : BunitContext
 		cut.WaitForState(() => cut.FindAll("[data-testid=run-calls]").Count == 1);
 
 		await Assert.That(cut.Find(".runs-detail-sub").TextContent).Contains("took 2.0 s · 8,287 calls");
+	}
+
+	[Test]
+	public async Task Render_ARunThatChangedTitlesButListsNone_SaysItsTitlesAreNoLongerListed()
+	{
+		var trimmed = Run(DateTimeOffset.UtcNow.AddDays(-120)) with { Counts = FeedRunCounts.None with { Total = 500, Added = 4, Removed = 3, Kept = 493 } };
+		RegisterServices([trimmed]);
+
+		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(trimmed)));
+		cut.WaitForState(() => cut.FindAll("[data-testid=run-titles-gone]").Count == 1);
+
+		await Assert.That(cut.Find("[data-testid=run-titles-gone]").TextContent).Contains(FeedRunView.TitlesGone);
+		await Assert.That(cut.Markup).DoesNotContain("matched your collection exactly");
 	}
 
 	[Test]

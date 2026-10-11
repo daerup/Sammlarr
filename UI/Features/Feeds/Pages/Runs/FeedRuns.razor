@@ -207,6 +207,13 @@
                                             RemovedLabel="Removed"
                                             AddedLabel="Added"/>
                             }
+                            else if (FeedRunView.LostItsTitles(run))
+                            {
+                                <div class="runs-empty" data-testid="run-titles-gone">
+                                    <LucideIcon Name="archive" Size="24"/>
+                                    <div>@FeedRunView.TitlesGone</div>
+                                </div>
+                            }
                             else if (run.Counts.Total > 0 && run.Conclusiveness is Conclusiveness.Conclusive)
                             {
                                 <div class="runs-empty">
