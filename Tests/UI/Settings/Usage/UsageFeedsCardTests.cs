@@ -235,7 +235,19 @@ public class UsageFeedsCardTests : BunitContext
 
 	private static UsageRun Run(RunId id, int hours, UsageTally calls, int couldNotLookUp = 0)
 	{
-		return new UsageRun(id, UsageSamples.To.AddHours(hours), TimeSpan.FromSeconds(4), new Manual(), 100, 2, 1, 2, couldNotLookUp, calls);
+		return new UsageRun(
+			id,
+			UsageSamples.To.AddHours(hours),
+			TimeSpan.FromSeconds(4),
+			new Manual(),
+			100,
+			2,
+			1,
+			2,
+			couldNotLookUp,
+			calls,
+			new Dictionary<RemoteService, UsageTally>()
+		);
 	}
 
 	private static UsageFeedLine Line(FeedId feed, string name, FeedProvider provider, params UsageRun[] runs)
@@ -248,7 +260,8 @@ public class UsageFeedsCardTests : BunitContext
 			true,
 			Some.Of(runs[^1].StartedAt),
 			runs,
-			new UsageFeedStats(calls, calls, calls / 100.0, 3, 0.03, 1, TimeSpan.FromSeconds(4))
+			new UsageFeedStats(calls, calls, calls / 100.0, 3, 0.03, 1, TimeSpan.FromSeconds(4)),
+			new Dictionary<RemoteService, UsageFeedStats>()
 		);
 	}
 
@@ -264,7 +277,16 @@ public class UsageFeedsCardTests : BunitContext
 				Run(ShowsRun, -2, UsageSamples.Tally(answered: 1200))
 			),
 			Line(Anime, "Seasonal anime", FeedProvider.AniList, Run(RunId.From(Guid.NewGuid()), -5, UsageSamples.Tally(answered: 300), couldNotLookUp: 4)),
-			new(Paused, "Old list", FeedProvider.Tmdb, false, new None(), [], new UsageFeedStats(0, 0, 0, 0, 0, 0, TimeSpan.Zero)),
+			new(
+				Paused,
+				"Old list",
+				FeedProvider.Tmdb,
+				false,
+				new None(),
+				[],
+				new UsageFeedStats(0, 0, 0, 0, 0, 0, TimeSpan.Zero),
+				new Dictionary<RemoteService, UsageFeedStats>()
+			),
 		];
 
 		protected override void BuildRenderTree(RenderTreeBuilder builder)

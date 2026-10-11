@@ -37,7 +37,7 @@ internal static class UsageSamples
 
 	internal static UsageServiceLine Line(RemoteService service, UsageTally tally, UsageRightNow? rightNow = null)
 	{
-		return new(service, tally, rightNow ?? Quiet, Slots(tally));
+		return new(service, tally, rightNow ?? Quiet, Slots(tally), []);
 	}
 
 	internal static UsagePeriod Period(IReadOnlyList<UsageServiceLine> services, IReadOnlyList<UsageCauseLine> causes)
@@ -48,7 +48,12 @@ internal static class UsageSamples
 
 	private static IReadOnlyList<UsageSlot> Slots(UsageTally lastHour)
 	{
-		return [.. Enumerable.Range(0, 24).Select(slot => new UsageSlot(Window.SlotAt(slot), slot == 23 ? lastHour : UsageTally.Empty))];
+		return
+		[
+			.. Enumerable
+				.Range(0, 24)
+				.Select(slot => new UsageSlot(Window.SlotAt(slot), slot == 23 ? lastHour : UsageTally.Empty, new Dictionary<UsageCause, long>())),
+		];
 	}
 
 	internal static UsageSnapshot Snapshot()

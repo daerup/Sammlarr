@@ -45,6 +45,30 @@ public class UsageFeedLinesTests
 	}
 
 	[Test]
+	public async Task ReadAsync_ARunAcrossServices_CountsEachServicesCallsAndTheirStats()
+	{
+		Stored(
+			Run(-3, 0, 1, 0, 1) with
+			{
+				Calls =
+				[
+					new FeedRunCalls(RemoteService.Tmdb, UsageOutcome.Answered, 10),
+					new FeedRunCalls(RemoteService.Plex, UsageOutcome.Answered, 4),
+					new FeedRunCalls(RemoteService.Plex, UsageOutcome.Failed, 1),
+				],
+			},
+			Run(-2, 30, 3, 0, 2)
+		);
+
+		var busy = (await Testee().ReadAsync(Day, CancellationToken.None)).First();
+
+		var mixed = busy.Runs.Single(run => run.Services.ContainsKey(RemoteService.Plex));
+		await Assert.That((mixed.Services[RemoteService.Tmdb].Total, mixed.Services[RemoteService.Plex].Total)).IsEqualTo((10L, 5L));
+		await Assert.That((busy.Services[RemoteService.Tmdb].Calls, busy.Services[RemoteService.Plex].Calls)).IsEqualTo((40L, 5L));
+		await Assert.That(busy.Services[RemoteService.Plex]).IsEqualTo(new UsageFeedStats(5, 2.5, 0.025, 2, 0.02, 0, TimeSpan.FromSeconds(1.5)));
+	}
+
+	[Test]
 	public async Task ReadAsync_ForEveryFeed_ListsTheBusiestFirstAndAFeedThatNeverRan()
 	{
 		Stored(Run(-2, 30, 3, 0, 2));

@@ -43,7 +43,19 @@ public class UsageRunDetailsTests : BunitContext
 
 	private IRenderedComponent<UsageRunDetails> RenderDetails(FeedRunTrigger trigger, int added, int removed, UsageTally calls)
 	{
-		var run = new UsageRun(RunId.From(Guid.NewGuid()), UsageSamples.To, TimeSpan.FromSeconds(4), trigger, 50, added, removed, 0, 0, calls);
+		var run = new UsageRun(
+			RunId.From(Guid.NewGuid()),
+			UsageSamples.To,
+			TimeSpan.FromSeconds(4),
+			trigger,
+			50,
+			added,
+			removed,
+			0,
+			0,
+			calls,
+			new Dictionary<RemoteService, UsageTally>()
+		);
 		var line = new UsageFeedLine(
 			Feed,
 			"Latest shows",
@@ -51,7 +63,8 @@ public class UsageRunDetailsTests : BunitContext
 			true,
 			Some.Of(run.StartedAt),
 			[run],
-			new UsageFeedStats(0, 0, 0, 0, 0, 0, TimeSpan.Zero)
+			new UsageFeedStats(0, 0, 0, 0, 0, 0, TimeSpan.Zero),
+			new Dictionary<RemoteService, UsageFeedStats>()
 		);
 		return Render<UsageRunDetails>(parameters => parameters.Add(details => details.Line, line).Add(details => details.Run, run));
 	}

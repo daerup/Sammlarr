@@ -26,12 +26,25 @@ internal sealed class UsageFeedLines(IFeedService feeds)
 
 	private static UsageFeedLine Line(Domain.Feed.Feed feed, Optional<DateTimeOffset> lastRun, IReadOnlyList<UsageRun> runs)
 	{
-		return new UsageFeedLine(feed.Id, feed.Name, feed.Provider, feed.Enabled, lastRun, runs, Stats(runs));
+		var services = runs.SelectMany(run => run.Services.Keys).Distinct();
+		return new UsageFeedLine(
+			feed.Id,
+			feed.Name,
+			feed.Provider,
+			feed.Enabled,
+			lastRun,
+			runs,
+			Stats(runs),
+			services.ToDictionary(
+				service => service,
+				service => Stats([.. runs.Select(run => run with { Calls = run.Services.GetValueOrNone(service).GetValueOr(UsageTally.Empty) })])
+			)
+		);
 	}
 
 	private static UsageRun Run(FeedRun run)
 	{
-		var calls = run.Calls.GroupBy(call => call.Outcome).ToDictionary(group => group.Key, group => group.Sum(call => call.Calls));
+		var calls = Tally(run.Calls);
 		return new UsageRun(
 			run.Id,
 			run.StartedAt,
@@ -42,7 +55,16 @@ internal sealed class UsageFeedLines(IFeedService feeds)
 			run.Counts.Removed,
 			run.Counts.UnmatchedNotFound + run.Counts.UnmatchedConflict,
 			run.Counts.UnmatchedCouldNotLookUp,
-			new UsageTally(calls, new Dictionary<int, long>())
+			calls,
+			run.Calls.GroupBy(call => call.Service).ToDictionary(group => group.Key, Tally)
+		);
+	}
+
+	private static UsageTally Tally(IEnumerable<FeedRunCalls> calls)
+	{
+		return new UsageTally(
+			calls.GroupBy(call => call.Outcome).ToDictionary(group => group.Key, group => group.Sum(call => call.Calls)),
+			new Dictionary<int, long>()
 		);
 	}
 

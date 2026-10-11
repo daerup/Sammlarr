@@ -5,7 +5,7 @@ using Domain.Usage;
 
 namespace Contracts.Usage;
 
-public sealed record UsageSlot(DateTimeOffset At, UsageTally Tally);
+public sealed record UsageSlot(DateTimeOffset At, UsageTally Tally, IReadOnlyDictionary<UsageCause, long> Causes);
 
 public sealed record UsageRightNow(
 	Optional<DateTimeOffset> LastCall,
@@ -15,7 +15,13 @@ public sealed record UsageRightNow(
 	Optional<DateTimeOffset> DownloadedAt
 );
 
-public sealed record UsageServiceLine(RemoteService Service, UsageTally Tally, UsageRightNow RightNow, IReadOnlyList<UsageSlot> Slots);
+public sealed record UsageServiceLine(
+	RemoteService Service,
+	UsageTally Tally,
+	UsageRightNow RightNow,
+	IReadOnlyList<UsageSlot> Slots,
+	IReadOnlyList<UsageCauseLine> Causes
+);
 
 public sealed record UsageCauseLine(UsageCause Cause, UsageTally Tally);
 
@@ -37,7 +43,8 @@ public sealed record UsageRun(
 	int Removed,
 	int NotFound,
 	int CouldNotLookUp,
-	UsageTally Calls
+	UsageTally Calls,
+	IReadOnlyDictionary<RemoteService, UsageTally> Services
 );
 
 public sealed record UsageFeedStats(
@@ -57,7 +64,8 @@ public sealed record UsageFeedLine(
 	bool Enabled,
 	Optional<DateTimeOffset> LastRun,
 	IReadOnlyList<UsageRun> Runs,
-	UsageFeedStats Stats
+	UsageFeedStats Stats,
+	IReadOnlyDictionary<RemoteService, UsageFeedStats> Services
 );
 
 public sealed record UsageSnapshot(UsagePeriod Current, UsagePeriod Previous, IReadOnlyList<UsageFeedLine> Feeds);
