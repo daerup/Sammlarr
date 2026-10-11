@@ -8,6 +8,7 @@ namespace Core.Tests.Media;
 public class EnricherChoiceTests
 {
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
+	private static readonly TimeSpan FreshFor = TimeSpan.FromDays(14);
 	private static readonly RemoteLoad Idle = RemoteLoad.Idle;
 	private static readonly TimeSpan ShownWait = TimeSpan.FromSeconds(5);
 	private static readonly IReadOnlySet<RemoteService> NoPreference = new HashSet<RemoteService>();
@@ -216,14 +217,14 @@ public class EnricherChoiceTests
 	[Test]
 	public async Task NeedsRefetch_WhenNobodyLeftToAskCanFillAGap_IsFalse()
 	{
-		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [], FieldNeeds.Everything, Now)).IsFalse();
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [], FieldNeeds.Everything, Now, FreshFor)).IsFalse();
 	}
 
 	[Test]
 	public async Task NeedsRefetch_WhenANewlyConnectedEnricherFillsAGap_IsTrue()
 	{
 		await Assert
-			.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [Candidate(RemoteService.Plex, PlexFills)], FieldNeeds.Everything, Now))
+			.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [Candidate(RemoteService.Plex, PlexFills)], FieldNeeds.Everything, Now, FreshFor))
 			.IsTrue();
 	}
 
@@ -231,7 +232,9 @@ public class EnricherChoiceTests
 	public async Task NeedsRefetch_RightAfterAnAsk_IsTrueWhenSomeoneNewCanFillANeededGap()
 	{
 		await Assert
-			.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromMinutes(1)), [Candidate(RemoteService.Plex, PlexFills)], FieldNeeds.Everything, Now))
+			.That(
+				EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromMinutes(1)), [Candidate(RemoteService.Plex, PlexFills)], FieldNeeds.Everything, Now, FreshFor)
+			)
 			.IsTrue();
 	}
 
@@ -241,7 +244,7 @@ public class EnricherChoiceTests
 		var readsOnlyTheTitle = new FieldNeeds(MediaField.Title, MediaFields.None);
 
 		await Assert
-			.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [Candidate(RemoteService.Plex, PlexFills)], readsOnlyTheTitle, Now))
+			.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [Candidate(RemoteService.Plex, PlexFills)], readsOnlyTheTitle, Now, FreshFor))
 			.IsFalse();
 	}
 
@@ -249,7 +252,7 @@ public class EnricherChoiceTests
 	public async Task NeedsRefetch_ForNoNeeds_IsFalseEvenWhenSomeoneCanFillAGap()
 	{
 		await Assert
-			.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [Candidate(RemoteService.Plex, PlexFills)], FieldNeeds.None, Now))
+			.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [Candidate(RemoteService.Plex, PlexFills)], FieldNeeds.None, Now, FreshFor))
 			.IsFalse();
 	}
 
@@ -258,7 +261,7 @@ public class EnricherChoiceTests
 	{
 		var blocked = Candidate(RemoteService.Plex, PlexFills, Idle with { BlockedUntil = Some.Of(Now.AddMinutes(1)) });
 
-		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [blocked], FieldNeeds.Everything, Now)).IsFalse();
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [blocked], FieldNeeds.Everything, Now, FreshFor)).IsFalse();
 	}
 
 	[Test]
@@ -266,7 +269,7 @@ public class EnricherChoiceTests
 	{
 		var blocked = Candidate(RemoteService.Plex, PlexFills, Blocked(seconds: 5));
 
-		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [blocked], FieldNeeds.Everything, Now)).IsTrue();
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [blocked], FieldNeeds.Everything, Now, FreshFor)).IsTrue();
 	}
 
 	[Test]
@@ -274,7 +277,7 @@ public class EnricherChoiceTests
 	{
 		var lifted = Candidate(RemoteService.Plex, PlexFills, Idle with { BlockedUntil = Some.Of(Now.AddMinutes(-1)) });
 
-		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [lifted], FieldNeeds.Everything, Now)).IsTrue();
+		await Assert.That(EnricherChoice.NeedsRefetch(Dune(askedAgo: TimeSpan.FromDays(1)), [lifted], FieldNeeds.Everything, Now, FreshFor)).IsTrue();
 	}
 
 	[Test]
@@ -282,7 +285,7 @@ public class EnricherChoiceTests
 	{
 		var complete = Dune(askedAgo: TimeSpan.FromDays(1)) with { Details = Complete };
 
-		await Assert.That(EnricherChoice.NeedsRefetch(complete, [Candidate(RemoteService.Plex, PlexFills)], FieldNeeds.Everything, Now)).IsFalse();
+		await Assert.That(EnricherChoice.NeedsRefetch(complete, [Candidate(RemoteService.Plex, PlexFills)], FieldNeeds.Everything, Now, FreshFor)).IsFalse();
 	}
 
 	[Test]
@@ -290,7 +293,7 @@ public class EnricherChoiceTests
 	{
 		var stale = Dune(askedAgo: TimeSpan.FromMinutes(1)) with { RefreshedAt = Now.AddDays(-14) };
 
-		await Assert.That(EnricherChoice.NeedsRefetch(stale, [], FieldNeeds.None, Now)).IsTrue();
+		await Assert.That(EnricherChoice.NeedsRefetch(stale, [], FieldNeeds.None, Now, FreshFor)).IsTrue();
 	}
 
 	[Test]

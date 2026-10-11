@@ -7,6 +7,7 @@ namespace Domain.Tests.Media;
 public class ProviderAnswerTests
 {
 	private static readonly DateTimeOffset At = new(2026, 10, 5, 12, 0, 0, TimeSpan.Zero);
+	private static readonly TimeSpan FreshFor = TimeSpan.FromDays(14);
 
 	private static readonly Gen<MovieDetails> Titles = Gen.Select(
 		Gen.Bool.Array[3],
@@ -61,7 +62,13 @@ public class ProviderAnswerTests
 	[Test]
 	public async Task AskableAt_ForAnAnswer_IsTwoWeeksLater()
 	{
-		await Assert.That(new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, At).AskableAt).IsEqualTo(At.AddDays(14));
+		await Assert.That(new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, At).AskableAt(FreshFor)).IsEqualTo(At.AddDays(14));
+	}
+
+	[Test]
+	public async Task AskableAt_ForAnAnswer_IsTheFreshPeriodLater()
+	{
+		await Assert.That(new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, At).AskableAt(TimeSpan.FromDays(7))).IsEqualTo(At.AddDays(7));
 	}
 
 	[Test]
@@ -70,7 +77,7 @@ public class ProviderAnswerTests
 		var failed = ProviderAnswer.Failed(RemoteService.Tmdb, Some.Of(new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, At.AddDays(-1))), At);
 
 		await Assert.That(failed.Failures).IsEqualTo(1);
-		await Assert.That(failed.AskableAt).IsEqualTo(At.AddHours(1));
+		await Assert.That(failed.AskableAt(FreshFor)).IsEqualTo(At.AddHours(1));
 	}
 
 	[Test]
@@ -80,8 +87,8 @@ public class ProviderAnswerTests
 		var third = ProviderAnswer.Failed(RemoteService.Tmdb, Some.Of(second), At);
 		var fifth = ProviderAnswer.Failed(RemoteService.Tmdb, Some.Of(ProviderAnswer.Failed(RemoteService.Tmdb, Some.Of(third), At)), At);
 
-		await Assert.That(second.AskableAt).IsEqualTo(At.AddHours(6));
-		await Assert.That(third.AskableAt).IsEqualTo(At.AddHours(24));
-		await Assert.That(fifth.AskableAt).IsEqualTo(At.AddHours(24));
+		await Assert.That(second.AskableAt(FreshFor)).IsEqualTo(At.AddHours(6));
+		await Assert.That(third.AskableAt(FreshFor)).IsEqualTo(At.AddHours(24));
+		await Assert.That(fifth.AskableAt(FreshFor)).IsEqualTo(At.AddHours(24));
 	}
 }

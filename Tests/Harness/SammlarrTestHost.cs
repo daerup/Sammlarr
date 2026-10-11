@@ -765,6 +765,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 		services.AddSingleton(new SchedulerOptions());
 		services.AddSingleton(new FeedLoadOptions());
+		services.AddSingleton(new HousekeepingOptions());
 		services.AddSingleton(new AccountsOptions());
 		services.AddModule<CoreModule>();
 		services.AddModule<DbModule>();

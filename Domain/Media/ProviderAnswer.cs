@@ -6,9 +6,9 @@ public sealed record ProviderAnswer(RemoteService Provider, MediaFields Unfilled
 {
 	private static readonly TimeSpan[] Backoff = [TimeSpan.FromHours(1), TimeSpan.FromHours(6), TimeSpan.FromHours(24)];
 
-	public DateTimeOffset AskableAt => AnsweredAt + Wait;
+	public DateTimeOffset AskableAt(TimeSpan freshFor) => AnsweredAt + Wait(freshFor);
 
-	private TimeSpan Wait => Failures == 0 ? CachedDetails.StaleAfter : Backoff[Math.Min(Failures, Backoff.Length) - 1];
+	private TimeSpan Wait(TimeSpan freshFor) => Failures == 0 ? freshFor : Backoff[Math.Min(Failures, Backoff.Length) - 1];
 
 	public static ProviderAnswer After(RemoteService provider, MediaFields fills, MediaDetails answer, DateTimeOffset at)
 	{

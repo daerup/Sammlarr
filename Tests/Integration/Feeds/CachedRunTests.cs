@@ -44,7 +44,7 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var answer = (await StoredAsync(fightClub)).Answers.Single(each => each.Provider == RemoteService.Tmdb);
 		await Assert.That(answer.Failures).IsEqualTo(1);
-		await Assert.That(answer.AskableAt).IsEqualTo(Now.AddHours(1));
+		await Assert.That(answer.AskableAt(new HousekeepingOptions().FreshFor)).IsEqualTo(Now.AddHours(1));
 	}
 
 	[Test]

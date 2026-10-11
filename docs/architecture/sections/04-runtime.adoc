@@ -121,7 +121,7 @@ before any provider call; the library is read before it, so a title stored withi
 
 ==== Details
 
-A stored title is reused as it is unless the details fetcher would ask again: 14 days after its last refresh, or when a
+A stored title is reused as it is unless the details fetcher would ask again: `Sammlarr:Housekeeping:FreshDays` (14 days) after its last refresh, or when a
 field the load needs is missing and a service that is not resting could fill it (see Freshness in
 <<section-glossary>>). A refresh asks the search setting's enricher first, then the open enricher that fills the
 most missing detail fields, one at a time, until no open enricher can fill what is still missing; a blocked enricher whose
@@ -132,7 +132,7 @@ what each could not give (`ProviderAnswer`), and a failure after sending as a fa
 that refused before sending, was skipped, or was never asked (no id for it, or the user has no key or sign-in for it)
 still counts as not having answered. Every answer wins over the stored copy and each answer over the later ones (`first ?? second ?? ... ?? stored`),
 so the stored copy only fills what no answer has; the next enricher is asked only while that still leaves a gap. A refresh
-asks from scratch until its first answer and keeps a stored value only while a provider gave it within the last 14 days
+asks from scratch until its first answer and keeps a stored value only while a provider gave it within the last `FreshDays`
 (`ProviderAnswer.AnsweredAt`), so a value removed upstream, or one whose provider is down or not connected, goes with
 the first refresh 14 or more days after a provider last gave it. Each rating source counts as one of
 those fields (`MediaFields` pairs the detail flags with a set of `RatingSource`): TMDB fills its own, Plex fills IMDb, Rotten Tomatoes and its copy of TMDB's.

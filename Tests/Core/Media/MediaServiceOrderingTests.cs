@@ -147,6 +147,7 @@ public class MediaServiceOrderingTests
 			[TestArtwork.ResizesAnything()],
 			dateTimeProvider.Object,
 			new FeedLoadOptions(),
+			new HousekeepingOptions(),
 			NullLogger<DetailsFetcher>.Instance
 		);
 		var resolver = new MediaIdResolver(

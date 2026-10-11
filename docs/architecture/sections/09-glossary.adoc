@@ -55,14 +55,14 @@ failure (`Failures`). An enricher is only asked when its `Fills` overlap a missi
 
 `CachedDetails`:: Stored details with two times and the provider answers: `RefreshedAt` (the last refresh) and
 `AskedAt` (the last ask that recorded an outcome; a gap fill moves only this one). Each `ProviderAnswer` is either an answer,
-which rests 14 days, or a failure (`Failures`), which rests 1, 6, then 24 hours.
+which rests `Sammlarr:Housekeeping:FreshDays` (14 days), or a failure (`Failures`), which rests 1, 6, then 24 hours.
 
 `FieldNeeds`:: The fields a load asks for: `Required` (what a feed filters or sorts on, everything on the detail
 sheet) and `Shown` (what a card shows, asked only within `ShownWait`). Grids ask for none.
 
-Freshness:: Whether a stored title is used as it is (`DetailsFetcher.FindReusable`). It is refreshed 14 days after
+Freshness:: Whether a stored title is used as it is (`DetailsFetcher.FindReusable`). It is refreshed `FreshDays` (14 days) after
 `RefreshedAt` (`CachedDetails.IsStale`), asking every service no longer resting, with the stored value of a field kept
-while a provider gave it within the 14 days before the refresh, or while the service that gives it was skipped. Before
+while a provider gave it within the `FreshDays` before the refresh, or while the service that gives it was skipped. Before
 that a gap is filled when the load needs the field and an enricher could fill it that accepts one of the title's ids,
 the current user has connected, is not resting, and takes the ask (`EnricherChoice.NeedsRefetch`). A refresh that
 skips a service whose stored fields it keeps holds `RefreshedAt`, so the title stays stale and is retried.
