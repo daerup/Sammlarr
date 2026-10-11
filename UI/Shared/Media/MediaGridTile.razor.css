@@ -80,3 +80,30 @@
 .media-card-backdrop span.shrink-0 {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
+
+.tile-text {
+    color: white;
+}
+
+.tile-text-soft {
+    color: rgb(255 255 255 / 0.7);
+}
+
+:root:not(.dark) .tile-no-art .media-card-failed {
+    filter: none;
+}
+
+:root:not(.dark) .tile-no-art .media-card-scrim {
+    display: none;
+}
+
+:root:not(.dark) .tile-no-art .tile-text,
+:root:not(.dark) .tile-no-art .tile-text-soft {
+    color: var(--foreground);
+    text-shadow: none;
+}
+
+:root:not(.dark) .tile-no-art ::deep .rating-badge.on-image {
+    color: var(--foreground);
+    filter: none;
+}

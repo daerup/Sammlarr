@@ -51,6 +51,18 @@ public class MediaGridTileTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_WhenTheArtworkFails_MarksTheTileWithoutArt()
+	{
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie(backdrop: null)));
+
+		await Assert.That(cut.Find("[data-testid=media-tile]").ClassList).DoesNotContain("tile-no-art");
+		await cut.Find("img.media-card-poster").TriggerEventAsync("onerror", new ErrorEventArgs());
+		await cut.Find("img.media-card-poster").TriggerEventAsync("onerror", new ErrorEventArgs());
+
+		await Assert.That(cut.Find("[data-testid=media-tile]").ClassList).Contains("tile-no-art");
+	}
+
+	[Test]
 	public async Task Render_WhenThereIsNoBackdrop_ShowsThePosterStraightAway()
 	{
 		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, Movie(backdrop: null)));
@@ -65,6 +77,7 @@ public class MediaGridTileTests : BunitContext
 
 		await Assert.That(cut.FindAll(".media-card-failed")).Count().IsEqualTo(1);
 		await Assert.That(cut.FindAll("img.media-card-poster")).IsEmpty();
+		await Assert.That(cut.Find("[data-testid=media-tile]").ClassList).Contains("tile-no-art");
 	}
 
 	[Test]
