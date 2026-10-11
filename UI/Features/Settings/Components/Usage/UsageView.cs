@@ -180,6 +180,8 @@ internal static class UsageView
 			.GetValueOr(new RightNowText(string.Empty, new None(), RightNowTone.Plain));
 	}
 
+	internal static string Time(DateTimeOffset at) => at.ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture);
+
 	internal static string Clock(DateTimeOffset at, DateTimeOffset now)
 	{
 		var local = at.ToLocalTime();
