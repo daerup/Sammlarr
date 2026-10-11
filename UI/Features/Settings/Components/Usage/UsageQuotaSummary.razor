@@ -3,7 +3,21 @@
 @inject MediaProviderBrandingService Branding
 
 <div class="usage-quota-summary flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground" data-testid="usage-quota-summary">
-    @if (Quota.Today.Answered is Some<QuotaAllowance>(var allowance))
+    @if (Range is not UsageRange.Day)
+    {
+        <LucideIcon Name="gauge" Size="15"/>
+        @if (Quota.Today.Answered.Map(answered => answered.Allowance) is Some<long>(var daily))
+        {
+            <span><b class="text-[15px] font-semibold text-foreground">@UsageView.Count(daily)</b> a day, resets at @UsageView.Time(Quota.Today.NextReset)</span>
+        }
+        else
+        {
+            <span>@Branding.GetBrandingInfo(Quota.Service).NickName resets at @UsageView.Time(Quota.Today.NextReset)</span>
+            <span class="opacity-50">·</span>
+            <span>its daily allowance shows after its next answer</span>
+        }
+    }
+    else if (Quota.Today.Answered is Some<QuotaAllowance>(var allowance))
     {
         @if (allowance.Remaining <= allowance.Reserve)
         {
@@ -50,6 +64,8 @@
     private static readonly TimeSpan Rounding = TimeSpan.FromMinutes(5);
 
     [Parameter] [EditorRequired] public required UsageQuota Quota { get; set; }
+
+    [Parameter] public UsageRange Range { get; set; } = UsageRange.Day;
 
     private static string Of(QuotaAllowance allowance) => allowance.Allowance.Map(daily => $" of {UsageView.Count(daily)}").GetValueOr(string.Empty);
 

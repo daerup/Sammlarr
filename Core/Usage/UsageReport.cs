@@ -31,13 +31,19 @@ internal sealed class UsageReport(
 		var today = await mdblist.TodayAsync(cancellationToken);
 		var live = await LiveAsync(now, today, cancellationToken);
 		var feeds = await feedLines.ReadAsync(window, cancellationToken);
-		IReadOnlyList<UsageQuota> quotas = [.. new[] { today }.WhereSome().Select(found => Quota(found, rows, now))];
+		IReadOnlyList<UsageQuota> quotas = [.. new[] { today }.WhereSome().Select(found => Quota(found, rows, window, now))];
 		return new UsageSnapshot(Period(window, rows, live), Period(before, rows, _ => Unknown), feeds, quotas);
 	}
 
-	private static UsageQuota Quota(QuotaToday today, UsageRows rows, DateTimeOffset now)
+	private static UsageQuota Quota(QuotaToday today, UsageRows rows, UsageWindow window, DateTimeOffset now)
 	{
-		return new UsageQuota(RemoteService.Mdblist, today, today.Answered.Map(allowance => QuotaDay.Of(Spent(rows), allowance, now)));
+		var spent = rows.Attempts.Where(row => row.Service == RemoteService.Mdblist).Select(row => (row.Hour, row.Cause, Spent: row.Attempts));
+		return new UsageQuota(
+			RemoteService.Mdblist,
+			today,
+			today.Answered.Map(allowance => QuotaDay.Of(Spent(rows), allowance, now)),
+			QuotaDays.Of(spent, today.NextReset, (int)Math.Round((window.To - window.From) / TimeSpan.FromDays(1)))
+		);
 	}
 
 	private static IReadOnlyList<(DateTimeOffset Hour, long Spent)> Spent(UsageRows rows)

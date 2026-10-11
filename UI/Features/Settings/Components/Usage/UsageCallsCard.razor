@@ -214,13 +214,20 @@
 
     private string Name(RemoteService service) => Branding.GetBrandingInfo(service).NickName;
 
-    private Optional<UsageQuota> Panel(RemoteService service) => Quotas.FirstOrNone(quota => quota.Service == service).When(_ => Range is UsageRange.Day);
+    private Optional<UsageQuota> Panel(RemoteService service) => Quotas.FirstOrNone(quota => quota.Service == service);
 
     private RenderFragment<(UsageQuota Quota, IReadOnlyList<UsageSlot> Slots)> QuotaPanel =>
         shown =>
             @<div class="usage-service-panel" data-testid="usage-quota-panel">
-                <UsageQuotaSummary Quota="shown.Quota"/>
-                <UsageQuotaLine Quota="shown.Quota" Window="Period.Window" Slots="shown.Slots"/>
+                <UsageQuotaSummary Quota="shown.Quota" Range="Range"/>
+                @if (Range is UsageRange.Day)
+                {
+                    <UsageQuotaLine Quota="shown.Quota" Window="Period.Window" Slots="shown.Slots"/>
+                }
+                else
+                {
+                    <UsageQuotaDays Quota="shown.Quota" Range="Range"/>
+                }
             </div>;
 
     private static string Left(double milliseconds)

@@ -1,0 +1,120 @@
+@using Contracts.Usage
+
+<div class="relative h-[184px] text-[10.5px] leading-none text-muted-foreground" data-testid="usage-quota-days">
+    <svg class="absolute top-0 overflow-visible" style="@($"left: {PlotLeft}px; width: calc(100% - {PlotLeft + PlotRight}px); height: {Height}px")">
+        <line x1="0" x2="100%" y1="@UsageView.Number(Y(0))" y2="@UsageView.Number(Y(0))" stroke="var(--border)"/>
+        @if (Allowance is Some<long>(var daily))
+        {
+            <line x1="0" x2="100%" y1="@UsageView.Number(Y(daily))" y2="@UsageView.Number(Y(daily))" stroke="var(--foreground)" stroke-width="1.2"
+                  data-testid="usage-quota-days-allowance"/>
+        }
+    </svg>
+    @foreach (var (day, index) in Quota.Days.Select((day, index) => (day, index)))
+    {
+        var last = index == Quota.Days.Count - 1;
+        <div class="absolute" style="@($"left: {At(index)}; width: {Slot}; top: {PlotTop}px; height: {PlotHeight}px")">
+            <BbTooltip DelayDuration="100" Placement="PopoverPlacement.Top">
+                <BbTooltipTrigger Focusable="false" Class="block size-full" style="display: block; position: relative; width: 100%; height: 100%"
+                                  data-testid="usage-quota-day">
+                    <span class="absolute bottom-0 left-1/2 flex -translate-x-1/2 flex-col-reverse gap-[1.5px]"
+                          style="@($"width: min(64px, 56%); height: {Percent(day.Total)}")">
+                        @foreach (var (_, spent) in Stacked(day))
+                        {
+                            <span class="block min-h-px rounded-[2px]" style="@($"flex: {spent}; background: {Bar}")"></span>
+                        }
+                    </span>
+                    @if (last || Quota.Days.Count <= 7)
+                    {
+                        <span class="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] text-foreground" style="@($"bottom: calc({Percent(day.Total)} + 5px)")"
+                              data-testid="usage-quota-day-total">@UsageView.Count(day.Total)@(last ? " so far" : string.Empty)</span>
+                    }
+                </BbTooltipTrigger>
+                <BbTooltipContent Class="@UsageView.Tip" data-testid="usage-quota-day-tip">
+                    <div class="mb-1 font-semibold whitespace-nowrap">@Label(day, last) · @Requests(day.Total)</div>
+                    @foreach (var (cause, spent) in day.Spent.Where(pair => pair.Value > 0).OrderByDescending(pair => pair.Value))
+                    {
+                        <div class="grid grid-cols-[14px_minmax(0,1fr)_auto] items-center gap-1.5 leading-[1.7]" data-testid="usage-quota-day-cause">
+                            <LucideIcon Name="@UsageView.Cause(cause).Icon" Size="12"/>
+                            <span class="whitespace-nowrap">@UsageView.Cause(cause).Name</span>
+                            <span class="pl-3 text-right font-medium tabular-nums">@UsageView.Count(spent)</span>
+                        </div>
+                    }
+                </BbTooltipContent>
+            </BbTooltip>
+        </div>
+        @if (Quota.Days.Count <= 7 || index % 3 == (Quota.Days.Count - 1) % 3)
+        {
+            <span class="absolute -translate-x-1/2 whitespace-nowrap" style="@($"left: calc({At(index)} + {Slot} / 2); top: {Height - 14}px")">@Label(day, last)</span>
+        }
+    }
+    <svg class="pointer-events-none absolute top-0 overflow-visible" style="@($"left: {PlotLeft}px; width: calc(100% - {PlotLeft + PlotRight}px); height: {Height}px")">
+        @if (Floors is Some<(long Half, long Reserve)>(var (half, reserve)))
+        {
+            <line x1="0" x2="100%" y1="@UsageView.Number(Y(half))" y2="@UsageView.Number(Y(half))" stroke="var(--muted-foreground)" stroke-width="1.4"
+                  stroke-dasharray="5 4" data-testid="usage-quota-days-floor" data-used="@half"/>
+            <line x1="0" x2="100%" y1="@UsageView.Number(Y(reserve))" y2="@UsageView.Number(Y(reserve))" stroke="var(--usage-gave-up)" stroke-width="1.4"
+                  stroke-dasharray="5 4" data-testid="usage-quota-days-floor" data-used="@reserve"/>
+        }
+    </svg>
+    <span class="absolute left-0 w-[34px] text-right tabular-nums" style="@TopAt(Y(Top) - 5)">@UsageView.Count(Top)</span>
+    @if (Floors is Some<(long Half, long Reserve)>(var (fills, lookups)))
+    {
+        <span class="absolute left-0 w-[34px] text-right tabular-nums" style="@TopAt(Y(fills) - 5)">@UsageView.Count(fills)</span>
+        <span class="absolute whitespace-nowrap" style="@($"right: {PlotRight - 8}px; transform: translateX(100%); {TopAt(Y(fills) - 5)}")">
+            Filling details stops after @UsageView.Count(fills)
+        </span>
+        <span class="absolute whitespace-nowrap text-[var(--usage-gave-up)]" style="@($"right: {PlotRight - 8}px; transform: translateX(100%); {TopAt(Y(lookups) + 3)}")">
+            Title lookups wait after @UsageView.Count(lookups)
+        </span>
+    }
+    @if (Allowance is Some<long>(var allowance))
+    {
+        <span class="absolute whitespace-nowrap text-[11px] text-foreground" style="@($"right: {PlotRight - 8}px; transform: translateX(100%); {TopAt(Y(allowance) - 5)}")">
+            @UsageView.Count(allowance) a day
+        </span>
+    }
+    <span class="absolute left-0 w-[34px] text-right tabular-nums" style="@TopAt(Y(0) - 5)">0</span>
+</div>
+
+@code {
+    private const int Height = 184;
+
+    private const int PlotTop = 14;
+
+    private const int PlotHeight = 150;
+
+    private const int PlotLeft = 40;
+
+    private const int PlotRight = 170;
+
+    private const string Bar = "color-mix(in oklab, var(--usage-shade) 62%, var(--card))";
+
+    [Parameter] [EditorRequired] public required UsageQuota Quota { get; set; }
+
+    [Parameter] [EditorRequired] public required UsageRange Range { get; set; }
+
+    private Optional<QuotaAllowance> Answered => Quota.Today.Answered;
+
+    private Optional<long> Allowance => Answered.Map(allowance => allowance.Allowance);
+
+    private Optional<(long Half, long Reserve)> Floors =>
+        Answered.Map(allowance => allowance.Allowance.Map(daily => (daily - (long)Math.Round(daily * allowance.BackgroundShare), daily - allowance.Reserve)));
+
+    private double Top => Allowance.Match(daily => daily, () => Math.Max(1, Quota.Days.Select(day => day.Total).DefaultIfEmpty(0).Max()));
+
+    private string Slot => FormattableString.Invariant($"calc((100% - {PlotLeft + PlotRight}px) / {Quota.Days.Count})");
+
+    private string At(int index) => FormattableString.Invariant($"calc({PlotLeft}px + (100% - {PlotLeft + PlotRight}px) * {index} / {Quota.Days.Count})");
+
+    private double Y(double used) => PlotTop + (PlotHeight * (1 - (used / Top)));
+
+    private string Percent(long used) => FormattableString.Invariant($"{Math.Min(1, used / Top) * 100:0.##}%");
+
+    private static string TopAt(double y) => $"top: {UsageView.Number(y)}px";
+
+    private static IEnumerable<KeyValuePair<UsageCause, long>> Stacked(QuotaDayUse day) => day.Spent.Where(pair => pair.Value > 0).OrderBy(pair => pair.Key);
+
+    private string Label(QuotaDayUse day, bool last) => last ? "Today" : UsageView.Slot(Range, day.Start.AddHours(12));
+
+    private static string Requests(long count) => count == 1 ? "1 request" : $"{UsageView.Count(count)} requests";
+}

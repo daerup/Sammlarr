@@ -80,15 +80,31 @@ public partial class UsageQuotaSummaryTests : BunitContext
 		await Assert.That(Text(cut)).IsEqualTo($"MDBList resets at {Resets} · no answer since, so what is left shows after its next call");
 	}
 
+	[Test]
+	public async Task Render_ForSevenDays_SaysTheDailyAllowanceAndWhenItResets()
+	{
+		var cut = RenderSummary(UsageSamples.Week(UsageSamples.Quota(UsageSamples.Allowance(191))), UsageRange.Week);
+
+		await Assert.That(Text(cut)).IsEqualTo($"1,000 a day, resets at {Resets}");
+	}
+
+	[Test]
+	public async Task Render_ForThirtyDaysWithoutAnAnswer_SaysWhenTheAllowanceShows()
+	{
+		var cut = RenderSummary(UsageSamples.Unanswered(), UsageRange.Month);
+
+		await Assert.That(Text(cut)).IsEqualTo($"MDBList resets at {Resets} · its daily allowance shows after its next answer");
+	}
+
 	private static string Text(IRenderedComponent<UsageQuotaSummary> cut)
 	{
 		var parts = cut.Find("[data-testid=usage-quota-summary]").Children.Select(part => Spaces().Replace(part.TextContent, " ").Trim());
 		return string.Join(" ", parts.Where(part => part.Length > 0));
 	}
 
-	private IRenderedComponent<UsageQuotaSummary> RenderSummary(UsageQuota quota)
+	private IRenderedComponent<UsageQuotaSummary> RenderSummary(UsageQuota quota, UsageRange range = UsageRange.Day)
 	{
-		return Render<UsageQuotaSummary>(parameters => parameters.Add(summary => summary.Quota, quota));
+		return Render<UsageQuotaSummary>(parameters => parameters.Add(summary => summary.Quota, quota).Add(summary => summary.Range, range));
 	}
 
 	[GeneratedRegex(@"\s+")]
