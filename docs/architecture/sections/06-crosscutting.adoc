@@ -327,7 +327,7 @@ connected services: `IServiceReadiness` answers it once per call to the media se
 from the access each remote service needs (a stored key or sign-in that was never rejected, a reachable
 Radarr or Sonarr, or none), never by calling the service. A key check answers `Valid`, `Rejected`, `Unreachable` or
 `Spent`, and only `Rejected` is remembered, so an outage or a rate limit never disconnects anything. An enricher skipped because it was blocked, busy or down, or refused before
-sending, records nothing and is asked on a later load that needs the field; one that answered rests 14 days, and one
+sending, records nothing and is asked on a later load that needs the field; one that answered rests `Sammlarr:Housekeeping:FreshDays` (14 days), and one
 that failed after sending rests 1, 6, then 24 hours. Ratings are fields per source:
 `MediaCompleteness` counts each `RatingSource` (TMDB, IMDb, Rotten Tomatoes critics and audience, Metacritic, Letterboxd,
 Trakt, MyAnimeList, AniList) the title has no

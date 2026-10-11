@@ -73,6 +73,7 @@ internal static class TestMediaService
 			[TestArtwork.ResizesAnything()],
 			dateTimeProvider.Object,
 			new FeedLoadOptions(),
+			new HousekeepingOptions(),
 			NullLogger<DetailsFetcher>.Instance
 		);
 		var resolver = new MediaIdResolver(

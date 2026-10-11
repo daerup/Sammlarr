@@ -209,6 +209,7 @@ public class BurstPrimersTests
 			[TestArtwork.ResizesAnything()],
 			clock.Object,
 			new FeedLoadOptions(),
+			new HousekeepingOptions(),
 			NullLogger<DetailsFetcher>.Instance
 		);
 		var primer = IBurstPrimer.Mock();

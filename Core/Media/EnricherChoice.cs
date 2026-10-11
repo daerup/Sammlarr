@@ -36,9 +36,9 @@ internal static class EnricherChoice
 		return leftToAsk.Where(candidate => needed.All.Overlaps(candidate.Fills) && !candidate.CanHelp(needed, now));
 	}
 
-	internal static bool NeedsRefetch(CachedDetails cached, IReadOnlyList<EnricherCandidate> leftToAsk, FieldNeeds needs, DateTimeOffset now)
+	internal static bool NeedsRefetch(CachedDetails cached, IReadOnlyList<EnricherCandidate> leftToAsk, FieldNeeds needs, DateTimeOffset now, TimeSpan freshFor)
 	{
 		var gaps = needs.Of(cached.Details.Missing);
-		return cached.IsStale(now) || leftToAsk.Any(candidate => candidate.CanHelp(gaps, now));
+		return cached.IsStale(now, freshFor) || leftToAsk.Any(candidate => candidate.CanHelp(gaps, now));
 	}
 }

@@ -39,7 +39,9 @@ public class DetailsFillTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var stored = await StoredAsync(fightClub);
 		await Assert.That(stored.Details.Genres).Contains("Drama");
-		await Assert.That(stored.Answers.Single(answer => answer.Provider == RemoteService.Tmdb).AskableAt).IsEqualTo(Now.AddDays(14));
+		var tmdb = stored.Answers.Single(answer => answer.Provider == RemoteService.Tmdb);
+		await Assert.That(tmdb.AnsweredAt).IsEqualTo(Now);
+		await Assert.That(tmdb.Failures).IsEqualTo(0);
 		await Assert.That(host.HttpStub.Requests(TmdbDetail(TestMedia.FightClub))).IsEqualTo(1);
 	}
 

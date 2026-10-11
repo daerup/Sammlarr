@@ -525,7 +525,7 @@ public class DetailsFetcherTests
 
 		var tmdb = (await deps.WrittenAsync(writer))[Id].Answers.Single(answer => answer.Provider == RemoteService.Tmdb);
 		await Assert.That(tmdb.Failures).IsEqualTo(2);
-		await Assert.That(tmdb.AskableAt).IsEqualTo(Now.AddHours(6));
+		await Assert.That(tmdb.AskableAt(new HousekeepingOptions().FreshFor)).IsEqualTo(Now.AddHours(6));
 	}
 
 	[Test]
@@ -1094,6 +1094,16 @@ public class DetailsFetcherTests
 	}
 
 	[Test]
+	public async Task FindReusable_ForATenDayOldCopy_IsNoneOnlyUnderASevenDayFreshPeriod()
+	{
+		var tenDaysOld = new CachedDetails(Complete(), Now.AddDays(-10), Now.AddDays(-10), []);
+		var deps = Dependencies.Create(housekeeping: new HousekeepingOptions { FreshDays = 7 });
+
+		await Assert.That(deps.Testee.FindReusable(Identity, Some.Of(tenDaysOld), Everyone, FieldNeeds.Everything)).IsNone();
+		await Assert.That(Dependencies.Create().Testee.FindReusable(Identity, Some.Of(tenDaysOld), Everyone, FieldNeeds.Everything)).IsSome();
+	}
+
+	[Test]
 	public async Task FindReusable_WhileTheOnlyServiceForAGapIsBackingOff_IsTheStoredCopy()
 	{
 		var deps = Dependencies.Create();
@@ -1196,7 +1206,8 @@ public class DetailsFetcherTests
 			MediaFields? tmdbFills = null,
 			IRemoteCapacity? capacity = null,
 			SearchProvider search = SearchProvider.Plex,
-			IArtworkResizer? resizer = null
+			IArtworkResizer? resizer = null,
+			HousekeepingOptions? housekeeping = null
 		)
 		{
 			var mediaRepository = IMediaRepository.Mock();
@@ -1231,6 +1242,7 @@ public class DetailsFetcherTests
 				[resizer ?? TestArtwork.ResizesAnything()],
 				Clock(),
 				new FeedLoadOptions(),
+				housekeeping ?? new HousekeepingOptions(),
 				NullLogger<DetailsFetcher>.Instance
 			);
 			return new Dependencies(mediaRepository, plex, tmdb, readiness, testee);

@@ -22,6 +22,7 @@ internal sealed class DetailsFetcher(
 	IEnumerable<IArtworkResizer> resizers,
 	IDateTimeProvider clock,
 	FeedLoadOptions options,
+	HousekeepingOptions housekeeping,
 	ILogger<DetailsFetcher> logger
 )
 {
@@ -41,7 +42,8 @@ internal sealed class DetailsFetcher(
 		var now = clock.Now;
 		var fills = enrichers.Find(remote).Map(enricher => enricher.Fills).GetValueOr(MediaFields.None);
 		return stored.Match(
-			cached => cached.Resting(now).Contains(remote) ? FieldNeeds.None : Target(Reason(cached, now), needs).Of(Unknown(cached, now) & fills),
+			cached =>
+				cached.Resting(now, housekeeping.FreshFor).Contains(remote) ? FieldNeeds.None : Target(Reason(cached, now), needs).Of(Unknown(cached, now) & fills),
 			() => Target(new Uncached(), needs).Of(fills)
 		);
 	}
@@ -88,8 +90,9 @@ internal sealed class DetailsFetcher(
 	private bool Unsure(CachedDetails copy, Error error)
 	{
 		var now = clock.Now;
-		var unreached = error.CausedBy<RemoteUnavailableException>().IsSome() || copy.Answers.Any(answer => answer.Failures > 0 && answer.AskableAt > now);
-		return copy.IsStale(now) && unreached;
+		var unreached =
+			error.CausedBy<RemoteUnavailableException>().IsSome() || copy.Answers.Any(answer => answer.Failures > 0 && answer.AskableAt(housekeeping.FreshFor) > now);
+		return copy.IsStale(now, housekeeping.FreshFor) && unreached;
 	}
 
 	public async Task<Result<MatchedMedia>> FetchAsync(
@@ -153,17 +156,18 @@ internal sealed class DetailsFetcher(
 		};
 	}
 
-	private static MediaFields Unknown(CachedDetails cached, DateTimeOffset now) => cached.IsStale(now) ? MediaFields.Everything : cached.Details.Missing;
+	private MediaFields Unknown(CachedDetails cached, DateTimeOffset now) =>
+		cached.IsStale(now, housekeeping.FreshFor) ? MediaFields.Everything : cached.Details.Missing;
 
-	private static FetchReason Reason(CachedDetails stored, DateTimeOffset now)
+	private FetchReason Reason(CachedDetails stored, DateTimeOffset now)
 	{
-		return stored.IsStale(now) ? new Stale(stored) : new Gaps(stored);
+		return stored.IsStale(now, housekeeping.FreshFor) ? new Stale(stored) : new Gaps(stored);
 	}
 
 	private bool NeedsRefetch(MediaIdentity identity, CachedDetails cached, IReadOnlySet<RemoteService> connected, FieldNeeds needs)
 	{
-		var leftToAsk = EnrichersLeftToAsk(identity, cached.Resting(clock.Now), connected);
-		return EnricherChoice.NeedsRefetch(cached, leftToAsk, needs, clock.Now);
+		var leftToAsk = EnrichersLeftToAsk(identity, cached.Resting(clock.Now, housekeeping.FreshFor), connected);
+		return EnricherChoice.NeedsRefetch(cached, leftToAsk, needs, clock.Now, housekeeping.FreshFor);
 	}
 
 	private static FieldNeeds Target(FetchReason reason, FieldNeeds needs)
@@ -188,7 +192,7 @@ internal sealed class DetailsFetcher(
 	private MediaFields GivenWithin(CachedDetails stored, DateTimeOffset now)
 	{
 		return stored
-			.Answers.Where(answer => answer.Failures == 0 && now - answer.AnsweredAt < CachedDetails.StaleAfter)
+			.Answers.Where(answer => answer.Failures == 0 && now - answer.AnsweredAt < housekeeping.FreshFor)
 			.Aggregate(MediaFields.None, (given, answer) => given | Given(answer));
 	}
 
@@ -241,12 +245,12 @@ internal sealed class DetailsFetcher(
 		};
 	}
 
-	private static ValueSet<ProviderAnswer> Answers(FetchReason reason, IEnumerable<ProviderAnswer> fresh, DateTimeOffset now)
+	private ValueSet<ProviderAnswer> Answers(FetchReason reason, IEnumerable<ProviderAnswer> fresh, DateTimeOffset now)
 	{
 		IEnumerable<ProviderAnswer> previous = reason switch
 		{
 			Gaps gaps => gaps.Stored.Answers,
-			Stale stale => stale.Stored.Answers.Where(answer => answer.Failures > 0 || answer.AskableAt > now),
+			Stale stale => stale.Stored.Answers.Where(answer => answer.Failures > 0 || answer.AskableAt(housekeeping.FreshFor) > now),
 			Uncached => [],
 		};
 		return [.. fresh.UnionBy(previous, answer => answer.Provider)];
@@ -274,7 +278,7 @@ internal sealed class DetailsFetcher(
 		var current = Layered(reason, fresh, backup, gapFills, answered: false);
 		List<RemoteService> answered = [];
 		List<ProviderAnswer> outcomes = [];
-		var asked = Stored(reason).Map(stored => stored.Resting(now)).GetValueOr([]).ToHashSet();
+		var asked = Stored(reason).Map(stored => stored.Resting(now, housekeeping.FreshFor)).GetValueOr([]).ToHashSet();
 		Optional<RemoteService> unavailable = new None();
 		var skipped = MediaFields.None;
 		var target = Target(reason, run.Needs);
