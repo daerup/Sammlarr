@@ -114,6 +114,19 @@ internal static class TestMediaService
 		return Enumerable.Range(0, count).Select(i => new IdentifyRequest([TmdbId.From(i.ToString(), MediaType.Movie)], new None())).ToAsyncEnumerable();
 	}
 
+	internal static async IAsyncEnumerable<IdentifyRequest> Paged(params int[] pages)
+	{
+		var next = 0;
+		foreach (var size in pages)
+		{
+			await Task.Delay(TimeSpan.FromMilliseconds(20));
+			foreach (var _ in Enumerable.Range(0, size))
+			{
+				yield return new IdentifyRequest([TmdbId.From($"{next++}", MediaType.Movie)], new None());
+			}
+		}
+	}
+
 	internal static FoundMedia CompleteMovie(IExternalMediaId external)
 	{
 		return new(

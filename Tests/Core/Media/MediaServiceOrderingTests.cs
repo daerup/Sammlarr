@@ -8,14 +8,13 @@ using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
 namespace Core.Tests.Media;
 
 public class MediaServiceOrderingTests
 {
-	private const int ManyTitles = 300;
-
 	private static readonly DateTimeOffset _now = new(2026, 5, 6, 12, 0, 0, TimeSpan.Zero);
 
 	[Test]
@@ -63,37 +62,31 @@ public class MediaServiceOrderingTests
 	}
 
 	[Test]
-	public async Task IdentifyWithDetailsAsync_PreservesInputOrder()
+	public async Task LoadListAsync_ForEachEntry_ReportsItsListPosition()
 	{
 		var builder = RequestBuilder.Requests(5);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.IdentifyWithDetailsAsync(builder.AsRequests().ToAsyncEnumerable()).ToListAsync();
+		var results = await testee.LoadListAsync(builder.AsRequests().ToAsyncEnumerable().AsListTitles()).ToListAsync();
 
-		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
+		await Assert
+			.That(results.OrderBy(result => result.Position).Select(result => result.Item).ExtractMediaIds())
+			.IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
+		await Assert.That(results.Select(result => result.Position)).IsEquivalentTo(Enumerable.Range(0, 5));
 	}
 
 	[Test]
-	public async Task IdentifyWithDetailsAsync_PreservesOrder_WhenSomeIdentifyFail()
+	public async Task LoadListAsync_WhenSomeIdentifyFail_StillReportsEachEntrysListPosition()
 	{
 		var builder = RequestBuilder.Requests(6).FailIdentifyAt(2, 4, 6);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.IdentifyWithDetailsAsync(builder.AsRequests().ToAsyncEnumerable()).ToListAsync();
+		var results = await testee.LoadListAsync(builder.AsRequests().ToAsyncEnumerable().AsListTitles()).ToListAsync();
 
-		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
-	}
-
-	[Test]
-	public async Task IdentifyWithDetailsAsync_PreservesOrder_WhenBatchExceedsConcurrencyLimit()
-	{
-		var batchSize = ManyTitles;
-		var builder = RequestBuilder.Requests(batchSize);
-		var testee = CreateTestee(builder);
-
-		var results = await testee.IdentifyWithDetailsAsync(builder.AsRequests().ToAsyncEnumerable()).ToListAsync();
-
-		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
+		await Assert
+			.That(results.OrderBy(result => result.Position).Select(result => result.Item).ExtractMediaIds())
+			.IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
+		await Assert.That(results.Select(result => result.Position)).IsEquivalentTo(Enumerable.Range(0, 6));
 	}
 
 	private static IMediaService CreateTestee(RequestBuilder builder)
