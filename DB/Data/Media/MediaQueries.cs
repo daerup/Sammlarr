@@ -1,48 +1,40 @@
-using System.Linq.Expressions;
-using System.Reflection;
+using System.Data.Common;
+using System.Text.Json;
 using Domain.Media;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Media;
 
 internal static class MediaQueries
 {
-	extension(IQueryable<ExternalMediaIdRow> source)
+	internal const string MediaIdColumn = "MediaId";
+
+	extension(SammlarrDbContext ctx)
 	{
-		public IQueryable<ExternalMediaIdRow> WhereMatchingAny(IEnumerable<IExternalMediaId> mediaIds) => source.Where(BuildAnyMatchPredicate(mediaIds));
-	}
-
-	private static readonly MethodInfo ContainsMethod = typeof(Enumerable)
-		.GetMethods()
-		.First(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2)
-		.MakeGenericMethod(typeof(string));
-
-	private static Expression<Func<ExternalMediaIdRow, bool>> BuildAnyMatchPredicate(IEnumerable<IExternalMediaId> mediaIds)
-	{
-		var groups = mediaIds
-			.GroupBy(id => (id.Source, id.Type))
-			.Select(g => (g.Key.Source, g.Key.Type, Ids: g.Select(id => id.Value).Distinct().ToArray()))
-			.ToList();
-
-		if (groups.Count is 0)
+		public async Task<DbTransaction> SnapshotAsync(CancellationToken cancellationToken)
 		{
-			return _ => false;
+			await ctx.Database.OpenConnectionAsync(cancellationToken);
+			var snapshot = ((SqliteConnection)ctx.Database.GetDbConnection()).BeginTransaction(deferred: true);
+			await ctx.Database.UseTransactionAsync(snapshot, cancellationToken);
+			return snapshot;
 		}
 
-		var parameter = Expression.Parameter(typeof(ExternalMediaIdRow), "externalId");
-		var source = Expression.Property(parameter, nameof(ExternalMediaIdRow.Source));
-		var type = Expression.Property(parameter, nameof(ExternalMediaIdRow.MediaType));
-		var id = Expression.Property(parameter, nameof(ExternalMediaIdRow.Id));
-
-		Expression? body = null;
-		foreach (var (idSource, idType, idValues) in groups)
+		public async Task<IReadOnlyList<Guid>> OwnersAsync(IEnumerable<IExternalMediaId> keys, CancellationToken cancellationToken)
 		{
-			var clause = Expression.AndAlso(
-				Expression.AndAlso(Expression.Equal(source, Expression.Constant(idSource)), Expression.Equal(type, Expression.Constant(idType))),
-				Expression.Call(null, ContainsMethod, Expression.Constant(idValues, typeof(IEnumerable<string>)), id)
-			);
-			body = body is null ? clause : Expression.OrElse(body, clause);
+			var triples = JsonSerializer.Serialize(keys.Select(key => new[] { $"{key.Source}", $"{key.Type}", key.Value }));
+			return await ctx
+				.Database.SqlQuery<Guid>(
+					$"""
+					SELECT DISTINCT e."MediaId" AS "Value"
+					FROM json_each({triples}) AS k
+					JOIN "ExternalMediaIds" AS e
+					  ON e."Source" = json_extract(k.value, '$[0]')
+					 AND e."MediaType" = json_extract(k.value, '$[1]')
+					 AND e."Id" = json_extract(k.value, '$[2]')
+					"""
+				)
+				.ToListAsync(cancellationToken);
 		}
-
-		return Expression.Lambda<Func<ExternalMediaIdRow, bool>>(body!, parameter);
 	}
 }

@@ -3,6 +3,7 @@ using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 
 namespace Integration.Tests.Media;
 
@@ -66,16 +67,48 @@ public class ExternalMediaIdRowTests(SammlarrTestHost fixture) : IAsyncDisposabl
 	}
 
 	[Test]
-	public async Task WhereMatchingAny_TranslatesAtScale()
+	public async Task OwnersAsync_ForKeysOfManyTitles_FindsEachOwnerOnceInOneQuery()
 	{
 		const int count = 2000;
-		var ids = Enumerable.Range(0, count).Select(i => (IIdentityKey)TvdbId.From($"tvdb-{i}", MediaType.Movie)).ToList();
-		fixture.Context.ExternalMediaIds.AddRange(ids.Select(id => id.ToExternalIdEntity(new MediaRow())));
+		var titles = Enumerable.Range(0, count).Select(_ => new MediaRow()).ToList();
+		var keys = titles.Select((media, index) => (Media: media, Key: TvdbId.From($"{index}", MediaType.Movie))).ToList();
+		fixture.Context.ExternalMediaIds.AddRange(keys.Select(pair => pair.Key.ToExternalIdEntity(pair.Media)));
+		fixture.Context.ExternalMediaIds.AddRange(keys.Select(pair => TmdbId.From(pair.Key.Value, MediaType.Movie).ToExternalIdEntity(pair.Media)));
+		fixture.Context.ExternalMediaIds.Add(TmdbId.From("0", MediaType.Show).ToExternalIdEntity(new MediaRow()));
+		fixture.Context.ExternalMediaIds.Add(ImdbId.From("0", MediaType.Movie).ToExternalIdEntity(new MediaRow()));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
+		IReadOnlyList<IExternalMediaId> asked =
+		[
+			.. keys.SelectMany(pair => new IExternalMediaId[] { pair.Key, TmdbId.From(pair.Key.Value, MediaType.Movie) }),
+			ImdbId.From("tt0000001", MediaType.Movie),
+		];
 
-		var matched = await fixture.Context.ExternalMediaIds.AsNoTracking().WhereMatchingAny(ids).ToListAsync();
+		var owners = await fixture.Context.OwnersAsync(asked, CancellationToken.None);
 
-		await Assert.That(matched).Count().IsEqualTo(count);
+		await Assert.That(owners).IsEquivalentTo(titles.Select(media => media.Id));
+	}
+
+	[Test]
+	public async Task SnapshotAsync_WhileADetailsCommitRuns_KeepsReadingTheSameRows()
+	{
+		var media = new MediaRow();
+		fixture.Context.ExternalMediaIds.Add(TmdbId.From("550", MediaType.Movie).ToExternalIdEntity(media));
+		await fixture.Context.SaveChangesAsync();
+		await using var reading = await fixture.ContextFactory.CreateDbContextAsync();
+		await using var snapshot = await reading.SnapshotAsync(CancellationToken.None);
+		var before = await reading.MediaRatings.CountAsync();
+
+		await new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock()).UpsertDetailsAsync(
+			new Dictionary<MediaId, CachedDetails> { [MediaId.From(media.Id)] = Rated() }
+		);
+
+		await Assert.That(await reading.MediaRatings.CountAsync()).IsEqualTo(before);
+	}
+
+	private static CachedDetails Rated()
+	{
+		var at = new DateTimeOffset(2026, 10, 1, 0, 0, 0, TimeSpan.Zero);
+		return new CachedDetails(new MovieDetails { Title = "Fight Club", Ratings = MediaRatings.From([new TmdbRating(8.4f, Some.Of(1000))]) }, at, at, []);
 	}
 }

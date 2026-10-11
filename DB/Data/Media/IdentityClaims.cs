@@ -106,7 +106,7 @@ internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contex
 		}
 		catch (DbUpdateException exception) when (exception.InnerException is SqliteException { SqliteErrorCode: ConstraintFailed })
 		{
-			List<Guid> owners = await ctx.ExternalMediaIds.WhereMatchingAny(added).Select(external => external.Media.Id).Distinct().ToListAsync();
+			var owners = await ctx.OwnersAsync(added, CancellationToken.None);
 			return new Conflicted([.. owners.Select(MediaId.From)], [.. added]);
 		}
 		finally
@@ -119,10 +119,10 @@ internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contex
 	{
 		List<IIdentityKey> keys = [.. claims.SelectMany(claim => claim.Keys).Distinct()];
 		List<Guid> pinned = [.. claims.Select(claim => claim.Pinned).WhereSome().Select(id => id.Value)];
-		var owning = ctx.ExternalMediaIds.WhereMatchingAny(keys).Select(external => external.Media.Id);
+		var owning = await ctx.OwnersAsync(keys, CancellationToken.None);
 		var rows = await ctx
 			.Media.AsNoTracking()
-			.Where(media => pinned.Contains(media.Id) || owning.Contains(media.Id))
+			.Where(media => EF.Parameter(pinned).Contains(media.Id) || EF.Parameter(owning).Contains(media.Id))
 			.Include(media => media.ExternalIds)
 			.ToListAsync();
 		return new Library(
