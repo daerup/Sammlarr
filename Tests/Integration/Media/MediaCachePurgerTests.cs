@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;
@@ -110,6 +111,23 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(wantlistedMedia.Id);
 		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo(wantlistedId);
+	}
+
+	[Test]
+	public async Task PurgeAsync_ForAWantlistedTitle_StampsWhenItLostItsDetails()
+	{
+		var purgedAt = new DateTimeOffset(2026, 10, 11, 12, 0, 0, TimeSpan.Zero);
+		var media = new MediaRow();
+		fixture.Context.ExternalMediaIds.Add(PlexId.From("3500", MediaType.Movie).ToExternalIdEntity(media));
+		fixture.Context.MediaDetails.Add(BuildDetails(media, "Wantlisted"));
+		fixture.Context.Wantlist.Add(new WantlistRow { Media = media, Origin = WantlistItemOrigin.Manual });
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+		fixture.SetCurrentTime(purgedAt);
+
+		await _testee.PurgeAsync();
+
+		await Assert.That(await fixture.Context.Media.Select(row => row.DetailsTrimmedAt).SingleAsync()).IsEqualTo(purgedAt);
 	}
 
 	[Test]
@@ -268,7 +286,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		await _testee.PurgeDetailsAsync();
 
-		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock());
+		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
 		var cached = await repository.GetAsync([MediaId.From(media.Id)]);
 
 		using var _ = Assert.Multiple();
@@ -312,6 +330,13 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var sink = IMediaSink.Mock();
 		sink.AddressedBy(Any()).Returns(type => addressing(type));
 		var sinks = new FakeKeyedServiceIndex<SinkKind, IMediaSink>().Register(SinkKind.Plex, sink.Object);
-		return new MediaCachePurger(fixture.ContextFactory, configRepository.Object, sinks, user, NullLogger<MediaCachePurger>.Instance);
+		return new MediaCachePurger(
+			fixture.ContextFactory,
+			configRepository.Object,
+			sinks,
+			user,
+			fixture.Resolve<IDateTimeProvider>(),
+			NullLogger<MediaCachePurger>.Instance
+		);
 	}
 }

@@ -418,8 +418,15 @@ truncates the log and vacuums the file when a tenth of its pages are free, so th
 size of its data. The ownerless `Housekeeping` ticker runs `HousekeepingPass`: it takes the job runner's turn
 (`JobTurn`, which `JobRunner` holds while it runs a job, so the pass never overlaps a feed run, a sync or a details fill),
 runs each `IHousekeepingStep` in the order of `HousekeepingStep`, compacts the file and keeps its last report
-(`HousekeepingReports`); a step that fails stops the pass and is recorded with what the earlier steps removed. Wolverine
-expires dead letters after its default 10 days. Schema is applied at startup by a hosted
+(`HousekeepingReports`); a step that fails stops the pass and is recorded with what the earlier steps removed. The
+steps and their windows (`Sammlarr:Housekeeping`): a feed run's titles, calls and answer times after `RunHistoryDays`
+(90; the run keeps its header and counts), usage stats after `UsageDays` (180), cached details whose `RefreshedAt` is
+older than `FreshDays + DetailsUnusedDays` (194 days, so unopened for 180), a title's ids once it has no details and
+they went `IdsUnusedDays - DetailsUnusedDays` ago (185; a title that never had details goes `IdsUnusedDays`, 365, after
+it was added), then settled jobs and TickerQ occurrences after 30 days. Whatever removes a title's details (the pass,
+a clear by hand, an invalidation) stamps `Media.DetailsTrimmedAt`. A title on a wantlist, a blocklist, the outbox or in
+a kept run (`ProtectedMediaIds`) never loses its details or ids to the pass; the media trims hold `MediaWriteLock`.
+Wolverine expires dead letters after its default 10 days. Schema is applied at startup by a hosted
 `DbInitializer` calling `Database.Migrate()`, never `EnsureCreated`; migrations live in
 `DB/Migrations`, and a test asserts `HasPendingModelChanges()` is false. The singleton
 provider-config row comes from the context's `UseSeeding` and `UseAsyncSeeding` hooks, which insert

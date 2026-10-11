@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Media;
 using DB.Data.Media;
 using Domain.Media;
@@ -16,7 +17,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Before(Test)]
 	public void Setup()
 	{
-		_testee = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock());
+		_testee = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
 	}
 
 	[Test]

@@ -7,4 +7,6 @@ internal record MediaRow : Entity<Guid>
 	public Collection<ExternalMediaIdRow> ExternalIds { get; set; } = [];
 
 	public MediaDetailsRow? Details { get; set; }
+
+	public DateTimeOffset? DetailsTrimmedAt { get; set; }
 }

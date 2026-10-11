@@ -36,5 +36,27 @@ internal static class MediaQueries
 				)
 				.ToListAsync(cancellationToken);
 		}
+
+		public IQueryable<Guid> ProtectedMediaIds()
+		{
+			return ctx
+				.Blocklist.IgnoreQueryFilters()
+				.Select(blocked => blocked.Media.Id)
+				.Union(ctx.Wantlist.IgnoreQueryFilters().Select(wanted => wanted.Media.Id))
+				.Union(ctx.WantlistOutbox.IgnoreQueryFilters().Select(queued => queued.Media.Id))
+				.Union(ctx.FeedRunItems.IgnoreQueryFilters().Select(item => item.MediaId));
+		}
+
+		public async Task<int> TrimDetailsAsync(IQueryable<MediaDetailsRow> details, DateTimeOffset now, CancellationToken cancellationToken)
+		{
+			var titles = details.Select(row => row.MediaId);
+			await using var transaction = await ctx.Database.BeginTransactionAsync(cancellationToken);
+			await ctx
+				.Media.Where(media => titles.Contains(media.Id))
+				.ExecuteUpdateAsync(setters => setters.SetProperty(media => media.DetailsTrimmedAt, (DateTimeOffset?)now.ToUniversalTime()), cancellationToken);
+			var removed = await details.ExecuteDeleteAsync(cancellationToken);
+			await transaction.CommitAsync(cancellationToken);
+			return removed;
+		}
 	}
 }

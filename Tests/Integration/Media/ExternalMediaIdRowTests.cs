@@ -1,10 +1,10 @@
+using Contracts;
 using Contracts.Media;
 using DB.Data.Media;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
-using TestInfrastructure;
 
 namespace Integration.Tests.Media;
 
@@ -100,9 +100,9 @@ public class ExternalMediaIdRowTests(SammlarrTestHost fixture) : IAsyncDisposabl
 		await using var snapshot = await reading.SnapshotAsync(CancellationToken.None);
 		var before = await reading.MediaRatings.CountAsync();
 
-		await new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock()).SaveDetailsAsync([
-			new DetailsChange(MediaId.From(media.Id), new None(), Rated()),
-		]);
+		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
+
+		await repository.SaveDetailsAsync([new DetailsChange(MediaId.From(media.Id), new None(), Rated())]);
 
 		await Assert.That(await reading.MediaRatings.CountAsync()).IsEqualTo(before);
 	}
