@@ -419,6 +419,37 @@ public class ArrSinkTests
 	}
 
 	[Test]
+	public async Task ApplyAsync_ForTwoNewShowsOfWhichOneIsAnime_RoutesEachOnItsOwn()
+	{
+		var arcane = MediaId.New();
+		SonarrAdds(424536);
+		_media
+			.GetSinkIdsAsync(Any<IEnumerable<MediaId>>(), Any())
+			.Returns(new Dictionary<MediaId, IExternalMediaId> { [Known] = TvdbId.From("424536", MediaType.Show), [arcane] = TvdbId.From("371028", MediaType.Show) });
+		_media
+			.GetStoredDetailsAsync(Any<IEnumerable<MediaId>>(), Any())
+			.Returns(
+				new Dictionary<MediaId, MediaDetails>
+				{
+					[Known] = MediaDetails.Empty(MediaType.Show) with { Title = "Frieren", Genres = ["Animation", "Fantasy"] },
+					[arcane] = MediaDetails.Empty(MediaType.Show) with { Title = "Arcane", Genres = ["Action", "Drama"] },
+				}
+			);
+		HoldingOnAnimeSites(AniListId.From("154587", MediaType.Show));
+
+		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None()), new SinkPush(arcane, new None())]).ToListAsync();
+
+		_sonarr.Verify(
+			request => request.Method(HttpMethod.Post).Path("/api/v3/series").BodyContains("\"tvdbId\":424536").BodyContains("\"rootFolderPath\":\"/anime\""),
+			Times.Once
+		);
+		_sonarr.Verify(
+			request => request.Method(HttpMethod.Post).Path("/api/v3/series").BodyContains("\"tvdbId\":371028").BodyContains("\"rootFolderPath\":\"/tv\""),
+			Times.Once
+		);
+	}
+
+	[Test]
 	public async Task ApplyAsync_ForAShowStoredUnderTheAnimeGenre_LooksItUpAndAddsItToTheAnimeFolder()
 	{
 		SonarrLooksUp(424536, "Anime", "Fantasy");
