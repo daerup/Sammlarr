@@ -1,60 +1,49 @@
-[[section-concepts]]
-== Cross-cutting Concepts
+# 6. Cross-cutting Concepts
 
 Concerns that cut across every layer, carrying the quality goals from
-<<section-introduction-and-goals>>: correctness (media model + identify), resilience (HTTP
+[Introduction and Goals](01-introduction-goals.md): correctness (media model + identify), resilience (HTTP
 pipeline), isolation (auth + query filters), maintainability (modules + code generation).
 
-=== Domain model and kernel
+## Domain model and kernel
 
 `Domain` holds the media model every layer speaks: a title is `MatchedMedia` or `UnmatchedMedia`
 (the `MediaMatchResult` union), both carrying one `MediaDetails` record (`MovieDetails`, `ShowDetails`,
 `UnknownDetails`) whose fields are all optional, and a search provider or enricher answers with `FoundMedia`,
-which has no `MediaId`. The terms are defined in <<section-glossary>>, produced by identify in <<section-runtime-view>>,
+which has no `MediaId`. The terms are defined in [Glossary](09-glossary.md), produced by identify in [Runtime View](04-runtime.md),
 and the shape is
-link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0009-model-a-title-as-an-identity-plus-optional-details.md[ADR 0009]. Below it, `Shared` is the kernel: `Optional<T>`,
+[ADR 0009](../../adr/0009-model-a-title-as-an-identity-plus-optional-details.md). Below it, `Shared` is the kernel: `Optional<T>`,
 `Result<T>`, `ValueSet<T>`, and the `union` types. Expected absence is an `Optional`, not null
-(<<absence>>); expected failure is a `Result`, not an exception. Media details are the exception: a missing details
+([Absence and failure: Optional, Result or null](#absence-and-failure-optional-result-or-null)); expected failure is a `Result`, not an exception. Media details are the exception: a missing details
 value is `null` from the provider mapper to the column (missing genres are an empty set, missing ratings are
 `MediaRatings.None`). Unions are matched by case directly, never through `.Value`; `Optional` and `Result` are read
 through their helpers instead. Enum switches are exhaustive with no default arm.
 
-[[absence]]
-=== Absence and failure: `Optional`, `Result` or `null`
+## Absence and failure: `Optional`, `Result` or `null`
 
 A value that can be missing is an `Optional<T>` wherever our own code hands it on. `T?` is left to the places a
 framework reads or writes, and to state that never leaves its type.
 
-[cols="1,1", options="header"]
-|===
-| `Optional<T>` | `T?`
-
-| non-private returns, parameters and properties of our types: `Find…`, lookups, query criteria, record fields that
-can be missing (`RunQuery.MustInclude`, `FeedOverview.LastRun`, `NotificationTemplate.Level`, `IMediaSink.AddressedBy`)
-| framework edges: EF rows and LINQ query parameters, JSON-persisted columns (`QueryFilter`), provider JSON DTOs,
-`IOptions` records, Blazor route, query and cascading parameters, `@bind` pairs, Fluid, webhook and Wolverine
-payloads, Serilog and OpenTelemetry models, BCL overrides and exception constructors
-
-| a UI parameter or view model whose value comes from the domain
-| UI-only state (selection, loading, busy, binding, create or edit mode, links), private fields, locals, sort keys
-|===
+| `Optional<T>` | `T?` |
+|---|---|
+| non-private returns, parameters and properties of our types: `Find…`, lookups, query criteria, record fields that can be missing (`RunQuery.MustInclude`, `FeedOverview.LastRun`, `NotificationTemplate.Level`, `IMediaSink.AddressedBy`) | framework edges: EF rows and LINQ query parameters, JSON-persisted columns (`QueryFilter`), provider JSON DTOs, `IOptions` records, Blazor route, query and cascading parameters, `@bind` pairs, Fluid, webhook and Wolverine payloads, Serilog and OpenTelemetry models, BCL overrides and exception constructors |
+| a UI parameter or view model whose value comes from the domain | UI-only state (selection, loading, busy, binding, create or edit mode, links), private fields, locals, sort keys |
 
 An `Optional` that does cross a System.Text.Json boundary needs `OptionalJsonConverterFactory` (`Shared`): it writes the
 value or `null` and reads `null` as `None`. Wolverine's serializer registers it (`MessagingHostExtensions`), so
 `DeliverNotification` carries its `NotificationTemplate` as is; without it .NET's union handling cannot read an
 `Optional` back.
 
-* `None` means absent, never "not loaded yet".
-* Convert once, at the edge: `Optional.Of(x)` in, `.ToNullable()` out (an awaited chain writes `(await x).ToNullable()`).
-* An `Optional<T>` member always holds a case: initialise it with `new None()`. `default(Optional<T>)` holds neither:
+- `None` means absent, never "not loaded yet".
+- Convert once, at the edge: `Optional.Of(x)` in, `.ToNullable()` out (an awaited chain writes `(await x).ToNullable()`).
+- An `Optional<T>` member always holds a case: initialise it with `new None()`. `default(Optional<T>)` holds neither:
 `Match`, `Map` and `GetValueOr` throw on it, and `IsSome`, `IsNone`, `Apply` and `ApplyNone` quietly treat it as
 neither case (an unconfigured mock of an `Optional`-returning member returns it).
-* `Optional` says nothing about why. A failure with a reason is a `Result`; bridge with `.ToResult(reason)`.
-* An `Optional` is never a sort key and never sits inside an operator EF translates; `Optional.Of(row.X)` in a final
+- `Optional` says nothing about why. A failure with a reason is a `Result`; bridge with `.ToResult(reason)`.
+- An `Optional` is never a sort key and never sits inside an operator EF translates; `Optional.Of(row.X)` in a final
 `Select` projection runs client-side and is fine.
-* `GetValueOr(value)` and `Match(value, value)` evaluate eagerly; pass a `Func` when the fallback throws or costs.
-* A branch that is async beside a plain one uses the mixed `Match` (`+.Match(x => FindAsync(x), () => Unusable)+`), a
-cached-or-load read the async `GetValueOr` (`+.GetValueOr(() => ReadAsync(id))+`), and a `None` or an error passed
+- `GetValueOr(value)` and `Match(value, value)` evaluate eagerly; pass a `Func` when the fallback throws or costs.
+- A branch that is async beside a plain one uses the mixed `Match` (`.Match(x => FindAsync(x), () => Unusable)`), a
+cached-or-load read the async `GetValueOr` (`.GetValueOr(() => ReadAsync(id))`), and a `None` or an error passed
 through the async `Map`. Give the plain branch a type: a bare `() => default` or `() => null` binds the non-mixed
 overload instead. `Task.FromResult` is left for a synchronous body behind an async contract, or where the task itself is
 the value (a ternary arm, a stored delegate, a task handed back as is). The mixed overloads have a lower
@@ -64,58 +53,51 @@ priority onto `Task` and `ValueTask` receivers.
 Build and read an `Optional` or a `Result` by chaining its helpers: values move through `Map`, `When` and `Or`; side
 effects go in `Apply`, `ApplyNone` and `ApplyError`, one step each (a step that needs more than one statement is a named
 method); at most one exit (`Match`, `GetValueOr`, `IsSome`, `ToNullable`, `ToResult`, …) leaves the chain, last. An async step finishes before the next
-one starts, and one `await` covers the chain. A step that returns a `ValueTask` is written `+async x => await StepAsync(x)+`,
-because a bare `+x => StepAsync(x)+` binds to the synchronous `Action` overload and is not awaited. A `bool` read
+one starts, and one `await` covers the chain. A step that returns a `ValueTask` is written `async x => await StepAsync(x)`,
+because a bare `x => StepAsync(x)` binds to the synchronous `Action` overload and is not awaited. A `bool` read
 (`IsSome`, `IsNone`, `IsSuccess`, `IsError`, `Map(…).GetValueOr(false)`) is for answers: a property, a predicate, a sort
 key, an argument, stored UI state, `Match(p, () => false)` asking about the value, a loop guard that leaves the loop.
 Outside a loop guard it never routes control flow on presence alone: a branch between side effects is `Apply` / `ApplyNone` / `ApplyError`, a branch between two
 values is `Match` or `Map(…).GetValueOr(…)`, and a service hands back its `Optional` rather than collapsing it to a
 `bool` its caller then branches on (`IJobQueue.CancelAsync` returns the cancelled request).
 
-[source,csharp]
-----
+```csharp
 _state = await ApiKeyService
     .TestAsync(Provider, _apiKeyInput)
     .Apply(key => _validatedKey = key)
     .ApplyError(_ => _validatedKey = null)
     .Match(CredentialState.Success, CredentialState.Failed);
-----
+```
 
-[cols="1,2,2", options="header"]
-|===
-| To | `Optional`: write | not
+| To | `Optional`: write | not |
+|---|---|---|
+| build from a nullable | `Optional.Of(RunIdParam).Map(id => RunId.From(UrlGuid.Decode(id)))` | `RunIdParam is null ? new None() : Some.Of(…)` |
+| build from a dictionary | `_byId.GetValueOrNone(id)` | `TryGetValue(…) ? Some.Of(v) : new None()` |
+| build from a sequence | `Widths.FirstOrNone(width => width >= size.Width)` | `FirstOrDefault(…) is var width and > 0 ? Some.Of(width) : new None()` |
+| build from a condition | `Optional.When(ticks != 0, () => new DateTimeOffset(ticks, TimeSpan.Zero))` (the value is built only when the condition holds) | `ticks == 0 ? new None() : Some.Of(…)`, `Optional.Of(cond ? x : null)` |
+| keep it only while a condition holds | `next.When(feed.Enabled)` | `feed.Enabled ? next : new None()` |
+| project either way | `LinkedRun.Match(linked => …, () => …)` | `LinkedRun is Some<RunId>(var linked) ? … : …` |
+| a value or a fallback | `due.Map(Until).GetValueOr(Timeout.InfiniteTimeSpan)` | `due is Some<DateTimeOffset>(var at) ? Until(at) : …` |
+| an async value or a fallback | `await feeds.FindAsync(id).Map(async feed => (FeedPlanResult)await PlanAsync(feed)).GetValueOr(new FeedPlanFailed(…))` | a ternary around `await` |
+| test presence | `_item.IsSome()` | `_item is Some<WantlistItem>` |
+| a yes/no that ends the expression | `run.Match(r => r.Failed, () => false)` | `is Some<FeedRun>({ Failed: true })`, `run.When(r => r.Failed).IsSome()` |
+| route around the value | `query.Feed.When(feed => feed == Feed).Map(…).GetValueOr([])` | `if (query.Feed is not Some<FeedId>(var feed) \|\| feed != Feed) { return []; }` |
+| keep the present values | `….Select(feed => NextRunOf(feed).Map(next => (feed, next))).WhereSome()` | `.Where(e => e.next is not null)`, then `e.next!.Value` |
+| act when present or absent | `row.Job.Map(job => JobQueue.CancelAsync(job, token)).Apply(_ => …).ApplyNone(() => …)` | `if (x is Some<T>(var v)) { … }`, `if (x.IsSome()) … else …`, `if (x.Map(…).GetValueOr(false))`, one block lambda |
+| hand it to a framework | `query.MustInclude.Map(run => run.Value).ToNullable()` | `is Some<RunId>(var id) ? id.Value : null` |
+| turn it into a `Result` | `.ToResult("The sink cannot address …")` | `is not Some<…> … { return Error.From(…); }` |
 
-| build from a nullable | `+Optional.Of(RunIdParam).Map(id => RunId.From(UrlGuid.Decode(id)))+` | `RunIdParam is null ? new None() : Some.Of(…)`
-| build from a dictionary | `_byId.GetValueOrNone(id)` | `TryGetValue(…) ? Some.Of(v) : new None()`
-| build from a sequence | `+Widths.FirstOrNone(width => width >= size.Width)+` | `+FirstOrDefault(…) is var width and > 0 ? Some.Of(width) : new None()+`
-| build from a condition | `+Optional.When(ticks != 0, () => new DateTimeOffset(ticks, TimeSpan.Zero))+` (the value is built only when the condition holds) | `+ticks == 0 ? new None() : Some.Of(…)+`, `+Optional.Of(cond ? x : null)+`
-| keep it only while a condition holds | `next.When(feed.Enabled)` | `+feed.Enabled ? next : new None()+`
-| project either way | `+LinkedRun.Match(linked => …, () => …)+` | `LinkedRun is Some<RunId>(var linked) ? … : …`
-| a value or a fallback | `due.Map(Until).GetValueOr(Timeout.InfiniteTimeSpan)` | `due is Some<DateTimeOffset>(var at) ? Until(at) : …`
-| an async value or a fallback | `+await feeds.FindAsync(id).Map(async feed => (FeedPlanResult)await PlanAsync(feed)).GetValueOr(new FeedPlanFailed(…))+` | a ternary around `await`
-| test presence | `_item.IsSome()` | `_item is Some<WantlistItem>`
-| a yes/no that ends the expression | `+run.Match(r => r.Failed, () => false)+` | `is Some<FeedRun>({ Failed: true })`, `+run.When(r => r.Failed).IsSome()+`
-| route around the value | `+query.Feed.When(feed => feed == Feed).Map(…).GetValueOr([])+` | `if (query.Feed is not Some<FeedId>(var feed) \|\| feed != Feed) { return []; }`
-| keep the present values | `+….Select(feed => NextRunOf(feed).Map(next => (feed, next))).WhereSome()+` | `+.Where(e => e.next is not null)+`, then `e.next!.Value`
-| act when present or absent | `+row.Job.Map(job => JobQueue.CancelAsync(job, token)).Apply(_ => …).ApplyNone(() => …)+` | `if (x is Some<T>(var v)) { … }`, `if (x.IsSome()) … else …`, `+if (x.Map(…).GetValueOr(false))+`, one block lambda
-| hand it to a framework | `+query.MustInclude.Map(run => run.Value).ToNullable()+` | `is Some<RunId>(var id) ? id.Value : null`
-| turn it into a `Result` | `.ToResult("The sink cannot address …")` | `is not Some<…> … { return Error.From(…); }`
-|===
-
-[cols="1,2,2", options="header"]
-|===
-| To | `Result`: write | not
-
-| project either way | `+await signIn.CompleteAsync(…).Map(user => SignInAndRedirectAsync(context, user, returnUrl)).GetValueOr(error => Results.Redirect(…))+` | `+switch { Success<User>(var user) => …, Error error => … }+`
-| pick a case, both sync | `+PlanAsync(sink).Match(summary => (WantlistPlanResult)summary, error => new WantlistSyncSinkUnreachable(error.Reason, …))+` | a type `switch` over the cases
-| act on success or failure | `result.Apply(…).ApplyError(…)` | `if (result is Success<T>(var v)) { … } else { … }`
-| keep the successes of a stream | `await foreach (var media in stream.WhereSuccessAwait())` | `if (result is Success<T>(var v))` inside the loop
-| a value or a fallback | `+loaded.Match(matched => (MediaMatchResult)matched, _ => request.Unmatched())+` | `loaded is Success<MatchedMedia>(var matched) ? matched : …`
-| keep a success that passes a test | `+handoff.ToOptional().When(match => match.Stored.IsNone())+` | `is Success<IdentifyHandoff>(var match) && …`
-| read the cause of an error | `+error.CausedBy<RemoteUnavailableException>().Match(next.Fills, MediaFields.None)+` | `Error { Exception: RemoteUnavailableException }`
-| chain a fallible step | `.Map(next)` (flattens a `Result`-returning step), `.MapError(…)` | a guard that returns the error by hand
-| leave the monad at a boundary | `+.GetOrThrow(error => new …Exception(error.Reason))+`, `.ToOptional()` | `is Error e ? throw … : …`
-|===
+| To | `Result`: write | not |
+|---|---|---|
+| project either way | `await signIn.CompleteAsync(…).Map(user => SignInAndRedirectAsync(context, user, returnUrl)).GetValueOr(error => Results.Redirect(…))` | `switch { Success<User>(var user) => …, Error error => … }` |
+| pick a case, both sync | `PlanAsync(sink).Match(summary => (WantlistPlanResult)summary, error => new WantlistSyncSinkUnreachable(error.Reason, …))` | a type `switch` over the cases |
+| act on success or failure | `result.Apply(…).ApplyError(…)` | `if (result is Success<T>(var v)) { … } else { … }` |
+| keep the successes of a stream | `await foreach (var media in stream.WhereSuccessAwait())` | `if (result is Success<T>(var v))` inside the loop |
+| a value or a fallback | `loaded.Match(matched => (MediaMatchResult)matched, _ => request.Unmatched())` | `loaded is Success<MatchedMedia>(var matched) ? matched : …` |
+| keep a success that passes a test | `handoff.ToOptional().When(match => match.Stored.IsNone())` | `is Success<IdentifyHandoff>(var match) && …` |
+| read the cause of an error | `error.CausedBy<RemoteUnavailableException>().Match(next.Fills, MediaFields.None)` | `Error { Exception: RemoteUnavailableException }` |
+| chain a fallible step | `.Map(next)` (flattens a `Result`-returning step), `.MapError(…)` | a guard that returns the error by hand |
+| leave the monad at a boundary | `.GetOrThrow(error => new …Exception(error.Reason))`, `.ToOptional()` | `is Error e ? throw … : …` |
 
 Outside `Shared`'s own helpers, either monad is pattern-matched only in a guard (`if (x is not Some<T>(var v)) { return …; }`,
 or the same on `Success<T>`) whose following code holds a method-scoped `using var` or a `try`, or that itself leaves a
@@ -139,49 +121,46 @@ and proposes the `Apply` / `ApplyNone` / `ApplyError` or `Match` chain instead; 
 `Match(p, () => false)` and a loop guard pass. The `AbsenceTests` architecture test fails on a nullable
 non-private member outside the framework edges and bridges listed in it.
 
-=== Modularity and dependency injection
+## Modularity and dependency injection
 
 Every layer and provider ships an `IServiceModule`; `Web`'s `Program.cs` composes them with `AddModule<T>()`
-(see <<section-building-block-view>>), and modules nest. Anything with more than one implementation
+(see [Building Block View](03-building-blocks.md)), and modules nest. Anything with more than one implementation
 is a keyed service, resolved by an enum key (`IFeedProvider` keyed `FeedProvider.Mdblist`);
 `IKeyedServiceIndex<TKey, TService>` wraps the lookup when the key is only known at runtime.
 
-=== Contract shape
+## Contract shape
 
 Small per-user lists are read whole as snapshots; history that grows is read through a query record.
 
-* *Snapshots.* The wantlist, blocklist, outbox and feeds are small and bounded per user, so one read returns the whole
+- **Snapshots.** The wantlist, blocklist, outbox and feeds are small and bounded per user, so one read returns the whole
 list as a Domain snapshot that callers question (`Contains`, `Find`, `Ids`, `Items`) instead of calling the
 database per question: `GetAsync()` gives the `WantlistSnapshot`, `BlocklistSnapshot` and `FeedSnapshot`, and
 `IWantlistService.GetOutboxAsync()` the `OutboxSnapshot`.
-* *Repositories access, services compose.* A repository returns items and aggregates from its own tables and never
+- **Repositories access, services compose.** A repository returns items and aggregates from its own tables and never
 builds a snapshot; the service builds it (the feed snapshot adds `OnWantlist` from
 `IWantlistRepository.CountByFeedAsync`). UI never injects a repository (except the notification settings ones) or
 `IWantlistOutbox`; it asks a service. `RepositoryTests` in the Architecture suite pins who may use the wantlist,
 outbox, feed, blocklist, media, API key and credential repositories, and keeps the feed, blocklist and wantlist
 persistence code off each other's tables (the wantlist still reads feed rows for its provenance).
-* *A query record for unbounded history.* Feed runs grow with every scheduled run and are paged, so they are read
+- **A query record for unbounded history.** Feed runs grow with every scheduled run and are paged, so they are read
 through `GetRunsAsync(RunQuery)`: `RunQuery.Take(limit)` with optional `Feed`, `Since` and `MustInclude`.
 
 Members say what they do; the type already says what to:
 
-[cols="1,2,2"]
-|===
-| Verb | Means | Returns
+| Verb | Means | Returns |
+|---|---|---|
+| `Get` | read something that exists | the value; a snapshot for a list; items from a repository |
+| `Find` | look up something that may be missing | `Optional` |
+| `Count…By` | an aggregate count | a dictionary |
+| `Create` / `Update` / `Delete` | an entity (feed, user) | the new id / nothing / nothing |
+| `Add` / `Remove` | membership of a list | bulk: the ids changed; single: nothing |
+| `Orphan` | keep a deleted feed's titles, without the feed | nothing |
+| `Store` / `Clear` | a stored secret | nothing |
+| `Pause` / `Resume` | feed scheduling | the ids changed |
+| `Apply` | push a batch to the sink | a stream of acks |
+| `ReportRejected` | the provider answered 401 | nothing |
 
-| `Get` | read something that exists | the value; a snapshot for a list; items from a repository
-| `Find` | look up something that may be missing | `Optional`
-| `Count…By` | an aggregate count | a dictionary
-| `Create` / `Update` / `Delete` | an entity (feed, user) | the new id / nothing / nothing
-| `Add` / `Remove` | membership of a list | bulk: the ids changed; single: nothing
-| `Orphan` | keep a deleted feed's titles, without the feed | nothing
-| `Store` / `Clear` | a stored secret | nothing
-| `Pause` / `Resume` | feed scheduling | the ids changed
-| `Apply` | push a batch to the sink | a stream of acks
-| `ReportRejected` | the provider answered 401 | nothing
-|===
-
-=== Provider extensibility and code generation
+## Provider extensibility and code generation
 
 Providers are registered, not generated. A provider module names the remote service it calls (`ForRemote<TOptions>(RemoteService)`)
 and registers through it its clients, its key check, its roles and its converters and enrichers; the Radarr + Sonarr pair
@@ -193,28 +172,28 @@ generator emits the options-record registration. Each `RatingSource` member name
 which a generator emits `SuppliedBy()` and the reverse, `SuppliedRatingSources()`; its owner and whether it publishes votes
 are facts of its rating type, read through `source.Card`.
 
-==== Adding a provider
+### Adding a provider
 
-* *A new service* is a `RemoteService` member with its `Access` and `OwnIds` arms and its brand, an options record and its
+- **A new service** is a `RemoteService` member with its `Access` and `OwnIds` arms and its brand, an options record and its
   appsettings section, and a module under `API/<Service>` that registers everything through `ForRemote`; a key gets a slot in
   `ApiKeyProvider` and a check through `ApiKey<T>`, a sign-in an `AuthProvider` member and one class through `Credential<T>`
   that both signs people in and checks their stored token, and a keyless service is `Open`, always connected and never paused.
-* *A new id source* is a `MediaProvider` member with its id type, its arm in the stored-id conversion, its brand and its page
+- **A new id source** is a `MediaProvider` member with its id type, its arm in the stored-id conversion, its brand and its page
   linker; a site that owns ids and is called is both.
-* *A new rating source* is a `RatingSource` member with `[SuppliedBy]`, a rating type behind `IOwnedRating<TSelf>` and its
+- **A new rating source** is a `RatingSource` member with `[SuppliedBy]`, a rating type behind `IOwnedRating<TSelf>` and its
   `Card` arm, parsed by each supplier's wire map and given its `RatingTexts`; it counts in every strategy the day it ships.
-* *An enricher that cannot vouch for a value* lists it in `Defers` (TVmaze, AniList and MyAnimeList their titles), and artwork
+- **An enricher that cannot vouch for a value** lists it in `Defers` (TVmaze, AniList and MyAnimeList their titles), and artwork
   no `IArtworkResizer` sizes is deferred on its own: both only fill a gap after the stored copy and every answer that may replace.
-* *A whole file* (IMDb's ratings, the anime id map) is an `IDataset` with an `IDatasetTable`, a row in `DatasetLoads` and a
+- **A whole file** (IMDb's ratings, the anime id map) is an `IDataset` with an `IDatasetTable`, a row in `DatasetLoads` and a
   `DatasetLoader` registered in Core; it loads daily and answers `Unavailable` until its first load (ADR 0013).
-* *A new feed source* is a `FeedProvider` member with its `Service`, a `Feed<T>` registration and its `FeedSources` entry
+- **A new feed source** is a `FeedProvider` member with its `Service`, a `Feed<T>` registration and its `FeedSources` entry
   (placeholder, help and page link); it throws on a shape it cannot read and never skips an item it cannot parse. A feed
   source whose site has browse pages adds a page table on `SiteLink` (`AniListPages`, `MalPages`) and reads a page up to
   `FeedPages.Titles`, its list forms tried first.
 
 The compiler, the role registration tests, the stored-enum-name test and the brand-art test catch a member that misses any of these.
 
-=== Lanes and HTTP resilience
+## Lanes and HTTP resilience
 
 Every call to a remote service passes a _lane_ (`LaneGate`, `Shared/Concurrency`): one per remote service, route and
 owner, which admits that route's requests by the limits its provider publishes. Nothing in Core sleeps or caps how many
@@ -222,11 +201,11 @@ titles run; the lanes pace each service, so a blocked or slow service holds back
 client of a remote service gets its pipeline through `ForRemote(...).Client`, built by `AddRemoteHttp<TOptions>`
 (`API/Http`), from outermost to innermost:
 
-. `UsageStampHandler` stamps the request with its service and cause;
-. a Polly retry (`LanedPipeline`), the only retry layer;
-. `LaneHandler`, which takes one lane permit per attempt, so a retry queues for a new permit like any other request;
-. the attempt timeout (`Http.AttemptTimeoutSeconds`);
-. `UsageTagsHandler` tags each attempt.
+1. `UsageStampHandler` stamps the request with its service and cause;
+1. a Polly retry (`LanedPipeline`), the only retry layer;
+1. `LaneHandler`, which takes one lane permit per attempt, so a retry queues for a new permit like any other request;
+1. the attempt timeout (`Http.AttemptTimeoutSeconds`);
+1. `UsageTagsHandler` tags each attempt.
 
 A request belongs to the lane whose route, one of the provider's configured URLs (`IProviderHttpOptions.Urls`) plus a
 path, is the longest prefix of its address; anything else takes the provider's `api` lane. The URL comes from the
@@ -241,33 +220,27 @@ read as `RateWindow(Requests, Per, Aligned)`), never flattened to requests per s
 window goes at full speed, and pacing starts only when it would exceed it. A lane may also cap the requests it has in
 flight (`MaxInFlight`) and batch (`MaxBatch`, below).
 
-[cols="1,3", options="header"]
-|===
-| Service | Lanes
-
-| TMDB | 40 per second
-| Trakt | 1,000 per 5 minutes
-| MDBList | 1,000 per 5 minutes, on fixed windows that start at :00, :05 and so on; title lookups batch up to 200 ids
-| AniList | 30 per minute (as published while AniList runs degraded), 1 in flight; title and prequel lookups batch up to 50 ids
-| MyAnimeList | 30 per second, 1 in flight
-| TVmaze | 20 per 10 seconds
-| Plex | `match` 300 per minute with 5 in flight; `api` and `metadata` 50 per second with 25 in flight each (Plex publishes no limit); `watchlist` 4 in flight
-| Wikidata | 5 in flight; SPARQL lookups batch up to 100 IMDb ids
-| Radarr, Sonarr | 4 in flight
-| IMDb datasets, anime lists | 2 in flight
-|===
+| Service | Lanes |
+|---|---|
+| TMDB | 40 per second |
+| Trakt | 1,000 per 5 minutes |
+| MDBList | 1,000 per 5 minutes, on fixed windows that start at :00, :05 and so on; title lookups batch up to 200 ids |
+| AniList | 30 per minute (as published while AniList runs degraded), 1 in flight; title and prequel lookups batch up to 50 ids |
+| MyAnimeList | 30 per second, 1 in flight |
+| TVmaze | 20 per 10 seconds |
+| Plex | `match` 300 per minute with 5 in flight; `api` and `metadata` 50 per second with 25 in flight each (Plex publishes no limit); `watchlist` 4 in flight |
+| Wikidata | 5 in flight; SPARQL lookups batch up to 100 IMDb ids |
+| Radarr, Sonarr | 4 in flight |
+| IMDb datasets, anime lists | 2 in flight |
 
 A lane admits its waiting attempts by class, then by order within the class:
 
-[cols="1,2,1", options="header"]
-|===
-| Class | Set by | Order inside
-
-| `Interactive` | anything unset: a search, a click | arrival
-| `Source` | every feed service's list pages (`SourcePages.ReadAsync`) | page order
-| `Title` | each title's chain in a list load | list position, oldest first
-| `Background` | the FillDetails job | oldest first
-|===
+| Class | Set by | Order inside |
+|---|---|---|
+| `Interactive` | anything unset: a search, a click | arrival |
+| `Source` | every feed service's list pages (`SourcePages.ReadAsync`) | page order |
+| `Title` | each title's chain in a list load | list position, oldest first |
+| `Background` | the FillDetails job | oldest first |
 
 A 429 with `Retry-After` blocks the lane until then; a 429 without one halves the lane's rate, at most once per window,
 and each window without a 429 gives back a tenth of the window's requests, at least one (a lane with no window pauses
@@ -292,7 +265,7 @@ asking class, one batch per batch key and class is out at a time, and whatever a
 `Background` key never rides in a `Title` batch. The batch's request takes its permit like any other; a lane never
 retries a batch, and a failed batch fails every key it carried. MDBList's title lookups (per API key, id kind and media
 type), AniList's titles (one `id_in` query) and prequels (one `idMal_in` query) and Wikidata's SPARQL lookups (one `VALUES` query per media type) ride
-keyed lanes. A load primes MDBList's lane with each burst's titles that still need a field it fills (<<section-runtime-view>>), so its batches fill
+keyed lanes. A load primes MDBList's lane with each burst's titles that still need a field it fills ([Runtime View](04-runtime.md)), so its batches fill
 even though a title reaches MDBList only after its TMDB step.
 
 A call's failure reaches its caller as an answer. `Answering.GuardedAsync` is the one place where a converter's or
@@ -301,11 +274,11 @@ rejected key is `Unavailable` and not sent; an HTTP error or a timeout is `Unava
 `RemoteUnavailableException` (a 429, 408 or 5xx that outlasted the retries, a dataset not loaded yet) says itself
 whether its request left (`Sent`); anything unexpected is `Faulted`; a cancellation is rethrown. Only `NoMatch` from every route settles a title as not found and
 fills the negative cache; `Unavailable` and `Faulted` never do. Per-provider numbers
-are in the table above and under `Http.Lanes` in `Web/appsettings.json`; how a load meets a blocked lane is in <<section-runtime-view>> and
+are in the table above and under `Http.Lanes` in `Web/appsettings.json`; how a load meets a blocked lane is in [Runtime View](04-runtime.md) and
 under Provider routing below
-(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0017-pace-remote-calls-on-lanes-with-limits-as-published.md[ADR 0017]).
+([ADR 0017](../../adr/0017-pace-remote-calls-on-lanes-with-limits-as-published.md)).
 
-=== Provider routing
+## Provider routing
 
 Which remote service is asked depends on its lanes. `IRemoteCapacity.Of(remote)` (scoped, in `API/Http`) folds every
 lane of the remote into a `RemoteLoad`, read for the asking class (`LanePriority.Current`) and counting a key's lanes
@@ -378,23 +351,23 @@ title. Before every hop the resolver checks the providers of the hops left: one 
 in the resolution ends its path as a no-match before that check, even when a later hop's provider is blocked. A title is
 cached as unmatched only when no path gave up.
 
-=== Identity keys, page links and claims
+## Identity keys, page links and claims
 
 A title's identity is its `MediaId` plus its identity keys. Every external id type is one of two kinds, and the
 exhaustive `MediaProvider.Role` switch (`Domain/Providers/ExternalIdRole.cs`) makes a new provider fail the build until
 it is classified:
 
-* An _identity key_ (`IIdentityKey`: TMDB, IMDb, TheTVDB, Plex, MDBList, Trakt, MyAnimeList, TVmaze, AniList) names one
+- An _identity key_ (`IIdentityKey`: TMDB, IMDb, TheTVDB, Plex, MDBList, Trakt, MyAnimeList, TVmaze, AniList) names one
 title. Matching, claims and the library's unique ids use keys only, stored in `ExternalMediaIds`: a key belongs to one
 title (the table's key is source, media type and value), and a title holds at most one key per source (a unique index
 on the title and the source).
-* A _page link_ (`IPageLink`: Rotten Tomatoes, Metacritic, Letterboxd) is the path of a rating site's page. It hangs off
+- A _page link_ (`IPageLink`: Rotten Tomatoes, Metacritic, Letterboxd) is the path of a rating site's page. It hangs off
 the title's details (`MediaDetails.PageLinks`, the `MediaPageLinks` table, at most one per site), never off its
 identity: remakes share a Metacritic slug, and MDBList's `-` placeholder is dropped. Two titles may show the same link,
 and a link never merges them.
 
 Identity is written before a title is handed out, through the claim lane (`IIdentityClaims`, one `IdentityClaims` per
-scope; the walk-through is in <<section-runtime-view>>). Every path that identifies a title claims: a list load,
+scope; the walk-through is in [Runtime View](04-runtime.md)). Every path that identifies a title claims: a list load,
 `IdentifyAsync` and the sink-id lookups, a search hit being registered, a rating breakdown asking for a page link
 (`FindIdAsync`), and the details step for the keys its enrichers found. A claim carries the keys, the title it is pinned
 to (if any) and the services whose answers produced its keys (`IdentityClaim.Sources`). The lane commits every claim
@@ -407,7 +380,7 @@ pair is noted as stored twice (`IIdentityConflicts`). A search hit whose claim c
 that holds the search provider's own key (TMDB's for a TMDB search, Plex's for a Plex search, TMDB's for a movie and
 TheTVDB's for a show from Radarr + Sonarr), and is not addable when no stored title holds it. Feed runs never merge two
 stored titles
-(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0018-claim-identity-before-hand-out-from-identity-keys-only.md[ADR 0018]).
+([ADR 0018](../../adr/0018-claim-identity-before-hand-out-from-identity-keys-only.md)).
 
 Two stored titles become one only through `IMediaMerge`, in one transaction under the media write lock. It checks
 again that no source has an id on both and that both are one media type (`IdentityConflict.Contradicts`), and refuses
@@ -424,7 +397,7 @@ then deleted, and its stored-twice notes with it. Other users' entries point at 
 restricting foreign keys, so every table moves set-based across users (`IgnoreQueryFilters`), never through one user's
 tracked rows.
 
-=== Persistence and migrations
+## Persistence and migrations
 
 State is one SQLite database via EF Core. Repositories create a context per operation from
 `IDbContextFactory<SammlarrDbContext>` (the context is `internal`). A `SqlitePragmaInterceptor`
@@ -467,7 +440,7 @@ the defaults after every migrate when the row is missing, so readers and writers
 (`EnumAsStringConvention`), `DateTimeOffset` as binary. `SaveChanges` stamps audit timestamps and
 the owning user.
 
-=== Secrets and configuration
+## Secrets and configuration
 
 Two distinct secret mechanisms: `[Encrypted]` (`DB`) encrypts credential and API-key columns at
 rest through an EF converter over `Microsoft.AspNetCore.DataProtection`; `[Sensitive]` (`Contracts`)
@@ -479,16 +452,17 @@ injects the record itself; runtime settings an admin changes (active search and 
 provider, registration mode) live in `ProviderConfig`, one global row behind a cached repository.
 Provider selection is instance-wide, not per user.
 
-NOTE: Data-protection keys are persisted to a filesystem key ring under a stable application name
-(`EncryptionModule`), so stored secrets survive a restart. The ring sits in `dp-keys` beside the database file unless
-`Sammlarr__DataProtection__KeyRingPath` names another folder, so a Sammlarr started from another folder still reads the
-secrets its database holds. In a container the ring shares the `/data` volume with the database; that volume must be
-writable by the container user (see <<section-technical-risks>>).
+> [!NOTE]
+> Data-protection keys are persisted to a filesystem key ring under a stable application name
+> (`EncryptionModule`), so stored secrets survive a restart. The ring sits in `dp-keys` beside the database file unless
+> `Sammlarr__DataProtection__KeyRingPath` names another folder, so a Sammlarr started from another folder still reads the
+> secrets its database holds. In a container the ring shares the `/data` volume with the database; that volume must be
+> writable by the container user (see [Risks and Technical Debt](08-risks-technical-debt.md)).
 
-=== Authentication and per-user isolation
+## Authentication and per-user isolation
 
 An install signs in one way, set in `ProviderConfig.AuthProvider` (a hand-written enum, not a `MediaProvider`): with Plex
-(<<section-runtime-view>>), or with Sammlarr accounts, a username and a password hashed by ASP.NET
+([Runtime View](04-runtime.md)), or with Sammlarr accounts, a username and a password hashed by ASP.NET
 Core's `PasswordHasher` and posted as a form to `/auth/local` (a Blazor circuit cannot set a cookie).
 Password sign-ins are rate-limited per address, checked one at a time per account, and five wrong
 passwords lock the account for 15 minutes. The Plex round trip carries a state value bound to the
@@ -503,9 +477,9 @@ wantlist, blocklist, notification targets and stored secrets are user-owned; `Pr
 the media catalogue are global. Background code (the job runner, the cron ticker function,
 Wolverine handlers) calls `IUserScope.AsAsync(owner)` so the same filters apply: every job and
 every scheduled feed carries its owner. Isolation tests are noted in
-<<section-quality-scenarios>>.
+[Quality Requirements](07-quality.md).
 
-=== Background work and scheduling
+## Background work and scheduling
 
 Background work that users start or schedule (feed runs, wantlist syncs and the FillDetails job) goes through one
 queue of record, the `Jobs` table (`IJobQueue`), and one hosted `JobRunner` that executes a row at
@@ -514,12 +488,12 @@ SQLite to one writer and each provider to one caller. TickerQ holds the cron sch
 enqueues; enqueueing coalesces by kind, key and owner; a deferred row waits in `Waiting` until a
 timer releases it. The FillDetails job, queued after a run and when a key or sign-in is stored, steps aside: the
 runner takes it only while no feed run or sync is queued or waiting, or once it has waited 30 minutes, and between its
-pages of 500 it requeues itself whenever another job is queued. The walk-through is in <<section-runtime-view>>, the reasoning in
-link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0006-run-background-work-through-one-job-queue.md[ADR 0006].
+pages of 500 it requeues itself whenever another job is queued. The walk-through is in [Runtime View](04-runtime.md), the reasoning in
+[ADR 0006](../../adr/0006-run-background-work-through-one-job-queue.md).
 
 A push to Plex is a step of the sync, not a message: pending changes wait in the wantlist outbox
 and the sync drains it inline, retrying a failed item on the next sync
-(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0007-push-watchlist-changes-inline-during-sync.md[ADR 0007]).
+([ADR 0007](../../adr/0007-push-watchlist-changes-inline-during-sync.md)).
 
 A downloaded dataset (IMDb's ratings file, Fribb's anime id map) is app-wide, not a user's, so it does not go through the `Jobs` queue,
 whose rows each belong to a user: `DatasetSchedule` registers one daily TickerQ cron ticker per `IDatasetLoader`
@@ -534,7 +508,7 @@ it is queued, starts, moves a step on and ends. Until a dataset's first load its
 so no title stores an empty answer for it. During a list load each dataset is read once per burst, through a scoped
 memo that is also the burst's primer (`ImdbRatingsInRun`, `AnimeIdsInRun`).
 
-=== Events and notifications
+## Events and notifications
 
 Anything that reports "something happened" is one of two disjoint kinds, and each has exactly
 one transport. An _event_ (`IEvent`: per-item push status, job state changes, "this feed just
@@ -548,10 +522,10 @@ cap. There is no external broker.
 Producers publish through one `Announcer`: `Announce(IEvent)` and `AnnounceAsync(INotification)`
 take the two markers, so sending a fact down the wrong transport does not compile. Which kind a
 fact is depends only on whether a user could reasonably subscribe to it, never on what triggered
-it (<<section-glossary>>,
-link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0008-separate-events-from-notifications.md[ADR 0008]).
+it ([Glossary](09-glossary.md),
+[ADR 0008](../../adr/0008-separate-events-from-notifications.md)).
 
-=== Logging and observability
+## Logging and observability
 
 Serilog with two custom destructuring policies: one unwraps `Optional`/`Result` to log the payload
 rather than the wrapper, the other masks `[Sensitive]` members and those `SensitiveModel` names as `***`. Sinks: console, an
@@ -597,14 +571,13 @@ draws the requests left hour by hour, counted back from what MDBList says is lef
 after each hour (retries included); requests another app spent on the same key show as one figure without an hour. On
 7 and 30 days `QuotaDays.Of` groups the hourly attempts by quota day, cut at the reset rather than at midnight.
 
-=== Live run trace
+## Live run trace
 
 While a feed runs, its owner can watch the titles move through Sammlarr, the services it asks and the three outcomes
 (the Feeds page's live view and the card's running pill). The view observes the run and
 never steers it: a hook that records a step never awaits, never throws and changes nothing the run decides.
 
-[mermaid]
-....
+```mermaid
 flowchart LR
   R[ListLoad, MediaIdResolver,<br/>DetailsFetcher, feed providers] -->|FeedRunSpans: start and stop| A[Sammlarr.FeedRun source<br/>+ System.Net.Http]
   A -->|own ActivityListener, synchronous| T[FeedRunTrace singleton<br/>steps per run, owner, cursor]
@@ -612,7 +585,7 @@ flowchart LR
   T -->|IFeedRunTraces.ReadAsync<br/>every 250 ms while a run is live| P[FeedRunProgress<br/>scoped per circuit]
   P --> L[FeedRunLive] -->|push batch| J[feed-live.js<br/>replays at real timing]
   P --> C[card running pill]
-....
+```
 
 A run's titles, paths, hops and give-ups are spans on the `Sammlarr.FeedRun` activity source, started through the
 static `FeedRunSpans` and only under the run span `FeedRunEngine` opens, so Browse, search and the editor preview record
@@ -635,4 +608,4 @@ that holds titles back to stay inside its own window draws a grey one that count
 after Hide starts from a snapshot (titles in flight, per-service counts, the fates so far). Telemetry may drop data and
 so may the view: the card's bar and every saved number come from the run that `FeedRunEngine` records (`FeedRunCounts`,
 with the titles already known and those not found earlier), never from spans
-(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0016-live-runs-pull-from-an-in-memory-trace.md[ADR 0016]).
+([ADR 0016](../../adr/0016-live-runs-pull-from-an-in-memory-trace.md)).

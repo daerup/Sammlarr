@@ -1,23 +1,21 @@
-[[section-deployment-view]]
-== Deployment View
+# 5. Deployment View
 
 Sammlarr deploys as one self-hosted process. It is an ASP.NET Core / Blazor Server app whose
 entire state lives in a local SQLite file: the application data, the job queue, the TickerQ
 schedule and the Wolverine notification queue share one database. There is no external database server and no message broker. Telemetry is
 sent over OTLP to an Aspire dashboard, which is optional. Provider secrets are not held in
 configuration; they are stored in the database, encrypted with data protection (see
-<<section-concepts>>).
+[Cross-cutting Concepts](06-crosscutting.md)).
 
 It runs two ways: through the Aspire AppHost for development, and as containers from a compose
 artifact the AppHost generates.
 
-=== Infrastructure Level 1
+## Infrastructure Level 1
 
 Development runs through the Aspire AppHost (`AppHost/AppHost.cs`), which launches the Web host and
 wires it to the dashboard.
 
-[mermaid]
-....
+```mermaid
 flowchart LR
   dev([Developer])
   subgraph host["Dev machine"]
@@ -30,7 +28,7 @@ flowchart LR
     web -->|file| db
   end
   dev -->|http :6769| web
-....
+```
 
 The Web endpoint is pinned to `http://localhost:6769` (`WithHttpEndpoint(port: 6769)`), so the app
 always has the same dev URL, and the AppHost is set to launch a browser at it. The Aspire
@@ -39,29 +37,25 @@ dashboard serves resource state, logs and traces at `http://localhost:15223`. Th
 starts over plain HTTP without the usual https requirement, and sets logging to verbose. The
 SQLite file (`Data Source=sammlarr.db`) is created in the working directory.
 
-[cols="1,3", options="header"]
-|===
-| Node / artifact | Role
+| Node / artifact | Role |
+|---|---|
+| AppHost | The Aspire orchestrator. Starts the Web host, injects its telemetry settings, opens a browser. |
+| Web process | The whole application: the Blazor host and its `UI` components, providers, the TickerQ scheduler, the job runner and the Wolverine worker, all in one process on `:6769`. |
+| Aspire dashboard | Receives OTLP logs and traces; the dev window into the running app. |
+| `sammlarr.db` | The SQLite database: application data, the `Jobs` table, TickerQ's cron tickers and the durable Wolverine queue. |
 
-| AppHost | The Aspire orchestrator. Starts the Web host, injects its telemetry settings, opens a browser.
-| Web process | The whole application: the Blazor host and its `UI` components, providers, the TickerQ scheduler, the job runner and the Wolverine worker, all in one process on `:6769`.
-| Aspire dashboard | Receives OTLP logs and traces; the dev window into the running app.
-| `sammlarr.db` | The SQLite database: application data, the `Jobs` table, TickerQ's cron tickers and the durable Wolverine queue.
-|===
-
-=== Infrastructure Level 2
+## Infrastructure Level 2
 
 The compose file is not hand-written. The AppHost is its source
-(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0001-drive-deployment-from-the-aspire-apphost.md[ADR 0001]):
+([ADR 0001](../../adr/0001-drive-deployment-from-the-aspire-apphost.md)):
 `aspire publish` generates it from the same model that runs the app in development, naming the released image
 `ghcr.io/daerup/sammlarr:X.Y.Z` with the `/data` volume and `restart: unless-stopped`. The image itself is built
 from `Web/Dockerfile` and pushed to the GitHub Container Registry by `release.yml` with Docker's actions
-(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0019-build-and-push-the-image-with-docker-actions.md[ADR 0019]).
+([ADR 0019](../../adr/0019-build-and-push-the-image-with-docker-actions.md)).
 The dev-only dashboard is omitted from the published compose; telemetry goes wherever
-`OTEL_EXPORTER_OTLP_ENDPOINT` points, or to the console when it is unset (see <<section-concepts>>).
+`OTEL_EXPORTER_OTLP_ENDPOINT` points, or to the console when it is unset (see [Cross-cutting Concepts](06-crosscutting.md)).
 
-[mermaid]
-....
+```mermaid
 flowchart LR
   user([User])
   subgraph compose["generated compose (aspire publish)"]
@@ -71,7 +65,7 @@ flowchart LR
   end
   user -->|"http :6769"| web
   web -.->|"OTLP (optional)"| backend["telemetry backend"]
-....
+```
 
 The container runs the single Web process on port `6769`, the same port as the dev run. One volume mounted
 at `/data` holds both the SQLite database and the data-protection key ring, so application data and stored secrets
@@ -83,4 +77,4 @@ health with `dotnet Web.dll healthcheck`.
 
 Because the queues and the database are in-process and file-based, a deployment is a single
 instance. There is no horizontal scale-out today; a second replica would contend on the same
-SQLite file, and the job runner assumes it is the only one (see <<section-technical-risks>>).
+SQLite file, and the job runner assumes it is the only one (see [Risks and Technical Debt](08-risks-technical-debt.md)).

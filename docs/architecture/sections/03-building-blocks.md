@@ -1,0 +1,156 @@
+# 3. Building Block View
+
+A set of .NET projects with one rule: dependencies point down toward the kernel. The
+implementations never reference each other, and the presentation never references them; they meet
+only through `Contracts`. `Web` is the one project that composes them.
+
+## Whitebox Overall System
+
+```mermaid
+flowchart TD
+  apphost["AppHost<br/>Aspire host"]
+  web["Web<br/>Blazor host, composition root"]
+  ui["UI<br/>Blazor components (RCL)"]
+  core["Core<br/>business logic"]
+  db["DB<br/>EF + SQLite"]
+  api["API<br/>providers + HTTP"]
+  msg["Messaging<br/>Wolverine notifications"]
+  obs["Observability<br/>Serilog + OTel"]
+  contracts["Contracts<br/>interfaces + ids"]
+  domain["Domain<br/>model + unions"]
+  shared["Shared<br/>kernel"]
+  gen["Roslyn<br/>generators + analyzers<br/>SAM0001 to SAM0003"]
+
+  apphost --> web
+  web --> ui
+  web --> core
+  web --> db
+  web --> api
+  web --> msg
+  ui --> contracts
+  core --> contracts
+  db --> contracts
+  api --> contracts
+  core --> obs
+  db --> obs
+  api --> obs
+  msg --> contracts
+  obs --> contracts
+  ui ~~~ obs
+  msg ~~~ obs
+  contracts --> domain
+  domain --> shared
+  domain -. build-time .-> gen
+  shared -. build-time .-> gen
+```
+
+Arrows are direct project references; every project reaches `Domain` transitively through
+`Contracts`. Core, DB and API are peers with the same dependency
+shape and never reference each other. Every project also references the `Shared` kernel, and both
+`Web` and `UI` reference `Observability`; those edges are omitted to keep the graph readable.
+
+| Building block | Responsibility |
+|---|---|
+| Shared | The kernel below everything. Monads (`Optional`, `Result`), `ValueSet`, options records, the lane primitives (`LaneGate`, the keyed `Lane<TKey, TOut>`, `LanePriority`) and the burst helpers (`BurstsAsync`, `Listed<T>`), and the `AddModule<T>()` DI infrastructure. Depends on nothing. |
+| Domain | The pure model: entities, value objects, the media union types, and the feed, wantlist, blocklist, provider and notification vocabulary. No infrastructure. See [Glossary](09-glossary.md). |
+| Contracts | The seams: service, repository and provider interfaces, the record-struct ids, and DI markers. Depends on `Domain` because its signatures use domain types. |
+| Observability | Serilog and OpenTelemetry setup, plus the tracing helpers (`AddTracedScoped`, `AddTracedKeyedScoped`) the other layers register through. |
+| Core | Business logic: loading lists in bursts and chains and identifying media (`ListLoad`, `TitleIdentifier`, `MediaIdResolver`, `DetailsFetcher`), the query processor (filter, sort, limit), caching, the blocklist, the wantlist and its sync, feed runs and their cron tickers, the job queue and its runner, the `Announcer` that publishes events and notifications, sign-in and user management. Implements most `Contracts` interfaces. |
+| DB | Persistence: `SammlarrDbContext`, entities, repositories and migrations on SQLite, including the `Jobs` table and the identity claim lane (`IdentityClaims`), plus the TickerQ scheduler store in the same file. Holds secrets under data protection. |
+| API | One folder per external provider, each an `IServiceModule` that registers a typed HTTP client and keyed services. Also the lanes and the HTTP pipeline every remote call passes, and the notification channels. |
+| Messaging | Wolverine durable messaging on SQLite, used for notifications only: the handlers that fan a notification out to its subscriptions and deliver it with retry. |
+| UI | Blazor components as a Razor class library: the `Features/*` vertical slices and the `Shared` cross-feature components and services. References only `Contracts`, `Shared` and `Observability`, never an implementation. |
+| Web | The Blazor host and composition root. Holds the root components (`App`, `Routes`) and, in `Program.cs`, the single `AddModule<T>()` wiring of every layer, plus the endpoints, health checks and host services. The one project that references every implementation and `UI`. |
+| AppHost | The Aspire host that runs `Web` and its dependencies for local development. |
+| Roslyn | Roslyn components, build-time only, wired from the root `Directory.Build.props` into every project but itself: source generators for the rating sources' suppliers (`[SuppliedBy]`), for the options-section registration and for the `Task` mirrors of the monad helpers, plus the analyzers: `SAM0001` (the test naming convention), `SAM0002` (an `Optional` or a `Result` read by hand instead of through its helpers) and `SAM0003` (a branch on one read as a `bool`). The generators inject nothing: they key off markers declared in `Shared` (`GenerateAsyncAttribute`, `IOptionsSection`) or `Domain` (`[SuppliedBy]`, declared in `Shared` and placed on `RatingSource`), so a project without them gets no generated code. |
+
+The load-bearing rule: `Core`, `DB` and `API` are siblings that never reference each other; when
+`Core` pushes to Plex it goes through the `IMediaSink` that `API` implements, resolved by
+DI. `UI` is presentation on abstractions only; `Web` is the one project that sees every
+implementation and the only place they compose. `Roslyn` runs at build time and ships no runtime assembly.
+
+## Level 2
+
+Two blocks are worth opening: `API`, where providers plug in, and `UI`, where features live.
+
+### API: one module per provider
+
+Each provider is a folder with an `IServiceModule` that registers a typed HTTP client (wrapped by
+its lanes) and keyed services against `Contracts` interfaces; `ApiModule` adds them
+all.
+
+| Service (module) | What it registers through `ForRemote`: each role keyed by its role enum, every `IExternalIdConverter` and `IDetailsEnricher` keyed by the remote service, each converter announcing its lookups |
+|---|---|
+| TMDB (`TmdbModule`) | `ITrendingService`, `IDetailsEnricher` (also fills its own rating, with votes), `IExternalIdConverter` (the enricher and the converter read a title's details through `TmdbApi`, a memo per load, so a load reads them once), `IFeedProvider` (`TmdbFeedService`: a list by its number or its themoviedb.org link, every page of it read from `/3/list` with the key, or from `/4/list` with the read access token when one is stored, a slot (`ApiKeyProvider.TmdbReadToken`) no access names, so TMDB stays ready without it; or a themoviedb.org page (`TmdbPages`: the movie and TV categories, a discover link with the keys `/3/discover` documents, and keyword, company and network pages as discover keys; presets, `tv/upcoming`, collections and people refused by name, and streaming services, monetization types and certifications only with the country they need) read through `/3` with the key up to its first 500 titles, each result typed by its page) |
+| Plex (`PlexModule`) | `IMediaSearchProvider` (the Search page, through Plex's title search), `IMediaSink`, `IOAuthProvider`, `IDetailsEnricher` (also fills the IMDb, Rotten Tomatoes and TMDB ratings its answer carries), `IExternalIdConverter` (`PlexIdConverter`: a TMDB, IMDb or TheTVDB id to the Plex id through the match endpoint on the discover host, `library/metadata/matches?type=1\|2&guid=tmdb://603`, one call per title, a definitive answer by one id answering the others (`AsksOnce`); and a Plex id to its other ids through the metadata endpoint), each Plex route on its own lane |
+| MDBList (`MdblistModule`) | `IFeedProvider`, `IDetailsEnricher` (`MdblistEnricher`: ratings and ids only, every source MDBList rates), `IExternalIdConverter` (`MdblistIdConverter`: an IMDb, TMDB, TheTVDB, Trakt or MyAnimeList id to every id MDBList holds for the title, with its title and year as hints, at cost 2 so TMDB's lookups go first while TMDB is open); both ask through `MdblistTitles`, a memo per load on the keyed lane `titles` of the user's API key, which asks a title by its first id in the order MDBList, IMDb, TMDB, TheTVDB, Trakt, MyAnimeList and sends up to 200 ids of one id kind and media type per request, with no timer; each burst primes it with its misses that need a field MDBList fills (`IBurstPrimer`), and `MdblistBudget`, the lane's quota, stops title lookups at the last `MDBList:FeedReserve` requests of the day, which stay for list pages |
+| Wikidata (`WikidataModule`) | `IExternalIdConverter` (`WikidataIdConverter`, registered through `ForRemote(RemoteService.Wikidata)`, which owns no ids and has its own lanes): an IMDb id to the title's Rotten Tomatoes, Metacritic and Letterboxd pages, its TMDB and TheTVDB ids of the IMDb id's type, and its AniList and MyAnimeList ids, at cost 3, the last resort for TMDB and TheTVDB ids. It asks on the keyed lane `sparql`: up to 100 IMDb ids of one media type in one keyless, form-encoded SPARQL `POST` with `VALUES`, its rows split back per id; an id without an item finds nothing, and a failed query fails every id it carried |
+| TVmaze (`TvmazeModule`) | `IExternalIdConverter` (`TvmazeIdConverter`: an IMDb or TheTVDB id of a show to its TVmaze, TheTVDB and IMDb ids, with its name and premiere year as hints, at cost 2; a movie id is answered empty without a request) and `IDetailsEnricher` (`TvmazeEnricher`: a show's title, plain summary, poster, premiere, genres and runtime per episode; it `Defers` the title, and its poster no resizer sizes only fills a gap), both through `TvmazeApi`, keyless, which keeps a found show for 10 minutes per lookup |
+| IMDb datasets (`ImdbModule`) | `IDataset` (`ImdbRatingsFile`: `title.ratings.tsv.gz`, about 1.7 million ratings, parsed as gzip, a line it cannot read failing the load) and `IDetailsEnricher` (`ImdbFileEnricher`: the IMDb rating with votes from the `ImdbRatings` table, keyless and with no request per title, unavailable until the first load; it reads through `ImdbRatingsInRun`, a memo per load that reads a burst's ids in one query as the burst's primer), registered through `ForRemote(RemoteService.ImdbDatasets)`, `Open` and wearing IMDb's brand |
+| Anime lists (`AnimeListsModule`) | `IDataset` (`AnimeIdsFile`, the `anime-ids` dataset: Fribb's `anime-list-full.json`, the entries with an AniList or MyAnimeList id, loaded daily into `AnimeIds` by the dataset loader) and `IExternalIdConverter` (`AnimeListsIdConverter`: an AniList or MyAnimeList id to the TheTVDB, TMDB and IMDb ids of its show or movie, and a show's or movie's TheTVDB, TMDB or IMDb id (of the request's type) to its AniList and MyAnimeList ids only, both at cost 0, since they read the local table and call nothing, unavailable until the first load, read through `AnimeIdsInRun`, a memo per load that reads a burst's ids in one query as the burst's primer). A later season, a part of the first or a movie mapped onto a show gets only its own ids, and each show id stays on the first entry that claims it, so a season never joins its show's stored title; a movie takes only its TMDB movie id. A later season or a part also keeps its series' TheTVDB id (`SeriesTvdb`; a special filed as season 0 does not), and `LaterSeasons`, which the AniList and MyAnimeList feeds wrap their requests in, asks for such an entry as its show, by every id the map holds for the show itself (or the series' TheTVDB id alone), with the season's title kept only to describe an unmatched row, reading what has arrived in chunks of 50 with one read for the season ids, one for their series and, when a chunk holds a season the map knows no show for, one for the prequels AniList names; before the map's first load a feed read fails saying so. A season the map holds no show id for at all (no TheTVDB, TMDB or IMDb id and no series), whose AniList format is TV, TV_SHORT or ONA, is asked as the show its prequel belongs to: `IAnimePrequels` (`AniListPrequels`, the AniList keyed lane `prequels`, up to 50 MyAnimeList ids in one `idMal_in` query) follows the first PREQUEL edge to a TV, TV_SHORT or ONA entry, and that entry's series (or its own TheTVDB id) stands for the show, credited to AniList as well; when AniList cannot answer, the season is unmatched as could not look up, so the run is not counted conclusive. A feed run keeps one row per title |
+| AniList (`AniListModule`) | `IFeedProvider` (`AniListFeedService`: a public list by username, `username/status` or its anilist.co link, one keyless GraphQL `MediaListCollection` request, or an anilist.co `search/anime` link or one of its twelve anime presets, read as `AniListPages` turns its labels into the variables of the page's own `Page.media` query, 50 a page up to 500 titles; every `Media` a page read is remembered by `AniListTitles`, a memo per load that the enricher asks first, and a miss rides the keyed lane `titles`, up to 50 ids in one `id_in` query; each entry asked by its AniList and MyAnimeList ids with its title and year; a `MUSIC` entry is left out unless the page itself asks for music; a private list fails the load saying so) and `IAnimePrequels` (`AniListPrequels`, see the anime lists above) and `IDetailsEnricher` (`AniListEnricher`: the English title or else the romaji one, deferred, the plain description, the cover, the start date, genres, episodes, runtime and the AniList rating with its votes summed from the score distribution), on a lane of 30 requests a minute, as AniList publishes while it runs degraded, one at a time; `AniListId` (`anilist.co/anime/{id}`) is also reached through the anime lists and Wikidata |
+| MyAnimeList (`MalModule`) | `IFeedProvider` (`MalFeedService`: a public list by username or its myanimelist.net/animelist link, or a `topanime.php` tab or an `anime/season` page read through `anime/ranking` or `anime/season/{year}/{season}` (`MalPages`), 500 titles in one call; following `paging.next` 1,000 entries a page; music videos, PVs and CMs (`media_type` music, pv, cm) are left out of lists and pages alike, and a page's 500 titles are counted after them; each asked by its MyAnimeList id with its English or own title and year; 403 fails the load as private, or for a page says MyAnimeList refused it, 404 as not found) and `IDetailsEnricher` (`MalEnricher`: the English title or else its own, deferred, the synopsis, the picture, the start date, genres, episodes, runtime and the MyAnimeList rating with `num_scoring_users` as votes), both with the person's client ID in `X-MAL-CLIENT-ID` (`ApiKeyProvider.Mal`, checked against `/anime/1`); MyAnimeList is the second supplier of its rating beside MDBList |
+| Trakt (`TraktModule`) | `IFeedProvider` (`TraktFeedService`: a public watchlist, a public list or a trending, popular or anticipated chart, stored as its path on trakt.tv (`TraktPages`, a bare username meaning its watchlist, an `app.trakt.tv/discover/{chart}?mode=` link read as its chart, one without a `mode` as both the movie and the show chart), read 250 a page following `X-Pagination-Page-Count`, a chart up to 500 titles; every item asked by the Trakt, IMDb, TMDB and TheTVDB ids it carries, a season or an episode as its show; a private profile, a missing list, Trakt's own 403 (a rejected client ID) and Cloudflare's 403 or a 429 (Trakt unavailable) each fail the load), `IExternalIdConverter` (`TraktIdConverter`: a Trakt, IMDb, TMDB or TheTVDB id to the others, at cost 1) and `IDetailsEnricher` (`TraktEnricher`: the Trakt rating with its votes, the summary, release date, runtime and genres, never artwork, since Trakt forbids hotlinking its images), all through `TraktTitles` with the person's client ID (`ApiKeyProvider.Trakt`, checked against `/genres/movies`), on a lane of 1,000 requests per 5 minutes, as Trakt publishes |
+| Radarr, Sonarr (`ArrModule`) | one `IMediaSink` together (`ArrSink`, keyed `SinkKind.Arr`): `RadarrApi` and `SonarrApi` over the shared `ArrApi`, each holding what is its own (paths, the id it adds by, its add options from `Arr:Radarr` or `Arr:Sonarr`, and which lookup field marks anime: Radarr's `keywords`, Sonarr's `genres`), its address and key from the admin's `ArrSinkConfig`; a new title goes to the app's anime slot (when one is set), and into Sonarr as an Anime series, when its lookup marks it anime or Sammlarr holds a stored AniList or MyAnimeList id for it (`IMediaService.GetIdsAsync`, read once per batch) |
+
+The id sources Sammlarr never calls:
+
+| Id source | Where its ids and ratings come from |
+|---|---|
+| IMDb | nothing: `ImdbId` is reached through Plex, TMDB and MDBList lookups, and its rating arrives in Plex's and MDBList's answers and from IMDb's datasets |
+| TheTVDB | nothing: `TvdbId` is reached through Plex, TMDB, MDBList, Wikidata and TVmaze lookups |
+| Rotten Tomatoes | nothing of its own: `RottenTomatoesId` (the title's page) is found by Wikidata, and its ratings arrive in Plex's and MDBList's answers |
+| Metacritic, Letterboxd | nothing of their own: their ratings and ids arrive in MDBList's answer (a Metacritic or Letterboxd id is the page path its rating links to), and Wikidata finds the Metacritic and Letterboxd pages too |
+
+The cross-cutting folders under `API`:
+
+- `Http`: the registration builder (`ForRemote<TOptions>(RemoteService)` and `ForService(Service)`, through which every provider module registers its clients, roles, key checks, converters and enrichers), `AddRemoteHttp<TOptions>` with the lanes (`Lanes`, `LaneHandler`, `LanedPipeline`: a lane per route by URL and path, one permit per attempt, one retry layer, the attempt timeout), the keyless `AddClientHttp<TOptions>` with the standard resilience handler, `RemoteCapacity` (a remote's lane state for routing), `Answering.GuardedAsync` and `LaneAnswers` (a call's failure as an `Answer<T>`), `RecentAnswers` (one shared fetch per key, cancelled when its last waiter leaves), and `CheckAccessAsync`, which every key and token check shares to answer `Valid`, `Rejected`, `Unreachable` or `Spent`.
+- `Feeds`: `SiteLink` (a site page link parsed into its stored path and query, unknown keys refused), `FeedPages.Titles` (a page read stops at 500 titles) and `AnimeSeason` (the anime season of a date by calendar quarter).
+- `Notifications`: the webhook and Pushover channels and the Fluid template renderer.
+- `Observability`: HTTP and provider instrumentation.
+
+### UI and Web: feature slices, and the host that composes them
+
+`UI/Features` is one folder per feature area (Auth, Browse, Feeds with a live-preview editor and
+a run log, Home as the library dashboard, Wantlist with per-item push status + sync, Blocklist,
+Settings), each a vertical slice of
+Blazor pages and components; `UI/Shared` holds the cross-feature components and services. `UI` is
+a Razor class library on abstractions only, so it ships no `Program.cs` and references no
+implementation.
+
+`Web` is the host. It owns the root components (`App`, `Routes`), and its `Program.cs` is the
+composition root: `AddModule<T>()` for Core, Shared, DB, API, UI and Messaging, then Wolverine,
+TickerQ, authentication, the Blazor interactive server render mode (with `UI`'s assembly registered so its
+pages are discovered), the auth and health endpoints, and the admin-only `/diagnostics/export`.
+
+## Level 3
+
+The anatomy of a provider module, using MDBList. The whole registration is one chain:
+
+```csharp
+services
+	.ForRemote<MdblistOptions>(RemoteService.Mdblist)
+	.Client<MdblistClient>()
+	.Client(MdblistClient.Unauthenticated)
+	.ApiKey<MdblistKeyCheck>(ApiKeyProvider.Mdblist)
+	.Feed<MdblistService>(FeedProvider.Mdblist)
+	.Enricher<MdblistEnricher>()
+	.Converter<MdblistIdConverter>();
+```
+
+- `ForRemote` names the remote service the module calls, so every client after it shares MDBList's lanes and wait budget.
+- `MdblistClient` is a typed HTTP client. `Client` gives it the laned pipeline (retry, one lane permit per attempt, attempt timeout) with the lanes `MDBList:Http:Lanes` configures, and records it as MDBList's client.
+- `MdblistKeyCheck` answers whether a key works, keyed to the `ApiKeyProvider.Mdblist` slot.
+- `MdblistService` implements `IFeedProvider`, keyed to `FeedProvider.Mdblist`. `FeedProvider` is a hand-written role enum whose members answer the `Service` that serves them, and the registration records that MDBList registered it.
+- `MdblistEnricher` and `MdblistIdConverter` are keyed by the remote service. Both ask through `MdblistTitles`, which the module also registers as an `IBurstPrimer`, and `MdblistBudget` is registered beside the registration chain as the quota of MDBList's lanes (`ILaneQuota`, keyed by the remote service).
+- Nothing outside the folder references `MdblistService`. The feed preview resolves `IFeedProvider` by the feed's `FeedProvider` key.
+
+Adding a provider is four steps:
+
+1. Add a `RemoteService` member with its `Access` and `OwnIds` arms (and a `MediaProvider` member if it brings ids of its own), and its options and appsettings section.
+1. Create an `API/<Provider>` folder with an `IServiceModule`.
+1. Register its clients and roles through `ForRemote` against the matching `Contracts` interface(s), adding a member to each role enum it serves.
+1. Add `AddModule<…>()` in `ApiModule`.
+
+The compiler then names every switch the new members must join (CS8509 is an error), and the role tests fail until every
+role member is registered by the service it claims and the remote service has a client. See [Cross-cutting Concepts](06-crosscutting.md).

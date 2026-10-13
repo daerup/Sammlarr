@@ -1,128 +1,127 @@
-[[section-glossary]]
-== Glossary
+# 9. Glossary
 
 Project vocabulary, the coined domain terms especially. The media-model terms are the types
-identify produces; their structure is in <<section-concepts>>.
+identify produces; their structure is in [Cross-cutting Concepts](06-crosscutting.md).
 
-=== Media model
+## Media model
 
-Media:: The movies and shows Sammlarr tracks. No single `Media` type; a title is one of the union
+**Media**: The movies and shows Sammlarr tracks. No single `Media` type; a title is one of the union
 cases below.
 
-MediaType:: `Movie`, `Show`, or `Unknown` (a provider result that is neither, such as a person in a
+**MediaType**: `Movie`, `Show`, or `Unknown` (a provider result that is neither, such as a person in a
 search).
 
-`MediaId`:: Sammlarr's own id for a title: a Vogen value object over a GUID, never empty and never a
+**`MediaId`**: Sammlarr's own id for a title: a Vogen value object over a GUID, never empty and never a
 placeholder. `MediaId.New()` mints one, `MediaId.From` reads a stored one.
 
-`IExternalMediaId`:: One provider's id for a title, with source provider, media type, and value (`TmdbId`, `ImdbId`,
+**`IExternalMediaId`**: One provider's id for a title, with source provider, media type, and value (`TmdbId`, `ImdbId`,
 `TvdbId`, `PlexId`, `MdblistId` and the rest). Each is either an identity key or a page link (`MediaProvider.Role`).
 
-Identity key:: An `IIdentityKey` (TMDB, IMDb, TheTVDB, Plex, MDBList, Trakt, MyAnimeList, TVmaze, AniList): an id that
+**Identity key**: An `IIdentityKey` (TMDB, IMDb, TheTVDB, Plex, MDBList, Trakt, MyAnimeList, TVmaze, AniList): an id that
 names one title. Only keys match titles, take part in claims and sit in `ExternalMediaIds`, where a key belongs to one
 title and a title holds at most one key per source. Contrast Page link.
 
-`MediaIdentity`:: A `MediaId` plus the identity keys identified as that title (see Identity key). Only titles Sammlarr stores have one. Rating pages are not keys (see Page link).
+**`MediaIdentity`**: A `MediaId` plus the identity keys identified as that title (see Identity key). Only titles Sammlarr stores have one. Rating pages are not keys (see Page link).
 
-`MediaDetails`:: What is known about a title: title, tagline, summary, artwork, release date,
+**`MediaDetails`**: What is known about a title: title, tagline, summary, artwork, release date,
 genres and ratings, plus the runtime (`MovieDetails`) or seasons, episodes and runtime per episode
 (`ShowDetails`); `UnknownDetails` carries the common fields only. Every field is optional: a
 missing value is `null` (never `""`, `0` or a sentinel date), missing genres are an empty set and
 missing ratings are `MediaRatings.None`. `PageLinks` holds the title's rating-site pages, at most one per site.
 
-`FoundMedia`:: A provider's answer: external ids plus details, no `MediaId`. `MatchTo(identity)`
+**`FoundMedia`**: A provider's answer: external ids plus details, no `MediaId`. `MatchTo(identity)`
 turns it into a match result.
 
-`MatchedMedia`:: A title with its `MediaIdentity` and its details.
+**`MatchedMedia`**: A title with its `MediaIdentity` and its details.
 
-`UnmatchedMedia`:: A title Sammlarr could not match to a library row, with the external ids and
+**`UnmatchedMedia`**: A title Sammlarr could not match to a library row, with the external ids and
 details known about it. It has no `MediaIdentity`, so it cannot be wantlisted or blocklisted. Its `Reason` says why:
 not found, not found earlier, couldn't look up, or a conflict (its ids sit on two stored titles, listed in
 `ConflictsWith`).
 
-`MediaMatchResult`:: The union of `MatchedMedia` and `UnmatchedMedia`: the outcome of identifying a
+**`MediaMatchResult`**: The union of `MatchedMedia` and `UnmatchedMedia`: the outcome of identifying a
 title. Search, trending and feed loading answer with it; list building works over it.
 
-Missing:: The details fields and rating sources with no value (`MediaDetails.Missing`, a `MediaFields`), computed and
+**Missing**: The details fields and rating sources with no value (`MediaDetails.Missing`, a `MediaFields`), computed and
 never stored. A title nobody has rated is missing every rating source (`MediaFields.AllRatings`); a TMDB or IMDb rating
 without votes still counts as missing.
 
-Provider answer:: Which provider answered a fetch of a title and what it could not give
+**Provider answer**: Which provider answered a fetch of a title and what it could not give
 (`ProviderAnswer`: `Provider`, `Unfilled`, the fields it fills that its own answer lacked, and `AnsweredAt`). A provider
 gave a field when the field is among its `Fills` and not among its `Unfilled`. Every ask records an outcome except a
 refusal before sending: an answer (found, no match, or a title of the wrong type) with what it could not give, or a
 failure (`Failures`). An enricher is only asked when its `Fills` overlap a missing field the load needs.
 
-`CachedDetails`:: Stored details with two times and the provider answers: `RefreshedAt` (the last refresh) and
+**`CachedDetails`**: Stored details with two times and the provider answers: `RefreshedAt` (the last refresh) and
 `AskedAt` (the last ask that recorded an outcome; a gap fill moves only this one). Each `ProviderAnswer` is either an answer,
 which rests `Sammlarr:Housekeeping:FreshDays` (14 days), or a failure (`Failures`), which rests 1, 6, then 24 hours.
 
-`FieldNeeds`:: The fields a load asks for: `Required` (what a feed filters or sorts on, everything on the detail
+**`FieldNeeds`**: The fields a load asks for: `Required` (what a feed filters or sorts on, everything on the detail
 sheet) and `Shown` (what a card shows, asked only within `ShownWait`). Grids ask for none.
 
-Freshness:: Whether a stored title is used as it is (`DetailsFetcher.FindReusable`). It is refreshed `FreshDays` (14 days) after
+**Freshness**: Whether a stored title is used as it is (`DetailsFetcher.FindReusable`). It is refreshed `FreshDays` (14 days) after
 `RefreshedAt` (`CachedDetails.IsStale`), asking every service no longer resting, with the stored value of a field kept
 while a provider gave it within the `FreshDays` before the refresh, or while the service that gives it was skipped. Before
 that a gap is filled when the load needs the field and an enricher could fill it that accepts one of the title's ids,
 the current user has connected, is not resting, and takes the ask (`EnricherChoice.NeedsRefetch`). A refresh that
 skips a service whose stored fields it keeps holds `RefreshedAt`, so the title stays stale and is retried.
 
-Stale title:: A title served from its stale copy because a service its refresh needed could not be reached
+**Stale title**: A title served from its stale copy because a service its refresh needed could not be reached
 (`MatchedMedia.Stale`). A Mirror feed counts no absence for it.
 
-`StoredMedia`:: A stored title as the repository returns it: its `MediaIdentity` and its
+**`StoredMedia`**: A stored title as the repository returns it: its `MediaIdentity` and its
 `CachedDetails`, if it has any.
 
-MediaRatings:: Every rating a title has (`All`), one `IMediaRating` per `RatingSource`, or `None` when it is unrated.
+**MediaRatings**: Every rating a title has (`All`), one `IMediaRating` per `RatingSource`, or `None` when it is unrated.
 
-RatingSource:: Where a rating comes from: TMDB, IMDb, Rotten Tomatoes critics or audience, Metacritic, Letterboxd, Trakt,
+**RatingSource**: Where a rating comes from: TMDB, IMDb, Rotten Tomatoes critics or audience, Metacritic, Letterboxd, Trakt,
 MyAnimeList or AniList. Each member names who delivers it (`[SuppliedBy<RemoteService>]`: Plex delivers the IMDb and Rotten
 Tomatoes ratings, MDBList every source but AniList, only MDBList Metacritic and Letterboxd, MDBList and Trakt the Trakt rating, MDBList and MyAnimeList the MyAnimeList rating, and only AniList its own, alongside IMDb's datasets for IMDb), and its `Card` answers
 whose rating it is (`Owner`; both Rotten Tomatoes sources belong to `MediaProvider.RottenTomatoes`), whether it carries
 votes (`PublishesVotes`) and how a value becomes its rating (`Rate`), all read from its rating type. Its colour, its page
 link, the id the breakdown asks for and its row in the Votes popover all follow from the owner.
 
-IMediaRating:: One source's rating, its own type per source: `Value` as the source writes it ("8.2", "95%"),
+**IMediaRating**: One source's rating, its own type per source: `Value` as the source writes it ("8.2", "95%"),
 `SammlarrValue` on the Sammlarr scale of 0 to 10, its `Votes` if the source publishes them, and its `Verdict`: whether
 it passed its owner's bar (`Liked` or `Disliked`; Rotten Tomatoes from 60%, TMDB and IMDb have none). The UI draws a
 verdict as its art (`providers/ratings/{source}-{verdict}.svg`) and anything else as the owner's tile.
 
-Sammlarr rating:: The one rating Sammlarr shows, filters and sorts on (`SammlarrRating`): a value on the 0 to 10 scale
+**Sammlarr rating**: The one rating Sammlarr shows, filters and sorts on (`SammlarrRating`): a value on the 0 to 10 scale
 and the ratings it counted (`Counted`), whose votes add up to its `Votes`. A `RatingStrategy` derives it from a title's
 `MediaRatings`. The UI draws it with `SammlarrRatingBadge` under your default (`RatingContext` reads it and the
 available sources once per circuit); a click shows `SammlarrRatingBreakdown`. Browse tiles add the ratings Sammlarr
 already stores for each title to TMDB's trending answer (`IMediaService.GetStoredRatingsAsync`, one read per page, no
 network), so their breakdown lists only the sources it has; opening the title loads its details and with them the rest.
 
-RatingStrategy:: How a Sammlarr rating is derived: `AveragedRating` (the mean of its switched-on sources; none listed
+**RatingStrategy**: How a Sammlarr rating is derived: `AveragedRating` (the mean of its switched-on sources; none listed
 means every source) or `OrderedRating` (First available: the first source in its order that rates the title). Each
 feed may keep its own (`Feed.RatingStrategy`); without one, a feed follows its owner's default, which Average over
 every source stands in for until the owner picks one.
 
-Available rating source:: A `RatingSource` one of whose suppliers is connected for the current user
+**Available rating source**: A `RatingSource` one of whose suppliers is connected for the current user
 (`IRatingService.GetAvailableAsync`). Only available sources count; an Average none of whose sources is available
 falls back to every available source, so disconnecting the provider behind a kept choice does not empty a feed while
 another provider still supplies ratings. Availability is read from the stored keys and accounts, never from a live
 check, so a provider that is briefly unreachable still counts.
 
-Page link:: An `IPageLink` (`RottenTomatoesId`, `MetacriticId`, `LetterboxdId`): the path of a rating site's page for a title,
+**Page link**: An `IPageLink` (`RottenTomatoesId`, `MetacriticId`, `LetterboxdId`): the path of a rating site's page for a title,
 such as `m/dune_part_two`. It is stored on the title's details (`MediaPageLinks`), never with its identity keys, so two
 titles may share one (remakes share a Metacritic slug) and a link never merges titles. `MediaProvider.Role` says which
 providers give keys and which give page links.
 
-Rotten Tomatoes page:: Where a breakdown's Rotten Tomatoes rows link: the title's Rotten Tomatoes page link. MDBList's
+**Rotten Tomatoes page**: Where a breakdown's Rotten Tomatoes rows link: the title's Rotten Tomatoes page link. MDBList's
 rating answer carries it; a breakdown whose title has none yet asks `IMediaService.FindIdAsync` for it the first time it
 opens, which finds it through `WikidataIdConverter` (Wikidata's "Rotten Tomatoes ID", P1258, by the title's IMDb id, P345,
 which TMDB supplies first when the title lacks it) and stores every page link and key in that answer. "No page" is
 remembered by the resolver's one-hour miss cache; a failed lookup is not. A title with no details row can't keep a link
 and asks again. Without a link the rows link to Rotten Tomatoes' search.
 
-Page linker:: An `IExternalPageLinker`, registered in the UI keyed by `MediaProvider`, one class per provider, that turns a
+**Page linker**: An `IExternalPageLinker`, registered in the UI keyed by `MediaProvider`, one class per provider, that turns a
 title's ids (and its title) into that provider's page, by its own id: TMDB, TheTVDB and MDBList by media type too (TheTVDB and
 MDBList have none for an unknown type), Rotten Tomatoes by its id or else its search for the title; every provider has one.
 The rating breakdown's rows ask with the title's ids.
 
-External IDs view:: `ExternalIdsView` (UI, scoped) decides every card the External IDs popover shows, and `MediaTitleLink`
+**External IDs view**: `ExternalIdsView` (UI, scoped) decides every card the External IDs popover shows, and `MediaTitleLink`
 only draws them: a card per id that has a page (each asked with that id alone, so two Plex ids link to two pages), none for
 Rotten Tomatoes, Metacritic, Letterboxd or Trakt (their pages open from the rating rows) or for an id without a page, and, for an admin whose wantlist syncs to
 Radarr + Sonarr, one card more: the title's Add New search in the app its type belongs to (`ArrSearchLinks`), by the first
@@ -131,28 +130,28 @@ role and the sink are checked on each call (the provider config is cached app-wi
 per circuit, the id cards show without waiting for that read (the Radarr or Sonarr card joins once it finishes), and a title without a
 card shows no popover.
 
-=== Identify and details
+## Identify and details
 
-Identify:: Turning external references into the right library title: a list load (`IMediaService.LoadListAsync`), or a
-batch of requests (`IdentifyAsync`). The correctness-critical operation; see <<section-runtime-view>>.
+**Identify**: Turning external references into the right library title: a list load (`IMediaService.LoadListAsync`), or a
+batch of requests (`IdentifyAsync`). The correctness-critical operation; see [Runtime View](04-runtime.md).
 
-Burst:: Everything a list source yields without waiting (`BurstsAsync`), such as one page of an MDBList list. A list
+**Burst**: Everything a list source yields without waiting (`BurstsAsync`), such as one page of an MDBList list. A list
 load reads the library once per burst and hands the burst's titles, each with its stored copy, to the primers
 (`IBurstPrimer`: MDBList's lane, the anime id map, IMDb's ratings file), each priming the ones it can help, before the
 burst's titles start.
 
-Chain:: One title's work in a list load (`ListLoad.SettleAsync`): its ids, its claim and its details, at
+**Chain**: One title's work in a list load (`ListLoad.SettleAsync`): its ids, its claim and its details, at
 `LaneClass.Title` in list order. Nothing caps how many chains run. Each settles exactly once and leaves with its list
 position; when no title settles for `StallAfter` (3 minutes), the `RunWatchdog` settles the open ones couldn't look up.
 
-Claim:: The write that decides a title's identity before it is handed out (`IIdentityClaims.ClaimAsync`): an
+**Claim**: The write that decides a title's identity before it is handed out (`IIdentityClaims.ClaimAsync`): an
 `IdentityClaim` of identity keys, the stored title it is pinned to (if any) and the services the keys came from
 (`Sources`). The claim lane (`IdentityClaims`, one per scope, not a Lane) commits what is queued in one transaction, and `ClaimRule` extends at most one stored title
 and never merges two. The outcome is `Claimed`, with the stored `MediaId`, or `Conflicted`, with the titles that hold the
 keys; a conflicted title settles unmatched as a conflict (`UnmatchedReason.Conflict`, `ConflictsWith`), and a Mirror
 feed counts the titles it owns among those as seen.
 
-Stored twice:: Two stored titles a claim says are one (`IdentityConflict`, kept in `IdentityConflicts`): the held
+**Stored twice**: Two stored titles a claim says are one (`IdentityConflict`, kept in `IdentityConflicts`): the held
 title, the other, the one claimed id that sits on the other, and the services that claimed it. The claim lane writes
 one in its transaction wherever a claim meets two rows: a pinned claim's key another row owns (`Claimed.Disputed`),
 an unpinned claim on two rows, a request whose ids already point at two rows, and a write race. A pair is noted once
@@ -160,128 +159,128 @@ in either order; meeting it again only moves `SeenAt`. It stays `Undecided` unti
 it, or `Distinct` with its reason: the rows contradict each other (a source on both, or a film and a show), a source
 answered with another id, or an admin kept them apart.
 
-Merge:: Making two stored titles one (`IMediaMerge.MergeAsync`): `Merged` with the survivor and the removed title,
+**Merge**: Making two stored titles one (`IMediaMerge.MergeAsync`): `Merged` with the survivor and the removed title,
 `Contradicted` when the two contradict each other by then, or `NotStored` when one of them is gone (merged before, or
 trimmed) or both ids name one title.
 
-Answer:: What a converter's or enricher's call ends in (`Answer<T>`): `Found`; `NoMatch`, the service has no such title;
+**Answer**: What a converter's or enricher's call ends in (`Answer<T>`): `Found`; `NoMatch`, the service has no such title;
 `Unavailable`, blocked, down, refused by a lane, at a quota reserve or failed in transit, with whether the request left
 (`Sent`); or `Faulted`, an answer that could not be used. `Answering.GuardedAsync` turns exceptions into answers. Only
 `NoMatch` from every route settles a title not found and is cached. Not the same as a Provider answer, which the details
 cache records per service.
 
-Details:: Loading what is known about an identified title: the cached details while they are fresh,
+**Details**: Loading what is known about an identified title: the cached details while they are fresh,
 otherwise a fetch through the `DetailsFetcher`, which asks the enrichers one at a time.
 
-Candidate:: One external id offered as input to identify. A title's candidates are resolved together and claimed as
+**Candidate**: One external id offered as input to identify. A title's candidates are resolved together and claimed as
 one identity.
 
-IdentifyHints:: Title, year and media type passed alongside the candidates. They describe a title that stays unmatched
+**IdentifyHints**: Title, year and media type passed alongside the candidates. They describe a title that stays unmatched
 and seed the resolution of a stored title; no id lookup searches by them (no converter announces a `ByHints`
 lookup).
 
-Id converter:: An `IExternalIdConverter`: one provider's id lookups and the `LookUpAsync` that answers them.
+**Id converter**: An `IExternalIdConverter`: one provider's id lookups and the `LookUpAsync` that answers them.
 `MediaIdResolver` chains the lookups toward the target (the provider the active sink addresses the title's
 type by, or the provider `FindIdAsync` asks for). Plex finds a Plex id by a TMDB, IMDb or TheTVDB id through its match
 endpoint, one call per title, and reads a Plex id's other ids through its metadata endpoint; TMDB looks up a TMDB id's
 detail and finds a TMDB id by an IMDb or TheTVDB id; Wikidata finds a title's page links (Rotten Tomatoes, Metacritic,
 Letterboxd) and other ids by an IMDb id, many IMDb ids in one query.
 
-Id lookup:: An `IdLookup`: what one provider call accepts (`ById`: some providers' ids; `ByHints`: the title
+**Id lookup**: An `IdLookup`: what one provider call accepts (`ById`: some providers' ids; `ByHints`: the title
 hints), which providers' ids its answer may yield, its cost in calls, and for a `ById` whether its answer carries
 title hints (`GivesHints`; Wikidata's does not, so no path asks it for hints) and whether a definitive answer by one of
 a title's ids answers it for all of them (`AsksOnce`, Plex's match). The planner turns each into hops; a path through a
 provider that is down or blocked past its `MaxWait` gives up, unless an earlier answer in the same resolution already said
 no to every request of the hop before it, and one blocked within it is asked and waits in the provider's lane.
 
-Dataset:: A whole file Sammlarr downloads daily instead of asking per title (IMDb's ratings file, the anime id map): an `IDataset` that
+**Dataset**: A whole file Sammlarr downloads daily instead of asking per title (IMDb's ratings file, the anime id map): an `IDataset` that
 parses it, an `IDatasetTable` replaced in one transaction, and its load recorded in `DatasetLoads`.
 
-Enricher:: An `IDetailsEnricher`, stored with its remote service, that fills details fields and declares the ids it accepts (TMDB takes its own,
+**Enricher**: An `IDetailsEnricher`, stored with its remote service, that fills details fields and declares the ids it accepts (TMDB takes its own,
 TheTVDB's and IMDb's, finding a TMDB id first; Plex takes its own). Every details lookup is an enricher's: Sammlarr asks one open
 enricher at a time, the search setting's service first, then the one filling the most missing detail fields, then the
 most missing rating sources, then the shortest estimated wait, then `RemoteService`'s order, until no open enricher can
 fill what is still missing.
 
-External URL:: An optional second address for Radarr or Sonarr (`ArrInstanceConfig.ExternalUrl`), for when a browser reaches the app
+**External URL**: An optional second address for Radarr or Sonarr (`ArrInstanceConfig.ExternalUrl`), for when a browser reaches the app
 somewhere other than the URL Sammlarr calls, such as a container name only Sammlarr resolves. Only links a person opens use it
 (the API key hint in Settings, the find card in the External IDs popover); `LinkUrl` falls back to the URL when it is empty.
 
-Library writer:: The `LibraryWriter` a load writes changed details through (`DetailsChange`, only titles whose details
+**Library writer**: The `LibraryWriter` a load writes changed details through (`DetailsChange`, only titles whose details
 changed): it commits them as the run goes, at most 256 titles per transaction, and writes a failed group one title at a
 time.
 
-Negative cache:: The in-memory cache of ids already known to be unmatched, kept for an hour and
+**Negative cache**: The in-memory cache of ids already known to be unmatched, kept for an hour and
 checked before any provider call, so a repeated miss skips the providers (`IUnmatchedMediaCache`). Only a resolution
 in which every route answered no match fills it.
 
-=== Curation
+## Curation
 
-Feed:: A saved query over a provider list: the provider, the list `Identifier`, an add
+**Feed**: A saved query over a provider list: the provider, the list `Identifier`, an add
 strategy, an optional filter, sort, and limit, and a schedule.
 
-Site page link:: A browse page of a feed source's own site (an AniList search, a MyAnimeList top anime or
+**Site page link**: A browse page of a feed source's own site (an AniList search, a MyAnimeList top anime or
 season page), stored as its path and query (`SiteLink`), read through the provider's API up to its first 500
 titles (`FeedPages.Titles`); a key or page the provider's table does not know is refused when the feed is tested.
 
-Add strategy:: How a feed's results reconcile into the wantlist. `Append` adds them and leaves
+**Add strategy**: How a feed's results reconcile into the wantlist. `Append` adds them and leaves
 them; `Mirror` keeps the items this feed added matching the feed, removing the ones that dropped
 out of it. Mirror only ever touches its own slice, never manual, remote, or other feeds' items.
 `FeedStrategy` is a union, so `Mirror` carries the data only it needs: an absence threshold, the
 number of consecutive runs an item must be missing before it is removed.
 
-Schedule:: When a feed runs, a `FeedRunTrigger`: `Manual`, or `Scheduled` with a cron expression
+**Schedule**: When a feed runs, a `FeedRunTrigger`: `Manual`, or `Scheduled` with a cron expression
 (seconds field included). A scheduled, enabled feed has a TickerQ cron ticker. The same union
 records what started each run.
 
-Feed run:: One application of a feed to the wantlist by `FeedRunEngine`: plan (the same planner
+**Feed run**: One application of a feed to the wantlist by `FeedRunEngine`: plan (the same planner
 the preview uses), then apply the adds and the feed's owned drops. Always executed as a job.
 
-Live run trace:: The in-memory record of a feed run in progress (`FeedRunTrace`): numbered steps for each title, path,
+**Live run trace**: The in-memory record of a feed run in progress (`FeedRunTrace`): numbered steps for each title, path,
 hop and give-up, read from the spans on the `Sammlarr.FeedRun` source, kept per feed until 30 seconds after the run
 ends and shown only to the feed's owner. The live view replays it; nothing saved is computed from it.
 
-Hop:: One ask of one service for one title, for its ids or for its details, with its outcome: answered, answered
+**Hop**: One ask of one service for one title, for its ids or for its details, with its outcome: answered, answered
 after a 429, gave up on a 429, or failed. A free lookup the service answers from data already loaded is a hop of zero
 milliseconds.
 
-Live-view lane:: The dashed paths along the top and bottom of the live view that skip the services: a title already stored
+**Live-view lane**: The dashed paths along the top and bottom of the live view that skip the services: a title already stored
 (known) goes straight to Matched, one the unmatched cache missed within the hour (not found earlier) straight to Not
 found. Not a request lane (see Lane).
 
-Run key:: The id of one trace (`TraceCursor.Run`). A reader's cursor carries it, so a read after the feed ran again
+**Run key**: The id of one trace (`TraceCursor.Run`). A reader's cursor carries it, so a read after the feed ran again
 gets a fresh snapshot instead of steps from the wrong run.
 
-Run log:: The recorded feed runs (`FeedRun` with its `FeedRunItem` rows): when, what triggered it,
+**Run log**: The recorded feed runs (`FeedRun` with its `FeedRunItem` rows): when, what triggered it,
 how conclusive the load was, and what was added, removed or could not be addressed. A run is written `Pending` as it
 starts and completed when it ends, `Stopped` if it threw, was cancelled or was cut off by a restart. A Mirror feed's
 miss counts live beside it, in `FeedAbsences`: one row per owned title still missing, with its count of conclusive runs.
 
-Filter, Sort, Limit:: The query rules applied to a feed's source list (`QueryFilter`,
+**Filter, Sort, Limit**: The query rules applied to a feed's source list (`QueryFilter`,
 `QuerySort`, `QueryLimit`). A limit picks from the top of the sort or at random (`QueryLimit.Pick`); a random pick
 ranks by a hash of the feed's id and the title's `MediaId`, so the preview and every run pick the same titles, and the
 titles a feed holds keep their slots.
 
-QueryVerdict:: What running a feed's rules over one candidate produces, carrying two independent
+**QueryVerdict**: What running a feed's rules over one candidate produces, carrying two independent
 facts. `QueryOutcome` is purely the query verdict: `Qualified`, `Culled` (filtered out) or
 `Truncated` (past the limit). `Enrollment` is what the user already did with the item:
 `InWantlist`, `InBlocklist`, `Owned` (this feed put it there). Questions like "will import" or
 "at risk" are predicates over both, so nothing depends on the order the rules are checked in.
 Unmatched candidates are reported separately as unmatched.
 
-Wantlist:: The set of titles Sammlarr keeps in sync with the sink.
+**Wantlist**: The set of titles Sammlarr keeps in sync with the sink.
 
-Sink:: The service the wantlist syncs to, an `IMediaSink` keyed by the hand-written `SinkKind`:
+**Sink**: The service the wantlist syncs to, an `IMediaSink` keyed by the hand-written `SinkKind`:
 Plex, or Radarr + Sonarr as one target (`ArrSink`: movies to Radarr by their TMDB id, shows to Sonarr by
 their TVDB id, new anime into the app's anime slot when it has one). A sync reads the sink, pulls in what was
 added there, and pushes queued changes. Each push carries the feed that added the title, if any, as a `SinkPush`.
 
-Tag scheme:: How Radarr + Sonarr knows a title is Sammlarr's (`ArrTagScheme`): a user tag
+**Tag scheme**: How Radarr + Sonarr knows a title is Sammlarr's (`ArrTagScheme`): a user tag
 `{prefix}-u-{user}`, a feed tag `{prefix}-{feed}` and an optional plain `{prefix}`, each slugged to
 `a-z0-9-`. A sync reads only the titles carrying the user's tag; removing a title another user still tags
 only takes this user's tag off.
 
-Anime slot:: An optional second root folder and quality profile for Radarr or Sonarr (`ArrInstanceConfig.AnimeRootFolderPath`,
+**Anime slot**: An optional second root folder and quality profile for Radarr or Sonarr (`ArrInstanceConfig.AnimeRootFolderPath`,
 `AnimeQualityProfileId`; `RoutesAnime` once a folder is chosen). A new title goes there, and into Sonarr as an Anime series, when it
 is anime by Sammlarr's own data (it holds an AniList or MyAnimeList id for it, or finds its TMDB or TheTVDB id in the anime id map,
 `IAnimeIds.FindManyAsync`) or, for a title whose stored genres hold Animation or are empty, when the app's lookup marks it anime
@@ -290,24 +289,24 @@ profile. Every add the app is not asked about posts a small body built from the 
 answers "not found" settles as unaddressable. The anime profile falls back to the
 default one (`ProfileFor`), and a title already in the app is only retagged, never moved.
 
-Provenance:: Where a wantlist item came from: `SinkOrigin` (added on the sink and pulled in),
+**Provenance**: Where a wantlist item came from: `SinkOrigin` (added on the sink and pulled in),
 `ManualOrigin` (search, browse, or feed preview), `FeedOrigin` (a feed put it there), or
 `OrphanedOrigin` (its feed was later deleted).
 
-Blocklist:: Titles excluded from curation so they never enter a list.
+**Blocklist**: Titles excluded from curation so they never enter a list.
 
-=== Providers and wiring
+## Providers and wiring
 
-Media provider:: An id namespace: `MediaProvider` (TMDB, IMDb, Rotten Tomatoes, TVDB, Plex, MDBList, Metacritic,
+**Media provider**: An id namespace: `MediaProvider` (TMDB, IMDb, Rotten Tomatoes, TVDB, Plex, MDBList, Metacritic,
 Letterboxd, Trakt, MyAnimeList, TVmaze, AniList) names whose ids an
 `IExternalMediaId` holds, and nothing else. Who is called and who is asked are remote services.
 
-Remote service:: One external service Sammlarr calls, with its own lanes: `RemoteService` (TMDB, Plex, MDBList, Wikidata, TVmaze, IMDb datasets, Anime lists, AniList, MyAnimeList,
+**Remote service**: One external service Sammlarr calls, with its own lanes: `RemoteService` (TMDB, Plex, MDBList, Wikidata, TVmaze, IMDb datasets, Anime lists, AniList, MyAnimeList,
 Trakt, Radarr, Sonarr). It answers its `Access` and its `OwnIds` (the media provider whose ids it owns, if any), and every client,
 key check, converter and enricher registers through it (`ForRemote`), so its clients share its lanes, its wait budgets
 (`MaxWait`, `EnrichWait`) and the load routing reads (`IRemoteCapacity`).
 
-Lane:: The door every call to one service route passes (`LaneGate`, one per remote service, route and owner; a route is
+**Lane**: The door every call to one service route passes (`LaneGate`, one per remote service, route and owner; a route is
 one of the provider's configured URLs plus a path). It admits attempts by class (`Interactive`, `Source`, `Title`,
 `Background`) and then by order, under the provider's limits as published (requests per window) and an optional cap on
 requests in flight. A 429 with `Retry-After` blocks it, one without halves its rate, and repeated failures take it down
@@ -315,158 +314,159 @@ for a while. A keyed lane (`Lane<TKey, TOut>`) in front of it batches ids for a 
 request, one batch per batch key and class at a time. Not the claim lane (see Claim) nor the live view's lanes (see
 Live-view lane).
 
-Gate:: A lane's admission (`LaneGate.EnterAsync`): one permit per HTTP attempt, retries included, granted by class,
+**Gate**: A lane's admission (`LaneGate.EnterAsync`): one permit per HTTP attempt, retries included, granted by class,
 order and the lane's windows, or refused at once (`LaneRefusedException`) when the lane is down or a block or a quota
 reserve outlasts the caller's patience, the service's `MaxWait`. A refused attempt is never sent, and a quota
 (`ILaneQuota`, such as MDBList's budget) can refuse one class while it admits another.
 
-Access:: What a remote service needs before a person can use it: `Open` (Wikidata, TVmaze, IMDb datasets, Anime lists, AniList), `UserKey` (an API key in a
+**Access**: What a remote service needs before a person can use it: `Open` (Wikidata, TVmaze, IMDb datasets, Anime lists, AniList), `UserKey` (an API key in a
 slot, `ApiKeyProvider`: TMDB, MDBList, MyAnimeList; TMDB's optional read access token is a slot no access names), `UserSignIn` (an `AuthProvider` sign-in: Plex) or `AppInstance` (the install's
 `ArrApp`: Radarr, Sonarr). `IServiceReadiness` reads it to say which remote services are connected.
 
-Service:: What serves a role: a remote service, the Radarr + Sonarr pair (`Arr`) or Sammlarr accounts (`SammlarrAccounts`).
+**Service**: What serves a role: a remote service, the Radarr + Sonarr pair (`Arr`) or Sammlarr accounts (`SammlarrAccounts`).
 Each role enum (`FeedProvider`, `TrendingProvider`, `SearchProvider`, `SinkKind`, `AuthProvider`) is written by hand and
 answers its `Service`; a service is ready when every remote service behind it (`Remotes`) is connected, so the pair needs
 both apps and Sammlarr accounts are always ready. The UI names and brands a choice through its service.
 
-Module:: An `IServiceModule`: a layer's or a provider's self-contained DI registration, added
+**Module**: An `IServiceModule`: a layer's or a provider's self-contained DI registration, added
 from `Web`'s `Program.cs` via `AddModule<T>()`.
 
-Keyed service:: A service resolved by an enum key, so a caller asks for, say, `IFeedProvider`
+**Keyed service**: A service resolved by an enum key, so a caller asks for, say, `IFeedProvider`
 keyed to `FeedProvider.Mdblist`.
 
-`ProviderConfig`:: The single global, admin-managed row of active provider selections (sink,
+**`ProviderConfig`**: The single global, admin-managed row of active provider selections (sink,
 search, trending, auth) plus the registration mode. Not per-user. The same row holds the Radarr + Sonarr
 connection (`ArrSinkConfig`, its API keys encrypted), read through `IArrSinkConfigService`.
 
-`RemoteUnavailableException`:: Raised when a remote service could not answer: a 429, 408 or 5xx past the retries, a
+**`RemoteUnavailableException`**: Raised when a remote service could not answer: a 429, 408 or 5xx past the retries, a
 timeout, a lane's refusal a client passes on, or a dataset not loaded yet. It says whether its request left (`Sent`).
 A converter's or enricher's caller gets it as an `Unavailable` answer, and a list page's caller degrades on it (partial
 results) rather than fail a whole run.
 
-=== Identity and access
+## Identity and access
 
-Role:: `Admin` or `Member`. The first user to sign in becomes Admin; everyone after is a
+**Role**: `Admin` or `Member`. The first user to sign in becomes Admin; everyone after is a
 Member. Admin manages providers, secrets, users and registration.
 
-Registration mode:: `Open`, so anyone with a Plex account may join, or `Closed`, so new
+**Registration mode**: `Open`, so anyone with a Plex account may join, or `Closed`, so new
 sign-ins are rejected.
 
-Secret:: An API key or a provider credential. Stored under data protection and redacted from
-logs through `[Sensitive]`. See <<section-concepts>>.
+**Secret**: An API key or a provider credential. Stored under data protection and redacted from
+logs through `[Sensitive]`. See [Cross-cutting Concepts](06-crosscutting.md).
 
-`IUserOwned`:: A marker interface on entities that belong to a user. The `DbContext` gives each a
+**`IUserOwned`**: A marker interface on entities that belong to a user. The `DbContext` gives each a
 per-user query filter and stamps the owner on insert.
 
-`IUserScope`:: Sets the ambient current user for a scope via `As`/`AsAsync`, so background work
+**`IUserScope`**: Sets the ambient current user for a scope via `As`/`AsAsync`, so background work
 (the job runner, the cron ticker function, the Wolverine handlers) runs under the right user's
 filters.
 
-=== Sync and announcing
+## Sync and announcing
 
-Sync:: Reconciling the local wantlist with its sink: pull remote changes in, push local changes
+**Sync**: Reconciling the local wantlist with its sink: pull remote changes in, push local changes
 out.
 
-Outbox:: The table of local wantlist changes not yet pushed to the sink, one row per title and sink with
+**Outbox**: The table of local wantlist changes not yet pushed to the sink, one row per title and sink with
 its action (add or remove), status and attempt count. Opposing changes cancel in it; each sync drains the
 active sink's rows inline, a sink switch drops the old sink's once it has stored the new one, and an item
-that fails five times becomes `Failed`. See <<section-runtime-view>>.
+that fails five times becomes `Failed`. See [Runtime View](04-runtime.md).
 
-Delta:: The difference between the wantlist and the sink computed during a sync
+**Delta**: The difference between the wantlist and the sink computed during a sync
 (`WantlistDelta`).
 
-Event:: Something that happened, announced only to open pages. In memory, never stored, gone on
+**Event**: Something that happened, announced only to open pages. In memory, never stored, gone on
 restart, and invisible in settings because no user can subscribe to one. Used for high-frequency
 progress that would be noise as a notification, such as per-item wantlist push status, and for
 telling a page its cached numbers are stale. Named `*Event`, marked `IEvent`. Contrast Notification.
 Which of the two a fact is never depends on what triggered it, only on whether a user could
 reasonably subscribe to it.
 
-Notification:: A durable, user-subscribable fact worth telling someone about. Queued on Wolverine,
+**Notification**: A durable, user-subscribable fact worth telling someone about. Queued on Wolverine,
 fanned out to every matching Subscription, rendered through a Template and delivered on a Channel.
 Named `*Notification`, marked `INotification`, which also carries the notification's own
 `DefaultLevel`. Neither marker is assignable to the other, so the two kinds cannot be confused.
 
-Event publisher:: The process-wide singleton carrying Events to open pages (`IEventPublisher`). A
+**Event publisher**: The process-wide singleton carrying Events to open pages (`IEventPublisher`). A
 C# `event`, not a queue: nothing is stored and nothing is replayed, so a page that was closed simply
 missed it. Notifications do not travel this way; they reach pages through the WebUi Channel.
 
-Announcer:: The single seam that publishes both kinds (`Announcer`). `Announce` takes an `IEvent`
+**Announcer**: The single seam that publishes both kinds (`Announcer`). `Announce` takes an `IEvent`
 and reaches the Event publisher alone; `AnnounceAsync` takes an `INotification` and goes to the
 durable queue. The parameter types are what keep the two apart: calling the wrong one does not
 compile.
 
-Channel:: How a notification is delivered: webhook, Pushover, or the in-app toasts of the WebUi
+**Channel**: How a notification is delivered: webhook, Pushover, or the in-app toasts of the WebUi
 channel (`INotificationChannel`). The WebUi channel is seeded as a Target on signup, so in-app
 notifications work without configuration and can be unsubscribed like any other.
 
-Target:: A configured notification destination, such as one webhook URL or Pushover account.
+**Target**: A configured notification destination, such as one webhook URL or Pushover account.
 
-Subscription:: A rule binding a notification type to a target and a template: who is told about
+**Subscription**: A rule binding a notification type to a target and a template: who is told about
 what.
 
-Template:: The Fluid template that renders a notification's title and body for a target.
+**Template**: The Fluid template that renders a notification's title and body for a target.
 
-=== Jobs and scheduling
+## Jobs and scheduling
 
-Job:: One unit of background work, a row in the `Jobs` table: a request (`RunFeed`, `SyncWantlist` or
+**Job**: One unit of background work, a row in the `Jobs` table: a request (`RunFeed`, `SyncWantlist` or
 `FillDetails`), its owner and a state. The table is the queue of record; the UI reads it.
 
-FillDetails job:: The owner's background job ("Filling details") that fills the missing fields of their wantlisted and
+**FillDetails job**: The owner's background job ("Filling details") that fills the missing fields of their wantlisted and
 blocklisted titles, 500 at a time at `LaneClass.Background`, asking only services that answer within `ShownWait`. It is
 queued after a run and when a key or sign-in is stored, and steps aside for any queued or waiting feed run or sync
 until it has waited 30 minutes.
 
-Job state:: `Waiting` (due in the future), `Queued` (ready), `Running`, then `Done` or `Failed`.
+**Job state**: `Waiting` (due in the future), `Queued` (ready), `Running`, then `Done` or `Failed`.
 A job its owner cancels before it starts ends `Cancelled`.
 
-Job runner:: The hosted service that takes the oldest `Queued` job and runs it, one at a time, in
+**Job runner**: The hosted service that takes the oldest `Queued` job and runs it, one at a time, in
 its own scope as the job's owner (`JobRunner`). A `JobAlarm` timer moves `Waiting` jobs to
 `Queued` when they are due.
 
-Coalescing:: Enqueueing a job that is already pending for the same kind, key and owner folds into
+**Coalescing**: Enqueueing a job that is already pending for the same kind, key and owner folds into
 the pending row instead of adding one. It is what turns N scheduled feed runs into one sync.
 
-Grace and MaxWait:: The sync a scheduled run arms as it starts is due `Grace` (2 minutes) later;
+**Grace and MaxWait**: The sync a scheduled run arms as it starts is due `Grace` (2 minutes) later;
 each further run pushes it back, never past its deadline, `MaxWait` (30 minutes) after it was
 first armed (`SchedulerOptions`). While one of the owner's scheduled or _sync when done_ runs is
 queued, the sync is `Queued` behind it instead of `Waiting`. A manual Sync moves the deadline to
 now, so nothing pushes it back.
 
-Cron ticker:: TickerQ's persisted cron entry. A feed's only enqueues a `RunFeed` job and never runs the
+**Cron ticker**: TickerQ's persisted cron entry. A feed's only enqueues a `RunFeed` job and never runs the
 feed itself; the dataset loads' and the nightly housekeeping pass's run their work directly, one at a time.
 
-=== Naming vocabulary
+## Naming vocabulary
 
-Id:: Identity only, no data (`MediaId`, `FeedId`, `RunId`).
+**Id**: Identity only, no data (`MediaId`, `FeedId`, `RunId`).
 
-Item:: A title as a member of a collection: a list, a run's results, a change list
+**Item**: A title as a member of a collection: a list, a run's results, a change list
 (`WantlistItem`, `BlocklistItem`, `FeedRunItem`, `ChangeItem`).
 
-Media:: A title with its display details (`MatchedMedia`, `WantlistedMedia`, `BlocklistedMedia`).
+**Media**: A title with its display details (`MatchedMedia`, `WantlistedMedia`, `BlocklistedMedia`).
 
-Entry:: A record in a log or a queue, ordered by time (`WantlistOutboxEntry`, `DiagnosticsLogEntry`,
+**Entry**: A record in a log or a queue, ordered by time (`WantlistOutboxEntry`, `DiagnosticsLogEntry`,
 `DiagnosticsSpanEntry`). The Architecture suite allows no other `*Entry` type in the layers it scans.
 
-Row:: A table row: a persisted DB type, internal to `DB` (`WantlistRow`, `FeedRunItemRow`), or a rendered UI
+**Row**: A table row: a persisted DB type, internal to `DB` (`WantlistRow`, `FeedRunItemRow`), or a rendered UI
 line (`UpNextRow`).
 
-=== Kernel types
+## Kernel types
 
 These live in `Shared`, the kernel below `Domain`, and are used throughout.
 
-`union`:: A closed set of case types, e.g. `MediaMatchResult` is `MatchedMedia` or
+**`union`**: A closed set of case types, e.g. `MediaMatchResult` is `MatchedMedia` or
 `UnmatchedMedia`. Matched by case directly, except `Optional` and `Result`, which are read through their helpers
-(<<absence>>).
+([Absence and failure: Optional, Result or null](06-crosscutting.md#absence-and-failure-optional-result-or-null)).
 
-`Optional<T>`:: A present-or-absent value (`Some` / `None`): how our code says a value may be missing; `T?` is
-left to framework edges and UI-only state (<<absence>>).
+**`Optional<T>`**: A present-or-absent value (`Some` / `None`): how our code says a value may be missing; `T?` is
+left to framework edges and UI-only state ([Absence and failure: Optional, Result or null](06-crosscutting.md#absence-and-failure-optional-result-or-null)).
 
-`Result<T>`:: A success-or-error value (`Success<T>` / `Error`). Used instead of exceptions for
-expected failures, and read through its helpers (<<absence>>).
+**`Result<T>`**: A success-or-error value (`Success<T>` / `Error`). Used instead of exceptions for
+expected failures, and read through its helpers ([Absence and failure: Optional, Result or null](06-crosscutting.md#absence-and-failure-optional-result-or-null)).
 
-`ValueSet<T>`:: A set with value equality: two sets with the same elements are equal. Used for
+**`ValueSet<T>`**: A set with value equality: two sets with the same elements are equal. Used for
 genres and external ids.
 
-NOTE: `sink` and `wantlist` are planned vocabulary from the media-sinks redesign, not built
-yet. They are defined where that change is described, in <<section-technical-risks>>.
+> [!NOTE]
+> `sink` and `wantlist` are planned vocabulary from the media-sinks redesign, not built
+> yet. They are defined where that change is described, in [Risks and Technical Debt](08-risks-technical-debt.md).
