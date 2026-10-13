@@ -95,7 +95,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal HttpStub HttpStub { get; } = new();
 
-	private ServiceProvider DbOnlyProvider => _dbOnlyProvider ??= BuildDbOnlyProvider();
+	private ServiceProvider DbOnlyProvider => _dbOnlyProvider ??= BuildDbOnlyProvider(ConnectionString);
 
 	internal SammlarrDbContext Context => _context ??= BuildContext(DbOnlyProvider, CurrentUser, ConnectionString);
 
@@ -735,10 +735,11 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		);
 	}
 
-	private static ServiceProvider BuildDbOnlyProvider(string? keyRingPath = null)
+	private static ServiceProvider BuildDbOnlyProvider(string connectionString, string? keyRingPath = null)
 	{
 		var services = new ServiceCollection();
 		services.AddLogging();
+		services.AddSingleton(new SammlarOptions { ConnectionString = connectionString });
 		services.AddModule<DbModule>();
 		if (keyRingPath is null)
 		{
@@ -768,6 +769,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		));
 		services.AddScoped(sp => sp.GetRequiredService<IDbContextFactory<SammlarrDbContext>>().CreateDbContext());
 
+		services.AddSingleton(new SammlarOptions { ConnectionString = ConnectionString });
 		services.AddSingleton(new SchedulerOptions());
 		services.AddSingleton(new FeedLoadOptions());
 		services.AddSingleton(new HousekeepingOptions());
@@ -886,7 +888,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		var path = Path.Combine(Directory.CreateDirectory(Scratch).FullName, "template.db");
 		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
 		connection.Open();
-		using var provider = BuildDbOnlyProvider();
+		using var provider = BuildDbOnlyProvider(connection.ConnectionString);
 		var user = new TestCurrentUser();
 		using var context = BuildContext(provider, user, connection);
 		context.Database.Migrate();
@@ -938,7 +940,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	{
 		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
 		connection.Open();
-		using var provider = BuildDbOnlyProvider(keyRingPath);
+		using var provider = BuildDbOnlyProvider(connection.ConnectionString, keyRingPath);
 		var user = new TestCurrentUser();
 		using var context = BuildContext(provider, user, connection);
 		context.Database.Migrate();

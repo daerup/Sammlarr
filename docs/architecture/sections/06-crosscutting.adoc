@@ -480,9 +480,10 @@ provider, registration mode) live in `ProviderConfig`, one global row behind a c
 Provider selection is instance-wide, not per user.
 
 NOTE: Data-protection keys are persisted to a filesystem key ring under a stable application name
-(`EncryptionModule`), so stored secrets survive a restart. In a container the ring shares the
-`/data` volume with the database; that volume must be writable by the container user (see
-<<section-technical-risks>>).
+(`EncryptionModule`), so stored secrets survive a restart. The ring sits in `dp-keys` beside the database file unless
+`Sammlarr__DataProtection__KeyRingPath` names another folder, so a Sammlarr started from another folder still reads the
+secrets its database holds. In a container the ring shares the `/data` volume with the database; that volume must be
+writable by the container user (see <<section-technical-risks>>).
 
 === Authentication and per-user isolation
 

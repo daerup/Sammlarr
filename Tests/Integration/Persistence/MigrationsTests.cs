@@ -1,3 +1,4 @@
+using DB;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,5 +13,13 @@ public class MigrationsTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task Model_WhenComparedToTheLatestMigration_HasNoPendingChanges()
 	{
 		await Assert.That(fixture.Context.Database.HasPendingModelChanges()).IsFalse();
+	}
+
+	[Test]
+	public async Task CreateDbContext_AtDesignTime_BuildsTheModel()
+	{
+		await using var context = new DesignTimeDbContextFactory().CreateDbContext([]);
+
+		await Assert.That(context.Model.GetEntityTypes()).IsNotEmpty();
 	}
 }
