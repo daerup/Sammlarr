@@ -46,5 +46,8 @@
 	<Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild" Inputs="@(TailwindInput)" Outputs="$(MSBuildThisFileDirectory)wwwroot\css\app.css">
 		<Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(RepoRoot)" Condition="!Exists('$(RepoRoot)node_modules')" />
 		<Exec Command="npm run css" WorkingDirectory="$(RepoRoot)" />
+		<ItemGroup>
+			<Content Include="wwwroot\css\app.css" Exclude="@(Content)" />
+		</ItemGroup>
 	</Target>
 </Project>
