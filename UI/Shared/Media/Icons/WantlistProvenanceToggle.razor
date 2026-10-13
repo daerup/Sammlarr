@@ -14,7 +14,7 @@
             <BbPopoverTrigger AsChild="false" class="provenance-dot" aria-label="Where it came from" title="Where it came from">
                 <span class="toggle-dot" style="background: @ColorOf(item.Provenance)"></span>
             </BbPopoverTrigger>
-            <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-auto p-0 overflow-hidden">
+            <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Offset="10" Class="w-auto p-0 overflow-hidden">
                 <ProvenanceDetails Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="Result.Identity.Id" Type="Result.Identity.Type"/>
             </BbPopoverContent>
         </BbPopover>
