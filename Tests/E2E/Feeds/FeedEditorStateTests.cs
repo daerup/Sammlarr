@@ -53,12 +53,6 @@ public class FeedEditorStateTests
 
 		await FeedEditor.Option(page, "Strategy", "Mirror").ClickAsync();
 
-		await Expect(FeedEditor.SaveButton(page)).ToBeVisibleAsync();
-		await Expect(FeedEditor.ApplyButton(page)).ToBeHiddenAsync();
-
-		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
-		await FeedEditor.Toggle(page, "Enable custom sorting").ClickAsync();
-
 		await Expect(FeedEditor.ApplyButton(page)).ToBeVisibleAsync();
 		await Expect(FeedEditor.SaveButton(page)).ToBeHiddenAsync();
 
@@ -66,6 +60,12 @@ public class FeedEditorStateTests
 
 		await Expect(FeedEditor.SaveButton(page)).ToBeVisibleAsync(Wait.Preview);
 		await Expect(FeedEditor.ApplyButton(page)).ToBeHiddenAsync();
+
+		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
+		await FeedEditor.Toggle(page, "Enable custom sorting").ClickAsync();
+
+		await Expect(FeedEditor.ApplyButton(page)).ToBeVisibleAsync();
+		await Expect(FeedEditor.SaveButton(page)).ToBeHiddenAsync();
 	}
 
 	[Test]
