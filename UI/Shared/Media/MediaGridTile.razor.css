@@ -107,3 +107,7 @@
     color: var(--foreground);
     filter: none;
 }
+
+:root:not(.dark) .tile-no-art .tile-bookmark ::deep svg {
+    stroke: var(--foreground);
+}

@@ -111,6 +111,14 @@ public class WantlistProvenanceToggleTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_TheProvenanceCard_SitsTenPixelsBelowTheDot()
+	{
+		var cut = RenderToggle(isToggled: true, item: FeedItem());
+
+		await Assert.That(cut.FindComponent<BbPopoverContent>().Instance.Offset).IsEqualTo(10);
+	}
+
+	[Test]
 	public async Task Click_OnTheBookmark_TogglesWithoutRevealing()
 	{
 		MatchedMedia? toggled = null;
