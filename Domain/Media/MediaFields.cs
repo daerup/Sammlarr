@@ -44,7 +44,19 @@ public readonly record struct MediaFields(MediaField Details, ValueSet<RatingSou
 	{
 		return text.Split(Separator, StringSplitOptions.RemoveEmptyEntries)
 			.Where(name => name != Nothing)
-			.Select(name => Enum.TryParse<MediaField>(name, out var detail) ? detail : Rated([Enum.Parse<RatingSource>(name)]))
+			.Select(Field)
+			.WhereSome()
 			.Aggregate(None, (fields, field) => fields | field);
+	}
+
+	private static Optional<MediaFields> Field(string name)
+	{
+		return Known<MediaField>(name).Map(detail => (MediaFields)detail).Or(() => Known<RatingSource>(name).Map(source => Rated([source])));
+	}
+
+	private static Optional<T> Known<T>(string name)
+		where T : struct, Enum
+	{
+		return Optional.When(Enum.TryParse<T>(name, out var value) && Enum.IsDefined(value), () => value);
 	}
 }
