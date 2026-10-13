@@ -1,611 +1,461 @@
 # 6. Cross-cutting Concepts
 
-Concerns that cut across every layer, carrying the quality goals from
-[Introduction and Goals](01-introduction-goals.md): correctness (media model + identify), resilience (HTTP
-pipeline), isolation (auth + query filters), maintainability (modules + code generation).
+This chapter holds the rules every layer follows, from typed absence to telemetry. The idea to take away: Core never
+waits on a service itself. Every remote call passes a lane that paces it by the limits the provider publishes, and Core
+decides whom to ask from what the lanes report. The flows these rules serve are in [Runtime View](04-runtime.md).
 
 ## Domain model and kernel
 
-`Domain` holds the media model every layer speaks: a title is `MatchedMedia` or `UnmatchedMedia`
-(the `MediaMatchResult` union), both carrying one `MediaDetails` record (`MovieDetails`, `ShowDetails`,
-`UnknownDetails`) whose fields are all optional, and a search provider or enricher answers with `FoundMedia`,
-which has no `MediaId`. The terms are defined in [Glossary](09-glossary.md), produced by identify in [Runtime View](04-runtime.md),
-and the shape is
-[ADR 0009](../../adr/0009-model-a-title-as-an-identity-plus-optional-details.md). Below it, `Shared` is the kernel: `Optional<T>`,
-`Result<T>`, `ValueSet<T>`, and the `union` types. Expected absence is an `Optional`, not null
-([Absence and failure: Optional, Result or null](#absence-and-failure-optional-result-or-null)); expected failure is a `Result`, not an exception. Media details are the exception: a missing details
-value is `null` from the provider mapper to the column (missing genres are an empty set, missing ratings are
-`MediaRatings.None`). Unions are matched by case directly, never through `.Value`; `Optional` and `Result` are read
-through their helpers instead. Enum switches are exhaustive with no default arm.
+`Domain` holds the media model ([ADR 0009](../../adr/0009-model-a-title-as-an-identity-plus-optional-details.md)). A
+resolved title is a `MediaMatchResult` union: `MatchedMedia` (a `MediaIdentity` plus details) or `UnmatchedMedia` (its
+external ids, details and an `UnmatchedReason`). Details are one `MediaDetails` record (`MovieDetails`, `ShowDetails`,
+`UnknownDetails`) with all fields optional. A search provider or enricher answers with `FoundMedia`, which has no
+`MediaId`. `Shared` is the kernel: `Optional<T>`, `Result<T>`, `ValueSet<T>` and the `union` types. Unions are matched
+by case, never through `.Value`; enum switches are exhaustive with no default arm (CS8509 is an error).
 
 ## Absence and failure: `Optional`, `Result` or `null`
 
-A value that can be missing is an `Optional<T>` wherever our own code hands it on. `T?` is left to the places a
-framework reads or writes, and to state that never leaves its type.
+A value that can be missing is an `Optional<T>` wherever our own code hands it on, and an expected failure a
+`Result<T>`. `T?` stays where the table puts it, and in media details from the provider mapper to the column
+(missing genres are an empty set, missing ratings `MediaRatings.None`).
 
 | `Optional<T>` | `T?` |
 |---|---|
-| non-private returns, parameters and properties of our types: `Find…`, lookups, query criteria, record fields that can be missing (`RunQuery.MustInclude`, `FeedOverview.LastRun`, `NotificationTemplate.Level`, `IMediaSink.AddressedBy`) | framework edges: EF rows and LINQ query parameters, JSON-persisted columns (`QueryFilter`), provider JSON DTOs, `IOptions` records, Blazor route, query and cascading parameters, `@bind` pairs, Fluid, webhook and Wolverine payloads, Serilog and OpenTelemetry models, BCL overrides and exception constructors |
+| non-private returns, parameters and properties of our types: `Find…`, lookups, query criteria, record fields that can be missing (`RunQuery.MustInclude`, `FeedOverview.LastRun`, `NotificationTemplate.Level`), `IMediaSink.AddressedBy` | framework edges: EF rows and LINQ query parameters, JSON-persisted columns (`QueryFilter`'s `FilterPredicate`), provider JSON DTOs, `IOptions` records, Blazor route, query and cascading parameters, `@bind` pairs, Fluid, webhook and Wolverine payloads, Serilog and OpenTelemetry models, BCL overrides and exception constructors |
 | a UI parameter or view model whose value comes from the domain | UI-only state (selection, loading, busy, binding, create or edit mode, links), private fields, locals, sort keys |
 
-An `Optional` that does cross a System.Text.Json boundary needs `OptionalJsonConverterFactory` (`Shared`): it writes the
-value or `null` and reads `null` as `None`. Wolverine's serializer registers it (`MessagingHostExtensions`), so
-`DeliverNotification` carries its `NotificationTemplate` as is; without it .NET's union handling cannot read an
-`Optional` back.
-
-- `None` means absent, never "not loaded yet".
-- Convert once, at the edge: `Optional.Of(x)` in, `.ToNullable()` out (an awaited chain writes `(await x).ToNullable()`).
-- An `Optional<T>` member always holds a case: initialise it with `new None()`. `default(Optional<T>)` holds neither:
-`Match`, `Map` and `GetValueOr` throw on it, and `IsSome`, `IsNone`, `Apply` and `ApplyNone` quietly treat it as
-neither case (an unconfigured mock of an `Optional`-returning member returns it).
-- `Optional` says nothing about why. A failure with a reason is a `Result`; bridge with `.ToResult(reason)`.
-- An `Optional` is never a sort key and never sits inside an operator EF translates; `Optional.Of(row.X)` in a final
-`Select` projection runs client-side and is fine.
-- `GetValueOr(value)` and `Match(value, value)` evaluate eagerly; pass a `Func` when the fallback throws or costs.
-- A branch that is async beside a plain one uses the mixed `Match` (`.Match(x => FindAsync(x), () => Unusable)`), a
-cached-or-load read the async `GetValueOr` (`.GetValueOr(() => ReadAsync(id))`), and a `None` or an error passed
-through the async `Map`. Give the plain branch a type: a bare `() => default` or `() => null` binds the non-mixed
-overload instead. `Task.FromResult` is left for a synchronous body behind an async contract, or where the task itself is
-the value (a ternary arm, a stored delegate, a task handed back as is). The mixed overloads have a lower
-`OverloadResolutionPriority`, so a branch that only throws keeps the non-mixed overload; the async mirror carries the
-priority onto `Task` and `ValueTask` receivers.
-
-Build and read an `Optional` or a `Result` by chaining its helpers: values move through `Map`, `When` and `Or`; side
-effects go in `Apply`, `ApplyNone` and `ApplyError`, one step each (a step that needs more than one statement is a named
-method); at most one exit (`Match`, `GetValueOr`, `IsSome`, `ToNullable`, `ToResult`, …) leaves the chain, last. An async step finishes before the next
-one starts, and one `await` covers the chain. A step that returns a `ValueTask` is written `async x => await StepAsync(x)`,
-because a bare `x => StepAsync(x)` binds to the synchronous `Action` overload and is not awaited. A `bool` read
-(`IsSome`, `IsNone`, `IsSuccess`, `IsError`, `Map(…).GetValueOr(false)`) is for answers: a property, a predicate, a sort
-key, an argument, stored UI state, `Match(p, () => false)` asking about the value, a loop guard that leaves the loop.
-Outside a loop guard it never routes control flow on presence alone: a branch between side effects is `Apply` / `ApplyNone` / `ApplyError`, a branch between two
-values is `Match` or `Map(…).GetValueOr(…)`, and a service hands back its `Optional` rather than collapsing it to a
-`bool` its caller then branches on (`IJobQueue.CancelAsync` returns the cancelled request).
-
-```csharp
-_state = await ApiKeyService
-    .TestAsync(Provider, _apiKeyInput)
-    .Apply(key => _validatedKey = key)
-    .ApplyError(_ => _validatedKey = null)
-    .Match(CredentialState.Success, CredentialState.Failed);
-```
+- `None` means absent, never "not loaded yet"; a failure with a reason is a `Result`.
+- An `Optional<T>` member is initialised with `new None()`. `default`, a `null` passed for an `Optional` and an
+  unconfigured mock's return hold neither case: `Match`, `Map` and `GetValueOr` throw, and `IsSome`, `IsNone`, `Apply`
+  and `ApplyNone` quietly see neither case.
+- Across System.Text.Json it needs `OptionalJsonConverterFactory` (Wolverine's serializer registers it; any other must
+  add it); an untyped hand-over (`RenderTreeBuilder.AddAttribute`) needs `Optional.Of(x)`. It is never a sort key or
+  inside an operator EF translates. `GetValueOr(value)` is eager: pass a `Func` for a costly fallback.
+- Side effects go in `Apply`, `ApplyNone` and `ApplyError`, one step each (a step that needs more than one statement
+  is a named method); a `ValueTask` step is `async x => await StepAsync(x)`, or it binds the `Action` overload unawaited.
+- A `bool` read (`IsSome`, `Match(p, () => false)`) answers a question; outside a loop guard it never routes control
+  flow, and a service returns its `Optional`, not a `bool` (`IJobQueue.CancelAsync`).
 
 | To | `Optional`: write | not |
 |---|---|---|
 | build from a nullable | `Optional.Of(RunIdParam).Map(id => RunId.From(UrlGuid.Decode(id)))` | `RunIdParam is null ? new None() : Some.Of(…)` |
 | build from a dictionary | `_byId.GetValueOrNone(id)` | `TryGetValue(…) ? Some.Of(v) : new None()` |
 | build from a sequence | `Widths.FirstOrNone(width => width >= size.Width)` | `FirstOrDefault(…) is var width and > 0 ? Some.Of(width) : new None()` |
-| build from a condition | `Optional.When(ticks != 0, () => new DateTimeOffset(ticks, TimeSpan.Zero))` (the value is built only when the condition holds) | `ticks == 0 ? new None() : Some.Of(…)`, `Optional.Of(cond ? x : null)` |
+| build from a condition | `Optional.When(ticks != 0, () => new DateTimeOffset(ticks, TimeSpan.Zero))` | `ticks == 0 ? new None() : Some.Of(…)`, `Optional.Of(cond ? x : null)` |
 | keep it only while a condition holds | `next.When(feed.Enabled)` | `feed.Enabled ? next : new None()` |
 | project either way | `LinkedRun.Match(linked => …, () => …)` | `LinkedRun is Some<RunId>(var linked) ? … : …` |
 | a value or a fallback | `due.Map(Until).GetValueOr(Timeout.InfiniteTimeSpan)` | `due is Some<DateTimeOffset>(var at) ? Until(at) : …` |
-| an async value or a fallback | `await feeds.FindAsync(id).Map(async feed => (FeedPlanResult)await PlanAsync(feed)).GetValueOr(new FeedPlanFailed(…))` | a ternary around `await` |
 | test presence | `_item.IsSome()` | `_item is Some<WantlistItem>` |
-| a yes/no that ends the expression | `run.Match(r => r.Failed, () => false)` | `is Some<FeedRun>({ Failed: true })`, `run.When(r => r.Failed).IsSome()` |
+| a yes/no that ends the expression | `job.Match(state => state is JobState.Running, () => false)` | `job is Some<JobState>(JobState.Running)`, `job.When(…).IsSome()` |
 | route around the value | `query.Feed.When(feed => feed == Feed).Map(…).GetValueOr([])` | `if (query.Feed is not Some<FeedId>(var feed) \|\| feed != Feed) { return []; }` |
-| keep the present values | `….Select(feed => NextRunOf(feed).Map(next => (feed, next))).WhereSome()` | `.Where(e => e.next is not null)`, then `e.next!.Value` |
+| keep the present values | `tconsts.Select(tconst => NumberOf(tconst).Map(id => (tconst, id))).WhereSome()` | `.Where(e => e.id is not null)`, then `e.id!.Value` |
 | act when present or absent | `row.Job.Map(job => JobQueue.CancelAsync(job, token)).Apply(_ => …).ApplyNone(() => …)` | `if (x is Some<T>(var v)) { … }`, `if (x.IsSome()) … else …`, `if (x.Map(…).GetValueOr(false))`, one block lambda |
 | hand it to a framework | `query.MustInclude.Map(run => run.Value).ToNullable()` | `is Some<RunId>(var id) ? id.Value : null` |
-| turn it into a `Result` | `.ToResult("The sink cannot address …")` | `is not Some<…> … { return Error.From(…); }` |
+| turn it into a `Result` | `Optional.Of(answer?.Data).ToResult("AniList answered without data.")` | `is not Some<…> … { return Error.From(…); }` |
 
 | To | `Result`: write | not |
 |---|---|---|
-| project either way | `await signIn.CompleteAsync(…).Map(user => SignInAndRedirectAsync(context, user, returnUrl)).GetValueOr(error => Results.Redirect(…))` | `switch { Success<User>(var user) => …, Error error => … }` |
+| project either way | `await setupCode.Match(…, () => signIn.CompleteAsync(…)).Map(user => SignInAndRedirectAsync(context, user, returnUrl)).GetValueOr(error => Results.Redirect(…))` | `switch { Success<User>(var user) => …, Error error => … }` |
 | pick a case, both sync | `PlanAsync(sink).Match(summary => (WantlistPlanResult)summary, error => new WantlistSyncSinkUnreachable(error.Reason, …))` | a type `switch` over the cases |
 | act on success or failure | `result.Apply(…).ApplyError(…)` | `if (result is Success<T>(var v)) { … } else { … }` |
 | keep the successes of a stream | `await foreach (var media in stream.WhereSuccessAwait())` | `if (result is Success<T>(var v))` inside the loop |
-| a value or a fallback | `loaded.Match(matched => (MediaMatchResult)matched, _ => request.Unmatched())` | `loaded is Success<MatchedMedia>(var matched) ? matched : …` |
-| keep a success that passes a test | `handoff.ToOptional().When(match => match.Stored.IsNone())` | `is Success<IdentifyHandoff>(var match) && …` |
-| read the cause of an error | `error.CausedBy<RemoteUnavailableException>().Match(next.Fills, MediaFields.None)` | `Error { Exception: RemoteUnavailableException }` |
+| keep a success that passes a test | `answer.ToOptional().When(found => found.Fits(type))` | `is Success<T>(var found) && …` |
+| read the cause of an error | `refused.CausedBy<RemoteUnavailableException>().Match(unavailable => NotReached(number, unavailable), () => refused)` | `Error { Exception: RemoteUnavailableException }` |
 | chain a fallible step | `.Map(next)` (flattens a `Result`-returning step), `.MapError(…)` | a guard that returns the error by hand |
 | leave the monad at a boundary | `.GetOrThrow(error => new …Exception(error.Reason))`, `.ToOptional()` | `is Error e ? throw … : …` |
 
-Outside `Shared`'s own helpers, either monad is pattern-matched only in a guard (`if (x is not Some<T>(var v)) { return …; }`,
-or the same on `Success<T>`) whose following code holds a method-scoped `using var` or a `try`, or that itself leaves a
-loop with `continue` or `break`. Razor markup may also `@if` on a case. When a member turns from `T?` into `Optional<T>`, its old
-readers that still compile change meaning: `x is null` is always false, `x is not null` and `x is { } v` always true
-(`v` is the `Optional` itself), `OrderBy` on it throws, and interpolation prints the union; `x ?? y`, `x!.Value` and a
-constant `case` stop compiling. A `null` passed where an `Optional<T>` is expected still compiles and builds a value
-that holds no case: pass `new None()`. A value handed over untyped (`RenderTreeBuilder.AddAttribute`, a
-parameter dictionary) is not converted at all and fails at run time: pass `Optional.Of(x)`.
+Outside `Shared`, a monad is matched by hand only in a guard (`if (x is not Some<T>(var v)) { return …; }`) that
+leaves a loop, or whose following code holds a method-scoped `using var` or a `try`; Razor markup may `@if` on a case.
+The build enforces this: `SAM0002` (`Roslyn/Monads/MonadPatternAnalyzer.cs`) fails hand matches, null and shape
+patterns, `default` or `null` as a monad, `?:` constructions, block-lambda or unawaited steps, and a monad used as a
+sort key or as text; `SAM0003` (`MonadBranchAnalyzer.cs`) fails a branch that reads a monad as a `bool`; the
+`AbsenceTests` architecture test fails a nullable non-private member outside the edges it lists.
 
-The build enforces this. The `Roslyn` project's `SAM0002` fails it on a hand match outside these guards, on a null
-or constant pattern against a monad, on `null` or `default` converted to one, on a `?:` that picks `Some.Of(…)` or
-`new None()` (`Optional.Of` for a null test, `GetValueOrNone` for a dictionary `TryGetValue`, `Optional.Of(…).When(…)`
-for a null test joined by `&&`, `Optional.When` for any other condition) or an `Optional` it already holds and
-`new None()` (`When(…)` on that `Optional`), and on an `Optional.Of` over a `?:` that picks `null`; it stays quiet when
-the arm cannot move into a lambda (an `await`, a `ref` or span-like value, `this` in a struct, a variable the condition
-assigns only when it holds) and leaves a condition that reads a monad to its own rows, on a block lambda or an unawaited `Task` or `ValueTask` step passed to
-`Apply`, and on a monad used as an ordering key or written as text; its message names the helper to use. `SAM0003` fails
-it when a branch reads a monad as a `bool` (`if (x.IsSome())`, `if (x.Map(…).GetValueOr(false))`, a `?:` on `IsSome()`)
-and proposes the `Apply` / `ApplyNone` / `ApplyError` or `Match` chain instead; a `bool` used as a value or argument, a
-`Match(p, () => false)` and a loop guard pass. The `AbsenceTests` architecture test fails on a nullable
-non-private member outside the framework edges and bridges listed in it.
+## Modules and dependency injection
 
-## Modularity and dependency injection
-
-Every layer and provider ships an `IServiceModule`; `Web`'s `Program.cs` composes them with `AddModule<T>()`
-(see [Building Block View](03-building-blocks.md)), and modules nest. Anything with more than one implementation
-is a keyed service, resolved by an enum key (`IFeedProvider` keyed `FeedProvider.Mdblist`);
-`IKeyedServiceIndex<TKey, TService>` wraps the lookup when the key is only known at runtime.
+Every layer and provider ships an `IServiceModule` (`Shared/DI`), composed in `Web/Program.cs` with `AddModule<T>()`
+([Building Block View](03-building-blocks.md)). A service with several implementations is keyed by an enum
+(`IFeedProvider` by `FeedProvider`), resolved through `IKeyedServiceIndex<TKey, TService>` or, to list the keys and
+find one, `IKeyedServiceSet<TKey, TService>`.
 
 ## Contract shape
 
-Small per-user lists are read whole as snapshots; history that grows is read through a query record.
+- **Snapshots for small lists.** The wantlist, blocklist, outbox and feeds are small per user, so one read returns the
+  whole list as a Domain snapshot (`WantlistSnapshot`, `BlocklistSnapshot`, `FeedSnapshot`, `OutboxSnapshot`).
+- **Repositories access, services compose.** A repository returns items and counts from its own tables; the service
+  builds the snapshot. UI injects no repository but the notification settings ones, nor `IWantlistOutbox`.
+  `RepositoryTests` pins who may use each repository and keeps each aggregate's persistence off the others' tables.
+- **A query record for unbounded history.** Feed runs are paged through `GetRunsAsync(RunQuery)`.
+- **Verbs.** A member's verb says what it does and its type what it acts on: `Get` reads what exists, `Find` what may
+  be missing (an `Optional`), `Count…By` returns a dictionary.
 
-- **Snapshots.** The wantlist, blocklist, outbox and feeds are small and bounded per user, so one read returns the whole
-list as a Domain snapshot that callers question (`Contains`, `Find`, `Ids`, `Items`) instead of calling the
-database per question: `GetAsync()` gives the `WantlistSnapshot`, `BlocklistSnapshot` and `FeedSnapshot`, and
-`IWantlistService.GetOutboxAsync()` the `OutboxSnapshot`.
-- **Repositories access, services compose.** A repository returns items and aggregates from its own tables and never
-builds a snapshot; the service builds it (the feed snapshot adds `OnWantlist` from
-`IWantlistRepository.CountByFeedAsync`). UI never injects a repository (except the notification settings ones) or
-`IWantlistOutbox`; it asks a service. `RepositoryTests` in the Architecture suite pins who may use the wantlist,
-outbox, feed, blocklist, media, API key and credential repositories, and keeps the feed, blocklist and wantlist
-persistence code off each other's tables (the wantlist still reads feed rows for its provenance).
-- **A query record for unbounded history.** Feed runs grow with every scheduled run and are paged, so they are read
-through `GetRunsAsync(RunQuery)`: `RunQuery.Take(limit)` with optional `Feed`, `Since` and `MustInclude`.
+## Providers: registration and extension
 
-Members say what they do; the type already says what to:
+Providers are registered by hand ([ADR 0010](../../adr/0010-split-the-ids-from-the-services-sammlarr-calls.md),
+[ADR 0011](../../adr/0011-give-a-service-every-role-its-api-supports.md)): a provider module registers its clients,
+key check, roles, id converters and enrichers through `ForRemote<TOptions>(RemoteService)` (`API/Http`), Radarr +
+Sonarr their sink and search through `ForService`. Each role registration records who registered it and which service
+the role claims (`Registered`).
 
-| Verb | Means | Returns |
-|---|---|---|
-| `Get` | read something that exists | the value; a snapshot for a list; items from a repository |
-| `Find` | look up something that may be missing | `Optional` |
-| `Count…By` | an aggregate count | a dictionary |
-| `Create` / `Update` / `Delete` | an entity (feed, user) | the new id / nothing / nothing |
-| `Add` / `Remove` | membership of a list | bulk: the ids changed; single: nothing |
-| `Orphan` | keep a deleted feed's titles, without the feed | nothing |
-| `Store` / `Clear` | a stored secret | nothing |
-| `Pause` / `Resume` | feed scheduling | the ids changed |
-| `Apply` | push a batch to the sink | a stream of acks |
-| `ReportRejected` | the provider answered 401 | nothing |
+- **A service:** a `RemoteService` member with its `Access` and `OwnIds` arms, its brand
+  (`UI/Shared/Services/Branding/MediaProviderBrandingService.cs` plus the art), an options record with its section
+  (and lanes) in `Web/appsettings.json`, and a module under `API/<Service>`. A key adds an `ApiKeyProvider` slot and a
+  key check registered with `ApiKey<T>(slot)`; a sign-in adds an `AuthProvider` member and one class, registered with
+  `Credential<T>`, that signs people in and checks their stored token; a keyless service is `Open`.
+- **An id source:** a `MediaProvider` member with its id type, its arms in `MediaProvider.Role` and the stored-id
+  conversion (`DB/Data/Media/MediaIdConversionExtensions.cs`), its brand and an `IExternalPageLinker`.
+- **A rating source:** a `RatingSource` member with `[SuppliedBy<RemoteService>]` (a generator derives `SuppliedBy()`
+  and `SuppliedRatingSources()`), a rating type behind `IOwnedRating<TSelf>`, its `Card` arm, each supplier's wire
+  mapping and its `RatingTexts`.
+- **A downloaded file:** an `IDataset<TRow>`, an `IDatasetTable<TRow>` and a `DatasetLoader<TRow>` ([Datasets](#datasets)).
+- **A feed source:** a `FeedProvider` member with its `Service`, a `Feed<T>` registration and a UI `FeedSources` entry;
+  browse pages go through a `SiteLink` page table (`AniListPages`, `MalPages`, `TmdbPages`, `TraktPages`). A feed
+  source throws on a shape it cannot read and never skips an item.
 
-## Provider extensibility and code generation
-
-Providers are registered, not generated. A provider module names the remote service it calls (`ForRemote<TOptions>(RemoteService)`)
-and registers through it its clients, its key check, its roles and its converters and enrichers; the Radarr + Sonarr pair
-registers its sink and search through `ForService`. Each role registration records who registered it beside the service
-the role member claims (`Registered`), and the role tests hold the two together, cover every member of each role enum and
-give every remote service a client. The role enums and the key slots are written by hand, each member answering its
-`Service` or its `Remote`, and a switch that misses a member does not compile (CS8509 is an error). A Roslyn source
-generator emits the options-record registration. Each `RatingSource` member names the remote services that supply it (`[SuppliedBy<RemoteService>]`), from
-which a generator emits `SuppliedBy()` and the reverse, `SuppliedRatingSources()`; its owner and whether it publishes votes
-are facts of its rating type, read through `source.Card`.
-
-### Adding a provider
-
-- **A new service** is a `RemoteService` member with its `Access` and `OwnIds` arms and its brand, an options record and its
-  appsettings section, and a module under `API/<Service>` that registers everything through `ForRemote`; a key gets a slot in
-  `ApiKeyProvider` and a check through `ApiKey<T>`, a sign-in an `AuthProvider` member and one class through `Credential<T>`
-  that both signs people in and checks their stored token, and a keyless service is `Open`, always connected and never paused.
-- **A new id source** is a `MediaProvider` member with its id type, its arm in the stored-id conversion, its brand and its page
-  linker; a site that owns ids and is called is both.
-- **A new rating source** is a `RatingSource` member with `[SuppliedBy]`, a rating type behind `IOwnedRating<TSelf>` and its
-  `Card` arm, parsed by each supplier's wire map and given its `RatingTexts`; it counts in every strategy the day it ships.
-- **An enricher that cannot vouch for a value** lists it in `Defers` (TVmaze, AniList and MyAnimeList their titles), and artwork
-  no `IArtworkResizer` sizes is deferred on its own: both only fill a gap after the stored copy and every answer that may replace.
-- **A whole file** (IMDb's ratings, the anime id map) is an `IDataset` with an `IDatasetTable`, a row in `DatasetLoads` and a
-  `DatasetLoader` registered in Core; it loads daily and answers `Unavailable` until its first load (ADR 0013).
-- **A new feed source** is a `FeedProvider` member with its `Service`, a `Feed<T>` registration and its `FeedSources` entry
-  (placeholder, help and page link); it throws on a shape it cannot read and never skips an item it cannot parse. A feed
-  source whose site has browse pages adds a page table on `SiteLink` (`AniListPages`, `MalPages`) and reads a page up to
-  `FeedPages.Titles`, its list forms tried first.
-
-The compiler, the role registration tests, the stored-enum-name test and the brand-art test catch a member that misses any of these.
+A member that misses one of these fails the build (the exhaustive switches) or a test: `RoleRegistrationTests` (each
+registration matches its claimed service; every role member, remote service and rating source is covered),
+`MediaProviderBrandingServiceTests` (brand art), or `StoredEnumNamesTests` (every stored enum name).
 
 ## Lanes and HTTP resilience
 
-Every call to a remote service passes a _lane_ (`LaneGate`, `Shared/Concurrency`): one per remote service, route and
-owner, which admits that route's requests by the limits its provider publishes. Nothing in Core sleeps or caps how many
-titles run; the lanes pace each service, so a blocked or slow service holds back only the titles that need it. Every
-client of a remote service gets its pipeline through `ForRemote(...).Client`, built by `AddRemoteHttp<TOptions>`
-(`API/Http`), from outermost to innermost:
+Every call to a remote service passes a _lane_ (`LaneGate`, `Shared/Concurrency`), one per service, route and owner,
+named and routed by `Lanes` (`API/Http/Lanes`). Lanes pace each service by its published limits, so Core never sleeps
+or throttles ([ADR 0017](../../adr/0017-pace-remote-calls-on-lanes-with-limits-as-published.md)). A client registered
+through `ForRemote(...).Client` gets this pipeline from `AddRemoteHttp<TOptions>`, outermost first:
 
-1. `UsageStampHandler` stamps the request with its service and cause;
-1. a Polly retry (`LanedPipeline`), the only retry layer;
-1. `LaneHandler`, which takes one lane permit per attempt, so a retry queues for a new permit like any other request;
-1. the attempt timeout (`Http.AttemptTimeoutSeconds`);
+1. `UsageStampHandler` stamps the request with its service and cause.
+1. A Polly retry (`LanedPipeline`), the only retry layer: up to `Http.RetryAttempts` retries of a 5xx, 408, 429 or
+   broken connection that the lane would admit now (`Lanes.Admits`), with no delay of its own after a 429.
+1. `LaneHandler` takes one lane permit per attempt, so a retry queues like any request.
+1. The attempt timeout (`Http.AttemptTimeoutSeconds`), whose expiry is not retried.
 1. `UsageTagsHandler` tags each attempt.
 
-A request belongs to the lane whose route, one of the provider's configured URLs (`IProviderHttpOptions.Urls`) plus a
-path, is the longest prefix of its address; anything else takes the provider's `api` lane. The URL comes from the
-provider's options, never from a client's base address, so staging and the E2E stack, which override the URLs, route
-the same way, and start-up fails on a route that names a URL the provider does not have (`LaneSettingsCheck`). Plex has
-four lanes: `match` and `watchlist` on its discover host (the watchlist's adds and removes go to the vod host),
-`metadata`, and `api` for plex.tv and every other Plex call. MDBList stamps each request with its API key and Radarr
-and Sonarr with their address as the lane's owner, so each key and each app has lanes of its own.
+Clients that call no remote service (Pushover, the webhook, the picture grids, GitHub's release feed) get
+`AddClientHttp<TOptions>`'s standard resilience handler, with a total timeout of `Http.TimeoutSeconds`.
 
-Each limit is written the way the provider publishes it, as requests per window (`Http.Lanes` in `appsettings.json`,
-read as `RateWindow(Requests, Per, Aligned)`), never flattened to requests per second: a run that stays inside the
-window goes at full speed, and pacing starts only when it would exceed it. A lane may also cap the requests it has in
-flight (`MaxInFlight`) and batch (`MaxBatch`, below).
+A request takes the lane whose route (a key of `IProviderHttpOptions.Urls` plus a path) is the longest prefix of its
+address, else the `api` lane (`LaneSettingsCheck` fails start-up on a route naming a URL key the provider lacks).
+MDBList makes its API key the lane owner, Radarr and Sonarr their address, so each key and app has lanes of its own.
 
-| Service | Lanes |
-|---|---|
-| TMDB | 40 per second |
-| Trakt | 1,000 per 5 minutes |
-| MDBList | 1,000 per 5 minutes, on fixed windows that start at :00, :05 and so on; title lookups batch up to 200 ids |
-| AniList | 30 per minute (as published while AniList runs degraded), 1 in flight; title and prequel lookups batch up to 50 ids |
-| MyAnimeList | 30 per second, 1 in flight |
-| TVmaze | 20 per 10 seconds |
-| Plex | `match` 300 per minute with 5 in flight; `api` and `metadata` 50 per second with 25 in flight each (Plex publishes no limit); `watchlist` 4 in flight |
-| Wikidata | 5 in flight; SPARQL lookups batch up to 100 IMDb ids |
-| Radarr, Sonarr | 4 in flight |
-| IMDb datasets, anime lists | 2 in flight |
+### Limits per service
 
-A lane admits its waiting attempts by class, then by order within the class:
+A limit is written as the provider publishes it, requests per window (`RateWindow`), never flattened to a steady
+per-second rate. A lane may also cap requests in flight (`MaxInFlight`) and batch ids (`MaxBatch`). This is the docs'
+one table of each provider's `Http` section in `Web/appsettings.json` (records `ProviderHttpOptions`, `LaneOptions`):
 
-| Class | Set by | Order inside |
+| Service | Lanes (`Http.Lanes`) | Waits |
+|---|---|---|
+| TMDB | `api` 40 per second | `MaxWaitSeconds` 15, `EnrichWaitSeconds` 15 |
+| Plex | `api` (plex.tv and the rest) and `metadata`: 50 per second, 25 in flight each; `match`: 300 per minute, 5 in flight; `watchlist`: 4 in flight (Plex publishes no limit) | `MaxWaitSeconds` 90 |
+| MDBList | `api` 1,000 per 5 minutes on aligned windows (:00, :05, …); `titles` batches of 200 | |
+| Trakt | `api` 1,000 per 5 minutes | |
+| AniList | `api` 30 per minute, 1 in flight; `titles` and `prequels` batches of 50 | |
+| MyAnimeList | `api` 30 per second, 1 in flight | |
+| TVmaze | `api` 20 per 10 seconds | |
+| Wikidata | `api` 5 in flight; `sparql` batches of 100 | |
+| Radarr, Sonarr | `api` 4 in flight | |
+| IMDb datasets, anime lists | `api` 2 in flight | |
+
+Every lane keeps the `LaneOptions` defaults for going down: `FailuresToDown` 4, `DownSeconds` 30. A wait left blank is
+0: the lane refuses while the service is blocked, and its enricher is asked only while it is open.
+
+### Admission and refusal
+
+A lane admits waiting attempts by `LaneClass`, then by order within the class:
+
+| `LaneClass` | Set by | Order inside |
 |---|---|---|
 | `Interactive` | anything unset: a search, a click | arrival |
-| `Source` | every feed service's list pages (`SourcePages.ReadAsync`) | page order |
-| `Title` | each title's chain in a list load | list position, oldest first |
-| `Background` | the FillDetails job | oldest first |
+| `Source` | feed list pages (`SourcePages.ReadAsync`) | page order |
+| `Title` | each title's chain in a list load | list order |
+| `Background` | the details fill, identity confirmation | oldest first |
 
-A 429 with `Retry-After` blocks the lane until then; a 429 without one halves the lane's rate, at most once per window,
-and each window without a 429 gives back a tenth of the window's requests, at least one (a lane with no window pauses
-for a second). `FailuresToDown` failed attempts in a row (a 5xx, a 408, a timeout, a broken connection; 4 by default)
-take the lane down for `DownSeconds` (30 by default), and then one probe decides. Waiting for room in a window is never refused. A down lane refuses every attempt at once,
-and a block or a quota reserve that outlasts the attempt's patience, its service's `MaxWait`, refuses it at once; either
-way the attempt fails with `LaneRefusedException` and nothing is sent. A quota is a lane's `ILaneQuota`, asked for the class that asks: MDBList's
-budget (`MdblistBudget`) lets list pages through, stops title lookups at the last `MDBList:FeedReserve` requests of the
-day, and stops the FillDetails job once less than half the day's allowance is left, so the job never spends what feed
-runs need.
+- A 429 with `Retry-After` blocks the lane until then; one without halves the rate, at most once per window (a lane
+  with no window pauses for a second), and each quiet window gives back a tenth of its requests, at least one.
+- `FailuresToDown` failed attempts in a row (5xx, 408, timeout, broken connection) take the lane down for
+  `DownSeconds`; then one probe decides.
+- Waiting for room in a window is never refused. A down lane, or a block or quota reserve that outlasts the service's
+  `MaxWait`, refuses at once with `LaneRefusedException`, before anything is sent.
+- A quota is the lane's `ILaneQuota`, asked per class. MDBList's (`MdblistBudget`) always admits list pages, stops
+  title lookups and `Interactive` asks once only `MDBList:FeedReserve` requests are left before the reset, and stops
+  `Background` work once less than `MDBList:BackgroundReserveShare` (half) of the day's allowance is left.
 
-The retry retries only what the lane would admit now (`LaneGate.Admits`): a 429 whose block outlasts the wait, or a
-lane that has just gone down, hands the caller the real response. A 429 is retried with no delay of its own, since the
-lane paces it. Lane clients carry no rate limiter, no concurrency gate, no circuit breaker and no total timeout of
-their own; their `HttpClient.Timeout` of 10 minutes is only a safety net for a stalled body. Clients that call no
-remote service (Pushover, the webhook, the picture grids, GitHub's latest release) get no lanes: `AddClientHttp<TOptions>` gives them the
-standard resilience handler (retry, attempt timeout, circuit breaker) and a total timeout from `Http.TimeoutSeconds`.
+A service that takes many ids per request also gets a keyed lane (`Lane<TKey, TOut>`): MDBList's title lookups,
+AniList's titles and prequels, Wikidata's SPARQL lookups. One batch per batch key and class is out at a time; what
+arrives meanwhile rides the next, up to `MaxBatch`. The batch's request takes a permit and the retry like any other;
+the keyed lane never sends a batch again, and a failed batch fails every key it carried.
 
-A service that takes many ids in one request also gets a keyed lane (`Lane<TKey, TOut>`): asks queue per batch key and
-asking class, one batch per batch key and class is out at a time, and whatever arrives while it is out rides the next one, up to
-`MaxBatch`. No timer gathers a batch, so a slow or throttled service gets bigger batches, not more of them, and a
-`Background` key never rides in a `Title` batch. The batch's request takes its permit like any other; a lane never
-retries a batch, and a failed batch fails every key it carried. MDBList's title lookups (per API key, id kind and media
-type), AniList's titles (one `id_in` query) and prequels (one `idMal_in` query) and Wikidata's SPARQL lookups (one `VALUES` query per media type) ride
-keyed lanes. A load primes MDBList's lane with each burst's titles that still need a field it fills ([Runtime View](04-runtime.md)), so its batches fill
-even though a title reaches MDBList only after its TMDB step.
-
-A call's failure reaches its caller as an answer. `Answering.GuardedAsync` is the one place where a converter's or
-enricher's exception becomes an `Answer<T>`: `Found`, `NoMatch`, `Unavailable` or `Faulted`. A lane refusal or a
-rejected key is `Unavailable` and not sent; an HTTP error or a timeout is `Unavailable` and sent; a
-`RemoteUnavailableException` (a 429, 408 or 5xx that outlasted the retries, a dataset not loaded yet) says itself
-whether its request left (`Sent`); anything unexpected is `Faulted`; a cancellation is rethrown. Only `NoMatch` from every route settles a title as not found and
-fills the negative cache; `Unavailable` and `Faulted` never do. Per-provider numbers
-are in the table above and under `Http.Lanes` in `Web/appsettings.json`; how a load meets a blocked lane is in [Runtime View](04-runtime.md) and
-under Provider routing below
-([ADR 0017](../../adr/0017-pace-remote-calls-on-lanes-with-limits-as-published.md)).
+`Answering.GuardedAsync` (`API/Http`) turns a converter's or enricher's outcome into an `Answer<T>` (MDBList's batched
+answers go through `LaneAnswers.ToAnswer`, which maps exceptions the same way): `Found`; `NoMatch` for an error without
+an exception (a 404); `Unavailable` for a lane refusal or rejected key (not sent), an HTTP error or timeout (sent), or
+a `RemoteUnavailableException` (a 429, 408 or 5xx past the retries, a dataset not loaded yet), which says itself
+whether it was sent (`Sent`); `Faulted` for anything else. A cancellation is rethrown. Only `NoMatch` from every route
+settles a title as not found.
 
 ## Provider routing
 
-Which remote service is asked depends on its lanes. `IRemoteCapacity.Of(remote)` (scoped, in `API/Http`) folds every
-lane of the remote into a `RemoteLoad`, read for the asking class (`LanePriority.Current`) and counting a key's lanes
-only for the signed-in user who sent through them: `BlockedUntil` (a 429's `Retry-After`, a quota reserve for that
-class, or the end of a down period), `EstimatedWait` (the block left plus the time its queue takes to drain at the
-window's rate), `Down`, `Waiting`, `MaxWait` (the provider's `Http.MaxWaitSeconds`: Plex 90, TMDB 15, 0 never waits)
-and `EnrichWait` (`Http.EnrichWaitSeconds`: TMDB 15, Plex unset, so never). So the FillDetails job sees MDBList blocked
-at its floor while a feed run still sees it open. Core reads only the contract. Both id resolution and enrichment take a
-blocked provider the same way, through `RemoteLoad.Takes`: only while it is not down and its block ends within its
-budget (`MaxWait` for id lookups, `EnrichWait` for enrichment); then the ask goes to the provider's lane, which holds it
-for at most the service's `MaxWait` and refuses it beyond that. Core never sleeps.
+Core asks a connected service only when its block ends within the right budget; the lane does any waiting.
+`IRemoteCapacity.Of(remote)` folds a service's lanes into a `RemoteLoad` (`BlockedUntil`, `EstimatedWait`, `Down`,
+`Paced`, the budgets), read for the asking class (so the details fill sees MDBList blocked at its floor while a feed run
+sees it open); an owner's lanes count only for the user who sent through them. `IServiceReadiness` decides what is
+connected from `RemoteService.Access` (always for a keyless service; a stored key or sign-in not rejected since it was
+stored; a Radarr or Sonarr address and key), never by calling the service. A key check answers `Valid`, `Rejected`,
+`Unreachable` or `Spent`; only `Rejected` is remembered.
 
-Enrichment asks, one at a time, the open enricher (the enrichers registered through `Enricher`, keyed by remote service)
-the search setting's service names while a detail field is missing, else the one whose `Fills` cover the most missing detail fields, then the most missing rating sources, the least busy first, among those that accept
-one of the title's ids (`Accepts`), until
-no enricher that takes the ask can fill what is still missing, open ones first; a blocked enricher whose block ends
-within its `EnrichWait` takes the ask, and its lane does the waiting. Only the enrichers the current user has connected are asked, and id lookups take only paths through
-connected services: `IServiceReadiness` answers it once per call to the media service, so once per feed run,
-from the access each remote service needs (a stored key or sign-in that was never rejected, a reachable
-Radarr or Sonarr, or none), never by calling the service. A key check answers `Valid`, `Rejected`, `Unreachable` or
-`Spent`, and only `Rejected` is remembered, so an outage or a rate limit never disconnects anything. An enricher skipped because it was blocked, busy or down, or refused before
-sending, records nothing and is asked on a later load that needs the field; one that answered rests `Sammlarr:Housekeeping:FreshDays` (14 days), and one
-that failed after sending rests 1, 6, then 24 hours. Ratings are fields per source:
-`MediaCompleteness` counts each `RatingSource` (TMDB, IMDb, Rotten Tomatoes critics and audience, Metacritic, Letterboxd,
-Trakt, MyAnimeList, AniList) the title has no
-rating from as a missing field: `MediaFields` holds the `MediaField` detail flags and a set of `RatingSource`, and a provider's sources enter it through `MediaFields.Rated`, so a provider's rating fills come from its `[SuppliedBy]` sources. A rating
-from a source that publishes votes (TMDB, IMDb: `Card.PublishesVotes`) still counts as missing while it has
-none, so Plex's copy of TMDB's rating, which carries no votes, leaves TMDB asked for its own. Each rating is its own type behind
-`IMediaRating` (`TmdbRating`, `ImdbRating`, `RottenTomatoesCriticsRating`, `RottenTomatoesAudienceRating`), keeping its
-own scale and its conversion onto the Sammlarr scale of 0 to 10, and its `Verdict` against its owner's bar (the UI draws a
-verdict as its art, a rating without one as its owner's tile); each rating type states its owner, whether it publishes
-votes and how it rates behind `IOwnedRating<TSelf>`, `RatingSource.Card` reads them for a source, and each source names the
-remote services that supply it (`[SuppliedBy<RemoteService>]`, generated `SuppliedBy()`), so no code outside its
-declaration, its rating type, its `Card` arm,
-Plex's wire mapping and the UI copy names a source (the Settings › Testing demos aside). Merging keeps one rating per source, and a rating
-with votes wins over a copy without (TMDB's own rating over Plex's copy of it). An enricher that fills ratings and
-finds none answers like any other: the rating stays in what it could not give. A fresh answer wins over the stored
-copy, and an earlier answer over a later one, except for what an enricher `Defers` (TVmaze its title, which it cannot
-vouch is English) and for a poster or backdrop no `IArtworkResizer` sizes (TVmaze's): those only fill a gap, after the
-stored copy and after every answer that may replace, so the grids keep their `srcset`. No provider is special, but the
-fields a load needs are: a field the feed filters or sorts on is asked from a service whose block ends within its
-`EnrichWait` (TMDB's 15 seconds, Plex none), a field a card only shows only from one that also answers within
-`ShownWait` (5 seconds); a service skipped either way records nothing and is asked again on a load that needs the
-field. A stale refresh that skips a service keeps the stored values of the fields it could give that no answer filled
-and, if it kept any, keeps `RefreshedAt`, so the title stays stale, is served as `Stale`, and the next load retries it.
+### Wait budgets
 
-Id resolution routes the same way. Each `IExternalIdConverter` announces its `Lookups`, the calls its own provider
-answers: a `ById` lookup accepts some providers' ids, a `ByHints` lookup accepts the title hints (no converter
-announces one), and each says which providers' ids its answer may yield and what it costs in calls (a lookup in a
-downloaded table, like the anime id map's, costs 0). `IdLookupPlanner` turns them into hops (an id to an id, an id to
-the hints, the hints to an id), plans every path of up to three hops from the ids the title already has to the target,
-and orders them by weight: each hop's cost times one plus its provider's estimated wait in seconds
-(`RemoteLoad.Weight`), so an idle two-hop detour goes before a direct hop blocked for ten seconds. Before planning,
-`MediaIdResolver` asks every lookup that costs 0 once from the ids the title holds, adding a provider's id only where
-the title has none, so a free answer (the anime id map's AniList and MyAnimeList ids for a show's TheTVDB, TMDB or IMDb
-id) reaches every title, and no path runs through such a lookup; then it tries the paths in that order. Plex finds a
-Plex id by a TMDB, IMDb or TheTVDB id through its match endpoint and reads a Plex id's other ids through its metadata
-endpoint; the match is an `AsksOnce` lookup, so a definitive answer by one of the title's ids answers it for the others,
-and a path through a match that already answered no is skipped. TMDB looks up a TMDB id's detail (its appended
-`external_ids` carry the IMDb and TheTVDB ids) and finds a TMDB id by an IMDb or TheTVDB id, so a title that carries a
-TMDB, IMDb or TheTVDB id can resolve without Plex; MDBList finds every id it holds for a title by any one of its IMDb,
-TMDB, TheTVDB, Trakt or MyAnimeList ids, at cost 2, so it is taken when TMDB is blocked, has no key or knows no TheTVDB
-id; Wikidata finds a title's Rotten Tomatoes, Metacritic and Letterboxd pages, its TMDB and TheTVDB ids and its AniList
-and MyAnimeList ids by an IMDb id, at cost 3 so it is the last resort for TMDB and TheTVDB ids, a `ById` lookup without
-hints (`GivesHints` false). Within one resolution each lookup is asked once per input, so paths that share a call make
-it once, and never by an id its own earlier answer gave: that answer already told everything the lookup knows about the
-title. Before every hop the resolver checks the providers of the hops left: one that is down, blocked past its
-`MaxWait`, or that answered as unavailable earlier in the resolution makes the path give up; one blocked within its
-`MaxWait` is asked, and its lane does the waiting. A hop whose every request was already answered with no match earlier
-in the resolution ends its path as a no-match before that check, even when a later hop's provider is blocked. A title is
-cached as unmatched only when no path gave up.
+`RemoteLoad.Takes` holds while the service is not down and its block ends within the budget; `AnswersWithin` also
+needs the estimated wait inside it. Values are in the [lane table](#limits-per-service).
+
+| Budget | Setting | Gates |
+|---|---|---|
+| `MaxWait` | the provider section's `Http:MaxWaitSeconds` | each hop of an id lookup path; the lane's patience before refusing (0 by default: only while open) |
+| `EnrichWait` | the provider section's `Http:EnrichWaitSeconds` | every enricher ask (0: only while open) |
+| `ShownWait` | `Sammlarr:FeedLoad:ShownWait` | an ask for a field the load shows but does not filter or sort on (every field for a stale or uncached title and for the details fill): the service must also answer within it |
+
+### Enricher choice
+
+`DetailsFetcher` asks enrichers one at a time while a needed field is missing (`EnricherChoice.Next`). Candidates are
+enrichers of connected services that accept one of the title's ids (`Accepts`), are not yet asked or resting, and fill
+a missing field within the budgets above. It picks open services first, then the search setting's service while a
+detail field is missing, then the most missing detail fields, then the most missing rating sources, then the least
+estimated wait, then `RemoteService` order, and stops when nothing needed is missing or no candidate is left.
+
+- An enricher that answered rests for that title for `Sammlarr:Housekeeping:FreshDays`; one that failed after sending
+  rests 1, 6, then 24 hours; one skipped or refused records nothing.
+- A fresh answer wins over the stored copy, an earlier answer over a later one. What an enricher `Defers` (TVmaze,
+  AniList and MyAnimeList their titles) and artwork no `IArtworkResizer` can size only fill gaps left after the rest.
+- A `RatingSource` without a rating counts as a missing field, as does a vote-less rating from a source that publishes
+  votes (all but Rotten Tomatoes and Metacritic). One rating is kept per source; one with votes wins.
+- A stale refresh that skipped a service keeps the stored values of that service's fields no answer filled and, if it
+  kept any, `RefreshedAt`, so the title is served as `Stale` and retried on the next load.
+
+### Id lookup paths
+
+`MediaIdResolver` finds a title's id at a target provider from the ids it holds. Each `IExternalIdConverter` announces
+`ById` lookups with what they accept, yield and cost in calls (`ByHints` is supported, but no converter announces one).
+
+| Service | Lookups: from → gives | Cost |
+|---|---|---|
+| Anime lists | AniList, MyAnimeList → those, TheTVDB, TMDB, IMDb; TheTVDB, TMDB, IMDb → AniList, MyAnimeList | 0 |
+| Plex | match (`AsksOnce`): TMDB, IMDb, TheTVDB → Plex; metadata: Plex → TMDB, IMDb, TheTVDB | 1 |
+| TMDB | detail: TMDB → IMDb, TheTVDB; find: IMDb, TheTVDB → TMDB | 1 |
+| Trakt | Trakt, IMDb, TMDB, TheTVDB → the same four | 1 |
+| TVmaze | IMDb, TheTVDB → TVmaze, TheTVDB, IMDb | 2 |
+| MDBList | IMDb, TMDB, TheTVDB, Trakt, MyAnimeList → the same and MDBList | 2 |
+| Wikidata | IMDb → TMDB, TheTVDB, AniList, MyAnimeList, rating site pages | 3 |
+
+`IdLookupPlanner` plans every path of up to three hops from the held ids to the target, ordered by weight (each hop's
+cost times one plus its service's estimated wait in seconds, `RemoteLoad.Weight`), then by length.
+
+- Free lookups are asked once before planning, adding ids only for sources the title lacks; no path runs through one.
+- A lookup is asked once per input per resolution; an `AsksOnce` lookup's definitive answer covers the other ids.
+- A hop already answered no for every input ends its path as a no-match. Otherwise a service ahead that is down,
+  blocked past its `MaxWait`, or unavailable earlier makes the path give up; one blocked within `MaxWait` is asked.
+- A title is cached as unmatched (in memory, for an hour) only when no path gave up.
 
 ## Identity keys, page links and claims
 
-A title's identity is its `MediaId` plus its identity keys. Every external id type is one of two kinds, and the
-exhaustive `MediaProvider.Role` switch (`Domain/Providers/ExternalIdRole.cs`) makes a new provider fail the build until
-it is classified:
+A title's identity is its `MediaId` plus its identity keys
+([ADR 0018](../../adr/0018-claim-identity-before-hand-out-from-identity-keys-only.md)). The exhaustive
+`MediaProvider.Role` switch (`Domain/Providers/ExternalIdRole.cs`) sorts every external id into one of two kinds:
 
 - An _identity key_ (`IIdentityKey`: TMDB, IMDb, TheTVDB, Plex, MDBList, Trakt, MyAnimeList, TVmaze, AniList) names one
-title. Matching, claims and the library's unique ids use keys only, stored in `ExternalMediaIds`: a key belongs to one
-title (the table's key is source, media type and value), and a title holds at most one key per source (a unique index
-on the title and the source).
-- A _page link_ (`IPageLink`: Rotten Tomatoes, Metacritic, Letterboxd) is the path of a rating site's page. It hangs off
-the title's details (`MediaDetails.PageLinks`, the `MediaPageLinks` table, at most one per site), never off its
-identity: remakes share a Metacritic slug, and MDBList's `-` placeholder is dropped. Two titles may show the same link,
-and a link never merges them.
+  title; matching and claims use keys only. Keys live in `ExternalMediaIds`, keyed by source, media type and value,
+  with at most one key per source on a title.
+- A _page link_ (`IPageLink`: Rotten Tomatoes, Metacritic, Letterboxd) hangs off the details (`MediaDetails.PageLinks`),
+  never the identity: remakes share a Metacritic slug, so a link never merges titles.
 
-Identity is written before a title is handed out, through the claim lane (`IIdentityClaims`, one `IdentityClaims` per
-scope; the walk-through is in [Runtime View](04-runtime.md)). Every path that identifies a title claims: a list load,
-`IdentifyAsync` and the sink-id lookups, a search hit being registered, a rating breakdown asking for a page link
-(`FindIdAsync`), and the details step for the keys its enrichers found. A claim carries the keys, the title it is pinned
-to (if any) and the services whose answers produced its keys (`IdentityClaim.Sources`). The lane commits every claim
-queued meanwhile in one transaction under the media write lock; a constraint error conflicts that claim only. The rule,
-`ClaimRule.Decide`, is pure and held by `ClaimRuleTests` and the `ClaimRuleLaws` property test: a claim extends at most
-one stored title and never merges two, never adds a second key of one source or a key of another media type, and a
-pinned claim drops what it cannot take, naming each key another title holds. A claim that would join two stored
-titles conflicts: the title settles unmatched as a conflict and both stored titles keep their keys. Either way the
-pair is noted as stored twice (`IIdentityConflicts`). A search hit whose claim conflicts uses the stored title
-that holds the search provider's own key (TMDB's for a TMDB search, Plex's for a Plex search, TMDB's for a movie and
-TheTVDB's for a show from Radarr + Sonarr), and is not addable when no stored title holds it. Feed runs never merge two
-stored titles
-([ADR 0018](../../adr/0018-claim-identity-before-hand-out-from-identity-keys-only.md)).
+Every path that identifies a title claims it before handing it out, through the claim lane (`IIdentityClaims`;
+walkthrough in [Runtime View](04-runtime.md)):
 
-Two stored titles become one only through `IMediaMerge`, in one transaction under the media write lock. It checks
-again that no source has an id on both and that both are one media type (`IdentityConflict.Contradicts`), and refuses
-the pair otherwise. The survivor is the title a wantlist or blocklist entry points at, else the older one (the older one
-too when both have entries). Every id of the other title moves to the survivor. The survivor's details win field by
-field and take what they lack from the other's, and its ratings, page links and provider answers win per source; when
-it has no details, the other's move over whole. The merged details count as refreshed when the earlier of the two
-was, so they go stale, and are fetched again with the fuller ids, no later than either half would have. Wantlist and
-blocklist entries move for every user, the older entry staying where a user holds both; where a user has an outbox
-action queued on both, the one that agrees with their wantlist after the move stays. Run items move one per run. An
-absence stays only where both titles missed the feed's latest run, with the lower count (the title as one was last
-seen when the fresher row was); an absence only one of them has goes, since the other was seen. The other title is
-then deleted, and its stored-twice notes with it. Other users' entries point at both titles through
-restricting foreign keys, so every table moves set-based across users (`IgnoreQueryFilters`), never through one user's
-tracked rows.
+- An `IdentityClaim` carries its keys, the title it is pinned to (if any) and the services that produced them. The lane
+  commits every queued claim in one transaction under `MediaWriteLock`; a constraint error conflicts that claim only.
+- `ClaimRule.Decide` is pure (`ClaimRuleTests`, `ClaimRuleLaws`). A claim extends at most one stored title, never adds
+  a second key of one source or a key of another media type, and when pinned drops what it cannot take. A claim that
+  would join two stored titles conflicts: the title settles unmatched and both keep their keys. A key another title
+  holds notes the pair as stored twice (the `IdentityConflicts` table, read through `IIdentityConflicts`).
+- A search hit is the exception: it shows as the stored title that holds the search provider's own key (TMDB's,
+  Plex's, or for Radarr + Sonarr TMDB's for a movie and TheTVDB's for a show), and stays unmatched, so not addable,
+  only when none does (`MediaSearchService`).
 
-## Persistence and migrations
+Two stored titles become one only through `IMediaMerge` (`DB/Data/Media/MediaMerge.cs`), called by `DuplicateTitles`
+and an admin's review, in one transaction under `MediaWriteLock`. It refuses a pair with ids of one source on both or
+two media types (`IdentityConflict.Contradicts`). The survivor (the title a wantlist or blocklist entry points at, else
+the older one) takes every id, fills its details field by field, takes the other's ratings, page links and answers for
+sources it lacks, and counts as refreshed at the earlier `RefreshedAt`. Rows move set-based across users
+(`IgnoreQueryFilters`); where one user holds both, the older entry, the outbox action (per sink) that agrees with their
+wantlist, and one run item per run stay. Then the other title is deleted.
 
-State is one SQLite database via EF Core. Repositories create a context per operation from
-`IDbContextFactory<SammlarrDbContext>` (the context is `internal`). A `SqlitePragmaInterceptor`
-sets WAL, `synchronous=NORMAL`, a busy timeout and an 8 MB `journal_size_limit`, the size a write-ahead
-log is cut back to once it restarts. After a dataset replace commits, `IDatabaseFile.CompactAsync`
-truncates the log and vacuums the file when a tenth of its pages are free, so the file stays about the
-size of its data. The ownerless `Housekeeping` ticker runs `HousekeepingPass` nightly at 03:00 server time, before the dataset
-loads at 04:30 (a cron ticker `HousekeepingSchedule` adds on every start), or by hand: it takes the job runner's turn
-(`JobTurn`, which `JobRunner` holds while it runs a job, so the pass never overlaps a feed run, a sync or a details fill;
-an admin's merges and keep-aparts from Settings › Housekeeping take it too),
-runs each `IHousekeepingStep` in the order of `HousekeepingStep`, compacts the file and keeps its last report
-(`HousekeepingReports`, saved after every step so a running pass shows how far it got); a step that fails stops the
-pass and is recorded with what the earlier steps removed. The
-steps and their windows (`Sammlarr:Housekeeping`): a feed run's titles, calls and answer times after `RunHistoryDays`
-(90; the run keeps its header and counts), usage stats after `UsageDays` (180), cached details whose `RefreshedAt` is
-older than `FreshDays + DetailsUnusedDays` (194 days, so unopened for 180), a title's ids once it has no details and
-they went `IdsUnusedDays - DetailsUnusedDays` ago (185; a title that never had details goes `IdsUnusedDays`, 365, after
-it was added), titles stored twice (`DuplicateTitles`, below), then settled jobs, TickerQ occurrences and finished
-one-off runs after 30 days. `DuplicateTitles` reads the due stored-twice notes: a pair whose rows contradict each other
-is kept apart without a lookup; every other pair is asked at once through `IIdentityConfirmation`, so the lanes batch
-(the burst primers first, then one lookup each). Each user in turn, in a scope of their own, under their keys and at
-the background lane class, asks the cheapest connected converter outside the note's own sources that maps one of the
-held title's ids to the claimed id's source; a lane that refuses without sending (a floor, a dataset not loaded)
-passes the note to the next converter, then to the next user. The claimed id merges the pair (`IMediaMerge`, one log
-line naming who claimed and who confirmed it), another id keeps it apart, and an answer that says nothing either way
-asks again after 1, 7, then 30 days. A note no converter could be asked about is left as it is, with no attempt
-counted. Its calls count as `UsageCause.Housekeeping`, and the step reports the titles it merged. Whatever removes a title's details (the pass,
-a clear by hand, an invalidation) stamps `Media.DetailsTrimmedAt`. A title on a wantlist, a blocklist, the outbox or in
-a kept run (`ProtectedMediaIds`) never loses its details or ids to the pass; the media trims hold `MediaWriteLock`.
-Wolverine expires dead letters after its default 10 days. Settings › Housekeeping sizes the two cache layers from the
-titles they hold times a per-title average measured on the dev file (1.63 KiB of details, 1.21 KiB of ids), since the
-bundled SQLite has no `dbstat`.
-Wolverine's connections to the same file do not memory-map it (`mmap_size` 0): on Windows a mapped file cannot be
-truncated, so a checkpoint after a `VACUUM` would leave the file at its old size.
-Schema is applied at startup by a hosted
-`DbInitializer` calling `Database.Migrate()`, never `EnsureCreated`; migrations live in
-`DB/Migrations`, and a test asserts `HasPendingModelChanges()` is false. The singleton
-provider-config row comes from the context's `UseSeeding` and `UseAsyncSeeding` hooks, which insert
-the defaults after every migrate when the row is missing, so readers and writers can assume it. Conventions: enums stored as their string name
-(`EnumAsStringConvention`), `DateTimeOffset` as binary. `SaveChanges` stamps audit timestamps and
-the owning user.
+## Persistence and housekeeping
+
+State is one SQLite file through EF Core ([ADR 0004](../../adr/0004-store-all-state-in-one-sqlite-file.md),
+[ADR 0003](../../adr/0003-use-ef-core-migrations-for-the-schema.md)).
+
+- Repositories create a context per operation from `IDbContextFactory<SammlarrDbContext>` (the context is `internal`).
+- `SqlitePragmaInterceptor` sets WAL, `synchronous=NORMAL`, a 5-second busy timeout and an 8 MB `journal_size_limit`.
+  Wolverine's connections set `mmap_size` 0, since Windows cannot truncate a mapped file; Wolverine expires its own
+  dead letters, and housekeeping leaves its tables alone.
+- `IDatabaseFile.CompactAsync` truncates the log and vacuums when a tenth of the pages are free, after a dataset load
+  and after the housekeeping pass.
+- `DbInitializer` applies the migrations in `DB/Migrations` at start-up; `UseSeeding` inserts the provider-config row.
+  Enums are stored as names, `DateTimeOffset` as binary; `SaveChanges` stamps audit timestamps and the owner.
+
+The `Housekeeping` ticker runs `HousekeepingPass` nightly at 03:00 (`HousekeepingSchedule`), or on demand from
+Settings › Housekeeping. It takes the job runner's turn (`JobTurn`), runs each `IHousekeepingStep` in order, saves its
+report (`HousekeepingReports`) after each step and compacts the file; a failing step stops the pass. The windows are
+`Sammlarr:Housekeeping` settings, except the fixed 30 days:
+
+| Step | Removes |
+|---|---|
+| `RunHistory` | a run's titles, calls and answer times after `RunHistoryDays` (the run keeps its counts) |
+| `UsageStats` | usage rows and deleted feeds' names after `UsageDays` |
+| `CachedDetails` | details not refreshed for `FreshDays + DetailsUnusedDays` |
+| `TitleIds` | a title and its ids once it has had no details for `IdsUnusedDays - DetailsUnusedDays` (from `Media.DetailsTrimmedAt`, which every details removal stamps), or `IdsUnusedDays` after it was added if it never had details |
+| `DuplicateTitles` | settles due stored-twice notes |
+| `SettledJobs`, `ScheduleEntries` | finished jobs, TickerQ occurrences and one-off runs after 30 days |
+
+- A title on a wantlist, a blocklist, the outbox or in a kept run (`ProtectedMediaIds`) keeps its details and ids. The
+  details and ids trims hold `MediaWriteLock`.
+- `DuplicateTitles` keeps a pair whose rows contradict apart and asks about every other pair through
+  `IIdentityConfirmation`: each user in turn, at the `Background` class, asks the lowest-weight connected converter
+  outside the claim's services (`IdentityConflict.Sources`) for the claimed id's source; one that refuses without
+  sending passes the note on, to the next converter, then the next user. The claimed id merges the pair, another keeps
+  it apart, and no answer asks again after 1, 7, then 30 days.
 
 ## Secrets and configuration
 
-Two distinct secret mechanisms: `[Encrypted]` (`DB`) encrypts credential and API-key columns at
-rest through an EF converter over `Microsoft.AspNetCore.DataProtection`; `[Sensitive]` (`Contracts`)
-only masks members as `***` in logs, and a Domain type, which cannot carry it, names its secrets in
-`SensitiveModel` (`Observability`) instead. A stored credential is usually both. Configuration comes in
-two shapes: static infrastructure settings (URLs, timeouts, connection string) are options records
-bound from config, with a generator emitting their section names and registration so a component
-injects the record itself; runtime settings an admin changes (active search and auth
-provider, registration mode) live in `ProviderConfig`, one global row behind a cached repository.
-Provider selection is instance-wide, not per user.
+- `[Encrypted]` (`DB`) encrypts stored secrets (credentials, API keys, the Radarr and Sonarr keys, notification-target
+  secrets) through an EF converter over ASP.NET Core Data Protection. `[Sensitive]` (`Contracts`) only masks a member
+  as `***` in logs; a Domain type names its secrets in `SensitiveModel` (`Observability`) instead.
+- Static settings (URLs, timeouts, lanes) are options records in `Shared/Options`, each an `IOptionsSection` naming
+  its section; a generator (`Roslyn/Options`) binds them all, so a component injects the record itself.
+- Settings an admin changes at run time (the sink, the Radarr and Sonarr connections with their keys, the trending,
+  search and sign-in providers, the registration mode) are `ProviderConfig`: one global row, cached by
+  `ProviderConfigService`.
 
 > [!NOTE]
-> Data-protection keys are persisted to a filesystem key ring under a stable application name
-> (`EncryptionModule`), so stored secrets survive a restart. The ring sits in `dp-keys` beside the database file unless
-> `Sammlarr__DataProtection__KeyRingPath` names another folder, so a Sammlarr started from another folder still reads the
-> secrets its database holds. In a container the ring shares the `/data` volume with the database; that volume must be
-> writable by the container user (see [Risks and Technical Debt](08-risks-technical-debt.md)).
+> Data-protection keys live in a key ring under the application name `Sammlarr` (`EncryptionModule`), so stored
+> secrets survive a restart. The ring is `dp-keys` beside the database file unless the environment variable
+> `Sammlarr__DataProtection__KeyRingPath` names another folder; configuration files cannot set it. In the container
+> the ring shares the `/data` volume ([Deployment View](05-deployment.md)).
 
 ## Authentication and per-user isolation
 
-An install signs in one way, set in `ProviderConfig.AuthProvider` (a hand-written enum, not a `MediaProvider`): with Plex
-([Runtime View](04-runtime.md)), or with Sammlarr accounts, a username and a password hashed by ASP.NET
-Core's `PasswordHasher` and posted as a form to `/auth/local` (a Blazor circuit cannot set a cookie).
-Password sign-ins are rate-limited per address, checked one at a time per account, and five wrong
-passwords lock the account for 15 minutes. The Plex round trip carries a state value bound to the
-browser by a short-lived cookie. Either way the app auth cookie is revalidated against the stored
-user on each request, so a removed user or a role change takes effect at once. A password change
-sets the user's `SessionsRevokedAt`; a cookie issued before that second is rejected, and open
-circuits are told to sign in again through `ISessionInvalidator`. Isolation
-is enforced in persistence: a user-owned entity implements `IUserOwned`, `OnModelCreating` gives it
-a global query filter on a shadow `UserId`, and the current-user lookup throws when unauthenticated
-(fails closed). An ownership stamper sets the owner on insert and blocks it from changing. Feeds,
-wantlist, blocklist, notification targets and stored secrets are user-owned; `ProviderConfig` and
-the media catalogue are global. Background code (the job runner, the cron ticker function,
-Wolverine handlers) calls `IUserScope.AsAsync(owner)` so the same filters apply: every job and
-every scheduled feed carries its owner. Isolation tests are noted in
-[Quality Requirements](07-quality.md).
+- An install signs in one way, `ProviderConfig.AuthProvider`: `Plex`, or `Local` accounts whose password is hashed by
+  ASP.NET Core's `PasswordHasher` and posted as a form to `/auth/local` (a Blazor circuit cannot set a cookie).
+  Password sign-ins are rate-limited per address and checked one at a time per account; five wrong passwords lock the
+  account for 15 minutes. The Plex round trip binds its state to the browser with a short-lived cookie.
+- The auth cookie is checked against the stored user and role on every request, so a removed user or a changed role
+  is signed out at once. A password change sets `SessionsRevokedAt`, which rejects older cookies; a password change,
+  role change or removal signs open circuits out (`ISessionInvalidator`).
+- Isolation lives in persistence ([ADR 0005](../../adr/0005-enforce-per-user-data-isolation.md)): an `IUserOwned`
+  entity gets a global query filter on a shadow `UserId`, the current-user lookup throws when nobody is signed in, and
+  an ownership stamper sets the owner on insert and blocks changing it. Feeds, wantlist, outbox, blocklist,
+  notification targets, API keys and sign-ins are per user; `ProviderConfig` (Radarr and Sonarr included) and the media
+  catalogue are global. Background code (the job runner, the feed ticker, Wolverine handlers) runs as the owner through
+  `IUserScope.AsAsync(owner)`. Isolation tests: [Quality Requirements](07-quality.md).
 
-## Background work and scheduling
+## The job queue
 
-Background work that users start or schedule (feed runs, wantlist syncs and the FillDetails job) goes through one
-queue of record, the `Jobs` table (`IJobQueue`), and one hosted `JobRunner` that executes a row at
-a time in a fresh DI scope, as the row's owner. Running one job at a time is deliberate: it keeps
-SQLite to one writer and each provider to one caller. TickerQ holds the cron schedule and only
-enqueues; enqueueing coalesces by kind, key and owner; a deferred row waits in `Waiting` until a
-timer releases it. The FillDetails job, queued after a run and when a key or sign-in is stored, steps aside: the
-runner takes it only while no feed run or sync is queued or waiting, or once it has waited 30 minutes, and between its
-pages of 500 it requeues itself whenever another job is queued. The walk-through is in [Runtime View](04-runtime.md), the reasoning in
-[ADR 0006](../../adr/0006-run-background-work-through-one-job-queue.md).
+The rules every job follows; the walkthrough of a run and a sync is in [Runtime View](04-runtime.md).
 
-A push to Plex is a step of the sync, not a message: pending changes wait in the wantlist outbox
-and the sync drains it inline, retrying a failed item on the next sync
-([ADR 0007](../../adr/0007-push-watchlist-changes-inline-during-sync.md)).
+- Feed runs, wantlist syncs and the details fill go through one queue of record, the `Jobs` table (`IJobQueue`), and
+  one hosted `JobRunner` that runs one row at a time in a fresh DI scope as its owner
+  ([ADR 0006](../../adr/0006-run-background-work-through-one-job-queue.md)). The runner holds `JobTurn` meanwhile; the
+  housekeeping pass and an admin's merges take the same turn.
+- A feed's TickerQ cron ticker only enqueues. Enqueueing coalesces by kind, key and owner, and a deferred row waits in
+  `Waiting` until `JobAlarm` releases it (delays under `Sammlarr:Scheduler`).
+- A job whose handler throws ends `Failed`, with no automatic retry. The owner can cancel a `Waiting` or `Queued` job
+  from Up Next on Home; one the runner already took runs. At start-up a `Running` row goes back to `Queued`, or ends
+  `Cancelled` when a like row is already pending.
+- The details fill ([FillDetails](04-runtime.md#filldetails)) steps aside: it waits
+  `Sammlarr:Scheduler:FillDetailsGrace`, then runs only while no feed run or sync is queued or waiting, or once
+  `Sammlarr:Scheduler:FillDetailsMaxWait` has passed.
+- A push to the active sink is a step of the sync: pending changes wait in the wantlist outbox and the sync drains it
+  ([ADR 0007](../../adr/0007-push-watchlist-changes-inline-during-sync.md)).
 
-A downloaded dataset (IMDb's ratings file, Fribb's anime id map) is app-wide, not a user's, so it does not go through the `Jobs` queue,
-whose rows each belong to a user: `DatasetSchedule` registers one daily TickerQ cron ticker per `IDatasetLoader`
-(and a one-off ticker on a start before the first load), and the `LoadDataset` ticker function runs the loader, one
-ticker at a time as TickerQ runs them. The loader asks with the last `ETag` (a 304 loads nothing), replaces the table in
-one transaction through the context's connection (a failed or empty file rolls back, so the last table stays) and
-records the load in `DatasetLoads`. Every check, changed or not, ends as a `DatasetCheck` (loaded, unchanged or failed
-with why; a load ends by compacting the file) that the ticker keeps in `DatasetChecks`, one row per dataset, for Settings ›
-Housekeeping. That page's Run now adds a one-off ticker for the dataset or the pass (`IHousekeepingTasks`), refused
-while the same task runs; a singleton `TaskActivity` knows what is queued or runs in this process and tells the page when
-it is queued, starts, moves a step on and ends. Until a dataset's first load its enricher and its converter answer `Unavailable`,
-so no title stores an empty answer for it. During a list load each dataset is read once per burst, through a scoped
-memo that is also the burst's primer (`ImdbRatingsInRun`, `AnimeIdsInRun`).
+## Datasets
+
+A downloaded dataset (IMDb's ratings file, Fribb's anime id map) belongs to the whole app, so it stays out of the
+per-user queue ([ADR 0013](../../adr/0013-load-shared-datasets-outside-the-job-queue.md)). `DatasetSchedule` registers
+a daily TickerQ ticker per `IDatasetLoader` at 04:30, plus a one-off ticker before the first load. The loader asks
+with the last `ETag`, replaces the table in one transaction (a failed or empty file keeps the old one), and records
+the load in `DatasetLoads` and the outcome in `DatasetChecks` (Settings › Housekeeping). Until the first load, its
+enricher and converter answer `Unavailable`.
 
 ## Events and notifications
 
-Anything that reports "something happened" is one of two disjoint kinds, and each has exactly
-one transport. An _event_ (`IEvent`: per-item push status, job state changes, "this feed just
-ran") goes to open pages through the in-process `IEventPublisher`; it is never stored and is gone
-on restart. A _notification_ (`INotification`: a sync or feed run finished or failed, a provider
-is rate limiting) is durable and subscribable: it is queued on Wolverine in the application
-database, fanned out to each matching subscription and delivered by its channel (webhook,
-Pushover, or the WebUi channel's in-app toast), with escalating retry cooldowns and an attempt
-cap. There is no external broker.
+Anything that reports "something happened" is one of two disjoint kinds, chosen only by whether a user could
+reasonably subscribe to it ([ADR 0008](../../adr/0008-separate-events-from-notifications.md)):
 
-Producers publish through one `Announcer`: `Announce(IEvent)` and `AnnounceAsync(INotification)`
-take the two markers, so sending a fact down the wrong transport does not compile. Which kind a
-fact is depends only on whether a user could reasonably subscribe to it, never on what triggered
-it ([Glossary](09-glossary.md),
-[ADR 0008](../../adr/0008-separate-events-from-notifications.md)).
+| | Event (`IEvent`) | Notification (`INotification`) |
+|---|---|---|
+| Examples | push status per item, job state, a feed just ran, wantlist and blocklist changes | a sync or feed run finished or failed, a provider is rate limiting |
+| Transport | in-process `IEventPublisher` to open pages; never stored | Wolverine, persisted in the app database, to each matching subscription's channel (webhook, Pushover, in-app toast) |
+| Retries | none | after 1, 5 and 15 minutes and 1 hour; 5 attempts at most |
+
+Core publishes through `Announcer` (`Announce(IEvent)`, `AnnounceAsync(INotification)`); only the lanes' rate-limit
+report (`ProviderRateLimitReporter`) uses `IMessagePublisher` directly.
 
 ## Logging and observability
 
-Serilog with two custom destructuring policies: one unwraps `Optional`/`Result` to log the payload
-rather than the wrapper, the other masks `[Sensitive]` members and those `SensitiveModel` names as `***`. Sinks: console, an
-in-memory ring buffer behind the admin `/diagnostics/export` zip, and OTLP when an endpoint is
-present. Tracing is OpenTelemetry over the `Sammlarr` activity source; services opt in via
-`AddTracedScoped`/`AddTracedKeyedScoped`, a proxy that spans each method call. OTLP export turns on
-only when Aspire injects an endpoint; otherwise console plus local errored-trace logging.
+- Serilog with two destructuring policies: one logs a union's payload instead of the wrapper, the other masks
+  `[Sensitive]` and `SensitiveModel` members as `***`.
+- Sinks: the console; OTLP for logs, traces and the usage meters when `OTEL_EXPORTER_OTLP_ENDPOINT` is set (Aspire
+  sets it); an in-memory capture, started in Settings › Diagnostics, that keeps logs and `Sammlarr` spans for the
+  admin-only `/diagnostics/export`.
+- Tracing is OpenTelemetry over the `Sammlarr` and `Sammlarr.FeedRun` sources plus ASP.NET Core and HttpClient. A
+  service opts in through `AddTracedScoped` or `AddTracedKeyedScoped`, a proxy that spans each call. Without OTLP,
+  `ActivityLogProcessor` logs spans that errored.
 
-Metrics count every call Sammlarr makes to a service (ADR 0014). Nothing is counted by hand: the Polly retry pipeline
-of a lane client measures each call (`resilience.polly.pipeline.duration`) and HttpClient each attempt on the wire
-(`http.client.request.duration`). A client built with `AddRemoteHttp` stamps the request with its `RemoteService` and
-the current cause outside the retry (`UsageStampHandler`), and tags every attempt inside it (`UsageTagsHandler`,
-through `HttpMetricsEnrichmentContext`, since a retry sends a clone that keeps the stamp but not the callback); a
-`MeteringEnricher` adds the call's outcome: `Answered`, `AnsweredAfter429`, `GaveUpOn429`, `Failed` or `Cancelled`.
-A call none of whose attempts got a lane permit (refused, or cancelled while it waited) is not counted. The cause is an
-ambient mark set by `UsageCauses.Mark` at each entry point; the outermost mark wins, so titles shown inside a feed run
-count for the run. The causes: `FeedRun` (a run, with its feed's id), `WantlistSync` (the sync with Radarr, Sonarr or
-Plex and what reads them for it: the sync dialog, a title added from a page, a sink switch, removing a person),
-`Dataset` (a dataset download), `Search`, `Browse`, `ShowingTitles` (titles a page shows, the rating breakdown's id
-lookups), `KeyTest` (the check of a key, a sign-in or a Radarr or Sonarr connection), `FeedEditor` (the editor's
-previews, its link check, saving a feed and the dry run before Run now, with the feed's id), `DetailsFill` (the
-background fill of missing details), else `Other`. A `PeriodicExportingMetricReader` hands `UsageExporter` each
-minute's deltas, which it folds into hourly rows (`RemoteUsage`, `RemoteAttempts` with their duration buckets) kept
-`Sammlarr:Housekeeping:UsageDays` (180 days); with OTLP set, the same meters also go to the dashboard. A feed run's
-calls are credited to the run through its
-feed id (a feed never runs twice at once, and a run id would be an unbounded tag): the enricher that classifies a call
-credits it to the feed's running run in `IFeedRunUsage` only when its mark is `FeedRun` (`UsageMark.Run`), so a preview
-of a feed that is running never joins the run, and the run is saved with its calls (`FeedRunCalls`). The cost rules:
-tags stay bounded (service, cause, outcome, feed id; never a title, a URL, a user or a run id), delta temporality, the
-default buckets. One bounded exception: a new feed's previews carry the draft id the feed will be saved under, so each
-editor visit to a feed that is never saved adds one feed id no feed ever gets (Settings › Usage folds those into one
-row).
+## Usage metrics and Settings › Usage
 
-Settings › Usage (`UsageReport`) reads the hourly rows per service, per cause and per feed. Picking a service in the
-Calls table narrows the page to it: the Calls chart, Calls by cause (that service's causes; Feed editor opens the feeds
-its calls went to) and Feeds (the feeds and runs that called it). A feed's name outlives the feed: deleting it records
-its name in `DeletedFeeds`, pruned with the usage rows, so its runs' calls and its editor calls stay named. The
-housekeeping pass prunes both once they are older than `UsageDays`; the metrics exporter only writes. For MDBList,
-whose key has a daily allowance, the picked row opens what is left today: `MdblistBudget` keeps per key the allowance
-from `x-ratelimit-limit`, the answers Sammlarr got since the reset, the minute the feed reserve was reached and how the
-day before ended (in memory, so a restart forgets the day before until the next reset), and the pure `QuotaDay.Of`
-draws the requests left hour by hour, counted back from what MDBList says is left now plus the attempts Sammlarr sent
-after each hour (retries included); requests another app spent on the same key show as one figure without an hour. On
-7 and 30 days `QuotaDays.Of` groups the hourly attempts by quota day, cut at the reset rather than at midnight.
+Every call to a service is counted with the built-in instruments
+([ADR 0014](../../adr/0014-count-provider-calls-with-the-built-in-instruments.md)): the retry pipeline measures each
+call (`resilience.polly.pipeline.duration`), HttpClient each attempt (`http.client.request.duration`).
+
+- `UsageStampHandler` stamps the `RemoteService` and cause, `UsageTagsHandler` tags each attempt, and
+  `UsageMeteringEnricher` adds the outcome (`Answered`, `AnsweredAfter429`, `GaveUpOn429`, `Failed`, `Cancelled`). A
+  call that never got a lane permit is not counted.
+- The cause is an ambient mark (`UsageCauses.Mark`) set at each entry point; the outermost wins, so titles shown inside
+  a feed run count for the run. `UsageCause`: `FeedRun`, `WantlistSync` (the sync dialog, adding from a page, a sink
+  switch, removing a person), `Dataset`, `Search`, `Browse`, `ShowingTitles` (including the rating breakdown's id
+  lookups), `KeyTest`, `FeedEditor` (previews, the link check, saving, the dry run before Run now), `DetailsFill`,
+  `Housekeeping`, `Other`.
+- Tags stay bounded (service, cause, outcome, feed id); a new feed's previews carry its draft id, and Settings › Usage
+  folds ids of feeds never saved into one row.
+- `UsageExporter` folds each minute's deltas into hourly rows (`RemoteUsage`, `RemoteAttempts`). A call marked
+  `FeedRun` is also credited to the running run (`IFeedRunUsage`) and saved in `FeedRunCalls`.
+
+Settings › Usage (`UsageReport`, admin-only) reads the hourly rows per service, cause and feed; a deleted feed's name
+stays in `DeletedFeeds` until its rows are pruned. For MDBList it adds the day's remaining allowance (`MdblistBudget`,
+`QuotaDay.Of`).
 
 ## Live run trace
 
-While a feed runs, its owner can watch the titles move through Sammlarr, the services it asks and the three outcomes
-(the Feeds page's live view and the card's running pill). The view observes the run and
-never steers it: a hook that records a step never awaits, never throws and changes nothing the run decides.
+While a feed runs, its owner can watch its titles move through the services (the Feeds page's live view and the card's
+running pill). The view only observes: a hook that records a step never awaits, never throws and changes nothing the
+run decides ([ADR 0016](../../adr/0016-live-runs-pull-from-an-in-memory-trace.md)).
 
 ```mermaid
 flowchart LR
-  R[ListLoad, MediaIdResolver,<br/>DetailsFetcher, feed providers] -->|FeedRunSpans: start and stop| A[Sammlarr.FeedRun source<br/>+ System.Net.Http]
-  A -->|own ActivityListener, synchronous| T[FeedRunTrace singleton<br/>steps per run, owner, cursor]
-  A -.->|OTel SDK, same spans| O[OTLP, dashboard]
-  T -->|IFeedRunTraces.ReadAsync<br/>every 250 ms while a run is live| P[FeedRunProgress<br/>scoped per circuit]
-  P --> L[FeedRunLive] -->|push batch| J[feed-live.js<br/>replays at real timing]
-  P --> C[card running pill]
+  R[ListLoad, TitleIdentifier,<br/>MediaIdResolver, DetailsFetcher,<br/>feed sources] -->|FeedRunSpans| A[Sammlarr.FeedRun<br/>+ System.Net.Http spans]
+  A -->|own ActivityListener| T[FeedRunTrace<br/>singleton, in memory]
+  A -.->|OTel SDK| O[OTLP, dashboard]
+  T -->|IFeedRunTraces.ReadAsync<br/>every 250 ms| W[FeedRunProgress per circuit<br/>FeedRunWatch per run]
+  W --> L[FeedRunLive] --> J[feed-live.js<br/>replays at recorded timing]
+  W --> C[card running pill]
 ```
 
-A run's titles, paths, hops and give-ups are spans on the `Sammlarr.FeedRun` activity source, started through the
-static `FeedRunSpans` and only under the run span `FeedRunEngine` opens, so Browse, search and the editor preview record
-nothing. `FeedRunTrace` reads them with its own `ActivityListener`, not an exporter (exporters see ended spans in
-batches, after the sampler) and not an SDK processor (the view must survive sampling or `OTEL_SDK_DISABLED`), and turns
-each start and stop into a numbered step; the HTTP spans under a hop upgrade its outcome to answered after a 429 or gave
-up. The trace is in memory only: one per feed, kept 30 seconds after the run ends, capped at 50,000 steps, read only by
-the feed's owner (`FeedRunTraces` compares the owner with `ICurrentUser`).
-
-Pages pull instead of subscribing. `IEventPublisher` calls every subscriber synchronously on the publishing thread, and
-hundreds of hops a second there would slow the run itself; a reader per circuit (`FeedRunProgress`) asks for the steps
-after its cursor four times a second while one of its owner's feeds runs, and the browser replays each batch at its
-recorded timing, 250 ms behind, so dots move smoothly without a render per hop. Each read also carries the run's progress for the
-view's footer: the source page being read (`feed.page`, with the total where the source reports one) and how many titles
-wait on a service; once the run is saved, `FeedRunEngine` hands its counts to the trace (`IFeedRunTrace.Counted`) and the
-footer shows what the feed's rules did with them. With the steps comes each service's load (`IRemoteCapacity`): a
-blocked lane (a 429, a quota reserve, a down lane) draws a yellow ring around the service that counts down, and a lane
-that holds titles back to stay inside its own window draws a grey one that counts down to when the window opens
-(`LaneLoad.Paced`), so the quiet stretch between two bursts does not look stuck. A late joiner or a view shown again
-after Hide starts from a snapshot (titles in flight, per-service counts, the fates so far). Telemetry may drop data and
-so may the view: the card's bar and every saved number come from the run that `FeedRunEngine` records (`FeedRunCounts`,
-with the titles already known and those not found earlier), never from spans
-([ADR 0016](../../adr/0016-live-runs-pull-from-an-in-memory-trace.md)).
+- Spans start through `FeedRunSpans` only under a run span (`IFeedRunTrace.Start`, called by `FeedRunEngine`), so
+  Browse, search and the editor preview record nothing. `FeedRunTrace` reads them with its own `ActivityListener`, so
+  the view survives sampling. HTTP spans under a hop mark it answered after a 429, or given up.
+- The trace keeps one run per feed for 30 seconds after it ends, only for the feed's owner; past 50,000 steps it drops
+  path, hop and give-up steps.
+- Pages pull rather than subscribe: each circuit's `FeedRunProgress` holds a `FeedRunWatch` per run that reads every
+  250 ms, and the browser replays each batch 250 ms behind.
+- Each read also brings the run's progress and each service's load, so a blocked lane and one pacing to its window
+  (`RemoteLoad.Paced`) show their countdowns.
+- The card's last-run bar and every saved number come from the run `FeedRunEngine` records (`FeedRunCounts`), never
+  from spans.
