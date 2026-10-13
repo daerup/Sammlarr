@@ -15,8 +15,6 @@ namespace Internal.Generated.WolverineHandlers
             _serviceScopeFactory = serviceScopeFactory;
         }
 
-
-
         public override async System.Threading.Tasks.Task HandleAsync(Wolverine.Runtime.MessageContext context, System.Threading.CancellationToken cancellation)
         {
             await using var serviceScope = _serviceScopeFactory.CreateAsyncScope();
@@ -54,13 +52,10 @@ namespace Internal.Generated.WolverineHandlers
             
             // The actual message execution
             await Messaging.Notifications.NotificationDeliveryHandler.Handle(deliverNotification, context.Envelope, userScope, notificationTargetRepository, keyedServiceIndexOfNotificationChannelAndNotificationChannel, notificationDeliveryOutcomeRepository, dateTimeProvider, cancellation).ConfigureAwait(false);
-
         }
-
     }
 
     // END: DeliverNotificationHandler636651780
     
     
 }
-
