@@ -24,6 +24,7 @@ internal static class MdblistApis
 	internal static readonly MdblistOptions Options = new()
 	{
 		BaseUrl = "https://api.mdblist.com",
+		FeedReserve = 120,
 		Http = new ProviderHttpOptions { Lanes = new() { ["titles"] = new LaneOptions { MaxBatch = 200 } } },
 	};
 
