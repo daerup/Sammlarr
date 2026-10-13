@@ -97,7 +97,7 @@
     opacity: 0.5;
 }
 
-.pipeline-tile.is-off ::deep .rating-mark,
+.pipeline-tile.is-off ::deep .provider-tile,
 .pipeline-tile.is-off .pipeline-name,
 .pipeline-tile.is-off .pipeline-rank {
     opacity: 0.45;
