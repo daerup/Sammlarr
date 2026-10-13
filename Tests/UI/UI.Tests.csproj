@@ -22,4 +22,8 @@
 	<ItemGroup>
 		<None Update="Branding\BirdReference.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<Compile Remove="Settings\DemoRenderTests.cs" />
+		<Compile Remove="Settings\TestingSectionTests.cs" />
+	</ItemGroup>
 </Project>
