@@ -1,6 +1,7 @@
 using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;
+using Contracts.Wantlist.Outbox;
 using Core.Wantlist.Sync;
 using Domain.Identity;
 using Domain.Media;
@@ -8,6 +9,7 @@ using Domain.Providers;
 using Domain.Usage;
 using Domain.Wantlist;
 using Domain.Wantlist.Arr;
+using Domain.Wantlist.Outbox;
 using Harness;
 using TestInfrastructure;
 using static Harness.Ids;
@@ -52,6 +54,32 @@ public class SinkSwitchTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That((await host.Resolve<IWantlistService>().GetOutboxAsync()).Adds).ContainsKey(movie);
 		await Assert.That(host.HttpStub.Causes(string.Empty)).IsNotEmpty();
 		await Assert.That(host.HttpStub.Causes(string.Empty).Distinct()).IsEquivalentTo([UsageCause.WantlistSync]);
+	}
+
+	[Test]
+	public async Task SwitchAsync_ToRadarrAndSonarr_DropsARemoveQueuedForPlex()
+	{
+		var removed = await host.Movie(new MediaSpec("Fight Club", MediaType.Movie, [Tmdb("550")])).SeedAsync();
+		await host.Resolve<IWantlistOutbox>().EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [removed]);
+
+		await Testee.SwitchAsync(SinkKind.Arr);
+
+		await Assert.That((await host.Resolve<IWantlistService>().GetOutboxAsync()).Entries).IsEmpty();
+		await Assert.That(await host.Resolve<IWantlistOutbox>().GetAllAsync(SinkKind.Plex)).IsEmpty();
+	}
+
+	[Test]
+	public async Task RequeueAllAsync_ForTheSinkASwitchMovesTo_LeavesTheQueueOfTheSinkInUseAlone()
+	{
+		var removed = await host.Movie(new MediaSpec("Fight Club", MediaType.Movie, [Tmdb("550")])).SeedAsync();
+		var wanted = await host.Movie(new MediaSpec("The Matrix", MediaType.Movie, [Tmdb("603")])).OnWantlist(ByHand);
+		await host.Resolve<IWantlistOutbox>().EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [removed]);
+
+		await host.Resolve<IWantlistService>().RequeueAllAsync(SinkKind.Arr);
+
+		var queued = await host.Resolve<IWantlistService>().GetOutboxAsync();
+		await Assert.That(queued.Removes.Keys).IsEquivalentTo([removed]);
+		await Assert.That(queued.Adds).DoesNotContainKey(wanted);
 	}
 
 	[Test]

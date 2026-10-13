@@ -86,10 +86,15 @@ internal sealed class SinkSwitch(
 		var queued = 0;
 		foreach (var user in everyone)
 		{
-			queued += await RequeueAsync(user.Id, cancellationToken);
+			queued += await RequeueAsync(user.Id, sink, cancellationToken);
 		}
 
 		await commit();
+		foreach (var user in everyone)
+		{
+			await SettleAsync(user.Id, sink, cancellationToken);
+		}
+
 		logger.LogInformation("The wantlist now syncs to {Sink}: queued {Queued} titles, {Unaddressable} without an id it can add by", sink, queued, unaddressable);
 		return Success.Of(new SinkSwitched(queued, unaddressable));
 	}
@@ -115,11 +120,8 @@ internal sealed class SinkSwitch(
 		using var _ = await scope.ServiceProvider.GetRequiredService<IUserScope>().AsAsync(user, cancellationToken);
 		var wantlist = scope.ServiceProvider.GetRequiredService<IWantlistService>();
 		var titles = await wantlist.GetAsync(cancellationToken);
-		var outbox = await wantlist.GetOutboxAsync(cancellationToken);
 		var blocked = await scope.ServiceProvider.GetRequiredService<IBlocklistService>().GetAsync(cancellationToken);
-		var missing = await scope
-			.ServiceProvider.GetRequiredService<IMediaService>()
-			.EnsureSinkIdsAsync([.. titles.Ids, .. outbox.Entries.Select(entry => entry.MediaId), .. blocked.Ids], sink, cancellationToken);
+		var missing = await scope.ServiceProvider.GetRequiredService<IMediaService>().EnsureSinkIdsAsync([.. titles.Ids, .. blocked.Ids], sink, cancellationToken);
 		return missing.Count(titles.Contains);
 	}
 
@@ -131,12 +133,21 @@ internal sealed class SinkSwitch(
 		return [.. titles.Ids];
 	}
 
-	private async Task<int> RequeueAsync(UserId user, CancellationToken cancellationToken)
+	private async Task<int> RequeueAsync(UserId user, SinkKind sink, CancellationToken cancellationToken)
 	{
 		await using var scope = scopes.CreateAsyncScope();
 		using var _ = await scope.ServiceProvider.GetRequiredService<IUserScope>().AsAsync(user, cancellationToken);
-		var queued = await scope.ServiceProvider.GetRequiredService<IWantlistService>().RequeueAllAsync(cancellationToken);
+		var queued = await scope.ServiceProvider.GetRequiredService<IWantlistService>().RequeueAllAsync(sink, cancellationToken);
 		return queued.Count;
+	}
+
+	private async Task SettleAsync(UserId user, SinkKind sink, CancellationToken cancellationToken)
+	{
+		await using var scope = scopes.CreateAsyncScope();
+		using var _ = await scope.ServiceProvider.GetRequiredService<IUserScope>().AsAsync(user, cancellationToken);
+		var wantlist = scope.ServiceProvider.GetRequiredService<IWantlistService>();
+		await wantlist.RequeueAllAsync(sink, cancellationToken);
+		await wantlist.DropOtherSinksAsync(sink, cancellationToken);
 	}
 
 	private sealed class HeldGates : IDisposable

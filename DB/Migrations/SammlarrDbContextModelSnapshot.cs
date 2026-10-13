@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261011205458_IdentityConflicts";
+    public override string LastMigrationId => "20261013183218_WantlistOutboxSink";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -1319,6 +1319,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Property<Guid>("MediaId")
                     .HasColumnType("TEXT");
 
+                b.Property<string>("Sink")
+                    .HasColumnType("TEXT");
+
                 b.Property<string>("Action")
                     .IsRequired()
                     .HasColumnType("TEXT");
@@ -1337,7 +1340,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("TEXT");
 
-                b.HasKey("UserId", "MediaId");
+                b.HasKey("UserId", "MediaId", "Sink");
 
                 b.HasIndex("Action");
 

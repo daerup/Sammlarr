@@ -1,5 +1,6 @@
 using Contracts.Wantlist.Outbox;
 using Domain.Media;
+using Domain.Providers;
 using Domain.Wantlist.Outbox;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,11 +8,12 @@ namespace DB.Data.Wantlist.Outbox;
 
 internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IWantlistOutbox
 {
-	public async Task<IReadOnlyList<WantlistOutboxEntry>> GetAllAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<WantlistOutboxEntry>> GetAllAsync(SinkKind sink, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rows = await (
 			from outboxEntry in ctx.WantlistOutbox.AsNoTracking()
+			where outboxEntry.Sink == sink
 			select new
 			{
 				MediaIdValue = outboxEntry.Media.Id,
@@ -30,19 +32,79 @@ internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbConte
 			.ToList();
 	}
 
-	public async Task EnqueueAsync(WantlistOperationAction action, IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
+	public async Task EnqueueAsync(SinkKind sink, WantlistOperationAction action, IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
 	{
-		var distinct = ids.Distinct().ToList();
-		if (distinct.Count == 0)
+		var rawIds = ids.Select(id => id.Value).Distinct().ToList();
+		if (rawIds.Count == 0)
 		{
 			return;
 		}
-		var rawIds = distinct.Select(id => id.Value).ToList();
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await QueueAsync(ctx, sink, action, rawIds, cancellationToken);
+	}
 
+	public async Task ReplaceAsync(SinkKind sink, IEnumerable<MediaId> adds, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await ctx.WantlistOutbox.Where(o => o.Sink == sink).ExecuteDeleteAsync(cancellationToken);
+		await QueueAsync(ctx, sink, WantlistOperationAction.Add, [.. adds.Select(id => id.Value).Distinct()], cancellationToken);
+	}
+
+	public async Task DropAsync(SinkKind sink, IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
+	{
+		var rawIds = ids.Select(id => id.Value).Distinct().ToList();
+		if (rawIds.Count == 0)
+		{
+			return;
+		}
+
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await ctx.WantlistOutbox.Where(o => o.Sink == sink && rawIds.Contains(o.Media.Id)).ExecuteDeleteAsync(cancellationToken);
+	}
+
+	public async Task DropOtherSinksAsync(SinkKind sink, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await ctx.WantlistOutbox.Where(o => o.Sink != sink).ExecuteDeleteAsync(cancellationToken);
+	}
+
+	public async Task RecordFailedAttemptAsync(
+		SinkKind sink,
+		IEnumerable<MediaId> ids,
+		WantlistOutboxState resultingState,
+		Optional<string> reason,
+		CancellationToken cancellationToken = default
+	)
+	{
+		var rawIds = ids.Select(id => id.Value).Distinct().ToList();
+		if (rawIds.Count == 0)
+		{
+			return;
+		}
+
+		var lastError = reason.ToNullable();
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await ctx
+			.WantlistOutbox.Where(o => o.Sink == sink && rawIds.Contains(o.Media.Id))
+			.ExecuteUpdateAsync(
+				s => s.SetProperty(o => o.Attempts, o => o.Attempts + 1).SetProperty(o => o.Status, resultingState).SetProperty(o => o.LastError, lastError),
+				cancellationToken
+			);
+	}
+
+	private static async Task QueueAsync(
+		SammlarrDbContext ctx,
+		SinkKind sink,
+		WantlistOperationAction action,
+		List<Guid> rawIds,
+		CancellationToken cancellationToken
+	)
+	{
 		var matchedMedia = await ctx.Media.Where(m => rawIds.Contains(m.Id)).ToListAsync(cancellationToken);
-		var existingByMediaId = await ctx.WantlistOutbox.Where(o => rawIds.Contains(o.Media.Id)).ToDictionaryAsync(o => o.Media.Id, cancellationToken);
+		var existingByMediaId = await ctx
+			.WantlistOutbox.Where(o => o.Sink == sink && rawIds.Contains(o.Media.Id))
+			.ToDictionaryAsync(o => o.Media.Id, cancellationToken);
 		var addedAtByMediaId = await ctx
 			.Wantlist.Where(w => rawIds.Contains(w.Media.Id))
 			.Select(w => new { w.Media.Id, w.CreatedAt })
@@ -65,6 +127,7 @@ internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbConte
 				{
 					Media = media,
 					Action = action,
+					Sink = sink,
 					Status = WantlistOutboxState.Pending,
 					AddedAt = addedAt,
 				}
@@ -72,40 +135,5 @@ internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbConte
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
-	}
-
-	public async Task DropAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
-	{
-		var rawIds = ids.Select(id => id.Value).Distinct().ToList();
-		if (rawIds.Count == 0)
-		{
-			return;
-		}
-
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await ctx.WantlistOutbox.Where(o => rawIds.Contains(o.Media.Id)).ExecuteDeleteAsync(cancellationToken);
-	}
-
-	public async Task RecordFailedAttemptAsync(
-		IEnumerable<MediaId> ids,
-		WantlistOutboxState resultingState,
-		Optional<string> reason,
-		CancellationToken cancellationToken = default
-	)
-	{
-		var rawIds = ids.Select(id => id.Value).Distinct().ToList();
-		if (rawIds.Count == 0)
-		{
-			return;
-		}
-
-		var lastError = reason.ToNullable();
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await ctx
-			.WantlistOutbox.Where(o => rawIds.Contains(o.Media.Id))
-			.ExecuteUpdateAsync(
-				s => s.SetProperty(o => o.Attempts, o => o.Attempts + 1).SetProperty(o => o.Status, resultingState).SetProperty(o => o.LastError, lastError),
-				cancellationToken
-			);
 	}
 }

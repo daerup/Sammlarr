@@ -1,5 +1,6 @@
 using Domain.Feed;
 using Domain.Media;
+using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
 
@@ -17,5 +18,7 @@ public interface IWantlistService
 
 	Task<IReadOnlyList<MediaId>> RemoveAsync(IEnumerable<MediaId> ids, FeedId addedBy, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyList<MediaId>> RequeueAllAsync(CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<MediaId>> RequeueAllAsync(SinkKind sink, CancellationToken cancellationToken = default);
+
+	Task DropOtherSinksAsync(SinkKind sink, CancellationToken cancellationToken = default);
 }

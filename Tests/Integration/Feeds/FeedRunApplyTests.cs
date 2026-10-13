@@ -393,7 +393,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
-		var queued = await host.Resolve<IWantlistOutbox>().GetAllAsync();
+		var queued = await host.Resolve<IWantlistOutbox>().GetAllAsync(SinkKind.Plex);
 		await Assert.That(queued.Where(op => op.Action == WantlistOperationAction.Add).Select(op => op.MediaId)).Contains(fightClub);
 	}
 
@@ -425,7 +425,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
-		var queued = await host.Resolve<IWantlistOutbox>().GetAllAsync();
+		var queued = await host.Resolve<IWantlistOutbox>().GetAllAsync(SinkKind.Plex);
 		await Assert.That(queued.Where(op => op.Action == WantlistOperationAction.Remove).Select(op => op.MediaId)).Contains(dropped);
 	}
 

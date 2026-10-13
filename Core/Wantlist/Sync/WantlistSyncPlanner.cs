@@ -40,7 +40,7 @@ internal sealed class WantlistSyncPlanner(
 			.Map(async snapshot =>
 			{
 				var items = await repo.GetAllAsync(cancellationToken);
-				var entries = await outbox.GetAllAsync(cancellationToken);
+				var entries = await outbox.GetAllAsync(sink.Kind, cancellationToken);
 				var waiting = await WaitingAsync(snapshot.Down, [.. items.Select(item => item.MediaId), .. entries.Select(entry => entry.MediaId)], cancellationToken);
 				var wanted = new WantlistSnapshot([.. items.Where(item => !waiting.Contains(item.MediaId))]);
 				var queued = new OutboxSnapshot([.. entries.Where(entry => !waiting.Contains(entry.MediaId))]);
@@ -88,7 +88,7 @@ internal sealed class WantlistSyncPlanner(
 			return;
 		}
 
-		await outbox.DropAsync(plan.Redundant, cancellationToken);
+		await outbox.DropAsync(sink, plan.Redundant, cancellationToken);
 		logger.LogInformation("Dropped {Count} wantlist outbox entries {Sink} already agrees with", plan.Redundant.Count, sink);
 	}
 

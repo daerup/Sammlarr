@@ -47,7 +47,7 @@ public class WantlistServiceTests
 		repository.GetAllAsync(Any()).Returns([]);
 		repository.AddAsync(Any(), Any(), Any()).Returns((ids, _, _) => [.. ids]);
 		var outbox = IWantlistOutbox.Mock();
-		outbox.GetAllAsync(Any()).Returns([]);
+		outbox.GetAllAsync(Any(), Any()).Returns([]);
 		return new WantlistService(
 			repository.Object,
 			outbox.Object,

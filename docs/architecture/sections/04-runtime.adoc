@@ -349,13 +349,17 @@ the drain (their outbox entries wait, with no attempt counted), and the sync ann
 the down app next to its usual notification. Only when neither app can be read does the whole sync
 stop.
 
-Switching the sink (Plex to Radarr + Sonarr or back, `ISinkSwitch`) holds every user's gate for the
-whole switch and refuses if a sync is running. Under each user it gives every wantlist, outbox and
-blocklist title the id the new sink addresses it by (re-identifying from the ids the title already
-carries), then queues every wantlist title as an add, and only then stores the new sink. Without the
-queued adds the first sync would read the new sink, find none of the titles and remove them all. A
-title no lookup can convert is counted and acks unaddressable on its first push; the cache purge
-keeps every id of a title that lacks the sink's id, so a later switch can still convert it.
+Switching the sink (Plex to Radarr + Sonarr or back, `ISinkSwitch`) holds every user's gate for the whole
+switch and refuses if a sync is running. Under each user it gives every wantlist and blocklist title the id
+the new sink addresses it by (re-identifying from the ids the title already carries), then queues every
+wantlist title as an add for the new sink, stores the new sink, queues the wantlist once more (a title added
+meanwhile went to the old sink's queue), and only then drops the outbox rows queued for the old one. Every
+outbox row names the sink it was queued for and a sync drains only the active sink's, so a remove queued
+before the switch never reaches the new sink, and a switch that fails before it stores the sink leaves the
+old sink's queue as it was. Without the queued adds the first sync would read the new sink, find none of the
+titles and remove them all. A title no lookup can convert is counted and acks unaddressable on its first
+push; the cache purge keeps every id of a title that lacks the sink's id, so a later switch can still
+convert it.
 
 === Other flows
 
