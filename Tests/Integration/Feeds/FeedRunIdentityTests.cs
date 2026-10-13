@@ -49,11 +49,12 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 		var before = await wantlist.GetAllAsync();
-		await host.Resolve<IMediaMerge>().MergeAsync(held, other);
+		var outcome = await host.Resolve<IMediaMerge>().MergeAsync(held, other);
 		await engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		await Assert.That(before).IsEmpty();
-		await Assert.That((await wantlist.GetAllAsync()).Single().MediaId).IsEqualTo(held);
+		var merged = await Assert.That(outcome).IsOfUnionType<MergeOutcome, Merged>();
+		await Assert.That((await wantlist.GetAllAsync()).Single().MediaId).IsEqualTo(merged!.Survivor);
 	}
 
 	[Test]
