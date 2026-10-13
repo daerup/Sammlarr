@@ -24,6 +24,8 @@ public interface IUsageStore
 	Task<UsageRows> ReadAsync(DateTimeOffset from, DateTimeOffset to, CancellationToken cancellationToken = default);
 
 	Task<int> PruneAsync(DateTimeOffset before, CancellationToken cancellationToken = default);
+
+	Task<IReadOnlyList<UsageFeedName>> FeedNamesAsync(CancellationToken cancellationToken = default);
 }
 
 public interface IUsageLastCalls

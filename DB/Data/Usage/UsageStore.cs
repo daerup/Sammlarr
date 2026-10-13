@@ -58,6 +58,27 @@ internal sealed class UsageStore(IDbContextFactory<SammlarrDbContext> dbContextF
 		return calls + attempts + feeds;
 	}
 
+	public async Task<IReadOnlyList<UsageFeedName>> FeedNamesAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var live = await ctx
+			.Feeds.IgnoreQueryFilters()
+			.AsNoTracking()
+			.Select(row => new
+			{
+				row.Id,
+				row.Name,
+				row.Provider,
+			})
+			.ToListAsync(cancellationToken);
+		var gone = await ctx.DeletedFeeds.IgnoreQueryFilters().AsNoTracking().ToListAsync(cancellationToken);
+		return
+		[
+			.. live.Select(row => new UsageFeedName(FeedId.From(row.Id), row.Name, row.Provider, new None())),
+			.. gone.Select(row => new UsageFeedName(FeedId.From(row.FeedId), row.Name, row.Provider, Some.Of(row.DeletedAt))),
+		];
+	}
+
 	private static bool Holds(RemoteUsageRow row, UsageCalls calls)
 	{
 		return row.Service == calls.Service

@@ -26,9 +26,12 @@ public class UsageFeedLinesTests
 
 	private readonly Mock<IDeletedFeeds> _deleted = IDeletedFeeds.Mock();
 
+	private readonly Mock<IUsageStore> _store = IUsageStore.Mock();
+
 	public UsageFeedLinesTests()
 	{
 		_deleted.ReadAsync(Any()).Returns([]);
+		_store.FeedNamesAsync(Any()).Returns([]);
 	}
 
 	[Test]
@@ -94,7 +97,7 @@ public class UsageFeedLinesTests
 	public async Task ReadAsync_ForAFeedIdThatIsBothLiveAndDeleted_NamesTheLiveFeed()
 	{
 		Stored(Run(-2, 30, 3, 0, 2));
-		_deleted.ReadAsync(Any()).Returns([new DeletedFeed(Busy.Id, "Old name", FeedProvider.Mdblist, To.AddHours(-5))]);
+		_store.FeedNamesAsync(Any()).Returns([Live(Busy), Gone(new DeletedFeed(Busy.Id, "Old name", FeedProvider.Mdblist, To.AddHours(-5)))]);
 
 		var feeds = await Testee().ReadAsync(Day, NoRows, CancellationToken.None);
 
@@ -128,11 +131,10 @@ public class UsageFeedLinesTests
 		await Assert.That(ended!.DeletedAt).IsEqualTo(To.AddHours(-5));
 		await Assert.That((ended.Calls[RemoteService.Mdblist].Total, ended.Calls[RemoteService.Tmdb].Total)).IsEqualTo((53L, 5L));
 		await Assert.That(line.Services[RemoteService.Mdblist].Calls).IsEqualTo(53);
-		await Assert.That(feeds.Names[gone.Feed].DeletedAt).IsSome().And.IsEqualTo(To.AddHours(-5));
 	}
 
 	[Test]
-	public async Task ReadAsync_ADeletedFeedWithoutRunsInTheWindow_HasNoLineButKeepsItsName()
+	public async Task ReadAsync_ADeletedFeedWithoutRunsInTheWindow_HasNoLine()
 	{
 		Stored(Run(-2, 30, 3, 0, 2));
 		var gone = new DeletedFeed(FeedId.From(Guid.NewGuid()), "Horror movies", FeedProvider.Mdblist, To.AddHours(-5));
@@ -141,8 +143,6 @@ public class UsageFeedLinesTests
 		var feeds = await Testee().ReadAsync(Day, NoRows, CancellationToken.None);
 
 		await Assert.That(feeds.Lines.Select(line => line.Name)).IsEquivalentTo(["Latest shows", "Paused list"]);
-		await Assert.That(feeds.Names[gone.Feed].Name).IsEqualTo("Horror movies");
-		await Assert.That(feeds.Names[Busy.Id].DeletedAt).IsNone();
 	}
 
 	private void Stored(params FeedRun[] runs)
@@ -166,5 +166,9 @@ public class UsageFeedLinesTests
 		};
 	}
 
-	private UsageFeedLines Testee() => new(_feeds.Object, _deleted.Object);
+	private static UsageFeedName Live(Domain.Feed.Feed feed) => new(feed.Id, feed.Name, feed.Provider, new None());
+
+	private static UsageFeedName Gone(DeletedFeed feed) => new(feed.Feed, feed.Name, feed.Provider, Some.Of(feed.DeletedAt));
+
+	private UsageFeedLines Testee() => new(_feeds.Object, _deleted.Object, _store.Object);
 }

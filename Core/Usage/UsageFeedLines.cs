@@ -9,7 +9,7 @@ namespace Core.Usage;
 
 internal sealed record UsageFeeds(IReadOnlyList<UsageFeedLine> Lines, IReadOnlyDictionary<FeedId, UsageFeedName> Names);
 
-internal sealed class UsageFeedLines(IFeedService feeds, IDeletedFeeds deleted)
+internal sealed class UsageFeedLines(IFeedService feeds, IDeletedFeeds deleted, IUsageStore store)
 {
 	private const int MostRuns = 10_000;
 
@@ -31,11 +31,7 @@ internal sealed class UsageFeedLines(IFeedService feeds, IDeletedFeeds deleted)
 		IEnumerable<UsageFeedLine> ended = gone.Where(feed => callsByFeed.Contains(feed.Feed))
 			.Select(feed => Ended(feed, [.. callsByFeed[feed.Feed]]))
 			.OrderByDescending(line => line.Stats.Calls);
-		IEnumerable<UsageFeedName> names =
-		[
-			.. live.Select(line => new UsageFeedName(line.Feed, line.Name, line.Provider, new None())),
-			.. gone.Select(feed => new UsageFeedName(feed.Feed, feed.Name, feed.Provider, Some.Of(feed.DeletedAt))),
-		];
+		var names = await store.FeedNamesAsync(cancellationToken);
 		return new UsageFeeds([.. live, .. ended], names.DistinctBy(name => name.Feed).ToDictionary(name => name.Feed));
 	}
 
