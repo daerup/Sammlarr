@@ -194,6 +194,21 @@ public class LaneGateTests
 	}
 
 	[Test]
+	public async Task Release_AfterACleanWindowOfALargeWindow_AddsATenthOfIt()
+	{
+		var time = new FakeTimeProvider();
+		using var testee = new LaneGate(Policy(new RateWindow(100, TimeSpan.FromSeconds(1))), time, new None(), "");
+		(await GrantedAsync(testee)).Release(new AttemptThrottled(new None()));
+		time.Advance(TimeSpan.FromSeconds(1));
+		(await GrantedAsync(testee)).Release(new AttemptAnswered());
+		time.Advance(TimeSpan.FromSeconds(1));
+
+		var granted = Enumerable.Range(0, 61).Select(_ => Enter(testee, LanePriority.Interactive)).ToList();
+
+		await Assert.That(granted.Count(entering => entering.IsCompleted)).IsEqualTo(60);
+	}
+
+	[Test]
 	public async Task Release_AfterAWindowWithAThrottle_AddsNothing()
 	{
 		var time = new FakeTimeProvider();

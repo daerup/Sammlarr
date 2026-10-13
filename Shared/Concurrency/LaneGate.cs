@@ -4,6 +4,8 @@ public sealed class LaneGate : IDisposable
 {
 	private static readonly TimeSpan LongestWake = TimeSpan.FromDays(1);
 
+	private const double RecoveryShare = 0.1;
+
 	private readonly Lock _gate = new();
 	private readonly PriorityQueue<Ticket, (int Class, long Order, long Seq)> _waiting = new();
 	private readonly LanePolicy _policy;
@@ -193,7 +195,7 @@ public sealed class LaneGate : IDisposable
 		_downUntil = new None();
 		Shortest()
 			.When(window => _scale < 1 && now - _throttled >= window.Per && now - _raised >= window.Per)
-			.Apply(window => _scale = Math.Min(1, _scale + 1.0 / window.Requests))
+			.Apply(window => _scale = Math.Min(1, _scale + Math.Max(1.0 / window.Requests, RecoveryShare)))
 			.Apply(_ => _raised = now);
 	}
 
