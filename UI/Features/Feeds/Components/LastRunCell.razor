@@ -1,4 +1,3 @@
-@using System.Globalization
 @using Contracts.Media
 @using Domain.Feed.Run
 @using UI.Shared.Changes
@@ -165,7 +164,7 @@ else
 
     private static string Heading(FeedRun run) => run.StartedAt.ToLocalTime().ToString("MMMM d, HH:mm");
 
-    private static string Count(int count) => count.ToString("N0", CultureInfo.InvariantCulture);
+    private static string Count(int count) => count.ToString("N0");
 
     private static string Tone(ChipTone tone)
     {

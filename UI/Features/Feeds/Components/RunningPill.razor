@@ -64,7 +64,7 @@
         return string.Create(CultureInfo.InvariantCulture, $"width: {Tally.Percent(count):0.###}%{background}");
     }
 
-    private static string Count(int count) => count.ToString("N0", CultureInfo.InvariantCulture);
+    private static string Count(int count) => count.ToString("N0");
 
     private bool Failed => Tally.Ended.Match(end => end.Ending is TraceEnding.Failed, () => false);
 

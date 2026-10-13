@@ -308,7 +308,7 @@
         return string.Create(CultureInfo.InvariantCulture, $"{seconds / 60}:{seconds % 60:00}");
     }
 
-    private static string Count(int count) => count.ToString("N0", CultureInfo.InvariantCulture);
+    private static string Count(int count) => count.ToString("N0");
 
     private static readonly RenderFragment Nothing = _ => { };
 
