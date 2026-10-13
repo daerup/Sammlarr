@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.6.0">
+<Project Sdk="Aspire.AppHost.Sdk/13.6.1">
 	<ItemGroup>
 		<ProjectReference Include="..\Web\Web.csproj" />
 		<ProjectReference Include="..\Shared\Shared.csproj" IsAspireProjectResource="false" />
