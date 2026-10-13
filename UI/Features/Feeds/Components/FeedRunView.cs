@@ -18,19 +18,28 @@ internal static class FeedRunView
 		return
 		[
 			.. run
-				.Items.Where(item => item.State is FeedRunItemState.Added or FeedRunItemState.Removed)
-				.Where(item => media.ContainsKey(item.MediaId))
+				.Items.Where(item => media.ContainsKey(item.MediaId))
 				.Select(item => new ChangeItem
 				{
 					Title = media[item.MediaId].Details.Title ?? string.Empty,
 					Id = item.MediaId,
 					Media = media[item.MediaId],
-					Kind = item.State is FeedRunItemState.Removed ? ChangeKind.Removed : ChangeKind.Added,
+					Kind = Kind(item.State),
 					Subtitle = Subtitle(media[item.MediaId]),
 					ContextIcon = item.State is FeedRunItemState.Removed ? "log-out" : null,
 					ContextTooltip = item.State is FeedRunItemState.Removed ? "Removed once it had been absent from enough runs" : null,
 				}),
 		];
+	}
+
+	private static ChangeKind Kind(FeedRunItemState state)
+	{
+		return state switch
+		{
+			FeedRunItemState.Added => ChangeKind.Added,
+			FeedRunItemState.Removed => ChangeKind.Removed,
+			FeedRunItemState.Unaddressable => ChangeKind.Unaddressable,
+		};
 	}
 
 	internal static IReadOnlyList<ChangeItem> Items(IFeedPlan summary, IReadOnlyDictionary<MediaId, MatchedMedia> media)

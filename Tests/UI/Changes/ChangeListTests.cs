@@ -34,6 +34,16 @@ public class ChangeListTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_ForATitleNoSinkCouldAdd_ListsItUnderItsOwnGroupAfterTheAdded()
+	{
+		var cut = RenderList(Added("Fresh"), new ChangeItem { Title = "Stuck", Kind = ChangeKind.Unaddressable });
+
+		var groups = cut.FindAll(".change-group").Select(group => group.TextContent.Trim()).ToList();
+		await Assert.That(groups).Count().IsEqualTo(2);
+		await Assert.That(groups[1]).Contains("Couldn't be added");
+	}
+
+	[Test]
 	public async Task Render_ForAnUnmatchedRow_UsesAPlaceholderInsteadOfAPoster()
 	{
 		var cut = RenderList(new ChangeItem { Title = "Nowhere", Kind = ChangeKind.Unmatched });

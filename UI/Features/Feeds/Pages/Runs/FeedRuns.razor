@@ -367,7 +367,7 @@
     private async Task ShowRunAsync(FeedRun run)
     {
         _selected = run;
-        var wanted = run.Items.Where(item => item.State is FeedRunItemState.Added or FeedRunItemState.Removed).Select(item => item.MediaId).ToList();
+        var wanted = run.Items.Select(item => item.MediaId).ToList();
         _items = FeedRunView.Items(run, await Media.GetDetailsByIdAsync(wanted));
     }
 

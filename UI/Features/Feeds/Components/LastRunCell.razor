@@ -67,7 +67,7 @@ else if (Overview.LastRun is Some<FeedRun>(var run))
                         <b class="@($"text-right font-semibold tabular-nums {(chip.Count > 0 ? Tone(chip.Tone) : "text-foreground")}")">@Count(chip.Count)</b>
                     }
                 </div>
-                <div class="mt-2 text-[11px] opacity-80">Click for the titles it added and removed</div>
+                <div class="mt-2 text-[11px] opacity-80">Click for the titles it added, removed or couldn't add</div>
             </BbTooltipContent>
         </BbTooltip>
     }
@@ -151,7 +151,7 @@ else
 
     private async Task OpenAsync(FeedRun run)
     {
-        var wanted = run.Items.Where(item => item.State is FeedRunItemState.Added or FeedRunItemState.Removed).Select(item => item.MediaId).ToList();
+        var wanted = run.Items.Select(item => item.MediaId).ToList();
         _items = FeedRunView.Items(run, await Media.GetDetailsByIdAsync(wanted));
         await SetOpenAsync(true);
     }

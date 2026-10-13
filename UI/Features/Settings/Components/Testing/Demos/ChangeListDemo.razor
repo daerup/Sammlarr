@@ -2,7 +2,7 @@
 @using UI.Shared.Changes
 
 <DemoCard Title="Change list" Where="Run dialog, sync dialog" Span="2"
-          Note="ChangeList with an added, a removed and an unmatched title under the run's count chips, and the ChangeDialog that frames it.">
+          Note="ChangeList with an added, a removed, an unmatched title and one no sink could add under the run's count chips, and the ChangeDialog that frames it.">
     <ChangeList Items="Items" Chips="Chips"/>
     <div>
         <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => _open = true">
@@ -39,6 +39,7 @@
             ContextTooltip = "Removed once it had been absent from enough runs",
         },
         new() { Title = "Unmatched Title", Kind = ChangeKind.Unmatched, Subtitle = "2024" },
+        new() { Title = "Unaddressable Title", Kind = ChangeKind.Unaddressable, Subtitle = "2023" },
     ];
 
     private static readonly IReadOnlyList<ChangeChip> Chips = FeedRunView.Chips(DemoFeeds.MirrorRun.Counts);
