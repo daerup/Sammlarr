@@ -185,6 +185,37 @@ public class DuplicateTitlesTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task RunAsync_WhenMdblistAnswersWhatItCannotRead_RecordsTheFaultAndAsksAgainADayLater()
+	{
+		await host.WithMdblistAccount("valid-mdblist-key");
+		host.HttpStub.RespondWithJsonForUrl(HousekeepingSeeds.MdblistTitles, """{"titles":"not a list"}""");
+		await host.StoredTwiceAsync("15739", "tt0083564");
+
+		await Testee.RunAsync(Now);
+
+		var note = (await Notes.AllAsync()).Single();
+		await Assert.That((note.Attempts, note.AskAfter)).IsEqualTo((1, Now.AddDays(1)));
+		await Assert.That(note.LastAsk.Map(ask => (ask.Service, ask.Outcome))).IsSome().And.IsEqualTo((RemoteService.Mdblist, AskOutcome.Faulted));
+	}
+
+	[Test]
+	public async Task RunAsync_WhileTheUsersMdblistKeyIsAtItsFloor_AsksWikidataForTheSameUser()
+	{
+		await host.WithMdblistAccount("valid-mdblist-key");
+		AtTheFloor("valid-mdblist-key");
+		host.WikidataMaps("tt0083564", "15739");
+		var held = await host.SeedMediaAsync(ImdbId.From("tt0083564", MediaType.Movie));
+		await host.SeedMediaAsync(TmdbId.From("15739", MediaType.Movie));
+		await host.Resolve<IIdentityClaims>().ClaimAsync(new IdentityClaim([TmdbId.From("15739", MediaType.Movie)], Some.Of(held), [RemoteService.Tmdb]));
+
+		var merged = await Testee.RunAsync(Now);
+
+		await Assert.That(merged).IsEqualTo(1);
+		await Assert.That(host.WikidataAsked("tt0083564")).IsEqualTo(1);
+		await Assert.That(host.HttpStub.Requests(TestUrls.MdblistApi)).IsEqualTo(0);
+	}
+
+	[Test]
 	public async Task RunAsync_Twice_MergesOnceThenReportsZero()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
