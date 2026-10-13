@@ -49,11 +49,11 @@
 		<ItemGroup>
 			<StaticWebAsset
 				Remove="@(StaticWebAsset)"
-				Condition="'%(SourceId)' == 'BlazorBlueprint.Components' and ('%(RelativePath)' == 'js/world-map.js' or $([System.String]::new('%(RelativePath)').StartsWith('maps/')))"
+				Condition="'%(SourceId)' == 'BlazorBlueprint.Components' and $([System.String]::new('%(RelativePath)').StartsWith('maps/'))"
 			/>
 			<StaticWebAssetEndpoint
 				Remove="@(StaticWebAssetEndpoint)"
-				Condition="$([System.String]::new('%(Identity)').StartsWith('_content/BlazorBlueprint.Components/maps/')) or $([System.String]::new('%(Identity)').StartsWith('_content/BlazorBlueprint.Components/js/world-map.'))"
+				Condition="$([System.String]::new('%(Identity)').StartsWith('_content/BlazorBlueprint.Components/maps/'))"
 			/>
 		</ItemGroup>
 	</Target>
