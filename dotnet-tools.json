@@ -9,24 +9,10 @@
       ],
       "rollForward": false
     },
-    "powerutils.benchmarkdotnet.reporter": {
-      "version": "1.8.1",
-      "commands": [
-        "pbreporter"
-      ],
-      "rollForward": false
-    },
     "husky": {
       "version": "0.9.1",
       "commands": [
         "husky"
-      ],
-      "rollForward": false
-    },
-    "dotnet-stryker": {
-      "version": "5.0.0",
-      "commands": [
-        "dotnet-stryker"
       ],
       "rollForward": false
     },

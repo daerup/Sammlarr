@@ -33,3 +33,5 @@ Shared/Concurrency/LaneAnswer.cs
 Contracts/Media/ListTitle.cs
 Domain/Media/ConflictState.cs
 Domain/Media/MergeOutcome.cs
+AppHost/arr/radarr/config.xml
+AppHost/arr/sonarr/config.xml

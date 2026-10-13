@@ -3,7 +3,6 @@
 		<TargetFramework>net11.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<LangVersion>preview</LangVersion>
 		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
 	<ItemGroup>

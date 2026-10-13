@@ -5,14 +5,12 @@
 	<ItemGroup>
 		<PackageVersion Include="Aspire.Hosting.Docker" Version="13.6.0" />
 		<PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.0" />
-		<PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
 		<PackageVersion Include="BlazorBlueprint.Components" Version="4.1.0" />
 		<PackageVersion Include="BlazorBlueprint.Icons.Lucide" Version="2.0.2" />
 		<PackageVersion Include="BlazorBlueprint.Primitives" Version="4.1.0" />
 		<PackageVersion Include="CronExpressionDescriptor" Version="2.51.0" />
 		<PackageVersion Include="Cronos" Version="0.13.0" />
 		<PackageVersion Include="Dapper" Version="2.1.89" />
-		<PackageVersion Include="Enterprize1.BenchmarkDotNet.GitCompare" Version="0.0.1" />
 		<PackageVersion Include="Fluid.Core" Version="2.40.0" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="11.0.0-rc.1.26425.128" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="11.0.0-rc.1.26425.128" />
