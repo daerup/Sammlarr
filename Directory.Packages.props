@@ -61,4 +61,7 @@
 		<PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.45.0" />
 		<PackageVersion Include="WolverineFx.Sqlite" Version="6.45.0" />
 	</ItemGroup>
+	<ItemGroup>
+		<GlobalPackageReference Include="DotNet.ReproducibleBuilds" Version="2.0.5" />
+	</ItemGroup>
 </Project>

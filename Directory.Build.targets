@@ -1,0 +1,15 @@
+<Project>
+	<PropertyGroup>
+		<DeterministicTimestamp Condition="'$(DeterministicTimestamp)' == ''">$(SOURCE_DATE_EPOCH)</DeterministicTimestamp>
+	</PropertyGroup>
+	<PropertyGroup Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('$(DeterministicTimestamp)', '^\d+$'))">
+		<StaticWebAssetLastModified>$([System.DateTimeOffset]::FromUnixTimeSeconds($(DeterministicTimestamp)).ToString('R'))</StaticWebAssetLastModified>
+	</PropertyGroup>
+	<Target Name="PinStaticWebAssetLastModified" BeforeTargets="GenerateStaticWebAssetsPublishManifest" Condition="'$(StaticWebAssetLastModified)' != ''">
+		<ItemGroup>
+			<StaticWebAssetEndpoint>
+				<ResponseHeaders>$([System.Text.RegularExpressions.Regex]::Replace('%(ResponseHeaders)', '("Last-Modified","Value":")[^"]*', '${1}$(StaticWebAssetLastModified)'))</ResponseHeaders>
+			</StaticWebAssetEndpoint>
+		</ItemGroup>
+	</Target>
+</Project>

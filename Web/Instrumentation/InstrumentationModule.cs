@@ -22,13 +22,15 @@ internal class InstrumentationModule : IServiceModule
 		options.EnableRazorComponentsSupport = false;
 	}
 
-	private static bool IsMeaningfulRequest(HttpContext context)
+	internal static bool IsMeaningfulRequest(HttpContext context)
 	{
 		var path = context.Request.Path.Value ?? string.Empty;
 		if (
 			path.StartsWith("/_blazor", StringComparison.Ordinal)
 			|| path.StartsWith("/_framework", StringComparison.Ordinal)
 			|| path.StartsWith("/_content", StringComparison.Ordinal)
+			|| path.StartsWith("/alive", StringComparison.Ordinal)
+			|| path.StartsWith("/health", StringComparison.Ordinal)
 		)
 		{
 			return false;

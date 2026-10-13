@@ -18,6 +18,12 @@ using Web.Setup;
 using Web.Staging;
 #endif
 
+if (args is ["healthcheck"])
+{
+	Environment.ExitCode = await ContainerHealthProbe.CheckAsync(new HttpClientHandler(), Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORTS"));
+	return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddModule<SharedModule>();
