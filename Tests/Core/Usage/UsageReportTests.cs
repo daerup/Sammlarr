@@ -42,6 +42,7 @@ public class UsageReportTests
 		_feeds.GetAsync(Any()).Returns(new FeedSnapshot([]));
 		_feeds.GetRunsAsync(Any(), Any()).Returns([]);
 		_deleted.ReadAsync(Any()).Returns([]);
+		_store.FeedNamesAsync(Any()).Returns([]);
 	}
 
 	[Test]
@@ -243,6 +244,7 @@ public class UsageReportTests
 		var trending = TestFeeds.Feed(Guid.NewGuid(), "Trending shows");
 		var weekly = TestFeeds.Feed(Guid.NewGuid(), "Top movies of the week");
 		_feeds.GetAsync(Any()).Returns(new FeedSnapshot([FeedOverview.Of(trending, new None(), 0), FeedOverview.Of(weekly, new None(), 0)]));
+		_store.FeedNamesAsync(Any()).Returns([Named(trending), Named(weekly)]);
 		Stored(
 			Edited(RemoteService.Mdblist, Some.Of(weekly.Id), 26),
 			Edited(RemoteService.Mdblist, Some.Of(trending.Id), 30),
@@ -268,6 +270,7 @@ public class UsageReportTests
 	{
 		var gone = new DeletedFeed(FeedId.From(Guid.NewGuid()), "Horror movies", FeedProvider.Mdblist, Now.AddHours(-4));
 		_deleted.ReadAsync(Any()).Returns([gone]);
+		_store.FeedNamesAsync(Any()).Returns([new UsageFeedName(gone.Feed, gone.Name, gone.Provider, Some.Of(gone.DeletedAt))]);
 		Stored(
 			new UsageCalls(RemoteService.Mdblist, Midnight.AddHours(3), UsageCause.FeedRun, UsageOutcome.Answered, Some.Of(gone.Feed), 58),
 			Edited(RemoteService.Mdblist, Some.Of(gone.Feed), 5),
@@ -290,10 +293,25 @@ public class UsageReportTests
 	}
 
 	[Test]
+	public async Task ReadAsync_ForFeedEditorCallsOnAnotherUsersFeed_NamesTheFeed()
+	{
+		var theirs = TestFeeds.Feed(Guid.NewGuid(), "Ben's anime");
+		_store.FeedNamesAsync(Any()).Returns([Named(theirs)]);
+		Stored(Edited(RemoteService.AniList, Some.Of(theirs.Id), 14));
+
+		var report = await Testee().ReadAsync(UsageRange.Day);
+
+		var editor = report.Current.Causes.Single(cause => cause.Cause == UsageCause.FeedEditor);
+		await Assert.That(editor.Feeds.Select(feed => feed.Feed.Map(name => name.Name).GetValueOr("unknown"))).IsEquivalentTo(["Ben's anime"]);
+	}
+
+	[Test]
 	public async Task ReadAsync_AsAMember_IsRefused()
 	{
 		await Assert.ThrowsAsync<UnauthorizedAccessException>(() => Testee(UserRole.Member).ReadAsync(UsageRange.Day));
 	}
+
+	private static UsageFeedName Named(Domain.Feed.Feed feed) => new(feed.Id, feed.Name, feed.Provider, new None());
 
 	private void Stored(params UsageCalls[] calls) => Stored(calls, []);
 
@@ -332,7 +350,7 @@ public class UsageReportTests
 			_capacity.Object,
 			_loads.Object,
 			_mdblist.Object,
-			new UsageFeedLines(_feeds.Object, _deleted.Object),
+			new UsageFeedLines(_feeds.Object, _deleted.Object, _store.Object),
 			clock.Object,
 			new TestCurrentUser { Role = role }
 		);

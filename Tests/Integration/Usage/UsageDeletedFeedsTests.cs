@@ -4,6 +4,7 @@ using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Providers;
 using Harness;
+using TUnit.Assertions.Enums;
 
 namespace Integration.Tests.Usage;
 
@@ -41,11 +42,50 @@ public class UsageDeletedFeedsTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(await host.Resolve<IDeletedFeeds>().ReadAsync()).IsEmpty();
 	}
 
-	private async Task<FeedId> SeedFeedAsync()
+	[Test]
+	public async Task PruneAsync_PastTheDeletion_ForgetsEveryUsersDeletedFeeds()
+	{
+		host.SetCurrentTime(Now);
+		await host.SignInAs("Ben");
+		await host.Resolve<IFeedService>().DeleteAsync(await SeedFeedAsync("Ben's anime"));
+		await host.SignInAs("Ann");
+		await host.Resolve<IFeedService>().DeleteAsync(await SeedFeedAsync());
+		var before = await host.Resolve<IUsageStore>().FeedNamesAsync();
+
+		await host.Resolve<IUsageStore>().PruneAsync(Now.AddMinutes(1));
+
+		await Assert.That(before).Count().IsEqualTo(2);
+		await Assert.That(await host.Resolve<IUsageStore>().FeedNamesAsync()).IsEmpty();
+	}
+
+	[Test]
+	public async Task FeedNamesAsync_ForAnotherUsersFeeds_NamesTheLiveOnesFirstThenTheDeleted()
+	{
+		host.SetCurrentTime(Now);
+		await host.SignInAs("Ben");
+		var live = await SeedFeedAsync("Ben's anime");
+		var gone = await SeedFeedAsync();
+		await host.Resolve<IFeedService>().DeleteAsync(gone);
+		await host.SignInAs("Ann");
+
+		var names = await host.Resolve<IUsageStore>().FeedNamesAsync();
+
+		await Assert
+			.That(names)
+			.IsEquivalentTo(
+				[
+					new UsageFeedName(live, "Ben's anime", FeedProvider.Mdblist, new None()),
+					new UsageFeedName(gone, "Horror movies", FeedProvider.Mdblist, Some.Of(Now)),
+				],
+				CollectionOrdering.Matching
+			);
+	}
+
+	private async Task<FeedId> SeedFeedAsync(string name = "Horror movies")
 	{
 		var entity = new FeedRow
 		{
-			Name = "Horror movies",
+			Name = name,
 			IsEnabled = false,
 			Provider = FeedProvider.Mdblist,
 			Strategy = new FeedStrategy(new Append()),

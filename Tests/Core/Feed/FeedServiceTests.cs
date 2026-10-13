@@ -62,6 +62,16 @@ public class FeedServiceTests
 	}
 
 	[Test]
+	public async Task DeleteAsync_WhenTheFeedCannotBeDeleted_KeepsNoNameForIt()
+	{
+		_repository.DeleteAsync(Id, Any()).Throws(new InvalidOperationException("database is locked"));
+
+		await Assert.ThrowsAsync<InvalidOperationException>(() => Testee.DeleteAsync(Id));
+
+		_deleted.AddAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
 	public async Task DeleteAsync_AFeedThatIsGone_KeepsNoName()
 	{
 		_repository.FindAsync(Id, Any()).Returns(new None());
