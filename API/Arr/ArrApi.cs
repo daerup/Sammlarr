@@ -127,18 +127,24 @@ internal abstract class ArrApi(HttpClient http)
 		return sent.Map(_ => titleIds.Count);
 	}
 
-	public async Task<Result<int>> DeleteAsync(ArrConnection connection, int titleId, CancellationToken cancellationToken)
+	public async Task<Result<int>> DeleteAsync(ArrConnection connection, int titleId, ArrInstanceConfig settings, CancellationToken cancellationToken)
 	{
-		var sent = await SendAsync(connection, HttpMethod.Delete, $"{Titles}/{titleId}?deleteFiles=false&{ExclusionFlag}=false", new None(), cancellationToken);
+		var path = $"{Titles}/{titleId}?deleteFiles={Flag(settings.DeleteFiles)}&{ExclusionFlag}=false";
+		var sent = await SendAsync(connection, HttpMethod.Delete, path, new None(), cancellationToken);
 		return sent.Map(_ => titleId);
 	}
 
-	public async Task<Result<int>> DeleteManyAsync(ArrConnection connection, IReadOnlyList<int> titleIds, CancellationToken cancellationToken)
+	public async Task<Result<int>> DeleteManyAsync(
+		ArrConnection connection,
+		IReadOnlyList<int> titleIds,
+		ArrInstanceConfig settings,
+		CancellationToken cancellationToken
+	)
 	{
 		var body = new JsonObject
 		{
 			[TitleIds] = new JsonArray([.. titleIds.Select(id => JsonValue.Create(id))]),
-			["deleteFiles"] = false,
+			["deleteFiles"] = settings.DeleteFiles,
 			[ExclusionFlag] = false,
 		};
 		var sent = await SendAsync(connection, HttpMethod.Delete, $"{Titles}/editor", Some.Of<object>(body), cancellationToken);
@@ -252,6 +258,8 @@ internal abstract class ArrApi(HttpClient http)
 			return [];
 		}
 	}
+
+	private static string Flag(bool value) => value ? "true" : "false";
 
 	private sealed record ArrAnswer(bool Succeeded, HttpStatusCode Status, string Text);
 }

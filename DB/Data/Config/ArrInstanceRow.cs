@@ -28,4 +28,6 @@ internal sealed record ArrInstanceRow
 	public bool Monitored { get; set; } = true;
 
 	public bool SearchOnAdd { get; set; } = true;
+
+	public bool DeleteFiles { get; set; }
 }

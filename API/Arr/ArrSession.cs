@@ -5,15 +5,17 @@ using Domain.Wantlist.Arr;
 
 namespace API.Arr;
 
-internal sealed class ArrSession(ArrApi api, ArrConnection connection, List<ArrTitle> titles, Dictionary<string, int> tags)
+internal sealed class ArrSession(ArrApi api, ArrConnection connection, ArrInstanceConfig instance, List<ArrTitle> titles, Dictionary<string, int> tags)
 {
 	public ArrApp App => api.App;
 
+	public bool DeleteFiles => instance.DeleteFiles;
+
 	public IReadOnlyList<ArrTitle> Titles => titles;
 
-	public static async Task<Result<ArrSession>> OpenAsync(ArrApi api, Result<ArrConnection> connection, CancellationToken cancellationToken)
+	public static async Task<Result<ArrSession>> OpenAsync(ArrApi api, ArrInstanceConfig instance, CancellationToken cancellationToken)
 	{
-		return await connection.Map(open => OpenAsync(api, open, cancellationToken));
+		return await Connect(api.App, instance).Map(open => OpenAsync(api, open, instance, cancellationToken));
 	}
 
 	public static Result<ArrConnection> Connect(ArrApp app, ArrInstanceConfig settings)
@@ -98,7 +100,7 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, List<ArrT
 
 	public async Task<Result<int>> DeleteAsync(ArrTitle title, CancellationToken cancellationToken)
 	{
-		var deleted = await api.DeleteAsync(connection, title.Id, cancellationToken);
+		var deleted = await api.DeleteAsync(connection, title.Id, instance, cancellationToken);
 		return deleted.Apply(_ => titles.Remove(title));
 	}
 
@@ -109,15 +111,17 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, List<ArrT
 
 	public async Task<Result<int>> DeleteAsync(IReadOnlyList<ArrTitle> doomed, CancellationToken cancellationToken)
 	{
-		var deleted = await api.DeleteManyAsync(connection, [.. doomed.Select(title => title.Id)], cancellationToken);
+		var deleted = await api.DeleteManyAsync(connection, [.. doomed.Select(title => title.Id)], instance, cancellationToken);
 		return deleted.Apply(_ => titles.RemoveAll(title => doomed.Contains(title)));
 	}
 
-	private static async Task<Result<ArrSession>> OpenAsync(ArrApi api, ArrConnection connection, CancellationToken cancellationToken)
+	private static async Task<Result<ArrSession>> OpenAsync(ArrApi api, ArrConnection connection, ArrInstanceConfig instance, CancellationToken cancellationToken)
 	{
 		var titles = await api.TitlesAsync(connection, cancellationToken);
 		var tags = await api.TagsAsync(connection, cancellationToken);
-		return titles.Map(loaded => tags.Map(labels => new ArrSession(api, connection, [.. loaded], labels.ToDictionary(tag => tag.Label, tag => tag.Id))));
+		return titles.Map(loaded =>
+			tags.Map(labels => new ArrSession(api, connection, instance, [.. loaded], labels.ToDictionary(tag => tag.Label, tag => tag.Id)))
+		);
 	}
 
 	private async Task<Result<int>> CreateTagAsync(string label, CancellationToken cancellationToken)

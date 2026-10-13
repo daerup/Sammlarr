@@ -16,6 +16,7 @@ using Domain.Wantlist.Outbox;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using TUnit.Mocks.Http;
 
 namespace API.Tests.Arr;
@@ -43,6 +44,10 @@ public class ArrSinkTests
 		},
 		ArrTagScheme.Default
 	);
+
+	private static readonly ArrSinkConfig DeletingMovieFiles = Connected with { Radarr = Connected.Radarr with { DeleteFiles = true } };
+
+	private static readonly ArrSinkConfig DeletingFiles = DeletingMovieFiles with { Sonarr = Connected.Sonarr with { DeleteFiles = true } };
 
 	private static readonly ArrSinkConfig RoutingAnime = Connected with
 	{
@@ -684,6 +689,51 @@ public class ArrSinkTests
 	}
 
 	[Test]
+	public async Task ApplyAsync_RemovingAMovieOnlyThisUserWantsWhileRadarrDeletesFiles_DeletesItWithItsFiles()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]}]""");
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/movie/10")).Respond(HttpStatusCode.OK);
+		Addressing(TmdbId.From("27205", MediaType.Movie));
+
+		var acks = await Testee(DeletingFiles).ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
+		_radarr.Verify(request => request.Method(HttpMethod.Delete).PathMatches(".*/movie/10\\?deleteFiles=true&addImportExclusion=false$"), Times.Once);
+	}
+
+	[Test]
+	public async Task ApplyAsync_RemovingAShowOnlyThisUserWantsWhileSonarrDeletesFiles_DeletesItWithItsFiles()
+	{
+		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
+		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":3,"tvdbId":81189,"tags":[1]}]""");
+		_sonarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/series/3")).Respond(HttpStatusCode.OK);
+		Addressing(TvdbId.From("81189", MediaType.Show));
+
+		var acks = await Testee(DeletingFiles).ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
+		_sonarr.Verify(request => request.Method(HttpMethod.Delete).PathMatches(".*/series/3\\?deleteFiles=true&addImportListExclusion=false$"), Times.Once);
+	}
+
+	[Test]
+	[Arguments("sammlarr-u-daerup")]
+	[Arguments("sammlarr-protected")]
+	public async Task ApplyAsync_RemovingASharedOrProtectedTitleWhileRadarrDeletesFiles_OnlyTakesTagsOff(string label)
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson($$"""[{"id":1,"label":"sammlarr-u-guest"},{"id":3,"label":"{{label}}"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1,3]}]""");
+		_radarr.OnPut("/api/v3/movie/editor").Respond(HttpStatusCode.Accepted);
+		Addressing(TmdbId.From("27205", MediaType.Movie));
+
+		var acks = await Testee(DeletingFiles).ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Applied)]);
+		_radarr.Verify(request => request.Method(HttpMethod.Put).BodyContains("\"applyTags\":\"remove\""), Times.Once);
+		_radarr.Verify(request => request.Method(HttpMethod.Delete), Times.Never);
+	}
+
+	[Test]
 	public async Task ApplyAsync_ForANewMovieWithoutAProfileOrFolderChosen_AcksItFailedWithoutAddingIt()
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
@@ -870,7 +920,7 @@ public class ArrSinkTests
 	);
 
 	[Test]
-	public async Task HoldingsOfAsync_CountsTheTitlesOnlyTheirTagHoldsApartFromSharedAndProtectedOnes()
+	public async Task HoldingsOfAsync_CountsPerAppTheTitlesOnlyTheirTagHoldsApartFromSharedAndProtectedOnesWithTheAppsFilesChoice()
 	{
 		_radarr
 			.OnGet("/api/v3/tag")
@@ -881,11 +931,16 @@ public class ArrSinkTests
 				"""[{"id":10,"tmdbId":1,"tags":[1]},{"id":11,"tmdbId":2,"tags":[1,2]},{"id":12,"tmdbId":3,"tags":[1,3]},{"id":13,"tmdbId":4,"tags":[2]}]"""
 			);
 		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":5,"label":"sammlarr-u-mira"}]""");
-		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":20,"tvdbId":81189,"tags":[5]}]""");
+		_sonarr
+			.OnGet("/api/v3/series")
+			.RespondWithJson("""[{"id":20,"tvdbId":81189,"tags":[5]},{"id":21,"tvdbId":121361,"tags":[5]},{"id":22,"tvdbId":153021,"tags":[]}]""");
 
-		var holdings = await Testee().HoldingsOfAsync(Mira);
+		var holdings = await Testee(DeletingMovieFiles).HoldingsOfAsync(Mira);
 
-		await Assert.That(holdings).IsSuccess().And.IsEqualTo(new SinkHoldings(2, 2, "sammlarr-u-mira"));
+		await Assert
+			.That(holdings)
+			.IsSuccess()
+			.And.IsEquivalentTo([new SinkHoldings(ArrApp.Radarr, 1, true), new SinkHoldings(ArrApp.Sonarr, 2, false)], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -897,7 +952,10 @@ public class ArrSinkTests
 
 		var holdings = await Testee().HoldingsOfAsync(Mira with { DisplayName = "Mira Renamed" });
 
-		await Assert.That(holdings).IsSuccess().And.IsEqualTo(new SinkHoldings(1, 0, "sammlarr-u-mira"));
+		await Assert
+			.That(holdings)
+			.IsSuccess()
+			.And.IsEquivalentTo([new SinkHoldings(ArrApp.Radarr, 1, false), new SinkHoldings(ArrApp.Sonarr, 0, false)], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -924,6 +982,29 @@ public class ArrSinkTests
 		);
 		_radarr.Verify(request => request.Method(HttpMethod.Put).BodyContains("\"movieIds\":[11]"), Times.Once);
 		_sonarr.Verify(request => request.Method(HttpMethod.Delete), Times.Never);
+	}
+
+	[Test]
+	public async Task DeleteTitlesOfAsync_SendsEachAppItsOwnFilesChoice()
+	{
+		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"}]""");
+		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":1,"tags":[1]}]""");
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/movie/editor")).Respond(HttpStatusCode.OK);
+		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":5,"label":"sammlarr-u-mira"}]""");
+		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":20,"tvdbId":81189,"tags":[5]}]""");
+		_sonarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/series/editor")).Respond(HttpStatusCode.OK);
+
+		var deleted = await Testee(DeletingMovieFiles).DeleteTitlesOfAsync(Mira);
+
+		await Assert.That(deleted).IsSuccess().And.IsEqualTo(2);
+		_radarr.Verify(
+			request => request.Method(HttpMethod.Delete).Path("/api/v3/movie/editor").BodyContains("\"movieIds\":[10]").BodyContains("\"deleteFiles\":true"),
+			Times.Once
+		);
+		_sonarr.Verify(
+			request => request.Method(HttpMethod.Delete).Path("/api/v3/series/editor").BodyContains("\"seriesIds\":[20]").BodyContains("\"deleteFiles\":false"),
+			Times.Once
+		);
 	}
 
 	[Test]
@@ -958,7 +1039,10 @@ public class ArrSinkTests
 		var holdings = await Testee().HoldingsOfAsync(bob);
 		var deleted = await Testee().DeleteTitlesOfAsync(bob);
 
-		await Assert.That(holdings).IsSuccess().And.IsEqualTo(new SinkHoldings(0, 1, "sammlarr-u-bob-smith"));
+		await Assert
+			.That(holdings)
+			.IsSuccess()
+			.And.IsEquivalentTo([new SinkHoldings(ArrApp.Radarr, 0, false), new SinkHoldings(ArrApp.Sonarr, 0, false)], CollectionOrdering.Matching);
 		await Assert.That(deleted).IsSuccess().And.IsEqualTo(0);
 		_radarr.Verify(request => request.Method(HttpMethod.Delete), Times.Never);
 		_radarr.Verify(request => request.Method(HttpMethod.Put), Times.Never);

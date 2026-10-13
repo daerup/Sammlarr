@@ -96,12 +96,11 @@ internal sealed class ArrSink(
 		}
 	}
 
-	public async Task<Result<SinkHoldings>> HoldingsOfAsync(User person, CancellationToken cancellationToken = default)
+	public async Task<Result<IReadOnlyList<SinkHoldings>>> HoldingsOfAsync(User person, CancellationToken cancellationToken = default)
 	{
 		var config = await configs.GetAsync(cancellationToken);
-		var owner = Owner(person);
-		var held = await HeldAsync(config, owner, cancellationToken);
-		return held.Map(apps => new SinkHoldings(apps.Sum(app => app.Sole.Count), apps.Sum(app => app.Staying.Count), config.Tags.UserTag(owner)));
+		var held = await HeldAsync(config, Owner(person), cancellationToken);
+		return held.Map(apps => (IReadOnlyList<SinkHoldings>)[.. apps.Select(app => new SinkHoldings(app.Session.App, app.Sole.Count, app.Session.DeleteFiles))]);
 	}
 
 	public async Task<Result<int>> DeleteTitlesOfAsync(User person, CancellationToken cancellationToken = default)
@@ -126,7 +125,7 @@ internal sealed class ArrSink(
 		Result<IReadOnlyList<Held>> held = Success.Of<IReadOnlyList<Held>>([]);
 		foreach (var api in apis.All)
 		{
-			var session = await ArrSession.OpenAsync(api, ArrSession.Connect(api.App, config.Of(api.App)), cancellationToken);
+			var session = await ArrSession.OpenAsync(api, config.Of(api.App), cancellationToken);
 			held = held.Map(found => session.Map(open => (IReadOnlyList<Held>)[.. found, Holdings(open, config.Tags, owner, others)]));
 		}
 
@@ -182,7 +181,7 @@ internal sealed class ArrSink(
 		CancellationToken cancellationToken
 	)
 	{
-		var opened = await ArrSession.OpenAsync(api, ArrSession.Connect(api.App, config.Of(api.App)), cancellationToken);
+		var opened = await ArrSession.OpenAsync(api, config.Of(api.App), cancellationToken);
 		return opened.Map(session => Mine(api, session, config, viewer, claims));
 	}
 
@@ -232,7 +231,7 @@ internal sealed class ArrSink(
 	{
 		if (!sessions.TryGetValue(api.App, out var session))
 		{
-			session = await ArrSession.OpenAsync(api, ArrSession.Connect(api.App, setup.Config.Of(api.App)), cancellationToken);
+			session = await ArrSession.OpenAsync(api, setup.Config.Of(api.App), cancellationToken);
 			sessions[api.App] = session;
 		}
 

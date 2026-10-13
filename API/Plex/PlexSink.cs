@@ -56,9 +56,9 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		}
 	}
 
-	public Task<Result<SinkHoldings>> HoldingsOfAsync(User person, CancellationToken cancellationToken = default)
+	public Task<Result<IReadOnlyList<SinkHoldings>>> HoldingsOfAsync(User person, CancellationToken cancellationToken = default)
 	{
-		return Task.FromResult<Result<SinkHoldings>>(OwnWatchlist);
+		return Task.FromResult<Result<IReadOnlyList<SinkHoldings>>>(OwnWatchlist);
 	}
 
 	public Task<Result<int>> DeleteTitlesOfAsync(User person, CancellationToken cancellationToken = default)

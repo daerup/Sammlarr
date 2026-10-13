@@ -68,7 +68,7 @@ internal sealed class UserManagementService(
 			.Match(refused => refused, () => StoreRoleAsync(id, role, cancellationToken));
 	}
 
-	public async Task<Result<SinkHoldings>> SinkHoldingsAsync(UserId id, CancellationToken cancellationToken = default)
+	public async Task<Result<IReadOnlyList<SinkHoldings>>> SinkHoldingsAsync(UserId id, CancellationToken cancellationToken = default)
 	{
 		await EnsureCallerIsAdminAsync(cancellationToken);
 		using var marked = UsageCauses.Mark(UsageCause.WantlistSync);
