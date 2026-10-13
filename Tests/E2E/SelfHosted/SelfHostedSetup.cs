@@ -73,7 +73,7 @@ internal static class SelfHostedSetup
 	internal static async Task<string> FinishAsync(IPage page, SelfHostedStack stack)
 	{
 		var invite = await ReachDoneAsync(page, stack);
-		await page.Button("Finish setup").ClickAsync();
+		await page.Button("Done").ClickAsync();
 		await StaysHomeAsync(page);
 		return invite;
 	}

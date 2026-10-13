@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Options;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using UI.Features.Onboarding.Components;
 using UI.Features.Settings.Components.Providers;
 using UI.Features.Settings.Components.Users;
@@ -160,18 +161,26 @@ public class SetupWizardTests : BunitContext
 	}
 
 	[Test]
-	public async Task FinishSetup_CompletesSetupAndGoesHome()
+	public async Task Done_CompletesSetupAndGoesHome()
 	{
 		WithTmdbKey();
-		var cut = RenderForAdmin();
-		await Next(cut).ClickAsync(new());
-		await Next(cut).ClickAsync(new());
-		await Next(cut).ClickAsync(new());
+		var cut = await RenderOnTheDoneStepAsync();
 
-		await Buttons(cut, "Finish setup").Single().ClickAsync(new());
+		await cut.FindAll("button").Single(button => button.TextContent.Trim() == "Done" && button.Closest("nav") is null).ClickAsync(new());
 
 		_onboarding.CompleteAsync(Any()).WasCalled(Times.Once);
 		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).IsEqualTo("http://localhost/");
+	}
+
+	[Test]
+	public async Task DoneStep_OffersOnlyBackAndDone_AndAddInSettingsForAMissingKey()
+	{
+		WithTmdbKey();
+		var cut = await RenderOnTheDoneStepAsync();
+
+		await Assert
+			.That(cut.FindAll("button").Where(button => button.Closest("nav") is null).Select(button => button.TextContent.Trim()))
+			.IsEquivalentTo(["Add in Settings", "Back", "Done"], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -196,6 +205,17 @@ public class SetupWizardTests : BunitContext
 	{
 		var cut = Render<SetupWizard>(parameters => parameters.Add(wizard => wizard.NeedsAdmin, false));
 		cut.WaitForState(() => cut.FindAll(".choice-card").Count == 2);
+		return cut;
+	}
+
+	private async Task<IRenderedComponent<SetupWizard>> RenderOnTheDoneStepAsync()
+	{
+		var cut = RenderForAdmin();
+		foreach (var _ in Enumerable.Range(0, 3))
+		{
+			await Next(cut).ClickAsync(new());
+		}
+
 		return cut;
 	}
 
