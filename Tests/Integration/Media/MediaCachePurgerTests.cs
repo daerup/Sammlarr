@@ -159,7 +159,14 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var queuedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(queuedId.ToExternalIdEntity(queuedMedia), queuedImdb.ToExternalIdEntity(queuedMedia));
-		fixture.Context.WantlistOutbox.Add(new WantlistOutboxRow { Media = queuedMedia, Action = WantlistOperationAction.Add });
+		fixture.Context.WantlistOutbox.Add(
+			new WantlistOutboxRow
+			{
+				Media = queuedMedia,
+				Action = WantlistOperationAction.Add,
+				Sink = SinkKind.Plex,
+			}
+		);
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 

@@ -7,6 +7,7 @@ using Contracts.Wantlist.Sync;
 using Core.Announcing;
 using Domain.Media;
 using Domain.Notifications;
+using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
@@ -91,7 +92,7 @@ internal sealed class WantlistSyncEngine(
 
 	private async Task<IReadOnlyList<PushOutcome>> DrainAsync(IMediaSink sink, IReadOnlySet<MediaId> waiting, CancellationToken cancellationToken)
 	{
-		var pending = new OutboxSnapshot(await outbox.GetAllAsync(cancellationToken)).Pending.Where(entry => !waiting.Contains(entry.MediaId)).ToList();
+		var pending = new OutboxSnapshot(await outbox.GetAllAsync(sink.Kind, cancellationToken)).Pending.Where(entry => !waiting.Contains(entry.MediaId)).ToList();
 		var addedBy = pending.Any(entry => entry.Action is WantlistOperationAction.Add) ? await AddingFeedsAsync(cancellationToken) : [];
 		List<PushOutcome> outcomes = [];
 		foreach (var batch in pending.GroupBy(entry => entry.Action))
@@ -134,18 +135,19 @@ internal sealed class WantlistSyncEngine(
 		{
 			var acked = awaiting[ack.MediaId];
 			awaiting.Remove(ack.MediaId);
-			outcomes.Add(await SettleAsync(acked, KindFor(acked, ack.Outcome), ack.Reason, cancellationToken));
+			outcomes.Add(await SettleAsync(sink.Kind, acked, KindFor(acked, ack.Outcome), ack.Reason, cancellationToken));
 		}
 
 		foreach (var unacked in awaiting.Values)
 		{
-			outcomes.Add(await SettleAsync(unacked, KindFor(unacked, SinkSyncOutcome.Failed), new None(), cancellationToken));
+			outcomes.Add(await SettleAsync(sink.Kind, unacked, KindFor(unacked, SinkSyncOutcome.Failed), new None(), cancellationToken));
 		}
 
 		return outcomes;
 	}
 
 	private async Task<PushOutcome> SettleAsync(
+		SinkKind sink,
 		WantlistOutboxEntry entry,
 		WantlistOutboxEventKind kind,
 		Optional<string> reason,
@@ -154,11 +156,12 @@ internal sealed class WantlistSyncEngine(
 	{
 		if (kind is WantlistOutboxEventKind.Pushed)
 		{
-			await outbox.DropAsync([entry.MediaId], cancellationToken);
+			await outbox.DropAsync(sink, [entry.MediaId], cancellationToken);
 		}
 		else
 		{
 			await outbox.RecordFailedAttemptAsync(
+				sink,
 				[entry.MediaId],
 				kind is WantlistOutboxEventKind.Abandoned ? WantlistOutboxState.Failed : WantlistOutboxState.Pending,
 				reason,

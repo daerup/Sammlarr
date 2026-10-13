@@ -21,7 +21,7 @@ public class WantlistSyncPlannerTests
 		var sink = WantlistStubs.EmptySink();
 		sink.GetAsync(Any()).Returns(WantlistStubs.NothingOnTheSink).Callback(() => cause = UsageCauses.Current.Cause);
 		var outbox = IWantlistOutbox.Mock();
-		outbox.GetAllAsync(Any()).Returns([]);
+		outbox.GetAllAsync(Any(), Any()).Returns([]);
 
 		await WantlistStubs.Planner(sink, outbox).PlanAsync();
 
@@ -33,11 +33,11 @@ public class WantlistSyncPlannerTests
 	{
 		var stale = MediaId.From(new Guid(11, 0, 0, new byte[8]));
 		var outbox = IWantlistOutbox.Mock();
-		outbox.GetAllAsync(Any()).Returns([new WantlistOutboxEntry(stale, WantlistOperationAction.Remove, WantlistOutboxState.Pending, 0)]);
+		outbox.GetAllAsync(Any(), Any()).Returns([new WantlistOutboxEntry(stale, WantlistOperationAction.Remove, WantlistOutboxState.Pending, 0)]);
 
 		await WantlistStubs.Planner(WantlistStubs.EmptySink(), outbox).PlanAsync();
 
-		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
+		outbox.DropAsync(Any(), Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -47,7 +47,7 @@ public class WantlistSyncPlannerTests
 
 		await WantlistStubs.Planner(WantlistStubs.EmptySink(), outbox).PlanAsync();
 
-		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
+		outbox.DropAsync(Any(), Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -117,14 +117,14 @@ public class WantlistSyncPlannerTests
 		var sink = IMediaSink.Mock();
 		sink.GetAsync(Any()).Returns(new SinkSnapshot([], []) { Down = Some.Of(new WantlistSyncSinkUnreachable("Sonarr is down.", [ArrApp.Sonarr])) });
 		var outbox = IWantlistOutbox.Mock();
-		outbox.GetAllAsync(Any()).Returns([new WantlistOutboxEntry(show, WantlistOperationAction.Remove, WantlistOutboxState.Pending, 0)]);
+		outbox.GetAllAsync(Any(), Any()).Returns([new WantlistOutboxEntry(show, WantlistOperationAction.Remove, WantlistOutboxState.Pending, 0)]);
 
 		var result = await WantlistStubs.Planner(sink, outbox, media: WantlistStubs.Typed((show, MediaType.Show))).PlanAsync();
 
 		var summary = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSummary>();
 		await Assert.That(summary!.Push.Removes).IsEmpty();
 		await Assert.That(summary.Waiting).IsEquivalentTo([show]);
-		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
+		outbox.DropAsync(Any(), Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
 	}
 
 	[Test]

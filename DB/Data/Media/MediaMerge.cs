@@ -1,6 +1,7 @@
 using Contracts.Media;
 using DB.Data.Feed;
 using Domain.Media;
+using Domain.Providers;
 using Domain.Wantlist.Outbox;
 using Microsoft.EntityFrameworkCore;
 
@@ -142,14 +143,21 @@ internal sealed class MediaMerge(IDbContextFactory<SammlarrDbContext> contexts, 
 			.Select(row => new Queued(
 				EF.Property<Guid>(row, UserOwnedConfigurationExtensions.UserIdColumn),
 				EF.Property<Guid>(row, MediaQueries.MediaIdColumn),
-				row.Action
+				row.Action,
+				row.Sink
 			))
 			.ToListAsync(cancellationToken);
 		var disagreeing = queued
-			.GroupBy(entry => entry.User)
-			.Where(user => user.Count() > 1)
-			.Select(user => user.OrderBy(entry => entry.Action == Agreeing(wanting.Contains(user.Key))).ThenBy(entry => entry.Media == keep).First());
-		await DropAsync(rows, disagreeing.Select(entry => (entry.User, entry.Media)), cancellationToken);
+			.GroupBy(entry => (entry.User, entry.Sink))
+			.Where(queue => queue.Count() > 1)
+			.Select(queue => queue.OrderBy(entry => entry.Action == Agreeing(wanting.Contains(queue.Key.User))).ThenBy(entry => entry.Media == keep).First());
+		foreach (var entry in disagreeing)
+		{
+			await Of(rows, entry.Media)
+				.Where(row => EF.Property<Guid>(row, UserOwnedConfigurationExtensions.UserIdColumn) == entry.User && row.Sink == entry.Sink)
+				.ExecuteDeleteAsync(cancellationToken);
+		}
+
 		await RehomeAsync(Of(rows, gone), keep, cancellationToken);
 	}
 
@@ -204,5 +212,5 @@ internal sealed class MediaMerge(IDbContextFactory<SammlarrDbContext> contexts, 
 
 	private sealed record Listed(Guid User, Guid Media, DateTimeOffset At);
 
-	private sealed record Queued(Guid User, Guid Media, WantlistOperationAction Action);
+	private sealed record Queued(Guid User, Guid Media, WantlistOperationAction Action, SinkKind Sink);
 }

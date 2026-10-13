@@ -107,7 +107,14 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 				}
 			);
 			seed.Wantlist.Add(new WantlistRow { Media = media, Origin = WantlistItemOrigin.Manual });
-			seed.WantlistOutbox.Add(new WantlistOutboxRow { Media = media, Action = WantlistOperationAction.Add });
+			seed.WantlistOutbox.Add(
+				new WantlistOutboxRow
+				{
+					Media = media,
+					Action = WantlistOperationAction.Add,
+					Sink = SinkKind.Plex,
+				}
+			);
 			seed.Blocklist.Add(new BlocklistRow { Media = media });
 			seed.ApiKeySettings.Add(new ApiKeyConfigRow { Provider = ApiKeyProvider.Tmdb, ApiKey = "victim-key" });
 			seed.Credentials.Add(

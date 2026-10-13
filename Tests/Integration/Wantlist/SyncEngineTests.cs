@@ -97,7 +97,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWantlistEmpty();
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [inception]);
 
 		var result = await Testee.SyncAsync(Trigger);
 
@@ -114,7 +114,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWantlistHas(TestMedia.Inception);
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [inception]);
 
 		var result = await Testee.SyncAsync(Trigger);
 
@@ -131,7 +131,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task SyncAsync_WhenTheProviderAlreadyReflectsAPendingRemove_ConfirmsAndDropsTheEntry()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Manual);
-		await Outbox.EnqueueAsync(WantlistOperationAction.Remove, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [inception]);
 		await host.RemoteWantlistEmpty();
 
 		await Testee.SyncAsync(Trigger);
@@ -146,7 +146,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 		await host.RemoteWantlistHas(TestMedia.Inception);
-		await Outbox.EnqueueAsync(WantlistOperationAction.Remove, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [inception]);
 
 		await Testee.SyncAsync(Trigger);
 
@@ -161,7 +161,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWantlistEmpty();
 		await host.ProviderRejectsPushes();
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [inception]);
 
 		var result = await Testee.SyncAsync(Trigger);
 
@@ -179,7 +179,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 		await host.RemoteWantlistHas(TestMedia.Inception);
 		await host.ProviderRejectsPushes();
-		await Outbox.EnqueueAsync(WantlistOperationAction.Remove, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [inception]);
 
 		var result = await Testee.SyncAsync(Trigger);
 
@@ -197,7 +197,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var solaris = await host.Movie("Solaris", tmdb: "11321").SeedAsync();
 		await host.RemoteWantlistEmpty();
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [solaris]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [solaris]);
 
 		await Testee.SyncAsync(Trigger);
 
@@ -209,7 +209,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task SyncAsync_WhenTheRemoteFetchFails_AbortsWithoutMutatingLocalState()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Manual);
-		await Outbox.EnqueueAsync(WantlistOperationAction.Remove, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [inception]);
 		await host.RemoteWantlistUnavailable();
 
 		var result = await Testee.SyncAsync(Trigger);
@@ -225,7 +225,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Manual);
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 		await host.RemoteWantlistHas(TestMedia.FightClub);
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [inception]);
 
 		var result = await Planner.PlanAsync();
 
@@ -272,7 +272,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWantlistEmpty();
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [inception]);
 
 		await Testee.SyncAsync(Trigger);
 
@@ -322,13 +322,13 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var unpushable = await host.SeedMediaAsync(TmdbId.From("55555", MediaType.Movie));
 		await host.RemoteWantlistEmpty();
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [unpushable]);
-		await Outbox.RecordFailedAttemptAsync([unpushable], WantlistOutboxState.Pending, new None());
-		await Outbox.RecordFailedAttemptAsync([unpushable], WantlistOutboxState.Pending, new None());
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [unpushable]);
+		await Outbox.RecordFailedAttemptAsync(SinkKind.Plex, [unpushable], WantlistOutboxState.Pending, new None());
+		await Outbox.RecordFailedAttemptAsync(SinkKind.Plex, [unpushable], WantlistOutboxState.Pending, new None());
 
 		await Testee.SyncAsync(Trigger);
 
-		await Assert.That((await Outbox.GetAllAsync()).Single().Attempts).IsEqualTo(3);
+		await Assert.That((await Outbox.GetAllAsync(SinkKind.Plex)).Single().Attempts).IsEqualTo(3);
 	}
 
 	private static async Task AssertPlanned(WantlistSyncSummary summary, WantlistSyncDirection direction, WantlistOperationAction action, MediaId mediaId) =>
@@ -343,11 +343,11 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private async Task AssertWantlistEmpty() => await Assert.That(await host.ScopedDbContext.Wantlist.CountAsync()).IsEqualTo(0);
 
-	private async Task AssertOutboxEmpty() => await Assert.That(await Outbox.GetAllAsync()).IsEmpty();
+	private async Task AssertOutboxEmpty() => await Assert.That(await Outbox.GetAllAsync(SinkKind.Plex)).IsEmpty();
 
 	private async Task AssertOutbox(WantlistOperationAction action, MediaId mediaId, int? attempts = null)
 	{
-		var entries = await Outbox.GetAllAsync();
+		var entries = await Outbox.GetAllAsync(SinkKind.Plex);
 		await Assert.That(entries).Count().IsEqualTo(1);
 		await Assert.That(entries.Any(entry => entry.MediaId == mediaId && entry.Action == action)).IsTrue();
 		if (attempts is { } expected)

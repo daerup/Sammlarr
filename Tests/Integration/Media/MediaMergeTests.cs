@@ -75,14 +75,14 @@ public class MediaMergeTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Resolve<IWantlistRepository>().AddAsync([older], new ManualOrigin(ManualSource.Search));
 		host.CurrentUser.Id = guest;
 		await host.Resolve<IWantlistRepository>().AddAsync([newer], new ManualOrigin(ManualSource.Browse));
-		await host.Resolve<IWantlistOutbox>().EnqueueAsync(WantlistOperationAction.Add, [newer]);
+		await host.Resolve<IWantlistOutbox>().EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [newer]);
 		host.CurrentUser.Id = UserId.From(SammlarrTestHost.SeededAdmin.Id);
 
 		await Testee.MergeAsync(older, newer);
 
 		host.CurrentUser.Id = guest;
 		await Assert.That((await host.Resolve<IWantlistRepository>().GetAllAsync()).Single().MediaId).IsEqualTo(older);
-		await Assert.That((await host.Resolve<IWantlistOutbox>().GetAllAsync()).Single().MediaId).IsEqualTo(older);
+		await Assert.That((await host.Resolve<IWantlistOutbox>().GetAllAsync(SinkKind.Plex)).Single().MediaId).IsEqualTo(older);
 	}
 
 	[Test]
@@ -194,16 +194,30 @@ public class MediaMergeTests(SammlarrTestHost host) : IAsyncDisposable
 		var guest = await host.SeedLocalUser("guest", "a test password", UserRole.Member);
 		await host.Resolve<IWantlistRepository>().AddAsync([newer], new ManualOrigin(ManualSource.Search));
 		var outbox = host.Resolve<IWantlistOutbox>();
-		await outbox.EnqueueAsync(WantlistOperationAction.Add, [newer]);
-		await outbox.EnqueueAsync(WantlistOperationAction.Remove, [older]);
+		await outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [newer]);
+		await outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [older]);
 		host.CurrentUser.Id = guest;
 		await host.Resolve<IWantlistRepository>().AddAsync([older], new ManualOrigin(ManualSource.Browse));
 		host.CurrentUser.Id = UserId.From(SammlarrTestHost.SeededAdmin.Id);
 
 		await Testee.MergeAsync(older, newer);
 
-		var queued = (await outbox.GetAllAsync()).Single();
+		var queued = (await outbox.GetAllAsync(SinkKind.Plex)).Single();
 		await Assert.That((queued.MediaId, queued.Action)).IsEqualTo((older, WantlistOperationAction.Add));
+	}
+
+	[Test]
+	public async Task MergeAsync_ForRowsQueuedForTwoSinks_KeepsOneRowPerSink()
+	{
+		var (older, newer) = await PairAsync();
+		var outbox = host.Resolve<IWantlistOutbox>();
+		await outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [older, newer]);
+		await outbox.EnqueueAsync(SinkKind.Arr, WantlistOperationAction.Add, [newer]);
+
+		await Testee.MergeAsync(older, newer);
+
+		await Assert.That((await outbox.GetAllAsync(SinkKind.Plex)).Single().MediaId).IsEqualTo(older);
+		await Assert.That((await outbox.GetAllAsync(SinkKind.Arr)).Single().MediaId).IsEqualTo(older);
 	}
 
 	[Test]

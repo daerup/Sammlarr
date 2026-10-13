@@ -20,11 +20,11 @@ The user-facing feature areas. Most map to a folder under `UI/Features`:
 
 | Browse | Browse trending movies and shows from TMDB and add them to the wantlist.
 | Feeds | Define, preview and run a _feed_: a saved query over an external provider list (an MDBList list) with filter, sort and limit rules. A feed runs on demand or on a cron schedule, and every run is kept in a run log.
-| Wantlist | The wantlist Sammlarr keeps in sync with Plex, pulling remote changes and pushing local ones queued in an outbox, with per-item push status.
+| Wantlist | The wantlist Sammlarr keeps in sync with its sink (Plex, or Radarr + Sonarr), pulling remote changes and pushing local ones queued in an outbox, with per-item push status.
 | Home | A dashboard of the library: its numbers, what runs next (the job queue and upcoming scheduled runs), and recent feed activity by day.
 | Blocklist | Exclude specific media so they never appear in curated lists.
 | Notifications | Webhook, Pushover and in-app notifications for sync, feed-run and rate-limit events, templated per target (configured under Settings).
-| Auth | Plex OAuth sign-in; app-owned users with Admin/Member roles and open or closed registration.
+| Auth | Plex OAuth or local accounts, chosen once at setup; app-owned users with Admin/Member roles and open or closed registration.
 | Settings | Manage providers, secrets (API keys and credentials), users, notifications, caching and diagnostics.
 |===
 

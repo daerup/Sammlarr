@@ -364,12 +364,13 @@ filters.
 
 === Sync and announcing
 
-Sync:: Reconciling the local wantlist with Plex: pull remote changes in, push local changes
+Sync:: Reconciling the local wantlist with its sink: pull remote changes in, push local changes
 out.
 
-Outbox:: The table of local wantlist changes not yet pushed to Plex, one row per title with its
-action (add or remove), status and attempt count. Opposing changes cancel in it; each sync drains
-it inline, and an item that fails five times becomes `Failed`. See <<section-runtime-view>>.
+Outbox:: The table of local wantlist changes not yet pushed to the sink, one row per title and sink with
+its action (add or remove), status and attempt count. Opposing changes cancel in it; each sync drains the
+active sink's rows inline, a sink switch drops the old sink's once it has stored the new one, and an item
+that fails five times becomes `Failed`. See <<section-runtime-view>>.
 
 Delta:: The difference between the wantlist and the sink computed during a sync
 (`WantlistDelta`).

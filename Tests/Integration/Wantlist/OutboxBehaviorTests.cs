@@ -33,7 +33,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task AddAsync_WhenARemoveIsPending_CancelsTheRemove()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
-		await Outbox.EnqueueAsync(WantlistOperationAction.Remove, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [inception]);
 
 		await Wantlist.AddAsync([inception], Manual);
 
@@ -44,7 +44,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task AddAsync_WhenTheCollectionIsEmpty_LeavesTheOutboxUntouched()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [inception]);
 
 		await Wantlist.AddAsync([], Manual);
 
@@ -65,7 +65,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task AddAsync_WhenAnAddIsAlreadyPending_DoesNotDuplicateIt()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [inception]);
 
 		await Wantlist.AddAsync([inception], Manual);
 
@@ -86,7 +86,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RemoveAsync_WhenAnAddIsPending_CancelsTheAdd()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [inception]);
 
 		await Wantlist.RemoveAsync([inception]);
 
@@ -97,7 +97,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RemoveAsync_WhenARemoveIsAlreadyPending_DoesNotDuplicateIt()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
-		await Outbox.EnqueueAsync(WantlistOperationAction.Remove, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [inception]);
 
 		await Wantlist.RemoveAsync([inception]);
 
@@ -108,7 +108,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RemoveAsync_WhenTheCollectionIsEmpty_LeavesTheOutboxUntouched()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
-		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [inception]);
 
 		await Wantlist.RemoveAsync([]);
 
@@ -131,7 +131,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 		var matrix = await host.Movie("The Matrix", tmdb: "603", plex: "603").OnWantlist(origin: Remote);
-		await Outbox.EnqueueAsync(WantlistOperationAction.Remove, [inception]);
+		await Outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [inception]);
 
 		await Wantlist.AddAsync([inception, fightClub, matrix], Manual);
 
@@ -140,7 +140,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private async Task AssertOutbox(params (WantlistOperationAction Action, MediaId MediaId)[] expected)
 	{
-		var entries = await Outbox.GetAllAsync();
+		var entries = await Outbox.GetAllAsync(SinkKind.Plex);
 		await Assert.That(entries).Count().IsEqualTo(expected.Length);
 		foreach (var (action, mediaId) in expected)
 		{
@@ -148,5 +148,5 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		}
 	}
 
-	private async Task AssertOutboxEmpty() => await Assert.That(await Outbox.GetAllAsync()).IsEmpty();
+	private async Task AssertOutboxEmpty() => await Assert.That(await Outbox.GetAllAsync(SinkKind.Plex)).IsEmpty();
 }
