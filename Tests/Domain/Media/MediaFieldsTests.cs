@@ -87,4 +87,15 @@ public class MediaFieldsTests
 	{
 		Fields.Sample(fields => MediaFields.Parse(fields.ToString()) == fields);
 	}
+
+	[Test]
+	[Arguments("Title, Retired, Imdb")]
+	[Arguments("Title, 4096, Imdb")]
+	[Arguments("Title, Imdb, 99")]
+	public async Task Parse_WhenAStoredNameIsUnknown_DropsItAndKeepsTheRest(string stored)
+	{
+		var fields = MediaFields.Parse(stored);
+
+		await Assert.That(fields).IsEqualTo(MediaField.Title | MediaFields.Rated([RatingSource.Imdb]));
+	}
 }
