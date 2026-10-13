@@ -1,7 +1,8 @@
 <DemoCard Title="Version card" Where="Settings: About" Span="2"
-          Note="VersionCard for a development build, which counts commits since the last tag, and for a release, which links its release notes.">
+          Note="VersionCard for a development build, which counts commits since the last tag, for a release, which links its release notes, and for a release with a newer one out, which shows the update badge.">
     <VersionCard Version="DevBuild" Repository="@Repository"/>
     <VersionCard Version="Release" Repository="@Repository"/>
+    <VersionCard Version="Release" Repository="@Repository" Update="Some.Of(Newer)"/>
 </DemoCard>
 
 @code {
@@ -10,4 +11,6 @@
     private static readonly AppVersion DevBuild = new("0.0.0-alpha.0.594");
 
     private static readonly AppVersion Release = new("1.2.0");
+
+    private static readonly AppUpdate Newer = new("1.3.0", new Uri("https://github.com/daerup/Sammlarr/releases/tag/v1.3.0"));
 }

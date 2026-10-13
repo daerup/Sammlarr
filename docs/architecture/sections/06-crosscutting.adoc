@@ -283,7 +283,7 @@ The retry retries only what the lane would admit now (`LaneGate.Admits`): a 429 
 lane that has just gone down, hands the caller the real response. A 429 is retried with no delay of its own, since the
 lane paces it. Lane clients carry no rate limiter, no concurrency gate, no circuit breaker and no total timeout of
 their own; their `HttpClient.Timeout` of 10 minutes is only a safety net for a stalled body. Clients that call no
-remote service (Pushover, the webhook, the picture grids) get no lanes: `AddClientHttp<TOptions>` gives them the
+remote service (Pushover, the webhook, the picture grids, GitHub's latest release) get no lanes: `AddClientHttp<TOptions>` gives them the
 standard resilience handler (retry, attempt timeout, circuit breaker) and a total timeout from `Http.TimeoutSeconds`.
 
 A service that takes many ids in one request also gets a keyed lane (`Lane<TKey, TOut>`): asks queue per batch key and

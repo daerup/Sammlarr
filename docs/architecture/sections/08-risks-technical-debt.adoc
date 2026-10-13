@@ -39,5 +39,5 @@ Operational risks in what is built, and deliberately deferred work.
 | E2E circuit crash | Unexplained: roughly one full E2E run in five trips the session-level circuit-crash guard while all tests pass. Not reproduced with output captured, so no stack trace yet.
 | Result-based error handling | Backlog: wantlist and blocklist writes return a `Result` instead of throwing. Lookups already answer instead of throwing (`Answer<T>`), and an identity conflict is a claim outcome.
 | Metrics | Not implemented; only logs and traces over OTLP.
-| Release pipeline | Not built. CI/CD, the image, GHCR releases (Aspire-driven, Option A) and the update check belong to the release-engineering plan. The build already stamps its version from git tags with MinVer and shows it in Settings › About and the footer.
+| Release pipeline | Partly built. `Web/Dockerfile` builds the image and `release.yml` pushes it to GHCR on a `v*` tag, which release-please creates; CI, the scans, signing and SBOMs belong to the release-engineering plan. The build stamps its version from git tags with MinVer and shows it in Settings › About and the footer, and a release build asks GitHub for the latest release at most every 12 hours to show an update badge there (a dev or staging build never asks).
 |===

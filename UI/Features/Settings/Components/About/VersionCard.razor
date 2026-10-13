@@ -9,12 +9,20 @@
                 {
                     <BbBadge Variant="BadgeVariant.Outline" Class="h-5 px-2 text-[11px] font-medium text-muted-foreground">Dev build</BbBadge>
                 }
+                @if (Update is Some<AppUpdate>(var update))
+                {
+                    <BbBadge Variant="BadgeVariant.Outline" Class="@UpdateBadge" data-testid="version-update">@update.Version available</BbBadge>
+                }
             </div>
             <span class="version-source text-xs text-muted-foreground">@Source</span>
         </div>
         @if (!string.IsNullOrWhiteSpace(Repository))
         {
             <div class="ml-auto flex shrink-0 items-center gap-4 whitespace-nowrap text-xs">
+                @if (Update is Some<AppUpdate>(var newer))
+                {
+                    <AppLink Href="@newer.Page.ToString()" External="true">What is new in @newer.Version</AppLink>
+                }
                 @if (!Version.IsDevBuild)
                 {
                     <AppLink Href="@($"{RepositoryUrl}/releases/tag/v{Version.Number}")" External="true">Release notes</AppLink>
@@ -29,6 +37,10 @@
     [Parameter] [EditorRequired] public required AppVersion Version { get; set; }
 
     [Parameter] [EditorRequired] public required string Repository { get; set; }
+
+    [Parameter] public Optional<AppUpdate> Update { get; set; } = new None();
+
+    private const string UpdateBadge = "h-5 px-2 text-[11px] font-medium text-[var(--alert-warning)] border-[color-mix(in_oklab,var(--alert-warning)_55%,transparent)]";
 
     private string RepositoryUrl => $"https://github.com/{Repository}";
 
