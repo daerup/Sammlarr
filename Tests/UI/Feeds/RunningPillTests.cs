@@ -1,3 +1,4 @@
+using System.Globalization;
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Feed.Trace;
@@ -22,8 +23,18 @@ public class RunningPillTests : BunitContext
 	{
 		var cut = Render<RunningPill>(parameters => parameters.Add(pill => pill.Run, _run.Object).Add(pill => pill.Bar, true));
 
-		await Assert.That(Text(cut)).IsEqualTo("Running · 812 / ~2,000");
+		await Assert.That(Text(cut)).IsEqualTo($"Running · 812 / ~{2000:N0}");
 		await Assert.That(cut.FindAll("[data-testid=running-bar] i")).Count().IsEqualTo(7);
+	}
+
+	[Test]
+	public async Task Render_InASwissGermanCulture_GroupsTheCountsLikeTheFeedCards()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-CH");
+
+		var cut = Render<RunningPill>(parameters => parameters.Add(pill => pill.Run, _run.Object));
+
+		await Assert.That(Text(cut)).IsEqualTo("Running · 812 / ~2’000");
 	}
 
 	[Test]
@@ -34,7 +45,7 @@ public class RunningPillTests : BunitContext
 		_run.Tally.Getter.Returns(RunTally.Of(FateTally.None with { Started = 950, Matched = 900 }, Some.Of(2004), 12000, new None(), Some.Of(2000)));
 		_run.RaiseBatch(new WireBatch([], [], false));
 
-		cut.WaitForState(() => Text(cut) == "Running · 900 / 2,004");
+		cut.WaitForState(() => Text(cut) == $"Running · 900 / {2004:N0}");
 		await Assert.That(cut.FindAll("[data-testid=running-bar]")).IsEmpty();
 	}
 
