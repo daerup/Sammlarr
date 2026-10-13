@@ -78,5 +78,5 @@ Migrations that shipped in a release are never edited or deleted.
 
 ## Architecture
 
-The architecture is described in [docs/architecture](docs/architecture/arc42.adoc) and the decisions behind it in
+The architecture is described in [docs/architecture](docs/architecture/README.md) and the decisions behind it in
 [docs/adr](docs/adr/README.md).

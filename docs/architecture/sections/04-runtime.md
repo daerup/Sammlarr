@@ -1,19 +1,17 @@
-[[section-runtime-view]]
-== Runtime View
+# 4. Runtime View
 
 Four scenarios: loading a list (the one the others build on), feed preview, a feed run through
 the job queue, and wantlist sync/push. Each runs across the layers through `Contracts`, with
 providers resolved by keyed DI.
 
-=== Loading a list
+## Loading a list
 
 Turning a list's entries (TMDB, IMDb or other ids, with title hints) into the right library rows, and the id the
 sink adds each title by, is where correctness hinges: a wrong match corrupts every list the title appears in. A feed
 service streams its entries into `IMediaService.LoadListAsync`, which hands each title back with its list position
 (`Listed<MediaMatchResult>`) as soon as it settles. Four ideas carry the load: bursts, chains, lanes and claims.
 
-[mermaid]
-....
+```mermaid
 flowchart LR
   SRC[List source<br/>pages as they arrive] --> BURST[Burst<br/>what the source has ready]
   BURST --> LIB[(Library read<br/>once per burst)]
@@ -27,7 +25,7 @@ flowchart LR
   DET --> OUT[Settle with<br/>its list position]
   IDS -.->|ask| LANES[[Lanes<br/>one per service route]]
   DET -.->|ask| LANES
-....
+```
 
 A _burst_ is everything the source yields without waiting (`BurstsAsync`): one page of an MDBList list, one page of
 TMDB results. `ListLoad` reads the library once per burst (`IMediaRepository.GetByExternalsAsync`: one flat,
@@ -51,13 +49,13 @@ Each load runs in its own DI scope entered as its caller (`FeedRunPlanner`, the 
 FillDetails job), so the per-load memos (`MdblistTitles`, `TmdbApi`, `AniListTitles`, `TraktTitles`, `AnimeIdsInRun`,
 `ImdbRatingsInRun`) start empty for every load and are shared by the feed service and its chains.
 
-==== Ids and the claim
+### Ids and the claim
 
 `TitleIdentifier` starts from the stored titles the entry's ids hit. Ids on two stored titles go straight to an
 unpinned claim, which conflicts and notes the pair (below). A stored title that holds the id the sink adds by is known: new ids from the list are added to it
 through a pinned claim, and the chain goes on to its details. Any other title is resolved by `MediaIdResolver`, from
 the list's ids plus the stored title's keys and hints, along the cheapest open path of id lookups to the target (see
-Provider routing in <<section-concepts>>). The target is the provider the active sink addresses that title's type by
+Provider routing in [Cross-cutting Concepts](06-crosscutting.md)). The target is the provider the active sink addresses that title's type by
 (`IMediaSink.AddressedBy`): Plex for every type when the wantlist syncs to Plex, so an MDBList or TMDB reference is
 converted to a Plex id; TMDB for movies and TheTVDB for shows when it syncs to Radarr + Sonarr, the ids those apps add
 by. A type the sink cannot address settles not found.
@@ -69,8 +67,7 @@ detour. A Plex id is read back through Plex's metadata endpoint for the title's 
 its detail, whose appended `external_ids` carry the IMDb and TheTVDB ids, and an IMDb or TheTVDB id through `find`;
 within a load, the id lookup and the details step share one read of a title's TMDB details.
 
-[mermaid]
-....
+```mermaid
 sequenceDiagram
   participant T as Title chain
   participant NC as Unmatched cache
@@ -102,7 +99,7 @@ sequenceDiagram
       R-->>T: couldn't look up, nothing cached
     end
   end
-....
+```
 
 A resolved title is claimed before it is handed out (`IIdentityClaims.ClaimAsync`), from its identity keys only; page
 links never take part. The claim lane (`IdentityClaims`, one per scope) commits every claim queued meanwhile in one
@@ -121,17 +118,17 @@ behind the claim; it is due at once, and a pair met again only moves its `SeenAt
 
 A title settles not found, and its ids are cached as unmatched for an hour, only when every route answered that it
 has no such title. A route that was unavailable, refused by its lane or answered with something unusable settles the
-title couldn't look up, and nothing is cached (see <<section-technical-risks>>). The cache short-circuits a repeat
+title couldn't look up, and nothing is cached (see [Risks and Technical Debt](08-risks-technical-debt.md)). The cache short-circuits a repeat
 before any provider call; the library is read before it, so a title stored within the hour is never hidden by it.
 
-==== Details
+### Details
 
 A stored title is reused as it is unless the details fetcher would ask again: `Sammlarr:Housekeeping:FreshDays` (14 days) after its last refresh, or when a
 field the load needs is missing and a service that is not resting could fill it (see Freshness in
-<<section-glossary>>). A refresh asks the search setting's enricher first, then the open enricher that fills the
+[Glossary](09-glossary.md)). A refresh asks the search setting's enricher first, then the open enricher that fills the
 most missing detail fields, one at a time, until no open enricher can fill what is still missing; a blocked enricher whose
 block ends within its `EnrichWait` (TMDB 15 s) is asked, and its lane holds the ask for at most the service's `MaxWait`
-(TMDB 15 s) before it refuses it (see Provider routing in <<section-concepts>>). A gap fill starts from the
+(TMDB 15 s) before it refuses it (see Provider routing in [Cross-cutting Concepts](06-crosscutting.md)). A gap fill starts from the
 stored copy and its answers and asks only the enrichers that have not answered. The cache stores who answered and
 what each could not give (`ProviderAnswer`), and a failure after sending as a failure with its backoff; a provider
 that refused before sending, was skipped, or was never asked (no id for it, or the user has no key or sign-in for it)
@@ -150,13 +147,12 @@ wait or answering with errors), the title keeps its stored copy, marked `Stale` 
 couldn't be reached, or, when nothing is stored and the service was unreachable, goes out with the list's own title.
 Nothing is cached as not found, so the next load asks again.
 
-=== Feed preview
+## Feed preview
 
 The user edits a feed in the editor and previews it. The result is computed live and never
 written anywhere; it just shows what the feed would load right now.
 
-[mermaid]
-....
+```mermaid
 sequenceDiagram
   actor U as User
   participant P as Feeds editor (UI)
@@ -182,7 +178,7 @@ sequenceDiagram
     E-->>P: FeedPlanResult (an AppendPlan or MirrorPlan, or FeedPlanFailed)
   end
   P-->>U: tiles, stat badges, unmatched list
-....
+```
 
 `IFeedProvider` is resolved by the feed's `FeedProvider` key, inside a scope the panel opens as the signed-in user.
 Each entry is loaded as a `MediaMatchResult` by the list load above, so a preview reuses stored rows and rarely asks
@@ -206,14 +202,13 @@ still loading is not evidence that an item has left it. The panel keeps reportin
 unfinished for as long as it is showing truncated results after a provider outage, so tightening
 a filter against a half-loaded list cannot propose deleting the part that never arrived.
 
-=== Feed runs and the job queue
+## Feed runs and the job queue
 
 A run applies what the preview showed. Feed runs and wantlist syncs never execute where they are
 requested: every request becomes a row in the `Jobs` table, and one runner works through the rows
 one at a time.
 
-[mermaid]
-....
+```mermaid
 sequenceDiagram
   participant T as TickerQ (cron)
   actor U as User (Run / Sync)
@@ -238,7 +233,7 @@ sequenceDiagram
   Note over J: further runs push the sync back,<br/>never past its deadline (first arming + MaxWait)
   J->>R: the alarm releases the sync when due
   R->>SE: dispatch the sync
-....
+```
 
 TickerQ owns only the _when_: each scheduled feed has one cron ticker (keyed by the feed id,
 created, updated or deleted as the feed is saved), and its function does nothing but enqueue a
@@ -287,18 +282,17 @@ itself whenever another job is queued, so it never holds up a run or a sync.
 
 While it runs, the engine holds the run's live trace open (`IFeedRunTrace.Start`, under the job owner's identity), and
 identifying a title, asking a service and giving up on one record into it as spans; the owner watches them on the Feeds
-page (<<section-concepts>>, Live run trace). The trace ends with the run's result and is dropped 30 seconds later;
+page ([Cross-cutting Concepts](06-crosscutting.md), Live run trace). The trace ends with the run's result and is dropped 30 seconds later;
 afterwards the card's bar and the run log read the saved `FeedRun`, whose counts include the titles already known and
 those not found earlier.
 
-=== Wantlist sync and push to Plex
+## Wantlist sync and push to Plex
 
 Adding a title and pushing it to Plex are two separate steps. An add writes the local row and
 queues the change in the outbox; the push happens inside the next sync, which drains the outbox
 inline. A change that fails stays in the outbox and is retried by the sync after it.
 
-[mermaid]
-....
+```mermaid
 sequenceDiagram
   actor U as User
   participant W as UI (Wantlist / Browse)
@@ -331,7 +325,7 @@ sequenceDiagram
     SE-->>W: event Retrying, or Abandoned on the fifth attempt
   end
   SE->>SE: one sync notification with what reached Plex
-....
+```
 
 Adds and removes cancel each other in the outbox (adding cancels a pending removal; removing
 cancels an un-pushed add), so opposing changes never reach Plex. Each item gets five attempts, one
@@ -361,7 +355,7 @@ titles and remove them all. A title no lookup can convert is counted and acks un
 push; the cache purge keeps every id of a title that lacks the sink's id, so a later switch can still
 convert it.
 
-=== Other flows
+## Other flows
 
 Two flows are worth a mention but not a diagram of their own. Notifications are the one thing on
 Wolverine's durable queue: a finished sync or feed run publishes one notification, a handler fans
@@ -369,4 +363,4 @@ it out to each matching subscription, and each is rendered from a Fluid template
 its own retry schedule (1, 5 and 15 minutes, then an hour); the WebUi channel delivers it as an
 in-app toast. Plex sign-in is a standard OAuth PIN flow; its notable parts, the app-owned
 `User`, the first user becoming Admin, the open or closed registration gate, and per-request
-session revalidation, are covered in <<section-concepts>>.
+session revalidation, are covered in [Cross-cutting Concepts](06-crosscutting.md).
