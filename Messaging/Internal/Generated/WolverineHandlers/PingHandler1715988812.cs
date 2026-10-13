@@ -15,8 +15,6 @@ namespace Internal.Generated.WolverineHandlers
             _loggerOfPingHandler = loggerOfPingHandler;
         }
 
-
-
         public override System.Threading.Tasks.Task HandleAsync(Wolverine.Runtime.MessageContext context, System.Threading.CancellationToken cancellation)
         {
             // The actual message body
@@ -31,11 +29,9 @@ namespace Internal.Generated.WolverineHandlers
 
             return System.Threading.Tasks.Task.CompletedTask;
         }
-
     }
 
     // END: PingHandler1715988812
     
     
 }
-
