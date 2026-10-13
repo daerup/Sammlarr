@@ -97,6 +97,16 @@ public class ArrTagsSectionTests : BunitContext
 	}
 
 	[Test]
+	public async Task ProtectedTag_ItsDialog_SaysTheAppsFileChoiceDecidesWhatHappensToFiles()
+	{
+		var cut = RenderTags([Guest]);
+
+		await ChangeButton(cut, "Change the protected tag").ClickAsync();
+
+		await Assert.That(cut.Markup).Contains("its files kept or deleted as that app is set.").And.DoesNotContain("Its files stay.");
+	}
+
+	[Test]
 	public async Task ProtectedTag_WithANameThatPosesAsAUserTag_CannotBeChanged()
 	{
 		var cut = RenderTags([Guest]);

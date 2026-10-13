@@ -161,23 +161,33 @@
             </BbCollapsible>
         </div>
 
-        <label class="arr-app-switch">
-            <BbSwitch Checked="Instance.Monitored" CheckedChanged="MonitoredChangedAsync" AriaLabel="@($"{App.Name} monitors new titles")"
-                      AriaDescribedBy="@($"{App.Name}-monitor-note")"/>
-            <span class="arr-app-switch-text">
-                <span class="arr-app-switch-name">Monitor new titles</span>
-                <span id="@($"{App.Name}-monitor-note")" class="arr-app-switch-note">@MonitorNote(App)</span>
-            </span>
-        </label>
-
-        <label class="arr-app-switch">
-            <BbSwitch Checked="Instance.SearchOnAdd" CheckedChanged="SearchChangedAsync" AriaLabel="@($"{App.Name} searches when a title is added")"
-                      AriaDescribedBy="@($"{App.Name}-search-note")"/>
-            <span class="arr-app-switch-text">
-                <span class="arr-app-switch-name">Search when added</span>
-                <span id="@($"{App.Name}-search-note")" class="arr-app-switch-note">@SearchNote(App)</span>
-            </span>
-        </label>
+        <div class="arr-app-wide arr-app-moments">
+            <div class="flex flex-col overflow-hidden rounded-md border bg-background" data-arr-moment="add">
+                <h5 class="border-b bg-foreground/5 px-3.5 py-2.5 text-[13px] font-semibold">How @App.Name adds a @Thing(App)</h5>
+                <div class="flex flex-1 flex-wrap items-start gap-2.5 p-3.5">
+                    <BbToggleGroup TValue="bool?" Value="Instance.Monitored" ValueChanged="MonitoredChangedAsync" Required="true" Class="@Track"
+                                   aria-label="@($"{App.Name} monitors new titles")">
+                        <BbToggleGroupItem TValue="bool?" Value="true" Class="@Option">Monitored</BbToggleGroupItem>
+                        <BbToggleGroupItem TValue="bool?" Value="false" Class="@Option">Unmonitored</BbToggleGroupItem>
+                    </BbToggleGroup>
+                    <BbToggleGroup TValue="bool?" Value="Instance.SearchOnAdd" ValueChanged="SearchChangedAsync" Required="true" Class="@Track"
+                                   aria-label="@($"{App.Name} starts a search when adding")">
+                        <BbToggleGroupItem TValue="bool?" Value="true" Class="@Option">Start search</BbToggleGroupItem>
+                        <BbToggleGroupItem TValue="bool?" Value="false" Class="@Option">No search</BbToggleGroupItem>
+                    </BbToggleGroup>
+                </div>
+            </div>
+            <div class="flex flex-col overflow-hidden rounded-md border bg-background" data-arr-moment="remove">
+                <h5 class="border-b bg-foreground/5 px-3.5 py-2.5 text-[13px] font-semibold">How Sammlarr removes a @Thing(App)</h5>
+                <div class="flex flex-1 flex-wrap items-start gap-2.5 p-3.5">
+                    <BbToggleGroup TValue="bool?" Value="Instance.DeleteFiles" ValueChanged="DeleteFilesChangedAsync" Required="true" Class="@Track"
+                                   aria-label="@($"{App.Name} keeps or deletes files when Sammlarr removes a {Thing(App)}")">
+                        <BbToggleGroupItem TValue="bool?" Value="false" Class="@Option">Keep files</BbToggleGroupItem>
+                        <BbToggleGroupItem TValue="bool?" Value="true" Class="@DestructiveOption">Delete files</BbToggleGroupItem>
+                    </BbToggleGroup>
+                </div>
+            </div>
+        </div>
     }
     else if (State != ArrConnectionState.Failed)
     {
@@ -297,23 +307,22 @@
         };
     }
 
-    private static string MonitorNote(ArrApp app)
+    private static string Thing(ArrApp app)
     {
         return app switch
         {
-            ArrApp.Radarr => "Radarr grabs a movie Sammlarr adds once it is released.",
-            ArrApp.Sonarr => "Sonarr grabs new episodes of the shows Sammlarr adds.",
+            ArrApp.Radarr => "movie",
+            ArrApp.Sonarr => "show",
         };
     }
 
-    private static string SearchNote(ArrApp app)
-    {
-        return app switch
-        {
-            ArrApp.Radarr => "Radarr searches right after adding a movie instead of waiting for its next RSS sync.",
-            ArrApp.Sonarr => "Sonarr searches for what is already out right after adding a show.",
-        };
-    }
+    private const string Track = "h-[34px] w-fit gap-0.5 rounded-[9px] bg-secondary p-[3px] text-muted-foreground";
+
+    private const string Option =
+        "h-full rounded-[7px] px-3 text-[13px] font-medium hover:text-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-xs";
+
+    private const string DestructiveOption =
+        "h-full rounded-[7px] px-3 text-[13px] font-medium data-[state=off]:hover:text-foreground data-[state=on]:bg-background data-[state=on]:text-destructive data-[state=on]:shadow-xs";
 
     protected override void OnParametersSet()
     {
@@ -366,9 +375,16 @@
 
     private Task AnimeProfileChangedAsync(int? profile) => InstanceChanged.InvokeAsync(Instance with { AnimeQualityProfileId = Optional.Of(profile) });
 
-    private Task MonitoredChangedAsync(bool monitored) => InstanceChanged.InvokeAsync(Instance with { Monitored = monitored });
+    private Task MonitoredChangedAsync(bool? monitored) => PickedAsync(monitored, picked => Instance with { Monitored = picked });
 
-    private Task SearchChangedAsync(bool search) => InstanceChanged.InvokeAsync(Instance with { SearchOnAdd = search });
+    private Task SearchChangedAsync(bool? search) => PickedAsync(search, picked => Instance with { SearchOnAdd = picked });
+
+    private Task DeleteFilesChangedAsync(bool? delete) => PickedAsync(delete, picked => Instance with { DeleteFiles = picked });
+
+    private Task PickedAsync(bool? value, Func<bool, ArrInstanceConfig> change)
+    {
+        return Optional.Of(value).Match(picked => InstanceChanged.InvokeAsync(change(picked)), () => Task.CompletedTask);
+    }
 
     private static Optional<string> Text(string typed) => Optional.When(!string.IsNullOrWhiteSpace(typed), typed.Trim);
 

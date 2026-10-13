@@ -36,16 +36,18 @@ public class SyncTests
 	}
 
 	[Test]
-	public async Task Movie_WithSearchWhenAddedOff_ReachesRadarrWithoutASearch()
+	public async Task Movie_WithNoSearch_ReachesRadarrWithoutASearch()
 	{
 		var stack = await SelfHostedApp.StackAsync();
 		var page = await SelfHostedApp.OpenPageAsync();
 		await SelfHostedSetup.FinishAsync(page, stack);
 		await SettingsPage.OpenWantlistSyncAsync(page);
 		var radarr = await ArrSections.OpenAsync(page, "Radarr");
-		var searchWhenAdded = radarr.Locator("button[role=switch][aria-label='Radarr searches when a title is added']");
-		await searchWhenAdded.ClickAsync();
-		await Expect(searchWhenAdded).ToHaveAttributeAsync("aria-checked", "false");
+		var noSearch = radarr
+			.GetByRole(AriaRole.Radiogroup, new LocatorGetByRoleOptions { Name = "Radarr starts a search when adding" })
+			.GetByRole(AriaRole.Radio, new LocatorGetByRoleOptions { Name = "No search" });
+		await noSearch.ClickAsync();
+		await Expect(noSearch).ToHaveAttributeAsync("aria-checked", "true");
 
 		await SelfHostedWantlist.AddAsync(page, Titles.ProjectHailMary);
 		await SelfHostedWantlist.SyncAsync(page);
