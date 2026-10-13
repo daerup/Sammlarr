@@ -45,7 +45,7 @@ public class SetupTests
 		await Expect(page.Text("Syncs to Radarr + Sonarr")).ToBeVisibleAsync();
 		await Expect(page.Text($"{SelfHostedSetup.MemberName}, invited")).ToBeVisibleAsync();
 		await Expect(page.Text("Skip setup")).ToHaveCountAsync(0);
-		await page.Button("Finish setup").ClickAsync();
+		await page.Button("Done").ClickAsync();
 		await SelfHostedSetup.StaysHomeAsync(page);
 	}
 

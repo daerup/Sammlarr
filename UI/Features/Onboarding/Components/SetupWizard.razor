@@ -85,16 +85,6 @@
                 <BbWizardStep Title="Done" Icon="@Icon(DoneStep)">
                     @Head("Sammlarr is set up", "Everything below can be changed in Settings.")
                     <SetupSummary Rows="_summary" LaterClicked="() => FinishAsync(SettingsLinks.Providers)"/>
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        <BbButton Size="ButtonSize.Small" OnClick="() => FinishAsync(FirstFeed)">
-                            <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
-                            <span>Create your first feed</span>
-                        </BbButton>
-                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => FinishAsync(Settings)">
-                            <LucideIcon Name="settings" Size="14" Class="mr-1.5"/>
-                            <span>Open Settings</span>
-                        </BbButton>
-                    </div>
                 </BbWizardStep>
             </ChildContent>
             <NavigationTemplate>
@@ -123,7 +113,7 @@
                             }
                             @if (_step == DoneStep)
                             {
-                                <BbButton Size="ButtonSize.Small" OnClick="() => FinishAsync(Home)">Finish setup</BbButton>
+                                <BbButton Size="ButtonSize.Small" OnClick="() => FinishAsync(Home)">Done</BbButton>
                             }
                             else
                             {
@@ -147,8 +137,6 @@
     private const int PeopleStep = 3;
     private const int DoneStep = 4;
     private const string Home = "/";
-    private const string FirstFeed = "/feeds/create";
-    private const string Settings = "/settings";
 
     private int _step;
     private int _drawnStep = -1;
