@@ -26,7 +26,7 @@ internal sealed class ArrSink(
 	ILogger<ArrSink> logger
 ) : IMediaSink
 {
-	private const string Animation = "Animation";
+	private static readonly string[] AnimatedGenres = ["Animation", "Anime"];
 
 	public SinkKind Kind => SinkKind.Arr;
 
@@ -449,7 +449,7 @@ internal sealed class ArrSink(
 			get
 			{
 				var genres = Details.Map(details => details.Genres).GetValueOr([]);
-				return genres.Count == 0 || genres.Contains(Animation, StringComparer.OrdinalIgnoreCase);
+				return genres.Count == 0 || genres.Any(genre => AnimatedGenres.Contains(genre, StringComparer.OrdinalIgnoreCase));
 			}
 		}
 	}

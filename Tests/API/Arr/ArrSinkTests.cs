@@ -419,6 +419,21 @@ public class ArrSinkTests
 	}
 
 	[Test]
+	public async Task ApplyAsync_ForAShowStoredUnderTheAnimeGenre_LooksItUpAndAddsItToTheAnimeFolder()
+	{
+		SonarrLooksUp(424536, "Anime", "Fantasy");
+		Storing(MediaType.Show, "Frieren", "Anime", "Fantasy");
+		HoldingOnAnimeSites();
+
+		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
+
+		_sonarr.Verify(
+			request => request.Method(HttpMethod.Post).Path("/api/v3/series").BodyContains("\"rootFolderPath\":\"/anime\"").BodyContains("\"seriesType\":\"anime\""),
+			Times.Once
+		);
+	}
+
+	[Test]
 	public async Task ApplyAsync_ForANewMovieRadarrTagsAnime_AddsItToTheAnimeFolderWithTheAnimeProfile()
 	{
 		RadarrLooksUp(372058, "anime", "body swap");
