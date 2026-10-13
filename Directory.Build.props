@@ -5,6 +5,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<PublishDocumentationFiles>false</PublishDocumentationFiles>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<LangVersion Condition="'$(MSBuildProjectName)' != 'Roslyn' and '$(MSBuildProjectName)' != 'Roslyn.Tests'">preview</LangVersion>
 		<NoWarn>$(NoWarn);CS1591</NoWarn>
 		<WarningsAsErrors>$(WarningsAsErrors);CS8509</WarningsAsErrors>
 		<Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>

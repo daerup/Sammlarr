@@ -3,7 +3,6 @@
 		<TargetFramework>net11.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<LangVersion>preview</LangVersion>
 		<!-- CS8524: allow exhaustive-over-named enum switches without a default arm (Razor compiler warnings ignore .editorconfig). -->
 		<NoWarn>$(NoWarn);CS8524</NoWarn>
 		<RepoRoot>$(MSBuildThisFileDirectory)..\</RepoRoot>
@@ -48,8 +47,14 @@
 	</ItemGroup>
 	<Target Name="DropUnusedBlueprintMap" BeforeTargets="BeforeBuild">
 		<ItemGroup>
-			<StaticWebAsset Remove="@(StaticWebAsset)" Condition="'%(SourceId)' == 'BlazorBlueprint.Components' and ('%(RelativePath)' == 'js/world-map.js' or $([System.String]::new('%(RelativePath)').StartsWith('maps/')))" />
-			<StaticWebAssetEndpoint Remove="@(StaticWebAssetEndpoint)" Condition="$([System.String]::new('%(Identity)').StartsWith('_content/BlazorBlueprint.Components/maps/')) or $([System.String]::new('%(Identity)').StartsWith('_content/BlazorBlueprint.Components/js/world-map.'))" />
+			<StaticWebAsset
+				Remove="@(StaticWebAsset)"
+				Condition="'%(SourceId)' == 'BlazorBlueprint.Components' and ('%(RelativePath)' == 'js/world-map.js' or $([System.String]::new('%(RelativePath)').StartsWith('maps/')))"
+			/>
+			<StaticWebAssetEndpoint
+				Remove="@(StaticWebAssetEndpoint)"
+				Condition="$([System.String]::new('%(Identity)').StartsWith('_content/BlazorBlueprint.Components/maps/')) or $([System.String]::new('%(Identity)').StartsWith('_content/BlazorBlueprint.Components/js/world-map.'))"
+			/>
 		</ItemGroup>
 	</Target>
 	<Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild" Inputs="@(TailwindInput)" Outputs="$(MSBuildThisFileDirectory)wwwroot\css\app.css">

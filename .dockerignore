@@ -30,7 +30,6 @@ README.md
 **/plans
 **/docs
 **/Tests
-**/StrykerOutput
 **/TestResults
 **/dp-keys
 **/*.db
