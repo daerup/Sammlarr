@@ -1,48 +1,54 @@
 # 1. Introduction and Goals
 
-Sammlarr is a self-hosted [Blazor Server](https://learn.microsoft.com/aspnet/core/blazor)
-app that builds curated lists of movies and shows. It has no catalogue of its own. It pulls
-from external services and stitches the results into one local library: trending titles and
-metadata from TMDB, list contents from MDBList, and a wantlist it reads from and writes back
-to Plex. IMDb and TheTVDB identifiers tie the same title together across all of them.
+Sammlarr is a self-hosted Blazor Server app that turns lists and charts from media services into one wantlist per
+person, synced with Plex or with Radarr and Sonarr. It keeps no catalogue: titles, ids, details and ratings come from
+the services in [Context and Scope](02-context-scope.md). Sammlarr stores the curation plus a cache of what it looked
+up. The idea to take away: a list entry becomes a title only through its ids, and an entry whose ids do not lead
+to exactly one title is left out, never guessed.
 
-The app is multi-user but small. Each person signs in with their Plex account and keeps their
-own feeds, wantlist and blocklist on a shared instance.
+Several people share one instance, signing in with Plex or with Sammlarr's own accounts (one of the two, chosen at
+setup), each with their own feeds, wantlist, blocklist and API keys.
 
 ## Requirements Overview
 
-The user-facing feature areas. Most map to a folder under `UI/Features`:
+The feature areas: pages under `UI/Features`, Settings sections under `UI/Features/Settings/Components`.
 
 | Feature | What it does |
 |---|---|
-| Browse | Browse trending movies and shows from TMDB and add them to the wantlist. |
-| Feeds | Define, preview and run a _feed_: a saved query over an external provider list (an MDBList list) with filter, sort and limit rules. A feed runs on demand or on a cron schedule, and every run is kept in a run log. |
-| Wantlist | The wantlist Sammlarr keeps in sync with its sink (Plex, or Radarr + Sonarr), pulling remote changes and pushing local ones queued in an outbox, with per-item push status. |
-| Home | A dashboard of the library: its numbers, what runs next (the job queue and upcoming scheduled runs), and recent feed activity by day. |
-| Blocklist | Exclude specific media so they never appear in curated lists. |
-| Notifications | Webhook, Pushover and in-app notifications for sync, feed-run and rate-limit events, templated per target (configured under Settings). |
-| Auth | Plex OAuth or local accounts, chosen once at setup; app-owned users with Admin/Member roles and open or closed registration. |
-| Settings | Manage providers, secrets (API keys and credentials), users, notifications, caching and diagnostics. |
+| Setup | First-run wizard: setup code from the server log, sign-in method, sink, API keys, people. |
+| Home | Where the library came from, queued jobs and scheduled runs, recent activity by day. |
+| Browse | TMDB's trending movies and shows, to add to the wantlist. |
+| Search | Finds a title through the chosen search provider (TMDB, Plex, or Radarr + Sonarr) and adds it. |
+| Feeds | A list or chart from MDBList, TMDB, Trakt, AniList or MyAnimeList, filtered, sorted and limited into the wantlist, by hand or on a schedule. Append only adds; Mirror also removes what left the list. A live preview, a run history. |
+| Live run view | A running feed shows each title as it is matched, the service it waits on, and a tally of outcomes. |
+| Wantlist | Synced with the sink: remote changes pulled, local ones pushed through an outbox. Each title shows its push status and origin (a feed, by hand, or the sink). |
+| Blocklist | Titles a feed never adds. |
+| Ratings | The Sammlarr rating: the first available source in a chosen order, or an average. A default per person; a feed may set its own and filter or sort by it. |
+| Notifications | Webhook, Pushover and in-app messages for syncs, feed runs and rate limits, templated per subscription. |
+| Providers | Each person's API keys and Plex account; the admin's sink, search provider, Radarr and Sonarr. |
+| Users | Admin and Member roles; open or closed Plex sign-ups, or invite and reset links for Sammlarr accounts. |
+| Housekeeping (admin) | The nightly trim, the daily dataset downloads, titles stored twice to review. |
+| Usage (admin) | Calls per service, how they ended and what made them. |
+| Diagnostics (admin) | A live in-memory log stream with a zip export. |
+| About | The running version, a newer release if there is one, the data sources. |
 
 ## Quality Goals
 
-The qualities that shape the design, most important first. Each is a top node of the quality
-tree in [Quality Requirements](07-quality.md).
+Most important first. Each is a top node of the quality tree in [Quality Requirements](07-quality.md).
 
 | Goal | Motivation |
 |---|---|
-| Correctness of list building | Feeds and the wantlist must resolve to the _right_ movies and shows. A bad match quietly corrupts the whole library. |
-| Resilience of provider calls | External providers rate-limit and fail. A 429 storm or an outage must not take down an entire run. |
-| Per-user data isolation | Several people share one instance. Each must only ever see and change their own feeds, wantlist and blocklist. |
-| Maintainability | One person evolves the code. Strong typing, clear layering and source generation keep that tractable. |
+| Correctness of list building | A wrong match quietly corrupts the library; a run that did not finish must not drop titles. |
+| Resilience of provider calls | Services rate-limit and fail. A 429 storm or a lookup outage slows a run and leaves titles unmatched, never dropped; only a list that cannot be read fails the run. |
+| Per-user data isolation | People share one instance. Each sees and changes only their own data. |
+| Maintainability | One person evolves the code. Strong typing, strict layering, source generators and analyzers keep that tractable. |
 
 ## Stakeholders
 
 | Role | Expectation |
 |---|---|
-| Admin | The first user to sign in. Configures providers, secrets, users and registration mode; has full Settings access. |
-| Member | Any later user. Curates their own feeds, wantlist and blocklist; no administrative settings. |
-| Maintainer | The single developer who builds and operates Sammlarr; wants a low-ceremony, well-documented architecture. |
+| Admin | Whoever completes setup with the setup code, or a member an admin promotes in Settings › Users. Picks the sign-in method and sink, sets up Radarr and Sonarr, manages people; alone sees Users, Housekeeping, Usage and Diagnostics. Curates like a member. |
+| Member | Joins by an invite link, or with Plex by signing in while sign-ups are open. Curates their own lists with their own API keys. |
+| Maintainer | The single developer who builds and runs Sammlarr; wants a low-ceremony, documented architecture. |
 
-The significant technical choices are captured as short decision records (ADRs). See the
-[architecture decision log](../../adr/README.md).
+The significant technical choices are ADRs in the [decision log](../../adr/README.md).
