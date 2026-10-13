@@ -4,6 +4,7 @@ using Domain.Feed.Run;
 using Domain.Media;
 using TestInfrastructure;
 using UI.Features.Feeds.Components;
+using UI.Shared.Changes;
 
 namespace UI.Tests.Feeds;
 
@@ -40,6 +41,25 @@ public class FeedRunViewTests
 		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.Stopped) with { SourceFailure = Some.Of(reason) };
 
 		await Assert.That(FeedRunView.Problem(run)).IsEqualTo("The run stopped before it finished, so some of its changes may be missing.");
+	}
+
+	[Test]
+	public async Task Items_ForATitleNoSinkCouldAdd_ListItApartFromTheAddedOnes()
+	{
+		var added = MediaId.New();
+		var stuck = MediaId.New();
+		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.Conclusive) with
+		{
+			Items =
+			[
+				new FeedRunItem { MediaId = added, State = FeedRunItemState.Added },
+				new FeedRunItem { MediaId = stuck, State = FeedRunItemState.Unaddressable },
+			],
+		};
+
+		var items = FeedRunView.Items(run, new Dictionary<MediaId, MatchedMedia> { [added] = Movie(added, "Fresh"), [stuck] = Movie(stuck, "Stuck") });
+
+		await Assert.That(items.Select(item => (item.Title, item.Kind))).IsEquivalentTo([("Fresh", ChangeKind.Added), ("Stuck", ChangeKind.Unaddressable)]);
 	}
 
 	[Test]
@@ -111,5 +131,10 @@ public class FeedRunViewTests
 		var plan = new AppendPlan([], [], FeedDelta.None, Conclusiveness.NoItems) { SourceFailure = Some.Of("HTTP 404") };
 
 		await Assert.That(FeedRunView.Problem(plan)).IsEqualTo("The source could not be read, so this run would change nothing.");
+	}
+
+	private static MatchedMedia Movie(MediaId id, string title)
+	{
+		return new(new MediaIdentity(id, []), new MovieDetails { Title = title });
 	}
 }

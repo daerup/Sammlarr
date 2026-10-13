@@ -288,6 +288,7 @@
             ChangeKind.Added => ChipTone.Added,
             ChangeKind.Unchanged => ChipTone.Neutral,
             ChangeKind.Unmatched => ChipTone.Unmatched,
+            ChangeKind.Unaddressable => ChipTone.Unmatched,
         };
 
     private static string? GroupGlyph(ChangeKind kind) =>
@@ -297,6 +298,7 @@
             ChangeKind.Added => "+",
             ChangeKind.Unchanged => null,
             ChangeKind.Unmatched => null,
+            ChangeKind.Unaddressable => null,
         };
 
     private static string GroupIcon(ChangeKind kind) =>
@@ -306,6 +308,7 @@
             ChangeKind.Added => "plus",
             ChangeKind.Unchanged => "bookmark-check",
             ChangeKind.Unmatched => "circle-alert",
+            ChangeKind.Unaddressable => "bookmark-x",
         };
 
     private string GroupLabel(ChangeKind kind) =>
@@ -315,6 +318,7 @@
             ChangeKind.Added => AddedLabel,
             ChangeKind.Unchanged => UnchangedLabel,
             ChangeKind.Unmatched => "Could not be matched",
+            ChangeKind.Unaddressable => "Couldn't be added",
         };
 
     private static string ToneClass(ChipTone tone) =>

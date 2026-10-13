@@ -8,6 +8,7 @@ public enum ChangeKind
 	Added,
 	Unchanged,
 	Unmatched,
+	Unaddressable,
 }
 
 public enum ChipTone

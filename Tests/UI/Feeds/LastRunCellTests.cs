@@ -46,6 +46,20 @@ public class LastRunCellTests : BunitContext
 	}
 
 	[Test]
+	public async Task Dialog_ForATitleNoSinkCouldAdd_ListsItUnderItsOwnGroup()
+	{
+		RegisterServices();
+		var stuck = new FeedRunItem { MediaId = MediaId.New(), State = FeedRunItemState.Unaddressable };
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.LastRun, Run() with { Items = [.. Run().Items, stuck] }));
+		cut.WaitForState(() => cut.FindAll(".last-run").Count == 1);
+		await cut.Find(".last-run").ClickAsync(new());
+
+		cut.WaitForState(() => cut.FindAll(".change-group").Count == 2);
+		await Assert.That(cut.FindAll(".change-group")[1].TextContent).Contains("Couldn't be added");
+	}
+
+	[Test]
 	public async Task Dialog_WhenOpenedAndClosed_TellsItsHostBothTimes()
 	{
 		RegisterServices();
@@ -158,7 +172,7 @@ public class LastRunCellTests : BunitContext
 		Services.AddLogging();
 
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(Added))));
+		media.GetDetailsAsync(Any(), Any(), Any()).Returns((ids, _, _) => Async([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Detail(id)))]));
 		Services.AddSingleton(media.Object);
 
 		var wantlist = IWantlistService.Mock();
