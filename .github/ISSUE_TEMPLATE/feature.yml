@@ -1,0 +1,16 @@
+name: Feature request
+description: Something Sammlarr could do.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What you want to do
+      description: The list, service or step you have in mind, and what you do today instead.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How it could work
+      description: Optional. Screens, settings or behaviour you picture.

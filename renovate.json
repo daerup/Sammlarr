@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests", "docker:pinDigests"],
+  "semanticCommits": "enabled",
+  "timezone": "Europe/Zurich",
+  "schedule": ["before 6am on monday"],
+  "packageRules": [
+    {
+      "description": "Everything that is not a major update arrives as one PR a week",
+      "groupName": "non-major dependencies",
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin"]
+    },
+    {
+      "description": "Test-only packages come as their own PR and merge by themselves once CI is green",
+      "matchPackageNames": ["TUnit*", "bunit", "Bogus", "CsCheck", "Verify.TUnit", "NetArchTest.eNhancedEdition", "Microsoft.Extensions.TimeProvider.Testing"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "test packages",
+      "automerge": true
+    },
+    {
+      "description": "Aspire's packages, its AppHost SDK and its CLI move together",
+      "matchPackageNames": ["/^aspire\\./i"],
+      "groupName": "Aspire",
+      "automerge": false
+    },
+    {
+      "description": "Roslyn stays at the SDK's compiler version, or the repo's analyzer stops loading (CS9057)",
+      "matchPackageNames": ["Microsoft.CodeAnalysis.*"],
+      "enabled": false
+    },
+    {
+      "description": "Radarr and Sonarr bumps wait for the self-hosted E2E suite",
+      "matchPackageNames": ["lscr.io/linuxserver/radarr", "lscr.io/linuxserver/sonarr"],
+      "groupName": null,
+      "automerge": false
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "The Radarr and Sonarr images the AppHost and E2E pin in C#",
+      "managerFilePatterns": ["/^AppHost/ArrContainers\\.cs$/"],
+      "matchStrings": ["\"(?<depName>lscr\\.io/linuxserver/[a-z]+)\", \"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)-ls(?<revision>\\d+)$"
+    }
+  ]
+}

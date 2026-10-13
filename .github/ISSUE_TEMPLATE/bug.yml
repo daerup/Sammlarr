@@ -1,0 +1,32 @@
+name: Bug report
+description: Something in Sammlarr does not work as it should.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Settings › About shows it.
+    validations:
+      required: true
+  - type: dropdown
+    id: sink
+    attributes:
+      label: Where your wantlist goes
+      options:
+        - Plex watchlist
+        - Radarr and Sonarr
+        - Not set up yet
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: The container log around the time it happened. Remove API keys, tokens and anything personal first.
+      render: text
