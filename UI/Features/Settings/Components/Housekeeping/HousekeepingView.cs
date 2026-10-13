@@ -35,7 +35,7 @@ internal static class HousekeepingView
 
 	internal static readonly IReadOnlyDictionary<RemoteService, DatasetLook> Datasets = new Dictionary<RemoteService, DatasetLook>
 	{
-		[RemoteService.ImdbDatasets] = new("IMDb ratings", "rates titles by IMDb id", "ratings", "https://developer.imdb.com/non-commercial-datasets/"),
+		[RemoteService.ImdbDatasets] = new("IMDb ratings", "rates titles by IMDb id", "ratings", "https://data.imdb.com/non-commercial-datasets/"),
 		[RemoteService.AnimeLists] = new("Anime ids", "maps AniList and MyAnimeList ids", "mappings", "https://github.com/Fribb/anime-lists"),
 	};
 

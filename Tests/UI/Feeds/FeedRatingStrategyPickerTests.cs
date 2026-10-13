@@ -151,7 +151,7 @@ public class FeedRatingStrategyPickerTests : BunitContext
 
 		await Assert
 			.That(cut.FindAll("button[role=switch]").Select(row => row.GetAttribute("aria-label")!))
-			.IsEquivalentTo(["Rotten Tomatoes audience counts", "IMDb counts", "TMDB counts", "Rotten Tomatoes critics counts"], CollectionOrdering.Matching);
+			.IsEquivalentTo(["Rotten Tomatoes® audience counts", "IMDb counts", "TMDB counts", "Rotten Tomatoes® critics counts"], CollectionOrdering.Matching);
 	}
 
 	private IRenderedComponent<FeedRatingStrategyPicker> RenderPicker(Optional<RatingStrategy> value)

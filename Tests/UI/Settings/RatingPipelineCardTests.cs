@@ -181,7 +181,7 @@ public class RatingPipelineCardTests : BunitContext
 		await Radio(cut, "Average").ClickAsync();
 
 		await Assert.That(Names(cut)).IsEquivalentTo(ranked, CollectionOrdering.Matching);
-		await Assert.That(ranked[0]).IsEqualTo("Rotten Tomatoes audience");
+		await Assert.That(ranked[0]).IsEqualTo("Rotten Tomatoes® audience");
 	}
 
 	private static List<string> Names(IRenderedComponent<RatingPipelineCard> cut) => [.. cut.FindAll(".pipeline-name").Select(name => name.TextContent.Trim())];

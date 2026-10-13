@@ -16,7 +16,7 @@ public partial class RatingBreakdownTests
 
 		await Expect(Link(breakdown, "TMDB")).ToHaveAttributeAsync("href", TmdbMoviePage());
 		await Expect(Link(breakdown, "IMDb")).ToHaveAttributeAsync("href", "https://www.imdb.com/title/tt33764258");
-		await Expect(Link(breakdown, "Rotten Tomatoes critics")).ToHaveAttributeAsync("href", "https://www.rottentomatoes.com/m/the_odyssey_2026");
+		await Expect(Link(breakdown, "Rotten Tomatoes® critics")).ToHaveAttributeAsync("href", "https://www.rottentomatoes.com/m/the_odyssey_2026");
 	}
 
 	[Test]
@@ -29,7 +29,7 @@ public partial class RatingBreakdownTests
 		var breakdown = await OpenBreakdownAsync(page, "The Runner");
 
 		await E2EApp.WaitForRequestsBeyondAsync("%22tt34564059%22", asked);
-		await Expect(Link(breakdown, "Rotten Tomatoes critics")).ToHaveAttributeAsync("href", "https://www.rottentomatoes.com/search?search=The%20Runner");
+		await Expect(Link(breakdown, "Rotten Tomatoes® critics")).ToHaveAttributeAsync("href", "https://www.rottentomatoes.com/search?search=The%20Runner");
 	}
 
 	private static async Task<ILocator> OpenBreakdownAsync(IPage page, string title)

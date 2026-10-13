@@ -1,0 +1,429 @@
+[
+  {
+    "file": "anilist-logo-dark.png",
+    "origin": "owner",
+    "sources": ["https://anilist.co"],
+    "author": "AniList",
+    "licence": "none published",
+    "changes": "AniList's wordmark PNG (488 x 111 on navy) with its background removed, cropped and scaled to 343 x 67"
+  },
+  {
+    "file": "anilist-logo-light.png",
+    "origin": "owner",
+    "sources": ["https://anilist.co"],
+    "author": "AniList",
+    "licence": "none published",
+    "changes": "AniList's wordmark PNG with its background removed, cropped and scaled to 343 x 67, and \"ANI\" recoloured from white to AniList navy #1E2630 for the light theme"
+  },
+  {
+    "file": "anilist-square.png",
+    "origin": "owner",
+    "sources": ["https://anilist.co"],
+    "author": "AniList",
+    "licence": "none published",
+    "changes": "AniList's 960 px app icon scaled to 256 px with rounded corners"
+  },
+  {
+    "file": "anime-lists-logo-dark.svg",
+    "origin": "sammlarr",
+    "sources": ["https://github.com/github/mona-sans"],
+    "author": "Sammlarr; typeface Mona Sans by GitHub",
+    "licence": "MIT AND OFL-1.1",
+    "changes": "\"anime-lists\" set in Mona Sans SemiBold as outlines, filled #F0F6FC for the dark theme"
+  },
+  {
+    "file": "anime-lists-logo-light.svg",
+    "origin": "sammlarr",
+    "sources": ["https://github.com/github/mona-sans"],
+    "author": "Sammlarr; typeface Mona Sans by GitHub",
+    "licence": "MIT AND OFL-1.1",
+    "changes": "\"anime-lists\" set in Mona Sans SemiBold as outlines, filled #1F2328 for the light theme"
+  },
+  {
+    "file": "github-mark-dark.svg",
+    "origin": "simpleIcons",
+    "sources": ["https://cdn.jsdelivr.net/npm/simple-icons@16.14.0/icons/github.svg"],
+    "author": "Simple Icons contributors",
+    "licence": "CC0-1.0",
+    "changes": "filled #F0F6FC for the dark theme; title and role removed"
+  },
+  {
+    "file": "github-mark-light.svg",
+    "origin": "simpleIcons",
+    "sources": ["https://cdn.jsdelivr.net/npm/simple-icons@16.14.0/icons/github.svg"],
+    "author": "Simple Icons contributors",
+    "licence": "CC0-1.0",
+    "changes": "filled #1F2328 for the light theme; title and role removed"
+  },
+  {
+    "file": "imdb-logo.svg",
+    "origin": "selfhst",
+    "sources": ["https://github.com/selfhst/icons/blob/589d718a638b7770abae0edd1b60ff36c0dd1d5a/svg/imdb.svg"],
+    "author": "selfh.st",
+    "licence": "CC-BY-4.0",
+    "changes": "viewBox cropped from 0 0 512 512 to 0 126.9 512 258.2, the badge alone"
+  },
+  {
+    "file": "imdb-square.svg",
+    "origin": "simpleIcons",
+    "sources": ["https://cdn.jsdelivr.net/npm/simple-icons@16.14.0/icons/imdb.svg"],
+    "author": "Simple Icons contributors",
+    "licence": "CC0-1.0",
+    "changes": "filled #F5C518; title and role removed"
+  },
+  {
+    "file": "imdb-tile.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:IMDb_Logo_Square.svg"],
+    "author": "IMDb",
+    "licence": "public domain (PD-textlogo)",
+    "changes": "drawing unchanged; width, height and version attributes removed"
+  },
+  {
+    "file": "letterboxd-logo-dark.svg",
+    "origin": "owner",
+    "sources": ["https://letterboxd.com/about/brand/", "https://a.ltrbxd.com/logos/letterboxd-logo-h-neg-rgb.svg"],
+    "author": "Letterboxd Limited",
+    "licence": "Letterboxd brand terms",
+    "changes": "drawing unchanged; XML prolog, generator comment, title and desc removed"
+  },
+  {
+    "file": "letterboxd-logo-light.svg",
+    "origin": "owner",
+    "sources": ["https://letterboxd.com/about/brand/", "https://a.ltrbxd.com/logos/letterboxd-logo-h-pos-rgb.svg"],
+    "author": "Letterboxd Limited",
+    "licence": "Letterboxd brand terms",
+    "changes": "drawing unchanged; XML prolog, generator comment, title and desc removed"
+  },
+  {
+    "file": "letterboxd-square.svg",
+    "origin": "simpleIcons",
+    "sources": ["https://cdn.jsdelivr.net/npm/simple-icons@16.14.0/icons/letterboxd.svg"],
+    "author": "Simple Icons contributors",
+    "licence": "CC0-1.0",
+    "changes": "the one-colour glyph split into its three dots, filled #FF8000, #00E054 and #40BCF4; not Letterboxd's own file, kept against Letterboxd's logo terms"
+  },
+  {
+    "file": "mdblist-logo-dark.svg",
+    "origin": "sammlarr",
+    "sources": ["https://mdblist.com/static/safari-pinned-tab.svg"],
+    "author": "Sammlarr (lockup); MDBList (mark); typeface Lato by Łukasz Dziedzic",
+    "licence": "MIT AND OFL-1.1; the mark: none published",
+    "changes": "MDBList's mark filled #4284CA beside \"MDBList\" set in Lato Bold as outlines, #FFFFFF for the dark theme"
+  },
+  {
+    "file": "mdblist-logo-light.svg",
+    "origin": "sammlarr",
+    "sources": ["https://mdblist.com/static/safari-pinned-tab.svg"],
+    "author": "Sammlarr (lockup); MDBList (mark); typeface Lato by Łukasz Dziedzic",
+    "licence": "MIT AND OFL-1.1; the mark: none published",
+    "changes": "MDBList's mark filled #4284CA beside \"MDBList\" set in Lato Bold as outlines, #171717 for the light theme"
+  },
+  {
+    "file": "mdblist-square.svg",
+    "origin": "owner",
+    "sources": ["https://mdblist.com/static/safari-pinned-tab.svg"],
+    "author": "MDBList",
+    "licence": "none published",
+    "changes": "filled #4284CA instead of #000000; DOCTYPE, potrace metadata, width and height removed"
+  },
+  {
+    "file": "metacritic-logo-dark.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Metacritic_logo.svg"],
+    "author": "Fandom, Inc.",
+    "licence": "public domain (PD-textlogo)",
+    "changes": "the black lettering filled #F2F2F2 for the dark theme; title removed"
+  },
+  {
+    "file": "metacritic-logo-light.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Metacritic_logo.svg"],
+    "author": "Fandom, Inc.",
+    "licence": "public domain (PD-textlogo)",
+    "changes": "drawing unchanged; title removed"
+  },
+  {
+    "file": "metacritic-square.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Metacritic_logo_Roundel.svg"],
+    "author": "Fandom, Inc.",
+    "licence": "public domain (PD-textlogo)",
+    "changes": "unchanged"
+  },
+  {
+    "file": "myanimelist-logo.png",
+    "origin": "owner",
+    "sources": ["https://cdn.myanimelist.net/images/mal-logo-xsmall@2x.png"],
+    "author": "MyAnimeList Co., Ltd.",
+    "licence": "none published",
+    "changes": "unchanged"
+  },
+  {
+    "file": "myanimelist-square.svg",
+    "origin": "owner",
+    "sources": ["https://cdn.myanimelist.net/images/favicon.svg"],
+    "author": "MyAnimeList Co., Ltd.",
+    "licence": "none published",
+    "changes": "drawing unchanged; XML prolog and generator comment removed"
+  },
+  {
+    "file": "plex-logo-dark.svg",
+    "origin": "owner",
+    "sources": ["https://brand.plex.tv"],
+    "author": "Plex, Inc.",
+    "licence": "Plex trademark guidelines",
+    "changes": "drawing unchanged (the kit's logo on black); XML prolog and comment removed"
+  },
+  {
+    "file": "plex-logo-light.svg",
+    "origin": "owner",
+    "sources": ["https://brand.plex.tv"],
+    "author": "Plex, Inc.",
+    "licence": "Plex trademark guidelines",
+    "changes": "drawing unchanged (the kit's logo on white); XML prolog and comment removed"
+  },
+  {
+    "file": "plex-square.svg",
+    "origin": "simpleIcons",
+    "sources": ["https://cdn.jsdelivr.net/npm/simple-icons@6.0.0/icons/plex.svg"],
+    "author": "Simple Icons contributors",
+    "licence": "CC0-1.0",
+    "changes": "Plex's chevron as Simple Icons drew it up to version 6, filled #EBAF00; not a file from Plex's kit"
+  },
+  {
+    "file": "radarr-square-dark.svg",
+    "origin": "selfhst",
+    "sources": ["https://github.com/selfhst/icons/blob/589d718a638b7770abae0edd1b60ff36c0dd1d5a/svg/radarr.svg"],
+    "author": "selfh.st",
+    "licence": "CC-BY-4.0",
+    "changes": "outline recoloured from #24292e to #e6e6e6 for the dark theme"
+  },
+  {
+    "file": "radarr-square-light.svg",
+    "origin": "selfhst",
+    "sources": ["https://github.com/selfhst/icons/blob/589d718a638b7770abae0edd1b60ff36c0dd1d5a/svg/radarr.svg"],
+    "author": "selfh.st",
+    "licence": "CC-BY-4.0",
+    "changes": "unchanged"
+  },
+  {
+    "file": "ratings/metacritic-disliked.svg",
+    "origin": "sammlarr",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Metacritic_logo_Roundel.svg"],
+    "author": "Sammlarr (square); Fandom, Inc. (the m)",
+    "licence": "MIT; the m public domain (PD-textlogo)",
+    "changes": "the roundel's white m, scaled, on a #FF6874 rounded square"
+  },
+  {
+    "file": "ratings/metacritic-liked.svg",
+    "origin": "sammlarr",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Metacritic_logo_Roundel.svg"],
+    "author": "Sammlarr (square); Fandom, Inc. (the m)",
+    "licence": "MIT; the m public domain (PD-textlogo)",
+    "changes": "the roundel's white m, scaled, on a #00CE7A rounded square"
+  },
+  {
+    "file": "ratings/rottentomatoesaudience-disliked.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Rotten_Tomatoes_negative_audience.svg"],
+    "author": "Emily Oberman (Pentagram), modified by Throast",
+    "licence": "public domain (PD-textlogo)",
+    "changes": "drawing unchanged; Inkscape metadata and an empty group removed, width and height turned into a viewBox"
+  },
+  {
+    "file": "ratings/rottentomatoesaudience-liked.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Rotten_Tomatoes_positive_audience.svg"],
+    "author": "Emily Oberman (Pentagram), modified by Throast",
+    "licence": "public domain (PD-textlogo)",
+    "changes": "drawing unchanged; width and height turned into a viewBox"
+  },
+  {
+    "file": "ratings/rottentomatoescritics-disliked.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Rotten_Tomatoes_rotten.svg"],
+    "author": "Emily Oberman (Pentagram), modified by Throast",
+    "licence": "public domain (PD-textlogo)",
+    "changes": "drawing unchanged; width and height turned into a viewBox"
+  },
+  {
+    "file": "ratings/rottentomatoescritics-liked.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Rotten_Tomatoes.svg"],
+    "author": "Emily Oberman (Pentagram), modified by Throast",
+    "licence": "public domain (PD-textlogo)",
+    "changes": "drawing unchanged; XML prolog, Inkscape metadata and ids removed, width and height turned into a viewBox"
+  },
+  {
+    "file": "rottentomatoes-logo.png",
+    "origin": "owner",
+    "sources": [
+      "https://www.rottentomatoes.com/help_desk/licensing",
+      "https://www.rottentomatoes.com/assets/pizza-pie/images/rottentomatoes_logo_40.336d6fe66ff.png"
+    ],
+    "author": "Fandango Media, LLC",
+    "licence": "Rotten Tomatoes licensing terms",
+    "changes": "unchanged"
+  },
+  {
+    "file": "rottentomatoes-square.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Rotten_Tomatoes.svg"],
+    "author": "Emily Oberman (Pentagram), modified by Throast",
+    "licence": "public domain (PD-textlogo)",
+    "changes": "drawing unchanged; XML prolog, Inkscape metadata and ids removed, width and height turned into a viewBox"
+  },
+  {
+    "file": "sammlarr-square-dark.svg",
+    "origin": "sammlarr",
+    "sources": ["https://github.com/daerup/Sammlarr"],
+    "author": "Sammlarr",
+    "licence": "MIT",
+    "changes": "Sammlarr's own magpie, for the dark theme"
+  },
+  {
+    "file": "sammlarr-square-light.svg",
+    "origin": "sammlarr",
+    "sources": ["https://github.com/daerup/Sammlarr"],
+    "author": "Sammlarr",
+    "licence": "MIT",
+    "changes": "Sammlarr's own magpie, for the light theme"
+  },
+  {
+    "file": "sonarr-square-dark.svg",
+    "origin": "selfhst",
+    "sources": ["https://github.com/selfhst/icons/blob/589d718a638b7770abae0edd1b60ff36c0dd1d5a/svg/sonarr.svg"],
+    "author": "selfh.st",
+    "licence": "CC-BY-4.0",
+    "changes": "unchanged"
+  },
+  {
+    "file": "sonarr-square-light.svg",
+    "origin": "selfhst",
+    "sources": ["https://github.com/selfhst/icons/blob/589d718a638b7770abae0edd1b60ff36c0dd1d5a/svg/sonarr.svg"],
+    "author": "selfh.st",
+    "licence": "CC-BY-4.0",
+    "changes": "the disc's and the cross's colours (#eee and #3a3f51) swapped for the light theme"
+  },
+  {
+    "file": "tmdb-logo.svg",
+    "origin": "owner",
+    "sources": ["https://www.themoviedb.org/about/logos-attribution"],
+    "author": "TMDB",
+    "licence": "TMDB API terms of use",
+    "changes": "drawing unchanged (the kit's blue_square_1); title removed"
+  },
+  {
+    "file": "tmdb-square.svg",
+    "origin": "owner",
+    "sources": ["https://www.themoviedb.org/about/logos-attribution"],
+    "author": "TMDB",
+    "licence": "TMDB API terms of use",
+    "changes": "drawing unchanged (the kit's blue_square_2); title removed"
+  },
+  {
+    "file": "trakt-logo-dark.svg",
+    "origin": "owner",
+    "sources": ["https://app.trakt.tv/branding"],
+    "author": "Trakt",
+    "licence": "Trakt branding terms",
+    "changes": "the name's currentColor fill set to #FFFFFF for the dark theme"
+  },
+  {
+    "file": "trakt-logo-light.svg",
+    "origin": "owner",
+    "sources": ["https://app.trakt.tv/branding"],
+    "author": "Trakt",
+    "licence": "Trakt branding terms",
+    "changes": "the name's currentColor fill set to #171717 for the light theme"
+  },
+  {
+    "file": "trakt-square.svg",
+    "origin": "owner",
+    "sources": ["https://app.trakt.tv/branding"],
+    "author": "Trakt",
+    "licence": "Trakt branding terms",
+    "changes": "unchanged"
+  },
+  {
+    "file": "tvdb-logo-dark.png",
+    "origin": "owner",
+    "sources": ["https://thetvdb.com/images/attribution/logo1.png"],
+    "author": "TheTVDB",
+    "licence": "TheTVDB attribution terms",
+    "changes": "unchanged"
+  },
+  {
+    "file": "tvdb-logo-light.png",
+    "origin": "owner",
+    "sources": ["https://thetvdb.com/images/attribution/logo2.png"],
+    "author": "TheTVDB",
+    "licence": "TheTVDB attribution terms",
+    "changes": "unchanged"
+  },
+  {
+    "file": "tvdb-square.svg",
+    "origin": "selfhst",
+    "sources": ["https://github.com/selfhst/icons/blob/589d718a638b7770abae0edd1b60ff36c0dd1d5a/svg/tvdb.svg"],
+    "author": "selfh.st",
+    "licence": "CC-BY-4.0",
+    "changes": "unchanged"
+  },
+  {
+    "file": "tvdb-tile-dark.svg",
+    "origin": "selfhst",
+    "sources": ["https://github.com/selfhst/icons/blob/589d718a638b7770abae0edd1b60ff36c0dd1d5a/svg/tvdb.svg"],
+    "author": "selfh.st",
+    "licence": "CC-BY-4.0",
+    "changes": "the grey #555 tile removed and the viewBox cropped to the \"tv\" tag and \"db\""
+  },
+  {
+    "file": "tvdb-tile-light.svg",
+    "origin": "selfhst",
+    "sources": ["https://github.com/selfhst/icons/blob/589d718a638b7770abae0edd1b60ff36c0dd1d5a/svg/tvdb.svg"],
+    "author": "selfh.st",
+    "licence": "CC-BY-4.0",
+    "changes": "the grey #555 tile removed, the viewBox cropped to the \"tv\" tag and \"db\", and \"db\" recoloured from #fff to #1B2626 for the light theme"
+  },
+  {
+    "file": "tvmaze-logo.png",
+    "origin": "owner",
+    "sources": ["https://static.tvmaze.com/images/tvm-header-logo.png"],
+    "author": "TVmaze",
+    "licence": "none published",
+    "changes": "unchanged"
+  },
+  {
+    "file": "tvmaze-square-dark.svg",
+    "origin": "sammlarr",
+    "sources": ["https://www.tvmaze.com"],
+    "author": "Sammlarr, after TVmaze's app icon",
+    "licence": "MIT",
+    "changes": "TVmaze's TV face drawn again: #F2F2F2 outline and antenna, no face fill, #3C948B eyes, for the dark theme"
+  },
+  {
+    "file": "tvmaze-square-light.svg",
+    "origin": "sammlarr",
+    "sources": ["https://www.tvmaze.com"],
+    "author": "Sammlarr, after TVmaze's app icon",
+    "licence": "MIT",
+    "changes": "TVmaze's TV face drawn again: #111111 outline and antenna, white face, #3C948B eyes, for the light theme"
+  },
+  {
+    "file": "wikidata-logo.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Wikidata-logo-en.svg"],
+    "author": "Planemad",
+    "licence": "public domain (PD-textlogo)",
+    "changes": "unchanged"
+  },
+  {
+    "file": "wikidata-square.svg",
+    "origin": "wikimediaCommons",
+    "sources": ["https://commons.wikimedia.org/wiki/File:Wikidata-logo-without-paddings.svg"],
+    "author": "Planemad (logo); Danny B. (this file)",
+    "licence": "public domain (PD-ineligible)",
+    "changes": "unchanged"
+  }
+]

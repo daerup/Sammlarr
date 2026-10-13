@@ -52,7 +52,7 @@ public class FeedRatingReasonsTests
 
 		await Assert
 			.That(FeedRatingReasons.For(Rule("Votes", 500.0), rating, ordered))
-			.IsEquivalentTo(["no votes behind its rating (Rotten Tomatoes critics publishes none)"]);
+			.IsEquivalentTo(["no votes behind its rating (Rotten Tomatoes® critics publishes none)"]);
 	}
 
 	[Test]

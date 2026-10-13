@@ -3,6 +3,7 @@ using Contracts.Media;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
+using UI.Shared.Media;
 using UI.Shared.Services.Branding;
 
 namespace UI.Features.Settings.Components.Housekeeping;
@@ -158,10 +159,10 @@ internal static class TitlesStoredTwiceView
 		return distinct.Reason switch
 		{
 			Contradiction contradiction =>
-				$"Kept apart: both have a {contradiction.Source.GetDescription()} id ({Value(pair.Held, contradiction.Source)} and {Value(pair.Other, contradiction.Source)}), so they are two {Kind(note)}s",
+				$"Kept apart: both have a {contradiction.Source.Label} id ({Value(pair.Held, contradiction.Source)} and {Value(pair.Other, contradiction.Source)}), so they are two {Kind(note)}s",
 			TypesDiffer => "Kept apart: one is a film and the other a show",
 			AnsweredElsewhere answered =>
-				$"Kept apart {Day(distinct.At)}: {branding.Name(answered.By)} says it is {answered.Answer.Source.GetDescription()} {answered.Answer.Value}, not {note.Claimed.Value}",
+				$"Kept apart {Day(distinct.At)}: {branding.Name(answered.By)} says it is {answered.Answer.Source.Label} {answered.Answer.Value}, not {note.Claimed.Value}",
 			KeptApartByHand kept => $"Kept apart by {(kept.By == me ? "you" : "hand")}, {Day(distinct.At)}",
 		};
 	}
@@ -170,7 +171,7 @@ internal static class TitlesStoredTwiceView
 	{
 		return reason switch
 		{
-			Contradiction contradiction => $"two {contradiction.Source.GetDescription()} ids",
+			Contradiction contradiction => $"two {contradiction.Source.Label} ids",
 			TypesDiffer => "a film and a show",
 			AnsweredElsewhere answered => $"{branding.Name(answered.By)} maps it elsewhere",
 			KeptApartByHand kept => kept.By == me ? "kept apart by you" : "kept apart by hand",
@@ -184,7 +185,7 @@ internal static class TitlesStoredTwiceView
 
 	private static string FirstId(StoredTitle title)
 	{
-		return title.Media.Identity.Keys.OrderBy(key => key.Source).FirstOrNone().Map(key => $"{key.Source.GetDescription()} {key.Value}").GetValueOr(string.Empty);
+		return title.Media.Identity.Keys.OrderBy(key => key.Source).FirstOrNone().Map(key => $"{key.Source.Label} {key.Value}").GetValueOr(string.Empty);
 	}
 
 	private static string Kind(IdentityConflict note)

@@ -15,9 +15,9 @@ public class RatingsTests
 		await Expect(tiles.First).ToBeVisibleAsync();
 		var before = await BoxesAsync(tiles);
 
-		await page.GetByRole(AriaRole.Switch, new PageGetByRoleOptions { Name = "Rotten Tomatoes critics counts" }).ClickAsync();
+		await page.GetByRole(AriaRole.Switch, new PageGetByRoleOptions { Name = "Rotten Tomatoes® critics counts" }).ClickAsync();
 
-		await Expect(tiles.Filter(new LocatorFilterOptions { HasText = "Rotten Tomatoes critics" })).ToHaveClassAsync(new Regex("is-off"));
+		await Expect(tiles.Filter(new LocatorFilterOptions { HasText = "Rotten Tomatoes® critics" })).ToHaveClassAsync(new Regex("is-off"));
 		await Assert.That(await BoxesAsync(tiles)).IsEquivalentTo(before, CollectionOrdering.Matching);
 	}
 

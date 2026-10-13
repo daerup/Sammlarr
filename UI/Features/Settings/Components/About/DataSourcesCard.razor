@@ -1,54 +1,134 @@
+@using Contracts.DI
+@using Contracts.Media
+@using Contracts.Media.Conversions
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
+@inject IEnumerable<Keyed<RemoteService, IExternalIdConverter>> Converters
+@inject IEnumerable<Keyed<RemoteService, IDetailsEnricher>> Enrichers
 
 <div class="overflow-hidden rounded-lg border bg-card">
     <CardHead Icon="database" Title="Data sources"/>
-    @foreach (var source in Sources)
+    @foreach (var remote in DataSources.Asked)
     {
-        <div class="source-row">
-            <span class="source-logo">
-                <BrandedLogo Brand="source.Brand" Form="ProviderLogoForm.Logo" Size="22"/>
-            </span>
-            <span class="source-gives">@source.Gives</span>
-            <span class="source-note">@source.Note</span>
-            <a class="source-open" href="@source.Href" target="_blank" rel="noopener noreferrer" aria-label="@($"Open {source.Brand.DisplayName}")">
-                <LucideIcon Name="external-link" Size="13"/>
-            </a>
-        </div>
+        @Row(_sources.Row(remote), Note(remote))
     }
-    <p class="source-credit">
-        Provider icons from
-        <AppLink Href="https://selfh.st/icons" External="true">selfh.st/icons</AppLink>
-        (CC BY 4.0; the TVDB tile is modified from theirs) and
-        <AppLink Href="https://simpleicons.org" External="true">Simple Icons</AppLink>
-        (CC0); IMDb's square logo, Rotten Tomatoes' tomato and popcorn marks and Metacritic's and Wikidata's logos from Wikimedia Commons
-        (public domain; Metacritic's lettering lightened for the dark theme, Wikidata's moved beside its bars);
-        TVmaze's and Letterboxd's logos from their own sites (TVmaze's TV face redrawn for the dark theme);
-        anime-lists set in Mona Sans (SIL OFL) beside GitHub's mark.
-        Rotten Tomatoes scores arrive through @RottenTomatoesSuppliers; Rotten Tomatoes and its marks are trademarks of Fandango. Each logo belongs to its owner.
-    </p>
+    <div class="source-band" data-testid="source-band">
+        <div class="source-band-head">
+            <LucideIcon Name="link" Size="13"/>
+            <span class="source-band-title">Pages and ratings</span>
+            <span class="source-band-note">Reach Sammlarr only through other services</span>
+        </div>
+        @foreach (var provider in DataSources.Reached)
+        {
+            @Row(_sources.Row(provider), Note(provider))
+        }
+    </div>
+    <BbCollapsible>
+        <div class="source-foot">
+            <span>Names and logos belong to their owners and only identify each service; no endorsement is implied.</span>
+            <BbCollapsibleTrigger AsChild="false" Class="group ml-auto inline-flex shrink-0 items-center gap-1 whitespace-nowrap font-medium text-foreground/80 hover:text-foreground">
+                Logo credits
+                <LucideIcon Name="chevron-down" Size="13" Class="transition-transform duration-150 group-data-[state=open]:rotate-180"/>
+            </BbCollapsibleTrigger>
+        </div>
+        <BbCollapsibleContent ForceMount="false">
+            <div class="source-credits" data-testid="logo-credits">
+                @foreach (var group in LogoCredits.ByOrigin)
+                {
+                    <div class="credit-group" data-origin="@group.Key">
+                        @Origin(group.Key)
+                        <ul class="credit-list">
+                            @foreach (var credit in group)
+                            {
+                                <li class="credit">
+                                    <span class="credit-head">
+                                        <span class="credit-file">@credit.File</span>
+                                        <span>@credit.Author</span>
+                                        <span>@credit.Licence</span>
+                                        <a class="credit-source" href="@credit.Sources[0]" target="_blank" rel="noopener noreferrer">@(new Uri(credit.Sources[0]).Host)</a>
+                                        @foreach (var file in credit.Sources.Skip(1))
+                                        {
+                                            <a class="credit-source" href="@file" target="_blank" rel="noopener noreferrer">file</a>
+                                        }
+                                    </span>
+                                    <span class="credit-changes">@credit.Changes</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        </BbCollapsibleContent>
+    </BbCollapsible>
 </div>
 
 @code {
-    private string RottenTomatoesSuppliers =>
-        string.Join(" and ", (RatingSource.RottenTomatoesCritics.SuppliedBy() + RatingSource.RottenTomatoesAudience.SuppliedBy()).Order().Select(Branding.Name));
+    private static readonly RenderFragment Nothing = _ => { };
 
-    private IReadOnlyList<DataSource> Sources =>
-    [
-        new(Branding.GetBrandingInfo(MediaProvider.Tmdb), "Titles, artwork, trending and ratings", "This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.", "https://www.themoviedb.org"),
-        new(Branding.GetBrandingInfo(MediaProvider.Plex), "Sign-in, search, the wantlist sync, and the IMDb and Rotten Tomatoes ratings", "Plex and the Plex logo are trademarks of Plex and used under a license.", "https://www.plex.tv"),
-        new(Branding.GetBrandingInfo(MediaProvider.Mdblist), "The lists your feeds import, and ratings from IMDb, TMDB, Rotten Tomatoes, Metacritic, Letterboxd, Trakt and MyAnimeList", "Lists and ratings come from MDBList.", "https://mdblist.com"),
-        new(Branding.GetBrandingInfo(MediaProvider.Tvdb), "Series ids, linked from a title", "Series ids link to TheTVDB.", "https://thetvdb.com"),
-        new(Branding.GetBrandingInfo(MediaProvider.Imdb), "Title ids, linked from a title, and ratings from IMDb's datasets, for personal and non-commercial use", "IMDb and all related logos are trademarks of IMDb.com, Inc. or its affiliates.", "https://www.imdb.com"),
-        new(Branding.GetBrandingInfo(MediaProvider.Metacritic), "Metascores, through MDBList, linked from a title", "Metacritic is a trademark of Fandom, Inc.", "https://www.metacritic.com"),
-        new(Branding.GetBrandingInfo(MediaProvider.Letterboxd), "Ratings, through MDBList, linked from a title", "Letterboxd is a trademark of Letterboxd Limited.", "https://letterboxd.com"),
-        new(Branding.GetBrandingInfo(MediaProvider.Tvmaze), "Show details and TVDB ids while TMDB cannot answer, linked from a show", "TVmaze's data is licensed under CC BY-SA 4.0.", "https://www.tvmaze.com"),
-        new(Branding.GetBrandingInfo(RemoteService.Wikidata), "Rotten Tomatoes, Metacritic and Letterboxd pages, and TMDB and TVDB ids no other service knows, by IMDb id", "Wikidata's data is available under CC0.", "https://www.wikidata.org"),
-        new(Branding.GetBrandingInfo(RemoteService.AnimeLists), "The map from AniList and MyAnimeList ids to TVDB, TMDB and IMDb ids, downloaded daily", "Fribb's anime-lists declares no licence; Sammlarr downloads it at runtime and never ships it.", "https://github.com/Fribb/anime-lists"),
-        new(Branding.GetBrandingInfo(MediaProvider.AniList), "Public anime lists as feeds, and anime details and ratings", "Data from AniList, through its public API.", "https://anilist.co"),
-        new(Branding.GetBrandingInfo(MediaProvider.Mal), "Public anime lists as feeds, and anime details and ratings, with your client ID", "Data from MyAnimeList, through its API.", "https://myanimelist.net"),
-        new(Branding.GetBrandingInfo(MediaProvider.Trakt), "Watchlists, public lists and charts as feeds, and the Trakt rating, with your client ID", "Data from Trakt, through its API.", "https://trakt.tv"),
-    ];
+    private DataSources _sources = null!;
 
-    private sealed record DataSource(BrandingInfo Brand, string Gives, string Note, string Href);
+    protected override void OnInitialized() => _sources = new DataSources(Converters, Enrichers, Branding);
+
+    private static RenderFragment Row(SourceRow row, RenderFragment note)
+    {
+        return @<div class="source-row" data-source="@row.Key">
+            <span class="source-logo">
+                <BrandedLogo Brand="row.Brand" Form="ProviderLogoForm.Logo" Size="22"/>
+            </span>
+            <div class="source-cell">
+                <div class="source-chips">
+                    @foreach (var chip in row.Chips)
+                    {
+                        <BbTooltip DelayDuration="150">
+                            <BbTooltipTrigger Focusable="false">
+                                <BbBadge Variant="BadgeVariant.Secondary" Class="h-[22px] cursor-default gap-[5px] rounded-md border-0 pl-1.5 pr-2 text-[11.5px] font-normal text-foreground/80 hover:bg-secondary" data-chip="@chip.Name">
+                                    <BbBadgeIcon Name="@chip.Icon" Class="text-muted-foreground"/>@chip.Name
+                                </BbBadge>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent Class="max-w-[320px]">@chip.Tip</BbTooltipContent>
+                        </BbTooltip>
+                    }
+                    @row.Via.Match(Via, () => Nothing)
+                </div>
+                @note
+            </div>
+            <a class="source-open" href="@row.Home" target="_blank" rel="noopener noreferrer" aria-label="@($"Open {row.Brand.DisplayName}")">
+                <LucideIcon Name="external-link" Size="13"/>
+            </a>
+        </div>;
+    }
+
+    private static RenderFragment Via(string via) => @<span class="source-via">@via</span>;
+
+    private static RenderFragment Note(RemoteService remote)
+    {
+        return remote switch
+        {
+            RemoteService.Tmdb => @<p class="source-note">This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.</p>,
+            RemoteService.Plex => @<p class="source-note">Plex and the Plex Play logo are trademarks of Plex and used under a license.</p>,
+            RemoteService.ImdbDatasets => @<p class="source-note">Information courtesy of IMDb (<a href="https://www.imdb.com" target="_blank" rel="noopener noreferrer">https://www.imdb.com</a>). Used with permission.</p>,
+            RemoteService.Tvmaze => @<p class="source-note">TVmaze's data is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>.</p>,
+            RemoteService.AnimeLists => @<p class="source-note">Contains information from <a href="https://github.com/cedya77/anime-offline-database" target="_blank" rel="noopener noreferrer">anime-offline-database</a>, which is made available here under the <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener noreferrer">Open Database License (ODbL)</a>. That database is cedya77's continuation of <a href="https://github.com/manami-project/anime-offline-database" target="_blank" rel="noopener noreferrer">manami-project</a>'s work. Fribb's anime-lists is built from it and declares no licence; Sammlarr downloads it at runtime and never ships it.</p>,
+            RemoteService.Mdblist or RemoteService.Wikidata or RemoteService.AniList or RemoteService.Mal or RemoteService.Trakt or RemoteService.Radarr or RemoteService.Sonarr => Nothing,
+        };
+    }
+
+    private static RenderFragment Note(MediaProvider provider)
+    {
+        return provider is MediaProvider.RottenTomatoes
+            ? @<p class="source-note">Rotten Tomatoes® and Tomatometer® are registered trademarks of Fandango Media, LLC.</p>
+            : Nothing;
+    }
+
+    private static RenderFragment Origin(LogoOrigin origin)
+    {
+        return origin switch
+        {
+            LogoOrigin.Selfhst => @<div class="credit-origin">selfh.st icons<span>by selfh.st, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span></div>,
+            LogoOrigin.SimpleIcons => @<div class="credit-origin">Simple Icons<span><a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0</a></span></div>,
+            LogoOrigin.WikimediaCommons => @<div class="credit-origin">Wikimedia Commons<span>public domain</span></div>,
+            LogoOrigin.Owner => @<div class="credit-origin">Each owner's own files<span>from their brand pages and sites</span></div>,
+            LogoOrigin.Sammlarr => @<div class="credit-origin">Drawn for Sammlarr<span>MIT, fonts under the SIL OFL</span></div>,
+        };
+    }
 }
