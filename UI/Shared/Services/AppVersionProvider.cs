@@ -1,12 +1,10 @@
-using System.Reflection;
 using Shared.Options;
 
 namespace UI.Shared.Services;
 
-internal sealed class AppVersionProvider(ReleaseOptions options)
+internal sealed class AppVersionProvider(ReleaseOptions options, AppVersion current)
 {
-	public AppVersion Current { get; } =
-		AppVersion.From(Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion);
+	public AppVersion Current => current;
 
 	public string Repository => options.GitHubRepo;
 }

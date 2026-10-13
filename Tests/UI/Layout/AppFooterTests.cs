@@ -25,6 +25,25 @@ public class AppFooterTests : BunitContext
 	}
 
 	[Test]
+	public async Task Version_WhenANewerReleaseIsOut_CarriesADotAndSaysSo()
+	{
+		var update = new AppUpdate("1.5.0", new Uri("https://github.com/daerup/Sammlarr/releases/tag/v1.5.0"));
+
+		var cut = Render<AppFooter>(parameters => parameters.Add(footer => footer.Version, new AppVersion("1.4.0")).Add(footer => footer.Update, Some.Of(update)));
+
+		await Assert.That(cut.FindAll("[data-testid=footer-update-dot]")).HasSingleItem();
+		await Assert.That(cut.Find("footer a").GetAttribute("title")).IsEqualTo("Sammlarr 1.5.0 is out");
+	}
+
+	[Test]
+	public async Task Version_WhileUpToDate_CarriesNoDot()
+	{
+		var cut = Render<AppFooter>(parameters => parameters.Add(footer => footer.Version, new AppVersion("1.4.0")));
+
+		await Assert.That(cut.FindAll("[data-testid=footer-update-dot]")).IsEmpty();
+	}
+
+	[Test]
 	public async Task Credit_SaysMadeWithLove()
 	{
 		var cut = Render<AppFooter>(parameters => parameters.Add(footer => footer.Version, new AppVersion("1.4.0")));

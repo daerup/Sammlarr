@@ -1,4 +1,5 @@
 @inject AppVersionProvider Versions
+@inject AppUpdateChecker Updates
 
 <div class="flex max-w-6xl flex-col gap-6">
     <div>
@@ -6,6 +7,19 @@
         <p class="text-sm text-muted-foreground">The version you run and where its data comes from.</p>
     </div>
 
-    <VersionCard Version="Versions.Current" Repository="@Versions.Repository"/>
+    <VersionCard Version="Versions.Current" Repository="@Versions.Repository" Update="_update"/>
     <DataSourcesCard/>
 </div>
+
+@code {
+    private Optional<AppUpdate> _update = new None();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _update = await Updates.CheckAsync();
+            StateHasChanged();
+        }
+    }
+}

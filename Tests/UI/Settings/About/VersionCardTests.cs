@@ -64,4 +64,31 @@ public class VersionCardTests : BunitContext
 		await Assert.That(cut.Find(".version-number").TextContent).IsEqualTo("1.4.0");
 		await Assert.That(cut.FindAll("a")).IsEmpty();
 	}
+
+	[Test]
+	public async Task Card_WhenANewerReleaseIsOut_ShowsItsBadgeAndLinksWhatIsNewBesideTheRunningReleasesNotes()
+	{
+		var update = new AppUpdate("1.5.0", new Uri("https://github.com/daerup/Sammlarr/releases/tag/v1.5.0"));
+
+		var cut = Render<VersionCard>(parameters =>
+			parameters.Add(card => card.Version, new AppVersion("1.4.0")).Add(card => card.Repository, "daerup/Sammlarr").Add(card => card.Update, Some.Of(update))
+		);
+
+		await Assert.That(cut.Find("[data-testid=version-update]").TextContent.Trim()).IsEqualTo("1.5.0 available");
+		await Assert
+			.That(cut.FindAll("a").Select(link => link.GetAttribute("href") ?? string.Empty))
+			.IsEquivalentTo([
+				"https://github.com/daerup/Sammlarr/releases/tag/v1.5.0",
+				"https://github.com/daerup/Sammlarr/releases/tag/v1.4.0",
+				"https://github.com/daerup/Sammlarr",
+			]);
+	}
+
+	[Test]
+	public async Task Card_WhileUpToDate_ShowsNoUpdateBadge()
+	{
+		var cut = Render<VersionCard>(parameters => parameters.Add(card => card.Version, new AppVersion("1.4.0")).Add(card => card.Repository, "daerup/Sammlarr"));
+
+		await Assert.That(cut.FindAll("[data-testid=version-update]")).IsEmpty();
+	}
 }

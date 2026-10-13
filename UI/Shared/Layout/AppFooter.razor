@@ -1,6 +1,10 @@
 <footer class="shrink-0 border-t">
     <div class="flex h-8 items-center justify-between px-6 text-xs text-muted-foreground">
-        <AppLink Href="/settings?section=about" Title="About this version">
+        <AppLink Href="/settings?section=about" Title="@LinkTitle">
+            @if (Update is Some<AppUpdate>)
+            {
+                <span class="update-dot" data-testid="footer-update-dot"></span>
+            }
             <span class="font-mono font-normal">@Version.Number</span>
         </AppLink>
         <span class="flex items-center gap-1">
@@ -13,4 +17,8 @@
 
 @code {
     [Parameter] [EditorRequired] public required AppVersion Version { get; set; }
+
+    [Parameter] public Optional<AppUpdate> Update { get; set; } = new None();
+
+    private string LinkTitle => Update.Match(update => $"Sammlarr {update.Version} is out", () => "About this version");
 }

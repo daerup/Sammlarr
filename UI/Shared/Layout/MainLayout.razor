@@ -3,6 +3,7 @@
 @using UI.Features.Onboarding.Components
 @inject CurrentUserAccessor CurrentUser
 @inject AppVersionProvider Versions
+@inject AppUpdateChecker Updates
 @inject SearchLauncher SearchLauncher
 
 <SessionInvalidationListener/>
@@ -59,7 +60,7 @@
         @Body
     </main>
 
-    <AppFooter Version="Versions.Current"/>
+    <AppFooter Version="Versions.Current" Update="_update"/>
 </div>
 
 <BbToastProvider Position="ToastPosition.BottomRight"/>
@@ -71,6 +72,8 @@
 	private bool _isSearchOpen;
 
 	private SearchPurpose _searchPurpose;
+
+	private Optional<AppUpdate> _update = new None();
 
 	[CascadingParameter]
 	private Task<AuthenticationState>? AuthenticationState { get; set; }
@@ -84,6 +87,15 @@
 	}
 
 	protected override void OnInitialized() => SearchLauncher.Opened += OpenSearch;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			_update = await Updates.CheckAsync();
+			StateHasChanged();
+		}
+	}
 
 	private void OpenSearch(SearchPurpose purpose)
 	{

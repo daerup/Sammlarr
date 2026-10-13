@@ -1,4 +1,5 @@
 using Shared.DI;
+using Shared.Options;
 using UI.Shared.Branding.Birds;
 using UI.Shared.Media;
 using UI.Shared.Services.Branding;
@@ -21,6 +22,7 @@ internal class ServicesModule : IServiceModule
 		services.AddScoped<ArtworkSources>();
 		services.AddScoped<RatingContext>();
 		services.AddScoped<ExternalIdsView>();
-		services.AddSingleton<AppVersionProvider>();
+		services.AddSingleton(provider => new AppVersionProvider(provider.GetRequiredService<ReleaseOptions>(), AppVersion.Running()));
+		services.AddSingleton<AppUpdateChecker>();
 	}
 }

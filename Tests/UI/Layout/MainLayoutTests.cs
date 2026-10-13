@@ -1,7 +1,9 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Bunit.TestDoubles;
+using Contracts;
 using Contracts.Identity;
+using Contracts.Updates;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Options;
@@ -21,7 +23,9 @@ public class MainLayoutTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddScoped(_ => new CurrentUserAccessor(new CurrentUserOverride()));
-		Services.AddSingleton(new AppVersionProvider(new ReleaseOptions()));
+		var versions = new AppVersionProvider(new ReleaseOptions(), new AppVersion("0.0.0-alpha.0.584"));
+		Services.AddSingleton(versions);
+		Services.AddSingleton(new AppUpdateChecker(versions, IReleaseFeed.Mock().Object, IDateTimeProvider.Mock().Object));
 		Services.AddScoped<SearchLauncher>();
 		ComponentFactories.AddStub<GlobalSearch>();
 		ComponentFactories.AddStub<ProfileCard>();
@@ -102,6 +106,21 @@ public class MainLayoutTests : BunitContext
 
 		var running = Services.GetRequiredService<AppVersionProvider>().Current.Number;
 		await Assert.That(cut.Find("footer a").TextContent).Contains(running);
+	}
+
+	[Test]
+	public async Task Footer_WhenANewerReleaseIsOut_MarksTheVersion()
+	{
+		AddAuthorization().SetAuthorized("alice");
+		var versions = new AppVersionProvider(new ReleaseOptions(), new AppVersion("1.4.0"));
+		var releases = IReleaseFeed.Mock();
+		releases.LatestAsync(Any(), Any()).Returns(Some.Of(new PublishedRelease("v1.5.0", new Uri("https://github.com/daerup/Sammlarr/releases/tag/v1.5.0"))));
+		Services.AddSingleton(versions);
+		Services.AddSingleton(new AppUpdateChecker(versions, releases.Object, IDateTimeProvider.Mock().Object));
+
+		var cut = RenderLayout();
+
+		await Assert.That(cut.WaitForElement("[data-testid=footer-update-dot]")).IsNotNull();
 	}
 
 	private IRenderedComponent<MainLayout> RenderLayout() => Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, _ => { }));

@@ -1,6 +1,7 @@
 using API.AniList;
 using API.Anime;
 using API.Arr;
+using API.GitHub;
 using API.Imdb;
 using API.Mal;
 using API.Mdblist;
@@ -34,6 +35,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<TraktModule>();
 		services.AddModule<ArrModule>();
 		services.AddModule<PicturesModule>();
+		services.AddModule<GitHubModule>();
 		services.AddModule<TvdbModule>();
 		services.AddModule<NotificationsApiModule>();
 		services.AddModule<InstrumentationModule>();
