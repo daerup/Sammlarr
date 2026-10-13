@@ -1,4 +1,5 @@
 using Domain.Media;
+using UI.Shared.Media;
 using UI.Shared.Media.Ratings;
 
 namespace UI.Features.Feeds.Pages.Editor;
@@ -12,7 +13,7 @@ internal enum VotesNote
 
 internal sealed record VotesRow(RatingSource Source, Optional<int> Rank)
 {
-	internal string Name => Source.Card.Owner.GetDescription();
+	internal string Name => Source.Card.Owner.Label;
 
 	internal bool HasVotes => Source.Card.PublishesVotes;
 }

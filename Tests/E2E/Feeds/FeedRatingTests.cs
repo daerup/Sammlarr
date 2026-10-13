@@ -51,7 +51,7 @@ public class FeedRatingTests
 
 		await FeedEditor.RatingStar(page).ClickAsync();
 		await page.GetByRole(AriaRole.Tab, new PageGetByRoleOptions { Name = "First available" }).ClickAsync();
-		await FeedEditor.PutFirstAsync(page, "Rotten Tomatoes critics", steps: 2);
+		await FeedEditor.PutFirstAsync(page, "Rotten Tomatoes® critics", steps: 2);
 		await page.Keyboard.PressAsync("Escape");
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
@@ -78,13 +78,13 @@ public class FeedRatingTests
 			.ToHaveTextAsync([
 				new Regex("TMDB"),
 				new Regex("IMDb"),
-				new Regex("Rotten Tomatoes"),
+				new Regex("Rotten Tomatoes®"),
 				new Regex("Metacritic"),
 				new Regex("Letterboxd"),
 				new Regex("Trakt"),
 				new Regex("MyAnimeList"),
 				new Regex("AniList"),
 			]);
-		await Expect(popover).ToContainTextAsync("A title only Rotten Tomatoes or Metacritic rates has no votes and fails this rule.");
+		await Expect(popover).ToContainTextAsync("A title only Rotten Tomatoes® or Metacritic rates has no votes and fails this rule.");
 	}
 }

@@ -20,7 +20,7 @@ public class VotesExplanationTests
 				[
 					("TMDB", true),
 					("IMDb", true),
-					("Rotten Tomatoes", false),
+					("Rotten Tomatoes®", false),
 					("Metacritic", false),
 					("Letterboxd", true),
 					("Trakt", true),
@@ -30,7 +30,7 @@ public class VotesExplanationTests
 				CollectionOrdering.Matching
 			);
 		await Assert.That(explanation.Note).IsEqualTo(VotesNote.UnvotedTitlesFail);
-		await Assert.That(explanation.UnvotedLine).IsEqualTo("A title only Rotten Tomatoes or Metacritic rates has no votes and fails this rule.");
+		await Assert.That(explanation.UnvotedLine).IsEqualTo("A title only Rotten Tomatoes® or Metacritic rates has no votes and fails this rule.");
 	}
 
 	[Test]
@@ -44,7 +44,7 @@ public class VotesExplanationTests
 		await Assert
 			.That(explanation.Rows.Select(row => (row.Rank.GetValueOr(0), row.Name)))
 			.IsEquivalentTo(
-				[(1, "Rotten Tomatoes"), (2, "TMDB"), (4, "IMDb"), (5, "Metacritic"), (6, "Letterboxd"), (7, "Trakt"), (8, "MyAnimeList"), (9, "AniList")],
+				[(1, "Rotten Tomatoes®"), (2, "TMDB"), (4, "IMDb"), (5, "Metacritic"), (6, "Letterboxd"), (7, "Trakt"), (8, "MyAnimeList"), (9, "AniList")],
 				CollectionOrdering.Matching
 			);
 		await Assert.That(explanation.Note).IsEqualTo(VotesNote.UnvotedTitlesFail);
@@ -55,7 +55,7 @@ public class VotesExplanationTests
 	{
 		var explanation = VotesExplanation.For(new RatingStrategy(new OrderedRating()), isOwn: false, Everything);
 
-		await Assert.That(explanation.UnvotedLine).IsEqualTo("A title whose first rating is Rotten Tomatoes or Metacritic has no votes and fails this rule.");
+		await Assert.That(explanation.UnvotedLine).IsEqualTo("A title whose first rating is Rotten Tomatoes® or Metacritic has no votes and fails this rule.");
 	}
 
 	[Test]
@@ -65,8 +65,8 @@ public class VotesExplanationTests
 
 		var explanation = VotesExplanation.For(new RatingStrategy(averaged), isOwn: false, Everything);
 
-		await Assert.That(explanation.Lead).IsEqualTo("This feed's rating averages Rotten Tomatoes only:");
-		await Assert.That(explanation.Rows.Select(row => row.Name)).IsEquivalentTo(["Rotten Tomatoes"]);
+		await Assert.That(explanation.Lead).IsEqualTo("This feed's rating averages Rotten Tomatoes® only:");
+		await Assert.That(explanation.Rows.Select(row => row.Name)).IsEquivalentTo(["Rotten Tomatoes®"]);
 		await Assert.That(explanation.Note).IsEqualTo(VotesNote.EveryTitleFails);
 	}
 

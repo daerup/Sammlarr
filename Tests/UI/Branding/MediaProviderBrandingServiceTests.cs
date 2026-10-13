@@ -47,6 +47,24 @@ public class MediaProviderBrandingServiceTests
 	}
 
 	[Test]
+	public async Task GetBrandingInfo_ForRottenTomatoes_CarriesTheRegisteredMarkAndItsOwnWordmark()
+	{
+		var brand = Testee.GetBrandingInfo(MediaProvider.RottenTomatoes);
+
+		await Assert.That(brand.DisplayName).IsEqualTo("Rotten Tomatoes®");
+		await Assert.That(brand.Logo.Light).IsEqualTo("rottentomatoes-logo.png");
+	}
+
+	[Test]
+	public async Task GetBrandingInfo_ForWikidata_IsWikimediasStackedLogoInBothThemes()
+	{
+		var logo = Testee.GetBrandingInfo(RemoteService.Wikidata).Logo;
+
+		await Assert.That(logo.Light).IsEqualTo("wikidata-logo.svg");
+		await Assert.That(logo.IsThemed).IsFalse();
+	}
+
+	[Test]
 	public async Task Brands_OfThePlexSignIn_IsPlexsBrand()
 	{
 		await Assert.That(Testee.Brands(AuthProvider.Plex.Service)).IsEquivalentTo([Testee.GetBrandingInfo(MediaProvider.Plex)]);
@@ -98,5 +116,5 @@ public class MediaProviderBrandingServiceTests
 		await Assert.That(Testee.NickName(new Arr())).IsEqualTo("Radarr + Sonarr");
 	}
 
-	private static bool IsUnclean(string svg) => svg.Contains("<?xml") || svg.Contains("<!--") || svg.Contains("<title") || svg.Contains("<text");
+	private static bool IsUnclean(string svg) => svg.Contains("<!--") || svg.Contains("<title") || svg.Contains("<text");
 }

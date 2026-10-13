@@ -43,7 +43,7 @@ public class MediaProviderBrandingService
 				"Wikidata",
 				"#006699",
 				new BrandArt("wikidata-square.svg"),
-				new BrandArt("wikidata-logo-light.svg", "wikidata-logo-dark.svg"),
+				new BrandArt("wikidata-logo.svg") { Scale = 1.8 },
 				new BrandTile(MutedTile, new BrandArt("wikidata-square.svg"), 70)
 			),
 			RemoteService.Radarr => new(
@@ -123,11 +123,11 @@ public class MediaProviderBrandingService
 				new BrandTile(OwnTile, new BrandArt("imdb-tile.svg"), 100)
 			),
 			MediaProvider.RottenTomatoes => new(
-				"Rotten Tomatoes",
-				"Rotten Tomatoes",
+				"Rotten Tomatoes®",
+				"Rotten Tomatoes®",
 				"#FA320A",
 				new BrandArt("rottentomatoes-square.svg"),
-				new BrandArt("rottentomatoes-square.svg"),
+				new BrandArt("rottentomatoes-logo.png"),
 				new BrandTile(MutedTile, new BrandArt("rottentomatoes-square.svg"), 70)
 			),
 			MediaProvider.Tvdb => new(

@@ -15,7 +15,21 @@ internal static class RatingTexts
 
 	public const string StoredFooter = "Browse only has the ratings Sammlarr stores for this title; opening it loads the rest.";
 
-	public static string Name(RatingSource source) => source.GetDescription();
+	public static string Name(RatingSource source)
+	{
+		return source switch
+		{
+			RatingSource.RottenTomatoesCritics => "Rotten Tomatoes® critics",
+			RatingSource.RottenTomatoesAudience => "Rotten Tomatoes® audience",
+			RatingSource.Tmdb
+			or RatingSource.Imdb
+			or RatingSource.Metacritic
+			or RatingSource.Letterboxd
+			or RatingSource.Trakt
+			or RatingSource.MyAnimeList
+			or RatingSource.AniList => source.GetDescription(),
+		};
+	}
 
 	public static string Short(RatingSource source)
 	{
@@ -39,8 +53,8 @@ internal static class RatingTexts
 		{
 			RatingSource.Tmdb => "TMDB: its users rate from 0.5 to 10 in half steps, and the average counts as it reads (8.6 is 8.6).",
 			RatingSource.Imdb => "IMDb: its users rate from 1 to 10, never 0, so an IMDb rating is at least 1.0. It counts as it reads (8.2 is 8.2).",
-			RatingSource.RottenTomatoesCritics => "Rotten Tomatoes critics: the share of critics who liked it, 0 to 100%, counted as a tenth (95% is 9.5).",
-			RatingSource.RottenTomatoesAudience => "Rotten Tomatoes audience: the share of users who liked it, 0 to 100%, counted as a tenth (95% is 9.5).",
+			RatingSource.RottenTomatoesCritics => "Rotten Tomatoes® critics: the share of critics who liked it, 0 to 100%, counted as a tenth (95% is 9.5).",
+			RatingSource.RottenTomatoesAudience => "Rotten Tomatoes® audience: the share of users who liked it, 0 to 100%, counted as a tenth (95% is 9.5).",
 			RatingSource.Metacritic => "Metacritic: the Metascore, a weighted average of critics' reviews from 0 to 100, counted as a tenth (73 is 7.3).",
 			RatingSource.Letterboxd => "Letterboxd: its users rate from half a star to five stars, counted twice (3.9 stars is 7.8).",
 			RatingSource.Trakt => "Trakt: its users' average as a share, 0 to 100%, counted as a tenth (84% is 8.4).",

@@ -28,8 +28,8 @@ public class FeedVotesPopoverTests : BunitContext
 		var rows = cut.WaitForElements(".votes-pop-row");
 		await Assert
 			.That(rows.Select(row => row.TextContent.Trim()))
-			.IsEquivalentTo(["TMDB", "IMDb", "Rotten Tomatoesno votes", "Metacriticno votes", "Letterboxd", "Trakt", "MyAnimeList", "AniList"]);
-		await Assert.That(cut.Find(".votes-pop").TextContent).Contains("A title only Rotten Tomatoes or Metacritic rates has no votes and fails this rule.");
+			.IsEquivalentTo(["TMDB", "IMDb", "Rotten Tomatoes®no votes", "Metacriticno votes", "Letterboxd", "Trakt", "MyAnimeList", "AniList"]);
+		await Assert.That(cut.Find(".votes-pop").TextContent).Contains("A title only Rotten Tomatoes® or Metacritic rates has no votes and fails this rule.");
 	}
 
 	[Test]
@@ -40,7 +40,7 @@ public class FeedVotesPopoverTests : BunitContext
 
 		await cut.Find("button.field-segment").ClickAsync();
 
-		await Assert.That(cut.WaitForElement(".votes-pop-warning").TextContent).StartsWith("Every title Rotten Tomatoes rates fails this rule");
+		await Assert.That(cut.WaitForElement(".votes-pop-warning").TextContent).StartsWith("Every title Rotten Tomatoes® rates fails this rule");
 	}
 
 	private sealed class Harness : ComponentBase

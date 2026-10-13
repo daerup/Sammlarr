@@ -30,6 +30,9 @@
 		<Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory=".." />
 	</Target>
 	<ItemGroup>
+		<EmbeddedResource Include="wwwroot\providers\credits.json" LogicalName="UI.providers.credits.json" />
+	</ItemGroup>
+	<ItemGroup>
 		<Content Update="Shared\PaginationControls.razor.css">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
