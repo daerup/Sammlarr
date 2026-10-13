@@ -17,7 +17,7 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 
 | # | Title | Status | Date |
 |---|-------|--------|------|
-| 0001 | [Drive deployment from the Aspire AppHost](0001-drive-deployment-from-the-aspire-apphost.md) | accepted | 2026-09-02 |
+| 0001 | [Drive deployment from the Aspire AppHost](0001-drive-deployment-from-the-aspire-apphost.md) | accepted, push path superseded by [0019](0019-build-and-push-the-image-with-docker-actions.md) | 2026-09-02 |
 | 0002 | [Split presentation from the host](0002-split-presentation-from-the-host.md) | accepted | 2026-09-06 |
 | 0003 | [Use EF Core migrations for the schema](0003-use-ef-core-migrations-for-the-schema.md) | accepted | 2026-09-06 |
 | 0004 | [Store all state in one SQLite file](0004-store-all-state-in-one-sqlite-file.md) | accepted | 2026-09-06 |
@@ -35,3 +35,4 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0016 | [Live runs pull from an in-memory trace](0016-live-runs-pull-from-an-in-memory-trace.md) | accepted | 2026-10-08 |
 | 0017 | [Pace remote calls on lanes with limits as published](0017-pace-remote-calls-on-lanes-with-limits-as-published.md) | accepted | 2026-10-10 |
 | 0018 | [Claim identity before hand-out from identity keys only](0018-claim-identity-before-hand-out-from-identity-keys-only.md) | accepted | 2026-10-10 |
+| 0019 | [Build and push the image with Docker's actions, compose with Aspire](0019-build-and-push-the-image-with-docker-actions.md) | accepted | 2026-10-13 |

@@ -51,36 +51,35 @@ SQLite file (`Data Source=sammlarr.db`) is created in the working directory.
 
 === Infrastructure Level 2
 
-The container deployment is not hand-authored. The AppHost is the source of truth
+The compose file is not hand-written. The AppHost is its source
 (link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0001-drive-deployment-from-the-aspire-apphost.md[ADR 0001]):
-`aspire publish` generates the Docker Compose artifact from the same model that runs the app in
-development, and `aspire do push` builds the Web image from `Web/Dockerfile` and pushes it to the
-GitHub Container Registry (`ghcr.io/daerup/sammlarr`). The dev-only dashboard is omitted from the
-published compose; telemetry goes wherever `OTEL_EXPORTER_OTLP_ENDPOINT` points, or to the console
-when it is unset (see <<section-concepts>>).
+`aspire publish` generates it from the same model that runs the app in development, naming the released image
+`ghcr.io/daerup/sammlarr:X.Y.Z` with the `/data` volume and `restart: unless-stopped`. The image itself is built
+from `Web/Dockerfile` and pushed to the GitHub Container Registry by `release.yml` with Docker's actions
+(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0019-build-and-push-the-image-with-docker-actions.md[ADR 0019]).
+The dev-only dashboard is omitted from the published compose; telemetry goes wherever
+`OTEL_EXPORTER_OTLP_ENDPOINT` points, or to the console when it is unset (see <<section-concepts>>).
 
 [mermaid]
 ....
 flowchart LR
   user([User])
   subgraph compose["generated compose (aspire publish)"]
-    web["web container<br/>ghcr.io/daerup/sammlarr"]
+    web["sammlarr service<br/>ghcr.io/daerup/sammlarr"]
     vol[("/data volume<br/>sammlarr.db + dp-keys")]
     web -->|file| vol
   end
-  user -->|"http :8080"| web
+  user -->|"http :6769"| web
   web -.->|"OTLP (optional)"| backend["telemetry backend"]
 ....
 
-The container runs the single Web process on port `8080`. One volume mounted at `/data` holds both
-the SQLite database and the data-protection key ring, so application data and stored secrets
+The container runs the single Web process on port `6769`, the same port as the dev run. One volume mounted
+at `/data` holds both the SQLite database and the data-protection key ring, so application data and stored secrets
 survive a restart; the keys use a stable application name so they still decrypt. Provider
 selection and secrets are read from the database as before.
 
-NOTE: The AppHost models this deployment, but it cannot be published yet, `Web/Dockerfile` does not
-exist. The Dockerfile, the GHCR push and the signing and SBOM steps are owned by the
-release-engineering work (see <<section-technical-risks>>). That Dockerfile must make `/data`
-writable by the container user, or the app cannot write the database and keys.
+The image is a chiseled ASP.NET runtime with ICU and tzdata. It runs as uid 1654, owns `/data`, and checks its own
+health with `dotnet Web.dll healthcheck`.
 
 Because the queues and the database are in-process and file-based, a deployment is a single
 instance. There is no horizontal scale-out today; a second replica would contend on the same
