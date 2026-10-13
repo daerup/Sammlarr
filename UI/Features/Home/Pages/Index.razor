@@ -237,7 +237,7 @@ else
     {
         var answer = await DialogService.ConfirmAsync(
             $"Cancel {row.Name}?",
-            "It leaves the queue without running. You can start it again at any time, and schedules keep running as usual.",
+            row.CancelNote,
             new ConfirmDialogOptions { ConfirmText = "Cancel it", CancelText = "Keep it", Destructive = true }
         );
         if (!answer.Confirmed)

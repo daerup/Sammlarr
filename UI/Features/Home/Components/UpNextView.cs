@@ -24,11 +24,18 @@ public sealed record UpNextRow(string Name, string Detail, string When, UpNextKi
 
 	public Optional<JobId> Job { get; init; } = new None();
 
+	public string CancelNote { get; init; } = string.Empty;
+
 	public bool CanCancel => Job.IsSome() && Kind is UpNextKind.Queued or UpNextKind.Waiting;
 }
 
 internal static class UpNextView
 {
+	private const string StartsAgainWhenAsked = "It leaves the queue without running. You can start it again at any time, and schedules keep running as usual.";
+
+	private const string StartsAgainByItself =
+		"It leaves the queue without running. It starts again by itself after the next feed run, a new key or a Plex sign-in.";
+
 	internal static IReadOnlyList<UpNextRow> InTheQueue(
 		QueueSnapshot queue,
 		IReadOnlyDictionary<FeedId, string> feedNames,
@@ -85,6 +92,7 @@ internal static class UpNextView
 		var href = Href(job.Request, feedNames);
 		var brands = Brands(job.Request, feedBrands, sinkBrands);
 		var deleted = Deleted(job.Request, feedNames);
+		var note = CancelNote(job.Request);
 		if (job.State is JobState.Running)
 		{
 			return new UpNextRow(name, "running now", "running", UpNextKind.Running, href, deleted) { Job = Some.Of(job.Id), Brands = brands };
@@ -96,9 +104,15 @@ internal static class UpNextView
 				RunsAt = Some.Of(job.RunAfter),
 				Job = Some.Of(job.Id),
 				Brands = brands,
+				CancelNote = note,
 			};
 		}
-		return new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, deleted) { Job = Some.Of(job.Id), Brands = brands };
+		return new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, deleted)
+		{
+			Job = Some.Of(job.Id),
+			Brands = brands,
+			CancelNote = note,
+		};
 	}
 
 	private static IReadOnlyList<BrandingInfo> Brands(
@@ -114,6 +128,8 @@ internal static class UpNextView
 			_ => [],
 		};
 	}
+
+	private static string CancelNote(IJobRequest request) => request is FillDetails ? StartsAgainByItself : StartsAgainWhenAsked;
 
 	private static string Waiting(IJobRequest request) => request is SyncWantlist ? "waiting for grace period" : "waiting";
 

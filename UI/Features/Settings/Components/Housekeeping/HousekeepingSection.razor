@@ -27,7 +27,6 @@ else
             <p class="mt-0.5 text-xs text-muted-foreground" data-testid="housekeeping-size" data-bloated="@(HousekeepingView.Bloated(overview.Size) ? "true" : "false")">
                 <b class="@SizeClass(overview.Size)">@HousekeepingView.Size(overview.Size.OnDisk)</b> on disk,
                 <b class="@SizeClass(overview.Size)">@HousekeepingView.Size(overview.Size.Data)</b> of it data@(Compacted(overview, now)).
-                Nobody starts the tasks; each row is its last run.
             </p>
         </div>
 
