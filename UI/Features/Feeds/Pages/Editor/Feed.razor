@@ -63,7 +63,7 @@
                          Text="Retry"
                          OnClick="() => ApplyAsync()"
                          Disabled="!_config.IsTestable"/>
-            @if (HasChanged)
+            @if (OffersSaveAfterFailure)
             {
                 <HoverButton Preset="HoverButtonPreset.Success"
                              Icon="save"
@@ -170,6 +170,7 @@
     private bool IsSettling => _isApplying && !_previewStatus.IsLoading && !_isSaving;
 
     private bool CanSave => _config.IsValid && HasChanged;
+    private bool OffersSaveAfterFailure => HasChanged && (_savedFeedId is not null || !_previewStatus.IsListMissing);
 
     private bool ShowTestButton => !_previewStatus.HasResults && !_previewStatus.IsLoading && !_isSaving;
     private bool ShowApplyButton => _previewStatus.HasResults && HasPendingChanges && !_isSaving;

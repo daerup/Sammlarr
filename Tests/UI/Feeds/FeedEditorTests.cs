@@ -217,6 +217,31 @@ public class FeedEditorTests : BunitContext
 			.IsEquivalentTo([draft]);
 	}
 
+	[Test]
+	public async Task Test_ForANewFeedWhoseListIsMissing_OffersRetryButNoSave()
+	{
+		_provider.GetFeedItemsAsync(Any(), Any(), Any()).Returns((identifier, _, _) => throw new FeedIdentifierNotFoundException(identifier));
+		var cut = RenderEditor(edit: false);
+		await ChangeAsync(cut, config => config with { Name = "Comedy", Provider = FeedProvider.Mdblist, Identifier = "hdlists/gone" });
+
+		await ClickAsync(cut, "Test");
+
+		cut.WaitForState(() => cut.FindAll("button").Any(button => button.TextContent.Trim() == "Retry"));
+		await Assert.That(SaveButtons(cut)).IsEmpty();
+	}
+
+	[Test]
+	public async Task Load_ForAnExistingFeedWhoseListIsMissing_StillOffersSaveForAChange()
+	{
+		_provider.GetFeedItemsAsync(Any(), Any(), Any()).Returns((identifier, _, _) => throw new FeedIdentifierNotFoundException(identifier));
+		var cut = RenderEditor();
+		cut.WaitForState(() => cut.FindAll("button").Any(button => button.TextContent.Trim() == "Retry"));
+
+		await ChangeAsync(cut, config => config with { IsEnabled = false });
+
+		await Assert.That(SaveButtons(cut)).HasSingleItem();
+	}
+
 	private IReadOnlyList<ToastData> Toasts => Services.GetRequiredService<ToastService>().Toasts;
 
 	private IRenderedComponent<IComponent> RenderEditor(bool edit = true)
