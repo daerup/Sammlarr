@@ -17,7 +17,6 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
 		<PackageReference Include="WolverineFx" />
-		<PackageReference Include="WolverineFx.RuntimeCompilation" />
 		<PackageReference Include="WolverineFx.Sqlite" />
 	</ItemGroup>
 </Project>

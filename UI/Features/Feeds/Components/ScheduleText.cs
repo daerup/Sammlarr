@@ -5,8 +5,12 @@ namespace UI.Features.Feeds.Components;
 
 internal static class ScheduleText
 {
-	internal static string Describe(FeedRunTrigger schedule) =>
-		schedule is Scheduled scheduled ? ExpressionDescriptor.GetDescription(scheduled.ToString()) : "Manual";
+	private static readonly Options English = new() { Locale = "en" };
+
+	internal static string Describe(FeedRunTrigger schedule)
+	{
+		return schedule is Scheduled scheduled ? ExpressionDescriptor.GetDescription(scheduled.ToString(), English) : "Manual";
+	}
 
 	internal static string Ago(DateTimeOffset moment, DateTimeOffset now)
 	{

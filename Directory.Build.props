@@ -3,6 +3,8 @@
 		<RestoreEnablePackagePruning>false</RestoreEnablePackagePruning>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<PublishDocumentationFiles>false</PublishDocumentationFiles>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<NoWarn>$(NoWarn);CS1591</NoWarn>
 		<WarningsAsErrors>$(WarningsAsErrors);CS8509</WarningsAsErrors>
 		<Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>

@@ -99,6 +99,16 @@ Every subsystem exposes an `IServiceModule`. Register via `services.AddModule<TM
 
 For provider-specific implementations (e.g., multiple `IMediaRecommendationService`s), use **keyed** registrations: `AddKeyedScoped<IFoo, FooImpl>(ProviderEnum.X)`.
 
+## Wolverine handlers (generated code)
+
+Wolverine runs in `TypeLoadMode.Static`: it loads pre-generated handler code from `Messaging/Internal/Generated` (committed; the release image carries no Roslyn). After adding, removing or changing a handler, a message type, a handler's return type, middleware or a policy, regenerate with the app stopped:
+
+```powershell
+Remove-Item -Recurse Messaging/Internal/Generated; dotnet run --project Web -- codegen write
+```
+
+`GeneratedHandlersTests` (Architecture tier) fails when a handler class is missing from the generated registry; a new message type on an existing handler fails at host start.
+
 ## Options
 
 Configuration types implement `IOptionsSection` and get registered via the `Shared.Options.Generator` Roslyn source generator. Add a new `record XOptions : IOptionsSection` in `Shared/Options/` — the generator handles binding/registration automatically. Do not call `services.Configure<XOptions>` by hand.

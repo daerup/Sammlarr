@@ -70,6 +70,15 @@ jobs:
           cache-to: type=gha,mode=max
           outputs: type=image,push=true,rewrite-timestamp=true
 
+      - name: Image size budget
+        env:
+          IMAGE: ghcr.io/daerup/sammlarr@${{ steps.build.outputs.digest }}
+          BUDGET_MB: '101'
+        run: |
+          size=$(docker buildx imagetools inspect "$IMAGE" --raw | jq '[.layers[].size] | add')
+          echo "Compressed image: $((size / 1048576)) MB, budget ${BUDGET_MB} MB"
+          test "$size" -le $((BUDGET_MB * 1048576))
+
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json

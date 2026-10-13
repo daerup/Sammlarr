@@ -13,7 +13,7 @@ COPY . .
 RUN --mount=type=cache,id=sammlarr-nuget,target=/root/.nuget/packages \
     --mount=type=cache,id=sammlarr-npm,target=/root/.npm \
     dotnet publish Web/Web.csproj -c Release -a $TARGETARCH --self-contained false -o /app \
-        -p:MinVerVersionOverride=$VERSION -p:ExcludeStaging=true -p:ContinuousIntegrationBuild=true
+        -p:MinVerVersionOverride=$VERSION -p:ExcludeStaging=true -p:ContinuousIntegrationBuild=true -p:DebugType=none
 RUN mkdir -p /data
 
 FROM mcr.microsoft.com/dotnet/aspnet:11.0-resolute-chiseled-extra@sha256:5c0161c2b5eb6bbbb8c775d0ac1be38598396261f6c54edc79308ac30d8229c7
