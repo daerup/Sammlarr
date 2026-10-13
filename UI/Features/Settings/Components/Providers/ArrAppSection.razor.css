@@ -39,33 +39,17 @@
     gap: 16px 24px;
 }
 
-.arr-app-switch {
+.arr-app-moments {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
-    gap: 12px;
-}
-
-.arr-app-switch-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.arr-app-switch-name {
-    font-size: 0.84375rem;
-    font-weight: 500;
-    line-height: 1.5rem;
-}
-
-.arr-app-switch-note {
-    font-size: 0.75rem;
-    line-height: 1.4;
-    color: var(--muted-foreground);
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 16px 24px;
 }
 
 @media (max-width: 640px) {
     .arr-app,
-    .arr-app-anime-pair {
+    .arr-app-anime-pair,
+    .arr-app-moments {
         grid-template-columns: minmax(0, 1fr);
     }
 }

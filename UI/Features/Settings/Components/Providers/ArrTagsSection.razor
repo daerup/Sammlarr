@@ -237,7 +237,7 @@
         return change switch
         {
             TagChange.Prefix => $"Radarr and Sonarr keep the old {Scheme.Root} tags. Sammlarr stops recognising those titles, so the next sync takes them off every wantlist.",
-            TagChange.Protection => $"Titles carrying {Scheme.ProtectedTag} stop being protected: taking one off every wantlist then removes it from Radarr or Sonarr. Its files stay.",
+            TagChange.Protection => $"Titles carrying {Scheme.ProtectedTag} stop being protected: taking one off every wantlist then removes it from Radarr or Sonarr, its files kept or deleted as that app is set.",
         };
     }
 
