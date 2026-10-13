@@ -1,19 +1,13 @@
 using System.Net;
-using API.Http;
 using API.Mdblist;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
-using Contracts.Providers;
-using Contracts.Usage;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Shared.Concurrency;
-using Shared.DI;
 using Shared.Options;
 using TestInfrastructure;
-using TUnit.Mocks.Http;
 
 namespace API.Tests.Mdblist;
 
@@ -44,8 +38,8 @@ public class MdblistClientTests
 	public async Task SendAsync_ForAnyRequest_RecordsTheRequestsMdblistHasLeft()
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().Respond(HttpStatusCode.OK).WithHeader("x-ratelimit-remaining", "962").WithHeader("x-ratelimit-reset", Reset);
-		using var host = Host(handler);
+		handler.OnAnyRequest().Respond(HttpStatusCode.OK).WithHeader("x-ratelimit-remaining", "962").WithHeader("x-ratelimit-reset", MdblistApis.Reset);
+		using var host = MdblistApis.Module(handler);
 
 		using var response = await host.Services.GetRequiredService<MdblistClient>().SendAsync(HttpMethod.Get, "lists/1/items", Key);
 
@@ -64,8 +58,8 @@ public class MdblistClientTests
 			.Respond(HttpStatusCode.TooManyRequests)
 			.WithHeader("Retry-After", "3600")
 			.WithHeader("x-ratelimit-remaining", "0")
-			.WithHeader("x-ratelimit-reset", Reset);
-		using var host = Host(handler);
+			.WithHeader("x-ratelimit-reset", MdblistApis.Reset);
+		using var host = MdblistApis.Module(handler);
 		var testee = host.Services.GetRequiredService<MdblistClient>();
 
 		using var response = await testee.SendAsync(HttpMethod.Get, "lists/1/items", Key);
@@ -79,7 +73,7 @@ public class MdblistClientTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.OK);
-		using var host = Host(handler);
+		using var host = MdblistApis.Module(handler);
 		host.Services.GetRequiredService<MdblistBudget>().Record(Key.Value, Spent());
 		using var title = LanePriority.Next(LaneClass.Title).Enter();
 
@@ -96,7 +90,7 @@ public class MdblistClientTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[]}""");
-		using var host = Host(handler);
+		using var host = MdblistApis.Module(handler);
 		host.Services.GetRequiredService<MdblistBudget>().Record(Key.Value, Spent());
 		using var page = LanePriority.Next(LaneClass.Source).Enter();
 
@@ -117,32 +111,5 @@ public class MdblistClientTests
 		await testee.SendAsync(HttpMethod.Get, "lists/1/items", new TestApiKey(ApiKeyProvider.Mdblist, new Faker().Random.AlphaNumeric(32)));
 
 		apiKeys.ReportRejected(ApiKeyProvider.Mdblist).WasCalled(Times.Once);
-	}
-
-	private static string Reset => $"{DateTimeOffset.UnixEpoch.AddDays(2).ToUnixTimeSeconds()}";
-
-	private static IHost Host(MockHttpHandler handler)
-	{
-		return new HostBuilder()
-			.ConfigureServices(services =>
-			{
-				services.AddLogging();
-				services.AddSingleton(
-					new MdblistOptions
-					{
-						BaseUrl = BaseUrl,
-						Http = new ProviderHttpOptions { AttemptTimeoutSeconds = 1 },
-					}
-				);
-				services.AddModule<HttpModule>();
-				services.AddSingleton(MdblistApis.Clock());
-				services.AddSingleton(IProviderRateLimitReporter.Mock().Object);
-				services.AddSingleton(IFeedRunUsage.Mock().Object);
-				services.AddSingleton(IApiKeyService.Mock().Object);
-				services.AddSingleton(ICurrentUser.Mock().Object);
-				new MdblistModule().RegisterServices(services);
-				services.AddHttpClient<MdblistClient>().ConfigurePrimaryHttpMessageHandler(() => handler);
-			})
-			.Build();
 	}
 }

@@ -25,11 +25,17 @@ public class MdblistModule : IServiceModule
 		services.AddScoped<MdblistTitles>();
 		services.AddScoped<IBurstPrimer>(provider => provider.GetRequiredService<MdblistTitles>());
 		services.AddSingleton<MdblistBudget>();
+		services.AddSingleton<MdblistKeyFlights>();
 		services.AddKeyedSingleton<ILaneQuota>(RemoteService.Mdblist, (provider, _) => provider.GetRequiredService<MdblistBudget>());
-		services
-			.AddHttpClient<MdblistClient>()
+		Answered(services.AddHttpClient<MdblistClient>());
+		Answered(services.AddHttpClient(MdblistClient.Unauthenticated));
+		services.AddScoped<IMdblistRequestsLeft, MdblistRequestsLeft>();
+	}
+
+	private static void Answered(IHttpClientBuilder client)
+	{
+		client
 			.AddHttpMessageHandler(provider => new MdblistBudgetHandler(provider.GetRequiredService<MdblistBudget>()))
 			.AddHttpMessageHandler(provider => new MdblistAnswerCheck(provider.GetRequiredService<ILogger<MdblistAnswerCheck>>()));
-		services.AddScoped<IMdblistRequestsLeft, MdblistRequestsLeft>();
 	}
 }

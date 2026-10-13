@@ -1,13 +1,18 @@
 using System.Net;
+using API.Http;
 using API.Http.Lanes;
 using API.Mdblist;
 using Contracts;
 using Contracts.Auth;
 using Contracts.Identity;
+using Contracts.Providers;
+using Contracts.Usage;
 using Domain.Auth;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shared.DI;
 using Shared.Options;
 using TestInfrastructure;
 using TUnit.Mocks.Http;
@@ -35,7 +40,35 @@ internal static class MdblistApis
 		return new(TimeProvider.System, [new RemoteSettings(RemoteService.Mdblist, Options)], new ServiceCollection().BuildServiceProvider());
 	}
 
+	internal static string Reset => $"{DateTimeOffset.UnixEpoch.AddDays(2).ToUnixTimeSeconds()}";
+
 	internal static MdblistBudget Budget() => new(Clock(), Options, NullLogger<MdblistBudget>.Instance);
+
+	internal static IHost Module(MockHttpHandler handler)
+	{
+		return new HostBuilder()
+			.ConfigureServices(services =>
+			{
+				services.AddLogging();
+				services.AddSingleton(
+					new MdblistOptions
+					{
+						BaseUrl = Options.BaseUrl,
+						Http = new ProviderHttpOptions { AttemptTimeoutSeconds = 1 },
+					}
+				);
+				services.AddModule<HttpModule>();
+				services.AddSingleton(Clock());
+				services.AddSingleton(IProviderRateLimitReporter.Mock().Object);
+				services.AddSingleton(IFeedRunUsage.Mock().Object);
+				services.AddSingleton(IApiKeyService.Mock().Object);
+				services.AddSingleton(ICurrentUser.Mock().Object);
+				new MdblistModule().RegisterServices(services);
+				services.AddHttpClient<MdblistClient>().ConfigurePrimaryHttpMessageHandler(() => handler);
+				services.AddHttpClient(MdblistClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(() => handler);
+			})
+			.Build();
+	}
 
 	internal static IDateTimeProvider Clock()
 	{
