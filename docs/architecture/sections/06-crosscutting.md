@@ -293,17 +293,16 @@ State is one SQLite file through EF Core ([ADR 0004](../../adr/0004-store-all-st
 [ADR 0003](../../adr/0003-use-ef-core-migrations-for-the-schema.md)).
 
 - Repositories create a context per operation from `IDbContextFactory<SammlarrDbContext>` (the context is `internal`).
-- `SqlitePragmaInterceptor` sets WAL, `synchronous=NORMAL`, a 5-second busy timeout and an 8 MB `journal_size_limit`.
-  Wolverine's connections set `mmap_size` 0, since Windows cannot truncate a mapped file; Wolverine expires its own
-  dead letters, and housekeeping leaves its tables alone.
+- `SqlitePragmaInterceptor` sets WAL and a 5-second busy timeout. Wolverine expires its own dead letters, and
+  housekeeping leaves its tables alone.
 - `IDatabaseFile.CompactAsync` truncates the log and vacuums when a tenth of the pages are free, after a dataset load
   and after the housekeeping pass.
 - `DbInitializer` applies the migrations in `DB/Migrations` at start-up; `UseSeeding` inserts the provider-config row.
   Enums are stored as names, `DateTimeOffset` as binary; `SaveChanges` stamps audit timestamps and the owner.
 
 The `Housekeeping` ticker runs `HousekeepingPass` nightly at 03:00 (`HousekeepingSchedule`), or on demand from
-Settings › Housekeeping. It takes the job runner's turn (`JobTurn`), runs each `IHousekeepingStep` in order, saves its
-report (`HousekeepingReports`) after each step and compacts the file; a failing step stops the pass. The windows are
+Settings › Housekeeping. It takes the job runner's turn (`JobTurn`), runs each step in order, saves its report after each
+step and compacts the file; a failing step stops the pass. The windows are
 `Sammlarr:Housekeeping` settings, except the fixed 30 days:
 
 | Step | Removes |
@@ -311,7 +310,7 @@ report (`HousekeepingReports`) after each step and compacts the file; a failing 
 | `RunHistory` | a run's titles, calls and answer times after `RunHistoryDays` (the run keeps its counts) |
 | `UsageStats` | usage rows and deleted feeds' names after `UsageDays` |
 | `CachedDetails` | details not refreshed for `FreshDays + DetailsUnusedDays` |
-| `TitleIds` | a title and its ids once it has had no details for `IdsUnusedDays - DetailsUnusedDays` (from `Media.DetailsTrimmedAt`, which every details removal stamps), or `IdsUnusedDays` after it was added if it never had details |
+| `TitleIds` | a title and its ids once it has had no details for `IdsUnusedDays - DetailsUnusedDays` (from `Media.DetailsTrimmedAt`), or `IdsUnusedDays` after it was added if it never had any |
 | `DuplicateTitles` | settles due stored-twice notes |
 | `SettledJobs`, `ScheduleEntries` | finished jobs, TickerQ occurrences and one-off runs after 30 days |
 
@@ -411,13 +410,11 @@ report (`ProviderRateLimitReporter`) uses `IMessagePublisher` directly.
 
 ## Usage metrics and Settings › Usage
 
-Every call to a service is counted with the built-in instruments
-([ADR 0014](../../adr/0014-count-provider-calls-with-the-built-in-instruments.md)): the retry pipeline measures each
-call (`resilience.polly.pipeline.duration`), HttpClient each attempt (`http.client.request.duration`).
+Every call to a service is counted with the built-in instruments, the retry pipeline per call and HttpClient per
+attempt ([ADR 0014](../../adr/0014-count-provider-calls-with-the-built-in-instruments.md)).
 
-- `UsageStampHandler` stamps the `RemoteService` and cause, `UsageTagsHandler` tags each attempt, and
-  `UsageMeteringEnricher` adds the outcome (`Answered`, `AnsweredAfter429`, `GaveUpOn429`, `Failed`, `Cancelled`). A
-  call that never got a lane permit is not counted.
+- Handlers stamp each call with its `RemoteService`, cause and outcome (`Answered`, `AnsweredAfter429`, `GaveUpOn429`,
+  `Failed`, `Cancelled`). A call that never got a lane permit is not counted.
 - The cause is an ambient mark (`UsageCauses.Mark`) set at each entry point; the outermost wins, so titles shown inside
   a feed run count for the run. `UsageCause`: `FeedRun`, `WantlistSync` (the sync dialog, adding from a page, a sink
   switch, removing a person), `Dataset`, `Search`, `Browse`, `ShowingTitles` (including the rating breakdown's id

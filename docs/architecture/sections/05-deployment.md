@@ -72,5 +72,5 @@ are not configuration: they live in the database, the keys and sign-ins encrypte
 | `Sammlarr__Accounts__SetupCode` | unset | The code `/setup` asks for before the first admin; unset, Sammlarr makes one and logs it. |
 | `Sammlarr__Accounts__ResetAdminPassword` | unset | Resets an admin's Sammlarr password at startup; remove it afterwards. |
 
-The job queue, the TickerQ schedule and the Wolverine queue share the one file and process, so a deployment is a single
-instance ([Risks and Technical Debt](08-risks-technical-debt.md)).
+A deployment is a single instance: the queues share the one file and process
+([Risks and Technical Debt](08-risks-technical-debt.md)).
