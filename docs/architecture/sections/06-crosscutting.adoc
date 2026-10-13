@@ -270,9 +270,9 @@ A lane admits its waiting attempts by class, then by order within the class:
 |===
 
 A 429 with `Retry-After` blocks the lane until then; a 429 without one halves the lane's rate, at most once per window,
-and each window without a 429 gives one request back (a lane with no window pauses for a second). `FailuresToDown`
-failed attempts in a row (a 5xx, a 408, a timeout, a broken connection; 4 by default) take the lane down for
-`DownSeconds` (30 by default), and then one probe decides. Waiting for room in a window is never refused. A down lane refuses every attempt at once,
+and each window without a 429 gives back a tenth of the window's requests, at least one (a lane with no window pauses
+for a second). `FailuresToDown` failed attempts in a row (a 5xx, a 408, a timeout, a broken connection; 4 by default)
+take the lane down for `DownSeconds` (30 by default), and then one probe decides. Waiting for room in a window is never refused. A down lane refuses every attempt at once,
 and a block or a quota reserve that outlasts the attempt's patience, its service's `MaxWait`, refuses it at once; either
 way the attempt fails with `LaneRefusedException` and nothing is sent. A quota is a lane's `ILaneQuota`, asked for the class that asks: MDBList's
 budget (`MdblistBudget`) lets list pages through, stops title lookups at the last `MDBList:FeedReserve` requests of the
