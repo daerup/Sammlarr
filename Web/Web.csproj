@@ -43,6 +43,15 @@
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<Content Remove="wwwroot\js\masonry.js" />
 	</ItemGroup>
+	<ItemGroup>
+		<Content Remove="wwwroot\css\app-input.css" />
+	</ItemGroup>
+	<Target Name="DropUnusedBlueprintMap" BeforeTargets="BeforeBuild">
+		<ItemGroup>
+			<StaticWebAsset Remove="@(StaticWebAsset)" Condition="'%(SourceId)' == 'BlazorBlueprint.Components' and ('%(RelativePath)' == 'js/world-map.js' or $([System.String]::new('%(RelativePath)').StartsWith('maps/')))" />
+			<StaticWebAssetEndpoint Remove="@(StaticWebAssetEndpoint)" Condition="$([System.String]::new('%(Identity)').StartsWith('_content/BlazorBlueprint.Components/maps/')) or $([System.String]::new('%(Identity)').StartsWith('_content/BlazorBlueprint.Components/js/world-map.'))" />
+		</ItemGroup>
+	</Target>
 	<Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild" Inputs="@(TailwindInput)" Outputs="$(MSBuildThisFileDirectory)wwwroot\css\app.css">
 		<Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(RepoRoot)" Condition="!Exists('$(RepoRoot)node_modules')" />
 		<Exec Command="npm run css" WorkingDirectory="$(RepoRoot)" />

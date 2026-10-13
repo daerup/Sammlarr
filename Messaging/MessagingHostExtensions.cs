@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using JasperFx.CodeGeneration;
 using JasperFx.CodeGeneration.Model;
 using Messaging.Notifications;
 using Microsoft.Extensions.Configuration;
@@ -26,12 +28,16 @@ public static class MessagingHostExtensions
 
 	private static void Configure(WolverineOptions options, string connectionString)
 	{
+		options.ApplicationAssembly = typeof(MessagingModule).Assembly;
+		options.CodeGeneration.TypeLoadMode = TypeLoadMode.Static;
+		options.CodeGeneration.GeneratedCodeOutputPath = Path.Combine(SourceFolder(), "Internal", "Generated");
 		options.ServiceLocationPolicy = ServiceLocationPolicy.AlwaysAllowed;
 		options.UseSystemTextJsonForSerialization(json => json.Converters.Add(new OptionalJsonConverterFactory()));
 		options.PersistMessagesWithSqlite(new SqliteDataSource(connectionString, new SqlitePragmaSettings { MmapSize = 0 }));
 		options.Durability.DeadLetterQueueExpirationEnabled = true;
 		options.Policies.UseDurableLocalQueues();
-		options.Discovery.IncludeAssembly(typeof(MessagingModule).Assembly);
 		options.Policies.OnException<NotificationDeliveryFailedException>().RetryWithCooldown(NotificationDeliveryRetry.Cooldowns);
 	}
+
+	private static string SourceFolder([CallerFilePath] string file = "") => Path.GetDirectoryName(file)!;
 }

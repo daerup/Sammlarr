@@ -3,6 +3,7 @@ using Core;
 using DB;
 using DB.Scheduling;
 using Domain.Identity;
+using JasperFx;
 using Messaging;
 using Observability;
 using Observability.Diagnostics;
@@ -49,6 +50,13 @@ builder.Services.AddSammlarrScheduling(builder.Configuration);
 builder.Host.UseSammlarrMessaging(builder.Configuration);
 
 var app = builder.Build();
+
+if (args is ["codegen", ..])
+{
+	Environment.ExitCode = await app.RunJasperFxCommands(args);
+	return;
+}
+
 app.UseTickerQ();
 
 app.UseRequestLocalization(BrowserLocalization.CreateOptions());

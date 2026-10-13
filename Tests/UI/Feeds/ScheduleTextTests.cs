@@ -1,3 +1,5 @@
+using System.Globalization;
+using Domain.Feed;
 using UI.Features.Feeds.Components;
 
 namespace UI.Tests.Feeds;
@@ -32,6 +34,16 @@ public class ScheduleTextTests
 		await Assert.That(ScheduleText.AwayExactly(Now.AddSeconds(42), Now)).IsEqualTo("in 42 s");
 		await Assert.That(ScheduleText.AwayExactly(Now.AddHours(1).AddSeconds(5), Now)).IsEqualTo("in 1 hr 0 min 5 s");
 		await Assert.That(ScheduleText.AwayExactly(Now.AddSeconds(-3), Now)).IsEqualTo("due now");
+	}
+
+	[Test]
+	public async Task Describe_InAGermanBrowser_StaysEnglishLikeTheRestOfTheUi()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("de-CH");
+
+		var text = ScheduleText.Describe(new FeedRunTrigger(new Scheduled("0 0 3 * * 1")));
+
+		await Assert.That(text).Contains("only on Monday").And.DoesNotContain("Montag");
 	}
 
 	[Test]

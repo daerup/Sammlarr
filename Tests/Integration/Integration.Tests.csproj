@@ -16,7 +16,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" />
 		<PackageReference Include="WolverineFx" />
-		<PackageReference Include="WolverineFx.RuntimeCompilation" />
 		<PackageReference Include="WolverineFx.Sqlite" />
 	</ItemGroup>
 	<ItemGroup>
