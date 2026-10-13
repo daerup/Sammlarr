@@ -1,6 +1,7 @@
 using Contracts;
 using DB.Conversion;
 using DB.Data;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -16,6 +17,7 @@ internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<S
 		var services = new ServiceCollection();
 		services.AddSingleton<IDateTimeProvider, DesignTimeDateTimeProvider>();
 		services.AddModule<ConversionModule>();
+		services.AddDataProtection().UseEphemeralDataProtectionProvider();
 		services.AddModule<DataAccessModule>();
 		services.AddScoped<EntityAuditer>();
 		services.AddScoped<UserOwnershipStamper>();
