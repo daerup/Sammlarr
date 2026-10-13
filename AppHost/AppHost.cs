@@ -29,24 +29,14 @@ else if (builder.ExecutionContext.IsRunMode)
 }
 else
 {
-	builder.AddDockerComposeEnvironment("sammlarr").WithDashboard(enabled: false);
+	builder.AddDockerComposeEnvironment("compose").WithDashboard(enabled: false);
 
-#pragma warning disable ASPIRECOMPUTE003
-	var registry = builder.AddContainerRegistry("ghcr", "ghcr.io", "daerup/sammlarr");
-#pragma warning restore ASPIRECOMPUTE003
-
-	var ui = builder
-		.AddDockerfile("blazor-ui", "..", "Web/Dockerfile")
-		.WithHttpEndpoint(port: 8080, targetPort: 8080, name: "http")
+	builder
+		.AddContainer("sammlarr", "ghcr.io/daerup/sammlarr", builder.Configuration["ImageTag"] ?? "latest")
+		.WithHttpEndpoint(port: 6769, targetPort: 6769, name: "http")
 		.WithExternalHttpEndpoints()
-		.WithHttpHealthCheck("/health")
-		.WithEnvironment("Sammlarr__ConnectionString", "Data Source=/data/sammlarr.db")
-		.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", "/data/dp-keys")
-		.WithVolume("sammlarr-data", "/data");
-
-#pragma warning disable ASPIRECOMPUTE003
-	ui.WithContainerRegistry(registry);
-#pragma warning restore ASPIRECOMPUTE003
+		.WithVolume("sammlarr-data", "/data")
+		.PublishAsDockerComposeService((_, service) => service.Restart = "unless-stopped");
 }
 
 builder.Build().Run();
