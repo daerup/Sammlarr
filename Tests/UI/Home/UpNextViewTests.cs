@@ -46,6 +46,17 @@ public class UpNextViewTests
 	}
 
 	[Test]
+	public async Task InTheQueue_ForADetailsFill_SaysCancellingItStartsItAgainByItself()
+	{
+		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new FillDetails(), JobState.Queued, default, 0), Job(Docs, JobState.Queued));
+
+		var rows = UpNextView.InTheQueue(queue, Names, Brands, Plex);
+
+		await Assert.That(rows[0].CancelNote).Contains("It starts again by itself after the next feed run");
+		await Assert.That(rows[1].CancelNote).Contains("You can start it again at any time");
+	}
+
+	[Test]
 	public async Task InTheQueue_ForAFeedJob_CarriesTheFeedsOwnProviderSoTheRowShowsItsBrand()
 	{
 		var queue = Snapshot(Job(Anime, JobState.Queued));
