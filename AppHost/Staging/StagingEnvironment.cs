@@ -74,7 +74,7 @@ internal static class StagingEnvironment
 
 		var sammlarr = builder
 			.AddDockerfile("sammlarr", RepositoryRoot(builder), Dockerfile)
-			.WithHttpEndpoint(port: config.Ports.Sammlarr, targetPort: 8080, name: "http", isProxied: false)
+			.WithHttpEndpoint(port: config.Ports.Sammlarr, targetPort: 6769, name: "http", isProxied: false)
 			.WithBindMount(layout.Sammlarr, "/data")
 			.WithAppSettings(builder.Configuration)
 			.WithEnvironment((PushoverOptions options) => options.BaseUrl, $"http://catcher:8080/{config.CatcherSession}/pushover/1")
