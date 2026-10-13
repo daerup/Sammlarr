@@ -1,0 +1,5 @@
+P:System.DateTimeOffset.Now;Use IDateTimeProvider
+P:System.DateTimeOffset.UtcNow;Use IDateTimeProvider
+P:System.DateTime.Now;Use IDateTimeProvider
+P:System.DateTime.UtcNow;Use IDateTimeProvider
+M:System.Threading.Tasks.Task.Wait;Await it

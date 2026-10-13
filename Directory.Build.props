@@ -2,6 +2,7 @@
 	<PropertyGroup>
 		<RestoreEnablePackagePruning>false</RestoreEnablePackagePruning>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<AnalysisLevel>latest-recommended</AnalysisLevel>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<PublishDocumentationFiles>false</PublishDocumentationFiles>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
@@ -11,6 +12,10 @@
 		<Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>
 		<Verify_SponsorshipExemptionUntil>2027-09</Verify_SponsorshipExemptionUntil>
 	</PropertyGroup>
+	<ItemGroup>
+		<AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" Visible="false" />
+		<AdditionalFiles Include="$(MSBuildThisFileDirectory)CodeMetricsConfig.txt" Visible="false" />
+	</ItemGroup>
 	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Roslyn' and '$(MSBuildProjectName)' != 'Roslyn.Tests'">
 		<Using Include="Shared" />
 		<Using Include="Shared.Collections" />
