@@ -91,6 +91,7 @@ public record PreviewStatus
 	public bool IsLoading { get; init; }
 	public bool HasResults { get; init; }
 	public bool HasFailed { get; init; }
+	public bool IsListMissing { get; init; }
 	public Optional<int> MirrorExposure { get; init; } = new None();
 }
 

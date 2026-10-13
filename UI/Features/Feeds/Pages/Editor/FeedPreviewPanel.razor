@@ -359,7 +359,7 @@
     private FeedId PreviewFeedId => SavedFeedId ?? DraftFeedId;
     [Parameter] public EventCallback<PreviewStatus> OnStatusChanged { get; set; }
 
-    private enum FetchState { Idle, Loading, Success, Failed }
+    private enum FetchState { Idle, Loading, Success, Failed, Missing }
 
     private FetchState _fetchState = FetchState.Idle;
     private List<Listed<MediaMatchResult>> _rawResults = [];
@@ -401,7 +401,7 @@
                 FetchState.Idle => "idle",
                 FetchState.Loading => "loading",
                 FetchState.Success => "success",
-                FetchState.Failed => "failed",
+                FetchState.Failed or FetchState.Missing => "failed",
             };
         }
     }
@@ -409,7 +409,8 @@
     private bool HasItems => _rawResults.Count > 0;
     private bool HasResults => _fetchState == FetchState.Success && _rawResults.Count > 0;
     private bool IsEmptyList => _fetchState == FetchState.Success && _rawResults.Count == 0;
-    private bool HasFailed => _fetchState == FetchState.Failed;
+    private bool HasFailed => _fetchState is FetchState.Failed or FetchState.Missing;
+    private bool IsListMissing => _fetchState == FetchState.Missing;
 
     protected override async Task OnInitializedAsync() => _ratingView = await RatingContext.GetAsync();
 
@@ -427,7 +428,7 @@
 
     protected override void OnParametersSet()
     {
-        if (_fetchState is FetchState.Success or FetchState.Failed &&
+        if (_fetchState is FetchState.Success or FetchState.Failed or FetchState.Missing &&
             (Config.Provider != _appliedConfig?.Provider ||
              !string.Equals(Config.Identifier?.Trim(), _appliedConfig?.Identifier?.Trim(), StringComparison.Ordinal)))
         {
@@ -450,7 +451,7 @@
         }
 
         Config = config;
-        var needsFetch = _fetchState is FetchState.Idle or FetchState.Failed ||
+        var needsFetch = _fetchState is FetchState.Idle or FetchState.Failed or FetchState.Missing ||
                          _rawResults.Count == 0 ||
                          Config.Provider != _appliedConfig?.Provider ||
                          !string.Equals(Config.Identifier?.Trim(), _appliedConfig?.Identifier?.Trim(), StringComparison.Ordinal);
@@ -610,7 +611,7 @@
             _rawResults = [];
             _unmatchedResults = [];
             _processedResults = [];
-            _fetchState = FetchState.Failed;
+            _fetchState = FetchState.Missing;
             Notify(notifier => notifier.Warning($"No list found with identifier '{ex.Identifier}'.", "List not found"));
         }
         catch (RemoteUnavailableException)
@@ -788,6 +789,7 @@
         IsLoading = IsLoading,
         HasResults = HasResults,
         HasFailed = HasFailed,
+        IsListMissing = IsListMissing,
         MirrorExposure = Optional.When(IsMirror && _fetchState == FetchState.Success && !_providerUnavailable, () => LeavingCount),
     };
 
