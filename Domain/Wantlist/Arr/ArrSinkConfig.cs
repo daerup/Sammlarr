@@ -22,6 +22,8 @@ public sealed record ArrInstanceConfig
 
 	public bool SearchOnAdd { get; init; } = true;
 
+	public bool DeleteFiles { get; init; }
+
 	public Optional<string> LinkUrl => ExternalUrl.Or(() => Url);
 
 	public bool IsConnectable => Url.IsSome() && ApiKey.IsSome();

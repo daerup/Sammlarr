@@ -6,6 +6,7 @@ using Contracts.Identity;
 using Contracts.Wantlist;
 using Domain.Identity;
 using Domain.Providers;
+using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Settings.Components.Users;
@@ -52,20 +53,45 @@ public class RemovePersonDialogTests : BunitContext
 
 		await TypeAsync(cut, "guest");
 
-		await Assert.That(cut.Find("label[for='remove-confirm']").TextContent).Contains("Type Guest to confirm");
+		await Assert.That(cut.Find("label[for='remove-confirm']").TextContent).Contains("Type 'Guest' to confirm");
 		await Assert.That(RemoveButton(cut).HasAttribute("disabled")).IsFalse();
 	}
 
 	[Test]
-	public async Task Dialog_UnderRadarrAndSonarr_SaysWhichTitlesGoAndWhichStay()
+	public async Task Confirm_NamesThePersonBoldBetweenQuotes()
 	{
-		_users.SinkHoldingsAsync(Any(), Any()).Returns(Success.Of(new SinkHoldings(12, 3, "sammlarr-u-daerup")));
+		var cut = RenderDialog(Daerup, SinkKind.Plex);
+
+		var label = cut.Find("label[for='remove-confirm']");
+		await Assert.That(label.TextContent.Trim()).IsEqualTo("Type 'Daerup' to confirm");
+		await Assert.That(label.QuerySelector("b")!.TextContent).IsEqualTo("Daerup");
+	}
+
+	[Test]
+	public async Task Dialog_UnderRadarrAndSonarr_SaysPerAppHowManyGoAndWhetherTheirFilesAreDeleted()
+	{
+		HoldingWith(new SinkHoldings(ArrApp.Radarr, 8, true), new SinkHoldings(ArrApp.Sonarr, 4, false));
 
 		var cut = RenderDialog(Daerup, SinkKind.Arr);
 
-		await Assert
-			.That(cut.WaitForElement("[data-holdings]").TextContent.Trim())
-			.IsEqualTo("12 titles carry only their tag (sammlarr-u-daerup) and go; their files stay on disk. 3 titles that someone else also wants stay.");
+		cut.WaitForElement("[data-holding]");
+		await Assert.That(Holding(cut, ArrApp.Radarr).TextContent.Trim()).IsEqualTo("8 movies · files deleted");
+		await Assert.That(Holding(cut, ArrApp.Sonarr).TextContent.Trim()).IsEqualTo("4 shows · files kept");
+		await Assert.That(Holding(cut, ArrApp.Radarr).QuerySelector(".text-destructive")!.TextContent).IsEqualTo("files deleted");
+		await Assert.That(Holding(cut, ArrApp.Sonarr).QuerySelector(".text-destructive")).IsNull();
+		await Assert.That(cut.Find("[data-holdings]").TextContent).DoesNotContain("someone else");
+	}
+
+	[Test]
+	public async Task Dialog_ForAnAppHoldingOneOrNoneOfTheirTitles_SaysOneMovieOrNothingToRemove()
+	{
+		HoldingWith(new SinkHoldings(ArrApp.Radarr, 1, false), new SinkHoldings(ArrApp.Sonarr, 0, true));
+
+		var cut = RenderDialog(Daerup, SinkKind.Arr);
+
+		cut.WaitForElement("[data-holding]");
+		await Assert.That(Holding(cut, ArrApp.Radarr).TextContent.Trim()).IsEqualTo("1 movie · files kept");
+		await Assert.That(Holding(cut, ArrApp.Sonarr).TextContent.Trim()).IsEqualTo("nothing to remove");
 	}
 
 	[Test]
@@ -95,6 +121,13 @@ public class RemovePersonDialogTests : BunitContext
 			builder.CloseComponent();
 		});
 	}
+
+	private void HoldingWith(params SinkHoldings[] holdings)
+	{
+		_users.SinkHoldingsAsync(Any(), Any()).Returns(Success.Of<IReadOnlyList<SinkHoldings>>(holdings));
+	}
+
+	private static IElement Holding(IRenderedComponent<IComponent> cut, ArrApp app) => cut.Find($"[data-holding='{app}']");
 
 	private static Task TypeAsync(IRenderedComponent<IComponent> cut, string text)
 	{

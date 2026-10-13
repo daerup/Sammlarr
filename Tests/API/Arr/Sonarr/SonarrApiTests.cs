@@ -26,7 +26,7 @@ public class SonarrApiTests
 	{
 		_sonarr.OnAnyRequest().Respond(HttpStatusCode.OK);
 
-		await Testee.DeleteManyAsync(Connection, [20, 21], CancellationToken.None);
+		await Testee.DeleteManyAsync(Connection, [20, 21], ArrInstanceConfig.Empty, CancellationToken.None);
 
 		_sonarr.Verify(
 			request =>

@@ -23,6 +23,7 @@ public class ArrSinkConfigRepositoryTests(SammlarrTestHost host) : IAsyncDisposa
 			RootFolderPath = Some.Of("/movies"),
 			Monitored = true,
 			SearchOnAdd = false,
+			DeleteFiles = true,
 		},
 		new ArrInstanceConfig
 		{
@@ -34,6 +35,7 @@ public class ArrSinkConfigRepositoryTests(SammlarrTestHost host) : IAsyncDisposa
 			AnimeRootFolderPath = Some.Of("/anime"),
 			Monitored = false,
 			SearchOnAdd = true,
+			DeleteFiles = false,
 		},
 		ArrTagScheme.Default with
 		{

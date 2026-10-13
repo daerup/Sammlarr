@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261013183218_WantlistOutboxSink";
+    public override string LastMigrationId => "20261013215255_ArrDeleteFiles";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -1660,6 +1660,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                             .HasMaxLength(4096)
                             .HasColumnType("TEXT");
 
+                        b1.Property<bool>("DeleteFiles")
+                            .HasColumnType("INTEGER");
+
                         b1.Property<string>("ExternalUrl")
                             .HasMaxLength(2048)
                             .HasColumnType("TEXT");
@@ -1704,6 +1707,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                         b1.Property<string>("ApiKey")
                             .HasMaxLength(4096)
                             .HasColumnType("TEXT");
+
+                        b1.Property<bool>("DeleteFiles")
+                            .HasColumnType("INTEGER");
 
                         b1.Property<string>("ExternalUrl")
                             .HasMaxLength(2048)

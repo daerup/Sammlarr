@@ -33,6 +33,12 @@ public class ArrSinkConfigTests
 	}
 
 	[Test]
+	public async Task DeleteFiles_ForANewInstance_KeepsTheFiles()
+	{
+		await Assert.That(ArrInstanceConfig.Empty.DeleteFiles).IsFalse();
+	}
+
+	[Test]
 	public async Task LinkUrl_WithoutAnExternalUrl_IsTheUrl()
 	{
 		await Assert.That(Connectable.LinkUrl).IsSome().And.IsEqualTo("http://radarr:7878");

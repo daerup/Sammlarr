@@ -54,6 +54,7 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 			AnimeRootFolderPath = Optional.Of(row.AnimeRootFolderPath),
 			Monitored = row.Monitored,
 			SearchOnAdd = row.SearchOnAdd,
+			DeleteFiles = row.DeleteFiles,
 		};
 	}
 
@@ -68,5 +69,6 @@ internal sealed class ArrSinkConfigRepository(IDbContextFactory<SammlarrDbContex
 		row.AnimeRootFolderPath = instance.AnimeRootFolderPath.ToNullable();
 		row.Monitored = instance.Monitored;
 		row.SearchOnAdd = instance.SearchOnAdd;
+		row.DeleteFiles = instance.DeleteFiles;
 	}
 }

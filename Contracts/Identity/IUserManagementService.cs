@@ -16,7 +16,7 @@ public interface IUserManagementService
 
 	Task<Result<UserRole>> ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default);
 
-	Task<Result<SinkHoldings>> SinkHoldingsAsync(UserId id, CancellationToken cancellationToken = default);
+	Task<Result<IReadOnlyList<SinkHoldings>>> SinkHoldingsAsync(UserId id, CancellationToken cancellationToken = default);
 
 	Task<Result<int>> DeleteAsync(UserId id, CancellationToken cancellationToken = default);
 

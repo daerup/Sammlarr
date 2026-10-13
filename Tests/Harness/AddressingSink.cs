@@ -20,7 +20,7 @@ internal sealed class AddressingSink(IMediaSink sink, Func<MediaType, Optional<M
 		return sink.ApplyAsync(action, pushes, cancellationToken);
 	}
 
-	public Task<Result<SinkHoldings>> HoldingsOfAsync(User person, CancellationToken cancellationToken = default)
+	public Task<Result<IReadOnlyList<SinkHoldings>>> HoldingsOfAsync(User person, CancellationToken cancellationToken = default)
 	{
 		return sink.HoldingsOfAsync(person, cancellationToken);
 	}
