@@ -120,7 +120,7 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 	private async Task<LaneAnswer<MdblistTypes.Titles.Title>> SettledOrAskedAsync(IApiKey apiKey, Asked found, CancellationToken cancellationToken)
 	{
 		await ((Task)found.Answer).WaitAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-		return found.Answer.IsCompletedSuccessfully ? found.Answer.Result : await Lane(apiKey).AskAsync(found.Key, Call(apiKey), cancellationToken);
+		return found.Answer.IsCompletedSuccessfully ? await found.Answer : await Lane(apiKey).AskAsync(found.Key, Call(apiKey), cancellationToken);
 	}
 
 	private void Remember(IEnumerable<MdblistKey> keys, Asked asked)
@@ -173,7 +173,7 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 	{
 		var batch = keys[0];
 		using var content = JsonContent.Create(new JsonObject { ["ids"] = new JsonArray([.. keys.Select(key => key.Encoded())]) });
-		using var response = await client.SendAsync(HttpMethod.Post, batch.Endpoint, apiKey, cancellationToken, content);
+		using var response = await client.SendAsync(HttpMethod.Post, batch.Endpoint, apiKey, content, cancellationToken);
 		if (response.StatusCode is HttpStatusCode.NotFound)
 		{
 			return Success.Of<IReadOnlyDictionary<MdblistKey, MdblistTypes.Titles.Title>>(new Dictionary<MdblistKey, MdblistTypes.Titles.Title>());

@@ -115,7 +115,7 @@ public class NotificationDeliveryPipelineTests
 			NotificationContext context,
 			NotificationTarget target,
 			NotificationTemplate template,
-			CancellationToken cancellationToken
+			CancellationToken cancellationToken = default
 		)
 		{
 			Sent.Add(target);

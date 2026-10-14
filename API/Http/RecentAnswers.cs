@@ -23,7 +23,7 @@ internal sealed class RecentAnswers<TKey, TValue>(IDateTimeProvider clock)
 		lock (_gate)
 		{
 			filed = _answers.GetValueOrNone(key).When(Fresh).GetValueOr(() => Start(key, ask));
-			filed.Join(cancellationToken, () => Leave(key, filed));
+			filed.Join(() => Leave(key, filed), cancellationToken);
 		}
 
 		return filed.Fetching.IsCancellationRequested ? Task.FromCanceled<Result<TValue>>(filed.Fetching) : filed.Answer.Value.WaitAsync(cancellationToken);
@@ -116,7 +116,7 @@ internal sealed class RecentAnswers<TKey, TValue>(IDateTimeProvider clock)
 
 		public CancellationToken Fetching => _fetching.Token;
 
-		public void Join(CancellationToken waiter, Action leave)
+		public void Join(Action leave, CancellationToken waiter)
 		{
 			if (_settled)
 			{

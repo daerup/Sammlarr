@@ -32,10 +32,14 @@
     {
         var typed = args.Value as string;
 
-        _typing?.Cancel();
-        _typing?.Dispose();
+        var previous = _typing;
         _typing = new CancellationTokenSource();
         var token = _typing.Token;
+        if (previous is not null)
+        {
+            await previous.CancelAsync();
+            previous.Dispose();
+        }
 
         try
         {

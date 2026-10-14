@@ -104,7 +104,7 @@ internal sealed class LaneGate : IDisposable
 	private Task<Result<LanePermit>> Enqueue(Ticket ticket, CancellationToken cancellationToken)
 	{
 		_waiting.Enqueue(ticket, ((int)ticket.Priority.Class, ticket.Priority.Order, _seq++));
-		ticket.Watch(cancellationToken, Cancelled);
+		ticket.Watch(Cancelled, cancellationToken);
 		PumpLocked();
 		return ticket.Task;
 	}
@@ -263,7 +263,7 @@ internal sealed class LaneGate : IDisposable
 
 		public bool Refuse(string reason) => Settled(_done.TrySetResult(Error.From(new LaneRefusedException(reason))));
 
-		public void Watch(CancellationToken cancellationToken, Action<Ticket> cancelled)
+		public void Watch(Action<Ticket> cancelled, CancellationToken cancellationToken)
 		{
 			_watch = cancellationToken.Register(() =>
 			{

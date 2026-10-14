@@ -18,8 +18,8 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyS
 		HttpMethod method,
 		string endpoint,
 		IApiKey apiKey,
-		CancellationToken cancellationToken = default,
-		HttpContent? content = null
+		HttpContent? content = null,
+		CancellationToken cancellationToken = default
 	)
 	{
 		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value));

@@ -27,23 +27,26 @@ public static class AsyncEnumerableExtensions
 			using var slots = new SemaphoreSlim(maxConcurrency, maxConcurrency);
 			var channel = Channel.CreateUnbounded<Task<TOut>>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = true });
 
-			var producer = Task.Run(async () =>
-			{
-				Activity.Current = anchor;
-				try
+			var producer = Task.Run(
+				async () =>
 				{
-					await foreach (var item in source.WithCancellation(abandon.Token))
+					Activity.Current = anchor;
+					try
 					{
-						await slots.WaitAsync(abandon.Token);
-						channel.Writer.TryWrite(RunAsync(item));
+						await foreach (var item in source.WithCancellation(abandon.Token))
+						{
+							await slots.WaitAsync(abandon.Token);
+							channel.Writer.TryWrite(RunAsync(item));
+						}
+						channel.Writer.Complete();
 					}
-					channel.Writer.Complete();
-				}
-				catch (Exception ex)
-				{
-					channel.Writer.Complete(ex);
-				}
-			});
+					catch (Exception ex)
+					{
+						channel.Writer.Complete(ex);
+					}
+				},
+				abandon.Token
+			);
 
 			try
 			{
@@ -86,7 +89,7 @@ public static class AsyncEnumerableExtensions
 			{
 				while (true)
 				{
-					if (burst.Count > 0 && !(moving.IsCompletedSuccessfully && moving.Result))
+					if (burst.Count > 0 && !(moving.IsCompletedSuccessfully && await moving))
 					{
 						yield return burst;
 						burst = [];
@@ -166,19 +169,22 @@ public static class AsyncEnumerableExtensions
 			var anchor = Activity.Current;
 			using var abandon = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-			var producer = Task.Run(async () =>
-			{
-				Activity.Current = anchor;
-				try
+			var producer = Task.Run(
+				async () =>
 				{
-					await produce(channel.Writer, abandon.Token);
-					channel.Writer.Complete();
-				}
-				catch (Exception ex)
-				{
-					channel.Writer.Complete(ex);
-				}
-			});
+					Activity.Current = anchor;
+					try
+					{
+						await produce(channel.Writer, abandon.Token);
+						channel.Writer.Complete();
+					}
+					catch (Exception ex)
+					{
+						channel.Writer.Complete(ex);
+					}
+				},
+				abandon.Token
+			);
 
 			try
 			{

@@ -91,7 +91,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 			.ToAsyncEnumerable()
 			.SelectAwait(async (page, token) => await FetchPageAsync(page, token), PageConcurrency, cancellationToken);
 
-		await foreach (var (remaining, _) in rest)
+		await foreach (var (remaining, _) in rest.WithCancellation(cancellationToken))
 		{
 			foreach (var item in remaining)
 			{
@@ -105,7 +105,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		var endpoint = Endpoint(action, plexId);
 		try
 		{
-			using var response = await plexClient.SendAsync(HttpMethod.Put, endpoint, cancellationToken, new StringContent(string.Empty));
+			using var response = await plexClient.SendAsync(HttpMethod.Put, endpoint, new StringContent(string.Empty), cancellationToken);
 			if (response.IsSuccessStatusCode)
 			{
 				return new SinkSyncAck(id, SinkSyncOutcome.Applied);
@@ -130,7 +130,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 	{
 		const string containerStartHeader = "X-Plex-Container-Start";
 		var offset = (page - 1) * PlexClient.ContainerSize;
-		var response = await plexClient.SendAsync(HttpMethod.Get, urls.Watchlist, cancellationToken, null, (containerStartHeader, offset.ToString()));
+		var response = await plexClient.SendAsync(HttpMethod.Get, urls.Watchlist, null, cancellationToken, (containerStartHeader, offset.ToString()));
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result =
 			await JsonSerializer.DeserializeAsync<PlexTypes.Watchlist.Root>(stream, cancellationToken: cancellationToken)

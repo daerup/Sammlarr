@@ -62,11 +62,7 @@ public static class UnionAssertionExtensions
 		where TCollection : IEnumerable<TItem>
 		where TItem : IUnion
 	{
-		public UnionCollectionAssertion<TCollection, TItem> AreOfUnionType(params IEnumerable<Type> expectedTypes)
-		{
-			using var _ = Assert.Multiple();
-			return new UnionCollectionAssertion<TCollection, TItem>(source.Context, expectedTypes);
-		}
+		public UnionCollectionAssertion<TCollection, TItem> AreOfUnionType(params IEnumerable<Type> expectedTypes) => new(source.Context, expectedTypes);
 	}
 }
 

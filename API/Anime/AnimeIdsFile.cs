@@ -45,7 +45,9 @@ internal sealed class AnimeIdsFile(HttpClient http) : IDataset<AnimeIdMapping>
 		}
 
 		var body = await response.Content.ReadAsByteArrayAsync(cancellationToken);
-		return Success.Of<Optional<DatasetFile<AnimeIdMapping>>>(Some.Of(new DatasetFile<AnimeIdMapping>(Optional.Of(response.Headers.ETag?.Tag), Parse(body))));
+		return Success.Of<Optional<DatasetFile<AnimeIdMapping>>>(
+			Some.Of(new DatasetFile<AnimeIdMapping>(Optional.Of(response.Headers.ETag?.Tag), Parse(body, cancellationToken)))
+		);
 	}
 
 	internal static async IAsyncEnumerable<AnimeIdMapping> Parse(byte[] body, [EnumeratorCancellation] CancellationToken cancellationToken = default)

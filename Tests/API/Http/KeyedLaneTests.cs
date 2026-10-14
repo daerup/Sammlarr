@@ -271,10 +271,10 @@ public class KeyedLaneTests
 		await Assert.That(sent.Select(batch => batch.Context)).IsEquivalentTo(["first", "second"]);
 	}
 
-	private static Task<LaneAnswer<int>> AskAs(Lane<int, int> lane, int key, LaneCall<int, int> call, LaneClass asking)
+	private static async Task<LaneAnswer<int>> AskAs(Lane<int, int> lane, int key, LaneCall<int, int> call, LaneClass asking)
 	{
 		using var _ = new LanePriority(asking, key).Enter();
-		return lane.AskAsync(key, call, CancellationToken.None);
+		return await lane.AskAsync(key, call, CancellationToken.None);
 	}
 
 	private static Task<LaneAnswer<int>> AskFrom(Lane<int, int> lane, int key, LaneCall<int, int> call, string asker)

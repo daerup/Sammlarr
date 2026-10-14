@@ -15,16 +15,17 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 	public async Task<PagedResult<MediaMatchResult>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
-		var apiKey = await apiKeys
-			.GetAsync(ApiKeyProvider.Tmdb, cancellationToken)
-			.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings."));
+		var configured = await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken);
+		var apiKey = configured.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings."));
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, formattedEndpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
 			throw new InvalidOperationException($"TMDB trending request failed with status {(int)response.StatusCode}.");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
+		var result =
+			await JsonSerializer.DeserializeAsync<TmdbTypes.Trending.Root>(stream, cancellationToken: cancellationToken)
+			?? throw new InvalidOperationException("TMDB trending response was empty.");
 
 		var finalItems = new MediaMatchResult[result.Results.Count];
 		var indexed = result.Results.Index().ToList();

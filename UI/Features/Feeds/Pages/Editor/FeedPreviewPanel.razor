@@ -536,10 +536,14 @@
             return;
         }
 
-        _cts?.Cancel();
-        _cts?.Dispose();
+        var previous = _cts;
         _cts = CancellationTokenSource.CreateLinkedTokenSource(_visit);
         var ct = _cts.Token;
+        if (previous is not null)
+        {
+            await previous.CancelAsync();
+            previous.Dispose();
+        }
 
         using var activity = Instrumentation.Source.StartActivity("FeedPreview", ActivityKind.Internal, default(ActivityContext));
         activity?.SetTag("sammlarr.feed.provider", Config.Provider?.ToString());
@@ -893,12 +897,12 @@
         {
             if (_blocklistIds.Contains(item.Identity.Id))
             {
-                await BlocklistService.RemoveAsync([item.Identity.Id]);
+                await BlocklistService.RemoveAsync([item.Identity.Id], _visit);
                 _blocklistIds.Remove(item.Identity.Id);
             }
             else
             {
-                await BlocklistService.AddAsync([item.Identity.Id]);
+                await BlocklistService.AddAsync([item.Identity.Id], _visit);
                 _blocklistIds.Add(item.Identity.Id);
             }
         }
@@ -932,15 +936,15 @@
         {
             if (IsWantlisted(item))
             {
-                await WantlistService.RemoveAsync([item.Identity.Id]);
+                await WantlistService.RemoveAsync([item.Identity.Id], _visit);
                 _wantlisted.Remove(item.Identity.Id);
             }
             else
             {
-                var added = await WantlistService.AddAsync([item.Identity.Id], new ManualOrigin(ManualSource.FeedPreview));
+                var added = await WantlistService.AddAsync([item.Identity.Id], new ManualOrigin(ManualSource.FeedPreview), _visit);
                 if (added.Unaddressable.Count > 0)
                 {
-                    var config = await ProviderConfig.GetAsync();
+                    var config = await ProviderConfig.GetAsync(_visit);
                     Notify(notifier => notifier.Warning(WantlistNotices.NoMatch(Branding.Name(config.Sink.Service), item.Details.Title), WantlistNotices.CantUpdate));
                 }
                 else

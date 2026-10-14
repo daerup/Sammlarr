@@ -62,7 +62,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 	{
 		var searchTypes = string.Join(",", mediaTypes.Select(ToPlexMediaType));
 		var endpoint = urls.Search(searchTypes, title, SearchLimit);
-		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
+		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken: cancellationToken);
 		EnsureUsable(response, endpoint);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = (await JsonSerializer.DeserializeAsync<PlexTypes.Search.Root>(stream, cancellationToken: cancellationToken))!;
@@ -90,7 +90,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 	private async Task<Result<Optional<PlexId>>> AskMatchAsync(int type, IExternalMediaId id, CancellationToken cancellationToken)
 	{
 		var endpoint = urls.Match(type, $"{id.Source.ToString().ToLowerInvariant()}://{id.Value}");
-		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
+		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken: cancellationToken);
 		if (response.StatusCode is HttpStatusCode.NotFound)
 		{
 			return NotInPlex;
@@ -126,7 +126,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 	private async Task<Result<FoundMedia>> FetchByIdAsync(PlexId plexId, CancellationToken cancellationToken)
 	{
 		var endpoint = urls.RatingKeyMetadata(plexId.Value);
-		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
+		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken: cancellationToken);
 		EnsureUsable(response, endpoint);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);

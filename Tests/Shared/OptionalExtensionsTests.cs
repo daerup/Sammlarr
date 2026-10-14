@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using CsCheck;
 using TestInfrastructure;
@@ -311,6 +312,7 @@ public class OptionalExtensionsTests
 	}
 
 	[Test]
+	[SuppressMessage("Reliability", "CA2012", Justification = "Pins the generated ValueTask mirror; each step awaits its source once.")]
 	public async Task ValueTaskMirror_ChainsWithSingleAwait()
 	{
 		ValueTask<Optional<int>> start = new(Some.Of(2));
