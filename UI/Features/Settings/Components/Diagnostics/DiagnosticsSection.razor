@@ -360,7 +360,7 @@
     public async ValueTask DisposeAsync()
     {
         Capture.Changed -= HandleCaptureChanged;
-        _cts.Cancel();
+        await _cts.CancelAsync();
         if (_renderLoop is not null)
         {
             try

@@ -92,4 +92,4 @@ app.MapGet(
 	)
 	.RequireAuthorization(policy => policy.RequireRole(nameof(UserRole.Admin)));
 
-app.Run();
+await app.RunAsync();

@@ -12,7 +12,7 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		NotificationContext context,
 		NotificationTarget target,
 		NotificationTemplate template,
-		CancellationToken cancellationToken
+		CancellationToken cancellationToken = default
 	)
 	{
 		if (target.Config is not PushoverConfig config)

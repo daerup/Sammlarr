@@ -47,7 +47,7 @@ internal sealed class ImdbRatingsFile(HttpClient http) : IDataset<ImdbRatingLine
 		}
 
 		var body = await response.Content.ReadAsByteArrayAsync(cancellationToken);
-		var file = new DatasetFile<ImdbRatingLine>(Optional.Of(response.Headers.ETag?.Tag), Parse(body));
+		var file = new DatasetFile<ImdbRatingLine>(Optional.Of(response.Headers.ETag?.Tag), Parse(body, cancellationToken));
 		return Success.Of<Optional<DatasetFile<ImdbRatingLine>>>(Some.Of(file));
 	}
 

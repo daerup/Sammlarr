@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Observability.Tracing;
@@ -15,6 +16,7 @@ public class TracingProxy<T> : DispatchProxy
 		return proxy;
 	}
 
+	[SuppressMessage("Reliability", "CA2012", Justification = "DispatchProxy hands the boxed ValueTask to the proxied call's caller, which awaits it once.")]
 	protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
 	{
 		var name = $"{typeof(T).Name}.{targetMethod!.Name}";

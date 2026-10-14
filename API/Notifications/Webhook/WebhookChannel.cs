@@ -23,7 +23,7 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 		NotificationContext context,
 		NotificationTarget target,
 		NotificationTemplate template,
-		CancellationToken cancellationToken
+		CancellationToken cancellationToken = default
 	)
 	{
 		if (target.Config is not WebhookConfig config)

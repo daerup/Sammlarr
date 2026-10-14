@@ -33,9 +33,8 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 
 	private async IAsyncEnumerable<IdentifyRequest> RequestsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
-		var clientId = await apiKeys
-			.GetAsync(ApiKeyProvider.Trakt, cancellationToken)
-			.GetOrThrow(_ => new InvalidOperationException("No Trakt client ID is configured. Add one in Settings."));
+		var configured = await apiKeys.GetAsync(ApiKeyProvider.Trakt, cancellationToken);
+		var clientId = configured.GetOrThrow(_ => new InvalidOperationException("No Trakt client ID is configured. Add one in Settings."));
 		var count = new PageCount();
 		foreach (var read in TraktPages.Reads(identifier))
 		{

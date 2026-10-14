@@ -21,17 +21,17 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDateTimeP
 
 	public async Task<Result<TmdbTypes.FindItem>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
-		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
+		return await (await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken)).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
 	}
 
 	public async Task<Result<IReadOnlyList<TmdbTypes.Trending.Result>>> SearchAsync(string query, CancellationToken cancellationToken = default)
 	{
-		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchSearchAsync(query, apiKey, cancellationToken));
+		return await (await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken)).Map(apiKey => FetchSearchAsync(query, apiKey, cancellationToken));
 	}
 
 	private async Task<Result<TmdbTypes.Details>> DetailAsync(TmdbId id, CancellationToken cancellationToken)
 	{
-		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
+		return await (await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken)).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
 	}
 
 	private async Task<Result<IReadOnlyList<TmdbTypes.Trending.Result>>> FetchSearchAsync(string query, IApiKey apiKey, CancellationToken cancellationToken)
@@ -67,7 +67,9 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDateTimeP
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var reason = $"TMDB has no details for {id.Value}";
-		return Result.WhenNotNull(JsonSerializer.Deserialize<TmdbTypes.Details>(stream), reason).When(detail => detail.Id != 0, reason);
+		return Result
+			.WhenNotNull(await JsonSerializer.DeserializeAsync<TmdbTypes.Details>(stream, cancellationToken: cancellationToken), reason)
+			.When(detail => detail.Id != 0, reason);
 	}
 
 	private static string? FindSource(IExternalMediaId id) =>
@@ -92,7 +94,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDateTimeP
 			return response.StatusCode.Unanswered(RemoteService.Tmdb, $"TMDB find returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		var result = JsonSerializer.Deserialize<TmdbTypes.Find>(stream);
+		var result = await JsonSerializer.DeserializeAsync<TmdbTypes.Find>(stream, cancellationToken: cancellationToken);
 		var item = id.Type switch
 		{
 			MediaType.Movie => result?.MovieResults.FirstOrDefault(),

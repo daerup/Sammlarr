@@ -39,4 +39,4 @@ else
 		.PublishAsDockerComposeService((_, service) => service.Restart = "unless-stopped");
 }
 
-builder.Build().Run();
+await builder.Build().RunAsync();

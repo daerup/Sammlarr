@@ -15,16 +15,15 @@ internal class PlexClient(HttpClient client, ICredentialService credentials, ICu
 	public async Task<HttpResponseMessage> SendAsync(
 		HttpMethod method,
 		string uri,
-		CancellationToken cancellationToken = default,
 		HttpContent? content = null,
+		CancellationToken cancellationToken = default,
 		params List<(string, string)> customHeaders
 	)
 	{
-		var credential = await credentials
-			.GetAsync(AuthProvider.Plex, cancellationToken)
-			.GetOrThrow(error =>
-				error.Exception.GetValueOr(() => new InvalidOperationException("No valid Plex credentials are stored. Use Plex auth to sign in first."))
-			);
+		var stored = await credentials.GetAsync(AuthProvider.Plex, cancellationToken);
+		var credential = stored.GetOrThrow(error =>
+			error.Exception.GetValueOr(() => new InvalidOperationException("No valid Plex credentials are stored. Use Plex auth to sign in first."))
+		);
 
 		var request = new HttpRequestMessage(method, uri);
 		request.Headers.Add("X-Plex-Token", credential.AccessToken);

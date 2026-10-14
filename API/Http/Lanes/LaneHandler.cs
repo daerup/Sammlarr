@@ -51,9 +51,10 @@ internal sealed class LaneHandler(RemoteService remote, Lanes lanes, IProviderRa
 	{
 		if (outcome is AttemptThrottled throttled)
 		{
+			var response = await sending;
 			var wait = throttled.RetryAt.Map(until => until - time.GetUtcNow()).GetValueOr(() => lanes.Backoff(name));
-			logger.LogWarning("{Remote} answered 429 on its {Route} lane, which waits {Wait}; headers: {Headers}", remote, name.Route, wait, Headers(sending.Result));
-			await sending.Result.TriggeredBy().Apply(user => reporter.ReportAsync(remote, wait, user, cancellationToken));
+			logger.LogWarning("{Remote} answered 429 on its {Route} lane, which waits {Wait}; headers: {Headers}", remote, name.Route, wait, Headers(response));
+			await response.TriggeredBy().Apply(user => reporter.ReportAsync(remote, wait, user, cancellationToken));
 		}
 	}
 

@@ -46,7 +46,7 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	protected bool IsConnected() => connected;
 
 	protected override async Task OnInitializedAsync() =>
-		Settings = await ProviderConfigService.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
+		Settings = await ProviderConfigService.GetAsync(Cancellation.Token) ?? throw new InvalidOperationException("Provider settings are not configured.");
 
 	protected void HandleAccessChanged(bool hasAccess)
 	{
