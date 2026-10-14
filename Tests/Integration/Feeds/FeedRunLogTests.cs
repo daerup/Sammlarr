@@ -30,7 +30,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task CompleteRunAsync_ForATitleMissingAcrossRuns_CountsTheConsecutiveRuns()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync(strategy: new Mirror(Window));
 		var missing = await fixture.SeedMediaAsync(TmdbId.From("550", MediaType.Movie));
 
 		await CompleteAsync(feedId, 1, Some.Of(Missed(missing)));
@@ -42,7 +42,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task CompleteRunAsync_WhenAMissingTitleComesBack_RestartsItsCount()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync(strategy: new Mirror(Window));
 		var missing = await fixture.SeedMediaAsync(TmdbId.From("550", MediaType.Movie));
 
 		await CompleteAsync(feedId, 1, Some.Of(Missed(missing)));
@@ -55,7 +55,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task CompleteRunAsync_WithoutAbsenceChanges_LeavesTheCountsAlone()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync(strategy: new Mirror(Window));
 		var missing = await fixture.SeedMediaAsync(TmdbId.From("550", MediaType.Movie));
 
 		await CompleteAsync(feedId, 1, Some.Of(Missed(missing)));
@@ -67,7 +67,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task CompleteRunAsync_ForATitleNoLongerOwned_DeletesItsRow()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync(strategy: new Mirror(Window));
 		var dropped = await fixture.SeedMediaAsync(TmdbId.From("550", MediaType.Movie));
 		var stillMissing = await fixture.SeedMediaAsync(TmdbId.From("27205", MediaType.Movie));
 
@@ -80,7 +80,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task UpdateAsync_ForAMirrorFeedSwitchedToAppend_StartsItsCountsAgain()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync(strategy: new Mirror(Window));
 		var missing = await fixture.SeedMediaAsync(TmdbId.From("550", MediaType.Movie));
 		await CompleteAsync(feedId, 1, Some.Of(Missed(missing)));
 
@@ -103,7 +103,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task RecordAsync_ForEveryRun_StoresTheCountsAndTheItemStates()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync();
 
 		await _testee.StartRunAsync(
 			Run(feedId, 1) with
@@ -137,7 +137,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task CompleteRunAsync_WithKnownCounts_ReadsThemBack()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync();
 		var run = Run(feedId, 1);
 		await _testee.StartRunAsync(run);
 
@@ -152,7 +152,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task CompleteRunAsync_WithItsCallsAnswerTimesAndTheUnmatchedSplit_ReadsThemBack()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync();
 		var run = Run(feedId, 1);
 		await _testee.StartRunAsync(run);
 		FeedRunCalls[] calls = [new(RemoteService.Tmdb, UsageOutcome.Answered, 290), new(RemoteService.Plex, UsageOutcome.AnsweredAfter429, 37)];
@@ -182,7 +182,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunsAsync_ForRunsWithAndWithoutASourceFailure_ReadsBothBack()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync();
 		await _testee.StartRunAsync(Run(feedId, 1) with { SourceFailure = Some.Of("No list found.") });
 		await _testee.StartRunAsync(Run(feedId, 2));
 
@@ -195,8 +195,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunsAsync_ForOneFeed_ReturnsItsNewestRunsFirstUpToTheLimit()
 	{
-		var comedy = await SeedFeedAsync();
-		var horror = await SeedFeedAsync();
+		var comedy = await fixture.SeedFeedAsync();
+		var horror = await fixture.SeedFeedAsync();
 
 		await _testee.StartRunAsync(Run(comedy, 1));
 		await _testee.StartRunAsync(Run(comedy, 2));
@@ -211,8 +211,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunsAsync_SinceACutoff_ReturnsEveryFeedsRunsFromThenNewestFirst()
 	{
-		var comedy = await SeedFeedAsync();
-		var horror = await SeedFeedAsync();
+		var comedy = await fixture.SeedFeedAsync();
+		var horror = await fixture.SeedFeedAsync();
 
 		await _testee.StartRunAsync(Run(comedy, 1));
 		await _testee.StartRunAsync(Run(comedy, 3));
@@ -226,7 +226,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunsAsync_ForACutoffInAnotherOffset_ComparesTheSameInstant()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync();
 
 		await _testee.StartRunAsync(Run(feedId, 2));
 
@@ -238,7 +238,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunsAsync_WhenTheRunToIncludeIsOlderThanTheLimit_KeepsGoingUntilItIsInTheList()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync();
 		var oldest = Run(feedId, 1);
 
 		await _testee.StartRunAsync(oldest);
@@ -254,7 +254,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunsAsync_WhenTheRunToIncludeIsUnknown_ReturnsThePlainLimit()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync();
 
 		await _testee.StartRunAsync(Run(feedId, 1));
 		await _testee.StartRunAsync(Run(feedId, 2));
@@ -268,8 +268,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunsAsync_WhenTheRunToIncludeBelongsToAnotherFeed_ReturnsThePlainLimit()
 	{
-		var comedy = await SeedFeedAsync();
-		var horror = await SeedFeedAsync();
+		var comedy = await fixture.SeedFeedAsync();
+		var horror = await fixture.SeedFeedAsync();
 		var elsewhere = Run(horror, 1);
 
 		await _testee.StartRunAsync(elsewhere);
@@ -285,10 +285,10 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunsAsync_ForAnotherUsersRuns_NeverReturnsThemEvenWhenAskedToIncludeOne()
 	{
-		var theirs = Run(await SeedFeedAsync(), 1);
+		var theirs = Run(await fixture.SeedFeedAsync(), 1);
 		await _testee.StartRunAsync(theirs);
 		await fixture.SignInAs("Member");
-		var mine = await SeedFeedAsync();
+		var mine = await fixture.SeedFeedAsync();
 		await _testee.StartRunAsync(Run(mine, 2));
 		await _testee.StartRunAsync(Run(mine, 3));
 		await _testee.StartRunAsync(Run(mine, 4));
@@ -301,8 +301,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunTotalsAsync_SeparatesFeedsWithHistoryFromOnesThatNeverRan()
 	{
-		var ran = await SeedFeedAsync();
-		var neverRan = await SeedFeedAsync();
+		var ran = await fixture.SeedFeedAsync();
+		var neverRan = await fixture.SeedFeedAsync();
 
 		await _testee.StartRunAsync(Run(ran, 1));
 
@@ -328,7 +328,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetRunTotalsAsync_ForAFeedWithRuns_TotalsTheCountsAndDatesTheFirstRun()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync();
 
 		await _testee.StartRunAsync(Run(feedId, 1) with { Counts = Counts(added: 3, removed: 1) });
 		await _testee.StartRunAsync(Run(feedId, 2) with { Counts = Counts(added: 2, removed: 0) });
@@ -385,21 +385,4 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 			},
 			Items = [],
 		};
-
-	private async Task<FeedId> SeedFeedAsync()
-	{
-		var entity = new FeedRow
-		{
-			Name = "Comedy",
-			IsEnabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new FeedStrategy(new Mirror(Window)),
-			Identifier = "hdlists/comedy",
-		};
-
-		fixture.Context.Feeds.Add(entity);
-		await fixture.Context.SaveChangesAsync();
-		fixture.Context.ChangeTracker.Clear();
-		return FeedId.From(entity.Id);
-	}
 }

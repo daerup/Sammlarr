@@ -1,5 +1,4 @@
 using System.Net;
-using API.Mdblist;
 using Contracts.Auth;
 using Contracts.Housekeeping;
 using Contracts.Media;
@@ -156,7 +155,7 @@ public class DuplicateTitlesTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WhileTheFirstUsersMdblistKeyIsAtItsFloor_AsksWithTheNextUsersKey()
 	{
 		await host.Resolve<IApiKeyService>().StoreAsync(new TestApiKey(ApiKeyProvider.Mdblist, "valid-mdblist-key"));
-		AtTheFloor("valid-mdblist-key");
+		host.MdblistKeyHasLeft("valid-mdblist-key", 400);
 		var guest = await host.SeedLocalUser("guest", "a test password", UserRole.Member);
 		host.CurrentUser.Id = guest;
 		await host.WithMdblistAccount("guest-mdblist-key");
@@ -174,7 +173,7 @@ public class DuplicateTitlesTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WhileTheOnlyMdblistKeyIsAtItsFloor_LeavesTheNoteWithoutAnAttempt()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
-		AtTheFloor("valid-mdblist-key");
+		host.MdblistKeyHasLeft("valid-mdblist-key", 400);
 		await host.StoredTwiceAsync("15739", "tt0083564");
 
 		await Testee.RunAsync(Now);
@@ -202,7 +201,7 @@ public class DuplicateTitlesTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WhileTheUsersMdblistKeyIsAtItsFloor_AsksWikidataForTheSameUser()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
-		AtTheFloor("valid-mdblist-key");
+		host.MdblistKeyHasLeft("valid-mdblist-key", 400);
 		host.WikidataMaps("tt0083564", "15739");
 		var held = await host.SeedMediaAsync(ImdbId.From("tt0083564", MediaType.Movie));
 		await host.SeedMediaAsync(TmdbId.From("15739", MediaType.Movie));
@@ -226,21 +225,5 @@ public class DuplicateTitlesTests(SammlarrTestHost host) : IAsyncDisposable
 		var second = await Testee.RunAsync(Now.AddDays(1));
 
 		await Assert.That((first, second)).IsEqualTo((1, 0));
-	}
-
-	private void AtTheFloor(string key)
-	{
-		var budget = host.Resolve<MdblistBudget>();
-		budget.Record(key, Allowance(30, Now.AddHours(-1)));
-		budget.Record(key, Allowance(1000, Now.AddDays(1)));
-		budget.Record(key, Allowance(400, Now.AddDays(1)));
-	}
-
-	private static HttpResponseMessage Allowance(long remaining, DateTimeOffset reset)
-	{
-		var answered = new HttpResponseMessage(HttpStatusCode.OK);
-		answered.Headers.Add("x-ratelimit-remaining", $"{remaining}");
-		answered.Headers.Add("x-ratelimit-reset", $"{reset.ToUnixTimeSeconds()}");
-		return answered;
 	}
 }

@@ -49,7 +49,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task LookUpAsync_ForAShow_RetrievesRatings()
 	{
-		await host.Show(TestMedia.BreakingBad).ServedByTmdb(rating: 9.5, votes: 50000).SeedAsync();
+		await host.Movie(TestMedia.BreakingBad).ServedByTmdb(rating: 9.5, votes: 50000).SeedAsync();
 
 		var ratings = await FetchTmdbRatings(TmdbId.From("1396", MediaType.Show));
 

@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Media;
-using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Feed.Trace;
 using Domain.Media;
@@ -10,6 +9,7 @@ using Domain.Providers;
 using Harness;
 using Observability.Tracing;
 using TestInfrastructure;
+using static Harness.FeedItemSpec;
 using static Harness.Ids;
 
 namespace Integration.Tests.Feeds;
@@ -21,11 +21,14 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private IFeedRunEngine Engine => host.Resolve<IFeedRunEngine>();
 
+	[Before(Test)]
+	public async Task ConnectMdblist() => await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+
 	[Test]
 	public async Task Run_WithStoredFoundAndMissingTitles_SettlesEachTitleOnce()
 	{
-		var feedId = await SeedFeedAsync("traced-list");
-		host.MdblistFeedContains("traced-list", Item("Fight Club", Tmdb("550")), Item("Heat", Tmdb("949")));
+		var feedId = await host.SeedFeedAsync("traced-list");
+		host.MdblistFeedContains("traced-list", Item("Fight Club", MediaType.Movie, Tmdb("550")), Item("Heat", MediaType.Movie, Tmdb("949")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 
 		await Engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
@@ -41,8 +44,8 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task Run_ThroughAListPage_RecordsThePageAndEndsWithTheRunsCounts()
 	{
-		var feedId = await SeedFeedAsync("paged-list");
-		host.MdblistFeedContains("paged-list", Item("Fight Club", Tmdb("550")), Item("Heat", Tmdb("949")));
+		var feedId = await host.SeedFeedAsync("paged-list");
+		host.MdblistFeedContains("paged-list", Item("Fight Club", MediaType.Movie, Tmdb("550")), Item("Heat", MediaType.Movie, Tmdb("949")));
 
 		await Engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
@@ -56,7 +59,7 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnsureSinkIds_InsideARun_RecordsNoTitle()
 	{
-		var feedId = await SeedFeedAsync("sink-ids-list");
+		var feedId = await host.SeedFeedAsync("sink-ids-list");
 		var heat = await host.Movie(new MediaSpec("Heat", MediaType.Movie, [Tmdb("949")])).SeedAsync();
 
 		using (host.Resolve<IFeedRunTrace>().Start(feedId, host.Resolve<ICurrentUser>().Id))
@@ -72,8 +75,8 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task Run_WithinTheHourOfAMiss_RecordsItAsNotFoundEarlier()
 	{
-		var feedId = await SeedFeedAsync("missed-list");
-		host.MdblistFeedContains("missed-list", Item("Heat", Tmdb("949")));
+		var feedId = await host.SeedFeedAsync("missed-list");
+		host.MdblistFeedContains("missed-list", Item("Heat", MediaType.Movie, Tmdb("949")));
 		await Engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		await Engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
@@ -86,10 +89,10 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task Run_WithItemsListedWithoutIds_CountsThemAsNotFound()
 	{
-		var feedId = await SeedFeedAsync("idless-list");
+		var feedId = await host.SeedFeedAsync("idless-list");
 		host.MdblistFeedContains(
 			"idless-list",
-			Item("Fight Club", Tmdb("550")),
+			Item("Fight Club", MediaType.Movie, Tmdb("550")),
 			new FeedItemSpec(null, MediaType.Movie, null, new Dictionary<MediaProvider, string>())
 		);
 		await host.Movie(TestMedia.FightClub).SeedAsync();
@@ -115,8 +118,8 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 			Sample = (ref options) => options.TraceId == traceId ? ActivitySamplingResult.AllData : ActivitySamplingResult.None,
 		};
 		ActivitySource.AddActivityListener(listener);
-		var feedId = await SeedFeedAsync("proxied-list");
-		host.MdblistFeedContains("proxied-list", Item("Fight Club", Tmdb("550")));
+		var feedId = await host.SeedFeedAsync("proxied-list");
+		host.MdblistFeedContains("proxied-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 
 		await Engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
@@ -129,10 +132,10 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task Run_WithAPlexMatch_RecordsTheHopThenTheSettle()
 	{
-		var feedId = await SeedFeedAsync("plex-list");
+		var feedId = await host.SeedFeedAsync("plex-list");
 		host.PlexHolds(TestMedia.Inception);
 		await host.PlexMatches(TestMedia.Inception);
-		host.MdblistFeedContains("plex-list", Item("Inception", Tmdb("27205")));
+		host.MdblistFeedContains("plex-list", Item("Inception", MediaType.Movie, Tmdb("27205")));
 
 		await Engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
@@ -144,12 +147,12 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task Run_WithTwoTitlesAtOnce_ParentsEachHopToItsOwnTitle()
 	{
-		var feedId = await SeedFeedAsync("pair-list");
+		var feedId = await host.SeedFeedAsync("pair-list");
 		host.PlexHolds(TestMedia.Inception);
 		host.PlexHolds(TestMedia.Interstellar);
 		await host.PlexMatches(TestMedia.Inception);
 		await host.PlexMatches(TestMedia.Interstellar);
-		host.MdblistFeedContains("pair-list", Item("Inception", Tmdb("27205")), Item("Interstellar", Tmdb("157336")));
+		host.MdblistFeedContains("pair-list", Item("Inception", MediaType.Movie, Tmdb("27205")), Item("Interstellar", MediaType.Movie, Tmdb("157336")));
 
 		await Engine.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
@@ -189,26 +192,5 @@ public class FeedRunTraceFlowTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var read = await host.Resolve<IFeedRunTraces>().ReadAsync(feedId, TraceCursor.Start);
 		return (await Assert.That(read).IsOfUnionType<TraceRead, TraceSnapshot>())!;
-	}
-
-	private static FeedItemSpec Item(string title, params ProviderId[] ids) =>
-		new(title, MediaType.Movie, null, ids.ToDictionary(id => id.Provider, id => id.Value));
-
-	private async Task<FeedId> SeedFeedAsync(string identifier)
-	{
-		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var entity = new FeedRow
-		{
-			Name = "Traced",
-			IsEnabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new FeedStrategy(new Append()),
-			Identifier = identifier,
-		};
-
-		host.Context.Feeds.Add(entity);
-		await host.Context.SaveChangesAsync();
-		host.Context.ChangeTracker.Clear();
-		return FeedId.From(entity.Id);
 	}
 }

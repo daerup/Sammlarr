@@ -2,6 +2,7 @@ using Contracts.Auth;
 using DB.Data.Auth;
 using Domain.Providers;
 using Harness;
+using Integration.Tests.DB.Conversion;
 using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
 
@@ -24,7 +25,7 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 		var encrypted = (await fixture.RawContext.Table<ApiKeyConfigRow>().QueryAsync(x => x.ApiKey)).Single();
 
 		await Assert.That(encrypted).IsNotEqualTo(plainKey);
-		await Assert.That(encrypted).Satisfies(IsBase64OrEmpty);
+		await Assert.That(encrypted).Satisfies(Ciphertext.IsBase64OrEmpty);
 	}
 
 	[Test]
@@ -92,20 +93,5 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 		await fixture.Context.ApiKeySettings.AddAsync(new ApiKeyConfigRow { Provider = provider, ApiKey = apiKey });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
-	}
-
-	private static bool IsBase64OrEmpty(string? value)
-	{
-		if (value is null)
-		{
-			return false;
-		}
-		if (string.IsNullOrEmpty(value))
-		{
-			return true;
-		}
-
-		var buffer = new Span<byte>(new byte[value.Length]);
-		return Convert.TryFromBase64String(value, buffer, out _);
 	}
 }

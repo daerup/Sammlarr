@@ -1,7 +1,6 @@
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Wantlist;
-using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
@@ -43,7 +42,8 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		var held = await host.SeedMediaAsync(TmdbId.From("15739", MediaType.Movie));
 		var other = await host.SeedMediaAsync(ImdbId.From("tt0083564", MediaType.Movie));
 		var annie = new Dictionary<MediaProvider, string> { [MediaProvider.Tmdb] = "15739", [MediaProvider.Imdb] = "tt0083564" };
-		var feedId = await SeedFeedAsync("annie-list", new FeedItemSpec("Annie", MediaType.Movie, 1982, annie));
+		host.MdblistFeedContains("annie-list", new FeedItemSpec("Annie", MediaType.Movie, 1982, annie));
+		var feedId = await host.SeedFeedAsync("annie-list");
 		var engine = host.Resolve<IFeedRunEngine>();
 		var wantlist = host.Resolve<IWantlistRepository>();
 
@@ -120,27 +120,11 @@ public class FeedRunIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private Task<FeedId> SeedRemakesFeedAsync()
 	{
-		return SeedFeedAsync(
+		host.MdblistFeedContains(
 			"remakes-list",
 			new FeedItemSpec("Annie", MediaType.Movie, 1982, new Dictionary<MediaProvider, string> { [MediaProvider.Tmdb] = "15739" }),
 			new FeedItemSpec("Annie", MediaType.Movie, 1999, new Dictionary<MediaProvider, string> { [MediaProvider.Tmdb] = "26177" })
 		);
-	}
-
-	private async Task<FeedId> SeedFeedAsync(string list, params FeedItemSpec[] items)
-	{
-		var entity = new FeedRow
-		{
-			Name = "Remakes",
-			IsEnabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new Append(),
-			Identifier = list,
-		};
-		host.Context.Feeds.Add(entity);
-		await host.Context.SaveChangesAsync();
-		host.Context.ChangeTracker.Clear();
-		host.MdblistFeedContains(list, items);
-		return FeedId.From(entity.Id);
+		return host.SeedFeedAsync("remakes-list");
 	}
 }

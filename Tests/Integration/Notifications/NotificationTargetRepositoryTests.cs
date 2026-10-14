@@ -3,6 +3,7 @@ using DB.Data.Notifications;
 using Domain.Identity;
 using Domain.Notifications;
 using Harness;
+using Integration.Tests.DB.Conversion;
 using TestInfrastructure;
 
 namespace Integration.Tests.Notifications;
@@ -65,7 +66,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 		var stored = (await fixture.RawContext.Table<NotificationTargetRow>().QueryAsync(row => row.SigningSecret)).Single();
 
 		await Assert.That(stored).IsNotEqualTo("whsec_plaintext");
-		await Assert.That(stored).Satisfies(IsBase64OrEmpty);
+		await Assert.That(stored).Satisfies(Ciphertext.IsBase64OrEmpty);
 	}
 
 	[Test]
@@ -78,8 +79,8 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 
 		await Assert.That(appToken).IsNotEqualTo("app-token-plain");
 		await Assert.That(userKey).IsNotEqualTo("user-key-plain");
-		await Assert.That(appToken).Satisfies(IsBase64OrEmpty);
-		await Assert.That(userKey).Satisfies(IsBase64OrEmpty);
+		await Assert.That(appToken).Satisfies(Ciphertext.IsBase64OrEmpty);
+		await Assert.That(userKey).Satisfies(Ciphertext.IsBase64OrEmpty);
 	}
 
 	[Test]
@@ -130,20 +131,5 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 		var mine = await _testee.GetAllAsync();
 		await Assert.That(mine).Count().IsEqualTo(1);
 		await Assert.That(mine[0].Id).IsEqualTo(id);
-	}
-
-	private static bool IsBase64OrEmpty(string? value)
-	{
-		if (value is null)
-		{
-			return false;
-		}
-		if (string.IsNullOrEmpty(value))
-		{
-			return true;
-		}
-
-		var buffer = new Span<byte>(new byte[value.Length]);
-		return Convert.TryFromBase64String(value, buffer, out _);
 	}
 }

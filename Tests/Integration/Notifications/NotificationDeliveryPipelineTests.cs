@@ -1,18 +1,15 @@
 using Contracts;
 using Contracts.DI;
-using Contracts.Identity;
 using Contracts.Messaging;
 using Contracts.Notifications;
 using Domain.Identity;
 using Domain.Notifications;
+using Integration.Tests.Messaging;
 using Messaging;
 using Messaging.Notifications;
-using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shared.DI;
-using Shared.Options;
 using TestInfrastructure;
 using Wolverine;
 using Wolverine.Runtime;
@@ -106,50 +103,26 @@ public class NotificationDeliveryPipelineTests
 			.FindAsync(Any<Guid>(), Any())
 			.Returns(Some.Of(new NotificationTarget(Guid.NewGuid(), "Hook", true, new WebhookConfig("https://example.test/hook", "whsec_x"))));
 
-		var userScope = IUserScope.Mock();
-		userScope.AsAsync(Any<UserId>(), Any()).Returns(new NoopDisposable());
-
 		var index = new FakeKeyedServiceIndex<NotificationChannel, INotificationChannel>().Register(NotificationChannel.Webhook, channel);
 
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(DateTimeOffset.UnixEpoch);
 
-		var dbPath = Path.Combine(Path.GetTempPath(), $"wolverine-dispatch-test-{Guid.NewGuid():N}.db");
-		var connectionString = $"Data Source={dbPath}";
-		try
-		{
-			var configuration = new ConfigurationBuilder()
-				.AddInMemoryCollection(
-					new Dictionary<string, string?> { [$"{SammlarOptions.SectionName}:{nameof(SammlarOptions.ConnectionString)}"] = connectionString }
-				)
-				.Build();
-
-			using var host = await Host.CreateDefaultBuilder()
-				.ConfigureServices(services =>
-				{
-					services.AddModule<MessagingModule>();
-					services.AddSingleton(subscriptions.Object);
-					services.AddSingleton(targets.Object);
-					services.AddSingleton(userScope.Object);
-					services.AddSingleton(Contracts.Media.IMediaRepository.Mock().Object);
-					services.AddSingleton(Contracts.Feed.IFeedRepository.Mock().Object);
-					services.AddSingleton<IKeyedServiceIndex<NotificationChannel, INotificationChannel>>(index);
-					services.AddSingleton<INotificationDeliveryOutcomeRepository>(new NoopOutcomes());
-					services.AddSingleton(clock.Object);
-				})
-				.UseSammlarrMessaging(configuration)
-				.StartAsync();
-
-			await body(host);
-		}
-		finally
-		{
-			SqliteConnection.ClearAllPools();
-			if (File.Exists(dbPath))
+		await MessagingHost.WithHostAsync(
+			body,
+			services =>
 			{
-				File.Delete(dbPath);
+				services.AddModule<MessagingModule>();
+				services.AddSingleton(subscriptions.Object);
+				services.AddSingleton(targets.Object);
+				services.AddSingleton(MessagingHost.PassingUserScope().Object);
+				services.AddSingleton(Contracts.Media.IMediaRepository.Mock().Object);
+				services.AddSingleton(Contracts.Feed.IFeedRepository.Mock().Object);
+				services.AddSingleton<IKeyedServiceIndex<NotificationChannel, INotificationChannel>>(index);
+				services.AddSingleton<INotificationDeliveryOutcomeRepository>(new NoopOutcomes());
+				services.AddSingleton(clock.Object);
 			}
-		}
+		);
 	}
 
 	private sealed class RecordingChannel : INotificationChannel
@@ -185,10 +158,5 @@ public class NotificationDeliveryPipelineTests
 			Task.FromResult<IReadOnlyDictionary<Guid, IReadOnlyList<NotificationDeliveryOutcome>>>(
 				new Dictionary<Guid, IReadOnlyList<NotificationDeliveryOutcome>>()
 			);
-	}
-
-	private sealed class NoopDisposable : IDisposable
-	{
-		public void Dispose() { }
 	}
 }

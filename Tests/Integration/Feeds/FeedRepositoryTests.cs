@@ -28,9 +28,9 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetAllAsync_WhenFeedsExist_ReturnsNewestFirst()
 	{
-		var oldestId = await SeedFeedAsync("Oldest", "oldest", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
-		var middleId = await SeedFeedAsync("Middle", "middle", new DateTimeOffset(2026, 02, 01, 8, 0, 0, TimeSpan.Zero));
-		var newestId = await SeedFeedAsync("Newest", "newest", new DateTimeOffset(2026, 03, 01, 8, 0, 0, TimeSpan.Zero));
+		var oldestId = await SeedFeedCreatedAtAsync("Oldest", "oldest", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
+		var middleId = await SeedFeedCreatedAtAsync("Middle", "middle", new DateTimeOffset(2026, 02, 01, 8, 0, 0, TimeSpan.Zero));
+		var newestId = await SeedFeedCreatedAtAsync("Newest", "newest", new DateTimeOffset(2026, 03, 01, 8, 0, 0, TimeSpan.Zero));
 
 		var feeds = await _testee.GetAllAsync();
 
@@ -44,7 +44,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task GetAllAsync_WhenFeedExists_MapsCreatedAt()
 	{
 		var expectedCreatedAt = new DateTimeOffset(2026, 04, 01, 10, 30, 0, TimeSpan.Zero);
-		var id = await SeedFeedAsync("CreatedAt Check", "created-at-check", expectedCreatedAt);
+		var id = await SeedFeedCreatedAtAsync("CreatedAt Check", "created-at-check", expectedCreatedAt);
 
 		var feed = (await _testee.GetAllAsync()).Single(l => l.Id == id);
 
@@ -54,7 +54,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task DeleteAsync_WhenFeedExists_RemovesFeed()
 	{
-		var id = await SeedFeedAsync("To Delete", "to-delete", new DateTimeOffset(2026, 05, 01, 12, 0, 0, TimeSpan.Zero));
+		var id = await SeedFeedCreatedAtAsync("To Delete", "to-delete", new DateTimeOffset(2026, 05, 01, 12, 0, 0, TimeSpan.Zero));
 
 		await _testee.DeleteAsync(id);
 
@@ -65,7 +65,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task DeleteAsync_WhenFeedDoesNotExist_DoesNotChangeData()
 	{
-		var id = await SeedFeedAsync("Keep", "keep", new DateTimeOffset(2026, 06, 01, 12, 0, 0, TimeSpan.Zero));
+		var id = await SeedFeedCreatedAtAsync("Keep", "keep", new DateTimeOffset(2026, 06, 01, 12, 0, 0, TimeSpan.Zero));
 
 		await _testee.DeleteAsync(FeedId.From(Guid.NewGuid()));
 
@@ -107,7 +107,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task FindAsync_WhenFeedExists_ReturnsProjectedFeed()
 	{
-		var id = await SeedFeedAsync("Wantlist", "my-wantlist", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
+		var id = await SeedFeedCreatedAtAsync("Wantlist", "my-wantlist", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
 
 		var feed = await Assert.That(await _testee.FindAsync(id)).IsSome();
 
@@ -121,7 +121,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task FindAsync_WhenTheRowHoldsAStoredFilterSortAndLimit_ReadsThemBack()
 	{
-		var id = await SeedFeedAsync("Top rated", "top-rated", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
+		var id = await SeedFeedCreatedAtAsync("Top rated", "top-rated", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
 		await fixture.Context.Database.ExecuteSqlAsync(
 			$$"""
 			UPDATE "Feeds" SET
@@ -164,7 +164,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task FindAsync_WhenTheRowHoldsNoFilterSortOrLimit_ReadsThemAsNone()
 	{
-		var id = await SeedFeedAsync("Plain", "plain", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
+		var id = await SeedFeedCreatedAtAsync("Plain", "plain", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
 
 		var feed = await Assert.That(await _testee.FindAsync(id)).IsSome();
 
@@ -182,7 +182,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task UpdateAsync_WhenFeedExists_ChangesAllFields()
 	{
-		var id = await SeedFeedAsync("Old Name", "old-id", new DateTimeOffset(2026, 02, 01, 8, 0, 0, TimeSpan.Zero));
+		var id = await SeedFeedCreatedAtAsync("Old Name", "old-id", new DateTimeOffset(2026, 02, 01, 8, 0, 0, TimeSpan.Zero));
 		var updateData = new FeedUpdateData
 		{
 			Name = "New Name",
@@ -254,21 +254,10 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(async () => await _testee.UpdateAsync(FeedId.From(Guid.NewGuid()), updateData)).Throws<InvalidOperationException>();
 	}
 
-	private async Task<FeedId> SeedFeedAsync(string name, string identifier, DateTimeOffset createdAt)
+	private async Task<FeedId> SeedFeedCreatedAtAsync(string name, string identifier, DateTimeOffset createdAt)
 	{
-		var entity = new FeedRow
-		{
-			Name = name,
-			IsEnabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new FeedStrategy(new Append()),
-			Identifier = identifier,
-		};
-
-		fixture.Context.Feeds.Add(entity);
-		await fixture.Context.SaveChangesAsync();
-		await fixture.Context.Feeds.Where(f => f.Id == entity.Id).ExecuteUpdateAsync(s => s.SetProperty(f => f.CreatedAt, createdAt));
-		fixture.Context.ChangeTracker.Clear();
-		return FeedId.From(entity.Id);
+		var id = await fixture.SeedFeedAsync(identifier, name: name);
+		await fixture.Context.Feeds.Where(f => f.Id == id.Value).ExecuteUpdateAsync(s => s.SetProperty(f => f.CreatedAt, createdAt));
+		return id;
 	}
 }

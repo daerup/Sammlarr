@@ -1,5 +1,4 @@
 using Contracts.Feed;
-using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Notifications;
 using Domain.Feed;
@@ -7,6 +6,7 @@ using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
 using Domain.Providers;
+using Integration.Tests.Messaging;
 using Messaging.Notifications;
 using TestInfrastructure;
 
@@ -30,7 +30,7 @@ public class NotificationDispatchHandlerTests
 
 		var messages = await NotificationDispatchHandler.Handle(
 			@event,
-			Scope().Object,
+			MessagingHost.PassingUserScope().Object,
 			subscriptions.Object,
 			Media().Object,
 			Feed().Object,
@@ -57,7 +57,7 @@ public class NotificationDispatchHandlerTests
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [pulledAdd], [], [], [pushedRemove], []),
-			Scope().Object,
+			MessagingHost.PassingUserScope().Object,
 			subscriptions.Object,
 			media.Object,
 			Feed().Object,
@@ -83,7 +83,7 @@ public class NotificationDispatchHandlerTests
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new WantlistSyncFailedNotification(User, DateTimeOffset.UtcNow, "Couldn't reach Plex"),
-			Scope().Object,
+			MessagingHost.PassingUserScope().Object,
 			subscriptions.Object,
 			Media().Object,
 			Feed().Object,
@@ -108,7 +108,7 @@ public class NotificationDispatchHandlerTests
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new ProviderRateLimitedNotification(User, DateTimeOffset.UtcNow, RemoteService.Plex, TimeSpan.FromSeconds(30)),
-			Scope().Object,
+			MessagingHost.PassingUserScope().Object,
 			subscriptions.Object,
 			Media().Object,
 			Feed().Object,
@@ -142,7 +142,7 @@ public class NotificationDispatchHandlerTests
 	[Test]
 	public async Task Handle_WhenFanningOut_EstablishesTheUserScopeForTheOwner()
 	{
-		var scope = Scope();
+		var scope = MessagingHost.PassingUserScope();
 
 		await NotificationDispatchHandler.Handle(
 			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []),
@@ -163,7 +163,7 @@ public class NotificationDispatchHandlerTests
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [MediaId.New()], [], [], [], []),
-			Scope().Object,
+			MessagingHost.PassingUserScope().Object,
 			SubscriptionsFor(NotificationEventType.WantlistSyncCompleted).Object,
 			media.Object,
 			Feed().Object,
@@ -187,7 +187,7 @@ public class NotificationDispatchHandlerTests
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [id], [], [], [], []),
-			Scope().Object,
+			MessagingHost.PassingUserScope().Object,
 			subscriptions.Object,
 			media.Object,
 			Feed().Object,
@@ -221,7 +221,7 @@ public class NotificationDispatchHandlerTests
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [described, bare], [], [], [], []),
-			Scope().Object,
+			MessagingHost.PassingUserScope().Object,
 			subscriptions.Object,
 			media.Object,
 			Feed().Object,
@@ -247,7 +247,7 @@ public class NotificationDispatchHandlerTests
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []),
-			Scope().Object,
+			MessagingHost.PassingUserScope().Object,
 			subscriptions.Object,
 			Media().Object,
 			Feed().Object,
@@ -270,7 +270,7 @@ public class NotificationDispatchHandlerTests
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new FeedRunCompletedNotification(User, DateTimeOffset.UtcNow, feed.Id, 2, 1),
-			Scope().Object,
+			MessagingHost.PassingUserScope().Object,
 			subscriptions.Object,
 			Media().Object,
 			Finding(Some.Of(feed)).Object,
@@ -292,7 +292,7 @@ public class NotificationDispatchHandlerTests
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new FeedRunFailedNotification(User, DateTimeOffset.UtcNow, FeedId.From(Guid.NewGuid()), "HTTP 404"),
-			Scope().Object,
+			MessagingHost.PassingUserScope().Object,
 			subscriptions.Object,
 			Media().Object,
 			Feed().Object,
@@ -333,17 +333,5 @@ public class NotificationDispatchHandlerTests
 		var repository = IFeedRepository.Mock();
 		repository.FindAsync(Any<FeedId>(), Any()).Returns(feed);
 		return repository;
-	}
-
-	private static Mock<IUserScope> Scope()
-	{
-		var scope = IUserScope.Mock();
-		scope.AsAsync(Any<UserId>(), Any()).Returns(new NoopDisposable());
-		return scope;
-	}
-
-	private sealed class NoopDisposable : IDisposable
-	{
-		public void Dispose() { }
 	}
 }

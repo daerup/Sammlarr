@@ -1,6 +1,5 @@
 using Contracts.Housekeeping;
 using Contracts.Media;
-using DB.Data.Feed;
 using DB.Data.Feed.Run;
 using DB.Data.Jobs;
 using Domain.Feed;
@@ -24,28 +23,13 @@ internal static class HousekeepingSeeds
 	{
 		public IHousekeepingStep Step(HousekeepingStep step) => host.Resolve<IEnumerable<IHousekeepingStep>>().Single(registered => registered.Step == step);
 
-		public async Task<Guid> SeedFeedAsync()
-		{
-			await using var ctx = await host.ContextFactory.CreateDbContextAsync();
-			var feed = new FeedRow
-			{
-				Id = Guid.NewGuid(),
-				IsEnabled = true,
-				Name = "Trending",
-				Provider = FeedProvider.Tmdb,
-			};
-			ctx.Feeds.Add(feed);
-			await ctx.SaveChangesAsync();
-			return feed.Id;
-		}
-
-		public async Task<Guid> SeedRunAsync(Guid feed, DateTimeOffset startedAt, Guid title)
+		public async Task<Guid> SeedRunAsync(FeedId feed, DateTimeOffset startedAt, Guid title)
 		{
 			await using var ctx = await host.ContextFactory.CreateDbContextAsync();
 			var run = new FeedRunRow
 			{
 				Id = Guid.NewGuid(),
-				FeedId = feed,
+				FeedId = feed.Value,
 				StartedAt = startedAt,
 				Added = 1,
 				Items =

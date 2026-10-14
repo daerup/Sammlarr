@@ -1,7 +1,5 @@
-using Contracts;
 using Contracts.Feed;
 using Contracts.Jobs;
-using Core.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Providers;
@@ -9,8 +7,6 @@ using Domain.Wantlist.Sync;
 using Harness;
 using Integration.Tests.Feeds;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -66,7 +62,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		await ClockReachesAsync(Three);
 		var documentaries = await CronFiresAsync(_documentaries);
 
-		await RunNextJobAsync();
+		await host.RunNextJobAsync();
 
 		var ran = await JobAsync(documentaries.Id);
 		var sync = await ArmedSyncAsync();
@@ -81,7 +77,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		await EnqueueAsync(DocumentaryFeed with { SyncAfter = true });
 		var beforeTheRun = await QueueAsync();
 
-		await RunNextJobAsync();
+		await host.RunNextJobAsync();
 
 		var sync = await ArmedSyncAsync();
 		await Assert.That(beforeTheRun).Count().IsEqualTo(1);
@@ -108,7 +104,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		await ClockReachesAsync(Three.AddMinutes(1));
 		await CronFiresAsync(_anime);
 
-		await RunNextJobAsync();
+		await host.RunNextJobAsync();
 
 		var sync = await ArmedSyncAsync();
 		await Assert.That(sync.Id).IsEqualTo(armed.Id);
@@ -124,7 +120,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		await EnqueueAsync(AnimeFeed);
 		var whileQueued = await ArmedSyncAsync();
 
-		await RunNextJobAsync();
+		await host.RunNextJobAsync();
 
 		var sync = await ArmedSyncAsync();
 		await Assert.That(whileQueued.State).IsEqualTo(JobState.Waiting);
@@ -160,7 +156,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		var armed = await SyncArmedByDocumentariesAsync();
 
 		await ClockReachesAsync(armed.RunAfter);
-		await RunNextJobAsync();
+		await host.RunNextJobAsync();
 
 		var sync = await JobAsync(armed.Id);
 		await Assert.That(sync.State).IsEqualTo(JobState.Done);
@@ -194,7 +190,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 			}
 		);
 
-		await RunNextJobAsync();
+		await host.RunNextJobAsync();
 
 		var ranFirst = await JobAsync(anime.Id);
 		var sync = await JobAsync(pressed.Id);
@@ -218,7 +214,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 			}
 		);
 
-		await RunNextJobAsync();
+		await host.RunNextJobAsync();
 
 		var sync = await JobAsync(pressed.Id);
 		var waitsItsTurn = await JobAsync(anime.Id);
@@ -278,7 +274,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(cancelled).IsSome().And.IsEqualTo(DocumentaryFeed);
 		await Assert.That((await JobAsync(queued.Id)).State).IsEqualTo(JobState.Cancelled);
-		await Assert.That(await RunNextJobAsync()).IsFalse();
+		await Assert.That(await host.RunNextJobAsync()).IsFalse();
 	}
 
 	[Test]
@@ -337,7 +333,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await ClockReachesAsync(Three);
 		await CronFiresAsync(_documentaries);
-		await RunNextJobAsync();
+		await host.RunNextJobAsync();
 		return await ArmedSyncAsync();
 	}
 
@@ -353,25 +349,14 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Resolve<IJobRepository>().ReleaseDueAsync(at);
 	}
 
-	private async Task<bool> RunNextJobAsync() =>
-		await new JobRunner(
-			host.Resolve<IServiceScopeFactory>(),
-			host.Resolve<JobSignal>(),
-			host.Resolve<JobAlarm>(),
-			host.Resolve<JobRunnerStatus>(),
-			host.Resolve<JobTurn>(),
-			host.Resolve<IDateTimeProvider>(),
-			NullLogger<JobRunner>.Instance
-		).TryRunNextAsync(CancellationToken.None);
-
 	private async Task RunQueueAsync()
 	{
-		while (await RunNextJobAsync()) { }
+		while (await host.RunNextJobAsync()) { }
 	}
 
 	private async Task<T> WhileTheNextJobRunsAsync<T>(HeldRequest held, Func<Task<T>> meanwhile)
 	{
-		var running = RunNextJobAsync();
+		var running = host.RunNextJobAsync();
 		await held.Arrived;
 		var result = await meanwhile();
 		held.Release();

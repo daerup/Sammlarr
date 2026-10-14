@@ -29,7 +29,7 @@ public class TmdbFeedTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task GetFeedItemsAsync_ForAMixedTmdbList_LoadsTheMovieAndTheShow()
 	{
 		await host.Movie(new MediaSpec("Inception", MediaType.Movie, [Tmdb("27205"), Imdb("tt1375666")])).ServedByTmdb().SeedAsync();
-		await host.Show(TestMedia.BreakingBad).ServedByTmdb().SeedAsync();
+		await host.Movie(TestMedia.BreakingBad).ServedByTmdb().SeedAsync();
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.TmdbApi}/list/42", MixedList);
 
 		var items = await Testee.GetFeedItemsAsync("42", FieldNeeds.None).InListOrderAsync().ToListAsync();

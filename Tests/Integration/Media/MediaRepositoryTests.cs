@@ -24,7 +24,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task GetExternalsAsync_WhenMediaExists_ReturnsExternalForRequestedSource()
 	{
 		var ids = new IIdentityKey[] { TmdbId.From("210", MediaType.Movie), PlexId.From("plex-210", MediaType.Movie) };
-		var mediaId = await SetUpMediaAsync(ids);
+		var mediaId = await fixture.SeedMediaAsync(ids);
 
 		var result = await _testee.GetExternalsAsync([mediaId], MediaProvider.Plex);
 
@@ -36,7 +36,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task GetByExternalsAsync_ReturnsMatchingMedia()
 	{
 		var imdbId = ImdbId.From("tt0401", MediaType.Movie);
-		var seededMediaId = await SetUpMediaAsync([imdbId]);
+		var seededMediaId = await fixture.SeedMediaAsync([imdbId]);
 
 		var rows = await _testee.GetByExternalsAsync([imdbId]);
 
@@ -48,20 +48,11 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task GetAsync_ReturnsMediaForExistingRows()
 	{
 		var imdbId = ImdbId.From("tt0402", MediaType.Movie);
-		var seededMediaId = await SetUpMediaAsync([imdbId]);
+		var seededMediaId = await fixture.SeedMediaAsync([imdbId]);
 
 		var rows = await _testee.GetAsync([seededMediaId]);
 
 		await Assert.That(rows.Count).IsEqualTo(1);
 		await Assert.That(rows[0].Identity.Id).IsEqualTo(seededMediaId);
-	}
-
-	private async Task<MediaId> SetUpMediaAsync(IEnumerable<IIdentityKey> ids)
-	{
-		var media = new MediaRow();
-		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
-		await fixture.Context.SaveChangesAsync();
-		fixture.Context.ChangeTracker.Clear();
-		return MediaId.From(media.Id);
 	}
 }

@@ -149,7 +149,7 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Resolve<IArrSinkConfigService>().StoreAsync(config with { Sonarr = config.Sonarr with { AnimeRootFolderPath = Some.Of("/anime") } });
 		host.HttpStub.RespondWithJsonForUrl("sonarr.test/api/v3/tag", """[{"id":1,"label":"sammlarr-u-test-user"}]""");
 		host.HttpStub.RespondForUrl("sonarr.test/api/v3/series", Series);
-		var show = await host.Show(new MediaSpec("Frieren", MediaType.Show, [Tvdb("424536"), AniList("154587")])).SeedAsync();
+		var show = await host.Movie(new MediaSpec("Frieren", MediaType.Show, [Tvdb("424536"), AniList("154587")])).SeedAsync();
 		await host.Resolve<IWantlistService>().AddAsync([show], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
 
 		await host.Resolve<IWantlistSyncEngine>().SyncAsync(Trigger);

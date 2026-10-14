@@ -1,5 +1,4 @@
 using Contracts.Feed;
-using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Providers;
 using Harness;
@@ -18,7 +17,8 @@ public class FeedRunLayoutTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.EnsurePlexAccount();
 		await host.WithTmdbAccount(SammlarrTestHost.TmdbApiKey);
-		var feed = await SeedFeedAsync();
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feed = await host.SeedFeedAsync();
 
 		var layout = await Testee.GetAsync(feed);
 
@@ -36,23 +36,5 @@ public class FeedRunLayoutTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(layout.Ids).IsEmpty();
 		await Assert.That(layout.Edges).IsEmpty();
 		await Assert.That(layout.Sink).IsEqualTo(SinkKind.Plex);
-	}
-
-	private async Task<FeedId> SeedFeedAsync()
-	{
-		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var entity = new FeedRow
-		{
-			Name = "Laid out",
-			IsEnabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new FeedStrategy(new Append()),
-			Identifier = "laid-out-list",
-		};
-
-		host.Context.Feeds.Add(entity);
-		await host.Context.SaveChangesAsync();
-		host.Context.ChangeTracker.Clear();
-		return FeedId.From(entity.Id);
 	}
 }

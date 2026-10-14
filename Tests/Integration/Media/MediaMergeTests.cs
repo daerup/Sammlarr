@@ -5,6 +5,7 @@ using Contracts.Wantlist.Outbox;
 using DB.Data.Feed;
 using DB.Data.Feed.Run;
 using DB.Data.Media;
+using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Identity;
 using Domain.Media;
@@ -293,11 +294,11 @@ public class MediaMergeTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.AddedAsync(newer, Now.AddHours(1));
 	}
 
-	private static FeedAbsenceRow Absence(Guid feed, MediaId title, int missed)
+	private static FeedAbsenceRow Absence(FeedId feed, MediaId title, int missed)
 	{
 		return new()
 		{
-			FeedId = feed,
+			FeedId = feed.Value,
 			MediaId = title.Value,
 			MissedRuns = missed,
 		};

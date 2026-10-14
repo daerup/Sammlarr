@@ -15,6 +15,7 @@ using Harness;
 using Shared.Concurrency;
 using Shared.Options;
 using TestInfrastructure;
+using static Harness.FeedItemSpec;
 using static Harness.Ids;
 
 namespace Integration.Tests.Feeds;
@@ -32,7 +33,7 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WhenTmdbAnswers503_RecordsAFailureWithBackoff()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("cached-list");
+		var feedId = await host.SeedFeedAsync("cached-list");
 		host.MdblistFeedContains("cached-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club")
@@ -139,7 +140,7 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
 		host.Movie(TestMedia.FightClub).ServedByTmdb(title: "Fight Club");
 		var fightClub = await StoreAsync(TestMedia.FightClub, Complete("Fight Club") with { PosterUrl = null }, RemoteService.Plex, RemoteService.Mdblist);
-		var feedId = await SeedFeedAsync("cached-list");
+		var feedId = await host.SeedFeedAsync("cached-list");
 		host.MdblistFeedContains("cached-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		host.Resolve<TmdbOptions>().Http.EnrichWaitSeconds = 15;
 		await host.RateLimitedAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(10));
@@ -158,7 +159,7 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
 		await StoreAsync(TestMedia.FightClub, Complete("Fight Club"), RemoteService.Mdblist);
 		await StoreAsync(TestMedia.Inception, Complete("Inception"), RemoteService.Mdblist);
-		var feedId = await SeedFeedAsync("cached-list");
+		var feedId = await host.SeedFeedAsync("cached-list");
 		host.MdblistFeedContains("cached-list", Item("Fight Club", MediaType.Movie, Tmdb("550")), Item("Inception", MediaType.Movie, Tmdb("27205")));
 		await RunAsync(feedId);
 		host.SetCurrentTime(NextDay);
@@ -176,9 +177,9 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
 		var fightClub = await StoreAsync(TestMedia.FightClub, Complete("Fight Club"));
-		var feedId = await SeedFeedAsync("cached-list");
+		var feedId = await host.SeedFeedAsync("cached-list");
 		host.MdblistFeedContains("cached-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
-		host.Resolve<MdblistBudget>().Record(SammlarrTestHost.MdblistApiKey, Spent(Now.AddDays(1)));
+		host.Resolve<MdblistBudget>().Record(SammlarrTestHost.MdblistApiKey, SammlarrTestHost.MdblistAllowance(10, Now.AddDays(1)));
 
 		await RunAsync(feedId);
 
@@ -196,12 +197,14 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 		host.Resolve<TmdbOptions>().Http.MaxWaitSeconds = 15;
 		host.Movie(TestMedia.FightClub).ServedByTmdb(title: "Fight Club", genres: ["Drama"]);
 		var fightClub = await StoreAsync(TestMedia.FightClub, Complete("Fight Club") with { Genres = [] }, RemoteService.Plex, RemoteService.Mdblist);
-		var feedId = await SeedFeedAsync("cached-list", GenreIs("Drama"));
+		var feedId = await host.SeedFeedAsync("cached-list", filter: GenreIs("Drama"));
 		host.MdblistFeedContains("cached-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.RateLimitedAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(10));
 
 		var running = RunAsync(feedId);
-		await EventuallyAsync(() => host.Resolve<Lanes>().Gate(new LaneName(RemoteService.Tmdb, Lanes.Rest), new None()).Load(LaneClass.Title).Waiting == 1);
+		await SammlarrTestHost.EventuallyAsync(() =>
+			host.Resolve<Lanes>().Gate(new LaneName(RemoteService.Tmdb, Lanes.Rest), new None()).Load(LaneClass.Title).Waiting == 1
+		);
 		time.Advance(TimeSpan.FromSeconds(10));
 
 		await Assert.That(await running.WaitAsync(Patience)).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
@@ -211,14 +214,6 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 	private static readonly TimeSpan Patience = TimeSpan.FromSeconds(10);
 
 	private const string MdblistTitles = $"{TestUrls.MdblistApi}/tmdb/movie";
-
-	private static HttpResponseMessage Spent(DateTimeOffset reset)
-	{
-		var answered = new HttpResponseMessage(HttpStatusCode.OK);
-		answered.Headers.Add("x-ratelimit-remaining", "10");
-		answered.Headers.Add("x-ratelimit-reset", $"{reset.ToUnixTimeSeconds()}");
-		return answered;
-	}
 
 	private static MovieDetails Complete(string title)
 	{
@@ -317,15 +312,6 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 		return new QueryFilter { Operator = FilterOperator.And, Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = [predicate] }] };
 	}
 
-	private static async Task EventuallyAsync(Func<bool> condition)
-	{
-		using var timeout = new CancellationTokenSource(Patience);
-		while (!condition())
-		{
-			await Task.Delay(TimeSpan.FromMilliseconds(20), timeout.Token);
-		}
-	}
-
 	private static string MdblistRatings(params (string Tmdb, int Metacritic)[] titles)
 	{
 		var entries = titles.Select(title =>
@@ -335,27 +321,4 @@ public class CachedRunTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	private static string TmdbDetail(MediaSpec spec) => string.Format(TmdbEndpoints.Detail, TmdbEndpoints.MovieType, spec.Ids[0].Value);
-
-	private static FeedItemSpec Item(string title, MediaType type, params ProviderId[] ids)
-	{
-		return new FeedItemSpec(title, type, null, ids.ToDictionary(id => id.Provider, id => id.Value));
-	}
-
-	private async Task<FeedId> SeedFeedAsync(string identifier, QueryFilter? filter = null)
-	{
-		var entity = new FeedRow
-		{
-			Name = "Comedy",
-			IsEnabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new FeedStrategy(new Append()),
-			Identifier = identifier,
-			Filter = filter,
-		};
-
-		host.Context.Feeds.Add(entity);
-		await host.Context.SaveChangesAsync();
-		host.Context.ChangeTracker.Clear();
-		return FeedId.From(entity.Id);
-	}
 }

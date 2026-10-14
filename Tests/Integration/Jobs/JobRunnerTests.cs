@@ -9,8 +9,6 @@ using Domain.Providers;
 using Domain.Wantlist.Sync;
 using Harness;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -22,24 +20,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
-	private JobRunner Testee
-	{
-		get
-		{
-			var scopes = host.Resolve<IServiceScopeFactory>();
-			var signal = new JobSignal();
-			var clock = host.Resolve<IDateTimeProvider>();
-			return new JobRunner(
-				scopes,
-				signal,
-				new JobAlarm(scopes, signal, clock, NullLogger<JobAlarm>.Instance),
-				new JobRunnerStatus(),
-				host.Resolve<JobTurn>(),
-				clock,
-				NullLogger<JobRunner>.Instance
-			);
-		}
-	}
+	private JobRunner Testee => host.BuildJobRunner();
 
 	[Test]
 	public async Task RunNextAsync_WhenNothingIsQueued_DoesNothing()
