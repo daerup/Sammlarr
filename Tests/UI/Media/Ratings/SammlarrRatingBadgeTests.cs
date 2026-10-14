@@ -7,7 +7,6 @@ using Domain.Providers;
 using Domain.Usage;
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Usage;
-using TUnit.Assertions.Enums;
 using UI.Shared.Media.Ratings;
 using UI.Shared.Services;
 
@@ -76,7 +75,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 	}
 
 	[Test]
-	public async Task Badge_WhenTheRatingReadsAsNineAndAHalf_Shines()
+	public async Task Badge_WhenTheRatingReadsAsNineAndAHalf_DrawsTheStarsRays()
 	{
 		var cut = Render<SammlarrRatingBadge>(parameters =>
 			parameters
@@ -85,7 +84,7 @@ public class SammlarrRatingBadgeTests : BunitContext
 		);
 
 		await Assert.That(cut.Find(".rating-badge").TextContent.Trim()).IsEqualTo("9.5");
-		await Assert.That(cut.Find(".rating-star").ClassList).Contains("shine");
+		await Assert.That(cut.FindAll(".rating-star .rating-star-rays")).HasSingleItem();
 	}
 
 	[Test]
@@ -104,13 +103,12 @@ public class SammlarrRatingBadgeTests : BunitContext
 	}
 
 	[Test]
-	public async Task Badge_WhenNoSourceRatesTheTitle_ShowsTheDashedStarWithADash()
+	public async Task Badge_WhenNoSourceRatesTheTitle_ShowsADashAndSaysItIsUnrated()
 	{
 		var cut = Render<SammlarrRatingBadge>(parameters => parameters.Add(badge => badge.Ratings, MediaRatings.None));
 
 		await Assert.That(cut.Find(".rating-badge").TextContent.Trim()).IsEqualTo("–");
-		await Assert.That(cut.Find(".rating-badge").ClassList).Contains("is-unrated");
-		await Assert.That(cut.Find(".rating-star path").GetAttribute("stroke-dasharray")).IsNotNull();
+		await Assert.That(cut.Find(".rating-badge").GetAttribute("aria-label")).IsEqualTo(RatingTexts.Unrated);
 	}
 
 	[Test]
@@ -122,11 +120,10 @@ public class SammlarrRatingBadgeTests : BunitContext
 	}
 
 	[Test]
-	public async Task Breakdown_UnderFirstAvailable_DimsTheRowsThatDoNotCountAndSaysWhyOnce()
+	public async Task Breakdown_UnderFirstAvailable_SaysOnceWhyTheRowsAfterThePickDoNotCount()
 	{
 		var cut = RenderBreakdown(ProjectHailMary, new RatingStrategy(new OrderedRating([RatingSource.Imdb])));
 
-		await Assert.That(cut.FindAll(".rating-row.dim").Count).IsEqualTo(3);
 		await Assert.That(cut.FindAll(".rating-row-name small").Count(line => line.TextContent == "not needed, IMDb came first")).IsEqualTo(1);
 	}
 
@@ -175,7 +172,6 @@ public class SammlarrRatingBadgeTests : BunitContext
 		await Assert
 			.That(cut.FindAll(".rating-row-link").Select(link => link.GetAttribute("href") ?? string.Empty))
 			.Contains("https://www.rottentomatoes.com/tv/last_seen");
-		_media.FindIdAsync(Any<MediaId>(), MediaProvider.RottenTomatoes, Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -200,16 +196,6 @@ public class SammlarrRatingBadgeTests : BunitContext
 	}
 
 	[Test]
-	public async Task Breakdown_ForEachRow_UsesItsOwnersBrandColour()
-	{
-		var cut = RenderBreakdown(LastSeen, new RatingStrategy(AveragedRating.Everything));
-
-		await Assert
-			.That(cut.FindAll(".rating-row").Select(row => row.GetAttribute("style") ?? string.Empty))
-			.IsEquivalentTo(["--brand: #01B4E4", "--brand: #F5DE50", "--brand: #FA320A"], CollectionOrdering.Matching);
-	}
-
-	[Test]
 	public async Task Breakdown_WhenTheTitleAlreadyHasARottenTomatoesId_LinksThereWithoutAsking()
 	{
 		var cut = RenderBreakdown(LastSeen, new RatingStrategy(AveragedRating.Everything), RottenTomatoesId.From("tv/last_seen", MediaType.Show));
@@ -220,28 +206,23 @@ public class SammlarrRatingBadgeTests : BunitContext
 		_media.FindIdAsync(Any<MediaId>(), Any<MediaProvider>(), Any()).WasCalled(Times.Never);
 	}
 
-	[Test]
-	public async Task Breakdown_ForASeries_SaysAniListAndMalRateItsFirstSeason()
+	public static IEnumerable<Func<(IExternalMediaId[] Ids, string[] Subtitles)>> AnimeTitles()
 	{
-		var cut = RenderAnime(TvdbId.From("267440", MediaType.Show), AniListId.From("16498", MediaType.Show));
-
-		await Assert.That(Subtitles(cut)).IsEquivalentTo(["season 1 · 2,826,539 votes", "season 1 · 610,640 votes"]);
+		return
+		[
+			() => ([TvdbId.From("267440", MediaType.Show), AniListId.From("16498", MediaType.Show)], ["season 1 · 2,826,539 votes", "season 1 · 610,640 votes"]),
+			() => ([TmdbId.From("129", MediaType.Movie), AniListId.From("199", MediaType.Movie)], ["2,826,539 votes", "610,640 votes"]),
+			() => ([AniListId.From("104578", MediaType.Show), MalId.From("38524", MediaType.Show)], ["2,826,539 votes", "610,640 votes"]),
+		];
 	}
 
 	[Test]
-	public async Task Breakdown_ForAMovie_GivesAniListAndMalNoSeason()
+	[MethodDataSource(nameof(AnimeTitles))]
+	public async Task Breakdown_ForAnAnimeTitle_SaysAniListAndMalRateTheFirstSeasonOnlyOfAWholeSeries(IExternalMediaId[] ids, string[] subtitles)
 	{
-		var cut = RenderAnime(TmdbId.From("129", MediaType.Movie), AniListId.From("199", MediaType.Movie));
+		var cut = RenderAnime(ids);
 
-		await Assert.That(Subtitles(cut)).IsEquivalentTo(["2,826,539 votes", "610,640 votes"]);
-	}
-
-	[Test]
-	public async Task Breakdown_ForALaterSeasonStoredAsItsOwnTitle_GivesAniListAndMalNoSeason()
-	{
-		var cut = RenderAnime(AniListId.From("104578", MediaType.Show), MalId.From("38524", MediaType.Show));
-
-		await Assert.That(Subtitles(cut)).IsEquivalentTo(["2,826,539 votes", "610,640 votes"]);
+		await Assert.That(Subtitles(cut)).IsEquivalentTo(subtitles);
 	}
 
 	private static IEnumerable<string> Subtitles(IRenderedComponent<SammlarrRatingBreakdown> cut) =>

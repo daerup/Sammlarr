@@ -23,40 +23,29 @@ public class ArrSearchLinksTests
 
 	private static readonly ImdbId BreakingBadImdb = ImdbId.From("tt0903747", MediaType.Show);
 
-	[Test]
-	public async Task For_AMovieWithTmdbAndImdbIds_FindsItInRadarrByItsTmdbId()
+	public static IEnumerable<Func<(IExternalMediaId[] Ids, ArrApp App, string Term, string Url)>> FindableTitles()
 	{
-		var link = ArrSearchLinks.For(Addressed, [MatrixImdb, TmdbId.From("603", MediaType.Movie)]);
-
-		await Assert.That(link).IsSome().And.IsEqualTo(Radarr("tmdb:603", "tmdb%3A603"));
+		return
+		[
+			() => ([MatrixImdb, TmdbId.From("603", MediaType.Movie)], ArrApp.Radarr, "tmdb:603", "http://radarr:7878/add/new?term=tmdb%3A603"),
+			() => ([MatrixImdb], ArrApp.Radarr, "imdb:tt0133093", "http://radarr:7878/add/new?term=imdb%3Att0133093"),
+			() =>
+				(
+					[BreakingBadImdb, TmdbId.From("1396", MediaType.Show), TvdbId.From("81189", MediaType.Show)],
+					ArrApp.Sonarr,
+					"tvdb:81189",
+					"http://sonarr:8989/add/new?term=tvdb%3A81189"
+				),
+			() => ([BreakingBadImdb, TmdbId.From("1396", MediaType.Show)], ArrApp.Sonarr, "tmdb:1396", "http://sonarr:8989/add/new?term=tmdb%3A1396"),
+			() => ([BreakingBadImdb], ArrApp.Sonarr, "imdb:tt0903747", "http://sonarr:8989/add/new?term=imdb%3Att0903747"),
+		];
 	}
 
 	[Test]
-	public async Task For_AMovieWithOnlyAnImdbId_FindsItInRadarrByThatId()
+	[MethodDataSource(nameof(FindableTitles))]
+	public async Task For_AMovieOrAShow_LinksToItsAppsSearchByTheBestIdItHasWithoutATrailingSlash(IExternalMediaId[] ids, ArrApp app, string term, string url)
 	{
-		await Assert.That(ArrSearchLinks.For(Addressed, [MatrixImdb])).IsSome().And.IsEqualTo(Radarr("imdb:tt0133093", "imdb%3Att0133093"));
-	}
-
-	[Test]
-	public async Task For_AShowWithTvdbTmdbAndImdbIds_FindsItInSonarrByItsTvdbIdWithoutTheTrailingSlash()
-	{
-		var link = ArrSearchLinks.For(Addressed, [BreakingBadImdb, TmdbId.From("1396", MediaType.Show), TvdbId.From("81189", MediaType.Show)]);
-
-		await Assert.That(link).IsSome().And.IsEqualTo(Sonarr("tvdb:81189", "tvdb%3A81189"));
-	}
-
-	[Test]
-	public async Task For_AShowWithTmdbAndImdbIds_FindsItInSonarrByItsTmdbId()
-	{
-		var link = ArrSearchLinks.For(Addressed, [BreakingBadImdb, TmdbId.From("1396", MediaType.Show)]);
-
-		await Assert.That(link).IsSome().And.IsEqualTo(Sonarr("tmdb:1396", "tmdb%3A1396"));
-	}
-
-	[Test]
-	public async Task For_AShowWithOnlyAnImdbId_FindsItInSonarrByThatId()
-	{
-		await Assert.That(ArrSearchLinks.For(Addressed, [BreakingBadImdb])).IsSome().And.IsEqualTo(Sonarr("imdb:tt0903747", "imdb%3Att0903747"));
+		await Assert.That(ArrSearchLinks.For(Addressed, ids)).IsSome().And.IsEqualTo(new ArrSearchLink(app, term, url));
 	}
 
 	[Test]
@@ -109,8 +98,4 @@ public class ArrSearchLinksTests
 			.IsSome()
 			.And.IsEqualTo("http://localhost:7879/add/new?term=tmdb%3A603");
 	}
-
-	private static ArrSearchLink Radarr(string term, string escaped) => new(ArrApp.Radarr, term, $"http://radarr:7878/add/new?term={escaped}");
-
-	private static ArrSearchLink Sonarr(string term, string escaped) => new(ArrApp.Sonarr, term, $"http://sonarr:8989/add/new?term={escaped}");
 }

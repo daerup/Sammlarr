@@ -19,14 +19,17 @@ public class RatingSuppliersPopoverTests : BunitContext
 	}
 
 	[Test]
-	public async Task Popover_ForASourceOnlyPlexSupplies_OffersToConnectPlex()
+	public async Task Popover_ForImdb_OffersToConnectPlexOrMdbListButLeavesOutItsDatasets()
 	{
 		var cut = await OpenAsync(RatingSource.Imdb);
 
-		var supplier = cut.Find("a.rating-supplier");
+		var suppliers = cut.FindAll("a.rating-supplier");
 		await Assert.That(cut.Find(".rating-suppliers-head").TextContent).IsEqualTo("IMDb ratings come from");
-		await Assert.That(supplier.GetAttribute("href")).IsEqualTo("/settings?section=providers&provider=plex");
-		await Assert.That(supplier.TextContent).Contains("Plex").And.Contains("Not connected");
+		await Assert.That(suppliers.Select(Href)).IsEquivalentTo(["/settings?section=providers&provider=plex", "/settings?section=providers&provider=mdblist"]);
+		await Assert
+			.That(suppliers.Single(link => Href(link).EndsWith("=plex", StringComparison.Ordinal)).TextContent)
+			.Contains("Plex")
+			.And.Contains("Not connected");
 	}
 
 	[Test]
@@ -44,16 +47,6 @@ public class RatingSuppliersPopoverTests : BunitContext
 		await Assert
 			.That(cut.FindAll("a.rating-supplier").Single(link => Href(link).EndsWith("=tmdb", StringComparison.Ordinal)).TextContent)
 			.Contains("No key yet");
-	}
-
-	[Test]
-	public async Task Popover_ForImdb_LeavesOutItsDatasetsWhichNeedNoConnecting()
-	{
-		var cut = await OpenAsync(RatingSource.Imdb);
-
-		await Assert
-			.That(cut.FindAll("a.rating-supplier").Select(Href))
-			.IsEquivalentTo(["/settings?section=providers&provider=plex", "/settings?section=providers&provider=mdblist"]);
 	}
 
 	private static string Href(IElement link) => link.GetAttribute("href") ?? string.Empty;

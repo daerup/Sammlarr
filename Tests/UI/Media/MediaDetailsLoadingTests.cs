@@ -13,10 +13,10 @@ public class MediaDetailsLoadingTests
 	private IMediaService Testee => _media.Object;
 
 	[Test]
-	public async Task GetDetailsByIdAsync_WhenAnIdComesBackTwice_KeepsTheLastAnswer()
+	public async Task GetDetailsByIdAsync_WhenAnIdComesBackTwice_AsksForNoExtraFieldsAndKeepsTheLastAnswer()
 	{
 		Result<MatchedMedia>[] answers = [Success.Of(Titled("First")), Success.Of(Titled("Second"))];
-		_media.GetDetailsAsync(Any(), Any(), Any()).Returns(answers.ToAsyncEnumerable());
+		_media.GetDetailsAsync(Any(), FieldNeeds.None, Any()).Returns(answers.ToAsyncEnumerable());
 
 		var found = await Testee.GetDetailsByIdAsync([Id]);
 
@@ -32,16 +32,6 @@ public class MediaDetailsLoadingTests
 		var found = await Testee.GetDetailsByIdAsync([Id]);
 
 		await Assert.That(found).IsEmpty();
-	}
-
-	[Test]
-	public async Task GetDetailsByIdAsync_AsksWithNone()
-	{
-		_media.GetDetailsAsync(Any(), Any(), Any()).Returns(AsyncEnumerable.Empty<Result<MatchedMedia>>());
-
-		await Testee.GetDetailsByIdAsync([Id]);
-
-		_media.GetDetailsAsync(Any(), FieldNeeds.None, Any()).WasCalled(Times.Once);
 	}
 
 	private static MatchedMedia Titled(string title) => new(new MediaIdentity(Id, []), new MovieDetails { Title = title });

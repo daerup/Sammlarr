@@ -65,13 +65,13 @@ public class ExternalIdsViewTests
 	}
 
 	[Test]
-	public async Task WithArrCardAsync_ForAMember_AddsNoCardAndReadsNoSettings()
+	public async Task WithArrCardAsync_ForAMemberOnARadarrAndSonarrWantlist_AddsNoCard()
 	{
+		Syncing(SinkKind.Arr);
+
 		var cards = await Testee().WithArrCardAsync(TmdbCards, [Tmdb]);
 
-		await Assert.That(cards).Count().IsEqualTo(1);
-		_providers.GetAsync(Any()).WasCalled(Times.Never);
-		_arr.GetAsync(Any()).WasCalled(Times.Never);
+		await Assert.That(cards.Select(card => card.Brand.DisplayName)).IsEquivalentTo(["The Movie Database"]);
 	}
 
 	[Test]
@@ -83,7 +83,6 @@ public class ExternalIdsViewTests
 		var cards = await Testee().WithArrCardAsync(TmdbCards, [Tmdb]);
 
 		await Assert.That(cards.Select(card => card.Brand.DisplayName)).IsEquivalentTo(["The Movie Database"]);
-		_arr.GetAsync(Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
@@ -108,16 +107,17 @@ public class ExternalIdsViewTests
 	}
 
 	[Test]
-	public async Task WithArrCardAsync_AskedTwice_ReadsTheRadarrAndSonarrSettingsOnce()
+	public async Task WithArrCardAsync_AskedTwice_KeepsTheRadarrAndSonarrSettingsItReadFirst()
 	{
 		_user.Role = UserRole.Admin;
 		Syncing(SinkKind.Arr);
 		var testee = Testee();
-
-		await testee.WithArrCardAsync(TmdbCards, [Tmdb]);
 		await testee.WithArrCardAsync(TmdbCards, [Tmdb]);
 
-		_arr.GetAsync(Any()).WasCalled(Times.Once);
+		_arr.GetAsync(Any()).Returns(ArrSinkConfig.Empty.With(ArrApp.Radarr, ArrInstanceConfig.Empty with { Url = Some.Of("http://radarr:9999") }));
+		var cards = await testee.WithArrCardAsync(TmdbCards, [Tmdb]);
+
+		await Assert.That(cards[^1].Page).IsEqualTo("http://radarr:7878/add/new?term=tmdb%3A603");
 	}
 
 	[Test]

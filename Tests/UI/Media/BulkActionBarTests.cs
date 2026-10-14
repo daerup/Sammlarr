@@ -23,15 +23,17 @@ public class BulkActionBarTests : BunitContext
 	}
 
 	[Test]
-	public async Task Remove_WhenEverySinglePageItemIsSelected_AsksForConfirmationEvenWithoutAListScopeEntry()
+	public async Task Remove_OnASinglePageListWithEveryItemSelected_AsksForConfirmationWithoutTheScopeSentence()
 	{
 		var removed = false;
 		var cut = RenderBar(selected: 7, page: 7, list: 7, onRemove: () => removed = true);
 
 		await ClickRemove(cut);
 
+		var dialog = cut.Find("[role=alertdialog]");
 		await Assert.That(removed).IsFalse();
-		await Assert.That(cut.Markup).Contains("Remove 7 titles from your blocklist?");
+		await Assert.That(dialog.TextContent).Contains("Remove 7 titles from your blocklist?");
+		await Assert.That(cut.Find($"#{dialog.GetAttribute("aria-describedby")}").TextContent.Trim()).IsEqualTo("Body.");
 	}
 
 	[Test]
@@ -55,16 +57,6 @@ public class BulkActionBarTests : BunitContext
 
 		await Assert.That(removed).IsFalse();
 		await Assert.That(cut.Markup).Contains("not just the 48 on this page");
-	}
-
-	[Test]
-	public async Task Confirm_OnASinglePageList_LeavesOutTheScopeSentenceBecauseThereIsNoOtherPage()
-	{
-		var cut = RenderBar(selected: 7, page: 7, list: 7, onRemove: () => { });
-
-		await ClickRemove(cut);
-
-		await Assert.That(cut.Markup).DoesNotContain("on this page.");
 	}
 
 	[Test]

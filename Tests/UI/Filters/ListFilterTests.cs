@@ -3,6 +3,7 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using UI.Shared.Filters;
 
 namespace UI.Tests.Filters;
@@ -82,9 +83,11 @@ public class ListFilterTests
 	}
 
 	[Test]
-	public async Task MatchesSource_WithNothingChosen_AcceptsEverything()
+	public async Task None_WithNothingChosen_AcceptsAnyTypeAndSourceAndCountsNoFilter()
 	{
+		await Assert.That(ListFilter.None.MatchesType(MediaType.Show)).IsTrue();
 		await Assert.That(ListFilter.None.MatchesSource(new ManualOrigin(ManualSource.Browse))).IsTrue();
+		await Assert.That(ListFilter.None.MatchesSource(new SinkOrigin(SinkKind.Plex))).IsTrue();
 		await Assert.That(ListFilter.None.ActiveCount).IsEqualTo(0);
 	}
 
@@ -135,13 +138,6 @@ public class ListFilterTests
 	}
 
 	[Test]
-	public async Task MatchesType_AndMatchesSource_AcceptEverythingWhenUnset()
-	{
-		await Assert.That(ListFilter.None.MatchesType(MediaType.Show)).IsTrue();
-		await Assert.That(ListFilter.None.MatchesSource(new SinkOrigin(SinkKind.Plex))).IsTrue();
-	}
-
-	[Test]
 	public async Task SortBy_TitleAscending_OrdersByTitleRegardlessOfWhenItWasAdded()
 	{
 		var items = new[] { ("Zodiac", 3), ("Arrival", 1), ("Moana", 2) };
@@ -151,7 +147,7 @@ public class ListFilterTests
 			.Select(item => item.Item1)
 			.ToList();
 
-		await Assert.That(sorted).IsEquivalentTo(["Arrival", "Moana", "Zodiac"]);
+		await Assert.That(sorted).IsEquivalentTo(["Arrival", "Moana", "Zodiac"], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -164,7 +160,7 @@ public class ListFilterTests
 			.Select(item => item.Item1)
 			.ToList();
 
-		await Assert.That(sorted).IsEquivalentTo(["Zodiac", "Moana", "Arrival"]);
+		await Assert.That(sorted).IsEquivalentTo(["Zodiac", "Moana", "Arrival"], CollectionOrdering.Matching);
 	}
 
 	private static MatchedMedia Movie(string title)

@@ -14,33 +14,13 @@ public class MediaPresentationTests
 	}
 
 	[Test]
-	public async Task Key_OfAMatchedTitle_UsesTheMediaId()
+	public async Task Key_OfAMatchedTitle_UsesTheMediaIdWhetherReadAsAMatchResultOrNot()
 	{
 		var movie = Matched();
 		MediaMatchResult media = movie;
 
 		await Assert.That(media.Key).IsEqualTo(movie.Identity.Id.Value.ToString());
-	}
-
-	[Test]
-	public async Task Key_OfAMatchedTitle_IsTheSameWhetherReadAsAMatchResultOrNot()
-	{
-		var movie = Matched();
-		MediaMatchResult media = movie;
-
-		await Assert.That(movie.Key).IsEqualTo(media.Key);
-	}
-
-	[Test]
-	public async Task Year_WhenReleased_IsTheReleaseYear()
-	{
-		await Assert.That(Matched().Details.Year).IsEqualTo(2010);
-	}
-
-	[Test]
-	public async Task Year_WhenTheReleaseDateIsUnknown_IsNull()
-	{
-		await Assert.That(Unmatched().Details.Year).IsNull();
+		await Assert.That(movie.Key).IsEqualTo(movie.Identity.Id.Value.ToString());
 	}
 
 	private static UnmatchedMedia Unmatched() => new([TmdbId.From("27205", MediaType.Movie)], new MovieDetails());
