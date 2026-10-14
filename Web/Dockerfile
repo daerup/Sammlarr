@@ -12,7 +12,8 @@ WORKDIR /src
 COPY . .
 RUN --mount=type=cache,id=sammlarr-nuget,target=/root/.nuget/packages \
     --mount=type=cache,id=sammlarr-npm,target=/root/.npm \
-    dotnet publish Web/Web.csproj -c Release -a $TARGETARCH --self-contained false -o /app \
+    dotnet restore Web/Web.csproj --locked-mode && \
+    dotnet publish Web/Web.csproj -c Release -a $TARGETARCH --self-contained false --no-restore -o /app \
         -p:MinVerVersionOverride=$VERSION -p:ExcludeStaging=true -p:ContinuousIntegrationBuild=true -p:DebugType=none
 RUN mkdir -p /data
 

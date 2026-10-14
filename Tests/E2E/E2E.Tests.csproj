@@ -5,6 +5,7 @@
 		<Nullable>enable</Nullable>
 		<IsTestProject>true</IsTestProject>
 		<OutputType>Exe</OutputType>
+		<RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
 		<UserSecretsId>c2b860a4-38b3-426b-a453-be7854249bcd</UserSecretsId>
 	</PropertyGroup>
 	<ItemGroup>
