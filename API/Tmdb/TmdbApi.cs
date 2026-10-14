@@ -21,17 +21,17 @@ internal sealed class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDa
 
 	public async Task<Result<TmdbTypes.FindItem>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
-		return await (await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken)).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
+		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
 	}
 
 	public async Task<Result<IReadOnlyList<TmdbTypes.Trending.Result>>> SearchAsync(string query, CancellationToken cancellationToken = default)
 	{
-		return await (await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken)).Map(apiKey => FetchSearchAsync(query, apiKey, cancellationToken));
+		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchSearchAsync(query, apiKey, cancellationToken));
 	}
 
 	private async Task<Result<TmdbTypes.Details>> DetailAsync(TmdbId id, CancellationToken cancellationToken)
 	{
-		return await (await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken)).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
+		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
 	}
 
 	private async Task<Result<IReadOnlyList<TmdbTypes.Trending.Result>>> FetchSearchAsync(string query, IApiKey apiKey, CancellationToken cancellationToken)
