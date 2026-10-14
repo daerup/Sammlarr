@@ -23,7 +23,7 @@ public class RunPlanTests
 	}
 
 	[Test]
-	public async Task Candidates_PutsAFeedRunningWithinTheDayInSoonAnyway()
+	public async Task Candidates_ForANeverRunFeedRunningWithinTheDay_PutsItInSoonAnywayAndSaysItNeverRanRatherThanShowingAZeroDelta()
 	{
 		var hourly = Feed("hourly", new Scheduled("0 0 * * * *"));
 
@@ -31,6 +31,8 @@ public class RunPlanTests
 
 		await Assert.That(candidates[0].Group).IsEqualTo(RunGroup.SoonAnyway);
 		await Assert.That(candidates[0].Flag).IsNull();
+		await Assert.That(candidates[0].LastRun.EverRan).IsFalse();
+		await Assert.That(candidates[0].LastRun.Changed).IsFalse();
 	}
 
 	[Test]
@@ -67,7 +69,7 @@ public class RunPlanTests
 	}
 
 	[Test]
-	public async Task Candidates_ShowsADisabledFeedButNeverPreSelectsIt()
+	public async Task Candidates_ForADisabledFeed_ShowsItFlaggedWithNoNextRunButNeverPreSelectsIt()
 	{
 		var off = Feed("off", new Scheduled("0 0 * * * *"), enabled: false);
 
@@ -76,17 +78,8 @@ public class RunPlanTests
 		await Assert.That(candidates).HasSingleItem();
 		await Assert.That(candidates[0].Enabled).IsFalse();
 		await Assert.That(candidates[0].Flag).IsEqualTo(RunFlag.Disabled);
-		await Assert.That(RunPlan.DefaultSelection(candidates)).IsEmpty();
-	}
-
-	[Test]
-	public async Task Candidates_ForADisabledScheduledFeed_ShowsNoNextRunBecauseItWillNotRun()
-	{
-		var off = Feed("off", new Scheduled("0 0 * * * *"), enabled: false);
-
-		var candidates = RunPlan.Candidates([NeverRan(off)], Now, TimeZoneInfo.Utc);
-
 		await Assert.That(candidates[0].NextRun).IsNone();
+		await Assert.That(RunPlan.DefaultSelection(candidates)).IsEmpty();
 	}
 
 	[Test]
@@ -109,15 +102,6 @@ public class RunPlanTests
 
 		await Assert.That(selected).HasSingleItem();
 		await Assert.That(selected.Contains(feeds[2].Id)).IsTrue();
-	}
-
-	[Test]
-	public async Task Candidates_ForAFeedThatNeverRan_SaysSoRatherThanShowingAZeroDelta()
-	{
-		var candidates = RunPlan.Candidates([NeverRan(Feed("fresh", new Scheduled("0 0 * * * *")))], Now, TimeZoneInfo.Utc);
-
-		await Assert.That(candidates[0].LastRun.EverRan).IsFalse();
-		await Assert.That(candidates[0].LastRun.Changed).IsFalse();
 	}
 
 	private static FeedOverview NeverRan(Feed feed) => FeedOverview.Of(feed, new None(), 0);

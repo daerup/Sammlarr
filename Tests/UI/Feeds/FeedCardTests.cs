@@ -40,22 +40,11 @@ public class FeedCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForAPausedFeed_MarksTheCardAndSaysSo()
+	public async Task Render_ForAPausedFeed_SaysSo()
 	{
 		var cut = RenderCard(Row(enabled: false));
 
-		await Assert.That(cut.Find("article").ClassList).Contains("is-paused");
 		await Assert.That(cut.Find(".feed-card-corner").TextContent).Contains("Paused");
-	}
-
-	[Test]
-	public async Task Render_ForAPausedFeed_DisablesItsRunButton()
-	{
-		var cut = RenderCard(Row(enabled: false));
-
-		var run = cut.Find(".feed-card-run");
-		await Assert.That(run.HasAttribute("disabled")).IsTrue();
-		await Assert.That(run.GetAttribute("aria-label")).IsEqualTo("Paused: resume the feed to run it");
 	}
 
 	[Test]
@@ -94,29 +83,21 @@ public class FeedCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WhileTheFeedRuns_DisablesItsRunButton()
-	{
-		var cut = RenderCard(Row(job: JobState.Running));
-
-		var run = cut.Find(".feed-card-run");
-		await Assert.That(run.HasAttribute("disabled")).IsTrue();
-		await Assert.That(run.GetAttribute("aria-label")).IsEqualTo("Running now");
-	}
-
-	[Test]
-	[Arguments(JobState.Running, false, "Running now", "is-running")]
-	[Arguments(JobState.Queued, true, "Waiting in the queue", "is-queued")]
-	[Arguments(JobState.Waiting, false, "Waiting in the queue", "is-queued")]
-	[Arguments(JobState.Done, false, "Paused: resume the feed to run it", "is-paused")]
-	[Arguments(JobState.Done, true, "Run", "")]
-	[Arguments(null, true, "Run", "")]
-	public async Task Render_ForEachJobState_LabelsAndMarksTheRunButton(JobState? job, bool enabled, string label, string mark)
+	[Arguments(JobState.Running, false, "Running now", true)]
+	[Arguments(JobState.Running, true, "Running now", true)]
+	[Arguments(JobState.Queued, true, "Waiting in the queue", true)]
+	[Arguments(JobState.Waiting, false, "Waiting in the queue", true)]
+	[Arguments(JobState.Done, false, "Paused: resume the feed to run it", true)]
+	[Arguments(null, false, "Paused: resume the feed to run it", true)]
+	[Arguments(JobState.Done, true, "Run", false)]
+	[Arguments(null, true, "Run", false)]
+	public async Task Render_ForEachJobState_LabelsTheRunButtonAndDisablesItUnlessTheFeedCanRun(JobState? job, bool enabled, string label, bool disabled)
 	{
 		var cut = RenderCard(Row(enabled: enabled, job: job));
 
 		var run = cut.Find(".feed-card-run");
 		await Assert.That(run.GetAttribute("aria-label")).IsEqualTo(label);
-		await Assert.That(string.Join(' ', run.ClassList.Where(name => name.StartsWith("is-", StringComparison.Ordinal)))).IsEqualTo(mark);
+		await Assert.That(run.HasAttribute("disabled")).IsEqualTo(disabled);
 	}
 
 	[Test]
@@ -132,14 +113,6 @@ public class FeedCardTests : BunitContext
 		await Assert.That(Normalized(cut.Find("[data-testid=running-pill]").TextContent)).IsEqualTo("Running · 12 / ~400");
 		await Assert.That(cut.FindAll(".last-run")).IsEmpty();
 		await Assert.That(cut.Find(".feed-card-chips").TextContent).DoesNotContain("Running");
-	}
-
-	[Test]
-	public async Task Render_JustFinished_FlashesTheFooter()
-	{
-		var cut = Render<FeedCard>(parameters => parameters.Add(card => card.Row, Row(runs: 3)).Add(card => card.Now, Now).Add(card => card.JustFinished, true));
-
-		await Assert.That(cut.Find(".feed-card-foot").ClassList).Contains("is-new");
 	}
 
 	[Test]

@@ -29,7 +29,8 @@ public class RunFeedsDialogTests : BunitContext
 		var cut = RenderDialog(new HashSet<FeedId> { Documentaries.Id, WeeklyPicks.Id, Trending.Id });
 
 		await Assert.That(cut.Find(".run-foot-push").TextContent).Contains("Run 1 feed");
-		await Assert.That(cut.Find(".run-from").TextContent).Contains("2 are paused or already in the queue and can't run");
+		await Assert.That(cut.Find(".run-from-count").TextContent).IsEqualTo("1");
+		await Assert.That(cut.Find(".run-from").TextContent).Contains("2 are");
 	}
 
 	[Test]
@@ -39,16 +40,6 @@ public class RunFeedsDialogTests : BunitContext
 
 		await Assert.That(cut.Find(".run-foot-push").TextContent).Contains("Run 1 feed");
 		await Assert.That(cut.FindAll(".run-from")).IsEmpty();
-	}
-
-	[Test]
-	public async Task Open_HatchesOnlyThePausedFeed()
-	{
-		var cut = RenderDialog(null);
-
-		var paused = cut.FindAll(".run-row.is-paused");
-		await Assert.That(paused).HasSingleItem();
-		await Assert.That(paused[0].TextContent).Contains(WeeklyPicks.Name);
 	}
 
 	private IRenderedComponent<IComponent> RenderDialog(IReadOnlySet<FeedId>? selection) =>

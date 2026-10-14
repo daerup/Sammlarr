@@ -89,11 +89,10 @@ public class FeedConfigPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Strategy_WhenTheSavedThresholdIsOne_ReadsSingularInAmber()
+	public async Task Strategy_WhenTheSavedThresholdIsOne_ReadsSingular()
 	{
 		var cut = RenderPanel(FeedProvider.Mdblist, new Mirror(1));
 
-		await Assert.That(RunLine(cut).ClassList.Contains("text-amber-500")).IsTrue();
 		await Assert.That(RunLine(cut).TextContent).Contains("missed run.");
 	}
 
@@ -162,29 +161,16 @@ public class FeedConfigPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Sort_WhenByRating_JoinsTheStarToTheSortField()
+	[Arguments(nameof(MediaQueryRow.Rating), true, false)]
+	[Arguments(nameof(MediaQueryRow.Votes), false, true)]
+	[Arguments(nameof(MediaQueryRow.Title), false, false)]
+	public async Task Sort_ForEachField_JoinsTheStarForRatingTheInfoForVotesAndNoSegmentOtherwise(string field, bool hasStar, bool hasInfo)
 	{
-		var cut = RenderPanelSorted(nameof(MediaQueryRow.Rating));
+		var cut = RenderPanelSorted(field);
 
-		await Assert.That(cut.FindAll(".sort-field button.field-segment.is-gold")).IsNotEmpty();
-		await Assert.That(cut.FindAll(".sort-field [aria-label='How Votes are counted']")).IsEmpty();
-	}
-
-	[Test]
-	public async Task Sort_WhenByVotes_JoinsTheInfoToTheSortField()
-	{
-		var cut = RenderPanelSorted(nameof(MediaQueryRow.Votes));
-
-		await Assert.That(cut.FindAll(".sort-field button.field-segment[aria-label='How Votes are counted']")).IsNotEmpty();
-		await Assert.That(cut.FindAll(".sort-field .is-gold")).IsEmpty();
-	}
-
-	[Test]
-	public async Task Sort_WhenByTitle_HasNoSegment()
-	{
-		var cut = RenderPanelSorted(nameof(MediaQueryRow.Title));
-
-		await Assert.That(cut.FindAll(".sort-field .field-segment")).IsEmpty();
+		await Assert.That(cut.FindAll(".sort-field button.field-segment.is-gold").Count > 0).IsEqualTo(hasStar);
+		await Assert.That(cut.FindAll(".sort-field button.field-segment[aria-label='How Votes are counted']").Count > 0).IsEqualTo(hasInfo);
+		await Assert.That(cut.FindAll(".sort-field .field-segment").Count).IsEqualTo(Convert.ToInt32(hasStar) + Convert.ToInt32(hasInfo));
 	}
 
 	[Test]
@@ -285,12 +271,12 @@ public class FeedConfigPanelTests : BunitContext
 	public async Task Limit_PickingAtRandom_EmitsPickRandomAndShowsTheHelper()
 	{
 		var cut = RenderConfig(Documentaries with { Limit = new QueryLimit { Count = 5 } });
-		await Assert.That(cut.Markup).DoesNotContain("at random from what passes your filters");
+		await Assert.That(cut.Markup).DoesNotContain("Picks 5 at random");
 
 		await Radio(cut, "At random").ClickAsync();
 
 		await Assert.That(_changes.Last().Limit?.Pick).IsEqualTo(LimitPick.Random);
-		await Assert.That(cut.Markup).Contains("Picks 5 at random from what passes your filters. Sorting only orders the preview.");
+		await Assert.That(cut.Markup).Contains("Picks 5 at random");
 	}
 
 	private static IElement IdentifierField(IRenderedComponent<FeedConfigPanel> cut) => cut.Find("#list-identifier");

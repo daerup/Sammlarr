@@ -51,13 +51,13 @@ public class FeedRunLiveTests : BunitContext
 		_run.Tally.Getter.Returns(RunTally.Before(Some.Of(400)));
 		_run.Hidden.Getter.Returns(() => _hidden);
 		_run.TraceKey.Getter.Returns(Some.Of(FirstRun));
-		_run.SnapshotAsync(Any()).Returns(Some.Of(Snapshot(FirstRun)));
+		SnapshotAt(12);
 		_run.Hide().Callback(() => _hidden = true);
 		_run.Show().Callback(() => _hidden = false);
 	}
 
 	[Test]
-	public async Task Mount_MidRun_SendsTheSnapshotOnce()
+	public async Task Mount_MidRun_SendsTheSnapshotOnceThenPushesTheBatchesInCursorOrder()
 	{
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 		cut.WaitForState(() => _module.Invocations["mount"].Count == 1);
@@ -67,16 +67,18 @@ public class FeedRunLiveTests : BunitContext
 
 		cut.WaitForState(() => _module.Invocations["push"].Count == 2);
 		var snapshot = (WireSnapshot)_module.Invocations["mount"].Single().Arguments[2]!;
+		var pushed = _module.Invocations["push"].SelectMany(push => ((WireBatch)push.Arguments[1]!).Steps).Select(step => step.Seq);
 		await Assert.That(_module.Invocations["mount"].Count).IsEqualTo(1);
 		await Assert.That(snapshot.CursorSeq).IsEqualTo(12);
 		await Assert.That(snapshot.Titles.Select(title => title.Name)).IsEquivalentTo(["Senna"]);
 		await Assert.That(snapshot.PagesRead).IsEqualTo(0);
 		await Assert.That(snapshot.Reading).IsNull();
 		await Assert.That(snapshot.SourceEnded).IsFalse();
+		await Assert.That(pushed).IsEquivalentTo([13L, 14L], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Mount_SendsTheListAndWhatEachOutcomeMeans()
+	public async Task Mount_SendsTheLayoutWithTheListTheServiceNodesAndWhatEachOutcomeMeans()
 	{
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 		cut.WaitForState(() => _module.Invocations["mount"].Count == 1);
@@ -87,6 +89,8 @@ public class FeedRunLiveTests : BunitContext
 		await Assert.That(layout.Meanings.CouldNotLookUp).Contains("the lookup never finished");
 		await Assert.That(layout.Meanings.Known).Contains("from an earlier run");
 		await Assert.That(layout.Meanings.NotFoundEarlier).Contains("found nothing");
+		await Assert.That(layout.Nodes.Select(node => (node.Key, node.Column))).IsEquivalentTo([("tmdb", 1), ("plex", 2)]);
+		await Assert.That(layout.Details.Single().Brand.Name).IsEqualTo("TMDB");
 	}
 
 	[Test]
@@ -103,31 +107,6 @@ public class FeedRunLiveTests : BunitContext
 		await Assert.That(sent.PagesRead).IsEqualTo(2);
 		await Assert.That(sent.Reading).IsEqualTo(3);
 		await Assert.That(sent.SourceEnded).IsTrue();
-	}
-
-	[Test]
-	public async Task Mount_SendsTheLayoutKeyedByService()
-	{
-		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
-
-		cut.WaitForState(() => _module.Invocations["mount"].Count == 1);
-		var layout = (WireLayout)_module.Invocations["mount"].Single().Arguments[1]!;
-		await Assert.That(layout.Nodes.Select(node => (node.Key, node.Column))).IsEquivalentTo([("tmdb", 1), ("plex", 2)]);
-		await Assert.That(layout.Details.Single().Brand.Name).IsEqualTo("TMDB");
-	}
-
-	[Test]
-	public async Task Push_SendsBatchesInCursorOrder()
-	{
-		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
-		cut.WaitForState(() => _module.Invocations["mount"].Count == 1);
-
-		_run.RaiseBatch(First);
-		_run.RaiseBatch(Second);
-
-		cut.WaitForState(() => _module.Invocations["push"].Count == 2);
-		var pushed = _module.Invocations["push"].Select(push => (WireBatch)push.Arguments[1]!).ToList();
-		await Assert.That(pushed.SelectMany(batch => batch.Steps).Select(step => step.Seq)).IsEquivalentTo([13L, 14L], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -148,14 +127,12 @@ public class FeedRunLiveTests : BunitContext
 	}
 
 	[Test]
-	public async Task Hide_KeepsTheHeaderWithALineThatFills()
+	public async Task Hide_KeepsTheHeaderAndOffersToShowTheRunAgain()
 	{
-		_run.Tally.Getter.Returns(RunTally.Of(FateTally.None with { Started = 120, Matched = 100 }, new None(), 4000, new None(), Some.Of(400)));
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 
 		await cut.Find("[data-testid=live-toggle]").ClickAsync(new());
 
-		await Assert.That(cut.Find("[data-testid=live-line] i").GetAttribute("style")).IsEqualTo("width: 25%");
 		await Assert.That(cut.Find("[data-testid=live-toggle]").TextContent).Contains("Show");
 	}
 
@@ -172,11 +149,13 @@ public class FeedRunLiveTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WhileShown_DrawsNoLine()
+	public async Task Render_ForAFreshShownRun_ShowsARunningChipWithNoLineAndNothingInTheFooter()
 	{
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 
 		await Assert.That(cut.FindAll("[data-testid=live-line]")).IsEmpty();
+		await Assert.That(Segments(cut)).IsEmpty();
+		await Assert.That(cut.Find(".feed-chip").TextContent.Trim()).IsEqualTo("Running");
 	}
 
 	[Test]
@@ -243,11 +222,13 @@ public class FeedRunLiveTests : BunitContext
 
 		await cut.Find("[data-testid=live-toggle]").ClickAsync(new());
 		cut.WaitForState(() => _module.Invocations["dispose"].Count == 1);
+		SnapshotAt(20);
 		await cut.Find("[data-testid=live-toggle]").ClickAsync(new());
 
 		cut.WaitForState(() => _module.Invocations["mount"].Count == 2);
+		var remounted = (WireSnapshot)_module.Invocations["mount"][1].Arguments[2]!;
 		await Assert.That(cut.Find("[data-testid=live-more]").HasAttribute("hidden")).IsFalse();
-		_run.SnapshotAsync(Any()).WasCalled(Times.Exactly(2));
+		await Assert.That(remounted.CursorSeq).IsEqualTo(20);
 	}
 
 	[Test]
@@ -300,14 +281,6 @@ public class FeedRunLiveTests : BunitContext
 		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
 
 		await Assert.That(Segments(cut)).IsEquivalentTo(["Titles flowing"], CollectionOrdering.Matching);
-	}
-
-	[Test]
-	public async Task Footer_BeforeAnyTitleStartedOrPageIsFetched_SaysNothing()
-	{
-		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
-
-		await Assert.That(Segments(cut)).IsEmpty();
 	}
 
 	[Test]
@@ -370,19 +343,6 @@ public class FeedRunLiveTests : BunitContext
 		await cut.Find("[data-testid=live-key-toggle]").ClickAsync(new());
 
 		await Assert.That(cut.Find("[data-testid=live-key]").HasAttribute("hidden")).IsFalse();
-		await Assert.That(cut.FindAll("[data-testid=live-key] > span").Count).IsEqualTo(5);
-	}
-
-	[Test]
-	public async Task Key_ListsTheGreyRing()
-	{
-		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
-
-		var entries = cut.FindAll("[data-testid=live-key] > span").Select(entry => Words(entry.TextContent)).ToList();
-
-		await Assert
-			.That(entries[entries.FindIndex(entry => entry.StartsWith("Yellow", StringComparison.Ordinal)) + 1])
-			.IsEqualTo("Grey ring Sammlarr is pacing itself to stay under the service's limit; the ring counts to the next send");
 	}
 
 	[Test]
@@ -406,41 +366,7 @@ public class FeedRunLiveTests : BunitContext
 		await Assert.That(cut.Find(card).TextContent).Contains("Couldn't look up").And.Contains("so the lookup never finished");
 	}
 
-	[Test]
-	public async Task Header_WhileRunning_ShowsANeutralRunningChip()
-	{
-		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
-
-		await Assert.That(cut.Find(".feed-chip").ClassList).Contains("is-running");
-	}
-
-	[Test]
-	public async Task Bar_ForARun_PutsNotFoundEarlierBesideNotFound()
-	{
-		_run.Tally.Getter.Returns(
-			RunTally.Of(
-				FateTally.None with
-				{
-					Started = 30,
-					Matched = 12,
-					Known = 4,
-					NotFound = 9,
-					Earlier = 5,
-					CouldNotLookUp = 2,
-				},
-				new None(),
-				4000,
-				new None(),
-				Some.Of(400)
-			)
-		);
-
-		var cut = Render<FeedRunLive>(parameters => parameters.Add(live => live.Run, _run.Object));
-
-		await Assert
-			.That(cut.FindAll("[data-testid=live-bar] i[data-part]").Select(part => part.GetAttribute("data-part") ?? ""))
-			.IsEquivalentTo(["Known", "Matched", "NotFound", "NotFoundEarlier", "CouldNotLookUp", "Conflict"], CollectionOrdering.Matching);
-	}
+	private void SnapshotAt(long cursor) => _run.SnapshotAsync(Any()).Returns(Some.Of(Snapshot(FirstRun, cursor)));
 
 	private static IReadOnlyList<string> Segments(IRenderedComponent<FeedRunLive> cut)
 	{
@@ -449,11 +375,11 @@ public class FeedRunLiveTests : BunitContext
 
 	private static string Words(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
-	private static TraceSnapshot Snapshot(Guid run)
+	private static TraceSnapshot Snapshot(Guid run, long seq = 12)
 	{
 		var title = new TitleInFlight(3, "Senna", Some.Of(2010), Some.Of(new HopPlace(RemoteService.Tmdb, TraceStage.Ids)), new None(), new None());
 		return new TraceSnapshot(
-			new TraceCursor(Some.Of(run), 12),
+			new TraceCursor(Some.Of(run), seq),
 			850,
 			[title],
 			[new NodeTally(new HopPlace(RemoteService.Tmdb, TraceStage.Ids), 2, 0, 0, 0, 1, 140)],

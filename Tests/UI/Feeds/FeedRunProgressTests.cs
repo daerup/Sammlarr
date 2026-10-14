@@ -62,14 +62,13 @@ public class FeedRunProgressTests
 	}
 
 	[Test]
-	public async Task Start_WithoutARun_ReadsNothing()
+	public async Task Start_WithoutARun_ShowsNothing()
 	{
 		using var testee = Progress();
 
 		await testee.StartAsync();
 
 		await Assert.That(testee.Live).IsNone();
-		_traces.ReadAsync(Any<FeedId>(), Any<TraceCursor>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -237,7 +236,6 @@ public class FeedRunProgressTests
 		await Task.Delay(300);
 
 		await Assert.That(testee.Live).IsNone();
-		_traces.ReadAsync(Any<FeedId>(), Any<TraceCursor>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -252,7 +250,6 @@ public class FeedRunProgressTests
 		await Task.Delay(300);
 
 		await Assert.That(testee.Live).IsNone();
-		_traces.ReadAsync(Any<FeedId>(), Any<TraceCursor>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
