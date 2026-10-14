@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.Json.Nodes;
 using API.Http;
@@ -136,6 +137,7 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 		return _asked.GetValueOrNone(key).Match(held => !Usable(held), () => true);
 	}
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "Result is read only once the answer completed successfully, so it does not block.")]
 	private bool Missed(MdblistKey key)
 	{
 		return _asked.GetValueOrNone(key).Match(held => held.Answer.IsCompletedSuccessfully && held.Answer.Result is LaneMiss, () => false);
@@ -196,6 +198,7 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 			.ToDictionary(pair => pair.Key, pair => pair.Title);
 	}
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "Result is read only once the answer completed successfully, so it does not block.")]
 	private bool Usable(Asked asked)
 	{
 		if (asked.Answer.IsCanceled || asked.Answer.IsFaulted)

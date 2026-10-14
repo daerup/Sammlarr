@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
 
 namespace Web.Staging;
@@ -60,6 +61,7 @@ internal sealed class ArrClient(HttpClient http)
 		}
 	}
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "The staging seed sets up its own Radarr and Sonarr, which no ForRemote client serves.")]
 	internal static ArrClient For(string url, string apiKey)
 	{
 		var http = new HttpClient { BaseAddress = new Uri($"{url.TrimEnd('/')}/") };

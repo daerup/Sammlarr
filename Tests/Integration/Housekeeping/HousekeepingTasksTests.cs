@@ -22,7 +22,7 @@ namespace Integration.Tests.Housekeeping;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private static readonly DateTimeOffset Now = new(new DateTime(2026, 10, 11, 22, 0, 0, DateTimeKind.Local));
+	private static readonly DateTimeOffset Now = new(2026, 10, 11, 22, 0, 0, TimeSpan.Zero);
 
 	private ServiceProvider? _scheduling;
 
@@ -76,16 +76,16 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task OverviewAsync_BeforeAnythingRan_ListsThePassAndEveryDatasetWithTheirNextRunInLocalTimeAndNoLastRun()
+	public async Task OverviewAsync_BeforeAnythingRan_ListsThePassAndEveryDatasetWithTheirNextRunInTheClocksZoneAndNoLastRun()
 	{
 		var overview = await Testee.OverviewAsync();
 
 		await Assert.That(overview.Pass.Last).IsNone();
-		await Assert.That(overview.Pass.NextRun).IsSome().And.IsEqualTo(new DateTimeOffset(new DateTime(2026, 10, 12, 3, 0, 0, DateTimeKind.Local)));
+		await Assert.That(overview.Pass.NextRun).IsSome().And.IsEqualTo(new DateTimeOffset(2026, 10, 12, 3, 0, 0, TimeSpan.Zero));
 		await Assert.That(overview.Datasets.Select(dataset => dataset.Service)).IsEquivalentTo([RemoteService.ImdbDatasets, RemoteService.AnimeLists]);
 		await Assert.That(overview.Datasets[0].Last).IsNone();
 		await Assert.That(overview.Datasets[1].Last).IsNone();
-		await Assert.That(overview.Datasets[0].NextRun).IsSome().And.IsEqualTo(new DateTimeOffset(new DateTime(2026, 10, 12, 4, 30, 0, DateTimeKind.Local)));
+		await Assert.That(overview.Datasets[0].NextRun).IsSome().And.IsEqualTo(new DateTimeOffset(2026, 10, 12, 4, 30, 0, TimeSpan.Zero));
 	}
 
 	[Test]

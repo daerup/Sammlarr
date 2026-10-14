@@ -3,3 +3,31 @@ P:System.DateTimeOffset.UtcNow;Use IDateTimeProvider
 P:System.DateTime.Now;Use IDateTimeProvider
 P:System.DateTime.UtcNow;Use IDateTimeProvider
 M:System.Threading.Tasks.Task.Wait;Await it
+P:System.DateTime.Today;Use IDateTimeProvider
+P:System.TimeZoneInfo.Local;Use IDateTimeProvider
+M:System.Threading.Thread.Sleep(System.Int32);Await Task.Delay
+M:System.Threading.Thread.Sleep(System.TimeSpan);Await Task.Delay
+P:System.Threading.Tasks.Task`1.Result;Await it
+M:System.Runtime.CompilerServices.TaskAwaiter.GetResult;Await it
+M:System.Runtime.CompilerServices.TaskAwaiter`1.GetResult;Await it
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action,System.Threading.CancellationToken);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action,System.Threading.Tasks.TaskCreationOptions);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action,System.Threading.CancellationToken,System.Threading.Tasks.TaskCreationOptions,System.Threading.Tasks.TaskScheduler);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action{System.Object},System.Object);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action{System.Object},System.Object,System.Threading.CancellationToken);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action{System.Object},System.Object,System.Threading.Tasks.TaskCreationOptions);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action{System.Object},System.Object,System.Threading.CancellationToken,System.Threading.Tasks.TaskCreationOptions,System.Threading.Tasks.TaskScheduler);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew`1(System.Func{``0});Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew`1(System.Func{``0},System.Threading.CancellationToken);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew`1(System.Func{``0},System.Threading.Tasks.TaskCreationOptions);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew`1(System.Func{``0},System.Threading.CancellationToken,System.Threading.Tasks.TaskCreationOptions,System.Threading.Tasks.TaskScheduler);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew`1(System.Func{System.Object,``0},System.Object);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew`1(System.Func{System.Object,``0},System.Object,System.Threading.CancellationToken);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew`1(System.Func{System.Object,``0},System.Object,System.Threading.Tasks.TaskCreationOptions);Use Task.Run
+M:System.Threading.Tasks.TaskFactory.StartNew`1(System.Func{System.Object,``0},System.Object,System.Threading.CancellationToken,System.Threading.Tasks.TaskCreationOptions,System.Threading.Tasks.TaskScheduler);Use Task.Run
+M:System.Environment.GetEnvironmentVariable(System.String);Bind it through IOptions
+M:System.Net.Http.HttpClient.#ctor;Use a typed client from ForRemote
+M:System.Net.Http.HttpClient.#ctor(System.Net.Http.HttpMessageHandler);Use a typed client from ForRemote
+M:System.Net.Http.HttpClient.#ctor(System.Net.Http.HttpMessageHandler,System.Boolean);Use a typed client from ForRemote
+T:System.Console;Log through ILogger

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Web.Health;
 
 internal static class ContainerHealthProbe
@@ -6,6 +8,11 @@ internal static class ContainerHealthProbe
 
 	private static readonly TimeSpan Patience = TimeSpan.FromSeconds(5);
 
+	[SuppressMessage(
+		"ApiDesign",
+		"RS0030",
+		Justification = "The container health check runs as its own short process before the host and its typed clients exist."
+	)]
 	public static async Task<int> CheckAsync(HttpMessageHandler handler, string? ports)
 	{
 		using var client = new HttpClient(handler) { Timeout = Patience };

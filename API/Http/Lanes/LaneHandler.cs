@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Contracts.Providers;
 using Domain.Providers;
@@ -25,6 +26,7 @@ internal sealed class LaneHandler(RemoteService remote, Lanes lanes, IProviderRa
 		return await sending;
 	}
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "Result is read only once the send completed successfully, so it does not block.")]
 	private AttemptOutcome Outcome(Task<HttpResponseMessage> sending)
 	{
 		if (!sending.IsCompletedSuccessfully)

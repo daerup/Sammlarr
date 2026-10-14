@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Hosting;
 using Serilog.Events;
 using Shared.Options;
@@ -8,6 +9,7 @@ internal sealed record ObservabilityContext(bool OtlpEnabled, string Environment
 {
 	private const string OtlpEndpointEnvVar = "OTEL_EXPORTER_OTLP_ENDPOINT";
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "The modules call it while they register their services, before the host's configuration is built.")]
 	public static ObservabilityContext Resolve()
 	{
 		var otlpEnabled = ShouldUseOtlp(System.Environment.GetEnvironmentVariable(OtlpEndpointEnvVar));

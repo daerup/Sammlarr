@@ -39,6 +39,7 @@ public class FeedCardTests : BunitContext
 		Services.AddScoped<ScrollService>();
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
+		clock.Zone.Getter.Returns(TimeZoneInfo.Utc);
 		Services.AddSingleton(clock.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

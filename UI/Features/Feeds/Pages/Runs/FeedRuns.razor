@@ -429,17 +429,19 @@
                 .Select(group => new RailDay(DayLabel(group.Key), [.. group.OrderByDescending(run => run.StartedAt)])),
         ];
 
-    private static string DayLabel(DateTime day) =>
-        day == DateTime.Today ? "Today"
-        : day == DateTime.Today.AddDays(-1) ? "Yesterday"
+    private DateTime Today => Clock.Now.ToLocalTime().Date;
+
+    private string DayLabel(DateTime day) =>
+        day == Today ? "Today"
+        : day == Today.AddDays(-1) ? "Yesterday"
         : day.ToString("d MMMM");
 
-    private static string Heading(FeedRun run)
+    private string Heading(FeedRun run)
     {
         var local = run.StartedAt.ToLocalTime();
         var day =
-            local.Date == DateTime.Today ? "Today"
-            : local.Date == DateTime.Today.AddDays(-1) ? "Yesterday"
+            local.Date == Today ? "Today"
+            : local.Date == Today.AddDays(-1) ? "Yesterday"
             : local.ToString("d MMMM");
         return $"{day}, {local:HH:mm}";
     }
@@ -463,7 +465,7 @@
     {
         get
         {
-            return Optional.Of(_feed).When(feed => feed.Enabled).Map(feed => feed.Schedule.NextRun(Clock.Now, TimeZoneInfo.Local));
+            return Optional.Of(_feed).When(feed => feed.Enabled).Map(feed => feed.Schedule.NextRun(Clock.Now, Clock.Zone));
         }
     }
 

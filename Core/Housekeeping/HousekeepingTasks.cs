@@ -79,5 +79,5 @@ internal sealed class HousekeepingTasks(
 		return true;
 	}
 
-	private Optional<DateTimeOffset> Next(string cron) => new Scheduled(cron).NextRun(clock.Now, TimeZoneInfo.Local);
+	private Optional<DateTimeOffset> Next(string cron) => new Scheduled(cron).NextRun(clock.Now, clock.Zone);
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Contracts.Providers;
 using Domain.Providers;
 
@@ -134,6 +135,7 @@ internal sealed class Lane<TKey, TOut>(int maxBatch) : ILane<TKey, TOut>
 		);
 	}
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "Result is read only once the batch completed successfully, so it does not block.")]
 	private static Result<IReadOnlyDictionary<TKey, TOut>> Settled(Task<Result<IReadOnlyDictionary<TKey, TOut>>> asking)
 	{
 		return asking.IsCompletedSuccessfully

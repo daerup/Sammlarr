@@ -112,6 +112,7 @@ public class FeedRunsTests : BunitContext
 		Services.AddSingleton<ICurrentUser>(new TestCurrentUser());
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
+		clock.Zone.Getter.Returns(TimeZoneInfo.Utc);
 		Services.AddSingleton(clock.Object);
 
 		var feeds = IFeedService.Mock();

@@ -377,9 +377,9 @@
 
     private void Rebuild()
     {
-        _rows = [.. _feeds.Select(overview => FeedRow.Of(overview, _feedJobs, _now, TimeZoneInfo.Local))];
+        _rows = [.. _feeds.Select(overview => FeedRow.Of(overview, _feedJobs, _now, Clock.Zone))];
         _visible = _filter.Apply(_rows);
-        _candidates = RunPlan.Candidates(_feeds, _now, TimeZoneInfo.Local);
+        _candidates = RunPlan.Candidates(_feeds, _now, Clock.Zone);
     }
 
     private async Task LoadQueueAsync()
@@ -487,7 +487,7 @@
     private void OpenRun(bool fromSelection)
     {
         _now = Clock.Now.ToLocalTime();
-        _candidates = RunPlan.Candidates(_feeds, _now, TimeZoneInfo.Local);
+        _candidates = RunPlan.Candidates(_feeds, _now, Clock.Zone);
         _runFromSelection = fromSelection;
         _isRunOpen = true;
     }

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Tracing;
 using Serilog;
@@ -41,6 +42,7 @@ internal static class LogPipeline
 		}
 	}
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "The console sink picks its theme by whether the console output is redirected.")]
 	private static void ConfigureExporters(LoggerConfiguration exporter, ObservabilityContext context)
 	{
 		if (context.OtlpEnabled)
