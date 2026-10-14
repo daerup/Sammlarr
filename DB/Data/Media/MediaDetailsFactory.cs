@@ -1,11 +1,13 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Domain.Media;
 
 namespace DB.Data.Media;
 
-internal static class MediaDetailsFactory
+internal sealed class MediaDetailsFactory
 {
-	public static MediaDetailsRow BuildFrom(CachedDetails cached, Guid mediaId)
+	[SuppressMessage("Performance", "CA1822", Justification = "The factory is an injected service, so the repository takes it as an instance.")]
+	public MediaDetailsRow BuildFrom(CachedDetails cached, Guid mediaId)
 	{
 		var row = NewRow(cached.Details);
 		ApplyCommonFields(row, cached, mediaId);
@@ -15,7 +17,8 @@ internal static class MediaDetailsFactory
 		return row;
 	}
 
-	public static CachedDetails ToCached(MediaDetailsRow row)
+	[SuppressMessage("Performance", "CA1822", Justification = "The factory is an injected service, so the repository takes it as an instance.")]
+	public CachedDetails ToCached(MediaDetailsRow row)
 	{
 		return new(
 			Details(row),

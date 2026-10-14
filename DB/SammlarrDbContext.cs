@@ -25,6 +25,8 @@ namespace DB;
 
 internal sealed class SammlarrDbContext(
 	DbContextOptions<SammlarrDbContext> options,
+	EntityAuditer entityAuditer,
+	UserOwnershipStamper userOwnershipStamper,
 	ICurrentUser currentUser,
 	IEnumerable<IPropertyAddedConvention> propertyConventions,
 	IEnumerable<IModelConfiguration> modelConfigurations,
@@ -163,7 +165,7 @@ internal sealed class SammlarrDbContext(
 	private void ApplyStamps()
 	{
 		var now = dateTimeProvider.Now;
-		ChangeTracker.Entries<IAuditable>().ToList().ForEach(entry => EntityAuditer.UpdateTimestamps(entry, now));
-		ChangeTracker.Entries<IUserOwned>().ToList().ForEach(entry => UserOwnershipStamper.Stamp(entry, CurrentUserId));
+		ChangeTracker.Entries<IAuditable>().ToList().ForEach(entry => entityAuditer.UpdateTimestamps(entry, now));
+		ChangeTracker.Entries<IUserOwned>().ToList().ForEach(entry => userOwnershipStamper.Stamp(entry, CurrentUserId));
 	}
 }

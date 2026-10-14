@@ -1,12 +1,14 @@
+using System.Diagnostics.CodeAnalysis;
 using DB.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DB;
 
-internal static class EntityAuditer
+internal sealed class EntityAuditer
 {
-	public static void UpdateTimestamps(EntityEntry<IAuditable> entry, DateTimeOffset timestamp)
+	[SuppressMessage("Performance", "CA1822", Justification = "The auditer is an injected service, so the DB context takes it as an instance.")]
+	public void UpdateTimestamps(EntityEntry<IAuditable> entry, DateTimeOffset timestamp)
 	{
 		if (entry.State is EntityState.Added)
 		{

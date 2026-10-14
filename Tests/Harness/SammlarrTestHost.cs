@@ -278,7 +278,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		];
 		details.RefreshedAt = fetched;
 		details.AskedAt = fetched;
-		var seeded = MediaDetailsFactory.ToCached(details).Details;
+		var seeded = new MediaDetailsFactory().ToCached(details).Details;
 		var enrichers = Resolve<IKeyedServiceSet<RemoteService, IDetailsEnricher>>();
 		details.Answers =
 		[
@@ -780,6 +780,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	{
 		return new(
 			options,
+			new EntityAuditer(),
+			new UserOwnershipStamper(),
 			user,
 			provider.GetRequiredService<IEnumerable<IPropertyAddedConvention>>(),
 			provider.GetRequiredService<IEnumerable<IModelConfiguration>>(),

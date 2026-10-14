@@ -8,6 +8,7 @@ internal sealed class MediaModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddScoped<MediaDetailsFactory>();
 		services.AddScoped<IModelConfiguration, MediaDetailsRowConfiguration>();
 		services.AddSingleton<MediaWriteLock>();
 		services.AddScoped<IMediaRepository, MediaRepository>();
