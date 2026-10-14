@@ -100,9 +100,8 @@ jobs:
 
       - name: App SBOM
         env:
-          HUSKY: '0'
           VERSION: ${{ steps.version.outputs.version }}
-        run: dotnet CycloneDX Web/Web.csproj -rs -ed -o sbom -fn sammlarr-app.cdx.json -F Json -sn Sammlarr -sv "$VERSION"
+        run: dotnet CycloneDX Web/Web.csproj -ed -o sbom -fn sammlarr-app.cdx.json -F Json -sn Sammlarr -sv "$VERSION"
 
       - name: Image SBOM
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
