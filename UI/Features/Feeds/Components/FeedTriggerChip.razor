@@ -1,3 +1,5 @@
+@using Contracts
+@inject IDateTimeProvider Clock
 
 @if (NextRun is Some<DateTimeOffset>(var next))
 {
@@ -29,7 +31,7 @@ else
 
     private string RingDash(DateTimeOffset next)
     {
-        var after = Schedule.NextRun(next, TimeZoneInfo.Local);
+        var after = Schedule.NextRun(next, Clock.Zone);
         var period = after.Map(following => following - next).GetValueOr(TimeSpan.Zero);
         var left = period > TimeSpan.Zero ? Math.Clamp((next - Now) / period, 0, 1) : 1;
         return FormattableString.Invariant($"{Circumference * left:0.##} {Circumference:0.##}");

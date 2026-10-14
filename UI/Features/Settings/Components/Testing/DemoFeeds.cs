@@ -127,6 +127,7 @@ internal static class DemoFeeds
 		),
 	];
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "Static demo data for the design demos, built once outside DI.")]
 	public static readonly IReadOnlyList<RunCandidate> Candidates = RunPlan.Candidates([.. Rows.Select(row => row.Overview)], Now, TimeZoneInfo.Local);
 
 	private static Feed Create(string name, FeedProvider provider, string identifier, FeedStrategy strategy, FeedRunTrigger schedule, bool enabled) =>

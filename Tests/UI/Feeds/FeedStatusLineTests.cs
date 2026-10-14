@@ -20,6 +20,7 @@ public class FeedStatusLineTests : BunitContext
 		Services.AddSingleton(IMediaService.Mock().Object);
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
+		clock.Zone.Getter.Returns(TimeZoneInfo.Utc);
 		Services.AddSingleton(clock.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

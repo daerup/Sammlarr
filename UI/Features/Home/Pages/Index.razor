@@ -337,9 +337,9 @@ else
             _sources = LibraryView.Sources(feeds.Feeds, _wantlistCount, ProviderName);
             _queued = UpNextView.InTheQueue(queue, names, brands, Sink);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);
-            _scheduled = UpNextView.OnASchedule(_feeds, _now, TimeZoneInfo.Local, BrandingService);
-            _candidates = RunPlan.Candidates(feeds.Feeds, _now, TimeZoneInfo.Local);
-            _days = ActivityLog.Days(runs, names, TimeZoneInfo.Local);
+            _scheduled = UpNextView.OnASchedule(_feeds, _now, Clock.Zone, BrandingService);
+            _candidates = RunPlan.Candidates(feeds.Feeds, _now, Clock.Zone);
+            _days = ActivityLog.Days(runs, names, Clock.Zone);
         }
         catch (OperationCanceledException)
         {

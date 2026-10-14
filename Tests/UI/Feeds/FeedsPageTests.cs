@@ -266,6 +266,7 @@ public class FeedsPageTests : BunitContext
 		capacity.Of(Any<RemoteService>()).Returns(RemoteLoad.Idle);
 		Services.AddSingleton(capacity.Object);
 		_clock.Now.Getter.Returns(Start);
+		_clock.Zone.Getter.Returns(TimeZoneInfo.Utc);
 		Services.AddSingleton(_clock.Object);
 		Services.AddScoped<FeedRunProgress>();
 		JSInterop.Mode = JSRuntimeMode.Loose;

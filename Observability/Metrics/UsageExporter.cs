@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Contracts;
 using Contracts.Usage;
 using Domain.Feed;
@@ -97,6 +98,7 @@ internal sealed class UsageExporter(IServiceScopeFactory scopes, IUsageLastCalls
 		return tags.GetValueOrNone(key).Map(value => Optional.When(Enum.TryParse<TEnum>(value, out var parsed), () => parsed));
 	}
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "OpenTelemetry's Export is synchronous, so the store write blocks until it lands.")]
 	private void Write(UsageRows rows)
 	{
 		if (rows.Calls.Count == 0 && rows.Attempts.Count == 0)

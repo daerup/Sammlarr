@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace AppHost;
 
 internal static class ArrContainers
@@ -67,6 +69,7 @@ internal static class ArrContainers
 			.OnResourceReady((resource, _, cancellationToken) => AddRootFoldersAsync(resource.GetEndpoint("http"), app, cancellationToken));
 	}
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "The AppHost has no ForRemote clients; this one setup call adds the Arr root folders.")]
 	private static async Task AddRootFoldersAsync(EndpointReference endpoint, ArrContainer app, CancellationToken cancellationToken)
 	{
 		using var http = new HttpClient { BaseAddress = new Uri($"{endpoint.Url}/api/v3/") };

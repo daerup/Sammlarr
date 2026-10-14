@@ -124,6 +124,7 @@ internal static class StagingEnvironment
 		builder.Services.AddHostedService(services => new FakeDownloader(layout.Downloads, stub, services.GetRequiredService<ILogger<FakeDownloader>>()));
 	}
 
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "The AppHost has no ForRemote clients; this one call resets the staging WireMock.")]
 	private static async Task ReloadMappingsAsync(EndpointReference endpoint, CancellationToken cancellationToken)
 	{
 		using var http = new HttpClient();

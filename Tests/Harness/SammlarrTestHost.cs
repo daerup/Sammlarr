@@ -1032,11 +1032,15 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private sealed class FixedClock : IDateTimeProvider
 	{
 		public DateTimeOffset Now { get; } = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
+
+		public TimeZoneInfo Zone => TimeZoneInfo.Utc;
 	}
 
 	private sealed class MutableClock : IDateTimeProvider
 	{
 		public DateTimeOffset Now { get; set; } = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
+
+		public TimeZoneInfo Zone => TimeZoneInfo.Utc;
 	}
 
 	private sealed class ClockTime(IDateTimeProvider clock) : TimeProvider
