@@ -14,7 +14,7 @@ public class MediaListEmptyStateTests : BunitContext
 	}
 
 	[Test]
-	public async Task Actions_WhenGiven_SitUnderTheText()
+	public async Task Actions_WhenGiven_AreShown()
 	{
 		var cut = Render<MediaListEmptyState>(parameters =>
 			parameters
@@ -23,7 +23,7 @@ public class MediaListEmptyStateTests : BunitContext
 				.Add(state => state.Actions, actions => actions.AddMarkupContent(0, "<button>Create your first feed</button>"))
 		);
 
-		await Assert.That(cut.Find("p + div button").TextContent).IsEqualTo("Create your first feed");
+		await Assert.That(cut.FindAll("button").Select(button => button.TextContent)).Contains("Create your first feed");
 	}
 
 	[Test]

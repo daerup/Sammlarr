@@ -21,7 +21,7 @@ public class BulkEditableMediaGridTests : BunitContext
 	}
 
 	[Test]
-	public async Task SelectionClick_InEditMode_FramesTheTileInTheThemeRingAndFillsItsEmptyBadgeWithACheck()
+	public async Task SelectionClick_InEditMode_FillsTheTilesEmptyBadgeWithACheckAndCountsItInTheBar()
 	{
 		var cut = Render<BulkEditableMediaGrid<MatchedMedia>>(parameters =>
 			parameters
@@ -32,16 +32,17 @@ public class BulkEditableMediaGridTests : BunitContext
 		);
 
 		await Assert.That(cut.FindAll("[data-testid=selection-badge] svg")).IsEmpty();
-		await Assert.That(cut.Find(".media-card").ClassList).DoesNotContain("ring-foreground");
 
 		await cut.Find("[data-testid=selection-layer]").ClickAsync(new());
 
 		await Assert.That(cut.FindAll("[data-testid=selection-badge] svg")).Count().IsEqualTo(1);
-		await Assert.That(cut.Find(".media-card").ClassList).Contains("ring-foreground");
+		await Assert.That(Collapsed(cut.Find(".bulk-sticky").TextContent)).Contains("1 selected");
 	}
 
 	private static MatchedMedia Movie()
 	{
 		return new(new MediaIdentity(MediaId.New(), []), new MovieDetails { BackdropUrl = "https://cdn.example.test/backdrop.jpg" });
 	}
+
+	private static string Collapsed(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 }

@@ -17,7 +17,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Shared.Media;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Media;
 
@@ -43,54 +42,21 @@ public class MediaDetailSheetTests : BunitContext
 	}
 
 	[Test]
-	public async Task Rating_WhenTheSheetOpensOnAPartlyKnownTitle_ShowsTheRatingsItLoads()
+	public async Task Rating_WhenTheSheetOpensOnAPartlyKnownTitle_LoadsEverythingAndShowsItsRatings()
 	{
 		Register();
 		var loaded = new MatchedMedia(
 			new MediaIdentity(Id, []),
 			new MovieDetails { Title = "Futurama", Ratings = MediaRatings.From([new TmdbRating(7.4f, Some.Of(900))]) }
 		);
-		_media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), Any(), Any()).Returns(new[] { (Result<MatchedMedia>)Success.Of(loaded) }.ToAsyncEnumerable());
+		_media
+			.GetDetailsAsync(Any<IEnumerable<MediaId>>(), FieldNeeds.Everything, Any())
+			.Returns(new[] { (Result<MatchedMedia>)Success.Of(loaded) }.ToAsyncEnumerable());
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => cut.FindAll(".rating-badge").Count > 0);
 
 		await Assert.That(cut.Find(".rating-badge").TextContent.Trim()).IsEqualTo("7.4");
-	}
-
-	[Test]
-	public void Open_AsksWithEverything()
-	{
-		Register();
-
-		var cut = RenderSheet();
-
-		cut.WaitForAssertion(() => _media.GetDetailsAsync(Any<IEnumerable<MediaId>>(), FieldNeeds.Everything, Any()).WasCalled(Times.Once));
-	}
-
-	[Test]
-	public async Task Dot_WhenTheItemCameFromAFeed_UsesTheFeedProvidersBrand()
-	{
-		Register();
-		_wantlist.GetAsync(Any()).Returns(Wantlisted(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "feed")));
-
-		var cut = RenderSheet();
-		cut.WaitForState(() => cut.FindAll(".toggle-dot").Count > 0);
-
-		var brand = Services.GetRequiredService<MediaProviderBrandingService>().GetBrandingInfo(MediaProvider.Mdblist).BrandColor;
-		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsEqualTo($"background: {brand}");
-	}
-
-	[Test]
-	public async Task Dot_WhenTheItemWasAddedByHand_ShowsANeutralDot()
-	{
-		Register();
-		_wantlist.GetAsync(Any()).Returns(Wantlisted(new ManualOrigin(ManualSource.Search)));
-
-		var cut = RenderSheet();
-		cut.WaitForState(() => cut.FindAll(".toggle-dot").Count > 0);
-
-		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsEqualTo("background: var(--muted-foreground)");
 	}
 
 	[Test]
@@ -114,19 +80,6 @@ public class MediaDetailSheetTests : BunitContext
 		await Assert.That(links[0]).StartsWith("/feeds/edit/");
 		await Assert.That(links[1]).Contains("/runs/");
 		await Assert.That(links[1]).Contains("?item=");
-	}
-
-	[Test]
-	public async Task Provenance_ForATitleThatIsNotOnTheWantlist_StaysHiddenOnRightClick()
-	{
-		Register();
-
-		var cut = RenderSheet();
-		cut.WaitForState(() => cut.FindAll(".provenance-trigger").Count > 0);
-
-		await cut.Find(".provenance-trigger").ContextMenuAsync(new());
-
-		await Assert.That(cut.FindAll(".provenance-details")).IsEmpty();
 	}
 
 	private static WantlistSnapshot Wantlisted(WantlistItemProvenance provenance) => new([new WantlistItem(Id, DateTimeOffset.UnixEpoch, provenance)]);

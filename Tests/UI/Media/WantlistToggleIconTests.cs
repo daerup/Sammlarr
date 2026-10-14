@@ -27,19 +27,13 @@ public class WantlistToggleIconTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WhenToggled_MarksTheIcon()
+	[Arguments(true, "Remove from wantlist")]
+	[Arguments(false, "Add to wantlist")]
+	public async Task Render_ForEitherState_LabelsTheButtonWithWhatAClickDoes(bool toggled, string label)
 	{
-		var cut = Render<WantlistToggleIcon>(parameters => parameters.Add(icon => icon.Result, Movie()).Add(icon => icon.IsToggled, true));
+		var cut = Render<WantlistToggleIcon>(parameters => parameters.Add(icon => icon.Result, Movie()).Add(icon => icon.IsToggled, toggled));
 
-		await Assert.That(cut.Find("button").ClassList).Contains("is-marked");
-	}
-
-	[Test]
-	public async Task Render_WhenNotToggled_LeavesTheIconUnmarked()
-	{
-		var cut = Render<WantlistToggleIcon>(parameters => parameters.Add(icon => icon.Result, Movie()).Add(icon => icon.IsToggled, false));
-
-		await Assert.That(cut.Find("button").ClassList).DoesNotContain("is-marked");
+		await Assert.That(cut.Find("button").GetAttribute("aria-label")).IsEqualTo(label);
 	}
 
 	private static MatchedMedia Movie() => new(new MediaIdentity(MediaId.New(), []), new MovieDetails());

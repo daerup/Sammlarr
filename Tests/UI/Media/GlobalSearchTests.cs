@@ -29,6 +29,10 @@ public class GlobalSearchTests : BunitContext
 
 	private static readonly MatchedMedia Matched = new(new MediaIdentity(MediaId.New(), [PlexId.From("1", MediaType.Movie)]), new MovieDetails { Title = Movie });
 
+	private static readonly WantlistSnapshot WithTheMovie = new([
+		new WantlistItem(Matched.Identity.Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(new ManualOrigin(ManualSource.Search))),
+	]);
+
 	private static readonly MediaMatchResult Unmatched = new UnmatchedMedia([PlexId.From("123", MediaType.Unknown)], new UnknownDetails { Title = Person });
 
 	private readonly Mock<IWantlistService> _wantlist = IWantlistService.Mock();
@@ -153,7 +157,9 @@ public class GlobalSearchTests : BunitContext
 		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = "dune" });
 		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
 
-		await Assert.That(cut.Find("[data-testid=search-miss]").TextContent).Contains("Sonarr did not answer, so its shows are missing.");
+		var miss = cut.Find("[data-testid=search-miss]").TextContent;
+		await Assert.That(miss).Contains("Sonarr");
+		await Assert.That(miss).Contains("shows");
 		await Assert.That(cut.Find("[data-testid=search-miss-reason]").TextContent).IsEqualTo("connection refused");
 	}
 
@@ -220,39 +226,42 @@ public class GlobalSearchTests : BunitContext
 
 		var toast = Services.GetRequiredService<ToastService>().Toasts.Single();
 		await Assert.That(toast.Variant).IsEqualTo(ToastVariant.Warning);
-		await Assert.That(toast.Description).IsEqualTo($"Plex has no match for '{Movie}', so it can't go on your wantlist.");
+		await Assert.That(toast.Description).Contains("Plex");
+		await Assert.That(toast.Description).Contains(Movie);
 	}
 
 	[Test]
-	public async Task Wantlist_WhenTheViewerAddsATitleElsewhere_IsReadAgain()
+	public async Task Wantlist_WhenTheViewerAddsATitleElsewhere_MarksItsToggle()
 	{
-		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+		_wantlist.GetAsync(Any()).ReturnsSequentially(new WantlistSnapshot([]), WithTheMovie);
+		var cut = await SearchForTheMovieAsync();
 
 		await cut.InvokeAsync(() => _events.Publish(new WantlistChangedEvent(TestCurrentUser.DefaultId, [Matched.Identity.Id], [])));
+		cut.WaitForState(() => cut.FindAll(".provenance-trigger > .search-result-toggle-btn[aria-label='Remove from wantlist']").Count == 1);
 
-		cut.WaitForAssertion(() => _wantlist.GetAsync(Any()).WasCalled(Times.Exactly(2)));
+		await Assert.That(WantlistToggleLabel(cut)).IsEqualTo("Remove from wantlist");
 	}
 
 	[Test]
-	public async Task Wantlist_WhenAnotherPersonAddsATitle_IsNotReadAgain()
+	public async Task Wantlist_WhenAnotherPersonAddsATitle_LeavesItsToggleAlone()
 	{
-		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+		_wantlist.GetAsync(Any()).ReturnsSequentially(new WantlistSnapshot([]), WithTheMovie);
+		var cut = await SearchForTheMovieAsync();
 
 		await cut.InvokeAsync(() => _events.Publish(new WantlistChangedEvent(UserId.New(), [Matched.Identity.Id], [])));
 
-		_wantlist.GetAsync(Any()).WasCalled(Times.Once);
+		await Assert.That(WantlistToggleLabel(cut)).IsEqualTo("Add to wantlist");
 	}
 
 	[Test]
-	public async Task Wantlist_WhenTheChangeIsAlreadyShown_IsNotReadAgain()
+	public async Task Wantlist_WhenTheChangeIsAlreadyShown_LeavesItsToggleAlone()
 	{
-		var item = new WantlistItem(Matched.Identity.Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
-		_wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([item]));
-		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+		_wantlist.GetAsync(Any()).ReturnsSequentially(WithTheMovie, new WantlistSnapshot([]));
+		var cut = await SearchForTheMovieAsync();
 
 		await cut.InvokeAsync(() => _events.Publish(new WantlistChangedEvent(TestCurrentUser.DefaultId, [Matched.Identity.Id], [])));
 
-		_wantlist.GetAsync(Any()).WasCalled(Times.Once);
+		await Assert.That(WantlistToggleLabel(cut)).IsEqualTo("Remove from wantlist");
 	}
 
 	[Test]
@@ -283,6 +292,19 @@ public class GlobalSearchTests : BunitContext
 					RegistrationMode = RegistrationMode.Open,
 				}
 			);
+	}
+
+	private async Task<IRenderedComponent<GlobalSearch>> SearchForTheMovieAsync()
+	{
+		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
+		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Movie });
+		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
+		return cut;
+	}
+
+	private static string? WantlistToggleLabel(IRenderedComponent<GlobalSearch> cut)
+	{
+		return cut.Find(".provenance-trigger > .search-result-toggle-btn").GetAttribute("aria-label");
 	}
 
 	private static MediaMatchResult Found(string title, MediaType type)

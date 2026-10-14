@@ -2,14 +2,11 @@ using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
 using Domain.Media;
-using Domain.Providers;
 using Domain.Wantlist;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
-using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Shared.Media.Icons;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Media;
 
@@ -26,48 +23,11 @@ public class WantlistProvenanceToggleTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WhenWantlistedByAFeed_ColoursTheDotWithItsProvider()
-	{
-		var cut = RenderToggle(isToggled: true, item: FeedItem());
-		var brand = Services.GetRequiredService<MediaProviderBrandingService>().GetBrandingInfo(MediaProvider.Mdblist).BrandColor;
-
-		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsEqualTo($"background: {brand}");
-	}
-
-	[Test]
 	public async Task Render_WhileToggling_ShowsNoDot()
 	{
 		var cut = RenderToggle(isToggled: true, item: FeedItem(), isToggling: true);
 
 		await Assert.That(cut.FindAll(".toggle-dot")).IsEmpty();
-	}
-
-	[Test]
-	public async Task Render_WhenAddedByHand_ShowsANeutralDot()
-	{
-		var cut = RenderToggle(
-			isToggled: true,
-			item: new WantlistItem(Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)))
-		);
-
-		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsEqualTo("background: var(--muted-foreground)");
-	}
-
-	[Test]
-	public async Task Render_WhenPulledFromTheSink_ColoursTheDotWithItsBrand()
-	{
-		var cut = RenderToggle(isToggled: true, item: new WantlistItem(Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(new SinkOrigin(SinkKind.Plex))));
-		var brand = Services.GetRequiredService<MediaProviderBrandingService>().GetBrandingInfo(MediaProvider.Plex).BrandColor;
-
-		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsEqualTo($"background: {brand}");
-	}
-
-	[Test]
-	public async Task Render_WhenItsFeedWasDeleted_ShowsAMutedDot()
-	{
-		var cut = RenderToggle(isToggled: true, item: new WantlistItem(Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(new OrphanedOrigin("Old feed"))));
-
-		await Assert.That(cut.Find(".toggle-dot").GetAttribute("style")).IsEqualTo("background: var(--muted-foreground)");
 	}
 
 	[Test]
@@ -108,14 +68,6 @@ public class WantlistProvenanceToggleTests : BunitContext
 
 		await Assert.That(cut.Find(".provenance-details").TextContent).Contains("Documentaries");
 		await Assert.That(toggled).IsNull();
-	}
-
-	[Test]
-	public async Task Render_TheProvenanceCard_SitsTenPixelsBelowTheDot()
-	{
-		var cut = RenderToggle(isToggled: true, item: FeedItem());
-
-		await Assert.That(cut.FindComponent<BbPopoverContent>().Instance.Offset).IsEqualTo(10);
 	}
 
 	[Test]

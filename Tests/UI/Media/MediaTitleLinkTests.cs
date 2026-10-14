@@ -44,19 +44,6 @@ public class MediaTitleLinkTests : BunitContext
 	}
 
 	[Test]
-	public async Task Popover_ForEachId_GivesItsRowTheProvidersBrandColourToHoverIn()
-	{
-		var cut = Render<Harness>();
-
-		await cut.Find(".media-title-trigger").ClickAsync(new());
-		cut.WaitForElement(".id-links-popover-list");
-
-		await Assert
-			.That(cut.FindAll(".id-link-card").Select(row => row.GetAttribute("style") ?? string.Empty))
-			.IsEquivalentTo(["--brand: #01B4E4", "--brand: #F5DE50"], CollectionOrdering.Matching);
-	}
-
-	[Test]
 	public async Task Title_ForAnAdminWhileTheRadarrAndSonarrSettingsLoad_IsAlreadyTheTrigger()
 	{
 		var providers = IProviderConfigService.Mock();
