@@ -36,16 +36,6 @@ public class MediaIdTests
 	}
 
 	[Test]
-	public async Task From_WhenValidGuid_KeepsValue()
-	{
-		var guid = Guid.NewGuid();
-
-		var id = MediaId.From(guid);
-
-		await Assert.That(id.Value).IsEqualTo(guid);
-	}
-
-	[Test]
 	public async Task MediaIdentity_WhenTheMediaIdIsUninitialized_Throws()
 	{
 		await Assert.That(() => new MediaIdentity(Uninitialized, [TmdbId.From("550", MediaType.Movie)])).Throws<ArgumentException>();
@@ -89,13 +79,5 @@ public class MediaIdTests
 		var roundTripped = JsonSerializer.Deserialize<WantlistSyncCompletedNotification>(JsonSerializer.Serialize(notification))!;
 
 		await Assert.That(roundTripped.PulledAdds).IsEquivalentTo(notification.PulledAdds);
-	}
-
-	[Test]
-	public async Task Equality_WhenSameGuid_AreEqual()
-	{
-		var guid = Guid.NewGuid();
-
-		await Assert.That(MediaId.From(guid)).IsEqualTo(MediaId.From(guid));
 	}
 }

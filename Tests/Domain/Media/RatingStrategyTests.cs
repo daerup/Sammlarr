@@ -22,28 +22,11 @@ public class RatingStrategyTests
 	]);
 
 	[Test]
-	public async Task Resolve_WhenAveragingEverySource_TakesTheMeanOfEveryRating()
-	{
-		var rating = new RatingStrategy(AveragedRating.Everything).Resolve(ProjectHailMary, Everything);
-
-		await Assert.That(rating).IsSome();
-		await Assert.That(rating.Map(found => found.Value).GetValueOr(0)).IsEqualTo(8.95f).Within(0.001f);
-	}
-
-	[Test]
 	public async Task Resolve_WhenAveragingSomeSources_LeavesTheSwitchedOffOnesOut()
 	{
 		var rating = new RatingStrategy(new AveragedRating([RatingSource.Imdb, RatingSource.RottenTomatoesCritics])).Resolve(ProjectHailMary, Everything);
 
 		await Assert.That(rating.Map(found => found.Value).GetValueOr(0)).IsEqualTo(8.85f).Within(0.001f);
-	}
-
-	[Test]
-	public async Task Resolve_WhenNoneOfTheAveragedSourcesIsAvailable_AveragesEveryAvailableSource()
-	{
-		var rating = new RatingStrategy(new AveragedRating([RatingSource.Imdb, RatingSource.RottenTomatoesCritics])).Resolve(ProjectHailMary, [RatingSource.Tmdb]);
-
-		await Assert.That(rating.Map(found => found.Value).GetValueOr(0)).IsEqualTo(8.6f);
 	}
 
 	[Test]

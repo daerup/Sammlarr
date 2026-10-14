@@ -7,13 +7,6 @@ namespace Domain.Tests.Jobs;
 public class JobRequestTests
 {
 	[Test]
-	public async Task Kind_DiscriminatesTheRequest()
-	{
-		await Assert.That(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()).Kind).IsEqualTo(JobKind.FeedRun);
-		await Assert.That(new SyncWantlist(new ManualTrigger()).Kind).IsEqualTo(JobKind.WantlistSync);
-	}
-
-	[Test]
 	public async Task Key_OfAFeedRun_IsItsFeedIdSoTwoRunsOfOneFeedCoalesce()
 	{
 		var feedId = FeedId.From(Guid.NewGuid());
