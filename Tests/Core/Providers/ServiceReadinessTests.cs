@@ -107,9 +107,9 @@ public sealed class ServiceReadinessTests : IDisposable
 	{
 		_arr.GetAsync(Any()).Returns(ArrSinkConfig.Empty with { Radarr = Reachable });
 
-		await Assert.That(await Testee.ReadyAsync(new Domain.Providers.Arr())).IsFalse();
+		await Assert.That(await Testee.ReadyAsync(new Arr())).IsFalse();
 		_arr.GetAsync(Any()).Returns(ArrSinkConfig.Empty with { Radarr = Reachable, Sonarr = Reachable });
-		await Assert.That(await Testee.ReadyAsync(new Domain.Providers.Arr())).IsTrue();
+		await Assert.That(await Testee.ReadyAsync(new Arr())).IsTrue();
 	}
 
 	[Test]

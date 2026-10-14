@@ -23,7 +23,7 @@ public class ProvenanceDetailsTests : BunitContext
 		var links = cut.FindAll("a").Select(link => link.GetAttribute("href")).ToList();
 
 		await Assert.That(cut.Find(".provenance-name-text").TextContent.Trim()).IsEqualTo("snoak/latest");
-		await Assert.That(links).HasCount(2);
+		await Assert.That(links).Count().IsEqualTo(2);
 		await Assert.That(links[0]).IsEqualTo($"/feeds/edit/{UrlGuid.Encode(Feed)}");
 		await Assert.That(links[1]).IsEqualTo($"/feeds/{UrlGuid.Encode(Feed)}/runs/{UrlGuid.Encode(Run)}");
 	}

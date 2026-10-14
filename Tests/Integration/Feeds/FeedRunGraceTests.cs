@@ -71,7 +71,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(await log.GetAbsencesAsync(feedId)).IsEmpty();
 	}
 
-	private static async Task RecordAsync(IFeedRepository log, Domain.Feed.Feed feed, int day, MirrorPlan summary)
+	private static async Task RecordAsync(IFeedRepository log, Feed feed, int day, MirrorPlan summary)
 	{
 		var run = new FeedRun
 		{

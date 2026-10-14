@@ -43,7 +43,7 @@ public sealed class InMemoryActivityProcessor(LogCaptureService capture) : BaseP
 			data.Kind,
 			data.Status,
 			data.StatusDescription,
-			data.StartTimeUtc,
+			new DateTimeOffset(data.StartTimeUtc, TimeSpan.Zero),
 			data.Duration,
 			tags,
 			events

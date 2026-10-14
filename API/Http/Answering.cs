@@ -26,13 +26,13 @@ internal static class Answering
 	private static Answer<T> Of<T>(RemoteService remote, Result<T> result)
 		where T : notnull
 	{
-		return result.Match<T, Answer<T>>(found => new Found<T>(found), error => Of<T>(remote, error));
+		return result.Match(found => new Found<T>(found), error => Of<T>(remote, error));
 	}
 
 	private static Answer<T> Of<T>(RemoteService remote, Error error)
 		where T : notnull
 	{
-		return error.Exception.Match<Exception, Answer<T>>(exception => Thrown<T>(remote, exception, error), () => new NoMatch(remote));
+		return error.Exception.Match(exception => Thrown<T>(remote, exception, error), () => new NoMatch(remote));
 	}
 
 	internal static Answer<T> Thrown<T>(RemoteService remote, Exception exception, Error error)

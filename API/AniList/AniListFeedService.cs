@@ -127,7 +127,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 	{
 		return error
 			.CausedBy<AniListAnswerException>()
-			.Match<AniListAnswerException, Exception>(
+			.Match(
 				problem => new InvalidOperationException($"AniList refused the search: {problem.Message}"),
 				() => error.Exception.GetValueOr(() => new InvalidOperationException(error.Reason))
 			);

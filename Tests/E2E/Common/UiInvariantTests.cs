@@ -135,6 +135,8 @@ public class UiInvariantTests
 
 		await Assert.That(contrast).IsGreaterThanOrEqualTo(4.5);
 	}
+
+	private static Task PressAsync(ILocator locator) => locator.DispatchEventAsync("click");
 #endif
 
 	[Test]
@@ -179,6 +181,4 @@ public class UiInvariantTests
 		await Expect(page.Locator("html")).ToHaveClassAsync(new Regex("dark"), new LocatorAssertionsToHaveClassOptions { Timeout = Wait.Settle });
 		await Expect(page.GetByLabel("Switch to light mode")).ToBeVisibleAsync(Wait.Settle);
 	}
-
-	private static Task PressAsync(ILocator locator) => locator.DispatchEventAsync("click");
 }

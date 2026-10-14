@@ -128,7 +128,7 @@ internal sealed class Lane<TKey, TOut>(int maxBatch) : ILane<TKey, TOut>
 
 	private static LaneAnswer<TOut> Answer(Result<IReadOnlyDictionary<TKey, TOut>> answer, TKey key)
 	{
-		return answer.Match<IReadOnlyDictionary<TKey, TOut>, LaneAnswer<TOut>>(
+		return answer.Match(
 			found => found.GetValueOrNone(key).Match<TOut, LaneAnswer<TOut>>(value => new LaneHit<TOut>(value), () => new LaneMiss()),
 			error => new LaneFailed(error)
 		);

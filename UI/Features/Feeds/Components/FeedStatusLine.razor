@@ -19,7 +19,7 @@
     @if (FeedPulse.Next(Rows) is { NextRun: Some<DateTimeOffset>(var at) } next)
     {
         <BbPopover>
-            <BbPopoverTrigger AsChild="false" Class="status-next" aria-label="@($"Next run: {next.Feed.Name}")">
+            <BbPopoverTrigger AsChild="false" class="status-next" aria-label="@($"Next run: {next.Feed.Name}")">
                 <LucideIcon Name="clock" Size="14"/>
                 Next <span class="status-strong">@ScheduleText.Away(at, Now)</span>
             </BbPopoverTrigger>

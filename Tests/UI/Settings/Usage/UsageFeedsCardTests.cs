@@ -50,12 +50,8 @@ public class UsageFeedsCardTests : BunitContext
 		await Assert.That(cut.FindAll("[data-testid=usage-feed-ring]")).Count().IsEqualTo(1);
 		await Assert.That(Dot(cut, LimitedRun).QuerySelector("[data-testid=usage-feed-ring]")).IsNotNull();
 		var ticks = cut.FindAll("[data-testid=usage-feeds-tick]").Select(tick => (tick.TextContent, tick.GetAttribute("style"))).ToList();
-		await Assert
-			.That(ticks)
-			.IsEquivalentTo(
-				[("1", "top: 163px"), ("10", "top: 122.5px"), ("100", "top: 82px"), ("1,000", "top: 41.5px"), ("10,000", "top: 1px")],
-				CollectionOrdering.Matching
-			);
+		(string, string?)[] expected = [("1", "top: 163px"), ("10", "top: 122.5px"), ("100", "top: 82px"), ("1,000", "top: 41.5px"), ("10,000", "top: 1px")];
+		await Assert.That(ticks).IsEquivalentTo(expected, CollectionOrdering.Matching);
 		await Assert
 			.That(Row(cut, "Latest shows").QuerySelector("[data-testid=usage-feed-runs]")!.GetAttribute("href"))
 			.IsEqualTo($"/feeds/{UrlGuid.Encode(Shows.Value)}/runs");
@@ -143,9 +139,10 @@ public class UsageFeedsCardTests : BunitContext
 
 		var cut = Render<Harness>();
 
+		string?[] expected = ["0%", "80%", "20%"];
 		await Assert
 			.That(cut.FindAll("[data-testid=usage-feed-dot] circle:last-child").Select(dot => dot.GetAttribute("cx")))
-			.IsEquivalentTo(["0%", "80%", "20%"], CollectionOrdering.Matching);
+			.IsEquivalentTo(expected, CollectionOrdering.Matching);
 	}
 
 	[Test]

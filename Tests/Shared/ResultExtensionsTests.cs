@@ -463,17 +463,17 @@ public class ResultExtensionsTests
 	[Test]
 	public async Task CausedBy_WhenTheExceptionIsOfTheType_IsTheTypedException()
 	{
-		var cause = new ArgumentNullException("id");
+		var cause = new FileNotFoundException();
 
-		await Assert.That(Error.From(cause).CausedBy<ArgumentNullException>()).IsSome().And.IsSameReferenceAs(cause);
+		await Assert.That(Error.From(cause).CausedBy<FileNotFoundException>()).IsSome().And.IsSameReferenceAs(cause);
 	}
 
 	[Test]
 	public async Task CausedBy_WhenTheExceptionDerivesFromTheType_IsTheException()
 	{
-		var cause = new ArgumentNullException("id");
+		var cause = new FileNotFoundException();
 
-		await Assert.That(Error.From(cause).CausedBy<ArgumentException>()).IsSome().And.IsSameReferenceAs(cause);
+		await Assert.That(Error.From(cause).CausedBy<IOException>()).IsSome().And.IsSameReferenceAs(cause);
 	}
 
 	[Test]
