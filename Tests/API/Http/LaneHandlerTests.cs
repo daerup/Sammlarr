@@ -18,7 +18,7 @@ public class LaneHandlerTests
 		var http = new ProviderHttpOptions
 		{
 			RetryAttempts = 1,
-			Lanes = new() { ["api"] = Window(1, TimeSpan.FromSeconds(1)) },
+			Lanes = new Dictionary<string, LaneOptions> { ["api"] = Window(1, TimeSpan.FromSeconds(1)) },
 		};
 		using var host = LanedHosts.Host(LanedHosts.Plex(http), RemoteService.Plex, wire);
 
@@ -46,7 +46,11 @@ public class LaneHandlerTests
 		var http = new ProviderHttpOptions
 		{
 			RetryAttempts = 0,
-			Lanes = new() { ["metadata"] = Routed("metadata", "library/metadata"), ["watchlist"] = Routed("discover", "library/sections/watchlist") },
+			Lanes = new Dictionary<string, LaneOptions>
+			{
+				["metadata"] = Routed("metadata", "library/metadata"),
+				["watchlist"] = Routed("discover", "library/sections/watchlist"),
+			},
 		};
 		using var host = LanedHosts.Host(LanedHosts.Plex(http), RemoteService.Plex, wire);
 		using var throttled = await host.Client().GetAsync("https://metadata.plex.test/library/metadata/5d776be17a53e9001e732ab9");
@@ -75,7 +79,7 @@ public class LaneHandlerTests
 		var options = new MdblistOptions
 		{
 			BaseUrl = "https://api.mdblist.test",
-			Http = new ProviderHttpOptions { Lanes = new() { ["api"] = Window(1, TimeSpan.FromMinutes(5)) } },
+			Http = new ProviderHttpOptions { Lanes = new Dictionary<string, LaneOptions> { ["api"] = Window(1, TimeSpan.FromMinutes(5)) } },
 		};
 		using var host = LanedHosts.Host(options, RemoteService.Mdblist, wire);
 
@@ -98,7 +102,7 @@ public class LaneHandlerTests
 		var http = new ProviderHttpOptions
 		{
 			RetryAttempts = 0,
-			Lanes = new() { ["match"] = Routed("discover", "library/metadata/matches") },
+			Lanes = new Dictionary<string, LaneOptions> { ["match"] = Routed("discover", "library/metadata/matches") },
 		};
 		using var host = LanedHosts.Host(LanedHosts.Plex(http), RemoteService.Plex, wire, logger: logger.Object);
 

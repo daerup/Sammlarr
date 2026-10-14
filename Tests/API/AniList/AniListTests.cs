@@ -339,7 +339,7 @@ public class AniListTests
 			UserAgent = "Sammlarr tests",
 			Http = new ProviderHttpOptions
 			{
-				Lanes = new()
+				Lanes = new Dictionary<string, LaneOptions>
 				{
 					["titles"] = new LaneOptions { MaxBatch = 50 },
 					["prequels"] = new LaneOptions { MaxBatch = 50 },

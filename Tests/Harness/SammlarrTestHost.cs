@@ -861,7 +861,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			new MdblistOptions
 			{
 				BaseUrl = $"https://{TestUrls.MdblistApi}",
-				Http = Unretried() with { Lanes = new() { ["titles"] = new LaneOptions { MaxBatch = 200 } } },
+				Http = Unretried() with { Lanes = new Dictionary<string, LaneOptions> { ["titles"] = new LaneOptions { MaxBatch = 200 } } },
 			}
 		);
 		services.AddSingleton(
@@ -869,7 +869,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			{
 				BaseUrl = $"https://{TestUrls.WikidataApi}",
 				UserAgent = "Sammlarr tests",
-				Http = Unretried() with { Lanes = new() { ["sparql"] = new LaneOptions { MaxBatch = 100 } } },
+				Http = Unretried() with { Lanes = new Dictionary<string, LaneOptions> { ["sparql"] = new LaneOptions { MaxBatch = 100 } } },
 			}
 		);
 		services.AddSingleton(
@@ -903,7 +903,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				UserAgent = "Sammlarr tests",
 				Http = Unretried() with
 				{
-					Lanes = new()
+					Lanes = new Dictionary<string, LaneOptions>
 					{
 						["titles"] = new LaneOptions { MaxBatch = 50 },
 						["prequels"] = new LaneOptions { MaxBatch = 50 },

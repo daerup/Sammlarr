@@ -67,7 +67,7 @@ public class LanesTests
 			ImageBaseUrl = "https://image.tmdb.org/t/p",
 			Http = new ProviderHttpOptions
 			{
-				Lanes = new()
+				Lanes = new Dictionary<string, LaneOptions>
 				{
 					["v3"] = new LaneOptions { Routes = [new LaneRouteOptions { Url = "api" }] },
 					["v4"] = new LaneOptions { Routes = [new LaneRouteOptions { Url = "v4" }] },
@@ -104,7 +104,7 @@ public class LanesTests
 	{
 		var http = new ProviderHttpOptions
 		{
-			Lanes = new() { ["match"] = new LaneOptions { Routes = [new LaneRouteOptions { Url = "matches", Path = "library" }] } },
+			Lanes = new Dictionary<string, LaneOptions> { ["match"] = new LaneOptions { Routes = [new LaneRouteOptions { Url = "matches", Path = "library" }] } },
 		};
 		var check = new LaneSettingsCheck([new RemoteSettings(RemoteService.Plex, LanedHosts.Plex(http))]);
 

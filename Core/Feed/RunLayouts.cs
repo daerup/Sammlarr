@@ -60,6 +60,14 @@ internal static class RunLayouts
 		internal static Placed Unplaced => new(int.MaxValue, 0);
 
 		public int CompareTo(Placed other) => (Column, Row).CompareTo((other.Column, other.Row));
+
+		public static bool operator <(Placed left, Placed right) => left.CompareTo(right) < 0;
+
+		public static bool operator <=(Placed left, Placed right) => left.CompareTo(right) <= 0;
+
+		public static bool operator >(Placed left, Placed right) => left.CompareTo(right) > 0;
+
+		public static bool operator >=(Placed left, Placed right) => left.CompareTo(right) >= 0;
 	}
 
 	private static Dictionary<RemoteService, int> Ranks(IEnumerable<IReadOnlyList<Hop>> paths)
