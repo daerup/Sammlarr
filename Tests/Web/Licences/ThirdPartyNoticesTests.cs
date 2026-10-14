@@ -16,17 +16,6 @@ public class ThirdPartyNoticesTests
 		["OFL-1.1"] = "OFL text",
 	};
 
-	private const string CronosNuspec = """
-		<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-		  <metadata>
-		    <id>Cronos</id>
-		    <license type="expression">MIT</license>
-		    <projectUrl>https://github.com/HangfireIO/Cronos</projectUrl>
-		    <copyright> Copyright © 2016 Hangfire OÜ. </copyright>
-		  </metadata>
-		</package>
-		""";
-
 	private static ShippedPackage Shipped(string id, string version, string? expression) => new(new Package(id, version, "", "", ""), expression);
 
 	private static Notices Collect(IEnumerable<ShippedPackage> packages, params LicenceOverride[] overrides)
@@ -135,7 +124,17 @@ public class ThirdPartyNoticesTests
 			  }
 			}
 			""";
-		Dictionary<string, string> nuspecs = new() { ["cronos/0.13.0"] = CronosNuspec };
+		const string cronos = """
+			<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+			  <metadata>
+			    <id>Cronos</id>
+			    <license type="expression">MIT</license>
+			    <projectUrl>https://github.com/HangfireIO/Cronos</projectUrl>
+			    <copyright> Copyright © 2016 Hangfire OÜ. </copyright>
+			  </metadata>
+			</package>
+			""";
+		Dictionary<string, string> nuspecs = new() { ["cronos/0.13.0"] = cronos };
 		Dictionary<string, string> notices = new() { ["cronos/0.13.0"] = "NOTICE\n\nCronos notice" };
 
 		var packages = ThirdPartyNotices.Shipped(deps, path => nuspecs[path], path => notices[path]);
@@ -162,8 +161,9 @@ public class ThirdPartyNoticesTests
 	}
 
 	[Test]
-	public async Task Nuspec_WithALicenceFileAndOnlyARepository_HasNoExpressionAndTheRepositoryAsProject()
+	public async Task Shipped_PackageWithALicenceFileAndOnlyARepository_HasNoExpressionAndTheRepositoryAsProject()
 	{
+		const string deps = """{ "libraries": { "SQLite/3.53.4": { "type": "package", "path": "sqlite/3.53.4" } } }""";
 		const string nuspec = """
 			<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 			  <metadata>
@@ -174,9 +174,19 @@ public class ThirdPartyNoticesTests
 			</package>
 			""";
 
-		var package = ThirdPartyNotices.Nuspec("SQLite/3.53.4", nuspec, "");
+		var packages = ThirdPartyNotices.Shipped(deps, _ => nuspec, _ => "");
 
-		await Assert.That(package).IsEqualTo(new ShippedPackage(new Package("SQLite", "3.53.4", "https://github.com/ericsink/SQLitePCL.raw", "", ""), null));
+		await Assert
+			.That(packages)
+			.IsEquivalentTo([new ShippedPackage(new Package("SQLite", "3.53.4", "https://github.com/ericsink/SQLitePCL.raw", "", ""), null)]);
+	}
+
+	[Test]
+	public async Task Notice_TwoFilesWithWindowsLineEndings_JoinsThemSortedByNameWithUnixLineEndings()
+	{
+		var notice = ThirdPartyNotices.Notice([("THIRD-PARTY-NOTICES.TXT", "Skia\r\nHarfBuzz\r\n"), ("NOTICE.txt", "Blazor Blueprint\r\n")]);
+
+		await Assert.That(notice).IsEqualTo("NOTICE.txt\n\nBlazor Blueprint\n\nTHIRD-PARTY-NOTICES.TXT\n\nSkia\nHarfBuzz");
 	}
 
 	[Test]
@@ -240,7 +250,7 @@ public class ThirdPartyNoticesTests
 	}
 
 	[Test]
-	public async Task Text_PackageWithANotice_PrintsTheNoticeUnderThePackage()
+	public async Task Text_PackageWithANotice_PrintsTheNoticeIndentedUnderThePackage()
 	{
 		var notices = new Notices(
 			[
@@ -257,7 +267,7 @@ public class ThirdPartyNoticesTests
 
 		await Assert
 			.That(text)
-			.Contains("\nBlazorBlueprint.Components 4.1.0\n  Licence: Apache-2.0\n  Copyright (c) Mathew Taylor\n\nNOTICE\n\nBlazor Blueprint\n\n");
+			.Contains("\nBlazorBlueprint.Components 4.1.0\n  Licence: Apache-2.0\n  Copyright (c) Mathew Taylor\n\n    NOTICE\n\n    Blazor Blueprint\n\n");
 	}
 
 	[Test]
