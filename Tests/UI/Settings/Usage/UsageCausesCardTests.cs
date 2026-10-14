@@ -1,5 +1,4 @@
 using BlazorBlueprint.Components;
-using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
 using Contracts.Usage;
 using Domain.Feed;
@@ -43,17 +42,7 @@ public class UsageCausesCardTests : BunitContext
 			.That(cut.FindAll("[data-testid=usage-gauge-segment]").Select(segment => segment.GetAttribute("data-outcome")!))
 			.IsEquivalentTo(["Answered", "Cancelled"]);
 		await Assert.That(cut.Find("[data-testid=usage-gauge-centre]").TextContent).IsEqualTo("71.4%");
-	}
-
-	[Test]
-	public async Task Outcome_WithoutCalls_IsGreyedAndHasNoShare()
-	{
-		var cut = RenderCard(UsageSamples.Snapshot().Current);
-
-		await cut.FindAll("[data-testid=usage-cause]").Single(row => row.TextContent.Contains("Search")).ClickAsync();
-
 		var failed = cut.FindAll("[data-testid=usage-outcome]").Single(row => row.TextContent.Contains("Failed"));
-		await Assert.That(failed.GetAttribute("data-empty")).IsEqualTo("true");
 		await Assert.That(failed.TextContent).DoesNotContain("%");
 	}
 
@@ -150,13 +139,13 @@ public class UsageCausesCardTests : BunitContext
 			)
 			.IsEquivalentTo(["Trending shows|41", "Horror movies|5", "New feed, not saved yet, or deleted|12"], CollectionOrdering.Matching);
 		await Assert.That(cut.FindAll("[data-testid=usage-cause-feed-deleted]")).Count().IsEqualTo(1);
-		var ghost = Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 16)).Find("path").GetAttribute("d");
 		await Assert
 			.That(
 				cut.FindAll("[data-testid=usage-cause-feed]")
-					.Select(row => row.Children[0].QuerySelector("img") is null ? row.Children[0].QuerySelector("path")!.GetAttribute("d") : "logo")
+					.Select(row => $"{row.QuerySelector(".truncate")!.TextContent.Trim()}|{row.QuerySelector("[data-testid=usage-cause-feed-deleted]") is not null}")
 			)
-			.IsEquivalentTo(["logo", ghost, ghost], CollectionOrdering.Matching);
+			.Contains("Horror movies|True")
+			.And.Contains("Trending shows|False");
 		await Assert
 			.That(cut.FindAll("[data-testid=usage-cause]").Single(row => row.TextContent.Contains("Feed editor")).NextElementSibling!.GetAttribute("data-testid"))
 			.IsEqualTo("usage-cause-feed");

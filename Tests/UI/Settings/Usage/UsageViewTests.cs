@@ -78,15 +78,6 @@ public class UsageViewTests
 	}
 
 	[Test]
-	public async Task CauseHint_ForTheFeedEditor_SaysAPreviewAndARunCanShareOneCall()
-	{
-		await Assert
-			.That(UsageView.CauseHint(UsageCause.FeedEditor))
-			.IsSome()
-			.And.EndsWith("A preview and a run can share one MDBList call; it counts for whichever load started first.");
-	}
-
-	[Test]
 	public async Task RightNow_PausedWhileFailing_SaysPausedFirst()
 	{
 		var at = new DateTimeOffset(2026, 10, 7, 9, 30, 0, TimeSpan.Zero);

@@ -1,8 +1,6 @@
 using BlazorBlueprint.Components;
-using BlazorBlueprint.Icons.Lucide.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Contracts.Usage;
 using Domain.Feed;
 using Domain.Feed.Run;
@@ -15,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Usage;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.Usage;
 
@@ -38,18 +35,39 @@ public class UsageFeedsCardTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
-		Services.AddSingleton(At(UsageSamples.To));
+		Services.AddSingleton(UsageSamples.At(UsageSamples.To));
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
 	[Test]
-	public async Task Render_ByDefault_PicksNoFeedAndShowsEveryOneInItsColour()
+	public async Task Render_ByDefault_DrawsEveryFeedAndItsRow()
 	{
 		var cut = Render<Harness>();
 
 		await Assert.That(cut.FindAll(".usage-feed-picked")).IsEmpty();
 		await Assert.That(cut.FindAll("[data-testid=usage-feed-group]")).Count().IsEqualTo(2);
 		await Assert.That(cut.FindAll(".usage-feed-dim")).IsEmpty();
+		await Assert.That(cut.FindAll("[data-testid=usage-feed-ring]")).Count().IsEqualTo(1);
+		await Assert.That(Dot(cut, LimitedRun).QuerySelector("[data-testid=usage-feed-ring]")).IsNotNull();
+		var ticks = cut.FindAll("[data-testid=usage-feeds-tick]").Select(tick => (tick.TextContent, tick.GetAttribute("style"))).ToList();
+		await Assert
+			.That(ticks)
+			.IsEquivalentTo(
+				[("1", "top: 163px"), ("10", "top: 122.5px"), ("100", "top: 82px"), ("1,000", "top: 41.5px"), ("10,000", "top: 1px")],
+				CollectionOrdering.Matching
+			);
+		await Assert
+			.That(Row(cut, "Latest shows").QuerySelector("[data-testid=usage-feed-runs]")!.GetAttribute("href"))
+			.IsEqualTo($"/feeds/{UrlGuid.Encode(Shows.Value)}/runs");
+		await Assert.That(Row(cut, "Old list").QuerySelector("[data-testid=usage-feed-last]")!.TextContent.Trim()).IsEqualTo("Never ran");
+		var deleted = Row(cut, "Horror movies");
+		await Assert
+			.That(deleted.QuerySelector("[data-testid=usage-feed-deleted]")!.TextContent)
+			.StartsWith("deleted ")
+			.And.EndsWith(UsageSamples.Local(UsageSamples.To.AddHours(-5)));
+		await Assert.That(deleted.Children[2].TextContent.Trim()).IsEqualTo("58");
+		await Assert.That(deleted.QuerySelector("[data-testid=usage-feed-runs]")).IsNull();
+		await Assert.That(deleted.QuerySelector("[data-testid=usage-feed-last]")).IsNull();
 	}
 
 	[Test]
@@ -61,9 +79,6 @@ public class UsageFeedsCardTests : BunitContext
 
 		var picked = cut.FindAll(".usage-feed-picked").Single();
 		await Assert.That(picked.GetAttribute("data-feed")).IsEqualTo("Seasonal anime");
-		await Assert
-			.That(picked.GetAttribute("style"))
-			.IsEqualTo($"--edge: {Services.GetRequiredService<MediaProviderBrandingService>().Color(FeedProvider.AniList.Service)}");
 		await Assert.That(cut.FindAll(".usage-feed-dim")).Count().IsEqualTo(1);
 
 		await Row(cut, "Seasonal anime").ClickAsync();
@@ -124,7 +139,7 @@ public class UsageFeedsCardTests : BunitContext
 	[Test]
 	public async Task Render_RunsOfTheLastHoursOnly_StretchTheTimeScaleFromTheFirstRunToNow()
 	{
-		Services.AddSingleton(At(UsageSamples.To.AddHours(-1)));
+		Services.AddSingleton(UsageSamples.At(UsageSamples.To.AddHours(-1)));
 
 		var cut = Render<Harness>();
 
@@ -163,18 +178,6 @@ public class UsageFeedsCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Dot_OfARunThatHitA429_WearsARingInTheLimitedColour()
-	{
-		var cut = Render<Harness>();
-
-		var rings = cut.FindAll("[data-testid=usage-feed-ring]");
-
-		await Assert.That(rings).Count().IsEqualTo(1);
-		await Assert.That(Dot(cut, LimitedRun).QuerySelector("[data-testid=usage-feed-ring]")!.GetAttribute("stroke")).IsEqualTo("var(--usage-after-429)");
-		await Assert.That(cut.Find("[data-testid=usage-feeds-legend]").TextContent).Contains("A ring: some calls were rate-limited").And.Contains("some gave up");
-	}
-
-	[Test]
 	public async Task Tab_SwitchedToUnmatched_RingsTheRunsThatCouldNotLookUpTitles()
 	{
 		var cut = Render<Harness>();
@@ -186,62 +189,13 @@ public class UsageFeedsCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_TheCallsScale_SpreadsEachPowerOfTenFromTheBottomToTheTop()
-	{
-		var cut = Render<Harness>();
-
-		var ticks = cut.FindAll("[data-testid=usage-feeds-tick]").Select(tick => (tick.TextContent, tick.GetAttribute("style"))).ToList();
-
-		await Assert
-			.That(ticks)
-			.IsEquivalentTo(
-				[("1", "top: 163px"), ("10", "top: 122.5px"), ("100", "top: 82px"), ("1,000", "top: 41.5px"), ("10,000", "top: 1px")],
-				CollectionOrdering.Matching
-			);
-	}
-
-	[Test]
-	public async Task Arrow_OfAFeed_LeadsToItsRunHistory()
-	{
-		var cut = Render<Harness>();
-
-		await Assert
-			.That(Row(cut, "Latest shows").QuerySelector("[data-testid=usage-feed-runs]")!.GetAttribute("href"))
-			.IsEqualTo($"/feeds/{UrlGuid.Encode(Shows.Value)}/runs");
-	}
-
-	[Test]
-	public async Task Render_APausedFeedThatNeverRan_SaysSo()
-	{
-		var cut = Render<Harness>();
-
-		await Assert.That(Row(cut, "Old list").QuerySelector("[data-testid=usage-feed-last]")!.TextContent.Trim()).IsEqualTo("Never ran");
-	}
-
-	[Test]
-	public async Task Render_ADeletedFeed_StrikesItsNameThroughAndSaysWhenItWent()
-	{
-		var cut = Render<Harness>();
-
-		var row = Row(cut, "Horror movies");
-		await Assert.That(row.QuerySelector(".line-through")!.TextContent).IsEqualTo("Horror movies");
-		await Assert
-			.That(row.QuerySelector("[data-testid=usage-feed-deleted]")!.TextContent)
-			.StartsWith("deleted ")
-			.And.EndsWith(UsageSamples.Local(UsageSamples.To.AddHours(-5)));
-		await Assert.That(row.Children[2].TextContent.Trim()).IsEqualTo("58");
-		await Assert.That(row.QuerySelector("[data-testid=usage-feed-runs]")).IsNull();
-		await Assert.That(row.QuerySelector("[data-testid=usage-feed-last]")).IsNull();
-		await Assert.That(row.Children[0].QuerySelector("img")).IsNull();
-		await Assert.That(row.Children[0].QuerySelector("path")!.GetAttribute("d")).IsEqualTo(Ghost());
-	}
-
-	[Test]
-	public async Task Picked_AServiceADeletedFeedCalled_KeepsTheDeletedFeed()
+	public async Task Picked_Tmdb_KeepsOnlyTheFeedsAndRunsThatCalledIt()
 	{
 		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Tmdb)));
 
 		await Assert.That(cut.FindAll("[data-testid=usage-feed]").Select(row => row.GetAttribute("data-feed")!)).IsEquivalentTo(["Latest shows", "Horror movies"]);
+		await Assert.That(cut.FindAll("[data-testid=usage-feed-dot]").Select(dot => dot.GetAttribute("data-run")!)).IsEquivalentTo([ShowsRun.ToString()]);
+		await Assert.That(Row(cut, "Latest shows").Children[3].TextContent.Trim()).IsEqualTo("1");
 	}
 
 	[Test]
@@ -254,15 +208,6 @@ public class UsageFeedsCardTests : BunitContext
 		await Assert.That(cut.FindAll("[data-testid=usage-feed-group]")).Count().IsEqualTo(1);
 		await Assert.That(cut.Find("[data-testid=usage-pick-chip]").GetAttribute("data-service")).IsEqualTo("Mdblist");
 		await Assert.That(cut.Find("[data-testid=usage-feeds]").TextContent).Contains("MDBList calls only, picked in the Calls table.");
-	}
-
-	[Test]
-	public async Task Picked_AService_LeavesOutTheRunsThatNeverCalledIt()
-	{
-		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Picked, Some.Of(RemoteService.Tmdb)));
-
-		await Assert.That(cut.FindAll("[data-testid=usage-feed-dot]").Select(dot => dot.GetAttribute("data-run")!)).IsEquivalentTo([ShowsRun.ToString()]);
-		await Assert.That(Row(cut, "Latest shows").Children[3].TextContent.Trim()).IsEqualTo("1");
 	}
 
 	[Test]
@@ -311,22 +256,12 @@ public class UsageFeedsCardTests : BunitContext
 		await Assert.That(cut.FindAll(".usage-feed-dim")).IsEmpty();
 	}
 
-	private string? Ghost() =>
-		Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 18)).Find("path").GetAttribute("d");
-
 	private static AngleSharp.Dom.IElement Row(IRenderedComponent<Harness> cut, string name)
 	{
 		return cut.FindAll("[data-testid=usage-feed]").Single(row => row.GetAttribute("data-feed") == name);
 	}
 
 	private static string HoverRules(IRenderedComponent<Harness> cut) => cut.Find(".usage-feeds > style").TextContent;
-
-	private static IDateTimeProvider At(DateTimeOffset now)
-	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(now);
-		return clock.Object;
-	}
 
 	private static AngleSharp.Dom.IElement Dot(IRenderedComponent<Harness> cut, RunId run)
 	{

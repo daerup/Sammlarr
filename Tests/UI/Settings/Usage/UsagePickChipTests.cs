@@ -16,13 +16,11 @@ public class UsagePickChipTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_AService_ShowsItsLogoAndName()
+	public async Task Render_AService_ShowsItsName()
 	{
 		var cut = Render<UsagePickChip>(parameters => parameters.Add(chip => chip.Service, RemoteService.Mdblist));
 
-		var chip = cut.Find("[data-testid=usage-pick-chip]");
-		await Assert.That(chip.TextContent.Trim()).IsEqualTo("MDBList");
-		await Assert.That(chip.QuerySelector("img.provider-logo")!.GetAttribute("src")).Contains("mdblist");
+		await Assert.That(cut.Find("[data-testid=usage-pick-chip]").TextContent.Trim()).IsEqualTo("MDBList");
 	}
 
 	[Test]

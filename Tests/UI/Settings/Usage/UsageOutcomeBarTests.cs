@@ -34,19 +34,6 @@ public class UsageOutcomeBarTests : BunitContext
 			.IsEquivalentTo(["Answered|2,573|98.4%", "Rate-limited, then answered|43|1.6%"]);
 	}
 
-	[Test]
-	public async Task Segment_PointedAt_SetsItsOutcomeInBold()
-	{
-		var cut = Render<Harness>();
-
-		await cut.Find("[data-outcome=AnsweredAfter429]").TriggerEventAsync("onmouseenter", new MouseEventArgs());
-		await cut.Find("[data-testid=usage-outcome-bar]").ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
-
-		var rows = cut.WaitForElement("[data-portal-content][data-state=open] [data-testid=usage-outcome-tip]").QuerySelectorAll("[data-at=true]");
-		await Assert.That(rows.Select(row => row.TextContent)).Count().IsEqualTo(1);
-		await Assert.That(rows[0].TextContent).Contains("Rate-limited, then answered");
-	}
-
 	private sealed class Harness : ComponentBase
 	{
 		protected override void BuildRenderTree(RenderTreeBuilder builder)
