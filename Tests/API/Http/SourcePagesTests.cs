@@ -1,5 +1,6 @@
 using API.Http;
-using Shared.Concurrency;
+using Contracts.Providers;
+using Domain.Providers;
 
 namespace API.Tests.Http;
 

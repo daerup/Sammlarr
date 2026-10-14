@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using API.Http.Lanes;
 using API.Plex;
 using API.Plex.Types;
 using API.Tests.Feeds;
@@ -10,7 +11,6 @@ using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
-using Shared.Concurrency;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;

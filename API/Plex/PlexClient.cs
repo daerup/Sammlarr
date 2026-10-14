@@ -1,9 +1,9 @@
 using API.Http;
+using API.Http.Lanes;
 using Contracts.Auth;
 using Contracts.Identity;
 using Domain.Providers;
 using Polly.Timeout;
-using Shared.Concurrency;
 
 namespace API.Plex;
 

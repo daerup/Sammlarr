@@ -1,9 +1,9 @@
 using System.Text.Json;
 using API.Http;
+using API.Http.Lanes;
 using Domain.Auth;
 using Domain.Providers;
 using Polly.Timeout;
-using Shared.Concurrency;
 using TestInfrastructure;
 
 namespace API.Tests.Http;

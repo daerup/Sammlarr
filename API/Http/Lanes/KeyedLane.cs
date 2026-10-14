@@ -1,6 +1,9 @@
-namespace Shared.Concurrency;
+using Contracts.Providers;
+using Domain.Providers;
 
-public sealed class Lane<TKey, TOut>(int maxBatch) : ILane<TKey, TOut>
+namespace API.Http.Lanes;
+
+internal sealed class Lane<TKey, TOut>(int maxBatch) : ILane<TKey, TOut>
 	where TKey : notnull
 	where TOut : notnull
 {
@@ -61,7 +64,7 @@ public sealed class Lane<TKey, TOut>(int maxBatch) : ILane<TKey, TOut>
 		_pending[(key, priority.Class)] = pending;
 		var batch = (call.BatchKey(key), priority.Class);
 		var batches = _batches.GetValueOrNone(batch).GetValueOr(() => _batches[batch] = new Batches());
-		batches.Waiting.Enqueue(pending, (priority.Rank.Class, priority.Rank.Order, _seq++));
+		batches.Waiting.Enqueue(pending, ((int)priority.Class, priority.Order, _seq++));
 		return pending;
 	}
 

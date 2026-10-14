@@ -2,7 +2,6 @@ using System.Net;
 using Contracts.Providers;
 using Domain.Providers;
 using Microsoft.Extensions.Logging;
-using Shared.Concurrency;
 
 namespace API.Http.Lanes;
 

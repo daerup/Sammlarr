@@ -5,7 +5,6 @@ using Contracts.Identity;
 using Domain.Auth;
 using Domain.Providers;
 using Polly.Timeout;
-using Shared.Concurrency;
 using Shared.Options;
 
 namespace API.Mdblist;

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using API.Http;
+using API.Http.Lanes;
 using Domain.Providers;
-using Shared.Concurrency;
 using TestInfrastructure;
 
 namespace API.Tests.Http;

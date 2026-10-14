@@ -22,18 +22,18 @@ One row per `RemoteService` member. Access (`RemoteServices.Access`) is one of f
 adds in Settings › Providers), `UserSignIn` (the user's Plex account, signed in with or connected), `AppInstance` (a
 Radarr or Sonarr the admin sets up) or `Open`.
 
-| Partner | Sammlarr reads | Sammlarr writes | Access |
-|---|---|---|---|
-| TMDB | Trending, search, feeds (lists; movie, TV, discover, keyword, company or network pages), id conversion, details, TMDB rating | nothing | user key, required; optional read token for lists |
-| Plex | Sign-in, the account's name and avatar, search, id conversion, details, ratings (TMDB, IMDb, Rotten Tomatoes), the watchlist | watchlist adds and removes | user's Plex account |
-| MDBList | List feeds, id conversion, ratings from eight sources | nothing | user key |
-| Wikidata | For IMDb ids: TMDB, TVDB, Rotten Tomatoes, Metacritic, Letterboxd, AniList and MyAnimeList ids (SPARQL) | nothing | open |
-| TVmaze | For a show's IMDb or TVDB id: its TVmaze id and details | nothing | open |
-| IMDb datasets | `title.ratings.tsv.gz` daily: every title's IMDb rating and votes | nothing | open |
-| Anime lists | Fribb's `anime-list-full.json` daily: AniList and MyAnimeList ids mapped to TVDB, TMDB and IMDb | nothing | open |
-| AniList | Feeds (a user's list, a search page), details, AniList rating, the prequels that lead a later season to its show | nothing | open |
-| MyAnimeList | Feeds (a user's list, a top or season page), details, MyAnimeList rating | nothing | user key (client id) |
-| Trakt | Feeds (a watchlist, a public list, a trending, popular or anticipated chart), id conversion, details, Trakt rating | nothing | user key (client id) |
+| Partner       | Sammlarr reads                                                                                                               | Sammlarr writes                                                                                                           | Access                                            |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| TMDB          | Trending, search, feeds (lists; movie, TV, discover, keyword, company or network pages), id conversion, details, TMDB rating | nothing                                                                                                                   | user key, required; optional read token for lists |
+| Plex          | Sign-in, the account's name and avatar, search, id conversion, details, ratings (TMDB, IMDb, Rotten Tomatoes), the watchlist | watchlist adds and removes                                                                                                | user's Plex account                               |
+| MDBList       | List feeds, id conversion, ratings from eight sources                                                                        | nothing                                                                                                                   | user key                                          |
+| Wikidata      | For IMDb ids: TMDB, TVDB, Rotten Tomatoes, Metacritic, Letterboxd, AniList and MyAnimeList ids (SPARQL)                      | nothing                                                                                                                   | open                                              |
+| TVmaze        | For a show's IMDb or TVDB id: its TVmaze id and details                                                                      | nothing                                                                                                                   | open                                              |
+| IMDb datasets | `title.ratings.tsv.gz` daily: every title's IMDb rating and votes                                                            | nothing                                                                                                                   | open                                              |
+| Anime lists   | Fribb's `anime-list-full.json` daily: AniList and MyAnimeList ids mapped to TVDB, TMDB and IMDb                              | nothing                                                                                                                   | open                                              |
+| AniList       | Feeds (a user's list, a search page), details, AniList rating, the prequels that lead a later season to its show             | nothing                                                                                                                   | open                                              |
+| MyAnimeList   | Feeds (a user's list, a top or season page), details, MyAnimeList rating                                                     | nothing                                                                                                                   | user key (client id)                              |
+| Trakt         | Feeds (a watchlist, a public list, a trending, popular or anticipated chart), id conversion, details, Trakt rating           | nothing                                                                                                                   | user key (client id)                              |
 | Radarr | Movies and tags, quality profiles, root folders, search lookups | adds movies, sets and removes tags, deletes a movie no other user or protection tag keeps (its files stay) | app instance |
 | Sonarr | The same for series | the same for series | app instance |
 

@@ -12,7 +12,6 @@ using Domain.Processing;
 using Domain.Providers;
 using Harness;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.Concurrency;
 using Shared.Options;
 using TestInfrastructure;
 using static Harness.FeedItemSpec;

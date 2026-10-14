@@ -1,8 +1,8 @@
 using System.Net;
+using API.Http.Lanes;
 using Contracts.Auth;
 using Domain.Auth;
 using Polly;
-using Shared.Concurrency;
 using Shared.Options;
 
 namespace API.Trakt;
