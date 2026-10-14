@@ -1,6 +1,6 @@
 namespace Domain.Providers;
 
-public union Answer<T>(Found<T>, NoMatch, Unavailable, Faulted) where T : notnull;
+public readonly union Answer<T>(Found<T>, NoMatch, Unavailable, Faulted) where T : notnull;
 
 public sealed record Found<T>(T Value) where T : notnull;
 

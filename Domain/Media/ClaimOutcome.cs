@@ -1,6 +1,6 @@
 namespace Domain.Media;
 
-public union ClaimOutcome(Claimed, Conflicted);
+public readonly union ClaimOutcome(Claimed, Conflicted);
 
 public sealed record Claimed(MediaId Id, ValueSet<IIdentityKey> Keys)
 {

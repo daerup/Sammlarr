@@ -43,7 +43,7 @@ public enum RemoteService
 	Sonarr,
 }
 
-public union Access(Open, UserKey, UserSignIn, AppInstance);
+public readonly union Access(Open, UserKey, UserSignIn, AppInstance);
 
 public readonly record struct Open;
 

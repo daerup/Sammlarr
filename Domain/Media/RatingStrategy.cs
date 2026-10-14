@@ -1,6 +1,6 @@
 namespace Domain.Media;
 
-public union RatingStrategy(OrderedRating, AveragedRating)
+public readonly union RatingStrategy(OrderedRating, AveragedRating)
 {
 	public Optional<SammlarrRating> Resolve(MediaRatings ratings, ValueSet<RatingSource> available)
 	{

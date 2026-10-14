@@ -1,3 +1,3 @@
 namespace Domain.Media;
 
-public union MediaMatchResult(MatchedMedia, UnmatchedMedia);
+public readonly union MediaMatchResult(MatchedMedia, UnmatchedMedia);

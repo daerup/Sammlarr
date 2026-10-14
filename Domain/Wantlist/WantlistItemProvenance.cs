@@ -13,4 +13,4 @@ public readonly record struct FeedOrigin(Feed.Feed Feed, FeedRun Run);
 
 public readonly record struct OrphanedOrigin(string FormerFeedName);
 
-public union WantlistItemProvenance(SinkOrigin, ManualOrigin, FeedOrigin, OrphanedOrigin);
+public readonly union WantlistItemProvenance(SinkOrigin, ManualOrigin, FeedOrigin, OrphanedOrigin);

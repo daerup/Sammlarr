@@ -2,9 +2,9 @@ using Domain.Wantlist.Arr;
 
 namespace Domain.Wantlist.Sync;
 
-public union WantlistSyncResult(WantlistSyncSummary, WantlistSyncAlreadyRunning, WantlistSyncSinkUnreachable);
+public readonly union WantlistSyncResult(WantlistSyncSummary, WantlistSyncAlreadyRunning, WantlistSyncSinkUnreachable);
 
-public union WantlistPlanResult(WantlistSyncSummary, WantlistSyncSinkUnreachable);
+public readonly union WantlistPlanResult(WantlistSyncSummary, WantlistSyncSinkUnreachable);
 
 public readonly record struct WantlistSyncAlreadyRunning
 {

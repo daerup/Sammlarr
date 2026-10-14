@@ -2,7 +2,7 @@ using Domain.Media;
 
 namespace Core.Media;
 
-internal union FetchReason(Uncached, Gaps, Stale);
+internal readonly union FetchReason(Uncached, Gaps, Stale);
 
 internal readonly record struct Uncached;
 

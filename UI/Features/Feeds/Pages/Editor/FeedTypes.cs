@@ -92,6 +92,7 @@ public record PreviewStatus
 	public bool HasResults { get; init; }
 	public bool HasFailed { get; init; }
 	public bool IsListMissing { get; init; }
+
 	public Optional<int> MirrorExposure { get; init; } = new None();
 }
 
@@ -138,6 +139,7 @@ public record FeedConfig
 	public QuerySort? Sort { get; init; }
 	public QueryLimit? Limit { get; init; }
 	public FeedRunTrigger Schedule { get; init; } = new FeedRunTrigger(new Manual());
+
 	public Optional<RatingStrategy> RatingStrategy { get; init; } = new None();
 
 	public bool IsScheduleValid { get; init; } = true;

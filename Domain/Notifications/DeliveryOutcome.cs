@@ -1,6 +1,6 @@
 namespace Domain.Notifications;
 
-public union DeliveryOutcome(Delivered, Retrying, Failed);
+public readonly union DeliveryOutcome(Delivered, Retrying, Failed);
 
 public readonly record struct Delivered;
 

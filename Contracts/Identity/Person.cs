@@ -12,4 +12,4 @@ public sealed record JoinedPerson(User User, PersonHoldings Holdings, Optional<D
 
 public sealed record InvitedPerson(string Username, string DisplayName, DateTimeOffset ExpiresAt);
 
-public union Person(JoinedPerson, InvitedPerson);
+public readonly union Person(JoinedPerson, InvitedPerson);

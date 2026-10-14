@@ -1,6 +1,6 @@
 namespace Domain.Feed.Planning;
 
-public union FeedPlanResult(IFeedPlan, FeedPlanFailed);
+public readonly union FeedPlanResult(IFeedPlan, FeedPlanFailed);
 
 public readonly record struct FeedPlanFailed(string Reason)
 {

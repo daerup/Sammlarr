@@ -3,13 +3,13 @@ using Domain.Providers;
 
 namespace Domain.Media;
 
-public union ConflictState(Undecided, Distinct);
+public readonly union ConflictState(Undecided, Distinct);
 
 public readonly record struct Undecided;
 
 public sealed record Distinct(DistinctReason Reason, DateTimeOffset At);
 
-public union DistinctReason(Contradiction, TypesDiffer, AnsweredElsewhere, KeptApartByHand);
+public readonly union DistinctReason(Contradiction, TypesDiffer, AnsweredElsewhere, KeptApartByHand);
 
 public sealed record Contradiction(MediaProvider Source);
 

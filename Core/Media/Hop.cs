@@ -4,7 +4,7 @@ using Domain.Providers;
 
 namespace Core.Media;
 
-internal union Hop(IdToId, IdToHints, HintsToId)
+internal readonly union Hop(IdToId, IdToHints, HintsToId)
 {
 	public RemoteService Remote
 	{

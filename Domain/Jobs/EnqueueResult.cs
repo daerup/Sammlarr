@@ -1,6 +1,6 @@
 namespace Domain.Jobs;
 
-public union EnqueueResult(Queued, AlreadyQueued);
+public readonly union EnqueueResult(Queued, AlreadyQueued);
 
 public readonly record struct Queued(JobId Id, JobState State);
 

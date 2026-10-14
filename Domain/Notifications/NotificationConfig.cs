@@ -1,6 +1,6 @@
 namespace Domain.Notifications;
 
-public union NotificationConfig(WebhookConfig, PushoverConfig, WebUiConfig);
+public readonly union NotificationConfig(WebhookConfig, PushoverConfig, WebUiConfig);
 
 public readonly record struct WebhookConfig(string Url, string SigningSecret)
 {

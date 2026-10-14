@@ -27,4 +27,4 @@ public static class Optional
     public static async Task<Optional<T>> Of<T>(Task<T?> value) where T : class => Of(await value);
 }
 
-public union Optional<T>(None, Some<T>) where T : notnull;
+public readonly union Optional<T>(None, Some<T>) where T : notnull;

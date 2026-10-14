@@ -1,6 +1,6 @@
 namespace Domain.Feed.Run;
 
-public union FeedRunResult(FeedRunCompleted, FeedRunAlreadyRunning, FeedRunFailed);
+public readonly union FeedRunResult(FeedRunCompleted, FeedRunAlreadyRunning, FeedRunFailed);
 
 public sealed record FeedRunCompleted(FeedDelta Delta, Conclusiveness Conclusiveness);
 

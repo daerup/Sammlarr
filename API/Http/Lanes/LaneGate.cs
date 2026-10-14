@@ -24,7 +24,9 @@ internal sealed class LaneGate : IDisposable
 	private DateTimeOffset _halved = DateTimeOffset.MinValue;
 	private DateTimeOffset _raised = DateTimeOffset.MinValue;
 	private DateTimeOffset _throttled = DateTimeOffset.MinValue;
+
 	private Optional<DateTimeOffset> _blockedUntil = new None();
+
 	private Optional<DateTimeOffset> _downUntil = new None();
 	private bool _probing;
 
