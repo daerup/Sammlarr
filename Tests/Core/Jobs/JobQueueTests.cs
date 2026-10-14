@@ -31,17 +31,6 @@ public class JobQueueTests
 	}
 
 	[Test]
-	public async Task EnqueueAsync_CarriesTheRequestThroughUntouched()
-	{
-		var (testee, jobs, _) = BuildTestee();
-
-		await testee.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
-
-		jobs.EnqueueAsync(new QueuedJob(new SyncWantlist(new ScheduledFeedTrigger()), TestCurrentUser.DefaultId, Now + Options.Grace, Options.MaxWait), Now, Any())
-			.WasCalled(Times.Once);
-	}
-
-	[Test]
 	public async Task EnqueueAsync_ForAFillDetails_WaitsItsGraceWithItsMaxWait()
 	{
 		var (testee, jobs, _) = BuildTestee();

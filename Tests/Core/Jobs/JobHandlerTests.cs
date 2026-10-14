@@ -10,14 +10,14 @@ namespace Core.Tests.Jobs;
 public class JobHandlerTests
 {
 	[Test]
-	public async Task DispatchAsync_ResolvesTheHandlerForTheRequestsRuntimeType()
+	public async Task DispatchAsync_HandsTheRequestWithItsTriggerToTheHandlerForItsRuntimeType()
 	{
-		var feedId = FeedId.From(Guid.NewGuid());
+		var request = new RunFeed(FeedId.From(Guid.NewGuid()), new Scheduled("0 0 * * * *"));
 		var (services, feeds, syncs) = BuildServices();
 
-		await JobRunner.DispatchAsync(services, new RunFeed(feedId, new Manual()), CancellationToken.None);
+		await JobRunner.DispatchAsync(services, request, CancellationToken.None);
 
-		await Assert.That(feeds.Received?.Id).IsEqualTo(feedId);
+		await Assert.That(feeds.Received).IsEqualTo(request);
 		await Assert.That(syncs.Received).IsNull();
 	}
 
@@ -30,16 +30,6 @@ public class JobHandlerTests
 
 		await Assert.That(syncs.Received).IsNotNull();
 		await Assert.That(feeds.Received).IsNull();
-	}
-
-	[Test]
-	public async Task DispatchAsync_CarriesTheTriggerSoRunHistoryCanTellSchedulingApart()
-	{
-		var (services, feeds, _) = BuildServices();
-
-		await JobRunner.DispatchAsync(services, new RunFeed(FeedId.From(Guid.NewGuid()), new Scheduled("0 0 * * * *")), CancellationToken.None);
-
-		await Assert.That(feeds.Received!.Value.Trigger is Scheduled).IsTrue();
 	}
 
 	[Test]

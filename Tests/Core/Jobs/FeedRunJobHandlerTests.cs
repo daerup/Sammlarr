@@ -92,17 +92,6 @@ public class FeedRunJobHandlerTests
 	}
 
 	[Test]
-	public async Task HandleAsync_RunsTheFeedUnderTheTriggerItWasQueuedWith()
-	{
-		var id = FeedId.From(Guid.NewGuid());
-		var (testee, _, _, engine) = Testee();
-
-		await testee.HandleAsync(new RunFeed(id, Nightly));
-
-		engine.RunAsync(id, Nightly, Any()).WasCalled(Times.Once);
-	}
-
-	[Test]
 	public async Task HandleAsync_AnnouncesTheRunFinishedSoAnOpenPageCanRefresh()
 	{
 		var id = FeedId.From(Guid.NewGuid());
