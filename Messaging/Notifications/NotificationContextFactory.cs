@@ -71,7 +71,7 @@ internal static class NotificationContextFactory
 		var id = entry.Identity.Id.ToString();
 		return entry.Cached.Match(
 			cached => new NotificationMedia(id, cached.Details.Title, cached.Details.Type, cached.Details.ReleaseDate?.Year),
-			() => new NotificationMedia(id, null, entry.Identity.Type, null)
+			() => new NotificationMedia(id, null, entry.Identity.Type)
 		);
 	}
 

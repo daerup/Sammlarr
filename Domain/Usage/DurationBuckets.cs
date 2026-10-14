@@ -35,7 +35,7 @@ public static class DurationBuckets
 	{
 		var lower = spot.Index == 0 ? 0 : UpToMs[spot.Index - 1];
 		var upper = UpToMs[spot.Index] == Over ? lower : UpToMs[spot.Index];
-		return lower + ((upper - lower) * spot.Within);
+		return lower + (upper - lower) * spot.Within;
 	}
 
 	private readonly record struct Spot(int Index, double Within);

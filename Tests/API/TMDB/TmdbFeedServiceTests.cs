@@ -97,7 +97,7 @@ public class TmdbFeedServiceTests
 			.RespondWith(_ =>
 			{
 				var page = Interlocked.Increment(ref asked);
-				var results = Enumerable.Range(((page - 1) * 20) + 1, 20).Select(id => $$$"""{"id":{{{id}}},"title":"Movie {{{id}}}"}""");
+				var results = Enumerable.Range((page - 1) * 20 + 1, 20).Select(id => $$$"""{"id":{{{id}}},"title":"Movie {{{id}}}"}""");
 				return new HttpResponseMessage(HttpStatusCode.OK)
 				{
 					Content = new StringContent("{\"total_pages\":500,\"results\":[" + string.Join(",", results) + "]}", System.Text.Encoding.UTF8, "application/json"),

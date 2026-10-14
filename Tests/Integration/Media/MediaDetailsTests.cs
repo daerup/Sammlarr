@@ -66,12 +66,12 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "", genres: ["Drama"])
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 11, 0), genres: [], answeredBy: [RemoteService.Tmdb]);
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 11), genres: [], answeredBy: [RemoteService.Tmdb]);
 
 		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.None).ToListAsync();
 
 		await AssertTitle(results[0], "Cached Title");
-		await AssertCachedAs(fightClub, "Cached Title", At(6, 1, 11, 0));
+		await AssertCachedAs(fightClub, "Cached Title", At(6, 1, 11));
 	}
 
 	[Test]
@@ -81,12 +81,12 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "", genres: ["Drama"])
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 9, 0), genres: [], answeredBy: [RemoteService.Tmdb]);
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 9), genres: [], answeredBy: [RemoteService.Tmdb]);
 
 		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertDetail(results[0], "Cached Title", genres: ["Drama"]);
-		await AssertCachedAs(fightClub, "Cached Title", At(6, 1, 9, 0), asked: At(6, 1, 11, 30));
+		await AssertCachedAs(fightClub, "Cached Title", At(6, 1, 9), asked: At(6, 1, 11, 30));
 	}
 
 	[Test]

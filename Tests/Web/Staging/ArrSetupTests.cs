@@ -1,4 +1,3 @@
-using System.Net;
 using TUnit.Assertions.Enums;
 using TUnit.Mocks.Http;
 using Web.Staging;
@@ -42,7 +41,7 @@ public class ArrSetupTests
 
 	private void Holds(string folders)
 	{
-		_sonarr.OnGet("/ping").Respond(HttpStatusCode.OK);
+		_sonarr.OnGet("/ping").Respond();
 		_sonarr.OnGet("/api/v3/rootfolder").RespondWithJson(folders);
 		_sonarr.OnPost("/api/v3/rootfolder").RespondWithJson("{}");
 		_sonarr.OnGet("/api/v3/downloadclient").RespondWithJson("""[{"id":1}]""");

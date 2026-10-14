@@ -38,7 +38,7 @@ public class MdblistClientTests
 	public async Task SendAsync_ForAnyRequest_RecordsTheRequestsMdblistHasLeft()
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().Respond(HttpStatusCode.OK).WithHeader("x-ratelimit-remaining", "962").WithHeader("x-ratelimit-reset", MdblistApis.Reset);
+		handler.OnAnyRequest().Respond().WithHeader("x-ratelimit-remaining", "962").WithHeader("x-ratelimit-reset", MdblistApis.Reset);
 		using var host = MdblistApis.Module(handler);
 
 		using var response = await host.Services.GetRequiredService<MdblistClient>().SendAsync(HttpMethod.Get, "lists/1/items", Key);
@@ -72,7 +72,7 @@ public class MdblistClientTests
 	public async Task SendAsync_ForATitleLookupAtTheFeedReserve_RefusesBeforeSending()
 	{
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().Respond(HttpStatusCode.OK);
+		handler.OnAnyRequest().Respond();
 		using var host = MdblistApis.Module(handler);
 		host.Services.GetRequiredService<MdblistBudget>().Record(Key.Value, Spent());
 		using var title = LanePriority.Next(LaneClass.Title).Enter();

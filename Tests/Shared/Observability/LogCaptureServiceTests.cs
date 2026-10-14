@@ -325,7 +325,7 @@ public class LogCaptureServiceTests
 	{
 		var testee = new LogCaptureService(new LoggingLevelSwitch());
 		testee.Start(LogLevel.Trace);
-		testee.AppendLog(MakeLog(LogLevel.Information, "msg"));
+		testee.AppendLog(MakeLog(LogLevel.Information));
 		testee.AppendSpan(MakeSpan("span.one", DateTimeOffset.UtcNow));
 
 		using var stream = testee.ExportZip();

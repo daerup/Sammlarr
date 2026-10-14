@@ -366,7 +366,7 @@ public class AniListTests
 	private static string SearchPage(int page, int count, bool more)
 	{
 		var titles = Enumerable
-			.Range(((page - 1) * 50) + 1, count)
+			.Range((page - 1) * 50 + 1, count)
 			.Select(id => $$$"""{"id":{{{id}}},"format":"TV","title":{"romaji":"Anime {{{id}}}"},"startDate":{"year":2026}}""");
 		var next = more ? "true" : "false";
 		return "{\"data\":{\"Page\":{\"pageInfo\":{\"hasNextPage\":" + next + "},\"media\":[" + string.Join(",", titles) + "]}}}";

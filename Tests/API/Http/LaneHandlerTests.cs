@@ -33,7 +33,7 @@ public class LaneHandlerTests
 	{
 		var wire = new Scripted(HttpStatusCode.TooManyRequests);
 		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions { RetryAttempts = 0 }), RemoteService.Plex, wire, clients: ["plex", "plex-sink"]);
-		using var throttled = await host.Client("plex").GetAsync("https://plex.test/library");
+		using var throttled = await host.Client().GetAsync("https://plex.test/library");
 
 		await Assert.That(async () => await host.Client("plex-sink").GetAsync("https://plex.test/api/v2/user")).Throws<LaneRefusedException>();
 		await Assert.That(wire.Asked).IsEqualTo(1);

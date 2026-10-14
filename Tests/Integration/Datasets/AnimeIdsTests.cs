@@ -135,7 +135,7 @@ public class AnimeIdsTests(SammlarrTestHost host) : IAsyncDisposable
 		var after = await media.FindIdAsync(show, MediaProvider.Tvdb);
 
 		await Assert.That(before).IsNone();
-		await Assert.That(after).IsSome().And.IsEqualTo<IExternalMediaId>(TvdbId.From("72025", MediaType.Show));
+		await Assert.That(after).IsSome().And.IsEqualTo(TvdbId.From("72025", MediaType.Show));
 	}
 
 	[Test]

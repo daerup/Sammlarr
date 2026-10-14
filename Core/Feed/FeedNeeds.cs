@@ -7,7 +7,7 @@ namespace Core.Feed;
 internal static class FeedNeeds
 {
 	internal static MediaFields Shown { get; } =
-		(MediaField.Title | MediaField.ReleaseDate | MediaField.Poster | MediaField.Backdrop | MediaField.Summary) | MediaFields.AllRatings;
+		MediaField.Title | MediaField.ReleaseDate | MediaField.Poster | MediaField.Backdrop | MediaField.Summary | MediaFields.AllRatings;
 
 	extension(Domain.Feed.Feed feed)
 	{

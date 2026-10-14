@@ -1,5 +1,4 @@
 using Domain.Providers;
-using TUnit.Assertions.Enums;
 
 namespace Domain.Tests.Providers;
 
@@ -10,7 +9,7 @@ public class ServiceTests
 	{
 		Service pair = new Arr();
 
-		await Assert.That(pair.Remotes).IsEquivalentTo([RemoteService.Radarr, RemoteService.Sonarr], CollectionOrdering.Any);
+		await Assert.That(pair.Remotes).IsEquivalentTo([RemoteService.Radarr, RemoteService.Sonarr]);
 	}
 
 	[Test]

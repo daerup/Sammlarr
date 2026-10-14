@@ -60,7 +60,7 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 	private static DateTimeOffset Ahead(DateTimeOffset reset, DateTimeOffset now)
 	{
 		var behind = Math.Max(0, Math.Floor((now - reset) / Day) + 1);
-		return reset + (Day * behind);
+		return reset + Day * behind;
 	}
 
 	public Optional<DateTimeOffset> BlockedUntil(string owner, LaneClass asking, DateTimeOffset now)

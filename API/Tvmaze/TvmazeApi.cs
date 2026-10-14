@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using API.Http;
 using API.Tvmaze.Types;
 using Contracts.Caching;

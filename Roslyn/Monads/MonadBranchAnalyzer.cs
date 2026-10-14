@@ -210,7 +210,7 @@ public sealed class MonadBranchAnalyzer : DiagnosticAnalyzer
 			var method = invocation.TargetMethod;
 			if (MonadTypes.IsHelper(method, PresenceReads))
 			{
-				yield return new Read(receiver, (method.Name is "IsSome" or "IsSuccess") != negated, onResult, lifted: false);
+				yield return new Read(receiver, method.Name is "IsSome" or "IsSuccess" != negated, onResult, lifted: false);
 			}
 			else if (LiftedReceiver(invocation, receiver) is { } mapped)
 			{

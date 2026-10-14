@@ -83,7 +83,7 @@ public class UsageStoreTests(SammlarrTestHost host) : IAsyncDisposable
 					UsageCause.FeedRun,
 					Some.Of(Feed),
 					calls * 2,
-					new Dictionary<int, long> { [100] = (calls * 2) - 1, [DurationBuckets.Over] = 1 }
+					new Dictionary<int, long> { [100] = calls * 2 - 1, [DurationBuckets.Over] = 1 }
 				),
 			]
 		);

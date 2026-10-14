@@ -111,7 +111,7 @@
 
     private string At(int index) => FormattableString.Invariant($"calc({PlotLeft}px + (100% - {PlotLeft + PlotRight}px) * {index} / {Quota.Days.Count})");
 
-    private double Y(double used) => PlotTop + (PlotHeight * (1 - (used / Top)));
+    private double Y(double used) => PlotTop + PlotHeight * (1 - used / Top);
 
     private string Percent(long used) => FormattableString.Invariant($"{Math.Min(1, used / Top) * 100:0.##}%");
 

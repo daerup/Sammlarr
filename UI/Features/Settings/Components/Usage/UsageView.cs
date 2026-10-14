@@ -37,14 +37,14 @@ internal static class UsageView
 		var index = buckets.TakeWhile(upTo => milliseconds > upTo).Count();
 		var lower = index == 0 ? 0 : buckets[index - 1];
 		var upper = buckets[index] == DurationBuckets.Over ? lower * 1.5 : buckets[index];
-		return (index + ((milliseconds - lower) / (upper - lower))) / buckets.Count;
+		return (index + (milliseconds - lower) / (upper - lower)) / buckets.Count;
 	}
 
 	internal static string Shade(long count, long busiest)
 	{
 		return count == 0
 			? "color-mix(in oklab, var(--foreground) 4%, transparent)"
-			: FormattableString.Invariant($"color-mix(in oklab, var(--usage-shade) {Math.Round(12 + (count * 88.0 / busiest))}%, var(--card))");
+			: FormattableString.Invariant($"color-mix(in oklab, var(--usage-shade) {Math.Round(12 + count * 88.0 / busiest)}%, var(--card))");
 	}
 
 	internal static string Calls(long count) => count == 1 ? "1 call" : $"{Count(count)} calls";

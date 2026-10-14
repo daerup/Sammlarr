@@ -62,7 +62,7 @@ public class AdminPasswordResetTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task StartAsync_OnAPlexInstall_ChangesNothing()
 	{
 		var config = host.Resolve<IProviderConfigService>();
-		await config.StoreAsync((await config.GetAsync()) with { AuthProvider = AuthProvider.Plex });
+		await config.StoreAsync(await config.GetAsync() with { AuthProvider = AuthProvider.Plex });
 
 		await Testee(Reset).StartAsync(CancellationToken.None);
 

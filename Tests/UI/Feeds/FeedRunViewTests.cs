@@ -10,7 +10,7 @@ namespace UI.Tests.Feeds;
 
 public class FeedRunViewTests
 {
-	private static readonly Feed Comedy = TestFeeds.Feed(new Guid(1, 0, 0, new byte[8]), "Comedy");
+	private static readonly Feed Comedy = TestFeeds.Feed(new Guid(1, 0, 0, new byte[8]));
 
 	[Test]
 	[Arguments(Conclusiveness.NoItems, "HTTP 404", 0, "The source could not be read, so nothing was applied.")]
@@ -55,7 +55,7 @@ public class FeedRunViewTests
 	{
 		var added = MediaId.New();
 		var stuck = MediaId.New();
-		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.Conclusive) with
+		var run = TestFeeds.Run(Comedy, Guid.NewGuid()) with
 		{
 			Items =
 			[

@@ -363,10 +363,10 @@
             switch (await JobQueue.EnqueueAsync(new SyncWantlist(new ManualTrigger()), _cts.Token))
             {
                 case Queued:
-                    Notifier.Info("Sync has been queued", null);
+                    Notifier.Info("Sync has been queued");
                     break;
                 case AlreadyQueued:
-                    Notifier.Info("A sync is already queued", null);
+                    Notifier.Info("A sync is already queued");
                     break;
             }
         }

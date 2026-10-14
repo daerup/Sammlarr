@@ -116,7 +116,7 @@ internal static class AniListPages
 					variables["countryOfOrigin"] = last;
 					break;
 				case "year range":
-					variables["yearGreater"] = (Int(values[0]) * 10000) - 1;
+					variables["yearGreater"] = Int(values[0]) * 10000 - 1;
 					variables["yearLesser"] = (Int(values[1]) + 1) * 10000;
 					break;
 				case "sort":

@@ -95,14 +95,14 @@ public class TraktFeedServiceTests
 			.RespondWith(_ =>
 			{
 				var page = Interlocked.Increment(ref calls);
-				var titles = Enumerable.Range(((page - 1) * 250) + 1, 250).Select(id => $$$"""{"title":"Show {{{id}}}","year":2026,"ids":{"trakt":{{{id}}}}}""");
+				var titles = Enumerable.Range((page - 1) * 250 + 1, 250).Select(id => $$$"""{"title":"Show {{{id}}}","year":2026,"ids":{"trakt":{{{id}}}}}""");
 				return Page("[" + string.Join(",", titles) + "]", pages: 10);
 			});
 
 		await Testee(handler).GetFeedItemsAsync("shows/popular", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert.That(_asked).Count().IsEqualTo(500);
-		await Assert.That(_asked[0].Candidates.Single()).IsEqualTo<IExternalMediaId>(TraktId.From("1", MediaType.Show));
+		await Assert.That(_asked[0].Candidates.Single()).IsEqualTo(TraktId.From("1", MediaType.Show));
 		await Assert.That(calls).IsEqualTo(2);
 	}
 

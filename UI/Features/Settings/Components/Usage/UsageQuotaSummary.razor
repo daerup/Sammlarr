@@ -84,5 +84,5 @@
             .GetValueOr("at this pace it lasts until the reset");
     }
 
-    private static DateTimeOffset About(DateTimeOffset at) => new((at.UtcTicks + (Rounding.Ticks / 2)) / Rounding.Ticks * Rounding.Ticks, TimeSpan.Zero);
+    private static DateTimeOffset About(DateTimeOffset at) => new((at.UtcTicks + Rounding.Ticks / 2) / Rounding.Ticks * Rounding.Ticks, TimeSpan.Zero);
 }

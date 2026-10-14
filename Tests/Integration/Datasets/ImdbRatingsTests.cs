@@ -144,7 +144,7 @@ public class ImdbRatingsTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(loaded.Outcome).IsEqualTo(DatasetOutcome.Loaded);
 		await Assert.That((await host.Resolve<IDatasetLoads>().FindAsync(DatasetNames.ImdbRatings)).Map(load => load.Rows)).IsSome().And.IsEqualTo(2);
 		await Assert.That(Imdb(before.Single())).IsNone();
-		await Assert.That(Imdb(after.Single())).IsSome().And.IsEqualTo<IMediaRating>(new ImdbRating(8.8f, Some.Of(2_669_240)));
+		await Assert.That(Imdb(after.Single())).IsSome().And.IsEqualTo(new ImdbRating(8.8f, Some.Of(2_669_240)));
 	}
 
 	private static Optional<IMediaRating> Imdb(Result<MatchedMedia> matched)

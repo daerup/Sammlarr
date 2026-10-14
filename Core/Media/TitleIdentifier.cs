@@ -74,7 +74,7 @@ internal sealed class TitleIdentifier(MediaIdResolver idResolver, IIdentityClaim
 
 	private static IdentifyRequest Seeded(IdentifyRequest request, StoredMedia stored)
 	{
-		return request with { Candidates = [.. request.Candidates.Union<IExternalMediaId>(stored.Identity.Keys)], Hints = request.Hints.Or(() => stored.Hints()) };
+		return request with { Candidates = [.. request.Candidates.Union(stored.Identity.Keys)], Hints = request.Hints.Or(() => stored.Hints()) };
 	}
 
 	private static Unidentified Conflict(ValueSet<MediaId> owners) => new(UnmatchedReason.Conflict, owners);

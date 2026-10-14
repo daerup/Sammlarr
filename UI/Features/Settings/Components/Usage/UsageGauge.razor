@@ -1,4 +1,3 @@
-@using Domain.Usage
 
 <svg width="@Size" height="@Height" viewBox="@ViewBox" class="block overflow-visible" role="img" aria-label="@($"{Centre} answered")" data-testid="usage-gauge">
     <path d="@Arc" fill="none" stroke="var(--secondary)" stroke-width="@Thick"/>
@@ -26,7 +25,7 @@
 
     private double Radius => (Size - Thick) / 2.0;
 
-    private double CentreY => Radius + (Thick / 2.0);
+    private double CentreY => Radius + Thick / 2.0;
 
     private double Length => Math.PI * Radius;
 
@@ -36,7 +35,7 @@
 
     private string Mid => Number(Size / 2.0);
 
-    private string Arc => $"M {Number(Thick / 2.0)},{Number(CentreY)} A {Number(Radius)} {Number(Radius)} 0 0 1 {Number(Size - (Thick / 2.0))},{Number(CentreY)}";
+    private string Arc => $"M {Number(Thick / 2.0)},{Number(CentreY)} A {Number(Radius)} {Number(Radius)} 0 0 1 {Number(Size - Thick / 2.0)},{Number(CentreY)}";
 
     private string Centre => UsageView.Share(Tally.Of(UsageOutcome.Answered), Tally.Total).Replace(".0%", "%", StringComparison.Ordinal);
 
@@ -50,7 +49,7 @@
             var raw = looks.Select(look => Tally.Of(look.Outcome) * Length / total).ToList();
             var small = raw.Count(length => length < floor);
             var large = Math.Max(1, raw.Where(length => length >= floor).Sum());
-            var lengths = raw.Select(length => length < floor ? floor : length * (Length - (small * floor)) / large).ToList();
+            var lengths = raw.Select(length => length < floor ? floor : length * (Length - small * floor) / large).ToList();
             var gap = looks.Count > 1 ? Gap : 0;
             var start = 0.0;
             var segments = new List<Segment>();

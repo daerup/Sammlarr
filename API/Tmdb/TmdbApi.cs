@@ -45,7 +45,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDateTimeP
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<TmdbTypes.Trending.Root>(stream, cancellationToken: cancellationToken);
-		return Success.Of<IReadOnlyList<TmdbTypes.Trending.Result>>(result?.Results ?? []);
+		return Success.Of(result?.Results ?? []);
 	}
 
 	private async Task<Result<TmdbTypes.Details>> FetchDetailAsync(TmdbId id, IApiKey apiKey, CancellationToken cancellationToken)

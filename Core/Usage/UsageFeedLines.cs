@@ -2,7 +2,6 @@ using Contracts.Feed;
 using Contracts.Usage;
 using Domain.Feed;
 using Domain.Feed.Run;
-using Domain.Providers;
 using Domain.Usage;
 
 namespace Core.Usage;

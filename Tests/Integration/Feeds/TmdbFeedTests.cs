@@ -1,7 +1,6 @@
 using Contracts.Auth;
 using Contracts.Feed;
 using DB.Data.Feed;
-using Domain.Auth;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;

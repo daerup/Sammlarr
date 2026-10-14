@@ -47,7 +47,7 @@ public class IdentityConflictTests
 			[TmdbId.From("420817", MediaType.Movie)]
 		);
 
-		await Assert.That(contradiction).IsSome().And.IsEqualTo<DistinctReason>(new Contradiction(MediaProvider.Tmdb));
+		await Assert.That(contradiction).IsSome().And.IsEqualTo(new Contradiction(MediaProvider.Tmdb));
 	}
 
 	[Test]
@@ -55,7 +55,7 @@ public class IdentityConflictTests
 	{
 		var contradiction = IdentityConflict.Contradicts([TmdbId.From("812", MediaType.Movie)], [ImdbId.From("tt0103639", MediaType.Show)]);
 
-		await Assert.That(contradiction).IsSome().And.IsEqualTo<DistinctReason>(new TypesDiffer());
+		await Assert.That(contradiction).IsSome().And.IsEqualTo(new TypesDiffer());
 	}
 
 	[Test]

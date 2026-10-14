@@ -53,7 +53,7 @@ internal sealed class ExternalIdsView(
 	public async Task<IReadOnlyList<ExternalIdCard>> WithArrCardAsync(IReadOnlyList<ExternalIdCard> idCards, IReadOnlyList<IExternalMediaId> ids)
 	{
 		var arrCard = await ArrAsync().Map(config => ArrSearchLinks.For(config, ids)).Map(ArrCard);
-		return arrCard.Match<ExternalIdCard, IReadOnlyList<ExternalIdCard>>(card => [.. idCards, card], () => idCards);
+		return arrCard.Match(card => [.. idCards, card], () => idCards);
 	}
 
 	private async Task<Optional<ArrSinkConfig>> ArrAsync()

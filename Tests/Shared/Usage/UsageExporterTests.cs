@@ -26,7 +26,7 @@ public class UsageExporterTests
 		var (store, added, lastCalls) = Mocks();
 		using var meter = new Meter($"usage-{Guid.NewGuid()}");
 		var calls = meter.CreateHistogram<double>(UsageExporter.PipelineDuration, "ms");
-		var attempts = meter.CreateHistogram<double>(
+		var attempts = meter.CreateHistogram(
 			UsageExporter.RequestDuration,
 			"s",
 			null,

@@ -1,4 +1,3 @@
-@using Domain.Usage
 
 <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
     Answer time
@@ -11,7 +10,7 @@
             <svg width="@SampleWidth" height="26" class="mt-2 mb-0.5 block overflow-visible">
                 @for (var index = 0; index < DurationBuckets.UpToMs.Count; index++)
                 {
-                    <rect x="@UsageView.Number((index * Cell) + 0.5)" y="0" width="@UsageView.Number(Cell - 1)" height="12" rx="2" fill="@Sample(index)"/>
+                    <rect x="@UsageView.Number(index * Cell + 0.5)" y="0" width="@UsageView.Number(Cell - 1)" height="12" rx="2" fill="@Sample(index)"/>
                 }
                 <text font-size="10" fill="var(--muted-foreground)">
                     @foreach (var (x, label, anchor) in Labels)
@@ -44,7 +43,7 @@
 
     private static string Sample(int index)
     {
-        var strength = 15 + (Math.Sin(index / 14.0 * Math.PI) * 80);
+        var strength = 15 + Math.Sin(index / 14.0 * Math.PI) * 80;
         return FormattableString.Invariant($"color-mix(in oklab, var(--usage-shade) {Math.Round(strength)}%, var(--card))");
     }
 }

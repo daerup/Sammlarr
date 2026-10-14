@@ -264,7 +264,7 @@ public class NotificationDispatchHandlerTests
 	[Test]
 	public async Task Handle_WhenAFeedRunCompletes_NamesTheFeedInTheContext()
 	{
-		var feed = TestFeeds.Feed(Guid.NewGuid(), "Comedy");
+		var feed = TestFeeds.Feed(Guid.NewGuid());
 		var subscriptions = SubscriptionsFor(
 			NotificationEventType.FeedRunCompleted,
 			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.FeedRunCompleted], NotificationTemplate.None)
