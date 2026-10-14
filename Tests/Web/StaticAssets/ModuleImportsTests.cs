@@ -5,9 +5,9 @@ namespace Web.Tests.StaticAssets;
 
 public partial class ModuleImportsTests
 {
-	private static readonly JsonElement Manifest = JsonDocument
-		.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Web.staticwebassets.runtime.json")))
-		.RootElement;
+	private static readonly JsonElement Manifest = JsonElement.Parse(
+		File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Web.staticwebassets.runtime.json"))
+	);
 
 	[Test]
 	public async Task Modules_ImportOnlyModulesThatAreServed_SoTrimmingAnAssetCannotBreakAnother()

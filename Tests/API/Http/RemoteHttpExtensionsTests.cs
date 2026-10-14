@@ -186,7 +186,7 @@ public class RemoteHttpExtensionsTests
 
 	private static string AppSettingsPath() => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "Web", "appsettings.json"));
 
-	private static JsonElement AppSettings() => JsonDocument.Parse(File.ReadAllText(AppSettingsPath())).RootElement;
+	private static JsonElement AppSettings() => JsonElement.Parse(File.ReadAllText(AppSettingsPath()));
 
 	private static ProviderHttpOptions ShippedHttp(string section)
 	{

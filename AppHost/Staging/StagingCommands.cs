@@ -111,6 +111,7 @@ internal static class StagingCommands
 			{
 				WorkingDirectory = StagingEnvironment.RepositoryRoot(sammlarr.ApplicationBuilder),
 				RedirectStandardError = true,
+				UseShellExecute = false,
 			}
 		)!;
 		await using var cancel = run.Token.Register(() => build.Kill(entireProcessTree: true));

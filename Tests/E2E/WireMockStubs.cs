@@ -6,6 +6,8 @@ internal static class WireMockStubs
 {
 	private static readonly string Root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "wiremock"));
 
+	private static readonly JsonSerializerOptions PolicyJson = new() { PropertyNameCaseInsensitive = true };
+
 	private static readonly PolicyFile Policies = LoadPolicies();
 
 	internal static string MappingsDirectory => Path.Combine(Root, "mappings");
@@ -25,9 +27,7 @@ internal static class WireMockStubs
 	private static PolicyFile LoadPolicies()
 	{
 		var file = Path.Combine(Root, "fixture-policy.json");
-		return File.Exists(file)
-			? JsonSerializer.Deserialize<PolicyFile>(File.ReadAllText(file), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new PolicyFile()
-			: new PolicyFile();
+		return File.Exists(file) ? JsonSerializer.Deserialize<PolicyFile>(File.ReadAllText(file), PolicyJson) ?? new PolicyFile() : new PolicyFile();
 	}
 
 	private sealed record PolicyFile

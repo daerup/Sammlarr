@@ -8,9 +8,7 @@ namespace UI.Tests.Branding;
 
 public partial class BirdDrawingTests
 {
-	private static readonly JsonElement Reference = JsonDocument
-		.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Branding", "BirdReference.json")))
-		.RootElement;
+	private static readonly JsonElement Reference = JsonElement.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Branding", "BirdReference.json")));
 
 	public static IEnumerable<Func<(BirdPose Pose, string Name)>> Poses()
 	{
