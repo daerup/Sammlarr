@@ -1,44 +1,72 @@
 using Core.Processing;
+using Domain.Media;
 using Domain.Processing;
+using TUnit.Assertions.Enums;
 using static TestInfrastructure.QueryFilterFactory;
 
 namespace Core.Tests.Processing;
 
 public class FilterEvaluatorTests
 {
+	private static readonly QueryPredicates<FilterRow> NoEnrollment = new(
+		IsWantlisted: _ => false,
+		IsBlocklisted: _ => false,
+		IsOwned: _ => false,
+		Identity: _ => Guid.Empty
+	);
+
 	[Test]
-	public async Task Build_WhenNoGroups_ReturnsEmpty()
+	public async Task Execute_ForEmptyNestedGroupsBesideAPredicate_AppliesOnlyThePredicate()
 	{
-		var result = FilterEvaluator.Build(new QueryFilter { Operator = FilterOperator.And, Groups = [] });
-		await Assert.That(result).IsEmpty();
+		var outcomes = await OutcomesAsync(
+			Filter(Group(FilterOperator.And, [Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020)], [Group(), Group(FilterOperator.Or, [], [Group()])])),
+			new FilterRow { Year = 2019 },
+			new FilterRow { Year = 2020 }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenEmptyGroup_ReturnsEmpty()
+	public async Task Execute_ForAnInWithAnEmptyListBesideAPredicate_AppliesOnlyThePredicate()
 	{
-		var result = FilterEvaluator.Build(Filter(Group()));
-		await Assert.That(result).IsEmpty();
+		var outcomes = await OutcomesAsync(
+			Filter(Group(In("MediaType"), Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020))),
+			new FilterRow { Year = 2019, MediaType = MediaType.Movie },
+			new FilterRow { Year = 2020, MediaType = MediaType.Show }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenSingleNumberComparison_ReturnsPredicate()
+	public async Task Execute_ForANumberComparison_QualifiesTheRowsItHoldsFor()
 	{
-		var result = FilterEvaluator.Build(Filter(Group(Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020))));
-		await Assert.That(result).IsEqualTo("(Year >= 2020)");
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020))),
+			new FilterRow { Year = 2019 },
+			new FilterRow { Year = 2020 },
+			new FilterRow { Year = 2021 }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenDateComparison_ComparesByDayNumber()
+	public async Task Execute_ForADateComparison_ComparesByDayAndCullsRowsWithoutADate()
 	{
-		var date = new DateOnly(2020, 1, 1);
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Date("ReleaseDate", FilterPredicateOperator.GreaterThan, new DateOnly(2020, 1, 1)))),
+			new FilterRow(),
+			new FilterRow { ReleaseDate = new DateOnly(2020, 1, 1) },
+			new FilterRow { ReleaseDate = new DateOnly(2020, 1, 2) }
+		);
 
-		var result = FilterEvaluator.Build(Filter(Group(Date("ReleaseDate", FilterPredicateOperator.GreaterThan, date))));
-
-		await Assert.That(result).IsEqualTo($"(ReleaseDate.HasValue && ReleaseDate.Value.DayNumber > {date.DayNumber})");
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenADatePredicateHasNoValue_FallsBackToDayZero()
+	public async Task Execute_ForADatePredicateWithoutAValue_ComparesWithDayZero()
 	{
 		var predicate = new FilterPredicate
 		{
@@ -47,13 +75,17 @@ public class FilterEvaluatorTests
 			ValueKind = FilterValueKind.Date,
 		};
 
-		var result = FilterEvaluator.Build(Filter(Group(predicate)));
+		var outcomes = await OutcomesAsync(
+			Filter(Group(predicate)),
+			new FilterRow { ReleaseDate = DateOnly.MinValue },
+			new FilterRow { ReleaseDate = DateOnly.MinValue.AddDays(1) }
+		);
 
-		await Assert.That(result).IsEqualTo("(ReleaseDate.HasValue && ReleaseDate.Value.DayNumber > 0)");
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenIsNotEmptyOnText_ChecksNullAndEmptyString()
+	public async Task Execute_ForIsNotEmptyOnText_CullsMissingAndEmptyText()
 	{
 		var predicate = new FilterPredicate
 		{
@@ -62,218 +94,266 @@ public class FilterEvaluatorTests
 			ValueKind = FilterValueKind.String,
 		};
 
-		var result = FilterEvaluator.Build(Filter(Group(predicate)));
+		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow(), new FilterRow { Tagline = "" }, new FilterRow { Tagline = "A dream." });
 
-		await Assert.That(result).IsEqualTo("(Tagline != null && Tagline != \"\")");
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenMultipleAndPredicates_ReturnsAndExpression()
+	public async Task Execute_ForTwoPredicatesJoinedByAnd_QualifiesRowsMatchingBothRegardlessOfCase()
 	{
-		var result = FilterEvaluator.Build(
-			Filter(Group(Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020), String("Genre", FilterPredicateOperator.Equals, "Action")))
-		);
-
-		await Assert.That(result).IsEqualTo("((Year >= 2020) and (Genre != null && Genre.ToLower() == \"Action\".ToLower()))");
-	}
-
-	[Test]
-	public async Task Build_WhenMultipleOrPredicates_ReturnsOrExpression()
-	{
-		var result = FilterEvaluator.Build(
-			Filter(
-				FilterOperator.Or,
-				Group(FilterOperator.Or, String("Genre", FilterPredicateOperator.Equals, "Action"), String("Genre", FilterPredicateOperator.Equals, "Comedy"))
-			)
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020), String("Genre", FilterPredicateOperator.Equals, "Action"))),
+			new FilterRow { Year = 2020, Genre = "Action" },
+			new FilterRow { Year = 2021, Genre = "action" },
+			new FilterRow { Year = 2019, Genre = "Action" },
+			new FilterRow { Year = 2020, Genre = "Drama" },
+			new FilterRow { Year = 2020 }
 		);
 
 		await Assert
-			.That(result)
-			.IsEqualTo("((Genre != null && Genre.ToLower() == \"Action\".ToLower()) or (Genre != null && Genre.ToLower() == \"Comedy\".ToLower()))");
+			.That(outcomes)
+			.IsEquivalentTo(
+				[QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled, QueryOutcome.Culled],
+				CollectionOrdering.Matching
+			);
 	}
 
 	[Test]
-	public async Task Build_WhenMultipleAndGroups_CombinesGroupsWithAnd()
+	public async Task Execute_ForTwoPredicatesJoinedByOr_QualifiesRowsMatchingEither()
 	{
-		var result = FilterEvaluator.Build(
-			Filter(Group(Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020)), Group(String("Genre", FilterPredicateOperator.Equals, "Action")))
+		var outcomes = await OutcomesAsync(
+			Filter(
+				FilterOperator.Or,
+				Group(FilterOperator.Or, String("Genre", FilterPredicateOperator.Equals, "Action"), String("Genre", FilterPredicateOperator.Equals, "Comedy"))
+			),
+			new FilterRow { Genre = "Action" },
+			new FilterRow { Genre = "Comedy" },
+			new FilterRow { Genre = "Drama" }
 		);
 
-		await Assert.That(result).IsEqualTo("((Year >= 2020) and (Genre != null && Genre.ToLower() == \"Action\".ToLower()))");
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenNestedGroups_WrapsNestedInParentheses()
+	public async Task Execute_ForTwoGroupsJoinedByAnd_QualifiesRowsMatchingBoth()
 	{
-		var result = FilterEvaluator.Build(
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020)), Group(String("Genre", FilterPredicateOperator.Equals, "Action"))),
+			new FilterRow { Year = 2020, Genre = "Action" },
+			new FilterRow { Year = 2019, Genre = "Action" },
+			new FilterRow { Year = 2020, Genre = "Drama" }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForANestedOrGroup_AppliesItAsOneTermOfTheOuterAnd()
+	{
+		var outcomes = await OutcomesAsync(
 			Filter(
 				Group(
 					FilterOperator.And,
 					[Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020)],
 					[Group(FilterOperator.Or, String("Genre", FilterPredicateOperator.Equals, "Action"), String("Genre", FilterPredicateOperator.Equals, "Comedy"))]
 				)
-			)
+			),
+			new FilterRow { Year = 2020, Genre = "Action" },
+			new FilterRow { Year = 2020, Genre = "Comedy" },
+			new FilterRow { Year = 2020, Genre = "Drama" },
+			new FilterRow { Year = 2019, Genre = "Action" }
 		);
 
 		await Assert
-			.That(result)
-			.IsEqualTo(
-				"((Year >= 2020) and ((Genre != null && Genre.ToLower() == \"Action\".ToLower()) or (Genre != null && Genre.ToLower() == \"Comedy\".ToLower())))"
-			);
+			.That(outcomes)
+			.IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenGroupContainsOnlyEmptyNestedGroups_ReturnsEmpty()
+	public async Task Execute_ForAContainsOnText_IgnoresCaseAndCullsMissingText()
 	{
-		var result = FilterEvaluator.Build(Filter(Group(FilterOperator.And, [], [Group()])));
-		await Assert.That(result).IsEmpty();
-	}
-
-	[Test]
-	public async Task Build_WhenStringContains_LowercasesBothSides()
-	{
-		var result = FilterEvaluator.Build(Filter(Group(String("Title", FilterPredicateOperator.Contains, "Foo"))));
-
-		await Assert.That(result).IsEqualTo("(Title != null && Title.ToLower().Contains(\"Foo\".ToLower()))");
-	}
-
-	[Test]
-	public async Task Build_WhenStringStartsWith_LowercasesBothSides()
-	{
-		var result = FilterEvaluator.Build(Filter(Group(String("Title", FilterPredicateOperator.StartsWith, "Foo"))));
-
-		await Assert.That(result).IsEqualTo("(Title != null && Title.ToLower().StartsWith(\"Foo\".ToLower()))");
-	}
-
-	[Test]
-	public async Task Build_WhenStringEndsWith_LowercasesBothSides()
-	{
-		var result = FilterEvaluator.Build(Filter(Group(String("Title", FilterPredicateOperator.EndsWith, "Foo"))));
-
-		await Assert.That(result).IsEqualTo("(Title != null && Title.ToLower().EndsWith(\"Foo\".ToLower()))");
-	}
-
-	[Test]
-	public async Task Build_WhenStringNotContains_LowercasesBothSides()
-	{
-		var result = FilterEvaluator.Build(Filter(Group(String("Title", FilterPredicateOperator.NotContains, "Foo"))));
-
-		await Assert.That(result).IsEqualTo("(Title == null || !Title.ToLower().Contains(\"Foo\".ToLower()))");
-	}
-
-	[Test]
-	public async Task Build_WhenStringIsEmpty_ChecksNullOrEmptyString()
-	{
-		var result = FilterEvaluator.Build(
-			Filter(
-				Group(
-					new FilterPredicate
-					{
-						Field = "Title",
-						Operator = FilterPredicateOperator.IsEmpty,
-						ValueKind = FilterValueKind.String,
-					}
-				)
-			)
+		var outcomes = await OutcomesAsync(
+			Filter(Group(String("Title", FilterPredicateOperator.Contains, "Foo"))),
+			new FilterRow { Title = "The FOOL" },
+			new FilterRow { Title = "Bar" },
+			new FilterRow()
 		);
 
-		await Assert.That(result).IsEqualTo("(Title == null || Title == \"\")");
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenNumberIsEmpty_ChecksNullOnly()
+	public async Task Execute_ForAStartsWithOnText_IgnoresCaseAndCullsMissingText()
 	{
-		var result = FilterEvaluator.Build(
-			Filter(
-				Group(
-					new FilterPredicate
-					{
-						Field = "Rating",
-						Operator = FilterPredicateOperator.IsEmpty,
-						ValueKind = FilterValueKind.Number,
-					}
-				)
-			)
+		var outcomes = await OutcomesAsync(
+			Filter(Group(String("Title", FilterPredicateOperator.StartsWith, "Foo"))),
+			new FilterRow { Title = "foobar" },
+			new FilterRow { Title = "Barfoo" },
+			new FilterRow()
 		);
 
-		await Assert.That(result).IsEqualTo("(Rating == null)");
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenGenresContains_UsesAnyOnCollection()
+	public async Task Execute_ForAnEndsWithOnText_IgnoresCaseAndCullsMissingText()
 	{
-		var result = FilterEvaluator.Build(Filter(Group(String("Genres", FilterPredicateOperator.Contains, "action"))));
-
-		await Assert.That(result).IsEqualTo("(Genres.Any(g => g.ToLower().Contains(\"action\".ToLower())))");
-	}
-
-	[Test]
-	public async Task Build_WhenGenresEquals_UsesAnyEqualityOnCollection()
-	{
-		var result = FilterEvaluator.Build(Filter(Group(String("Genres", FilterPredicateOperator.Equals, "Action"))));
-
-		await Assert.That(result).IsEqualTo("(Genres.Any(g => g.ToLower() == \"Action\".ToLower()))");
-	}
-
-	[Test]
-	public async Task Build_WhenGenresIsEmpty_ChecksNullOrCount()
-	{
-		var result = FilterEvaluator.Build(
-			Filter(
-				Group(
-					new FilterPredicate
-					{
-						Field = "Genres",
-						Operator = FilterPredicateOperator.IsEmpty,
-						ValueKind = FilterValueKind.String,
-					}
-				)
-			)
+		var outcomes = await OutcomesAsync(
+			Filter(Group(String("Title", FilterPredicateOperator.EndsWith, "Foo"))),
+			new FilterRow { Title = "BarFOO" },
+			new FilterRow { Title = "Foobar" },
+			new FilterRow()
 		);
 
-		await Assert.That(result).IsEqualTo("(Genres == null || Genres.Count == 0)");
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Build_WhenIn_EmitsDynamicLinqInExpression()
+	public async Task Execute_ForANotContainsOnText_IgnoresCaseAndQualifiesMissingText()
 	{
-		var result = FilterEvaluator.Build(Filter(Group(In("MediaType", "Movie", "Show"))));
-
-		await Assert.That(result).IsEqualTo("(MediaType.ToString() in (\"Movie\", \"Show\"))");
-	}
-
-	[Test]
-	public async Task Build_WhenNotIn_NegatesInExpression()
-	{
-		var result = FilterEvaluator.Build(Filter(Group(NotIn("MediaType", "Movie"))));
-
-		await Assert.That(result).IsEqualTo("(!(MediaType.ToString() in (\"Movie\")))");
-	}
-
-	[Test]
-	public async Task Build_WhenInWithEmptyList_ReturnsEmpty()
-	{
-		var result = FilterEvaluator.Build(Filter(Group(In("MediaType"))));
-
-		await Assert.That(result).IsEmpty();
-	}
-
-	[Test]
-	public async Task Build_WhenDateIsNotEmpty_ChecksNotNullOnly()
-	{
-		var result = FilterEvaluator.Build(
-			Filter(
-				Group(
-					new FilterPredicate
-					{
-						Field = "ReleaseDate",
-						Operator = FilterPredicateOperator.IsNotEmpty,
-						ValueKind = FilterValueKind.Date,
-					}
-				)
-			)
+		var outcomes = await OutcomesAsync(
+			Filter(Group(String("Title", FilterPredicateOperator.NotContains, "Foo"))),
+			new FilterRow { Title = "FOO Fighters" },
+			new FilterRow { Title = "Bar" },
+			new FilterRow()
 		);
 
-		await Assert.That(result).IsEqualTo("(ReleaseDate != null)");
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForIsEmptyOnText_QualifiesMissingAndEmptyText()
+	{
+		var predicate = new FilterPredicate
+		{
+			Field = "Title",
+			Operator = FilterPredicateOperator.IsEmpty,
+			ValueKind = FilterValueKind.String,
+		};
+
+		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow(), new FilterRow { Title = "" }, new FilterRow { Title = "Heat" });
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForIsEmptyOnANumber_QualifiesOnlyAMissingNumber()
+	{
+		var predicate = new FilterPredicate
+		{
+			Field = "Rating",
+			Operator = FilterPredicateOperator.IsEmpty,
+			ValueKind = FilterValueKind.Number,
+		};
+
+		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow(), new FilterRow { Rating = 0 }, new FilterRow { Rating = 7.5 });
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForAContainsOnGenres_QualifiesRowsWithAnyGenreContainingIt()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(String("Genres", FilterPredicateOperator.Contains, "action"))),
+			new FilterRow { Genres = ["Drama", "Action Comedy"] },
+			new FilterRow { Genres = ["Drama"] },
+			new FilterRow { Genres = [] }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForAnEqualsOnGenres_QualifiesRowsWithAnyGenreEqualToItRegardlessOfCase()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(String("Genres", FilterPredicateOperator.Equals, "Action"))),
+			new FilterRow { Genres = ["Drama", "ACTION"] },
+			new FilterRow { Genres = ["Action Comedy"] }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForIsEmptyOnGenres_QualifiesMissingAndEmptyGenres()
+	{
+		var predicate = new FilterPredicate
+		{
+			Field = "Genres",
+			Operator = FilterPredicateOperator.IsEmpty,
+			ValueKind = FilterValueKind.String,
+		};
+
+		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow(), new FilterRow { Genres = [] }, new FilterRow { Genres = ["Drama"] });
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForAnInOnTheMediaType_QualifiesTheListedTypes()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(In("MediaType", "Movie", "Show"))),
+			new FilterRow { MediaType = MediaType.Movie },
+			new FilterRow { MediaType = MediaType.Show },
+			new FilterRow { MediaType = MediaType.Unknown }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForANotInOnTheMediaType_CullsTheListedTypes()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(NotIn("MediaType", "Movie"))),
+			new FilterRow { MediaType = MediaType.Movie },
+			new FilterRow { MediaType = MediaType.Show }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForIsNotEmptyOnADate_CullsOnlyAMissingDate()
+	{
+		var predicate = new FilterPredicate
+		{
+			Field = "ReleaseDate",
+			Operator = FilterPredicateOperator.IsNotEmpty,
+			ValueKind = FilterValueKind.Date,
+		};
+
+		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow(), new FilterRow { ReleaseDate = DateOnly.MinValue });
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+	}
+
+	private static async Task<IReadOnlyList<QueryOutcome>> OutcomesAsync(QueryFilter filter, params FilterRow[] rows)
+	{
+		var verdicts = await new QueryProcessor<FilterRow>().ExecuteAsync(rows, new QueryOptions { Filter = Some.Of(filter) }, NoEnrollment).ToListAsync();
+		return [.. verdicts.Select(verdict => verdict.Outcome)];
+	}
+
+	private sealed record FilterRow
+	{
+		public int Year { get; init; }
+
+		public DateOnly? ReleaseDate { get; init; }
+
+		public string? Title { get; init; }
+
+		public string? Tagline { get; init; }
+
+		public string? Genre { get; init; }
+
+		public double? Rating { get; init; }
+
+		public List<string>? Genres { get; init; }
+
+		public MediaType MediaType { get; init; }
 	}
 }
