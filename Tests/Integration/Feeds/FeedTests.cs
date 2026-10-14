@@ -1,8 +1,10 @@
+using API.Mdblist;
 using Contracts.Feed;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 using static Harness.FeedItemSpec;
 using static Harness.Ids;
 
@@ -149,7 +151,23 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task GetFeedItemsAsync_WhenAnItemHasNoReleaseYear_ToleratesIt()
 	{
 		await host.WithMdblistAccount("test-key");
-		host.MdblistFeedContains("no-year-list", Item("Orphaned", MediaType.Movie));
+		host.HttpStub.RespondWithJsonForUrl(
+			MdblistLists.ItemsPath("no-year-list"),
+			"""
+			{
+			  "movies": [{
+			    "id": 1,
+			    "ids": {"imdb": null, "tmdb": null, "tvdb": null, "mdblist": null, "mal": null},
+			    "rank": 1,
+			    "title": "Orphaned",
+			    "mediatype": "movie",
+			    "release_date": null,
+			    "release_year": null
+			  }],
+			  "shows": []
+			}
+			"""
+		);
 
 		var items = await Testee.GetFeedItemsAsync("no-year-list", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
@@ -261,9 +279,10 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205"))).ServedByPlex().ServedByTmdb().SeedAsync();
 		host.MdblistFeedContains("fuzzy-list", Item("INCEPTION (2010)", MediaType.Movie, Tmdb("27205")));
 
-		await Testee.GetFeedItemsAsync("fuzzy-list", FieldNeeds.None).InListOrderAsync().ToListAsync();
+		var items = await Testee.GetFeedItemsAsync("fuzzy-list", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
-		await AssertExternalIdStored(inception, MediaProvider.Tmdb, "27205");
+		var matched = await Assert.That(items.Single()).IsOfUnionType<MediaMatchResult, MatchedMedia>();
+		await Assert.That(matched!.Identity.Id).IsEqualTo(inception);
 	}
 
 	private static MediaSpec Spec(string title, params ProviderId[] ids) => new(title, MediaType.Movie, ids);
