@@ -133,7 +133,7 @@ public class FeedEditorTests : BunitContext
 		var cut = RenderEditor();
 		cut.WaitForAssertion(() => _provider.NormalizeAsync(Any(), Any()).WasCalled(Times.Once));
 
-		await DisposeComponentsAsync();
+		await DisposeFromTheDispatcherAsync();
 		await Renderer.Dispatcher.InvokeAsync(() => lookup.SetResult(Success.Of("hdlists/comedy")));
 		await Task.Delay(TimeSpan.FromMilliseconds(200));
 
@@ -141,16 +141,26 @@ public class FeedEditorTests : BunitContext
 	}
 
 	[Test]
-	public async Task Dispose_DuringTheListLookup_ShowsNoFailedToTestToast()
+	public async Task Dispose_DuringTheListLookup_CancelsItAndShowsNoFailedToTestToast()
 	{
 		var lookup = new TaskCompletionSource<Result<string>>();
-		_provider.NormalizeAsync(Any(), Any()).Returns((_, token) => lookup.Task.WaitAsync(token));
+		var asked = CancellationToken.None;
+		_provider
+			.NormalizeAsync(Any(), Any())
+			.Returns(
+				(_, token) =>
+				{
+					asked = token;
+					return lookup.Task.WaitAsync(token);
+				}
+			);
 		var cut = RenderEditor();
 		cut.WaitForAssertion(() => _provider.NormalizeAsync(Any(), Any()).WasCalled(Times.Once));
 
-		await DisposeComponentsAsync();
+		await DisposeFromTheDispatcherAsync();
 		await Task.Delay(TimeSpan.FromMilliseconds(200));
 
+		await Assert.That(asked.IsCancellationRequested).IsTrue();
 		await Assert.That(Toasts).IsEmpty();
 	}
 
@@ -160,7 +170,7 @@ public class FeedEditorTests : BunitContext
 		var cut = RenderEditor();
 		WhileLoading(cut);
 
-		await DisposeComponentsAsync();
+		await DisposeFromTheDispatcherAsync();
 		await Task.Delay(TimeSpan.FromMilliseconds(200));
 
 		await Assert.That(_loading.IsCancellationRequested).IsTrue();
@@ -243,6 +253,8 @@ public class FeedEditorTests : BunitContext
 	}
 
 	private IReadOnlyList<ToastData> Toasts => Services.GetRequiredService<ToastService>().Toasts;
+
+	private Task DisposeFromTheDispatcherAsync() => Renderer.Dispatcher.InvokeAsync(DisposeComponentsAsync);
 
 	private IRenderedComponent<IComponent> RenderEditor(bool edit = true)
 	{
