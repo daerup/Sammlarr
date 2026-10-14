@@ -77,8 +77,8 @@ public class RepositoryTests
 			(
 				typeof(IApiKeyConfigRepository),
 				[
-					"DB.Data.Access.ApiKeyConfigRepository",
-					"DB.Data.Access.AccessModule",
+					"DB.Data.Auth.ApiKeyConfigRepository",
+					"DB.Data.Auth.AuthDataModule",
 					"Core.Auth.ApiKeyService",
 					"Core.Providers.ServiceReadiness",
 					"API.Mdblist.MdblistRequestsLeft",
@@ -87,7 +87,7 @@ public class RepositoryTests
 		yield return () =>
 			(
 				typeof(ICredentialRepository),
-				["DB.Data.Access.CredentialRepository", "DB.Data.Access.AccessModule", "Core.Auth.CredentialService", "Core.Providers.ServiceReadiness"]
+				["DB.Data.Auth.CredentialRepository", "DB.Data.Auth.AuthDataModule", "Core.Auth.CredentialService", "Core.Providers.ServiceReadiness"]
 			);
 		yield return () =>
 			(typeof(IArrSinkConfigRepository), ["DB.Data.Config.ArrSinkConfigRepository", "DB.Data.Config.ConfigModule", "Core.Settings.ArrSinkConfigService"]);

@@ -2,7 +2,7 @@ using Contracts.Auth;
 using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 
-namespace DB.Data.Access;
+namespace DB.Data.Auth;
 
 internal sealed class ApiKeyConfigRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IApiKeyConfigRepository
 {

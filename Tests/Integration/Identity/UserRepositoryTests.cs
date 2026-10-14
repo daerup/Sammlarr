@@ -1,5 +1,5 @@
 using Contracts.Identity;
-using DB.Data.Access;
+using DB.Data.Auth;
 using DB.Data.Blocklist;
 using DB.Data.Feed;
 using DB.Data.Identity;

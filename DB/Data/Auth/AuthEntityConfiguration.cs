@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace DB.Data.Access;
+namespace DB.Data.Auth;
 
-internal sealed class AccessEntityConfiguration : IModelConfiguration
+internal sealed class AuthEntityConfiguration : IModelConfiguration
 {
 	public void Apply(ModelBuilder modelBuilder)
 	{

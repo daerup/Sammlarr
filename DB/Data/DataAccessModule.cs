@@ -1,4 +1,4 @@
-using DB.Data.Access;
+using DB.Data.Auth;
 using DB.Data.Blocklist;
 using DB.Data.Cleanup;
 using DB.Data.Config;
@@ -22,7 +22,7 @@ internal class DataAccessModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddModule<AccessModule>();
+		services.AddModule<AuthDataModule>();
 		services.AddModule<BlocklistModule>();
 		services.AddModule<CleanupModule>();
 		services.AddModule<ConfigModule>();
