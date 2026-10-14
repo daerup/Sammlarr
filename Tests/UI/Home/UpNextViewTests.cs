@@ -67,31 +67,14 @@ public class UpNextViewTests
 	}
 
 	[Test]
-	public async Task InTheQueue_ForASyncJob_CarriesTheSinkSoTheRowShowsItsBrand()
+	public async Task InTheQueue_ForASyncJob_NamesItSyncWantlistAndCarriesTheSinkSoTheRowShowsItsBrand()
 	{
 		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ManualTrigger()), JobState.Queued, default, 0));
 
 		var row = UpNextView.InTheQueue(queue, Names, Brands, Plex)[0];
 
+		await Assert.That(row.Name).IsEqualTo("Sync Wantlist");
 		await Assert.That(row.Brands).IsEquivalentTo(Plex);
-	}
-
-	[Test]
-	public async Task InTheQueue_ForAFeedThatWasDeleted_HasNoBrandToShow()
-	{
-		var queue = Snapshot(Job(FeedId.From(Guid.NewGuid()), JobState.Queued));
-
-		await Assert.That(UpNextView.InTheQueue(queue, Names, Brands, Plex)[0].Brands).IsEmpty();
-	}
-
-	[Test]
-	public async Task InTheQueue_NamesASyncJobSyncWantlist()
-	{
-		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ManualTrigger()), JobState.Queued, default, 0));
-
-		var rows = UpNextView.InTheQueue(queue, Names, Brands, Plex);
-
-		await Assert.That(rows[0].Name).IsEqualTo("Sync Wantlist");
 	}
 
 	[Test]
@@ -115,7 +98,7 @@ public class UpNextViewTests
 	}
 
 	[Test]
-	public async Task InTheQueue_ForAFeedThatWasDeleted_NamesTheRowMarksItDeletedAndLinksNowhere()
+	public async Task InTheQueue_ForAFeedThatWasDeleted_NamesTheRowMarksItDeletedAndGivesItNoBrandOrLink()
 	{
 		var queue = Snapshot(Job(FeedId.From(Guid.NewGuid()), JobState.Queued));
 
@@ -124,6 +107,7 @@ public class UpNextViewTests
 		await Assert.That(row.Name).IsEqualTo("A deleted feed");
 		await Assert.That(row.Href).IsNull();
 		await Assert.That(row.Deleted).IsTrue();
+		await Assert.That(row.Brands).IsEmpty();
 	}
 
 	[Test]
@@ -142,13 +126,14 @@ public class UpNextViewTests
 	}
 
 	[Test]
-	public async Task OnASchedule_LinksEachFeedToItsEditor()
+	public async Task OnASchedule_LinksTheFeedToItsEditorAndGivesTheRowNoRunTimeOfItsOwn()
 	{
 		IReadOnlyList<Feed> feeds = [Feed(Docs, "docs", new Scheduled("0 0 4 * * *"))];
 
-		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc, Branding);
+		var row = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc, Branding).Single();
 
-		await Assert.That(rows[0].Href).IsEqualTo($"/feeds/edit/{UrlGuid.Encode(Docs.Value)}");
+		await Assert.That(row.Href).IsEqualTo($"/feeds/edit/{UrlGuid.Encode(Docs.Value)}");
+		await Assert.That(row.RunsAt).IsNone();
 	}
 
 	[Test]
@@ -164,16 +149,6 @@ public class UpNextViewTests
 		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc, Branding);
 
 		await Assert.That(rows.Select(row => row.Name)).IsEquivalentTo(["hourly", "docs"], CollectionOrdering.Matching);
-	}
-
-	[Test]
-	public async Task OnASchedule_GivesTheRowsNoRunTimeOfTheirOwn()
-	{
-		IReadOnlyList<Feed> feeds = [Feed(Docs, "docs", new Scheduled("0 0 4 * * *"))];
-
-		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc, Branding);
-
-		await Assert.That(rows.Single().RunsAt).IsNone();
 	}
 
 	[Test]
