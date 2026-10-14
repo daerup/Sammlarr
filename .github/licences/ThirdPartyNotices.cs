@@ -86,7 +86,7 @@ internal static class ThirdPartyNotices
 		];
 	}
 
-	internal static ShippedPackage Nuspec(string name, string nuspec, string notice)
+	private static ShippedPackage Nuspec(string name, string nuspec, string notice)
 	{
 		var root = XDocument.Parse(nuspec).Root!;
 		var metadata = root.Element(root.Name.Namespace + "metadata")!;
@@ -114,7 +114,7 @@ internal static class ThirdPartyNotices
 			text.Append($"{package.Id} {package.Version}\n  Licence: {licence}\n");
 			Line(text, "  Project: ", package.Project);
 			Line(text, "  ", package.Copyright);
-			Line(text, "\n", package.Notice);
+			Line(text, "\n", Indented(package.Notice));
 			text.Append('\n');
 		}
 		text.Append("\nLicence texts\n\n");
@@ -149,16 +149,31 @@ internal static class ThirdPartyNotices
 
 	private static string? NuspecIn(string folder) => Directory.EnumerateFiles(folder, "*.nuspec").Select(File.ReadAllText).SingleOrDefault();
 
+	internal static string Notice(IEnumerable<(string Name, string Text)> files)
+	{
+		return string.Join(
+			"\n\n",
+			files
+				.OrderBy(file => file.Name, StringComparer.OrdinalIgnoreCase)
+				.ThenBy(file => file.Name, StringComparer.Ordinal)
+				.Select(file => $"{file.Name}\n\n{file.Text.ReplaceLineEndings("\n").Trim()}")
+		);
+	}
+
 	private static string NoticeIn(string folder)
 	{
 		var files = Directory
 			.EnumerateFiles(folder)
+			.Select(file => (Name: Path.GetFileName(file), Path: file))
 			.Where(file =>
-				Path.GetFileName(file).StartsWith("NOTICE", StringComparison.OrdinalIgnoreCase)
-				|| Path.GetFileName(file).StartsWith("THIRD-PARTY-NOTICES", StringComparison.OrdinalIgnoreCase)
-			)
-			.Order(StringComparer.OrdinalIgnoreCase);
-		return string.Join("\n\n", files.Select(file => $"{Path.GetFileName(file)}\n\n{File.ReadAllText(file).ReplaceLineEndings("\n").Trim()}"));
+				file.Name.StartsWith("NOTICE", StringComparison.OrdinalIgnoreCase) || file.Name.StartsWith("THIRD-PARTY-NOTICES", StringComparison.OrdinalIgnoreCase)
+			);
+		return Notice(files.Select(file => (file.Name, File.ReadAllText(file.Path))));
+	}
+
+	private static string Indented(string notice)
+	{
+		return string.Join('\n', notice.Split('\n').Select(line => line.Length > 0 ? $"    {line}" : line));
 	}
 
 	private static IEnumerable<Asset> Assets(string credits, string folder)
