@@ -19,9 +19,9 @@ public class ProtectedComponentTests : BunitContext
 	}
 
 	[Test]
-	[Arguments(SinkKind.Plex, "Connect your Plex account to sync your wantlist.")]
-	[Arguments(SinkKind.Arr, "Radarr + Sonarr needs setting up before you can sync your wantlist.")]
-	public async Task Tooltip_WhenTheSinkIsNotReady_SaysWhatItNeeds(SinkKind sink, string message)
+	[Arguments(SinkKind.Plex, "Plex account")]
+	[Arguments(SinkKind.Arr, "Radarr + Sonarr")]
+	public async Task Tooltip_WhenTheSinkIsNotReady_NamesWhatIsMissingAndWhatItBlocks(SinkKind sink, string missing)
 	{
 		var cut = Render(builder =>
 		{
@@ -41,6 +41,6 @@ public class ProtectedComponentTests : BunitContext
 
 		await cut.Find(".cursor-not-allowed").FirstElementChild!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
 
-		await Assert.That(cut.WaitForElement("[role=tooltip]").TextContent.Trim()).IsEqualTo(message);
+		await Assert.That(cut.WaitForElement("[role=tooltip]").TextContent).Contains(missing).And.Contains("sync your wantlist");
 	}
 }

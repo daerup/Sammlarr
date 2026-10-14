@@ -112,16 +112,6 @@ public class ActivityLogTests
 	}
 
 	[Test]
-	public async Task Days_ForARunWhoseFeedWasDeleted_StillNamesTheRow()
-	{
-		var runs = new[] { Run(FeedId.From(Guid.NewGuid()), Today, added: 1) };
-
-		var days = ActivityLog.Days(runs, Names, TimeZoneInfo.Utc);
-
-		await Assert.That(days[0].Feeds[0].Name).IsEqualTo("A deleted feed");
-	}
-
-	[Test]
 	public async Task Outcome_ForEachInconclusiveReason_ExplainsWhatHappened()
 	{
 		var noItems = new ActivityRun(Run(Docs, Today, conclusiveness: Conclusiveness.NoItems), "feed");

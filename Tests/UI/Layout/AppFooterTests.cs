@@ -44,11 +44,10 @@ public class AppFooterTests : BunitContext
 	}
 
 	[Test]
-	public async Task Credit_SaysMadeWithLove()
+	public async Task Credit_NamesTheHeartLoveForScreenReaders()
 	{
 		var cut = Render<AppFooter>(parameters => parameters.Add(footer => footer.Version, new AppVersion("1.4.0")));
 
-		var words = cut.Find("footer").TextContent.Split(default(char[]), StringSplitOptions.RemoveEmptyEntries);
-		await Assert.That(string.Join(' ', words)).EndsWith("Made with love");
+		await Assert.That(cut.Find("footer .sr-only").TextContent.Trim()).IsEqualTo("love");
 	}
 }

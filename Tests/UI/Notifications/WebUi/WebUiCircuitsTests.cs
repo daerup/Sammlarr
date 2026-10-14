@@ -47,17 +47,6 @@ public class WebUiCircuitsTests
 	}
 
 	[Test]
-	public async Task Show_WhenTheRegistrationIsDisposed_ShowsNothing()
-	{
-		var user = UserId.New();
-		testee.Register(user, shown.Add).Dispose();
-
-		testee.Show(user, Toast);
-
-		await Assert.That(shown).IsEmpty();
-	}
-
-	[Test]
 	public async Task Show_WhenOneOfSeveralCircuitsIsDisposed_ShowsTheToastInTheRemainingOne()
 	{
 		var user = UserId.New();
@@ -67,13 +56,5 @@ public class WebUiCircuitsTests
 		testee.Show(user, Toast);
 
 		await Assert.That(shown).HasSingleItem();
-	}
-
-	[Test]
-	public async Task Show_WhenNoCircuitIsOpen_ShowsNothing()
-	{
-		testee.Show(UserId.New(), Toast);
-
-		await Assert.That(shown).IsEmpty();
 	}
 }

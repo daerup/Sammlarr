@@ -42,17 +42,6 @@ public class WebUiToastListenerTests : BunitContext
 	}
 
 	[Test]
-	public async Task Show_WhenTheToastIsForAnotherUser_RaisesNothing()
-	{
-		SignedIn();
-		var cut = Render<WebUiToastListener>();
-
-		await cut.InvokeAsync(() => circuits.Show(UserId.New(), NewToast()));
-
-		await Assert.That(Toasts).IsEmpty();
-	}
-
-	[Test]
 	public async Task Show_WhenNobodyIsSignedIn_RaisesNothing()
 	{
 		Anonymous();

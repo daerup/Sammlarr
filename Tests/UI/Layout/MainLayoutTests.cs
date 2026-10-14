@@ -77,24 +77,24 @@ public class MainLayoutTests : BunitContext
 	}
 
 	[Test]
-	public async Task HomeLink_OnTheHomePage_IsMarkedActive()
+	public async Task HomeLink_OnTheHomePage_IsTheCurrentPage()
 	{
 		AddAuthorization().SetAuthorized("alice");
 
 		var cut = RenderLayout();
 
-		await Assert.That(cut.Find("a[aria-label='Sammlarr home']").ClassList).Contains("active");
+		await Assert.That(cut.Find("a[aria-label='Sammlarr home']").GetAttribute("aria-current")).IsEqualTo("page");
 	}
 
 	[Test]
-	public async Task HomeLink_OnAnotherPage_IsNotMarkedActive()
+	public async Task HomeLink_OnAnotherPage_IsNotTheCurrentPage()
 	{
 		AddAuthorization().SetAuthorized("alice");
 		Services.GetRequiredService<NavigationManager>().NavigateTo("/feeds");
 
 		var cut = RenderLayout();
 
-		await Assert.That(cut.Find("a[aria-label='Sammlarr home']").ClassList).DoesNotContain("active");
+		await Assert.That(cut.Find("a[aria-label='Sammlarr home']").HasAttribute("aria-current")).IsFalse();
 	}
 
 	[Test]

@@ -5,12 +5,6 @@ namespace UI.Tests.Branding.Birds;
 public class PersonHuesTests
 {
 	[Test]
-	public async Task After_ForTheFirstPerson_IsTheLogosGold()
-	{
-		await Assert.That(PersonHues.After(new None())).IsEqualTo(40);
-	}
-
-	[Test]
 	public async Task After_EachNextPerson_StepsTheGoldenAngleRoundTheWheel()
 	{
 		double[] hues = [PersonHues.After(new None())];

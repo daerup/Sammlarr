@@ -65,12 +65,6 @@ public class MediaProviderBrandingServiceTests
 	}
 
 	[Test]
-	public async Task Brands_OfThePlexSignIn_IsPlexsBrand()
-	{
-		await Assert.That(Testee.Brands(AuthProvider.Plex.Service)).IsEquivalentTo([Testee.GetBrandingInfo(MediaProvider.Plex)]);
-	}
-
-	[Test]
 	public async Task Brands_OfSammlarrAccounts_IsSammlarrsOwnBrand()
 	{
 		await Assert.That(Testee.Brands(AuthProvider.Local.Service).Single().NickName).IsEqualTo("Sammlarr");
@@ -79,7 +73,7 @@ public class MediaProviderBrandingServiceTests
 	[Test]
 	public async Task Brands_OfAService_AreTheBrandsBehindIt()
 	{
-		await Assert.That(Testee.Brands(SinkKind.Plex.Service).Select(brand => brand.NickName)).IsEquivalentTo(["Plex"]);
+		await Assert.That(Testee.Brands(SinkKind.Plex.Service)).IsEquivalentTo([Testee.GetBrandingInfo(MediaProvider.Plex)]);
 		await Assert.That(Testee.Brands(SearchProvider.Tmdb.Service).Select(brand => brand.NickName)).IsEquivalentTo(["TMDb"]);
 		await Assert.That(Testee.Brands(new Arr()).Select(brand => brand.NickName)).IsEquivalentTo(["Radarr", "Sonarr"], CollectionOrdering.Matching);
 	}

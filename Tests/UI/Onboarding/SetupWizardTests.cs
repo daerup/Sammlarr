@@ -79,12 +79,13 @@ public class SetupWizardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Wizard_OnceTheAdminExists_StartsOnTheWantlistWithTheAccountDone()
+	public async Task Wizard_OnceTheAdminExists_StartsOnTheWantlistWithTheAccountDoneAndRadarrAndSonarrSyncing()
 	{
 		var cut = RenderForAdmin();
 
 		await Assert.That(cut.Find("h4").TextContent).IsEqualTo("Where your wantlist syncs");
 		await Assert.That(cut.Find("nav button").InnerHtml).DoesNotContain(">1<");
+		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(row => row.Syncs)).IsTrue();
 	}
 
 	[Test]
@@ -108,14 +109,6 @@ public class SetupWizardTests : BunitContext
 
 		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(row => row.SettingUp)).IsTrue();
 		await Assert.That(cut.Markup).Contains("Connect Radarr and Sonarr to continue");
-	}
-
-	[Test]
-	public async Task Wantlist_OnceItSyncsToRadarrAndSonarr_ShowsTheirRowAsSyncing()
-	{
-		var cut = RenderForAdmin();
-
-		await Assert.That(cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(row => row.Syncs)).IsTrue();
 	}
 
 	[Test]

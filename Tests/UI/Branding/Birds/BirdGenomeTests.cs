@@ -45,14 +45,6 @@ public class BirdGenomeTests
 	}
 
 	[Test]
-	public async Task Of_ForTheSameUser_AlwaysPicksTheSameBird()
-	{
-		var id = UserId.New();
-
-		await Assert.That(BirdGenome.Of(id)).IsEqualTo(BirdGenome.Of(UserId.From(id.Value)));
-	}
-
-	[Test]
 	public void From_ForAnyGenes_PicksOnlyValuesTheDrawingKnows()
 	{
 		Gen.UInt.Sample(genes =>

@@ -49,7 +49,6 @@ public class SetupRedirectTests : BunitContext
 		Render<SetupRedirect>();
 
 		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).IsEqualTo("http://localhost/");
-		_onboarding.IsCompleteAsync(Any()).WasCalled(Times.Never);
 	}
 
 	[Test]

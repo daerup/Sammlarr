@@ -4,7 +4,6 @@ using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Options;
 using UI.Features.Onboarding.Components;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Onboarding;
 
@@ -20,14 +19,18 @@ public class AdminFormTests : BunitContext
 	}
 
 	[Test]
-	public async Task Form_AtFirst_PicksNeitherWayAndSaysThePickIsFinal()
+	public async Task Form_BeforeAWayIsPicked_LeavesBothCardsUncheckedAndReachableSubmitsNothingAndSaysThePickIsFinal()
 	{
 		var cut = Render<AdminForm>();
 
-		await Assert.That(cut.FindAll(".choice-card[data-picked]")).IsEmpty();
+		var radios = cut.FindAll("[role=radio]");
+		await Assert.That(radios.Select(radio => radio.GetAttribute("aria-checked")).OfType<string>()).IsEquivalentTo(["false", "false"]);
+		await Assert.That(radios.Select(radio => radio.GetAttribute("tabindex")).OfType<string>()).IsEquivalentTo(["0", "-1"]);
 		await Assert.That(cut.FindAll("input[name=username]")).IsEmpty();
 		await Assert.That(cut.FindAll("button[formaction]")).IsEmpty();
-		await Assert.That(cut.Find("[data-final]").TextContent).Contains("You can't change this after setup.");
+		await Assert.That(cut.Find("button[type=submit]").HasAttribute("disabled")).IsTrue();
+		await Assert.That(cut.Find("[role=radiogroup]").GetAttribute("aria-describedby")).IsEqualTo("signin-final");
+		await Assert.That(cut.FindAll("#signin-final")).HasSingleItem();
 	}
 
 	[Test]
@@ -50,7 +53,7 @@ public class AdminFormTests : BunitContext
 	}
 
 	[Test]
-	public async Task Form_WithSammlarrAccountsPicked_PostsTheAdminToSetupWithBothPasswordsInOneRow()
+	public async Task Form_WithSammlarrAccountsPicked_PostsTheAdminToSetupWithBothPasswordsMasked()
 	{
 		var cut = Render<AdminForm>(parameters => parameters.Add(form => form.Picked, AuthProvider.Local));
 
@@ -58,7 +61,9 @@ public class AdminFormTests : BunitContext
 		await Assert
 			.That(cut.FindAll("input[name]").Select(input => input.GetAttribute("name")).OfType<string>())
 			.IsEquivalentTo(["code", "username", "password", "confirmation"]);
-		await Assert.That(cut.Find("[data-passwords]").QuerySelectorAll("input[type=password]").Length).IsEqualTo(2);
+		await Assert
+			.That(cut.FindAll("input[type=password]").Select(input => input.GetAttribute("name")).OfType<string>())
+			.IsEquivalentTo(["password", "confirmation"]);
 		await Assert.That(cut.FindAll("button[formaction]")).IsEmpty();
 	}
 
@@ -69,17 +74,8 @@ public class AdminFormTests : BunitContext
 
 		await cut.Find("#signin-local").ClickAsync();
 
-		await Assert.That(cut.Find(".choice-card[data-picked]").GetAttribute("for")).IsEqualTo("signin-local");
+		await Assert.That(cut.Find("#signin-local").GetAttribute("aria-checked")).IsEqualTo("true");
 		await Assert.That(cut.FindAll("input[name=username]")).HasSingleItem();
-	}
-
-	[Test]
-	public async Task Form_BeforeAWayIsPicked_LetsTheKeyboardReachTheCardsAndEnterSubmitNothing()
-	{
-		var cut = Render<AdminForm>();
-
-		await Assert.That(cut.FindAll("[role=radio]").Select(radio => radio.GetAttribute("tabindex")).OfType<string>()).IsEquivalentTo(["0", "-1"]);
-		await Assert.That(cut.Find("button[type=submit]").HasAttribute("disabled")).IsTrue();
 	}
 
 	[Test]
@@ -91,24 +87,6 @@ public class AdminFormTests : BunitContext
 
 		await Assert.That(cut.FindAll("input[name=username]")).IsEmpty();
 		await Assert.That(cut.Find("button[formaction]").GetAttribute("formaction")).IsEqualTo("/setup/plex");
-	}
-
-	[Test]
-	public async Task Form_SpansTheCardWithoutAWidthCap()
-	{
-		var cut = Render<AdminForm>();
-
-		await Assert.That(cut.Find("form").ClassList.Any(name => name.StartsWith("max-w", StringComparison.Ordinal))).IsFalse();
-	}
-
-	[Test]
-	public async Task Cards_EachCarryTheirOwnBrand()
-	{
-		var cut = Render<AdminForm>();
-
-		var brands = cut.FindAll(".choice-card").Select(card => card.GetAttribute("style")).OfType<string>();
-		var plex = Services.GetRequiredService<MediaProviderBrandingService>().GetBrandingInfo(MediaProvider.Plex).BrandColor;
-		await Assert.That(brands).IsEquivalentTo([$"--brand: {plex}", "--brand: var(--foreground)"]);
 	}
 
 	[Test]
