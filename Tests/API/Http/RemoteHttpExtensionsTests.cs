@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using API.Http;
+using API.Http.Lanes;
 using API.Notifications.Webhook;
 using Contracts.Identity;
 using Contracts.Providers;
@@ -11,7 +12,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Polly.Timeout;
-using Shared.Concurrency;
 using Shared.Options;
 using TestInfrastructure;
 

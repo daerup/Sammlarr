@@ -7,7 +7,6 @@ using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Shared.Concurrency;
 
 namespace Core.Media;
 

@@ -12,7 +12,6 @@ using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
 using Harness;
-using Shared.Concurrency;
 using Shared.Options;
 using TestInfrastructure;
 using static Harness.Ids;

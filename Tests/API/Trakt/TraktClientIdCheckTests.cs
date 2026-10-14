@@ -1,8 +1,8 @@
 using System.Net;
 using System.Text;
+using API.Http.Lanes;
 using API.Trakt;
 using Domain.Auth;
-using Shared.Concurrency;
 using Shared.Options;
 using TUnit.Mocks.Http;
 

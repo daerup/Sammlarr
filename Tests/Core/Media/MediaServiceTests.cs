@@ -1,9 +1,9 @@
 using Contracts.Media;
 using Contracts.Media.Conversions;
+using Contracts.Providers;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;
-using Shared.Concurrency;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 

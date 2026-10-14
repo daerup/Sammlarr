@@ -28,8 +28,8 @@ Domain/Media/ClaimOutcome.cs
 Domain/Providers/Answer.cs
 Core/Media/Resolution.cs
 Core/Media/Identification.cs
-Shared/Concurrency/AttemptOutcome.cs
-Shared/Concurrency/LaneAnswer.cs
+API/Http/Lanes/AttemptOutcome.cs
+API/Http/Lanes/LaneAnswer.cs
 Contracts/Media/ListTitle.cs
 Domain/Media/ConflictState.cs
 Domain/Media/MergeOutcome.cs

@@ -1,7 +1,9 @@
-using Shared.Concurrency;
+using API.Http.Lanes;
+using Contracts.Providers;
+using Domain.Providers;
 using TestInfrastructure;
 
-namespace Shared.Tests.Concurrency;
+namespace API.Tests.Http;
 
 public class KeyedLaneTests
 {

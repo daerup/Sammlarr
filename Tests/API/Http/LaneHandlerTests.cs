@@ -5,7 +5,6 @@ using System.Net.Http.Headers;
 using API.Http.Lanes;
 using Domain.Providers;
 using Microsoft.Extensions.Logging;
-using Shared.Concurrency;
 using Shared.Options;
 
 namespace API.Tests.Http;

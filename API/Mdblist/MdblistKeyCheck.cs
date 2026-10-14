@@ -1,8 +1,9 @@
 using API.Http;
 using API.Http.Lanes;
 using Contracts.Auth;
+using Contracts.Providers;
 using Domain.Auth;
-using Shared.Concurrency;
+using Domain.Providers;
 using Shared.Options;
 
 namespace API.Mdblist;

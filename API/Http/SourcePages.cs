@@ -1,5 +1,6 @@
+using Contracts.Providers;
+using Domain.Providers;
 using Observability.Feed;
-using Shared.Concurrency;
 
 namespace API.Http;
 

@@ -1,11 +1,11 @@
 using System.Net;
+using API.Http.Lanes;
 using API.Plex;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
 using Domain.Auth;
 using Domain.Providers;
-using Shared.Concurrency;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;

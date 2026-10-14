@@ -1,8 +1,8 @@
 using System.Net;
 using API.Http;
+using API.Http.Lanes;
 using Domain.Auth;
 using Polly.Timeout;
-using Shared.Concurrency;
 
 namespace API.Tests.Http;
 

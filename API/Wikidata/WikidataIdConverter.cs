@@ -8,7 +8,6 @@ using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
-using Shared.Concurrency;
 
 namespace API.Wikidata;
 

@@ -1,7 +1,7 @@
 using System.Net;
+using API.Http.Lanes;
 using Domain.Auth;
 using Polly;
-using Shared.Concurrency;
 
 namespace API.Http;
 

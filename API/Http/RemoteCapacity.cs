@@ -1,7 +1,6 @@
 using Contracts.Identity;
 using Contracts.Providers;
 using Domain.Providers;
-using Shared.Concurrency;
 
 namespace API.Http;
 

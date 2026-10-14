@@ -8,7 +8,6 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist.Arr;
 using Polly.Timeout;
-using Shared.Concurrency;
 
 namespace API.Arr;
 

@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
+using Contracts.Providers;
 using Domain.Identity;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.Concurrency;
 using Shared.Options;
 
 namespace API.Http.Lanes;

@@ -1,13 +1,13 @@
-namespace Shared.Concurrency;
+namespace API.Http.Lanes;
 
-public sealed record LaneCall<TKey, TOut>(
+internal sealed record LaneCall<TKey, TOut>(
 	Func<TKey, string> BatchKey,
 	Func<IReadOnlyList<TKey>, CancellationToken, Task<Result<IReadOnlyDictionary<TKey, TOut>>>> SendAsync
 )
 	where TKey : notnull
 	where TOut : notnull;
 
-public interface ILane<TKey, TOut>
+internal interface ILane<TKey, TOut>
 	where TKey : notnull
 	where TOut : notnull
 {

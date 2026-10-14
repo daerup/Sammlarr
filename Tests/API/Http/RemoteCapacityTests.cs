@@ -1,11 +1,11 @@
 using API.Http;
 using API.Http.Lanes;
 using Contracts.Identity;
+using Contracts.Providers;
 using Domain.Identity;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
-using Shared.Concurrency;
 using Shared.Options;
 using TestInfrastructure;
 

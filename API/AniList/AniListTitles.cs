@@ -4,7 +4,6 @@ using API.Http;
 using API.Http.Lanes;
 using Contracts;
 using Domain.Providers;
-using Shared.Concurrency;
 
 namespace API.AniList;
 
