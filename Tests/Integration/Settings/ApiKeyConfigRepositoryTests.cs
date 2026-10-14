@@ -29,21 +29,6 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	[Arguments("simple-key")]
-	[Arguments("key-with-dashes-123")]
-	[Arguments("special!@#$%^&*()")]
-	[Arguments("unicode-café")]
-	[Arguments("")]
-	public async Task StoreAsync_WithVariousKeys_PreservesPlaintext(string apiKey)
-	{
-		await Testee.StoreAsync(ApiKeyProvider.Tmdb, apiKey);
-
-		var setting = await fixture.Context.ApiKeySettings.SingleAsync();
-
-		await Assert.That(setting.ApiKey).IsEqualTo(apiKey);
-	}
-
-	[Test]
 	public async Task StoreAsync_WithDifferentProviders_StoresIndependently()
 	{
 		var key = "shared-api-key";

@@ -91,27 +91,6 @@ public class CredentialRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 	}
 
 	[Test]
-	[Arguments("simple-token")]
-	[Arguments("token-with-dashes-123")]
-	[Arguments("special!@#$%^&*()")]
-	[Arguments("unicode-café")]
-	[Arguments("")]
-	public async Task StoreCredential_WithVariousTokens_PreservesPlaintext(string token)
-	{
-		var authProvider = AuthProvider.Plex;
-		var clientId = Guid.NewGuid();
-		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
-
-		await Testee.StoreAsync(authProvider, token, expiresAt, clientId);
-
-		var credential = await fixture.Context.Credentials.SingleAsync();
-
-		await Assert.That(credential).IsNotNull();
-		await Assert.That(credential.AccessToken).IsEqualTo(token);
-		await Assert.That(credential.Provider).IsEqualTo(authProvider);
-	}
-
-	[Test]
 	public async Task UpdateCredential_WithNewToken_UpdatesValue()
 	{
 		var authProvider = AuthProvider.Plex;

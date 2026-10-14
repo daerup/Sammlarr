@@ -41,21 +41,6 @@ public class EncryptedStringConverterTests
 	}
 
 	[Test]
-	public async Task ConvertFromProvider_WithValidCiphertext_ReturnsOriginalPlaintext()
-	{
-		var service = CreateDataProtectionService();
-		var testee = new EncryptedStringConverter(service);
-		var convertToProvider = testee.ConvertToProviderExpression.Compile();
-		var convertFromProvider = testee.ConvertFromProviderExpression.Compile();
-		var plaintext = "api-key-12345";
-		var encrypted = convertToProvider(plaintext);
-
-		var decrypted = convertFromProvider(encrypted);
-
-		await Assert.That(decrypted).IsEqualTo(plaintext);
-	}
-
-	[Test]
 	public async Task ConvertToProvider_ThenConvertFromProvider_WithVariousValues_RoundTripSucceeds()
 	{
 		var service = CreateDataProtectionService();
