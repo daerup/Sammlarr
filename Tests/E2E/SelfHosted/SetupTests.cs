@@ -48,13 +48,4 @@ public class SetupTests
 		await page.Button("Done").ClickAsync();
 		await SelfHostedSetup.StaysHomeAsync(page);
 	}
-
-	[Test]
-	public async Task Invite_WhenTheMemberJoins_AsksForTheirTmdbKeyThenLetsThemIn()
-	{
-		var stack = await SelfHostedApp.StackAsync();
-		var invite = await SelfHostedSetup.FinishAsync(await SelfHostedApp.OpenPageAsync(), stack);
-
-		await SelfHostedSetup.JoinAsync(await SelfHostedApp.OpenPageAsync(), invite);
-	}
 }

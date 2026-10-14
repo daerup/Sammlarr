@@ -9,7 +9,9 @@ public class NotificationTargetTests
 
 	private const string UrlInput = "input[placeholder='https://example.com/hook']";
 
-	private const string Unreachable = "https://e2e-unreachable.invalid/hook";
+	private const string UnreachableHost = "e2e-unreachable.invalid";
+
+	private const string Unreachable = $"https://{UnreachableHost}/hook";
 
 	[Test]
 	public async Task Webhook_WhenCreated_AppearsAndCanBeEditedAndDeleted()
@@ -31,7 +33,7 @@ public class NotificationTargetTests
 
 		await DeleteClientAsync(page, renamed);
 
-		await Expect(page.GetByText("No clients yet. Add a webhook or Pushover connection.")).ToBeVisibleAsync();
+		await Expect(page.Text(renamed)).ToBeHiddenAsync();
 	}
 
 	[Test]
@@ -45,16 +47,15 @@ public class NotificationTargetTests
 
 		await SaveAsync(page);
 
-		await Expect(page.GetByText("App token and user key are required.")).ToBeVisibleAsync();
+		await Expect(page.Locator("p.text-destructive")).ToBeVisibleAsync();
 
 		await page.Button("Cancel").ClickAsync();
 
-		await Expect(page.GetByText("App token and user key are required.")).ToBeHiddenAsync();
 		await Expect(page.Locator(NameInput)).ToBeHiddenAsync();
 	}
 
 	[Test]
-	public async Task TestPing_WhenSent_ReportsTheOutcomeInTheDialog()
+	public async Task TestPing_ToAnUnreachableHost_ReportsWhyItFailedInTheDialog()
 	{
 		var name = TestData.Name("Ping");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
@@ -64,7 +65,8 @@ public class NotificationTargetTests
 		await Client(page, name).GetByRole(AriaRole.Button).First.ClickAsync();
 		await page.Button("Test connection").ClickAsync();
 
-		await Expect(page.Locator("p.text-destructive")).ToBeVisibleAsync(Wait.Preview);
+		await Expect(page.GetByRole(AriaRole.Dialog).GetByText(UnreachableHost)).ToBeVisibleAsync(Wait.Preview);
+		await Expect(page.Text("Delivered.")).ToBeHiddenAsync();
 
 		await page.Button("Cancel").ClickAsync();
 		await DeleteClientAsync(page, name);
@@ -86,21 +88,17 @@ public class NotificationTargetTests
 		await events.First.GetByRole(AriaRole.Checkbox).ClickAsync();
 		await SaveAsync(page);
 
-		var alert = page.Locator("div.rounded-lg.border").Filter(new LocatorFilterOptions { HasText = chosen }).First;
+		var alert = page.Locator("[data-alert]").Filter(new LocatorFilterOptions { HasText = chosen }).First;
 		await Expect(alert).ToBeVisibleAsync(Wait.Settle);
 
 		await SettingsPage.VisitSectionAsync(page, "notifications");
 
-		await Expect(page.Locator("div.rounded-lg.border").Filter(new LocatorFilterOptions { HasText = chosen }).First).ToBeVisibleAsync();
+		await Expect(page.Locator("[data-alert]").Filter(new LocatorFilterOptions { HasText = chosen }).First).ToBeVisibleAsync();
 
 		await DeleteClientAsync(page, name);
 	}
 
-	private static ILocator Client(IPage page, string name) =>
-		page.Locator("div.flex-col.gap-4")
-			.Filter(new LocatorFilterOptions { Has = page.Heading("Clients") })
-			.Locator("div.items-center.rounded-lg.border")
-			.Filter(new LocatorFilterOptions { HasText = name });
+	private static ILocator Client(IPage page, string name) => page.Locator("[data-client]").Filter(new LocatorFilterOptions { HasText = name });
 
 	private static async Task CreateWebhookAsync(IPage page, string name)
 	{

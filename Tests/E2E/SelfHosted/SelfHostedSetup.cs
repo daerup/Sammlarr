@@ -30,7 +30,7 @@ internal static class SelfHostedSetup
 
 	internal static async Task SwitchToRadarrAndSonarrAsync(IPage page, SelfHostedStack stack)
 	{
-		await Expect(page.Text("Connect Plex to continue")).ToBeVisibleAsync();
+		await Expect(page.Button("Next")).ToBeDisabledAsync();
 		await page.Locator("#sink-Arr").ClickAsync();
 		await ArrSections.ConnectAsync(page, "Radarr", stack.Radarr.Url);
 		await ArrSections.ConnectAsync(page, "Sonarr", stack.Sonarr.Url);
@@ -40,7 +40,7 @@ internal static class SelfHostedSetup
 
 	internal static async Task AddTmdbKeyAsync(IPage page)
 	{
-		await Expect(page.Text("Add a TMDB key to continue")).ToBeVisibleAsync();
+		await Expect(page.Button("Next")).ToBeDisabledAsync();
 		var row = page.Locator("#provider-row-tmdb [data-slot=tmdb]");
 		await row.Locator("input[placeholder='Enter API key']").EnterAsync(TmdbKey);
 		await row.Button("Test").ClickAsync();

@@ -24,8 +24,6 @@ internal static class Locators
 
 		internal ILocator Heading(string name) => page.GetByRole(AriaRole.Heading, Exact(name));
 
-		internal ILocator Row(string name) => page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name });
-
 		internal ILocator FeedCard(string name) => page.GetByRole(AriaRole.Article, Exact(name));
 
 		internal ILocator Option(string name) => page.GetByRole(AriaRole.Option, Exact(name));

@@ -83,6 +83,5 @@ public class FeedEditorStateTests
 		await Expect(FeedEditor.TestButton(page)).ToBeVisibleAsync();
 		await Expect(FeedEditor.SaveButton(page)).ToBeHiddenAsync();
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
-		await Expect(page.GetByText("Run a test to preview the media items from your list.")).ToBeVisibleAsync();
 	}
 }

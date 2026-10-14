@@ -1,6 +1,4 @@
 using System.Globalization;
-using System.Text.RegularExpressions;
-using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Feeds;
@@ -26,7 +24,7 @@ public class FeedSaveTests
 		await FeedEditor.Toggle(page, "Enabled").ClickAsync();
 		await FeedEditor.SaveButton(page).ClickAsync();
 
-		await Expect(page.FeedCard(name)).ToHaveClassAsync(new Regex("is-paused"), new LocatorAssertionsToHaveClassOptions { Timeout = Wait.Settle });
+		await Expect(page.FeedCard(name).Text("Paused")).ToBeVisibleAsync(Wait.Settle);
 		await Assert.That(new Uri(page.Url).AbsolutePath).IsEqualTo("/feeds");
 	}
 

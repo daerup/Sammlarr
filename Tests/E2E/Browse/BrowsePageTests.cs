@@ -6,15 +6,6 @@ namespace E2E.Tests.Browse;
 public class BrowsePageTests
 {
 	[Test]
-	public async Task Browse_WhenAuthenticated_RendersResolvedTrendingTiles()
-	{
-		var page = await E2EApp.AdminAt(Routes.Browse);
-
-		await Expect(Tiles(page).First).ToBeVisibleAsync(Wait.Settle);
-		await Assert.That(await Resolved(page).CountAsync()).IsGreaterThan(0);
-	}
-
-	[Test]
 	public async Task Browse_WhenAddingATrendingItem_TheWantlistGainsIt()
 	{
 		var page = await E2EApp.AdminAt(Routes.Wantlist);

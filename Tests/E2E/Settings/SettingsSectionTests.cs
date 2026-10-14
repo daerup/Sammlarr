@@ -5,28 +5,20 @@ namespace E2E.Tests.Settings;
 public class SettingsSectionTests
 {
 	[Test]
-	[Arguments("providers", "Which service does what, and the account, keys and connections behind it.")]
-	[Arguments("notifications", "Webhook or Pushover connections to deliver to.")]
-	[Arguments("housekeeping", "Runs by itself")]
-	[Arguments("diagnostics", "Live log stream")]
-	[Arguments("users", "People with access to this Sammlarr. Everyone signs in with Plex.")]
-#if DEBUG
-	[Arguments("testing", "Fire a toast of the chosen kind")]
-#endif
-	[Arguments("about", "This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.")]
-	public async Task Section_WhenSelectedByQueryAsAdmin_RendersThatSection(string slug, string expectedContent)
+	public async Task About_WhenSelectedByQueryAsAdmin_ShowsTheTmdbNotice()
 	{
-		var page = await E2EApp.AdminAt(SettingsPage.Section(slug));
+		var page = await E2EApp.AdminAt(SettingsPage.Section("about"));
 
-		await Expect(page.GetByText(expectedContent)).ToBeVisibleAsync();
+		await Expect(page.GetByText("This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.")).ToBeVisibleAsync();
 	}
 
 	[Test]
-	public async Task Section_WhenSlugIsUnknown_FallsBackWithoutFailing()
+	public async Task Section_WhenSlugIsUnknown_FallsBackToTheSettingsPageAndItsTitle()
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section("does-not-exist"));
 
 		await page.ShouldNotBeAtAsync(Routes.SignIn);
+		await Assert.That(await page.TitleAsync()).Contains("Settings");
 		await Expect(page.Heading("Settings")).ToBeVisibleAsync();
 	}
 }

@@ -12,7 +12,6 @@ internal enum PreviewBadge
 	Bypassed,
 	Filtered,
 	Skipped,
-	Unmatched,
 }
 
 internal static class FeedEditor
@@ -111,8 +110,6 @@ internal static class FeedEditor
 
 	internal static ILocator RatingStar(IPage page) => page.Locator("button.field-segment.is-gold").First;
 
-	internal static ILocator VotesInfo(IPage page) => page.Locator(".number-rule-box button.field-segment[aria-label='How Votes are counted']");
-
 	internal static async Task PutFirstAsync(IPage page, string source, int steps)
 	{
 		var grip = page.Locator($".rating-picker-grip[aria-label^='Move {source};']");
@@ -144,6 +141,5 @@ internal static class FeedEditor
 			PreviewBadge.Bypassed => 3,
 			PreviewBadge.Filtered => 4,
 			PreviewBadge.Skipped => 5,
-			PreviewBadge.Unmatched => 6,
 		};
 }

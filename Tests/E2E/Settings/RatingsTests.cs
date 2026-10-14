@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 using TUnit.Assertions.Enums;
 using static Microsoft.Playwright.Assertions;
@@ -15,9 +14,10 @@ public class RatingsTests
 		await Expect(tiles.First).ToBeVisibleAsync();
 		var before = await BoxesAsync(tiles);
 
-		await page.GetByRole(AriaRole.Switch, new PageGetByRoleOptions { Name = "Rotten Tomatoes® critics counts" }).ClickAsync();
+		var rottenTomatoes = page.GetByRole(AriaRole.Switch, new PageGetByRoleOptions { Name = "Rotten Tomatoes® critics counts" });
+		await rottenTomatoes.ClickAsync();
 
-		await Expect(tiles.Filter(new LocatorFilterOptions { HasText = "Rotten Tomatoes® critics" })).ToHaveClassAsync(new Regex("is-off"));
+		await Expect(rottenTomatoes).ToHaveAttributeAsync("aria-checked", "false");
 		await Assert.That(await BoxesAsync(tiles)).IsEquivalentTo(before, CollectionOrdering.Matching);
 	}
 
