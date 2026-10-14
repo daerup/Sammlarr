@@ -11,7 +11,7 @@ public readonly record struct MediaIdentity(MediaId Id, ValueSet<IIdentityKey> K
 	public MediaType Type => Keys.FirstOrDefault()?.Type ?? MediaType.Unknown;
 }
 
-[ValueObject<Guid>]
+[ValueObject<Guid>(comparison: ComparisonGeneration.Omit)]
 public readonly partial struct MediaId
 {
 	private static Validation Validate(Guid input) => input == Guid.Empty ? Validation.Invalid("MediaId cannot be empty.") : Validation.Ok;
@@ -19,14 +19,6 @@ public readonly partial struct MediaId
 	public static MediaId New() => From(Guid.NewGuid());
 
 	public override string ToString() => IsInitialized() ? Value.ToString("N") : "[UNINITIALIZED]";
-
-	public static bool operator <(MediaId left, MediaId right) => left.CompareTo(right) < 0;
-
-	public static bool operator <=(MediaId left, MediaId right) => left.CompareTo(right) <= 0;
-
-	public static bool operator >(MediaId left, MediaId right) => left.CompareTo(right) > 0;
-
-	public static bool operator >=(MediaId left, MediaId right) => left.CompareTo(right) >= 0;
 }
 
 public interface IExternalMediaId
