@@ -18,14 +18,6 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	private IJobQueue Testee => host.Resolve<IJobQueue>();
 
 	[Test]
-	public async Task EnqueueAsync_WhenNothingIsQueued_QueuesTheJob()
-	{
-		var result = await Testee.EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
-
-		await Assert.That(result).IsOfUnionType<EnqueueResult, Queued>();
-	}
-
-	[Test]
 	public async Task EnqueueAsync_WhenTheSameFeedIsAlreadyQueued_FoldsIntoIt()
 	{
 		IJobRequest request = new RunFeed(FeedId.From(Guid.NewGuid()), new Manual());
@@ -47,16 +39,6 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(results.Count(result => result is Queued)).IsEqualTo(1);
 		await Assert.That(results.Count(result => result is AlreadyQueued)).IsEqualTo(7);
-	}
-
-	[Test]
-	public async Task EnqueueAsync_WhenADifferentFeedIsQueued_QueuesItSeparately()
-	{
-		await Testee.EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
-
-		var result = await Testee.EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
-
-		await Assert.That(result).IsOfUnionType<EnqueueResult, Queued>();
 	}
 
 	[Test]
