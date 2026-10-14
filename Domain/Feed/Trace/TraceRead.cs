@@ -10,7 +10,7 @@ public readonly record struct TraceCursor(Optional<Guid> Run, long Seq)
 	public static TraceCursor Start => new(new None(), 0);
 }
 
-public union TraceRead(TraceSnapshot, TraceBatch, NoTrace);
+public readonly union TraceRead(TraceSnapshot, TraceBatch, NoTrace);
 
 public sealed record TraceSnapshot(
 	TraceCursor Cursor,

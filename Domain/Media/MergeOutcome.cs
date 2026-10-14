@@ -1,6 +1,6 @@
 namespace Domain.Media;
 
-public union MergeOutcome(Merged, Contradicted, NotStored);
+public readonly union MergeOutcome(Merged, Contradicted, NotStored);
 
 public sealed record Merged(MediaId Survivor, MediaId Removed);
 

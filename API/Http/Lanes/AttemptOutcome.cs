@@ -1,6 +1,6 @@
 namespace API.Http.Lanes;
 
-internal union AttemptOutcome(AttemptAnswered, AttemptThrottled, AttemptFailed, AttemptAbandoned);
+internal readonly union AttemptOutcome(AttemptAnswered, AttemptThrottled, AttemptFailed, AttemptAbandoned);
 
 internal sealed record AttemptAnswered;
 

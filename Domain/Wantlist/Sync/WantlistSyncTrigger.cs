@@ -1,6 +1,6 @@
 namespace Domain.Wantlist.Sync;
 
-public union WantlistSyncTrigger(ManualTrigger, ScheduledFeedTrigger)
+public readonly union WantlistSyncTrigger(ManualTrigger, ScheduledFeedTrigger)
 {
 	private const string ManualLiteral = "Manual";
 	private const string ScheduledFeedLiteral = "ScheduledFeed";

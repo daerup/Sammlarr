@@ -44,4 +44,4 @@ public static class Result
 	public static async Task<Result<T>> WhenNotNull<T>(Task<T?> value, string reason) where T : class => WhenNotNull(await value, reason);
 }
 
-public union Result<T>(Success<T>, Error) where T : notnull;
+public readonly union Result<T>(Success<T>, Error) where T : notnull;

@@ -1,6 +1,6 @@
 namespace Contracts.Notifications;
 
-public union DeliveryResult(DeliverySucceeded, DeliveryRetryable, DeliveryUnrecoverable);
+public readonly union DeliveryResult(DeliverySucceeded, DeliveryRetryable, DeliveryUnrecoverable);
 
 public readonly record struct DeliverySucceeded;
 

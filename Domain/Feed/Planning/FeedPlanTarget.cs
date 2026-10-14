@@ -1,6 +1,6 @@
 namespace Domain.Feed.Planning;
 
-public union FeedPlanTarget(SavedFeed, DraftFeed);
+public readonly union FeedPlanTarget(SavedFeed, DraftFeed);
 
 public readonly record struct SavedFeed(FeedId Id);
 

@@ -159,7 +159,9 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 	private readonly PeriodicTimer _timer = new(Tick);
 	private int _sent;
 	private FateTally _fates = FateTally.None;
+
 	private Optional<int> _requests = new None();
+
 	private Optional<FeedRunEnd> _ended = new None();
 
 	private Optional<SourcePage> _page = new None();

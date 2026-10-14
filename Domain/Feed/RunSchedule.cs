@@ -23,7 +23,7 @@ public readonly record struct Scheduled
 	public override string ToString() => _raw;
 }
 
-public union FeedRunTrigger(Manual, Scheduled)
+public readonly union FeedRunTrigger(Manual, Scheduled)
 {
 	private const string ManualLiteral = "manual";
 

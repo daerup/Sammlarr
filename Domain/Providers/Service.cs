@@ -2,7 +2,7 @@ using Domain.Wantlist.Arr;
 
 namespace Domain.Providers;
 
-public union Service(RemoteService, Arr, SammlarrAccounts)
+public readonly union Service(RemoteService, Arr, SammlarrAccounts)
 {
 	public ValueSet<RemoteService> Remotes
 	{

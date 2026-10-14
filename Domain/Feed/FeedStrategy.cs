@@ -18,4 +18,4 @@ public readonly record struct Mirror
 	}
 }
 
-public union FeedStrategy(Append, Mirror);
+public readonly union FeedStrategy(Append, Mirror);

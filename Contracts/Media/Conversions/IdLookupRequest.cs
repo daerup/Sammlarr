@@ -3,7 +3,7 @@ using Domain.Media.Conversions;
 
 namespace Contracts.Media.Conversions;
 
-public union IdLookupRequest(ByIdRequest, ByHintsRequest);
+public readonly union IdLookupRequest(ByIdRequest, ByHintsRequest);
 
 public readonly record struct ByIdRequest(ById Lookup, IExternalMediaId Id);
 

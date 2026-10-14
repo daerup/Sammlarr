@@ -179,6 +179,7 @@ dotnet_diagnostic.MA0048.severity = none
 dotnet_diagnostic.MA0049.severity = none
 dotnet_diagnostic.CA1711.severity = none
 dotnet_diagnostic.CA1716.severity = none
+dotnet_diagnostic.CA1805.severity = none
 
 # analyzer marks from the Phase 18 report: leave, visible in the IDE only
 dotnet_diagnostic.CA1000.severity = suggestion
@@ -195,6 +196,8 @@ dotnet_diagnostic.CA1822.severity = warning
 dotnet_diagnostic.CA1852.severity = warning
 dotnet_diagnostic.CA2012.severity = warning
 dotnet_diagnostic.CA2016.severity = warning
+dotnet_diagnostic.IDE0250.severity = warning
+dotnet_diagnostic.IDE0251.severity = warning
 dotnet_diagnostic.MA0053.severity = warning
 
 # Space preferences
