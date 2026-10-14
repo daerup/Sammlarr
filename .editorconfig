@@ -67,7 +67,15 @@ dotnet_naming_symbols.constant_fields.applicable_kinds = field
 dotnet_naming_symbols.constant_fields.required_modifiers = const
 dotnet_naming_style.pascal_case_style.capitalization = pascal_case
 
-# static fields should be camelCase (no prefix)
+# static readonly fields are PascalCase, as the code writes them
+dotnet_naming_rule.static_readonly_fields_should_be_pascal_case.severity = suggestion
+dotnet_naming_rule.static_readonly_fields_should_be_pascal_case.symbols = static_readonly_fields
+dotnet_naming_rule.static_readonly_fields_should_be_pascal_case.style = pascal_case_style
+dotnet_naming_symbols.static_readonly_fields.applicable_kinds = field
+dotnet_naming_symbols.static_readonly_fields.required_modifiers = static, readonly
+dotnet_naming_symbols.static_readonly_fields.applicable_accessibilities = private, internal, private_protected
+
+# other static fields should be camelCase (no prefix)
 dotnet_naming_rule.static_fields_should_have_prefix.severity = suggestion
 dotnet_naming_rule.static_fields_should_have_prefix.symbols = static_fields
 dotnet_naming_rule.static_fields_should_have_prefix.style = static_camel_case_style
@@ -149,7 +157,6 @@ dotnet_diagnostic.IDE0005.severity = warning
 dotnet_diagnostic.CA1502.severity = warning
 dotnet_diagnostic.CA1505.severity = warning
 dotnet_diagnostic.CA1506.severity = warning
-dotnet_diagnostic.MA0049.severity = warning
 dotnet_diagnostic.IDE0035.severity = warning
 dotnet_diagnostic.IDE0051.severity = warning
 dotnet_diagnostic.IDE0052.severity = warning
@@ -160,6 +167,27 @@ dotnet_diagnostic.IDE0080.severity = warning
 dotnet_diagnostic.IDE0240.severity = warning
 dotnet_diagnostic.IDE0241.severity = warning
 dotnet_diagnostic.IDE0350.severity = warning
+
+# analyzer marks from the Phase 18 report: off
+dotnet_diagnostic.MA0004.severity = none
+dotnet_diagnostic.MA0006.severity = none
+dotnet_diagnostic.MA0008.severity = none
+dotnet_diagnostic.MA0038.severity = none
+dotnet_diagnostic.MA0041.severity = none
+dotnet_diagnostic.MA0046.severity = none
+dotnet_diagnostic.MA0048.severity = none
+dotnet_diagnostic.MA0049.severity = none
+dotnet_diagnostic.CA1711.severity = none
+dotnet_diagnostic.CA1716.severity = none
+
+# analyzer marks from the Phase 18 report: leave, visible in the IDE only
+dotnet_diagnostic.CA1000.severity = suggestion
+dotnet_diagnostic.CA1720.severity = suggestion
+dotnet_diagnostic.CA1848.severity = suggestion
+dotnet_diagnostic.CA1859.severity = suggestion
+dotnet_diagnostic.CA1863.severity = suggestion
+dotnet_diagnostic.CA1873.severity = suggestion
+dotnet_diagnostic.MA0051.severity = suggestion
 
 # Space preferences
 csharp_space_after_cast = false
@@ -188,8 +216,33 @@ csharp_space_between_square_brackets = false
 # License header
 file_header_template = unset
 
+# Rider inspection marks from the Phase 18 report, for C# in .cs and .razor files
+[*.{cs,razor}]
+resharper_arrange_trailing_comma_in_multiline_lists_highlighting = none
+resharper_arrange_object_creation_when_type_evident_highlighting = none
+resharper_arrange_object_creation_when_type_not_evident_highlighting = none
+resharper_suspicious_type_conversion_global_highlighting = none
+resharper_not_accessed_positional_property_global_highlighting = suggestion
+resharper_not_accessed_positional_property_local_highlighting = suggestion
+
 [DB/Migrations/*.cs]
 generated_code = true
+
+# analyzer marks from the Phase 18 report: off in tests
+[Tests/**.cs]
+dotnet_diagnostic.CA1305.severity = none
+dotnet_diagnostic.CA1506.severity = none
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1816.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA5351.severity = none
+dotnet_diagnostic.MA0001.severity = none
+dotnet_diagnostic.MA0002.severity = none
+dotnet_diagnostic.MA0009.severity = none
+dotnet_diagnostic.MA0011.severity = none
+dotnet_diagnostic.MA0076.severity = none
+dotnet_diagnostic.MA0089.severity = none
+dotnet_diagnostic.RS0030.severity = none
 
 # Xml project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]
