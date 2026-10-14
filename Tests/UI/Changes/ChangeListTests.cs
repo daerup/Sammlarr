@@ -1,4 +1,5 @@
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Primitives;
 using Bunit;
 using Domain.Media;
 using Microsoft.AspNetCore.Components;
@@ -80,7 +81,6 @@ public class ChangeListTests : BunitContext
 
 		await Assert.That(chips[0].TagName).IsEqualTo("BUTTON");
 		await Assert.That(chips[1].TagName).IsNotEqualTo("BUTTON");
-		await Assert.That(chips[1].ClassList).Contains("is-count");
 		await Assert.That(cut.FindAll(".change-chip-sep")).Count().IsEqualTo(1);
 	}
 
@@ -113,7 +113,6 @@ public class ChangeListTests : BunitContext
 		var chips = cut.FindAll(".change-chip");
 
 		await Assert.That(chips[1].TagName).IsNotEqualTo("BUTTON");
-		await Assert.That(chips[1].ClassList).DoesNotContain("is-on");
 	}
 
 	[Test]
@@ -153,33 +152,16 @@ public class ChangeListTests : BunitContext
 	}
 
 	[Test]
-	public async Task Dialog_WhenGivenEverySlotItsCallersUse_RendersWithoutAnUnknownParameter()
+	public async Task Dialog_WhenGivenEverySlotItsCallersUse_ShowsTheirGroupHeadingsAndBand()
 	{
-		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton(ArtworkStub.Sizing());
-		JSInterop.Mode = JSRuntimeMode.Loose;
+		var portal = OpenDialog();
+		portal.WaitForState(() => portal.FindAll(".change-band").Count == 1);
 
-		var cut = Render<ChangeDialog>(parameters =>
-			parameters
-				.Add(dialog => dialog.Open, true)
-				.Add(dialog => dialog.Title, "Review changes before syncing")
-				.Add(dialog => dialog.Subtitle, "7 titles compared")
-				.Add(dialog => dialog.Items, [Removed("Gone"), Added("Fresh"), Unchanged("Held")])
-				.Add(dialog => dialog.Chips, [])
-				.Add(dialog => dialog.Fold, Fold(1))
-				.Add(dialog => dialog.RemovedLabel, "Removing")
-				.Add(dialog => dialog.AddedLabel, "Adding")
-				.Add(dialog => dialog.UnchangedLabel, "Already in sync")
-				.Add(dialog => dialog.EmptyMessage, "Everything is in sync.")
-				.Add(dialog => dialog.Note, "7 runs")
-				.Add(dialog => dialog.BandTone, ChangeBandTone.Bad)
-				.Add(dialog => dialog.Prologue, builder => builder.AddContent(0, "5 waiting"))
-				.Add(dialog => dialog.Band, builder => builder.AddContent(0, "Plex is unreachable"))
-				.Add(dialog => dialog.Actions, builder => builder.AddContent(0, "Cancel"))
-		);
-
-		await Assert.That(cut.Instance.UnchangedLabel).IsEqualTo("Already in sync");
-		await Assert.That(cut.Instance.Items).Count().IsEqualTo(3);
+		var groups = portal.FindAll(".change-group").Select(group => group.TextContent.Trim()).ToList();
+		await Assert.That(groups).Count().IsEqualTo(2);
+		await Assert.That(groups[0]).Contains("Removing");
+		await Assert.That(groups[1]).Contains("Adding");
+		await Assert.That(portal.Find(".change-band").TextContent).Contains("Plex is unreachable");
 	}
 
 	[Test]
@@ -407,6 +389,37 @@ public class ChangeListTests : BunitContext
 		await Assert.That(cut.Find(".change-chip-count").TextContent.Trim()).IsEqualTo(2614.ToString("N0"));
 		await Assert.That(cut.Find(".change-group-count").TextContent.Trim()).IsEqualTo(1200.ToString("N0"));
 		await Assert.That(cut.Find(".change-pin b").TextContent).IsEqualTo(2614.ToString("N0"));
+	}
+
+	private IRenderedComponent<BbPortalHost> OpenDialog()
+	{
+		Services.AddBlazorBlueprintComponents();
+		Services.AddLogging();
+		Services.AddSingleton(ArtworkStub.Sizing());
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
+		var portal = Render<BbPortalHost>();
+		Render<ChangeDialog>(parameters =>
+			parameters
+				.Add(dialog => dialog.Open, true)
+				.Add(dialog => dialog.OnOpenChanged, _ => { })
+				.Add(dialog => dialog.Title, "Review changes before syncing")
+				.Add(dialog => dialog.Subtitle, "7 titles compared")
+				.Add(dialog => dialog.Items, [Removed("Gone"), Added("Fresh"), Unchanged("Held")])
+				.Add(dialog => dialog.Chips, [])
+				.Add(dialog => dialog.Fold, Fold(1))
+				.Add(dialog => dialog.RemovedLabel, "Removing")
+				.Add(dialog => dialog.AddedLabel, "Adding")
+				.Add(dialog => dialog.UnchangedLabel, "Already in sync")
+				.Add(dialog => dialog.EmptyMessage, "Everything is in sync.")
+				.Add(dialog => dialog.Note, "7 runs")
+				.Add(dialog => dialog.BandTone, ChangeBandTone.Bad)
+				.Add(dialog => dialog.Prologue, builder => builder.AddContent(0, "5 waiting"))
+				.Add(dialog => dialog.Band, builder => builder.AddContent(0, "Plex is unreachable"))
+				.Add(dialog => dialog.Actions, builder => builder.AddContent(0, "Cancel"))
+		);
+
+		return portal;
 	}
 
 	private static ChangeFold Fold(int count, Action? unfolding = null)

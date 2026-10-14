@@ -38,10 +38,12 @@ public class ProvenanceBadgeTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForATitleWhoseFeedIsGone_IsNotALinkAtAll()
+	public async Task Render_ForATitleWhoseFeedIsGone_WearsTheGhostAndIsNotALinkAtAll()
 	{
 		var cut = RenderBadge(new OrphanedOrigin("Old feed"));
 
+		var ghost = Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 14)).Find("path").GetAttribute("d");
+		await Assert.That(cut.FindAll("svg path").Select(path => path.GetAttribute("d"))).Contains(ghost);
 		await Assert.That(cut.FindAll("a")).IsEmpty();
 	}
 
@@ -61,15 +63,6 @@ public class ProvenanceBadgeTests : BunitContext
 		var cut = RenderBadge(new SinkOrigin(SinkKind.Arr), type: type);
 
 		await Assert.That(cut.Find(".wl-badge-label").TextContent.Trim()).IsEqualTo(app);
-	}
-
-	[Test]
-	public async Task Render_ForATitleWhoseFeedIsGone_WearsTheGhost()
-	{
-		var cut = RenderBadge(new OrphanedOrigin("Old feed"));
-
-		var ghost = Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 14)).Find("path").GetAttribute("d");
-		await Assert.That(cut.FindAll("svg path").Select(path => path.GetAttribute("d"))).Contains(ghost);
 	}
 
 	private IRenderedComponent<ProvenanceBadge> RenderBadge(WantlistItemProvenance provenance, MediaId? itemId = null, MediaType type = MediaType.Movie)
