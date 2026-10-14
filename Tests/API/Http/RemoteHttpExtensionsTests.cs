@@ -73,11 +73,19 @@ public class RemoteHttpExtensionsTests
 	}
 
 	[Test]
-	public async Task AddRemoteHttp_ForALaneClient_AllowsTenMinutesInsteadOfTheDefaultHundredSeconds()
+	public async Task AddRemoteHttp_ForALaneClient_AllowsThirtyMinutesByDefault()
 	{
 		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions()), RemoteService.Plex, new Counting());
 
-		await Assert.That(host.Client().Timeout).IsEqualTo(TimeSpan.FromMinutes(10));
+		await Assert.That(host.Client().Timeout).IsEqualTo(TimeSpan.FromMinutes(30));
+	}
+
+	[Test]
+	public async Task AddRemoteHttp_ForALaneClient_TakesTheGlobalTimeout()
+	{
+		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions()), RemoteService.Plex, new Counting(), httpTimeout: TimeSpan.FromMinutes(45));
+
+		await Assert.That(host.Client().Timeout).IsEqualTo(TimeSpan.FromMinutes(45));
 	}
 
 	[Test]

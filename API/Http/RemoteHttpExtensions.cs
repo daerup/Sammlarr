@@ -4,6 +4,7 @@ using Contracts.Usage;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Options;
 using Polly.Timeout;
 using Shared.Options;
 
@@ -11,8 +12,6 @@ namespace API.Http;
 
 internal static class RemoteHttpExtensions
 {
-	internal static readonly TimeSpan LongestCall = TimeSpan.FromMinutes(10);
-
 	public static IHttpClientBuilder AddClientHttp<TOptions>(this IHttpClientBuilder builder)
 		where TOptions : class, IProviderHttpOptions
 	{
@@ -24,7 +23,9 @@ internal static class RemoteHttpExtensions
 		where TOptions : class, IProviderHttpOptions
 	{
 		builder.AddHttpMessageHandler(() => new UsageStampHandler(remote));
-		Configure<TOptions>(builder).ConfigureHttpClient(client => client.Timeout = LongestCall).AddLanes<TOptions>(remote);
+		Configure<TOptions>(builder)
+			.ConfigureHttpClient((sp, client) => client.Timeout = sp.GetRequiredService<IOptions<SammlarOptions>>().Value.HttpTimeout)
+			.AddLanes<TOptions>(remote);
 		builder.AddHttpMessageHandler(sp => new UsageTagsHandler(sp.GetRequiredService<IFeedRunUsage>()));
 		builder.Services.AddSingleton(sp => new RemoteSettings(remote, sp.GetRequiredService<TOptions>()));
 		return builder;

@@ -57,7 +57,7 @@ public sealed class LaneGate : IDisposable
 			return Refusal(priority, now + patience, now)
 				.Match<string, Task<Result<LanePermit>>>(
 					reason => Task.FromResult<Result<LanePermit>>(Error.From(new LaneRefusedException(reason))),
-					() => Enqueue(new Ticket(priority, now + patience), cancellationToken)
+					() => Enqueue(new Ticket(priority, patience), cancellationToken)
 				);
 		}
 	}
@@ -128,7 +128,7 @@ public sealed class LaneGate : IDisposable
 		var now = _time.GetUtcNow();
 		while (_waiting.TryPeek(out var head, out _))
 		{
-			if (head.Task.IsCompleted || Refusal(head.Priority, head.Deadline, now).Map(head.Refuse).GetValueOr(false))
+			if (head.Task.IsCompleted || Refusal(head.Priority, now + head.Patience, now).Map(head.Refuse).GetValueOr(false))
 			{
 				_waiting.Dequeue();
 				continue;
@@ -204,12 +204,12 @@ public sealed class LaneGate : IDisposable
 		_failures = 0;
 		_probing = false;
 		_throttled = now;
-		throttled.RetryAt.Apply(Block).ApplyNone(() => Slow(now));
+		throttled.RetryAt.Apply(until => Block(until, now)).ApplyNone(() => Slow(now));
 	}
 
 	private void Slow(DateTimeOffset now)
 	{
-		Shortest().ApplyNone(() => Block(now + _policy.Pause)).When(window => now - _halved >= window.Per).Apply(window => Halve(window, now));
+		Shortest().ApplyNone(() => Block(now + _policy.Pause, now)).When(window => now - _halved >= window.Per).Apply(window => Halve(window, now));
 	}
 
 	private void Halve(RateWindow window, DateTimeOffset now)
@@ -218,10 +218,10 @@ public sealed class LaneGate : IDisposable
 		_halved = now;
 	}
 
-	private void Block(DateTimeOffset until)
+	private void Block(DateTimeOffset until, DateTimeOffset now)
 	{
 		_blockedUntil = Some.Of(_blockedUntil.When(current => current > until).GetValueOr(until));
-		Refuse(ticket => ticket.Deadline < until, $"blocked until {until:O}");
+		Refuse(ticket => until > now + ticket.Patience, $"blocked until {until:O}");
 	}
 
 	private void Failed(DateTimeOffset now)
@@ -245,14 +245,14 @@ public sealed class LaneGate : IDisposable
 
 	private Optional<RateWindow> Shortest() => _policy.Limits.OrderBy(window => window.Per).FirstOrNone();
 
-	private sealed class Ticket(LanePriority priority, DateTimeOffset deadline)
+	private sealed class Ticket(LanePriority priority, TimeSpan patience)
 	{
 		private readonly TaskCompletionSource<Result<LanePermit>> _done = new(TaskCreationOptions.RunContinuationsAsynchronously);
 		private CancellationTokenRegistration _watch;
 
 		public LanePriority Priority => priority;
 
-		public DateTimeOffset Deadline => deadline;
+		public TimeSpan Patience => patience;
 
 		public Task<Result<LanePermit>> Task => _done.Task;
 
