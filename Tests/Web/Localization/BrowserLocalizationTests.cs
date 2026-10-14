@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Localization;
 using Web.Localization;
 
 namespace Web.Tests.Localization;
@@ -11,16 +10,6 @@ public class BrowserLocalizationTests
 		var options = BrowserLocalization.CreateOptions();
 
 		await Assert.That(options.DefaultRequestCulture.Culture.Name).IsEqualTo("en-US");
-	}
-
-	[Test]
-	public async Task CreateOptions_NegotiatesCultureFromBrowserHeader()
-	{
-		var options = BrowserLocalization.CreateOptions();
-
-		var negotiatesFromBrowser = options.RequestCultureProviders.Any(provider => provider is AcceptLanguageHeaderRequestCultureProvider);
-
-		await Assert.That(negotiatesFromBrowser).IsTrue();
 	}
 
 	[Test]

@@ -146,17 +146,6 @@ public class StagingSeedTests : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Configured_LetsBothConfiguredPeopleSignInWithTheirPasswords()
-	{
-		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
-
-		await using var scope = _services.CreateAsyncScope();
-		var signIn = scope.ServiceProvider.GetRequiredService<ISignInService>();
-		await Assert.That(await signIn.SignInWithPasswordAsync(Admin, AdminPassword)).IsSuccess();
-		await Assert.That(await signIn.SignInWithPasswordAsync(Member, MemberPassword)).IsSuccess();
-	}
-
-	[Test]
 	public async Task Configured_FinishesSetupWithTheAdminsWantlistOnRadarrAndSonarrAndASyncQueued()
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
@@ -182,7 +171,7 @@ public class StagingSeedTests : IAsyncDisposable
 	[Test]
 	[Arguments(Admin, AdminPassword)]
 	[Arguments(Member, MemberPassword)]
-	public async Task Configured_StoresEachPersonsKeys(string username, string password)
+	public async Task Configured_LetsEachPersonSignInWithTheirPasswordAndStoresTheirKeys(string username, string password)
 	{
 		await StagingSeed.SeedAsync(_services, StagingScenario.Configured, Settings, CancellationToken.None);
 
@@ -282,8 +271,8 @@ public class StagingSeedTests : IAsyncDisposable
 	private async Task AsAsync(string username, string password, Func<IServiceProvider, Task> check)
 	{
 		await using var scope = _services.CreateAsyncScope();
-		var signedIn = await scope.ServiceProvider.GetRequiredService<ISignInService>().SignInWithPasswordAsync(username, password);
-		using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(signedIn.GetOrThrow(error => new InvalidOperationException(error.Reason)));
+		var signedIn = await Assert.That(await scope.ServiceProvider.GetRequiredService<ISignInService>().SignInWithPasswordAsync(username, password)).IsSuccess();
+		using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(signedIn!);
 		await check(scope.ServiceProvider);
 	}
 

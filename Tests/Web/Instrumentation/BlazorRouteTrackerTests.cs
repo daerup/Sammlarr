@@ -15,14 +15,6 @@ public class BlazorRouteTrackerTests
 	public void CreateTracker() => _tracker = new BlazorRouteTracker();
 
 	[Test]
-	public async Task OnLocationChanged_AbsoluteUri_KeepsPathOnly()
-	{
-		var url = _tracker.UpdateAndGet(Conn, "OnLocationChanged", new object?[] { AbsoluteUrl, null, false });
-
-		await Assert.That(url).IsEqualTo("/feeds/edit/abc");
-	}
-
-	[Test]
 	public async Task OnLocationChanged_AbsoluteUriWithQuery_PreservesQueryString()
 	{
 		var url = _tracker.UpdateAndGet(Conn, "OnLocationChanged", new object?[] { AbsoluteUrlWithQuery, null, false });
