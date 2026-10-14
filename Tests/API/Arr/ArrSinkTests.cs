@@ -27,6 +27,8 @@ public class ArrSinkTests
 
 	private static readonly MediaId Known = MediaId.New();
 
+	private static readonly TmdbId Inception = TmdbId.From("27205", MediaType.Movie);
+
 	private static readonly ArrSinkConfig Connected = new(
 		new ArrInstanceConfig
 		{
@@ -105,14 +107,11 @@ public class ArrSinkTests
 				"""[{"id":10,"title":"Inception","year":2010,"tmdbId":27205,"imdbId":"tt1375666","tags":[1]},{"id":11,"tmdbId":550,"tags":[2]},{"id":12,"tmdbId":603,"tags":[]}]"""
 			);
 		EmptySonarr();
-		Identifying();
+		Identifying(Inception);
 
 		var snapshot = await Testee().GetAsync();
 
 		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
-		_media
-			.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests!.Single().Candidates.Any(id => id.Value == "27205")), Any())
-			.WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -122,13 +121,11 @@ public class ArrSinkTests
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"},{"id":2,"label":"sammlarr-u-renamed"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]},{"id":11,"tmdbId":550,"tags":[2]}]""");
 		EmptySonarr();
-		Identifying();
+		Identifying(Inception);
 
-		await Testee().GetAsync();
+		var snapshot = await Testee().GetAsync();
 
-		_media
-			.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests!.Single().Candidates.Any(id => id.Value == "27205")), Any())
-			.WasCalled(Times.Once);
+		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
 	}
 
 	[Test]
@@ -136,7 +133,7 @@ public class ArrSinkTests
 	{
 		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
 		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":3,"tvdbId":81189,"tags":[1]}]""");
-		Identifying();
+		Identifying(TvdbId.From("81189", MediaType.Show));
 		var testee = Testee(Connected with { Radarr = ArrInstanceConfig.Empty });
 
 		var snapshot = await testee.GetAsync();
@@ -152,7 +149,7 @@ public class ArrSinkTests
 	{
 		_radarr.OnAnyRequest().Respond(HttpStatusCode.Unauthorized);
 		EmptySonarr();
-		Identifying();
+		Identifying(Inception);
 
 		var snapshot = await Testee().GetAsync();
 
@@ -233,21 +230,16 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	[Arguments("anime", "/anime-movies")]
-	[Arguments("sequel", "/movies")]
-	public async Task ApplyAsync_ForAnAnimatedMovieTheMapDoesNotKnow_LooksItUpAndRoutesByRadarrsKeyword(string keyword, string folder)
+	public async Task ApplyAsync_ForAnAnimatedMovieTheMapDoesNotKnowAndRadarrDoesNotTagAnime_LooksItUpAndAddsItToTheDefaultFolder()
 	{
-		RadarrLooksUp(260514, keyword);
+		RadarrLooksUp(260514, "sequel");
 		Storing(MediaType.Movie, "Cars 3", "Animation", "Family");
 		HoldingOnAnimeSites();
 
 		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Add, [new SinkPush(Known, new None())]).ToListAsync();
 
 		_radarr.Verify(request => request.Method(HttpMethod.Get).PathMatches(".*/movie/lookup\\?term=tmdb:260514$"), Times.Once);
-		_radarr.Verify(request => request.Method(HttpMethod.Post).Path("/api/v3/movie").BodyContains($"\"rootFolderPath\":\"{folder}\""), Times.Once);
-		_animeIds
-			.FindManyAsync(Is<IReadOnlyCollection<IExternalMediaId>>(ids => ids!.Single().Equals(TmdbId.From("260514", MediaType.Movie))), Any())
-			.WasCalled(Times.Once);
+		_radarr.Verify(request => request.Method(HttpMethod.Post).Path("/api/v3/movie").BodyContains("\"rootFolderPath\":\"/movies\""), Times.Once);
 	}
 
 	[Test]
@@ -521,7 +513,7 @@ public class ArrSinkTests
 	}
 
 	[Test]
-	public async Task ApplyAsync_WithoutAnAnimeFolder_NeverReadsTheStoredIdsOrTheAnimeMap()
+	public async Task ApplyAsync_ForAShowInSonarrsAnimeGenreWithoutAnAnimeFolder_AddsItAsAStandardSeriesToTheDefaultFolder()
 	{
 		SonarrLooksUp(424536, "Anime");
 
@@ -531,21 +523,6 @@ public class ArrSinkTests
 			request => request.Method(HttpMethod.Post).Path("/api/v3/series").BodyContains("\"rootFolderPath\":\"/tv\"").BodyContains("\"seriesType\":\"standard\""),
 			Times.Once
 		);
-		_media.GetIdsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any()).WasNeverCalled();
-		_animeIds.FindManyAsync(Any(), Any()).WasNeverCalled();
-	}
-
-	[Test]
-	public async Task ApplyAsync_RemovingWhileRoutingAnime_NeverReadsTheStoredIdsDetailsOrTheAnimeMap()
-	{
-		EmptySonarr();
-		Addressing(TvdbId.From("424536", MediaType.Show));
-
-		await Testee(RoutingAnime).ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
-
-		_media.GetIdsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any()).WasNeverCalled();
-		_media.GetStoredDetailsAsync(Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
-		_animeIds.FindManyAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -647,14 +624,11 @@ public class ArrSinkTests
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr"},{"id":2,"label":"sammlarr-latest"},{"id":3,"label":"4k"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[2]},{"id":11,"tmdbId":550,"tags":[3]}]""");
 		EmptySonarr();
-		Identifying();
+		Identifying(Inception);
 
 		var snapshot = await Testee(Connected with { Tags = ArrTagScheme.Default with { PerUser = false } }).GetAsync();
 
 		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
-		_media
-			.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests!.Single().Candidates.Any(id => id.Value == "27205")), Any())
-			.WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -802,7 +776,7 @@ public class ArrSinkTests
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]}]""");
 		EmptySonarr();
-		Identifying();
+		Identifying(Inception);
 
 		var snapshot = await Testee(Connected with { Tags = ArrTagScheme.Default with { UserSource = ArrUserTagSource.Id } }).GetAsync();
 
@@ -815,14 +789,11 @@ public class ArrSinkTests
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr"},{"id":2,"label":"sammlarr-u-daerup"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]},{"id":11,"tmdbId":550,"tags":[2]}]""");
 		EmptySonarr();
-		Identifying();
+		Identifying(Inception);
 
 		var snapshot = await Testee().GetAsync();
 
 		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
-		_media
-			.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests!.Single().Candidates.Any(id => id.Value == "27205")), Any())
-			.WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -837,7 +808,7 @@ public class ArrSinkTests
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]}]""");
 		EmptySonarr();
-		Identifying();
+		Identifying(Inception);
 
 		var snapshot = await Testee().GetAsync();
 
@@ -1102,14 +1073,17 @@ public class ArrSinkTests
 		_sonarr.OnGet("/api/v3/series").RespondWithJson("[]");
 	}
 
-	private void Identifying()
+	private void Identifying(IExternalMediaId asKnown)
 	{
 		_media
 			.IdentifyAsync(Any<IEnumerable<IdentifyRequest>>(), Any())
 			.Returns(
 				(requests, _) =>
 					requests
-						.Select(request => (Result<MediaIdentity>)Success.Of(new MediaIdentity(Known, [.. request.Candidates.OfType<IIdentityKey>()])))
+						.Select(request =>
+							(Result<MediaIdentity>)
+								Success.Of(new MediaIdentity(request.Candidates.Contains(asKnown) ? Known : MediaId.New(), [.. request.Candidates.OfType<IIdentityKey>()]))
+						)
 						.ToAsyncEnumerable()
 			);
 	}

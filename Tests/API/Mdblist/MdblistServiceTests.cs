@@ -24,7 +24,7 @@ public class MdblistServiceTests
 	public async Task GetFeedItemsAsync_WhenIdentifierReturns404_ThrowsFeedIdentifierNotFound()
 	{
 		const string identifier = "missing-list";
-		var testee = CreateTestee(new StubHandler(HttpStatusCode.NotFound), out _);
+		var testee = CreateTestee(new StubHandler(HttpStatusCode.NotFound));
 
 		var act = async () =>
 		{
@@ -36,14 +36,13 @@ public class MdblistServiceTests
 	}
 
 	[Test]
-	public async Task GetFeedItemsAsync_WhenTheListSpansPages_ResolvesEveryPageInOneStream()
+	public async Task GetFeedItemsAsync_WhenTheListSpansPages_ListsATitleFromEachPage()
 	{
-		var testee = CreateTestee(new StubHandler(HttpStatusCode.OK, pages: 2), out var media);
+		var testee = CreateTestee(new StubHandler(HttpStatusCode.OK, pages: 2));
 
 		var results = await testee.GetFeedItemsAsync("multi-page", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
-		media.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -51,7 +50,7 @@ public class MdblistServiceTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[{"title":"No Ids","release_year":2024}]}""");
-		var testee = CreateTestee(handler, out _);
+		var testee = CreateTestee(handler);
 
 		var results = await testee.GetFeedItemsAsync("id-less", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
@@ -68,7 +67,7 @@ public class MdblistServiceTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[{"title":" ","release_year":0}],"shows":[]}""");
-		var testee = CreateTestee(handler, out _);
+		var testee = CreateTestee(handler);
 
 		var results = await testee.GetFeedItemsAsync("blank", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
@@ -83,7 +82,7 @@ public class MdblistServiceTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""[{"id":88434,"user_name":"snoak","name":"Trakt's Trending Shows","slug":"trakt-s-trending-shows"}]""");
-		var testee = CreateTestee(handler, out _);
+		var testee = CreateTestee(handler);
 
 		var normalized = await testee.NormalizeAsync("88434");
 
@@ -97,7 +96,7 @@ public class MdblistServiceTests
 	public async Task NormalizeAsync_ForALinkOrAPath_StoresThePathWithoutAsking(string input, string stored)
 	{
 		var handler = Mock.HttpHandler();
-		var testee = CreateTestee(handler, out _);
+		var testee = CreateTestee(handler);
 
 		var normalized = await testee.NormalizeAsync(input);
 
@@ -110,7 +109,7 @@ public class MdblistServiceTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
-		var testee = CreateTestee(handler, out _);
+		var testee = CreateTestee(handler);
 
 		var error = await Assert.That(await testee.NormalizeAsync("99999999")).IsError();
 
@@ -122,7 +121,7 @@ public class MdblistServiceTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.ServiceUnavailable);
-		var testee = CreateTestee(handler, out _);
+		var testee = CreateTestee(handler);
 
 		var error = await Assert.That(await testee.NormalizeAsync("88434")).IsError();
 
@@ -135,7 +134,7 @@ public class MdblistServiceTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Throws(new HttpRequestException("No such host is known."));
-		var testee = CreateTestee(handler, out _);
+		var testee = CreateTestee(handler);
 
 		var error = await Assert.That(await testee.NormalizeAsync("88434")).IsError();
 
@@ -146,7 +145,7 @@ public class MdblistServiceTests
 	public async Task NormalizeAsync_ForSomethingThatIsNoList_RefusesWithoutAsking()
 	{
 		var handler = Mock.HttpHandler();
-		var testee = CreateTestee(handler, out _);
+		var testee = CreateTestee(handler);
 
 		var error = await Assert.That(await testee.NormalizeAsync("top-250-movies")).IsError();
 
@@ -159,7 +158,7 @@ public class MdblistServiceTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[]}""");
-		var testee = CreateTestee(handler, out _);
+		var testee = CreateTestee(handler);
 
 		await testee.GetFeedItemsAsync("chazlarson/external/2868", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
@@ -169,7 +168,7 @@ public class MdblistServiceTests
 	[Test]
 	public async Task GetFeedItemsAsync_InsideARun_ReportsEachPageWithoutATotal()
 	{
-		var testee = CreateTestee(new StubHandler(HttpStatusCode.OK, pages: 2), out _);
+		var testee = CreateTestee(new StubHandler(HttpStatusCode.OK, pages: 2));
 		using var spans = new PageSpans();
 
 		await testee.GetFeedItemsAsync("multi-page", FieldNeeds.None).InListOrderAsync().ToListAsync();
@@ -178,14 +177,14 @@ public class MdblistServiceTests
 		await Assert.That(spans.Read).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
 	}
 
-	private static MdblistService CreateTestee(HttpMessageHandler handler, out Mock<IMediaService> media)
+	private static MdblistService CreateTestee(HttpMessageHandler handler)
 	{
 		var apiKeyStore = IApiKeyService.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Mdblist, "test-key");
 		apiKeyStore.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(apiKey));
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
-		media = IMediaService.Mock();
+		var media = IMediaService.Mock();
 		media.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any()).Returns((entries, _, token) => ListLoads.UnresolvedAsync(entries, _ => { }, token));
 		return new MdblistService(client, media.Object, apiKeyStore.Object);
 	}

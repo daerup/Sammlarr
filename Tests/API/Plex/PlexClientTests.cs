@@ -83,24 +83,23 @@ public class PlexClientTests
 					.Header("X-Custom", "abc"),
 			Times.Once
 		);
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task SendAsync_ReadsCredentialForEachRequest()
+	public async Task SendAsync_AfterANewCredentialIsStored_SendsItsToken()
 	{
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
-		var credential = credentialFaker.Generate();
 		var credentialStore = ICredentialService.Mock();
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credentialFaker.Generate());
 		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
-
 		await testee.SendAsync(HttpMethod.Get, $"{PlexBaseUrl}/one");
+		var renewed = credentialFaker.Generate();
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(renewed);
+
 		await testee.SendAsync(HttpMethod.Get, $"{PlexBaseUrl}/two");
 
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).WasCalled(Times.Exactly(2));
-		await Assert.That(handler.Requests.Count).IsEqualTo(2);
+		handler.Verify(request => request.Path("/two").Header("X-Plex-Token", renewed.AccessToken), Times.Once);
 	}
 
 	[Test]

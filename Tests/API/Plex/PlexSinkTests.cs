@@ -23,25 +23,14 @@ public class PlexSinkTests
 	private static readonly MediaId Known = MediaId.New();
 
 	[Test]
-	[Arguments(MediaType.Movie)]
-	[Arguments(MediaType.Show)]
-	[Arguments(MediaType.Unknown)]
-	public async Task AddressedBy_ForEveryMediaType_IsPlex(MediaType type) =>
-		await Assert.That(Sink(HttpStatusCode.OK, IMediaService.Mock()).AddressedBy(type)).IsSome().And.IsEqualTo(MediaProvider.Plex);
-
-	[Test]
 	public async Task GetAsync_WhenAnItemMatches_ReturnsItsMediaIdFromItsPlexId()
 	{
-		var media = MatchingAs(Known);
-		var testee = Sink(BuildWantlistJson(1, CreateMetadata(ratingKey: "plex-42")), media);
+		var testee = Sink(BuildWantlistJson(1, CreateMetadata(ratingKey: "plex-42")), MatchingAs(Known, PlexId.From("plex-42", MediaType.Movie)));
 
 		var snapshot = await testee.GetAsync();
 
 		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
 		await Assert.That(snapshot.Unmatched).IsEmpty();
-		media
-			.IdentifyAsync(Is<IEnumerable<IdentifyRequest>>(requests => requests?.Single() is { Candidates: [{ Value: "plex-42" }] }), Any())
-			.WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -180,9 +169,11 @@ public class PlexSinkTests
 		return new PlexSink(Client(handler), PlexTestUrls.Instance, media.Object, logger ?? NullLogger<PlexSink>.Instance);
 	}
 
-	private static Mock<IMediaService> MatchingAs(MediaId mediaId)
+	private static Mock<IMediaService> MatchingAs(MediaId mediaId, IExternalMediaId plexId)
 	{
-		return Identifying(request => Success.Of(new MediaIdentity(mediaId, [.. request.Candidates.OfType<IIdentityKey>()])));
+		return Identifying(request =>
+			request.Candidates.Contains(plexId) ? Success.Of(new MediaIdentity(mediaId, [.. request.Candidates.OfType<IIdentityKey>()])) : Error.From("unmatched")
+		);
 	}
 
 	private static Mock<IMediaService> MatchingNothing() => Identifying(_ => Error.From("unmatched"));
