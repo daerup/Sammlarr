@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM node:24-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 AS node
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:11.0@sha256:d0a39ca4acefe992f26030f8fb8c60e1b14ac088822cb3fdfbe536ecf843a675 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:11.0@sha256:bfabf51e74c5a7cf2fc4eac852145db86f4867d475257d809518d6a2b0fe71e1 AS build
 ARG TARGETARCH
 ARG VERSION=0.0.0-local
 ARG SOURCE_DATE_EPOCH
@@ -16,7 +16,7 @@ RUN --mount=type=cache,id=sammlarr-nuget,target=/root/.nuget/packages \
         -p:MinVerVersionOverride=$VERSION -p:ExcludeStaging=true -p:ContinuousIntegrationBuild=true -p:DebugType=none
 RUN mkdir -p /data
 
-FROM mcr.microsoft.com/dotnet/aspnet:11.0-resolute-chiseled-extra@sha256:5c0161c2b5eb6bbbb8c775d0ac1be38598396261f6c54edc79308ac30d8229c7
+FROM mcr.microsoft.com/dotnet/aspnet:11.0-resolute-chiseled-extra@sha256:d7d08bb9d44a7c5a2b68c80b3b444d447188e98581810ee035abae4deebaf8e1
 WORKDIR /app
 COPY --from=build /app .
 COPY --from=build --chown=$APP_UID:$APP_UID /data /data
