@@ -43,7 +43,7 @@ public class NotificationAlertDialogTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WhenNoLevelIsConfigured_PreviewsTheLevelDerivedFromTheEvent()
+	public async Task Render_WhenNoLevelIsConfigured_SaysAutomaticAndPreviewsTheEventsLevel()
 	{
 		var cut = Render<NotificationAlertDialog>(parameters =>
 			parameters
@@ -54,19 +54,6 @@ public class NotificationAlertDialogTests : BunitContext
 		);
 
 		await Assert.That(cut.FindAll("div.font-mono").Last().TextContent.Trim()).IsEqualTo(nameof(NotificationLevel.Warning));
-	}
-
-	[Test]
-	public async Task Render_WhenNoLevelIsConfigured_LabelsTheSelectionInsteadOfBlanking()
-	{
-		var cut = Render<NotificationAlertDialog>(parameters =>
-			parameters
-				.Add(dialog => dialog.Open, true)
-				.Add(dialog => dialog.Clients, [Target])
-				.Add(dialog => dialog.Client, Target)
-				.Add(dialog => dialog.Existing, Subscription(new None()))
-		);
-
 		await Assert.That(cut.Find("button[role=combobox]").TextContent.Trim()).IsEqualTo("Automatic");
 	}
 

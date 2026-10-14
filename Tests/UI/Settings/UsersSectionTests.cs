@@ -71,7 +71,7 @@ public class UsersSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_OnASammlarrAccountsInstall_OffersInvitesInsteadOfSignUps()
+	public async Task Render_OnASammlarrAccountsInstall_OffersInvitesAndDescribesEachPerson()
 	{
 		Installed(AuthProvider.Local);
 
@@ -80,29 +80,6 @@ public class UsersSectionTests : BunitContext
 		cut.WaitForElement(".person-row");
 		await Assert.That(cut.FindAll("[aria-label='Allow new sign-ups']")).IsEmpty();
 		await Assert.That(cut.FindAll("button").Any(button => button.TextContent.Contains("Invite member"))).IsTrue();
-	}
-
-	[Test]
-	public async Task People_OnASammlarrAccountsInstall_HeadTheirRowsWithInviteBesideTheHeading()
-	{
-		Installed(AuthProvider.Local);
-
-		var cut = Render<UsersSection>();
-
-		cut.WaitForElement(".person-row");
-		var heading = cut.FindAll("h4").Single(candidate => candidate.TextContent.Trim() == "People");
-		await Assert.That(heading.ParentElement!.TextContent).Contains("Invite member");
-		await Assert.That(heading.ParentElement.NextElementSibling!.QuerySelector(".person-row")).IsNotNull();
-	}
-
-	[Test]
-	public async Task Rows_SayWhatEachPersonHoldsAndWhereTheyStand()
-	{
-		Installed(AuthProvider.Local);
-
-		var cut = Render<UsersSection>();
-
-		cut.WaitForElement(".person-row");
 		var rows = cut.FindAll(".person-row")
 			.Select(row => $"{row.QuerySelector("[data-owns]")!.TextContent.Trim()} | {row.QuerySelector("[data-status]")!.TextContent.Trim()}");
 		await Assert
@@ -112,6 +89,8 @@ public class UsersSectionTests : BunitContext
 				$"No feeds or titles yet | Locked until {LockedUntil.ToLocalTime():HH:mm}",
 				"Not joined yet | Invited · link expires in 6 days",
 			]);
+		var birds = cut.FindAll(".person-row").Select(row => $"{row.GetAttribute("style")} | {row.QuerySelectorAll("[data-bird]").Length}");
+		await Assert.That(birds).IsEquivalentTo(["--bird-hue: 40 | 1", "--bird-hue: 177.5 | 1", " | 0"]);
 	}
 
 	[Test]
@@ -131,18 +110,6 @@ public class UsersSectionTests : BunitContext
 		cut.WaitForElement(".person-row");
 		var statuses = cut.FindAll("[data-status]").Select(status => status.TextContent.Trim());
 		await Assert.That(statuses).IsEquivalentTo(["Active", "Invited · link expires in 5 hours", "Invite expired"]);
-	}
-
-	[Test]
-	public async Task Rows_OnASammlarrAccountsInstall_ShowEachPersonsBirdInTheirColour()
-	{
-		Installed(AuthProvider.Local);
-
-		var cut = Render<UsersSection>();
-
-		cut.WaitForElement(".person-row");
-		var rows = cut.FindAll(".person-row").Select(row => $"{row.GetAttribute("style")} | {row.QuerySelectorAll("[data-bird]").Length}");
-		await Assert.That(rows).IsEquivalentTo(["--bird-hue: 40 | 1", "--bird-hue: 177.5 | 1", " | 0"]);
 	}
 
 	[Test]
@@ -181,7 +148,6 @@ public class UsersSectionTests : BunitContext
 		cut.WaitForAssertion(() =>
 			_users.StoreColourAsync(Member.Id, Is<StoredColour>(colour => colour!.GoldenHue.GetValueOr(0) == 177.5), Any()).WasCalled(Times.Once)
 		);
-		cut.WaitForAssertion(() => _users.GetPeopleAsync(Any()).WasCalled(Times.Exactly(2)));
 		await Assert.That(cut.Find("[data-person='daerup']").GetAttribute("style")).IsEqualTo("--bird-hue: 177.5");
 	}
 

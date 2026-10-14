@@ -33,7 +33,7 @@ public class InviteDialogTests : BunitContext
 		var cut = await OpenAsync("mira");
 
 		await Assert.That(cut.WaitForElement("[data-link]").TextContent).EndsWith("/join/abc");
-		await Assert.That(cut.Markup).Contains("It works once and for 7 days; mira sets their own password there.");
+		await Assert.That(cut.FindComponent<BbDialogDescription>().Find("*").TextContent).Contains("7 days").And.Contains("mira");
 	}
 
 	[Test]

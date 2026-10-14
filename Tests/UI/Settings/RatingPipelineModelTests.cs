@@ -80,7 +80,7 @@ public class RatingPipelineModelTests
 	}
 
 	[Test]
-	public async Task For_WhenSeveralSourcesCount_CentresTheirPinsAndTheRatingOnThem()
+	public async Task For_WhenEverySourceCounts_CentresThePinsOnTheCardsStraightEdge()
 	{
 		var model = RatingPipelineModel.For(new RatingStrategy(AveragedRating.Everything), SourceOrder, Everything);
 		var middle = model.Tiles.Average(tile => tile.Y);
@@ -88,6 +88,11 @@ public class RatingPipelineModelTests
 		await Assert.That(model.Traces.Average(trace => trace.Pin)).IsEqualTo(middle).Within(0.001);
 		await Assert.That(model.OutputY + RatingPipelineModel.OutputHeight / 2).IsEqualTo(middle).Within(0.001);
 		await Assert.That(model.Traces.Select(trace => trace.Pin)).IsInOrder();
+		await Assert.That(model.Traces.Count).IsEqualTo(Sources.Length);
+		await Assert.That(model.Traces.Min(trace => trace.Pin)).IsGreaterThanOrEqualTo(model.OutputY + RatingPipelineModel.PinInset - 0.001);
+		await Assert
+			.That(model.Traces.Max(trace => trace.Pin))
+			.IsLessThanOrEqualTo(model.OutputY + RatingPipelineModel.OutputHeight - RatingPipelineModel.PinInset + 0.001);
 	}
 
 	[Test]
@@ -96,18 +101,6 @@ public class RatingPipelineModelTests
 		var model = RatingPipelineModel.For(new RatingStrategy(AveragedRating.Everything), SourceOrder, [RatingSource.Tmdb]);
 
 		await Assert.That(model.Traces.Single().Pin).IsEqualTo(model.OutputY + RatingPipelineModel.OutputHeight / 2).Within(0.001);
-	}
-
-	[Test]
-	public async Task For_WhenEverySourceCounts_LandsEveryPinOnTheCardsStraightEdge()
-	{
-		var model = RatingPipelineModel.For(new RatingStrategy(AveragedRating.Everything), SourceOrder, Everything);
-
-		await Assert.That(model.Traces.Count).IsEqualTo(Sources.Length);
-		await Assert.That(model.Traces.Min(trace => trace.Pin)).IsGreaterThanOrEqualTo(model.OutputY + RatingPipelineModel.PinInset - 0.001);
-		await Assert
-			.That(model.Traces.Max(trace => trace.Pin))
-			.IsLessThanOrEqualTo(model.OutputY + RatingPipelineModel.OutputHeight - RatingPipelineModel.PinInset + 0.001);
 	}
 
 	[Test]
