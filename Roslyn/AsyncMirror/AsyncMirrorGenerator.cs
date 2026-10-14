@@ -224,25 +224,14 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 
 	private static string ArgNamesOf(MethodDeclarationSyntax method) => string.Join(", ", method.ParameterList.Parameters.Select(static p => p.Identifier.Text));
 
-	private readonly struct MethodInfo
+	private readonly struct MethodInfo(string name, string returnType, string typeParams, string parameters, string constraints, string argNames, string priority)
 	{
-		public MethodInfo(string name, string returnType, string typeParams, string parameters, string constraints, string argNames, string priority)
-		{
-			Name = name;
-			ReturnType = returnType;
-			TypeParams = typeParams;
-			Params = parameters;
-			Constraints = constraints;
-			ArgNames = argNames;
-			Priority = priority;
-		}
-
-		public string Name { get; }
-		public string ReturnType { get; }
-		public string TypeParams { get; }
-		public string Params { get; }
-		public string Constraints { get; }
-		public string ArgNames { get; }
-		public string Priority { get; }
+		public string Name { get; } = name;
+		public string ReturnType { get; } = returnType;
+		public string TypeParams { get; } = typeParams;
+		public string Params { get; } = parameters;
+		public string Constraints { get; } = constraints;
+		public string ArgNames { get; } = argNames;
+		public string Priority { get; } = priority;
 	}
 }

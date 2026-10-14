@@ -546,13 +546,15 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private static MeterListener MeasuringCalls()
 	{
-		var listener = new MeterListener();
-		listener.InstrumentPublished = (instrument, meters) =>
+		var listener = new MeterListener
 		{
-			if (instrument.Name == "resilience.polly.pipeline.duration")
+			InstrumentPublished = (instrument, meters) =>
 			{
-				meters.EnableMeasurementEvents(instrument);
-			}
+				if (instrument.Name == "resilience.polly.pipeline.duration")
+				{
+					meters.EnableMeasurementEvents(instrument);
+				}
+			},
 		};
 		listener.Start();
 		return listener;

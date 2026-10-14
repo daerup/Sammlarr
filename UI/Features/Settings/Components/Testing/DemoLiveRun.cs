@@ -168,7 +168,7 @@ internal sealed class DemoLiveRun : ILiveRun, IDisposable
 
 	private readonly Dictionary<RemoteService, int> _waiting = [];
 
-	private static readonly FeedRunCounts Counts = new FeedRunCounts
+	private static readonly FeedRunCounts Counts = new()
 	{
 		Total = 120,
 		Added = 6,

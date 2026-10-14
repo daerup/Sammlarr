@@ -735,8 +735,7 @@
             :
             [
                 .. _unmatchedResults
-                    .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unmatched, _activeFilters) && MatchesSearch(r.Details.Title))
-                    .Select(MediaMatchResult (r) => r),
+                    .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unmatched, _activeFilters) && MatchesSearch(r.Details.Title)),
             ];
         _filteredGoneResults = _activeFilters.Count > 0 ? [] : [.. _goneResults.Where(gone => MatchesSearch(gone.Media.Details.Title))];
         RecountBadges();

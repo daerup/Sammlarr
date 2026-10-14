@@ -11,9 +11,7 @@ namespace Integration.Tests.Housekeeping;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class HousekeepingTickerTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private TaskActivity? _activity;
-
-	private TaskActivity Activity => _activity ??= new TaskActivity(host.Resolve<IDateTimeProvider>());
+	private TaskActivity Activity => field ??= new TaskActivity(host.Resolve<IDateTimeProvider>());
 
 	private HousekeepingTicker Testee => new(host.Resolve<IServiceScopeFactory>(), Activity);
 

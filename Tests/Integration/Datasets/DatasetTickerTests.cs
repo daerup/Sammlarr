@@ -12,9 +12,7 @@ namespace Integration.Tests.Datasets;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class DatasetTickerTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private TaskActivity? _activity;
-
-	private TaskActivity Activity => _activity ??= new TaskActivity(host.Resolve<IDateTimeProvider>());
+	private TaskActivity Activity => field ??= new TaskActivity(host.Resolve<IDateTimeProvider>());
 
 	private DatasetTicker Testee => new(host.Resolve<IServiceScopeFactory>(), Activity);
 

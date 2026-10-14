@@ -79,8 +79,6 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private ServiceProvider? _fullGraphProvider;
 	private IServiceScope? _fullGraphScope;
 	private SammlarrDbContext? _context;
-	private IDbContextFactory<SammlarrDbContext>? _contextFactory;
-	private RawDbContext? _rawContext;
 	private bool _plexAccountConfigured;
 	private Func<MediaType, Optional<MediaProvider>>? _sinkAddressing;
 	private bool _tmdbAccountConfigured;
@@ -90,7 +88,6 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	private Optional<TimeProvider> _time = new None();
 	private bool _cachesOnTheClock;
-	private WikidataStub? _wikidata;
 	private readonly OAuthStub _oauth = new();
 	private readonly SessionInvalidatorStub _sessionInvalidator = new();
 
@@ -108,9 +105,9 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal SammlarrDbContext ContextOn(SqliteConnection connection) => BuildContext(DbOnlyProvider, CurrentUser, connection);
 
-	internal IDbContextFactory<SammlarrDbContext> ContextFactory => _contextFactory ??= new FileContextFactory(DbOnlyProvider, ConnectionString, CurrentUser);
+	internal IDbContextFactory<SammlarrDbContext> ContextFactory => field ??= new FileContextFactory(DbOnlyProvider, ConnectionString, CurrentUser);
 
-	internal RawDbContext RawContext => _rawContext ??= new RawDbContext(Context);
+	internal RawDbContext RawContext => field ??= new RawDbContext(Context);
 
 	private IServiceProvider FullGraph
 	{
@@ -355,7 +352,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal int WikidataAsked(string imdb) => Wikidata.Asked(imdb);
 
-	private WikidataStub Wikidata => _wikidata ??= new WikidataStub(HttpStub);
+	private WikidataStub Wikidata => field ??= new WikidataStub(HttpStub);
 
 	internal void TmdbUnreachable() => HttpStub.RespondForUrl(TestUrls.TmdbApi, _ => throw new HttpRequestException("The TMDB API is unreachable."));
 

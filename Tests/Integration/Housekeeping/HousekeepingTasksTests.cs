@@ -26,9 +26,7 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private ServiceProvider? _scheduling;
 
-	private TaskActivity? _activity;
-
-	private TaskActivity Activity => _activity ??= new TaskActivity(host.Resolve<IDateTimeProvider>());
+	private TaskActivity Activity => field ??= new TaskActivity(host.Resolve<IDateTimeProvider>());
 
 	private HousekeepingTasks Testee
 	{

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Domain.Media;
 
 namespace Shared.Tests;
@@ -5,6 +6,7 @@ namespace Shared.Tests;
 public class ValueSetTests
 {
 	[Test]
+	[SuppressMessage("Usage", "TUnitAssertions0016", Justification = "ValueSet is a struct with value equality, and this test checks that Equals")]
 	public async Task Equals_WhenSameItemsDifferentOrder_AreEqual()
 	{
 		IExternalMediaId tmdb = TmdbId.From("1", MediaType.Movie);
