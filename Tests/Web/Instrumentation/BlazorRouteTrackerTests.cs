@@ -11,7 +11,7 @@ public class BlazorRouteTrackerTests
 
 	private BlazorRouteTracker _tracker = null!;
 
-	[Before(HookType.Test)]
+	[Before(Test)]
 	public void CreateTracker() => _tracker = new BlazorRouteTracker();
 
 	[Test]

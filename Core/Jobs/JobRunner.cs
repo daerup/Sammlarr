@@ -30,13 +30,25 @@ internal sealed class JobRunner(
 
 		try
 		{
-			await GuardAsync(() => RequeueRunningAsync(stoppingToken), "Jobs left running by a previous process could not be recovered", stoppingToken);
-			await GuardAsync(() => alarm.ArmAsync(stoppingToken), "The alarm for deferred jobs could not be set and they may run late", stoppingToken);
+			await GuardAsync(
+				() => RequeueRunningAsync(stoppingToken),
+				exception => logger.LogError(exception, "Jobs left running by a previous process could not be recovered"),
+				stoppingToken
+			);
+			await GuardAsync(
+				() => alarm.ArmAsync(stoppingToken),
+				exception => logger.LogError(exception, "The alarm for deferred jobs could not be set and they may run late"),
+				stoppingToken
+			);
 			signal.Raise();
 
 			await foreach (var _ in signal.NudgesAsync().WithCancellation(stoppingToken))
 			{
-				await GuardAsync(() => PumpAsync(stoppingToken), "The job runner could not take the next job and will retry when one is enqueued", stoppingToken);
+				await GuardAsync(
+					() => PumpAsync(stoppingToken),
+					exception => logger.LogError(exception, "The job runner could not take the next job and will retry when one is enqueued"),
+					stoppingToken
+				);
 			}
 		}
 		catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
@@ -46,7 +58,7 @@ internal sealed class JobRunner(
 		}
 	}
 
-	private async Task GuardAsync(Func<Task> work, string whatFailed, CancellationToken cancellationToken)
+	private async Task GuardAsync(Func<Task> work, Action<Exception> logFailure, CancellationToken cancellationToken)
 	{
 		try
 		{
@@ -59,7 +71,7 @@ internal sealed class JobRunner(
 		catch (Exception exception)
 		{
 			status.Failed(clock.Now);
-			logger.LogError(exception, whatFailed);
+			logFailure(exception);
 		}
 	}
 

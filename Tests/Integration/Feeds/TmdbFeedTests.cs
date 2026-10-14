@@ -33,7 +33,8 @@ public class TmdbFeedTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var items = await Testee.GetFeedItemsAsync("42", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
-		await Assert.That(items.Select(item => item.Details.Title)).IsEquivalentTo(["Inception", "Breaking Bad"]);
+		string?[] titles = ["Inception", "Breaking Bad"];
+		await Assert.That(items.Select(item => item.Details.Title)).IsEquivalentTo(titles);
 	}
 
 	[Test]

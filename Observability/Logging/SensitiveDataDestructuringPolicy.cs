@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Contracts;
 using Serilog.Core;
@@ -12,7 +13,7 @@ internal sealed class SensitiveDataDestructuringPolicy(IReadOnlyDictionary<Type,
 
 	private readonly ConcurrentDictionary<Type, PropertyReader[]?> _plans = new();
 
-	public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, out LogEventPropertyValue? result)
+	public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, [NotNullWhen(true)] out LogEventPropertyValue? result)
 	{
 		var readers = _plans.GetOrAdd(value.GetType(), BuildPlan);
 		if (readers is null)

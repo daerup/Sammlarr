@@ -565,7 +565,7 @@
             _fetchedNeeds = asking(await Planner.NeedsAsync(SynthesizeFeed(), ct));
             var reprocessAt = 1;
             var sinceRender = Stopwatch.StartNew();
-            await foreach (var item in service.GetFeedItemsAsync(Config.Identifier.Trim(), _fetchedNeeds, ct).WithCancellation(ct))
+            await foreach (var item in service.GetFeedItemsAsync(Config.Identifier!.Trim(), _fetchedNeeds, ct).WithCancellation(ct))
             {
                 _rawResults.Add(item);
                 var reprocessed = _rawResults.Count >= reprocessAt;

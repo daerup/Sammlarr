@@ -254,7 +254,7 @@ public class MdblistTitlesTests
 		release.Set();
 
 		await Assert.That(await joiner).IsFound();
-		await ((Task)first).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+		await first.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 		handler.Verify(request => request.Method(HttpMethod.Post), Times.Once);
 	}
 

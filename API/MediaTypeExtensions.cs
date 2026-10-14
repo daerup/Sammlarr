@@ -6,11 +6,7 @@ internal static class MediaTypeExtensions
 {
 	extension(MediaType)
 	{
-		public static MediaType Parse(string mediaType)
-		{
-			TryParse(mediaType, out MediaType result);
-			return result;
-		}
+		public static MediaType Parse(string mediaType) => TryParse(mediaType, out var result) ? result : MediaType.Unknown;
 
 		public static bool TryParse(string mediaType, out MediaType result)
 		{

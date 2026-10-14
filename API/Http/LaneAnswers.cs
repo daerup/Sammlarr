@@ -22,6 +22,6 @@ internal static class LaneAnswers
 	internal static Answer<T> Failed<T>(Error cause, RemoteService remote)
 		where T : notnull
 	{
-		return cause.Exception.Match<Exception, Answer<T>>(exception => Answering.Thrown<T>(remote, exception, cause), () => new Faulted(remote, cause));
+		return cause.Exception.Match(exception => Answering.Thrown<T>(remote, exception, cause), () => new Faulted(remote, cause));
 	}
 }

@@ -585,7 +585,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		return (feedId, fightClub, inception);
 	}
 
-	private async Task<Domain.Feed.Feed> DraftAsync(string identifier, QueryLimit limit)
+	private async Task<Feed> DraftAsync(string identifier, QueryLimit limit)
 	{
 		var feedId = await host.SeedFeedAsync(identifier, limit: limit);
 		return (await Assert.That(await host.Resolve<IFeedRepository>().FindAsync(feedId)).IsSome())!;

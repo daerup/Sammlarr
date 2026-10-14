@@ -276,16 +276,17 @@
 
     private async Task TryClose()
     {
-        if (
-            _dirty
-            && !await DialogService.Confirm(
+        if (_dirty)
+        {
+            var answer = await DialogService.ConfirmAsync(
                 "Discard changes?",
                 "Your unsaved changes to this alert will be lost.",
                 new ConfirmDialogOptions { ConfirmText = "Discard", CancelText = "Keep editing", Destructive = true }
-            )
-        )
-        {
-            return;
+            );
+            if (!answer.Confirmed)
+            {
+                return;
+            }
         }
         await OpenChanged.InvokeAsync(false);
     }

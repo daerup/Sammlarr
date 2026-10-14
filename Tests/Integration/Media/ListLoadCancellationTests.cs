@@ -33,7 +33,7 @@ public class ListLoadCancellationTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await leaving.CancelAsync();
 		var sent = host.HttpStub.Requests("");
-		await ((Task)DrainAsync(titles)).WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+		await DrainAsync(titles).WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 		await Task.Delay(TimeSpan.FromMilliseconds(300));
 
 		await Assert.That(host.HttpStub.Requests("")).IsEqualTo(sent);

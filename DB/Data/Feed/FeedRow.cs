@@ -12,7 +12,7 @@ internal sealed record FeedRow : Entity<Guid>, IUserOwned
 	public bool IsEnabled { get; set; }
 
 	[Required]
-	public string Name { get; set; }
+	public string Name { get; set; } = string.Empty;
 
 	[Required]
 	public FeedProvider Provider { get; set; }

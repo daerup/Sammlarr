@@ -69,11 +69,12 @@ public class RunCallsTests : BunitContext
 	{
 		protected override void BuildRenderTree(RenderTreeBuilder builder)
 		{
+			Optional<RunTypical> typical = Some.Of(new RunTypical(470, 9));
 			builder.OpenComponent<BbPortalHost>(0);
 			builder.CloseComponent();
 			builder.OpenComponent<RunCalls>(1);
 			builder.AddComponentParameter(2, nameof(RunCalls.Run), Run);
-			builder.AddComponentParameter(3, nameof(RunCalls.Typical), (Optional<RunTypical>)Some.Of(new RunTypical(470, 9)));
+			builder.AddComponentParameter(3, nameof(RunCalls.Typical), typical);
 			builder.CloseComponent();
 		}
 	}

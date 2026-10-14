@@ -54,7 +54,7 @@ public class FilterDefinitionConverterTests
 	{
 		var result = FilterDefinitionConverter.ToQueryFilter(Definition(Condition("Title", BbFilterOp.IsEmpty)));
 
-		await Assert.That(result!.Groups[0].Predicates).HasCount(1);
+		await Assert.That(result!.Groups[0].Predicates).Count().IsEqualTo(1);
 		await Assert.That(result.Groups[0].Predicates[0].Operator).IsEqualTo(FilterPredicateOperator.IsEmpty);
 	}
 

@@ -217,7 +217,8 @@ public class WantlistSyncButtonTests : BunitContext
 			() => cut.FindAll(".sync-app").Count == 2 && cut.FindAll(".sync-app").All(app => app.TextContent.Contains("unreachable")),
 			TimeSpan.FromSeconds(10)
 		);
-		await Assert.That(cut.FindAll(".sync-app").Select(app => app.GetAttribute("data-app"))).IsEquivalentTo(["Radarr", "Sonarr"]);
+		string?[] apps = ["Radarr", "Sonarr"];
+		await Assert.That(cut.FindAll(".sync-app").Select(app => app.GetAttribute("data-app"))).IsEquivalentTo(apps);
 	}
 
 	[Test]
