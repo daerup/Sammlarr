@@ -104,7 +104,7 @@ internal static partial class ArrTagSlug
 	public static Optional<string> Of(string text)
 	{
 		var kept = text.Normalize(NormalizationForm.FormKD).Where(Shown).Select(character => IsTagCharacter(character) ? char.ToLowerInvariant(character) : '-');
-		var slug = Dashes().Replace(string.Concat(kept), "-").Trim('-');
+		var slug = Dashes.Replace(string.Concat(kept), "-").Trim('-');
 		return Optional.When(slug.Length > 0, () => slug);
 	}
 
@@ -118,6 +118,6 @@ internal static partial class ArrTagSlug
 
 	private static bool IsTagCharacter(char character) => char.IsAsciiLetterOrDigit(character);
 
-	[GeneratedRegex("-{2,}")]
-	private static partial Regex Dashes();
+	[GeneratedRegex("-{2,}", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex Dashes { get; }
 }

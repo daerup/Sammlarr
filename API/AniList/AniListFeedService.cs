@@ -35,7 +35,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 
 	public Task<Result<string>> NormalizeAsync(string input, CancellationToken cancellationToken = default)
 	{
-		var userShaped = ListPattern().IsMatch(input.Trim());
+		var userShaped = ListPattern.IsMatch(input.Trim());
 		return Task.FromResult(UserList(input).Match(list => Success.Of(list), () => Page(input).MapError(error => userShaped ? NotAList : error)));
 	}
 
@@ -46,7 +46,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 
 	private static Optional<string> UserList(string input)
 	{
-		var match = ListPattern().Match(input.Trim());
+		var match = ListPattern.Match(input.Trim());
 		var status = match.Groups["status"].Value.ToLowerInvariant();
 		return Optional.When(
 			match.Success && (status.Length == 0 || Statuses.Contains(status)),
@@ -146,6 +146,10 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 			);
 	}
 
-	[GeneratedRegex(@"^(?:(?:https?://)?(?:www\.)?anilist\.co/user/)?(?<user>[A-Za-z0-9_-]+)(?:/animelist)?(?:/(?<status>[A-Za-z]+))?/?$")]
-	private static partial Regex ListPattern();
+	[GeneratedRegex(
+		@"^(?:(?:https?://)?(?:www\.)?anilist\.co/user/)?(?<user>[A-Za-z0-9_-]+)(?:/animelist)?(?:/(?<status>[A-Za-z]+))?/?$",
+		RegexOptions.None,
+		matchTimeoutMilliseconds: 1000
+	)]
+	private static partial Regex ListPattern { get; }
 }

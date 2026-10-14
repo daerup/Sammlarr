@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace UI.Shared.Branding.Birds;
 
-internal static class BirdRig
+internal static partial class BirdRig
 {
 	internal const double EyeRadius = 5.57;
 
@@ -106,7 +106,10 @@ internal static class BirdRig
 
 	private static string[] Split(string body)
 	{
-		var parts = Regex.Split(body, "z(?=M)", RegexOptions.IgnoreCase);
+		var parts = SubpathBreak.Split(body);
 		return [.. parts.Select((part, index) => index < parts.Length - 1 ? $"{part}z" : part)];
 	}
+
+	[GeneratedRegex("z(?=M)", RegexOptions.IgnoreCase, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex SubpathBreak { get; }
 }
