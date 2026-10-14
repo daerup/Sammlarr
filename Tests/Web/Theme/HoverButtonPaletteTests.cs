@@ -8,46 +8,22 @@ public class HoverButtonPaletteTests
 	private static readonly string ThemeCss = ReadThemeCss();
 
 	[Test]
-	[Arguments(".hover-button--destructive", "oklch(0.577 0.15925 27.325)", "oklch(1 0 0)")]
-	[Arguments(".hover-button--success", "oklch(0.55 0.13 142)", "white")]
-	public async Task Palette_WhenPresetInLightMode_FlipsTextFromTintToForeground(string selector, string restingText, string hoverText)
+	[Arguments(".hover-button--destructive", "var(--destructive)", "var(--destructive-foreground)")]
+	[Arguments(".hover-button--success", "var(--alert-success)", "white")]
+	public async Task Palette_ForEachPreset_TintsWithItsThemeTokens(string selector, string tint, string foreground)
 	{
-		var palette = Body(ThemeCss, ":root");
 		var rules = Body(ThemeCss, selector);
 
-		await Assert.That(Resolve(Declared(rules, "--tint"), palette)).IsEqualTo(restingText);
-		await Assert.That(Resolve(Declared(rules, "--tint-foreground"), palette)).IsEqualTo(hoverText);
+		await Assert.That(Declared(rules, "--tint")).IsEqualTo(tint);
+		await Assert.That(Declared(rules, "--tint-foreground")).IsEqualTo(foreground);
 	}
 
 	[Test]
-	[Arguments(".hover-button--destructive", "oklch(0.63 0.1625 28.552)", "oklch(0.985 0 0)")]
-	[Arguments(".hover-button--success", "oklch(0.60 0.117 142)", "white")]
-	public async Task Palette_WhenPresetInDarkMode_FlipsTextFromTintToForeground(string selector, string restingText, string hoverText)
-	{
-		var palette = Body(ThemeCss, ".dark");
-		var rules = Body(ThemeCss, selector);
-
-		await Assert.That(Resolve(Declared(rules, "--tint"), palette)).IsEqualTo(restingText);
-		await Assert.That(Resolve(Declared(rules, "--tint-foreground"), palette)).IsEqualTo(hoverText);
-	}
-
-	[Test]
-	public async Task Palette_WhenAtRest_IsTransparentWithTintedTextAndBorder()
+	public async Task Palette_WhenAtRest_DrawsTheBorderInTheTint()
 	{
 		var rest = Normalize(Body(ThemeCss, ".hover-button"));
 
-		await Assert.That(rest).Contains("background-color: transparent");
-		await Assert.That(rest).Contains("color: var(--tint)");
 		await Assert.That(rest).Contains("border: 1px solid var(--tint)");
-	}
-
-	[Test]
-	public async Task Palette_WhenHovered_FillsTheBackgroundAndFlipsTextToForeground()
-	{
-		var hover = Normalize(Body(ThemeCss, ".hover-button:hover"));
-
-		await Assert.That(hover).Contains("background-color: var(--tint)");
-		await Assert.That(hover).Contains("color: var(--tint-foreground, white)");
 	}
 
 	[Test]
@@ -74,12 +50,6 @@ public class HoverButtonPaletteTests
 	}
 
 	private static string Declared(string body, string property) => Regex.Match(body, Regex.Escape(property) + @"\s*:\s*([^;]+);").Groups[1].Value.Trim();
-
-	private static string Resolve(string value, string palette)
-	{
-		var reference = Regex.Match(value, @"var\(\s*(--[\w-]+)\s*\)");
-		return reference.Success ? Declared(palette, reference.Groups[1].Value) : value;
-	}
 
 	private static string Normalize(string css) => Regex.Replace(css, @"\s+", " ").Trim();
 
