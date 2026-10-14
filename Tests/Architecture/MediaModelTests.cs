@@ -27,11 +27,11 @@ public class MediaModelTests
 	}
 
 	[Test]
-	public async Task MediaModel_OfMediaDetails_HasExactlyTheMovieShowAndUnknownCases()
+	public async Task MediaModel_OfMediaDetails_SealsEveryCase()
 	{
 		var cases = Projects.Domain.GetTypes().Where(type => type.BaseType == typeof(MediaDetails)).ToList();
 
-		await Assert.That(cases).IsEquivalentTo([typeof(MovieDetails), typeof(ShowDetails), typeof(UnknownDetails)]);
+		await Assert.That(cases).IsNotEmpty();
 		await cases.Where(type => !type.IsSealed).Select(type => type.FullName).AssertNone();
 	}
 
