@@ -48,19 +48,19 @@ Arrows are `<ProjectReference>`s. Every project except `Contracts` and `Roslyn` 
 left out. `Roslyn` ships nothing at runtime: the root `Directory.Build.props` adds it to every other project as an
 analyzer.
 
-| Project | What it holds |
-|---|---|
+| Project         | What it holds                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Shared` | The kernel, on no other project: the monads `Optional` and `Result`, `ValueSet`, the options records (`Shared/Options`), the lane primitives (`LaneGate`, `Lane<TKey, TOut>`, `LanePriority`), the burst helper `BurstsAsync`, and the module infrastructure (`IServiceModule`, `AddModule<T>()`). |
 | `Domain` | The pure model, on `Shared` only: entities, value objects and unions for media, feeds, the wantlist and blocklist, providers (`RemoteService`, the role enums), jobs and notifications, and the ids (`MediaId`, `FeedId`, `UserId`, one record struct per external id). No infrastructure. See [Cross-cutting Concepts](06-crosscutting.md). |
-| `Contracts` | The seams: the service, repository and provider-role interfaces, the records they exchange, and the DI markers (`Keyed`, `Registered`, `ClientOf`). References `Domain` because its signatures use domain types. |
+| `Contracts`     | The seams: the service, repository and provider-role interfaces, the records they exchange, and the DI markers (`Keyed`, `Registered`, `ClientOf`). References `Domain` because its signatures use domain types.                                                                                                                                                                                                                                        |
 | `Observability` | Serilog and OpenTelemetry setup, the in-memory log capture behind Settings › Diagnostics, the usage metrics, the feed-run spans, and the tracing helpers (`AddTracedScoped`, `AddTracedKeyedScoped`) other projects register through. |
 | `Core` | The business logic behind the service interfaces: loading a list and identifying its titles (`Core/Media`), the query processor (filter, sort, limit), feeds and their runs, the wantlist and its sync, the blocklist, the job queue and runner, the TickerQ tickers (feed schedules, dataset loads, housekeeping), the `Announcer`, sign-in, users, setup, ratings and usage reports. |
 | `DB` | Persistence in one SQLite file ([ADR 0004](../../adr/0004-store-all-state-in-one-sqlite-file.md)): `SammlarrDbContext`, the row types, the repositories and the EF Core migrations, including the job table, the identity claims (`IdentityClaims`), the wantlist outbox and the usage store; the TickerQ store (`DB/Scheduling`); and the encryption of stored secrets with data protection (`DB/Conversion/Encryption`). |
 | `API` | One folder per external service, each with an `IServiceModule` that registers its HTTP clients and the roles it serves, plus the lanes and HTTP pipeline every remote call passes and the webhook and Pushover channels. See [API: one module per provider](#api-one-module-per-provider). |
-| `Messaging` | Wolverine with durable queues in the same SQLite file, for notifications only: `NotificationDispatchHandler` fans a notification out to its subscriptions and `NotificationDeliveryHandler` delivers each one, retried with cooldowns ([ADR 0008](../../adr/0008-separate-events-from-notifications.md)). |
-| `UI` | The Blazor components as a Razor class library on BlazorBlueprint: one folder per feature under `UI/Features`, shared components and services under `UI/Shared`. References only `Contracts`, `Observability` and `Shared` ([ADR 0002](../../adr/0002-split-presentation-from-the-host.md)). |
-| `Web` | The ASP.NET Core host and composition root: the root components (`App`, `Routes`), `Program.cs`, the auth and health endpoints, the generated Tailwind CSS in `wwwroot`, and the `Dockerfile`. |
-| `AppHost` | The Aspire host: runs `Web` for development and describes the container deployment ([ADR 0001](../../adr/0001-drive-deployment-from-the-aspire-apphost.md)). See [Deployment View](05-deployment.md). |
+| `Messaging`     | Wolverine with durable queues in the same SQLite file, for notifications only: `NotificationDispatchHandler` fans a notification out to its subscriptions and `NotificationDeliveryHandler` delivers each one, retried with cooldowns ([ADR 0008](../../adr/0008-separate-events-from-notifications.md)).                                                                                                                                               |
+| `UI`            | The Blazor components as a Razor class library on BlazorBlueprint: one folder per feature under `UI/Features`, shared components and services under `UI/Shared`. References only `Contracts`, `Observability` and `Shared` ([ADR 0002](../../adr/0002-split-presentation-from-the-host.md)).                                                                                                                                                            |
+| `Web`           | The ASP.NET Core host and composition root: the root components (`App`, `Routes`), `Program.cs`, the auth and health endpoints, the generated Tailwind CSS in `wwwroot`, and the `Dockerfile`.                                                                                                                                                                                                                                                          |
+| `AppHost`       | The Aspire host: runs `Web` for development and describes the container deployment ([ADR 0001](../../adr/0001-drive-deployment-from-the-aspire-apphost.md)). See [Deployment View](05-deployment.md).                                                                                                                                                                                                                                                   |
 | `Roslyn` | Build time only. Source generators for the options registration (types marked `IOptionsSection`), the rating suppliers (`[SuppliedBy]` on `RatingSource`) and the `Task` mirrors of the monad helpers (`[GenerateAsync]`); analyzers `SAM0001` (test names), `SAM0002` and `SAM0003` (an `Optional` or `Result` read by hand, or branched on as a `bool`; see [Absence and failure](06-crosscutting.md#absence-and-failure-optional-result-or-null)). |
 
 The test projects under `Tests/` (one per tier, plus shared harnesses and the architecture and analyzer tests) are
@@ -152,16 +152,16 @@ its pages are routed), the auth endpoints under `/auth` (`Web/Auth/AuthEndpoints
 A feature area keeps one folder name across `Domain`, `Contracts`, `Core` and `DB/Data`, with the exceptions in the table;
 the last column is its UI home:
 
-| Area | `Domain` | `Contracts` | `Core` | `DB/Data` | `UI` |
-|---|---|---|---|---|---|
-| Feeds | `Feed` | `Feed` | `Feed` | `Feed` | `Features/Feeds` |
-| Wantlist and sinks | `Wantlist` | `Wantlist` | `Wantlist` | `Wantlist` | `Features/Wantlist` |
-| Titles: loading, ids, details | `Media` | `Media` | `Media` | `Media` | `Shared/Media` |
-| Background jobs | `Jobs` | `Jobs` | `Jobs` | `Jobs` | `Features/Home` |
+| Area                          | `Domain`           | `Contracts`        | `Core`             | `DB/Data`            | `UI`                                 |
+| ----------------------------- | ------------------ | ------------------ | ------------------ | -------------------- | ------------------------------------ |
+| Feeds                         | `Feed`             | `Feed`             | `Feed`             | `Feed`               | `Features/Feeds`                     |
+| Wantlist and sinks            | `Wantlist`         | `Wantlist`         | `Wantlist`         | `Wantlist`           | `Features/Wantlist`                  |
+| Titles: loading, ids, details | `Media`            | `Media`            | `Media`            | `Media`              | `Shared/Media`                       |
+| Background jobs               | `Jobs`             | `Jobs`             | `Jobs`             | `Jobs`               | `Features/Home`                      |
 | Sign-in and users | `Auth`, `Identity` | `Auth`, `Identity` | `Auth`, `Identity` | `Access`, `Identity` | `Features/Auth`, `Features/Settings` |
-| Notifications | `Notifications` | `Notifications` | `Notifications` | `Notifications` | `Features/Settings` |
-| Usage | `Usage` | `Usage` | `Usage` | `Usage` | `Features/Settings` |
-| Housekeeping | | `Housekeeping` | `Housekeeping` | `Housekeeping` | `Features/Settings` |
+| Notifications                 | `Notifications`    | `Notifications`    | `Notifications`    | `Notifications`      | `Features/Settings`                  |
+| Usage                         | `Usage`            | `Usage`            | `Usage`            | `Usage`              | `Features/Settings`                  |
+| Housekeeping                  |                    | `Housekeeping`     | `Housekeeping`     | `Housekeeping`       | `Features/Settings`                  |
 
 Notifications also live in `Messaging` and `API`, usage in `Observability`. The flows that cross these folders are in the
 [Runtime View](04-runtime.md).
