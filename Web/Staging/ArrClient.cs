@@ -19,7 +19,9 @@ internal sealed class ArrClient(HttpClient http)
 		if (!response.IsSuccessStatusCode)
 		{
 			throw new HttpRequestException(
-				$"POST {http.BaseAddress}api/v3/{path} answered {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync(cancellationToken)}"
+				FormattableString.Invariant(
+					$"POST {http.BaseAddress}api/v3/{path} answered {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync(cancellationToken)}"
+				)
 			);
 		}
 

@@ -29,7 +29,7 @@ internal static class MediaFacts
 		}
 
 		var suffix = count == 1 ? string.Empty : "s";
-		facts.Add($"{count} {singularLabel}{suffix}");
+		facts.Add(FormattableString.CurrentCulture($"{count} {singularLabel}{suffix}"));
 	}
 
 	private static string? GetRuntimeLabel(TimeSpan runtime)
@@ -43,6 +43,6 @@ internal static class MediaFacts
 		var hours = totalMinutes / 60;
 		var minutes = totalMinutes % 60;
 
-		return hours > 0 ? $"{hours}h {minutes}m" : $"{minutes}m";
+		return hours > 0 ? FormattableString.CurrentCulture($"{hours}h {minutes}m") : FormattableString.CurrentCulture($"{minutes}m");
 	}
 }

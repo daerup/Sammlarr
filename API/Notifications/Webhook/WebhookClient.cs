@@ -42,9 +42,11 @@ internal sealed class WebhookClient(IHttpClientFactory factory, ICurrentUser own
 		(int)status switch
 		{
 			>= 200 and < 300 => new DeliverySucceeded(),
-			>= 300 and < 400 => new DeliveryUnrecoverable($"The webhook endpoint returned an unfollowed redirect (HTTP {(int)status})."),
+			>= 300 and < 400 => new DeliveryUnrecoverable(
+				FormattableString.CurrentCulture($"The webhook endpoint returned an unfollowed redirect (HTTP {(int)status}).")
+			),
 			429 => new DeliveryRetryable("The webhook endpoint is rate limiting (HTTP 429)."),
-			>= 400 and < 500 => new DeliveryUnrecoverable($"The webhook endpoint returned HTTP {(int)status}."),
-			_ => new DeliveryRetryable($"The webhook endpoint returned HTTP {(int)status}."),
+			>= 400 and < 500 => new DeliveryUnrecoverable(FormattableString.CurrentCulture($"The webhook endpoint returned HTTP {(int)status}.")),
+			_ => new DeliveryRetryable(FormattableString.CurrentCulture($"The webhook endpoint returned HTTP {(int)status}.")),
 		};
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Nodes;
 using API.Arr.Types;
 using Domain.Media;
@@ -23,7 +24,7 @@ internal sealed class RadarrApi(HttpClient http, RadarrOptions options) : ArrApi
 
 	public override int AddressOf(ArrTitle title) => title.TmdbId;
 
-	public override IReadOnlyList<IExternalMediaId> IdsOf(ArrTitle title) => [TmdbId.From(title.TmdbId.ToString(), MediaType.Movie)];
+	public override IReadOnlyList<IExternalMediaId> IdsOf(ArrTitle title) => [TmdbId.From(title.TmdbId.ToString(CultureInfo.InvariantCulture), MediaType.Movie)];
 
 	public override bool IsAnime(JsonObject lookup) => Lists(lookup, "keywords", "anime");
 

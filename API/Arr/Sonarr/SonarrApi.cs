@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Nodes;
 using API.Arr.Types;
 using Domain.Media;
@@ -25,8 +26,8 @@ internal sealed class SonarrApi(HttpClient http, SonarrOptions options) : ArrApi
 
 	public override IReadOnlyList<IExternalMediaId> IdsOf(ArrTitle title)
 	{
-		var tvdb = TvdbId.From(title.TvdbId.ToString(), MediaType.Show);
-		return title.TmdbId > 0 ? [tvdb, TmdbId.From(title.TmdbId.ToString(), MediaType.Show)] : [tvdb];
+		var tvdb = TvdbId.From(title.TvdbId.ToString(CultureInfo.InvariantCulture), MediaType.Show);
+		return title.TmdbId > 0 ? [tvdb, TmdbId.From(title.TmdbId.ToString(CultureInfo.InvariantCulture), MediaType.Show)] : [tvdb];
 	}
 
 	public override bool IsAnime(JsonObject lookup) => Lists(lookup, "genres", "Anime");

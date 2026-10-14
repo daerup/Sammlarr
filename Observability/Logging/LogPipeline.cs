@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Tracing;
 using Serilog;
@@ -46,7 +47,7 @@ internal static class LogPipeline
 		if (context.OtlpEnabled)
 		{
 			exporter.WriteTo.OpenTelemetry(otlp =>
-				otlp.ResourceAttributes = new Dictionary<string, object>
+				otlp.ResourceAttributes = new Dictionary<string, object>(StringComparer.Ordinal)
 				{
 					["service.name"] = Instrumentation.ServiceName,
 					["service.version"] = context.Version,
@@ -54,6 +55,10 @@ internal static class LogPipeline
 				}
 			);
 		}
-		exporter.WriteTo.Console(outputTemplate: ConsoleTemplate, theme: Console.IsOutputRedirected ? ConsoleTheme.None : AnsiConsoleTheme.Code);
+		exporter.WriteTo.Console(
+			outputTemplate: ConsoleTemplate,
+			formatProvider: CultureInfo.InvariantCulture,
+			theme: Console.IsOutputRedirected ? ConsoleTheme.None : AnsiConsoleTheme.Code
+		);
 	}
 }

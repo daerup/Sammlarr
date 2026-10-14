@@ -1,3 +1,4 @@
+using System.Globalization;
 using Contracts.Notifications;
 using Domain.Media;
 using Domain.Notifications;
@@ -49,7 +50,7 @@ internal sealed class FluidTemplateRenderer : INotificationTemplateRenderer
 		options.ValueConverters.Add(value => value is RemoteService remote ? remote.ToString() : null);
 		options.ValueConverters.Add(value => value is FeedProvider feedProvider ? feedProvider.ToString() : null);
 		options.ValueConverters.Add(value => value is MediaType mediaType ? mediaType.ToString() : null);
-		options.ValueConverters.Add(value => value is TimeSpan span ? span.ToString(@"hh\:mm\:ss") : null);
+		options.ValueConverters.Add(value => value is TimeSpan span ? span.ToString(@"hh\:mm\:ss", CultureInfo.CurrentCulture) : null);
 		options.MemberAccessStrategy.MemberNameStrategy = MemberNameStrategies.CamelCase;
 		options.MemberAccessStrategy.Register<NotificationContext>();
 		options.MemberAccessStrategy.Register<NotificationData>();

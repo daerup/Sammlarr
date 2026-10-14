@@ -15,7 +15,7 @@ internal static class OptionsEnvironmentExtensions
 		where T : IResourceWithEnvironment
 		where TOptions : IOptionsSection
 	{
-		var name = $"{TOptions.SectionName}:{((MemberExpression)property.Body).Member.Name}".Replace(":", "__");
+		var name = $"{TOptions.SectionName}:{((MemberExpression)property.Body).Member.Name}".Replace(":", "__", StringComparison.Ordinal);
 		return builder.WithEnvironment(name, Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty);
 	}
 
@@ -24,7 +24,7 @@ internal static class OptionsEnvironmentExtensions
 	{
 		foreach (var (key, value) in section.AsEnumerable().Where(setting => setting.Value is not null))
 		{
-			builder.WithEnvironment(key.Replace(":", "__"), value);
+			builder.WithEnvironment(key.Replace(":", "__", StringComparison.Ordinal), value);
 		}
 
 		return builder;

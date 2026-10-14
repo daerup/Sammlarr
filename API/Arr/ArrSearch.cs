@@ -16,7 +16,7 @@ internal sealed class ArrSearch(ArrApis apis, IArrSinkConfigService configs, ILo
 		var answers = await Task.WhenAll(asked.Select(api => FoundAsync(api, config, query, cancellationToken)));
 		if (answers.Length > 0 && answers.All(answer => answer.IsError()))
 		{
-			throw new InvalidOperationException(string.Join(" ", answers.Select(answer => answer.Match(_ => string.Empty, error => error.Reason))));
+			throw new InvalidOperationException(string.Join(' ', answers.Select(answer => answer.Match(_ => string.Empty, error => error.Reason))));
 		}
 
 		var missed = asked

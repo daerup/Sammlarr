@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -59,7 +60,7 @@ public class SuppliedByGenerator : IIncrementalGenerator
 			.GetMembers()
 			.OfType<IFieldSymbol>()
 			.Where(static field => field.HasConstantValue)
-			.OrderBy(static field => Convert.ToInt64(field.ConstantValue))
+			.OrderBy(static field => Convert.ToInt64(field.ConstantValue, CultureInfo.InvariantCulture))
 			.Select(static field => (field.Name, field.ConstantValue))
 			.ToImmutableArray();
 	}
@@ -68,10 +69,10 @@ public class SuppliedByGenerator : IIncrementalGenerator
 
 	private static void Emit(SourceProductionContext context, ImmutableArray<SuppliedMember> members)
 	{
-		foreach (var target in members.GroupBy(static member => member.TargetQualified))
+		foreach (var target in members.GroupBy(static member => member.TargetQualified, StringComparer.Ordinal))
 		{
 			var first = target.First();
-			var suppliersBySource = target.ToDictionary(static member => member.Member, static member => member.Suppliers);
+			var suppliersBySource = target.ToDictionary(static member => member.Member, static member => member.Suppliers, StringComparer.Ordinal);
 			context.AddSource($"{first.TargetName}Suppliers.g.cs", SourceText.From(Build(first, suppliersBySource), Encoding.UTF8));
 		}
 	}
@@ -122,7 +123,7 @@ public class SuppliedByGenerator : IIncrementalGenerator
 
 	private static string SourcesArm(SuppliedMember shape, string supplier, Dictionary<string, ImmutableArray<string>> suppliersBySource)
 	{
-		var sources = suppliersBySource.Where(pair => pair.Value.Contains(supplier)).Select(pair => pair.Key);
+		var sources = suppliersBySource.Where(pair => pair.Value.Contains(supplier, StringComparer.Ordinal)).Select(pair => pair.Key);
 		var values = string.Join(", ", shape.TargetMembers.Where(sources.Contains).Select(source => $"{shape.TargetQualified}.{source}"));
 		return $"\t\t\t{shape.SupplierQualified}.{supplier} => [{values}],";
 	}

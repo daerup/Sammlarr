@@ -19,7 +19,7 @@ public class StagingRunTests
 		await Assert
 			.That(async () => await run.RunAsync(CancellationToken.None))
 			.Throws<InvalidOperationException>()
-			.WithMessageContaining("absolute path only, not 'sammlarr.db'");
+			.WithMessageContaining("absolute path only, not 'sammlarr.db'", StringComparison.Ordinal);
 	}
 
 	[Test]

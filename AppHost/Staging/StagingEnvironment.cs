@@ -97,12 +97,12 @@ internal static class StagingEnvironment
 			.WithUrls(context =>
 			{
 				context.Urls.Clear();
-				context.Urls.Add(new() { Url = $"http://{config.Host}:{config.Ports.Sammlarr}", DisplayText = "Sammlarr" });
+				context.Urls.Add(new() { Url = FormattableString.Invariant($"http://{config.Host}:{config.Ports.Sammlarr}"), DisplayText = "Sammlarr" });
 			});
 		sammlarr.WithStagingCommands(new StagingResources(layout, scenario, radarr, sonarr, seed));
 		if (builder.Configuration["LaunchSammlarr"] == "true")
 		{
-			sammlarr.WithBrowserLaunch(() => $"http://{config.Host}:{config.Ports.Sammlarr}");
+			sammlarr.WithBrowserLaunch(() => FormattableString.Invariant($"http://{config.Host}:{config.Ports.Sammlarr}"));
 		}
 
 		if (builder.Configuration["LaunchDashboard"] == "true")
@@ -149,7 +149,7 @@ internal static class StagingEnvironment
 	)
 	{
 		var section = $"Staging__{app.DisplayName}";
-		var address = $"http://{app.Name}:{app.Port}";
+		var address = FormattableString.Invariant($"http://{app.Name}:{app.Port}");
 		return seed.WithEnvironment($"{section}__Url", container.GetEndpoint("http"))
 			.WithEnvironment($"{section}__Address", address)
 			.WithEnvironment($"{section}__RootFolder", app.Library)

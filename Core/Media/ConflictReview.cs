@@ -74,7 +74,7 @@ internal sealed class ConflictReview(
 
 	private Optional<Refused> Logged(Merged merged, IdentityConflict note)
 	{
-		logger.Merged(merged, note, $"hand ({currentUser.Id})");
+		logger.Merged(merged, note, FormattableString.Invariant($"hand ({currentUser.Id})"));
 		return new None();
 	}
 

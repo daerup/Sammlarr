@@ -75,7 +75,7 @@ internal static class StagingSeed
 			await scoped.GetRequiredService<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger()), cancellationToken);
 		}
 
-		var token = invite.Path[(invite.Path.LastIndexOf('/') + 1)..];
+		var token = invite.Path[(invite.Path.LastIndexOf('/', StringComparison.Ordinal) + 1)..];
 		var member = Require(
 			await scoped.GetRequiredService<IAccountLinkService>().JoinAsync(token, personas.Member.Password, personas.Member.Password, cancellationToken)
 		);

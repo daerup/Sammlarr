@@ -45,7 +45,7 @@ internal sealed class MalEnricher(MalClient client, IApiKeyService apiKeys) : ID
 
 	private async Task<Result<FoundMedia>> AskAsync(IExternalMediaId id, int number, IApiKey clientId, CancellationToken cancellationToken)
 	{
-		using var response = await client.GetAsync($"anime/{number}?fields={MalAnime.Fields}", clientId, cancellationToken);
+		using var response = await client.GetAsync(FormattableString.Invariant($"anime/{number}?fields={MalAnime.Fields}"), clientId, cancellationToken);
 		if (response.StatusCode is HttpStatusCode.NotFound)
 		{
 			return Success.Of(new FoundMedia([id], MediaDetails.Empty(id.Type)));
@@ -53,7 +53,10 @@ internal sealed class MalEnricher(MalClient client, IApiKeyService apiKeys) : ID
 
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(RemoteService.Mal, $"MyAnimeList answered {(int)response.StatusCode} for anime {number}.");
+			return response.StatusCode.Unanswered(
+				RemoteService.Mal,
+				FormattableString.CurrentCulture($"MyAnimeList answered {(int)response.StatusCode} for anime {number}.")
+			);
 		}
 
 		var anime =

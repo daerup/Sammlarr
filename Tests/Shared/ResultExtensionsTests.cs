@@ -251,7 +251,7 @@ public class ResultExtensionsTests
 		await Assert
 			.That(() => result.GetOrThrow(error => new InvalidOperationException(error.Reason)))
 			.Throws<InvalidOperationException>()
-			.WithMessageContaining("boom");
+			.WithMessageContaining("boom", StringComparison.Ordinal);
 	}
 
 	[Test]

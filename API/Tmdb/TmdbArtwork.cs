@@ -11,12 +11,13 @@ internal sealed class TmdbArtwork(TmdbOptions options) : IArtworkResizer
 
 	public string? Original(string? path) => string.IsNullOrWhiteSpace(path) ? null : $"{Base}original/{path.TrimStart('/')}";
 
-	public Optional<string> Resize(string url, ArtworkSize size) => FileOf(url).Map(file => WidthFor(size).Map(width => $"{Base}w{width}/{file}"));
+	public Optional<string> Resize(string url, ArtworkSize size) =>
+		FileOf(url).Map(file => WidthFor(size).Map(width => FormattableString.Invariant($"{Base}w{width}/{file}")));
 
 	private Optional<string> FileOf(string url)
 	{
 		var sized = url.StartsWith(Base, StringComparison.Ordinal) ? url[Base.Length..] : string.Empty;
-		var slash = sized.IndexOf('/');
+		var slash = sized.IndexOf('/', StringComparison.Ordinal);
 		return Optional.When(slash > 0 && slash < sized.Length - 1, () => sized[(slash + 1)..]);
 	}
 

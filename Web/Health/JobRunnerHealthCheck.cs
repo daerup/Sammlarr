@@ -27,8 +27,12 @@ internal sealed class JobRunnerHealthCheck(IJobRunnerStatus status) : IHealthChe
 		return failures switch
 		{
 			0 => HealthCheckResult.Healthy(),
-			> ToleratedFailures => HealthCheckResult.Unhealthy($"The job runner has failed {failures} times in a row{since}. Queued work is not running."),
-			_ => HealthCheckResult.Degraded($"The job runner has failed {failures} time(s) in a row{since}. It retries when work is enqueued."),
+			> ToleratedFailures => HealthCheckResult.Unhealthy(
+				FormattableString.Invariant($"The job runner has failed {failures} times in a row{since}. Queued work is not running.")
+			),
+			_ => HealthCheckResult.Degraded(
+				FormattableString.Invariant($"The job runner has failed {failures} time(s) in a row{since}. It retries when work is enqueued.")
+			),
 		};
 	}
 }

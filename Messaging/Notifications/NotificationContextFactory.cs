@@ -1,3 +1,4 @@
+using System.Globalization;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Notifications;
@@ -32,7 +33,8 @@ internal static class NotificationContextFactory
 		return (await feedRepository.FindAsync(FeedId.From(guid), cancellationToken).Map(ToNotificationFeed)).ToNullable();
 	}
 
-	private static NotificationFeed ToNotificationFeed(Feed feed) => new(feed.Id.ToString(), feed.Name, feed.Provider, feed.Identifier);
+	private static NotificationFeed ToNotificationFeed(Feed feed) =>
+		new(feed.Id.ToString("D", CultureInfo.InvariantCulture), feed.Name, feed.Provider, feed.Identifier);
 
 	private static NotificationPayload ToPayload(INotification message) =>
 		message switch
@@ -45,8 +47,8 @@ internal static class NotificationContextFactory
 				pushedRemoves: e.PushedRemoves
 			),
 			WantlistSyncFailedNotification e => Payload(e) with { Reason = e.Reason },
-			FeedRunCompletedNotification e => Payload(e) with { FeedId = e.FeedId.ToString(), Added = e.Added, Removed = e.Removed },
-			FeedRunFailedNotification e => Payload(e) with { FeedId = e.FeedId.ToString(), Reason = e.Reason },
+			FeedRunCompletedNotification e => Payload(e) with { FeedId = e.FeedId.ToString("D", CultureInfo.InvariantCulture), Added = e.Added, Removed = e.Removed },
+			FeedRunFailedNotification e => Payload(e) with { FeedId = e.FeedId.ToString("D", CultureInfo.InvariantCulture), Reason = e.Reason },
 			ProviderRateLimitedNotification e => Payload(e) with { Provider = e.Provider, RetryAfter = e.RetryAfter },
 			_ => Payload(message),
 		};
@@ -68,7 +70,7 @@ internal static class NotificationContextFactory
 
 	private static NotificationMedia ToNotificationMedia(StoredMedia entry)
 	{
-		var id = entry.Identity.Id.ToString();
+		var id = entry.Identity.Id.ToString("N", CultureInfo.InvariantCulture);
 		return entry.Cached.Match(
 			cached => new NotificationMedia(id, cached.Details.Title, cached.Details.Type, cached.Details.ReleaseDate?.Year),
 			() => new NotificationMedia(id, null, entry.Identity.Type)
@@ -133,12 +135,18 @@ internal static class NotificationContextFactory
 			.Concat(Describe(payload.PushedRemoves, "Removed remotely", resolved))
 			.Concat(Describe(payload.Media, null, resolved))
 			.ToList();
-		return items.Count == 0 ? null : items.OrderBy(item => item.Descriptor ?? string.Empty).ToList();
+		return items.Count == 0 ? null : items.OrderBy(item => item.Descriptor ?? string.Empty, StringComparer.CurrentCulture).ToList();
 	}
 
 	private static IEnumerable<NotificationMedia> Describe(
 		IReadOnlyList<MediaId> ids,
 		string? descriptor,
 		IReadOnlyDictionary<MediaId, NotificationMedia> resolved
-	) => ids.Select(id => (resolved.GetValueOrDefault(id) ?? new NotificationMedia(id.ToString(), null, MediaType.Unknown)) with { Descriptor = descriptor });
+	) =>
+		ids.Select(id =>
+			(resolved.GetValueOrDefault(id) ?? new NotificationMedia(id.ToString("N", CultureInfo.InvariantCulture), null, MediaType.Unknown)) with
+			{
+				Descriptor = descriptor,
+			}
+		);
 }

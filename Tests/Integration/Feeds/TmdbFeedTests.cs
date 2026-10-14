@@ -42,7 +42,7 @@ public class TmdbFeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert
 			.That(async () => await Testee.GetFeedItemsAsync("42", FieldNeeds.None).InListOrderAsync().ToListAsync())
 			.Throws<Exception>()
-			.WithMessageContaining("No TMDB API key");
+			.WithMessageContaining("No TMDB API key", StringComparison.Ordinal);
 	}
 
 	[Test]

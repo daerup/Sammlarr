@@ -25,7 +25,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert
 			.That(async () => await Testee.GetFeedItemsAsync("top-250", FieldNeeds.None).InListOrderAsync().ToListAsync())
 			.Throws<Exception>()
-			.WithMessageContaining("No MDBList API key");
+			.WithMessageContaining("No MDBList API key", StringComparison.Ordinal);
 	}
 
 	[Test]
@@ -37,7 +37,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert
 			.That(async () => await Testee.GetFeedItemsAsync("broken-list", FieldNeeds.None).InListOrderAsync().ToListAsync())
 			.Throws<Exception>()
-			.WithMessageContaining("500");
+			.WithMessageContaining("500", StringComparison.Ordinal);
 	}
 
 	[Test]

@@ -13,7 +13,7 @@ public record PlexOptions : IOptionsSection, IProviderHttpOptions
 	public required OAuthenticationOptions Authentication { get; set; }
 	public ProviderHttpOptions Http { get; set; } = new();
 	public IReadOnlyDictionary<string, string> Urls =>
-		new Dictionary<string, string>
+		new Dictionary<string, string>(StringComparer.Ordinal)
 		{
 			["plex"] = BaseUrl,
 			["discover"] = DiscoverUrl,

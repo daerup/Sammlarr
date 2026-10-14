@@ -73,7 +73,7 @@ internal static class ArrContainers
 		http.DefaultRequestHeaders.Add("X-Api-Key", ApiKey);
 		var folders = await http.GetFromJsonAsync<RootFolder[]>("rootfolder", cancellationToken);
 		string[] libraries = [app.Library, app.AnimeLibrary];
-		foreach (var library in libraries.Except(folders!.Select(folder => folder.Path)))
+		foreach (var library in libraries.Except(folders!.Select(folder => folder.Path), StringComparer.Ordinal))
 		{
 			using var response = await http.PostAsJsonAsync("rootfolder", new { path = library }, cancellationToken);
 			response.EnsureSuccessStatusCode();

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using API.Http;
 using API.Tmdb.Types;
@@ -36,12 +37,12 @@ internal sealed class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDa
 
 	private async Task<Result<IReadOnlyList<TmdbTypes.Trending.Result>>> FetchSearchAsync(string query, IApiKey apiKey, CancellationToken cancellationToken)
 	{
-		var endpoint = string.Format(TmdbEndpoints.Search, Uri.EscapeDataString(query));
+		var endpoint = string.Format(CultureInfo.InvariantCulture, TmdbEndpoints.Search, Uri.EscapeDataString(query));
 		using var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning("TMDB search returned {StatusCode} for {Query}", (int)response.StatusCode, query);
-			return response.StatusCode.Unanswered(RemoteService.Tmdb, $"TMDB search returned {(int)response.StatusCode}.");
+			return response.StatusCode.Unanswered(RemoteService.Tmdb, FormattableString.CurrentCulture($"TMDB search returned {(int)response.StatusCode}."));
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<TmdbTypes.Trending.Root>(stream, cancellationToken: cancellationToken);
@@ -54,7 +55,7 @@ internal sealed class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDa
 		{
 			return Error.From($"TMDB does not support media type {id.Type}.");
 		}
-		var endpoint = string.Format(TmdbEndpoints.DetailWithExternalIds, mediaType, id.Value);
+		var endpoint = string.Format(CultureInfo.InvariantCulture, TmdbEndpoints.DetailWithExternalIds, mediaType, id.Value);
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
@@ -63,7 +64,10 @@ internal sealed class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDa
 				(int)response.StatusCode,
 				id.Value
 			);
-			return response.StatusCode.Unanswered(RemoteService.Tmdb, $"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
+			return response.StatusCode.Unanswered(
+				RemoteService.Tmdb,
+				FormattableString.CurrentCulture($"TMDB detail returned {(int)response.StatusCode} for {id.Value}")
+			);
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var reason = $"TMDB has no details for {id.Value}";
@@ -86,12 +90,15 @@ internal sealed class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDa
 		{
 			return Error.From($"TMDB cannot find a title by a {id.Source} id.");
 		}
-		var endpoint = string.Format(TmdbEndpoints.Find, id.Value, source);
+		var endpoint = string.Format(CultureInfo.InvariantCulture, TmdbEndpoints.Find, id.Value, source);
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning("TMDB find returned {StatusCode} for {ExternalId}", (int)response.StatusCode, id.Value);
-			return response.StatusCode.Unanswered(RemoteService.Tmdb, $"TMDB find returned {(int)response.StatusCode} for {id.Value}");
+			return response.StatusCode.Unanswered(
+				RemoteService.Tmdb,
+				FormattableString.CurrentCulture($"TMDB find returned {(int)response.StatusCode} for {id.Value}")
+			);
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<TmdbTypes.Find>(stream, cancellationToken: cancellationToken);

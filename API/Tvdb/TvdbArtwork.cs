@@ -18,7 +18,7 @@ internal sealed class TvdbArtwork : IArtworkResizer
 
 	private static string Thumbnail(string url)
 	{
-		var extension = url.LastIndexOf('.');
+		var extension = url.LastIndexOf('.', StringComparison.Ordinal);
 		return $"{url[..extension]}_t{url[extension..]}";
 	}
 }

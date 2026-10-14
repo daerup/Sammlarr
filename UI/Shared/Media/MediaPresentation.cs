@@ -13,7 +13,7 @@ public static class MediaPresentation
 				return media switch
 				{
 					MatchedMedia matched => matched.Key,
-					UnmatchedMedia unmatched => string.Join("|", unmatched.Externals.Select(id => $"{id.Source}:{id.Value}").Order(StringComparer.Ordinal)),
+					UnmatchedMedia unmatched => string.Join('|', unmatched.Externals.Select(id => $"{id.Source}:{id.Value}").Order(StringComparer.Ordinal)),
 				};
 			}
 		}

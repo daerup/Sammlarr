@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http.Headers;
 using API.Http;
 using Contracts.Media.Artwork;
@@ -38,6 +39,6 @@ internal sealed class PlexModule : IServiceModule
 		client.DefaultRequestHeaders.Add("X-Plex-Device", "Web");
 		client.DefaultRequestHeaders.Add("X-Plex-Device-Name", auth.ProductName);
 		client.DefaultRequestHeaders.Add("X-Plex-Platform", "Web");
-		client.DefaultRequestHeaders.Add("X-Plex-Container-Size", PlexClient.ContainerSize.ToString());
+		client.DefaultRequestHeaders.Add("X-Plex-Container-Size", PlexClient.ContainerSize.ToString(CultureInfo.InvariantCulture));
 	}
 }

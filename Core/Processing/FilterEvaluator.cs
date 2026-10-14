@@ -28,7 +28,7 @@ internal static class FilterEvaluator
 		{
 			0 => string.Empty,
 			1 => parts[0],
-			_ => $"({string.Join($" {@operator.ToString().ToLower()} ", parts)})",
+			_ => $"({string.Join($" {@operator.ToString().ToLowerInvariant()} ", parts)})",
 		};
 
 	private static string Compile(FilterPredicate p)
@@ -108,7 +108,7 @@ internal static class FilterEvaluator
 		kind switch
 		{
 			FilterValueKind.String => $"{field} != null && {field}.ToLower() == {value}.ToLower()",
-			FilterValueKind.Date => $"{field}.HasValue && {field}.Value.DayNumber == {ToDayNumber(value)}",
+			FilterValueKind.Date => FormattableString.Invariant($"{field}.HasValue && {field}.Value.DayNumber == {ToDayNumber(value)}"),
 			_ => $"{field} == {value}",
 		};
 
@@ -116,16 +116,18 @@ internal static class FilterEvaluator
 		kind switch
 		{
 			FilterValueKind.String => $"({field} == null || {field}.ToLower() != {value}.ToLower())",
-			FilterValueKind.Date => $"(!{field}.HasValue || {field}.Value.DayNumber != {ToDayNumber(value)})",
+			FilterValueKind.Date => FormattableString.Invariant($"(!{field}.HasValue || {field}.Value.DayNumber != {ToDayNumber(value)})"),
 			_ => $"{field} != {value}",
 		};
 
 	private static string FormatComparison(string field, string op, string? value, FilterValueKind kind) =>
-		kind == FilterValueKind.Date ? $"{field}.HasValue && {field}.Value.DayNumber {op} {ToDayNumber(value)}" : $"{field} {op} {value}";
+		kind == FilterValueKind.Date
+			? FormattableString.Invariant($"{field}.HasValue && {field}.Value.DayNumber {op} {ToDayNumber(value)}")
+			: $"{field} {op} {value}";
 
 	private static string FormatBetween(string field, string? min, string? max, FilterValueKind kind) =>
 		kind == FilterValueKind.Date
-			? $"{field}.HasValue && {field}.Value.DayNumber >= {ToDayNumber(min)} && {field}.Value.DayNumber <= {ToDayNumber(max)}"
+			? FormattableString.Invariant($"{field}.HasValue && {field}.Value.DayNumber >= {ToDayNumber(min)} && {field}.Value.DayNumber <= {ToDayNumber(max)}")
 			: $"{field} >= {min} && {field} <= {max}";
 
 	private static int ToDayNumber(string? value) => value is null ? 0 : DateOnly.FromDateTime(JsonSerializer.Deserialize<DateTime>(value)).DayNumber;

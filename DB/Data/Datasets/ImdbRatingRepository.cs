@@ -27,7 +27,7 @@ internal sealed class ImdbRatingRepository(IDbContextFactory<SammlarrDbContext> 
 	public async Task<IReadOnlyDictionary<string, ImdbRating>> FindManyAsync(IReadOnlyCollection<string> tconsts, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var titles = tconsts.Distinct().Select(tconst => NumberOf(tconst).Map(id => (Tconst: tconst, Id: id))).WhereSome().ToList();
+		var titles = tconsts.Distinct(StringComparer.Ordinal).Select(tconst => NumberOf(tconst).Map(id => (Tconst: tconst, Id: id))).WhereSome().ToList();
 		var byId = new Dictionary<int, ImdbRating>();
 		foreach (var slice in titles.Select(title => title.Id).Distinct().Chunk(SliceSize))
 		{
@@ -38,7 +38,7 @@ internal sealed class ImdbRatingRepository(IDbContextFactory<SammlarrDbContext> 
 		return titles
 			.Select(title => byId.GetValueOrNone(title.Id).Map(rating => (title.Tconst, Rating: rating)))
 			.WhereSome()
-			.ToDictionary(rated => rated.Tconst, rated => rated.Rating);
+			.ToDictionary(rated => rated.Tconst, rated => rated.Rating, StringComparer.Ordinal);
 	}
 
 	public async Task<int> ReplaceAsync(IAsyncEnumerable<ImdbRatingLine> rows, CancellationToken cancellationToken = default)

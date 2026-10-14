@@ -64,7 +64,7 @@ internal static class StagingLibrary
 		CancellationToken cancellationToken
 	)
 	{
-		var movie = (await radarr.GetAsync($"movie/lookup?term=tmdb:{title.Id}", cancellationToken))[0]!;
+		var movie = (await radarr.GetAsync(FormattableString.Invariant($"movie/lookup?term=tmdb:{title.Id}"), cancellationToken))[0]!;
 		var folder = Folder(movie);
 		if (title.OnDisk)
 		{
@@ -98,7 +98,7 @@ internal static class StagingLibrary
 		CancellationToken cancellationToken
 	)
 	{
-		var series = (await sonarr.GetAsync($"series/lookup?term=tvdb:{title.Id}", cancellationToken))[0]!;
+		var series = (await sonarr.GetAsync(FormattableString.Invariant($"series/lookup?term=tvdb:{title.Id}"), cancellationToken))[0]!;
 		var folder = Folder(series);
 		if (title.OnDisk)
 		{
@@ -130,7 +130,8 @@ internal static class StagingLibrary
 		File.WriteAllBytes(Path.Combine(directory, file), []);
 	}
 
-	private static string Folder(JsonNode title) => $"{Clean(title["title"]!.GetValue<string>())} ({title["year"]!.GetValue<int>()})";
+	private static string Folder(JsonNode title) =>
+		FormattableString.Invariant($"{Clean(title["title"]!.GetValue<string>())} ({title["year"]!.GetValue<int>()})");
 
 	private static string Clean(string title)
 	{

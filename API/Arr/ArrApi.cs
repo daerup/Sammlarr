@@ -128,7 +128,7 @@ internal abstract class ArrApi(HttpClient http)
 
 	public async Task<Result<int>> DeleteAsync(ArrConnection connection, int titleId, ArrInstanceConfig settings, CancellationToken cancellationToken)
 	{
-		var path = $"{Titles}/{titleId}?deleteFiles={Flag(settings.DeleteFiles)}&{ExclusionFlag}=false";
+		var path = FormattableString.Invariant($"{Titles}/{titleId}?deleteFiles={Flag(settings.DeleteFiles)}&{ExclusionFlag}=false");
 		var sent = await SendAsync(connection, HttpMethod.Delete, path, new None(), cancellationToken);
 		return sent.Map(_ => titleId);
 	}
@@ -235,7 +235,7 @@ internal abstract class ArrApi(HttpClient http)
 
 	private string Refusal(ArrConnection connection, HttpStatusCode status, string body)
 	{
-		var answer = $"{App.Name} answered {(int)status} {status} at {connection.Address}.";
+		var answer = FormattableString.CurrentCulture($"{App.Name} answered {(int)status} {status} at {connection.Address}.");
 		return status switch
 		{
 			HttpStatusCode.Unauthorized => $"{answer} Check the API key under Settings › General in {App.Name}.",
@@ -244,7 +244,7 @@ internal abstract class ArrApi(HttpClient http)
 		};
 	}
 
-	private static string Validation(string body) => string.Join(" ", Failures(body).Select(failure => failure.ErrorMessage).OfType<string>());
+	private static string Validation(string body) => string.Join(' ', Failures(body).Select(failure => failure.ErrorMessage).OfType<string>());
 
 	private static IReadOnlyList<ArrValidationFailure> Failures(string body)
 	{

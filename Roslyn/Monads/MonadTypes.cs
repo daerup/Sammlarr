@@ -39,7 +39,7 @@ internal sealed class MonadTypes
 
 	internal static bool IsHelper(IMethodSymbol method, params string[] names)
 	{
-		return names.Contains(method.Name) && InSharedNamespace(method.ContainingType);
+		return names.Contains(method.Name, StringComparer.Ordinal) && InSharedNamespace(method.ContainingType);
 	}
 
 	internal static IOperation? Receiver(IInvocationOperation invocation)
