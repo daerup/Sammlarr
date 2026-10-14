@@ -1,6 +1,7 @@
 <Project>
 	<PropertyGroup>
 		<RestoreEnablePackagePruning>false</RestoreEnablePackagePruning>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<AnalysisLevel>latest-recommended</AnalysisLevel>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
