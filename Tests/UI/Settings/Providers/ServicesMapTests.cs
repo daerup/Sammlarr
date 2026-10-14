@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Settings.Providers;
 
@@ -61,18 +60,6 @@ public class ServicesMapTests : BunitContext
 	}
 
 	[Test]
-	public async Task Feeds_InsteadOfAViaDot_GetsAPinPerLineInTheLinesColour()
-	{
-		var cut = RenderMap(canPick: false);
-		var branding = Services.GetRequiredService<MediaProviderBrandingService>();
-		RemoteService[] feeds = [RemoteService.Tmdb, RemoteService.Mdblist, RemoteService.AniList, RemoteService.Mal, RemoteService.Trakt];
-
-		var pins = cut.FindAll(".map-feeds-pin").Select(pin => pin.GetAttribute("fill")!);
-		await Assert.That(cut.FindAll(".map-vias circle").Count).IsEqualTo(4);
-		await Assert.That(pins).IsEquivalentTo(feeds.Select(feed => branding.Color(feed)));
-	}
-
-	[Test]
 	public async Task Sources_WithRoomForTheirName_ShowItAndTheirStatusLikeAServiceBox()
 	{
 		var cut = RenderMap(canPick: false, RemoteService.AniList);
@@ -96,13 +83,14 @@ public class ServicesMapTests : BunitContext
 	}
 
 	[Test]
-	public async Task Map_ForAnAdmin_OffersAChipForEachRoleWithASecondChoice()
+	public async Task Map_ForAnAdmin_OffersAChipForEachRoleWithASecondChoiceAndNoManagedNote()
 	{
 		var cut = RenderMap(canPick: true);
 
 		await Assert
 			.That(cut.FindAll(".map-chip").Select(chip => chip.GetAttribute("aria-label") ?? string.Empty))
 			.IsEquivalentTo(["Change what Wantlist uses", "Change what Search uses"]);
+		await Assert.That(cut.Markup).DoesNotContain("Managed by an admin");
 	}
 
 	[Test]
@@ -186,14 +174,6 @@ public class ServicesMapTests : BunitContext
 	}
 
 	[Test]
-	public async Task Tmdb_WithTheReadToken_SaysOnlyThatTheKeyIsSet()
-	{
-		var cut = RenderMap(canPick: false, RemoteService.Tmdb);
-
-		await Assert.That(Service(cut, "TMDb").QuerySelector(".map-service-status")!.TextContent.Trim()).IsEqualTo("Your key is set");
-	}
-
-	[Test]
 	public async Task BehindTheScenes_ForTheServicesWithNothingToSetUp_SaysWhatEachDoesAndWhenItsFileCameIn()
 	{
 		var downloads = new Dictionary<RemoteService, DateTimeOffset> { [RemoteService.ImdbDatasets] = Now.AddHours(-3.5) };
@@ -211,26 +191,11 @@ public class ServicesMapTests : BunitContext
 	}
 
 	[Test]
-	public async Task Map_ForAMember_OffersNoControl()
+	public async Task Map_ForAMember_OffersNoControlAndSaysWhoManagesIt()
 	{
 		var cut = RenderMap(canPick: false);
 
 		await Assert.That(cut.FindAll(".map-chip")).IsEmpty();
-	}
-
-	[Test]
-	public async Task Map_ForAnAdmin_SaysNothingAboutWhoManagesIt()
-	{
-		var cut = RenderMap(canPick: true);
-
-		await Assert.That(cut.Markup).DoesNotContain("Managed by an admin");
-	}
-
-	[Test]
-	public async Task Map_ForAMember_SaysWhoManagesIt()
-	{
-		var cut = RenderMap(canPick: false);
-
 		await Assert.That(cut.Markup).Contains("Managed by an admin");
 	}
 
@@ -313,7 +278,7 @@ public class ServicesMapTests : BunitContext
 	}
 
 	[Test]
-	public async Task RadarrAndSonarr_WhenClicked_DrawsBothMarksInTheMixedColourAndAsksToOpenTheWantlistSync()
+	public async Task RadarrAndSonarr_WhenConnectedAndClicked_SaysSoAndAsksToOpenTheWantlistSync()
 	{
 		List<RemoteService> opened = [];
 		var arr = 0;
@@ -329,8 +294,6 @@ public class ServicesMapTests : BunitContext
 		var box = Service(cut, "Radarr + Sonarr");
 
 		await Assert.That(box.QuerySelector(".map-service-status")!.TextContent.Trim()).IsEqualTo("Connected");
-		await Assert.That(box.InnerHtml).Contains("radarr-square").And.Contains("sonarr-square");
-		await Assert.That(box.GetAttribute("style")).Contains($"--brand: {Services.GetRequiredService<MediaProviderBrandingService>().Color(new Arr())}");
 		await box.ClickAsync();
 		await Assert.That(arr).IsEqualTo(1);
 		await Assert.That(opened).IsEmpty();

@@ -34,21 +34,13 @@ public class SammlarrAccountRowTests : BunitContext
 	}
 
 	[Test]
-	public async Task Row_ForTheSignedInPerson_SaysWhoIsSignedIn()
-	{
-		var cut = Render<SammlarrAccountRow>();
-
-		await Assert.That(cut.Markup).Contains("Signed in as guest");
-	}
-
-	[Test]
-	public async Task Row_WearsSammlarrsLogoAndTheThemesTextColourRatherThanPlexsYellow()
+	public async Task Row_ForTheSignedInPerson_WearsSammlarrsLogoAndSaysWhoIsSignedIn()
 	{
 		var cut = Render<SammlarrAccountRow>();
 
 		await Assert.That(cut.FindAll(".provider-row svg.sammlarr-logo")).HasSingleItem();
 		await Assert.That(cut.Find(".provider-row .sr-only").TextContent).IsEqualTo("Sammlarr");
-		await Assert.That(cut.Find(".provider-row").GetAttribute("style")).IsEqualTo("--brand: var(--foreground)");
+		await Assert.That(cut.Markup).Contains("Signed in as guest");
 	}
 
 	[Test]

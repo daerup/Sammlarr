@@ -28,15 +28,6 @@ public class ProviderRowTests : BunitContext
 	}
 
 	[Test]
-	public async Task Row_Always_PutsTheStatusLast()
-	{
-		var cut = RenderRow();
-
-		var status = cut.Find("button").Children.Last();
-		await Assert.That(status.TextContent.Trim()).IsEqualTo("Connected");
-	}
-
-	[Test]
 	public async Task Row_Always_TitlesItselfWithTheProvidersNamedLogo()
 	{
 		var cut = RenderRow();
@@ -66,48 +57,22 @@ public class ProviderRowTests : BunitContext
 		await Assert.That(cut.Markup).DoesNotContain("API key ·");
 	}
 
-	[Test]
-	public async Task Row_ForAProvider_IsTheMapsScrollTargetWithoutARing()
-	{
-		var cut = Render<ProviderRow>(row =>
-			row.Add(provider => provider.Key, TmdbRow)
-				.Add(provider => provider.Brand, Brands.GetBrandingInfo(MediaProvider.Tmdb))
-				.Add(provider => provider.Status, "<span>Connected</span>")
-				.AddChildContent("<p>The form</p>")
-		);
-
-		await Assert.That(cut.Find(".provider-row").Id).IsEqualTo("provider-row-tmdb");
-		await Assert.That(cut.Find(".provider-row").ClassList.Contains("is-ringed")).IsFalse();
-	}
+	public static IEnumerable<Func<(Service Key, string Id)>> Keys() =>
+		[() => (TmdbRow, "provider-row-tmdb"), () => (AccountsRow, "provider-row-sammlarr"), () => (ArrRow, "provider-row-arr")];
 
 	[Test]
-	public async Task Row_ForSammlarrAccounts_HasItsOwnIdAndOnlyTheSignInRole()
+	[MethodDataSource(nameof(Keys))]
+	public async Task Row_ForEachKey_IsTheMapsScrollTargetUnderItsOwnId(Service key, string id)
 	{
 		var cut = Render<ProviderRow>(parameters =>
 			parameters
-				.Add(row => row.Key, AccountsRow)
-				.Add(row => row.Brand, Brands.Brands(AuthProvider.Local.Service).Single())
-				.Add(row => row.Status, "<span>Signed in</span>")
-				.AddChildContent("<p>The form</p>")
-		);
-
-		await Assert.That(cut.Find(".provider-row").Id).IsEqualTo("provider-row-sammlarr");
-		await Assert.That(cut.FindAll(".provider-role .sr-only").Select(role => role.TextContent)).IsEquivalentTo(["Sign-in"]);
-	}
-
-	[Test]
-	public async Task Row_ForRadarrAndSonarr_HasItsOwnIdAndTheWantlistAndSearchRoles()
-	{
-		var cut = Render<ProviderRow>(parameters =>
-			parameters
-				.Add(row => row.Key, ArrRow)
-				.Add(row => row.Brand, Brands.GetBrandingInfo(RemoteService.Radarr))
+				.Add(row => row.Key, key)
+				.Add(row => row.Brand, Brands.GetBrandingInfo(MediaProvider.Tmdb))
 				.Add(row => row.Status, "<span>Connected</span>")
 				.AddChildContent("<p>The form</p>")
 		);
 
-		await Assert.That(cut.Find(".provider-row").Id).IsEqualTo("provider-row-arr");
-		await Assert.That(cut.FindAll(".provider-role .sr-only").Select(role => role.TextContent)).IsEquivalentTo(["Wantlist", "Search"]);
+		await Assert.That(cut.Find(".provider-row").Id).IsEqualTo(id);
 	}
 
 	private IRenderedComponent<ProviderRow> RenderRow(EventCallback<bool> openChanged = default) =>

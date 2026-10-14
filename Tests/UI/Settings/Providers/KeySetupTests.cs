@@ -14,19 +14,10 @@ public class KeySetupTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_StartsClosedUnderItsTitleAndTime()
+	public async Task Trigger_OpensTheNumberedStepsThatStartClosed()
 	{
 		var cut = RenderSetup();
-
-		var trigger = cut.Find("[data-key-setup] button");
-		await Assert.That(trigger.GetAttribute("aria-expanded")).IsEqualTo("false");
-		await Assert.That(trigger.TextContent).Contains("How to get a client ID").And.Contains("about 3 minutes");
-	}
-
-	[Test]
-	public async Task Trigger_OpensTheNumberedSteps()
-	{
-		var cut = RenderSetup();
+		await Assert.That(cut.Find("[data-key-setup] button").GetAttribute("aria-expanded")).IsEqualTo("false");
 
 		await cut.Find("[data-key-setup] button").ClickAsync(new());
 

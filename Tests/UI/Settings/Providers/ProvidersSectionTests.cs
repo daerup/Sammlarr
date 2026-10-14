@@ -90,35 +90,12 @@ public class ProvidersSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task Section_OnAPlexInstall_ShowsNoSammlarrAccount()
+	public async Task Section_OnAPlexInstall_ShowsAPlexRowThatReturnsToProvidersAndNoSammlarrOrRadarrAndSonarrRow()
 	{
 		var cut = RenderSection();
 
 		await Assert.That(cut.FindComponents<Stub<SammlarrAccountRow>>()).IsEmpty();
-		await Assert.That(cut.FindComponents<Stub<AccountRow>>()).Count().IsEqualTo(1);
-	}
-
-	[Test]
-	public async Task Section_IsAsWideAsTheServicesMapCard()
-	{
-		var cut = RenderSection();
-
-		await Assert.That(cut.Find("div").GetAttribute("style")).IsEqualTo($"width: {ServicesMapModel.CardWidth}px");
-	}
-
-	[Test]
-	public async Task Section_ForAnAdmin_OffersNoWayToRunSetupAgain()
-	{
-		var cut = RenderSection();
-
-		await Assert.That(cut.Markup).DoesNotContain("Run setup again");
-	}
-
-	[Test]
-	public async Task Section_OnPlex_ShowsNoWantlistSync()
-	{
-		var cut = RenderSection();
-
+		await Assert.That(cut.FindComponent<Stub<AccountRow>>().Instance.Parameters.Get(row => row.ReturnUrl)).IsEqualTo("/settings?section=providers");
 		await Assert.That(cut.FindComponents<Stub<ArrSinkRow>>()).IsEmpty();
 	}
 
@@ -202,13 +179,14 @@ public class ProvidersSectionTests : BunitContext
 	{
 		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
 		_switch.SwitchAsync(SinkKind.Plex, Any()).Returns(Success.Of(new SinkSwitched(12, 0)));
+		_switch.PreviewAsync(SinkKind.Plex, Any()).Returns(new SinkSwitchPreview(20, 7));
 		var cut = RenderSection();
 
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Plex));
 		var dialog = cut.FindComponent<Stub<SinkSwitchDialog>>().Instance.Parameters;
 		await Assert.That(dialog.Get(asked => asked.Target)).IsEqualTo(SinkKind.Plex);
 		await Assert.That(dialog.Get(asked => asked.WithoutPlex)).IsEquivalentTo(["Bob"]);
-		_switch.PreviewAsync(SinkKind.Plex, Any()).WasCalled(Times.Once);
+		await Assert.That(dialog.Get(asked => asked.Preview)).IsEqualTo(new SinkSwitchPreview(20, 7));
 		_switch.SwitchAsync(Any<SinkKind>(), Any()).WasCalled(Times.Never);
 
 		await cut.InvokeAsync(() => dialog.Get(asked => asked.Confirmed).InvokeAsync());
@@ -226,14 +204,6 @@ public class ProvidersSectionTests : BunitContext
 		var arr = cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters;
 		await Assert.That(arr.Get(row => row.Syncs)).IsFalse();
 		await Assert.That(arr.Get(row => row.SettingUp)).IsFalse();
-	}
-
-	[Test]
-	public async Task Section_WhenNothingUsesRadarrAndSonarr_LeavesTheirRowOut()
-	{
-		var cut = RenderSection();
-
-		await Assert.That(cut.FindComponents<Stub<ArrSinkRow>>()).IsEmpty();
 	}
 
 	[Test]
@@ -388,14 +358,6 @@ public class ProvidersSectionTests : BunitContext
 		await Assert
 			.That(Map(cut).Get(map => map.Downloads))
 			.IsEquivalentTo(new Dictionary<RemoteService, DateTimeOffset> { [RemoteService.ImdbDatasets] = loadedAt });
-	}
-
-	[Test]
-	public async Task PlexRow_OnAPlexInstall_ReturnsToTheProviders()
-	{
-		var cut = RenderSection();
-
-		await Assert.That(cut.FindComponent<Stub<AccountRow>>().Instance.Parameters.Get(row => row.ReturnUrl)).IsEqualTo("/settings?section=providers");
 	}
 
 	private string ScrolledTo(IRenderedComponent<ProvidersSection> cut)

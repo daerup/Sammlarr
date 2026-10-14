@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Components.Web;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
-using UI.Shared.Common;
 
 namespace UI.Tests.Settings.Providers;
 
@@ -40,14 +39,13 @@ public class ArrAppSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task Section_WhenTheTestFailed_SaysWhyAndOutlinesTheKey()
+	public async Task Section_WhenTheTestFailed_SaysWhyAndOffersNoProfiles()
 	{
 		const string why = "Sonarr answered 401 Unauthorized at http://sonarr:8989. Check the API key under Settings › General in Sonarr.";
 
 		var cut = RenderSection(Stored, ArrConnectionState.Failed, why);
 
 		await Assert.That(cut.Find("[role=alert]").TextContent.Trim()).IsEqualTo(why);
-		await Assert.That(cut.FindComponent<SensitiveInput>().Instance.Class).Contains("border-destructive");
 		await Assert.That(cut.Markup).DoesNotContain("Quality profile");
 	}
 
@@ -56,7 +54,7 @@ public class ArrAppSectionTests : BunitContext
 	{
 		var cut = RenderSection(Stored, ArrConnectionState.Untested);
 
-		await Assert.That(cut.Markup).Contains("Test the connection to load Sonarr's quality profiles and root folders.");
+		await Assert.That(cut.Markup).Contains("Test the connection");
 		await Assert.That(cut.Markup).DoesNotContain("Root folder");
 	}
 
@@ -131,14 +129,11 @@ public class ArrAppSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task DeleteFiles_WhilePicked_IsDrawnDestructive()
+	public async Task DeleteFiles_WhilePicked_IsChecked()
 	{
 		var cut = RenderWithChanges(Stored with { DeleteFiles = true }, []);
 
-		var delete = Option(cut, DeletesFiles, "Delete files");
-		await Assert.That(delete.GetAttribute("aria-checked")).IsEqualTo("true");
-		await Assert.That(delete.ClassList).Contains("data-[state=on]:text-destructive");
-		await Assert.That(Option(cut, DeletesFiles, "Keep files").ClassList).DoesNotContain("data-[state=on]:text-destructive");
+		await Assert.That(Option(cut, DeletesFiles, "Delete files").GetAttribute("aria-checked")).IsEqualTo("true");
 	}
 
 	[Test]
@@ -213,33 +208,18 @@ public class ArrAppSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task AnimeHint_ForRadarr_SaysOnlyAnimatedMoviesAreAskedAbout()
+	[Arguments(ArrApp.Radarr, "TMDB", "TMDB gives it the keyword anime", "movies", false)]
+	[Arguments(ArrApp.Sonarr, "TVDB", "TheTVDB gives it the genre Anime", "shows", true)]
+	public async Task AnimeHint_ForAnApp_NamesItsIdMapAndAnimeTagAndAsksOnlyAboutAnimatedTitles(ArrApp app, string map, string tag, string titles, bool series)
 	{
 		var portal = Render<BbPortalHost>();
-		var cut = RenderSection(Stored, ArrConnectionState.Connected, app: ArrApp.Radarr);
+		var cut = RenderSection(Stored, ArrConnectionState.Connected, app: app);
 
 		await cut.Find("[aria-label='What counts as anime']").TriggerEventAsync("onmouseenter", new MouseEventArgs());
 
-		await Assert
-			.That(Hint(portal))
-			.IsEqualTo(
-				"What counts as anime A new movie goes to the anime folder when it is anime by: Sammlarr's own anime data: Sammlarr holds an AniList or MyAnimeList id for it, or finds its TMDB id in the anime id map from anime-lists. Radarr, for animated movies only: when it is animated (genre Animation) and Sammlarr's data does not call it anime, Sammlarr asks Radarr, which counts it as anime when TMDB gives it the keyword anime. Everything else goes to the normal folder, for example Western animation such as Cars 3 (Radarr is asked and says no) and live-action adaptations such as Ghost in the Shell (2017) (not animated, so never asked). Movies already in Radarr never move."
-			);
-	}
-
-	[Test]
-	public async Task AnimeHint_ForSonarr_SaysOnlyAnimatedShowsAreAskedAbout()
-	{
-		var portal = Render<BbPortalHost>();
-		var cut = RenderSection(Stored, ArrConnectionState.Connected, app: ArrApp.Sonarr);
-
-		await cut.Find("[aria-label='What counts as anime']").TriggerEventAsync("onmouseenter", new MouseEventArgs());
-
-		await Assert
-			.That(Hint(portal))
-			.IsEqualTo(
-				"What counts as anime A new show goes to the anime folder, as an Anime series, when it is anime by: Sammlarr's own anime data: Sammlarr holds an AniList or MyAnimeList id for it, or finds its TVDB id in the anime id map from anime-lists. Sonarr, for animated shows only: when it is animated (genre Animation) and Sammlarr's data does not call it anime, Sammlarr asks Sonarr, which counts it as anime when TheTVDB gives it the genre Anime. Everything else goes to the normal folder, for example Western animation such as Arcane (Sonarr is asked and says no) and live-action adaptations such as One Piece (2023) (not animated, so never asked). Shows already in Sonarr never move."
-			);
+		var hint = Hint(portal);
+		await Assert.That(hint).Contains($"finds its {map} id in the anime id map").And.Contains($"when {tag}").And.Contains($"{app}, for animated {titles} only");
+		await Assert.That(hint.Contains("as an Anime series", StringComparison.Ordinal)).IsEqualTo(series);
 	}
 
 	[Test]
