@@ -59,18 +59,7 @@ public class GlobalSearchTests : BunitContext
 		Services.AddSingleton(ArtworkStub.Sizing());
 		Services.AddSingleton(IMediaService.Mock().Object);
 
-		_providerConfig
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
+		_providerConfig.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex);
 		Services.AddSingleton(_providerConfig.Object);
 
 		_wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
@@ -136,9 +125,7 @@ public class GlobalSearchTests : BunitContext
 		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = "dune" });
 		await cut.Find("#search-input").KeyDownAsync(new KeyboardEventArgs { Key = "Enter" });
 
-		await Assert
-			.That(cut.FindAll("[role=tab]").Select(tab => string.Concat(tab.TextContent.Where(character => !char.IsWhiteSpace(character)))))
-			.IsEquivalentTo(["Movies2", "Shows1"]);
+		await Assert.That(cut.FindAll("[role=tab]").Select(tab => tab.TextContent.Squeezed())).IsEquivalentTo(["Movies2", "Shows1"]);
 		await Assert.That(cut.FindAll(".search-result-row")).Count().IsEqualTo(2);
 
 		await cut.Find("[role=tab][aria-selected=false]").ClickAsync(new MouseEventArgs());

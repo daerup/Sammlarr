@@ -40,7 +40,8 @@ public class ProviderLogoTests : BunitContext
 		);
 
 		var images = cut.FindAll("img");
-		await Assert.That(images.Select(image => image.GetAttribute("style")).OfType<string>().Distinct(StringComparer.Ordinal)).IsEquivalentTo([height]);
+		await Assert.That(images).IsNotEmpty();
+		await Assert.That(images.Select(image => image.GetAttribute("style")!)).All().Satisfy(style => style.IsEqualTo(height));
 		await Assert.That(images.Where(image => image.HasAttribute("width"))).IsEmpty();
 	}
 

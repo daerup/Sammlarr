@@ -55,7 +55,7 @@ public class RatingSumTests : BunitContext
 
 		var cut = Render<RatingSum>(parameters => parameters.Add(sum => sum.Terms, RatingTexts.Terms(rating)).Add(sum => sum.Result, RatingTexts.Number(rating)));
 
-		await Assert.That(Squeezed(cut.Find(".rating-sum").TextContent)).IsEqualTo("(7.4+7.3+5.1+7.1)÷4=6.7");
+		await Assert.That(cut.Find(".rating-sum").TextContent.Squeezed()).IsEqualTo("(7.4+7.3+5.1+7.1)÷4=6.7");
 		await Assert.That(cut.FindAll(".rating-sum-term").Count).IsEqualTo(4);
 	}
 
@@ -68,7 +68,7 @@ public class RatingSumTests : BunitContext
 			parameters.Add(sum => sum.Terms, RatingTexts.VoteTerms(rating)).Add(sum => sum.Result, "6,491").Add(sum => sum.Divided, false)
 		);
 
-		await Assert.That(Squeezed(cut.Find(".rating-sum").TextContent)).IsEqualTo("109+6,382=6,491");
+		await Assert.That(cut.Find(".rating-sum").TextContent.Squeezed()).IsEqualTo("109+6,382=6,491");
 	}
 
 	[Test]
@@ -83,13 +83,11 @@ public class RatingSumTests : BunitContext
 				.Add(sum => sum.Why, RatingTexts.Why(new RatingStrategy(new OrderedRating())))
 		);
 
-		await Assert.That(Squeezed(cut.Find(".rating-sum").TextContent)).IsEqualTo("7.4→7.4,firstintheorder");
+		await Assert.That(cut.Find(".rating-sum").TextContent.Squeezed()).IsEqualTo("7.4→7.4,firstintheorder");
 	}
 
 	private static async Task<SammlarrRating> AverageAsync(MediaRatings ratings)
 	{
 		return await Assert.That(AveragedRating.Everything.Resolve(ratings, Everything)).IsSome();
 	}
-
-	private static string Squeezed(string text) => string.Concat(text.Where(character => !char.IsWhiteSpace(character)));
 }

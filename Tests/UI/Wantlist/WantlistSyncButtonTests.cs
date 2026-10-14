@@ -15,7 +15,6 @@ using Domain.Identity;
 using Domain.Jobs;
 using Domain.Media;
 using Domain.Providers;
-using Domain.Settings;
 using Domain.Wantlist;
 using Domain.Wantlist.Arr;
 using Domain.Wantlist.Outbox;
@@ -179,14 +178,16 @@ public class WantlistSyncButtonTests : BunitContext
 		var media = IMediaService.Mock();
 		media
 			.GetDetailsAsync(Any(), Any(), Any())
-			.Returns((ids, _, _) => Async([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, id == movie ? MediaType.Movie : MediaType.Show)))]));
+			.Returns(
+				(ids, _, _) => AsyncSequence.Of([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, id == movie ? MediaType.Movie : MediaType.Show)))])
+			);
 		Services.AddSingleton(media.Object);
 
 		var cut = Render<WantlistSyncButton>(parameters => parameters.Add(button => button.Sink, SinkKind.Arr));
 
 		cut.WaitForElement("[data-app=Sonarr] .is-removed");
-		await Assert.That(Spaceless(cut.Find("[data-app=Radarr]").TextContent)).IsEqualTo("+1");
-		await Assert.That(Spaceless(cut.Find("[data-app=Sonarr]").TextContent)).IsEqualTo("+2−1");
+		await Assert.That(cut.Find("[data-app=Radarr]").TextContent.Squeezed()).IsEqualTo("+1");
+		await Assert.That(cut.Find("[data-app=Sonarr]").TextContent.Squeezed()).IsEqualTo("+2−1");
 	}
 
 	[Test]
@@ -318,7 +319,7 @@ public class WantlistSyncButtonTests : BunitContext
 				{
 					var asked = ids.ToList();
 					read.AddRange(asked);
-					return Async([.. asked.Select(id => (Result<MatchedMedia>)Success.Of(id == Synced ? Detail(id) : Typed(id, MediaType.Movie)))]);
+					return AsyncSequence.Of([.. asked.Select(id => (Result<MatchedMedia>)Success.Of(id == Synced ? Detail(id) : Typed(id, MediaType.Movie)))]);
 				}
 			);
 		Services.AddSingleton(media.Object);
@@ -350,7 +351,7 @@ public class WantlistSyncButtonTests : BunitContext
 				{
 					var asked = ids.ToList();
 					read.AddRange(asked);
-					return Async([.. asked.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, MediaType.Movie)))]);
+					return AsyncSequence.Of([.. asked.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, MediaType.Movie)))]);
 				}
 			);
 		Services.AddSingleton(media.Object);
@@ -383,7 +384,9 @@ public class WantlistSyncButtonTests : BunitContext
 	private static IMediaService MediaOf(MediaType type)
 	{
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any(), Any()).Returns((ids, _, _) => Async([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, type)))]));
+		media
+			.GetDetailsAsync(Any(), Any(), Any())
+			.Returns((ids, _, _) => AsyncSequence.Of([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Typed(id, type)))]));
 		return media.Object;
 	}
 
@@ -415,7 +418,7 @@ public class WantlistSyncButtonTests : BunitContext
 		Services.AddSingleton(planner.Object);
 
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(Synced))));
+		media.GetDetailsAsync(Any(), Any(), Any()).Returns(AsyncSequence.Of<Result<MatchedMedia>>(Success.Of(Detail(Synced))));
 		Services.AddSingleton(media.Object);
 
 		var wantlist = IWantlistService.Mock();
@@ -427,18 +430,7 @@ public class WantlistSyncButtonTests : BunitContext
 		Services.AddSingleton(blocklist.Object);
 
 		var providerConfig = IProviderConfigService.Mock();
-		providerConfig
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
+		providerConfig.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex);
 		Services.AddSingleton(providerConfig.Object);
 
 		var currentUser = ICurrentUser.Mock();
@@ -469,17 +461,6 @@ public class WantlistSyncButtonTests : BunitContext
 	private static WantlistSyncSummary Summary(WantlistDelta? pull = null, WantlistDelta? push = null) => new(pull ?? NoChanges, push ?? NoChanges, [Synced]);
 
 	private static IReadOnlyList<MediaId> Ids(int count) => [.. Enumerable.Range(0, count).Select(_ => MediaId.New())];
-
-	private static async IAsyncEnumerable<T> Async<T>(params T[] items)
-	{
-		foreach (var item in items)
-		{
-			await Task.Yield();
-			yield return item;
-		}
-	}
-
-	private static string Spaceless(string text) => string.Concat(text.Where(character => !char.IsWhiteSpace(character)));
 
 	private static MatchedMedia Typed(MediaId id, MediaType type)
 	{

@@ -50,7 +50,7 @@ public class SammlarrAccountRowTests : BunitContext
 
 		cut.WaitForState(() => cut.FindAll("[data-counts]").Count == 1);
 		await Assert
-			.That(cut.FindAll("[data-counts] > span").Select(count => Spaced(count.TextContent)))
+			.That(cut.FindAll("[data-counts] > span").Select(count => count.TextContent.Words()))
 			.IsEquivalentTo(["2 users", "1 admin", "1 invite pending", "1 locked out"]);
 	}
 
@@ -81,6 +81,4 @@ public class SammlarrAccountRowTests : BunitContext
 		var user = new User(UserId.New(), role.ToString(), string.Empty, role, DateTimeOffset.UnixEpoch);
 		return new JoinedPerson(user, PersonHoldings.Empty, lockedUntil, new StoredColour(new None(), new None()));
 	}
-
-	private static string Spaced(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 }

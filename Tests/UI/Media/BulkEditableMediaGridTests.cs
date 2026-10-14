@@ -36,13 +36,11 @@ public class BulkEditableMediaGridTests : BunitContext
 		await cut.Find("[data-testid=selection-layer]").ClickAsync(new());
 
 		await Assert.That(cut.FindAll("[data-testid=selection-badge] svg")).Count().IsEqualTo(1);
-		await Assert.That(Collapsed(cut.Find(".bulk-sticky").TextContent)).Contains("1 selected");
+		await Assert.That(cut.Find(".bulk-sticky").TextContent.Words()).Contains("1 selected");
 	}
 
 	private static MatchedMedia Movie()
 	{
 		return new(new MediaIdentity(MediaId.New(), []), new MovieDetails { BackdropUrl = "https://cdn.example.test/backdrop.jpg" });
 	}
-
-	private static string Collapsed(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 }

@@ -4,6 +4,7 @@ using Bunit;
 using Domain.Media;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
 
 namespace UI.Tests.Feeds;
@@ -28,7 +29,10 @@ public class FeedVotesPopoverTests : BunitContext
 		var rows = cut.WaitForElements(".votes-pop-row");
 		await Assert
 			.That(rows.Select(row => row.TextContent.Trim()))
-			.IsEquivalentTo(["TMDB", "IMDb", "Rotten Tomatoes®no votes", "Metacriticno votes", "Letterboxd", "Trakt", "MyAnimeList", "AniList"]);
+			.IsEquivalentTo(
+				["TMDB", "IMDb", "Rotten Tomatoes®no votes", "Metacriticno votes", "Letterboxd", "Trakt", "MyAnimeList", "AniList"],
+				CollectionOrdering.Matching
+			);
 		await Assert.That(cut.Find(".votes-pop").TextContent).Contains("A title only Rotten Tomatoes® or Metacritic rates has no votes and fails this rule.");
 	}
 

@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Usage;
@@ -7,7 +6,7 @@ using UI.Features.Settings.Components.Usage;
 
 namespace UI.Tests.Settings.Usage;
 
-public partial class UsageQuotaSummaryTests : BunitContext
+public class UsageQuotaSummaryTests : BunitContext
 {
 	private static readonly string Resets = UsageSamples.Local(UsageSamples.Reset);
 
@@ -106,7 +105,7 @@ public partial class UsageQuotaSummaryTests : BunitContext
 
 	private static string Text(IRenderedComponent<UsageQuotaSummary> cut)
 	{
-		var parts = cut.Find("[data-testid=usage-quota-summary]").Children.Select(part => Spaces().Replace(part.TextContent, " ").Trim());
+		var parts = cut.Find("[data-testid=usage-quota-summary]").Children.Select(part => part.TextContent.Words());
 		return string.Join(" ", parts.Where(part => part.Length > 0));
 	}
 
@@ -114,7 +113,4 @@ public partial class UsageQuotaSummaryTests : BunitContext
 	{
 		return Render<UsageQuotaSummary>(parameters => parameters.Add(summary => summary.Quota, quota).Add(summary => summary.Range, range));
 	}
-
-	[GeneratedRegex(@"\s+")]
-	private static partial Regex Spaces();
 }

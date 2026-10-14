@@ -370,10 +370,8 @@ public class FeedRunLiveTests : BunitContext
 
 	private static IReadOnlyList<string> Segments(IRenderedComponent<FeedRunLive> cut)
 	{
-		return [.. cut.FindAll("[data-testid=live-foot] .live-foot-main > span").Select(span => Words(span.TextContent))];
+		return [.. cut.FindAll("[data-testid=live-foot] .live-foot-main > span").Select(span => span.TextContent.Words())];
 	}
-
-	private static string Words(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
 	private static TraceSnapshot Snapshot(Guid run, long seq = 12)
 	{

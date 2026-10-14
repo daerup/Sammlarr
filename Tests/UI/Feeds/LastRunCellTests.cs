@@ -9,8 +9,6 @@ using Domain.Blocklist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
-using Domain.Providers;
-using Domain.Settings;
 using Domain.Wantlist;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -171,7 +169,7 @@ public class LastRunCellTests : BunitContext
 		Services.AddLogging();
 
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any(), Any()).Returns((ids, _, _) => Async([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Detail(id)))]));
+		media.GetDetailsAsync(Any(), Any(), Any()).Returns((ids, _, _) => AsyncSequence.Of([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Detail(id)))]));
 		Services.AddSingleton(media.Object);
 
 		var wantlist = IWantlistService.Mock();
@@ -183,18 +181,7 @@ public class LastRunCellTests : BunitContext
 		Services.AddSingleton(blocklist.Object);
 
 		var providerConfig = IProviderConfigService.Mock();
-		providerConfig
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
+		providerConfig.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex);
 		Services.AddSingleton(providerConfig.Object);
 
 		Services.AddScoped<Notifier>();
@@ -206,41 +193,13 @@ public class LastRunCellTests : BunitContext
 	}
 
 	private static FeedRun Run() =>
-		new()
+		TestFeeds.Run(TestFeeds.Feed(Feed.Value), Guid.NewGuid()) with
 		{
-			Id = RunId.From(Guid.NewGuid()),
-			FeedId = Feed,
 			StartedAt = DateTimeOffset.UtcNow.AddMinutes(-5),
 			Duration = TimeSpan.FromSeconds(2),
-			Strategy = new FeedStrategy(new Append()),
-			Trigger = new FeedRunTrigger(new Manual()),
-			Conclusiveness = Conclusiveness.Conclusive,
-			Counts = new FeedRunCounts
-			{
-				Total = 1,
-				Added = 1,
-				Kept = 0,
-				Bypassed = 0,
-				Filtered = 0,
-				Skipped = 0,
-				UnmatchedNotFound = 0,
-				UnmatchedCouldNotLookUp = 0,
-				UnmatchedConflict = 0,
-				Removed = 0,
-				Known = 0,
-				NotFoundEarlier = 0,
-			},
+			Counts = FeedRunCounts.None with { Total = 1, Added = 1 },
 			Items = [new FeedRunItem { MediaId = Added, State = FeedRunItemState.Added }],
 		};
-
-	private static async IAsyncEnumerable<T> Async<T>(params T[] items)
-	{
-		foreach (var item in items)
-		{
-			await Task.Yield();
-			yield return item;
-		}
-	}
 
 	private static MatchedMedia Detail(MediaId id)
 	{

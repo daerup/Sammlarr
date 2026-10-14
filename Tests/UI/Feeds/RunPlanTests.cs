@@ -1,6 +1,5 @@
 using Domain.Feed;
 using Domain.Feed.Run;
-using Domain.Providers;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
@@ -108,39 +107,14 @@ public class RunPlanTests
 
 	private static FeedOverview Ran(Feed feed, Conclusiveness outcome, int fetched)
 	{
-		return FeedOverview.Of(
-			feed,
-			Some.Of(
-				new FeedRunTotals(
-					new FeedRun
-					{
-						Id = RunId.From(Guid.NewGuid()),
-						FeedId = feed.Id,
-						StartedAt = Now.AddHours(-1),
-						Duration = TimeSpan.FromSeconds(2),
-						Strategy = new Append(),
-						Trigger = new Manual(),
-						Conclusiveness = outcome,
-						Counts = FeedRunCounts.None with { Total = fetched },
-						Items = [],
-					},
-					FeedRunHistory.None
-				)
-			),
-			0
-		);
+		var run = TestFeeds.Run(feed, Guid.NewGuid(), outcome) with { Counts = FeedRunCounts.None with { Total = fetched } };
+		return FeedOverview.Of(feed, Some.Of(new FeedRunTotals(run, FeedRunHistory.None)), 0);
 	}
 
 	private static Feed Feed(string name, FeedRunTrigger? schedule = null, bool enabled = true) =>
-		new()
+		TestFeeds.Feed(Guid.NewGuid(), name) with
 		{
-			Name = name,
-			Id = FeedId.From(Guid.NewGuid()),
 			Enabled = enabled,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new Append(),
-			Identifier = name,
-			CreatedAt = Now.AddYears(-1),
 			Schedule = schedule ?? new Manual(),
 		};
 }

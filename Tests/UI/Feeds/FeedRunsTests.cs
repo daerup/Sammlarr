@@ -118,17 +118,7 @@ public class FeedRunsTests : BunitContext
 			.Returns(
 				new FeedSnapshot([
 					new FeedOverview(
-						new Feed
-						{
-							Name = "Comedy",
-							Id = Feed,
-							Enabled = true,
-							Provider = FeedProvider.Mdblist,
-							Strategy = new FeedStrategy(new Append()),
-							Identifier = "hdlists/comedy",
-							CreatedAt = runs[^1].StartedAt,
-							Schedule = new FeedRunTrigger(new Manual()),
-						},
+						TestFeeds.Feed(Feed.Value),
 						Some.Of(runs[0]),
 						new FeedRunHistory
 						{
@@ -175,16 +165,9 @@ public class FeedRunsTests : BunitContext
 	private static string Link(FeedRun run) => UrlGuid.Encode(run.Id.Value);
 
 	private static FeedRun Run(DateTimeOffset startedAt) =>
-		new()
+		TestFeeds.Run(TestFeeds.Feed(Feed.Value), Guid.NewGuid()) with
 		{
-			Id = RunId.From(Guid.NewGuid()),
-			FeedId = Feed,
 			StartedAt = startedAt,
 			Duration = TimeSpan.FromSeconds(2),
-			Strategy = new FeedStrategy(new Append()),
-			Trigger = new FeedRunTrigger(new Manual()),
-			Conclusiveness = Conclusiveness.Conclusive,
-			Counts = FeedRunCounts.None,
-			Items = [],
 		};
 }

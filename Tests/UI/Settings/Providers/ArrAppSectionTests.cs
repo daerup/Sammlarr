@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
@@ -323,7 +322,7 @@ public class ArrAppSectionTests : BunitContext
 	private static string Description(IRenderedComponent<ArrAppSection> cut)
 	{
 		var description = cut.FindAll("*").Last(element => element.TextContent.Contains("Found in"));
-		return Regex.Replace(description.TextContent, @"\s+", " ").Trim();
+		return description.TextContent.Words();
 	}
 
 	[Test]
@@ -344,12 +343,12 @@ public class ArrAppSectionTests : BunitContext
 
 	private static string AnimeHeader(IRenderedComponent<ArrAppSection> cut)
 	{
-		return Regex.Replace(cut.Find("[data-arr-anime] button").TextContent, @"\s+", " ").Trim();
+		return cut.Find("[data-arr-anime] button").TextContent.Words();
 	}
 
 	private static string Hint(IRenderedComponent<BbPortalHost> portal)
 	{
-		return Regex.Replace(portal.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]").TextContent, @"\s+", " ").Trim();
+		return portal.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]").TextContent.Words();
 	}
 
 	private static BbSelect<string> AnimeFolder(IRenderedComponent<ArrAppSection> cut)

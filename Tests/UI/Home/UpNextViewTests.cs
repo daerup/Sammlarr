@@ -179,15 +179,8 @@ public class UpNextViewTests
 	private static PendingJob Job(FeedId feedId, JobState state) => new(JobId.From(Guid.NewGuid()), new RunFeed(feedId, new Manual()), state, default, 0);
 
 	private static Feed Feed(FeedId id, string name, FeedRunTrigger? schedule = null) =>
-		new()
+		TestFeeds.Feed(id.Value, name) with
 		{
-			Name = name,
-			Id = id,
-			Enabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new Append(),
-			Identifier = name,
-			CreatedAt = Now.AddYears(-1),
 			Schedule = schedule ?? new Manual(),
 		};
 }
