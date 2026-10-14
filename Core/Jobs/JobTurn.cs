@@ -1,6 +1,6 @@
 namespace Core.Jobs;
 
-internal sealed class JobTurn
+internal sealed class JobTurn : IDisposable
 {
 	private readonly SemaphoreSlim _turn = new(1, 1);
 
@@ -11,6 +11,8 @@ internal sealed class JobTurn
 		await _turn.WaitAsync(cancellationToken);
 		return new Release(_turn);
 	}
+
+	public void Dispose() => _turn.Dispose();
 
 	private sealed class Release(SemaphoreSlim turn) : IDisposable
 	{

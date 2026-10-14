@@ -60,7 +60,7 @@ internal sealed class FeedRunProgress(
 		lock (_gate)
 		{
 			_disposed = true;
-			_watch?.Stop();
+			_watch?.Dispose();
 		}
 	}
 
@@ -132,7 +132,7 @@ internal sealed class FeedRunProgress(
 
 			watch.Changed += OnChanged;
 			watch.Folded += () => Fold(watch);
-			_watch?.Stop();
+			_watch?.Dispose();
 			_watch = watch;
 		}
 

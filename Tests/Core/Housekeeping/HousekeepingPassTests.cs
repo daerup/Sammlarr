@@ -8,7 +8,7 @@ using TUnit.Assertions.Enums;
 
 namespace Core.Tests.Housekeeping;
 
-public class HousekeepingPassTests
+public class HousekeepingPassTests : IDisposable
 {
 	private static readonly DateTimeOffset Now = new(2026, 10, 11, 3, 0, 0, TimeSpan.Zero);
 
@@ -35,6 +35,8 @@ public class HousekeepingPassTests
 		_activity = new TaskActivity(clock.Object);
 		_activity.Changed += () => _progress++;
 	}
+
+	public void Dispose() => _turn.Dispose();
 
 	[Test]
 	public async Task RunAsync_ForStepsGivenOutOfOrder_RunsEachInItsOrderThenCompacts()

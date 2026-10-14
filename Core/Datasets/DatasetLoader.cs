@@ -14,9 +14,11 @@ internal interface IDatasetLoader
 	Task<DatasetCheck> LoadAsync(CancellationToken cancellationToken = default);
 }
 
-internal sealed class DatasetGate
+internal sealed class DatasetGate : IDisposable
 {
 	private readonly SemaphoreSlim _oneLoad = new(1, 1);
+
+	public void Dispose() => _oneLoad.Dispose();
 
 	internal async Task<T> OneAtATimeAsync<T>(Func<Task<T>> load, CancellationToken cancellationToken)
 	{

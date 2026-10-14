@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Contracts;
 
 namespace API.Http;
@@ -94,6 +95,11 @@ internal sealed class RecentAnswers<TKey, TValue>(IDateTimeProvider clock)
 		}
 	}
 
+	[SuppressMessage(
+		"Design",
+		"CA1001:Types that own disposable fields should be disposable",
+		Justification = "the token source has no timer or linked token to free, and a settled answer stays readable for ten minutes, so no point is safe to dispose it"
+	)]
 	private sealed class Filed
 	{
 		private readonly CancellationTokenSource _fetching = new();

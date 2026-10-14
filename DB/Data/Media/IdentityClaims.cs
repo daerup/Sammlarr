@@ -8,12 +8,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Media;
 
-internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contexts, MediaWriteLock writeLock, IDateTimeProvider clock) : IIdentityClaims
+internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contexts, MediaWriteLock writeLock, IDateTimeProvider clock)
+	: IIdentityClaims,
+		IDisposable
 {
 	private const int ConstraintFailed = 19;
 
 	private readonly ConcurrentQueue<PendingClaim> _queue = new();
 	private readonly SemaphoreSlim _committing = new(1, 1);
+
+	public void Dispose() => _committing.Dispose();
 
 	public async Task<ClaimOutcome> ClaimAsync(IdentityClaim claim, CancellationToken cancellationToken = default)
 	{

@@ -15,7 +15,7 @@ internal sealed class FeedRunWatch(
 	IRemoteCapacity capacity,
 	IDateTimeProvider clock,
 	StrongBox<bool> hidden
-) : ILiveRun
+) : ILiveRun, IDisposable
 {
 	private static readonly TimeSpan Tick = TimeSpan.FromMilliseconds(250);
 
@@ -87,7 +87,7 @@ internal sealed class FeedRunWatch(
 
 	internal void Settle() => _settled = true;
 
-	internal void Stop() => _timer.Dispose();
+	public void Dispose() => _timer.Dispose();
 
 	internal async Task WatchAsync()
 	{
@@ -95,7 +95,7 @@ internal sealed class FeedRunWatch(
 		{
 			if (await ReadAsync())
 			{
-				Stop();
+				Dispose();
 				_folded = true;
 				Folded?.Invoke();
 				return;
