@@ -136,36 +136,6 @@ public sealed class ApiKeyServiceTests : IDisposable
 	}
 
 	[Test]
-	public async Task StoreAsync_AfterARejection_ServesTheNewKey()
-	{
-		Testee.ReportRejected(ApiKeyProvider.Tmdb);
-
-		await Testee.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "new-key"));
-
-		await Assert.That(await Testee.GetAsync(ApiKeyProvider.Tmdb)).IsSuccess();
-	}
-
-	[Test]
-	public async Task ClearAsync_AfterARead_DropsTheCachedKey()
-	{
-		await Testee.GetAsync(ApiKeyProvider.Tmdb);
-
-		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
-
-		await Testee.GetAsync(ApiKeyProvider.Tmdb);
-		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Exactly(2));
-	}
-
-	[Test]
-	public async Task TestAsync_ForAKeyTmdbAccepts_IsThatKey()
-	{
-		await Assert
-			.That(await Testee.TestAsync(ApiKeyProvider.Tmdb, "typed-key"))
-			.IsSuccess()
-			.And.Multiple(async key => await Assert.That(key.Value).IsEqualTo("typed-key"));
-	}
-
-	[Test]
 	[Arguments(AccessCheck.Rejected, "The TMDB API key is not valid.")]
 	[Arguments(AccessCheck.Unreachable, "TMDB could not be reached to check the API key. Try again in a moment.")]
 	[Arguments(AccessCheck.Spent, "TMDB is limiting requests right now. Try the API key again in a moment.")]

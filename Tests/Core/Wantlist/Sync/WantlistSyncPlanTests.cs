@@ -9,46 +9,13 @@ namespace Core.Tests.Wantlist.Sync;
 public class WantlistSyncPlanTests
 {
 	[Test]
-	public async Task Compute_WhenTheRemoteHasAnIdTheLocalLacks_PullsItIn()
-	{
-		var remoteOnly = Id(1);
-		var shared = Id(2);
-
-		var plan = WantlistSyncPlan.Compute(Sink(remoteOnly, shared), Wanted(shared), Queued());
-
-		await Assert.That(plan.Pull.Adds).IsEquivalentTo([remoteOnly]);
-		await Assert.That(plan.Pull.Removes).IsEmpty();
-	}
-
-	[Test]
-	public async Task Compute_WhenTheLocalHasAnIdTheRemoteDropped_PullsARemoval()
-	{
-		var localOnly = Id(1);
-		var shared = Id(2);
-
-		var plan = WantlistSyncPlan.Compute(Sink(shared), Wanted(localOnly, shared), Queued());
-
-		await Assert.That(plan.Pull.Removes).IsEquivalentTo([localOnly]);
-		await Assert.That(plan.Pull.Adds).IsEmpty();
-	}
-
-	[Test]
-	public async Task Compute_WhenAnOutboxEntryHasFailed_LeavesItOutOfThePush()
+	public async Task Compute_WhenAnOutboxEntryHasFailed_LeavesItOutOfThePushButStillCountsItAsIntentAgainstThePull()
 	{
 		var abandoned = Id(1);
 
 		var plan = WantlistSyncPlan.Compute(Sink(), Wanted(abandoned), Queued(Entry(abandoned, WantlistOperationAction.Add, WantlistOutboxState.Failed)));
 
 		await Assert.That(plan.Push.Adds).IsEmpty();
-	}
-
-	[Test]
-	public async Task Compute_WhenAnOutboxEntryHasFailed_StillCountsItAsIntentAgainstThePull()
-	{
-		var abandoned = Id(1);
-
-		var plan = WantlistSyncPlan.Compute(Sink(), Wanted(abandoned), Queued(Entry(abandoned, WantlistOperationAction.Add, WantlistOutboxState.Failed)));
-
 		await Assert.That(plan.Pull.Removes).IsEmpty();
 	}
 

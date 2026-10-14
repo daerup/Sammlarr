@@ -210,7 +210,7 @@ public class FeedRunTraceTests
 	}
 
 	[Test]
-	public async Task End_WithTitlesStillInFlight_ClearsThem()
+	public async Task End_WithTitlesStillInFlight_ClearsThemAndReportsNoneWaiting()
 	{
 		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
 		using (testee.Start(_feed, Owner))
@@ -227,6 +227,8 @@ public class FeedRunTraceTests
 		await Assert.That(snapshot.Titles).IsEmpty();
 		await Assert.That(snapshot.Nodes.Single().Waiting).IsEqualTo(0);
 		await Assert.That(snapshot.Requests).IsSome().And.IsEqualTo(1);
+		await Assert.That(snapshot.Progress.Waiting).IsEqualTo(0);
+		await Assert.That(snapshot.Progress.Busiest).IsNone();
 	}
 
 	[Test]
@@ -325,25 +327,6 @@ public class FeedRunTraceTests
 
 		var progress = (await SnapshotAsync(testee)).Progress;
 
-		await Assert.That(progress.Busiest).IsNone();
-	}
-
-	[Test]
-	public async Task End_WithTitlesStillWaiting_ReportsNoneWaiting()
-	{
-		using var testee = new FeedRunTrace(NullLogger<FeedRunTrace>.Instance);
-		using (testee.Start(_feed, Owner))
-		{
-			using (FeedRunSpans.Enter(FeedRunSpans.Title("Heat", new None())))
-			{
-				_ = FeedRunSpans.Hop(RemoteService.Plex, TraceStage.Ids);
-			}
-		}
-
-		testee.End(_feed, new FeedRunFailed("The source returned nothing."));
-
-		var progress = (await SnapshotAsync(testee)).Progress;
-		await Assert.That(progress.Waiting).IsEqualTo(0);
 		await Assert.That(progress.Busiest).IsNone();
 	}
 

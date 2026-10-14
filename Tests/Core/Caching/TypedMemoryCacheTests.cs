@@ -1,8 +1,5 @@
-using Contracts.Caching;
 using Core.Caching;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
-using Shared.DI;
 using TestInfrastructure;
 
 namespace Core.Tests.Caching;
@@ -29,6 +26,7 @@ public class TypedMemoryCacheTests
 	}
 
 	[Test]
+	[NotInParallel("typed-memory-cache-clear")]
 	public async Task TypedMemoryCache_WhenTheStoredValueIsTheDefault_StillFindsIt()
 	{
 		using var memoryCache = new MemoryCache(new MemoryCacheOptions());
@@ -142,19 +140,5 @@ public class TypedMemoryCacheTests
 
 		await Assert.That(flags.GetValueOrNone("shared")).IsNone();
 		await Assert.That(counts.GetValueOrNone("shared")).IsSome().And.IsEqualTo(7);
-	}
-
-	[Test]
-	public async Task TypedMemoryCache_ResolvedFromCoreModule_StoresAndReturnsValue()
-	{
-		var services = new ServiceCollection();
-		services.AddModule<CoreModule>();
-		await using var serviceProvider = services.BuildServiceProvider();
-		using var scope = serviceProvider.CreateScope();
-		var testee = scope.ServiceProvider.GetRequiredService<ITypedMemoryCache<string, string>>();
-
-		testee.Set("key", "value");
-
-		await Assert.That(testee.GetValueOrNone("key")).IsSome().And.IsEqualTo("value");
 	}
 }

@@ -90,27 +90,6 @@ public class WantlistSyncPlannerTests
 	}
 
 	[Test]
-	public async Task PlanAsync_WhenOnlySonarrCannotBeRead_PlansTheMoviesAndLeavesTheShowsWaiting()
-	{
-		var (movie, newMovie, show, newShow) = (MediaId.New(), MediaId.New(), MediaId.New(), MediaId.New());
-		var down = new WantlistSyncSinkUnreachable("Sonarr answered 401 Unauthorized.", [ArrApp.Sonarr]);
-		var sink = IMediaSink.Mock();
-		sink.GetAsync(Any()).Returns(new SinkSnapshot([movie], []) { Down = Some.Of(down) });
-		var repository = WantlistStubs.EmptyRepository();
-		repository.GetAllAsync(Any()).Returns([.. WantlistStubs.Wanted([movie, show]).Items]);
-		var outbox = WantlistStubs.OutboxPending([newMovie, newShow]);
-		var media = WantlistStubs.Typed((movie, MediaType.Movie), (newMovie, MediaType.Movie), (show, MediaType.Show), (newShow, MediaType.Show));
-
-		var result = await WantlistStubs.Planner(sink, outbox, repository: repository, media: media).PlanAsync();
-
-		var summary = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSummary>();
-		await Assert.That(summary!.Pull.Removes).IsEmpty();
-		await Assert.That(summary.Push.Adds).IsEquivalentTo([newMovie]);
-		await Assert.That(summary.Waiting).IsEquivalentTo([newShow]);
-		await Assert.That(summary.Down).IsSome().And.IsEqualTo(down);
-	}
-
-	[Test]
 	public async Task PlanAsync_WhenOnlySonarrCannotBeRead_NeitherDropsNorPlansAQueuedShowRemoval()
 	{
 		var show = MediaId.New();

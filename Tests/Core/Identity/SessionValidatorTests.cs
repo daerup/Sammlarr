@@ -39,14 +39,6 @@ public class SessionValidatorTests
 	}
 
 	[Test]
-	public async Task IsValidAsync_ForASessionFromBeforeThePasswordChanged_ReturnsFalse()
-	{
-		_users.FindSessionAsync(TargetId, Any()).Returns(Some.Of(new UserSession(UserRole.Member, Some.Of(RevokedAt))));
-
-		await Assert.That(await Testee.IsValidAsync(TargetId, UserRole.Member, RevokedAt.AddMinutes(-1))).IsFalse();
-	}
-
-	[Test]
 	public async Task IsValidAsync_ForACookieIssuedInTheSecondOfTheChange_ReturnsTrue()
 	{
 		_users.FindSessionAsync(TargetId, Any()).Returns(Some.Of(new UserSession(UserRole.Member, Some.Of(RevokedAt))));

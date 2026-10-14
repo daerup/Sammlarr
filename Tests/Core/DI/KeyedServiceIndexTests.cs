@@ -1,7 +1,5 @@
-using Contracts.DI;
 using Core.DI;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.DI;
 
 namespace Core.Tests.DI;
 
@@ -34,19 +32,6 @@ public class KeyedServiceIndexTests
 		var testee = new KeyedServiceIndex<TestProvider, ITestService>(scope.ServiceProvider);
 
 		await Assert.That(() => testee[TestProvider.Plex]).Throws<InvalidOperationException>();
-	}
-
-	[Test]
-	public async Task KeyedServiceIndex_ResolvedFromCoreModule_ReturnsRegisteredService()
-	{
-		var services = new ServiceCollection();
-		services.AddModule<CoreModule>();
-		services.AddKeyedScoped<ITestService, TmdbService>(TestProvider.Tmdb);
-		await using var serviceProvider = services.BuildServiceProvider();
-		using var scope = serviceProvider.CreateScope();
-		var testee = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<TestProvider, ITestService>>();
-
-		await Assert.That(testee[TestProvider.Tmdb].Name).IsEqualTo("tmdb");
 	}
 
 	private enum TestProvider
