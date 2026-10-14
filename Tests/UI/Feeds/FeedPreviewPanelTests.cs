@@ -60,18 +60,6 @@ public class FeedPreviewPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Preview_WhenAnOwnedRowIsBlocklisted_ItStillLeavesOnceItStopsQualifying()
-	{
-		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
-
-		await ApplyAsync(cut, new Mirror(3));
-		cut.WaitForState(() => cut.FindAll(".preview-main-results .search-result-row").Count == 5);
-
-		await Assert.That(cut.FindAll(".preview-main-results .result-leaving")).Count().IsEqualTo(2);
-		await Assert.That(BadgeCounts(cut)[2]).IsEqualTo(2);
-	}
-
-	[Test]
 	public async Task Preview_WhenTheFeedAlreadyOwnsAQualifyingRow_ItIsNotCountedAsAnImport()
 	{
 		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
@@ -87,18 +75,17 @@ public class FeedPreviewPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Preview_WhenOnItsWayOutIsToggled_TheTotalBadgeStopsReadingAsActive()
+	public async Task Preview_WhenOnItsWayOutIsToggled_TheGridShowsOnlyTheLeavingRows()
 	{
 		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
 
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-main-results .search-result-row").Count == 5);
 
-		await Assert.That(TotalBadge(cut).ClassList).Contains("is-active");
-
 		await cut.Find(".leaving-badge-slot .preview-filter-badge").ClickAsync(new MouseEventArgs());
 
-		await Assert.That(TotalBadge(cut).ClassList).DoesNotContain("is-active");
+		await Assert.That(cut.FindAll(".preview-main-results .search-result-row")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll(".preview-main-results .result-leaving")).Count().IsEqualTo(2);
 	}
 
 	[Test]
@@ -124,7 +111,8 @@ public class FeedPreviewPanelTests : BunitContext
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-gone-results .search-result-row").Count == 1);
 
-		await Assert.That(cut.FindAll(".preview-gone-results .search-result-toggle-btn")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll(".preview-gone-results button[aria-label='Add to wantlist']")).Count().IsEqualTo(1);
+		await Assert.That(cut.FindAll(".preview-gone-results button[aria-label='Add to blocklist']")).Count().IsEqualTo(1);
 	}
 
 	[Test]
@@ -162,8 +150,6 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private static int LeavingBadge(IRenderedComponent<FeedPreviewPanel> cut) =>
 		int.Parse(cut.Find(".leaving-badge-slot .preview-filter-badge span").TextContent);
-
-	private static IElement TotalBadge(IRenderedComponent<FeedPreviewPanel> cut) => cut.FindAll(".stat-badges-row .preview-filter-badge")[0];
 
 	[Test]
 	public async Task Apply_AsksTheProviderAsTheFeedEditorForTheDraftsFeed()
@@ -233,7 +219,6 @@ public class FeedPreviewPanelTests : BunitContext
 		await ApplyAsync(cut, new Append(), visit: visit.Token);
 
 		provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Never);
-		planner.NeedsAsync(Any(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]

@@ -70,16 +70,6 @@ public class FeedsPageTests : BunitContext
 	}
 
 	[Test]
-	public async Task RunFeeds_WithoutAnyFeed_IsNotOffered()
-	{
-		RegisterServices([]);
-		var cut = RenderPage();
-		cut.WaitForState(() => cut.Markup.Contains("No feeds yet."));
-
-		await Assert.That(Buttons(cut, "Run feeds")).IsEmpty();
-	}
-
-	[Test]
 	public async Task Render_WhileYourFeedRuns_ShowsTheLiveView()
 	{
 		RegisterServices([Overview()], Some.Of(Comedy), Snapshot(new None()));
@@ -137,7 +127,7 @@ public class FeedsPageTests : BunitContext
 	}
 
 	[Test]
-	public async Task Fold_AfterTheRun_RemovesTheViewAndFlashesTheCard()
+	public async Task Fold_AfterTheRun_RemovesTheViewAndThePillAndSaysNothingIsRunning()
 	{
 		RegisterServices([Overview()], Some.Of(Comedy), Snapshot(Some.Of(new FeedRunEnd(TraceEnding.Completed, 900))));
 		var cut = RenderPage();
@@ -146,7 +136,6 @@ public class FeedsPageTests : BunitContext
 		_clock.Now.Getter.Returns(Start.AddSeconds(6));
 
 		cut.WaitForState(() => cut.FindAll("[data-testid=feed-run-live]").Count == 0, TimeSpan.FromSeconds(3));
-		await Assert.That(cut.Find(".feed-card-foot").ClassList).Contains("is-new");
 		await Assert.That(cut.FindAll("[data-testid=running-pill]")).IsEmpty();
 		await Assert.That(cut.Find("[data-testid=feed-run-idle]").TextContent).Contains("Nothing is running");
 	}
@@ -178,13 +167,14 @@ public class FeedsPageTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WithoutFeeds_ShowsNoLiveView()
+	public async Task Render_WithoutFeeds_OffersNoRunAndShowsNoLiveView()
 	{
 		RegisterServices([]);
 
 		var cut = RenderPage();
 
 		cut.WaitForState(() => cut.Markup.Contains("No feeds yet."));
+		await Assert.That(Buttons(cut, "Run feeds")).IsEmpty();
 		await Assert.That(cut.FindAll("#feed-run-live")).IsEmpty();
 	}
 

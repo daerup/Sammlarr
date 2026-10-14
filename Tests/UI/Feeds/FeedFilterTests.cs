@@ -17,9 +17,9 @@ public class FeedFilterTests
 	}
 
 	[Test]
-	public async Task Apply_ForAProvider_KeepsItsFeeds()
+	public async Task Apply_ForAProvider_KeepsOnlyItsFeeds()
 	{
-		var shown = (FeedFilter.None with { Providers = [FeedProvider.Mdblist] }).Apply(All);
+		var shown = (FeedFilter.None with { Providers = [FeedProvider.Mdblist] }).Apply([.. All, Popular]);
 
 		await Assert.That(shown).IsEquivalentTo(All);
 	}

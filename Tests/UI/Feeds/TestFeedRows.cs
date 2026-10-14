@@ -16,6 +16,8 @@ internal static class TestFeedRows
 
 	internal static readonly FeedRow[] All = [Comedy, Documentaries, WeeklyPicks, Trending];
 
+	internal static readonly FeedRow Popular = Row("Popular movies", FeedProvider.Tmdb);
+
 	private static FeedRow Row(
 		string name,
 		FeedProvider provider,

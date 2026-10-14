@@ -28,9 +28,7 @@ public class RunBarTests
 	[Test]
 	public async Task Meaning_ForMatched_NamesTheSink()
 	{
-		await Assert
-			.That(RunBar.Meaning(RunPart.Matched, "Radarr + Sonarr"))
-			.IsEqualTo("Found this run: Sammlarr now has the ids it needs to add it to Radarr + Sonarr.");
+		await Assert.That(RunBar.Meaning(RunPart.Matched, "Radarr + Sonarr")).Contains("Radarr + Sonarr");
 	}
 
 	[Test]

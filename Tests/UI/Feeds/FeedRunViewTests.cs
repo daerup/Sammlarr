@@ -13,11 +13,28 @@ public class FeedRunViewTests
 	private static readonly Feed Comedy = TestFeeds.Feed(new Guid(1, 0, 0, new byte[8]), "Comedy");
 
 	[Test]
-	public async Task Problem_WhenARunFailedReadingTheSource_SaysTheSourceCouldNotBeRead()
+	[Arguments(Conclusiveness.NoItems, "HTTP 404", 0, "The source could not be read, so nothing was applied.")]
+	[Arguments(Conclusiveness.NoItems, null, 0, "The source returned nothing, so nothing was applied.")]
+	[Arguments(Conclusiveness.Stopped, FeedRun.Interrupted, 0, "The run stopped before it finished, so some of its changes may be missing.")]
+	[Arguments(Conclusiveness.Stopped, FeedRun.Cancelled, 0, "The run stopped before it finished, so some of its changes may be missing.")]
+	[Arguments(Conclusiveness.Unresolved, null, 3, "Some titles couldn't be looked up, so no removals were applied.")]
+	[Arguments(Conclusiveness.StillLoading, "HTTP 500", 3, "The source failed partway through, so no removals were applied.")]
+	[Arguments(Conclusiveness.StillLoading, null, 3, "The source was still loading, so no removals were applied.")]
+	[Arguments(Conclusiveness.Pending, null, 0, null)]
+	public async Task Problem_ForARun_SaysWhatKeptItFromApplyingEverythingOrNothingWhileItIsStillGoing(
+		Conclusiveness conclusiveness,
+		string? failure,
+		int total,
+		string? expected
+	)
 	{
-		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.NoItems) with { SourceFailure = Some.Of("HTTP 404") };
+		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), conclusiveness) with
+		{
+			Counts = FeedRunCounts.None with { Total = total },
+			SourceFailure = Optional.Of(failure),
+		};
 
-		await Assert.That(FeedRunView.Problem(run)).IsEqualTo("The source could not be read, so nothing was applied.");
+		await Assert.That(FeedRunView.Problem(run)).IsEqualTo(expected);
 	}
 
 	[Test]
@@ -31,16 +48,6 @@ public class FeedRunViewTests
 		var chip = FeedRunView.Chips(counts).Single(chip => chip.Icon == "circle-alert");
 
 		await Assert.That((chip.Count, chip.Tooltip)).IsEqualTo((notFound + couldNotLookUp + conflict, tooltip));
-	}
-
-	[Test]
-	[Arguments(FeedRun.Interrupted)]
-	[Arguments(FeedRun.Cancelled)]
-	public async Task Problem_ForARunThatStoppedBeforeItFinished_SaysSoRatherThanBlamingTheSource(string reason)
-	{
-		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.Stopped) with { SourceFailure = Some.Of(reason) };
-
-		await Assert.That(FeedRunView.Problem(run)).IsEqualTo("The run stopped before it finished, so some of its changes may be missing.");
 	}
 
 	[Test]
@@ -63,74 +70,20 @@ public class FeedRunViewTests
 	}
 
 	[Test]
-	public async Task Problem_ForARunStillGoing_IsNull()
+	[Arguments(Conclusiveness.StillLoading, true, "HTTP 500", "The source failed partway through, so this run would hold back removals.")]
+	[Arguments(Conclusiveness.NoItems, false, "HTTP 404", "The source could not be read, so this run would change nothing.")]
+	[Arguments(Conclusiveness.Conclusive, false, null, null)]
+	public async Task Problem_ForAPlan_SaysWhatASourceFailureWouldHoldBackOrNothingWithoutOne(
+		Conclusiveness conclusiveness,
+		bool hasUnmatched,
+		string? failure,
+		string? expected
+	)
 	{
-		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.Pending);
+		UnmatchedMedia[] unmatched = hasUnmatched ? [new UnmatchedMedia([], new MovieDetails())] : [];
+		var plan = new AppendPlan([], unmatched, FeedDelta.None, conclusiveness) { SourceFailure = Optional.Of(failure) };
 
-		await Assert.That(FeedRunView.Problem(run)).IsNull();
-	}
-
-	[Test]
-	public async Task Problem_ForARunWithTitlesItCouldNotLookUp_SaysNoRemovalsWereApplied()
-	{
-		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.Unresolved) with { Counts = FeedRunCounts.None with { Total = 3 } };
-
-		await Assert.That(FeedRunView.Problem(run)).IsEqualTo("Some titles couldn't be looked up, so no removals were applied.");
-	}
-
-	[Test]
-	public async Task Problem_WhenARunFailedWithoutASourceFailure_SaysTheSourceReturnedNothing()
-	{
-		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.NoItems);
-
-		await Assert.That(FeedRunView.Problem(run)).IsEqualTo("The source returned nothing, so nothing was applied.");
-	}
-
-	[Test]
-	public async Task Problem_WhenARunStillLoadingFailedPartway_SaysTheSourceFailedPartway()
-	{
-		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.StillLoading) with
-		{
-			Counts = FeedRunCounts.None with { Total = 3 },
-			SourceFailure = Some.Of("HTTP 500"),
-		};
-
-		await Assert.That(FeedRunView.Problem(run)).IsEqualTo("The source failed partway through, so no removals were applied.");
-	}
-
-	[Test]
-	public async Task Problem_WhenARunWasStillLoadingWithoutAFailure_SaysTheSourceWasStillLoading()
-	{
-		var run = TestFeeds.Run(Comedy, Guid.NewGuid(), Conclusiveness.StillLoading) with { Counts = FeedRunCounts.None with { Total = 3 } };
-
-		await Assert.That(FeedRunView.Problem(run)).IsEqualTo("The source was still loading, so no removals were applied.");
-	}
-
-	[Test]
-	public async Task Problem_WhenAPlanSourceFailedAfterLoadingSome_SaysTheRunWouldHoldBackRemovals()
-	{
-		var plan = new AppendPlan([], [new UnmatchedMedia([], new MovieDetails())], FeedDelta.None, Conclusiveness.StillLoading)
-		{
-			SourceFailure = Some.Of("HTTP 500"),
-		};
-
-		await Assert.That(FeedRunView.Problem(plan)).IsEqualTo("The source failed partway through, so this run would hold back removals.");
-	}
-
-	[Test]
-	public async Task Problem_WhenAPlanHasNoSourceFailure_IsNull()
-	{
-		var plan = new AppendPlan([], [], FeedDelta.None, Conclusiveness.Conclusive);
-
-		await Assert.That(FeedRunView.Problem(plan)).IsNull();
-	}
-
-	[Test]
-	public async Task Problem_WhenAPlanSourceFailedBeforeLoadingAnything_SaysTheRunWouldChangeNothing()
-	{
-		var plan = new AppendPlan([], [], FeedDelta.None, Conclusiveness.NoItems) { SourceFailure = Some.Of("HTTP 404") };
-
-		await Assert.That(FeedRunView.Problem(plan)).IsEqualTo("The source could not be read, so this run would change nothing.");
+		await Assert.That(FeedRunView.Problem(plan)).IsEqualTo(expected);
 	}
 
 	private static MatchedMedia Movie(MediaId id, string title)

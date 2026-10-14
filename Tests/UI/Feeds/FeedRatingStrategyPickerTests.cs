@@ -39,12 +39,15 @@ public class FeedRatingStrategyPickerTests : BunitContext
 	}
 
 	[Test]
-	public async Task Picker_WhenTheFeedFollowsYourDefault_ListsTheDefaultsSourcesReadOnly()
+	public async Task Picker_WhenTheFeedFollowsAnAveragedDefault_ListsTheDefaultsSourcesReadOnlyWithoutRanks()
 	{
 		var cut = RenderPicker(new None());
 
 		await Assert.That(cut.Find(".rating-picker-follows").TextContent).Contains("Follows your default");
-		await Assert.That(cut.FindAll(".is-readonly .rating-picker-check").Count).IsEqualTo(4);
+		await Assert
+			.That(cut.FindAll(".is-readonly .rating-picker-item > span:last-child").Select(name => name.TextContent))
+			.IsEquivalentTo(["TMDB", "IMDb", "Rotten Tomatoes® critics", "Rotten Tomatoes® audience"]);
+		await Assert.That(cut.FindAll(".is-readonly .rating-picker-rank")).IsEmpty();
 	}
 
 	[Test]

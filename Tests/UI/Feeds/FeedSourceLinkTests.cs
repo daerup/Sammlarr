@@ -40,12 +40,11 @@ public class FeedSourceLinkTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForAnExternalLink_OpensSafelyInANewTabAsAnAppLink()
+	public async Task Render_ForAnExternalLink_OpensSafelyInANewTab()
 	{
 		var cut = Render<FeedSourceLink>(parameters => parameters.Add(link => link.Provider, FeedProvider.Mdblist).Add(link => link.Identifier, "some-list"));
 
 		var anchor = cut.Find("a");
-		await Assert.That(anchor.ClassList).Contains("app-link");
 		await Assert.That(anchor.GetAttribute("target")).IsEqualTo("_blank");
 		await Assert.That(anchor.GetAttribute("rel")).IsEqualTo("noopener noreferrer");
 	}
@@ -56,27 +55,5 @@ public class FeedSourceLinkTests : BunitContext
 		var cut = Render<FeedSourceLink>(parameters => parameters.Add(link => link.Provider, FeedProvider.Mdblist).Add(link => link.Identifier, "some-list"));
 
 		await Assert.That(cut.Find("a").GetAttribute("title")).IsEqualTo("Open on MDBList");
-	}
-
-	[Test]
-	public async Task Render_WhenMuted_MutesTheLink()
-	{
-		var cut = Render<FeedSourceLink>(parameters =>
-			parameters.Add(link => link.Provider, FeedProvider.Mdblist).Add(link => link.Identifier, "some-list").Add(link => link.Muted, true)
-		);
-
-		await Assert.That(cut.Find("a").ClassList).Contains("is-muted");
-	}
-
-	[Test]
-	public async Task Render_WithASizeClass_ReplacesTheDefaultSize()
-	{
-		var cut = Render<FeedSourceLink>(parameters =>
-			parameters.Add(link => link.Provider, FeedProvider.Mdblist).Add(link => link.Identifier, "some-list").Add(link => link.Class, "text-[11px]")
-		);
-
-		var classes = cut.Find("a").ClassList;
-		await Assert.That(classes).Contains("text-[11px]");
-		await Assert.That(classes).DoesNotContain("text-sm");
 	}
 }

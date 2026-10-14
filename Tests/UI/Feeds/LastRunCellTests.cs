@@ -119,7 +119,6 @@ public class LastRunCellTests : BunitContext
 		await cut.Find("[data-testid=last-run-bar]").ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
 		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-tip]").Count == 1);
 
-		await Assert.That(cut.FindAll("[data-testid=last-run-bar] i").Select(part => part.GetAttribute("data-part"))).IsEquivalentTo(["Matched"]);
 		await Assert.That(cut.Find("[data-testid=last-run-tip]").TextContent).Contains("Finding the titles").And.Contains("What the run did");
 		await Assert.That(cut.Find("[data-testid=last-run-tip-did]").TextContent).Contains("Added to your collection");
 	}

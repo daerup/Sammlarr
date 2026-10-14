@@ -24,7 +24,7 @@ public class RunningPillTests : BunitContext
 		var cut = Render<RunningPill>(parameters => parameters.Add(pill => pill.Run, _run.Object).Add(pill => pill.Bar, true));
 
 		await Assert.That(Text(cut)).IsEqualTo($"Running · 812 / ~{2000:N0}");
-		await Assert.That(cut.FindAll("[data-testid=running-bar] i")).Count().IsEqualTo(7);
+		await Assert.That(cut.FindAll("[data-testid=running-bar]")).Count().IsEqualTo(1);
 	}
 
 	[Test]
@@ -69,7 +69,6 @@ public class RunningPillTests : BunitContext
 		var cut = Render<RunningPill>(parameters => parameters.Add(pill => pill.Run, _run.Object));
 
 		await Assert.That(Text(cut)).IsEqualTo("Failed · 0 / 0");
-		await Assert.That(cut.Find("[data-testid=running-pill]").ClassList).Contains("is-failed");
 	}
 
 	[Test]

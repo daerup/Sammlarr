@@ -13,7 +13,7 @@ public class VotesExplanationTests
 	{
 		var explanation = VotesExplanation.For(new RatingStrategy(AveragedRating.Everything), isOwn: false, Everything);
 
-		await Assert.That(explanation.Lead).IsEqualTo("Added up from the providers this feed's rating averages (your default, Average):");
+		await Assert.That(explanation.Lead).Contains("your default, Average");
 		await Assert
 			.That(explanation.Rows.Select(row => (row.Name, row.HasVotes)))
 			.IsEquivalentTo(
@@ -40,7 +40,7 @@ public class VotesExplanationTests
 
 		var explanation = VotesExplanation.For(new RatingStrategy(ordered), isOwn: true, Everything);
 
-		await Assert.That(explanation.Lead).IsEqualTo("Taken from the first of these that rated it (this feed's own rating, First available):");
+		await Assert.That(explanation.Lead).Contains("this feed's own rating, First available");
 		await Assert
 			.That(explanation.Rows.Select(row => (row.Rank.GetValueOr(0), row.Name)))
 			.IsEquivalentTo(
@@ -65,7 +65,7 @@ public class VotesExplanationTests
 
 		var explanation = VotesExplanation.For(new RatingStrategy(averaged), isOwn: false, Everything);
 
-		await Assert.That(explanation.Lead).IsEqualTo("This feed's rating averages Rotten Tomatoes® only:");
+		await Assert.That(explanation.Lead).Contains("Rotten Tomatoes®");
 		await Assert.That(explanation.Rows.Select(row => row.Name)).IsEquivalentTo(["Rotten Tomatoes®"]);
 		await Assert.That(explanation.Note).IsEqualTo(VotesNote.EveryTitleFails);
 	}

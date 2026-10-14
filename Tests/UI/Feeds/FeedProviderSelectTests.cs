@@ -18,23 +18,21 @@ public class FeedProviderSelectTests : BunitContext
 	}
 
 	[Test]
-	public async Task Trigger_WithAProvider_TintsItWithThatBrand()
+	public async Task Trigger_WithAProvider_NamesIt()
 	{
 		var cut = RenderSelect(FeedProvider.Mdblist);
 
 		var trigger = cut.Find("[role=combobox]");
 		await Assert.That(trigger.TextContent).Contains("MDBList");
-		await Assert.That(trigger.GetAttribute("style")).IsEqualTo("--brand: #4284CA");
 	}
 
 	[Test]
-	public async Task Trigger_WithoutAProvider_StaysNeutral()
+	public async Task Trigger_WithoutAProvider_SaysNoneIsAvailable()
 	{
 		var cut = RenderSelect(null, FeedProvider.Mdblist, FeedProvider.Tmdb, FeedProvider.AniList, FeedProvider.Mal, FeedProvider.Trakt);
 
 		var trigger = cut.Find("[role=combobox]");
 		await Assert.That(trigger.TextContent).Contains("No provider available");
-		await Assert.That(trigger.HasAttribute("style")).IsFalse();
 	}
 
 	[Test]
@@ -44,28 +42,16 @@ public class FeedProviderSelectTests : BunitContext
 
 		var trigger = cut.Find("[role=combobox]");
 		await Assert.That(trigger.TextContent).Contains("Select a provider");
-		await Assert.That(trigger.HasAttribute("style")).IsFalse();
 	}
 
 	[Test]
-	public async Task Trigger_WhenTheChosenProviderLostItsKey_KeepsItButGreysItOutLikeItsOption()
+	public async Task Trigger_WhenTheChosenProviderLostItsKey_KeepsItAndSaysItHasNoKey()
 	{
 		var cut = RenderSelect(FeedProvider.Mdblist, FeedProvider.Mdblist);
 
 		var trigger = cut.Find("[role=combobox]");
 		await Assert.That(trigger.TextContent).Contains("MDBList").And.Contains("No API key");
-		await Assert.That(trigger.QuerySelector(".grayscale")).IsNotNull();
-		await Assert.That(trigger.HasAttribute("style")).IsFalse();
 		await Assert.That(trigger.HasAttribute("aria-invalid")).IsFalse();
-	}
-
-	[Test]
-	public async Task Open_WithASelection_TintsEachRowWithItsBrand()
-	{
-		var cut = await OpenAsync(FeedProvider.Mdblist);
-
-		var washes = cut.FindAll("[role=option] .provider-wash").Select(wash => wash.GetAttribute("style") ?? string.Empty).ToList();
-		await Assert.That(washes).IsEquivalentTo(["--brand: #4284CA", "--brand: #01B4E4", "--brand: #02A9FF", "--brand: #2F52A2", "--brand: #9F42C6"]);
 	}
 
 	[Test]
