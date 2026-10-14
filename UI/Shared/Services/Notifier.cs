@@ -11,7 +11,7 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 	public void Show(Toast toast, [CallerFilePath] string source = "", [CallerMemberName] string member = "") =>
 		Show(toast.Level, toast.Message, toast.Title, source, member);
 
-	public void Show(
+	private void Show(
 		NotificationLevel level,
 		string description,
 		string? title = null,

@@ -2,7 +2,7 @@ namespace UI.Features.Feeds.Pages;
 
 internal static class FeedPaging
 {
-	internal const int PageSize = 20;
+	private const int PageSize = 20;
 
 	internal static int PageCount(int feedCount) => Math.Max(1, (int)Math.Ceiling(feedCount / (double)PageSize));
 

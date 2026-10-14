@@ -36,7 +36,7 @@ internal static class MdblistApis
 		return new MdblistTitles(client, keys.Object, Lanes(), clock ?? Clock());
 	}
 
-	internal static Lanes Lanes()
+	private static Lanes Lanes()
 	{
 		return new(TimeProvider.System, [new RemoteSettings(RemoteService.Mdblist, Options)], new ServiceCollection().BuildServiceProvider());
 	}

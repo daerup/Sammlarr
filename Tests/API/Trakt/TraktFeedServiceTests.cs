@@ -222,7 +222,7 @@ public class TraktFeedServiceTests
 			.Throws<InvalidDataException>();
 	}
 
-	internal static HttpResponseMessage Page(string body, int pages)
+	private static HttpResponseMessage Page(string body, int pages)
 	{
 		var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
 		response.Headers.Add("X-Pagination-Page-Count", $"{pages}");

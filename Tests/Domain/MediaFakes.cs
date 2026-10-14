@@ -5,7 +5,7 @@ namespace Domain.Tests;
 
 internal static class MediaFakes
 {
-	public static MediaIdentity MovieIdentity()
+	private static MediaIdentity MovieIdentity()
 	{
 		var faker = new Faker();
 		return new(MediaId.New(), [TmdbId.From(faker.Random.Int(1, 1_000_000).ToString(), MediaType.Movie)]);

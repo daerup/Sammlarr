@@ -14,7 +14,7 @@ namespace API.Imdb;
 
 internal sealed class ImdbRatingsFile(HttpClient http) : IDataset<ImdbRatingLine>
 {
-	internal const string Header = "tconst\taverageRating\tnumVotes";
+	private const string Header = "tconst\taverageRating\tnumVotes";
 
 	public string Name => DatasetNames.ImdbRatings;
 
@@ -51,7 +51,7 @@ internal sealed class ImdbRatingsFile(HttpClient http) : IDataset<ImdbRatingLine
 		return Success.Of<Optional<DatasetFile<ImdbRatingLine>>>(Some.Of(file));
 	}
 
-	internal static async IAsyncEnumerable<ImdbRatingLine> Parse(byte[] body, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	private static async IAsyncEnumerable<ImdbRatingLine> Parse(byte[] body, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		using var plain = new MemoryStream();
 		await using (var gzip = new GZipStream(new MemoryStream(body), CompressionMode.Decompress))

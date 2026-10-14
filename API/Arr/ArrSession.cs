@@ -55,9 +55,9 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, ArrInstan
 
 	public IReadOnlyList<int> Owned(ArrTitle title, ArrTagScheme scheme) => [.. title.Tags.Where(tag => scheme.Owns(Label(tag)))];
 
-	public Optional<int> TagId(string label) => tags.GetValueOrNone(label);
+	private Optional<int> TagId(string label) => tags.GetValueOrNone(label);
 
-	public string Label(int id) => tags.FirstOrNone(tag => tag.Value == id).Match(tag => tag.Key, () => string.Empty);
+	private string Label(int id) => tags.FirstOrNone(tag => tag.Value == id).Match(tag => tag.Key, () => string.Empty);
 
 	public Optional<ArrTitle> Find(IExternalMediaId id)
 	{

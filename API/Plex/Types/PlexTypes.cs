@@ -29,7 +29,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("year")] int Year
 		)
 		{
-			public MediaType MediaType => MediaType.Parse(Type);
+			private MediaType MediaType => MediaType.Parse(Type);
 			public PlexId PlexId => PlexId.From(RatingKey, MediaType);
 		}
 
@@ -69,7 +69,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("imdbRatingCount")] int? ImdbRatingCount = null
 		)
 		{
-			public MediaType MediaType => MediaType.Parse(Type);
+			private MediaType MediaType => MediaType.Parse(Type);
 			public PlexId PlexId => PlexId.From(RatingKey, MediaType);
 			public TmdbId[] TmdbIds => GetId("tmdb://", i => TmdbId.From(i, MediaType));
 			public ImdbId[] ImdbIds => GetId("imdb://", i => ImdbId.From(i, MediaType));
@@ -113,7 +113,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("leafCount")] int? EpisodeCount
 		)
 		{
-			public MediaType MediaType => MediaType.Parse(Type);
+			private MediaType MediaType => MediaType.Parse(Type);
 			public PlexId PlexId => PlexId.From(RatingKey, MediaType);
 		}
 

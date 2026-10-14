@@ -13,7 +13,7 @@ internal static class PlexEndpoints
 	public const string SearchPath = "library/search";
 	public const string PinsPath = "api/v2/pins";
 	public const string UserPath = "api/v2/user";
-	public const string PhotoPath = "photo";
+	private const string PhotoPath = "photo";
 
 	public const string SearchQuery = $"{SearchPath}?searchTypes={{0}}&searchProviders=discover&includeMetadata=1&limit={{2}}&{SearchQueryParam}={{1}}";
 	public const string MatchQuery = $"{MatchesPath}?type={{0}}&guid={{1}}";

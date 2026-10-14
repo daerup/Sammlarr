@@ -34,7 +34,7 @@ internal static class WebhookConnect
 		};
 	}
 
-	internal static bool IsLinkLocal(IPAddress address)
+	private static bool IsLinkLocal(IPAddress address)
 	{
 		return address.IsIPv4MappedToIPv6 ? IsLinkLocal(address.MapToIPv4()) : address.IsIPv6LinkLocal || address.GetAddressBytes() is [169, 254, _, _];
 	}

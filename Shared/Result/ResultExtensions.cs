@@ -65,8 +65,7 @@ public static partial class ResultExtensions
 				Error err => map(err),
 			};
 
-		[GenerateAsync]
-		public Result<T> When(Func<T, bool> predicate, Error error) =>
+		private Result<T> When(Func<T, bool> predicate, Error error) =>
 			result switch
 			{
 				Success<T>(var value) => predicate(value) ? result : error,

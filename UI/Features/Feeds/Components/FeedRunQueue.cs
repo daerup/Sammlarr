@@ -26,7 +26,7 @@ internal static class FeedRunQueue
 		return Summary(queued, feeds.Count - queued);
 	}
 
-	internal static string Summary(int queued, int alreadyQueued) =>
+	private static string Summary(int queued, int alreadyQueued) =>
 		(queued, alreadyQueued) switch
 		{
 			(0, _) => $"{FeedCount(alreadyQueued)} already queued.",
