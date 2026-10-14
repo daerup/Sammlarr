@@ -6,9 +6,9 @@ namespace Observability.Metrics;
 
 internal static class MetricsPipeline
 {
-	internal const int ExportMilliseconds = 60_000;
+	private const int ExportMilliseconds = 60_000;
 
-	internal static readonly string[] Meters = ["System.Net.Http", "Polly"];
+	private static readonly string[] Meters = ["System.Net.Http", "Polly"];
 
 	public static void Register(IServiceCollection services, ObservabilityContext context)
 	{

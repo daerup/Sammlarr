@@ -98,7 +98,7 @@ internal static partial class TmdbPages
 		return Refused(page).Match<string, Result<SiteLink>>(reason => Error.From(reason), () => kept);
 	}
 
-	internal static MediaType TypeOf(SiteLink page)
+	private static MediaType TypeOf(SiteLink page)
 	{
 		return page.Path.StartsWith("tv", StringComparison.Ordinal) || page.Path.EndsWith("/tv", StringComparison.Ordinal) ? MediaType.Show : MediaType.Movie;
 	}

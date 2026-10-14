@@ -73,7 +73,7 @@ internal static class DemoFeeds
 		enabled: true
 	);
 
-	public static readonly FeedRun QuietRun = Run(DocumentariesFeed, Conclusiveness.Conclusive, FeedRunCounts.None with { Total = 402, Kept = 402 }, []);
+	private static readonly FeedRun QuietRun = Run(DocumentariesFeed, Conclusiveness.Conclusive, FeedRunCounts.None with { Total = 402, Kept = 402 }, []);
 
 	public static readonly IReadOnlyList<FeedRow> Rows =
 	[

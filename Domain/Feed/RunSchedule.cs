@@ -8,7 +8,7 @@ public readonly record struct Scheduled
 {
 	private readonly string _raw;
 
-	public CronExpression CronExpression { get; init; }
+	private CronExpression CronExpression { get; init; }
 
 	public Scheduled(string cronExpression)
 	{

@@ -2,7 +2,7 @@ namespace Web.Auth;
 
 internal static class SetupClaim
 {
-	internal const string CookieName = "sammlarr.setup";
+	private const string CookieName = "sammlarr.setup";
 
 	private static readonly TimeSpan Lifetime = TimeSpan.FromMinutes(15);
 

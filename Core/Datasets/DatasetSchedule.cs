@@ -40,7 +40,7 @@ internal sealed class DatasetSchedule(IServiceProvider services, IDateTimeProvid
 
 	public Task StoppedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
-	internal static Guid IdOf(string name) => new(SHA256.HashData(Encoding.UTF8.GetBytes($"dataset:{name}"))[..16]);
+	private static Guid IdOf(string name) => new(SHA256.HashData(Encoding.UTF8.GetBytes($"dataset:{name}"))[..16]);
 
 	private async Task FirstLoadAsync(ITimeTickerManager<TimeTickerEntity> once, string name, CancellationToken cancellationToken)
 	{

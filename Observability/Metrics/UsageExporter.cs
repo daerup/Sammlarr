@@ -43,7 +43,7 @@ internal sealed class UsageExporter(IServiceScopeFactory scopes, IUsageLastCalls
 		return ExportResult.Success;
 	}
 
-	internal static void Read(string metric, in MetricPoint point, List<UsageCalls> calls, List<UsageAttempts> attempts)
+	private static void Read(string metric, in MetricPoint point, List<UsageCalls> calls, List<UsageAttempts> attempts)
 	{
 		var tags = new Dictionary<string, string>(StringComparer.Ordinal);
 		foreach (var tag in point.Tags)
@@ -70,7 +70,7 @@ internal sealed class UsageExporter(IServiceScopeFactory scopes, IUsageLastCalls
 		}
 	}
 
-	internal static DateTimeOffset Hour(DateTimeOffset at)
+	private static DateTimeOffset Hour(DateTimeOffset at)
 	{
 		var utc = at.ToUniversalTime();
 		return new DateTimeOffset(utc.Year, utc.Month, utc.Day, utc.Hour, 0, 0, TimeSpan.Zero);

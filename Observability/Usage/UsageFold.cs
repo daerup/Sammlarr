@@ -23,7 +23,7 @@ internal static class UsageFold
 		return new UsageRows(foldedCalls, foldedAttempts);
 	}
 
-	internal static IReadOnlyDictionary<int, long> Merged(IEnumerable<IReadOnlyDictionary<int, long>> buckets)
+	private static IReadOnlyDictionary<int, long> Merged(IEnumerable<IReadOnlyDictionary<int, long>> buckets)
 	{
 		return buckets.SelectMany(each => each).GroupBy(pair => pair.Key).ToDictionary(group => group.Key, group => group.Sum(pair => pair.Value));
 	}

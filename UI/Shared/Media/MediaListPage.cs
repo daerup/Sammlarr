@@ -17,9 +17,9 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	[Inject]
 	internal ScrollService ScrollService { get; set; } = null!;
 
-	protected const int PageSize = 20;
+	private const int PageSize = 20;
 
-	protected int Page = 1;
+	private int _page = 1;
 	protected readonly CancellationTokenSource Cancellation = new();
 	protected ProviderConfig? Settings;
 	protected ListFilter Filter = ListFilter.None;
@@ -76,19 +76,19 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	protected Task ApplyFilterAsync(ListFilter filter)
 	{
 		Filter = filter;
-		Page = 1;
+		_page = 1;
 		return Task.CompletedTask;
 	}
 
 	protected static int PageCount(int itemCount) => Math.Max(1, (int)Math.Ceiling(itemCount / (double)PageSize));
 
-	protected int PageWithin(int itemCount) => Math.Clamp(Page, 1, PageCount(itemCount));
+	protected int PageWithin(int itemCount) => Math.Clamp(_page, 1, PageCount(itemCount));
 
 	protected IReadOnlyList<T> Paged<T>(IReadOnlyList<T> items) => [.. items.Skip((PageWithin(items.Count) - 1) * PageSize).Take(PageSize)];
 
 	protected Task GoToPageAsync(int page)
 	{
-		Page = page;
+		_page = page;
 		return ScrollService.ToTopAfterAsync(() => Task.CompletedTask, Cancellation.Token);
 	}
 
@@ -102,7 +102,7 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 
 	protected Task ApplySearchAsync(string? search) => ApplyFilterAsync(Filter with { Search = search });
 
-	protected void CloseSheet()
+	private void CloseSheet()
 	{
 		IsSheetOpen = false;
 		ClearSelection();

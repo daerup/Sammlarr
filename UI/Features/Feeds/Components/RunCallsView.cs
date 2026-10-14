@@ -10,7 +10,7 @@ public sealed record RunTypical(double Calls, int Runs);
 
 internal static class RunCallsView
 {
-	internal static long Total(FeedRun run) => run.Calls.Sum(call => call.Calls);
+	private static long Total(FeedRun run) => run.Calls.Sum(call => call.Calls);
 
 	internal static IReadOnlyList<(RemoteService Service, UsageTally Tally)> Services(FeedRun run)
 	{

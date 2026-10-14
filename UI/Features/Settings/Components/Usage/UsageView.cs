@@ -121,7 +121,7 @@ internal static class UsageView
 
 	internal static string Each(UsageRange range) => range is UsageRange.Day ? "hour" : "day";
 
-	internal static OutcomeLook Look(UsageOutcome outcome)
+	private static OutcomeLook Look(UsageOutcome outcome)
 	{
 		return outcome switch
 		{

@@ -28,7 +28,7 @@ internal static class SelfHostedSetup
 		await page.WaitForCircuitAsync();
 	}
 
-	internal static async Task SwitchToRadarrAndSonarrAsync(IPage page, SelfHostedStack stack)
+	private static async Task SwitchToRadarrAndSonarrAsync(IPage page, SelfHostedStack stack)
 	{
 		await Expect(page.Button("Next")).ToBeDisabledAsync();
 		await page.Locator("#sink-Arr").ClickAsync();
@@ -38,7 +38,7 @@ internal static class SelfHostedSetup
 		await Expect(page.Button("Next")).ToBeEnabledAsync(Wait.Settle);
 	}
 
-	internal static async Task AddTmdbKeyAsync(IPage page)
+	private static async Task AddTmdbKeyAsync(IPage page)
 	{
 		await Expect(page.Button("Next")).ToBeDisabledAsync();
 		var row = page.Locator("#provider-row-tmdb [data-slot=tmdb]");
@@ -48,7 +48,7 @@ internal static class SelfHostedSetup
 		await Expect(page.Button("Next")).ToBeEnabledAsync(Wait.Settle);
 	}
 
-	internal static async Task<string> InviteAsync(IPage page, string username)
+	private static async Task<string> InviteAsync(IPage page, string username)
 	{
 		await page.ButtonContaining("Invite member").ClickAsync();
 		var dialog = page.Modal("Invite member");

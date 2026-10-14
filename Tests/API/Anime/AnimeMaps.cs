@@ -26,9 +26,9 @@ internal static class AnimeMaps
 		Some.Of(431162)
 	);
 
-	internal static readonly AnimeIdMapping BareSeason = new(MediaType.Show, Some.Of(200001), Some.Of(60001), new None(), new None(), new None(), new None());
+	private static readonly AnimeIdMapping BareSeason = new(MediaType.Show, Some.Of(200001), Some.Of(60001), new None(), new None(), new None(), new None());
 
-	internal static readonly AnimeIdMapping BareMovie = new(MediaType.Movie, Some.Of(200003), Some.Of(60003), new None(), new None(), new None(), new None());
+	private static readonly AnimeIdMapping BareMovie = new(MediaType.Movie, Some.Of(200003), Some.Of(60003), new None(), new None(), new None(), new None());
 
 	internal static readonly string[] ApothecaryDiariesIds =
 	[
@@ -75,7 +75,7 @@ internal static class AnimeMaps
 		return loads;
 	}
 
-	internal static IReadOnlyDictionary<IExternalMediaId, AnimeIdMapping> FindMany(IEnumerable<IExternalMediaId> ids)
+	private static IReadOnlyDictionary<IExternalMediaId, AnimeIdMapping> FindMany(IEnumerable<IExternalMediaId> ids)
 	{
 		return ids.Distinct().Select(id => Find(id).Map(entry => (Id: id, Entry: entry))).WhereSome().ToDictionary(found => found.Id, found => found.Entry);
 	}

@@ -63,7 +63,7 @@ public static class E2EApp
 		return await context.NewPageAsync();
 	}
 
-	internal static async Task<string> RequestJournalAsync() => await (await StackAsync()).RequestJournalAsync();
+	private static async Task<string> RequestJournalAsync() => await (await StackAsync()).RequestJournalAsync();
 
 	internal static async Task<Uri> WireMockUrlAsync() => (await StackAsync()).WireMockUrl;
 

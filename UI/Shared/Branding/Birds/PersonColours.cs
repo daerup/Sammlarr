@@ -7,7 +7,7 @@ internal static class PersonColours
 {
 	internal static IReadOnlyDictionary<UserId, double> GoldenHues(IEnumerable<JoinedPerson> people) => GoldenHues(people.Select(Roster));
 
-	internal static IReadOnlyDictionary<UserId, double> GoldenHues(IEnumerable<RosterColour> roster)
+	private static IReadOnlyDictionary<UserId, double> GoldenHues(IEnumerable<RosterColour> roster)
 	{
 		Dictionary<UserId, double> hues = [];
 		Optional<double> last = new None();

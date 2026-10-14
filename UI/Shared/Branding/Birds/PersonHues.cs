@@ -2,7 +2,7 @@ namespace UI.Shared.Branding.Birds;
 
 internal static class PersonHues
 {
-	internal const double First = 40;
+	private const double First = 40;
 
 	private const double GoldenAngle = 137.5;
 

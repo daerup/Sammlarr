@@ -145,7 +145,7 @@ internal static class FeedRunView
 		];
 	}
 
-	internal static string UnmatchedSplit(FeedRunCounts counts)
+	private static string UnmatchedSplit(FeedRunCounts counts)
 	{
 		List<string> parts = [$"{counts.UnmatchedNotFound} not found by any service"];
 		if (counts.UnmatchedCouldNotLookUp > 0)

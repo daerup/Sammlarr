@@ -36,7 +36,7 @@ public static class Success
 
 public static class Result
 {
-	public static Result<T> WhenNotNull<T>(T? value, Error error) where T : class => value is not null ? Success.Of(value) : error;
+	private static Result<T> WhenNotNull<T>(T? value, Error error) where T : class => value is not null ? Success.Of(value) : error;
 
 	public static Result<T> WhenNotNull<T>(T? value, string reason) where T : class => WhenNotNull(value, Error.From(reason));
 
