@@ -69,24 +69,16 @@ public class ArrSinkRowTests : BunitContext
 	}
 
 	[Test]
-	public async Task Row_WhenBothAppsAnswer_SaysConnectedNextToItsRoles()
+	public async Task Row_WhenBothAppsAnswer_SaysConnectedNextToItsRolesAndOpensOnRadarrBeforeSonarrAndTags()
 	{
 		var cut = RenderRow(settingUp: false);
 
 		cut.WaitForState(() => Badge(cut) == "Connected");
 		await Assert.That(cut.FindAll(".arr-row-head .provider-role .sr-only").Select(role => role.TextContent)).IsEquivalentTo(["Wantlist", "Search"]);
 		await Assert.That(cut.Markup).DoesNotContain("Connection · wantlist");
-	}
-
-	[Test]
-	public async Task Row_WhenSonarrRefusesTheKey_NamesItOnTheClosedRow()
-	{
-		_tester.TestAsync(ArrApp.Sonarr, Any<ArrInstanceConfig>(), Any()).Returns(Error.From("Sonarr answered 401 Unauthorized at http://sonarr:8989."));
-
-		var cut = RenderRow(settingUp: false);
-
-		cut.WaitForState(() => Badge(cut) == "Sonarr not answering");
-		await Assert.That(Badge(cut)).IsEqualTo("Sonarr not answering");
+		await Assert.That(Tabs(cut).Select(Name)).IsEquivalentTo(["Radarr", "Sonarr", "Tags"], CollectionOrdering.Matching);
+		await Assert.That(cut.FindAll("[role=tab]").Select(tab => tab.TextContent)).DoesNotContain(text => text.Contains("movies") || text.Contains("shows"));
+		await Assert.That(Name(cut.Find("[role=tab][aria-selected=true]"))).IsEqualTo("Radarr");
 	}
 
 	[Test]
@@ -238,25 +230,6 @@ public class ArrSinkRowTests : BunitContext
 	}
 
 	[Test]
-	public async Task Tags_WhenOnlySearchUsesRadarrAndSonarr_AreLeftOut()
-	{
-		var cut = RenderRow(settingUp: false, syncs: false);
-
-		cut.WaitForState(() => Badge(cut) == "Connected");
-		await Assert.That(cut.FindComponents<ArrTagsSection>()).IsEmpty();
-	}
-
-	[Test]
-	public async Task Tabs_WhileTheWantlistSyncsThere_AreRadarrSonarrAndTagsWithoutWhatEachAdds()
-	{
-		var cut = RenderRow(settingUp: false);
-
-		cut.WaitForState(() => Badge(cut) == "Connected");
-		await Assert.That(Tabs(cut).Select(Name)).IsEquivalentTo(["Radarr", "Sonarr", "Tags"], CollectionOrdering.Matching);
-		await Assert.That(cut.FindAll("[role=tab]").Select(tab => tab.TextContent)).DoesNotContain(text => text.Contains("movies") || text.Contains("shows"));
-	}
-
-	[Test]
 	[Arguments(true, false)]
 	[Arguments(false, false)]
 	public async Task Tabs_WhileSettingUpOrForSearchOnly_LeaveTagsOut(bool settingUp, bool syncs)
@@ -277,15 +250,6 @@ public class ArrSinkRowTests : BunitContext
 		cut.WaitForState(() => Badge(cut) == "Sonarr not answering");
 		await Assert.That(Name(cut.Find("[role=tab][aria-selected=true]"))).IsEqualTo("Sonarr");
 		await Assert.That(Tab(cut, "Sonarr").TextContent).Contains("Test failed");
-	}
-
-	[Test]
-	public async Task Tabs_WhenBothAppsAnswer_OpenOnRadarr()
-	{
-		var cut = RenderRow(settingUp: false);
-
-		cut.WaitForState(() => Badge(cut) == "Connected");
-		await Assert.That(Name(cut.Find("[role=tab][aria-selected=true]"))).IsEqualTo("Radarr");
 	}
 
 	[Test]

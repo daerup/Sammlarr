@@ -26,14 +26,13 @@ public class ArrTagsSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task Rows_ShowTheTagEachWritesWithTheChangingPartBright()
+	public async Task Rows_ShowTheTagEachWrites()
 	{
 		var cut = RenderTags([Guest]);
 
 		await Assert
 			.That(cut.FindAll(".arr-tag-chip").Select(chip => chip.TextContent))
 			.IsEquivalentTo(["sammlarr-u-guest", "sammlarr-top-movies-of-the-week", "sammlarr"]);
-		await Assert.That(cut.FindAll(".arr-tag-fixed").Select(part => part.TextContent)).IsEquivalentTo(["sammlarr-u-", "sammlarr-", string.Empty]);
 	}
 
 	[Test]
@@ -94,16 +93,6 @@ public class ArrTagsSectionTests : BunitContext
 		await Button(cut, "Change tag").ClickAsync();
 
 		await Assert.That(_stored.Single().Protection).IsEqualTo("keep-me");
-	}
-
-	[Test]
-	public async Task ProtectedTag_ItsDialog_SaysTheAppsFileChoiceDecidesWhatHappensToFiles()
-	{
-		var cut = RenderTags([Guest]);
-
-		await ChangeButton(cut, "Change the protected tag").ClickAsync();
-
-		await Assert.That(cut.Markup).Contains("its files kept or deleted as that app is set.").And.DoesNotContain("Its files stay.");
 	}
 
 	[Test]

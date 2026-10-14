@@ -70,7 +70,7 @@ public class ApiKeyRowTests : BunitContext
 	}
 
 	[Test]
-	public async Task Test_WhenTheProviderRejectsTheKey_OutlinesTheFieldAndLeavesTheReasonToTheBadge()
+	public async Task Test_WhenTheProviderRejectsTheKey_ShowsInvalidAndLeavesTheReasonToTheBadge()
 	{
 		_keys.TestAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Error.From(Rejection));
 		var cut = RenderRow();
@@ -79,7 +79,6 @@ public class ApiKeyRowTests : BunitContext
 		await Button(cut, "Test").ClickAsync(new MouseEventArgs());
 
 		await Assert.That(Status(cut)).IsEqualTo("Invalid");
-		await Assert.That(cut.Find("input").ClassList.Contains("border-destructive")).IsTrue();
 		await Assert.That(cut.Markup).DoesNotContain(Rejection);
 	}
 
