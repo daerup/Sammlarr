@@ -13,7 +13,6 @@ using Domain.Settings;
 using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using UI.Features.Settings.Components.Housekeeping;
 using UI.Features.Settings.Components.Providers;
 using UI.Features.Settings.Components.Ratings;
 using UI.Shared.Services;
@@ -114,7 +113,7 @@ public class SettingsPageTests : BunitContext
 	}
 
 	[Test]
-	public async Task SectionNav_ForAnAdmin_OffersTheTestingPlaygroundOnlyInDebugBuilds()
+	public async Task SectionNav_ForAnAdmin_OffersHousekeepingDiagnosticsAndUsersAndTheTestingPlaygroundOnlyInDebugBuilds()
 	{
 		var admin = ICurrentUser.Mock();
 		admin.Role.Getter.Returns(UserRole.Admin);
@@ -122,7 +121,10 @@ public class SettingsPageTests : BunitContext
 
 		var cut = RenderAt("/settings?section=providers");
 
-		var offered = cut.FindAll("nav button").Select(button => button.TextContent.Trim());
+		var offered = cut.FindAll("nav button").Select(button => button.TextContent.Trim()).ToList();
+		await Assert.That(offered).Contains("Housekeeping");
+		await Assert.That(offered).Contains("Diagnostics");
+		await Assert.That(offered).Contains("Users");
 #if DEBUG
 		await Assert.That(offered).Contains("Testing");
 #else
@@ -156,7 +158,7 @@ public class SettingsPageTests : BunitContext
 	}
 
 	[Test]
-	public async Task SectionNav_ForAMember_OffersTheirAccountButNotTheUsers()
+	public async Task SectionNav_ForAMember_OffersTheirAccountAndAboutButNotTheUsers()
 	{
 		var member = ICurrentUser.Mock();
 		member.Role.Getter.Returns(UserRole.Member);
@@ -166,20 +168,24 @@ public class SettingsPageTests : BunitContext
 
 		var offered = cut.FindAll("nav button").Select(button => button.TextContent.Trim()).ToList();
 		await Assert.That(offered).Contains("Account");
+		await Assert.That(offered).Contains("About");
 		await Assert.That(offered).DoesNotContain("Users");
 	}
 
 	[Test]
-	public async Task SectionNav_ForAMemberLinkedToHousekeeping_NeitherOffersNorOpensIt()
+	[Arguments("housekeeping", "Housekeeping")]
+	[Arguments("diagnostics", "Diagnostics")]
+	[Arguments("users", "Users")]
+	[Arguments("testing", "Testing")]
+	public async Task SectionNav_ForAMemberLinkedToAnAdminSection_NeitherOffersNorOpensIt(string slug, string label)
 	{
 		var member = ICurrentUser.Mock();
 		member.Role.Getter.Returns(UserRole.Member);
 		Services.AddSingleton(member.Object);
 
-		var cut = RenderAt("/settings?section=housekeeping");
+		var cut = RenderAt($"/settings?section={slug}");
 
-		await Assert.That(cut.FindAll("nav button").Select(button => button.TextContent.Trim())).DoesNotContain("Housekeeping");
-		await Assert.That(cut.FindComponents<HousekeepingSection>()).IsEmpty();
+		await Assert.That(cut.FindAll("nav button").Select(button => button.TextContent.Trim())).DoesNotContain(label);
 		await Assert.That(cut.FindComponents<ProvidersSection>()).HasSingleItem();
 	}
 
