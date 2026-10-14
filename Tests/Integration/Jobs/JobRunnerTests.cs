@@ -1,8 +1,11 @@
 using Contracts;
+using Contracts.Feed;
 using Contracts.Jobs;
 using Core.Jobs;
+using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Jobs;
+using Domain.Providers;
 using Domain.Wantlist.Sync;
 using Harness;
 using Microsoft.EntityFrameworkCore;
@@ -147,6 +150,37 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 		await Testee.TryRunNextAsync(CancellationToken.None);
 
 		await Assert.That(await KindsAsync()).DoesNotContain(JobKind.WantlistSync);
+	}
+
+	[Test]
+	public async Task RunNextAsync_ForAQueuedScheduledFeedRun_StoresTheRunUnderTheScheduledTrigger()
+	{
+		var feed = await SeedFeedAsync("nightly-list");
+		host.MdblistFeedEmpty("nightly-list");
+		await host.Resolve<IJobQueue>().EnqueueAsync(new RunFeed(feed, new Scheduled("0 0 3 * * *")));
+
+		await Testee.TryRunNextAsync(CancellationToken.None);
+
+		var run = (await host.Resolve<IFeedRepository>().GetRunsAsync(RunQuery.Take(1) with { Feed = Some.Of(feed) })).Single();
+		await Assert.That(run.Trigger).IsOfUnionType<FeedRunTrigger, Scheduled>();
+	}
+
+	private async Task<FeedId> SeedFeedAsync(string identifier)
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var entity = new FeedRow
+		{
+			Name = "Nightly",
+			IsEnabled = true,
+			Provider = FeedProvider.Mdblist,
+			Strategy = new FeedStrategy(new Append()),
+			Identifier = identifier,
+		};
+
+		host.Context.Feeds.Add(entity);
+		await host.Context.SaveChangesAsync();
+		host.Context.ChangeTracker.Clear();
+		return FeedId.From(entity.Id);
 	}
 
 	private async Task<IReadOnlyList<JobKind>> KindsAsync()

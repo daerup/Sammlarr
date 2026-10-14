@@ -30,18 +30,11 @@ public class JobRunnerResilienceTests
 	}
 
 	[Test]
-	public async Task ExecuteAsync_BeforeItHasStarted_DoesNotReportItselfStopped()
+	public async Task JobRunnerStatus_BeforeTheRunnerStarts_HasNotStoppedAndHasNoFailureToDate()
 	{
-		var (_, status) = BuildTestee(Idle());
+		var status = new JobRunnerStatus();
 
 		await Assert.That(status.HasStopped).IsFalse();
-	}
-
-	[Test]
-	public async Task ExecuteAsync_BeforeItHasStarted_HasNoFailureToDate()
-	{
-		var (_, status) = BuildTestee(Idle());
-
 		await Assert.That(status.LastFailureAt).IsNone();
 	}
 
