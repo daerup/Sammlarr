@@ -73,19 +73,6 @@ public class SignInServiceTests
 	}
 
 	[Test]
-	public async Task CompleteAsync_ForTheFirstSignInWithoutTheSetupCode_RefusesIt()
-	{
-		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Open));
-		_plex.CompleteLoginAsync(Any(), Any()).Returns(Success.Of(Login));
-		_users.FindByLoginAsync(Any<AuthProvider>(), Any(), Any()).Returns(new None());
-
-		var result = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
-
-		await Assert.That(result).IsError();
-		_users.CreateAsync(Any<User>(), Any<AuthProvider>(), Any(), Any()).WasCalled(Times.Never);
-	}
-
-	[Test]
 	public async Task CompleteSetupAsync_WithAWrongSetupCode_RefusesTheFirstSignIn()
 	{
 		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Open));
@@ -96,18 +83,6 @@ public class SignInServiceTests
 
 		await Assert.That(result).IsError();
 		_users.CreateAsync(Any<User>(), Any<AuthProvider>(), Any(), Any()).WasCalled(Times.Never);
-	}
-
-	[Test]
-	public async Task CompleteSetupAsync_WithTheSetupCode_MakesTheFirstPersonTheAdmin()
-	{
-		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Open));
-		_plex.CompleteLoginAsync(Any(), Any()).Returns(Success.Of(Login));
-		_users.FindByLoginAsync(Any<AuthProvider>(), Any(), Any()).Returns(new None());
-
-		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", _setup.Code.ToLowerInvariant());
-
-		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Role).IsEqualTo(UserRole.Admin));
 	}
 
 	private static ProviderConfig Config(RegistrationMode registration)

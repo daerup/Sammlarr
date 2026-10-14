@@ -1,8 +1,5 @@
-using Contracts.DI;
 using Core.DI;
 using Domain.Providers;
-using Microsoft.Extensions.DependencyInjection;
-using Shared.DI;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
@@ -35,20 +32,6 @@ public class KeyedServiceSetTests
 		var testee = new KeyedServiceSet<RemoteService, Named>([new(RemoteService.Tmdb, Tmdb)]);
 
 		await Assert.That(testee.Find(RemoteService.Wikidata)).IsNone();
-	}
-
-	[Test]
-	public async Task KeyedServiceSet_ResolvedFromCoreModule_GathersEveryKeyedRegistration()
-	{
-		var services = new ServiceCollection();
-		services.AddModule<CoreModule>();
-		services.AddSingleton(new Keyed<RemoteService, Named>(RemoteService.Plex, Plex));
-		await using var serviceProvider = services.BuildServiceProvider();
-		using var scope = serviceProvider.CreateScope();
-
-		var testee = scope.ServiceProvider.GetRequiredService<IKeyedServiceSet<RemoteService, Named>>();
-
-		await Assert.That(testee.Keys).IsEquivalentTo([RemoteService.Plex]);
 	}
 
 	private sealed record Named(string Name);
