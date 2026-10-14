@@ -4,7 +4,7 @@ using Shared.Options;
 
 namespace Core.Setup;
 
-internal sealed class SetupGate(AccountsOptions options)
+internal sealed class SetupGate(AccountsOptions options) : IDisposable
 {
 	private const string Alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
@@ -32,6 +32,8 @@ internal sealed class SetupGate(AccountsOptions options)
 		await _claim.WaitAsync(cancellationToken);
 		return new Lease(_claim);
 	}
+
+	public void Dispose() => _claim.Dispose();
 
 	private static Optional<string> Configured(string setupCode)
 	{

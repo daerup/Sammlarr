@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,11 @@ internal static class StagingEnvironment
 
 	internal static string RepositoryRoot(IDistributedApplicationBuilder builder) => Path.GetFullPath(Path.Combine(builder.AppHostDirectory, ".."));
 
+	[SuppressMessage(
+		"Maintainability",
+		"CA1506:Avoid excessive class coupling",
+		Justification = "the staging composition root: it wires every staging container, project and command"
+	)]
 	internal static void AddStaging(this IDistributedApplicationBuilder builder)
 	{
 		var config = StagingConfig.Load(builder);

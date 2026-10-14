@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.RateLimiting;
 using Contracts.Identity;
 using Microsoft.AspNetCore.Authentication;
@@ -11,6 +12,11 @@ internal sealed class AuthenticationModule : IServiceModule
 {
 	internal const string SignInLimit = "sign-in";
 
+	[SuppressMessage(
+		"Maintainability",
+		"CA1506:Avoid excessive class coupling",
+		Justification = "a DI module: its job is to wire the cookie, session check and sign-in rate limit types"
+	)]
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddCascadingAuthenticationState();

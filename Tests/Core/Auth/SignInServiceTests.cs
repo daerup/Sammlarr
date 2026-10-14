@@ -15,7 +15,7 @@ using TestInfrastructure;
 
 namespace Core.Tests.Auth;
 
-public class SignInServiceTests
+public class SignInServiceTests : IDisposable
 {
 	private static readonly ExternalLogin Login = new("plex-uuid", "Zoe", "avatar", new OAuthTokenGrant("token", DateTimeOffset.UnixEpoch, Guid.Empty));
 
@@ -24,6 +24,8 @@ public class SignInServiceTests
 	private readonly Mock<IProviderConfigService> _config = IProviderConfigService.Mock();
 	private readonly Mock<ILogger<SignInService>> _logger = ILogger<SignInService>.Mock();
 	private readonly SetupGate _setup = new(new AccountsOptions());
+
+	public void Dispose() => _setup.Dispose();
 
 	private SignInService Testee
 	{

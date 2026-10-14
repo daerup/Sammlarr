@@ -288,11 +288,9 @@ internal sealed class DetailsFetcher(
 			var at = clock.Now;
 			if (EnricherChoice.Next(missing, leftToAsk, preferred, at) is not Some<EnricherCandidate>(var next))
 			{
-				var unasked = EnricherChoice.Unasked(missing, leftToAsk, at).ToList();
-				var stopped = unasked.FirstOrNone().Map(blocked => blocked.Remote);
-				stopped.Apply(remote => FeedRunSpans.GaveUp(remote, TraceStage.Details));
+				var (stopped, unasked) = GiveUp(missing, leftToAsk, at);
 				unavailable = unavailable.Or(stopped);
-				skipped |= unasked.Aggregate(MediaFields.None, (fields, candidate) => fields | candidate.Fills);
+				skipped |= unasked;
 				break;
 			}
 
@@ -316,6 +314,14 @@ internal sealed class DetailsFetcher(
 
 		var kept = Kept(reason, current, skipped);
 		return new Enrichment(new MatchedMedia(known, kept), answered, outcomes, unavailable, kept.Missing.Count < current.Missing.Count);
+	}
+
+	private static (Optional<RemoteService> Stopped, MediaFields Unasked) GiveUp(FieldNeeds missing, List<EnricherCandidate> leftToAsk, DateTimeOffset at)
+	{
+		var unasked = EnricherChoice.Unasked(missing, leftToAsk, at).ToList();
+		var stopped = unasked.FirstOrNone().Map(blocked => blocked.Remote);
+		stopped.Apply(remote => FeedRunSpans.GaveUp(remote, TraceStage.Details));
+		return (stopped, unasked.Aggregate(MediaFields.None, (fields, candidate) => fields | candidate.Fills));
 	}
 
 	private static MediaDetails Kept(FetchReason reason, MediaDetails current, MediaFields skipped)

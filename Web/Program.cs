@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using API;
 using Contracts;
 using Core;
@@ -19,6 +20,14 @@ using Web.Setup;
 #if STAGING_SEED
 using Web.Staging;
 #endif
+
+[assembly: SuppressMessage(
+	"Maintainability",
+	"CA1506:Avoid excessive class coupling",
+	Scope = "member",
+	Target = "~M:Program.<Main>$(System.String[])",
+	Justification = "the composition root: it wires every layer's module and the request pipeline"
+)]
 
 if (args is ["healthcheck"])
 {

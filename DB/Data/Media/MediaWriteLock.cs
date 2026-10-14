@@ -1,6 +1,6 @@
 namespace DB.Data.Media;
 
-internal sealed class MediaWriteLock
+internal sealed class MediaWriteLock : IDisposable
 {
 	private readonly SemaphoreSlim _gate = new(1, 1);
 
@@ -9,6 +9,8 @@ internal sealed class MediaWriteLock
 		await _gate.WaitAsync(cancellationToken);
 		return new Release(_gate);
 	}
+
+	public void Dispose() => _gate.Dispose();
 
 	private sealed class Release(SemaphoreSlim gate) : IDisposable
 	{

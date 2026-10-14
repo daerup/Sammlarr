@@ -6,6 +6,7 @@ using Contracts.Processing;
 using Contracts.Ratings;
 using Contracts.Wantlist;
 using Core.Processing;
+using Domain.Blocklist;
 using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Media;
@@ -80,6 +81,20 @@ internal sealed class FeedRunPlanner(
 
 	private async Task<IFeedPlan> PlanAsync(Domain.Feed.Feed feed, RawFeedLoad load, FeedRating rating, CancellationToken cancellationToken)
 	{
+		var (resolved, unmatchedItems) = Split(load, rating);
+		var wanted = new WantlistSnapshot(await wantlist.GetAllAsync(cancellationToken));
+		var blocked = await blocklist.GetAsync(cancellationToken);
+		var owned = wanted.Items.Where(item => item.Provenance is FeedOrigin origin && origin.Feed.Id == feed.Id).Select(item => item.MediaId).ToHashSet();
+
+		var verdicts = await ClassifyAsync(feed, resolved, wanted, blocked, owned, cancellationToken);
+
+		var absences = feed.Strategy is Mirror ? await feeds.GetAbsencesAsync(feed.Id, cancellationToken) : new Dictionary<MediaId, int>();
+
+		return FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatchedItems, load.State, load.SourceFailure), owned, absences, feed.Strategy);
+	}
+
+	private static (List<MediaQueryRow> Resolved, List<UnmatchedMedia> Unmatched) Split(RawFeedLoad load, FeedRating rating)
+	{
 		var (strategy, available) = rating;
 		var unmatchedItems = new List<UnmatchedMedia>();
 		var resolved = new List<MediaQueryRow>();
@@ -99,10 +114,18 @@ internal sealed class FeedRunPlanner(
 			}
 		}
 
-		var wanted = new WantlistSnapshot(await wantlist.GetAllAsync(cancellationToken));
-		var blocked = await blocklist.GetAsync(cancellationToken);
-		var owned = wanted.Items.Where(item => item.Provenance is FeedOrigin origin && origin.Feed.Id == feed.Id).Select(item => item.MediaId).ToHashSet();
+		return (resolved, unmatchedItems);
+	}
 
+	private async Task<List<QueryVerdict<MatchedMedia>>> ClassifyAsync(
+		Domain.Feed.Feed feed,
+		List<MediaQueryRow> resolved,
+		WantlistSnapshot wanted,
+		BlocklistSnapshot blocked,
+		HashSet<MediaId> owned,
+		CancellationToken cancellationToken
+	)
+	{
 		var options = new QueryOptions
 		{
 			Sort = feed.Sort,
@@ -118,13 +141,7 @@ internal sealed class FeedRunPlanner(
 		);
 
 		var classified = resolved.Count > 0 ? await processor.ExecuteAsync(resolved, options, predicates, cancellationToken).ToListAsync(cancellationToken) : [];
-		var verdicts = classified
-			.Select(verdict => new QueryVerdict<MatchedMedia>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot))
-			.ToList();
-
-		var absences = feed.Strategy is Mirror ? await feeds.GetAbsencesAsync(feed.Id, cancellationToken) : new Dictionary<MediaId, int>();
-
-		return FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatchedItems, load.State, load.SourceFailure), owned, absences, feed.Strategy);
+		return classified.Select(verdict => new QueryVerdict<MatchedMedia>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot)).ToList();
 	}
 
 	private async Task<RawFeedLoad> FetchAsync(Domain.Feed.Feed feed, FieldNeeds needs, CancellationToken cancellationToken)

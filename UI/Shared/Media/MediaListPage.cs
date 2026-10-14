@@ -20,14 +20,14 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	private const int PageSize = 20;
 
 	private int _page = 1;
-	protected readonly CancellationTokenSource Cancellation = new();
-	protected ProviderConfig? Settings;
-	protected ListFilter Filter = ListFilter.None;
-	protected bool ShowFilters;
-	protected bool IsLoadingList;
-	protected string? ErrorMessage;
-	protected bool IsEditMode;
-	protected bool IsSheetOpen;
+	protected CancellationTokenSource Cancellation { get; } = new();
+	protected ProviderConfig? Settings { get; set; }
+	protected ListFilter Filter { get; set; } = ListFilter.None;
+	protected bool ShowFilters { get; set; }
+	protected bool IsLoadingList { get; set; }
+	protected string? ErrorMessage { get; set; }
+	protected bool IsEditMode { get; set; }
+	protected bool IsSheetOpen { get; set; }
 
 	private bool signedIn;
 	private bool connected;
@@ -121,5 +121,6 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	{
 		Cancellation.Cancel();
 		Cancellation.Dispose();
+		GC.SuppressFinalize(this);
 	}
 }

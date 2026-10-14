@@ -14,6 +14,14 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 {
 	public async Task<PagedResult<MediaMatchResult>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
+		var result = await FetchAsync(page, cancellationToken);
+		var finalItems = await MatchAsync(result.Results, cancellationToken);
+		var stored = await media.GetStoredRatingsAsync(finalItems.Select(item => item.MatchedId).WhereSome(), cancellationToken);
+		return new PagedResult<MediaMatchResult>([.. finalItems.Select(item => WithStoredRatings(item, stored))], result.TotalPages);
+	}
+
+	private async Task<TmdbTypes.Trending.Root> FetchAsync(int page, CancellationToken cancellationToken)
+	{
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
 		var configured = await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken);
 		var apiKey = configured.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings."));
@@ -23,12 +31,14 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 			throw new InvalidOperationException($"TMDB trending request failed with status {(int)response.StatusCode}.");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		var result =
-			await JsonSerializer.DeserializeAsync<TmdbTypes.Trending.Root>(stream, cancellationToken: cancellationToken)
+		return await JsonSerializer.DeserializeAsync<TmdbTypes.Trending.Root>(stream, cancellationToken: cancellationToken)
 			?? throw new InvalidOperationException("TMDB trending response was empty.");
+	}
 
-		var finalItems = new MediaMatchResult[result.Results.Count];
-		var indexed = result.Results.Index().ToList();
+	private async Task<MediaMatchResult[]> MatchAsync(IReadOnlyList<TmdbTypes.Trending.Result> results, CancellationToken cancellationToken)
+	{
+		var finalItems = new MediaMatchResult[results.Count];
+		var indexed = results.Index().ToList();
 
 		var unresolvable = indexed.Where(x => x.Item.MediaType is MediaType.Unknown).ToList();
 		unresolvable.ForEach(r => finalItems[r.Index] = Found(r.Item).Unmatched());
@@ -41,8 +51,8 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		{
 			finalItems[entry.Index] = BuildTrending(entry.Item, identity);
 		}
-		var stored = await media.GetStoredRatingsAsync(finalItems.Select(item => item.MatchedId).WhereSome(), cancellationToken);
-		return new PagedResult<MediaMatchResult>([.. finalItems.Select(item => WithStoredRatings(item, stored))], result.TotalPages);
+
+		return finalItems;
 	}
 
 	private static MediaMatchResult WithStoredRatings(MediaMatchResult item, IReadOnlyDictionary<MediaId, MediaRatings> stored)
