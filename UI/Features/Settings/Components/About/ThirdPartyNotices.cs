@@ -12,9 +12,12 @@ internal sealed class ThirdPartyNotices(string directory)
 {
 	private const string FileName = "third-party-notices.json";
 
-	public async Task<Optional<Notices>> ReadAsync()
+	private readonly Lazy<Task<Optional<Notices>>> _shipped = new(() => ReadAsync(Path.Combine(directory, FileName)));
+
+	public Task<Optional<Notices>> GetAsync() => _shipped.Value;
+
+	private static async Task<Optional<Notices>> ReadAsync(string path)
 	{
-		var path = Path.Combine(directory, FileName);
 		if (!File.Exists(path))
 		{
 			return new None();

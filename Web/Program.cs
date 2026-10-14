@@ -91,7 +91,7 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode().AddAdditionalAssemblies(typeof(UI.Shared.Layout.MainLayout).Assembly);
 app.MapAuthEndpoints();
 app.MapHealthEndpoints();
-app.MapNoticesEndpoint();
+app.MapNoticesEndpoint(AppContext.BaseDirectory);
 
 app.MapGet(
 		"/diagnostics/export",

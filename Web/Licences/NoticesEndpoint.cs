@@ -4,14 +4,13 @@ internal static class NoticesEndpoint
 {
 	private const string FileName = "THIRD-PARTY-NOTICES.txt";
 
-	public static void MapNoticesEndpoint(this IEndpointRouteBuilder endpoints)
+	public static void MapNoticesEndpoint(this IEndpointRouteBuilder endpoints, string directory)
 	{
-		endpoints.MapGet($"/{FileName}", () => Serve(AppContext.BaseDirectory));
+		endpoints.MapGet($"/{FileName}", () => Serve(Path.Combine(directory, FileName))).RequireAuthorization();
 	}
 
-	internal static IResult Serve(string directory)
+	private static IResult Serve(string path)
 	{
-		var path = Path.Combine(directory, FileName);
 		return File.Exists(path) ? Results.File(path, "text/plain; charset=utf-8", FileName) : Results.NotFound();
 	}
 }

@@ -11,7 +11,7 @@ public class LicencesCardTests : BunitContext
 {
 	private static readonly string Shipped = Path.Combine(AppContext.BaseDirectory, "Settings", "About");
 
-	private static readonly string LocalBuild = Path.Combine(AppContext.BaseDirectory, "Settings", "About", "no-notices");
+	private readonly DirectoryInfo _published = Directory.CreateTempSubdirectory("sammlarr-notices-");
 
 	[Before(Test)]
 	public void Setup()
@@ -20,18 +20,29 @@ public class LicencesCardTests : BunitContext
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
+	[After(Test)]
+	public void RemovePublished() => _published.Delete(recursive: true);
+
 	[Test]
-	public async Task Head_CountsThePackagesAndTheirLicences_AndOffersTheNoticesFileForDownload()
+	public async Task Head_WithTheShippedNotices_CountsThePackagesAndTheirLicences()
+	{
+		var cut = Loaded(Shipped);
+
+		await Assert.That(Text(cut.Find("div > div"))).IsEqualTo("Licences 8 packages under 3 licences THIRD-PARTY-NOTICES");
+	}
+
+	[Test]
+	public async Task NoticesLink_WithTheShippedNotices_DownloadsTheTextFile()
 	{
 		var cut = Loaded(Shipped);
 
 		var notices = cut.Find("a[download]");
-		await Assert.That(Text(cut.Find("div > div"))).IsEqualTo("Licences 8 packages under 3 licences THIRD-PARTY-NOTICES");
+		await Assert.That(Text(notices)).IsEqualTo("THIRD-PARTY-NOTICES");
 		await Assert.That(notices.GetAttribute("href")).IsEqualTo("/THIRD-PARTY-NOTICES.txt");
 	}
 
 	[Test]
-	public async Task Groups_OnePerLicenceWithTheMostPackagesFirst_NameTheCountAndTheFirstPackages()
+	public async Task Groups_ForThreeLicences_ListTheBiggestFirstWithItsCountAndFirstNames()
 	{
 		var cut = Loaded(Shipped);
 
@@ -48,7 +59,7 @@ public class LicencesCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Groups_StayClosedUntilOpened()
+	public async Task Groups_BeforeOneIsOpened_ShowNoPackagesOrLicenceText()
 	{
 		var cut = Loaded(Shipped);
 
@@ -58,7 +69,7 @@ public class LicencesCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Group_WhenOpened_ListsEachPackageWithItsVersionAndCopyright_ThenTheLicenceTextOnce()
+	public async Task Group_WhenOpened_ListsEachPackageWithVersionAndCopyrightThenTheLicenceTextOnce()
 	{
 		var cut = Loaded(Shipped);
 
@@ -80,7 +91,7 @@ public class LicencesCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Packages_WithAProject_LinkItInANewTab_AndOneWithoutStaysPlainText()
+	public async Task Package_WithAProject_LinksItInANewTab()
 	{
 		var cut = Loaded(Shipped);
 
@@ -102,23 +113,33 @@ public class LicencesCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Package_WithoutAProject_ShowsItsNameAsPlainText()
+	{
+		var cut = Loaded(Shipped);
+
+		await OpenAsync(cut, "MIT 5 packages");
+
+		var sqlite = cut.FindAll("li").Single(row => Text(row).StartsWith("WolverineFx.Sqlite", StringComparison.Ordinal));
+		await Assert.That(sqlite.QuerySelectorAll("a")).IsEmpty();
+	}
+
+	[Test]
 	public async Task Head_ForASinglePackage_SpeaksInTheSingular()
 	{
-		var directory = Directory.CreateTempSubdirectory("sammlarr-notices-").FullName;
 		await File.WriteAllTextAsync(
-			Path.Combine(directory, "third-party-notices.json"),
+			Path.Combine(_published.FullName, "third-party-notices.json"),
 			"""{ "licences": [ { "id": "MIT", "text": "MIT License", "packages": [ { "id": "Cronos", "version": "0.11.1", "project": "", "copyright": "" } ] } ], "assets": [] }"""
 		);
 
-		var cut = Loaded(directory);
+		var cut = Loaded(_published.FullName);
 
 		await Assert.That(Text(cut.Find("div > div"))).IsEqualTo("Licences 1 package under 1 licence THIRD-PARTY-NOTICES");
 	}
 
 	[Test]
-	public async Task LocalBuild_WithoutTheNoticesFile_SaysWhyAndLinksTheLatestReleasesList()
+	public async Task Card_WithoutTheNoticesFile_SaysWhyAndLinksTheLatestReleasesList()
 	{
-		var cut = Loaded(LocalBuild);
+		var cut = Loaded(_published.FullName);
 
 		await Assert
 			.That(Text(cut.Find("div")))
@@ -132,9 +153,9 @@ public class LicencesCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task LocalBuild_WithoutARepository_SaysWhyWithoutALink()
+	public async Task Card_WithoutTheNoticesFileOrARepository_SaysWhyWithoutALink()
 	{
-		var cut = Loaded(LocalBuild, string.Empty);
+		var cut = Loaded(_published.FullName, string.Empty);
 
 		await Assert
 			.That(Text(cut.Find("div")))
