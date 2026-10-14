@@ -37,7 +37,7 @@ internal sealed class ArrConnectionTester(ArrApis apis, ICurrentUser currentUser
 		return profiles.Map(found => folders.Map(roots => new ArrInstanceChoices([.. found.Select(Profile)], [.. roots.Select(Folder).WhereSome()])));
 	}
 
-	private static ArrQualityProfile Profile(ArrProfile profile) => new(profile.Id, profile.Name ?? FormattableString.CurrentCulture($"Profile {profile.Id}"));
+	private static ArrQualityProfile Profile(ArrProfile profile) => new(profile.Id, profile.Name ?? $"Profile {profile.Id}");
 
 	private static Optional<ArrRootFolder> Folder(ArrFolder folder) => Optional.Of(folder.Path).Map(path => new ArrRootFolder(path, folder.FreeSpace));
 }

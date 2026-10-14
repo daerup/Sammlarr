@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
 using Domain.Feed;
 using Domain.Usage;
 
@@ -32,7 +31,7 @@ public static class UsageCauses
 
 		Marked.Value = mark;
 		Activity.Current?.SetTag(UsageTags.Cause, mark.Cause.ToString());
-		mark.Feed.Apply(feed => Activity.Current?.SetTag(UsageTags.Feed, feed.ToString("D", CultureInfo.InvariantCulture)));
+		mark.Feed.Apply(feed => Activity.Current?.SetTag(UsageTags.Feed, feed.ToString()));
 		return new Unmark(null);
 	}
 

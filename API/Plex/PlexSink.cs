@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using API.Plex.Types;
@@ -113,7 +112,7 @@ internal sealed class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaServi
 			}
 
 			logger.LogWarning("Plex watchlist push failed ({StatusCode}) for {ExternalId} at {Endpoint}", (int)response.StatusCode, plexId.Value, endpoint);
-			return Failed(id, FormattableString.CurrentCulture($"Plex answered {(int)response.StatusCode} {response.StatusCode}."));
+			return Failed(id, $"Plex answered {(int)response.StatusCode} {response.StatusCode}.");
 		}
 		catch (Exception ex)
 		{
@@ -131,13 +130,7 @@ internal sealed class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaServi
 	{
 		const string containerStartHeader = "X-Plex-Container-Start";
 		var offset = (page - 1) * PlexClient.ContainerSize;
-		var response = await plexClient.SendAsync(
-			HttpMethod.Get,
-			urls.Watchlist,
-			null,
-			cancellationToken,
-			(containerStartHeader, offset.ToString(CultureInfo.InvariantCulture))
-		);
+		var response = await plexClient.SendAsync(HttpMethod.Get, urls.Watchlist, null, cancellationToken, (containerStartHeader, offset.ToString()));
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result =
 			await JsonSerializer.DeserializeAsync<PlexTypes.Watchlist.Root>(stream, cancellationToken: cancellationToken)

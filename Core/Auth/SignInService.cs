@@ -148,7 +148,7 @@ internal sealed class SignInService(
 	private static Result<User> Locked(DateTimeOffset until, DateTimeOffset now)
 	{
 		var minutes = Math.Max(1, (int)Math.Ceiling((until - now).TotalMinutes));
-		return Error.From(FormattableString.CurrentCulture($"Too many failed sign-ins. Try again in {minutes} {(minutes == 1 ? "minute" : "minutes")}."));
+		return Error.From($"Too many failed sign-ins. Try again in {minutes} {(minutes == 1 ? "minute" : "minutes")}.");
 	}
 
 	private async Task<Result<User>> ProvisionAsync(AuthProvider provider, ExternalLogin login, Optional<string> setupCode, CancellationToken cancellationToken)

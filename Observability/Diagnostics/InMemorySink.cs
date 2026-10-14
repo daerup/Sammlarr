@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using Serilog.Events;
@@ -28,7 +27,7 @@ public sealed class InMemorySink(LogCaptureService capture) : ILogEventSink
 			SourceContext(logEvent),
 			0,
 			null,
-			logEvent.RenderMessage(CultureInfo.InvariantCulture),
+			logEvent.RenderMessage(),
 			logEvent.Exception?.ToString(),
 			activity?.TraceId.ToString(),
 			activity?.SpanId.ToString(),
@@ -50,7 +49,7 @@ public sealed class InMemorySink(LogCaptureService capture) : ILogEventSink
 			{
 				continue;
 			}
-			result[key] = value is ScalarValue scalar ? scalar.Value?.ToString() : value.ToString(null, CultureInfo.InvariantCulture);
+			result[key] = value is ScalarValue scalar ? scalar.Value?.ToString() : value.ToString();
 		}
 		return result;
 	}

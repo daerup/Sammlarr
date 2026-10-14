@@ -20,7 +20,7 @@ internal sealed class ArtworkSources(IEnumerable<IArtworkResizer> resizers)
 
 		var sources = candidates
 			.SelectMany(candidate => Resize(url, candidate.Size).Match(resized => new[] { (Url: resized, candidate.Descriptor) }, () => []))
-			.DistinctBy(source => source.Url, StringComparer.Ordinal)
+			.DistinctBy(source => source.Url)
 			.Select(source => $"{source.Url} {source.Descriptor}")
 			.ToList();
 		return sources.Count == 0 ? null : string.Join(", ", sources);

@@ -27,7 +27,7 @@ internal static class UsageView
 
 	internal static readonly IReadOnlyList<OutcomeLook> Outcomes = [.. Enum.GetValues<UsageOutcome>().Select(Look)];
 
-	internal static string Count(double count) => Math.Round(count, MidpointRounding.ToEven).ToString("N0", CultureInfo.InvariantCulture);
+	internal static string Count(double count) => Math.Round(count).ToString("N0", CultureInfo.InvariantCulture);
 
 	internal static string Number(double value) => FormattableString.Invariant($"{value:0.##}");
 
@@ -44,9 +44,7 @@ internal static class UsageView
 	{
 		return count == 0
 			? "color-mix(in oklab, var(--foreground) 4%, transparent)"
-			: FormattableString.Invariant(
-				$"color-mix(in oklab, var(--usage-shade) {Math.Round(12 + count * 88.0 / busiest, MidpointRounding.ToEven)}%, var(--card))"
-			);
+			: FormattableString.Invariant($"color-mix(in oklab, var(--usage-shade) {Math.Round(12 + count * 88.0 / busiest)}%, var(--card))");
 	}
 
 	internal static string Calls(long count) => count == 1 ? "1 call" : $"{Count(count)} calls";
@@ -75,9 +73,7 @@ internal static class UsageView
 
 	internal static string Duration(double milliseconds)
 	{
-		return milliseconds >= 1000
-			? FormattableString.Invariant($"{milliseconds / 1000:0.0} s")
-			: FormattableString.Invariant($"{Math.Round(milliseconds, MidpointRounding.ToEven)} ms");
+		return milliseconds >= 1000 ? FormattableString.Invariant($"{milliseconds / 1000:0.0} s") : FormattableString.Invariant($"{Math.Round(milliseconds)} ms");
 	}
 
 	internal static Optional<double> Change(double now, double before) => Optional.When(before > 0, () => (now - before) / before);

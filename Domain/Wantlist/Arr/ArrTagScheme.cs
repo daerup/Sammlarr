@@ -55,7 +55,7 @@ public sealed record ArrTagScheme(
 	public string ProtectedTag => $"{Root}-{Guard}";
 
 	public IReadOnlyList<string> UserTags(ArrTagUser user) =>
-		[.. Enum.GetValues<ArrUserTagSource>().Select(source => (this with { UserSource = source }).UserTag(user)).Distinct(StringComparer.Ordinal)];
+		[.. Enum.GetValues<ArrUserTagSource>().Select(source => (this with { UserSource = source }).UserTag(user)).Distinct()];
 
 	public string FeedTag(ArrTagFeed feed)
 	{

@@ -4,7 +4,7 @@ public record RadarrOptions : IOptionsSection, IProviderHttpOptions
 {
 	public RadarrAvailability MinimumAvailability { get; set; } = RadarrAvailability.Released;
 	public ProviderHttpOptions Http { get; set; } = new();
-	public IReadOnlyDictionary<string, string> Urls => new Dictionary<string, string>(StringComparer.Ordinal);
+	public IReadOnlyDictionary<string, string> Urls => new Dictionary<string, string>();
 	public static string SectionName => "Arr:Radarr";
 }
 

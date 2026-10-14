@@ -6,6 +6,6 @@ public static class ReturnUrls
 
 	private static bool IsLocal(string url)
 	{
-		return url.StartsWith('/', StringComparison.Ordinal) && (url.Length == 1 || url[1] is not ('/' or '\\')) && !url.Any(char.IsControl);
+		return url.StartsWith('/') && (url.Length == 1 || url[1] is not ('/' or '\\')) && !url.Any(char.IsControl);
 	}
 }

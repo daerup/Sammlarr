@@ -15,7 +15,7 @@ internal sealed record SiteLink(string Path, IReadOnlyList<KeyValuePair<string, 
 		return Optional.When(!foreign, () => Of(onHost ? rest[site.Length..] : rest));
 	}
 
-	internal Result<SiteLink> Knowing(IReadOnlySet<string> keys, string site) => Knowing(keys, new HashSet<string>(StringComparer.Ordinal), site);
+	internal Result<SiteLink> Knowing(IReadOnlySet<string> keys, string site) => Knowing(keys, new HashSet<string>(), site);
 
 	internal Result<SiteLink> Knowing(IReadOnlySet<string> keys, IReadOnlySet<string> dropped, string site)
 	{
@@ -33,7 +33,7 @@ internal sealed record SiteLink(string Path, IReadOnlyList<KeyValuePair<string, 
 
 	internal string Stored()
 	{
-		var query = string.Join('&', Query.Select(pair => $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value)}"));
+		var query = string.Join("&", Query.Select(pair => $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value)}"));
 		return query.Length == 0 ? Path : $"{Path}?{query}";
 	}
 

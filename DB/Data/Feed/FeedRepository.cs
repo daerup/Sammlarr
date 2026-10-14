@@ -54,9 +54,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	public async Task UpdateAsync(FeedId id, FeedUpdateData data, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var entity =
-			await ctx.Feeds.FindAsync([id.Value], cancellationToken)
-			?? throw new InvalidOperationException(FormattableString.Invariant($"Feed with id {id} not found."));
+		var entity = await ctx.Feeds.FindAsync([id.Value], cancellationToken) ?? throw new InvalidOperationException($"Feed with id {id} not found.");
 
 		entity.Name = data.Name;
 		entity.IsEnabled = data.IsEnabled;

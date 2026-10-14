@@ -1,5 +1,4 @@
 using System.Data.Common;
-using System.Globalization;
 using Contracts.Housekeeping;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -69,7 +68,7 @@ internal sealed class DatabaseFile(IDbContextFactory<SammlarrDbContext> contexts
 	{
 		await using var command = connection.CreateCommand();
 		command.CommandText = $"PRAGMA {pragma}";
-		return Convert.ToInt64(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+		return Convert.ToInt64(await command.ExecuteScalarAsync(cancellationToken));
 	}
 
 	private static long OnDisk(DbConnection connection)

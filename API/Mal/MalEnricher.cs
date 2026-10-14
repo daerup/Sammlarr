@@ -53,10 +53,7 @@ internal sealed class MalEnricher(MalClient client, IApiKeyService apiKeys) : ID
 
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(
-				RemoteService.Mal,
-				FormattableString.CurrentCulture($"MyAnimeList answered {(int)response.StatusCode} for anime {number}.")
-			);
+			return response.StatusCode.Unanswered(RemoteService.Mal, $"MyAnimeList answered {(int)response.StatusCode} for anime {number}.");
 		}
 
 		var anime =

@@ -10,9 +10,7 @@ internal static class WantlistStatusView
 	internal const string Removed = "removed";
 
 	internal static IReadOnlyList<StatusOption> Options(int removedCount) =>
-		removedCount == 0
-			? []
-			: [new StatusOption(Active, "On your wantlist"), new StatusOption(Removed, FormattableString.CurrentCulture($"Pending removal ({removedCount})"))];
+		removedCount == 0 ? [] : [new StatusOption(Active, "On your wantlist"), new StatusOption(Removed, $"Pending removal ({removedCount})")];
 
 	internal static IReadOnlyList<string> Adjusted(IReadOnlyList<string> statuses, int activeCount, int removedCount) =>
 		statuses switch

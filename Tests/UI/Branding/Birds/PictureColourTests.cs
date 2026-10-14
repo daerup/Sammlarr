@@ -55,13 +55,13 @@ public class PictureColourTests
 
 	private static Optional<(double Hue, double Chroma)> Rounded(byte[] picture)
 	{
-		return PictureColour.Of(picture).Map(tone => (Math.Round(tone.Hue, MidpointRounding.ToEven), Math.Round(tone.Chroma, 2, MidpointRounding.ToEven)));
+		return PictureColour.Of(picture).Map(tone => (Math.Round(tone.Hue), Math.Round(tone.Chroma, 2)));
 	}
 
 	private static Rgb Grey(int x, int y)
 	{
 		var reach = Math.Min(1, Math.Sqrt(Math.Pow(x + 0.5 - 24, 2) + Math.Pow(y + 0.5 - 18, 2)) / 34);
-		var level = (byte)Math.Round(0xd8 - (0xd8 - 0x4a) * reach, MidpointRounding.ToEven);
+		var level = (byte)Math.Round(0xd8 - (0xd8 - 0x4a) * reach);
 		return new Rgb(level, level, level);
 	}
 

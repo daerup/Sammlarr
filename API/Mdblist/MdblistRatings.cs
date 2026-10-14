@@ -4,7 +4,7 @@ namespace API.Mdblist;
 
 internal static class MdblistRatings
 {
-	internal static readonly IReadOnlyDictionary<string, RatingSource> ByName = new Dictionary<string, RatingSource>(StringComparer.Ordinal)
+	internal static readonly IReadOnlyDictionary<string, RatingSource> ByName = new Dictionary<string, RatingSource>
 	{
 		["imdb"] = RatingSource.Imdb,
 		["tmdb"] = RatingSource.Tmdb,

@@ -16,7 +16,7 @@ internal static class ArrSetup
 		await arr.WaitUntilUpAsync(cancellationToken);
 		var folders = (await arr.GetAsync("rootfolder", cancellationToken)).AsArray().Select(folder => folder!["path"]!.GetValue<string>()).ToList();
 		string[] wanted = [options.RootFolder, options.AnimeRootFolder];
-		foreach (var path in wanted.Except(folders, StringComparer.Ordinal))
+		foreach (var path in wanted.Except(folders))
 		{
 			await arr.PostAsync("rootfolder", new { path }, cancellationToken);
 		}

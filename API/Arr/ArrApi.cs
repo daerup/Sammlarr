@@ -235,7 +235,7 @@ internal abstract class ArrApi(HttpClient http)
 
 	private string Refusal(ArrConnection connection, HttpStatusCode status, string body)
 	{
-		var answer = FormattableString.CurrentCulture($"{App.Name} answered {(int)status} {status} at {connection.Address}.");
+		var answer = $"{App.Name} answered {(int)status} {status} at {connection.Address}.";
 		return status switch
 		{
 			HttpStatusCode.Unauthorized => $"{answer} Check the API key under Settings › General in {App.Name}.",
@@ -244,7 +244,7 @@ internal abstract class ArrApi(HttpClient http)
 		};
 	}
 
-	private static string Validation(string body) => string.Join(' ', Failures(body).Select(failure => failure.ErrorMessage).OfType<string>());
+	private static string Validation(string body) => string.Join(" ", Failures(body).Select(failure => failure.ErrorMessage).OfType<string>());
 
 	private static IReadOnlyList<ArrValidationFailure> Failures(string body)
 	{

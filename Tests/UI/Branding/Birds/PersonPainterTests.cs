@@ -43,7 +43,7 @@ public class PersonPainterTests
 				person.User.Id,
 				Is<StoredColour>(colour =>
 					colour!.Picture.Map(picture => picture.Url).GetValueOr(string.Empty) == Avatar
-					&& colour.Picture.Map(picture => picture.Tone).Map(tone => Math.Round(tone.Hue, MidpointRounding.ToEven)).GetValueOr(0) == 195
+					&& colour.Picture.Map(picture => picture.Tone).Map(tone => Math.Round(tone.Hue)).GetValueOr(0) == 195
 				),
 				Any()
 			)

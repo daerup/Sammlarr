@@ -13,7 +13,7 @@ namespace API.Mdblist;
 
 internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions options, ILogger<MdblistBudget> logger) : ILaneQuota
 {
-	private readonly ConcurrentDictionary<string, Allowance> _byKey = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, Allowance> _byKey = new();
 
 	private readonly ConcurrentDictionary<(string ApiKey, DateTimeOffset ResetAt), byte> _warned = new();
 

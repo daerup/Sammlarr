@@ -6,7 +6,7 @@ namespace Core.Jobs;
 
 internal sealed class TaskActivity(IDateTimeProvider clock)
 {
-	private readonly ConcurrentDictionary<string, TaskRun> _running = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, TaskRun> _running = new();
 
 	internal event Action Changed = delegate { };
 

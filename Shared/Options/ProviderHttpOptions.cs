@@ -9,5 +9,5 @@ public record ProviderHttpOptions
 	public int RetryAttempts { get; set; } = 2;
 	public int MaxWaitSeconds { get; set; }
 	public int EnrichWaitSeconds { get; set; }
-	public IReadOnlyDictionary<string, LaneOptions> Lanes { get; set; } = new Dictionary<string, LaneOptions>(StringComparer.Ordinal);
+	public IReadOnlyDictionary<string, LaneOptions> Lanes { get; set; } = new Dictionary<string, LaneOptions>();
 }

@@ -1,4 +1,3 @@
-using System.Globalization;
 using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Feed.Run;
@@ -68,7 +67,7 @@ internal static class FeedRunView
 
 	internal static string Pending(IFeedPlan summary)
 	{
-		var parts = new List<string> { FormattableString.CurrentCulture($"{summary.Verdicts.Count + summary.Unmatched.Count} fetched") };
+		var parts = new List<string> { $"{summary.Verdicts.Count + summary.Unmatched.Count} fetched" };
 
 		if (summary.Conclusiveness is not Conclusiveness.Conclusive)
 		{
@@ -148,15 +147,15 @@ internal static class FeedRunView
 
 	private static string UnmatchedSplit(FeedRunCounts counts)
 	{
-		List<string> parts = [FormattableString.CurrentCulture($"{counts.UnmatchedNotFound} not found by any service")];
+		List<string> parts = [$"{counts.UnmatchedNotFound} not found by any service"];
 		if (counts.UnmatchedCouldNotLookUp > 0)
 		{
-			parts.Add(FormattableString.CurrentCulture($"{counts.UnmatchedCouldNotLookUp} could not be looked up (tried again next run)"));
+			parts.Add($"{counts.UnmatchedCouldNotLookUp} could not be looked up (tried again next run)");
 		}
 
 		if (counts.UnmatchedConflict > 0)
 		{
-			parts.Add(FormattableString.CurrentCulture($"{counts.UnmatchedConflict} whose ids disagree with stored titles"));
+			parts.Add($"{counts.UnmatchedConflict} whose ids disagree with stored titles");
 		}
 
 		return string.Join(", ", parts);
@@ -203,7 +202,7 @@ internal static class FeedRunView
 
 		if (run.Counts.Total > 0)
 		{
-			parts.Add(FormattableString.CurrentCulture($"{run.Counts.Total} fetched"));
+			parts.Add($"{run.Counts.Total} fetched");
 		}
 
 		if (run.Conclusiveness is not Conclusiveness.Pending)
@@ -214,7 +213,7 @@ internal static class FeedRunView
 		return string.Join(" · ", parts);
 	}
 
-	internal static string Took(TimeSpan duration) => FormattableString.CurrentCulture($"{duration.TotalSeconds:0.0} s");
+	internal static string Took(TimeSpan duration) => $"{duration.TotalSeconds:0.0} s";
 
-	private static string Subtitle(MatchedMedia media) => media.Details.Year?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+	private static string Subtitle(MatchedMedia media) => media.Details.Year?.ToString() ?? string.Empty;
 }

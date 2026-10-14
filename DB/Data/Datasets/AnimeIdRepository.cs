@@ -153,7 +153,7 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 
 		private readonly ILookup<int?, AnimeIdRow> _tmdb = rows.ToLookup(row => row.TmdbId);
 
-		private readonly ILookup<string?, AnimeIdRow> _imdb = rows.ToLookup(row => row.ImdbId, StringComparer.Ordinal);
+		private readonly ILookup<string?, AnimeIdRow> _imdb = rows.ToLookup(row => row.ImdbId);
 
 		public Optional<AnimeIdRow> Find(IExternalMediaId id)
 		{

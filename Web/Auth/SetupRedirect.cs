@@ -9,7 +9,7 @@ internal static class SetupRedirect
 	{
 		return QueryHelpers.AddQueryString(
 			"/setup",
-			new Dictionary<string, string?>(StringComparer.Ordinal) { ["error"] = error.Reason, ["with"] = signInWith.ToString().ToLowerInvariant() }
+			new Dictionary<string, string?> { ["error"] = error.Reason, ["with"] = signInWith.ToString().ToLowerInvariant() }
 		);
 	}
 }

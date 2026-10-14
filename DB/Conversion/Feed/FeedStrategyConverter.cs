@@ -1,4 +1,3 @@
-using System.Globalization;
 using Domain.Feed;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -24,7 +23,7 @@ internal sealed class FeedStrategyConverter : ValueConverter<FeedStrategy, strin
 		var parts = text.Split(':');
 		return parts[0] switch
 		{
-			MirrorLiteral => new FeedStrategy(new Mirror(int.Parse(parts[1], CultureInfo.InvariantCulture))),
+			MirrorLiteral => new FeedStrategy(new Mirror(int.Parse(parts[1]))),
 			_ => new FeedStrategy(new Append()),
 		};
 	}

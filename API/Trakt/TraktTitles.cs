@@ -72,7 +72,7 @@ internal sealed class TraktTitles(TraktClient client, IApiKeyService apiKeys, ID
 
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(RemoteService.Trakt, FormattableString.CurrentCulture($"Trakt answered {(int)response.StatusCode} for {id}."));
+			return response.StatusCode.Unanswered(RemoteService.Trakt, $"Trakt answered {(int)response.StatusCode} for {id}.");
 		}
 
 		return endpoint.StartsWith("search/", StringComparison.Ordinal)

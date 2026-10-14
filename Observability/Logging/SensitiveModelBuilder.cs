@@ -12,7 +12,7 @@ internal sealed class SensitiveModelBuilder
 		var name = ((MemberExpression)member).Member.Name;
 		if (!_properties.TryGetValue(typeof(T), out var names))
 		{
-			names = new HashSet<string>(StringComparer.Ordinal);
+			names = [];
 			_properties[typeof(T)] = names;
 		}
 		names.Add(name);

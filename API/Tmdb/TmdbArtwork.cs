@@ -17,7 +17,7 @@ internal sealed class TmdbArtwork(TmdbOptions options) : IArtworkResizer
 	private Optional<string> FileOf(string url)
 	{
 		var sized = url.StartsWith(Base, StringComparison.Ordinal) ? url[Base.Length..] : string.Empty;
-		var slash = sized.IndexOf('/', StringComparison.Ordinal);
+		var slash = sized.IndexOf('/');
 		return Optional.When(slash > 0 && slash < sized.Length - 1, () => sized[(slash + 1)..]);
 	}
 

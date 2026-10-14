@@ -10,7 +10,7 @@ public sealed class TestMethodNamingAnalyzer : DiagnosticAnalyzer
 {
 	private const string TestAttribute = "TUnit.Core.TestAttribute";
 
-	private static readonly Regex Convention = new("^[A-Z][A-Za-z0-9]*(?:_[A-Z0-9][A-Za-z0-9]*)+$", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
+	private static readonly Regex Convention = new("^[A-Z][A-Za-z0-9]*(_[A-Z0-9][A-Za-z0-9]*)+$", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
 	private static readonly DiagnosticDescriptor Rule = new(
 		"SAM0001",

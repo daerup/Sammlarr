@@ -96,7 +96,7 @@ internal static class HousekeepingView
 		[
 			.. report
 				.Steps.OrderBy(step => step.Step is HousekeepingStep.UsageStats)
-				.GroupBy(step => Label(step.Step, options), StringComparer.Ordinal)
+				.GroupBy(step => Label(step.Step, options))
 				.Select(steps => (steps.Key, steps.Sum(step => step.Removed))),
 		];
 	}
@@ -113,7 +113,7 @@ internal static class HousekeepingView
 		return $"{day} {UsageView.Time(at)}";
 	}
 
-	internal static string Days(int days) => days == 365 ? "a year" : FormattableString.CurrentCulture($"{days} days");
+	internal static string Days(int days) => days == 365 ? "a year" : $"{days} days";
 
 	internal static string Titles(int count) => count == 1 ? "1 title" : $"{Number(count)} titles";
 
@@ -135,7 +135,7 @@ internal static class HousekeepingView
 	private static string Progress(Optional<HousekeepingReport> last, TaskRun run)
 	{
 		return last.When(report => run.Started && report.FinishedAt.IsNone() && report.StartedAt + StoredPrecision > run.Since)
-			.Map(report => FormattableString.CurrentCulture($"{report.Steps.Count} of {StepTotal} steps done"))
+			.Map(report => $"{report.Steps.Count} of {StepTotal} steps done")
 			.GetValueOr(Waiting);
 	}
 

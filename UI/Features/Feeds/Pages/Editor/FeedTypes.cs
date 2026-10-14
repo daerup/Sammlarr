@@ -119,12 +119,11 @@ internal static class MirrorSwitch
 	private static string Known(int exposure, int threshold)
 	{
 		var single = exposure == 1;
-		var left = single ? "1 has already left the list" : FormattableString.CurrentCulture($"{exposure} have already left the list");
+		var left = single ? "1 has already left the list" : $"{exposure} have already left the list";
 		return $"{left}, and {(single ? "is" : "are")} deleted {Timing(threshold, single)}.";
 	}
 
-	private static string Timing(int threshold, bool single) =>
-		threshold == 1 ? "on the next run" : FormattableString.CurrentCulture($"after {threshold} runs without {(single ? "it" : "them")}");
+	private static string Timing(int threshold, bool single) => threshold == 1 ? "on the next run" : $"after {threshold} runs without {(single ? "it" : "them")}";
 }
 
 public sealed record IdentifierCheck(string Typed, Result<string> Answer);

@@ -18,7 +18,7 @@ internal static class MalPages
 
 	private static readonly string[] Seasons = ["winter", "spring", "summer", "fall"];
 
-	private static readonly HashSet<string> TopKeys = new(StringComparer.Ordinal) { "type", "limit" };
+	private static readonly HashSet<string> TopKeys = ["type", "limit"];
 
 	internal static bool IsPage(string identifier) =>
 		identifier.StartsWith(Top, StringComparison.Ordinal) || identifier.StartsWith(Season, StringComparison.Ordinal);
@@ -29,9 +29,9 @@ internal static class MalPages
 		return link.Path switch
 		{
 			Top => link.Knowing(TopKeys, "MyAnimeList").Map(Ranked),
-			Season or $"{Season}/schedule" => link.Knowing(new HashSet<string>(StringComparer.Ordinal), "MyAnimeList"),
+			Season or $"{Season}/schedule" => link.Knowing(new HashSet<string>(), "MyAnimeList"),
 			_ when segments.Length == 4 && $"{segments[0]}/{segments[1]}" == Season && IsYear(segments[2]) && Seasons.Contains(segments[3]) => link.Knowing(
-				new HashSet<string>(StringComparer.Ordinal),
+				new HashSet<string>(),
 				"MyAnimeList"
 			),
 			"anime.php" => Error.From("Sammlarr cannot follow MyAnimeList's search, since it ranks by relevance. Paste a top anime or season link."),

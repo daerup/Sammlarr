@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using API.Http;
@@ -17,13 +16,11 @@ internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, Pl
 		var clientId = Guid.NewGuid();
 		using var request = new HttpRequestMessage(HttpMethod.Post, urls.Pins);
 		request.Headers.AddClientId(clientId);
-		request.Content = new FormUrlEncodedContent(new Dictionary<string, string>(StringComparer.Ordinal) { ["strong"] = "true" });
+		request.Content = new FormUrlEncodedContent(new Dictionary<string, string> { ["strong"] = "true" });
 		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
-			return Error.From(
-				FormattableString.CurrentCulture($"Plex could not start the sign-in (it answered {(int)response.StatusCode}). Please try again in a moment.")
-			);
+			return Error.From($"Plex could not start the sign-in (it answered {(int)response.StatusCode}). Please try again in a moment.");
 		}
 
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -31,20 +28,16 @@ internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, Pl
 
 		var forwardUrl = QueryHelpers.AddQueryString(
 			callbackUrl,
-			new Dictionary<string, string?>(StringComparer.Ordinal)
-			{
-				["pinId"] = result.PinId.ToString(CultureInfo.InvariantCulture),
-				["clientId"] = clientId.ToString(),
-			}
+			new Dictionary<string, string?> { ["pinId"] = result.PinId.ToString(), ["clientId"] = clientId.ToString() }
 		);
-		var queryParams = new Dictionary<string, string?>(StringComparer.Ordinal)
+		var queryParams = new Dictionary<string, string?>
 		{
 			["clientID"] = clientId.ToString(),
 			["code"] = result.Code,
 			["context%5Bdevice%5D%5Bproduct%5D"] = options.Authentication.ProductName,
 			["forwardUrl"] = forwardUrl,
 		};
-		return Success.Of(QueryHelpers.AddQueryString(urls.AuthApp, queryParams).Replace("?", "#?", StringComparison.Ordinal));
+		return Success.Of(QueryHelpers.AddQueryString(urls.AuthApp, queryParams).Replace("?", "#?"));
 	}
 
 	public async Task<Result<ExternalLogin>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default)
@@ -52,7 +45,7 @@ internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, Pl
 		var query = QueryHelpers.ParseQuery(callbackQuery);
 		if (
 			!query.TryGetValue("pinId", out var pinIdValue)
-			|| !int.TryParse(pinIdValue, CultureInfo.InvariantCulture, out var pinId)
+			|| !int.TryParse(pinIdValue, out var pinId)
 			|| !query.TryGetValue("clientId", out var clientIdValue)
 			|| !Guid.TryParse(clientIdValue, out var clientId)
 		)

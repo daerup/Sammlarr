@@ -17,7 +17,7 @@ public static class TypeExtensions
 				return type.Name;
 			}
 
-			var name = type.Name[..type.Name.IndexOf('`', StringComparison.Ordinal)];
+			var name = type.Name[..type.Name.IndexOf('`')];
 			var args = string.Join(", ", type.GetGenericArguments().Select(GetGenericName));
 			return $"{name}<{args}>";
 		}

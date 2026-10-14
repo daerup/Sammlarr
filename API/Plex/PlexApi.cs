@@ -60,7 +60,7 @@ internal sealed class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimePro
 
 	public async Task<SearchAnswer> SearchAsync(string title, IReadOnlyCollection<MediaType> mediaTypes, CancellationToken cancellationToken = default)
 	{
-		var searchTypes = string.Join(',', mediaTypes.Select(ToPlexMediaType));
+		var searchTypes = string.Join(",", mediaTypes.Select(ToPlexMediaType));
 		var endpoint = urls.Search(searchTypes, title, SearchLimit);
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken: cancellationToken);
 		EnsureUsable(response, endpoint);
