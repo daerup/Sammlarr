@@ -2,9 +2,9 @@ using System.Net;
 using API.Http.Lanes;
 using API.Mdblist;
 using Contracts;
+using Domain.Providers;
 using Domain.Usage;
 using Microsoft.Extensions.Logging.Abstractions;
-using Shared.Concurrency;
 using TestInfrastructure;
 
 namespace API.Tests.Mdblist;

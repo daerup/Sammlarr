@@ -3,7 +3,6 @@ using API.AniList.Types;
 using API.Anime;
 using API.Http.Lanes;
 using Domain.Providers;
-using Shared.Concurrency;
 
 namespace API.AniList;
 

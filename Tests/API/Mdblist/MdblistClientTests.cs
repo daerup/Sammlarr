@@ -3,9 +3,9 @@ using API.Mdblist;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
+using Contracts.Providers;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.Concurrency;
 using Shared.Options;
 using TestInfrastructure;
 

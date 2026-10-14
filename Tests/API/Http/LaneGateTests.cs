@@ -1,9 +1,11 @@
+using API.Http.Lanes;
+using Contracts.Providers;
+using Domain.Providers;
 using Microsoft.Extensions.Time.Testing;
-using Shared.Concurrency;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
-namespace Shared.Tests.Concurrency;
+namespace API.Tests.Http;
 
 public class LaneGateTests
 {

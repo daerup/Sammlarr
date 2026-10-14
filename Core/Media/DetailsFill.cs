@@ -2,11 +2,12 @@ using Contracts.Blocklist;
 using Contracts.Identity;
 using Contracts.Jobs;
 using Contracts.Media;
+using Contracts.Providers;
 using Contracts.Wantlist;
 using Domain.Jobs;
 using Domain.Media;
+using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.Concurrency;
 
 namespace Core.Media;
 

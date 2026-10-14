@@ -1,7 +1,7 @@
+using API.Http.Lanes;
 using Domain.Auth;
 using Domain.Providers;
 using Polly.Timeout;
-using Shared.Concurrency;
 
 namespace API.Http;
 
