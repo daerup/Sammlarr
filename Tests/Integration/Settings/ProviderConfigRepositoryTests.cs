@@ -26,31 +26,21 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	}
 
 	[Test]
-	public async Task StoreAsync_StoresAndRetrievesSuccessfully()
+	public async Task StoreAsync_WithValuesOtherThanTheSeededOnes_ReadsThemBackFromTheOneRow()
 	{
-		var expected = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex);
+		var stored = new ProviderConfig
+		{
+			Sink = SinkKind.Arr,
+			TrendingProvider = TrendingProvider.Tmdb,
+			SearchProvider = SearchProvider.Tmdb,
+			AuthProvider = AuthProvider.Plex,
+			RegistrationMode = RegistrationMode.Closed,
+		};
 
-		await Testee.StoreAsync(expected);
+		await Testee.StoreAsync(stored);
 
-		var entity = await fixture.Context.ProviderSettings.SingleAsync();
-
-		await Assert.That(entity.Sink).IsEqualTo(expected.Sink);
-		await Assert.That(entity.TrendingProvider).IsEqualTo(expected.TrendingProvider);
-		await Assert.That(entity.SearchProvider).IsEqualTo(expected.SearchProvider);
-	}
-
-	[Test]
-	public async Task StoreAsync_WhenCalledTwice_UpdatesSingletonRow()
-	{
-		var initial = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex);
-		var updated = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex);
-
-		await Testee.StoreAsync(initial);
-		await Testee.StoreAsync(updated);
-
-		var entities = await fixture.Context.ProviderSettings.ToListAsync();
-
-		await Assert.That(entities).Count().IsEqualTo(1);
+		await Assert.That(await Testee.GetAsync()).IsEqualTo(stored);
+		await Assert.That(await fixture.Context.ProviderSettings.CountAsync()).IsEqualTo(1);
 	}
 
 	[Test]
@@ -73,14 +63,4 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		await Assert.That(await fixture.Context.ProviderSettings.AsNoTracking().SingleAsync()).IsEqualTo(edited);
 		await Assert.That(edited).IsNotEqualTo(ProviderConfigRow.Default);
 	}
-
-	private static ProviderConfig CreateProviderSettings(SinkKind sinkProvider, TrendingProvider trendingProvider, SearchProvider searchProvider) =>
-		new()
-		{
-			Sink = sinkProvider,
-			TrendingProvider = trendingProvider,
-			SearchProvider = searchProvider,
-			AuthProvider = AuthProvider.Plex,
-			RegistrationMode = RegistrationMode.Open,
-		};
 }

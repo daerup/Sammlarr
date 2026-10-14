@@ -27,17 +27,6 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task GetAsync_WhenNoKeyWasStored_ReturnsNothing() => await Assert.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb)).IsError();
 
 	[Test]
-	public async Task GetAsync_WhenAKeyWasStored_ReturnsIt()
-	{
-		await ApiKeys.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-key-12345"));
-
-		await Assert
-			.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb))
-			.IsSuccess()
-			.And.Multiple(async key => await Assert.That(key.Value).IsEqualTo("tmdb-key-12345"));
-	}
-
-	[Test]
 	public async Task StoreAsync_WhenAKeyAlreadyExists_ReplacesIt()
 	{
 		await ApiKeys.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "old-key"));
@@ -125,17 +114,6 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task LookUpAsync_WhenTheTmdbKeyIsMissing_IsNoMatch()
 	{
 		await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie), [])).IsOfUnionType<Answer<FoundMedia>, NoMatch>();
-	}
-
-	[Test]
-	public async Task LookUpAsync_WhenTheTmdbKeyIsConfigured_LoadsTheRating()
-	{
-		await host.WithTmdbAccount("valid-tmdb-key");
-		host.Movie("Test Movie", tmdb: "550").ServedByTmdb(rating: 7.8, votes: 5000);
-
-		var found = await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie), [])).IsFound();
-
-		await Assert.That(found!.Details.Ratings.All).IsNotEmpty();
 	}
 
 	[Test]

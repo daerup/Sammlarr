@@ -28,19 +28,6 @@ public class EncryptedGuidConverterTests
 	}
 
 	[Test]
-	public async Task ConvertBack_WithEncryptedString_ReturnsOriginalGuid()
-	{
-		var service = CreateDataProtectionService();
-		var testee = new EncryptedGuidConverter(service);
-		var originalGuid = Guid.NewGuid();
-		var encrypted = testee.ConvertToProvider(originalGuid);
-
-		var decrypted = testee.ConvertFromProvider(encrypted);
-
-		await Assert.That(decrypted).IsEqualTo(originalGuid);
-	}
-
-	[Test]
 	public async Task Encrypt_ThenDecrypt_WithVariousGuids_RoundTripSucceeds()
 	{
 		var service = CreateDataProtectionService();
