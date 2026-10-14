@@ -41,7 +41,8 @@ jobs:
 
       - run: dotnet tool restore
 
-      - run: dotnet restore Sammlarr.slnx --locked-mode
+      - id: restore
+        run: dotnet restore Sammlarr.slnx --locked-mode
 
       - run: dotnet build Sammlarr.slnx -c "$CONFIGURATION" --no-restore -warnaserror '-warnNotAsError:NU1900;NU1901;NU1902;NU1903;NU1904'
 
@@ -79,6 +80,21 @@ jobs:
           retention-days: 7
 
       - run: dotnet csharpier check .
+
+      - name: Licences
+        if: ${{ !cancelled() && steps.restore.outcome == 'success' }}
+        run: >
+          dotnet nuget-license -i Web/Web.csproj -t -o Table -err
+          -a .github/licences/allowed.json
+          -override .github/licences/overrides.json
+          -ignore .github/licences/ignored.json
+
+      - name: Vulnerable packages
+        if: ${{ !cancelled() && steps.restore.outcome == 'success' }}
+        run: |
+          dotnet list Sammlarr.slnx package --vulnerable --include-transitive --format json > vulnerable.json
+          jq '{ problems, vulnerable: [.projects[] | select(.frameworks)] }' vulnerable.json
+          jq -e '([.projects[].frameworks[]?] | length == 0) and ((.problems // []) | length == 0)' vulnerable.json
 
   coverage-badge:
     if: ${{ !cancelled() && github.event_name == 'push' && needs.build-test.outputs.line != '' }}
