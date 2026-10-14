@@ -1,4 +1,5 @@
 using API;
+using Contracts;
 using Core;
 using DB;
 using DB.Scheduling;
@@ -83,10 +84,10 @@ app.MapHealthEndpoints();
 
 app.MapGet(
 		"/diagnostics/export",
-		(LogCaptureService capture) =>
+		(LogCaptureService capture, IDateTimeProvider clock) =>
 		{
 			var stream = capture.ExportZip();
-			var fileName = $"diagnostics-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}.zip";
+			var fileName = $"diagnostics-{clock.Now:yyyyMMdd-HHmmss}.zip";
 			return Results.File(stream, "application/zip", fileName);
 		}
 	)

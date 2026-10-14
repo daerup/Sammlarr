@@ -1,8 +1,10 @@
+@using Contracts
 @using Contracts.Media
 @using Domain.Feed.Run
 @using UI.Shared.Changes
 @using global::Shared
 @inject IMediaService Media
+@inject IDateTimeProvider Clock
 
 @if (Running is Some<ILiveRun>(var live))
 {
@@ -180,7 +182,7 @@ else
     private RenderFragment Pill(FeedRun run) =>
         @<button type="button" class="last-run" @onclick="() => OpenAsync(run)">
             <LucideIcon Name="history" Size="14"/>
-            <span>@ScheduleText.Ago(run.StartedAt, DateTimeOffset.UtcNow)</span>
+            <span>@ScheduleText.Ago(run.StartedAt, Clock.Now)</span>
             @if (run.Conclusiveness is Conclusiveness.Pending)
             {
                 <span class="last-run-badge">

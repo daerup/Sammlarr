@@ -1,5 +1,6 @@
 @page "/"
 @implements IDisposable
+@using Contracts
 @using Contracts.Announcing
 @using Contracts.Blocklist
 @using Contracts.Feed
@@ -29,6 +30,7 @@
 @inject DialogService DialogService
 @inject IJobQueueView JobQueueView
 @inject MediaProviderBrandingService BrandingService
+@inject IDateTimeProvider Clock
 
 <PageTitle>Sammlarr</PageTitle>
 
@@ -179,8 +181,8 @@ else
     private ProviderConfig? _settings;
     private MediaMatchResult? _selected;
     private UserId? _userId;
-    private DateTimeOffset _now = DateTimeOffset.Now;
-    private DateOnly _today = DateOnly.FromDateTime(DateTime.Now);
+    private DateTimeOffset _now;
+    private DateOnly _today;
     private int _wantlistCount;
     private int _blocklistCount;
     private WantlistSnapshot _wantlist = new([]);
@@ -262,6 +264,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        ReadClock();
         _reload = new(LoadAsync);
         Events.Published += OnEvent;
         _settings = await ProviderConfigService.GetAsync();
@@ -281,6 +284,12 @@ else
         _isLoading = true;
         await Task.Yield();
         await LoadAsync();
+    }
+
+    private void ReadClock()
+    {
+        _now = Clock.Now.ToLocalTime();
+        _today = DateOnly.FromDateTime(_now.DateTime);
     }
 
     private void ClearLibrary()
@@ -309,8 +318,7 @@ else
 
     private async Task LoadAsync()
     {
-        _now = DateTimeOffset.Now;
-        _today = DateOnly.FromDateTime(DateTime.Now);
+        ReadClock();
 
         try
         {

@@ -1,5 +1,6 @@
 using BlazorBlueprint.Components;
 using Bunit;
+using Contracts;
 using Contracts.Blocklist;
 using Contracts.Feed;
 using Contracts.Identity;
@@ -22,6 +23,8 @@ namespace UI.Tests.Feeds;
 public class FeedRunsTests : BunitContext
 {
 	private static readonly FeedId Feed = FeedId.From(new Guid(31, 0, 0, new byte[8]));
+
+	private static readonly DateTimeOffset Now = new(2026, 10, 14, 12, 0, 0, TimeSpan.Zero);
 
 	private static readonly IReadOnlyList<FeedRun> Runs = History(30);
 
@@ -56,11 +59,7 @@ public class FeedRunsTests : BunitContext
 	[Test]
 	public async Task Render_ForARunWhoseSourceFailed_ShowsWhyAlongsideTheFailure()
 	{
-		var failed = Run(DateTimeOffset.UtcNow) with
-		{
-			Conclusiveness = Conclusiveness.StillLoading,
-			SourceFailure = Some.Of("No list found with identifier 'hdlists/comedy'."),
-		};
+		var failed = Run(Now) with { Conclusiveness = Conclusiveness.StillLoading, SourceFailure = Some.Of("No list found with identifier 'hdlists/comedy'.") };
 		RegisterServices([failed]);
 
 		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(failed)));
@@ -73,7 +72,7 @@ public class FeedRunsTests : BunitContext
 	[Test]
 	public async Task Render_ARunThatMadeCalls_EndsItsSummaryWithTheCallCount()
 	{
-		var calling = Run(DateTimeOffset.UtcNow) with { Calls = [new FeedRunCalls(RemoteService.Tmdb, UsageOutcome.Answered, 8287)] };
+		var calling = Run(Now) with { Calls = [new FeedRunCalls(RemoteService.Tmdb, UsageOutcome.Answered, 8287)] };
 		RegisterServices([calling]);
 
 		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(calling)));
@@ -85,7 +84,7 @@ public class FeedRunsTests : BunitContext
 	[Test]
 	public async Task Render_ARunThatChangedTitlesButListsNone_SaysItsTitlesAreNoLongerListed()
 	{
-		var trimmed = Run(DateTimeOffset.UtcNow.AddDays(-120)) with { Counts = FeedRunCounts.None with { Total = 500, Added = 4, Removed = 3, Kept = 493 } };
+		var trimmed = Run(Now.AddDays(-120)) with { Counts = FeedRunCounts.None with { Total = 500, Added = 4, Removed = 3, Kept = 493 } };
 		RegisterServices([trimmed]);
 
 		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(trimmed)));
@@ -111,6 +110,9 @@ public class FeedRunsTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
 		Services.AddSingleton<ICurrentUser>(new TestCurrentUser());
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(Now);
+		Services.AddSingleton(clock.Object);
 
 		var feeds = IFeedService.Mock();
 		feeds
@@ -159,8 +161,7 @@ public class FeedRunsTests : BunitContext
 		return query.MustInclude.Match(id => runs.ToList().FindIndex(run => run.Id == id) + 1, () => 0);
 	}
 
-	private static IReadOnlyList<FeedRun> History(int count) =>
-		[.. Enumerable.Range(0, count).Select(hoursAgo => Run(DateTimeOffset.UtcNow.AddHours(-hoursAgo)))];
+	private static IReadOnlyList<FeedRun> History(int count) => [.. Enumerable.Range(0, count).Select(hoursAgo => Run(Now.AddHours(-hoursAgo)))];
 
 	private static string Link(FeedRun run) => UrlGuid.Encode(run.Id.Value);
 

@@ -1,6 +1,7 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
+using Contracts;
 using Contracts.Blocklist;
 using Contracts.Media;
 using Contracts.Settings;
@@ -24,6 +25,7 @@ namespace UI.Tests.Feeds;
 
 public class LastRunCellTests : BunitContext
 {
+	private static readonly DateTimeOffset Now = new(2026, 10, 14, 12, 0, 0, TimeSpan.Zero);
 	private static readonly FeedId Feed = FeedId.From(new Guid(11, 0, 0, new byte[8]));
 	private static readonly MediaId Added = MediaId.From(new Guid(12, 0, 0, new byte[8]));
 
@@ -167,6 +169,9 @@ public class LastRunCellTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(Now);
+		Services.AddSingleton(clock.Object);
 
 		var media = IMediaService.Mock();
 		media.GetDetailsAsync(Any(), Any(), Any()).Returns((ids, _, _) => AsyncSequence.Of([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Detail(id)))]));
@@ -195,7 +200,7 @@ public class LastRunCellTests : BunitContext
 	private static FeedRun Run() =>
 		TestFeeds.Run(TestFeeds.Feed(Feed.Value), Guid.NewGuid()) with
 		{
-			StartedAt = DateTimeOffset.UtcNow.AddMinutes(-5),
+			StartedAt = Now.AddMinutes(-5),
 			Duration = TimeSpan.FromSeconds(2),
 			Counts = FeedRunCounts.None with { Total = 1, Added = 1 },
 			Items = [new FeedRunItem { MediaId = Added, State = FeedRunItemState.Added }],

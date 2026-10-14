@@ -1,5 +1,7 @@
+@using Contracts
 @using Domain.Notifications
 @using global::Shared.Extensions
+@inject IDateTimeProvider Clock
 
 @if (Outcomes.Count == 0)
 {
@@ -64,7 +66,7 @@ else
             Failed => "Failed",
         };
 
-    private static string? Detail(DeliveryOutcome outcome) =>
+    private string? Detail(DeliveryOutcome outcome) =>
         outcome switch
         {
             Delivered => null,
@@ -72,9 +74,9 @@ else
             Failed failed => failed.Reason,
         };
 
-    private static string Relative(DateTimeOffset when)
+    private string Relative(DateTimeOffset when)
     {
-        var delta = when - DateTimeOffset.UtcNow;
+        var delta = when - Clock.Now;
         var magnitude = delta < TimeSpan.Zero ? -delta : delta;
         var unit =
             magnitude.TotalDays >= 1 ? $"{(int)magnitude.TotalDays}d"
