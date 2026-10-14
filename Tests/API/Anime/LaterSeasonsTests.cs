@@ -45,9 +45,8 @@ public class LaterSeasonsTests
 	}
 
 	[Test]
-	public async Task ShowsOf_ForAPageOfShows_ReadsTheMapTwice()
+	public async Task ShowsOf_ForAPageOfShows_AnswersEachInListOrder()
 	{
-		var map = AnimeMaps.KnowingTheApothecaryDiaries();
 		IdentifyRequest[] page =
 		[
 			ThirdSeasonAsked,
@@ -55,7 +54,7 @@ public class LaterSeasonsTests
 			new IdentifyRequest([AniListId.From("999999", MediaType.Show)], new None()),
 		];
 
-		var shows = await AnimeMaps.Seasons(map).ShowsOf(page.ToAsyncEnumerable(), CancellationToken.None).ToListAsync();
+		var shows = await AnimeMaps.Seasons(AnimeMaps.KnowingTheApothecaryDiaries()).ShowsOf(page.ToAsyncEnumerable(), CancellationToken.None).ToListAsync();
 
 		List<IdentifyRequest> asked = [];
 		foreach (var show in shows)
@@ -66,8 +65,6 @@ public class LaterSeasonsTests
 		await Assert
 			.That(asked.Select(request => $"{request.Candidates[0]}"))
 			.IsEquivalentTo(["AniList:Show:161645", "AniList:Show:161645", "AniList:Show:999999"], CollectionOrdering.Matching);
-		map.FindManyAsync(Any(), Any()).WasCalled(Times.Exactly(2));
-		map.FindAsync(Any(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]

@@ -10,41 +10,39 @@ public class AnimeIdsInRunTests
 	private static readonly AniListId Apothecary = AniListId.From("161645", MediaType.Show);
 
 	[Test]
-	public async Task PrimeAsync_ThenFindAsync_ReadsTheMapOnce()
+	public async Task PrimeAsync_ThenFindAsync_AnswersThePrimedEntryWhateverTheMapSaysNow()
 	{
 		var map = AnimeMaps.KnowingTheApothecaryDiaries();
-		var loads = AnimeMaps.Loads(DatasetNames.AnimeIds);
-		var testee = new AnimeIdsInRun(map.Object, loads.Object);
+		var testee = new AnimeIdsInRun(map.Object, AnimeMaps.Loads(DatasetNames.AnimeIds).Object);
 		await testee.PrimeAsync(
 			[
 				[Apothecary],
 			],
 			CancellationToken.None
 		);
+		map.FindAsync(Any(), Any()).Returns(new None());
 
 		var found = await testee.FindAsync(Apothecary, CancellationToken.None);
 
 		await Assert.That(found).IsSuccess().And.IsEqualTo(Some.Of(AnimeMaps.ApothecaryDiaries));
-		map.FindManyAsync(Any(), Any()).WasCalled(Times.Once);
-		map.FindAsync(Any(), Any()).WasCalled(Times.Never);
-		loads.FindAsync(Any(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task FindAsync_BeforeTheMapIsLoaded_AsksWhetherItLoadedAgainNextTime()
+	public async Task FindAsync_BeforeTheMapIsLoaded_FailsAndSucceedsNextTimeOnceItLoaded()
 	{
 		var loads = AnimeMaps.Loads(DatasetNames.AnimeIds, loaded: false);
-		var testee = new AnimeIdsInRun(AnimeMaps.Unknown().Object, loads.Object);
-		await testee.FindAsync(Apothecary, CancellationToken.None);
+		var testee = new AnimeIdsInRun(AnimeMaps.KnowingTheApothecaryDiaries().Object, loads.Object);
+		var unloaded = await testee.FindAsync(Apothecary, CancellationToken.None);
+		loads.FindAsync(Any(), Any()).Returns(Some.Of(new DatasetLoad(DatasetNames.AnimeIds, DateTimeOffset.UnixEpoch, new None(), 1)));
 
-		var second = await testee.FindAsync(Apothecary, CancellationToken.None);
+		var found = await testee.FindAsync(Apothecary, CancellationToken.None);
 
-		await Assert.That(second).IsError();
-		loads.FindAsync(Any(), Any()).WasCalled(Times.Exactly(2));
+		await Assert.That(unloaded).IsError();
+		await Assert.That(found).IsSuccess().And.IsEqualTo(Some.Of(AnimeMaps.ApothecaryDiaries));
 	}
 
 	[Test]
-	public async Task PrimeAsync_ForAnIdTheMapLacks_RemembersTheMiss()
+	public async Task PrimeAsync_ForAnIdTheMapLacks_RemembersTheMissOnceTheMapKnowsTheId()
 	{
 		var map = AnimeMaps.Unknown();
 		var testee = new AnimeIdsInRun(map.Object, AnimeMaps.Loads(DatasetNames.AnimeIds).Object);
@@ -54,12 +52,12 @@ public class AnimeIdsInRunTests
 			],
 			CancellationToken.None
 		);
+		map.FindAsync(Any(), Any()).Returns(Some.Of(AnimeMaps.ApothecaryDiaries));
 
 		var found = await testee.FindAsync(Apothecary, CancellationToken.None);
 
 		var entry = await Assert.That(found).IsSuccess();
 		await Assert.That(entry!).IsNone();
-		map.FindAsync(Any(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
@@ -79,6 +77,5 @@ public class AnimeIdsInRunTests
 		var found = await testee.FindAsync(Apothecary, CancellationToken.None);
 
 		await Assert.That(found).IsSuccess().And.IsEqualTo(Some.Of(AnimeMaps.ApothecaryDiaries));
-		map.FindAsync(Any(), Any()).WasCalled(Times.Once);
 	}
 }

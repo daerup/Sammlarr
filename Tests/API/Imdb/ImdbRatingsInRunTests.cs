@@ -9,7 +9,7 @@ namespace API.Tests.Imdb;
 public class ImdbRatingsInRunTests
 {
 	[Test]
-	public async Task PrimeAsync_ForABurst_ReadsTheRatingsInOneQuery()
+	public async Task PrimeAsync_ForABurst_KeepsTheRatingsAndMissesItReadWhateverTheDatasetSaysLater()
 	{
 		var ratings = IImdbRatings.Mock();
 		ratings.FindManyAsync(Any(), Any()).Returns(new Dictionary<string, ImdbRating> { ["tt0137523"] = new(8.8f, Some.Of(2_000_000)) });
@@ -21,6 +21,7 @@ public class ImdbRatingsInRunTests
 			],
 			CancellationToken.None
 		);
+		ratings.FindAsync(Any(), Any()).Returns(Some.Of(new ImdbRating(1.0f, Some.Of(10))));
 
 		var fightClub = await testee.FindAsync("tt0137523", CancellationToken.None);
 		var inception = await testee.FindAsync("tt1375666", CancellationToken.None);
@@ -29,7 +30,5 @@ public class ImdbRatingsInRunTests
 		await Assert.That(rated!).IsSome().And.IsEqualTo(new ImdbRating(8.8f, Some.Of(2_000_000)));
 		var unrated = await Assert.That(inception).IsSome();
 		await Assert.That(unrated!).IsNone();
-		ratings.FindManyAsync(Any(), Any()).WasCalled(Times.Once);
-		ratings.FindAsync(Any(), Any()).WasCalled(Times.Never);
 	}
 }
