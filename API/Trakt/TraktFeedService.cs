@@ -114,7 +114,7 @@ internal sealed class TraktFeedService(TraktClient client, IMediaService media, 
 
 	private static Optional<int> Header(HttpResponseMessage response, string name)
 	{
-		IEnumerable<string> values = response.Headers.TryGetValues(name, out var found) ? found : [];
+		var values = response.Headers.TryGetValues(name, out var found) ? found : [];
 		return values
 			.FirstOrNone(value => int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out _))
 			.Map(value => int.Parse(value, NumberStyles.None, CultureInfo.InvariantCulture));

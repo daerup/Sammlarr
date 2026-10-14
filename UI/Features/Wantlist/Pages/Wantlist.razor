@@ -259,8 +259,8 @@
             var listed = WantlistStatusView.WithPendingRemovals(await WantlistService.GetAsync(Cancellation.Token), outbox);
             using var marked = UsageCauses.Mark(UsageCause.ShowingTitles);
             var all = await Media.GetDetailsAsync(listed, FieldNeeds.None, Cancellation.Token).ToListAsync(Cancellation.Token);
-            _items = all.Where(item => !_removedIds.Contains(item.Media.Identity.Id)).ToList();
-            _removedItems = all.Where(item => _removedIds.Contains(item.Media.Identity.Id)).ToList();
+            _items = [.. all.Where(item => !_removedIds.Contains(item.Media.Identity.Id))];
+            _removedItems = [.. all.Where(item => _removedIds.Contains(item.Media.Identity.Id))];
             Filter = Filter with { Statuses = WantlistStatusView.Adjusted(Filter.Statuses, _items.Count, _removedItems.Count) };
             ApplyFeedFromQuery();
 

@@ -53,7 +53,7 @@ public class RunLayoutsTests
 	[Test]
 	public async Task Build_ForServicesThatConvertEachOthersIds_KeepsEveryEdgeBetweenColumns()
 	{
-		IReadOnlyList<Hop> hops = IdLookupPlanner.Derive([
+		var hops = IdLookupPlanner.Derive([
 			TestLookups.Converter(RemoteService.Tmdb, [TestLookups.Find, new ById(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Imdb], Cost: 1)]),
 			TestLookups.Converter(RemoteService.Trakt, [new ById(Accepts: [MediaProvider.Imdb, MediaProvider.Tmdb], Yields: [MediaProvider.Tvdb], Cost: 1)]),
 		]);

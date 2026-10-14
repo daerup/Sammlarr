@@ -138,7 +138,7 @@
                 ("rss", Count(holdings.Feeds, "feed", "feeds"), "and their run history", holdings.Feeds > 0),
                 ("bookmark", Titles(holdings.Wanted), "on their wantlist", holdings.Wanted > 0),
                 ("ban", Titles(holdings.Blocklisted), "on their blocklist", holdings.Blocklisted > 0),
-                ("key-round", "Their keys", Listed(holdings.Keys.Select(key => Branding.GetBrandingInfo(key).NickName).Distinct().ToList()), holdings.Keys.Count > 0),
+                ("key-round", "Their keys", Listed([.. holdings.Keys.Select(key => Branding.GetBrandingInfo(key).NickName).Distinct()]), holdings.Keys.Count > 0),
             ];
             return [.. rows.Where(row => row.Shown).Select(row => (row.Icon, row.What, row.Detail))];
         }

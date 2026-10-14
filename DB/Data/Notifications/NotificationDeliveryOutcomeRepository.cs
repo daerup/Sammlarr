@@ -59,7 +59,7 @@ internal sealed class NotificationDeliveryOutcomeRepository(IDbContextFactory<Sa
 			.ThenByDescending(outcome => outcome.Id)
 			.ToListAsync(cancellationToken);
 		return rows.GroupBy(outcome => outcome.TargetId)
-			.ToDictionary(group => group.Key, group => (IReadOnlyList<NotificationDeliveryOutcome>)group.Take(count).Select(Map).ToList());
+			.ToDictionary(group => group.Key, group => (IReadOnlyList<NotificationDeliveryOutcome>)[.. group.Take(count).Select(Map)]);
 	}
 
 	private static async Task PruneAsync(SammlarrDbContext ctx, Guid targetId, CancellationToken cancellationToken)

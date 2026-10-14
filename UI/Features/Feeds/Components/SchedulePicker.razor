@@ -311,7 +311,7 @@
                 _weeklyTime = _dailyTime;
                 if (_weeklyDaysOfWeek.Count == 0)
                 {
-                    _weeklyDaysOfWeek = Enum.GetValues<DayOfWeek>().Order(DayOfWeekComparer.Instance).ToList();
+                    _weeklyDaysOfWeek = [.. Enum.GetValues<DayOfWeek>().Order(DayOfWeekComparer.Instance)];
                 }
                 break;
 
@@ -470,10 +470,7 @@
             }
         }
 
-        return parsedDays
-            .Select(static day => (DayOfWeek)day)
-            .Order(DayOfWeekComparer.Instance)
-            .ToList();
+        return [.. parsedDays.Select(static day => (DayOfWeek)day).Order(DayOfWeekComparer.Instance)];
     }
 
     private static IEnumerable<int> ExpandDayOfWeekSegment(string segment)

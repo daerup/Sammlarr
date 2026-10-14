@@ -45,7 +45,7 @@ public class FeedSaveTests
 		new($"/lists/{Identifier}/items", 200, $"{{\"movies\":[{Items(items)}],\"shows\":[]}}")
 		{
 			Query = new Dictionary<string, string> { ["limit"] = "1000", ["offset"] = offset.ToString(CultureInfo.InvariantCulture) },
-			Headers = hasMore ? new Dictionary<string, string> { ["X-Has-More"] = "true" } : new Dictionary<string, string>(),
+			Headers = hasMore ? new Dictionary<string, string> { ["X-Has-More"] = "true" } : [],
 			DelayMs = delayMs,
 		};
 

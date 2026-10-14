@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Shared.Collections;
@@ -55,5 +56,10 @@ public readonly struct ValueSet<T> : IReadOnlySet<T>, IEquatable<ValueSet<T>>
 
 public static class ValueSet
 {
+	[SuppressMessage(
+		"ReSharper",
+		"UseCollectionExpression",
+		Justification = "Create is the collection builder, so a collection expression here would call it again"
+	)]
 	public static ValueSet<T> Create<T>(ReadOnlySpan<T> items) => items.Length == 0 ? default : new ValueSet<T>([.. items]);
 }

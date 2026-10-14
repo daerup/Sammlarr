@@ -65,7 +65,7 @@ internal sealed class WantlistSyncPlanner(
 				var planned = types.Where(type => answered.Contains(type.Value)).Select(type => type.Key).ToHashSet();
 				return ids.Where(id => !planned.Contains(id)).ToHashSet();
 			},
-			() => new HashSet<MediaId>()
+			() => []
 		);
 	}
 

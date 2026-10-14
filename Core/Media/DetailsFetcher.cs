@@ -247,7 +247,7 @@ internal sealed class DetailsFetcher(
 
 	private ValueSet<ProviderAnswer> Answers(FetchReason reason, IEnumerable<ProviderAnswer> fresh, DateTimeOffset now)
 	{
-		IEnumerable<ProviderAnswer> previous = reason switch
+		var previous = reason switch
 		{
 			Gaps gaps => gaps.Stored.Answers,
 			Stale stale => stale.Stored.Answers.Where(answer => answer.Failures > 0 || answer.AskableAt(housekeeping.FreshFor) > now),

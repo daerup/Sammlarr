@@ -288,7 +288,7 @@ public class OptionalExtensionsTests
 	{
 		Optional<int> optional = Some.Of(4);
 
-		Optional<string> mapped = optional.Map(value => Some.Of(value.ToString()));
+		var mapped = optional.Map(value => Some.Of(value.ToString()));
 
 		await Assert.That(mapped).IsSome().And.IsEqualTo("4");
 	}

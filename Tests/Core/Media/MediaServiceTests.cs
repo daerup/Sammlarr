@@ -135,8 +135,8 @@ public class MediaServiceTests
 	{
 		var firstId = MediaId.New();
 		var secondId = MediaId.New();
-		MatchedMedia firstDetail = BuildDetail(firstId);
-		MatchedMedia secondDetail = BuildDetail(secondId);
+		var firstDetail = BuildDetail(firstId);
+		var secondDetail = BuildDetail(secondId);
 		var (testee, deps) = TestMediaService.Create();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([Stored(secondDetail), Stored(firstDetail)]);
 		WantlistItem[] items = [WantlistItemFor(firstId, 1), WantlistItemFor(secondId, 2)];
@@ -156,7 +156,7 @@ public class MediaServiceTests
 	{
 		var cachedId = MediaId.New();
 		var missingId = MediaId.New();
-		MatchedMedia cachedDetail = BuildDetail(cachedId);
+		var cachedDetail = BuildDetail(cachedId);
 		var (testee, deps) = TestMediaService.Create();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([Stored(cachedDetail)]);
 

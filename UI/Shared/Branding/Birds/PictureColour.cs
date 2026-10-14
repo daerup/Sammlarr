@@ -54,7 +54,7 @@ internal static class PictureColour
 		for (var round = 0; round < Rounds; round++)
 		{
 			var nearest = points.Select(point => Nearest(centres, point)).ToArray();
-			centres = [.. centres.Select((centre, index) => MeanOf(points.Where((_, at) => nearest[at] == index).ToArray()).GetValueOr(centre))];
+			centres = [.. centres.Select((centre, index) => MeanOf([.. points.Where((_, at) => nearest[at] == index)]).GetValueOr(centre))];
 			owners = nearest;
 		}
 

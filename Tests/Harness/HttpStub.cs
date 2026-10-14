@@ -11,7 +11,7 @@ internal sealed class HttpStub : HttpMessageHandler
 {
 	private readonly List<(string UrlContains, Func<HttpRequestMessage, bool> Validator)> _credentialValidators = [];
 
-	private readonly Dictionary<string, Func<HttpRequestMessage, Task<HttpResponseMessage>>> _urlResponders = new();
+	private readonly Dictionary<string, Func<HttpRequestMessage, Task<HttpResponseMessage>>> _urlResponders = [];
 
 	private readonly ConcurrentQueue<string> _requested = new();
 

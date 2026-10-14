@@ -219,7 +219,7 @@ public class ResultExtensionsTests
 	{
 		Result<int> result = Success.Of(4);
 
-		Result<string> mapped = result.Map(value => Success.Of(value.ToString()));
+		var mapped = result.Map(value => Success.Of(value.ToString()));
 
 		await Assert.That(mapped).IsSuccess().And.IsEqualTo("4");
 	}
@@ -279,7 +279,7 @@ public class ResultExtensionsTests
 	{
 		Result<int> result = Success.Of(4);
 
-		Result<string> mapped = await result.Map(value => Task.FromResult(Success.Of(value.ToString())));
+		var mapped = await result.Map(value => Task.FromResult(Success.Of(value.ToString())));
 
 		await Assert.That(mapped).IsSuccess().And.IsEqualTo("4");
 	}
@@ -322,7 +322,7 @@ public class ResultExtensionsTests
 	[Test]
 	public async Task TaskMirror_AppliesMapErrorAndMatch_WithSingleAwait()
 	{
-		Task<Result<int>> start = Task.FromResult<Result<int>>(Error.From("boom"));
+		var start = Task.FromResult<Result<int>>(Error.From("boom"));
 		var captured = "";
 
 		var outcome = await start

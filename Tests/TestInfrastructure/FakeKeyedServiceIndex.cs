@@ -6,7 +6,7 @@ public class FakeKeyedServiceIndex<TKey, TService> : IKeyedServiceIndex<TKey, TS
 	where TKey : struct, Enum
 	where TService : class
 {
-	private readonly Dictionary<TKey, TService> _services = new();
+	private readonly Dictionary<TKey, TService> _services = [];
 
 	public TService this[TKey key] =>
 		_services.TryGetValue(key, out var service) ? service : throw new InvalidOperationException($"No service registered for key '{key}'.");

@@ -345,7 +345,7 @@
                         <span>@fact</span>
                     }
                     <span aria-hidden="true">•</span>
-                    <SammlarrRatingBadge Ratings="details.Ratings" Ids="@(title.Media.Identity.Keys.ToList<IExternalMediaId>())" Title="@details.Title" Size="13" StoredOnly="true" Align="PopoverAlign.Center"/>
+                    <SammlarrRatingBadge Ratings="details.Ratings" Ids="@([.. title.Media.Identity.Keys])" Title="@details.Title" Size="13" StoredOnly="true" Align="PopoverAlign.Center"/>
                 </div>
                 @if (details.Genres.Count > 0)
                 {

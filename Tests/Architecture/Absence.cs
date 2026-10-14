@@ -175,7 +175,7 @@ internal static class Absence
 			};
 		}
 
-		for (MemberInfo? scope = member; scope is not null; scope = scope.DeclaringType)
+		for (var scope = member; scope is not null; scope = scope.DeclaringType)
 		{
 			var context = scope
 				.GetCustomAttributesData()

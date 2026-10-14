@@ -53,5 +53,5 @@ public class NotificationTemplateVariablesTests
 	}
 
 	private static HashSet<string> Tokens(params NotificationEventType[] eventTypes) =>
-		NotificationTemplateVariables.GroupsFor(eventTypes).SelectMany(group => group.Variables).Select(variable => variable.Token).ToHashSet();
+		[.. NotificationTemplateVariables.GroupsFor(eventTypes).SelectMany(group => group.Variables).Select(variable => variable.Token)];
 }

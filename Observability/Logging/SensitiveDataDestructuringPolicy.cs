@@ -48,7 +48,7 @@ internal sealed class SensitiveDataDestructuringPolicy(IReadOnlyDictionary<Type,
 			return null;
 		}
 
-		return properties.Select(property => new PropertyReader(property.Name, property.GetValue, IsSensitive(property))).ToArray();
+		return [.. properties.Select(property => new PropertyReader(property.Name, property.GetValue, IsSensitive(property)))];
 	}
 
 	private sealed record PropertyReader(string Name, Func<object?, object?> Read, bool IsSensitive);

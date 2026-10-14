@@ -124,7 +124,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		IQueryable<FeedRunRow> runs = ctx.FeedRuns.AsNoTracking();
+		var runs = ctx.FeedRuns.AsNoTracking();
 		runs = query.Feed.Map(feed => runs.Where(row => row.FeedId == feed.Value)).GetValueOr(runs);
 		runs = query.Since.Map(since => since.ToUniversalTime()).Map(cutoff => runs.Where(row => row.StartedAt >= cutoff)).GetValueOr(runs);
 

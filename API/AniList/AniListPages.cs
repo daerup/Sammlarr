@@ -131,7 +131,7 @@ internal static class AniListPages
 	private static List<KeyValuePair<string, string>> LabelsOf(SiteLink search, DateOnly today)
 	{
 		var preset = PresetOf(search);
-		KeyValuePair<string, string>[] seasonal = preset switch
+		var seasonal = preset switch
 		{
 			"this-season" => Season(AnimeSeason.Of(today)),
 			"next-season" => Season(AnimeSeason.Of(today).Next()),

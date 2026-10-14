@@ -53,7 +53,7 @@
                         </div>
                     }
                     <BbSheetTitle Class="font-bold tracking-wide text-xl">
-                        <MediaTitleLink Title="@details.Title" Ids="@(media.Externals.ToList())" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                        <MediaTitleLink Title="@details.Title" Ids="@([.. media.Externals])" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
                     </BbSheetTitle>
                     <BbSheetDescription Class="font-normal tracking-wide">
                         <span class="media-sheet-meta-line inline-flex items-center gap-1.5 flex-wrap">
@@ -70,7 +70,7 @@
                                 <span>@fact</span>
                             }
                             <span aria-hidden="true">•</span>
-                            <SammlarrRatingBadge Ratings="@_loadedRatings.GetValueOr(details.Ratings)" Ids="@(media.Externals.ToList())" Title="@details.Title" Size="17" Align="PopoverAlign.Center" Media="media.MatchedId"/>
+                            <SammlarrRatingBadge Ratings="@_loadedRatings.GetValueOr(details.Ratings)" Ids="@([.. media.Externals])" Title="@details.Title" Size="17" Align="PopoverAlign.Center" Media="media.MatchedId"/>
                         </span>
                     </BbSheetDescription>
                     @if (details.Genres.Count > 0)

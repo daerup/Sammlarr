@@ -134,7 +134,7 @@
 
     private bool _isCreate => Existing is null;
 
-    private List<SelectOption<Guid?>> ClientOptions => Clients.Select(client => new SelectOption<Guid?>(client.Id, $"{client.Name} ({client.Channel})")).ToList();
+    private List<SelectOption<Guid?>> ClientOptions => [.. Clients.Select(client => new SelectOption<Guid?>(client.Id, $"{client.Name} ({client.Channel})"))];
 
     private NotificationTarget? _client;
     private Guid? _clientId;

@@ -21,7 +21,7 @@ public sealed class MonadBranchAnalyzer : DiagnosticAnalyzer
 
 	private static readonly string[] PresenceReads = ["IsSome", "IsNone", "IsSuccess", "IsError"];
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
 	public override void Initialize(AnalysisContext context)
 	{

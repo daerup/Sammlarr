@@ -119,7 +119,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 
 	private async Task<IReadOnlySet<string>> GenresAsync(CancellationToken cancellationToken)
 	{
-		var answer = await client.AskAsync<AniListTypes.GenreData>(GenresQuery, new JsonObject(), cancellationToken);
+		var answer = await client.AskAsync<AniListTypes.GenreData>(GenresQuery, [], cancellationToken);
 		return answer.GetOrThrow(Refused).Genres?.ToHashSet(StringComparer.Ordinal) ?? new HashSet<string>(StringComparer.Ordinal);
 	}
 
