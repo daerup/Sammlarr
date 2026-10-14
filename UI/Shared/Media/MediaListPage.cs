@@ -12,9 +12,6 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	protected IProviderConfigService ProviderConfigService { get; set; } = null!;
 
 	[Inject]
-	internal AccountConnectionPrompt AccountConnectionPrompt { get; set; } = null!;
-
-	[Inject]
 	internal Notifier Notifier { get; set; } = null!;
 
 	[Inject]

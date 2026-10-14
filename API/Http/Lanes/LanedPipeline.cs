@@ -14,7 +14,7 @@ internal static class LanedPipeline
 {
 	internal const string RetryPipeline = "retry";
 
-	public static IHttpClientBuilder AddLanes<TOptions>(this IHttpClientBuilder builder, RemoteService remote)
+	public static void AddLanes<TOptions>(this IHttpClientBuilder builder, RemoteService remote)
 		where TOptions : class, IProviderHttpOptions
 	{
 		builder.AddResilienceHandler(
@@ -33,7 +33,6 @@ internal static class LanedPipeline
 			"attempt",
 			(pipeline, context) => pipeline.AddTimeout(TimeSpan.FromSeconds(context.ServiceProvider.GetRequiredService<TOptions>().Http.AttemptTimeoutSeconds))
 		);
-		return builder;
 	}
 
 	private static HttpRetryStrategyOptions Retry(RemoteService remote, ProviderHttpOptions http, Lanes lanes)

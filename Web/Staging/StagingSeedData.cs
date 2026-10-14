@@ -24,15 +24,12 @@ internal sealed record SeedTitle
 
 	public string? Tvdb { get; init; }
 
-	public string? Imdb { get; init; }
-
 	internal IReadOnlyList<IExternalMediaId> Ids()
 	{
 		Optional<IExternalMediaId>[] ids =
 		[
 			Optional.Of(Tmdb).Map(id => (IExternalMediaId)TmdbId.From(id, Type)),
 			Optional.Of(Tvdb).Map(id => (IExternalMediaId)TvdbId.From(id, Type)),
-			Optional.Of(Imdb).Map(id => (IExternalMediaId)ImdbId.From(id, Type)),
 		];
 		return [.. ids.WhereSome()];
 	}

@@ -2,19 +2,16 @@ using System.Data.Common;
 using System.Linq.Expressions;
 using Dapper;
 using DB;
-using DB.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Harness;
 
 internal class RawDbContext(SammlarrDbContext context)
 {
-	public RawDbContext<TTable> Table<TTable>()
-		where TTable : IIdentifiable<Guid> => new(context);
+	public RawDbContext<TTable> Table<TTable>() => new(context);
 }
 
 internal class RawDbContext<TTable>
-	where TTable : IIdentifiable<Guid>
 {
 	private readonly SammlarrDbContext _context;
 
