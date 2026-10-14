@@ -92,7 +92,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.SeedLocalUser("guest", Password, UserRole.Member);
 		var config = host.Resolve<IProviderConfigService>();
-		await config.StoreAsync((await config.GetAsync()) with { AuthProvider = AuthProvider.Plex });
+		await config.StoreAsync(await config.GetAsync() with { AuthProvider = AuthProvider.Plex });
 
 		var result = await Testee.SignInWithPasswordAsync("guest", Password);
 
@@ -157,7 +157,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var guest = await host.SeedLocalUser("guest", Password, UserRole.Member);
 		var config = host.Resolve<IProviderConfigService>();
-		await config.StoreAsync((await config.GetAsync()) with { AuthProvider = AuthProvider.Plex });
+		await config.StoreAsync(await config.GetAsync() with { AuthProvider = AuthProvider.Plex });
 		host.OAuthReturns("plex-uuid", "Someone on Plex");
 
 		var result = await Testee.LinkAsync(AuthProvider.Plex, "callback", guest);

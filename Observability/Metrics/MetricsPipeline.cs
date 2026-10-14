@@ -6,8 +6,6 @@ namespace Observability.Metrics;
 
 internal static class MetricsPipeline
 {
-	private const int ExportMilliseconds = 60_000;
-
 	private static readonly string[] Meters = ["System.Net.Http", "Polly"];
 
 	public static void Register(IServiceCollection services, ObservabilityContext context)
@@ -20,7 +18,7 @@ internal static class MetricsPipeline
 			{
 				metrics
 					.AddMeter(Meters)
-					.AddReader(sp => new PeriodicExportingMetricReader(sp.GetRequiredService<UsageExporter>(), ExportMilliseconds)
+					.AddReader(sp => new PeriodicExportingMetricReader(sp.GetRequiredService<UsageExporter>())
 					{
 						TemporalityPreference = MetricReaderTemporalityPreference.Delta,
 					});

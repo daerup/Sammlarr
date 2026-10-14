@@ -1,5 +1,4 @@
 using API.Http;
-using Domain.Auth;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;

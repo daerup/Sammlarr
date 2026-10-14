@@ -1,6 +1,5 @@
 using Contracts.Announcing;
 using Contracts.Media;
-using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Core.Announcing;

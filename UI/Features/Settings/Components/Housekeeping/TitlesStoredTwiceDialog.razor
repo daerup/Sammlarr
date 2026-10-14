@@ -186,7 +186,7 @@
 
     private IReadOnlyList<StoredTwice> Queue => _inKept ? _keptApart : _toDecide;
 
-    private StoredTwice? Current => _applied.Match<IReadOnlyList<Refused>, StoredTwice?>(_ => null, () => Queue.ElementAtOrDefault(_index));
+    private StoredTwice? Current => _applied.Match(_ => null, () => Queue.ElementAtOrDefault(_index));
 
     private bool Applied => _applied.Match(_ => true, () => false);
 

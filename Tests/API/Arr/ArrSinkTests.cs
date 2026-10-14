@@ -547,7 +547,7 @@ public class ArrSinkTests
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"},{"id":2,"label":"sammlarr-latest"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1,2]}]""");
-		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/movie/10")).Respond(HttpStatusCode.OK);
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/movie/10")).Respond();
 		Addressing(TmdbId.From("27205", MediaType.Movie));
 
 		var acks = await Testee().ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
@@ -636,7 +636,7 @@ public class ArrSinkTests
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr"},{"id":3,"label":"sammlarr-u-daerup"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1,3]}]""");
-		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/movie/10")).Respond(HttpStatusCode.OK);
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/movie/10")).Respond();
 		Addressing(TmdbId.From("27205", MediaType.Movie));
 
 		var acks = await Testee(Connected with { Tags = ArrTagScheme.Default with { PerUser = false } })
@@ -653,7 +653,7 @@ public class ArrSinkTests
 	{
 		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
 		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":3,"tvdbId":81189,"tags":[1]}]""");
-		_sonarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/series/3")).Respond(HttpStatusCode.OK);
+		_sonarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/series/3")).Respond();
 		Addressing(TvdbId.From("81189", MediaType.Show));
 
 		var acks = await Testee().ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
@@ -667,7 +667,7 @@ public class ArrSinkTests
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1]}]""");
-		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/movie/10")).Respond(HttpStatusCode.OK);
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/movie/10")).Respond();
 		Addressing(TmdbId.From("27205", MediaType.Movie));
 
 		var acks = await Testee(DeletingFiles).ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
@@ -681,7 +681,7 @@ public class ArrSinkTests
 	{
 		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"}]""");
 		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":3,"tvdbId":81189,"tags":[1]}]""");
-		_sonarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/series/3")).Respond(HttpStatusCode.OK);
+		_sonarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/series/3")).Respond();
 		Addressing(TvdbId.From("81189", MediaType.Show));
 
 		var acks = await Testee(DeletingFiles).ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
@@ -849,7 +849,7 @@ public class ArrSinkTests
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-guest"},{"id":4,"label":"sammlarr-kept"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":27205,"tags":[1,4]}]""");
-		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/movie/10")).Respond(HttpStatusCode.OK);
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).PathStartsWith("/api/v3/movie/10")).Respond();
 		Addressing(TmdbId.From("27205", MediaType.Movie));
 
 		await Testee().ApplyAsync(WantlistOperationAction.Remove, [new SinkPush(Known, new None())]).ToListAsync();
@@ -934,7 +934,7 @@ public class ArrSinkTests
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"},{"id":2,"label":"sammlarr-u-guest"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":1,"tags":[1]},{"id":11,"tmdbId":2,"tags":[1,2]},{"id":12,"tmdbId":3,"tags":[1]}]""");
-		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/movie/editor")).Respond(HttpStatusCode.OK);
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/movie/editor")).Respond();
 		_radarr.OnPut("/api/v3/movie/editor").Respond(HttpStatusCode.Accepted);
 		EmptySonarr();
 
@@ -960,10 +960,10 @@ public class ArrSinkTests
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":1,"tags":[1]}]""");
-		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/movie/editor")).Respond(HttpStatusCode.OK);
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/movie/editor")).Respond();
 		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":5,"label":"sammlarr-u-mira"}]""");
 		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":20,"tvdbId":81189,"tags":[5]}]""");
-		_sonarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/series/editor")).Respond(HttpStatusCode.OK);
+		_sonarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/series/editor")).Respond();
 
 		var deleted = await Testee(DeletingMovieFiles).DeleteTitlesOfAsync(Mira);
 
@@ -1024,7 +1024,7 @@ public class ArrSinkTests
 	{
 		_radarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":1,"label":"sammlarr-u-mira"}]""");
 		_radarr.OnGet("/api/v3/movie").RespondWithJson("""[{"id":10,"tmdbId":1,"tags":[1]},{"id":12,"tmdbId":3,"tags":[1]}]""");
-		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/movie/editor")).Respond(HttpStatusCode.OK);
+		_radarr.OnRequest(request => request.Method(HttpMethod.Delete).Path("/api/v3/movie/editor")).Respond();
 		_sonarr.OnGet("/api/v3/tag").RespondWithJson("""[{"id":5,"label":"sammlarr-u-mira"}]""");
 		_sonarr.OnGet("/api/v3/series").RespondWithJson("""[{"id":20,"tvdbId":81189,"tags":[5]}]""");
 		_sonarr.OnRequest(request => request.Method(HttpMethod.Delete)).Respond(HttpStatusCode.InternalServerError);

@@ -29,7 +29,7 @@ public class MdblistIdLookupTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var found = await host.Resolve<IMediaService>().FindIdAsync(show, MediaProvider.Tvdb);
 
-		await Assert.That(found).IsSome().And.IsEqualTo<IExternalMediaId>(TvdbId.From("81189", MediaType.Show));
+		await Assert.That(found).IsSome().And.IsEqualTo(TvdbId.From("81189", MediaType.Show));
 	}
 
 	[Test]

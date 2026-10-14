@@ -230,6 +230,12 @@ resharper_suspicious_type_conversion_global_highlighting = none
 resharper_not_accessed_positional_property_global_highlighting = suggestion
 resharper_not_accessed_positional_property_local_highlighting = suggestion
 
+# fixed in the Phase 18 sweep and kept as warnings
+resharper_arrange_redundant_parentheses_highlighting = warning
+resharper_redundant_argument_default_value_highlighting = warning
+resharper_redundant_type_arguments_of_method_highlighting = warning
+resharper_redundant_using_directive_highlighting = warning
+
 [DB/Migrations/*.cs]
 generated_code = true
 

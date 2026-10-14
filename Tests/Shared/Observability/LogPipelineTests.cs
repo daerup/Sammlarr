@@ -3,7 +3,6 @@ using Observability;
 using Observability.Logging;
 using Serilog;
 using Serilog.Core;
-using Serilog.Events;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -19,7 +18,7 @@ public class LogPipelineTests
 	{
 		var captured = new CapturingSink();
 		var provider = new ServiceCollection()
-			.AddSingleton(new LoggingLevelSwitch(LogEventLevel.Information))
+			.AddSingleton(new LoggingLevelSwitch())
 			.AddSingleton(new ObservabilityOptions())
 			.AddSingleton<ILogEventSink>(captured)
 			.BuildServiceProvider();

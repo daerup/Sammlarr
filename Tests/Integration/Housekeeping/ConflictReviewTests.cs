@@ -104,7 +104,7 @@ public class ConflictReviewTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var refused = await Testee.ApplyAsync([new ReviewChoice(note, ConflictChoice.Merge)]);
 
-		await Assert.That(refused.Single().Reason).IsEqualTo<DistinctReason>(new Contradiction(MediaProvider.Tmdb));
+		await Assert.That(refused.Single().Reason).IsEqualTo(new Contradiction(MediaProvider.Tmdb));
 		await Assert.That((await Notes.AllAsync()).Single().State).IsOfUnionType<ConflictState, Distinct>();
 	}
 

@@ -61,7 +61,7 @@ public class MediaDetailSheetTests : BunitContext
 	public async Task Provenance_WhenTheWantlistIconIsRightClicked_IsRevealedInAPopover()
 	{
 		Register();
-		_wantlist.GetAsync(Any()).Returns(Wantlisted(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "Comedy")));
+		_wantlist.GetAsync(Any()).Returns(Wantlisted(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid())));
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => cut.FindAll(".provenance-trigger").Count > 0);
@@ -84,7 +84,7 @@ public class MediaDetailSheetTests : BunitContext
 
 	private static IElement? Toggle(IRenderedComponent<Harness> cut) =>
 		cut.FindAll(".media-detail-sheet-content button")
-			.FirstOrDefault(button => button.GetAttribute("aria-label") is { } label && (label.Contains("wantlist", StringComparison.OrdinalIgnoreCase)));
+			.FirstOrDefault(button => button.GetAttribute("aria-label") is { } label && label.Contains("wantlist", StringComparison.OrdinalIgnoreCase));
 
 	private IRenderedComponent<Harness> RenderSheet() => Render<Harness>();
 

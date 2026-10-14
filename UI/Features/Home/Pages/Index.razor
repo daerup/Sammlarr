@@ -227,7 +227,7 @@ else
     {
         try
         {
-            Notifier.Info(await FeedRunQueue.EnqueueAsync(JobQueue, plan.Feeds, plan.SyncAfter, _cancellation.Token), null);
+            Notifier.Info(await FeedRunQueue.EnqueueAsync(JobQueue, plan.Feeds, plan.SyncAfter, _cancellation.Token));
         }
         catch (Exception ex)
         {

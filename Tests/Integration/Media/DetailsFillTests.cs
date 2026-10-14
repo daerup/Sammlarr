@@ -4,7 +4,6 @@ using Contracts.Jobs;
 using Contracts.Media;
 using Contracts.Wantlist;
 using Core.Media;
-using Domain.Jobs;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;

@@ -17,7 +17,7 @@ public sealed record QuotaDay(IReadOnlyList<QuotaPoint> Points, IReadOnlyList<Qu
 	public static QuotaDay Of(IReadOnlyList<(DateTimeOffset Hour, long Spent)> spent, QuotaAllowance allowance, DateTimeOffset now)
 	{
 		var reset = OnTheHour(allowance.ResetAt - Day);
-		var marks = Enumerable.Range(0, 24).Select(hour => reset + (Hour * hour)).TakeWhile(at => at < now);
+		var marks = Enumerable.Range(0, 24).Select(hour => reset + Hour * hour).TakeWhile(at => at < now);
 		List<QuotaPoint> today = [.. marks.Select(at => new QuotaPoint(at, Left(at, spent, allowance))), new QuotaPoint(now, allowance.Remaining)];
 		var before = allowance.DayBefore.When(ended => (ended.ResetAt - (allowance.ResetAt - Day)).Duration() < Drift);
 		List<QuotaPoint> ended = [.. Before(before, spent, allowance, reset, now)];
@@ -41,7 +41,7 @@ public sealed record QuotaDay(IReadOnlyList<QuotaPoint> Points, IReadOnlyList<Qu
 			ended =>
 				Enumerable
 					.Range(0, 24)
-					.Select(hours => reset - (Hour * hours))
+					.Select(hours => reset - Hour * hours)
 					.TakeWhile(at => at > now - Day)
 					.Reverse()
 					.Select(at => new QuotaPoint(at, Capped(ended.Left + spent.Where(hour => hour.Hour >= at && hour.Hour < reset).Sum(hour => hour.Spent), allowance))),
@@ -73,12 +73,12 @@ public sealed record QuotaDay(IReadOnlyList<QuotaPoint> Points, IReadOnlyList<Qu
 		DateTimeOffset now
 	)
 	{
-		var since = reset + (Hour * Math.Floor((now - reset) / Hour)) - PaceSpan;
+		var since = reset + Hour * Math.Floor((now - reset) / Hour) - PaceSpan;
 		var paced = spent.Where(hour => hour.Hour >= since).Sum(hour => hour.Spent);
 		return Optional
 			.When(
 				allowance.Remaining > allowance.Reserve && paced > 0,
-				() => now + (Hour * ((allowance.Remaining - allowance.Reserve) * ((now - since) / Hour) / paced))
+				() => now + Hour * ((allowance.Remaining - allowance.Reserve) * ((now - since) / Hour) / paced)
 			)
 			.When(reached => reached < allowance.ResetAt);
 	}

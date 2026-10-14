@@ -26,7 +26,7 @@ internal sealed class MediaMerge(IDbContextFactory<SammlarrDbContext> contexts, 
 
 		var outcome = await IdentityConflict
 			.Contradicts(Keys(rows[0]), Keys(rows[1]))
-			.Match<DistinctReason, MergeOutcome>(reason => new Contradicted(reason), () => MoveAsync(ctx, rows, cancellationToken));
+			.Match(reason => new Contradicted(reason), () => MoveAsync(ctx, rows, cancellationToken));
 		await transaction.CommitAsync(cancellationToken);
 		return outcome;
 	}

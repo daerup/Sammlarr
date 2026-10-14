@@ -1,4 +1,3 @@
-@using Domain.Usage
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
 
@@ -10,13 +9,13 @@
                 @for (var index = 0; index < DurationBuckets.UpToMs.Count; index++)
                 {
                     var at = index;
-                    <rect x="@UsageView.Number((at * Cell) + 0.5)" y="0" width="@UsageView.Number(Cell - 1)" height="14" rx="2"
+                    <rect x="@UsageView.Number(at * Cell + 0.5)" y="0" width="@UsageView.Number(Cell - 1)" height="14" rx="2"
                           fill="@UsageView.Shade(Count(at), Busiest)" stroke="@(IsAt(at) ? "var(--foreground)" : "none")" stroke-width="1.5"
                           data-testid="usage-strip-square" @onmouseenter="() => _at = Some.Of(at)"/>
                 }
                 @foreach (var (tick, colour) in Ticks)
                 {
-                    <rect x="@UsageView.Number((UsageView.StripAt(tick) * Width) - 1)" y="-2" width="2" height="18" fill="@colour" pointer-events="none"
+                    <rect x="@UsageView.Number(UsageView.StripAt(tick) * Width - 1)" y="-2" width="2" height="18" fill="@colour" pointer-events="none"
                           data-testid="usage-strip-tick"/>
                 }
             </svg>

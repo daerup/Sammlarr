@@ -3,12 +3,10 @@ using System.Net;
 using System.Text;
 using API.Mdblist;
 using Contracts.Feed;
-using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Microsoft.Extensions.DependencyInjection;
-using TestInfrastructure;
 
 namespace Integration.Tests.Feeds;
 

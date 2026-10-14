@@ -65,7 +65,7 @@
         }
         @if (Gap(allowance) is Some<long>(var gap))
         {
-            <span class="absolute -translate-x-full whitespace-nowrap text-[11px] text-foreground" style="@($"left: calc({At(Share(Reset))} - 10px); {TopAt(Y(top - (gap / 2.0), top) - 5)}")">
+            <span class="absolute -translate-x-full whitespace-nowrap text-[11px] text-foreground" style="@($"left: calc({At(Share(Reset))} - 10px); {TopAt(Y(top - gap / 2.0, top) - 5)}")">
                 @UsageView.Count(gap) used outside Sammlarr, time not known
             </span>
         }
@@ -151,7 +151,7 @@
         return allowance.Allowance.Match(daily => daily, () => Math.Max(1, day.Points.Max(point => point.Left)));
     }
 
-    private static double Y(double left, double top) => PlotTop + (PlotHeight * (1 - (left / top)));
+    private static double Y(double left, double top) => PlotTop + PlotHeight * (1 - left / top);
 
     private static string TopAt(double y) => $"top: {UsageView.Number(y)}px";
 
@@ -184,7 +184,7 @@
     private double Paced(QuotaAllowance allowance, DateTimeOffset reserveAt)
     {
         var perHour = (allowance.Remaining - allowance.Reserve) / (reserveAt - Now).TotalHours;
-        return Math.Max(0, allowance.Remaining - (perHour * (Window.To - Now).TotalHours));
+        return Math.Max(0, allowance.Remaining - perHour * (Window.To - Now).TotalHours);
     }
 
     private string Line(QuotaDay day, double top) => $"M{string.Join(" L", day.Points.Select(point => Point(point, top)))}";
@@ -196,7 +196,7 @@
         return $"{Line(day, top)} L{X(last.At)},{PlotHeight} L{X(first.At)},{PlotHeight} Z";
     }
 
-    private string Point(QuotaPoint point, double top) => FormattableString.Invariant($"{X(point.At)},{PlotHeight * (1 - (point.Left / top)):0.##}");
+    private string Point(QuotaPoint point, double top) => FormattableString.Invariant($"{X(point.At)},{PlotHeight * (1 - point.Left / top):0.##}");
 
     private string X(DateTimeOffset at) => FormattableString.Invariant($"{Share(at) * Span:0.##}");
 

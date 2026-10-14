@@ -73,7 +73,7 @@ internal sealed class FeedRunTrace : IFeedRunTrace, IDisposable
 	internal TraceRead Read(FeedId feed, UserId viewer, TraceCursor after)
 	{
 		Sweep();
-		return _runs.GetValueOrNone(feed).When(run => run.Owner == viewer).Match<TracedRun, TraceRead>(run => run.Read(after), () => new NoTrace());
+		return _runs.GetValueOrNone(feed).When(run => run.Owner == viewer).Match(run => run.Read(after), () => new NoTrace());
 	}
 
 	public void Dispose() => _listener.Dispose();

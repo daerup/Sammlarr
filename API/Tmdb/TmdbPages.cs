@@ -95,7 +95,7 @@ internal static partial class TmdbPages
 	{
 		var page = Canonical(link);
 		var kept = page.Knowing(KeysOf(page.Path), Dropped, Site);
-		return Refused(page).Match<string, Result<SiteLink>>(reason => Error.From(reason), () => kept);
+		return Refused(page).Match(reason => Error.From(reason), () => kept);
 	}
 
 	private static MediaType TypeOf(SiteLink page)

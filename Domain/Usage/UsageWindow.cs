@@ -23,7 +23,7 @@ public sealed record UsageWindow(DateTimeOffset From, DateTimeOffset To, TimeSpa
 
 	public UsageWindow Before() => this with { From = From - (To - From), To = From };
 
-	public DateTimeOffset SlotAt(int index) => From + (Step * index);
+	public DateTimeOffset SlotAt(int index) => From + Step * index;
 
 	public bool Contains(DateTimeOffset at) => at >= From && at < To;
 

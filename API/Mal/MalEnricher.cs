@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Net;
-using System.Net.Http.Json;
 using API.Http;
 using API.Mal.Types;
 using Contracts.Auth;

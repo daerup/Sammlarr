@@ -127,7 +127,7 @@ public class ProviderAnswersTests(SammlarrTestHost host) : IAsyncDisposable
 	private async Task<MediaId> DuneAsync()
 	{
 		var config = host.Resolve<IProviderConfigService>();
-		await config.StoreAsync((await config.GetAsync()) with { SearchProvider = SearchProvider.Tmdb });
+		await config.StoreAsync(await config.GetAsync() with { SearchProvider = SearchProvider.Tmdb });
 		return await host.Movie(Dune).ServedByTmdb(rating: 7.8, votes: 12_000).ServedByPlex(imdbRating: 8.0, imdbVotes: 900_000).SeedAsync();
 	}
 

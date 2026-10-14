@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json.Nodes;
 using API.Arr;
 using API.Arr.Sonarr;
@@ -24,7 +23,7 @@ public class SonarrApiTests
 	[Test]
 	public async Task DeleteManyAsync_SendsTheSeriesIdsWithoutAnImportListExclusion()
 	{
-		_sonarr.OnAnyRequest().Respond(HttpStatusCode.OK);
+		_sonarr.OnAnyRequest().Respond();
 
 		await Testee.DeleteManyAsync(Connection, [20, 21], ArrInstanceConfig.Empty, CancellationToken.None);
 
@@ -38,7 +37,7 @@ public class SonarrApiTests
 	[Test]
 	public async Task RetagAsync_SendsTheSeriesIdsToTheEditor()
 	{
-		_sonarr.OnAnyRequest().Respond(HttpStatusCode.OK);
+		_sonarr.OnAnyRequest().Respond();
 
 		await Testee.RetagAsync(Connection, [20], [1], ArrTagChange.Remove, CancellationToken.None);
 

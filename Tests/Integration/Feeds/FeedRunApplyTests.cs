@@ -541,7 +541,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	private async Task SwitchSinkAsync(SinkKind sink)
 	{
 		var config = host.Resolve<IProviderConfigService>();
-		await config.StoreAsync((await config.GetAsync()) with { Sink = sink });
+		await config.StoreAsync(await config.GetAsync() with { Sink = sink });
 	}
 
 	private static MeterListener MeasuringCalls()

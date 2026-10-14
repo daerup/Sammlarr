@@ -137,7 +137,7 @@ public class AccountLinkTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var token = await InviteAsync("Mira");
 		var config = host.Resolve<IProviderConfigService>();
-		await config.StoreAsync((await config.GetAsync()) with { AuthProvider = AuthProvider.Plex });
+		await config.StoreAsync(await config.GetAsync() with { AuthProvider = AuthProvider.Plex });
 
 		await Assert.That(await Testee.JoinAsync(token, Password, Password)).IsError();
 	}

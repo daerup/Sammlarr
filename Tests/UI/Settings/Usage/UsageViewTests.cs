@@ -1,6 +1,5 @@
 using System.Globalization;
 using Domain.Usage;
-using TestInfrastructure;
 using UI.Features.Settings.Components.Usage;
 
 namespace UI.Tests.Settings.Usage;

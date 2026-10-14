@@ -137,7 +137,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 	{
 		return error
 			.CausedBy<AniListAnswerException>()
-			.Match<AniListAnswerException, Exception>(
+			.Match(
 				problem =>
 					problem.Message.Contains("Private", StringComparison.OrdinalIgnoreCase)
 						? new InvalidOperationException($"AniList keeps the list of {identifier.Split('/')[0]} private, so Sammlarr cannot read it.")

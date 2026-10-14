@@ -497,7 +497,7 @@
         ExitSelecting();
         try
         {
-            Notifier.Info(await FeedRunQueue.EnqueueAsync(JobQueue, plan.Feeds, plan.SyncAfter, _cancellation.Token), null);
+            Notifier.Info(await FeedRunQueue.EnqueueAsync(JobQueue, plan.Feeds, plan.SyncAfter, _cancellation.Token));
         }
         catch (Exception ex)
         {
@@ -641,7 +641,7 @@
                     break;
                 case FeedPlanFailed failed when !token.IsCancellationRequested:
                     _confirmOpen = false;
-                    Notifier.Warning(failed.ToString(), null);
+                    Notifier.Warning(failed.ToString());
                     break;
             }
         }
@@ -724,10 +724,10 @@
             switch (await JobQueue.EnqueueAsync(new RunFeed(feed.Id, new Manual())))
             {
                 case Queued:
-                    Notifier.Info($"'{feed.Name}' has been queued", null);
+                    Notifier.Info($"'{feed.Name}' has been queued");
                     break;
                 case AlreadyQueued:
-                    Notifier.Info($"'{feed.Name}' is already queued", null);
+                    Notifier.Info($"'{feed.Name}' is already queued");
                     break;
             }
         }
