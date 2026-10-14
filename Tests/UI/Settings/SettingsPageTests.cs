@@ -9,7 +9,6 @@ using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Identity;
 using Domain.Providers;
-using Domain.Settings;
 using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,18 +44,7 @@ public class SettingsPageTests : BunitContext
 		AddAuthorization().SetAuthorized("alice");
 
 		var config = IProviderConfigService.Mock();
-		config
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
+		config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex);
 		Services.AddSingleton(config.Object);
 
 		var keys = IApiKeyService.Mock();

@@ -1,6 +1,7 @@
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Providers;
+using TestInfrastructure;
 using UI.Features.Feeds.Pages;
 
 namespace UI.Tests.Feeds;
@@ -31,15 +32,11 @@ internal static class TestFeedRows
 	{
 		return new(
 			FeedOverview.Of(
-				new Feed
+				TestFeeds.Feed(Guid.NewGuid(), name, provider) with
 				{
-					Name = name,
-					Id = FeedId.From(Guid.NewGuid()),
 					Enabled = enabled,
-					Provider = provider,
 					Strategy = mirror ? new FeedStrategy(new Mirror()) : new FeedStrategy(new Append()),
 					Identifier = identifier ?? name,
-					CreatedAt = Now,
 					Schedule = next is null ? new FeedRunTrigger(new Manual()) : new FeedRunTrigger(new Scheduled("0 26 * * * *")),
 				},
 				new None(),

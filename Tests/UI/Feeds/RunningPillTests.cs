@@ -82,9 +82,5 @@ public class RunningPillTests : BunitContext
 		await Assert.That(opened).IsEqualTo(1);
 	}
 
-	private static string Text(IRenderedComponent<RunningPill> cut)
-	{
-		var words = cut.Find("[data-testid=running-pill]").TextContent.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-		return string.Join(' ', words);
-	}
+	private static string Text(IRenderedComponent<RunningPill> cut) => cut.Find("[data-testid=running-pill]").TextContent.Words();
 }

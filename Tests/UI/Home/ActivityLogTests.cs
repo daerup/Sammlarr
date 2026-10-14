@@ -1,6 +1,7 @@
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
 
@@ -180,15 +181,9 @@ public class ActivityLogTests
 		Conclusiveness conclusiveness = Conclusiveness.Conclusive,
 		IReadOnlyList<MediaId>? addedIds = null
 	) =>
-		new()
+		TestFeeds.Run(TestFeeds.Feed(feedId.Value), Guid.NewGuid(), conclusiveness) with
 		{
-			Id = RunId.From(Guid.NewGuid()),
-			FeedId = feedId,
 			StartedAt = startedAt,
-			Duration = TimeSpan.FromSeconds(4),
-			Strategy = new Mirror(),
-			Trigger = new Scheduled("0 0 4 * * *"),
-			Conclusiveness = conclusiveness,
 			Counts = FeedRunCounts.None with { Total = total, Added = addedIds?.Count ?? added, Removed = removed },
 			Items =
 			[
@@ -197,9 +192,7 @@ public class ActivityLogTests
 					MediaId = id,
 					State = FeedRunItemState.Added,
 				}),
-				.. Enumerable.Range(0, removed).Select(_ => Item(FeedRunItemState.Removed)),
+				.. Enumerable.Range(0, removed).Select(_ => new FeedRunItem { MediaId = MediaId.New(), State = FeedRunItemState.Removed }),
 			],
 		};
-
-	private static FeedRunItem Item(FeedRunItemState state) => new() { MediaId = MediaId.New(), State = state };
 }

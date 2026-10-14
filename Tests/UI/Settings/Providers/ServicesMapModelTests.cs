@@ -1,6 +1,5 @@
 using System.Globalization;
 using Domain.Providers;
-using Domain.Settings;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
 
@@ -8,19 +7,10 @@ namespace UI.Tests.Settings.Providers;
 
 public class ServicesMapModelTests
 {
-	private static readonly ProviderConfig Config = new()
-	{
-		Sink = SinkKind.Plex,
-		TrendingProvider = TrendingProvider.Tmdb,
-		SearchProvider = SearchProvider.Plex,
-		AuthProvider = AuthProvider.Plex,
-		RegistrationMode = RegistrationMode.Open,
-	};
-
 	[Test]
 	public async Task Roles_Always_ReadSignInFirstAndFeedsLast()
 	{
-		var roles = ServicesMapModel.For(Config).Roles.Select(role => role.Name);
+		var roles = ServicesMapModel.For(ProviderBranding.OnPlexSearchingPlex).Roles.Select(role => role.Name);
 
 		await Assert.That(roles).IsEquivalentTo(["Sign-in", "Wantlist", "Search", "Trending", "Feeds"], CollectionOrdering.Matching);
 	}
@@ -28,7 +18,9 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task Traces_ForTodaysProviders_LandEachOnItsOwnPinInRoleOrder()
 	{
-		var traces = ServicesMapModel.For(Config).Traces.Select(trace => $"{trace.Role} > {trace.Provider} at {trace.Points[^1].X},{trace.Points[^1].Y}");
+		var traces = ServicesMapModel
+			.For(ProviderBranding.OnPlexSearchingPlex)
+			.Traces.Select(trace => $"{trace.Role} > {trace.Provider} at {trace.Points[^1].X},{trace.Points[^1].Y}");
 
 		await Assert
 			.That(traces)
@@ -48,7 +40,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task Roles_WhenTheWantlistSyncsToRadarrAndSonarr_LandOnOneBoxForBoth()
 	{
-		var model = ServicesMapModel.For(Config with { Sink = SinkKind.Arr });
+		var model = ServicesMapModel.For(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr });
 
 		var wantlist = model.Roles.Single(role => role.Name == "Wantlist");
 		await Assert.That(wantlist.Provider).IsEqualTo(new Arr());
@@ -59,7 +51,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task Traces_ForTheMiddleRoleOfEachService_RunStraight()
 	{
-		var straight = Straight(ServicesMapModel.For(Config));
+		var straight = Straight(ServicesMapModel.For(ProviderBranding.OnPlexSearchingPlex));
 
 		await Assert.That(straight).IsEquivalentTo(["Wantlist", "Trending"]);
 	}
@@ -67,7 +59,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task Traces_ForServicesThatEachTakeOneRoleInARow_RunStraight()
 	{
-		var model = ServicesMapModel.For(Config with { AuthProvider = AuthProvider.Local, SearchProvider = SearchProvider.Tmdb });
+		var model = ServicesMapModel.For(ProviderBranding.OnPlexSearchingPlex with { AuthProvider = AuthProvider.Local, SearchProvider = SearchProvider.Tmdb });
 
 		await Assert.That(Straight(model)).IsEquivalentTo(["Sign-in", "Wantlist", "Search"]);
 	}
@@ -75,7 +67,9 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task Services_ForTodaysProviders_SitBesideTheirRolesWithAPinPerIncomingTrace()
 	{
-		var services = ServicesMapModel.For(Config).Services.Select(service => $"{service.Provider} {service.Y}: {string.Join(" ", service.Pins)}");
+		var services = ServicesMapModel
+			.For(ProviderBranding.OnPlexSearchingPlex)
+			.Services.Select(service => $"{service.Provider} {service.Y}: {string.Join(" ", service.Pins)}");
 
 		await Assert.That(services).IsEquivalentTo(["Plex 78: 70 78 86", "Tmdb 186: 182 190"]);
 	}
@@ -84,7 +78,7 @@ public class ServicesMapModelTests
 	public async Task Sources_ForTodaysProviders_SitInARowUnderTheFeedsWithTheirNames()
 	{
 		var sources = ServicesMapModel
-			.For(Config)
+			.For(ProviderBranding.OnPlexSearchingPlex)
 			.Sources.Select(source => $"{source.Provider} {source.X},{source.Y} {source.Width} {(source.Named ? "named" : "logo")}");
 
 		await Assert
@@ -118,7 +112,7 @@ public class ServicesMapModelTests
 	public async Task FeedLines_ForTodaysProviders_LeaveAPinEachWithTheBoxedLineOnTopAndTheLeftmostSourceAtTheBottom()
 	{
 		var pins = ServicesMapModel
-			.For(Config)
+			.For(ProviderBranding.OnPlexSearchingPlex)
 			.FeedLines.OrderBy(line => line.Points[0].Y)
 			.Select(line => $"{line.Provider} {line.Points[0].X},{line.Points[0].Y}");
 
@@ -128,7 +122,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task Traces_ToEachSource_RunStraightFromTheirPinAndDropIntoTheMiddleOfTheirSource()
 	{
-		var model = ServicesMapModel.For(Config);
+		var model = ServicesMapModel.For(ProviderBranding.OnPlexSearchingPlex);
 
 		var trakt = model.Traces.Single(trace => trace.Provider == RemoteService.Trakt);
 		var source = model.Sources.Single(candidate => candidate.Provider == RemoteService.Trakt);
@@ -141,7 +135,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task FeedLines_BeyondWhatTheFeedsRowHolds_GrowDownwardAndPushTheSourcesLower()
 	{
-		var model = ServicesMapModel.For(Config, [RemoteService.Tmdb, .. Enumerable.Repeat<Service>(RemoteService.Mdblist, 8)]);
+		var model = ServicesMapModel.For(ProviderBranding.OnPlexSearchingPlex, [RemoteService.Tmdb, .. Enumerable.Repeat<Service>(RemoteService.Mdblist, 8)]);
 
 		await Assert.That(model.FeedLines.Min(line => line.Points[0].Y)).IsEqualTo(218);
 		await Assert.That(model.Sources[0].Y).IsEqualTo(308);
@@ -150,7 +144,7 @@ public class ServicesMapModelTests
 	[Test]
 	public async Task Traces_WhenSearchAlsoUsesTmdb_NeverCross()
 	{
-		var model = ServicesMapModel.For(Config with { SearchProvider = SearchProvider.Tmdb });
+		var model = ServicesMapModel.For(ProviderBranding.OnPlexSearchingPlex with { SearchProvider = SearchProvider.Tmdb });
 
 		await Assert.That(Crossings(model)).IsEmpty();
 	}
@@ -165,7 +159,7 @@ public class ServicesMapModelTests
 	[Arguments(17)]
 	public async Task Traces_ForAnyNumberOfFeedSources_NeverCross(int sources)
 	{
-		var model = ServicesMapModel.For(Config, [RemoteService.Tmdb, .. Enumerable.Repeat<Service>(RemoteService.Mdblist, sources)]);
+		var model = ServicesMapModel.For(ProviderBranding.OnPlexSearchingPlex, [RemoteService.Tmdb, .. Enumerable.Repeat<Service>(RemoteService.Mdblist, sources)]);
 
 		await Assert.That(Crossings(model)).IsEmpty();
 	}

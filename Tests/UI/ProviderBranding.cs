@@ -44,6 +44,8 @@ internal static class ProviderBranding
 		RegistrationMode = RegistrationMode.Open,
 	};
 
+	internal static readonly ProviderConfig OnPlexSearchingPlex = OnPlex with { SearchProvider = SearchProvider.Plex };
+
 	internal static readonly IKeyedServiceIndex<MediaProvider, IExternalPageLinker> Linkers = PageLinkers();
 
 	private static IKeyedServiceIndex<MediaProvider, IExternalPageLinker> PageLinkers()

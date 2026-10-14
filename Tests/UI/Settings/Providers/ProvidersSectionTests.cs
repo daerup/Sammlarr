@@ -8,7 +8,6 @@ using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Identity;
 using Domain.Providers;
-using Domain.Settings;
 using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,15 +22,6 @@ namespace UI.Tests.Settings.Providers;
 
 public class ProvidersSectionTests : BunitContext
 {
-	private static readonly ProviderConfig OnPlex = new()
-	{
-		Sink = SinkKind.Plex,
-		TrendingProvider = TrendingProvider.Tmdb,
-		SearchProvider = SearchProvider.Plex,
-		AuthProvider = AuthProvider.Plex,
-		RegistrationMode = RegistrationMode.Open,
-	};
-
 	private readonly Mock<IProviderConfigService> _config = IProviderConfigService.Mock();
 
 	private readonly Mock<ISinkSwitch> _switch = ISinkSwitch.Mock();
@@ -75,14 +65,14 @@ public class ProvidersSectionTests : BunitContext
 		ComponentFactories.AddStub<ArrSinkRow>();
 		ComponentFactories.AddStub<SinkSwitchDialog>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
-		_config.GetAsync(Any()).Returns(OnPlex);
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex);
 		_switch.PreviewAsync(Any(), Any()).Returns(new SinkSwitchPreview(0, 0));
 	}
 
 	[Test]
 	public async Task Section_OnASammlarrAccountsInstall_HeadsAccountsAndKeysWithTheSammlarrAccount()
 	{
-		_config.GetAsync(Any()).Returns(OnPlex with { AuthProvider = AuthProvider.Local });
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { AuthProvider = AuthProvider.Local });
 
 		var cut = RenderSection();
 
@@ -132,7 +122,7 @@ public class ProvidersSectionTests : BunitContext
 		_switch.PreviewAsync(SinkKind.Arr, Any()).Returns(new SinkSwitchPreview(30, 12));
 		var cut = RenderSection();
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Arr));
-		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr });
 
 		await cut.InvokeAsync(() => cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.SwitchRequested).InvokeAsync());
 		var dialog = cut.FindComponent<Stub<SinkSwitchDialog>>().Instance.Parameters;
@@ -165,7 +155,7 @@ public class ProvidersSectionTests : BunitContext
 	[Test]
 	public async Task InstanceMoved_OnRadarrAndSonarr_MovesTheWantlistThroughTheSwitch()
 	{
-		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr });
 		_switch.MoveAsync(Any<ArrSinkConfig>(), Any()).Returns(Success.Of(new SinkSwitched(12, 0)));
 		var cut = RenderSection();
 
@@ -177,7 +167,7 @@ public class ProvidersSectionTests : BunitContext
 	[Test]
 	public async Task PickingPlex_OnRadarrAndSonarr_AsksBeforeSwitchingBack()
 	{
-		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr });
 		_switch.SwitchAsync(SinkKind.Plex, Any()).Returns(Success.Of(new SinkSwitched(12, 0)));
 		_switch.PreviewAsync(SinkKind.Plex, Any()).Returns(new SinkSwitchPreview(20, 7));
 		var cut = RenderSection();
@@ -197,7 +187,7 @@ public class ProvidersSectionTests : BunitContext
 	[Test]
 	public async Task Section_WhenSearchUsesRadarrAndSonarrButTheWantlistPlex_KeepsTheirRow()
 	{
-		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Arr });
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { SearchProvider = SearchProvider.Arr });
 
 		var cut = RenderSection();
 
@@ -213,7 +203,7 @@ public class ProvidersSectionTests : BunitContext
 
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SearchPicked).InvokeAsync(SearchProvider.Tmdb));
 
-		_config.StoreAsync(OnPlex with { SearchProvider = SearchProvider.Tmdb }, Any()).WasCalled(Times.Once);
+		_config.StoreAsync(ProviderBranding.OnPlexSearchingPlex with { SearchProvider = SearchProvider.Tmdb }, Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -244,7 +234,7 @@ public class ProvidersSectionTests : BunitContext
 	public async Task Section_ForAMember_HidesWantlistSyncAndTheMapsPickersButDrawsRadarrAndSonarrReady()
 	{
 		_user.Role = UserRole.Member;
-		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr });
 
 		var cut = RenderSection();
 
@@ -268,7 +258,7 @@ public class ProvidersSectionTests : BunitContext
 	[Test]
 	public async Task ArrOpened_OpensTheRadarrAndSonarrRowAndScrollsToIt()
 	{
-		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr });
 		var cut = RenderSection();
 
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.ArrOpened).InvokeAsync());
@@ -283,7 +273,7 @@ public class ProvidersSectionTests : BunitContext
 	public async Task AccountsOpened_ForAnyone_OpensTheSammlarrAccountRowAndScrollsToIt(UserRole role)
 	{
 		_user.Role = role;
-		_config.GetAsync(Any()).Returns(OnPlex with { AuthProvider = AuthProvider.Local });
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { AuthProvider = AuthProvider.Local });
 		var cut = RenderSection();
 
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.AccountsOpened).InvokeAsync());
@@ -295,7 +285,9 @@ public class ProvidersSectionTests : BunitContext
 	[Test]
 	public async Task SearchPicked_PlexWithoutAPlexAccount_OpensThePlexRowAndStoresNothing()
 	{
-		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb, Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local });
+		_config
+			.GetAsync(Any())
+			.Returns(ProviderBranding.OnPlexSearchingPlex with { SearchProvider = SearchProvider.Tmdb, Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local });
 		var cut = RenderSection();
 		await Assert.That(cut.FindComponents<Stub<AccountRow>>()).IsEmpty();
 
@@ -310,12 +302,12 @@ public class ProvidersSectionTests : BunitContext
 	[Test]
 	public async Task SearchAfterSignIn_WithPlexConnected_StoresPlexForSearch()
 	{
-		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb });
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { SearchProvider = SearchProvider.Tmdb });
 		_connected.Add(RemoteService.Plex);
 
 		var cut = Render<ProvidersSection>(parameters => parameters.Add(section => section.SearchAfterSignIn, SearchProvider.Plex));
 
-		cut.WaitForAssertion(() => _config.StoreAsync(OnPlex, Any()).WasCalled(Times.Once));
+		cut.WaitForAssertion(() => _config.StoreAsync(ProviderBranding.OnPlexSearchingPlex, Any()).WasCalled(Times.Once));
 		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/settings?section=providers");
 	}
 
@@ -323,7 +315,7 @@ public class ProvidersSectionTests : BunitContext
 	public async Task SearchAfterSignIn_ForAMember_StoresNothing()
 	{
 		_user.Role = UserRole.Member;
-		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb });
+		_config.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex with { SearchProvider = SearchProvider.Tmdb });
 		_connected.Add(RemoteService.Plex);
 
 		var cut = Render<ProvidersSection>(parameters => parameters.Add(section => section.SearchAfterSignIn, SearchProvider.Plex));
@@ -336,14 +328,16 @@ public class ProvidersSectionTests : BunitContext
 	[Test]
 	public async Task PlexSignIn_AfterPickingPlexForSearch_StoresPlexForSearch()
 	{
-		_config.GetAsync(Any()).Returns(OnPlex with { SearchProvider = SearchProvider.Tmdb, Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local });
+		_config
+			.GetAsync(Any())
+			.Returns(ProviderBranding.OnPlexSearchingPlex with { SearchProvider = SearchProvider.Tmdb, Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local });
 		var cut = RenderSection();
 		await cut.InvokeAsync(() => _ = Map(cut).Get(map => map.SearchPicked).InvokeAsync(SearchProvider.Plex));
 		_connected.Add(RemoteService.Plex);
 
 		await cut.InvokeAsync(() => cut.FindComponent<Stub<AccountRow>>().Instance.Parameters.Get(row => row.Changed).InvokeAsync());
 
-		_config.StoreAsync(OnPlex with { Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local }, Any()).WasCalled(Times.Once);
+		_config.StoreAsync(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr, AuthProvider = AuthProvider.Local }, Any()).WasCalled(Times.Once);
 	}
 
 	[Test]

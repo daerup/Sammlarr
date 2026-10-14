@@ -377,21 +377,7 @@ public class FeedRunProgressTests
 		return new TraceBatch(new TraceCursor(Some.Of(Run), 9), 2000, steps, FateTally.None, new None(), ended);
 	}
 
-	private static FeedRun Previous(Feed feed, int total)
-	{
-		return new FeedRun
-		{
-			Id = RunId.From(Guid.NewGuid()),
-			FeedId = feed.Id,
-			StartedAt = Start.AddHours(-1),
-			Duration = TimeSpan.FromSeconds(19),
-			Strategy = new Append(),
-			Trigger = new Manual(),
-			Conclusiveness = Conclusiveness.Conclusive,
-			Counts = FeedRunCounts.None with { Total = total },
-			Items = [],
-		};
-	}
+	private static FeedRun Previous(Feed feed, int total) => TestFeeds.Run(feed, Guid.NewGuid()) with { Counts = FeedRunCounts.None with { Total = total } };
 
 	private static async Task EventuallyAsync(Func<bool> condition)
 	{

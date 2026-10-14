@@ -294,17 +294,7 @@ public class FeedsPageTests : BunitContext
 	private static FeedOverview Overview(FeedId id, string name)
 	{
 		return new FeedOverview(
-			new Feed
-			{
-				Name = name,
-				Id = id,
-				Enabled = true,
-				Provider = FeedProvider.Mdblist,
-				Strategy = new FeedStrategy(new Append()),
-				Identifier = "hdlists/comedy",
-				CreatedAt = DateTimeOffset.UtcNow,
-				Schedule = new FeedRunTrigger(new Manual()),
-			},
+			TestFeeds.Feed(id.Value, name),
 			new None(),
 			new FeedRunHistory
 			{

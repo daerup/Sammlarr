@@ -162,7 +162,7 @@ public class FeedPreviewPanelTests : BunitContext
 				(_, _, _) =>
 				{
 					mark = UsageCauses.Current;
-					return Async(new Listed<MediaMatchResult>(0, Detail(MediaId.New())));
+					return AsyncSequence.Of(new Listed<MediaMatchResult>(0, Detail(MediaId.New())));
 				}
 			);
 		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
@@ -249,7 +249,7 @@ public class FeedPreviewPanelTests : BunitContext
 				(_, _, token) =>
 				{
 					streaming = token;
-					return HeldAsync(loaded.Task, token);
+					return HeldItems.UntilAsync(loaded.Task, token);
 				}
 			);
 		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
@@ -264,12 +264,6 @@ public class FeedPreviewPanelTests : BunitContext
 		await Assert.That(Services.GetRequiredService<ToastService>().Toasts).IsEmpty();
 	}
 
-	private static async IAsyncEnumerable<Listed<MediaMatchResult>> HeldAsync(Task loaded, [EnumeratorCancellation] CancellationToken cancellationToken)
-	{
-		await loaded.WaitAsync(cancellationToken);
-		yield break;
-	}
-
 	private static List<IElement> Retry(IRenderedComponent<FeedPreviewPanel> cut)
 	{
 		return [.. cut.FindAll("button").Where(button => button.TextContent.Contains("Retry"))];
@@ -281,7 +275,7 @@ public class FeedPreviewPanelTests : BunitContext
 		planner.NeedsAsync(Any(), Any()).ReturnsSequentially(needs);
 		planner.PlanAsync(Any(), Any()).Returns(new AppendPlan([], [], FeedDelta.None, Conclusiveness.NoItems));
 		var provider = IFeedProvider.Mock();
-		provider.GetFeedItemsAsync(Any(), Any(), Any()).Returns(Async(new Listed<MediaMatchResult>(0, Detail(MediaId.New()))));
+		provider.GetFeedItemsAsync(Any(), Any(), Any()).Returns(AsyncSequence.Of(new Listed<MediaMatchResult>(0, Detail(MediaId.New()))));
 		return (planner, provider);
 	}
 
@@ -335,7 +329,7 @@ public class FeedPreviewPanelTests : BunitContext
 		var media = IMediaService.Mock();
 		if (gone is { } id)
 		{
-			media.GetDetailsAsync(Any(), Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(id))));
+			media.GetDetailsAsync(Any(), Any(), Any()).Returns(AsyncSequence.Of<Result<MatchedMedia>>(Success.Of(Detail(id))));
 		}
 		Services.AddSingleton(media.Object);
 		Services.AddSingleton<IKeyedServiceIndex<FeedProvider, IFeedProvider>>(
@@ -436,15 +430,6 @@ public class FeedPreviewPanelTests : BunitContext
 	private static RawFeedLoad Load(FeedPlanTarget target) => target is DraftFeed(_, var load) ? load : new RawFeedLoad([], FeedLoadState.Finished);
 
 	private static IReadOnlyList<MediaMatchResult> Items(FeedPlanTarget target) => [.. Load(target).Items.Select(listed => listed.Item)];
-
-	private static async IAsyncEnumerable<T> Async<T>(params T[] items)
-	{
-		foreach (var item in items)
-		{
-			await Task.Yield();
-			yield return item;
-		}
-	}
 
 	private static MatchedMedia Detail(MediaId id)
 	{

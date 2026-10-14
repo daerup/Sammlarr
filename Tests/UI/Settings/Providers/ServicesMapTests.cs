@@ -16,15 +16,6 @@ public class ServicesMapTests : BunitContext
 {
 	private static readonly DateTimeOffset Now = new(new DateTime(2026, 10, 8, 12, 0, 0), TimeZoneInfo.Local.GetUtcOffset(new DateTime(2026, 10, 8, 12, 0, 0)));
 
-	private static readonly ProviderConfig Config = new()
-	{
-		Sink = SinkKind.Plex,
-		TrendingProvider = TrendingProvider.Tmdb,
-		SearchProvider = SearchProvider.Plex,
-		AuthProvider = AuthProvider.Plex,
-		RegistrationMode = RegistrationMode.Open,
-	};
-
 	[Before(Test)]
 	public void Setup()
 	{
@@ -102,7 +93,7 @@ public class ServicesMapTests : BunitContext
 			builder.OpenComponent<BbPortalHost>(0);
 			builder.CloseComponent();
 			builder.OpenComponent<ServicesMap>(1);
-			builder.AddComponentParameter(2, nameof(ServicesMap.Config), Config);
+			builder.AddComponentParameter(2, nameof(ServicesMap.Config), ProviderBranding.OnPlexSearchingPlex);
 			builder.AddComponentParameter(3, nameof(ServicesMap.Ready), new HashSet<RemoteService>());
 			builder.AddComponentParameter(4, nameof(ServicesMap.CanPick), true);
 			builder.AddComponentParameter(5, nameof(ServicesMap.SinkPicked), EventCallback.Factory.Create<SinkKind>(this, picked.Add));
@@ -119,7 +110,14 @@ public class ServicesMapTests : BunitContext
 	[Test]
 	public async Task SearchChip_BeforeTheServicesAreConnected_OffersOnlyTheOnesThatAre()
 	{
-		var cut = RenderPicker(Config with { SearchProvider = SearchProvider.Tmdb }, new HashSet<RemoteService> { RemoteService.Tmdb }, _ => { });
+		var cut = RenderPicker(
+			ProviderBranding.OnPlexSearchingPlex with
+			{
+				SearchProvider = SearchProvider.Tmdb,
+			},
+			new HashSet<RemoteService> { RemoteService.Tmdb },
+			_ => { }
+		);
 
 		await cut.FindAll(".map-chip")[1].ClickAsync();
 		cut.WaitForElement("[role=menuitem]");
@@ -132,7 +130,15 @@ public class ServicesMapTests : BunitContext
 	public async Task SearchChip_WhenAConnectedServiceIsPicked_RaisesIt()
 	{
 		List<SearchProvider> picked = [];
-		var cut = RenderPicker(Config with { SearchProvider = SearchProvider.Tmdb }, new HashSet<RemoteService> { RemoteService.Tmdb }, picked.Add, arrReady: true);
+		var cut = RenderPicker(
+			ProviderBranding.OnPlexSearchingPlex with
+			{
+				SearchProvider = SearchProvider.Tmdb,
+			},
+			new HashSet<RemoteService> { RemoteService.Tmdb },
+			picked.Add,
+			arrReady: true
+		);
 
 		await cut.FindAll(".map-chip")[1].ClickAsync();
 		cut.WaitForElement("[role=menuitem]");
@@ -166,7 +172,10 @@ public class ServicesMapTests : BunitContext
 	public async Task Tmdb_WithoutTheReadToken_SaysSoAndKeepsItsFeedsLineSolid()
 	{
 		var cut = Render<ServicesMap>(parameters =>
-			parameters.Add(map => map.Config, Config).Add(map => map.Ready, Enum.GetValues<RemoteService>().ToHashSet()).Add(map => map.ReadTokenMissing, true)
+			parameters
+				.Add(map => map.Config, ProviderBranding.OnPlexSearchingPlex)
+				.Add(map => map.Ready, Enum.GetValues<RemoteService>().ToHashSet())
+				.Add(map => map.ReadTokenMissing, true)
 		);
 
 		await Assert.That(Service(cut, "TMDb").QuerySelector(".map-service-status")!.TextContent.Trim()).IsEqualTo("Your key is set · no read token");
@@ -178,7 +187,10 @@ public class ServicesMapTests : BunitContext
 	{
 		var downloads = new Dictionary<RemoteService, DateTimeOffset> { [RemoteService.ImdbDatasets] = Now.AddHours(-3.5) };
 		var cut = Render<ServicesMap>(parameters =>
-			parameters.Add(map => map.Config, Config).Add(map => map.Ready, new HashSet<RemoteService>()).Add(map => map.Downloads, downloads)
+			parameters
+				.Add(map => map.Config, ProviderBranding.OnPlexSearchingPlex)
+				.Add(map => map.Ready, new HashSet<RemoteService>())
+				.Add(map => map.Downloads, downloads)
 		);
 
 		var items = cut.FindAll("[data-testid=map-behind-item]")
@@ -204,7 +216,7 @@ public class ServicesMapTests : BunitContext
 	[Arguments(AuthProvider.Local)]
 	public async Task SignIn_WhicheverWayTheInstallSignsIn_HasNoChip(AuthProvider signIn)
 	{
-		var cut = RenderMap(Config with { AuthProvider = signIn }, canPick: true);
+		var cut = RenderMap(ProviderBranding.OnPlexSearchingPlex with { AuthProvider = signIn }, canPick: true);
 
 		await Assert.That(cut.FindAll("[aria-label='Change what Sign-in uses']")).IsEmpty();
 		await Assert.That(cut.FindAll("[aria-label='Change what Wantlist uses']")).IsNotEmpty();
@@ -215,7 +227,7 @@ public class ServicesMapTests : BunitContext
 	{
 		var cut = Render<ServicesMap>(parameters =>
 			parameters
-				.Add(map => map.Config, Config with { AuthProvider = AuthProvider.Local })
+				.Add(map => map.Config, ProviderBranding.OnPlexSearchingPlex with { AuthProvider = AuthProvider.Local })
 				.Add(map => map.Ready, new HashSet<RemoteService>())
 				.Add(map => map.People, 3)
 		);
@@ -233,7 +245,7 @@ public class ServicesMapTests : BunitContext
 		List<RemoteService> opened = [];
 		var cut = Render<ServicesMap>(parameters =>
 			parameters
-				.Add(map => map.Config, Config)
+				.Add(map => map.Config, ProviderBranding.OnPlexSearchingPlex)
 				.Add(map => map.Ready, new HashSet<RemoteService>())
 				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<RemoteService>(this, opened.Add))
 		);
@@ -251,7 +263,7 @@ public class ServicesMapTests : BunitContext
 		var accounts = 0;
 		var cut = Render<ServicesMap>(parameters =>
 			parameters
-				.Add(map => map.Config, Config with { AuthProvider = AuthProvider.Local })
+				.Add(map => map.Config, ProviderBranding.OnPlexSearchingPlex with { AuthProvider = AuthProvider.Local })
 				.Add(map => map.Ready, new HashSet<RemoteService>())
 				.Add(map => map.People, 3)
 				.Add(map => map.ServiceOpened, EventCallback.Factory.Create<RemoteService>(this, opened.Add))
@@ -272,7 +284,7 @@ public class ServicesMapTests : BunitContext
 	[Arguments(SinkKind.Plex, false, "div")]
 	public async Task RadarrAndSonarr_ForAnAdmin_OpensTheirRowWhetherTheWantlistOrOnlySearchUsesThem(SinkKind sink, bool canPick, string element)
 	{
-		var cut = RenderMap(Config with { Sink = sink, SearchProvider = SearchProvider.Arr }, canPick);
+		var cut = RenderMap(ProviderBranding.OnPlexSearchingPlex with { Sink = sink, SearchProvider = SearchProvider.Arr }, canPick);
 
 		await Assert.That(Service(cut, "Radarr + Sonarr").LocalName).IsEqualTo(element);
 	}
@@ -284,7 +296,7 @@ public class ServicesMapTests : BunitContext
 		var arr = 0;
 		var cut = Render<ServicesMap>(parameters =>
 			parameters
-				.Add(map => map.Config, Config with { Sink = SinkKind.Arr })
+				.Add(map => map.Config, ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr })
 				.Add(map => map.Ready, new HashSet<RemoteService>())
 				.Add(map => map.ArrReady, true)
 				.Add(map => map.CanPick, true)
@@ -302,7 +314,7 @@ public class ServicesMapTests : BunitContext
 	[Test]
 	public async Task RadarrAndSonarr_WhenNotConnected_SaysNotSetUp()
 	{
-		var cut = RenderMap(Config with { Sink = SinkKind.Arr }, canPick: true);
+		var cut = RenderMap(ProviderBranding.OnPlexSearchingPlex with { Sink = SinkKind.Arr }, canPick: true);
 
 		await Assert.That(Service(cut, "Radarr + Sonarr").QuerySelector(".map-service-status")!.TextContent.Trim()).IsEqualTo("Not set up");
 	}
@@ -320,7 +332,8 @@ public class ServicesMapTests : BunitContext
 		return cut.FindAll(".map-service").Single(service => service.QuerySelector(".map-service-name")!.TextContent.Trim() == name);
 	}
 
-	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params RemoteService[] ready) => RenderMap(Config, canPick, ready);
+	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params RemoteService[] ready) =>
+		RenderMap(ProviderBranding.OnPlexSearchingPlex, canPick, ready);
 
 	private IRenderedComponent<ServicesMap> RenderMap(ProviderConfig config, bool canPick, params RemoteService[] ready)
 	{

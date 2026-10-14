@@ -20,7 +20,7 @@ public class MirrorSwitchTests
 
 	[Test]
 	[MethodDataSource(nameof(Switches))]
-	public async Task NeedsConfirmation_AsksOnlyWhenAppendBecomesMirrorWithTitlesExposedOrAnUnknownCount(
+	public async Task NeedsConfirmation_ForEachSwitch_AsksOnlyWhenAppendBecomesMirrorWithTitlesExposedOrAnUnknownCount(
 		FeedStrategy stored,
 		FeedStrategy pending,
 		Optional<int> exposure,

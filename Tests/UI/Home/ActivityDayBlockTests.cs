@@ -4,6 +4,7 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using UI.Features.Home.Components;
 using UI.Tests.Media;
 
@@ -30,7 +31,7 @@ public class ActivityDayBlockTests : BunitContext
 	{
 		var cut = Render(Day(added: 3, removed: 2));
 
-		var stat = Collapsed(cut.Find(".dstat").TextContent);
+		var stat = cut.Find(".dstat").TextContent.Words();
 		await Assert.That(stat).DoesNotContain("·");
 		await Assert.That(stat).Contains("+3 added").And.Contains("2 removed").And.Contains("1 run");
 	}
@@ -92,8 +93,6 @@ public class ActivityDayBlockTests : BunitContext
 		await Assert.That(cut.Find(".chip").GetAttribute("href")).IsEqualTo($"/feeds/{UrlGuid.Encode(Docs.Value)}/runs/{UrlGuid.Encode(run.Id.Value)}");
 	}
 
-	private static string Collapsed(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
-
 	private IRenderedComponent<ActivityDayBlock> Render(ActivityDay day) =>
 		Render<ActivityDayBlock>(parameters =>
 			parameters
@@ -105,22 +104,16 @@ public class ActivityDayBlockTests : BunitContext
 	private static ActivityDay Day(int added = 0, int removed = 0) => ActivityLog.Days([Run(added, removed)], Names, TimeZoneInfo.Utc)[0];
 
 	private static FeedRun Run(int added, int removed) =>
-		new()
+		TestFeeds.Run(TestFeeds.Feed(Docs.Value), Guid.NewGuid()) with
 		{
-			Id = RunId.From(Guid.NewGuid()),
-			FeedId = Docs,
 			StartedAt = Noon,
-			Duration = TimeSpan.FromSeconds(4),
-			Strategy = new Mirror(),
-			Trigger = new Scheduled("0 0 4 * * *"),
-			Conclusiveness = Conclusiveness.Conclusive,
 			Counts = FeedRunCounts.None with { Total = added + removed, Added = added, Removed = removed },
 			Items =
 			[
-				.. Enumerable.Range(0, added).Select(_ => Item(FeedRunItemState.Added)),
-				.. Enumerable.Range(0, removed).Select(_ => Item(FeedRunItemState.Removed)),
+				.. Enumerable
+					.Repeat(FeedRunItemState.Added, added)
+					.Concat(Enumerable.Repeat(FeedRunItemState.Removed, removed))
+					.Select(state => new FeedRunItem { MediaId = MediaId.New(), State = state }),
 			],
 		};
-
-	private static FeedRunItem Item(FeedRunItemState state) => new() { MediaId = MediaId.New(), State = state };
 }

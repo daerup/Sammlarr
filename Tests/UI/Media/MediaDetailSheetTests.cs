@@ -8,8 +8,6 @@ using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Blocklist;
 using Domain.Media;
-using Domain.Providers;
-using Domain.Settings;
 using Domain.Wantlist;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -111,18 +109,7 @@ public class MediaDetailSheetTests : BunitContext
 		Services.AddSingleton(_media.Object);
 
 		var providerConfig = IProviderConfigService.Mock();
-		providerConfig
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
+		providerConfig.GetAsync(Any()).Returns(ProviderBranding.OnPlexSearchingPlex);
 		Services.AddSingleton(providerConfig.Object);
 
 		Services.AddScoped<Notifier>();

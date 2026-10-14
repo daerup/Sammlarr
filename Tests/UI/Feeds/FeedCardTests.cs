@@ -9,8 +9,8 @@ using Domain.Feed.Run;
 using Domain.Feed.Trace;
 using Domain.Jobs;
 using Domain.Media;
-using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages;
 using UI.Shared.Services;
@@ -69,7 +69,7 @@ public class FeedCardTests : BunitContext
 	{
 		var cut = RenderCard(Row(mirror: 3));
 
-		await Assert.That(Normalized(cut.Find(".feed-card-chips").TextContent)).StartsWith("Mirror · 3");
+		await Assert.That(cut.Find(".feed-card-chips").TextContent.Words()).StartsWith("Mirror · 3");
 	}
 
 	[Test]
@@ -110,7 +110,7 @@ public class FeedCardTests : BunitContext
 			parameters.Add(card => card.Row, Row(runs: 3, job: JobState.Running)).Add(card => card.Now, Now).Add(card => card.Running, Some.Of(live.Object))
 		);
 
-		await Assert.That(Normalized(cut.Find("[data-testid=running-pill]").TextContent)).IsEqualTo("Running · 12 / ~400");
+		await Assert.That(cut.Find("[data-testid=running-pill]").TextContent.Words()).IsEqualTo("Running · 12 / ~400");
 		await Assert.That(cut.FindAll(".last-run")).IsEmpty();
 		await Assert.That(cut.Find(".feed-card-chips").TextContent).DoesNotContain("Running");
 	}
@@ -127,44 +127,27 @@ public class FeedCardTests : BunitContext
 	private IRenderedComponent<FeedCard> RenderCard(FeedRow row, bool selecting = false) =>
 		Render<FeedCard>(parameters => parameters.Add(card => card.Row, row).Add(card => card.Now, Now).Add(card => card.IsSelecting, selecting));
 
-	private static string Normalized(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
-
 	private static FeedRow Row(bool enabled = true, int? mirror = null, int onWantlist = 0, int runs = 0, JobState? job = null)
 	{
+		var feed = TestFeeds.Feed(Comedy.Value, "hdlists/comedy-movies-2001-20207") with
+		{
+			Enabled = enabled,
+			Strategy = mirror is { } grace ? new FeedStrategy(new Mirror(grace)) : new FeedStrategy(new Append()),
+			Schedule = new FeedRunTrigger(new Scheduled("0 26 * * * *")),
+		};
 		return new(
-			FeedOverview.Of(
-				new Feed
-				{
-					Name = "hdlists/comedy-movies-2001-20207",
-					Id = Comedy,
-					Enabled = enabled,
-					Provider = FeedProvider.Mdblist,
-					Strategy = mirror is { } grace ? new FeedStrategy(new Mirror(grace)) : new FeedStrategy(new Append()),
-					Identifier = "hdlists/comedy-movies-2001-2020",
-					CreatedAt = Now,
-					Schedule = new FeedRunTrigger(new Scheduled("0 26 * * * *")),
-				},
-				Optional.When(runs > 0, () => Totals(runs)),
-				onWantlist
-			),
+			FeedOverview.Of(feed, Optional.When(runs > 0, () => Totals(feed, runs)), onWantlist),
 			Optional.Of(job),
 			Optional.When(enabled, () => Now.AddMinutes(43))
 		);
 	}
 
-	private static FeedRunTotals Totals(int runs) =>
+	private static FeedRunTotals Totals(Feed feed, int runs) =>
 		new(
-			new FeedRun
+			TestFeeds.Run(feed, Guid.NewGuid()) with
 			{
-				Id = RunId.From(Guid.NewGuid()),
-				FeedId = Comedy,
 				StartedAt = Now.AddMinutes(-16),
 				Duration = TimeSpan.FromSeconds(2),
-				Strategy = new FeedStrategy(new Append()),
-				Trigger = new FeedRunTrigger(new Manual()),
-				Conclusiveness = Conclusiveness.Conclusive,
-				Counts = FeedRunCounts.None,
-				Items = [],
 			},
 			new FeedRunHistory
 			{

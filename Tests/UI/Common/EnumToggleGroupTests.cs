@@ -26,17 +26,6 @@ public class EnumToggleGroupTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForAnEnum_EmitsOneRadioPerValueWithoutATooltip()
-	{
-		var portal = Render<BbPortalHost>();
-		var cut = RenderGroup(Choice.First);
-
-		await Assert.That(Radios(cut).Count).IsEqualTo(3);
-		await Assert.That(cut.Find("[role=radiogroup]").GetAttribute("aria-label")).IsEqualTo("Enum selection");
-		await Assert.That(portal.FindAll("[role=tooltip]")).IsEmpty();
-	}
-
-	[Test]
 	public async Task Render_WhenAValueIsChosen_ChecksOnlyIt()
 	{
 		var cut = RenderGroup(Choice.Second);
@@ -93,6 +82,7 @@ public class EnumToggleGroupTests : BunitContext
 		await radios[1].QuerySelector("span span")!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
 
 		await Assert.That(radios.Count).IsEqualTo(3);
+		await Assert.That(cut.Find("[role=radiogroup]").GetAttribute("aria-label")).IsEqualTo("Enum selection");
 		await Assert.That(cut.FindAll("[role=radiogroup] [tabindex='0']").Count).IsEqualTo(1);
 		await Assert.That(radios[1].TextContent.Trim()).IsEqualTo(nameof(Choice.Second));
 		await Assert.That(portal.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]").TextContent).Contains("About Second");

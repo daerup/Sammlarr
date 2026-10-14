@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
@@ -56,7 +55,7 @@ public class FeedEditorTests : BunitContext
 				(_, _, token) =>
 				{
 					_loading = token;
-					return HeldAsync(_listLoaded.Task, token);
+					return HeldItems.UntilAsync(_listLoaded.Task, token);
 				}
 			);
 	}
@@ -331,29 +330,8 @@ public class FeedEditorTests : BunitContext
 
 	private static List<IElement> Dialogs(IRenderedComponent<IComponent> cut) => [.. cut.FindAll("[role='alertdialog'], [role='dialog']")];
 
-	private static async IAsyncEnumerable<Listed<MediaMatchResult>> HeldAsync(Task loaded, [EnumeratorCancellation] CancellationToken cancellationToken)
-	{
-		await loaded.WaitAsync(cancellationToken);
-		yield break;
-	}
-
 	private static FeedOverview Overview()
 	{
-		return new FeedOverview(
-			new Domain.Feed.Feed
-			{
-				Name = "Comedy",
-				Id = Comedy,
-				Enabled = true,
-				Provider = FeedProvider.Mdblist,
-				Strategy = new FeedStrategy(new Append()),
-				Identifier = "hdlists/comedy",
-				CreatedAt = DateTimeOffset.UtcNow,
-				Schedule = new FeedRunTrigger(new Manual()),
-			},
-			new None(),
-			FeedRunHistory.None,
-			0
-		);
+		return new FeedOverview(TestFeeds.Feed(Comedy.Value) with { Identifier = "hdlists/comedy" }, new None(), FeedRunHistory.None, 0);
 	}
 }

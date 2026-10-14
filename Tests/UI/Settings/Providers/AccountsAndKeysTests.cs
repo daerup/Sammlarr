@@ -2,22 +2,12 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Bunit.TestDoubles;
 using Domain.Providers;
-using Domain.Settings;
 using UI.Features.Settings.Components.Providers;
 
 namespace UI.Tests.Settings.Providers;
 
 public class AccountsAndKeysTests : BunitContext
 {
-	private static readonly ProviderConfig Config = new()
-	{
-		Sink = SinkKind.Plex,
-		TrendingProvider = TrendingProvider.Tmdb,
-		SearchProvider = SearchProvider.Plex,
-		AuthProvider = AuthProvider.Plex,
-		RegistrationMode = RegistrationMode.Open,
-	};
-
 	[Before(Test)]
 	public void Setup()
 	{
@@ -29,7 +19,7 @@ public class AccountsAndKeysTests : BunitContext
 	[Test]
 	public async Task Rows_OnAPlexInstall_OfferFourKeysWithTmdbsTokenAndSetupStepsForMalAndTrakt()
 	{
-		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));
+		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, ProviderBranding.OnPlexSearchingPlex));
 
 		var rows = cut.FindComponents<Stub<ApiKeyRow>>().Select(row => row.Instance.Parameters).ToList();
 
@@ -49,7 +39,7 @@ public class AccountsAndKeysTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		JSInterop.Mode = JSRuntimeMode.Loose;
-		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, Config));
+		var cut = Render<AccountsAndKeys>(parameters => parameters.Add(section => section.Config, ProviderBranding.OnPlexSearchingPlex));
 		var mal = cut.FindComponents<Stub<ApiKeyRow>>().Select(row => row.Instance.Parameters).Single(row => row.Get(key => key.Provider) == ApiKeyProvider.Mal);
 
 		var setup = Render(mal.Get(key => key.Setup) ?? (_ => { }));
