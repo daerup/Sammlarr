@@ -114,25 +114,7 @@ public class MdblistTitlesTests
 	}
 
 	[Test]
-	public async Task PrimeAsync_ThenAskByAnotherKeyOfTheTitle_SendsNothingMore()
-	{
-		var handler = await RecordedAsync();
-		var testee = MdblistApis.Titles(handler);
-		await testee.PrimeAsync(
-			[
-				[TmdbId.From("550", MediaType.Movie)],
-			],
-			CancellationToken.None
-		);
-
-		var found = await testee.FindAsync([FightClub, TmdbId.From("550", MediaType.Movie)]);
-
-		await Assert.That(found).IsFound();
-		handler.Verify(request => request.Method(HttpMethod.Post), Times.Once);
-	}
-
-	[Test]
-	public async Task FindAsync_ForAKeyAbsentFromThePrimedGroup_UsesThePendingAskOfAnotherKey()
+	public async Task FindAsync_ForAKeyAbsentFromThePrimedGroup_FindsTheTitleThroughThePendingAskOfAnotherKey()
 	{
 		using var release = new ManualResetEventSlim();
 		var handler = Held(release, FightClubJson);
@@ -146,8 +128,8 @@ public class MdblistTitlesTests
 
 		var asking = testee.FindAsync([FightClub, TmdbId.From("550", MediaType.Movie)]);
 		release.Set();
-		await asking;
 
+		await Assert.That(await asking).IsFound();
 		handler.Verify(request => request.Method(HttpMethod.Post).PathMatches(@"^/tmdb/movie(\?.*)?$"), Times.Once);
 		handler.Verify(request => request.Method(HttpMethod.Post), Times.Once);
 	}

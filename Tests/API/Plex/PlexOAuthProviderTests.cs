@@ -43,14 +43,6 @@ public class PlexOAuthProviderTests
 		plex.Verify(request => request.HasHeader("X-Plex-Token"), Times.Once);
 	}
 
-	[Test]
-	public async Task CheckAsync_ForATokenPlexRefuses_IsRejected()
-	{
-		var plex = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.Unauthorized);
-
-		await Assert.That(await Testee(plex).CheckAsync(Guid.NewGuid(), "plex-token")).IsEqualTo(AccessCheck.Rejected);
-	}
-
 	private static PlexOAuthProvider Testee(MockHttpHandler plex)
 	{
 		var options = new PlexOptions

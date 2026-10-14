@@ -102,7 +102,6 @@ internal static class TmdbTypes
 		public DateOnly? ReleasedAs(MediaType type) => ReleasedOn(type, ReleaseDate, FirstAirDate);
 
 		public MediaType MediaType => MediaType.Parse(Type);
-		public TmdbId TmdbId => TmdbId.From(Id.ToString(), MediaType);
 	}
 
 	public record Genre([property: JsonPropertyName("id")] int Id, [property: JsonPropertyName("name")] string Name);

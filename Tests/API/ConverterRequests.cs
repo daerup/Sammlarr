@@ -19,18 +19,4 @@ internal static class ConverterRequests
 			.Single(byId => byId.Accepts.Contains(id.Source));
 		return new ByIdRequest(lookup, id);
 	}
-
-	internal static IdLookupRequest RequestByHints(this IExternalIdConverter converter, IdentifyHints hints, params IExternalMediaId[] known)
-	{
-		var lookup = converter
-			.Lookups.SelectMany<IdLookup, ByHints>(each =>
-				each switch
-				{
-					ByHints byHints => [byHints],
-					ById => [],
-				}
-			)
-			.Single();
-		return new ByHintsRequest(lookup, hints, known);
-	}
 }

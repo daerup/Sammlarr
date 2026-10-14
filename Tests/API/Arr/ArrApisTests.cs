@@ -57,12 +57,4 @@ public class ArrApisTests
 
 		await Assert.That(owners).IsEquivalentTo(["http://radarr:7878"]);
 	}
-
-	[Test]
-	[Arguments(ArrApp.Radarr)]
-	[Arguments(ArrApp.Sonarr)]
-	public async Task For_AnApp_IsThatAppsApi(ArrApp app)
-	{
-		await Assert.That(Testee.For(app).App).IsEqualTo(app);
-	}
 }

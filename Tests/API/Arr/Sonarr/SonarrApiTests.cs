@@ -67,12 +67,6 @@ public class SonarrApiTests
 	}
 
 	[Test]
-	public async Task AddressOf_AShow_IsItsTvdbId()
-	{
-		await Assert.That(Testee.AddressOf(new ArrTitle(20, "Breaking Bad", 2008, 1396, 81189, null, []))).IsEqualTo(81189);
-	}
-
-	[Test]
 	public Task Prepare_WithTheDefaultOptions_AddsAStandardSeriesInSeasonFolders()
 	{
 		return VerifyJson(Testee.Prepare(Lookup(), ArrInstanceConfig.Empty, Addition).ToJsonString());

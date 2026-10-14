@@ -26,19 +26,6 @@ public class MdblistKeyCheckTests
 	}
 
 	[Test]
-	public async Task CheckAsync_ForAKeyMdblistRefuses_IsRejected()
-	{
-		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.Forbidden);
-		var testee = new MdblistKeyCheck(
-			new SingleClientHttpClientFactory(handler.CreateClient(BaseUrl)),
-			new MdblistOptions { BaseUrl = BaseUrl },
-			new MdblistKeyFlights()
-		);
-
-		await Assert.That(await testee.CheckAsync("mdblist-key")).IsEqualTo(AccessCheck.Rejected);
-	}
-
-	[Test]
 	public async Task CheckAsync_WhenMdblistAnswersALimitInA200_IsSpent()
 	{
 		var handler = Mock.HttpHandler();

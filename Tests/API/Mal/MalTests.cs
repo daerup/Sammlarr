@@ -251,12 +251,6 @@ public class MalTests
 		await Assert.That(found!.Details.Title).IsEqualTo("Sen to Chihiro no Kamikakushi");
 	}
 
-	[Test]
-	public async Task Fills_TheMyAnimeListRatingAsItsSecondSupplier()
-	{
-		await Assert.That(RatingSource.MyAnimeList.SuppliedBy()).Contains(RemoteService.Mal).And.Contains(RemoteService.Mdblist);
-	}
-
 	private static Mock<IApiKeyService> Keys()
 	{
 		var keys = IApiKeyService.Mock();

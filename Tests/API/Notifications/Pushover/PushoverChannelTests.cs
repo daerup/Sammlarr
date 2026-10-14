@@ -14,20 +14,20 @@ public class PushoverChannelTests
 	private static readonly DateTimeOffset Now = DateTimeOffset.FromUnixTimeSeconds(1_700_000_000);
 
 	[Test]
-	public async Task SendAsync_WhenSending_PostsTheRenderedFormFieldsToPushover()
+	public async Task SendAsync_WithTitleAndMessageTemplates_PostsTheRenderedFormFieldsToPushover()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
 		var result = await Channel(handler)
-			.SendAsync(Context(), PushoverTarget(), Template(title: "{{ title }}", message: "{{ summary }}"), CancellationToken.None);
+			.SendAsync(Context(), PushoverTarget(), Template(title: "[{{ type }}] {{ title }}", message: "{{ summary }} now"), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliverySucceeded>();
 		await Assert.That(handler.Request!.RequestUri!.ToString()).IsEqualTo("https://api.pushover.net/1/messages.json");
 		var form = Form(handler);
 		await Assert.That(form["token"]).IsEqualTo("app-token");
 		await Assert.That(form["user"]).IsEqualTo("user-key");
-		await Assert.That(form["title"]).IsEqualTo("Wantlist sync completed");
-		await Assert.That(form["message"]).IsEqualTo("Synced.");
+		await Assert.That(form["title"]).IsEqualTo("[WantlistSyncCompleted] Wantlist sync completed");
+		await Assert.That(form["message"]).IsEqualTo("Synced. now");
 		await Assert.That(form["priority"]).IsEqualTo("0");
 	}
 
@@ -52,18 +52,6 @@ public class PushoverChannelTests
 		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(title: "{{ title }}", message: ""), CancellationToken.None);
 
 		await Assert.That(Form(handler)["message"]).IsEqualTo("(empty)");
-	}
-
-	[Test]
-	public async Task SendAsync_WhenTemplatesAreSet_OverrideTheTitleAndMessage()
-	{
-		var handler = new CapturingHandler(HttpStatusCode.OK);
-
-		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(title: "[{{ type }}]", message: "{{ summary }} now"), CancellationToken.None);
-
-		var form = Form(handler);
-		await Assert.That(form["title"]).IsEqualTo("[WantlistSyncCompleted]");
-		await Assert.That(form["message"]).IsEqualTo("Synced. now");
 	}
 
 	[Test]

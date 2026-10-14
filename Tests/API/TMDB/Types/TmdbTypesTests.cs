@@ -72,22 +72,6 @@ public class TmdbTypesTests
 		await Assert.That(testee.ReleasedAs(MediaType.Movie)).IsEqualTo(new DateOnly(2019, 1, 1));
 	}
 
-	[Test]
-	public async Task Details_TmdbId_ReturnsExpectedValueObject()
-	{
-		var testee = new TmdbTypes.Details(42, "Original", "Original Name", "2020-01-01", null, "Title", "Name", "unknown");
-
-		await Assert.That(testee.TmdbId).IsEqualTo(TmdbId.From("42", MediaType.Unknown));
-	}
-
-	[Test]
-	public async Task TrendingResult_TmdbId_ReturnsExpectedValueObject()
-	{
-		var testee = CreateTrendingResult();
-
-		await Assert.That(testee.TmdbId).IsEqualTo(TmdbId.From("10", MediaType.Movie));
-	}
-
 	private static TmdbTypes.Trending.Result CreateTrendingResult(
 		string? title = "Title",
 		string? name = "Name",
