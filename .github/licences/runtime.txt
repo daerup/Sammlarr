@@ -1,0 +1,10 @@
+Runtime and base image
+
+The container image runs Sammlarr on the .NET runtime and ASP.NET Core, licensed under MIT,
+Copyright (c) .NET Foundation and Contributors. Their licence and Microsoft's third-party notices ship in the image at
+/usr/share/dotnet/LICENSE.txt and /usr/share/dotnet/ThirdPartyNotices.txt.
+
+The base image is mcr.microsoft.com/dotnet/aspnet (Ubuntu, chiseled). Its operating system packages are separate
+programs under their own licences, some of them copyleft. Every release lists them with their versions and licences in
+the image SBOM (sammlarr-image.cdx.json), and each package keeps its copyright file in /usr/share/doc/<package>/copyright
+in the image. Their source is published by Ubuntu at https://launchpad.net/ubuntu (apt-get source <package>).
