@@ -70,22 +70,15 @@ public class ProvenanceDetailsTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForAnItemWhoseFeedWasDeleted_KeepsTheNameButOffersNoDeadLinks()
+	public async Task Render_ForAnItemWhoseFeedWasDeleted_KeepsTheNameWearsTheGhostAndOffersNoDeadLinks()
 	{
 		var cut = RenderDetails(new OrphanedOrigin("Weekly picks"));
 
+		var ghost = Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 14)).Find("path").GetAttribute("d");
 		await Assert.That(cut.Find(".provenance-name-text").TextContent.Trim()).IsEqualTo("Weekly picks");
 		await Assert.That(cut.Find(".provenance-note").TextContent.Trim()).IsEqualTo("This feed no longer exists");
-		await Assert.That(cut.FindAll("a")).IsEmpty();
-	}
-
-	[Test]
-	public async Task Render_ForATitleWhoseFeedIsGone_WearsTheGhost()
-	{
-		var cut = RenderDetails(new OrphanedOrigin("Old feed"));
-
-		var ghost = Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 14)).Find("path").GetAttribute("d");
 		await Assert.That(cut.FindAll("svg path").Select(path => path.GetAttribute("d"))).Contains(ghost);
+		await Assert.That(cut.FindAll("a")).IsEmpty();
 	}
 
 	private IRenderedComponent<ProvenanceDetails> RenderDetails(WantlistItemProvenance provenance, MediaType type = MediaType.Movie)

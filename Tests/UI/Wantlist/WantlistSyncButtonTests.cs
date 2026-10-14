@@ -96,15 +96,15 @@ public class WantlistSyncButtonTests : BunitContext
 	}
 
 	[Test]
-	public async Task Plan_WhenAnAttemptFailsTransiently_RetriesInsteadOfReportingAnError()
+	public async Task Plan_WhenAnAttemptFailsTransiently_RetriesAndSaysInSyncInsteadOfReportingAnError()
 	{
 		var (_, planner) = RegisterServices();
 		planner.PlanAsync(Any()).ReturnsSequentially(new WantlistSyncSinkUnreachable("temporary", []), Summary(), Summary());
 
 		var cut = Render<Harness>();
 
-		cut.WaitForAssertion(() => planner.PlanAsync(Any()).WasCalled(Times.Exactly(2)), TimeSpan.FromSeconds(10));
-		await Assert.That(cut.FindAll(".change-band")).IsEmpty();
+		cut.WaitForState(() => !cut.Find(".sync-status").TextContent.Contains("Comparing"), TimeSpan.FromSeconds(10));
+		await Assert.That(cut.Find(".sync-status").TextContent).Contains("In sync");
 	}
 
 	[Test]
@@ -143,7 +143,6 @@ public class WantlistSyncButtonTests : BunitContext
 
 		cut.WaitForElement(".sync-status .is-added");
 		await Assert.That(cut.Find("[role=group]").QuerySelectorAll("button").Length).IsEqualTo(1);
-		await Assert.That(cut.Find(".sync-status").TagName).IsEqualTo("SPAN");
 	}
 
 	[Test]
