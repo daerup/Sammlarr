@@ -84,7 +84,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         await Task.Yield();
-        _notices = await ThirdPartyNotices.ReadAsync();
+        _notices = await ThirdPartyNotices.GetAsync();
         _loaded = true;
     }
 
