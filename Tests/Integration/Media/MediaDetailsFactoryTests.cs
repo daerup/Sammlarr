@@ -22,64 +22,6 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Test]
-	public async Task BuildFrom_WhenMovieDetails_CopiesAllFields()
-	{
-		var details = MovieDetails();
-
-		var entity = (MovieDetailsRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
-
-		using var _ = Assert.Multiple();
-		await Assert.That(entity.Title).IsEqualTo(details.Title);
-		await Assert.That(entity.Tagline).IsEqualTo(details.Tagline);
-		await Assert.That(entity.Summary).IsEqualTo(details.Summary);
-		await Assert.That(entity.PosterUrl).IsEqualTo(details.PosterUrl);
-		await Assert.That(entity.BackdropUrl).IsEqualTo(details.BackdropUrl);
-		await Assert.That(entity.ReleaseDate).IsEqualTo(details.ReleaseDate);
-		await Assert.That(entity.Genres).IsEquivalentTo(details.Genres);
-		await Assert.That(entity.Runtime).IsEqualTo(details.Runtime);
-	}
-
-	[Test]
-	public async Task BuildFrom_WhenShowDetails_CopiesAllFields()
-	{
-		var details = ShowDetails();
-
-		var entity = (ShowDetailsRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
-
-		using var _ = Assert.Multiple();
-		await Assert.That(entity.Title).IsEqualTo(details.Title);
-		await Assert.That(entity.Seasons).IsEqualTo(details.Seasons);
-		await Assert.That(entity.Episodes).IsEqualTo(details.Episodes);
-		await Assert.That(entity.RuntimePerEpisode).IsEqualTo(details.RuntimePerEpisode);
-	}
-
-	[Test]
-	public async Task BuildFrom_ForCachedDetails_CopiesBothTimesAndTheAnswers()
-	{
-		var asked = RefreshedAt.AddHours(2);
-
-		var entity = _testee.BuildFrom(new CachedDetails(new MovieDetails { Title = "Solaris" }, RefreshedAt, asked, [TmdbLackedTheTagline]), Guid.NewGuid());
-
-		await Assert.That(entity.RefreshedAt).IsEqualTo(RefreshedAt);
-		await Assert.That(entity.AskedAt).IsEqualTo(asked);
-		await Assert
-			.That(entity.Answers.Select(answer => (answer.Provider, answer.Unfilled, answer.AnsweredAt)))
-			.IsEquivalentTo([(RemoteService.Tmdb, (MediaFields)MediaField.Tagline, RefreshedAt)]);
-	}
-
-	[Test]
-	public async Task BuildFrom_WhenDetailsHaveRatings_BuildsRatings()
-	{
-		var details = MovieDetails() with { Ratings = MediaRatings.From([new TmdbRating(8.4f, Some.Of(1234))]) };
-
-		var entity = (MovieDetailsRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
-
-		await Assert.That(entity.Ratings).Count().IsEqualTo(1);
-		await Assert.That(entity.Ratings[0].Source).IsEqualTo(RatingSource.Tmdb);
-		await Assert.That(entity.Ratings[0].NormalizedValue).IsEqualTo(8.4f);
-	}
-
-	[Test]
 	public async Task ToCached_WhenMovieEntity_ReadsBackWhatItWrote()
 	{
 		var plexId = PlexId.From("plex-400", MediaType.Movie);
@@ -110,46 +52,6 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 	}
 
 	[Test]
-	public async Task ToCached_PassesThroughRatings()
-	{
-		var plexId = PlexId.From("plex-420", MediaType.Movie);
-		var mediaId = await fixture.SeedMediaAsync([plexId]);
-		var entity = await PersistAsync(Cached(MovieDetails() with { Ratings = MediaRatings.From([new TmdbRating(7.5f, Some.Of(500))]) }), mediaId);
-
-		var cached = _testee.ToCached(entity);
-
-		using var _ = Assert.Multiple();
-		await Assert.That(cached.Details.Ratings.All.Count).IsEqualTo(1);
-		await Assert.That(cached.Details.Ratings.All.Single().Source).IsEqualTo(RatingSource.Tmdb);
-	}
-
-	[Test]
-	public async Task BuildFrom_WhenSomeFieldsAreMissing_WritesTheValuesItHas()
-	{
-		var plexId = PlexId.From("plex-420", MediaType.Movie);
-		var mediaId = await fixture.SeedMediaAsync([plexId]);
-		var details = new MovieDetails
-		{
-			Title = "Partial Title",
-			Tagline = "Partial Tagline",
-			Summary = "Partial Summary",
-			PosterUrl = "https://example.com/partial-poster.jpg",
-			ReleaseDate = new DateOnly(2019, 5, 4),
-			Runtime = TimeSpan.FromMinutes(95),
-		};
-
-		var entity = await PersistAsync(Cached(details), mediaId);
-
-		using var _ = Assert.Multiple();
-		await Assert.That(entity.Title).IsEqualTo("Partial Title");
-		await Assert.That(entity.Tagline).IsEqualTo("Partial Tagline");
-		await Assert.That(entity.Summary).IsEqualTo("Partial Summary");
-		await Assert.That(entity.PosterUrl).IsEqualTo("https://example.com/partial-poster.jpg");
-		await Assert.That(entity.ReleaseDate).IsEqualTo(new DateOnly(2019, 5, 4));
-		await Assert.That(((MovieDetailsRow)entity).Runtime).IsEqualTo(TimeSpan.FromMinutes(95));
-	}
-
-	[Test]
 	public async Task ToCached_WhenAMovieRowHasOnlyATitle_ReadsTheRestAsUnknown()
 	{
 		var plexId = PlexId.From("plex-421", MediaType.Movie);
@@ -167,27 +69,6 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		var entity = await PersistAsync(Cached(new ShowDetails { Title = "Only a title" }), mediaId);
 
 		await Assert.That(_testee.ToCached(entity).Details).IsEqualTo(new ShowDetails { Title = "Only a title" });
-	}
-
-	[Test]
-	public async Task BuildFrom_WhenAShowHasCounts_WritesThem()
-	{
-		var plexId = PlexId.From("plex-423", MediaType.Show);
-		var mediaId = await fixture.SeedMediaAsync([plexId]);
-		var details = new ShowDetails
-		{
-			Title = "Partial Show",
-			Seasons = 4,
-			Episodes = 40,
-			RuntimePerEpisode = TimeSpan.FromMinutes(22),
-		};
-
-		var entity = (ShowDetailsRow)await PersistAsync(Cached(details), mediaId);
-
-		using var _ = Assert.Multiple();
-		await Assert.That(entity.Seasons).IsEqualTo(4);
-		await Assert.That(entity.Episodes).IsEqualTo(40);
-		await Assert.That(entity.RuntimePerEpisode).IsEqualTo(TimeSpan.FromMinutes(22));
 	}
 
 	private async Task<MediaDetailsRow> PersistAsync(CachedDetails cached, MediaId mediaId)

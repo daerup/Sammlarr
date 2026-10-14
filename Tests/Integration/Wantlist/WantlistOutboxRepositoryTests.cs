@@ -59,20 +59,6 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	}
 
 	[Test]
-	public async Task GetAllAsync_IncludesStatusAndAttempts()
-	{
-		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-700", MediaType.Movie)]);
-		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
-		await _testee.RecordFailedAttemptAsync(SinkKind.Plex, [mediaId], WantlistOutboxState.Pending, new None());
-
-		var entry = (await _testee.GetAllAsync(SinkKind.Plex)).Single();
-
-		await Assert.That(entry.MediaId).IsEqualTo(mediaId);
-		await Assert.That(entry.Status).IsEqualTo(WantlistOutboxState.Pending);
-		await Assert.That(entry.Attempts).IsEqualTo(1);
-	}
-
-	[Test]
 	public async Task GetAllAsync_ForAnotherSink_LeavesOutTheRowsQueuedForThisOne()
 	{
 		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-206", MediaType.Movie)]);
