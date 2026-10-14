@@ -18,7 +18,7 @@ public class FeedRunLiveTests : BunitContext
 {
 	private static readonly Feed Documentaries = TestFeedRows.Documentaries.Overview.Feed;
 
-	private static readonly RunLayout Layout = new RunLayout(
+	private static readonly RunLayout Layout = new(
 		[MediaProvider.Plex],
 		[new(RemoteService.Tmdb, 1, false), new(RemoteService.Plex, 2, false)],
 		[RemoteService.Tmdb],

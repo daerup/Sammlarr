@@ -5,11 +5,9 @@ using OpenTelemetry;
 
 namespace Observability.Tracing;
 
-internal sealed class ActivityLogProcessor : BaseProcessor<Activity>
+internal sealed class ActivityLogProcessor(ILoggerFactory loggerFactory) : BaseProcessor<Activity>
 {
-	private readonly ILogger _logger;
-
-	public ActivityLogProcessor(ILoggerFactory loggerFactory) => _logger = loggerFactory.CreateLogger("Sammlarr.Activity");
+	private readonly ILogger _logger = loggerFactory.CreateLogger("Sammlarr.Activity");
 
 	public override void OnEnd(Activity data)
 	{

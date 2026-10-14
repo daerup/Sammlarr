@@ -128,36 +128,24 @@ public class SuppliedByGenerator : IIncrementalGenerator
 		return $"\t\t\t{shape.SupplierQualified}.{supplier} => [{values}],";
 	}
 
-	private readonly struct SuppliedMember
+	private readonly struct SuppliedMember(
+		string targetQualified,
+		string targetName,
+		string targetNamespace,
+		ImmutableArray<string> targetMembers,
+		string supplierQualified,
+		ImmutableArray<string> supplierMembers,
+		string member,
+		ImmutableArray<string> suppliers
+	)
 	{
-		public SuppliedMember(
-			string targetQualified,
-			string targetName,
-			string targetNamespace,
-			ImmutableArray<string> targetMembers,
-			string supplierQualified,
-			ImmutableArray<string> supplierMembers,
-			string member,
-			ImmutableArray<string> suppliers
-		)
-		{
-			TargetQualified = targetQualified;
-			TargetName = targetName;
-			TargetNamespace = targetNamespace;
-			TargetMembers = targetMembers;
-			SupplierQualified = supplierQualified;
-			SupplierMembers = supplierMembers;
-			Member = member;
-			Suppliers = suppliers;
-		}
-
-		public string TargetQualified { get; }
-		public string TargetName { get; }
-		public string TargetNamespace { get; }
-		public ImmutableArray<string> TargetMembers { get; }
-		public string SupplierQualified { get; }
-		public ImmutableArray<string> SupplierMembers { get; }
-		public string Member { get; }
-		public ImmutableArray<string> Suppliers { get; }
+		public string TargetQualified { get; } = targetQualified;
+		public string TargetName { get; } = targetName;
+		public string TargetNamespace { get; } = targetNamespace;
+		public ImmutableArray<string> TargetMembers { get; } = targetMembers;
+		public string SupplierQualified { get; } = supplierQualified;
+		public ImmutableArray<string> SupplierMembers { get; } = supplierMembers;
+		public string Member { get; } = member;
+		public ImmutableArray<string> Suppliers { get; } = suppliers;
 	}
 }

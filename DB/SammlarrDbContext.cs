@@ -23,36 +23,22 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DB;
 
-internal sealed class SammlarrDbContext : DbContext
+internal sealed class SammlarrDbContext(
+	DbContextOptions<SammlarrDbContext> options,
+	ICurrentUser currentUser,
+	IEnumerable<IPropertyAddedConvention> propertyConventions,
+	IEnumerable<IModelConfiguration> modelConfigurations,
+	IDateTimeProvider dateTimeProvider
+) : DbContext(options)
 {
 	private static readonly MethodInfo SetUserFilterMethod = typeof(SammlarrDbContext).GetMethod(
 		nameof(SetUserFilter),
 		BindingFlags.Instance | BindingFlags.NonPublic
 	)!;
 
-	private readonly IDateTimeProvider _dateTimeProvider;
-	private readonly ICurrentUser _currentUser;
-	private readonly IEnumerable<IPropertyAddedConvention> _propertyConventions;
-	private readonly IEnumerable<IModelConfiguration> _modelConfigurations;
-
-	public SammlarrDbContext(
-		DbContextOptions<SammlarrDbContext> options,
-		ICurrentUser currentUser,
-		IEnumerable<IPropertyAddedConvention> propertyConventions,
-		IEnumerable<IModelConfiguration> modelConfigurations,
-		IDateTimeProvider dateTimeProvider
-	)
-		: base(options)
-	{
-		_propertyConventions = propertyConventions;
-		_modelConfigurations = modelConfigurations;
-		_currentUser = currentUser;
-		_dateTimeProvider = dateTimeProvider;
-	}
-
 	private Guid CurrentUserId =>
-		_currentUser.IsAuthenticated
-			? _currentUser.Id.Value
+		currentUser.IsAuthenticated
+			? currentUser.Id.Value
 			: throw new InvalidOperationException("No authenticated user in scope; user-owned data cannot be accessed anonymously.");
 
 	public DbSet<CredentialRow> Credentials => Set<CredentialRow>();
@@ -125,7 +111,7 @@ internal sealed class SammlarrDbContext : DbContext
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
-		_propertyConventions.ToList().ForEach(convention => configurationBuilder.Conventions.Add(_ => convention));
+		propertyConventions.ToList().ForEach(convention => configurationBuilder.Conventions.Add(_ => convention));
 
 		if (Database.IsSqlite())
 		{
@@ -137,7 +123,7 @@ internal sealed class SammlarrDbContext : DbContext
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
-		_modelConfigurations.ToList().ForEach(builder => builder.Apply(modelBuilder));
+		modelConfigurations.ToList().ForEach(builder => builder.Apply(modelBuilder));
 
 		modelBuilder
 			.Model.GetEntityTypes()
@@ -176,7 +162,7 @@ internal sealed class SammlarrDbContext : DbContext
 
 	private void ApplyStamps()
 	{
-		var now = _dateTimeProvider.Now;
+		var now = dateTimeProvider.Now;
 		ChangeTracker.Entries<IAuditable>().ToList().ForEach(entry => EntityAuditer.UpdateTimestamps(entry, now));
 		ChangeTracker.Entries<IUserOwned>().ToList().ForEach(entry => UserOwnershipStamper.Stamp(entry, CurrentUserId));
 	}
