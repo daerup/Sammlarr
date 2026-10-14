@@ -91,6 +91,7 @@ public class MediaRatingTests
 	{
 		await Assert.That(RatingSource.Tmdb.SuppliedBy()).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Plex, RemoteService.Mdblist]);
 		await Assert.That(RatingSource.RottenTomatoesAudience.SuppliedBy()).IsEquivalentTo([RemoteService.Plex, RemoteService.Mdblist]);
+		await Assert.That(RatingSource.MyAnimeList.SuppliedBy()).IsEquivalentTo([RemoteService.Mdblist, RemoteService.Mal]);
 	}
 
 	[Test]

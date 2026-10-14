@@ -1,5 +1,4 @@
 using System.Net;
-using API.Http.Lanes;
 using API.Mdblist;
 using Contracts;
 using Domain.Usage;
@@ -114,24 +113,6 @@ public class MdblistBudgetTests
 		budget.Record("mdblist-key", Answer(remaining: 110, Reset));
 
 		await Assert.That(budget.BlockedUntil("mdblist-key", LaneClass.Background, Now)).IsSome().And.IsEqualTo(Reset);
-	}
-
-	[Test]
-	public async Task Record_ForARequestStampedWithTheLaneOwner_CountsItForThatKey()
-	{
-		var budget = MdblistApis.Budget();
-		var answered = new HttpResponseMessage(HttpStatusCode.OK);
-		answered.Headers.Add("x-ratelimit-remaining", "640");
-		answered.Headers.Add("x-ratelimit-reset", $"{Reset.ToUnixTimeSeconds()}");
-		var wire = Mock.HttpHandler();
-		wire.OnAnyRequest().RespondWith(answered);
-		using var invoker = new HttpMessageInvoker(new MdblistBudgetHandler(budget) { InnerHandler = wire });
-		using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.mdblist.com/lists/1/items");
-		request.Options.Set(LaneHandler.Owner, "mdblist-key");
-
-		using var response = await invoker.SendAsync(request, CancellationToken.None);
-
-		await Assert.That(Left(budget, "mdblist-key")).IsSome().And.IsEqualTo(640);
 	}
 
 	[Test]

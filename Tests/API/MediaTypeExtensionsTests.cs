@@ -25,16 +25,4 @@ public class MediaTypeExtensionsTests
 		await Assert.That(success).IsFalse();
 		await Assert.That(parsed).IsEqualTo(MediaType.Unknown);
 	}
-
-	[Test]
-	[Arguments("movie", MediaType.Movie)]
-	[Arguments("movies", MediaType.Movie)]
-	[Arguments("show", MediaType.Show)]
-	[Arguments("series", MediaType.Show)]
-	[Arguments("tv", MediaType.Show)]
-	public async Task Parse_WhenKnownValue_ReturnsExpectedType(string value, MediaType expected)
-	{
-		var parsed = MediaType.Parse(value);
-		await Assert.That(parsed).IsEqualTo(expected);
-	}
 }

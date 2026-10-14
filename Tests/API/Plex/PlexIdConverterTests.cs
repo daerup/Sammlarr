@@ -25,26 +25,6 @@ public class PlexIdConverterTests
 	private static readonly TmdbId FightClub = TmdbId.From("550", MediaType.Movie);
 
 	[Test]
-	public async Task LookUpAsync_ForAPlexId_ReturnsEveryGuidPlexHolds()
-	{
-		var payload = CreatePlexByIdPayload(true, false, true);
-		var testee = new PlexIdConverter(CreatePlexApi(payload.Json));
-
-		var result = await testee.LookUpAsync(testee.RequestById(payload.PlexId));
-
-		await Assert
-			.That(result)
-			.IsFound()
-			.And.Multiple(async found =>
-			{
-				await Assert.That(found.Ids).Contains(payload.PlexId);
-				await Assert.That(found.Ids).Contains(payload.TmdbIds[0]);
-				await Assert.That(found.Ids).Contains(payload.ImdbId);
-				await Assert.That(found.Ids).Contains(payload.TvdbId!.Value);
-			});
-	}
-
-	[Test]
 	public async Task LookUpAsync_ForAPlexIdWithTwoTmdbGuids_ReturnsBothAndTheOtherGuids()
 	{
 		var payload = CreatePlexByIdPayload(true, true, true);

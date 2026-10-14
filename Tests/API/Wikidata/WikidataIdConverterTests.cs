@@ -58,25 +58,6 @@ public class WikidataIdConverterTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_ForIdsWaitingBehindAQuery_SendsThemInOneQuery()
-	{
-		using var release = new ManualResetEventSlim();
-		var bodies = new ConcurrentQueue<string>();
-		var testee = Testee(Capturing(bodies, """{"results":{"bindings":[]}}""", release));
-		var first = testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0000001", MediaType.Movie)));
-		Task[] waiting =
-		[
-			.. new[] { "tt0000002", "tt0000003", "tt0000004" }.Select(imdb => testee.LookUpAsync(testee.RequestById(ImdbId.From(imdb, MediaType.Movie)))),
-		];
-
-		release.Set();
-		await Task.WhenAll([first, .. waiting]);
-
-		await Assert.That(bodies).Count().IsEqualTo(2);
-		await Assert.That(bodies.Last()).Contains("\"tt0000002\" \"tt0000003\" \"tt0000004\"");
-	}
-
-	[Test]
 	public async Task LookUpAsync_WhenAQueryFails_FailsEveryIdItCarried()
 	{
 		using var release = new ManualResetEventSlim();
@@ -107,7 +88,7 @@ public class WikidataIdConverterTests
 	}
 
 	[Test]
-	public async Task LookUpAsync_ForOneQueryAnsweringSeveralIds_GivesEachIdItsOwnRows()
+	public async Task LookUpAsync_ForIdsWaitingBehindAQuery_SendsThemInOneQueryAndGivesEachIdItsOwnRows()
 	{
 		using var release = new ManualResetEventSlim();
 		var bodies = new ConcurrentQueue<string>();
@@ -126,6 +107,7 @@ public class WikidataIdConverterTests
 			.IsFound()
 			.And.Multiple(async found => await Assert.That(found.Ids).IsEquivalentTo(new IExternalMediaId[] { RottenTomatoesId.From("m/second", MediaType.Movie) }));
 		await Assert.That(await third).IsFound().And.Multiple(async found => await Assert.That(found.Ids).IsEmpty());
+		await Assert.That(bodies).Count().IsEqualTo(2);
 		await Assert.That(bodies.Last()).Contains("\"tt0000002\" \"tt0000003\"");
 	}
 

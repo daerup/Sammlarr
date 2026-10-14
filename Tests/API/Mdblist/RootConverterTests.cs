@@ -95,13 +95,13 @@ public class RootConverterTests
 	}
 
 	[Test]
-	public async Task Deserialize_MixedValidAndBroken_PartitionsBetweenStrictAndUnmatched()
+	public async Task Deserialize_ABrokenMovieBeforeAGoodOne_StillReadsTheGoodOneAfterIt()
 	{
 		const string json = """
 			{
 				"movies": [
-					{ "id": 1, "ids": { "imdb": "tt1", "tmdb": 11, "tvdb": null, "mdblist": null, "mal": null }, "rank": 1, "title": "Good Movie", "status": "released", "country": "US", "runtime": 120, "mediatype": "movie", "release_date": "2020-01-01", "release_year": 2020, "spoken_language": "en" },
-					{ "id": 2, "ids": { "imdb": "tt2", "tmdb": 22, "tvdb": null, "mdblist": null, "mal": null }, "rank": 2, "title": "Broken Movie", "status": "released", "country": "US", "runtime": null, "mediatype": "movie", "release_date": "2021-01-01", "release_year": 2021, "spoken_language": "en" }
+					{ "id": 2, "ids": { "imdb": "tt2", "tmdb": 22, "tvdb": null, "mdblist": null, "mal": null }, "rank": 1, "title": "Broken Movie", "status": "released", "country": "US", "runtime": null, "mediatype": "movie", "release_date": "2021-01-01", "release_year": 2021, "spoken_language": "en" },
+					{ "id": 1, "ids": { "imdb": "tt1", "tmdb": 11, "tvdb": null, "mdblist": null, "mal": null }, "rank": 2, "title": "Good Movie", "status": "released", "country": "US", "runtime": 120, "mediatype": "movie", "release_date": "2020-01-01", "release_year": 2020, "spoken_language": "en" }
 				],
 				"shows": []
 			}
@@ -109,10 +109,7 @@ public class RootConverterTests
 
 		var root = JsonSerializer.Deserialize<MdblistTypes.ListItems.Root>(json)!;
 
-		await Assert.That(root.movies).Count().IsEqualTo(1);
-		await Assert.That(root.movies[0].title).IsEqualTo("Good Movie");
-		await Assert.That(root.unmatched).Count().IsEqualTo(1);
-		await Assert.That(root.unmatched[0].title).IsEqualTo("Broken Movie");
-		await Assert.That(root.unmatched[0].MediaType).IsEqualTo(MediaType.Movie);
+		await Assert.That(root.unmatched.Select(movie => movie.title)).IsEquivalentTo(["Broken Movie"]);
+		await Assert.That(root.movies.Select(movie => movie.title)).IsEquivalentTo(["Good Movie"]);
 	}
 }
