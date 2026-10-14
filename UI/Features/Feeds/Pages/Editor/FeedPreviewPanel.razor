@@ -897,12 +897,12 @@
         {
             if (_blocklistIds.Contains(item.Identity.Id))
             {
-                await BlocklistService.RemoveAsync([item.Identity.Id], _visit);
+                await BlocklistService.RemoveAsync([item.Identity.Id], CancellationToken.None);
                 _blocklistIds.Remove(item.Identity.Id);
             }
             else
             {
-                await BlocklistService.AddAsync([item.Identity.Id], _visit);
+                await BlocklistService.AddAsync([item.Identity.Id], CancellationToken.None);
                 _blocklistIds.Add(item.Identity.Id);
             }
         }
@@ -936,12 +936,12 @@
         {
             if (IsWantlisted(item))
             {
-                await WantlistService.RemoveAsync([item.Identity.Id], _visit);
+                await WantlistService.RemoveAsync([item.Identity.Id], CancellationToken.None);
                 _wantlisted.Remove(item.Identity.Id);
             }
             else
             {
-                var added = await WantlistService.AddAsync([item.Identity.Id], new ManualOrigin(ManualSource.FeedPreview), _visit);
+                var added = await WantlistService.AddAsync([item.Identity.Id], new ManualOrigin(ManualSource.FeedPreview), CancellationToken.None);
                 if (added.Unaddressable.Count > 0)
                 {
                     var config = await ProviderConfig.GetAsync(_visit);
