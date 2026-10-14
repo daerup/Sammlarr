@@ -141,7 +141,7 @@ internal sealed class FeedRunPlanner(
 		);
 
 		var classified = resolved.Count > 0 ? await processor.ExecuteAsync(resolved, options, predicates, cancellationToken).ToListAsync(cancellationToken) : [];
-		return classified.Select(verdict => new QueryVerdict<MatchedMedia>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot)).ToList();
+		return [.. classified.Select(verdict => new QueryVerdict<MatchedMedia>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot))];
 	}
 
 	private async Task<RawFeedLoad> FetchAsync(Domain.Feed.Feed feed, FieldNeeds needs, CancellationToken cancellationToken)

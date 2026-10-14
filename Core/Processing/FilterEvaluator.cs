@@ -5,8 +5,8 @@ namespace Core.Processing;
 
 internal static class FilterEvaluator
 {
-	private static readonly HashSet<string> CollectionStringFields = [with(StringComparer.Ordinal), "Genres"];
-	private static readonly HashSet<string> EnumStringFields = [with(StringComparer.Ordinal), "MediaType"];
+	private static readonly HashSet<string> CollectionStringFields = new(StringComparer.Ordinal) { "Genres" };
+	private static readonly HashSet<string> EnumStringFields = new(StringComparer.Ordinal) { "MediaType" };
 
 	public static string Build(QueryFilter filter)
 	{
