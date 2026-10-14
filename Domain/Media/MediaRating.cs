@@ -70,7 +70,8 @@ public readonly record struct RottenTomatoesCriticsRating(int Percent) : IOwnedR
 
 	public static bool PublishesVotes => false;
 
-	public static RottenTomatoesCriticsRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue / 10 * Ceiling));
+	public static RottenTomatoesCriticsRating Rate(float sammlarrValue, Optional<int> votes) =>
+		new((int)MathF.Round(sammlarrValue / 10 * Ceiling, MidpointRounding.ToEven));
 
 	public RatingSource Source => RatingSource.RottenTomatoesCritics;
 
@@ -93,7 +94,8 @@ public readonly record struct RottenTomatoesAudienceRating(int Percent) : IOwned
 
 	public static bool PublishesVotes => false;
 
-	public static RottenTomatoesAudienceRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue / 10 * Ceiling));
+	public static RottenTomatoesAudienceRating Rate(float sammlarrValue, Optional<int> votes) =>
+		new((int)MathF.Round(sammlarrValue / 10 * Ceiling, MidpointRounding.ToEven));
 
 	public RatingSource Source => RatingSource.RottenTomatoesAudience;
 
@@ -116,7 +118,7 @@ public readonly record struct MetacriticRating(int Metascore) : IOwnedRating<Met
 
 	public static bool PublishesVotes => false;
 
-	public static MetacriticRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10));
+	public static MetacriticRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10, MidpointRounding.ToEven));
 
 	public RatingSource Source => RatingSource.Metacritic;
 
@@ -162,7 +164,7 @@ public readonly record struct TraktRating(int Percent, Optional<int> Votes) : IO
 
 	public static bool PublishesVotes => true;
 
-	public static TraktRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10), votes);
+	public static TraktRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10, MidpointRounding.ToEven), votes);
 
 	public RatingSource Source => RatingSource.Trakt;
 
@@ -196,7 +198,7 @@ public readonly record struct AniListRating(int Score, Optional<int> Votes) : IO
 
 	public static bool PublishesVotes => true;
 
-	public static AniListRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10), votes);
+	public static AniListRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10, MidpointRounding.ToEven), votes);
 
 	public RatingSource Source => RatingSource.AniList;
 

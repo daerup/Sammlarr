@@ -50,7 +50,8 @@ internal static class TracePath
 
 	private static MapPoint Toward(MapPoint from, MapPoint to, double share) => new(from.X + (to.X - from.X) * share, from.Y + (to.Y - from.Y) * share);
 
-	private static string Command(string command, MapPoint point) => FormattableString.Invariant($"{command}{Math.Round(point.X, 2)} {Math.Round(point.Y, 2)}");
+	private static string Command(string command, MapPoint point) =>
+		FormattableString.Invariant($"{command}{Math.Round(point.X, 2, MidpointRounding.ToEven)} {Math.Round(point.Y, 2, MidpointRounding.ToEven)}");
 }
 
 internal sealed record ServicesMapModel(

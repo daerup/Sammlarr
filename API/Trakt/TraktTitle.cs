@@ -48,7 +48,9 @@ internal static class TraktTitle
 			Ratings = Optional
 				.Of(title.Rating)
 				.When(rating => rating > 0)
-				.Map(rating => MediaRatings.From([new TraktRating((int)Math.Round(rating * 10), Optional.Of(title.Votes).When(votes => votes > 0))]))
+				.Map(rating =>
+					MediaRatings.From([new TraktRating((int)Math.Round(rating * 10, MidpointRounding.ToEven), Optional.Of(title.Votes).When(votes => votes > 0))])
+				)
 				.GetValueOr(MediaRatings.None),
 		};
 		var runtime = ProviderValues.Minutes(title.Runtime);

@@ -47,14 +47,17 @@ internal static class RunCallsView
 		{
 			(true, _) => ("About the same as this feed's typical run", "minus"),
 			(false, true) => (FormattableString.Invariant($"{ratio:0.0}× this feed's typical run"), "trending-up"),
-			(false, false) => ($"{Math.Round((1 - ratio) * 100).ToString(CultureInfo.InvariantCulture)}% under this feed's typical run", "trending-down"),
+			(false, false) => (
+				$"{Math.Round((1 - ratio) * 100, MidpointRounding.ToEven).ToString(CultureInfo.InvariantCulture)}% under this feed's typical run",
+				"trending-down"
+			),
 		};
 	}
 
 	internal static string Basis(RunTypical typical)
 	{
 		var runs = typical.Runs == 1 ? "its 1 run" : FormattableString.CurrentCulture($"its {typical.Runs} runs");
-		return $"({UsageView.Calls((long)Math.Round(typical.Calls))}, the median of {runs} in the last 30 days)";
+		return $"({UsageView.Calls((long)Math.Round(typical.Calls, MidpointRounding.ToEven))}, the median of {runs} in the last 30 days)";
 	}
 
 	private static double Median(IReadOnlyList<long> sorted)

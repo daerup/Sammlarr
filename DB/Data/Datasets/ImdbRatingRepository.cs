@@ -57,7 +57,7 @@ internal sealed class ImdbRatingRepository(IDbContextFactory<SammlarrDbContext> 
 		await foreach (var row in rows.WithCancellation(cancellationToken))
 		{
 			id.Value = NumberOf(row.Tconst).GetValueOr(() => throw new InvalidDataException($"The IMDb ratings file holds an id it cannot read: '{row.Tconst}'."));
-			score.Value = (byte)MathF.Round(row.Average * TenthsPerPoint);
+			score.Value = (byte)MathF.Round(row.Average * TenthsPerPoint, MidpointRounding.ToEven);
 			votes.Value = row.Votes;
 			await command.ExecuteNonQueryAsync(cancellationToken);
 			count++;
