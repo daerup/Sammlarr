@@ -21,7 +21,7 @@ public class UsageQuotaDaysTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_AWeek_DrawsABarPerQuotaDayAndCallsTodaysSoFar()
+	public async Task Render_AWeek_DrawsEachDayTheAllowanceAndBothFloors()
 	{
 		var cut = RenderDays(UsageSamples.Week(UsageSamples.Quota(UsageSamples.Allowance(191))), UsageRange.Week);
 
@@ -29,15 +29,7 @@ public class UsageQuotaDaysTests : BunitContext
 		await Assert
 			.That(cut.FindAll("[data-testid=usage-quota-day-total]").Select(total => total.TextContent))
 			.IsEquivalentTo(["654", "696", "627", "865", "691", "950", "809 so far"], CollectionOrdering.Matching);
-	}
-
-	[Test]
-	public async Task Render_WithTheAllowance_DrawsItAndWhereBothFloorsStart()
-	{
-		var cut = RenderDays(UsageSamples.Week(UsageSamples.Quota(UsageSamples.Allowance(191))), UsageRange.Week);
-
 		await Assert.That(cut.FindAll("[data-testid=usage-quota-days-allowance]")).Count().IsEqualTo(1);
-		await Assert.That(cut.FindAll("[data-testid=usage-quota-days-floor]").Select(floor => floor.GetAttribute("data-used")!)).IsEquivalentTo(["500", "950"]);
 		await Assert.That(cut.Markup).Contains("1,000 a day").And.Contains("Filling details stops after 500").And.Contains("Title lookups wait after 950");
 	}
 

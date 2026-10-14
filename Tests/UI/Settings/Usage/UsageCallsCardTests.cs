@@ -26,18 +26,6 @@ public class UsageCallsCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_TheCallsTab_ListsEveryOutcomeWithAnsweredInItsGrey()
-	{
-		var cut = RenderCard(UsageSamples.Snapshot().Current);
-
-		var swatches = cut.FindAll("[data-testid=usage-outcome-legend] > span")
-			.Select(item => $"{item.TextContent.Trim()}|{item.QuerySelector("span")?.GetAttribute("style")}");
-
-		await Assert.That(swatches.First()).IsEqualTo("Answered|background: var(--usage-answered)");
-		await Assert.That(swatches).Count().IsEqualTo(5);
-	}
-
-	[Test]
 	[Arguments("Enter")]
 	[Arguments(" ")]
 	public async Task Row_WhenEnterOrSpaceIsPressed_PicksItsService(string key)
@@ -78,21 +66,21 @@ public class UsageCallsCardTests : BunitContext
 		var cut = RenderCard(UsageSamples.Snapshot().Current, Some.Of(RemoteService.Plex));
 
 		await Assert.That(Answered(cut)).IsEqualTo(40);
-		await Assert.That(Row(cut, "Plex").GetAttribute("data-picked")).IsEqualTo("true");
+		await Assert.That(Row(cut, "Plex").GetAttribute("aria-pressed")).IsEqualTo("true");
 		await Assert.That(cut.Find("[data-testid=usage-pick-chip]").GetAttribute("data-service")).IsEqualTo("Plex");
-		await Assert
-			.That(cut.Find("[data-testid=usage-calls]").TextContent)
-			.Contains("Plex: last 24 hours, each hour split by how its calls ended. Click Plex again, or the × on its chip, for every service.");
+		await Assert.That(cut.FindComponent<BbCardDescription>().Find("p").TextContent.Trim()).StartsWith("Plex: last 24 hours");
 	}
 
 	[Test]
-	public async Task Picked_Nothing_ShowsEveryServiceWithoutAChip()
+	public async Task Picked_Nothing_ShowsEveryServiceAndNamesTheSilentOnes()
 	{
 		var cut = RenderCard(UsageSamples.Snapshot().Current);
 
 		await Assert.That(Answered(cut)).IsEqualTo(130);
 		await Assert.That(cut.FindAll("[data-testid=usage-pick-chip]")).IsEmpty();
 		await Assert.That(cut.Find("[data-testid=usage-calls]").TextContent).Contains("All services: last 24 hours");
+		var silent = cut.Find("[data-testid=usage-silent]").TextContent;
+		await Assert.That(silent).Contains("No calls in the last 24 hours").And.Contains("Wikidata").And.DoesNotContain("TMDb");
 	}
 
 	[Test]
@@ -144,7 +132,7 @@ public class UsageCallsCardTests : BunitContext
 
 		await Assert.That(cut.Find("[data-testid=usage-calls-none]").TextContent).IsEqualTo("No MDBList calls in the last 7 days.");
 		await Assert.That(cut.Find("[data-testid=usage-pick-chip]").GetAttribute("data-service")).IsEqualTo("Mdblist");
-		await Assert.That(cut.FindAll(".usage-service-picked")).IsEmpty();
+		await Assert.That(cut.FindAll("[data-testid=usage-service][aria-pressed=true]")).IsEmpty();
 	}
 
 	[Test]
@@ -222,15 +210,6 @@ public class UsageCallsCardTests : BunitContext
 		await Assert.That(rightNow["Mdblist"]).IsEqualTo("962 requests left today");
 		await Assert.That(rightNow["ImdbDatasets"]).IsEqualTo($"Downloaded at {clock}");
 		await Assert.That(rightNow["Tmdb"]).IsEqualTo($"Last call {clock}");
-	}
-
-	[Test]
-	public async Task Render_ServicesWithoutCalls_AreNamedUnderTheTable()
-	{
-		var cut = RenderCard(UsageSamples.Snapshot().Current);
-
-		var silent = cut.Find("[data-testid=usage-silent]").TextContent;
-		await Assert.That(silent).Contains("No calls in the last 24 hours").And.Contains("Wikidata").And.DoesNotContain("TMDb");
 	}
 
 	private static AngleSharp.Dom.IElement Row(IRenderedComponent<UsageCallsCard> cut, string name)

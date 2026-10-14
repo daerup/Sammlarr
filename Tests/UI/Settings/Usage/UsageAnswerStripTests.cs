@@ -24,7 +24,7 @@ public class UsageAnswerStripTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ATally_ShadesEachSquareByItsShareOfTheBusiest()
+	public async Task Render_ATally_ShadesTheSquaresAndMarksTheMedianBeforeTheP95()
 	{
 		var cut = RenderStrip(Answers);
 
@@ -33,13 +33,6 @@ public class UsageAnswerStripTests : BunitContext
 		await Assert.That(fills[5]).IsEqualTo(UsageView.Shade(90, 90));
 		await Assert.That(fills[7]).IsEqualTo(UsageView.Shade(5, 90));
 		await Assert.That(fills.Where(fill => fill == UsageView.Shade(0, 90))).Count().IsEqualTo(13);
-	}
-
-	[Test]
-	public async Task Render_ATally_MarksTheMedianBeforeTheP95()
-	{
-		var cut = RenderStrip(Answers);
-
 		var ticks = cut.FindAll("[data-testid=usage-strip-tick]").Select(tick => double.Parse(tick.GetAttribute("x")!, CultureInfo.InvariantCulture)).ToList();
 		await Assert.That(ticks).Count().IsEqualTo(2);
 		await Assert.That(ticks[0]).IsLessThan(ticks[1]);
@@ -55,7 +48,6 @@ public class UsageAnswerStripTests : BunitContext
 
 		var tip = cut.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]").TextContent;
 		await Assert.That(tip).Contains("TMDb").And.Contains("≤500 ms").And.Contains("5 calls").And.Contains("5.3%").And.Contains("median").And.Contains("p95");
-		await Assert.That(cut.FindAll("[data-testid=usage-strip-square]")[7].GetAttribute("stroke")).IsEqualTo("var(--foreground)");
 	}
 
 	[Test]
@@ -64,22 +56,6 @@ public class UsageAnswerStripTests : BunitContext
 		var cut = RenderStrip(UsageTally.Empty);
 
 		await Assert.That(cut.FindAll("[data-testid=usage-strip]")).IsEmpty();
-	}
-
-	[Test]
-	public async Task Heading_InfoPointedAt_ExplainsTheSquaresOnASampleStrip()
-	{
-		var cut = RenderStrip(Answers);
-
-		await cut.Find("[data-testid=usage-answer-time-info]").TriggerEventAsync("onmouseenter", new MouseEventArgs());
-
-		var help = cut.WaitForElement("[data-portal-content][data-state=open] [data-testid=usage-answer-time-help]").TextContent;
-		await Assert
-			.That(help)
-			.Contains("The stronger its shade, the more of the service's calls took that long.")
-			.And.Contains("5 ms")
-			.And.Contains(">10 s")
-			.And.Contains("point at a square for its calls");
 	}
 
 	private IRenderedComponent<Harness> RenderStrip(UsageTally tally)

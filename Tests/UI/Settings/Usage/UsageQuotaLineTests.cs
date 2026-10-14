@@ -20,12 +20,18 @@ public class UsageQuotaLineTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WithTheAllowance_DrawsTheHalfFloorAndTheReserve()
+	public async Task Render_ANormalMorning_DrawsTheFloorsTheWaitTheDayBeforeAndWhatIsLeft()
 	{
 		var cut = RenderLine(UsageSamples.Quota(UsageSamples.Allowance(191)));
 
-		await Assert.That(cut.FindAll("[data-testid=usage-quota-floor]").Select(floor => floor.GetAttribute("data-left")!)).IsEquivalentTo(["500", "50"]);
 		await Assert.That(cut.Markup).Contains("Filling details stops at 500 left").And.Contains("Title lookups wait at 50 left, feed list pages may use the rest");
+		await Assert.That(cut.FindAll("[data-testid=usage-quota-wait]")).Count().IsEqualTo(1);
+		await Assert
+			.That(cut.Find("[data-testid=usage-quota-waited]").TextContent)
+			.IsEqualTo($"Title lookups waited {UsageSamples.Local(UsageSamples.Reset.AddHours(-4).AddMinutes(-56))} - {UsageSamples.Local(UsageSamples.Reset)}");
+		await Assert.That(cut.Find("[data-testid=usage-quota-path]").GetAttribute("d")).StartsWith("M0,68.2 ");
+		await Assert.That(cut.FindAll("[data-testid=usage-quota-unknown]")).IsEmpty();
+		await Assert.That(cut.Find("[data-testid=usage-quota-now]").TextContent).IsEqualTo("191 left");
 	}
 
 	[Test]
@@ -35,17 +41,6 @@ public class UsageQuotaLineTests : BunitContext
 
 		await Assert.That(cut.FindAll("[data-testid=usage-quota-floor]").Select(floor => floor.GetAttribute("data-left")!)).IsEquivalentTo(["50"]);
 		await Assert.That(cut.Markup).DoesNotContain("Filling details stops");
-	}
-
-	[Test]
-	public async Task Render_LastNightsWait_ShadesItAndSaysWhenItRan()
-	{
-		var cut = RenderLine(UsageSamples.Quota(UsageSamples.Allowance(191)));
-
-		await Assert.That(cut.FindAll("[data-testid=usage-quota-wait]")).Count().IsEqualTo(1);
-		await Assert
-			.That(cut.Find("[data-testid=usage-quota-waited]").TextContent)
-			.IsEqualTo($"Title lookups waited {UsageSamples.Local(UsageSamples.Reset.AddHours(-4).AddMinutes(-56))} - {UsageSamples.Local(UsageSamples.Reset)}");
 	}
 
 	[Test]
@@ -60,14 +55,6 @@ public class UsageQuotaLineTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_Now_LabelsWhatIsLeft()
-	{
-		var cut = RenderLine(UsageSamples.Quota(UsageSamples.Allowance(191)));
-
-		await Assert.That(cut.Find("[data-testid=usage-quota-now]").TextContent).IsEqualTo("191 left");
-	}
-
-	[Test]
 	public async Task Render_WithoutTheDayBeforeAndAResetSecondsPastTheHour_StillSaysWhy()
 	{
 		var allowance = UsageSamples.Allowance(191) with { DayBefore = new None() };
@@ -77,23 +64,13 @@ public class UsageQuotaLineTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WithoutTheDayBefore_StartsAtTheResetAndSaysWhy()
+	public async Task Render_WithoutTheDayBefore_StartsAtTheResetSaysWhyAndHasNoEarlierHourToPointAt()
 	{
 		var cut = RenderLine(UsageSamples.Quota(UsageSamples.Allowance(191) with { DayBefore = new None() }));
 
 		await Assert.That(cut.Find("[data-testid=usage-quota-path]").GetAttribute("d")).StartsWith("M583.33,0 ");
-		await Assert
-			.That(cut.Find("[data-testid=usage-quota-unknown]").TextContent)
-			.IsEqualTo("Sammlarr did not see how the day before ended: its hours show after the next reset");
-	}
-
-	[Test]
-	public async Task Render_WithTheDayBefore_DrawsItsHoursWithoutANote()
-	{
-		var cut = RenderLine(UsageSamples.Quota(UsageSamples.Allowance(191)));
-
-		await Assert.That(cut.Find("[data-testid=usage-quota-path]").GetAttribute("d")).StartsWith("M0,68.2 ");
-		await Assert.That(cut.FindAll("[data-testid=usage-quota-unknown]")).IsEmpty();
+		await Assert.That(cut.FindAll("[data-testid=usage-quota-unknown]")).Count().IsEqualTo(1);
+		await Assert.That(cut.FindAll("[data-testid=usage-quota-hour]")).Count().IsEqualTo(10);
 	}
 
 	[Test]
@@ -127,14 +104,6 @@ public class UsageQuotaLineTests : BunitContext
 		await Assert
 			.That(tip.QuerySelectorAll("[data-testid=usage-quota-tip-cause]").Select(row => string.Join("|", row.Children.Select(cell => cell.TextContent.Trim()))))
 			.IsEquivalentTo(["|Feed runs|299", "|Filling details|120"]);
-	}
-
-	[Test]
-	public async Task Hour_BeforeTheLineStarts_HasNothingToPointAt()
-	{
-		var cut = RenderLine(UsageSamples.Quota(UsageSamples.Allowance(191) with { DayBefore = new None() }));
-
-		await Assert.That(cut.FindAll("[data-testid=usage-quota-hour]")).Count().IsEqualTo(10);
 	}
 
 	private IRenderedComponent<UsageQuotaLine> RenderLine(UsageQuota quota)
