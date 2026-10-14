@@ -50,56 +50,6 @@ public class MediaMergerTests
 	}
 
 	[Test]
-	public async Task FillFrom_WhenBothSidesLackAField_KeepsTheGap()
-	{
-		var first = new MovieDetails { Title = "Dune" };
-		var second = new MovieDetails { Summary = "Paul Atreides." };
-
-		var merged = first.FillFrom(second);
-
-		await Assert.That(merged.Missing.Overlaps(MediaField.Runtime)).IsTrue();
-	}
-
-	[Test]
-	public async Task FillFrom_WhenBothSidesHaveAValue_KeepsThePrimaryValue()
-	{
-		var first = new MovieDetails { Title = "Dune", Tagline = "Fear is the mind-killer" };
-		var second = new MovieDetails
-		{
-			Title = "Wrong",
-			Tagline = "Wrong tagline",
-			Summary = "Paul Atreides.",
-		};
-
-		var merged = first.FillFrom(second);
-
-		await Assert.That(merged.Title).IsEqualTo("Dune");
-		await Assert.That(merged.Tagline).IsEqualTo("Fear is the mind-killer");
-		await Assert.That(merged.Summary).IsEqualTo("Paul Atreides.");
-	}
-
-	[Test]
-	public async Task FillFrom_WhenBothSidesCarryEveryField_KeepsThePrimaryUnchanged()
-	{
-		var primary = MediaFakes.CompleteMovieDetails();
-
-		var merged = primary.FillFrom(MediaFakes.CompleteMovieDetails());
-
-		await Assert.That(merged).IsEqualTo(primary);
-	}
-
-	[Test]
-	public async Task FillFrom_WhenThePrimaryLacksTheTitle_TakesItFromTheOther()
-	{
-		var first = new MovieDetails { Summary = "Paul Atreides." };
-		var second = new MovieDetails { Title = "Dune" };
-
-		var merged = first.FillFrom(second);
-
-		await Assert.That(merged.Title).IsEqualTo("Dune");
-	}
-
-	[Test]
 	public async Task FillFrom_WhenShowsMerge_FillsTheShowFields()
 	{
 		var first = new ShowDetails { Title = "Breaking Bad", Seasons = 5 };

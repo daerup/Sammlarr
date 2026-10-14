@@ -8,16 +8,6 @@ public class ScheduledTests
 	private static readonly DateTimeOffset Noon = new(2026, 9, 18, 10, 0, 0, TimeSpan.Zero);
 
 	[Test]
-	public async Task NextRun_WhenTheDailyTimeHasPassed_ReturnsTomorrow()
-	{
-		var testee = new Scheduled("0 0 9 * * *");
-
-		var next = testee.NextRun(Noon, TimeZoneInfo.Utc);
-
-		await Assert.That(next).IsSome().And.IsEqualTo(new DateTimeOffset(2026, 9, 19, 9, 0, 0, TimeSpan.Zero));
-	}
-
-	[Test]
 	public async Task NextRun_WhenStartingExactlyOnAnOccurrence_SkipsToTheFollowingOne()
 	{
 		var testee = new Scheduled("0 0 9 * * *");

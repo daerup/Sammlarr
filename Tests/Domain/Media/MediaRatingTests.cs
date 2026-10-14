@@ -18,12 +18,16 @@ public class MediaRatingTests
 	}
 
 	[Test]
-	public async Task RottenTomatoesCriticsRating_CountsItsPercentAsATenth()
+	[Arguments(95, "95%", 9.5f)]
+	[Arguments(64, "64%", 6.4f)]
+	[Arguments(72, "72%", 7.2f)]
+	[Arguments(96, "96%", 9.6f)]
+	public async Task RottenTomatoesCriticsRating_CountsItsPercentAsATenth(int percent, string shown, float tenth)
 	{
-		var rating = new RottenTomatoesCriticsRating(95);
+		var rating = new RottenTomatoesCriticsRating(percent);
 
-		await Assert.That(rating.Value).IsEqualTo("95%");
-		await Assert.That(rating.SammlarrValue).IsEqualTo(9.5f);
+		await Assert.That(rating.Value).IsEqualTo(shown);
+		await Assert.That(rating.SammlarrValue).IsEqualTo(tenth);
 		await Assert.That(rating.Votes).IsNone();
 	}
 
@@ -45,15 +49,6 @@ public class MediaRatingTests
 		await Assert.That(rating.Value).IsEqualTo("88%");
 		await Assert.That(rating.SammlarrValue).IsEqualTo(8.8f);
 		await Assert.That(rating.Votes).IsNone();
-	}
-
-	[Test]
-	[Arguments(64, 6.4f)]
-	[Arguments(72, 7.2f)]
-	[Arguments(96, 9.6f)]
-	public async Task RottenTomatoesCriticsRating_ComparesLikeTheSameNumberFromAnotherSource(int percent, float tenth)
-	{
-		await Assert.That(new RottenTomatoesCriticsRating(percent).SammlarrValue).IsEqualTo(new TmdbRating(tenth, new None()).SammlarrValue);
 	}
 
 	[Test]

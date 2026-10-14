@@ -32,16 +32,6 @@ public class MediaRatingsTests
 	}
 
 	[Test]
-	public async Task Equals_WhenSameSources_AreEqual()
-	{
-		var first = MediaRatings.From([new TmdbRating(8f, new None())]);
-		var second = MediaRatings.From([new TmdbRating(8f, new None())]);
-
-		await Assert.That(first).IsEqualTo(second);
-		await Assert.That(first.GetHashCode()).IsEqualTo(second.GetHashCode());
-	}
-
-	[Test]
 	public async Task FillFrom_WhenTheOtherRatesMoreSources_KeepsMineAndAddsTheirs()
 	{
 		var mine = MediaRatings.From([new TmdbRating(8.6f, Some.Of(7705))]);

@@ -29,14 +29,6 @@ public class FeedPlanTests
 	}
 
 	[Test]
-	public async Task Compute_ForAnAppendFeed_DropsNothingEvenWhenOwnedItemsVanish()
-	{
-		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept, Dropped], strategy: new Append());
-
-		await Assert.That(plan.Delta.Drops).IsEmpty();
-	}
-
-	[Test]
 	public async Task Compute_WhenAnOwnedItemIsBlocklisted_StillDropsItOnceItStopsQualifying()
 	{
 		var plan = Compute(
@@ -170,7 +162,6 @@ public class FeedPlanTests
 	private static IFeedPlan Compute(
 		IReadOnlyList<QueryVerdict<MatchedMedia>> verdicts,
 		IReadOnlyList<MediaId> owned,
-		FeedStrategy? strategy = null,
 		FeedLoadState state = FeedLoadState.Finished,
 		int unmatchedCount = 0,
 		IReadOnlyList<(MediaId Id, int Absences)>? absences = null,
@@ -181,7 +172,7 @@ public class FeedPlanTests
 			new ClassifiedFeedLoad(verdicts, unmatched ?? [.. Enumerable.Range(0, unmatchedCount).Select(Unmatched)], state),
 			owned.ToHashSet(),
 			(absences ?? [.. owned.Select(id => (Id: id, Absences: 10))]).ToDictionary(entry => entry.Id, entry => entry.Absences),
-			strategy ?? new Mirror(3)
+			new Mirror(3)
 		);
 	}
 

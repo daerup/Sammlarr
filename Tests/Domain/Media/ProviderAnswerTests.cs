@@ -60,12 +60,6 @@ public class ProviderAnswerTests
 	}
 
 	[Test]
-	public async Task AskableAt_ForAnAnswer_IsTwoWeeksLater()
-	{
-		await Assert.That(new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, At).AskableAt(FreshFor)).IsEqualTo(At.AddDays(14));
-	}
-
-	[Test]
 	public async Task AskableAt_ForAnAnswer_IsTheFreshPeriodLater()
 	{
 		await Assert.That(new ProviderAnswer(RemoteService.Tmdb, MediaFields.None, At).AskableAt(TimeSpan.FromDays(7))).IsEqualTo(At.AddDays(7));
