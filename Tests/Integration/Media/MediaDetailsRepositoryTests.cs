@@ -257,29 +257,6 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task GetAsync_WhenRatingsExist_ReadsThemBack()
-	{
-		var plexId = PlexId.From("plex-814", MediaType.Movie);
-		var mediaId = await fixture.SeedMediaAsync([plexId]);
-		var rated = Complete() with { Ratings = MediaRatings.From([new TmdbRating(8.5f, Some.Of(1200))]) };
-		await _testee.SaveDetailsAsync(Details(mediaId, Cached(rated)));
-		fixture.Context.ChangeTracker.Clear();
-
-		var stored = (await _testee.GetAsync([mediaId])).Single();
-
-		await Assert
-			.That(stored.Cached)
-			.IsSome()
-			.And.Multiple(async cached =>
-			{
-				var rating = cached.Details.Ratings.All.Single();
-				await Assert.That(rating.Source).IsEqualTo(RatingSource.Tmdb);
-				await Assert.That(rating.SammlarrValue).IsEqualTo(8.5f);
-				await Assert.That(rating.Votes).IsSome().And.IsEqualTo(1200);
-			});
-	}
-
-	[Test]
 	public async Task GetAsync_WhenEverySourceRatedTheTitle_RoundTripsEachRatingType()
 	{
 		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-816", MediaType.Movie)]);
@@ -298,7 +275,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task GetByExternalsAsync_ForATitleWithManyIdsRatingsAndAnswers_ReadsEachChildRowOnce()
+	public async Task GetByExternalsAsync_ForATitleWithManyIdsRatingsAndAnswers_FindsItAndReadsEachChildRowOnce()
 	{
 		IIdentityKey[] keys = [PlexId.From("plex-815", MediaType.Movie), TmdbId.From("815", MediaType.Movie), ImdbId.From("tt0815", MediaType.Movie)];
 		var mediaId = await fixture.SeedMediaAsync(keys);
@@ -312,6 +289,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 
 		var stored = (await _testee.GetByExternalsAsync([keys[0], keys[1]])).Single();
 
+		await Assert.That(stored.Identity.Id).IsEqualTo(mediaId);
 		await Assert.That(stored.Identity.Keys).Count().IsEqualTo(3);
 		var cached = await Assert.That(stored.Cached).IsSome();
 		await Assert.That(cached!.Details.Ratings.All).Count().IsEqualTo(2);

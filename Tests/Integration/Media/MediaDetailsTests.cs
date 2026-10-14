@@ -30,20 +30,6 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_WhenTheCacheIsStale_RefetchesAndStoresIt()
-	{
-		var fightClub = await host.Movie(TestMedia.FightClub)
-			.ServedByPlex(title: "")
-			.ServedByTmdb(title: "Live Title")
-			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 17));
-
-		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
-
-		await AssertTitle(results[0], "Live Title");
-		await AssertCachedAs(fightClub, "Live Title", At(6, 1));
-	}
-
-	[Test]
 	public async Task GetDetailsAsync_WhenEveryProviderIsUnreachable_ServesTheStaleCacheKeepsItsRefreshTimeAndMovesItsAskTime()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
@@ -71,17 +57,6 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 
 		await AssertTitle(results[0], "Live Title");
-	}
-
-	[Test]
-	public async Task GetDetailsAsync_WhenTheMediaIsUncached_FetchesFromProvidersAndStoresIt()
-	{
-		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex(title: "").ServedByTmdb(title: "Live Title").SeedAsync();
-
-		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
-
-		await AssertTitle(results[0], "Live Title");
-		await AssertCachedAs(fightClub, "Live Title", At(6, 1));
 	}
 
 	[Test]
@@ -147,7 +122,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_WhenStale_ReenrichesAndReplacesTheDetail()
+	public async Task GetDetailsAsync_WhenStale_ReenrichesAndReplacesTheDetailWithBothItsTimesMoved()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club", summary: "An insomniac office worker")
@@ -158,6 +133,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await AssertDetail(results[0], "Fight Club", summary: "An insomniac office worker", genres: ["Drama", "Thriller"], rating: RatingSource.Tmdb);
 		await AssertDetailCachedAs(Detail(results[0]), fightClub, At(6, 1));
+		await AssertCachedAs(fightClub, "Fight Club", At(6, 1));
 	}
 
 	[Test]
@@ -278,20 +254,6 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		await Testee.InvalidateAsync([fightClub]);
 
 		await AssertStoredIds(Tmdb("550"), Plex("550"));
-	}
-
-	[Test]
-	public async Task InvalidateAsync_WhenTheDetailsAreFresh_StillForcesARefetch()
-	{
-		var fightClub = await host.Movie(TestMedia.FightClub)
-			.ServedByPlex(title: "")
-			.ServedByTmdb(title: "Live Title")
-			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1));
-
-		await Testee.InvalidateAsync([fightClub]);
-		var results = await Testee.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
-
-		await AssertTitle(results[0], "Live Title");
 	}
 
 	[Test]

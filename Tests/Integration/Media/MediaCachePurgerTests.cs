@@ -270,7 +270,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task PurgeDetailsAsync_DeletesAllDetailsAndRatings_KeepsMediaAndExternalIds()
+	public async Task PurgeDetailsAsync_DeletesAllDetailsAndRatings_KeepsMediaAndExternalIdsSoTheTitleReadsBackWithoutDetails()
 	{
 		var plexId = PlexId.From("5000", MediaType.Movie);
 		var imdbId = ImdbId.From("tt5000", MediaType.Movie);
@@ -293,35 +293,17 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		await _testee.PurgeDetailsAsync();
 
+		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
+		var stored = await repository.GetAsync([MediaId.From(media.Id)]);
+
 		using var _ = Assert.Multiple();
 		await Assert.That(await fixture.Context.MediaDetails.AnyAsync()).IsFalse();
 		await Assert.That(await fixture.Context.MediaRatings.AnyAsync()).IsFalse();
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.ExternalMediaIds.CountAsync()).IsEqualTo(2);
-	}
-
-	[Test]
-	public async Task PurgeDetailsAsync_RetainedMediaKeepsItsIdentityWithoutDetails()
-	{
-		var plexId = PlexId.From("6000", MediaType.Movie);
-		var imdbId = ImdbId.From("tt6000", MediaType.Movie);
-
-		var media = new MediaRow();
-		fixture.Context.ExternalMediaIds.AddRange(plexId.ToExternalIdEntity(media), imdbId.ToExternalIdEntity(media));
-		fixture.Context.MediaDetails.Add(BuildDetails(media, "Cached"));
-		await fixture.Context.SaveChangesAsync();
-		fixture.Context.ChangeTracker.Clear();
-
-		await _testee.PurgeDetailsAsync();
-
-		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
-		var cached = await repository.GetAsync([MediaId.From(media.Id)]);
-
-		using var _ = Assert.Multiple();
-		await Assert.That(cached.Count).IsEqualTo(1);
-		await Assert.That(cached[0].Identity.Id).IsEqualTo(MediaId.From(media.Id));
-		await Assert.That(cached[0].Identity.Keys.Count).IsEqualTo(2);
-		await Assert.That(cached[0].Cached).IsNone();
+		await Assert.That(stored.Single().Identity.Id).IsEqualTo(MediaId.From(media.Id));
+		await Assert.That(stored.Single().Identity.Keys.Count).IsEqualTo(2);
+		await Assert.That(stored.Single().Cached).IsNone();
 	}
 
 	private static MovieDetailsRow BuildDetails(MediaRow media, string title)

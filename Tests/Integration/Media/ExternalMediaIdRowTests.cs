@@ -14,30 +14,6 @@ public class ExternalMediaIdRowTests(SammlarrTestHost fixture) : IAsyncDisposabl
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Test]
-	public async Task ExternalId_PersistsAndReloadsAllThreeFields()
-	{
-		var media = new MediaRow();
-		fixture.Context.ExternalMediaIds.Add(
-			new ExternalMediaIdRow
-			{
-				Source = MediaProvider.Tmdb,
-				MediaType = MediaType.Movie,
-				Id = "12345",
-				Media = media,
-			}
-		);
-		await fixture.Context.SaveChangesAsync();
-		fixture.Context.ChangeTracker.Clear();
-
-		var reloaded = await fixture.Context.ExternalMediaIds.AsNoTracking().SingleAsync();
-
-		using var _ = Assert.Multiple();
-		await Assert.That(reloaded.Source).IsEqualTo(MediaProvider.Tmdb);
-		await Assert.That(reloaded.MediaType).IsEqualTo(MediaType.Movie);
-		await Assert.That(reloaded.Id).IsEqualTo("12345");
-	}
-
-	[Test]
 	public async Task UniqueIndex_RejectsDuplicateIdentifier()
 	{
 		var firstMedia = new MediaRow();

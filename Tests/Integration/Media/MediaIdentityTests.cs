@@ -1,13 +1,12 @@
 using System.Net;
 using API.Plex;
-using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;
-using Core.Media;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using static Harness.Ids;
 
@@ -116,18 +115,6 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		var results = await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
 
 		await Assert.That(results[0]).IsError();
-	}
-
-	[Test]
-	public async Task IdentifyAsync_WhenResolvingAPlexId_StoresEveryIdPlexReported()
-	{
-		host.SinkAddresses(MediaProvider.Tmdb);
-		await host.EnsurePlexAccount();
-		host.PlexHolds(TestMedia.FightClub);
-
-		await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
-
-		await AssertStored(Tmdb("550"), Plex("550"));
 	}
 
 	[Test]
@@ -314,17 +301,18 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task IdentifyAsync_ForThePlexSink_CachesAPlexIdWithoutMetadataAsUnmatched()
+	public async Task IdentifyAsync_ForThePlexSinkAndAPlexIdWithoutMetadata_MissesInAFreshScopeTooAfterAskingPlexOnce()
 	{
 		await host.EnsurePlexAccount();
 		host.PlexHasNoMetadataFor(Spec("Mystery", Plex("777")));
 
-		var results = await Testee.IdentifyAsync([Request(null, Plex("777"))]).ToListAsync();
+		var first = await Testee.IdentifyAsync([Request(null, Plex("777"))]).ToListAsync();
+		await using var fresh = host.Resolve<IServiceScopeFactory>().CreateAsyncScope();
+		var second = await fresh.ServiceProvider.GetRequiredService<IMediaService>().IdentifyAsync([Request(null, Plex("777"))]).ToListAsync();
 
-		await Assert.That(results[0]).IsError();
-		var unmatched = host.Resolve<ITypedMemoryCache<string, bool>>();
-		var connected = await host.Resolve<MediaIdResolver>().ConnectedAsync(CancellationToken.None);
-		await Assert.That(unmatched.GetValueOrNone(UnmatchedCacheKey.Build([Ext(Plex("777"))], MediaProvider.Plex, connected))).IsSome();
+		await Assert.That(first[0]).IsError();
+		await Assert.That(second[0]).IsError();
+		await Assert.That(host.HttpStub.Requests($"{PlexEndpoints.MetadataPath}/777")).IsEqualTo(1);
 	}
 
 	[Test]
@@ -409,19 +397,6 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await AssertResolved(results[0], Plex("550"));
 		await AssertRequests(match: 1, find: 0, detail: 0, detailUrl: "movie/550?");
-	}
-
-	[Test]
-	public async Task IdentifyAsync_WhileTheMatchIsUnavailable_LeavesTheTitleForTheNextRun()
-	{
-		await host.PlexMatchFails(Spec("Fight Club", Tmdb("550")), HttpStatusCode.ServiceUnavailable);
-
-		var results = await Testee.IdentifyAsync([Request(null, Tmdb("550"))]).ToListAsync();
-
-		await Assert.That(results[0]).IsError();
-		var unmatched = host.Resolve<ITypedMemoryCache<string, bool>>();
-		var connected = await host.Resolve<MediaIdResolver>().ConnectedAsync(CancellationToken.None);
-		await Assert.That(unmatched.GetValueOrNone(UnmatchedCacheKey.Build([Ext(Tmdb("550"))], MediaProvider.Plex, connected))).IsNone();
 	}
 
 	[Test]

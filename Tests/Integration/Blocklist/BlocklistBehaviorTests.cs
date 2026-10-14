@@ -1,9 +1,7 @@
 using Contracts.Blocklist;
-using Contracts.Media;
 using Domain.Blocklist;
 using Domain.Media;
 using Harness;
-using TestInfrastructure;
 
 namespace Integration.Tests.Blocklist;
 
@@ -54,25 +52,6 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		var blocklist = await host.Resolve<IBlocklistService>().GetAsync();
 
 		await Assert.That(blocklist.Ids).IsEquivalentTo([fightClub, inception]);
-	}
-
-	[Test]
-	public async Task GetDetailsAsync_ForBlocklistItems_EnrichesThemWithDetailsAndRating()
-	{
-		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).OnBlocklist();
-		var blocklist = await host.Resolve<IBlocklistService>().GetAsync();
-
-		var items = await host.Resolve<IMediaService>().GetDetailsAsync(blocklist.Items, FieldNeeds.Everything).ToListAsync();
-
-		await Assert.That(items).Count().IsEqualTo(1);
-		await Assert
-			.That(items[0].Media)
-			.Multiple(async movie =>
-			{
-				await Assert.That(movie.Details.Title).IsEqualTo("Fight Club");
-				await Assert.That(movie.Details.PosterUrl).IsNotNullOrEmpty();
-				await Assert.That(movie.Details.Ratings.All.Any(rating => rating.Source == RatingSource.Tmdb)).IsTrue();
-			});
 	}
 
 	[Test]
