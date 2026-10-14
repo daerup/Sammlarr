@@ -28,24 +28,23 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private TaskActivity Activity => field ??= new TaskActivity(host.Resolve<IDateTimeProvider>());
 
-	private HousekeepingTasks Testee
+	private HousekeepingTasks Testee => TesteeOn(host.Resolve<IDateTimeProvider>());
+
+	private HousekeepingTasks TesteeOn(IDateTimeProvider clock)
 	{
-		get
-		{
-			_scheduling ??= BuildScheduling();
-			return new HousekeepingTasks(
-				host.Resolve<IHousekeepingReports>(),
-				host.Resolve<IDatasetChecks>(),
-				host.Resolve<IDatasetLoads>(),
-				host.Resolve<IDatabaseFile>(),
-				host.Resolve<IMediaCachePurger>(),
-				host.Resolve<IIdentityConflicts>(),
-				_scheduling.GetRequiredService<ITimeTickerManager<TimeTickerEntity>>(),
-				Activity,
-				host.CurrentUser,
-				host.Resolve<IDateTimeProvider>()
-			);
-		}
+		_scheduling ??= BuildScheduling();
+		return new HousekeepingTasks(
+			host.Resolve<IHousekeepingReports>(),
+			host.Resolve<IDatasetChecks>(),
+			host.Resolve<IDatasetLoads>(),
+			host.Resolve<IDatabaseFile>(),
+			host.Resolve<IMediaCachePurger>(),
+			host.Resolve<IIdentityConflicts>(),
+			_scheduling.GetRequiredService<ITimeTickerManager<TimeTickerEntity>>(),
+			Activity,
+			host.CurrentUser,
+			clock
+		);
 	}
 
 	[Before(Test)]
@@ -78,14 +77,19 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task OverviewAsync_BeforeAnythingRan_ListsThePassAndEveryDatasetWithTheirNextRunInTheClocksZoneAndNoLastRun()
 	{
-		var overview = await Testee.OverviewAsync();
+		var twoHoursAhead = TimeSpan.FromHours(2);
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(Now);
+		clock.Zone.Getter.Returns(TimeZoneInfo.CreateCustomTimeZone("UTC+02", twoHoursAhead, "UTC+02", "UTC+02"));
+
+		var overview = await TesteeOn(clock.Object).OverviewAsync();
 
 		await Assert.That(overview.Pass.Last).IsNone();
-		await Assert.That(overview.Pass.NextRun).IsSome().And.IsEqualTo(new DateTimeOffset(2026, 10, 12, 3, 0, 0, TimeSpan.Zero));
+		await Assert.That(overview.Pass.NextRun).IsSome().And.IsEqualTo(new DateTimeOffset(2026, 10, 12, 3, 0, 0, twoHoursAhead));
 		await Assert.That(overview.Datasets.Select(dataset => dataset.Service)).IsEquivalentTo([RemoteService.ImdbDatasets, RemoteService.AnimeLists]);
 		await Assert.That(overview.Datasets[0].Last).IsNone();
 		await Assert.That(overview.Datasets[1].Last).IsNone();
-		await Assert.That(overview.Datasets[0].NextRun).IsSome().And.IsEqualTo(new DateTimeOffset(2026, 10, 12, 4, 30, 0, TimeSpan.Zero));
+		await Assert.That(overview.Datasets[0].NextRun).IsSome().And.IsEqualTo(new DateTimeOffset(2026, 10, 12, 4, 30, 0, twoHoursAhead));
 	}
 
 	[Test]
