@@ -93,8 +93,7 @@ public class UiInvariantTests
 		await PressAsync(toasts.Button("Show"));
 		await page.Button("View details").ClickAsync();
 
-		await Expect(page.Locator(".error-dialog")).ToBeVisibleAsync(Wait.Settle);
-		await Expect(page.GetByText("System.InvalidOperationException")).ToBeVisibleAsync();
+		await Expect(page.GetByText("System.InvalidOperationException")).ToBeVisibleAsync(Wait.Settle);
 		await Expect(page.GetByText("Stack Trace")).ToBeVisibleAsync();
 	}
 

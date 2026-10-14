@@ -1,5 +1,3 @@
-using System.Globalization;
-using E2E.Tests.Feeds;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -8,25 +6,19 @@ namespace E2E.Tests.Blocklist;
 public class BlocklistTests
 {
 	[Test]
-	public async Task Blocklisted_WhenPreviewingAFeed_IsBypassedAndListedOnTheBlocklistPage()
+	public async Task Blocklisted_FromTheBrowseDetailSheet_IsListedOnTheBlocklistPageUntilABulkRemoveEmptiesIt()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
-		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, TestData.Name("Blocklist"));
-		await FeedEditor.TestAsync(page);
-		await FeedEditor.PreviewLoadedAsync(page);
+		var page = await E2EApp.AdminAt(Routes.Browse);
+		var tile = page.Locator("[data-testid='media-tile']:not(.tile-unmatched)").First;
+		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
+		var target = (await tile.Locator("h3").InnerTextAsync()).Trim();
 
-		var titles = await FeedEditor.RowTitlesAsync(page);
-		var target = titles[0];
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync("0");
+		await tile.ClickAsync();
+		await page.Button("Add to blocklist").ClickAsync();
+		await Expect(page.Button("Remove from blocklist")).ToBeVisibleAsync();
 
-		await FeedEditor.Rows(page).First.Locator(".search-result-toggle-btn[style*='destructive']").ClickAsync();
-
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync("1");
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync((titles.Count - 1).ToString(CultureInfo.InvariantCulture));
-
-		await page.VisitAsync("/blocklist");
-		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = target, Exact = true })).ToBeVisibleAsync(Wait.Settle);
+		await page.VisitAsync(Routes.Blocklist);
+		await Expect(page.Heading(target)).ToBeVisibleAsync(Wait.Settle);
 
 		await page.ButtonContaining("Bulk edit").ClickAsync();
 		await page.GetByRole(AriaRole.Checkbox, new PageGetByRoleOptions { Name = "Select all on this page" }).ClickAsync();

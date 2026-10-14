@@ -35,7 +35,7 @@
         {
             @foreach (var client in _clients)
             {
-                <div class="flex items-center gap-3 rounded-lg border p-4">
+                <div class="flex items-center gap-3 rounded-lg border p-4" data-client>
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                         <LucideIcon Name="@ChannelIcon(client.Channel)" Size="18"/>
                     </div>
@@ -87,7 +87,7 @@
         {
             @foreach (var alert in _alerts)
             {
-                <div class="flex items-center gap-3 rounded-lg border p-4">
+                <div class="flex items-center gap-3 rounded-lg border p-4" data-alert>
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                         <LucideIcon Name="@ChannelIcon(alert.Client.Channel)" Size="18"/>
                     </div>

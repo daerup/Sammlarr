@@ -20,7 +20,7 @@ public class FeedFilteringTests
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
-		await FeedEditor.Rows(page).First.Locator(".search-result-toggle-btn[style*='destructive']").ClickAsync();
+		await FeedEditor.Rows(page).First.Button("Add to blocklist").ClickAsync();
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
 		await FeedEditor.FillAsync(page, "#limit", TestData.Count(Limit));
@@ -39,7 +39,7 @@ public class FeedFilteringTests
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(Limit));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit - 1));
 
-		await FeedEditor.Rows(page).First.Locator(".search-result-toggle-btn[style*='destructive']").ClickAsync();
+		await FeedEditor.Rows(page).First.Button("Remove from blocklist").ClickAsync();
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(TestData.Count(0));
 	}
@@ -82,13 +82,12 @@ public class FeedFilteringTests
 
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
 
-		await Expect(page.GetByText("Limit must be a positive whole number.")).ToBeVisibleAsync();
 		await Expect(page.Locator("#limit")).ToHaveAttributeAsync("aria-invalid", "true");
 		await Expect(FeedEditor.TestButton(page)).ToBeDisabledAsync();
 
 		await FeedEditor.FillAsync(page, "#limit", TestData.Count(Limit));
 
-		await Expect(page.GetByText("Limit must be a positive whole number.")).ToBeHiddenAsync();
+		await Expect(page.Locator("#limit")).Not.ToHaveAttributeAsync("aria-invalid", "true");
 		await Expect(FeedEditor.TestButton(page)).ToBeEnabledAsync();
 	}
 }

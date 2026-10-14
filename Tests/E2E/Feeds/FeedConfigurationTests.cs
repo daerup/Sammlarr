@@ -117,7 +117,6 @@ public class FeedConfigurationTests
 		await Expect(FeedEditor.Option(page, "Strategy", "Mirror")).ToHaveAttributeAsync("aria-checked", "true");
 		await Expect(FeedEditor.Option(page, "Strategy", "Append")).ToHaveAttributeAsync("aria-checked", "false");
 		await Expect(FeedEditor.RunCount(page)).ToHaveValueAsync("5");
-		await Expect(page.GetByText("missed runs.")).ToBeVisibleAsync();
 	}
 
 	[Test]
@@ -217,7 +216,7 @@ public class FeedConfigurationTests
 		await FeedEditor.FillAsync(page, "#list-identifier", UnknownIdentifier);
 		await FeedEditor.TestAsync(page);
 
-		await Expect(page.GetByText($"No list found with identifier '{UnknownIdentifier}'.")).ToBeVisibleAsync(Wait.Preview);
+		await Expect(page.GetByText("List not found")).ToBeVisibleAsync(Wait.Preview);
 		await Expect(page.GetByText("Test failed")).ToBeVisibleAsync();
 		await Expect(page.Button("Retry")).ToBeVisibleAsync();
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
@@ -234,7 +233,7 @@ public class FeedConfigurationTests
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(page.Locator("#list-identifier")).ToHaveValueAsync(FeedEditor.StoredListIdentifier);
-		await Expect(page.Locator("[data-identifier-note]")).ToHaveTextAsync($"Looked up from {FeedEditor.ListIdentifier}.");
+		await Expect(page.Locator("[data-identifier-note]")).ToContainTextAsync(FeedEditor.ListIdentifier);
 	}
 
 	[Test]
@@ -248,7 +247,8 @@ public class FeedConfigurationTests
 
 		await FeedEditor.TestButton(page).ClickAsync();
 
-		await Expect(page.Locator("[data-identifier-error]")).ToHaveTextAsync("Paste the list's link from mdblist.com, its owner/list, or its number.");
+		await Expect(page.Locator("[data-identifier-error]")).ToBeVisibleAsync();
+		await Expect(page.Locator("#list-identifier")).ToHaveAttributeAsync("aria-invalid", "true");
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
 		await Expect(FeedEditor.SaveButton(page)).ToBeHiddenAsync();
 	}

@@ -29,9 +29,11 @@ public class MirrorTests
 		var page = await SelfHostedApp.OpenPageAsync();
 		await SelfHostedSetup.FinishAsync(page, stack);
 		var movie = await stack.Radarr.AddMovieAsync(Titles.ProjectHailMaryTmdb);
+		var held = (await stack.Radarr.GetAsync("movie")).AsArray().Select(added => added!["title"]!.GetValue<string>());
+		await Assert.That(held).IsEquivalentTo([Titles.ProjectHailMary]);
 		var preview = await SelfHostedWantlist.OpenSyncAsync(page);
 		await Expect(preview.GetByText("0 titles compared")).ToBeVisibleAsync(Wait.Settle);
-		await Expect(preview.Text("Everything is in sync.")).ToBeVisibleAsync();
+		await Expect(preview.Locator(".change-row")).ToHaveCountAsync(0);
 
 		await stack.Radarr.TagMovieAsync(movie, Titles.AdminTag);
 		await SelfHostedWantlist.SyncAsync(page);

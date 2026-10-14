@@ -18,7 +18,7 @@ public class BlocklistRemovalTests
 		await FeedEditor.Badge(page, PreviewBadge.Included).ClickAsync();
 		var target = (await FeedEditor.RowTitlesAsync(page))[0];
 
-		await FeedEditor.Rows(page).First.Locator(".search-result-toggle-btn[style*='destructive']").ClickAsync();
+		await FeedEditor.Rows(page).First.Button("Add to blocklist").ClickAsync();
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(TestData.Count(bypassed + 1));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(included - 1));

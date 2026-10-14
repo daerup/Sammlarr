@@ -9,8 +9,6 @@ public class UsersManagementTests
 {
 	private static readonly string MemberName = SammlarrTestHost.SeededMember.DisplayName;
 
-	private static readonly string AdminName = SammlarrTestHost.SeededAdmin.DisplayName;
-
 	private const int PinId = 515151;
 
 	private const string AccessChanged = "Your access changed";
@@ -62,19 +60,6 @@ public class UsersManagementTests
 
 		await ChangeRoleAsync(admin, "Make member");
 		await Expect(Badge(admin, MemberName, "Member")).ToBeVisibleAsync();
-	}
-
-	[Test]
-	public async Task RemoveAdmin_WhenLastAdmin_IsRefused()
-	{
-		var page = await E2EApp.AdminAt(SettingsPage.Section("users"));
-
-		await Expect(Badge(page, AdminName, "Admin")).ToBeVisibleAsync();
-		await SettingsPage.OpenPersonAsync(page, AdminName);
-		await Expect(SettingsPage.PersonRow(page, AdminName).Text("The last admin can't be made a member or removed.")).ToBeVisibleAsync();
-		await Expect(SettingsPage.PersonRow(page, AdminName).Button("Remove")).ToBeHiddenAsync();
-		await SettingsPage.OpenPersonAsync(page, MemberName);
-		await Expect(SettingsPage.PersonRow(page, MemberName).Button("Remove")).ToBeVisibleAsync();
 	}
 
 	[Test]

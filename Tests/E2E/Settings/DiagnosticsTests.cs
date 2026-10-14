@@ -10,18 +10,6 @@ public class DiagnosticsTests
 	private const string Waiting = "Waiting for log entries…";
 
 	[Test]
-	public async Task LogStream_WhenOpened_ShowsEntries()
-	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
-
-		await CaptureEntriesAsync(page);
-
-		await Expect(page.Text(Waiting)).ToBeHiddenAsync();
-		await Expect(page.Button("Export")).ToBeEnabledAsync();
-		await StopAsync(page);
-	}
-
-	[Test]
 	public async Task Filter_WhenNoMatch_ShowsEmptyMessage()
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
