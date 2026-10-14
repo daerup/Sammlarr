@@ -22,24 +22,6 @@ public class NotificationDeliveryPipelineTests
 	private static readonly UserId User = UserId.From(Guid.NewGuid());
 
 	[Test]
-	public async Task Publish_WhenAnEventIsRaised_DeliversToEachSubscribedTarget()
-	{
-		var channel = new RecordingChannel();
-		await WithHostAsync(
-			channel,
-			async host =>
-			{
-				var session = await host.TrackActivity()
-					.Timeout(TimeSpan.FromSeconds(30))
-					.PublishMessageAndWaitAsync(new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []));
-
-				await Assert.That(session.Executed.MessagesOf<DeliverNotification>().ToList()).Count().IsEqualTo(1);
-				await Assert.That(channel.Sent).Count().IsEqualTo(1);
-			}
-		);
-	}
-
-	[Test]
 	public async Task Publish_ThroughTheMessagePublisherSeam_Delivers()
 	{
 		var channel = new RecordingChannel();

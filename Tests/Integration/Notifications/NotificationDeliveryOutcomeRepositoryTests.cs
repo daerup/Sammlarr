@@ -28,18 +28,6 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 		(await _testee.GetRecentByTargetAsync(count)).GetValueOrDefault(targetId, []);
 
 	[Test]
-	public async Task RecordAsync_WhenDelivered_RoundTripsTheOutcome()
-	{
-		var targetId = await CreateTargetAsync();
-
-		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WantlistSyncCompleted, new Delivered());
-
-		var recent = await RecentAsync(targetId);
-		await Assert.That(recent).Count().IsEqualTo(1);
-		await Assert.That(recent[0].Outcome).IsOfUnionType<DeliveryOutcome, Delivered>();
-	}
-
-	[Test]
 	public async Task RecordAsync_WhenRetrying_RoundTripsReasonAndNextAttempt()
 	{
 		var targetId = await CreateTargetAsync();

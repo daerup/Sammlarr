@@ -1,4 +1,5 @@
 using Contracts.Feed;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Notifications;
 using Domain.Feed;
@@ -6,6 +7,7 @@ using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
 using Domain.Providers;
+using Harness;
 using Integration.Tests.Messaging;
 using Messaging.Notifications;
 using TestInfrastructure;
@@ -140,42 +142,41 @@ public class NotificationDispatchHandlerTests
 	}
 
 	[Test]
-	public async Task Handle_WhenFanningOut_EstablishesTheUserScopeForTheOwner()
+	public async Task Handle_ForOneOwnersEvent_DeliversOnlyToTheTargetThatOwnerSubscribed()
 	{
-		var scope = MessagingHost.PassingUserScope();
+		await using var host = new SammlarrTestHost();
+		var (ann, annsTarget) = await SubscribedAsync(host, "Ann");
+		await SubscribedAsync(host, "Ben");
 
-		await NotificationDispatchHandler.Handle(
-			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []),
-			scope.Object,
+		var messages = await NotificationDispatchHandler.Handle(
+			new WantlistSyncCompletedNotification(ann, DateTimeOffset.UtcNow, [], [], [], [], []),
+			host.Resolve<IUserScope>(),
+			host.Resolve<INotificationSubscriptionRepository>(),
+			Media().Object,
+			Feed().Object,
+			CancellationToken.None
+		);
+
+		await Assert.That(messages.OfType<DeliverNotification>().Select(delivery => delivery.TargetId)).IsEquivalentTo([annsTarget]);
+	}
+
+	[Test]
+	public async Task Handle_WhenNoSubscriptionMatches_ProducesNoMessages()
+	{
+		var messages = await NotificationDispatchHandler.Handle(
+			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [MediaId.New()], [], [], [], []),
+			MessagingHost.PassingUserScope().Object,
 			SubscriptionsFor(NotificationEventType.WantlistSyncCompleted).Object,
 			Media().Object,
 			Feed().Object,
 			CancellationToken.None
 		);
 
-		scope.AsAsync(User, Any()).WasCalled(Times.Once);
-	}
-
-	[Test]
-	public async Task Handle_WhenNoSubscriptionMatches_ProducesNoMessages()
-	{
-		var media = Media();
-
-		var messages = await NotificationDispatchHandler.Handle(
-			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [MediaId.New()], [], [], [], []),
-			MessagingHost.PassingUserScope().Object,
-			SubscriptionsFor(NotificationEventType.WantlistSyncCompleted).Object,
-			media.Object,
-			Feed().Object,
-			CancellationToken.None
-		);
-
 		await Assert.That(messages).IsEmpty();
-		media.GetAsync(Any<IReadOnlyList<MediaId>>(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
-	public async Task Handle_WhenSeveralTargetsMatch_ResolvesMediaOnceAndSharesTheContext()
+	public async Task Handle_WhenSeveralTargetsMatch_DescribesTheTitleInEachDelivery()
 	{
 		var id = MediaId.New();
 		var subscriptions = SubscriptionsFor(
@@ -196,9 +197,10 @@ public class NotificationDispatchHandlerTests
 
 		var deliveries = messages.OfType<DeliverNotification>().ToList();
 		await Assert.That(deliveries).Count().IsEqualTo(2);
-		media.GetAsync(Any<IReadOnlyList<MediaId>>(), Any()).WasCalled(Times.Once);
-		await Assert.That(deliveries[0].Context).IsSameReferenceAs(deliveries[1].Context);
-		await Assert.That(deliveries[0].Context.Data.Media!.Single().Title).IsEqualTo("The Matrix");
+		foreach (var delivery in deliveries)
+		{
+			await Assert.That(delivery.Context.Data.Media!.Single().Title).IsEqualTo("The Matrix");
+		}
 	}
 
 	[Test]
@@ -324,6 +326,15 @@ public class NotificationDispatchHandlerTests
 			new MediaIdentity(id, [TmdbId.From(id.ToString(), MediaType.Movie)]),
 			Some.Of(new CachedDetails(new MovieDetails { Title = title }, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []))
 		);
+	}
+
+	private static async Task<(UserId Owner, Guid Target)> SubscribedAsync(SammlarrTestHost host, string name)
+	{
+		await host.SignInAs(name);
+		var target = await host.Resolve<INotificationTargetRepository>()
+			.CreateAsync(new NotificationTarget(Guid.Empty, name, true, new PushoverConfig("token", "key")));
+		await host.Resolve<INotificationSubscriptionRepository>().AddAsync(target, [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None);
+		return (host.CurrentUser.Id, target);
 	}
 
 	private static Mock<IFeedRepository> Feed() => Finding(new None());

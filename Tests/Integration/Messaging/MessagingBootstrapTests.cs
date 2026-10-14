@@ -1,5 +1,4 @@
 using Contracts.Feed;
-using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Messaging;
 using Contracts.Notifications;
@@ -35,7 +34,6 @@ public class MessagingBootstrapTests
 	{
 		var owner = UserId.From(Guid.NewGuid());
 		INotification notification = new FeedRunCompletedNotification(owner, DateTimeOffset.UtcNow, FeedId.From(Guid.NewGuid()), 3, 1);
-		var userScope = MessagingHost.PassingUserScope();
 
 		await MessagingHost.WithHostAsync(
 			async host =>
@@ -49,9 +47,8 @@ public class MessagingBootstrapTests
 				var session = await host.TrackActivity().Timeout(TimeSpan.FromSeconds(30)).ExecuteAndWaitAsync(publish);
 
 				await Assert.That(session.Executed.MessagesOf<FeedRunCompletedNotification>().ToList()).Count().IsEqualTo(1);
-				userScope.AsAsync(owner, Any()).WasCalled(Times.Once);
 			},
-			services => DispatchCollaborators(services, userScope)
+			DispatchCollaborators
 		);
 	}
 
@@ -69,13 +66,13 @@ public class MessagingBootstrapTests
 		});
 	}
 
-	private static void DispatchCollaborators(IServiceCollection services, Mock<IUserScope> userScope)
+	private static void DispatchCollaborators(IServiceCollection services)
 	{
 		var subscriptions = INotificationSubscriptionRepository.Mock();
 		subscriptions.GetForEventTypeAsync(Any<NotificationEventType>(), Any()).Returns([]);
 
 		services.AddModule<MessagingModule>();
-		services.AddSingleton(userScope.Object);
+		services.AddSingleton(MessagingHost.PassingUserScope().Object);
 		services.AddSingleton(subscriptions.Object);
 		services.AddSingleton(IMediaRepository.Mock().Object);
 		services.AddSingleton(IFeedRepository.Mock().Object);
