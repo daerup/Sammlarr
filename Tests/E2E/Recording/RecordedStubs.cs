@@ -92,8 +92,8 @@ internal static class RecordedStubs
 					replayPath.Length == 0 ? "/" : replayPath,
 					QueryMatchers(request, url),
 					status,
-					ContentType(response["headers"]),
-					Body(response)
+					ContentTypeOf(response["headers"]),
+					BodyOf(response)
 				)
 			);
 		}
@@ -182,7 +182,7 @@ internal static class RecordedStubs
 	private static string Sanitize(string value) =>
 		new string([.. value.Where(char.IsLetterOrDigit)]).ToLowerInvariant() is { Length: > 0 } cleaned ? cleaned[..Math.Min(24, cleaned.Length)] : "x";
 
-	private static string Body(JsonNode response)
+	private static string BodyOf(JsonNode response)
 	{
 		var body = response["body"];
 		var raw = body?.GetValueKind() == JsonValueKind.String ? body.GetValue<string>() : response["jsonBody"]?.ToJsonString() ?? string.Empty;
@@ -201,7 +201,7 @@ internal static class RecordedStubs
 		}
 	}
 
-	private static string ContentType(JsonNode? headers)
+	private static string ContentTypeOf(JsonNode? headers)
 	{
 		var value = (headers as JsonObject)?.FirstOrDefault(header => string.Equals(header.Key, "Content-Type", StringComparison.OrdinalIgnoreCase)).Value;
 		return value?.GetValueKind() == JsonValueKind.String ? value.GetValue<string>() : "application/json";

@@ -136,7 +136,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 			await JsonSerializer.DeserializeAsync<PlexTypes.Watchlist.Root>(stream, cancellationToken: cancellationToken)
 			?? throw new InvalidOperationException("Plex watchlist response was empty.");
 
-		var items = (result.MediaContainer.Metadata ?? []).Select(Item).ToList();
+		var items = (result.MediaContainer.Items ?? []).Select(Item).ToList();
 		var totalPages = result.MediaContainer.TotalSize <= 0 ? 1 : (int)Math.Ceiling(result.MediaContainer.TotalSize / (double)PlexClient.ContainerSize);
 
 		return (items, totalPages);

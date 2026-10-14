@@ -126,11 +126,11 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 			method.TypeParameterList?.ToString() ?? "",
 			method.ParameterList.ToString(),
 			string.Join(" ", method.ConstraintClauses.Select(static c => c.ToString())),
-			ArgNames(method),
-			Priority(method)
+			ArgNamesOf(method),
+			PriorityOf(method)
 		);
 
-	private static string Priority(MethodDeclarationSyntax method)
+	private static string PriorityOf(MethodDeclarationSyntax method)
 	{
 		var priorities = method
 			.AttributeLists.SelectMany(static list => list.Attributes)
@@ -182,11 +182,11 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 		}
 
 		var constraintSuffix = string.IsNullOrEmpty(constraints) ? "" : " " + constraints;
-		var priority = Priority(method);
+		var priority = PriorityOf(method);
 		var definition = expressionBodied
 			? $"[CompilerGenerated] {priority}public async {returnType} {name}{typeParams}({parameters}){constraintSuffix} => {body};"
 			: $"[CompilerGenerated] {priority}public async {returnType} {name}{typeParams}({parameters}){constraintSuffix} {body}";
-		var signature = new MethodInfo(name, returnType, typeParams, $"({parameters})", constraints, ArgNames(method), priority);
+		var signature = new MethodInfo(name, returnType, typeParams, $"({parameters})", constraints, ArgNamesOf(method), priority);
 		return (definition, signature);
 	}
 
@@ -222,7 +222,7 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 			""";
 	}
 
-	private static string ArgNames(MethodDeclarationSyntax method) => string.Join(", ", method.ParameterList.Parameters.Select(static p => p.Identifier.Text));
+	private static string ArgNamesOf(MethodDeclarationSyntax method) => string.Join(", ", method.ParameterList.Parameters.Select(static p => p.Identifier.Text));
 
 	private readonly struct MethodInfo
 	{

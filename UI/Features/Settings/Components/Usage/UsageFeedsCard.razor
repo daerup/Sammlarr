@@ -251,7 +251,7 @@
 
     private IReadOnlyList<UsageFeedLine> Shown { get; set; } = [];
 
-    private IEnumerable<(UsageFeedLine Line, string Key)> Keyed => Feeds.Select((line, index) => (line, Key(index))).Where(feed => Shown.Contains(feed.line));
+    private IEnumerable<(UsageFeedLine Line, string Key)> Keyed => Feeds.Select((line, index) => (line, KeyOf(index))).Where(feed => Shown.Contains(feed.line));
 
     private IReadOnlyList<Plot> Plotted
     {
@@ -266,7 +266,7 @@
                     .Where(feed => feed.line.Runs.Count > 0 && Shown.Contains(feed.line))
                     .Select(feed => new Plot(
                         feed.line,
-                        Key(feed.index),
+                        KeyOf(feed.index),
                         [
                             .. feed
                                 .line.Runs.Where(Called)
@@ -396,7 +396,7 @@
         _open = true;
     }
 
-    private static string Key(int index) => $"f{index}";
+    private static string KeyOf(int index) => $"f{index}";
 
     private static string Percent(double share) => FormattableString.Invariant($"{share * 100:0.###}%");
 

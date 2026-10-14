@@ -18,15 +18,15 @@ internal static class AniListTypes
 
 	public sealed record PageData([property: JsonPropertyName("Page")] Page? Page);
 
-	public sealed record Page([property: JsonPropertyName("pageInfo")] PageInfo? PageInfo, [property: JsonPropertyName("media")] IReadOnlyList<Media>? Media);
+	public sealed record Page([property: JsonPropertyName("pageInfo")] PageInfo? PageInfo, [property: JsonPropertyName("media")] IReadOnlyList<Media>? Items);
 
 	public sealed record PageInfo([property: JsonPropertyName("hasNextPage")] bool HasNextPage);
 
 	public sealed record GenreData([property: JsonPropertyName("GenreCollection")] IReadOnlyList<string>? Genres);
 
-	public sealed record RelatedData([property: JsonPropertyName("Page")] RelatedPage? Page);
+	public sealed record RelatedData([property: JsonPropertyName("Page")] RelatedPage? RelatedPage);
 
-	public sealed record RelatedPage([property: JsonPropertyName("media")] IReadOnlyList<Related>? Media);
+	public sealed record RelatedPage([property: JsonPropertyName("media")] IReadOnlyList<Related>? Items);
 
 	public sealed record Related(
 		[property: JsonPropertyName("idMal")] int? IdMal,

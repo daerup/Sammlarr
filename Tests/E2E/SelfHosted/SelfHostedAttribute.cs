@@ -5,7 +5,7 @@ namespace E2E.Tests.SelfHosted;
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class SelfHostedAttribute : Attribute, ITestRegisteredEventReceiver, ITestDiscoveryEventReceiver
 {
-	private static readonly StackLimit Limit = new();
+	private static readonly StackLimit Stacks = new();
 
 	private static readonly ParallelGroupAttribute Group = new(nameof(SelfHosted));
 
@@ -14,7 +14,7 @@ public sealed class SelfHostedAttribute : Attribute, ITestRegisteredEventReceive
 	public ValueTask OnTestRegistered(TestRegisteredContext context)
 	{
 		context.ClearParallelLimiter();
-		context.SetParallelLimiter(Limit);
+		context.SetParallelLimiter(Stacks);
 		return ValueTask.CompletedTask;
 	}
 

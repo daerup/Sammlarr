@@ -83,7 +83,7 @@ internal sealed class AnimeIdsFile(HttpClient http) : IDataset<AnimeIdMapping>
 			&& entry.EpisodeOffset?.Tmdb is null or 0;
 	}
 
-	private static Optional<int> FirstMovie(AnimeListsTypes.Tmdb? tmdb)
+	private static Optional<int> FirstMovie(AnimeListsTypes.TmdbIds? tmdb)
 	{
 		return Optional
 			.Of(tmdb?.Movie)
