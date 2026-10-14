@@ -5,6 +5,7 @@ using Domain.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -15,7 +16,7 @@ namespace Web.Tests.Licences;
 
 public class NoticesEndpointTests
 {
-	private const string Notices = "/THIRD-PARTY-NOTICES.txt";
+	private const string NoticesFile = "THIRD-PARTY-NOTICES.txt";
 
 	private readonly DirectoryInfo _published = Directory.CreateTempSubdirectory("sammlarr-notices-");
 
@@ -30,12 +31,12 @@ public class NoticesEndpointTests
 		using var client = Client(app);
 		await SignInAsync(client);
 
-		using var response = await client.GetAsync(new Uri(Notices, UriKind.Relative));
+		using var response = await client.GetAsync(new Uri(NoticesFile, UriKind.Relative));
 
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 		await Assert.That(response.Content.Headers.ContentType?.ToString()).IsEqualTo("text/plain; charset=utf-8");
 		await Assert.That(response.Content.Headers.ContentDisposition?.DispositionType).IsEqualTo("attachment");
-		await Assert.That(response.Content.Headers.ContentDisposition?.FileName).IsEqualTo("THIRD-PARTY-NOTICES.txt");
+		await Assert.That(response.Content.Headers.ContentDisposition?.FileName).IsEqualTo(NoticesFile);
 		await Assert.That(await response.Content.ReadAsStringAsync()).IsEqualTo("Cronos 0.11.1 MIT");
 	}
 
@@ -46,7 +47,7 @@ public class NoticesEndpointTests
 		await using var app = await StartAsync();
 		using var client = Client(app);
 
-		using var response = await client.GetAsync(new Uri(Notices, UriKind.Relative));
+		using var response = await client.GetAsync(new Uri(NoticesFile, UriKind.Relative));
 
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Redirect);
 		await Assert.That(response.Headers.Location?.AbsolutePath).IsEqualTo("/signin");
@@ -59,12 +60,12 @@ public class NoticesEndpointTests
 		using var client = Client(app);
 		await SignInAsync(client);
 
-		using var response = await client.GetAsync(new Uri(Notices, UriKind.Relative));
+		using var response = await client.GetAsync(new Uri(NoticesFile, UriKind.Relative));
 
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
 	}
 
-	private Task PublishAsync(string notices) => File.WriteAllTextAsync(Path.Combine(_published.FullName, "THIRD-PARTY-NOTICES.txt"), notices);
+	private Task PublishAsync(string notices) => File.WriteAllTextAsync(Path.Combine(_published.FullName, NoticesFile), notices);
 
 	private async Task<WebApplication> StartAsync()
 	{
@@ -72,6 +73,7 @@ public class NoticesEndpointTests
 		sessions.IsValidAsync(Any(), Any(), Any(), Any()).Returns(true);
 		var builder = WebApplication.CreateSlimBuilder();
 		builder.WebHost.UseUrls("http://127.0.0.1:0");
+		builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
 		builder.Services.AddModule<AuthenticationModule>();
 		builder.Services.AddSingleton(sessions.Object);
 		var app = builder.Build();
