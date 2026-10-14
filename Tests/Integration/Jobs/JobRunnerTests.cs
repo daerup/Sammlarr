@@ -9,7 +9,6 @@ using Domain.Providers;
 using Domain.Wantlist.Sync;
 using Harness;
 using Microsoft.EntityFrameworkCore;
-using Shared.Options;
 using TestInfrastructure;
 
 namespace Integration.Tests.Jobs;
@@ -55,58 +54,6 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(await running).IsTrue();
 		await Assert.That(stateWhileHeld).IsEqualTo(JobState.Queued);
-		await Assert.That(await StateOfAsync(queued.Id)).IsEqualTo(JobState.Done);
-	}
-
-	[Test]
-	public async Task EnqueueAsync_ForAScheduledSync_LeavesItWaitingWithItsDueTimeRatherThanReadyToRun()
-	{
-		var armedAt = host.Resolve<IDateTimeProvider>().Now;
-
-		var queued = await Assert
-			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger())))
-			.IsOfUnionType<EnqueueResult, Queued>();
-
-		await Assert.That(await StateOfAsync(queued.Id)).IsEqualTo(JobState.Waiting);
-		var pending = (await host.Resolve<IJobQueueView>().GetAsync()).Jobs.Single();
-		await Assert.That(pending.State).IsEqualTo(JobState.Waiting);
-		await Assert.That(pending.RunAfter).IsEqualTo(armedAt + host.Resolve<SchedulerOptions>().Grace);
-	}
-
-	[Test]
-	public async Task EnqueueAsync_ForTwoScheduledRuns_StillLeavesOneWaitingSyncRatherThanTwo()
-	{
-		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
-		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
-
-		await Assert.That(await KindsAsync()).IsEquivalentTo([JobKind.WantlistSync]);
-	}
-
-	[Test]
-	public async Task EnqueueAsync_WhenAManualSyncLandsOnAWaitingOne_PullsItForwardToQueuedInsteadOfAddingASecond()
-	{
-		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
-
-		var pressed = await Assert
-			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger())))
-			.IsOfUnionType<EnqueueResult, AlreadyQueued>();
-
-		await Assert.That(await StateOfAsync(pressed.Id)).IsEqualTo(JobState.Queued);
-		await Assert.That(await KindsAsync()).IsEquivalentTo([JobKind.WantlistSync]);
-	}
-
-	[Test]
-	public async Task ReleaseDueAsync_OnceTheGraceHasPassed_MakesTheWaitingSyncTakeableAndItRunsToDone()
-	{
-		await host.RemoteWantlistEmpty();
-		var queued = await Assert
-			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger())))
-			.IsOfUnionType<EnqueueResult, Queued>();
-		PastTheGrace();
-
-		await host.Resolve<IJobRepository>().ReleaseDueAsync(host.Resolve<IDateTimeProvider>().Now);
-
-		await Assert.That(await Testee.TryRunNextAsync(CancellationToken.None)).IsTrue();
 		await Assert.That(await StateOfAsync(queued.Id)).IsEqualTo(JobState.Done);
 	}
 

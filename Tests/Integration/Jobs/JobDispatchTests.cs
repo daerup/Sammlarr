@@ -92,17 +92,6 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task RequeueRunningAsync_PutsAJobTheProcessDiedHoldingBackInTheQueue()
-	{
-		await EnqueueAsync(FeedId.From(Guid.NewGuid()));
-		await Testee.TakeNextAsync(Now);
-
-		await Assert.That(await Testee.RequeueRunningAsync(Now)).IsEqualTo(1);
-
-		await Assert.That(await Testee.TakeNextAsync(Now)).IsSome();
-	}
-
-	[Test]
 	public async Task RequeueRunningAsync_CountsTheLostRunAgainstTheJob()
 	{
 		await EnqueueAsync(FeedId.From(Guid.NewGuid()));

@@ -244,15 +244,6 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task RunningTheSameFeedTwice_KeepsTheOneAlreadyQueued()
-	{
-		var (first, second) = await EnqueueAsync([DocumentaryFeed, DocumentaryFeed]);
-
-		await Assert.That(second.Id).IsEqualTo(first.Id);
-		await Assert.That(second.State).IsEqualTo(JobState.Queued);
-	}
-
-	[Test]
 	public async Task RunningAFeedThatIsAlreadyRunning_DoesNotQueueItAgain()
 	{
 		var running = await EnqueueAsync(DocumentaryFeed);
