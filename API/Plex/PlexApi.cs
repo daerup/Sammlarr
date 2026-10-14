@@ -74,7 +74,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 		return new SearchAnswer(
 			[
 				.. result
-					.MediaContainer.SearchResults.SelectMany(c => c.NestedSearchResult)
+					.MediaContainer.SearchResults.SelectMany(c => c.NestedSearchResults)
 					.Select(s => s.Metadata.ToFound())
 					.DistinctBy(r => r.Externals.OfType<PlexId>().FirstOrDefault()),
 			],
@@ -99,7 +99,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 		EnsureUsable(response, endpoint);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
-		var first = Optional.Of(result?.MediaContainer?.Metadata).Map(metadata => metadata.FirstOrNone());
+		var first = Optional.Of(result?.MediaContainer?.Items).Map(metadata => metadata.FirstOrNone());
 		return Success.Of(first.Map(found => PlexId.From(found.RatingKey, id.Type)));
 	}
 
@@ -131,7 +131,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider c
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
 		var reason = $"Plex returned no metadata for ratingKey {plexId.Value}.";
-		return Result.WhenNotNull(result?.MediaContainer?.Metadata, reason).When(metadata => metadata.Count > 0, reason).Map(metadata => metadata[0].ToFound());
+		return Result.WhenNotNull(result?.MediaContainer?.Items, reason).When(metadata => metadata.Count > 0, reason).Map(metadata => metadata[0].ToFound());
 	}
 
 	private static string ToPlexMediaType(MediaType mediaType) =>
@@ -162,7 +162,7 @@ file static class PlexMetadataMappingExtensions
 			PosterUrl = NormalizePlexImageUrl(result.Poster),
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
 			ReleaseDate = ProviderValues.Date(result.OriginallyAvailableAt),
-			Genres = ProviderValues.Genres(result.Genre?.Select(genre => genre.Tag)),
+			Genres = ProviderValues.Genres(result.Genres?.Select(genre => genre.Tag)),
 			Ratings = Ratings(result),
 		};
 	}
@@ -199,7 +199,7 @@ file static class PlexMetadataMappingExtensions
 			PosterUrl = NormalizePlexImageUrl(result.Thumb),
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
 			ReleaseDate = ProviderValues.Date(result.OriginallyAvailableAt) ?? ProviderValues.YearStart(result.Year),
-			Genres = ProviderValues.Genres(result.Genre?.Select(genre => genre.Tag)),
+			Genres = ProviderValues.Genres(result.Genres?.Select(genre => genre.Tag)),
 		};
 	}
 

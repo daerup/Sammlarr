@@ -19,10 +19,10 @@ namespace Core.Tests.Media;
 public class DetailsFetcherTests
 {
 	private static readonly MediaId Id = MediaId.New();
-	private static readonly PlexId Plex = PlexId.From("plex-rating", MediaType.Movie);
-	private static readonly TmdbId Tmdb = TmdbId.From("500", MediaType.Movie);
-	private static readonly MediaIdentity Identity = new(Id, [Plex, Tmdb]);
-	private static readonly MediaIdentity PlexOnly = new(Id, [Plex]);
+	private static readonly PlexId PlexMovieId = PlexId.From("plex-rating", MediaType.Movie);
+	private static readonly TmdbId TmdbMovieId = TmdbId.From("500", MediaType.Movie);
+	private static readonly MediaIdentity Identity = new(Id, [PlexMovieId, TmdbMovieId]);
+	private static readonly MediaIdentity PlexOnly = new(Id, [PlexMovieId]);
 	private static readonly IReadOnlySet<RemoteService> Everyone = new HashSet<RemoteService> { RemoteService.Tmdb, RemoteService.Plex };
 	private static readonly IReadOnlySet<RemoteService> OnlyPlex = new HashSet<RemoteService> { RemoteService.Plex };
 
@@ -392,13 +392,13 @@ public class DetailsFetcherTests
 		var deps = Dependencies.Create();
 		deps.PlexAnswers(Unrated());
 		var imdb = ImdbId.From("tt1375666", MediaType.Movie);
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([Tmdb, imdb], Complete())));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([TmdbMovieId, imdb], Complete())));
 		await using var writer = deps.Writer();
 
 		var fetched = await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That(fetched.Identity.Id).IsEqualTo(Id);
-		await Assert.That(fetched.Identity.Keys).IsEquivalentTo(new IExternalMediaId[] { Plex, Tmdb, imdb });
+		await Assert.That(fetched.Identity.Keys).IsEquivalentTo(new IExternalMediaId[] { PlexMovieId, TmdbMovieId, imdb });
 	}
 
 	[Test]
@@ -406,7 +406,7 @@ public class DetailsFetcherTests
 	{
 		var deps = Dependencies.Create();
 		var imdb = ImdbId.From("tt1375666", MediaType.Movie);
-		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([Plex, Tmdb, imdb], Unrated())));
+		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([PlexMovieId, TmdbMovieId, imdb], Unrated())));
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns(Answer(new MovieDetails { Ratings = TmdbOnly }));
 		await using var writer = deps.Writer();
 
@@ -628,7 +628,7 @@ public class DetailsFetcherTests
 	{
 		var imdb = ImdbId.From("tt1375666", MediaType.Movie);
 		var deps = Dependencies.Create();
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([Tmdb, imdb], Complete())));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([TmdbMovieId, imdb], Complete())));
 		await using var writer = deps.Writer();
 
 		var fetched = await Matched(await deps.Testee.FetchAsync(new MediaIdentity(Id, [imdb]), new None(), Run(Everyone, writer)));
@@ -697,7 +697,7 @@ public class DetailsFetcherTests
 
 		await Assert.That(fetched.Details.Title).IsEqualTo("Inception");
 		await Assert.That((await deps.WrittenAsync(writer))[Id].RefreshedAt).IsEqualTo(Now);
-		deps.Plex.LookUpAsync(Plex, Any(), Any()).WasCalled(Times.Once);
+		deps.Plex.LookUpAsync(PlexMovieId, Any(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -881,7 +881,7 @@ public class DetailsFetcherTests
 
 		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
-		deps.Tmdb.LookUpAsync(Tmdb, Any(), Any()).WasCalled(Times.Once);
+		deps.Tmdb.LookUpAsync(TmdbMovieId, Any(), Any()).WasCalled(Times.Once);
 		deps.Plex.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).WasCalled(Times.Never);
 	}
 
@@ -894,7 +894,7 @@ public class DetailsFetcherTests
 
 		await Matched(await deps.Testee.FetchAsync(PlexOnly, new None(), Run(Everyone, writer)));
 
-		deps.Plex.LookUpAsync(Plex, Any(), Any()).WasCalled(Times.Once);
+		deps.Plex.LookUpAsync(PlexMovieId, Any(), Any()).WasCalled(Times.Once);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).WasCalled(Times.Never);
 	}
 
@@ -1144,7 +1144,7 @@ public class DetailsFetcherTests
 
 	private static Answer<FoundMedia> Answer(MediaDetails details)
 	{
-		return new Found<FoundMedia>(new FoundMedia([Tmdb], details));
+		return new Found<FoundMedia>(new FoundMedia([TmdbMovieId], details));
 	}
 
 	private static MovieDetails Complete()

@@ -140,7 +140,7 @@ public class PlexApiTests
 			Type: "show",
 			Year: 0,
 			Duration: 0,
-			Genre: [new PlexTypes.Search.Genre(" ")],
+			Genres: [new PlexTypes.Search.Genre(" ")],
 			OriginallyAvailableAt: "",
 			SeasonCount: 0,
 			EpisodeCount: 0
@@ -236,7 +236,7 @@ public class PlexApiTests
 			Type: "movie",
 			Year: 2024,
 			Duration: 6_000_000,
-			Genre: null,
+			Genres: null,
 			OriginallyAvailableAt: "2024-01-01",
 			SeasonCount: null,
 			EpisodeCount: null
@@ -247,14 +247,14 @@ public class PlexApiTests
 	private static string SearchPayloadOf(PlexTypes.Search.Metadata metadata)
 	{
 		var nested = new PlexTypes.Search.NestedSearchResult(metadata);
-		var searchResult = new PlexTypes.Search.SearchResult(Size: 1, NestedSearchResult: [nested]);
+		var searchResult = new PlexTypes.Search.SearchResult(Size: 1, NestedSearchResults: [nested]);
 		var container = new PlexTypes.Search.MediaContainer(SuggestedTerms: [], Identifier: "search", Size: 1, SearchResults: [searchResult]);
 		return JsonSerializer.Serialize(new PlexTypes.Search.Root(container));
 	}
 
 	private static string BuildEmptySearchPayload()
 	{
-		var emptyResult = new PlexTypes.Search.SearchResult(Size: 0, NestedSearchResult: []);
+		var emptyResult = new PlexTypes.Search.SearchResult(Size: 0, NestedSearchResults: []);
 		var container = new PlexTypes.Search.MediaContainer(SuggestedTerms: [], Identifier: "search", Size: 1, SearchResults: [emptyResult]);
 		return JsonSerializer.Serialize(new PlexTypes.Search.Root(container));
 	}
@@ -284,8 +284,8 @@ public class PlexApiTests
 			Duration: 0,
 			SeasonCount: null,
 			EpisodeCount: null,
-			Guid: [],
-			Genre: []
+			Guids: [],
+			Genres: []
 		);
 	}
 

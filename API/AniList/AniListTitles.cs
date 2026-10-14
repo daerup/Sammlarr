@@ -42,7 +42,7 @@ internal sealed class AniListTitles(AniListClient client, Lanes lanes, IDateTime
 			cancellationToken
 		);
 		return answer.Map(data =>
-			(IReadOnlyDictionary<int, AniListTypes.Media>)(data.Page?.Media ?? []).DistinctBy(media => media.Id).ToDictionary(media => media.Id)
+			(IReadOnlyDictionary<int, AniListTypes.Media>)(data.Page?.Items ?? []).DistinctBy(media => media.Id).ToDictionary(media => media.Id)
 		);
 	}
 }

@@ -25,7 +25,7 @@ public class WebhookChannelTests
 		var context = Context();
 		var secret = WebhookSigning.GenerateSecret();
 
-		var result = await Channel(handler).SendAsync(context, WebhookTarget("https://example.test/hook", secret), Body(null), CancellationToken.None);
+		var result = await Channel(handler).SendAsync(context, WebhookTarget("https://example.test/hook", secret), Template(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliverySucceeded>();
 		await Assert.That(handler.Request!.Method).IsEqualTo(HttpMethod.Post);
@@ -49,7 +49,8 @@ public class WebhookChannelTests
 			new NotificationData { Media = [new NotificationMedia("abc", "The Matrix", MediaType.Movie)] }
 		);
 
-		await Channel(handler).SendAsync(context, WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
+		await Channel(handler)
+			.SendAsync(context, WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Template(null), CancellationToken.None);
 
 		var body = Encoding.UTF8.GetString(handler.Body!);
 		await Assert.That(body).Contains("\"data\":{");
@@ -65,7 +66,7 @@ public class WebhookChannelTests
 			.SendAsync(
 				Context(),
 				WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()),
-				Body("{\"t\":\"{{ title }}\"}"),
+				Template("{\"t\":\"{{ title }}\"}"),
 				CancellationToken.None
 			);
 
@@ -78,7 +79,7 @@ public class WebhookChannelTests
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
 		var result = await Channel(handler)
-			.SendAsync(Context(), WebhookTarget("http://catcher:8080/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("http://catcher:8080/hook", WebhookSigning.GenerateSecret()), Template(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliverySucceeded>();
 		await Assert.That(handler.Request!.RequestUri).IsEqualTo(new Uri("http://catcher:8080/hook"));
@@ -90,7 +91,7 @@ public class WebhookChannelTests
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
 		var result = await Channel(handler)
-			.SendAsync(Context(), WebhookTarget("ftp://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("ftp://example.test/hook", WebhookSigning.GenerateSecret()), Template(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 		await Assert.That(handler.Request).IsNull();
@@ -102,7 +103,7 @@ public class WebhookChannelTests
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
 		var result = await Channel(handler)
-			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body("{{ unclosed"), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Template("{{ unclosed"), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 		await Assert.That(handler.Request).IsNull();
@@ -112,7 +113,7 @@ public class WebhookChannelTests
 	public async Task SendAsync_WhenTheServerErrors_IsRetryable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.InternalServerError))
-			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Template(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryRetryable>();
 	}
@@ -121,7 +122,7 @@ public class WebhookChannelTests
 	public async Task SendAsync_WhenUnauthorized_IsUnrecoverable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.Unauthorized))
-			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Template(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 	}
@@ -130,7 +131,7 @@ public class WebhookChannelTests
 	public async Task SendAsync_WhenRateLimited_IsRetryable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.TooManyRequests))
-			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Template(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryRetryable>();
 	}
@@ -159,7 +160,7 @@ public class WebhookChannelTests
 
 	private static NotificationTarget WebhookTarget(string url, string secret) => new(Guid.NewGuid(), "Hook", true, new WebhookConfig(url, secret));
 
-	private static NotificationTemplate Body(string? template) =>
+	private static NotificationTemplate Template(string? template) =>
 		template is null ? NotificationTemplate.None : new NotificationTemplate(Some.Of(template), new None(), new None(), new None(), new None());
 
 	private static string Header(CapturingHandler handler, string name) => handler.Request!.Headers.GetValues(name).Single();

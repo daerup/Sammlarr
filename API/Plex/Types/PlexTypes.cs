@@ -12,7 +12,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("offset")] int Offset,
 			[property: JsonPropertyName("totalSize")] int TotalSize,
 			[property: JsonPropertyName("size")] int Size,
-			[property: JsonPropertyName("Metadata")] IReadOnlyList<Metadata>? Metadata
+			[property: JsonPropertyName("Metadata")] IReadOnlyList<Metadata>? Items
 		);
 
 		public record Metadata(
@@ -45,7 +45,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("librarySectionTitle")] string LibrarySectionTitle,
 			[property: JsonPropertyName("offset")] int Offset,
 			[property: JsonPropertyName("totalSize")] int TotalSize,
-			[property: JsonPropertyName("Metadata")] IReadOnlyList<Metadata> Metadata
+			[property: JsonPropertyName("Metadata")] IReadOnlyList<Metadata> Items
 		);
 
 		public record Metadata(
@@ -63,8 +63,8 @@ internal static class PlexTypes
 			[property: JsonPropertyName("duration")] int Duration,
 			[property: JsonPropertyName("childCount")] int? SeasonCount,
 			[property: JsonPropertyName("leafCount")] int? EpisodeCount,
-			[property: JsonPropertyName("Guid")] IReadOnlyList<Guid> Guid,
-			[property: JsonPropertyName("Genre")] IReadOnlyList<Genre> Genre,
+			[property: JsonPropertyName("Guid")] IReadOnlyList<Guid> Guids,
+			[property: JsonPropertyName("Genre")] IReadOnlyList<Genre> Genres,
 			[property: JsonPropertyName("Rating")] IReadOnlyList<Rating>? Ratings = null,
 			[property: JsonPropertyName("imdbRatingCount")] int? ImdbRatingCount = null
 		)
@@ -76,7 +76,7 @@ internal static class PlexTypes
 			public TvdbId[] TvdbIds => GetId("tvdb://", i => TvdbId.From(i, MediaType));
 
 			private T[] GetId<T>(string prefix, Func<string, T> convert) =>
-				Guid.Where(g => g.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Select(g => convert(g.Id[prefix.Length..])).ToArray();
+				Guids.Where(g => g.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Select(g => convert(g.Id[prefix.Length..])).ToArray();
 		}
 
 		public record Genre([property: JsonPropertyName("tag")] string Tag);
@@ -107,7 +107,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("type")] string Type,
 			[property: JsonPropertyName("year")] int Year,
 			[property: JsonPropertyName("duration")] int? Duration,
-			[property: JsonPropertyName("Genre")] IReadOnlyList<Genre>? Genre,
+			[property: JsonPropertyName("Genre")] IReadOnlyList<Genre>? Genres,
 			[property: JsonPropertyName("originallyAvailableAt")] string? OriginallyAvailableAt,
 			[property: JsonPropertyName("childCount")] int? SeasonCount,
 			[property: JsonPropertyName("leafCount")] int? EpisodeCount
@@ -123,7 +123,7 @@ internal static class PlexTypes
 
 		public record SearchResult(
 			[property: JsonPropertyName("size")] int Size,
-			[property: JsonPropertyName("SearchResult")] IReadOnlyList<NestedSearchResult> NestedSearchResult
+			[property: JsonPropertyName("SearchResult")] IReadOnlyList<NestedSearchResult> NestedSearchResults
 		);
 
 		public record NestedSearchResult([property: JsonPropertyName("Metadata")] Metadata Metadata);

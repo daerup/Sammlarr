@@ -107,7 +107,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 			var answer = await SourcePages.ReadAsync(page, () => client.AskAsync<AniListTypes.PageData>(SearchQuery, asked, cancellationToken));
 			var found = answer.GetOrThrow(Refused).Page ?? throw new InvalidDataException("AniList answered a search without a page.");
 			FeedRunSpans.SourcePage(page, new None());
-			foreach (var title in (found.Media ?? []).Where(title => music || AniListMedia.IsTitle(title)))
+			foreach (var title in (found.Items ?? []).Where(title => music || AniListMedia.IsTitle(title)))
 			{
 				yield return title;
 			}

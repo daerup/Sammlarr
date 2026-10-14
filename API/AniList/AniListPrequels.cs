@@ -41,7 +41,7 @@ internal sealed class AniListPrequels(AniListClient client, Lanes lanes) : IAnim
 		);
 		return answer.Map(data =>
 			(IReadOnlyDictionary<int, int>)
-				(data.Page?.Media ?? [])
+				(data.RelatedPage?.Items ?? [])
 					.Where(media => SeasonFormats.Contains(media.Format))
 					.Select(media => Optional.Of(media.IdMal).Map(season => Prequel(media).Map(prequel => KeyValuePair.Create(season, prequel))))
 					.WhereSome()

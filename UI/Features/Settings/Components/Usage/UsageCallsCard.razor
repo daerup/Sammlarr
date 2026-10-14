@@ -216,7 +216,7 @@
     private IReadOnlyList<Mark> Marks =>
         [
             .. new[] { (Q: 0.5, Name: "median", Colour: "var(--foreground)"), (Q: 0.95, Name: "p95", Colour: UsageView.Accent) }
-                .Select((mark, row) => Answers.Percentile(mark.Q).Map(at => new Mark(Left(at), $"{mark.Name} {UsageView.Duration(at)}", mark.Colour, row)))
+                .Select((mark, row) => Answers.Percentile(mark.Q).Map(at => new Mark(LeftOf(at), $"{mark.Name} {UsageView.Duration(at)}", mark.Colour, row)))
                 .WhereSome(),
         ];
 
@@ -248,7 +248,7 @@
                 }
             </div>;
 
-    private static string Left(double milliseconds)
+    private static string LeftOf(double milliseconds)
     {
         return FormattableString.Invariant($"calc({PlotLeft}px + (100% - {PlotLeft + PlotRight}px) * {UsageView.StripAt(milliseconds):0.####})");
     }
