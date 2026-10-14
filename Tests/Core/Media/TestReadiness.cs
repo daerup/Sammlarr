@@ -6,7 +6,7 @@ internal static class TestReadiness
 {
 	internal static IServiceReadiness Everything() => EverythingMock().Object;
 
-	internal static Mock<IServiceReadiness> EverythingMock()
+	private static Mock<IServiceReadiness> EverythingMock()
 	{
 		var readiness = IServiceReadiness.Mock();
 		readiness.ConnectedAsync(Any(), Any()).Returns((asked, _) => asked.ToHashSet());

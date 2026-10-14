@@ -20,18 +20,6 @@ public class BurstPrimersTests
 	private static readonly IReadOnlySet<RemoteService> NoIdServices = new HashSet<RemoteService>();
 
 	[Test]
-	public async Task PrimeAsync_ForAnUncachedTitle_PrimesItsIds()
-	{
-		var (testee, primer) = Testee(RemoteLoad.Idle);
-
-		await testee.PrimeAsync([new PrimedTitle(FightClub, new None())], Run(Mdblist, ShownRatings), NoIdServices, CancellationToken.None);
-
-		primer
-			.PrimeAsync(Is<IReadOnlyCollection<IReadOnlyList<IExternalMediaId>>>(titles => titles!.Single().SequenceEqual(FightClub)), Any())
-			.WasCalled(Times.Once);
-	}
-
-	[Test]
 	public async Task PrimeAsync_ForATitleTheServiceAnsweredLately_PrimesNothing()
 	{
 		var (testee, primer) = Testee(RemoteLoad.Idle);

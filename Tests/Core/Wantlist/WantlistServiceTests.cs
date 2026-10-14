@@ -4,6 +4,7 @@ using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Core.Announcing;
+using Core.Tests.Settings;
 using Core.Wantlist;
 using Domain.Feed;
 using Domain.Media;

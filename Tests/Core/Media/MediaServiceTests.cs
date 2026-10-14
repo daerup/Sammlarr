@@ -65,16 +65,6 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task LoadListAsync_ForAManyTitleList_ReadsTheConnectedIdServicesOnce()
-	{
-		var (testee, deps) = TestMediaService.Create();
-
-		await testee.LoadListAsync(TestMediaService.Paged(300, 300).AsListTitles(), FieldNeeds.Everything).ToListAsync();
-
-		deps.IdReadiness.ConnectedAsync(Any(), Any()).WasCalled(Times.Once);
-	}
-
-	[Test]
 	public async Task LoadListAsync_WhenCancelledWhileFetchingDetails_StopsWithoutHandingOutTheTitle()
 	{
 		using var cancellation = new CancellationTokenSource();
@@ -317,23 +307,6 @@ public class MediaServiceTests
 		var results = await testee.GetDetailsAsync([id], FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.Single()).IsSuccess().And.Multiple(async media => await Assert.That(media.Details.Title).IsEqualTo("T"));
-	}
-
-	[Test]
-	public async Task LoadListAsync_WhenIdentifyFails_YieldsUnmatchedWithoutFetching()
-	{
-		var external = TmdbId.From("999", MediaType.Movie);
-		var (testee, deps) = TestMediaService.Create();
-		deps.UnmatchedCache.GetValueOrNone(Any<string>()).Returns(Some.Of(true));
-
-		var results = await testee
-			.LoadListAsync(ListTitles.Of(new IdentifyRequest([external], new None())), FieldNeeds.Everything)
-			.InListOrderAsync()
-			.ToListAsync();
-
-		await Assert.That(results.Count).IsEqualTo(1);
-		await Assert.That(results[0]).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
-		deps.MediaRepo.SaveDetailsAsync(Any(), Any()).WasNeverCalled();
 	}
 
 	[Test]

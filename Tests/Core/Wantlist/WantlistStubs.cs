@@ -6,6 +6,7 @@ using Contracts.Messaging;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Core.Announcing;
+using Core.Tests.Settings;
 using Core.Wantlist.Sync;
 using Domain.Media;
 using Domain.Providers;

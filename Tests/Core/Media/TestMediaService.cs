@@ -3,14 +3,12 @@ using Contracts.Caching;
 using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Conversions;
-using Contracts.Providers;
-using Contracts.Settings;
 using Core.DI;
 using Core.Media;
+using Core.Tests.Settings;
 using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
-using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
 
@@ -41,23 +39,9 @@ internal static class TestMediaService
 		mediaRepo.GetAsync(Any(), Any()).Returns(Array.Empty<StoredMedia>());
 		mediaRepo.GetByExternalsAsync(Any(), Any()).Returns(Array.Empty<StoredMedia>());
 
-		var configRepo = IProviderConfigService.Mock();
-		configRepo
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
+		var configRepo = ProviderConfigStubs.PlexWantlist();
 
 		var enrichers = new KeyedServiceSet<RemoteService, IDetailsEnricher>([new(RemoteService.Plex, details.Object), new(RemoteService.Tmdb, idle.Object)]);
-
-		var idReadiness = TestReadiness.EverythingMock();
 
 		var converter = IExternalIdConverter.Mock();
 		converter.Lookups.Returns([new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb], Cost: 1)]);
@@ -80,7 +64,7 @@ internal static class TestMediaService
 			[new(RemoteService.Tmdb, converter.Object), .. converters],
 			unmatchedCache.Object,
 			TestCapacity.Open(),
-			idReadiness.Object,
+			TestReadiness.Everything(),
 			dateTimeProvider.Object,
 			NullLogger<MediaIdResolver>.Instance
 		);
@@ -99,7 +83,7 @@ internal static class TestMediaService
 			mediaRepo.Object,
 			primers
 		);
-		return (testee, new Deps(mediaRepo, details, unmatchedCache, converter, idReadiness, claims));
+		return (testee, new Deps(mediaRepo, details, unmatchedCache, converter, claims));
 	}
 
 	internal sealed record Deps(
@@ -107,7 +91,6 @@ internal static class TestMediaService
 		Mock<IDetailsEnricher> Details,
 		Mock<ITypedMemoryCache<string, bool>> UnmatchedCache,
 		Mock<IExternalIdConverter> Converter,
-		Mock<IServiceReadiness> IdReadiness,
 		Mock<IIdentityClaims> Claims
 	);
 
@@ -118,11 +101,6 @@ internal static class TestMediaService
 			ByIdRequest(_, var id) => new Found<IdLookupResult>(new IdLookupResult([TmdbId.From($"found-{id.Value}", id.Type)], new None())),
 			ByHintsRequest => new NoMatch(RemoteService.Tmdb),
 		};
-	}
-
-	internal static IAsyncEnumerable<IdentifyRequest> Requests(int count)
-	{
-		return Enumerable.Range(0, count).Select(i => new IdentifyRequest([TmdbId.From(i.ToString(), MediaType.Movie)], new None())).ToAsyncEnumerable();
 	}
 
 	internal static async IAsyncEnumerable<IdentifyRequest> Paged(params int[] pages)
