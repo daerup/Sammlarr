@@ -37,7 +37,7 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 		var known = _byKey.GetValueOrNone(apiKey);
 		var nextReset = known
 			.Map(allowance => Ahead(allowance.ResetAt, now))
-			.GetValueOr(() => Ahead(new DateTimeOffset(now.UtcDateTime.Date.Add(options.DailyResetUtc.ToTimeSpan()), TimeSpan.Zero), now));
+			.GetValueOr(() => Ahead(now.UtcDateTime.Date.Add(options.DailyResetUtc.ToTimeSpan()), now));
 		return new QuotaToday(nextReset, known.When(allowance => now < allowance.ResetAt).Map(Answered));
 	}
 
