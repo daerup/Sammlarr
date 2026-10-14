@@ -16,18 +16,15 @@ public class WebUiChannelTests
 	private readonly WebUiCircuits circuits = new();
 	private readonly List<Toast> shown = [];
 
-	private Result<RenderedNotification> rendered = Success.Of(RenderedNotification.Empty);
+	private WebUiChannel Testee => Rendering(Success.Of(RenderedNotification.Empty));
 
-	private WebUiChannel Testee
+	private WebUiChannel Rendering(Result<RenderedNotification> rendered)
 	{
-		get
-		{
-			var recipient = ICurrentUser.Mock();
-			recipient.Id.Returns(Recipient);
-			var renderer = INotificationTemplateRenderer.Mock();
-			renderer.Render(Any<NotificationTemplate>(), Any()).Returns(rendered);
-			return new WebUiChannel(circuits, recipient.Object, renderer.Object, NullLogger<WebUiChannel>.Instance);
-		}
+		var recipient = ICurrentUser.Mock();
+		recipient.Id.Returns(Recipient);
+		var renderer = INotificationTemplateRenderer.Mock();
+		renderer.Render(Any<NotificationTemplate>(), Any()).Returns(rendered);
+		return new WebUiChannel(circuits, recipient.Object, renderer.Object, NullLogger<WebUiChannel>.Instance);
 	}
 
 	[Before(Test)]
@@ -36,9 +33,9 @@ public class WebUiChannelTests
 	[Test]
 	public async Task SendAsync_WhenTheTemplateRenders_ShowsTheRenderedTitleAndMessage()
 	{
-		rendered = Success.Of(new RenderedNotification(Some.Of("Nightly run"), Some.Of("42 items added"), new None()));
+		var rendered = Success.Of(new RenderedNotification(Some.Of("Nightly run"), Some.Of("42 items added"), new None()));
 
-		var result = await Testee.SendAsync(Context(NotificationEventType.FeedRunCompleted), Target(), NotificationTemplate.None);
+		var result = await Rendering(rendered).SendAsync(Context(NotificationEventType.FeedRunCompleted), Target(), NotificationTemplate.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliverySucceeded>();
 		await Assert.That(shown).HasSingleItem();
@@ -91,9 +88,8 @@ public class WebUiChannelTests
 	[Test]
 	public async Task SendAsync_WhenTheTemplateIsInvalid_FailsUnrecoverablyAndShowsNothing()
 	{
-		rendered = Error.From("The template is not valid.");
-
-		var result = await Testee.SendAsync(Context(NotificationEventType.FeedRunCompleted), Target(), NotificationTemplate.None);
+		var result = await Rendering(Error.From("The template is not valid."))
+			.SendAsync(Context(NotificationEventType.FeedRunCompleted), Target(), NotificationTemplate.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 		await Assert.That(shown).IsEmpty();

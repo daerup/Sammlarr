@@ -80,6 +80,7 @@ internal sealed class Screencast(ICDPSession session, DirectoryInfo folder, View
 			new ProcessStartInfo("ffmpeg")
 			{
 				RedirectStandardError = true,
+				UseShellExecute = false,
 				ArgumentList = { "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", list, "-vf", filter, "-loop", "0", gif },
 			}
 		)!;

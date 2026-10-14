@@ -23,14 +23,15 @@ internal static class PageExtensions
 		{
 			await page.WaitForFunctionAsync(CircuitReady, null, new PageWaitForFunctionOptions { Timeout = Wait.Preview, PollingInterval = 100 });
 		}
-		catch (TimeoutException)
+		catch (TimeoutException exception)
 		{
 			var blazor = await page.EvaluateAsync<bool>("() => !!window.Blazor");
 			var reconnecting = await page.EvaluateAsync<bool>("() => !!document.querySelector('#components-reconnect-modal.components-reconnect-show')");
 			var handlers = await page.EvaluateAsync<bool>($"() => {HandlersAttached}");
 			var body = (await page.InnerTextAsync("body")).ReplaceLineEndings(" ");
 			throw new TimeoutException(
-				$"circuit never became ready at {page.Url} (blazor={blazor}, reconnecting={reconnecting}, handlers={handlers}), body '{body[..Math.Min(400, body.Length)]}'"
+				$"circuit never became ready at {page.Url} (blazor={blazor}, reconnecting={reconnecting}, handlers={handlers}), body '{body[..Math.Min(400, body.Length)]}'",
+				exception
 			);
 		}
 	}
