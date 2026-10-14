@@ -9,14 +9,13 @@ internal static class StagingServices
 {
 	extension(IServiceCollection services)
 	{
-		internal IServiceCollection AddStagingSeed(IConfiguration configuration)
+		internal void AddStagingSeed(IConfiguration configuration)
 		{
 			services.AddSammlarrScheduling(configuration);
 			services.AddScoped<ICurrentUser, SeedingUser>();
 			services.AddScoped<IMessagePublisher, UnsentMessages>();
 			services.AddSingleton<ISessionInvalidator, NoSessions>();
 			services.AddSingleton<StagingRun>();
-			return services;
 		}
 	}
 

@@ -148,15 +148,6 @@ public static class AsyncEnumerableExtensions
 	extension<TIn>(IEnumerable<TIn> source)
 	{
 		public IReadOnlyList<Listed<TIn>> Numbered(int from = 0) => [.. source.Select((item, index) => new Listed<TIn>(from + index, item))];
-
-		public IAsyncEnumerable<TOut> SelectAwait<TOut>(
-			Func<TIn, CancellationToken, ValueTask<TOut>> selector,
-			int maxConcurrency,
-			CancellationToken cancellationToken = default
-		)
-		{
-			return source.ToAsyncEnumerable().SelectAwait(selector, maxConcurrency, cancellationToken);
-		}
 	}
 
 	extension<T>(Channel<T> channel)

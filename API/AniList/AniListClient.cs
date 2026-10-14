@@ -23,9 +23,7 @@ internal sealed class AniListClient(HttpClient http)
 		var problems = answer?.Errors ?? [];
 		if (problems.Count > 0)
 		{
-			return Error.From(
-				new AniListAnswerException(string.Join("; ", problems.Select(problem => problem.Message)), problems.Select(problem => problem.Status ?? 0).Max())
-			);
+			return Error.From(new AniListAnswerException(string.Join("; ", problems.Select(problem => problem.Message))));
 		}
 
 		if (!response.IsSuccessStatusCode)
@@ -37,7 +35,4 @@ internal sealed class AniListClient(HttpClient http)
 	}
 }
 
-internal sealed class AniListAnswerException(string message, int status) : Exception(message)
-{
-	public int Status { get; } = status;
-}
+internal sealed class AniListAnswerException(string message) : Exception(message);

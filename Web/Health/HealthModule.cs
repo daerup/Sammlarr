@@ -24,12 +24,11 @@ internal static class HealthEndpoints
 	private const string HealthEndpointPath = "/health";
 	private const string AlivenessEndpointPath = "/alive";
 
-	public static WebApplication MapHealthEndpoints(this WebApplication app)
+	public static void MapHealthEndpoints(this WebApplication app)
 	{
 		var healthChecks = app.MapGroup("");
 		healthChecks.CacheOutput(Policy).WithRequestTimeout(Policy);
 		healthChecks.MapHealthChecks(HealthEndpointPath);
 		healthChecks.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions { Predicate = static check => check.Tags.Contains("live") });
-		return app;
 	}
 }
