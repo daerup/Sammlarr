@@ -15,6 +15,7 @@ public class EntityAuditerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	private readonly DateTimeOffset _now = DateTimeOffset.Now;
+	private readonly EntityAuditer _testee = new();
 	private readonly DateTimeOffset _then = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(10));
 
 	[Test]
@@ -22,7 +23,7 @@ public class EntityAuditerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var entry = GetAuditableEntry(EntityState.Added);
 
-		EntityAuditer.UpdateTimestamps(entry, _now);
+		_testee.UpdateTimestamps(entry, _now);
 
 		await Assert.That(entry.Entity.CreatedAt).IsEqualTo(_now);
 		await Assert.That(entry.Entity.UpdatedAt).IsEqualTo(_now);
@@ -33,7 +34,7 @@ public class EntityAuditerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var entry = GetAuditableEntry(EntityState.Modified);
 
-		EntityAuditer.UpdateTimestamps(entry, _now);
+		_testee.UpdateTimestamps(entry, _now);
 
 		await Assert.That(entry.Entity.CreatedAt).IsEqualTo(_then);
 		await Assert.That(entry.Entity.UpdatedAt).IsEqualTo(_now);
@@ -46,7 +47,7 @@ public class EntityAuditerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var entry = GetAuditableEntry(state);
 
-		EntityAuditer.UpdateTimestamps(entry, _now);
+		_testee.UpdateTimestamps(entry, _now);
 
 		await Assert.That(entry.Entity.CreatedAt).IsEqualTo(_then);
 		await Assert.That(entry.Entity.UpdatedAt).IsEqualTo(_then);

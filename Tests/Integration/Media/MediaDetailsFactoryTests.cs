@@ -17,6 +17,8 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		RefreshedAt.AddDays(-3)
 	);
 
+	private readonly MediaDetailsFactory _testee = new();
+
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Test]
@@ -36,7 +38,7 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		);
 		var entity = await PersistAsync(written, mediaId);
 
-		await Assert.That(MediaDetailsFactory.ToCached(entity)).IsEqualTo(written);
+		await Assert.That(_testee.ToCached(entity)).IsEqualTo(written);
 	}
 
 	[Test]
@@ -46,7 +48,7 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		var mediaId = await fixture.SeedMediaAsync([plexId]);
 		var entity = await PersistAsync(Cached(ShowDetails()), mediaId);
 
-		await Assert.That(MediaDetailsFactory.ToCached(entity)).IsEqualTo(Cached(ShowDetails()));
+		await Assert.That(_testee.ToCached(entity)).IsEqualTo(Cached(ShowDetails()));
 	}
 
 	[Test]
@@ -56,7 +58,7 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		var mediaId = await fixture.SeedMediaAsync([plexId]);
 		var entity = await PersistAsync(Cached(new MovieDetails { Title = "Only a title" }), mediaId);
 
-		await Assert.That(MediaDetailsFactory.ToCached(entity).Details).IsEqualTo(new MovieDetails { Title = "Only a title" });
+		await Assert.That(_testee.ToCached(entity).Details).IsEqualTo(new MovieDetails { Title = "Only a title" });
 	}
 
 	[Test]
@@ -66,12 +68,12 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		var mediaId = await fixture.SeedMediaAsync([plexId]);
 		var entity = await PersistAsync(Cached(new ShowDetails { Title = "Only a title" }), mediaId);
 
-		await Assert.That(MediaDetailsFactory.ToCached(entity).Details).IsEqualTo(new ShowDetails { Title = "Only a title" });
+		await Assert.That(_testee.ToCached(entity).Details).IsEqualTo(new ShowDetails { Title = "Only a title" });
 	}
 
 	private async Task<MediaDetailsRow> PersistAsync(CachedDetails cached, MediaId mediaId)
 	{
-		var entity = MediaDetailsFactory.BuildFrom(cached, mediaId.Value);
+		var entity = _testee.BuildFrom(cached, mediaId.Value);
 		fixture.Context.MediaDetails.Add(entity);
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();

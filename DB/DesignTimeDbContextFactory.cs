@@ -19,6 +19,8 @@ internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<S
 		services.AddModule<ConversionModule>();
 		services.AddDataProtection().UseEphemeralDataProtectionProvider();
 		services.AddModule<DataAccessModule>();
+		services.AddScoped<EntityAuditer>();
+		services.AddScoped<UserOwnershipStamper>();
 
 		var provider = services.BuildServiceProvider();
 
@@ -26,6 +28,8 @@ internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<S
 
 		return new SammlarrDbContext(
 			options,
+			provider.GetRequiredService<EntityAuditer>(),
+			provider.GetRequiredService<UserOwnershipStamper>(),
 			new AnonymousCurrentUser(),
 			provider.GetServices<IPropertyAddedConvention>(),
 			provider.GetServices<IModelConfiguration>(),

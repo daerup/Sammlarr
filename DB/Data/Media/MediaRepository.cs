@@ -6,8 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Media;
 
-internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, MediaWriteLock writeLock, IDateTimeProvider clock)
-	: IMediaRepository
+internal sealed class MediaRepository(
+	IDbContextFactory<SammlarrDbContext> dbContextFactory,
+	MediaDetailsFactory detailsFactory,
+	MediaWriteLock writeLock,
+	IDateTimeProvider clock
+) : IMediaRepository
 {
 	public async Task<IReadOnlyList<StoredMedia>> GetAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default)
 	{
@@ -33,7 +37,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		return await ReadAsync(ctx, await ctx.OwnersAsync(candidates, cancellationToken), cancellationToken);
 	}
 
-	private static async Task<IReadOnlyList<StoredMedia>> ReadAsync(SammlarrDbContext ctx, IReadOnlyList<Guid> owners, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<StoredMedia>> ReadAsync(SammlarrDbContext ctx, IReadOnlyList<Guid> owners, CancellationToken cancellationToken)
 	{
 		if (owners.Count == 0)
 		{
@@ -74,7 +78,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			group external.Row by external.MediaId into owned
 			select new StoredMedia(
 				new MediaIdentity(MediaId.From(owned.Key), [.. owned.Select(row => (IIdentityKey)row.ToExternalMediaId())]),
-				details.GetValueOrNone(owned.Key).Map(MediaDetailsFactory.ToCached)
+				details.GetValueOrNone(owned.Key).Map(detailsFactory.ToCached)
 			),
 		];
 	}
@@ -106,7 +110,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			.ExecuteDeleteAsync(cancellationToken);
 		foreach (var change in changed)
 		{
-			var row = MediaDetailsFactory.BuildFrom(change.After, change.Id.Value);
+			var row = detailsFactory.BuildFrom(change.After, change.Id.Value);
 			ctx.Entry(row).State = stored.Contains(row.MediaId) ? EntityState.Modified : EntityState.Added;
 			ctx.AddRange(row.Ratings);
 			ctx.AddRange(row.Answers);

@@ -76,7 +76,7 @@ public class ExternalMediaIdRowTests(SammlarrTestHost fixture) : IAsyncDisposabl
 		await using var snapshot = await reading.SnapshotAsync(CancellationToken.None);
 		var before = await reading.MediaRatings.CountAsync();
 
-		var repository = new MediaRepository(fixture.ContextFactory, new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
+		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
 
 		await repository.SaveDetailsAsync([new DetailsChange(MediaId.From(media.Id), new None(), Rated())]);
 
