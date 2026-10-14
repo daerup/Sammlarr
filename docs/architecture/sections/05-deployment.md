@@ -12,6 +12,23 @@ container, all state lives in one `/data` folder, the database and the key ring 
 | Dashboard | http://localhost:15223 | http://localhost:15224 | none |
 | Data | `Web/sammlarr.db`, `Web/dp-keys` | `%LOCALAPPDATA%\Sammlarr\staging` | the `sammlarr-data` volume at `/data` |
 
+## The deployed system
+
+```mermaid
+flowchart LR
+  browser["Browser"] -->|":6769"| app
+  ghcr[("ghcr.io/daerup/sammlarr")] -.->|image| app
+  app["sammlarr container<br/>Docker, chiseled image"] --- vol[("/data volume<br/>sammlarr.db, dp-keys")]
+  app --> providers["List and title services<br/>TMDB, Plex, MDBList, Trakt, ..."]
+  app --> arr["Radarr, Sonarr"]
+  app --> notify["Webhook, Pushover"]
+  app --> github["GitHub releases<br/>(update check)"]
+  app -.-> otel["OTLP collector<br/>(optional)"]
+```
+
+One container, one volume. Sammlarr only calls out: to the services it reads, the Radarr and Sonarr it writes to, the
+notification targets each user sets up, GitHub for the update check, and an OTLP collector when one is configured.
+
 ## Dev run and staging
 
 The AppHost's `http` profile (`AppHost/Properties/launchSettings.json`) sets `ASPIRE_ALLOW_UNSECURED_TRANSPORT=true`,
@@ -34,6 +51,13 @@ and an indexer, and a webhook catcher (`AppHost/Staging`). Guide: [Testing › S
   (1654), which owns `/data`. Plain HTTP on 6769.
 - **Health**: `HEALTHCHECK` runs `dotnet Web.dll healthcheck`, which asks `/alive` (the process and the job runner's
   liveness) and exits 0 or 1 (`Web/Health/ContainerHealthProbe.cs`).
+
+| Image property | Today |
+|---|---|
+| Reproducible | yes: base images pinned by digest, `SOURCE_DATE_EPOCH` and `rewrite-timestamp` (see Build) |
+| Signed (cosign) | not yet: release plan Phase 7 |
+| SLSA provenance | not yet: Phase 7 (`release.yml` sets `provenance: false`) |
+| SBOM | not yet: Phase 6 (`release.yml` sets `sbom: false`) |
 
 ## Release
 
