@@ -3,7 +3,6 @@ using API.Http.Lanes;
 using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Processing;
-using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Feed.Run;
@@ -16,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Shared.Concurrency;
 using Shared.Options;
 using TestInfrastructure;
+using static Harness.FeedItemSpec;
 using static Harness.Ids;
 
 namespace Integration.Tests.Feeds;
@@ -32,7 +32,7 @@ public class FeedRunTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var time = host.UseFakeTime();
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("stalled-list");
+		var feedId = await host.SeedFeedAsync("stalled-list");
 		host.MdblistFeedContains("stalled-list", Item("Heat", MediaType.Movie, Tmdb("949")) with { Year = 1995 });
 		await host.WithPlexAccount("plex-token");
 		await host.PlexMatchesNothing(new MediaSpec("Heat", MediaType.Movie, [Tmdb("949")]));
@@ -40,7 +40,9 @@ public class FeedRunTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RateLimitedAsync(RemoteService.Plex, minutes: 60);
 
 		var running = host.Resolve<IFeedRunEngine>().RunAsync(feedId, new FeedRunTrigger(new Manual()));
-		await EventuallyAsync(() => host.Resolve<Lanes>().Gate(new LaneName(RemoteService.Plex, Lanes.Rest), new None()).Load(LaneClass.Title).Waiting == 1);
+		await SammlarrTestHost.EventuallyAsync(() =>
+			host.Resolve<Lanes>().Gate(new LaneName(RemoteService.Plex, Lanes.Rest), new None()).Load(LaneClass.Title).Waiting == 1
+		);
 		time.Advance(new FeedLoadOptions().StallAfter);
 
 		var completed = await Assert.That(await running.WaitAsync(Patience)).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
@@ -65,7 +67,7 @@ public class FeedRunTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task PlanAsync_TwiceInOneScope_StartsEachLoadWithEmptyMemos()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("memo-list");
+		var feedId = await host.SeedFeedAsync("memo-list");
 		host.MdblistFeedContains("memo-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		var planner = host.Resolve<IFeedRunPlanner>();
@@ -73,7 +75,7 @@ public class FeedRunTests(SammlarrTestHost host) : IAsyncDisposable
 		await planner.PlanAsync(new SavedFeed(feedId));
 		await planner.PlanAsync(new SavedFeed(feedId));
 
-		await EventuallyAsync(() => host.HttpStub.Requests($"{TestUrls.MdblistApi}/tmdb/movie") == 2);
+		await SammlarrTestHost.EventuallyAsync(() => host.HttpStub.Requests($"{TestUrls.MdblistApi}/tmdb/movie") == 2);
 	}
 
 	[Test]
@@ -87,7 +89,7 @@ public class FeedRunTests(SammlarrTestHost host) : IAsyncDisposable
 			Role = UserRole.Member,
 		};
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("owners-list");
+		var feedId = await host.SeedFeedAsync("owners-list");
 		host.MdblistFeedEmpty("owners-list");
 		await host.SignInAs("Stranger");
 		await using var scope = host.Resolve<IServiceScopeFactory>().CreateAsyncScope();
@@ -97,36 +99,5 @@ public class FeedRunTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var plan = await Assert.That(result).IsOfUnionType<FeedPlanResult, AppendPlan>();
 		await Assert.That(plan!.SourceFailure).IsNone();
-	}
-
-	private static async Task EventuallyAsync(Func<bool> condition)
-	{
-		using var timeout = new CancellationTokenSource(Patience);
-		while (!condition())
-		{
-			await Task.Delay(TimeSpan.FromMilliseconds(20), timeout.Token);
-		}
-	}
-
-	private static FeedItemSpec Item(string title, MediaType type, params ProviderId[] ids)
-	{
-		return new FeedItemSpec(title, type, null, ids.ToDictionary(id => id.Provider, id => id.Value));
-	}
-
-	private async Task<FeedId> SeedFeedAsync(string identifier)
-	{
-		var entity = new FeedRow
-		{
-			Name = "Comedy",
-			IsEnabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new FeedStrategy(new Append()),
-			Identifier = identifier,
-		};
-
-		host.Context.Feeds.Add(entity);
-		await host.Context.SaveChangesAsync();
-		host.Context.ChangeTracker.Clear();
-		return FeedId.From(entity.Id);
 	}
 }

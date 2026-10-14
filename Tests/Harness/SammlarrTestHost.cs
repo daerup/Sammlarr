@@ -4,6 +4,7 @@ using System.Text;
 using API;
 using API.Http.Lanes;
 using API.Mal;
+using API.Mdblist;
 using API.Plex;
 using API.Tmdb;
 using Contracts;
@@ -16,13 +17,17 @@ using Contracts.Media;
 using Contracts.Messaging;
 using Contracts.Wantlist;
 using Core;
+using Core.Jobs;
 using DB;
 using DB.Data;
+using DB.Data.Feed;
 using DB.Data.Identity;
 using DB.Data.Media;
 using Domain.Announcing;
+using Domain.Feed;
 using Domain.Identity;
 using Domain.Media;
+using Domain.Processing;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.DataProtection;
@@ -35,6 +40,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
 using Shared.Concurrency;
 using Shared.DI;
@@ -134,6 +140,68 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		List<IEvent> heard = [];
 		Resolve<IEventPublisher>().Published += heard.Add;
 		return heard;
+	}
+
+	internal async Task<FeedId> SeedFeedAsync(
+		string identifier = "hdlists/comedy",
+		FeedStrategy? strategy = null,
+		QueryFilter? filter = null,
+		QueryLimit? limit = null,
+		string name = "Comedy"
+	)
+	{
+		await using var context = await ContextFactory.CreateDbContextAsync();
+		var feed = new FeedRow
+		{
+			Name = name,
+			IsEnabled = true,
+			Provider = FeedProvider.Mdblist,
+			Strategy = strategy ?? new Append(),
+			Identifier = identifier,
+			Filter = filter,
+			Limit = limit,
+		};
+		context.Feeds.Add(feed);
+		await context.SaveChangesAsync();
+		return FeedId.From(feed.Id);
+	}
+
+	internal JobRunner BuildJobRunner() =>
+		new(
+			Resolve<IServiceScopeFactory>(),
+			Resolve<JobSignal>(),
+			Resolve<JobAlarm>(),
+			Resolve<JobRunnerStatus>(),
+			Resolve<JobTurn>(),
+			Resolve<IDateTimeProvider>(),
+			NullLogger<JobRunner>.Instance
+		);
+
+	internal Task<bool> RunNextJobAsync() => BuildJobRunner().TryRunNextAsync(CancellationToken.None);
+
+	internal static async Task EventuallyAsync(Func<bool> condition)
+	{
+		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+		while (!condition())
+		{
+			await Task.Delay(TimeSpan.FromMilliseconds(20), timeout.Token);
+		}
+	}
+
+	internal static HttpResponseMessage MdblistAllowance(long remaining, DateTimeOffset reset)
+	{
+		var answered = new HttpResponseMessage(HttpStatusCode.OK);
+		answered.Headers.Add("x-ratelimit-remaining", $"{remaining}");
+		answered.Headers.Add("x-ratelimit-reset", $"{reset.ToUnixTimeSeconds()}");
+		return answered;
+	}
+
+	internal void MdblistKeyHasLeft(string key, long remaining)
+	{
+		var budget = Resolve<MdblistBudget>();
+		budget.Record(key, MdblistAllowance(30, _clock.Now.AddHours(-1)));
+		budget.Record(key, MdblistAllowance(1000, _clock.Now.AddDays(1)));
+		budget.Record(key, MdblistAllowance(remaining, _clock.Now.AddDays(1)));
 	}
 
 	internal async Task<MediaId> SeedMediaAsync(params IIdentityKey[] externals)
@@ -465,9 +533,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal MediaBuilder Movie(MediaSpec spec) => new(this, spec.Type, spec.Title, spec.Ids);
 
-	internal MediaBuilder Show(MediaSpec spec) => new(this, spec.Type, spec.Title, spec.Ids);
-
-	internal MediaBuilder Movie(string title, string? tmdb = null, string? plex = null, string? imdb = null, string? tvdb = null)
+	internal MediaBuilder Movie(string title, string? tmdb = null, string? plex = null)
 	{
 		var ids = new List<ProviderId>();
 		if (tmdb is not null)
@@ -478,16 +544,6 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		if (plex is not null)
 		{
 			ids.Add(Ids.Plex(plex));
-		}
-
-		if (imdb is not null)
-		{
-			ids.Add(Ids.Imdb(imdb));
-		}
-
-		if (tvdb is not null)
-		{
-			ids.Add(Ids.Tvdb(tvdb));
 		}
 
 		return new MediaBuilder(this, MediaType.Movie, title, ids);

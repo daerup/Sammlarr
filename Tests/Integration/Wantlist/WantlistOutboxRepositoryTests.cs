@@ -1,4 +1,3 @@
-using DB.Data.Media;
 using DB.Data.Wantlist.Outbox;
 using Domain.Media;
 using Domain.Providers;
@@ -19,19 +18,10 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Before(Test)]
 	public void Setup() => _testee = new WantlistOutboxRepository(fixture.ContextFactory);
 
-	private async Task<MediaId> SeedMediaAsync(IEnumerable<IIdentityKey> ids)
-	{
-		var media = new MediaRow();
-		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
-		await fixture.Context.SaveChangesAsync();
-		fixture.Context.ChangeTracker.Clear();
-		return MediaId.From(media.Id);
-	}
-
 	[Test]
 	public async Task EnqueueAsync_NewId_InsertsPendingRow()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-200", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-200", MediaType.Movie)]);
 
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 
@@ -43,7 +33,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task EnqueueAsync_ExistingId_ReplacesKind()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-201", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-201", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [mediaId]);
@@ -56,8 +46,8 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task GetAllAsync_ReturnsAllOps()
 	{
-		var addId = await SeedMediaAsync([PlexId.From("plex-202", MediaType.Movie)]);
-		var removeId = await SeedMediaAsync([PlexId.From("plex-203", MediaType.Movie)]);
+		var addId = await fixture.SeedMediaAsync([PlexId.From("plex-202", MediaType.Movie)]);
+		var removeId = await fixture.SeedMediaAsync([PlexId.From("plex-203", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [addId]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [removeId]);
 
@@ -71,7 +61,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task GetAllAsync_IncludesStatusAndAttempts()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-700", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-700", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 		await _testee.RecordFailedAttemptAsync(SinkKind.Plex, [mediaId], WantlistOutboxState.Pending, new None());
 
@@ -85,7 +75,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task GetAllAsync_ForAnotherSink_LeavesOutTheRowsQueuedForThisOne()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-206", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-206", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [mediaId]);
 
 		await Assert.That(await _testee.GetAllAsync(SinkKind.Arr)).IsEmpty();
@@ -95,8 +85,8 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task ReplaceAsync_ForAnotherSink_QueuesItsAddsAndLeavesTheOtherSinksRowsAlone()
 	{
-		var removed = await SeedMediaAsync([PlexId.From("plex-207", MediaType.Movie)]);
-		var wanted = await SeedMediaAsync([PlexId.From("plex-208", MediaType.Movie)]);
+		var removed = await fixture.SeedMediaAsync([PlexId.From("plex-207", MediaType.Movie)]);
+		var wanted = await fixture.SeedMediaAsync([PlexId.From("plex-208", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [removed]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [wanted]);
 
@@ -113,8 +103,8 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task ReplaceAsync_Again_KeepsOnlyTheLatestAdds()
 	{
-		var earlier = await SeedMediaAsync([PlexId.From("plex-209", MediaType.Movie)]);
-		var later = await SeedMediaAsync([PlexId.From("plex-210", MediaType.Movie)]);
+		var earlier = await fixture.SeedMediaAsync([PlexId.From("plex-209", MediaType.Movie)]);
+		var later = await fixture.SeedMediaAsync([PlexId.From("plex-210", MediaType.Movie)]);
 		await _testee.ReplaceAsync(SinkKind.Arr, [earlier]);
 
 		await _testee.ReplaceAsync(SinkKind.Arr, [later]);
@@ -125,8 +115,8 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task DropOtherSinksAsync_KeepsOnlyTheRowsOfTheGivenSink()
 	{
-		var removed = await SeedMediaAsync([PlexId.From("plex-211", MediaType.Movie)]);
-		var wanted = await SeedMediaAsync([PlexId.From("plex-212", MediaType.Movie)]);
+		var removed = await fixture.SeedMediaAsync([PlexId.From("plex-211", MediaType.Movie)]);
+		var wanted = await fixture.SeedMediaAsync([PlexId.From("plex-212", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Remove, [removed]);
 		await _testee.ReplaceAsync(SinkKind.Arr, [wanted]);
 
@@ -139,7 +129,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task DropAsync_ForOneSink_LeavesTheSameTitlesRowForTheOtherSink()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-213", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-213", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 		await _testee.EnqueueAsync(SinkKind.Arr, WantlistOperationAction.Add, [mediaId]);
 
@@ -152,7 +142,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task RecordFailedAttemptAsync_ForOneSink_LeavesTheSameTitlesRowForTheOtherSink()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-214", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-214", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 		await _testee.EnqueueAsync(SinkKind.Arr, WantlistOperationAction.Add, [mediaId]);
 
@@ -165,7 +155,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task DropAsync_RemovesEntry()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-205", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-205", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 
 		await _testee.DropAsync(SinkKind.Plex, [mediaId]);
@@ -186,7 +176,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task RecordFailedAttemptAsync_TransientIncrementsAttemptsAndKeepsPending()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-500", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-500", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 
 		await _testee.RecordFailedAttemptAsync(SinkKind.Plex, [mediaId], WantlistOutboxState.Pending, new None());
@@ -200,7 +190,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task RecordFailedAttemptAsync_WithAReason_KeepsItAsTheLastErrorUntilTheTitleIsQueuedAgain()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-503", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-503", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 
 		await _testee.RecordFailedAttemptAsync(SinkKind.Plex, [mediaId], WantlistOutboxState.Pending, Some.Of("Plex answered 500 Internal Server Error."));
@@ -214,7 +204,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task RecordFailedAttemptAsync_WithoutAReason_ClearsTheEarlierOne()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-504", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-504", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 		await _testee.RecordFailedAttemptAsync(SinkKind.Plex, [mediaId], WantlistOutboxState.Pending, Some.Of("Plex answered 500 Internal Server Error."));
 
@@ -226,7 +216,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task RecordFailedAttemptAsync_GiveUpMarksFailedAndRoundTrips()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-701", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-701", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 
 		await _testee.RecordFailedAttemptAsync(SinkKind.Plex, [mediaId], WantlistOutboxState.Failed, new None());
@@ -239,7 +229,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task RecordFailedAttemptAsync_EmptyInput_NoOp()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-502", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-502", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 
 		await _testee.RecordFailedAttemptAsync(SinkKind.Plex, [], WantlistOutboxState.Failed, new None());
@@ -252,7 +242,7 @@ public class WantlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task EnqueueAsync_ExistingId_ResetsStatusToPendingAndAttemptsToZero()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-702", MediaType.Movie)]);
+		var mediaId = await fixture.SeedMediaAsync([PlexId.From("plex-702", MediaType.Movie)]);
 		await _testee.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [mediaId]);
 		await _testee.RecordFailedAttemptAsync(SinkKind.Plex, [mediaId], WantlistOutboxState.Failed, new None());
 

@@ -3,6 +3,7 @@ using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using static Harness.FeedItemSpec;
 using static Harness.Ids;
 
 namespace Integration.Tests.Feeds;
@@ -247,7 +248,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.WithMdblistAccount("test-key");
 		await host.Movie(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205"))).ServedByPlex().ServedByTmdb().SeedAsync();
-		await host.Show(TestMedia.BreakingBad).ServedByPlex().ServedByTmdb().SeedAsync();
+		await host.Movie(TestMedia.BreakingBad).ServedByPlex().ServedByTmdb().SeedAsync();
 		host.MdblistFeedContains("mixed-list", Item("Inception", MediaType.Movie, Tmdb("27205")), Item("Breaking Bad", MediaType.Show, Tmdb("1396")));
 
 		await Assert.That(await Testee.GetFeedItemsAsync("mixed-list", FieldNeeds.None).InListOrderAsync().ToListAsync()).Count().IsEqualTo(2);
@@ -266,9 +267,6 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	private static MediaSpec Spec(string title, params ProviderId[] ids) => new(title, MediaType.Movie, ids);
-
-	private static FeedItemSpec Item(string? title, MediaType type, params ProviderId[] ids) =>
-		new(title, type, null, ids.ToDictionary(id => id.Provider, id => id.Value));
 
 	private static FeedPage Page(int offset, bool hasMore, params string[] titles) => new(offset, hasMore, titles);
 

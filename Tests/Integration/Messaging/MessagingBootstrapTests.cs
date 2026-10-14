@@ -8,12 +8,8 @@ using Domain.Feed;
 using Domain.Identity;
 using Domain.Notifications;
 using Messaging;
-using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Shared.DI;
-using Shared.Options;
 using Wolverine;
 using Wolverine.Persistence.Durability;
 using Wolverine.RDBMS;
@@ -27,7 +23,7 @@ public class MessagingBootstrapTests
 	[Test]
 	public async Task Publish_WhenTheMessageIsDurable_IsHandledThroughTheSqliteStore()
 	{
-		await WithHostAsync(async host =>
+		await MessagingHost.WithHostAsync(async host =>
 		{
 			var session = await host.TrackActivity().PublishMessageAndWaitAsync(new Ping("hello"));
 			await Assert.That(session.Executed.MessagesOf<Ping>().ToList()).Count().IsEqualTo(1);
@@ -39,9 +35,9 @@ public class MessagingBootstrapTests
 	{
 		var owner = UserId.From(Guid.NewGuid());
 		INotification notification = new FeedRunCompletedNotification(owner, DateTimeOffset.UtcNow, FeedId.From(Guid.NewGuid()), 3, 1);
-		var userScope = DispatchingUserScope();
+		var userScope = MessagingHost.PassingUserScope();
 
-		await WithHostAsync(
+		await MessagingHost.WithHostAsync(
 			async host =>
 			{
 				Func<IMessageContext, Task> publish = async _ =>
@@ -62,7 +58,7 @@ public class MessagingBootstrapTests
 	[Test]
 	public async Task Start_ForTheSqliteStore_OpensConnectionsThatDoNotMemoryMapTheFileSoACompactionCanShrinkIt()
 	{
-		await WithHostAsync(async host =>
+		await MessagingHost.WithHostAsync(async host =>
 		{
 			var store = (IMessageDatabase)host.Services.GetRequiredService<IMessageStore>();
 			await using var connection = await store.DataSource.OpenConnectionAsync();
@@ -71,13 +67,6 @@ public class MessagingBootstrapTests
 
 			await Assert.That(Convert.ToInt64(await command.ExecuteScalarAsync())).IsEqualTo(0);
 		});
-	}
-
-	private static Mock<IUserScope> DispatchingUserScope()
-	{
-		var userScope = IUserScope.Mock();
-		userScope.AsAsync(Any<UserId>(), Any()).Returns(new NoopDisposable());
-		return userScope;
 	}
 
 	private static void DispatchCollaborators(IServiceCollection services, Mock<IUserScope> userScope)
@@ -90,41 +79,5 @@ public class MessagingBootstrapTests
 		services.AddSingleton(subscriptions.Object);
 		services.AddSingleton(IMediaRepository.Mock().Object);
 		services.AddSingleton(IFeedRepository.Mock().Object);
-	}
-
-	private static async Task WithHostAsync(Func<IHost, Task> body, Action<IServiceCollection>? configureServices = null)
-	{
-		var dbPath = Path.Combine(Path.GetTempPath(), $"wolverine-test-{Guid.NewGuid():N}.db");
-		var connectionString = $"Data Source={dbPath}";
-		try
-		{
-			var configuration = new ConfigurationBuilder()
-				.AddInMemoryCollection(
-					new Dictionary<string, string?> { [$"{SammlarOptions.SectionName}:{nameof(SammlarOptions.ConnectionString)}"] = connectionString }
-				)
-				.Build();
-
-			var builder = Host.CreateDefaultBuilder();
-			if (configureServices is not null)
-			{
-				builder.ConfigureServices(configureServices);
-			}
-
-			using var host = await builder.UseSammlarrMessaging(configuration).StartAsync();
-			await body(host);
-		}
-		finally
-		{
-			SqliteConnection.ClearAllPools();
-			if (File.Exists(dbPath))
-			{
-				File.Delete(dbPath);
-			}
-		}
-	}
-
-	private sealed class NoopDisposable : IDisposable
-	{
-		public void Dispose() { }
 	}
 }

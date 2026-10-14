@@ -51,7 +51,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task GetTrendingAsync_WhenAShowIsCached_ResolvesIt()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.BreakingBad);
-		await host.Show(TestMedia.BreakingBad).SeedAsync();
+		await host.Movie(TestMedia.BreakingBad).SeedAsync();
 
 		var items = (await FetchTrending(1)).Items;
 

@@ -8,7 +8,11 @@ using Shared.Concurrency;
 
 namespace Harness;
 
-internal sealed record FeedItemSpec(string? Title, MediaType Type, int? Year, IReadOnlyDictionary<MediaProvider, string> Ids);
+internal sealed record FeedItemSpec(string? Title, MediaType Type, int? Year, IReadOnlyDictionary<MediaProvider, string> Ids)
+{
+	internal static FeedItemSpec Item(string? title, MediaType type, params ProviderId[] ids) =>
+		new(title, type, null, ids.ToDictionary(id => id.Provider, id => id.Value));
+}
 
 internal sealed record FeedPage(int Offset, bool HasMore, IReadOnlyList<string> Titles);
 

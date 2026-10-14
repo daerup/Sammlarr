@@ -1,10 +1,8 @@
 using Contracts.Feed;
-using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
-using Domain.Providers;
 using Harness;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
@@ -21,7 +19,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task PlanAsync_ForAnOwnedItemMissingFromTheList_DropsItOnlyOnceGraceIsSpent()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync(strategy: new Mirror(Threshold));
 		var feed = (await Assert.That(await fixture.Resolve<IFeedRepository>().FindAsync(feedId)).IsSome())!;
 		var origin = await fixture.SeedFeedOriginAsync(feedId);
 
@@ -52,7 +50,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task PlanAsync_WhenTheListOutageIsInconclusive_NeverBurnsGrace()
 	{
-		var feedId = await SeedFeedAsync();
+		var feedId = await fixture.SeedFeedAsync(strategy: new Mirror(Threshold));
 		var feed = (await Assert.That(await fixture.Resolve<IFeedRepository>().FindAsync(feedId)).IsSome())!;
 		var origin = await fixture.SeedFeedOriginAsync(feedId);
 
@@ -102,22 +100,5 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 				Runtime = TimeSpan.FromMinutes(90),
 			}
 		);
-	}
-
-	private async Task<FeedId> SeedFeedAsync()
-	{
-		var entity = new FeedRow
-		{
-			Name = "Comedy",
-			IsEnabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new FeedStrategy(new Mirror(Threshold)),
-			Identifier = "hdlists/comedy",
-		};
-
-		fixture.Context.Feeds.Add(entity);
-		await fixture.Context.SaveChangesAsync();
-		fixture.Context.ChangeTracker.Clear();
-		return FeedId.From(entity.Id);
 	}
 }

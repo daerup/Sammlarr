@@ -36,7 +36,7 @@ public class MediaSearchTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task SearchAsync_WhenResultsMixTypes_ReturnsMoviesAndShows()
 	{
 		await host.Movie(TestMedia.FightClub).SeedAsync();
-		await host.Show(TestMedia.BreakingBad).SeedAsync();
+		await host.Movie(TestMedia.BreakingBad).SeedAsync();
 		await host.PlexSearchReturns("thriller", TestMedia.FightClub, TestMedia.BreakingBad);
 
 		var results = (await Testee.SearchAsync("thriller", [MediaType.Movie, MediaType.Show])).Results;

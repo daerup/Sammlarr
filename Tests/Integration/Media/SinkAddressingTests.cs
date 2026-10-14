@@ -55,7 +55,7 @@ public class SinkAddressingTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task GetSinkIdsAsync_ForTitlesThatCarryEveryId_ReturnsEachTitlesOwnAddressAndSkipsATypeItCannotAddress()
 	{
 		var movie = await host.Movie(new MediaSpec("The Matrix", MediaType.Movie, [Tmdb("603"), Tvdb("9603"), Plex("603")])).SeedAsync();
-		var show = await host.Show(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Tvdb("81189"), Plex("1396")])).SeedAsync();
+		var show = await host.Movie(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Tvdb("81189"), Plex("1396")])).SeedAsync();
 		var unknown = await host.Movie(new MediaSpec("Mystery", MediaType.Unknown, [Tmdb("42"), Tvdb("42"), Plex("42")])).SeedAsync();
 
 		var sinkIds = await Testee.GetSinkIdsAsync([movie, show, unknown]);
@@ -92,7 +92,7 @@ public class SinkAddressingTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var breakingBad = new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Plex("1396")]);
 		host.PlexHasNoMetadataFor(breakingBad);
-		var show = await host.Show(breakingBad).SeedAsync();
+		var show = await host.Movie(breakingBad).SeedAsync();
 
 		var added = await host.Resolve<IWantlistService>().AddAsync([show], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
 
@@ -103,7 +103,7 @@ public class SinkAddressingTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task AddAsync_ForAShowFoundOnlyByItsTmdbId_LooksUpTheIdTheSinkAddsShowsBy()
 	{
 		await host.TmdbKnowsTheExternalIdsOf(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Tvdb("81189")]));
-		var show = await host.Show(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396")])).SeedAsync();
+		var show = await host.Movie(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396")])).SeedAsync();
 
 		await host.Resolve<IWantlistService>().AddAsync([show], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
 

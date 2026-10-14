@@ -1,11 +1,8 @@
 using System.Net;
-using API.Mdblist;
 using API.Tmdb;
-using Contracts;
 using Contracts.Jobs;
 using Contracts.Media;
 using Contracts.Wantlist;
-using Core.Jobs;
 using Core.Media;
 using Domain.Jobs;
 using Domain.Media;
@@ -13,7 +10,6 @@ using Domain.Providers;
 using Domain.Wantlist;
 using Harness;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -117,10 +113,7 @@ public class DetailsFillTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
 		var fightClub = await WantlistedAsync(TestMedia.FightClub, Complete("Fight Club"));
-		var budget = host.Resolve<MdblistBudget>();
-		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 30, reset: Now.AddHours(-1)));
-		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 1000, reset: Now.AddDays(1)));
-		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 400, reset: Now.AddDays(1)));
+		host.MdblistKeyHasLeft(SammlarrTestHost.MdblistApiKey, 400);
 
 		await FillAsync();
 
@@ -133,22 +126,11 @@ public class DetailsFillTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
 		await WantlistedAsync(TestMedia.FightClub, Complete("Fight Club"));
-		var budget = host.Resolve<MdblistBudget>();
-		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 30, reset: Now.AddHours(-1)));
-		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 1000, reset: Now.AddDays(1)));
-		budget.Record(SammlarrTestHost.MdblistApiKey, Allowance(remaining: 600, reset: Now.AddDays(1)));
+		host.MdblistKeyHasLeft(SammlarrTestHost.MdblistApiKey, 600);
 
 		await FillAsync();
 
 		await Assert.That(host.HttpStub.Requests($"{TestUrls.MdblistApi}/tmdb/movie")).IsEqualTo(1);
-	}
-
-	private static HttpResponseMessage Allowance(long remaining, DateTimeOffset reset)
-	{
-		var answered = new HttpResponseMessage(HttpStatusCode.OK);
-		answered.Headers.Add("x-ratelimit-remaining", $"{remaining}");
-		answered.Headers.Add("x-ratelimit-reset", $"{reset.ToUnixTimeSeconds()}");
-		return answered;
 	}
 
 	[Test]
@@ -166,7 +148,7 @@ public class DetailsFillTests(SammlarrTestHost host) : IAsyncDisposable
 		host.SetCurrentTime(due);
 		await host.Resolve<IJobRepository>().ReleaseDueAsync(due);
 
-		while (await RunNextJobAsync()) { }
+		while (await host.RunNextJobAsync()) { }
 
 		await Assert.That(host.HttpStub.Requests("api_key=ann-tmdb-key")).IsEqualTo(1);
 		await Assert.That(host.HttpStub.Requests("api_key=ben-tmdb-key")).IsEqualTo(1);
@@ -211,19 +193,6 @@ public class DetailsFillTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await using var scope = host.Resolve<IServiceScopeFactory>().CreateAsyncScope();
 		await scope.ServiceProvider.GetRequiredService<DetailsFill>().RunAsync(CancellationToken.None);
-	}
-
-	private async Task<bool> RunNextJobAsync()
-	{
-		return await new JobRunner(
-			host.Resolve<IServiceScopeFactory>(),
-			host.Resolve<JobSignal>(),
-			host.Resolve<JobAlarm>(),
-			host.Resolve<JobRunnerStatus>(),
-			host.Resolve<JobTurn>(),
-			host.Resolve<IDateTimeProvider>(),
-			NullLogger<JobRunner>.Instance
-		).TryRunNextAsync(CancellationToken.None);
 	}
 
 	private static string TmdbDetail(MediaSpec spec) => string.Format(TmdbEndpoints.Detail, TmdbEndpoints.MovieType, spec.Ids[0].Value);

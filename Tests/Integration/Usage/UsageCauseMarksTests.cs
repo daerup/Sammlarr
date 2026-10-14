@@ -1,15 +1,10 @@
-using Contracts;
 using Contracts.Jobs;
-using Core.Jobs;
-using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Usage;
 using Harness;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
 
 namespace Integration.Tests.Usage;
@@ -25,7 +20,8 @@ public class UsageCauseMarksTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task Jobs_ForAFeedRunAndTheDetailsFillItArms_SendNoMdblistCallWithoutACause()
 	{
 		host.SetCurrentTime(Now);
-		var feed = await SeedFeedAsync("marked-list");
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feed = await host.SeedFeedAsync("marked-list");
 		host.MdblistFeedContains(
 			"marked-list",
 			new FeedItemSpec("Fight Club", MediaType.Movie, 1999, new Dictionary<MediaProvider, string> { [MediaProvider.Tmdb] = "550" })
@@ -33,45 +29,14 @@ public class UsageCauseMarksTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		await host.Resolve<IJobQueue>().EnqueueAsync(new RunFeed(feed, new Manual()));
 
-		while (await RunNextJobAsync()) { }
+		while (await host.RunNextJobAsync()) { }
 		var due = Now + host.Resolve<SchedulerOptions>().FillDetailsGrace;
 		host.SetCurrentTime(due);
 		await host.Resolve<IJobRepository>().ReleaseDueAsync(due);
-		while (await RunNextJobAsync()) { }
+		while (await host.RunNextJobAsync()) { }
 
 		var causes = host.HttpStub.Causes(TestUrls.MdblistApi);
 		await Assert.That(causes).Contains(UsageCause.FeedRun).And.Contains(UsageCause.DetailsFill);
 		await Assert.That(causes).DoesNotContain(UsageCause.Other);
-	}
-
-	private async Task<FeedId> SeedFeedAsync(string identifier)
-	{
-		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var entity = new FeedRow
-		{
-			Name = "Marked",
-			IsEnabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new FeedStrategy(new Append()),
-			Identifier = identifier,
-		};
-
-		host.Context.Feeds.Add(entity);
-		await host.Context.SaveChangesAsync();
-		host.Context.ChangeTracker.Clear();
-		return FeedId.From(entity.Id);
-	}
-
-	private async Task<bool> RunNextJobAsync()
-	{
-		return await new JobRunner(
-			host.Resolve<IServiceScopeFactory>(),
-			host.Resolve<JobSignal>(),
-			host.Resolve<JobAlarm>(),
-			host.Resolve<JobRunnerStatus>(),
-			host.Resolve<JobTurn>(),
-			host.Resolve<IDateTimeProvider>(),
-			NullLogger<JobRunner>.Instance
-		).TryRunNextAsync(CancellationToken.None);
 	}
 }

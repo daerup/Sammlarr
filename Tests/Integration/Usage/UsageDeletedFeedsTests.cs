@@ -1,7 +1,5 @@
 using Contracts.Feed;
 using Contracts.Usage;
-using DB.Data.Feed;
-using Domain.Feed;
 using Domain.Providers;
 using Harness;
 using TUnit.Assertions.Enums;
@@ -19,7 +17,7 @@ public class UsageDeletedFeedsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task DeleteAsync_AFeed_KeepsItsNameForTheUsagePage()
 	{
 		host.SetCurrentTime(Now);
-		var feed = await SeedFeedAsync();
+		var feed = await host.SeedFeedAsync(name: "Horror movies");
 
 		await host.Resolve<IFeedService>().DeleteAsync(feed);
 
@@ -31,7 +29,7 @@ public class UsageDeletedFeedsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task PruneAsync_PastTheDeletion_ForgetsTheDeletedFeed()
 	{
 		host.SetCurrentTime(Now);
-		await host.Resolve<IFeedService>().DeleteAsync(await SeedFeedAsync());
+		await host.Resolve<IFeedService>().DeleteAsync(await host.SeedFeedAsync(name: "Horror movies"));
 		var store = host.Resolve<IUsageStore>();
 
 		await store.PruneAsync(Now.AddMinutes(-1));
@@ -47,9 +45,9 @@ public class UsageDeletedFeedsTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		host.SetCurrentTime(Now);
 		await host.SignInAs("Ben");
-		await host.Resolve<IFeedService>().DeleteAsync(await SeedFeedAsync("Ben's anime"));
+		await host.Resolve<IFeedService>().DeleteAsync(await host.SeedFeedAsync(name: "Ben's anime"));
 		await host.SignInAs("Ann");
-		await host.Resolve<IFeedService>().DeleteAsync(await SeedFeedAsync());
+		await host.Resolve<IFeedService>().DeleteAsync(await host.SeedFeedAsync(name: "Horror movies"));
 		var before = await host.Resolve<IUsageStore>().FeedNamesAsync();
 
 		await host.Resolve<IUsageStore>().PruneAsync(Now.AddMinutes(1));
@@ -63,8 +61,8 @@ public class UsageDeletedFeedsTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		host.SetCurrentTime(Now);
 		await host.SignInAs("Ben");
-		var live = await SeedFeedAsync("Ben's anime");
-		var gone = await SeedFeedAsync();
+		var live = await host.SeedFeedAsync(name: "Ben's anime");
+		var gone = await host.SeedFeedAsync(name: "Horror movies");
 		await host.Resolve<IFeedService>().DeleteAsync(gone);
 		await host.SignInAs("Ann");
 
@@ -79,20 +77,5 @@ public class UsageDeletedFeedsTests(SammlarrTestHost host) : IAsyncDisposable
 				],
 				CollectionOrdering.Matching
 			);
-	}
-
-	private async Task<FeedId> SeedFeedAsync(string name = "Horror movies")
-	{
-		var entity = new FeedRow
-		{
-			Name = name,
-			IsEnabled = false,
-			Provider = FeedProvider.Mdblist,
-			Strategy = new FeedStrategy(new Append()),
-			Identifier = "hdlists/horror-movies-2001-2020",
-		};
-		host.Context.Feeds.Add(entity);
-		await host.Context.SaveChangesAsync();
-		return FeedId.From(entity.Id);
 	}
 }

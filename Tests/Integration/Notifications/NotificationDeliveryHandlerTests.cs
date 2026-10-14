@@ -1,8 +1,8 @@
 using Contracts;
-using Contracts.Identity;
 using Contracts.Notifications;
 using Domain.Identity;
 using Domain.Notifications;
+using Integration.Tests.Messaging;
 using Messaging.Notifications;
 using TestInfrastructure;
 using Wolverine;
@@ -113,7 +113,7 @@ public class NotificationDeliveryHandlerTests
 		await NotificationDeliveryHandler.Handle(
 			new DeliverNotification(Context(), targetId, User, NotificationTemplate.None),
 			new Envelope { Attempts = attempts },
-			Scope(),
+			MessagingHost.PassingUserScope().Object,
 			targets.Object,
 			index,
 			outcomes,
@@ -137,13 +137,6 @@ public class NotificationDeliveryHandlerTests
 	private static Some<NotificationTarget> WebhookTarget(bool enabled)
 	{
 		return Some.Of(new NotificationTarget(Guid.NewGuid(), "Hook", enabled, new WebhookConfig("https://example.test/hook", "whsec_x")));
-	}
-
-	private static IUserScope Scope()
-	{
-		var scope = IUserScope.Mock();
-		scope.AsAsync(Any<UserId>(), Any()).Returns(new NoopDisposable());
-		return scope.Object;
 	}
 
 	private sealed class CapturingOutcomes : INotificationDeliveryOutcomeRepository
@@ -185,10 +178,5 @@ public class NotificationDeliveryHandlerTests
 			Sent.Add(target);
 			return Task.FromResult(result);
 		}
-	}
-
-	private sealed class NoopDisposable : IDisposable
-	{
-		public void Dispose() { }
 	}
 }

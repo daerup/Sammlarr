@@ -5,7 +5,6 @@ using Contracts.Ratings;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
-using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Feed.Run;
@@ -18,6 +17,7 @@ using Harness;
 using Microsoft.EntityFrameworkCore;
 using Observability.Usage;
 using TestInfrastructure;
+using static Harness.FeedItemSpec;
 using static Harness.Ids;
 
 namespace Integration.Tests.Feeds;
@@ -35,7 +35,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForAnAppendFeed_AddsWhatTheListHoldsAndRemovesNothing()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("append-list", new Append());
+		var feedId = await host.SeedFeedAsync("append-list");
 		host.MdblistFeedContains("append-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		var stale = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
 
@@ -51,7 +51,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		using var listener = MeasuringCalls();
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("measured-list", new Append());
+		var feedId = await host.SeedFeedAsync("measured-list");
 		host.MdblistFeedContains("measured-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 
 		using (UsageCauses.Mark(feedId))
@@ -67,10 +67,10 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForATitleWithoutASinkId_CompletesAndAddsTheRest()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("switched-list", new Append());
+		var feedId = await host.SeedFeedAsync("switched-list");
 		host.MdblistFeedContains("switched-list", Item("Fight Club", MediaType.Movie, Tmdb("550")), Item("Breaking Bad", MediaType.Show, Tmdb("1396")));
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
-		var breakingBad = await host.Show(TestMedia.BreakingBad).SeedAsync();
+		var breakingBad = await host.Movie(TestMedia.BreakingBad).SeedAsync();
 		host.PlexHasNoMetadataFor(TestMedia.BreakingBad);
 		var feedRead = host.HoldMdblistFeed("switched-list");
 
@@ -90,7 +90,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		using var listener = MeasuringCalls();
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("rejected-list", new Append());
+		var feedId = await host.SeedFeedAsync("rejected-list");
 		host.MdblistFeedContains("rejected-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		await host.Context.Database.ExecuteSqlRawAsync("""CREATE TRIGGER "RejectAdds" BEFORE INSERT ON "Wantlist" BEGIN SELECT RAISE(ABORT, 'locked'); END;""");
@@ -110,7 +110,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WhenCancelled_SavesTheRunAsEnded()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("cancelled-list", new Append());
+		var feedId = await host.SeedFeedAsync("cancelled-list");
 		host.MdblistFeedContains("cancelled-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		var feedRead = host.HoldMdblistFeed("cancelled-list");
 		using var cancellation = new CancellationTokenSource();
@@ -130,7 +130,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WhileItRuns_ShowsPendingInRunHistory()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("pending-list", new Append());
+		var feedId = await host.SeedFeedAsync("pending-list");
 		host.MdblistFeedContains("pending-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		var feedRead = host.HoldMdblistFeed("pending-list");
@@ -149,7 +149,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForAMirrorFeedMissingAnOwnedTitle_CountsItsAbsence()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("absent-list", new Mirror(3));
+		var feedId = await host.SeedFeedAsync("absent-list", new Mirror(3));
 		host.MdblistFeedContains("absent-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		var gone = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
@@ -163,7 +163,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForAMirrorFeedWithACouldNotLookUpTitle_RemovesNothing()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("unresolved-list", new Mirror(1));
+		var feedId = await host.SeedFeedAsync("unresolved-list", new Mirror(1));
 		host.MdblistFeedContains(
 			"unresolved-list",
 			Item("Fight Club", MediaType.Movie, Tmdb("550")),
@@ -188,7 +188,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WithTmdbBlocked_SettlesTheTitlesThatDontNeedTmdb()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("tmdb-blocked-list", new Append());
+		var feedId = await host.SeedFeedAsync("tmdb-blocked-list");
 		host.MdblistFeedContains(
 			"tmdb-blocked-list",
 			Item("Fight Club", MediaType.Movie, Tmdb("550")),
@@ -217,7 +217,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForAMirrorFeed_RemovesOnlyTheTitlesItOwns()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("mirror-list", new Mirror(1));
+		var feedId = await host.SeedFeedAsync("mirror-list", new Mirror(1));
 		host.MdblistFeedContains("mirror-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 
@@ -235,7 +235,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WhenTheProviderFailsOutright_LeavesTheWantlistAlone()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("broken-list", new Mirror(1));
+		var feedId = await host.SeedFeedAsync("broken-list", new Mirror(1));
 		host.MdblistFeedReturnsStatus("broken-list", System.Net.HttpStatusCode.InternalServerError);
 		var owned = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
 
@@ -248,7 +248,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WhenTheListCannotBeFound_FailsAndRecordsWhyOnTheRun()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("missing-list", new Mirror(1));
+		var feedId = await host.SeedFeedAsync("missing-list", new Mirror(1));
 		host.MdblistFeedReturnsStatus("missing-list", System.Net.HttpStatusCode.NotFound);
 
 		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
@@ -263,7 +263,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task PlanAsync_ForAFeedWithItems_ReturnsAPlanAndChangesNothing()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("preview-list", new Mirror(1));
+		var feedId = await host.SeedFeedAsync("preview-list", new Mirror(1));
 		host.MdblistFeedContains("preview-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		var owned = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
@@ -279,7 +279,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task PlanAsync_ForAListNamingOneTitleTwice_KeepsOneRowThatUsesOneSlotOfTheLimit()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("twice-list", new Append(), new QueryLimit { Count = 2 });
+		var feedId = await host.SeedFeedAsync("twice-list", limit: new QueryLimit { Count = 2 });
 		host.MdblistFeedContains(
 			"twice-list",
 			Item("Fight Club", MediaType.Movie, Tmdb("550")),
@@ -326,7 +326,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task PlanAsync_WithoutAnMdblistKey_ReturnsAPlanThatSaysWhyTheSourceFailed()
 	{
-		var feedId = await SeedFeedAsync("keyless-list", new Mirror(1));
+		var feedId = await host.SeedFeedAsync("keyless-list", new Mirror(1));
 
 		var result = await host.Resolve<IFeedRunPlanner>().PlanAsync(new SavedFeed(feedId));
 
@@ -338,7 +338,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForABlocklistedTitleTheFeedOwns_RemovesItLikeAnyOtherOnceItStopsQualifying()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("blocklist-list", new Mirror(1));
+		var feedId = await host.SeedFeedAsync("blocklist-list", new Mirror(1));
 		host.MdblistFeedContains("blocklist-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 
@@ -354,7 +354,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForABlocklistedTitleTheFeedOwns_KeepsItWhileItStillQualifies()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("blocklist-kept-list", new Mirror(1));
+		var feedId = await host.SeedFeedAsync("blocklist-kept-list", new Mirror(1));
 		host.MdblistFeedContains("blocklist-kept-list", Item("Inception", MediaType.Movie, Tmdb("27205")));
 
 		var blocklisted = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
@@ -369,8 +369,8 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForATitleAnotherFeedOwns_LeavesItAloneEvenWhenAbsentFromThisList()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var runningFeed = await SeedFeedAsync("running-list", new Mirror(1));
-		var otherFeed = await SeedFeedAsync("other-list", new Mirror(1));
+		var runningFeed = await host.SeedFeedAsync("running-list", new Mirror(1));
+		var otherFeed = await host.SeedFeedAsync("other-list", new Mirror(1));
 		host.MdblistFeedContains("running-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 
@@ -387,7 +387,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WhenItAddsTitles_QueuesThemToPushInsteadOfLeavingTheSyncToRemoveThem()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("pushing-list", new Append());
+		var feedId = await host.SeedFeedAsync("pushing-list");
 		host.MdblistFeedContains("pushing-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 
@@ -401,7 +401,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForAMirrorFeed_AnnouncesWhatItAddedAndDropped()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("announced-list", new Mirror(1));
+		var feedId = await host.SeedFeedAsync("announced-list", new Mirror(1));
 		host.MdblistFeedContains("announced-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 		var dropped = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
@@ -418,7 +418,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_WhenMirrorRemovesATitle_QueuesTheRemovalSoTheSyncCannotPullItBack()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("dropping-list", new Mirror(1));
+		var feedId = await host.SeedFeedAsync("dropping-list", new Mirror(1));
 		host.MdblistFeedContains("dropping-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		var dropped = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
@@ -433,7 +433,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForEachTitleItAdds_StampsTheRunThatAddedItSoProvenanceCanPointAtIt()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("stamping-list", new Append());
+		var feedId = await host.SeedFeedAsync("stamping-list");
 		host.MdblistFeedContains("stamping-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 
@@ -452,7 +452,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_ForAFeedWithAStoredFilterSortAndLimit_AddsOnlyTheTopRatedTitleTheFilterLetsThrough()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("top-rated-list", new Append());
+		var feedId = await host.SeedFeedAsync("top-rated-list");
 		await host.Context.Database.ExecuteSqlAsync(
 			$$"""
 			UPDATE "Feeds" SET
@@ -520,7 +520,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RunAsync_Always_RecordsTheRunSoItShowsInTheHistory()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("logged-list", new Append());
+		var feedId = await host.SeedFeedAsync("logged-list");
 		host.MdblistFeedContains("logged-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
@@ -529,9 +529,6 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(runs).IsNotEmpty();
 		await Assert.That(runs[0].Trigger).IsEqualTo(new FeedRunTrigger(new Manual()));
 	}
-
-	private static FeedItemSpec Item(string? title, MediaType type, params ProviderId[] ids) =>
-		new(title, type, null, ids.ToDictionary(id => id.Provider, id => id.Value));
 
 	private async Task<IReadOnlyList<MediaId>> WantlistIdsAsync() => [.. (await host.Resolve<IWantlistRepository>().GetAllAsync()).Select(item => item.MediaId)];
 
@@ -564,7 +561,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	private async Task<(FeedId Feed, MediaId FightClub, MediaId Inception)> SeedRatedFeedAsync(string? ratingStrategy)
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("rated-list", new Append());
+		var feedId = await host.SeedFeedAsync("rated-list");
 		await host.Context.Database.ExecuteSqlAsync(
 			$$"""
 			UPDATE "Feeds" SET
@@ -590,7 +587,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private async Task<Domain.Feed.Feed> DraftAsync(string identifier, QueryLimit limit)
 	{
-		var feedId = await SeedFeedAsync(identifier, new Append(), limit);
+		var feedId = await host.SeedFeedAsync(identifier, limit: limit);
 		return (await Assert.That(await host.Resolve<IFeedRepository>().FindAsync(feedId)).IsSome())!;
 	}
 
@@ -609,22 +606,4 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	private static MediaId Id(MatchedMedia matched) => matched.Identity.Id;
-
-	private async Task<FeedId> SeedFeedAsync(string identifier, FeedStrategy strategy, QueryLimit? limit = null)
-	{
-		var entity = new FeedRow
-		{
-			Name = "Comedy",
-			IsEnabled = true,
-			Provider = FeedProvider.Mdblist,
-			Strategy = strategy,
-			Identifier = identifier,
-			Limit = limit,
-		};
-
-		host.Context.Feeds.Add(entity);
-		await host.Context.SaveChangesAsync();
-		host.Context.ChangeTracker.Clear();
-		return FeedId.From(entity.Id);
-	}
 }
