@@ -67,7 +67,7 @@ internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, Pl
 			return Error.From("Authentication was not completed. Please try again.");
 		}
 
-		return await FetchAccountAsync(authToken, clientId, new DateTimeOffset(pin.ExpiresAt), cancellationToken);
+		return await FetchAccountAsync(authToken, clientId, pin.ExpiresAt, cancellationToken);
 	}
 
 	public async Task<AccessCheck> CheckAsync(Guid clientId, string accessToken, CancellationToken cancellationToken = default)
