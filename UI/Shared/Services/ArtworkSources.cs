@@ -4,7 +4,8 @@ namespace UI.Shared.Services;
 
 internal sealed class ArtworkSources(IEnumerable<IArtworkResizer> resizers)
 {
-	public string? ByWidth(string? url, params IReadOnlyList<ArtworkSize> sizes) => SrcSet(url, [.. sizes.Select(size => (size, $"{size.Width}w"))]);
+	public string? ByWidth(string? url, params IReadOnlyList<ArtworkSize> sizes) =>
+		SrcSet(url, [.. sizes.Select(size => (size, FormattableString.Invariant($"{size.Width}w")))]);
 
 	public string Sized(string url, ArtworkSize size) => Resize(url, size).GetValueOr(url);
 
@@ -19,7 +20,7 @@ internal sealed class ArtworkSources(IEnumerable<IArtworkResizer> resizers)
 
 		var sources = candidates
 			.SelectMany(candidate => Resize(url, candidate.Size).Match(resized => new[] { (Url: resized, candidate.Descriptor) }, () => []))
-			.DistinctBy(source => source.Url)
+			.DistinctBy(source => source.Url, StringComparer.Ordinal)
 			.Select(source => $"{source.Url} {source.Descriptor}")
 			.ToList();
 		return sources.Count == 0 ? null : string.Join(", ", sources);

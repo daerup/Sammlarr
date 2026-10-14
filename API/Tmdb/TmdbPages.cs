@@ -21,14 +21,14 @@ internal static partial class TmdbPages
 		["tv/top-rated"] = "tv/top_rated",
 	};
 
-	private static readonly HashSet<string> Dropped = ["view"];
+	private static readonly HashSet<string> Dropped = new(StringComparer.Ordinal) { "view" };
 
-	private static readonly HashSet<string> MovieCategoryKeys = ["region", "language"];
+	private static readonly HashSet<string> MovieCategoryKeys = new(StringComparer.Ordinal) { "region", "language" };
 
-	private static readonly HashSet<string> TvCategoryKeys = ["language", "timezone"];
+	private static readonly HashSet<string> TvCategoryKeys = new(StringComparer.Ordinal) { "language", "timezone" };
 
-	private static readonly HashSet<string> Shared =
-	[
+	private static readonly HashSet<string> Shared = new(StringComparer.Ordinal)
+	{
 		"include_adult",
 		"language",
 		"sort_by",
@@ -50,11 +50,10 @@ internal static partial class TmdbPages
 		"without_genres",
 		"without_keywords",
 		"without_watch_providers",
-	];
+	};
 
-	private static readonly HashSet<string> MovieKeys =
-	[
-		.. Shared,
+	private static readonly HashSet<string> MovieKeys = new(Shared, StringComparer.Ordinal)
+	{
 		"certification",
 		"certification.gte",
 		"certification.lte",
@@ -71,11 +70,10 @@ internal static partial class TmdbPages
 		"with_people",
 		"with_release_type",
 		"year",
-	];
+	};
 
-	private static readonly HashSet<string> TvKeys =
-	[
-		.. Shared,
+	private static readonly HashSet<string> TvKeys = new(Shared, StringComparer.Ordinal)
+	{
 		"air_date.gte",
 		"air_date.lte",
 		"first_air_date_year",
@@ -87,7 +85,7 @@ internal static partial class TmdbPages
 		"with_networks",
 		"with_status",
 		"with_type",
-	];
+	};
 
 	internal static bool IsPage(string identifier) => !identifier.All(char.IsAsciiDigit);
 
@@ -143,7 +141,7 @@ internal static partial class TmdbPages
 			"tv" => TvKeys,
 			_ when Categories.ContainsKey(path) => CategoryKeysOf(path),
 			_ when ByPattern.IsMatch(path) => path.EndsWith("/tv", StringComparison.Ordinal) ? TvKeys : MovieKeys,
-			_ => new HashSet<string>(),
+			_ => new HashSet<string>(StringComparer.Ordinal),
 		};
 	}
 

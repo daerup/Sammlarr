@@ -96,7 +96,7 @@ app.MapGet(
 		(LogCaptureService capture, IDateTimeProvider clock) =>
 		{
 			var stream = capture.ExportZip();
-			var fileName = $"diagnostics-{clock.Now:yyyyMMdd-HHmmss}.zip";
+			var fileName = FormattableString.Invariant($"diagnostics-{clock.Now:yyyyMMdd-HHmmss}.zip");
 			return Results.File(stream, "application/zip", fileName);
 		}
 	)

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using Domain.Feed;
 using Domain.Feed.Trace;
@@ -15,7 +16,7 @@ public static class FeedRunSpans
 
 	public static Optional<Activity> Run(FeedId feed, Guid run)
 	{
-		return Optional.Of(Start(FeedRunNames.Run, [new(UsageTags.Feed, feed.ToString()), new(FeedRunTags.Run, run.ToString())]));
+		return Optional.Of(Start(FeedRunNames.Run, [new(UsageTags.Feed, feed.ToString("D", CultureInfo.InvariantCulture)), new(FeedRunTags.Run, run.ToString())]));
 	}
 
 	public static Optional<Activity> Title(string name, Optional<int> year)

@@ -41,7 +41,10 @@ internal sealed class AnimeIdsFile(HttpClient http) : IDataset<AnimeIdMapping>
 
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(RemoteService.AnimeLists, $"The anime id map answered {(int)response.StatusCode}.");
+			return response.StatusCode.Unanswered(
+				RemoteService.AnimeLists,
+				FormattableString.CurrentCulture($"The anime id map answered {(int)response.StatusCode}.")
+			);
 		}
 
 		var body = await response.Content.ReadAsByteArrayAsync(cancellationToken);

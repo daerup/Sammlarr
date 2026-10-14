@@ -77,7 +77,7 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 				OnAction = () =>
 				{
 					_ = dialogService.OpenAsync<ExceptionDetailDialog>(
-						new Dictionary<string, object?> { { "Exception", exception } },
+						new Dictionary<string, object?>(StringComparer.Ordinal) { { "Exception", exception } },
 						new DialogOpenOptions { Title = "Exception Details", Size = DialogSize.ExtraLarge }
 					);
 				},

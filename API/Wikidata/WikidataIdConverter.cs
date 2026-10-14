@@ -89,12 +89,18 @@ internal sealed partial class WikidataIdConverter(HttpClient http, Lanes lanes) 
 		using var response = await http.SendAsync(request, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(RemoteService.Wikidata, $"Wikidata answered {(int)response.StatusCode} for {ids.Count} titles.");
+			return response.StatusCode.Unanswered(
+				RemoteService.Wikidata,
+				FormattableString.CurrentCulture($"Wikidata answered {(int)response.StatusCode} for {ids.Count} titles.")
+			);
 		}
 
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var answer = await JsonSerializer.DeserializeAsync<SparqlAnswer>(stream, cancellationToken: cancellationToken);
-		var byImdb = (answer?.Results?.Bindings ?? []).ToLookup(row => row.GetValueOrNone("imdb").Map(value => value.Value).GetValueOr(string.Empty));
+		var byImdb = (answer?.Results?.Bindings ?? []).ToLookup(
+			row => row.GetValueOrNone("imdb").Map(value => value.Value).GetValueOr(string.Empty),
+			StringComparer.Ordinal
+		);
 		return Success.Of<IReadOnlyDictionary<ImdbId, IReadOnlyList<IExternalMediaId>>>(
 			ids.Where(id => byImdb.Contains(id.Value)).ToDictionary(id => id, id => Ids([.. byImdb[id.Value]], type))
 		);
@@ -107,7 +113,7 @@ internal sealed partial class WikidataIdConverter(HttpClient http, Lanes lanes) 
 			First(rows, "rt", RottenTomatoesPage).Map(path => Id(RottenTomatoesId.From(path, type))),
 			First(rows, "tmdb", Number).Map(value => Id(TmdbId.From(value, type))),
 			First(rows, "tvdb", Number).Map(value => Id(TvdbId.From(value, type))),
-			First(rows, "metacritic", MetacriticPage).Map(page => Id(MetacriticId.From(page[(page.IndexOf('/') + 1)..], type))),
+			First(rows, "metacritic", MetacriticPage).Map(page => Id(MetacriticId.From(page[(page.IndexOf('/', StringComparison.Ordinal) + 1)..], type))),
 			First(rows, "letterboxd", Slug).Map(slug => Id(LetterboxdId.From(slug, type))),
 			First(rows, "anilist", Number).Map(value => Id(AniListId.From(value, type))),
 			First(rows, "mal", Number).Map(value => Id(MalId.From(value, type))),

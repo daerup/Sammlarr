@@ -34,14 +34,16 @@ internal static class Edges
 	internal static bool Allow(NullableMember member)
 	{
 		var type = member.Type.Name;
-		return type.EndsWith("Row")
-			|| (member.Namespace.StartsWith("API.") && member.Namespace.EndsWith(".Types"))
+		return type.EndsWith("Row", StringComparison.Ordinal)
+			|| (member.Namespace.StartsWith("API.", StringComparison.Ordinal) && member.Namespace.EndsWith(".Types", StringComparison.Ordinal))
 			|| type is "FilterPredicate"
 			|| NotificationPayload.Contains(type)
 			|| Telemetry.Contains(member.Namespace)
 			|| (member.Kind is "constructor" && typeof(Exception).IsAssignableFrom(member.Type))
 			|| member.Namespace is "API.Http"
-			|| (member.Member.Name is "SendAsync" && member.Namespace.StartsWith("API.") && type.EndsWith("Client"))
+			|| (
+				member.Member.Name is "SendAsync" && member.Namespace.StartsWith("API.", StringComparison.Ordinal) && type.EndsWith("Client", StringComparison.Ordinal)
+			)
 			|| Bridges.Contains((type, member.Member.Name))
 			|| (MediaDetails.Contains(type) && member.Namespace is "Domain.Media")
 			|| MediaDetailsFeeders.Contains(type);

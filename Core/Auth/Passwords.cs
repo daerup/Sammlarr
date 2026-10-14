@@ -14,7 +14,7 @@ internal static class Passwords
 
 	internal static Optional<Error> Weakness(string password, int minimum)
 	{
-		return Optional.When(password.Length < minimum, () => Error.From($"A password needs at least {minimum} characters."));
+		return Optional.When(password.Length < minimum, () => Error.From(FormattableString.CurrentCulture($"A password needs at least {minimum} characters.")));
 	}
 
 	internal static Optional<Error> Problem(string password, string confirmation, int minimum)

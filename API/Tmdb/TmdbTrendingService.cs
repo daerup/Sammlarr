@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using API.Tmdb.Types;
 using Contracts;
@@ -22,13 +23,13 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 
 	private async Task<TmdbTypes.Trending.Root> FetchAsync(int page, CancellationToken cancellationToken)
 	{
-		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
+		var formattedEndpoint = string.Format(CultureInfo.InvariantCulture, TmdbEndpoints.Trending, page);
 		var configured = await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken);
 		var apiKey = configured.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings."));
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, formattedEndpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
-			throw new InvalidOperationException($"TMDB trending request failed with status {(int)response.StatusCode}.");
+			throw new InvalidOperationException(FormattableString.Invariant($"TMDB trending request failed with status {(int)response.StatusCode}."));
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		return await JsonSerializer.DeserializeAsync<TmdbTypes.Trending.Root>(stream, cancellationToken: cancellationToken)

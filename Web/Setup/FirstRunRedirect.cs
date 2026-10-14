@@ -21,6 +21,6 @@ internal sealed class FirstRunRedirect(RequestDelegate next)
 	{
 		return HttpMethods.IsGet(request.Method)
 			&& request.Headers.Accept.Any(accept => accept?.Contains("text/html", StringComparison.Ordinal) == true)
-			&& !Unguarded.Any(path => request.Path.StartsWithSegments(path));
+			&& !Unguarded.Any(path => request.Path.StartsWithSegments(path, StringComparison.OrdinalIgnoreCase));
 	}
 }

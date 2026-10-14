@@ -148,7 +148,7 @@ public class LaterSeasonsTests
 		await Assert
 			.That(async () => await testee.ShowsOf(AsyncOf(ThirdSeasonAsked), CancellationToken.None).ToListAsync())
 			.Throws<InvalidOperationException>()
-			.WithMessage("The anime id map has not been loaded yet.");
+			.WithMessage("The anime id map has not been loaded yet.", StringComparison.Ordinal);
 	}
 
 	private static async Task<IdentifyRequest> AskedAsync(LaterSeasons testee, IdentifyRequest request)

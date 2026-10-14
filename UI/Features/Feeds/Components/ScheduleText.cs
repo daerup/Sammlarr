@@ -1,3 +1,4 @@
+using System.Globalization;
 using CronExpressionDescriptor;
 using Domain.Feed;
 
@@ -18,10 +19,10 @@ internal static class ScheduleText
 
 		return elapsed switch
 		{
-			{ TotalMinutes: < 60 } => $"{elapsed.TotalMinutes:0} min ago",
-			{ TotalHours: < 24 } => $"{elapsed.TotalHours:0} hours ago",
-			{ TotalDays: < 30 } => $"{elapsed.TotalDays:0} days ago",
-			_ => moment.ToLocalTime().ToString("MMM d"),
+			{ TotalMinutes: < 60 } => FormattableString.CurrentCulture($"{elapsed.TotalMinutes:0} min ago"),
+			{ TotalHours: < 24 } => FormattableString.CurrentCulture($"{elapsed.TotalHours:0} hours ago"),
+			{ TotalDays: < 30 } => FormattableString.CurrentCulture($"{elapsed.TotalDays:0} days ago"),
+			_ => moment.ToLocalTime().ToString("MMM d", CultureInfo.CurrentCulture),
 		};
 	}
 
@@ -39,13 +40,15 @@ internal static class ScheduleText
 		span = TimeSpan.FromMinutes(Math.Round(span.TotalMinutes, MidpointRounding.AwayFromZero));
 		if (span < TimeSpan.FromHours(1))
 		{
-			return $"in {span.Minutes} min";
+			return FormattableString.CurrentCulture($"in {span.Minutes} min");
 		}
 		if (span < TimeSpan.FromDays(1))
 		{
-			return span.Minutes == 0 ? $"in {span.Hours} hr" : $"in {span.Hours} hr {span.Minutes} min";
+			return span.Minutes == 0
+				? FormattableString.CurrentCulture($"in {span.Hours} hr")
+				: FormattableString.CurrentCulture($"in {span.Hours} hr {span.Minutes} min");
 		}
-		return span.Days == 1 ? "tomorrow" : $"in {span.Days} days";
+		return span.Days == 1 ? "tomorrow" : FormattableString.CurrentCulture($"in {span.Days} days");
 	}
 
 	internal static string AwayExactly(DateTimeOffset at, DateTimeOffset from)
@@ -55,9 +58,9 @@ internal static class ScheduleText
 		return span switch
 		{
 			{ TotalSeconds: < 1 } => "due now",
-			{ TotalMinutes: < 1 } => $"in {span.Seconds} s",
-			{ TotalHours: < 1 } => $"in {span.Minutes} min {span.Seconds} s",
-			_ => $"in {(int)span.TotalHours} hr {span.Minutes} min {span.Seconds} s",
+			{ TotalMinutes: < 1 } => FormattableString.CurrentCulture($"in {span.Seconds} s"),
+			{ TotalHours: < 1 } => FormattableString.CurrentCulture($"in {span.Minutes} min {span.Seconds} s"),
+			_ => FormattableString.CurrentCulture($"in {(int)span.TotalHours} hr {span.Minutes} min {span.Seconds} s"),
 		};
 	}
 }

@@ -74,7 +74,7 @@ public readonly record struct RottenTomatoesCriticsRating(int Percent) : IOwnedR
 
 	public RatingSource Source => RatingSource.RottenTomatoesCritics;
 
-	public string Value => $"{Percent}%";
+	public string Value => FormattableString.Invariant($"{Percent}%");
 
 	public float SammlarrValue => Percent * 10 / Ceiling;
 
@@ -97,7 +97,7 @@ public readonly record struct RottenTomatoesAudienceRating(int Percent) : IOwned
 
 	public RatingSource Source => RatingSource.RottenTomatoesAudience;
 
-	public string Value => $"{Percent}%";
+	public string Value => FormattableString.Invariant($"{Percent}%");
 
 	public float SammlarrValue => Percent * 10 / Ceiling;
 
@@ -166,7 +166,7 @@ public readonly record struct TraktRating(int Percent, Optional<int> Votes) : IO
 
 	public RatingSource Source => RatingSource.Trakt;
 
-	public string Value => $"{Percent}%";
+	public string Value => FormattableString.Invariant($"{Percent}%");
 
 	public float SammlarrValue => Percent / 10f;
 
@@ -200,7 +200,7 @@ public readonly record struct AniListRating(int Score, Optional<int> Votes) : IO
 
 	public RatingSource Source => RatingSource.AniList;
 
-	public string Value => $"{Score}%";
+	public string Value => FormattableString.Invariant($"{Score}%");
 
 	public float SammlarrValue => Score / 10f;
 

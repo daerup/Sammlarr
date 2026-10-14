@@ -288,7 +288,7 @@ public class FeedConfigPanelTests : BunitContext
 
 	private static IElement ProviderLabel(IRenderedComponent<FeedConfigPanel> cut)
 	{
-		return cut.FindAll("label").First(label => label.TextContent.Trim().StartsWith("Provider"));
+		return cut.FindAll("label").First(label => label.TextContent.Trim().StartsWith("Provider", StringComparison.Ordinal));
 	}
 
 	private static IElement Radio(IRenderedComponent<FeedConfigPanel> cut, string name)

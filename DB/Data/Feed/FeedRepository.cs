@@ -57,7 +57,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		var entity = await ctx.Feeds.FindAsync([id.Value], cancellationToken);
 		if (entity == null)
 		{
-			throw new InvalidOperationException($"Feed with id {id} not found.");
+			throw new InvalidOperationException(FormattableString.Invariant($"Feed with id {id} not found."));
 		}
 
 		entity.Name = data.Name;

@@ -191,21 +191,26 @@ dotnet_diagnostic.CA1873.severity = suggestion
 dotnet_diagnostic.MA0051.severity = suggestion
 
 # fixed in the Phase 18 sweep and kept as warnings
-<<<<<<< HEAD
 dotnet_diagnostic.CA1068.severity = warning
+dotnet_diagnostic.CA1305.severity = warning
+dotnet_diagnostic.CA1310.severity = warning
 dotnet_diagnostic.CA1822.severity = warning
 dotnet_diagnostic.CA1852.severity = warning
 dotnet_diagnostic.CA2012.severity = warning
 dotnet_diagnostic.CA2016.severity = warning
 dotnet_diagnostic.IDE0250.severity = warning
 dotnet_diagnostic.IDE0251.severity = warning
-dotnet_diagnostic.MA0053.severity = warning
-=======
+dotnet_diagnostic.MA0001.severity = warning
+dotnet_diagnostic.MA0002.severity = warning
 dotnet_diagnostic.MA0009.severity = warning
+dotnet_diagnostic.MA0011.severity = warning
+dotnet_diagnostic.MA0053.severity = warning
+dotnet_diagnostic.MA0074.severity = warning
+dotnet_diagnostic.MA0076.severity = warning
+dotnet_diagnostic.MA0089.severity = warning
 dotnet_diagnostic.MA0110.severity = warning
 dotnet_diagnostic.MA0190.severity = warning
 dotnet_diagnostic.SYSLIB1045.severity = warning
->>>>>>> 45c43078 (refactor(regex): every product regex is a source-generated partial property with a one-second match timeout, BirdRig's subpath split included, and no regex captures a group nobody reads)
 
 # Space preferences
 csharp_space_after_cast = false

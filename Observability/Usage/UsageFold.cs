@@ -1,3 +1,4 @@
+using System.Globalization;
 using Contracts.Usage;
 
 namespace Observability.Usage;
@@ -28,5 +29,6 @@ internal static class UsageFold
 		return buckets.SelectMany(each => each).GroupBy(pair => pair.Key).ToDictionary(group => group.Key, group => group.Sum(pair => pair.Value));
 	}
 
-	private static string FeedKey(Optional<Domain.Feed.FeedId> feed) => feed.Match(found => found.ToString(), () => string.Empty);
+	private static string FeedKey(Optional<Domain.Feed.FeedId> feed) =>
+		feed.Match(found => found.ToString("D", CultureInfo.InvariantCulture), () => string.Empty);
 }

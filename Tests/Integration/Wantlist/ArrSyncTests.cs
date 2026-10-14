@@ -161,7 +161,7 @@ public class ArrSyncTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		if (request.Method != HttpMethod.Post)
 		{
-			return Json(request.RequestUri!.AbsolutePath.EndsWith("/lookup") ? """[{"title":"Frieren","tvdbId":424536}]""" : "[]");
+			return Json(request.RequestUri!.AbsolutePath.EndsWith("/lookup", StringComparison.Ordinal) ? """[{"title":"Frieren","tvdbId":424536}]""" : "[]");
 		}
 
 		_added.Add(request.Content!.ReadAsStringAsync().GetAwaiter().GetResult());

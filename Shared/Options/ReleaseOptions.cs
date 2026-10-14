@@ -14,7 +14,7 @@ public record ReleaseOptions : IOptionsSection, IProviderHttpOptions
 			TimeoutSeconds = 5,
 		};
 
-	public IReadOnlyDictionary<string, string> Urls => new Dictionary<string, string>();
+	public IReadOnlyDictionary<string, string> Urls => new Dictionary<string, string>(StringComparer.Ordinal);
 
 	public static string SectionName => "Sammlarr:Release";
 }

@@ -15,7 +15,7 @@ internal sealed class TickerFeedScheduler(ICronTickerManager<CronTickerEntity> t
 		var added = await tickers.AddAsync(Ticker(id, schedule), cancellationToken);
 		if (!added.IsSucceeded)
 		{
-			throw new InvalidOperationException($"Feed {id} could not be scheduled on '{schedule}'.", added.Exception);
+			throw new InvalidOperationException(FormattableString.Invariant($"Feed {id} could not be scheduled on '{schedule}'."), added.Exception);
 		}
 	}
 

@@ -33,7 +33,7 @@ public class PlexClientTests
 		await Assert
 			.That(async () => await testee.SendAsync(HttpMethod.Get, PlexBaseUrl))
 			.Throws<InvalidOperationException>()
-			.WithMessageContaining("No valid Plex credentials are stored");
+			.WithMessageContaining("No valid Plex credentials are stored", StringComparison.Ordinal);
 	}
 
 	[Test]

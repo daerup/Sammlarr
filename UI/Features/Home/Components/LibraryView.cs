@@ -10,7 +10,7 @@ internal static class LibraryView
 	{
 		var named = feeds
 			.Where(overview => overview.OnWantlist > 0)
-			.GroupBy(overview => overview.Feed.Name)
+			.GroupBy(overview => overview.Feed.Name, StringComparer.Ordinal)
 			.Select(group => (Name: group.Key, Count: group.Sum(overview => overview.OnWantlist)))
 			.OrderByDescending(entry => entry.Count)
 			.ToList();

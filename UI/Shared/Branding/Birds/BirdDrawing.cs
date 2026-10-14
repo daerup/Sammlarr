@@ -34,7 +34,7 @@ internal static class BirdDrawing
 			Invariant($"<g transform=\"rotate({shape.Tail} {BirdRig.TailPivot.X} {BirdRig.TailPivot.Y})\"><path d=\"{MagpieGeometry.Tail}\" fill=\"{body}\"/></g>")
 		);
 		art.Append(Crest(shape, crown, body));
-		art.Append(Invariant($"<path d=\"M{string.Join("L", points.Select(point => $"{Fixed(point.X)},{Fixed(point.Y)}"))}Z\" fill=\"{body}\"/>"));
+		art.Append(Invariant($"<path d=\"M{string.Join('L', points.Select(point => $"{Fixed(point.X)},{Fixed(point.Y)}"))}Z\" fill=\"{body}\"/>"));
 		if (wings.Count == 0)
 		{
 			art.Append(Invariant($"<path d=\"{BirdRig.Crease}\" fill=\"{cut}\" transform=\"{(shape.Round ? Rounder : string.Empty)}\"/>"));
@@ -45,7 +45,7 @@ internal static class BirdDrawing
 			art.Append(Blade(wing, shoulder, body));
 			art.Append(
 				Invariant(
-					$"<path d=\"{BirdRig.WingEdge} {string.Join(" ", BirdRig.WingLines.Take(shape.Feathers))}\" fill=\"none\" stroke=\"{cut}\" stroke-width=\"3.2\" stroke-linecap=\"round\"{Placed(wing, shoulder)}/>"
+					$"<path d=\"{BirdRig.WingEdge} {string.Join(' ', BirdRig.WingLines.Take(shape.Feathers))}\" fill=\"none\" stroke=\"{cut}\" stroke-width=\"3.2\" stroke-linecap=\"round\"{Placed(wing, shoulder)}/>"
 				)
 			);
 		}

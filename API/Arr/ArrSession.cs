@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Nodes;
 using API.Arr.Types;
 using Domain.Media;
@@ -36,7 +37,7 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, ArrInstan
 
 	public ValueSet<int> Mine(ArrTagScheme scheme, ArrTagUser user)
 	{
-		var labels = scheme.UserTags(user).ToHashSet();
+		var labels = scheme.UserTags(user).ToHashSet(StringComparer.Ordinal);
 		return [.. tags.Where(tag => scheme.PerUser ? labels.Contains(tag.Key) : scheme.Owns(tag.Key)).Select(tag => tag.Value)];
 	}
 
@@ -46,7 +47,7 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, ArrInstan
 		return labels.Any(scheme.Owns) && !labels.Any(scheme.IsUserTag);
 	}
 
-	public bool IsProtected(ArrTitle title, ArrTagScheme scheme) => title.Tags.Select(Label).Contains(scheme.ProtectedTag);
+	public bool IsProtected(ArrTitle title, ArrTagScheme scheme) => title.Tags.Select(Label).Contains(scheme.ProtectedTag, StringComparer.Ordinal);
 
 	public bool WantedByOthers(ArrTitle title, ArrTagScheme scheme, ValueSet<int> mine)
 	{
@@ -61,7 +62,7 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, ArrInstan
 
 	public Optional<ArrTitle> Find(IExternalMediaId id)
 	{
-		return titles.FirstOrNone(title => api.AddressOf(title).ToString() == id.Value);
+		return titles.FirstOrNone(title => api.AddressOf(title).ToString(CultureInfo.InvariantCulture) == id.Value);
 	}
 
 	public async Task<Result<IReadOnlyList<int>>> EnsureTagsAsync(IReadOnlyList<string> labels, CancellationToken cancellationToken)
@@ -120,7 +121,7 @@ internal sealed class ArrSession(ArrApi api, ArrConnection connection, ArrInstan
 		var titles = await api.TitlesAsync(connection, cancellationToken);
 		var tags = await api.TagsAsync(connection, cancellationToken);
 		return titles.Map(loaded =>
-			tags.Map(labels => new ArrSession(api, connection, instance, [.. loaded], labels.ToDictionary(tag => tag.Label, tag => tag.Id)))
+			tags.Map(labels => new ArrSession(api, connection, instance, [.. loaded], labels.ToDictionary(tag => tag.Label, tag => tag.Id, StringComparer.Ordinal)))
 		);
 	}
 

@@ -26,7 +26,7 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 			sources,
 			static (spc, items) =>
 			{
-				var emitted = new HashSet<string>();
+				var emitted = new HashSet<string>(StringComparer.Ordinal);
 				foreach (var item in items)
 				{
 					if (item.HintName is not null && emitted.Add(item.HintName))
@@ -76,7 +76,7 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 
 		var receiver = member.ChildNodes().OfType<ParameterListSyntax>().FirstOrDefault()?.Parameters.FirstOrDefault();
 		var receiverType = receiver?.Type?.ToString();
-		if (receiverType is null || receiverType.StartsWith("Task<") || receiverType.StartsWith("ValueTask<"))
+		if (receiverType is null || receiverType.StartsWith("Task<", StringComparison.Ordinal) || receiverType.StartsWith("ValueTask<", StringComparison.Ordinal))
 		{
 			yield break;
 		}
@@ -135,14 +135,14 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 		var priorities = method
 			.AttributeLists.SelectMany(static list => list.Attributes)
 			.Where(static a => a.Name.ToString().Split('.', ':').Last() is "OverloadResolutionPriority" or "OverloadResolutionPriorityAttribute");
-		return string.Concat(priorities.Select(static a => $"[{a}] "));
+		return string.Concat(priorities.Select(static a => FormattableString.Invariant($"[{a}] ")));
 	}
 
 	private static (string Definition, MethodInfo Signature) DeriveAsync(MethodDeclarationSyntax method)
 	{
 		var name = method.Identifier.Text;
 		var typeParams = method.TypeParameterList?.ToString() ?? "";
-		var returnType = $"Task<{method.ReturnType}>";
+		var returnType = FormattableString.Invariant($"Task<{method.ReturnType}>");
 		var constraints = string.Join(" ", method.ConstraintClauses.Select(static c => c.ToString()));
 		var callbackNames = new List<string>();
 
@@ -202,7 +202,7 @@ public class AsyncMirrorGenerator : IIncrementalGenerator
 
 	private static string MirroredMethod(string wrapper, MethodInfo signature)
 	{
-		var returnsTask = signature.ReturnType.StartsWith("Task<");
+		var returnsTask = signature.ReturnType.StartsWith("Task<", StringComparison.Ordinal);
 		var returned = returnsTask ? signature.ReturnType.Substring(5, signature.ReturnType.Length - 6) : signature.ReturnType;
 		var call = $"(await source).{signature.Name}({signature.ArgNames})";
 		var invocation = returnsTask ? $"await {call}" : call;

@@ -48,7 +48,7 @@ internal sealed class TvmazeApi(HttpClient http, ITypedMemoryCache<string, Tvmaz
 
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(RemoteService.Tvmaze, $"TVmaze answered {(int)response.StatusCode} for {query}.");
+			return response.StatusCode.Unanswered(RemoteService.Tvmaze, FormattableString.CurrentCulture($"TVmaze answered {(int)response.StatusCode} for {query}."));
 		}
 
 		var show = Optional.Of(await response.Content.ReadFromJsonAsync<TvmazeTypes.Show>(cancellationToken));

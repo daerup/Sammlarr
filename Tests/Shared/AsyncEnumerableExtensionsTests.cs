@@ -338,7 +338,7 @@ public class AsyncEnumerableExtensionsTests
 			}
 		};
 
-		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("selector failed");
+		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("selector failed", StringComparison.Ordinal);
 		await Assert.That(seen).IsEquivalentTo([0, 1], CollectionOrdering.Matching);
 	}
 
@@ -379,7 +379,7 @@ public class AsyncEnumerableExtensionsTests
 			}
 		};
 
-		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("source failed");
+		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("source failed", StringComparison.Ordinal);
 		await Assert.That(seen).IsEquivalentTo([0, 1, 2], CollectionOrdering.Matching);
 	}
 

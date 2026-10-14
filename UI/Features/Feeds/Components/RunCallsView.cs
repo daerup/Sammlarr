@@ -53,7 +53,7 @@ internal static class RunCallsView
 
 	internal static string Basis(RunTypical typical)
 	{
-		var runs = typical.Runs == 1 ? "its 1 run" : $"its {typical.Runs} runs";
+		var runs = typical.Runs == 1 ? "its 1 run" : FormattableString.CurrentCulture($"its {typical.Runs} runs");
 		return $"({UsageView.Calls((long)Math.Round(typical.Calls))}, the median of {runs} in the last 30 days)";
 	}
 

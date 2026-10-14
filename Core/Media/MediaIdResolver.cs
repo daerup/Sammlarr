@@ -322,7 +322,7 @@ internal sealed class MediaIdResolver(
 		private static string HintsKey(IdentifyHints hints, IReadOnlyList<IExternalMediaId> known)
 		{
 			var ids = known.Select(id => $"{id}").Order(StringComparer.Ordinal);
-			return $"{hints.MediaType}:{hints.Year}:{hints.Title}|{string.Join(",", ids)}";
+			return FormattableString.Invariant($"{hints.MediaType}:{hints.Year}:{hints.Title}|{string.Join(',', ids)}");
 		}
 	}
 }

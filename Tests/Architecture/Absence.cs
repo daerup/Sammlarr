@@ -29,7 +29,10 @@ internal static class Absence
 
 		var context = new NullabilityInfoContext();
 		var foreign = ForeignImplementations(type);
-		foreach (var method in type.GetMethods(Declared).Where(method => !method.IsPrivate && (!method.IsSpecialName || method.Name.StartsWith("op_"))))
+		foreach (
+			var method in type.GetMethods(Declared)
+				.Where(method => !method.IsPrivate && (!method.IsSpecialName || method.Name.StartsWith("op_", StringComparison.Ordinal)))
+		)
 		{
 			if (IsSkipped(method, foreign.Contains(method), method.GetBaseDefinition().DeclaringType != type))
 			{

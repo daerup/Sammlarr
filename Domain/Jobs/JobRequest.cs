@@ -1,3 +1,4 @@
+using System.Globalization;
 using Domain.Feed;
 using Domain.Wantlist.Sync;
 
@@ -13,7 +14,7 @@ public interface IJobRequest
 public readonly record struct RunFeed(FeedId Id, FeedRunTrigger Trigger, bool SyncAfter = false) : IJobRequest
 {
 	public JobKind Kind => JobKind.FeedRun;
-	public string Key => Id.ToString();
+	public string Key => Id.ToString("D", CultureInfo.InvariantCulture);
 	public bool ArmsSync => Trigger is Scheduled || SyncAfter;
 }
 

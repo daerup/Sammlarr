@@ -62,7 +62,7 @@ internal static class TmdbTypes
 		)
 		{
 			public MediaType MediaType => MediaType.Parse(Type);
-			public TmdbId TmdbId => TmdbId.From(Id.ToString(), MediaType);
+			public TmdbId TmdbId => TmdbId.From(Id.ToString(CultureInfo.InvariantCulture), MediaType);
 
 			public string? DisplayTitle => ProviderValues.Text(Title) ?? ProviderValues.Text(Name);
 			public DateOnly? Released => ReleasedOn(MediaType, ReleaseDate, FirstAirDate);
