@@ -241,7 +241,7 @@ public class ProvidersSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task Section_ForAMember_HidesWantlistSyncButDrawsRadarrAndSonarrReady()
+	public async Task Section_ForAMember_HidesWantlistSyncAndTheMapsPickersButDrawsRadarrAndSonarrReady()
 	{
 		_user.Role = UserRole.Member;
 		_config.GetAsync(Any()).Returns(OnPlex with { Sink = SinkKind.Arr });
@@ -249,6 +249,7 @@ public class ProvidersSectionTests : BunitContext
 		var cut = RenderSection();
 
 		await Assert.That(cut.FindComponents<Stub<ArrSinkRow>>()).IsEmpty();
+		await Assert.That(Map(cut).Get(map => map.CanPick)).IsFalse();
 		await Assert.That(Map(cut).Get(map => map.ArrReady)).IsTrue();
 	}
 

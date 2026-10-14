@@ -33,18 +33,5 @@ public class WantlistSyncTests
 		await Expect(SettingsPage.MapService(page, "Radarr + Sonarr")).ToHaveCountAsync(0);
 	}
 
-	[Test]
-	public async Task StayOnPlex_DuringSetup_PutsTheWantlistSyncAway()
-	{
-		var page = await E2EApp.AdminAt(SettingsPage.Section("providers"));
-
-		await SettingsPage.MapChip(page, "Wantlist").ClickAsync();
-		await page.MenuItem("Radarr + Sonarr").ClickAsync();
-		await page.Button("Stay on Plex").ClickAsync();
-
-		await Expect(page.Locator(".arr-row")).ToHaveCountAsync(0);
-		await Expect(SettingsPage.MapService(page, "Plex")).ToBeVisibleAsync();
-	}
-
 	private static ILocator TagsTab(IPage page) => page.GetByRole(AriaRole.Tab).Filter(new LocatorFilterOptions { HasText = "Tags" });
 }

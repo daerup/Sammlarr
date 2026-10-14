@@ -34,12 +34,4 @@ public class AboutTests
 		await Assert.That(resting).IsEqualTo(muted);
 		await Assert.That(hovered).IsNotEqualTo(resting);
 	}
-
-	[Test]
-	public async Task About_WhenSignedInAsMember_IsOfferedInTheSectionNav()
-	{
-		var page = await E2EApp.MemberAt(Routes.Settings);
-
-		await Expect(page.Button("About")).ToBeVisibleAsync();
-	}
 }

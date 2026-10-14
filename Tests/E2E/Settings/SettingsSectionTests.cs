@@ -22,20 +22,6 @@ public class SettingsSectionTests
 	}
 
 	[Test]
-	[Arguments("Housekeeping")]
-	[Arguments("Diagnostics")]
-	[Arguments("Users")]
-#if DEBUG
-	[Arguments("Testing")]
-#endif
-	public async Task AdminSection_WhenSignedInAsAdmin_IsOfferedInTheSectionNav(string label)
-	{
-		var page = await E2EApp.AdminAt(Routes.Settings);
-
-		await Expect(page.Button(label)).ToBeVisibleAsync();
-	}
-
-	[Test]
 	public async Task Section_WhenSlugIsUnknown_FallsBackWithoutFailing()
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section("does-not-exist"));

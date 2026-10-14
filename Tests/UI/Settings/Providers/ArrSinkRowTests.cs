@@ -47,6 +47,8 @@ public class ArrSinkRowTests : BunitContext
 
 	private int _switchRequests;
 
+	private int _stayRequests;
+
 	private readonly List<ArrSinkConfig> _moves = [];
 
 	[Before(Test)]
@@ -102,6 +104,17 @@ public class ArrSinkRowTests : BunitContext
 		await SwitchButton(cut).ClickAsync();
 
 		await Assert.That(_switchRequests).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task StayOnPlex_InSetup_AsksToStayOnPlex()
+	{
+		var cut = RenderRow(settingUp: true);
+
+		cut.WaitForState(() => cut.Markup.Contains("Stay on Plex"));
+		await StayOnPlexButton(cut).ClickAsync();
+
+		await Assert.That(_stayRequests).IsEqualTo(1);
 	}
 
 	[Test]
@@ -319,6 +332,11 @@ public class ArrSinkRowTests : BunitContext
 		return cut.FindAll("button").Single(button => button.TextContent.Contains("Switch the wantlist"));
 	}
 
+	private static AngleSharp.Dom.IElement StayOnPlexButton(IRenderedComponent<ArrSinkRow> cut)
+	{
+		return cut.FindAll("button").Single(button => button.TextContent.Contains("Stay on Plex"));
+	}
+
 	private IRenderedComponent<ArrSinkRow> RenderRow(bool settingUp, bool syncs = true)
 	{
 		return Render<ArrSinkRow>(parameters =>
@@ -327,6 +345,7 @@ public class ArrSinkRowTests : BunitContext
 				.Add(row => row.Syncs, syncs)
 				.Add(row => row.Open, true)
 				.Add(row => row.SwitchRequested, () => _switchRequests++)
+				.Add(row => row.StayOnPlex, () => _stayRequests++)
 				.Add(row => row.InstanceMoved, config => _moves.Add(config))
 		);
 	}
