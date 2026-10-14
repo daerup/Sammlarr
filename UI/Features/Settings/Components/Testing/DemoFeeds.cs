@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
@@ -9,6 +10,7 @@ namespace UI.Features.Settings.Components.Testing;
 
 internal static class DemoFeeds
 {
+	[SuppressMessage("ApiDesign", "RS0030", Justification = "Static demo data for the design demos, built once outside DI.")]
 	public static readonly DateTimeOffset Now = DateTimeOffset.Now;
 
 	public static readonly FeedRunTrigger Daily = new Scheduled("0 0 9 * * *");

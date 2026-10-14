@@ -1,5 +1,6 @@
 @page "/feeds"
 @implements IDisposable
+@using Contracts
 @using Contracts.Announcing
 @using Contracts.Feed
 @using Contracts.Identity
@@ -29,6 +30,7 @@
 @inject MediaProviderBrandingService Branding
 @inject FeedRunProgress Progress
 @inject ScrollService ScrollService
+@inject IDateTimeProvider Clock
 
 <PageTitle>Feeds</PageTitle>
 
@@ -307,7 +309,7 @@
     private bool _isSignedIn;
     private UserId? _viewer;
     private CoalescedReload _previewReload = null!;
-    private DateTimeOffset _now = DateTimeOffset.Now;
+    private DateTimeOffset _now;
 
     private IReadOnlyList<FeedOverview> _feeds = [];
     private IReadOnlyList<FeedRow> _rows = [];
@@ -354,6 +356,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _now = Clock.Now.ToLocalTime();
         _previewReload = new(ReloadPreviewAsync);
         Events.Published += OnEvent;
         Progress.Changed += OnProgress;
@@ -365,7 +368,7 @@
 
     private async Task LoadAsync()
     {
-        _now = DateTimeOffset.Now;
+        _now = Clock.Now.ToLocalTime();
         await LoadQueueAsync();
         _feeds = (await FeedService.GetAsync(_cancellation.Token)).Feeds;
         _lastWeek = FeedPulse.Moved(await FeedService.GetRunsAsync(RunQuery.Take(RunCap) with { Since = Some.Of(_now - LastWeek) }, _cancellation.Token));
@@ -483,7 +486,7 @@
 
     private void OpenRun(bool fromSelection)
     {
-        _now = DateTimeOffset.Now;
+        _now = Clock.Now.ToLocalTime();
         _candidates = RunPlan.Candidates(_feeds, _now, TimeZoneInfo.Local);
         _runFromSelection = fromSelection;
         _isRunOpen = true;

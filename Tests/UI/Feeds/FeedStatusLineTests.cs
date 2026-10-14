@@ -1,6 +1,7 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
+using Contracts;
 using Contracts.Media;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Feeds.Components;
@@ -17,6 +18,9 @@ public class FeedStatusLineTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
 		Services.AddSingleton(IMediaService.Mock().Object);
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(Now);
+		Services.AddSingleton(clock.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

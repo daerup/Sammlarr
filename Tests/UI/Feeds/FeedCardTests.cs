@@ -1,5 +1,6 @@
 using BlazorBlueprint.Components;
 using Bunit;
+using Contracts;
 using Contracts.Blocklist;
 using Contracts.Media;
 using Contracts.Settings;
@@ -36,6 +37,9 @@ public class FeedCardTests : BunitContext
 		Services.AddScoped<Notifier>();
 		Services.AddProviderBranding();
 		Services.AddScoped<ScrollService>();
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(Now);
+		Services.AddSingleton(clock.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
