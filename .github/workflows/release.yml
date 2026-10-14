@@ -11,6 +11,9 @@ concurrency:
   group: release
   cancel-in-progress: false
 
+env:
+  HUSKY: '0'
+
 jobs:
   image:
     runs-on: ubuntu-latest
@@ -91,7 +94,6 @@ jobs:
 
       - name: Compose file for the release
         env:
-          HUSKY: '0'
           ImageTag: ${{ steps.version.outputs.version }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
