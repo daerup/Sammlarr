@@ -34,8 +34,8 @@ Radarr or Sonarr the admin sets up) or `Open`.
 | AniList       | Feeds (a user's list, a search page), details, AniList rating, the prequels that lead a later season to its show             | nothing                                                                                                                   | open                                              |
 | MyAnimeList   | Feeds (a user's list, a top or season page), details, MyAnimeList rating                                                     | nothing                                                                                                                   | user key (client id)                              |
 | Trakt         | Feeds (a watchlist, a public list, a trending, popular or anticipated chart), id conversion, details, Trakt rating           | nothing                                                                                                                   | user key (client id)                              |
-| Radarr | Movies and tags, quality profiles, root folders, search lookups | adds movies, sets and removes tags, deletes a movie no other user or protection tag keeps (its files stay) | app instance |
-| Sonarr | The same for series | the same for series | app instance |
+| Radarr        | Movies and tags, quality profiles, root folders, search lookups                                                              | adds movies, sets and removes tags, deletes a movie no other user or protection tag keeps (with its files only if set to) | app instance                                      |
+| Sonarr        | The same for series                                                                                                          | the same as Radarr, for series                                                                                            | app instance                                      |
 
 How the two daily files load: [Cross-cutting Concepts](06-crosscutting.md). Every call to a `RemoteService` passes its
 lanes ([Lanes and HTTP resilience](06-crosscutting.md#lanes-and-http-resilience)); key storage is in

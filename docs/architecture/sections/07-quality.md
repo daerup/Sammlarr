@@ -51,7 +51,7 @@ Scenario P, load speed, supports the first two goals.
   If nothing settles for `StallAfter`, the watchdog settles the rest and the run is recorded.
 - **Measure**: `FeedRunApplyTests.RunAsync_WithTmdbBlocked_SettlesTheTitlesThatDontNeedTmdb`,
   `FeedRunTests.Run_WithAServiceBlockedForever_EndsAfterStallAfterWithEveryTitleSettled`, `AnsweringTests`, and
-  `LaneGateTests` and `KeyedLaneTests` (`Tests/Shared/Concurrency`). Mechanism:
+  `LaneGateTests` and `KeyedLaneTests` (`Tests/API/Http`). Mechanism:
   [Lanes and HTTP resilience](06-crosscutting.md#lanes-and-http-resilience).
 
 ### I: per-user isolation
