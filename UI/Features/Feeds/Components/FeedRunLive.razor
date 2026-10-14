@@ -49,14 +49,14 @@
     <div class="live-more feed-live-fold" @ref="_more" hidden="@Run.Hidden" data-testid="live-more">
         <div class="live-sum">
             <div class="live-bar" data-testid="live-bar">
-                @foreach (var part in Tally.Bar)
+                @foreach (var part in RunTally.Bar)
                 {
                     <i style="@Width(Tally.Count(part), RunBar.Color(part))" data-part="@part"></i>
                 }
                 <i class="is-flight" style="@Width(Tally.InFlight, null)"></i>
             </div>
             <div class="live-legend" data-testid="live-legend">
-                @foreach (var part in Tally.Legend)
+                @foreach (var part in RunTally.Legend)
                 {
                     @LegendEntry(RunBar.Label(part), RunBar.Meaning(part, Branding.NickName(Run.Layout.Sink.Service)), Tally.Count(part), $"background: {RunBar.Color(part)}", null)
                 }

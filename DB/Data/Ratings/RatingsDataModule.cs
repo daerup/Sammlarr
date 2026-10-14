@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Data.Ratings;
 
-internal class RatingsDataModule : IServiceModule
+internal sealed class RatingsDataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

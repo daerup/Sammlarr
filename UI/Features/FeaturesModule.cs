@@ -4,7 +4,7 @@ using UI.Features.Settings;
 
 namespace UI.Features;
 
-internal class FeaturesModule : IServiceModule
+internal sealed class FeaturesModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

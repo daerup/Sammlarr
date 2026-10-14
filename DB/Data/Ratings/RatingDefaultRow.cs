@@ -5,7 +5,7 @@ using Domain.Media;
 namespace DB.Data.Ratings;
 
 [Table("RatingDefaults")]
-internal record RatingDefaultRow : Entity<Guid>, IUserOwned
+internal sealed record RatingDefaultRow : Entity<Guid>, IUserOwned
 {
 	[Required]
 	public required RatingStrategy Strategy { get; set; }

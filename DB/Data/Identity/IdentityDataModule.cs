@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Data.Identity;
 
-internal class IdentityDataModule : IServiceModule
+internal sealed class IdentityDataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

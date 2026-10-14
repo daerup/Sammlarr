@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DB.Data.Cleanup;
 
-internal class MediaCachePurger(
+internal sealed class MediaCachePurger(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
 	IProviderConfigRepository providerConfigRepository,
 	IKeyedServiceIndex<SinkKind, IMediaSink> sinks,

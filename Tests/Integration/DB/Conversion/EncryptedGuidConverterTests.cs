@@ -6,7 +6,7 @@ namespace Integration.Tests.DB.Conversion;
 
 public class EncryptedGuidConverterTests
 {
-	private IDataProtectionService CreateDataProtectionService()
+	private static IDataProtectionService CreateDataProtectionService()
 	{
 		var services = new ServiceCollection();
 		services.AddDataProtection();

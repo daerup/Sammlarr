@@ -22,10 +22,9 @@ namespace Internal.Generated.WolverineHandlers
 
             System.Diagnostics.Activity.Current?.SetTag("message.handler", "Messaging.PingHandler");
             System.Diagnostics.Activity.Current?.SetTag("handler.type", "Messaging.PingHandler");
-            var pingHandler = new Messaging.PingHandler();
             
             // The actual message execution
-            pingHandler.Handle(ping, _loggerOfPingHandler);
+            Messaging.PingHandler.Handle(ping, _loggerOfPingHandler);
 
             return System.Threading.Tasks.Task.CompletedTask;
         }

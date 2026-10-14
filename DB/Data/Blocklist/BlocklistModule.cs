@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Data.Blocklist;
 
-internal class BlocklistModule : IServiceModule
+internal sealed class BlocklistModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

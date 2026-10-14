@@ -6,7 +6,7 @@ using Domain.Notifications;
 namespace DB.Data.Notifications;
 
 [Table("NotificationTargets")]
-internal record NotificationTargetRow : Entity<Guid>, IUserOwned
+internal sealed record NotificationTargetRow : Entity<Guid>, IUserOwned
 {
 	[Required]
 	[MaxLength(200)]

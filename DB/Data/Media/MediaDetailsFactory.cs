@@ -3,9 +3,9 @@ using Domain.Media;
 
 namespace DB.Data.Media;
 
-internal class MediaDetailsFactory
+internal static class MediaDetailsFactory
 {
-	public MediaDetailsRow BuildFrom(CachedDetails cached, Guid mediaId)
+	public static MediaDetailsRow BuildFrom(CachedDetails cached, Guid mediaId)
 	{
 		var row = NewRow(cached.Details);
 		ApplyCommonFields(row, cached, mediaId);
@@ -15,7 +15,7 @@ internal class MediaDetailsFactory
 		return row;
 	}
 
-	public CachedDetails ToCached(MediaDetailsRow row)
+	public static CachedDetails ToCached(MediaDetailsRow row)
 	{
 		return new(
 			Details(row),

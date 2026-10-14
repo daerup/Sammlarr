@@ -7,7 +7,7 @@ using Polly.Timeout;
 
 namespace API.Plex;
 
-internal class PlexClient(HttpClient client, ICredentialService credentials, ICurrentUser currentUser)
+internal sealed class PlexClient(HttpClient client, ICredentialService credentials, ICurrentUser currentUser)
 {
 	public const string Unauthenticated = "Plex";
 	public const int ContainerSize = 100;

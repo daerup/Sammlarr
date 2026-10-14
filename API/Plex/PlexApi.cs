@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
-internal class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider clock, ILogger<PlexApi> logger) : IMediaSearchProvider, IDetailsEnricher
+internal sealed class PlexApi(PlexClient plexClient, PlexUrls urls, IDateTimeProvider clock, ILogger<PlexApi> logger) : IMediaSearchProvider, IDetailsEnricher
 {
 	private const int SearchLimit = 30;
 

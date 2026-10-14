@@ -3,7 +3,7 @@ using Domain.Media;
 
 namespace DB.Data.Media;
 
-internal record MediaRatingRow
+internal sealed record MediaRatingRow
 {
 	[Required]
 	public required RatingSource Source { get; set; }

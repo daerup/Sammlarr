@@ -6,7 +6,7 @@ using Domain.Providers;
 namespace DB.Data.Auth;
 
 [Table("Credentials")]
-internal record CredentialRow : Entity<Guid>, IUserOwned
+internal sealed record CredentialRow : Entity<Guid>, IUserOwned
 {
 	[Required]
 	public required AuthProvider Provider { get; set; }

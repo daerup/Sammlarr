@@ -6,7 +6,7 @@ using Shared.Options;
 
 namespace API.Wikidata;
 
-internal class WikidataModule : IServiceModule
+internal sealed class WikidataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

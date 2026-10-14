@@ -3,7 +3,7 @@ using UI.Features.Settings.Components.Notifications;
 
 namespace UI.Features.Settings.Components;
 
-internal class ComponentsModule : IServiceModule
+internal sealed class ComponentsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

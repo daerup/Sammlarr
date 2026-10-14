@@ -8,7 +8,7 @@ using Shared.Options;
 
 namespace API.Tmdb;
 
-internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyService apiKeys, ICurrentUser currentUser)
+internal sealed class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyService apiKeys, ICurrentUser currentUser)
 {
 	public const string Unauthenticated = "Tmdb";
 	public const string QueryParam = "api_key";

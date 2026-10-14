@@ -2,7 +2,7 @@ using Shared.DI;
 
 namespace UI.Features.Settings.Components.Notifications;
 
-internal class NotificationsModule : IServiceModule
+internal sealed class NotificationsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

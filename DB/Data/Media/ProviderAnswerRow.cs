@@ -4,7 +4,7 @@ using Domain.Providers;
 
 namespace DB.Data.Media;
 
-internal record ProviderAnswerRow
+internal sealed record ProviderAnswerRow
 {
 	[Required]
 	public required RemoteService Provider { get; set; }

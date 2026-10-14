@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Harness;
 
-internal class RawDbContext(SammlarrDbContext context)
+internal sealed class RawDbContext(SammlarrDbContext context)
 {
 	public RawDbContext<TTable> Table<TTable>() => new(context);
 }
 
-internal class RawDbContext<TTable>
+internal sealed class RawDbContext<TTable>
 {
 	private readonly SammlarrDbContext _context;
 

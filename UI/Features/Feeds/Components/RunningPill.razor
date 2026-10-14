@@ -11,7 +11,7 @@
     {
         <button type="button" class="run-bar" aria-label="Open the live view" data-testid="running-bar" @onclick="OnOpen">
             <span class="run-track">
-                @foreach (var part in Tally.Bar)
+                @foreach (var part in RunTally.Bar)
                 {
                     <i style="@Width(Tally.Count(part), RunBar.Color(part))"></i>
                 }

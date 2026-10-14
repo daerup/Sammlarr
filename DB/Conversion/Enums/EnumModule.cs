@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Conversion.Enums;
 
-internal class EnumModule : IServiceModule
+internal sealed class EnumModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services) => services.AddScoped<IPropertyAddedConvention, EnumAsStringConvention>();
 }

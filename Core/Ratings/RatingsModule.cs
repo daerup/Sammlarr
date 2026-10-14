@@ -5,7 +5,7 @@ using Shared.DI;
 
 namespace Core.Ratings;
 
-internal class RatingsModule : IServiceModule
+internal sealed class RatingsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

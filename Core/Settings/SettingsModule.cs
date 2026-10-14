@@ -5,7 +5,7 @@ using Shared.DI;
 
 namespace Core.Settings;
 
-internal class SettingsModule : IServiceModule
+internal sealed class SettingsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

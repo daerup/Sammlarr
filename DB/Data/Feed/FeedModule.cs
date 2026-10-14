@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Data.Feed;
 
-internal class FeedModule : IServiceModule
+internal sealed class FeedModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

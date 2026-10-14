@@ -3,7 +3,7 @@ using Shared.DI;
 
 namespace Core.Notifications;
 
-internal class NotificationsModule : IServiceModule
+internal sealed class NotificationsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

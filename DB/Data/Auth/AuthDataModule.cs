@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Data.Auth;
 
-internal class AuthDataModule : IServiceModule
+internal sealed class AuthDataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

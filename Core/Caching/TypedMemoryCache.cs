@@ -4,7 +4,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Core.Caching;
 
-internal class TypedMemoryCache<TKey, TValue>(IMemoryCache cache) : ITypedMemoryCache<TKey, TValue>
+internal sealed class TypedMemoryCache<TKey, TValue>(IMemoryCache cache) : ITypedMemoryCache<TKey, TValue>
 	where TKey : notnull
 	where TValue : notnull
 {

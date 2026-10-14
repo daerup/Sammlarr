@@ -35,9 +35,9 @@ public sealed record RunTally(FateTally Fates, Optional<int> Total, bool Estimat
 		};
 	}
 
-	internal IReadOnlyList<RunPart> Legend => LegendOrder;
+	internal static IReadOnlyList<RunPart> Legend => LegendOrder;
 
-	internal IReadOnlyList<RunPart> Bar => Enum.GetValues<RunPart>();
+	internal static IReadOnlyList<RunPart> Bar => Enum.GetValues<RunPart>();
 
 	internal double Percent(int count) => 100d * count / Math.Max(1, Math.Max(Total.GetValueOr(0), Done + InFlight));
 }

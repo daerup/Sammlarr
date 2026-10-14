@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
-internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService mediaService, ILogger<PlexSink> logger) : IMediaSink
+internal sealed class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService mediaService, ILogger<PlexSink> logger) : IMediaSink
 {
 	private const int PageConcurrency = 10;
 

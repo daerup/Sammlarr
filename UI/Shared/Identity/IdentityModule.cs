@@ -3,7 +3,7 @@ using Shared.DI;
 
 namespace UI.Shared.Identity;
 
-internal class IdentityModule : IServiceModule
+internal sealed class IdentityModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

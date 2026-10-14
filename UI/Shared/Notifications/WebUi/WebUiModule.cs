@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace UI.Shared.Notifications.WebUi;
 
-internal class WebUiModule : IServiceModule
+internal sealed class WebUiModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

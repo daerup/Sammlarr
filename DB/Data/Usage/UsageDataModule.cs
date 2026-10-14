@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Data.Usage;
 
-internal class UsageDataModule : IServiceModule
+internal sealed class UsageDataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

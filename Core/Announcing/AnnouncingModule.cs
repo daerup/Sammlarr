@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace Core.Announcing;
 
-internal class AnnouncingModule : IServiceModule
+internal sealed class AnnouncingModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

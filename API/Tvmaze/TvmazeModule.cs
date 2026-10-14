@@ -6,7 +6,7 @@ using Shared.Options;
 
 namespace API.Tvmaze;
 
-internal class TvmazeModule : IServiceModule
+internal sealed class TvmazeModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

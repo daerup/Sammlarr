@@ -22,4 +22,4 @@ public class QueryProcessorSourceTests
 	}
 }
 
-internal record LazyRow(string Name);
+internal sealed record LazyRow(string Name);

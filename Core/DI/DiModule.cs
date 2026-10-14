@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace Core.DI;
 
-internal class DiModule : IServiceModule
+internal sealed class DiModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

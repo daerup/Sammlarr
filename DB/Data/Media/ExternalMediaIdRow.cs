@@ -3,7 +3,7 @@ using Domain.Providers;
 
 namespace DB.Data.Media;
 
-internal record ExternalMediaIdRow
+internal sealed record ExternalMediaIdRow
 {
 	public required MediaProvider Source { get; set; }
 

@@ -30,7 +30,7 @@ internal static class MetricsPipeline
 	}
 }
 
-internal class MetricsModule : IServiceModule
+internal sealed class MetricsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services) => MetricsPipeline.Register(services, ObservabilityContext.Resolve());
 }

@@ -6,7 +6,7 @@ using Shared.DI;
 
 namespace Core.Wantlist;
 
-internal class WantlistModule : IServiceModule
+internal sealed class WantlistModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

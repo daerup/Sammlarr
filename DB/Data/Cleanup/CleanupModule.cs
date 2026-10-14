@@ -5,7 +5,7 @@ using Shared.DI;
 
 namespace DB.Data.Cleanup;
 
-internal class CleanupModule : IServiceModule
+internal sealed class CleanupModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

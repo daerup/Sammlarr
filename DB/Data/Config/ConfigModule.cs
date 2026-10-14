@@ -5,7 +5,7 @@ using Shared.DI;
 
 namespace DB.Data.Config;
 
-internal class ConfigModule : IServiceModule
+internal sealed class ConfigModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

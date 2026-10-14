@@ -6,7 +6,7 @@ using Web.Instrumentation;
 
 namespace Web;
 
-internal class WebModule : IServiceModule
+internal sealed class WebModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

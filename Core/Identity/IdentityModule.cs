@@ -5,7 +5,7 @@ using Shared.DI;
 
 namespace Core.Identity;
 
-internal class IdentityModule : IServiceModule
+internal sealed class IdentityModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

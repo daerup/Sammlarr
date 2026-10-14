@@ -14,7 +14,7 @@ internal static class TmdbTypes
 
 	internal static class Lists
 	{
-		public record Item(
+		public sealed record Item(
 			[property: JsonPropertyName("id")] int Id,
 			[property: JsonPropertyName("media_type")] string? Type,
 			[property: JsonPropertyName("title")] string? Title,
@@ -28,7 +28,7 @@ internal static class TmdbTypes
 			public DateOnly? Released(MediaType type) => ReleasedOn(type, ReleaseDate, FirstAirDate);
 		}
 
-		public record Page(
+		public sealed record Page(
 			[property: JsonPropertyName("items")] IReadOnlyList<Item>? Items,
 			[property: JsonPropertyName("results")] IReadOnlyList<Item>? Results,
 			[property: JsonPropertyName("total_pages")] int? TotalPages
@@ -40,7 +40,7 @@ internal static class TmdbTypes
 
 	internal static class Trending
 	{
-		public record Result(
+		public sealed record Result(
 			[property: JsonPropertyName("adult")] bool Adult,
 			[property: JsonPropertyName("backdrop_path")] string BackdropPath,
 			[property: JsonPropertyName("id")] int Id,
@@ -68,7 +68,7 @@ internal static class TmdbTypes
 			public DateOnly? Released => ReleasedOn(MediaType, ReleaseDate, FirstAirDate);
 		}
 
-		public record Root(
+		public sealed record Root(
 			[property: JsonPropertyName("page")] int Page,
 			[property: JsonPropertyName("results")] IReadOnlyList<Result> Results,
 			[property: JsonPropertyName("total_pages")] int TotalPages,
@@ -76,7 +76,7 @@ internal static class TmdbTypes
 		);
 	}
 
-	public record Details(
+	public sealed record Details(
 		[property: JsonPropertyName("id")] int Id,
 		[property: JsonPropertyName("original_title")] string? OriginalTitle,
 		[property: JsonPropertyName("original_name")] string? OriginalName,
@@ -104,14 +104,14 @@ internal static class TmdbTypes
 		public MediaType MediaType => MediaType.Parse(Type);
 	}
 
-	public record Genre([property: JsonPropertyName("id")] int Id, [property: JsonPropertyName("name")] string Name);
+	public sealed record Genre([property: JsonPropertyName("id")] int Id, [property: JsonPropertyName("name")] string Name);
 
-	public record Find(
+	public sealed record Find(
 		[property: JsonPropertyName("movie_results")] IReadOnlyList<FindItem> MovieResults,
 		[property: JsonPropertyName("tv_results")] IReadOnlyList<FindItem> TvResults
 	);
 
-	public record ExternalIds([property: JsonPropertyName("imdb_id")] string? ImdbId, [property: JsonPropertyName("tvdb_id")] int? TvdbId)
+	public sealed record ExternalIds([property: JsonPropertyName("imdb_id")] string? ImdbId, [property: JsonPropertyName("tvdb_id")] int? TvdbId)
 	{
 		public IEnumerable<IExternalMediaId> Ids(MediaType type)
 		{
@@ -127,7 +127,7 @@ internal static class TmdbTypes
 		}
 	}
 
-	public record FindItem(
+	public sealed record FindItem(
 		[property: JsonPropertyName("id")] int Id,
 		[property: JsonPropertyName("original_title")] string? OriginalTitle,
 		[property: JsonPropertyName("original_name")] string? OriginalName,

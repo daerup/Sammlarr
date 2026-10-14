@@ -7,7 +7,7 @@ using Domain.Providers;
 
 namespace API.Tmdb;
 
-internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDetailsEnricher
+internal sealed class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDetailsEnricher
 {
 	public MediaFields Fills { get; } =
 		MediaField.Title

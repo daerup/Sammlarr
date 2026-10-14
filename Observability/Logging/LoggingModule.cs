@@ -6,7 +6,7 @@ using Shared.Options;
 
 namespace Observability.Logging;
 
-internal class LoggingModule : IServiceModule
+internal sealed class LoggingModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

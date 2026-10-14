@@ -48,5 +48,5 @@ public class TmdbClientTests
 		apiKeys.ReportRejected(ApiKeyProvider.Tmdb).WasCalled(Times.Once);
 	}
 
-	private string GetApiKey() => new Faker().Random.AlphaNumeric(32);
+	private static string GetApiKey() => new Faker().Random.AlphaNumeric(32);
 }

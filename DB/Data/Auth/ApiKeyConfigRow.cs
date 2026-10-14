@@ -6,7 +6,7 @@ using Domain.Providers;
 namespace DB.Data.Auth;
 
 [Table("ApiKeyConfigs")]
-internal record ApiKeyConfigRow : Entity<Guid>, IUserOwned
+internal sealed record ApiKeyConfigRow : Entity<Guid>, IUserOwned
 {
 	[Required]
 	public required ApiKeyProvider Provider { get; set; }

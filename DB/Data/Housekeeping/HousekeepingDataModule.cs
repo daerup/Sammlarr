@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Data.Housekeeping;
 
-internal class HousekeepingDataModule : IServiceModule
+internal sealed class HousekeepingDataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

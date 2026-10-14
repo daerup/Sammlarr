@@ -5,7 +5,7 @@ using UI.Shared.Services;
 
 namespace UI.Shared;
 
-internal class UiSharedModule : IServiceModule
+internal sealed class UiSharedModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

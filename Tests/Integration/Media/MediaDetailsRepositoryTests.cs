@@ -27,7 +27,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	[Before(Test)]
 	public void Setup()
 	{
-		_testee = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
+		_testee = new MediaRepository(fixture.ContextFactory, new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
 	}
 
 	[Test]

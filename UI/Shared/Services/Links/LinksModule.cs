@@ -3,7 +3,7 @@ using Shared.DI;
 
 namespace UI.Shared.Services.Links;
 
-internal class LinksModule : IServiceModule
+internal sealed class LinksModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

@@ -5,7 +5,7 @@ using Domain.Wantlist.Outbox;
 
 namespace DB.Data.Wantlist.Outbox;
 
-internal record WantlistOutboxRow : IUserOwned
+internal sealed record WantlistOutboxRow : IUserOwned
 {
 	public required MediaRow Media { get; set; }
 

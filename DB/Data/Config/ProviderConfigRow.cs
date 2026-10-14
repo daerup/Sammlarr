@@ -7,7 +7,7 @@ using Domain.Wantlist.Arr;
 namespace DB.Data.Config;
 
 [Table("ProviderConfig")]
-internal record ProviderConfigRow
+internal sealed record ProviderConfigRow
 {
 	public const int SingletonId = 1;
 

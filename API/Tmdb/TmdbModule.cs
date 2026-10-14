@@ -7,7 +7,7 @@ using Shared.Options;
 
 namespace API.Tmdb;
 
-internal class TmdbModule : IServiceModule
+internal sealed class TmdbModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

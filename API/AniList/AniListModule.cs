@@ -7,7 +7,7 @@ using Shared.Options;
 
 namespace API.AniList;
 
-internal class AniListModule : IServiceModule
+internal sealed class AniListModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

@@ -8,7 +8,7 @@ using Domain.Providers;
 
 namespace API.Tmdb;
 
-internal class TmdbIdConverter(TmdbApi tmdbApi) : IExternalIdConverter
+internal sealed class TmdbIdConverter(TmdbApi tmdbApi) : IExternalIdConverter
 {
 	private static readonly ById ByTmdbId = new(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Imdb, MediaProvider.Tvdb], Cost: 1);
 

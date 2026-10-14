@@ -489,7 +489,7 @@ public class QueryProcessorRatingTests
 	}
 }
 
-internal record Item(string Name, int Year, string Genre = "Unknown")
+internal sealed record Item(string Name, int Year, string Genre = "Unknown")
 {
 	public Guid Id { get; init; } = Guid.NewGuid();
 }

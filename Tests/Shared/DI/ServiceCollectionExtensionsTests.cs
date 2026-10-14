@@ -18,7 +18,7 @@ public class ServiceCollectionExtensionsTests
 	}
 }
 
-file class TestModule : IServiceModule
+file sealed class TestModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services) => services.AddSingleton<ITestService>(new TestService("registered"));
 }
@@ -28,4 +28,4 @@ file interface ITestService
 	string Value { get; }
 }
 
-file record TestService(string Value) : ITestService;
+file sealed record TestService(string Value) : ITestService;
