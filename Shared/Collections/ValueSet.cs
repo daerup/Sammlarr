@@ -18,6 +18,10 @@ public readonly struct ValueSet<T> : IReadOnlySet<T>, IEquatable<ValueSet<T>>
 
 	public static ValueSet<T> operator +(ValueSet<T> left, IEnumerable<T> right) => [.. left, .. right];
 
+	public static bool operator ==(ValueSet<T> left, ValueSet<T> right) => left.Equals(right);
+
+	public static bool operator !=(ValueSet<T> left, ValueSet<T> right) => !left.Equals(right);
+
 	public bool IsSubsetOf(IEnumerable<T> other) => Items.IsSubsetOf(other);
 
 	public bool IsSupersetOf(IEnumerable<T> other) => Items.IsSupersetOf(other);

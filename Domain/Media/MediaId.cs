@@ -19,6 +19,14 @@ public readonly partial struct MediaId
 	public static MediaId New() => From(Guid.NewGuid());
 
 	public override string ToString() => IsInitialized() ? Value.ToString("N") : "[UNINITIALIZED]";
+
+	public static bool operator <(MediaId left, MediaId right) => left.CompareTo(right) < 0;
+
+	public static bool operator <=(MediaId left, MediaId right) => left.CompareTo(right) <= 0;
+
+	public static bool operator >(MediaId left, MediaId right) => left.CompareTo(right) > 0;
+
+	public static bool operator >=(MediaId left, MediaId right) => left.CompareTo(right) >= 0;
 }
 
 public interface IExternalMediaId

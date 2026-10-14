@@ -25,7 +25,7 @@ internal static class MdblistApis
 	{
 		BaseUrl = "https://api.mdblist.com",
 		FeedReserve = 120,
-		Http = new ProviderHttpOptions { Lanes = new() { ["titles"] = new LaneOptions { MaxBatch = 200 } } },
+		Http = new ProviderHttpOptions { Lanes = new Dictionary<string, LaneOptions> { ["titles"] = new LaneOptions { MaxBatch = 200 } } },
 	};
 
 	internal static MdblistTitles Titles(MockHttpHandler handler, IDateTimeProvider? clock = null)

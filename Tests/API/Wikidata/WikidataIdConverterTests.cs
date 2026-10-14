@@ -296,7 +296,7 @@ public class WikidataIdConverterTests
 		{
 			BaseUrl = "https://query.wikidata.org",
 			UserAgent = "Sammlarr tests",
-			Http = new ProviderHttpOptions { Lanes = new() { ["sparql"] = new LaneOptions { MaxBatch = 100 } } },
+			Http = new ProviderHttpOptions { Lanes = new Dictionary<string, LaneOptions> { ["sparql"] = new LaneOptions { MaxBatch = 100 } } },
 		};
 		return new(TimeProvider.System, [new RemoteSettings(RemoteService.Wikidata, options)], new ServiceCollection().BuildServiceProvider());
 	}

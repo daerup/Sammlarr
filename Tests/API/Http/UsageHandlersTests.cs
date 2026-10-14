@@ -193,7 +193,7 @@ public class UsageHandlersTests
 						{
 							RetryAttempts = retryAttempts,
 							MaxWaitSeconds = 5,
-							Lanes = new()
+							Lanes = new Dictionary<string, LaneOptions>
 							{
 								["api"] = new LaneOptions { FailuresToDown = failuresToDown, MaxInFlight = maxInFlight },
 							},

@@ -2,8 +2,8 @@ namespace Shared.Options;
 
 public record LaneOptions
 {
-	public List<LaneRouteOptions> Routes { get; set; } = [];
-	public List<RateWindowOptions> Limits { get; set; } = [];
+	public IReadOnlyList<LaneRouteOptions> Routes { get; set; } = [];
+	public IReadOnlyList<RateWindowOptions> Limits { get; set; } = [];
 	public int MaxInFlight { get; set; } = int.MaxValue;
 	public int MaxBatch { get; set; } = 1;
 	public int FailuresToDown { get; set; } = 4;

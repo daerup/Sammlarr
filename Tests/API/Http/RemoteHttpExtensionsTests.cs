@@ -107,7 +107,10 @@ public class RemoteHttpExtensionsTests
 		var http = new ProviderHttpOptions
 		{
 			RetryAttempts = 0,
-			Lanes = new() { ["api"] = new LaneOptions { Limits = [new RateWindowOptions { Requests = 10, Per = TimeSpan.FromMinutes(1) }] } },
+			Lanes = new Dictionary<string, LaneOptions>
+			{
+				["api"] = new LaneOptions { Limits = [new RateWindowOptions { Requests = 10, Per = TimeSpan.FromMinutes(1) }] },
+			},
 		};
 		using var host = LanedHosts.Host(LanedHosts.Plex(http), RemoteService.Plex, new Throttling(retryAfter: false), reporter.Object);
 
@@ -144,7 +147,7 @@ public class RemoteHttpExtensionsTests
 		var http = new ProviderHttpOptions
 		{
 			RetryAttempts = 0,
-			Lanes = new() { ["api"] = new LaneOptions { FailuresToDown = 1 } },
+			Lanes = new Dictionary<string, LaneOptions> { ["api"] = new LaneOptions { FailuresToDown = 1 } },
 		};
 		using var host = LanedHosts.Host(LanedHosts.Plex(http), RemoteService.Plex, new Failing());
 		using var failed = await host.Client().GetAsync("https://plex.test/library");
@@ -159,7 +162,10 @@ public class RemoteHttpExtensionsTests
 		var answering = new Counting();
 		var http = new ProviderHttpOptions
 		{
-			Lanes = new() { ["api"] = new LaneOptions { Limits = [new RateWindowOptions { Requests = 2, Per = TimeSpan.FromSeconds(1) }] } },
+			Lanes = new Dictionary<string, LaneOptions>
+			{
+				["api"] = new LaneOptions { Limits = [new RateWindowOptions { Requests = 2, Per = TimeSpan.FromSeconds(1) }] },
+			},
 		};
 		using var host = LanedHosts.Host(LanedHosts.Plex(http), RemoteService.Plex, answering);
 
