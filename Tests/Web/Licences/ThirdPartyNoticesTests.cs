@@ -7,10 +7,32 @@ namespace Web.Tests.Licences;
 
 public class ThirdPartyNoticesTests
 {
-	private static ShippedPackage Shipped(string id, string version, string? expression) => new(new Package(id, version, "", ""), expression);
+	private static readonly Dictionary<string, string> Texts = new()
+	{
+		["Apache-2.0"] = "Apache text",
+		["blessing"] = "blessing text",
+		["BSD-2-Clause"] = "BSD text",
+		["MIT"] = "MIT text",
+		["OFL-1.1"] = "OFL text",
+	};
 
-	private static Notices Collect(IEnumerable<ShippedPackage> packages, params LicenceOverride[] overrides) =>
-		ThirdPartyNotices.Collect(packages, overrides, id => $"{id} text", []);
+	private const string CronosNuspec = """
+		<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+		  <metadata>
+		    <id>Cronos</id>
+		    <license type="expression">MIT</license>
+		    <projectUrl>https://github.com/HangfireIO/Cronos</projectUrl>
+		    <copyright> Copyright © 2016 Hangfire OÜ. </copyright>
+		  </metadata>
+		</package>
+		""";
+
+	private static ShippedPackage Shipped(string id, string version, string? expression) => new(new Package(id, version, "", "", ""), expression);
+
+	private static Notices Collect(IEnumerable<ShippedPackage> packages, params LicenceOverride[] overrides)
+	{
+		return ThirdPartyNotices.Collect(packages, overrides, Texts, []);
+	}
 
 	[Test]
 	public async Task Collect_PackagesUnderThreeLicences_GroupsThemOncePerLicenceSortedById()
@@ -62,15 +84,19 @@ public class ThirdPartyNoticesTests
 		await Assert
 			.That(() => Collect([Shipped("ncrontab", "3.4.0", null)], new LicenceOverride("ncrontab", "3.3.0", "Apache-2.0")))
 			.Throws<InvalidOperationException>()
-			.WithMessageContaining("ncrontab 3.4.0 declares no licence expression; add it to .github/licences/overrides.json");
+			.WithMessageContaining(
+				"ncrontab 3.4.0 declares no licence with a text in .github/licences/texts (no expression); add it to .github/licences/overrides.json"
+			);
 	}
 
 	[Test]
-	public async Task Collect_DualLicensedPackage_LandsUnderItsFirstChoice()
+	[Arguments("MIT OR Apache-2.0", "MIT")]
+	[Arguments("LGPL-2.1-only OR MIT", "MIT")]
+	public async Task Collect_DualLicensedPackage_LandsUnderTheFirstChoiceWithAText(string expression, string expected)
 	{
-		var notices = Collect([Shipped("TickerQ", "10.4.0", "MIT OR Apache-2.0")]);
+		var notices = Collect([Shipped("TickerQ", "10.4.0", expression)]);
 
-		await Assert.That(notices.Licences.Single().Id).IsEqualTo("MIT");
+		await Assert.That(notices.Licences.Single().Id).IsEqualTo(expected);
 	}
 
 	[Test]
@@ -81,7 +107,7 @@ public class ThirdPartyNoticesTests
 		var notices = ThirdPartyNotices.Collect(
 			[],
 			[],
-			id => id,
+			Texts,
 			[
 				Asset("providers/tmdb.svg", "https://tmdb.org"),
 				Asset("css/app.css", "https://github.com/tailwindlabs"),
@@ -98,24 +124,41 @@ public class ThirdPartyNoticesTests
 	}
 
 	[Test]
-	public async Task Nuspec_WithALicenceExpression_ReadsTheExpressionProjectAndTrimmedCopyright()
+	public async Task Shipped_DepsWithAProjectAPackageAndARuntimePack_ReadsOnlyThePackageFromItsFolder()
 	{
-		const string nuspec = """
-			<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-			  <metadata>
-			    <id>Cronos</id>
-			    <license type="expression">MIT</license>
-			    <projectUrl>https://github.com/HangfireIO/Cronos</projectUrl>
-			    <copyright> Copyright © 2016 Hangfire OÜ. </copyright>
-			  </metadata>
-			</package>
+		const string deps = """
+			{
+			  "libraries": {
+			    "Core/1.0.0": { "type": "project", "serviceable": false, "sha512": "" },
+			    "Cronos/0.13.0": { "type": "package", "serviceable": true, "path": "cronos/0.13.0" },
+			    "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64/11.0.0": { "type": "runtimepack", "serviceable": false, "sha512": "" }
+			  }
+			}
 			""";
+		Dictionary<string, string> nuspecs = new() { ["cronos/0.13.0"] = CronosNuspec };
+		Dictionary<string, string> notices = new() { ["cronos/0.13.0"] = "NOTICE\n\nCronos notice" };
 
-		var package = ThirdPartyNotices.Nuspec("Cronos/0.13.0", nuspec);
+		var packages = ThirdPartyNotices.Shipped(deps, path => nuspecs[path], path => notices[path]);
 
 		await Assert
-			.That(package)
-			.IsEqualTo(new ShippedPackage(new Package("Cronos", "0.13.0", "https://github.com/HangfireIO/Cronos", "Copyright © 2016 Hangfire OÜ."), "MIT"));
+			.That(packages)
+			.IsEquivalentTo([
+				new ShippedPackage(
+					new Package("Cronos", "0.13.0", "https://github.com/HangfireIO/Cronos", "Copyright © 2016 Hangfire OÜ.", "NOTICE\n\nCronos notice"),
+					"MIT"
+				),
+			]);
+	}
+
+	[Test]
+	public async Task Shipped_PackageFolderWithoutANuspec_FailsNamingThePackage()
+	{
+		const string deps = """{ "libraries": { "Cronos/0.13.0": { "type": "package", "path": "cronos/0.13.0" } } }""";
+
+		await Assert
+			.That(() => ThirdPartyNotices.Shipped(deps, _ => null, _ => ""))
+			.Throws<InvalidOperationException>()
+			.WithMessageContaining("Cronos/0.13.0 has no nuspec in its package folder cronos/0.13.0");
 	}
 
 	[Test]
@@ -131,16 +174,22 @@ public class ThirdPartyNoticesTests
 			</package>
 			""";
 
-		var package = ThirdPartyNotices.Nuspec("SQLite/3.53.4", nuspec);
+		var package = ThirdPartyNotices.Nuspec("SQLite/3.53.4", nuspec, "");
 
-		await Assert.That(package).IsEqualTo(new ShippedPackage(new Package("SQLite", "3.53.4", "https://github.com/ericsink/SQLitePCL.raw", ""), null));
+		await Assert.That(package).IsEqualTo(new ShippedPackage(new Package("SQLite", "3.53.4", "https://github.com/ericsink/SQLitePCL.raw", "", ""), null));
 	}
 
 	[Test]
-	public async Task Json_ForTheCard_WritesTheContractFieldsInOrderWithoutEscapingText()
+	public async Task Json_ForTheCard_WritesTheContractFieldsInOrderWithoutTheNoticeOrEscapingText()
 	{
 		var notices = new Notices(
-			[new Licence("MIT", "MIT text", [new Package("Cronos", "0.13.0", "https://github.com/HangfireIO/Cronos", "Copyright © Hangfire OÜ")])],
+			[
+				new Licence(
+					"MIT",
+					"MIT text",
+					[new Package("Cronos", "0.13.0", "https://github.com/HangfireIO/Cronos", "Copyright © Hangfire OÜ", "NOTICE\n\nCronos notice")]
+				),
+			],
 			[new Asset("providers/tmdb.svg", "https://tmdb.org", "TMDB", "TMDB API terms of use", "none")]
 		);
 
@@ -181,13 +230,47 @@ public class ThirdPartyNoticesTests
 	[Test]
 	public async Task Text_PackageWithoutProjectOrCopyright_ListsIdVersionAndLicenceOnlyAndEndsWithTheRuntimePart()
 	{
-		var notices = new Notices([new Licence("MIT", "MIT text", [new Package("TailwindMerge.NET", "1.3.0", "", "")])], []);
+		var notices = new Notices([new Licence("MIT", "MIT text", [new Package("TailwindMerge.NET", "1.3.0", "", "", "")])], []);
 
-		var text = ThirdPartyNotices.Text(notices, "Runtime and base image\n");
+		var text = ThirdPartyNotices.Text(notices, Texts, "Runtime and base image\n");
 
 		await Assert.That(text).Contains("\nTailwindMerge.NET 1.3.0\n  Licence: MIT\n\n");
 		await Assert.That(text).Contains("\nMIT\n\nMIT text\n");
 		await Assert.That(text).EndsWith("\nRuntime and base image\n");
+	}
+
+	[Test]
+	public async Task Text_PackageWithANotice_PrintsTheNoticeUnderThePackage()
+	{
+		var notices = new Notices(
+			[
+				new Licence(
+					"Apache-2.0",
+					"Apache text",
+					[new Package("BlazorBlueprint.Components", "4.1.0", "", "Copyright (c) Mathew Taylor", "NOTICE\n\nBlazor Blueprint")]
+				),
+			],
+			[]
+		);
+
+		var text = ThirdPartyNotices.Text(notices, Texts, "");
+
+		await Assert
+			.That(text)
+			.Contains("\nBlazorBlueprint.Components 4.1.0\n  Licence: Apache-2.0\n  Copyright (c) Mathew Taylor\n\nNOTICE\n\nBlazor Blueprint\n\n");
+	}
+
+	[Test]
+	public async Task Text_TwoAssetsUnderALicenceNoPackageUses_PrintThatLicenceTextOnce()
+	{
+		var notices = new Notices(
+			[new Licence("MIT", "MIT text", [new Package("Cronos", "0.13.0", "", "", "")])],
+			[new Asset("fonts/roboto", "", "", "OFL-1.1", ""), new Asset("fonts/roboto-mono", "", "", "OFL-1.1", "")]
+		);
+
+		var text = ThirdPartyNotices.Text(notices, Texts, "");
+
+		await Assert.That(text.Split("\nOFL-1.1\n\nOFL text\n")).Count().IsEqualTo(2);
 	}
 
 	[Test]
