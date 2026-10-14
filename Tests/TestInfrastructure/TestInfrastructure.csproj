@@ -5,6 +5,7 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="Serilog" />
 		<PackageReference Include="TUnit.Assertions" />
 	</ItemGroup>
 	<ItemGroup>

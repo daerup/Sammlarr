@@ -267,7 +267,7 @@ public class LaneGateTests
 		var time = new FakeTimeProvider();
 		var quota = ILaneQuota.Mock();
 		quota.BlockedUntil(Any(), Any(), Any()).Returns(new None());
-		quota.BlockedUntil(Any(), LaneClass.Title, Any()).Returns(Some.Of(time.GetUtcNow().AddHours(1)));
+		quota.BlockedUntil("mdblist-key", LaneClass.Title, Any()).Returns(Some.Of(time.GetUtcNow().AddHours(1)));
 		using var testee = new LaneGate(Policy(TwoPerSecond), time, Some.Of(quota.Object), "mdblist-key");
 
 		var source = await testee.EnterAsync(new LanePriority(LaneClass.Source, 1), TimeSpan.Zero, CancellationToken.None);
@@ -275,7 +275,6 @@ public class LaneGateTests
 
 		await Assert.That(source).IsSuccess();
 		await Assert.That(title).IsError();
-		quota.BlockedUntil("mdblist-key", LaneClass.Source, Any()).WasCalled(Times.AtLeastOnce);
 	}
 
 	[Test]

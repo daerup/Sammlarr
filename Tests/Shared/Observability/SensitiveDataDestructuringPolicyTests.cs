@@ -3,8 +3,8 @@ using Domain.Notifications;
 using Domain.Wantlist.Arr;
 using Observability.Logging;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
+using TestInfrastructure;
 
 namespace Shared.Tests.Observability;
 
@@ -80,14 +80,5 @@ public class SensitiveDataDestructuringPolicyTests
 		var name = ((ScalarValue)structure.Properties.Single(p => p.Name == "Name").Value).Value;
 
 		await Assert.That(name).IsEqualTo("hello");
-	}
-
-	private sealed class CapturingSink : ILogEventSink
-	{
-		private readonly List<LogEvent> _events = [];
-
-		public LogEvent Last => _events[^1];
-
-		public void Emit(LogEvent logEvent) => _events.Add(logEvent);
 	}
 }

@@ -44,13 +44,10 @@ public class UrlGuidTests
 	}
 
 	[Test]
-	public async Task Encode_IsStable_ForSameGuid()
+	public async Task Encode_ForAKnownGuid_GivesTheEncodingSharedLinksAlreadyCarry()
 	{
 		var id = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
 
-		var first = UrlGuid.Encode(id);
-		var second = UrlGuid.Encode(id);
-
-		await Assert.That(first).IsEqualTo(second);
+		await Assert.That(UrlGuid.Encode(id)).IsEqualTo("1MOyofblkHirze8SNFZ4kA");
 	}
 }
