@@ -1,0 +1,33 @@
+{
+  "licences": [
+    {
+      "id": "Apache-2.0",
+      "text": "Apache License\nVersion 2.0, January 2004\nhttp://www.apache.org/licenses/\n\nTERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION",
+      "packages": [
+        { "id": "Serilog", "version": "4.3.1", "project": "https://serilog.net/", "copyright": "Copyright © Serilog Contributors" },
+        { "id": "Vogen", "version": "8.0.6", "project": "https://github.com/SteveDunn/Vogen", "copyright": "Copyright Steve Dunn" }
+      ]
+    },
+    {
+      "id": "MIT",
+      "text": "MIT License\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction.",
+      "packages": [
+        { "id": "Cronos", "version": "0.11.1", "project": "https://github.com/HangfireIO/Cronos", "copyright": "Copyright (c) 2017 Hangfire OÜ" },
+        { "id": "Fluid.Core", "version": "2.31.0", "project": "https://github.com/sebastienros/fluid", "copyright": "Sebastien Ros" },
+        { "id": "Microsoft.Extensions.Http.Resilience", "version": "10.7.0", "project": "https://dot.net/", "copyright": "© Microsoft Corporation" },
+        { "id": "WolverineFx", "version": "6.28.2", "project": "https://wolverinefx.net", "copyright": "Jeremy D. Miller, Babu Annamalai, Jaedyn Tonee" },
+        { "id": "WolverineFx.Sqlite", "version": "6.28.2", "project": "", "copyright": "" }
+      ]
+    },
+    {
+      "id": "MIT OR Apache-2.0",
+      "text": "MIT License or Apache License, Version 2.0, at your option.",
+      "packages": [
+        { "id": "TickerQ", "version": "10.4.0", "project": "https://github.com/Arcenox-co/TickerQ", "copyright": "Copyright © 2025 Arcenox LLC" }
+      ]
+    }
+  ],
+  "assets": [
+    { "file": "providers/tmdb-logo.svg", "origin": "https://www.themoviedb.org/about/logos-attribution", "author": "TMDB", "licence": "used as TMDB's attribution asks", "changes": "none" }
+  ]
+}

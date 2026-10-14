@@ -4,11 +4,12 @@
 <div class="flex max-w-6xl flex-col gap-6">
     <div>
         <h2 class="text-lg font-semibold">About</h2>
-        <p class="text-sm text-muted-foreground">The version you run and where its data comes from.</p>
+        <p class="text-sm text-muted-foreground">The version you run, where its data comes from, and the open-source software inside it.</p>
     </div>
 
     <VersionCard Version="Versions.Current" Repository="@Versions.Repository" Update="_update"/>
     <DataSourcesCard/>
+    <LicencesCard Repository="@Versions.Repository"/>
 </div>
 
 @code {
