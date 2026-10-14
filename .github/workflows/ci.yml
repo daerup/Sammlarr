@@ -1,0 +1,158 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  HUSKY: '0'
+  DOTNET_NOLOGO: 'true'
+  CONFIGURATION: ${{ startsWith(github.head_ref, 'release-please--') && 'Release' || 'Debug' }}
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: dotnet tool restore
+
+      - run: dotnet restore Sammlarr.slnx --locked-mode
+
+      - run: dotnet build Sammlarr.slnx -c "$CONFIGURATION" --no-restore -warnaserror '-warnNotAsError:NU1900;NU1901;NU1902;NU1903;NU1904'
+
+      - name: Fast test tiers
+        run: |
+          status=0
+          for tier in Domain Shared Core API Integration UI Web Architecture Roslyn; do
+            dotnet run --project "Tests/$tier" --no-build -c "$CONFIGURATION" -- \
+              --coverage --coverage-output-format cobertura --coverage-output "$tier.cobertura.xml" || status=1
+          done
+          exit $status
+
+      - name: Coverage
+        run: >
+          dotnet tool run reportgenerator
+          "-reports:Tests/**/TestResults/*.cobertura.xml"
+          -targetdir:coverage
+          "-reporttypes:Html;MarkdownSummaryGithub;TextSummary;JsonSummary;Cobertura"
+          "minimumCoverageThresholds:lineCoverage=93"
+
+      - name: Coverage summary
+        if: always()
+        run: cat coverage/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: coverage
+          path: coverage
+          retention-days: 7
+
+      - run: dotnet csharpier check .
+
+  reproducible:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+          cache: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Publish twice from a clean tree
+        run: |
+          SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+          export SOURCE_DATE_EPOCH
+          for run in 1 2; do
+            git clean -xdfq
+            dotnet restore Web/Web.csproj --locked-mode
+            dotnet publish Web/Web.csproj -c Release -a x64 --self-contained false --no-restore -o "$RUNNER_TEMP/publish/$run" \
+              -p:ExcludeStaging=true -p:ContinuousIntegrationBuild=true -p:DebugType=none
+          done
+
+      - name: Compare
+        id: compare
+        run: |
+          cd "$RUNNER_TEMP"
+          (cd publish/1 && find . -type f -exec sha256sum {} + | sort -k2) > hashes-1.txt
+          (cd publish/2 && find . -type f -exec sha256sum {} + | sort -k2) > hashes-2.txt
+          echo "$(wc -l < hashes-1.txt) files"
+          diff hashes-1.txt hashes-2.txt
+
+      - name: Diffoscope
+        if: failure() && steps.compare.outcome == 'failure'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends diffoscope
+          diffoscope --html "$RUNNER_TEMP/diffoscope.html" "$RUNNER_TEMP/publish/1" "$RUNNER_TEMP/publish/2" || true
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure() && steps.compare.outcome == 'failure'
+        with:
+          name: reproducibility
+          path: |
+            ${{ runner.temp }}/diffoscope.html
+            ${{ runner.temp }}/hashes-*.txt
+          retention-days: 7
+
+  e2e:
+    if: github.event_name == 'push' || startsWith(github.head_ref, 'release-please--')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: dotnet tool restore
+
+      - run: dotnet restore Sammlarr.slnx --locked-mode
+
+      - run: dotnet build Tests/E2E -c "$CONFIGURATION" --no-restore
+
+      - run: pwsh "Tests/E2E/bin/$CONFIGURATION/net11.0/playwright.ps1" install --with-deps chromium
+
+      - run: dotnet run --project Tests/E2E --no-build -c "$CONFIGURATION"
