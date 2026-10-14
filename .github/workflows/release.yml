@@ -87,12 +87,37 @@ jobs:
         with:
           node-version: 24
 
+      - run: dotnet tool restore
+
       - name: Compose file for the release
         env:
           HUSKY: '0'
           ImageTag: ${{ steps.version.outputs.version }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dotnet tool restore
           dotnet aspire publish --apphost AppHost --output-path aspire-output --non-interactive --nologo
           gh release upload "$GITHUB_REF_NAME" aspire-output/docker-compose.yaml --clobber
+
+      - name: App SBOM
+        env:
+          HUSKY: '0'
+          VERSION: ${{ steps.version.outputs.version }}
+        run: dotnet CycloneDX Web/Web.csproj -rs -ed -o sbom -fn sammlarr-app.cdx.json -F Json -sn Sammlarr -sv "$VERSION"
+
+      - name: Image SBOM
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.74.0
+          image-ref: ghcr.io/daerup/sammlarr@${{ steps.build.outputs.digest }}
+          format: cyclonedx
+          output: sbom/sammlarr-image.cdx.json
+
+      - name: SBOMs and notices for the release
+        env:
+          IMAGE: ghcr.io/daerup/sammlarr@${{ steps.build.outputs.digest }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          container=$(docker create "$IMAGE")
+          docker cp "$container:/app/THIRD-PARTY-NOTICES.txt" sbom/
+          docker rm "$container"
+          gh release upload "$GITHUB_REF_NAME" sbom/sammlarr-app.cdx.json sbom/sammlarr-image.cdx.json sbom/THIRD-PARTY-NOTICES.txt --clobber
