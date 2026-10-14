@@ -21,6 +21,8 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      line: ${{ steps.line.outputs.value }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -64,6 +66,11 @@ jobs:
         if: always()
         run: cat coverage/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY" || true
 
+      - name: Line coverage
+        id: line
+        if: always()
+        run: echo "value=$(jq '.summary.linecoverage // empty' coverage/Summary.json)" >> "$GITHUB_OUTPUT" || true
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
@@ -72,6 +79,60 @@ jobs:
           retention-days: 7
 
       - run: dotnet csharpier check .
+
+  coverage-badge:
+    if: ${{ !cancelled() && github.event_name == 'push' && needs.build-test.outputs.line != '' }}
+    needs: build-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: coverage-badge
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Coverage badge on the badges branch
+        env:
+          LINE: ${{ needs.build-test.outputs.line }}
+        run: |
+          [ "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA" ] || exit 0
+          colour=$(awk -v line="$LINE" 'BEGIN { print (line >= 90 ? "green" : (line >= 80 ? "yellow" : "red")) }')
+          if git fetch --depth 1 origin badges; then git switch -c badges FETCH_HEAD; else git switch --orphan badges; fi
+          printf '{ "schemaVersion": 1, "label": "coverage", "message": "%s%%", "color": "%s" }\n' "$LINE" "$colour" > coverage.json
+          git add coverage.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "coverage: $LINE%" || exit 0
+          git push origin badges
+
+  coverage-comment:
+    if: >-
+      ${{ !cancelled() && github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && github.actor != 'dependabot[bot]' && needs.build-test.outputs.line != '' }}
+    needs: build-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Main's coverage
+        id: main
+        run: |
+          if git fetch --depth 1 origin badges; then
+            echo "value=$(git show FETCH_HEAD:coverage.json | jq -r '.message')" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=not measured yet" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: coverage
+          message: |
+            Line coverage **${{ needs.build-test.outputs.line }}%** (main: ${{ steps.main.outputs.value }}). Full report: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   reproducible:
     runs-on: ubuntu-latest
