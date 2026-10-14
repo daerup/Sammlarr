@@ -20,6 +20,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="Branding\BirdReference.json" CopyToOutputDirectory="PreserveNewest" />
+		<None Update="Settings\About\third-party-notices.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<Compile Remove="Settings\DemoRenderTests.cs" />

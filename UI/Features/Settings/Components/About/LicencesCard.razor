@@ -1,0 +1,106 @@
+@inject ThirdPartyNotices ThirdPartyNotices
+
+@if (!_loaded)
+{
+    <BbSkeleton Class="h-36 w-full rounded-lg"/>
+}
+else if (_notices is Some<Notices>(var notices))
+{
+    <div class="overflow-hidden rounded-lg border bg-card">
+        <CardHead Icon="scale" Title="Licences">
+            <span class="text-[11.5px] text-muted-foreground">@Counted(notices)</span>
+            <a href="/THIRD-PARTY-NOTICES.txt" download class="ml-auto inline-flex items-center gap-1 whitespace-nowrap text-xs font-semibold text-foreground underline-offset-[3px] hover:underline focus-visible:underline">
+                THIRD-PARTY-NOTICES
+                <LucideIcon Name="download" Size="12" Class="opacity-70"/>
+            </a>
+        </CardHead>
+        @foreach (var licence in notices.Licences.OrderByDescending(licence => licence.Packages.Count))
+        {
+            <div class="notice-group">
+                <BbCollapsible>
+                    <BbCollapsibleTrigger AsChild="false" Class="group flex w-full items-center gap-2.5 px-[15px] py-2 text-left text-[12.5px] font-medium">
+                        <LucideIcon Name="chevron-right" Size="13" Class="shrink-0 text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
+                        <span class="shrink-0">@Named(licence.Id)</span>
+                        <span class="shrink-0 text-[11.5px] font-normal text-muted-foreground">@Packages(licence.Packages.Count)</span>
+                        <span class="ml-auto min-w-0 max-w-[340px] truncate text-[11px] font-normal text-muted-foreground">@FirstNames(licence)</span>
+                    </BbCollapsibleTrigger>
+                    <BbCollapsibleContent ForceMount="false">
+                        <ul class="notice-packages">
+                            @foreach (var package in licence.Packages)
+                            {
+                                <li class="notice-package">
+                                    <span class="notice-name">
+                                        @if (string.IsNullOrWhiteSpace(package.Project))
+                                        {
+                                            <span>@package.Id</span>
+                                        }
+                                        else
+                                        {
+                                            <AppLink Href="@package.Project" External="true">@package.Id</AppLink>
+                                        }
+                                        &#32;<span class="notice-version">@package.Version</span>
+                                    </span>
+                                    <span class="notice-copyright">@package.Copyright</span>
+                                </li>
+                            }
+                        </ul>
+                        <pre class="notice-text">@licence.Text</pre>
+                    </BbCollapsibleContent>
+                </BbCollapsible>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="overflow-hidden rounded-lg border bg-card">
+        <CardHead Icon="scale" Title="Licences"/>
+        <div class="flex gap-3 px-[15px] py-4">
+            <LucideIcon Name="file-question-mark" Size="18" Class="mt-px shrink-0 text-muted-foreground"/>
+            <div class="flex min-w-0 flex-col gap-0.5">
+                <span class="text-[12.5px] font-medium">No licence list in this build</span>
+                <p class="text-xs text-muted-foreground">
+                    It is generated when Sammlarr is published, so a local build runs without it.
+                    @if (!string.IsNullOrWhiteSpace(Repository))
+                    {
+                        <text>The list for the latest release is on </text><AppLink Href="@($"https://github.com/{Repository}/releases/latest")" External="true">GitHub</AppLink><text>.</text>
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter] [EditorRequired] public required string Repository { get; set; }
+
+    private const int FirstNamesShown = 4;
+
+    private Optional<Notices> _notices = new None();
+
+    private bool _loaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        _notices = await ThirdPartyNotices.ReadAsync();
+        _loaded = true;
+    }
+
+    private static string Counted(Notices notices)
+    {
+        var licences = notices.Licences.Count == 1 ? "1 licence" : $"{notices.Licences.Count} licences";
+        return $"{Packages(notices.Licences.Sum(licence => licence.Packages.Count))} under {licences}";
+    }
+
+    private static string Packages(int count) => count == 1 ? "1 package" : $"{count} packages";
+
+    private static string Named(string id) => id.Replace(" OR ", " or ", StringComparison.Ordinal).Replace(" AND ", " and ", StringComparison.Ordinal);
+
+    private static string FirstNames(NoticedLicence licence)
+    {
+        var names = string.Join(", ", licence.Packages.Take(FirstNamesShown).Select(package => package.Id));
+        return licence.Packages.Count > FirstNamesShown ? $"{names} ..." : names;
+    }
+}
