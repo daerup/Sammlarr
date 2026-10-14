@@ -15,6 +15,7 @@ using UI;
 using Web;
 using Web.Auth;
 using Web.Health;
+using Web.Licences;
 using Web.Localization;
 using Web.Setup;
 #if STAGING_SEED
@@ -90,6 +91,7 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode().AddAdditionalAssemblies(typeof(UI.Shared.Layout.MainLayout).Assembly);
 app.MapAuthEndpoints();
 app.MapHealthEndpoints();
+app.MapNoticesEndpoint();
 
 app.MapGet(
 		"/diagnostics/export",
