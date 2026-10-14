@@ -162,8 +162,7 @@
         new(LogVerbosity.Verbose, "Verbose"),
     ];
 
-    private static readonly IReadOnlyList<SelectOption<int>> BufferSizeOptions =
-        LogCaptureService.BufferSizeOptions.Select(n => new SelectOption<int>(n, n.ToString("N0"))).ToList();
+    private static readonly IReadOnlyList<SelectOption<int>> BufferSizeOptions = [.. LogCaptureService.BufferSizeOptions.Select(n => new SelectOption<int>(n, n.ToString("N0")))];
 
     private readonly CancellationTokenSource _cts = new();
 

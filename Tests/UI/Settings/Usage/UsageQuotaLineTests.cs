@@ -122,7 +122,7 @@ public class UsageQuotaLineTests : BunitContext
 					.Select(slot => new UsageSlot(
 						UsageSamples.Hours.SlotAt(slot),
 						UsageTally.Empty,
-						slot == 15 ? new Dictionary<UsageCause, long> { [UsageCause.DetailsFill] = 120, [UsageCause.FeedRun] = 299 } : new Dictionary<UsageCause, long>()
+						slot == 15 ? new Dictionary<UsageCause, long> { [UsageCause.DetailsFill] = 120, [UsageCause.FeedRun] = 299 } : []
 					)),
 			];
 			builder.OpenComponent<BbPortalHost>(0);

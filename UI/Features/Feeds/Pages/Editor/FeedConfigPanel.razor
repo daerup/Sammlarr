@@ -531,19 +531,18 @@
         new(nameof(MediaQueryRow.Episodes), "Episodes", FilterFieldType.Number),
     ];
 
-    private static readonly IReadOnlyList<SelectOption<string>> SortFields =
-        FieldDefinitions.Select(f => new SelectOption<string>(f.Property, f.Label)).ToList();
+    private static readonly IReadOnlyList<SelectOption<string>> SortFields = [.. FieldDefinitions.Select(f => new SelectOption<string>(f.Property, f.Label))];
 
     private static readonly IReadOnlyList<FilterField> FilterFields =
-        FieldDefinitions
-            .Select(f => new FilterField
-            {
-                Name = f.Property,
-                Label = f.Label,
-                Type = f.FilterType,
-                Options = f.Options ?? [],
-            })
-            .ToList();
+    [
+        .. FieldDefinitions.Select(f => new FilterField
+        {
+            Name = f.Property,
+            Label = f.Label,
+            Type = f.FilterType,
+            Options = f.Options ?? [],
+        }),
+    ];
 
     private IReadOnlyDictionary<string, RenderFragment<FilterValueEditorContext>> RuleEditors
     {

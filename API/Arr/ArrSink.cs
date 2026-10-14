@@ -157,14 +157,13 @@ internal sealed class ArrSink(
 
 	private static async Task<Result<int>> ClearAsync(Held app, int before, CancellationToken cancellationToken)
 	{
-		Result<int> deleted = app.Sole.Count == 0 ? Success.Of(0) : await app.Session.DeleteAsync(app.Sole, cancellationToken);
+		var deleted = app.Sole.Count == 0 ? Success.Of(0) : await app.Session.DeleteAsync(app.Sole, cancellationToken);
 		return await deleted.Match(gone => UntagAsync(app, before + gone, cancellationToken), error => AlreadyDeleted(error, before));
 	}
 
 	private static async Task<Result<int>> UntagAsync(Held app, int deleted, CancellationToken cancellationToken)
 	{
-		Result<int> untagged =
-			app.Staying.Count == 0 || app.Only.Count == 0 ? Success.Of(0) : await app.Session.UntagAsync(app.Staying, [.. app.Only], cancellationToken);
+		var untagged = app.Staying.Count == 0 || app.Only.Count == 0 ? Success.Of(0) : await app.Session.UntagAsync(app.Staying, [.. app.Only], cancellationToken);
 		return untagged.Map(_ => deleted).MapError(error => AlreadyDeleted(error, deleted));
 	}
 

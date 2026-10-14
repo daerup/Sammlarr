@@ -383,8 +383,8 @@
     private string? _focusedResult;
     private MediaId? _togglingWantlistItem;
     private MediaId? _togglingBlocklistItem;
-    private readonly HashSet<MediaId> _wantlisted = new();
-    private readonly HashSet<MediaId> _blocklistIds = new();
+    private readonly HashSet<MediaId> _wantlisted = [];
+    private readonly HashSet<MediaId> _blocklistIds = [];
     private bool _refreshDialogOpen;
     private bool _providerUnavailable;
     private readonly Stopwatch _fetchTimer = new();
@@ -724,16 +724,21 @@
 
     private void RebuildFilteredViews()
     {
-        _filteredResults = _processedResults
-            .Where(r => (!_atRiskOnly || r.AtRisk) && PreviewResultFilter.IsVisible(PreviewResultFilter.Bucket(r), _activeFilters) && MatchesSearch(r.Item.Details.Title))
-            .ToList();
+        _filteredResults =
+        [
+            .. _processedResults.Where(r =>
+                (!_atRiskOnly || r.AtRisk) && PreviewResultFilter.IsVisible(PreviewResultFilter.Bucket(r), _activeFilters) && MatchesSearch(r.Item.Details.Title)
+            ),
+        ];
         _filteredUnmatchedResults = _atRiskOnly
             ? []
-            : _unmatchedResults
-                .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unmatched, _activeFilters) && MatchesSearch(r.Details.Title))
-                .Select(MediaMatchResult (r) => r)
-                .ToList();
-        _filteredGoneResults = _activeFilters.Count > 0 ? [] : _goneResults.Where(gone => MatchesSearch(gone.Media.Details.Title)).ToList();
+            :
+            [
+                .. _unmatchedResults
+                    .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unmatched, _activeFilters) && MatchesSearch(r.Details.Title))
+                    .Select(MediaMatchResult (r) => r),
+            ];
+        _filteredGoneResults = _activeFilters.Count > 0 ? [] : [.. _goneResults.Where(gone => MatchesSearch(gone.Media.Details.Title))];
         RecountBadges();
     }
 

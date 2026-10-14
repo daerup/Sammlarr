@@ -22,7 +22,7 @@ public sealed class TestMethodNamingAnalyzer : DiagnosticAnalyzer
 		description: "See docs/architecture/testing.md for the naming convention."
 	);
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
 	public override void Initialize(AnalysisContext context)
 	{

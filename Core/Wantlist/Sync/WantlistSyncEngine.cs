@@ -45,7 +45,7 @@ internal sealed class WantlistSyncEngine(
 		activity?.SetTag("sammlarr.sync.sink", sink.Kind.ToString());
 
 		var planning = await planner.PlanAsync(cancellationToken);
-		WantlistSyncResult syncResult = planning switch
+		var syncResult = planning switch
 		{
 			WantlistSyncSinkUnreachable failed => failed,
 			WantlistSyncSummary plan => await ExecuteAsync(plan, sink, cancellationToken),

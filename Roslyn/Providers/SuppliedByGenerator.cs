@@ -34,21 +34,19 @@ public class SuppliedByGenerator : IIncrementalGenerator
 		var supplierType = (INamedTypeSymbol)context.Attributes[0].AttributeClass!.TypeArguments[0];
 		var supplierMembers = Members(supplierType);
 		var arguments = context.Attributes[0].ConstructorArguments;
-		var suppliers =
-			arguments.Length > 0 && arguments[0].Kind == TypedConstantKind.Array
-				? arguments[0]
-					.Values.Select(value => supplierMembers.FirstOrDefault(supplier => Equals(supplier.Value, value.Value)).Name)
-					.Where(name => name is not null)
-					.ToImmutableArray()
-				: ImmutableArray<string>.Empty;
+		var named = arguments.Length > 0 && arguments[0].Kind == TypedConstantKind.Array ? arguments[0].Values : [];
+		ImmutableArray<string> suppliers =
+		[
+			.. named.Select(value => supplierMembers.FirstOrDefault(supplier => Equals(supplier.Value, value.Value)).Name).Where(name => name is not null),
+		];
 
 		return new SuppliedMember(
 			Qualified(target),
 			target.Name,
 			target.ContainingNamespace.ToDisplayString(),
-			Members(target).Select(static field => field.Name).ToImmutableArray(),
+			[.. Members(target).Select(static field => field.Name)],
 			Qualified(supplierType),
-			supplierMembers.Select(static field => field.Name).ToImmutableArray(),
+			[.. supplierMembers.Select(static field => field.Name)],
 			member.Name,
 			suppliers
 		);
@@ -56,13 +54,15 @@ public class SuppliedByGenerator : IIncrementalGenerator
 
 	private static ImmutableArray<(string Name, object? Value)> Members(INamedTypeSymbol enumType)
 	{
-		return enumType
-			.GetMembers()
-			.OfType<IFieldSymbol>()
-			.Where(static field => field.HasConstantValue)
-			.OrderBy(static field => Convert.ToInt64(field.ConstantValue, CultureInfo.InvariantCulture))
-			.Select(static field => (field.Name, field.ConstantValue))
-			.ToImmutableArray();
+		return
+		[
+			.. enumType
+				.GetMembers()
+				.OfType<IFieldSymbol>()
+				.Where(static field => field.HasConstantValue)
+				.OrderBy(static field => Convert.ToInt64(field.ConstantValue, CultureInfo.InvariantCulture))
+				.Select(static field => (field.Name, field.ConstantValue)),
+		];
 	}
 
 	private static string Qualified(ITypeSymbol type) => type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -116,7 +116,7 @@ public class SuppliedByGenerator : IIncrementalGenerator
 
 	private static string SuppliersArm(SuppliedMember shape, string source, Dictionary<string, ImmutableArray<string>> suppliersBySource)
 	{
-		var suppliers = suppliersBySource.TryGetValue(source, out var named) ? named : ImmutableArray<string>.Empty;
+		var suppliers = suppliersBySource.TryGetValue(source, out var named) ? named : [];
 		var values = string.Join(", ", suppliers.Select(supplier => $"{shape.SupplierQualified}.{supplier}"));
 		return $"\t\t\t{shape.TargetQualified}.{source} => [{values}],";
 	}

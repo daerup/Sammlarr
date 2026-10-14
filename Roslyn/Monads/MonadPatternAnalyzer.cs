@@ -37,7 +37,7 @@ public sealed class MonadPatternAnalyzer : DiagnosticAnalyzer
 		OperationKind.ObjectCreation,
 	];
 
-	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
+	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
 	public override void Initialize(AnalysisContext context)
 	{

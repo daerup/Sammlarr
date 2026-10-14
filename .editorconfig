@@ -198,8 +198,14 @@ dotnet_diagnostic.CA1822.severity = warning
 dotnet_diagnostic.CA1852.severity = warning
 dotnet_diagnostic.CA2012.severity = warning
 dotnet_diagnostic.CA2016.severity = warning
+dotnet_diagnostic.IDE0007.severity = warning
+dotnet_diagnostic.IDE0028.severity = warning
 dotnet_diagnostic.IDE0250.severity = warning
 dotnet_diagnostic.IDE0251.severity = warning
+dotnet_diagnostic.IDE0300.severity = warning
+dotnet_diagnostic.IDE0301.severity = warning
+dotnet_diagnostic.IDE0303.severity = warning
+dotnet_diagnostic.IDE0305.severity = warning
 dotnet_diagnostic.MA0001.severity = warning
 dotnet_diagnostic.MA0002.severity = warning
 dotnet_diagnostic.MA0009.severity = warning
@@ -247,6 +253,7 @@ resharper_arrange_object_creation_when_type_not_evident_highlighting = none
 resharper_suspicious_type_conversion_global_highlighting = none
 resharper_not_accessed_positional_property_global_highlighting = suggestion
 resharper_not_accessed_positional_property_local_highlighting = suggestion
+resharper_use_collection_expression_highlighting = warning
 
 # fixed in the Phase 18 sweep and kept as warnings
 resharper_arrange_redundant_parentheses_highlighting = warning

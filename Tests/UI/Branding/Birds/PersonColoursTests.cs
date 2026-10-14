@@ -19,7 +19,7 @@ public class PersonColoursTests
 
 		var hues = PersonColours.GoldenHues([third, first, second]);
 
-		await Assert.That(new[] { hues[first.User.Id], hues[second.User.Id], hues[third.User.Id] }).IsEquivalentTo([315, 92.5, 230], CollectionOrdering.Matching);
+		await Assert.That([hues[first.User.Id], hues[second.User.Id], hues[third.User.Id]]).IsEquivalentTo([315, 92.5, 230], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -31,7 +31,7 @@ public class PersonColoursTests
 
 		var hues = PersonColours.GoldenHues([later, first, earlier]);
 
-		await Assert.That(new[] { hues[earlier.User.Id], hues[later.User.Id] }).IsEquivalentTo([92.5, 230], CollectionOrdering.Matching);
+		await Assert.That([hues[earlier.User.Id], hues[later.User.Id]]).IsEquivalentTo([92.5, 230], CollectionOrdering.Matching);
 	}
 
 	[Test]

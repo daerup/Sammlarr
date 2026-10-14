@@ -186,7 +186,7 @@ internal sealed class MediaService(
 	{
 		var connected = await idResolver.ConnectedAsync(cancellationToken);
 		var resolution = await idResolver.ResolveAsync(new IdentifyRequest([.. media.Identity.Keys], media.Hints()), site, connected, cancellationToken);
-		IReadOnlyList<IExternalMediaId> found = resolution switch
+		var found = resolution switch
 		{
 			Resolved resolved => resolved.Ids,
 			NoMatchAnywhere or NotFoundEarlier or NotRun => [],

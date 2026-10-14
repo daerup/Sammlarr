@@ -76,7 +76,7 @@ internal static class PlexTypes
 			public TvdbId[] TvdbIds => GetId("tvdb://", i => TvdbId.From(i, MediaType));
 
 			private T[] GetId<T>(string prefix, Func<string, T> convert) =>
-				Guids.Where(g => g.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Select(g => convert(g.Id[prefix.Length..])).ToArray();
+				[.. Guids.Where(g => g.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Select(g => convert(g.Id[prefix.Length..]))];
 		}
 
 		public sealed record Genre([property: JsonPropertyName("tag")] string Tag);
