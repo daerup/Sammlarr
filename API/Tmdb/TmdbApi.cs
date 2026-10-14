@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Tmdb;
 
-internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDateTimeProvider clock, ILogger<TmdbApi> logger)
+internal sealed class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDateTimeProvider clock, ILogger<TmdbApi> logger)
 {
 	private readonly RecentAnswers<TmdbId, TmdbTypes.Details> _details = new(clock);
 

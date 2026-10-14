@@ -8,7 +8,7 @@ using Shared.DI;
 
 namespace Core.Media;
 
-internal class MediaModule : IServiceModule
+internal sealed class MediaModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

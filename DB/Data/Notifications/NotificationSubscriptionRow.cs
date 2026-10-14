@@ -5,7 +5,7 @@ using Domain.Notifications;
 namespace DB.Data.Notifications;
 
 [Table("NotificationSubscriptions")]
-internal record NotificationSubscriptionRow : Entity<Guid>, IUserOwned
+internal sealed record NotificationSubscriptionRow : Entity<Guid>, IUserOwned
 {
 	public required Guid TargetId { get; set; }
 

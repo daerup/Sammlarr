@@ -6,7 +6,7 @@ using Shared.DI;
 
 namespace Core.Feed;
 
-internal class FeedModule : IServiceModule
+internal sealed class FeedModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

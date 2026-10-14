@@ -8,7 +8,7 @@ using Shared.Options;
 
 namespace API.Imdb;
 
-internal class ImdbModule : IServiceModule
+internal sealed class ImdbModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

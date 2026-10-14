@@ -5,7 +5,7 @@ using Shared.DI;
 
 namespace Web.Instrumentation;
 
-internal class InstrumentationModule : IServiceModule
+internal sealed class InstrumentationModule : IServiceModule
 {
 	private static readonly string[] AssetExtensions = [".css", ".js", ".map", ".png", ".ico", ".svg", ".woff", ".woff2", ".webp", ".jpg", ".gif"];
 

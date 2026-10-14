@@ -9,7 +9,7 @@ using Shared.Options;
 
 namespace API.Mdblist;
 
-internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyService apiKeys, ICurrentUser currentUser)
+internal sealed class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyService apiKeys, ICurrentUser currentUser)
 {
 	public const string Unauthenticated = "Mdblist";
 	public const string QueryParam = "apikey";

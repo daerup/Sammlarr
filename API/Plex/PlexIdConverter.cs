@@ -6,7 +6,7 @@ using Domain.Providers;
 
 namespace API.Plex;
 
-internal class PlexIdConverter(PlexApi plexApi) : IExternalIdConverter
+internal sealed class PlexIdConverter(PlexApi plexApi) : IExternalIdConverter
 {
 	private static readonly ValueSet<MediaProvider> Guids = [MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb, MediaProvider.Tvdb];
 

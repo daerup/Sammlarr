@@ -6,7 +6,7 @@ using Domain.Wantlist;
 
 namespace DB.Data.Wantlist;
 
-internal record WantlistRow : IAuditable, IUserOwned
+internal sealed record WantlistRow : IAuditable, IUserOwned
 {
 	public required MediaRow Media { get; set; }
 

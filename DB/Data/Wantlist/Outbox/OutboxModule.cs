@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Data.Wantlist.Outbox;
 
-internal class OutboxModule : IServiceModule
+internal sealed class OutboxModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

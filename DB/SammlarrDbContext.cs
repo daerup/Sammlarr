@@ -31,16 +31,12 @@ internal sealed class SammlarrDbContext : DbContext
 	)!;
 
 	private readonly IDateTimeProvider _dateTimeProvider;
-	private readonly EntityAuditer _entityAuditer;
-	private readonly UserOwnershipStamper _userOwnershipStamper;
 	private readonly ICurrentUser _currentUser;
 	private readonly IEnumerable<IPropertyAddedConvention> _propertyConventions;
 	private readonly IEnumerable<IModelConfiguration> _modelConfigurations;
 
 	public SammlarrDbContext(
 		DbContextOptions<SammlarrDbContext> options,
-		EntityAuditer entityAuditer,
-		UserOwnershipStamper userOwnershipStamper,
 		ICurrentUser currentUser,
 		IEnumerable<IPropertyAddedConvention> propertyConventions,
 		IEnumerable<IModelConfiguration> modelConfigurations,
@@ -50,8 +46,6 @@ internal sealed class SammlarrDbContext : DbContext
 	{
 		_propertyConventions = propertyConventions;
 		_modelConfigurations = modelConfigurations;
-		_entityAuditer = entityAuditer;
-		_userOwnershipStamper = userOwnershipStamper;
 		_currentUser = currentUser;
 		_dateTimeProvider = dateTimeProvider;
 	}
@@ -183,7 +177,7 @@ internal sealed class SammlarrDbContext : DbContext
 	private void ApplyStamps()
 	{
 		var now = _dateTimeProvider.Now;
-		ChangeTracker.Entries<IAuditable>().ToList().ForEach(entry => _entityAuditer.UpdateTimestamps(entry, now));
-		ChangeTracker.Entries<IUserOwned>().ToList().ForEach(entry => _userOwnershipStamper.Stamp(entry, CurrentUserId));
+		ChangeTracker.Entries<IAuditable>().ToList().ForEach(entry => EntityAuditer.UpdateTimestamps(entry, now));
+		ChangeTracker.Entries<IUserOwned>().ToList().ForEach(entry => UserOwnershipStamper.Stamp(entry, CurrentUserId));
 	}
 }

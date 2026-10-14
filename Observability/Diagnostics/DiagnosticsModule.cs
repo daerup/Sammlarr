@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace Observability.Diagnostics;
 
-internal class DiagnosticsModule : IServiceModule
+internal sealed class DiagnosticsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

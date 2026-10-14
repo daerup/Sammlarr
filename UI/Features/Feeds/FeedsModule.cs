@@ -3,7 +3,7 @@ using UI.Features.Feeds.Components;
 
 namespace UI.Features.Feeds;
 
-internal class FeedsModule : IServiceModule
+internal sealed class FeedsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

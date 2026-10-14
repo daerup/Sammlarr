@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DB;
 
-internal class EntityAuditer
+internal static class EntityAuditer
 {
-	public void UpdateTimestamps(EntityEntry<IAuditable> entry, DateTimeOffset timestamp)
+	public static void UpdateTimestamps(EntityEntry<IAuditable> entry, DateTimeOffset timestamp)
 	{
 		if (entry.State is EntityState.Added)
 		{

@@ -9,7 +9,7 @@ using Shared.Options;
 
 namespace API.Plex;
 
-internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options, PlexUrls urls) : IOAuthProvider, ICredentialValidator
+internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options, PlexUrls urls) : IOAuthProvider, ICredentialValidator
 {
 	public async Task<Result<string>> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default)
 	{

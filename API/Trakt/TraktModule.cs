@@ -6,7 +6,7 @@ using Shared.Options;
 
 namespace API.Trakt;
 
-internal class TraktModule : IServiceModule
+internal sealed class TraktModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

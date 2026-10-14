@@ -18,7 +18,7 @@ using Shared.DI;
 
 namespace DB.Data;
 
-internal class DataAccessModule : IServiceModule
+internal sealed class DataAccessModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

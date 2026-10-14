@@ -6,7 +6,7 @@ using Shared.Options;
 
 namespace API.Mal;
 
-internal class MalModule : IServiceModule
+internal sealed class MalModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

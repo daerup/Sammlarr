@@ -5,7 +5,7 @@ using Shared.DI;
 
 namespace Core.Setup;
 
-internal class SetupModule : IServiceModule
+internal sealed class SetupModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

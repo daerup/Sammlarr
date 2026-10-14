@@ -9,7 +9,7 @@ using Shared.Options;
 
 namespace API.Arr;
 
-internal class ArrModule : IServiceModule
+internal sealed class ArrModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

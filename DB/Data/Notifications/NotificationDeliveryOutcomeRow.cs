@@ -6,7 +6,7 @@ using Domain.Notifications;
 namespace DB.Data.Notifications;
 
 [Table("NotificationDeliveryOutcomes")]
-internal record NotificationDeliveryOutcomeRow : Entity<Guid>, IUserOwned
+internal sealed record NotificationDeliveryOutcomeRow : Entity<Guid>, IUserOwned
 {
 	public required Guid EventId { get; set; }
 

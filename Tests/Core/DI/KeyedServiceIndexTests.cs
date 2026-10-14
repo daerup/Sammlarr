@@ -45,12 +45,12 @@ public class KeyedServiceIndexTests
 		string Name { get; }
 	}
 
-	private class TmdbService : ITestService
+	private sealed class TmdbService : ITestService
 	{
 		public string Name => "tmdb";
 	}
 
-	private class PlexService : ITestService
+	private sealed class PlexService : ITestService
 	{
 		public string Name => "plex";
 	}

@@ -5,7 +5,7 @@ using Shared.DI;
 
 namespace DB.Conversion;
 
-internal class ConversionModule : IServiceModule
+internal sealed class ConversionModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

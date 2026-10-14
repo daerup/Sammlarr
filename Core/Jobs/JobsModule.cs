@@ -6,7 +6,7 @@ using Shared.DI;
 
 namespace Core.Jobs;
 
-internal class JobsModule : IServiceModule
+internal sealed class JobsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

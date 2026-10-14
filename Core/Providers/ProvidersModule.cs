@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace Core.Providers;
 
-internal class ProvidersModule : IServiceModule
+internal sealed class ProvidersModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

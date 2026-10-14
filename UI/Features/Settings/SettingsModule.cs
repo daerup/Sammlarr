@@ -3,7 +3,7 @@ using UI.Features.Settings.Components;
 
 namespace UI.Features.Settings;
 
-internal class SettingsModule : IServiceModule
+internal sealed class SettingsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

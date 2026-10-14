@@ -293,7 +293,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		await _testee.PurgeDetailsAsync();
 
-		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
+		var repository = new MediaRepository(fixture.ContextFactory, new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
 		var stored = await repository.GetAsync([MediaId.From(media.Id)]);
 
 		using var _ = Assert.Multiple();

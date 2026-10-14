@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace Core.Caching;
 
-internal class CachingModule : IServiceModule
+internal sealed class CachingModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

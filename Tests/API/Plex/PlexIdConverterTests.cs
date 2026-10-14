@@ -201,5 +201,5 @@ public class PlexIdConverterTests
 		return new PlexApi(plexClient, PlexTestUrls.Instance, FeedClock.Today(), NullLogger<PlexApi>.Instance);
 	}
 
-	private record PlexByIdPayload(string Json, PlexId PlexId, IReadOnlyList<TmdbId> TmdbIds, ImdbId ImdbId, TvdbId? TvdbId);
+	private sealed record PlexByIdPayload(string Json, PlexId PlexId, IReadOnlyList<TmdbId> TmdbIds, ImdbId ImdbId, TvdbId? TvdbId);
 }

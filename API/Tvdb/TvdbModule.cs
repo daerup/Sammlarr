@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace API.Tvdb;
 
-internal class TvdbModule : IServiceModule
+internal sealed class TvdbModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

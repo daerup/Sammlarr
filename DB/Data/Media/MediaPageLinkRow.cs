@@ -3,7 +3,7 @@ using Domain.Providers;
 
 namespace DB.Data.Media;
 
-internal record MediaPageLinkRow
+internal sealed record MediaPageLinkRow
 {
 	[Required]
 	public required MediaProvider Site { get; set; }

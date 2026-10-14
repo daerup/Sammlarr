@@ -1,6 +1,6 @@
 namespace DB.Data.Feed;
 
-internal record FeedAbsenceRow : IUserOwned
+internal sealed record FeedAbsenceRow : IUserOwned
 {
 	public Guid FeedId { get; set; }
 

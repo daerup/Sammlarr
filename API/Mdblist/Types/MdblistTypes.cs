@@ -8,19 +8,19 @@ internal static class MdblistTypes
 {
 	public static class Lists
 	{
-		public record Info([property: JsonPropertyName("user_name")] string UserName, [property: JsonPropertyName("slug")] string Slug);
+		public sealed record Info([property: JsonPropertyName("user_name")] string UserName, [property: JsonPropertyName("slug")] string Slug);
 	}
 
 	public static class Titles
 	{
-		public record Title(
+		public sealed record Title(
 			[property: JsonPropertyName("ids")] ListItems.Ids Ids,
 			[property: JsonPropertyName("ratings")] IReadOnlyList<Rating>? Ratings,
 			[property: JsonPropertyName("title")] string? Name = null,
 			[property: JsonPropertyName("year")] int? Year = null
 		);
 
-		public record Rating(
+		public sealed record Rating(
 			[property: JsonPropertyName("source")] string Source,
 			[property: JsonPropertyName("score")] float? Score,
 			[property: JsonPropertyName("votes")] int? Votes,
@@ -31,9 +31,9 @@ internal static class MdblistTypes
 	public static class ListItems
 	{
 		[JsonConverter(typeof(RootConverter))]
-		public record Root(IReadOnlyList<Movie> movies, IReadOnlyList<Show> shows, IReadOnlyList<UnmatchedListItem> unmatched);
+		public sealed record Root(IReadOnlyList<Movie> movies, IReadOnlyList<Show> shows, IReadOnlyList<UnmatchedListItem> unmatched);
 
-		public record UnmatchedListItem(MediaType MediaType, Ids ids, string title, int release_year);
+		public sealed record UnmatchedListItem(MediaType MediaType, Ids ids, string title, int release_year);
 
 		public interface IListItem
 		{
@@ -42,7 +42,7 @@ internal static class MdblistTypes
 			int release_year { get; }
 		}
 
-		public record Ids(
+		public sealed record Ids(
 			[property: JsonPropertyName("imdb")] string? imdb,
 			[property: JsonPropertyName("tmdb")] int? tmdb,
 			[property: JsonPropertyName("tvdb")] int? tvdb,
@@ -51,7 +51,7 @@ internal static class MdblistTypes
 			[property: JsonPropertyName("trakt")] int? trakt = null
 		);
 
-		public record Movie(
+		public sealed record Movie(
 			[property: JsonPropertyName("id")] int id,
 			[property: JsonPropertyName("ids")] Ids ids,
 			[property: JsonPropertyName("rank")] int rank,
@@ -65,7 +65,7 @@ internal static class MdblistTypes
 			[property: JsonPropertyName("spoken_language")] string spoken_language
 		) : IListItem;
 
-		public record Show(
+		public sealed record Show(
 			[property: JsonPropertyName("id")] int id,
 			[property: JsonPropertyName("ids")] Ids ids,
 			[property: JsonPropertyName("rank")] int rank,

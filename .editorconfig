@@ -191,8 +191,11 @@ dotnet_diagnostic.MA0051.severity = suggestion
 
 # fixed in the Phase 18 sweep and kept as warnings
 dotnet_diagnostic.CA1068.severity = warning
+dotnet_diagnostic.CA1822.severity = warning
+dotnet_diagnostic.CA1852.severity = warning
 dotnet_diagnostic.CA2012.severity = warning
 dotnet_diagnostic.CA2016.severity = warning
+dotnet_diagnostic.MA0053.severity = warning
 
 # Space preferences
 csharp_space_after_cast = false

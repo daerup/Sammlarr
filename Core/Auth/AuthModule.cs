@@ -6,7 +6,7 @@ using Shared.DI;
 
 namespace Core.Auth;
 
-internal class AuthModule : IServiceModule
+internal sealed class AuthModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

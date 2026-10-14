@@ -3,7 +3,7 @@ using Shared.DI;
 
 namespace Core.Processing;
 
-internal class ProcessingModule : IServiceModule
+internal sealed class ProcessingModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

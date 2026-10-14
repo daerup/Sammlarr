@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Data.Jobs;
 
-internal class JobModule : IServiceModule
+internal sealed class JobModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

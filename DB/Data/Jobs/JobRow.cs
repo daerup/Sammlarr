@@ -2,7 +2,7 @@ using Domain.Jobs;
 
 namespace DB.Data.Jobs;
 
-internal record JobRow : Entity<Guid>
+internal sealed record JobRow : Entity<Guid>
 {
 	public Guid OwnerId { get; set; }
 

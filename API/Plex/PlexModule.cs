@@ -8,7 +8,7 @@ using Shared.Options;
 
 namespace API.Plex;
 
-internal class PlexModule : IServiceModule
+internal sealed class PlexModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

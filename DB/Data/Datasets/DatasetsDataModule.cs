@@ -4,7 +4,7 @@ using Shared.DI;
 
 namespace DB.Data.Datasets;
 
-internal class DatasetsDataModule : IServiceModule
+internal sealed class DatasetsDataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

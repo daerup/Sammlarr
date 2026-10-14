@@ -9,7 +9,7 @@ using Shared.Options;
 
 namespace DB.Conversion.Encryption;
 
-internal class EncryptionModule : IServiceModule
+internal sealed class EncryptionModule : IServiceModule
 {
 	private const string ApplicationName = "Sammlarr";
 

@@ -3,7 +3,7 @@ using Shared.DI;
 
 namespace DB.Data.Feed.Run;
 
-internal class FeedRunModule : IServiceModule
+internal sealed class FeedRunModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

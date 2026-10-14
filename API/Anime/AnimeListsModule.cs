@@ -8,7 +8,7 @@ using Shared.Options;
 
 namespace API.Anime;
 
-internal class AnimeListsModule : IServiceModule
+internal sealed class AnimeListsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

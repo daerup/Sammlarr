@@ -1,6 +1,6 @@
 namespace UI.Shared.Services;
 
-internal class ProfileDropdownService
+internal sealed class ProfileDropdownService
 {
 	public event Func<Task>? OnOpenRequested;
 

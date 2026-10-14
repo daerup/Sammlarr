@@ -7,7 +7,7 @@ using UI.Shared.Services.Links;
 
 namespace UI.Shared.Services;
 
-internal class ServicesModule : IServiceModule
+internal sealed class ServicesModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

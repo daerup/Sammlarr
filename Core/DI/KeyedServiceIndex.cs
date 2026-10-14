@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Core.DI;
 
-internal class KeyedServiceIndex<TKey, TService>(IServiceProvider serviceProvider) : IKeyedServiceIndex<TKey, TService>
+internal sealed class KeyedServiceIndex<TKey, TService>(IServiceProvider serviceProvider) : IKeyedServiceIndex<TKey, TService>
 	where TKey : struct, Enum
 	where TService : class
 {

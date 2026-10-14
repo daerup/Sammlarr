@@ -3,7 +3,7 @@ using Shared.DI;
 
 namespace DB.Data.Scheduler;
 
-internal class SchedulerDataModule : IServiceModule
+internal sealed class SchedulerDataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

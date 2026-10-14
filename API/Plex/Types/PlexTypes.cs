@@ -7,7 +7,7 @@ internal static class PlexTypes
 {
 	internal static class Watchlist
 	{
-		public record MediaContainer(
+		public sealed record MediaContainer(
 			[property: JsonPropertyName("identifier")] string Identifier,
 			[property: JsonPropertyName("offset")] int Offset,
 			[property: JsonPropertyName("totalSize")] int TotalSize,
@@ -15,7 +15,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("Metadata")] IReadOnlyList<Metadata>? Items
 		);
 
-		public record Metadata(
+		public sealed record Metadata(
 			[property: JsonPropertyName("art")] string Art,
 			[property: JsonPropertyName("rating")] double Rating,
 			[property: JsonPropertyName("ratingKey")] string RatingKey,
@@ -33,14 +33,14 @@ internal static class PlexTypes
 			public PlexId PlexId => PlexId.From(RatingKey, MediaType);
 		}
 
-		public record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
+		public sealed record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
 	}
 
 	internal static class ById
 	{
-		public record Guid([property: JsonPropertyName("id")] string Id);
+		public sealed record Guid([property: JsonPropertyName("id")] string Id);
 
-		public record MediaContainer(
+		public sealed record MediaContainer(
 			[property: JsonPropertyName("librarySectionID")] string LibrarySectionId,
 			[property: JsonPropertyName("librarySectionTitle")] string LibrarySectionTitle,
 			[property: JsonPropertyName("offset")] int Offset,
@@ -48,7 +48,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("Metadata")] IReadOnlyList<Metadata> Items
 		);
 
-		public record Metadata(
+		public sealed record Metadata(
 			[property: JsonPropertyName("art")] string Art,
 			[property: JsonPropertyName("ratingKey")] string RatingKey,
 			[property: JsonPropertyName("summary")] string? Summary,
@@ -79,27 +79,27 @@ internal static class PlexTypes
 				Guids.Where(g => g.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Select(g => convert(g.Id[prefix.Length..])).ToArray();
 		}
 
-		public record Genre([property: JsonPropertyName("tag")] string Tag);
+		public sealed record Genre([property: JsonPropertyName("tag")] string Tag);
 
-		public record Rating(
+		public sealed record Rating(
 			[property: JsonPropertyName("image")] string Image,
 			[property: JsonPropertyName("type")] string Type,
 			[property: JsonPropertyName("value")] double Value
 		);
 
-		public record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
+		public sealed record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
 	}
 
 	internal static class Search
 	{
-		public record MediaContainer(
+		public sealed record MediaContainer(
 			[property: JsonPropertyName("suggestedTerms")] IReadOnlyList<object> SuggestedTerms,
 			[property: JsonPropertyName("identifier")] string Identifier,
 			[property: JsonPropertyName("size")] int Size,
 			[property: JsonPropertyName("SearchResults")] IReadOnlyList<SearchResult> SearchResults
 		);
 
-		public record Metadata(
+		public sealed record Metadata(
 			[property: JsonPropertyName("ratingKey")] string RatingKey,
 			[property: JsonPropertyName("title")] string Title,
 			[property: JsonPropertyName("thumb")] string? Thumb,
@@ -117,21 +117,21 @@ internal static class PlexTypes
 			public PlexId PlexId => PlexId.From(RatingKey, MediaType);
 		}
 
-		public record Genre([property: JsonPropertyName("tag")] string Tag);
+		public sealed record Genre([property: JsonPropertyName("tag")] string Tag);
 
-		public record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
+		public sealed record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
 
-		public record SearchResult(
+		public sealed record SearchResult(
 			[property: JsonPropertyName("size")] int Size,
 			[property: JsonPropertyName("SearchResult")] IReadOnlyList<NestedSearchResult> NestedSearchResults
 		);
 
-		public record NestedSearchResult([property: JsonPropertyName("Metadata")] Metadata Metadata);
+		public sealed record NestedSearchResult([property: JsonPropertyName("Metadata")] Metadata Metadata);
 	}
 
 	internal static class Auth
 	{
-		public record Root(
+		public sealed record Root(
 			[property: JsonPropertyName("id")] int PinId,
 			[property: JsonPropertyName("code")] string Code,
 			[property: JsonPropertyName("product")] string Product,
@@ -146,7 +146,7 @@ internal static class PlexTypes
 
 	internal static class User
 	{
-		public record Root(
+		public sealed record Root(
 			[property: JsonPropertyName("uuid")] string? Uuid,
 			[property: JsonPropertyName("username")] string Username,
 			[property: JsonPropertyName("title")] string Title,
@@ -158,7 +158,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("joinedAt")] long? JoinedAt
 		);
 
-		public record Subscription(
+		public sealed record Subscription(
 			[property: JsonPropertyName("active")] bool Active,
 			[property: JsonPropertyName("status")] string? Status,
 			[property: JsonPropertyName("plan")] string? Plan

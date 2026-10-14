@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Domain.Providers;
 using Domain.Wantlist.Arr;
 
@@ -95,6 +96,11 @@ public class MediaProviderBrandingService
 
 	public string Name(RemoteService remote) => remote.OwnIds.Map(provider => provider.GetDescription()).GetValueOr(() => GetBrandingInfo(remote).NickName);
 
+	[SuppressMessage(
+		"Performance",
+		"CA1822:Mark members as static",
+		Justification = "the components call both GetBrandingInfo overloads on the injected service, so a static one would split the overload set"
+	)]
 	public BrandingInfo GetBrandingInfo(MediaProvider provider) =>
 		provider switch
 		{

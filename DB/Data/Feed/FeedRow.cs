@@ -6,7 +6,7 @@ using Domain.Providers;
 
 namespace DB.Data.Feed;
 
-internal record FeedRow : Entity<Guid>, IUserOwned
+internal sealed record FeedRow : Entity<Guid>, IUserOwned
 {
 	[Required]
 	public bool IsEnabled { get; set; }

@@ -239,7 +239,7 @@ internal sealed class ArrSink(
 		return pushed.ApplyError(error => logger.LogWarning("Pushing {Action} for {ExternalId} to {App} failed: {Reason}", action, id, api.App.Name, error.Reason));
 	}
 
-	private Task<Result<SinkSyncOutcome>> PushToAsync(
+	private static Task<Result<SinkSyncOutcome>> PushToAsync(
 		ArrSession session,
 		WantlistOperationAction action,
 		SinkPush push,
@@ -255,7 +255,13 @@ internal sealed class ArrSink(
 		};
 	}
 
-	private async Task<Result<SinkSyncOutcome>> AddAsync(ArrSession session, SinkPush push, IExternalMediaId id, Setup setup, CancellationToken cancellationToken)
+	private static async Task<Result<SinkSyncOutcome>> AddAsync(
+		ArrSession session,
+		SinkPush push,
+		IExternalMediaId id,
+		Setup setup,
+		CancellationToken cancellationToken
+	)
 	{
 		var feed = push.AddedBy.Map(added => new ArrTagFeed(added.Id.Value, added.Name));
 		var labels = setup.Config.Tags.Labels(setup.Viewer, feed);
@@ -372,12 +378,12 @@ internal sealed class ArrSink(
 		return added.Map(found => found.Match(SinkSyncOutcome.Applied, SinkSyncOutcome.Unaddressable));
 	}
 
-	private Task<Result<SinkSyncOutcome>> RemoveAsync(ArrSession session, IExternalMediaId id, Setup setup, CancellationToken cancellationToken)
+	private static Task<Result<SinkSyncOutcome>> RemoveAsync(ArrSession session, IExternalMediaId id, Setup setup, CancellationToken cancellationToken)
 	{
 		return session.Find(id).Match(title => UntagAsync(session, title, setup, cancellationToken), () => Success.Of(SinkSyncOutcome.Applied));
 	}
 
-	private async Task<Result<SinkSyncOutcome>> UntagAsync(ArrSession session, ArrTitle title, Setup setup, CancellationToken cancellationToken)
+	private static async Task<Result<SinkSyncOutcome>> UntagAsync(ArrSession session, ArrTitle title, Setup setup, CancellationToken cancellationToken)
 	{
 		var scheme = setup.Config.Tags;
 		var mine = session.Mine(scheme, setup.Viewer);

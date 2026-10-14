@@ -2,7 +2,7 @@ using Microsoft.JSInterop;
 
 namespace UI.Shared.Services;
 
-internal class ScrollService(IJSRuntime jsRuntime)
+internal sealed class ScrollService(IJSRuntime jsRuntime)
 {
 	public async Task ToTopAfterAsync(Func<Task> navigateAction, CancellationToken cancellationToken = default)
 	{

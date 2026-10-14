@@ -2,7 +2,7 @@ using Domain.Feed.Run;
 
 namespace DB.Data.Feed.Run;
 
-internal record FeedRunItemRow : Entity<Guid>, IUserOwned
+internal sealed record FeedRunItemRow : Entity<Guid>, IUserOwned
 {
 	public Guid FeedRunId { get; set; }
 

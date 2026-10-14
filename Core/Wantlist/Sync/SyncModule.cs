@@ -6,7 +6,7 @@ using Shared.DI;
 
 namespace Core.Wantlist.Sync;
 
-internal class SyncModule : IServiceModule
+internal sealed class SyncModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

@@ -43,7 +43,7 @@ internal abstract record MediaDetailsRow : IAuditable
 	public List<MediaPageLinkRow> PageLinks { get; set; } = [];
 }
 
-internal record MovieDetailsRow : MediaDetailsRow
+internal sealed record MovieDetailsRow : MediaDetailsRow
 {
 	public MovieDetailsRow()
 	{
@@ -53,7 +53,7 @@ internal record MovieDetailsRow : MediaDetailsRow
 	public TimeSpan? Runtime { get; set; }
 }
 
-internal record ShowDetailsRow : MediaDetailsRow
+internal sealed record ShowDetailsRow : MediaDetailsRow
 {
 	public ShowDetailsRow()
 	{
