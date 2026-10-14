@@ -1,7 +1,6 @@
 [
   {
     "file": "css/app.css",
-    "origin": "npm",
     "sources": ["https://github.com/tailwindlabs/tailwindcss"],
     "author": "Copyright (c) Tailwind Labs, Inc.",
     "licence": "MIT",
@@ -9,10 +8,23 @@
   },
   {
     "file": "css/app.css",
-    "origin": "npm",
     "sources": ["https://github.com/sindresorhus/modern-normalize"],
     "author": "Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com); Copyright (c) Jonathan Neal; Copyright (c) Nicolas Gallagher",
     "licence": "MIT",
     "changes": "Tailwind's base styles (Preflight) build on modern-normalize"
+  },
+  {
+    "file": "fonts/roboto",
+    "sources": ["https://github.com/googlefonts/roboto-classic"],
+    "author": "Copyright 2011 The Roboto Project Authors (https://github.com/googlefonts/roboto-classic)",
+    "licence": "OFL-1.1",
+    "changes": "the Google Fonts woff2 subsets per script, self-hosted"
+  },
+  {
+    "file": "fonts/roboto-mono",
+    "sources": ["https://github.com/googlefonts/robotomono"],
+    "author": "Copyright 2015 The Roboto Mono Project Authors (https://github.com/googlefonts/robotomono)",
+    "licence": "OFL-1.1",
+    "changes": "the Google Fonts woff2 subsets per script, self-hosted"
   }
 ]
