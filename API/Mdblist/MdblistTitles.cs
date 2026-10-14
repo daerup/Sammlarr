@@ -9,7 +9,6 @@ using Contracts.Media;
 using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
-using Shared.Concurrency;
 
 namespace API.Mdblist;
 

@@ -1,6 +1,9 @@
-namespace Shared.Concurrency;
+using Contracts.Providers;
+using Domain.Providers;
 
-public sealed class LaneGate : IDisposable
+namespace API.Http.Lanes;
+
+internal sealed class LaneGate : IDisposable
 {
 	private static readonly TimeSpan LongestWake = TimeSpan.FromDays(1);
 
@@ -100,7 +103,7 @@ public sealed class LaneGate : IDisposable
 
 	private Task<Result<LanePermit>> Enqueue(Ticket ticket, CancellationToken cancellationToken)
 	{
-		_waiting.Enqueue(ticket, (ticket.Priority.Rank.Class, ticket.Priority.Rank.Order, _seq++));
+		_waiting.Enqueue(ticket, ((int)ticket.Priority.Class, ticket.Priority.Order, _seq++));
 		ticket.Watch(cancellationToken, Cancelled);
 		PumpLocked();
 		return ticket.Task;
@@ -325,7 +328,7 @@ public sealed class LaneGate : IDisposable
 	}
 }
 
-public sealed class LanePermit
+internal sealed class LanePermit
 {
 	private readonly LaneGate _lane;
 	private int _released;

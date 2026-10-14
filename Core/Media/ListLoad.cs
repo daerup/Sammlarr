@@ -2,12 +2,12 @@ using System.Diagnostics;
 using System.Threading.Channels;
 using Contracts.Media;
 using Contracts.Media.Conversions;
+using Contracts.Providers;
 using Core.Wantlist.Sync;
 using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using Observability.Feed;
-using Shared.Concurrency;
 using Shared.Options;
 
 namespace Core.Media;

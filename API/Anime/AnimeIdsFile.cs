@@ -4,11 +4,11 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using API.Anime.Types;
 using API.Http;
+using API.Http.Lanes;
 using Contracts.Datasets;
 using Domain.Media;
 using Domain.Providers;
 using Polly.Timeout;
-using Shared.Concurrency;
 
 namespace API.Anime;
 
