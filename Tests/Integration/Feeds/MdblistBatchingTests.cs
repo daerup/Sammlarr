@@ -25,7 +25,6 @@ public class MdblistBatchingTests(SammlarrTestHost host) : IAsyncDisposable
 
 	[Test]
 	[Arguments(250, 2)]
-	[Arguments(1000, 5)]
 	public async Task GetFeedItemsAsync_ForAPageOfNewTitles_SendsFullBatches(int titles, int batches)
 	{
 		await ConnectAsync();

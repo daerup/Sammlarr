@@ -15,18 +15,6 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task GetTrendingAsync_WhenAMovieIsCached_ResolvesIt()
-	{
-		await host.TmdbTrendingPage(1, TestMedia.Inception);
-		await host.Movie(TestMedia.Inception).SeedAsync();
-
-		var items = (await FetchTrending(1)).Items;
-
-		await Assert.That(items).Count().IsEqualTo(1);
-		await AssertResolvedAs(items[0], TestMedia.Inception);
-	}
-
-	[Test]
 	public async Task GetTrendingAsync_ForACachedMovie_AddsTheRatingsSammlarrStoresForIt()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception);
@@ -60,19 +48,6 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetTrendingAsync_WhenAMovieIsUncached_ResolvesItThroughPlex()
-	{
-		await host.TmdbTrendingPage(1, TestMedia.Inception);
-		host.PlexHolds(TestMedia.Inception);
-		await host.PlexMatches(TestMedia.Inception);
-
-		var items = (await FetchTrending(1)).Items;
-
-		await Assert.That(items).Count().IsEqualTo(1);
-		await AssertResolvedAs(items[0], TestMedia.Inception);
-	}
-
-	[Test]
 	public async Task GetTrendingAsync_WhenPlexCannotResolveTheMovie_LeavesItUnmatched()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception);
@@ -86,17 +61,6 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetTrendingAsync_WhenTheMediaTypeIsUnknown_LeavesItUnmatched()
-	{
-		await host.TmdbTrendingPage(1, TestMedia.Person("Some Person"));
-
-		var items = (await FetchTrending(1)).Items;
-
-		await Assert.That(items).Count().IsEqualTo(1);
-		await AssertUnmatched(items[0], "Some Person");
-	}
-
-	[Test]
 	public async Task GetTrendingAsync_WhenThePageIsEmpty_ReturnsNoItems()
 	{
 		await host.TmdbTrendingPage(1);
@@ -105,7 +69,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetTrendingAsync_WhenItemsMixResolvedAndUnmatched_PreservesTheirOrder()
+	public async Task GetTrendingAsync_ForACachedMovieAPersonAndAnUncachedMovie_ResolvesTheMoviesFromCacheAndPlexAndLeavesThePersonUnmatchedInOrder()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception, TestMedia.Person("Christopher Nolan"), TestMedia.Interstellar);
 		await host.Movie(TestMedia.Inception).SeedAsync();

@@ -26,16 +26,18 @@ public class DuplicateTitlesTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task RunAsync_ForAPairMdblistConfirms_MergesItAndForgetsTheNote()
+	public async Task RunAsync_ForAPairMdblistConfirms_MergesItForgetsTheNoteAndFindsNothingADayLater()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
 		host.MdblistMaps(("15739", "tt0083564"));
 		var (held, other) = await host.StoredTwiceAsync("15739", "tt0083564");
 
 		var merged = await Testee.RunAsync(Now);
+		var notesAfterTheMerge = await Notes.AllAsync();
+		var dayLater = await Testee.RunAsync(Now.AddDays(1));
 
-		await Assert.That(merged).IsEqualTo(1);
-		await Assert.That(await Notes.AllAsync()).IsEmpty();
+		await Assert.That((merged, dayLater)).IsEqualTo((1, 0));
+		await Assert.That(notesAfterTheMerge).IsEmpty();
 		await Assert.That(await host.Resolve<IMediaRepository>().GetAsync([held, other])).HasSingleItem();
 		await Assert.That(host.HttpStub.Causes(HousekeepingSeeds.MdblistTitles).Distinct()).IsEquivalentTo([UsageCause.Housekeeping]);
 	}
@@ -212,18 +214,5 @@ public class DuplicateTitlesTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(merged).IsEqualTo(1);
 		await Assert.That(host.WikidataAsked("tt0083564")).IsEqualTo(1);
 		await Assert.That(host.HttpStub.Requests(TestUrls.MdblistApi)).IsEqualTo(0);
-	}
-
-	[Test]
-	public async Task RunAsync_Twice_MergesOnceThenReportsZero()
-	{
-		await host.WithMdblistAccount("valid-mdblist-key");
-		host.MdblistMaps(("15739", "tt0083564"));
-		await host.StoredTwiceAsync("15739", "tt0083564");
-
-		var first = await Testee.RunAsync(Now);
-		var second = await Testee.RunAsync(Now.AddDays(1));
-
-		await Assert.That((first, second)).IsEqualTo((1, 0));
 	}
 }
