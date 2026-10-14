@@ -65,4 +65,10 @@
 			<Content Include="wwwroot\css\app.css" Exclude="@(Content)" />
 		</ItemGroup>
 	</Target>
+	<Target Name="WriteThirdPartyNotices" AfterTargets="Publish">
+		<Exec
+			Command="&quot;$(DOTNET_HOST_PATH)&quot; run --file .github/licences/notices.cs -- &quot;$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(PublishDir), $(ProjectDepsFileName)))&quot; &quot;$(NuGetPackageRoot.TrimEnd('\/'))&quot;"
+			WorkingDirectory="$(RepoRoot)"
+		/>
+	</Target>
 </Project>

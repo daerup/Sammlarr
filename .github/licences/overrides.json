@@ -1,0 +1,5 @@
+[
+  { "Id": "ncrontab", "Version": "3.3.0", "License": "Apache-2.0" },
+  { "Id": "Planetarium.LruCacheNet", "Version": "1.2.0", "License": "MIT" },
+  { "Id": "SQLite", "Version": "3.53.4", "License": "blessing" }
+]

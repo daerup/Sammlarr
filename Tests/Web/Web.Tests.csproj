@@ -13,6 +13,9 @@
 		<PackageReference Include="TUnit.Mocks.Http" />
 	</ItemGroup>
 	<ItemGroup>
+		<Compile Include="..\..\.github\licences\ThirdPartyNotices.cs" Link="Licences\ThirdPartyNotices.cs" />
+	</ItemGroup>
+	<ItemGroup>
 		<ProjectReference Include="..\..\Web\Web.csproj" />
 		<ProjectReference Include="..\TestInfrastructure\TestInfrastructure.csproj" />
 	</ItemGroup>
