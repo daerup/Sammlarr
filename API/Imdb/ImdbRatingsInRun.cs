@@ -9,7 +9,7 @@ internal sealed class ImdbRatingsInRun(IImdbRatings ratings, IDatasetLoads loads
 {
 	private readonly Lock _gate = new();
 
-	private readonly Dictionary<string, Optional<ImdbRating>> _known = new(StringComparer.Ordinal);
+	private readonly Dictionary<string, Optional<ImdbRating>> _known = [];
 
 	private bool _loaded;
 
@@ -19,11 +19,7 @@ internal sealed class ImdbRatingsInRun(IImdbRatings ratings, IDatasetLoads loads
 	{
 		List<string> asked =
 		[
-			.. titles
-				.SelectMany(ids => ids)
-				.Where(id => id.Source is MediaProvider.Imdb && Known(id.Value).IsNone())
-				.Select(id => id.Value)
-				.Distinct(StringComparer.Ordinal),
+			.. titles.SelectMany(ids => ids).Where(id => id.Source is MediaProvider.Imdb && Known(id.Value).IsNone()).Select(id => id.Value).Distinct(),
 		];
 		if (asked.Count == 0 || !await LoadedAsync(cancellationToken))
 		{

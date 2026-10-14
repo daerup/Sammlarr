@@ -100,7 +100,7 @@ public class ListLoadTests
 			}
 		};
 
-		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("the lookup broke", StringComparison.Ordinal);
+		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("the lookup broke");
 		await Assert.That(settled).Count().IsEqualTo(3);
 		await Assert.That(Reason(settled.Single(result => result.Position == 1).Item)).IsEqualTo(UnmatchedReason.CouldNotLookUp);
 	}
@@ -286,7 +286,7 @@ public class ListLoadTests
 			}
 		};
 
-		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("the list failed", StringComparison.Ordinal);
+		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("the list failed");
 		await Assert
 			.That(seen.Select(result => result.Externals.OfType<ImdbId>().Single().Value))
 			.IsEquivalentTo([.. Enumerable.Range(0, 25).Select(Tt)], CollectionOrdering.Matching);

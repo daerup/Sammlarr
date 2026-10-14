@@ -70,12 +70,11 @@ public readonly record struct RottenTomatoesCriticsRating(int Percent) : IOwnedR
 
 	public static bool PublishesVotes => false;
 
-	public static RottenTomatoesCriticsRating Rate(float sammlarrValue, Optional<int> votes) =>
-		new((int)MathF.Round(sammlarrValue / 10 * Ceiling, MidpointRounding.ToEven));
+	public static RottenTomatoesCriticsRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue / 10 * Ceiling));
 
 	public RatingSource Source => RatingSource.RottenTomatoesCritics;
 
-	public string Value => FormattableString.Invariant($"{Percent}%");
+	public string Value => $"{Percent}%";
 
 	public float SammlarrValue => Percent * 10 / Ceiling;
 
@@ -94,12 +93,11 @@ public readonly record struct RottenTomatoesAudienceRating(int Percent) : IOwned
 
 	public static bool PublishesVotes => false;
 
-	public static RottenTomatoesAudienceRating Rate(float sammlarrValue, Optional<int> votes) =>
-		new((int)MathF.Round(sammlarrValue / 10 * Ceiling, MidpointRounding.ToEven));
+	public static RottenTomatoesAudienceRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue / 10 * Ceiling));
 
 	public RatingSource Source => RatingSource.RottenTomatoesAudience;
 
-	public string Value => FormattableString.Invariant($"{Percent}%");
+	public string Value => $"{Percent}%";
 
 	public float SammlarrValue => Percent * 10 / Ceiling;
 
@@ -118,7 +116,7 @@ public readonly record struct MetacriticRating(int Metascore) : IOwnedRating<Met
 
 	public static bool PublishesVotes => false;
 
-	public static MetacriticRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10, MidpointRounding.ToEven));
+	public static MetacriticRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10));
 
 	public RatingSource Source => RatingSource.Metacritic;
 
@@ -164,11 +162,11 @@ public readonly record struct TraktRating(int Percent, Optional<int> Votes) : IO
 
 	public static bool PublishesVotes => true;
 
-	public static TraktRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10, MidpointRounding.ToEven), votes);
+	public static TraktRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10), votes);
 
 	public RatingSource Source => RatingSource.Trakt;
 
-	public string Value => FormattableString.Invariant($"{Percent}%");
+	public string Value => $"{Percent}%";
 
 	public float SammlarrValue => Percent / 10f;
 
@@ -198,11 +196,11 @@ public readonly record struct AniListRating(int Score, Optional<int> Votes) : IO
 
 	public static bool PublishesVotes => true;
 
-	public static AniListRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10, MidpointRounding.ToEven), votes);
+	public static AniListRating Rate(float sammlarrValue, Optional<int> votes) => new((int)MathF.Round(sammlarrValue * 10), votes);
 
 	public RatingSource Source => RatingSource.AniList;
 
-	public string Value => FormattableString.Invariant($"{Score}%");
+	public string Value => $"{Score}%";
 
 	public float SammlarrValue => Score / 10f;
 

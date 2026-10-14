@@ -343,7 +343,7 @@ public sealed class MonadPatternAnalyzer : DiagnosticAnalyzer
 			return;
 		}
 
-		if (OrderingKeys.Contains(method.Name, StringComparer.Ordinal))
+		if (OrderingKeys.Contains(method.Name))
 		{
 			if (Lambdas(invocation).Any(lambda => monads.IsMonad(lambda.Symbol.ReturnType)))
 			{

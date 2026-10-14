@@ -11,9 +11,6 @@ public class SammlarrTestHostTests
 		using var client = new HttpClient(host.HttpStub, disposeHandler: false);
 		await client.GetAsync(new Uri("https://nowhere.test/stray"));
 
-		await Assert
-			.That(async () => await host.DisposeAsync())
-			.Throws<InvalidOperationException>()
-			.WithMessageContaining("https://nowhere.test/stray", StringComparison.Ordinal);
+		await Assert.That(async () => await host.DisposeAsync()).Throws<InvalidOperationException>().WithMessageContaining("https://nowhere.test/stray");
 	}
 }

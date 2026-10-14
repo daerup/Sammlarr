@@ -13,6 +13,6 @@ internal static class WantlistNotices
 	{
 		return count == 1
 			? $"{sink} has no match for 1 title, so it can't go on your wantlist."
-			: FormattableString.CurrentCulture($"{sink} has no match for {count} titles, so they can't go on your wantlist.");
+			: $"{sink} has no match for {count} titles, so they can't go on your wantlist.";
 	}
 }

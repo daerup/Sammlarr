@@ -50,7 +50,7 @@ public sealed record ListFilter
 
 	public int ActiveCount => (Sources.Count > 0 ? 1 : 0) + (Type is null ? 0 : 1) + (string.IsNullOrWhiteSpace(Search) ? 0 : 1) + (Statuses.Count > 0 ? 1 : 0);
 
-	public bool HasStatus(string key) => Statuses.Contains(key, StringComparer.Ordinal);
+	public bool HasStatus(string key) => Statuses.Contains(key);
 
 	public bool HasFilters => ActiveCount > 0;
 

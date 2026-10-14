@@ -94,8 +94,7 @@ internal static class TitlesStoredTwiceView
 
 	public static Optional<string> DetailsTitle(StoredTitle title) => Details(title).Map(details => Optional.Of(details.Title)).When(name => name.Length > 0);
 
-	public static string ApplyTitle(int changes) =>
-		changes == 0 ? "Nothing to apply" : FormattableString.CurrentCulture($"Apply {changes} {Plural(changes, "change")}?");
+	public static string ApplyTitle(int changes) => changes == 0 ? "Nothing to apply" : $"Apply {changes} {Plural(changes, "change")}?";
 
 	public static (string Label, string Icon) Unmarked(IdentityConflict note)
 	{
@@ -113,12 +112,12 @@ internal static class TitlesStoredTwiceView
 		List<string> parts = [];
 		if (uses.Wantlists > 0)
 		{
-			parts.Add(FormattableString.CurrentCulture($"on {uses.Wantlists} {Plural(uses.Wantlists, "wantlist")}"));
+			parts.Add($"on {uses.Wantlists} {Plural(uses.Wantlists, "wantlist")}");
 		}
 
 		if (uses.Feeds > 0)
 		{
-			parts.Add(FormattableString.CurrentCulture($"in {uses.Feeds} {Plural(uses.Feeds, "feed")}"));
+			parts.Add($"in {uses.Feeds} {Plural(uses.Feeds, "feed")}");
 		}
 
 		return parts.Count == 0 ? "on no wantlist and in no feed" : string.Join(" · ", parts);
@@ -148,11 +147,9 @@ internal static class TitlesStoredTwiceView
 	{
 		var open =
 			undecided > 0
-				? FormattableString.CurrentCulture(
-					$"{undecided} {Plural(undecided, "pair")} that may be one title. The nightly pass checks them with a second source; settle one now if you know."
-				)
+				? $"{undecided} {Plural(undecided, "pair")} that may be one title. The nightly pass checks them with a second source; settle one now if you know."
 				: "Nothing to decide: every pair found so far is settled.";
-		var kept = keptApart > 0 ? FormattableString.CurrentCulture($" {keptApart} {Plural(keptApart, "pair")} {Are(keptApart)} kept apart.") : string.Empty;
+		var kept = keptApart > 0 ? $" {keptApart} {Plural(keptApart, "pair")} {Are(keptApart)} kept apart." : string.Empty;
 		return open + kept;
 	}
 
@@ -217,7 +214,7 @@ internal static class TitlesStoredTwiceView
 		{
 			1 => "once",
 			2 => "twice",
-			_ => FormattableString.CurrentCulture($"{attempts} times"),
+			_ => $"{attempts} times",
 		};
 	}
 

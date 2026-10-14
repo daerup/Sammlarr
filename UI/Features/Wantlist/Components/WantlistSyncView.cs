@@ -1,4 +1,3 @@
-using System.Globalization;
 using Domain.Media;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
@@ -57,7 +56,7 @@ internal static class WantlistSyncView
 	private static string UnmatchedSubtitle(UnmatchedMedia unmatched)
 	{
 		var source = unmatched.Externals.FirstOrDefault()?.Source.GetDescription();
-		var year = unmatched.Details.Year?.ToString(CultureInfo.CurrentCulture);
+		var year = unmatched.Details.Year?.ToString();
 		return string.Join(" · ", new[] { year, source is null ? null : $"on {source}", "Cannot be imported" }.Where(part => part is not null));
 	}
 
@@ -102,5 +101,5 @@ internal static class WantlistSyncView
 			},
 		];
 
-	private static string Subtitle(MatchedMedia media) => media.Details.Year?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+	private static string Subtitle(MatchedMedia media) => media.Details.Year?.ToString() ?? string.Empty;
 }

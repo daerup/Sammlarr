@@ -181,10 +181,7 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(
-				RemoteService.Mdblist,
-				FormattableString.CurrentCulture($"MDBList answered {(int)response.StatusCode} for {keys.Count} titles.")
-			);
+			return response.StatusCode.Unanswered(RemoteService.Mdblist, $"MDBList answered {(int)response.StatusCode} for {keys.Count} titles.");
 		}
 
 		var titles = await response.Content.ReadFromJsonAsync<List<MdblistTypes.Titles.Title>>(cancellationToken) ?? [];

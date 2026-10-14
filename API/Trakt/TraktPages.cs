@@ -9,7 +9,7 @@ internal static partial class TraktPages
 {
 	private const string Types = "movie,show,season,episode";
 
-	private static readonly HashSet<string> Charts = new(StringComparer.Ordinal) { "trending", "popular", "anticipated" };
+	private static readonly HashSet<string> Charts = ["trending", "popular", "anticipated"];
 
 	internal static Optional<SiteLink> Parse(string input)
 	{

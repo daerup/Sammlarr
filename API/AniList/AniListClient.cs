@@ -15,7 +15,7 @@ internal sealed class AniListClient(HttpClient http)
 		using var response = await http.PostAsync(string.Empty, content, cancellationToken);
 		if (response.StatusCode is HttpStatusCode.TooManyRequests or >= HttpStatusCode.InternalServerError)
 		{
-			return response.StatusCode.Unanswered(RemoteService.AniList, FormattableString.CurrentCulture($"AniList answered {(int)response.StatusCode}."));
+			return response.StatusCode.Unanswered(RemoteService.AniList, $"AniList answered {(int)response.StatusCode}.");
 		}
 
 		var answer = await response.Content.ReadFromJsonAsync<AniListTypes.Answer<TData>>(cancellationToken);
@@ -27,7 +27,7 @@ internal sealed class AniListClient(HttpClient http)
 
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(RemoteService.AniList, FormattableString.CurrentCulture($"AniList answered {(int)response.StatusCode}."));
+			return response.StatusCode.Unanswered(RemoteService.AniList, $"AniList answered {(int)response.StatusCode}.");
 		}
 
 		return Optional.Of(answer?.Data).ToResult("AniList answered without data.");

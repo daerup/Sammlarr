@@ -42,5 +42,5 @@ public sealed record MediaQueryRow(MatchedMedia Media, Optional<SammlarrRating> 
 
 	public int? Episodes => Media.Details is ShowDetails show ? show.Episodes : null;
 
-	private static int? Minutes(TimeSpan? runtime) => runtime is { } value ? (int)Math.Round(value.TotalMinutes, MidpointRounding.ToEven) : null;
+	private static int? Minutes(TimeSpan? runtime) => runtime is { } value ? (int)Math.Round(value.TotalMinutes) : null;
 }

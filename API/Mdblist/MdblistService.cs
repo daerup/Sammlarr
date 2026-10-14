@@ -68,10 +68,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 
 		if (!response.IsSuccessStatusCode)
 		{
-			var refused = response.StatusCode.Unanswered(
-				RemoteService.Mdblist,
-				FormattableString.CurrentCulture($"MDBList refused to look up list {number} ({(int)response.StatusCode}).")
-			);
+			var refused = response.StatusCode.Unanswered(RemoteService.Mdblist, $"MDBList refused to look up list {number} ({(int)response.StatusCode}).");
 			return refused.CausedBy<RemoteUnavailableException>().Match(unavailable => NotReached(number, unavailable), () => refused);
 		}
 
@@ -79,15 +76,12 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		return lists!.FirstOrNone().Map(list => $"{list.UserName}/{list.Slug}").ToResult(NoList(number));
 	}
 
-	private static Error NoList(long number) => Error.From(FormattableString.CurrentCulture($"MDBList has no list {number}."));
+	private static Error NoList(long number) => Error.From($"MDBList has no list {number}.");
 
 	private static Error NotReached(long number, Exception cause)
 	{
 		var unavailable = cause as RemoteUnavailableException ?? new RemoteUnavailableException(RemoteService.Mdblist, sent: true, cause);
-		return Error.From(
-			FormattableString.CurrentCulture($"MDBList didn't answer, so {number} can't be looked up yet. Paste the list's link instead; it needs no request."),
-			unavailable
-		);
+		return Error.From($"MDBList didn't answer, so {number} can't be looked up yet. Paste the list's link instead; it needs no request.", unavailable);
 	}
 
 	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, FieldNeeds needs, CancellationToken cancellationToken = default)

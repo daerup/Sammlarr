@@ -66,7 +66,7 @@ public class ArrSearchTests
 		await Assert
 			.That(async () => await Testee().SearchAsync("hail", [MediaType.Movie]))
 			.Throws<InvalidOperationException>()
-			.WithMessageContaining("Check the API key under Settings › General in Radarr.", StringComparison.Ordinal);
+			.WithMessageContaining("Check the API key under Settings › General in Radarr.");
 	}
 
 	[Test]

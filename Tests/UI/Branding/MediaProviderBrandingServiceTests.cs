@@ -32,7 +32,7 @@ public class MediaProviderBrandingServiceTests
 			.Select(file => Path.Combine(ProvidersFolder, file))
 			.ToList();
 		var missing = files.Where(file => !File.Exists(file));
-		var unclean = files.Where(file => file.EndsWith(".svg", StringComparison.Ordinal) && File.Exists(file) && IsUnclean(File.ReadAllText(file)));
+		var unclean = files.Where(file => file.EndsWith(".svg") && File.Exists(file) && IsUnclean(File.ReadAllText(file)));
 		await Assert.That(missing).IsEmpty();
 		await Assert.That(unclean).IsEmpty();
 	}

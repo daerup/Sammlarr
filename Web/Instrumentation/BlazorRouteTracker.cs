@@ -4,7 +4,7 @@ namespace Web.Instrumentation;
 
 internal sealed class BlazorRouteTracker
 {
-	private readonly ConcurrentDictionary<string, string> _urls = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, string> _urls = new();
 
 	public string? UpdateAndGet(string connectionId, string hubMethodName, IReadOnlyList<object?> arguments)
 	{

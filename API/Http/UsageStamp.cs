@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
 using System.Net.Http.Metrics;
 using API.Http.Lanes;
 using Contracts.Usage;
@@ -25,7 +24,7 @@ internal sealed record UsageStamp(RemoteService Service, UsageMark Mark)
 	internal IReadOnlyList<KeyValuePair<string, object?>> Tags()
 	{
 		List<KeyValuePair<string, object?>> tags = [new(UsageTags.Service, Service.ToString()), new(UsageTags.Cause, Mark.Cause.ToString())];
-		Mark.Feed.Apply(feed => tags.Add(new(UsageTags.Feed, feed.ToString("D", CultureInfo.InvariantCulture))));
+		Mark.Feed.Apply(feed => tags.Add(new(UsageTags.Feed, feed.ToString())));
 		return tags;
 	}
 

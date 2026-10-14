@@ -45,7 +45,7 @@ internal sealed class ArrSink(
 			mine.Apply(items.AddRange).ApplyError(error => failed.Add((api.App, error.Reason)));
 		}
 
-		var reason = string.Join(' ', failed.Select(app => app.Reason));
+		var reason = string.Join(" ", failed.Select(app => app.Reason));
 		if (failed.Count == apis.All.Count)
 		{
 			throw new ArrAppsUnreachableException(reason, [.. failed.Select(app => app.App)]);
@@ -169,7 +169,7 @@ internal sealed class ArrSink(
 
 	private static Error AlreadyDeleted(Error error, int deleted)
 	{
-		return deleted == 0 ? error : Error.From(FormattableString.CurrentCulture($"{error.Reason} {deleted} of their titles were already deleted."));
+		return deleted == 0 ? error : Error.From($"{error.Reason} {deleted} of their titles were already deleted.");
 	}
 
 	private static async Task<Result<IReadOnlyList<FoundMedia>>> MineAsync(
@@ -281,7 +281,7 @@ internal sealed class ArrSink(
 		}
 
 		return session.IsUnclaimed(title, scheme)
-			? setup.Claimant.Match(claimant => [.. labels.Append(scheme.UserTag(claimant)).Distinct(StringComparer.Ordinal)], () => labels)
+			? setup.Claimant.Match(claimant => [.. labels.Append(scheme.UserTag(claimant)).Distinct()], () => labels)
 			: labels;
 	}
 

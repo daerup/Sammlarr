@@ -43,10 +43,7 @@ internal sealed class ImdbRatingsFile(HttpClient http) : IDataset<ImdbRatingLine
 
 		if (!response.IsSuccessStatusCode)
 		{
-			return response.StatusCode.Unanswered(
-				RemoteService.ImdbDatasets,
-				FormattableString.CurrentCulture($"IMDb's datasets answered {(int)response.StatusCode} for the ratings file.")
-			);
+			return response.StatusCode.Unanswered(RemoteService.ImdbDatasets, $"IMDb's datasets answered {(int)response.StatusCode} for the ratings file.");
 		}
 
 		var body = await response.Content.ReadAsByteArrayAsync(cancellationToken);

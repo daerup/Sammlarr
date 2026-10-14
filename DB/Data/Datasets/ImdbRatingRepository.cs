@@ -27,7 +27,7 @@ internal sealed class ImdbRatingRepository(IDbContextFactory<SammlarrDbContext> 
 	public async Task<IReadOnlyDictionary<string, ImdbRating>> FindManyAsync(IReadOnlyCollection<string> tconsts, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var titles = tconsts.Distinct(StringComparer.Ordinal).Select(tconst => NumberOf(tconst).Map(id => (Tconst: tconst, Id: id))).WhereSome().ToList();
+		var titles = tconsts.Distinct().Select(tconst => NumberOf(tconst).Map(id => (Tconst: tconst, Id: id))).WhereSome().ToList();
 		var byId = new Dictionary<int, ImdbRating>();
 		foreach (var slice in titles.Select(title => title.Id).Distinct().Chunk(SliceSize))
 		{
@@ -38,7 +38,7 @@ internal sealed class ImdbRatingRepository(IDbContextFactory<SammlarrDbContext> 
 		return titles
 			.Select(title => byId.GetValueOrNone(title.Id).Map(rating => (title.Tconst, Rating: rating)))
 			.WhereSome()
-			.ToDictionary(rated => rated.Tconst, rated => rated.Rating, StringComparer.Ordinal);
+			.ToDictionary(rated => rated.Tconst, rated => rated.Rating);
 	}
 
 	public async Task<int> ReplaceAsync(IAsyncEnumerable<ImdbRatingLine> rows, CancellationToken cancellationToken = default)
@@ -57,7 +57,7 @@ internal sealed class ImdbRatingRepository(IDbContextFactory<SammlarrDbContext> 
 		await foreach (var row in rows.WithCancellation(cancellationToken))
 		{
 			id.Value = NumberOf(row.Tconst).GetValueOr(() => throw new InvalidDataException($"The IMDb ratings file holds an id it cannot read: '{row.Tconst}'."));
-			score.Value = (byte)MathF.Round(row.Average * TenthsPerPoint, MidpointRounding.ToEven);
+			score.Value = (byte)MathF.Round(row.Average * TenthsPerPoint);
 			votes.Value = row.Votes;
 			await command.ExecuteNonQueryAsync(cancellationToken);
 			count++;

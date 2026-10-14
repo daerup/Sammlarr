@@ -13,11 +13,11 @@ public sealed record ActivityRun(FeedRun Run, string FeedName)
 	internal string Outcome =>
 		Run.Conclusiveness switch
 		{
-			Conclusiveness.Conclusive => FormattableString.CurrentCulture($"{Run.Counts.Total} seen, {Run.Counts.Kept} kept"),
+			Conclusiveness.Conclusive => $"{Run.Counts.Total} seen, {Run.Counts.Kept} kept",
 			Conclusiveness.StillLoading => "the list stopped loading partway, so nothing was removed",
 			Conclusiveness.NoItems => "the list came back empty",
-			Conclusiveness.NoMatches => FormattableString.CurrentCulture($"none of the {Run.Counts.Total} titles could be matched"),
-			Conclusiveness.NoneAdmitted => FormattableString.CurrentCulture($"all {Run.Counts.Total} titles were filtered out"),
+			Conclusiveness.NoMatches => $"none of the {Run.Counts.Total} titles could be matched",
+			Conclusiveness.NoneAdmitted => $"all {Run.Counts.Total} titles were filtered out",
 			Conclusiveness.Pending => "still running",
 			Conclusiveness.Unresolved => "some titles couldn't be looked up, so nothing was removed",
 			Conclusiveness.Stopped => "the run stopped before it finished",

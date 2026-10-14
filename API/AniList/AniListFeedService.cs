@@ -93,7 +93,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 			.ToResult(NotAList)
 			.Map(AniListPages.Of)
 			.GetOrThrow(error => new InvalidOperationException(error.Reason));
-		var genres = AniListPages.NeedsGenres(search) ? await GenresAsync(cancellationToken) : new HashSet<string>(StringComparer.Ordinal);
+		var genres = AniListPages.NeedsGenres(search) ? await GenresAsync(cancellationToken) : new HashSet<string>();
 		var music = AniListPages.AsksForMusic(search);
 		var variables = AniListPages
 			.Variables(search, genres, DateOnly.FromDateTime(clock.Now.UtcDateTime))
@@ -120,7 +120,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 	private async Task<IReadOnlySet<string>> GenresAsync(CancellationToken cancellationToken)
 	{
 		var answer = await client.AskAsync<AniListTypes.GenreData>(GenresQuery, [], cancellationToken);
-		return answer.GetOrThrow(Refused).Genres?.ToHashSet(StringComparer.Ordinal) ?? new HashSet<string>(StringComparer.Ordinal);
+		return answer.GetOrThrow(Refused).Genres?.ToHashSet(StringComparer.Ordinal) ?? [];
 	}
 
 	private static Exception Refused(Error error)

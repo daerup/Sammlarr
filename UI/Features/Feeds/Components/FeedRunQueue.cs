@@ -31,8 +31,8 @@ internal static class FeedRunQueue
 		{
 			(0, _) => $"{FeedCount(alreadyQueued)} already queued.",
 			(_, 0) => $"Queued {FeedCount(queued)}. They run one at a time.",
-			_ => FormattableString.CurrentCulture($"Queued {FeedCount(queued)}, {alreadyQueued} already queued. They run one at a time."),
+			_ => $"Queued {FeedCount(queued)}, {alreadyQueued} already queued. They run one at a time.",
 		};
 
-	private static string FeedCount(int count) => count == 1 ? "1 feed" : FormattableString.CurrentCulture($"{count} feeds");
+	private static string FeedCount(int count) => count == 1 ? "1 feed" : $"{count} feeds";
 }

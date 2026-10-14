@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Net;
 using Contracts.Notifications;
 using Domain.Notifications;
@@ -15,19 +14,19 @@ internal sealed class PushoverClient(HttpClient client)
 {
 	public async Task<DeliveryResult> SendAsync(PushoverMessage message, CancellationToken cancellationToken)
 	{
-		Dictionary<string, string> fields = new(StringComparer.Ordinal)
+		Dictionary<string, string> fields = new()
 		{
 			["token"] = message.AppToken,
 			["user"] = message.UserKey,
 			["title"] = message.Title,
 			["message"] = message.Message,
-			["priority"] = ((int)message.Priority).ToString(CultureInfo.InvariantCulture),
+			["priority"] = ((int)message.Priority).ToString(),
 		};
 
 		if (message.Priority is PushoverPriority.Emergency)
 		{
-			fields["retry"] = PushoverMessage.RetrySeconds.ToString(CultureInfo.InvariantCulture);
-			fields["expire"] = PushoverMessage.ExpireSeconds.ToString(CultureInfo.InvariantCulture);
+			fields["retry"] = PushoverMessage.RetrySeconds.ToString();
+			fields["expire"] = PushoverMessage.ExpireSeconds.ToString();
 		}
 
 		using var content = new FormUrlEncodedContent(fields);
@@ -62,9 +61,9 @@ internal sealed class PushoverClient(HttpClient client)
 		}
 		if (status is >= 400 and < 500)
 		{
-			return new DeliveryUnrecoverable(FormattableString.CurrentCulture($"Pushover rejected the message (HTTP {status}){Detail(body)}"));
+			return new DeliveryUnrecoverable($"Pushover rejected the message (HTTP {status}){Detail(body)}");
 		}
-		return new DeliveryRetryable(FormattableString.CurrentCulture($"Pushover returned HTTP {status}{Detail(body)}"));
+		return new DeliveryRetryable($"Pushover returned HTTP {status}{Detail(body)}");
 	}
 
 	private static string Detail(string body)

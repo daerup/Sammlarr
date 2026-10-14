@@ -5,7 +5,7 @@ namespace API.Mdblist;
 
 internal sealed class MdblistKeyFlights
 {
-	private readonly ConcurrentDictionary<string, Lazy<Task<AccessCheck>>> _flights = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, Lazy<Task<AccessCheck>>> _flights = new();
 
 	public Task<AccessCheck> JoinAsync(string apiKey, Func<Task<AccessCheck>> check)
 	{

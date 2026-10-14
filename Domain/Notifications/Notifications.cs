@@ -22,10 +22,8 @@ public sealed record WantlistSyncCompletedNotification(
 
 	public string Summary =>
 		FailedPushes.Count == 0
-			? FormattableString.CurrentCulture($"Pulled {PulledAdds.Count + PulledRemoves.Count}, pushed {PushedAdds.Count + PushedRemoves.Count}.")
-			: FormattableString.CurrentCulture(
-				$"Pulled {PulledAdds.Count + PulledRemoves.Count}, pushed {PushedAdds.Count + PushedRemoves.Count}, {FailedPushes.Count} failed."
-			);
+			? $"Pulled {PulledAdds.Count + PulledRemoves.Count}, pushed {PushedAdds.Count + PushedRemoves.Count}."
+			: $"Pulled {PulledAdds.Count + PulledRemoves.Count}, pushed {PushedAdds.Count + PushedRemoves.Count}, {FailedPushes.Count} failed.";
 
 	public NotificationLevel DefaultLevel => FailedPushes.Count == 0 ? NotificationLevel.Success : NotificationLevel.Warning;
 }
@@ -58,7 +56,7 @@ public sealed record FeedRunCompletedNotification(UserId UserId, DateTimeOffset 
 
 	public NotificationEventType Type => NotificationEventType.FeedRunCompleted;
 
-	public string Summary => FormattableString.CurrentCulture($"Added {Added}, removed {Removed}.");
+	public string Summary => $"Added {Added}, removed {Removed}.";
 
 	public NotificationLevel DefaultLevel => NotificationLevel.Success;
 }
@@ -80,7 +78,7 @@ public sealed record ProviderRateLimitedNotification(UserId UserId, DateTimeOffs
 
 	public NotificationEventType Type => NotificationEventType.ProviderRateLimited;
 
-	public string Summary => FormattableString.CurrentCulture($"Waiting {(int)Math.Ceiling(RetryAfter.TotalSeconds)}s before retrying.");
+	public string Summary => $"Waiting {(int)Math.Ceiling(RetryAfter.TotalSeconds)}s before retrying.";
 
 	public NotificationLevel DefaultLevel => NotificationLevel.Warning;
 }

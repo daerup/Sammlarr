@@ -94,14 +94,12 @@ internal static class StagingCommands
 
 		var seeded = await run.Notifications.WaitForResourceAsync(
 			staging.Seed.Resource.Name,
-			update => KnownResourceStates.TerminalStates.Contains(update.Snapshot.State?.Text, StringComparer.Ordinal) && update.Snapshot.StartTimeStamp > started,
+			update => KnownResourceStates.TerminalStates.Contains(update.Snapshot.State?.Text) && update.Snapshot.StartTimeStamp > started,
 			run.Token
 		);
 		if (seeded.Snapshot.State?.Text != KnownResourceStates.Finished || seeded.Snapshot.ExitCode != 0)
 		{
-			return CommandResults.Failure(
-				FormattableString.CurrentCulture($"The seeder ended {seeded.Snapshot.State?.Text} with exit code {seeded.Snapshot.ExitCode}; its log has the reason.")
-			);
+			return CommandResults.Failure($"The seeder ended {seeded.Snapshot.State?.Text} with exit code {seeded.Snapshot.ExitCode}; its log has the reason.");
 		}
 
 		return await run.StartHealthyAsync(sammlarr);

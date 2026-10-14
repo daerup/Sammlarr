@@ -8,8 +8,8 @@ internal static class AniListPages
 {
 	internal const string Search = "search/anime";
 
-	private static readonly HashSet<string> Labels = new(StringComparer.Ordinal)
-	{
+	private static readonly HashSet<string> Labels =
+	[
 		"search",
 		"genres",
 		"excludeGenres",
@@ -22,9 +22,9 @@ internal static class AniListPages
 		"country of origin",
 		"year range",
 		"sort",
-	};
+	];
 
-	private static readonly HashSet<string> Numeric = new(StringComparer.Ordinal) { "minimumTagRank", "year", "year range" };
+	private static readonly HashSet<string> Numeric = ["minimumTagRank", "year", "year range"];
 
 	private static readonly Dictionary<string, KeyValuePair<string, string>[]> Presets = new(StringComparer.Ordinal)
 	{
@@ -76,7 +76,7 @@ internal static class AniListPages
 		var variables = new JsonObject { ["type"] = "ANIME" };
 		var seasonal = labels.Any(pair => pair.Key == "season");
 		var searched = labels.Any(pair => pair.Key == "search");
-		foreach (var group in labels.GroupBy(pair => pair.Key, StringComparer.Ordinal))
+		foreach (var group in labels.GroupBy(pair => pair.Key))
 		{
 			var values = group.Select(pair => pair.Value).ToList();
 			var last = values[^1];
