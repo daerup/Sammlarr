@@ -63,7 +63,7 @@ internal sealed partial class WikidataIdConverter(HttpClient http, Lanes lanes) 
 
 	private async Task<Result<IdLookupResult>> IdsAsync(ImdbId imdb, CancellationToken cancellationToken)
 	{
-		if (!ImdbPattern().IsMatch(imdb.Value))
+		if (!ImdbPattern.IsMatch(imdb.Value))
 		{
 			return Error.From($"'{imdb.Value}' is not an IMDb title id.");
 		}
@@ -104,13 +104,13 @@ internal sealed partial class WikidataIdConverter(HttpClient http, Lanes lanes) 
 	{
 		Optional<IExternalMediaId>[] found =
 		[
-			First(rows, "rt", RottenTomatoesPage()).Map(path => Id(RottenTomatoesId.From(path, type))),
-			First(rows, "tmdb", Number()).Map(value => Id(TmdbId.From(value, type))),
-			First(rows, "tvdb", Number()).Map(value => Id(TvdbId.From(value, type))),
-			First(rows, "metacritic", MetacriticPage()).Map(page => Id(MetacriticId.From(page[(page.IndexOf('/') + 1)..], type))),
-			First(rows, "letterboxd", Slug()).Map(slug => Id(LetterboxdId.From(slug, type))),
-			First(rows, "anilist", Number()).Map(value => Id(AniListId.From(value, type))),
-			First(rows, "mal", Number()).Map(value => Id(MalId.From(value, type))),
+			First(rows, "rt", RottenTomatoesPage).Map(path => Id(RottenTomatoesId.From(path, type))),
+			First(rows, "tmdb", Number).Map(value => Id(TmdbId.From(value, type))),
+			First(rows, "tvdb", Number).Map(value => Id(TvdbId.From(value, type))),
+			First(rows, "metacritic", MetacriticPage).Map(page => Id(MetacriticId.From(page[(page.IndexOf('/') + 1)..], type))),
+			First(rows, "letterboxd", Slug).Map(slug => Id(LetterboxdId.From(slug, type))),
+			First(rows, "anilist", Number).Map(value => Id(AniListId.From(value, type))),
+			First(rows, "mal", Number).Map(value => Id(MalId.From(value, type))),
 		];
 		return [.. found.WhereSome()];
 	}
@@ -122,20 +122,20 @@ internal sealed partial class WikidataIdConverter(HttpClient http, Lanes lanes) 
 
 	private static IExternalMediaId Id(IExternalMediaId id) => id;
 
-	[GeneratedRegex(@"^tt[0-9]+\z")]
-	private static partial Regex ImdbPattern();
+	[GeneratedRegex(@"^tt[0-9]+\z", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex ImdbPattern { get; }
 
-	[GeneratedRegex(@"^(m|tv)/[a-z0-9_\-]+\z")]
-	private static partial Regex RottenTomatoesPage();
+	[GeneratedRegex(@"^(?:m|tv)/[a-z0-9_\-]+\z", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex RottenTomatoesPage { get; }
 
-	[GeneratedRegex(@"^[0-9]+\z")]
-	private static partial Regex Number();
+	[GeneratedRegex(@"^[0-9]+\z", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex Number { get; }
 
-	[GeneratedRegex(@"^(movie|tv)/[a-z0-9\-]+\z")]
-	private static partial Regex MetacriticPage();
+	[GeneratedRegex(@"^(?:movie|tv)/[a-z0-9\-]+\z", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex MetacriticPage { get; }
 
-	[GeneratedRegex(@"^[a-z0-9\-]+\z")]
-	private static partial Regex Slug();
+	[GeneratedRegex(@"^[a-z0-9\-]+\z", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex Slug { get; }
 
 	private sealed record SparqlAnswer([property: JsonPropertyName("results")] SparqlResults? Results);
 

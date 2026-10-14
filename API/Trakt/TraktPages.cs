@@ -14,7 +14,7 @@ internal static partial class TraktPages
 	internal static Optional<SiteLink> Parse(string input)
 	{
 		var trimmed = input.Trim();
-		return UserPattern().IsMatch(trimmed)
+		return UserPattern.IsMatch(trimmed)
 			? Some.Of(new SiteLink($"users/{trimmed}/watchlist", []))
 			: SiteLink.Parse(trimmed, "trakt.tv").Or(() => SiteLink.Parse(trimmed, "app.trakt.tv"));
 	}
@@ -77,6 +77,6 @@ internal static partial class TraktPages
 		};
 	}
 
-	[GeneratedRegex(@"^[A-Za-z0-9_-]+$")]
-	private static partial Regex UserPattern();
+	[GeneratedRegex(@"^[A-Za-z0-9_-]+$", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex UserPattern { get; }
 }

@@ -69,12 +69,12 @@ internal static partial class AniListMedia
 		return date is { Year: { } year, Month: { } month, Day: { } day } ? new DateOnly(year, month, day) : ProviderValues.YearStart(date?.Year);
 	}
 
-	private static string? Plain(string? html) => html is null ? null : WebUtility.HtmlDecode(Tags().Replace(html, string.Empty)).Trim();
+	private static string? Plain(string? html) => html is null ? null : WebUtility.HtmlDecode(Tags.Replace(html, string.Empty)).Trim();
 
 	private static string Number(int value) => value.ToString(CultureInfo.InvariantCulture);
 
 	private static IExternalMediaId Id(IExternalMediaId id) => id;
 
-	[GeneratedRegex("<[^>]*>")]
-	private static partial Regex Tags();
+	[GeneratedRegex("<[^>]*>", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex Tags { get; }
 }

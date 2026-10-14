@@ -7,13 +7,13 @@ internal static partial class MdblistLists
 {
 	internal static Optional<string> Parse(string input)
 	{
-		var match = Address().Match(input.Trim());
+		var match = Address.Match(input.Trim());
 		return Optional.When(match.Success, () => match.Groups["list"].Value);
 	}
 
 	internal static string ItemsPath(string list)
 	{
-		var external = External().Match(list);
+		var external = External.Match(list);
 		return external.Success
 			? string.Format(CultureInfo.InvariantCulture, MdblistEndpoints.ExternalListItems, external.Groups["id"].Value)
 			: string.Format(CultureInfo.InvariantCulture, MdblistEndpoints.ListItems, list);
@@ -21,10 +21,11 @@ internal static partial class MdblistLists
 
 	[GeneratedRegex(
 		@"^(?:(?:https?://)?(?:www\.)?mdblist\.com/lists/)?(?<list>\d+|[\w-][\w.-]*/external/\d+|[\w-][\w.-]*/[\w-][\w.-]*)/?(?:[?#].*)?$",
-		RegexOptions.IgnoreCase
+		RegexOptions.IgnoreCase,
+		matchTimeoutMilliseconds: 1000
 	)]
-	private static partial Regex Address();
+	private static partial Regex Address { get; }
 
-	[GeneratedRegex(@"^[\w-][\w.-]*/external/(?<id>\d+)$", RegexOptions.IgnoreCase)]
-	private static partial Regex External();
+	[GeneratedRegex(@"^[\w-][\w.-]*/external/(?<id>\d+)$", RegexOptions.IgnoreCase, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex External { get; }
 }

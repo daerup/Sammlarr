@@ -54,7 +54,7 @@ internal static partial class BirdPath
 
 	private static List<Segment> Segments(string path)
 	{
-		var tokens = Tokens().Matches(path).Select(match => match.Value).ToList();
+		var tokens = Tokens.Matches(path).Select(match => match.Value).ToList();
 		var segments = new List<Segment>();
 		var position = 0;
 		var command = 'M';
@@ -125,8 +125,8 @@ internal static partial class BirdPath
 		);
 	}
 
-	[GeneratedRegex(@"[a-zA-Z]|-?\d*\.?\d+(?:e[-+]?\d+)?")]
-	private static partial Regex Tokens();
+	[GeneratedRegex(@"[a-zA-Z]|-?\d*\.?\d+(?:e[-+]?\d+)?", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex Tokens { get; }
 
 	private sealed record Segment(BirdPoint[] Controls);
 

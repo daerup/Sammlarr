@@ -113,7 +113,7 @@ internal static partial class TmdbPages
 
 	private static (string Endpoint, IEnumerable<KeyValuePair<string, string>> Keys) Endpoint(SiteLink page)
 	{
-		var by = ByPattern().Match(page.Path);
+		var by = ByPattern.Match(page.Path);
 		if (by.Success)
 		{
 			return ($"discover/{Kind(page)}", [KeyValuePair.Create(DiscoverKey(by.Groups["kind"].Value), by.Groups["id"].Value), .. page.Query]);
@@ -129,7 +129,7 @@ internal static partial class TmdbPages
 
 	private static SiteLink Canonical(SiteLink link)
 	{
-		var by = SluggedPattern().Match(link.Path);
+		var by = SluggedPattern.Match(link.Path);
 		return by.Success ? link with { Path = $"{by.Groups["kind"].Value}/{by.Groups["id"].Value}/{by.Groups["type"].Value}" } : link;
 	}
 
@@ -142,14 +142,14 @@ internal static partial class TmdbPages
 			"movie" => MovieKeys,
 			"tv" => TvKeys,
 			_ when Categories.ContainsKey(path) => CategoryKeysOf(path),
-			_ when ByPattern().IsMatch(path) => path.EndsWith("/tv", StringComparison.Ordinal) ? TvKeys : MovieKeys,
+			_ when ByPattern.IsMatch(path) => path.EndsWith("/tv", StringComparison.Ordinal) ? TvKeys : MovieKeys,
 			_ => new HashSet<string>(),
 		};
 	}
 
 	private static Optional<string> Refused(SiteLink page)
 	{
-		var known = page.Path is "discover/movie" or "discover/tv" || Categories.ContainsKey(page.Path) || ByPattern().IsMatch(page.Path);
+		var known = page.Path is "discover/movie" or "discover/tv" || Categories.ContainsKey(page.Path) || ByPattern.IsMatch(page.Path);
 		return page.Values("discover_preset")
 			.FirstOrNone()
 			.Map(preset => $"Sammlarr cannot follow TMDB's {preset} preset, since the API has no list for it. Paste the discover link its filters give.")
@@ -185,9 +185,13 @@ internal static partial class TmdbPages
 		};
 	}
 
-	[GeneratedRegex(@"^(?<kind>keyword|company)/(?<id>[0-9]+)/(?:movie|tv)$|^(?<kind>network)/(?<id>[0-9]+)/tv$")]
-	private static partial Regex ByPattern();
+	[GeneratedRegex(
+		@"^(?<kind>keyword|company)/(?<id>[0-9]+)/(?:movie|tv)$|^(?<kind>network)/(?<id>[0-9]+)/tv$",
+		RegexOptions.None,
+		matchTimeoutMilliseconds: 1000
+	)]
+	private static partial Regex ByPattern { get; }
 
-	[GeneratedRegex(@"^(?<kind>keyword|company|network)/(?<id>[0-9]+)(?:-[^/]*)?/(?<type>movie|tv)$")]
-	private static partial Regex SluggedPattern();
+	[GeneratedRegex(@"^(?<kind>keyword|company|network)/(?<id>[0-9]+)(?:-[^/]*)?/(?<type>movie|tv)$", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+	private static partial Regex SluggedPattern { get; }
 }

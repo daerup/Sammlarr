@@ -191,6 +191,7 @@ dotnet_diagnostic.CA1873.severity = suggestion
 dotnet_diagnostic.MA0051.severity = suggestion
 
 # fixed in the Phase 18 sweep and kept as warnings
+<<<<<<< HEAD
 dotnet_diagnostic.CA1068.severity = warning
 dotnet_diagnostic.CA1822.severity = warning
 dotnet_diagnostic.CA1852.severity = warning
@@ -199,6 +200,12 @@ dotnet_diagnostic.CA2016.severity = warning
 dotnet_diagnostic.IDE0250.severity = warning
 dotnet_diagnostic.IDE0251.severity = warning
 dotnet_diagnostic.MA0053.severity = warning
+=======
+dotnet_diagnostic.MA0009.severity = warning
+dotnet_diagnostic.MA0110.severity = warning
+dotnet_diagnostic.MA0190.severity = warning
+dotnet_diagnostic.SYSLIB1045.severity = warning
+>>>>>>> 45c43078 (refactor(regex): every product regex is a source-generated partial property with a one-second match timeout, BirdRig's subpath split included, and no regex captures a group nobody reads)
 
 # Space preferences
 csharp_space_after_cast = false
@@ -293,6 +300,11 @@ dotnet_diagnostic.MA0011.severity = none
 dotnet_diagnostic.MA0076.severity = none
 dotnet_diagnostic.MA0089.severity = none
 dotnet_diagnostic.RS0030.severity = none
+
+# fixed in product in the Phase 18 sweep, suggestions in tests
+dotnet_diagnostic.MA0110.severity = suggestion
+dotnet_diagnostic.MA0190.severity = suggestion
+dotnet_diagnostic.SYSLIB1045.severity = suggestion
 
 # Xml project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]

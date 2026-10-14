@@ -29,7 +29,7 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 
 	public Task<Result<string>> NormalizeAsync(string input, CancellationToken cancellationToken = default)
 	{
-		var match = ListPattern().Match(input.Trim());
+		var match = ListPattern.Match(input.Trim());
 		var list = Optional.When(match.Success, () => match.Groups["user"].Value);
 		return Task.FromResult(list.Match(user => Success.Of(user), () => Page(input)));
 	}
@@ -112,6 +112,10 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 			?? throw new InvalidDataException("MyAnimeList answered an empty list page.");
 	}
 
-	[GeneratedRegex(@"^(?:(?:https?://)?(?:www\.)?myanimelist\.net/(?:animelist|profile)/)?(?<user>[A-Za-z0-9_-]{2,16})/?(?:[?#].*)?$")]
-	private static partial Regex ListPattern();
+	[GeneratedRegex(
+		@"^(?:(?:https?://)?(?:www\.)?myanimelist\.net/(?:animelist|profile)/)?(?<user>[A-Za-z0-9_-]{2,16})/?(?:[?#].*)?$",
+		RegexOptions.None,
+		matchTimeoutMilliseconds: 1000
+	)]
+	private static partial Regex ListPattern { get; }
 }
