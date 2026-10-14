@@ -204,6 +204,35 @@ jobs:
             ${{ runner.temp }}/hashes-*.txt
           retention-days: 7
 
+  trivy-image:
+    if: startsWith(github.head_ref, 'release-please--')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: Web/Dockerfile
+          platforms: linux/amd64
+          tags: sammlarr:scan
+          load: true
+          push: false
+          provenance: false
+          sbom: false
+
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.74.0
+          image-ref: sammlarr:scan
+          scanners: vuln
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+
   e2e:
     if: github.event_name == 'push' || startsWith(github.head_ref, 'release-please--')
     runs-on: ubuntu-latest
