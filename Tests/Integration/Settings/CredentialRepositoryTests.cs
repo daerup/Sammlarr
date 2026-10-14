@@ -1,5 +1,5 @@
 using Contracts.Auth;
-using DB.Data.Access;
+using DB.Data.Auth;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;

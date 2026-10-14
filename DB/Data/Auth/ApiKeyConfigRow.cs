@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DB.Conversion.Encryption;
 using Domain.Providers;
 
-namespace DB.Data.Access;
+namespace DB.Data.Auth;
 
 [Table("ApiKeyConfigs")]
 internal record ApiKeyConfigRow : Entity<Guid>, IUserOwned

@@ -2,14 +2,14 @@ using Contracts.Auth;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
-namespace DB.Data.Access;
+namespace DB.Data.Auth;
 
-internal class AccessModule : IServiceModule
+internal class AuthDataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddScoped<ICredentialRepository, CredentialRepository>();
 		services.AddScoped<IApiKeyConfigRepository, ApiKeyConfigRepository>();
-		services.AddScoped<IModelConfiguration, AccessEntityConfiguration>();
+		services.AddScoped<IModelConfiguration, AuthEntityConfiguration>();
 	}
 }

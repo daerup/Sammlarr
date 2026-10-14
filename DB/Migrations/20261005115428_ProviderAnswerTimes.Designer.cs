@@ -20,7 +20,7 @@ partial class _20261005115428_ProviderAnswerTimes
 #pragma warning disable 612, 618
         modelBuilder.HasAnnotation("ProductVersion", "11.0.0-rc.1.26425.128");
 
-        modelBuilder.Entity("DB.Data.Access.ApiKeyConfigRow", b =>
+        modelBuilder.Entity("DB.Data.Auth.ApiKeyConfigRow", b =>
             {
                 b.Property<Guid>("Id")
                     .ValueGeneratedOnAdd()
@@ -52,7 +52,7 @@ partial class _20261005115428_ProviderAnswerTimes
                 b.ToTable("ApiKeyConfigs");
             });
 
-        modelBuilder.Entity("DB.Data.Access.CredentialRow", b =>
+        modelBuilder.Entity("DB.Data.Auth.CredentialRow", b =>
             {
                 b.Property<Guid>("Id")
                     .ValueGeneratedOnAdd()
@@ -1114,7 +1114,7 @@ partial class _20261005115428_ProviderAnswerTimes
                 b.HasDiscriminator().HasValue("Show");
             });
 
-        modelBuilder.Entity("DB.Data.Access.ApiKeyConfigRow", b =>
+        modelBuilder.Entity("DB.Data.Auth.ApiKeyConfigRow", b =>
             {
                 b.HasOne("DB.Data.Identity.UserRow", null)
                     .WithMany()
@@ -1123,7 +1123,7 @@ partial class _20261005115428_ProviderAnswerTimes
                     .IsRequired();
             });
 
-        modelBuilder.Entity("DB.Data.Access.CredentialRow", b =>
+        modelBuilder.Entity("DB.Data.Auth.CredentialRow", b =>
             {
                 b.HasOne("DB.Data.Identity.UserRow", null)
                     .WithMany()

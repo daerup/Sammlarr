@@ -2,7 +2,7 @@ using System.Reflection;
 using Contracts;
 using Contracts.Identity;
 using DB.Data;
-using DB.Data.Access;
+using DB.Data.Auth;
 using DB.Data.Blocklist;
 using DB.Data.Config;
 using DB.Data.Datasets;
