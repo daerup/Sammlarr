@@ -33,6 +33,7 @@ internal static class LanedHosts
 		HttpMessageHandler wire,
 		IProviderRateLimitReporter? reporter = null,
 		ILogger<LaneHandler>? logger = null,
+		TimeSpan? httpTimeout = null,
 		params string[] clients
 	)
 		where TOptions : class, IProviderHttpOptions
@@ -41,6 +42,7 @@ internal static class LanedHosts
 			.ConfigureServices(services =>
 			{
 				services.AddSingleton(options);
+				Optional.Of(httpTimeout).Apply(given => services.Configure<SammlarOptions>(sammlarr => sammlarr.HttpTimeout = given));
 				services.AddSingleton(ICurrentUser.Mock().Object);
 				services.AddSingleton(reporter ?? IProviderRateLimitReporter.Mock().Object);
 				services.AddSingleton(IFeedRunUsage.Mock().Object);

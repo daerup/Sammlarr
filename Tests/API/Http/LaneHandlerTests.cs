@@ -33,7 +33,7 @@ public class LaneHandlerTests
 	public async Task SendAsync_On429WithRetryAfter_BlocksTheRouteForEveryClient()
 	{
 		var wire = new Scripted(HttpStatusCode.TooManyRequests);
-		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions { RetryAttempts = 0 }), RemoteService.Plex, wire, null, null, "plex", "plex-sink");
+		using var host = LanedHosts.Host(LanedHosts.Plex(new ProviderHttpOptions { RetryAttempts = 0 }), RemoteService.Plex, wire, clients: ["plex", "plex-sink"]);
 		using var throttled = await host.Client("plex").GetAsync("https://plex.test/library");
 
 		await Assert.That(async () => await host.Client("plex-sink").GetAsync("https://plex.test/api/v2/user")).Throws<LaneRefusedException>();

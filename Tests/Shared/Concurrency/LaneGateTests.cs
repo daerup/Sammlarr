@@ -94,6 +94,23 @@ public class LaneGateTests
 	}
 
 	[Test]
+	public async Task Release_ThrottledWithRetryAfter_KeepsAWaiterThatQueuedLongerThanItsPatience()
+	{
+		var time = new FakeTimeProvider();
+		using var testee = new LaneGate(Policy(new RateWindow(1, TimeSpan.FromMinutes(1))), time, new None(), "");
+		var first = await GrantedAsync(testee);
+		var title = testee.EnterAsync(new LanePriority(LaneClass.Title, 1), TimeSpan.FromSeconds(15), CancellationToken.None);
+		time.Advance(TimeSpan.FromSeconds(30));
+
+		first.Release(new AttemptThrottled(Some.Of(time.GetUtcNow().AddSeconds(10))));
+		var keptThroughTheBlock = !title.IsCompleted;
+		time.Advance(TimeSpan.FromSeconds(30));
+
+		await Assert.That(keptThroughTheBlock).IsTrue();
+		await Assert.That(await title.WaitAsync(Patience)).IsSuccess();
+	}
+
+	[Test]
 	public async Task Release_FailingTwice_GoesDownThenLetsOneProbeThrough()
 	{
 		var time = new FakeTimeProvider();
