@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using TestInfrastructure;
 
 namespace Shared.Tests;
@@ -225,7 +224,6 @@ public class ResultExtensionsTests
 	}
 
 	[Test]
-	[SuppressMessage("Reliability", "CA2012", Justification = "Pins the generated ValueTask mirror; each step awaits its source once.")]
 	public async Task ValueTaskMirror_ChainsWithSingleAwait()
 	{
 		ValueTask<Result<int>> start = new(Success.Of(2));

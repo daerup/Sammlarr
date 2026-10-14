@@ -141,8 +141,9 @@ internal sealed class TmdbFeedService(TmdbClient client, TmdbOptions options, IM
 
 	private async Task<IApiKey> KeyAsync(CancellationToken cancellationToken)
 	{
-		var configured = await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken);
-		return configured.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings."));
+		return await apiKeys
+			.GetAsync(ApiKeyProvider.Tmdb, cancellationToken)
+			.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings."));
 	}
 
 	private async Task<HttpResponseMessage> V3PageAsync(string identifier, int page, CancellationToken cancellationToken)

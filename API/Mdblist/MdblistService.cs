@@ -40,9 +40,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 
 	private async Task<Result<string>> PathOfAsync(long number, CancellationToken cancellationToken)
 	{
-		return await (await apiKeys.GetAsync(ApiKeyProvider.Mdblist, cancellationToken))
-			.MapError(_ => NoKey)
-			.Map(key => FindListAsync(number, key, cancellationToken));
+		return await apiKeys.GetAsync(ApiKeyProvider.Mdblist, cancellationToken).MapError(_ => NoKey).Map(key => FindListAsync(number, key, cancellationToken));
 	}
 
 	private async Task<Result<string>> FindListAsync(long number, IApiKey apiKey, CancellationToken cancellationToken)
@@ -126,8 +124,9 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 	private async Task<(MdblistTypes.ListItems.Root Page, bool HasMore)> FetchPageAsync(string identifier, int offset, CancellationToken cancellationToken)
 	{
 		var endpoint = string.Format(CultureInfo.InvariantCulture, MdblistEndpoints.Page, MdblistLists.ItemsPath(identifier), PageSize, offset);
-		var configured = await apiKeys.GetAsync(ApiKeyProvider.Mdblist, cancellationToken);
-		var apiKey = configured.GetOrThrow(_ => new InvalidOperationException("No MDBList API key is configured. Add one in Settings."));
+		var apiKey = await apiKeys
+			.GetAsync(ApiKeyProvider.Mdblist, cancellationToken)
+			.GetOrThrow(_ => new InvalidOperationException("No MDBList API key is configured. Add one in Settings."));
 		using var response = await client.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken: cancellationToken);
 		if (response.StatusCode == HttpStatusCode.NotFound)
 		{
