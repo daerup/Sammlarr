@@ -21,8 +21,9 @@ A value that can be missing is an `Optional<T>` wherever our own code hands it o
 
 | `Optional<T>`                                                                                                                                                                                                                             | `T?`                                                                                                                                                                                                                                                                                                                                                                |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| non-private returns, parameters and properties of our types: `Find…`, lookups, query criteria, record fields that can be missing (`RunQuery.MustInclude`, `FeedOverview.LastRun`, `NotificationTemplate.Level`), `IMediaSink.AddressedBy` | framework edges: EF rows and LINQ query parameters, JSON-persisted columns (`QueryFilter`'s `FilterPredicate`), provider JSON DTOs, `IOptions` records, Blazor route, query and cascading parameters, `@bind` pairs, Fluid, webhook and Wolverine payloads, Serilog and OpenTelemetry models, BCL overrides and exception constructors |
+| non-private returns, parameters and properties of our types: `Find…`, lookups, query criteria, record fields that can be missing (`RunQuery.MustInclude`, `FeedOverview.LastRun`, `NotificationTemplate.Level`), `IMediaSink.AddressedBy` | framework edges: EF rows and LINQ query parameters, JSON-persisted columns (`QueryFilter`'s `FilterPredicate`), provider JSON DTOs, Blazor route, query and cascading parameters, `@bind` pairs, Fluid, webhook and Wolverine payloads, Serilog and OpenTelemetry models, BCL overrides and exception constructors |
 | a UI parameter or view model whose value comes from the domain                                                                                                                                                                            | UI-only state (selection, loading, busy, binding, create or edit mode, links), private fields, locals, sort keys                                                                                                                                                                                                                                                    |
+|                                                                                                                                                                                                                                           |                                                                                                                                                                                                                                                                                                                                                                     |
 
 - `None` means absent, never "not loaded yet"; a failure with a reason is a `Result`.
 - An `Optional<T>` member is initialised with `new None()`. `default`, a `null` passed for an `Optional` and an
@@ -36,40 +37,7 @@ A value that can be missing is an `Optional<T>` wherever our own code hands it o
 - A `bool` read (`IsSome`, `Match(p, () => false)`) answers a question; outside a loop guard it never routes control
   flow, and a service returns its `Optional`, not a `bool` (`IJobQueue.CancelAsync`).
 
-| To | `Optional`: write | not |
-|---|---|---|
-| build from a nullable | `Optional.Of(RunIdParam).Map(id => RunId.From(UrlGuid.Decode(id)))` | `RunIdParam is null ? new None() : Some.Of(…)` |
-| build from a dictionary | `_byId.GetValueOrNone(id)` | `TryGetValue(…) ? Some.Of(v) : new None()` |
-| build from a sequence | `Widths.FirstOrNone(width => width >= size.Width)` | `FirstOrDefault(…) is var width and > 0 ? Some.Of(width) : new None()` |
-| build from a condition | `Optional.When(ticks != 0, () => new DateTimeOffset(ticks, TimeSpan.Zero))` | `ticks == 0 ? new None() : Some.Of(…)`, `Optional.Of(cond ? x : null)` |
-| keep it only while a condition holds | `next.When(feed.Enabled)` | `feed.Enabled ? next : new None()` |
-| project either way | `LinkedRun.Match(linked => …, () => …)` | `LinkedRun is Some<RunId>(var linked) ? … : …` |
-| a value or a fallback | `due.Map(Until).GetValueOr(Timeout.InfiniteTimeSpan)` | `due is Some<DateTimeOffset>(var at) ? Until(at) : …` |
-| test presence | `_item.IsSome()` | `_item is Some<WantlistItem>` |
-| a yes/no that ends the expression | `job.Match(state => state is JobState.Running, () => false)` | `job is Some<JobState>(JobState.Running)`, `job.When(…).IsSome()` |
-| route around the value | `query.Feed.When(feed => feed == Feed).Map(…).GetValueOr([])` | `if (query.Feed is not Some<FeedId>(var feed) \|\| feed != Feed) { return []; }` |
-| keep the present values | `tconsts.Select(tconst => NumberOf(tconst).Map(id => (tconst, id))).WhereSome()` | `.Where(e => e.id is not null)`, then `e.id!.Value` |
-| act when present or absent | `row.Job.Map(job => JobQueue.CancelAsync(job, token)).Apply(_ => …).ApplyNone(() => …)` | `if (x is Some<T>(var v)) { … }`, `if (x.IsSome()) … else …`, `if (x.Map(…).GetValueOr(false))`, one block lambda |
-| hand it to a framework | `query.MustInclude.Map(run => run.Value).ToNullable()` | `is Some<RunId>(var id) ? id.Value : null` |
-| turn it into a `Result` | `Optional.Of(answer?.Data).ToResult("AniList answered without data.")` | `is not Some<…> … { return Error.From(…); }` |
-
-| To | `Result`: write | not |
-|---|---|---|
-| project either way | `await setupCode.Match(…, () => signIn.CompleteAsync(…)).Map(user => SignInAndRedirectAsync(context, user, returnUrl)).GetValueOr(error => Results.Redirect(…))` | `switch { Success<User>(var user) => …, Error error => … }` |
-| pick a case, both sync | `PlanAsync(sink).Match(summary => (WantlistPlanResult)summary, error => new WantlistSyncSinkUnreachable(error.Reason, …))` | a type `switch` over the cases |
-| act on success or failure | `result.Apply(…).ApplyError(…)` | `if (result is Success<T>(var v)) { … } else { … }` |
-| keep the successes of a stream | `await foreach (var media in stream.WhereSuccessAwait())` | `if (result is Success<T>(var v))` inside the loop |
-| keep a success that passes a test | `answer.ToOptional().When(found => found.Fits(type))` | `is Success<T>(var found) && …` |
-| read the cause of an error | `refused.CausedBy<RemoteUnavailableException>().Match(unavailable => NotReached(number, unavailable), () => refused)` | `Error { Exception: RemoteUnavailableException }` |
-| chain a fallible step | `.Map(next)` (flattens a `Result`-returning step), `.MapError(…)` | a guard that returns the error by hand |
-| leave the monad at a boundary | `.GetOrThrow(error => new …Exception(error.Reason))`, `.ToOptional()` | `is Error e ? throw … : …` |
-
-Outside `Shared`, a monad is matched by hand only in a guard (`if (x is not Some<T>(var v)) { return …; }`) that
-leaves a loop, or whose following code holds a method-scoped `using var` or a `try`; Razor markup may `@if` on a case.
-The build enforces this: `SAM0002` (`Roslyn/Monads/MonadPatternAnalyzer.cs`) fails hand matches, null and shape
-patterns, `default` or `null` as a monad, `?:` constructions, block-lambda or unawaited steps, and a monad used as a
-sort key or as text; `SAM0003` (`MonadBranchAnalyzer.cs`) fails a branch that reads a monad as a `bool`; the
-`AbsenceTests` architecture test fails a nullable non-private member outside the edges it lists.
+The custom analyzers and the `AbsenceTests` architecture test enforce these rules at build time.
 
 ## Modules and dependency injection
 
@@ -118,35 +86,28 @@ registration matches its claimed service; every role member, remote service and 
 
 ## Lanes and HTTP resilience
 
-Every call to a remote service passes a _lane_ (`LaneGate`, `Shared/Concurrency`), one per service, route and owner,
-named and routed by `Lanes` (`API/Http/Lanes`). Lanes pace each service by its published limits, so Core never sleeps
-or throttles ([ADR 0017](../../adr/0017-pace-remote-calls-on-lanes-with-limits-as-published.md)). A client registered
-through `ForRemote(...).Client` gets this pipeline from `AddRemoteHttp<TOptions>`, outermost first:
+Every call to a remote service passes a _lane_ (`API/Http/Lanes`): one per service and route, and one per key for
+MDBList and per app for Radarr and Sonarr. A lane paces its service by the limits the provider publishes, so Core
+never sleeps or throttles ([ADR 0017](../../adr/0017-pace-remote-calls-on-lanes-with-limits-as-published.md)). A remote
+client's pipeline, outermost first:
 
-1. `UsageStampHandler` stamps the request with its service and cause.
-1. A Polly retry (`LanedPipeline`), the only retry layer: up to `Http.RetryAttempts` retries of a 5xx, 408, 429 or
-   broken connection that the lane would admit now (`Lanes.Admits`), with no delay of its own after a 429.
-1. `LaneHandler` takes one lane permit per attempt, so a retry queues like any request.
-1. The attempt timeout (`Http.AttemptTimeoutSeconds`), whose expiry is not retried.
-1. `UsageTagsHandler` tags each attempt.
+1. A retry of a 5xx, 408, 429 or broken connection, only when the lane would admit it now.
+1. The lane permit, one per attempt, so a retry queues like any other request.
+1. The attempt timeout (`Http.AttemptTimeoutSeconds`), which is not retried.
 
-Clients that call no remote service (Pushover, the webhook, the picture grids, GitHub's release feed) get
-`AddClientHttp<TOptions>`'s standard resilience handler, with a total timeout of `Http.TimeoutSeconds`.
-
-A request takes the lane whose route (a key of `IProviderHttpOptions.Urls` plus a path) is the longest prefix of its
-address, else the `api` lane (`LaneSettingsCheck` fails start-up on a route naming a URL key the provider lacks).
-MDBList makes its API key the lane owner, Radarr and Sonarr their address, so each key and app has lanes of its own.
+Around it, the client's own timeout (`Sammlarr:HttpTimeout`, 30 minutes) bounds the whole call, its wait in the lane
+included. Clients that call no remote service (Pushover, the webhook, the picture grids, GitHub) get .NET's standard
+resilience handler instead.
 
 ### Limits per service
 
-A limit is written as the provider publishes it, requests per window (`RateWindow`), never flattened to a steady
-per-second rate. A lane may also cap requests in flight (`MaxInFlight`) and batch ids (`MaxBatch`). This is the docs'
-one table of each provider's `Http` section in `Web/appsettings.json` (records `ProviderHttpOptions`, `LaneOptions`):
+A limit is written as the provider publishes it, requests per window. The `Http` section of each provider in
+`Web/appsettings.json`:
 
 | Service | Lanes (`Http.Lanes`) | Waits |
 |---|---|---|
 | TMDB | `api` 40 per second | `MaxWaitSeconds` 15, `EnrichWaitSeconds` 15 |
-| Plex | `api` (plex.tv and the rest) and `metadata`: 50 per second, 25 in flight each; `match`: 300 per minute, 5 in flight; `watchlist`: 4 in flight (Plex publishes no limit) | `MaxWaitSeconds` 90 |
+| Plex | `api` (plex.tv and the rest) and `metadata`: 50 per second, 25 in flight each; `match`: 5 per second, 5 in flight (Plex answers 429 to a burst of about 15 within a second, and only 8 seconds later); `watchlist`: 4 in flight (Plex publishes no limit) | `MaxWaitSeconds` 90 |
 | MDBList | `api` 1,000 per 5 minutes on aligned windows (:00, :05, …); `titles` batches of 200 | |
 | Trakt | `api` 1,000 per 5 minutes | |
 | AniList | `api` 30 per minute, 1 in flight; `titles` and `prequels` batches of 50 | |
@@ -156,41 +117,24 @@ one table of each provider's `Http` section in `Web/appsettings.json` (records `
 | Radarr, Sonarr | `api` 4 in flight | |
 | IMDb datasets, anime lists | `api` 2 in flight | |
 
-Every lane keeps the `LaneOptions` defaults for going down: `FailuresToDown` 4, `DownSeconds` 30. A wait left blank is
-0: the lane refuses while the service is blocked, and its enricher is asked only while it is open.
+A wait left blank is 0: the lane refuses while the service is blocked.
 
 ### Admission and refusal
 
-A lane admits waiting attempts by `LaneClass`, then by order within the class:
+- Waiting attempts go in class order: interactive asks (a search, a click), then list pages, then a list's titles in
+  list order, then background work.
+- A 429 with `Retry-After` blocks the lane until then. One without halves the rate, which recovers a tenth per quiet
+  window.
+- Four failed attempts in a row (5xx, 408, timeout, broken connection) take the lane down for 30 seconds; then one
+  probe decides.
+- Waiting for room in a window is never refused. A down lane, or a block longer than the service's `MaxWait` (counted
+  from when the block starts), refuses at once, before anything is sent. MDBList's quota also holds title lookups back
+  near the day's reserve.
+- Services that take many ids per request (MDBList, AniList, Wikidata) batch them on a keyed lane; a failed batch fails
+  every id it carried.
 
-| `LaneClass` | Set by | Order inside |
-|---|---|---|
-| `Interactive` | anything unset: a search, a click | arrival |
-| `Source` | feed list pages (`SourcePages.ReadAsync`) | page order |
-| `Title` | each title's chain in a list load | list order |
-| `Background` | the details fill, identity confirmation | oldest first |
-
-- A 429 with `Retry-After` blocks the lane until then; one without halves the rate, at most once per window (a lane
-  with no window pauses for a second), and each quiet window gives back a tenth of its requests, at least one.
-- `FailuresToDown` failed attempts in a row (5xx, 408, timeout, broken connection) take the lane down for
-  `DownSeconds`; then one probe decides.
-- Waiting for room in a window is never refused. A down lane, or a block or quota reserve that outlasts the service's
-  `MaxWait`, refuses at once with `LaneRefusedException`, before anything is sent.
-- A quota is the lane's `ILaneQuota`, asked per class. MDBList's (`MdblistBudget`) always admits list pages, stops
-  title lookups and `Interactive` asks once only `MDBList:FeedReserve` requests are left before the reset, and stops
-  `Background` work once less than `MDBList:BackgroundReserveShare` (half) of the day's allowance is left.
-
-A service that takes many ids per request also gets a keyed lane (`Lane<TKey, TOut>`): MDBList's title lookups,
-AniList's titles and prequels, Wikidata's SPARQL lookups. One batch per batch key and class is out at a time; what
-arrives meanwhile rides the next, up to `MaxBatch`. The batch's request takes a permit and the retry like any other;
-the keyed lane never sends a batch again, and a failed batch fails every key it carried.
-
-`Answering.GuardedAsync` (`API/Http`) turns a converter's or enricher's outcome into an `Answer<T>` (MDBList's batched
-answers go through `LaneAnswers.ToAnswer`, which maps exceptions the same way): `Found`; `NoMatch` for an error without
-an exception (a 404); `Unavailable` for a lane refusal or rejected key (not sent), an HTTP error or timeout (sent), or
-a `RemoteUnavailableException` (a 429, 408 or 5xx past the retries, a dataset not loaded yet), which says itself
-whether it was sent (`Sent`); `Faulted` for anything else. A cancellation is rethrown. Only `NoMatch` from every route
-settles a title as not found.
+Every lookup ends as an answer: found, no match (a 404), unavailable (refused, or failed past the retries) or faulted.
+Only "no match" from every route settles a title as not found.
 
 ## Provider routing
 
@@ -213,79 +157,17 @@ needs the estimated wait inside it. Values are in the [lane table](#limits-per-s
 | `EnrichWait` | the provider section's `Http:EnrichWaitSeconds` | every enricher ask (0: only while open) |
 | `ShownWait` | `Sammlarr:FeedLoad:ShownWait` | an ask for a field the load shows but does not filter or sort on (every field for a stale or uncached title and for the details fill): the service must also answer within it |
 
-### Enricher choice
-
-`DetailsFetcher` asks enrichers one at a time while a needed field is missing (`EnricherChoice.Next`). Candidates are
-enrichers of connected services that accept one of the title's ids (`Accepts`), are not yet asked or resting, and fill
-a missing field within the budgets above. It picks open services first, then the search setting's service while a
-detail field is missing, then the most missing detail fields, then the most missing rating sources, then the least
-estimated wait, then `RemoteService` order, and stops when nothing needed is missing or no candidate is left.
-
-- An enricher that answered rests for that title for `Sammlarr:Housekeeping:FreshDays`; one that failed after sending
-  rests 1, 6, then 24 hours; one skipped or refused records nothing.
-- A fresh answer wins over the stored copy, an earlier answer over a later one. What an enricher `Defers` (TVmaze,
-  AniList and MyAnimeList their titles) and artwork no `IArtworkResizer` can size only fill gaps left after the rest.
-- A `RatingSource` without a rating counts as a missing field, as does a vote-less rating from a source that publishes
-  votes (all but Rotten Tomatoes and Metacritic). One rating is kept per source; one with votes wins.
-- A stale refresh that skipped a service keeps the stored values of that service's fields no answer filled and, if it
-  kept any, `RefreshedAt`, so the title is served as `Stale` and retried on the next load.
-
-### Id lookup paths
-
-`MediaIdResolver` finds a title's id at a target provider from the ids it holds. Each `IExternalIdConverter` announces
-`ById` lookups with what they accept, yield and cost in calls (`ByHints` is supported, but no converter announces one).
-
-| Service | Lookups: from → gives | Cost |
-|---|---|---|
-| Anime lists | AniList, MyAnimeList → those, TheTVDB, TMDB, IMDb; TheTVDB, TMDB, IMDb → AniList, MyAnimeList | 0 |
-| Plex | match (`AsksOnce`): TMDB, IMDb, TheTVDB → Plex; metadata: Plex → TMDB, IMDb, TheTVDB | 1 |
-| TMDB | detail: TMDB → IMDb, TheTVDB; find: IMDb, TheTVDB → TMDB | 1 |
-| Trakt | Trakt, IMDb, TMDB, TheTVDB → the same four | 1 |
-| TVmaze | IMDb, TheTVDB → TVmaze, TheTVDB, IMDb | 2 |
-| MDBList | IMDb, TMDB, TheTVDB, Trakt, MyAnimeList → the same and MDBList | 2 |
-| Wikidata | IMDb → TMDB, TheTVDB, AniList, MyAnimeList, rating site pages | 3 |
-
-`IdLookupPlanner` plans every path of up to three hops from the held ids to the target, ordered by weight (each hop's
-cost times one plus its service's estimated wait in seconds, `RemoteLoad.Weight`), then by length.
-
-- Free lookups are asked once before planning, adding ids only for sources the title lacks; no path runs through one.
-- A lookup is asked once per input per resolution; an `AsksOnce` lookup's definitive answer covers the other ids.
-- A hop already answered no for every input ends its path as a no-match. Otherwise a service ahead that is down,
-  blocked past its `MaxWait`, or unavailable earlier makes the path give up; one blocked within `MaxWait` is asked.
-- A title is cached as unmatched (in memory, for an hour) only when no path gave up.
-
-## Identity keys, page links and claims
+## Identity keys and page links
 
 A title's identity is its `MediaId` plus its identity keys
-([ADR 0018](../../adr/0018-claim-identity-before-hand-out-from-identity-keys-only.md)). The exhaustive
-`MediaProvider.Role` switch (`Domain/Providers/ExternalIdRole.cs`) sorts every external id into one of two kinds:
+([ADR 0018](../../adr/0018-claim-identity-before-hand-out-from-identity-keys-only.md)).
 
-- An _identity key_ (`IIdentityKey`: TMDB, IMDb, TheTVDB, Plex, MDBList, Trakt, MyAnimeList, TVmaze, AniList) names one
-  title; matching and claims use keys only. Keys live in `ExternalMediaIds`, keyed by source, media type and value,
-  with at most one key per source on a title.
-- A _page link_ (`IPageLink`: Rotten Tomatoes, Metacritic, Letterboxd) hangs off the details (`MediaDetails.PageLinks`),
-  never the identity: remakes share a Metacritic slug, so a link never merges titles.
-
-Every path that identifies a title claims it before handing it out, through the claim lane (`IIdentityClaims`;
-walkthrough in [Runtime View](04-runtime.md)):
-
-- An `IdentityClaim` carries its keys, the title it is pinned to (if any) and the services that produced them. The lane
-  commits every queued claim in one transaction under `MediaWriteLock`; a constraint error conflicts that claim only.
-- `ClaimRule.Decide` is pure (`ClaimRuleTests`, `ClaimRuleLaws`). A claim extends at most one stored title, never adds
-  a second key of one source or a key of another media type, and when pinned drops what it cannot take. A claim that
-  would join two stored titles conflicts: the title settles unmatched and both keep their keys. A key another title
-  holds notes the pair as stored twice (the `IdentityConflicts` table, read through `IIdentityConflicts`).
-- A search hit is the exception: it shows as the stored title that holds the search provider's own key (TMDB's,
-  Plex's, or for Radarr + Sonarr TMDB's for a movie and TheTVDB's for a show), and stays unmatched, so not addable,
-  only when none does (`MediaSearchService`).
-
-Two stored titles become one only through `IMediaMerge` (`DB/Data/Media/MediaMerge.cs`), called by `DuplicateTitles`
-and an admin's review, in one transaction under `MediaWriteLock`. It refuses a pair with ids of one source on both or
-two media types (`IdentityConflict.Contradicts`). The survivor (the title a wantlist or blocklist entry points at, else
-the older one) takes every id, fills its details field by field, takes the other's ratings, page links and answers for
-sources it lacks, and counts as refreshed at the earlier `RefreshedAt`. Rows move set-based across users
-(`IgnoreQueryFilters`); where one user holds both, the older entry, the outbox action (per sink) that agrees with their
-wantlist, and one run item per run stay. Then the other title is deleted.
+- An _identity key_ (TMDB, IMDb, TheTVDB, Plex, MDBList, Trakt, MyAnimeList, TVmaze, AniList) names one title. A title
+  holds at most one key per source, and matching and claims use keys only.
+- A _page link_ (Rotten Tomatoes, Metacritic, Letterboxd) only hangs off a title's details: remakes share a Metacritic
+  slug, so a link never joins titles.
+- A claim never joins two stored titles ([Ids and the claim](04-runtime.md#ids-and-the-claim)). Two stored titles
+  become one only through a merge, from housekeeping's review, which refuses a pair whose ids contradict.
 
 ## Persistence and housekeeping
 
