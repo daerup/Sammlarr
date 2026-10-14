@@ -1,11 +1,10 @@
 using Contracts.Media;
 using Contracts.Media.Search;
-using Contracts.Settings;
 using Core.DI;
 using Core.Media;
+using Core.Tests.Settings;
 using Domain.Media;
 using Domain.Providers;
-using Domain.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 
@@ -67,24 +66,11 @@ public class MediaSearchServiceTests
 		provider.SearchAsync(Any(), Any(), Any()).Returns(new SearchAnswer([new FoundMedia([Plex, Tmdb], new MovieDetails { Title = "Annie" })], missed));
 		var services = new ServiceCollection();
 		services.AddKeyedSingleton(SearchProvider.Plex, provider.Object);
-		var config = IProviderConfigService.Mock();
-		config
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
 		return new MediaSearchService(
 			new KeyedServiceIndex<SearchProvider, IMediaSearchProvider>(services.BuildServiceProvider()),
 			media.Object,
 			repository.Object,
-			config.Object
+			ProviderConfigStubs.PlexWantlist().Object
 		);
 	}
 }

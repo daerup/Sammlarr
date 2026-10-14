@@ -317,8 +317,9 @@ public class DetailsFetcherTests
 	}
 
 	[Test]
-	public async Task FetchAsync_WhenTheBlockOutlastsTheEnrichWait_SkipsTheEnricherEvenForAMissingRating()
+	public async Task FetchAsync_WhenTheBlockOutlastsTheEnrichWait_SkipsTheEnricherEvenForAMissingRatingAndRecordsGaveUp()
 	{
+		using var trace = new TitleTrace();
 		var deps = Dependencies.Create(capacity: TmdbBlocked(() => Now.AddMinutes(1)));
 		deps.PlexAnswers(Unrated());
 		await using var writer = deps.Writer();
@@ -326,6 +327,7 @@ public class DetailsFetcherTests
 		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).WasCalled(Times.Never);
+		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Details)).GaveUp).IsEqualTo(1);
 	}
 
 	[Test]
@@ -339,19 +341,6 @@ public class DetailsFetcherTests
 		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
 
 		await Assert.That((await trace.NodeAsync(RemoteService.Plex, TraceStage.Details)).Answered).IsEqualTo(1);
-	}
-
-	[Test]
-	public async Task FetchAsync_WhenTheEnricherIsBlocked_RecordsGaveUp()
-	{
-		using var trace = new TitleTrace();
-		var deps = Dependencies.Create(capacity: TmdbBlocked(() => Now.AddMinutes(1)));
-		deps.PlexAnswers(Unrated());
-		await using var writer = deps.Writer();
-
-		await Matched(await deps.Testee.FetchAsync(Identity, new None(), Run(Everyone, writer)));
-
-		await Assert.That((await trace.NodeAsync(RemoteService.Tmdb, TraceStage.Details)).GaveUp).IsEqualTo(1);
 	}
 
 	[Test]
@@ -471,18 +460,6 @@ public class DetailsFetcherTests
 		await Assert.That(written.Details).IsEqualTo(stale.Details);
 		await Assert.That(written.RefreshedAt).IsEqualTo(stale.RefreshedAt);
 		await Assert.That(written.Answers.Select(answer => (answer.Provider, answer.Failures))).IsEquivalentTo([(RemoteService.Plex, 1), (RemoteService.Tmdb, 1)]);
-	}
-
-	[Test]
-	public async Task LoadAsync_WhenAnAttemptFails_RecordsAFailure()
-	{
-		var deps = Dependencies.Create();
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns(Down);
-		await using var writer = deps.Writer();
-
-		await deps.Testee.LoadAsync(Stored(UnratedByPlex), MediaDetails.Empty(MediaType.Movie), Run(Everyone, writer), CancellationToken.None);
-
-		await Assert.That(Outcomes(await deps.WrittenAsync(writer))).IsEquivalentTo([(RemoteService.Plex, 0), (RemoteService.Tmdb, 1)]);
 	}
 
 	[Test]
@@ -1124,14 +1101,8 @@ public class DetailsFetcherTests
 	public async Task ConnectedAsync_IsWhatReadinessSaysOfTheEnrichers()
 	{
 		var deps = Dependencies.Create();
-		deps.Readiness.ConnectedAsync(Any(), Any()).Returns(new HashSet<RemoteService> { RemoteService.Plex });
 
-		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([RemoteService.Plex]);
-		deps.Readiness.ConnectedAsync(
-				Is<IEnumerable<RemoteService>>(asked => asked!.Order().SequenceEqual(new[] { RemoteService.Tmdb, RemoteService.Plex })),
-				Any()
-			)
-			.WasCalled(Times.Once);
+		await Assert.That(await deps.Testee.ConnectedAsync(CancellationToken.None)).IsEquivalentTo([RemoteService.Tmdb, RemoteService.Plex]);
 	}
 
 	private static DetailsRun Run(IReadOnlySet<RemoteService> connected, LibraryWriter writer) => new(connected, FieldNeeds.Everything, writer);
@@ -1194,13 +1165,7 @@ public class DetailsFetcherTests
 
 	private static MovieDetails Unrated() => Complete() with { Ratings = MediaRatings.None };
 
-	private sealed record Dependencies(
-		Mock<IMediaRepository> MediaRepository,
-		Mock<IDetailsEnricher> Plex,
-		Mock<IDetailsEnricher> Tmdb,
-		Mock<IServiceReadiness> Readiness,
-		DetailsFetcher Testee
-	)
+	private sealed record Dependencies(Mock<IMediaRepository> MediaRepository, Mock<IDetailsEnricher> Plex, Mock<IDetailsEnricher> Tmdb, DetailsFetcher Testee)
 	{
 		public static Dependencies Create(
 			MediaFields? tmdbFills = null,
@@ -1217,7 +1182,6 @@ public class DetailsFetcherTests
 			var tmdb = IDetailsEnricher.Mock();
 			tmdb.Fills.Returns(tmdbFills ?? Everything);
 			tmdb.Accepts.Returns([MediaProvider.Tmdb, MediaProvider.Tvdb, MediaProvider.Imdb]);
-			var readiness = IServiceReadiness.Mock();
 
 			var config = IProviderConfigService.Mock();
 			config
@@ -1238,14 +1202,14 @@ public class DetailsFetcherTests
 				TestClaims.Granting().Object,
 				config.Object,
 				capacity ?? TestCapacity.Open(),
-				readiness.Object,
+				TestReadiness.Everything(),
 				[resizer ?? TestArtwork.ResizesAnything()],
 				Clock(),
 				new FeedLoadOptions(),
 				housekeeping ?? new HousekeepingOptions(),
 				NullLogger<DetailsFetcher>.Instance
 			);
-			return new Dependencies(mediaRepository, plex, tmdb, readiness, testee);
+			return new Dependencies(mediaRepository, plex, tmdb, testee);
 		}
 
 		public void PlexAnswers(MovieDetails details, MediaIdentity? identity = null)

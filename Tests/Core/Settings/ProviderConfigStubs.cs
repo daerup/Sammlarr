@@ -2,7 +2,7 @@ using Contracts.Settings;
 using Domain.Providers;
 using Domain.Settings;
 
-namespace Core.Tests.Wantlist;
+namespace Core.Tests.Settings;
 
 internal static class ProviderConfigStubs
 {

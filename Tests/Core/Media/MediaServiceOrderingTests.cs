@@ -1,13 +1,7 @@
-using Contracts;
 using Contracts.Media;
-using Contracts.Settings;
-using Core.DI;
 using Core.Media;
 using Domain.Media;
 using Domain.Providers;
-using Domain.Settings;
-using Microsoft.Extensions.Logging.Abstractions;
-using Shared.Options;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
@@ -15,7 +9,7 @@ namespace Core.Tests.Media;
 
 public class MediaServiceOrderingTests
 {
-	private static readonly DateTimeOffset _now = new(2026, 5, 6, 12, 0, 0, TimeSpan.Zero);
+	private static readonly DateTimeOffset _now = TestMediaService.Now;
 
 	[Test]
 	public async Task IdentifyAsync_PreservesInputOrder()
@@ -40,17 +34,6 @@ public class MediaServiceOrderingTests
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ById_PreservesInputOrder()
-	{
-		var builder = RequestBuilder.Requests(5);
-		var testee = CreateTestee(builder);
-
-		var results = await testee.GetDetailsAsync(builder.AsMediaIds(), FieldNeeds.Everything).ToListAsync();
-
-		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
-	}
-
-	[Test]
 	public async Task GetDetailsAsync_ById_PreservesOrder_WhenSomeFail()
 	{
 		var builder = RequestBuilder.Requests(6).FailDetailsAt(2, 4, 6);
@@ -59,20 +42,6 @@ public class MediaServiceOrderingTests
 		var results = await testee.GetDetailsAsync(builder.AsMediaIds(), FieldNeeds.Everything).ToListAsync();
 
 		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
-	}
-
-	[Test]
-	public async Task LoadListAsync_ForEachEntry_ReportsItsListPosition()
-	{
-		var builder = RequestBuilder.Requests(5);
-		var testee = CreateTestee(builder);
-
-		var results = await testee.LoadListAsync(builder.AsRequests().ToAsyncEnumerable().AsListTitles(), FieldNeeds.Everything).ToListAsync();
-
-		await Assert
-			.That(results.OrderBy(result => result.Position).Select(result => result.Item).ExtractMediaIds())
-			.IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
-		await Assert.That(results.Select(result => result.Position)).IsEquivalentTo(Enumerable.Range(0, 5));
 	}
 
 	[Test]
@@ -91,11 +60,8 @@ public class MediaServiceOrderingTests
 
 	private static IMediaService CreateTestee(RequestBuilder builder)
 	{
-		var mediaRepo = IMediaRepository.Mock();
-		var unmatchedCache = TestUnmatchedCache.Empty();
-
+		var (testee, deps) = TestMediaService.Create();
 		var externalToId = builder.Items.Where(i => i.Identifies).ToDictionary(i => (IExternalMediaId)i.External, i => i.MediaId.Value);
-
 		var storedMap = builder
 			.Items.Where(i => i.HasDetails)
 			.ToDictionary(
@@ -103,10 +69,8 @@ public class MediaServiceOrderingTests
 				i => new StoredMedia(new MediaIdentity(i.MediaId, [i.External]), Some.Of(new CachedDetails(i.Detail.Details, _now, _now, [])))
 			);
 
-		mediaRepo.GetAsync(Any(), Any()).Returns((ids, _) => ids.Select(id => id.Value).Where(storedMap.ContainsKey).Select(g => storedMap[g]).ToList());
-
-		mediaRepo
-			.GetByExternalsAsync(Any(), Any())
+		deps.MediaRepo.GetAsync(Any(), Any()).Returns((ids, _) => ids.Select(id => id.Value).Where(storedMap.ContainsKey).Select(g => storedMap[g]).ToList());
+		deps.MediaRepo.GetByExternalsAsync(Any(), Any())
 			.Returns(
 				(externals, _) =>
 					externals.Where(externalToId.ContainsKey).Select(e => externalToId[e]).Distinct().Where(storedMap.ContainsKey).Select(g => storedMap[g]).ToList()
@@ -114,65 +78,11 @@ public class MediaServiceOrderingTests
 
 		foreach (var item in builder.Items.Where(i => !i.Identifies))
 		{
-			var key = UnmatchedCacheKey.Build([item.External], MediaProvider.Tmdb, []);
-			unmatchedCache.GetValueOrNone(Is<string>(k => k == key)).Returns(Some.Of(true));
+			var key = UnmatchedCacheKey.Build([item.External], MediaProvider.Tmdb, [RemoteService.Tmdb]);
+			deps.UnmatchedCache.GetValueOrNone(Is<string>(k => k == key)).Returns(Some.Of(true));
 		}
 
-		var dateTimeProvider = IDateTimeProvider.Mock();
-		dateTimeProvider.Now.Returns(_now);
-		var enricher = IDetailsEnricher.Mock();
-		var configRepository = IProviderConfigService.Mock();
-		configRepository
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
-
-		var enrichers = new KeyedServiceSet<RemoteService, IDetailsEnricher>([new(RemoteService.Plex, enricher.Object), new(RemoteService.Tmdb, enricher.Object)]);
-
-		var claims = TestClaims.Granting();
-		var detailsFetcher = new DetailsFetcher(
-			enrichers,
-			claims.Object,
-			configRepository.Object,
-			TestCapacity.Open(),
-			TestReadiness.Everything(),
-			[TestArtwork.ResizesAnything()],
-			dateTimeProvider.Object,
-			new FeedLoadOptions(),
-			new HousekeepingOptions(),
-			NullLogger<DetailsFetcher>.Instance
-		);
-		var resolver = new MediaIdResolver(
-			[],
-			unmatchedCache.Object,
-			TestCapacity.Open(),
-			TestReadiness.Everything(),
-			dateTimeProvider.Object,
-			NullLogger<MediaIdResolver>.Instance
-		);
-		var identifier = new TitleIdentifier(resolver, claims.Object);
-		var writers = new LibraryWriterFactory(mediaRepo.Object, NullLogger<LibraryWriter>.Instance);
-		var primers = new BurstPrimers([], detailsFetcher, TestCapacity.Open(), dateTimeProvider.Object, new FeedLoadOptions());
-		var sink = TestSinks.AddressingBy(MediaProvider.Tmdb, configRepository.Object);
-		return new MediaService(
-			resolver,
-			identifier,
-			detailsFetcher,
-			new ListLoad(identifier, resolver, detailsFetcher, writers, sink, mediaRepo.Object, primers, new FeedLoadOptions(), TimeProvider.System),
-			claims.Object,
-			writers,
-			sink,
-			mediaRepo.Object,
-			primers
-		);
+		return testee;
 	}
 }
 

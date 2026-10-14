@@ -20,7 +20,7 @@ public class ListLoadTests
 	{
 		var (testee, deps) = TestMediaService.Create();
 
-		await testee.LoadListAsync(Paged([3, 2]), FieldNeeds.Everything).ToListAsync();
+		await testee.LoadListAsync(TestMediaService.Paged(3, 2).AsListTitles(), FieldNeeds.Everything).ToListAsync();
 
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any()).WasCalled(Times.Exactly(2));
 	}
@@ -168,22 +168,43 @@ public class ListLoadTests
 	}
 
 	[Test]
-	public async Task LoadListAsync_ForAnimeMissesWithoutAFieldNeed_PrimesAnimeListsWithTheirIds()
+	public async Task LoadListAsync_ForAnimeMissesWithoutAFieldNeed_PrimesAnimeListsWithTheirIdsBeforeAskingIt()
 	{
+		var frieren = AniListId.From("154587", MediaType.Show);
+		var primed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var priming = new TaskCompletionSource();
 		var primer = IBurstPrimer.Mock();
 		primer.Remote.Returns(RemoteService.AnimeLists);
+		primer
+			.PrimeAsync(Is<IReadOnlyCollection<IReadOnlyList<IExternalMediaId>>>(titles => titles!.Single().Contains(frieren)), Any())
+			.ReturnsAsync(priming.Task)
+			.Callback(() => primed.TrySetResult());
+		var askedWhilePriming = false;
 		var anime = IExternalIdConverter.Mock();
 		anime.Lookups.Returns([new ById(Accepts: [MediaProvider.AniList], Yields: [MediaProvider.Tmdb], Cost: 0, GivesHints: false)]);
-		anime.LookUpAsync(Any(), Any()).Returns(new NoMatch(RemoteService.AnimeLists));
+		anime
+			.LookUpAsync(Any(), Any())
+			.Returns(
+				(_, _) =>
+				{
+					askedWhilePriming |= !priming.Task.IsCompleted;
+					return new NoMatch(RemoteService.AnimeLists);
+				}
+			);
 		var (testee, _) = TestMediaService.Create([primer.Object], [new(RemoteService.AnimeLists, anime.Object)]);
-		var frieren = AniListId.From("154587", MediaType.Show);
 
-		await testee
+		var load = testee
 			.LoadListAsync(new[] { new IdentifyRequest([frieren], new None()) }.ToAsyncEnumerable().AsListTitles(), FieldNeeds.None)
 			.InListOrderAsync()
-			.ToListAsync();
+			.ToListAsync()
+			.AsTask();
+		await primed.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		await Task.Delay(TimeSpan.FromMilliseconds(50));
+		priming.SetResult();
+		await load;
 
-		primer.PrimeAsync(Is<IReadOnlyCollection<IReadOnlyList<IExternalMediaId>>>(titles => titles!.Single().Contains(frieren)), Any()).WasCalled(Times.Once);
+		anime.LookUpAsync(Any(), Any()).WasCalled(Times.Once);
+		await Assert.That(askedWhilePriming).IsFalse();
 	}
 
 	private static UnmatchedMedia Idless() => new([], new MovieDetails { Title = "No Ids" });
@@ -210,19 +231,6 @@ public class ListLoadTests
 	private static List<IdentifyRequest> Imdb(int count)
 	{
 		return [.. Enumerable.Range(0, count).Select(index => new IdentifyRequest([ImdbId.From(Tt(index), MediaType.Movie)], new None()))];
-	}
-
-	private static async IAsyncEnumerable<ListTitle> Paged(int[] pages)
-	{
-		var next = 0;
-		foreach (var size in pages)
-		{
-			await Task.Delay(TimeSpan.FromMilliseconds(20));
-			foreach (var _ in Enumerable.Range(0, size))
-			{
-				yield return new IdentifyRequest([ImdbId.From($"tt{next++}", MediaType.Movie)], new None());
-			}
-		}
 	}
 
 	[Test]
