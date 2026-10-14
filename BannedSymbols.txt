@@ -3,6 +3,11 @@ P:System.DateTimeOffset.UtcNow;Use IDateTimeProvider
 P:System.DateTime.Now;Use IDateTimeProvider
 P:System.DateTime.UtcNow;Use IDateTimeProvider
 M:System.Threading.Tasks.Task.Wait;Await it
+M:System.Threading.Tasks.Task.Wait(System.Int32);Await it
+M:System.Threading.Tasks.Task.Wait(System.Threading.CancellationToken);Await it
+M:System.Threading.Tasks.Task.Wait(System.Int32,System.Threading.CancellationToken);Await it
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan);Await it
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan,System.Threading.CancellationToken);Await it
 P:System.DateTime.Today;Use IDateTimeProvider
 P:System.TimeZoneInfo.Local;Use IDateTimeProvider
 M:System.Threading.Thread.Sleep(System.Int32);Await Task.Delay

@@ -28,17 +28,10 @@ using Web.Staging;
 	Target = "~M:Program.<Main>$(System.String[])",
 	Justification = "the composition root: it wires every layer's module and the request pipeline"
 )]
-[assembly: SuppressMessage(
-	"ApiDesign",
-	"RS0030",
-	Scope = "member",
-	Target = "~M:Program.<Main>$(System.String[])",
-	Justification = "The container health check reads its port before the host, and with it the configuration, is built."
-)]
 
 if (args is ["healthcheck"])
 {
-	Environment.ExitCode = await ContainerHealthProbe.CheckAsync(new HttpClientHandler(), Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORTS"));
+	Environment.ExitCode = await ContainerHealthProbe.CheckAsync(new HttpClientHandler());
 	return;
 }
 

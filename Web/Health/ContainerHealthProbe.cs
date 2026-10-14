@@ -11,6 +11,13 @@ internal static class ContainerHealthProbe
 	[SuppressMessage(
 		"ApiDesign",
 		"RS0030",
+		Justification = "The container health check reads its port before the host, and with it the configuration, is built."
+	)]
+	public static Task<int> CheckAsync(HttpMessageHandler handler) => CheckAsync(handler, Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORTS"));
+
+	[SuppressMessage(
+		"ApiDesign",
+		"RS0030",
 		Justification = "The container health check runs as its own short process before the host and its typed clients exist."
 	)]
 	public static async Task<int> CheckAsync(HttpMessageHandler handler, string? ports)
