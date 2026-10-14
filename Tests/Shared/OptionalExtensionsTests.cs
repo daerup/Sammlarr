@@ -496,7 +496,7 @@ public class OptionalExtensionsTests
 	[Test]
 	public async Task FirstOrNoneAsync_ReturnsFirstMatchSkippingNulls()
 	{
-		var result = await ToAsync(null, "a", "bb", "ccc").FirstOrNoneAsync(s => s.Length >= 2);
+		var result = await AsyncSequence.Of(null, "a", "bb", "ccc").FirstOrNoneAsync(s => s.Length >= 2);
 
 		await Assert.That(result).IsSome().And.IsEqualTo("bb");
 	}
@@ -504,7 +504,7 @@ public class OptionalExtensionsTests
 	[Test]
 	public async Task FirstOrNoneAsync_WhenNoMatch_IsNone()
 	{
-		var result = await ToAsync(null, "a").FirstOrNoneAsync(s => s.Length >= 5);
+		var result = await AsyncSequence.Of(null, "a").FirstOrNoneAsync(s => s.Length >= 5);
 
 		await Assert.That(result).IsNone();
 	}
@@ -679,15 +679,6 @@ public class OptionalExtensionsTests
 		{
 			await Task.Delay(20);
 			steps.Add("first");
-		}
-	}
-
-	private static async IAsyncEnumerable<T> ToAsync<T>(params T[] items)
-	{
-		foreach (var item in items)
-		{
-			await Task.Yield();
-			yield return item;
 		}
 	}
 

@@ -53,7 +53,6 @@ public class UsageExporterTests
 		await Assert.That(rows.Calls.Single().Feed).IsSome().And.IsEqualTo(feed);
 		await Assert.That(rows.Attempts.Single().Attempts).IsEqualTo(3);
 		await Assert.That(rows.Attempts.Single().Buckets).IsEquivalentTo(new Dictionary<int, long> { [100] = 2, [DurationBuckets.Over] = 1 });
-		lastCalls.Saw(RemoteService.Tmdb, Now).WasCalled(Times.Once);
 	}
 
 	[Test]

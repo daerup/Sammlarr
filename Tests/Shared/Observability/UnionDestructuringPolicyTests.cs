@@ -1,7 +1,7 @@
 using Observability.Logging;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
+using TestInfrastructure;
 
 namespace Shared.Tests.Observability;
 
@@ -56,14 +56,5 @@ public class UnionDestructuringPolicyTests
 		using var logger = new LoggerConfiguration().Destructure.With(new UnionDestructuringPolicy()).WriteTo.Sink(sink).CreateLogger();
 		logger.Information("{@Envelope}", graph);
 		return (StructureValue)sink.Last.Properties["Envelope"];
-	}
-
-	private sealed class CapturingSink : ILogEventSink
-	{
-		private readonly List<LogEvent> _events = [];
-
-		public LogEvent Last => _events[^1];
-
-		public void Emit(LogEvent logEvent) => _events.Add(logEvent);
 	}
 }

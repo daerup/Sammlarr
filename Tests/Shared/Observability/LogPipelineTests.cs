@@ -5,6 +5,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Shared.Options;
+using TestInfrastructure;
 
 namespace Shared.Tests.Observability;
 
@@ -29,12 +30,5 @@ public class LogPipelineTests
 		logger.ForContext(Constants.SourceContextPropertyName, category).Information("Seeded the staging database");
 
 		await Assert.That(captured.Events.Count > 0).IsEqualTo(kept);
-	}
-
-	private sealed class CapturingSink : ILogEventSink
-	{
-		public List<LogEvent> Events { get; } = [];
-
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
 	}
 }

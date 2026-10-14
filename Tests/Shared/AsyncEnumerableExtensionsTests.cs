@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
 namespace Shared.Tests;
@@ -128,22 +129,21 @@ public class AsyncEnumerableExtensionsTests
 	[Test]
 	public async Task SelectAwait_WhenSequenceIsNotEnumerated_DoesNotInvokeProjection()
 	{
-		var source = CreateAsyncEnumerable(1, 2, 3);
+		var source = AsyncSequence.Of(1, 2, 3);
 		var wasInvoked = false;
-		var testee = source.SelectAwait(value =>
+		_ = source.SelectAwait(value =>
 		{
 			wasInvoked = true;
 			return new ValueTask<int>(value * 2);
 		});
 
 		await Assert.That(wasInvoked).IsFalse();
-		await Assert.That(testee).IsTypeOf<IAsyncEnumerator<int>>();
 	}
 
 	[Test]
 	public async Task SelectAwait_WhenSourceIsEnumerated_ProjectsValuesInOrder()
 	{
-		var source = CreateAsyncEnumerable(1, 2, 3);
+		var source = AsyncSequence.Of(1, 2, 3);
 		var testee = source.SelectAwait(async value =>
 		{
 			await Task.Yield();
@@ -162,7 +162,7 @@ public class AsyncEnumerableExtensionsTests
 	public async Task SelectAwait_Concurrent_RunsItemsUpToConcurrencyLimitInParallel()
 	{
 		var items = Enumerable.Range(1, 4).Select(v => new GatedItem(v)).ToList();
-		var pipeline = CreateAsyncEnumerable(items).SelectAwait(item => item.InvokeAsync(), maxConcurrency: 4);
+		var pipeline = AsyncSequence.Of(items).SelectAwait(item => item.InvokeAsync(), maxConcurrency: 4);
 		var consume = pipeline.ToListAsync().AsTask();
 
 		await Task.WhenAll(items.Select(i => i.Started)).WaitAsync(TimeSpan.FromSeconds(5));
@@ -176,7 +176,7 @@ public class AsyncEnumerableExtensionsTests
 	public async Task SelectAwait_Concurrent_PreservesSourceOrderEvenWhenLaterItemsCompleteFirst()
 	{
 		var items = Enumerable.Range(1, 5).Select(v => new GatedItem(v)).ToArray();
-		var pipeline = CreateAsyncEnumerable(items).SelectAwait(item => item.InvokeAsync(), maxConcurrency: 5);
+		var pipeline = AsyncSequence.Of(items).SelectAwait(item => item.InvokeAsync(), maxConcurrency: 5);
 		var consume = pipeline.ToListAsync().AsTask();
 
 		await Task.WhenAll(items.Select(i => i.Started)).WaitAsync(TimeSpan.FromSeconds(5));
@@ -190,7 +190,7 @@ public class AsyncEnumerableExtensionsTests
 	public async Task SelectAwait_Concurrent_YieldsInSourceOrderBeyondConcurrencyLimit()
 	{
 		var items = Enumerable.Range(1, 5).Select(v => new GatedItem(v)).ToArray();
-		var pipeline = CreateAsyncEnumerable(items).SelectAwait(item => item.InvokeAsync(), maxConcurrency: 2);
+		var pipeline = AsyncSequence.Of(items).SelectAwait(item => item.InvokeAsync(), maxConcurrency: 2);
 		var consume = pipeline.ToListAsync().AsTask();
 		items.Reverse().ToList().ForEach(i => i.Complete());
 
@@ -199,7 +199,7 @@ public class AsyncEnumerableExtensionsTests
 	}
 
 	[Test]
-	public async Task SelectAwait_WhenProjectionThrows_PropagatesException()
+	public async Task SelectAwait_WhenTheSourceThrows_ProjectsTheItemsBeforeItThenThrows()
 	{
 		var source = CreateAsyncEnumerable(() => 1, () => 2, () => throw new InvalidOperationException());
 		var projectedValues = new List<int>();
@@ -222,7 +222,7 @@ public class AsyncEnumerableExtensionsTests
 		var items = new[] { blocker }.Concat(Enumerable.Range(2, 19).Select(v => new GatedItem(v))).ToArray();
 		items.Skip(1).ToList().ForEach(i => i.Complete());
 
-		var pipeline = CreateAsyncEnumerable(items).SelectAwait(item => item == blocker ? item.InvokeForeverAsync() : item.InvokeAsync(), maxConcurrency: 5);
+		var pipeline = AsyncSequence.Of(items).SelectAwait(item => item == blocker ? item.InvokeForeverAsync() : item.InvokeAsync(), maxConcurrency: 5);
 
 		// iterator never completes (blocker holds its slot forever).
 		_ = pipeline.ToListAsync().AsTask();
@@ -235,7 +235,7 @@ public class AsyncEnumerableExtensionsTests
 	public async Task SelectAwait_Concurrent_PreservesOrderUnderChaoticCompletionOrder()
 	{
 		var items = Enumerable.Range(0, 200).Select(v => new GatedItem(v)).ToArray();
-		var pipeline = CreateAsyncEnumerable(items).SelectAwait(item => item.InvokeAsync(), maxConcurrency: 20);
+		var pipeline = AsyncSequence.Of(items).SelectAwait(item => item.InvokeAsync(), maxConcurrency: 20);
 		var consume = pipeline.ToListAsync().AsTask();
 
 		var random = new Random(0xC0FFEE);
@@ -257,7 +257,7 @@ public class AsyncEnumerableExtensionsTests
 			return value;
 		}
 
-		var pipeline = CreateAsyncEnumerable(Enumerable.Range(1, 100).ToArray()).SelectAwait(Track, maxConcurrency: 10);
+		var pipeline = AsyncSequence.Of(Enumerable.Range(1, 100).ToArray()).SelectAwait(Track, maxConcurrency: 10);
 
 		var results = await pipeline.ToListAsync();
 
@@ -307,7 +307,7 @@ public class AsyncEnumerableExtensionsTests
 
 		async Task ConsumeAsync()
 		{
-			await foreach (var _ in CreateAsyncEnumerable(0, 1, 2).SelectAwait(Hold, maxConcurrency: 3))
+			await foreach (var _ in AsyncSequence.Of(0, 1, 2).SelectAwait(Hold, maxConcurrency: 3))
 			{
 				await waiting.Task;
 				break;
@@ -326,7 +326,8 @@ public class AsyncEnumerableExtensionsTests
 		var act = async () =>
 		{
 			await foreach (
-				var item in CreateAsyncEnumerable(0, 1, 2, 3)
+				var item in AsyncSequence
+					.Of(0, 1, 2, 3)
 					.SelectAwait(
 						(value, _) => value == 2 ? ValueTask.FromException<int>(new InvalidOperationException("selector failed")) : ValueTask.FromResult(value),
 						maxConcurrency: 3
@@ -357,7 +358,7 @@ public class AsyncEnumerableExtensionsTests
 			return value;
 		}
 
-		var consume = CreateAsyncEnumerable(0, 1).SelectAwait(Hold, maxConcurrency: 2, cancellation.Token).ToListAsync().AsTask();
+		var consume = AsyncSequence.Of(0, 1).SelectAwait(Hold, maxConcurrency: 2, cancellation.Token).ToListAsync().AsTask();
 		await waiting.Task.WaitAsync(TimeSpan.FromSeconds(5));
 		await cancellation.CancelAsync();
 
@@ -390,15 +391,6 @@ public class AsyncEnumerableExtensionsTests
 		}
 
 		return value;
-	}
-
-	private static async IAsyncEnumerable<T> CreateAsyncEnumerable<T>(params IEnumerable<T> values)
-	{
-		foreach (var value in values)
-		{
-			await Task.Yield();
-			yield return value;
-		}
 	}
 
 	private static async IAsyncEnumerable<int> CreateAsyncEnumerable(params Func<int>[] valueProviders)

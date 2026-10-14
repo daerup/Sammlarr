@@ -425,7 +425,7 @@ public class ResultExtensionsTests
 	{
 		var values = new List<int>();
 
-		await foreach (var value in ToAsync<Result<int>>(Success.Of(1), Error.From("x"), Success.Of(3)).WhereSuccessAwait())
+		await foreach (var value in AsyncSequence.Of<Result<int>>(Success.Of(1), Error.From("x"), Success.Of(3)).WhereSuccessAwait())
 		{
 			values.Add(value);
 		}
@@ -439,7 +439,7 @@ public class ResultExtensionsTests
 		var pairs = new List<string>();
 
 		await foreach (
-			var (value, companion) in ToAsync<(Result<int>, string)>((Success.Of(1), "a"), (Error.From("x"), "b"), (Success.Of(3), "c")).WhereSuccessAwait()
+			var (value, companion) in AsyncSequence.Of<(Result<int>, string)>((Success.Of(1), "a"), (Error.From("x"), "b"), (Success.Of(3), "c")).WhereSuccessAwait()
 		)
 		{
 			pairs.Add($"{value}{companion}");
@@ -484,15 +484,6 @@ public class ResultExtensionsTests
 	public async Task CausedBy_WhenTheErrorHasNoException_IsNone()
 	{
 		await Assert.That(Error.From("boom").CausedBy<Exception>()).IsNone();
-	}
-
-	private static async IAsyncEnumerable<T> ToAsync<T>(params T[] items)
-	{
-		foreach (var item in items)
-		{
-			await Task.Yield();
-			yield return item;
-		}
 	}
 
 	private static Result<int> Halve(int value) => value % 2 == 0 ? Success.Of(value / 2) : Error.From("odd");
