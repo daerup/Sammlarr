@@ -11,17 +11,17 @@ Sammlarr's own terms, each linked to the section that explains it.
 ([Context and Scope](02-context-scope.md#ids-without-a-service)).
 
 **Identity key**: An external id that names one title, such as a TMDB or IMDb id. Only keys match titles and take part
-in claims ([Cross-cutting Concepts](06-crosscutting.md#identity-keys-page-links-and-claims)).
+in claims ([Cross-cutting Concepts](06-crosscutting.md#identity-keys-and-page-links)).
 
 **Page link**: A title's page on Rotten Tomatoes, Metacritic or Letterboxd; it never identifies a title
-([Cross-cutting Concepts](06-crosscutting.md#identity-keys-page-links-and-claims)).
+([Cross-cutting Concepts](06-crosscutting.md#identity-keys-and-page-links)).
 
 **Claim**: The write that fixes a title's identity before Sammlarr hands it out (`IIdentityClaims`). A pinned claim
 extends only its title; an unpinned one finds or starts its title; none merges two ([Runtime View](04-runtime.md#ids-and-the-claim)).
 
 **Stored twice**: Two stored titles a claim's keys tie together, noted (`IdentityConflict`) until housekeeping or an
 admin merges them or keeps them apart
-([Cross-cutting Concepts](06-crosscutting.md#identity-keys-page-links-and-claims)).
+([Cross-cutting Concepts](06-crosscutting.md#identity-keys-and-page-links)).
 
 ## Loading a list
 
@@ -45,16 +45,16 @@ services once per burst ([Runtime View](04-runtime.md#bursts-and-chains)).
 | Conflict | Its keys sit on two stored titles, or contradict each other. |
 
 **Id converter**: A service's id lookups (`IExternalIdConverter`), which `MediaIdResolver` chains into paths toward the
-sink id ([Cross-cutting Concepts](06-crosscutting.md#id-lookup-paths)).
+sink id ([Runtime View](04-runtime.md#ids-and-the-claim)).
 
 **Enricher**: A service's details lookup (`IDetailsEnricher`), asked one at a time until nothing the load needs is
-missing ([Cross-cutting Concepts](06-crosscutting.md#enricher-choice)).
+missing ([Runtime View](04-runtime.md#details)).
 
 **Fresh, stale**: A stored title is fresh for `FreshDays` (14) after its last refresh; the next load refreshes a stale
 one ([Runtime View](04-runtime.md#details)).
 
 **Resting**: An enricher that answered for a title is not asked again for `FreshDays`; one that failed waits 1, 6,
-then 24 hours ([Cross-cutting Concepts](06-crosscutting.md#enricher-choice)).
+then 24 hours ([Runtime View](04-runtime.md#details)).
 
 **Dataset**: A file downloaded daily into a table (IMDb's ratings, the anime id map); its lookups cost nothing
 ([Cross-cutting Concepts](06-crosscutting.md#datasets)).
