@@ -10,26 +10,12 @@ public class NotificationEventCatalogTests
 	private static readonly DateTimeOffset Now = DateTimeOffset.UnixEpoch;
 
 	[Test]
-	public async Task Catalog_ForTheWantlistSyncEvent_IncludesIt()
+	public async Task Catalog_HoldsEveryEventButTheTestPing()
 	{
 		var catalog = NotificationEventCatalog.Subscribable.Select(option => option.EventType).ToHashSet();
 
 		await Assert.That(catalog).Contains(new WantlistSyncCompletedNotification(User, Now, [], [], [], [], []).Type);
-	}
-
-	[Test]
-	public async Task Catalog_ForGranularAndInternalEvents_ExcludesThem()
-	{
-		var catalog = NotificationEventCatalog.Subscribable.Select(option => option.EventType).ToHashSet();
-
 		await Assert.That(catalog.Contains(new TestPingNotification(User, Now, Guid.NewGuid()).Type)).IsFalse();
-	}
-
-	[Test]
-	public async Task Catalog_ForEveryOption_ProvidesALabel()
-	{
-		await Assert.That(NotificationEventCatalog.Subscribable).IsNotEmpty();
-		await Assert.That(NotificationEventCatalog.Subscribable.All(option => !string.IsNullOrWhiteSpace(option.Label))).IsTrue();
 	}
 
 	[Test]

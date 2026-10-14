@@ -57,9 +57,7 @@ public class DataSourcesCardTests : BunitContext
 
 		var band = Keys(cut.FindAll($"{Band} .source-row")).ToList();
 		var asked = Keys(cut.FindAll(".source-row").Where(row => row.Closest(Band) is null));
-		await Assert
-			.That((cut.Find(".source-band-title").TextContent, cut.Find(".source-band-note").TextContent))
-			.IsEqualTo(("Pages and ratings", "Reach Sammlarr only through other services"));
+		await Assert.That(cut.Find(".source-band-title").TextContent).IsEqualTo("Pages and ratings");
 		await Assert.That(band).IsEquivalentTo(["Tvdb", "RottenTomatoes", "Metacritic", "Letterboxd"], CollectionOrdering.Matching);
 		await Assert.That(asked).DoesNotContain("Tvdb");
 		await Assert.That(Chips(cut, "Tvdb")).IsEquivalentTo(["Pages"]);

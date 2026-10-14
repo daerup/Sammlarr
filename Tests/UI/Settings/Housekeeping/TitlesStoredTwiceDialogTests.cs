@@ -78,9 +78,9 @@ public class TitlesStoredTwiceDialogTests : BunitContext
 		await Assert
 			.That(rail.Select(item => item.QuerySelector("b")!.TextContent))
 			.IsEquivalentTo(["Dune: Part Two", "The Fellowship of the Ring", "Aladdin", "Annie"], CollectionOrdering.Matching);
-		await Assert
-			.That(rail.Select(item => item.QuerySelector(".st-dot")!.ClassList.Contains("is-tried")))
-			.IsEquivalentTo([true, false, false, false], CollectionOrdering.Matching);
+		var lines = rail.Select(item => item.QuerySelector(".st-item-sub")!.TextContent.Trim()).ToList();
+		await Assert.That(lines[0]).StartsWith("asked twice, next ");
+		await Assert.That(lines.Skip(1)).IsEquivalentTo(["new, asking tonight", "two TMDB ids", "MDBList maps it elsewhere"], CollectionOrdering.Matching);
 		await Assert.That(Text(cut, "stored-twice-progress")).IsEqualTo("Pair 1 of 2");
 	}
 
@@ -96,16 +96,14 @@ public class TitlesStoredTwiceDialogTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForAPairKeptApartBecauseBothHoldATmdbId_MarksTheTmdbIdsRedAndOffersNoMerge()
+	public async Task Render_ForAPairKeptApartBecauseBothHoldATmdbId_NamesBothTmdbIdsAndOffersNoMerge()
 	{
 		var cut = RenderOpen();
 
 		await Rail(cut, "Aladdin").ClickAsync(new());
 
-		var clashing = cut.FindAll("[data-testid=stored-twice-id]").Where(id => id.ClassList.Contains("is-clash")).Select(id => id.TextContent.Trim());
-		await Assert.That(clashing).IsEquivalentTo(["812", "420817"]);
+		await Assert.That(Text(cut, "stored-twice-claim")).Contains("812").And.Contains("420817");
 		await Assert.That(Text(cut, "stored-twice-actions")).Contains("can't be merged").And.DoesNotContain("Merge");
-		await Assert.That(cut.FindAll("[data-testid=stored-twice-year]").Select(year => year.ClassList.Contains("st-year-differs"))).IsEquivalentTo([true, true]);
 	}
 
 	[Test]

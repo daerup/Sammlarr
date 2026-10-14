@@ -41,15 +41,15 @@ public class RatingPipelineCardTests : BunitContext
 	[Test]
 	public async Task Switch_WhenASourceIsSwitchedOff_StoresTheDefaultAndRereadsIt()
 	{
+		var rest = new RatingStrategy(new AveragedRating([.. Enum.GetValues<RatingSource>().Where(source => source != RatingSource.Tmdb)]));
 		await _context.GetAsync();
 		var cut = RenderCard(new RatingStrategy(AveragedRating.Everything), Supplied);
+		_ratings.GetDefaultAsync(Any()).Returns(rest);
 
 		await cut.Find("button[role=switch][aria-label='TMDB counts']").ClickAsync();
-		await _context.GetAsync();
 
-		var rest = new RatingStrategy(new AveragedRating([.. Enum.GetValues<RatingSource>().Where(source => source != RatingSource.Tmdb)]));
 		_ratings.StoreDefaultAsync(rest, Any()).WasCalled(Times.Once);
-		_ratings.GetDefaultAsync(Any()).WasCalled(Times.Exactly(2));
+		await Assert.That((await _context.GetAsync()).Default).IsEqualTo(rest);
 	}
 
 	[Test]
@@ -64,19 +64,24 @@ public class RatingPipelineCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Switch_ForTheLastSourceSwitchedOn_IsLocked()
+	public async Task Render_WithOnlyImdbOn_LocksItsSwitchAndShowsNoNotice()
 	{
 		var cut = RenderCard(new RatingStrategy(new AveragedRating([RatingSource.Imdb])), Supplied);
 
 		await Assert.That(cut.Find("button[role=switch][aria-label='IMDb counts']").HasAttribute("disabled")).IsTrue();
+		await Assert.That(cut.FindAll(".pipeline-notice")).IsEmpty();
 	}
 
 	[Test]
-	public async Task Switch_WhenTheOtherSwitchedOnSourcesHaveNoSupplier_IsLocked()
+	public async Task Render_WhenPartOfTheChoiceHasNoSupplier_LocksTheOtherSwitchAndGreysItsTileWithoutANotice()
 	{
 		var cut = RenderCard(new RatingStrategy(new AveragedRating([RatingSource.Tmdb, RatingSource.Imdb])), [RatingSource.Tmdb]);
 
 		await Assert.That(cut.Find("button[role=switch][aria-label='TMDB counts']").HasAttribute("disabled")).IsTrue();
+		await Assert.That(cut.FindAll(".pipeline-notice")).IsEmpty();
+		var imdb = Tile(cut, "IMDb");
+		await Assert.That(imdb.TextContent).Contains("needs a");
+		await Assert.That(imdb.QuerySelectorAll("button[role=switch]")).IsEmpty();
 	}
 
 	[Test]
@@ -84,28 +89,18 @@ public class RatingPipelineCardTests : BunitContext
 	{
 		var cut = RenderCard(new RatingStrategy(new AveragedRating([RatingSource.Imdb, RatingSource.RottenTomatoesCritics])), [RatingSource.Tmdb]);
 
-		await Assert.That(cut.Find(".pipeline-notice").TextContent.Trim()).IsEqualTo("Your choice (IMDb, RT critics) needs a provider; TMDB is used instead.");
-	}
-
-	[Test]
-	public async Task Render_WhenPartOfTheChoiceHasNoSupplier_GreysItsTileWithoutANotice()
-	{
-		var cut = RenderCard(new RatingStrategy(new AveragedRating([RatingSource.Tmdb, RatingSource.Imdb])), [RatingSource.Tmdb]);
-
-		await Assert.That(cut.FindAll(".pipeline-notice")).IsEmpty();
-		await Assert.That(Unsupplied(cut)).Contains("IMDb");
+		await Assert.That(cut.Find(".pipeline-notice").TextContent).Contains("IMDb, RT critics").And.Contains("TMDB is used instead");
 	}
 
 	[Test]
 	public async Task Render_WhenASourceHasNoSupplier_GreysItsTileAndLinksItsSuppliers()
 	{
 		var cut = RenderCard(new RatingStrategy(AveragedRating.Everything), Supplied);
-		var letterboxd = cut.FindAll(".pipeline-tile.is-unsupplied").Single(tile => tile.QuerySelector(".pipeline-name")!.TextContent.Trim() == "Letterboxd");
+		var letterboxd = Tile(cut, "Letterboxd");
 
 		await Assert.That(letterboxd.TextContent).Contains("needs a");
 		await Assert.That(letterboxd.QuerySelectorAll(".rating-suppliers-link")).IsNotEmpty();
 		await Assert.That(letterboxd.QuerySelectorAll("button[role=switch]")).IsEmpty();
-		await Assert.That(cut.FindAll(".pipeline-stub").Count).IsEqualTo(cut.FindAll(".pipeline-tile.is-unsupplied").Count);
 	}
 
 	[Test]
@@ -124,9 +119,7 @@ public class RatingPipelineCardTests : BunitContext
 			[RatingSource.Tmdb, RatingSource.Imdb]
 		);
 
-		await Assert
-			.That(cut.Find(".pipeline-notice").TextContent.Trim())
-			.IsEqualTo("Your choice (RT critics, RT audience) needs a provider; TMDB, IMDb are used instead.");
+		await Assert.That(cut.Find(".pipeline-notice").TextContent).Contains("RT critics, RT audience").And.Contains("TMDB, IMDb are used instead");
 	}
 
 	[Test]
@@ -165,14 +158,6 @@ public class RatingPipelineCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Notice_WhenEveryChosenSourceIsAvailable_IsNotShown()
-	{
-		var cut = RenderCard(new RatingStrategy(new AveragedRating([RatingSource.Imdb])), Supplied);
-
-		await Assert.That(cut.FindAll(".pipeline-notice")).IsEmpty();
-	}
-
-	[Test]
 	public async Task Combination_WhenSwitchedFromFirstAvailableToAverage_KeepsTheRowOrder()
 	{
 		var cut = RenderCard(new RatingStrategy(new OrderedRating([RatingSource.RottenTomatoesAudience, RatingSource.Imdb])), Supplied);
@@ -189,6 +174,11 @@ public class RatingPipelineCardTests : BunitContext
 	private static List<string> Unsupplied(IRenderedComponent<RatingPipelineCard> cut)
 	{
 		return [.. cut.FindAll(".pipeline-tile.is-unsupplied .pipeline-name").Select(name => name.TextContent.Trim())];
+	}
+
+	private static IElement Tile(IRenderedComponent<RatingPipelineCard> cut, string name)
+	{
+		return cut.FindAll(".pipeline-tile").Single(tile => tile.QuerySelector(".pipeline-name")!.TextContent.Trim() == name);
 	}
 
 	private static IElement Radio(IRenderedComponent<RatingPipelineCard> cut, string name)

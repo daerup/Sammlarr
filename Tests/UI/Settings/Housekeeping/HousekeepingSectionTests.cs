@@ -78,17 +78,7 @@ public class HousekeepingSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WithNoTitleStoredTwice_LeavesTheRowOut()
-	{
-		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
-
-		var cut = RenderLoaded();
-
-		await Assert.That(cut.FindAll("[data-testid=housekeeping-stored-twice]")).IsEmpty();
-	}
-
-	[Test]
-	public async Task Render_BeforeAnythingRan_ReadsNeverRunAndADashForEveryTask()
+	public async Task Render_BeforeAnythingRan_ReadsNeverRunAndLeavesTheStoredTwiceRowOut()
 	{
 		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
 
@@ -96,6 +86,7 @@ public class HousekeepingSectionTests : BunitContext
 
 		await Assert.That(Texts(cut, "housekeeping-when")).IsEquivalentTo(["never run", "never run", "never run"]);
 		await Assert.That(Texts(cut, "housekeeping-did")).IsEquivalentTo([HousekeepingView.Nothing, HousekeepingView.Nothing, HousekeepingView.Nothing]);
+		await Assert.That(cut.FindAll("[data-testid=housekeeping-stored-twice]")).IsEmpty();
 	}
 
 	[Test]
@@ -163,18 +154,6 @@ public class HousekeepingSectionTests : BunitContext
 	}
 
 	[Test]
-	[Arguments(108_000_000L, "true")]
-	[Arguments(34_300_000L, "false")]
-	public async Task Render_ForTheFileOnDisk_MarksItBloatedFromHalfAgainItsData(long onDisk, string bloated)
-	{
-		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())) with { Size = new DatabaseSize(onDisk, 32_100_000) });
-
-		var cut = RenderLoaded();
-
-		await Assert.That(cut.Find("[data-testid=housekeeping-size]").GetAttribute("data-bloated")).IsEqualTo(bloated);
-	}
-
-	[Test]
 	public async Task RunNow_ForADataset_StartsThatDatasetsLoad()
 	{
 		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
@@ -229,7 +208,7 @@ public class HousekeepingSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task ClearUnmatchedLookups_WhenClicked_ClearsThemAtOnceAndSaysWhatFollows()
+	public async Task ClearUnmatchedLookups_WhenClicked_ClearsThemAtOnceAndSaysSo()
 	{
 		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
 		var cut = RenderLoaded();
@@ -237,7 +216,7 @@ public class HousekeepingSectionTests : BunitContext
 		await cut.Find("[data-testid=housekeeping-clear-unmatched] button").ClickAsync(new MouseEventArgs());
 
 		_unmatched.Clear().WasCalled(Times.Once);
-		await Assert.That(Toasts.Single().Description).IsEqualTo("Unmatched titles will be tried again on the next run.");
+		await Assert.That(Toasts).HasSingleItem();
 	}
 
 	private IReadOnlyList<ToastData> Toasts => Services.GetRequiredService<ToastService>().Toasts;

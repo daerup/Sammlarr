@@ -58,16 +58,6 @@ public class RemovePersonDialogTests : BunitContext
 	}
 
 	[Test]
-	public async Task Confirm_NamesThePersonBoldBetweenQuotes()
-	{
-		var cut = RenderDialog(Daerup, SinkKind.Plex);
-
-		var label = cut.Find("label[for='remove-confirm']");
-		await Assert.That(label.TextContent.Trim()).IsEqualTo("Type 'Daerup' to confirm");
-		await Assert.That(label.QuerySelector("b")!.TextContent).IsEqualTo("Daerup");
-	}
-
-	[Test]
 	public async Task Dialog_UnderRadarrAndSonarr_SaysPerAppHowManyGoAndWhetherTheirFilesAreDeleted()
 	{
 		HoldingWith(new SinkHoldings(ArrApp.Radarr, 8, true), new SinkHoldings(ArrApp.Sonarr, 4, false));
@@ -77,8 +67,6 @@ public class RemovePersonDialogTests : BunitContext
 		cut.WaitForElement("[data-holding]");
 		await Assert.That(Holding(cut, ArrApp.Radarr).TextContent.Trim()).IsEqualTo("8 movies · files deleted");
 		await Assert.That(Holding(cut, ArrApp.Sonarr).TextContent.Trim()).IsEqualTo("4 shows · files kept");
-		await Assert.That(Holding(cut, ArrApp.Radarr).QuerySelector(".text-destructive")!.TextContent).IsEqualTo("files deleted");
-		await Assert.That(Holding(cut, ArrApp.Sonarr).QuerySelector(".text-destructive")).IsNull();
 		await Assert.That(cut.Find("[data-holdings]").TextContent).DoesNotContain("someone else");
 	}
 

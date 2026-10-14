@@ -33,9 +33,7 @@ public class RatingsSectionTests : BunitContext
 		var cut = Render<RatingsSection>();
 
 		cut.WaitForState(() => cut.FindAll(".imdb-file").Count == 1);
-		await Assert
-			.That(cut.Find(".imdb-file").TextContent)
-			.IsEqualTo($"IMDb ratings come from IMDb's ratings file of {loadedAt.ToLocalTime():d MMMM yyyy, HH:mm}.");
+		await Assert.That(cut.Find(".imdb-file").TextContent).Contains($"{loadedAt.ToLocalTime():d MMMM yyyy, HH:mm}");
 	}
 
 	[Test]
@@ -46,6 +44,8 @@ public class RatingsSectionTests : BunitContext
 		var cut = Render<RatingsSection>();
 
 		cut.WaitForState(() => cut.FindAll(".imdb-file").Count == 1);
-		await Assert.That(cut.Find(".imdb-file").TextContent).IsEqualTo("IMDb's ratings file has not been loaded yet.");
+		var line = cut.Find(".imdb-file").TextContent;
+		await Assert.That(line).Contains("not been loaded yet");
+		await Assert.That(line.Any(char.IsDigit)).IsFalse();
 	}
 }

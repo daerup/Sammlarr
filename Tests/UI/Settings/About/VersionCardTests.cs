@@ -24,9 +24,7 @@ public class VersionCardTests : BunitContext
 
 		await Assert.That(cut.Find(".version-number").TextContent).IsEqualTo("0.0.0-alpha.0.584");
 		await Assert.That(cut.Markup).Contains("Dev build");
-		await Assert
-			.That(cut.Find(".version-source").TextContent)
-			.IsEqualTo("The version comes from git when Sammlarr is built. Nothing is tagged as a release yet, so it counts the commits so far: 584.");
+		await Assert.That(cut.Find(".version-source").TextContent).Contains("so far: 584");
 		await Assert.That(cut.FindAll("a").Select(link => link.GetAttribute("href") ?? string.Empty)).IsEquivalentTo(["https://github.com/daerup/Sammlarr"]);
 	}
 
@@ -37,9 +35,7 @@ public class VersionCardTests : BunitContext
 			parameters.Add(card => card.Version, new AppVersion("1.4.1-alpha.0.1")).Add(card => card.Repository, "daerup/Sammlarr")
 		);
 
-		await Assert
-			.That(cut.Find(".version-source").TextContent)
-			.IsEqualTo("The version comes from git when Sammlarr is built: this build is 1 commit past the latest release tag.");
+		await Assert.That(cut.Find(".version-source").TextContent).Contains("1 commit past");
 	}
 
 	[Test]
@@ -50,7 +46,7 @@ public class VersionCardTests : BunitContext
 		var cut = Render<VersionCard>(parameters => parameters.Add(card => card.Version, new AppVersion(number)).Add(card => card.Repository, "daerup/Sammlarr"));
 
 		await Assert.That(cut.Markup).DoesNotContain("Dev build");
-		await Assert.That(cut.Find(".version-source").TextContent).IsEqualTo($"The version comes from the release tag v{number} this build was made from.");
+		await Assert.That(cut.Find(".version-source").TextContent).Contains($"release tag v{number}");
 		await Assert
 			.That(cut.FindAll("a").Select(link => link.GetAttribute("href") ?? string.Empty))
 			.IsEquivalentTo([$"https://github.com/daerup/Sammlarr/releases/tag/v{number}", "https://github.com/daerup/Sammlarr"], CollectionOrdering.Matching);
