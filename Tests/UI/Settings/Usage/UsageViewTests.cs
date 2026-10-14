@@ -25,7 +25,7 @@ public class UsageViewTests
 	[Arguments(12500d, 14.5)]
 	public async Task StripAt_AnAnswerTime_SitsInItsSquareAsFarAsItIsIntoTheRange(double milliseconds, double squares)
 	{
-		await Assert.That(Math.Round(UsageView.StripAt(milliseconds) * DurationBuckets.UpToMs.Count, 6)).IsEqualTo(squares);
+		await Assert.That(Math.Round(UsageView.StripAt(milliseconds) * DurationBuckets.UpToMs.Count, 6, MidpointRounding.ToEven)).IsEqualTo(squares);
 	}
 
 	[Test]

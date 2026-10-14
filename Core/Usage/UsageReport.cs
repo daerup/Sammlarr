@@ -43,7 +43,7 @@ internal sealed class UsageReport(
 			RemoteService.Mdblist,
 			today,
 			today.Answered.Map(allowance => QuotaDay.Of(Spent(rows), allowance, now)),
-			QuotaDays.Of(spent, today.NextReset, (int)Math.Round((window.To - window.From) / TimeSpan.FromDays(1)))
+			QuotaDays.Of(spent, today.NextReset, (int)Math.Round((window.To - window.From) / TimeSpan.FromDays(1), MidpointRounding.ToEven))
 		);
 	}
 
