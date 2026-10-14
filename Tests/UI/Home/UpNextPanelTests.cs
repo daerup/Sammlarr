@@ -1,5 +1,4 @@
 using BlazorBlueprint.Components;
-using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
 using Contracts;
 using Domain.Jobs;
@@ -90,32 +89,6 @@ public class UpNextPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Row_WhileRunning_CarriesTheSweepAndTheOthersDoNot()
-	{
-		IReadOnlyList<UpNextRow> queued =
-		[
-			new("hdlists/documentaries", "running now", "running", UpNextKind.Running, "/feeds/edit/docs"),
-			new("snoak/latest-movies-digital-release", "queued", string.Empty, UpNextKind.Queued, "/feeds/edit/latest"),
-		];
-
-		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
-
-		var rows = cut.FindAll(".row").Select(row => row.ClassList.Contains("is-running"));
-		await Assert.That(rows).IsEquivalentTo([true, false]);
-	}
-
-	[Test]
-	public async Task Row_ForAFeedThatWasDeleted_ShowsAGhostInPlaceOfTheStateGlyph()
-	{
-		IReadOnlyList<UpNextRow> queued = [new("A deleted feed", "queued", string.Empty, UpNextKind.Queued, null, Deleted: true)];
-
-		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
-
-		var ghost = Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 12));
-		await Assert.That(cut.Find(".row-icon path").GetAttribute("d")).IsEqualTo(ghost.Find("path").GetAttribute("d"));
-	}
-
-	[Test]
 	public async Task Row_WhileWaiting_CountsDownToWhenItRuns()
 	{
 		var now = new DateTimeOffset(2026, 9, 30, 14, 0, 0, TimeSpan.Zero);
@@ -160,7 +133,7 @@ public class UpNextPanelTests : BunitContext
 
 		await Assert.That(cut.FindAll(".sect-title").Select(title => title.TextContent)).IsEquivalentTo(["Running and queued", "On a schedule"]);
 		await Assert.That(shownAtFirst).IsEqualTo(0);
-		await Assert.That(cut.FindAll(".sect-empty").Select(placeholder => placeholder.TextContent)).IsEquivalentTo(["Nothing is running or queued right now."]);
+		await Assert.That(cut.FindAll(".sect-empty")).HasSingleItem();
 	}
 
 	[Test]

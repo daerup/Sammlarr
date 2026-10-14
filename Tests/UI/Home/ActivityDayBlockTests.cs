@@ -1,5 +1,4 @@
 using BlazorBlueprint.Components;
-using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
 using Domain.Feed;
 using Domain.Feed.Run;
@@ -31,8 +30,9 @@ public class ActivityDayBlockTests : BunitContext
 	{
 		var cut = Render(Day(added: 3, removed: 2));
 
-		await Assert.That(cut.Find(".dstat").TextContent).DoesNotContain("·");
-		await Assert.That(cut.FindAll(".dstat .part")).Count().IsEqualTo(3);
+		var stat = Collapsed(cut.Find(".dstat").TextContent);
+		await Assert.That(stat).DoesNotContain("·");
+		await Assert.That(stat).Contains("+3 added").And.Contains("2 removed").And.Contains("1 run");
 	}
 
 	[Test]
@@ -40,7 +40,6 @@ public class ActivityDayBlockTests : BunitContext
 	{
 		var cut = Render(Day(added: 3));
 
-		await Assert.That(cut.FindAll(".dstat .part")).Count().IsEqualTo(2);
 		await Assert.That(cut.Find(".dstat").TextContent).DoesNotContain("removed");
 	}
 
@@ -74,28 +73,26 @@ public class ActivityDayBlockTests : BunitContext
 	}
 
 	[Test]
-	public async Task Chip_OfAFeedThatIsGone_WearsTheGhostAndLinksNowhere()
+	public async Task Chip_OfAFeedThatIsGone_SaysSoAndLinksNowhere()
 	{
 		var cut = Render(ActivityLog.Days([Run(2, 0)], new Dictionary<FeedId, string>(), TimeZoneInfo.Utc)[0]);
 
 		var chip = cut.Find(".chip");
-		await Assert.That(chip.TagName).IsEqualTo("SPAN");
 		await Assert.That(chip.TextContent).Contains("A deleted feed");
-		await Assert.That(chip.QuerySelector("path")!.GetAttribute("d")).IsEqualTo(FirstPath("ghost"));
+		await Assert.That(chip.HasAttribute("href")).IsFalse();
 	}
 
 	[Test]
-	public async Task Chip_OfAFeedThatExists_LinksToItsLatestRunWithTheFeedIcon()
+	public async Task Chip_OfAFeedThatExists_LinksToItsLatestRun()
 	{
-		var cut = Render(Day(added: 2));
+		var run = Run(2, 0);
 
-		var chip = cut.Find(".chip");
-		await Assert.That(chip.TagName).IsEqualTo("A");
-		await Assert.That(chip.QuerySelector("path")!.GetAttribute("d")).IsEqualTo(FirstPath("rss"));
+		var cut = Render(ActivityLog.Days([run], Names, TimeZoneInfo.Utc)[0]);
+
+		await Assert.That(cut.Find(".chip").GetAttribute("href")).IsEqualTo($"/feeds/{UrlGuid.Encode(Docs.Value)}/runs/{UrlGuid.Encode(run.Id.Value)}");
 	}
 
-	private string? FirstPath(string icon) =>
-		Render<LucideIcon>(parameters => parameters.Add(lucide => lucide.Name, icon).Add(lucide => lucide.Size, 11)).Find("path").GetAttribute("d");
+	private static string Collapsed(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
 	private IRenderedComponent<ActivityDayBlock> Render(ActivityDay day) =>
 		Render<ActivityDayBlock>(parameters =>

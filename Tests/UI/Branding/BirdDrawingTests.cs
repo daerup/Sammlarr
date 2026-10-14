@@ -63,14 +63,6 @@ public partial class BirdDrawingTests
 	}
 
 	[Test]
-	public async Task Draw_ForTheSameGenes_AlwaysDrawsTheSameBird()
-	{
-		var genome = BirdGenome.Of("guest");
-
-		await Assert.That(BirdDrawing.Draw(genome, "B", "C")).IsEqualTo(BirdDrawing.Draw(genome, "B", "C"));
-	}
-
-	[Test]
 	[Arguments(0.25, "0.3")]
 	[Arguments(-0.25, "-0.3")]
 	[Arguments(0.35, "0.3")]

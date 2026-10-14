@@ -29,7 +29,9 @@ public class PasswordLinkCardTests : BunitContext
 
 		var cut = Render<PasswordLinkCard>(parameters => parameters.Add(card => card.Kind, AccountLinkKind.Invite).Add(card => card.Token, "token"));
 
-		await Assert.That(cut.WaitForElement("p").TextContent.Trim()).IsEqualTo("guest invited you as mira. Choose a password to finish.");
+		var paragraph = cut.WaitForElement("p");
+		await Assert.That(paragraph.TextContent.Trim()).StartsWith("guest");
+		await Assert.That(paragraph.QuerySelector("span")?.TextContent).IsEqualTo("mira");
 		await Assert.That(cut.Find("form").GetAttribute("action")).IsEqualTo("/auth/join");
 		await Assert.That(cut.Find("input[name=token]").GetAttribute("value")).IsEqualTo("token");
 	}

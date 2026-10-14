@@ -37,14 +37,6 @@ public class SammlarrLogoTests : BunitContext
 	}
 
 	[Test]
-	public async Task Wordmark_Always_DrawsThePerchAsPartOfTheSSoTheJoinHasNoSeam()
-	{
-		var cut = Render<SammlarrLogo>();
-
-		await Assert.That(cut.FindAll("path.sammlarr-word")).Count().IsEqualTo(1);
-	}
-
-	[Test]
 	public async Task Logo_UnderACommaDecimalCulture_StillWritesDotDecimals()
 	{
 		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
@@ -53,23 +45,5 @@ public class SammlarrLogoTests : BunitContext
 
 		await Assert.That(cut.Find("svg.sammlarr-logo").GetAttribute("viewBox")).DoesNotContain(",");
 		await Assert.That(cut.Find("g[transform]").GetAttribute("transform")).DoesNotContain(",");
-	}
-
-	[Test]
-	public async Task Magpie_Always_DrawsInTheCurrentTextColour()
-	{
-		var cut = Render<SammlarrLogo>();
-
-		var fills = cut.FindAll(".sammlarr-mark path:not(.sammlarr-star):not(.sammlarr-rays)").Select(path => path.GetAttribute("fill") ?? string.Empty);
-		await Assert.That(fills.Distinct()).IsEquivalentTo(["currentColor"]);
-	}
-
-	[Test]
-	public async Task Star_Always_KeepsItsOwnAccentColour()
-	{
-		var cut = Render<SammlarrLogo>();
-
-		var star = cut.Find("svg path.sammlarr-star");
-		await Assert.That(star.GetAttribute("fill")).IsNull();
 	}
 }

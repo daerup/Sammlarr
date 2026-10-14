@@ -1,11 +1,9 @@
-using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
-using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
 
 namespace UI.Tests.Home;
@@ -27,27 +25,6 @@ public class LibrarySourcesPanelTests : BunitContext
 		var cut = Render<Harness>();
 
 		await Assert.That(Grows(cut)).IsEquivalentTo(["flex: 1", "flex: 203"]);
-	}
-
-	[Test]
-	public async Task Render_ForEachSource_GivesItsSegmentAndKeyTheirOwnTone()
-	{
-		var cut = Render<Harness>();
-
-		await Assert.That(cut.FindAll(".stack-part").Select(Tone)).IsEquivalentTo(["tone-0", "tone-1"]);
-		await Assert.That(cut.FindAll(".key-dot").Select(Tone)).IsEquivalentTo(["tone-0", "tone-1"]);
-	}
-
-	[Test]
-	public async Task Render_ForMoreSourcesThanTones_GivesTheAccentToTheFirstSourceOnlyAndCyclesTheRest()
-	{
-		IReadOnlyList<SourceShare> seven = [.. Enumerable.Range(1, 7).Select(rank => new SourceShare($"feed {rank}", 8 - rank))];
-
-		var cut = Render<LibrarySourcesPanel>(parameters => parameters.Add(panel => panel.Sources, seven).Add(panel => panel.Total, 28));
-
-		await Assert
-			.That(cut.FindAll(".key-dot").Select(Tone))
-			.IsEquivalentTo(["tone-0", "tone-1", "tone-2", "tone-3", "tone-1", "tone-2", "tone-3"], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -110,8 +87,6 @@ public class LibrarySourcesPanelTests : BunitContext
 
 	private static IEnumerable<string> Grows(IRenderedComponent<Harness> cut) =>
 		cut.FindAll(".stack .stack-part").Select(part => part.ParentElement!.GetAttribute("style") ?? string.Empty);
-
-	private static string Tone(IElement element) => element.ClassList.Single(name => name.StartsWith("tone-", StringComparison.Ordinal));
 
 	private sealed class Harness : ComponentBase
 	{

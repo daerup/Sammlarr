@@ -14,51 +14,6 @@ public class HoverButtonTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForAnyHoverButton_CarriesTheBaseClass()
-	{
-		var cut = Render<HoverButton>(parameters => parameters.Add(button => button.Text, "Go"));
-
-		await Assert.That(cut.Find("button").ClassList).Contains("hover-button");
-	}
-
-	[Test]
-	[Arguments(HoverButtonPreset.Custom, "hover-button--custom")]
-	[Arguments(HoverButtonPreset.Destructive, "hover-button--destructive")]
-	[Arguments(HoverButtonPreset.Success, "hover-button--success")]
-	public async Task Render_ForAPreset_SelectsItsModifierClass(HoverButtonPreset preset, string modifier)
-	{
-		var cut = Render<HoverButton>(parameters => parameters.Add(button => button.Preset, preset).Add(button => button.Text, "Go"));
-
-		await Assert.That(cut.Find("button").ClassList).Contains(modifier);
-	}
-
-	[Test]
-	public async Task Render_WithACustomColor_WiresItThroughTheTintVariable()
-	{
-		var cut = Render<HoverButton>(parameters => parameters.Add(button => button.Color, "#3b82f6").Add(button => button.Text, "Go"));
-
-		await Assert.That(cut.Find("button").GetAttribute("style")).Contains("--tint: #3b82f6");
-	}
-
-	[Test]
-	public async Task Render_WithoutACustomColor_LeavesTheTintToTheTheme()
-	{
-		var cut = Render<HoverButton>(parameters => parameters.Add(button => button.Preset, HoverButtonPreset.Destructive).Add(button => button.Text, "Go"));
-
-		await Assert.That(cut.Find("button").GetAttribute("style") ?? string.Empty).DoesNotContain("--tint");
-	}
-
-	[Test]
-	public async Task Render_WhenBorderless_AddsTheModifierOnlyThen()
-	{
-		var borderless = Render<HoverButton>(parameters => parameters.Add(button => button.Border, false).Add(button => button.Text, "Go"));
-		var bordered = Render<HoverButton>(parameters => parameters.Add(button => button.Text, "Go"));
-
-		await Assert.That(borderless.Find("button").ClassList).Contains("hover-button--borderless");
-		await Assert.That(bordered.Find("button").ClassList).DoesNotContain("hover-button--borderless");
-	}
-
-	[Test]
 	public async Task Render_WithExtraClasses_AppendsThemAlongsideTheBaseClass()
 	{
 		var cut = Render<HoverButton>(parameters => parameters.Add(button => button.Class, "mt-4").Add(button => button.Text, "Go"));

@@ -24,39 +24,24 @@ public class ProviderLogoTests : BunitContext
 	{
 		var cut = Render<ProviderLogo>(parameters => parameters.Add(logo => logo.Provider, MediaProvider.Plex).Add(logo => logo.Form, ProviderLogoForm.Logo));
 
-		var sources = cut.FindAll("img").Select(image => $"{image.ClassList.Contains("is-light")}|{image.GetAttribute("src")}");
-		await Assert.That(sources).IsEquivalentTo(["True|_content/UI/providers/plex-logo-light.svg", "False|_content/UI/providers/plex-logo-dark.svg"]);
+		await Assert
+			.That(cut.FindAll("img").Select(image => image.GetAttribute("src")).OfType<string>())
+			.IsEquivalentTo(["_content/UI/providers/plex-logo-light.svg", "_content/UI/providers/plex-logo-dark.svg"]);
 	}
 
 	[Test]
-	public async Task Logo_AtAGivenSize_HoldsThatHeightSoTheWidthFollowsTheArt()
+	[Arguments(MediaProvider.Tvdb, 22, "height: 22px")]
+	[Arguments(MediaProvider.Mdblist, 18, "height: 22.5px")]
+	[Arguments(MediaProvider.Plex, 18, "height: 20.7px")]
+	public async Task Logo_AtAGivenSize_HoldsThatSizeScaledByItsArtAndLetsTheWidthFollow(MediaProvider provider, int size, string height)
 	{
 		var cut = Render<ProviderLogo>(parameters =>
-			parameters.Add(logo => logo.Provider, MediaProvider.Tvdb).Add(logo => logo.Form, ProviderLogoForm.Logo).Add(logo => logo.Size, 22)
+			parameters.Add(logo => logo.Provider, provider).Add(logo => logo.Form, ProviderLogoForm.Logo).Add(logo => logo.Size, size)
 		);
 
-		var sizes = cut.FindAll("img").Select(image => $"{image.GetAttribute("width")}|{image.GetAttribute("style")}");
-		await Assert.That(sizes).IsEquivalentTo(["|height: 22px", "|height: 22px"]);
-	}
-
-	[Test]
-	public async Task Logo_WhoseArtLeavesRoomBesideTheName_IsDrawnTallerSoItsLettersMatchTheOthers()
-	{
-		var cut = Render<ProviderLogo>(parameters =>
-			parameters.Add(logo => logo.Provider, MediaProvider.Mdblist).Add(logo => logo.Form, ProviderLogoForm.Logo).Add(logo => logo.Size, 18)
-		);
-
-		await Assert.That(cut.Find("img").GetAttribute("style")).IsEqualTo("height: 22.5px");
-	}
-
-	[Test]
-	public async Task Logo_ForPlex_IsDrawnTallerSoItsOfficialArtKeepsTheOldWeight()
-	{
-		var cut = Render<ProviderLogo>(parameters =>
-			parameters.Add(logo => logo.Provider, MediaProvider.Plex).Add(logo => logo.Form, ProviderLogoForm.Logo).Add(logo => logo.Size, 18)
-		);
-
-		await Assert.That(cut.FindAll("img").Select(image => image.GetAttribute("style") ?? string.Empty)).IsEquivalentTo(["height: 20.7px", "height: 20.7px"]);
+		var images = cut.FindAll("img");
+		await Assert.That(images.Select(image => image.GetAttribute("style")).OfType<string>().Distinct(StringComparer.Ordinal)).IsEquivalentTo([height]);
+		await Assert.That(images.Where(image => image.HasAttribute("width"))).IsEmpty();
 	}
 
 	[Test]

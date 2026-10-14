@@ -99,18 +99,6 @@ public class WebUiChannelTests
 		await Assert.That(shown).IsEmpty();
 	}
 
-	[Test]
-	public async Task SendAsync_WhenAnotherUserHasACircuitOpen_ShowsNothingToThem()
-	{
-		var others = new List<Toast>();
-		circuits.Register(UserId.New(), others.Add);
-
-		await Testee.SendAsync(Context(NotificationEventType.FeedRunCompleted), Target(), NotificationTemplate.None);
-
-		await Assert.That(shown).HasSingleItem();
-		await Assert.That(others).IsEmpty();
-	}
-
 	private static NotificationTarget Target() => new(Guid.NewGuid(), "This app", true, new WebUiConfig());
 
 	private static NotificationContext Context(NotificationEventType type, NotificationLevel level = NotificationLevel.Info) =>

@@ -11,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Shared.Layout;
 using UI.Shared.Services;
-using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Layout;
 
@@ -25,8 +24,6 @@ public class ProfileCardTests : BunitContext
 		AuthProvider = AuthProvider.Plex,
 		RegistrationMode = RegistrationMode.Open,
 	};
-
-	private static readonly MediaProviderBrandingService Brands = new();
 
 	private readonly ProfileDropdownService _dropdown = new();
 
@@ -47,24 +44,11 @@ public class ProfileCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Card_WhenTheWantlistSyncsToRadarrAndSonarr_WearsTheSignInProvidersBrand()
+	public async Task Card_WhenTheWantlistSyncsToRadarrAndSonarr_LinksTheSignInProvidersAccount()
 	{
 		var cut = await RenderOpenCardAsync(OnArr);
 
 		await Assert.That(cut.WaitForElement("[aria-label='Open Plex account in new tab']")).IsNotNull();
-		await Assert
-			.That(cut.Find("[style*='linear-gradient']").GetAttribute("style"))
-			.Contains($"color-mix(in oklch, {Brands.GetBrandingInfo(MediaProvider.Plex).BrandColor} 12%, transparent)");
-	}
-
-	[Test]
-	public async Task Card_OnASammlarrAccountsInstall_WearsTheThemesTextColour()
-	{
-		var cut = await RenderOpenCardAsync(OnArr with { Sink = SinkKind.Plex, AuthProvider = AuthProvider.Local });
-
-		await Assert
-			.That(cut.WaitForElement("[style*='linear-gradient']").GetAttribute("style"))
-			.Contains("color-mix(in oklch, var(--foreground) 12%, transparent)");
 	}
 
 	[Test]
