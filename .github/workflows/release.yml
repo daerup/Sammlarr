@@ -23,7 +23,6 @@ jobs:
     outputs:
       digest: ${{ steps.build.outputs.digest }}
       version: ${{ steps.version.outputs.version }}
-      epoch: ${{ steps.version.outputs.epoch }}
       labels: ${{ steps.meta.outputs.labels }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -33,9 +32,7 @@ jobs:
       - id: version
         run: |
           echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-          epoch=$(git log -1 --pretty=%ct)
-          echo "epoch=$epoch" >> "$GITHUB_OUTPUT"
-          echo "created=$(date -u -d "@$epoch" +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          echo "created=$(date -u -d "@$(git log -1 --pretty=%ct)" +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
@@ -56,32 +53,12 @@ jobs:
             org.opencontainers.image.created=${{ steps.version.outputs.created }}
 
       - id: build
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
-        env:
-          SOURCE_DATE_EPOCH: ${{ steps.version.outputs.epoch }}
+        uses: ./.github/actions/build-image
         with:
-          context: .
-          file: Web/Dockerfile
-          platforms: linux/amd64
+          version: ${{ steps.version.outputs.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            VERSION=${{ steps.version.outputs.version }}
-            SOURCE_DATE_EPOCH=${{ steps.version.outputs.epoch }}
-          provenance: false
-          sbom: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           outputs: type=image,push=true,oci-mediatypes=true,rewrite-timestamp=true
-
-      - name: Image size budget
-        env:
-          IMAGE: ghcr.io/daerup/sammlarr@${{ steps.build.outputs.digest }}
-          BUDGET_MB: '101'
-        run: |
-          size=$(docker buildx imagetools inspect "$IMAGE" --raw | jq '[.layers[].size] | add')
-          echo "Compressed image: $((size / 1048576)) MB, budget ${BUDGET_MB} MB"
-          test "$size" -le $((BUDGET_MB * 1048576))
 
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
@@ -136,20 +113,11 @@ jobs:
 
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
-      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
-        env:
-          SOURCE_DATE_EPOCH: ${{ needs.image.outputs.epoch }}
+      - uses: ./.github/actions/build-image
         with:
-          context: .
-          file: Web/Dockerfile
-          platforms: linux/amd64
+          version: ${{ needs.image.outputs.version }}
           labels: ${{ needs.image.outputs.labels }}
-          build-args: |
-            VERSION=${{ needs.image.outputs.version }}
-            SOURCE_DATE_EPOCH=${{ needs.image.outputs.epoch }}
-          provenance: false
-          sbom: false
-          no-cache: true
+          cache: 'false'
           outputs: type=oci,dest=${{ runner.temp }}/rebuilt-layout,tar=false,oci-mediatypes=true,rewrite-timestamp=true
 
       - name: Compare with the pushed image
