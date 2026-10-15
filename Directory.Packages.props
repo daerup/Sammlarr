@@ -12,6 +12,7 @@
 		<PackageVersion Include="Cronos" Version="0.13.0" />
 		<PackageVersion Include="Dapper" Version="2.1.89" />
 		<PackageVersion Include="Fluid.Core" Version="2.40.0" />
+		<PackageVersion Include="MessagePack" Version="2.5.307" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="11.0.0-rc.2.26504.105" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="11.0.0-rc.2.26504.105" />
 		<PackageVersion Include="Microsoft.AspNetCore.DataProtection" Version="11.0.0-rc.2.26504.105" />

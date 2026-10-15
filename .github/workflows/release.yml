@@ -16,7 +16,7 @@ env:
 
 jobs:
   image:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
       packages: write
@@ -126,7 +126,7 @@ jobs:
 
   rebuild:
     needs: image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 45
     permissions:
       contents: read
