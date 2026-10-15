@@ -1,7 +1,6 @@
 # Testing
 
-A map of how Sammlarr is tested and how to run each tier. The how-to-write detail lives in the
-`write-tunit-test` skill; this page is the overview and the one source of truth for commands and environment variables.
+A map of how Sammlarr is tested and how to run each tier, and the one source of truth for commands and environment variables.
 
 Everything runs on **TUnit** over Microsoft.Testing.Platform. Test projects are executables, so the native runner is `dotnet run`, not `dotnet test` (Verify
 snapshots need the native runner).
