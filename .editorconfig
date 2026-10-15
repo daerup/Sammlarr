@@ -168,7 +168,7 @@ dotnet_diagnostic.IDE0240.severity = warning
 dotnet_diagnostic.IDE0241.severity = warning
 dotnet_diagnostic.IDE0350.severity = warning
 
-# analyzer marks from the Phase 18 report: off
+# analyzers: off
 dotnet_diagnostic.CA1305.severity = none
 dotnet_diagnostic.CA1310.severity = none
 dotnet_diagnostic.CA1711.severity = none
@@ -196,7 +196,7 @@ dotnet_diagnostic.MA0089.severity = none
 dotnet_diagnostic.MA0132.severity = none
 dotnet_diagnostic.MA0193.severity = none
 
-# analyzer marks from the Phase 18 report: leave, visible in the IDE only
+# analyzers: suggestions
 dotnet_diagnostic.CA1000.severity = suggestion
 dotnet_diagnostic.CA1720.severity = suggestion
 dotnet_diagnostic.CA1848.severity = suggestion
@@ -205,7 +205,7 @@ dotnet_diagnostic.CA1863.severity = suggestion
 dotnet_diagnostic.CA1873.severity = suggestion
 dotnet_diagnostic.MA0051.severity = suggestion
 
-# fixed in the Phase 18 sweep and kept as warnings
+# analyzers: warnings
 dotnet_diagnostic.CA1068.severity = warning
 dotnet_diagnostic.CA1822.severity = warning
 dotnet_diagnostic.CA1852.severity = warning
@@ -250,7 +250,7 @@ csharp_space_between_square_brackets = false
 # License header
 file_header_template = unset
 
-# Rider inspection marks from the Phase 18 report, for C# in .cs and .razor files
+# Rider inspections for C# in .cs and .razor files
 [*.{cs,razor}]
 resharper_arrange_trailing_comma_in_multiline_lists_highlighting = none
 resharper_arrange_object_creation_when_type_evident_highlighting = none
@@ -261,13 +261,13 @@ resharper_not_accessed_positional_property_global_highlighting = suggestion
 resharper_not_accessed_positional_property_local_highlighting = suggestion
 resharper_use_collection_expression_highlighting = warning
 
-# fixed in the Phase 18 sweep and kept as warnings
+# Rider inspections: warnings
 resharper_arrange_redundant_parentheses_highlighting = warning
 resharper_redundant_argument_default_value_highlighting = warning
 resharper_redundant_type_arguments_of_method_highlighting = warning
 resharper_redundant_using_directive_highlighting = warning
 
-# left by the Phase 18 report, so a suggestion in Rider rather than a warning (D43)
+# Rider inspections: suggestions
 resharper_access_to_modified_closure_highlighting = suggestion
 resharper_asp_entity_highlighting = suggestion
 resharper_compare_of_floats_by_equality_operator_highlighting = suggestion
@@ -303,7 +303,7 @@ resharper_variable_hides_outer_variable_highlighting = suggestion
 [DB/Migrations/*.cs]
 generated_code = true
 
-# analyzer marks from the Phase 18 report: off in tests
+# analyzers: off in tests
 [Tests/**.cs]
 dotnet_diagnostic.CA1506.severity = none
 dotnet_diagnostic.CA1707.severity = none
@@ -313,7 +313,7 @@ dotnet_diagnostic.CA5351.severity = none
 dotnet_diagnostic.MA0009.severity = none
 dotnet_diagnostic.RS0030.severity = none
 
-# fixed in product in the Phase 18 sweep, suggestions in tests
+# analyzers: suggestions in tests
 dotnet_diagnostic.MA0110.severity = suggestion
 dotnet_diagnostic.MA0190.severity = suggestion
 dotnet_diagnostic.SYSLIB1045.severity = suggestion
