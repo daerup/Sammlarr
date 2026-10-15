@@ -19,7 +19,7 @@ env:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     outputs:
       line: ${{ steps.line.outputs.value }}
@@ -51,7 +51,8 @@ jobs:
           status=0
           for tier in Domain Shared Core API Integration UI Web Architecture Roslyn; do
             dotnet run --project "Tests/$tier" --no-build -c "$CONFIGURATION" -- \
-              --coverage --coverage-output-format cobertura --coverage-output "$tier.cobertura.xml" || status=1
+              --coverage --coverage-output-format cobertura --coverage-output "$tier.cobertura.xml" \
+              --coverage-settings "$GITHUB_WORKSPACE/.github/coverage.xml" || status=1
           done
           exit $status
 
@@ -99,7 +100,7 @@ jobs:
   coverage-badge:
     if: ${{ !cancelled() && github.event_name == 'push' && needs.build-test.outputs.line != '' }}
     needs: build-test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     concurrency:
       group: coverage-badge
@@ -127,7 +128,7 @@ jobs:
       && github.event.pull_request.head.repo.full_name == github.repository
       && github.actor != 'dependabot[bot]' && needs.build-test.outputs.line != '' }}
     needs: build-test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -151,7 +152,7 @@ jobs:
             Line coverage **${{ needs.build-test.outputs.line }}%** (main: ${{ steps.main.outputs.value }}). Full report: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   reproducible:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -206,7 +207,7 @@ jobs:
 
   trivy-image:
     if: startsWith(github.head_ref, 'release-please--')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -237,7 +238,7 @@ jobs:
 
   e2e:
     if: github.event_name == 'push' || startsWith(github.head_ref, 'release-please--')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

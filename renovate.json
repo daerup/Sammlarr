@@ -18,8 +18,8 @@
       "automerge": true
     },
     {
-      "description": "Aspire's packages, its AppHost SDK and its CLI move together",
-      "matchPackageNames": ["/^aspire\\./i"],
+      "description": "Aspire's packages, its AppHost SDK and its CLI move together, with the MessagePack the AppHost pins above Aspire's own",
+      "matchPackageNames": ["/^aspire\\./i", "MessagePack"],
       "groupName": "Aspire",
       "automerge": false
     },
@@ -33,6 +33,11 @@
       "matchPackageNames": ["lscr.io/linuxserver/radarr", "lscr.io/linuxserver/sonarr"],
       "groupName": null,
       "automerge": false
+    },
+    {
+      "description": "The C# pins carry a tag only, so there is no digest to pin",
+      "matchManagers": ["custom.regex"],
+      "pinDigests": false
     }
   ],
   "customManagers": [

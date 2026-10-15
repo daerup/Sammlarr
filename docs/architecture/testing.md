@@ -110,8 +110,8 @@ flowchart LR
 host (adding the TMDB or MDBList key from user-secrets or the environment itself), writes the mapping and fixture, and compares existing fixtures under the
 policies. A request that had no fixture got a 404 in that run, so its test fails: run again until the replay is green.
 
-**After an image bump.** When a tag in `AppHost/ArrContainers.cs` is raised (by hand for now; Renovate takes over once `release-engineering` adds its regex
-manager), run `Tests/E2E`. A failing self-hosted test, or an unmatched request in the session failure, names what changed: a new metadata call (record it
+**After an image bump.** When a tag in `AppHost/ArrContainers.cs` is raised (Renovate opens these as their own PRs through its regex manager), run
+`Tests/E2E`. A failing self-hosted test, or an unmatched request in the session failure, names what changed: a new metadata call (record it
 with `E2E_LIVE=true` if it goes to `api.radarr.video` or `skyhook.sonarr.tv`, otherwise stub it in `arr-stubs`), a changed API shape (the failing
 assertion), or a new host (add it to `MetadataHosts`, and to `ProviderRecording.ArrMetadata` if its calls should be recorded).
 

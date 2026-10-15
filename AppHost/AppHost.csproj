@@ -5,6 +5,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Aspire.Hosting.Docker" />
+		<PackageReference Include="MessagePack" />
 	</ItemGroup>
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
