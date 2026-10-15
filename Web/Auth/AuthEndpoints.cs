@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Shared.Options;
 using UI.Shared.Services;
 
 namespace Web.Auth;
@@ -24,7 +25,7 @@ internal static class AuthEndpoints
 
 		group.MapGet(
 			"/login",
-			async (string provider, string? returnUrl, HttpContext context, ISignInService signIn, CancellationToken cancellationToken) =>
+			async (string provider, string? returnUrl, HttpContext context, ISignInService signIn, SammlarOptions options, CancellationToken cancellationToken) =>
 			{
 				if (!TryParseProvider(provider, out var authProvider))
 				{
@@ -32,7 +33,7 @@ internal static class AuthEndpoints
 				}
 
 				var callbackUrl = QueryHelpers.AddQueryString(
-					$"{context.Request.Scheme}://{context.Request.Host}/auth/{provider}/callback",
+					$"{PublicOrigin.Of(options, context.Request)}/auth/{provider}/callback",
 					"state",
 					OAuthState.Issue(context)
 				);

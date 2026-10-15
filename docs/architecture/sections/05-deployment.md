@@ -90,6 +90,8 @@ are not configuration: they live in the database, the keys and sign-ins encrypte
 |---|---|---|
 | `ASPNETCORE_HTTP_PORTS` | `6769` | The port. |
 | `Sammlarr__ConnectionString` | `Data Source=/data/sammlarr.db` | The database. |
+| `TZ` | `Etc/UTC` in the example compose | The time zone schedules and times in the app use. |
+| `Sammlarr__PublicUrl` | unset | The root address people open Sammlarr at behind a reverse proxy; the Plex sign-in returns there, so it then works only at that address. Unset, the request's own address. |
 | `Sammlarr__DataProtection__KeyRingPath` | `/data/dp-keys` | The key ring; unset, `dp-keys` beside the database. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | unset | Adds OTLP export of logs, traces and metrics; logs always go to the console. |
 | `Sammlarr__Observability__LogLevel` | `Standard` | `Quiet`, `Standard` or `Verbose`. |
