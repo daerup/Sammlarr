@@ -256,4 +256,4 @@ jobs:
 
       - run: pwsh "Tests/E2E/bin/$CONFIGURATION/net11.0/playwright.ps1" install --with-deps chromium
 
-      - run: dotnet run --project Tests/E2E --no-build -c "$CONFIGURATION"
+      - run: PUID=$(id -u) PGID=$(id -g) dotnet run --project Tests/E2E --no-build -c "$CONFIGURATION"

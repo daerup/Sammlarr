@@ -53,7 +53,9 @@ batch with its Radarr and Sonarr containers. Never use coverlet: it is VSTest-on
 
 Each test leases an **isolated stack** for its duration: its own Aspire application, WireMock container and SQLite database. Nothing is shared between
 concurrent tests, so no test class needs `[NotInParallel]`, and TUnit's parallel limit is the stack count. Stacks boot once per session and are pooled; a
-test never runs concurrently with another test on the same stack.
+test never runs concurrently with another test on the same stack. Stacks run without Aspire's dashboard, so Sammlarr gets an empty
+`OTEL_EXPORTER_OTLP_ENDPOINT` (`StackBoot.WithoutTelemetryExport`): Aspire would otherwise point it at an unused collector, whose exporter retries outlast
+the 10 s Aspire gives a stop on Linux.
 
 How many stacks the main pool has is `E2EApp.StackCount` (the self-hosted pool's is `SelfHostedApp.StackCount`). More is not automatically faster: each
 stack costs an application and a container to boot, and boot dominates a suite this size.
@@ -203,6 +205,7 @@ alone (`[NotInParallel]`).
 | `E2E_PRUNE=true`         | Delete fixtures the live run did not capture. Opt-in on purpose: a filtered run only touches some endpoints, so pruning would delete the rest |
 | `E2E_AUDIT=true`         | Dump the main pool's served and unmatched request URLs to the temp directory   |
 | `E2E_RESOURCE_LOG=<dir>` | Write each stack's application log to `<dir>/stack-<n>.log` (`self-hosted-<n>.log` for the self-hosted pool) |
+| `PUID`, `PGID`           | Linux only: the user and group the self-hosted and live stacks' Radarr and Sonarr run as, set to `$(id -u)` and `$(id -g)` so they can write the folders the test run creates (CI does) |
 
 Live secrets come from `dotnet user-secrets` on `Tests/E2E`, named from the generated provider enums: `{PROVIDER}_API_KEY` and `{PROVIDER}_TOKEN`, for example
 `TMDB_API_KEY`, `PLEX_TOKEN`. `TMDB_API_KEY` is required: the seeded member gets the same TMDB key, since a member without one is sent to the key prompt.
