@@ -1158,10 +1158,9 @@ export function push(host, batch) {
     views.get(host)?.push(batch);
 }
 
-export function fold(host) {
-    host.style.height = `${host.offsetHeight}px`;
-    requestAnimationFrame(() => host.classList.add('is-folded'));
-    return new Promise(resolve => setTimeout(resolve, 550));
+export async function fold(host) {
+    host.style.overflow = 'hidden';
+    await host.animate([{ height: `${host.offsetHeight}px` }, { height: '0px', opacity: 0 }], { duration: 500, easing: 'ease', fill: 'forwards' }).finished;
 }
 
 export function dispose(host) {
