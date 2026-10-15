@@ -1,0 +1,48 @@
+name: Build the image
+description: The one image build that the release, its rebuild check and the image scan share, so all three get the same inputs
+inputs:
+  version:
+    description: Version stamped into the app
+    default: 0.0.0-local
+  labels:
+    description: OCI labels
+    default: ''
+  tags:
+    description: Image tags
+    default: ''
+  outputs:
+    description: BuildKit outputs
+    required: true
+  cache:
+    description: Read and write the GitHub Actions build cache
+    default: 'true'
+outputs:
+  digest:
+    description: Digest of the built image
+    value: ${{ steps.build.outputs.digest }}
+runs:
+  using: composite
+  steps:
+    - id: epoch
+      shell: bash
+      run: echo "value=$(git log -1 --pretty=%ct)" >> "$GITHUB_OUTPUT"
+
+    - id: build
+      uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+      env:
+        SOURCE_DATE_EPOCH: ${{ steps.epoch.outputs.value }}
+      with:
+        context: .
+        file: Web/Dockerfile
+        platforms: linux/amd64
+        tags: ${{ inputs.tags }}
+        labels: ${{ inputs.labels }}
+        build-args: |
+          VERSION=${{ inputs.version }}
+          SOURCE_DATE_EPOCH=${{ steps.epoch.outputs.value }}
+        provenance: false
+        sbom: false
+        no-cache: ${{ inputs.cache != 'true' }}
+        cache-from: ${{ inputs.cache == 'true' && 'type=gha' || '' }}
+        cache-to: ${{ inputs.cache == 'true' && 'type=gha,mode=max' || '' }}
+        outputs: ${{ inputs.outputs }}
