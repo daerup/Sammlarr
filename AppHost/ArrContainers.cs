@@ -6,6 +6,8 @@ internal static class ArrContainers
 {
 	internal const string ApiKey = "0123456789abcdef0123456789abcdef";
 
+	private const string LinuxServerId = "911";
+
 	internal static readonly ArrContainer Radarr = new("radarr", "Radarr", "lscr.io/linuxserver/radarr", "6.4.4.10685-ls318", 7878, "/movies", "/anime-movies");
 
 	internal static readonly ArrContainer Sonarr = new("sonarr", "Sonarr", "lscr.io/linuxserver/sonarr", "4.0.20.3014-ls326", 8989, "/tv", "/anime");
@@ -65,6 +67,8 @@ internal static class ArrContainers
 			.WithBindMount(config, "/config")
 			.WithBindMount(library, app.Library)
 			.WithBindMount(animeLibrary, app.AnimeLibrary)
+			.WithEnvironment("PUID", builder.Configuration["PUID"] ?? LinuxServerId)
+			.WithEnvironment("PGID", builder.Configuration["PGID"] ?? LinuxServerId)
 			.WithHttpHealthCheck("/ping")
 			.OnResourceReady((resource, _, cancellationToken) => AddRootFoldersAsync(resource.GetEndpoint("http"), app, cancellationToken));
 	}

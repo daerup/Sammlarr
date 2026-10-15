@@ -72,6 +72,7 @@ internal sealed class E2EStack
 		var webBuilder = builder
 			.CreateResourceBuilder(web)
 			.WithEndpoint("http", endpoint => endpoint.Port = null)
+			.WithoutTelemetryExport()
 			.WithEnvironment("Sammlarr__Observability__LogLevel", nameof(LogVerbosity.Quiet))
 			.WithEnvironment("Sammlarr__ConnectionString", $"Data Source={seed.DbPath}")
 			.WithEnvironment("Sammlarr__Scheduler__FillDetailsGrace", "1.00:00:00")

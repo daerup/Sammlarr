@@ -34,7 +34,7 @@ public class RunningPillTests : BunitContext
 
 		var cut = Render<RunningPill>(parameters => parameters.Add(pill => pill.Run, _run.Object));
 
-		await Assert.That(Text(cut)).IsEqualTo("Running · 812 / ~2’000");
+		await Assert.That(Text(cut)).IsEqualTo($"Running · 812 / ~2{CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator}000");
 	}
 
 	[Test]

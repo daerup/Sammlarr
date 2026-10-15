@@ -120,6 +120,7 @@ internal sealed partial class SelfHostedStack
 		var webBuilder = builder
 			.CreateResourceBuilder(web)
 			.WithEndpoint("http", endpoint => endpoint.Port = null)
+			.WithoutTelemetryExport()
 			.WithEnvironment("Sammlarr__Observability__LogLevel", nameof(LogVerbosity.Quiet))
 			.WithEnvironment("Sammlarr__ConnectionString", $"Data Source={DatabasePath(workDir)}")
 			.WithEnvironment("Sammlarr__Scheduler__FillDetailsGrace", "1.00:00:00")
