@@ -1,47 +1,52 @@
 using Contracts.Identity;
 using Domain.Identity;
 using Domain.Providers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DB.Data.Identity;
 
-internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IUserRepository
+internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, IServiceScopeFactory scopes) : IUserRepository
 {
 	public async Task<User> GetAsync(UserId id, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx.Users.AsNoTracking().Where(user => user.Id == id.Value).Select(Project).SingleAsync(cancellationToken);
+		return Members.ToUser(await Members.Of(ctx).AsNoTracking().SingleAsync(member => member.Row.Id == id.Value, cancellationToken));
 	}
 
 	public async Task<Optional<User>> FindByLoginAsync(AuthProvider provider, string externalUserId, CancellationToken cancellationToken = default)
 	{
+		var loginProvider = provider.ToString();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var found = await ctx
-			.Users.AsNoTracking()
-			.Where(user => user.Provider == provider && user.ExternalUserId == externalUserId)
-			.Select(Project)
+		var found = await (
+			from login in ctx.UserLogins
+			join member in Members.Of(ctx) on login.UserId equals member.Row.Id
+			where login.LoginProvider == loginProvider && login.ProviderKey == externalUserId
+			select member
+		)
+			.AsNoTracking()
 			.SingleOrDefaultAsync(cancellationToken);
 
-		return Optional.Of(found);
+		return Optional.Of(found).Map(Members.ToUser);
 	}
 
 	public async Task CreateAsync(User user, AuthProvider provider, string externalUserId, CancellationToken cancellationToken = default)
 	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		ctx.Users.Add(
-			new UserRow
-			{
-				Id = user.Id.Value,
-				Provider = provider,
-				ExternalUserId = externalUserId,
-				DisplayName = user.DisplayName,
-				TagName = user.TagName,
-				AvatarUrl = user.AvatarUrl,
-				Role = user.Role,
-				JoinedAt = user.JoinedAt,
-			}
-		);
-		await ctx.SaveChangesAsync(cancellationToken);
+		await using var scope = scopes.CreateAsyncScope();
+		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
+		var row = new UserRow
+		{
+			Id = user.Id.Value,
+			UserName = $"{provider}-{externalUserId}".ToLowerInvariant(),
+			DisplayName = user.DisplayName,
+			TagName = user.TagName,
+			AvatarUrl = user.AvatarUrl,
+			JoinedAt = user.JoinedAt,
+		};
+		(await users.CreateAsync(row)).Ensure();
+		(await users.AddToRoleAsync(row, user.Role.ToString())).Ensure();
+		(await users.AddLoginAsync(row, new UserLoginInfo(provider.ToString(), externalUserId, provider.ToString()))).Ensure();
 	}
 
 	public async Task<IReadOnlyDictionary<UserId, StoredColour>> GetColoursAsync(CancellationToken cancellationToken = default)
@@ -87,7 +92,8 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx.Users.AsNoTracking().OrderBy(user => user.JoinedAt).Select(Project).ToListAsync(cancellationToken);
+		var members = await Members.Of(ctx).AsNoTracking().OrderBy(member => member.Row.JoinedAt).ToListAsync(cancellationToken);
+		return [.. members.Select(Members.ToUser)];
 	}
 
 	public async Task<int> CountAsync(CancellationToken cancellationToken = default)
@@ -136,29 +142,31 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 
 	public async Task ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default)
 	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var row = await ctx.Users.SingleAsync(user => user.Id == id.Value, cancellationToken);
-		row.Role = role;
-		await ctx.SaveChangesAsync(cancellationToken);
+		await using var scope = scopes.CreateAsyncScope();
+		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
+		var row = await users.RequireAsync(id);
+		(await users.RemoveFromRolesAsync(row, await users.GetRolesAsync(row))).Ensure();
+		(await users.AddToRoleAsync(row, role.ToString())).Ensure();
+		(await users.UpdateSecurityStampAsync(row)).Ensure();
 	}
 
 	public async Task DeleteAsync(UserId id, CancellationToken cancellationToken = default)
 	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var row = await ctx.Users.SingleAsync(user => user.Id == id.Value, cancellationToken);
-		ctx.Users.Remove(row);
-		await ctx.SaveChangesAsync(cancellationToken);
+		await using var scope = scopes.CreateAsyncScope();
+		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
+		(await users.DeleteAsync(await users.RequireAsync(id))).Ensure();
 	}
 
-	public async Task<Optional<UserSession>> FindSessionAsync(UserId id, CancellationToken cancellationToken = default)
+	public async Task<Optional<UserRole>> FindRoleAsync(UserId id, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var found = await ctx
-			.Users.AsNoTracking()
-			.Where(user => user.Id == id.Value)
-			.Select(user => new { user.Role, user.SessionsRevokedAt })
+		var role = await Members
+			.Of(ctx)
+			.AsNoTracking()
+			.Where(member => member.Row.Id == id.Value)
+			.Select(member => member.Role)
 			.SingleOrDefaultAsync(cancellationToken);
-		return Optional.Of(found).Map(session => new UserSession(session.Role, Optional.Of(session.SessionsRevokedAt)));
+		return Optional.Of(role).Map(name => Enum.Parse<UserRole>(name));
 	}
 
 	private static async Task<Dictionary<Guid, int>> CountedAsync<T>(IQueryable<T> rows, CancellationToken cancellationToken)
@@ -173,7 +181,4 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	{
 		return Optional.Of(hue).Map(found => Optional.Of(chroma).Map(saturation => new PictureTone(found, saturation)));
 	}
-
-	private static System.Linq.Expressions.Expression<Func<UserRow, User>> Project =>
-		user => new User(UserId.From(user.Id), user.DisplayName, user.AvatarUrl, user.Role, user.JoinedAt) { TagName = user.TagName };
 }

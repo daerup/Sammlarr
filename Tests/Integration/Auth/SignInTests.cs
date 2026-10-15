@@ -107,6 +107,19 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task SignInAsync_ASecondTime_FindsTheUserTheFirstSignInCreated()
+	{
+		var before = await host.ScopedDbContext.Users.CountAsync();
+		host.OAuthReturns("plex-new", "Nina");
+		await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+
+		var again = await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+
+		await Assert.That(again).IsSuccess();
+		await Assert.That(await host.ScopedDbContext.Users.CountAsync()).IsEqualTo(before + 1);
+	}
+
+	[Test]
 	public async Task SignInAsync_AfterAPlexRename_RefreshesTheNameAndPictureButKeepsTheTagName()
 	{
 		var existing = await host.SeedExistingUser("plex-uuid", UserRole.Member, "John");

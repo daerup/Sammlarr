@@ -5,7 +5,6 @@ using Contracts.Settings;
 using Contracts.Wantlist;
 using DB.Data.Blocklist;
 using DB.Data.Cleanup;
-using DB.Data.Identity;
 using DB.Data.Media;
 using DB.Data.Wantlist;
 using DB.Data.Wantlist.Outbox;
@@ -183,19 +182,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task PurgeAsync_ProtectsMediaReferencedByAnotherUser()
 	{
 		var otherUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-		fixture.Context.Users.Add(
-			new UserRow
-			{
-				Id = otherUserId,
-				Provider = AuthProvider.Plex,
-				ExternalUserId = otherUserId.ToString(),
-				DisplayName = "Other",
-				TagName = "Other",
-				AvatarUrl = string.Empty,
-				Role = UserRole.Member,
-				JoinedAt = DateTimeOffset.UnixEpoch,
-			}
-		);
+		SeedRows.Member(fixture.Context, SeedRows.User(otherUserId, $"plex-{otherUserId}", "Other", string.Empty), UserRole.Member, new None());
 
 		var sharedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.Add(PlexId.From("9000", MediaType.Movie).ToExternalIdEntity(sharedMedia));

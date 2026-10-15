@@ -43,11 +43,24 @@ public class AdminPasswordResetTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task StartAsync_AgainAfterTheAdminChoseANewPassword_KeepsTheirChoice()
 	{
 		await Testee(Reset).StartAsync(CancellationToken.None);
-		await host.Resolve<ILocalAccountRepository>().SetPasswordAsync(_owner, Passwords.Hash("chosen since then"), DateTimeOffset.UnixEpoch);
+		await host.Resolve<ILocalAccountRepository>().ReplacePasswordAsync(_owner, "chosen since then");
 
 		await Testee(Reset).StartAsync(CancellationToken.None);
 
 		await Assert.That(await SignIn.SignInWithPasswordAsync("owner", "chosen since then")).IsSuccess();
+	}
+
+	[Test]
+	public async Task StartAsync_ForALockedOutAdmin_LiftsTheLock()
+	{
+		for (var attempt = 0; attempt < 5; attempt++)
+		{
+			await SignIn.SignInWithPasswordAsync("owner", "wrong password!");
+		}
+
+		await Testee(Reset).StartAsync(CancellationToken.None);
+
+		await Assert.That(await SignIn.SignInWithPasswordAsync("owner", Reset)).IsSuccess();
 	}
 
 	[Test]
@@ -66,8 +79,8 @@ public class AdminPasswordResetTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee(Reset).StartAsync(CancellationToken.None);
 
-		var account = await host.Resolve<ILocalAccountRepository>().GetAsync(_owner);
-		await Assert.That(account.Match(found => found.PasswordHash.Match(hash => Passwords.Verify(hash, Password), () => false), () => false)).IsTrue();
+		var attempt = await host.Resolve<ILocalAccountRepository>().CheckPasswordAsync("owner", Password);
+		await Assert.That(attempt).IsOfUnionType<PasswordAttempt, PasswordAccepted>();
 	}
 
 	private AdminPasswordReset Testee(string value)

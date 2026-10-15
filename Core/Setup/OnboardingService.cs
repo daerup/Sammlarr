@@ -9,7 +9,6 @@ using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging;
-using Shared.Options;
 
 namespace Core.Setup;
 
@@ -24,7 +23,6 @@ internal sealed class OnboardingService(
 	ICurrentUser currentUser,
 	IDateTimeProvider clock,
 	WebUiNotificationSeeder webUiNotifications,
-	AccountsOptions options,
 	ILogger<OnboardingService> logger
 ) : IOnboardingService
 {
@@ -59,7 +57,7 @@ internal sealed class OnboardingService(
 		using var lease = await gate.EnterAsync(cancellationToken);
 		var problem = (await CodeProblemAsync(claim.SetupCode, cancellationToken))
 			.Or(() => Usernames.Problem(claim.Username))
-			.Or(() => Passwords.Problem(claim.Password, claim.Confirmation, options.MinimumPasswordLength));
+			.Or(() => Passwords.Mismatch(claim.Password, claim.Confirmation));
 		return await problem.Match(error => error, () => CreateAdminAsync(claim, cancellationToken));
 	}
 
@@ -83,7 +81,12 @@ internal sealed class OnboardingService(
 	private async Task<Result<User>> CreateAdminAsync(AdminClaim claim, CancellationToken cancellationToken)
 	{
 		var admin = new User(UserId.New(), claim.Username.Trim(), string.Empty, UserRole.Admin, clock.Now);
-		await accounts.CreateAsync(admin, Usernames.Normalize(claim.Username), Passwords.Hash(claim.Password), cancellationToken);
+		var created = await accounts.CreateAsync(admin, claim.Username, claim.Password, cancellationToken);
+		return await created.Map(found => SettleAdminAsync(found, cancellationToken));
+	}
+
+	private async Task<Result<User>> SettleAdminAsync(User admin, CancellationToken cancellationToken)
+	{
 		gate.SawAdmin();
 		using (userScope.As(admin))
 		{

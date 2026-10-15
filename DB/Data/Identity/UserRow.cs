@@ -1,17 +1,13 @@
 using System.ComponentModel.DataAnnotations;
-using Domain.Identity;
-using Domain.Providers;
+using Microsoft.AspNetCore.Identity;
 
 namespace DB.Data.Identity;
 
-internal sealed record UserRow : Entity<Guid>
+internal sealed class UserRow : IdentityUser<Guid>, IAuditable
 {
-	public required AuthProvider Provider { get; set; }
-	public required string ExternalUserId { get; set; }
 	public required string DisplayName { get; set; }
 	public required string TagName { get; set; }
 	public required string AvatarUrl { get; set; }
-	public required UserRole Role { get; set; }
 	public required DateTimeOffset JoinedAt { get; set; }
 	public double? Hue { get; set; }
 
@@ -21,11 +17,8 @@ internal sealed record UserRow : Entity<Guid>
 	public double? PictureChroma { get; set; }
 
 	[MaxLength(512)]
-	public string? PasswordHash { get; set; }
-	public int FailedSignIns { get; set; }
-	public DateTimeOffset? LockedUntil { get; set; }
-	public DateTimeOffset? SessionsRevokedAt { get; set; }
-
-	[MaxLength(512)]
 	public string? ConfigResetHash { get; set; }
+
+	public DateTimeOffset CreatedAt { get; set; }
+	public DateTimeOffset UpdatedAt { get; set; }
 }

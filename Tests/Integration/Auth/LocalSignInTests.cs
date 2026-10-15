@@ -69,7 +69,25 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert
 			.That(result)
 			.IsError()
-			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Too many failed sign-ins. Try again in 15 minutes."));
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Too many failed sign-ins. Try again in a few minutes."));
+	}
+
+	[Test]
+	public async Task SignInWithPasswordAsync_FourMinutesIntoTheLock_StillRefusesTheRightPassword()
+	{
+		await host.SeedLocalUser("guest", Password, UserRole.Member);
+		for (var attempt = 0; attempt < 5; attempt++)
+		{
+			await Testee.SignInWithPasswordAsync("guest", "wrong password!");
+		}
+
+		host.SetCurrentTime(Now.AddMinutes(4));
+		var result = await Testee.SignInWithPasswordAsync("guest", Password);
+
+		await Assert
+			.That(result)
+			.IsError()
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Too many failed sign-ins. Try again in a few minutes."));
 	}
 
 	[Test]
@@ -81,7 +99,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 			await Testee.SignInWithPasswordAsync("guest", "wrong password!");
 		}
 
-		host.SetCurrentTime(Now.AddMinutes(16));
+		host.SetCurrentTime(Now.AddMinutes(6));
 		var result = await Testee.SignInWithPasswordAsync("guest", Password);
 
 		await Assert.That(result).IsSuccess();

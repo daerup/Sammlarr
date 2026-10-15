@@ -1,12 +1,11 @@
 using System.Net;
 using System.Security.Claims;
-using Contracts.Identity;
 using Domain.Identity;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 using Web.Auth;
@@ -69,13 +68,12 @@ public class NoticesEndpointTests
 
 	private async Task<WebApplication> StartAsync()
 	{
-		var sessions = ISessionValidator.Mock();
-		sessions.IsValidAsync(Any(), Any(), Any(), Any()).Returns(true);
+		var stamps = ISecurityStampValidator.Mock();
 		var builder = WebApplication.CreateSlimBuilder();
 		builder.WebHost.UseUrls("http://127.0.0.1:0");
 		builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
 		builder.Services.AddModule<AuthenticationModule>();
-		builder.Services.AddSingleton(sessions.Object);
+		builder.Services.AddSingleton(stamps.Object);
 		var app = builder.Build();
 		app.UseAuthentication();
 		app.UseAuthorization();
@@ -88,7 +86,7 @@ public class NoticesEndpointTests
 	private static ClaimsPrincipal Member()
 	{
 		Claim[] claims = [new(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()), new(ClaimTypes.Role, nameof(UserRole.Member))];
-		return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
+		return new ClaimsPrincipal(new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme));
 	}
 
 	private static HttpClient Client(WebApplication app)

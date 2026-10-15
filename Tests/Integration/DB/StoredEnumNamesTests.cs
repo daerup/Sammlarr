@@ -57,7 +57,6 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 					"TrendingProvider: Tmdb",
 					"UsageCause: FeedRun, WantlistSync, Dataset, Search, Browse, ShowingTitles, KeyTest, FeedEditor, DetailsFill, Housekeeping, Other",
 					"UsageOutcome: Answered, AnsweredAfter429, GaveUpOn429, Failed, Cancelled",
-					"UserRole: Admin, Member",
 					"WantlistItemOrigin: Sink, Manual, Feed, Orphaned",
 					"WantlistOperationAction: Add, Remove",
 					"WantlistOutboxState: Pending, Failed",

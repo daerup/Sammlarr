@@ -10,11 +10,15 @@ public interface ILocalAccountRepository
 
 	Task<IReadOnlyList<LocalAccount>> GetAllAsync(CancellationToken cancellationToken = default);
 
-	Task CreateAsync(User user, string username, string passwordHash, CancellationToken cancellationToken = default);
+	Task<Result<User>> CreateAsync(User user, string username, string password, CancellationToken cancellationToken = default);
 
-	Task SetPasswordAsync(UserId id, string passwordHash, DateTimeOffset revokedAt, CancellationToken cancellationToken = default);
+	Task<PasswordAttempt> CheckPasswordAsync(string username, string password, CancellationToken cancellationToken = default);
 
-	Task ResetFromConfigAsync(UserId id, string passwordHash, DateTimeOffset revokedAt, CancellationToken cancellationToken = default);
+	Task<Result<User>> ChangePasswordAsync(UserId id, string current, string next, CancellationToken cancellationToken = default);
 
-	Task SetFailedSignInsAsync(UserId id, int failures, Optional<DateTimeOffset> lockedUntil, CancellationToken cancellationToken = default);
+	Task<Result<User>> ReplacePasswordAsync(UserId id, string password, CancellationToken cancellationToken = default);
+
+	Task<Result<ConfigReset>> ResetFromConfigAsync(UserId id, string password, CancellationToken cancellationToken = default);
+
+	Task UnlockAsync(UserId id, CancellationToken cancellationToken = default);
 }

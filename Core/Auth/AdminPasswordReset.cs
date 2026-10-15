@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Identity;
 using Contracts.Settings;
 using Domain.Identity;
@@ -12,6 +11,8 @@ namespace Core.Auth;
 
 internal sealed class AdminPasswordReset(IServiceProvider services, AccountsOptions options, ILogger<AdminPasswordReset> logger) : IHostedService
 {
+	private static readonly Error NoAdmin = Error.From("there is no admin with a Sammlarr account yet");
+
 	public async Task StartAsync(CancellationToken cancellationToken)
 	{
 		if (options.ResetAdminPassword.Length == 0)
@@ -20,46 +21,44 @@ internal sealed class AdminPasswordReset(IServiceProvider services, AccountsOpti
 		}
 
 		await using var scope = services.CreateAsyncScope();
-		await Passwords
-			.Weakness(options.ResetAdminPassword, options.MinimumPasswordLength)
-			.Match(Refuse, () => ResetAsync(scope.ServiceProvider, cancellationToken));
+		var reset = await ResetAsync(scope.ServiceProvider, cancellationToken);
+		reset.ApplyError(Refuse);
 	}
 
 	public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
-	private Task Refuse(Error reason)
-	{
-		logger.LogError("Sammlarr:Accounts:ResetAdminPassword was not applied: {Reason}", reason.Reason);
-		return Task.CompletedTask;
-	}
+	private void Refuse(Error reason) => logger.LogError("Sammlarr:Accounts:ResetAdminPassword was not applied: {Reason}", reason.Reason);
 
-	private async Task ResetAsync(IServiceProvider scoped, CancellationToken cancellationToken)
+	private async Task<Result<ConfigReset>> ResetAsync(IServiceProvider scoped, CancellationToken cancellationToken)
 	{
 		var config = await scoped.GetRequiredService<IProviderConfigService>().GetAsync(cancellationToken);
 		if (config.AuthProvider != AuthProvider.Local)
 		{
-			logger.LogError("Sammlarr:Accounts:ResetAdminPassword was not applied: this Sammlarr signs in with {Provider}", config.AuthProvider);
-			return;
+			return Error.From($"this Sammlarr signs in with {config.AuthProvider}");
 		}
 
 		var accounts = scoped.GetRequiredService<ILocalAccountRepository>();
 		var admin = (await accounts.GetAllAsync(cancellationToken)).FirstOrNone(account => account.User.Role == UserRole.Admin);
-		await admin.Match(
-			found => ApplyAsync(scoped, accounts, found, cancellationToken),
-			() => Refuse(Error.From("there is no admin with a Sammlarr account yet"))
-		);
+		return await admin.ToResult(NoAdmin).Map(found => ApplyAsync(accounts, found, cancellationToken));
 	}
 
-	private async Task ApplyAsync(IServiceProvider scoped, ILocalAccountRepository accounts, LocalAccount admin, CancellationToken cancellationToken)
+	private async Task<Result<ConfigReset>> ApplyAsync(ILocalAccountRepository accounts, LocalAccount admin, CancellationToken cancellationToken)
 	{
-		if (admin.ConfigResetHash.Match(hash => Passwords.Verify(hash, options.ResetAdminPassword), () => false))
-		{
-			logger.LogWarning("Sammlarr:Accounts:ResetAdminPassword was already applied to admin {Username}. Remove the setting now.", admin.Username);
-			return;
-		}
+		var reset = await accounts.ResetFromConfigAsync(admin.User.Id, options.ResetAdminPassword, cancellationToken);
+		reset.Apply(outcome => Report(outcome, admin.Username));
+		return reset;
+	}
 
-		var now = scoped.GetRequiredService<IDateTimeProvider>().Now;
-		await accounts.ResetFromConfigAsync(admin.User.Id, Passwords.Hash(options.ResetAdminPassword), now, cancellationToken);
-		logger.LogWarning("The password of admin {Username} was reset from Sammlarr:Accounts:ResetAdminPassword. Remove the setting now.", admin.Username);
+	private void Report(ConfigReset outcome, string username)
+	{
+		switch (outcome)
+		{
+			case ConfigReset.AlreadyApplied:
+				logger.LogWarning("Sammlarr:Accounts:ResetAdminPassword was already applied to admin {Username}. Remove the setting now.", username);
+				break;
+			case ConfigReset.Applied:
+				logger.LogWarning("The password of admin {Username} was reset from Sammlarr:Accounts:ResetAdminPassword. Remove the setting now.", username);
+				break;
+		}
 	}
 }

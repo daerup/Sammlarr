@@ -579,20 +579,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		await using var context = Resolve<IDbContextFactory<SammlarrDbContext>>().CreateDbContext();
 		if (!await context.Users.AnyAsync(user => user.Id == CurrentUser.Id.Value))
 		{
-			context.Users.Add(
-				new UserRow
-				{
-					Id = CurrentUser.Id.Value,
-					Provider = AuthProvider.Plex,
-					ExternalUserId = CurrentUser.Id.Value.ToString(),
-					DisplayName = CurrentUser.DisplayName,
-					TagName = CurrentUser.DisplayName,
-					AvatarUrl = CurrentUser.AvatarUrl,
-					Role = CurrentUser.Role,
-					JoinedAt = DateTimeOffset.UnixEpoch,
-				}
-			);
-			await context.SaveChangesAsync();
+			var id = CurrentUser.Id.Value;
+			SeedRows.Member(context, SeedRows.User(id, $"plex-{id}", CurrentUser.DisplayName, CurrentUser.AvatarUrl), CurrentUser.Role, Some.Of(id.ToString()));
 		}
 	}
 
@@ -614,8 +602,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	internal async Task SetDatabaseRole(UserId userId, UserRole role)
 	{
 		var context = ScopedDbContext;
-		var user = await context.Users.SingleAsync(candidate => candidate.Id == userId.Value);
-		user.Role = role;
+		await context.UserRoles.Where(membership => membership.UserId == userId.Value).ExecuteDeleteAsync();
+		context.UserRoles.Add(new IdentityUserRole<Guid> { UserId = userId.Value, RoleId = SeedRows.RoleId(context, role) });
 		await context.SaveChangesAsync();
 		context.ChangeTracker.Clear();
 	}
@@ -643,26 +631,13 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		context.ChangeTracker.Clear();
 	}
 
-	internal async Task<UserId> SeedExistingUser(string externalUserId, UserRole role, string displayName)
+	internal Task<UserId> SeedExistingUser(string externalUserId, UserRole role, string displayName)
 	{
 		var id = Guid.NewGuid();
 		var context = ScopedDbContext;
-		context.Users.Add(
-			new UserRow
-			{
-				Id = id,
-				Provider = AuthProvider.Plex,
-				ExternalUserId = externalUserId,
-				DisplayName = displayName,
-				TagName = displayName,
-				AvatarUrl = "avatar",
-				Role = role,
-				JoinedAt = DateTimeOffset.UnixEpoch,
-			}
-		);
-		await context.SaveChangesAsync();
+		SeedRows.Member(context, SeedRows.User(id, $"plex-{externalUserId}", displayName, "avatar"), role, Some.Of(externalUserId));
 		context.ChangeTracker.Clear();
-		return UserId.From(id);
+		return Task.FromResult(UserId.From(id));
 	}
 
 	internal async Task SignsInWithSammlarrAccounts()
@@ -674,30 +649,24 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		context.ChangeTracker.Clear();
 	}
 
-	internal async Task<UserId> SeedLocalUser(string username, string password, UserRole role)
+	internal Task<UserId> SeedLocalUser(string username, string password, UserRole role)
 	{
 		var id = Guid.NewGuid();
 		var context = ScopedDbContext;
-		context.Users.Add(
-			new UserRow
-			{
-				Id = id,
-				Provider = AuthProvider.Local,
-				ExternalUserId = Usernames.Normalize(username),
-				DisplayName = username,
-				TagName = username,
-				AvatarUrl = string.Empty,
-				Role = role,
-				JoinedAt = DateTimeOffset.UnixEpoch,
-				PasswordHash = new PasswordHasher<string>().HashPassword(string.Empty, password),
-			}
-		);
-		await context.SaveChangesAsync();
+		var user = SeedRows.User(id, Usernames.Normalize(username), username, string.Empty);
+		user.PasswordHash = new PasswordHasher<UserRow>().HashPassword(user, password);
+		SeedRows.Member(context, user, role, new None());
 		context.ChangeTracker.Clear();
-		return UserId.From(id);
+		return Task.FromResult(UserId.From(id));
 	}
 
 	internal void SignOut() => CurrentUser.IsAuthenticated = false;
+
+	internal async Task<string?> SecurityStampOf(UserId id)
+	{
+		await using var context = Resolve<IDbContextFactory<SammlarrDbContext>>().CreateDbContext();
+		return await context.Users.Where(user => user.Id == id.Value).Select(user => user.SecurityStamp).SingleAsync();
+	}
 
 	internal async Task<int> CountOwnedAsync<T>(Func<SammlarrDbContext, IQueryable<T>> selector)
 	{

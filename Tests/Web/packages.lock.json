@@ -226,11 +226,6 @@
           "Microsoft.AspNetCore.Cryptography.Internal": "11.0.0-rc.2.26504.105"
         }
       },
-      "Microsoft.AspNetCore.DataProtection.Abstractions": {
-        "type": "Transitive",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "YEzDlJ1Cskq/y/W4UO/lOo/a1r14FufM+Ix/oOI05nZ4U79nfauXO7ZIReEcdi6McC+qC8/UpDG4LXMZLPqtkg=="
-      },
       "Microsoft.AspNetCore.Metadata": {
         "type": "Transitive",
         "resolved": "11.0.0-rc.2.26504.105",
@@ -507,6 +502,25 @@
         "dependencies": {
           "Microsoft.Extensions.Http": "10.0.13",
           "Microsoft.Extensions.Telemetry": "10.11.0"
+        }
+      },
+      "Microsoft.Extensions.Identity.Core": {
+        "type": "Transitive",
+        "resolved": "11.0.0-rc.2.26504.105",
+        "contentHash": "3wcpVex+f1Fzw6NAZXLYByiOCWlNq+03vXn0mJ0Pm7pF0da5VnERLjqPvMg+S884P2HmQowhzI/5pWz3Cobd5g==",
+        "dependencies": {
+          "Microsoft.AspNetCore.Cryptography.KeyDerivation": "11.0.0-rc.2.26504.105",
+          "Microsoft.Extensions.Diagnostics": "11.0.0-rc.2.26504.105",
+          "Microsoft.Extensions.Logging": "11.0.0-rc.2.26504.105"
+        }
+      },
+      "Microsoft.Extensions.Identity.Stores": {
+        "type": "Transitive",
+        "resolved": "11.0.0-rc.2.26504.105",
+        "contentHash": "3cz2x6urSmeYbsLKkRWXXCa5XXHB4buM0BE0FTNfDQhmj3EHEiu7HjZRjz2rbXt6D3YrVo5qQFpzBUHCA7ni1A==",
+        "dependencies": {
+          "Microsoft.Extensions.Identity.Core": "11.0.0-rc.2.26504.105",
+          "Microsoft.Extensions.Logging": "11.0.0-rc.2.26504.105"
         }
       },
       "Microsoft.Extensions.Localization.Abstractions": {
@@ -997,19 +1011,6 @@
           "System.Runtime": "4.1.0"
         }
       },
-      "System.Security.Cryptography.Pkcs": {
-        "type": "Transitive",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "cYggI0Mk5zfpEQWd6l0IdN1/uZnWX/b64xCZlrEYthz39zgXFAy1VpKtMFdYFzE1/PKugJFtUc/uXe+fLT4HeQ=="
-      },
-      "System.Security.Cryptography.Xml": {
-        "type": "Transitive",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "lcYQkhdyA5AbOwD4T9MbExzhS6O977lr+X7qXWg2FAQKJp/J/NER3NZ4nseNrBuEEyfxwjmuJbXy4rUeV6Q2+A==",
-        "dependencies": {
-          "System.Security.Cryptography.Pkcs": "11.0.0-rc.2.26504.105"
-        }
-      },
       "System.Text.Encoding": {
         "type": "Transitive",
         "resolved": "4.0.11",
@@ -1135,7 +1136,6 @@
         "dependencies": {
           "Contracts": "[1.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[11.0.0-rc.2.26504.105, )",
-          "Microsoft.Extensions.Identity.Core": "[11.0.0-rc.2.26504.105, )",
           "Observability": "[1.0.0, )",
           "Shared": "[1.0.0, )",
           "System.Linq.Dynamic.Core": "[1.7.4, )",
@@ -1146,9 +1146,8 @@
         "type": "Project",
         "dependencies": {
           "Contracts": "[1.0.0, )",
-          "Microsoft.AspNetCore.DataProtection": "[11.0.0-rc.2.26504.105, )",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[11.0.0-rc.2.26504.105, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[11.0.0-rc.2.26504.105, )",
-          "Microsoft.Extensions.Caching.Memory": "[11.0.0-rc.2.26504.105, )",
           "Observability": "[1.0.0, )",
           "OpenTelemetry.Instrumentation.EntityFrameworkCore": "[1.19.1-beta.1, )",
           "Shared": "[1.0.0, )",
@@ -1313,15 +1312,14 @@
           "Microsoft.JSInterop": "11.0.0-rc.2.26504.105"
         }
       },
-      "Microsoft.AspNetCore.DataProtection": {
+      "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
         "type": "CentralTransitive",
         "requested": "[11.0.0-rc.2.26504.105, )",
         "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "OZFhCwn5HTwMdFd2C0UKlzMu5k+bDpQWWf5KgePjDHpc+cVuFT5te66VD4KEFNrdXKtYjGGwcjY+cux7hp6ZKQ==",
+        "contentHash": "V5HvjpMdfs9KcukhLwHGOgiRuNlt5ZQBY1JOG2hntHd1idlvi11796uUFBUKUnyZHLkk6i9P5hCJGaITXeDuNw==",
         "dependencies": {
-          "Microsoft.AspNetCore.Cryptography.Internal": "11.0.0-rc.2.26504.105",
-          "Microsoft.AspNetCore.DataProtection.Abstractions": "11.0.0-rc.2.26504.105",
-          "System.Security.Cryptography.Xml": "11.0.0-rc.2.26504.105"
+          "Microsoft.EntityFrameworkCore.Relational": "11.0.0-rc.2.26504.105",
+          "Microsoft.Extensions.Identity.Stores": "11.0.0-rc.2.26504.105"
         }
       },
       "Microsoft.EntityFrameworkCore.Sqlite": {
@@ -1395,17 +1393,6 @@
           "Microsoft.Extensions.Http.Diagnostics": "10.11.0",
           "Microsoft.Extensions.ObjectPool": "10.0.13",
           "Microsoft.Extensions.Resilience": "10.11.0"
-        }
-      },
-      "Microsoft.Extensions.Identity.Core": {
-        "type": "CentralTransitive",
-        "requested": "[11.0.0-rc.2.26504.105, )",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "3wcpVex+f1Fzw6NAZXLYByiOCWlNq+03vXn0mJ0Pm7pF0da5VnERLjqPvMg+S884P2HmQowhzI/5pWz3Cobd5g==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Cryptography.KeyDerivation": "11.0.0-rc.2.26504.105",
-          "Microsoft.Extensions.Diagnostics": "11.0.0-rc.2.26504.105",
-          "Microsoft.Extensions.Logging": "11.0.0-rc.2.26504.105"
         }
       },
       "Microsoft.Extensions.Options.ConfigurationExtensions": {

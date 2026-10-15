@@ -48,7 +48,7 @@ public class CurrentUserAccessorTests
 
 	private static ClaimsPrincipal SignedIn(UserId id, string name, UserRole role)
 	{
-		Claim[] claims = [new(ClaimTypes.NameIdentifier, id.Value.ToString()), new(ClaimTypes.Name, name), new(ClaimTypes.Role, role.ToString())];
+		Claim[] claims = [new(ClaimTypes.NameIdentifier, id.Value.ToString()), new(AuthClaims.DisplayName, name), new(ClaimTypes.Role, role.ToString())];
 		return new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
 	}
 }

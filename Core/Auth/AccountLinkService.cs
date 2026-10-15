@@ -63,7 +63,12 @@ internal sealed class AccountLinkService(
 		}
 
 		var user = new User(UserId.New(), invite.DisplayName, string.Empty, UserRole.Member, dateTimeProvider.Now);
-		await accounts.CreateAsync(user, invite.Username, Passwords.Hash(password), cancellationToken);
+		var created = await accounts.CreateAsync(user, invite.Username, password, cancellationToken);
+		return await created.Map(joined => WelcomeAsync(joined, cancellationToken));
+	}
+
+	private async Task<Result<User>> WelcomeAsync(User user, CancellationToken cancellationToken)
+	{
 		using (userScope.As(user))
 		{
 			await webUiNotifications.SeedAsync(cancellationToken);
@@ -85,10 +90,14 @@ internal sealed class AccountLinkService(
 
 	private async Task<Result<User>> StoreAsync(UserId id, string password, CancellationToken cancellationToken)
 	{
-		await accounts.SetPasswordAsync(id, Passwords.Hash(password), dateTimeProvider.Now, cancellationToken);
+		var replaced = await accounts.ReplacePasswordAsync(id, password, cancellationToken);
+		replaced.Apply(_ => Announce(id));
+		return replaced;
+	}
+
+	private void Announce(UserId id)
+	{
 		sessionInvalidator.Invalidate(id);
-		var account = await accounts.GetAsync(id, cancellationToken);
 		logger.LogInformation("Password reset through a link for user {UserId}", id);
-		return account.Map(found => found.User).ToResult(Unusable);
 	}
 }

@@ -134,7 +134,7 @@ internal sealed class UserManagementService(
 	public async Task UnlockAsync(UserId id, CancellationToken cancellationToken = default)
 	{
 		await EnsureCallerIsAdminAsync(cancellationToken);
-		await accounts.SetFailedSignInsAsync(id, 0, new None(), cancellationToken);
+		await accounts.UnlockAsync(id, cancellationToken);
 	}
 
 	public Task StoreColourAsync(UserId id, StoredColour colour, CancellationToken cancellationToken = default)

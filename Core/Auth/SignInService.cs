@@ -20,17 +20,14 @@ internal sealed class SignInService(
 	IUserScope userScope,
 	IProviderConfigService providerConfig,
 	IDateTimeProvider dateTimeProvider,
-	SignInGate gate,
 	SetupGate setupGate,
 	WebUiNotificationSeeder webUiNotifications,
 	ILogger<SignInService> logger
 ) : ISignInService
 {
-	private const int MaxFailedSignIns = 5;
-
-	private static readonly TimeSpan LockOut = TimeSpan.FromMinutes(15);
-
 	private static readonly Error WrongPassword = Error.From("Wrong username or password.");
+
+	private static readonly Error Locked = Error.From("Too many failed sign-ins. Try again in a few minutes.");
 
 	private static readonly Error NoAdminYet = Error.From("This Sammlarr has no admin yet. Open /setup and enter the setup code from the server log.");
 
@@ -95,45 +92,31 @@ internal sealed class SignInService(
 			return Error.From($"This Sammlarr signs in with {SignInName(config.AuthProvider)}.");
 		}
 
-		var found = await localAccounts.FindAsync(username, cancellationToken);
-		return await found.Match(account => GatedCheckAsync(account.User.Id, password, cancellationToken), () => Unknown(password));
-	}
-
-	private static Result<User> Unknown(string password)
-	{
-		Passwords.Verify(Passwords.Decoy, password);
-		return WrongPassword;
-	}
-
-	private async Task<Result<User>> GatedCheckAsync(UserId id, string password, CancellationToken cancellationToken)
-	{
-		using var lease = await gate.EnterAsync(id, cancellationToken);
-		var current = await localAccounts.GetAsync(id, cancellationToken);
-		return await current.Match(account => CheckPasswordAsync(account, password, cancellationToken), () => WrongPassword);
-	}
-
-	private async Task<Result<User>> CheckPasswordAsync(LocalAccount account, string password, CancellationToken cancellationToken)
-	{
-		var now = dateTimeProvider.Now;
-		return await account
-			.LockedUntil.When(until => until > now)
-			.Match(until => Locked(until, now), () => AttemptAsync(account, password, now, cancellationToken));
-	}
-
-	private async Task<Result<User>> AttemptAsync(LocalAccount account, string password, DateTimeOffset now, CancellationToken cancellationToken)
-	{
-		if (account.PasswordHash.Match(hash => Passwords.Verify(hash, password), () => false))
+		var attempt = await localAccounts.CheckPasswordAsync(username, password, cancellationToken);
+		return attempt switch
 		{
-			await localAccounts.SetFailedSignInsAsync(account.User.Id, 0, new None(), cancellationToken);
-			logger.LogInformation("Sign-in completed for {Provider} as user {UserId}", AuthProvider.Local, account.User.Id);
-			return Success.Of(account.User);
-		}
+			PasswordAccepted accepted => Passed(accepted.User),
+			AccountLockedOut => LockedOut(username),
+			PasswordRejected => Rejected(username),
+		};
+	}
 
-		var failures = account.FailedSignIns + 1;
-		var lockedUntil = Optional.When(failures >= MaxFailedSignIns, () => now + LockOut);
-		await localAccounts.SetFailedSignInsAsync(account.User.Id, lockedUntil.Match(_ => 0, () => failures), lockedUntil, cancellationToken);
-		logger.LogWarning("Sign-in failed for {Provider} user {UserId}: wrong password", AuthProvider.Local, account.User.Id);
-		return lockedUntil.Match(until => Locked(until, now), () => WrongPassword);
+	private Result<User> Passed(User user)
+	{
+		logger.LogInformation("Sign-in completed for {Provider} as user {UserId}", AuthProvider.Local, user.Id);
+		return Success.Of(user);
+	}
+
+	private Result<User> LockedOut(string username)
+	{
+		logger.LogWarning("Sign-in refused for {Provider} user {Username}: the account is locked out", AuthProvider.Local, username);
+		return Locked;
+	}
+
+	private Result<User> Rejected(string username)
+	{
+		logger.LogWarning("Sign-in failed for {Provider} user {Username}: wrong username or password", AuthProvider.Local, username);
+		return WrongPassword;
 	}
 
 	private static string SignInName(AuthProvider provider)
@@ -143,12 +126,6 @@ internal sealed class SignInService(
 			AuthProvider.Plex => "Plex",
 			AuthProvider.Local => "Sammlarr accounts",
 		};
-	}
-
-	private static Result<User> Locked(DateTimeOffset until, DateTimeOffset now)
-	{
-		var minutes = Math.Max(1, (int)Math.Ceiling((until - now).TotalMinutes));
-		return Error.From($"Too many failed sign-ins. Try again in {minutes} {(minutes == 1 ? "minute" : "minutes")}.");
 	}
 
 	private async Task<Result<User>> ProvisionAsync(AuthProvider provider, ExternalLogin login, Optional<string> setupCode, CancellationToken cancellationToken)

@@ -14,15 +14,14 @@
         "resolved": "3.0.303",
         "contentHash": "IBcDi9Gq15J7F7Akw/KCVrxMsms13e7rgA6ssVhoqn+3BWDvCg3RAhzPMK8foJapDMgz5tG4cDHO/JImrnn1cw=="
       },
-      "Microsoft.AspNetCore.DataProtection": {
+      "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
         "type": "Direct",
         "requested": "[11.0.0-rc.2.26504.105, )",
         "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "OZFhCwn5HTwMdFd2C0UKlzMu5k+bDpQWWf5KgePjDHpc+cVuFT5te66VD4KEFNrdXKtYjGGwcjY+cux7hp6ZKQ==",
+        "contentHash": "V5HvjpMdfs9KcukhLwHGOgiRuNlt5ZQBY1JOG2hntHd1idlvi11796uUFBUKUnyZHLkk6i9P5hCJGaITXeDuNw==",
         "dependencies": {
-          "Microsoft.AspNetCore.Cryptography.Internal": "11.0.0-rc.2.26504.105",
-          "Microsoft.AspNetCore.DataProtection.Abstractions": "11.0.0-rc.2.26504.105",
-          "System.Security.Cryptography.Xml": "11.0.0-rc.2.26504.105"
+          "Microsoft.EntityFrameworkCore.Relational": "11.0.0-rc.2.26504.105",
+          "Microsoft.Extensions.Identity.Stores": "11.0.0-rc.2.26504.105"
         }
       },
       "Microsoft.CodeAnalysis.BannedApiAnalyzers": {
@@ -68,12 +67,6 @@
         "requested": "[11.0.0-rc.2.26504.105, )",
         "resolved": "11.0.0-rc.2.26504.105",
         "contentHash": "aRn35IzDorWq+Amjf87yPr+63DiWj2nMphZXbKAIFMpWchT0dLBagMa5dDayH2aj/+plNOiAJFhGxgJTaKqGQw=="
-      },
-      "Microsoft.Extensions.Caching.Memory": {
-        "type": "Direct",
-        "requested": "[11.0.0-rc.2.26504.105, )",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "Kpu0ccfFy/dZijjX1ib38axnfhPhkeGL9Xew7DMBfa24o7Jeaiq/AWQgW7hOsRQk+TkGhfFTW5RiWPnCMGqKUQ=="
       },
       "OpenTelemetry.Instrumentation.EntityFrameworkCore": {
         "type": "Direct",
@@ -151,10 +144,13 @@
         "resolved": "11.0.0-rc.2.26504.105",
         "contentHash": "/R35xaboFCU+uPPdShfh1K7Ii/914D8egKwIDMn66t5FEg9CXXeIdtkFkADj/lEo73epBwj5f+X6Ri+lcQn9VQ=="
       },
-      "Microsoft.AspNetCore.DataProtection.Abstractions": {
+      "Microsoft.AspNetCore.Cryptography.KeyDerivation": {
         "type": "Transitive",
         "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "YEzDlJ1Cskq/y/W4UO/lOo/a1r14FufM+Ix/oOI05nZ4U79nfauXO7ZIReEcdi6McC+qC8/UpDG4LXMZLPqtkg=="
+        "contentHash": "LhbiJu7qbOebylpkX5dLjOUmSTXHwi0AkzmwKeXjivgRzfuH7pYWNlda7sg9DYUSWlSWpp6NYci81RbZMIRc3Q==",
+        "dependencies": {
+          "Microsoft.AspNetCore.Cryptography.Internal": "11.0.0-rc.2.26504.105"
+        }
       },
       "Microsoft.Build.Framework": {
         "type": "Transitive",
@@ -306,6 +302,15 @@
         "resolved": "11.0.0-rc.2.26504.105",
         "contentHash": "HN/LL/uNN7Lj74VwWRkaB26X694U+s7wwHBYvKycOUhTIMbPdCayB1bM2W6+FnYcLL1/oEDQNZLLco5bIo0FpA=="
       },
+      "Microsoft.Extensions.Diagnostics": {
+        "type": "Transitive",
+        "resolved": "11.0.0-rc.2.26504.105",
+        "contentHash": "qKUt588f6I5G/AD0ZhEyyNbaOZwc1DDJ1WcVR3LlAau0QZ/pheWTFm+o62aTHHq9r8F4Gb9Fzn9rq7guXpLARQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration": "11.0.0-rc.2.26504.105",
+          "Microsoft.Extensions.Options.ConfigurationExtensions": "11.0.0-rc.2.26504.105"
+        }
+      },
       "Microsoft.Extensions.Diagnostics.Abstractions": {
         "type": "Transitive",
         "resolved": "10.0.0",
@@ -333,6 +338,25 @@
           "Microsoft.Extensions.Diagnostics.Abstractions": "10.0.0",
           "Microsoft.Extensions.FileProviders.Abstractions": "10.0.0",
           "Microsoft.Extensions.Logging.Abstractions": "10.0.0"
+        }
+      },
+      "Microsoft.Extensions.Identity.Core": {
+        "type": "Transitive",
+        "resolved": "11.0.0-rc.2.26504.105",
+        "contentHash": "3wcpVex+f1Fzw6NAZXLYByiOCWlNq+03vXn0mJ0Pm7pF0da5VnERLjqPvMg+S884P2HmQowhzI/5pWz3Cobd5g==",
+        "dependencies": {
+          "Microsoft.AspNetCore.Cryptography.KeyDerivation": "11.0.0-rc.2.26504.105",
+          "Microsoft.Extensions.Diagnostics": "11.0.0-rc.2.26504.105",
+          "Microsoft.Extensions.Logging": "11.0.0-rc.2.26504.105"
+        }
+      },
+      "Microsoft.Extensions.Identity.Stores": {
+        "type": "Transitive",
+        "resolved": "11.0.0-rc.2.26504.105",
+        "contentHash": "3cz2x6urSmeYbsLKkRWXXCa5XXHB4buM0BE0FTNfDQhmj3EHEiu7HjZRjz2rbXt6D3YrVo5qQFpzBUHCA7ni1A==",
+        "dependencies": {
+          "Microsoft.Extensions.Identity.Core": "11.0.0-rc.2.26504.105",
+          "Microsoft.Extensions.Logging": "11.0.0-rc.2.26504.105"
         }
       },
       "Microsoft.Extensions.Logging": {
@@ -649,19 +673,6 @@
           "System.Runtime": "4.1.0"
         }
       },
-      "System.Security.Cryptography.Pkcs": {
-        "type": "Transitive",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "cYggI0Mk5zfpEQWd6l0IdN1/uZnWX/b64xCZlrEYthz39zgXFAy1VpKtMFdYFzE1/PKugJFtUc/uXe+fLT4HeQ=="
-      },
-      "System.Security.Cryptography.Xml": {
-        "type": "Transitive",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "lcYQkhdyA5AbOwD4T9MbExzhS6O977lr+X7qXWg2FAQKJp/J/NER3NZ4nseNrBuEEyfxwjmuJbXy4rUeV6Q2+A==",
-        "dependencies": {
-          "System.Security.Cryptography.Pkcs": "11.0.0-rc.2.26504.105"
-        }
-      },
       "System.Text.Encoding": {
         "type": "Transitive",
         "resolved": "4.0.11",
@@ -756,6 +767,12 @@
           "Microsoft.CodeAnalysis.Analyzers": "5.9.0-1.26328.17",
           "Microsoft.CodeAnalysis.Common": "[5.9.0]"
         }
+      },
+      "Microsoft.Extensions.Caching.Memory": {
+        "type": "CentralTransitive",
+        "requested": "[11.0.0-rc.2.26504.105, )",
+        "resolved": "11.0.0-rc.2.26504.105",
+        "contentHash": "Kpu0ccfFy/dZijjX1ib38axnfhPhkeGL9Xew7DMBfa24o7Jeaiq/AWQgW7hOsRQk+TkGhfFTW5RiWPnCMGqKUQ=="
       },
       "Microsoft.Extensions.DependencyInjection": {
         "type": "CentralTransitive",
