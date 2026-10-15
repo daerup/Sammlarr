@@ -54,10 +54,10 @@ and an indexer, and a webhook catcher (`AppHost/Staging`). Guide: [Testing › S
 
 | Image property | Today |
 |---|---|
-| Reproducible | yes: base images pinned by digest, `SOURCE_DATE_EPOCH` and `rewrite-timestamp` (see Build) |
-| Signed (cosign) | not yet: release plan Phase 7 |
-| SLSA provenance | not yet: Phase 7 (`release.yml` sets `provenance: false`) |
-| SBOM | not yet: Phase 6 (`release.yml` sets `sbom: false`) |
+| Reproducible | yes: base images pinned by digest, `SOURCE_DATE_EPOCH` and `rewrite-timestamp` (see Build); each release rebuilds its tag on a fresh runner and fails when the digest or `/app` differs (`release.yml`, job `rebuild`) |
+| Signed (cosign) | not yet: needs the public repository, since keyless signing writes to Sigstore's public log |
+| SLSA provenance | not yet: needs the public repository (`release.yml` sets `provenance: false`) |
+| SBOM | on each release: `sammlarr-app.cdx.json` (CycloneDX, the app's packages) and `sammlarr-image.cdx.json` (Trivy, the image), beside `THIRD-PARTY-NOTICES.txt` |
 
 ## Release
 

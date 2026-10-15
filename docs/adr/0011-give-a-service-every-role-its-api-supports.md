@@ -24,6 +24,6 @@ provider per role, which leaves the gaps a blocked or keyless install hits.
 ## Consequences
 
 * A title with only an IMDb id still reaches TVDB through MDBList, Wikidata or TVmaze while TMDB is blocked or keyless, and gets IMDb's rating with votes from the daily file on every install.
-* New rating sources count in every strategy at once (D8), so a feed with a rating threshold can import or drop titles when one ships; the release note says so.
+* New rating sources count in every strategy at once, so a feed with a rating threshold can import or drop titles when one ships; the release note says so.
 * Values from a source that cannot vouch for them (a title that may not be English, artwork no resizer can size) only fill gaps (`IDetailsEnricher.Defers`), so an extra source never makes a title worse.
 * Every path is bounded: a lookup is asked once per input in a resolve, never by an id its own answer gave, and a title nobody can match is cached as unmatched for an hour.
