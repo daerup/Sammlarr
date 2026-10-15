@@ -34,8 +34,6 @@ jobs:
           echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
           echo "created=$(date -u -d "@$(git log -1 --pretty=%ct)" +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
-      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
@@ -108,12 +106,13 @@ jobs:
     permissions:
       contents: read
       packages: read
+    outputs:
+      buildkit: ${{ steps.build.outputs.buildkit }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-
-      - uses: ./.github/actions/build-image
+      - id: build
+        uses: ./.github/actions/build-image
         with:
           version: ${{ needs.image.outputs.version }}
           labels: ${{ needs.image.outputs.labels }}
@@ -160,3 +159,21 @@ jobs:
             ${{ runner.temp }}/pushed.txt
             ${{ runner.temp }}/rebuilt.txt
           retention-days: 7
+
+  reproduced:
+    needs: [image, rebuild]
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+    steps:
+      - name: Note the matching rebuild on the release
+        env:
+          DIGEST: ${{ needs.image.outputs.digest }}
+          BUILDKIT: ${{ needs.rebuild.outputs.buildkit }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          notes=$(gh release view "$GITHUB_REF_NAME" --json body --jq .body)
+          gh release edit "$GITHUB_REF_NAME" --notes "$notes
+
+          Reproduced on a fresh runner without cache: \`$DIGEST\` matches (BuildKit $BUILDKIT)."
