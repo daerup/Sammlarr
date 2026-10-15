@@ -1,0 +1,16 @@
+services:
+  sammlarr:
+    image: ghcr.io/daerup/sammlarr:latest
+    ports:
+      - "6769:6769"
+    volumes:
+      # For a bind mount like ./data:/data, the folder must be writable by uid 1654
+      # (chown 1654:1654 ./data), or run as its owner with user: "<uid>:<gid>".
+      - sammlarr-data:/data
+    environment:
+      - TZ=Etc/UTC
+    restart: unless-stopped
+
+volumes:
+  sammlarr-data:
+    name: sammlarr-data
