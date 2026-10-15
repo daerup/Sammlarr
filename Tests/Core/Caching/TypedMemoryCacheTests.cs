@@ -1,5 +1,6 @@
 using Core.Caching;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Internal;
 using TestInfrastructure;
 
 namespace Core.Tests.Caching;
@@ -86,15 +87,19 @@ public class TypedMemoryCacheTests
 	[Test]
 	public async Task TypedMemoryCache_WhenSetWithTtl_ExpiresAfterDuration()
 	{
-		using var memoryCache = new MemoryCache(new MemoryCacheOptions { ExpirationScanFrequency = TimeSpan.FromMilliseconds(1) });
+		var now = new DateTimeOffset(2026, 10, 16, 8, 0, 0, TimeSpan.Zero);
+		var clock = ISystemClock.Mock();
+		clock.UtcNow.Getter.Returns(() => now);
+		using var memoryCache = new MemoryCache(new MemoryCacheOptions { Clock = clock.Object });
 		var testee = new TypedMemoryCache<string, string>(memoryCache);
 
-		testee.Set("key", "value", TimeSpan.FromMilliseconds(10));
-		var immediately = testee.GetValueOrNone("key");
-		await Task.Delay(100);
+		testee.Set("key", "value", TimeSpan.FromMinutes(10));
+		now = now.AddMinutes(10).AddTicks(-1);
+		var beforeExpiry = testee.GetValueOrNone("key");
+		now = now.AddTicks(2);
 		var afterExpiry = testee.GetValueOrNone("key");
 
-		await Assert.That(immediately).IsSome().And.IsEqualTo("value");
+		await Assert.That(beforeExpiry).IsSome().And.IsEqualTo("value");
 		await Assert.That(afterExpiry).IsNone();
 	}
 
