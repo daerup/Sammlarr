@@ -48,6 +48,13 @@
       "matchStrings": ["\"(?<depName>lscr\\.io/linuxserver/[a-z]+)\", \"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
       "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)-ls(?<revision>\\d+)$"
+    },
+    {
+      "customType": "regex",
+      "description": "The BuildKit the image build, its rebuild and the scan share",
+      "managerFilePatterns": ["/^\\.github/actions/build-image/action\\.yml$/"],
+      "matchStrings": ["image=(?<depName>moby/buildkit):(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"],
+      "datasourceTemplate": "docker"
     }
   ]
 }
