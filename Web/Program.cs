@@ -82,7 +82,6 @@ app.UseHttpsRedirection();
 app.UseMiddleware<FirstRunRedirect>();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRateLimiter();
 app.UseAntiforgery();
 app.UseRequestTimeouts();
 app.UseOutputCache();

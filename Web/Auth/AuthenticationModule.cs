@@ -1,22 +1,12 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Threading.RateLimiting;
 using Contracts.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.WebUtilities;
 using Shared.DI;
 
 namespace Web.Auth;
 
 internal sealed class AuthenticationModule : IServiceModule
 {
-	internal const string SignInLimit = "sign-in";
-
-	[SuppressMessage(
-		"Maintainability",
-		"CA1506:Avoid excessive class coupling",
-		Justification = "a DI module: its job is to wire the cookie, session check and sign-in rate limit types"
-	)]
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddCascadingAuthenticationState();
@@ -48,23 +38,5 @@ internal sealed class AuthenticationModule : IServiceModule
 				};
 			});
 		services.AddAuthorization();
-		services.AddRateLimiter(options =>
-		{
-			options.AddPolicy(
-				SignInLimit,
-				context =>
-					RateLimitPartition.GetFixedWindowLimiter(
-						context.Connection.RemoteIpAddress?.ToString() ?? string.Empty,
-						_ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }
-					)
-			);
-			options.OnRejected = (context, _) =>
-			{
-				context.HttpContext.Response.Redirect(
-					QueryHelpers.AddQueryString("/signin", "authError", "Too many sign-in attempts from here. Wait a minute and try again.")
-				);
-				return ValueTask.CompletedTask;
-			};
-		});
 	}
 }

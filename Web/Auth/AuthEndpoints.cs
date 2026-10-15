@@ -79,85 +79,75 @@ internal static class AuthEndpoints
 			}
 		);
 
-		endpoints
-			.MapPost(
-				"/auth/local",
-				async (
-					[FromForm] string username,
-					[FromForm] string password,
-					[FromForm] string? returnUrl,
-					HttpContext context,
-					ISignInService signIn,
-					CancellationToken cancellationToken
-				) =>
-				{
-					return await signIn
-						.SignInWithPasswordAsync(username, password, cancellationToken)
-						.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
-						.GetValueOr(error => Results.Redirect(SignInPage(error, returnUrl)));
-				}
-			)
-			.RequireRateLimiting(AuthenticationModule.SignInLimit);
-		endpoints
-			.MapPost(
-				"/auth/join",
-				async ([FromForm] string token, [FromForm] string password, [FromForm] string confirmation, HttpContext context, IAccountLinkService links) =>
-				{
-					return await links
-						.JoinAsync(token, password, confirmation, context.RequestAborted)
-						.Map(user => SignInAndRedirectAsync(context, user, "/"))
-						.GetValueOr(error => Results.Redirect(LinkPage("join", token, error)));
-				}
-			)
-			.RequireRateLimiting(AuthenticationModule.SignInLimit);
-		endpoints
-			.MapPost(
-				"/auth/reset",
-				async ([FromForm] string token, [FromForm] string password, [FromForm] string confirmation, HttpContext context, IAccountLinkService links) =>
-				{
-					return await links
-						.ResetPasswordAsync(token, password, confirmation, context.RequestAborted)
-						.Map(user => SignInAndRedirectAsync(context, user, "/"))
-						.GetValueOr(error => Results.Redirect(LinkPage("reset", token, error)));
-				}
-			)
-			.RequireRateLimiting(AuthenticationModule.SignInLimit);
-		endpoints
-			.MapPost(
-				"/setup/admin",
-				async (
-					[FromForm] string code,
-					[FromForm] string username,
-					[FromForm] string password,
-					[FromForm] string confirmation,
-					HttpContext context,
-					IOnboardingService onboarding
-				) =>
-				{
-					return await onboarding
-						.ClaimAsync(new AdminClaim(code, username, password, confirmation), context.RequestAborted)
-						.Map(user => SignInAndRedirectAsync(context, user, SetupPath))
-						.GetValueOr(error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Local)));
-				}
-			)
-			.RequireRateLimiting(AuthenticationModule.SignInLimit);
-		endpoints
-			.MapPost(
-				"/setup/plex",
-				async ([FromForm] string code, HttpContext context, IOnboardingService onboarding) =>
-				{
-					var problem = await onboarding.CodeProblemAsync(code, context.RequestAborted);
-					return problem.Match(
-						error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Plex)),
-						() =>
-						{
-							SetupClaim.Issue(context, code);
-							return Results.Redirect(QueryHelpers.AddQueryString("/auth/plex/login", "returnUrl", SetupPath));
-						}
-					);
-				}
-			)
-			.RequireRateLimiting(AuthenticationModule.SignInLimit);
+		endpoints.MapPost(
+			"/auth/local",
+			async (
+				[FromForm] string username,
+				[FromForm] string password,
+				[FromForm] string? returnUrl,
+				HttpContext context,
+				ISignInService signIn,
+				CancellationToken cancellationToken
+			) =>
+			{
+				return await signIn
+					.SignInWithPasswordAsync(username, password, cancellationToken)
+					.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
+					.GetValueOr(error => Results.Redirect(SignInPage(error, returnUrl)));
+			}
+		);
+		endpoints.MapPost(
+			"/auth/join",
+			async ([FromForm] string token, [FromForm] string password, [FromForm] string confirmation, HttpContext context, IAccountLinkService links) =>
+			{
+				return await links
+					.JoinAsync(token, password, confirmation, context.RequestAborted)
+					.Map(user => SignInAndRedirectAsync(context, user, "/"))
+					.GetValueOr(error => Results.Redirect(LinkPage("join", token, error)));
+			}
+		);
+		endpoints.MapPost(
+			"/auth/reset",
+			async ([FromForm] string token, [FromForm] string password, [FromForm] string confirmation, HttpContext context, IAccountLinkService links) =>
+			{
+				return await links
+					.ResetPasswordAsync(token, password, confirmation, context.RequestAborted)
+					.Map(user => SignInAndRedirectAsync(context, user, "/"))
+					.GetValueOr(error => Results.Redirect(LinkPage("reset", token, error)));
+			}
+		);
+		endpoints.MapPost(
+			"/setup/admin",
+			async (
+				[FromForm] string code,
+				[FromForm] string username,
+				[FromForm] string password,
+				[FromForm] string confirmation,
+				HttpContext context,
+				IOnboardingService onboarding
+			) =>
+			{
+				return await onboarding
+					.ClaimAsync(new AdminClaim(code, username, password, confirmation), context.RequestAborted)
+					.Map(user => SignInAndRedirectAsync(context, user, SetupPath))
+					.GetValueOr(error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Local)));
+			}
+		);
+		endpoints.MapPost(
+			"/setup/plex",
+			async ([FromForm] string code, HttpContext context, IOnboardingService onboarding) =>
+			{
+				var problem = await onboarding.CodeProblemAsync(code, context.RequestAborted);
+				return problem.Match(
+					error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Plex)),
+					() =>
+					{
+						SetupClaim.Issue(context, code);
+						return Results.Redirect(QueryHelpers.AddQueryString("/auth/plex/login", "returnUrl", SetupPath));
+					}
+				);
+			}
+		);
 		endpoints.MapGet(
 			"/auth/logout",
 			async (HttpContext context) =>
