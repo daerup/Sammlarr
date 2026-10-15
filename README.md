@@ -59,31 +59,17 @@ it syncs to your Plex watchlist or to Radarr and Sonarr.
 Sammlarr runs as one container, `ghcr.io/daerup/sammlarr`, built for `linux/amd64` and tagged `:latest` and with each release's version (`:0.1.0`). You need
 Docker with Compose.
 
-1. Make a folder for Sammlarr and a `data` folder inside it. The container runs as user `1654`, so that user has to own `data`:
+1. Download the example [`compose.yaml`](compose.yaml) into a folder for Sammlarr and set its `TZ` to your time zone, the one schedules and times in the app
+   use:
 
    ```sh
-   mkdir -p sammlarr/data && cd sammlarr
-   sudo chown 1654:1654 data
+   mkdir sammlarr && cd sammlarr
+   curl -LO https://raw.githubusercontent.com/daerup/Sammlarr/main/compose.yaml
    ```
 
-   To keep the folder's owner instead, run the container as that owner with a `user:` line in the compose file below, for example `user: "99:100"` on Unraid.
+   It runs the latest image on port 6769 and keeps the data in the `sammlarr-data` volume.
 
-2. Save this as `compose.yaml`, with your own time zone:
-
-   ```yaml
-   services:
-     sammlarr:
-       image: ghcr.io/daerup/sammlarr:latest
-       ports:
-         - "6769:6769"
-       volumes:
-         - ./data:/data
-       environment:
-         - TZ=Europe/Zurich
-       restart: unless-stopped
-   ```
-
-3. Start it and read the setup code from the log:
+2. Start it and read the setup code from the log:
 
    ```sh
    docker compose up -d
@@ -92,7 +78,7 @@ Docker with Compose.
 
    The first start logs a line like `No admin yet. Open /setup and enter setup code 7KQ4-M2XP`.
 
-4. Open `http://<your server>:6769/setup`, enter the setup code and follow the wizard.
+3. Open `http://<your server>:6769/setup`, enter the setup code and follow the wizard.
 
 Then create your first feed: paste a list's link, check the preview, save.
 
@@ -125,14 +111,19 @@ docker compose pull
 docker compose up -d
 ```
 
-To choose when you upgrade, pin a version instead, `ghcr.io/daerup/sammlarr:0.1.0`, and change it when you are ready. Auto-updaters like Watchtower follow
-`:latest` too. Settings › About shows a badge, and the version in the footer a dot, once a newer release is out.
+To choose when you upgrade, pin a version in the `image:` line instead, `ghcr.io/daerup/sammlarr:0.1.0`, and change it when you are ready. Auto-updaters like
+Watchtower follow `:latest` too. Settings › About shows a badge, and the version in the footer a dot, once a newer release is out.
 
 Read the release notes first. Breaking changes are listed at the top, under BREAKING CHANGES. Sammlarr updates its database when it starts, so going back to an
-older version needs a copy of `/data` from before the update (see
-[backups](#backups)).
+older version needs a copy of the data from before the update (see [backups](#backups)).
 
 ## Backups
 
-`/data` holds the database and `dp-keys`, the key ring that encrypts the stored API keys and sign-ins. Back up the whole folder with the container stopped, and
-keep the two together.
+The `sammlarr-data` volume holds the database and `dp-keys`, the key ring that encrypts the stored API keys and sign-ins. Keep the two together: stop the
+container and copy the whole volume, here into `sammlarr-data.tgz` next to the compose file:
+
+```sh
+docker compose stop
+docker run --rm -v sammlarr-data:/data:ro -v "$PWD":/backup busybox tar czf /backup/sammlarr-data.tgz -C /data .
+docker compose start
+```
