@@ -113,19 +113,6 @@
           "System.Diagnostics.DiagnosticSource": "5.0.0"
         }
       },
-      "Microsoft.AspNetCore.Cryptography.Internal": {
-        "type": "Transitive",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "/R35xaboFCU+uPPdShfh1K7Ii/914D8egKwIDMn66t5FEg9CXXeIdtkFkADj/lEo73epBwj5f+X6Ri+lcQn9VQ=="
-      },
-      "Microsoft.AspNetCore.Cryptography.KeyDerivation": {
-        "type": "Transitive",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "LhbiJu7qbOebylpkX5dLjOUmSTXHwi0AkzmwKeXjivgRzfuH7pYWNlda7sg9DYUSWlSWpp6NYci81RbZMIRc3Q==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Cryptography.Internal": "11.0.0-rc.2.26504.105"
-        }
-      },
       "Microsoft.DiaSymReader": {
         "type": "Transitive",
         "resolved": "2.2.10",
@@ -174,15 +161,6 @@
         "resolved": "10.0.10",
         "contentHash": "rfZA1RjR021RPqSmIPovfz2aOd79TGqJ9BengbjnzIISOVwjLmuSDnhCMmiY/1c6iYvGolQ1iNGzkav0u11XEA=="
       },
-      "Microsoft.Extensions.Diagnostics": {
-        "type": "Transitive",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "qKUt588f6I5G/AD0ZhEyyNbaOZwc1DDJ1WcVR3LlAau0QZ/pheWTFm+o62aTHHq9r8F4Gb9Fzn9rq7guXpLARQ==",
-        "dependencies": {
-          "Microsoft.Extensions.Configuration": "11.0.0-rc.2.26504.105",
-          "Microsoft.Extensions.Options.ConfigurationExtensions": "11.0.0-rc.2.26504.105"
-        }
-      },
       "Microsoft.Extensions.Diagnostics.Abstractions": {
         "type": "Transitive",
         "resolved": "10.0.0",
@@ -214,10 +192,12 @@
       },
       "Microsoft.Extensions.Logging": {
         "type": "Transitive",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "tGZ8lo15pCx32vlCtKprvLFtnNmPykudpw/62pkf4hN4kzwhZTiRkxgZwjl5PSwsaNmVDdwnZiYkqeBBxqRSiQ==",
+        "resolved": "10.0.0",
+        "contentHash": "BStFkd5CcnEtarlcgYDBcFzGYCuuNMzPs02wN3WBsOFoYIEmYoUdAiU+au6opzoqfTYJsMTW00AeqDdnXH2CvA==",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection": "11.0.0-rc.2.26504.105"
+          "Microsoft.Extensions.DependencyInjection": "10.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Options": "10.0.0"
         }
       },
       "Microsoft.Extensions.Logging.Abstractions": {
@@ -553,7 +533,6 @@
         "dependencies": {
           "Contracts": "[1.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[11.0.0-rc.2.26504.105, )",
-          "Microsoft.Extensions.Identity.Core": "[11.0.0-rc.2.26504.105, )",
           "Observability": "[1.0.0, )",
           "Shared": "[1.0.0, )",
           "System.Linq.Dynamic.Core": "[1.7.4, )",
@@ -623,17 +602,6 @@
         "requested": "[11.0.0-rc.2.26504.105, )",
         "resolved": "11.0.0-rc.2.26504.105",
         "contentHash": "2zf8Zt2/sOYVW1/jXSA6Pq5KWxFBGKFzbRzJOLHwjeiQn+5uWieetzEoPkmOW7Ho+F3FyC4UJMoRkX4927EZXg=="
-      },
-      "Microsoft.Extensions.Identity.Core": {
-        "type": "CentralTransitive",
-        "requested": "[11.0.0-rc.2.26504.105, )",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "3wcpVex+f1Fzw6NAZXLYByiOCWlNq+03vXn0mJ0Pm7pF0da5VnERLjqPvMg+S884P2HmQowhzI/5pWz3Cobd5g==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Cryptography.KeyDerivation": "11.0.0-rc.2.26504.105",
-          "Microsoft.Extensions.Diagnostics": "11.0.0-rc.2.26504.105",
-          "Microsoft.Extensions.Logging": "11.0.0-rc.2.26504.105"
-        }
       },
       "Microsoft.Extensions.Options.ConfigurationExtensions": {
         "type": "CentralTransitive",

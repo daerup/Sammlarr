@@ -35,6 +35,17 @@ public class OnboardingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task ClaimAsync_WithATooShortPassword_CreatesNobody()
+	{
+		await host.NoUsers();
+
+		var claimed = await Testee.ClaimAsync(new AdminClaim(SetupCode, "Ada", "too short", "too short"));
+
+		await Assert.That(claimed).IsError().And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("A password needs at least 12 characters."));
+		await Assert.That(await host.ScopedDbContext.Users.CountAsync()).IsEqualTo(0);
+	}
+
+	[Test]
 	public async Task ClaimAsync_WithAWrongSetupCode_CreatesNobody()
 	{
 		await host.NoUsers();

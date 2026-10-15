@@ -1,9 +1,7 @@
-using DB.Data.Identity;
 using DB.Data.Jobs;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Jobs;
-using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,20 +69,7 @@ public class JobsTableTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var id = Guid.NewGuid();
 		await using var context = await host.ContextFactory.CreateDbContextAsync();
-		context.Users.Add(
-			new UserRow
-			{
-				Id = id,
-				Provider = AuthProvider.Plex,
-				ExternalUserId = id.ToString(),
-				DisplayName = "Second User",
-				TagName = "Second User",
-				AvatarUrl = string.Empty,
-				Role = UserRole.Member,
-				JoinedAt = DateTimeOffset.UnixEpoch,
-			}
-		);
-		await context.SaveChangesAsync();
+		SeedRows.Member(context, SeedRows.User(id, $"plex-{id}", "Second User", string.Empty), UserRole.Member, new None());
 		return id;
 	}
 

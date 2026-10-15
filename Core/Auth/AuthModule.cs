@@ -11,7 +11,6 @@ internal sealed class AuthModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddScoped(typeof(SecretCache<,>));
-		services.AddSingleton<SignInGate>();
 		services.AddTracedScoped<ISignInService, SignInService>();
 		services.AddTracedScoped<IApiKeyService, ApiKeyService>();
 		services.AddTracedScoped<ICredentialService, CredentialService>();

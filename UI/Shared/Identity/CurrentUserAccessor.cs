@@ -36,7 +36,7 @@ internal sealed class CurrentUserAccessor(CurrentUserOverride currentUserOverrid
 			}
 		}
 
-		public string DisplayName => principal.Identity?.Name ?? string.Empty;
+		public string DisplayName => principal.FindFirst(AuthClaims.DisplayName)?.Value ?? string.Empty;
 
 		public string AvatarUrl => principal.FindFirst(AuthClaims.Avatar)?.Value ?? string.Empty;
 

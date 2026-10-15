@@ -1,8 +1,8 @@
 using System.Security.Claims;
-using Domain.Identity;
+using Harness;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace E2E.Tests;
@@ -11,7 +11,7 @@ internal static class AuthCookie
 {
 	internal const string Name = "sammlarr.auth";
 
-	internal static string Forge(string keyRingPath, Guid userId, string displayName, UserRole role)
+	internal static string Forge(string keyRingPath, SeededUser user)
 	{
 		var protector = new ServiceCollection()
 			.AddDataProtection()
@@ -19,14 +19,18 @@ internal static class AuthCookie
 			.SetApplicationName("Sammlarr")
 			.Services.BuildServiceProvider()
 			.GetRequiredService<IDataProtectionProvider>()
-			.CreateProtector("Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationMiddleware", CookieAuthenticationDefaults.AuthenticationScheme, "v2");
+			.CreateProtector("Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationMiddleware", IdentityConstants.ApplicationScheme, "v2");
 
 		var identity = new ClaimsIdentity(
-			[new Claim(ClaimTypes.NameIdentifier, userId.ToString()), new Claim(ClaimTypes.Name, displayName), new Claim(ClaimTypes.Role, role.ToString())],
-			CookieAuthenticationDefaults.AuthenticationScheme
+			[
+				new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+				new Claim(ClaimTypes.Role, user.Role.ToString()),
+				new Claim(new ClaimsIdentityOptions().SecurityStampClaimType, user.SecurityStamp),
+			],
+			IdentityConstants.ApplicationScheme
 		);
 
-		var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), CookieAuthenticationDefaults.AuthenticationScheme);
+		var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), IdentityConstants.ApplicationScheme);
 		return new TicketDataFormat(protector).Protect(ticket);
 	}
 }

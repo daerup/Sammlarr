@@ -43,12 +43,14 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task ChangeRoleAsync_WhenPromotingAMember_PersistsTheRoleAndInvalidatesTheirSession()
 	{
 		var member = await host.SeedExistingUser("member-1", UserRole.Member, "Bob");
+		var stamp = await host.SecurityStampOf(member);
 
 		await Testee.ChangeRoleAsync(member, UserRole.Admin);
 
 		var users = await Testee.GetAllAsync();
 		await Assert.That(users.Single(user => user.Id == member).Role).IsEqualTo(UserRole.Admin);
 		await Assert.That(host.InvalidatedSessions).Contains(member);
+		await Assert.That(await host.SecurityStampOf(member)).IsNotEqualTo(stamp);
 	}
 
 	[Test]

@@ -35,3 +35,4 @@ Domain/Media/ConflictState.cs
 Domain/Media/MergeOutcome.cs
 AppHost/arr/radarr/config.xml
 AppHost/arr/sonarr/config.xml
+Contracts/Identity/PasswordAttempt.cs

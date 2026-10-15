@@ -173,7 +173,7 @@ internal sealed class E2EStack
 		}
 	}
 
-	private static string Forge(string keyRingPath, SeededUser user) => AuthCookie.Forge(keyRingPath, user.Id, user.DisplayName, user.Role);
+	private static string Forge(string keyRingPath, SeededUser user) => AuthCookie.Forge(keyRingPath, user);
 
 	private static Dictionary<TProvider, string> Credentials<TProvider>(string suffix)
 		where TProvider : struct, Enum =>

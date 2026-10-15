@@ -27,5 +27,5 @@ public interface IUserRepository
 
 	Task DeleteAsync(UserId id, CancellationToken cancellationToken = default);
 
-	Task<Optional<UserSession>> FindSessionAsync(UserId id, CancellationToken cancellationToken = default);
+	Task<Optional<UserRole>> FindRoleAsync(UserId id, CancellationToken cancellationToken = default);
 }

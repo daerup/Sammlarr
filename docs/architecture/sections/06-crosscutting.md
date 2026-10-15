@@ -223,14 +223,17 @@ step and compacts the file; a failing step stops the pass. The windows are
 
 ## Authentication and per-user isolation
 
-- An install signs in one way, `ProviderConfig.AuthProvider`: `Plex`, or `Local` accounts whose password is hashed by
-  ASP.NET Core's `PasswordHasher` and posted as a form to `/auth/local` (a Blazor circuit cannot set a cookie).
-  Password sign-ins are checked one at a time per account; five wrong passwords lock the account for 15 minutes. Limits
-  per address belong to the reverse proxy (or fail2ban), which sees the real one; Sammlarr reads no forwarded headers.
-  The Plex round trip binds its state to the browser with a short-lived cookie.
-- The auth cookie is checked against the stored user and role on every request, so a removed user or a changed role
-  is signed out at once. A password change sets `SessionsRevokedAt`, which rejects older cookies; a password change,
-  role change or removal signs open circuits out (`ISessionInvalidator`).
+- Accounts are ASP.NET Core Identity's: the user table, roles (`Admin`, `Member`) and Plex logins are Identity's
+  tables, `UserManager` and `SignInManager` do the work in `DB`, behind the `ILocalAccountRepository`, `IUserRepository` and
+  `ISignInCookie` ports, and each call runs in its own scope so a circuit never holds a context. An install
+  signs in one way, `ProviderConfig.AuthProvider`: `Plex`, or `Local` accounts whose password is posted as a form to
+  `/auth/local` (a Blazor circuit cannot set a cookie). Identity's lockout applies with its defaults: five wrong
+  passwords lock the account for five minutes, and a locked account is told so. Limits per address belong to the
+  reverse proxy (or fail2ban), which sees the real one; Sammlarr reads no forwarded headers. The Plex round trip binds
+  its state to the browser with a short-lived cookie.
+- The cookie is Identity's application cookie. `SecurityStampValidator` checks it on every request
+  (`ValidationInterval` zero), so a password change, a role change (which renews the stamp) or a removal signs the
+  user out on their next page load; open circuits are signed out at once (`ISessionInvalidator`).
 - Isolation lives in persistence ([ADR 0005](../../adr/0005-enforce-per-user-data-isolation.md)): an `IUserOwned`
   entity gets a global query filter on a shadow `UserId`, the current-user lookup throws when nobody is signed in, and
   an ownership stamper sets the owner on insert and blocks changing it. Feeds, wantlist, outbox, blocklist,

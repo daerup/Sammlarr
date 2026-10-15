@@ -3,6 +3,7 @@ using DB.Data.Auth;
 using DB.Data.Identity;
 using Domain.Identity;
 using Domain.Providers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 
 namespace Harness;
@@ -33,22 +34,49 @@ internal static class SeedRows
 
 	internal static void PlexUser(SammlarrDbContext context, Guid id, string displayName, UserRole role, string avatarUrl, double hue)
 	{
-		context.Users.Add(
-			new UserRow
-			{
-				Id = id,
-				Provider = AuthProvider.Plex,
-				ExternalUserId = id.ToString(),
-				DisplayName = displayName,
-				TagName = displayName,
-				AvatarUrl = avatarUrl,
-				Role = role,
-				JoinedAt = DateTimeOffset.UnixEpoch,
-				Hue = hue,
-			}
+		var user = User(id, $"plex-{id}", displayName, avatarUrl);
+		user.Hue = hue;
+		Member(context, user, role, Some.Of(id.ToString()));
+	}
+
+	internal static UserRow User(Guid id, string userName, string displayName, string avatarUrl)
+	{
+		return new UserRow
+		{
+			Id = id,
+			UserName = userName,
+			NormalizedUserName = userName.ToUpperInvariant(),
+			SecurityStamp = Stamp(id),
+			ConcurrencyStamp = Guid.NewGuid().ToString(),
+			LockoutEnabled = true,
+			DisplayName = displayName,
+			TagName = displayName,
+			AvatarUrl = avatarUrl,
+			JoinedAt = DateTimeOffset.UnixEpoch,
+		};
+	}
+
+	internal static string Stamp(Guid id) => id.ToString("N").ToUpperInvariant();
+
+	internal static void Member(SammlarrDbContext context, UserRow user, UserRole role, Optional<string> plexId)
+	{
+		context.Users.Add(user);
+		context.UserRoles.Add(new IdentityUserRole<Guid> { UserId = user.Id, RoleId = RoleId(context, role) });
+		plexId.Apply(key =>
+			context.UserLogins.Add(
+				new IdentityUserLogin<Guid>
+				{
+					LoginProvider = nameof(AuthProvider.Plex),
+					ProviderKey = key,
+					ProviderDisplayName = nameof(AuthProvider.Plex),
+					UserId = user.Id,
+				}
+			)
 		);
 		Save(context);
 	}
+
+	internal static Guid RoleId(SammlarrDbContext context, UserRole role) => context.Roles.Single(found => found.Name == role.ToString()).Id;
 
 	internal static void SetupFinished(SammlarrDbContext context)
 	{

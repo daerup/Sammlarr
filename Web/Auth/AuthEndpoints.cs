@@ -1,11 +1,10 @@
 using System.Security.Claims;
 using Contracts.Auth;
-using Contracts.Identity;
 using Contracts.Setup;
 using Domain.Identity;
 using Domain.Providers;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Shared.Options;
@@ -153,7 +152,7 @@ internal static class AuthEndpoints
 			"/auth/logout",
 			async (HttpContext context) =>
 			{
-				await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+				await context.SignOutAsync(IdentityConstants.ApplicationScheme);
 				return Results.Redirect("/");
 			}
 		);
@@ -161,7 +160,7 @@ internal static class AuthEndpoints
 
 	private static async Task<IResult> SignInAndRedirectAsync(HttpContext context, User user, string? returnUrl)
 	{
-		await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, BuildPrincipal(user));
+		await context.RequestServices.GetRequiredService<ISignInCookie>().SignInAsync(user.Id, context.RequestAborted);
 		return Results.Redirect(ReturnUrls.Target(returnUrl));
 	}
 
@@ -193,17 +192,4 @@ internal static class AuthEndpoints
 		var page = QueryHelpers.AddQueryString("/signin", "authError", error.Reason);
 		return string.IsNullOrWhiteSpace(returnUrl) ? page : QueryHelpers.AddQueryString(page, "returnUrl", returnUrl);
 	}
-
-	private static ClaimsPrincipal BuildPrincipal(User user) =>
-		new(
-			new ClaimsIdentity(
-				[
-					new Claim(ClaimTypes.NameIdentifier, user.Id.Value.ToString()),
-					new Claim(ClaimTypes.Name, user.DisplayName),
-					new Claim(ClaimTypes.Role, user.Role.ToString()),
-					new Claim(AuthClaims.Avatar, user.AvatarUrl),
-				],
-				CookieAuthenticationDefaults.AuthenticationScheme
-			)
-		);
 }

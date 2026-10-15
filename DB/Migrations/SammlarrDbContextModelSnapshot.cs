@@ -15,12 +15,12 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261013215255_ArrDeleteFiles";
+    public override string LastMigrationId => "20261016091523_AccountsOnIdentity";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
 #pragma warning disable 612, 618
-        modelBuilder.HasAnnotation("ProductVersion", "11.0.0-rc.1.26425.128");
+        modelBuilder.HasAnnotation("ProductVersion", "11.0.0-rc.2.26504.105");
 
         modelBuilder.Entity("DB.Data.Auth.ApiKeyConfigRow", b =>
             {
@@ -687,8 +687,15 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .ValueGeneratedOnAdd()
                     .HasColumnType("TEXT");
 
+                b.Property<int>("AccessFailedCount")
+                    .HasColumnType("INTEGER");
+
                 b.Property<string>("AvatarUrl")
                     .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ConcurrencyStamp")
+                    .IsConcurrencyToken()
                     .HasColumnType("TEXT");
 
                 b.Property<string>("ConfigResetHash")
@@ -702,11 +709,11 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasColumnType("TEXT");
 
-                b.Property<string>("ExternalUserId")
-                    .IsRequired()
+                b.Property<string>("Email")
+                    .HasMaxLength(256)
                     .HasColumnType("TEXT");
 
-                b.Property<int>("FailedSignIns")
+                b.Property<bool>("EmailConfirmed")
                     .HasColumnType("INTEGER");
 
                 b.Property<double?>("Hue")
@@ -715,12 +722,28 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Property<long>("JoinedAt")
                     .HasColumnType("INTEGER");
 
-                b.Property<long?>("LockedUntil")
+                b.Property<bool>("LockoutEnabled")
                     .HasColumnType("INTEGER");
 
-                b.Property<string>("PasswordHash")
-                    .HasMaxLength(512)
+                b.Property<long?>("LockoutEnd")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("NormalizedEmail")
+                    .HasMaxLength(256)
                     .HasColumnType("TEXT");
+
+                b.Property<string>("NormalizedUserName")
+                    .HasMaxLength(256)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("PasswordHash")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("PhoneNumber")
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("PhoneNumberConfirmed")
+                    .HasColumnType("INTEGER");
 
                 b.Property<double?>("PictureChroma")
                     .HasColumnType("REAL");
@@ -732,30 +755,33 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .HasMaxLength(2048)
                     .HasColumnType("TEXT");
 
-                b.Property<string>("Provider")
-                    .IsRequired()
+                b.Property<string>("SecurityStamp")
                     .HasColumnType("TEXT");
-
-                b.Property<string>("Role")
-                    .IsRequired()
-                    .HasColumnType("TEXT");
-
-                b.Property<long?>("SessionsRevokedAt")
-                    .HasColumnType("INTEGER");
 
                 b.Property<string>("TagName")
                     .IsRequired()
                     .HasColumnType("TEXT");
 
+                b.Property<bool>("TwoFactorEnabled")
+                    .HasColumnType("INTEGER");
+
                 b.Property<long>("UpdatedAt")
                     .HasColumnType("INTEGER");
 
+                b.Property<string>("UserName")
+                    .HasMaxLength(256)
+                    .HasColumnType("TEXT");
+
                 b.HasKey("Id");
 
-                b.HasIndex("Provider", "ExternalUserId")
-                    .IsUnique();
+                b.HasIndex("NormalizedEmail")
+                    .HasDatabaseName("EmailIndex");
 
-                b.ToTable("Users");
+                b.HasIndex("NormalizedUserName")
+                    .IsUnique()
+                    .HasDatabaseName("UserNameIndex");
+
+                b.ToTable("AspNetUsers");
             });
 
         modelBuilder.Entity("DB.Data.Jobs.JobRow", b =>
@@ -1391,6 +1417,132 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("SourceRunId");
 
                 b.ToTable("Wantlist");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ConcurrencyStamp")
+                    .IsConcurrencyToken()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Name")
+                    .HasMaxLength(256)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("NormalizedName")
+                    .HasMaxLength(256)
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("NormalizedName")
+                    .IsUnique()
+                    .HasDatabaseName("RoleNameIndex");
+
+                b.ToTable("AspNetRoles");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("ClaimType")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ClaimValue")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("RoleId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("RoleId");
+
+                b.ToTable("AspNetRoleClaims");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("ClaimType")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ClaimValue")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("UserId");
+
+                b.ToTable("AspNetUserClaims");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+            {
+                b.Property<string>("LoginProvider")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ProviderKey")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ProviderDisplayName")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("LoginProvider", "ProviderKey");
+
+                b.HasIndex("UserId");
+
+                b.ToTable("AspNetUserLogins");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+            {
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("RoleId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("UserId", "RoleId");
+
+                b.HasIndex("RoleId");
+
+                b.ToTable("AspNetUserRoles");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+            {
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("LoginProvider")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Name")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Value")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("UserId", "LoginProvider", "Name");
+
+                b.ToTable("AspNetUserTokens");
             });
 
         modelBuilder.Entity("TickerQ.Utilities.Entities.CronTickerEntity", b =>
@@ -2054,6 +2206,57 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("SourceFeed");
 
                 b.Navigation("SourceRun");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            {
+                b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                    .WithMany()
+                    .HasForeignKey("RoleId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+            {
+                b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                    .WithMany()
+                    .HasForeignKey("RoleId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
             });
 
         modelBuilder.Entity("TickerQ.Utilities.Entities.CronTickerOccurrenceEntity<TickerQ.Utilities.Entities.CronTickerEntity>", b =>

@@ -30,12 +30,13 @@ public class LocalAccountTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task ChangePasswordAsync_WithTheRightCurrentPassword_SignsInWithTheNewOneAndEndsOlderSessions()
 	{
+		var stamp = await host.SecurityStampOf(host.CurrentUser.Id);
+
 		var changed = await Testee.ChangePasswordAsync(Password, NewPassword);
 
 		await Assert.That(changed).IsSuccess();
 		await Assert.That(await host.Resolve<ISignInService>().SignInWithPasswordAsync("guest", NewPassword)).IsSuccess();
-		await Assert.That(await host.Resolve<ISessionValidator>().IsValidAsync(host.CurrentUser.Id, UserRole.Member, Now.AddMinutes(-1))).IsFalse();
-		await Assert.That(await host.Resolve<ISessionValidator>().IsValidAsync(host.CurrentUser.Id, UserRole.Member, Now.AddMinutes(1))).IsTrue();
+		await Assert.That(await host.SecurityStampOf(host.CurrentUser.Id)).IsNotEqualTo(stamp);
 		await Assert.That(host.InvalidatedSessions).Contains(host.CurrentUser.Id);
 	}
 
@@ -44,7 +45,7 @@ public class LocalAccountTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var changed = await Testee.ChangePasswordAsync("not the password", NewPassword);
 
-		await Assert.That(changed).IsError();
+		await Assert.That(changed).IsError().And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("The current password is not right."));
 		await Assert.That(await host.Resolve<ISignInService>().SignInWithPasswordAsync("guest", Password)).IsSuccess();
 	}
 

@@ -13,6 +13,7 @@ using Domain.Providers;
 using Domain.Wantlist.Outbox;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 
 namespace Integration.Tests.Identity;
@@ -27,7 +28,7 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	private IUserRepository _testee = null!;
 
 	[Before(Test)]
-	public void Setup() => _testee = new UserRepository(fixture.ContextFactory);
+	public void Setup() => _testee = new UserRepository(fixture.ContextFactory, fixture.Resolve<IServiceScopeFactory>());
 
 	[Test]
 	public async Task GetAsync_ReturnsStoredUserWithRealRole()

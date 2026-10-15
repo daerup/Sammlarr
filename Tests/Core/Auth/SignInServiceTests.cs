@@ -21,6 +21,7 @@ public class SignInServiceTests : IDisposable
 
 	private readonly Mock<IOAuthProvider> _plex = IOAuthProvider.Mock();
 	private readonly Mock<IUserRepository> _users = IUserRepository.Mock();
+	private readonly Mock<ILocalAccountRepository> _accounts = ILocalAccountRepository.Mock();
 	private readonly Mock<IProviderConfigService> _config = IProviderConfigService.Mock();
 	private readonly Mock<ILogger<SignInService>> _logger = ILogger<SignInService>.Mock();
 	private readonly SetupGate _setup = new(new AccountsOptions());
@@ -35,11 +36,10 @@ public class SignInServiceTests : IDisposable
 				new FakeKeyedServiceIndex<AuthProvider, IOAuthProvider>().Register(AuthProvider.Plex, _plex.Object),
 				ICredentialService.Mock().Object,
 				_users.Object,
-				ILocalAccountRepository.Mock().Object,
+				_accounts.Object,
 				IUserScope.Mock().Object,
 				_config.Object,
 				IDateTimeProvider.Mock().Object,
-				new SignInGate(),
 				_setup,
 				new WebUiNotificationSeeder(INotificationTargetRepository.Mock().Object, INotificationSubscriptionRepository.Mock().Object),
 				_logger.Object
@@ -85,6 +85,21 @@ public class SignInServiceTests : IDisposable
 
 		await Assert.That(result).IsError();
 		_users.CreateAsync(Any<User>(), Any<AuthProvider>(), Any(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task SignInWithPasswordAsync_ForALockedOutAccount_SaysSoAndWarnsWhichAccount()
+	{
+		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Closed) with { AuthProvider = AuthProvider.Local });
+		_accounts.CheckPasswordAsync("ada", "secret", Any()).Returns(new AccountLockedOut());
+
+		var result = await Testee.SignInWithPasswordAsync("ada", "secret");
+
+		await Assert
+			.That(result)
+			.IsError()
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Too many failed sign-ins. Try again in a few minutes."));
+		await Assert.That(Warnings()).IsEquivalentTo(["Sign-in refused for Local user ada: the account is locked out"]);
 	}
 
 	private static ProviderConfig Config(RegistrationMode registration)

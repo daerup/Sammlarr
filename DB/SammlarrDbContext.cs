@@ -17,6 +17,9 @@ using DB.Data.Ratings;
 using DB.Data.Usage;
 using DB.Data.Wantlist;
 using DB.Data.Wantlist.Outbox;
+using Domain.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -31,7 +34,7 @@ internal sealed class SammlarrDbContext(
 	IEnumerable<IPropertyAddedConvention> propertyConventions,
 	IEnumerable<IModelConfiguration> modelConfigurations,
 	IDateTimeProvider dateTimeProvider
-) : DbContext(options)
+) : IdentityDbContext<UserRow, IdentityRole<Guid>, Guid>(options)
 {
 	private static readonly MethodInfo SetUserFilterMethod = typeof(SammlarrDbContext).GetMethod(
 		nameof(SetUserFilter),
@@ -68,7 +71,6 @@ internal sealed class SammlarrDbContext(
 	public DbSet<BlocklistRow> Blocklist => Set<BlocklistRow>();
 	public DbSet<WantlistRow> Wantlist => Set<WantlistRow>();
 	public DbSet<WantlistOutboxRow> WantlistOutbox => Set<WantlistOutboxRow>();
-	public DbSet<UserRow> Users => Set<UserRow>();
 	public DbSet<AccountLinkRow> AccountLinks => Set<AccountLinkRow>();
 	public DbSet<JobRow> Jobs => Set<JobRow>();
 	public DbSet<NotificationTargetRow> NotificationTargets => Set<NotificationTargetRow>();
@@ -87,28 +89,43 @@ internal sealed class SammlarrDbContext(
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
 		optionsBuilder
-			.UseSeeding((context, _) => EnsureProviderConfig(context))
-			.UseAsyncSeeding((context, _, cancellationToken) => EnsureProviderConfigAsync(context, cancellationToken));
+			.UseSeeding((context, _) => EnsureSeeds(context))
+			.UseAsyncSeeding((context, _, cancellationToken) => EnsureSeedsAsync(context, cancellationToken));
 	}
 
-	private static void EnsureProviderConfig(DbContext context)
+	private static void EnsureSeeds(DbContext context)
 	{
 		var settings = context.Set<ProviderConfigRow>();
 		if (!settings.Any())
 		{
 			settings.Add(ProviderConfigRow.Default);
-			context.SaveChanges();
 		}
+
+		var roles = context.Set<IdentityRole<Guid>>();
+		var existing = roles.Select(role => role.Name).ToList();
+		roles.AddRange(MissingRoles(existing));
+		context.SaveChanges();
 	}
 
-	private static async Task EnsureProviderConfigAsync(DbContext context, CancellationToken cancellationToken)
+	private static async Task EnsureSeedsAsync(DbContext context, CancellationToken cancellationToken)
 	{
 		var settings = context.Set<ProviderConfigRow>();
 		if (!await settings.AnyAsync(cancellationToken))
 		{
 			settings.Add(ProviderConfigRow.Default);
-			await context.SaveChangesAsync(cancellationToken);
 		}
+
+		var roles = context.Set<IdentityRole<Guid>>();
+		var existing = await roles.Select(role => role.Name).ToListAsync(cancellationToken);
+		roles.AddRange(MissingRoles(existing));
+		await context.SaveChangesAsync(cancellationToken);
+	}
+
+	private static IEnumerable<IdentityRole<Guid>> MissingRoles(IReadOnlyCollection<string?> existing)
+	{
+		return Enum.GetNames<UserRole>()
+			.Where(name => !existing.Contains(name))
+			.Select(name => new IdentityRole<Guid>(name) { Id = Guid.NewGuid(), NormalizedName = name.ToUpperInvariant() });
 	}
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
