@@ -14,6 +14,7 @@ internal sealed class AuthenticationModule : IServiceModule
 		{
 			options.Cookie.Name = "sammlarr.auth";
 			options.LoginPath = "/signin";
+			options.AccessDeniedPath = "/";
 			options.ReturnUrlParameter = "returnUrl";
 			options.ExpireTimeSpan = TimeSpan.FromDays(30);
 			options.SlidingExpiration = true;
