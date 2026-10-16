@@ -15,6 +15,8 @@ concurrency:
 env:
   HUSKY: '0'
   DOTNET_NOLOGO: 'true'
+  TUNIT_DISABLE_GITHUB_REPORTER: 'true'
+  TUNIT_DISABLE_HTML_REPORTER: 'true'
   CONFIGURATION: ${{ startsWith(github.head_ref, 'release-please--') && 'Release' || 'Debug' }}
 
 jobs:
@@ -52,9 +54,17 @@ jobs:
           for tier in Domain Shared Core API Integration UI Web Architecture Roslyn; do
             dotnet run --project "tests/$tier" --no-build -c "$CONFIGURATION" -- \
               --coverage --coverage-output-format cobertura --coverage-output "$tier.cobertura.xml" \
-              --coverage-settings "$GITHUB_WORKSPACE/.github/coverage.xml" || status=1
+              --coverage-settings "$GITHUB_WORKSPACE/.github/coverage.xml" \
+              --report-trx --report-trx-filename "$RUNNER_TEMP/test-results/$tier.trx" || status=1
           done
           exit $status
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: test-results
+          path: ${{ runner.temp }}/test-results
+          retention-days: 7
 
       - name: Coverage
         run: >
@@ -255,4 +265,13 @@ jobs:
 
       - run: pwsh "tests/E2E/bin/$CONFIGURATION/net11.0/playwright.ps1" install --with-deps chromium
 
-      - run: PUID=$(id -u) PGID=$(id -g) dotnet run --project tests/E2E --no-build -c "$CONFIGURATION"
+      - run: >
+          PUID=$(id -u) PGID=$(id -g) dotnet run --project tests/E2E --no-build -c "$CONFIGURATION" --
+          --report-trx --report-trx-filename "$RUNNER_TEMP/test-results/E2E.trx"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: test-results-e2e
+          path: ${{ runner.temp }}/test-results
+          retention-days: 7
