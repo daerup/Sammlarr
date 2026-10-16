@@ -41,6 +41,26 @@ public class LocalAccountTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task ChangePasswordAsync_AfterFiveWrongCurrentPasswords_LocksTheAccount()
+	{
+		for (var attempt = 0; attempt < 5; attempt++)
+		{
+			await Testee.ChangePasswordAsync("not the password", NewPassword);
+		}
+
+		var changed = await Testee.ChangePasswordAsync(Password, NewPassword);
+
+		await Assert
+			.That(changed)
+			.IsError()
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Too many failed sign-ins. Try again in a few minutes."));
+		await Assert
+			.That(await host.Resolve<ISignInService>().SignInWithPasswordAsync("guest", Password))
+			.IsError()
+			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Too many failed sign-ins. Try again in a few minutes."));
+	}
+
+	[Test]
 	public async Task ChangePasswordAsync_WithAWrongCurrentPassword_KeepsTheOldOne()
 	{
 		var changed = await Testee.ChangePasswordAsync("not the password", NewPassword);
