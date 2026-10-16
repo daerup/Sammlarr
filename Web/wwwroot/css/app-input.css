@@ -7,7 +7,7 @@
 @config "../../../UI/tailwind.config.js";
 
 /* Import Tailwind with full theme (preflight is minimal, blazorblueprint.css provides resets) */
-@import 'tailwindcss';
+@import 'tailwindcss' source(none);
 
 /* Scan the component library and the host for utility classes */
 @source "../../../UI/Features";
