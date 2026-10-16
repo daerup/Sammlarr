@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+		<PackageReference Include="Dapper" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Core\Core.csproj" />
+		<ProjectReference Include="..\..\src\API\API.csproj" />
+		<ProjectReference Include="..\..\src\DB\DB.csproj" />
+		<ProjectReference Include="..\..\src\Messaging\Messaging.csproj" />
+		<ProjectReference Include="..\TestInfrastructure\TestInfrastructure.csproj" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<!-- CS8524: allow exhaustive-over-named enum switches without a default arm (Razor compiler warnings ignore .editorconfig). -->
+		<NoWarn>$(NoWarn);CS8524</NoWarn>
+		<NoWarn>$(NoWarn);BL0013;BL0016</NoWarn>
+	</PropertyGroup>
+	<ItemGroup>
+		<Using Include="Microsoft.Extensions.DependencyInjection" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Contracts\Contracts.csproj" />
+		<ProjectReference Include="..\Shared\Shared.csproj" />
+		<ProjectReference Include="..\Observability\Observability.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+		<PackageReference Include="BlazorBlueprint.Components" />
+		<PackageReference Include="BlazorBlueprint.Primitives" />
+		<PackageReference Include="BlazorBlueprint.Icons.Lucide" />
+		<PackageReference Include="CronExpressionDescriptor" />
+		<PackageReference Include="Serilog" />
+	</ItemGroup>
+	<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
+		<Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
+		<Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="..\.." />
+	</Target>
+	<ItemGroup>
+		<EmbeddedResource Include="wwwroot\providers\credits.json" LogicalName="UI.providers.credits.json" />
+	</ItemGroup>
+	<ItemGroup>
+		<Content Update="Shared\PaginationControls.razor.css">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</Content>
+		<Content Remove="Shared\Media\SearchTile\Skeleton.razor" />
+		<Content Update="Shared\Media\MediaDetailSheet.razor.css">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</Content>
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<Content Remove="Features\Settings\Components\Testing\**" />
+		<None Remove="Features\Settings\Components\Testing\**" />
+		<Compile Remove="Features\Settings\Components\Testing\**" />
+	</ItemGroup>
+</Project>

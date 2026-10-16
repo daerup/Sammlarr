@@ -300,11 +300,11 @@ resharper_usage_of_default_struct_equality_highlighting = suggestion
 resharper_using_statement_resource_initialization_highlighting = suggestion
 resharper_variable_hides_outer_variable_highlighting = suggestion
 
-[DB/Migrations/*.cs]
+[src/DB/Migrations/*.cs]
 generated_code = true
 
 # analyzers: off in tests
-[Tests/**.cs]
+[tests/**.cs]
 dotnet_diagnostic.CA1506.severity = none
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1816.severity = none
@@ -353,6 +353,6 @@ end_of_line = crlf
 
 # Optional/Result stay in the flat `Shared` namespace: folding to `Shared.Optional`/`Shared.Result`
 # would collide with the eponymous `Optional`/`Result` types. Skip the folder-to-namespace check there.
-[Shared/{Optional,Result}/*.cs]
+[src/Shared/{Optional,Result}/*.cs]
 dotnet_style_namespace_match_folder = false
 resharper_check_namespace_highlighting = none

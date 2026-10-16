@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Bogus" />
+		<PackageReference Include="CsCheck" />
+		<PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+		<PackageReference Include="TUnit" />
+		<PackageReference Include="TUnit.Assertions" />
+		<PackageReference Include="TUnit.Core" />
+		<PackageReference Include="TUnit.Mocks" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Shared\Shared.csproj" />
+		<ProjectReference Include="..\..\src\Contracts\Contracts.csproj" />
+		<ProjectReference Include="..\..\src\Domain\Domain.csproj" />
+		<ProjectReference Include="..\..\src\Observability\Observability.csproj" />
+		<ProjectReference Include="..\TestInfrastructure\TestInfrastructure.csproj" />
+	</ItemGroup>
+</Project>

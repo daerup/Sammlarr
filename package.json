@@ -1,10 +1,10 @@
 {
   "name": "sammlarr-styles",
   "private": true,
-  "description": "Tailwind build for Web/wwwroot/css/app.css. Runs automatically from Web.csproj; `npm run css` to do it by hand.",
+  "description": "Tailwind build for src/Web/wwwroot/css/app.css. Runs automatically from Web.csproj; `npm run css` to do it by hand.",
   "scripts": {
-    "css": "tailwindcss -i Web/wwwroot/css/app-input.css -o Web/wwwroot/css/app.css",
-    "css:watch": "tailwindcss -i Web/wwwroot/css/app-input.css -o Web/wwwroot/css/app.css --watch"
+    "css": "tailwindcss -i src/Web/wwwroot/css/app-input.css -o src/Web/wwwroot/css/app.css",
+    "css:watch": "tailwindcss -i src/Web/wwwroot/css/app-input.css -o src/Web/wwwroot/css/app.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.3",

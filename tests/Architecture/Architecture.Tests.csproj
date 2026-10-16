@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="NetArchTest.eNhancedEdition" />
+		<PackageReference Include="TUnit" />
+		<PackageReference Include="TUnit.Assertions" />
+		<PackageReference Include="TUnit.Core" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Shared\Shared.csproj" />
+		<ProjectReference Include="..\..\src\Domain\Domain.csproj" />
+		<ProjectReference Include="..\..\src\Contracts\Contracts.csproj" />
+		<ProjectReference Include="..\..\src\Core\Core.csproj" />
+		<ProjectReference Include="..\..\src\DB\DB.csproj" />
+		<ProjectReference Include="..\..\src\API\API.csproj" />
+		<ProjectReference Include="..\..\src\Observability\Observability.csproj" />
+		<ProjectReference Include="..\..\src\UI\UI.csproj" />
+		<ProjectReference Include="..\..\src\Messaging\Messaging.csproj" />
+	</ItemGroup>
+</Project>

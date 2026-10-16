@@ -11,7 +11,7 @@ test. Tiers and how to run them: [Testing](../testing.md).
 | Correctness of list building | A title is matched from identity keys only; one title is one library row; ids that would join two stored titles settle as a conflict, never a merge; a Mirror feed drops nothing after a load it cannot trust | Scenarios C and M |
 | Resilience of provider calls | A 429 or a lookup outage slows a run and leaves titles unmatched, never dropped (only an unreadable list fails a run); a blocked service slows only the titles that need it | Scenario R |
 | Per-user data isolation | Reads filtered to the current user, writes stamped with the owner, a query without a user throws, background work runs as the owner | Scenario I |
-| Maintainability | Unions and strong types, strict layering, least visibility, one test naming rule; role enums and module wiring by hand, the compiler finding every switch a new service joins ([ADR 0010](../../adr/0010-split-the-ids-from-the-services-sammlarr-calls.md)); options registration, `SuppliedBy` and `AsyncMirror` generated | `Tests/Architecture` (`AbsenceTests` among them); `RoleRegistrationTests`; analyzers `SAM0001` (test names), `SAM0002` and `SAM0003` (`Optional` and `Result` through their helpers) |
+| Maintainability | Unions and strong types, strict layering, least visibility, one test naming rule; role enums and module wiring by hand, the compiler finding every switch a new service joins ([ADR 0010](../../adr/0010-split-the-ids-from-the-services-sammlarr-calls.md)); options registration, `SuppliedBy` and `AsyncMirror` generated | `tests/Architecture` (`AbsenceTests` among them); `RoleRegistrationTests`; analyzers `SAM0001` (test names), `SAM0002` and `SAM0003` (`Optional` and `Result` through their helpers) |
 
 Scenario P, load speed, supports the first two goals.
 
@@ -26,8 +26,8 @@ Scenario P, load speed, supports the first two goals.
   unmatched as a conflict naming both titles (`UnmatchedMedia.ConflictsWith`) and the run completes; an enricher's key
   that would join two titles is dropped. Keys carry the media type, so a movie and a show sharing a number never meet;
   rating page links (Rotten Tomatoes, Metacritic, Letterboxd) are not keys, so remakes sharing a slug stay two titles.
-- **Measure**: `ClaimRuleTests` and the CsCheck laws in `ClaimRuleLaws` (`Tests/Domain/Media`); `IdentityClaimsTests`
-  and `FeedRunIdentityTests` (`Tests/Integration`); the nightly merge in `DuplicateTitlesTests` and `MediaMergeTests`.
+- **Measure**: `ClaimRuleTests` and the CsCheck laws in `ClaimRuleLaws` (`tests/Domain/Media`); `IdentityClaimsTests`
+  and `FeedRunIdentityTests` (`tests/Integration`); the nightly merge in `DuplicateTitlesTests` and `MediaMergeTests`.
 - **Limit**: one shared key is enough to extend a row ("Identity on one shared key" in
   [Risks and Technical Debt](08-risks-technical-debt.md)).
 
@@ -38,7 +38,7 @@ Scenario P, load speed, supports the first two goals.
   title that couldn't be looked up.
 - **Response**: the plan is inconclusive and drops nothing. On a conclusive load an owned title goes only after it has
   been missing for `AbsenceThreshold` runs.
-- **Measure**: `FeedPlanTests` and the property tests in `FeedPlanProperties` (`Tests/Domain/Feed`).
+- **Measure**: `FeedPlanTests` and the property tests in `FeedPlanProperties` (`tests/Domain/Feed`).
 
 ### R: a service rate-limits or goes down
 
@@ -51,14 +51,14 @@ Scenario P, load speed, supports the first two goals.
   If nothing settles for `StallAfter`, the watchdog settles the rest and the run is recorded.
 - **Measure**: `FeedRunApplyTests.RunAsync_WithTmdbBlocked_SettlesTheTitlesThatDontNeedTmdb`,
   `FeedRunTests.Run_WithAServiceBlockedForever_EndsAfterStallAfterWithEveryTitleSettled`, `AnsweringTests`, and
-  `LaneGateTests` and `KeyedLaneTests` (`Tests/API/Http`). Mechanism:
+  `LaneGateTests` and `KeyedLaneTests` (`tests/API/Http`). Mechanism:
   [Lanes and HTTP resilience](06-crosscutting.md#lanes-and-http-resilience).
 
 ### I: per-user isolation
 
 - **Stimulus**: user B opens feeds, wantlist or blocklist while user A's rows exist.
 - **Response**: B sees only B's rows. A query on a user-owned table with no signed-in user throws.
-- **Measure**: `UserIsolationTests` and `UserOwnedAccessGuardTests` (`Tests/Integration/Identity`; the guard fails
+- **Measure**: `UserIsolationTests` and `UserOwnedAccessGuardTests` (`tests/Integration/Identity`; the guard fails
   closed and covers every user-owned entity).
 
 ### P: a cached list loads again

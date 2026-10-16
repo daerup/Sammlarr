@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsTestProject>true</IsTestProject>
+		<OutputType>Exe</OutputType>
+		<RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+		<UserSecretsId>c2b860a4-38b3-426b-a453-be7854249bcd</UserSecretsId>
+	</PropertyGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="TUnit" />
+		<PackageReference Include="TUnit.Playwright" />
+		<PackageReference Include="Aspire.Hosting.Testing" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\AppHost\AppHost.csproj" />
+		<ProjectReference Include="..\Harness\Harness.csproj" />
+		<ProjectReference Include="..\..\src\Web\Web.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Remove="wiremock\responses\plex-metadata\library-metadata-5d7768f6ad5437001f75426f.verified.json" />
+		<None Remove="wiremock\responses\plex-metadata\library-metadata-5d776d16f617c90020185db0.verified.json" />
+		<None Remove="wiremock\responses\plex-metadata\library-metadata-5d9c0849ba6eb9001fba0171.verified.json" />
+		<None Remove="wiremock\responses\plex-metadata\library-metadata-5f407c7fbf3e560040c56e3a.verified.json" />
+		<None Remove="wiremock\responses\plex-metadata\library-metadata-5f40830f537293003d411445.verified.json" />
+		<None Remove="wiremock\responses\plex-metadata\library-metadata-61b180686bfb4feb48515e07.verified.json" />
+		<None Remove="wiremock\responses\plex-metadata\library-metadata-67532bafcd26edcc810aea48.verified.json" />
+		<None Remove="wiremock\responses\plex-metadata\library-metadata-682324b73e6bdf304c6137d4.verified.json" />
+		<None Remove="wiremock\responses\tmdb\movie-1137844.verified.json" />
+	</ItemGroup>
+</Project>

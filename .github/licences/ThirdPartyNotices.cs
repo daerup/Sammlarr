@@ -35,7 +35,7 @@ internal static class ThirdPartyNotices
 			Read<LicenceOverride[]>(".github/licences/overrides.json"),
 			Read<Dictionary<string, string>>(".github/licences/copyrights.json"),
 			texts,
-			[.. Assets("UI/wwwroot/providers/credits.json", "providers/"), .. Assets(".github/licences/assets.json", "")]
+			[.. Assets("src/UI/wwwroot/providers/credits.json", "providers/"), .. Assets(".github/licences/assets.json", "")]
 		);
 		var output = Path.GetDirectoryName(depsFile)!;
 		File.WriteAllText(Path.Combine(output, "third-party-notices.json"), Json(notices));

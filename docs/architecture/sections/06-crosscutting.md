@@ -41,7 +41,7 @@ The custom analyzers and the `AbsenceTests` architecture test enforce these rule
 
 ## Modules and dependency injection
 
-Every layer and provider ships an `IServiceModule` (`Shared/DI`), composed in `Web/Program.cs` with `AddModule<T>()`
+Every layer and provider ships an `IServiceModule` (`src/Shared/DI`), composed in `src/Web/Program.cs` with `AddModule<T>()`
 ([Building Block View](03-building-blocks.md)). A service with several implementations is keyed by an enum
 (`IFeedProvider` by `FeedProvider`), resolved through `IKeyedServiceIndex<TKey, TService>` or, to list the keys and
 find one, `IKeyedServiceSet<TKey, TService>`.
@@ -61,17 +61,17 @@ find one, `IKeyedServiceSet<TKey, TService>`.
 
 Providers are registered by hand ([ADR 0010](../../adr/0010-split-the-ids-from-the-services-sammlarr-calls.md),
 [ADR 0011](../../adr/0011-give-a-service-every-role-its-api-supports.md)): a provider module registers its clients,
-key check, roles, id converters and enrichers through `ForRemote<TOptions>(RemoteService)` (`API/Http`), Radarr +
+key check, roles, id converters and enrichers through `ForRemote<TOptions>(RemoteService)` (`src/API/Http`), Radarr +
 Sonarr their sink and search through `ForService`. Each role registration records who registered it and which service
 the role claims (`Registered`).
 
 - **A service:** a `RemoteService` member with its `Access` and `OwnIds` arms, its brand
-  (`UI/Shared/Services/Branding/MediaProviderBrandingService.cs` plus the art), an options record with its section
-  (and lanes) in `Web/appsettings.json`, and a module under `API/<Service>`. A key adds an `ApiKeyProvider` slot and a
+  (`src/UI/Shared/Services/Branding/MediaProviderBrandingService.cs` plus the art), an options record with its section
+  (and lanes) in `src/Web/appsettings.json`, and a module under `src/API/<Service>`. A key adds an `ApiKeyProvider` slot and a
   key check registered with `ApiKey<T>(slot)`; a sign-in adds an `AuthProvider` member and one class, registered with
   `Credential<T>`, that signs people in and checks their stored token; a keyless service is `Open`.
 - **An id source:** a `MediaProvider` member with its id type, its arms in `MediaProvider.Role` and the stored-id
-  conversion (`DB/Data/Media/MediaIdConversionExtensions.cs`), its brand and an `IExternalPageLinker`.
+  conversion (`src/DB/Data/Media/MediaIdConversionExtensions.cs`), its brand and an `IExternalPageLinker`.
 - **A rating source:** a `RatingSource` member with `[SuppliedBy<RemoteService>]` (a generator derives `SuppliedBy()`
   and `SuppliedRatingSources()`), a rating type behind `IOwnedRating<TSelf>`, its `Card` arm, each supplier's wire
   mapping and its `RatingTexts`.
@@ -86,7 +86,7 @@ registration matches its claimed service; every role member, remote service and 
 
 ## Lanes and HTTP resilience
 
-Every call to a remote service passes a _lane_ (`API/Http/Lanes`): one per service and route, and one per key for
+Every call to a remote service passes a _lane_ (`src/API/Http/Lanes`): one per service and route, and one per key for
 MDBList and per app for Radarr and Sonarr. A lane paces its service by the limits the provider publishes, so Core
 never sleeps or throttles ([ADR 0017](../../adr/0017-pace-remote-calls-on-lanes-with-limits-as-published.md)). A remote
 client's pipeline, outermost first:
@@ -102,7 +102,7 @@ resilience handler instead.
 ### Limits per service
 
 A limit is written as the provider publishes it, requests per window. The `Http` section of each provider in
-`Web/appsettings.json`:
+`src/Web/appsettings.json`:
 
 | Service | Lanes (`Http.Lanes`) | Waits |
 |---|---|---|
@@ -179,7 +179,7 @@ State is one SQLite file through EF Core ([ADR 0004](../../adr/0004-store-all-st
   housekeeping leaves its tables alone.
 - `IDatabaseFile.CompactAsync` truncates the log and vacuums when a tenth of the pages are free, after a dataset load
   and after the housekeeping pass.
-- `DbInitializer` applies the migrations in `DB/Migrations` at start-up; `UseSeeding` inserts the provider-config row.
+- `DbInitializer` applies the migrations in `src/DB/Migrations` at start-up; `UseSeeding` inserts the provider-config row.
   Enums are stored as names, `DateTimeOffset` as binary; `SaveChanges` stamps audit timestamps and the owner.
 
 The `Housekeeping` ticker runs `HousekeepingPass` nightly at 03:00 (`HousekeepingSchedule`), or on demand from
@@ -209,8 +209,8 @@ step and compacts the file; a failing step stops the pass. The windows are
 - `[Encrypted]` (`DB`) encrypts stored secrets (credentials, API keys, the Radarr and Sonarr keys, notification-target
   secrets) through an EF converter over ASP.NET Core Data Protection. `[Sensitive]` (`Contracts`) only masks a member
   as `***` in logs; a Domain type names its secrets in `SensitiveModel` (`Observability`) instead.
-- Static settings (URLs, timeouts, lanes) are options records in `Shared/Options`, each an `IOptionsSection` naming
-  its section; a generator (`Roslyn/Options`) binds them all, so a component injects the record itself.
+- Static settings (URLs, timeouts, lanes) are options records in `src/Shared/Options`, each an `IOptionsSection` naming
+  its section; a generator (`src/Roslyn/Options`) binds them all, so a component injects the record itself.
 - Settings an admin changes at run time (the sink, the Radarr and Sonarr connections with their keys, the trending,
   search and sign-in providers, the registration mode) are `ProviderConfig`: one global row, cached by
   `ProviderConfigService`.
