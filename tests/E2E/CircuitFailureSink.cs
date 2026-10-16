@@ -1,38 +1,49 @@
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace E2E.Tests;
 
-internal sealed class CircuitFailureSink(string category, string marker, string traceName, Action<string> capture) : ILoggerProvider
+internal sealed partial class CircuitFailureSink(string category, string marker, string traceName, Action<string> capture) : ILoggerProvider
 {
-	private const int TrailingLines = 15;
-
 	private static readonly string? TraceDirectory = Environment.GetEnvironmentVariable("E2E_RESOURCE_LOG");
 
 	private static readonly Lock TraceGate = new();
 
-	private int _remaining;
+	private bool _capturing;
 
 	public ILogger CreateLogger(string categoryName) => categoryName.StartsWith(category, StringComparison.Ordinal) ? new Sink(this) : NullLogger.Instance;
 
 	public void Dispose() { }
+
+	internal static void AssertNone(IReadOnlyCollection<string> crashed)
+	{
+		if (crashed.Count > 0)
+		{
+			Assert.Fail($"A circuit crashed:{Environment.NewLine}{string.Join(Environment.NewLine, crashed)}");
+		}
+	}
 
 	private void Observe(string message)
 	{
 		Trace(message);
 		if (message.Contains(marker, StringComparison.Ordinal))
 		{
-			_remaining = TrailingLines;
-			capture(message);
-			return;
+			_capturing = true;
+		}
+		else if (LogEntry().IsMatch(message))
+		{
+			_capturing = false;
 		}
 
-		if (_remaining > 0)
+		if (_capturing)
 		{
-			_remaining--;
 			capture(message);
 		}
 	}
+
+	[GeneratedRegex(@"^\d+: \S+ \[\d{2}:\d{2}:\d{2}\.\d{3} [A-Z]{3}\] ")]
+	private static partial Regex LogEntry();
 
 	private void Trace(string message)
 	{

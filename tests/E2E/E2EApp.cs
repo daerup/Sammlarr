@@ -220,7 +220,7 @@ public static class E2EApp
 		}
 
 		await Assert.That(unmatched.Distinct()).IsEmpty();
-		await Assert.That(crashed).IsEmpty();
+		CircuitFailureSink.AssertNone(crashed);
 	}
 
 	[After(TestSession, Order = 1)]
