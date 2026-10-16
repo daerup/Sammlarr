@@ -11,14 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DB.Migrations;
 
 [DbContext(typeof(SammlarrDbContext))]
-[Migration("20261004154304_UserTagName")]
-partial class _20261004154304_UserTagName
+[Migration("20261016151958_Baseline")]
+partial class _20261016151958_Baseline
 {
     /// <inheritdoc />
     protected override void BuildTargetModel(ModelBuilder modelBuilder)
     {
 #pragma warning disable 612, 618
-        modelBuilder.HasAnnotation("ProductVersion", "11.0.0-rc.1.26425.128");
+        modelBuilder.HasAnnotation("ProductVersion", "11.0.0-rc.2.26504.105");
 
         modelBuilder.Entity("DB.Data.Auth.ApiKeyConfigRow", b =>
             {
@@ -135,6 +135,10 @@ partial class _20261004154304_UserTagName
                     .HasMaxLength(64)
                     .HasColumnType("TEXT");
 
+                b.Property<string>("ArrTagProtection")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
                 b.Property<string>("ArrTagUserSource")
                     .IsRequired()
                     .HasColumnType("TEXT");
@@ -145,27 +149,6 @@ partial class _20261004154304_UserTagName
 
                 b.Property<long?>("OnboardingCompletedAt")
                     .HasColumnType("INTEGER");
-
-                b.Property<string>("RadarrApiKey")
-                    .HasMaxLength(4096)
-                    .HasColumnType("TEXT");
-
-                b.Property<bool>("RadarrMonitored")
-                    .HasColumnType("INTEGER");
-
-                b.Property<int?>("RadarrQualityProfileId")
-                    .HasColumnType("INTEGER");
-
-                b.Property<string>("RadarrRootFolderPath")
-                    .HasMaxLength(1024)
-                    .HasColumnType("TEXT");
-
-                b.Property<bool>("RadarrSearchOnAdd")
-                    .HasColumnType("INTEGER");
-
-                b.Property<string>("RadarrUrl")
-                    .HasMaxLength(2048)
-                    .HasColumnType("TEXT");
 
                 b.Property<string>("RegistrationMode")
                     .IsRequired()
@@ -179,27 +162,6 @@ partial class _20261004154304_UserTagName
                     .IsRequired()
                     .HasColumnType("TEXT");
 
-                b.Property<string>("SonarrApiKey")
-                    .HasMaxLength(4096)
-                    .HasColumnType("TEXT");
-
-                b.Property<bool>("SonarrMonitored")
-                    .HasColumnType("INTEGER");
-
-                b.Property<int?>("SonarrQualityProfileId")
-                    .HasColumnType("INTEGER");
-
-                b.Property<string>("SonarrRootFolderPath")
-                    .HasMaxLength(1024)
-                    .HasColumnType("TEXT");
-
-                b.Property<bool>("SonarrSearchOnAdd")
-                    .HasColumnType("INTEGER");
-
-                b.Property<string>("SonarrUrl")
-                    .HasMaxLength(2048)
-                    .HasColumnType("TEXT");
-
                 b.Property<string>("TrendingProvider")
                     .IsRequired()
                     .HasColumnType("TEXT");
@@ -207,27 +169,159 @@ partial class _20261004154304_UserTagName
                 b.HasKey("Id");
 
                 b.ToTable("ProviderConfig");
+            });
 
-                b.HasData(
-                    new
-                    {
-                        Id = 1,
-                        ArrTagFeedSource = "ListName",
-                        ArrTagPerFeed = true,
-                        ArrTagPerUser = true,
-                        ArrTagPlainPrefix = false,
-                        ArrTagPrefix = "sammlarr",
-                        ArrTagUserSource = "Name",
-                        AuthProvider = "Plex",
-                        RadarrMonitored = true,
-                        RadarrSearchOnAdd = true,
-                        RegistrationMode = "Open",
-                        SearchProvider = "Tmdb",
-                        Sink = "Plex",
-                        SonarrMonitored = true,
-                        SonarrSearchOnAdd = true,
-                        TrendingProvider = "Tmdb"
-                    });
+        modelBuilder.Entity("DB.Data.Datasets.AnimeIdRow", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER");
+
+                b.Property<int?>("AniListId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("ImdbId")
+                    .HasColumnType("TEXT");
+
+                b.Property<int?>("MalId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int?>("SeriesTvdbId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int?>("TmdbId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int?>("TvdbId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Type")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("AniListId");
+
+                b.HasIndex("MalId");
+
+                b.HasIndex("TvdbId");
+
+                b.HasIndex("ImdbId", "Type");
+
+                b.HasIndex("TmdbId", "Type");
+
+                b.ToTable("AnimeIds");
+            });
+
+        modelBuilder.Entity("DB.Data.Datasets.DatasetCheckRow", b =>
+            {
+                b.Property<string>("Name")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Failure")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("FinishedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Outcome")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("StartedAt")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Name");
+
+                b.ToTable("DatasetChecks");
+            });
+
+        modelBuilder.Entity("DB.Data.Datasets.DatasetLoadRow", b =>
+            {
+                b.Property<string>("Name")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ETag")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("LoadedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int>("Rows")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Name");
+
+                b.ToTable("DatasetLoads");
+            });
+
+        modelBuilder.Entity("DB.Data.Datasets.ImdbRatingRow", b =>
+            {
+                b.Property<int>("Id")
+                    .HasColumnType("INTEGER");
+
+                b.Property<byte>("Score")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int>("Votes")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Id");
+
+                b.ToTable("ImdbRatings");
+            });
+
+        modelBuilder.Entity("DB.Data.Feed.DeletedFeedRow", b =>
+            {
+                b.Property<Guid>("FeedId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("DeletedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Provider")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("FeedId");
+
+                b.HasIndex("DeletedAt");
+
+                b.HasIndex("UserId");
+
+                b.ToTable("DeletedFeeds");
+            });
+
+        modelBuilder.Entity("DB.Data.Feed.FeedAbsenceRow", b =>
+            {
+                b.Property<Guid>("FeedId")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("MediaId")
+                    .HasColumnType("TEXT");
+
+                b.Property<int>("MissedRuns")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("FeedId", "MediaId");
+
+                b.HasIndex("MediaId");
+
+                b.HasIndex("UserId");
+
+                b.ToTable("FeedAbsences");
             });
 
         modelBuilder.Entity("DB.Data.Feed.FeedRow", b =>
@@ -285,6 +379,45 @@ partial class _20261004154304_UserTagName
                 b.HasIndex("UserId");
 
                 b.ToTable("Feeds");
+            });
+
+        modelBuilder.Entity("DB.Data.Feed.Run.FeedRunCallsRow", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("Calls")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long>("CreatedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid>("FeedRunId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Outcome")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Service")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("UpdatedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("UserId");
+
+                b.HasIndex("FeedRunId", "Service", "Outcome")
+                    .IsUnique();
+
+                b.ToTable("FeedRunCalls");
             });
 
         modelBuilder.Entity("DB.Data.Feed.Run.FeedRunItemRow", b =>
@@ -353,6 +486,12 @@ partial class _20261004154304_UserTagName
                 b.Property<int>("Kept")
                     .HasColumnType("INTEGER");
 
+                b.Property<int>("Known")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int>("NotFoundEarlier")
+                    .HasColumnType("INTEGER");
+
                 b.Property<int>("Removed")
                     .HasColumnType("INTEGER");
 
@@ -376,7 +515,13 @@ partial class _20261004154304_UserTagName
                     .IsRequired()
                     .HasColumnType("TEXT");
 
-                b.Property<int>("Unmatched")
+                b.Property<int>("UnmatchedConflict")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int>("UnmatchedCouldNotLookUp")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int>("UnmatchedNotFound")
                     .HasColumnType("INTEGER");
 
                 b.Property<long>("UpdatedAt")
@@ -394,59 +539,89 @@ partial class _20261004154304_UserTagName
                 b.ToTable("FeedRuns");
             });
 
-        modelBuilder.Entity("DB.Data.Identity.AccountLinkRow", b =>
+        modelBuilder.Entity("DB.Data.Feed.Run.FeedRunTimesRow", b =>
             {
                 b.Property<Guid>("Id")
                     .ValueGeneratedOnAdd()
                     .HasColumnType("TEXT");
 
+                b.Property<long>("Attempts")
+                    .HasColumnType("INTEGER");
+
                 b.Property<long>("CreatedAt")
                     .HasColumnType("INTEGER");
 
-                b.Property<string>("DisplayName")
-                    .IsRequired()
-                    .HasMaxLength(128)
+                b.Property<Guid>("FeedRunId")
                     .HasColumnType("TEXT");
 
-                b.Property<long>("ExpiresAt")
+                b.Property<string>("Service")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<int>("UpToMs")
                     .HasColumnType("INTEGER");
-
-                b.Property<string>("IssuedBy")
-                    .IsRequired()
-                    .HasMaxLength(128)
-                    .HasColumnType("TEXT");
-
-                b.Property<string>("Kind")
-                    .IsRequired()
-                    .HasColumnType("TEXT");
-
-                b.Property<string>("TokenHash")
-                    .IsRequired()
-                    .HasMaxLength(64)
-                    .HasColumnType("TEXT");
 
                 b.Property<long>("UpdatedAt")
                     .HasColumnType("INTEGER");
 
-                b.Property<Guid?>("UserId")
-                    .HasColumnType("TEXT");
-
-                b.Property<string>("Username")
-                    .IsRequired()
-                    .HasMaxLength(128)
+                b.Property<Guid>("UserId")
                     .HasColumnType("TEXT");
 
                 b.HasKey("Id");
 
-                b.HasIndex("TokenHash")
-                    .IsUnique();
-
                 b.HasIndex("UserId");
 
-                b.HasIndex("Kind", "Username")
+                b.HasIndex("FeedRunId", "Service", "UpToMs")
                     .IsUnique();
 
-                b.ToTable("AccountLinks");
+                b.ToTable("FeedRunTimes");
+            });
+
+        modelBuilder.Entity("DB.Data.Housekeeping.HousekeepingReportRow", b =>
+            {
+                b.Property<int>("Id")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long?>("BytesAfter")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long?>("BytesBefore")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("FailedStep")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("FailureReason")
+                    .HasColumnType("TEXT");
+
+                b.Property<long?>("FinishedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long>("StartedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<bool?>("Vacuumed")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Id");
+
+                b.ToTable("HousekeepingReports");
+            });
+
+        modelBuilder.Entity("DB.Data.Housekeeping.HousekeepingStepRow", b =>
+            {
+                b.Property<int>("ReportId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Step")
+                    .HasColumnType("TEXT");
+
+                b.Property<int>("Removed")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("ReportId", "Step");
+
+                b.ToTable("HousekeepingReportSteps");
             });
 
         modelBuilder.Entity("DB.Data.Identity.UserRow", b =>
@@ -455,8 +630,15 @@ partial class _20261004154304_UserTagName
                     .ValueGeneratedOnAdd()
                     .HasColumnType("TEXT");
 
+                b.Property<int>("AccessFailedCount")
+                    .HasColumnType("INTEGER");
+
                 b.Property<string>("AvatarUrl")
                     .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ConcurrencyStamp")
+                    .IsConcurrencyToken()
                     .HasColumnType("TEXT");
 
                 b.Property<string>("ConfigResetHash")
@@ -470,53 +652,79 @@ partial class _20261004154304_UserTagName
                     .IsRequired()
                     .HasColumnType("TEXT");
 
-                b.Property<string>("ExternalUserId")
-                    .IsRequired()
+                b.Property<string>("Email")
+                    .HasMaxLength(256)
                     .HasColumnType("TEXT");
 
-                b.Property<int>("FailedSignIns")
+                b.Property<bool>("EmailConfirmed")
                     .HasColumnType("INTEGER");
 
-                b.Property<double>("Hue")
+                b.Property<double?>("Hue")
                     .HasColumnType("REAL");
 
-                b.Property<long>("JoinedAt")
+                b.Property<long?>("JoinedAt")
                     .HasColumnType("INTEGER");
 
-                b.Property<long?>("KeyPromptedAt")
+                b.Property<bool>("LockoutEnabled")
                     .HasColumnType("INTEGER");
 
-                b.Property<long?>("LockedUntil")
+                b.Property<long?>("LockoutEnd")
                     .HasColumnType("INTEGER");
+
+                b.Property<string>("NormalizedEmail")
+                    .HasMaxLength(256)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("NormalizedUserName")
+                    .HasMaxLength(256)
+                    .HasColumnType("TEXT");
 
                 b.Property<string>("PasswordHash")
-                    .HasMaxLength(512)
                     .HasColumnType("TEXT");
 
-                b.Property<string>("Provider")
-                    .IsRequired()
+                b.Property<string>("PhoneNumber")
                     .HasColumnType("TEXT");
 
-                b.Property<string>("Role")
-                    .IsRequired()
-                    .HasColumnType("TEXT");
-
-                b.Property<long?>("SessionsRevokedAt")
+                b.Property<bool>("PhoneNumberConfirmed")
                     .HasColumnType("INTEGER");
+
+                b.Property<double?>("PictureChroma")
+                    .HasColumnType("REAL");
+
+                b.Property<double?>("PictureHue")
+                    .HasColumnType("REAL");
+
+                b.Property<string>("PictureUrl")
+                    .HasMaxLength(2048)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("SecurityStamp")
+                    .HasColumnType("TEXT");
 
                 b.Property<string>("TagName")
                     .IsRequired()
                     .HasColumnType("TEXT");
 
+                b.Property<bool>("TwoFactorEnabled")
+                    .HasColumnType("INTEGER");
+
                 b.Property<long>("UpdatedAt")
                     .HasColumnType("INTEGER");
 
+                b.Property<string>("UserName")
+                    .HasMaxLength(256)
+                    .HasColumnType("TEXT");
+
                 b.HasKey("Id");
 
-                b.HasIndex("Provider", "ExternalUserId")
-                    .IsUnique();
+                b.HasIndex("NormalizedEmail")
+                    .HasDatabaseName("EmailIndex");
 
-                b.ToTable("Users");
+                b.HasIndex("NormalizedUserName")
+                    .IsUnique()
+                    .HasDatabaseName("UserNameIndex");
+
+                b.ToTable("AspNetUsers");
             });
 
         modelBuilder.Entity("DB.Data.Jobs.JobRow", b =>
@@ -588,9 +796,99 @@ partial class _20261004154304_UserTagName
 
                 b.HasKey("Source", "MediaType", "Id");
 
-                b.HasIndex("MediaId");
+                b.HasIndex("MediaId", "Source")
+                    .IsUnique();
 
                 b.ToTable("ExternalMediaIds");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.IdentityConflictRow", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("AnswerId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("AnswerSource")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("AnswerType")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("AnsweredBy")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("AskAfter")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long?>("AskedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("AskedOutcome")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("AskedService")
+                    .HasColumnType("TEXT");
+
+                b.Property<int>("Attempts")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("ClaimedId")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ClaimedSource")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ClaimedType")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ContradictedBy")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Distinct")
+                    .HasColumnType("TEXT");
+
+                b.Property<long?>("DistinctAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid>("HeldId")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid?>("KeptApartBy")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("OtherId")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("SeenAt")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Id");
+
+                b.HasIndex("OtherId");
+
+                b.HasIndex("HeldId", "OtherId")
+                    .IsUnique();
+
+                b.ToTable("IdentityConflicts");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.IdentityConflictSourceRow", b =>
+            {
+                b.Property<Guid>("ConflictId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Service")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("ConflictId", "Service");
+
+                b.ToTable("IdentityConflictSources");
             });
 
         modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>
@@ -598,17 +896,13 @@ partial class _20261004154304_UserTagName
                 b.Property<Guid>("MediaId")
                     .HasColumnType("TEXT");
 
+                b.Property<long>("AskedAt")
+                    .HasColumnType("INTEGER");
+
                 b.Property<string>("BackdropUrl")
                     .HasColumnType("TEXT");
 
-                b.Property<string>("ConfirmedAbsent")
-                    .IsRequired()
-                    .HasColumnType("TEXT");
-
                 b.Property<long>("CreatedAt")
-                    .HasColumnType("INTEGER");
-
-                b.Property<long>("FetchedAt")
                     .HasColumnType("INTEGER");
 
                 b.PrimitiveCollection<string>("Genres")
@@ -621,6 +915,9 @@ partial class _20261004154304_UserTagName
 
                 b.Property<string>("PosterUrl")
                     .HasColumnType("TEXT");
+
+                b.Property<long>("RefreshedAt")
+                    .HasColumnType("INTEGER");
 
                 b.Property<DateOnly?>("ReleaseDate")
                     .HasColumnType("TEXT");
@@ -647,6 +944,24 @@ partial class _20261004154304_UserTagName
                 b.UseTphMappingStrategy();
             });
 
+        modelBuilder.Entity("DB.Data.Media.MediaPageLinkRow", b =>
+            {
+                b.Property<Guid>("MediaId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Site")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Path")
+                    .IsRequired()
+                    .HasMaxLength(300)
+                    .HasColumnType("TEXT");
+
+                b.HasKey("MediaId", "Site");
+
+                b.ToTable("MediaPageLinks");
+            });
+
         modelBuilder.Entity("DB.Data.Media.MediaRatingRow", b =>
             {
                 b.Property<Guid>("MediaId")
@@ -657,13 +972,6 @@ partial class _20261004154304_UserTagName
 
                 b.Property<float>("NormalizedValue")
                     .HasColumnType("REAL");
-
-                b.Property<long?>("RottenTomatoesAskedAt")
-                    .HasColumnType("INTEGER");
-
-                b.Property<string>("RottenTomatoesPath")
-                    .HasMaxLength(256)
-                    .HasColumnType("TEXT");
 
                 b.Property<int?>("VoteCount")
                     .HasColumnType("INTEGER");
@@ -684,12 +992,38 @@ partial class _20261004154304_UserTagName
                 b.Property<long>("CreatedAt")
                     .HasColumnType("INTEGER");
 
+                b.Property<long?>("DetailsTrimmedAt")
+                    .HasColumnType("INTEGER");
+
                 b.Property<long>("UpdatedAt")
                     .HasColumnType("INTEGER");
 
                 b.HasKey("Id");
 
                 b.ToTable("Media");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.ProviderAnswerRow", b =>
+            {
+                b.Property<Guid>("MediaId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Provider")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("AnsweredAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int>("Failures")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Unfilled")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.HasKey("MediaId", "Provider");
+
+                b.ToTable("ProviderAnswers");
             });
 
         modelBuilder.Entity("DB.Data.Notifications.NotificationDeliveryOutcomeRow", b =>
@@ -866,12 +1200,95 @@ partial class _20261004154304_UserTagName
                 b.ToTable("RatingDefaults");
             });
 
+        modelBuilder.Entity("DB.Data.Usage.RemoteAttemptBucketRow", b =>
+            {
+                b.Property<long>("AttemptId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int>("UpToMs")
+                    .HasColumnType("INTEGER");
+
+                b.Property<long>("Count")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("AttemptId", "UpToMs");
+
+                b.ToTable("RemoteAttemptBuckets");
+            });
+
+        modelBuilder.Entity("DB.Data.Usage.RemoteAttemptRow", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER");
+
+                b.Property<long>("Attempts")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Cause")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid?>("FeedId")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("Hour")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Service")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("Hour");
+
+                b.ToTable("RemoteAttempts");
+            });
+
+        modelBuilder.Entity("DB.Data.Usage.RemoteUsageRow", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER");
+
+                b.Property<long>("Calls")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Cause")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid?>("FeedId")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("Hour")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Outcome")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Service")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("Hour");
+
+                b.ToTable("RemoteUsage");
+            });
+
         modelBuilder.Entity("DB.Data.Wantlist.Outbox.WantlistOutboxRow", b =>
             {
                 b.Property<Guid>("UserId")
                     .HasColumnType("TEXT");
 
                 b.Property<Guid>("MediaId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Sink")
                     .HasColumnType("TEXT");
 
                 b.Property<string>("Action")
@@ -884,11 +1301,15 @@ partial class _20261004154304_UserTagName
                 b.Property<int>("Attempts")
                     .HasColumnType("INTEGER");
 
+                b.Property<string>("LastError")
+                    .HasMaxLength(1000)
+                    .HasColumnType("TEXT");
+
                 b.Property<string>("Status")
                     .IsRequired()
                     .HasColumnType("TEXT");
 
-                b.HasKey("UserId", "MediaId");
+                b.HasKey("UserId", "MediaId", "Sink");
 
                 b.HasIndex("Action");
 
@@ -939,6 +1360,132 @@ partial class _20261004154304_UserTagName
                 b.HasIndex("SourceRunId");
 
                 b.ToTable("Wantlist");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ConcurrencyStamp")
+                    .IsConcurrencyToken()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Name")
+                    .HasMaxLength(256)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("NormalizedName")
+                    .HasMaxLength(256)
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("NormalizedName")
+                    .IsUnique()
+                    .HasDatabaseName("RoleNameIndex");
+
+                b.ToTable("AspNetRoles");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("ClaimType")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ClaimValue")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("RoleId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("RoleId");
+
+                b.ToTable("AspNetRoleClaims");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("ClaimType")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ClaimValue")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("UserId");
+
+                b.ToTable("AspNetUserClaims");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+            {
+                b.Property<string>("LoginProvider")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ProviderKey")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ProviderDisplayName")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("LoginProvider", "ProviderKey");
+
+                b.HasIndex("UserId");
+
+                b.ToTable("AspNetUserLogins");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+            {
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.Property<Guid>("RoleId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("UserId", "RoleId");
+
+                b.HasIndex("RoleId");
+
+                b.ToTable("AspNetUserRoles");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+            {
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("LoginProvider")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Name")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Value")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("UserId", "LoginProvider", "Name");
+
+                b.ToTable("AspNetUserTokens");
             });
 
         modelBuilder.Entity("TickerQ.Utilities.Entities.CronTickerEntity", b =>
@@ -1190,8 +1737,158 @@ partial class _20261004154304_UserTagName
                 b.Navigation("Media");
             });
 
+        modelBuilder.Entity("DB.Data.Config.ProviderConfigRow", b =>
+            {
+                b.OwnsOne("DB.Data.Config.ArrInstanceRow", "Radarr", b1 =>
+                    {
+                        b1.Property<int>("ProviderConfigRowId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<int?>("AnimeQualityProfileId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("AnimeRootFolderPath")
+                            .HasMaxLength(1024)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<string>("ApiKey")
+                            .HasMaxLength(4096)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<bool>("DeleteFiles")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("ExternalUrl")
+                            .HasMaxLength(2048)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<bool>("Monitored")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<int?>("QualityProfileId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("RootFolderPath")
+                            .HasMaxLength(1024)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<bool>("SearchOnAdd")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("Url")
+                            .HasMaxLength(2048)
+                            .HasColumnType("TEXT");
+
+                        b1.HasKey("ProviderConfigRowId");
+
+                        b1.ToTable("ProviderConfig");
+
+                        b1.WithOwner()
+                            .HasForeignKey("ProviderConfigRowId");
+                    });
+
+                b.OwnsOne("DB.Data.Config.ArrInstanceRow", "Sonarr", b1 =>
+                    {
+                        b1.Property<int>("ProviderConfigRowId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<int?>("AnimeQualityProfileId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("AnimeRootFolderPath")
+                            .HasMaxLength(1024)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<string>("ApiKey")
+                            .HasMaxLength(4096)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<bool>("DeleteFiles")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("ExternalUrl")
+                            .HasMaxLength(2048)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<bool>("Monitored")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<int?>("QualityProfileId")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("RootFolderPath")
+                            .HasMaxLength(1024)
+                            .HasColumnType("TEXT");
+
+                        b1.Property<bool>("SearchOnAdd")
+                            .HasColumnType("INTEGER");
+
+                        b1.Property<string>("Url")
+                            .HasMaxLength(2048)
+                            .HasColumnType("TEXT");
+
+                        b1.HasKey("ProviderConfigRowId");
+
+                        b1.ToTable("ProviderConfig");
+
+                        b1.WithOwner()
+                            .HasForeignKey("ProviderConfigRowId");
+                    });
+
+                b.Navigation("Radarr")
+                    .IsRequired();
+
+                b.Navigation("Sonarr")
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Feed.DeletedFeedRow", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Feed.FeedAbsenceRow", b =>
+            {
+                b.HasOne("DB.Data.Feed.FeedRow", null)
+                    .WithMany()
+                    .HasForeignKey("FeedId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("DB.Data.Media.MediaRow", null)
+                    .WithMany()
+                    .HasForeignKey("MediaId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
         modelBuilder.Entity("DB.Data.Feed.FeedRow", b =>
             {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Feed.Run.FeedRunCallsRow", b =>
+            {
+                b.HasOne("DB.Data.Feed.Run.FeedRunRow", null)
+                    .WithMany("Calls")
+                    .HasForeignKey("FeedRunId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
                 b.HasOne("DB.Data.Identity.UserRow", null)
                     .WithMany()
                     .HasForeignKey("UserId")
@@ -1229,12 +1926,28 @@ partial class _20261004154304_UserTagName
                     .IsRequired();
             });
 
-        modelBuilder.Entity("DB.Data.Identity.AccountLinkRow", b =>
+        modelBuilder.Entity("DB.Data.Feed.Run.FeedRunTimesRow", b =>
             {
+                b.HasOne("DB.Data.Feed.Run.FeedRunRow", null)
+                    .WithMany("Times")
+                    .HasForeignKey("FeedRunId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
                 b.HasOne("DB.Data.Identity.UserRow", null)
                     .WithMany()
                     .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Housekeeping.HousekeepingStepRow", b =>
+            {
+                b.HasOne("DB.Data.Housekeeping.HousekeepingReportRow", null)
+                    .WithMany("Steps")
+                    .HasForeignKey("ReportId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
             });
 
         modelBuilder.Entity("DB.Data.Jobs.JobRow", b =>
@@ -1257,6 +1970,30 @@ partial class _20261004154304_UserTagName
                 b.Navigation("Media");
             });
 
+        modelBuilder.Entity("DB.Data.Media.IdentityConflictRow", b =>
+            {
+                b.HasOne("DB.Data.Media.MediaRow", null)
+                    .WithMany()
+                    .HasForeignKey("HeldId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("DB.Data.Media.MediaRow", null)
+                    .WithMany()
+                    .HasForeignKey("OtherId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Media.IdentityConflictSourceRow", b =>
+            {
+                b.HasOne("DB.Data.Media.IdentityConflictRow", null)
+                    .WithMany("Sources")
+                    .HasForeignKey("ConflictId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
         modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>
             {
                 b.HasOne("DB.Data.Media.MediaRow", "Media")
@@ -1268,10 +2005,32 @@ partial class _20261004154304_UserTagName
                 b.Navigation("Media");
             });
 
+        modelBuilder.Entity("DB.Data.Media.MediaPageLinkRow", b =>
+            {
+                b.HasOne("DB.Data.Media.MediaDetailsRow", "Details")
+                    .WithMany("PageLinks")
+                    .HasForeignKey("MediaId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Details");
+            });
+
         modelBuilder.Entity("DB.Data.Media.MediaRatingRow", b =>
             {
                 b.HasOne("DB.Data.Media.MediaDetailsRow", "Details")
                     .WithMany("Ratings")
+                    .HasForeignKey("MediaId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Details");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.ProviderAnswerRow", b =>
+            {
+                b.HasOne("DB.Data.Media.MediaDetailsRow", "Details")
+                    .WithMany("Answers")
                     .HasForeignKey("MediaId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
@@ -1327,6 +2086,15 @@ partial class _20261004154304_UserTagName
                     .IsRequired();
             });
 
+        modelBuilder.Entity("DB.Data.Usage.RemoteAttemptBucketRow", b =>
+            {
+                b.HasOne("DB.Data.Usage.RemoteAttemptRow", null)
+                    .WithMany("Buckets")
+                    .HasForeignKey("AttemptId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
         modelBuilder.Entity("DB.Data.Wantlist.Outbox.WantlistOutboxRow", b =>
             {
                 b.HasOne("DB.Data.Media.MediaRow", "Media")
@@ -1375,6 +2143,57 @@ partial class _20261004154304_UserTagName
                 b.Navigation("SourceRun");
             });
 
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            {
+                b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                    .WithMany()
+                    .HasForeignKey("RoleId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+            {
+                b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                    .WithMany()
+                    .HasForeignKey("RoleId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
         modelBuilder.Entity("TickerQ.Utilities.Entities.CronTickerOccurrenceEntity<TickerQ.Utilities.Entities.CronTickerEntity>", b =>
             {
                 b.HasOne("TickerQ.Utilities.Entities.CronTickerEntity", "CronTicker")
@@ -1398,11 +2217,29 @@ partial class _20261004154304_UserTagName
 
         modelBuilder.Entity("DB.Data.Feed.Run.FeedRunRow", b =>
             {
+                b.Navigation("Calls");
+
                 b.Navigation("Items");
+
+                b.Navigation("Times");
+            });
+
+        modelBuilder.Entity("DB.Data.Housekeeping.HousekeepingReportRow", b =>
+            {
+                b.Navigation("Steps");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.IdentityConflictRow", b =>
+            {
+                b.Navigation("Sources");
             });
 
         modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>
             {
+                b.Navigation("Answers");
+
+                b.Navigation("PageLinks");
+
                 b.Navigation("Ratings");
             });
 
@@ -1411,6 +2248,11 @@ partial class _20261004154304_UserTagName
                 b.Navigation("Details");
 
                 b.Navigation("ExternalIds");
+            });
+
+        modelBuilder.Entity("DB.Data.Usage.RemoteAttemptRow", b =>
+            {
+                b.Navigation("Buckets");
             });
 
         modelBuilder.Entity("TickerQ.Utilities.Entities.TimeTickerEntity", b =>

@@ -43,3 +43,9 @@ page (a page's identities would exist only once its slowest title settled, so th
 * One shared key is still enough to extend a stored title; there is no multi-id agreement check.
 * A database that holds two keys of one source on a title cannot take the unique index: migrating it fails, saying to
   delete it or use the staging Reset.
+
+## Notes
+
+* 2026-10-16: the migration history was reset to one baseline
+  ([ADR 0003](0003-use-ef-core-migrations-for-the-schema.md)), so a database from before it no longer migrates at
+  all, and the startup message about two keys of one source is gone.

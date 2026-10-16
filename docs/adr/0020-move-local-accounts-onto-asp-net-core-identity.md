@@ -40,3 +40,9 @@ field); OpenID Connect only (a self-hoster would have to run an identity provide
 * Identity's token provider reads the real clock, so the one-day expiry is not testable with a fake clock.
 * The tables are `AspNetUsers`, `AspNetRoles` and their kin. A database from before the move migrates, but its accounts
   lose their roles, user names and Plex logins, so setup starts again.
+
+## Notes
+
+* 2026-10-16: the migration history was reset to one baseline the same day
+  ([ADR 0003](0003-use-ef-core-migrations-for-the-schema.md)), so a database from before the move no longer migrates
+  at all; it is deleted and set up again.
