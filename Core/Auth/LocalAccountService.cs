@@ -1,10 +1,15 @@
 using Contracts.Identity;
 using Domain.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Auth;
 
-internal sealed class LocalAccountService(ILocalAccountRepository accounts, ICurrentUser currentUser, ISessionInvalidator sessionInvalidator)
-	: ILocalAccountService
+internal sealed class LocalAccountService(
+	ILocalAccountRepository accounts,
+	ICurrentUser currentUser,
+	ISessionInvalidator sessionInvalidator,
+	ILogger<LocalAccountService> logger
+) : ILocalAccountService
 {
 	public async Task<Result<User>> ChangePasswordAsync(string current, string next, CancellationToken cancellationToken = default)
 	{
@@ -18,7 +23,9 @@ internal sealed class LocalAccountService(ILocalAccountRepository accounts, ICur
 	private async Task<Result<User>> ChangeAsync(LocalAccount account, string current, string next, CancellationToken cancellationToken)
 	{
 		var changed = await accounts.ChangePasswordAsync(account.User.Id, current, next, cancellationToken);
-		changed.Apply(_ => sessionInvalidator.Invalidate(account.User.Id));
+		changed
+			.Apply(_ => sessionInvalidator.Invalidate(account.User.Id))
+			.ApplyError(error => logger.LogWarning("Password change refused for user {UserId}: {Reason}", account.User.Id, error.Reason));
 		return changed;
 	}
 }
