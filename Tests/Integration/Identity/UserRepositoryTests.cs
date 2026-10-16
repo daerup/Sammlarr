@@ -139,6 +139,36 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		where TRow : class => set.IgnoreQueryFilters().CountAsync(row => EF.Property<Guid>(row, "UserId") == userId.Value);
 
 	[Test]
+	public async Task CreateAsync_WhenItsRoleCannotBeGiven_LeavesNoUserBehind()
+	{
+		await using (var ctx = await fixture.ContextFactory.CreateDbContextAsync())
+		{
+			await ctx.Roles.Where(role => role.Name == nameof(UserRole.Member)).ExecuteDeleteAsync();
+		}
+
+		var stranger = new User(UserId.New(), "Stranger", Avatar, UserRole.Member, DateTimeOffset.UnixEpoch);
+
+		await Assert.That(() => _testee.CreateAsync(stranger, AuthProvider.Plex, "stranger-external")).Throws<InvalidOperationException>();
+
+		await using var check = await fixture.ContextFactory.CreateDbContextAsync();
+		await Assert.That(await check.Users.AnyAsync(user => user.Id == stranger.Id.Value)).IsFalse();
+	}
+
+	[Test]
+	public async Task ChangeRoleAsync_WhenTheNewRoleCannotBeGiven_KeepsTheOldOne()
+	{
+		var person = await CreateAsync("plex-member", DateTimeOffset.UnixEpoch);
+		await using (var ctx = await fixture.ContextFactory.CreateDbContextAsync())
+		{
+			await ctx.Roles.Where(role => role.Name == nameof(UserRole.Admin)).ExecuteDeleteAsync();
+		}
+
+		await Assert.That(() => _testee.ChangeRoleAsync(person, UserRole.Admin)).Throws<InvalidOperationException>();
+
+		await Assert.That(await _testee.FindRoleAsync(person)).IsSome().And.IsEqualTo(UserRole.Member);
+	}
+
+	[Test]
 	public async Task CreateAsync_LeavesTheColourForTheUsersListToPaint()
 	{
 		var person = await CreateAsync("plex-first", DateTimeOffset.UnixEpoch.AddYears(60));

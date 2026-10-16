@@ -34,7 +34,6 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	public async Task CreateAsync(User user, AuthProvider provider, string externalUserId, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
-		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
 		var row = new UserRow
 		{
 			Id = user.Id.Value,
@@ -44,9 +43,15 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			AvatarUrl = user.AvatarUrl,
 			JoinedAt = user.JoinedAt,
 		};
-		(await users.CreateAsync(row)).Ensure();
-		(await users.AddToRoleAsync(row, user.Role.ToString())).Ensure();
-		(await users.AddLoginAsync(row, new UserLoginInfo(provider.ToString(), externalUserId, provider.ToString()))).Ensure();
+		await scope.InTransactionAsync(
+			async users =>
+			{
+				(await users.CreateAsync(row)).Ensure();
+				(await users.AddToRoleAsync(row, user.Role.ToString())).Ensure();
+				(await users.AddLoginAsync(row, new UserLoginInfo(provider.ToString(), externalUserId, provider.ToString()))).Ensure();
+			},
+			cancellationToken
+		);
 	}
 
 	public async Task<IReadOnlyDictionary<UserId, StoredColour>> GetColoursAsync(CancellationToken cancellationToken = default)
@@ -143,11 +148,16 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	public async Task ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
-		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
-		var row = await users.RequireAsync(id);
-		(await users.RemoveFromRolesAsync(row, await users.GetRolesAsync(row))).Ensure();
-		(await users.AddToRoleAsync(row, role.ToString())).Ensure();
-		(await users.UpdateSecurityStampAsync(row)).Ensure();
+		await scope.InTransactionAsync(
+			async users =>
+			{
+				var row = await users.RequireAsync(id);
+				(await users.RemoveFromRolesAsync(row, await users.GetRolesAsync(row))).Ensure();
+				(await users.AddToRoleAsync(row, role.ToString())).Ensure();
+				(await users.UpdateSecurityStampAsync(row)).Ensure();
+			},
+			cancellationToken
+		);
 	}
 
 	public async Task DeleteAsync(UserId id, CancellationToken cancellationToken = default)
