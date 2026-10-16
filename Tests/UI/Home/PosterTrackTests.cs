@@ -39,6 +39,18 @@ public class PosterTrackTests : BunitContext
 	}
 
 	[Test]
+	public async Task Dispose_WhenTheBrowserClosesWhileItStopsWatching_ReportsNoError()
+	{
+		var watcher = JSInterop.SetupModule("./js/poster-track.js").SetupModule(invocation => invocation.Identifier == "observe");
+		watcher.SetupVoid("dispose").SetException(new TaskCanceledException());
+		Render<PosterTrack>(parameters => parameters.Add(track => track.Ids, [First]).Add(track => track.Media, new Dictionary<MediaId, MatchedMedia>()));
+
+		await Renderer.Dispatcher.InvokeAsync(DisposeComponentsAsync);
+
+		await Assert.That(Renderer.UnhandledException.IsCompleted).IsFalse();
+	}
+
+	[Test]
 	public async Task ImageError_WhenTheSizedPosterFails_FallsBackToTheOriginal()
 	{
 		var media = new MatchedMedia(new MediaIdentity(First, []), new MovieDetails { PosterUrl = Poster });

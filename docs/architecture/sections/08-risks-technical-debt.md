@@ -46,6 +46,7 @@ service in `Web/appsettings.json` ([Lanes and HTTP resilience](06-crosscutting.m
 | IMDb's logo | IMDb's "Used with permission" covers its datasets, not its logo, which needs IMDb's own permission. | Kept by choice; the External IDs popover shows the logo beside its links, never as one. |
 | Rotten Tomatoes' marks | Its licensing page routes any use of its marks and scores through a request, and none was filed. | Settings › About › Data sources shows ® and "Fandango Media, LLC", both verdicts flip at 60%, and a score links to the title's page when its Rotten Tomatoes id is known (a search otherwise); the request can follow before 1.0. |
 | Letterboxd's square | Letterboxd's terms want its logo unaltered and taken from its brand page; the square is a Simple Icons glyph split into coloured dots. | Kept by choice; swap in Letterboxd's own file if it objects. |
+| GitHub's mark | GitHub's logo rules forbid changing the mark's colours; the anime-lists tile uses Simple Icons' copy filled with two soft greys (`github-mark-light.svg`, `github-mark-dark.svg`). | Kept by choice; swap in GitHub's own black and white marks from github.com/logos if it objects. |
 
 ## Deferred work
 
@@ -53,6 +54,6 @@ service in `Web/appsettings.json` ([Lanes and HTTP resilience](06-crosscutting.m
 |---|---|
 | Tooltip guard | `Web/wwwroot/js/tooltip-guard.js` works around two BlazorBlueprint 4.1.0 tooltip bugs (opening on a focus no Tab caused, staying visible after a raced close); `UiInvariantTests` catch markup changes. A screen reader moving focus without Tab gets no tooltip, and a nested trigger needs `AsChild="false" Class="inline-flex" Focusable="false"`. Remove it once `BbTooltip` is fixed. |
 | Job queue surfacing | Home shows your own jobs only (`QueueSnapshot.OthersPending` is computed, not rendered), and an abandoned push has no retry action. |
-| E2E circuit crash | Unexplained: now and then a full E2E run trips the circuit-crash guard (`CircuitFailureSink`) while every test passes; no stack trace yet. |
+| E2E circuit crash | Now and then a full E2E run trips the circuit-crash guard (`CircuitFailureSink`) while every test passes. One cause is fixed: `PosterTrack`'s JS dispose ended in `TaskCanceledException` when the browser closed mid-dispose. Others may remain; the guard's log names the component. |
 | Result-based errors | Blocklist writes throw `UnknownMediaException` and wantlist writes fail on the foreign key, instead of returning a `Result`. |
 | Release pipeline | Built: CI on pull requests and pushes to `main` (build, tests with a coverage gate, formatting, the licence and vulnerable-package gates, a reproducible-publish check, E2E on `main` and the Release PR, a Trivy scan of the Release PR's image), the PR-title check, release-please versioning, the MinVer version and the update badge, and on a `v*` tag the image, GHCR push, SBOMs, notices and a rebuild check ([Deployment View](05-deployment.md)). Not built: signing and provenance attestations (they need a public repository), an arm64 image. |
