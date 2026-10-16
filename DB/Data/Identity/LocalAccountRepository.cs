@@ -36,7 +36,6 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 	public async Task<Result<User>> CreateAsync(User user, string username, string password, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
-		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
 		var row = new UserRow
 		{
 			Id = user.Id.Value,
@@ -46,13 +45,19 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 			AvatarUrl = user.AvatarUrl,
 			JoinedAt = user.JoinedAt,
 		};
-		var created = await users.CreateAsync(row, password);
-		if (created.Succeeded)
-		{
-			(await users.AddToRoleAsync(row, user.Role.ToString())).Ensure();
-		}
+		return await scope.InTransactionAsync(
+			async users =>
+			{
+				var created = await users.CreateAsync(row, password);
+				if (created.Succeeded)
+				{
+					(await users.AddToRoleAsync(row, user.Role.ToString())).Ensure();
+				}
 
-		return created.ToResult(user);
+				return created.ToResult(user);
+			},
+			cancellationToken
+		);
 	}
 
 	public async Task<PasswordAttempt> CheckPasswordAsync(string username, string password, CancellationToken cancellationToken = default)
@@ -120,7 +125,6 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 	public async Task<Result<UserId>> InviteAsync(string username, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
-		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
 		var name = username.Trim();
 		var row = new UserRow
 		{
@@ -130,13 +134,19 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 			TagName = name,
 			AvatarUrl = string.Empty,
 		};
-		var created = await users.CreateAsync(row);
-		if (created.Succeeded)
-		{
-			(await users.AddToRoleAsync(row, nameof(UserRole.Member))).Ensure();
-		}
+		return await scope.InTransactionAsync(
+			async users =>
+			{
+				var created = await users.CreateAsync(row);
+				if (created.Succeeded)
+				{
+					(await users.AddToRoleAsync(row, nameof(UserRole.Member))).Ensure();
+				}
 
-		return created.ToResult(UserId.From(row.Id));
+				return created.ToResult(UserId.From(row.Id));
+			},
+			cancellationToken
+		);
 	}
 
 	public async Task<IssuedToken> IssueTokenAsync(UserId id, CancellationToken cancellationToken = default)
@@ -192,15 +202,20 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 	public async Task<Result<User>> ResetPasswordAsync(UserId id, string token, string password, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
-		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
-		var row = await HolderAsync(users, AccountLinkKind.Reset, id, token);
-		if (row is null)
-		{
-			return Unusable(users);
-		}
+		return await scope.InTransactionAsync(
+			async users =>
+			{
+				var row = await HolderAsync(users, AccountLinkKind.Reset, id, token);
+				if (row is null)
+				{
+					return Unusable(users);
+				}
 
-		var reset = await ReplaceAsync(users, row, Decode(token), password);
-		return reset.ToResult(Members.ToUser(row, await RoleOfAsync(users, row)));
+				var reset = await ReplaceAsync(users, row, Decode(token), password);
+				return reset.ToResult(Members.ToUser(row, await RoleOfAsync(users, row)));
+			},
+			cancellationToken
+		);
 	}
 
 	public async Task<Result<ConfigReset>> ResetFromConfigAsync(UserId id, string password, CancellationToken cancellationToken = default)
