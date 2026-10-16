@@ -98,11 +98,20 @@ jobs:
         run: cosign sign --yes "$IMAGE"
 
       - name: Provenance
+        id: provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-name: ghcr.io/daerup/sammlarr
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
+
+      - name: Provenance for the release
+        env:
+          BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cp "$BUNDLE" sbom/sammlarr-image.intoto.jsonl
+          gh release upload "$GITHUB_REF_NAME" sbom/sammlarr-image.intoto.jsonl --clobber
 
       - name: App SBOM attestation
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2

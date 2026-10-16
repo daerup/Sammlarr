@@ -56,7 +56,7 @@ and an indexer, and a webhook catcher (`src/AppHost/Staging`). Guide: [Testing â
 |---|---|
 | Reproducible | yes: base images pinned by digest, `SOURCE_DATE_EPOCH` and `rewrite-timestamp` (see Build), and one BuildKit for every image build, pinned by version and digest in `.github/actions/build-image`; each release rebuilds its tag on a fresh runner and fails when the digest or `/app` differs, and a match adds the digest and the BuildKit version to the release notes (`release.yml`, jobs `rebuild` and `reproduced`) |
 | Signed (cosign) | from 0.1.0: keyless, by the release's own run, the signature pushed to GHCR beside the image ([SECURITY.md](../../../SECURITY.md#verifying-what-you-run)) |
-| SLSA provenance | from 0.1.0: GitHub's build provenance attestation (`actions/attest`), pushed to GHCR; BuildKit's own stays off (`provenance: false` in `.github/actions/build-image`), so the image keeps the one manifest a rebuild matches |
+| SLSA provenance | from 0.1.0: GitHub's build provenance attestation (`actions/attest`), pushed to GHCR and attached to the release as `sammlarr-image.intoto.jsonl`; BuildKit's own stays off (`provenance: false` in `.github/actions/build-image`), so the image keeps the one manifest a rebuild matches |
 | SBOM | on each release: `sammlarr-app.cdx.json` (CycloneDX, the app's packages) and `sammlarr-image.cdx.json` (Trivy, the image), beside `THIRD-PARTY-NOTICES.txt`; from 0.1.0 both are also attested against the image's digest |
 
 ## Release

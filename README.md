@@ -14,7 +14,7 @@
   <a href="https://github.com/daerup/Sammlarr/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/daerup/Sammlarr"></a>
   <a href="https://github.com/daerup/Sammlarr/pkgs/container/sammlarr"><img alt="Container image" src="https://img.shields.io/badge/image-ghcr.io%2Fdaerup%2Fsammlarr-blue"></a>
   <img alt=".NET SDK" src="https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/daerup/Sammlarr/main/global.json&query=$.sdk.version&label=.NET%20SDK">
-  <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/github/license/daerup/Sammlarr"></a>
+  <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 <p align="center">
   Follow movie and show lists from MDBList, TMDB, Trakt, AniList and MyAnimeList, filter them,
