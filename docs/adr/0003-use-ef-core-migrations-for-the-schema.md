@@ -40,3 +40,8 @@ live database).
   later change to its defaults into an `UpdateData` that resets every install's settings. `Baseline` no longer inserts
   the row and `DropProviderConfigSeed` carries only the snapshot change, so existing databases keep their row and a
   new one gets `ProviderConfigRow.Default` from the hooks.
+* 2026-10-16: the history was reset again to one `Baseline` before the first release, and every database was
+  deleted. The 37 migrations before it, from the 2026-10-04 `Baseline` to `LinksAsIdentityTokens`, live in git up to
+  the commit before the reset, with the two tests that replayed them. The new schema matched the old chain's in every
+  table, column, index and foreign key. From the first release on, migrations are only added, never changed or
+  deleted, since installs keep the history they ran.
