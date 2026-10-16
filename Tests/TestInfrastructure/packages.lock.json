@@ -64,7 +64,6 @@
         "dependencies": {
           "Microsoft.Extensions.Caching.Memory": "[11.0.0-rc.2.26504.105, )",
           "Microsoft.Extensions.DependencyInjection": "[11.0.0-rc.2.26504.105, )",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "[11.0.0-rc.2.26504.105, )",
           "Microsoft.Extensions.Options.ConfigurationExtensions": "[11.0.0-rc.2.26504.105, )"
         }
       },
@@ -85,12 +84,6 @@
         "requested": "[11.0.0-rc.2.26504.105, )",
         "resolved": "11.0.0-rc.2.26504.105",
         "contentHash": "yjotWRNS6RNuJE1UNlVWgRTPfEhavYoGMdORt3Y90rB8bJo+GNVAsrnvclyPn830Ws2etLC94QcYBZ13Naszgw=="
-      },
-      "Microsoft.Extensions.DependencyInjection.Abstractions": {
-        "type": "CentralTransitive",
-        "requested": "[11.0.0-rc.2.26504.105, )",
-        "resolved": "11.0.0-rc.2.26504.105",
-        "contentHash": "2zf8Zt2/sOYVW1/jXSA6Pq5KWxFBGKFzbRzJOLHwjeiQn+5uWieetzEoPkmOW7Ho+F3FyC4UJMoRkX4927EZXg=="
       },
       "Microsoft.Extensions.Options.ConfigurationExtensions": {
         "type": "CentralTransitive",

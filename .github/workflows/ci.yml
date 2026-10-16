@@ -88,7 +88,6 @@ jobs:
           dotnet nuget-license -i Web/Web.csproj -t -o Table -err
           -a .github/licences/allowed.json
           -override .github/licences/overrides.json
-          -ignore .github/licences/ignored.json
 
       - name: Vulnerable packages
         if: ${{ !cancelled() && steps.restore.outcome == 'success' }}
