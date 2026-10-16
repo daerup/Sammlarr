@@ -36,3 +36,4 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0017 | [Pace remote calls on lanes with limits as published](0017-pace-remote-calls-on-lanes-with-limits-as-published.md) | accepted | 2026-10-10 |
 | 0018 | [Claim identity before hand-out from identity keys only](0018-claim-identity-before-hand-out-from-identity-keys-only.md) | accepted | 2026-10-10 |
 | 0019 | [Build and push the image with Docker's actions, compose with Aspire](0019-build-and-push-the-image-with-docker-actions.md) | accepted | 2026-10-13 |
+| 0020 | [Move local accounts onto ASP.NET Core Identity](0020-move-local-accounts-onto-asp-net-core-identity.md) | accepted | 2026-10-16 |
