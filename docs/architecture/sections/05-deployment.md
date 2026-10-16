@@ -64,7 +64,7 @@ and an indexer, and a webhook catcher (`src/AppHost/Staging`). Guide: [Testing â
 ```mermaid
 flowchart LR
   tag["tag vX.Y.Z"] --> build["build src/Web/Dockerfile"]
-  build --> ghcr[("GHCR<br/>:X.Y.Z :latest :sha-...")]
+  build --> ghcr[("GHCR<br/>:X.Y.Z, then :latest")]
   compose["compose.yaml<br/>from the repo"]
   subgraph server["Self-hosted machine"]
     web["sammlarr :6769"] --> vol[("/data<br/>sammlarr.db, dp-keys")]
@@ -74,8 +74,9 @@ flowchart LR
 ```
 
 release-please tags `vX.Y.Z` when its release PR merges. `.github/workflows/release.yml` builds the image for
-`linux/amd64` with Docker's actions and pushes it to GHCR
-([ADR 0019](../../adr/0019-build-and-push-the-image-with-docker-actions.md)). The release carries no compose file
+`linux/amd64` with Docker's actions and pushes it to GHCR as `:X.Y.Z`
+([ADR 0019](../../adr/0019-build-and-push-the-image-with-docker-actions.md)); `:latest` moves to it only once the image
+is signed and attested and the rebuild matched. The release carries no compose file
 ([ADR 0021](../../adr/0021-ship-one-hand-written-compose-file.md)). The README's Quick start downloads the repo's
 `compose.yaml`, which runs `:latest` on port 6769 with the named volume `sammlarr-data` at `/data` and
 `restart: unless-stopped`. To pin a version, change the `image:` tag in that file.
