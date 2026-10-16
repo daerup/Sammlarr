@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Shared.DI;
+using Shared.Options;
 
 namespace Web.Auth;
 
@@ -18,6 +19,7 @@ internal sealed class AuthenticationModule : IServiceModule
 			options.SlidingExpiration = true;
 		});
 		services.Configure<SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.Zero);
+		services.AddOptions<SammlarOptions>().Validate(PublicOrigin.IsValid, PublicOrigin.Requirement).ValidateOnStart();
 		services.AddAuthorization();
 	}
 }
