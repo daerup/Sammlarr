@@ -9,17 +9,17 @@ snapshots need the native runner).
 
 | Tier                      | Project                        | What belongs there                                      | Mechanism                         |
 |---------------------------|--------------------------------|---------------------------------------------------------|-----------------------------------|
-| Pure unit                 | `Tests/Domain`, `Tests/Shared` | Value objects, unions, algebraic laws                   | plain `[Test]`, CsCheck for laws  |
-| Provider clients          | `Tests/API`                    | HTTP clients and converters                             | `TUnit.Mocks.Http` at the handler |
-| Single-collaborator units | `Tests/Core`                   | A service with one dependency                           | one `IFoo.Mock()`                 |
-| Behaviour + repositories  | `Tests/Integration`            | The real Core+DB+API graph, EF queries, migration drift; the DB converters and conventions (`Tests/Integration/DB`) | `SammlarrTestHost` on real SQLite |
-| Components                | `Tests/UI`                     | Blazor render logic, event wiring, empty/error states   | bUnit, `.cs` only                 |
-| Host                      | `Tests/Web`                    | The Web host's own code: redirects, health checks, the staging seed and its settings (`Tests/Web/Staging`); the only non-E2E tier that builds Web, so the only one that needs Node | plain `[Test]`, mocks, a temporary SQLite file for the seed |
-| End to end                | `Tests/E2E`                    | Cross-feature flows through a real browser              | Playwright + Aspire + WireMock    |
-| Conventions               | `Tests/Architecture`           | Dependency direction, naming, design rules              | NetArchTest                       |
-| Roslyn components         | `Tests/Roslyn`                 | Source generators and analyzers                         | in-memory compilation             |
+| Pure unit                 | `tests/Domain`, `tests/Shared` | Value objects, unions, algebraic laws                   | plain `[Test]`, CsCheck for laws  |
+| Provider clients          | `tests/API`                    | HTTP clients and converters                             | `TUnit.Mocks.Http` at the handler |
+| Single-collaborator units | `tests/Core`                   | A service with one dependency                           | one `IFoo.Mock()`                 |
+| Behaviour + repositories  | `tests/Integration`            | The real Core+DB+API graph, EF queries, migration drift; the DB converters and conventions (`tests/Integration/DB`) | `SammlarrTestHost` on real SQLite |
+| Components                | `tests/UI`                     | Blazor render logic, event wiring, empty/error states   | bUnit, `.cs` only                 |
+| Host                      | `tests/Web`                    | The Web host's own code: redirects, health checks, the staging seed and its settings (`tests/Web/Staging`); the only non-E2E tier that builds Web, so the only one that needs Node | plain `[Test]`, mocks, a temporary SQLite file for the seed |
+| End to end                | `tests/E2E`                    | Cross-feature flows through a real browser              | Playwright + Aspire + WireMock    |
+| Conventions               | `tests/Architecture`           | Dependency direction, naming, design rules              | NetArchTest                       |
+| Roslyn components         | `tests/Roslyn`                 | Source generators and analyzers                         | in-memory compilation             |
 
-Rule of thumb: wiring more than one or two `.Mock()`s just to construct the subject means it belongs in `Tests/Integration` as a harness scenario, not a unit
+Rule of thumb: wiring more than one or two `.Mock()`s just to construct the subject means it belongs in `tests/Integration` as a harness scenario, not a unit
 test.
 
 `SammlarrTestHost` gives each test its own SQLite file in WAL mode, copied on first use from a template migrated once
@@ -36,10 +36,10 @@ The E2E suite includes the tests on the self-hosted stacks and the staging smoke
 
 ```powershell
 dotnet build                                             # always build first
-dotnet run --project Tests/Core --no-build               # one tier
-dotnet run --project Tests/E2E  --no-build               # E2E (needs Docker)
-dotnet run --project Tests/Core --no-build --treenode-filter "/*/*/FilterEvaluatorTests/*"
-dotnet run --project Tests/Domain --no-build -- --coverage --coverage-output-format cobertura
+dotnet run --project tests/Core --no-build               # one tier
+dotnet run --project tests/E2E  --no-build               # E2E (needs Docker)
+dotnet run --project tests/Core --no-build --treenode-filter "/*/*/FilterEvaluatorTests/*"
+dotnet run --project tests/Domain --no-build -- --coverage --coverage-output-format cobertura
 ```
 
 The non-E2E tiers run in roughly 20 seconds combined; E2E takes about nine minutes, because it boots real application stacks and then runs the self-hosted
@@ -61,7 +61,7 @@ recorded list's titles into the admin's wantlist, and every later preview of tha
 count what a filter culls or read the badge's own number, never a fixed included count. A one-stack run (`DOTNET_PROCESSOR_COUNT=2`) shakes such
 dependencies out.
 
-Provider traffic is served by WireMock from committed fixtures under `Tests/E2E/wiremock`: `mappings/<provider>/` holds the request matchers and
+Provider traffic is served by WireMock from committed fixtures under `tests/E2E/wiremock`: `mappings/<provider>/` holds the request matchers and
 `responses/<provider>/` the bodies, which are bind-mounted as WireMock's `__files` (the hand-written `arr-stubs`, `newznab` and `plex-stubs` mappings
 carry their bodies inline; `plex-stubs` acknowledges Plex watchlist adds and removals, which a switch back to Plex sends for every title on the stack). Fixtures are committed and `*.verified.json` is pinned to LF by `.gitattributes`.
 
@@ -81,8 +81,8 @@ A feed run's live view has one flow: `FeedLiveRunTests` creates a feed on the re
 
 ### Self-hosted stacks
 
-Tests marked `[SelfHosted]` (`Tests/E2E/SelfHosted`) run on a second pool: up to two stacks that each run the pinned Radarr and Sonarr images from
-`AppHost/ArrContainers.cs` beside Sammlarr, which starts on an empty database with no users, so each test makes its Sammlarr accounts through setup. They
+Tests marked `[SelfHosted]` (`tests/E2E/SelfHosted`) run on a second pool: up to two stacks that each run the pinned Radarr and Sonarr images from
+`src/AppHost/ArrContainers.cs` beside Sammlarr, which starts on an empty database with no users, so each test makes its Sammlarr accounts through setup. They
 cover what needs an empty install or the real apps: the first run, sign-in, search, the wantlist sync, and what Sammlarr shows when an app refuses its key.
 
 ```mermaid
@@ -113,8 +113,8 @@ flowchart LR
 host (adding the TMDB or MDBList key from user-secrets or the environment itself), writes the mapping and fixture, and compares existing fixtures under the
 policies. A request that had no fixture got a 404 in that run, so its test fails: run again until the replay is green.
 
-**After an image bump.** When a tag in `AppHost/ArrContainers.cs` is raised (Renovate opens these as their own PRs through its regex manager), run
-`Tests/E2E`. A failing self-hosted test, or an unmatched request in the session failure, names what changed: a new metadata call (record it
+**After an image bump.** When a tag in `src/AppHost/ArrContainers.cs` is raised (Renovate opens these as their own PRs through its regex manager), run
+`tests/E2E`. A failing self-hosted test, or an unmatched request in the session failure, names what changed: a new metadata call (record it
 with `E2E_LIVE=true` if it goes to `api.radarr.video` or `skyhook.sonarr.tv`, otherwise stub it in `arr-stubs`), a changed API shape (the failing
 assertion), or a new host (add it to `MetadataHosts`, and to `ProviderRecording.ArrMetadata` if its calls should be recorded).
 
@@ -131,7 +131,7 @@ A bump that only rebuilds the image (Radarr `6.4.4.10685-ls318` to `-ls319`, tri
 ## Staging
 
 Staging is a long-lived, seeded Sammlarr for clicking around by hand, next to the dev session: the `staging` launch profile on the same
-`AppHost`, running Sammlarr from the image `Web/Dockerfile` builds, with real Radarr and Sonarr already connected.
+`AppHost`, running Sammlarr from the image `src/Web/Dockerfile` builds, with real Radarr and Sonarr already connected.
 
 ```powershell
 dotnet user-secrets set Parameters:tmdb-api-key <your key> --project AppHost      # once; Parameters:mdblist-api-key, Parameters:mal-client-id and Parameters:trakt-client-id are optional
@@ -153,7 +153,7 @@ profile; the staging smoke test does neither).
 
 Every port is published on 127.0.0.1 only.
 
-**Settings** live in `AppHost/appsettings.Staging.json`, which the staging profile loads on top of the AppHost's own: under
+**Settings** live in `src/AppHost/appsettings.Staging.json`, which the staging profile loads on top of the AppHost's own: under
 `Staging`, the host name, the ports, the catcher session, the proxy and its allowlist, the two personas and `Seed`, what the seed puts in
 (the wantlist's titles by TMDB, TVDB or IMDb id, the feeds, the Radarr library by TMDB id and the Sonarr one by TVDB id with each title's
 `OnDisk` and tag `Owner`, the webhook's and Pushover's names and secrets, and the title and message template both subscribe to every event
@@ -161,7 +161,7 @@ with); under `Sammlarr`, settings handed as they are to the staged Sammlarr and 
 and `Accounts:MinimumPasswordLength`; the seeded webhook belongs to the admin, and an admin's webhook reaches the catcher over http on its private address).
 The values above are its defaults.
 
-**Scenarios.** The `seed` resource (Web started with `seed-staging`, its code in `Web/Staging`, which the published image leaves out) prepares Radarr and Sonarr (a default and an anime root folder: `/movies` and `/anime-movies` in Radarr, `/tv` and `/anime` in Sonarr; a blackhole
+**Scenarios.** The `seed` resource (Web started with `seed-staging`, its code in `src/Web/Staging`, which the published image leaves out) prepares Radarr and Sonarr (a default and an anime root folder: `/movies` and `/anime-movies` in Radarr, `/tv` and `/anime` in Sonarr; a blackhole
 download client, the Newznab indexer, a small library: titles on disk, monitored titles without files, and The Martian tagged for `admin`
 so the pull-back path shows; each step skips what is already there) and, unless the database carries the `.seeded` marker of a finished seed, seeds a scenario:
 
@@ -179,19 +179,19 @@ seeder again and start everything; `rebuild` rebuilds the image from the working
 
 **What is real and what is caught.** TMDB, MDBList, Wikidata, TVmaze, IMDb's ratings file, AniList, MyAnimeList, Trakt and the anime id map (`raw.githubusercontent.com`) are real (with your keys). Radarr and Sonarr use their own metadata
 services. Plex is read-only: its APIs (`Plex` in the settings) go through WireMock, which proxies sign-in, search, the watchlist and
-metadata to the real Plex (`AppHost/Staging/wiremock/plex.json`) but answers watchlist adds and removes itself, so they show in its journal and
+metadata to the real Plex (`src/AppHost/Staging/wiremock/plex.json`) but answers watchlist adds and removes itself, so they show in its journal and
 never reach your watchlist; Plex's images and sign-in page stay the real ones. Webhooks and Pushover (`Pushover:BaseUrl`) go to the catcher, and Sammlarr's
 `HTTP_PROXY`/`HTTPS_PROXY` point at a dead port with a `NO_PROXY` allowlist, so a call to any other host fails. Searches go to WireMock's
 Newznab indexer, which answers every title search with one release; the AppHost's fake downloader turns each grabbed `.nzb` into
-`downloads/<app>/watch/<release>/<release>.mkv` from `AppHost/Staging/stub.mkv`, and Radarr imports it about a minute and a half later. Sonarr
+`downloads/<app>/watch/<release>/<release>.mkv` from `src/AppHost/Staging/stub.mkv`, and Radarr imports it about a minute and a half later. Sonarr
 searches a new show season by season, and a one-file season pack stays in its queue unimported.
 
-**Data** lives under `%LOCALAPPDATA%\Sammlarr\staging` (`-- --StagingRoot=<dir>` moves it) and survives restarts; it is never `Web/sammlarr.db` or
-`Web/dp-keys`. Radarr, Sonarr and WireMock keep running after the session stops, as `sammlarr-staging-radarr`, `-sonarr` and
+**Data** lives under `%LOCALAPPDATA%\Sammlarr\staging` (`-- --StagingRoot=<dir>` moves it) and survives restarts; it is never `src/Web/sammlarr.db` or
+`src/Web/dp-keys`. Radarr, Sonarr and WireMock keep running after the session stops, as `sammlarr-staging-radarr`, `-sonarr` and
 `-wiremock`. `aspire stop --force` does not remove them for a session started with `dotnet run`;
 `docker rm -f sammlarr-staging-radarr sammlarr-staging-sonarr sammlarr-staging-wiremock` does, and their data stays in the data directory.
 
-`Tests/E2E/Staging/StagingSmokeTests` boots the staging profile on a temporary data directory, with session containers on free ports, and
+`tests/E2E/Staging/StagingSmokeTests` boots the staging profile on a temporary data directory, with session containers on free ports, and
 signs in as `admin`. It is skipped unless `E2E_STAGING=true`: it builds the image and needs the internet (Radarr's and Sonarr's metadata
 services), and in two of three full runs on 2026-10-05 DCP's image build ran past the ten-minute boot budget. With the variable set it runs
 alone (`[NotInParallel]`).
@@ -208,7 +208,7 @@ alone (`[NotInParallel]`).
 | `E2E_RESOURCE_LOG=<dir>` | Write each stack's application log to `<dir>/stack-<n>.log` (`self-hosted-<n>.log` for the self-hosted pool) |
 | `PUID`, `PGID`           | Linux only: the user and group the self-hosted and live stacks' Radarr and Sonarr run as, set to `$(id -u)` and `$(id -g)` so they can write the folders the test run creates (CI does) |
 
-Live secrets come from `dotnet user-secrets` on `Tests/E2E`, named from the generated provider enums: `{PROVIDER}_API_KEY` and `{PROVIDER}_TOKEN`, for example
+Live secrets come from `dotnet user-secrets` on `tests/E2E`, named from the generated provider enums: `{PROVIDER}_API_KEY` and `{PROVIDER}_TOKEN`, for example
 `TMDB_API_KEY`, `PLEX_TOKEN`. `TMDB_API_KEY` is required: the seeded member gets the same TMDB key, since a member without one is sent to the key prompt.
 
 ## Mutation testing

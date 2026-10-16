@@ -23,7 +23,7 @@
 	</ItemGroup>
 	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Roslyn'">
 		<ProjectReference
-			Include="$(MSBuildThisFileDirectory)Roslyn\Roslyn.csproj"
+			Include="$(MSBuildThisFileDirectory)src\Roslyn\Roslyn.csproj"
 			OutputItemType="Analyzer"
 			ReferenceOutputAssembly="false"
 			IsAspireProjectResource="false"

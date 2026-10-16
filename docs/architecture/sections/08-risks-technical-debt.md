@@ -2,7 +2,7 @@
 
 Open risks in what is built, then deferred work. The idea to take away: most risks come from the outside services
 Sammlarr depends on and from running in one process on one SQLite file. Limits and wait budgets named here are set per
-service in `Web/appsettings.json` ([Lanes and HTTP resilience](06-crosscutting.md#lanes-and-http-resilience)).
+service in `src/Web/appsettings.json` ([Lanes and HTTP resilience](06-crosscutting.md#lanes-and-http-resilience)).
 
 ## Risks
 
@@ -28,7 +28,7 @@ service in `Web/appsettings.json` ([Lanes and HTTP resilience](06-crosscutting.m
 | Risk | Impact | Mitigation |
 |---|---|---|
 | Plex 429 storm | Titles that need Plex settle "couldn't look up" for that run. | Each Plex route has its own lane; Plex publishes no limits, so the configured ones are guesses. A 429 blocks or slows only its lane, other titles settle meanwhile, and nothing is cached unmatched, so the next run retries. |
-| Plex's match endpoint is undocumented | Other ids become Plex ids only through `library/metadata/matches` (`API/Plex/PlexIdConverter.cs`). If Plex changes it, new titles for a Plex sink fail to identify: a 404 or empty answer settles "not found" (cached for an hour), a 5xx "couldn't look up". | `PlexMatchTests` and the E2E mapping `plex-discover/library-metadata-matches.json` pin Sammlarr's side of the format. A run where every Plex title settles "not found" points here. |
+| Plex's match endpoint is undocumented | Other ids become Plex ids only through `library/metadata/matches` (`src/API/Plex/PlexIdConverter.cs`). If Plex changes it, new titles for a Plex sink fail to identify: a 404 or empty answer settles "not found" (cached for an hour), a 5xx "couldn't look up". | `PlexMatchTests` and the E2E mapping `plex-discover/library-metadata-matches.json` pin Sammlarr's side of the format. A run where every Plex title settles "not found" points here. |
 | Trakt's API Use Policy | Trakt allows a self-hosted tool on its own credentials but forbids mirroring its lists or passing its data on, has blocked services without notice, and deletes an API app unused for 30 days. | Each person brings their own client ID; Sammlarr reads only public lists for them and passes nothing on; the key row warns about the 30 days. |
 | Trakt's rating for every title | Each title with a Trakt or IMDb id but no Trakt rating costs a Trakt request, so a large first load without MDBList waits on Trakt's lane. | `TraktTitles` reuses an answer for ten minutes under every id it carries; MDBList usually fills the rating first. |
 | AniList's rate | Every anime a feed brings asks AniList, so a large anime feed's details wait on AniList's narrow lane. | `AniListTitles` reuses what a feed page read and asks the rest in batches. |
@@ -52,7 +52,7 @@ service in `Web/appsettings.json` ([Lanes and HTTP resilience](06-crosscutting.m
 
 | Item | State |
 |---|---|
-| Tooltip guard | `Web/wwwroot/js/tooltip-guard.js` works around two BlazorBlueprint 4.1.0 tooltip bugs (opening on a focus no Tab caused, staying visible after a raced close); `UiInvariantTests` catch markup changes. A screen reader moving focus without Tab gets no tooltip, and a nested trigger needs `AsChild="false" Class="inline-flex" Focusable="false"`. Remove it once `BbTooltip` is fixed. |
+| Tooltip guard | `src/Web/wwwroot/js/tooltip-guard.js` works around two BlazorBlueprint 4.1.0 tooltip bugs (opening on a focus no Tab caused, staying visible after a raced close); `UiInvariantTests` catch markup changes. A screen reader moving focus without Tab gets no tooltip, and a nested trigger needs `AsChild="false" Class="inline-flex" Focusable="false"`. Remove it once `BbTooltip` is fixed. |
 | Job queue surfacing | Home shows your own jobs only (`QueueSnapshot.OthersPending` is computed, not rendered), and an abandoned push has no retry action. |
 | E2E circuit crash | Now and then a full E2E run trips the circuit-crash guard (`CircuitFailureSink`) while every test passes. One cause is fixed: `PosterTrack`'s JS dispose ended in `TaskCanceledException` when the browser closed mid-dispose. Others may remain; the guard's log names the component. |
 | Result-based errors | Blocklist writes throw `UnknownMediaException` and wantlist writes fail on the foreign key, instead of returning a `Result`. |

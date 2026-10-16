@@ -41,7 +41,7 @@ runs:
         SOURCE_DATE_EPOCH: ${{ steps.epoch.outputs.value }}
       with:
         context: .
-        file: Web/Dockerfile
+        file: src/Web/Dockerfile
         platforms: linux/amd64
         tags: ${{ inputs.tags }}
         labels: ${{ inputs.labels }}

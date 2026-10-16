@@ -1,16 +1,16 @@
 # 5. Deployment View
 
-Sammlarr runs as one process with one SQLite file. The Aspire AppHost (`AppHost/AppHost.cs`) starts it for development
+Sammlarr runs as one process with one SQLite file. The Aspire AppHost (`src/AppHost/AppHost.cs`) starts it for development
 and staging; a self-hoster runs the released image with the repo's `compose.yaml`. The idea to take away: in the
 container, all state lives in one `/data` folder, the database and the key ring that decrypts its secrets.
 
 | | Dev run | Staging | Release |
 |---|---|---|---|
 | Started by | `aspire run`, or Rider's `AppHost: http` | `dotnet run --project AppHost -c Staging --launch-profile staging` | a `v*` tag |
-| Sammlarr runs as | the `Web` project | an image built from `Web/Dockerfile` | `ghcr.io/daerup/sammlarr` |
+| Sammlarr runs as | the `Web` project | an image built from `src/Web/Dockerfile` | `ghcr.io/daerup/sammlarr` |
 | App | http://localhost:6769 | http://staging.localhost:6789 | port 6769 |
 | Dashboard | http://localhost:15223 | http://localhost:15224 | none |
-| Data | `Web/sammlarr.db`, `Web/dp-keys` | `%LOCALAPPDATA%\Sammlarr\staging` | the `sammlarr-data` volume at `/data` |
+| Data | `src/Web/sammlarr.db`, `src/Web/dp-keys` | `%LOCALAPPDATA%\Sammlarr\staging` | the `sammlarr-data` volume at `/data` |
 
 ## The deployed system
 
@@ -31,17 +31,17 @@ notification targets each user sets up, GitHub for the update check, and an OTLP
 
 ## Dev run and staging
 
-The AppHost's `http` profile (`AppHost/Properties/launchSettings.json`) sets `ASPIRE_ALLOW_UNSECURED_TRANSPORT=true`,
+The AppHost's `http` profile (`src/AppHost/Properties/launchSettings.json`) sets `ASPIRE_ALLOW_UNSECURED_TRANSPORT=true`,
 so a bare `aspire run` needs no https. `AppHost.cs` pins the port, logs at `Verbose` and opens a browser when
-`LaunchSammlarr` is true, which `AppHost/appsettings.Development.json` sets; `RadarrSonarr=true` adds throwaway Radarr and
+`LaunchSammlarr` is true, which `src/AppHost/appsettings.Development.json` sets; `RadarrSonarr=true` adds throwaway Radarr and
 Sonarr containers. `dotnet build` of `Web` runs `npm ci` and `npm run css`, so building needs Node 24.
 
 Staging is a seeded Sammlarr for trying things by hand: its own image, real Radarr and Sonarr, WireMock in place of Plex
-and an indexer, and a webhook catcher (`AppHost/Staging`). Guide: [Testing › Staging](../testing.md#staging).
+and an indexer, and a webhook catcher (`src/AppHost/Staging`). Guide: [Testing › Staging](../testing.md#staging).
 
 ## The container
 
-`Web/Dockerfile`:
+`src/Web/Dockerfile`:
 
 - **Build**: the .NET 11 SDK with Node 24 for the Tailwind build; `dotnet publish -p:ExcludeStaging=true` leaves the
   staging seed out. Base images are pinned by digest; the commit time as `SOURCE_DATE_EPOCH` and BuildKit's
@@ -50,7 +50,7 @@ and an indexer, and a webhook catcher (`AppHost/Staging`). Guide: [Testing › S
 - **Runtime**: `aspnet:11.0-resolute-chiseled-extra` (no shell, ICU and tzdata included), running as `$APP_UID`
   (1654), which owns `/data`. Plain HTTP on 6769.
 - **Health**: `HEALTHCHECK` runs `dotnet Web.dll healthcheck`, which asks `/alive` (the process and the job runner's
-  liveness) and exits 0 or 1 (`Web/Health/ContainerHealthProbe.cs`).
+  liveness) and exits 0 or 1 (`src/Web/Health/ContainerHealthProbe.cs`).
 
 | Image property | Today |
 |---|---|
@@ -63,7 +63,7 @@ and an indexer, and a webhook catcher (`AppHost/Staging`). Guide: [Testing › S
 
 ```mermaid
 flowchart LR
-  tag["tag vX.Y.Z"] --> build["build Web/Dockerfile"]
+  tag["tag vX.Y.Z"] --> build["build src/Web/Dockerfile"]
   build --> ghcr[("GHCR<br/>:X.Y.Z :latest :sha-...")]
   compose["compose.yaml<br/>from the repo"]
   subgraph server["Self-hosted machine"]
@@ -82,7 +82,7 @@ release-please tags `vX.Y.Z` when its release PR merges. `.github/workflows/rele
 
 ## Configuration at deploy
 
-Environment variables override `Web/appsettings.json` (`__` for `:`). Provider keys, sign-ins and the admin's choices
+Environment variables override `src/Web/appsettings.json` (`__` for `:`). Provider keys, sign-ins and the admin's choices
 are not configuration: they live in the database, the keys and sign-ins encrypted ([Cross-cutting Concepts](06-crosscutting.md)).
 
 | Variable | In the image | Effect |

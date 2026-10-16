@@ -49,7 +49,7 @@
     {
       "customType": "regex",
       "description": "The Radarr and Sonarr images the AppHost and E2E pin in C#",
-      "managerFilePatterns": ["/^AppHost/ArrContainers\\.cs$/"],
+      "managerFilePatterns": ["/^src/AppHost/ArrContainers\\.cs$/"],
       "matchStrings": ["\"(?<depName>lscr\\.io/linuxserver/[a-z]+)\", \"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
       "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)-ls(?<revision>\\d+)$"

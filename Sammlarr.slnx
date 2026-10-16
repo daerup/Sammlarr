@@ -46,30 +46,32 @@
 		<File Path="docs/architecture/sections/09-glossary.md" />
 		<File Path="global.json" />
 	</Folder>
-	<Folder Name="/Tests/">
-		<Project Path="Tests/API/API.Tests.csproj" />
-		<Project Path="Tests/Architecture/Architecture.Tests.csproj" />
-		<Project Path="Tests/Core/Core.Tests.csproj" />
-		<Project Path="Tests/E2E/E2E.Tests.csproj" />
-		<Project Path="Tests/Harness/Harness.csproj" />
-		<Project Path="Tests/Domain/Domain.Tests.csproj" />
-		<Project Path="Tests/Integration/Integration.Tests.csproj" />
-		<Project Path="Tests/Roslyn/Roslyn.Tests.csproj" />
-		<Project Path="Tests/Shared/Shared.Tests.csproj" />
-		<Project Path="Tests/TestInfrastructure/TestInfrastructure.csproj" />
-		<Project Path="Tests/UI/UI.Tests.csproj" />
-		<Project Path="Tests/Web/Web.Tests.csproj" />
+	<Folder Name="/src/">
+		<Project Path="src/API/API.csproj" />
+		<Project Path="src/AppHost/AppHost.csproj" />
+		<Project Path="src/Contracts/Contracts.csproj" />
+		<Project Path="src/Core/Core.csproj" />
+		<Project Path="src/DB/DB.csproj" />
+		<Project Path="src/Domain/Domain.csproj" />
+		<Project Path="src/Messaging/Messaging.csproj" />
+		<Project Path="src/Observability/Observability.csproj" />
+		<Project Path="src/Roslyn/Roslyn.csproj" />
+		<Project Path="src/Shared/Shared.csproj" />
+		<Project Path="src/UI/UI.csproj" />
+		<Project Path="src/Web/Web.csproj" />
 	</Folder>
-	<Project Path="API/API.csproj" />
-	<Project Path="Contracts/Contracts.csproj" />
-	<Project Path="Core/Core.csproj" />
-	<Project Path="DB/DB.csproj" />
-	<Project Path="Domain/Domain.csproj" />
-	<Project Path="Messaging/Messaging.csproj" />
-	<Project Path="Observability/Observability.csproj" />
-	<Project Path="AppHost/AppHost.csproj" />
-	<Project Path="Roslyn/Roslyn.csproj" />
-	<Project Path="Shared/Shared.csproj" />
-	<Project Path="UI/UI.csproj" />
-	<Project Path="Web/Web.csproj" />
+	<Folder Name="/tests/">
+		<Project Path="tests/API/API.Tests.csproj" />
+		<Project Path="tests/Architecture/Architecture.Tests.csproj" />
+		<Project Path="tests/Core/Core.Tests.csproj" />
+		<Project Path="tests/Domain/Domain.Tests.csproj" />
+		<Project Path="tests/E2E/E2E.Tests.csproj" />
+		<Project Path="tests/Harness/Harness.csproj" />
+		<Project Path="tests/Integration/Integration.Tests.csproj" />
+		<Project Path="tests/Roslyn/Roslyn.Tests.csproj" />
+		<Project Path="tests/Shared/Shared.Tests.csproj" />
+		<Project Path="tests/TestInfrastructure/TestInfrastructure.csproj" />
+		<Project Path="tests/UI/UI.Tests.csproj" />
+		<Project Path="tests/Web/Web.Tests.csproj" />
+	</Folder>
 </Solution>

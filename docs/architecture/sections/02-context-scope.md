@@ -2,7 +2,7 @@
 
 Sammlarr sits between its users and a dozen media services. It reads lists, ids, details and ratings from them and
 writes in only two places: the wantlist's sink (Plex, or Radarr + Sonarr) and the notification targets. Every media
-service it calls is a member of `RemoteService` (`Domain/Providers/RemoteService.cs`), which also says how it is accessed.
+service it calls is a member of `RemoteService` (`src/Domain/Providers/RemoteService.cs`), which also says how it is accessed.
 
 ```mermaid
 flowchart LR
@@ -48,13 +48,13 @@ Three partners sit outside `RemoteService`:
 - **GitHub releases**: the latest release of `Sammlarr:Release:GitHubRepo`, asked by a release build at most every 12
   hours, for the update notice in the footer and Settings › About.
 - **Image hosts**: the browser loads artwork straight from TMDB, Plex, TheTVDB and the other services' hosts. Sammlarr
-  only picks the size (`IArtworkResizer` in `API/Tmdb`, `API/Plex`, `API/Tvdb`). The one picture the server fetches
-  itself is a person's profile picture, read once per URL to paint their avatar (`API/Pictures`).
+  only picks the size (`IArtworkResizer` in `src/API/Tmdb`, `src/API/Plex`, `src/API/Tvdb`). The one picture the server fetches
+  itself is a person's profile picture, read once per URL to paint their avatar (`src/API/Pictures`).
 
 ## Sign-in and Sinks
 
-The admin fixes `AuthProvider` once, by how they create the admin account at setup (`Core/Setup/OnboardingService.cs`,
-`Core/Auth/SignInService.cs`):
+The admin fixes `AuthProvider` once, by how they create the admin account at setup (`src/Core/Setup/OnboardingService.cs`,
+`src/Core/Auth/SignInService.cs`):
 
 - **Plex**: Plex's PIN flow on plex.tv. The token it returns is also the user's Plex access.
 - **Local**: Sammlarr's own accounts, password hashes in its database, no external partner. Users can still connect a

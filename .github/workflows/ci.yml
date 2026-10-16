@@ -50,7 +50,7 @@ jobs:
         run: |
           status=0
           for tier in Domain Shared Core API Integration UI Web Architecture Roslyn; do
-            dotnet run --project "Tests/$tier" --no-build -c "$CONFIGURATION" -- \
+            dotnet run --project "tests/$tier" --no-build -c "$CONFIGURATION" -- \
               --coverage --coverage-output-format cobertura --coverage-output "$tier.cobertura.xml" \
               --coverage-settings "$GITHUB_WORKSPACE/.github/coverage.xml" || status=1
           done
@@ -59,7 +59,7 @@ jobs:
       - name: Coverage
         run: >
           dotnet tool run reportgenerator
-          "-reports:Tests/**/TestResults/*.cobertura.xml"
+          "-reports:tests/**/TestResults/*.cobertura.xml"
           -targetdir:coverage
           "-reporttypes:Html;MarkdownSummaryGithub;TextSummary;JsonSummary;Cobertura"
           "-assemblyfilters:-JasperFx*;-Harness;-TestInfrastructure"
@@ -87,7 +87,7 @@ jobs:
       - name: Licences
         if: ${{ !cancelled() && steps.restore.outcome == 'success' }}
         run: >
-          dotnet nuget-license -i Web/Web.csproj -t -o Table -err
+          dotnet nuget-license -i src/Web/Web.csproj -t -o Table -err
           -a .github/licences/allowed.json
           -override .github/licences/overrides.json
 
@@ -176,8 +176,8 @@ jobs:
           export SOURCE_DATE_EPOCH
           for run in 1 2; do
             git clean -xdfq
-            dotnet restore Web/Web.csproj --locked-mode
-            dotnet publish Web/Web.csproj -c Release -a x64 --self-contained false --no-restore -o "$RUNNER_TEMP/publish/$run" \
+            dotnet restore src/Web/Web.csproj --locked-mode
+            dotnet publish src/Web/Web.csproj -c Release -a x64 --self-contained false --no-restore -o "$RUNNER_TEMP/publish/$run" \
               -p:ExcludeStaging=true -p:ContinuousIntegrationBuild=true -p:DebugType=none
           done
 
@@ -251,8 +251,8 @@ jobs:
 
       - run: dotnet restore Sammlarr.slnx --locked-mode
 
-      - run: dotnet build Tests/E2E -c "$CONFIGURATION" --no-restore
+      - run: dotnet build tests/E2E -c "$CONFIGURATION" --no-restore
 
-      - run: pwsh "Tests/E2E/bin/$CONFIGURATION/net11.0/playwright.ps1" install --with-deps chromium
+      - run: pwsh "tests/E2E/bin/$CONFIGURATION/net11.0/playwright.ps1" install --with-deps chromium
 
-      - run: PUID=$(id -u) PGID=$(id -g) dotnet run --project Tests/E2E --no-build -c "$CONFIGURATION"
+      - run: PUID=$(id -u) PGID=$(id -g) dotnet run --project tests/E2E --no-build -c "$CONFIGURATION"

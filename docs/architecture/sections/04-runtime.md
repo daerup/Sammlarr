@@ -19,7 +19,7 @@ flowchart LR
 A list arrives as entries: a few ids and a title hint each. The load turns each entry into a title in Sammlarr's
 library that carries the id the active sink adds it by: Plex's own id on Plex; TMDB for movies and TheTVDB for shows
 on Radarr + Sonarr. A wrong match would corrupt every list the title is on, so a title is handed out only once its
-identity is settled (`Core/Media/ListLoad.cs`).
+identity is settled (`src/Core/Media/ListLoad.cs`).
 
 ```mermaid
 flowchart LR

@@ -11,7 +11,7 @@ setup), each with their own feeds, wantlist, blocklist and API keys.
 
 ## Requirements Overview
 
-The feature areas: pages under `UI/Features`, Settings sections under `UI/Features/Settings/Components`.
+The feature areas: pages under `src/UI/Features`, Settings sections under `src/UI/Features/Settings/Components`.
 
 | Feature              | What it does                                                                                                                                                                                                                          |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
