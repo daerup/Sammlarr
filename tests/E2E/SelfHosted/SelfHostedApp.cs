@@ -114,7 +114,7 @@ public static class SelfHostedApp
 		}
 
 		await Assert.That(E2EApp.IsLive ? await RecordAsync(journal) : Unmatched(journal)).IsEmpty();
-		await Assert.That(crashed).IsEmpty();
+		CircuitFailureSink.AssertNone(crashed);
 		Directory.Delete(_sessionDir, recursive: true);
 	}
 
