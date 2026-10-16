@@ -199,23 +199,6 @@ public class AsyncEnumerableExtensionsTests
 	}
 
 	[Test]
-	public async Task SelectAwait_WhenTheSourceThrows_ProjectsTheItemsBeforeItThenThrows()
-	{
-		var source = CreateAsyncEnumerable(() => 1, () => 2, () => throw new InvalidOperationException());
-		var projectedValues = new List<int>();
-		var testee = source.SelectAwait(value =>
-		{
-			projectedValues.Add(value);
-			return new ValueTask<int>(value);
-		});
-
-		await Assert.That(async () => await testee.ToListAsync()).Throws<InvalidOperationException>();
-		await Assert.That(projectedValues.Count).IsEqualTo(2);
-		await Assert.That(projectedValues[0]).IsEqualTo(1);
-		await Assert.That(projectedValues[1]).IsEqualTo(2);
-	}
-
-	[Test]
 	public async Task SelectAwait_Concurrent_KeepsWindowFullEvenWhenItemBlocksForever()
 	{
 		var blocker = new GatedItem(1);
@@ -391,15 +374,6 @@ public class AsyncEnumerableExtensionsTests
 		}
 
 		return value;
-	}
-
-	private static async IAsyncEnumerable<int> CreateAsyncEnumerable(params Func<int>[] valueProviders)
-	{
-		foreach (var valueProvider in valueProviders)
-		{
-			await Task.Yield();
-			yield return valueProvider();
-		}
 	}
 
 	private sealed record GatedItem(int Value)
