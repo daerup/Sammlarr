@@ -101,11 +101,13 @@ public class FeedPreviewTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(3);
+		var listed = await E2EApp.RequestCountAsync($"/lists/{identifier}/items");
 
 		await page.GetByLabel("Refresh assets").DispatchEventAsync("click");
 		await Expect(page.Heading("Refresh assets?")).ToBeVisibleAsync();
 		await page.Button("Refresh").ClickAsync();
 
+		await E2EApp.WaitForRequestsBeyondAsync($"/lists/{identifier}/items", listed);
 		await FeedEditor.PreviewLoadedAsync(page);
 		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(3);
 
