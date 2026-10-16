@@ -13,6 +13,9 @@ services:
       # so Plex sends you back there after signing in; Plex sign-in then works only at that address.
       # Empty uses the address the request came in on.
       - Sammlarr__PublicUrl=
+      # Take each visitor's address (and https) from the reverse proxy's X-Forwarded-For and -Proto headers, so
+      # Sammlarr's request limits count per visitor, not per proxy. With no proxy in front, set it to false.
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
     restart: unless-stopped
 
 volumes:

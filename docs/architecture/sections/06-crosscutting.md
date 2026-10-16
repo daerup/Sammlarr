@@ -229,9 +229,13 @@ step and compacts the file; a failing step stops the pass. The windows are
   runs in its own scope so a circuit never holds a context. An install signs in one way, `ProviderConfig.AuthProvider`:
   `Plex`, or `Local` accounts whose password is posted as a form to `/auth/local` (a Blazor circuit cannot set a
   cookie). Identity's lockout applies with its defaults: five wrong passwords lock the account for five minutes, and a
-  locked account is told so; wrong current passwords on the account page count toward the same lock. Limits per address
-  belong to the reverse proxy (or fail2ban), which sees the real one; Sammlarr reads no forwarded headers. The Plex
-  round trip binds its state to the browser with a short-lived cookie.
+  locked account is told so; wrong current passwords on the account page count toward the same lock. The Plex round
+  trip binds its state to the browser with a short-lived cookie.
+- ASP.NET Core's rate limiter caps every request ([ADR 0022](../../adr/0022-rate-limit-requests-in-the-app.md)): a
+  token bucket per signed-in user, else per address (300 requests, refilled at 300 a minute), with static assets and
+  health checks left out; the sign-in, join, reset and setup posts are further capped at 10 a minute per address. Over
+  a limit, Sammlarr answers 429 with `Retry-After`. Behind a reverse proxy the address comes from `X-Forwarded-For`, which
+  `ASPNETCORE_FORWARDEDHEADERS_ENABLED` (on in `compose.yaml`) makes the framework read.
 - An invite is a user without a password yet: Settings › Users shows them as invited, and every other list or count
   of users leaves them out until they join. Invite and reset links carry Identity's password-reset token, protected
   with the data-protection key ring: valid for one day, and void once the security stamp changes (a new password, a

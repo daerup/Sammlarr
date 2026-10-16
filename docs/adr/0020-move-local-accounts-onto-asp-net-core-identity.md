@@ -1,8 +1,9 @@
 # Move local accounts onto ASP.NET Core Identity
 
-| Status   | Date       |
-|----------|------------|
-| accepted | 2026-10-16 |
+| Status                                                                          | Date       |
+|---------------------------------------------------------------------------------|------------|
+| accepted                                                                        | 2026-10-16 |
+| limits per address superseded by [0022](0022-rate-limit-requests-in-the-app.md) | 2026-10-16 |
 
 ## Context
 

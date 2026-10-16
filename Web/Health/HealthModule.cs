@@ -27,7 +27,7 @@ internal static class HealthEndpoints
 	public static void MapHealthEndpoints(this WebApplication app)
 	{
 		var healthChecks = app.MapGroup("");
-		healthChecks.CacheOutput(Policy).WithRequestTimeout(Policy);
+		healthChecks.CacheOutput(Policy).WithRequestTimeout(Policy).DisableRateLimiting();
 		healthChecks.MapHealthChecks(HealthEndpointPath);
 		healthChecks.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions { Predicate = static check => check.Tags.Contains("live") });
 	}

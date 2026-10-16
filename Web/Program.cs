@@ -81,12 +81,13 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseMiddleware<FirstRunRedirect>();
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 app.UseAntiforgery();
 app.UseRequestTimeouts();
 app.UseOutputCache();
 
-app.MapStaticAssets();
+app.MapStaticAssets().DisableRateLimiting();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode().AddAdditionalAssemblies(typeof(UI.Shared.Layout.MainLayout).Assembly);
 app.MapAuthEndpoints();
 app.MapHealthEndpoints();
