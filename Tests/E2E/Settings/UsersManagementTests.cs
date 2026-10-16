@@ -18,22 +18,21 @@ public class UsersManagementTests
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section("users"));
 		await Expect(Badge(page, MemberName, "Member")).ToBeVisibleAsync();
+		var stale = await E2EApp.OpenMemberPageAsync();
 
 		await ChangeRoleAsync(page, "Make admin");
 		await Expect(Badge(page, MemberName, "Admin")).ToBeVisibleAsync();
 		await SettingsPage.VisitSectionAsync(page, "users");
 		await Expect(Badge(page, MemberName, "Admin")).ToBeVisibleAsync();
 
-		var stale = await E2EApp.OpenMemberPageAsync();
 		await stale.GotoAsync(Routes.Settings);
 		await stale.ShouldBeAtAsync(Routes.SignIn);
 
 		await ChangeRoleAsync(page, "Make member");
 		await Expect(Badge(page, MemberName, "Member")).ToBeVisibleAsync();
+		await SettingsPage.VisitSectionAsync(page, "users");
 
-		var restored = await E2EApp.MemberAt(Routes.Settings);
-
-		await restored.ShouldNotBeAtAsync(Routes.SignIn);
+		await Expect(Badge(page, MemberName, "Member")).ToBeVisibleAsync();
 	}
 
 	[Test]

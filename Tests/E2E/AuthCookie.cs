@@ -11,13 +11,14 @@ internal static class AuthCookie
 {
 	internal const string Name = "sammlarr.auth";
 
-	internal static string Forge(string keyRingPath, SeededUser user)
+	internal static string Forge(string keyRingPath, SeededUser user, string securityStamp)
 	{
-		var protector = new ServiceCollection()
+		using var provider = new ServiceCollection()
 			.AddDataProtection()
 			.PersistKeysToFileSystem(new DirectoryInfo(keyRingPath))
 			.SetApplicationName("Sammlarr")
-			.Services.BuildServiceProvider()
+			.Services.BuildServiceProvider();
+		var protector = provider
 			.GetRequiredService<IDataProtectionProvider>()
 			.CreateProtector("Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationMiddleware", IdentityConstants.ApplicationScheme, "v2");
 
@@ -25,7 +26,7 @@ internal static class AuthCookie
 			[
 				new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
 				new Claim(ClaimTypes.Role, user.Role.ToString()),
-				new Claim(new ClaimsIdentityOptions().SecurityStampClaimType, user.SecurityStamp),
+				new Claim(new ClaimsIdentityOptions().SecurityStampClaimType, securityStamp),
 			],
 			IdentityConstants.ApplicationScheme
 		);

@@ -34,20 +34,25 @@ internal sealed class E2EStack
 
 	internal Uri WireMockUrl => WireMock.BaseAddress!;
 
-	internal string AdminCookie => _seed.AdminCookie;
+	internal string ForgeAdminCookie() => Forge(SammlarrTestHost.SeededAdmin);
 
-	internal string MemberCookie => _seed.MemberCookie;
+	internal string ForgeMemberCookie() => Forge(SammlarrTestHost.SeededMember);
 
 	internal static E2ESeed Seed(bool live, string keyRing)
 	{
 		var workDir = Directory.CreateTempSubdirectory("sammlarr-e2e-").FullName;
 		var dbPath = Path.Combine(workDir, "sammlarr.db");
 
-		var admin = live
-			? SammlarrTestHost.SeedRecordingDatabase(dbPath, keyRing, Credentials<ApiKeyProvider>("_API_KEY"), Credentials<AuthProvider>("_TOKEN"))
-			: SammlarrTestHost.SeedDatabaseFile(dbPath, keyRing);
+		if (live)
+		{
+			SammlarrTestHost.SeedRecordingDatabase(dbPath, keyRing, Credentials<ApiKeyProvider>("_API_KEY"), Credentials<AuthProvider>("_TOKEN"));
+		}
+		else
+		{
+			SammlarrTestHost.SeedDatabaseFile(dbPath, keyRing);
+		}
 
-		return new E2ESeed(workDir, dbPath, keyRing, Forge(keyRing, admin), Forge(keyRing, SammlarrTestHost.SeededMember));
+		return new E2ESeed(workDir, dbPath, keyRing);
 	}
 
 	internal static async Task<E2EStack> LaunchAsync(E2ESeed seed, int index, bool live, Action<string> onCircuitFailure)
@@ -173,7 +178,7 @@ internal sealed class E2EStack
 		}
 	}
 
-	private static string Forge(string keyRingPath, SeededUser user) => AuthCookie.Forge(keyRingPath, user);
+	private string Forge(SeededUser user) => AuthCookie.Forge(_seed.KeyRing, user, SammlarrTestHost.SecurityStampIn(_seed.DbPath, user.Id));
 
 	private static Dictionary<TProvider, string> Credentials<TProvider>(string suffix)
 		where TProvider : struct, Enum =>
@@ -183,4 +188,4 @@ internal sealed class E2EStack
 			.ToDictionary(entry => entry.provider, entry => entry.secret!);
 }
 
-internal sealed record E2ESeed(string WorkDir, string DbPath, string KeyRing, string AdminCookie, string MemberCookie);
+internal sealed record E2ESeed(string WorkDir, string DbPath, string KeyRing);

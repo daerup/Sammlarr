@@ -46,7 +46,7 @@ internal static class SeedRows
 			Id = id,
 			UserName = userName,
 			NormalizedUserName = userName.ToUpperInvariant(),
-			SecurityStamp = Stamp(id),
+			SecurityStamp = Guid.NewGuid().ToString(),
 			ConcurrencyStamp = Guid.NewGuid().ToString(),
 			LockoutEnabled = true,
 			DisplayName = displayName,
@@ -55,8 +55,6 @@ internal static class SeedRows
 			JoinedAt = DateTimeOffset.UnixEpoch,
 		};
 	}
-
-	internal static string Stamp(Guid id) => id.ToString("N").ToUpperInvariant();
 
 	internal static void Member(SammlarrDbContext context, UserRow user, UserRole role, Optional<string> plexId)
 	{
