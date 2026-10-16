@@ -3,6 +3,7 @@ using Shared.DI;
 using Web.Auth;
 using Web.Health;
 using Web.Instrumentation;
+using Web.RateLimiting;
 
 namespace Web;
 
@@ -13,6 +14,7 @@ internal sealed class WebModule : IServiceModule
 		services.AddModule<AuthenticationModule>();
 		services.AddModule<HealthModule>();
 		services.AddModule<InstrumentationModule>();
+		services.AddModule<RateLimitingModule>();
 		services.AddRazorComponents().AddInteractiveServerComponents();
 		services.AddBlazorBlueprintComponents();
 	}
