@@ -39,6 +39,7 @@ internal sealed class WantlistSyncPlanner(
 		return await TryGetAsync(sink, cancellationToken)
 			.Map(async snapshot =>
 			{
+				cancellationToken.ThrowIfCancellationRequested();
 				var items = await repo.GetAllAsync(cancellationToken);
 				var entries = await outbox.GetAllAsync(sink.Kind, cancellationToken);
 				var waiting = await WaitingAsync(snapshot.Down, [.. items.Select(item => item.MediaId), .. entries.Select(entry => entry.MediaId)], cancellationToken);

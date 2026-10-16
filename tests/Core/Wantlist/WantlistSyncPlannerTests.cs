@@ -124,6 +124,20 @@ public class WantlistSyncPlannerTests
 	}
 
 	[Test]
+	public async Task PlanAsync_WhenCancelledWhileTheSinkIsRead_StopsBeforeReadingTheWantlist()
+	{
+		using var leaving = new CancellationTokenSource();
+		var sink = IMediaSink.Mock();
+		sink.GetAsync(Any()).Returns(WantlistStubs.NothingOnTheSink).Callback(leaving.Cancel);
+		var repository = WantlistStubs.EmptyRepository();
+
+		await Assert
+			.That(async () => await WantlistStubs.Planner(sink, WantlistStubs.EmptyOutbox(), repository: repository).PlanAsync(leaving.Token))
+			.Throws<OperationCanceledException>();
+		repository.GetAllAsync(Any()).WasNeverCalled();
+	}
+
+	[Test]
 	public async Task PlanAsync_WhenTheSinkCannotBeRead_WarnsWhy()
 	{
 		var sink = IMediaSink.Mock();
