@@ -109,13 +109,13 @@ internal sealed class SignInService(
 
 	private Result<User> LockedOut(string username)
 	{
-		logger.LogWarning("Sign-in refused for {Provider} user {Username}: the account is locked out", AuthProvider.Local, username);
+		logger.LogWarning("Sign-in refused for {Provider} user {Username}: the account is locked out", AuthProvider.Local, username.ReplaceLineEndings(" "));
 		return Locked;
 	}
 
 	private Result<User> Rejected(string username)
 	{
-		logger.LogWarning("Sign-in failed for {Provider} user {Username}: wrong username or password", AuthProvider.Local, username);
+		logger.LogWarning("Sign-in failed for {Provider} user {Username}: wrong username or password", AuthProvider.Local, username.ReplaceLineEndings(" "));
 		return WrongPassword;
 	}
 

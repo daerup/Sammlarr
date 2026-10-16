@@ -102,6 +102,18 @@ public class SignInServiceTests : IDisposable
 		await Assert.That(Warnings()).IsEquivalentTo(["Sign-in refused for Local user ada: the account is locked out"]);
 	}
 
+	[Test]
+	public async Task SignInWithPasswordAsync_WithLineBreaksInTheUsername_WarnsOnOneLine()
+	{
+		const string username = "ada\r\nSign-in completed for Local as user\nadmin";
+		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Closed) with { AuthProvider = AuthProvider.Local });
+		_accounts.CheckPasswordAsync(username, "secret", Any()).Returns(new PasswordRejected());
+
+		await Testee.SignInWithPasswordAsync(username, "secret");
+
+		await Assert.That(Warnings()).IsEquivalentTo(["Sign-in failed for Local user ada Sign-in completed for Local as user admin: wrong username or password"]);
+	}
+
 	private static ProviderConfig Config(RegistrationMode registration)
 	{
 		return new ProviderConfig
