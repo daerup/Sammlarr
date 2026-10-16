@@ -195,13 +195,16 @@ jobs:
     permissions:
       packages: write
     steps:
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Move latest to the release
         env:
           DIGEST: ${{ needs.image.outputs.digest }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "$GH_TOKEN" | skopeo login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          skopeo copy -q --retry-times 3 --preserve-digests "docker://ghcr.io/daerup/sammlarr@$DIGEST" docker://ghcr.io/daerup/sammlarr:latest
+        run: docker buildx imagetools create --prefer-index=false --tag ghcr.io/daerup/sammlarr:latest "ghcr.io/daerup/sammlarr@$DIGEST"
 
   reproduced:
     needs: [image, rebuild]
