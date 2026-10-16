@@ -923,7 +923,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return path;
 	}
 
-	public static SeededUser SeedDatabaseFile(string path, string keyRingPath) =>
+	public static void SeedDatabaseFile(string path, string keyRingPath) =>
 		SeedFile(
 			path,
 			keyRingPath,
@@ -936,7 +936,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			}
 		);
 
-	public static SeededUser SeedRecordingDatabase(
+	public static void SeedRecordingDatabase(
 		string path,
 		string keyRingPath,
 		IReadOnlyDictionary<ApiKeyProvider, string> apiKeys,
@@ -960,7 +960,16 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			}
 		);
 
-	private static SeededUser SeedFile(string path, string keyRingPath, string memberTmdbKey, Action<SammlarrDbContext> seed)
+	public static string SecurityStampIn(string path, Guid id)
+	{
+		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
+		connection.Open();
+		using var provider = BuildDbOnlyProvider(connection.ConnectionString);
+		using var context = BuildContext(provider, new TestCurrentUser(), connection);
+		return context.Users.Where(user => user.Id == id).Select(user => user.SecurityStamp).Single()!;
+	}
+
+	private static void SeedFile(string path, string keyRingPath, string memberTmdbKey, Action<SammlarrDbContext> seed)
 	{
 		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
 		connection.Open();
@@ -975,7 +984,6 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		SeedMemberTmdbKey(context, user, memberTmdbKey);
 		seed(context);
 		SeedRows.WriteAheadLogging(connection);
-		return Project(user);
 	}
 
 	private static void SeedSecondaryUsers(SammlarrDbContext context)

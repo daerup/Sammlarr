@@ -26,9 +26,9 @@ public static class E2EApp
 
 	internal static Task<IPage> OpenPageAsync() => NewPageAsync(_ => null);
 
-	internal static Task<IPage> OpenAuthenticatedPageAsync() => NewPageAsync(stack => stack.AdminCookie);
+	internal static Task<IPage> OpenAuthenticatedPageAsync() => NewPageAsync(stack => stack.ForgeAdminCookie());
 
-	internal static Task<IPage> OpenMemberPageAsync() => NewPageAsync(stack => stack.MemberCookie);
+	internal static Task<IPage> OpenMemberPageAsync() => NewPageAsync(stack => stack.ForgeMemberCookie());
 
 	internal static Task<IPage> OpenPageWithAuthCookieAsync(string value) => NewPageAsync(_ => value);
 
