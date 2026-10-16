@@ -51,11 +51,13 @@ public class FeedPreviewTests
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
+		var included = int.Parse(await FeedEditor.Badge(page, PreviewBadge.Included).InnerTextAsync(), CultureInfo.InvariantCulture);
+
 		await FeedEditor.Badge(page, PreviewBadge.Skipped).ClickAsync();
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(listed - Limit);
 
 		await FeedEditor.Badge(page, PreviewBadge.Included).ClickAsync();
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(listed);
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(listed - Limit + included);
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveClassAsync(new Regex("is-active"));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveClassAsync(new Regex("is-active"));
 
@@ -107,8 +109,8 @@ public class FeedPreviewTests
 		await FeedEditor.PreviewLoadedAsync(page);
 		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(3);
 
-		await FeedEditor.FillAsync(page, SearchBox, Guid.NewGuid().ToString("N"));
-		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(0, Wait.Settle);
+		await FeedEditor.FillAsync(page, SearchBox, "Unmatched 1");
+		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(1, Wait.Settle);
 		await FeedEditor.FillAsync(page, SearchBox, string.Empty);
 		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(3, Wait.Settle);
 	}

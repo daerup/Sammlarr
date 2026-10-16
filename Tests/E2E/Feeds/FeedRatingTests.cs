@@ -19,7 +19,7 @@ public class FeedRatingTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(6), Wait.Preview);
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(3), Wait.Preview);
 
 		await FeedEditor.RatingStar(page).ClickAsync();
 		await page.GetByRole(AriaRole.Tab, new PageGetByRoleOptions { Name = "First available" }).ClickAsync();
@@ -28,7 +28,7 @@ public class FeedRatingTests
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(5), Wait.Preview);
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(4), Wait.Preview);
 	}
 
 	[Test]
@@ -46,7 +46,7 @@ public class FeedRatingTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(9), Wait.Preview);
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(0), Wait.Preview);
 
 		await FeedEditor.RatingStar(page).ClickAsync();
 		await page.GetByRole(AriaRole.Tab, new PageGetByRoleOptions { Name = "First available" }).ClickAsync();
@@ -55,7 +55,7 @@ public class FeedRatingTests
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(0), Wait.Preview);
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(9), Wait.Preview);
 		await FeedEditor.Rows(page).First.Locator(".search-result-status-indicator").HoverAsync();
 		await Expect(page.GetByText("no votes behind its rating").First).ToBeVisibleAsync();
 	}

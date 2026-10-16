@@ -7,7 +7,7 @@ namespace E2E.Tests.SelfHosted;
 
 public static class SelfHostedApp
 {
-	internal const int StackCount = 2;
+	internal static int StackCount { get; } = Math.Clamp(Environment.ProcessorCount / 8, 1, 2);
 
 	private static readonly TimeSpan LeaseTimeout = TimeSpan.FromMinutes(5);
 	private static readonly Lazy<Task> Boot = new(StartAsync);
