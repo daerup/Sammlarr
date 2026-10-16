@@ -14,6 +14,7 @@ public class BrowsePageTests
 
 		await page.VisitAsync(Routes.Browse);
 		await Expect(Resolved(page).First).ToBeVisibleAsync(Wait.Settle);
+		var title = (await Resolved(page).First.Locator("h3").InnerTextAsync()).Trim();
 		await Resolved(page).First.ClickAsync();
 
 		var addButton = page.ButtonContaining("Add to Wantlist");
@@ -24,6 +25,14 @@ public class BrowsePageTests
 		await page.VisitAsync(Routes.Wantlist);
 
 		await Expect(Tiles(page)).ToHaveCountAsync(before + 1, Wait.Settle);
+
+		await page.VisitAsync(Routes.Browse);
+		await Resolved(page).Filter(new LocatorFilterOptions { Has = page.Heading(title) }).First.ClickAsync();
+		await page.Button("Remove from wantlist").ClickAsync();
+		await Expect(addButton).ToBeVisibleAsync(Wait.Settle);
+		await page.VisitAsync(Routes.Wantlist);
+
+		await Expect(Tiles(page)).ToHaveCountAsync(before, Wait.Settle);
 	}
 
 	private static ILocator Tiles(IPage page) => page.Locator("[data-testid='media-tile']");

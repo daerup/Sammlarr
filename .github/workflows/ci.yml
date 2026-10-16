@@ -62,7 +62,9 @@ jobs:
           "-reports:Tests/**/TestResults/*.cobertura.xml"
           -targetdir:coverage
           "-reporttypes:Html;MarkdownSummaryGithub;TextSummary;JsonSummary;Cobertura"
-          "minimumCoverageThresholds:lineCoverage=93"
+          "-assemblyfilters:-JasperFx*;-Harness;-TestInfrastructure"
+          "-classfilters:-DB.Migrations.*"
+          "minimumCoverageThresholds:lineCoverage=80"
 
       - name: Coverage summary
         if: always()

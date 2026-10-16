@@ -11,7 +11,11 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<TailwindInput Include="$(MSBuildThisFileDirectory)wwwroot\css\app-input.css;$(RepoRoot)UI\tailwind.config.js" Visible="false" />
-		<TailwindInput Include="$(RepoRoot)UI\**\*.razor;$(RepoRoot)UI\**\*.cs;$(MSBuildThisFileDirectory)*.razor" Exclude="$(RepoRoot)UI\obj\**;$(RepoRoot)UI\bin\**" Visible="false" />
+		<TailwindInput
+			Include="$(RepoRoot)UI\**\*.razor;$(RepoRoot)UI\**\*.cs;$(MSBuildThisFileDirectory)*.razor"
+			Exclude="$(RepoRoot)UI\obj\**;$(RepoRoot)UI\bin\**"
+			Visible="false"
+		/>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Core\Core.csproj" />
