@@ -101,8 +101,8 @@ flowchart LR
 - **What answers.** Recorded metadata in `mappings/{radarr,sonarr}-metadata` (matched by host); in `mappings/arr-stubs`, stubs for the apps' background calls
   (update check, time, notifications, Sonarr's scene mappings and daily series) and a 404 for every image and scene-numbering request; and a Newznab indexer
   in `mappings/newznab`. The tests read the indexer's requests from WireMock's journal (`SelfHostedStack.IndexerSearchesAsync`).
-- **Pool.** `SelfHostedApp` boots both stacks on first use and leases one per test. A used stack is reset when it is leased again: Sammlarr stops and its
-  database files are deleted, Sonarr gets its API key back if a test broke it, both apps' command queues settle, both apps lose every title, tag and
+- **Pool.** `SelfHostedApp` boots both stacks on first use and leases one per test. A used stack is reset when it is leased again: Sammlarr's process tree is
+  killed (on Windows Aspire's stop cannot signal it and kills it after 12 s anyway, microsoft/aspire#10377) and its database files are deleted, Sonarr gets its API key back if a test broke it, both apps' command queues settle, both apps lose every title, tag and
   indexer, the indexer is added again, Sammlarr starts on the fresh database, the queues settle once more, and WireMock's journal is kept for the
   session-end check and cleared. `[SelfHosted]` gives these tests their own parallel limit of two and a `ParallelGroup`, so they run as a batch after the
   rest of the suite.

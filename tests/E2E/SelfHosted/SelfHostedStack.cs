@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Aspire.Hosting;
@@ -13,6 +15,8 @@ namespace E2E.Tests.SelfHosted;
 internal sealed partial class SelfHostedStack
 {
 	private const string Web = "blazor-ui";
+
+	private const string ExecutablePid = "executable.pid";
 
 	private const int StopAttempts = 3;
 
@@ -204,7 +208,7 @@ internal sealed partial class SelfHostedStack
 	{
 		using var reset = new CancellationTokenSource(ResetTimeout);
 		_setupCodes.Forget();
-		await StopResourceAsync(Web, reset.Token);
+		await KillWebAsync(reset.Token);
 		foreach (var suffix in new[] { "", "-wal", "-shm" })
 		{
 			File.Delete($"{DatabasePath(_workDir)}{suffix}");
@@ -295,6 +299,15 @@ internal sealed partial class SelfHostedStack
 
 	[GeneratedRegex("<ApiKey>[^<]*</ApiKey>")]
 	private static partial Regex ApiKeyElement();
+
+	private async Task KillWebAsync(CancellationToken cancellationToken)
+	{
+		_app.ResourceNotifications.TryGetCurrentState(Web, out var current);
+		var pid = current!.Snapshot.Properties.Single(property => property.Name == ExecutablePid).Value;
+		using var process = Process.GetProcessById(Convert.ToInt32(pid, CultureInfo.InvariantCulture));
+		process.Kill(entireProcessTree: true);
+		await _app.ResourceNotifications.WaitForResourceAsync(Web, KnownResourceStates.TerminalStates, cancellationToken);
+	}
 
 	private async Task StopResourceAsync(string resource, CancellationToken cancellationToken)
 	{
