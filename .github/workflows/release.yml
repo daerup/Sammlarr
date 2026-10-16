@@ -47,9 +47,8 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/daerup/sammlarr
-          tags: |
-            type=semver,pattern={{version}}
-            type=sha
+          flavor: latest=false
+          tags: type=semver,pattern={{version}}
           labels: |
             org.opencontainers.image.created=${{ steps.version.outputs.created }}
 
@@ -189,6 +188,20 @@ jobs:
             ${{ runner.temp }}/pushed.txt
             ${{ runner.temp }}/rebuilt.txt
           retention-days: 7
+
+  latest:
+    needs: [image, rebuild]
+    runs-on: ubuntu-26.04
+    permissions:
+      packages: write
+    steps:
+      - name: Move latest to the release
+        env:
+          DIGEST: ${{ needs.image.outputs.digest }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GH_TOKEN" | skopeo login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          skopeo copy -q --retry-times 3 --preserve-digests "docker://ghcr.io/daerup/sammlarr@$DIGEST" docker://ghcr.io/daerup/sammlarr:latest
 
   reproduced:
     needs: [image, rebuild]
