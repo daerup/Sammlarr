@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Contracts.Auth;
+using Contracts.Identity;
 using Contracts.Setup;
 using Domain.Identity;
 using Domain.Providers;
@@ -16,6 +17,8 @@ namespace Web.Auth;
 internal static class AuthEndpoints
 {
 	private const string SetupPath = "/setup";
+
+	private static readonly Error DeadLink = Error.From(UnusableLink.Message);
 
 	private static readonly Error StaleSignIn = Error.From("The sign-in timed out or was started in another browser. Please try again.");
 
@@ -99,44 +102,8 @@ internal static class AuthEndpoints
 				}
 			)
 			.RequireRateLimiting(RateLimitingModule.SignInForms);
-		endpoints
-			.MapPost(
-				"/auth/join",
-				async (
-					[FromForm] Guid user,
-					[FromForm] string token,
-					[FromForm] string password,
-					[FromForm] string confirmation,
-					HttpContext context,
-					IAccountLinkService links
-				) =>
-				{
-					return await links
-						.JoinAsync(UserId.From(user), token, password, confirmation, context.RequestAborted)
-						.Map(account => SignInAndRedirectAsync(context, account, "/"))
-						.GetValueOr(error => Results.Redirect(LinkPage("join", user, token, error)));
-				}
-			)
-			.RequireRateLimiting(RateLimitingModule.SignInForms);
-		endpoints
-			.MapPost(
-				"/auth/reset",
-				async (
-					[FromForm] Guid user,
-					[FromForm] string token,
-					[FromForm] string password,
-					[FromForm] string confirmation,
-					HttpContext context,
-					IAccountLinkService links
-				) =>
-				{
-					return await links
-						.ResetPasswordAsync(UserId.From(user), token, password, confirmation, context.RequestAborted)
-						.Map(account => SignInAndRedirectAsync(context, account, "/"))
-						.GetValueOr(error => Results.Redirect(LinkPage("reset", user, token, error)));
-				}
-			)
-			.RequireRateLimiting(RateLimitingModule.SignInForms);
+		endpoints.MapPost("/auth/join", JoinAsync).RequireRateLimiting(RateLimitingModule.SignInForms);
+		endpoints.MapPost("/auth/reset", ResetAsync).RequireRateLimiting(RateLimitingModule.SignInForms);
 		endpoints
 			.MapPost(
 				"/setup/admin",
@@ -181,6 +148,42 @@ internal static class AuthEndpoints
 				return Results.Redirect("/");
 			}
 		);
+	}
+
+	internal static Task<IResult> JoinAsync(
+		[FromForm] Guid user,
+		[FromForm] string token,
+		[FromForm] string password,
+		[FromForm] string confirmation,
+		HttpContext context,
+		IAccountLinkService links
+	)
+	{
+		return RedeemAsync("join", user, token, context, id => links.JoinAsync(id, token, password, confirmation, context.RequestAborted));
+	}
+
+	internal static Task<IResult> ResetAsync(
+		[FromForm] Guid user,
+		[FromForm] string token,
+		[FromForm] string password,
+		[FromForm] string confirmation,
+		HttpContext context,
+		IAccountLinkService links
+	)
+	{
+		return RedeemAsync("reset", user, token, context, id => links.ResetPasswordAsync(id, token, password, confirmation, context.RequestAborted));
+	}
+
+	private static async Task<IResult> RedeemAsync(string page, Guid user, string token, HttpContext context, Func<UserId, Task<Result<User>>> redeem)
+	{
+		if (!UserId.TryFrom(user, out var id))
+		{
+			return Results.Redirect(LinkPage(page, user, token, DeadLink));
+		}
+
+		return await redeem(id)
+			.Map(account => SignInAndRedirectAsync(context, account, "/"))
+			.GetValueOr(error => Results.Redirect(LinkPage(page, user, token, error)));
 	}
 
 	private static async Task<IResult> SignInAndRedirectAsync(HttpContext context, User user, string? returnUrl)

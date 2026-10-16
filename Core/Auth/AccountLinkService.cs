@@ -19,7 +19,7 @@ internal sealed class AccountLinkService(
 	ILogger<AccountLinkService> logger
 ) : IAccountLinkService
 {
-	private static readonly Error Unusable = Error.From("This link has expired or was already used. Ask your admin for a new one.");
+	private static readonly Error Unusable = Error.From(UnusableLink.Message);
 
 	public async Task<Optional<AccountLinkPreview>> InspectAsync(AccountLinkKind kind, UserId user, string token, CancellationToken cancellationToken = default)
 	{
