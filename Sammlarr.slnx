@@ -30,6 +30,7 @@
 		<File Path="docs/adr/0018-claim-identity-before-hand-out-from-identity-keys-only.md" />
 		<File Path="docs/adr/0019-build-and-push-the-image-with-docker-actions.md" />
 		<File Path="docs/adr/0020-move-local-accounts-onto-asp-net-core-identity.md" />
+		<File Path="docs/adr/0021-ship-one-hand-written-compose-file.md" />
 		<File Path="docs/adr/README.md" />
 		<File Path="docs/architecture/README.md" />
 		<File Path="docs/architecture/testing.md" />

@@ -1,7 +1,7 @@
 # 5. Deployment View
 
-Sammlarr runs as one process with one SQLite file. The Aspire AppHost (`AppHost/AppHost.cs`) models it: run mode
-starts it for development, publish mode writes the Docker Compose file a self-hoster runs. The idea to take away: in the
+Sammlarr runs as one process with one SQLite file. The Aspire AppHost (`AppHost/AppHost.cs`) starts it for development
+and staging; a self-hoster runs the released image with the repo's `compose.yaml`. The idea to take away: in the
 container, all state lives in one `/data` folder, the database and the key ring that decrypts its secrets.
 
 | | Dev run | Staging | Release |
@@ -65,8 +65,7 @@ and an indexer, and a webhook catcher (`AppHost/Staging`). Guide: [Testing › S
 flowchart LR
   tag["tag vX.Y.Z"] --> build["build Web/Dockerfile"]
   build --> ghcr[("GHCR<br/>:X.Y.Z :latest :sha-...")]
-  tag --> pub["aspire publish"]
-  pub --> compose["docker-compose.yaml<br/>on the GitHub release"]
+  compose["compose.yaml<br/>from the repo"]
   subgraph server["Self-hosted machine"]
     web["sammlarr :6769"] --> vol[("/data<br/>sammlarr.db, dp-keys")]
   end
@@ -75,11 +74,11 @@ flowchart LR
 ```
 
 release-please tags `vX.Y.Z` when its release PR merges. `.github/workflows/release.yml` builds the image for
-`linux/amd64` with Docker's actions, pushes it to GHCR, and runs `aspire publish` with `ImageTag` set to the version.
-The AppHost's publish branch (`AddContainer`) writes a compose that runs that image on port 6769 with the named volume
-`sammlarr-data` at `/data`, `restart: unless-stopped` and no dashboard; the workflow attaches it to the release. Why:
-[ADR 0019](../../adr/0019-build-and-push-the-image-with-docker-actions.md), which replaces the push path of
-[ADR 0001](../../adr/0001-drive-deployment-from-the-aspire-apphost.md).
+`linux/amd64` with Docker's actions and pushes it to GHCR
+([ADR 0019](../../adr/0019-build-and-push-the-image-with-docker-actions.md)). The release carries no compose file
+([ADR 0021](../../adr/0021-ship-one-hand-written-compose-file.md)). The README's Quick start downloads the repo's
+`compose.yaml`, which runs `:latest` on port 6769 with the named volume `sammlarr-data` at `/data` and
+`restart: unless-stopped`. To pin a version, change the `image:` tag in that file.
 
 ## Configuration at deploy
 

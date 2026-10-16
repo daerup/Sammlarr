@@ -1,8 +1,9 @@
 # Build and push the image with Docker's actions, compose with Aspire
 
-| Status   | Date       |
-|----------|------------|
-| accepted | 2026-10-13 |
+| Status                                                                        | Date       |
+|-------------------------------------------------------------------------------|------------|
+| accepted                                                                      | 2026-10-13 |
+| compose half superseded by [0021](0021-ship-one-hand-written-compose-file.md) | 2026-10-16 |
 
 ## Context
 
@@ -31,3 +32,8 @@ digest output.
   itself is reproducible; cosign and the attestations sign the digest that was pushed.
 * The image build lives in a workflow, not the AppHost; `Web/Dockerfile` stays the one definition of the image.
 * Supersedes ADR 0001's push path; the hand-written `compose.yaml` is gone.
+
+## Notes
+
+* 2026-10-16: `compose.yaml` is hand-written again and the only compose file; releases attach none
+  ([ADR 0021](0021-ship-one-hand-written-compose-file.md)).
