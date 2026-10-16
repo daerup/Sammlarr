@@ -4,7 +4,6 @@
 		<ProjectReference Include="..\Shared\Shared.csproj" IsAspireProjectResource="false" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Aspire.Hosting.Docker" />
 		<PackageReference Include="MessagePack" />
 	</ItemGroup>
 	<PropertyGroup>

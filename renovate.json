@@ -18,7 +18,7 @@
       "automerge": true
     },
     {
-      "description": "Aspire's packages, its AppHost SDK and its CLI move together, with the MessagePack the AppHost pins above Aspire's own",
+      "description": "Aspire's packages and its AppHost SDK move together, with the MessagePack the AppHost pins above Aspire's own",
       "matchPackageNames": ["/^aspire\\./i", "MessagePack"],
       "groupName": "Aspire",
       "automerge": false
@@ -33,6 +33,11 @@
       "matchPackageNames": ["lscr.io/linuxserver/radarr", "lscr.io/linuxserver/sonarr"],
       "groupName": null,
       "automerge": false
+    },
+    {
+      "description": "compose.yaml follows Sammlarr's own :latest for whoever downloads it, so it is never pinned or bumped",
+      "matchPackageNames": ["ghcr.io/daerup/sammlarr"],
+      "enabled": false
     },
     {
       "description": "The C# pins carry a tag only, so there is no digest to pin",

@@ -1,8 +1,10 @@
 # Drive deployment from the Aspire AppHost
 
-| Status   | Date       |
-|----------|------------|
-| accepted, push path superseded by [0019](0019-build-and-push-the-image-with-docker-actions.md) | 2026-09-02 |
+| Status                                                                               | Date       |
+|--------------------------------------------------------------------------------------|------------|
+| accepted                                                                             | 2026-09-02 |
+| push path superseded by [0019](0019-build-and-push-the-image-with-docker-actions.md) | 2026-10-13 |
+| superseded by [0021](0021-ship-one-hand-written-compose-file.md)                     | 2026-10-16 |
 
 ## Context
 

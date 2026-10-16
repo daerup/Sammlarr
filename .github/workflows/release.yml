@@ -62,19 +62,7 @@ jobs:
         with:
           global-json-file: global.json
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24
-
       - run: dotnet tool restore
-
-      - name: Compose file for the release
-        env:
-          ImageTag: ${{ steps.version.outputs.version }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          dotnet aspire publish --apphost AppHost --output-path aspire-output --non-interactive --nologo
-          gh release upload "$GITHUB_REF_NAME" aspire-output/docker-compose.yaml --clobber
 
       - name: App SBOM
         env:
