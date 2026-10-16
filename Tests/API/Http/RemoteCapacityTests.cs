@@ -106,14 +106,18 @@ public class RemoteCapacityTests : IDisposable
 	}
 
 	[Test]
-	public async Task Of_ForTwoPacedGates_CarriesTheLaterOpening()
+	[Arguments(false)]
+	[Arguments(true)]
+	public async Task Of_ForTwoPacedGates_CarriesTheLaterOpening(bool keyedFirst)
 	{
+		var plain = new LaneName(RemoteService.Plex, "api");
 		var keyed = new LaneName(RemoteService.Plex, "api", "plex-token");
 		_lanes.Gate(keyed, Some.Of(_user));
-		await ReleaseAsync(new LaneName(RemoteService.Plex, "api"), new AttemptAnswered());
+		LaneName[] released = keyedFirst ? [keyed, plain] : [plain, keyed];
+		await ReleaseAsync(released[0], new AttemptAnswered());
 		_time.Advance(TimeSpan.FromMilliseconds(500));
-		await ReleaseAsync(keyed, new AttemptAnswered());
-		var waiting = new[] { new LaneName(RemoteService.Plex, "api"), keyed }
+		await ReleaseAsync(released[1], new AttemptAnswered());
+		var waiting = new[] { plain, keyed }
 			.Select(name => _lanes.Gate(name, new None()).EnterAsync(LanePriority.Interactive, TimeSpan.FromMinutes(1), CancellationToken.None))
 			.ToList();
 
