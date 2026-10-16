@@ -33,6 +33,7 @@ internal static class ThirdPartyNotices
 		var notices = Collect(
 			Shipped(File.ReadAllText(depsFile), path => NuspecIn(Path.Combine(packageRoot, path)), path => NoticeIn(Path.Combine(packageRoot, path))),
 			Read<LicenceOverride[]>(".github/licences/overrides.json"),
+			Read<Dictionary<string, string>>(".github/licences/copyrights.json"),
 			texts,
 			[.. Assets("UI/wwwroot/providers/credits.json", "providers/"), .. Assets(".github/licences/assets.json", "")]
 		);
@@ -44,6 +45,7 @@ internal static class ThirdPartyNotices
 	internal static Notices Collect(
 		IEnumerable<ShippedPackage> packages,
 		IReadOnlyCollection<LicenceOverride> overrides,
+		IReadOnlyDictionary<string, string> copyrights,
 		IReadOnlyDictionary<string, string> texts,
 		IEnumerable<Asset> assets
 	)
@@ -51,6 +53,7 @@ internal static class ThirdPartyNotices
 		return new(
 			[
 				.. packages
+					.Select(package => WithCopyright(package, copyrights))
 					.GroupBy(package => LicenceOf(package, overrides, texts))
 					.OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
 					.Select(group => new Licence(
@@ -145,6 +148,16 @@ internal static class ThirdPartyNotices
 			?? throw new InvalidOperationException(
 				$"{package.Package.Id} {package.Package.Version} declares no licence with a text in .github/licences/texts ({package.Expression ?? "no expression"}); add it to .github/licences/overrides.json"
 			);
+	}
+
+	private static ShippedPackage WithCopyright(ShippedPackage shipped, IReadOnlyDictionary<string, string> copyrights)
+	{
+		return shipped.Package.Copyright.Length == 0 && copyrights.TryGetValue(shipped.Package.Id, out var copyright)
+			? shipped with
+			{
+				Package = shipped.Package with { Copyright = copyright },
+			}
+			: shipped;
 	}
 
 	private static string? NuspecIn(string folder) => Directory.EnumerateFiles(folder, "*.nuspec").Select(File.ReadAllText).SingleOrDefault();
