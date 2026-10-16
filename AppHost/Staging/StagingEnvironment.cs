@@ -84,6 +84,7 @@ internal static class StagingEnvironment
 			.WithBindMount(layout.Sammlarr, "/data")
 			.WithAppSettings(builder.Configuration)
 			.WithEnvironment((PushoverOptions options) => options.BaseUrl, $"http://catcher:8080/{config.CatcherSession}/pushover/1")
+			.WithEnvironment("TZ", "Europe/Zurich")
 			.WithEnvironment("HTTP_PROXY", config.Network.DeadProxy)
 			.WithEnvironment("HTTPS_PROXY", config.Network.DeadProxy)
 			.WithEnvironment("NO_PROXY", string.Join(',', config.Network.Reachable))

@@ -11,7 +11,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<TailwindInput Include="$(MSBuildThisFileDirectory)wwwroot\css\app-input.css;$(RepoRoot)UI\tailwind.config.js" Visible="false" />
-		<TailwindInput Include="$(RepoRoot)UI\**\*.razor;$(MSBuildThisFileDirectory)*.razor" Exclude="$(RepoRoot)UI\obj\**;$(RepoRoot)UI\bin\**" Visible="false" />
+		<TailwindInput Include="$(RepoRoot)UI\**\*.razor;$(RepoRoot)UI\**\*.cs;$(MSBuildThisFileDirectory)*.razor" Exclude="$(RepoRoot)UI\obj\**;$(RepoRoot)UI\bin\**" Visible="false" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Core\Core.csproj" />
@@ -61,6 +61,7 @@
 	<Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild" Inputs="@(TailwindInput)" Outputs="$(MSBuildThisFileDirectory)wwwroot\css\app.css">
 		<Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(RepoRoot)" Condition="!Exists('$(RepoRoot)node_modules')" />
 		<Exec Command="npm run css" WorkingDirectory="$(RepoRoot)" />
+		<Touch Files="$(MSBuildThisFileDirectory)wwwroot\css\app.css" />
 		<ItemGroup>
 			<Content Include="wwwroot\css\app.css" Exclude="@(Content)" />
 		</ItemGroup>
