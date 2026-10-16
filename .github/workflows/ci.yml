@@ -163,6 +163,7 @@ jobs:
             Line coverage **${{ needs.build-test.outputs.line }}%** (main: ${{ steps.main.outputs.value }}). Full report: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   reproducible:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     steps:
