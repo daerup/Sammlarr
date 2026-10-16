@@ -148,7 +148,7 @@ public record FeedConfig
 
 	public bool IsTestable => Provider is not null && IsProviderAvailable && !string.IsNullOrWhiteSpace(Identifier) && (Limit is null || Limit.Count > 0);
 
-	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid;
+	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid && FilterDefinitionConverter.Incomplete(Filter).IsNone();
 
 	public int GetPreviewHash() =>
 		HashCode.Combine(HashCode.Combine(Provider, Identifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit, Strategy, RatingStrategy));

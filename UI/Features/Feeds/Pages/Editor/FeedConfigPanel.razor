@@ -167,7 +167,16 @@
 
                     @if (_filterEnabled)
                     {
-                        <BbFilterBuilder Filter="@_filter" FilterChanged="@ChangeFilter" Fields="FilterFields" ValueEditors="RuleEditors"/>
+                        <div>
+                            <BbFilterBuilder Filter="@_filter" FilterChanged="@ChangeFilter" Fields="FilterFields" ValueEditors="RuleEditors"/>
+                            @if (UnfinishedFilter is { } unfinished)
+                            {
+                                <BbFieldError Class="mt-1.5 flex items-center gap-1.5" data-filter-unfinished>
+                                    <LucideIcon Name="circle-alert" Size="13"/>
+                                    <span>@unfinished</span>
+                                </BbFieldError>
+                            }
+                        </div>
                     }
 
                     <BbField>
@@ -510,6 +519,10 @@
     private SlotPolicy BlocklistedBehavior => _limit.Blocklisted;
 
     private record FieldDefinition(string Property, string Label, FilterFieldType FilterType, IReadOnlyList<SelectOption<string>>? Options = null);
+
+    private string? UnfinishedFilter => FilterDefinitionConverter.Incomplete(_filter).Map(condition => $"Finish or remove the {LabelOf(condition.Field)} condition to save.").ToNullable();
+
+    private static string LabelOf(string field) => FieldDefinitions.FirstOrNone(definition => definition.Property == field).Map(definition => definition.Label).GetValueOr(field);
 
     private static readonly IReadOnlyList<FieldDefinition> FieldDefinitions =
     [

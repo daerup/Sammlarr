@@ -1,5 +1,6 @@
 using BlazorBlueprint.Primitives.Filtering;
 using Domain.Processing;
+using TestInfrastructure;
 using UI.Features.Feeds.Pages.Editor;
 using BbFilterOp = BlazorBlueprint.Primitives.Filtering.FilterOperator;
 using BbLogicalOp = BlazorBlueprint.Primitives.Filtering.LogicalOperator;
@@ -89,6 +90,37 @@ public class FilterDefinitionConverterTests
 
 		await Assert.That(restored!.Conditions[0].Field).IsEqualTo("Year");
 		await Assert.That(restored.Conditions[0].Operator).IsEqualTo(BbFilterOp.GreaterThan);
+	}
+
+	[Test]
+	public async Task Incomplete_ForABetweenWithoutItsEndInANestedGroup_FindsIt()
+	{
+		var between = new FilterCondition
+		{
+			Field = "Rating",
+			Operator = BbFilterOp.Between,
+			Value = 6.0,
+		};
+		var definition = Definition(Condition("Title", BbFilterOp.Contains, "Batman"));
+		definition.Groups.Add(Definition(between));
+
+		await Assert.That(FilterDefinitionConverter.Incomplete(definition)).IsSome().And.IsEqualTo(between);
+	}
+
+	[Test]
+	public async Task Incomplete_ForAMediaTypeWithOnePicked_FindsNothing()
+	{
+		string[] picked = ["Movie"];
+
+		await Assert.That(FilterDefinitionConverter.Incomplete(Definition(Condition("MediaType", BbFilterOp.In, picked)))).IsNone();
+	}
+
+	[Test]
+	public async Task Incomplete_ForAnIsOneOfStillHoldingTheValueOfAnIs_FindsIt()
+	{
+		var switched = Condition("MediaType", BbFilterOp.In, "Movie");
+
+		await Assert.That(FilterDefinitionConverter.Incomplete(Definition(switched))).IsSome().And.IsEqualTo(switched);
 	}
 
 	private static FilterDefinition? RoundTrip(FilterDefinition definition) =>
