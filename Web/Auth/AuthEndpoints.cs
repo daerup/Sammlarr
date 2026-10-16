@@ -98,22 +98,36 @@ internal static class AuthEndpoints
 		);
 		endpoints.MapPost(
 			"/auth/join",
-			async ([FromForm] string token, [FromForm] string password, [FromForm] string confirmation, HttpContext context, IAccountLinkService links) =>
+			async (
+				[FromForm] Guid user,
+				[FromForm] string token,
+				[FromForm] string password,
+				[FromForm] string confirmation,
+				HttpContext context,
+				IAccountLinkService links
+			) =>
 			{
 				return await links
-					.JoinAsync(token, password, confirmation, context.RequestAborted)
-					.Map(user => SignInAndRedirectAsync(context, user, "/"))
-					.GetValueOr(error => Results.Redirect(LinkPage("join", token, error)));
+					.JoinAsync(UserId.From(user), token, password, confirmation, context.RequestAborted)
+					.Map(account => SignInAndRedirectAsync(context, account, "/"))
+					.GetValueOr(error => Results.Redirect(LinkPage("join", user, token, error)));
 			}
 		);
 		endpoints.MapPost(
 			"/auth/reset",
-			async ([FromForm] string token, [FromForm] string password, [FromForm] string confirmation, HttpContext context, IAccountLinkService links) =>
+			async (
+				[FromForm] Guid user,
+				[FromForm] string token,
+				[FromForm] string password,
+				[FromForm] string confirmation,
+				HttpContext context,
+				IAccountLinkService links
+			) =>
 			{
 				return await links
-					.ResetPasswordAsync(token, password, confirmation, context.RequestAborted)
-					.Map(user => SignInAndRedirectAsync(context, user, "/"))
-					.GetValueOr(error => Results.Redirect(LinkPage("reset", token, error)));
+					.ResetPasswordAsync(UserId.From(user), token, password, confirmation, context.RequestAborted)
+					.Map(account => SignInAndRedirectAsync(context, account, "/"))
+					.GetValueOr(error => Results.Redirect(LinkPage("reset", user, token, error)));
 			}
 		);
 		endpoints.MapPost(
@@ -177,9 +191,9 @@ internal static class AuthEndpoints
 		return Some.Of(UserId.From(id));
 	}
 
-	private static string LinkPage(string page, string token, Error error)
+	private static string LinkPage(string page, Guid user, string token, Error error)
 	{
-		return QueryHelpers.AddQueryString($"/{page}/{Uri.EscapeDataString(token)}", "error", error.Reason);
+		return QueryHelpers.AddQueryString($"/{page}/{user}/{Uri.EscapeDataString(token)}", "error", error.Reason);
 	}
 
 	private static string Failed(Error error, AuthProvider provider, Optional<string> setupCode, string? returnUrl)

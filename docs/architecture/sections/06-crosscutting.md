@@ -231,6 +231,10 @@ step and compacts the file; a failing step stops the pass. The windows are
   passwords lock the account for five minutes, and a locked account is told so. Limits per address belong to the
   reverse proxy (or fail2ban), which sees the real one; Sammlarr reads no forwarded headers. The Plex round trip binds
   its state to the browser with a short-lived cookie.
+- An invite is a user without a password yet: Settings › Users shows them as invited, and every other list or count
+  of users leaves them out until they join. Invite and reset links carry Identity's password-reset token, protected
+  with the data-protection key ring: valid for one day, and void once the security stamp changes (a new password, a
+  renewed invite, a role change). Nothing about them is stored, so nothing needs purging.
 - The cookie is Identity's application cookie. `SecurityStampValidator` checks it on every request
   (`ValidationInterval` zero), so a password change, a role change (which renews the stamp) or a removal signs the
   user out on their next page load; open circuits are signed out at once (`ISessionInvalidator`).

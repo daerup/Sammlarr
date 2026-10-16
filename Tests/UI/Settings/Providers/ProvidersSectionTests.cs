@@ -48,7 +48,7 @@ public class ProvidersSectionTests : BunitContext
 		Services.AddSingleton(_switch.Object);
 		Services.AddSingleton<ICurrentUser>(_user);
 		var users = IUserManagementService.Mock();
-		users.GetPeopleAsync(Any()).Returns([Joined("Ada", RemoteService.Plex), Joined("Bob"), new InvitedPerson("lena", "lena", DateTimeOffset.UnixEpoch)]);
+		users.GetPeopleAsync(Any()).Returns([Joined("Ada", RemoteService.Plex), Joined("Bob"), new InvitedPerson("lena", "lena")]);
 		Services.AddSingleton(users.Object);
 		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty);
 		Services.AddSingleton(_arrConfigs.Object);

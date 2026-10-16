@@ -1,8 +1,6 @@
 @using Contracts.Identity
 @inject IUserManagementService Users
-@using Contracts
 @inject NavigationManager Navigation
-@inject IDateTimeProvider Clock
 
 <BbDialog Open="_open" OpenChanged="SetOpen">
     <BbDialogTrigger>
@@ -80,7 +78,7 @@
         var issued = await Users.InviteAsync(_username);
         _creating = false;
         _invited = _username.Trim();
-        issued.Apply(link => _issued = new Issued(Navigation.ToAbsoluteUri(link.Path).ToString(), LinkText.Lifetime(link.ExpiresAt, Clock.Now))).ApplyError(error => _error = error.Reason);
+        issued.Apply(link => _issued = new Issued(Navigation.ToAbsoluteUri(link.Path).ToString(), LinkText.Lifetime(link.Lifetime))).ApplyError(error => _error = error.Reason);
         await issued.Match(_ => Invited.InvokeAsync(), _ => Task.CompletedTask);
     }
 

@@ -1,7 +1,6 @@
 using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts;
 using Contracts.Identity;
 using Contracts.Settings;
 using Domain.Identity;
@@ -29,7 +28,7 @@ public class UsersSectionTests : BunitContext
 	[
 		new JoinedPerson(Admin, new PersonHoldings(3, 15, 2, []), new None(), new StoredColour(Some.Of(40d), new None())),
 		new JoinedPerson(Member, PersonHoldings.Empty, Some.Of(LockedUntil), new StoredColour(Some.Of(177.5d), new None())),
-		new InvitedPerson("mira", "mira", Now.AddDays(6).AddHours(2)),
+		new InvitedPerson("mira", "mira"),
 	];
 
 	private readonly Mock<IUserManagementService> _users = IUserManagementService.Mock();
@@ -45,9 +44,6 @@ public class UsersSectionTests : BunitContext
 		Services.AddScoped<Notifier>();
 		Services.AddProviderBranding();
 		Services.AddSingleton<ICurrentUser>(new TestCurrentUser());
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		Services.AddSingleton(clock.Object);
 		_users.GetPeopleAsync(Any()).Returns(People);
 		Services.AddSingleton(_users.Object);
 		Services.AddSingleton(_config.Object);
@@ -87,29 +83,10 @@ public class UsersSectionTests : BunitContext
 			.IsEquivalentTo([
 				"3 feeds · 15 wanted · 2 blocklisted | Active",
 				$"No feeds or titles yet | Locked until {LockedUntil.ToLocalTime():HH:mm}",
-				"Not joined yet | Invited · link expires in 6 days",
+				"Not joined yet | Invited",
 			]);
 		var birds = cut.FindAll(".person-row").Select(row => $"{row.GetAttribute("style")} | {row.QuerySelectorAll("[data-bird]").Length}");
 		await Assert.That(birds).IsEquivalentTo(["--bird-hue: 40 | 1", "--bird-hue: 177.5 | 1", " | 0"]);
-	}
-
-	[Test]
-	public async Task Rows_ForInvitesRunningOut_SayHowLongIsLeftOrThatTheyExpired()
-	{
-		Installed(AuthProvider.Local);
-		_users
-			.GetPeopleAsync(Any())
-			.Returns([
-				new JoinedPerson(Admin, PersonHoldings.Empty, new None(), new StoredColour(Some.Of(40d), new None())),
-				new InvitedPerson("soon", "soon", Now.AddHours(5)),
-				new InvitedPerson("old", "old", Now.AddHours(-1)),
-			]);
-
-		var cut = Render<UsersSection>();
-
-		cut.WaitForElement(".person-row");
-		var statuses = cut.FindAll("[data-status]").Select(status => status.TextContent.Trim());
-		await Assert.That(statuses).IsEquivalentTo(["Active", "Invited · link expires in 5 hours", "Invite expired"]);
 	}
 
 	[Test]

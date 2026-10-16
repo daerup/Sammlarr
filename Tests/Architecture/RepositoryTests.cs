@@ -106,11 +106,6 @@ public class RepositoryTests
 				]
 			);
 		yield return () => (typeof(ISetupStateRepository), ["DB.Data.Config.SetupStateRepository", "DB.Data.Config.ConfigModule", "Core.Setup.OnboardingService"]);
-		yield return () =>
-			(
-				typeof(IAccountLinkRepository),
-				["DB.Data.Identity.AccountLinkRepository", "DB.Data.Identity.IdentityDataModule", "Core.Auth.AccountLinkService", "Core.Identity.UserManagementService"]
-			);
 	}
 
 	[Test]

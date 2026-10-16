@@ -99,7 +99,7 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	public async Task<int> CountAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx.Users.CountAsync(cancellationToken);
+		return await Members.Of(ctx).CountAsync(cancellationToken);
 	}
 
 	public async Task<IReadOnlyDictionary<UserId, PersonHoldings>> GetHoldingsAsync(CancellationToken cancellationToken = default)

@@ -9,6 +9,7 @@ using Domain.Providers;
 using Domain.Settings;
 using Domain.Wantlist;
 using Harness;
+using Integration.Tests.Auth;
 using TestInfrastructure;
 
 namespace Integration.Tests.Identity;
@@ -211,15 +212,47 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task InviteAsync_AgainOnceTheFirstInviteExpired_MakesANewOne()
+	public async Task InviteAsync_ForANameWithAnOpenInvite_IsRefused()
 	{
-		var now = new DateTimeOffset(2026, 10, 4, 12, 0, 0, TimeSpan.Zero);
-		host.SetCurrentTime(now);
 		await host.SignsInWithSammlarrAccounts();
 		await Testee.InviteAsync("Mira");
-		host.SetCurrentTime(now.AddDays(8));
 
-		await Assert.That(await Testee.InviteAsync("Mira")).IsSuccess();
+		await Assert.That(await Testee.InviteAsync("Mira")).IsError();
+	}
+
+	[Test]
+	public async Task InviteAsync_LeavesTheInviteOutOfTheUsers()
+	{
+		await host.SignsInWithSammlarrAccounts();
+		var before = await Testee.CountAsync();
+
+		await Testee.InviteAsync("Mira");
+
+		await Assert.That(await Testee.CountAsync()).IsEqualTo(before);
+		await Assert.That((await Testee.GetAllAsync()).Select(user => user.DisplayName)).DoesNotContain("Mira");
+	}
+
+	[Test]
+	public async Task RevokeInviteAsync_WithTheNameOfSomeoneWhoJoined_RemovesNobody()
+	{
+		await host.SignsInWithSammlarrAccounts();
+		var guest = await host.SeedLocalUser("guest", "correct horse battery", UserRole.Member);
+
+		await Testee.RevokeInviteAsync("guest");
+
+		await Assert.That((await Testee.GetAllAsync()).Select(user => user.Id)).Contains(guest);
+	}
+
+	[Test]
+	public async Task RenewInviteAsync_MakesALinkThatJoins()
+	{
+		await host.SignsInWithSammlarrAccounts();
+		await Testee.InviteAsync("Mira");
+
+		var renewed = IssuedLinkParts.Of(await Testee.RenewInviteAsync("mira"));
+
+		var joined = await host.Resolve<IAccountLinkService>().JoinAsync(renewed.User, renewed.Token, "correct horse battery", "correct horse battery");
+		await Assert.That(joined).IsSuccess();
 	}
 
 	[Test]
@@ -227,10 +260,12 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.SignsInWithSammlarrAccounts();
 		var guest = await host.SeedLocalUser("guest", "correct horse battery", UserRole.Member);
-		var token = (await Testee.ResetLinkAsync(guest)).GetOrThrow(error => new InvalidOperationException(error.Reason)).Path.Split('/')[^1];
+		var link = IssuedLinkParts.Of(await Testee.ResetLinkAsync(guest));
 		await Testee.DeleteAsync(guest);
 
-		await Assert.That(await host.Resolve<IAccountLinkService>().ResetPasswordAsync(token, "a brand new password", "a brand new password")).IsError();
+		await Assert
+			.That(await host.Resolve<IAccountLinkService>().ResetPasswordAsync(link.User, link.Token, "a brand new password", "a brand new password"))
+			.IsError();
 	}
 
 	private static JoinedPerson Joined(IReadOnlyList<Person> people, UserId id)

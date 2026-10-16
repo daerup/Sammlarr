@@ -43,7 +43,6 @@ public class UserManagementServiceTests
 			return new UserManagementService(
 				_users.Object,
 				ILocalAccountRepository.Mock().Object,
-				IAccountLinkRepository.Mock().Object,
 				new TestCurrentUser(),
 				config.Object,
 				validator.Object,

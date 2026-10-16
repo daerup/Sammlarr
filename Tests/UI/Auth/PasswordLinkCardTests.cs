@@ -11,6 +11,8 @@ namespace UI.Tests.Auth;
 
 public class PasswordLinkCardTests : BunitContext
 {
+	private static readonly Guid Invited = Guid.Parse("6a3c1f4e-2b7d-4e8a-9f10-3c5d7e9a1b2c");
+
 	private readonly Mock<IAccountLinkService> _links = IAccountLinkService.Mock();
 
 	[Before(Test)]
@@ -23,26 +25,29 @@ public class PasswordLinkCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Card_ForAnInvite_SaysWhoInvitedThemAndPostsTheJoin()
+	public async Task Card_ForAnInvite_NamesTheirAccountAndPostsTheJoin()
 	{
-		_links.InspectAsync(AccountLinkKind.Invite, "token", Any()).Returns(Some.Of(new AccountLinkPreview(AccountLinkKind.Invite, "mira", "guest")));
+		_links.InspectAsync(AccountLinkKind.Invite, UserId.From(Invited), "token", Any()).Returns(Some.Of(new AccountLinkPreview(AccountLinkKind.Invite, "mira")));
 
-		var cut = Render<PasswordLinkCard>(parameters => parameters.Add(card => card.Kind, AccountLinkKind.Invite).Add(card => card.Token, "token"));
+		var cut = Render<PasswordLinkCard>(parameters =>
+			parameters.Add(card => card.Kind, AccountLinkKind.Invite).Add(card => card.User, Invited).Add(card => card.Token, "token")
+		);
 
 		var paragraph = cut.WaitForElement("p");
-		await Assert.That(paragraph.TextContent.Trim()).StartsWith("guest");
+		await Assert.That(paragraph.TextContent.Trim()).StartsWith("You were invited as");
 		await Assert.That(paragraph.QuerySelector("span")?.TextContent).IsEqualTo("mira");
 		await Assert.That(cut.Find("form").GetAttribute("action")).IsEqualTo("/auth/join");
+		await Assert.That(cut.Find("input[name=user]").GetAttribute("value")).IsEqualTo(Invited.ToString());
 		await Assert.That(cut.Find("input[name=token]").GetAttribute("value")).IsEqualTo("token");
 	}
 
 	[Test]
 	public async Task Pages_ForEachKindOfLink_RenderTheirCard()
 	{
-		_links.InspectAsync(Any<AccountLinkKind>(), Any(), Any()).Returns(new None());
+		_links.InspectAsync(Any<AccountLinkKind>(), UserId.From(Invited), Any(), Any()).Returns(new None());
 
-		var join = Render<Join>(parameters => parameters.Add(page => page.Token, "token"));
-		var reset = Render<ResetPassword>(parameters => parameters.Add(page => page.Token, "token"));
+		var join = Render<Join>(parameters => parameters.Add(page => page.User, Invited).Add(page => page.Token, "token"));
+		var reset = Render<ResetPassword>(parameters => parameters.Add(page => page.User, Invited).Add(page => page.Token, "token"));
 
 		await Assert.That(join.FindComponents<PasswordLinkCard>()).Count().IsEqualTo(1);
 		await Assert.That(reset.FindComponents<PasswordLinkCard>()).Count().IsEqualTo(1);
@@ -51,9 +56,11 @@ public class PasswordLinkCardTests : BunitContext
 	[Test]
 	public async Task Card_ForALinkThatNoLongerWorks_SaysToAskForANewOne()
 	{
-		_links.InspectAsync(Any<AccountLinkKind>(), Any(), Any()).Returns(new None());
+		_links.InspectAsync(Any<AccountLinkKind>(), UserId.From(Invited), Any(), Any()).Returns(new None());
 
-		var cut = Render<PasswordLinkCard>(parameters => parameters.Add(card => card.Kind, AccountLinkKind.Reset).Add(card => card.Token, "used"));
+		var cut = Render<PasswordLinkCard>(parameters =>
+			parameters.Add(card => card.Kind, AccountLinkKind.Reset).Add(card => card.User, Invited).Add(card => card.Token, "used")
+		);
 
 		await Assert.That(cut.WaitForElement("h2").TextContent.Trim()).IsEqualTo("This link no longer works");
 		await Assert.That(cut.FindAll("form")).IsEmpty();

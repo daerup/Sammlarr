@@ -16,6 +16,7 @@ internal static class Members
 		return from user in ctx.Users
 			join membership in ctx.UserRoles on user.Id equals membership.UserId
 			join role in ctx.Roles on membership.RoleId equals role.Id
+			where user.JoinedAt != null
 			select new Member { Row = user, Role = role.Name! };
 	}
 
@@ -23,6 +24,9 @@ internal static class Members
 
 	internal static User ToUser(UserRow row, string role)
 	{
-		return new User(UserId.From(row.Id), row.DisplayName, row.AvatarUrl, Enum.Parse<UserRole>(role), row.JoinedAt) { TagName = row.TagName };
+		return new User(UserId.From(row.Id), row.DisplayName, row.AvatarUrl, Enum.Parse<UserRole>(role), row.JoinedAt.GetValueOrDefault())
+		{
+			TagName = row.TagName,
+		};
 	}
 }

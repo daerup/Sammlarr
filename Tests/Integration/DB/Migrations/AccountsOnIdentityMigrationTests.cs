@@ -27,7 +27,7 @@ public class AccountsOnIdentityMigrationTests(SammlarrTestHost host) : IAsyncDis
 
 		await migrator.MigrateAsync();
 
-		await Assert.That(await RawSql.ReadAsync(connection, "SELECT DisplayName FROM AspNetUsers")).IsEquivalentTo(["Ada"]);
+		await Assert.That(await RawSql.ReadAsync(connection, "SELECT DisplayName FROM AspNetUsers WHERE JoinedAt IS NOT NULL")).IsEquivalentTo(["Ada"]);
 		await Assert.That(await RawSql.ReadAsync(connection, "SELECT UserId FROM Feeds")).IsEquivalentTo([$"{user}"]);
 	}
 }
