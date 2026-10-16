@@ -29,7 +29,7 @@ README.md
 **/.idea
 **/plans
 **/docs
-**/Tests
+**/tests
 **/TestResults
 **/dp-keys
 **/*.db
