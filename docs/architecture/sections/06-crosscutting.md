@@ -223,15 +223,15 @@ step and compacts the file; a failing step stops the pass. The windows are
 
 ## Authentication and per-user isolation
 
-- Accounts are ASP.NET Core Identity's: the user table, roles (`Admin`, `Member`) and Plex logins are Identity's
-  tables, `UserManager` and `SignInManager` do the work in `DB`, behind the `ILocalAccountRepository`,
-  `IUserRepository` and `ISignInCookie` ports, and each call runs in its own scope so a circuit never holds a context.
-  An install signs in one way, `ProviderConfig.AuthProvider`: `Plex`, or `Local` accounts whose password is posted as a
-  form to `/auth/local` (a Blazor circuit cannot set a cookie). Identity's lockout applies with its defaults: five
-  wrong passwords lock the account for five minutes, and a locked account is told so; wrong current passwords on the
-  account page count toward the same lock. Limits per address belong to the reverse proxy (or fail2ban), which sees the
-  real one; Sammlarr reads no forwarded headers. The Plex round trip binds its state to the browser with a short-lived
-  cookie.
+- Accounts are ASP.NET Core Identity's ([ADR 0020](../../adr/0020-move-local-accounts-onto-asp-net-core-identity.md)):
+  the user table, roles (`Admin`, `Member`) and Plex logins are Identity's tables, `UserManager` and `SignInManager` do
+  the work in `DB`, behind the `ILocalAccountRepository`, `IUserRepository` and `ISignInCookie` ports, and each call
+  runs in its own scope so a circuit never holds a context. An install signs in one way, `ProviderConfig.AuthProvider`:
+  `Plex`, or `Local` accounts whose password is posted as a form to `/auth/local` (a Blazor circuit cannot set a
+  cookie). Identity's lockout applies with its defaults: five wrong passwords lock the account for five minutes, and a
+  locked account is told so; wrong current passwords on the account page count toward the same lock. Limits per address
+  belong to the reverse proxy (or fail2ban), which sees the real one; Sammlarr reads no forwarded headers. The Plex
+  round trip binds its state to the browser with a short-lived cookie.
 - An invite is a user without a password yet: Settings › Users shows them as invited, and every other list or count
   of users leaves them out until they join. Invite and reset links carry Identity's password-reset token, protected
   with the data-protection key ring: valid for one day, and void once the security stamp changes (a new password, a
