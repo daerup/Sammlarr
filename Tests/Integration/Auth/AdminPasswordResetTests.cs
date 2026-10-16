@@ -43,7 +43,7 @@ public class AdminPasswordResetTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task StartAsync_AgainAfterTheAdminChoseANewPassword_KeepsTheirChoice()
 	{
 		await Testee(Reset).StartAsync(CancellationToken.None);
-		await host.Resolve<ILocalAccountRepository>().ReplacePasswordAsync(_owner, "chosen since then");
+		await host.Resolve<ILocalAccountRepository>().ChangePasswordAsync(_owner, Reset, "chosen since then");
 
 		await Testee(Reset).StartAsync(CancellationToken.None);
 

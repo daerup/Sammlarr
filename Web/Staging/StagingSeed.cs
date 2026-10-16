@@ -11,6 +11,7 @@ using Contracts.Wantlist;
 using DB;
 using Domain.Auth;
 using Domain.Feed;
+using Domain.Identity;
 using Domain.Jobs;
 using Domain.Notifications;
 using Domain.Processing;
@@ -75,9 +76,11 @@ internal static class StagingSeed
 			await scoped.GetRequiredService<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger()), cancellationToken);
 		}
 
-		var token = invite.Path[(invite.Path.LastIndexOf('/') + 1)..];
+		var link = invite.Path.Split('/');
 		var member = Require(
-			await scoped.GetRequiredService<IAccountLinkService>().JoinAsync(token, personas.Member.Password, personas.Member.Password, cancellationToken)
+			await scoped
+				.GetRequiredService<IAccountLinkService>()
+				.JoinAsync(UserId.From(Guid.Parse(link[2])), link[3], personas.Member.Password, personas.Member.Password, cancellationToken)
 		);
 		using (users.As(member))
 		{

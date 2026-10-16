@@ -1,4 +1,4 @@
-@page "/join/{Token}"
+@page "/join/{User:guid}/{Token}"
 @layout AuthLayout
 @attribute [AllowAnonymous]
 @using Domain.Identity
@@ -6,9 +6,11 @@
 
 <PageTitle>Join Sammlarr</PageTitle>
 
-<PasswordLinkCard Kind="AccountLinkKind.Invite" Token="@Token" Error="@Error"/>
+<PasswordLinkCard Kind="AccountLinkKind.Invite" User="@User" Token="@Token" Error="@Error"/>
 
 @code {
+    [Parameter] public required Guid User { get; set; }
+
     [Parameter] public required string Token { get; set; }
 
     [SupplyParameterFromQuery(Name = "error")]

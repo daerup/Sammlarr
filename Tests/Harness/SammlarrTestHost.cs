@@ -901,6 +901,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		);
 		services.AddSingleton<PublishedMessages>();
 		services.AddScoped<IMessagePublisher, RecordingMessagePublisher>();
+		services.AddDataProtection().UseEphemeralDataProtectionProvider();
 		return services.BuildServiceProvider();
 	}
 

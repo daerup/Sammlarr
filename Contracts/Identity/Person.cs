@@ -10,6 +10,6 @@ public sealed record PersonHoldings(int Feeds, int Wanted, int Blocklisted, IRea
 
 public sealed record JoinedPerson(User User, PersonHoldings Holdings, Optional<DateTimeOffset> LockedUntil, StoredColour Colour);
 
-public sealed record InvitedPerson(string Username, string DisplayName, DateTimeOffset ExpiresAt);
+public sealed record InvitedPerson(string Username, string DisplayName);
 
 public readonly union Person(JoinedPerson, InvitedPerson);

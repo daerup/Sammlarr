@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts;
 using Contracts.Identity;
 using Domain.Identity;
 using Microsoft.AspNetCore.Components;
@@ -22,13 +21,8 @@ public class SammlarrAccountRowTests : BunitContext
 		var users = IUserManagementService.Mock();
 		users
 			.GetPeopleAsync(Any())
-			.Returns([
-				Joined(UserRole.Admin, new None()),
-				Joined(UserRole.Member, Some.Of(DateTimeOffset.UnixEpoch)),
-				new InvitedPerson("lena", "lena", DateTimeOffset.UnixEpoch),
-			]);
+			.Returns([Joined(UserRole.Admin, new None()), Joined(UserRole.Member, Some.Of(DateTimeOffset.UnixEpoch)), new InvitedPerson("lena", "lena")]);
 		Services.AddSingleton(users.Object);
-		Services.AddSingleton(IDateTimeProvider.Mock().Object);
 		Services.AddSingleton<ICurrentUser>(_user);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

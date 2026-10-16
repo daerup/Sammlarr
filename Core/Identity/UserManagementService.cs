@@ -2,7 +2,6 @@ using Contracts;
 using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Wantlist;
-using Core.Auth;
 using Core.Wantlist.Sync;
 using Domain.Identity;
 using Domain.Providers;
@@ -15,7 +14,6 @@ namespace Core.Identity;
 internal sealed class UserManagementService(
 	IUserRepository users,
 	ILocalAccountRepository accounts,
-	IAccountLinkRepository links,
 	ICurrentUser currentUser,
 	IProviderConfigService providerConfig,
 	ISessionValidator sessionValidator,
@@ -37,7 +35,7 @@ internal sealed class UserManagementService(
 		var holdings = await users.GetHoldingsAsync(cancellationToken);
 		var colours = await users.GetColoursAsync(cancellationToken);
 		var locals = (await accounts.GetAllAsync(cancellationToken)).ToDictionary(account => account.User.Id);
-		var invites = await links.GetAllAsync(AccountLinkKind.Invite, cancellationToken);
+		var invites = await accounts.GetInvitedAsync(cancellationToken);
 		var joined = (await users.GetAllAsync(cancellationToken)).Select(user =>
 			(Person)
 				new JoinedPerson(
@@ -47,7 +45,7 @@ internal sealed class UserManagementService(
 					colours.GetValueOrNone(user.Id).GetValueOr(StoredColour.Empty)
 				)
 		);
-		return [.. joined, .. invites.Select(invite => (Person)new InvitedPerson(invite.Username, invite.DisplayName, invite.ExpiresAt))];
+		return [.. joined, .. invites.Select(invite => (Person)new InvitedPerson(invite.Username, invite.DisplayName))];
 	}
 
 	public Task<int> CountAsync(CancellationToken cancellationToken = default) => users.CountAsync(cancellationToken);
@@ -101,24 +99,21 @@ internal sealed class UserManagementService(
 		await EnsureCallerIsAdminAsync(cancellationToken);
 		var name = username.Trim();
 		var problem = await InviteProblemAsync(name, cancellationToken);
-		return await problem.Match(refused => refused, () => IssueAsync(AccountLinkKind.Invite, name, name, new None(), cancellationToken));
+		return await problem.Match(refused => refused, () => InvitedAsync(name, cancellationToken));
 	}
 
 	public async Task<Result<IssuedLink>> RenewInviteAsync(string username, CancellationToken cancellationToken = default)
 	{
 		await EnsureCallerIsAdminAsync(cancellationToken);
-		var normalized = Usernames.Normalize(username);
-		var invite = (await links.GetAllAsync(AccountLinkKind.Invite, cancellationToken)).FirstOrNone(found => found.Username == normalized);
-		return await invite.Match(
-			found => IssueAsync(AccountLinkKind.Invite, found.Username, found.DisplayName, new None(), cancellationToken),
-			() => Error.From($"{username} has no invite to renew.")
-		);
+		var invite = await FindInviteAsync(username, cancellationToken);
+		return await invite.Match(found => RenewAsync(found.Id, cancellationToken), () => Error.From($"{username} has no invite to renew."));
 	}
 
 	public async Task RevokeInviteAsync(string username, CancellationToken cancellationToken = default)
 	{
 		await EnsureCallerIsAdminAsync(cancellationToken);
-		await links.RevokeAsync(AccountLinkKind.Invite, username, cancellationToken);
+		var invite = await FindInviteAsync(username, cancellationToken);
+		await invite.Match(found => users.DeleteAsync(found.Id, cancellationToken), () => Task.CompletedTask);
 	}
 
 	public async Task<Result<IssuedLink>> ResetLinkAsync(UserId id, CancellationToken cancellationToken = default)
@@ -126,7 +121,7 @@ internal sealed class UserManagementService(
 		await EnsureCallerIsAdminAsync(cancellationToken);
 		var account = await accounts.GetAsync(id, cancellationToken);
 		return await account.Match(
-			found => IssueAsync(AccountLinkKind.Reset, found.Username, found.User.DisplayName, Some.Of(id), cancellationToken),
+			found => IssueAsync(AccountLinkKind.Reset, found.User.Id, cancellationToken),
 			() => Error.From("Only a Sammlarr account has a password to reset.")
 		);
 	}
@@ -158,38 +153,43 @@ internal sealed class UserManagementService(
 	private async Task<Optional<Error>> InviteProblemAsync(string name, CancellationToken cancellationToken)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
-		var normalized = Usernames.Normalize(name);
-		var taken =
-			(await accounts.FindAsync(name, cancellationToken)).IsSome()
-			|| (await links.GetAllAsync(AccountLinkKind.Invite, cancellationToken)).Any(invite =>
-				invite.Username == normalized && invite.ExpiresAt > dateTimeProvider.Now
-			);
+		var taken = (await accounts.FindAsync(name, cancellationToken)).IsSome() || (await FindInviteAsync(name, cancellationToken)).IsSome();
 		return Optional
 			.When(config.AuthProvider != AuthProvider.Local, () => Error.From("Invites are for a Sammlarr that signs in with Sammlarr accounts."))
 			.Or(() => Usernames.Problem(name))
 			.Or(() => Optional.When(taken, () => Error.From($"{name} already has an account or an invite.")));
 	}
 
-	private async Task<Result<IssuedLink>> IssueAsync(
-		AccountLinkKind kind,
-		string username,
-		string displayName,
-		Optional<UserId> user,
-		CancellationToken cancellationToken
-	)
+	private async Task<Optional<InvitedAccount>> FindInviteAsync(string username, CancellationToken cancellationToken)
 	{
-		var token = LinkTokens.New();
-		var expiresAt = dateTimeProvider.Now + LinkTokens.Lifetime;
-		await links.StoreAsync(new AccountLink(kind, username, displayName, user, currentUser.DisplayName, expiresAt), LinkTokens.Hash(token), cancellationToken);
-		return Success.Of(new IssuedLink(LinkPath(kind, token), expiresAt));
+		var normalized = Usernames.Normalize(username);
+		return (await accounts.GetInvitedAsync(cancellationToken)).FirstOrNone(found => found.Username == normalized);
 	}
 
-	private static string LinkPath(AccountLinkKind kind, string token)
+	private async Task<Result<IssuedLink>> InvitedAsync(string name, CancellationToken cancellationToken)
+	{
+		var invited = await accounts.InviteAsync(name, cancellationToken);
+		return await invited.Map(id => IssueAsync(AccountLinkKind.Invite, id, cancellationToken));
+	}
+
+	private async Task<Result<IssuedLink>> RenewAsync(UserId id, CancellationToken cancellationToken)
+	{
+		await accounts.RevokeTokensAsync(id, cancellationToken);
+		return await IssueAsync(AccountLinkKind.Invite, id, cancellationToken);
+	}
+
+	private async Task<Result<IssuedLink>> IssueAsync(AccountLinkKind kind, UserId id, CancellationToken cancellationToken)
+	{
+		var issued = await accounts.IssueTokenAsync(id, cancellationToken);
+		return Success.Of(new IssuedLink(LinkPath(kind, id, issued.Token), issued.Lifetime));
+	}
+
+	private static string LinkPath(AccountLinkKind kind, UserId id, string token)
 	{
 		return kind switch
 		{
-			AccountLinkKind.Invite => $"/join/{token}",
-			AccountLinkKind.Reset => $"/reset/{token}",
+			AccountLinkKind.Invite => $"/join/{id.Value}/{token}",
+			AccountLinkKind.Reset => $"/reset/{id.Value}/{token}",
 		};
 	}
 

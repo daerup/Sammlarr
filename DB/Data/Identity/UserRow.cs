@@ -8,7 +8,7 @@ internal sealed class UserRow : IdentityUser<Guid>, IAuditable
 	public required string DisplayName { get; set; }
 	public required string TagName { get; set; }
 	public required string AvatarUrl { get; set; }
-	public required DateTimeOffset JoinedAt { get; set; }
+	public DateTimeOffset? JoinedAt { get; set; }
 	public double? Hue { get; set; }
 
 	[MaxLength(2048)]

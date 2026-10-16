@@ -118,7 +118,7 @@ resilience events.
 | `Feeds` | `/feeds`, `/feeds/create`, `/feeds/edit/{id}`, `/feeds/clone/{id}`, `/feeds/{id}/runs`, `/feeds/{id}/runs/{runId}` | The feed list, the editor, the run history and the live run view. |
 | `Wantlist` | `/wantlist` | The wantlist and its sync. |
 | `Blocklist` | `/blocklist` | The blocked titles. |
-| `Auth` | `/signin`, `/join/{token}`, `/reset/{token}` | Sign-in, joining through an invite link, choosing a new password. |
+| `Auth` | `/signin`, `/join/{user}/{token}`, `/reset/{user}/{token}` | Sign-in, joining through an invite link, choosing a new password. |
 | `Onboarding` | `/setup`, `/welcome` | The first-run wizard (admin and sign-in method, sink, keys, people) and a new member's prompt for a TMDB key. |
 | `Settings` | `/settings` | One section per settings area; Testing only in Debug builds. |
 

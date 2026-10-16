@@ -1,7 +1,6 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Contracts.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +10,6 @@ namespace UI.Tests.Settings;
 
 public class InviteDialogTests : BunitContext
 {
-	private static readonly DateTimeOffset Now = new(2026, 10, 4, 12, 0, 0, TimeSpan.Zero);
-
 	private readonly Mock<IUserManagementService> _users = IUserManagementService.Mock();
 
 	[Before(Test)]
@@ -20,20 +17,17 @@ public class InviteDialogTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton(_users.Object);
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		Services.AddSingleton(clock.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
 	[Test]
 	public async Task CreateLink_ForAFreeUsername_ShowsTheLinkAndHowLongItWorks()
 	{
-		_users.InviteAsync("mira", Any()).Returns(Success.Of(new IssuedLink("/join/abc", Now.AddDays(7))));
+		_users.InviteAsync("mira", Any()).Returns(Success.Of(new IssuedLink("/join/6a3c1f4e-2b7d-4e8a-9f10-3c5d7e9a1b2c/abc", TimeSpan.FromDays(1))));
 		var cut = await OpenAsync("mira");
 
-		await Assert.That(cut.WaitForElement("[data-link]").TextContent).EndsWith("/join/abc");
-		await Assert.That(cut.FindComponent<BbDialogDescription>().Find("*").TextContent).Contains("7 days").And.Contains("mira");
+		await Assert.That(cut.WaitForElement("[data-link]").TextContent).EndsWith("/join/6a3c1f4e-2b7d-4e8a-9f10-3c5d7e9a1b2c/abc");
+		await Assert.That(cut.FindComponent<BbDialogDescription>().Find("*").TextContent).Contains("1 day").And.Contains("mira");
 	}
 
 	[Test]

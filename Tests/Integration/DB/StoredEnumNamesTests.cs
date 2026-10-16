@@ -25,7 +25,6 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 			.That(stored)
 			.IsEquivalentTo(
 				[
-					"AccountLinkKind: Invite, Reset",
 					"ApiKeyProvider: Tmdb, Mdblist, TmdbReadToken, Mal, Trakt",
 					"ArrFeedTagSource: ListName, Id",
 					"ArrUserTagSource: Name, Id",

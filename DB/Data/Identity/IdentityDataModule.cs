@@ -13,9 +13,7 @@ internal sealed class IdentityDataModule : IServiceModule
 	{
 		services.AddScoped<IUserRepository, UserRepository>();
 		services.AddScoped<ILocalAccountRepository, LocalAccountRepository>();
-		services.AddScoped<IAccountLinkRepository, AccountLinkRepository>();
 		services.AddScoped<ISignInCookie, IdentityCookie>();
-		services.AddScoped<IModelConfiguration, AccountLinkConfiguration>();
 		services.AddAuthenticationCore();
 		services
 			.AddIdentityCore<UserRow>()

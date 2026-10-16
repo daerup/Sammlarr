@@ -1,9 +1,7 @@
-@using Contracts
 @using Contracts.Identity
 @using Domain.Identity
 @using UI.Shared.Branding.Birds
 @inject IUserManagementService Users
-@inject IDateTimeProvider Clock
 @inject NavigationManager Navigation
 @inject Notifier Notifier
 
@@ -218,23 +216,13 @@
         {
             return Person switch
             {
-                InvitedPerson invited => Invitation(invited.ExpiresAt - Clock.Now),
+                InvitedPerson => ("Invited", "text-amber-500", "bg-amber-500"),
                 JoinedPerson joined => joined.LockedUntil.Match(
                     until => ($"Locked until {until.ToLocalTime():HH:mm}", "text-destructive", "bg-destructive"),
                     () => ("Active", "text-muted-foreground", "bg-success")
                 ),
             };
         }
-    }
-
-    private static (string Text, string Tone, string Dot) Invitation(TimeSpan left)
-    {
-        return (left <= TimeSpan.Zero ? "Invite expired" : $"Invited · link expires in {Remaining(left)}", "text-amber-500", "bg-amber-500");
-    }
-
-    private static string Remaining(TimeSpan left)
-    {
-        return left.TotalDays >= 1 ? Counted((int)left.TotalDays, "day", "days") : Counted(Math.Max(1, (int)left.TotalHours), "hour", "hours");
     }
 
     private static string Counted(int count, string one, string many) => $"{count:N0} {(count == 1 ? one : many)}";
@@ -280,7 +268,7 @@
     private void Present(Result<IssuedLink> issued, string title, Func<string, string> describe)
     {
         issued
-            .Apply(link => _issued = new Issued(title, describe(LinkText.Lifetime(link.ExpiresAt, Clock.Now)), Navigation.ToAbsoluteUri(link.Path).ToString()))
+            .Apply(link => _issued = new Issued(title, describe(LinkText.Lifetime(link.Lifetime)), Navigation.ToAbsoluteUri(link.Path).ToString()))
             .ApplyError(error => Notifier.Error(error.Reason));
     }
 
