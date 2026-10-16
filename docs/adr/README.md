@@ -28,7 +28,7 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0009 | [Model a title as an identity plus optional details](0009-model-a-title-as-an-identity-plus-optional-details.md) | accepted | 2026-10-03 |
 | 0010 | [Split the ids from the services Sammlarr calls](0010-split-the-ids-from-the-services-sammlarr-calls.md) | accepted | 2026-10-05 |
 | 0011 | [Give a service every role its API supports](0011-give-a-service-every-role-its-api-supports.md) | accepted | 2026-10-05 |
-| 0012 | [Read IMDb, Trakt and Letterboxd lists through MDBList](0012-read-imdb-trakt-and-letterboxd-lists-through-mdblist.md) | accepted | 2026-10-05 |
+| 0012 | [Read IMDb, Trakt and Letterboxd lists through MDBList](0012-read-imdb-trakt-and-letterboxd-lists-through-mdblist.md) | accepted, superseded for Trakt | 2026-10-05 |
 | 0013 | [Load shared datasets outside the job queue](0013-load-shared-datasets-outside-the-job-queue.md) | accepted | 2026-10-06 |
 | 0014 | [Count provider calls with the built-in instruments](0014-count-provider-calls-with-the-built-in-instruments.md) | accepted | 2026-10-07 |
 | 0015 | [Keep an id two stored titles claim on neither](0015-keep-an-id-two-stored-titles-claim-on-neither.md) | superseded by [0018](0018-claim-identity-before-hand-out-from-identity-keys-only.md) | 2026-10-08 |

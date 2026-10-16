@@ -58,8 +58,8 @@ Scenario P, load speed, supports the first two goals.
 
 - **Stimulus**: user B opens feeds, wantlist or blocklist while user A's rows exist.
 - **Response**: B sees only B's rows. A query on a user-owned table with no signed-in user throws.
-- **Measure**: `UserIsolationTests` (`Tests/Integration/Identity` and `Tests/E2E/Identity`) and
-  `UserOwnedAccessGuardTests` (fails closed, covers every user-owned entity).
+- **Measure**: `UserIsolationTests` and `UserOwnedAccessGuardTests` (`Tests/Integration/Identity`; the guard fails
+  closed and covers every user-owned entity).
 
 ### P: a cached list loads again
 
@@ -67,6 +67,5 @@ Scenario P, load speed, supports the first two goals.
 - **Response**: the library is read once per burst; a fresh stored title settles with no call; only misses are routed,
   and only for the fields the feed needs. Nothing caps the titles in flight, so a fully cached run is bound only by
   its list pages and the library reads.
-- **Measure**: `CachedRunTests.RunAsync_ForAFullyCachedList_SendsOnlyItsPage`; by hand, the `[Explicit]` benchmarks
-  `CachedRunBenchmark` (a cached run of 4,000 titles) and `ListLoadBenchmark` (how soon half of a list with stalling
-  titles is out).
+- **Measure**: `CachedRunTests.RunAsync_ForAFullyCachedList_SendsOnlyItsPage`; by hand, the `[Explicit]` benchmark
+  `ListLoadBenchmark` (how soon half of a list with stalling titles is out).

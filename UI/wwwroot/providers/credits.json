@@ -101,7 +101,7 @@
     "sources": ["https://cdn.jsdelivr.net/npm/simple-icons@16.14.0/icons/letterboxd.svg"],
     "author": "Simple Icons contributors",
     "licence": "CC0-1.0",
-    "changes": "the one-colour glyph split into its three dots, filled #FF8000, #00E054 and #40BCF4; not Letterboxd's own file, kept against Letterboxd's logo terms"
+    "changes": "the one-colour glyph split into its three dots, filled #FF8000, #00E054 and #40BCF4"
   },
   {
     "file": "mdblist-logo-dark.svg",
