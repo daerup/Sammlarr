@@ -82,8 +82,20 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 	public async Task<Result<User>> ChangePasswordAsync(UserId id, string current, string next, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
-		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
+		var signIns = scope.ServiceProvider.GetRequiredService<SignInManager<UserRow>>();
+		var users = signIns.UserManager;
 		var row = await users.RequireAsync(id);
+		var check = await signIns.CheckPasswordSignInAsync(row, current, lockoutOnFailure: true);
+		if (check.IsLockedOut)
+		{
+			return Error.From(Lockout.Message);
+		}
+
+		if (!check.Succeeded)
+		{
+			return Error.From(users.ErrorDescriber.PasswordMismatch().Description);
+		}
+
 		var changed = await users.ChangePasswordAsync(row, current, next);
 		return changed.ToResult(Members.ToUser(row, await RoleOfAsync(users, row)));
 	}

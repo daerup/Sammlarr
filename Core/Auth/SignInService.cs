@@ -27,7 +27,7 @@ internal sealed class SignInService(
 {
 	private static readonly Error WrongPassword = Error.From("Wrong username or password.");
 
-	private static readonly Error Locked = Error.From("Too many failed sign-ins. Try again in a few minutes.");
+	private static readonly Error Locked = Error.From(Lockout.Message);
 
 	private static readonly Error NoAdminYet = Error.From("This Sammlarr has no admin yet. Open /setup and enter the setup code from the server log.");
 
