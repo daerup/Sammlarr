@@ -30,11 +30,7 @@ helpers stub what an account brings with it: `WithPlexAccount` accepts the token
 answers title lookups with `[]`. The stub answers with the first pattern registered that matches, so a test overrides
 a default by stubbing the same key (`$"{TestUrls.MdblistApi}/tmdb/movie"`), not a shorter one.
 
-Current suite: **3994** non-E2E tests plus **159** E2E (17 of them on the self-hosted stacks, and the staging smoke test, skipped by default).
-
-| Domain | Shared | Core | API | Architecture | Roslyn | Integration | UI   | Web |
-|--------|--------|------|-----|--------------|--------|-------------|------|-----|
-| 342    | 210    | 543  | 696 | 44           | 100    | 681         | 1308 | 70  |
+The E2E suite includes the tests on the self-hosted stacks and the staging smoke test, which is skipped by default.
 
 ## Running
 
