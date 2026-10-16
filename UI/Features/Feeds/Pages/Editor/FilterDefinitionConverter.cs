@@ -25,6 +25,13 @@ internal static class FilterDefinitionConverter
 		return new QueryFilter { Operator = ToContractsOperator(filter.Operator), Groups = [group] };
 	}
 
+	public static Optional<FilterCondition> Incomplete(FilterDefinition? filter)
+	{
+		return Optional
+			.Of(filter)
+			.Map(definition => definition.Conditions.FirstOrNone(IsIncomplete).Or(() => definition.Groups.Select(Incomplete).WhereSome().FirstOrNone()));
+	}
+
 	public static FilterDefinition? FromQueryFilter(QueryFilter? filter)
 	{
 		if (filter is null)
@@ -47,6 +54,12 @@ internal static class FilterDefinitionConverter
 		}
 
 		return definition.IsEmpty ? null : definition;
+	}
+
+	private static bool IsIncomplete(FilterCondition condition)
+	{
+		return (condition.Operator is BBFilterOp.In or BBFilterOp.NotIn && !(condition.Value is IEnumerable<string> picked && picked.Any()))
+			|| (condition.Operator is BBFilterOp.Between && (condition.Value is null || condition.ValueEnd is null));
 	}
 
 	private static FilterGroup? ToFilterGroup(FilterDefinition filterDef)

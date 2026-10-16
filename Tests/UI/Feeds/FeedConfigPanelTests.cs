@@ -279,6 +279,23 @@ public class FeedConfigPanelTests : BunitContext
 		await Assert.That(cut.Markup).Contains("Picks 5 at random");
 	}
 
+	[Test]
+	public async Task Filter_WithAMediaTypeConditionAndNothingPicked_SaysToFinishItAndCannotBeSaved()
+	{
+		var condition = new FilterCondition
+		{
+			Field = "MediaType",
+			Operator = BlazorBlueprint.Primitives.Filtering.FilterOperator.In,
+			Value = Array.Empty<string>(),
+		};
+		var config = Documentaries with { Filter = new FilterDefinition { Conditions = [condition] } };
+
+		var cut = RenderConfig(config);
+
+		await Assert.That(cut.Find("[data-filter-unfinished]").TextContent.Trim()).IsEqualTo("Finish or remove the Media Type condition to save.");
+		await Assert.That(config.IsValid).IsFalse();
+	}
+
 	private static IElement IdentifierField(IRenderedComponent<FeedConfigPanel> cut) => cut.Find("#list-identifier");
 
 	private static void Checked(IRenderedComponent<FeedConfigPanel> cut, IdentifierCheck check)
