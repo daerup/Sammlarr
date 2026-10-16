@@ -16,11 +16,14 @@ public class ThirdPartyNoticesTests
 		["OFL-1.1"] = "OFL text",
 	};
 
-	private static ShippedPackage Shipped(string id, string version, string? expression) => new(new Package(id, version, "", "", ""), expression);
+	private static readonly Dictionary<string, string> Copyrights = new() { ["WolverineFx"] = "Copyright (c) Jeremy D. Miller and Contributors." };
+
+	private static ShippedPackage Shipped(string id, string version, string? expression, string copyright = "") =>
+		new(new Package(id, version, "", copyright, ""), expression);
 
 	private static Notices Collect(IEnumerable<ShippedPackage> packages, params LicenceOverride[] overrides)
 	{
-		return ThirdPartyNotices.Collect(packages, overrides, Texts, []);
+		return ThirdPartyNotices.Collect(packages, overrides, Copyrights, Texts, []);
 	}
 
 	[Test]
@@ -79,6 +82,22 @@ public class ThirdPartyNoticesTests
 	}
 
 	[Test]
+	public async Task Collect_PackageWithoutACopyright_TakesItFromTheCopyrightsFile()
+	{
+		var notices = Collect([Shipped("WolverineFx", "6.49.0", "MIT")]);
+
+		await Assert.That(notices.Licences.Single().Packages.Single().Copyright).IsEqualTo("Copyright (c) Jeremy D. Miller and Contributors.");
+	}
+
+	[Test]
+	public async Task Collect_PackageWithItsOwnCopyright_KeepsIt()
+	{
+		var notices = Collect([Shipped("WolverineFx", "6.49.0", "MIT", "Copyright (c) the package")]);
+
+		await Assert.That(notices.Licences.Single().Packages.Single().Copyright).IsEqualTo("Copyright (c) the package");
+	}
+
+	[Test]
 	[Arguments("MIT OR Apache-2.0", "MIT")]
 	[Arguments("LGPL-2.1-only OR MIT", "MIT")]
 	public async Task Collect_DualLicensedPackage_LandsUnderTheFirstChoiceWithAText(string expression, string expected)
@@ -96,6 +115,7 @@ public class ThirdPartyNoticesTests
 		var notices = ThirdPartyNotices.Collect(
 			[],
 			[],
+			Copyrights,
 			Texts,
 			[
 				Asset("providers/tmdb.svg", "https://tmdb.org"),
