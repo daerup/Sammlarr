@@ -4,6 +4,7 @@
   "semanticCommits": "enabled",
   "timezone": "Europe/Zurich",
   "schedule": ["before 6am on monday"],
+  "lockFileMaintenance": { "enabled": true },
   "packageRules": [
     {
       "description": "Everything that is not a major update arrives as one PR a week",
