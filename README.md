@@ -9,8 +9,6 @@
   <a href="https://github.com/daerup/Sammlarr/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://img.shields.io/github/actions/workflow/status/daerup/Sammlarr/codeql.yml?branch=main&label=CodeQL"></a>
   <a href="https://github.com/daerup/Sammlarr/actions/workflows/ci.yml"><img alt="Coverage" src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/daerup/Sammlarr/badges/coverage.json"></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/daerup/Sammlarr"><img alt="OpenSSF Scorecard" src="https://img.shields.io/ossf-scorecard/github.com/daerup/Sammlarr?label=OpenSSF%20Scorecard"></a>
-</p>
-<p align="center">
   <a href="https://github.com/daerup/Sammlarr/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/daerup/Sammlarr"></a>
 </p>
 <p align="center">
