@@ -108,29 +108,42 @@ jobs:
           jq '{ problems, vulnerable: [.projects[] | select(.frameworks)] }' vulnerable.json
           jq -e '([.projects[].frameworks[]?] | length == 0) and ((.problems // []) | length == 0)' vulnerable.json
 
-  coverage-badge:
+  badges:
     if: ${{ !cancelled() && github.event_name == 'push' && needs.build-test.outputs.line != '' }}
-    needs: build-test
+    needs: [build-test, test-report]
     runs-on: ubuntu-26.04
     timeout-minutes: 5
     concurrency:
-      group: coverage-badge
+      group: badges
       cancel-in-progress: false
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Coverage badge on the badges branch
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: coverage
+          path: ${{ runner.temp }}/coverage
+
+      - name: Badges on the badges branch
         env:
           LINE: ${{ needs.build-test.outputs.line }}
+          PASSED: ${{ needs.test-report.outputs.passed }}
+          FAILED: ${{ needs.test-report.outputs.failed }}
         run: |
           [ "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA" ] || exit 0
           colour=$(awk -v line="$LINE" 'BEGIN { print (line >= 90 ? "green" : (line >= 80 ? "yellow" : "red")) }')
           if git fetch --depth 1 origin badges; then git switch -c badges FETCH_HEAD; else git switch --orphan badges; fi
           printf '{ "schemaVersion": 1, "label": "coverage", "message": "%s%%", "color": "%s" }\n' "$LINE" "$colour" > coverage.json
-          git add coverage.json
-          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "coverage: $LINE%" || exit 0
+          cp "$RUNNER_TEMP/coverage/SummaryGithub.md" coverage.md
+          git add coverage.json coverage.md
+          if [ -n "$PASSED" ]; then
+            if [ "${FAILED:-0}" -gt 0 ]; then tests="$FAILED failed, $PASSED passed" tests_colour=red; else tests="$PASSED passed" tests_colour=green; fi
+            printf '{ "schemaVersion": 1, "label": "tests", "message": "%s", "color": "%s" }\n' "$tests" "$tests_colour" > tests.json
+            git add tests.json
+          fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "coverage $LINE%${tests:+, tests $tests}" || exit 0
           git push origin badges
 
   coverage-comment:
@@ -329,6 +342,9 @@ jobs:
     needs: [build-test, e2e]
     runs-on: ubuntu-26.04
     timeout-minutes: 5
+    outputs:
+      passed: ${{ steps.report.outputs.passed }}
+      failed: ${{ steps.report.outputs.failed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -337,7 +353,8 @@ jobs:
           pattern: test-results*
           merge-multiple: true
 
-      - uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+      - id: report
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
         with:
           name: tests
           path: '*.trx'
