@@ -61,9 +61,11 @@
                         </button>
                     }
                 </div>
-                <Virtualize Items="group.Items" Context="item" ItemSize="RowHeight" OverscanCount="8">
-                    <ChangeRow @key="item" Item="item" OnSelect="SelectAsync" Highlighted="@IsHighlighted(item)" Reveal="@Reveals(item)" OnRevealed="Revealed"/>
-                </Virtualize>
+                <VirtualizeGuard>
+                    <Virtualize Items="group.Items" Context="item" ItemSize="RowHeight" OverscanCount="8">
+                        <ChangeRow @key="item" Item="item" OnSelect="SelectAsync" Highlighted="@IsHighlighted(item)" Reveal="@Reveals(item)" OnRevealed="Revealed"/>
+                    </Virtualize>
+                </VirtualizeGuard>
             </section>
         }
         @if (Fold is { Count: > 0 } fold && _fold is not FoldState.Open && Shows(fold.Kind))

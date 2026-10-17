@@ -329,6 +329,8 @@ jobs:
       - run: >
           PUID=$(id -u) PGID=$(id -g) dotnet run --project tests/E2E --no-build -c "$CONFIGURATION" --
           --report-trx --report-trx-filename "$RUNNER_TEMP/test-results/E2E.trx"
+        env:
+          E2E_RESOURCE_LOG: ${{ runner.temp }}/test-results/stacks
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()

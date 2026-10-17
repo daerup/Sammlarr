@@ -1,0 +1,18 @@
+@using System.Runtime.ExceptionServices
+@inherits ErrorBoundaryBase
+
+@ChildContent
+
+@code {
+    private const string ReleasedReference = "VirtualizeJsInterop";
+
+    protected override Task OnErrorAsync(Exception exception)
+    {
+        if (exception.GetBaseException() is not ObjectDisposedException { ObjectName: var name } || !name.Contains(ReleasedReference, StringComparison.Ordinal))
+        {
+            ExceptionDispatchInfo.Throw(exception);
+        }
+
+        return Task.CompletedTask;
+    }
+}

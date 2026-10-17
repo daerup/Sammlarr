@@ -128,6 +128,19 @@ public class FeedPreviewPanelTests : BunitContext
 	}
 
 	[Test]
+	public async Task Preview_WhenTheViewportIsMeasuredOnlyAfterTheListGrew_ShowsTheRows()
+	{
+		JSInterop.SetupVoid("Blazor._internal.Virtualize.init", _ => true).SetVoidResult();
+		JSInterop.SetupVoid("Blazor._internal.Virtualize.restoreAnchor", _ => true);
+		var cut = RenderPanel(new NewestFirstPlanner(), resolved: 5, unmatched: 0);
+
+		await ApplyAsync(cut, new Append());
+		await ReportViewportAsync(cut);
+
+		await Assert.That(cut.FindAll(".preview-main-results .search-result-row")).Count().IsEqualTo(5);
+	}
+
+	[Test]
 	public async Task Apply_WithASortAndALimitButNoFilter_PlansADraftCarryingThemAndNoFilter()
 	{
 		var planner = IFeedRunPlanner.Mock();
@@ -303,6 +316,15 @@ public class FeedPreviewPanelTests : BunitContext
 		);
 	}
 
+	private Task ReportViewportAsync(IRenderedComponent<FeedPreviewPanel> cut)
+	{
+		const int viewportFill = 2;
+		var reference = JSInterop.Invocations["Blazor._internal.Virtualize.init"][^1].Arguments[0]!;
+		var virtualize = reference.GetType().GetProperty("Value")!.GetValue(reference)!;
+		var report = virtualize.GetType().GetMethod("OnSpacerBeforeVisible")!;
+		return cut.InvokeAsync(() => report.Invoke(virtualize, [0f, 0f, 800f, viewportFill]));
+	}
+
 	private static List<int> BadgeCounts(IRenderedComponent<FeedPreviewPanel> cut) =>
 		[.. cut.FindAll(".stat-badges-row .preview-filter-badge span").Select(badge => int.Parse(badge.TextContent))];
 
@@ -424,6 +446,32 @@ public class FeedPreviewPanelTests : BunitContext
 			return Task.FromResult<FeedPlanResult>(
 				new MirrorPlan(verdicts, [], new FeedDelta([], [], [gone]), Conclusiveness.Conclusive, new Dictionary<MediaId, int> { [gone] = 3 })
 			);
+		}
+	}
+
+	private sealed class NewestFirstPlanner : IFeedRunPlanner
+	{
+		public Task<FieldNeeds> NeedsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default) => Task.FromResult(FieldNeeds.None);
+
+		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
+		{
+			var verdicts = Items(target)
+				.Matched()
+				.Reverse()
+				.Select(item => new QueryVerdict<MatchedMedia>(
+					item,
+					QueryOutcome.Qualified,
+					new Enrollment
+					{
+						InWantlist = false,
+						InBlocklist = false,
+						Owned = false,
+					},
+					ConsumesSlot: true
+				))
+				.ToList();
+
+			return Task.FromResult<FeedPlanResult>(new AppendPlan(verdicts, [], FeedDelta.None, Conclusiveness.Conclusive));
 		}
 	}
 

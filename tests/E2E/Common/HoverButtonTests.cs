@@ -22,13 +22,10 @@ public class HoverButtonTests
 		);
 
 		await signOut.HoverAsync();
-		await page.WaitForTimeoutAsync(300);
-		var hoverColor = await signOut.EvaluateAsync<string>("el => getComputedStyle(el).color");
-		var hoverBackground = await signOut.EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
 
 		await Assert.That(restingBackground).IsEqualTo("rgba(0, 0, 0, 0)");
 		await Assert.That(restingColor).IsEqualTo(destructive);
-		await Assert.That(hoverBackground).IsEqualTo(restingColor);
-		await Assert.That(hoverColor).IsNotEqualTo(restingColor);
+		await Expect(signOut).ToHaveCSSAsync("background-color", restingColor);
+		await Expect(signOut).Not.ToHaveCSSAsync("color", restingColor);
 	}
 }
