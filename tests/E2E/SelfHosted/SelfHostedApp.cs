@@ -66,6 +66,7 @@ public static class SelfHostedApp
 		var taken = lease.Value.Taken;
 		try
 		{
+			await FailureSnapshot.WriteAsync(context, lease.Value.Contexts);
 			foreach (var browserContext in lease.Value.Contexts)
 			{
 				await browserContext.CloseAsync();

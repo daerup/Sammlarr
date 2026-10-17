@@ -77,13 +77,9 @@ public class FeedPreviewTests
 		var served = await FeedEditor.ServedTitlesAsync();
 		var warm = await E2EApp.RequestCountAsync("/library/metadata/");
 
-		await page.GetByLabel("Refresh assets").DispatchEventAsync("click");
-		await Expect(page.Heading("Refresh assets?")).ToBeVisibleAsync();
-		await page.Button("Refresh").ClickAsync();
+		await RefreshAsync(page);
 
 		await E2EApp.WaitForRequestsBeyondAsync("/library/metadata/", warm);
-		await FeedEditor.PreviewLoadedAsync(page);
-
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(served.Count);
 	}
 
@@ -103,12 +99,9 @@ public class FeedPreviewTests
 		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(3);
 		var listed = await E2EApp.RequestCountAsync($"/lists/{identifier}/items");
 
-		await page.GetByLabel("Refresh assets").DispatchEventAsync("click");
-		await Expect(page.Heading("Refresh assets?")).ToBeVisibleAsync();
-		await page.Button("Refresh").ClickAsync();
+		await RefreshAsync(page);
 
 		await E2EApp.WaitForRequestsBeyondAsync($"/lists/{identifier}/items", listed);
-		await FeedEditor.PreviewLoadedAsync(page);
 		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(3);
 
 		await FeedEditor.FillAsync(page, SearchBox, "Unmatched 1");
@@ -119,6 +112,16 @@ public class FeedPreviewTests
 
 	private static string UnmatchedList(int count) =>
 		$"{{\"movies\":[{string.Join(',', Enumerable.Range(0, count).Select(index => $"{{\"title\":\"E2E Unmatched {index}\",\"release_year\":2024}}"))}],\"shows\":[]}}";
+
+	private static async Task RefreshAsync(IPage page)
+	{
+		var dialog = page.Heading("Refresh assets?");
+		await page.GetByLabel("Refresh assets").DispatchEventAsync("click");
+		await Expect(dialog).ToBeVisibleAsync();
+		await page.Button("Refresh").ClickAsync();
+		await Expect(dialog).ToBeHiddenAsync(Wait.Settle);
+		await FeedEditor.PreviewLoadedAsync(page);
+	}
 
 	private static async Task PreviewAsync(IPage page, string scenario)
 	{

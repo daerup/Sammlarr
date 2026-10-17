@@ -1,6 +1,7 @@
 using Bunit;
 using Domain.Media;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 using UI.Features.Home.Components;
 using UI.Tests.Media;
 using ErrorEventArgs = Microsoft.AspNetCore.Components.Web.ErrorEventArgs;
@@ -46,6 +47,25 @@ public class PosterTrackTests : BunitContext
 		Render<PosterTrack>(parameters => parameters.Add(track => track.Ids, [First]).Add(track => track.Media, new Dictionary<MediaId, MatchedMedia>()));
 
 		await Renderer.Dispatcher.InvokeAsync(DisposeComponentsAsync);
+
+		await Assert.That(Renderer.UnhandledException.IsCompleted).IsFalse();
+	}
+
+	[Test]
+	public async Task Dispose_WhileItsModuleIsStillLoading_ReportsNoError()
+	{
+		var import = new TaskCompletionSource<IJSObjectReference>();
+		var js = IJSRuntime.Mock();
+		js.InvokeAsync<IJSObjectReference>(Any<string>(), Any<object?[]?>()).Returns((_, _) => new ValueTask<IJSObjectReference>(import.Task));
+		Services.AddSingleton(js.Object);
+		var module = IJSObjectReference.Mock();
+		module
+			.InvokeAsync<IJSObjectReference>(Any<string>(), Any<object?[]?>())
+			.Throws(new ObjectDisposedException("DotNetObjectReference`1[[UI.Features.Home.Components.PosterTrack]]"));
+		Render<PosterTrack>(parameters => parameters.Add(track => track.Ids, [First]).Add(track => track.Media, new Dictionary<MediaId, MatchedMedia>()));
+
+		await Renderer.Dispatcher.InvokeAsync(DisposeComponentsAsync);
+		await Renderer.Dispatcher.InvokeAsync(() => import.SetResult(module.Object));
 
 		await Assert.That(Renderer.UnhandledException.IsCompleted).IsFalse();
 	}

@@ -4,6 +4,8 @@ namespace E2E.Tests;
 
 internal static class Wait
 {
+	internal const float Default = 15_000;
+
 	internal const float Settle = 30_000;
 
 	internal const float Preview = 60_000;

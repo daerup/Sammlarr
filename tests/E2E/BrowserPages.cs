@@ -20,6 +20,7 @@ internal static class BrowserPages
 	internal static Task<IBrowser> LaunchAsync(IPlaywright playwright)
 	{
 		var headed = Environment.GetEnvironmentVariable("E2E_HEADED") is "true";
+		Assertions.SetDefaultExpectTimeout(Wait.Default);
 		return playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = !headed, SlowMo = headed ? 2000 : 0 });
 	}
 

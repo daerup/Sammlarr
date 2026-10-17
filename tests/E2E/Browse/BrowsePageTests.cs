@@ -8,14 +8,10 @@ public class BrowsePageTests
 	[Test]
 	public async Task Browse_WhenAddingATrendingItem_TheWantlistGainsIt()
 	{
-		var page = await E2EApp.AdminAt(Routes.Wantlist);
-		await Expect(page.Heading("Wantlist")).ToBeVisibleAsync(Wait.Settle);
-		var before = await Tiles(page).CountAsync();
-
-		await page.VisitAsync(Routes.Browse);
-		await Expect(Resolved(page).First).ToBeVisibleAsync(Wait.Settle);
-		var title = (await Resolved(page).First.Locator("h3").InnerTextAsync()).Trim();
-		await Resolved(page).First.ClickAsync();
+		var page = await E2EApp.AdminAt(Routes.Browse);
+		var tile = TrendingTiles.Resolved(page, TrendingTiles.Title);
+		await Expect(tile).ToBeVisibleAsync(Wait.Settle);
+		await tile.ClickAsync();
 
 		var addButton = page.ButtonContaining("Add to Wantlist");
 		await Expect(addButton).ToBeVisibleAsync(Wait.Settle);
@@ -24,18 +20,15 @@ public class BrowsePageTests
 
 		await page.VisitAsync(Routes.Wantlist);
 
-		await Expect(Tiles(page)).ToHaveCountAsync(before + 1, Wait.Settle);
+		await Expect(page.Heading(TrendingTiles.Title)).ToBeVisibleAsync(Wait.Settle);
 
 		await page.VisitAsync(Routes.Browse);
-		await Resolved(page).Filter(new LocatorFilterOptions { Has = page.Heading(title) }).First.ClickAsync();
+		await tile.ClickAsync();
 		await page.Button("Remove from wantlist").ClickAsync();
 		await Expect(addButton).ToBeVisibleAsync(Wait.Settle);
 		await page.VisitAsync(Routes.Wantlist);
 
-		await Expect(Tiles(page)).ToHaveCountAsync(before, Wait.Settle);
+		await Expect(page.Heading("Wantlist")).ToBeVisibleAsync(Wait.Settle);
+		await Expect(page.Heading(TrendingTiles.Title)).ToBeHiddenAsync(Wait.Settle);
 	}
-
-	private static ILocator Tiles(IPage page) => page.Locator("[data-testid='media-tile']");
-
-	private static ILocator Resolved(IPage page) => page.Locator("[data-testid='media-tile']:not(.tile-unmatched)");
 }

@@ -28,10 +28,8 @@ public class AboutTests
 		);
 
 		await footerVersion.HoverAsync();
-		await page.WaitForTimeoutAsync(300);
-		var hovered = await footerVersion.EvaluateAsync<string>("el => getComputedStyle(el).color");
 
 		await Assert.That(resting).IsEqualTo(muted);
-		await Assert.That(hovered).IsNotEqualTo(resting);
+		await Expect(footerVersion).Not.ToHaveCSSAsync("color", resting);
 	}
 }

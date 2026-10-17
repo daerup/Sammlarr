@@ -187,31 +187,36 @@ public static class E2EApp
 
 		var served = new List<string>();
 		var unmatched = new List<string>();
-		foreach (var stack in _stacks)
+		try
 		{
-			served.AddRange(Urls(await stack.RequestJournalAsync()));
-			unmatched.AddRange(Urls(await stack.UnmatchedAsync()));
-		}
+			foreach (var stack in _stacks)
+			{
+				served.AddRange(Urls(await stack.RequestJournalAsync()));
+				unmatched.AddRange(Urls(await stack.UnmatchedAsync()));
+			}
 
-		if (Environment.GetEnvironmentVariable("E2E_AUDIT") is "true")
+			if (Environment.GetEnvironmentVariable("E2E_AUDIT") is "true")
+			{
+				await File.WriteAllLinesAsync(Path.Combine(Path.GetTempPath(), "e2e-served.txt"), served.Distinct());
+				await File.WriteAllLinesAsync(Path.Combine(Path.GetTempPath(), "e2e-unmatched.txt"), unmatched.Distinct());
+			}
+
+			if (IsLive)
+			{
+				await CaptureRemainingAsync();
+			}
+		}
+		finally
 		{
-			await File.WriteAllLinesAsync(Path.Combine(Path.GetTempPath(), "e2e-served.txt"), served.Distinct());
-			await File.WriteAllLinesAsync(Path.Combine(Path.GetTempPath(), "e2e-unmatched.txt"), unmatched.Distinct());
-		}
+			await _browser!.DisposeAsync();
+			_playwright!.Dispose();
+			foreach (var stack in _stacks)
+			{
+				await stack.StopAsync();
+			}
 
-		if (IsLive)
-		{
-			await CaptureRemainingAsync();
+			Directory.Delete(_keyRing, recursive: true);
 		}
-
-		await _browser!.DisposeAsync();
-		_playwright!.Dispose();
-		foreach (var stack in _stacks)
-		{
-			await stack.StopAsync();
-		}
-
-		Directory.Delete(_keyRing, recursive: true);
 
 		List<string> crashed;
 		lock (CaptureGate)
@@ -279,6 +284,7 @@ public static class E2EApp
 		var lease = await pending.Value;
 		try
 		{
+			await FailureSnapshot.WriteAsync(context, lease.Contexts);
 			foreach (var browserContext in lease.Contexts)
 			{
 				await browserContext.CloseAsync();
