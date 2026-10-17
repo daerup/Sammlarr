@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/17/2026 - 15:01:32 |
+| Generated on: | 10/17/2026 - 17:43:46 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1515 |
 | Files: | 1069 |
-| **Line coverage:** | 85.9% (39422 of 45870) |
-| Covered lines: | 39422 |
-| Uncovered lines: | 6448 |
+| **Line coverage:** | 85.9% (39431 of 45870) |
+| Covered lines: | 39431 |
+| Uncovered lines: | 6439 |
 | Coverable lines: | 45870 |
 | Total lines: | 68006 |
-| **Branch coverage:** | 78% (14745 of 18903) |
-| Covered branches: | 14745 |
+| **Branch coverage:** | 78% (14746 of 18903) |
+| Covered branches: | 14746 |
 | Total branches: | 18903 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -393,11 +393,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.6%</summary>
+<details><summary>Core - 96.8%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.6%**|**88.4%**|
+|**Core**|**96.8%**|**88.4%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -426,7 +426,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|81.8%|100%|
+|Core.Datasets.DatasetTicker|90.9%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -550,7 +550,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|34.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -577,7 +577,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**95.8%**|**84.8%**|
+|**DB**|**95.8%**|**84.9%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -648,7 +648,7 @@
 |DB.Data.Identity.IdentityDataModule|100%|100%|
 |DB.Data.Identity.IdentityExtensions|91.3%|83.3%|
 |DB.Data.Identity.IdentityExtensions<T>|91.3%|83.3%|
-|DB.Data.Identity.LocalAccountRepository|100%|94%|
+|DB.Data.Identity.LocalAccountRepository|100%|96%|
 |DB.Data.Identity.Members|100%||
 |DB.Data.Identity.UserRepository|99.3%|96.4%|
 |DB.Data.Identity.UserRepository<T>|99.3%|96.4%|
