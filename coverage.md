@@ -3,7 +3,7 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/17/2026 - 17:43:46 |
+| Generated on: | 10/17/2026 - 17:59:40 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1515 |
@@ -13,8 +13,8 @@
 | Uncovered lines: | 6439 |
 | Coverable lines: | 45870 |
 | Total lines: | 68006 |
-| **Branch coverage:** | 78% (14746 of 18903) |
-| Covered branches: | 14746 |
+| **Branch coverage:** | 78% (14747 of 18903) |
+| Covered branches: | 14747 |
 | Total branches: | 18903 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -577,7 +577,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**95.8%**|**84.9%**|
+|**DB**|**95.8%**|**85%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -684,7 +684,7 @@
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
 |DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
-|DB.Data.Notifications.NotificationTargetRepository|96.4%|66.6%|
+|DB.Data.Notifications.NotificationTargetRepository|96.4%|70.8%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
 |DB.Data.Ratings.RatingDefaultConfiguration|100%|100%|
