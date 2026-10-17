@@ -65,6 +65,28 @@ public class UiInvariantTests
 	}
 
 	[Test]
+	public async Task Popover_WhenTheBrowserHasNoRandomUuid_StillCloses()
+	{
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.AddInitScriptAsync("delete Crypto.prototype.randomUUID");
+		await page.VisitAsync("/feeds/create");
+		var heading = page.Heading("Create feed");
+		await Expect(heading).ToBeVisibleAsync(Wait.Settle);
+		var trigger = page.Locator(".provider-trigger");
+		var option = page.OptionContaining("MDBList");
+
+		await trigger.ClickAsync();
+		await Expect(option).ToBeVisibleAsync(Wait.Settle);
+		await page.Keyboard.PressAsync("Escape");
+		await Expect(option).ToBeHiddenAsync();
+
+		await trigger.ClickAsync();
+		await Expect(option).ToBeVisibleAsync(Wait.Settle);
+		await heading.ClickAsync();
+		await Expect(option).ToBeHiddenAsync();
+	}
+
+	[Test]
 	public async Task CtrlK_WhenPressed_OpensSearch()
 	{
 		var page = await E2EApp.AdminAt(Routes.Blocklist);
