@@ -15,7 +15,7 @@
     <link href="@Assets["css/app.css"]" rel="stylesheet"/>
     <!-- Blazor CSS isolation bundle (scoped CSS bundles into the host app) -->
     <link href="@Assets["Web.styles.css"]" rel="stylesheet"/>
-    <HeadOutlet/>
+    <HeadOutlet @rendermode="InteractiveServer"/>
 </head>
 <body class="font-sans antialiased">
 <Routes @rendermode="InteractiveServer"/>

@@ -1,9 +1,10 @@
 # Build and push the image with Docker's actions, compose with Aspire
 
-| Status                                                                        | Date       |
-|-------------------------------------------------------------------------------|------------|
-| accepted                                                                      | 2026-10-13 |
-| compose half superseded by [0021](0021-ship-one-hand-written-compose-file.md) | 2026-10-16 |
+| Status                                                                               | Date       |
+|--------------------------------------------------------------------------------------|------------|
+| accepted                                                                             | 2026-10-13 |
+| compose half superseded by [0021](0021-ship-one-hand-written-compose-file.md)        | 2026-10-16 |
+| superseded by [0023](0023-push-an-unsigned-image-by-version-and-move-latest-last.md) | 2026-10-17 |
 
 ## Context
 
@@ -37,5 +38,3 @@ digest output.
 
 * 2026-10-16: `compose.yaml` is hand-written again and the only compose file; releases attach none
   ([ADR 0021](0021-ship-one-hand-written-compose-file.md)).
-* 2026-10-17: the build pushes `:X.Y.Z` only; `:latest` moves in a last job, once the image is signed and attested and
-  the rebuild matched. The `:sha` tag is gone, since every image comes from a version tag.

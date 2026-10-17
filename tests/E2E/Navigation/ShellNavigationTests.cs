@@ -1,7 +1,19 @@
+using static Microsoft.Playwright.Assertions;
+
 namespace E2E.Tests.Navigation;
 
 public class ShellNavigationTests
 {
+	[Test]
+	public async Task NavMenuItem_WhenClicked_ShowsItsPageTitle()
+	{
+		var page = await E2EApp.AdminAt(Routes.Home);
+
+		await page.MenuItem("Feeds").First.ClickAsync();
+
+		await Expect(page).ToHaveTitleAsync("Feeds");
+	}
+
 	[Test]
 	[Arguments("Browse", Routes.Browse)]
 	[Arguments("Wantlist", Routes.Wantlist)]

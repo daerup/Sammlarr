@@ -6,6 +6,7 @@ using DB.Scheduling;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using TickerQ.Utilities;
 using TickerQ.Utilities.Entities;
@@ -15,6 +16,8 @@ namespace Integration.Tests.Scheduler;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class DatasetScheduleTests(SammlarrTestHost host) : IAsyncDisposable
 {
+	private readonly WarningLog _warnings = new();
+
 	private ServiceProvider? _scheduling;
 
 	public async ValueTask DisposeAsync()
@@ -36,6 +39,14 @@ public class DatasetScheduleTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(daily.Function).IsEqualTo(DatasetTicker.FunctionName);
 		await Assert.That(daily.Expression).IsEqualTo(DatasetSchedule.Daily);
 		await Assert.That((await TickersAsync<TimeTickerEntity>()).Select(ticker => ticker.Function)).IsEquivalentTo([DatasetTicker.FunctionName]);
+	}
+
+	[Test]
+	public async Task StartedAsync_BeforeTheFirstLoad_SchedulesItWithoutAWarning()
+	{
+		await Testee().StartedAsync(CancellationToken.None);
+
+		await Assert.That(_warnings.Messages).IsEmpty();
 	}
 
 	[Test]
@@ -66,7 +77,7 @@ public class DatasetScheduleTests(SammlarrTestHost host) : IAsyncDisposable
 	private ServiceProvider BuildScheduling()
 	{
 		var services = new ServiceCollection();
-		services.AddLogging();
+		services.AddLogging(logging => logging.AddProvider(_warnings));
 		services.AddSingleton<ICurrentUser>(host.CurrentUser);
 		services.AddSingleton(host.Resolve<IDateTimeProvider>());
 		services.AddSingleton(host.Resolve<IDatasetLoads>());
@@ -81,5 +92,27 @@ public class DatasetScheduleTests(SammlarrTestHost host) : IAsyncDisposable
 		public string Name => name;
 
 		public Task<DatasetCheck> LoadAsync(CancellationToken cancellationToken = default) => throw new InvalidOperationException("Never loaded here.");
+	}
+
+	private sealed class WarningLog : ILoggerProvider, ILogger
+	{
+		public List<string> Messages { get; } = [];
+
+		public ILogger CreateLogger(string categoryName) => this;
+
+		public void Dispose() { }
+
+		public IDisposable? BeginScope<TState>(TState state)
+			where TState : notnull => null;
+
+		public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Warning;
+
+		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+		{
+			if (IsEnabled(logLevel))
+			{
+				Messages.Add(formatter(state, exception));
+			}
+		}
 	}
 }

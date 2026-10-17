@@ -35,5 +35,7 @@ internal sealed class SchedulingModule : IServiceModule
 		});
 
 	private static void Configure(DbContextOptionsBuilder options) =>
-		options.AddInterceptors(new SqlitePragmaInterceptor()).ConfigureWarnings(warnings => warnings.Ignore(SqliteEventId.SchemaConfiguredWarning));
+		options
+			.AddInterceptors(new SqlitePragmaInterceptor())
+			.ConfigureWarnings(warnings => warnings.Ignore(SqliteEventId.SchemaConfiguredWarning, RelationalEventId.MultipleCollectionIncludeWarning));
 }

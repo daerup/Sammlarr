@@ -10,8 +10,8 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 ENV HUSKY=0
 WORKDIR /src
 COPY . .
-RUN --mount=type=cache,id=sammlarr-nuget,target=/root/.nuget/packages \
-    --mount=type=cache,id=sammlarr-npm,target=/root/.npm \
+RUN --mount=type=cache,id=sammlarr-nuget,target=/root/.nuget/packages,sharing=locked \
+    --mount=type=cache,id=sammlarr-npm,target=/root/.npm,sharing=locked \
     dotnet restore src/Web/Web.csproj --locked-mode && \
     dotnet publish src/Web/Web.csproj -c Release -a $TARGETARCH --self-contained false --no-restore -o /app \
         -p:MinVerVersionOverride=$VERSION -p:ExcludeStaging=true -p:ContinuousIntegrationBuild=true -p:DebugType=none
