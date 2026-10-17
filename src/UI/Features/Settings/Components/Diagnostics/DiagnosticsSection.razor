@@ -127,27 +127,29 @@
         }
         else
         {
-            <Virtualize Items="_filteredLogs" Context="entry" ItemSize="68" OverscanCount="10">
-                <ItemContent>
-                    <div class="px-5 py-3 border-b border-border/40 hover:bg-accent/40 transition-colors space-y-1.5">
-                        <div class="flex items-center gap-3 text-xs">
-                            <span class="text-muted-foreground tabular-nums shrink-0 font-mono">@entry.Timestamp.ToLocalTime().ToString("HH:mm:ss.fff")</span>
-                            <BbBadge Variant="@LevelVariant(entry.Level)" Class="@($"w-24 justify-center {LevelClass(entry.Level)}")">@entry.Level</BbBadge>
-                            <span class="text-muted-foreground truncate font-mono min-w-0 flex-1" title="@entry.Category">@entry.Category</span>
-                            @if (entry.TraceId is not null)
-                            {
-                                <span title="@entry.TraceId" class="shrink-0">
-                                    <BbBadge Variant="BadgeVariant.Outline" Class="font-mono text-[10px] tabular-nums">
-                                        <LucideIcon Name="git-branch" Size="10" Class="mr-1 opacity-60"/>
-                                        @entry.TraceId.AsSpan(0, Math.Min(8, entry.TraceId.Length)).ToString()
-                                    </BbBadge>
-                                </span>
-                            }
+            <VirtualizeGuard>
+                <Virtualize Items="_filteredLogs" Context="entry" ItemSize="68" OverscanCount="10">
+                    <ItemContent>
+                        <div class="px-5 py-3 border-b border-border/40 hover:bg-accent/40 transition-colors space-y-1.5">
+                            <div class="flex items-center gap-3 text-xs">
+                                <span class="text-muted-foreground tabular-nums shrink-0 font-mono">@entry.Timestamp.ToLocalTime().ToString("HH:mm:ss.fff")</span>
+                                <BbBadge Variant="@LevelVariant(entry.Level)" Class="@($"w-24 justify-center {LevelClass(entry.Level)}")">@entry.Level</BbBadge>
+                                <span class="text-muted-foreground truncate font-mono min-w-0 flex-1" title="@entry.Category">@entry.Category</span>
+                                @if (entry.TraceId is not null)
+                                {
+                                    <span title="@entry.TraceId" class="shrink-0">
+                                        <BbBadge Variant="BadgeVariant.Outline" Class="font-mono text-[10px] tabular-nums">
+                                            <LucideIcon Name="git-branch" Size="10" Class="mr-1 opacity-60"/>
+                                            @entry.TraceId.AsSpan(0, Math.Min(8, entry.TraceId.Length)).ToString()
+                                        </BbBadge>
+                                    </span>
+                                }
+                            </div>
+                            <div class="text-sm font-mono break-words text-foreground/90" title="@(entry.Exception ?? entry.Message)">@entry.Message</div>
                         </div>
-                        <div class="text-sm font-mono break-words text-foreground/90" title="@(entry.Exception ?? entry.Message)">@entry.Message</div>
-                    </div>
-                </ItemContent>
-            </Virtualize>
+                    </ItemContent>
+                </Virtualize>
+            </VirtualizeGuard>
         }
     </div>
 </div>

@@ -142,114 +142,118 @@
             @if (_filteredResults.Count > 0)
             {
                 <div class="preview-main-results">
-                <Virtualize Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
-                    <ItemContent>
-                    @{
-                    var item = result.Item;
-                    var isCulled = result.Outcome is QueryOutcome.Culled;
-                    var isTruncated = result.Outcome is QueryOutcome.Truncated;
-                    var isAtRisk = IsMirror && result.AtRisk;
-                    var isDimmed = (isCulled || isTruncated) && !isAtRisk;
-                    var isGreyedOut = result.Bypassed;
-                    var isBlocklisted = IsBlocklisted(item);
-                    var isInWantlist = IsWantlisted(item);
-                    var isTogglingWantlist = _togglingWantlistItem == item.Identity.Id;
-                    var isTogglingBlocklist = _togglingBlocklistItem == item.Identity.Id;
+                <VirtualizeGuard>
+                    <Virtualize Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
+                        <ItemContent>
+                        @{
+                        var item = result.Item;
+                        var isCulled = result.Outcome is QueryOutcome.Culled;
+                        var isTruncated = result.Outcome is QueryOutcome.Truncated;
+                        var isAtRisk = IsMirror && result.AtRisk;
+                        var isDimmed = (isCulled || isTruncated) && !isAtRisk;
+                        var isGreyedOut = result.Bypassed;
+                        var isBlocklisted = IsBlocklisted(item);
+                        var isInWantlist = IsWantlisted(item);
+                        var isTogglingWantlist = _togglingWantlistItem == item.Identity.Id;
+                        var isTogglingBlocklist = _togglingBlocklistItem == item.Identity.Id;
 
-                    var hoverStyle = (isAtRisk, isDimmed, isGreyedOut) switch
-                    {
-                        (true, _, _) => "result-leaving",
-                        (false, true, _) => "result-dimmed",
-                        (false, false, true) => "result-grey",
-                        _ => "hover-bg"
-                    };
-                    <div class="pb-2">
-                            <MediaDetailTile @key="item"
-                                             Media="item"
-                                             Strategy="(_appliedConfig ?? Config).RatingStrategy"
-                                             Class="@(hoverStyle)"
-                                             IsFocused="_focusedResult == item.Key"
-                                             OnFocusIn="() => _focusedResult = item.Key"
-                                             OnFocusOut="() => ClearFocus(item)">
-                                <Icons>
-                                    @if (isAtRisk)
-                                    {
-                                        <LeavingIndicator Reason="@PreviewCopy.AtRiskReason(result)" Threshold="MirrorThreshold" Absences="AbsencesOf(item.Identity.Id)"/>
-                                    }
-                                    else if (isDimmed)
-                                    {
-                                        <BbTooltipProvider>
-                                            <BbTooltip DelayDuration="300">
-                                                <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                                                    <div class="search-result-status-indicator">
-                                                        <LucideIcon Name="@PreviewCopy.OutcomeIcon(result)" Size="24"/>
-                                                    </div>
-                                                </BbTooltipTrigger>
-                                                <BbTooltipContent>
-                                                    @(isCulled ? CulledTooltip(item) : "Excluded by the specified limit.")
-                                                </BbTooltipContent>
-                                            </BbTooltip>
-                                        </BbTooltipProvider>
-                                    }
-                                    else if (isGreyedOut)
-                                    {
-                                        <BbTooltipProvider>
-                                            <BbTooltip DelayDuration="300">
-                                                <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                                                    <div class="search-result-status-indicator">
-                                                        <LucideIcon Name="redo-dot" Size="24"/>
-                                                    </div>
-                                                </BbTooltipTrigger>
-                                                <BbTooltipContent>@BypassedTooltip(result)</BbTooltipContent>
-                                            </BbTooltip>
-                                        </BbTooltipProvider>
-                                    }
-                                    <WantlistToggleIcon Result="item"
-                                                         IsToggled="isInWantlist"
-                                                         IsToggling="isTogglingWantlist"
-                                                         DotColor="@(result.Enrollment.Owned ? FeedBrandColor : null)"
-                                                         OnToggle="ToggleWantlistAsync"/>
-                                    <BlocklistToggleIcon Result="item" IsToggled="isBlocklisted" IsToggling="isTogglingBlocklist" OnToggle="ToggleBlocklistAsync"/>
-                                </Icons>
-                            </MediaDetailTile>
-                        </div>
-                    }
-                    </ItemContent>
-                </Virtualize>
+                        var hoverStyle = (isAtRisk, isDimmed, isGreyedOut) switch
+                        {
+                            (true, _, _) => "result-leaving",
+                            (false, true, _) => "result-dimmed",
+                            (false, false, true) => "result-grey",
+                            _ => "hover-bg"
+                        };
+                        <div class="pb-2">
+                                <MediaDetailTile @key="item"
+                                                 Media="item"
+                                                 Strategy="(_appliedConfig ?? Config).RatingStrategy"
+                                                 Class="@(hoverStyle)"
+                                                 IsFocused="_focusedResult == item.Key"
+                                                 OnFocusIn="() => _focusedResult = item.Key"
+                                                 OnFocusOut="() => ClearFocus(item)">
+                                    <Icons>
+                                        @if (isAtRisk)
+                                        {
+                                            <LeavingIndicator Reason="@PreviewCopy.AtRiskReason(result)" Threshold="MirrorThreshold" Absences="AbsencesOf(item.Identity.Id)"/>
+                                        }
+                                        else if (isDimmed)
+                                        {
+                                            <BbTooltipProvider>
+                                                <BbTooltip DelayDuration="300">
+                                                    <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                                        <div class="search-result-status-indicator">
+                                                            <LucideIcon Name="@PreviewCopy.OutcomeIcon(result)" Size="24"/>
+                                                        </div>
+                                                    </BbTooltipTrigger>
+                                                    <BbTooltipContent>
+                                                        @(isCulled ? CulledTooltip(item) : "Excluded by the specified limit.")
+                                                    </BbTooltipContent>
+                                                </BbTooltip>
+                                            </BbTooltipProvider>
+                                        }
+                                        else if (isGreyedOut)
+                                        {
+                                            <BbTooltipProvider>
+                                                <BbTooltip DelayDuration="300">
+                                                    <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                                        <div class="search-result-status-indicator">
+                                                            <LucideIcon Name="redo-dot" Size="24"/>
+                                                        </div>
+                                                    </BbTooltipTrigger>
+                                                    <BbTooltipContent>@BypassedTooltip(result)</BbTooltipContent>
+                                                </BbTooltip>
+                                            </BbTooltipProvider>
+                                        }
+                                        <WantlistToggleIcon Result="item"
+                                                             IsToggled="isInWantlist"
+                                                             IsToggling="isTogglingWantlist"
+                                                             DotColor="@(result.Enrollment.Owned ? FeedBrandColor : null)"
+                                                             OnToggle="ToggleWantlistAsync"/>
+                                        <BlocklistToggleIcon Result="item" IsToggled="isBlocklisted" IsToggling="isTogglingBlocklist" OnToggle="ToggleBlocklistAsync"/>
+                                    </Icons>
+                                </MediaDetailTile>
+                            </div>
+                        }
+                        </ItemContent>
+                    </Virtualize>
+                </VirtualizeGuard>
                 </div>
             }
             @if (_filteredGoneResults.Count > 0)
             {
                 <div class="mt-4 preview-gone-results">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">@PreviewCopy.GoneHeading</p>
-                    <Virtualize Items="_filteredGoneResults" Context="gone" ItemSize="215" OverscanCount="6">
-                        <ItemContent>
-                    @{
-                            var goneItem = gone.Media;
-                            <div class="pb-2">
-                                <MediaDetailTile @key="goneItem"
-                                                 Media="goneItem"
-                                                 Class="result-leaving"
-                                                 IsFocused="_focusedResult == goneItem.Key"
-                                                 OnFocusIn="() => _focusedResult = goneItem.Key"
-                                                 OnFocusOut="() => ClearFocus(goneItem)">
-                                    <Icons>
-                                        <LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold" Absences="AbsencesOf(goneItem.Identity.Id)"/>
-                                        <WantlistToggleIcon Result="goneItem"
-                                                             IsToggled="IsWantlisted(goneItem)"
-                                                             IsToggling="_togglingWantlistItem == goneItem.Identity.Id"
-                                                             DotColor="@FeedBrandColor"
-                                                             OnToggle="ToggleWantlistAsync"/>
-                                        <BlocklistToggleIcon Result="goneItem"
-                                                             IsToggled="IsBlocklisted(goneItem)"
-                                                             IsToggling="_togglingBlocklistItem == goneItem.Identity.Id"
-                                                             OnToggle="ToggleBlocklistAsync"/>
-                                    </Icons>
-                                </MediaDetailTile>
-                            </div>
-                    }
-                        </ItemContent>
-                    </Virtualize>
+                    <VirtualizeGuard>
+                        <Virtualize Items="_filteredGoneResults" Context="gone" ItemSize="215" OverscanCount="6">
+                            <ItemContent>
+                        @{
+                                var goneItem = gone.Media;
+                                <div class="pb-2">
+                                    <MediaDetailTile @key="goneItem"
+                                                     Media="goneItem"
+                                                     Class="result-leaving"
+                                                     IsFocused="_focusedResult == goneItem.Key"
+                                                     OnFocusIn="() => _focusedResult = goneItem.Key"
+                                                     OnFocusOut="() => ClearFocus(goneItem)">
+                                        <Icons>
+                                            <LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold" Absences="AbsencesOf(goneItem.Identity.Id)"/>
+                                            <WantlistToggleIcon Result="goneItem"
+                                                                 IsToggled="IsWantlisted(goneItem)"
+                                                                 IsToggling="_togglingWantlistItem == goneItem.Identity.Id"
+                                                                 DotColor="@FeedBrandColor"
+                                                                 OnToggle="ToggleWantlistAsync"/>
+                                            <BlocklistToggleIcon Result="goneItem"
+                                                                 IsToggled="IsBlocklisted(goneItem)"
+                                                                 IsToggling="_togglingBlocklistItem == goneItem.Identity.Id"
+                                                                 OnToggle="ToggleBlocklistAsync"/>
+                                        </Icons>
+                                    </MediaDetailTile>
+                                </div>
+                        }
+                            </ItemContent>
+                        </Virtualize>
+                    </VirtualizeGuard>
                     @if (_goneShortfall > 0)
                     {
                         <p class="text-xs text-muted-foreground px-1 pt-1">+@_goneShortfall more the provider could not describe</p>
@@ -260,32 +264,34 @@
             {
                 <div class="mt-4">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
-                    <Virtualize Items="_filteredUnmatchedResults" Context="item" ItemSize="215" OverscanCount="6">
-                        <ItemContent>
-                    @{
-                            <div class="pb-2">
-                                <MediaDetailTile @key="item"
-                                                 Media="item"
-                                                 IsFocused="_focusedResult == item.Key"
-                                                 OnFocusIn="() => _focusedResult = item.Key"
-                                                 OnFocusOut="() => ClearFocus(item)">
-                                    <Icons>
-                                        <BbTooltipProvider>
-                                            <BbTooltip DelayDuration="300">
-                                                <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                                                    <div class="search-result-status-indicator">
-                                                        <LucideIcon Name="circle-alert" Size="24"/>
-                                                    </div>
-                                                </BbTooltipTrigger>
-                                                <BbTooltipContent>Could not be matched in your media provider. This item will not be imported.</BbTooltipContent>
-                                            </BbTooltip>
-                                        </BbTooltipProvider>
-                                    </Icons>
-                                </MediaDetailTile>
-                            </div>
-                    }
-                        </ItemContent>
-                    </Virtualize>
+                    <VirtualizeGuard>
+                        <Virtualize Items="_filteredUnmatchedResults" Context="item" ItemSize="215" OverscanCount="6">
+                            <ItemContent>
+                        @{
+                                <div class="pb-2">
+                                    <MediaDetailTile @key="item"
+                                                     Media="item"
+                                                     IsFocused="_focusedResult == item.Key"
+                                                     OnFocusIn="() => _focusedResult = item.Key"
+                                                     OnFocusOut="() => ClearFocus(item)">
+                                        <Icons>
+                                            <BbTooltipProvider>
+                                                <BbTooltip DelayDuration="300">
+                                                    <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                                        <div class="search-result-status-indicator">
+                                                            <LucideIcon Name="circle-alert" Size="24"/>
+                                                        </div>
+                                                    </BbTooltipTrigger>
+                                                    <BbTooltipContent>Could not be matched in your media provider. This item will not be imported.</BbTooltipContent>
+                                                </BbTooltip>
+                                            </BbTooltipProvider>
+                                        </Icons>
+                                    </MediaDetailTile>
+                                </div>
+                        }
+                            </ItemContent>
+                        </Virtualize>
+                    </VirtualizeGuard>
                 </div>
             }
             @if (IsLoading)
