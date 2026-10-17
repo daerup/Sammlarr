@@ -63,6 +63,7 @@ internal sealed class E2EStack
 		);
 		builder.Services.AddLogging(logging => logging.AddProvider(new CircuitFailureSink(CircuitLogCategory, CircuitFailure, $"stack-{index}", onCircuitFailure)));
 		builder.WaitThroughBusyDocker();
+		builder.RunProjectsOutsideTheIde();
 		builder.UnpinArrPorts();
 		var wiremock = builder.AddContainer("wiremock", "wiremock/wiremock", "latest").WithHttpEndpoint(targetPort: 8080).WithHttpHealthCheck("/__admin/health");
 		var wiremockHttp = wiremock.GetEndpoint("http");

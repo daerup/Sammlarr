@@ -107,6 +107,7 @@ public class StagingSmokeTests
 		);
 		builder.Services.AddLogging(logging => logging.AddFilter("AppHost.Resources", LogLevel.Warning));
 		builder.WaitThroughBusyDocker();
+		builder.RunProjectsOutsideTheIde();
 		foreach (var container in builder.Resources.OfType<ContainerResource>().ToList())
 		{
 			foreach (var name in container.Annotations.OfType<ContainerNameAnnotation>().ToList())
