@@ -23,7 +23,6 @@ body:
       options:
         - Plex watchlist
         - Radarr and Sonarr
-        - Not set up yet
   - type: textarea
     id: logs
     attributes:
