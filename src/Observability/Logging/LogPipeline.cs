@@ -12,6 +12,7 @@ internal static class LogPipeline
 {
 	private const string ConsoleTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {SourceContext} {Message:lj}{NewLine}{Exception}";
 	private static readonly string[] AppLogCategories = ["Sammlarr", "Core", "DB", "API", "UI", "Web", "Shared", "Domain", "Contracts"];
+	private static readonly string[] DroppedTemplates = ["Resilience pipeline execut", "No XML encryptor configured"];
 
 	public static void Configure(LoggerConfiguration logger, IServiceProvider provider, ObservabilityContext context)
 	{
@@ -21,7 +22,7 @@ internal static class LogPipeline
 		logger
 			.MinimumLevel.Warning()
 			.MinimumLevel.Override("Polly", appLevelSwitch)
-			.Filter.ByExcluding(logEvent => logEvent.MessageTemplate.Text.StartsWith("Resilience pipeline execut", StringComparison.Ordinal))
+			.Filter.ByExcluding(logEvent => DroppedTemplates.Any(template => logEvent.MessageTemplate.Text.StartsWith(template, StringComparison.Ordinal)))
 			.Enrich.FromLogContext()
 			.Destructure.With(new UnionDestructuringPolicy())
 			.Destructure.With(new SensitiveDataDestructuringPolicy(SensitiveModel.Build()))

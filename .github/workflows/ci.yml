@@ -188,8 +188,10 @@ jobs:
           for run in 1 2; do
             git clean -xdfq
             dotnet restore src/Web/Web.csproj --locked-mode
-            dotnet publish src/Web/Web.csproj -c Release -a x64 --self-contained false --no-restore -o "$RUNNER_TEMP/publish/$run" \
-              -p:ExcludeStaging=true -p:ContinuousIntegrationBuild=true -p:DebugType=none
+            for arch in x64 arm64; do
+              dotnet publish src/Web/Web.csproj -c Release -a "$arch" --self-contained false --no-restore -o "$RUNNER_TEMP/publish/$run/$arch" \
+                -p:ExcludeStaging=true -p:ContinuousIntegrationBuild=true -p:DebugType=none
+            done
           done
 
       - name: Compare
@@ -229,6 +231,7 @@ jobs:
 
       - uses: ./.github/actions/build-image
         with:
+          platforms: linux/amd64
           tags: sammlarr:scan
           outputs: type=docker
 

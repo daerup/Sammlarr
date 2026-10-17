@@ -5,16 +5,11 @@
   </picture>
 </p>
 <p align="center">
+  <a href="https://github.com/daerup/Sammlarr/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/daerup/Sammlarr"></a>
   <a href="https://github.com/daerup/Sammlarr/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/daerup/Sammlarr/ci.yml?branch=main&label=CI"></a>
   <a href="https://github.com/daerup/Sammlarr/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://img.shields.io/github/actions/workflow/status/daerup/Sammlarr/codeql.yml?branch=main&label=CodeQL"></a>
   <a href="https://github.com/daerup/Sammlarr/actions/workflows/ci.yml"><img alt="Coverage" src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/daerup/Sammlarr/badges/coverage.json"></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/daerup/Sammlarr"><img alt="OpenSSF Scorecard" src="https://img.shields.io/ossf-scorecard/github.com/daerup/Sammlarr?label=OpenSSF%20Scorecard"></a>
-</p>
-<p align="center">
-  <a href="https://github.com/daerup/Sammlarr/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/daerup/Sammlarr"></a>
-  <a href="https://github.com/daerup/Sammlarr/pkgs/container/sammlarr"><img alt="Container image" src="https://img.shields.io/badge/image-ghcr.io%2Fdaerup%2Fsammlarr-blue"></a>
-  <img alt=".NET SDK" src="https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/daerup/Sammlarr/main/global.json&query=$.sdk.version&label=.NET%20SDK">
-  <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 <p align="center">
   Follow movie and show lists from MDBList, TMDB, Trakt, AniList and MyAnimeList, filter them,
@@ -24,7 +19,6 @@
   <a href="#what-it-does">What it does</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#providers">Providers</a> ·
-  <a href="#updating">Updating</a> ·
   <a href="docs/faq.md">FAQ</a>
 </p>
 
@@ -68,8 +62,8 @@ it syncs to your Plex watchlist or to Radarr and Sonarr.
 
 ## Quick start
 
-Sammlarr runs as one container, `ghcr.io/daerup/sammlarr`, built for `linux/amd64` and tagged `:latest` and with each release's version (`:0.1.0`). You need
-Docker with Compose.
+Sammlarr runs as one container, `ghcr.io/daerup/sammlarr`, tagged `:latest` and with each release's version (`:0.1.0`), for
+`linux/amd64` and `linux/arm64`. You need Docker with Compose.
 
 1. Download the example [`compose.yaml`](compose.yaml) into a folder for Sammlarr and set its `TZ` to your time zone, the one schedules and times in the app
    use:
@@ -79,7 +73,8 @@ Docker with Compose.
    curl -LO https://raw.githubusercontent.com/daerup/Sammlarr/main/compose.yaml
    ```
 
-   It runs the latest image on port 6769 and keeps the data in the `sammlarr-data` volume.
+   It runs the latest image on port 6769 and keeps the data in the `sammlarr-data` volume: the database and `dp-keys`, the key ring for the stored API
+   keys. Back up the whole volume, and back it up before an update, since Sammlarr migrates its database on start and an older version can't read it after.
 
 2. Start it and read the setup code from the log:
 
@@ -113,29 +108,3 @@ Wikidata, TVmaze, the IMDb datasets and anime-lists fill in ids, details and IMD
 the [FAQ](docs/faq.md#what-do-the-services-allow-for-free).
 
 Notifications (a webhook or Pushover, per person) are set up in Settings › Notifications.
-
-## Updating
-
-`:latest` moves to every new release. To update:
-
-```sh
-docker compose pull
-docker compose up -d
-```
-
-To choose when you upgrade, pin a version in the `image:` line instead, `ghcr.io/daerup/sammlarr:0.1.0`, and change it when you are ready. Auto-updaters like
-Watchtower follow `:latest` too. Settings › About shows a badge, and the version in the footer a dot, once a newer release is out.
-
-Read the release notes first. Breaking changes are listed at the top, under BREAKING CHANGES. Sammlarr updates its database when it starts, so going back to an
-older version needs a copy of the data from before the update (see [backups](#backups)).
-
-## Backups
-
-The `sammlarr-data` volume holds the database and `dp-keys`, the key ring that encrypts the stored API keys and sign-ins. Keep the two together: stop the
-container and copy the whole volume, here into `sammlarr-data.tgz` next to the compose file:
-
-```sh
-docker compose stop
-docker run --rm -v sammlarr-data:/data:ro -v "$PWD":/backup busybox tar czf /backup/sammlarr-data.tgz -C /data .
-docker compose start
-```
