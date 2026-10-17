@@ -19,7 +19,6 @@
   <a href="#what-it-does">What it does</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#providers">Providers</a> ·
-  <a href="#updating">Updating</a> ·
   <a href="docs/faq.md">FAQ</a>
 </p>
 
@@ -75,7 +74,8 @@ Docker with Compose.
    curl -LO https://raw.githubusercontent.com/daerup/Sammlarr/main/compose.yaml
    ```
 
-   It runs the latest image on port 6769 and keeps the data in the `sammlarr-data` volume.
+   It runs the latest image on port 6769 and keeps the data in the `sammlarr-data` volume: the database and `dp-keys`, the key ring for the stored API
+   keys. Back up the whole volume, and back it up before an update, since Sammlarr migrates its database on start and an older version can't read it after.
 
 2. Start it and read the setup code from the log:
 
@@ -109,29 +109,3 @@ Wikidata, TVmaze, the IMDb datasets and anime-lists fill in ids, details and IMD
 the [FAQ](docs/faq.md#what-do-the-services-allow-for-free).
 
 Notifications (a webhook or Pushover, per person) are set up in Settings › Notifications.
-
-## Updating
-
-`:latest` moves to every new release. To update:
-
-```sh
-docker compose pull
-docker compose up -d
-```
-
-To choose when you upgrade, pin a version in the `image:` line instead, `ghcr.io/daerup/sammlarr:0.1.0`, and change it when you are ready. Auto-updaters like
-Watchtower follow `:latest` too. Settings › About shows a badge, and the version in the footer a dot, once a newer release is out.
-
-Read the release notes first. Breaking changes are listed at the top, under BREAKING CHANGES. Sammlarr updates its database when it starts, so going back to an
-older version needs a copy of the data from before the update (see [backups](#backups)).
-
-## Backups
-
-The `sammlarr-data` volume holds the database and `dp-keys`, the key ring that encrypts the stored API keys and sign-ins. Keep the two together: stop the
-container and copy the whole volume, here into `sammlarr-data.tgz` next to the compose file:
-
-```sh
-docker compose stop
-docker run --rm -v sammlarr-data:/data:ro -v "$PWD":/backup busybox tar czf /backup/sammlarr-data.tgz -C /data .
-docker compose start
-```
