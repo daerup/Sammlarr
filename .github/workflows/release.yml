@@ -195,15 +195,19 @@ jobs:
     runs-on: ubuntu-26.04
     permissions:
       contents: write
+      packages: read
     steps:
-      - name: Note the matching rebuild on the release
+      - name: Note the image and its matching rebuild on the release
         env:
           DIGEST: ${{ needs.image.outputs.digest }}
           BUILDKIT: ${{ needs.rebuild.outputs.buildkit }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
+          image="ghcr.io/daerup/sammlarr:${GITHUB_REF_NAME#v}"
+          page=$(gh api --paginate "users/$GITHUB_REPOSITORY_OWNER/packages/container/sammlarr/versions" --jq ".[] | select(.name == \"$DIGEST\") | .html_url" || true)
+          if [ -n "$page" ]; then image="[$image]($page)"; else image="\`$image\`"; echo "::warning::no package version found for $DIGEST"; fi
           notes=$(gh release view "$GITHUB_REF_NAME" --json body --jq .body)
           gh release edit "$GITHUB_REF_NAME" --notes "$notes
 
-          Reproduced on a fresh runner without cache: \`$DIGEST\` matches (BuildKit $BUILDKIT)."
+          Image: $image \`$DIGEST\`, reproduced on a fresh runner without cache (BuildKit $BUILDKIT)."
