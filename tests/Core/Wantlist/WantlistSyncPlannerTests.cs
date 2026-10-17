@@ -138,6 +138,20 @@ public class WantlistSyncPlannerTests
 	}
 
 	[Test]
+	public async Task PlanAsync_WhenTheViewerLeavesMidRead_StopsWithoutWarning()
+	{
+		using var leaving = new CancellationTokenSource();
+		var sink = IMediaSink.Mock();
+		sink.GetAsync(Any()).Callback(leaving.Cancel).Throws(new TaskCanceledException());
+		var logger = ILogger<WantlistSyncPlanner>.Mock();
+
+		await Assert
+			.That(async () => await WantlistStubs.Planner(sink, WantlistStubs.EmptyOutbox(), logger.Object).PlanAsync(leaving.Token))
+			.Throws<OperationCanceledException>();
+		await Assert.That(Mock.Invocations(logger).Where(call => call.Arguments[0] is LogLevel.Warning)).IsEmpty();
+	}
+
+	[Test]
 	public async Task PlanAsync_WhenTheSinkCannotBeRead_WarnsWhy()
 	{
 		var sink = IMediaSink.Mock();

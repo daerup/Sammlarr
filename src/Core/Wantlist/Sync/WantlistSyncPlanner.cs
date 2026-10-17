@@ -76,7 +76,7 @@ internal sealed class WantlistSyncPlanner(
 		{
 			return Success.Of(await sink.GetAsync(cancellationToken));
 		}
-		catch (Exception ex)
+		catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
 		{
 			return Error.From(ex);
 		}
