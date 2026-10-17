@@ -16,6 +16,11 @@ internal static class StackBoot
 		builder.Services.Configure<ResourceNotificationServiceOptions>(options => options.DefaultWaitBehavior = WaitBehavior.WaitOnResourceUnavailable);
 	}
 
+	internal static void RunProjectsOutsideTheIde(this IDistributedApplicationTestingBuilder builder)
+	{
+		builder.Configuration["DEBUG_SESSION_PORT"] = "";
+	}
+
 	internal static IResourceBuilder<ProjectResource> WithoutTelemetryExport(this IResourceBuilder<ProjectResource> web)
 	{
 		return web.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", "");
