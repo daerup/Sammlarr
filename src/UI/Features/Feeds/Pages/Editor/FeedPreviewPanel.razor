@@ -143,7 +143,7 @@
             {
                 <div class="preview-main-results">
                 <VirtualizeGuard>
-                    <Virtualize Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
+                    <Virtualize @key="_filteredResults.Count" Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
                         <ItemContent>
                         @{
                         var item = result.Item;
@@ -225,7 +225,7 @@
                 <div class="mt-4 preview-gone-results">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">@PreviewCopy.GoneHeading</p>
                     <VirtualizeGuard>
-                        <Virtualize Items="_filteredGoneResults" Context="gone" ItemSize="215" OverscanCount="6">
+                        <Virtualize @key="_filteredGoneResults.Count" Items="_filteredGoneResults" Context="gone" ItemSize="215" OverscanCount="6">
                             <ItemContent>
                         @{
                                 var goneItem = gone.Media;
@@ -265,7 +265,7 @@
                 <div class="mt-4">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
                     <VirtualizeGuard>
-                        <Virtualize Items="_filteredUnmatchedResults" Context="item" ItemSize="215" OverscanCount="6">
+                        <Virtualize @key="_filteredUnmatchedResults.Count" Items="_filteredUnmatchedResults" Context="item" ItemSize="215" OverscanCount="6">
                             <ItemContent>
                         @{
                                 <div class="pb-2">
