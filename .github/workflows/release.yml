@@ -70,6 +70,8 @@ jobs:
 
       - name: Image SBOM
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_PLATFORM: linux/amd64
         with:
           version: v0.74.0
           image-ref: ghcr.io/daerup/sammlarr@${{ steps.build.outputs.digest }}
@@ -113,8 +115,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd "$RUNNER_TEMP"
-          skopeo copy -q --retry-times 3 --src-creds "$GITHUB_ACTOR:$GH_TOKEN" "docker://ghcr.io/daerup/sammlarr@$PUSHED" dir:pushed-layout
+          skopeo inspect --raw --retry-times 3 --creds "$GITHUB_ACTOR:$GH_TOKEN" "docker://ghcr.io/daerup/sammlarr@$PUSHED" > pushed-index.json
           rebuilt=$(jq -r '.manifests[0].digest' rebuilt-layout/index.json)
+          rebuilt_index="rebuilt-layout/blobs/sha256/${rebuilt#sha256:}"
           unpack() {
             mkdir -p "$3"
             cp "$1" "$3/manifest.json"
@@ -124,10 +127,20 @@ jobs:
             done
             (cd "$3/app" && find . -type f -exec sha256sum {} + | sort -k2) > "$3.txt"
           }
-          unpack pushed-layout/manifest.json pushed-layout pushed
-          unpack "rebuilt-layout/blobs/sha256/${rebuilt#sha256:}" rebuilt-layout/blobs/sha256 rebuilt
-          echo "pushed $PUSHED, rebuilt $rebuilt, $(wc -l < pushed.txt) files in /app"
-          diff pushed.txt rebuilt.txt
+          platform='.manifests[] | select(.platform.architecture == $arch) | .digest'
+          mkdir -p pushed-layout pushed rebuilt
+          cp pushed-index.json pushed/index.json
+          cp "$rebuilt_index" rebuilt/index.json
+          for arch in $(jq -r '.manifests[].platform.architecture' pushed-index.json); do
+            pushed_manifest=$(jq -r --arg arch "$arch" "$platform" pushed-index.json)
+            rebuilt_manifest=$(jq -r --arg arch "$arch" "$platform" "$rebuilt_index")
+            skopeo copy -q --retry-times 3 --src-creds "$GITHUB_ACTOR:$GH_TOKEN" "docker://ghcr.io/daerup/sammlarr@$pushed_manifest" "dir:pushed-layout/$arch"
+            unpack "pushed-layout/$arch/manifest.json" "pushed-layout/$arch" "pushed/$arch"
+            unpack "rebuilt-layout/blobs/sha256/${rebuilt_manifest#sha256:}" rebuilt-layout/blobs/sha256 "rebuilt/$arch"
+            echo "$arch: pushed $pushed_manifest, rebuilt $rebuilt_manifest, $(wc -l < "pushed/$arch.txt") files in /app"
+            diff "pushed/$arch.txt" "rebuilt/$arch.txt"
+          done
+          echo "pushed $PUSHED, rebuilt $rebuilt"
           test "$rebuilt" = "$PUSHED" || { echo "::error::rebuilt $rebuilt, pushed $PUSHED"; exit 1; }
 
       - name: Diffoscope
@@ -143,8 +156,10 @@ jobs:
           name: rebuild
           path: |
             ${{ runner.temp }}/diffoscope.html
-            ${{ runner.temp }}/pushed.txt
-            ${{ runner.temp }}/rebuilt.txt
+            ${{ runner.temp }}/pushed/*.txt
+            ${{ runner.temp }}/rebuilt/*.txt
+            ${{ runner.temp }}/pushed/index.json
+            ${{ runner.temp }}/rebuilt/index.json
           retention-days: 7
 
   latest:

@@ -67,7 +67,8 @@ it syncs to your Plex watchlist or to Radarr and Sonarr.
 
 ## Quick start
 
-Sammlarr runs as one container, `ghcr.io/daerup/sammlarr`, built for `linux/amd64` and tagged `:latest` and with each release's version (`:0.1.0`). You need
+Sammlarr runs as one container, `ghcr.io/daerup/sammlarr`, tagged `:latest` and with each release's version (`:0.1.0`). Releases after 0.1.0 run on
+`linux/amd64` and `linux/arm64`, 0.1.0 on `linux/amd64` only. You need
 Docker with Compose.
 
 1. Download the example [`compose.yaml`](compose.yaml) into a folder for Sammlarr and set its `TZ` to your time zone, the one schedules and times in the app

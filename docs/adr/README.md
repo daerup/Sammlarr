@@ -40,3 +40,4 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0021 | [Ship one hand-written compose file](0021-ship-one-hand-written-compose-file.md) | accepted | 2026-10-16 |
 | 0022 | [Rate-limit requests in the app](0022-rate-limit-requests-in-the-app.md) | accepted | 2026-10-16 |
 | 0023 | [Push an unsigned image by version and move latest last](0023-push-an-unsigned-image-by-version-and-move-latest-last.md) | accepted | 2026-10-17 |
+| 0024 | [Build the image for amd64 and arm64 on one runner](0024-build-the-image-for-amd64-and-arm64-on-one-runner.md) | accepted | 2026-10-17 |
