@@ -65,7 +65,7 @@ and an indexer, and a webhook catcher (`src/AppHost/Staging`). Guide: [Testing â
 ```mermaid
 flowchart LR
   tag["tag vX.Y.Z"] --> build["build src/Web/Dockerfile"]
-  build --> ghcr[("GHCR<br/>:X.Y.Z, then :latest")]
+  build --> ghcr[("GHCR<br/>by digest, then :X.Y.Z and :latest")]
   compose["compose.yaml<br/>from the repo"]
   subgraph server["Self-hosted machine"]
     web["sammlarr :6769"] --> vol[("/data<br/>sammlarr.db, dp-keys")]
@@ -74,11 +74,14 @@ flowchart LR
   ghcr -.->|pulls| web
 ```
 
-release-please tags `vX.Y.Z` when its release PR merges. `.github/workflows/release.yml` builds the image for
-`linux/amd64` and `linux/arm64` on one runner with Docker's actions and pushes the index over both to GHCR as `:X.Y.Z`
+release-please tags `vX.Y.Z` and creates its release as a draft when its release PR merges.
+`.github/workflows/release.yml` builds the image for `linux/amd64` and `linux/arm64` on one runner with Docker's actions
+and pushes the index over both to GHCR by digest
 ([ADR 0023](../../adr/0023-push-an-unsigned-image-by-version-and-move-latest-last.md),
-[ADR 0024](../../adr/0024-build-the-image-for-amd64-and-arm64-on-one-runner.md)); `:latest` moves to it only once the
-rebuild matched and the provenance verified. `docker pull` picks the image for the machine's platform. The Release PR's Trivy scan builds
+[ADR 0024](../../adr/0024-build-the-image-for-amd64-and-arm64-on-one-runner.md)). Only once the rebuild matched and the
+provenance verified does the `publish` job tag it `:X.Y.Z` and `:latest` and publish the release; a failed release stays
+a draft ([ADR 0026](../../adr/0026-publish-a-release-only-after-its-checks-pass.md)). `docker pull` picks the image for
+the machine's platform. The Release PR's Trivy scan builds
 `linux/amd64` only. The release carries no compose file
 ([ADR 0021](../../adr/0021-ship-one-hand-written-compose-file.md)). The README's Quick start downloads the repo's
 `compose.yaml`, which runs `:latest` on port 6769 with the named volume `sammlarr-data` at `/data` and

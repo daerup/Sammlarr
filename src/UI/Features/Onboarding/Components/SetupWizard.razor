@@ -21,7 +21,7 @@
                 <BbWizardStep Title="Account" Icon="@Icon(AccountStep)">
                     @if (NeedsAdmin)
                     {
-                        @Head("Create the admin account", "Nobody has signed in yet. Enter the setup code from the server log, then choose how people sign in to this Sammlarr: with Plex, or with Sammlarr accounts you create. Whoever does this becomes the admin.")
+                        @Head("Create the admin account", "Enter the setup code and choose how people sign in. You become the admin.")
                         <AdminForm Error="@Error" Picked="SignInWith"/>
                     }
                     else

@@ -28,7 +28,7 @@ internal sealed class OnboardingService(
 {
 	private static readonly Error Taken = Error.From("This Sammlarr already has an admin. Sign in instead.");
 
-	private static readonly Error WrongCode = Error.From("That is not the setup code. Copy it from the server log.");
+	private static readonly Error WrongCode = Error.From("That is not the setup code.");
 
 	public async Task<bool> NeedsAdminAsync(CancellationToken cancellationToken = default)
 	{

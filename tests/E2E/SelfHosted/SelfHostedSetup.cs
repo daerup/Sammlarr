@@ -18,7 +18,7 @@ internal static class SelfHostedSetup
 	internal static async Task CreateAdminAsync(IPage page, SelfHostedStack stack)
 	{
 		await page.VisitAsync(Routes.Setup);
-		await page.Labelled("Setup code").EnterAsync(await stack.SetupCodeAsync());
+		await PasteSetupCodeAsync(page, await stack.SetupCodeAsync());
 		await page.Locator("#signin-local").ClickAsync();
 		await page.Labelled("Username").EnterAsync(AdminName);
 		await page.Labelled("Password").EnterAsync(AdminPassword);
@@ -26,6 +26,16 @@ internal static class SelfHostedSetup
 		await page.Button("Create admin account").ClickAsync();
 		await Expect(page.Heading("Where your wantlist syncs")).ToBeVisibleAsync(Wait.Settle);
 		await page.WaitForCircuitAsync();
+	}
+
+	private static async Task PasteSetupCodeAsync(IPage page, string code)
+	{
+		await page.Labelled("Setup code")
+			.First.EvaluateAsync(
+				"(box, code) => { const data = new DataTransfer(); data.setData('text', code); box.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true })); }",
+				code
+			);
+		await Expect(page.Locator("input[name=code]")).ToHaveValueAsync(code.Replace("-", ""));
 	}
 
 	private static async Task SwitchToRadarrAndSonarrAsync(IPage page, SelfHostedStack stack)

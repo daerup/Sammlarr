@@ -57,9 +57,8 @@ jobs:
         uses: ./.github/actions/build-image
         with:
           version: ${{ steps.version.outputs.version }}
-          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,push=true,oci-mediatypes=true,rewrite-timestamp=true
+          outputs: type=image,name=ghcr.io/daerup/sammlarr,push-by-digest=true,push=true,oci-mediatypes=true,rewrite-timestamp=true
 
       - name: Provenance
         id: provenance
@@ -177,10 +176,11 @@ jobs:
             ${{ runner.temp }}/rebuilt/index.json
           retention-days: 7
 
-  latest:
+  publish:
     needs: [image, notes]
     runs-on: ubuntu-26.04
     permissions:
+      contents: write
       packages: write
     steps:
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
@@ -189,10 +189,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Move latest to the release
+      - name: Tag the release and move latest to it
         env:
           DIGEST: ${{ needs.image.outputs.digest }}
-        run: docker buildx imagetools create --prefer-index=false --tag ghcr.io/daerup/sammlarr:latest "ghcr.io/daerup/sammlarr@$DIGEST"
+          VERSION: ${{ needs.image.outputs.version }}
+        run: docker buildx imagetools create --prefer-index=false --tag "ghcr.io/daerup/sammlarr:$VERSION" --tag ghcr.io/daerup/sammlarr:latest "ghcr.io/daerup/sammlarr@$DIGEST"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release edit "$GITHUB_REF_NAME" --draft=false
 
   notes:
     needs: [image, rebuild]
@@ -224,9 +231,9 @@ jobs:
           image="\`ghcr.io/daerup/sammlarr:$VERSION\`"
           page=$(gh api --paginate "users/$GITHUB_REPOSITORY_OWNER/packages/container/sammlarr/versions" --jq ".[] | select(.name == \"$DIGEST\") | .html_url" || true)
           if [ -n "$page" ]; then image="[$image]($page)"; else echo "::warning::no package version found for $DIGEST"; fi
-          previous=$(gh release list --exclude-drafts --limit 2 --json tagName --jq '.[1].tagName // empty')
+          previous=$(gh release list --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName // empty')
           previous=${previous#v}
-          kept="so \`:latest\` stays on ${previous:-the previous release}"
+          kept="so the release stays a draft and \`:latest\` on ${previous:-the previous release}"
           ok=true
           if [ "$REBUILT" = "$DIGEST" ]; then
             reproducible="✅ **Reproducible**: rebuilt without cache to the same digest, with BuildKit $BUILDKIT, \`VERSION=$VERSION\` and \`SOURCE_DATE_EPOCH=$EPOCH\` ([how to repeat it]($security))"
@@ -250,4 +257,4 @@ jobs:
 
           * $reproducible
           * $attested"
-          $ok || { echo "::error::a release check failed, so :latest stays where it is"; exit 1; }
+          $ok || { echo "::error::a release check failed, so the release stays a draft"; exit 1; }

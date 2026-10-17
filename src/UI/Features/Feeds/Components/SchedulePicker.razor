@@ -213,7 +213,7 @@
             {
                 return null;
             }
-            try { return ExpressionDescriptor.GetDescription(expression, new Options { Use24HourTimeFormat = true }); }
+            try { return ExpressionDescriptor.GetDescription(expression, new Options { Locale = "en", Use24HourTimeFormat = true }); }
             catch { return null; }
         }
     }

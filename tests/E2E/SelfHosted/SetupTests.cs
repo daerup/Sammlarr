@@ -20,6 +20,21 @@ public class SetupTests
 	}
 
 	[Test]
+	public async Task SetupCode_PastedWhereTheBrowserHidesThePasteEvent_FillsEveryBox()
+	{
+		var page = await SelfHostedApp.OpenPageAsync();
+		await page.VisitAsync(Routes.Setup);
+		await page.WaitForCircuitAsync();
+
+		await page.Labelled("Setup code")
+			.First.EvaluateAsync(
+				"box => { box.focus(); box.dispatchEvent(new InputEvent('beforeinput', { inputType: 'insertFromPaste', bubbles: true, cancelable: true })); document.execCommand('insertText', false, 'AHAM-B6RZ'); }"
+			);
+
+		await Expect(page.Locator("input[name=code]")).ToHaveValueAsync("AHAMB6RZ");
+	}
+
+	[Test]
 	public async Task Admin_CreatedWithTheLoggedSetupCode_IsASammlarrAccountSentBackToSetupUntilItIsFinished()
 	{
 		var stack = await SelfHostedApp.StackAsync();

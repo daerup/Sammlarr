@@ -1,6 +1,7 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Providers;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Options;
 using UI.Features.Onboarding.Components;
@@ -31,6 +32,31 @@ public class AdminFormTests : BunitContext
 		await Assert.That(cut.Find("button[type=submit]").HasAttribute("disabled")).IsTrue();
 		await Assert.That(cut.Find("[role=radiogroup]").GetAttribute("aria-describedby")).IsEqualTo("signin-final");
 		await Assert.That(cut.FindAll("#signin-final")).HasSingleItem();
+	}
+
+	[Test]
+	public async Task SetupCode_AsksForEightLettersOrDigitsAndSaysOnceWhereToFindThem()
+	{
+		var cut = Render<AdminForm>();
+
+		var boxes = cut.FindAll("[data-setup-code] [data-otp] > input[aria-label='Setup code']");
+		await Assert.That(boxes).Count().IsEqualTo(8);
+		await Assert.That(boxes.Select(box => box.GetAttribute("inputmode")).OfType<string>().Distinct()).IsEquivalentTo(["text"]);
+		await Assert.That(cut.Find("[data-setup-code]").TextContent).Contains("Copy it from the server log");
+		await Assert.That(cut.Markup.Split("server log")).Count().IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task SetupCode_TypedIntoTheBoxes_PostsAsOneCode()
+	{
+		var cut = Render<AdminForm>();
+
+		foreach (var (character, slot) in "AHAMB6RZ".Select((character, slot) => (character, slot)))
+		{
+			await cut.FindAll("[data-setup-code] input[aria-label='Setup code']")[slot].InputAsync(new ChangeEventArgs { Value = character.ToString() });
+		}
+
+		await Assert.That(cut.Find("input[type=hidden][name=code]").GetAttribute("value")).IsEqualTo("AHAMB6RZ");
 	}
 
 	[Test]
