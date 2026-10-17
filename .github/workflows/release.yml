@@ -20,6 +20,8 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
+      attestations: write
     outputs:
       digest: ${{ steps.build.outputs.digest }}
       version: ${{ steps.version.outputs.version }}
@@ -57,6 +59,13 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,push=true,oci-mediatypes=true,rewrite-timestamp=true
 
+      - name: Provenance
+        id: provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ghcr.io/daerup/sammlarr
+          subject-digest: ${{ steps.build.outputs.digest }}
+
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
@@ -78,15 +87,17 @@ jobs:
           format: cyclonedx
           output: sbom/sammlarr-image.cdx.json
 
-      - name: SBOMs and notices for the release
+      - name: SBOMs, provenance and notices for the release
         env:
           IMAGE: ghcr.io/daerup/sammlarr@${{ steps.build.outputs.digest }}
+          BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           container=$(docker create "$IMAGE")
           docker cp "$container:/app/THIRD-PARTY-NOTICES.txt" sbom/
           docker rm "$container"
-          gh release upload "$GITHUB_REF_NAME" sbom/sammlarr-app.cdx.json sbom/sammlarr-image.cdx.json sbom/THIRD-PARTY-NOTICES.txt --clobber
+          cp "$BUNDLE" sbom/sammlarr-image.intoto.jsonl
+          gh release upload "$GITHUB_REF_NAME" sbom/sammlarr-app.cdx.json sbom/sammlarr-image.cdx.json sbom/sammlarr-image.intoto.jsonl sbom/THIRD-PARTY-NOTICES.txt --clobber
 
   rebuild:
     needs: image

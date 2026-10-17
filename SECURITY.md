@@ -9,7 +9,10 @@ Say what you found, which version it affects (Settings › About shows it) and h
 
 ## Verifying what you run
 
-Each release rebuilds its tag on a fresh runner without cache, and its notes name the digest the rebuild matched and
+Each release attests its image's build provenance:
+`gh attestation verify oci://ghcr.io/daerup/sammlarr:X.Y.Z --repo daerup/Sammlarr`.
+
+Each release also rebuilds its tag on a fresh runner without cache, and its notes name the digest the rebuild matched and
 the BuildKit version that built both. To repeat it, build the tag the way the `rebuild` job in
 `.github/workflows/release.yml` does: `src/Web/Dockerfile` for `linux/amd64,linux/arm64` on the BuildKit image pinned
 in `.github/actions/build-image`, with the build arguments `VERSION` and `SOURCE_DATE_EPOCH` (the tag's commit time),

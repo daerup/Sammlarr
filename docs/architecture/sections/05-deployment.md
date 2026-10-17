@@ -57,7 +57,7 @@ and an indexer, and a webhook catcher (`src/AppHost/Staging`). Guide: [Testing â
 | Image property | Today |
 |---|---|
 | Reproducible | yes: base images pinned by digest, `SOURCE_DATE_EPOCH` and `rewrite-timestamp` (see Build), and one BuildKit for every image build, pinned by version and digest in `.github/actions/build-image`; each release rebuilds its tag on a fresh runner and fails when the index digest or either platform's `/app` differs, and a match adds the digest and the BuildKit version to the release notes (`release.yml`, jobs `rebuild` and `reproduced`) |
-| Signed, attested | no: GHCR has no referrers API, so each signature or attestation would show as one more tagged version beside the image; BuildKit's own provenance stays off too (`provenance: false` in `.github/actions/build-image`), so the image's index holds only the two platform images a rebuild matches |
+| Signed, attested | attested, not signed: the `image` job attests the index's build provenance with `actions/attest` and keeps it out of GHCR, which has no referrers API and would show it as one more tagged version; it is on the repository's attestations page and on the release as `sammlarr-image.intoto.jsonl` ([ADR 0025](../../adr/0025-attest-the-image-provenance-outside-the-registry.md)). BuildKit's own provenance stays off (`provenance: false` in `.github/actions/build-image`), so the image's index holds only the two platform images a rebuild matches |
 | SBOM | on each release: `sammlarr-app.cdx.json` (CycloneDX, the app's packages) and `sammlarr-image.cdx.json` (Trivy, read from the amd64 image; the arm64 image holds the same OS packages at the same versions), beside `THIRD-PARTY-NOTICES.txt` |
 
 ## Release

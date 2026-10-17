@@ -39,5 +39,5 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0020 | [Move local accounts onto ASP.NET Core Identity](0020-move-local-accounts-onto-asp-net-core-identity.md) | accepted, limits per address superseded by [0022](0022-rate-limit-requests-in-the-app.md) | 2026-10-16 |
 | 0021 | [Ship one hand-written compose file](0021-ship-one-hand-written-compose-file.md) | accepted | 2026-10-16 |
 | 0022 | [Rate-limit requests in the app](0022-rate-limit-requests-in-the-app.md) | accepted | 2026-10-16 |
-| 0023 | [Push an unsigned image by version and move latest last](0023-push-an-unsigned-image-by-version-and-move-latest-last.md) | accepted | 2026-10-17 |
+| 0023 | [Push an unsigned image by version and move latest last](0023-push-an-unsigned-image-by-version-and-move-latest-last.md) | accepted, attestation superseded by [0025](0025-attest-the-image-provenance-outside-the-registry.md) | 2026-10-17 |
 | 0024 | [Build the image for amd64 and arm64 on one runner](0024-build-the-image-for-amd64-and-arm64-on-one-runner.md) | accepted | 2026-10-17 |
