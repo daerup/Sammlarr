@@ -3,19 +3,19 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/17/2026 - 09:34:58 |
+| Generated on: | 10/17/2026 - 15:01:32 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
-| Classes: | 1514 |
-| Files: | 1068 |
-| **Line coverage:** | 85.9% (39407 of 45854) |
-| Covered lines: | 39407 |
-| Uncovered lines: | 6447 |
-| Coverable lines: | 45854 |
-| Total lines: | 67966 |
-| **Branch coverage:** | 78% (14743 of 18901) |
-| Covered branches: | 14743 |
-| Total branches: | 18901 |
+| Classes: | 1515 |
+| Files: | 1069 |
+| **Line coverage:** | 85.9% (39422 of 45870) |
+| Covered lines: | 39422 |
+| Uncovered lines: | 6448 |
+| Coverable lines: | 45870 |
+| Total lines: | 68006 |
+| **Branch coverage:** | 78% (14745 of 18903) |
+| Covered branches: | 14745 |
+| Total branches: | 18903 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
 </details>
@@ -577,7 +577,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**95.8%**|**85%**|
+|**DB**|**95.8%**|**84.8%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -648,7 +648,7 @@
 |DB.Data.Identity.IdentityDataModule|100%|100%|
 |DB.Data.Identity.IdentityExtensions|91.3%|83.3%|
 |DB.Data.Identity.IdentityExtensions<T>|91.3%|83.3%|
-|DB.Data.Identity.LocalAccountRepository|100%|96%|
+|DB.Data.Identity.LocalAccountRepository|100%|94%|
 |DB.Data.Identity.Members|100%||
 |DB.Data.Identity.UserRepository|99.3%|96.4%|
 |DB.Data.Identity.UserRepository<T>|99.3%|96.4%|
@@ -684,7 +684,7 @@
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
 |DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
-|DB.Data.Notifications.NotificationTargetRepository|96.4%|70.8%|
+|DB.Data.Notifications.NotificationTargetRepository|96.4%|66.6%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
 |DB.Data.Ratings.RatingDefaultConfiguration|100%|100%|
@@ -1187,7 +1187,7 @@
 |UI.Features.Home.Components.HomeSkeleton|0%|0%|
 |UI.Features.Home.Components.LibrarySourcesPanel|95.1%|95%|
 |UI.Features.Home.Components.LibraryView|100%|100%|
-|UI.Features.Home.Components.PosterTrack|66.6%|64.2%|
+|UI.Features.Home.Components.PosterTrack|68%|64.2%|
 |UI.Features.Home.Components.SourceShare|100%||
 |UI.Features.Home.Components.UpNextPanel|91.6%|83.3%|
 |UI.Features.Home.Components.UpNextRow|100%|100%|
@@ -1445,8 +1445,9 @@
 |UI.Shared.Common.HoverButton|100%|85.7%|
 |UI.Shared.Common.KeyboardShortcut|86.2%|41.6%|
 |UI.Shared.Common.ListSearch|33.3%|25%|
-|UI.Shared.Common.PaginationControls|59.3%|55.8%|
+|UI.Shared.Common.PaginationControls|61.1%|55.8%|
 |UI.Shared.Common.SensitiveInput|83.3%|100%|
+|UI.Shared.Common.VirtualizeGuard|87.5%|100%|
 |UI.Shared.Filters.FilterStrip|66.6%|50%|
 |UI.Shared.Filters.ListFilter|82.6%|60%|
 |UI.Shared.Filters.ListFilter<T>|82.6%|60%|
