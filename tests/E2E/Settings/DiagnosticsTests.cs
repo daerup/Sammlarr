@@ -1,3 +1,4 @@
+using E2E.Tests.Feeds;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -6,8 +7,6 @@ namespace E2E.Tests.Settings;
 public class DiagnosticsTests
 {
 	private const string FilterInput = "input[placeholder='Filter by message, category, or trace id…']";
-
-	private const string Waiting = "Waiting for log entries…";
 
 	[Test]
 	public async Task Filter_WhenNoMatch_ShowsEmptyMessage()
@@ -36,12 +35,17 @@ public class DiagnosticsTests
 
 	private static async Task CaptureEntriesAsync(IPage page)
 	{
+		var unknownList = $"e2e/diagnostics-{Guid.NewGuid():N}";
+		await using var stub = await E2EApp.StubAsync($"/lists/{unknownList}/items", 404, "{}");
 		await SettingsPage.VisitSectionAsync(page, "diagnostics");
 		await page.Button("Start").ClickAsync();
 
-		await E2EApp.AdminAt(Routes.Feeds);
+		var editor = await E2EApp.AdminAt(Routes.CreateFeed);
+		await FeedEditor.SelectMdblistAsync(editor);
+		await FeedEditor.FillAsync(editor, "#list-identifier", unknownList);
+		await FeedEditor.TestAsync(editor);
 
-		await Expect(page.Text(Waiting)).ToBeHiddenAsync(Wait.Settle);
+		await Expect(page.GetByText(unknownList)).ToBeVisibleAsync(Wait.Preview);
 	}
 
 	private static async Task StopAsync(IPage page)
