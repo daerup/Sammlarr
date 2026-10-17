@@ -45,8 +45,9 @@ Three partners sit outside `RemoteService`:
 
 - **Notification targets**: a webhook URL or Pushover account each user sets up. Sammlarr sends a templated message per
   event.
-- **GitHub releases**: the latest release of `Sammlarr:Release:GitHubRepo`, asked by a release build at most every 12
-  hours, for the update notice in the footer and Settings › About.
+- **GitHub releases**: the latest release of `Sammlarr:Release:GitHubRepo`, asked by a release build each time
+  Settings › About opens and otherwise at most every `Sammlarr:Release:CheckInterval` (30 minutes by default), for the
+  update notice in the footer and Settings › About.
 - **Image hosts**: the browser loads artwork straight from TMDB, Plex, TheTVDB and the other services' hosts. Sammlarr
   only picks the size (`IArtworkResizer` in `src/API/Tmdb`, `src/API/Plex`, `src/API/Tvdb`). The one picture the server fetches
   itself is a person's profile picture, read once per URL to paint their avatar (`src/API/Pictures`).

@@ -30,11 +30,11 @@ internal static class SelfHostedSetup
 
 	private static async Task PasteSetupCodeAsync(IPage page, string code)
 	{
-		await page.Labelled("Setup code")
-			.First.EvaluateAsync(
-				"(box, code) => { const data = new DataTransfer(); data.setData('text', code); box.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true })); }",
-				code
-			);
+		await page.WaitForFunctionAsync(
+			"code => { const data = new DataTransfer(); data.setData('text', code); return !document.querySelector(\"input[aria-label='Setup code']\").dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true })); }",
+			code,
+			new PageWaitForFunctionOptions { Timeout = Wait.Settle, PollingInterval = 250 }
+		);
 		await Expect(page.Locator("input[name=code]")).ToHaveValueAsync(code.Replace("-", ""));
 	}
 

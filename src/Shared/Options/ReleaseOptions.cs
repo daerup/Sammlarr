@@ -6,6 +6,8 @@ public record ReleaseOptions : IOptionsSection, IProviderHttpOptions
 
 	public string ApiUrl { get; set; } = "https://api.github.com/";
 
+	public TimeSpan CheckInterval { get; set; } = TimeSpan.FromMinutes(30);
+
 	public ProviderHttpOptions Http { get; set; } =
 		new()
 		{

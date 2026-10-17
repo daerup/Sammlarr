@@ -59,24 +59,17 @@
         }
 
         <div class="flex items-center justify-between gap-2">
-            @if (!_isCreate)
-            {
-                <BbButton Variant="ButtonVariant.Outline" OnClick="TestAsync" Disabled="_busy">
-                    @if (_testing)
-                    {
-                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                    }
-                    else
-                    {
-                        <LucideIcon Name="zap" Size="14" Class="mr-2"/>
-                    }
-                    <span>Test connection</span>
-                </BbButton>
-            }
-            else
-            {
-                <span></span>
-            }
+            <BbButton Variant="ButtonVariant.Outline" OnClick="TestAsync" Disabled="_busy">
+                @if (_testing)
+                {
+                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                }
+                else
+                {
+                    <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                }
+                <span>Test connection</span>
+            </BbButton>
             <div class="flex gap-2">
                 <BbButton Variant="ButtonVariant.Outline" OnClick="Cancel" Disabled="_busy">Cancel</BbButton>
                 <BbButton OnClick="SaveAsync" Disabled="_busy">

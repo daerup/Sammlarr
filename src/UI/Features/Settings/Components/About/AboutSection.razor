@@ -19,7 +19,7 @@
     {
         if (firstRender)
         {
-            _update = await Updates.CheckAsync();
+            _update = await Updates.CheckNowAsync();
             StateHasChanged();
         }
     }

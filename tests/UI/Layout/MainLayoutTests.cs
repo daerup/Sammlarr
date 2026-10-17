@@ -25,7 +25,7 @@ public class MainLayoutTests : BunitContext
 		Services.AddScoped(_ => new CurrentUserAccessor(new CurrentUserOverride()));
 		var versions = new AppVersionProvider(new ReleaseOptions(), new AppVersion("0.0.0-alpha.0.584"));
 		Services.AddSingleton(versions);
-		Services.AddSingleton(new AppUpdateChecker(versions, IReleaseFeed.Mock().Object, IDateTimeProvider.Mock().Object));
+		Services.AddSingleton(new AppUpdateChecker(versions, new ReleaseOptions(), IReleaseFeed.Mock().Object, IDateTimeProvider.Mock().Object));
 		Services.AddScoped<SearchLauncher>();
 		ComponentFactories.AddStub<GlobalSearch>();
 		ComponentFactories.AddStub<ProfileCard>();
@@ -116,7 +116,7 @@ public class MainLayoutTests : BunitContext
 		var releases = IReleaseFeed.Mock();
 		releases.LatestAsync(Any(), Any()).Returns(Some.Of(new PublishedRelease("v1.5.0", new Uri("https://github.com/daerup/Sammlarr/releases/tag/v1.5.0"))));
 		Services.AddSingleton(versions);
-		Services.AddSingleton(new AppUpdateChecker(versions, releases.Object, IDateTimeProvider.Mock().Object));
+		Services.AddSingleton(new AppUpdateChecker(versions, new ReleaseOptions(), releases.Object, IDateTimeProvider.Mock().Object));
 
 		var cut = RenderLayout();
 
