@@ -46,7 +46,7 @@ and an indexer, and a webhook catcher (`src/AppHost/Staging`). Guide: [Testing â
 - **Build**: the .NET 11 SDK with Node 24 for the Tailwind build; `dotnet publish -p:ExcludeStaging=true` leaves the
   staging seed out. Base images are pinned by digest; the commit time as `SOURCE_DATE_EPOCH` and BuildKit's
   `rewrite-timestamp` keep build times out of the image, so a rebuild of a tag can reach the same digest
-  ([ADR 0019](../../adr/0019-build-and-push-the-image-with-docker-actions.md)).
+  ([ADR 0023](../../adr/0023-push-an-unsigned-image-by-version-and-move-latest-last.md)).
 - **Runtime**: `aspnet:11.0-resolute-chiseled-extra` (no shell, ICU and tzdata included), running as `$APP_UID`
   (1654), which owns `/data`. Plain HTTP on 6769.
 - **Health**: `HEALTHCHECK` runs `dotnet Web.dll healthcheck`, which asks `/alive` (the process and the job runner's
@@ -55,9 +55,8 @@ and an indexer, and a webhook catcher (`src/AppHost/Staging`). Guide: [Testing â
 | Image property | Today |
 |---|---|
 | Reproducible | yes: base images pinned by digest, `SOURCE_DATE_EPOCH` and `rewrite-timestamp` (see Build), and one BuildKit for every image build, pinned by version and digest in `.github/actions/build-image`; each release rebuilds its tag on a fresh runner and fails when the digest or `/app` differs, and a match adds the digest and the BuildKit version to the release notes (`release.yml`, jobs `rebuild` and `reproduced`) |
-| Signed (cosign) | from 0.1.0: keyless, by the release's own run, the signature pushed to GHCR beside the image ([SECURITY.md](../../../SECURITY.md#verifying-what-you-run)) |
-| SLSA provenance | from 0.1.0: GitHub's build provenance attestation (`actions/attest`), pushed to GHCR and attached to the release as `sammlarr-image.intoto.jsonl`; BuildKit's own stays off (`provenance: false` in `.github/actions/build-image`), so the image keeps the one manifest a rebuild matches |
-| SBOM | on each release: `sammlarr-app.cdx.json` (CycloneDX, the app's packages) and `sammlarr-image.cdx.json` (Trivy, the image), beside `THIRD-PARTY-NOTICES.txt`; from 0.1.0 both are also attested against the image's digest |
+| Signed, attested | no: GHCR has no referrers API, so each signature or attestation would show as one more tagged version beside the image; BuildKit's own provenance stays off too (`provenance: false` in `.github/actions/build-image`), so the image keeps the one manifest a rebuild matches |
+| SBOM | on each release: `sammlarr-app.cdx.json` (CycloneDX, the app's packages) and `sammlarr-image.cdx.json` (Trivy, the image), beside `THIRD-PARTY-NOTICES.txt` |
 
 ## Release
 
@@ -75,8 +74,8 @@ flowchart LR
 
 release-please tags `vX.Y.Z` when its release PR merges. `.github/workflows/release.yml` builds the image for
 `linux/amd64` with Docker's actions and pushes it to GHCR as `:X.Y.Z`
-([ADR 0019](../../adr/0019-build-and-push-the-image-with-docker-actions.md)); `:latest` moves to it only once the image
-is signed and attested and the rebuild matched. The release carries no compose file
+([ADR 0023](../../adr/0023-push-an-unsigned-image-by-version-and-move-latest-last.md)); `:latest` moves to it only once the
+rebuild matched. The release carries no compose file
 ([ADR 0021](../../adr/0021-ship-one-hand-written-compose-file.md)). The README's Quick start downloads the repo's
 `compose.yaml`, which runs `:latest` on port 6769 with the named volume `sammlarr-data` at `/data` and
 `restart: unless-stopped`. To pin a version, change the `image:` tag in that file.

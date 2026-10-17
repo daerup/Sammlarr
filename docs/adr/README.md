@@ -35,7 +35,8 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0016 | [Live runs pull from an in-memory trace](0016-live-runs-pull-from-an-in-memory-trace.md) | accepted | 2026-10-08 |
 | 0017 | [Pace remote calls on lanes with limits as published](0017-pace-remote-calls-on-lanes-with-limits-as-published.md) | accepted | 2026-10-10 |
 | 0018 | [Claim identity before hand-out from identity keys only](0018-claim-identity-before-hand-out-from-identity-keys-only.md) | accepted | 2026-10-10 |
-| 0019 | [Build and push the image with Docker's actions, compose with Aspire](0019-build-and-push-the-image-with-docker-actions.md) | accepted, compose half superseded by [0021](0021-ship-one-hand-written-compose-file.md) | 2026-10-13 |
+| 0019 | [Build and push the image with Docker's actions, compose with Aspire](0019-build-and-push-the-image-with-docker-actions.md) | superseded by [0023](0023-push-an-unsigned-image-by-version-and-move-latest-last.md) | 2026-10-13 |
 | 0020 | [Move local accounts onto ASP.NET Core Identity](0020-move-local-accounts-onto-asp-net-core-identity.md) | accepted, limits per address superseded by [0022](0022-rate-limit-requests-in-the-app.md) | 2026-10-16 |
 | 0021 | [Ship one hand-written compose file](0021-ship-one-hand-written-compose-file.md) | accepted | 2026-10-16 |
 | 0022 | [Rate-limit requests in the app](0022-rate-limit-requests-in-the-app.md) | accepted | 2026-10-16 |
+| 0023 | [Push an unsigned image by version and move latest last](0023-push-an-unsigned-image-by-version-and-move-latest-last.md) | accepted | 2026-10-17 |
