@@ -4,8 +4,6 @@ using Contracts.Identity;
 using Contracts.Setup;
 using Domain.Identity;
 using Domain.Providers;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Shared.Options;
@@ -140,14 +138,13 @@ internal static class AuthEndpoints
 				}
 			)
 			.RequireRateLimiting(RateLimitingModule.SignInForms);
-		endpoints.MapGet(
-			"/auth/logout",
-			async (HttpContext context) =>
-			{
-				await context.SignOutAsync(IdentityConstants.ApplicationScheme);
-				return Results.Redirect("/");
-			}
-		);
+		endpoints.MapPost("/auth/logout", SignOutAsync);
+	}
+
+	internal static async Task<IResult> SignOutAsync([FromForm] string returnUrl, ISignInCookie cookie)
+	{
+		await cookie.SignOutAsync();
+		return Results.Redirect(ReturnUrls.Target(returnUrl));
 	}
 
 	internal static Task<IResult> JoinAsync(

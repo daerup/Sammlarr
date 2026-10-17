@@ -6,6 +6,7 @@ using Contracts.Settings;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
@@ -59,11 +60,24 @@ public class ProfileCardTests : BunitContext
 		await Assert.That(cut.WaitForElement("#profile-dropdown-trigger [data-bird]")).IsNotNull();
 	}
 
-	private async Task<IRenderedComponent<Harness>> RenderOpenCardAsync(ProviderConfig providers)
+	[Test]
+	public async Task SignOut_PostsTheAntiforgeryFormBackToThePageItWasOpenedOn()
+	{
+		var cut = await RenderOpenCardAsync(OnArr, "/settings/users");
+
+		var form = cut.WaitForElement("form[action='/auth/logout']");
+		await Assert.That(form.GetAttribute("method")).IsEqualTo("post");
+		await Assert.That(form.QuerySelector("input[name=returnUrl]")?.GetAttribute("value")).IsEqualTo("/settings/users");
+		await Assert.That(cut.FindComponents<AntiforgeryToken>()).HasSingleItem();
+		await Assert.That(form.QuerySelector("button[type=submit]")?.TextContent.Trim()).IsEqualTo("Sign out");
+	}
+
+	private async Task<IRenderedComponent<Harness>> RenderOpenCardAsync(ProviderConfig providers, string route = "/")
 	{
 		var config = IProviderConfigService.Mock();
 		config.GetAsync(Any()).Returns(providers);
 		Services.AddSingleton(config.Object);
+		Services.GetRequiredService<NavigationManager>().NavigateTo(route);
 		var cut = Render<Harness>();
 		await cut.InvokeAsync(_dropdown.RequestOpenAsync);
 		return cut;

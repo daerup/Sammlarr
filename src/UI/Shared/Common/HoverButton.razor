@@ -1,4 +1,5 @@
 <BbButton Variant="ButtonVariant.Outline"
+          Type="@Type"
           Class="@CssClass"
           style="@(string.IsNullOrEmpty(Color) ? null : $"--tint: {Color};")"
           OnClick="OnClick"
@@ -26,6 +27,7 @@
     [Parameter] public string? Class { get; set; }
     [Parameter] public string? AriaLabel { get; set; }
     [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Default;
+    [Parameter] public ButtonType Type { get; set; } = ButtonType.Button;
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 

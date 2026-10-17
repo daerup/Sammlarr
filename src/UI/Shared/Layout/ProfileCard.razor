@@ -67,14 +67,16 @@
                     </div>
                 </div>
 
-                <div class="p-2">
+                <form action="/auth/logout" method="post" class="p-2">
+                    <AntiforgeryToken/>
+                    <input type="hidden" name="returnUrl" value="@ReturnUrl"/>
                     <HoverButton Preset="HoverButtonPreset.Destructive"
                                  Icon="log-out"
                                  Text="Sign out"
-                                 OnClick="SignOut"
+                                 Type="ButtonType.Submit"
                                  Border="false"
                                  Class="w-full"/>
-                </div>
+                </form>
             </div>
         </BbDropdownMenuContent>
     </BbDropdownMenu>
@@ -124,7 +126,7 @@
         }
     }
 
-    private void SignOut() => NavigationManager.NavigateTo("/auth/logout", forceLoad: true);
+    private string ReturnUrl => "/" + NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
 
     private async Task HandleProfileDropdownOpenRequestedAsync()
     {

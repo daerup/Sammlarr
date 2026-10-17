@@ -13,4 +13,10 @@ internal sealed class IdentityCookie(IServiceScopeFactory scopes) : ISignInCooki
 		var signIns = scope.ServiceProvider.GetRequiredService<SignInManager<UserRow>>();
 		await signIns.SignInAsync(await signIns.UserManager.RequireAsync(user), isPersistent: false);
 	}
+
+	public async Task SignOutAsync()
+	{
+		await using var scope = scopes.CreateAsyncScope();
+		await scope.ServiceProvider.GetRequiredService<SignInManager<UserRow>>().SignOutAsync();
+	}
 }

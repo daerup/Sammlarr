@@ -62,7 +62,7 @@ public class ChangePasswordFormTests : BunitContext
 
 		await ChangeButton(cut).ClickAsync();
 
-		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/auth/logout");
+		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/signin");
 	}
 
 	[Test]

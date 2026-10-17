@@ -89,6 +89,49 @@ public class SignInTests
 		await SelfHostedSetup.StaysHomeAsync(other);
 	}
 
+	[Test]
+	public async Task SignOut_AfterSigningBackIn_EndsTheSessionAgain()
+	{
+		var stack = await SelfHostedApp.StackAsync();
+		var page = await SelfHostedApp.OpenPageAsync();
+		await SelfHostedSetup.FinishAsync(page, stack);
+		await SignOutAsync(page);
+		await SignInAsync(page, SelfHostedSetup.AdminName, SelfHostedSetup.AdminPassword);
+		await SelfHostedSetup.StaysHomeAsync(page);
+
+		await SignOutAsync(page);
+
+		await StillSignedOutAsync(page);
+	}
+
+	[Test]
+	public async Task ChangePassword_ForYourOwnAccount_SignsOutUntilTheNewOneIsUsed()
+	{
+		var stack = await SelfHostedApp.StackAsync();
+		var page = await SelfHostedApp.OpenPageAsync();
+		await SelfHostedSetup.FinishAsync(page, stack);
+		await SettingsPage.VisitSectionAsync(page, "users");
+		await page.Locator("[data-you]").ButtonContaining("Change password").ClickAsync();
+		await page.Labelled("Current password").EnterAsync(SelfHostedSetup.AdminPassword);
+		await page.Labelled("New password").EnterAsync(NewPassword);
+		await page.Labelled("Confirm password").EnterAsync(NewPassword);
+
+		await page.Locator("[data-you]").ButtonContaining("Change password").Last.ClickAsync();
+
+		await page.ShouldBeAtAsync(Routes.SignIn);
+		await StillSignedOutAsync(page);
+		await SignInAsync(page, SelfHostedSetup.AdminName, NewPassword);
+		await SelfHostedSetup.StaysHomeAsync(page);
+	}
+
+	private static async Task SignOutAsync(IPage page)
+	{
+		await page.ButtonContaining("Account menu").ClickAsync();
+		await page.ButtonContaining("Sign out").ClickAsync();
+		await page.ShouldBeAtAsync(Routes.SignIn);
+		await page.WaitForCircuitAsync();
+	}
+
 	private static async Task SignInAsync(IPage page, string username, string password)
 	{
 		await page.VisitAsync(Routes.SignIn);
