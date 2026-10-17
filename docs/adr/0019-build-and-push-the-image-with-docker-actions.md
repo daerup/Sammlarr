@@ -37,5 +37,6 @@ digest output.
 
 * 2026-10-16: `compose.yaml` is hand-written again and the only compose file; releases attach none
   ([ADR 0021](0021-ship-one-hand-written-compose-file.md)).
-* 2026-10-17: the build pushes `:X.Y.Z` only; `:latest` moves in a last job, once the image is signed and attested and
-  the rebuild matched. The `:sha` tag is gone, since every image comes from a version tag.
+* 2026-10-17: the build pushes `:X.Y.Z` only; `:latest` moves in a last job, once the rebuild matched. The `:sha` tag
+  is gone, since every image comes from a version tag. Releases are no longer signed or attested: GHCR has no referrers
+  API, so each signature and attestation showed as one more tagged version beside the image.
