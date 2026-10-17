@@ -152,6 +152,37 @@ public class FeedConfigurationTests
 	}
 
 	[Test]
+	public async Task Schedule_TypedIntoWhileThePickerIsOpen_ClosesThePickerClampsAndPersists()
+	{
+		var name = TestData.Name("Typed time");
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.VisitAsync("/feeds/create");
+		await FeedEditor.ConfigureAsync(page, name);
+		await FeedEditor.OpenOptionalSectionAsync(page, "Sync Frequency");
+		await FeedEditor.Option(page, "Trigger", "Scheduled").ClickAsync();
+		await FeedEditor.TestAsync(page);
+		await page.Button("Open time picker").ClickAsync();
+		await Expect(page.Button("Now")).ToBeVisibleAsync();
+
+		await page.Labelled("Hour").ClickAsync();
+		await Expect(page.Button("Now")).ToBeHiddenAsync();
+		await page.Keyboard.TypeAsync("25");
+		await page.Labelled("Minute").ClickAsync();
+		await page.Keyboard.TypeAsync("75");
+
+		await Expect(page.Labelled("Hour")).ToHaveValueAsync("23");
+		await Expect(page.Labelled("Minute")).ToHaveValueAsync("59");
+		await FeedEditor.SaveAsync(page);
+
+		var card = page.FeedCard(name);
+		await Expect(card).ToBeVisibleAsync(Wait.Settle);
+		await card.Labelled("Edit").ClickAsync();
+
+		await Expect(page.Labelled("Hour")).ToHaveValueAsync("23");
+		await Expect(page.Labelled("Minute")).ToHaveValueAsync("59");
+	}
+
+	[Test]
 	public async Task Clone_WhenOpened_PrefillsAndSavesSeparately()
 	{
 		var suffix = Guid.NewGuid().ToString("N")[..6];

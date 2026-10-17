@@ -10,11 +10,7 @@
     @if (_scheduleMode == ScheduleMode.Daily)
     {
         <div class="flex flex-wrap items-center gap-3">
-            <BbTimePicker Value="_dailyTime"
-                          ValueChanged="OnDailyTimeChanged"
-                          Format="TimeFormat.Hour24"
-                          MinuteStep="5"
-                          Placeholder="Select time"/>
+            @TimeEntry(_dailyTime, OnDailyTimeChanged)
             @if (_dailyTime.HasValue)
             {
                 <div class="flex flex-col gap-0.5 w-full">
@@ -33,11 +29,7 @@
     @if (_scheduleMode == ScheduleMode.Weekly)
     {
         <div class="flex flex-wrap items-center gap-3">
-            <BbTimePicker Value="_weeklyTime"
-                          ValueChanged="OnWeeklyTimeChanged"
-                          Format="TimeFormat.Hour24"
-                          MinuteStep="5"
-                          Placeholder="Select time"/>
+            @TimeEntry(_weeklyTime, OnWeeklyTimeChanged)
             <BbMultiSelect TValue="DayOfWeek"
                            Values="_weeklyDaysOfWeek"
                            ValuesChanged="OnWeeklyDaysChanged"
@@ -301,6 +293,25 @@
                                 .ToList()
                             ?? [];
         NotifyChanged();
+    }
+
+    private RenderFragment TimeEntry(TimeSpan? time, Action<TimeSpan?> changed)
+    {
+        return @<div class="relative w-fit">
+                   <BbTimeInput Value="time"
+                                ValueChanged="changed"
+                                Format="TimeFormat.Hour24"
+                                MinuteStep="5"
+                                ShowPicker="false"
+                                Class="pe-11"
+                                data-clamp/>
+                   <BbTimePicker Value="time"
+                                 ValueChanged="changed"
+                                 Format="TimeFormat.Hour24"
+                                 MinuteStep="5"
+                                 AriaLabel="Open time picker"
+                                 Class="absolute end-3 top-1.5 h-7 w-7 justify-center border-0 bg-transparent px-0 py-0 [&>span]:hidden [&>svg]:me-0"/>
+               </div>;
     }
 
     private void TransferScheduleConfig(ScheduleMode from, ScheduleMode to)
