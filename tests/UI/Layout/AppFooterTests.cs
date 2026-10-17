@@ -44,10 +44,10 @@ public class AppFooterTests : BunitContext
 	}
 
 	[Test]
-	public async Task Credit_NamesTheHeartLoveForScreenReaders()
+	public async Task Footer_HoldsOnlyTheVersion()
 	{
 		var cut = Render<AppFooter>(parameters => parameters.Add(footer => footer.Version, new AppVersion("1.4.0")));
 
-		await Assert.That(cut.Find("footer .sr-only").TextContent.Trim()).IsEqualTo("love");
+		await Assert.That(cut.Find("footer").TextContent.Trim()).IsEqualTo("1.4.0");
 	}
 }
