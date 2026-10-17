@@ -14,7 +14,9 @@ an image, and Scorecard's Signed-Releases check, which looks for a signed asset 
 
 The `image` job in `release.yml` attests the pushed index's build provenance with `actions/attest`, without
 `push-to-registry`: the attestation is stored with the repository's attestations, not in GHCR, and its Sigstore bundle
-goes on the release as `sammlarr-image.intoto.jsonl`. The image itself is still not signed with cosign.
+goes on the release as `sammlarr-image.intoto.jsonl`. The image itself is still not signed with cosign. Before `:latest`
+moves, the `notes` job verifies the attestation with `gh attestation verify`, held to `release.yml`, the tag and a
+GitHub-hosted runner, and the release notes show the result beside the rebuild check's.
 
 Rejected: cosign and `push-to-registry: true` (the extra package version ADR 0023 removed); signing the release assets
 with `cosign sign-blob` (one bundle per asset, and nothing that names the image).
@@ -25,5 +27,6 @@ with `cosign sign-blob` (one bundle per asset, and nothing that names the image)
   repository built the image; the package page keeps one version per release.
 * Each release carries one more asset, which Signed-Releases counts.
 * The attestation names the index digest from outside the image, so the image and the rebuild check are unchanged.
-* The `image` job needs `id-token: write` and `attestations: write` again.
+* A release whose attestation does not verify keeps `:latest` on the previous release, and its notes say so.
+* The `image` job needs `id-token: write` and `attestations: write` again, the `notes` job `attestations: read`.
 * Supersedes the attestation half of ADR 0023.
