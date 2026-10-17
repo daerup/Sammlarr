@@ -1,8 +1,9 @@
 # Push an unsigned image by version and move latest last
 
-| Status   | Date       |
-|----------|------------|
-| accepted | 2026-10-17 |
+| Status                                                                                     | Date       |
+|--------------------------------------------------------------------------------------------|------------|
+| accepted                                                                                   | 2026-10-17 |
+| attestation superseded by [0025](0025-attest-the-image-provenance-outside-the-registry.md) | 2026-10-17 |
 
 ## Context
 

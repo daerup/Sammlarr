@@ -20,8 +20,12 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
+      attestations: write
     outputs:
       digest: ${{ steps.build.outputs.digest }}
+      epoch: ${{ steps.build.outputs.epoch }}
+      attestation: ${{ steps.provenance.outputs.attestation-url }}
       version: ${{ steps.version.outputs.version }}
       labels: ${{ steps.meta.outputs.labels }}
     steps:
@@ -57,6 +61,13 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,push=true,oci-mediatypes=true,rewrite-timestamp=true
 
+      - name: Provenance
+        id: provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ghcr.io/daerup/sammlarr
+          subject-digest: ${{ steps.build.outputs.digest }}
+
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
@@ -78,15 +89,17 @@ jobs:
           format: cyclonedx
           output: sbom/sammlarr-image.cdx.json
 
-      - name: SBOMs and notices for the release
+      - name: SBOMs, provenance and notices for the release
         env:
           IMAGE: ghcr.io/daerup/sammlarr@${{ steps.build.outputs.digest }}
+          BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           container=$(docker create "$IMAGE")
           docker cp "$container:/app/THIRD-PARTY-NOTICES.txt" sbom/
           docker rm "$container"
-          gh release upload "$GITHUB_REF_NAME" sbom/sammlarr-app.cdx.json sbom/sammlarr-image.cdx.json sbom/THIRD-PARTY-NOTICES.txt --clobber
+          cp "$BUNDLE" sbom/sammlarr-image.intoto.jsonl
+          gh release upload "$GITHUB_REF_NAME" sbom/sammlarr-app.cdx.json sbom/sammlarr-image.cdx.json sbom/sammlarr-image.intoto.jsonl sbom/THIRD-PARTY-NOTICES.txt --clobber
 
   rebuild:
     needs: image
@@ -97,6 +110,7 @@ jobs:
       packages: read
     outputs:
       buildkit: ${{ steps.build.outputs.buildkit }}
+      digest: ${{ steps.compare.outputs.rebuilt }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -117,6 +131,7 @@ jobs:
           cd "$RUNNER_TEMP"
           skopeo inspect --raw --retry-times 3 --creds "$GITHUB_ACTOR:$GH_TOKEN" "docker://ghcr.io/daerup/sammlarr@$PUSHED" > pushed-index.json
           rebuilt=$(jq -r '.manifests[0].digest' rebuilt-layout/index.json)
+          echo "rebuilt=$rebuilt" >> "$GITHUB_OUTPUT"
           rebuilt_index="rebuilt-layout/blobs/sha256/${rebuilt#sha256:}"
           unpack() {
             mkdir -p "$3"
@@ -163,7 +178,7 @@ jobs:
           retention-days: 7
 
   latest:
-    needs: [image, rebuild]
+    needs: [image, notes]
     runs-on: ubuntu-26.04
     permissions:
       packages: write
@@ -179,20 +194,60 @@ jobs:
           DIGEST: ${{ needs.image.outputs.digest }}
         run: docker buildx imagetools create --prefer-index=false --tag ghcr.io/daerup/sammlarr:latest "ghcr.io/daerup/sammlarr@$DIGEST"
 
-  reproduced:
+  notes:
     needs: [image, rebuild]
+    if: ${{ !cancelled() && needs.image.result == 'success' }}
     runs-on: ubuntu-26.04
     permissions:
       contents: write
+      packages: read
+      attestations: read
     steps:
-      - name: Note the matching rebuild on the release
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image section on the release
         env:
           DIGEST: ${{ needs.image.outputs.digest }}
+          VERSION: ${{ needs.image.outputs.version }}
+          EPOCH: ${{ needs.image.outputs.epoch }}
+          ATTESTATION: ${{ needs.image.outputs.attestation }}
+          REBUILT: ${{ needs.rebuild.outputs.digest }}
           BUILDKIT: ${{ needs.rebuild.outputs.buildkit }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
+          security="https://github.com/$GITHUB_REPOSITORY/blob/main/SECURITY.md#verifying-what-you-run"
+          image="\`ghcr.io/daerup/sammlarr:$VERSION\`"
+          page=$(gh api --paginate "users/$GITHUB_REPOSITORY_OWNER/packages/container/sammlarr/versions" --jq ".[] | select(.name == \"$DIGEST\") | .html_url" || true)
+          if [ -n "$page" ]; then image="[$image]($page)"; else echo "::warning::no package version found for $DIGEST"; fi
+          previous=$(gh release list --exclude-drafts --limit 2 --json tagName --jq '.[1].tagName // empty')
+          previous=${previous#v}
+          kept="so \`:latest\` stays on ${previous:-the previous release}"
+          ok=true
+          if [ "$REBUILT" = "$DIGEST" ]; then
+            reproducible="✅ **Reproducible**: rebuilt without cache to the same digest, with BuildKit $BUILDKIT, \`VERSION=$VERSION\` and \`SOURCE_DATE_EPOCH=$EPOCH\` ([how to repeat it]($security))"
+          elif [ -n "$REBUILT" ]; then
+            reproducible="❌ **Reproducible**: a rebuild without cache got \`$REBUILT\`, $kept" ok=false
+          else
+            reproducible="❌ **Reproducible**: the rebuild without cache did not finish, $kept" ok=false
+          fi
+          if gh attestation verify "oci://ghcr.io/daerup/sammlarr@$DIGEST" --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yml" --source-ref "$GITHUB_REF" --deny-self-hosted-runners; then
+            attested="✅ **Attested**: the [build provenance]($ATTESTATION) verifies as built by \`release.yml\` from \`$GITHUB_REF_NAME\` on a GitHub-hosted runner ([how to verify it]($security))"
+          else
+            attested="❌ **Attested**: no valid build provenance found for this digest, $kept" ok=false
+          fi
           notes=$(gh release view "$GITHUB_REF_NAME" --json body --jq .body)
           gh release edit "$GITHUB_REF_NAME" --notes "$notes
 
-          Reproduced on a fresh runner without cache: \`$DIGEST\` matches (BuildKit $BUILDKIT)."
+          ### Image
+
+          $image for linux/amd64 and linux/arm64, index digest \`$DIGEST\`
+
+          * $reproducible
+          * $attested"
+          $ok || { echo "::error::a release check failed, so :latest stays where it is"; exit 1; }

@@ -26,6 +26,9 @@ outputs:
   buildkit:
     description: BuildKit version that built it
     value: ${{ steps.buildkit.outputs.value }}
+  epoch:
+    description: SOURCE_DATE_EPOCH it was built with
+    value: ${{ steps.epoch.outputs.value }}
 runs:
   using: composite
   steps:
