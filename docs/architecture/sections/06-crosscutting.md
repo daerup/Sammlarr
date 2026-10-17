@@ -241,7 +241,8 @@ step and compacts the file; a failing step stops the pass. The windows are
   with the data-protection key ring: valid for one day, and void once the security stamp changes (a new password, a
   renewed invite, a role change). Nothing about them is stored, so nothing needs purging.
 - The cookie is Identity's application cookie. `SecurityStampValidator` checks it on every request
-  (`ValidationInterval` zero), so a password change, a role change (which renews the stamp) or a removal signs the
+  (`ValidationInterval` zero) without re-issuing it, so a late request from a page you signed out of cannot bring the
+  session back; a password change, a role change (which renews the stamp) or a removal signs the
   user out on their next page load; open circuits are signed out at once (`ISessionInvalidator`).
 - Isolation lives in persistence ([ADR 0005](../../adr/0005-enforce-per-user-data-isolation.md)): an `IUserOwned`
   entity gets a global query filter on a shadow `UserId`, the current-user lookup throws when nobody is signed in, and

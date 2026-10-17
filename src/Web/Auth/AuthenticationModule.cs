@@ -18,6 +18,11 @@ internal sealed class AuthenticationModule : IServiceModule
 			options.ReturnUrlParameter = "returnUrl";
 			options.ExpireTimeSpan = TimeSpan.FromDays(30);
 			options.SlidingExpiration = true;
+			options.Events.OnValidatePrincipal = async context =>
+			{
+				await SecurityStampValidator.ValidatePrincipalAsync(context);
+				context.ShouldRenew = false;
+			};
 		});
 		services.Configure<SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.Zero);
 		services.AddOptions<SammlarOptions>().Validate(PublicOrigin.IsValid, PublicOrigin.Requirement).ValidateOnStart();
