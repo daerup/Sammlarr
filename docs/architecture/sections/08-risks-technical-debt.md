@@ -10,7 +10,7 @@ service in `src/Web/appsettings.json` ([Lanes and HTTP resilience](06-crosscutti
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Key ring at rest | The data-protection keys sit unencrypted in `/data/dp-keys`, beside the secrets they decrypt. A bind-mounted `/data` must be writable by uid 1654. | Restrict access to the volume (the compose's named volume takes the image's ownership); an at-rest key protector is possible hardening. |
+| Key ring at rest | The data-protection keys sit unencrypted in `/data/dp-keys`, beside the secrets they decrypt, and the log drops ASP.NET Core's warning about it. A bind-mounted `/data` must be writable by uid 1654. | Restrict access to the volume (the compose's named volume takes the image's ownership); an at-rest key protector is possible hardening. |
 | Single instance only | A second replica contends on one SQLite file, `JobRunner` requeues every `Running` job at startup as abandoned, and the cached `ProviderConfig` and Radarr + Sonarr settings are never invalidated across processes. | Run one instance ([ADR 0004](../../adr/0004-store-all-state-in-one-sqlite-file.md)). |
 | No job deadline | All feed runs, syncs and details fills share one queue that runs one job at a time, and a job has no deadline, so a hung job stalls all queued work until a restart. | Attempt timeouts, `MaxWait`, `EnrichWait` and a list load's `StallAfter` watchdog bound most waits. Fix: a per-job deadline in `JobRunner`. |
 | Sync push assumes clean acks | `WantlistSyncEngine.ApplyBatchAsync` looks each sink ack up by media id; an ack for a title it did not send, or a second one, throws and fails the sync, and the batch stays pending to fail again. | None yet; guard the lookup. |
