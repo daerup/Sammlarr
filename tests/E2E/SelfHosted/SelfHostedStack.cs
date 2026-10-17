@@ -87,6 +87,7 @@ internal sealed partial class SelfHostedStack
 			logging.AddProvider(setupCodes).AddProvider(new CircuitFailureSink(WebLogCategory, CircuitFailure, $"self-hosted-{index}", onCircuitFailure))
 		);
 		builder.WaitThroughBusyDocker();
+		builder.RunProjectsOutsideTheIde();
 
 		var wiremock = builder
 			.AddContainer("wiremock", "wiremock/wiremock", "latest")
