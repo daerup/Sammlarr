@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.1](https://github.com/daerup/Sammlarr/compare/v0.1.0...v0.1.1) (2026-10-17)
+
+
+### Features
+
+* publish the image for linux/arm64 as well as linux/amd64 ([0e623fd](https://github.com/daerup/Sammlarr/commit/0e623fdd60661b64c958037d6441cef3e67634d3))
+
+
+### Bug Fixes
+
+* keep framework warnings out of a fresh start's log ([0e623fd](https://github.com/daerup/Sammlarr/commit/0e623fdd60661b64c958037d6441cef3e67634d3))
+* **ui:** keep circuits alive and preview rows rendering under load ([#8](https://github.com/daerup/Sammlarr/issues/8)) ([a9da34a](https://github.com/daerup/Sammlarr/commit/a9da34ad8751608083b8eb8b5306f9a7530113d7))
+* **ui:** update the page title after navigating between pages ([0e623fd](https://github.com/daerup/Sammlarr/commit/0e623fdd60661b64c958037d6441cef3e67634d3))
+
 ## 0.1.0 (2026-10-16)
 
 
