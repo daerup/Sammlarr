@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Blocklist;
 using Contracts.Feed;
 using Contracts.Identity;
@@ -50,6 +51,7 @@ public class FeedRunPlannerTests
 			new ServiceCollection().BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
 			ICurrentUser.Mock().Object,
 			ratings.Object,
+			IDateTimeProvider.Mock().Object,
 			NullLogger<FeedRunPlanner>.Instance
 		);
 	}

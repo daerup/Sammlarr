@@ -23,11 +23,11 @@
             <BbSelect TValue="string" Value="@(Condition.Value as string)" ValueChanged="SetAsync" Options="Field.Options" Placeholder="Select..." Class="w-[180px]"/>
             break;
         case FeedFieldKind.Date:
-            <BbDatePicker Value="@(Condition.Value as DateTime?)" ValueChanged="SetDateAsync" AriaLabel="@Field.Label" Class="w-[180px]"/>
+            <FeedDateRuleEditor Value="@Condition.Value" ValueChanged="SetAsync" Label="@Field.Label"/>
             @if (Condition.Operator is FilterOperator.Between)
             {
                 <span class="text-sm text-muted-foreground">and</span>
-                <BbDatePicker Value="@(Condition.ValueEnd as DateTime?)" ValueChanged="SetDateEndAsync" AriaLabel="@($"{Field.Label}, upper bound")" Class="w-[180px]"/>
+                <FeedDateRuleEditor Value="@Condition.ValueEnd" ValueChanged="SetEndAsync" Label="@($"{Field.Label}, upper bound")"/>
             }
             break;
     }
@@ -93,9 +93,7 @@
 
     private Task SetPickedAsync(IEnumerable<string>? picked) => SetAsync(picked?.ToArray());
 
-    private Task SetDateAsync(DateTime? value) => SetAsync(value);
-
-    private Task SetDateEndAsync(DateTime? value)
+    private Task SetEndAsync(object? value)
     {
         Condition.ValueEnd = value;
         return Changed.InvokeAsync();

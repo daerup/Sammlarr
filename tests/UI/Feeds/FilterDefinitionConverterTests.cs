@@ -84,6 +84,40 @@ public class FilterDefinitionConverterTests
 	}
 
 	[Test]
+	public async Task ToQueryFilter_ForARelativeDate_WritesASignedDurationAsADate()
+	{
+		var result = FilterDefinitionConverter.ToQueryFilter(
+			Definition(Condition("ReleaseDate", BbFilterOp.GreaterThan, new RelativeDate(2, DateUnit.Years, Ahead: false)))
+		);
+
+		var predicate = result!.Groups[0].Predicates[0];
+		await Assert.That(predicate.ValueKind).IsEqualTo(FilterValueKind.Date);
+		await Assert.That(predicate.Value).IsEqualTo("\"-P2Y\"");
+	}
+
+	[Test]
+	public async Task RoundTrip_ForARelativeDate_KeepsItRelative()
+	{
+		var twoYearsAgo = new RelativeDate(2, DateUnit.Years, Ahead: false);
+
+		var restored = RoundTrip(Definition(Condition("ReleaseDate", BbFilterOp.GreaterThan, twoYearsAgo)));
+
+		await Assert.That(restored!.Conditions[0].Value).IsEqualTo(twoYearsAgo);
+	}
+
+	[Test]
+	public async Task RoundTrip_ForABetweenWithAFixedAndARelativeEnd_KeepsBothKinds()
+	{
+		var between = Condition("ReleaseDate", BbFilterOp.Between, new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+		between.ValueEnd = new RelativeDate(10, DateUnit.Years, Ahead: false);
+
+		var restored = RoundTrip(Definition(between));
+
+		await Assert.That(restored!.Conditions[0].Value).IsEqualTo(new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+		await Assert.That(restored.Conditions[0].ValueEnd).IsEqualTo(new RelativeDate(10, DateUnit.Years, Ahead: false));
+	}
+
+	[Test]
 	public async Task RoundTrip_WhenFieldAndOperatorSet_PreservesThem()
 	{
 		var restored = RoundTrip(Definition(Condition("Year", BbFilterOp.GreaterThan, 2000.0)));

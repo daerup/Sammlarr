@@ -22,7 +22,7 @@ internal sealed class QueryProcessor<T>
 	)
 	{
 		var all = options.Sort.Map(sort => Sort(source, sort)).GetValueOr(() => [.. source]);
-		var qualifying = options.Filter.Map(filter => new HashSet<T>(all.Where(Compile(filter)), ByReference));
+		var qualifying = options.Filter.Map(filter => new HashSet<T>(all.Where(Compile(DateFilters.On(filter, options.Today))), ByReference));
 		var verdicts = new QueryVerdict<T>[all.Count];
 
 		var taken = 0;

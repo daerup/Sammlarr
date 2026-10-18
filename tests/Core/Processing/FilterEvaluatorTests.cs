@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Core.Processing;
 using Domain.Media;
 using Domain.Processing;
@@ -332,9 +333,40 @@ public class FilterEvaluatorTests
 		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
 	}
 
+	[Test]
+	public async Task Execute_ForARelativeDate_ComparesWithTheDayItNamesFromToday()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Date("ReleaseDate", FilterPredicateOperator.GreaterThan, new RelativeDate(2, DateUnit.Years, Ahead: false)))),
+			new FilterRow { ReleaseDate = new DateOnly(2024, 10, 18) },
+			new FilterRow { ReleaseDate = new DateOnly(2024, 10, 19) }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForABetweenWithAFixedAndARelativeEnd_KeepsTheDaysBetweenThem()
+	{
+		var between = Date("ReleaseDate", FilterPredicateOperator.Between, new DateOnly(1980, 1, 1)) with
+		{
+			ValueEnd = JsonSerializer.Serialize(new RelativeDate(10, DateUnit.Years, Ahead: false).ToIso()),
+		};
+
+		var outcomes = await OutcomesAsync(
+			Filter(Group(between)),
+			new FilterRow { ReleaseDate = new DateOnly(1979, 12, 31) },
+			new FilterRow { ReleaseDate = new DateOnly(2016, 10, 18) },
+			new FilterRow { ReleaseDate = new DateOnly(2016, 10, 19) }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
 	private static async Task<IReadOnlyList<QueryOutcome>> OutcomesAsync(QueryFilter filter, params FilterRow[] rows)
 	{
-		var verdicts = await new QueryProcessor<FilterRow>().ExecuteAsync(rows, new QueryOptions { Filter = Some.Of(filter) }, NoEnrollment).ToListAsync();
+		var options = new QueryOptions { Filter = Some.Of(filter), Today = new DateOnly(2026, 10, 18) };
+		var verdicts = await new QueryProcessor<FilterRow>().ExecuteAsync(rows, options, NoEnrollment).ToListAsync();
 		return [.. verdicts.Select(verdict => verdict.Outcome)];
 	}
 

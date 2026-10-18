@@ -41,6 +41,8 @@ internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<S
 	{
 		public DateTimeOffset Now => default;
 
+		public DateOnly Today => default;
+
 		public TimeZoneInfo Zone => TimeZoneInfo.Utc;
 	}
 }

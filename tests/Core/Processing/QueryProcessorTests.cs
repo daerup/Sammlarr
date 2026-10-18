@@ -464,6 +464,23 @@ public class QueryProcessorRatingTests
 		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([few, unvoted]);
 	}
 
+	[Test]
+	public async Task Execute_ForARelativeDateOnTheNextDay_ComparesWithTheNextDay()
+	{
+		var released = MovieWithRating(2024, 7.0f);
+		var filter = Filter(
+			Group(Date(nameof(MediaQueryRow.ReleaseDate), FilterPredicateOperator.GreaterOrEqual, new RelativeDate(0, DateUnit.Days, Ahead: false)))
+		);
+		var lastDay = new QueryOptions { Filter = Some.Of(filter), Today = new DateOnly(2024, 1, 1) };
+		var nextDay = lastDay with { Today = new DateOnly(2024, 1, 2) };
+
+		var before = await _testee.ExecuteAsync([released], lastDay, NoEnrollment).ToListAsync();
+		var after = await _testee.ExecuteAsync([released], nextDay, NoEnrollment).ToListAsync();
+
+		await Assert.That(before.Single().Outcome).IsEqualTo(QueryOutcome.Qualified);
+		await Assert.That(after.Single().Outcome).IsEqualTo(QueryOutcome.Culled);
+	}
+
 	private static QueryPredicates<MediaQueryRow> NoEnrollment =>
 		new(IsWantlisted: _ => false, IsBlocklisted: _ => false, IsOwned: _ => false, Identity: row => row.Media.Identity.Id.Value);
 

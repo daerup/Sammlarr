@@ -1009,12 +1009,16 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	{
 		public DateTimeOffset Now { get; } = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
 
+		public DateOnly Today => DateOnly.FromDateTime(Now.UtcDateTime);
+
 		public TimeZoneInfo Zone => TimeZoneInfo.Utc;
 	}
 
 	private sealed class MutableClock : IDateTimeProvider
 	{
 		public DateTimeOffset Now { get; set; } = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
+
+		public DateOnly Today => DateOnly.FromDateTime(Now.UtcDateTime);
 
 		public TimeZoneInfo Zone => TimeZoneInfo.Utc;
 	}

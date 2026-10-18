@@ -32,6 +32,15 @@ public static class QueryFilterFactory
 			Value = JsonSerializer.Serialize(value),
 		};
 
+	public static FilterPredicate Date(string field, FilterPredicateOperator op, RelativeDate value) =>
+		new()
+		{
+			Field = field,
+			Operator = op,
+			ValueKind = FilterValueKind.Date,
+			Value = JsonSerializer.Serialize(value.ToIso()),
+		};
+
 	public static FilterPredicate In(string field, params string[] values) =>
 		new()
 		{

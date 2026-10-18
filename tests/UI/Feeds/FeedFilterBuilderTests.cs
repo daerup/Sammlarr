@@ -3,8 +3,10 @@ using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using BlazorBlueprint.Primitives.Filtering;
 using Bunit;
+using Contracts;
 using Contracts.Processing;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
 
@@ -18,6 +20,7 @@ public class FeedFilterBuilderTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(IDateTimeProvider.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
