@@ -174,7 +174,7 @@
                     @if (_filterEnabled)
                     {
                         <div>
-                            <BbFilterBuilder Filter="@_filter" FilterChanged="@ChangeFilter" Fields="FilterFields" ValueEditors="RuleEditors"/>
+                            <FeedFilterBuilder Filter="@_filter" FilterChanged="@ChangeFilter" Adornments="FieldAdornments"/>
                             @if (UnfinishedFilter is { } unfinished)
                             {
                                 <BbFieldError Class="mt-1.5 flex items-center gap-1.5" data-filter-unfinished>
@@ -210,12 +210,12 @@
                             </BbFieldLabel>
                             <BbFieldContent>
                                 <div class="flex items-center gap-3">
-                                    <div class="sort-field">
+                                    <div class="field-adorned">
                                         <BbSelect TValue="string"
                                                   Value="@SortField"
                                                   Class="w-40"
                                                   ValueChanged="@ChangeSortField"
-                                                  Options="SortFields"/>
+                                                  Options="FeedFields.Options"/>
                                         @if (SortField == nameof(MediaQueryRow.Rating))
                                         {
                                             @RatingStar
@@ -527,27 +527,14 @@
 
     private string? UnfinishedFilter => FilterDefinitionConverter.Incomplete(_filter).Map(condition => $"Finish or remove the {FeedFields.LabelOf(condition.Field)} condition to save.").ToNullable();
 
-    private static readonly IReadOnlyList<SelectOption<string>> SortFields = [.. FeedFields.All.Select(f => new SelectOption<string>(f.Property, f.Label))];
-
-    private static readonly IReadOnlyList<FilterField> FilterFields =
-    [
-        .. FeedFields.All.Select(f => new FilterField
-        {
-            Name = f.Property,
-            Label = f.Label,
-            Type = f.FilterType,
-            Options = f.Options ?? [],
-        }),
-    ];
-
-    private IReadOnlyDictionary<string, RenderFragment<FilterValueEditorContext>> RuleEditors
+    private IReadOnlyDictionary<string, RenderFragment> FieldAdornments
     {
         get
         {
-            return new Dictionary<string, RenderFragment<FilterValueEditorContext>>
+            return new Dictionary<string, RenderFragment>
             {
-                [nameof(MediaQueryRow.Rating)] = context => @<FeedNumberRuleEditor Context="context" Label="Rating" Unit="/ 10" Min="0" Max="10" Step="0.1" Adornment="RatingStar"/>,
-                [nameof(MediaQueryRow.Votes)] = context => @<FeedNumberRuleEditor Context="context" Label="Votes" Min="0" Step="100" Adornment="VotesInfo"/>,
+                [nameof(MediaQueryRow.Rating)] = RatingStar,
+                [nameof(MediaQueryRow.Votes)] = VotesInfo,
             };
         }
     }

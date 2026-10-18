@@ -1,0 +1,110 @@
+@using BlazorBlueprint.Primitives.Filtering
+
+<div class="@GroupClass" role="group" aria-label="@GroupLabel">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            @if (Depth == 0)
+            {
+                <span class="text-xs font-medium uppercase tracking-wider text-muted-foreground">Where</span>
+            }
+            <BbSelect TValue="LogicalOperator" Value="@Group.Operator" ValueChanged="ChangeOperatorAsync" Options="LogicalOptions" Class="w-[80px]"/>
+        </div>
+        @if (Depth > 0)
+        {
+            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Class="shrink-0 text-muted-foreground hover:text-destructive" AriaLabel="Remove group"
+                      OnClick="OnRemove">
+                <LucideIcon Name="x" Size="16"/>
+            </BbButton>
+        }
+    </div>
+    @if (Group.Conditions.Count > 0 || Group.Groups.Count > 0)
+    {
+        <div class="space-y-2">
+            @foreach (var condition in Group.Conditions)
+            {
+                <FeedFilterCondition @key="condition.Id" Condition="condition" Changed="Changed" Adornments="Adornments"
+                                     OnRemove="@(() => RemoveConditionAsync(condition))"/>
+            }
+            @foreach (var nested in Group.Groups)
+            {
+                <FeedFilterGroup @key="nested" Group="nested" Depth="@(Depth + 1)" Changed="Changed" Adornments="Adornments"
+                                 OnRemove="@(() => RemoveGroupAsync(nested))"/>
+            }
+        </div>
+    }
+    <div class="flex items-center gap-2">
+        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="text-xs text-muted-foreground hover:text-foreground" OnClick="AddConditionAsync">
+            <LucideIcon Name="plus" Size="14"/>
+            Add condition
+        </BbButton>
+        @if (Depth < MaxDepth)
+        {
+            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="text-xs text-muted-foreground hover:text-foreground" OnClick="AddGroupAsync">
+                <LucideIcon Name="plus" Size="14"/>
+                Add group
+            </BbButton>
+        }
+    </div>
+</div>
+
+@code {
+    private const int MaxDepth = 2;
+
+    [Parameter] [EditorRequired] public required FilterDefinition Group { get; set; }
+
+    [Parameter] public int Depth { get; set; }
+
+    [Parameter] [EditorRequired] public required EventCallback Changed { get; set; }
+
+    [Parameter] public EventCallback OnRemove { get; set; }
+
+    [Parameter] [EditorRequired] public required IReadOnlyDictionary<string, RenderFragment> Adornments { get; set; }
+
+    private static readonly IReadOnlyList<SelectOption<LogicalOperator>> LogicalOptions =
+        [new(LogicalOperator.And, "AND"), new(LogicalOperator.Or, "OR")];
+
+    private string GroupLabel => Depth == 0 ? "Root filter group" : $"Nested filter group at depth {Depth}";
+
+    private string GroupClass
+    {
+        get
+        {
+            return Depth switch
+            {
+                0 => "space-y-3 rounded-lg border bg-background p-3",
+                1 => "space-y-3 rounded-lg border border-s-4 border-s-blue-500 bg-muted/30 p-3",
+                _ => "space-y-3 rounded-lg border border-s-4 border-s-purple-500 bg-muted/30 p-3",
+            };
+        }
+    }
+
+    private Task ChangeOperatorAsync(LogicalOperator chosen)
+    {
+        Group.Operator = chosen;
+        return Changed.InvokeAsync();
+    }
+
+    private Task AddConditionAsync()
+    {
+        Group.Conditions.Add(FeedFields.NewCondition());
+        return Changed.InvokeAsync();
+    }
+
+    private Task AddGroupAsync()
+    {
+        Group.Groups.Add(new FilterDefinition { Conditions = [FeedFields.NewCondition()] });
+        return Changed.InvokeAsync();
+    }
+
+    private Task RemoveConditionAsync(FilterCondition condition)
+    {
+        Group.Conditions.Remove(condition);
+        return Changed.InvokeAsync();
+    }
+
+    private Task RemoveGroupAsync(FilterDefinition nested)
+    {
+        Group.Groups.Remove(nested);
+        return Changed.InvokeAsync();
+    }
+}

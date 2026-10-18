@@ -1,0 +1,19 @@
+@using BlazorBlueprint.Primitives.Filtering
+
+<div class="space-y-3" role="region" aria-label="Filter builder">
+    <FeedFilterGroup Group="Filter" Changed="ChangedAsync" Adornments="Adornments"/>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required FilterDefinition Filter { get; set; }
+
+    [Parameter] public EventCallback<FilterDefinition> FilterChanged { get; set; }
+
+    [Parameter] public IReadOnlyDictionary<string, RenderFragment> Adornments { get; set; } = new Dictionary<string, RenderFragment>();
+
+    private Task ChangedAsync()
+    {
+        Filter.Version++;
+        return FilterChanged.InvokeAsync(Filter);
+    }
+}

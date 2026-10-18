@@ -959,6 +959,33 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
     }
 }
 
+@utility field-adorned {
+    display: inline-flex;
+    align-items: stretch;
+    height: 2.5rem;
+    overflow: hidden;
+    border: 1px solid var(--input);
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--background);
+
+    &:has([role="combobox"]:focus-visible) {
+        box-shadow: 0 0 0 2px var(--ring);
+    }
+
+    & [role="combobox"] {
+        height: 100%;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    & [role="combobox"]:focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
+}
+
 /* Classes the scanner cannot see because they are assembled in C# go here, e.g.
    @source inline("px-6 mt-7"); — plain literals in markup are found automatically. */
 

@@ -1,57 +1,66 @@
+@using BlazorBlueprint.Primitives.Filtering
+@using FilterOperator = BlazorBlueprint.Primitives.Filtering.FilterOperator
+
 <div class="number-rule">
     <div class="number-rule-box">
         <BbNumericInput TValue="double"
-                        Value="@Read(Context.Value)"
-                        ValueChanged="@(value => Context.SetValueAsync(value, Context.ValueEnd))"
-                        Min="Min"
-                        Max="Max"
-                        Step="Step"
+                        Value="@Read(Condition.Value)"
+                        ValueChanged="@(value => SetAsync(value, Condition.ValueEnd))"
+                        Min="Rule.Min"
+                        Max="Rule.Max"
+                        Step="Rule.Step"
                         ShowButtons="false"
                         AllowNegative="false"
                         AriaLabel="@Label"
                         data-number-rule/>
-        @if (Unit is not null)
+        @if (Rule.Unit is not null)
         {
-            <span class="number-rule-unit">@Unit</span>
+            <span class="number-rule-unit">@Rule.Unit</span>
         }
-        <span class="number-rule-adornment">@Adornment</span>
+        @if (Adornment is not null)
+        {
+            <span class="number-rule-adornment">@Adornment</span>
+        }
     </div>
-    @if (Context.Operator is BlazorBlueprint.Primitives.Filtering.FilterOperator.Between)
+    @if (Condition.Operator is FilterOperator.Between)
     {
         <span class="number-rule-and">and</span>
         <div class="number-rule-box">
             <BbNumericInput TValue="double"
-                            Value="@Read(Context.ValueEnd)"
-                            ValueChanged="@(value => Context.SetValueAsync(Context.Value, value))"
-                            Min="Min"
-                            Max="Max"
-                            Step="Step"
+                            Value="@Read(Condition.ValueEnd)"
+                            ValueChanged="@(value => SetAsync(Condition.Value, value))"
+                            Min="Rule.Min"
+                            Max="Rule.Max"
+                            Step="Rule.Step"
                             ShowButtons="false"
                             AllowNegative="false"
                             AriaLabel="@($"{Label}, upper bound")"
                             data-number-rule/>
-            @if (Unit is not null)
+            @if (Rule.Unit is not null)
             {
-                <span class="number-rule-unit">@Unit</span>
+                <span class="number-rule-unit">@Rule.Unit</span>
             }
         </div>
     }
 </div>
 
 @code {
-    [Parameter] [EditorRequired] public required FilterValueEditorContext Context { get; set; }
+    [Parameter] [EditorRequired] public required FilterCondition Condition { get; set; }
 
     [Parameter] [EditorRequired] public required string Label { get; set; }
 
-    [Parameter] public string? Unit { get; set; }
-
-    [Parameter] public double? Min { get; set; }
-
-    [Parameter] public double? Max { get; set; }
-
-    [Parameter] public double? Step { get; set; }
+    [Parameter] [EditorRequired] public required FeedNumberRule Rule { get; set; }
 
     [Parameter] public RenderFragment? Adornment { get; set; }
 
+    [Parameter] public EventCallback Changed { get; set; }
+
     private static double Read(object? value) => value is double number ? number : 0;
+
+    private Task SetAsync(object? value, object? valueEnd)
+    {
+        Condition.Value = value;
+        Condition.ValueEnd = valueEnd;
+        return Changed.InvokeAsync();
+    }
 }

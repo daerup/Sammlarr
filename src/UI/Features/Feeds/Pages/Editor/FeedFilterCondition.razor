@@ -1,0 +1,109 @@
+@using BlazorBlueprint.Primitives.Filtering
+@using FilterOperator = BlazorBlueprint.Primitives.Filtering.FilterOperator
+
+<div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filter condition">
+    <div class="w-[160px] @AdornedClass">
+        <BbSelect TValue="string" Value="@Condition.Field" ValueChanged="ChangeFieldAsync" Options="FeedFields.Options" Class="min-w-0 flex-1"/>
+        @Adornment
+    </div>
+    <BbSelect TValue="FilterOperator" Value="@Condition.Operator" ValueChanged="ChangeOperatorAsync" Options="Field.Operators" Class="w-[180px]"/>
+    @switch (Field.Kind)
+    {
+        case FeedFieldKind.Text:
+            <BbInput Value="@(Condition.Value as string)" ValueChanged="SetAsync" Placeholder="Enter value..."
+                     UpdateTiming="UpdateTiming.Immediate" Class="w-[180px]"/>
+            break;
+        case FeedFieldKind.Number:
+            <FeedNumberRuleEditor Condition="Condition" Label="@Field.Label" Rule="Field.Number" Changed="Changed"/>
+            break;
+        case FeedFieldKind.Choice when IsMultiple:
+            <BbMultiSelect TValue="string" Values="@Picked" ValuesChanged="SetPickedAsync" Options="Field.Options" Placeholder="Select..." Class="w-[180px]"/>
+            break;
+        case FeedFieldKind.Choice:
+            <BbSelect TValue="string" Value="@(Condition.Value as string)" ValueChanged="SetAsync" Options="Field.Options" Placeholder="Select..." Class="w-[180px]"/>
+            break;
+        case FeedFieldKind.Date:
+            <BbDatePicker Value="@(Condition.Value as DateTime?)" ValueChanged="SetDateAsync" AriaLabel="@Field.Label" Class="w-[180px]"/>
+            @if (Condition.Operator is FilterOperator.Between)
+            {
+                <span class="text-sm text-muted-foreground">and</span>
+                <BbDatePicker Value="@(Condition.ValueEnd as DateTime?)" ValueChanged="SetDateEndAsync" AriaLabel="@($"{Field.Label}, upper bound")" Class="w-[180px]"/>
+            }
+            break;
+    }
+    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Class="shrink-0 text-muted-foreground hover:text-destructive" AriaLabel="Remove condition"
+              OnClick="OnRemove">
+        <LucideIcon Name="x" Size="16"/>
+    </BbButton>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required FilterCondition Condition { get; set; }
+
+    [Parameter] [EditorRequired] public required EventCallback Changed { get; set; }
+
+    [Parameter] [EditorRequired] public required EventCallback OnRemove { get; set; }
+
+    [Parameter] [EditorRequired] public required IReadOnlyDictionary<string, RenderFragment> Adornments { get; set; }
+
+    private FeedField Field => FeedFields.For(Condition.Field);
+
+    private RenderFragment? Adornment => Adornments.GetValueOrDefault(Condition.Field);
+
+    private string? AdornedClass => Adornment is null ? null : "field-adorned";
+
+    private bool IsMultiple => Condition.Operator is FilterOperator.In or FilterOperator.NotIn;
+
+    private IEnumerable<string> Picked => Condition.Value as IEnumerable<string> ?? [];
+
+    private Task ChangeFieldAsync(string field)
+    {
+        var kind = Field.Kind;
+        Condition.Field = field;
+        if (!Field.Offers(Condition.Operator))
+        {
+            Condition.Operator = Field.Operators[0].Value;
+        }
+
+        if (kind != Field.Kind)
+        {
+            Condition.Value = null;
+            Condition.ValueEnd = null;
+        }
+
+        return Changed.InvokeAsync();
+    }
+
+    private Task ChangeOperatorAsync(FilterOperator chosen)
+    {
+        var multiple = IsMultiple;
+        Condition.Operator = chosen;
+        if (multiple != IsMultiple)
+        {
+            Condition.Value = null;
+        }
+
+        if (chosen is not FilterOperator.Between)
+        {
+            Condition.ValueEnd = null;
+        }
+
+        return Changed.InvokeAsync();
+    }
+
+    private Task SetPickedAsync(IEnumerable<string>? picked) => SetAsync(picked?.ToArray());
+
+    private Task SetDateAsync(DateTime? value) => SetAsync(value);
+
+    private Task SetDateEndAsync(DateTime? value)
+    {
+        Condition.ValueEnd = value;
+        return Changed.InvokeAsync();
+    }
+
+    private Task SetAsync(object? value)
+    {
+        Condition.Value = value;
+        return Changed.InvokeAsync();
+    }
+}

@@ -137,8 +137,9 @@ public class FeedConfigPanelTests : BunitContext
 		var cut = RenderPanelFiltering("Rating", 7.0);
 
 		await Assert
-			.That(cut.Find(".number-rule-box button.field-segment.is-gold").GetAttribute("aria-label"))
+			.That(cut.Find(".field-adorned button.field-segment.is-gold").GetAttribute("aria-label"))
 			.IsEqualTo("This feed's Sammlarr rating: My default (Average). Click to change.");
+		await Assert.That(cut.FindAll(".number-rule-box .field-segment")).IsEmpty();
 	}
 
 	[Test]
@@ -146,8 +147,26 @@ public class FeedConfigPanelTests : BunitContext
 	{
 		var cut = RenderPanelFiltering("Votes", 500.0);
 
-		await Assert.That(cut.FindAll(".number-rule-box button.field-segment[aria-label='How Votes are counted']")).IsNotEmpty();
+		await Assert.That(cut.FindAll(".field-adorned button.field-segment[aria-label='How Votes are counted']")).IsNotEmpty();
+		await Assert.That(cut.FindAll(".number-rule-box .field-segment")).IsEmpty();
 		await Assert.That(cut.FindAll("button.field-segment.is-gold")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Rule_ForARatingBetween_JoinsTheStarToTheField()
+	{
+		var cut = RenderPanelFiltering("Rating", 7.0, BlazorBlueprint.Primitives.Filtering.FilterOperator.Between, 9.0);
+
+		await Assert.That(cut.FindAll("[aria-label='Filter condition'] button.field-segment.is-gold")).HasSingleItem();
+		await Assert.That(cut.FindAll("[aria-label='Filter condition'] .field-adorned button.field-segment.is-gold")).HasSingleItem();
+	}
+
+	[Test]
+	public async Task Rule_ForAFieldWithoutAStarOrInfo_KeepsAPlainFieldSelect()
+	{
+		var cut = RenderPanelFiltering("Seasons", 2.0);
+
+		await Assert.That(cut.FindAll("[aria-label='Filter condition'] .field-adorned")).IsEmpty();
 	}
 
 	[Test]
@@ -169,9 +188,9 @@ public class FeedConfigPanelTests : BunitContext
 	{
 		var cut = RenderPanelSorted(field);
 
-		await Assert.That(cut.FindAll(".sort-field button.field-segment.is-gold").Count > 0).IsEqualTo(hasStar);
-		await Assert.That(cut.FindAll(".sort-field button.field-segment[aria-label='How Votes are counted']").Count > 0).IsEqualTo(hasInfo);
-		await Assert.That(cut.FindAll(".sort-field .field-segment").Count).IsEqualTo(Convert.ToInt32(hasStar) + Convert.ToInt32(hasInfo));
+		await Assert.That(cut.FindAll(".field-adorned button.field-segment.is-gold").Count > 0).IsEqualTo(hasStar);
+		await Assert.That(cut.FindAll(".field-adorned button.field-segment[aria-label='How Votes are counted']").Count > 0).IsEqualTo(hasInfo);
+		await Assert.That(cut.FindAll(".field-adorned .field-segment").Count).IsEqualTo(Convert.ToInt32(hasStar) + Convert.ToInt32(hasInfo));
 	}
 
 	[Test]

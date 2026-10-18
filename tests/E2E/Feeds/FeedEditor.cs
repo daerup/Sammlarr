@@ -26,7 +26,7 @@ internal static class FeedEditor
 
 	private const string RowTitle = $"{ResultRow} .media-title-text";
 
-	private const int FilterBuilderDebounceMs = 300;
+	private const int ReplanPauseMs = 300;
 
 	internal static async Task ConfigureAsync(IPage page, string name)
 	{
@@ -107,7 +107,7 @@ internal static class FeedEditor
 		await page.Locator("[role='group'][aria-label='Filter condition']").Combobox.First.ClickAsync();
 		await page.Option(field).ClickAsync();
 		await FillAsync(page, "input[placeholder='Enter value...']", value);
-		await page.WaitForTimeoutAsync(FilterBuilderDebounceMs * 3);
+		await page.WaitForTimeoutAsync(ReplanPauseMs * 3);
 	}
 
 	internal static async Task AddNumberConditionAsync(IPage page, string field, string comparison, string value)
@@ -119,7 +119,7 @@ internal static class FeedEditor
 		await condition.Combobox.Nth(1).ClickAsync();
 		await page.Option(comparison).ClickAsync();
 		await condition.Locator($"input[aria-label='{field}']").EnterAsync(value);
-		await page.WaitForTimeoutAsync(FilterBuilderDebounceMs * 3);
+		await page.WaitForTimeoutAsync(ReplanPauseMs * 3);
 	}
 
 	internal static ILocator RatingStar(IPage page) => page.Locator("button.field-segment.is-gold").First;
