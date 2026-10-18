@@ -198,15 +198,111 @@ public class FeedPreviewPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Apply_WhenTheDraftNowRequiresAFieldTheLoadDidNotNeed_LoadsTheListAgain()
+	public async Task Apply_WhenEveryLoadedTitleHasTheNewField_ReplansWithoutReadingOrLoadingAgain()
+	{
+		var provider = Listing(Detail(MediaId.New(), Tagline), Detail(MediaId.New(), Tagline));
+		var media = IMediaService.Mock();
+		var cut = RenderPanel(TaglineSortPlanner(), resolved: 0, unmatched: 0, provider: provider.Object, media: media);
+		await ApplyAsync(cut, new Append());
+		cut.WaitForState(() => Rows(cut).Count == 2);
+
+		await ApplyAsync(cut, new Append(), ByTagline);
+
+		media.GetDetailsAsync(Any(), Any(), Any()).WasCalled(Times.Never);
+		provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Once);
+		await Assert.That(cut.FindAll("[data-preview-reloading]")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Apply_WhenSomeTitlesLackTheNewField_ReadsItForThemAloneWhileTheRowsWait()
+	{
+		var untagged = Detail(MediaId.New());
+		var provider = Listing(Detail(MediaId.New(), Tagline), untagged);
+		var media = IMediaService.Mock();
+		var read = new TaskCompletionSource();
+		media.GetDetailsAsync(Any(), Any(), Any()).Returns((_, _, token) => ReadAfter(read.Task, Detail(untagged.Identity.Id, Tagline), token));
+		var cut = RenderPanel(TaglineSortPlanner(), resolved: 0, unmatched: 0, provider: provider.Object, media: media);
+		await ApplyAsync(cut, new Append());
+		cut.WaitForState(() => Rows(cut).Count == 2);
+
+		await ApplyAsync(cut, new Append(), ByTagline);
+
+		cut.WaitForState(() => cut.FindAll("[data-preview-reloading]").Count > 0);
+		await Assert.That(cut.Find("[data-preview-reloading]").TextContent).Contains("Reading Tagline · 0 of 1");
+		await Assert.That(cut.Find(".preview-main-results").ClassList).Contains("opacity-40");
+		await Assert.That(Rows(cut).Count).IsEqualTo(2);
+		media
+			.GetDetailsAsync(Is<IEnumerable<MediaId>>(ids => ids != null && ids.SequenceEqual(new[] { untagged.Identity.Id })), Any(), Any())
+			.WasCalled(Times.Once);
+
+		await cut.InvokeAsync(read.SetResult);
+
+		cut.WaitForState(() => cut.FindAll("[data-preview-reloading]").Count == 0);
+		await Assert.That(cut.Find(".preview-main-results").ClassList).DoesNotContain("opacity-40");
+		provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task Apply_WhenANewFieldIsNeededMidLoad_LoadsTheListAgainWithIt()
 	{
 		var (planner, provider) = Loading(FieldNeeds.None, new FieldNeeds(MediaField.Genres, MediaFields.None));
+		var held = new TaskCompletionSource();
+		provider.GetFeedItemsAsync(Any(), Any(), Any()).Returns((_, _, token) => HeldItems.UntilAsync(held.Task, token));
 		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
-		await ApplyAsync(cut, new Append());
+		_ = ApplyAsync(cut, new Append());
+		cut.WaitForAssertion(() => provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Once));
 
 		await ApplyAsync(cut, new Append(), new QuerySort { Property = nameof(MediaQueryRow.Genres), Direction = ListSortDirection.Ascending });
 
-		provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Exactly(2));
+		cut.WaitForAssertion(() => provider.GetFeedItemsAsync(Any(), new FieldNeeds(MediaField.Genres, MediaFields.None), Any()).WasCalled(Times.Once));
+	}
+
+	[Test]
+	public async Task Apply_ForAnotherListMidLoad_CancelsTheFirstStreamAndLoadsTheNewOne()
+	{
+		var (planner, provider) = Loading(FieldNeeds.None);
+		var streams = new List<CancellationToken>();
+		var held = new TaskCompletionSource();
+		provider
+			.GetFeedItemsAsync(Any(), Any(), Any())
+			.Returns(
+				(_, _, token) =>
+				{
+					streams.Add(token);
+					return HeldItems.UntilAsync(held.Task, token);
+				}
+			);
+		var cut = RenderPanel(planner.Object, resolved: 0, unmatched: 0, provider: provider.Object);
+		_ = ApplyAsync(cut, new Append());
+		cut.WaitForAssertion(() => provider.GetFeedItemsAsync(Any(), Any(), Any()).WasCalled(Times.Once));
+
+		_ = ApplyAsync(cut, new Append(), identifier: "other");
+
+		cut.WaitForAssertion(() => provider.GetFeedItemsAsync("other", Any(), Any()).WasCalled(Times.Once));
+		await Assert.That(streams[0].IsCancellationRequested).IsTrue();
+	}
+
+	[Test]
+	public async Task Config_ForAListNotLoadedYet_DimsTheRowsOfTheLoadedOne()
+	{
+		var cut = RenderPanel(new NewestFirstPlanner(), resolved: 2, unmatched: 0);
+		await ApplyAsync(cut, new Append());
+		cut.WaitForState(() => Rows(cut).Count == 2);
+
+		cut.Render(parameters =>
+			parameters.Add(
+				panel => panel.Config,
+				new FeedConfig
+				{
+					Name = "counted",
+					Provider = FeedProvider.Mdblist,
+					Identifier = "other",
+				}
+			)
+		);
+
+		await Assert.That(cut.Find(".preview-main-results").ClassList).Contains("opacity-40");
+		await Assert.That(Rows(cut).Count).IsEqualTo(2);
 	}
 
 	[Test]
@@ -297,6 +393,7 @@ public class FeedPreviewPanelTests : BunitContext
 		FeedStrategy strategy,
 		QuerySort? sort = null,
 		QueryLimit? limit = null,
+		string identifier = "list",
 		CancellationToken visit = default
 	)
 	{
@@ -306,7 +403,7 @@ public class FeedPreviewPanelTests : BunitContext
 				{
 					Name = "counted",
 					Provider = FeedProvider.Mdblist,
-					Identifier = "list",
+					Identifier = identifier,
 					Strategy = strategy,
 					Sort = sort,
 					Limit = limit,
@@ -333,7 +430,8 @@ public class FeedPreviewPanelTests : BunitContext
 		int resolved,
 		int unmatched,
 		MediaId? gone = null,
-		IFeedProvider? provider = null
+		IFeedProvider? provider = null,
+		Mock<IMediaService>? media = null
 	)
 	{
 		Services.AddBlazorBlueprintComponents();
@@ -348,12 +446,12 @@ public class FeedPreviewPanelTests : BunitContext
 		Services.AddSingleton(blocklist.Object);
 		Services.AddSingleton(ICurrentUser.Mock().Object);
 		Services.AddSingleton(IUserScope.Mock().Object);
-		var media = IMediaService.Mock();
+		var details = media ?? IMediaService.Mock();
 		if (gone is { } id)
 		{
-			media.GetDetailsAsync(Any(), Any(), Any()).Returns(AsyncSequence.Of<Result<MatchedMedia>>(Success.Of(Detail(id))));
+			details.GetDetailsAsync(Any(), Any(), Any()).Returns(AsyncSequence.Of<Result<MatchedMedia>>(Success.Of(Detail(id))));
 		}
-		Services.AddSingleton(media.Object);
+		Services.AddSingleton(details.Object);
 		Services.AddSingleton<IKeyedServiceIndex<FeedProvider, IFeedProvider>>(
 			new FakeKeyedServiceIndex<FeedProvider, IFeedProvider>().Register(FeedProvider.Mdblist, provider ?? new StubFeedService(resolved, unmatched))
 		);
@@ -453,39 +551,84 @@ public class FeedPreviewPanelTests : BunitContext
 	{
 		public Task<FieldNeeds> NeedsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default) => Task.FromResult(FieldNeeds.None);
 
-		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
-		{
-			var verdicts = Items(target)
-				.Matched()
-				.Reverse()
-				.Select(item => new QueryVerdict<MatchedMedia>(
-					item,
-					QueryOutcome.Qualified,
-					new Enrollment
-					{
-						InWantlist = false,
-						InBlocklist = false,
-						Owned = false,
-					},
-					ConsumesSlot: true
-				))
-				.ToList();
+		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default) =>
+			Task.FromResult(Qualified(Items(target).Matched().Reverse()));
+	}
 
-			return Task.FromResult<FeedPlanResult>(new AppendPlan(verdicts, [], FeedDelta.None, Conclusiveness.Conclusive));
-		}
+	private static readonly QuerySort ByTagline = new() { Property = nameof(MediaQueryRow.Tagline), Direction = ListSortDirection.Ascending };
+
+	private const string Tagline = "Truth has a deadline.";
+
+	private static IReadOnlyList<IElement> Rows(IRenderedComponent<FeedPreviewPanel> cut) => cut.FindAll(".preview-main-results .search-result-row");
+
+	private static IFeedRunPlanner TaglineSortPlanner()
+	{
+		var planner = IFeedRunPlanner.Mock();
+		planner
+			.NeedsAsync(Any(), Any())
+			.Returns(
+				(feed, _) =>
+					Task.FromResult(
+						feed.Sort.Match(
+							sort => sort.Property == nameof(MediaQueryRow.Tagline) ? new FieldNeeds(MediaField.Tagline, MediaFields.None) : FieldNeeds.None,
+							() => FieldNeeds.None
+						)
+					)
+			);
+		planner.PlanAsync(Any(), Any()).Returns((target, _) => Task.FromResult(Qualified(Items(target).Matched())));
+		return planner.Object;
+	}
+
+	private static Mock<IFeedProvider> Listing(params MatchedMedia[] items)
+	{
+		var provider = IFeedProvider.Mock();
+		provider
+			.GetFeedItemsAsync(Any(), Any(), Any())
+			.Returns(AsyncSequence.Of<Listed<MediaMatchResult>>([.. items.Select((item, index) => new Listed<MediaMatchResult>(index, item))]));
+		return provider;
+	}
+
+	private static async IAsyncEnumerable<Result<MatchedMedia>> ReadAfter(
+		Task read,
+		MatchedMedia media,
+		[EnumeratorCancellation] CancellationToken cancellationToken
+	)
+	{
+		await read.WaitAsync(cancellationToken);
+		yield return Success.Of(media);
+	}
+
+	private static FeedPlanResult Qualified(IEnumerable<MatchedMedia> items)
+	{
+		var verdicts = items
+			.Select(item => new QueryVerdict<MatchedMedia>(
+				item,
+				QueryOutcome.Qualified,
+				new Enrollment
+				{
+					InWantlist = false,
+					InBlocklist = false,
+					Owned = false,
+				},
+				ConsumesSlot: true
+			))
+			.ToList();
+
+		return new AppendPlan(verdicts, [], FeedDelta.None, Conclusiveness.Conclusive);
 	}
 
 	private static RawFeedLoad Load(FeedPlanTarget target) => target is DraftFeed(_, var load) ? load : new RawFeedLoad([], FeedLoadState.Finished);
 
 	private static IReadOnlyList<MediaMatchResult> Items(FeedPlanTarget target) => [.. Load(target).Items.Select(listed => listed.Item)];
 
-	private static MatchedMedia Detail(MediaId id)
+	private static MatchedMedia Detail(MediaId id, string? tagline = null)
 	{
 		return new MatchedMedia(
 			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
 			new MovieDetails
 			{
 				Title = "Gone",
+				Tagline = tagline,
 				ReleaseDate = new DateOnly(2020, 1, 1),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(90),

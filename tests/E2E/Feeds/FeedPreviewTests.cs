@@ -48,7 +48,7 @@ public class FeedPreviewTests
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
 		await FeedEditor.FillAsync(page, "#limit", Limit.ToString(CultureInfo.InvariantCulture));
-		await FeedEditor.ApplyAsync(page);
+		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var included = int.Parse(await FeedEditor.Badge(page, PreviewBadge.Included).InnerTextAsync(), CultureInfo.InvariantCulture);
@@ -94,7 +94,7 @@ public class FeedPreviewTests
 		await FeedEditor.SelectMdblistAsync(page);
 		await FeedEditor.FillAsync(page, "#name", TestData.Name("Unmatched"));
 		await FeedEditor.FillAsync(page, "#list-identifier", identifier);
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 		await Expect(page.Locator(FeedEditor.UnmatchedRow)).ToHaveCountAsync(3);
 		var listed = await E2EApp.RequestCountAsync($"/lists/{identifier}/items");
@@ -127,7 +127,7 @@ public class FeedPreviewTests
 	{
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, $"E2E {scenario} {Guid.NewGuid().ToString("N")[..6]}");
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 	}
 }

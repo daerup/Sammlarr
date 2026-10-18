@@ -43,7 +43,7 @@ public class DiagnosticsTests
 		var editor = await E2EApp.AdminAt(Routes.CreateFeed);
 		await FeedEditor.SelectMdblistAsync(editor);
 		await FeedEditor.FillAsync(editor, "#list-identifier", unknownList);
-		await FeedEditor.TestAsync(editor);
+		await FeedEditor.LoadAsync(editor);
 
 		await Expect(page.GetByText(unknownList)).ToBeVisibleAsync(Wait.Preview);
 	}

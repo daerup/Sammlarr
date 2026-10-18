@@ -16,7 +16,7 @@ public class FeedRatingTests
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable filters").ClickAsync();
 		await FeedEditor.AddNumberConditionAsync(page, "Rating", "greater or equal", "7");
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(3), Wait.Preview);
@@ -25,7 +25,7 @@ public class FeedRatingTests
 		await page.GetByRole(AriaRole.Tab, new PageGetByRoleOptions { Name = "First available" }).ClickAsync();
 		await FeedEditor.PutFirstAsync(page, "IMDb", steps: 1);
 		await page.Keyboard.PressAsync("Escape");
-		await FeedEditor.ApplyAsync(page);
+		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(4), Wait.Preview);
@@ -43,7 +43,7 @@ public class FeedRatingTests
 		await FeedEditor.Toggle(page, "Enable custom sorting").ClickAsync();
 		await page.Field("Sort by").Combobox.ClickAsync();
 		await page.Option("Rating").ClickAsync();
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(0), Wait.Preview);
@@ -52,7 +52,7 @@ public class FeedRatingTests
 		await page.GetByRole(AriaRole.Tab, new PageGetByRoleOptions { Name = "First available" }).ClickAsync();
 		await FeedEditor.PutFirstAsync(page, "Rotten Tomatoes® critics", steps: 2);
 		await page.Keyboard.PressAsync("Escape");
-		await FeedEditor.ApplyAsync(page);
+		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(9), Wait.Preview);

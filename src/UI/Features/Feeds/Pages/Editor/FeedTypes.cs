@@ -80,6 +80,30 @@ internal static class PreviewCopy
 			QueryOutcome.Qualified => string.Empty,
 		};
 	}
+
+	internal static string Fields(MediaFields fields)
+	{
+		string[] details = [.. Enum.GetValues<MediaField>().Where(field => field is not MediaField.None && fields.Details.HasFlag(field)).Select(Label).Distinct()];
+		return string.Join(", ", fields.Ratings.Count > 0 ? [.. details, "Ratings"] : details);
+	}
+
+	private static string Label(MediaField field)
+	{
+		return field switch
+		{
+			MediaField.None => string.Empty,
+			MediaField.Title => "Title",
+			MediaField.Tagline => "Tagline",
+			MediaField.Summary => "Summary",
+			MediaField.Poster => "Poster",
+			MediaField.Backdrop => "Backdrop",
+			MediaField.ReleaseDate => "Release Date",
+			MediaField.Genres => "Genres",
+			MediaField.Runtime or MediaField.RuntimePerEpisode => "Runtime",
+			MediaField.Seasons => "Seasons",
+			MediaField.Episodes => "Episodes",
+		};
+	}
 }
 
 internal sealed record AbsencePhrase(string Lead, string Join, string Tail);
@@ -126,7 +150,12 @@ internal static class MirrorSwitch
 	private static string Timing(int threshold, bool single) => threshold == 1 ? "on the next run" : $"after {threshold} runs without {(single ? "it" : "them")}";
 }
 
-public sealed record IdentifierCheck(string Typed, Result<string> Answer);
+public sealed record IdentifierCheck(string Typed, Result<string> Answer)
+{
+	public bool Refused => Answer.Match(_ => false, error => !Unreachable(error));
+
+	public static bool Unreachable(Error error) => error.CausedBy<RemoteUnavailableException>().IsSome();
+}
 
 public record FeedConfig
 {
@@ -148,7 +177,19 @@ public record FeedConfig
 
 	public bool IsTestable => Provider is not null && IsProviderAvailable && !string.IsNullOrWhiteSpace(Identifier) && (Limit is null || Limit.Count > 0);
 
-	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid && FilterDefinitionConverter.Incomplete(Filter).IsNone();
+	public Optional<string> Problem =>
+		this switch
+		{
+			{ Name: var name } when string.IsNullOrWhiteSpace(name) => Some.Of("Name is required"),
+			{ Provider: null } => Some.Of("Pick a provider"),
+			{ IsProviderAvailable: false } => Some.Of("The provider's API key is missing"),
+			{ Identifier: var identifier } when string.IsNullOrWhiteSpace(identifier) => Some.Of("List identifier is required"),
+			{ Limit.Count: <= 0 } => Some.Of("Limit must be a positive whole number"),
+			{ IsScheduleValid: false } => Some.Of("The schedule is incomplete"),
+			_ => FilterDefinitionConverter.Incomplete(Filter).Map(condition => $"{FeedFields.LabelOf(condition.Field)} condition unfinished"),
+		};
+
+	public bool SameSource(FeedConfig other) => Provider == other.Provider && Identifier.Trim() == other.Identifier.Trim();
 
 	public int GetPreviewHash() =>
 		HashCode.Combine(HashCode.Combine(Provider, Identifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit, Strategy, RatingStrategy));

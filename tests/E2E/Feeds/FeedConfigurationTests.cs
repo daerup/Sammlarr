@@ -16,7 +16,7 @@ public class FeedConfigurationTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, TestData.Name("Limit"));
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
@@ -27,7 +27,7 @@ public class FeedConfigurationTests
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
 		await FeedEditor.FillAsync(page, "#limit", TestData.Count(limit));
-		await FeedEditor.ApplyAsync(page);
+		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(listed));
@@ -45,19 +45,19 @@ public class FeedConfigurationTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, TestData.Name("Sort"));
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var sourceOrder = await FeedEditor.RowTitlesAsync(page);
 
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable custom sorting").ClickAsync();
-		await FeedEditor.ApplyAsync(page);
+		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 		var descending = await FeedEditor.RowTitlesAsync(page);
 
 		await page.Button("Descending").ClickAsync();
-		await FeedEditor.ApplyAsync(page);
+		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 		var ascending = await FeedEditor.RowTitlesAsync(page);
 
@@ -73,7 +73,7 @@ public class FeedConfigurationTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, TestData.Name("Filter"));
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var titles = await FeedEditor.RowTitlesAsync(page);
@@ -83,7 +83,7 @@ public class FeedConfigurationTests
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable filters").ClickAsync();
 		await FeedEditor.AddConditionAsync(page, "Title", kept);
-		await FeedEditor.ApplyAsync(page);
+		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(titles.Count));
@@ -105,8 +105,8 @@ public class FeedConfigurationTests
 		await FeedEditor.ConfigureAsync(page, name);
 		await FeedEditor.Option(page, "Strategy", "Mirror").ClickAsync();
 		await FeedEditor.RunCount(page).EnterAsync("5");
-		await FeedEditor.TestAsync(page);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.LoadAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 
 		var card = page.FeedCard(name);
 		await Expect(card).ToBeVisibleAsync(Wait.Settle);
@@ -132,7 +132,7 @@ public class FeedConfigurationTests
 		await FeedEditor.Option(page, "Trigger", "Scheduled").ClickAsync();
 		await page.GetByRole(AriaRole.Combobox).Filter(new LocatorFilterOptions { HasText = "Daily" }).ClickAsync();
 		await page.Option("Expression").ClickAsync();
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 
 		await FeedEditor.FillAsync(page, CronField("Hour"), "99");
 		await Expect(page.Locator(CronField("Hour"))).ToHaveAttributeAsync("aria-invalid", "true");
@@ -140,7 +140,7 @@ public class FeedConfigurationTests
 
 		await FeedEditor.FillAsync(page, CronField("Minute"), minute);
 		await FeedEditor.FillAsync(page, CronField("Hour"), hour);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 
 		var card = page.FeedCard(name);
 		await Expect(card).ToBeVisibleAsync(Wait.Settle);
@@ -160,7 +160,7 @@ public class FeedConfigurationTests
 		await FeedEditor.ConfigureAsync(page, name);
 		await FeedEditor.OpenOptionalSectionAsync(page, "Sync Frequency");
 		await FeedEditor.Option(page, "Trigger", "Scheduled").ClickAsync();
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await page.Button("Open time picker").ClickAsync();
 		await Expect(page.Button("Now")).ToBeVisibleAsync();
 
@@ -172,7 +172,7 @@ public class FeedConfigurationTests
 
 		await Expect(page.Labelled("Hour")).ToHaveValueAsync("23");
 		await Expect(page.Labelled("Minute")).ToHaveValueAsync("59");
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 
 		var card = page.FeedCard(name);
 		await Expect(card).ToBeVisibleAsync(Wait.Settle);
@@ -192,8 +192,8 @@ public class FeedConfigurationTests
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, original);
 		await FeedEditor.Option(page, "Strategy", "Mirror").ClickAsync();
-		await FeedEditor.TestAsync(page);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.LoadAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 
 		var originalCard = page.FeedCard(original);
 		await Expect(originalCard).ToBeVisibleAsync(Wait.Settle);
@@ -205,7 +205,7 @@ public class FeedConfigurationTests
 		await Expect(FeedEditor.Option(page, "Strategy", "Mirror")).ToHaveAttributeAsync("aria-checked", "true");
 
 		await FeedEditor.FillAsync(page, "#name", copy);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 
 		var copyCard = page.FeedCard(copy);
 		await Expect(copyCard).ToBeVisibleAsync(Wait.Settle);
@@ -221,8 +221,8 @@ public class FeedConfigurationTests
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
 		await FeedEditor.Toggle(page, "Enabled").ClickAsync();
-		await FeedEditor.TestAsync(page);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.LoadAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 
 		var card = page.FeedCard(name);
 		await Expect(card).ToBeVisibleAsync(Wait.Settle);
@@ -231,7 +231,7 @@ public class FeedConfigurationTests
 		await card.Labelled("Edit").ClickAsync();
 		await Expect(FeedEditor.Toggle(page, "Enabled")).ToHaveAttributeAsync("aria-checked", "false");
 		await FeedEditor.Toggle(page, "Enabled").ClickAsync();
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 
 		await Expect(card).ToBeVisibleAsync(Wait.Settle);
 		await Expect(card.Text("Paused")).ToBeHiddenAsync();
@@ -245,11 +245,11 @@ public class FeedConfigurationTests
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.SelectMdblistAsync(page);
 		await FeedEditor.FillAsync(page, "#list-identifier", UnknownIdentifier);
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 
-		await Expect(page.GetByText("List not found")).ToBeVisibleAsync(Wait.Preview);
-		await Expect(page.GetByText("Test failed")).ToBeVisibleAsync();
+		await Expect(page.Locator("[data-preview-state='failed']").GetByText("List not found")).ToBeVisibleAsync(Wait.Preview);
 		await Expect(page.Button("Retry")).ToBeVisibleAsync();
+		await Expect(FeedEditor.SaveButton(page)).ToBeDisabledAsync();
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
 	}
 
@@ -260,7 +260,7 @@ public class FeedConfigurationTests
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, TestData.Name("Number"));
 
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(page.Locator("#list-identifier")).ToHaveValueAsync(FeedEditor.StoredListIdentifier);
@@ -274,14 +274,13 @@ public class FeedConfigurationTests
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.SelectMdblistAsync(page);
 		await FeedEditor.FillAsync(page, "#name", TestData.Name("Refused"));
-		await FeedEditor.FillAsync(page, "#list-identifier", "top-250-movies");
 
-		await FeedEditor.TestButton(page).ClickAsync();
+		await FeedEditor.FillAsync(page, "#list-identifier", "top-250-movies");
 
 		await Expect(page.Locator("[data-identifier-error]")).ToBeVisibleAsync();
 		await Expect(page.Locator("#list-identifier")).ToHaveAttributeAsync("aria-invalid", "true");
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
-		await Expect(FeedEditor.SaveButton(page)).ToBeHiddenAsync();
+		await Expect(FeedEditor.SaveButton(page)).ToBeDisabledAsync();
 	}
 
 	private static string CronField(string label) => $"input[aria-label^='{label}']";

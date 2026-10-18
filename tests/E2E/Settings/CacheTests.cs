@@ -30,7 +30,7 @@ public class CacheTests
 	{
 		await page.VisitAsync(Routes.CreateFeed);
 		await FeedEditor.ConfigureAsync(page, TestData.Name("Cache"));
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 	}
 

@@ -19,8 +19,8 @@ public class UpNextTests
 		await page.Option("Expression").ClickAsync();
 		await FeedEditor.FillAsync(page, "input[aria-label^='Minute']", "30");
 		await FeedEditor.FillAsync(page, "input[aria-label^='Hour']", "4");
-		await FeedEditor.TestAsync(page);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.LoadAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 		await Expect(page.FeedCard(name)).ToBeVisibleAsync(Wait.Settle);
 
 		await page.VisitAsync(Routes.Home);

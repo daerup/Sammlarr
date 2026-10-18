@@ -49,27 +49,41 @@ internal static class FeedEditor
 
 	internal static Task FillAsync(IPage page, string selector, string value) => page.Locator(selector).EnterAsync(value);
 
-	internal static Task TestAsync(IPage page) => TestButton(page).ClickAsync();
+	internal static Task LoadAsync(IPage page) =>
+		Expect(page.Locator("[data-preview-state='idle']")).ToHaveCountAsync(0, new LocatorAssertionsToHaveCountOptions { Timeout = Wait.Preview });
 
-	internal static Task ApplyAsync(IPage page) => ApplyButton(page).ClickAsync();
-
-	internal static async Task PreviewLoadedAsync(IPage page)
+	internal static async Task CaughtUpAsync(IPage page)
 	{
-		await Expect(SaveButton(page)).ToBeEnabledAsync(Wait.Preview);
-		await Expect(page.Locator("[data-preview-state='success']")).ToBeVisibleAsync(Wait.Preview);
+		var preview = page.Locator("[data-preview-current]");
+		try
+		{
+			await Expect(preview).ToHaveAttributeAsync("data-preview-current", "false", new LocatorAssertionsToHaveAttributeOptions { Timeout = 1_000 });
+		}
+		catch (PlaywrightException) { }
+
+		await Expect(preview).ToHaveAttributeAsync("data-preview-current", "true", new LocatorAssertionsToHaveAttributeOptions { Timeout = Wait.Preview });
 	}
 
-	internal static async Task SaveAsync(IPage page)
+	internal static Task PreviewLoadedAsync(IPage page) => Expect(page.Locator("[data-preview-state='success']")).ToBeVisibleAsync(Wait.Preview);
+
+	internal static async Task SaveAndCloseAsync(IPage page)
 	{
 		await PreviewLoadedAsync(page);
+		await Expect(SaveButton(page)).ToBeEnabledAsync(Wait.Preview);
 		await SaveButton(page).ClickAsync();
+		await Expect(SavedStatus(page)).ToBeVisibleAsync(Wait.Settle);
+		await CloseButton(page).ClickAsync();
 	}
 
 	internal static ILocator SaveButton(IPage page) => page.Button("Save").First;
 
-	internal static ILocator ApplyButton(IPage page) => page.Button("Apply").First;
+	internal static ILocator CloseButton(IPage page) => page.Button("Close").First;
 
-	internal static ILocator TestButton(IPage page) => page.Button("Test").First;
+	internal static ILocator SavedStatus(IPage page) => page.Locator("[data-save-status='saved']");
+
+	internal static ILocator SaveStatus(IPage page) => page.Locator("[data-save-status]");
+
+	internal static ILocator PendingIdentifier(IPage page) => page.Locator("[data-identifier-pending]");
 
 	internal static ILocator Rows(IPage page) => page.Locator(ResultRow);
 

@@ -14,8 +14,8 @@ public class StackIsolationTests
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);
 		await FeedEditor.ConfigureAsync(page, SharedName);
-		await FeedEditor.TestAsync(page);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.LoadAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 
 		await Expect(page.FeedCard(SharedName)).ToHaveCountAsync(1, Wait.Settle);
 

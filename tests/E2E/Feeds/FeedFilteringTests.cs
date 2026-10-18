@@ -16,7 +16,7 @@ public class FeedFilteringTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, TestData.Name("Slots"));
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
@@ -24,13 +24,13 @@ public class FeedFilteringTests
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
 		await FeedEditor.FillAsync(page, "#limit", TestData.Count(Limit));
-		await FeedEditor.ApplyAsync(page);
+		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit));
 
 		await FeedEditor.Option(page, "Blocklist slot policy", "Preserved").ClickAsync();
-		await FeedEditor.ApplyAsync(page);
+		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit - 1));
@@ -47,15 +47,15 @@ public class FeedFilteringTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var kept = (await FeedEditor.RowTitlesAsync(page))[0];
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable filters").ClickAsync();
 		await FeedEditor.AddConditionAsync(page, "Title", kept);
-		await FeedEditor.ApplyAsync(page);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.CaughtUpAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 
 		var card = page.FeedCard(name);
 		await Expect(card).ToBeVisibleAsync(Wait.Settle);
@@ -70,21 +70,23 @@ public class FeedFilteringTests
 	}
 
 	[Test]
-	public async Task Limit_WhenEnabledButEmpty_BlocksTheTest()
+	public async Task Limit_WhenEnabledButEmpty_BlocksSavingAndSaysWhy()
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, TestData.Name("NoLimit"));
+		await FeedEditor.PreviewLoadedAsync(page);
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
 
 		await Expect(page.Locator("#limit")).ToHaveAttributeAsync("aria-invalid", "true");
-		await Expect(FeedEditor.TestButton(page)).ToBeDisabledAsync();
+		await Expect(FeedEditor.SaveButton(page)).ToBeDisabledAsync();
+		await Expect(FeedEditor.SaveStatus(page)).ToHaveTextAsync("Limit must be a positive whole number");
 
 		await FeedEditor.FillAsync(page, "#limit", TestData.Count(Limit));
 
 		await Expect(page.Locator("#limit")).Not.ToHaveAttributeAsync("aria-invalid", "true");
-		await Expect(FeedEditor.TestButton(page)).ToBeEnabledAsync();
+		await Expect(FeedEditor.SaveButton(page)).ToBeEnabledAsync();
 	}
 }

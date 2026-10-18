@@ -12,8 +12,8 @@ public class FeedLiveRunTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
-		await FeedEditor.TestAsync(page);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.LoadAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 		var card = page.FeedCard(name);
 		await Expect(card).ToBeVisibleAsync(Wait.Settle);
 

@@ -40,7 +40,7 @@ public class BlocklistRemovalTests
 	private static async Task PreviewAsync(IPage page)
 	{
 		await FeedEditor.ConfigureAsync(page, TestData.Name("Unblocklist"));
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 	}
 

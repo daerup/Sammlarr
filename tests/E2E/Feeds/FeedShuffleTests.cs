@@ -18,11 +18,11 @@ public class FeedShuffleTests
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
 		await FeedEditor.FillAsync(page, "#limit", TestData.Count(Limit));
 		await FeedEditor.Option(page, "Maximum items", "At random").ClickAsync();
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 		var picked = await TitlesAsync(page, PreviewBadge.Included, PreviewBadge.Bypassed);
 
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 		await RunAsync(page, name);
 		await page.FeedCard(name).Labelled("Edit").ClickAsync();
 		await Expect(page.Locator("[data-preview-state='success']")).ToBeVisibleAsync(Wait.Preview);

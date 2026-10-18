@@ -15,8 +15,8 @@ public class UsagePickTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync(Routes.CreateFeed);
 		await FeedEditor.ConfigureAsync(page, name);
-		await FeedEditor.TestAsync(page);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.LoadAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 		var feed = page.FeedCard(name);
 		await Expect(feed).ToBeVisibleAsync(Wait.Settle);
 		await feed.Labelled("Run").ClickAsync();
@@ -47,7 +47,7 @@ public class UsagePickTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync(Routes.CreateFeed);
 		await FeedEditor.ConfigureAsync(page, TestData.Name("Usage preview"));
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await UntilCountedAsync(page, "Feed editor");

@@ -6,7 +6,7 @@ namespace E2E.Tests.Feeds;
 public class FeedImportTests
 {
 	[Test]
-	public async Task Save_WhenNameIsMissing_IsNotOffered()
+	public async Task Save_WhenNameIsMissing_IsOffAndSaysWhy()
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
@@ -14,17 +14,18 @@ public class FeedImportTests
 		await FeedEditor.SelectMdblistAsync(page);
 		await page.Locator("#list-identifier").EnterAsync(FeedEditor.ListIdentifier);
 
-		await Expect(page.Button("Save")).ToBeHiddenAsync();
+		await Expect(FeedEditor.SaveButton(page)).ToBeDisabledAsync();
+		await Expect(FeedEditor.SaveStatus(page)).ToHaveTextAsync("Name is required");
 	}
 
 	[Test]
-	public async Task Test_WhenGivenAnMdblistList_LoadsTheListItemsIntoThePreview()
+	public async Task Identifier_WhenGivenAnMdblistList_LoadsTheListItemsIntoThePreview()
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 
 		await FeedEditor.ConfigureAsync(page, "E2E Preview Feed");
-		await FeedEditor.TestAsync(page);
+		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var served = await FeedEditor.ServedTitlesAsync();

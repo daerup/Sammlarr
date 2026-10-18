@@ -1,6 +1,6 @@
 <BbTooltip DelayDuration="0">
     <BbTooltipTrigger AsChild="false" Class="p-0">
-        <button type="button" class="preview-filter-badge @(Active ? "is-active" : null)" @onclick="OnClick">
+        <button @key="_flashes" type="button" class="preview-filter-badge @(Active ? "is-active" : null) @(_flashes > 0 ? "is-flashing" : null)" @onclick="OnClick">
             <LucideIcon Name="@Icon" Size="14"/>
             <span>@Count</span>
         </button>
@@ -12,6 +12,22 @@
     [Parameter] [EditorRequired] public required string Icon { get; set; }
     [Parameter] [EditorRequired] public required int Count { get; set; }
     [Parameter] public bool Active { get; set; }
+    [Parameter] public int Flash { get; set; }
     [Parameter] public RenderFragment? Tooltip { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
+
+    private int _seenFlash;
+    private int? _shownCount;
+    private int _flashes;
+
+    protected override void OnParametersSet()
+    {
+        if (Flash != _seenFlash && _shownCount is { } shown && shown != Count)
+        {
+            _flashes++;
+        }
+
+        _seenFlash = Flash;
+        _shownCount = Count;
+    }
 }

@@ -9,6 +9,7 @@ using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Feeds.Pages.Editor;
@@ -254,6 +255,75 @@ public class FeedConfigPanelTests : BunitContext
 	}
 
 	[Test]
+	public async Task Identifier_OnEnter_Commits()
+	{
+		var commits = 0;
+		var cut = RenderConfig(Documentaries, () => commits++);
+
+		await IdentifierField(cut).KeyUpAsync(new KeyboardEventArgs { Key = "Enter" });
+
+		await Assert.That(commits).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Identifier_WhenTheFieldReportsItsValue_TakesThatValueThenCommits()
+	{
+		var commits = 0;
+		var cut = RenderConfig(Documentaries, () => commits++);
+
+		await IdentifierField(cut).ChangeAsync(new ChangeEventArgs { Value = "hdlists/comedy" });
+
+		await Assert.That(commits).IsEqualTo(1);
+		await Assert.That(_changes.Last().Identifier).IsEqualTo("hdlists/comedy");
+	}
+
+	[Test]
+	public async Task Identifier_OnAnyOtherKey_CommitsNothing()
+	{
+		var commits = 0;
+		var cut = RenderConfig(Documentaries, () => commits++);
+
+		await IdentifierField(cut).KeyUpAsync(new KeyboardEventArgs { Key = "a" });
+
+		await Assert.That(commits).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Identifier_WhenPasted_CommitsOnceThePastedValueArrives()
+	{
+		var commits = 0;
+		var cut = RenderConfig(Documentaries, () => commits++);
+
+		await IdentifierField(cut).TriggerEventAsync("onpaste", new ClipboardEventArgs());
+		await Assert.That(commits).IsEqualTo(0);
+		await cut.InvokeAsync(() => IdentifierInput(cut).Instance.ValueChanged.InvokeAsync("hdlists/comedy"));
+
+		await Assert.That(commits).IsEqualTo(1);
+		await Assert.That(_changes.Last().Identifier).IsEqualTo("hdlists/comedy");
+	}
+
+	[Test]
+	public async Task Identifier_WhileTyped_CommitsNothing()
+	{
+		var commits = 0;
+		var cut = RenderConfig(Documentaries, () => commits++);
+
+		await cut.InvokeAsync(() => IdentifierInput(cut).Instance.ValueChanged.InvokeAsync("hdlists/com"));
+
+		await Assert.That(commits).IsEqualTo(0);
+		await Assert.That(_changes.Last().Identifier).IsEqualTo("hdlists/com");
+	}
+
+	[Test]
+	public async Task Identifier_WhilePending_ShowsTheEnterKeyInsideTheField()
+	{
+		var cut = Render<FeedConfigPanel>(parameters => parameters.Add(panel => panel.Value, Documentaries).Add(panel => panel.Pending, true));
+
+		await Assert.That(cut.FindAll("[data-identifier-pending]")).HasSingleItem();
+		await Assert.That(IdentifierField(cut).HasAttribute("disabled")).IsFalse();
+	}
+
+	[Test]
 	[Arguments(FeedProvider.Mdblist, "Browse lists on MDBList", "https://mdblist.com/toplists/")]
 	[Arguments(FeedProvider.Tmdb, "Make a list on TMDB", "https://www.themoviedb.org/list/new")]
 	[Arguments(FeedProvider.AniList, "Find a user on AniList", "https://anilist.co/search/users")]
@@ -293,10 +363,13 @@ public class FeedConfigPanelTests : BunitContext
 		var cut = RenderConfig(config);
 
 		await Assert.That(cut.Find("[data-filter-unfinished]").TextContent.Trim()).IsEqualTo("Finish or remove the Media Type condition to save.");
-		await Assert.That(config.IsValid).IsFalse();
+		await Assert.That(config.Problem).IsSome();
 	}
 
 	private static IElement IdentifierField(IRenderedComponent<FeedConfigPanel> cut) => cut.Find("#list-identifier");
+
+	private static IRenderedComponent<BbInput> IdentifierInput(IRenderedComponent<FeedConfigPanel> cut) =>
+		cut.FindComponents<BbInput>().Single(input => input.Instance.Id == "list-identifier");
 
 	private static void Checked(IRenderedComponent<FeedConfigPanel> cut, IdentifierCheck check)
 	{
@@ -349,10 +422,13 @@ public class FeedConfigPanelTests : BunitContext
 		return RenderConfig(Documentaries with { Provider = provider, Strategy = strategy, RatingStrategy = Optional.Of(rating) });
 	}
 
-	private IRenderedComponent<FeedConfigPanel> RenderConfig(FeedConfig config)
+	private IRenderedComponent<FeedConfigPanel> RenderConfig(FeedConfig config, Action? onCommit = null)
 	{
 		return Render<FeedConfigPanel>(parameters =>
-			parameters.Add(panel => panel.Value, config).Add(panel => panel.OnChange, EventCallback.Factory.Create<FeedConfig>(this, _changes.Add))
+			parameters
+				.Add(panel => panel.Value, config)
+				.Add(panel => panel.OnChange, EventCallback.Factory.Create<FeedConfig>(this, _changes.Add))
+				.Add(panel => panel.OnCommit, EventCallback.Factory.Create(this, onCommit ?? (() => { })))
 		);
 	}
 }

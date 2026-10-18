@@ -10,7 +10,7 @@ public class FeedSaveTests
 	private const int PageDelayMs = 8000;
 
 	[Test]
-	public async Task Save_WhileThePreviewIsStillLoading_ForASwitchOff_PersistsAndLeaves()
+	public async Task Save_WhileThePreviewIsStillLoading_ForASwitchOff_PersistsAndStays()
 	{
 		var name = TestData.Name("Switch");
 		await CreateAsync(name);
@@ -24,8 +24,10 @@ public class FeedSaveTests
 		await FeedEditor.Toggle(page, "Enabled").ClickAsync();
 		await FeedEditor.SaveButton(page).ClickAsync();
 
+		await Expect(FeedEditor.SavedStatus(page)).ToBeVisibleAsync(Wait.Settle);
+		await Assert.That(new Uri(page.Url).AbsolutePath).StartsWith("/feeds/edit/");
+		await FeedEditor.CloseButton(page).ClickAsync();
 		await Expect(page.FeedCard(name).Text("Paused")).ToBeVisibleAsync(Wait.Settle);
-		await Assert.That(new Uri(page.Url).AbsolutePath).IsEqualTo("/feeds");
 	}
 
 	private static async Task CreateAsync(string name)
@@ -36,8 +38,8 @@ public class FeedSaveTests
 		await FeedEditor.SelectMdblistAsync(page);
 		await FeedEditor.FillAsync(page, "#name", name);
 		await FeedEditor.FillAsync(page, "#list-identifier", Identifier);
-		await FeedEditor.TestAsync(page);
-		await FeedEditor.SaveAsync(page);
+		await FeedEditor.LoadAsync(page);
+		await FeedEditor.SaveAndCloseAsync(page);
 		await Expect(page.FeedCard(name)).ToBeVisibleAsync(Wait.Settle);
 	}
 

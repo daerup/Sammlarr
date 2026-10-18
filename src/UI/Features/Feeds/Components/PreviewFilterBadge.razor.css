@@ -19,3 +19,20 @@
     color: var(--accent-foreground);
     background-color: var(--accent);
 }
+
+.preview-filter-badge.is-flashing {
+    animation: preview-filter-badge-flash 1.8s ease-out;
+}
+
+@keyframes preview-filter-badge-flash {
+    0%, 30% {
+        color: var(--accent-foreground);
+        background-color: var(--accent);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .preview-filter-badge.is-flashing {
+        animation: none;
+    }
+}

@@ -79,6 +79,7 @@
 
 .feed-card-source {
     display: flex;
+    width: fit-content;
     min-width: 0;
     line-height: 16px;
     overflow-x: clip;

@@ -1,4 +1,5 @@
 @using System.Diagnostics
+@using System.Globalization
 @using Contracts.Blocklist
 @using Contracts.DI
 @using Contracts.Feed
@@ -69,9 +70,11 @@
                 <div>
                     <h2 class="text-base font-semibold tracking-wide flex items-center gap-2">
                         <span>Media Results</span>
-                        @if (IsLoading)
+                        @if (IsLoading || Updating)
                         {
-                            <BbSpinner Size="SpinnerSize.Small"/>
+                            <span class="inline-flex" data-preview-busy>
+                                <BbSpinner Size="SpinnerSize.Small"/>
+                            </span>
                         }
                     </h2>
                     <p class="text-sm text-muted-foreground mt-0.5">
@@ -79,40 +82,44 @@
                                         Provider="@(_appliedConfig?.Provider ?? Config.Provider!.Value)"
                                         Muted="true"/>
                     </p>
+                    @if (_reloading is { } reloading)
+                    {
+                        <p class="mt-1 text-xs text-muted-foreground" data-preview-reloading>@reloading.Progress</p>
+                    }
                 </div>
                 <BbTooltipProvider>
-                    <div class="flex items-start">
+                    <div class="flex items-start transition-opacity @DimClass">
                     <div class="stat-badges-row flex items-start text-xs font-medium">
-                        <PreviewFilterBadge Icon="list" Count="_rawResults.Count" Active="_activeFilters.Count == 0 && !_atRiskOnly" OnClick="ResetFilters">
+                        <PreviewFilterBadge Flash="_flash" Icon="list" Count="_rawResults.Count" Active="_activeFilters.Count == 0 && !_atRiskOnly" OnClick="ResetFilters">
                             <Tooltip>Total items fetched from the source list. Click to clear filters.</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="check" Count="IncludedCount" Active="IsFilterActive(PreviewBucket.Added)" OnClick="() => ToggleFilter(PreviewBucket.Added)">
+                        <PreviewFilterBadge Flash="_flash" Icon="check" Count="IncludedCount" Active="IsFilterActive(PreviewBucket.Added)" OnClick="() => ToggleFilter(PreviewBucket.Added)">
                             <Tooltip>Items that will be imported</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="bookmark-check" Count="KeptCount" Active="IsFilterActive(PreviewBucket.Kept)" OnClick="() => ToggleFilter(PreviewBucket.Kept)">
+                        <PreviewFilterBadge Flash="_flash" Icon="bookmark-check" Count="KeptCount" Active="IsFilterActive(PreviewBucket.Kept)" OnClick="() => ToggleFilter(PreviewBucket.Kept)">
                             <Tooltip>Items this feed already added and still wants. Nothing to import.</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="redo-dot" Count="BypassedCount" Active="IsFilterActive(PreviewBucket.Bypassed)" OnClick="() => ToggleFilter(PreviewBucket.Bypassed)">
+                        <PreviewFilterBadge Flash="_flash" Icon="redo-dot" Count="BypassedCount" Active="IsFilterActive(PreviewBucket.Bypassed)" OnClick="() => ToggleFilter(PreviewBucket.Bypassed)">
                             <Tooltip>
                                 <p class="font-medium mb-0.5">Bypasses import</p>
                                 <p>@WantlistCount in your wantlist · @BlocklistCount in your blocklist</p>
                                 <p class="opacity-70 mt-0.5">These will not be imported.</p>
                             </Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="filter-x" Count="FilteredCount" Active="IsFilterActive(PreviewBucket.Filtered)" OnClick="() => ToggleFilter(PreviewBucket.Filtered)">
+                        <PreviewFilterBadge Flash="_flash" Icon="filter-x" Count="FilteredCount" Active="IsFilterActive(PreviewBucket.Filtered)" OnClick="() => ToggleFilter(PreviewBucket.Filtered)">
                             <Tooltip>Items excluded by your filter rules</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="scissors" Count="SkippedCount" Active="IsFilterActive(PreviewBucket.Skipped)" OnClick="() => ToggleFilter(PreviewBucket.Skipped)">
+                        <PreviewFilterBadge Flash="_flash" Icon="scissors" Count="SkippedCount" Active="IsFilterActive(PreviewBucket.Skipped)" OnClick="() => ToggleFilter(PreviewBucket.Skipped)">
                             <Tooltip>Items excluded by the import limit</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="circle-alert" Count="UnmatchedCount" Active="IsFilterActive(PreviewBucket.Unmatched)" OnClick="() => ToggleFilter(PreviewBucket.Unmatched)">
+                        <PreviewFilterBadge Flash="_flash" Icon="circle-alert" Count="UnmatchedCount" Active="IsFilterActive(PreviewBucket.Unmatched)" OnClick="() => ToggleFilter(PreviewBucket.Unmatched)">
                             <Tooltip>Items that could not be matched in your media provider</Tooltip>
                         </PreviewFilterBadge>
                     </div>
                     @if (IsMirror && LeavingCount > 0)
                     {
                         <div class="leaving-badge-slot flex items-start text-xs font-medium ml-2 pl-2 border-l border-border">
-                            <PreviewFilterBadge Icon="log-out" Count="LeavingCount" Active="_atRiskOnly" OnClick="ToggleAtRiskOnly">
+                            <PreviewFilterBadge Flash="_flash" Icon="log-out" Count="LeavingCount" Active="_atRiskOnly" OnClick="ToggleAtRiskOnly">
                                 <Tooltip>
                                     <p class="font-medium mb-0.5">On its way out</p>
                                     <p>@AtRiskCount no longer match your rules · @(_goneResults.Count + _goneShortfall) gone from the list</p>
@@ -141,7 +148,7 @@
         {
             @if (_filteredResults.Count > 0)
             {
-                <div class="preview-main-results">
+                <div class="preview-main-results transition-opacity @DimClass">
                 <VirtualizeGuard>
                     <Virtualize @key="_filteredResults.Count" Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
                         <ItemContent>
@@ -222,7 +229,7 @@
             }
             @if (_filteredGoneResults.Count > 0)
             {
-                <div class="mt-4 preview-gone-results">
+                <div class="mt-4 preview-gone-results transition-opacity @DimClass">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">@PreviewCopy.GoneHeading</p>
                     <VirtualizeGuard>
                         <Virtualize @key="_filteredGoneResults.Count" Items="_filteredGoneResults" Context="gone" ItemSize="215" OverscanCount="6">
@@ -262,7 +269,7 @@
             }
             @if (_filteredUnmatchedResults.Count > 0)
             {
-                <div class="mt-4">
+                <div class="mt-4 transition-opacity @DimClass">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
                     <VirtualizeGuard>
                         <Virtualize @key="_filteredUnmatchedResults.Count" Items="_filteredUnmatchedResults" Context="item" ItemSize="215" OverscanCount="6">
@@ -294,7 +301,7 @@
                     </VirtualizeGuard>
                 </div>
             }
-            @if (IsLoading)
+            @if (IsLoading && _reloading is null)
             {
                 <div class="mt-2 space-y-2">
                     <AutoSkeletons Preset="AutoSkeletonPreset.MediaDetailTile" Count="3"/>
@@ -340,9 +347,21 @@
                 else
                 {
                     <LucideIcon Name="zap-off" Size="48" Class="mb-4"/>
-                    <p class="text-lg font-semibold">Test failed</p>
-                    <p class="text-muted-foreground text-sm mt-2">Could not fetch media from the provider. Please check your input and try again.</p>
+                    <p class="text-lg font-semibold">@(IsListMissing ? "List not found" : "Couldn't load the list")</p>
+                    <p class="text-muted-foreground text-sm mt-2">@(IsListMissing ? "The provider has no list with this identifier. Check the link or the identifier." : "Could not fetch media from the provider. Check the list identifier and try again.")</p>
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Class="mt-4" OnClick="RetryAsync" Disabled="IsLoading">
+                        <LucideIcon Name="refresh-cw" Size="14" Class="mr-1"/>
+                        Retry
+                    </BbButton>
                 }
+            </div>
+        }
+        else if (Config.IsTestable)
+        {
+            <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
+                <LucideIcon Name="corner-down-left" Size="48" Class="text-muted-foreground mb-4"/>
+                <p class="text-lg font-semibold">Press Enter to load the list</p>
+                <p class="text-muted-foreground text-sm mt-2">Or leave the field. Nothing is fetched while you type.</p>
             </div>
         }
         else
@@ -350,7 +369,7 @@
             <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
                 <LucideIcon Name="list-music" Size="48" Class="text-muted-foreground mb-4"/>
                 <p class="text-lg font-semibold">Media results will appear here</p>
-                <p class="text-muted-foreground text-sm mt-2">Run a test to preview the media items from your list.</p>
+                <p class="text-muted-foreground text-sm mt-2">Paste a list's link or its identifier to preview it.</p>
             </div>
         }
     </div>
@@ -361,6 +380,7 @@
     [Parameter] public required FeedConfig Config { get; set; }
     [Parameter] public FeedId? SavedFeedId { get; set; }
     [Parameter] public required FeedId DraftFeedId { get; set; }
+    [Parameter] public bool Updating { get; set; }
 
     private FeedId PreviewFeedId => SavedFeedId ?? DraftFeedId;
     [Parameter] public EventCallback<PreviewStatus> OnStatusChanged { get; set; }
@@ -383,6 +403,22 @@
     private CancellationTokenSource? _cts;
     private CancellationToken _visit;
     private PreviewStatus _lastEmittedStatus = new();
+    private int _fetchGeneration;
+    private int _planGeneration;
+    private int _flash;
+    private Reading? _reloading;
+    private bool _listComplete;
+
+    private bool IsStale => _appliedConfig is { } applied && !applied.SameSource(Config);
+
+    private string DimClass => _reloading is not null || IsStale ? "opacity-40" : string.Empty;
+
+    private sealed class Reading(string fields, int total)
+    {
+        public int Count { get; set; }
+
+        public string Progress => $"Reading {fields} · {Count.ToString("N0", CultureInfo.InvariantCulture)} of {total.ToString("N0", CultureInfo.InvariantCulture)}";
+    }
 
     private string _searchQuery = string.Empty;
     private readonly HashSet<PreviewBucket> _activeFilters = [];
@@ -432,62 +468,137 @@
         return Optional.Of(applied.Filter).Map(filter => FeedRatingReasons.For(filter, strategy.Resolve(item.Details.Ratings, view.Available), strategy)).GetValueOr([]);
     }
 
-    protected override void OnParametersSet()
-    {
-        if (_fetchState is FetchState.Success or FetchState.Failed or FetchState.Missing &&
-            (Config.Provider != _appliedConfig?.Provider ||
-             !string.Equals(Config.Identifier?.Trim(), _appliedConfig?.Identifier?.Trim(), StringComparison.Ordinal)))
-        {
-            _fetchState = FetchState.Idle;
-            _rawResults = [];
-            _unmatchedResults = [];
-            _processedResults = [];
-            _appliedConfig = null;
-        }
-
-        _ = EmitStatusIfChangedAsync();
-    }
+    protected override void OnParametersSet() => _ = EmitStatusIfChangedAsync();
 
     public async Task ApplyAsync(FeedConfig config, CancellationToken visit)
     {
         _visit = visit;
-        if (visit.IsCancellationRequested || _fetchState == FetchState.Loading)
+        if (visit.IsCancellationRequested)
         {
             return;
         }
 
+        var fresh = _appliedConfig is not { } applied || !applied.SameSource(config) || _fetchState is FetchState.Idle or FetchState.Failed or FetchState.Missing;
         Config = config;
-        var needsFetch = _fetchState is FetchState.Idle or FetchState.Failed or FetchState.Missing ||
-                         _rawResults.Count == 0 ||
-                         Config.Provider != _appliedConfig?.Provider ||
-                         !string.Equals(Config.Identifier?.Trim(), _appliedConfig?.Identifier?.Trim(), StringComparison.Ordinal);
+        _appliedConfig = config;
 
-        _appliedConfig = Config;
-        needsFetch = needsFetch || await ReadsNewFieldsAsync();
-
-        if (needsFetch)
+        if (fresh)
         {
             _fetchState = FetchState.Loading;
-            _rawResults = [];
-            _unmatchedResults = [];
-            _processedResults = [];
+            ClearResults();
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
             await FetchAsync(AsTheFeedReads);
         }
-        else
+        else if (_reloading is null)
         {
-            await ReprocessLoadedAsync();
+            await CatchUpAsync();
         }
 
         await EmitStatusIfChangedAsync();
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task<bool> ReadsNewFieldsAsync()
+    private async Task CatchUpAsync()
     {
         var needs = await Planner.NeedsAsync(SynthesizeFeed(), _visit);
-        return !needs.Required.Except(_fetchedNeeds.Required).IsEmpty;
+        var missing = needs.Required.Except(_fetchedNeeds.Required);
+        if (missing.IsEmpty)
+        {
+            await ReprocessLoadedAsync();
+            return;
+        }
+
+        if (_fetchState is FetchState.Loading)
+        {
+            _ = FetchAsync(AsTheFeedReads);
+            return;
+        }
+
+        List<MediaId> lacking = [.. _rawResults.Select(listed => listed.Item).Matched().Where(item => !(item.Details.Missing & missing).IsEmpty).Select(item => item.Identity.Id)];
+        if (lacking.Count == 0)
+        {
+            _fetchedNeeds = new FieldNeeds(_fetchedNeeds.Required | missing, _fetchedNeeds.Shown);
+            await ReprocessLoadedAsync();
+            return;
+        }
+
+        _ = TopUpAsync(lacking, missing);
+    }
+
+    private async Task TopUpAsync(IReadOnlyList<MediaId> lacking, MediaFields missing)
+    {
+        var reading = new Reading(PreviewCopy.Fields(missing), lacking.Count);
+        _reloading = reading;
+        _fetchState = FetchState.Loading;
+        var (fetch, ct) = await StartFetchAsync();
+        await EmitStatusIfChangedAsync();
+        await InvokeAsync(StateHasChanged);
+        using var marked = UsageCauses.Mark(UsageCause.FeedEditor, Some.Of(PreviewFeedId));
+        var read = new Dictionary<MediaId, MediaDetails>();
+
+        try
+        {
+            var sinceRender = Stopwatch.StartNew();
+            await foreach (var answer in Media.GetDetailsAsync(lacking, new FieldNeeds(missing, MediaFields.None), ct).WithCancellation(ct))
+            {
+                answer.Apply(media => read[media.Identity.Id] = media.Details);
+                reading.Count++;
+                if (sinceRender.ElapsedMilliseconds >= 150)
+                {
+                    sinceRender.Restart();
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+
+            _rawResults = [.. _rawResults.Select(listed => WithDetails(listed, read))];
+            _fetchedNeeds = new FieldNeeds(_fetchedNeeds.Required | missing, _fetchedNeeds.Shown);
+            _reloading = null;
+            _fetchState = FetchState.Success;
+            await CatchUpAsync();
+        }
+        catch (Exception) when (fetch != _fetchGeneration || _visit.IsCancellationRequested)
+        {
+        }
+        catch (Exception ex)
+        {
+            Notify(notifier => notifier.Error(ex, $"Failed to read {PreviewCopy.Fields(missing)}"));
+        }
+        finally
+        {
+            if (fetch == _fetchGeneration)
+            {
+                _reloading = null;
+                _fetchState = FetchState.Success;
+                await EmitStatusIfChangedAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    private static Listed<MediaMatchResult> WithDetails(Listed<MediaMatchResult> listed, IReadOnlyDictionary<MediaId, MediaDetails> read)
+    {
+        if (listed.Item is MatchedMedia matched && read.TryGetValue(matched.Identity.Id, out var details))
+        {
+            return new Listed<MediaMatchResult>(listed.Position, matched with { Details = details });
+        }
+
+        return listed;
+    }
+
+    private async Task<(int Fetch, CancellationToken Token)> StartFetchAsync()
+    {
+        var fetch = ++_fetchGeneration;
+        var previous = _cts;
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(_visit);
+        var token = _cts.Token;
+        if (previous is not null)
+        {
+            await previous.CancelAsync();
+            previous.Dispose();
+        }
+
+        return (fetch, token);
     }
 
     private static FieldNeeds AsTheFeedReads(FieldNeeds needs) => needs;
@@ -497,7 +608,7 @@
     private async Task RetryAsync()
     {
         _fetchState = FetchState.Idle;
-        await ApplyAsync(Config, _visit);
+        await ApplyAsync(_appliedConfig ?? Config, _visit);
     }
 
     private async Task OnRefreshConfirmedAsync()
@@ -542,21 +653,16 @@
             return;
         }
 
-        var previous = _cts;
-        _cts = CancellationTokenSource.CreateLinkedTokenSource(_visit);
-        var ct = _cts.Token;
-        if (previous is not null)
-        {
-            await previous.CancelAsync();
-            previous.Dispose();
-        }
-
+        ClearResults();
+        _listComplete = false;
+        var (fetch, ct) = await StartFetchAsync();
         using var activity = Instrumentation.Source.StartActivity("FeedPreview", ActivityKind.Internal, default(ActivityContext));
         activity?.SetTag("sammlarr.feed.provider", Config.Provider?.ToString());
         activity?.SetTag("sammlarr.feed.identifier", Config.Identifier?.Trim());
         using var marked = UsageCauses.Mark(UsageCause.FeedEditor, Some.Of(PreviewFeedId));
 
-        ClearResults();
+        var loaded = _rawResults;
+        var source = _appliedConfig ?? Config;
 
         try
         {
@@ -566,18 +672,23 @@
 
             await using var scope = Scopes.CreateAsyncScope();
             using var user = scope.ServiceProvider.GetRequiredService<IUserScope>().As(CurrentUser);
-            var service = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<FeedProvider, IFeedProvider>>()[Config.Provider!.Value];
+            var service = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<FeedProvider, IFeedProvider>>()[source.Provider!.Value];
             _fetchTimer.Restart();
             _fetchedNeeds = asking(await Planner.NeedsAsync(SynthesizeFeed(), ct));
             var reprocessAt = 1;
             var sinceRender = Stopwatch.StartNew();
-            await foreach (var item in service.GetFeedItemsAsync(Config.Identifier!.Trim(), _fetchedNeeds, ct).WithCancellation(ct))
+            await foreach (var item in service.GetFeedItemsAsync(source.Identifier.Trim(), _fetchedNeeds, ct).WithCancellation(ct))
             {
-                _rawResults.Add(item);
-                var reprocessed = _rawResults.Count >= reprocessAt;
+                if (fetch != _fetchGeneration)
+                {
+                    return;
+                }
+
+                loaded.Add(item);
+                var reprocessed = loaded.Count >= reprocessAt;
                 if (reprocessed)
                 {
-                    reprocessAt = _rawResults.Count * 2;
+                    reprocessAt = loaded.Count * 2;
                     if (!await ReprocessAsync(FeedLoadState.Unfinished, ct))
                     {
                         return;
@@ -593,6 +704,7 @@
             }
             _fetchTimer.Stop();
 
+            _listComplete = true;
             if (!await ReprocessAsync(FeedLoadState.Finished, ct))
             {
                 return;
@@ -608,6 +720,9 @@
             }
 
             Notify(notifier => notifier.Info($"Loaded {_rawResults.Count} items in {FormatElapsed(_fetchTimer.Elapsed)}."));
+        }
+        catch (Exception) when (fetch != _fetchGeneration)
+        {
         }
         catch (OperationCanceledException)
         {
@@ -649,8 +764,10 @@
             Notify(notifier => notifier.Error(ex, "Failed to fetch media"));
         }
     }
+
     private void ClearResults()
     {
+        _reloading = null;
         _rawResults = [];
         _unmatchedResults = [];
         _processedResults = [];
@@ -664,8 +781,15 @@
 
     private async Task<bool> ReprocessAsync(FeedLoadState state, CancellationToken cancellationToken)
     {
+        var generation = ++_planGeneration;
         using var marked = UsageCauses.Mark(UsageCause.FeedEditor, Some.Of(PreviewFeedId));
-        if (await Planner.PlanAsync(new DraftFeed(SynthesizeFeed(), new RawFeedLoad(_rawResults, state)), cancellationToken) is not IFeedPlan plan)
+        var planned = await Planner.PlanAsync(new DraftFeed(SynthesizeFeed(), new RawFeedLoad(_rawResults, state)), cancellationToken);
+        if (generation != _planGeneration)
+        {
+            return true;
+        }
+
+        if (planned is not IFeedPlan plan)
         {
             ClearResults();
             _fetchState = FetchState.Failed;
@@ -673,34 +797,38 @@
             return false;
         }
 
+        var (gone, shortfall) = await GoneAsync(plan, state, cancellationToken);
+        if (generation != _planGeneration)
+        {
+            return true;
+        }
+
         _processedResults = plan.Verdicts;
         _unmatchedResults = plan.Unmatched;
         _missedRuns = plan is MirrorPlan mirrored ? mirrored.MissedRuns : new Dictionary<MediaId, int>();
-
-        await HydrateGoneAsync(plan, state, cancellationToken);
+        _goneResults = gone;
+        _goneShortfall = shortfall;
         RebuildFilteredViews();
         return true;
     }
 
-    private async Task HydrateGoneAsync(IFeedPlan plan, FeedLoadState state, CancellationToken cancellationToken)
+    private async Task<(List<GoneItem> Gone, int Shortfall)> GoneAsync(IFeedPlan plan, FeedLoadState state, CancellationToken cancellationToken)
     {
         if (state is FeedLoadState.Unfinished || plan is not MirrorPlan mirrored)
         {
-            _goneResults = [];
-            _goneShortfall = 0;
-            return;
+            return ([], 0);
         }
 
-        var present = _processedResults.Select(verdict => verdict.Item.Identity.Id).ToHashSet();
+        var present = plan.Verdicts.Select(verdict => verdict.Item.Identity.Id).ToHashSet();
         var gone = mirrored.MissedRuns.Keys.Where(id => !present.Contains(id)).OrderByDescending(id => mirrored.MissedRuns[id]).ToList();
 
         var described = await Media.GetDetailsByIdAsync(gone, cancellationToken);
 
-        _goneResults = [.. gone.Where(described.ContainsKey).Select(id => new GoneItem(described[id]))];
-        _goneShortfall = gone.Count - _goneResults.Count;
+        List<GoneItem> items = [.. gone.Where(described.ContainsKey).Select(id => new GoneItem(described[id]))];
+        return (items, gone.Count - items.Count);
     }
 
-    private FeedLoadState LoadedState() => _providerUnavailable ? FeedLoadState.Unfinished : FeedLoadState.Finished;
+    private FeedLoadState LoadedState() => _listComplete && !_providerUnavailable ? FeedLoadState.Finished : FeedLoadState.Unfinished;
 
     private Domain.Feed.Feed SynthesizeFeed()
     {
@@ -841,7 +969,10 @@
     {
         try
         {
-            await ReprocessAsync(LoadedState(), _visit);
+            if (await ReprocessAsync(LoadedState(), _visit))
+            {
+                _flash++;
+            }
         }
         catch (OperationCanceledException) when (_visit.IsCancellationRequested)
         {
@@ -882,7 +1013,7 @@
     private string BypassedTooltip(QueryVerdict<MatchedMedia> row)
     {
         var source = row.Enrollment.InWantlist ? "On your wantlist" : "On your blocklist";
-        if (Config.Limit is null)
+        if ((_appliedConfig ?? Config).Limit is null)
             return $"{source}, will not be imported.";
         return row.ConsumesSlot ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
     }

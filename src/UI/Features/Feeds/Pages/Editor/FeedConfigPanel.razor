@@ -117,12 +117,18 @@
                     </BbTooltipProvider>
                 </BbFieldLabel>
                 <BbFieldContent>
-                    <BbInput id="list-identifier" Placeholder="@GetIdentifierPlaceholder(_provider)"
-                             Value="@_identifier" ValueChanged="@ChangeIdentifier"
-                             Class="bg-accent" Required="true"
-                             Disabled="@IsLoading"
-                             AriaInvalid="@IdentifierRefused"
-                             UpdateTiming="UpdateTiming.Immediate"/>
+                    <div class="relative" @onkeyup="CommitOnEnterAsync" @onpaste="CommitAfterPaste">
+                        <BbInput id="list-identifier" Placeholder="@GetIdentifierPlaceholder(_provider)"
+                                 Value="@_identifier" ValueChanged="@ChangeIdentifierAsync"
+                                 Class="@(Pending ? "bg-accent pr-16" : "bg-accent")" Required="true"
+                                 AriaInvalid="@IdentifierRefused"
+                                 UpdateTiming="UpdateTiming.Immediate"
+                                 onchange="@TypedCommit"/>
+                        @if (Pending)
+                        {
+                            <BbKbd Keys="Enter" Class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2" data-identifier-pending/>
+                        }
+                    </div>
                     @if (ShownCheck is { } check)
                     {
                         @check.Answer.Match(stored => IdentifierNote(check.Typed, stored), IdentifierProblem)
@@ -406,8 +412,9 @@
 @code {
 
     [Parameter] public required FeedConfig Value { get; set; }
-    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool Pending { get; set; }
     [Parameter] public EventCallback<FeedConfig> OnChange { get; set; }
+    [Parameter] public EventCallback OnCommit { get; set; }
     [Parameter] public IdentifierCheck? Check { get; set; }
 
     private IdentifierCheck? _adopted;
@@ -420,7 +427,7 @@
         }
     }
 
-    private bool IdentifierRefused => ShownCheck is { } check && check.Answer.Match(_ => false, error => !Unreachable(error));
+    private bool IdentifierRefused => ShownCheck is { Refused: true };
 
     protected override void OnParametersSet()
     {
@@ -439,8 +446,6 @@
         }
     }
 
-    private static bool Unreachable(Error error) => error.CausedBy<RemoteUnavailableException>().IsSome();
-
     private static RenderFragment IdentifierNote(string typed, string stored) => @<text>
         @if (typed != stored && NoteFor(typed) is { } note)
         {
@@ -452,7 +457,7 @@
     </text>;
 
     private static RenderFragment IdentifierProblem(Error error) => @<text>
-        @if (Unreachable(error))
+        @if (IdentifierCheck.Unreachable(error))
         {
             <p class="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--alert-warning)]" role="alert" data-identifier-warning>
                 <LucideIcon Name="cloud-off" Size="13"/>
@@ -485,6 +490,7 @@
 
     private static readonly QuerySort DefaultSort = new() { Property = nameof(MediaQueryRow.Title), Direction = ListSortDirection.Descending };
     private static readonly QueryLimit DefaultLimit = new() { Count = 0, Wantlisted = SlotPolicy.Consumed, Blocklisted = SlotPolicy.Consumed };
+    private const long PastedValueWindowMs = 500;
 
     private bool _isEnabled;
     private string _name = string.Empty;
@@ -492,6 +498,7 @@
     private StrategyMode _strategyMode;
     private int _absenceThreshold = new Mirror().AbsenceThreshold;
     private string _identifier = string.Empty;
+    private long _pastedAt;
     private Optional<RatingStrategy> _ratingStrategy = new None();
     private RatingView? _ratingView;
     private bool _filtersSectionOpen;
@@ -636,10 +643,33 @@
         _absenceThreshold = v;
         NotifyChange();
     }
-    private void ChangeIdentifier(string v)
+    private async Task ChangeIdentifierAsync(string v)
     {
         _identifier = v;
         NotifyChange();
+        if (Environment.TickCount64 - _pastedAt < PastedValueWindowMs)
+        {
+            _pastedAt = 0;
+            await OnCommit.InvokeAsync();
+        }
+    }
+
+    private void CommitAfterPaste() => _pastedAt = Environment.TickCount64;
+
+    private Task CommitOnEnterAsync(KeyboardEventArgs args) => args.Key == "Enter" ? OnCommit.InvokeAsync() : Task.CompletedTask;
+
+    private EventCallback<ChangeEventArgs> TypedCommit => EventCallback.Factory.Create<ChangeEventArgs>(this, CommitTypedAsync);
+
+    private async Task CommitTypedAsync(ChangeEventArgs args)
+    {
+        _pastedAt = 0;
+        if (args.Value is string typed && typed != _identifier)
+        {
+            _identifier = typed;
+            NotifyChange();
+        }
+
+        await OnCommit.InvokeAsync();
     }
     private void ChangeFilter(FilterDefinition f)
     {
