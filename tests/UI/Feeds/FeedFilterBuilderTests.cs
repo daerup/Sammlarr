@@ -185,6 +185,31 @@ public class FeedFilterBuilderTests : BunitContext
 	}
 
 	[Test]
+	public async Task Field_InTheList_TagsSeasonsAndEpisodesAsShowsOnly()
+	{
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [Condition(nameof(MediaQueryRow.Title), FilterOperator.Contains, "Ink")] });
+
+		await FieldTrigger(cut).ClickAsync(new());
+
+		var tagged = cut.FindAll("[role=option]").Where(option => option.QuerySelector("[data-shows-only]") is not null);
+		await Assert
+			.That(tagged.Select(option => option.TextContent.Replace("Shows", "").Trim()))
+			.IsEquivalentTo(["Seasons", "Episodes"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Count_ForOneAndForMore_SpellsTheUnitOutInTheBox()
+	{
+		var episodes = Condition(nameof(MediaQueryRow.Episodes), FilterOperator.Between, 1.0);
+		episodes.ValueEnd = 10.0;
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [Condition(nameof(MediaQueryRow.Seasons), FilterOperator.Equals, 3.0), episodes] });
+
+		await Assert
+			.That(cut.FindAll(".number-rule-unit").Select(unit => unit.TextContent))
+			.IsEquivalentTo(["seasons", "episode", "episodes"], CollectionOrdering.Matching);
+	}
+
+	[Test]
 	public async Task Field_WhenRuntimeIsPickedAgainOnATotal_KeepsTheTotal()
 	{
 		var condition = Condition(nameof(MediaQueryRow.TotalRuntimeMinutes), FilterOperator.LessOrEqual, new Duration(6, DurationUnit.Hours));

@@ -410,6 +410,29 @@ public class FilterEvaluatorTests
 	}
 
 	[Test]
+	[Arguments(FilterPredicateOperator.Equals)]
+	[Arguments(FilterPredicateOperator.NotEquals)]
+	[Arguments(FilterPredicateOperator.LessOrEqual)]
+	public async Task Execute_ForASeasonsConditionOnAMovie_CullsItWhateverTheOperator(FilterPredicateOperator op)
+	{
+		var outcomes = await OutcomesAsync(Filter(Group(Number("Seasons", op, 3))), new FilterRow());
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled]);
+	}
+
+	[Test]
+	public async Task Execute_ForAnEpisodesConditionOnShows_JudgesTheirCount()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Number("Episodes", FilterPredicateOperator.NotEquals, 10))),
+			new FilterRow { Episodes = 10 },
+			new FilterRow { Episodes = 12 }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+	}
+
+	[Test]
 	public async Task Execute_ForARelativeDate_ComparesWithTheDayItNamesFromToday()
 	{
 		var outcomes = await OutcomesAsync(
@@ -473,5 +496,9 @@ public class FilterEvaluatorTests
 		public List<string>? Genres { get; init; }
 
 		public MediaType MediaType { get; init; }
+
+		public int? Seasons { get; init; }
+
+		public int? Episodes { get; init; }
 	}
 }

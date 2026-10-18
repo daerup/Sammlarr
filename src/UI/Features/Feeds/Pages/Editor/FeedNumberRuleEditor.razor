@@ -36,15 +36,17 @@
                         AllowNegative="false"
                         AriaLabel="@label"
                         data-number-rule/>
-        @if (Rule.Unit is not null)
+        @if (UnitOf(value) is { } unit)
         {
-            <span class="number-rule-unit">@Rule.Unit</span>
+            <span class="number-rule-unit">@unit</span>
         }
         @if (Adornment is not null)
         {
             <span class="number-rule-adornment">@Adornment</span>
         }
     </div>;
+
+    private string? UnitOf(object? value) => Read(value) is 1 ? Rule.Unit : Rule.Plural ?? Rule.Unit;
 
     private Task SetAsync(object? value, object? valueEnd)
     {

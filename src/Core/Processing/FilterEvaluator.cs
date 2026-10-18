@@ -7,6 +7,7 @@ internal static class FilterEvaluator
 {
 	private static readonly HashSet<string> CollectionStringFields = new(StringComparer.Ordinal) { "Genres" };
 	private static readonly HashSet<string> EnumStringFields = new(StringComparer.Ordinal) { "MediaType" };
+	private static readonly HashSet<string> ShowOnlyFields = new(StringComparer.Ordinal) { "Seasons", "Episodes" };
 
 	public static string Build(QueryFilter filter)
 	{
@@ -32,6 +33,12 @@ internal static class FilterEvaluator
 		};
 
 	private static string Compile(FilterPredicate p)
+	{
+		var compiled = CompileField(p);
+		return ShowOnlyFields.Contains(p.Field) && compiled.Length > 0 ? $"{p.Field} != null && ({compiled})" : compiled;
+	}
+
+	private static string CompileField(FilterPredicate p)
 	{
 		if (CollectionStringFields.Contains(p.Field))
 		{

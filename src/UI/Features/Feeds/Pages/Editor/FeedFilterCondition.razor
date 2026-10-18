@@ -3,7 +3,25 @@
 
 <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filter condition">
     <div class="w-[160px] @AdornedClass">
-        <BbSelect TValue="string" Value="@Field.Property" ValueChanged="ChangeFieldAsync" Options="FeedFields.Options" Class="min-w-0 flex-1"/>
+        <BbSelect TValue="string" Value="@Field.Property" ValueChanged="ChangeFieldAsync" DisplayTextSelector="FeedFields.LabelOf" Class="min-w-0 flex-1">
+            <BbSelectTrigger>
+                <BbSelectValue/>
+            </BbSelectTrigger>
+            <BbSelectContent>
+                @foreach (var field in FeedFields.All)
+                {
+                    <BbSelectItem Value="@field.Property" Text="@field.Label">
+                        <span class="flex items-center gap-2">
+                            @field.Label
+                            @if (field.ShowsOnly)
+                            {
+                                <BbBadge Variant="BadgeVariant.Secondary" Class="px-1.5 py-0 text-[11px] font-normal" data-shows-only>Shows</BbBadge>
+                            }
+                        </span>
+                    </BbSelectItem>
+                }
+            </BbSelectContent>
+        </BbSelect>
         @Adornment
     </div>
     <BbSelect TValue="FilterOperator" Value="@Condition.Operator" ValueChanged="ChangeOperatorAsync" Options="Field.Operators" Class="w-[180px]"/>

@@ -80,8 +80,16 @@ internal static class FeedFields
 			Number = Count,
 			Total = Some.Of(nameof(MediaQueryRow.TotalRuntimeMinutes)),
 		},
-		new(nameof(MediaQueryRow.Seasons), "Seasons", FeedFieldKind.Number, NumberOperators) { Number = Count },
-		new(nameof(MediaQueryRow.Episodes), "Episodes", FeedFieldKind.Number, NumberOperators) { Number = Count },
+		new(nameof(MediaQueryRow.Seasons), "Seasons", FeedFieldKind.Number, NumberOperators)
+		{
+			Number = Count with { Unit = "season", Plural = "seasons" },
+			ShowsOnly = true,
+		},
+		new(nameof(MediaQueryRow.Episodes), "Episodes", FeedFieldKind.Number, NumberOperators)
+		{
+			Number = Count with { Unit = "episode", Plural = "episodes" },
+			ShowsOnly = true,
+		},
 	];
 
 	internal static IReadOnlyList<SelectOption<string>> Options { get; } = [.. All.Select(field => new SelectOption<string>(field.Property, field.Label))];
@@ -122,6 +130,8 @@ internal sealed record FeedField(string Property, string Label, FeedFieldKind Ki
 
 	public Optional<string> Total { get; init; } = new None();
 
+	public bool ShowsOnly { get; init; }
+
 	public bool Names(string field) => Property == field || IsTotal(field);
 
 	public bool IsTotal(string field) => Total.Match(total => total == field, () => false);
@@ -131,4 +141,4 @@ internal sealed record FeedField(string Property, string Label, FeedFieldKind Ki
 	public bool Offers(FilterOperator op) => Operators.Any(offered => offered.Value == op);
 }
 
-public sealed record FeedNumberRule(double? Min = null, double? Max = null, double? Step = null, string? Unit = null);
+public sealed record FeedNumberRule(double? Min = null, double? Max = null, double? Step = null, string? Unit = null, string? Plural = null);
