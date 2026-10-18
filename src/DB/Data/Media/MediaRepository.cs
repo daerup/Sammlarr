@@ -171,4 +171,19 @@ internal sealed class MediaRepository(
 		return rows.GroupBy(r => r.MediaId)
 			.ToDictionary(group => MediaId.From(group.Key), group => group.MinBy(r => r.External.Id, StringComparer.Ordinal)!.External.ToExternalMediaId());
 	}
+
+	public async Task<IReadOnlyList<GenreCount>> GetGenresAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await ctx
+			.Database.SqlQuery<GenreCount>(
+				$"""
+				SELECT g.value AS "Genre", COUNT(DISTINCT d."MediaId") AS "Titles"
+				FROM "MediaDetails" AS d, json_each(d."Genres") AS g
+				GROUP BY g.value
+				ORDER BY "Titles" DESC, "Genre"
+				"""
+			)
+			.ToListAsync(cancellationToken);
+	}
 }

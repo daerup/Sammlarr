@@ -20,8 +20,9 @@ internal static class FeedFields
 
 	private static readonly IReadOnlyList<SelectOption<FilterOperator>> GenreOperators =
 	[
-		new(FilterOperator.Contains, "contains"),
-		new(FilterOperator.NotContains, "not contains"),
+		new(FilterOperator.In, "contains any"),
+		new(FilterOperator.Contains, "contains all"),
+		new(FilterOperator.NotIn, "contains none"),
 	];
 
 	private static readonly IReadOnlyList<SelectOption<FilterOperator>> ChoiceOperators =
@@ -59,7 +60,7 @@ internal static class FeedFields
 		new(nameof(MediaQueryRow.Title), "Title", FeedFieldKind.Text, TextOperators),
 		new(nameof(MediaQueryRow.Tagline), "Tagline", FeedFieldKind.Text, TextOperators),
 		new(nameof(MediaQueryRow.Summary), "Summary", FeedFieldKind.Text, TextOperators),
-		new(nameof(MediaQueryRow.Genres), "Genres", FeedFieldKind.Text, GenreOperators),
+		new(nameof(MediaQueryRow.Genres), "Genres", FeedFieldKind.Genres, GenreOperators),
 		new(nameof(MediaQueryRow.MediaType), "Media Type", FeedFieldKind.Choice, ChoiceOperators)
 		{
 			Options =
@@ -83,8 +84,14 @@ internal static class FeedFields
 
 	internal static FeedField For(string field) => All.Single(definition => definition.Property == field);
 
-	internal static string LabelOf(string field) =>
-		All.FirstOrNone(definition => definition.Property == field).Map(definition => definition.Label).GetValueOr(field);
+	internal static Optional<FeedField> Of(string field) => All.FirstOrNone(definition => definition.Property == field);
+
+	internal static string LabelOf(string field) => Of(field).Map(definition => definition.Label).GetValueOr(field);
+
+	internal static bool TakesPicks(FilterCondition condition)
+	{
+		return condition.Operator is FilterOperator.In or FilterOperator.NotIn || condition.Field == nameof(MediaQueryRow.Genres);
+	}
 
 	internal static FilterCondition NewCondition()
 	{
@@ -99,6 +106,7 @@ internal enum FeedFieldKind
 	Number,
 	Choice,
 	Date,
+	Genres,
 }
 
 internal sealed record FeedField(string Property, string Label, FeedFieldKind Kind, IReadOnlyList<SelectOption<FilterOperator>> Operators)

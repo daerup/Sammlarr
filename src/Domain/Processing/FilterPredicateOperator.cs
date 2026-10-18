@@ -19,4 +19,5 @@ public enum FilterPredicateOperator
 	IsFalse,
 	In,
 	NotIn,
+	ContainsAll,
 }

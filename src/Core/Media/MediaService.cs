@@ -160,6 +160,8 @@ internal sealed class MediaService(
 		return stored.ToDictionary(media => media.Identity.Id, media => media.Identity.Type);
 	}
 
+	public Task<IReadOnlyList<GenreCount>> GetGenresAsync(CancellationToken cancellationToken = default) => mediaRepository.GetGenresAsync(cancellationToken);
+
 	public async Task<Optional<IExternalMediaId>> FindIdAsync(MediaId id, MediaProvider provider, CancellationToken cancellationToken = default)
 	{
 		return provider.Role switch

@@ -1,6 +1,7 @@
 using BlazorBlueprint.Primitives.Filtering;
 using Domain.Processing;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
 using BbFilterOp = BlazorBlueprint.Primitives.Filtering.FilterOperator;
 using BbLogicalOp = BlazorBlueprint.Primitives.Filtering.LogicalOperator;
@@ -76,11 +77,11 @@ public class FilterDefinitionConverterTests
 	[Test]
 	public async Task RoundTrip_WhenOperatorIsIn_PreservesTheSelectedOptions()
 	{
-		string[] genres = ["Action", "Drama"];
+		string[] types = ["Movie", "Show"];
 
-		var restored = RoundTrip(Definition(Condition("Genres", BbFilterOp.In, genres)));
+		var restored = RoundTrip(Definition(Condition("MediaType", BbFilterOp.In, types)));
 
-		await Assert.That(restored!.Conditions[0].Value as string[]).IsEquivalentTo(genres);
+		await Assert.That(restored!.Conditions[0].Value as string[]).IsEquivalentTo(types);
 	}
 
 	[Test]
@@ -115,6 +116,39 @@ public class FilterDefinitionConverterTests
 
 		await Assert.That(restored!.Conditions[0].Value).IsEqualTo(new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc));
 		await Assert.That(restored.Conditions[0].ValueEnd).IsEqualTo(new RelativeDate(10, DateUnit.Years, Ahead: false));
+	}
+
+	[Test]
+	[Arguments(BbFilterOp.NotIn)]
+	[Arguments(BbFilterOp.Contains)]
+	public async Task RoundTrip_ForGenresPickedAndTyped_KeepsBothAndTheOperator(BbFilterOp op)
+	{
+		var match = new GenreMatch(["Drama", "Sci-Fi & Fantasy"], ["anim"]);
+
+		var restored = RoundTrip(Definition(Condition("Genres", op, match)));
+
+		await Assert.That(restored!.Conditions[0].Operator).IsEqualTo(op);
+		var value = await Assert.That(restored.Conditions[0].Value).IsTypeOf<GenreMatch>();
+		await Assert.That(value!.Genres).IsEquivalentTo(match.Genres, CollectionOrdering.Matching);
+		await Assert.That(value.Texts).IsEquivalentTo(match.Texts, CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task ToQueryFilter_ForGenresContainingAll_WritesContainsAll()
+	{
+		var written = FilterDefinitionConverter.ToQueryFilter(Definition(Condition("Genres", BbFilterOp.Contains, new GenreMatch(["Drama"], []))));
+
+		await Assert.That(written!.Groups[0].Predicates[0].Operator).IsEqualTo(FilterPredicateOperator.ContainsAll);
+	}
+
+	[Test]
+	[Arguments(BbFilterOp.In)]
+	[Arguments(BbFilterOp.Contains)]
+	public async Task Incomplete_ForGenresWithNothingPickedOrTyped_FindsIt(BbFilterOp op)
+	{
+		var empty = Condition("Genres", op, GenreMatch.None);
+
+		await Assert.That(FilterDefinitionConverter.Incomplete(Definition(empty))).IsSome().And.IsEqualTo(empty);
 	}
 
 	[Test]

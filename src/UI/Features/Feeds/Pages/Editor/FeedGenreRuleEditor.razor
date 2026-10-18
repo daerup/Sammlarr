@@ -1,0 +1,134 @@
+@using Contracts.Media
+@inject IMediaService Media
+
+<BbPopover Open="_open" OpenChanged="OpenChangedAsync">
+    <BbPopoverTrigger AsChild="false" aria-label="@Label"
+                      class="flex min-h-10 w-[260px] flex-wrap items-center gap-1 rounded-md border border-input bg-background px-2 py-1 text-sm hover:bg-accent">
+        @if (Value.IsEmpty)
+        {
+            <span class="px-1 text-muted-foreground">Select genres...</span>
+        }
+        @foreach (var genre in Value.Genres)
+        {
+            <BbBadge Variant="BadgeVariant.Secondary" Class="pt-[3px] pb-px" data-genre-chip>@genre</BbBadge>
+        }
+        @foreach (var text in Value.Texts)
+        {
+            <BbBadge Variant="BadgeVariant.Outline" Class="gap-1 border-dashed font-mono" data-genre-text>
+                <LucideIcon Name="text-cursor" Size="11"/>@text
+            </BbBadge>
+        }
+    </BbPopoverTrigger>
+    <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" AutoFocusId="@_searchId" Class="w-[300px] p-0" aria-label="@Label">
+        @if (Value.Texts.Count > 0)
+        {
+            <div class="flex flex-wrap gap-1 border-b p-2">
+                @foreach (var text in Value.Texts)
+                {
+                    <button type="button" class="inline-flex items-center gap-1 rounded border border-dashed border-muted-foreground px-1.5 font-mono text-xs hover:bg-accent"
+                            aria-label="@($"Remove {text}")" @onclick="() => RemoveTextAsync(text)">
+                        <LucideIcon Name="text-cursor" Size="11"/>@text<LucideIcon Name="x" Size="11"/>
+                    </button>
+                }
+            </div>
+        }
+        <BbCommand SearchQuery="@_search" SearchQueryChanged="SearchFor">
+            <BbCommandInput Id="@_searchId" Placeholder="Search genres..." DisableDebounce="true"/>
+            <BbCommandList Class="max-h-[236px] p-1">
+                <BbCommandEmpty>No genre found.</BbCommandEmpty>
+                @if (Typed is { } typed)
+                {
+                    <BbCommandItem Value="@($"+{typed}")" SearchText="@_search" OnSelect="AddTextAsync" Class="@ItemClass" data-genre-add>
+                        <LucideIcon Name="text-cursor" Size="13"/>
+                        <span>Add <b>"@typed"</b> as text</span>
+                        <span class="ml-auto text-xs text-muted-foreground">matches @Count(Matching(typed).Count())</span>
+                    </BbCommandItem>
+                }
+                @foreach (var genre in Listed)
+                {
+                    <BbCommandItem Value="@genre.Genre" OnSelect="() => ToggleAsync(genre.Genre)" Class="@ItemClass" data-genre-option
+                                   data-picked="@(IsPicked(genre.Genre) ? "true" : "false")">
+                        <span class="@(IsPicked(genre.Genre) ? PickedBox : EmptyBox)" aria-hidden="true">
+                            @if (IsPicked(genre.Genre))
+                            {
+                                <LucideIcon Name="check" Size="11"/>
+                            }
+                        </span>
+                        <span data-genre-name>@genre.Genre</span>
+                        <span class="ml-auto text-[11px] tabular-nums text-muted-foreground" data-genre-count>@genre.Titles</span>
+                    </BbCommandItem>
+                }
+            </BbCommandList>
+        </BbCommand>
+    </BbPopoverContent>
+</BbPopover>
+
+@code {
+    private const string ItemClass = "gap-[9px] rounded-[5px] px-1.5 py-[5px] text-[12.5px] leading-[18px] data-[picked=true]:bg-accent/60";
+
+    private const string PickedBox = "flex size-[15px] shrink-0 items-center justify-center rounded border border-foreground bg-foreground text-background";
+    private const string EmptyBox = "flex size-[15px] shrink-0 items-center justify-center rounded border border-muted-foreground";
+
+    private readonly string _searchId = $"genre-search-{Guid.NewGuid():N}";
+
+    private Optional<IReadOnlyList<GenreCount>> _genres = new None();
+
+    private bool _open;
+
+    private string _search = string.Empty;
+
+    [Parameter] public GenreMatch Value { get; set; } = GenreMatch.None;
+
+    [Parameter] public EventCallback<GenreMatch> ValueChanged { get; set; }
+
+    [Parameter] [EditorRequired] public required string Label { get; set; }
+
+    private IReadOnlyList<GenreCount> Known => _genres.GetValueOr([]);
+
+    private IEnumerable<GenreCount> Listed => Value.Genres.Except(Known.Select(genre => genre.Genre)).Select(gone => new GenreCount(gone, 0)).Concat(Known);
+
+    private string? Typed
+    {
+        get
+        {
+            var typed = _search.Trim();
+            var known = typed.Length == 0
+                || Value.Texts.Contains(typed, StringComparer.OrdinalIgnoreCase)
+                || Known.Any(genre => string.Equals(genre.Genre, typed, StringComparison.OrdinalIgnoreCase));
+            return known ? null : typed;
+        }
+    }
+
+    private static string Count(int genres) => genres == 1 ? "1 genre" : $"{genres} genres";
+
+    private IEnumerable<GenreCount> Matching(string text) => Known.Where(genre => genre.Genre.Contains(text, StringComparison.OrdinalIgnoreCase));
+
+    private bool IsPicked(string genre) => Value.Genres.Contains(genre);
+
+    private async Task OpenChangedAsync(bool open)
+    {
+        _open = open;
+        _search = string.Empty;
+        if (open && _genres.IsNone())
+        {
+            _genres = Some.Of(await Media.GetGenresAsync());
+        }
+    }
+
+    private void SearchFor(string text) => _search = text;
+
+    private Task ToggleAsync(string genre)
+    {
+        var genres = IsPicked(genre) ? Value.Genres.Where(picked => picked != genre) : Value.Genres.Append(genre);
+        return ValueChanged.InvokeAsync(Value with { Genres = [.. genres] });
+    }
+
+    private Task AddTextAsync()
+    {
+        var typed = _search.Trim();
+        _search = string.Empty;
+        return ValueChanged.InvokeAsync(Value with { Texts = [.. Value.Texts, typed] });
+    }
+
+    private Task RemoveTextAsync(string text) => ValueChanged.InvokeAsync(Value with { Texts = [.. Value.Texts.Where(kept => kept != text)] });
+}

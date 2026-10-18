@@ -20,4 +20,8 @@ public interface IMediaRepository
 		MediaProvider source,
 		CancellationToken cancellationToken = default
 	);
+
+	Task<IReadOnlyList<GenreCount>> GetGenresAsync(CancellationToken cancellationToken = default);
 }
+
+public sealed record GenreCount(string Genre, int Titles);

@@ -4,11 +4,13 @@ using BlazorBlueprint.Primitives;
 using BlazorBlueprint.Primitives.Filtering;
 using Bunit;
 using Contracts;
+using Contracts.Media;
 using Contracts.Processing;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
+using GenreMatch = Domain.Processing.GenreMatch;
 
 namespace UI.Tests.Feeds;
 
@@ -21,17 +23,31 @@ public class FeedFilterBuilderTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton(IDateTimeProvider.Mock().Object);
+		Services.AddSingleton(IMediaService.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
 	[Test]
-	public async Task Operators_ForGenres_OfferContainsAndNotContainsOnly()
+	public async Task Operators_ForGenres_OfferContainsAnyAllAndNoneOnly()
 	{
-		var cut = RenderBuilder(new FilterDefinition { Conditions = [Condition(nameof(MediaQueryRow.Genres), FilterOperator.Contains, "Drama")] });
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [Condition(nameof(MediaQueryRow.Genres), FilterOperator.In, new GenreMatch(["Drama"], []))] });
 
 		await OperatorTrigger(cut).ClickAsync(new());
 
-		await Assert.That(OptionTexts(cut)).IsEquivalentTo(["contains", "not contains"], CollectionOrdering.Matching);
+		await Assert.That(OptionTexts(cut)).IsEquivalentTo(["contains any", "contains all", "contains none"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Operator_WhenGenresTurnFromAnyToAll_KeepsThePicks()
+	{
+		var drama = new GenreMatch(["Drama"], []);
+		var condition = Condition(nameof(MediaQueryRow.Genres), FilterOperator.In, drama);
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+		await PickAsync(cut, OperatorTrigger(cut), "contains all");
+
+		await Assert.That(condition.Operator).IsEqualTo(FilterOperator.Contains);
+		await Assert.That(condition.Value).IsEqualTo(drama);
 	}
 
 	[Test]
@@ -70,6 +86,19 @@ public class FeedFilterBuilderTests : BunitContext
 
 		await Assert.That(condition.Operator).IsEqualTo(FilterOperator.Contains);
 		await Assert.That(condition.Value).IsEqualTo("Ink");
+	}
+
+	[Test]
+	public async Task Field_WhenChangedToGenres_ShowsThePickerWithNothingPicked()
+	{
+		var condition = Condition(nameof(MediaQueryRow.Title), FilterOperator.Contains, "Ink");
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+		await PickAsync(cut, FieldTrigger(cut), "Genres");
+
+		await Assert.That(condition.Operator).IsEqualTo(FilterOperator.In);
+		await Assert.That(condition.Value).IsNull();
+		await Assert.That(cut.FindAll("button[aria-label='Genres']")).HasSingleItem();
 	}
 
 	[Test]

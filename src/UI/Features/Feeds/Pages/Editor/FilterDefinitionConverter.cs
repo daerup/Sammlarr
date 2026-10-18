@@ -1,5 +1,6 @@
 using System.Text.Json;
 using BlazorBlueprint.Primitives.Filtering;
+using Contracts.Processing;
 using Domain.Processing;
 using BBFilterOp = BlazorBlueprint.Primitives.Filtering.FilterOperator;
 using BBLogicalOp = BlazorBlueprint.Primitives.Filtering.LogicalOperator;
@@ -58,8 +59,18 @@ internal static class FilterDefinitionConverter
 
 	private static bool IsIncomplete(FilterCondition condition)
 	{
-		return (condition.Operator is BBFilterOp.In or BBFilterOp.NotIn && !(condition.Value is IEnumerable<string> picked && picked.Any()))
+		return (FeedFields.TakesPicks(condition) && !HasPicks(condition.Value))
 			|| (condition.Operator is BBFilterOp.Between && (condition.Value is null || condition.ValueEnd is null));
+	}
+
+	private static bool HasPicks(object? value)
+	{
+		return value switch
+		{
+			GenreMatch match => !match.IsEmpty,
+			IEnumerable<string> picked => picked.Any(),
+			_ => false,
+		};
 	}
 
 	private static FilterGroup? ToFilterGroup(FilterDefinition filterDef)
@@ -116,7 +127,7 @@ internal static class FilterDefinitionConverter
 		return new FilterPredicate
 		{
 			Field = condition.Field,
-			Operator = ToPredicateOperator(condition.Operator),
+			Operator = PredicateOperatorOf(condition),
 			ValueKind = DetectKind(condition.Value ?? condition.ValueEnd),
 			Value = Serialize(condition.Value),
 			ValueEnd = Serialize(condition.ValueEnd),
@@ -128,20 +139,31 @@ internal static class FilterDefinitionConverter
 		{
 			Field = predicate.Field,
 			Operator = ToBbPredicateOperator(predicate.Operator),
-			Value = DeserializeValue(predicate.Value, predicate.ValueKind, predicate.Operator),
+			Value = DeserializeValue(predicate),
 			ValueEnd = Deserialize(predicate.ValueEnd, predicate.ValueKind),
 		};
 
-	private static object? DeserializeValue(string? value, FilterValueKind kind, FilterPredicateOperator op) =>
-		op is FilterPredicateOperator.In or FilterPredicateOperator.NotIn
-			? value is null
-				? null
-				: JsonSerializer.Deserialize<string[]>(value)
-			: Deserialize(value, kind);
+	private static object? DeserializeValue(FilterPredicate predicate)
+	{
+		return (predicate.Value, predicate.Operator, predicate.Field) switch
+		{
+			({ } json, FilterPredicateOperator.In or FilterPredicateOperator.NotIn or FilterPredicateOperator.ContainsAll, nameof(MediaQueryRow.Genres)) =>
+				JsonSerializer.Deserialize<GenreMatch>(json),
+			({ } json, FilterPredicateOperator.In or FilterPredicateOperator.NotIn, _) => JsonSerializer.Deserialize<string[]>(json),
+			_ => Deserialize(predicate.Value, predicate.ValueKind),
+		};
+	}
 
 	private static ContractsFilterOp ToContractsOperator(BBLogicalOp op) => op == BBLogicalOp.Or ? ContractsFilterOp.Or : ContractsFilterOp.And;
 
 	private static BBLogicalOp ToBbOperator(ContractsFilterOp op) => op == ContractsFilterOp.Or ? BBLogicalOp.Or : BBLogicalOp.And;
+
+	private static FilterPredicateOperator PredicateOperatorOf(FilterCondition condition)
+	{
+		return condition is { Field: nameof(MediaQueryRow.Genres), Operator: BBFilterOp.Contains }
+			? FilterPredicateOperator.ContainsAll
+			: ToPredicateOperator(condition.Operator);
+	}
 
 	private static FilterPredicateOperator ToPredicateOperator(BBFilterOp op) =>
 		op switch
@@ -189,6 +211,7 @@ internal static class FilterDefinitionConverter
 			FilterPredicateOperator.IsFalse => BBFilterOp.IsFalse,
 			FilterPredicateOperator.In => BBFilterOp.In,
 			FilterPredicateOperator.NotIn => BBFilterOp.NotIn,
+			FilterPredicateOperator.ContainsAll => BBFilterOp.Contains,
 		};
 
 	private static FilterValueKind DetectKind(object? value) =>

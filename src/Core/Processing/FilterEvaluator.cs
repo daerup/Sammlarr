@@ -10,8 +10,8 @@ internal static class FilterEvaluator
 
 	public static string Build(QueryFilter filter)
 	{
-		var parts = filter.Groups.Select(BuildGroup).ToList();
-		return Join(filter.Operator, parts);
+		var parts = filter.Groups.Select(BuildGroup).Where(part => part.Length > 0).ToList();
+		return Join(filter.Operator, parts) is { Length: > 0 } expression ? expression : "true";
 	}
 
 	private static string BuildGroup(FilterGroup group)
@@ -60,7 +60,7 @@ internal static class FilterEvaluator
 			FilterPredicateOperator.Between => p.ValueEnd is null ? string.Empty : FormatBetween(f, v, p.ValueEnd, p.ValueKind),
 			FilterPredicateOperator.In => FormatIn(f, v),
 			FilterPredicateOperator.NotIn => FormatIn(f, v) is { Length: > 0 } expr ? $"!({expr})" : string.Empty,
-			_ => string.Empty,
+			FilterPredicateOperator.ContainsAll => string.Empty,
 		};
 	}
 
@@ -79,8 +79,29 @@ internal static class FilterEvaluator
 			FilterPredicateOperator.NotEquals => $"!{f}.Any(g => g.ToLower() == {v}.ToLower())",
 			FilterPredicateOperator.IsEmpty => $"{f} == null || {f}.Count == 0",
 			FilterPredicateOperator.IsNotEmpty => $"{f} != null && {f}.Count > 0",
+			FilterPredicateOperator.In => FormatAnyGenre(f, v),
+			FilterPredicateOperator.NotIn => FormatAnyGenre(f, v) is { Length: > 0 } expr ? $"!({expr})" : string.Empty,
+			FilterPredicateOperator.ContainsAll => FormatAllGenres(f, v),
 			_ => string.Empty,
 		};
+	}
+
+	private static string FormatAnyGenre(string field, string? json)
+	{
+		var tests = GenreTests(json);
+		return tests.Count == 0 ? string.Empty : $"{field}.Any(g => {string.Join(" || ", tests)})";
+	}
+
+	private static string FormatAllGenres(string field, string? json) => string.Join(" && ", GenreTests(json).Select(test => $"{field}.Any(g => {test})"));
+
+	private static List<string> GenreTests(string? json)
+	{
+		var match = Optional.Of(json).Map(text => JsonSerializer.Deserialize<GenreMatch>(text) ?? GenreMatch.None).GetValueOr(GenreMatch.None);
+		return
+		[
+			.. match.Genres.Select(genre => $"g.ToLower() == {JsonSerializer.Serialize(genre)}.ToLower()"),
+			.. match.Texts.Select(text => $"g.ToLower().Contains({JsonSerializer.Serialize(text)}.ToLower())"),
+		];
 	}
 
 	private static string FormatIn(string field, string? jsonArray)

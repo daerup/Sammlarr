@@ -334,6 +334,82 @@ public class FilterEvaluatorTests
 	}
 
 	[Test]
+	public async Task Execute_ForGenresContainingAnyOf_MatchesPickedGenresExactlyAndTextAnywhere()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Genres(FilterPredicateOperator.In, new GenreMatch(["Sci-Fi & Fantasy"], ["anim"])))),
+			new FilterRow { Genres = ["Drama"] },
+			new FilterRow { Genres = ["Sci-Fi & Fantasy"] },
+			new FilterRow { Genres = ["Science Fiction"] },
+			new FilterRow { Genres = ["Anime"] }
+		);
+
+		await Assert
+			.That(outcomes)
+			.IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForGenresContainingNoneOf_CullsEveryTitleCarryingOne()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Genres(FilterPredicateOperator.NotIn, new GenreMatch(["Animation"], ["anime"])))),
+			new FilterRow { Genres = ["Drama", "Animation"] },
+			new FilterRow { Genres = ["Anime"] },
+			new FilterRow { Genres = ["Documentary"] }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForGenresContainingAll_KeepsOnlyTitlesCarryingEveryPickAndText()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Genres(FilterPredicateOperator.ContainsAll, new GenreMatch(["Drama", "Comedy"], ["anim"])))),
+			new FilterRow { Genres = ["Drama", "Comedy", "Animation"] },
+			new FilterRow { Genres = ["Drama", "Animation"] },
+			new FilterRow { Genres = ["Drama", "Comedy"] }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForTypedGenreTextWithQuotesAndBackslashes_MatchesItLiterally()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Genres(FilterPredicateOperator.In, new GenreMatch([], ["a\"b\\", "\") || true || (\""])))),
+			new FilterRow { Genres = ["xa\"b\\x"] },
+			new FilterRow { Genres = ["zzz"] }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForAnEmptyTopLevelGroupBesideAnother_AppliesOnlyTheOther()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(), Group(Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020))),
+			new FilterRow { Year = 2019 },
+			new FilterRow { Year = 2020 }
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	[Arguments(FilterPredicateOperator.In)]
+	[Arguments(FilterPredicateOperator.ContainsAll)]
+	public async Task Execute_ForGenresWithNothingPicked_KeepsEveryTitle(FilterPredicateOperator op)
+	{
+		var outcomes = await OutcomesAsync(Filter(Group(Genres(op, GenreMatch.None))), new FilterRow { Genres = ["Drama"] });
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified]);
+	}
+
+	[Test]
 	public async Task Execute_ForARelativeDate_ComparesWithTheDayItNamesFromToday()
 	{
 		var outcomes = await OutcomesAsync(
@@ -361,6 +437,16 @@ public class FilterEvaluatorTests
 		);
 
 		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	private static FilterPredicate Genres(FilterPredicateOperator op, GenreMatch match)
+	{
+		return new FilterPredicate
+		{
+			Field = "Genres",
+			Operator = op,
+			Value = JsonSerializer.Serialize(match),
+		};
 	}
 
 	private static async Task<IReadOnlyList<QueryOutcome>> OutcomesAsync(QueryFilter filter, params FilterRow[] rows)

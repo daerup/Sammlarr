@@ -22,6 +22,9 @@
         case FeedFieldKind.Choice:
             <BbSelect TValue="string" Value="@(Condition.Value as string)" ValueChanged="SetAsync" Options="Field.Options" Placeholder="Select..." Class="w-[180px]"/>
             break;
+        case FeedFieldKind.Genres:
+            <FeedGenreRuleEditor Value="@(Condition.Value as GenreMatch ?? GenreMatch.None)" ValueChanged="SetAsync" Label="@Field.Label"/>
+            break;
         case FeedFieldKind.Date:
             <FeedDateRuleEditor Value="@Condition.Value" ValueChanged="SetAsync" Label="@Field.Label"/>
             @if (Condition.Operator is FilterOperator.Between)
@@ -52,7 +55,7 @@
 
     private string? AdornedClass => Adornment is null ? null : "field-adorned";
 
-    private bool IsMultiple => Condition.Operator is FilterOperator.In or FilterOperator.NotIn;
+    private bool IsMultiple => FeedFields.TakesPicks(Condition);
 
     private IEnumerable<string> Picked => Condition.Value as IEnumerable<string> ?? [];
 
@@ -60,7 +63,7 @@
     {
         var kind = Field.Kind;
         Condition.Field = field;
-        if (!Field.Offers(Condition.Operator))
+        if (!Field.Offers(Condition.Operator) || Field.Kind is FeedFieldKind.Genres)
         {
             Condition.Operator = Field.Operators[0].Value;
         }

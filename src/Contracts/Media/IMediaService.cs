@@ -38,6 +38,8 @@ public interface IMediaService
 
 	Task<IReadOnlyDictionary<MediaId, MediaType>> GetTypesAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
+	Task<IReadOnlyList<GenreCount>> GetGenresAsync(CancellationToken cancellationToken = default);
+
 	Task<Optional<IExternalMediaId>> FindIdAsync(MediaId id, MediaProvider provider, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetIdsAsync(
