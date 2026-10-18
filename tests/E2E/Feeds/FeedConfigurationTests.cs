@@ -20,7 +20,7 @@ public class FeedConfigurationTests
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(listed));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(listed));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(0));
 
 		var limit = listed - 2;
@@ -31,10 +31,10 @@ public class FeedConfigurationTests
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(listed));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(limit));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - limit));
 
 		await FeedEditor.Badge(page, PreviewBadge.Included).ClickAsync();
+		await FeedEditor.Badge(page, PreviewBadge.Bypassed).ClickAsync();
 
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(limit);
 	}
@@ -87,10 +87,10 @@ public class FeedConfigurationTests
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(titles.Count));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(1));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(titles.Count - 1));
 
 		await FeedEditor.Badge(page, PreviewBadge.Included).ClickAsync();
+		await FeedEditor.Badge(page, PreviewBadge.Bypassed).ClickAsync();
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(1);
 
 		await Assert.That(await FeedEditor.RowTitlesAsync(page)).IsEquivalentTo([kept], CollectionOrdering.Matching);

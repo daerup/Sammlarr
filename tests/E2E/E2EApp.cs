@@ -10,7 +10,7 @@ public static class E2EApp
 {
 	internal static bool IsLive { get; } = Environment.GetEnvironmentVariable("E2E_LIVE") is "true";
 
-	internal static int StackCount { get; } = IsLive ? 1 : Math.Clamp(Environment.ProcessorCount / 2, 1, 8);
+	internal static int StackCount { get; } = IsLive ? 1 : 2;
 
 	private static readonly Lazy<Task> Boot = new(StartAsync);
 	private static readonly Lock CaptureGate = new();

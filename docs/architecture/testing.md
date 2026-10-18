@@ -53,13 +53,16 @@ test never runs concurrently with another test on the same stack. Stacks run wit
 `OTEL_EXPORTER_OTLP_ENDPOINT` (`StackBoot.WithoutTelemetryExport`): Aspire would otherwise point it at an unused collector, whose exporter retries outlast
 the 10 s Aspire gives a stop on Linux.
 
-How many stacks the main pool has is `E2EApp.StackCount`: half the machine's cores, at most eight (the self-hosted pool's is `SelfHostedApp.StackCount`: two from 16 cores, otherwise one), so a small CI runner is not starved. More is not automatically faster: each
-stack costs an application and a container to boot, and boot dominates a suite this size.
+Every machine runs the suite like CI's four-core runner, so a CI failure reproduces locally: `CiRunner` pins the test process, and every stack and
+browser it starts, to four cores, with two main stacks (`E2EApp.StackCount`) and one self-hosted (`SelfHostedApp.StackCount`). CI runs it in Release,
+only on the Release PR; its `test-results-e2e` artifact holds the TRX and each stack's log.
+
+`CircuitFailureSink` fails the session on any circuit crash in a stack's log, except `Virtualize`'s dispose cancelled because its page closed first
+(the framework catches only `JSDisconnectedException`).
 
 A pooled stack keeps its database between tests, so no test may depend on which tests ran before it on the same stack. A feed run, for one, puts the
 recorded list's titles into the admin's wantlist, and every later preview of that list shows them as bypassed rather than included: preview assertions
-count what a filter culls or read the badge's own number, never a fixed included count. A one-stack run (`DOTNET_PROCESSOR_COUNT=2`) shakes such
-dependencies out.
+count what a filter culls or read the badge's own number, never a fixed included count.
 
 Provider traffic is served by WireMock from committed fixtures under `tests/E2E/wiremock`: `mappings/<provider>/` holds the request matchers and
 `responses/<provider>/` the bodies, which are bind-mounted as WireMock's `__files` (the hand-written `arr-stubs`, `newznab` and `plex-stubs` mappings
@@ -81,7 +84,7 @@ A feed run's live view has one flow: `FeedLiveRunTests` creates a feed on the re
 
 ### Self-hosted stacks
 
-Tests marked `[SelfHosted]` (`tests/E2E/SelfHosted`) run on a second pool: up to two stacks that each run the pinned Radarr and Sonarr images from
+Tests marked `[SelfHosted]` (`tests/E2E/SelfHosted`) run on a second pool: one stack that runs the pinned Radarr and Sonarr images from
 `src/AppHost/ArrContainers.cs` beside Sammlarr, which starts on an empty database with no users, so each test makes its Sammlarr accounts through setup. They
 cover what needs an empty install or the real apps: the first run, sign-in, search, the wantlist sync, and what Sammlarr shows when an app refuses its key.
 

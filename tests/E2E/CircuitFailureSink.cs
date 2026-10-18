@@ -18,11 +18,36 @@ internal sealed partial class CircuitFailureSink(string category, string marker,
 
 	internal static void AssertNone(IReadOnlyCollection<string> crashed)
 	{
-		if (crashed.Count > 0)
+		var crashes = Crashes(crashed).Where(crash => !IsVirtualizeDisposedAfterItsPageClosed(crash)).SelectMany(crash => crash).ToList();
+		if (crashes.Count > 0)
 		{
-			Assert.Fail($"A circuit crashed:{Environment.NewLine}{string.Join(Environment.NewLine, crashed)}");
+			Assert.Fail($"A circuit crashed:{Environment.NewLine}{string.Join(Environment.NewLine, crashes)}");
 		}
 	}
+
+	private static IEnumerable<List<string>> Crashes(IEnumerable<string> lines)
+	{
+		List<string> crash = [];
+		foreach (var line in lines)
+		{
+			if (LogEntry().IsMatch(line) && crash.Count > 0)
+			{
+				yield return crash;
+				crash = [];
+			}
+
+			crash.Add(line);
+		}
+
+		if (crash.Count > 0)
+		{
+			yield return crash;
+		}
+	}
+
+	private static bool IsVirtualizeDisposedAfterItsPageClosed(List<string> crash) =>
+		crash.Any(line => line.Contains("System.Threading.Tasks.TaskCanceledException", StringComparison.Ordinal))
+		&& crash.Any(line => line.Contains("Virtualization.VirtualizeJsInterop.DisposeAsync", StringComparison.Ordinal));
 
 	private void Observe(string message)
 	{

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Harness;
+using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Auth;
@@ -38,12 +39,11 @@ public class SessionTests
 
 		await Assert.That(page.Url).Contains($"returnUrl={Uri.EscapeDataString(DeepLink)}");
 
-		await page.RouteAsync(LoginRoute, route => route.AbortAsync());
+		await page.RouteAsync(LoginRoute, route => route.FulfillAsync(new RouteFulfillOptions { Status = 204 }));
 		var login = await page.RunAndWaitForRequestAsync(() => page.ButtonContaining("Sign in with Plex").ClickAsync(), LoginRoute);
 
 		await Assert.That(login.Url).Contains($"returnUrl={Uri.EscapeDataString(DeepLink)}");
 
-		await page.UnrouteAsync(LoginRoute);
 		await page.VisitAsync(await page.PlexCallbackAsync(DeepLink));
 
 		await Assert.That(new Uri(page.Url).AbsolutePath).IsEqualTo(DeepLink);

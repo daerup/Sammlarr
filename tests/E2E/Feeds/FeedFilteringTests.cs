@@ -27,21 +27,17 @@ public class FeedFilteringTests
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(TestData.Count(1));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(Limit - 1));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit));
 
 		await FeedEditor.Option(page, "Blocklist slot policy", "Preserved").ClickAsync();
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(TestData.Count(1));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(Limit));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit - 1));
 
 		await FeedEditor.Rows(page).First.Button("Remove from blocklist").ClickAsync();
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(TestData.Count(0));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit));
 	}
 
 	[Test]
@@ -69,7 +65,8 @@ public class FeedFilteringTests
 		var condition = page.Locator("[role='group'][aria-label='Filter condition']");
 		await Expect(condition.GetByRole(AriaRole.Combobox).First).ToHaveTextAsync(new Regex("Title"));
 		await Expect(page.Locator("input[placeholder='Enter value...']")).ToHaveValueAsync(kept);
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(1), Wait.Preview);
+		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(listed - 1), Wait.Preview);
 	}
 
 	[Test]
