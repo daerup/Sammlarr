@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Text.Json;
 using Contracts.Processing;
 using Core.Processing;
 using Domain.Feed.Run;
@@ -481,6 +482,76 @@ public class QueryProcessorRatingTests
 		await Assert.That(after.Single().Outcome).IsEqualTo(QueryOutcome.Culled);
 	}
 
+	[Test]
+	public async Task Execute_WhenFilterTotalRuntimeAtMostHours_CountsAShowsEpisodesTimesTheirLength()
+	{
+		var miniseries = Show(episodes: 6, minutes: 60);
+		var longRunning = Show(episodes: 41, minutes: 28);
+		var uncounted = Show(episodes: null, minutes: 24);
+		var movie = MovieWithRating(2024, 7.0f);
+		var options = new QueryOptions
+		{
+			Filter = Some.Of(
+				Filter(Group(Length(nameof(MediaQueryRow.TotalRuntimeMinutes), FilterPredicateOperator.LessOrEqual, new Duration(6, DurationUnit.Hours))))
+			),
+		};
+
+		var results = await _testee.ExecuteAsync([miniseries, longRunning, uncounted, movie], options, NoEnrollment).ToListAsync();
+
+		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([miniseries, movie]);
+		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([longRunning, uncounted]);
+	}
+
+	[Test]
+	public async Task Execute_WhenFilterRuntimeAtMostAFractionOfHours_RoundsTheBoundToWholeMinutes()
+	{
+		var inside = Movie(minutes: 246);
+		var outside = Movie(minutes: 247);
+		var options = new QueryOptions
+		{
+			Filter = Some.Of(Filter(Group(Length(nameof(MediaQueryRow.RuntimeMinutes), FilterPredicateOperator.LessOrEqual, new Duration(4.1, DurationUnit.Hours))))),
+		};
+
+		var results = await _testee.ExecuteAsync([inside, outside], options, NoEnrollment).ToListAsync();
+
+		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([inside]);
+		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([outside]);
+	}
+
+	[Test]
+	public async Task Execute_WhenFilterRuntimeBetweenHours_KeepsTheLengthsInside()
+	{
+		var shorter = Movie(minutes: 89);
+		var inside = Movie(minutes: 100);
+		var longer = Movie(minutes: 121);
+		var between = Length(nameof(MediaQueryRow.RuntimeMinutes), FilterPredicateOperator.Between, new Duration(1.5, DurationUnit.Hours)) with
+		{
+			ValueEnd = JsonSerializer.Serialize(new Duration(2, DurationUnit.Hours).ToIso()),
+		};
+		var options = new QueryOptions { Filter = Some.Of(Filter(Group(between))) };
+
+		var results = await _testee.ExecuteAsync([shorter, inside, longer], options, NoEnrollment).ToListAsync();
+
+		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([inside]);
+		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([shorter, longer]);
+	}
+
+	private static MediaQueryRow Movie(int minutes) =>
+		Row($"{minutes}", new MovieDetails { Title = $"Movie {minutes}", Runtime = TimeSpan.FromMinutes(minutes) });
+
+	private static MediaQueryRow Show(int? episodes, int minutes)
+	{
+		return Row(
+			$"{episodes}-{minutes}",
+			new ShowDetails
+			{
+				Title = "Show",
+				Episodes = episodes,
+				RuntimePerEpisode = TimeSpan.FromMinutes(minutes),
+			}
+		);
+	}
+
 	private static QueryPredicates<MediaQueryRow> NoEnrollment =>
 		new(IsWantlisted: _ => false, IsBlocklisted: _ => false, IsOwned: _ => false, Identity: row => row.Media.Identity.Id.Value);
 
@@ -489,17 +560,22 @@ public class QueryProcessorRatingTests
 
 	private static MediaQueryRow MovieWithRating(int year, float? rating, int? votes = 1)
 	{
+		return Row(
+			year.ToString(),
+			new MovieDetails
+			{
+				Title = $"Movie {year}",
+				ReleaseDate = new DateOnly(year, 1, 1),
+				Runtime = TimeSpan.FromMinutes(90),
+				Ratings = rating is { } value ? MediaRatings.From([new TmdbRating(value, Optional.Of(votes))]) : MediaRatings.None,
+			}
+		);
+	}
+
+	private static MediaQueryRow Row(string id, MediaDetails details)
+	{
 		return MediaQueryRow.From(
-			new MatchedMedia(
-				new MediaIdentity(MediaId.New(), [TmdbId.From(year.ToString(), MediaType.Movie)]),
-				new MovieDetails
-				{
-					Title = $"Movie {year}",
-					ReleaseDate = new DateOnly(year, 1, 1),
-					Runtime = TimeSpan.FromMinutes(90),
-					Ratings = rating is { } value ? MediaRatings.From([new TmdbRating(value, Optional.Of(votes))]) : MediaRatings.None,
-				}
-			),
+			new MatchedMedia(new MediaIdentity(MediaId.New(), [TmdbId.From(id, details.Type)]), details),
 			new RatingStrategy(AveragedRating.Everything),
 			[RatingSource.Tmdb]
 		);

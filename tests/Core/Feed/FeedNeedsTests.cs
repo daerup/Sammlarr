@@ -35,6 +35,16 @@ public class FeedNeedsTests
 	}
 
 	[Test]
+	public async Task Needs_ForAFilterOnTotalRuntime_IsBothRuntimesAndTheEpisodeCount()
+	{
+		var feed = TestFeeds.Feed(Guid.NewGuid()) with { Filter = Some.Of(Filtering(nameof(MediaQueryRow.TotalRuntimeMinutes))) };
+
+		var needs = feed.Needs(AveragedRating.Everything, Available);
+
+		await Assert.That(needs.Required).IsEqualTo(MediaField.Runtime | MediaField.RuntimePerEpisode | MediaField.Episodes);
+	}
+
+	[Test]
 	public async Task Needs_WithoutFilterOrSort_IsWhatACardShows()
 	{
 		var needs = TestFeeds.Feed(Guid.NewGuid()).Needs(AveragedRating.Everything, Available);

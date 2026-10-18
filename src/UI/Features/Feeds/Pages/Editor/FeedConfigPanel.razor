@@ -212,7 +212,7 @@
                                 <div class="flex items-center gap-3">
                                     <div class="field-adorned">
                                         <BbSelect TValue="string"
-                                                  Value="@SortField"
+                                                  Value="@SortSelection"
                                                   Class="w-40"
                                                   ValueChanged="@ChangeSortField"
                                                   Options="FeedFields.Options"/>
@@ -223,6 +223,10 @@
                                         else if (SortField == nameof(MediaQueryRow.Votes))
                                         {
                                             @VotesInfo
+                                        }
+                                        else if (SortsByRuntime)
+                                        {
+                                            <FeedRuntimeModeButton Total="SortsByTotal" TotalChanged="ChangeSortTotal"/>
                                         }
                                     </div>
                                     <BbTooltipProvider>
@@ -521,6 +525,10 @@
     private string AbsenceToneClass => _absenceThreshold == 1 ? "text-amber-500" : "text-muted-foreground";
 
     private string SortField => _sort.Property;
+    private Optional<FeedField> SortedField => FeedFields.Of(SortField);
+    private string SortSelection => SortedField.Map(sorted => sorted.Property).GetValueOr(SortField);
+    private bool SortsByRuntime => SortedField.Match(sorted => sorted.Kind is FeedFieldKind.Runtime, () => false);
+    private bool SortsByTotal => SortedField.Match(sorted => sorted.IsTotal(SortField), () => false);
     private ListSortDirection SortDir => _sort.Direction;
     private SlotPolicy WantlistedBehavior => _limit.Wantlisted;
     private SlotPolicy BlocklistedBehavior => _limit.Blocklisted;
@@ -700,7 +708,18 @@
 
     private void ChangeSortField(string? v)
     {
-        _sort = _sort with { Property = v ?? SortField };
+        if (v is null || SortedField.Match(sorted => sorted.Names(v), () => false))
+        {
+            return;
+        }
+
+        _sort = _sort with { Property = v };
+        NotifyChange();
+    }
+
+    private void ChangeSortTotal(bool total)
+    {
+        _sort = _sort with { Property = SortedField.Map(sorted => sorted.NameFor(total)).GetValueOr(SortField) };
         NotifyChange();
     }
 

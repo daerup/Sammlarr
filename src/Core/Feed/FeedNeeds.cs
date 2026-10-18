@@ -33,6 +33,7 @@ internal static class FeedNeeds
 			nameof(MediaQueryRow.Genres) => MediaField.Genres,
 			nameof(MediaQueryRow.ReleaseDate) => MediaField.ReleaseDate,
 			nameof(MediaQueryRow.RuntimeMinutes) => MediaField.Runtime | MediaField.RuntimePerEpisode,
+			nameof(MediaQueryRow.TotalRuntimeMinutes) => MediaField.Runtime | MediaField.RuntimePerEpisode | MediaField.Episodes,
 			nameof(MediaQueryRow.Seasons) => MediaField.Seasons,
 			nameof(MediaQueryRow.Episodes) => MediaField.Episodes,
 			_ => MediaFields.None,

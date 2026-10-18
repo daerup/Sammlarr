@@ -2,45 +2,11 @@
 @using FilterOperator = BlazorBlueprint.Primitives.Filtering.FilterOperator
 
 <div class="number-rule">
-    <div class="number-rule-box">
-        <BbNumericInput TValue="double"
-                        Value="@Read(Condition.Value)"
-                        ValueChanged="@(value => SetAsync(value, Condition.ValueEnd))"
-                        Min="Rule.Min"
-                        Max="Rule.Max"
-                        Step="Rule.Step"
-                        ShowButtons="false"
-                        AllowNegative="false"
-                        AriaLabel="@Label"
-                        data-number-rule/>
-        @if (Rule.Unit is not null)
-        {
-            <span class="number-rule-unit">@Rule.Unit</span>
-        }
-        @if (Adornment is not null)
-        {
-            <span class="number-rule-adornment">@Adornment</span>
-        }
-    </div>
+    @Box(Condition.Value, value => SetAsync(Write(value), Condition.ValueEnd), Label)
     @if (Condition.Operator is FilterOperator.Between)
     {
         <span class="number-rule-and">and</span>
-        <div class="number-rule-box">
-            <BbNumericInput TValue="double"
-                            Value="@Read(Condition.ValueEnd)"
-                            ValueChanged="@(value => SetAsync(Condition.Value, value))"
-                            Min="Rule.Min"
-                            Max="Rule.Max"
-                            Step="Rule.Step"
-                            ShowButtons="false"
-                            AllowNegative="false"
-                            AriaLabel="@($"{Label}, upper bound")"
-                            data-number-rule/>
-            @if (Rule.Unit is not null)
-            {
-                <span class="number-rule-unit">@Rule.Unit</span>
-            }
-        </div>
+        @Box(Condition.ValueEnd, value => SetAsync(Condition.Value, Write(value)), $"{Label}, upper bound")
     }
 </div>
 
@@ -53,9 +19,32 @@
 
     [Parameter] public RenderFragment? Adornment { get; set; }
 
+    [Parameter] public Func<object?, double> Read { get; set; } = value => value is double number ? number : 0;
+
+    [Parameter] public Func<double, object> Write { get; set; } = amount => amount;
+
     [Parameter] public EventCallback Changed { get; set; }
 
-    private static double Read(object? value) => value is double number ? number : 0;
+    private RenderFragment Box(object? value, Func<double, Task> changed, string label) => @<div class="number-rule-box">
+        <BbNumericInput TValue="double"
+                        Value="@Read(value)"
+                        ValueChanged="changed"
+                        Min="Rule.Min"
+                        Max="Rule.Max"
+                        Step="Rule.Step"
+                        ShowButtons="false"
+                        AllowNegative="false"
+                        AriaLabel="@label"
+                        data-number-rule/>
+        @if (Rule.Unit is not null)
+        {
+            <span class="number-rule-unit">@Rule.Unit</span>
+        }
+        @if (Adornment is not null)
+        {
+            <span class="number-rule-adornment">@Adornment</span>
+        }
+    </div>;
 
     private Task SetAsync(object? value, object? valueEnd)
     {

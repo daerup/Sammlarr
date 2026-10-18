@@ -3,7 +3,7 @@
 
 <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filter condition">
     <div class="w-[160px] @AdornedClass">
-        <BbSelect TValue="string" Value="@Condition.Field" ValueChanged="ChangeFieldAsync" Options="FeedFields.Options" Class="min-w-0 flex-1"/>
+        <BbSelect TValue="string" Value="@Field.Property" ValueChanged="ChangeFieldAsync" Options="FeedFields.Options" Class="min-w-0 flex-1"/>
         @Adornment
     </div>
     <BbSelect TValue="FilterOperator" Value="@Condition.Operator" ValueChanged="ChangeOperatorAsync" Options="Field.Operators" Class="w-[180px]"/>
@@ -15,6 +15,9 @@
             break;
         case FeedFieldKind.Number:
             <FeedNumberRuleEditor Condition="Condition" Label="@Field.Label" Rule="Field.Number" Changed="Changed"/>
+            break;
+        case FeedFieldKind.Runtime:
+            <FeedRuntimeRuleEditor Condition="Condition" Label="@Field.Label" Rule="Field.Number" Changed="Changed"/>
             break;
         case FeedFieldKind.Choice when IsMultiple:
             <BbMultiSelect TValue="string" Values="@Picked" ValuesChanged="SetPickedAsync" Options="Field.Options" Placeholder="Select..." Class="w-[180px]"/>
@@ -51,7 +54,11 @@
 
     private FeedField Field => FeedFields.For(Condition.Field);
 
-    private RenderFragment? Adornment => Adornments.GetValueOrDefault(Condition.Field);
+    private RenderFragment? Adornment => Field.Kind is FeedFieldKind.Runtime ? RuntimeMode : Adornments.GetValueOrDefault(Condition.Field);
+
+    private RenderFragment RuntimeMode => @<FeedRuntimeModeButton Total="IsTotal" TotalChanged="SetTotalAsync"/>;
+
+    private bool IsTotal => Field.IsTotal(Condition.Field);
 
     private string? AdornedClass => Adornment is null ? null : "field-adorned";
 
@@ -61,6 +68,11 @@
 
     private Task ChangeFieldAsync(string field)
     {
+        if (Field.Names(field))
+        {
+            return Task.CompletedTask;
+        }
+
         var kind = Field.Kind;
         Condition.Field = field;
         if (!Field.Offers(Condition.Operator) || Field.Kind is FeedFieldKind.Genres)
@@ -91,6 +103,12 @@
             Condition.ValueEnd = null;
         }
 
+        return Changed.InvokeAsync();
+    }
+
+    private Task SetTotalAsync(bool total)
+    {
+        Condition.Field = Field.NameFor(total);
         return Changed.InvokeAsync();
     }
 

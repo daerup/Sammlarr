@@ -41,6 +41,15 @@ public static class QueryFilterFactory
 			Value = JsonSerializer.Serialize(value.ToIso()),
 		};
 
+	public static FilterPredicate Length(string field, FilterPredicateOperator op, Duration value) =>
+		new()
+		{
+			Field = field,
+			Operator = op,
+			ValueKind = FilterValueKind.Duration,
+			Value = JsonSerializer.Serialize(value.ToIso()),
+		};
+
 	public static FilterPredicate In(string field, params string[] values) =>
 		new()
 		{

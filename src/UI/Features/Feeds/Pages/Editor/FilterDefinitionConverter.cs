@@ -219,6 +219,7 @@ internal static class FilterDefinitionConverter
 		{
 			null => FilterValueKind.String,
 			DateOnly or DateTime or DateTimeOffset or RelativeDate => FilterValueKind.Date,
+			Duration => FilterValueKind.Duration,
 			bool => FilterValueKind.Boolean,
 			IConvertible c
 				when c.GetTypeCode()
@@ -242,6 +243,7 @@ internal static class FilterDefinitionConverter
 			null => null,
 			DateOnly d => JsonSerializer.Serialize(d.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)),
 			RelativeDate relative => JsonSerializer.Serialize(relative.ToIso()),
+			Duration duration => JsonSerializer.Serialize(duration.ToIso()),
 			_ => JsonSerializer.Serialize(value),
 		};
 
@@ -253,6 +255,7 @@ internal static class FilterDefinitionConverter
 				FilterValueKind.Number => JsonSerializer.Deserialize<double>(value),
 				FilterValueKind.Boolean => JsonSerializer.Deserialize<bool>(value),
 				FilterValueKind.Date => DateOf(value),
+				FilterValueKind.Duration => Optional.Of(JsonSerializer.Deserialize<string>(value)).Map(Duration.FromIso).ToNullable(),
 				_ => JsonSerializer.Deserialize<string>(value),
 			};
 

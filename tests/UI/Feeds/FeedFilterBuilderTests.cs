@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
+using Duration = Domain.Processing.Duration;
+using DurationUnit = Domain.Processing.DurationUnit;
 using GenreMatch = Domain.Processing.GenreMatch;
 
 namespace UI.Tests.Feeds;
@@ -102,6 +104,99 @@ public class FeedFilterBuilderTests : BunitContext
 	}
 
 	[Test]
+	public async Task Runtime_ForTheTotal_JoinsTheTotalModeToTheField()
+	{
+		var cut = RenderBuilder(
+			new FilterDefinition
+			{
+				Conditions = [Condition(nameof(MediaQueryRow.TotalRuntimeMinutes), FilterOperator.LessOrEqual, new Duration(6, DurationUnit.Hours))],
+			}
+		);
+
+		await Assert.That(FieldTrigger(cut).TextContent).Contains("Runtime");
+		await Assert.That(cut.Find(".field-adorned [data-runtime-mode]").GetAttribute("aria-label")).IsEqualTo("Total runtime");
+		await Assert.That(cut.FindAll(".number-rule-box [data-runtime-mode]")).IsEmpty();
+		await Assert.That(cut.Find("input[aria-label='Runtime']").GetAttribute("value")).IsEqualTo("6");
+	}
+
+	[Test]
+	[Arguments(nameof(MediaQueryRow.RuntimeMinutes), "Total", nameof(MediaQueryRow.TotalRuntimeMinutes), "Total runtime")]
+	[Arguments(nameof(MediaQueryRow.TotalRuntimeMinutes), "Per episode", nameof(MediaQueryRow.RuntimeMinutes), "Runtime per episode")]
+	public async Task Runtime_WhenTheOtherModeIsPickedInThePopover_SwitchesTheField(string field, string mode, string switched, string label)
+	{
+		var condition = Condition(field, FilterOperator.LessOrEqual, new Duration(30, DurationUnit.Minutes));
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+		await cut.Find("[data-runtime-mode]").ClickAsync(new());
+		await Buttons(cut, mode).Single().ClickAsync(new());
+
+		await Assert.That(condition.Field).IsEqualTo(switched);
+		await Assert.That(cut.Find("[data-runtime-mode]").GetAttribute("aria-label")).IsEqualTo(label);
+		await Assert.That(_changes.Last().Version).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Runtime_ForABetween_ShowsTheUnitSwitchInBothBoxes()
+	{
+		var condition = Condition(nameof(MediaQueryRow.RuntimeMinutes), FilterOperator.Between, new Duration(1, DurationUnit.Hours));
+		condition.ValueEnd = new Duration(2, DurationUnit.Hours);
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+		await Assert.That(PickedUnits(cut)).IsEquivalentTo(["h", "h"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Runtime_WhenHoursArePickedBeforeTyping_KeepsTheValueEmptyAndTypesInHours()
+	{
+		var condition = Condition(nameof(MediaQueryRow.RuntimeMinutes), FilterOperator.LessOrEqual);
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+		await Buttons(cut, "h").Single().ClickAsync(new());
+		var untouched = condition.Value;
+		await TypeAsync(cut, 2);
+
+		await Assert.That(untouched).IsNull();
+		await Assert.That(condition.Value).IsEqualTo(new Duration(2, DurationUnit.Hours));
+	}
+
+	[Test]
+	public async Task Runtime_WhenHoursArePickedInTheUpperBox_KeepsTheNumberInTheNewUnitOnBothEnds()
+	{
+		var condition = Condition(nameof(MediaQueryRow.RuntimeMinutes), FilterOperator.Between, new Duration(1, DurationUnit.Minutes));
+		condition.ValueEnd = new Duration(2, DurationUnit.Minutes);
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+		await Buttons(cut, "h").Last().ClickAsync(new());
+
+		await Assert.That(condition.Value).IsEqualTo(new Duration(1, DurationUnit.Hours));
+		await Assert.That(condition.ValueEnd).IsEqualTo(new Duration(2, DurationUnit.Hours));
+		await Assert.That(PickedUnits(cut)).IsEquivalentTo(["h", "h"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Runtime_WhenTyped_KeepsTheChosenUnit()
+	{
+		var condition = Condition(nameof(MediaQueryRow.RuntimeMinutes), FilterOperator.LessOrEqual, new Duration(2, DurationUnit.Hours));
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+		await TypeAsync(cut, 3);
+
+		await Assert.That(condition.Value).IsEqualTo(new Duration(3, DurationUnit.Hours));
+	}
+
+	[Test]
+	public async Task Field_WhenRuntimeIsPickedAgainOnATotal_KeepsTheTotal()
+	{
+		var condition = Condition(nameof(MediaQueryRow.TotalRuntimeMinutes), FilterOperator.LessOrEqual, new Duration(6, DurationUnit.Hours));
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+		await PickAsync(cut, FieldTrigger(cut), "Runtime");
+
+		await Assert.That(condition.Field).IsEqualTo(nameof(MediaQueryRow.TotalRuntimeMinutes));
+		await Assert.That(_changes).IsEmpty();
+	}
+
+	[Test]
 	public async Task Operator_WhenMediaTypeTurnsToIsAnyOf_DropsTheSingleChoice()
 	{
 		var condition = Condition(nameof(MediaQueryRow.MediaType), FilterOperator.Equals, "Movie");
@@ -170,7 +265,7 @@ public class FeedFilterBuilderTests : BunitContext
 		await Assert.That(_changes.Last().Conditions).IsEmpty();
 	}
 
-	private static FilterCondition Condition(string field, FilterOperator op, object value)
+	private static FilterCondition Condition(string field, FilterOperator op, object? value = null)
 	{
 		return new FilterCondition
 		{
@@ -187,8 +282,14 @@ public class FeedFilterBuilderTests : BunitContext
 	private static IEnumerable<IElement> Buttons(IRenderedComponent<IComponent> cut, string text) =>
 		cut.FindAll("button").Where(button => button.TextContent.Trim() == text);
 
+	private static IEnumerable<string> PickedUnits(IRenderedComponent<IComponent> cut) =>
+		cut.FindAll(".number-rule-box [aria-label='Unit'] [data-state=on]").Select(unit => unit.TextContent.Trim());
+
 	private static IEnumerable<string> OptionTexts(IRenderedComponent<IComponent> cut) =>
 		cut.FindAll("[role=option]").Select(option => option.TextContent.Trim());
+
+	private static Task TypeAsync(IRenderedComponent<IComponent> cut, double amount) =>
+		cut.InvokeAsync(() => cut.FindComponents<BbNumericInput<double>>().Single().Instance.ValueChanged.InvokeAsync(amount));
 
 	private static async Task PickAsync(IRenderedComponent<IComponent> cut, IElement trigger, string option)
 	{

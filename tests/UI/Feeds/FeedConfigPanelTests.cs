@@ -194,6 +194,33 @@ public class FeedConfigPanelTests : BunitContext
 	}
 
 	[Test]
+	public async Task Sort_WhenRuntimeTurnsToTotal_SortsByTheTotalAndStillShowsRuntime()
+	{
+		var cut = RenderPanelSorted(nameof(MediaQueryRow.RuntimeMinutes));
+
+		await cut.InvokeAsync(() => cut.FindComponent<FeedRuntimeModeButton>().Instance.TotalChanged.InvokeAsync(true));
+
+		await Assert.That(_changes.Last().Sort!.Property).IsEqualTo(nameof(MediaQueryRow.TotalRuntimeMinutes));
+		await Assert.That(cut.Find(".field-adorned [data-runtime-mode]").GetAttribute("aria-label")).IsEqualTo("Total runtime");
+		await Assert.That(cut.Find(".field-adorned [role=combobox]").TextContent.Trim()).IsEqualTo("Runtime");
+	}
+
+	[Test]
+	public async Task Sort_WhenRuntimeIsPickedAgainOnATotal_KeepsTheTotal()
+	{
+		var cut = RenderPanelSorted(nameof(MediaQueryRow.TotalRuntimeMinutes));
+
+		await cut.InvokeAsync(() =>
+			cut.FindComponents<BbSelect<string>>()
+				.Single(select => select.Instance.Value == nameof(MediaQueryRow.RuntimeMinutes))
+				.Instance.ValueChanged.InvokeAsync(nameof(MediaQueryRow.RuntimeMinutes))
+		);
+
+		await Assert.That(_changes).IsEmpty();
+		await Assert.That(cut.Find(".field-adorned [data-runtime-mode]").GetAttribute("aria-label")).IsEqualTo("Total runtime");
+	}
+
+	[Test]
 	public async Task Rule_WhenARatingIsBetweenTwoBounds_ShowsBothBounds()
 	{
 		var cut = RenderPanelFiltering("Rating", 7.0, BlazorBlueprint.Primitives.Filtering.FilterOperator.Between, 8.5);

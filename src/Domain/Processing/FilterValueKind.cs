@@ -6,4 +6,5 @@ public enum FilterValueKind
 	Number,
 	Boolean,
 	Date,
+	Duration,
 }

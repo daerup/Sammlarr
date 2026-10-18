@@ -75,16 +75,20 @@ internal static class FeedFields
 			Number = new FeedNumberRule(Min: 0, Max: 10, Step: 0.1, Unit: "/ 10"),
 		},
 		new(nameof(MediaQueryRow.Votes), "Votes", FeedFieldKind.Number, NumberOperators) { Number = new FeedNumberRule(Min: 0, Step: 100) },
-		new(nameof(MediaQueryRow.RuntimeMinutes), "Runtime (min)", FeedFieldKind.Number, NumberOperators) { Number = Count },
+		new(nameof(MediaQueryRow.RuntimeMinutes), "Runtime", FeedFieldKind.Runtime, NumberOperators)
+		{
+			Number = Count,
+			Total = Some.Of(nameof(MediaQueryRow.TotalRuntimeMinutes)),
+		},
 		new(nameof(MediaQueryRow.Seasons), "Seasons", FeedFieldKind.Number, NumberOperators) { Number = Count },
 		new(nameof(MediaQueryRow.Episodes), "Episodes", FeedFieldKind.Number, NumberOperators) { Number = Count },
 	];
 
 	internal static IReadOnlyList<SelectOption<string>> Options { get; } = [.. All.Select(field => new SelectOption<string>(field.Property, field.Label))];
 
-	internal static FeedField For(string field) => All.Single(definition => definition.Property == field);
+	internal static FeedField For(string field) => All.Single(definition => definition.Names(field));
 
-	internal static Optional<FeedField> Of(string field) => All.FirstOrNone(definition => definition.Property == field);
+	internal static Optional<FeedField> Of(string field) => All.FirstOrNone(definition => definition.Names(field));
 
 	internal static string LabelOf(string field) => Of(field).Map(definition => definition.Label).GetValueOr(field);
 
@@ -107,6 +111,7 @@ internal enum FeedFieldKind
 	Choice,
 	Date,
 	Genres,
+	Runtime,
 }
 
 internal sealed record FeedField(string Property, string Label, FeedFieldKind Kind, IReadOnlyList<SelectOption<FilterOperator>> Operators)
@@ -114,6 +119,14 @@ internal sealed record FeedField(string Property, string Label, FeedFieldKind Ki
 	public IReadOnlyList<SelectOption<string>> Options { get; init; } = [];
 
 	public FeedNumberRule Number { get; init; } = new();
+
+	public Optional<string> Total { get; init; } = new None();
+
+	public bool Names(string field) => Property == field || IsTotal(field);
+
+	public bool IsTotal(string field) => Total.Match(total => total == field, () => false);
+
+	public string NameFor(bool total) => total ? Total.GetValueOr(Property) : Property;
 
 	public bool Offers(FilterOperator op) => Operators.Any(offered => offered.Value == op);
 }

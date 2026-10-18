@@ -152,6 +152,20 @@ public class FilterDefinitionConverterTests
 	}
 
 	[Test]
+	public async Task RoundTrip_ForARuntimeInHours_KeepsTheUnitAndTheTotal()
+	{
+		var sixHours = new Duration(6, DurationUnit.Hours);
+
+		var written = FilterDefinitionConverter.ToQueryFilter(Definition(Condition("TotalRuntimeMinutes", BbFilterOp.LessOrEqual, sixHours)));
+		var restored = FilterDefinitionConverter.FromQueryFilter(written);
+
+		await Assert.That(written!.Groups[0].Predicates[0].ValueKind).IsEqualTo(FilterValueKind.Duration);
+		await Assert.That(written.Groups[0].Predicates[0].Value).IsEqualTo("\"PT6H\"");
+		await Assert.That(restored!.Conditions[0].Field).IsEqualTo("TotalRuntimeMinutes");
+		await Assert.That(restored.Conditions[0].Value).IsEqualTo(sixHours);
+	}
+
+	[Test]
 	public async Task RoundTrip_WhenFieldAndOperatorSet_PreservesThem()
 	{
 		var restored = RoundTrip(Definition(Condition("Year", BbFilterOp.GreaterThan, 2000.0)));

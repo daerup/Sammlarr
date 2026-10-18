@@ -38,6 +38,19 @@ public sealed record MediaQueryRow(MatchedMedia Media, Optional<SammlarrRating> 
 		}
 	}
 
+	public int? TotalRuntimeMinutes
+	{
+		get
+		{
+			return Media.Details switch
+			{
+				ShowDetails show => Minutes(show.RuntimePerEpisode * show.Episodes),
+				MovieDetails movie => Minutes(movie.Runtime),
+				UnknownDetails => null,
+			};
+		}
+	}
+
 	public int? Seasons => Media.Details is ShowDetails show ? show.Seasons : null;
 
 	public int? Episodes => Media.Details is ShowDetails show ? show.Episodes : null;
