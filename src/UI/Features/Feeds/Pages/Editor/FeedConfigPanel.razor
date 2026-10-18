@@ -518,37 +518,13 @@
     private SlotPolicy WantlistedBehavior => _limit.Wantlisted;
     private SlotPolicy BlocklistedBehavior => _limit.Blocklisted;
 
-    private record FieldDefinition(string Property, string Label, FilterFieldType FilterType, IReadOnlyList<SelectOption<string>>? Options = null);
+    private string? UnfinishedFilter => FilterDefinitionConverter.Incomplete(_filter).Map(condition => $"Finish or remove the {FeedFields.LabelOf(condition.Field)} condition to save.").ToNullable();
 
-    private string? UnfinishedFilter => FilterDefinitionConverter.Incomplete(_filter).Map(condition => $"Finish or remove the {LabelOf(condition.Field)} condition to save.").ToNullable();
-
-    private static string LabelOf(string field) => FieldDefinitions.FirstOrNone(definition => definition.Property == field).Map(definition => definition.Label).GetValueOr(field);
-
-    private static readonly IReadOnlyList<FieldDefinition> FieldDefinitions =
-    [
-        new(nameof(MediaQueryRow.Title), "Title", FilterFieldType.Text),
-        new(nameof(MediaQueryRow.Tagline), "Tagline", FilterFieldType.Text),
-        new(nameof(MediaQueryRow.Summary), "Summary", FilterFieldType.Text),
-        new(nameof(MediaQueryRow.Genres), "Genres", FilterFieldType.Text),
-        new(
-            nameof(MediaQueryRow.MediaType),
-            "Media Type",
-            FilterFieldType.Enum,
-            [new SelectOption<string>(nameof(MediaType.Movie), MediaType.Movie.Label), new SelectOption<string>(nameof(MediaType.Show), MediaType.Show.Label)]
-        ),
-        new(nameof(MediaQueryRow.ReleaseDate), "Release Date", FilterFieldType.Date),
-        new(nameof(MediaQueryRow.Rating), "Rating", FilterFieldType.Number),
-        new(nameof(MediaQueryRow.Votes), "Votes", FilterFieldType.Number),
-        new(nameof(MediaQueryRow.RuntimeMinutes), "Runtime (min)", FilterFieldType.Number),
-        new(nameof(MediaQueryRow.Seasons), "Seasons", FilterFieldType.Number),
-        new(nameof(MediaQueryRow.Episodes), "Episodes", FilterFieldType.Number),
-    ];
-
-    private static readonly IReadOnlyList<SelectOption<string>> SortFields = [.. FieldDefinitions.Select(f => new SelectOption<string>(f.Property, f.Label))];
+    private static readonly IReadOnlyList<SelectOption<string>> SortFields = [.. FeedFields.All.Select(f => new SelectOption<string>(f.Property, f.Label))];
 
     private static readonly IReadOnlyList<FilterField> FilterFields =
     [
-        .. FieldDefinitions.Select(f => new FilterField
+        .. FeedFields.All.Select(f => new FilterField
         {
             Name = f.Property,
             Label = f.Label,
