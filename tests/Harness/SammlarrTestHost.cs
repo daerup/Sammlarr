@@ -61,7 +61,10 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	public static readonly SeededUser SeededMember = new(Guid.Parse("22222222-2222-2222-2222-222222222222"), "Member User", UserRole.Member);
 
-	public static readonly SeededUser SeededRemovable = new(Guid.Parse("33333333-3333-3333-3333-333333333333"), "Removable User", UserRole.Member);
+	public static readonly SeedKeys ReplayKeys = new(
+		new Dictionary<ApiKeyProvider, string> { [ApiKeyProvider.Tmdb] = TmdbApiKey, [ApiKeyProvider.Mdblist] = MdblistApiKey },
+		new Dictionary<AuthProvider, string> { [AuthProvider.Plex] = PlexToken }
+	);
 
 	private static SeededUser Project(TestCurrentUser user) => new(user.Id.Value, user.DisplayName, user.Role);
 
@@ -921,53 +924,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return path;
 	}
 
-	public static void SeedDatabaseFile(string path, string keyRingPath) =>
-		SeedFile(
-			path,
-			keyRingPath,
-			TmdbApiKey,
-			context =>
-			{
-				SeedRows.ApiKey(context, ApiKeyProvider.Tmdb, TmdbApiKey);
-				SeedRows.ApiKey(context, ApiKeyProvider.Mdblist, MdblistApiKey);
-				SeedRows.Credential(context, AuthProvider.Plex, PlexToken);
-			}
-		);
-
-	public static void SeedRecordingDatabase(
-		string path,
-		string keyRingPath,
-		IReadOnlyDictionary<ApiKeyProvider, string> apiKeys,
-		IReadOnlyDictionary<AuthProvider, string> tokens
-	) =>
-		SeedFile(
-			path,
-			keyRingPath,
-			apiKeys[ApiKeyProvider.Tmdb],
-			context =>
-			{
-				foreach (var (provider, apiKey) in apiKeys)
-				{
-					SeedRows.ApiKey(context, provider, apiKey);
-				}
-
-				foreach (var (provider, token) in tokens)
-				{
-					SeedRows.Credential(context, provider, token);
-				}
-			}
-		);
-
-	public static string SecurityStampIn(string path, Guid id)
-	{
-		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
-		connection.Open();
-		using var provider = BuildDbOnlyProvider(connection.ConnectionString);
-		using var context = BuildContext(provider, new TestCurrentUser(), connection);
-		return context.Users.Where(user => user.Id == id).Select(user => user.SecurityStamp).Single()!;
-	}
-
-	private static void SeedFile(string path, string keyRingPath, string memberTmdbKey, Action<SammlarrDbContext> seed)
+	public static void SeedDatabaseFile(string path, string keyRingPath, SeedKeys keys)
 	{
 		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
 		connection.Open();
@@ -978,17 +935,41 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		SeedRows.SearchWith(context, SearchProvider.Plex);
 		SeedRows.SetupFinished(context);
 		SeedUser(context, user);
-		SeedSecondaryUsers(context);
-		SeedMemberTmdbKey(context, user, memberTmdbKey);
-		seed(context);
+		SeedRows.PlexUser(context, SeededMember.Id, SeededMember.DisplayName, SeededMember.Role, string.Empty, 177.5);
+		SeedMemberTmdbKey(context, user, keys.ApiKeys[ApiKeyProvider.Tmdb]);
+		SeedCredentials(context, keys);
 		SeedRows.WriteAheadLogging(connection);
 	}
 
-	private static void SeedSecondaryUsers(SammlarrDbContext context)
+	public static void SeedPerson(string path, string keyRingPath, SeededUser person, SeedKeys keys)
 	{
-		foreach (var ((id, displayName, role), hue) in new[] { (SeededMember, 177.5), (SeededRemovable, 315.0) })
+		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
+		connection.Open();
+		using var provider = BuildDbOnlyProvider(connection.ConnectionString, keyRingPath);
+		using var context = BuildContext(provider, new TestCurrentUser { Id = UserId.From(person.Id) }, connection);
+		SeedRows.PlexUser(context, person.Id, person.DisplayName, person.Role, string.Empty, 220);
+		SeedCredentials(context, keys);
+	}
+
+	public static string SecurityStampIn(string path, Guid id)
+	{
+		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
+		connection.Open();
+		using var provider = BuildDbOnlyProvider(connection.ConnectionString);
+		using var context = BuildContext(provider, new TestCurrentUser(), connection);
+		return context.Users.Where(user => user.Id == id).Select(user => user.SecurityStamp).Single()!;
+	}
+
+	private static void SeedCredentials(SammlarrDbContext context, SeedKeys keys)
+	{
+		foreach (var (provider, apiKey) in keys.ApiKeys)
 		{
-			SeedRows.PlexUser(context, id, displayName, role, string.Empty, hue);
+			SeedRows.ApiKey(context, provider, apiKey);
+		}
+
+		foreach (var (provider, token) in keys.Tokens)
+		{
+			SeedRows.Credential(context, provider, token);
 		}
 	}
 

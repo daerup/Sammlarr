@@ -6,7 +6,7 @@ public class AuthLifecycleTests
 	public async Task SignOut_FromTheAccountMenu_EndsTheSession()
 	{
 		var page = await E2EApp.AdminAt(Routes.Home);
-		await page.ButtonContaining("signed in as Test User").ClickAsync();
+		await page.ButtonContaining($"signed in as {(await E2EApp.AdminAsync()).DisplayName}").ClickAsync();
 
 		await page.ButtonContaining("Sign out").ClickAsync();
 

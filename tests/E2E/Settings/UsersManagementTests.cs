@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Harness;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -7,8 +6,6 @@ namespace E2E.Tests.Settings;
 
 public class UsersManagementTests
 {
-	private static readonly string MemberName = SammlarrTestHost.SeededMember.DisplayName;
-
 	private const int PinId = 515151;
 
 	private const string AccessChanged = "Your access changed";
@@ -16,34 +13,36 @@ public class UsersManagementTests
 	[Test]
 	public async Task RoleChange_WhenAppliedToMember_Persists()
 	{
+		var member = (await E2EApp.MemberAsync()).DisplayName;
 		var page = await E2EApp.AdminAt(SettingsPage.Section("users"));
-		await Expect(Badge(page, MemberName, "Member")).ToBeVisibleAsync();
+		await Expect(Badge(page, member, "Member")).ToBeVisibleAsync();
 		var stale = await E2EApp.OpenMemberPageAsync();
 
-		await ChangeRoleAsync(page, "Make admin");
-		await Expect(Badge(page, MemberName, "Admin")).ToBeVisibleAsync();
+		await ChangeRoleAsync(page, member, "Make admin");
+		await Expect(Badge(page, member, "Admin")).ToBeVisibleAsync();
 		await SettingsPage.VisitSectionAsync(page, "users");
-		await Expect(Badge(page, MemberName, "Admin")).ToBeVisibleAsync();
+		await Expect(Badge(page, member, "Admin")).ToBeVisibleAsync();
 
 		await stale.GotoAsync(Routes.Settings);
 		await stale.ShouldBeAtAsync(Routes.SignIn);
 
-		await ChangeRoleAsync(page, "Make member");
-		await Expect(Badge(page, MemberName, "Member")).ToBeVisibleAsync();
+		await ChangeRoleAsync(page, member, "Make member");
+		await Expect(Badge(page, member, "Member")).ToBeVisibleAsync();
 		await SettingsPage.VisitSectionAsync(page, "users");
 
-		await Expect(Badge(page, MemberName, "Member")).ToBeVisibleAsync();
+		await Expect(Badge(page, member, "Member")).ToBeVisibleAsync();
 	}
 
 	[Test]
 	public async Task RoleChange_WhileTheMemberHasTheAppOpen_ForcesThemToSignInAgain()
 	{
+		var name = (await E2EApp.MemberAsync()).DisplayName;
 		var member = await E2EApp.MemberAt(Routes.Feeds);
 		await Expect(member.Heading("Feeds")).ToBeVisibleAsync();
 		await Expect(member.Text(AccessChanged)).ToBeHiddenAsync();
 
 		var admin = await E2EApp.AdminAt(SettingsPage.Section("users"));
-		await ChangeRoleAsync(admin, "Make admin");
+		await ChangeRoleAsync(admin, name, "Make admin");
 
 		await Expect(member.Text(AccessChanged)).ToBeVisibleAsync(Wait.Settle);
 
@@ -56,15 +55,12 @@ public class UsersManagementTests
 
 		await member.ShouldBeAtAsync(Routes.SignIn);
 		await Expect(member.Heading("Browse")).ToBeHiddenAsync();
-
-		await ChangeRoleAsync(admin, "Make member");
-		await Expect(Badge(admin, MemberName, "Member")).ToBeVisibleAsync();
 	}
 
 	[Test]
 	public async Task RemoveUser_WhenTheirNameIsTyped_DropsFromTheList()
 	{
-		var removable = SammlarrTestHost.SeededRemovable.DisplayName;
+		var removable = (await E2EApp.MemberAsync()).DisplayName;
 		var page = await E2EApp.AdminAt(SettingsPage.Section("users"));
 		await Expect(SettingsPage.PersonRow(page, removable)).ToBeVisibleAsync();
 
@@ -106,10 +102,10 @@ public class UsersManagementTests
 
 	private static ILocator Badge(IPage page, string user, string role) => SettingsPage.PersonRow(page, user).Text(role);
 
-	private static async Task ChangeRoleAsync(IPage page, string action)
+	private static async Task ChangeRoleAsync(IPage page, string member, string action)
 	{
-		await SettingsPage.OpenPersonAsync(page, MemberName);
-		await SettingsPage.PersonRow(page, MemberName).Button(action).ClickAsync();
+		await SettingsPage.OpenPersonAsync(page, member);
+		await SettingsPage.PersonRow(page, member).Button(action).ClickAsync();
 		await page.AlertDialog.Button(action).ClickAsync();
 	}
 

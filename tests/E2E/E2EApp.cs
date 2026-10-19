@@ -1,7 +1,9 @@
 using System.Collections.Concurrent;
 using System.Text.Json.Nodes;
 using System.Threading.Channels;
+using Domain.Identity;
 using E2E.Tests.Recording;
+using Harness;
 using Microsoft.Playwright;
 
 namespace E2E.Tests;
@@ -26,9 +28,13 @@ public static class E2EApp
 
 	internal static Task<IPage> OpenPageAsync() => NewPageAsync(_ => null);
 
-	internal static Task<IPage> OpenAuthenticatedPageAsync() => NewPageAsync(stack => stack.ForgeAdminCookie());
+	internal static Task<IPage> OpenAuthenticatedPageAsync() => NewPageAsync(lease => lease.Stack.Forge(lease.Admin.Value));
 
-	internal static Task<IPage> OpenMemberPageAsync() => NewPageAsync(stack => stack.ForgeMemberCookie());
+	internal static Task<IPage> OpenMemberPageAsync() => NewPageAsync(lease => lease.Stack.Forge(lease.Member.Value));
+
+	internal static async Task<SeededUser> AdminAsync() => (await LeaseAsync()).Admin.Value;
+
+	internal static async Task<SeededUser> MemberAsync() => (await LeaseAsync()).Member.Value;
 
 	internal static Task<IPage> OpenPageWithAuthCookieAsync(string value) => NewPageAsync(_ => value);
 
@@ -43,12 +49,12 @@ public static class E2EApp
 		return page;
 	}
 
-	private static async Task<IPage> NewPageAsync(Func<E2EStack, string?> cookie)
+	private static async Task<IPage> NewPageAsync(Func<Lease, string?> cookie)
 	{
 		var lease = await LeaseAsync();
 		var context = await BrowserPages.OpenAsync(_browser!, lease.Stack.BaseUrl);
 		lease.Contexts.Add(context);
-		if (cookie(lease.Stack) is { } value)
+		if (cookie(lease) is { } value)
 		{
 			await context.AddCookiesAsync([
 				new Cookie
@@ -301,6 +307,10 @@ public static class E2EApp
 		internal E2EStack Stack { get; } = stack;
 
 		internal ConcurrentBag<IBrowserContext> Contexts { get; } = [];
+
+		internal Lazy<SeededUser> Admin { get; } = new(() => stack.AddPerson(UserRole.Admin));
+
+		internal Lazy<SeededUser> Member { get; } = new(() => stack.AddPerson(UserRole.Member));
 	}
 
 	private static async Task StartAsync()

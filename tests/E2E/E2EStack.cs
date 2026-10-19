@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using Domain.Identity;
 using Domain.Providers;
 using E2E.Tests.Recording;
 using Harness;
@@ -34,25 +35,22 @@ internal sealed class E2EStack
 
 	internal Uri WireMockUrl => WireMock.BaseAddress!;
 
-	internal string ForgeAdminCookie() => Forge(SammlarrTestHost.SeededAdmin);
+	internal string Forge(SeededUser user) => AuthCookie.Forge(_seed.KeyRing, user, SammlarrTestHost.SecurityStampIn(_seed.DbPath, user.Id));
 
-	internal string ForgeMemberCookie() => Forge(SammlarrTestHost.SeededMember);
+	internal SeededUser AddPerson(UserRole role)
+	{
+		var person = new SeededUser(Guid.NewGuid(), TestData.Name(role.ToString()), role);
+		SammlarrTestHost.SeedPerson(_seed.DbPath, _seed.KeyRing, person, _seed.Keys);
+		return person;
+	}
 
 	internal static E2ESeed Seed(bool live, string keyRing)
 	{
 		var workDir = Directory.CreateTempSubdirectory("sammlarr-e2e-").FullName;
 		var dbPath = Path.Combine(workDir, "sammlarr.db");
-
-		if (live)
-		{
-			SammlarrTestHost.SeedRecordingDatabase(dbPath, keyRing, Credentials<ApiKeyProvider>("_API_KEY"), Credentials<AuthProvider>("_TOKEN"));
-		}
-		else
-		{
-			SammlarrTestHost.SeedDatabaseFile(dbPath, keyRing);
-		}
-
-		return new E2ESeed(workDir, dbPath, keyRing);
+		var keys = live ? new SeedKeys(Credentials<ApiKeyProvider>("_API_KEY"), Credentials<AuthProvider>("_TOKEN")) : SammlarrTestHost.ReplayKeys;
+		SammlarrTestHost.SeedDatabaseFile(dbPath, keyRing, keys);
+		return new E2ESeed(workDir, dbPath, keyRing, keys);
 	}
 
 	internal static async Task<E2EStack> LaunchAsync(E2ESeed seed, int index, bool live, Action<string> onCircuitFailure)
@@ -179,8 +177,6 @@ internal sealed class E2EStack
 		}
 	}
 
-	private string Forge(SeededUser user) => AuthCookie.Forge(_seed.KeyRing, user, SammlarrTestHost.SecurityStampIn(_seed.DbPath, user.Id));
-
 	private static Dictionary<TProvider, string> Credentials<TProvider>(string suffix)
 		where TProvider : struct, Enum =>
 		Enum.GetValues<TProvider>()
@@ -189,4 +185,4 @@ internal sealed class E2EStack
 			.ToDictionary(entry => entry.provider, entry => entry.secret!);
 }
 
-internal sealed record E2ESeed(string WorkDir, string DbPath, string KeyRing);
+internal sealed record E2ESeed(string WorkDir, string DbPath, string KeyRing, SeedKeys Keys);

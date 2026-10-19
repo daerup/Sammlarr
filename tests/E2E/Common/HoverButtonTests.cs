@@ -8,7 +8,7 @@ public class HoverButtonTests
 	public async Task SignOutButton_InTheMenuNamingTheSignedInUser_RestsInTheDestructiveColourAndInvertsToItsFillOnHover()
 	{
 		var page = await E2EApp.AdminAt(Routes.Home);
-		var profile = page.ButtonContaining("signed in as Test User");
+		var profile = page.ButtonContaining($"signed in as {(await E2EApp.AdminAsync()).DisplayName}");
 		await Expect(profile).ToBeVisibleAsync();
 
 		await profile.ClickAsync();

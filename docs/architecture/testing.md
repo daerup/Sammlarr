@@ -53,6 +53,11 @@ test never runs concurrently with another test on the same stack. Stacks run wit
 `OTEL_EXPORTER_OTLP_ENDPOINT` (`StackBoot.WithoutTelemetryExport`): Aspire would otherwise point it at an unused collector, whose exporter retries outlast
 the 10 s Aspire gives a stop on Linux.
 
+A pooled stack keeps its database, so each test signs in as people of its own: the first `OpenAuthenticatedPageAsync` or `OpenMemberPageAsync` of a test
+seeds a fresh admin or member into the stack's database, with the same keys and Plex token as the seed, and every later page of that test is the same
+person (`E2EApp.AdminAsync` and `MemberAsync` name them). A test never sees another test's feeds, wantlist or blocklist; only global state is shared on a
+stack, such as the provider settings, title ids and details, and the sign-up switch.
+
 Every machine runs the suite like CI's four-core runner, so a CI failure reproduces locally: `CiRunner` pins the test process, and every stack and
 browser it starts, to four cores, with two main stacks (`E2EApp.StackCount`) and one self-hosted (`SelfHostedApp.StackCount`). CI runs it on the Release PR,
 in Release, and on every Renovate PR before it merges; its `test-results-e2e` artifact holds the TRX and each stack's log.
