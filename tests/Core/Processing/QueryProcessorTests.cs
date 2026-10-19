@@ -348,15 +348,44 @@ public class QueryProcessorTests
 	}
 
 	[Test]
-	public async Task Execute_WhenThePickIsRandom_TitlesTheFeedHoldsKeepTheirSlots()
+	public async Task Execute_WhenThePickIsRandom_AnOwnedTitleIsDrawnLikeAnyOther()
 	{
 		var items = Numbered(10);
-		var unpicked = await _testee.ExecuteAsync(items, AtRandom(1, Seed), Enrolled()).ToListAsync();
-		var held = Items(unpicked, QueryOutcome.Truncated).Last();
+		var unowned = await _testee.ExecuteAsync(items, AtRandom(1, Seed), Enrolled()).ToListAsync();
+		var held = Items(unowned, QueryOutcome.Truncated).Last();
 
 		var results = await _testee.ExecuteAsync(items, AtRandom(1, Seed), Enrolled(owned: held)).ToListAsync();
 
-		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([held]);
+		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo(Items(unowned, QueryOutcome.Qualified));
+		await Assert.That(results.Single(row => row.Item == held).AtRisk).IsTrue();
+	}
+
+	[Test]
+	public async Task Execute_WhenTheDrawSkipsOwnedTitles_TheyQualifyWithoutASlotAndTheDrawStillFillsTheLimit()
+	{
+		var items = Numbered(10);
+		var unowned = await _testee.ExecuteAsync(items, AtRandom(1, Seed), Enrolled()).ToListAsync();
+		var held = Items(unowned, QueryOutcome.Qualified).Single();
+
+		var results = await _testee.ExecuteAsync(items, AtRandom(1, Seed) with { DrawSkipsOwned = true }, Enrolled(owned: held)).ToListAsync();
+
+		var kept = results.Single(row => row.Item == held);
+		await Assert.That(kept.Kept).IsTrue();
+		await Assert.That(kept.ConsumesSlot).IsFalse();
+		await Assert.That(results.Count(row => row.Outcome is QueryOutcome.Qualified && !row.Enrollment.Owned)).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Execute_WhenThePickIsFromTheTop_SkippingOwnedTitlesInTheDrawChangesNothing()
+	{
+		var first = new Item("First", 2020, "Action");
+		var second = new Item("Second", 2021, "Drama");
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 1 }), DrawSkipsOwned = true };
+
+		var results = await _testee.ExecuteAsync([first, second], options, Enrolled(owned: first)).ToListAsync();
+
+		await Assert.That(results[0].ConsumesSlot).IsTrue();
+		await Assert.That(results[1].Outcome).IsEqualTo(QueryOutcome.Truncated);
 	}
 
 	[Test]

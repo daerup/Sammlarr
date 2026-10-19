@@ -25,6 +25,8 @@ public interface IFeedRepository
 
 	Task<IReadOnlyList<FeedRun>> GetRunsAsync(RunQuery query, CancellationToken cancellationToken = default);
 
+	Task<Optional<DateTimeOffset>> LastConclusiveRunStartAsync(FeedId feedId, CancellationToken cancellationToken = default);
+
 	Task<IReadOnlyDictionary<FeedId, FeedRunTotals>> GetRunTotalsAsync(CancellationToken cancellationToken = default);
 
 	Task StartRunAsync(FeedRun run, CancellationToken cancellationToken = default);

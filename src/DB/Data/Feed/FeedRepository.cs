@@ -135,6 +135,18 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			.ToListAsync(cancellationToken);
 	}
 
+	public async Task<Optional<DateTimeOffset>> LastConclusiveRunStartAsync(FeedId feedId, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var started = await ctx
+			.FeedRuns.AsNoTracking()
+			.Where(row => row.FeedId == feedId.Value && row.Conclusiveness == Conclusiveness.Conclusive)
+			.OrderByDescending(row => row.StartedAt)
+			.Select(row => (DateTimeOffset?)row.StartedAt)
+			.FirstOrDefaultAsync(cancellationToken);
+		return Optional.Of(started);
+	}
+
 	public async Task<IReadOnlyDictionary<FeedId, FeedRunTotals>> GetRunTotalsAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);

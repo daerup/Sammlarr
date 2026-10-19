@@ -133,7 +133,8 @@ internal sealed class FeedRunPlanner(
 			Sort = feed.Sort,
 			Limit = feed.Limit,
 			Filter = feed.Filter,
-			ShuffleSeed = feed.Id.Value,
+			ShuffleSeed = await ShuffleSeedAsync(feed, cancellationToken),
+			DrawSkipsOwned = feed.Strategy is Append,
 			Today = clock.Today,
 		};
 		var predicates = new QueryPredicates<MediaQueryRow>(
@@ -145,6 +146,17 @@ internal sealed class FeedRunPlanner(
 
 		var classified = resolved.Count > 0 ? await processor.ExecuteAsync(resolved, options, predicates, cancellationToken).ToListAsync(cancellationToken) : [];
 		return [.. classified.Select(verdict => new QueryVerdict<MatchedMedia>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot))];
+	}
+
+	private async Task<Guid> ShuffleSeedAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken)
+	{
+		if (!feed.Limit.Match(limit => limit.Pick is LimitPick.Random, () => false))
+		{
+			return feed.Id.Value;
+		}
+
+		var lastRun = await feeds.LastConclusiveRunStartAsync(feed.Id, cancellationToken);
+		return lastRun.Map(started => ShuffleRank.Reseed(feed.Id.Value, started)).GetValueOr(feed.Id.Value);
 	}
 
 	private async Task<RawFeedLoad> FetchAsync(Domain.Feed.Feed feed, FieldNeeds needs, CancellationToken cancellationToken)

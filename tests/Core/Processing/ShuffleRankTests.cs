@@ -13,4 +13,16 @@ public class ShuffleRankTests
 	{
 		await Assert.That(ShuffleRank.Of(Guid.Parse(seed), Key)).IsEqualTo(rank);
 	}
+
+	[Test]
+	public async Task Reseed_ForTheSameRun_GivesTheSameSeedAndAnotherRunAnother()
+	{
+		var run = new DateTimeOffset(2026, 10, 19, 6, 0, 0, TimeSpan.FromHours(2));
+
+		var seed = ShuffleRank.Reseed(Key, run);
+
+		await Assert.That(ShuffleRank.Reseed(Key, run.ToUniversalTime())).IsEqualTo(seed);
+		await Assert.That(ShuffleRank.Reseed(Key, run.AddTicks(1))).IsNotEqualTo(seed);
+		await Assert.That(seed).IsNotEqualTo(Key);
+	}
 }

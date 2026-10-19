@@ -135,6 +135,25 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task LastConclusiveRunStartAsync_SkipsGuardedRunsAndTakesTheNewest()
+	{
+		var feedId = await fixture.SeedFeedAsync();
+		await _testee.StartRunAsync(Run(feedId, 1));
+		await _testee.StartRunAsync(Run(feedId, 2));
+		await _testee.StartRunAsync(Run(feedId, 3) with { Conclusiveness = Conclusiveness.Unresolved });
+
+		await Assert.That(await _testee.LastConclusiveRunStartAsync(feedId)).IsSome().And.IsEqualTo(Day(2));
+	}
+
+	[Test]
+	public async Task LastConclusiveRunStartAsync_ForAFeedThatNeverRan_IsNone()
+	{
+		var feedId = await fixture.SeedFeedAsync();
+
+		await Assert.That(await _testee.LastConclusiveRunStartAsync(feedId)).IsNone();
+	}
+
+	[Test]
 	public async Task CompleteRunAsync_WithKnownCounts_ReadsThemBack()
 	{
 		var feedId = await fixture.SeedFeedAsync();

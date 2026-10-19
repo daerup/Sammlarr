@@ -65,50 +65,51 @@ public class RandomPickTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task PlanAsync_ForARandomPick_KeepsHeldTitlesWhenOneLeavesTheList()
+	public async Task PlanAsync_ForAMirrorFeedWithARandomPick_DrawsAgainFromTheLastSuccessfulRun()
 	{
 		var seeded = await SeedListAsync(Titles);
-		var feed = await CreateAsync(new Mirror(3));
+		var feed = await CreateAsync(new Mirror(1));
 		await RunAsync(feed);
-		var held = await WantlistIdsAsync();
-		var (leaving, staying) = (held[0], held[1]);
-		host.MdblistFeedContains(List, [.. Titles.Where((_, index) => seeded[index] != leaving).Select(Listed)]);
+		var first = await WantlistIdsAsync();
+		var lastRun = (await host.Resolve<IFeedRepository>().GetRunsAsync(RunQuery.Take(1) with { Feed = Some.Of(feed) })).Single();
+		var seed = ShuffleRank.Reseed(feed.Value, lastRun.StartedAt);
+		var drawn = seeded.OrderBy(id => ShuffleRank.Of(seed, id.Value)).Take(2).ToList();
 
 		var plan = await Assert.That(await Planner.PlanAsync(new SavedFeed(feed))).IsOfUnionType<FeedPlanResult, MirrorPlan>();
 
-		await Assert.That(Picked(plan!.Verdicts)).Count().IsEqualTo(2);
-		await Assert.That(Picked(plan.Verdicts)).Contains(staying);
-		await Assert.That(plan.Delta.Adds).Count().IsEqualTo(1);
-		await Assert.That(plan.Delta.Drops).IsEmpty();
+		await Assert.That(Picked(plan!.Verdicts)).IsEquivalentTo(drawn);
+		await Assert.That(plan.Delta.Drops).IsEquivalentTo(first.Except(drawn));
 	}
 
 	[Test]
-	public async Task PlanAsync_ForARandomPick_KeepsHeldTitlesWhenBetterRankedOnesJoin()
+	public async Task PlanAsync_ForARandomPick_KeepsTheDrawUntilARunSucceeds()
 	{
-		var seeded = await SeedListAsync(Titles);
-		var feed = FeedId.From(Guid.NewGuid());
-		var lowest = Titles.Zip(seeded).OrderByDescending(title => ShuffleRank.Of(feed.Value, title.Second.Value)).Take(2).ToList();
-		host.MdblistFeedContains(List, [.. lowest.Select(title => Listed(title.First))]);
-		await RunAsync(await host.Resolve<IFeedService>().CreatedAsync(Data(new Append()) with { Id = Some.Of(feed) }));
-		host.MdblistFeedContains(List, [.. Titles.Select(Listed)]);
+		await SeedListAsync(Titles);
+		var feed = await CreateAsync(new Mirror(1));
+		var before = await Assert.That(await Planner.PlanAsync(new SavedFeed(feed))).IsOfUnionType<FeedPlanResult, MirrorPlan>();
+		await host.Resolve<IFeedRepository>().StartRunAsync(TestFeeds.Run(await host.FeedAsync(feed), Guid.NewGuid(), Conclusiveness.NoItems));
 
-		var plan = await Assert.That(await Planner.PlanAsync(new SavedFeed(feed))).IsOfUnionType<FeedPlanResult, AppendPlan>();
+		var after = await Assert.That(await Planner.PlanAsync(new SavedFeed(feed))).IsOfUnionType<FeedPlanResult, MirrorPlan>();
 
-		await Assert.That(Picked(plan!.Verdicts)).IsEquivalentTo(lowest.Select(title => title.Second));
-		await Assert.That(plan.Delta.Adds).IsEmpty();
+		await Assert.That(Picked(after!.Verdicts)).IsEquivalentTo(Picked(before!.Verdicts));
 	}
 
 	[Test]
-	public async Task PlanAsync_ForAnAppendFeedWithARandomPick_AddsNothingOnTheSecondRun()
+	public async Task PlanAsync_ForAnAppendFeedWithARandomPick_AddsTitlesItHasNotAddedOnEveryRun()
 	{
 		await SeedListAsync(Titles);
 		var feed = await CreateAsync(new Append());
 		await RunAsync(feed);
+		var first = await WantlistIdsAsync();
 
 		var plan = await Assert.That(await Planner.PlanAsync(new SavedFeed(feed))).IsOfUnionType<FeedPlanResult, AppendPlan>();
+		await RunAsync(feed);
+		await RunAsync(feed);
 
-		await Assert.That(plan!.Delta.Adds).IsEmpty();
-		await Assert.That(await WantlistIdsAsync()).Count().IsEqualTo(2);
+		await Assert.That(plan!.Delta.Adds).Count().IsEqualTo(2);
+		await Assert.That(plan.Delta.Adds.Intersect(first)).IsEmpty();
+		await Assert.That(plan.Verdicts.Where(verdict => verdict.Kept).Select(verdict => verdict.Item.Identity.Id)).IsEquivalentTo(first);
+		await Assert.That(await WantlistIdsAsync()).Count().IsEqualTo(Titles.Length);
 	}
 
 	private async Task<IReadOnlyList<MediaId>> SeedListAsync(IReadOnlyList<MediaSpec> titles)

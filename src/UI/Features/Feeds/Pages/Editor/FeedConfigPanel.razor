@@ -753,7 +753,7 @@
     private const string SlotScopeHelper = "Only affects items this feed did not add itself.";
 
     private const string PickTooltip =
-        "From the top takes the first items in your sort order. At random picks them in an order fixed for this feed, and the titles it already added keep their slots.";
+        "From the top takes the first items in your sort order. At random draws a new pick after every successful run, and an Append feed only draws from titles it has not added yet.";
 
     private static string GetSlotPolicyTooltip(SlotPolicy behavior) =>
         behavior switch

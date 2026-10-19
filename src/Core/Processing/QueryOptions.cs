@@ -11,5 +11,7 @@ internal sealed record QueryOptions
 	public Optional<QueryLimit> Limit { get; init; } = new None();
 	public Guid ShuffleSeed { get; init; }
 
+	public bool DrawSkipsOwned { get; init; }
+
 	public DateOnly Today { get; init; }
 }

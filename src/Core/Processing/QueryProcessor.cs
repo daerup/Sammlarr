@@ -47,6 +47,10 @@ internal sealed class QueryProcessor<T>
 			{
 				verdicts[position] = new QueryVerdict<T>(item, QueryOutcome.Culled, enrollment, false);
 			}
+			else if (enrollment.Owned && SitsOutTheDraw(options))
+			{
+				verdicts[position] = new QueryVerdict<T>(item, QueryOutcome.Qualified, enrollment, false);
+			}
 			else if (options.Limit.Match(limit => taken >= limit.Count, () => false))
 			{
 				verdicts[position] = new QueryVerdict<T>(item, QueryOutcome.Truncated, enrollment, false);
@@ -69,16 +73,19 @@ internal sealed class QueryProcessor<T>
 	private static IEnumerable<int> Slotted(List<T> all, QueryOptions options, QueryPredicates<T> predicates)
 	{
 		var positions = Enumerable.Range(0, all.Count);
-		if (!options.Limit.Match(limit => limit.Pick is LimitPick.Random, () => false))
+		if (!PicksAtRandom(options))
 		{
 			return positions;
 		}
 
 		return positions
-			.OrderByDescending(position => predicates.IsOwned(all[position]))
-			.ThenBy(position => ShuffleRank.Of(options.ShuffleSeed, predicates.Identity(all[position])))
+			.OrderBy(position => ShuffleRank.Of(options.ShuffleSeed, predicates.Identity(all[position])))
 			.ThenBy(position => predicates.Identity(all[position]));
 	}
+
+	private static bool PicksAtRandom(QueryOptions options) => options.Limit.Match(limit => limit.Pick is LimitPick.Random, () => false);
+
+	private static bool SitsOutTheDraw(QueryOptions options) => options.DrawSkipsOwned && PicksAtRandom(options);
 
 	private static List<T> Sort(IEnumerable<T> source, QuerySort sort)
 	{
