@@ -122,7 +122,7 @@
                             <PreviewFilterBadge Flash="_flash" Icon="log-out" Count="LeavingCount" Active="_atRiskOnly" OnClick="ToggleAtRiskOnly">
                                 <Tooltip>
                                     <p class="font-medium mb-0.5">On its way out</p>
-                                    <p>@AtRiskCount no longer match your rules · @(_goneResults.Count + _goneShortfall) gone from the list</p>
+                                    <p>@AtRiskCount no longer match your rules@(GoneCount > 0 ? $" · {GoneCount} no longer on the remote list" : null)</p>
                                 </Tooltip>
                             </PreviewFilterBadge>
                         </div>
@@ -987,6 +987,7 @@
     private int UnmatchedCount => _unmatchedResults.Count;
     private int AtRiskCount { get; set; }
     private int LeavingCount { get; set; }
+    private int GoneCount => _goneResults.Count + _goneShortfall;
     private int WantlistCount { get; set; }
     private int BlocklistCount { get; set; }
 
@@ -1000,7 +1001,7 @@
         FilteredCount = buckets.GetValueOrDefault(PreviewBucket.Filtered);
         SkippedCount = buckets.GetValueOrDefault(PreviewBucket.Skipped);
         AtRiskCount = IsMirror ? _processedResults.Count(result => result.AtRisk) : 0;
-        LeavingCount = AtRiskCount + _goneResults.Count + _goneShortfall;
+        LeavingCount = AtRiskCount + GoneCount;
 
         var bypassed = _processedResults.Where(result => PreviewResultFilter.Bucket(result) is PreviewBucket.Bypassed).ToList();
         WantlistCount = bypassed.Count(result => result.Enrollment.InWantlist);

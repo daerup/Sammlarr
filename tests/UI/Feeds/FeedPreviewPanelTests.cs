@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using AngleSharp.Dom;
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Primitives;
 using Bunit;
 using Contracts.Blocklist;
 using Contracts.DI;
@@ -103,6 +104,29 @@ public class FeedPreviewPanelTests : BunitContext
 	}
 
 	[Test]
+	public async Task Preview_WhenATitleLeftTheRemoteList_TheOnItsWayOutTipCountsIt()
+	{
+		var gone = MediaId.From(new Guid(99, 0, 0, new byte[8]));
+		var cut = RenderPanel(new GonePlanner(gone), resolved: 5, unmatched: 0, gone: gone);
+
+		await ApplyAsync(cut, new Mirror(3));
+		cut.WaitForState(() => cut.FindAll(".preview-gone-results .search-result-row").Count == 1);
+
+		await Assert.That(await LeavingTipAsync(cut)).IsEqualTo("0 no longer match your rules · 1 no longer on the remote list");
+	}
+
+	[Test]
+	public async Task Preview_WhenNoTitleLeftTheRemoteList_TheOnItsWayOutTipLeavesItOut()
+	{
+		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
+
+		await ApplyAsync(cut, new Mirror(3));
+		cut.WaitForState(() => cut.FindAll(".preview-main-results .search-result-row").Count == 5);
+
+		await Assert.That(await LeavingTipAsync(cut)).IsEqualTo("2 no longer match your rules");
+	}
+
+	[Test]
 	public async Task Preview_ForAGoneRow_TheWantlistAndBlocklistTogglesAreAvailable()
 	{
 		var gone = MediaId.From(new Guid(99, 0, 0, new byte[8]));
@@ -163,6 +187,13 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private static int LeavingBadge(IRenderedComponent<FeedPreviewPanel> cut) =>
 		int.Parse(cut.Find(".leaving-badge-slot .preview-filter-badge span").TextContent);
+
+	private async Task<string> LeavingTipAsync(IRenderedComponent<FeedPreviewPanel> cut)
+	{
+		var portal = Render<BbPortalHost>();
+		await cut.Find(".leaving-badge-slot .preview-filter-badge").ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
+		return portal.WaitForElement("[data-portal-content][data-state=open] [role=tooltip] p:last-of-type").TextContent;
+	}
 
 	[Test]
 	public async Task Apply_AsksTheProviderAsTheFeedEditorForTheDraftsFeed()
