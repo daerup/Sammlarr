@@ -2,7 +2,7 @@
 @using FilterOperator = BlazorBlueprint.Primitives.Filtering.FilterOperator
 
 <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filter condition">
-    <div class="w-[160px] @AdornedClass">
+    <div class="w-[200px] @AdornedClass">
         <BbSelect TValue="string" Value="@Field.Property" ValueChanged="ChangeFieldAsync" DisplayTextSelector="FeedFields.LabelOf" Class="min-w-0 flex-1">
             <BbSelectTrigger>
                 <BbSelectValue/>
