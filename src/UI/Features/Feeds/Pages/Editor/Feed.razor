@@ -151,7 +151,7 @@
         _config.IsTestable
         && _applied is { } applied
         && applied.SameSource(_config)
-        && (_previewStatus.HasResults || _previewStatus.IsLoading)
+        && (_previewStatus.HasResults || _previewStatus.IsLoading || (_previewStatus.HasFailed && !_previewStatus.IsListMissing))
         && FilterDefinitionConverter.Incomplete(_config.Filter).IsNone();
 
     private bool ListNotFound => IdentifierRefused || (_savedFeedId is null && _previewStatus.IsListMissing);

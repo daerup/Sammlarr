@@ -349,6 +349,22 @@ public class FeedEditorTests : BunitContext
 	}
 
 	[Test]
+	public async Task Change_AfterThePlanFailed_PreviewsTheListAgain()
+	{
+		_provider.GetFeedItemsAsync(Any(), Any(), Any()).Returns(AsyncSequence.Of(new Listed<MediaMatchResult>(0, Movie())));
+		var cut = RenderEditor();
+		cut.WaitForState(() => Previewed(cut));
+		_planner.PlanAsync(Any(), Any()).Returns(new FeedPlanFailed("Failed to compare two elements in the array."));
+		await ChangeAsync(cut, config => config with { Limit = new QueryLimit { Count = 10 } });
+		cut.WaitForState(() => cut.FindAll("[data-preview-state='failed']").Count > 0, PastThePause);
+		_planner.PlanAsync(Any(), Any()).Returns(new AppendPlan([], [], FeedDelta.None, Conclusiveness.NoItems));
+
+		await ChangeAsync(cut, config => config with { Limit = null });
+
+		cut.WaitForState(() => Previewed(cut), PastThePause);
+	}
+
+	[Test]
 	public async Task Filter_WhileItsReplanIsPending_ShowsTheSpinnerUntilItLands()
 	{
 		_provider.GetFeedItemsAsync(Any(), Any(), Any()).Returns(AsyncSequence.Of(new Listed<MediaMatchResult>(0, Movie())));
