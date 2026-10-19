@@ -41,6 +41,27 @@ public class FeedFilteringTests
 	}
 
 	[Test]
+	public async Task NumberCondition_ClickedBesideTheNumber_FocusesTheInput()
+	{
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.VisitAsync("/feeds/create");
+		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
+		await FeedEditor.Toggle(page, "Enable filters").ClickAsync();
+		await FeedEditor.AddNumberConditionAsync(page, "Votes", "greater than", "1");
+		var box = page.Locator(".number-rule-box").First;
+		var size = await box.BoundingBoxAsync();
+
+		await box.ClickAsync(
+			new LocatorClickOptions
+			{
+				Position = new Position { X = size!.Width - 8, Y = size.Height / 2 },
+			}
+		);
+
+		await Expect(page.Locator("input[aria-label='Votes']")).ToBeFocusedAsync();
+	}
+
+	[Test]
 	public async Task Filter_WhenSavedAndReopened_IsRestoredInTheEditor()
 	{
 		var name = TestData.Name("Restored");
