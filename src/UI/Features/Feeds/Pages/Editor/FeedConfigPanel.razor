@@ -640,6 +640,11 @@
     }
     private async Task ChangeIdentifierAsync(string v)
     {
+        if (RepeatsWhatWasLookedUp(v))
+        {
+            return;
+        }
+
         _identifier = v;
         NotifyChange();
         if (Environment.TickCount64 - _pastedAt < PastedValueWindowMs)
@@ -648,6 +653,9 @@
             await OnCommit.InvokeAsync();
         }
     }
+
+    private bool RepeatsWhatWasLookedUp(string? typed) =>
+        Check is { } check && check.Typed == typed?.Trim() && check.Answer.Match(stored => stored == _identifier, _ => false);
 
     private void CommitAfterPaste() => _pastedAt = Environment.TickCount64;
 

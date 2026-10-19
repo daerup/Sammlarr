@@ -301,6 +301,18 @@ public class FeedConfigPanelTests : BunitContext
 	}
 
 	[Test]
+	public async Task Identifier_WhenTheFieldReportsTheLookedUpNumberLate_KeepsTheListItResolvedTo()
+	{
+		var cut = RenderConfig(Documentaries with { Identifier = "88434" });
+		Checked(cut, new IdentifierCheck("88434", Success.Of("snoak/trakt-s-trending-shows")));
+
+		await cut.InvokeAsync(() => IdentifierInput(cut).Instance.ValueChanged.InvokeAsync("88434"));
+
+		await Assert.That(IdentifierField(cut).GetAttribute("value")).IsEqualTo("snoak/trakt-s-trending-shows");
+		await Assert.That(_changes).IsEmpty();
+	}
+
+	[Test]
 	public async Task Identifier_OnEnter_Commits()
 	{
 		var commits = 0;
