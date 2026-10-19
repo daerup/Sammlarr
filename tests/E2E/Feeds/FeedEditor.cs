@@ -26,6 +26,8 @@ internal static class FeedEditor
 
 	private const string RowTitle = $"{ResultRow} .media-title-text";
 
+	private const string RowRating = $"{ResultRow} .rating-badge-wrap";
+
 	private const int ReplanPauseMs = 300;
 
 	internal static async Task ConfigureAsync(IPage page, string name)
@@ -91,6 +93,12 @@ internal static class FeedEditor
 	{
 		await Expect(page.Locator(RowTitle).First).ToBeVisibleAsync();
 		return [.. (await page.Locator(RowTitle).AllTextContentsAsync()).Select(title => title.Trim())];
+	}
+
+	internal static async Task<IReadOnlyList<double>> RowRatingsAsync(IPage page)
+	{
+		await Expect(page.Locator(RowRating).First).ToBeVisibleAsync();
+		return [.. (await page.Locator(RowRating).AllTextContentsAsync()).Select(rating => double.Parse(rating.Trim(), CultureInfo.InvariantCulture))];
 	}
 
 	internal static ILocator Badge(IPage page, PreviewBadge badge) => page.Locator(".stat-badges-row .preview-filter-badge").Nth(Position(badge));

@@ -215,7 +215,7 @@
                                                   Value="@SortSelection"
                                                   Class="w-40"
                                                   ValueChanged="@ChangeSortField"
-                                                  Options="FeedFields.Options"/>
+                                                  Options="FeedFields.SortOptions"/>
                                         @if (SortField == nameof(MediaQueryRow.Rating))
                                         {
                                             @RatingStar
@@ -492,7 +492,7 @@
 
     private readonly HashSet<FeedProvider> _disabledProviders = [];
 
-    private static readonly QuerySort DefaultSort = new() { Property = nameof(MediaQueryRow.Title), Direction = ListSortDirection.Descending };
+    private static readonly QuerySort DefaultSort = new() { Property = nameof(MediaQueryRow.Rating), Direction = ListSortDirection.Descending };
     private static readonly QueryLimit DefaultLimit = new() { Count = 0, Wantlisted = SlotPolicy.Consumed, Blocklisted = SlotPolicy.Consumed };
     private const long PastedValueWindowMs = 500;
 

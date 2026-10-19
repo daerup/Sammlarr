@@ -183,7 +183,7 @@ public class FeedConfigPanelTests : BunitContext
 	[Test]
 	[Arguments(nameof(MediaQueryRow.Rating), true, false)]
 	[Arguments(nameof(MediaQueryRow.Votes), false, true)]
-	[Arguments(nameof(MediaQueryRow.Title), false, false)]
+	[Arguments(nameof(MediaQueryRow.Seasons), false, false)]
 	public async Task Sort_ForEachField_JoinsTheStarForRatingTheInfoForVotesAndNoSegmentOtherwise(string field, bool hasStar, bool hasInfo)
 	{
 		var cut = RenderPanelSorted(field);

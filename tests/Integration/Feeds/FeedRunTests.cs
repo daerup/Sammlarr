@@ -49,16 +49,16 @@ public class FeedRunTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task NeedsAsync_ForASortOnGenres_RequiresGenresAndAsksForWhatACardShows()
+	public async Task NeedsAsync_ForASortOnReleaseDate_RequiresTheReleaseDateAndAsksForWhatACardShows()
 	{
 		var feed = TestFeeds.Feed(Guid.NewGuid()) with
 		{
-			Sort = Some.Of(new QuerySort { Property = nameof(MediaQueryRow.Genres), Direction = ListSortDirection.Ascending }),
+			Sort = Some.Of(new QuerySort { Property = nameof(MediaQueryRow.ReleaseDate), Direction = ListSortDirection.Ascending }),
 		};
 
 		var needs = await host.Resolve<IFeedRunPlanner>().NeedsAsync(feed);
 
-		await Assert.That(needs.Required).IsEqualTo(MediaField.Genres);
+		await Assert.That(needs.Required).IsEqualTo(MediaField.ReleaseDate);
 		await Assert.That(needs.Shown.Overlaps(MediaField.Poster)).IsTrue();
 	}
 

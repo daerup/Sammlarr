@@ -69,30 +69,35 @@ internal static class FeedFields
 				new SelectOption<string>(nameof(MediaType.Show), MediaType.Show.Label),
 			],
 		},
-		new(nameof(MediaQueryRow.ReleaseDate), "Release Date", FeedFieldKind.Date, DateOperators),
+		new(nameof(MediaQueryRow.ReleaseDate), "Release Date", FeedFieldKind.Date, DateOperators) { Sortable = true },
 		new(nameof(MediaQueryRow.Rating), "Rating", FeedFieldKind.Number, NumberOperators)
 		{
 			Number = new FeedNumberRule(Min: 0, Max: 10, Step: 0.1, Unit: "/ 10"),
+			Sortable = true,
 		},
-		new(nameof(MediaQueryRow.Votes), "Votes", FeedFieldKind.Number, NumberOperators) { Number = new FeedNumberRule(Min: 0, Step: 100) },
+		new(nameof(MediaQueryRow.Votes), "Votes", FeedFieldKind.Number, NumberOperators) { Number = new FeedNumberRule(Min: 0, Step: 100), Sortable = true },
 		new(nameof(MediaQueryRow.RuntimeMinutes), "Runtime", FeedFieldKind.Runtime, NumberOperators)
 		{
 			Number = Count,
 			Total = Some.Of(nameof(MediaQueryRow.TotalRuntimeMinutes)),
+			Sortable = true,
 		},
 		new(nameof(MediaQueryRow.Seasons), "Seasons", FeedFieldKind.Number, NumberOperators)
 		{
 			Number = Count with { Unit = "season", Plural = "seasons" },
 			ShowsOnly = true,
+			Sortable = true,
 		},
 		new(nameof(MediaQueryRow.Episodes), "Episodes", FeedFieldKind.Number, NumberOperators)
 		{
 			Number = Count with { Unit = "episode", Plural = "episodes" },
 			ShowsOnly = true,
+			Sortable = true,
 		},
 	];
 
-	internal static IReadOnlyList<SelectOption<string>> Options { get; } = [.. All.Select(field => new SelectOption<string>(field.Property, field.Label))];
+	internal static IReadOnlyList<SelectOption<string>> SortOptions { get; } =
+	[.. All.Where(field => field.Sortable).Select(field => new SelectOption<string>(field.Property, field.Label))];
 
 	internal static FeedField For(string field) => All.Single(definition => definition.Names(field));
 
@@ -131,6 +136,8 @@ internal sealed record FeedField(string Property, string Label, FeedFieldKind Ki
 	public Optional<string> Total { get; init; } = new None();
 
 	public bool ShowsOnly { get; init; }
+
+	public bool Sortable { get; init; }
 
 	public bool Names(string field) => Property == field || IsTotal(field);
 

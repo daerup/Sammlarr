@@ -54,17 +54,18 @@ public class FeedConfigurationTests
 		await FeedEditor.Toggle(page, "Enable custom sorting").ClickAsync();
 		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
-		var descending = await FeedEditor.RowTitlesAsync(page);
+		var bestFirst = await FeedEditor.RowRatingsAsync(page);
+		var sorted = await FeedEditor.RowTitlesAsync(page);
 
 		await page.Button("Descending").ClickAsync();
 		await FeedEditor.CaughtUpAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
-		var ascending = await FeedEditor.RowTitlesAsync(page);
+		var worstFirst = await FeedEditor.RowRatingsAsync(page);
 
-		await Assert.That(ascending).IsEquivalentTo(sourceOrder);
-		await Assert.That(ascending).IsNotEquivalentTo(sourceOrder, CollectionOrdering.Matching);
-		await Assert.That(descending).IsEquivalentTo(ascending.Reverse(), CollectionOrdering.Matching);
-		await Assert.That(ascending).IsEquivalentTo(sourceOrder.Order(StringComparer.InvariantCulture), CollectionOrdering.Matching);
+		await Assert.That(sorted).IsEquivalentTo(sourceOrder);
+		await Assert.That(sorted).IsNotEquivalentTo(sourceOrder, CollectionOrdering.Matching);
+		await Assert.That(bestFirst).IsInDescendingOrder();
+		await Assert.That(worstFirst).IsEquivalentTo(bestFirst.Reverse(), CollectionOrdering.Matching);
 	}
 
 	[Test]
