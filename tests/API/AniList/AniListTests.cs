@@ -149,6 +149,19 @@ public class AniListTests
 	}
 
 	[Test]
+	public async Task GetFeedItemsAsync_WhenTheLaneRefuses_SaysAniListIsUnavailable()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Throws(new LaneRefusedException("blocked until 2026-10-19T16:17:25Z"));
+
+		var unavailable = await Assert
+			.That(async () => await Feed(handler).GetFeedItemsAsync("search/anime/popular", FieldNeeds.None).InListOrderAsync().ToListAsync())
+			.Throws<RemoteUnavailableException>();
+
+		await Assert.That(unavailable!.Remote).IsEqualTo(RemoteService.AniList);
+	}
+
+	[Test]
 	public async Task LookUpAsync_ForATitleTheFeedRead_AnswersWithoutAskingAniListAgain()
 	{
 		var handler = Mock.HttpHandler();

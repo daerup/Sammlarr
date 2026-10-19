@@ -2,7 +2,9 @@ using System.Net;
 using System.Text.Json.Nodes;
 using API.AniList.Types;
 using API.Http;
+using API.Http.Lanes;
 using Domain.Providers;
+using Polly.Timeout;
 
 namespace API.AniList;
 
@@ -12,7 +14,7 @@ internal sealed class AniListClient(HttpClient http)
 		where TData : class
 	{
 		using var content = JsonContent.Create(new JsonObject { ["query"] = query, ["variables"] = variables });
-		using var response = await http.PostAsync(string.Empty, content, cancellationToken);
+		using var response = await PostAsync(content, cancellationToken);
 		if (response.StatusCode is HttpStatusCode.TooManyRequests or >= HttpStatusCode.InternalServerError)
 		{
 			return response.StatusCode.Unanswered(RemoteService.AniList, $"AniList answered {(int)response.StatusCode}.");
@@ -31,6 +33,18 @@ internal sealed class AniListClient(HttpClient http)
 		}
 
 		return Optional.Of(answer?.Data).ToResult("AniList answered without data.");
+	}
+
+	private async Task<HttpResponseMessage> PostAsync(HttpContent content, CancellationToken cancellationToken)
+	{
+		try
+		{
+			return await http.PostAsync(string.Empty, content, cancellationToken);
+		}
+		catch (Exception ex) when (ex is LaneRefusedException or TimeoutRejectedException)
+		{
+			throw new RemoteUnavailableException(RemoteService.AniList, sent: ex is TimeoutRejectedException, ex);
+		}
 	}
 }
 
