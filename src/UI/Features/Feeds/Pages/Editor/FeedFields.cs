@@ -3,6 +3,8 @@ using BlazorBlueprint.Primitives.Filtering;
 using Contracts.Processing;
 using Domain.Media;
 using UI.Shared.Media;
+using Duration = Domain.Processing.Duration;
+using DurationUnit = Domain.Processing.DurationUnit;
 
 namespace UI.Features.Feeds.Pages.Editor;
 
@@ -138,6 +140,19 @@ internal sealed record FeedField(string Property, string Label, FeedFieldKind Ki
 	public bool ShowsOnly { get; init; }
 
 	public bool Sortable { get; init; }
+
+	public object? Blank
+	{
+		get
+		{
+			return Kind switch
+			{
+				FeedFieldKind.Number => 0.0,
+				FeedFieldKind.Runtime => new Duration(0, DurationUnit.Minutes),
+				FeedFieldKind.Text or FeedFieldKind.Choice or FeedFieldKind.Date or FeedFieldKind.Genres => null,
+			};
+		}
+	}
 
 	public bool Names(string field) => Property == field || IsTotal(field);
 

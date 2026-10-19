@@ -24,7 +24,17 @@
         </BbSelect>
         @Adornment
     </div>
-    <BbSelect TValue="FilterOperator" Value="@Condition.Operator" ValueChanged="ChangeOperatorAsync" Options="Field.Operators" Class="w-[180px]"/>
+    <BbSelect TValue="FilterOperator" Value="@Condition.Operator" ValueChanged="ChangeOperatorAsync" Class="w-[180px]">
+        <BbSelectTrigger>
+            <span class="truncate">@OperatorLabel</span>
+        </BbSelectTrigger>
+        <BbSelectContent>
+            @foreach (var offered in Field.Operators)
+            {
+                <BbSelectItem Value="@offered.Value" Text="@offered.Text"/>
+            }
+        </BbSelectContent>
+    </BbSelect>
     @switch (Field.Kind)
     {
         case FeedFieldKind.Text:
@@ -78,6 +88,8 @@
 
     private bool IsTotal => Field.IsTotal(Condition.Field);
 
+    private string OperatorLabel => Field.Operators.FirstOrNone(offered => offered.Value == Condition.Operator).Map(offered => offered.Text).GetValueOr(string.Empty);
+
     private string? AdornedClass => Adornment is null ? null : "field-adorned";
 
     private bool IsMultiple => FeedFields.TakesPicks(Condition);
@@ -100,8 +112,8 @@
 
         if (kind != Field.Kind)
         {
-            Condition.Value = null;
-            Condition.ValueEnd = null;
+            Condition.Value = Field.Blank;
+            Condition.ValueEnd = Condition.Operator is FilterOperator.Between ? Field.Blank : null;
         }
 
         return Changed.InvokeAsync();
@@ -116,10 +128,7 @@
             Condition.Value = null;
         }
 
-        if (chosen is not FilterOperator.Between)
-        {
-            Condition.ValueEnd = null;
-        }
+        Condition.ValueEnd = chosen is FilterOperator.Between ? Condition.ValueEnd ?? Field.Blank : null;
 
         return Changed.InvokeAsync();
     }

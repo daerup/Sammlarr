@@ -74,8 +74,63 @@ public class FeedFilterBuilderTests : BunitContext
 
 		await Assert.That(condition.Field).IsEqualTo(nameof(MediaQueryRow.Rating));
 		await Assert.That(condition.Operator).IsEqualTo(FilterOperator.Equals);
-		await Assert.That(condition.Value).IsNull();
+		await Assert.That(condition.Value).IsEqualTo(0.0);
 		await Assert.That(_changes.Last().Version).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Field_WhenADateAfterTurnsIntoRating_ShowsGreaterThanAndHoldsTheZeroTheBoxShows()
+	{
+		var condition = Condition(nameof(MediaQueryRow.ReleaseDate), FilterOperator.GreaterThan, new DateTime(2020, 1, 1));
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+		await PickAsync(cut, FieldTrigger(cut), "Rating");
+
+		await Assert.That(OperatorTrigger(cut).TextContent.Trim()).IsEqualTo("greater than");
+		await Assert.That(condition.Value).IsEqualTo(0.0);
+		await Assert.That(cut.Find("input[aria-label='Rating']").GetAttribute("value")).IsEqualTo("0");
+	}
+
+	[Test]
+	public async Task Operator_WhenANumberTurnsToBetween_StartsTheUpperBoundAtTheZeroItShows()
+	{
+		var condition = Condition(nameof(MediaQueryRow.Votes), FilterOperator.GreaterThan, 500.0);
+		var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+		await PickAsync(cut, OperatorTrigger(cut), "between");
+
+		await Assert.That(condition.Value).IsEqualTo(500.0);
+		await Assert.That(condition.ValueEnd).IsEqualTo(0.0);
+	}
+
+	[Test]
+	public async Task Field_ChangedFromAnyOperatorToAnyOtherField_ShowsAnOperatorTheNewFieldOffers()
+	{
+		List<string> broken = [];
+		foreach (var from in FeedFields.All)
+		{
+			foreach (var op in from.Operators)
+			{
+				foreach (var to in FeedFields.All.Where(field => !field.Names(from.Property)))
+				{
+					await DisposeComponentsAsync();
+					var condition = Condition(from.Property, op.Value);
+					var cut = RenderBuilder(new FilterDefinition { Conditions = [condition] });
+
+					await FieldTrigger(cut).ClickAsync(new());
+					await cut.FindAll("[role=option]").Single(found => found.TextContent.Replace("Shows", "").Trim() == to.Label).ClickAsync(new());
+
+					var shown = OperatorTrigger(cut).TextContent.Trim();
+					var label = to.Operators.FirstOrDefault(offered => offered.Value == condition.Operator)?.Text;
+					if (label is null || shown != label)
+					{
+						broken.Add($"{from.Label} {op.Text} -> {to.Label}: shows '{shown}', holds {condition.Operator}");
+					}
+				}
+			}
+		}
+
+		await Assert.That(broken).IsEmpty();
 	}
 
 	[Test]
