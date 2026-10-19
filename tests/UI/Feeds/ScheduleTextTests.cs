@@ -47,6 +47,14 @@ public class ScheduleTextTests
 	}
 
 	[Test]
+	public async Task Ago_InAGermanBrowser_StaysEnglishLikeTheRestOfTheUi()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-CH");
+
+		await Assert.That(ScheduleText.Ago(Now.AddDays(-95), Now)).StartsWith("Jun ");
+	}
+
+	[Test]
 	public async Task Ago_ReadsAsAHumanWouldSayIt()
 	{
 		await Assert.That(ScheduleText.Ago(Now.AddMinutes(-16), Now)).IsEqualTo("16 min ago");

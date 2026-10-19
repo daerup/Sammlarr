@@ -1,3 +1,4 @@
+using System.Globalization;
 using BlazorBlueprint.Components;
 using Bunit;
 using Contracts;
@@ -92,6 +93,19 @@ public class FeedRunsTests : BunitContext
 
 		await Assert.That(cut.Find("[data-testid=run-titles-gone]").TextContent).Contains(FeedRunView.TitlesGone);
 		await Assert.That(cut.Markup).DoesNotContain("matched your collection exactly");
+	}
+
+	[Test]
+	public async Task Render_InAGermanBrowser_StaysEnglishLikeTheRestOfTheUi()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-CH");
+		var older = Run(Now.AddDays(-3));
+		RegisterServices([older]);
+
+		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(older)));
+		cut.WaitForState(() => cut.FindAll(".runs-item").Count == 1);
+
+		await Assert.That(cut.Markup).Contains("1 run since 11 October").And.DoesNotContain("Oktober");
 	}
 
 	[Test]

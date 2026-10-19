@@ -1,3 +1,4 @@
+@using System.Globalization
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
 
@@ -38,7 +39,7 @@
         <div class="provenance-meta">
             <div>
                 <span class="provenance-key">Added</span>
-                <span class="provenance-value">@AddedAt.LocalDateTime.ToString("d MMM yyyy, HH:mm")</span>
+                <span class="provenance-value">@AddedAt.LocalDateTime.ToString("d MMM yyyy, HH:mm", CultureInfo.InvariantCulture)</span>
             </div>
             @if (ProvenanceView.RunCounts(Provenance) is { } counts && counts is { Added: > 0 } or { Removed: > 0 })
             {

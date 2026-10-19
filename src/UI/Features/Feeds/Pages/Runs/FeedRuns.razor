@@ -1,5 +1,6 @@
 @page "/feeds/{FeedIdParam}/runs"
 @page "/feeds/{FeedIdParam}/runs/{RunIdParam}"
+@using System.Globalization
 @using Contracts
 @using Contracts.Feed
 @using Contracts.Media
@@ -434,7 +435,7 @@
     private string DayLabel(DateTime day) =>
         day == Today ? "Today"
         : day == Today.AddDays(-1) ? "Yesterday"
-        : day.ToString("d MMMM");
+        : day.ToString("d MMMM", CultureInfo.InvariantCulture);
 
     private string Heading(FeedRun run)
     {
@@ -442,7 +443,7 @@
         var day =
             local.Date == Today ? "Today"
             : local.Date == Today.AddDays(-1) ? "Yesterday"
-            : local.ToString("d MMMM");
+            : local.ToString("d MMMM", CultureInfo.InvariantCulture);
         return $"{day}, {local:HH:mm}";
     }
 
@@ -469,14 +470,14 @@
         }
     }
 
-    private string? NextRunLine => ChipNextRun.Map(next => $"next run {next:d MMMM HH:mm}").ToNullable();
+    private string? NextRunLine => ChipNextRun.Map(next => string.Create(CultureInfo.InvariantCulture, $"next run {next:d MMMM HH:mm}")).ToNullable();
 
     private string HistoryLine
     {
         get
         {
             return _history.FirstRunAt.Match(
-                first => $"{_history.TotalRuns} {(_history.TotalRuns == 1 ? "run" : "runs")} since {first.ToLocalTime():d MMMM}",
+                first => string.Create(CultureInfo.InvariantCulture, $"{_history.TotalRuns} {(_history.TotalRuns == 1 ? "run" : "runs")} since {first.ToLocalTime():d MMMM}"),
                 () => $"{_history.TotalRuns} runs"
             );
         }

@@ -1,3 +1,4 @@
+@using System.Globalization
 @using UI.Features.Feeds.Pages
 @using UI.Shared.Services.Branding
 @using UrlGuid = global::Shared.UrlGuid
@@ -86,5 +87,5 @@
     private int Queued => FeedPulse.Queued(Rows);
 
 
-    private string When(DateTimeOffset at) => at - Now < TimeSpan.FromDays(1) ? at.ToLocalTime().ToString("HH:mm") : at.ToLocalTime().ToString("d MMMM HH:mm");
+    private string When(DateTimeOffset at) => at - Now < TimeSpan.FromDays(1) ? at.ToLocalTime().ToString("HH:mm") : at.ToLocalTime().ToString("d MMMM HH:mm", CultureInfo.InvariantCulture);
 }

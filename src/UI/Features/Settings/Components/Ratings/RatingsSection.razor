@@ -1,3 +1,4 @@
+@using System.Globalization
 @using Contracts.Ratings
 @inject RatingContext RatingContext
 @inject IRatingService Ratings
@@ -26,7 +27,7 @@
 
     private string ImdbFileText =>
         _imdbFile.Match(
-            loaded => $"IMDb ratings come from IMDb's ratings file of {loaded.ToLocalTime().ToString("d MMMM yyyy, HH:mm")}.",
+            loaded => $"IMDb ratings come from IMDb's ratings file of {loaded.ToLocalTime().ToString("d MMMM yyyy, HH:mm", CultureInfo.InvariantCulture)}.",
             () => "IMDb's ratings file has not been loaded yet.");
 
     protected override async Task OnInitializedAsync()

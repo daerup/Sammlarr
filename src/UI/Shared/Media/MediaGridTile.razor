@@ -1,3 +1,4 @@
+@using System.Globalization
 @using Contracts.Media
 @using Contracts.Media.Artwork
 @inject IMediaService MediaService
@@ -60,7 +61,7 @@
                 }
                 @if (Details.ReleaseDate is { } released)
                 {
-                    <span class="tile-text-soft font-medium text-sm shrink-0">@released.ToString("MMM d, yyyy")</span>
+                    <span class="tile-text-soft font-medium text-sm shrink-0">@released.ToString("MMM d, yyyy", CultureInfo.InvariantCulture)</span>
                 }
             </div>
         </div>

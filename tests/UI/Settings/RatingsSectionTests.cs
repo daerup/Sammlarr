@@ -1,3 +1,4 @@
+using System.Globalization;
 using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Ratings;
@@ -25,15 +26,16 @@ public class RatingsSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task ImdbFile_OnceLoaded_SaysWhichDaysFileTheRatingsComeFrom()
+	public async Task ImdbFile_OnceLoaded_SaysInEnglishWhichDaysFileTheRatingsComeFrom()
 	{
+		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-CH");
 		var loadedAt = new DateTimeOffset(2026, 10, 6, 4, 30, 0, TimeSpan.Zero);
 		_ratings.GetImdbFileDateAsync(Any()).Returns(Some.Of(loadedAt));
 
 		var cut = Render<RatingsSection>();
 
 		cut.WaitForState(() => cut.FindAll(".imdb-file").Count == 1);
-		await Assert.That(cut.Find(".imdb-file").TextContent).Contains($"{loadedAt.ToLocalTime():d MMMM yyyy, HH:mm}");
+		await Assert.That(cut.Find(".imdb-file").TextContent).Contains(loadedAt.ToLocalTime().ToString("d MMMM yyyy, HH:mm", CultureInfo.InvariantCulture));
 	}
 
 	[Test]

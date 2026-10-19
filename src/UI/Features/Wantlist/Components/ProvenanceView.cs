@@ -1,3 +1,4 @@
+using System.Globalization;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
@@ -72,7 +73,7 @@ internal static class ProvenanceView
 
 	internal static string Description(WantlistItemProvenance provenance, MediaProviderBrandingService branding, DateTimeOffset addedAt, MediaType type)
 	{
-		var when = addedAt.LocalDateTime.ToString("MMM d, yyyy HH:mm");
+		var when = addedAt.LocalDateTime.ToString("MMM d, yyyy HH:mm", CultureInfo.InvariantCulture);
 
 		return provenance.Value switch
 		{

@@ -1,3 +1,4 @@
+using System.Globalization;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
@@ -134,6 +135,20 @@ public class LastRunCellTests : BunitContext
 
 		cut.WaitForState(() => cut.Instance.Opened.Count == 1);
 		await Assert.That(cut.Instance.Opened).IsEquivalentTo([true]);
+	}
+
+	[Test]
+	public async Task Dialog_InAGermanBrowser_StaysEnglishLikeTheRestOfTheUi()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-CH");
+		RegisterServices();
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Bar, true));
+		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-bar]").Count == 1);
+		await cut.Find("[data-testid=last-run-bar]").ClickAsync(new());
+
+		cut.WaitForState(() => cut.Instance.Opened.Count == 1);
+		await Assert.That(cut.Markup).Contains("October 14").And.DoesNotContain("Oktober");
 	}
 
 	[Test]

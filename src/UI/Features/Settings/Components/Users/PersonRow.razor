@@ -1,3 +1,4 @@
+@using System.Globalization
 @using Contracts.Identity
 @using Domain.Identity
 @using UI.Shared.Branding.Birds
@@ -195,7 +196,7 @@
         {
             return Person switch
             {
-                JoinedPerson joined => $"Joined {joined.User.JoinedAt.LocalDateTime:MMM d, yyyy} · {SignsIn(SignIn)}",
+                JoinedPerson joined => string.Create(CultureInfo.InvariantCulture, $"Joined {joined.User.JoinedAt.LocalDateTime:MMM d, yyyy} · {SignsIn(SignIn)}"),
                 InvitedPerson => $"Invited, not joined yet · {SignsIn(SignIn)}",
             };
         }

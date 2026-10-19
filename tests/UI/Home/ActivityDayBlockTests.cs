@@ -1,3 +1,4 @@
+using System.Globalization;
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Feed;
@@ -42,6 +43,16 @@ public class ActivityDayBlockTests : BunitContext
 		var cut = Render(Day(added: 3));
 
 		await Assert.That(cut.Find(".dstat").TextContent).DoesNotContain("removed");
+	}
+
+	[Test]
+	public async Task Name_InAGermanBrowser_StaysEnglishLikeTheRestOfTheUi()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-CH");
+
+		var cut = Render(Day(added: 1), DateOnly.FromDateTime(Noon.DateTime).AddDays(2));
+
+		await Assert.That(cut.Find(".dname").TextContent).IsEqualTo("Sunday 27 September");
 	}
 
 	[Test]
@@ -93,12 +104,12 @@ public class ActivityDayBlockTests : BunitContext
 		await Assert.That(cut.Find(".chip").GetAttribute("href")).IsEqualTo($"/feeds/{UrlGuid.Encode(Docs.Value)}/runs/{UrlGuid.Encode(run.Id.Value)}");
 	}
 
-	private IRenderedComponent<ActivityDayBlock> Render(ActivityDay day) =>
+	private IRenderedComponent<ActivityDayBlock> Render(ActivityDay day, DateOnly? today = null) =>
 		Render<ActivityDayBlock>(parameters =>
 			parameters
 				.Add(block => block.Day, day)
 				.Add(block => block.Media, new Dictionary<MediaId, MatchedMedia>())
-				.Add(block => block.Today, DateOnly.FromDateTime(Noon.DateTime))
+				.Add(block => block.Today, today ?? DateOnly.FromDateTime(Noon.DateTime))
 		);
 
 	private static ActivityDay Day(int added = 0, int removed = 0) => ActivityLog.Days([Run(added, removed)], Names, TimeZoneInfo.Utc)[0];

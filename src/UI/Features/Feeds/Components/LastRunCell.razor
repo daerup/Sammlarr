@@ -1,3 +1,4 @@
+@using System.Globalization
 @using Contracts
 @using Contracts.Media
 @using Domain.Feed.Run
@@ -164,7 +165,7 @@ else
         return DialogOpenChanged.InvokeAsync(open);
     }
 
-    private static string Heading(FeedRun run) => run.StartedAt.ToLocalTime().ToString("MMMM d, HH:mm");
+    private static string Heading(FeedRun run) => run.StartedAt.ToLocalTime().ToString("MMMM d, HH:mm", CultureInfo.InvariantCulture);
 
     private static string Count(int count) => count.ToString("N0");
 

@@ -1,3 +1,4 @@
+@using System.Globalization
 
 <div class="dcard">
     <button type="button" class="dtop @(_collapsed ? "is-collapsed" : null)" aria-expanded="@(_collapsed ? "false" : "true")" @onclick="@(() => _collapsed = !_collapsed)">
@@ -114,8 +115,8 @@
     private string DayName =>
         Day.Date == Today ? "Today"
         : Day.Date == Today.AddDays(-1) ? "Yesterday"
-        : Day.Date.Year == Today.Year ? Day.Date.ToString("dddd d MMMM")
-        : Day.Date.ToString("d MMMM yyyy");
+        : Day.Date.Year == Today.Year ? Day.Date.ToString("dddd d MMMM", CultureInfo.InvariantCulture)
+        : Day.Date.ToString("d MMMM yyyy", CultureInfo.InvariantCulture);
 
     private static string At(ActivityRun entry) => entry.Run.StartedAt.ToLocalTime().ToString("HH:mm");
 

@@ -1,3 +1,4 @@
+using System.Globalization;
 using CronExpressionDescriptor;
 using Domain.Feed;
 
@@ -21,7 +22,7 @@ internal static class ScheduleText
 			{ TotalMinutes: < 60 } => $"{elapsed.TotalMinutes:0} min ago",
 			{ TotalHours: < 24 } => $"{elapsed.TotalHours:0} hours ago",
 			{ TotalDays: < 30 } => $"{elapsed.TotalDays:0} days ago",
-			_ => moment.ToLocalTime().ToString("MMM d"),
+			_ => moment.ToLocalTime().ToString("MMM d", CultureInfo.InvariantCulture),
 		};
 	}
 

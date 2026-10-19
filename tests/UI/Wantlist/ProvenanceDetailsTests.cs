@@ -1,3 +1,4 @@
+using System.Globalization;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
@@ -49,6 +50,16 @@ public class ProvenanceDetailsTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_InAGermanBrowser_StaysEnglishLikeTheRestOfTheUi()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-CH");
+
+		var cut = RenderDetails(TestFeeds.Origin(Feed, Run), addedAt: new DateTimeOffset(2026, 3, 15, 12, 0, 0, TimeSpan.Zero));
+
+		await Assert.That(cut.Markup).Contains("15 Mar 2026");
+	}
+
+	[Test]
 	public async Task Render_ForASinkItem_NamesTheSourceWithoutRepeatingTheProvider()
 	{
 		var cut = RenderDetails(new SinkOrigin(SinkKind.Plex));
@@ -81,7 +92,11 @@ public class ProvenanceDetailsTests : BunitContext
 		await Assert.That(cut.FindAll("a")).IsEmpty();
 	}
 
-	private IRenderedComponent<ProvenanceDetails> RenderDetails(WantlistItemProvenance provenance, MediaType type = MediaType.Movie)
+	private IRenderedComponent<ProvenanceDetails> RenderDetails(
+		WantlistItemProvenance provenance,
+		MediaType type = MediaType.Movie,
+		DateTimeOffset? addedAt = null
+	)
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
@@ -89,7 +104,10 @@ public class ProvenanceDetailsTests : BunitContext
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		return Render<ProvenanceDetails>(parameters =>
-			parameters.Add(details => details.Provenance, provenance).Add(details => details.AddedAt, DateTimeOffset.UnixEpoch).Add(details => details.Type, type)
+			parameters
+				.Add(details => details.Provenance, provenance)
+				.Add(details => details.AddedAt, addedAt ?? DateTimeOffset.UnixEpoch)
+				.Add(details => details.Type, type)
 		);
 	}
 }

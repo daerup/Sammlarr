@@ -1,3 +1,4 @@
+using System.Globalization;
 using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Media;
@@ -87,6 +88,17 @@ public class MediaGridTileTests : BunitContext
 		cut.Render(parameters => parameters.Add(tile => tile.Media, Movie()));
 
 		await Assert.That(cut.Find("img.media-card-poster").GetAttribute("src")).IsEqualTo(Backdrop);
+	}
+
+	[Test]
+	public async Task Release_InAGermanBrowser_StaysEnglishLikeTheRestOfTheUi()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-CH");
+		var media = new MatchedMedia(new MediaIdentity(MediaId.New(), []), new MovieDetails { ReleaseDate = new DateOnly(1999, 3, 28) });
+
+		var cut = Render<MediaGridTile>(parameters => parameters.Add(tile => tile.Media, media));
+
+		await Assert.That(cut.Markup).Contains("Mar 28, 1999");
 	}
 
 	[Test]
