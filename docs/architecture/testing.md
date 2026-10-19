@@ -54,8 +54,8 @@ test never runs concurrently with another test on the same stack. Stacks run wit
 the 10 s Aspire gives a stop on Linux.
 
 Every machine runs the suite like CI's four-core runner, so a CI failure reproduces locally: `CiRunner` pins the test process, and every stack and
-browser it starts, to four cores, with two main stacks (`E2EApp.StackCount`) and one self-hosted (`SelfHostedApp.StackCount`). CI runs it in Release,
-only on the Release PR; its `test-results-e2e` artifact holds the TRX and each stack's log.
+browser it starts, to four cores, with two main stacks (`E2EApp.StackCount`) and one self-hosted (`SelfHostedApp.StackCount`). CI runs it on the Release PR,
+in Release, and on every Renovate PR before it merges; its `test-results-e2e` artifact holds the TRX and each stack's log.
 
 `CircuitFailureSink` fails the session on any circuit crash in a stack's log, except `Virtualize`'s dispose cancelled because its page closed first
 (the framework catches only `JSDisconnectedException`).
@@ -116,8 +116,8 @@ flowchart LR
 host (adding the TMDB or MDBList key from user-secrets or the environment itself), writes the mapping and fixture, and compares existing fixtures under the
 policies. A request that had no fixture got a 404 in that run, so its test fails: run again until the replay is green.
 
-**After an image bump.** When a tag in `src/AppHost/ArrContainers.cs` is raised (Renovate opens these as their own PRs through its regex manager), run
-`tests/E2E`. A failing self-hosted test, or an unmatched request in the session failure, names what changed: a new metadata call (record it
+**After an image bump.** When a tag in `src/AppHost/ArrContainers.cs` is raised (Renovate opens these as their own PRs through its regex manager, and
+CI runs `tests/E2E` on them), a failing self-hosted test, or an unmatched request in the session failure, names what changed: a new metadata call (record it
 with `E2E_LIVE=true` if it goes to `api.radarr.video` or `skyhook.sonarr.tv`, otherwise stub it in `arr-stubs`), a changed API shape (the failing
 assertion), or a new host (add it to `MetadataHosts`, and to `ProviderRecording.ArrMetadata` if its calls should be recorded).
 
@@ -129,7 +129,8 @@ What a breaking bump has looked like so far:
 | A new background call                            | nothing fails until the session end, which names it (Sonarr's `services.sonarr.tv/v1/time` and `/v1/notification`)    |
 | An app that cannot reach its mocked hosts at all | its lookups answer 503 and the search never shows a result; the app's own log (`GET /api/v3/log`) names the cause, here Sonarr rejecting the test CA's chain |
 
-A bump that only rebuilds the image (Radarr `6.4.4.10685-ls318` to `-ls319`, tried 2026-10-05) passes the self-hosted tests unchanged.
+A bump that only rebuilds the image (Radarr `6.4.4.10685-ls318` to `-ls319`, tried 2026-10-05) passes the self-hosted tests unchanged, so the pins
+name the app's version (`version-6.4.4.10685`) and follow LinuxServer's rebuilds of it.
 
 ## Staging
 

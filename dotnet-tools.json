@@ -14,7 +14,7 @@
       "commands": [
         "husky"
       ],
-      "rollForward": false
+      "rollForward": true
     },
     "dotnet-reportgenerator-globaltool": {
       "version": "5.5.11",

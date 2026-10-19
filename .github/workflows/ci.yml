@@ -299,7 +299,7 @@ jobs:
           category: trivy-${{ matrix.scan }}
 
   e2e:
-    if: startsWith(github.head_ref, 'release-please--')
+    if: startsWith(github.head_ref, 'release-please--') || startsWith(github.head_ref, 'renovate/')
     runs-on: ubuntu-26.04
     timeout-minutes: 90
     steps:

@@ -5,6 +5,7 @@
   "timezone": "Europe/Zurich",
   "schedule": ["before 6am on monday"],
   "lockFileMaintenance": { "enabled": true },
+  "automerge": true,
   "packageRules": [
     {
       "description": "Everything that is not a major update arrives as one PR a week",
@@ -12,17 +13,15 @@
       "matchUpdateTypes": ["minor", "patch", "digest", "pin"]
     },
     {
-      "description": "Test-only packages come as their own PR and merge by themselves once CI is green",
+      "description": "Test-only packages come as their own PR",
       "matchPackageNames": ["TUnit*", "bunit", "Bogus", "CsCheck", "Verify.TUnit", "NetArchTest.eNhancedEdition", "Microsoft.Extensions.TimeProvider.Testing"],
       "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "test packages",
-      "automerge": true
+      "groupName": "test packages"
     },
     {
       "description": "Aspire's packages and its AppHost SDK move together, with the MessagePack the AppHost pins above Aspire's own",
       "matchPackageNames": ["/^aspire\\./i", "MessagePack"],
-      "groupName": "Aspire",
-      "automerge": false
+      "groupName": "Aspire"
     },
     {
       "description": "Roslyn stays at the SDK's compiler version, or the repo's analyzer stops loading (CS9057)",
@@ -30,10 +29,9 @@
       "enabled": false
     },
     {
-      "description": "Radarr and Sonarr bumps wait for the self-hosted E2E suite",
+      "description": "Radarr and Sonarr bumps come as their own PR",
       "matchPackageNames": ["lscr.io/linuxserver/radarr", "lscr.io/linuxserver/sonarr"],
-      "groupName": null,
-      "automerge": false
+      "groupName": null
     },
     {
       "description": "compose.yaml follows Sammlarr's own :latest for whoever downloads it, so it is never pinned or bumped",
@@ -44,6 +42,11 @@
       "description": "The C# pins carry a tag only, so there is no digest to pin",
       "matchManagers": ["custom.regex"],
       "pinDigests": false
+    },
+    {
+      "description": "Major updates wait for a review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
     }
   ],
   "customManagers": [
@@ -53,7 +56,7 @@
       "managerFilePatterns": ["/^src/AppHost/ArrContainers\\.cs$/"],
       "matchStrings": ["\"(?<depName>lscr\\.io/linuxserver/[a-z]+)\", \"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "docker",
-      "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)-ls(?<revision>\\d+)$"
+      "versioningTemplate": "regex:^version-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)$"
     },
     {
       "customType": "regex",
