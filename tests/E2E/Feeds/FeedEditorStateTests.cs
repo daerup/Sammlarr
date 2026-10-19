@@ -73,7 +73,7 @@ public class FeedEditorStateTests
 
 		await page.Keyboard.PressAsync("Control+Enter");
 
-		await Expect(FeedEditor.SavedStatus(page)).ToBeVisibleAsync(Wait.Settle);
+		await FeedEditor.SavedAsync(page);
 	}
 
 	[Test]

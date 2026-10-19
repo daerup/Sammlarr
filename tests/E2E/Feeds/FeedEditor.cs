@@ -73,8 +73,14 @@ internal static class FeedEditor
 		await PreviewLoadedAsync(page);
 		await Expect(SaveButton(page)).ToBeEnabledAsync(Wait.Preview);
 		await SaveButton(page).ClickAsync();
-		await Expect(SavedStatus(page)).ToBeVisibleAsync(Wait.Settle);
+		await SavedAsync(page);
 		await CloseButton(page).ClickAsync();
+	}
+
+	internal static async Task SavedAsync(IPage page)
+	{
+		await Expect(SavedStatus(page)).ToBeVisibleAsync(Wait.Settle);
+		await Expect(page.Heading("Edit feed")).ToBeVisibleAsync(Wait.Settle);
 	}
 
 	internal static ILocator SaveButton(IPage page) => page.Button("Save").First;

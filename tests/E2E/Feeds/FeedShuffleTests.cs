@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -20,25 +21,28 @@ public class FeedShuffleTests
 		await FeedEditor.Option(page, "Maximum items", "At random").ClickAsync();
 		await FeedEditor.LoadAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
-		var picked = await TitlesAsync(page, PreviewBadge.Included, PreviewBadge.Bypassed);
+		await FeedEditor.Badge(page, PreviewBadge.Included).ClickAsync();
+		await FeedEditor.Badge(page, PreviewBadge.Bypassed).ClickAsync();
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(Limit);
+		await FeedEditor.Badge(page, PreviewBadge.Bypassed).ClickAsync();
+		var added = await TitlesAsync(page, await CountAsync(page, PreviewBadge.Included));
 
 		await FeedEditor.SaveAndCloseAsync(page);
 		await RunAsync(page, name);
 		await page.FeedCard(name).Labelled("Edit").ClickAsync();
 		await Expect(page.Locator("[data-preview-state='success']")).ToBeVisibleAsync(Wait.Preview);
+		await FeedEditor.Badge(page, PreviewBadge.Kept).ClickAsync();
 
-		await Assert.That(await TitlesAsync(page, PreviewBadge.Kept, PreviewBadge.Bypassed)).IsEquivalentTo(picked);
+		await Assert.That(await TitlesAsync(page, added.Count)).IsEquivalentTo(added);
 	}
 
-	private static async Task<IReadOnlyList<string>> TitlesAsync(IPage page, params PreviewBadge[] badges)
-	{
-		foreach (var badge in badges)
-		{
-			await FeedEditor.Badge(page, badge).ClickAsync();
-		}
+	private static async Task<int> CountAsync(IPage page, PreviewBadge badge) =>
+		int.Parse((await FeedEditor.Badge(page, badge).InnerTextAsync()).Trim(), CultureInfo.InvariantCulture);
 
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(Limit);
-		return await FeedEditor.RowTitlesAsync(page);
+	private static async Task<IReadOnlyList<string>> TitlesAsync(IPage page, int count)
+	{
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(count);
+		return count == 0 ? [] : await FeedEditor.RowTitlesAsync(page);
 	}
 
 	private static async Task RunAsync(IPage page, string name)
