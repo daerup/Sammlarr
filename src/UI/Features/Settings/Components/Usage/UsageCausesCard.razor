@@ -55,7 +55,9 @@
                             <span>
                                 @if (cause is not null)
                                 {
-                                    <span class="block h-2 rounded-[3px]" style="@FormattableString.Invariant($"width: {Math.Max(2, tally.Total * 100.0 / Busiest)}%; background: {(picked ? UsageView.Accent : "var(--usage-answered)")}")"></span>
+                                    <StackedBar Total="Busiest">
+                                        <StackedBarPart Name="@name" Value="tally.Total" Color="@(picked ? UsageView.Accent : "var(--usage-answered)")"/>
+                                    </StackedBar>
                                 }
                             </span>
                             <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
@@ -95,8 +97,9 @@
                                         }
                                     </span>
                                     <span>
-                                        <span class="block h-2 rounded-[3px]"
-                                              style="@FormattableString.Invariant($"width: {Math.Max(2, feed.Calls * 100.0 / Busiest)}%; background: color-mix(in oklab, var(--usage-answered) 65%, transparent)")"></span>
+                                        <StackedBar Total="Busiest">
+                                            <StackedBarPart Name="Calls" Value="feed.Calls" Color="color-mix(in oklab, var(--usage-answered) 65%, transparent)"/>
+                                        </StackedBar>
                                     </span>
                                     <span class="text-right tabular-nums">@UsageView.Count(feed.Calls)</span>
                                     <span></span>
