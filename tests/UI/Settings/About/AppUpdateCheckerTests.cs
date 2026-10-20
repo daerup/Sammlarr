@@ -31,9 +31,19 @@ public class AppUpdateCheckerTests
 	}
 
 	[Test]
+	public async Task CheckAsync_ForAReleaseWhoseMinorVersionRunsPastNine_ComparesItAsANumber()
+	{
+		_releases.LatestAsync(Any(), Any()).Returns(Some.Of(new PublishedRelease("v1.10.0", Page)));
+
+		await Assert.That(await Testee("1.9.0").CheckAsync()).IsSome().And.IsEqualTo(new AppUpdate("1.10.0", Page));
+	}
+
+	[Test]
 	[Arguments("v1.4.0")]
 	[Arguments("v1.3.9")]
-	public async Task CheckAsync_ForTheSameOrAnOlderRelease_ReportsNothing(string tag)
+	[Arguments("v1.5.0-rc.1")]
+	[Arguments("nightly")]
+	public async Task CheckAsync_ForATagThatIsNoNewerRelease_ReportsNothing(string tag)
 	{
 		_releases.LatestAsync(Any(), Any()).Returns(Some.Of(new PublishedRelease(tag, Page)));
 
@@ -130,6 +140,8 @@ public class AppUpdateCheckerTests
 	[Test]
 	[Arguments("0.0.0-alpha.0.584")]
 	[Arguments("0.0.0-local")]
+	[Arguments("1.4.1-alpha.0.3")]
+	[Arguments("2.0.0-rc.1")]
 	public async Task CheckAsync_ForABuildThatIsNoRelease_NeverAsksGitHub(string running)
 	{
 		var update = await Testee(running).CheckAsync();

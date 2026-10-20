@@ -23,6 +23,7 @@
 		<PackageReference Include="BlazorBlueprint.Icons.Lucide" />
 		<PackageReference Include="CronExpressionDescriptor" />
 		<PackageReference Include="Humanizer.Core" />
+		<PackageReference Include="Semver" />
 		<PackageReference Include="Serilog" />
 	</ItemGroup>
 	<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">

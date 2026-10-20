@@ -32,7 +32,17 @@ public class AppVersionTests
 
 		await Assert.That(version.Number).IsEqualTo("1.4.0");
 		await Assert.That(version.IsDevBuild).IsFalse();
+		await Assert.That(version.HasRelease).IsTrue();
 		await Assert.That(version.CommitsSinceRelease).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task From_WithoutGitHistory_IsNeitherADevBuildNorARelease()
+	{
+		var version = AppVersion.From("0.0.0-alpha.0");
+
+		await Assert.That(version.IsDevBuild).IsFalse();
+		await Assert.That(version.HasRelease).IsFalse();
 	}
 
 	[Test]
