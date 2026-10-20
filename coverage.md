@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/20/2026 - 21:03:59 |
+| Generated on: | 10/20/2026 - 21:13:30 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1547 |
 | Files: | 1093 |
-| **Line coverage:** | 86.8% (40737 of 46882) |
-| Covered lines: | 40737 |
-| Uncovered lines: | 6145 |
+| **Line coverage:** | 86.8% (40736 of 46882) |
+| Covered lines: | 40736 |
+| Uncovered lines: | 6146 |
 | Coverable lines: | 46882 |
 | Total lines: | 69934 |
-| **Branch coverage:** | 79.4% (15361 of 19343) |
-| Covered branches: | 15361 |
+| **Branch coverage:** | 79.4% (15360 of 19343) |
+| Covered branches: | 15360 |
 | Total branches: | 19343 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -30,7 +30,7 @@
 |API.AniList.AniListClient|91.6%|77.7%|
 |API.AniList.AniListClient<TData>|91.6%|77.7%|
 |API.AniList.AniListEnricher|93.1%|50%|
-|API.AniList.AniListFeedService|96.9%|79.1%|
+|API.AniList.AniListFeedService|96.9%|77.7%|
 |API.AniList.AniListMedia|97.9%|80.5%|
 |API.AniList.AniListModule|100%|100%|
 |API.AniList.AniListPages|100%|100%|
@@ -693,8 +693,8 @@
 |DB.Data.Notifications.NotificationDataModule|100%||
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
-|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|83.3%|
-|DB.Data.Notifications.NotificationTargetRepository|96.4%|66.6%|
+|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
+|DB.Data.Notifications.NotificationTargetRepository|96.4%|70.8%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
 |DB.Data.Ratings.RatingDefaultConfiguration|100%|100%|
@@ -900,7 +900,7 @@
 |Domain.Wantlist.Arr.ArrSearchTerm|100%||
 |Domain.Wantlist.Arr.ArrSinkConfig|100%|85.7%|
 |Domain.Wantlist.Arr.ArrTagFeed|100%||
-|Domain.Wantlist.Arr.ArrTagScheme|100%|88.8%|
+|Domain.Wantlist.Arr.ArrTagScheme|97.8%|88.8%|
 |Domain.Wantlist.Arr.ArrTagSlug|100%|100%|
 |Domain.Wantlist.Arr.ArrTagUser|100%||
 |Domain.Wantlist.Outbox.OutboxSnapshot|100%|100%|
