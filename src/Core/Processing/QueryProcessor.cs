@@ -101,16 +101,19 @@ internal sealed class QueryProcessor<T>
 	{
 		var expression = FilterEvaluator.Build(filter);
 		var compiled = _compiled;
-		if (compiled is null || !string.Equals(compiled.Expression, expression, StringComparison.Ordinal))
+		if (compiled is null || !compiled.Expression.Equals(expression))
 		{
-			compiled = new CompiledFilter(expression, DynamicExpressionParser.ParseLambda<T, bool>(FilterConfig, false, expression).Compile());
+			compiled = new CompiledFilter(
+				expression,
+				DynamicExpressionParser.ParseLambda<T, bool>(FilterConfig, false, expression.Text, [.. expression.Values]).Compile()
+			);
 			_compiled = compiled;
 		}
 
 		return compiled.Predicate;
 	}
 
-	private sealed record CompiledFilter(string Expression, Func<T, bool> Predicate);
+	private sealed record CompiledFilter(FilterExpression Expression, Func<T, bool> Predicate);
 
 	private static bool ConsumesSlot(Enrollment enrollment, QueryLimit limit)
 	{

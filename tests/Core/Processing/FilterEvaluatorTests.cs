@@ -54,6 +54,48 @@ public class FilterEvaluatorTests
 	}
 
 	[Test]
+	public async Task Execute_ForAWholeNumberAgainstADecimalField_ComparesTheirValues()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Number("Rating", FilterPredicateOperator.GreaterOrEqual, 7))),
+			new FilterRow { Rating = 6.9 },
+			new FilterRow { Rating = 7.5 },
+			new FilterRow()
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForAFractionAgainstAnOptionalWholeNumber_ComparesTheirValues()
+	{
+		var outcomes = await OutcomesAsync(
+			Filter(Group(Number("Votes", FilterPredicateOperator.GreaterThan, 7.5))),
+			new FilterRow { Votes = 7 },
+			new FilterRow { Votes = 8 },
+			new FilterRow()
+		);
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForAnInWithNumbersOnAnOptionalWholeNumber_QualifiesTheListedValues()
+	{
+		var predicate = new FilterPredicate
+		{
+			Field = "Votes",
+			Operator = FilterPredicateOperator.In,
+			ValueKind = FilterValueKind.Number,
+			Value = "[500, 1000]",
+		};
+
+		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow { Votes = 500 }, new FilterRow { Votes = 501 }, new FilterRow());
+
+		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
 	public async Task Execute_ForADateComparison_ComparesByDayAndCullsRowsWithoutADate()
 	{
 		var outcomes = await OutcomesAsync(
@@ -182,6 +224,38 @@ public class FilterEvaluatorTests
 		);
 
 		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForANumberThatReadsLikeAnExpression_RefusesIt()
+	{
+		var predicate = new FilterPredicate
+		{
+			Field = "Year",
+			Operator = FilterPredicateOperator.GreaterOrEqual,
+			ValueKind = FilterValueKind.Number,
+			Value = "2030 || true",
+		};
+
+		await Assert.That(async () => await OutcomesAsync(Filter(Group(predicate)), new FilterRow { Year = 2020 })).Throws<JsonException>();
+	}
+
+	[Test]
+	public async Task Execute_ForTheSameFilterWithAnotherValue_AppliesTheNewValue()
+	{
+		var testee = new QueryProcessor<FilterRow>();
+		FilterRow[] rows = [new() { Year = 2019 }, new() { Year = 2021 }];
+
+		await testee
+			.ExecuteAsync(rows, new QueryOptions { Filter = Some.Of(Filter(Group(Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020)))) }, NoEnrollment)
+			.ToListAsync();
+		var verdicts = await testee
+			.ExecuteAsync(rows, new QueryOptions { Filter = Some.Of(Filter(Group(Number("Year", FilterPredicateOperator.GreaterOrEqual, 2010)))) }, NoEnrollment)
+			.ToListAsync();
+
+		await Assert
+			.That(verdicts.Select(verdict => verdict.Outcome))
+			.IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -492,6 +566,8 @@ public class FilterEvaluatorTests
 		public string? Genre { get; init; }
 
 		public double? Rating { get; init; }
+
+		public int? Votes { get; init; }
 
 		public List<string>? Genres { get; init; }
 

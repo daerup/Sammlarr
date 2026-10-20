@@ -36,7 +36,7 @@ internal static class Edges
 		var type = member.Type.Name;
 		return type.EndsWith("Row")
 			|| (member.Namespace.StartsWith("API.") && member.Namespace.EndsWith(".Types"))
-			|| type is "FilterPredicate"
+			|| type is "FilterPredicate" or "FilterExpression"
 			|| NotificationPayload.Contains(type)
 			|| Telemetry.Contains(member.Namespace)
 			|| (member.Kind is "constructor" && typeof(Exception).IsAssignableFrom(member.Type))
