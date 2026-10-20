@@ -3,14 +3,14 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/20/2026 - 21:13:30 |
+| Generated on: | 10/20/2026 - 21:28:02 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1547 |
 | Files: | 1093 |
-| **Line coverage:** | 86.8% (40736 of 46882) |
-| Covered lines: | 40736 |
-| Uncovered lines: | 6146 |
+| **Line coverage:** | 86.8% (40732 of 46882) |
+| Covered lines: | 40732 |
+| Uncovered lines: | 6150 |
 | Coverable lines: | 46882 |
 | Total lines: | 69934 |
 | **Branch coverage:** | 79.4% (15360 of 19343) |
@@ -398,11 +398,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.9%</summary>
+<details><summary>Core - 96.8%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.9%**|**88.1%**|
+|**Core**|**96.8%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -431,7 +431,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|90.9%|100%|
+|Core.Datasets.DatasetTicker|95.4%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -478,8 +478,8 @@
 |Core.Jobs.FeedRunJobHandler|100%|100%|
 |Core.Jobs.JobAlarm|90.2%|83.3%|
 |Core.Jobs.JobQueue|98.4%|88.8%|
-|Core.Jobs.JobRunner|79.5%|83.3%|
-|Core.Jobs.JobRunner<TRequest>|79.5%|83.3%|
+|Core.Jobs.JobRunner|76.1%|83.3%|
+|Core.Jobs.JobRunner<TRequest>|76.1%|83.3%|
 |Core.Jobs.JobRunnerStatus|100%||
 |Core.Jobs.JobRunnerStatus.Session|100%||
 |Core.Jobs.JobSignal|100%||
@@ -693,8 +693,8 @@
 |DB.Data.Notifications.NotificationDataModule|100%||
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
-|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
-|DB.Data.Notifications.NotificationTargetRepository|96.4%|70.8%|
+|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|83.3%|
+|DB.Data.Notifications.NotificationTargetRepository|96.4%|66.6%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
 |DB.Data.Ratings.RatingDefaultConfiguration|100%|100%|
@@ -900,7 +900,7 @@
 |Domain.Wantlist.Arr.ArrSearchTerm|100%||
 |Domain.Wantlist.Arr.ArrSinkConfig|100%|85.7%|
 |Domain.Wantlist.Arr.ArrTagFeed|100%||
-|Domain.Wantlist.Arr.ArrTagScheme|97.8%|88.8%|
+|Domain.Wantlist.Arr.ArrTagScheme|100%|88.8%|
 |Domain.Wantlist.Arr.ArrTagSlug|100%|100%|
 |Domain.Wantlist.Arr.ArrTagUser|100%||
 |Domain.Wantlist.Outbox.OutboxSnapshot|100%|100%|
