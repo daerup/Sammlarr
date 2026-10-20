@@ -1,6 +1,7 @@
 using Domain.Media;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
+using Humanizer;
 using UI.Shared.Changes;
 using UI.Shared.Media;
 
@@ -55,7 +56,7 @@ internal static class WantlistSyncView
 
 	private static string UnmatchedSubtitle(UnmatchedMedia unmatched)
 	{
-		var source = unmatched.Externals.FirstOrDefault()?.Source.GetDescription();
+		var source = unmatched.Externals.FirstOrDefault()?.Source.Humanize();
 		var year = unmatched.Details.Year?.ToString();
 		return string.Join(" · ", new[] { year, source is null ? null : $"on {source}", "Cannot be imported" }.Where(part => part is not null));
 	}

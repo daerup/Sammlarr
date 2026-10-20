@@ -2,6 +2,7 @@ using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Providers;
+using Humanizer;
 using UI.Features.Feeds.Components;
 using UI.Shared.Common;
 using UI.Shared.Services.Branding;
@@ -145,6 +146,6 @@ internal static class UpNextView
 		{
 			RunFeed feed => FeedLabel.Of(feed.Id, feedNames),
 			SyncWantlist => "Sync Wantlist",
-			_ => request.Kind.GetDescription(),
+			_ => request.Kind.Humanize(),
 		};
 }

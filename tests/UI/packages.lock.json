@@ -462,6 +462,7 @@
         "type": "Project",
         "dependencies": {
           "Cronos": "[0.13.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Shared": "[1.0.0, )",
           "Vogen": "[8.0.7, )"
         }

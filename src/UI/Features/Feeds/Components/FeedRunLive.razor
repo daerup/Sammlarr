@@ -26,7 +26,7 @@
                     @Branding.NickName(Run.Layout.Sink.Service)
                     @if (Run.Layout.Targets.Count > 0)
                     {
-                        <span class="live-needs">· needs @Run.Layout.Targets.Select(target => target.GetDescription()).Humanize(Notation.Words) ids</span>
+                        <span class="live-needs">· needs @Run.Layout.Targets.Select(target => target.Humanize()).Humanize(Notation.Words) ids</span>
                     }
                 </span>
             </div>

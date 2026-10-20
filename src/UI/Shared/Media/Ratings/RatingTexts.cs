@@ -28,7 +28,7 @@ internal static class RatingTexts
 			or RatingSource.Letterboxd
 			or RatingSource.Trakt
 			or RatingSource.MyAnimeList
-			or RatingSource.AniList => source.GetDescription(),
+			or RatingSource.AniList => source.Humanize(),
 		};
 	}
 

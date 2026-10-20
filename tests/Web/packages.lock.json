@@ -826,6 +826,7 @@
         "dependencies": {
           "Contracts": "[1.0.0, )",
           "Fluid.Core": "[2.40.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Microsoft.Extensions.Http.Resilience": "[10.11.0, )",
           "Observability": "[1.0.0, )",
           "OpenTelemetry.Instrumentation.Http": "[1.19.0, )",
@@ -844,6 +845,7 @@
         "type": "Project",
         "dependencies": {
           "Contracts": "[1.0.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Observability": "[1.0.0, )",
           "Shared": "[1.0.0, )",
           "System.Linq.Dynamic.Core": "[1.7.4, )",
@@ -867,6 +869,7 @@
         "type": "Project",
         "dependencies": {
           "Cronos": "[0.13.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Shared": "[1.0.0, )",
           "Vogen": "[8.0.7, )"
         }
@@ -875,6 +878,7 @@
         "type": "Project",
         "dependencies": {
           "Contracts": "[1.0.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Shared": "[1.0.0, )",
           "WolverineFx": "[6.49.0, )",
           "WolverineFx.Sqlite": "[6.49.0, )"

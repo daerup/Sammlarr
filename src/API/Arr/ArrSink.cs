@@ -12,6 +12,7 @@ using Domain.Providers;
 using Domain.Wantlist.Arr;
 using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
+using Humanizer;
 using Microsoft.Extensions.Logging;
 
 namespace API.Arr;
@@ -211,7 +212,7 @@ internal sealed class ArrSink(
 		return apis.Taking(id)
 			.Match(
 				async api => Ack(push.MediaId, await PushWithAsync(api, action, push, id, setup, sessions, cancellationToken)),
-				() => Unaddressable(push.MediaId, $"Neither Radarr nor Sonarr adds a {$"{id.Type}".ToLowerInvariant()} by its {id.Source.GetDescription()} id.")
+				() => Unaddressable(push.MediaId, $"Neither Radarr nor Sonarr adds a {$"{id.Type}".ToLowerInvariant()} by its {id.Source.Humanize()} id.")
 			);
 	}
 

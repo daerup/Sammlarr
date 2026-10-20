@@ -257,7 +257,7 @@ public class NotificationDispatchHandlerTests
 		);
 
 		var context = messages.OfType<DeliverNotification>().Single().Context;
-		await Assert.That(context.Title).IsEqualTo(NotificationEventType.WantlistSyncCompleted.GetDescription());
+		await Assert.That(context.Title).IsEqualTo("Wantlist sync completed");
 		await Assert.That(context.Summary).IsEqualTo("Pulled 0, pushed 0.");
 	}
 

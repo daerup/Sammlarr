@@ -5,6 +5,7 @@ internal static class Packages
 	internal const string System = "System";
 	internal const string Cronos = "Cronos";
 	internal const string Vogen = "Vogen";
+	internal const string Humanizer = "Humanizer";
 	internal const string DependencyInjection = "Microsoft.Extensions.DependencyInjection";
 	internal const string Options = "Microsoft.Extensions.Options";
 	internal const string Configuration = "Microsoft.Extensions.Configuration";

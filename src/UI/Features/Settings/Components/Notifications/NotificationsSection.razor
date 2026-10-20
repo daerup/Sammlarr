@@ -1,6 +1,5 @@
 @using Contracts.Notifications
 @using Domain.Notifications
-@using global::Shared.Extensions
 @inject INotificationTargetRepository Targets
 @inject INotificationSubscriptionRepository Subscriptions
 @inject INotificationDeliveryOutcomeRepository Outcomes
@@ -53,7 +52,7 @@
                             }
                             <NotificationHealthDot Outcomes="Health(client.Id)"/>
                         </div>
-                        <p class="text-xs text-muted-foreground">@client.Channel.GetDescription()@(client.Enabled ? "" : " · disabled")</p>
+                        <p class="text-xs text-muted-foreground">@client.Channel.Humanize()@(client.Enabled ? "" : " · disabled")</p>
                     </div>
                     <div class="flex shrink-0 items-center gap-1">
                         <BbSwitch Checked="client.Enabled" CheckedChanged="value => ToggleEnabledAsync(client, value)"/>
@@ -101,7 +100,7 @@
                                 <div class="flex flex-wrap gap-1">
                                     @foreach (var eventType in alert.Subscription.EventTypes)
                                     {
-                                        <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@eventType.GetDescription()</BbBadge>
+                                        <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@eventType.Humanize()</BbBadge>
                                     }
                                 </div>
                             </BbTooltipContent>
