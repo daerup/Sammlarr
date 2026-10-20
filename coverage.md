@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/20/2026 - 20:40:07 |
+| Generated on: | 10/20/2026 - 21:03:59 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1547 |
 | Files: | 1093 |
-| **Line coverage:** | 86.8% (40729 of 46882) |
-| Covered lines: | 40729 |
-| Uncovered lines: | 6153 |
+| **Line coverage:** | 86.8% (40737 of 46882) |
+| Covered lines: | 40737 |
+| Uncovered lines: | 6145 |
 | Coverable lines: | 46882 |
 | Total lines: | 69934 |
-| **Branch coverage:** | 79.4% (15359 of 19343) |
-| Covered branches: | 15359 |
+| **Branch coverage:** | 79.4% (15361 of 19343) |
+| Covered branches: | 15361 |
 | Total branches: | 19343 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -30,7 +30,7 @@
 |API.AniList.AniListClient|91.6%|77.7%|
 |API.AniList.AniListClient<TData>|91.6%|77.7%|
 |API.AniList.AniListEnricher|93.1%|50%|
-|API.AniList.AniListFeedService|96.9%|77.7%|
+|API.AniList.AniListFeedService|96.9%|79.1%|
 |API.AniList.AniListMedia|97.9%|80.5%|
 |API.AniList.AniListModule|100%|100%|
 |API.AniList.AniListPages|100%|100%|
@@ -398,11 +398,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.8%</summary>
+<details><summary>Core - 96.9%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.8%**|**88.1%**|
+|**Core**|**96.9%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -431,7 +431,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|81.8%|100%|
+|Core.Datasets.DatasetTicker|90.9%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -478,8 +478,8 @@
 |Core.Jobs.FeedRunJobHandler|100%|100%|
 |Core.Jobs.JobAlarm|90.2%|83.3%|
 |Core.Jobs.JobQueue|98.4%|88.8%|
-|Core.Jobs.JobRunner|76.1%|83.3%|
-|Core.Jobs.JobRunner<TRequest>|76.1%|83.3%|
+|Core.Jobs.JobRunner|79.5%|83.3%|
+|Core.Jobs.JobRunner<TRequest>|79.5%|83.3%|
 |Core.Jobs.JobRunnerStatus|100%||
 |Core.Jobs.JobRunnerStatus.Session|100%||
 |Core.Jobs.JobSignal|100%||
@@ -583,7 +583,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**95.9%**|**85.3%**|
+|**DB**|**95.9%**|**85.4%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -693,7 +693,7 @@
 |DB.Data.Notifications.NotificationDataModule|100%||
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
-|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
+|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|83.3%|
 |DB.Data.Notifications.NotificationTargetRepository|96.4%|66.6%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
