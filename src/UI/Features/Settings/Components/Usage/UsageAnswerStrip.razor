@@ -20,7 +20,7 @@
                 }
             </svg>
         </BbTooltipTrigger>
-        <BbTooltipContent Class="@UsageView.Tip" data-testid="usage-strip-tip">
+        <BbTooltipContent Class="@Tooltips.Panel" data-testid="usage-strip-tip">
             <div class="mb-1.5 flex items-center gap-2 font-semibold">
                 <BrandedLogo Brand="Branding.GetBrandingInfo(Service)" Size="14" Decorative="true"/>
                 @Branding.GetBrandingInfo(Service).NickName
@@ -31,7 +31,7 @@
                 <div class="grid grid-cols-[auto_auto_auto] items-baseline gap-x-3.5 tabular-nums">
                     <b class="font-semibold">@UsageView.Bucket(DurationBuckets.UpToMs[at])</b>
                     <span class="text-right"><b class="font-semibold">@UsageView.Count(Count(at))</b> <span class="text-muted-foreground">calls</span></span>
-                    <span class="text-right text-muted-foreground">@UsageView.Share(Count(at), Answers)</span>
+                    <span class="text-right text-muted-foreground">@Shares.Of(Count(at), Answers)</span>
                 </div>
             }
             <div class="mt-1.5 flex items-center gap-3 border-t pt-1.5 text-muted-foreground">

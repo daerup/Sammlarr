@@ -4,7 +4,7 @@
     <UsageStat Label="Traffic" Icon="arrow-up-right" Value="@UsageView.Count(Now.Total)" Unit="calls"
                Change="UsageView.Change(Now.Total, Then.Total)" Sub="@UsageView.Before(Range)"
                Points="Spark(tally => tally.Total)" Color="@UsageView.Accent"/>
-    <UsageStat Label="Errors" Icon="circle-x" Value="@UsageView.Share(Now.Errors, Now.Total)"
+    <UsageStat Label="Errors" Icon="circle-x" Value="@Shares.Of(Now.Errors, Now.Total)"
                Change="UsageView.Change(Rate(Now, Now.Errors), Rate(Then, Then.Errors))" UpIsWorse="true"
                Sub="@($"{UsageView.Count(Now.Errors)} failed or gave up")"
                Points="Spark(tally => tally.Errors)" Color="var(--usage-failed)"/>
@@ -12,7 +12,7 @@
                Change="Now.Percentile(0.95).Map(now => Then.Percentile(0.95).Map(then => UsageView.Change(now, then)))" UpIsWorse="true"
                Sub="@Now.Percentile(0.5).Map(median => $"median {UsageView.Duration(median)}").GetValueOr("no answers yet")"
                Points="Spark(tally => tally.Percentile(0.95).GetValueOr(0))" Color="@UsageView.Grey"/>
-    <UsageStat Label="Rate limits" Icon="gauge" Value="@UsageView.Share(Now.RateLimited, Now.Total)" Unit="of calls hit a 429"
+    <UsageStat Label="Rate limits" Icon="gauge" Value="@Shares.Of(Now.RateLimited, Now.Total)" Unit="of calls hit a 429"
                Change="UsageView.Change(Rate(Now, Now.RateLimited), Rate(Then, Then.RateLimited))" UpIsWorse="true"
                Sub="@RateLimitsSub" Points="Spark(tally => tally.RateLimited)" Color="var(--usage-after-429)"/>
 </div>

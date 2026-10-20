@@ -25,8 +25,6 @@ internal static class UsageView
 
 	private const double Noticeable = 0.01;
 
-	internal const string Tip = "border bg-popover px-2.5 py-2 text-xs text-popover-foreground shadow-lg";
-
 	internal static readonly IReadOnlyList<OutcomeLook> Outcomes = [.. Enum.GetValues<UsageOutcome>().Select(Look)];
 
 	internal static string Count(double count) => Math.Round(count).ToString("N0", CultureInfo.InvariantCulture);
@@ -54,16 +52,6 @@ internal static class UsageView
 	internal static string Requests(long count) => "request".ToQuantity(count, "N0", CultureInfo.InvariantCulture);
 
 	internal static string Titles(double count) => "title".ToQuantity((long)Math.Round(count), "N0", CultureInfo.InvariantCulture);
-
-	internal static string Share(long part, long total)
-	{
-		return (total, part * 1000 < total && part > 0) switch
-		{
-			(0, _) => "0%",
-			(_, true) => "<0.1%",
-			_ => FormattableString.Invariant($"{part * 100.0 / total:0.0}%"),
-		};
-	}
 
 	internal static string Tone(long part, long total, string trouble)
 	{

@@ -60,7 +60,7 @@
                             </span>
                             <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
                             <span class="@($"text-right tabular-nums {(Trouble(tally) * 100 > tally.Total ? "font-medium text-[var(--usage-gave-up)]" : "text-muted-foreground")}")"
-                                  title="Hit trouble">@UsageView.Share(Trouble(tally), tally.Total)</span>
+                                  title="Hit trouble">@Shares.Of(Trouble(tally), tally.Total)</span>
                         </button>
                         @if (opened)
                         {
@@ -119,7 +119,7 @@
                                 <LucideIcon Name="check" Size="13"/>
                                 <span>Answered</span>
                                 <span class="text-right tabular-nums">@UsageView.Count(CauseTally.Total)</span>
-                                <span class="text-right tabular-nums text-muted-foreground">@UsageView.Share(CauseTally.Total, CauseTally.Total)</span>
+                                <span class="text-right tabular-nums text-muted-foreground">@Shares.Of(CauseTally.Total, CauseTally.Total)</span>
                             </div>
                             <div class="flex items-center gap-2 text-muted-foreground" data-testid="usage-no-trouble">
                                 <LucideIcon Name="circle-check" Size="14"/>
@@ -136,7 +136,7 @@
                                     <LucideIcon Name="@look.Icon" Size="13"/>
                                     <span>@look.Name</span>
                                     <span class="text-right tabular-nums">@UsageView.Count(count)</span>
-                                    <span class="text-right tabular-nums text-muted-foreground">@(count == 0 ? string.Empty : UsageView.Share(count, CauseTally.Total))</span>
+                                    <span class="text-right tabular-nums text-muted-foreground">@(count == 0 ? string.Empty : Shares.Of(count, CauseTally.Total))</span>
                                 </div>
                             }
                         }

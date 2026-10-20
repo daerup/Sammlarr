@@ -9,7 +9,7 @@
             }
         </span>
     </BbTooltipTrigger>
-    <BbTooltipContent Class="@UsageView.Tip" data-testid="usage-outcome-tip">
+    <BbTooltipContent Class="@Tooltips.Panel" data-testid="usage-outcome-tip">
         <div class="mb-1 flex items-center gap-2 font-semibold">
             @Title
             <span class="font-normal text-muted-foreground">· @UsageView.Calls(Tally.Total)</span>
@@ -22,7 +22,7 @@
                 <LucideIcon Name="@look.Icon" Size="12"/>
                 <span class="whitespace-nowrap">@look.Name</span>
                 <span class="text-right tabular-nums">@UsageView.Count(Tally.Of(look.Outcome))</span>
-                <span class="text-right tabular-nums text-muted-foreground">@UsageView.Share(Tally.Of(look.Outcome), Tally.Total)</span>
+                <span class="text-right tabular-nums text-muted-foreground">@Shares.Of(Tally.Of(look.Outcome), Tally.Total)</span>
             </div>
         }
     </BbTooltipContent>
