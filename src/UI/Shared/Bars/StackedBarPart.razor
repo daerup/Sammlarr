@@ -1,0 +1,17 @@
+@implements IDisposable
+
+@code {
+    [CascadingParameter] private StackedBar Bar { get; set; } = null!;
+
+    [Parameter, EditorRequired] public required string Name { get; set; }
+
+    [Parameter, EditorRequired] public required long Value { get; set; }
+
+    [Parameter] public string? Color { get; set; }
+
+    [Parameter] public BarPattern Pattern { get; set; } = BarPattern.Solid;
+
+    protected override void OnInitialized() => Bar.Add(this);
+
+    public void Dispose() => Bar.Remove(this);
+}

@@ -1,0 +1,111 @@
+.stacked-bar {
+    display: block;
+    min-width: 0;
+}
+
+.sb-track {
+    position: relative;
+    display: flex;
+    width: 100%;
+}
+
+.sb-track ::deep [data-sb-anchor] {
+    position: absolute;
+    top: 0;
+    left: var(--sb-x, 0);
+    width: 1px;
+    height: 100%;
+}
+
+.sb-fill {
+    display: flex;
+    gap: 2px;
+    height: 100%;
+    min-width: min-content;
+    overflow: hidden;
+}
+
+.sb-part,
+.sb-rest {
+    display: block;
+    min-width: 3px;
+    height: 100%;
+    transition: flex-grow 0.25s linear, opacity 120ms ease;
+}
+
+.sb-rest {
+    background: var(--secondary);
+}
+
+.sb-part.is-dim,
+.sb-rest.is-dim {
+    opacity: 0.3;
+}
+
+.sb-keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.sb-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    padding: 2px 10px 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: none;
+    color: var(--foreground);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.sb-key:hover {
+    background: var(--secondary);
+}
+
+.sb-key:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+.sb-key b {
+    font-weight: 500;
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+}
+
+.sb-key-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 270px;
+}
+
+.sb-key.is-off {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+.sb-swatch {
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    flex: none;
+}
+
+.sb-key.is-off .sb-swatch {
+    background: transparent !important;
+    box-shadow: inset 0 0 0 1.5px var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sb-part,
+    .sb-rest {
+        transition: none;
+    }
+}

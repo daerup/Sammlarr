@@ -53,6 +53,9 @@
     --fate-conflict: oklch(0.66 0.15 55);
     --fate-earlier: color-mix(in oklch, var(--destructive) 45%, white);
     --usage-after-429-text: oklch(0.55 0.12 75);
+    --bar-auto-l: 0.53;
+    --bar-auto-l2: 0.65;
+    --bar-auto-c: 0.14;
 
     /* Sidebar variables */
     --sidebar-background: oklch(0.985 0 0);
@@ -125,6 +128,9 @@
     --fate-conflict: oklch(0.73 0.14 55);
     --fate-earlier: color-mix(in oklch, var(--destructive) 62%, var(--card));
     --usage-after-429-text: var(--usage-after-429);
+    --bar-auto-l: 0.76;
+    --bar-auto-l2: 0.64;
+    --bar-auto-c: 0.13;
 
     /* Sidebar variables */
     --sidebar-background: oklch(0.205 0 0);
