@@ -48,7 +48,7 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		var requests = resolvable.Select(x => new IdentifyRequest([x.Item.TmdbId], BuildHints(x.Item)) { Sources = [RemoteService.Tmdb] });
 		var pipeline = media.IdentifyAsync(requests, cancellationToken);
 
-		await foreach (var (identity, entry) in pipeline.ZipAwait(resolvable, cancellationToken))
+		await foreach (var (identity, entry) in pipeline.Zip(resolvable.ToAsyncEnumerable()))
 		{
 			finalItems[entry.Index] = BuildTrending(entry.Item, identity);
 		}

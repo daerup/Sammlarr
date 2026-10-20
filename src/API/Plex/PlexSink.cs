@@ -28,7 +28,7 @@ internal sealed class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaServi
 		var requests = items.Select(item => new IdentifyRequest([.. item.Externals], new None()) { Sources = [RemoteService.Plex] });
 		List<MediaId> matched = [];
 		List<UnmatchedMedia> unmatched = [];
-		await foreach (var (result, item) in mediaService.IdentifyAsync(requests, cancellationToken).ZipAwait(items, cancellationToken))
+		await foreach (var (result, item) in mediaService.IdentifyAsync(requests, cancellationToken).Zip(items.ToAsyncEnumerable()))
 		{
 			result
 				.Apply(identity => matched.Add(identity.Id))

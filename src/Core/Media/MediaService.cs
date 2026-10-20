@@ -78,7 +78,7 @@ internal sealed class MediaService(
 	)
 	{
 		var listed = items.ToList();
-		var pipeline = GetDetailsAsync(listed.Select(item => item.MediaId), needs, cancellationToken).ZipAwait(listed, cancellationToken);
+		var pipeline = GetDetailsAsync(listed.Select(item => item.MediaId), needs, cancellationToken).Zip(listed.ToAsyncEnumerable());
 		await foreach (var (media, item) in pipeline.WhereSuccessAwait().WithCancellation(cancellationToken))
 		{
 			yield return item.With(media);

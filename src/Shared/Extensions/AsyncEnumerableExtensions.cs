@@ -109,22 +109,6 @@ public static class AsyncEnumerableExtensions
 				await ((Task)moving).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 			}
 		}
-
-		public async IAsyncEnumerable<(TIn First, TOther Second)> ZipAwait<TOther>(
-			IEnumerable<TOther> other,
-			[EnumeratorCancellation] CancellationToken cancellationToken = default
-		)
-		{
-			using var otherEnumerator = other.GetEnumerator();
-			await foreach (var item in source.WithCancellation(cancellationToken))
-			{
-				if (!otherEnumerator.MoveNext())
-				{
-					yield break;
-				}
-				yield return (item, otherEnumerator.Current);
-			}
-		}
 	}
 
 	extension<TIn>(IAsyncEnumerable<Listed<TIn>> listed)
@@ -143,11 +127,6 @@ public static class AsyncEnumerableExtensions
 				}
 			}
 		}
-	}
-
-	extension<TIn>(IEnumerable<TIn> source)
-	{
-		public IReadOnlyList<Listed<TIn>> Numbered(int from = 0) => [.. source.Select((item, index) => new Listed<TIn>(from + index, item))];
 	}
 
 	extension<T>(Channel<T> channel)
