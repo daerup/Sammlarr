@@ -184,7 +184,7 @@
             return Person switch
             {
                 JoinedPerson { Holdings: { Feeds: 0, Wanted: 0, Blocklisted: 0 } } => "No feeds or titles yet",
-                JoinedPerson joined => $"{Counted(joined.Holdings.Feeds, "feed", "feeds")} · {joined.Holdings.Wanted:N0} wanted · {joined.Holdings.Blocklisted:N0} blocklisted",
+                JoinedPerson joined => $"{"feed".ToQuantity(joined.Holdings.Feeds, "N0")} · {joined.Holdings.Wanted:N0} wanted · {joined.Holdings.Blocklisted:N0} blocklisted",
                 InvitedPerson => "Not joined yet",
             };
         }
@@ -225,8 +225,6 @@
             };
         }
     }
-
-    private static string Counted(int count, string one, string many) => $"{count:N0} {(count == 1 ? one : many)}";
 
     private async Task RenewAsync(InvitedPerson invited)
     {

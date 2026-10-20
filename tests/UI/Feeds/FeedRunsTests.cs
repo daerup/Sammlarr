@@ -79,7 +79,7 @@ public class FeedRunsTests : BunitContext
 		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(calling)));
 		cut.WaitForState(() => cut.FindAll("[data-testid=run-calls]").Count == 1);
 
-		await Assert.That(cut.Find(".runs-detail-sub").TextContent).Contains("took 2.0 s · 8,287 calls");
+		await Assert.That(cut.Find(".runs-detail-sub").TextContent).Contains("took 2 s · 8,287 calls");
 	}
 
 	[Test]

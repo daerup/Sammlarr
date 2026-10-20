@@ -30,7 +30,7 @@
                     }
                 </BbTooltipTrigger>
                 <BbTooltipContent Class="@UsageView.Tip" data-testid="usage-quota-day-tip">
-                    <div class="mb-1 font-semibold whitespace-nowrap">@Label(day, last) · @Requests(day.Total)</div>
+                    <div class="mb-1 font-semibold whitespace-nowrap">@Label(day, last) · @UsageView.Requests(day.Total)</div>
                     @foreach (var (cause, spent) in day.Spent.Where(pair => pair.Value > 0).OrderByDescending(pair => pair.Value))
                     {
                         <div class="grid grid-cols-[14px_minmax(0,1fr)_auto] items-center gap-1.5 leading-[1.7]" data-testid="usage-quota-day-cause">
@@ -120,6 +120,4 @@
     private static IEnumerable<KeyValuePair<UsageCause, long>> Stacked(QuotaDayUse day) => day.Spent.Where(pair => pair.Value > 0).OrderBy(pair => pair.Key);
 
     private string Label(QuotaDayUse day, bool last) => last ? "Today" : UsageView.Slot(Range, day.Start.AddHours(12));
-
-    private static string Requests(long count) => count == 1 ? "1 request" : $"{UsageView.Count(count)} requests";
 }

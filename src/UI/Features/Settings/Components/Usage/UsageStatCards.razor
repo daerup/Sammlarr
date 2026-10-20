@@ -30,7 +30,7 @@
         Snapshot
             .Current.Services.FirstOrNone(line => line.Service == RemoteService.Mdblist)
             .Map(line => line.RightNow.RequestsLeft)
-            .Map(left => $"MDBList: {UsageView.Count(left)} requests left today")
+            .Map(left => $"MDBList: {UsageView.Requests(left)} left today")
             .GetValueOr($"{UsageView.Calls(Now.RateLimited)} hit a 429");
 
     private static double Rate(UsageTally tally, long part) => tally.Total == 0 ? 0 : (double)part / tally.Total;

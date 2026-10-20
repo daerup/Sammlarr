@@ -30,8 +30,8 @@ public class CountdownTests : BunitContext
 		var atFirst = cut.Find(".countdown").TextContent;
 		now = Start.AddSeconds(90);
 
-		cut.WaitForState(() => cut.Find(".countdown").TextContent == "in under a minute", TimeSpan.FromSeconds(3));
-		await Assert.That(atFirst).IsEqualTo("in 2 min");
+		cut.WaitForState(() => cut.Find(".countdown").TextContent == "30 seconds from now", TimeSpan.FromSeconds(3));
+		await Assert.That(atFirst).IsEqualTo("2 minutes from now");
 	}
 
 	[Test]
@@ -46,7 +46,7 @@ public class CountdownTests : BunitContext
 		now = Start.AddSeconds(5);
 
 		cut.WaitForState(() => Tooltip(cut) == "in 1 min 55 s", TimeSpan.FromSeconds(3));
-		await Assert.That(atFirst).IsEqualTo("in 2 min 0 s");
+		await Assert.That(atFirst).IsEqualTo("in 2 min");
 	}
 
 	private void UseClock(Func<DateTimeOffset> now)

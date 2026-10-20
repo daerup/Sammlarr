@@ -55,9 +55,9 @@ else
         {
             <AppLink Href="/wantlist" Arrow="false">@_wantlistCount.ToString("N0")</AppLink>
 
-            <span> titles on your wantlist, assembled by</span>
+            <span>@("title".ToQuantity(_wantlistCount, ShowQuantityAs.None)) on your wantlist, assembled by</span>
             <AppLink Href="/feeds" Arrow="false">@_feeds.Count.ToString("N0")</AppLink>
-            <span>@(_feeds.Count == 1 ? "feed" : "feeds"). </span>
+            <span>@("feed".ToQuantity(_feeds.Count, ShowQuantityAs.None)). </span>
 
             @if (_blocklistCount > 0)
             {

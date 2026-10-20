@@ -223,7 +223,7 @@
         }
     }
 
-    private string Subtitle => _dryRun is { } report ? $"{report.NoOps.Count + report.TotalChanges:N0} titles compared" : $"Comparing with {ProviderName}…";
+    private string Subtitle => _dryRun is { } report ? $"{"title".ToQuantity(report.NoOps.Count + report.TotalChanges, "N0")} compared" : $"Comparing with {ProviderName}…";
 
     private ChangeFold? InSync => _dryRun is { NoOps.Count: > 0 } plan ? new ChangeFold(ChangeKind.Unchanged, plan.NoOps.Count, () => UnfoldAsync(plan)) : null;
 

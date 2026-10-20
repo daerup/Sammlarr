@@ -919,6 +919,7 @@
           "BlazorBlueprint.Primitives": "[4.1.0, )",
           "Contracts": "[1.0.0, )",
           "CronExpressionDescriptor": "[2.51.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Microsoft.AspNetCore.Components.Authorization": "[11.0.0-rc.2.26504.105, )",
           "Microsoft.AspNetCore.Components.Web": "[11.0.0-rc.2.26504.105, )",
           "Observability": "[1.0.0, )",
@@ -994,6 +995,12 @@
           "Parlot": "1.5.2",
           "TimeZoneConverter": "7.2.0"
         }
+      },
+      "Humanizer.Core": {
+        "type": "CentralTransitive",
+        "requested": "[3.0.10, )",
+        "resolved": "3.0.10",
+        "contentHash": "yZIhtw8sYuvsONzQbZxWpR60tMWYHXoo0DL6nyOqSFiU5POjBTSEyWFpTQtJEZuy+oqiYTXKXY/Mjx7KnqIQFw=="
       },
       "Microsoft.AspNetCore.Components.Authorization": {
         "type": "CentralTransitive",

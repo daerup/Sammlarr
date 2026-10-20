@@ -48,7 +48,7 @@ public class SinkSwitchDialogTests : BunitContext
 	}
 
 	[Test]
-	[Arguments(new[] { "Ada", "Bob", "Cy" }, "Ada, Bob and Cy have no Plex connected, so their wantlists wait until they connect.")]
+	[Arguments(new[] { "Ada", "Bob", "Cy" }, "Ada, Bob, and Cy have no Plex connected, so their wantlists wait until they connect.")]
 	[Arguments(new[] { "Ada" }, "Ada has no Plex connected, so their wantlist waits until they connect.")]
 	public async Task Dialog_ForASwitchToPlex_NamesThePeopleWithoutPlexWhoseWantlistsWait(string[] withoutPlex, string expected)
 	{

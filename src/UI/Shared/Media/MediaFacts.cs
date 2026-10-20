@@ -1,4 +1,6 @@
 using Domain.Media;
+using Humanizer;
+using UI.Shared.Formatting;
 
 namespace UI.Shared.Media;
 
@@ -28,21 +30,12 @@ internal static class MediaFacts
 			return;
 		}
 
-		var suffix = count == 1 ? string.Empty : "s";
-		facts.Add($"{count} {singularLabel}{suffix}");
+		facts.Add(singularLabel.ToQuantity(count.Value));
 	}
 
 	private static string? GetRuntimeLabel(TimeSpan runtime)
 	{
-		var totalMinutes = (int)Math.Round(runtime.TotalMinutes, MidpointRounding.AwayFromZero);
-		if (totalMinutes <= 0)
-		{
-			return null;
-		}
-
-		var hours = totalMinutes / 60;
-		var minutes = totalMinutes % 60;
-
-		return hours > 0 ? $"{hours}h {minutes}m" : $"{minutes}m";
+		var minutes = TimeSpan.FromMinutes(Math.Round(runtime.TotalMinutes, MidpointRounding.AwayFromZero));
+		return minutes > TimeSpan.Zero ? minutes.Humanize(2, Notation.Symbols, TimeUnit.Minute) : null;
 	}
 }

@@ -28,7 +28,7 @@ public class HousekeepingViewTests
 	[Test]
 	[Arguments(34_288_435L, "32.7 MB")]
 	[Arguments(113_246_208L, "108 MB")]
-	public async Task Size_InAnyCulture_ShowsOneDecimalBelowAHundredMegabytes(long bytes, string expected)
+	public async Task Size_InAnyCulture_ReadsInTheLargestWholeUnitWithOneDecimal(long bytes, string expected)
 	{
 		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
 
@@ -76,7 +76,7 @@ public class HousekeepingViewTests
 			.That(HousekeepingView.Breakdown(report, new HousekeepingOptions()))
 			.IsEquivalentTo([
 				("Feed history: titles and calls of runs older than 90 days", 500),
-				("Title ids nobody used for a year", 11),
+				("Title ids nobody used for 365 days", 11),
 				("\"No earlier season\" answers older than 3 days", 4),
 				("Finished jobs and schedule entries, 30 days", 226),
 			]);

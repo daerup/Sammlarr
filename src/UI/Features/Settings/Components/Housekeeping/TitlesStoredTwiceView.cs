@@ -3,6 +3,8 @@ using Contracts.Media;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
+using Humanizer;
+using UI.Shared.Formatting;
 using UI.Shared.Media;
 using UI.Shared.Services.Branding;
 
@@ -40,7 +42,7 @@ internal static class TitlesStoredTwiceView
 		var (held, other) = (Name(pair.Held), Name(pair.Other));
 		var years = new[] { Year(pair.Held), Year(pair.Other) }.WhereSome().Distinct().ToList();
 		var shown = Name(Shown(pair));
-		var together = years.Count == 0 ? shown : $"{shown} ({string.Join(" and ", years)})";
+		var together = years.Count == 0 ? shown : $"{shown} ({years.Humanize(Notation.Words)})";
 		return Details(pair.Held)
 			.Map(_ => Details(pair.Other).Map(_ => held == other ? together : $"{held} and {other}").GetValueOr(together))
 			.GetValueOr(together);
@@ -50,7 +52,7 @@ internal static class TitlesStoredTwiceView
 	{
 		var names = note.Sources.Order().Select(source => branding.Name(source)).ToList();
 		var verb = names.Count == 1 ? "says" : "say";
-		return $"{string.Join(" and ", names)} {verb} they are one {Kind(note)}";
+		return $"{names.Humanize(Notation.Words)} {verb} they are one {Kind(note)}";
 	}
 
 	private static string Asking(IdentityConflict note, MediaProviderBrandingService branding)
@@ -94,7 +96,7 @@ internal static class TitlesStoredTwiceView
 
 	public static Optional<string> DetailsTitle(StoredTitle title) => Details(title).Map(details => Optional.Of(details.Title)).When(name => name.Length > 0);
 
-	public static string ApplyTitle(int changes) => changes == 0 ? "Nothing to apply" : $"Apply {changes} {Plural(changes, "change")}?";
+	public static string ApplyTitle(int changes) => changes == 0 ? "Nothing to apply" : $"Apply {"change".ToQuantity(changes)}?";
 
 	public static (string Label, string Icon) Unmarked(IdentityConflict note)
 	{
@@ -112,12 +114,12 @@ internal static class TitlesStoredTwiceView
 		List<string> parts = [];
 		if (uses.Wantlists > 0)
 		{
-			parts.Add($"on {uses.Wantlists} {Plural(uses.Wantlists, "wantlist")}");
+			parts.Add($"on {"wantlist".ToQuantity(uses.Wantlists)}");
 		}
 
 		if (uses.Feeds > 0)
 		{
-			parts.Add($"in {uses.Feeds} {Plural(uses.Feeds, "feed")}");
+			parts.Add($"in {"feed".ToQuantity(uses.Feeds)}");
 		}
 
 		return parts.Count == 0 ? "on no wantlist and in no feed" : string.Join(" · ", parts);
@@ -147,9 +149,9 @@ internal static class TitlesStoredTwiceView
 	{
 		var open =
 			undecided > 0
-				? $"{undecided} {Plural(undecided, "pair")} that may be one title. The nightly pass checks them with a second source; settle one now if you know."
+				? $"{"pair".ToQuantity(undecided)} that may be one title. The nightly pass checks them with a second source; settle one now if you know."
 				: "Nothing to decide: every pair found so far is settled.";
-		var kept = keptApart > 0 ? $" {keptApart} {Plural(keptApart, "pair")} {Are(keptApart)} kept apart." : string.Empty;
+		var kept = keptApart > 0 ? $" {"pair".ToQuantity(keptApart)} {Are(keptApart)} kept apart." : string.Empty;
 		return open + kept;
 	}
 
@@ -159,7 +161,7 @@ internal static class TitlesStoredTwiceView
 		return distinct.Reason switch
 		{
 			Contradiction contradiction =>
-				$"Kept apart: both have a {contradiction.Source.Label} id ({Value(pair.Held, contradiction.Source)} and {Value(pair.Other, contradiction.Source)}), so they are two {Kind(note)}s",
+				$"Kept apart: both have a {contradiction.Source.Label} id ({Value(pair.Held, contradiction.Source)} and {Value(pair.Other, contradiction.Source)}), so they are two {Kind(note).Pluralize()}",
 			TypesDiffer => "Kept apart: one is a film and the other a show",
 			AnsweredElsewhere answered =>
 				$"Kept apart {Day(distinct.At)}: {branding.Name(answered.By)} says it is {answered.Answer.Source.Label} {answered.Answer.Value}, not {note.Claimed.Value}",
@@ -219,8 +221,6 @@ internal static class TitlesStoredTwiceView
 	}
 
 	private static string Day(DateTimeOffset at) => at.ToLocalTime().ToString("MMM d", Invariant);
-
-	private static string Plural(int count, string noun) => count == 1 ? noun : $"{noun}s";
 
 	private static string Are(int count) => count == 1 ? "is" : "are";
 }

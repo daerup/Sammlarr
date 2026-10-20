@@ -53,7 +53,7 @@
                             <span>·</span>
                             <span>
                                 <AppLink Href="@($"/wantlist?feed={FeedIdParam}")" Arrow="false"
-                                         Title="@($"Show the {_onWantlist} titles this feed put on your wantlist")">@_onWantlist</AppLink>
+                                         Title="@($"Show the {"title".ToQuantity(_onWantlist)} this feed put on your wantlist")">@_onWantlist</AppLink>
                                 on your wantlist
                             </span>
                         }
@@ -477,8 +477,8 @@
         get
         {
             return _history.FirstRunAt.Match(
-                first => string.Create(CultureInfo.InvariantCulture, $"{_history.TotalRuns} {(_history.TotalRuns == 1 ? "run" : "runs")} since {first.ToLocalTime():d MMMM}"),
-                () => $"{_history.TotalRuns} runs"
+                first => string.Create(CultureInfo.InvariantCulture, $"{"run".ToQuantity(_history.TotalRuns)} since {first.ToLocalTime():d MMMM}"),
+                () => "run".ToQuantity(_history.TotalRuns)
             );
         }
     }

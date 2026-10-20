@@ -62,7 +62,7 @@ public class FeedStatusLineTests : BunitContext
 		await cut.Find(".status-next").ClickAsync(new());
 
 		var details = cut.Find(".next-details");
-		await Assert.That(details.QuerySelector(".next-chips")?.TextContent).Contains("Mirror").And.Contains("in 43 min");
+		await Assert.That(details.QuerySelector(".next-chips")?.TextContent).Contains("Mirror").And.Contains("43 minutes from now");
 		await Assert.That(details.QuerySelector(".next-last .last-run")?.TextContent).Contains("Never");
 		await Assert.That(details.TextContent).DoesNotContain("Strategy");
 	}

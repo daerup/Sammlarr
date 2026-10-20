@@ -203,7 +203,7 @@
     private async Task RemoveBulkAsync(IReadOnlyList<BlocklistedMedia> toRemove)
     {
         await BlocklistService.RemoveAsync(toRemove.Select(item => item.Media.Identity.Id), Cancellation.Token);
-        ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blocklist.");
+        ToastService.Success($"Removed {"item".ToQuantity(toRemove.Count)} from your blocklist.");
     }
 
     private async Task WantlistBulkAsync(IReadOnlyList<BlocklistedMedia> toMark)
@@ -232,7 +232,7 @@
 
     private static BulkConfirm WantlistConfirm(int count) => new($"Wantlist {Titles(count)}?", "They stay blocklisted.");
 
-    private static string Titles(int count) => count == 1 ? "1 title" : $"{count} titles";
+    private static string Titles(int count) => "title".ToQuantity(count);
 
     public override void Dispose()
     {

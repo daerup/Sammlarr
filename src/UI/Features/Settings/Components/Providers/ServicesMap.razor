@@ -289,7 +289,7 @@
         {
             RemoteService remote => Readiness(remote),
             Arr => ArrReady ? "Connected" : "Not set up",
-            SammlarrAccounts => People == 1 ? "Local accounts · 1 person" : $"Local accounts · {People} people",
+            SammlarrAccounts => $"Local accounts · {"person".ToQuantity(People)}",
         };
     }
 

@@ -1,4 +1,5 @@
 using Domain.Media;
+using UI.Shared.Formatting;
 using UI.Shared.Media;
 using UI.Shared.Media.Ratings;
 
@@ -24,11 +25,10 @@ internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Row
 
 	internal string UnvotedLine =>
 		FirstAvailable
-			? $"A title whose first rating is {Unvoted(" or ")} has no votes and fails this rule."
-			: $"A title only {Unvoted(" or ")} rates has no votes and fails this rule.";
+			? $"A title whose first rating is {Unvoted} has no votes and fails this rule."
+			: $"A title only {Unvoted} rates has no votes and fails this rule.";
 
-	internal string Warning =>
-		$"Every title {Unvoted(" or ")} rates fails this rule, because none of them publishes votes. Switch a source with votes on with the";
+	internal string Warning => $"Every title {Unvoted} rates fails this rule, because none of them publishes votes. Switch a source with votes on with the";
 
 	internal static VotesExplanation For(RatingStrategy strategy, bool isOwn, ValueSet<RatingSource> available)
 	{
@@ -46,7 +46,7 @@ internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Row
 		if (rows.Count > 0 && rows.All(row => !row.HasVotes))
 		{
 			return new(
-				$"This feed's rating averages {string.Join(" and ", rows.Select(row => row.Name))} only:",
+				$"This feed's rating averages {rows.Select(row => row.Name).Humanize(Notation.Words)} only:",
 				rows,
 				VotesNote.EveryTitleFails,
 				FirstAvailable: false
@@ -67,5 +67,5 @@ internal sealed record VotesExplanation(string Lead, IReadOnlyList<VotesRow> Row
 
 	private static VotesNote Closing(IReadOnlyList<VotesRow> rows) => rows.Any(row => !row.HasVotes) ? VotesNote.UnvotedTitlesFail : VotesNote.Nothing;
 
-	private string Unvoted(string separator) => string.Join(separator, Rows.Where(row => !row.HasVotes).Select(row => row.Name));
+	private string Unvoted => Rows.Where(row => !row.HasVotes).Select(row => row.Name).Humanize(Notation.Words, "or");
 }

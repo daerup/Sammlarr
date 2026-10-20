@@ -60,7 +60,7 @@
 
     private int ShownTotal => Sources.Where(IsShown).Sum(source => source.Count);
 
-    private string Note => ShownTotal == Total ? $"{Total:N0} titles" : $"{ShownTotal:N0} of {Total:N0} titles";
+    private string Note => ShownTotal == Total ? "title".ToQuantity(Total, "N0") : $"{ShownTotal:N0} of {"title".ToQuantity(Total, "N0")}";
 
     private bool IsShown(SourceShare source) => !_hidden.Contains(source.Name);
 
@@ -84,5 +84,5 @@
     private string Detail(SourceShare source) =>
         IsShown(source)
             ? $"{source.Name} · {source.Count:N0} of {ShownTotal:N0} ({source.Count / (double)ShownTotal:P1})"
-            : $"{source.Name} · {source.Count:N0} titles, hidden";
+            : $"{source.Name} · {"title".ToQuantity(source.Count, "N0")}, hidden";
 }

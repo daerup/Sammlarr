@@ -31,7 +31,7 @@ else if (Overview.LastRun is Some<FeedRun>(var run))
             <BbTooltipContent Class="w-[300px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg" data-testid="last-run-tip">
                 <div class="flex justify-between gap-2.5">
                     <b class="font-semibold text-foreground">Run of @Heading(run)</b>
-                    <span class="tabular-nums">@FeedRunView.Took(run.Duration) · @Count(run.Counts.Total) @(run.Counts.Total == 1 ? "title" : "titles")</span>
+                    <span class="tabular-nums">@run.Duration.Humanize(2, Notation.Symbols) · @("title".ToQuantity(run.Counts.Total, "N0"))</span>
                 </div>
                 @if (segments.Count > 0)
                 {
@@ -103,7 +103,7 @@ else
                   Chips="@FeedRunView.Chips(last.Counts)"
                   OnSelect="ShowDetailsAsync"
                   EmptyMessage="@(FeedRunView.LostItsTitles(last) ? FeedRunView.TitlesGone : "Nothing was added or removed.")"
-                  Note="@($"{_runCount} {(_runCount == 1 ? "run" : "runs")}")"
+                  Note="@("run".ToQuantity(_runCount))"
                   NoteHref="@($"/feeds/{UrlGuid.Encode(Overview.Feed.Id.Value)}/runs")"
                   Band="@(FeedRunView.Problem(last) is { } problem ? ProblemBand(last, problem) : null)"
                   BandTone="@(last.Failed ? ChangeBandTone.Bad : ChangeBandTone.Warn)">
@@ -183,7 +183,7 @@ else
     private RenderFragment Pill(FeedRun run) =>
         @<button type="button" class="last-run" @onclick="() => OpenAsync(run)">
             <LucideIcon Name="history" Size="14"/>
-            <span>@ScheduleText.Ago(run.StartedAt, Clock.Now)</span>
+            <span>@run.StartedAt.Humanize(Clock.Now)</span>
             @if (run.Conclusiveness is Conclusiveness.Pending)
             {
                 <span class="last-run-badge">

@@ -20,4 +20,12 @@ public class RatingTextsTests
 	{
 		await Assert.That(RatingTexts.Scale(RatingSource.RottenTomatoesCritics)).StartsWith("Rotten Tomatoes® critics: ");
 	}
+
+	[Test]
+	[Arguments(1, "1 vote")]
+	[Arguments(549_900, "549,900 votes")]
+	public async Task Votes_ForACount_GroupsItAndAgreesInNumber(int votes, string expected)
+	{
+		await Assert.That(RatingTexts.Votes(votes)).IsEqualTo(expected);
+	}
 }

@@ -207,7 +207,7 @@
     private string SearchModalDescription => Description ?? $"Find a movie or show from {SearchProviderName} and add it to your wantlist.";
     private IReadOnlyList<BrandingInfo> Brands => Branding.Brands(SearchProvider.Service);
     private ProviderLogoForm FooterForm => Brands.Count == 1 ? ProviderLogoForm.Logo : ProviderLogoForm.Mark;
-    private string ResultsSource => string.Join(" and ", Brands.Select(brand => brand.DisplayName));
+    private string ResultsSource => Brands.Select(brand => brand.DisplayName).Humanize(Notation.Words);
 
     protected override void OnParametersSet()
     {

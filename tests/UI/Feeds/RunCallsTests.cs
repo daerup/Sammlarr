@@ -57,7 +57,7 @@ public class RunCallsTests : BunitContext
 			.Contains("851")
 			.And.Contains("2.8")
 			.And.Contains("95.2%")
-			.And.Contains("21.4 s");
+			.And.Contains("21 s 400 ms");
 		await Assert
 			.That(panel.QuerySelectorAll("[data-testid=run-calls-service]").Select(row => row.GetAttribute("data-service")!))
 			.IsEquivalentTo(["Plex", "Tmdb"], CollectionOrdering.Matching);

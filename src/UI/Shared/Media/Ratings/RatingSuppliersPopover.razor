@@ -27,7 +27,7 @@
 @code {
     [Parameter] [EditorRequired] public required IReadOnlyList<RatingSource> Sources { get; set; }
 
-    private string Names => Sources.Count == 1 ? RatingTexts.Name(Sources[0]) : string.Join(", ", Sources.Select(RatingTexts.Short));
+    private string Names => Sources.Count == 1 ? RatingTexts.Name(Sources[0]) : Sources.Select(RatingTexts.Short).Humanize(Notation.Words);
 
     private string Heading => $"{Names} ratings come from";
 

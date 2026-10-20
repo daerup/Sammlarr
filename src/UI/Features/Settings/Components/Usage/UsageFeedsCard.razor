@@ -175,7 +175,7 @@
                                     }
                                     @UsageView.Count(line.Stats.Unmatched) <span class="text-muted-foreground">· @FormattableString.Invariant($"{line.Stats.UnmatchedShare * 100:0.#}%")</span>
                                 </span>
-                                <span class="text-right tabular-nums text-muted-foreground">@(line.Runs.Count > 0 ? UsageView.Duration(line.Stats.Took.TotalMilliseconds) : string.Empty)</span>
+                                <span class="text-right tabular-nums text-muted-foreground">@(line.Runs.Count > 0 ? line.Stats.Took.Humanize(2, Notation.Symbols) : string.Empty)</span>
                                 <span class="flex min-w-0 items-center gap-1.5 truncate text-xs text-muted-foreground" data-testid="usage-feed-last">
                                     @if (!line.Enabled)
                                     {
@@ -409,7 +409,7 @@
 
     private string UnmatchedTitle(UsageFeedLine line)
     {
-        var typical = $"Typical run: {UsageView.Count(line.Stats.Unmatched)} titles unmatched.";
+        var typical = $"Typical run: {UsageView.Titles(line.Stats.Unmatched)} unmatched.";
         return line.Stats.CouldNotLookUp > 0
             ? $"{typical} Over the {UsageView.Window(Range)}, {UsageView.Count(line.Stats.CouldNotLookUp)} could not even be looked up."
             : $"{typical} Every one was not found by any service.";

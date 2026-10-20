@@ -459,13 +459,13 @@
     private async Task RemoveBulkAsync(IReadOnlyList<WantlistedMedia> toRemove)
     {
         await WantlistService.RemoveAsync(toRemove.Select(item => item.Media.Identity.Id), Cancellation.Token);
-        Notifier.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your wantlist.");
+        Notifier.Success($"Removed {"item".ToQuantity(toRemove.Count)} from your wantlist.");
     }
 
     private async Task BlocklistBulkAsync(IReadOnlyList<WantlistedMedia> toMark)
     {
         await BlocklistService.AddAsync(toMark.Select(item => item.Media.Identity.Id), Cancellation.Token);
-        Notifier.Success($"Blocklisted {toMark.Count} title{(toMark.Count == 1 ? "" : "s")}.");
+        Notifier.Success($"Blocklisted {Titles(toMark.Count)}.");
     }
 
     private static BulkConfirm RemoveConfirm(int count) =>
@@ -477,7 +477,7 @@
     private static BulkConfirm BlocklistConfirm(int count) =>
         new($"Blocklist {Titles(count)}?", "Future feed runs will skip them. They stay on your wantlist.");
 
-    private static string Titles(int count) => count == 1 ? "1 title" : $"{count} titles";
+    private static string Titles(int count) => "title".ToQuantity(count);
 
     public override void Dispose()
     {

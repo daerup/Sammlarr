@@ -32,7 +32,7 @@
 
     private RunTally Tally => Run.Tally;
 
-    private string Of => Tally.Total.Match(total => $" / {(Tally.Estimated ? "~" : "")}{Count(total)}", () => Tally.Done == 1 ? " title" : " titles");
+    private string Of => Tally.Total.Match(total => $" / {(Tally.Estimated ? "~" : "")}{Count(total)}", () => $" {"title".ToQuantity(Tally.Done, ShowQuantityAs.None)}");
 
     protected override void OnParametersSet()
     {

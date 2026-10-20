@@ -1,6 +1,8 @@
 using System.Globalization;
 using Contracts.Usage;
 using Domain.Usage;
+using Humanizer;
+using UI.Shared.Formatting;
 
 namespace UI.Features.Settings.Components.Usage;
 
@@ -47,7 +49,11 @@ internal static class UsageView
 			: FormattableString.Invariant($"color-mix(in oklab, var(--usage-shade) {Math.Round(12 + count * 88.0 / busiest)}%, var(--card))");
 	}
 
-	internal static string Calls(long count) => count == 1 ? "1 call" : $"{Count(count)} calls";
+	internal static string Calls(long count) => "call".ToQuantity(count, "N0", CultureInfo.InvariantCulture);
+
+	internal static string Requests(long count) => "request".ToQuantity(count, "N0", CultureInfo.InvariantCulture);
+
+	internal static string Titles(double count) => "title".ToQuantity((long)Math.Round(count), "N0", CultureInfo.InvariantCulture);
 
 	internal static string Share(long part, long total)
 	{
@@ -71,10 +77,7 @@ internal static class UsageView
 		return $"text-right tabular-nums {colour}";
 	}
 
-	internal static string Duration(double milliseconds)
-	{
-		return milliseconds >= 1000 ? FormattableString.Invariant($"{milliseconds / 1000:0.0} s") : FormattableString.Invariant($"{Math.Round(milliseconds)} ms");
-	}
+	internal static string Duration(double milliseconds) => TimeSpan.FromMilliseconds(Math.Round(milliseconds)).Humanize(2, Notation.Symbols);
 
 	internal static Optional<double> Change(double now, double before) => Optional.When(before > 0, () => (now - before) / before);
 
@@ -83,10 +86,7 @@ internal static class UsageView
 		return upToMs == DurationBuckets.Over ? ">10 s" : $"≤{Bound(upToMs)}";
 	}
 
-	private static string Bound(int upToMs)
-	{
-		return upToMs >= 1000 ? FormattableString.Invariant($"{upToMs / 1000.0:0.#} s") : FormattableString.Invariant($"{upToMs} ms");
-	}
+	private static string Bound(int upToMs) => TimeSpan.FromMilliseconds(upToMs).Humanize(2, Notation.Symbols);
 
 	internal static string Slot(UsageRange range, DateTimeOffset at)
 	{
@@ -178,7 +178,7 @@ internal static class UsageView
 		return rightNow
 			.PausedUntil.Map(until => new RightNowText($"Paused until {Clock(until, now)}", Some.Of("pause"), RightNowTone.Paused))
 			.Or(() => rightNow.FailingSince.Map(since => new RightNowText($"Not answering since {Clock(since, now)}", Some.Of("circle-x"), RightNowTone.Down)))
-			.Or(() => rightNow.RequestsLeft.Map(left => new RightNowText($"{Count(left)} requests left today", Some.Of("gauge"), RightNowTone.Plain)))
+			.Or(() => rightNow.RequestsLeft.Map(left => new RightNowText($"{Requests(left)} left today", Some.Of("gauge"), RightNowTone.Plain)))
 			.Or(() => rightNow.DownloadedAt.Map(at => new RightNowText($"Downloaded at {Clock(at, now)}", Some.Of("database"), RightNowTone.Plain)))
 			.Or(() => rightNow.LastCall.Map(at => new RightNowText($"Last call {Clock(at, now)}", new None(), RightNowTone.Plain)))
 			.GetValueOr(new RightNowText(string.Empty, new None(), RightNowTone.Plain));

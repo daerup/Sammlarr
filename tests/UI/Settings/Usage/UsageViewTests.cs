@@ -10,7 +10,7 @@ public class UsageViewTests
 	[Arguments(5, "≤5 ms")]
 	[Arguments(250, "≤250 ms")]
 	[Arguments(1000, "≤1 s")]
-	[Arguments(2500, "≤2.5 s")]
+	[Arguments(2500, "≤2 s 500 ms")]
 	[Arguments(DurationBuckets.Over, ">10 s")]
 	public async Task Bucket_ByItsUpperBound_IsLabelledUpToIt(int upToMs, string label)
 	{

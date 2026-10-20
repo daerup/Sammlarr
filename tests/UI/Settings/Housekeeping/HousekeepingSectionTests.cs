@@ -234,7 +234,7 @@ public class HousekeepingSectionTests : BunitContext
 		await Assert
 			.That(cut.Find("[data-testid=housekeeping-clear-show-parts]").TextContent)
 			.Contains("2,605 stored")
-			.And.Contains("0.5 MB")
+			.And.Contains("483.3 KB")
 			.And.Contains("Nightly: \"no earlier season\" answers older than 3 days");
 	}
 

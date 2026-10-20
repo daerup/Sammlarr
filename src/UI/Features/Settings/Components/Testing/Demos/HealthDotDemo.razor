@@ -7,7 +7,7 @@
     <div class="flex items-center gap-3">
         <span class="text-sm font-medium">Dot:</span>
         <NotificationHealthDot Outcomes="_outcomes"/>
-        <span class="text-xs text-muted-foreground">@_outcomes.Count @(_outcomes.Count == 1 ? "entry" : "entries")</span>
+        <span class="text-xs text-muted-foreground">@("entry".ToQuantity(_outcomes.Count))</span>
     </div>
     <div class="flex flex-wrap items-center gap-2">
         <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => Add(new Delivered())">

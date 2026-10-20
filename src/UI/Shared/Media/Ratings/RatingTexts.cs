@@ -1,5 +1,6 @@
 using System.Globalization;
 using Domain.Media;
+using Humanizer;
 
 namespace UI.Shared.Media.Ratings;
 
@@ -69,6 +70,8 @@ internal static class RatingTexts
 
 	public static string Count(int votes) => votes.ToString("N0", CultureInfo.InvariantCulture);
 
+	public static string Votes(int votes) => "vote".ToQuantity(votes, "N0", CultureInfo.InvariantCulture);
+
 	public static string Conversion(IMediaRating rating) => $"{rating.Value} → {Number(rating.SammlarrValue)}";
 
 	public static string Strategy(RatingStrategy strategy)
@@ -94,7 +97,7 @@ internal static class RatingTexts
 		};
 	}
 
-	private static string Votes(IMediaRating rating) => rating.Votes.Match(votes => $"{Count(votes)} votes", () => "no vote count");
+	private static string Votes(IMediaRating rating) => rating.Votes.Match(Votes, () => "no vote count");
 
 	public static string Reason(RatingRowState state, Optional<SammlarrRating> sammlarr, string where)
 	{

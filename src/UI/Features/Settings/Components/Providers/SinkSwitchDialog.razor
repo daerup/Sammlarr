@@ -51,7 +51,7 @@
 
     private int Titles => Preview.Ready + Preview.ToLookUp;
 
-    private string What => $"Every title on everyone's wantlist ({Counted(People, "person", "people")}, {Counted(Titles, "title", "titles")}) goes to {Branding.Name(Target.Service)} on their next sync. {Keeps}";
+    private string What => $"Every title on everyone's wantlist ({"person".ToQuantity(People, "N0")}, {"title".ToQuantity(Titles, "N0")}) goes to {Branding.Name(Target.Service)} on their next sync. {Keeps}";
 
     private string Readiness =>
         Preview.ToLookUp == 0
@@ -61,7 +61,7 @@
     private string Waiting =>
         $"{Names} {(WithoutPlex.Count == 1 ? "has" : "have")} no Plex connected, so {(WithoutPlex.Count == 1 ? "their wantlist waits" : "their wantlists wait")} until they connect.";
 
-    private string Names => WithoutPlex.Count == 1 ? WithoutPlex[0] : $"{string.Join(", ", WithoutPlex.SkipLast(1))} and {WithoutPlex[^1]}";
+    private string Names => WithoutPlex.Humanize(Notation.Words);
 
     private string Keeps
     {

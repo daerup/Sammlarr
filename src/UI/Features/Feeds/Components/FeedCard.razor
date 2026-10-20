@@ -76,7 +76,7 @@
             {
                 <span class="feed-card-control feed-stat-link">
                     <AppLink Href="@($"/wantlist?feed={UrlGuid.Encode(Feed.Id.Value)}")"
-                             Title="@($"Show the {Row.OnWantlist} titles this feed put on your wantlist")">@Row.OnWantlist</AppLink>
+                             Title="@($"Show the {"title".ToQuantity(Row.OnWantlist)} this feed put on your wantlist")">@Row.OnWantlist</AppLink>
                 </span>
             }
             else

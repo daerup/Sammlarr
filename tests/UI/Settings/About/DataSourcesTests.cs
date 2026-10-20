@@ -50,7 +50,7 @@ public class DataSourcesTests
 			[]
 		);
 
-		await Assert.That(Tip(testee.Row(RemoteService.Plex), "Matching")).IsEqualTo("Matching: finds the same title on TMDB, IMDb and TVDB by its Plex id");
+		await Assert.That(Tip(testee.Row(RemoteService.Plex), "Matching")).IsEqualTo("Matching: finds the same title on TMDB, IMDb, and TVDB by its Plex id");
 	}
 
 	[Test]
@@ -58,7 +58,7 @@ public class DataSourcesTests
 	{
 		var testee = Testee([], [Registrations.Enricher(RemoteService.Tvmaze, MediaField.RuntimePerEpisode | MediaField.Title | MediaField.ReleaseDate)]);
 
-		await Assert.That(Tip(testee.Row(RemoteService.Tvmaze), "Details")).IsEqualTo("Details: title, release date and episode runtime");
+		await Assert.That(Tip(testee.Row(RemoteService.Tvmaze), "Details")).IsEqualTo("Details: title, release date, and episode runtime");
 	}
 
 	[Test]
@@ -66,7 +66,7 @@ public class DataSourcesTests
 	{
 		await Assert
 			.That(Tip(Testee([], []).Row(RemoteService.Plex), "Ratings"))
-			.IsEqualTo("Ratings: TMDB, IMDb, Rotten Tomatoes® critics and Rotten Tomatoes® audience");
+			.IsEqualTo("Ratings: TMDB, IMDb, Rotten Tomatoes® critics, and Rotten Tomatoes® audience");
 	}
 
 	[Test]

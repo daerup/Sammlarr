@@ -38,6 +38,16 @@ public class UpNextPanelTests : BunitContext
 	}
 
 	[Test]
+	public async Task Note_WithOneFeedScheduled_CountsItInTheSingular()
+	{
+		IReadOnlyList<UpNextRow> scheduled = [new("feed 1", "At 04:00", "a day from now", UpNextKind.Scheduled, null)];
+
+		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Scheduled, scheduled));
+
+		await Assert.That(cut.Find(".band-note").TextContent).IsEqualTo("1 feed on a schedule");
+	}
+
+	[Test]
 	public async Task Row_ForAFeed_LinksItsNameToTheFeedEditor()
 	{
 		IReadOnlyList<UpNextRow> queued =
@@ -102,7 +112,7 @@ public class UpNextPanelTests : BunitContext
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
 
-		await Assert.That(cut.Find(".row-when").TextContent.Trim()).IsEqualTo("in 2 min");
+		await Assert.That(cut.Find(".row-when").TextContent.Trim()).IsEqualTo("2 minutes from now");
 	}
 
 	[Test]

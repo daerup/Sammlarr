@@ -113,7 +113,7 @@ else
                         <BbAlertDialogDescription>
                             This frees about <b class="font-medium text-foreground">@HousekeepingView.Size(cache.DetailsBytes)</b> of the @HousekeepingView.Size(overview.Size.OnDisk) database.
                             Every one of these <b class="font-medium text-foreground">@HousekeepingView.Titles(cache.Detailed)</b> is fetched from its providers again the next time it is shown,
-                            so the next feed runs and previews make up to <b class="font-medium text-foreground">@HousekeepingView.Number(cache.Detailed) lookups</b>, and a busy provider may answer 429 for a while.
+                            so the next feed runs and previews make up to <b class="font-medium text-foreground">@HousekeepingView.Lookups(cache.Detailed)</b>, and a busy provider may answer 429 for a while.
                         </BbAlertDialogDescription>
                     </BbAlertDialogHeader>
                     <p class="text-[13px] text-muted-foreground">
@@ -153,7 +153,7 @@ else
                         <BbAlertDialogDescription>
                             This frees about <b class="font-medium text-foreground">@HousekeepingView.Size(cache.DetailsBytes + cache.IdsBytes)</b> of the @HousekeepingView.Size(overview.Size.OnDisk) database.
                             Every one of these <b class="font-medium text-foreground">@HousekeepingView.Titles(cache.Matched)</b> is matched against the providers from scratch the next time it is needed:
-                            the slowest to rebuild, with up to <b class="font-medium text-foreground">@HousekeepingView.Number(cache.Matched) lookups</b> and their details on top.
+                            the slowest to rebuild, with up to <b class="font-medium text-foreground">@HousekeepingView.Lookups(cache.Matched)</b> and their details on top.
                             Wantlisted, blocklisted and queued titles keep their ids.
                         </BbAlertDialogDescription>
                     </BbAlertDialogHeader>

@@ -26,7 +26,7 @@
                     @Branding.NickName(Run.Layout.Sink.Service)
                     @if (Run.Layout.Targets.Count > 0)
                     {
-                        <span class="live-needs">· needs @string.Join(" and ", Run.Layout.Targets.Select(target => target.GetDescription())) ids</span>
+                        <span class="live-needs">· needs @Run.Layout.Targets.Select(target => target.GetDescription()).Humanize(Notation.Words) ids</span>
                     }
                 </span>
             </div>
@@ -122,9 +122,9 @@
 
     private RunTally Tally => Run.Tally;
 
-    private string Clock => Tally.Ended.Match(end => FeedRunView.Took(TimeSpan.FromMilliseconds(end.ElapsedMs)), () => Elapsed(Tally.ElapsedMs));
+    private string Clock => Tally.Ended.Match(end => TimeSpan.FromMilliseconds(end.ElapsedMs).Humanize(2, Notation.Symbols), () => Elapsed(Tally.ElapsedMs));
 
-    private string Of => Tally.Total.Match(total => $"of {(Tally.Estimated ? "~" : "")}{Count(total)}", () => Tally.Done == 1 ? "title" : "titles");
+    private string Of => Tally.Total.Match(total => $"of {(Tally.Estimated ? "~" : "")}{Count(total)}", () => "title".ToQuantity(Tally.Done, ShowQuantityAs.None));
 
     protected override void OnInitialized()
     {

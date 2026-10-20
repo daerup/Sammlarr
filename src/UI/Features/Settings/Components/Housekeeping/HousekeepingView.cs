@@ -2,8 +2,10 @@ using System.Globalization;
 using Contracts.Datasets;
 using Contracts.Housekeeping;
 using Domain.Providers;
+using Humanizer;
 using Shared.Options;
 using UI.Features.Settings.Components.Usage;
+using UI.Shared.Formatting;
 
 namespace UI.Features.Settings.Components.Housekeeping;
 
@@ -24,8 +26,6 @@ internal static class HousekeepingView
 	internal const string Nothing = "—";
 
 	private const string Waiting = "waiting for its turn";
-
-	private const long Megabyte = 1024 * 1024;
 
 	private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
@@ -61,10 +61,7 @@ internal static class HousekeepingView
 
 	internal static string Next(Optional<DateTimeOffset> next, DateTimeOffset now) => next.Map(at => Day(at, now)).GetValueOr(Nothing);
 
-	internal static string Size(long bytes)
-	{
-		return bytes >= 100 * Megabyte ? string.Create(Invariant, $"{bytes / Megabyte} MB") : string.Create(Invariant, $"{(double)bytes / Megabyte:0.0} MB");
-	}
+	internal static string Size(long bytes) => bytes.Bytes().Humanize("0.#", Notation.Symbols);
 
 	internal static bool Bloated(DatabaseSize size) => size.OnDisk >= size.Data * 3 / 2;
 
@@ -113,9 +110,11 @@ internal static class HousekeepingView
 		return $"{day} {UsageView.Time(at)}";
 	}
 
-	internal static string Days(int days) => days == 365 ? "a year" : $"{days} days";
+	internal static string Days(int days) => "day".ToQuantity(days);
 
-	internal static string Titles(int count) => count == 1 ? "1 title" : $"{Number(count)} titles";
+	internal static string Titles(int count) => "title".ToQuantity(count, "N0", Invariant);
+
+	internal static string Lookups(int count) => "lookup".ToQuantity(count, "N0", Invariant);
 
 	internal static string Number(int count) => count.ToString("N0", Invariant);
 
@@ -213,5 +212,5 @@ internal static class HousekeepingView
 			.GetValueOr("the compaction");
 	}
 
-	private static string Rows(int removed) => removed == 1 ? "row removed" : "rows removed";
+	private static string Rows(int removed) => $"{"row".ToQuantity(removed, ShowQuantityAs.None)} removed";
 }

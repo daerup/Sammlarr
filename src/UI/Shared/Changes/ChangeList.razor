@@ -220,7 +220,7 @@
 
     private void Hide() => _fold = FoldState.Folded;
 
-    private static string Titles(int count) => count == 1 ? "title" : "titles";
+    private static string Titles(int count) => "title".ToQuantity(count, ShowQuantityAs.None);
 
     private RenderFragment ChipFace(ChangeChip chip) =>
         @<text>

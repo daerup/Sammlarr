@@ -163,6 +163,29 @@ public class LastRunCellTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_ThePill_SaysHowLongAgoTheRunStarted()
+	{
+		RegisterServices();
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.LastRun, Run() with { StartedAt = Now.AddMinutes(-16) }));
+		cut.WaitForState(() => cut.FindAll(".last-run").Count == 1);
+
+		await Assert.That(cut.Find(".last-run").TextContent).Contains("16 minutes ago");
+	}
+
+	[Test]
+	public async Task Render_ThePillInAGermanBrowser_StaysEnglishLikeTheRestOfTheUi()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("de-CH");
+		RegisterServices();
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.LastRun, Run() with { StartedAt = Now.AddDays(-95) }));
+		cut.WaitForState(() => cut.FindAll(".last-run").Count == 1);
+
+		await Assert.That(cut.Find(".last-run").TextContent).Contains("3 months ago").And.DoesNotContain("vor");
+	}
+
+	[Test]
 	public async Task Render_RunningWithoutALastRun_ShowsTheRunningPill()
 	{
 		RegisterServices();

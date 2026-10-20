@@ -77,12 +77,14 @@ public class MediaListBodyTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WhenFiltersHideEverything_ShowsTheNoMatchStateWithTheHiddenCount()
+	[Arguments(42, "42 titles are hidden")]
+	[Arguments(1, "1 title is hidden")]
+	public async Task Render_WhenFiltersHideEverything_ShowsTheNoMatchStateWithTheHiddenCount(int total, string hidden)
 	{
-		var cut = RenderBody(totalCount: 42, visibleCount: 0);
+		var cut = RenderBody(totalCount: total, visibleCount: 0);
 
 		await Assert.That(cut.Markup).Contains("Nothing matches these filters.");
-		await Assert.That(cut.Markup).Contains("42 titles are hidden");
+		await Assert.That(cut.Markup).Contains(hidden);
 		await Assert.That(cut.Markup).DoesNotContain("nothing here yet");
 	}
 

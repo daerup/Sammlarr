@@ -36,3 +36,21 @@ M:System.Net.Http.HttpClient.#ctor;Use a typed client from ForRemote
 M:System.Net.Http.HttpClient.#ctor(System.Net.Http.HttpMessageHandler);Use a typed client from ForRemote
 M:System.Net.Http.HttpClient.#ctor(System.Net.Http.HttpMessageHandler,System.Boolean);Use a typed client from ForRemote
 T:System.Console;Log through ILogger
+M:Humanizer.TimeSpanHumanizeExtensions.Humanize(System.TimeSpan,System.Int32,System.Globalization.CultureInfo,Humanizer.TimeUnit,Humanizer.TimeUnit,System.String,System.Boolean);Use Humanize(precision, Notation)
+M:Humanizer.TimeSpanHumanizeExtensions.Humanize(System.TimeSpan,System.Int32,System.Boolean,System.Globalization.CultureInfo,Humanizer.TimeUnit,Humanizer.TimeUnit,System.String,System.Boolean);Use Humanize(precision, Notation)
+M:Humanizer.ByteSizeExtensions.Humanize(Humanizer.ByteSize,System.String);Use Humanize(format, Notation)
+M:Humanizer.ByteSizeExtensions.Humanize(Humanizer.ByteSize,System.IFormatProvider);Use Humanize(format, Notation)
+M:Humanizer.ByteSizeExtensions.Humanize(Humanizer.ByteSize,System.String,System.IFormatProvider);Use Humanize(format, Notation)
+M:Humanizer.ByteSize.ToString;Use Humanize(format, Notation)
+M:Humanizer.ByteSize.ToString(System.IFormatProvider);Use Humanize(format, Notation)
+M:Humanizer.ByteSize.ToString(System.String);Use Humanize(format, Notation)
+M:Humanizer.ByteSize.ToString(System.String,System.IFormatProvider);Use Humanize(format, Notation)
+M:Humanizer.ByteSize.ToFullWords(System.String,System.IFormatProvider);Use Humanize(format, Notation)
+M:Humanizer.TimeSpanHumanizeExtensions.ToAge(System.TimeSpan,System.Globalization.CultureInfo,Humanizer.TimeUnit,System.Boolean);Use Humanize(precision, Notation)
+M:Humanizer.CollectionHumanizeExtensions.Humanize``1(System.Collections.Generic.IEnumerable{``0});Use Humanize(Notation), it joins in English whatever the browser's language
+M:Humanizer.CollectionHumanizeExtensions.Humanize``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.String});Use Humanize(Notation)
+M:Humanizer.CollectionHumanizeExtensions.Humanize``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Object});Use Humanize(Notation)
+M:Humanizer.CollectionHumanizeExtensions.Humanize``1(System.Collections.Generic.IEnumerable{``0},System.String);Use Humanize(Notation, conjunction)
+M:Humanizer.CollectionHumanizeExtensions.Humanize``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.String},System.String);Use Humanize(Notation, conjunction)
+M:Humanizer.CollectionHumanizeExtensions.Humanize``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Object},System.String);Use Humanize(Notation, conjunction)
+T:Humanizer.DateHumanizeExtensions;Use Humanize(now)

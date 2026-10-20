@@ -178,7 +178,7 @@
                 @if (_visible.Count == 0)
                 {
                     <MediaListEmptyState Icon="filter-x" Heading="Nothing matches these filters.">
-                        @_rows.Count feeds are hidden. Clear the filters to see them.
+                        @("feed".ToQuantity(_rows.Count)) @(_rows.Count == 1 ? "is" : "are") hidden. Clear the filters to see everything.
                     </MediaListEmptyState>
                 }
                 else
@@ -542,11 +542,7 @@
     private string ConfirmTitle(FeedsConfirm confirm) =>
         confirm switch
         {
-            FeedsConfirm.Pause => Chosen.Count(row => row.Feed.Enabled) switch
-            {
-                1 => "Pause 1 feed?",
-                var pausing => $"Pause {pausing} feeds?",
-            },
+            FeedsConfirm.Pause => $"Pause {"feed".ToQuantity(Chosen.Count(row => row.Feed.Enabled))}?",
             FeedsConfirm.Delete => _deleting.Count == 1 ? $"Delete \"{_deleting[0].Feed.Name}\"?" : $"Delete {_deleting.Count} feeds?",
         };
 

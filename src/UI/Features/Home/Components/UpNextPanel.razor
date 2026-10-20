@@ -24,7 +24,6 @@
             : Scheduled.Count switch
             {
                 0 => "nothing scheduled",
-                1 => "1 feed on a schedule",
-                var count => $"{count} feeds on a schedule",
+                var count => $"{"feed".ToQuantity(count)} on a schedule",
             };
 }

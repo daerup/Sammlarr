@@ -75,6 +75,6 @@
             ("Calls", UsageView.Count(All.Total)),
             ("Per title", Run.Counts.Total == 0 ? "n/a" : FormattableString.Invariant($"{All.Total / (double)Run.Counts.Total:0.0}")),
             ("Answered", UsageView.Share(All.Of(UsageOutcome.Answered), All.Total)),
-            ("Took", UsageView.Duration(Run.Duration.TotalMilliseconds)),
+            ("Took", Run.Duration.Humanize(2, Notation.Symbols)),
         ];
 }
