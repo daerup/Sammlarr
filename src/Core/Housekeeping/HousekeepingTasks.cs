@@ -45,7 +45,14 @@ internal sealed class HousekeepingTasks(
 
 		var notes = await conflicts.AllAsync(cancellationToken);
 		var storedTwice = new StoredTwiceCount(notes.Count(note => note.State is Undecided), notes.Count(note => note.State is Distinct));
-		return new HousekeepingOverview(await database.SizeAsync(cancellationToken), pass, datasets, await cache.CountAsync(cancellationToken), storedTwice);
+		return new HousekeepingOverview(
+			await database.SizeAsync(cancellationToken),
+			await database.PartsAsync(cancellationToken),
+			pass,
+			datasets,
+			await cache.CountAsync(cancellationToken),
+			storedTwice
+		);
 	}
 
 	public Task<bool> RunPassAsync(CancellationToken cancellationToken = default)

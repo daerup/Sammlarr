@@ -27,6 +27,17 @@ else
                 <b class="@SizeClass(overview.Size)">@HousekeepingView.Size(overview.Size.OnDisk)</b> on disk,
                 <b class="@SizeClass(overview.Size)">@HousekeepingView.Size(overview.Size.Data)</b> of it data@(Compacted(overview, now)).
             </p>
+            <div class="mt-2.5">
+                <StackedBar ShowLegend="true" Format="HousekeepingView.Size">
+                    <Title>@HousekeepingView.Size(overview.Size.OnDisk) on disk</Title>
+                    <ChildContent>
+                        @foreach (var part in HousekeepingView.FileParts(overview, Branding.GetBrandingInfo(RemoteService.ImdbDatasets).BrandColor))
+                        {
+                            <StackedBarPart Name="@part.Name" Value="part.Bytes" Color="@part.Color.ToNullable()" Pattern="part.Pattern"/>
+                        }
+                    </ChildContent>
+                </StackedBar>
+            </div>
         </div>
 
         <div class="@GroupHead">Runs by itself</div>

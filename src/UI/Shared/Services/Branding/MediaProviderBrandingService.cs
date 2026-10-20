@@ -124,7 +124,7 @@ public class MediaProviderBrandingService
 			MediaProvider.Imdb => new(
 				"IMDb",
 				"IMDb",
-				"#F5DE50",
+				"#F5C518",
 				new BrandArt("imdb-square.svg"),
 				new BrandArt("imdb-logo.svg"),
 				new BrandTile(OwnTile, new BrandArt("imdb-tile.svg"), 100)

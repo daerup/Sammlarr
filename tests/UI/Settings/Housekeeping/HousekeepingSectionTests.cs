@@ -13,6 +13,7 @@ using Microsoft.Extensions.Time.Testing;
 using Shared.Options;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Housekeeping;
+using UI.Shared.Bars;
 using UI.Shared.Services;
 using UI.Tests.Media;
 
@@ -46,6 +47,35 @@ public class HousekeepingSectionTests : BunitContext
 		Services.AddSingleton(ArtworkStub.Sizing());
 		Services.AddSingleton(IConflictReview.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	[Test]
+	public async Task Render_UnderTheSizeLine_BreaksTheFileDownWithAKeyForEachPart()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
+
+		var cut = RenderLoaded();
+
+		var bar = cut.FindComponent<StackedBar>();
+		await Assert.That(bar.Instance.ShowLegend).IsTrue();
+		await Assert
+			.That(bar.FindComponents<StackedBarPart>().Select(part => (part.Instance.Name, part.Instance.Value)))
+			.IsEquivalentTo(
+				[
+					("IMDb ratings", 22_216_704L),
+					("Anime ids", 2_719_744L),
+					("Cached details", 3_475_160L),
+					("Title ids", 2_605_130L),
+					("Show parts", 494_950L),
+					("Feed history", 110_592L),
+					("Settings, jobs and usage", 477_720L),
+					("Free pages and write-ahead log", 2_200_000L),
+				],
+				CollectionOrdering.Matching
+			);
+		var parts = bar.FindComponents<StackedBarPart>();
+		await Assert.That((parts[0].Instance.Color, parts[0].Instance.Pattern)).IsEqualTo(("#F5C518", BarPattern.Solid));
+		await Assert.That(parts[^1].Instance.Pattern).IsEqualTo(BarPattern.Hatched);
 	}
 
 	[Test]
@@ -303,6 +333,7 @@ public class HousekeepingSectionTests : BunitContext
 		var anime = new DatasetTask(RemoteService.AnimeLists, Some.Of(EarlierToday.AddHours(25.5)), new None(), new None(), new None());
 		return new HousekeepingOverview(
 			new DatabaseSize(34_300_000, 32_100_000),
+			new DatabaseParts(22_216_704, 2_719_744, 110_592),
 			pass,
 			[imdb, anime],
 			new CachedTitles(2_132, 3_475_160, 2_153, 2_605_130, 2_605, 494_950),

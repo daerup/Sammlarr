@@ -10,6 +10,20 @@ internal sealed class DatabaseFile(IDbContextFactory<SammlarrDbContext> contexts
 {
 	private const double VacuumWhenFree = 0.1;
 
+	private const long BytesPerImdbRating = 13;
+
+	private const long BytesPerAnimeId = 84;
+
+	private const long BytesPerRun = 357;
+
+	private const long BytesPerRunTitle = 359;
+
+	private const long BytesPerRunCalls = 426;
+
+	private const long BytesPerRunTimes = 428;
+
+	private const long BytesPerAbsence = 293;
+
 	public async Task<Compaction> CompactAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await contexts.CreateDbContextAsync(cancellationToken);
@@ -41,6 +55,22 @@ internal sealed class DatabaseFile(IDbContextFactory<SammlarrDbContext> contexts
 		var free = await PragmaAsync(connection, "freelist_count", cancellationToken);
 		var pageSize = await PragmaAsync(connection, "page_size", cancellationToken);
 		return new DatabaseSize(OnDisk(connection), (pages - free) * pageSize);
+	}
+
+	public async Task<DatabaseParts> PartsAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await contexts.CreateDbContextAsync(cancellationToken);
+		var history =
+			await ctx.FeedRuns.IgnoreQueryFilters().LongCountAsync(cancellationToken) * BytesPerRun
+			+ await ctx.FeedRunItems.IgnoreQueryFilters().LongCountAsync(cancellationToken) * BytesPerRunTitle
+			+ await ctx.FeedRunCalls.IgnoreQueryFilters().LongCountAsync(cancellationToken) * BytesPerRunCalls
+			+ await ctx.FeedRunTimes.IgnoreQueryFilters().LongCountAsync(cancellationToken) * BytesPerRunTimes
+			+ await ctx.FeedAbsences.IgnoreQueryFilters().LongCountAsync(cancellationToken) * BytesPerAbsence;
+		return new DatabaseParts(
+			await ctx.ImdbRatings.LongCountAsync(cancellationToken) * BytesPerImdbRating,
+			await ctx.AnimeIds.LongCountAsync(cancellationToken) * BytesPerAnimeId,
+			history
+		);
 	}
 
 	private async Task<bool> VacuumAsync(DbConnection connection, CancellationToken cancellationToken)

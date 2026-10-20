@@ -6,6 +6,7 @@ using Domain.Providers;
 using Shared.Options;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Housekeeping;
+using UI.Shared.Bars;
 
 namespace UI.Tests.Settings.Housekeeping;
 
@@ -41,6 +42,18 @@ public class HousekeepingViewTests
 	public async Task Bloated_ForTheFileAgainstItsData_IsTrueFromHalfAgainTheData(long onDisk, long data, bool expected)
 	{
 		await Assert.That(HousekeepingView.Bloated(new DatabaseSize(onDisk, data))).IsEqualTo(expected);
+	}
+
+	[Test]
+	public async Task File_WhenTheEstimatesPassTheData_LeavesNothingForTheRestAndCountsFreeSpaceApart()
+	{
+		var pass = new HousekeepingReport(Now, Some.Of(Now), [], new None(), new None());
+		var overview = Overview(pass, Imdb(new None(), new None())) with { Size = new DatabaseSize(100, 90), Parts = new DatabaseParts(80, 20, 0) };
+
+		var file = HousekeepingView.FileParts(overview, "#F5C518");
+
+		await Assert.That(file[^2]).IsEqualTo(new FilePart("Settings, jobs and usage", 0, new None(), BarPattern.Solid));
+		await Assert.That(file[^1]).IsEqualTo(new FilePart("Free pages and write-ahead log", 10, new None(), BarPattern.Hatched));
 	}
 
 	[Test]
@@ -152,6 +165,7 @@ public class HousekeepingViewTests
 	{
 		return new HousekeepingOverview(
 			new DatabaseSize(2, 1),
+			new DatabaseParts(0, 0, 0),
 			new PassTask(new None(), new None(), Some.Of(pass)),
 			[imdb],
 			new CachedTitles(0, 0, 0, 0, 0, 0),

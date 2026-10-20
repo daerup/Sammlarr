@@ -56,6 +56,19 @@ public class DatabaseFileTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(size.Data).IsLessThan(size.OnDisk);
 	}
 
+	[Test]
+	public async Task PartsAsync_ForTheRatingsAndAnotherUsersFeedRun_EstimatesEachFromItsRows()
+	{
+		await host.Resolve<IImdbRatings>().ReplaceAsync(Ratings(3_000));
+		await host.SeedRunAsync(await host.SeedFeedAsync(), DateTimeOffset.UtcNow, Guid.NewGuid());
+
+		await host.SignInAs("member");
+
+		var parts = await Testee.PartsAsync();
+
+		await Assert.That(parts).IsEqualTo(new DatabaseParts(39_000, 0, 1_570));
+	}
+
 	private string DatabasePath => host.Connection.DataSource;
 
 	private string WriteAheadLog => $"{DatabasePath}-wal";

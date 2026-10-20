@@ -5,6 +5,7 @@ using Domain.Providers;
 using Humanizer;
 using Shared.Options;
 using UI.Features.Settings.Components.Usage;
+using UI.Shared.Bars;
 using UI.Shared.Formatting;
 
 namespace UI.Features.Settings.Components.Housekeeping;
@@ -20,6 +21,8 @@ public enum TaskTone
 public sealed record TaskLine(TaskTone Tone, string When, Optional<string> Count, string Did, Optional<string> Error);
 
 internal sealed record DatasetLook(string Name, string What, string Noun, string Href);
+
+internal sealed record FilePart(string Name, long Bytes, Optional<string> Color, BarPattern Pattern);
 
 internal static class HousekeepingView
 {
@@ -64,6 +67,23 @@ internal static class HousekeepingView
 	internal static string Size(long bytes) => bytes.Bytes().Humanize("0.#", Notation.Symbols);
 
 	internal static bool Bloated(DatabaseSize size) => size.OnDisk >= size.Data * 3 / 2;
+
+	internal static IReadOnlyList<FilePart> FileParts(HousekeepingOverview overview, string imdb)
+	{
+		var (size, parts, cache) = (overview.Size, overview.Parts, overview.Cache);
+		var counted = parts.ImdbRatings + parts.AnimeIds + cache.DetailsBytes + cache.IdsBytes + cache.ShowPartsBytes + parts.FeedHistory;
+		return
+		[
+			new("IMDb ratings", parts.ImdbRatings, Some.Of(imdb), BarPattern.Solid),
+			new("Anime ids", parts.AnimeIds, new None(), BarPattern.Solid),
+			new("Cached details", cache.DetailsBytes, new None(), BarPattern.Solid),
+			new("Title ids", cache.IdsBytes, new None(), BarPattern.Solid),
+			new("Show parts", cache.ShowPartsBytes, new None(), BarPattern.Solid),
+			new("Feed history", parts.FeedHistory, new None(), BarPattern.Solid),
+			new("Settings, jobs and usage", Math.Max(0, size.Data - counted), new None(), BarPattern.Solid),
+			new("Free pages and write-ahead log", Math.Max(0, size.OnDisk - size.Data), new None(), BarPattern.Hatched),
+		];
+	}
 
 	internal static Optional<DateTimeOffset> CompactedAt(HousekeepingOverview overview)
 	{
