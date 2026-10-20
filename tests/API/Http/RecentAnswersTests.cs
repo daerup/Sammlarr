@@ -1,6 +1,6 @@
 using API.Http;
 using API.Tests.Feeds;
-using Contracts;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
 namespace API.Tests.Http;
@@ -34,17 +34,15 @@ public class RecentAnswersTests
 	public async Task AskAsync_SomeSecondsAfterAnAnswer_AsksAgainOnceTenMinutesHavePassed(int seconds, int asks)
 	{
 		var asked = 0;
-		var now = FeedClock.Now;
 		Func<CancellationToken, Task<Result<string>>> ask = _ =>
 		{
 			asked++;
 			return Task.FromResult<Result<string>>(Success.Of("Dune"));
 		};
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(() => now);
-		var testee = new RecentAnswers<string, string>(clock.Object);
+		var clock = new FakeTimeProvider(FeedClock.Now);
+		var testee = new RecentAnswers<string, string>(clock);
 		await testee.AskAsync("dune", ask);
-		now = now.AddSeconds(seconds);
+		clock.Advance(TimeSpan.FromSeconds(seconds));
 
 		await testee.AskAsync("dune", ask);
 

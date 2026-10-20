@@ -2,7 +2,6 @@ using System.Net;
 using API.Http;
 using API.Http.Lanes;
 using API.Mdblist;
-using Contracts;
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Providers;
@@ -28,7 +27,7 @@ internal static class MdblistApis
 		Http = new ProviderHttpOptions { Lanes = new Dictionary<string, LaneOptions> { ["titles"] = new LaneOptions { MaxBatch = 200 } } },
 	};
 
-	internal static MdblistTitles Titles(MockHttpHandler handler, IDateTimeProvider? clock = null)
+	internal static MdblistTitles Titles(MockHttpHandler handler, TimeProvider? clock = null)
 	{
 		var keys = IApiKeyService.Mock();
 		keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of<IApiKey>(new TestApiKey(ApiKeyProvider.Mdblist, "mdblist-key")));
@@ -71,12 +70,7 @@ internal static class MdblistApis
 			.Build();
 	}
 
-	internal static IDateTimeProvider Clock()
-	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(DateTimeOffset.UnixEpoch.AddDays(1));
-		return clock.Object;
-	}
+	internal static TimeProvider Clock() => new FrozenClock(DateTimeOffset.UnixEpoch.AddDays(1));
 
 	internal static Task<string> RecordedAsync(string name) => File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Mdblist", "Recorded", name));
 
@@ -87,5 +81,10 @@ internal static class MdblistApis
 		response.Headers.Add("x-ratelimit-reset", $"{reset.ToUnixTimeSeconds()}");
 		Optional.Of(limit).Apply(value => response.Headers.Add("x-ratelimit-limit", $"{value}"));
 		return response;
+	}
+
+	private sealed class FrozenClock(DateTimeOffset now) : TimeProvider
+	{
+		public override DateTimeOffset GetUtcNow() => now;
 	}
 }

@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Announcing;
 using Contracts.Feed;
 using Contracts.Identity;
@@ -10,6 +9,7 @@ using Domain.Feed.Trace;
 using Domain.Identity;
 using Domain.Jobs;
 using Domain.Providers;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using UI.Features.Feeds.Components;
 
@@ -31,14 +31,13 @@ public class FeedRunProgressTests
 	private readonly Mock<IFeedRunTraces> _traces = IFeedRunTraces.Mock();
 	private readonly Mock<IRemoteCapacity> _capacity = IRemoteCapacity.Mock();
 	private readonly Mock<ICurrentUser> _user = ICurrentUser.Mock();
-	private readonly Mock<IDateTimeProvider> _clock = IDateTimeProvider.Mock();
+	private readonly FakeTimeProvider _clock = new(Start);
 
 	[Before(Test)]
 	public void Setup()
 	{
 		_user.IsAuthenticated.Getter.Returns(true);
 		_user.Id.Getter.Returns(Owner);
-		_clock.Now.Getter.Returns(Start);
 		_queue.GetAsync(Any()).Returns(new QueueSnapshot([], 0));
 		_feeds.GetAsync(Any()).Returns(new FeedSnapshot([Overview(Documentaries), Overview(Comedy)]));
 		_layouts.GetAsync(Any<FeedId>(), Any()).Returns(Layout);
@@ -217,10 +216,10 @@ public class FeedRunProgressTests
 		await testee.StartAsync();
 		await EventuallyAsync(() => testee.Live.Match(run => run.Tally.Ended.IsSome(), () => false));
 
-		_clock.Now.Getter.Returns(Start.AddSeconds(1));
+		_clock.SetUtcNow(Start.AddSeconds(1));
 		await Task.Delay(600);
 		var holding = testee.Live;
-		_clock.Now.Getter.Returns(Start.AddSeconds(1.5));
+		_clock.SetUtcNow(Start.AddSeconds(1.5));
 
 		await EventuallyAsync(() => testee.Live.IsNone());
 		await Assert.That(holding).IsSome();
@@ -354,7 +353,7 @@ public class FeedRunProgressTests
 
 	private FeedRunProgress Progress()
 	{
-		return new FeedRunProgress(_queue.Object, _events.Object, _feeds.Object, _layouts.Object, _traces.Object, _capacity.Object, _user.Object, _clock.Object);
+		return new FeedRunProgress(_queue.Object, _events.Object, _feeds.Object, _layouts.Object, _traces.Object, _capacity.Object, _user.Object, _clock);
 	}
 
 	private static void Hold(ManualResetEventSlim entered, ManualResetEventSlim release)

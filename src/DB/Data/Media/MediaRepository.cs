@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -10,7 +9,7 @@ internal sealed class MediaRepository(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
 	MediaDetailsFactory detailsFactory,
 	MediaWriteLock writeLock,
-	IDateTimeProvider clock
+	TimeProvider clock
 ) : IMediaRepository
 {
 	public async Task<IReadOnlyList<StoredMedia>> GetAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default)
@@ -147,7 +146,7 @@ internal sealed class MediaRepository(
 
 		var rawIds = ids.Select(id => id.Value).ToList();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await ctx.TrimDetailsAsync(ctx.MediaDetails.Where(m => rawIds.Contains(m.MediaId)), clock.Now, cancellationToken);
+		await ctx.TrimDetailsAsync(ctx.MediaDetails.Where(m => rawIds.Contains(m.MediaId)), clock.GetUtcNow(), cancellationToken);
 	}
 
 	public async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(

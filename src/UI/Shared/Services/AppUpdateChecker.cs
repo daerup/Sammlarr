@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Updates;
 using Semver;
 using Shared.Options;
@@ -7,7 +6,7 @@ namespace UI.Shared.Services;
 
 public sealed record AppUpdate(string Version, Uri Page);
 
-internal sealed class AppUpdateChecker(AppVersionProvider versions, ReleaseOptions options, IReleaseFeed releases, IDateTimeProvider clock)
+internal sealed class AppUpdateChecker(AppVersionProvider versions, ReleaseOptions options, IReleaseFeed releases, TimeProvider clock)
 {
 	private readonly Lock _gate = new();
 
@@ -27,7 +26,7 @@ internal sealed class AppUpdateChecker(AppVersionProvider versions, ReleaseOptio
 
 		lock (_gate)
 		{
-			var now = clock.Now;
+			var now = clock.GetUtcNow();
 			var fresh = _checked.When(check => now - check.At < kept).GetValueOr(() => new Check(now, AskAsync(running)));
 			_checked = Some.Of(fresh);
 			return fresh.Update;

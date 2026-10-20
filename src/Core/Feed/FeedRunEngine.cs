@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Contracts;
 using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Usage;
@@ -21,7 +20,7 @@ internal sealed class FeedRunEngine(
 	IFeedRunUsage usage,
 	IFeedRunTrace trace,
 	ICurrentUser currentUser,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	ILogger<FeedRunEngine> logger
 ) : IFeedRunEngine
 {
@@ -63,7 +62,7 @@ internal sealed class FeedRunEngine(
 	private async Task<FeedRunResult> RecordAsync(Domain.Feed.Feed feed, FeedRunTrigger trigger, CancellationToken cancellationToken)
 	{
 		var elapsed = Stopwatch.StartNew();
-		var run = Started(feed, trigger, clock.Now);
+		var run = Started(feed, trigger, clock.GetUtcNow());
 		await feeds.StartRunAsync(run, cancellationToken);
 		usage.Start(feed.Id);
 		Optional<AbsenceChanges> absences = new None();

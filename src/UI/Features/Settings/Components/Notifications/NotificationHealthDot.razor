@@ -1,6 +1,5 @@
-@using Contracts
 @using Domain.Notifications
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 @if (Outcomes.Count == 0)
 {
@@ -25,7 +24,7 @@ else
                                     <span class="font-medium">@Label(entry.Outcome)</span>
                                     <span class="truncate text-muted-foreground">@entry.EventType.Humanize()</span>
                                 </span>
-                                <span class="shrink-0 text-muted-foreground">@entry.RecordedAt.Humanize(Clock.Now)</span>
+                                <span class="shrink-0 text-muted-foreground">@entry.RecordedAt.Humanize(Clock.GetUtcNow())</span>
                             </div>
                             @if (Detail(entry.Outcome) is { } detail)
                             {
@@ -69,7 +68,7 @@ else
         outcome switch
         {
             Delivered => null,
-            Retrying retrying => $"retry {retrying.NextAttemptAt.Humanize(Clock.Now)} · {retrying.Reason}",
+            Retrying retrying => $"retry {retrying.NextAttemptAt.Humanize(Clock.GetUtcNow())} · {retrying.Reason}",
             Failed failed => failed.Reason,
         };
 }

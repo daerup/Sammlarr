@@ -1,8 +1,8 @@
-using Contracts;
 using Contracts.Housekeeping;
 using Core.Housekeeping;
 using Core.Jobs;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
@@ -30,9 +30,8 @@ public class HousekeepingPassTests : IDisposable
 	{
 		_database.CompactAsync(Any()).Returns(new Compaction(200, 100, true)).Callback(() => _ran.Add("compaction"));
 		_reports.SaveAsync(_saved, Any()).Returns(() => Task.CompletedTask);
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		_activity = new TaskActivity(clock.Object);
+		var clock = new FakeTimeProvider(Now);
+		_activity = new TaskActivity(clock);
 		_activity.Changed += () => _progress++;
 	}
 
@@ -120,8 +119,7 @@ public class HousekeepingPassTests : IDisposable
 
 	private HousekeepingPass Testee(params IHousekeepingStep[] steps)
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		return new HousekeepingPass(steps, _database.Object, _reports.Object, _turn, _activity, clock.Object, NullLogger<HousekeepingPass>.Instance);
+		var clock = new FakeTimeProvider(Now);
+		return new HousekeepingPass(steps, _database.Object, _reports.Object, _turn, _activity, clock, NullLogger<HousekeepingPass>.Instance);
 	}
 }

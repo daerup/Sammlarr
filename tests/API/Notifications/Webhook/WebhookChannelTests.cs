@@ -3,13 +3,13 @@ using System.Security.Cryptography;
 using System.Text;
 using API.Notifications;
 using API.Notifications.Webhook;
-using Contracts;
 using Contracts.Identity;
 using Contracts.Notifications;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
 namespace API.Tests.Notifications.Webhook;
@@ -138,13 +138,12 @@ public class WebhookChannelTests
 
 	private static WebhookChannel Channel(HttpMessageHandler handler)
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
+		var clock = new FakeTimeProvider(Now);
 		var clients = IHttpClientFactory.Mock();
 		clients.CreateClient(Any()).Returns(new HttpClient(handler));
 		var owner = ICurrentUser.Mock();
 		owner.Role.Returns(UserRole.Member);
-		return new WebhookChannel(new WebhookClient(clients.Object, owner.Object), new FluidTemplateRenderer(), clock.Object, NullLogger<WebhookChannel>.Instance);
+		return new WebhookChannel(new WebhookClient(clients.Object, owner.Object), new FluidTemplateRenderer(), clock, NullLogger<WebhookChannel>.Instance);
 	}
 
 	private static NotificationContext Context() =>

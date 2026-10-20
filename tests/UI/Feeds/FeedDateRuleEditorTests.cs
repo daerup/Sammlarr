@@ -2,10 +2,10 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Domain.Processing;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using UI.Features.Feeds.Pages.Editor;
 
 namespace UI.Tests.Feeds;
@@ -20,9 +20,7 @@ public class FeedDateRuleEditorTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		var clock = IDateTimeProvider.Mock();
-		clock.Today.Getter.Returns(Today);
-		Services.AddSingleton(clock.Object);
+		Services.AddSingleton<TimeProvider>(new FakeTimeProvider(new DateTimeOffset(Today, TimeOnly.MinValue, TimeSpan.Zero)));
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

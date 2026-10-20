@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Feed;
 using Contracts.Jobs;
 using Core.Announcing;
@@ -10,6 +9,7 @@ using Domain.Jobs;
 using Domain.Notifications;
 using Domain.Usage;
 using Domain.Wantlist.Sync;
+using Microsoft.Extensions.Time.Testing;
 using Observability.Usage;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
@@ -125,11 +125,10 @@ public class FeedRunJobHandlerTests
 		engine.RunAsync(Any<FeedId>(), Any<FeedRunTrigger>(), Any()).Returns(new FeedRunFailed("stubbed"));
 		var queue = IJobQueue.Mock();
 		queue.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Queued));
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(new DateTimeOffset(2026, 9, 27, 12, 0, 0, TimeSpan.Zero));
+		var clock = new FakeTimeProvider(new DateTimeOffset(2026, 9, 27, 12, 0, 0, TimeSpan.Zero));
 		var events = new EventPublisher();
 		var announcer = new Announcer(events, published ?? new RecordingPublisher());
 
-		return (new FeedRunJobHandler(engine.Object, queue.Object, announcer, new TestCurrentUser(), clock.Object), queue, events, engine);
+		return (new FeedRunJobHandler(engine.Object, queue.Object, announcer, new TestCurrentUser(), clock), queue, events, engine);
 	}
 }

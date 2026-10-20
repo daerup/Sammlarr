@@ -1,9 +1,8 @@
-@using Contracts
 @using Contracts.Datasets
 @using Contracts.Usage
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <UsageCard Title="@(_tab is CallsTab.Calls ? "Calls" : "Answer time")" Subtitle="@Subtitle" TestId="usage-calls">
     <Chip>
@@ -79,7 +78,7 @@
             @foreach (var line in Period.Services)
             {
                 var tally = line.Tally;
-                var now = UsageView.RightNow(line.RightNow, Clock.Now);
+                var now = UsageView.RightNow(line.RightNow, Clock.GetUtcNow());
                 var picked = IsPicked(line.Service);
                 var open = Panel(line.Service).When(_ => picked);
                 <div class="@($"usage-service cursor-pointer rounded-md pl-3 pr-1 text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-service-picked" : string.Empty)}")"

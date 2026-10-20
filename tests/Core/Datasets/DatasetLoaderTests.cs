@@ -1,9 +1,9 @@
-using Contracts;
 using Contracts.Datasets;
 using Contracts.Housekeeping;
 using Core.Datasets;
 using Domain.Usage;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Observability.Usage;
 using TestInfrastructure;
 
@@ -149,14 +149,13 @@ public class DatasetLoaderTests
 
 	private DatasetLoader<ImdbRatingLine> Testee(DatasetGate? gate = null)
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(Now);
+		var clock = new FakeTimeProvider(Now);
 		return new DatasetLoader<ImdbRatingLine>(
 			_dataset.Object,
 			_table.Object,
 			_loads.Object,
 			_database.Object,
-			clock.Object,
+			clock,
 			gate ?? new DatasetGate(),
 			NullLogger<DatasetLoader<ImdbRatingLine>>.Instance
 		);

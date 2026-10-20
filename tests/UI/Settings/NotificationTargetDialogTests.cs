@@ -1,11 +1,11 @@
 using System.Text.RegularExpressions;
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts;
 using Contracts.DI;
 using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using UI.Features.Settings.Components.Notifications;
 using UI.Shared.Services;
@@ -28,7 +28,7 @@ public class NotificationTargetDialogTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton(_targets.Object);
-		Services.AddSingleton(IDateTimeProvider.Mock().Object);
+		Services.AddSingleton<TimeProvider>(new FakeTimeProvider());
 		Services.AddSingleton<IKeyedServiceIndex<NotificationChannel, INotificationChannel>>(
 			new FakeKeyedServiceIndex<NotificationChannel, INotificationChannel>().Register(NotificationChannel.Webhook, _webhook.Object)
 		);

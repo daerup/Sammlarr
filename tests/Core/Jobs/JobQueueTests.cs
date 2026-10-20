@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Jobs;
 using Core.Announcing;
 using Core.Jobs;
@@ -9,6 +8,7 @@ using Domain.Jobs;
 using Domain.Wantlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -181,19 +181,14 @@ public class JobQueueTests
 		jobs.QueuedAsync(Any<UserId>(), Any<JobKind>(), Any()).Returns([]);
 		jobs.QueueWaitingAsync(Any<UserId>(), Any<JobKind>(), Any<DateTimeOffset>(), Any()).Returns(0);
 		jobs.NextWaitingAsync(Any()).Returns(new None());
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
+		var clock = new FakeTimeProvider(Now);
 
 		var services = new ServiceCollection();
 		services.AddSingleton(jobs.Object);
 		var raised = signal ?? new JobSignal();
-		var alarm = new JobAlarm(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(), raised, clock.Object, NullLogger<JobAlarm>.Instance);
+		var alarm = new JobAlarm(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(), raised, clock, NullLogger<JobAlarm>.Instance);
 
 		var events = new EventPublisher();
-		return (
-			new JobQueue(jobs.Object, raised, alarm, new TestCurrentUser(), clock.Object, Options, new Announcer(events, new RecordingPublisher())),
-			jobs,
-			events
-		);
+		return (new JobQueue(jobs.Object, raised, alarm, new TestCurrentUser(), clock, Options, new Announcer(events, new RecordingPublisher())), jobs, events);
 	}
 }

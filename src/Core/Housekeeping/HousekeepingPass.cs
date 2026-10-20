@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Housekeeping;
 using Core.Jobs;
 using Microsoft.Extensions.Logging;
@@ -11,14 +10,14 @@ internal sealed class HousekeepingPass(
 	IHousekeepingReports reports,
 	JobTurn turn,
 	TaskActivity activity,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	ILogger<HousekeepingPass> logger
 )
 {
 	public async Task<HousekeepingReport> RunAsync(CancellationToken cancellationToken = default)
 	{
 		using var held = await turn.TakeAsync(cancellationToken);
-		var running = new HousekeepingReport(clock.Now, new None(), [], new None(), new None());
+		var running = new HousekeepingReport(clock.GetUtcNow(), new None(), [], new None(), new None());
 		await reports.SaveAsync(running, cancellationToken);
 		activity.Progressed();
 		var finished = await RunStepsAsync(running, cancellationToken);
@@ -44,12 +43,12 @@ internal sealed class HousekeepingPass(
 
 			at = new None();
 			var file = await database.CompactAsync(cancellationToken);
-			return running with { FinishedAt = Some.Of(clock.Now), Steps = counts, File = Some.Of(file) };
+			return running with { FinishedAt = Some.Of(clock.GetUtcNow()), Steps = counts, File = Some.Of(file) };
 		}
 		catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
 		{
 			logger.LogError(exception, "Housekeeping stopped at {Step}", at.Map(step => step.ToString()).GetValueOr("the compaction"));
-			return running with { FinishedAt = Some.Of(clock.Now), Steps = counts, Failure = Some.Of(new HousekeepingFailure(at, exception.Message)) };
+			return running with { FinishedAt = Some.Of(clock.GetUtcNow()), Steps = counts, Failure = Some.Of(new HousekeepingFailure(at, exception.Message)) };
 		}
 	}
 }

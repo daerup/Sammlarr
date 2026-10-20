@@ -3,7 +3,6 @@
 @page "/feeds/clone/{CloneFeedId}"
 @implements IDisposable
 @using System.Globalization
-@using Contracts
 @using Contracts.Providers
 @using Contracts.DI
 @using Contracts.Feed
@@ -15,7 +14,7 @@
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject Notifier Notifier
 @inject DialogService DialogService
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -431,7 +430,7 @@
             return SaveProblem.Match(Problem, () => Unsaved);
         }
 
-        return Optional.Of(_savedAt).Map(savedAt => SavedAt(TimeZoneInfo.ConvertTime(savedAt, Clock.Zone).ToString("HH:mm", CultureInfo.InvariantCulture))).ToNullable();
+        return Optional.Of(_savedAt).Map(savedAt => SavedAt(TimeZoneInfo.ConvertTime(savedAt, Clock.LocalTimeZone).ToString("HH:mm", CultureInfo.InvariantCulture))).ToNullable();
     }
 
     private static RenderFragment Unsaved => @<span class="mr-1.5 inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-muted-foreground" data-save-status="unsaved">
@@ -541,7 +540,7 @@
         _storedHash = _config.GetSaveHash();
         _storedPreviewHash = _config.GetPreviewHash();
         _storedStrategy = _config.Strategy;
-        _savedAt = Clock.Now;
+        _savedAt = Clock.GetUtcNow();
         if (created && !_visit.IsCancellationRequested)
         {
             NavigationManager.NavigateTo($"/feeds/edit/{UrlGuid.Encode(id.Value)}", replace: true);

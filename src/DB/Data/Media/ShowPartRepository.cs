@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Contracts;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -9,7 +8,7 @@ using Shared.Options;
 
 namespace DB.Data.Media;
 
-internal sealed class ShowPartRepository(IDbContextFactory<SammlarrDbContext> contexts, IDateTimeProvider clock, HousekeepingOptions options) : IShowParts
+internal sealed class ShowPartRepository(IDbContextFactory<SammlarrDbContext> contexts, TimeProvider clock, HousekeepingOptions options) : IShowParts
 {
 	private static readonly DateTimeOffsetToBinaryConverter BinaryTime = new();
 
@@ -19,7 +18,7 @@ internal sealed class ShowPartRepository(IDbContextFactory<SammlarrDbContext> co
 	)
 	{
 		List<string> ids = [.. parts.Select(part => part.Value).Distinct()];
-		var askedSince = (clock.Now - options.NoPrequelFor).ToUniversalTime();
+		var askedSince = (clock.GetUtcNow() - options.NoPrequelFor).ToUniversalTime();
 		await using var ctx = await contexts.CreateDbContextAsync(cancellationToken);
 		var answered = await (
 			from part in ctx.ShowParts.AsNoTracking()
@@ -49,7 +48,7 @@ internal sealed class ShowPartRepository(IDbContextFactory<SammlarrDbContext> co
 		var media = show.Map(found => found.Value).ToNullable();
 		var season = place.TvdbSeason.ToNullable();
 		var offset = place.EpisodeOffset.ToNullable();
-		var askedAt = BinaryTime.ConvertToProvider(clock.Now.ToUniversalTime());
+		var askedAt = BinaryTime.ConvertToProvider(clock.GetUtcNow().ToUniversalTime());
 		await using var ctx = await contexts.CreateDbContextAsync(cancellationToken);
 		await ctx.Database.ExecuteSqlAsync(
 			$"""

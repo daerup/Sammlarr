@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Notifications;
@@ -10,6 +9,7 @@ using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -39,7 +39,7 @@ public class SignInServiceTests : IDisposable
 				_accounts.Object,
 				IUserScope.Mock().Object,
 				_config.Object,
-				IDateTimeProvider.Mock().Object,
+				new FakeTimeProvider(),
 				_setup,
 				new WebUiNotificationSeeder(INotificationTargetRepository.Mock().Object, INotificationSubscriptionRepository.Mock().Object),
 				_logger.Object

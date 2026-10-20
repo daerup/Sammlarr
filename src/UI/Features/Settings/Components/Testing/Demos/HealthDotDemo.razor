@@ -1,6 +1,5 @@
-@using Contracts
 @using Domain.Notifications
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <DemoCard Title="Delivery health dot" Where="Notifications / Clients"
           Note="NotificationHealthDot over a live outcome list: red on any failure, amber on any retry, else green; grey when empty. Click the dot for the popover. Add or remove entries below.">
@@ -14,7 +13,7 @@
             <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
             Delivered
         </BbButton>
-        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => Add(new Retrying(RetryReason, Clock.Now.AddMinutes(4)))">
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => Add(new Retrying(RetryReason, Clock.GetUtcNow().AddMinutes(4)))">
             <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
             Retrying
         </BbButton>
@@ -48,5 +47,5 @@
     private int _eventIndex;
 
     private void Add(DeliveryOutcome outcome) =>
-        _outcomes = [new NotificationDeliveryOutcome(outcome, Events[_eventIndex++ % Events.Length], Clock.Now), .. _outcomes];
+        _outcomes = [new NotificationDeliveryOutcome(outcome, Events[_eventIndex++ % Events.Length], Clock.GetUtcNow()), .. _outcomes];
 }

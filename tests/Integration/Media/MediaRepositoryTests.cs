@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Media;
 using DB.Data.Media;
 using Domain.Media;
@@ -18,7 +17,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Before(Test)]
 	public void Setup()
 	{
-		_testee = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
+		_testee = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<TimeProvider>());
 	}
 
 	[Test]
@@ -52,7 +51,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var mediaId = await fixture.SeedMediaAsync([id]);
 		var details = new MovieDetails { Title = id.Value, Genres = [.. genres] };
-		var now = fixture.Resolve<IDateTimeProvider>().Now;
+		var now = fixture.Resolve<TimeProvider>().GetUtcNow();
 		await _testee.SaveDetailsAsync([new DetailsChange(mediaId, new None(), new CachedDetails(details, now, now, []))]);
 	}
 }

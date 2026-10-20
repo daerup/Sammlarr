@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.DI;
 using Contracts.Messaging;
 using Contracts.Notifications;
@@ -9,6 +8,7 @@ using Messaging;
 using Messaging.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Time.Testing;
 using Shared.DI;
 using TestInfrastructure;
 using Wolverine;
@@ -87,8 +87,7 @@ public class NotificationDeliveryPipelineTests
 
 		var index = new FakeKeyedServiceIndex<NotificationChannel, INotificationChannel>().Register(NotificationChannel.Webhook, channel);
 
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(DateTimeOffset.UnixEpoch);
+		var clock = new FakeTimeProvider(DateTimeOffset.UnixEpoch);
 
 		await MessagingHost.WithHostAsync(
 			body,
@@ -102,7 +101,7 @@ public class NotificationDeliveryPipelineTests
 				services.AddSingleton(Contracts.Feed.IFeedRepository.Mock().Object);
 				services.AddSingleton<IKeyedServiceIndex<NotificationChannel, INotificationChannel>>(index);
 				services.AddSingleton<INotificationDeliveryOutcomeRepository>(new NoopOutcomes());
-				services.AddSingleton(clock.Object);
+				services.AddSingleton<TimeProvider>(clock);
 			}
 		);
 	}

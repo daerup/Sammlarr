@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Contracts;
 using Contracts.Announcing;
 using Contracts.Feed;
 using Contracts.Identity;
@@ -22,7 +21,7 @@ internal sealed class FeedRunProgress(
 	IFeedRunTraces traces,
 	IRemoteCapacity capacity,
 	ICurrentUser currentUser,
-	IDateTimeProvider clock
+	TimeProvider clock
 ) : IDisposable
 {
 	private readonly Lock _gate = new();

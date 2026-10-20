@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
@@ -55,7 +54,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenAScheduledSyncIsArmed_WaitsOutTheGraceBeforeItIsDue()
 	{
-		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		var armedAt = host.Resolve<TimeProvider>().GetUtcNow();
 
 		await Testee.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 
@@ -65,7 +64,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenASyncIsRearmedInsideTheWindow_PushesTheGraceOut()
 	{
-		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		var armedAt = host.Resolve<TimeProvider>().GetUtcNow();
 		await Testee.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 		host.SetCurrentTime(armedAt + TimeSpan.FromMinutes(1));
 
@@ -77,7 +76,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenASyncIsRearmedForever_StillFiresAtMaxWait()
 	{
-		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		var armedAt = host.Resolve<TimeProvider>().GetUtcNow();
 		await Testee.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 		var ceiling = armedAt + Options.Grace + Options.MaxWait;
 
@@ -93,7 +92,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenTheSameFeedIsRequeued_DoesNotDelayIt()
 	{
-		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		var armedAt = host.Resolve<TimeProvider>().GetUtcNow();
 		IJobRequest request = new RunFeed(FeedId.From(Guid.NewGuid()), new Manual());
 		await Testee.EnqueueAsync(request);
 		host.SetCurrentTime(armedAt + TimeSpan.FromMinutes(5));
@@ -106,7 +105,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenAManualSyncIsPressed_FiresImmediatelyWithoutTheGrace()
 	{
-		var pressedAt = host.Resolve<IDateTimeProvider>().Now;
+		var pressedAt = host.Resolve<TimeProvider>().GetUtcNow();
 
 		await Testee.EnqueueAsync(new SyncWantlist(new ManualTrigger()));
 
@@ -116,7 +115,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenAManualSyncLandsOnAnArmedOne_PullsItForwardInsteadOfDeferringIt()
 	{
-		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		var armedAt = host.Resolve<TimeProvider>().GetUtcNow();
 		await Testee.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 		var pressedAt = armedAt + TimeSpan.FromMinutes(1);
 		host.SetCurrentTime(pressedAt);
@@ -150,7 +149,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RequeueRunningAsync_ForARunningJobWithAPendingTwin_CancelsItAndRequeuesTheRest()
 	{
 		var jobs = host.Resolve<IJobRepository>();
-		var now = host.Resolve<IDateTimeProvider>().Now;
+		var now = host.Resolve<TimeProvider>().GetUtcNow();
 		var (run, _) = await FillThenRunAsync();
 		var later = now + Options.FillDetailsGrace + TimeSpan.FromMinutes(1);
 		var fill = await jobs.TakeNextAsync(later + Options.FillDetailsMaxWait);
@@ -175,7 +174,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private async Task<(IJobRequest Run, DateTimeOffset DueAt)> FillThenRunAsync()
 	{
-		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		var armedAt = host.Resolve<TimeProvider>().GetUtcNow();
 		await Testee.EnqueueAsync(new FillDetails());
 		var dueAt = armedAt + Options.FillDetailsGrace;
 		host.SetCurrentTime(dueAt);

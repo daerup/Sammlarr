@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using API.Http.Lanes;
-using Contracts;
 using Domain.Providers;
 using Domain.Usage;
 using Microsoft.Extensions.Logging;
@@ -11,7 +10,7 @@ using Shared.Options;
 
 namespace API.Mdblist;
 
-internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions options, ILogger<MdblistBudget> logger) : ILaneQuota
+internal sealed class MdblistBudget(TimeProvider clock, MdblistOptions options, ILogger<MdblistBudget> logger) : ILaneQuota
 {
 	private readonly ConcurrentDictionary<string, Allowance> _byKey = new();
 
@@ -28,12 +27,12 @@ internal sealed class MdblistBudget(IDateTimeProvider clock, MdblistOptions opti
 				Header(headers, "x-ratelimit-reset")
 					.Map(reset => new Reading(remaining, DateTimeOffset.FromUnixTimeSeconds(reset), Header(headers, "x-ratelimit-limit"), spent))
 			)
-			.Apply(seen => _byKey.AddOrUpdate(apiKey, _ => Allowance.First(seen), (_, before) => before.After(seen, options.FeedReserve, clock.Now)));
+			.Apply(seen => _byKey.AddOrUpdate(apiKey, _ => Allowance.First(seen), (_, before) => before.After(seen, options.FeedReserve, clock.GetUtcNow())));
 	}
 
 	public QuotaToday Today(string apiKey)
 	{
-		var now = clock.Now;
+		var now = clock.GetUtcNow();
 		var known = _byKey.GetValueOrNone(apiKey);
 		var nextReset = known
 			.Map(allowance => Ahead(allowance.ResetAt, now))

@@ -1,11 +1,10 @@
-using Contracts;
 using Contracts.Ratings;
 using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Ratings;
 
-internal sealed class RatingDefaultRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, IDateTimeProvider clock) : IRatingDefaultRepository
+internal sealed class RatingDefaultRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, TimeProvider clock) : IRatingDefaultRepository
 {
 	public async Task<Optional<RatingStrategy>> FindAsync(CancellationToken cancellationToken = default)
 	{
@@ -38,7 +37,7 @@ internal sealed class RatingDefaultRepository(IDbContextFactory<SammlarrDbContex
 	private async Task<int> UpdateAsync(RatingStrategy strategy, CancellationToken cancellationToken)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var now = clock.Now;
+		var now = clock.GetUtcNow();
 		return await ctx.RatingDefaults.ExecuteUpdateAsync(
 			setters => setters.SetProperty(row => row.Strategy, strategy).SetProperty(row => row.UpdatedAt, now),
 			cancellationToken

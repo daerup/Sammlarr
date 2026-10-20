@@ -1,10 +1,10 @@
 using System.Diagnostics.Metrics;
-using Contracts;
 using Contracts.Usage;
 using Domain.Feed;
 using Domain.Providers;
 using Domain.Usage;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using Observability.Metrics;
 using Observability.Usage;
 using OpenTelemetry;
@@ -90,10 +90,5 @@ public class UsageExporterTests
 		return new ServiceCollection().AddSingleton(store).BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 	}
 
-	private static IDateTimeProvider Clock()
-	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		return clock.Object;
-	}
+	private static TimeProvider Clock() => new FakeTimeProvider(Now);
 }

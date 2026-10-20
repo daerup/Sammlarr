@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Housekeeping;
 using Core.Housekeeping;
 using Core.Jobs;
@@ -11,7 +10,7 @@ namespace Integration.Tests.Housekeeping;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class HousekeepingTickerTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private TaskActivity Activity => field ??= new TaskActivity(host.Resolve<IDateTimeProvider>());
+	private TaskActivity Activity => field ??= new TaskActivity(host.Resolve<TimeProvider>());
 
 	private HousekeepingTicker Testee => new(host.Resolve<IServiceScopeFactory>(), Activity);
 

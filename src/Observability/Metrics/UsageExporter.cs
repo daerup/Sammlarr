@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Contracts;
 using Contracts.Usage;
 using Domain.Feed;
 using Domain.Providers;
@@ -11,7 +10,7 @@ using OpenTelemetry.Metrics;
 
 namespace Observability.Metrics;
 
-internal sealed class UsageExporter(IServiceScopeFactory scopes, IUsageLastCalls lastCalls, IDateTimeProvider clock) : BaseExporter<Metric>
+internal sealed class UsageExporter(IServiceScopeFactory scopes, IUsageLastCalls lastCalls, TimeProvider clock) : BaseExporter<Metric>
 {
 	internal const string PipelineDuration = "resilience.polly.pipeline.duration";
 
@@ -37,7 +36,7 @@ internal sealed class UsageExporter(IServiceScopeFactory scopes, IUsageLastCalls
 		var rows = UsageFold.Of(calls, attempts);
 		foreach (var call in rows.Calls.Where(call => call.Outcome is not UsageOutcome.Cancelled))
 		{
-			lastCalls.Saw(call.Service, clock.Now);
+			lastCalls.Saw(call.Service, clock.GetUtcNow());
 		}
 
 		Write(rows);

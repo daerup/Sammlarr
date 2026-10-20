@@ -2,12 +2,11 @@ using System.Text.Json.Nodes;
 using API.AniList.Types;
 using API.Http;
 using API.Http.Lanes;
-using Contracts;
 using Domain.Providers;
 
 namespace API.AniList;
 
-internal sealed class AniListTitles(AniListClient client, Lanes lanes, IDateTimeProvider clock)
+internal sealed class AniListTitles(AniListClient client, Lanes lanes, TimeProvider clock)
 {
 	private const string Query = $"query ($ids: [Int]) {{ Page(perPage: 50) {{ media(id_in: $ids, type: ANIME) {{ {AniListMedia.Fields} }} }} }}";
 

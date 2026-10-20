@@ -1,6 +1,5 @@
 @page "/feeds"
 @implements IDisposable
-@using Contracts
 @using Contracts.Announcing
 @using Contracts.Feed
 @using Contracts.Identity
@@ -30,7 +29,7 @@
 @inject MediaProviderBrandingService Branding
 @inject FeedRunProgress Progress
 @inject ScrollService ScrollService
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <PageTitle>Feeds</PageTitle>
 
@@ -356,7 +355,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _now = Clock.Now.ToLocalTime();
+        _now = Clock.GetUtcNow().ToLocalTime();
         _previewReload = new(ReloadPreviewAsync);
         Events.Published += OnEvent;
         Progress.Changed += OnProgress;
@@ -368,7 +367,7 @@
 
     private async Task LoadAsync()
     {
-        _now = Clock.Now.ToLocalTime();
+        _now = Clock.GetUtcNow().ToLocalTime();
         await LoadQueueAsync();
         _feeds = (await FeedService.GetAsync(_cancellation.Token)).Feeds;
         _lastWeek = FeedPulse.Moved(await FeedService.GetRunsAsync(RunQuery.Take(RunCap) with { Since = Some.Of(_now - LastWeek) }, _cancellation.Token));
@@ -377,9 +376,9 @@
 
     private void Rebuild()
     {
-        _rows = [.. _feeds.Select(overview => FeedRow.Of(overview, _feedJobs, _now, Clock.Zone))];
+        _rows = [.. _feeds.Select(overview => FeedRow.Of(overview, _feedJobs, _now, Clock.LocalTimeZone))];
         _visible = _filter.Apply(_rows);
-        _candidates = RunPlan.Candidates(_feeds, _now, Clock.Zone);
+        _candidates = RunPlan.Candidates(_feeds, _now, Clock.LocalTimeZone);
     }
 
     private async Task LoadQueueAsync()
@@ -486,8 +485,8 @@
 
     private void OpenRun(bool fromSelection)
     {
-        _now = Clock.Now.ToLocalTime();
-        _candidates = RunPlan.Candidates(_feeds, _now, Clock.Zone);
+        _now = Clock.GetUtcNow().ToLocalTime();
+        _candidates = RunPlan.Candidates(_feeds, _now, Clock.LocalTimeZone);
         _runFromSelection = fromSelection;
         _isRunOpen = true;
     }

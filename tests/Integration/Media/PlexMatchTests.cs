@@ -1,6 +1,5 @@
 using System.Net;
 using API.Plex;
-using Contracts;
 using Contracts.Media;
 using Domain.Media;
 using Harness;
@@ -63,7 +62,7 @@ public class PlexMatchTests(SammlarrTestHost host) : IAsyncDisposable
 		host.ExpireCachesOnTheClock();
 		await host.PlexMatchesNothing(FightClub);
 		await LoadAsync();
-		host.SetCurrentTime(host.Resolve<IDateTimeProvider>().Now + TimeSpan.FromHours(1));
+		host.SetCurrentTime(host.Resolve<TimeProvider>().GetUtcNow() + TimeSpan.FromHours(1));
 
 		await LoadAsync();
 
@@ -76,7 +75,7 @@ public class PlexMatchTests(SammlarrTestHost host) : IAsyncDisposable
 		host.ExpireCachesOnTheClock();
 		await host.PlexMatchesNothing(FightClub);
 		await LoadAsync();
-		host.SetCurrentTime(host.Resolve<IDateTimeProvider>().Now + TimeSpan.FromMinutes(59));
+		host.SetCurrentTime(host.Resolve<TimeProvider>().GetUtcNow() + TimeSpan.FromMinutes(59));
 
 		var result = await LoadAsync();
 

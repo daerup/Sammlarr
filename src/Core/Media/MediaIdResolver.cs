@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Contracts;
 using Contracts.Caching;
 using Contracts.DI;
 using Contracts.Media;
@@ -19,7 +18,7 @@ internal sealed class MediaIdResolver(
 	ITypedMemoryCache<string, bool> unmatchedCache,
 	IRemoteCapacity capacity,
 	IServiceReadiness readiness,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	ILogger<MediaIdResolver> logger
 )
 {
@@ -298,7 +297,7 @@ internal sealed class MediaIdResolver(
 
 	private bool Takes(IEnumerable<Hop> remaining, HashSet<RemoteService> down)
 	{
-		var now = clock.Now;
+		var now = clock.GetUtcNow();
 		var refused = remaining.Select(hop => hop.Remote).Distinct().FirstOrNone(remote => down.Contains(remote) || !WithinMaxWait(capacity.Of(remote), now));
 		refused.When(remote => !down.Contains(remote)).Apply(remote => FeedRunSpans.GaveUp(remote, TraceStage.Ids));
 		return refused.IsNone();

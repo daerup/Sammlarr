@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Datasets;
 using Contracts.Feed;
 using Contracts.Providers;
@@ -8,6 +7,7 @@ using Domain.Feed;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Usage;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
@@ -342,8 +342,7 @@ public class UsageReportTests
 
 	private UsageReport Testee(UserRole role = UserRole.Admin)
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
+		var clock = new FakeTimeProvider(Now);
 		return new UsageReport(
 			_store.Object,
 			_lastCalls.Object,
@@ -351,7 +350,7 @@ public class UsageReportTests
 			_loads.Object,
 			_mdblist.Object,
 			new UsageFeedLines(_feeds.Object, _deleted.Object, _store.Object),
-			clock.Object,
+			clock,
 			new TestCurrentUser { Role = role }
 		);
 	}

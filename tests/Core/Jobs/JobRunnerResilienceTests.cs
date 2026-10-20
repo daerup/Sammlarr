@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Contracts;
 using Contracts.Identity;
 using Contracts.Jobs;
 using Core.Jobs;
@@ -8,6 +7,7 @@ using Domain.Jobs;
 using Domain.Wantlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
 namespace Core.Tests.Jobs;
@@ -126,8 +126,7 @@ public class JobRunnerResilienceTests
 
 	private static (JobRunner Testee, JobRunnerStatus Status) BuildTestee(Mock<IJobRepository> jobs)
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(DateTimeOffset.UnixEpoch);
+		var clock = new FakeTimeProvider(DateTimeOffset.UnixEpoch);
 		var userScope = IUserScope.Mock();
 		userScope.AsAsync(Any<UserId>(), Any()).Returns(new NoopDisposable());
 
@@ -142,10 +141,10 @@ public class JobRunnerResilienceTests
 		var runner = new JobRunner(
 			scopes,
 			signal,
-			new JobAlarm(scopes, signal, clock.Object, NullLogger<JobAlarm>.Instance),
+			new JobAlarm(scopes, signal, clock, NullLogger<JobAlarm>.Instance),
 			status,
 			new JobTurn(),
-			clock.Object,
+			clock,
 			NullLogger<JobRunner>.Instance
 		);
 

@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Media;
 using Contracts.Media.Artwork;
 using Contracts.Providers;
@@ -11,6 +10,7 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -1217,12 +1217,7 @@ public class DetailsFetcherTests
 			Plex.LookUpAsync(Any<IExternalMediaId>(), Any(), Any()).Returns(new Found<FoundMedia>(new FoundMedia([.. (identity ?? Identity).Keys], details)));
 		}
 
-		private static IDateTimeProvider Clock()
-		{
-			var clock = IDateTimeProvider.Mock();
-			clock.Now.Returns(Now);
-			return clock.Object;
-		}
+		private static TimeProvider Clock() => new FakeTimeProvider(Now);
 
 		public LibraryWriter Writer() => new(MediaRepository.Object, NullLogger<LibraryWriter>.Instance);
 

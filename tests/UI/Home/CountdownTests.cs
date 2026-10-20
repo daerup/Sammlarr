@@ -1,11 +1,11 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using UI.Features.Home.Components;
 
 namespace UI.Tests.Home;
@@ -24,11 +24,10 @@ public class CountdownTests : BunitContext
 	[Test]
 	public async Task Text_AsTimePasses_TicksDownWithoutBeingRenderedAgain()
 	{
-		var now = Start;
-		UseClock(() => now);
+		var clock = UseClock();
 		var cut = Render<Harness>();
 		var atFirst = cut.Find(".countdown").TextContent;
-		now = Start.AddSeconds(90);
+		clock.SetUtcNow(Start.AddSeconds(90));
 
 		cut.WaitForState(() => cut.Find(".countdown").TextContent == "30 seconds from now", TimeSpan.FromSeconds(3));
 		await Assert.That(atFirst).IsEqualTo("2 minutes from now");
@@ -37,23 +36,22 @@ public class CountdownTests : BunitContext
 	[Test]
 	public async Task Tooltip_OnHover_ShowsTheTimeLeftToTheSecondAndKeepsTicking()
 	{
-		var now = Start;
-		UseClock(() => now);
+		var clock = UseClock();
 		var cut = Render<Harness>();
 
 		await cut.Find(".countdown").ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
 		var atFirst = Tooltip(cut);
-		now = Start.AddSeconds(5);
+		clock.SetUtcNow(Start.AddSeconds(5));
 
 		cut.WaitForState(() => Tooltip(cut) == "in 1 min 55 s", TimeSpan.FromSeconds(3));
 		await Assert.That(atFirst).IsEqualTo("in 2 min");
 	}
 
-	private void UseClock(Func<DateTimeOffset> now)
+	private FakeTimeProvider UseClock()
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(now);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(Start);
+		Services.AddSingleton<TimeProvider>(clock);
+		return clock;
 	}
 
 	private static string Tooltip(IRenderedComponent<Harness> cut) =>

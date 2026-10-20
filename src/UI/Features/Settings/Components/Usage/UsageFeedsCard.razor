@@ -1,8 +1,7 @@
-@using Contracts
 @using Contracts.Usage
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <UsageCard Title="Feeds" Subtitle="@Subtitle" TestId="usage-feeds">
     <Chip>
@@ -159,7 +158,7 @@
                                 <span></span>
                                 <span></span>
                                 <span></span>
-                                <span class="truncate text-xs text-muted-foreground" data-testid="usage-feed-deleted">deleted @UsageView.Clock(gone.DeletedAt, Clock.Now)</span>
+                                <span class="truncate text-xs text-muted-foreground" data-testid="usage-feed-deleted">deleted @UsageView.Clock(gone.DeletedAt, Clock.GetUtcNow())</span>
                                 <span></span>
                             }
                             else
@@ -181,7 +180,7 @@
                                     {
                                         <LucideIcon Name="pause" Size="12"/>
                                     }
-                                    @line.LastRun.Map(at => UsageView.Clock(at, Clock.Now)).GetValueOr("Never ran")
+                                    @line.LastRun.Map(at => UsageView.Clock(at, Clock.GetUtcNow())).GetValueOr("Never ran")
                                 </span>
                                 <a class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground" href="@RunsOf(line.Feed)"
                                    title="Open the run history" data-testid="usage-feed-runs" @onclick:stopPropagation="true">
@@ -356,7 +355,7 @@
         return PlotTop + (PlotHeight - PlotTop) * (1 - share);
     }
 
-    private (DateTimeOffset From, DateTimeOffset To) Span => (Window.SlotAt(FirstSlot), Clock.Now < Window.To ? Clock.Now : Window.To);
+    private (DateTimeOffset From, DateTimeOffset To) Span => (Window.SlotAt(FirstSlot), Clock.GetUtcNow() < Window.To ? Clock.GetUtcNow() : Window.To);
 
     private static double Across(DateTimeOffset at, (DateTimeOffset From, DateTimeOffset To) span) => Math.Clamp((at - span.From) / (span.To - span.From), 0, 1);
 

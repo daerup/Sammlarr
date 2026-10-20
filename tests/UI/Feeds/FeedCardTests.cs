@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts;
 using Contracts.Blocklist;
 using Contracts.Media;
 using Contracts.Settings;
@@ -11,6 +10,7 @@ using Domain.Feed.Trace;
 using Domain.Jobs;
 using Domain.Media;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages;
@@ -37,10 +37,8 @@ public class FeedCardTests : BunitContext
 		Services.AddScoped<Notifier>();
 		Services.AddProviderBranding();
 		Services.AddScoped<ScrollService>();
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		clock.Zone.Getter.Returns(TimeZoneInfo.Utc);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(Now);
+		Services.AddSingleton<TimeProvider>(clock);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

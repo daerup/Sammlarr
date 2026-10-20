@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Datasets;
 using Contracts.Housekeeping;
 using Contracts.Identity;
@@ -12,6 +11,7 @@ using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using TickerQ.Utilities;
 using TickerQ.Utilities.Entities;
@@ -26,11 +26,11 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private ServiceProvider? _scheduling;
 
-	private TaskActivity Activity => field ??= new TaskActivity(host.Resolve<IDateTimeProvider>());
+	private TaskActivity Activity => field ??= new TaskActivity(host.Resolve<TimeProvider>());
 
-	private HousekeepingTasks Testee => TesteeOn(host.Resolve<IDateTimeProvider>());
+	private HousekeepingTasks Testee => TesteeOn(host.Resolve<TimeProvider>());
 
-	private HousekeepingTasks TesteeOn(IDateTimeProvider clock)
+	private HousekeepingTasks TesteeOn(TimeProvider clock)
 	{
 		_scheduling ??= BuildScheduling();
 		return new HousekeepingTasks(
@@ -78,11 +78,10 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task OverviewAsync_BeforeAnythingRan_ListsThePassAndEveryDatasetWithTheirNextRunInTheClocksZoneAndNoLastRun()
 	{
 		var twoHoursAhead = TimeSpan.FromHours(2);
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		clock.Zone.Getter.Returns(TimeZoneInfo.CreateCustomTimeZone("UTC+02", twoHoursAhead, "UTC+02", "UTC+02"));
+		var clock = new FakeTimeProvider(Now);
+		clock.SetLocalTimeZone(TimeZoneInfo.CreateCustomTimeZone("UTC+02", twoHoursAhead, "UTC+02", "UTC+02"));
 
-		var overview = await TesteeOn(clock.Object).OverviewAsync();
+		var overview = await TesteeOn(clock).OverviewAsync();
 
 		await Assert.That(overview.Pass.Last).IsNone();
 		await Assert.That(overview.Pass.NextRun).IsSome().And.IsEqualTo(new DateTimeOffset(2026, 10, 12, 3, 0, 0, twoHoursAhead));

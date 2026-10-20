@@ -2,7 +2,6 @@ using Contracts.Housekeeping;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Observability.Tracing;
 using Shared.DI;
 
@@ -23,7 +22,6 @@ internal sealed class MediaModule : IServiceModule
 		services.AddScoped<IIdentityConfirmation, IdentityConfirmation>();
 		services.AddScoped<IHousekeepingStep, DuplicateTitles>();
 		services.AddScoped<IConflictReview, ConflictReview>();
-		services.TryAddSingleton(TimeProvider.System);
 		services.AddTracedScoped<IMediaService, MediaService>();
 		services.AddTracedScoped<IMediaSearchService, MediaSearchService>();
 	}

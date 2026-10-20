@@ -2,7 +2,6 @@ using System.Globalization;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Contracts.Blocklist;
 using Contracts.Media;
 using Contracts.Settings;
@@ -16,6 +15,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
@@ -207,9 +207,8 @@ public class LastRunCellTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(Now);
+		Services.AddSingleton<TimeProvider>(clock);
 
 		var media = IMediaService.Mock();
 		media.GetDetailsAsync(Any(), Any(), Any()).Returns((ids, _, _) => AsyncSequence.Of([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Detail(id)))]));

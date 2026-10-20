@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Identity;
@@ -28,7 +27,7 @@ public class JobQueueViewTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task GetAsync_ReturnsMyOwnJobsSoonestFirst()
 	{
-		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		var armedAt = host.Resolve<TimeProvider>().GetUtcNow();
 		var feed = FeedId.From(Guid.NewGuid());
 		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 		await host.Resolve<IJobQueue>().EnqueueAsync(new RunFeed(feed, new Manual()));

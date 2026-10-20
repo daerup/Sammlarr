@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Blocklist;
 using Contracts.Feed;
 using Contracts.Identity;
@@ -11,6 +10,7 @@ using Domain.Feed.Planning;
 using Domain.Media;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
 namespace Core.Tests.Feed;
@@ -51,7 +51,7 @@ public class FeedRunPlannerTests
 			new ServiceCollection().BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
 			ICurrentUser.Mock().Object,
 			ratings.Object,
-			IDateTimeProvider.Mock().Object,
+			new FakeTimeProvider(),
 			NullLogger<FeedRunPlanner>.Instance
 		);
 	}

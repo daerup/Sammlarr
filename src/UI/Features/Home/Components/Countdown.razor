@@ -1,13 +1,12 @@
-@using Contracts
 @using UI.Features.Feeds.Components
 @implements IDisposable
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <BbTooltip DelayDuration="200">
     <BbTooltipTrigger AsChild="false" Class="cursor-default">
-        <span class="countdown">@ScheduleText.Away(At, Clock.Now)</span>
+        <span class="countdown">@ScheduleText.Away(At, Clock.GetUtcNow())</span>
     </BbTooltipTrigger>
-    <BbTooltipContent>@ScheduleText.AwayExactly(At, Clock.Now)</BbTooltipContent>
+    <BbTooltipContent>@ScheduleText.AwayExactly(At, Clock.GetUtcNow())</BbTooltipContent>
 </BbTooltip>
 
 @code {

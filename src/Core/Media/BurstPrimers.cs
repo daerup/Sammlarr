@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Media;
 using Contracts.Providers;
 using Domain.Media;
@@ -11,7 +10,7 @@ internal sealed class BurstPrimers(
 	IEnumerable<IBurstPrimer> primers,
 	DetailsFetcher details,
 	IRemoteCapacity capacity,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	FeedLoadOptions options
 )
 {
@@ -44,8 +43,8 @@ internal sealed class BurstPrimers(
 		}
 
 		var load = capacity.Of(remote);
-		var takes = load.Takes(clock.Now, load.EnrichWait);
-		var inTime = takes && load.AnswersWithin(clock.Now, options.ShownWait);
+		var takes = load.Takes(clock.GetUtcNow(), load.EnrichWait);
+		var inTime = takes && load.AnswersWithin(clock.GetUtcNow(), options.ShownWait);
 		return [.. titles.Where(title => Wants(remote, title, run.Needs, (takes, inTime))).Select(title => title.Ids)];
 	}
 

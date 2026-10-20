@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Identity;
 using Contracts.Jobs;
 using Core.Announcing;
@@ -13,7 +12,7 @@ internal sealed class JobQueue(
 	JobSignal signal,
 	JobAlarm alarm,
 	ICurrentUser currentUser,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	SchedulerOptions options,
 	Announcer announcer
 ) : IJobQueue
@@ -22,7 +21,7 @@ internal sealed class JobQueue(
 
 	public async Task<EnqueueResult> EnqueueAsync(IJobRequest request, CancellationToken cancellationToken = default)
 	{
-		var now = clock.Now;
+		var now = clock.GetUtcNow();
 		var (delay, maxWait, skipWhileRunning) = Arming(request);
 		var runAfter = now + delay;
 		var result = await jobs.EnqueueAsync(new QueuedJob(request, currentUser.Id, runAfter, maxWait, skipWhileRunning), now, cancellationToken);
@@ -54,7 +53,7 @@ internal sealed class JobQueue(
 
 	public async Task<Optional<IJobRequest>> CancelAsync(JobId id, CancellationToken cancellationToken = default)
 	{
-		return await jobs.CancelAsync(id, currentUser.Id, clock.Now, cancellationToken)
+		return await jobs.CancelAsync(id, currentUser.Id, clock.GetUtcNow(), cancellationToken)
 			.Apply(_ => alarm.ArmAsync(cancellationToken))
 			.Apply(_ => signal.Raise())
 			.Apply(request => announcer.Announce(new JobStateChangedEvent(currentUser.Id, request.Kind, request.Key, JobState.Cancelled)));

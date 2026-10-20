@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using API;
-using Contracts;
 using Core;
 using DB;
 using DB.Scheduling;
@@ -94,10 +93,10 @@ app.MapNoticesEndpoint(AppContext.BaseDirectory);
 
 app.MapGet(
 		"/diagnostics/export",
-		(LogCaptureService capture, IDateTimeProvider clock) =>
+		(LogCaptureService capture, TimeProvider clock) =>
 		{
 			var stream = capture.ExportZip();
-			var fileName = FormattableString.Invariant($"diagnostics-{clock.Now:yyyyMMdd-HHmmss}.zip");
+			var fileName = FormattableString.Invariant($"diagnostics-{clock.GetUtcNow():yyyyMMdd-HHmmss}.zip");
 			return Results.File(stream, "application/zip", fileName);
 		}
 	)

@@ -1,6 +1,5 @@
 using API.Arr;
 using API.Http;
-using Contracts;
 using Contracts.Providers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,7 +42,6 @@ public class ArrModuleTests
 			{
 				services.AddModule<SharedModule>();
 				services.AddModule<HttpModule>();
-				services.AddSingleton(IDateTimeProvider.Mock().Object);
 				services.AddSingleton(IProviderRateLimitReporter.Mock().Object);
 				services.AddModule<ArrModule>();
 			})

@@ -1,4 +1,3 @@
-@using Contracts
 @using Contracts.Housekeeping
 @using Contracts.Media
 @using global::Shared.Options
@@ -10,7 +9,7 @@
 @inject IUnmatchedMediaCache UnmatchedCache
 @inject HousekeepingOptions Options
 @inject MediaProviderBrandingService Branding
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 @inject Notifier Notifier
 
 @if (_overview is not { } overview)
@@ -19,7 +18,7 @@
 }
 else
 {
-    var now = Clock.Now;
+    var now = Clock.GetUtcNow();
     var cache = overview.Cache;
     <div class="overflow-hidden rounded-xl border bg-card">
         <div class="px-[18px] py-3.5">

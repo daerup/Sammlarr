@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
@@ -21,7 +20,7 @@ internal sealed class OnboardingService(
 	IApiKeyService apiKeys,
 	IUserScope userScope,
 	ICurrentUser currentUser,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	WebUiNotificationSeeder webUiNotifications,
 	ILogger<OnboardingService> logger
 ) : IOnboardingService
@@ -70,7 +69,7 @@ internal sealed class OnboardingService(
 	public async Task CompleteAsync(CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
-		await state.SetCompletedAtAsync(clock.Now, cancellationToken);
+		await state.SetCompletedAtAsync(clock.GetUtcNow(), cancellationToken);
 	}
 
 	public async Task<bool> NeedsKeyPromptAsync(CancellationToken cancellationToken = default)
@@ -80,7 +79,7 @@ internal sealed class OnboardingService(
 
 	private async Task<Result<User>> CreateAdminAsync(AdminClaim claim, CancellationToken cancellationToken)
 	{
-		var admin = new User(UserId.New(), claim.Username.Trim(), string.Empty, UserRole.Admin, clock.Now);
+		var admin = new User(UserId.New(), claim.Username.Trim(), string.Empty, UserRole.Admin, clock.GetUtcNow());
 		var created = await accounts.CreateAsync(admin, claim.Username, claim.Password, cancellationToken);
 		return await created.Map(found => SettleAdminAsync(found, cancellationToken));
 	}

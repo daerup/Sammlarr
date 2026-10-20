@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
@@ -14,7 +13,7 @@ internal sealed class AccountLinkService(
 	IProviderConfigService providerConfig,
 	IUserScope userScope,
 	ISessionInvalidator sessionInvalidator,
-	IDateTimeProvider dateTimeProvider,
+	TimeProvider clock,
 	WebUiNotificationSeeder webUiNotifications,
 	ILogger<AccountLinkService> logger
 ) : IAccountLinkService
@@ -63,7 +62,7 @@ internal sealed class AccountLinkService(
 
 	private async Task<Result<User>> JoinedAsync(UserId id, string token, string password, CancellationToken cancellationToken)
 	{
-		var joined = await accounts.JoinAsync(id, token, password, dateTimeProvider.Now, cancellationToken);
+		var joined = await accounts.JoinAsync(id, token, password, clock.GetUtcNow(), cancellationToken);
 		return await joined.Map(user => WelcomeAsync(user, cancellationToken));
 	}
 

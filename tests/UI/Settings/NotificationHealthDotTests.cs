@@ -1,9 +1,9 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Domain.Notifications;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using UI.Features.Settings.Components.Notifications;
 
 namespace UI.Tests.Settings;
@@ -16,9 +16,8 @@ public class NotificationHealthDotTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(Now);
+		Services.AddSingleton<TimeProvider>(clock);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

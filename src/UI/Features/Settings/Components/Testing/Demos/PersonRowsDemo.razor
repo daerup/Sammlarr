@@ -1,8 +1,7 @@
-@using Contracts
 @using Contracts.Identity
 @using Domain.Identity
 @using UI.Shared.Branding.Birds
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <DemoCard Title="Person rows" Where="Settings › Users" Span="2"
           Note="PersonRow for the last admin (you), a locked member, someone coloured by their Plex picture, and an open invite. Made-up people: opening a row shows its actions, which go to the real Users service and fail on them.">
@@ -22,7 +21,7 @@
 
     protected override void OnInitialized()
     {
-        var now = Clock.Now;
+        var now = Clock.GetUtcNow();
         _rows =
         [
             (Joined("Ada", UserRole.Admin, string.Empty, new None(), now.AddDays(-40)), PersonColour.Golden(40), true),

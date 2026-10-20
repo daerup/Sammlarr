@@ -1,5 +1,5 @@
-using Contracts;
 using Contracts.Updates;
+using Microsoft.Extensions.Time.Testing;
 using Shared.Options;
 using TestInfrastructure;
 using UI.Shared.Services;
@@ -14,11 +14,10 @@ public class AppUpdateCheckerTests
 
 	private readonly Mock<IReleaseFeed> _releases = IReleaseFeed.Mock();
 
-	private readonly Mock<IDateTimeProvider> _clock = IDateTimeProvider.Mock();
+	private readonly FakeTimeProvider _clock = new(Now);
 
 	public AppUpdateCheckerTests()
 	{
-		_clock.Now.Returns(Now);
 		_releases.LatestAsync(Any(), Any()).Returns(Some.Of(new PublishedRelease("v1.5.0", Page)));
 	}
 
@@ -63,7 +62,7 @@ public class AppUpdateCheckerTests
 	{
 		var testee = Testee("1.4.0");
 		await testee.CheckAsync();
-		_clock.Now.Returns(Now.AddMinutes(29));
+		_clock.SetUtcNow(Now.AddMinutes(29));
 
 		await testee.CheckAsync();
 
@@ -75,7 +74,7 @@ public class AppUpdateCheckerTests
 	{
 		var testee = Testee("1.4.0");
 		await testee.CheckAsync();
-		_clock.Now.Returns(Now.AddMinutes(30));
+		_clock.SetUtcNow(Now.AddMinutes(30));
 
 		await testee.CheckAsync();
 
@@ -87,9 +86,9 @@ public class AppUpdateCheckerTests
 	{
 		var testee = Testee("1.4.0", new ReleaseOptions { CheckInterval = TimeSpan.FromHours(2) });
 		await testee.CheckAsync();
-		_clock.Now.Returns(Now.AddMinutes(90));
+		_clock.SetUtcNow(Now.AddMinutes(90));
 		await testee.CheckAsync();
-		_clock.Now.Returns(Now.AddHours(2));
+		_clock.SetUtcNow(Now.AddHours(2));
 
 		await testee.CheckAsync();
 
@@ -162,6 +161,6 @@ public class AppUpdateCheckerTests
 	private AppUpdateChecker Testee(string running, ReleaseOptions? options = null)
 	{
 		var release = options ?? new ReleaseOptions();
-		return new AppUpdateChecker(new AppVersionProvider(release, new AppVersion(running)), release, _releases.Object, _clock.Object);
+		return new AppUpdateChecker(new AppVersionProvider(release, new AppVersion(running)), release, _releases.Object, _clock);
 	}
 }

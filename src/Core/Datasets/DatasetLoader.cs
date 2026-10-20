@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Datasets;
 using Contracts.Housekeeping;
 using Domain.Usage;
@@ -45,7 +44,7 @@ internal sealed class DatasetLoader<TRow>(
 	IDatasetTable<TRow> table,
 	IDatasetLoads loads,
 	IDatabaseFile database,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	DatasetGate gate,
 	ILogger<DatasetLoader<TRow>> logger
 ) : IDatasetLoader
@@ -60,14 +59,14 @@ internal sealed class DatasetLoader<TRow>(
 	private async Task<DatasetCheck> LoadNowAsync(DatasetRead read, CancellationToken cancellationToken)
 	{
 		using var marked = UsageCauses.Mark(UsageCause.Dataset);
-		var started = new DatasetCheck(dataset.Name, clock.Now, clock.Now, DatasetOutcome.Unchanged, new None());
+		var started = new DatasetCheck(dataset.Name, clock.GetUtcNow(), clock.GetUtcNow(), DatasetOutcome.Unchanged, new None());
 		var last = await loads.FindAsync(dataset.Name, cancellationToken);
 		var download = await dataset.DownloadAsync(last.When(_ => read is DatasetRead.WhenChanged).Map(load => load.ETag), cancellationToken);
 		var check = await download.Match(
 			file => file.Match(changed => ReplaceAsync(started, changed, cancellationToken), () => Task.FromResult(started)),
 			error => Failed(started, error.Reason)
 		);
-		return check with { FinishedAt = clock.Now };
+		return check with { FinishedAt = clock.GetUtcNow() };
 	}
 
 	private async Task<DatasetCheck> ReplaceAsync(DatasetCheck check, DatasetFile<TRow> file, CancellationToken cancellationToken)
@@ -75,7 +74,7 @@ internal sealed class DatasetLoader<TRow>(
 		try
 		{
 			var rows = await table.ReplaceAsync(file.Rows, cancellationToken);
-			await loads.RecordAsync(new DatasetLoad(dataset.Name, clock.Now, file.ETag, rows), cancellationToken);
+			await loads.RecordAsync(new DatasetLoad(dataset.Name, clock.GetUtcNow(), file.ETag, rows), cancellationToken);
 			logger.LogInformation("Loaded {Rows} rows of {Dataset}", rows, dataset.Name);
 		}
 		catch (Exception exception) when (exception is not OperationCanceledException)

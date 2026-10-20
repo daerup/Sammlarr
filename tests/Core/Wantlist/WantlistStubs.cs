@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Announcing;
 using Contracts.Identity;
 using Contracts.Media;
@@ -15,6 +14,7 @@ using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
 namespace Core.Tests.Wantlist;
@@ -101,8 +101,7 @@ internal static class WantlistStubs
 	)
 	{
 		outbox ??= EmptyOutbox();
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(new DateTimeOffset(2026, 9, 23, 12, 0, 0, TimeSpan.Zero));
+		var clock = new FakeTimeProvider(new DateTimeOffset(2026, 9, 23, 12, 0, 0, TimeSpan.Zero));
 
 		return new WantlistSyncEngine(
 			gate ?? new WantlistSyncGate(),
@@ -112,7 +111,7 @@ internal static class WantlistStubs
 			outbox.Object,
 			new Announcer((events ?? IEventPublisher.Mock()).Object, publisher ?? new RecordingPublisher()),
 			user ?? new TestCurrentUser(),
-			clock.Object,
+			clock,
 			NullLogger<WantlistSyncEngine>.Instance
 		);
 	}

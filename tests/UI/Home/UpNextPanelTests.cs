@@ -1,9 +1,9 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts;
 using Domain.Jobs;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
@@ -102,9 +102,8 @@ public class UpNextPanelTests : BunitContext
 	public async Task Row_WhileWaiting_CountsDownToWhenItRuns()
 	{
 		var now = new DateTimeOffset(2026, 9, 30, 14, 0, 0, TimeSpan.Zero);
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(now);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(now);
+		Services.AddSingleton<TimeProvider>(clock);
 		IReadOnlyList<UpNextRow> queued =
 		[
 			new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null) { RunsAt = Some.Of(now.AddMinutes(2)) },

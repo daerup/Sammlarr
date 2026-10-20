@@ -1,10 +1,9 @@
 using System.Collections.Concurrent;
-using Contracts;
 using Contracts.Housekeeping;
 
 namespace Core.Jobs;
 
-internal sealed class TaskActivity(IDateTimeProvider clock)
+internal sealed class TaskActivity(TimeProvider clock)
 {
 	private readonly ConcurrentDictionary<string, TaskRun> _running = new();
 
@@ -14,7 +13,7 @@ internal sealed class TaskActivity(IDateTimeProvider clock)
 
 	internal bool TryClaim(string task)
 	{
-		var claimed = _running.TryAdd(task, new TaskRun(clock.Now, false));
+		var claimed = _running.TryAdd(task, new TaskRun(clock.GetUtcNow(), false));
 		if (claimed)
 		{
 			Changed();
@@ -25,7 +24,7 @@ internal sealed class TaskActivity(IDateTimeProvider clock)
 
 	internal IDisposable Begin(string task)
 	{
-		_running[task] = new TaskRun(clock.Now, true);
+		_running[task] = new TaskRun(clock.GetUtcNow(), true);
 		Changed();
 		return new End(this, task);
 	}
