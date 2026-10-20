@@ -3,19 +3,19 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/20/2026 - 19:48:30 |
+| Generated on: | 10/20/2026 - 20:40:07 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
-| Classes: | 1537 |
-| Files: | 1086 |
-| **Line coverage:** | 86.6% (40741 of 47001) |
-| Covered lines: | 40741 |
-| Uncovered lines: | 6260 |
-| Coverable lines: | 47001 |
-| Total lines: | 69882 |
-| **Branch coverage:** | 79% (15399 of 19482) |
-| Covered branches: | 15399 |
-| Total branches: | 19482 |
+| Classes: | 1547 |
+| Files: | 1093 |
+| **Line coverage:** | 86.8% (40729 of 46882) |
+| Covered lines: | 40729 |
+| Uncovered lines: | 6153 |
+| Coverable lines: | 46882 |
+| Total lines: | 69934 |
+| **Branch coverage:** | 79.4% (15359 of 19343) |
+| Covered branches: | 15359 |
+| Total branches: | 19343 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
 </details>
@@ -94,7 +94,7 @@
 |API.Arr.Types.ArrTitle|100%||
 |API.Arr.Types.ArrValidationFailure|100%||
 |API.Feeds.AnimeSeason|100%|100%|
-|API.Feeds.SiteLink|100%|96.8%|
+|API.Feeds.SiteLink|100%|100%|
 |API.GitHub.GitHubModule|100%||
 |API.GitHub.GitHubReleaseFeed|100%|62.5%|
 |API.GitHub.GitHubReleaseFeed.LatestRelease|100%||
@@ -162,7 +162,7 @@
 |API.Mal.MalClient|100%||
 |API.Mal.MalClientIdCheck|16.6%||
 |API.Mal.MalEnricher|94.2%|62.5%|
-|API.Mal.MalFeedService|96.9%|88.6%|
+|API.Mal.MalFeedService|96.9%|90.9%|
 |API.Mal.MalModule|100%|100%|
 |API.Mal.MalPages|100%|97.2%|
 |API.Mal.Types.MalTypes.AlternativeTitles|100%||
@@ -218,7 +218,7 @@
 |API.Observability.InstrumentationModule|100%|100%|
 |API.Pictures.PictureGrids|100%|90%|
 |API.Pictures.PicturesModule|100%||
-|API.Plex|86.3%|70.3%|
+|API.Plex|86.8%|70.3%|
 |API.Plex.PlexApi|97.8%|82.6%|
 |API.Plex.PlexArtwork|100%|100%|
 |API.Plex.PlexClient|100%|100%|
@@ -226,7 +226,7 @@
 |API.Plex.PlexModule|100%|75%|
 |API.Plex.PlexOAuthProvider|46%|7.6%|
 |API.Plex.PlexSink|86.1%|80.5%|
-|API.Plex.PlexUrls|95.4%||
+|API.Plex.PlexUrls|97.6%||
 |API.Plex.Types.PlexTypes.Auth.Root|100%||
 |API.Plex.Types.PlexTypes.ById.Genre|100%||
 |API.Plex.Types.PlexTypes.ById.Guid|100%||
@@ -327,6 +327,7 @@
 |Contracts.Feed.FeedUpdateData|100%||
 |Contracts.Feed.RunQuery|100%||
 |Contracts.Housekeeping.Compaction|100%||
+|Contracts.Housekeeping.DatabaseParts|100%||
 |Contracts.Housekeeping.DatabaseSize|100%||
 |Contracts.Housekeeping.DatasetTask|100%||
 |Contracts.Housekeeping.HousekeepingFailure|100%||
@@ -401,7 +402,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.8%**|**88.5%**|
+|**Core**|**96.8%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -464,7 +465,7 @@
 |Core.Housekeeping.HousekeepingModule|100%||
 |Core.Housekeeping.HousekeepingPass|100%|100%|
 |Core.Housekeeping.HousekeepingSchedule|68%|50%|
-|Core.Housekeeping.HousekeepingTasks|89.7%|90%|
+|Core.Housekeeping.HousekeepingTasks|91%|90%|
 |Core.Housekeeping.HousekeepingTicker|100%||
 |Core.Housekeeping.UsageTrim|100%||
 |Core.Identity.IdentityModule|100%||
@@ -529,7 +530,8 @@
 |Core.Media.UnmatchedMediaCache|100%||
 |Core.Notifications.NotificationsModule|100%||
 |Core.Notifications.WebUiNotificationSeeder|100%||
-|Core.Processing.FilterEvaluator|87.8%|75%|
+|Core.Processing.FilterEvaluator|87.4%|68.9%|
+|Core.Processing.FilterExpression|80%|50%|
 |Core.Processing.FilterValues|100%|87.5%|
 |Core.Processing.ProcessingModule|100%||
 |Core.Processing.QueryOptions|100%||
@@ -551,11 +553,10 @@
 |Core.Setup.SetupGate|100%|100%|
 |Core.Setup.SetupGate.Lease|100%||
 |Core.Setup.SetupModule|100%||
-|Core.SystemDateTimeProvider|33.3%||
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|45.7%|100%|
+|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -578,11 +579,11 @@
 |Core.Wantlist.WantlistService|98%|94.4%|
 
 </details>
-<details><summary>DB - 95.8%</summary>
+<details><summary>DB - 95.9%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**95.8%**|**85.5%**|
+|**DB**|**95.9%**|**85.3%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -638,7 +639,7 @@
 |DB.Data.Feed.Run.FeedRunRow|100%||
 |DB.Data.Feed.Run.FeedRunRowConfiguration|100%|100%|
 |DB.Data.Housekeeping.CachedDetailsTrim|100%||
-|DB.Data.Housekeeping.DatabaseFile|92.7%|75%|
+|DB.Data.Housekeeping.DatabaseFile|94.2%|75%|
 |DB.Data.Housekeeping.HousekeepingDataModule|100%||
 |DB.Data.Housekeeping.HousekeepingReportConfiguration|100%|100%|
 |DB.Data.Housekeeping.HousekeepingReportRepository|100%|100%|
@@ -692,8 +693,8 @@
 |DB.Data.Notifications.NotificationDataModule|100%||
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
-|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|83.3%|
-|DB.Data.Notifications.NotificationTargetRepository|96.4%|70.8%|
+|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
+|DB.Data.Notifications.NotificationTargetRepository|96.4%|66.6%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
 |DB.Data.Ratings.RatingDefaultConfiguration|100%|100%|
@@ -716,8 +717,7 @@
 |DB.DatabaseMigrationExtensions|100%||
 |DB.DbInitializer|95.6%|100%|
 |DB.DbModule|91.3%|83.3%|
-|DB.DesignTimeDbContextFactory|86.9%||
-|DB.DesignTimeDbContextFactory.DesignTimeDateTimeProvider|0%||
+|DB.DesignTimeDbContextFactory|100%||
 |DB.EntityAuditer|100%|100%|
 |DB.Observability.InstrumentationModule|28%|28.5%|
 |DB.Observability.SqlSummary|100%|100%|
@@ -1021,11 +1021,11 @@
 |Roslyn.Testing.TestMethodNamingAnalyzer|100%|100%|
 
 </details>
-<details><summary>Shared - 87.5%</summary>
+<details><summary>Shared - 86.7%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Shared**|**87.5%**|**77.5%**|
+|**Shared**|**86.7%**|**78.1%**|
 |Shared.AsyncEnumerableOptionalExtensions<T>|100%|100%|
 |Shared.AsyncEnumerableResultExtensions<T, TCompanion>|100%|100%|
 |Shared.AsyncEnumerableResultExtensions<T>|100%|100%|
@@ -1038,12 +1038,10 @@
 |Shared.EnumerableOptionalExtensions<TSource, T>|100%|100%|
 |Shared.Error|100%|100%|
 |Shared.Error<TException>|100%|100%|
-|Shared.Extensions.AsyncEnumerableExtensions|98.4%|71.6%|
-|Shared.Extensions.AsyncEnumerableExtensions<T>|98.4%|71.6%|
-|Shared.Extensions.AsyncEnumerableExtensions<TIn, TOther>|98.4%|71.6%|
-|Shared.Extensions.AsyncEnumerableExtensions<TIn, TOut>|98.4%|71.6%|
-|Shared.Extensions.AsyncEnumerableExtensions<TIn>|98.4%|71.6%|
-|Shared.Extensions.EnumExtensions|100%|83.3%|
+|Shared.Extensions.AsyncEnumerableExtensions|100%|72.8%|
+|Shared.Extensions.AsyncEnumerableExtensions<T>|100%|72.8%|
+|Shared.Extensions.AsyncEnumerableExtensions<TIn, TOut>|100%|72.8%|
+|Shared.Extensions.AsyncEnumerableExtensions<TIn>|100%|72.8%|
 |Shared.Extensions.StringExtensions|100%|100%|
 |Shared.Extensions.TypeExtensions|0%|0%|
 |Shared.Optional|100%|100%|
@@ -1096,16 +1094,15 @@
 |Shared.Some<T>|50%||
 |Shared.Success|100%||
 |Shared.Success<T>|50%||
-|Shared.SuppliedByAttribute<TSupplier>|0%||
-|Shared.UrlGuid|100%|100%|
+|Shared.SuppliedByAttribute<TSupplier>|100%||
 
 </details>
-<details><summary>UI - 78.6%</summary>
+<details><summary>UI - 79.1%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**UI**|**78.6%**|**73.9%**|
-|System.Text.RegularExpressions.Generated|76.3%|57.2%|
+|**UI**|**79.1%**|**74.8%**|
+|System.Text.RegularExpressions.Generated|76.7%|54.7%|
 |System.Text.RegularExpressions.Generated.RunnerFactory|||
 |System.Text.RegularExpressions.Generated.RunnerFactory.Runner|||
 |UI.Features.Auth.Components.PasswordLinkCard|83.6%|50%|
@@ -1120,35 +1117,35 @@
 |UI.Features.Feeds.Components.FeedJobStates|100%|100%|
 |UI.Features.Feeds.Components.FeedProviderFilter|14.8%|7.1%|
 |UI.Features.Feeds.Components.FeedProviderSelect|100%|88.2%|
-|UI.Features.Feeds.Components.FeedRunLive|97.3%|96.2%|
+|UI.Features.Feeds.Components.FeedRunLive|97.1%|97%|
 |UI.Features.Feeds.Components.FeedRunProgress|97.8%|84.7%|
 |UI.Features.Feeds.Components.FeedRunProgress.Request|100%||
 |UI.Features.Feeds.Components.FeedRunQueue|0%|0%|
-|UI.Features.Feeds.Components.FeedRunView|82.3%|69.8%|
+|UI.Features.Feeds.Components.FeedRunView|82.2%|69.8%|
 |UI.Features.Feeds.Components.FeedRunWatch|97.6%|65.6%|
 |UI.Features.Feeds.Components.FeedSourceLink|100%||
 |UI.Features.Feeds.Components.FeedStatusLine|96.8%|95.4%|
 |UI.Features.Feeds.Components.FeedStrategyChip|100%|100%|
 |UI.Features.Feeds.Components.FeedTriggerChip|100%|87.5%|
 |UI.Features.Feeds.Components.LastRun|100%|50%|
-|UI.Features.Feeds.Components.LastRunCell|93.2%|83%|
+|UI.Features.Feeds.Components.LastRunCell|93.2%|83.6%|
 |UI.Features.Feeds.Components.LeavingIndicator|100%|100%|
+|UI.Features.Feeds.Components.LiveRunBar|100%|100%|
 |UI.Features.Feeds.Components.LiveWire|89.1%|72.5%|
 |UI.Features.Feeds.Components.PreviewFilterBadge|100%|100%|
-|UI.Features.Feeds.Components.RunBar|98.2%|84%|
+|UI.Features.Feeds.Components.RunBar|100%|88.8%|
 |UI.Features.Feeds.Components.RunCalls|100%|85.7%|
-|UI.Features.Feeds.Components.RunCallsView|100%|96.8%|
+|UI.Features.Feeds.Components.RunCallsView|100%|100%|
 |UI.Features.Feeds.Components.RunCandidate|100%||
-|UI.Features.Feeds.Components.RunFeedsDialog|52.2%|59%|
-|UI.Features.Feeds.Components.RunningPill|100%|91.6%|
+|UI.Features.Feeds.Components.RunFeedsDialog|52.2%|59.3%|
+|UI.Features.Feeds.Components.RunningPill|100%|93.3%|
 |UI.Features.Feeds.Components.RunPlan|90%|87.2%|
 |UI.Features.Feeds.Components.RunProblem|100%|100%|
-|UI.Features.Feeds.Components.RunSegment|100%||
 |UI.Features.Feeds.Components.RunTally|100%|88.8%|
 |UI.Features.Feeds.Components.RunTypical|100%||
 |UI.Features.Feeds.Components.SchedulePicker|58.2%|40.3%|
 |UI.Features.Feeds.Components.SchedulePicker.DayOfWeekComparer|100%|50%|
-|UI.Features.Feeds.Components.ScheduleText|100%|96.1%|
+|UI.Features.Feeds.Components.ScheduleText|100%|100%|
 |UI.Features.Feeds.Components.WireBatch|100%||
 |UI.Features.Feeds.Components.WireBrand|100%||
 |UI.Features.Feeds.Components.WireLayout|100%||
@@ -1161,7 +1158,7 @@
 |UI.Features.Feeds.Pages.Editor.AbsencePhrase|100%||
 |UI.Features.Feeds.Pages.Editor.Feed|90.5%|83.1%|
 |UI.Features.Feeds.Pages.Editor.FeedConfig|100%|100%|
-|UI.Features.Feeds.Pages.Editor.FeedConfigPanel|77.6%|79.1%|
+|UI.Features.Feeds.Pages.Editor.FeedConfigPanel|77.6%|78.8%|
 |UI.Features.Feeds.Pages.Editor.FeedDateRuleEditor|84.7%|86.4%|
 |UI.Features.Feeds.Pages.Editor.FeedField|100%|92.3%|
 |UI.Features.Feeds.Pages.Editor.FeedFields|100%|100%|
@@ -1172,7 +1169,7 @@
 |UI.Features.Feeds.Pages.Editor.FeedLinkCheck|100%||
 |UI.Features.Feeds.Pages.Editor.FeedNumberRule|100%||
 |UI.Features.Feeds.Pages.Editor.FeedNumberRuleEditor|95.2%|100%|
-|UI.Features.Feeds.Pages.Editor.FeedPreviewPanel|71.1%|70%|
+|UI.Features.Feeds.Pages.Editor.FeedPreviewPanel|71%|70.1%|
 |UI.Features.Feeds.Pages.Editor.FeedPreviewPanel.Reading|100%||
 |UI.Features.Feeds.Pages.Editor.FeedRatingReasons|86.7%|77.5%|
 |UI.Features.Feeds.Pages.Editor.FeedRatingStarButton|0%||
@@ -1195,23 +1192,23 @@
 |UI.Features.Feeds.Pages.FeedPaging|100%||
 |UI.Features.Feeds.Pages.FeedPulse|80%|100%|
 |UI.Features.Feeds.Pages.FeedRow|82.6%|42.8%|
-|UI.Features.Feeds.Pages.Feeds|53%|47.5%|
+|UI.Features.Feeds.Pages.Feeds|53.8%|47.5%|
 |UI.Features.Feeds.Pages.ProviderCount|100%||
-|UI.Features.Feeds.Pages.Runs.FeedRuns|76.4%|72%|
+|UI.Features.Feeds.Pages.Runs.FeedRuns|76.4%|71.7%|
 |UI.Features.Feeds.Pages.Runs.FeedRuns.RailDay|100%||
 |UI.Features.Home.Components.ActivityDay|100%||
-|UI.Features.Home.Components.ActivityDayBlock|81.6%|70.3%|
+|UI.Features.Home.Components.ActivityDayBlock|81.6%|72%|
 |UI.Features.Home.Components.ActivityLog|100%|100%|
-|UI.Features.Home.Components.ActivityRun|60%|52.9%|
+|UI.Features.Home.Components.ActivityRun|65%|58.8%|
 |UI.Features.Home.Components.Countdown|100%||
 |UI.Features.Home.Components.FeedContribution|100%||
 |UI.Features.Home.Components.FeedLabel|100%||
 |UI.Features.Home.Components.HomeSkeleton|0%|0%|
-|UI.Features.Home.Components.LibrarySourcesPanel|95.1%|95%|
+|UI.Features.Home.Components.LibrarySourcesPanel|85.7%|87.5%|
 |UI.Features.Home.Components.LibraryView|100%|100%|
 |UI.Features.Home.Components.PosterTrack|68%|64.2%|
 |UI.Features.Home.Components.SourceShare|100%||
-|UI.Features.Home.Components.UpNextPanel|91.6%|83.3%|
+|UI.Features.Home.Components.UpNextPanel|100%|100%|
 |UI.Features.Home.Components.UpNextRow|100%|100%|
 |UI.Features.Home.Components.UpNextSection|100%|97.2%|
 |UI.Features.Home.Components.UpNextView|92.3%|73.8%|
@@ -1228,7 +1225,7 @@
 |UI.Features.Onboarding.Pages.Welcome|92.8%|83.3%|
 |UI.Features.Settings.Components.About.AboutModule|0%||
 |UI.Features.Settings.Components.About.AboutSection|0%|0%|
-|UI.Features.Settings.Components.About.DataSources|89.8%|65.8%|
+|UI.Features.Settings.Components.About.DataSources|89.5%|65%|
 |UI.Features.Settings.Components.About.DataSourcesCard|99.7%|96.6%|
 |UI.Features.Settings.Components.About.LicencesCard|100%|100%|
 |UI.Features.Settings.Components.About.LogoCredit|100%||
@@ -1239,24 +1236,27 @@
 |UI.Features.Settings.Components.About.SourceChip|100%||
 |UI.Features.Settings.Components.About.SourceRow|100%||
 |UI.Features.Settings.Components.About.ThirdPartyNotices|100%|100%|
-|UI.Features.Settings.Components.About.VersionCard|100%|95%|
+|UI.Features.Settings.Components.About.VersionCard|100%|100%|
 |UI.Features.Settings.Components.ComponentsModule|0%||
 |UI.Features.Settings.Components.Diagnostics.DiagnosticsSection|0%|0%|
 |UI.Features.Settings.Components.Housekeeping.DatasetLook|100%||
-|UI.Features.Settings.Components.Housekeeping.HousekeepingSection|80.9%|85%|
+|UI.Features.Settings.Components.Housekeeping.FilePart|100%||
+|UI.Features.Settings.Components.Housekeeping.HousekeepingCacheRow|100%||
+|UI.Features.Settings.Components.Housekeeping.HousekeepingClearDialog|100%||
+|UI.Features.Settings.Components.Housekeeping.HousekeepingSection|80%|86.3%|
 |UI.Features.Settings.Components.Housekeeping.HousekeepingTaskRow|98.2%|93.3%|
-|UI.Features.Settings.Components.Housekeeping.HousekeepingView|90%|75.6%|
+|UI.Features.Settings.Components.Housekeeping.HousekeepingView|90.9%|75.6%|
 |UI.Features.Settings.Components.Housekeeping.TaskLine|100%||
 |UI.Features.Settings.Components.Housekeeping.TitlesStoredTwiceDialog|93.1%|90%|
-|UI.Features.Settings.Components.Housekeeping.TitlesStoredTwiceView|89.1%|73.7%|
+|UI.Features.Settings.Components.Housekeeping.TitlesStoredTwiceView|89%|73.2%|
 |UI.Features.Settings.Components.Notifications.ClientEditorBase|50%||
 |UI.Features.Settings.Components.Notifications.LeveledAlertFields|100%|100%|
 |UI.Features.Settings.Components.Notifications.NotificationAlertDialog|60%|53.9%|
 |UI.Features.Settings.Components.Notifications.NotificationConfigBuilder|66.6%||
 |UI.Features.Settings.Components.Notifications.NotificationEventCatalog|100%|100%|
 |UI.Features.Settings.Components.Notifications.NotificationEventOption|100%||
-|UI.Features.Settings.Components.Notifications.NotificationHealthDot|6.5%|2.3%|
-|UI.Features.Settings.Components.Notifications.NotificationSampleContext|68.7%|14.2%|
+|UI.Features.Settings.Components.Notifications.NotificationHealthDot|83.3%|56.2%|
+|UI.Features.Settings.Components.Notifications.NotificationSampleContext|62.5%|14.2%|
 |UI.Features.Settings.Components.Notifications.NotificationsModule|0%||
 |UI.Features.Settings.Components.Notifications.NotificationsSection|0%|0%|
 |UI.Features.Settings.Components.Notifications.NotificationsSection.Alert|0%||
@@ -1278,7 +1278,7 @@
 |UI.Features.Settings.Components.Providers.AccountsAndKeys|78.5%|83.3%|
 |UI.Features.Settings.Components.Providers.ApiKeyField|62.5%|87.5%|
 |UI.Features.Settings.Components.Providers.ApiKeyRow|100%|100%|
-|UI.Features.Settings.Components.Providers.ArrAppSection|98.2%|91%|
+|UI.Features.Settings.Components.Providers.ArrAppSection|98.1%|90.5%|
 |UI.Features.Settings.Components.Providers.ArrSettingsLink|100%|100%|
 |UI.Features.Settings.Components.Providers.ArrSinkRow|97.1%|93.1%|
 |UI.Features.Settings.Components.Providers.ArrSinkRow.AppStatus|100%||
@@ -1303,10 +1303,10 @@
 |UI.Features.Settings.Components.Providers.SammlarrAccountRow|100%|100%|
 |UI.Features.Settings.Components.Providers.ServiceRole|100%||
 |UI.Features.Settings.Components.Providers.ServiceRoles|100%||
-|UI.Features.Settings.Components.Providers.ServicesMap|95.9%|88.4%|
+|UI.Features.Settings.Components.Providers.ServicesMap|95.9%|89.2%|
 |UI.Features.Settings.Components.Providers.ServicesMapModel|99.1%|95.8%|
 |UI.Features.Settings.Components.Providers.SetupValue|100%|100%|
-|UI.Features.Settings.Components.Providers.SinkSwitchDialog|100%|95.4%|
+|UI.Features.Settings.Components.Providers.SinkSwitchDialog|100%|95%|
 |UI.Features.Settings.Components.Providers.TracePath|100%|100%|
 |UI.Features.Settings.Components.Ratings.PipelineTile|100%||
 |UI.Features.Settings.Components.Ratings.PipelineTrace|100%||
@@ -1341,7 +1341,7 @@
 |UI.Features.Settings.Components.Testing.Demos.FeedRatingDemo.DemoFeedRating|100%||
 |UI.Features.Settings.Components.Testing.Demos.FormControlsDemo|77.7%|25%|
 |UI.Features.Settings.Components.Testing.Demos.GuardsDemo|80%|50%|
-|UI.Features.Settings.Components.Testing.Demos.HealthDotDemo|14.2%|50%|
+|UI.Features.Settings.Components.Testing.Demos.HealthDotDemo|14.2%||
 |UI.Features.Settings.Components.Testing.Demos.LibrarySourcesDemo|100%||
 |UI.Features.Settings.Components.Testing.Demos.ListFilterBarDemo|90%||
 |UI.Features.Settings.Components.Testing.Demos.LiveRunDemo|23.8%|25%|
@@ -1385,9 +1385,9 @@
 |UI.Features.Settings.Components.Usage.UsageFeedsCard.Plot|100%||
 |UI.Features.Settings.Components.Usage.UsageGauge|100%|100%|
 |UI.Features.Settings.Components.Usage.UsageGauge.Segment|100%||
-|UI.Features.Settings.Components.Usage.UsageOutcomeBar|81.2%|100%|
+|UI.Features.Settings.Components.Usage.UsageOutcomeBar|100%|100%|
 |UI.Features.Settings.Components.Usage.UsagePickChip|100%||
-|UI.Features.Settings.Components.Usage.UsageQuotaDays|100%|98.1%|
+|UI.Features.Settings.Components.Usage.UsageQuotaDays|100%|100%|
 |UI.Features.Settings.Components.Usage.UsageQuotaLine|100%|98.4%|
 |UI.Features.Settings.Components.Usage.UsageQuotaLine.Hour|100%||
 |UI.Features.Settings.Components.Usage.UsageQuotaLine.Shade|100%||
@@ -1399,18 +1399,18 @@
 |UI.Features.Settings.Components.Usage.UsageSparkline.SparkPoint|100%||
 |UI.Features.Settings.Components.Usage.UsageStat|100%|90%|
 |UI.Features.Settings.Components.Usage.UsageStatCards|88.8%|100%|
-|UI.Features.Settings.Components.Usage.UsageView|96.1%|85%|
+|UI.Features.Settings.Components.Usage.UsageView|95.8%|82.3%|
 |UI.Features.Settings.Components.Users.ChangePasswordForm|100%|75%|
 |UI.Features.Settings.Components.Users.InviteDialog|100%|90%|
 |UI.Features.Settings.Components.Users.InviteDialog.Issued|100%||
 |UI.Features.Settings.Components.Users.IssuedLinkBody|100%||
 |UI.Features.Settings.Components.Users.JoinedPeople|100%|83.3%|
 |UI.Features.Settings.Components.Users.LinkBox|36.8%|50%|
-|UI.Features.Settings.Components.Users.LinkText|100%|50%|
+|UI.Features.Settings.Components.Users.LinkText|100%||
 |UI.Features.Settings.Components.Users.PeopleList|100%|92.8%|
-|UI.Features.Settings.Components.Users.PersonRow|61.9%|71.8%|
+|UI.Features.Settings.Components.Users.PersonRow|61.6%|72.5%|
 |UI.Features.Settings.Components.Users.PersonRow.Issued|0%||
-|UI.Features.Settings.Components.Users.RemovePersonDialog|79.1%|66%|
+|UI.Features.Settings.Components.Users.RemovePersonDialog|78.7%|65.2%|
 |UI.Features.Settings.Components.Users.SignUpsCard|46.1%|25%|
 |UI.Features.Settings.Components.Users.TypedName|100%|75%|
 |UI.Features.Settings.Components.Users.UsersSection|100%|91.6%|
@@ -1421,7 +1421,7 @@
 |UI.Features.Wantlist.Components.ProvenanceBadge|90%|92.8%|
 |UI.Features.Wantlist.Components.ProvenanceDetails|100%|92.8%|
 |UI.Features.Wantlist.Components.ProvenanceView|70%|62.9%|
-|UI.Features.Wantlist.Components.PushStatusDot|96.4%|85.7%|
+|UI.Features.Wantlist.Components.PushStatusDot|96.2%|84.2%|
 |UI.Features.Wantlist.Components.WantlistStatusView|100%|86.6%|
 |UI.Features.Wantlist.Components.WantlistSyncButton|80.5%|91.4%|
 |UI.Features.Wantlist.Components.WantlistSyncView|100%|66.6%|
@@ -1429,6 +1429,13 @@
 |UI.Shared.Announcing.CoalescedReload|100%|100%|
 |UI.Shared.Announcing.ListChange|100%|100%|
 |UI.Shared.Announcing.ViewerEvent|100%|100%|
+|UI.Shared.Bars.BarPaint|100%|100%|
+|UI.Shared.Bars.Deferred|100%||
+|UI.Shared.Bars.StackedBar|99.3%|97%|
+|UI.Shared.Bars.StackedBar.Segment|100%||
+|UI.Shared.Bars.StackedBar.Snapshot|100%|100%|
+|UI.Shared.Bars.StackedBarPart|100%||
+|UI.Shared.Bars.StackedBarView|100%|95%|
 |UI.Shared.Branding.Birds.BirdArt|100%||
 |UI.Shared.Branding.Birds.BirdDrawing|100%|96.3%|
 |UI.Shared.Branding.Birds.BirdGenome|100%|100%|
@@ -1455,7 +1462,7 @@
 |UI.Shared.Changes.ChangeChip|100%||
 |UI.Shared.Changes.ChangeDialog|100%|96.1%|
 |UI.Shared.Changes.ChangeFold|100%||
-|UI.Shared.Changes.ChangeList|94.7%|88.4%|
+|UI.Shared.Changes.ChangeList|94.7%|88.3%|
 |UI.Shared.Changes.ChangeList.Group|100%||
 |UI.Shared.Changes.ChangeRow|96.4%|91.6%|
 |UI.Shared.Common.AppLink|100%|100%|
@@ -1469,6 +1476,7 @@
 |UI.Shared.Common.ListSearch|33.3%|25%|
 |UI.Shared.Common.PaginationControls|61.1%|55.8%|
 |UI.Shared.Common.SensitiveInput|83.3%|100%|
+|UI.Shared.Common.UrlGuid|100%||
 |UI.Shared.Common.VirtualizeGuard|87.5%|100%|
 |UI.Shared.Filters.FilterStrip|66.6%|50%|
 |UI.Shared.Filters.ListFilter|82.6%|60%|
@@ -1477,6 +1485,8 @@
 |UI.Shared.Filters.SourceChoice|100%|77.7%|
 |UI.Shared.Filters.SourceOption|100%||
 |UI.Shared.Filters.StatusOption|100%||
+|UI.Shared.Formatting.NotationExtensions|100%|85%|
+|UI.Shared.Formatting.Shares|100%|100%|
 |UI.Shared.Guards.ProtectedComponent|78.2%|64.2%|
 |UI.Shared.Guards.ProtectedSection|81.4%|71.4%|
 |UI.Shared.Guards.RedirectToSignIn|0%|0%|
@@ -1517,9 +1527,9 @@
 |UI.Shared.Media.MediaDetailSheet|53.4%|58.3%|
 |UI.Shared.Media.MediaDetailsLoading|100%||
 |UI.Shared.Media.MediaDetailTile|92.3%|85.2%|
-|UI.Shared.Media.MediaFacts|92.5%|83.3%|
+|UI.Shared.Media.MediaFacts|100%|100%|
 |UI.Shared.Media.MediaGridTile|100%|96.8%|
-|UI.Shared.Media.MediaListBody|93.1%|83.3%|
+|UI.Shared.Media.MediaListBody|93.1%|85%|
 |UI.Shared.Media.MediaListEmptyState|100%|100%|
 |UI.Shared.Media.MediaListPage|0%|0%|
 |UI.Shared.Media.MediaListShell|0%|0%|
@@ -1536,7 +1546,7 @@
 |UI.Shared.Media.Ratings.RatingSum|100%|100%|
 |UI.Shared.Media.Ratings.RatingSuppliersPopover|100%|100%|
 |UI.Shared.Media.Ratings.RatingTerm|100%||
-|UI.Shared.Media.Ratings.RatingTexts|86.6%|72.8%|
+|UI.Shared.Media.Ratings.RatingTexts|85.7%|72.8%|
 |UI.Shared.Media.Ratings.SammlarrRatingBadge|96.1%|66.6%|
 |UI.Shared.Media.Ratings.SammlarrRatingBreakdown|93.3%|91%|
 |UI.Shared.Media.SearchModal|67%|64.4%|
@@ -1550,9 +1560,9 @@
 |UI.Shared.Notifications.WebUi.WebUiToastListener|100%|100%|
 |UI.Shared.Services.AccountConnectionPrompt|38.4%|0%|
 |UI.Shared.Services.AppUpdate|100%||
-|UI.Shared.Services.AppUpdateChecker|100%|83.3%|
+|UI.Shared.Services.AppUpdateChecker|100%|100%|
 |UI.Shared.Services.AppUpdateChecker.Check|100%||
-|UI.Shared.Services.AppVersion|85.7%|100%|
+|UI.Shared.Services.AppVersion|90%|100%|
 |UI.Shared.Services.AppVersionProvider|100%||
 |UI.Shared.Services.ArtworkSources|100%|100%|
 |UI.Shared.Services.Branding.BrandArt|100%||
