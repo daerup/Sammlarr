@@ -14,8 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages;
+using UI.Shared.Common;
 using UI.Shared.Services;
-using UrlGuid = Shared.UrlGuid;
 
 namespace UI.Tests.Feeds;
 

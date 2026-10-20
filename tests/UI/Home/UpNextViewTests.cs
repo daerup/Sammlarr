@@ -6,8 +6,8 @@ using Domain.Wantlist.Sync;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
+using UI.Shared.Common;
 using UI.Shared.Services.Branding;
-using UrlGuid = Shared.UrlGuid;
 
 namespace UI.Tests.Home;
 

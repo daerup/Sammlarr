@@ -1,7 +1,6 @@
 @using Domain.Feed.Run
 @using UI.Features.Feeds.Pages
 @using UI.Shared.Services.Branding
-@using UrlGuid = global::Shared.UrlGuid
 @inject MediaProviderBrandingService Branding
 
 <article class="feed-card @(Feed.Enabled ? null : "is-paused") @(IsSelecting ? "is-selecting" : null) @(IsSelected ? "is-selected" : null)"

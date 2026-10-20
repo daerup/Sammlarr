@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Feeds.Pages.Editor;
+using UI.Shared.Common;
 using UI.Shared.Services;
 using UI.Tests.Media;
 using FeedPage = UI.Features.Feeds.Pages.Editor.Feed;

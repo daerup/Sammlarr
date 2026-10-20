@@ -4,8 +4,8 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Arr;
+using UI.Shared.Common;
 using UI.Shared.Services.Branding;
-using UrlGuid = Shared.UrlGuid;
 
 namespace UI.Features.Wantlist.Components;
 

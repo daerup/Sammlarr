@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages.Runs;
+using UI.Shared.Common;
 using UI.Shared.Services;
 
 namespace UI.Tests.Feeds;

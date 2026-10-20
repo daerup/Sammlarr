@@ -3,8 +3,8 @@ using Domain.Feed;
 using Domain.Jobs;
 using Domain.Providers;
 using UI.Features.Feeds.Components;
+using UI.Shared.Common;
 using UI.Shared.Services.Branding;
-using UrlGuid = Shared.UrlGuid;
 
 namespace UI.Features.Home.Components;
 

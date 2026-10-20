@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Usage;
+using UI.Shared.Common;
 
 namespace UI.Tests.Settings.Usage;
 
