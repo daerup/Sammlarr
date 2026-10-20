@@ -66,11 +66,6 @@
     cursor: pointer;
 }
 
-.foot-track {
+.foot-bar ::deep .stacked-bar {
     flex: 1;
-    height: 6px;
-    display: flex;
-    border-radius: 99px;
-    overflow: hidden;
-    background: var(--secondary);
 }

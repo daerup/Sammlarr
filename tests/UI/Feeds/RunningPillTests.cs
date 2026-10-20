@@ -1,7 +1,10 @@
 using System.Globalization;
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Primitives;
 using Bunit;
 using Domain.Feed.Trace;
+using Microsoft.AspNetCore.Components.Web;
+using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
 
 namespace UI.Tests.Feeds;
@@ -25,6 +28,32 @@ public class RunningPillTests : BunitContext
 
 		await Assert.That(Text(cut)).IsEqualTo($"Running · 812 / ~{2000:N0}");
 		await Assert.That(cut.FindAll("[data-testid=running-bar]")).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Bar_PointedAtWhileRunning_ListsWhatIsBeingLookedUpAndWhatIsStillToCome()
+	{
+		var cut = Render(builder =>
+		{
+			builder.OpenComponent<BbPortalHost>(0);
+			builder.CloseComponent();
+			builder.OpenComponent<RunningPill>(1);
+			builder.AddComponentParameter(2, nameof(RunningPill.Run), _run.Object);
+			builder.AddComponentParameter(3, nameof(RunningPill.Bar), true);
+			builder.CloseComponent();
+		});
+
+		await cut.Find("[data-testid=running-bar] [data-testid=stacked-bar-track] [data-part]").TriggerEventAsync("onmouseenter", new MouseEventArgs());
+		var tip = cut.WaitForElement("[data-portal-content][data-state=open] [data-testid=stacked-bar-tip]");
+
+		await Assert.That(tip.TextContent).StartsWith($"812 of ~{2000:N0}");
+		await Assert
+			.That(
+				tip.QuerySelectorAll("[data-testid=stacked-bar-tip-row]")
+					.TakeLast(2)
+					.Select(row => string.Join("|", row.Children.Select(cell => cell.TextContent.Trim())))
+			)
+			.IsEquivalentTo(["Being looked up|8|0.4%", $"Still to come|{1180:N0}|59.0%"], CollectionOrdering.Matching);
 	}
 
 	[Test]

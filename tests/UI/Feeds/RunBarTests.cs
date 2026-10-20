@@ -7,7 +7,7 @@ namespace UI.Tests.Feeds;
 public class RunBarTests
 {
 	[Test]
-	public async Task Segments_ForARun_SumToItsTotal()
+	public async Task Segments_ForARun_SplitItsTotalByHowEachTitleWasFound()
 	{
 		var counts = FeedRunCounts.None with { Total = 20, Known = 6, NotFoundEarlier = 2, UnmatchedNotFound = 5, UnmatchedCouldNotLookUp = 1 };
 
@@ -22,7 +22,6 @@ public class RunBarTests
 		await Assert
 			.That(RunBar.Legend(segments).Select(segment => segment.Part))
 			.IsEquivalentTo([RunPart.Matched, RunPart.Known, RunPart.NotFound, RunPart.NotFoundEarlier, RunPart.CouldNotLookUp], CollectionOrdering.Matching);
-		await Assert.That(segments.Sum(segment => segment.Percent)).IsEqualTo(100);
 	}
 
 	[Test]

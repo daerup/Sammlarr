@@ -111,17 +111,30 @@ public class LastRunCellTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WithBar_ShowsTheBarAndBothTooltipSections()
+	public async Task Pill_PointedAt_ShowsBothTooltipSections()
 	{
 		RegisterServices();
 
 		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Bar, true));
 		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-bar]").Count == 1);
-		await cut.Find("[data-testid=last-run-bar]").ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
+		await cut.Find(".last-run").ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
 		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-tip]").Count == 1);
 
 		await Assert.That(cut.Find("[data-testid=last-run-tip]").TextContent).Contains("Finding the titles").And.Contains("What the run did");
 		await Assert.That(cut.Find("[data-testid=last-run-tip-did]").TextContent).Contains("Added to your collection");
+	}
+
+	[Test]
+	public async Task Bar_PointedAt_ListsHowTheRunFoundItsTitlesUnderItsDate()
+	{
+		RegisterServices();
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Bar, true));
+		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-bar]").Count == 1);
+		await cut.Find("[data-testid=last-run-bar] [data-testid=stacked-bar-track] [data-part]").TriggerEventAsync("onmouseenter", new MouseEventArgs());
+		cut.WaitForState(() => cut.FindAll("[data-testid=stacked-bar-tip]").Count == 1);
+
+		await Assert.That(cut.Find("[data-testid=stacked-bar-tip]").TextContent).Contains("Run of October 14").And.DoesNotContain("What the run did");
 	}
 
 	[Test]

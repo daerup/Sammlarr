@@ -1,0 +1,22 @@
+<StackedBar Size="Size" Total="Tally.Total.ToNullable()" RestName="@Rest" Format="Count">
+    <Title>@Heading</Title>
+    <ChildContent>
+        @foreach (var part in RunTally.Bar)
+        {
+            <StackedBarPart Name="@RunBar.Label(part)" Value="Tally.Count(part)" Color="@RunBar.Color(part)"/>
+        }
+        <StackedBarPart Name="@RunBar.InFlight" Value="Tally.InFlight" Pattern="BarPattern.Striped"/>
+    </ChildContent>
+</StackedBar>
+
+@code {
+    [Parameter, EditorRequired] public required RunTally Tally { get; set; }
+
+    [Parameter] public BarSize Size { get; set; } = BarSize.Small;
+
+    private string Heading => Tally.Total.Match(total => $"{Count(Tally.Done)} of {(Tally.Estimated ? "~" : "")}{Count(total)}", () => "title".ToQuantity(Tally.Done, "N0"));
+
+    private string? Rest => Tally.Ended.Match(_ => (string?)null, () => RunBar.Rest);
+
+    private static string Count(long count) => count.ToString("N0");
+}

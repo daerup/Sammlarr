@@ -1,4 +1,3 @@
-@using System.Globalization
 @using Domain.Feed.Trace
 @implements IDisposable
 
@@ -10,13 +9,7 @@
     @if (Bar)
     {
         <button type="button" class="run-bar" aria-label="Open the live view" data-testid="running-bar" @onclick="OnOpen">
-            <span class="run-track">
-                @foreach (var part in RunTally.Bar)
-                {
-                    <i style="@Width(Tally.Count(part), RunBar.Color(part))"></i>
-                }
-                <i class="is-flight" style="@Width(Tally.InFlight, null)"></i>
-            </span>
+            <LiveRunBar Tally="Tally"/>
         </button>
     }
 </span>
@@ -57,12 +50,6 @@
     }
 
     public void Dispose() => Unsubscribe();
-
-    private string Width(int count, string? color)
-    {
-        var background = color is null ? "" : $"; background: {color}";
-        return string.Create(CultureInfo.InvariantCulture, $"width: {Tally.Percent(count):0.###}%{background}");
-    }
 
     private static string Count(int count) => count.ToString("N0");
 

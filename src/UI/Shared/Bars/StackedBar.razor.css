@@ -25,6 +25,7 @@
     height: 100%;
     min-width: min-content;
     overflow: hidden;
+    transition: width 0.25s linear;
 }
 
 .sb-part,
@@ -106,6 +107,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .sb-fill,
     .sb-part,
     .sb-rest {
         transition: none;

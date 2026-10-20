@@ -43,25 +43,16 @@
         </div>
         @if (Run.Hidden)
         {
-            <div class="live-line" data-testid="live-line"><i style="@Width(Tally.Done, null)"></i></div>
+            <div class="live-line" data-testid="live-line">
+                <StackedBar Size="BarSize.Line" Total="Math.Max(Tally.Total.GetValueOr(0), Tally.Done + Tally.InFlight)">
+                    <StackedBarPart Name="Done" Value="Tally.Done" Color="var(--muted-foreground)"/>
+                </StackedBar>
+            </div>
         }
     </div>
     <div class="live-more" @ref="_more" hidden="@Run.Hidden" data-testid="live-more">
-        <div class="live-sum">
-            <div class="live-bar" data-testid="live-bar">
-                @foreach (var part in RunTally.Bar)
-                {
-                    <i style="@Width(Tally.Count(part), RunBar.Color(part))" data-part="@part"></i>
-                }
-                <i class="is-flight" style="@Width(Tally.InFlight, null)"></i>
-            </div>
-            <div class="live-legend" data-testid="live-legend">
-                @foreach (var part in RunTally.Legend)
-                {
-                    @LegendEntry(RunBar.Label(part), RunBar.Meaning(part, Branding.NickName(Run.Layout.Sink.Service)), Tally.Count(part), $"background: {RunBar.Color(part)}", null)
-                }
-                @LegendEntry("In flight", RunBar.InFlightMeaning, Tally.InFlight, null, "is-flight")
-            </div>
+        <div class="live-sum" data-testid="live-bar">
+            <LiveRunBar Tally="Tally" Size="BarSize.Large"/>
         </div>
         <div class="live-body" @ref="_body" data-testid="live-body"></div>
         <div class="live-key" hidden="@(!_keyOpen)" data-testid="live-key">
@@ -108,7 +99,6 @@
     [Parameter] public EventCallback OnFolded { get; set; }
 
     [Parameter] public int Flash { get; set; }
-
 
     private ElementReference _more;
     private ElementReference _body;
@@ -294,12 +284,6 @@
         catch (JSDisconnectedException) { }
     }
 
-    private string Width(int count, string? color)
-    {
-        var background = color is null ? "" : $"; background: {color}";
-        return string.Create(CultureInfo.InvariantCulture, $"width: {Tally.Percent(count):0.###}%{background}");
-    }
-
     private static string Elapsed(int ms)
     {
         var seconds = Math.Max(0, ms / 1000);
@@ -346,17 +330,6 @@
 
     private static RenderFragment Past(FeedRunCounts counts, QueryLimit limit) =>
         @<span><b>@Count(counts.Skipped)</b> over this run's limit of @Count(limit.Count)</span>;
-
-    private static RenderFragment LegendEntry(string label, string meaning, int count, string? style, string? swatch) =>
-        @<BbTooltip DelayDuration="150">
-            <BbTooltipTrigger AsChild="false">
-                <span data-testid="live-legend-entry"><i class="sq @swatch" style="@style"></i>@label <b>@Count(count)</b></span>
-            </BbTooltipTrigger>
-            <BbTooltipContent Class="w-[280px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">
-                <b class="mb-0.5 block font-semibold text-foreground">@label</b>
-                @meaning
-            </BbTooltipContent>
-        </BbTooltip>;
 
     private static RenderFragment Added(int added) => @<span class="added-chip" data-testid="live-added">+@Count(added) to your wantlist</span>;
 

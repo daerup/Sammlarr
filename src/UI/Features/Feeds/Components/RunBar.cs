@@ -1,4 +1,3 @@
-using System.Globalization;
 using Domain.Feed.Run;
 
 namespace UI.Features.Feeds.Components;
@@ -13,10 +12,7 @@ internal enum RunPart
 	Conflict,
 }
 
-internal readonly record struct RunSegment(RunPart Part, int Count, double Percent)
-{
-	internal string Style => string.Create(CultureInfo.InvariantCulture, $"width: {Percent:0.###}%; background: {RunBar.Color(Part)}");
-}
+internal readonly record struct RunSegment(RunPart Part, int Count);
 
 internal static class RunBar
 {
@@ -42,7 +38,7 @@ internal static class RunBar
 			(RunPart.CouldNotLookUp, counts.UnmatchedCouldNotLookUp),
 			(RunPart.Conflict, counts.UnmatchedConflict),
 		];
-		return [.. parts.Where(part => part.Count > 0).Select(part => new RunSegment(part.Part, part.Count, 100.0 * part.Count / counts.Total))];
+		return [.. parts.Where(part => part.Count > 0).Select(part => new RunSegment(part.Part, part.Count))];
 	}
 
 	internal static IReadOnlyList<RunSegment> Legend(IReadOnlyList<RunSegment> segments) =>
@@ -61,7 +57,9 @@ internal static class RunBar
 		};
 	}
 
-	internal const string InFlightMeaning = "Being looked up right now.";
+	internal const string InFlight = "Being looked up";
+
+	internal const string Rest = "Still to come";
 
 	internal static string Meaning(RunPart part, string sink)
 	{
