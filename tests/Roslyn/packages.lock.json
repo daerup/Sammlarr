@@ -72,15 +72,15 @@
       },
       "Verify.TUnit": {
         "type": "Direct",
-        "requested": "[33.3.3, )",
-        "resolved": "33.3.3",
-        "contentHash": "njelLm0sc+6Pr9gF+T1OGdy/kqNQjIeHN+A26IFf5CFiNry32ZpkswNgExXVuobhDxnTOFR+f7nQoJxRSp+lzg==",
+        "requested": "[33.3.4, )",
+        "resolved": "33.3.4",
+        "contentHash": "h2mWDecz3Jp7ry1J9qBk/uujqwiHfrduVRmD/+qrj5RiLvIFlKIbrF+yU5YnNeYShH+9Rak416241c7af2ihIg==",
         "dependencies": {
           "Argon": "0.38.2",
-          "DiffEngine": "20.8.1",
+          "DiffEngine": "20.8.2",
           "SimpleInfoName": "3.2.1",
-          "TUnit.Core": "1.73.19",
-          "Verify": "33.3.3"
+          "TUnit.Core": "1.75.0",
+          "Verify": "33.3.4"
         }
       },
       "Argon": {
@@ -90,8 +90,8 @@
       },
       "DiffEngine": {
         "type": "Transitive",
-        "resolved": "20.8.1",
-        "contentHash": "vfBch+CoUIPSfWk5nfEkzRZjWEHzAnGrvSj6SDH5vbFAAqMpXd/vJfBAd9WXlilTyCk4BYwO5U+P7con7NS3Gg==",
+        "resolved": "20.8.2",
+        "contentHash": "913FZh0PW/wL53zdx+go/doxQuulU8C6SSgmAHMAuVS/mF1JCYcBgg29F8XkpWEGW0JotbIscsifjlaLwE71bw==",
         "dependencies": {
           "EmptyFiles": "8.20.1"
         }
@@ -207,11 +207,11 @@
       },
       "Verify": {
         "type": "Transitive",
-        "resolved": "33.3.3",
-        "contentHash": "oGoHHLmnvdJgyBWzg2321osBmOcposRX7R4ZvYX8ELLrIzojNLMdL+ff5nzsV4tX2Q+Iyae4AcE6YwPVttrvVQ==",
+        "resolved": "33.3.4",
+        "contentHash": "0Fz2d9Ta0A5lg12V8t3rrEFDEAnJLp8HAMCCQZA6ur3ZLfWlZvah9b2dXZr9H5TipjW+8NEYlie9bsHhKFe+ig==",
         "dependencies": {
           "Argon": "0.38.2",
-          "DiffEngine": "20.8.1",
+          "DiffEngine": "20.8.2",
           "SimpleInfoName": "3.2.1"
         }
       },
