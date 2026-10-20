@@ -1,0 +1,34 @@
+<BbAlertDialog>
+    <BbAlertDialogTrigger>
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="Disabled">
+            <LucideIcon Name="eraser" Size="13" Class="mr-1.5"/>
+            <span>Clear</span>
+        </BbButton>
+    </BbAlertDialogTrigger>
+    <BbAlertDialogContent>
+        <BbAlertDialogHeader>
+            <BbAlertDialogTitle>@Title</BbAlertDialogTitle>
+            <BbAlertDialogDescription>@ChildContent</BbAlertDialogDescription>
+        </BbAlertDialogHeader>
+        <BbAlertDialogFooter>
+            <BbAlertDialogCancel>
+                <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+            </BbAlertDialogCancel>
+            <BbAlertDialogAction>
+                <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="@Action" OnClick="OnClear"/>
+            </BbAlertDialogAction>
+        </BbAlertDialogFooter>
+    </BbAlertDialogContent>
+</BbAlertDialog>
+
+@code {
+    [Parameter] [EditorRequired] public required string Title { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
+
+    [Parameter] [EditorRequired] public required string Action { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public EventCallback OnClear { get; set; }
+}

@@ -36,7 +36,7 @@ public class CacheTests
 
 	private static async Task ClearIdsAsync(IPage page)
 	{
-		await page.GetByTestId("housekeeping-clear-ids").Button("Clear…").ClickAsync();
+		await page.GetByTestId("housekeeping-clear-ids").Button("Clear").ClickAsync();
 		await page.Button("Clear title ids and details").ClickAsync();
 		await Expect(page.Text("Title ids and details cleared.")).ToBeVisibleAsync();
 	}

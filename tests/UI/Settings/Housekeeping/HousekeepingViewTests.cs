@@ -90,7 +90,7 @@ public class HousekeepingViewTests
 			.IsEquivalentTo([
 				("Feed history: titles and calls of runs older than 90 days", 500),
 				("Title ids nobody used for 365 days", 11),
-				("\"No earlier season\" answers older than 3 days", 4),
+				("Seasons with no show found, older than 3 days", 4),
 				("Finished jobs and schedule entries, 30 days", 226),
 			]);
 	}

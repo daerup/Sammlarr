@@ -134,7 +134,7 @@ internal static class HousekeepingView
 
 	internal static string Titles(int count) => "title".ToQuantity(count, "N0", Invariant);
 
-	internal static string Lookups(int count) => "lookup".ToQuantity(count, "N0", Invariant);
+	internal static string ProviderCalls(int count) => "provider call".ToQuantity(count, "N0", Invariant);
 
 	internal static string Number(int count) => count.ToString("N0", Invariant);
 
@@ -208,7 +208,7 @@ internal static class HousekeepingView
 			HousekeepingStep.UsageStats => $"Usage stats older than {Days(options.UsageDays)}",
 			HousekeepingStep.CachedDetails => $"Cached details nobody opened for {Days(options.DetailsUnusedDays)}",
 			HousekeepingStep.TitleIds => $"Title ids nobody used for {Days(options.IdsUnusedDays)}",
-			HousekeepingStep.ShowParts => $"\"No earlier season\" answers older than {Days(options.NoPrequelDays)}",
+			HousekeepingStep.ShowParts => $"Seasons with no show found, older than {Days(options.NoPrequelDays)}",
 			HousekeepingStep.DuplicateTitles => "Titles stored twice, merged once a second source confirms them",
 			HousekeepingStep.SettledJobs or HousekeepingStep.ScheduleEntries => "Finished jobs and schedule entries, 30 days",
 		};

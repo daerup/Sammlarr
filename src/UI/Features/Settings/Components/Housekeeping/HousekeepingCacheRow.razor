@@ -1,0 +1,41 @@
+<div class="@($"{Grid} px-[18px] py-[9px] text-[13px] [&>:last-child]:justify-self-end")" data-testid="@TestId">
+    <div class="flex items-center gap-2.5 font-medium whitespace-nowrap">
+        @Tile
+        <span>@Name</span>
+        <BbTooltip DelayDuration="150">
+            <BbTooltipTrigger AsChild="false" Class="ml-1.5 inline-flex cursor-help text-muted-foreground opacity-75 hover:text-foreground hover:opacity-100" role="button" aria-label="@($"About {Name.ApplyCase(LetterCasing.LowerCase)}")" data-testid="housekeeping-cache-why">
+                <LucideIcon Name="info" Size="13"/>
+            </BbTooltipTrigger>
+            <BbTooltipContent Class="w-[340px] border bg-popover px-3 py-2.5 text-xs text-muted-foreground shadow-lg">@Why</BbTooltipContent>
+        </BbTooltip>
+    </div>
+    <span class="whitespace-nowrap text-muted-foreground" data-testid="housekeeping-cache-holds">@Holds</span>
+    <span class="whitespace-nowrap text-muted-foreground" data-testid="housekeeping-cache-size">@Size</span>
+    <span class="flex flex-col leading-[1.3] whitespace-nowrap text-muted-foreground">
+        <span data-testid="housekeeping-cache-next">@Next</span>
+        <span class="text-[11.5px] opacity-80" data-testid="housekeeping-cache-removes">@Removes</span>
+    </span>
+    @ChildContent
+</div>
+
+@code {
+    internal const string Grid = "grid grid-cols-[minmax(0,1fr)_120px_100px_250px_110px] items-center gap-3.5";
+
+    [Parameter] [EditorRequired] public required string TestId { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment Tile { get; set; }
+
+    [Parameter] [EditorRequired] public required string Name { get; set; }
+
+    [Parameter] [EditorRequired] public required string Why { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment Holds { get; set; }
+
+    [Parameter] [EditorRequired] public required string Size { get; set; }
+
+    [Parameter] [EditorRequired] public required string Next { get; set; }
+
+    [Parameter] [EditorRequired] public required string Removes { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
+}
