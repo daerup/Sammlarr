@@ -20,4 +20,9 @@ public sealed record AnimeIdMapping(
 	Optional<int> Tmdb,
 	Optional<string> Imdb,
 	Optional<int> SeriesTvdb
-);
+)
+{
+	public Optional<int> TvdbSeason { get; init; } = new None();
+
+	public Optional<int> EpisodeOffset { get; init; } = new None();
+}

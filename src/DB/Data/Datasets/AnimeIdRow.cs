@@ -21,4 +21,8 @@ internal sealed record AnimeIdRow
 	public string? ImdbId { get; init; }
 
 	public int? SeriesTvdbId { get; init; }
+
+	public int? TvdbSeason { get; init; }
+
+	public int? EpisodeOffset { get; init; }
 }

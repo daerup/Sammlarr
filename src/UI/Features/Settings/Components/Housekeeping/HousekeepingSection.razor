@@ -171,6 +171,45 @@ else
                 </BbAlertDialogContent>
             </BbAlertDialog>
         </div>
+        <div class="@($"{ClearRow} border-t")" data-testid="housekeeping-clear-show-parts">
+            <LucideIcon Name="layers" Size="18" Class="text-muted-foreground"/>
+            <div>
+                <div class="text-sm font-medium">Show parts</div>
+                <div class="max-w-[80ch] text-[12.5px] text-muted-foreground">
+                    @HousekeepingView.Number(cache.ShowParts) stored: anime seasons, parts and specials matched to their show, and "no earlier season" answers. Cleared, each is looked up again in the Anime ids list, or on AniList.
+                </div>
+                <div class="mt-[3px] flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <LucideIcon Name="moon" Size="12" Class="opacity-80"/>
+                    Nightly: "no earlier season" answers older than @HousekeepingView.Days(Options.NoPrequelDays)
+                </div>
+            </div>
+            <span class="text-right text-[13px] whitespace-nowrap text-muted-foreground">@HousekeepingView.Size(cache.ShowPartsBytes)</span>
+            <BbAlertDialog>
+                <BbAlertDialogTrigger>
+                    <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear…" Size="ButtonSize.Small" Disabled="_clearing"/>
+                </BbAlertDialogTrigger>
+                <BbAlertDialogContent>
+                    <BbAlertDialogHeader>
+                        <BbAlertDialogTitle>Clear show parts?</BbAlertDialogTitle>
+                        <BbAlertDialogDescription>
+                            This frees about <b class="font-medium text-foreground">@HousekeepingView.Size(cache.ShowPartsBytes)</b> of the @HousekeepingView.Size(overview.Size.OnDisk) database.
+                            The next anime feed runs and previews ask AniList again for the seasons the Anime ids list cannot place: up to <b class="font-medium text-foreground">one request for every 50 titles</b>, until each is matched to its show again.
+                        </BbAlertDialogDescription>
+                    </BbAlertDialogHeader>
+                    <p class="text-[13px] text-muted-foreground">
+                        The nightly pass already clears "no earlier season" answers older than @HousekeepingView.Days(Options.NoPrequelDays). Clear by hand only when an anime season lands on the wrong show.
+                    </p>
+                    <BbAlertDialogFooter>
+                        <BbAlertDialogCancel>
+                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                        </BbAlertDialogCancel>
+                        <BbAlertDialogAction>
+                            <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear show parts" OnClick="ClearShowPartsAsync"/>
+                        </BbAlertDialogAction>
+                    </BbAlertDialogFooter>
+                </BbAlertDialogContent>
+            </BbAlertDialog>
+        </div>
         <div class="@($"{ClearRow} border-t")" data-testid="housekeeping-clear-unmatched">
             <LucideIcon Name="circle-alert" Size="18" Class="text-muted-foreground"/>
             <div>
@@ -242,6 +281,8 @@ else
     private async Task ClearDetailsAsync() => await ClearAsync(() => CachePurger.PurgeDetailsAsync(), "Cached details cleared.");
 
     private async Task ClearIdsAsync() => await ClearAsync(() => CachePurger.PurgeAsync(), "Title ids and details cleared.");
+
+    private async Task ClearShowPartsAsync() => await ClearAsync(() => CachePurger.PurgeShowPartsAsync(), "Show parts cleared.");
 
     private async Task ClearAsync(Func<Task> clear, string done)
     {

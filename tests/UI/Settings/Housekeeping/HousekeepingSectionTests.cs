@@ -97,7 +97,7 @@ public class HousekeepingSectionTests : BunitContext
 
 		var cut = RenderLoaded();
 
-		await Assert.That(Row(cut, "pass").TextContent).Contains("running since 03:00").And.Contains("2 of 7 steps done");
+		await Assert.That(Row(cut, "pass").TextContent).Contains("running since 03:00").And.Contains("2 of 8 steps done");
 		await Assert.That(RunNow(cut).Select(button => button.HasAttribute("disabled"))).IsEquivalentTo([true, false, false], CollectionOrdering.Matching);
 	}
 
@@ -208,6 +208,37 @@ public class HousekeepingSectionTests : BunitContext
 	}
 
 	[Test]
+	public async Task ClearShowParts_OnceConfirmed_ClearsThemAndSaysSo()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
+		var cut = RenderWithDialogs();
+		cut.WaitForState(() => cut.FindAll("[data-testid=housekeeping-clear-show-parts] button").Count == 1);
+
+		await cut.Find("[data-testid=housekeeping-clear-show-parts] button").ClickAsync(new MouseEventArgs());
+		cut.WaitForState(() => Buttons(cut, "Clear show parts").Count == 1);
+		await Buttons(cut, "Clear show parts").Single().ClickAsync(new MouseEventArgs());
+
+		cut.WaitForAssertion(() => _purger.PurgeShowPartsAsync(Any()).WasCalled(Times.Once));
+		_purger.PurgeAsync(Any()).WasNeverCalled();
+		_purger.PurgeDetailsAsync(Any()).WasNeverCalled();
+		await Assert.That(Toasts.Single().Description).IsEqualTo("Show parts cleared.");
+	}
+
+	[Test]
+	public async Task Render_ShowsTheShowPartsSizeAndTheNightlyRule()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
+
+		var cut = RenderLoaded();
+
+		await Assert
+			.That(cut.Find("[data-testid=housekeeping-clear-show-parts]").TextContent)
+			.Contains("2,605 stored")
+			.And.Contains("0.5 MB")
+			.And.Contains("Nightly: \"no earlier season\" answers older than 3 days");
+	}
+
+	[Test]
 	public async Task ClearUnmatchedLookups_WhenClicked_ClearsThemAtOnceAndSaysSo()
 	{
 		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
@@ -275,7 +306,7 @@ public class HousekeepingSectionTests : BunitContext
 			new DatabaseSize(34_300_000, 32_100_000),
 			pass,
 			[imdb, anime],
-			new CachedTitles(2_132, 3_475_160, 2_153, 2_605_130),
+			new CachedTitles(2_132, 3_475_160, 2_153, 2_605_130, 2_605, 494_950),
 			new StoredTwiceCount(0, 0)
 		);
 	}

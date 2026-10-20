@@ -32,6 +32,19 @@ public class TitleIdsTrimTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task RunAsync_ForAShowAPartLinksTo_RemovesTheLinkWithIt()
+	{
+		var forgotten = await host.SeedMediaAsync(TvdbId.From("431162", MediaType.Show));
+		await host.Resolve<IShowParts>().AddAsync([AniListId.From("185660", MediaType.Show)], Some.Of(forgotten), new ShowPartPlace(new None(), new None()));
+		await host.AddedAsync(forgotten, Now.AddDays(-366));
+
+		await Testee.RunAsync(Now);
+
+		await using var ctx = await host.ContextFactory.CreateDbContextAsync();
+		await Assert.That(await ctx.ShowParts.AnyAsync()).IsFalse();
+	}
+
+	[Test]
 	public async Task RunAsync_ForATitleThatNeverHadDetails_RemovesItOnlyAfterAYear()
 	{
 		var old = await host.Movie(TestMedia.Inception).SeedAsync();

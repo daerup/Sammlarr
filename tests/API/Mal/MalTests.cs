@@ -280,10 +280,6 @@ public class MalTests
 	private MalFeedService Feed(MockHttpHandler handler, Mock<IAnimeIds> map)
 	{
 		var keys = Keys();
-		var media = IMediaService.Mock();
-		media
-			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any())
-			.Returns((entries, _, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
-		return new MalFeedService(Client(handler, keys), media.Object, keys.Object, AnimeMaps.Seasons(map), FeedClock.Today());
+		return new MalFeedService(Client(handler, keys), keys.Object, AnimeMaps.Seasons(map, media: AnimeMaps.Passing(_asked.Add)), FeedClock.Today());
 	}
 }

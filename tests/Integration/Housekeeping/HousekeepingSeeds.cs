@@ -2,6 +2,7 @@ using Contracts.Housekeeping;
 using Contracts.Media;
 using DB.Data.Feed.Run;
 using DB.Data.Jobs;
+using DB.Data.Media;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
@@ -131,6 +132,20 @@ internal static class HousekeepingSeeds
 				$$"""{"title":"Annie","year":1982,"type":"movie","ids":{"imdb":"{{title.Imdb}}","trakt":null,"tmdb":{{title.Tmdb}},"tvdb":null,"mal":null,"mdblist":"m{{title.Tmdb}}"},"ratings":[]}"""
 			);
 			host.HttpStub.RespondWithJsonForUrl(MdblistTitles, $"[{string.Join(",", found)}]");
+		}
+
+		public async Task NoShowAnsweredAsync(IExternalMediaId part, DateTimeOffset at)
+		{
+			await using var ctx = await host.ContextFactory.CreateDbContextAsync();
+			ctx.ShowParts.Add(
+				new ShowPartRow
+				{
+					Source = part.Source,
+					Id = part.Value,
+					AskedAt = at,
+				}
+			);
+			await ctx.SaveChangesAsync();
 		}
 
 		public async Task AddedAsync(MediaId id, DateTimeOffset at)

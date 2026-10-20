@@ -52,6 +52,8 @@ internal sealed class SammlarrDbContext(
 
 	public DbSet<ExternalMediaIdRow> ExternalMediaIds => Set<ExternalMediaIdRow>();
 
+	public DbSet<ShowPartRow> ShowParts => Set<ShowPartRow>();
+
 	public DbSet<MediaDetailsRow> MediaDetails => Set<MediaDetailsRow>();
 
 	public DbSet<MediaRatingRow> MediaRatings => Set<MediaRatingRow>();

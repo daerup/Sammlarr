@@ -73,6 +73,7 @@ public class RepositoryTests
 					"Messaging.Notifications.NotificationDispatchHandler",
 				]
 			);
+		yield return () => (typeof(IShowParts), ["DB.Data.Media.ShowPartRepository", "DB.Data.Media.MediaModule", "API.Anime.LaterSeasons"]);
 		yield return () =>
 			(
 				typeof(IApiKeyConfigRepository),

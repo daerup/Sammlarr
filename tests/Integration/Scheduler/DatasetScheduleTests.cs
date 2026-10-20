@@ -36,9 +36,16 @@ public class DatasetScheduleTests(SammlarrTestHost host) : IAsyncDisposable
 		await Testee().StartedAsync(CancellationToken.None);
 
 		var daily = (await TickersAsync<CronTickerEntity>()).Single();
+		var now = (await TickersAsync<TimeTickerEntity>()).Single();
 		await Assert.That(daily.Function).IsEqualTo(DatasetTicker.FunctionName);
 		await Assert.That(daily.Expression).IsEqualTo(DatasetSchedule.Daily);
-		await Assert.That((await TickersAsync<TimeTickerEntity>()).Select(ticker => ticker.Function)).IsEquivalentTo([DatasetTicker.FunctionName]);
+		await Assert.That(now.Function).IsEqualTo(DatasetTicker.FunctionName);
+		await Assert
+			.That(TickerHelper.ReadTickerRequest<DatasetRequest>(daily.Request))
+			.IsEqualTo(new DatasetRequest(DatasetNames.ImdbRatings, DatasetRead.WhenChanged));
+		await Assert
+			.That(TickerHelper.ReadTickerRequest<DatasetRequest>(now.Request))
+			.IsEqualTo(new DatasetRequest(DatasetNames.ImdbRatings, DatasetRead.WhenChanged));
 	}
 
 	[Test]
@@ -91,7 +98,10 @@ public class DatasetScheduleTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		public string Name => name;
 
-		public Task<DatasetCheck> LoadAsync(CancellationToken cancellationToken = default) => throw new InvalidOperationException("Never loaded here.");
+		public Task<DatasetCheck> LoadAsync(DatasetRead read, CancellationToken cancellationToken = default)
+		{
+			throw new InvalidOperationException("Never loaded here.");
+		}
 	}
 
 	private sealed class WarningLog : ILoggerProvider, ILogger

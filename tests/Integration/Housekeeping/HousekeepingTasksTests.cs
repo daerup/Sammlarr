@@ -134,7 +134,7 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task LoadDatasetAsync_Twice_SchedulesOneLoadOfThatDatasetAndRefusesTheSecond()
+	public async Task LoadDatasetAsync_Twice_SchedulesOneLoadThatAlwaysReadsTheFileAndRefusesTheSecond()
 	{
 		var first = await Testee.LoadDatasetAsync(RemoteService.ImdbDatasets);
 		var second = await Testee.LoadDatasetAsync(RemoteService.ImdbDatasets);
@@ -143,7 +143,9 @@ public class HousekeepingTasksTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(second).IsFalse();
 		var ticker = (await OnceTickersAsync()).Single();
 		await Assert.That(ticker.Function).IsEqualTo(DatasetTicker.FunctionName);
-		await Assert.That(TickerHelper.ReadTickerRequest<DatasetRequest>(ticker.Request)).IsEqualTo(new DatasetRequest(DatasetNames.ImdbRatings));
+		await Assert
+			.That(TickerHelper.ReadTickerRequest<DatasetRequest>(ticker.Request))
+			.IsEqualTo(new DatasetRequest(DatasetNames.ImdbRatings, DatasetRead.Always));
 	}
 
 	private async Task<IReadOnlyList<TimeTickerEntity>> OnceTickersAsync()

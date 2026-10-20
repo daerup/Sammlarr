@@ -23,11 +23,31 @@ public class DatasetTickerTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		host.HttpStub.RespondForUrl($"{TestUrls.ImdbDatasets}/title.ratings.tsv.gz", _ => new HttpResponseMessage(HttpStatusCode.NotFound));
 
-		await Testee.LoadAsync(DatasetNames.ImdbRatings);
+		await Testee.LoadAsync(DatasetNames.ImdbRatings, DatasetRead.WhenChanged);
 
 		var check = await host.Resolve<IDatasetChecks>().FindAsync(DatasetNames.ImdbRatings);
 		await Assert.That(check.Map(found => found.Outcome)).IsSome().And.IsEqualTo(DatasetOutcome.Failed);
 		await Assert.That(check.Map(found => found.Failure)).IsSome();
 		await Assert.That(Activity.Running(DatasetNames.ImdbRatings)).IsNone();
+	}
+
+	[Test]
+	public async Task LoadAsync_Always_AsksWithoutTheStoredETag()
+	{
+		await host.Resolve<IDatasetLoads>().RecordAsync(new DatasetLoad(DatasetNames.ImdbRatings, DateTimeOffset.UnixEpoch, Some.Of("\"last\""), 2));
+		var asked = new List<HttpRequestMessage>();
+		host.HttpStub.RespondForUrl(
+			$"{TestUrls.ImdbDatasets}/title.ratings.tsv.gz",
+			request =>
+			{
+				asked.Add(request);
+				return new HttpResponseMessage(HttpStatusCode.NotModified);
+			}
+		);
+
+		await Testee.LoadAsync(DatasetNames.ImdbRatings, DatasetRead.Always);
+
+		await Assert.That(asked).Count().IsEqualTo(1);
+		await Assert.That(asked[0].Headers.IfNoneMatch).IsEmpty();
 	}
 }

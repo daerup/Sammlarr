@@ -64,6 +64,7 @@ public class HousekeepingViewTests
 			[
 				new StepCount(HousekeepingStep.RunHistory, 500),
 				new StepCount(HousekeepingStep.TitleIds, 11),
+				new StepCount(HousekeepingStep.ShowParts, 4),
 				new StepCount(HousekeepingStep.SettledJobs, 200),
 				new StepCount(HousekeepingStep.ScheduleEntries, 26),
 			],
@@ -76,6 +77,7 @@ public class HousekeepingViewTests
 			.IsEquivalentTo([
 				("Feed history: titles and calls of runs older than 90 days", 500),
 				("Title ids nobody used for a year", 11),
+				("\"No earlier season\" answers older than 3 days", 4),
 				("Finished jobs and schedule entries, 30 days", 226),
 			]);
 	}
@@ -118,7 +120,7 @@ public class HousekeepingViewTests
 
 		var line = HousekeepingView.Pass(new PassTask(new None(), Some.Of(new TaskRun(since, true)), Some.Of(report)), Now);
 
-		await Assert.That(line.Did).IsEqualTo("1 of 7 steps done");
+		await Assert.That(line.Did).IsEqualTo("1 of 8 steps done");
 	}
 
 	[Test]
@@ -152,7 +154,7 @@ public class HousekeepingViewTests
 			new DatabaseSize(2, 1),
 			new PassTask(new None(), new None(), Some.Of(pass)),
 			[imdb],
-			new CachedTitles(0, 0, 0, 0),
+			new CachedTitles(0, 0, 0, 0, 0, 0),
 			new StoredTwiceCount(0, 0)
 		);
 	}

@@ -2,6 +2,7 @@ using Contracts.Housekeeping;
 using Contracts.Usage;
 using Core.Housekeeping;
 using Domain.Jobs;
+using Domain.Media;
 using Domain.Providers;
 using Domain.Usage;
 using Harness;
@@ -35,6 +36,7 @@ public class HousekeepingPassTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("valid-mdblist-key");
 		host.MdblistMaps(("15739", "tt0083564"));
 		await host.StoredTwiceAsync("15739", "tt0083564");
+		await host.NoShowAnsweredAsync(MalId.From("60001", MediaType.Show), Now.AddDays(-4));
 		host.SignOut();
 
 		var first = await Testee.RunAsync();

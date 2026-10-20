@@ -41,7 +41,7 @@ public class DatasetLoaderTests
 			.Returns(Success.Of<Optional<DatasetFile<ImdbRatingLine>>>(new None()))
 			.Callback(() => cause = UsageCauses.Current.Cause);
 
-		await Testee().LoadAsync();
+		await Testee().LoadAsync(DatasetRead.WhenChanged);
 
 		await Assert.That(cause).IsEqualTo(UsageCause.Dataset);
 	}
@@ -51,7 +51,7 @@ public class DatasetLoaderTests
 	{
 		_dataset.DownloadAsync(Any(), Any()).Returns(Success.Of<Optional<DatasetFile<ImdbRatingLine>>>(new None()));
 
-		var loaded = await Testee().LoadAsync();
+		var loaded = await Testee().LoadAsync(DatasetRead.WhenChanged);
 
 		await Assert.That(loaded).IsEqualTo(new DatasetCheck(DatasetNames.ImdbRatings, Now, Now, DatasetOutcome.Unchanged, new None()));
 		_table.ReplaceAsync(Any(), Any()).WasNeverCalled();
@@ -65,10 +65,21 @@ public class DatasetLoaderTests
 		_dataset.DownloadAsync((Optional<string>)Some.Of("\"yesterday\""), Any()).Returns(Changed());
 		_table.ReplaceAsync(Any(), Any()).Returns(2);
 
-		var loaded = await Testee().LoadAsync();
+		var loaded = await Testee().LoadAsync(DatasetRead.WhenChanged);
 
 		await Assert.That(loaded).IsEqualTo(new DatasetCheck(DatasetNames.ImdbRatings, Now, Now, DatasetOutcome.Loaded, new None()));
 		_loads.RecordAsync(new DatasetLoad(DatasetNames.ImdbRatings, Now, Some.Of("\"today\""), 2), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task LoadAsync_Always_AsksForTheWholeFileDespiteTheStoredETag()
+	{
+		_dataset.DownloadAsync((Optional<string>)new None(), Any()).Returns(Changed());
+		_table.ReplaceAsync(Any(), Any()).Returns(2);
+
+		var loaded = await Testee().LoadAsync(DatasetRead.Always);
+
+		await Assert.That(loaded).IsEqualTo(new DatasetCheck(DatasetNames.ImdbRatings, Now, Now, DatasetOutcome.Loaded, new None()));
 	}
 
 	[Test]
@@ -81,7 +92,7 @@ public class DatasetLoaderTests
 		_loads.RecordAsync(Any(), Any()).Callback(() => recorded = true);
 		_database.CompactAsync(Any()).Returns(new Compaction(100, 50, true)).Callback(() => compactedAfterRecord = recorded);
 
-		await Testee().LoadAsync();
+		await Testee().LoadAsync(DatasetRead.WhenChanged);
 
 		_database.CompactAsync(Any()).WasCalled(Times.Once);
 		await Assert.That(compactedAfterRecord).IsTrue();
@@ -93,7 +104,7 @@ public class DatasetLoaderTests
 		_dataset.DownloadAsync(Any(), Any()).Returns(Changed());
 		_table.ReplaceAsync(Any(), Any()).Throws(new InvalidDataException("The file is cut short."));
 
-		var loaded = await Testee().LoadAsync();
+		var loaded = await Testee().LoadAsync(DatasetRead.WhenChanged);
 
 		await Assert.That(loaded.Outcome).IsEqualTo(DatasetOutcome.Failed);
 		await Assert.That(loaded.Failure).IsSome().And.IsEqualTo("The file is cut short.");
@@ -106,7 +117,7 @@ public class DatasetLoaderTests
 	{
 		_dataset.DownloadAsync(Any(), Any()).Returns(Error.From("IMDb's datasets answered 500 for the ratings file."));
 
-		var loaded = await Testee().LoadAsync();
+		var loaded = await Testee().LoadAsync(DatasetRead.WhenChanged);
 
 		await Assert.That(loaded.Outcome).IsEqualTo(DatasetOutcome.Failed);
 		await Assert.That(loaded.Failure).IsSome().And.IsEqualTo("IMDb's datasets answered 500 for the ratings file.");
@@ -122,8 +133,8 @@ public class DatasetLoaderTests
 		_table.ReplaceAsync(Any(), Any()).ReturnsAsync(replacing.Task);
 		var gate = new DatasetGate();
 
-		var first = Testee(gate).LoadAsync();
-		var second = Testee(gate).LoadAsync();
+		var first = Testee(gate).LoadAsync(DatasetRead.WhenChanged);
+		var second = Testee(gate).LoadAsync(DatasetRead.WhenChanged);
 
 		_dataset.DownloadAsync(Any(), Any()).WasCalled(Times.Once);
 		replacing.SetResult(2);

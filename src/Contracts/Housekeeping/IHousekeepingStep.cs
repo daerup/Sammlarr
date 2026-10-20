@@ -6,6 +6,7 @@ public enum HousekeepingStep
 	UsageStats,
 	CachedDetails,
 	TitleIds,
+	ShowParts,
 	DuplicateTitles,
 	SettledJobs,
 	ScheduleEntries,

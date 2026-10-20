@@ -14,7 +14,7 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 	private const int SliceSize = 1000;
 
 	private const string Insert =
-		"INSERT INTO AnimeIds (Type, AniListId, MalId, TvdbId, TmdbId, ImdbId, SeriesTvdbId) VALUES ($type, $anilist, $mal, $tvdb, $tmdb, $imdb, $series)";
+		"INSERT INTO AnimeIds (Type, AniListId, MalId, TvdbId, TmdbId, ImdbId, SeriesTvdbId, TvdbSeason, EpisodeOffset) VALUES ($type, $anilist, $mal, $tvdb, $tmdb, $imdb, $series, $season, $offset)";
 
 	public async Task<Optional<AnimeIdMapping>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
@@ -106,6 +106,8 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 		var tmdb = Parameter(command, "$tmdb", DbType.Int32);
 		var imdb = Parameter(command, "$imdb", DbType.String);
 		var series = Parameter(command, "$series", DbType.Int32);
+		var season = Parameter(command, "$season", DbType.Int32);
+		var offset = Parameter(command, "$offset", DbType.Int32);
 		await command.PrepareAsync(cancellationToken);
 		var count = 0;
 		await foreach (var row in rows.WithCancellation(cancellationToken))
@@ -117,6 +119,8 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 			tmdb.Value = Value(row.Tmdb);
 			imdb.Value = row.Imdb.Map(value => (object)value).GetValueOr(DBNull.Value);
 			series.Value = Value(row.SeriesTvdb);
+			season.Value = Value(row.TvdbSeason);
+			offset.Value = Value(row.EpisodeOffset);
 			await command.ExecuteNonQueryAsync(cancellationToken);
 			count++;
 		}
@@ -140,7 +144,11 @@ internal sealed class AnimeIdRepository(IDbContextFactory<SammlarrDbContext> dbC
 			Optional.Of(row.TmdbId),
 			Optional.Of(row.ImdbId),
 			Optional.Of(row.SeriesTvdbId)
-		);
+		)
+		{
+			TvdbSeason = Optional.Of(row.TvdbSeason),
+			EpisodeOffset = Optional.Of(row.EpisodeOffset),
+		};
 	}
 
 	private sealed class Columns(IReadOnlyList<AnimeIdRow> rows)

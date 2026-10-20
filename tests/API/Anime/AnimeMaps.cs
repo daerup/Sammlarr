@@ -1,5 +1,7 @@
 using API.Anime;
+using API.Tests.Feeds;
 using Contracts.Datasets;
+using Contracts.Media;
 using Domain.Media;
 
 namespace API.Tests.Anime;
@@ -55,10 +57,38 @@ internal static class AnimeMaps
 		return map;
 	}
 
-	internal static LaterSeasons Seasons(Mock<IAnimeIds> map, bool loaded = true, IAnimePrequels? prequels = null)
+	internal static LaterSeasons Seasons(
+		Mock<IAnimeIds> map,
+		bool loaded = true,
+		IAnimePrequels? prequels = null,
+		IMediaService? media = null,
+		IShowParts? parts = null
+	)
 	{
 		var loads = Loads(DatasetNames.AnimeIds, loaded);
-		return new LaterSeasons(new AnimeIdsInRun(map.Object, loads.Object), loads.Object, prequels ?? NoPrequels().Object);
+		return new LaterSeasons(
+			new AnimeIdsInRun(map.Object, loads.Object),
+			loads.Object,
+			prequels ?? NoPrequels().Object,
+			parts ?? NoParts().Object,
+			media ?? Passing(_ => { })
+		);
+	}
+
+	internal static IMediaService Passing(Action<IdentifyRequest> asked)
+	{
+		var media = IMediaService.Mock();
+		media
+			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any())
+			.Returns((titles, _, cancellation) => ListLoads.UnresolvedAsync(titles, asked, cancellation));
+		return media.Object;
+	}
+
+	internal static Mock<IShowParts> NoParts()
+	{
+		var parts = IShowParts.Mock();
+		parts.GetShowsAsync(Any(), Any()).Returns(new Dictionary<IExternalMediaId, Optional<IReadOnlyList<IExternalMediaId>>>());
+		return parts;
 	}
 
 	internal static Mock<IAnimePrequels> NoPrequels()

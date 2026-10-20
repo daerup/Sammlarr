@@ -15,8 +15,7 @@ using Observability.Feed;
 
 namespace API.AniList;
 
-internal sealed partial class AniListFeedService(AniListClient client, IMediaService media, LaterSeasons seasons, AniListTitles titles, IDateTimeProvider clock)
-	: IFeedProvider
+internal sealed partial class AniListFeedService(AniListClient client, LaterSeasons seasons, AniListTitles titles, IDateTimeProvider clock) : IFeedProvider
 {
 	private const string Query =
 		$"query ($user: String, $status: MediaListStatus) {{ MediaListCollection(userName: $user, type: ANIME, status: $status) {{ lists {{ entries {{ media {{ {AniListMedia.Fields} }} }} }} }} }}";
@@ -41,7 +40,7 @@ internal sealed partial class AniListFeedService(AniListClient client, IMediaSer
 
 	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, FieldNeeds needs, CancellationToken cancellationToken = default)
 	{
-		return media.LoadListAsync(seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken), needs, cancellationToken);
+		return seasons.LoadAsync(RequestsAsync(identifier, cancellationToken), needs, cancellationToken);
 	}
 
 	private static Optional<string> UserList(string input)

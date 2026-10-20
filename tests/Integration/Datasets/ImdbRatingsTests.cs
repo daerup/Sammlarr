@@ -137,7 +137,7 @@ public class ImdbRatingsTests(SammlarrTestHost host) : IAsyncDisposable
 		var media = host.Resolve<IMediaService>();
 
 		var before = await media.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
-		var loaded = await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.ImdbRatings).LoadAsync();
+		var loaded = await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.ImdbRatings).LoadAsync(DatasetRead.WhenChanged);
 		host.SetCurrentTime(new DateTimeOffset(2024, 6, 1, 2, 0, 0, TimeSpan.Zero));
 		var after = await media.GetDetailsAsync([fightClub], FieldNeeds.Everything).ToListAsync();
 

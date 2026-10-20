@@ -14,6 +14,7 @@ internal sealed class HousekeepingDataModule : IServiceModule
 		services.AddScoped<IHousekeepingStep, RunHistoryTrim>();
 		services.AddScoped<IHousekeepingStep, CachedDetailsTrim>();
 		services.AddScoped<IHousekeepingStep, TitleIdsTrim>();
+		services.AddScoped<IHousekeepingStep, ShowPartsTrim>();
 		services.AddScoped<IHousekeepingStep, SettledJobsTrim>();
 		services.AddScoped<IHousekeepingStep, ScheduleEntriesTrim>();
 	}

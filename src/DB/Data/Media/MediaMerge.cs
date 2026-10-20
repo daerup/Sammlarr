@@ -49,6 +49,7 @@ internal sealed class MediaMerge(IDbContextFactory<SammlarrDbContext> contexts, 
 		var (keep, gone) = (ordered[0].Id, ordered[1].Id);
 		await ctx.Database.ExecuteSqlRawAsync("PRAGMA defer_foreign_keys = ON", cancellationToken);
 		await RehomeAsync(Of(ctx.ExternalMediaIds, gone), keep, cancellationToken);
+		await RehomeAsync(Of(ctx.ShowParts, gone), keep, cancellationToken);
 		await MoveDetailsAsync(ctx, keep, gone, cancellationToken);
 		await MoveListedAsync(ctx.Wantlist, keep, gone, cancellationToken);
 		await MoveListedAsync(ctx.Blocklist, keep, gone, cancellationToken);

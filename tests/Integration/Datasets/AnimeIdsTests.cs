@@ -111,10 +111,14 @@ public class AnimeIdsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task FindAsync_ForALaterSeason_KeepsTheSeriesItBelongsTo()
+	public async Task FindAsync_ForALaterSeason_KeepsTheSeriesItBelongsToAndItsPlace()
 	{
 		var map = host.Resolve<IAnimeIds>();
-		var season = new AnimeIdMapping(MediaType.Show, Some.Of(291), Some.Of(291), new None(), new None(), new None(), Some.Of(72025));
+		var season = new AnimeIdMapping(MediaType.Show, Some.Of(291), Some.Of(291), new None(), new None(), new None(), Some.Of(72025))
+		{
+			TvdbSeason = Some.Of(3),
+			EpisodeOffset = Some.Of(24),
+		};
 
 		await map.ReplaceAsync(new[] { season }.ToAsyncEnumerable());
 
@@ -130,7 +134,7 @@ public class AnimeIdsTests(SammlarrTestHost host) : IAsyncDisposable
 		var media = host.Resolve<IMediaService>();
 
 		var before = await media.FindIdAsync(show, MediaProvider.Tvdb);
-		await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.AnimeIds).LoadAsync();
+		await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.AnimeIds).LoadAsync(DatasetRead.WhenChanged);
 		host.SetCurrentTime(new DateTimeOffset(2024, 6, 1, 2, 0, 0, TimeSpan.Zero));
 		var after = await media.FindIdAsync(show, MediaProvider.Tvdb);
 
@@ -142,7 +146,7 @@ public class AnimeIdsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task FindIdAsync_ForALaterSeason_FindsNoTvdbIdAndLeavesTheShowAlone()
 	{
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.AnimeLists}/anime-list-full.json", Map);
-		await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.AnimeIds).LoadAsync();
+		await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.AnimeIds).LoadAsync(DatasetRead.WhenChanged);
 		var first = await host.SeedMediaAsync(AniListId.From("290", MediaType.Show));
 		var second = await host.SeedMediaAsync(AniListId.From("291", MediaType.Show));
 		var media = host.Resolve<IMediaService>();

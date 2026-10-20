@@ -17,5 +17,7 @@ internal sealed class MediaModule : IServiceModule
 		services.AddScoped<IMediaMerge, MediaMerge>();
 		services.AddScoped<IModelConfiguration, IdentityConflictConfiguration>();
 		services.AddScoped<IModelConfiguration, MediaRowConfiguration>();
+		services.AddScoped<IModelConfiguration, ShowPartConfiguration>();
+		services.AddScoped<IShowParts, ShowPartRepository>();
 	}
 }

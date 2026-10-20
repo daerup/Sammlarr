@@ -59,7 +59,7 @@ internal sealed class HousekeepingTasks(
 	{
 		currentUser.EnsureAdmin();
 		var name = DatasetNames.ByService[dataset];
-		return StartAsync(name, DatasetTicker.Once(name, clock.Now), cancellationToken);
+		return StartAsync(name, DatasetTicker.Once(name, clock.Now, DatasetRead.Always), cancellationToken);
 	}
 
 	private async Task<bool> StartAsync(string task, TimeTickerEntity ticker, CancellationToken cancellationToken)

@@ -1,14 +1,17 @@
 using System.Net;
+using System.Text;
 using Contracts.Datasets;
 using Contracts.Feed;
 using Core.Datasets;
 using DB.Data.Feed;
+using DB.Data.Media;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
+using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
 
 namespace Integration.Tests.Feeds;
@@ -21,6 +24,21 @@ public class AnimeSeasonRunTests(SammlarrTestHost host) : IAsyncDisposable
 	private const string MapKnowingOnlyItsAnimeIds = """[{"type":"TV","anilist_id":185660,"mal_id":59130}]""";
 
 	private const string NoPrequel = """{"data":{"Page":{"media":[{"idMal":59130,"format":"TV","relations":{"edges":[]}}]}}}""";
+
+	private const string ShowAndItsBareSeason = """
+		[{"type":"TV","anilist_id":161645,"mal_id":54492,"tvdb_id":431162,"season":{"tvdb":1}},
+		{"type":"TV","anilist_id":185660,"mal_id":59130}]
+		""";
+
+	private const string ShowAndItsPlacedSeason = """
+		[{"type":"TV","anilist_id":161645,"mal_id":54492,"tvdb_id":431162,"season":{"tvdb":1}},
+		{"type":"TV","anilist_id":185660,"mal_id":59130,"tvdb_id":431162,"season":{"tvdb":3}}]
+		""";
+
+	private const string ThePrequelIsTheShow =
+		"""{"data":{"Page":{"media":[{"idMal":59130,"format":"TV","relations":{"edges":[{"relationType":"PREQUEL","node":{"idMal":54492,"type":"ANIME","format":"TV"}}]}}]}}}""";
+
+	private const string NoTitles = """{"data":{"Page":{"media":[]}}}""";
 
 	private static readonly FeedItemSpec LaterSeason = new(
 		"Kusuriya no Hitorigoto 3rd Season",
@@ -76,10 +94,122 @@ public class AnimeSeasonRunTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(snapshot!.Fates.CouldNotLookUp).IsEqualTo(1);
 	}
 
+	[Test]
+	public async Task Run_TwiceForALaterSeasonFoundThroughItsPrequel_AsksForThePrequelOnce()
+	{
+		host.SinkAddresses(MediaProvider.Tvdb);
+		await host.WithMalAccount("mal-client-id");
+		host.MalSeasonHolds(Season, LaterSeason);
+		await LoadAnimeMapAsync(ShowAndItsBareSeason);
+		var prequelAsks = AnsweringAniList(ThePrequelIsTheShow);
+		NoDetailsForTheShow();
+		var feedId = await SeedSeasonFeedAsync();
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+		var first = await PartsAsync();
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		await Assert.That(prequelAsks()).IsEqualTo(1);
+		await Assert.That(first.Select(part => $"{part.Source}:{part.Id}")).IsEquivalentTo(["AniList:185660", "Mal:59130"]);
+		await Assert.That(await PartsAsync()).IsEquivalentTo(first);
+	}
+
+	[Test]
+	public async Task Run_ForALaterSeasonTheMapPointsAtItsShow_LinksItWithoutAPrequelAsk()
+	{
+		host.SinkAddresses(MediaProvider.Tvdb);
+		await host.WithMalAccount("mal-client-id");
+		host.MalSeasonHolds(Season, LaterSeason);
+		await LoadAnimeMapAsync(ShowAndItsPlacedSeason);
+		var prequelAsks = AnsweringAniList(ThePrequelIsTheShow);
+		NoDetailsForTheShow();
+		var feedId = await SeedSeasonFeedAsync();
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		await Assert.That(prequelAsks()).IsEqualTo(0);
+		await Assert.That((await PartsAsync()).Select(part => $"{part.Id} season {part.TvdbSeason}")).IsEquivalentTo(["185660 season 3", "59130 season 3"]);
+	}
+
+	[Test]
+	public async Task Run_WhenTheSeasonCouldNotBeLookedUp_LinksNothingAndAsksAgainNextRun()
+	{
+		host.SinkAddresses(MediaProvider.Tvdb);
+		await host.WithMalAccount("mal-client-id");
+		host.MalSeasonHolds(Season, LaterSeason);
+		await LoadAnimeMapAsync(ShowAndItsBareSeason);
+		host.HttpStub.RespondWithStatusForUrl(TestUrls.AniList, HttpStatusCode.InternalServerError);
+		var feedId = await SeedSeasonFeedAsync();
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+		var firstRun = host.HttpStub.Requests(TestUrls.AniList);
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		await Assert.That(await PartsAsync()).IsEmpty();
+		await Assert.That(host.HttpStub.Requests(TestUrls.AniList)).IsGreaterThan(firstRun);
+	}
+
+	[Test]
+	public async Task Run_TwiceForASeasonWithoutAPrequel_AsksForThePrequelOnce()
+	{
+		host.SinkAddresses(MediaProvider.Tvdb);
+		await host.WithMalAccount("mal-client-id");
+		host.MalSeasonHolds(Season, LaterSeason);
+		await LoadAnimeMapAsync(MapKnowingOnlyItsAnimeIds);
+		var prequelAsks = AnsweringAniList(NoPrequel);
+		var feedId = await SeedSeasonFeedAsync();
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		var parts = await PartsAsync();
+		await Assert.That(prequelAsks()).IsEqualTo(1);
+		await Assert.That(parts.Select(part => $"{part.Source}:{part.Id}")).IsEquivalentTo(["AniList:185660", "Mal:59130"]);
+		await Assert.That(parts.Where(part => part.Media != null)).IsEmpty();
+	}
+
+	private void NoDetailsForTheShow()
+	{
+		host.HttpStub.RespondWithStatusForUrl("/anime/54492", HttpStatusCode.NotFound);
+		host.HttpStub.RespondWithStatusForUrl("/lookup/shows?thetvdb=431162", HttpStatusCode.NotFound);
+	}
+
+	private Func<int> AnsweringAniList(string prequels)
+	{
+		var asked = 0;
+		host.HttpStub.RespondForUrlAsync(
+			TestUrls.AniList,
+			async request =>
+			{
+				var body = await request.Content!.ReadAsStringAsync();
+				var isPrequelAsk = body.Contains("idMal_in", StringComparison.Ordinal);
+				if (isPrequelAsk)
+				{
+					Interlocked.Increment(ref asked);
+				}
+
+				return new HttpResponseMessage(HttpStatusCode.OK)
+				{
+					Content = new StringContent(isPrequelAsk ? prequels : NoTitles, Encoding.UTF8, "application/json"),
+				};
+			}
+		);
+		return () => asked;
+	}
+
+	private async Task<IReadOnlyList<StoredPart>> PartsAsync()
+	{
+		await using var context = await host.ContextFactory.CreateDbContextAsync();
+		return await context
+			.ShowParts.AsNoTracking()
+			.Select(part => new StoredPart(part.Source, part.Id, EF.Property<Guid?>(part, MediaQueries.MediaIdColumn), part.TvdbSeason))
+			.ToListAsync();
+	}
+
 	private async Task LoadAnimeMapAsync(string map)
 	{
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.AnimeLists}/anime-list-full.json", map);
-		await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.AnimeIds).LoadAsync();
+		await host.Resolve<IEnumerable<IDatasetLoader>>().Single(loader => loader.Name == DatasetNames.AnimeIds).LoadAsync(DatasetRead.WhenChanged);
 	}
 
 	private async Task<FeedId> SeedSeasonFeedAsync()
@@ -98,4 +228,6 @@ public class AnimeSeasonRunTests(SammlarrTestHost host) : IAsyncDisposable
 		host.Context.ChangeTracker.Clear();
 		return FeedId.From(entity.Id);
 	}
+
+	private sealed record StoredPart(MediaProvider Source, string Id, Guid? Media, int? TvdbSeason);
 }

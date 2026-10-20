@@ -7,6 +7,8 @@ public interface IMediaCachePurger
 	Task PurgeAsync(CancellationToken cancellationToken = default);
 
 	Task PurgeDetailsAsync(CancellationToken cancellationToken = default);
+
+	Task PurgeShowPartsAsync(CancellationToken cancellationToken = default);
 }
 
-public sealed record CachedTitles(int Detailed, long DetailsBytes, int Matched, long IdsBytes);
+public sealed record CachedTitles(int Detailed, long DetailsBytes, int Matched, long IdsBytes, int ShowParts, long ShowPartsBytes);

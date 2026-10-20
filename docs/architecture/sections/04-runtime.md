@@ -72,6 +72,10 @@ Finding the sink's id starts from what the library holds:
 - Otherwise the load looks the id up from the ids it has, cheapest way first: the downloaded tables, then chains of up
   to three lookups across the services. A busy service counts as more expensive, and one that is down or blocked too
   long is skipped for the next way.
+- An anime list's later season, part or special is asked as its show: the anime id map names its TheTVDB show, or
+  else AniList's earlier season leads to it. Once the show is matched, the season is stored with it as a show part, so
+  the next load goes straight to the show. When AniList's answer leads to no show, that answer is kept for
+  `NoPrequelDays` (3, in the housekeeping settings) and AniList is not asked again until then; a failed ask is not kept.
 
 | Service | Turns these ids into those | Cost in calls |
 |---|---|---|

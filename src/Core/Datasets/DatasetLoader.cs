@@ -7,11 +7,17 @@ using Observability.Usage;
 
 namespace Core.Datasets;
 
+internal enum DatasetRead
+{
+	WhenChanged,
+	Always,
+}
+
 internal interface IDatasetLoader
 {
 	string Name { get; }
 
-	Task<DatasetCheck> LoadAsync(CancellationToken cancellationToken = default);
+	Task<DatasetCheck> LoadAsync(DatasetRead read, CancellationToken cancellationToken = default);
 }
 
 internal sealed class DatasetGate : IDisposable
@@ -46,17 +52,17 @@ internal sealed class DatasetLoader<TRow>(
 {
 	public string Name => dataset.Name;
 
-	public Task<DatasetCheck> LoadAsync(CancellationToken cancellationToken = default)
+	public Task<DatasetCheck> LoadAsync(DatasetRead read, CancellationToken cancellationToken = default)
 	{
-		return gate.OneAtATimeAsync(() => LoadNowAsync(cancellationToken), cancellationToken);
+		return gate.OneAtATimeAsync(() => LoadNowAsync(read, cancellationToken), cancellationToken);
 	}
 
-	private async Task<DatasetCheck> LoadNowAsync(CancellationToken cancellationToken)
+	private async Task<DatasetCheck> LoadNowAsync(DatasetRead read, CancellationToken cancellationToken)
 	{
 		using var marked = UsageCauses.Mark(UsageCause.Dataset);
 		var started = new DatasetCheck(dataset.Name, clock.Now, clock.Now, DatasetOutcome.Unchanged, new None());
 		var last = await loads.FindAsync(dataset.Name, cancellationToken);
-		var download = await dataset.DownloadAsync(last.Map(load => load.ETag), cancellationToken);
+		var download = await dataset.DownloadAsync(last.When(_ => read is DatasetRead.WhenChanged).Map(load => load.ETag), cancellationToken);
 		var check = await download.Match(
 			file => file.Match(changed => ReplaceAsync(started, changed, cancellationToken), () => Task.FromResult(started)),
 			error => Failed(started, error.Reason)

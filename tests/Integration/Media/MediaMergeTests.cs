@@ -41,6 +41,21 @@ public class MediaMergeTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task MergeAsync_ForAPartLinkedToTheRemovedRow_MovesTheLinkToTheSurvivor()
+	{
+		var (older, newer) = await PairAsync();
+		var parts = host.Resolve<IShowParts>();
+		var part = AniListId.From("185660", MediaType.Show);
+		await parts.AddAsync([part], Some.Of(newer), new ShowPartPlace(new None(), new None()));
+
+		await Testee.MergeAsync(newer, older);
+
+		var found = await parts.GetShowsAsync([part]);
+		var keys = await Assert.That(found[part]).IsSome();
+		await Assert.That(keys!.Select(id => $"{id}")).IsEquivalentTo(["Tmdb:Movie:15739", "Imdb:Movie:tt0083564"]);
+	}
+
+	[Test]
 	public async Task MergeAsync_WhenOnlyTheNewerRowIsWanted_KeepsTheNewerRow()
 	{
 		var (older, newer) = await PairAsync();

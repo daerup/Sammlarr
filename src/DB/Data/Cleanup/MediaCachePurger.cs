@@ -25,13 +25,16 @@ internal sealed class MediaCachePurger(
 
 	private const long IdsBytesPerTitle = 1_239;
 
+	private const long BytesPerShowPart = 190;
+
 	public async Task<CachedTitles> CountAsync(CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var detailed = await ctx.MediaDetails.CountAsync(cancellationToken);
 		var matched = await ctx.Media.CountAsync(media => !ctx.ProtectedMediaIds().Contains(media.Id), cancellationToken);
-		return new CachedTitles(detailed, detailed * DetailsBytesPerTitle, matched, matched * IdsBytesPerTitle);
+		var parts = await ctx.ShowParts.CountAsync(cancellationToken);
+		return new CachedTitles(detailed, detailed * DetailsBytesPerTitle, matched, matched * IdsBytesPerTitle, parts, parts * BytesPerShowPart);
 	}
 
 	public async Task PurgeAsync(CancellationToken cancellationToken = default)
@@ -78,5 +81,13 @@ internal sealed class MediaCachePurger(
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var deleted = await ctx.TrimDetailsAsync(ctx.MediaDetails, clock.Now, cancellationToken);
 		logger.LogInformation("Media details purged: deleted {DetailsDeleted} details records", deleted);
+	}
+
+	public async Task PurgeShowPartsAsync(CancellationToken cancellationToken = default)
+	{
+		currentUser.EnsureAdmin();
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var deleted = await ctx.ShowParts.ExecuteDeleteAsync(cancellationToken);
+		logger.LogInformation("Show parts purged: deleted {ShowPartsDeleted} show parts", deleted);
 	}
 }

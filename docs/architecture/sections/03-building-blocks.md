@@ -92,7 +92,7 @@ clients, roles, converter and enricher is in [Cross-cutting Concepts](06-crosscu
 | Wikidata | `Wikidata` (`WikidataModule`) | none | `WikidataIdConverter` | |
 | TVmaze | `Tvmaze` (`TvmazeModule`) | none | `TvmazeIdConverter`, `TvmazeEnricher` | |
 | IMDb datasets | `Imdb` (`ImdbModule`) | none | `ImdbFileEnricher` | `ImdbRatingsFile` (dataset), `ImdbRatingsInRun` (burst primer) |
-| Anime lists | `Anime` (`AnimeListsModule`) | none | `AnimeListsIdConverter` | `AnimeIdsFile` (dataset), `AnimeIdsInRun` (burst primer), `LaterSeasons` |
+| Anime lists | `Anime` (`AnimeListsModule`) | none | `AnimeListsIdConverter` | `AnimeIdsFile` (dataset), `AnimeIdsInRun` (burst primer), `LaterSeasons` (reads and writes `IShowParts`) |
 | AniList | `AniList` (`AniListModule`) | `FeedProvider.AniList` | `AniListEnricher` | `AniListTitles`, `AniListPrequels` (`IAnimePrequels`) |
 | MyAnimeList | `Mal` (`MalModule`) | key check `ApiKeyProvider.Mal`; `FeedProvider.Mal` | `MalEnricher` | |
 | Trakt | `Trakt` (`TraktModule`) | key check `ApiKeyProvider.Trakt`; `FeedProvider.Trakt` | `TraktIdConverter`, `TraktEnricher` | `TraktTitles` |

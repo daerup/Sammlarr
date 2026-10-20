@@ -12,7 +12,11 @@ public record HousekeepingOptions : IOptionsSection
 
 	public int UsageDays { get; set; } = 180;
 
+	public int NoPrequelDays { get; set; } = 3;
+
 	public TimeSpan FreshFor => TimeSpan.FromDays(FreshDays);
+
+	public TimeSpan NoPrequelFor => TimeSpan.FromDays(NoPrequelDays);
 
 	public static string SectionName => "Sammlarr:Housekeeping";
 }

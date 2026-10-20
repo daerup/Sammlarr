@@ -27,10 +27,24 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 	private static readonly Func<MediaType, Optional<MediaProvider>> PlexForEveryTitle = _ => Some.Of(MediaProvider.Plex);
 
+	private static readonly ShowPartPlace Unplaced = new(new None(), new None());
+
 	private IMediaCachePurger _testee = null!;
 
 	[Before(Test)]
 	public void Setup() => _testee = Purger(PlexForEveryTitle, fixture.CurrentUser);
+
+	[Test]
+	public async Task PurgeAsync_ForALinkedShow_RemovesTheLinkWithIt()
+	{
+		var show = await fixture.SeedMediaAsync(TvdbId.From("431162", MediaType.Show));
+		await fixture.Resolve<IShowParts>().AddAsync([AniListId.From("185660", MediaType.Show)], Some.Of(show), Unplaced);
+
+		await _testee.PurgeAsync();
+
+		await using var ctx = await fixture.ContextFactory.CreateDbContextAsync();
+		await Assert.That(await ctx.ShowParts.AnyAsync()).IsFalse();
+	}
 
 	[Test]
 	public async Task PurgeAsync_WhenNotAdmin_Throws()
@@ -127,10 +141,11 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		fixture.Context.Wantlist.Add(new WantlistRow { Media = wanted, Origin = WantlistItemOrigin.Manual });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
+		await fixture.Resolve<IShowParts>().AddAsync([AniListId.From("185660", MediaType.Show)], new None(), Unplaced);
 
 		var counted = await _testee.CountAsync();
 
-		await Assert.That(counted).IsEqualTo(new CachedTitles(2, 2 * 1_669, 2, 2 * 1_239));
+		await Assert.That(counted).IsEqualTo(new CachedTitles(2, 2 * 1_669, 2, 2 * 1_239, 1, 190));
 	}
 
 	[Test]
@@ -291,6 +306,40 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(stored.Single().Identity.Id).IsEqualTo(MediaId.From(media.Id));
 		await Assert.That(stored.Single().Identity.Keys.Count).IsEqualTo(2);
 		await Assert.That(stored.Single().Cached).IsNone();
+	}
+
+	[Test]
+	public async Task PurgeShowPartsAsync_RemovesEveryLinkAndAnswer()
+	{
+		var show = await fixture.SeedMediaAsync(TvdbId.From("431162", MediaType.Show));
+		var parts = fixture.Resolve<IShowParts>();
+		await parts.AddAsync([AniListId.From("185660", MediaType.Show)], Some.Of(show), Unplaced);
+		await parts.AddAsync([MalId.From("60001", MediaType.Show)], new None(), Unplaced);
+
+		await _testee.PurgeShowPartsAsync();
+
+		await using var ctx = await fixture.ContextFactory.CreateDbContextAsync();
+		await Assert.That(await ctx.ShowParts.AnyAsync()).IsFalse();
+	}
+
+	[Test]
+	public async Task PurgeShowPartsAsync_LeavesTheShowsAndTheirIds()
+	{
+		var show = await fixture.SeedMediaAsync(TvdbId.From("431162", MediaType.Show));
+		await fixture.Resolve<IShowParts>().AddAsync([AniListId.From("185660", MediaType.Show)], Some.Of(show), Unplaced);
+
+		await _testee.PurgeShowPartsAsync();
+
+		var stored = await fixture.Resolve<IMediaRepository>().GetAsync([show]);
+		await Assert.That(stored.Single().Identity.Keys.Select(id => $"{id}")).IsEquivalentTo(["Tvdb:Show:431162"]);
+	}
+
+	[Test]
+	public async Task PurgeShowPartsAsync_WhenNotAdmin_Throws()
+	{
+		var testee = Purger(PlexForEveryTitle, new TestCurrentUser { Role = UserRole.Member });
+
+		await Assert.That(async () => await testee.PurgeShowPartsAsync()).Throws<UnauthorizedAccessException>();
 	}
 
 	private static MovieDetailsRow BuildDetails(MediaRow media, string title)

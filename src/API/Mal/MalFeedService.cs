@@ -18,8 +18,7 @@ using Observability.Feed;
 
 namespace API.Mal;
 
-internal sealed partial class MalFeedService(MalClient client, IMediaService media, IApiKeyService apiKeys, LaterSeasons seasons, IDateTimeProvider clock)
-	: IFeedProvider
+internal sealed partial class MalFeedService(MalClient client, IApiKeyService apiKeys, LaterSeasons seasons, IDateTimeProvider clock) : IFeedProvider
 {
 	private const string Fields = "list_status,media_type,start_date,alternative_titles";
 
@@ -41,7 +40,7 @@ internal sealed partial class MalFeedService(MalClient client, IMediaService med
 
 	public IAsyncEnumerable<Listed<MediaMatchResult>> GetFeedItemsAsync(string identifier, FieldNeeds needs, CancellationToken cancellationToken = default)
 	{
-		return media.LoadListAsync(seasons.ShowsOf(RequestsAsync(identifier, cancellationToken), cancellationToken), needs, cancellationToken);
+		return seasons.LoadAsync(RequestsAsync(identifier, cancellationToken), needs, cancellationToken);
 	}
 
 	private async IAsyncEnumerable<IdentifyRequest> RequestsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)

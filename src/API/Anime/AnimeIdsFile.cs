@@ -71,8 +71,16 @@ internal sealed class AnimeIdsFile(HttpClient http) : IDataset<AnimeIdMapping>
 		var tvdb = Claim(claimed, "tvdb", Optional.Of(entry.Tvdb).When(_ => type is MediaType.Show && whole));
 		var tmdb = Claim(claimed, $"tmdb-{type}", type is MediaType.Movie ? movie : Optional.Of(entry.Tmdb?.Tv).When(_ => whole));
 		var imdb = Claim(claimed, "imdb", Optional.Of(entry.Imdb?.FirstOrDefault()).When(_ => whole));
-		var series = Optional.Of(entry.Tvdb).When(_ => type is MediaType.Show && !whole && entry.Season?.Tvdb is not 0);
-		return new AnimeIdMapping(type, Optional.Of(entry.AniList), Optional.Of(entry.Mal), tvdb, tmdb, imdb, series);
+		var bare = tvdb.Kept.IsNone() && tmdb.Kept.IsNone() && imdb.Kept.IsNone();
+		var lost = tvdb.Lost || imdb.Lost;
+		var special = entry.Season?.Tvdb is 0 || (type is MediaType.Movie && movie.IsNone() && entry.Tmdb?.Tv is not null);
+		var series = Optional.Of(entry.Tvdb).When(_ => bare && (!whole || special || lost));
+		var kind = series.Map(_ => MediaType.Show).GetValueOr(type);
+		return new AnimeIdMapping(kind, Optional.Of(entry.AniList), Optional.Of(entry.Mal), tvdb.Kept, tmdb.Kept, imdb.Kept, series)
+		{
+			TvdbSeason = Optional.Of(entry.Season?.Tvdb).When(_ => bare),
+			EpisodeOffset = Optional.Of(entry.EpisodeOffset?.Tvdb).When(_ => bare),
+		};
 	}
 
 	private static bool IsTheShowItself(AnimeListsTypes.Anime entry)
@@ -98,9 +106,13 @@ internal sealed class AnimeIdsFile(HttpClient http) : IDataset<AnimeIdMapping>
 			);
 	}
 
-	private static Optional<T> Claim<T>(HashSet<string> claimed, string kind, Optional<T> id)
+	private static Claimed<T> Claim<T>(HashSet<string> claimed, string kind, Optional<T> id)
 		where T : notnull
 	{
-		return id.When(found => claimed.Add($"{kind}:{found}"));
+		var kept = id.When(found => claimed.Add($"{kind}:{found}"));
+		return new Claimed<T>(kept, id.IsSome() && kept.IsNone());
 	}
+
+	private readonly record struct Claimed<T>(Optional<T> Kept, bool Lost)
+		where T : notnull;
 }

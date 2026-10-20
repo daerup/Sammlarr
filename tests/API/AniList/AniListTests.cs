@@ -167,11 +167,7 @@ public class AniListTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(PlanningList);
 		var titles = Titles(handler);
-		var media = IMediaService.Mock();
-		media
-			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any())
-			.Returns((entries, _, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
-		var feed = new AniListFeedService(Client(handler), media.Object, AnimeMaps.Seasons(AnimeMaps.Unknown()), titles, FeedClock.Today());
+		var feed = new AniListFeedService(Client(handler), AnimeMaps.Seasons(AnimeMaps.Unknown(), media: AnimeMaps.Passing(_asked.Add)), titles, FeedClock.Today());
 		await feed.GetFeedItemsAsync("someone", FieldNeeds.None).InListOrderAsync().ToListAsync();
 
 		var found = await new AniListEnricher(titles).LookUpAsync(AttackOnTitan, []);
@@ -188,11 +184,7 @@ public class AniListTests
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(() => now);
 		var titles = new AniListTitles(Client(handler), Lanes(), clock.Object);
-		var media = IMediaService.Mock();
-		media
-			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any())
-			.Returns((entries, _, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
-		await new AniListFeedService(Client(handler), media.Object, AnimeMaps.Seasons(AnimeMaps.Unknown()), titles, clock.Object)
+		await new AniListFeedService(Client(handler), AnimeMaps.Seasons(AnimeMaps.Unknown(), media: AnimeMaps.Passing(_asked.Add)), titles, clock.Object)
 			.GetFeedItemsAsync("someone", FieldNeeds.None)
 			.ToListAsync();
 		now = now.AddMinutes(11);
@@ -530,10 +522,6 @@ public class AniListTests
 
 	private AniListFeedService Feed(MockHttpHandler handler, Mock<IAnimeIds> map)
 	{
-		var media = IMediaService.Mock();
-		media
-			.LoadListAsync(Any<IAsyncEnumerable<ListTitle>>(), Any(), Any())
-			.Returns((entries, _, cancellation) => ListLoads.UnresolvedAsync(entries, _asked.Add, cancellation));
-		return new AniListFeedService(Client(handler), media.Object, AnimeMaps.Seasons(map), Titles(handler), FeedClock.Today());
+		return new AniListFeedService(Client(handler), AnimeMaps.Seasons(map, media: AnimeMaps.Passing(_asked.Add)), Titles(handler), FeedClock.Today());
 	}
 }

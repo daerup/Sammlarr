@@ -189,6 +189,7 @@ internal static class HousekeepingView
 			HousekeepingStep.UsageStats => $"Usage stats older than {Days(options.UsageDays)}",
 			HousekeepingStep.CachedDetails => $"Cached details nobody opened for {Days(options.DetailsUnusedDays)}",
 			HousekeepingStep.TitleIds => $"Title ids nobody used for {Days(options.IdsUnusedDays)}",
+			HousekeepingStep.ShowParts => $"\"No earlier season\" answers older than {Days(options.NoPrequelDays)}",
 			HousekeepingStep.DuplicateTitles => "Titles stored twice, merged once a second source confirms them",
 			HousekeepingStep.SettledJobs or HousekeepingStep.ScheduleEntries => "Finished jobs and schedule entries, 30 days",
 		};
@@ -203,6 +204,7 @@ internal static class HousekeepingView
 					HousekeepingStep.UsageStats => "usage stats",
 					HousekeepingStep.CachedDetails => "cached details",
 					HousekeepingStep.TitleIds => "title ids",
+					HousekeepingStep.ShowParts => "show parts",
 					HousekeepingStep.DuplicateTitles => "titles stored twice",
 					HousekeepingStep.SettledJobs => "finished jobs",
 					HousekeepingStep.ScheduleEntries => "schedule entries",

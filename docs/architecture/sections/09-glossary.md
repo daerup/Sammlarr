@@ -16,6 +16,11 @@ in claims ([Cross-cutting Concepts](06-crosscutting.md#identity-keys-and-page-li
 **Page link**: A title's page on Rotten Tomatoes, Metacritic or Letterboxd; it never identifies a title
 ([Cross-cutting Concepts](06-crosscutting.md#identity-keys-and-page-links)).
 
+**Show part**: A later season's, part's or special's own AniList or MyAnimeList id, stored with the show it led to
+(`IShowParts`), so the next anime list load goes straight to the show without walking the anime id map or asking AniList.
+An answer that led to no show is kept for `NoPrequelDays` (3 days)
+([Cross-cutting Concepts](06-crosscutting.md#identity-keys-and-page-links)).
+
 **Claim**: The write that fixes a title's identity before Sammlarr hands it out (`IIdentityClaims`). A pinned claim
 extends only its title; an unpinned one finds or starts its title; none merges two ([Runtime View](04-runtime.md#ids-and-the-claim)).
 

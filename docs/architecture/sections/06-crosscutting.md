@@ -166,6 +166,11 @@ A title's identity is its `MediaId` plus its identity keys
   holds at most one key per source, and matching and claims use keys only.
 - A _page link_ (Rotten Tomatoes, Metacritic, Letterboxd) only hangs off a title's details: remakes share a Metacritic
   slug, so a link never joins titles.
+- A _show part_ (`ShowParts`) is a season's, part's or special's own id pointing at the stored show it led to, with its
+  TheTVDB season and episode offset where the anime id map gives them, or AniList's "no earlier season" answer with no
+  show, read for `NoPrequelDays`. It is neither a key nor a page link: it never takes part in a claim and never shows on
+  a title. A linked part goes with its show and moves with a merge; Settings › Housekeeping clears every show part by
+  hand.
 - A claim never joins two stored titles ([Ids and the claim](04-runtime.md#ids-and-the-claim)). Two stored titles
   become one only through a merge, from housekeeping's review, which refuses a pair whose ids contradict.
 
@@ -192,7 +197,8 @@ step and compacts the file; a failing step stops the pass. The windows are
 | `RunHistory` | a run's titles, calls and answer times after `RunHistoryDays` (the run keeps its counts) |
 | `UsageStats` | usage rows and deleted feeds' names after `UsageDays` |
 | `CachedDetails` | details not refreshed for `FreshDays + DetailsUnusedDays` |
-| `TitleIds` | a title and its ids once it has had no details for `IdsUnusedDays - DetailsUnusedDays` (from `Media.DetailsTrimmedAt`), or `IdsUnusedDays` after it was added if it never had any |
+| `TitleIds` | a title, its ids and its show parts once it has had no details for `IdsUnusedDays - DetailsUnusedDays` (from `Media.DetailsTrimmedAt`), or `IdsUnusedDays` after it was added if it never had any |
+| `ShowParts` | AniList's "no earlier season" answers after `NoPrequelDays` |
 | `DuplicateTitles` | settles due stored-twice notes |
 | `SettledJobs`, `ScheduleEntries` | finished jobs, TickerQ occurrences and one-off runs after 30 days |
 
@@ -275,9 +281,10 @@ The rules every job follows; the walkthrough of a run and a sync is in [Runtime 
 A downloaded dataset (IMDb's ratings file, Fribb's anime id map) belongs to the whole app, so it stays out of the
 per-user queue ([ADR 0013](../../adr/0013-load-shared-datasets-outside-the-job-queue.md)). `DatasetSchedule` registers
 a daily TickerQ ticker per `IDatasetLoader` at 04:30, plus a one-off ticker before the first load. The loader asks
-with the last `ETag`, replaces the table in one transaction (a failed or empty file keeps the old one), and records
-the load in `DatasetLoads` and the outcome in `DatasetChecks` (Settings › Housekeeping). Until the first load, its
-enricher and converter answer `Unavailable`.
+with the last `ETag`, except when a dataset's Run button in Settings › Housekeeping starts it: that load downloads and
+reads the file whether it changed or not. The loader replaces the table in one transaction (a failed or empty file
+keeps the old one), and records the load in `DatasetLoads` and the outcome in `DatasetChecks` (Settings ›
+Housekeeping). Until the first load, its enricher and converter answer `Unavailable`.
 
 ## Events and notifications
 

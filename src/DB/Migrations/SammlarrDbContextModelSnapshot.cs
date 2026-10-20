@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261016151958_Baseline";
+    public override string LastMigrationId => "20261019195205_ShowPartAnswers";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -182,6 +182,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.Property<int?>("AniListId")
                     .HasColumnType("INTEGER");
 
+                b.Property<int?>("EpisodeOffset")
+                    .HasColumnType("INTEGER");
+
                 b.Property<string>("ImdbId")
                     .HasColumnType("TEXT");
 
@@ -195,6 +198,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .HasColumnType("INTEGER");
 
                 b.Property<int?>("TvdbId")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int?>("TvdbSeason")
                     .HasColumnType("INTEGER");
 
                 b.Property<string>("Type")
@@ -1026,6 +1032,33 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.HasKey("MediaId", "Provider");
 
                 b.ToTable("ProviderAnswers");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.ShowPartRow", b =>
+            {
+                b.Property<string>("Id")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Source")
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("AskedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<int?>("EpisodeOffset")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid?>("MediaId")
+                    .HasColumnType("TEXT");
+
+                b.Property<int?>("TvdbSeason")
+                    .HasColumnType("INTEGER");
+
+                b.HasKey("Id", "Source");
+
+                b.HasIndex("MediaId");
+
+                b.ToTable("ShowParts");
             });
 
         modelBuilder.Entity("DB.Data.Notifications.NotificationDeliveryOutcomeRow", b =>
@@ -2038,6 +2071,16 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                     .IsRequired();
 
                 b.Navigation("Details");
+            });
+
+        modelBuilder.Entity("DB.Data.Media.ShowPartRow", b =>
+            {
+                b.HasOne("DB.Data.Media.MediaRow", "Media")
+                    .WithMany()
+                    .HasForeignKey("MediaId")
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                b.Navigation("Media");
             });
 
         modelBuilder.Entity("DB.Data.Notifications.NotificationDeliveryOutcomeRow", b =>

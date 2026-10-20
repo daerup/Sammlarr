@@ -35,7 +35,7 @@ public class StoredEnumNamesTests(SammlarrTestHost host) : IAsyncDisposable
 					"DistinctKind: Contradiction, TypesDiffer, AnsweredElsewhere, KeptApartByHand",
 					"FeedProvider: Mdblist, Tmdb, AniList, Mal, Trakt",
 					"FeedRunItemState: Added, Removed, Unaddressable",
-					"HousekeepingStep: RunHistory, UsageStats, CachedDetails, TitleIds, DuplicateTitles, SettledJobs, ScheduleEntries",
+					"HousekeepingStep: RunHistory, UsageStats, CachedDetails, TitleIds, ShowParts, DuplicateTitles, SettledJobs, ScheduleEntries",
 					"JobKind: FeedRun, WantlistSync, DetailsFill",
 					"JobState: Waiting, Queued, Running, Done, Failed, Cancelled",
 					"ManualSource: Unknown, Search, Browse, FeedPreview",
