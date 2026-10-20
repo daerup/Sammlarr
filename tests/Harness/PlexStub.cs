@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Text;
+using System.Text.Encodings.Web;
 using API.Plex;
 using Domain.Media;
 using Domain.Providers;
@@ -100,7 +101,10 @@ internal static class PlexStub
 	}
 
 	public static void Search(HttpStub http, string term, IReadOnlyList<ResolvedVersion> results) =>
-		http.RespondWithJsonForUrl($"{PlexEndpoints.SearchQueryParam}={Uri.EscapeDataString(term)}", results.Count == 0 ? EmptySearchJson : SearchJson(results));
+		http.RespondWithJsonForUrl(
+			$"{PlexEndpoints.SearchQueryParam}={UrlEncoder.Default.Encode(term)}",
+			results.Count == 0 ? EmptySearchJson : SearchJson(results)
+		);
 
 	private const string EmptySearchJson = """
 		{

@@ -22,6 +22,22 @@ public class SiteLinkTests
 	}
 
 	[Test]
+	public async Task Stored_EscapesEveryReservedCharacterTheWayStoredLinksAlreadyRead()
+	{
+		var link = SiteLink.Parse("https://www.themoviedb.org/discover/movie?with_genres=28,12&q=a!b(c)*;@$'", "themoviedb.org");
+
+		await Assert.That(link.Map(found => found.Stored())).IsSome().And.IsEqualTo("discover/movie?with_genres=28%2C12&q=a%21b%28c%29%2A%3B%40%24%27");
+	}
+
+	[Test]
+	public async Task Parse_ForEmptySegmentsBareKeysAndBrokenEscapes_KeepsWhatItCanRead()
+	{
+		var link = SiteLink.Parse("search/anime?a&&b=%zz&c=x+y", "anilist.co");
+
+		await Assert.That(link.Map(found => found.Stored())).IsSome().And.IsEqualTo("search/anime?a=&b=%25zz&c=x%20y");
+	}
+
+	[Test]
 	public async Task Parse_DropsTrackingKeys()
 	{
 		var link = SiteLink.Parse("https://myanimelist.net/topanime.php?_location=mal_h_m&type=airing&utm_source=x", "myanimelist.net");
