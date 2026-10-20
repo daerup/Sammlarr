@@ -32,7 +32,7 @@
                         @Branding.GetBrandingInfo(service).NickName
                     </span>
                     <span>
-                        <UsageOutcomeBar Tally="tally" Width="Math.Max(2, tally.Total * 100.0 / Busiest)">
+                        <UsageOutcomeBar Tally="tally" Busiest="Busiest">
                             <Title>
                                 <BrandedLogo Brand="Branding.GetBrandingInfo(service)" Size="14" Decorative="true"/>
                                 @Branding.GetBrandingInfo(service).NickName
@@ -40,11 +40,11 @@
                         </UsageOutcomeBar>
                     </span>
                     <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
-                    <span class="@UsageView.Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@UsageView.Share(tally.Errors, tally.Total)</span>
+                    <span class="@UsageView.Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@Shares.Of(tally.Errors, tally.Total)</span>
                     <span>
                         <UsageAnswerStrip Service="service" Tally="tally" Width="150"/>
                     </span>
-                    <span class="@UsageView.Tone(tally.RateLimited, tally.Total, "text-[var(--usage-after-429)] font-medium")">@UsageView.Share(tally.RateLimited, tally.Total)</span>
+                    <span class="@UsageView.Tone(tally.RateLimited, tally.Total, "text-[var(--usage-after-429)] font-medium")">@Shares.Of(tally.RateLimited, tally.Total)</span>
                 </div>
             }
         </div>
@@ -74,7 +74,7 @@
         [
             ("Calls", UsageView.Count(All.Total)),
             ("Per title", Run.Counts.Total == 0 ? "n/a" : FormattableString.Invariant($"{All.Total / (double)Run.Counts.Total:0.0}")),
-            ("Answered", UsageView.Share(All.Of(UsageOutcome.Answered), All.Total)),
-            ("Took", UsageView.Duration(Run.Duration.TotalMilliseconds)),
+            ("Answered", Shares.Of(All.Of(UsageOutcome.Answered), All.Total)),
+            ("Took", Run.Duration.Humanize(2, Notation.Symbols)),
         ];
 }

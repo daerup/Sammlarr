@@ -1,6 +1,5 @@
 @page "/feeds"
 @implements IDisposable
-@using Contracts
 @using Contracts.Announcing
 @using Contracts.Feed
 @using Contracts.Identity
@@ -30,7 +29,7 @@
 @inject MediaProviderBrandingService Branding
 @inject FeedRunProgress Progress
 @inject ScrollService ScrollService
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <PageTitle>Feeds</PageTitle>
 
@@ -178,7 +177,7 @@
                 @if (_visible.Count == 0)
                 {
                     <MediaListEmptyState Icon="filter-x" Heading="Nothing matches these filters.">
-                        @_rows.Count feeds are hidden. Clear the filters to see them.
+                        @("feed".ToQuantity(_rows.Count)) @(_rows.Count == 1 ? "is" : "are") hidden. Clear the filters to see everything.
                     </MediaListEmptyState>
                 }
                 else
@@ -356,7 +355,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _now = Clock.Now.ToLocalTime();
+        _now = Clock.GetUtcNow().ToLocalTime();
         _previewReload = new(ReloadPreviewAsync);
         Events.Published += OnEvent;
         Progress.Changed += OnProgress;
@@ -368,7 +367,7 @@
 
     private async Task LoadAsync()
     {
-        _now = Clock.Now.ToLocalTime();
+        _now = Clock.GetUtcNow().ToLocalTime();
         await LoadQueueAsync();
         _feeds = (await FeedService.GetAsync(_cancellation.Token)).Feeds;
         _lastWeek = FeedPulse.Moved(await FeedService.GetRunsAsync(RunQuery.Take(RunCap) with { Since = Some.Of(_now - LastWeek) }, _cancellation.Token));
@@ -377,9 +376,9 @@
 
     private void Rebuild()
     {
-        _rows = [.. _feeds.Select(overview => FeedRow.Of(overview, _feedJobs, _now, Clock.Zone))];
+        _rows = [.. _feeds.Select(overview => FeedRow.Of(overview, _feedJobs, _now, Clock.LocalTimeZone))];
         _visible = _filter.Apply(_rows);
-        _candidates = RunPlan.Candidates(_feeds, _now, Clock.Zone);
+        _candidates = RunPlan.Candidates(_feeds, _now, Clock.LocalTimeZone);
     }
 
     private async Task LoadQueueAsync()
@@ -486,8 +485,8 @@
 
     private void OpenRun(bool fromSelection)
     {
-        _now = Clock.Now.ToLocalTime();
-        _candidates = RunPlan.Candidates(_feeds, _now, Clock.Zone);
+        _now = Clock.GetUtcNow().ToLocalTime();
+        _candidates = RunPlan.Candidates(_feeds, _now, Clock.LocalTimeZone);
         _runFromSelection = fromSelection;
         _isRunOpen = true;
     }
@@ -542,11 +541,7 @@
     private string ConfirmTitle(FeedsConfirm confirm) =>
         confirm switch
         {
-            FeedsConfirm.Pause => Chosen.Count(row => row.Feed.Enabled) switch
-            {
-                1 => "Pause 1 feed?",
-                var pausing => $"Pause {pausing} feeds?",
-            },
+            FeedsConfirm.Pause => $"Pause {"feed".ToQuantity(Chosen.Count(row => row.Feed.Enabled))}?",
             FeedsConfirm.Delete => _deleting.Count == 1 ? $"Delete \"{_deleting[0].Feed.Name}\"?" : $"Delete {_deleting.Count} feeds?",
         };
 

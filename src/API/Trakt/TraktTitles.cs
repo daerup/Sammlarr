@@ -1,7 +1,6 @@
 using System.Net;
 using API.Http;
 using API.Trakt.Types;
-using Contracts;
 using Contracts.Auth;
 using Domain.Auth;
 using Domain.Media;
@@ -9,7 +8,7 @@ using Domain.Providers;
 
 namespace API.Trakt;
 
-internal sealed class TraktTitles(TraktClient client, IApiKeyService apiKeys, IDateTimeProvider clock)
+internal sealed class TraktTitles(TraktClient client, IApiKeyService apiKeys, TimeProvider clock)
 {
 	private readonly RecentAnswers<string, Optional<TraktTypes.Title>> _found = new(clock);
 

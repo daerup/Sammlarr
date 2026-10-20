@@ -1,7 +1,5 @@
-@using Contracts
 @using Domain.Notifications
-@using global::Shared.Extensions
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 @if (Outcomes.Count == 0)
 {
@@ -24,9 +22,9 @@ else
                             <div class="flex items-center justify-between gap-2">
                                 <span class="flex min-w-0 items-baseline gap-1.5">
                                     <span class="font-medium">@Label(entry.Outcome)</span>
-                                    <span class="truncate text-muted-foreground">@entry.EventType.GetDescription()</span>
+                                    <span class="truncate text-muted-foreground">@entry.EventType.Humanize()</span>
                                 </span>
-                                <span class="shrink-0 text-muted-foreground">@Relative(entry.RecordedAt)</span>
+                                <span class="shrink-0 text-muted-foreground">@entry.RecordedAt.Humanize(Clock.GetUtcNow())</span>
                             </div>
                             @if (Detail(entry.Outcome) is { } detail)
                             {
@@ -70,19 +68,7 @@ else
         outcome switch
         {
             Delivered => null,
-            Retrying retrying => $"retry {Relative(retrying.NextAttemptAt)} · {retrying.Reason}",
+            Retrying retrying => $"retry {retrying.NextAttemptAt.Humanize(Clock.GetUtcNow())} · {retrying.Reason}",
             Failed failed => failed.Reason,
         };
-
-    private string Relative(DateTimeOffset when)
-    {
-        var delta = when - Clock.Now;
-        var magnitude = delta < TimeSpan.Zero ? -delta : delta;
-        var unit =
-            magnitude.TotalDays >= 1 ? $"{(int)magnitude.TotalDays}d"
-            : magnitude.TotalHours >= 1 ? $"{(int)magnitude.TotalHours}h"
-            : magnitude.TotalMinutes >= 1 ? $"{(int)magnitude.TotalMinutes}m"
-            : $"{(int)magnitude.TotalSeconds}s";
-        return delta < TimeSpan.Zero ? $"{unit} ago" : $"in {unit}";
-    }
 }

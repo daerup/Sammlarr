@@ -1,5 +1,4 @@
 using System.Reflection;
-using Contracts;
 using Contracts.Identity;
 using Contracts.Jobs;
 using Core.Announcing;
@@ -16,7 +15,7 @@ internal sealed class JobRunner(
 	JobAlarm alarm,
 	JobRunnerStatus status,
 	JobTurn turn,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	ILogger<JobRunner> logger
 ) : BackgroundService
 {
@@ -58,7 +57,7 @@ internal sealed class JobRunner(
 		}
 		catch (Exception exception)
 		{
-			status.Failed(clock.Now);
+			status.Failed(clock.GetUtcNow());
 			logger.LogError(exception, whatFailed);
 		}
 	}
@@ -79,7 +78,7 @@ internal sealed class JobRunner(
 	internal async Task RequeueRunningAsync(CancellationToken cancellationToken)
 	{
 		await using var scope = scopes.CreateAsyncScope();
-		var requeued = await scope.ServiceProvider.GetRequiredService<IJobRepository>().RequeueRunningAsync(clock.Now, cancellationToken);
+		var requeued = await scope.ServiceProvider.GetRequiredService<IJobRepository>().RequeueRunningAsync(clock.GetUtcNow(), cancellationToken);
 		if (requeued > 0)
 		{
 			logger.LogWarning("Requeued {Count} jobs a previous process left running", requeued);
@@ -91,7 +90,7 @@ internal sealed class JobRunner(
 		using var held = await turn.TakeAsync(cancellationToken);
 		await using var scope = scopes.CreateAsyncScope();
 		var jobs = scope.ServiceProvider.GetRequiredService<IJobRepository>();
-		if (await jobs.TakeNextAsync(clock.Now, cancellationToken) is not Some<RunningJob>(var job))
+		if (await jobs.TakeNextAsync(clock.GetUtcNow(), cancellationToken) is not Some<RunningJob>(var job))
 		{
 			return false;
 		}
@@ -103,7 +102,7 @@ internal sealed class JobRunner(
 		try
 		{
 			await DispatchAsync(scope.ServiceProvider, request, cancellationToken);
-			await jobs.CompleteAsync(job.Id, clock.Now, CancellationToken.None);
+			await jobs.CompleteAsync(job.Id, clock.GetUtcNow(), CancellationToken.None);
 			announcer.Announce(new JobStateChangedEvent(job.Owner, request.Kind, request.Key, JobState.Done));
 		}
 		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -114,7 +113,7 @@ internal sealed class JobRunner(
 		catch (Exception exception)
 		{
 			logger.LogError(exception, "Job {Kind} {Key} failed", request.Kind, request.Key);
-			await jobs.FailAsync(job.Id, clock.Now, CancellationToken.None);
+			await jobs.FailAsync(job.Id, clock.GetUtcNow(), CancellationToken.None);
 			announcer.Announce(new JobStateChangedEvent(job.Owner, request.Kind, request.Key, JobState.Failed));
 		}
 

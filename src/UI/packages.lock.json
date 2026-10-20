@@ -47,6 +47,12 @@
         "resolved": "2.0.5",
         "contentHash": "8LrlvI1KpjjJ4VGSqZ16yoOCKlQnYS+Y8rYNifNrscmVh5anJcF9E4e0NiDP30BHBMUbkoJ5KdcxoRWM7Pz9Aw=="
       },
+      "Humanizer.Core": {
+        "type": "Direct",
+        "requested": "[3.0.10, )",
+        "resolved": "3.0.10",
+        "contentHash": "yZIhtw8sYuvsONzQbZxWpR60tMWYHXoo0DL6nyOqSFiU5POjBTSEyWFpTQtJEZuy+oqiYTXKXY/Mjx7KnqIQFw=="
+      },
       "Meziantou.Analyzer": {
         "type": "Direct",
         "requested": "[3.0.303, )",
@@ -80,6 +86,12 @@
         "requested": "[5.6.0, )",
         "resolved": "5.6.0",
         "contentHash": "Kcobt3pnOdO0A+6CKiMHZdTEluJpsfxiV20axtZdmfBQnDmiWTKPJADlgAfdTuKNAnVarrkJa0UEGwuOo91muw=="
+      },
+      "Semver": {
+        "type": "Direct",
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "9jZCicsVgTebqkAujRWtC9J1A5EQVlu0TVKHcgoCuv345ve5DYf4D1MjhKEnQjdRZo6x/vdv6QQrYFs7ilGzLA=="
       },
       "Serilog": {
         "type": "Direct",
@@ -312,6 +324,7 @@
         "type": "Project",
         "dependencies": {
           "Cronos": "[0.13.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Shared": "[1.0.0, )",
           "Vogen": "[8.0.7, )"
         }

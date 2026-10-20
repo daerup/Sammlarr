@@ -55,6 +55,7 @@ public class RunCallsViewTests
 	public async Task Basis_OfTheTypicalRun_NamesItsCallsAndHowManyRunsItCameFrom()
 	{
 		await Assert.That(RunCallsView.Basis(new RunTypical(4664, 12))).Contains("4,664").And.Contains("12 runs");
+		await Assert.That(RunCallsView.Basis(new RunTypical(1, 1))).IsEqualTo("(1 call, the median of its 1 run in the last 30 days)");
 	}
 
 	private static FeedRun Calling(long calls)

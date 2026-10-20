@@ -1,6 +1,5 @@
 @page "/"
 @implements IDisposable
-@using Contracts
 @using Contracts.Announcing
 @using Contracts.Blocklist
 @using Contracts.Feed
@@ -30,7 +29,7 @@
 @inject DialogService DialogService
 @inject IJobQueueView JobQueueView
 @inject MediaProviderBrandingService BrandingService
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <PageTitle>Sammlarr</PageTitle>
 
@@ -55,9 +54,9 @@ else
         {
             <AppLink Href="/wantlist" Arrow="false">@_wantlistCount.ToString("N0")</AppLink>
 
-            <span> titles on your wantlist, assembled by</span>
+            <span>@("title".ToQuantity(_wantlistCount, ShowQuantityAs.None)) on your wantlist, assembled by</span>
             <AppLink Href="/feeds" Arrow="false">@_feeds.Count.ToString("N0")</AppLink>
-            <span>@(_feeds.Count == 1 ? "feed" : "feeds"). </span>
+            <span>@("feed".ToQuantity(_feeds.Count, ShowQuantityAs.None)). </span>
 
             @if (_blocklistCount > 0)
             {
@@ -288,7 +287,7 @@ else
 
     private void ReadClock()
     {
-        _now = Clock.Now.ToLocalTime();
+        _now = Clock.GetUtcNow().ToLocalTime();
         _today = DateOnly.FromDateTime(_now.DateTime);
     }
 
@@ -337,9 +336,9 @@ else
             _sources = LibraryView.Sources(feeds.Feeds, _wantlistCount, ProviderName);
             _queued = UpNextView.InTheQueue(queue, names, brands, Sink);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);
-            _scheduled = UpNextView.OnASchedule(_feeds, _now, Clock.Zone, BrandingService);
-            _candidates = RunPlan.Candidates(feeds.Feeds, _now, Clock.Zone);
-            _days = ActivityLog.Days(runs, names, Clock.Zone);
+            _scheduled = UpNextView.OnASchedule(_feeds, _now, Clock.LocalTimeZone, BrandingService);
+            _candidates = RunPlan.Candidates(feeds.Feeds, _now, Clock.LocalTimeZone);
+            _days = ActivityLog.Days(runs, names, Clock.LocalTimeZone);
         }
         catch (OperationCanceledException)
         {

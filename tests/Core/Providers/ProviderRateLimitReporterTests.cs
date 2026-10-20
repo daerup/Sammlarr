@@ -1,10 +1,10 @@
-using Contracts;
 using Contracts.Messaging;
 using Core.Providers;
 using Domain.Identity;
 using Domain.Notifications;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 
 namespace Core.Tests.Providers;
 
@@ -29,7 +29,7 @@ public class ProviderRateLimitReporterTests
 		var (testee, publisher, clock) = CreateTestee();
 		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
-		clock.Now.Returns(Now + TimeSpan.FromSeconds(1));
+		clock.SetUtcNow(Now + TimeSpan.FromSeconds(1));
 		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
 		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Once);
@@ -41,7 +41,7 @@ public class ProviderRateLimitReporterTests
 		var (testee, publisher, clock) = CreateTestee();
 		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
-		clock.Now.Returns(Now + TimeSpan.FromSeconds(6));
+		clock.SetUtcNow(Now + TimeSpan.FromSeconds(6));
 		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
 		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Exactly(2));
@@ -53,10 +53,10 @@ public class ProviderRateLimitReporterTests
 		var (testee, publisher, clock) = CreateTestee();
 		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(60), Owner);
 
-		clock.Now.Returns(Now + TimeSpan.FromSeconds(1));
+		clock.SetUtcNow(Now + TimeSpan.FromSeconds(1));
 		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(2), Owner);
 
-		clock.Now.Returns(Now + TimeSpan.FromSeconds(5));
+		clock.SetUtcNow(Now + TimeSpan.FromSeconds(5));
 		await testee.ReportAsync(RemoteService.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
 		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Exactly(2));
@@ -73,16 +73,15 @@ public class ProviderRateLimitReporterTests
 		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Exactly(2));
 	}
 
-	private static (ProviderRateLimitReporter Testee, Mock<IMessagePublisher> Publisher, Mock<IDateTimeProvider> Clock) CreateTestee()
+	private static (ProviderRateLimitReporter Testee, Mock<IMessagePublisher> Publisher, FakeTimeProvider Clock) CreateTestee()
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(Now);
+		var clock = new FakeTimeProvider(Now);
 		var publisher = IMessagePublisher.Mock();
 
 		var services = new ServiceCollection();
 		services.AddScoped(_ => publisher.Object);
 		var provider = services.BuildServiceProvider();
 
-		return (new ProviderRateLimitReporter(provider.GetRequiredService<IServiceScopeFactory>(), clock.Object), publisher, clock);
+		return (new ProviderRateLimitReporter(provider.GetRequiredService<IServiceScopeFactory>(), clock), publisher, clock);
 	}
 }

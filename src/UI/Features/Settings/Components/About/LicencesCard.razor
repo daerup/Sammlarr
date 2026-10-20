@@ -90,11 +90,11 @@ else
 
     private static string Counted(Notices notices)
     {
-        var licences = notices.Licences.Count == 1 ? "1 licence" : $"{notices.Licences.Count} licences";
+        var licences = "licence".ToQuantity(notices.Licences.Count);
         return $"{Packages(notices.Licences.Sum(licence => licence.Packages.Count))} under {licences}";
     }
 
-    private static string Packages(int count) => count == 1 ? "1 package" : $"{count} packages";
+    private static string Packages(int count) => "package".ToQuantity(count);
 
     private static string Named(string id) => id.Replace(" OR ", " or ", StringComparison.Ordinal).Replace(" AND ", " and ", StringComparison.Ordinal);
 

@@ -2,6 +2,7 @@ using System.Globalization;
 using Domain.Feed.Run;
 using Domain.Providers;
 using Domain.Usage;
+using Humanizer;
 using UI.Features.Settings.Components.Usage;
 
 namespace UI.Features.Feeds.Components;
@@ -53,8 +54,7 @@ internal static class RunCallsView
 
 	internal static string Basis(RunTypical typical)
 	{
-		var runs = typical.Runs == 1 ? "its 1 run" : $"its {typical.Runs} runs";
-		return $"({UsageView.Calls((long)Math.Round(typical.Calls))}, the median of {runs} in the last 30 days)";
+		return $"({UsageView.Calls((long)Math.Round(typical.Calls))}, the median of its {"run".ToQuantity(typical.Runs)} in the last 30 days)";
 	}
 
 	private static double Median(IReadOnlyList<long> sorted)

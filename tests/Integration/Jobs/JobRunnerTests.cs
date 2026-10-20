@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Feed;
 using Contracts.Jobs;
 using Core.Jobs;
@@ -63,7 +62,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RemoteWantlistEmpty();
 		var queued = await Assert.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger()))).IsOfUnionType<EnqueueResult, Queued>();
 		PastTheGrace();
-		await Assert.That(await host.Resolve<IJobRepository>().TakeNextAsync(host.Resolve<IDateTimeProvider>().Now)).IsSome();
+		await Assert.That(await host.Resolve<IJobRepository>().TakeNextAsync(host.Resolve<TimeProvider>().GetUtcNow())).IsSome();
 
 		await Testee.RequeueRunningAsync(CancellationToken.None);
 
@@ -117,7 +116,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 		return await context.Jobs.Select(row => row.Kind).ToListAsync();
 	}
 
-	private void PastTheGrace() => host.SetCurrentTime(host.Resolve<IDateTimeProvider>().Now + TimeSpan.FromHours(1));
+	private void PastTheGrace() => host.SetCurrentTime(host.Resolve<TimeProvider>().GetUtcNow() + TimeSpan.FromHours(1));
 
 	private async Task<JobState> StateOfAsync(JobId id)
 	{

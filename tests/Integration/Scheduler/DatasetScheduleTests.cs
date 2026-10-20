@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Datasets;
 using Contracts.Identity;
 using Core.Datasets;
@@ -71,7 +70,7 @@ public class DatasetScheduleTests(SammlarrTestHost host) : IAsyncDisposable
 	private DatasetSchedule Testee()
 	{
 		_scheduling ??= BuildScheduling();
-		return new DatasetSchedule(_scheduling, _scheduling.GetRequiredService<IDateTimeProvider>(), NullLogger<DatasetSchedule>.Instance);
+		return new DatasetSchedule(_scheduling, _scheduling.GetRequiredService<TimeProvider>(), NullLogger<DatasetSchedule>.Instance);
 	}
 
 	private async Task<IReadOnlyList<TTicker>> TickersAsync<TTicker>()
@@ -86,7 +85,7 @@ public class DatasetScheduleTests(SammlarrTestHost host) : IAsyncDisposable
 		var services = new ServiceCollection();
 		services.AddLogging(logging => logging.AddProvider(_warnings));
 		services.AddSingleton<ICurrentUser>(host.CurrentUser);
-		services.AddSingleton(host.Resolve<IDateTimeProvider>());
+		services.AddSingleton(host.Resolve<TimeProvider>());
 		services.AddSingleton(host.Resolve<IDatasetLoads>());
 		services.AddSingleton<IDatasetLoader>(new Named(DatasetNames.ImdbRatings));
 		services.AddSammlarrScheduling(host.Connection);

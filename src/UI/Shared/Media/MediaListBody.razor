@@ -38,7 +38,7 @@ else if (TotalCount is { } total)
     @if (VisibleCount == 0)
     {
         <MediaListEmptyState Icon="filter-x" Heading="Nothing matches these filters.">
-            @total titles are hidden. Clear the filters to see them.
+            @("title".ToQuantity(total)) @(total == 1 ? "is" : "are") hidden. Clear the filters to see everything.
         </MediaListEmptyState>
     }
     else

@@ -49,7 +49,7 @@ internal sealed class ListLoad(
 					.BurstsAsync(cancellationToken)
 			)
 			{
-				var listed = burst.Select(Traced).Numbered(titles.Count);
+				List<Listed<TitleWork>> listed = [.. burst.Select((entry, index) => new Listed<TitleWork>(titles.Count + index, Traced(entry)))];
 				var shelf = ShelveAndPrimeAsync(listed, context, (primes.Token, cancellationToken));
 				titles.AddRange(listed.Select(title => SettleAsync(title, shelf, context, settled, watchdog)));
 			}

@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Artwork;
@@ -20,7 +19,7 @@ internal sealed class DetailsFetcher(
 	IRemoteCapacity capacity,
 	IServiceReadiness readiness,
 	IEnumerable<IArtworkResizer> resizers,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	FeedLoadOptions options,
 	HousekeepingOptions housekeeping,
 	ILogger<DetailsFetcher> logger
@@ -39,7 +38,7 @@ internal sealed class DetailsFetcher(
 
 	public FieldNeeds FillsFor(RemoteService remote, FieldNeeds needs, Optional<CachedDetails> stored)
 	{
-		var now = clock.Now;
+		var now = clock.GetUtcNow();
 		var fills = enrichers.Find(remote).Map(enricher => enricher.Fills).GetValueOr(MediaFields.None);
 		return stored.Match(
 			cached =>
@@ -89,7 +88,7 @@ internal sealed class DetailsFetcher(
 
 	private bool Unsure(CachedDetails copy, Error error)
 	{
-		var now = clock.Now;
+		var now = clock.GetUtcNow();
 		var unreached =
 			error.CausedBy<RemoteUnavailableException>().IsSome() || copy.Answers.Any(answer => answer.Failures > 0 && answer.AskableAt(housekeeping.FreshFor) > now);
 		return copy.IsStale(now, housekeeping.FreshFor) && unreached;
@@ -102,7 +101,7 @@ internal sealed class DetailsFetcher(
 		CancellationToken cancellationToken = default
 	)
 	{
-		var now = clock.Now;
+		var now = clock.GetUtcNow();
 		var reason = stored.Map(previous => Reason(previous, now)).GetValueOr(new Uncached());
 		var preferred = await PreferredAsync(cancellationToken);
 		var (enriched, answered, outcomes, unavailable, held) = await EnrichAsync(
@@ -118,7 +117,7 @@ internal sealed class DetailsFetcher(
 			stored
 				.When(_ => outcomes.Count > 0)
 				.Apply(previous =>
-					run.Writer.Save(new DetailsChange(identity.Id, stored, previous with { AskedAt = clock.Now, Answers = Answers(reason, outcomes, now) }))
+					run.Writer.Save(new DetailsChange(identity.Id, stored, previous with { AskedAt = clock.GetUtcNow(), Answers = Answers(reason, outcomes, now) }))
 				);
 			return unavailable.Match(remote => Error.From(new RemoteUnavailableException(remote, sent: false)), () => Error.From("the details could not be fetched"));
 		}
@@ -129,7 +128,7 @@ internal sealed class DetailsFetcher(
 		}
 
 		var identified = await KeepNewKeysAsync(identity, enriched.Identity, answered, cancellationToken);
-		var askedAt = clock.Now;
+		var askedAt = clock.GetUtcNow();
 		var cached = new CachedDetails(enriched.Details, RefreshedAt(reason, held, askedAt), askedAt, Answers(reason, outcomes, now));
 		run.Writer.Save(new DetailsChange(identity.Id, stored, cached));
 		return Success.Of(enriched with { Identity = identified, Stale = held });
@@ -166,8 +165,8 @@ internal sealed class DetailsFetcher(
 
 	private bool NeedsRefetch(MediaIdentity identity, CachedDetails cached, IReadOnlySet<RemoteService> connected, FieldNeeds needs)
 	{
-		var leftToAsk = EnrichersLeftToAsk(identity, cached.Resting(clock.Now, housekeeping.FreshFor), connected);
-		return EnricherChoice.NeedsRefetch(cached, leftToAsk, needs, clock.Now, housekeeping.FreshFor);
+		var leftToAsk = EnrichersLeftToAsk(identity, cached.Resting(clock.GetUtcNow(), housekeeping.FreshFor), connected);
+		return EnricherChoice.NeedsRefetch(cached, leftToAsk, needs, clock.GetUtcNow(), housekeeping.FreshFor);
 	}
 
 	private static FieldNeeds Target(FetchReason reason, FieldNeeds needs)
@@ -271,7 +270,7 @@ internal sealed class DetailsFetcher(
 		CancellationToken cancellationToken
 	)
 	{
-		var now = clock.Now;
+		var now = clock.GetUtcNow();
 		var known = identity;
 		var fresh = MediaDetails.Empty(backup.Type);
 		var gapFills = MediaDetails.Empty(backup.Type);
@@ -285,7 +284,7 @@ internal sealed class DetailsFetcher(
 		while (target.Of(current.Missing) is var missing && !missing.IsEmpty)
 		{
 			var leftToAsk = EnrichersLeftToAsk(known, asked, run.Connected);
-			var at = clock.Now;
+			var at = clock.GetUtcNow();
 			if (EnricherChoice.Next(missing, leftToAsk, preferred, at) is not Some<EnricherCandidate>(var next))
 			{
 				var (stopped, unasked) = GiveUp(missing, leftToAsk, at);

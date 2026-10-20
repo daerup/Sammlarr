@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts;
 using Contracts.Blocklist;
 using Contracts.Identity;
 using Contracts.Media;
@@ -8,6 +7,7 @@ using Contracts.Wantlist;
 using Domain.Media;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using Shared.Options;
 using UI.Features.Settings.Components.Testing;
 using UI.Shared.Services;
@@ -30,10 +30,8 @@ public class DemoRenderTests : BunitContext
 		Services.AddSingleton(new AccountsOptions());
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton(ArtworkStub.Sizing());
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(new DateTimeOffset(2026, 10, 4, 12, 0, 0, TimeSpan.Zero));
-		clock.Zone.Getter.Returns(TimeZoneInfo.Utc);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(new DateTimeOffset(2026, 10, 4, 12, 0, 0, TimeSpan.Zero));
+		Services.AddSingleton<TimeProvider>(clock);
 		Services.AddSingleton(IUserManagementService.Mock().Object);
 		Services.AddSingleton(IMediaService.Mock().Object);
 		Services.AddSingleton(IWantlistService.Mock().Object);

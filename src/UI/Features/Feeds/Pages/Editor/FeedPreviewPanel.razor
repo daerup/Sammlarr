@@ -719,7 +719,7 @@
                 return;
             }
 
-            Notify(notifier => notifier.Info($"Loaded {_rawResults.Count} items in {FormatElapsed(_fetchTimer.Elapsed)}."));
+            Notify(notifier => notifier.Info($"Loaded {"item".ToQuantity(_rawResults.Count)} in {_fetchTimer.Elapsed.Humanize(2, Notation.Symbols)}."));
         }
         catch (Exception) when (fetch != _fetchGeneration)
         {
@@ -940,9 +940,6 @@
         _cts?.Cancel();
         _cts?.Dispose();
     }
-
-    private static string FormatElapsed(TimeSpan elapsed) =>
-        elapsed.TotalSeconds < 1 ? $"{elapsed.TotalMilliseconds:0} ms" : $"{elapsed.TotalSeconds:0.0} s";
 
     private async Task LoadWantlistAndBlocklistAsync(CancellationToken cancellationToken)
     {

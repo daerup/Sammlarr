@@ -50,11 +50,9 @@
         State switch
         {
             PushDotState.Pushed => $"Synced to {ProviderName}",
-            PushDotState.Failed => $"Synchronization failed after {AttemptText(Attempts)}",
+            PushDotState.Failed => $"Synchronization failed after {"attempt".ToQuantity(Attempts)}",
             PushDotState.Removed => $"Pending removal from {ProviderName}",
             PushDotState.Pending when Attempts == 0 => "Synchronization pending",
             PushDotState.Pending => $"Synchronization pending (attempt {Attempts + 1})",
         };
-
-    private static string AttemptText(int attempts) => $"{attempts} attempt{(attempts == 1 ? "" : "s")}";
 }

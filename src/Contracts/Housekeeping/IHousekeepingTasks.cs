@@ -17,6 +17,7 @@ public interface IHousekeepingTasks
 
 public sealed record HousekeepingOverview(
 	DatabaseSize Size,
+	DatabaseParts Parts,
 	PassTask Pass,
 	IReadOnlyList<DatasetTask> Datasets,
 	CachedTitles Cache,

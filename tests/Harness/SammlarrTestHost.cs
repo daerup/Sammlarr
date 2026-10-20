@@ -7,7 +7,6 @@ using API.Mal;
 using API.Mdblist;
 using API.Plex;
 using API.Tmdb;
-using Contracts;
 using Contracts.Announcing;
 using Contracts.Auth;
 using Contracts.DI;
@@ -89,8 +88,10 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private readonly RemoteWantlistState _remote = new();
 	private readonly MutableClock _clock = new();
 
-	private Optional<TimeProvider> _time = new None();
+	private Optional<FakeTimeProvider> _time = new None();
 	private bool _cachesOnTheClock;
+
+	private TimeProvider Clock => _time.Match<FakeTimeProvider, TimeProvider>(time => time, () => _clock);
 	private readonly OAuthStub _oauth = new();
 	private readonly SessionInvalidatorStub _sessionInvalidator = new();
 
@@ -172,7 +173,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			Resolve<JobAlarm>(),
 			Resolve<JobRunnerStatus>(),
 			Resolve<JobTurn>(),
-			Resolve<IDateTimeProvider>(),
+			Resolve<TimeProvider>(),
 			NullLogger<JobRunner>.Instance
 		);
 
@@ -198,9 +199,9 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	internal void MdblistKeyHasLeft(string key, long remaining)
 	{
 		var budget = Resolve<MdblistBudget>();
-		budget.Record(key, MdblistAllowance(30, _clock.Now.AddHours(-1)));
-		budget.Record(key, MdblistAllowance(1000, _clock.Now.AddDays(1)));
-		budget.Record(key, MdblistAllowance(remaining, _clock.Now.AddDays(1)));
+		budget.Record(key, MdblistAllowance(30, Clock.GetUtcNow().AddHours(-1)));
+		budget.Record(key, MdblistAllowance(1000, Clock.GetUtcNow().AddDays(1)));
+		budget.Record(key, MdblistAllowance(remaining, Clock.GetUtcNow().AddDays(1)));
 	}
 
 	internal async Task<MediaId> SeedMediaAsync(params IIdentityKey[] externals)
@@ -217,14 +218,18 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return MediaId.From(media.Id);
 	}
 
-	internal void SetCurrentTime(DateTimeOffset now) => _clock.Now = now;
+	internal void SetCurrentTime(DateTimeOffset now)
+	{
+		_clock.Now = now;
+		_time.Apply(time => time.SetUtcNow(now));
+	}
 
 	internal void ExpireCachesOnTheClock() => _cachesOnTheClock = true;
 
 	internal FakeTimeProvider UseFakeTime()
 	{
 		var time = new FakeTimeProvider(_clock.Now);
-		_time = Some.Of<TimeProvider>(time);
+		_time = Some.Of(time);
 		return time;
 	}
 
@@ -418,7 +423,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		var entered = await gate.EnterAsync(LanePriority.Interactive, TimeSpan.Zero, CancellationToken.None);
 		entered
 			.GetOrThrow(_ => new InvalidOperationException($"{remote}'s lane refused the permit that throttles it."))
-			.Release(new AttemptThrottled(Some.Of(_clock.Now + block)));
+			.Release(new AttemptThrottled(Some.Of(Clock.GetUtcNow() + block)));
 	}
 
 	internal void TmdbHasNoDetail(MediaSpec spec)
@@ -586,7 +591,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	}
 
 	internal void OAuthReturns(string externalUserId, string displayName, string avatarUrl = "avatar") =>
-		_oauth.Returns(new ExternalLogin(externalUserId, displayName, avatarUrl, new OAuthTokenGrant("plex-token", _clock.Now.AddDays(30), Guid.NewGuid())));
+		_oauth.Returns(new ExternalLogin(externalUserId, displayName, avatarUrl, new OAuthTokenGrant("plex-token", Clock.GetUtcNow().AddDays(30), Guid.NewGuid())));
 
 	internal void OAuthFails(string reason) => _oauth.Fails(reason);
 
@@ -755,7 +760,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			user,
 			provider.GetRequiredService<IEnumerable<IPropertyAddedConvention>>(),
 			provider.GetRequiredService<IEnumerable<IModelConfiguration>>(),
-			new FixedClock()
+			new FakeTimeProvider(MutableClock.Start)
 		);
 	}
 
@@ -808,11 +813,10 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddSingleton<ISessionInvalidator>(_sessionInvalidator);
 		services.ConfigureAll<HttpStandardResilienceOptions>(options => options.Retry.ShouldHandle = _ => ValueTask.FromResult(false));
 		services.AddLogging();
-		services.AddSingleton<IDateTimeProvider>(_clock);
-		services.AddSingleton(_time.GetValueOr(() => new ClockTime(_clock)));
+		services.AddSingleton(Clock);
 		if (_cachesOnTheClock)
 		{
-			services.Configure<MemoryCacheOptions>(options => options.Clock = new CacheClock(_clock));
+			services.Configure<MemoryCacheOptions>(options => options.Clock = new CacheClock(Clock));
 		}
 
 		services.ConfigureAll<HttpClientFactoryOptions>(options => options.HttpMessageHandlerBuilderActions.Add(builder => builder.PrimaryHandler = HttpStub));
@@ -986,32 +990,20 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		SeedRows.PlexUser(context, user.Id.Value, user.DisplayName, user.Role, user.AvatarUrl, 40);
 	}
 
-	private sealed class FixedClock : IDateTimeProvider
+	private sealed class MutableClock : TimeProvider
 	{
-		public DateTimeOffset Now { get; } = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
+		internal static readonly DateTimeOffset Start = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
 
-		public DateOnly Today => DateOnly.FromDateTime(Now.UtcDateTime);
+		public DateTimeOffset Now { get; set; } = Start;
 
-		public TimeZoneInfo Zone => TimeZoneInfo.Utc;
+		public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
+
+		public override DateTimeOffset GetUtcNow() => Now;
 	}
 
-	private sealed class MutableClock : IDateTimeProvider
+	private sealed class CacheClock(TimeProvider clock) : ISystemClock
 	{
-		public DateTimeOffset Now { get; set; } = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
-
-		public DateOnly Today => DateOnly.FromDateTime(Now.UtcDateTime);
-
-		public TimeZoneInfo Zone => TimeZoneInfo.Utc;
-	}
-
-	private sealed class ClockTime(IDateTimeProvider clock) : TimeProvider
-	{
-		public override DateTimeOffset GetUtcNow() => clock.Now;
-	}
-
-	private sealed class CacheClock(IDateTimeProvider clock) : ISystemClock
-	{
-		public DateTimeOffset UtcNow => clock.Now;
+		public DateTimeOffset UtcNow => clock.GetUtcNow();
 	}
 
 	private sealed class FileContextFactory(IServiceProvider provider, string connectionString, ICurrentUser user) : IDbContextFactory<SammlarrDbContext>

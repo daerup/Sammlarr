@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Notifications;
@@ -16,7 +15,7 @@ public static class NotificationDeliveryHandler
 		INotificationTargetRepository targets,
 		IKeyedServiceIndex<NotificationChannel, INotificationChannel> channels,
 		INotificationDeliveryOutcomeRepository outcomes,
-		IDateTimeProvider clock,
+		TimeProvider clock,
 		CancellationToken cancellationToken
 	)
 	{
@@ -34,7 +33,7 @@ public static class NotificationDeliveryHandler
 		int attempts,
 		IKeyedServiceIndex<NotificationChannel, INotificationChannel> channels,
 		INotificationDeliveryOutcomeRepository outcomes,
-		IDateTimeProvider clock,
+		TimeProvider clock,
 		CancellationToken cancellationToken
 	)
 	{
@@ -45,7 +44,7 @@ public static class NotificationDeliveryHandler
 			DeliverySucceeded => new Delivered(),
 			DeliveryUnrecoverable unrecoverable => new Failed(unrecoverable.Reason),
 			DeliveryRetryable retryable when attempts >= NotificationDeliveryRetry.MaxAttempts => new Failed(retryable.Reason),
-			DeliveryRetryable retryable => new Retrying(retryable.Reason, clock.Now + NotificationDeliveryRetry.Cooldowns[attempts - 1]),
+			DeliveryRetryable retryable => new Retrying(retryable.Reason, clock.GetUtcNow() + NotificationDeliveryRetry.Cooldowns[attempts - 1]),
 		};
 
 		await outcomes.RecordAsync(message.Context.Id, message.TargetId, message.Context.Type, outcome, cancellationToken);

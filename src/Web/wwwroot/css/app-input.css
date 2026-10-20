@@ -457,6 +457,30 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
 }
 
 @layer components {
+    .bar-hatched {
+        background: repeating-linear-gradient(135deg, color-mix(in oklch, var(--muted-foreground) 55%, transparent) 0 2px, transparent 2px 5px);
+    }
+
+    .bar-striped {
+        background: repeating-linear-gradient(-45deg, var(--alert-warning) 0 5px, color-mix(in oklch, var(--alert-warning) 55%, transparent) 5px 10px);
+        background-size: 14px 14px;
+        animation: bar-slide 0.6s linear infinite;
+    }
+
+    @keyframes bar-slide {
+        to {
+            background-position: 14px 0;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .bar-striped {
+            animation: none;
+        }
+    }
+}
+
+@layer components {
     .feed-live {
         --f-matched: var(--alert-success);
         --f-notfound: var(--destructive);

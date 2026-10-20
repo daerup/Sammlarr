@@ -5,6 +5,7 @@ using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
 using Domain.Providers;
+using Humanizer;
 
 namespace UI.Features.Settings.Components.Notifications;
 
@@ -22,15 +23,7 @@ internal static class NotificationSampleContext
 	public static NotificationContext For(NotificationEventType eventType)
 	{
 		var sample = Sample(eventType);
-		return new NotificationContext(
-			sample.Id,
-			sample.Type,
-			sample.DefaultLevel,
-			sample.OccurredAt,
-			sample.Type.GetDescription(),
-			sample.Summary,
-			Data(eventType)
-		);
+		return new NotificationContext(sample.Id, sample.Type, sample.DefaultLevel, sample.OccurredAt, sample.Type.Humanize(), sample.Summary, Data(eventType));
 	}
 
 	private static INotification Sample(NotificationEventType eventType) =>

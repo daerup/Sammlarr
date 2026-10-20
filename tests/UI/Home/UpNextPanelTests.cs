@@ -1,9 +1,9 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts;
 using Domain.Jobs;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
@@ -35,6 +35,16 @@ public class UpNextPanelTests : BunitContext
 
 		await Assert.That(cut.Find(".band-note").TextContent).IsEqualTo("7 feeds on a schedule");
 		await Assert.That(cut.FindAll(".row")).Count().IsEqualTo(5);
+	}
+
+	[Test]
+	public async Task Note_WithOneFeedScheduled_CountsItInTheSingular()
+	{
+		IReadOnlyList<UpNextRow> scheduled = [new("feed 1", "At 04:00", "a day from now", UpNextKind.Scheduled, null)];
+
+		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Scheduled, scheduled));
+
+		await Assert.That(cut.Find(".band-note").TextContent).IsEqualTo("1 feed on a schedule");
 	}
 
 	[Test]
@@ -92,9 +102,8 @@ public class UpNextPanelTests : BunitContext
 	public async Task Row_WhileWaiting_CountsDownToWhenItRuns()
 	{
 		var now = new DateTimeOffset(2026, 9, 30, 14, 0, 0, TimeSpan.Zero);
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(now);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(now);
+		Services.AddSingleton<TimeProvider>(clock);
 		IReadOnlyList<UpNextRow> queued =
 		[
 			new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null) { RunsAt = Some.Of(now.AddMinutes(2)) },
@@ -102,7 +111,7 @@ public class UpNextPanelTests : BunitContext
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
 
-		await Assert.That(cut.Find(".row-when").TextContent.Trim()).IsEqualTo("in 2 min");
+		await Assert.That(cut.Find(".row-when").TextContent.Trim()).IsEqualTo("2 minutes from now");
 	}
 
 	[Test]

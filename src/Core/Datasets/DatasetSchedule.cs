@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using Contracts;
 using Contracts.Datasets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,7 +10,7 @@ using TickerQ.Utilities.Interfaces.Managers;
 
 namespace Core.Datasets;
 
-internal sealed class DatasetSchedule(IServiceProvider services, IDateTimeProvider clock, ILogger<DatasetSchedule> logger) : IHostedLifecycleService
+internal sealed class DatasetSchedule(IServiceProvider services, TimeProvider clock, ILogger<DatasetSchedule> logger) : IHostedLifecycleService
 {
 	internal const string Daily = "0 30 4 * * *";
 
@@ -44,7 +43,7 @@ internal sealed class DatasetSchedule(IServiceProvider services, IDateTimeProvid
 
 	private async Task FirstLoadAsync(ITimeTickerManager<TimeTickerEntity> once, string name, CancellationToken cancellationToken)
 	{
-		var added = await once.AddAsync(DatasetTicker.Once(name, clock.Now, DatasetRead.WhenChanged), cancellationToken);
+		var added = await once.AddAsync(DatasetTicker.Once(name, clock.GetUtcNow(), DatasetRead.WhenChanged), cancellationToken);
 		Warn(name, "first", added.IsSucceeded, added.Exception);
 	}
 

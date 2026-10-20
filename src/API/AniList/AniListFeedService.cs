@@ -5,7 +5,6 @@ using API.AniList.Types;
 using API.Anime;
 using API.Feeds;
 using API.Http;
-using Contracts;
 using Contracts.Feed;
 using Contracts.Media;
 using Domain.Feed;
@@ -15,7 +14,7 @@ using Observability.Feed;
 
 namespace API.AniList;
 
-internal sealed partial class AniListFeedService(AniListClient client, LaterSeasons seasons, AniListTitles titles, IDateTimeProvider clock) : IFeedProvider
+internal sealed partial class AniListFeedService(AniListClient client, LaterSeasons seasons, AniListTitles titles, TimeProvider clock) : IFeedProvider
 {
 	private const string Query =
 		$"query ($user: String, $status: MediaListStatus) {{ MediaListCollection(userName: $user, type: ANIME, status: $status) {{ lists {{ entries {{ media {{ {AniListMedia.Fields} }} }} }} }} }}";
@@ -95,7 +94,7 @@ internal sealed partial class AniListFeedService(AniListClient client, LaterSeas
 		var genres = AniListPages.NeedsGenres(search) ? await GenresAsync(cancellationToken) : new HashSet<string>();
 		var music = AniListPages.AsksForMusic(search);
 		var variables = AniListPages
-			.Variables(search, genres, DateOnly.FromDateTime(clock.Now.UtcDateTime))
+			.Variables(search, genres, DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime))
 			.GetOrThrow(error => new InvalidOperationException(error.Reason));
 		var page = 1;
 		var more = true;

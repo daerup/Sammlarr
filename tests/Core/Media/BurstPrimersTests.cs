@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Media;
 using Contracts.Settings;
 using Core.DI;
@@ -6,6 +5,7 @@ using Core.Media;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Shared.Options;
 
 namespace Core.Tests.Media;
@@ -185,8 +185,7 @@ public class BurstPrimersTests
 		var enricher = IDetailsEnricher.Mock();
 		enricher.Fills.Returns(fills);
 		enricher.Accepts.Returns([MediaProvider.Imdb]);
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(Now);
+		var clock = new FakeTimeProvider(Now);
 		var capacity = TestCapacity.With(_ => load);
 		var details = new DetailsFetcher(
 			new KeyedServiceSet<RemoteService, IDetailsEnricher>([new(RemoteService.Mdblist, enricher.Object)]),
@@ -195,13 +194,13 @@ public class BurstPrimersTests
 			capacity,
 			TestReadiness.Everything(),
 			[TestArtwork.ResizesAnything()],
-			clock.Object,
+			clock,
 			new FeedLoadOptions(),
 			new HousekeepingOptions(),
 			NullLogger<DetailsFetcher>.Instance
 		);
 		var primer = IBurstPrimer.Mock();
 		primer.Remote.Returns(RemoteService.Mdblist);
-		return (new BurstPrimers([.. others, primer.Object], details, capacity, clock.Object, new FeedLoadOptions()), primer);
+		return (new BurstPrimers([.. others, primer.Object], details, capacity, clock, new FeedLoadOptions()), primer);
 	}
 }

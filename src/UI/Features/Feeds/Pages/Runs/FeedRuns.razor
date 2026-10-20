@@ -1,7 +1,6 @@
 @page "/feeds/{FeedIdParam}/runs"
 @page "/feeds/{FeedIdParam}/runs/{RunIdParam}"
 @using System.Globalization
-@using Contracts
 @using Contracts.Feed
 @using Contracts.Media
 @using Domain.Feed.Run
@@ -12,7 +11,7 @@
 @inject IMediaService Media
 @inject NavigationManager Navigation
 @inject ScrollService ScrollService
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <PageTitle>Run history</PageTitle>
 
@@ -31,7 +30,7 @@
                 <div class="runs-title">
                     <h2>Run history</h2>
                     <FeedStrategyChip Strategy="feed.Strategy"/>
-                    <FeedTriggerChip Schedule="feed.Schedule" NextRun="@ChipNextRun" Now="Clock.Now"/>
+                    <FeedTriggerChip Schedule="feed.Schedule" NextRun="@ChipNextRun" Now="Clock.GetUtcNow()"/>
                     @if (!feed.Enabled)
                     {
                         <FeedChip Tone="FeedChipTone.Attention" Icon="pause">Paused</FeedChip>
@@ -53,7 +52,7 @@
                             <span>·</span>
                             <span>
                                 <AppLink Href="@($"/wantlist?feed={FeedIdParam}")" Arrow="false"
-                                         Title="@($"Show the {_onWantlist} titles this feed put on your wantlist")">@_onWantlist</AppLink>
+                                         Title="@($"Show the {"title".ToQuantity(_onWantlist)} this feed put on your wantlist")">@_onWantlist</AppLink>
                                 on your wantlist
                             </span>
                         }
@@ -344,7 +343,7 @@
 
     private async Task LoadTypicalAsync(FeedId feedId)
     {
-        var recent = await FeedService.GetRunsAsync(RunQuery.Take(TypicalReach) with { Feed = Some.Of(feedId), Since = Some.Of(Clock.Now.AddDays(-30)), WithItems = false });
+        var recent = await FeedService.GetRunsAsync(RunQuery.Take(TypicalReach) with { Feed = Some.Of(feedId), Since = Some.Of(Clock.GetUtcNow().AddDays(-30)), WithItems = false });
         _typical = RunCallsView.Typical(recent);
     }
 
@@ -430,7 +429,7 @@
                 .Select(group => new RailDay(DayLabel(group.Key), [.. group.OrderByDescending(run => run.StartedAt)])),
         ];
 
-    private DateTime Today => Clock.Now.ToLocalTime().Date;
+    private DateTime Today => Clock.GetUtcNow().ToLocalTime().Date;
 
     private string DayLabel(DateTime day) =>
         day == Today ? "Today"
@@ -466,7 +465,7 @@
     {
         get
         {
-            return Optional.Of(_feed).When(feed => feed.Enabled).Map(feed => feed.Schedule.NextRun(Clock.Now, Clock.Zone));
+            return Optional.Of(_feed).When(feed => feed.Enabled).Map(feed => feed.Schedule.NextRun(Clock.GetUtcNow(), Clock.LocalTimeZone));
         }
     }
 
@@ -477,8 +476,8 @@
         get
         {
             return _history.FirstRunAt.Match(
-                first => string.Create(CultureInfo.InvariantCulture, $"{_history.TotalRuns} {(_history.TotalRuns == 1 ? "run" : "runs")} since {first.ToLocalTime():d MMMM}"),
-                () => $"{_history.TotalRuns} runs"
+                first => string.Create(CultureInfo.InvariantCulture, $"{"run".ToQuantity(_history.TotalRuns)} since {first.ToLocalTime():d MMMM}"),
+                () => "run".ToQuantity(_history.TotalRuns)
             );
         }
     }

@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics.Metrics;
 using API.Http;
 using API.Http.Lanes;
-using Contracts;
 using Contracts.Providers;
 using Contracts.Usage;
 using Domain.Feed;
@@ -200,7 +199,6 @@ public class UsageHandlersTests
 						},
 					}
 				);
-				services.AddSingleton(IDateTimeProvider.Mock().Object);
 				services.AddSingleton(IProviderRateLimitReporter.Mock().Object);
 				services.AddSingleton(feedRuns ?? IFeedRunUsage.Mock().Object);
 				services.AddModule<HttpModule>();

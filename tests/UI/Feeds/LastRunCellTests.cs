@@ -2,7 +2,6 @@ using System.Globalization;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Contracts.Blocklist;
 using Contracts.Media;
 using Contracts.Settings;
@@ -16,6 +15,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
@@ -111,17 +111,30 @@ public class LastRunCellTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_WithBar_ShowsTheBarAndBothTooltipSections()
+	public async Task Pill_PointedAt_ShowsBothTooltipSections()
 	{
 		RegisterServices();
 
 		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Bar, true));
 		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-bar]").Count == 1);
-		await cut.Find("[data-testid=last-run-bar]").ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
+		await cut.Find(".last-run").ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
 		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-tip]").Count == 1);
 
 		await Assert.That(cut.Find("[data-testid=last-run-tip]").TextContent).Contains("Finding the titles").And.Contains("What the run did");
 		await Assert.That(cut.Find("[data-testid=last-run-tip-did]").TextContent).Contains("Added to your collection");
+	}
+
+	[Test]
+	public async Task Bar_PointedAt_ListsHowTheRunFoundItsTitlesUnderItsDate()
+	{
+		RegisterServices();
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.Bar, true));
+		cut.WaitForState(() => cut.FindAll("[data-testid=last-run-bar]").Count == 1);
+		await cut.Find("[data-testid=last-run-bar] [data-testid=stacked-bar-track] [data-part]").TriggerEventAsync("onmouseenter", new MouseEventArgs());
+		cut.WaitForState(() => cut.FindAll("[data-testid=stacked-bar-tip]").Count == 1);
+
+		await Assert.That(cut.Find("[data-testid=stacked-bar-tip]").TextContent).Contains("Run of October 14").And.DoesNotContain("What the run did");
 	}
 
 	[Test]
@@ -163,6 +176,29 @@ public class LastRunCellTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_ThePill_SaysHowLongAgoTheRunStarted()
+	{
+		RegisterServices();
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.LastRun, Run() with { StartedAt = Now.AddMinutes(-16) }));
+		cut.WaitForState(() => cut.FindAll(".last-run").Count == 1);
+
+		await Assert.That(cut.Find(".last-run").TextContent).Contains("16 minutes ago");
+	}
+
+	[Test]
+	public async Task Render_ThePillInAGermanBrowser_StaysEnglishLikeTheRestOfTheUi()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("de-CH");
+		RegisterServices();
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.LastRun, Run() with { StartedAt = Now.AddDays(-95) }));
+		cut.WaitForState(() => cut.FindAll(".last-run").Count == 1);
+
+		await Assert.That(cut.Find(".last-run").TextContent).Contains("3 months ago").And.DoesNotContain("vor");
+	}
+
+	[Test]
 	public async Task Render_RunningWithoutALastRun_ShowsTheRunningPill()
 	{
 		RegisterServices();
@@ -184,9 +220,8 @@ public class LastRunCellTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(Now);
+		Services.AddSingleton<TimeProvider>(clock);
 
 		var media = IMediaService.Mock();
 		media.GetDetailsAsync(Any(), Any(), Any()).Returns((ids, _, _) => AsyncSequence.Of([.. ids.Select(id => (Result<MatchedMedia>)Success.Of(Detail(id)))]));

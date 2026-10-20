@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Auth;
 using Contracts.Settings;
 using Contracts.Setup;
@@ -85,7 +84,7 @@ public class OnboardingTests(SammlarrTestHost host) : IAsyncDisposable
 		await Testee.CompleteAsync();
 
 		await Assert.That(before).IsFalse();
-		await Assert.That(await host.Resolve<ISetupStateRepository>().CompletedAtAsync()).IsSome().And.IsEqualTo(host.Resolve<IDateTimeProvider>().Now);
+		await Assert.That(await host.Resolve<ISetupStateRepository>().CompletedAtAsync()).IsSome().And.IsEqualTo(host.Resolve<TimeProvider>().GetUtcNow());
 	}
 
 	[Test]

@@ -1,8 +1,8 @@
 using System.Globalization;
-using Contracts;
 using Contracts.Usage;
 using Domain.Providers;
 using Domain.Usage;
+using Microsoft.Extensions.Time.Testing;
 
 namespace UI.Tests.Settings.Usage;
 
@@ -27,12 +27,7 @@ internal static class UsageSamples
 		);
 	}
 
-	internal static IDateTimeProvider Clock()
-	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(To.AddHours(-3));
-		return clock.Object;
-	}
+	internal static TimeProvider Clock() => new FakeTimeProvider(To.AddHours(-3));
 
 	private static readonly UsageWindow Window = new(To.AddHours(-24), To, TimeSpan.FromHours(1));
 
@@ -67,12 +62,7 @@ internal static class UsageSamples
 
 	private static readonly long[] Yesterday = [24, 19, 9, 37, 40, 31, 48, 58, 60, 4, 0, 0, 0, 0];
 
-	internal static IDateTimeProvider At(DateTimeOffset now)
-	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(now);
-		return clock.Object;
-	}
+	internal static TimeProvider At(DateTimeOffset now) => new FakeTimeProvider(now);
 
 	internal static QuotaAllowance Allowance(long remaining)
 	{

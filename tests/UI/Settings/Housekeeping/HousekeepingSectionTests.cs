@@ -2,7 +2,6 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Contracts.Datasets;
 using Contracts.Housekeeping;
 using Contracts.Media;
@@ -10,9 +9,11 @@ using Domain.Providers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using Shared.Options;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Housekeeping;
+using UI.Shared.Bars;
 using UI.Shared.Services;
 using UI.Tests.Media;
 
@@ -37,9 +38,8 @@ public class HousekeepingSectionTests : BunitContext
 		Services.AddProviderBranding();
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton(new HousekeepingOptions());
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(Now);
+		Services.AddSingleton<TimeProvider>(clock);
 		Services.AddSingleton(_tasks.Object);
 		Services.AddSingleton(_purger.Object);
 		Services.AddSingleton(_unmatched.Object);
@@ -47,6 +47,35 @@ public class HousekeepingSectionTests : BunitContext
 		Services.AddSingleton(ArtworkStub.Sizing());
 		Services.AddSingleton(IConflictReview.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	[Test]
+	public async Task Render_UnderTheSizeLine_BreaksTheFileDownWithAKeyForEachPart()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
+
+		var cut = RenderLoaded();
+
+		var bar = cut.FindComponent<StackedBar>();
+		await Assert.That(bar.Instance.ShowLegend).IsTrue();
+		await Assert
+			.That(bar.FindComponents<StackedBarPart>().Select(part => (part.Instance.Name, part.Instance.Value)))
+			.IsEquivalentTo(
+				[
+					("IMDb ratings", 22_216_704L),
+					("Anime ids", 2_719_744L),
+					("Cached details", 3_475_160L),
+					("Title ids", 2_605_130L),
+					("Show parts", 494_950L),
+					("Feed history", 110_592L),
+					("Settings, jobs and usage", 477_720L),
+					("Free pages and write-ahead log", 2_200_000L),
+				],
+				CollectionOrdering.Matching
+			);
+		var parts = bar.FindComponents<StackedBarPart>();
+		await Assert.That((parts[0].Instance.Color, parts[0].Instance.Pattern)).IsEqualTo(("#F5C518", BarPattern.Solid));
+		await Assert.That(parts[^1].Instance.Pattern).IsEqualTo(BarPattern.Hatched);
 	}
 
 	[Test]
@@ -208,6 +237,23 @@ public class HousekeepingSectionTests : BunitContext
 	}
 
 	[Test]
+	public async Task ClearCachedDetails_WhenAsked_SaysOnlyWhatItCosts()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
+		var cut = RenderWithDialogs();
+		cut.WaitForState(() => cut.FindAll("[data-testid=housekeeping-clear-details] button").Count == 1);
+
+		await cut.Find("[data-testid=housekeeping-clear-details] button").ClickAsync(new MouseEventArgs());
+
+		cut.WaitForState(() => cut.FindAll("[role=alertdialog]").Count == 1);
+		await Assert
+			.That(cut.Find("[role=alertdialog]").TextContent)
+			.Contains("Each of the 2,132 titles fetches its posters and ratings again the next time it is shown")
+			.And.Contains("up to 2,132 provider calls")
+			.And.DoesNotContain("nightly");
+	}
+
+	[Test]
 	public async Task ClearShowParts_OnceConfirmed_ClearsThemAndSaysSo()
 	{
 		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
@@ -225,17 +271,81 @@ public class HousekeepingSectionTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ShowsTheShowPartsSizeAndTheNightlyRule()
+	public async Task Render_TheCaches_RunFromTheCheapestClearToTheCostliest()
 	{
 		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
 
 		var cut = RenderLoaded();
 
 		await Assert
-			.That(cut.Find("[data-testid=housekeeping-clear-show-parts]").TextContent)
-			.Contains("2,605 stored")
-			.And.Contains("0.5 MB")
-			.And.Contains("Nightly: \"no earlier season\" answers older than 3 days");
+			.That(cut.FindAll("[data-testid^=housekeeping-clear-]").Select(row => row.GetAttribute("data-testid") ?? string.Empty))
+			.IsEquivalentTo(
+				["housekeeping-clear-unmatched", "housekeeping-clear-show-parts", "housekeeping-clear-details", "housekeeping-clear-ids"],
+				CollectionOrdering.Matching
+			);
+	}
+
+	[Test]
+	public async Task Render_EveryCache_OffersThePlainClear()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
+
+		var cut = RenderLoaded();
+
+		await Assert
+			.That(cut.FindAll("[data-testid^=housekeeping-clear-] button").Select(button => button.TextContent.Trim()))
+			.IsEquivalentTo(["Clear", "Clear", "Clear", "Clear"]);
+	}
+
+	[Test]
+	public async Task Render_TheCaches_NameTheirColumnsInTheBand()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
+
+		var cut = RenderLoaded();
+
+		await Assert
+			.That(cut.Find("[data-testid=housekeeping-caches-band]").Children.Select(cell => cell.TextContent))
+			.IsEquivalentTo(["Caches", "Holds", "Size", "Next trim", ""], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	[Arguments("details", "2,132 titles", "3.3 MB", "tomorrow 03:00", "details nobody opened in 180 days")]
+	[Arguments("ids", "2,153 titles", "5.8 MB", "tomorrow 03:00", "ids nobody used in 365 days")]
+	[Arguments("show-parts", "2,605 parts", "483.3 KB", "tomorrow 03:00", "seasons with no show found, after 3 days")]
+	[Arguments("unmatched", HousekeepingView.Nothing, "in memory", "within the hour", "each an hour after it failed")]
+	public async Task Render_ACache_SaysWhatItHoldsItsSizeAndWhenItIsNextTrimmed(string cache, string holds, string size, string next, string removes)
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(new PassTask(Some.Of(EarlierToday.AddDays(1)), new None(), new None())));
+
+		var cut = RenderLoaded();
+
+		await Assert.That(CacheCells(cut, cache)).IsEquivalentTo([holds, size, next, removes], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Render_TheInfoBesideACache_SaysWhatItIsForAndWhenToClearIt()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
+		var cut = RenderWithDialogs();
+		cut.WaitForState(() => cut.FindAll("[data-testid=housekeeping-clear-details] [data-testid=housekeeping-cache-why]").Count == 1);
+
+		await cut.Find("[data-testid=housekeeping-clear-details] [data-testid=housekeeping-cache-why]").TriggerEventAsync("onmouseenter", new MouseEventArgs());
+
+		cut.WaitForState(() => cut.FindAll("[data-portal-content][data-state=open] [role=tooltip]").Count == 1);
+		await Assert.That(cut.Find("[data-portal-content][data-state=open] [role=tooltip]").TextContent).Contains("Clear it when artwork or ratings look wrong.");
+	}
+
+	[Test]
+	public async Task Render_TheInfoBesideACache_IsNamedForScreenReaders()
+	{
+		_tasks.OverviewAsync(Any()).Returns(Overview(Pass(new None())));
+
+		var cut = RenderLoaded();
+
+		await Assert
+			.That(cut.Find("[data-testid=housekeeping-clear-details] [data-testid=housekeeping-cache-why]").GetAttribute("aria-label"))
+			.IsEqualTo("About cached details");
 	}
 
 	[Test]
@@ -280,6 +390,12 @@ public class HousekeepingSectionTests : BunitContext
 		return cut.FindAll("[data-testid=housekeeping-task]").Single(row => row.GetAttribute("data-task") == task);
 	}
 
+	private static IEnumerable<string> CacheCells(IRenderedComponent<HousekeepingSection> cut, string cache)
+	{
+		string[] cells = ["holds", "size", "next", "removes"];
+		return cells.Select(cell => cut.Find($"[data-testid=housekeeping-clear-{cache}] [data-testid=housekeeping-cache-{cell}]").TextContent);
+	}
+
 	private static IReadOnlyList<IElement> RunNow(IRenderedComponent<HousekeepingSection> cut) => cut.FindAll("[data-testid=housekeeping-run]");
 
 	private static IEnumerable<string> Texts(IRenderedComponent<HousekeepingSection> cut, string testId)
@@ -304,6 +420,7 @@ public class HousekeepingSectionTests : BunitContext
 		var anime = new DatasetTask(RemoteService.AnimeLists, Some.Of(EarlierToday.AddHours(25.5)), new None(), new None(), new None());
 		return new HousekeepingOverview(
 			new DatabaseSize(34_300_000, 32_100_000),
+			new DatabaseParts(22_216_704, 2_719_744, 110_592),
 			pass,
 			[imdb, anime],
 			new CachedTitles(2_132, 3_475_160, 2_153, 2_605_130, 2_605, 494_950),

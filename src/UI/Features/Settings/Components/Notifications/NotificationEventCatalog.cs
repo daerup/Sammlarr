@@ -1,4 +1,5 @@
 using Domain.Notifications;
+using Humanizer;
 
 namespace UI.Features.Settings.Components.Notifications;
 
@@ -10,11 +11,11 @@ internal static class NotificationEventCatalog
 
 	public static readonly IReadOnlyList<NotificationEventOption> Subscribable = Enum.GetValues<NotificationEventType>()
 		.Except(NotSubscribable)
-		.Select(type => new NotificationEventOption(type, type.GetDescription()))
+		.Select(type => new NotificationEventOption(type, type.Humanize()))
 		.ToList();
 
 	public static string Summarise(IReadOnlyList<NotificationEventType> eventTypes) =>
-		eventTypes.Count == 1 ? eventTypes[0].GetDescription() : $"{eventTypes.Count} events";
+		eventTypes.Count == 1 ? eventTypes[0].Humanize() : $"{eventTypes.Count} events";
 
-	public static string Spell(IReadOnlyList<NotificationEventType> eventTypes) => string.Join(", ", eventTypes.Select(eventType => eventType.GetDescription()));
+	public static string Spell(IReadOnlyList<NotificationEventType> eventTypes) => string.Join(", ", eventTypes.Select(eventType => eventType.Humanize()));
 }

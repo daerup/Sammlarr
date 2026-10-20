@@ -5,7 +5,7 @@
     <BbInput Value="@_name" ValueChanged="@(name => _name = name ?? string.Empty)" Placeholder="Type a name…" Class="max-w-xs"/>
     <div class="flex items-center gap-4">
         <span class="demo-bird" style="width: 96px; height: 96px">@Bird(Genome, 96)</span>
-        <span class="text-xs text-muted-foreground">@Genome.Pose, crest @Genome.Crest, @Genome.Feathers @(Genome.Feathers == 1 ? "feather" : "feathers")@(Genome.FacesLeft ? ", facing left" : null)</span>
+        <span class="text-xs text-muted-foreground">@Genome.Pose, crest @Genome.Crest, @("feather".ToQuantity(Genome.Feathers))@(Genome.FacesLeft ? ", facing left" : null)</span>
     </div>
     <div class="flex flex-wrap gap-3">
         @foreach (var pose in Enum.GetValues<BirdPose>())

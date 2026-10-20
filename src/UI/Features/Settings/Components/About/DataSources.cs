@@ -6,6 +6,7 @@ using Domain.Media.Conversions;
 using Domain.Providers;
 using UI.Features.Settings.Components.Housekeeping;
 using UI.Features.Settings.Components.Providers;
+using UI.Shared.Formatting;
 using UI.Shared.Media;
 using UI.Shared.Media.Ratings;
 using UI.Shared.Services.Branding;
@@ -60,7 +61,7 @@ internal sealed class DataSources(
 		var rated = RatedOn(provider).ToList();
 		var suppliers = rated.SelectMany(source => source.SuppliedBy()).Distinct().Order().Select(remote => branding.Name(remote)).ToList();
 		var chip = Ratings(rated).GetValueOr(() => new SourceChip("link", "Pages", $"Pages: a title links to its page on {provider.Label}"));
-		var via = suppliers.Count == 0 ? PagesVia : $"through {Listed(suppliers, "and")}";
+		var via = suppliers.Count == 0 ? PagesVia : $"through {suppliers.Humanize(Notation.Words)}";
 		return new SourceRow(provider.ToString(), branding.GetBrandingInfo(provider), [chip], Some.Of(via), Home(provider));
 	}
 
@@ -74,13 +75,13 @@ internal sealed class DataSources(
 	{
 		var fills = enrichers.Where(enricher => enricher.Key == remote).Aggregate(MediaField.None, (all, enricher) => all | enricher.Capability.Fills.Details);
 		var fields = Enum.GetValues<MediaField>().Where(field => fills.Overlaps(field)).Select(Word).ToList();
-		return Optional.When(fields.Count > 0, () => new SourceChip("file-text", "Details", $"Details: {Listed(fields, "and")}"));
+		return Optional.When(fields.Count > 0, () => new SourceChip("file-text", "Details", $"Details: {fields.Humanize(Notation.Words)}"));
 	}
 
 	private static Optional<SourceChip> Ratings(IEnumerable<RatingSource> sources)
 	{
 		var names = sources.Order().Select(RatingTexts.Name).ToList();
-		return Optional.When(names.Count > 0, () => new SourceChip("star", "Ratings", $"Ratings: {Listed(names, "and")}"));
+		return Optional.When(names.Count > 0, () => new SourceChip("star", "Ratings", $"Ratings: {names.Humanize(Notation.Words)}"));
 	}
 
 	private static IEnumerable<RatingSource> RatedOn(MediaProvider provider) => Enum.GetValues<RatingSource>().Where(source => source.Card.Owner == provider);
@@ -98,12 +99,7 @@ internal sealed class DataSources(
 
 	private static string Names(IEnumerable<MediaProvider> providers, string conjunction)
 	{
-		return Listed([.. providers.Order().Select(provider => provider.Label)], conjunction);
-	}
-
-	private static string Listed(IReadOnlyList<string> names, string conjunction)
-	{
-		return names.Count > 1 ? $"{string.Join(", ", names.SkipLast(1))} {conjunction} {names[^1]}" : string.Concat(names);
+		return providers.Order().Select(provider => provider.Label).Humanize(Notation.Words, conjunction);
 	}
 
 	private static string Lowered(string text) => string.Concat(text[..1].ToLowerInvariant(), text[1..]);

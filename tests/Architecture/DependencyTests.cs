@@ -13,7 +13,7 @@ public class DependencyTests
 	[Test]
 	public async Task Dependencies_OfDomain_AreOnlyTheKernel()
 	{
-		await Projects.Domain.OnlyDependsOn(Projects.Shared).AndPackages(Packages.Cronos, Packages.Vogen);
+		await Projects.Domain.OnlyDependsOn(Projects.Shared).AndPackages(Packages.Cronos, Packages.Vogen, Packages.Humanizer);
 	}
 
 	[Test]

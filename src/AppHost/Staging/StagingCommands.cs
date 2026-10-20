@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AppHost.Staging;
@@ -65,7 +64,6 @@ internal static class StagingCommands
 		}
 	}
 
-	[SuppressMessage("ApiDesign", "RS0030", Justification = "The AppHost has no IDateTimeProvider; the seed's start compares against Aspire's own start stamps.")]
 	private static async Task<ExecuteCommandResult> ResetAsync(CommandRun run, IResource sammlarr, StagingResources staging, string scenario)
 	{
 		foreach (var resource in new[] { sammlarr, staging.Radarr.Resource, staging.Sonarr.Resource })
@@ -86,7 +84,7 @@ internal static class StagingCommands
 			}
 		}
 
-		var started = DateTime.UtcNow;
+		var started = TimeProvider.System.GetUtcNow().UtcDateTime;
 		if (await run.ExecuteAsync(staging.Seed.Resource, KnownResourceCommands.StartCommand) is { Success: false } seedRefused)
 		{
 			return seedRefused;

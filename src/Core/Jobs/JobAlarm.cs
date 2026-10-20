@@ -1,11 +1,10 @@
-using Contracts;
 using Contracts.Jobs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Jobs;
 
-internal sealed class JobAlarm(IServiceScopeFactory scopes, JobSignal signal, IDateTimeProvider clock, ILogger<JobAlarm> logger) : IDisposable
+internal sealed class JobAlarm(IServiceScopeFactory scopes, JobSignal signal, TimeProvider clock, ILogger<JobAlarm> logger) : IDisposable
 {
 	private static readonly TimeSpan LongestWait = TimeSpan.FromMinutes(15);
 
@@ -31,7 +30,7 @@ internal sealed class JobAlarm(IServiceScopeFactory scopes, JobSignal signal, ID
 
 	private TimeSpan Until(DateTimeOffset at)
 	{
-		var wait = at - clock.Now;
+		var wait = at - clock.GetUtcNow();
 		return wait > LongestWait ? LongestWait
 			: wait > TimeSpan.Zero ? wait
 			: TimeSpan.Zero;
@@ -42,7 +41,7 @@ internal sealed class JobAlarm(IServiceScopeFactory scopes, JobSignal signal, ID
 		try
 		{
 			await using var scope = scopes.CreateAsyncScope();
-			var released = await scope.ServiceProvider.GetRequiredService<IJobRepository>().ReleaseDueAsync(clock.Now);
+			var released = await scope.ServiceProvider.GetRequiredService<IJobRepository>().ReleaseDueAsync(clock.GetUtcNow());
 			if (released > 0)
 			{
 				signal.Raise();

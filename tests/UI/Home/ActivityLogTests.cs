@@ -117,9 +117,11 @@ public class ActivityLogTests
 	{
 		var noItems = new ActivityRun(Run(Docs, Today, conclusiveness: Conclusiveness.NoItems), "feed");
 		var noneAdmitted = new ActivityRun(Run(Docs, Today, total: 40, conclusiveness: Conclusiveness.NoneAdmitted), "feed");
+		var noMatches = new ActivityRun(Run(Docs, Today, total: 1, conclusiveness: Conclusiveness.NoMatches), "feed");
 
 		await Assert.That(noItems.Outcome).IsEqualTo("the list came back empty");
-		await Assert.That(noneAdmitted.Outcome).IsEqualTo("all 40 titles were filtered out");
+		await Assert.That(noneAdmitted.Outcome).IsEqualTo("40 titles seen, all filtered out");
+		await Assert.That(noMatches.Outcome).IsEqualTo("1 title seen, none matched");
 	}
 
 	[Test]

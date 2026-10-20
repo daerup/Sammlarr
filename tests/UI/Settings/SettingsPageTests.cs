@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts;
 using Contracts.Auth;
 using Contracts.Datasets;
 using Contracts.Identity;
@@ -12,6 +11,7 @@ using Domain.Providers;
 using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using UI.Features.Settings.Components.Providers;
 using UI.Features.Settings.Components.Ratings;
 using UI.Shared.Services;
@@ -51,9 +51,8 @@ public class SettingsPageTests : BunitContext
 		keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
 		keys.IsStoredAsync(Any(), Any()).Returns(false);
 		Services.AddSingleton(keys.Object);
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(DateTimeOffset.UnixEpoch);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(DateTimeOffset.UnixEpoch);
+		Services.AddSingleton<TimeProvider>(clock);
 		var loads = IDatasetLoads.Mock();
 		loads.FindAsync(Any(), Any()).Returns(new None());
 		Services.AddSingleton(loads.Object);

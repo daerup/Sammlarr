@@ -1,5 +1,4 @@
 using System.Net;
-using Contracts;
 using Contracts.Datasets;
 using Core.Datasets;
 using Core.Jobs;
@@ -12,7 +11,7 @@ namespace Integration.Tests.Datasets;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class DatasetTickerTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private TaskActivity Activity => field ??= new TaskActivity(host.Resolve<IDateTimeProvider>());
+	private TaskActivity Activity => field ??= new TaskActivity(host.Resolve<TimeProvider>());
 
 	private DatasetTicker Testee => new(host.Resolve<IServiceScopeFactory>(), Activity);
 

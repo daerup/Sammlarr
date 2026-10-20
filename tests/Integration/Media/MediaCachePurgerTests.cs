@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;
@@ -295,7 +294,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		await _testee.PurgeDetailsAsync();
 
-		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<IDateTimeProvider>());
+		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock(), fixture.Resolve<TimeProvider>());
 		var stored = await repository.GetAsync([MediaId.From(media.Id)]);
 
 		using var _ = Assert.Multiple();
@@ -381,7 +380,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 			configRepository.Object,
 			sinks,
 			user,
-			fixture.Resolve<IDateTimeProvider>(),
+			fixture.Resolve<TimeProvider>(),
 			NullLogger<MediaCachePurger>.Instance
 		);
 	}

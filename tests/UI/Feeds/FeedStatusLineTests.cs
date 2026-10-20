@@ -1,9 +1,9 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Contracts.Media;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages;
 using static UI.Tests.Feeds.TestFeedRows;
@@ -18,10 +18,8 @@ public class FeedStatusLineTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
 		Services.AddSingleton(IMediaService.Mock().Object);
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		clock.Zone.Getter.Returns(TimeZoneInfo.Utc);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(Now);
+		Services.AddSingleton<TimeProvider>(clock);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -62,7 +60,7 @@ public class FeedStatusLineTests : BunitContext
 		await cut.Find(".status-next").ClickAsync(new());
 
 		var details = cut.Find(".next-details");
-		await Assert.That(details.QuerySelector(".next-chips")?.TextContent).Contains("Mirror").And.Contains("in 43 min");
+		await Assert.That(details.QuerySelector(".next-chips")?.TextContent).Contains("Mirror").And.Contains("43 minutes from now");
 		await Assert.That(details.QuerySelector(".next-last .last-run")?.TextContent).Contains("Never");
 		await Assert.That(details.TextContent).DoesNotContain("Strategy");
 	}

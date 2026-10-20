@@ -1,7 +1,9 @@
+using Humanizer;
+
 namespace Domain.Providers;
 
 public sealed class RemoteUnavailableException(RemoteService remote, bool sent, Exception? innerException = null)
-	: Exception($"{remote.GetDescription()} is temporarily unavailable.", innerException)
+	: Exception($"{remote.Humanize()} is temporarily unavailable.", innerException)
 {
 	public RemoteService Remote { get; } = remote;
 

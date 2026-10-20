@@ -2,11 +2,11 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers;
 
@@ -21,9 +21,8 @@ public class ServicesMapTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddProviderBranding();
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(Now);
+		Services.AddSingleton<TimeProvider>(clock);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

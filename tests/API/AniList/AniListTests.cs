@@ -4,7 +4,6 @@ using API.AniList;
 using API.Http.Lanes;
 using API.Tests.Anime;
 using API.Tests.Feeds;
-using Contracts;
 using Contracts.Datasets;
 using Contracts.Media;
 using Domain.Feed;
@@ -12,6 +11,7 @@ using Domain.Feed.Trace;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using Shared.Options;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
@@ -180,14 +180,12 @@ public class AniListTests
 	public async Task LookUpAsync_ForATitleTheFeedReadMoreThanTenMinutesAgo_AsksAniListAgain()
 	{
 		var handler = Answering(out var calls, call => call == 1 ? PlanningList : """{"data":{"Page":{"media":[]}}}""");
-		var now = FeedClock.Now;
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(() => now);
-		var titles = new AniListTitles(Client(handler), Lanes(), clock.Object);
-		await new AniListFeedService(Client(handler), AnimeMaps.Seasons(AnimeMaps.Unknown(), media: AnimeMaps.Passing(_asked.Add)), titles, clock.Object)
+		var clock = new FakeTimeProvider(FeedClock.Now);
+		var titles = new AniListTitles(Client(handler), Lanes(), clock);
+		await new AniListFeedService(Client(handler), AnimeMaps.Seasons(AnimeMaps.Unknown(), media: AnimeMaps.Passing(_asked.Add)), titles, clock)
 			.GetFeedItemsAsync("someone", FieldNeeds.None)
 			.ToListAsync();
-		now = now.AddMinutes(11);
+		clock.Advance(TimeSpan.FromMinutes(11));
 
 		await new AniListEnricher(titles).LookUpAsync(AttackOnTitan, []);
 

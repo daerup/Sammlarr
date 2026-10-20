@@ -37,6 +37,7 @@
         "type": "Project",
         "dependencies": {
           "Cronos": "[0.13.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Shared": "[1.0.0, )",
           "Vogen": "[8.0.7, )"
         }
@@ -54,6 +55,12 @@
         "requested": "[0.13.0, )",
         "resolved": "0.13.0",
         "contentHash": "Nkve+Yi0+ol3ntSBRHeW0ka9cJQ8vndSUvvkXqF9LVqwpoqWueyxu/HS275r98RDOmF7/mzRnZW5XXUBXob+TA=="
+      },
+      "Humanizer.Core": {
+        "type": "CentralTransitive",
+        "requested": "[3.0.10, )",
+        "resolved": "3.0.10",
+        "contentHash": "yZIhtw8sYuvsONzQbZxWpR60tMWYHXoo0DL6nyOqSFiU5POjBTSEyWFpTQtJEZuy+oqiYTXKXY/Mjx7KnqIQFw=="
       },
       "Microsoft.Extensions.Caching.Memory": {
         "type": "CentralTransitive",

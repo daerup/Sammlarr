@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using Contracts;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -8,9 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Media;
 
-internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contexts, MediaWriteLock writeLock, IDateTimeProvider clock)
-	: IIdentityClaims,
-		IDisposable
+internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contexts, MediaWriteLock writeLock, TimeProvider clock) : IIdentityClaims, IDisposable
 {
 	private const int ConstraintFailed = 19;
 
@@ -106,7 +103,7 @@ internal sealed class IdentityClaims(IDbContextFactory<SammlarrDbContext> contex
 
 	private IdentityConflict Note(MediaId held, MediaId other, IIdentityKey claimed, ValueSet<RemoteService> sources)
 	{
-		return new IdentityConflict(held, other, claimed, sources, clock.Now, 0, clock.Now, new None(), new Undecided());
+		return new IdentityConflict(held, other, claimed, sources, clock.GetUtcNow(), 0, clock.GetUtcNow(), new None(), new Undecided());
 	}
 
 	private static IIdentityKey OwnedBy(Library library, IdentityClaim claim, MediaId owner)

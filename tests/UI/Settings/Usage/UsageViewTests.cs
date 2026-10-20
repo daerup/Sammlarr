@@ -10,7 +10,7 @@ public class UsageViewTests
 	[Arguments(5, "≤5 ms")]
 	[Arguments(250, "≤250 ms")]
 	[Arguments(1000, "≤1 s")]
-	[Arguments(2500, "≤2.5 s")]
+	[Arguments(2500, "≤2 s 500 ms")]
 	[Arguments(DurationBuckets.Over, ">10 s")]
 	public async Task Bucket_ByItsUpperBound_IsLabelledUpToIt(int upToMs, string label)
 	{
@@ -44,16 +44,6 @@ public class UsageViewTests
 	public async Task Calls_ByCount_IsSingularForOne(long count, string text)
 	{
 		await Assert.That(UsageView.Calls(count)).IsEqualTo(text);
-	}
-
-	[Test]
-	[Arguments(0L, 140L, "0.0%")]
-	[Arguments(1L, 8287L, "<0.1%")]
-	[Arguments(43L, 14483L, "0.3%")]
-	[Arguments(5L, 0L, "0%")]
-	public async Task Share_OfAPart_ReadsLessThanATenthWhenItWouldRoundToNothing(long part, long total, string share)
-	{
-		await Assert.That(UsageView.Share(part, total)).IsEqualTo(share);
 	}
 
 	[Test]

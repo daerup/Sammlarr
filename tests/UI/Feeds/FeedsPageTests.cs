@@ -2,7 +2,6 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using Bunit;
-using Contracts;
 using Contracts.Announcing;
 using Contracts.Blocklist;
 using Contracts.Feed;
@@ -22,6 +21,7 @@ using Domain.Providers;
 using Domain.Usage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using Observability.Usage;
 using TestInfrastructure;
 using UI.Features.Feeds.Components;
@@ -38,7 +38,7 @@ public class FeedsPageTests : BunitContext
 
 	private static readonly DateTimeOffset Start = new(2026, 10, 8, 18, 0, 0, TimeSpan.Zero);
 
-	private readonly Mock<IDateTimeProvider> _clock = IDateTimeProvider.Mock();
+	private readonly FakeTimeProvider _clock = new(Start);
 
 	private readonly Mock<IJobQueue> _jobs = IJobQueue.Mock();
 
@@ -133,7 +133,7 @@ public class FeedsPageTests : BunitContext
 		var cut = RenderPage();
 		cut.WaitForState(() => cut.FindAll("[data-testid=live-done]").Count == 1);
 
-		_clock.Now.Getter.Returns(Start.AddSeconds(6));
+		_clock.SetUtcNow(Start.AddSeconds(6));
 
 		cut.WaitForState(() => cut.FindAll("[data-testid=feed-run-live]").Count == 0, TimeSpan.FromSeconds(3));
 		await Assert.That(cut.FindAll("[data-testid=running-pill]")).IsEmpty();
@@ -265,9 +265,7 @@ public class FeedsPageTests : BunitContext
 		var capacity = IRemoteCapacity.Mock();
 		capacity.Of(Any<RemoteService>()).Returns(RemoteLoad.Idle);
 		Services.AddSingleton(capacity.Object);
-		_clock.Now.Getter.Returns(Start);
-		_clock.Zone.Getter.Returns(TimeZoneInfo.Utc);
-		Services.AddSingleton(_clock.Object);
+		Services.AddSingleton<TimeProvider>(_clock);
 		Services.AddScoped<FeedRunProgress>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

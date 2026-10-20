@@ -51,6 +51,12 @@
         "resolved": "5.6.0",
         "contentHash": "Kcobt3pnOdO0A+6CKiMHZdTEluJpsfxiV20axtZdmfBQnDmiWTKPJADlgAfdTuKNAnVarrkJa0UEGwuOo91muw=="
       },
+      "Microsoft.Extensions.TimeProvider.Testing": {
+        "type": "Direct",
+        "requested": "[10.11.0, )",
+        "resolved": "10.11.0",
+        "contentHash": "DTivKZ2Du0dJideTTa6vPj/eXKNRu+RxtjBX7NOOUXHBtHx1ehbE+lM+j3/5M3wU6BqzcZqEEyR4+FnPKs2rTA=="
+      },
       "TUnit": {
         "type": "Direct",
         "requested": "[1.75.0, )",
@@ -462,6 +468,7 @@
         "type": "Project",
         "dependencies": {
           "Cronos": "[0.13.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Shared": "[1.0.0, )",
           "Vogen": "[8.0.7, )"
         }
@@ -505,9 +512,11 @@
           "BlazorBlueprint.Primitives": "[4.1.0, )",
           "Contracts": "[1.0.0, )",
           "CronExpressionDescriptor": "[2.51.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Microsoft.AspNetCore.Components.Authorization": "[11.0.0-rc.2.26504.105, )",
           "Microsoft.AspNetCore.Components.Web": "[11.0.0-rc.2.26504.105, )",
           "Observability": "[1.0.0, )",
+          "Semver": "[3.0.0, )",
           "Serilog": "[4.4.0, )",
           "Shared": "[1.0.0, )"
         }
@@ -556,6 +565,12 @@
         "requested": "[0.13.0, )",
         "resolved": "0.13.0",
         "contentHash": "Nkve+Yi0+ol3ntSBRHeW0ka9cJQ8vndSUvvkXqF9LVqwpoqWueyxu/HS275r98RDOmF7/mzRnZW5XXUBXob+TA=="
+      },
+      "Humanizer.Core": {
+        "type": "CentralTransitive",
+        "requested": "[3.0.10, )",
+        "resolved": "3.0.10",
+        "contentHash": "yZIhtw8sYuvsONzQbZxWpR60tMWYHXoo0DL6nyOqSFiU5POjBTSEyWFpTQtJEZuy+oqiYTXKXY/Mjx7KnqIQFw=="
       },
       "Microsoft.AspNetCore.Components.Authorization": {
         "type": "CentralTransitive",
@@ -617,6 +632,12 @@
         "dependencies": {
           "OpenTelemetry": "1.19.1"
         }
+      },
+      "Semver": {
+        "type": "CentralTransitive",
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "9jZCicsVgTebqkAujRWtC9J1A5EQVlu0TVKHcgoCuv345ve5DYf4D1MjhKEnQjdRZo6x/vdv6QQrYFs7ilGzLA=="
       },
       "Serilog": {
         "type": "CentralTransitive",

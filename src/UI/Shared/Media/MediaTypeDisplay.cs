@@ -1,4 +1,5 @@
 using Domain.Media;
+using Humanizer;
 
 namespace UI.Shared.Media;
 
@@ -19,7 +20,7 @@ internal static class MediaTypeDisplay
 			}
 		}
 
-		public string Label => type.GetDescription();
+		public string Label => type.Humanize();
 
 		public string Plural
 		{

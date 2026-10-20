@@ -36,7 +36,7 @@
 
     private string Arc => $"M {Number(Thick / 2.0)},{Number(CentreY)} A {Number(Radius)} {Number(Radius)} 0 0 1 {Number(Size - Thick / 2.0)},{Number(CentreY)}";
 
-    private string Centre => UsageView.Share(Tally.Of(UsageOutcome.Answered), Tally.Total).Replace(".0%", "%", StringComparison.Ordinal);
+    private string Centre => Shares.Of(Tally.Of(UsageOutcome.Answered), Tally.Total).Replace(".0%", "%", StringComparison.Ordinal);
 
     private IReadOnlyList<Segment> Segments
     {

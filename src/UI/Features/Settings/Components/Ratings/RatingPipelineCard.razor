@@ -150,14 +150,14 @@
 
     private IReadOnlyList<RatingSource> Missing => _averaged.Missing(Available);
 
-    private string NoticeLead => $"Your choice ({string.Join(", ", Missing.Select(RatingTexts.Short))}) needs a ";
+    private string NoticeLead => $"Your choice ({Missing.Select(RatingTexts.Short).Humanize(Notation.Words)}) needs a ";
 
     private string NoticeTail
     {
         get
         {
             var used = _averaged.Counted(Available).Order().Select(RatingTexts.Short).ToList();
-            return $"; {string.Join(", ", used)} {(used.Count == 1 ? "is" : "are")} used instead.";
+            return $"; {used.Humanize(Notation.Words)} {(used.Count == 1 ? "is" : "are")} used instead.";
         }
     }
 

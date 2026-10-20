@@ -5,6 +5,7 @@ using Domain.Announcing;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Notifications;
+using Humanizer;
 
 namespace Messaging.Notifications;
 
@@ -110,7 +111,7 @@ internal static class NotificationContextFactory
 			message.Type,
 			message.DefaultLevel,
 			message.OccurredAt,
-			message.Type.GetDescription(),
+			message.Type.Humanize(),
 			message.Summary,
 			pulledAdds ?? [],
 			pulledRemoves ?? [],

@@ -1,6 +1,6 @@
-using Contracts;
 using Contracts.Housekeeping;
 using Core.Jobs;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
 namespace Core.Tests.Jobs;
@@ -17,9 +17,8 @@ public class TaskActivityTests
 
 	public TaskActivityTests()
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(Now);
-		Testee = new TaskActivity(clock.Object);
+		var clock = new FakeTimeProvider(Now);
+		Testee = new TaskActivity(clock);
 		Testee.Changed += () => _changes++;
 	}
 

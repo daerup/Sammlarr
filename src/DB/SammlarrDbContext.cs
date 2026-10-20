@@ -1,5 +1,4 @@
 using System.Reflection;
-using Contracts;
 using Contracts.Identity;
 using DB.Data;
 using DB.Data.Auth;
@@ -33,7 +32,7 @@ internal sealed class SammlarrDbContext(
 	ICurrentUser currentUser,
 	IEnumerable<IPropertyAddedConvention> propertyConventions,
 	IEnumerable<IModelConfiguration> modelConfigurations,
-	IDateTimeProvider dateTimeProvider
+	TimeProvider clock
 ) : IdentityDbContext<UserRow, IdentityRole<Guid>, Guid>(options)
 {
 	private static readonly MethodInfo SetUserFilterMethod = typeof(SammlarrDbContext).GetMethod(
@@ -182,7 +181,7 @@ internal sealed class SammlarrDbContext(
 
 	private void ApplyStamps()
 	{
-		var now = dateTimeProvider.Now;
+		var now = clock.GetUtcNow();
 		ChangeTracker.Entries<IAuditable>().ToList().ForEach(entry => entityAuditer.UpdateTimestamps(entry, now));
 		ChangeTracker.Entries<IUserOwned>().ToList().ForEach(entry => userOwnershipStamper.Stamp(entry, CurrentUserId));
 	}

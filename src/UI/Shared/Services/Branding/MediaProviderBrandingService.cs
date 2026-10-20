@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Domain.Providers;
 using Domain.Wantlist.Arr;
+using Humanizer;
 
 namespace UI.Shared.Services.Branding;
 
@@ -94,7 +95,7 @@ public class MediaProviderBrandingService
 
 	public string NickName(Service service) => string.Join(" + ", Brands(service).Select(brand => brand.NickName));
 
-	public string Name(RemoteService remote) => remote.OwnIds.Map(provider => provider.GetDescription()).GetValueOr(() => GetBrandingInfo(remote).NickName);
+	public string Name(RemoteService remote) => remote.OwnIds.Map(provider => provider.Humanize()).GetValueOr(() => GetBrandingInfo(remote).NickName);
 
 	[SuppressMessage(
 		"Performance",
@@ -123,7 +124,7 @@ public class MediaProviderBrandingService
 			MediaProvider.Imdb => new(
 				"IMDb",
 				"IMDb",
-				"#F5DE50",
+				"#F5C518",
 				new BrandArt("imdb-square.svg"),
 				new BrandArt("imdb-logo.svg"),
 				new BrandTile(OwnTile, new BrandArt("imdb-tile.svg"), 100)

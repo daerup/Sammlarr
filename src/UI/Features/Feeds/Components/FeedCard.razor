@@ -1,7 +1,6 @@
 @using Domain.Feed.Run
 @using UI.Features.Feeds.Pages
 @using UI.Shared.Services.Branding
-@using UrlGuid = global::Shared.UrlGuid
 @inject MediaProviderBrandingService Branding
 
 <article class="feed-card @(Feed.Enabled ? null : "is-paused") @(IsSelecting ? "is-selecting" : null) @(IsSelected ? "is-selected" : null)"
@@ -76,7 +75,7 @@
             {
                 <span class="feed-card-control feed-stat-link">
                     <AppLink Href="@($"/wantlist?feed={UrlGuid.Encode(Feed.Id.Value)}")"
-                             Title="@($"Show the {Row.OnWantlist} titles this feed put on your wantlist")">@Row.OnWantlist</AppLink>
+                             Title="@($"Show the {"title".ToQuantity(Row.OnWantlist)} this feed put on your wantlist")">@Row.OnWantlist</AppLink>
                 </span>
             }
             else

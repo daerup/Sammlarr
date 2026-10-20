@@ -1,5 +1,4 @@
 using BlazorBlueprint.Components;
-using BlazorBlueprint.Primitives;
 using Bunit;
 using Domain.Feed;
 using Domain.Feed.Run;
@@ -7,7 +6,6 @@ using Domain.Feed.Trace;
 using Domain.Processing;
 using Domain.Providers;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
@@ -195,7 +193,7 @@ public class FeedRunLiveTests : BunitContext
 
 		cut.WaitForState(() => cut.Find("[data-testid=live-count]").TextContent == "9 of 380");
 		await Assert.That(cut.Find("[data-testid=live-clock]").TextContent).IsEqualTo("0:02");
-		await Assert.That(cut.Find("[data-testid=live-legend]").TextContent).Contains("Already known 4");
+		await Assert.That(cut.Find("[data-testid=live-bar] [data-part='Already known']").GetAttribute("style")).StartsWith("flex: 4 1 0");
 	}
 
 	[Test]
@@ -343,27 +341,6 @@ public class FeedRunLiveTests : BunitContext
 		await cut.Find("[data-testid=live-key-toggle]").ClickAsync(new());
 
 		await Assert.That(cut.Find("[data-testid=live-key]").HasAttribute("hidden")).IsFalse();
-	}
-
-	[Test]
-	public async Task LegendEntry_OnHover_SaysWhatItMeans()
-	{
-		var cut = Render(builder =>
-		{
-			builder.OpenComponent<BbPortalHost>(0);
-			builder.CloseComponent();
-			builder.OpenComponent<FeedRunLive>(1);
-			builder.AddComponentParameter(2, nameof(FeedRunLive.Run), _run.Object);
-			builder.CloseComponent();
-		});
-		var couldNot = cut.FindAll("[data-testid=live-legend-entry]").Single(entry => entry.TextContent.Contains("Couldn't look up"));
-
-		var card = $"#{couldNot.ParentElement!.Id!.Replace("-trigger", "-content", StringComparison.Ordinal)}";
-
-		await couldNot.ParentElement.TriggerEventAsync("onmouseenter", new MouseEventArgs());
-
-		cut.WaitForState(() => cut.FindAll(card).Count == 1);
-		await Assert.That(cut.Find(card).TextContent).Contains("Couldn't look up").And.Contains("so the lookup never finished");
 	}
 
 	private void SnapshotAt(long cursor) => _run.SnapshotAsync(Any()).Returns(Some.Of(Snapshot(FirstRun, cursor)));

@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Datasets;
 using Contracts.Identity;
 using Contracts.Providers;
@@ -16,7 +15,7 @@ internal sealed class UsageReport(
 	IDatasetLoads loads,
 	IMdblistRequestsLeft mdblist,
 	UsageFeedLines feedLines,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	ICurrentUser currentUser
 ) : IUsageReport
 {
@@ -25,7 +24,7 @@ internal sealed class UsageReport(
 	public async Task<UsageSnapshot> ReadAsync(UsageRange range, CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
-		var now = clock.Now;
+		var now = clock.GetUtcNow();
 		var window = UsageWindow.Of(range, now.ToLocalTime());
 		var before = window.Before();
 		var rows = await store.ReadAsync(before.From, window.To, cancellationToken);

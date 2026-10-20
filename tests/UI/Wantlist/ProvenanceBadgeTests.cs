@@ -7,6 +7,7 @@ using Domain.Wantlist;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Wantlist.Components;
+using UI.Shared.Common;
 
 namespace UI.Tests.Wantlist;
 

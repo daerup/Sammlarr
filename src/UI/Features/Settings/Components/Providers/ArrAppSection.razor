@@ -387,17 +387,5 @@
 
     private static Optional<string> Text(string typed) => Optional.When(!string.IsNullOrWhiteSpace(typed), typed.Trim);
 
-    private static string Free(long bytes)
-    {
-        string[] units = ["B", "KB", "MB", "GB", "TB", "PB"];
-        var size = (double)bytes;
-        var unit = 0;
-        while (size >= 1024 && unit < units.Length - 1)
-        {
-            size /= 1024;
-            unit++;
-        }
-
-        return FormattableString.Invariant($"{size:0.#} {units[unit]}");
-    }
+    private static string Free(long bytes) => bytes.Bytes().Humanize("0.#", Notation.Symbols);
 }

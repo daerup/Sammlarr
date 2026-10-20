@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Identity;
 using Contracts.Media;
 using Core.Jobs;
@@ -14,7 +13,7 @@ internal sealed class ConflictReview(
 	JobTurn turn,
 	TaskActivity activity,
 	ICurrentUser currentUser,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	ILogger<ConflictReview> logger
 ) : IConflictReview
 {
@@ -80,13 +79,13 @@ internal sealed class ConflictReview(
 
 	private async Task<Optional<Refused>> RefusedAsync(IdentityConflict note, DistinctReason reason, CancellationToken cancellationToken)
 	{
-		await conflicts.SaveAsync(note with { State = new Distinct(reason, clock.Now) }, cancellationToken);
+		await conflicts.SaveAsync(note with { State = new Distinct(reason, clock.GetUtcNow()) }, cancellationToken);
 		return Some.Of(new Refused(note, reason));
 	}
 
 	private async Task<Optional<Refused>> KeptApartAsync(IdentityConflict note, CancellationToken cancellationToken)
 	{
-		await conflicts.SaveAsync(note with { State = new Distinct(new KeptApartByHand(currentUser.Id), clock.Now) }, cancellationToken);
+		await conflicts.SaveAsync(note with { State = new Distinct(new KeptApartByHand(currentUser.Id), clock.GetUtcNow()) }, cancellationToken);
 		return new None();
 	}
 }

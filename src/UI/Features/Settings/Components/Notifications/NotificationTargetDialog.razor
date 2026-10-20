@@ -1,6 +1,5 @@
 @using Contracts.Notifications
 @using Domain.Notifications
-@using global::Shared.Extensions
 @inject INotificationTargetRepository Targets
 @inject NotificationTester Tester
 @inject Notifier Notifier
@@ -92,7 +91,7 @@
         Option(NotificationChannel.WebUi),
     ];
 
-    private static SelectOption<NotificationChannel> Option(NotificationChannel channel) => new(channel, channel.GetDescription());
+    private static SelectOption<NotificationChannel> Option(NotificationChannel channel) => new(channel, channel.Humanize());
 
     [CascadingParameter]
     public IDialogReference DialogRef { get; set; } = null!;

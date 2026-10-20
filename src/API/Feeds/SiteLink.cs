@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.WebUtilities;
+
 namespace API.Feeds;
 
 internal sealed record SiteLink(string Path, IReadOnlyList<KeyValuePair<string, string>> Query)
@@ -40,18 +42,20 @@ internal sealed record SiteLink(string Path, IReadOnlyList<KeyValuePair<string, 
 	private static SiteLink Of(string pathAndQuery)
 	{
 		var parts = pathAndQuery.Split('?', 2);
-		var query = parts.Length == 2 ? parts[1] : string.Empty;
-		var pairs = query
-			.Split('&', StringSplitOptions.RemoveEmptyEntries)
-			.Select(pair => pair.Split('=', 2))
-			.Select(pair => KeyValuePair.Create(Decode(pair[0]), pair.Length == 2 ? Decode(pair[1]) : string.Empty))
-			.Where(pair => !IsTracking(pair.Key));
-		return new SiteLink(parts[0].Trim('/'), [.. pairs]);
+		List<KeyValuePair<string, string>> pairs = [];
+		foreach (var pair in new QueryStringEnumerable(parts.Length == 2 ? parts[1] : string.Empty))
+		{
+			var key = pair.DecodeName().ToString();
+			if (!IsTracking(key))
+			{
+				pairs.Add(KeyValuePair.Create(key, pair.DecodeValue().ToString()));
+			}
+		}
+
+		return new SiteLink(parts[0].Trim('/'), pairs);
 	}
 
 	private static bool IsHost(string site, string rest) => site.Contains('.', StringComparison.Ordinal) && rest.Length > site.Length && rest[site.Length] == '/';
 
 	private static bool IsTracking(string key) => key == "_location" || key.StartsWith("utm_", StringComparison.Ordinal);
-
-	private static string Decode(string value) => Uri.UnescapeDataString(value.Replace('+', ' '));
 }

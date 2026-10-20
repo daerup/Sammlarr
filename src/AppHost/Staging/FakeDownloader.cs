@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -24,10 +23,9 @@ internal sealed class FakeDownloader(string downloads, string stub, ILogger<Fake
 		}
 	}
 
-	[SuppressMessage("ApiDesign", "RS0030", Justification = "The AppHost has no IDateTimeProvider; the age compares against file times the file system stamps.")]
 	private void DownloadGrabs()
 	{
-		var settled = DateTime.UtcNow - Settled;
+		var settled = TimeProvider.System.GetUtcNow().UtcDateTime - Settled;
 		foreach (var app in Directory.EnumerateDirectories(downloads))
 		{
 			foreach (var nzb in Directory.EnumerateFiles(Path.Combine(app, "nzb"), "*.nzb").Where(file => File.GetLastWriteTimeUtc(file) < settled))

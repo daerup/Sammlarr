@@ -6,7 +6,6 @@ using API.Anime;
 using API.Feeds;
 using API.Http;
 using API.Mal.Types;
-using Contracts;
 using Contracts.Auth;
 using Contracts.Feed;
 using Contracts.Media;
@@ -18,7 +17,7 @@ using Observability.Feed;
 
 namespace API.Mal;
 
-internal sealed partial class MalFeedService(MalClient client, IApiKeyService apiKeys, LaterSeasons seasons, IDateTimeProvider clock) : IFeedProvider
+internal sealed partial class MalFeedService(MalClient client, IApiKeyService apiKeys, LaterSeasons seasons, TimeProvider clock) : IFeedProvider
 {
 	private const string Fields = "list_status,media_type,start_date,alternative_titles";
 
@@ -62,7 +61,7 @@ internal sealed partial class MalFeedService(MalClient client, IApiKeyService ap
 		return isPage
 			? MalPages.Request(
 				SiteLink.Parse(identifier, "myanimelist.net").ToResult(NotAList).Map(MalPages.Of).GetOrThrow(error => new InvalidOperationException(error.Reason)),
-				DateOnly.FromDateTime(clock.Now.UtcDateTime)
+				DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime)
 			)
 			: string.Format(CultureInfo.InvariantCulture, "users/{0}/animelist?fields={1}&limit=1000", Uri.EscapeDataString(identifier), Fields);
 	}

@@ -1,8 +1,8 @@
 using System.Net;
 using API.Mdblist;
-using Contracts;
 using Domain.Media;
 using Domain.Providers;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
 namespace API.Tests.Mdblist;
@@ -138,12 +138,11 @@ public class MdblistEnricherTests
 	public async Task LookUpAsync_AMinuteAfterAFailedAnswer_AsksAgain()
 	{
 		var handler = FailingOnce(await MdblistApis.RecordedAsync("movies.json"));
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(DateTimeOffset.UnixEpoch.AddDays(1));
-		var testee = new MdblistEnricher(MdblistApis.Titles(handler, clock.Object));
+		var clock = new FakeTimeProvider(DateTimeOffset.UnixEpoch.AddDays(1));
+		var testee = new MdblistEnricher(MdblistApis.Titles(handler, clock));
 
 		await testee.LookUpAsync(FightClub, []);
-		clock.Now.Returns(DateTimeOffset.UnixEpoch.AddDays(1).AddMinutes(1));
+		clock.SetUtcNow(DateTimeOffset.UnixEpoch.AddDays(1).AddMinutes(1));
 		var again = await testee.LookUpAsync(FightClub, []);
 
 		await Assert.That(again).IsFound();

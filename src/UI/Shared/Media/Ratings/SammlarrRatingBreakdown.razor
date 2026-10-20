@@ -34,13 +34,13 @@
                 @if (VoteSources > 1)
                 {
                     <BbTooltip DelayDuration="150">
-                        <BbTooltipTrigger AsChild="false" Class="rating-tip">@RatingTexts.Count(votes) votes</BbTooltipTrigger>
+                        <BbTooltipTrigger AsChild="false" Class="rating-tip">@RatingTexts.Votes(votes)</BbTooltipTrigger>
                         <BbTooltipContent Class="max-w-[360px]"><RatingSum Terms="VoteTerms" Result="@RatingTexts.Count(votes)" Divided="false"/></BbTooltipContent>
                     </BbTooltip>
                 }
                 else
                 {
-                    <span>@RatingTexts.Count(votes) votes</span>
+                    <span>@RatingTexts.Votes(votes)</span>
                 }
             }
             else if (Value is not null)

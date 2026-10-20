@@ -816,6 +816,7 @@
         "dependencies": {
           "Contracts": "[1.0.0, )",
           "Fluid.Core": "[2.40.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Microsoft.Extensions.Http.Resilience": "[10.11.0, )",
           "Observability": "[1.0.0, )",
           "OpenTelemetry.Instrumentation.Http": "[1.19.0, )",
@@ -834,6 +835,7 @@
         "type": "Project",
         "dependencies": {
           "Contracts": "[1.0.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Observability": "[1.0.0, )",
           "Shared": "[1.0.0, )",
           "System.Linq.Dynamic.Core": "[1.7.4, )",
@@ -857,6 +859,7 @@
         "type": "Project",
         "dependencies": {
           "Cronos": "[0.13.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Shared": "[1.0.0, )",
           "Vogen": "[8.0.7, )"
         }
@@ -865,6 +868,7 @@
         "type": "Project",
         "dependencies": {
           "Contracts": "[1.0.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Shared": "[1.0.0, )",
           "WolverineFx": "[6.49.0, )",
           "WolverineFx.Sqlite": "[6.49.0, )"
@@ -900,9 +904,11 @@
           "BlazorBlueprint.Primitives": "[4.1.0, )",
           "Contracts": "[1.0.0, )",
           "CronExpressionDescriptor": "[2.51.0, )",
+          "Humanizer.Core": "[3.0.10, )",
           "Microsoft.AspNetCore.Components.Authorization": "[11.0.0-rc.2.26504.105, )",
           "Microsoft.AspNetCore.Components.Web": "[11.0.0-rc.2.26504.105, )",
           "Observability": "[1.0.0, )",
+          "Semver": "[3.0.0, )",
           "Serilog": "[4.4.0, )",
           "Shared": "[1.0.0, )"
         }
@@ -961,6 +967,12 @@
           "Parlot": "1.5.2",
           "TimeZoneConverter": "7.2.0"
         }
+      },
+      "Humanizer.Core": {
+        "type": "CentralTransitive",
+        "requested": "[3.0.10, )",
+        "resolved": "3.0.10",
+        "contentHash": "yZIhtw8sYuvsONzQbZxWpR60tMWYHXoo0DL6nyOqSFiU5POjBTSEyWFpTQtJEZuy+oqiYTXKXY/Mjx7KnqIQFw=="
       },
       "Microsoft.AspNetCore.Components.Authorization": {
         "type": "CentralTransitive",
@@ -1101,6 +1113,12 @@
           "Microsoft.Extensions.Configuration": "10.0.0",
           "OpenTelemetry.Api.ProviderBuilderExtensions": "[1.19.0, 2.0.0)"
         }
+      },
+      "Semver": {
+        "type": "CentralTransitive",
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "9jZCicsVgTebqkAujRWtC9J1A5EQVlu0TVKHcgoCuv345ve5DYf4D1MjhKEnQjdRZo6x/vdv6QQrYFs7ilGzLA=="
       },
       "Serilog": {
         "type": "CentralTransitive",

@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Identity;
@@ -19,7 +18,7 @@ internal sealed class SignInService(
 	ILocalAccountRepository localAccounts,
 	IUserScope userScope,
 	IProviderConfigService providerConfig,
-	IDateTimeProvider dateTimeProvider,
+	TimeProvider clock,
 	SetupGate setupGate,
 	WebUiNotificationSeeder webUiNotifications,
 	ILogger<SignInService> logger
@@ -155,7 +154,7 @@ internal sealed class SignInService(
 		}
 
 		var role = isFirstUser ? UserRole.Admin : UserRole.Member;
-		var user = new User(UserId.New(), login.DisplayName, login.AvatarUrl, role, dateTimeProvider.Now);
+		var user = new User(UserId.New(), login.DisplayName, login.AvatarUrl, role, clock.GetUtcNow());
 		await users.CreateAsync(user, provider, login.ExternalUserId, cancellationToken);
 		setupGate.SawAdmin();
 		using (userScope.As(user))

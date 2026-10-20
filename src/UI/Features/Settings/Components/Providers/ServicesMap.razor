@@ -1,8 +1,7 @@
 @using System.Globalization
-@using Contracts
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <div class="w-fit max-w-full overflow-hidden rounded-lg border bg-card">
     <CardHead Icon="network" Title="Which service does what">
@@ -155,7 +154,7 @@
         <div class="map-behind-grid">
             @foreach (var (service, does) in BehindTheScenes.Services)
             {
-                var status = BehindTheScenes.Status(service, Downloads, Clock.Now);
+                var status = BehindTheScenes.Status(service, Downloads, Clock.GetUtcNow());
                 <div class="map-behind-item" data-testid="map-behind-item" data-service="@service">
                     <span class="map-behind-name">
                         @foreach (var mark in Marks(service))
@@ -289,7 +288,7 @@
         {
             RemoteService remote => Readiness(remote),
             Arr => ArrReady ? "Connected" : "Not set up",
-            SammlarrAccounts => People == 1 ? "Local accounts · 1 person" : $"Local accounts · {People} people",
+            SammlarrAccounts => $"Local accounts · {"person".ToQuantity(People)}",
         };
     }
 

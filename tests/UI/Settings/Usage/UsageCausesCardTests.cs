@@ -7,6 +7,7 @@ using Domain.Usage;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Usage;
+using UI.Shared.Bars;
 
 namespace UI.Tests.Settings.Usage;
 
@@ -28,6 +29,20 @@ public class UsageCausesCardTests : BunitContext
 		await Assert.That(cut.Find("[data-testid=usage-gauge-centre]").TextContent).IsEqualTo("92.9%");
 		await Assert.That(cut.FindAll("[data-testid=usage-gauge-segment]")).Count().IsEqualTo(5);
 		await Assert.That(cut.Find("[data-testid=usage-cause-picked]").TextContent).Contains("All causes").And.Contains("140 calls");
+	}
+
+	[Test]
+	public async Task Render_EachCause_FillsItsShareOfTheBusiestCause()
+	{
+		var cut = RenderCard(
+			Period(
+				new UsageCauseLine(UsageCause.Browse, UsageSamples.Tally(answered: 75), []),
+				new UsageCauseLine(UsageCause.Search, UsageSamples.Tally(answered: 30), [])
+			)
+		);
+
+		await Assert.That(cut.FindComponents<StackedBar>().Select(bar => bar.Instance.Total ?? 0)).IsEquivalentTo([75L, 75L]);
+		await Assert.That(cut.FindComponents<StackedBarPart>().Select(part => part.Instance.Value)).IsEquivalentTo([75L, 30L], CollectionOrdering.Matching);
 	}
 
 	[Test]

@@ -24,6 +24,17 @@ public class PlexOAuthProviderTests
 	}
 
 	[Test]
+	public async Task BeginLoginAsync_NamesTheProductOnPlexsSignInEncodedOnce()
+	{
+		var plex = Mock.HttpHandler();
+		plex.OnAnyRequest().RespondWithJson("""{"id":4242,"code":"pin-code","authToken":null}""");
+
+		var signIn = await Assert.That(await Testee(plex).BeginLoginAsync(Callback)).IsSuccess();
+
+		await Assert.That(signIn).Contains("context%5Bdevice%5D%5Bproduct%5D=Sammlarr");
+	}
+
+	[Test]
 	public async Task BeginLoginAsync_WhenPlexRefusesThePin_FailsSayingSo()
 	{
 		var plex = Mock.HttpHandler();

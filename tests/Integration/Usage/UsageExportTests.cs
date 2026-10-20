@@ -1,5 +1,4 @@
 using System.Diagnostics.Metrics;
-using Contracts;
 using Contracts.Usage;
 using Domain.Providers;
 using Domain.Usage;
@@ -34,7 +33,7 @@ public class UsageExportTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		using var meter = new Meter($"usage-{Guid.NewGuid()}");
 		var calls = meter.CreateHistogram<double>(UsageExporter.PipelineDuration, "ms");
-		var exporter = new UsageExporter(host.Resolve<IServiceScopeFactory>(), host.Resolve<IUsageLastCalls>(), host.Resolve<IDateTimeProvider>());
+		var exporter = new UsageExporter(host.Resolve<IServiceScopeFactory>(), host.Resolve<IUsageLastCalls>(), host.Resolve<TimeProvider>());
 		using var meters = Sdk.CreateMeterProviderBuilder()
 			.AddMeter(meter.Name)
 			.AddReader(new BaseExportingMetricReader(exporter) { TemporalityPreference = MetricReaderTemporalityPreference.Delta })

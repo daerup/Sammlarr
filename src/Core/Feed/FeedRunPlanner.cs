@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Blocklist;
 using Contracts.DI;
 using Contracts.Feed;
@@ -27,7 +26,7 @@ internal sealed class FeedRunPlanner(
 	IServiceScopeFactory scopes,
 	ICurrentUser currentUser,
 	IRatingService ratings,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	ILogger<FeedRunPlanner> logger
 ) : IFeedRunPlanner
 {
@@ -135,7 +134,7 @@ internal sealed class FeedRunPlanner(
 			Filter = feed.Filter,
 			ShuffleSeed = await ShuffleSeedAsync(feed, cancellationToken),
 			DrawSkipsOwned = feed.Strategy is Append,
-			Today = clock.Today,
+			Today = DateOnly.FromDateTime(clock.GetLocalNow().DateTime),
 		};
 		var predicates = new QueryPredicates<MediaQueryRow>(
 			IsWantlisted: row => wanted.Contains(row.Media.Identity.Id),

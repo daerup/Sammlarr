@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Feed;
 using Contracts.Providers;
 using Contracts.Wantlist;
@@ -6,6 +5,7 @@ using Core.Feed;
 using Domain.Feed;
 using Domain.Providers;
 using Domain.Usage;
+using Microsoft.Extensions.Time.Testing;
 using Observability.Usage;
 using TestInfrastructure;
 
@@ -173,12 +173,7 @@ public class FeedServiceTests
 		_repository.UpdateAsync(Any<FeedId>(), Any<FeedUpdateData>(), Any()).WasNeverCalled();
 	}
 
-	private static IDateTimeProvider Clock()
-	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		return clock.Object;
-	}
+	private static TimeProvider Clock() => new FakeTimeProvider(Now);
 
 	private static FeedCreateData CreateData(string identifier)
 	{

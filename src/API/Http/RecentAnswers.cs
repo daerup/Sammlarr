@@ -1,9 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
-using Contracts;
 
 namespace API.Http;
 
-internal sealed class RecentAnswers<TKey, TValue>(IDateTimeProvider clock)
+internal sealed class RecentAnswers<TKey, TValue>(TimeProvider clock)
 	where TKey : notnull
 	where TValue : notnull
 {
@@ -34,17 +33,17 @@ internal sealed class RecentAnswers<TKey, TValue>(IDateTimeProvider clock)
 	{
 		lock (_gate)
 		{
-			var filed = new Filed(clock.Now, _ => Task.FromResult<Result<TValue>>(Success.Of(value)));
+			var filed = new Filed(clock.GetUtcNow(), _ => Task.FromResult<Result<TValue>>(Success.Of(value)));
 			filed.Settle();
 			_answers[key] = filed;
 		}
 	}
 
-	private bool Fresh(Filed filed) => clock.Now - filed.At < Kept;
+	private bool Fresh(Filed filed) => clock.GetUtcNow() - filed.At < Kept;
 
 	private Filed Start(TKey key, Func<CancellationToken, Task<Result<TValue>>> ask)
 	{
-		var filed = new Filed(clock.Now, started => KeepAsync(key, started, ask));
+		var filed = new Filed(clock.GetUtcNow(), started => KeepAsync(key, started, ask));
 		_answers[key] = filed;
 		return filed;
 	}

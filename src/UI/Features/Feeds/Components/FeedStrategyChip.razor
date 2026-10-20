@@ -1,7 +1,7 @@
 
 @if (Strategy is Mirror mirror)
 {
-    <FeedChip Tone="FeedChipTone.Mirror" Icon="flip-horizontal-2" Title="@($"Mirror: removes a title after {mirror.AbsenceThreshold} runs without it")">
+    <FeedChip Tone="FeedChipTone.Mirror" Icon="flip-horizontal-2" Title="@($"Mirror: removes a title after {"run".ToQuantity(mirror.AbsenceThreshold)} without it")">
         Mirror <span class="feed-chip-sep">·</span> @mirror.AbsenceThreshold
     </FeedChip>
 }

@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Wantlist;
@@ -19,7 +18,7 @@ internal sealed class UserManagementService(
 	ISessionValidator sessionValidator,
 	ISessionInvalidator sessionInvalidator,
 	ActiveSink sinks,
-	IDateTimeProvider dateTimeProvider
+	TimeProvider clock
 ) : IUserManagementService
 {
 	public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -31,7 +30,7 @@ internal sealed class UserManagementService(
 	public async Task<IReadOnlyList<Person>> GetPeopleAsync(CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
-		var now = dateTimeProvider.Now;
+		var now = clock.GetUtcNow();
 		var holdings = await users.GetHoldingsAsync(cancellationToken);
 		var colours = await users.GetColoursAsync(cancellationToken);
 		var locals = (await accounts.GetAllAsync(cancellationToken)).ToDictionary(account => account.User.Id);

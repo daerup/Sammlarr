@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using Contracts;
 using Contracts.Messaging;
 using Contracts.Providers;
 using Domain.Identity;
@@ -9,13 +8,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Core.Providers;
 
-internal sealed class ProviderRateLimitReporter(IServiceScopeFactory scopeFactory, IDateTimeProvider dateTimeProvider) : IProviderRateLimitReporter
+internal sealed class ProviderRateLimitReporter(IServiceScopeFactory scopeFactory, TimeProvider clock) : IProviderRateLimitReporter
 {
 	private readonly ConcurrentDictionary<RemoteService, DateTimeOffset> _limitedUntil = new();
 
 	public async Task ReportAsync(RemoteService remote, TimeSpan retryAfter, UserId triggeredBy, CancellationToken cancellationToken = default)
 	{
-		var now = dateTimeProvider.Now;
+		var now = clock.GetUtcNow();
 		if (!StartsBurst(remote, now, now + retryAfter))
 		{
 			return;

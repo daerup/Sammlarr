@@ -11,43 +11,15 @@
     else
     {
         <div class="band-body">
-            <BbTooltipProvider>
-                <div class="stack">
-                    @for (var index = 0; index < Sources.Count; index++)
+            <StackedBar Size="BarSize.Large" ShowLegend="true" HiddenChanged="OnHidden">
+                <Title>@("title".ToQuantity(ShownTotal, "N0"))</Title>
+                <ChildContent>
+                    @foreach (var source in Sources)
                     {
-                        var source = Sources[index];
-                        var tone = Tone(index);
-                        @if (IsShown(source))
-                        {
-                            <BbTooltip @key="source.Name" DelayDuration="150">
-                                <BbTooltipTrigger AsChild="false" Focusable="false" style="@Grow(source)">
-                                    <span class="stack-part @tone"></span>
-                                </BbTooltipTrigger>
-                                <BbTooltipContent>@Detail(source)</BbTooltipContent>
-                            </BbTooltip>
-                        }
+                        <StackedBarPart Name="@source.Name" Value="source.Count"/>
                     }
-                </div>
-                <div class="keys">
-                    @for (var index = 0; index < Sources.Count; index++)
-                    {
-                        var source = Sources[index];
-                        var tone = Tone(index);
-                        <BbTooltip DelayDuration="150">
-                            <BbTooltipTrigger AsChild="false" Focusable="false">
-                                <button type="button"
-                                        class="key @(IsShown(source) ? null : "is-hidden")"
-                                        aria-pressed="@(IsShown(source) ? "true" : "false")"
-                                        @onclick="() => Toggle(source)">
-                                    <i class="key-dot @tone"></i>
-                                    <span class="key-name">@source.Name</span>
-                                </button>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>@Detail(source)</BbTooltipContent>
-                        </BbTooltip>
-                    }
-                </div>
-            </BbTooltipProvider>
+                </ChildContent>
+            </StackedBar>
         </div>
     }
 </div>
@@ -56,33 +28,11 @@
     [Parameter, EditorRequired] public required IReadOnlyList<SourceShare> Sources { get; set; }
     [Parameter] public int Total { get; set; }
 
-    private readonly HashSet<string> _hidden = [];
+    private IReadOnlySet<string> _hidden = new HashSet<string>();
 
-    private int ShownTotal => Sources.Where(IsShown).Sum(source => source.Count);
+    private int ShownTotal => Sources.Where(source => !_hidden.Contains(source.Name)).Sum(source => source.Count);
 
-    private string Note => ShownTotal == Total ? $"{Total:N0} titles" : $"{ShownTotal:N0} of {Total:N0} titles";
+    private string Note => ShownTotal == Total ? "title".ToQuantity(Total, "N0") : $"{ShownTotal:N0} of {"title".ToQuantity(Total, "N0")}";
 
-    private bool IsShown(SourceShare source) => !_hidden.Contains(source.Name);
-
-    private void Toggle(SourceShare source)
-    {
-        if (_hidden.Remove(source.Name))
-        {
-            return;
-        }
-
-        if (Sources.Count(IsShown) > 1)
-        {
-            _hidden.Add(source.Name);
-        }
-    }
-
-    private static string Tone(int index) => index == 0 ? "tone-0" : $"tone-{1 + (index - 1) % 3}";
-
-    private static string Grow(SourceShare source) => $"flex: {source.Count}";
-
-    private string Detail(SourceShare source) =>
-        IsShown(source)
-            ? $"{source.Name} · {source.Count:N0} of {ShownTotal:N0} ({source.Count / (double)ShownTotal:P1})"
-            : $"{source.Name} · {source.Count:N0} titles, hidden";
+    private void OnHidden(IReadOnlySet<string> hidden) => _hidden = hidden;
 }

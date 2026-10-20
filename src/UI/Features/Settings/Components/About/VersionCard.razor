@@ -44,7 +44,7 @@
 
     private string RepositoryUrl => $"https://github.com/{Repository}";
 
-    private string Commits => Version.CommitsSinceRelease == 1 ? "1 commit" : $"{Version.CommitsSinceRelease} commits";
+    private string Commits => "commit".ToQuantity(Version.CommitsSinceRelease);
 
     private string Source =>
         !Version.IsDevBuild ? $"The version comes from the release tag v{Version.Number} this build was made from."

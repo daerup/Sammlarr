@@ -84,7 +84,7 @@
                 <BbTooltip DelayDuration="100" Placement="PopoverPlacement.Top">
                     <BbTooltipTrigger Focusable="false" Class="block size-full" style="display: block; width: 100%; height: 100%" data-testid="usage-quota-hour">
                     </BbTooltipTrigger>
-                    <BbTooltipContent Class="@UsageView.Tip" data-testid="usage-quota-tip">
+                    <BbTooltipContent Class="@Tooltips.Panel" data-testid="usage-quota-tip">
                         <div class="mb-1 font-semibold whitespace-nowrap">
                             @UsageView.Time(hour.From) - @UsageView.Time(hour.Until) · @UsageView.Count(hour.Before) → @UsageView.Count(hour.After) left
                         </div>

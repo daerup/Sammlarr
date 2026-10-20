@@ -1,4 +1,3 @@
-using Contracts;
 using Core.Announcing;
 using Core.Auth;
 using Core.Blocklist;
@@ -19,6 +18,7 @@ using Core.Setup;
 using Core.Usage;
 using Core.Wantlist;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Shared.DI;
 
 namespace Core;
@@ -46,6 +46,6 @@ public class CoreModule : IServiceModule
 		services.AddModule<SetupModule>();
 		services.AddModule<UsageModule>();
 		services.AddModule<WantlistModule>();
-		services.AddTransient<IDateTimeProvider, SystemDateTimeProvider>();
+		services.TryAddSingleton(TimeProvider.System);
 	}
 }

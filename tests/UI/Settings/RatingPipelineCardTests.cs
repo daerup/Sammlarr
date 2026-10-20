@@ -89,7 +89,7 @@ public class RatingPipelineCardTests : BunitContext
 	{
 		var cut = RenderCard(new RatingStrategy(new AveragedRating([RatingSource.Imdb, RatingSource.RottenTomatoesCritics])), [RatingSource.Tmdb]);
 
-		await Assert.That(cut.Find(".pipeline-notice").TextContent).Contains("IMDb, RT critics").And.Contains("TMDB is used instead");
+		await Assert.That(cut.Find(".pipeline-notice").TextContent).Contains("IMDb and RT critics").And.Contains("TMDB is used instead");
 	}
 
 	[Test]
@@ -119,7 +119,7 @@ public class RatingPipelineCardTests : BunitContext
 			[RatingSource.Tmdb, RatingSource.Imdb]
 		);
 
-		await Assert.That(cut.Find(".pipeline-notice").TextContent).Contains("RT critics, RT audience").And.Contains("TMDB, IMDb are used instead");
+		await Assert.That(cut.Find(".pipeline-notice").TextContent).Contains("RT critics and RT audience").And.Contains("TMDB and IMDb are used instead");
 	}
 
 	[Test]

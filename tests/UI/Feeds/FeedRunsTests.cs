@@ -1,7 +1,6 @@
 using System.Globalization;
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts;
 using Contracts.Blocklist;
 using Contracts.Feed;
 using Contracts.Identity;
@@ -14,9 +13,11 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Usage;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using UI.Features.Feeds.Components;
 using UI.Features.Feeds.Pages.Runs;
+using UI.Shared.Common;
 using UI.Shared.Services;
 
 namespace UI.Tests.Feeds;
@@ -79,7 +80,7 @@ public class FeedRunsTests : BunitContext
 		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(calling)));
 		cut.WaitForState(() => cut.FindAll("[data-testid=run-calls]").Count == 1);
 
-		await Assert.That(cut.Find(".runs-detail-sub").TextContent).Contains("took 2.0 s · 8,287 calls");
+		await Assert.That(cut.Find(".runs-detail-sub").TextContent).Contains("took 2 s · 8,287 calls");
 	}
 
 	[Test]
@@ -124,10 +125,8 @@ public class FeedRunsTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
 		Services.AddSingleton<ICurrentUser>(new TestCurrentUser());
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(Now);
-		clock.Zone.Getter.Returns(TimeZoneInfo.Utc);
-		Services.AddSingleton(clock.Object);
+		var clock = new FakeTimeProvider(Now);
+		Services.AddSingleton<TimeProvider>(clock);
 
 		var feeds = IFeedService.Mock();
 		feeds

@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Contracts;
 using Contracts.Identity;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
@@ -24,7 +23,7 @@ internal sealed class WantlistSyncEngine(
 	IWantlistOutbox outbox,
 	Announcer announcer,
 	ICurrentUser currentUser,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	ILogger<WantlistSyncEngine> logger
 ) : IWantlistSyncEngine
 {
@@ -53,7 +52,7 @@ internal sealed class WantlistSyncEngine(
 		var down = DownOf(planning);
 		down.Apply(unreachable => activity?.SetStatus(ActivityStatusCode.Error, unreachable.Reason));
 		await down.Apply(unreachable =>
-			announcer.AnnounceAsync(new WantlistSyncFailedNotification(currentUser.Id, clock.Now, unreachable.Reason), cancellationToken)
+			announcer.AnnounceAsync(new WantlistSyncFailedNotification(currentUser.Id, clock.GetUtcNow(), unreachable.Reason), cancellationToken)
 		);
 		return syncResult;
 	}
@@ -76,7 +75,7 @@ internal sealed class WantlistSyncEngine(
 
 		var pushed = await DrainAsync(sink, plan.Waiting.ToHashSet(), cancellationToken);
 		await SyncNotification
-			.For(currentUser.Id, clock.Now, pulledAdds, pulledRemoves, pushed)
+			.For(currentUser.Id, clock.GetUtcNow(), pulledAdds, pulledRemoves, pushed)
 			.Apply(synced => announcer.AnnounceAsync(synced, cancellationToken));
 
 		logger.LogInformation(

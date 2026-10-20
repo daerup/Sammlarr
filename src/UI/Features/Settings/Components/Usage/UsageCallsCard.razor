@@ -1,9 +1,8 @@
-@using Contracts
 @using Contracts.Datasets
 @using Contracts.Usage
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <UsageCard Title="@(_tab is CallsTab.Calls ? "Calls" : "Answer time")" Subtitle="@Subtitle" TestId="usage-calls">
     <Chip>
@@ -79,7 +78,7 @@
             @foreach (var line in Period.Services)
             {
                 var tally = line.Tally;
-                var now = UsageView.RightNow(line.RightNow, Clock.Now);
+                var now = UsageView.RightNow(line.RightNow, Clock.GetUtcNow());
                 var picked = IsPicked(line.Service);
                 var open = Panel(line.Service).When(_ => picked);
                 <div class="@($"usage-service cursor-pointer rounded-md pl-3 pr-1 text-[12.5px] hover:bg-foreground/5 {(picked ? "usage-service-picked" : string.Empty)}")"
@@ -94,7 +93,7 @@
                         }
                     </span>
                     <span>
-                        <UsageOutcomeBar Tally="tally" Width="tally.Total * 100.0 / Busiest">
+                        <UsageOutcomeBar Tally="tally" Busiest="Busiest">
                             <Title>
                                 <BrandedLogo Brand="Branding.GetBrandingInfo(line.Service)" Size="14" Decorative="true"/>
                                 @Branding.GetBrandingInfo(line.Service).NickName
@@ -102,11 +101,11 @@
                         </UsageOutcomeBar>
                     </span>
                     <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
-                    <span class="@UsageView.Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@UsageView.Share(tally.Errors, tally.Total)</span>
+                    <span class="@UsageView.Tone(tally.Errors, tally.Total, "text-[var(--usage-failed)] font-medium")">@Shares.Of(tally.Errors, tally.Total)</span>
                     <span>
                         <UsageAnswerStrip Service="line.Service" Tally="tally"/>
                     </span>
-                    <span class="@UsageView.Tone(tally.RateLimited, tally.Total, "text-[var(--usage-gave-up)] font-medium")">@UsageView.Share(tally.RateLimited, tally.Total)</span>
+                    <span class="@UsageView.Tone(tally.RateLimited, tally.Total, "text-[var(--usage-gave-up)] font-medium")">@Shares.Of(tally.RateLimited, tally.Total)</span>
                     <span class="@($"flex min-w-0 items-center gap-1.5 overflow-hidden text-xs text-ellipsis whitespace-nowrap {NowColour(now.Tone)}")" data-testid="usage-right-now">
                         @if (now.Icon is Some<string>(var icon))
                         {

@@ -2,14 +2,13 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Contracts;
 using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging;
 
 namespace API.Notifications.Webhook;
 
-internal sealed class WebhookChannel(WebhookClient client, INotificationTemplateRenderer renderer, IDateTimeProvider clock, ILogger<WebhookChannel> logger)
+internal sealed class WebhookChannel(WebhookClient client, INotificationTemplateRenderer renderer, TimeProvider clock, ILogger<WebhookChannel> logger)
 	: INotificationChannel
 {
 	private static readonly JsonSerializerOptions BodyJson = new()
@@ -41,7 +40,7 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 	private async Task<DeliveryResult> SendAsync(WebhookConfig config, Uri uri, NotificationContext context, string body, CancellationToken cancellationToken)
 	{
 		var payload = Encoding.UTF8.GetBytes(body);
-		var (id, timestamp, signature) = WebhookSigning.Sign(context.Id, clock.Now, payload, config.SigningSecret);
+		var (id, timestamp, signature) = WebhookSigning.Sign(context.Id, clock.GetUtcNow(), payload, config.SigningSecret);
 
 		using var request = new HttpRequestMessage(HttpMethod.Post, uri) { Content = new ByteArrayContent(payload) };
 		request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");

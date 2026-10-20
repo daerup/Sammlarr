@@ -13,6 +13,7 @@
 		<ProjectReference Include="..\Observability\Observability.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Humanizer.Core" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" />
 		<PackageReference Include="Fluid.Core" />

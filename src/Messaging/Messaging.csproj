@@ -14,6 +14,7 @@
 		<InternalsVisibleTo Include="Harness" />
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Humanizer.Core" />
 		<PackageReference Include="WolverineFx" />
 		<PackageReference Include="WolverineFx.Sqlite" />
 	</ItemGroup>

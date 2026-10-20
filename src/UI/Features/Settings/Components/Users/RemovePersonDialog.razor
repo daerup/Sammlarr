@@ -135,10 +135,10 @@
             var holdings = Person.Holdings;
             (string Icon, string What, string Detail, bool Shown)[] rows =
             [
-                ("rss", Count(holdings.Feeds, "feed", "feeds"), "and their run history", holdings.Feeds > 0),
+                ("rss", "feed".ToQuantity(holdings.Feeds, "N0"), "and their run history", holdings.Feeds > 0),
                 ("bookmark", Titles(holdings.Wanted), "on their wantlist", holdings.Wanted > 0),
                 ("ban", Titles(holdings.Blocklisted), "on their blocklist", holdings.Blocklisted > 0),
-                ("key-round", "Their keys", Listed([.. holdings.Keys.Select(key => Branding.GetBrandingInfo(key).NickName).Distinct()]), holdings.Keys.Count > 0),
+                ("key-round", "Their keys", holdings.Keys.Select(key => Branding.GetBrandingInfo(key).NickName).Distinct().Humanize(Notation.Words), holdings.Keys.Count > 0),
             ];
             return [.. rows.Where(row => row.Shown).Select(row => (row.Icon, row.What, row.Detail))];
         }
@@ -180,18 +180,15 @@
 
     private string Removal(int cleared) => _withSinkTitles ? $"Removed {Name} and {Titles(cleared)} from Radarr and Sonarr." : $"Removed {Name}.";
 
-    private static string Titles(int count) => Count(count, "title", "titles");
+    private static string Titles(int count) => "title".ToQuantity(count, "N0");
 
     private static string Holding(SinkHoldings holding)
     {
         return holding.App switch
         {
-            ArrApp.Radarr => Count(holding.Sole, "movie", "movies"),
-            ArrApp.Sonarr => Count(holding.Sole, "show", "shows"),
+            ArrApp.Radarr => "movie".ToQuantity(holding.Sole, "N0"),
+            ArrApp.Sonarr => "show".ToQuantity(holding.Sole, "N0"),
         };
     }
 
-    private static string Count(int count, string one, string many) => $"{count:N0} {(count == 1 ? one : many)}";
-
-    private static string Listed(IReadOnlyList<string> names) => names.Count > 1 ? $"{string.Join(", ", names.SkipLast(1))} and {names[^1]}" : string.Concat(names);
 }

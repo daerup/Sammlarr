@@ -55,12 +55,14 @@
                             <span>
                                 @if (cause is not null)
                                 {
-                                    <span class="block h-2 rounded-[3px]" style="@FormattableString.Invariant($"width: {Math.Max(2, tally.Total * 100.0 / Busiest)}%; background: {(picked ? UsageView.Accent : "var(--usage-answered)")}")"></span>
+                                    <StackedBar Total="Busiest">
+                                        <StackedBarPart Name="@name" Value="tally.Total" Color="@(picked ? UsageView.Accent : "var(--usage-answered)")"/>
+                                    </StackedBar>
                                 }
                             </span>
                             <span class="text-right tabular-nums">@UsageView.Count(tally.Total)</span>
                             <span class="@($"text-right tabular-nums {(Trouble(tally) * 100 > tally.Total ? "font-medium text-[var(--usage-gave-up)]" : "text-muted-foreground")}")"
-                                  title="Hit trouble">@UsageView.Share(Trouble(tally), tally.Total)</span>
+                                  title="Hit trouble">@Shares.Of(Trouble(tally), tally.Total)</span>
                         </button>
                         @if (opened)
                         {
@@ -95,8 +97,9 @@
                                         }
                                     </span>
                                     <span>
-                                        <span class="block h-2 rounded-[3px]"
-                                              style="@FormattableString.Invariant($"width: {Math.Max(2, feed.Calls * 100.0 / Busiest)}%; background: color-mix(in oklab, var(--usage-answered) 65%, transparent)")"></span>
+                                        <StackedBar Total="Busiest">
+                                            <StackedBarPart Name="Calls" Value="feed.Calls" Color="color-mix(in oklab, var(--usage-answered) 65%, transparent)"/>
+                                        </StackedBar>
                                     </span>
                                     <span class="text-right tabular-nums">@UsageView.Count(feed.Calls)</span>
                                     <span></span>
@@ -119,7 +122,7 @@
                                 <LucideIcon Name="check" Size="13"/>
                                 <span>Answered</span>
                                 <span class="text-right tabular-nums">@UsageView.Count(CauseTally.Total)</span>
-                                <span class="text-right tabular-nums text-muted-foreground">@UsageView.Share(CauseTally.Total, CauseTally.Total)</span>
+                                <span class="text-right tabular-nums text-muted-foreground">@Shares.Of(CauseTally.Total, CauseTally.Total)</span>
                             </div>
                             <div class="flex items-center gap-2 text-muted-foreground" data-testid="usage-no-trouble">
                                 <LucideIcon Name="circle-check" Size="14"/>
@@ -136,7 +139,7 @@
                                     <LucideIcon Name="@look.Icon" Size="13"/>
                                     <span>@look.Name</span>
                                     <span class="text-right tabular-nums">@UsageView.Count(count)</span>
-                                    <span class="text-right tabular-nums text-muted-foreground">@(count == 0 ? string.Empty : UsageView.Share(count, CauseTally.Total))</span>
+                                    <span class="text-right tabular-nums text-muted-foreground">@(count == 0 ? string.Empty : Shares.Of(count, CauseTally.Total))</span>
                                 </div>
                             }
                         }

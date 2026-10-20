@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Identity;
 using Contracts.Settings;
 using Contracts.Wantlist;
@@ -8,6 +7,7 @@ using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
 using Domain.Usage;
+using Microsoft.Extensions.Time.Testing;
 using Observability.Usage;
 using TestInfrastructure;
 
@@ -48,7 +48,7 @@ public class UserManagementServiceTests
 				validator.Object,
 				ISessionInvalidator.Mock().Object,
 				new ActiveSink(config.Object, new FakeKeyedServiceIndex<SinkKind, IMediaSink>().Register(SinkKind.Arr, _sink.Object)),
-				IDateTimeProvider.Mock().Object
+				new FakeTimeProvider()
 			);
 		}
 	}

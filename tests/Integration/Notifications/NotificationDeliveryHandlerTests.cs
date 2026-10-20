@@ -1,9 +1,9 @@
-using Contracts;
 using Contracts.Notifications;
 using Domain.Identity;
 using Domain.Notifications;
 using Integration.Tests.Messaging;
 using Messaging.Notifications;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 using Wolverine;
 
@@ -107,8 +107,7 @@ public class NotificationDeliveryHandlerTests
 		var index = new FakeKeyedServiceIndex<NotificationChannel, INotificationChannel>().Register(NotificationChannel.Webhook, channel);
 		outcomes ??= new CapturingOutcomes();
 
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(DateTimeOffset.UnixEpoch);
+		var clock = new FakeTimeProvider(DateTimeOffset.UnixEpoch);
 
 		await NotificationDeliveryHandler.Handle(
 			new DeliverNotification(Context(), targetId, User, NotificationTemplate.None),
@@ -117,7 +116,7 @@ public class NotificationDeliveryHandlerTests
 			targets.Object,
 			index,
 			outcomes,
-			clock.Object,
+			clock,
 			CancellationToken.None
 		);
 		return outcomes;

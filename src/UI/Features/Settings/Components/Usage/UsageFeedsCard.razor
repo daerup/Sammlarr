@@ -1,8 +1,7 @@
-@using Contracts
 @using Contracts.Usage
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 
 <UsageCard Title="Feeds" Subtitle="@Subtitle" TestId="usage-feeds">
     <Chip>
@@ -136,7 +135,7 @@
                             @if (stats.Calls > 0)
                             {
                                 <span>
-                                    <UsageOutcomeBar Tally="Tally(line)" Width="Math.Max(2, stats.Calls * 100.0 / Busiest)">
+                                    <UsageOutcomeBar Tally="Tally(line)" Busiest="Busiest">
                                         <Title>
                                             @foreach (var brand in Branding.Brands(line.Provider.Service).Take(1))
                                             {
@@ -159,7 +158,7 @@
                                 <span></span>
                                 <span></span>
                                 <span></span>
-                                <span class="truncate text-xs text-muted-foreground" data-testid="usage-feed-deleted">deleted @UsageView.Clock(gone.DeletedAt, Clock.Now)</span>
+                                <span class="truncate text-xs text-muted-foreground" data-testid="usage-feed-deleted">deleted @UsageView.Clock(gone.DeletedAt, Clock.GetUtcNow())</span>
                                 <span></span>
                             }
                             else
@@ -175,13 +174,13 @@
                                     }
                                     @UsageView.Count(line.Stats.Unmatched) <span class="text-muted-foreground">· @FormattableString.Invariant($"{line.Stats.UnmatchedShare * 100:0.#}%")</span>
                                 </span>
-                                <span class="text-right tabular-nums text-muted-foreground">@(line.Runs.Count > 0 ? UsageView.Duration(line.Stats.Took.TotalMilliseconds) : string.Empty)</span>
+                                <span class="text-right tabular-nums text-muted-foreground">@(line.Runs.Count > 0 ? line.Stats.Took.Humanize(2, Notation.Symbols) : string.Empty)</span>
                                 <span class="flex min-w-0 items-center gap-1.5 truncate text-xs text-muted-foreground" data-testid="usage-feed-last">
                                     @if (!line.Enabled)
                                     {
                                         <LucideIcon Name="pause" Size="12"/>
                                     }
-                                    @line.LastRun.Map(at => UsageView.Clock(at, Clock.Now)).GetValueOr("Never ran")
+                                    @line.LastRun.Map(at => UsageView.Clock(at, Clock.GetUtcNow())).GetValueOr("Never ran")
                                 </span>
                                 <a class="flex items-center justify-center rounded text-muted-foreground hover:text-foreground" href="@RunsOf(line.Feed)"
                                    title="Open the run history" data-testid="usage-feed-runs" @onclick:stopPropagation="true">
@@ -356,7 +355,7 @@
         return PlotTop + (PlotHeight - PlotTop) * (1 - share);
     }
 
-    private (DateTimeOffset From, DateTimeOffset To) Span => (Window.SlotAt(FirstSlot), Clock.Now < Window.To ? Clock.Now : Window.To);
+    private (DateTimeOffset From, DateTimeOffset To) Span => (Window.SlotAt(FirstSlot), Clock.GetUtcNow() < Window.To ? Clock.GetUtcNow() : Window.To);
 
     private static double Across(DateTimeOffset at, (DateTimeOffset From, DateTimeOffset To) span) => Math.Clamp((at - span.From) / (span.To - span.From), 0, 1);
 
@@ -409,7 +408,7 @@
 
     private string UnmatchedTitle(UsageFeedLine line)
     {
-        var typical = $"Typical run: {UsageView.Count(line.Stats.Unmatched)} titles unmatched.";
+        var typical = $"Typical run: {UsageView.Titles(line.Stats.Unmatched)} unmatched.";
         return line.Stats.CouldNotLookUp > 0
             ? $"{typical} Over the {UsageView.Window(Range)}, {UsageView.Count(line.Stats.CouldNotLookUp)} could not even be looked up."
             : $"{typical} Every one was not found by any service.";

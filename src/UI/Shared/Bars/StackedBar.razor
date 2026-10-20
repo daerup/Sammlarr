@@ -1,0 +1,236 @@
+@using System.Collections.Frozen
+@using System.Globalization
+
+<CascadingValue Value="this" IsFixed="true">@ChildContent</CascadingValue>
+<Deferred>
+    @{
+        var bar = Snap();
+    }
+    <span class="stacked-bar">
+        @if (bar.Rows > 1 || Title is not null)
+        {
+            <BbTooltip Open="_open" OpenChanged="open => _open = open" Placement="PopoverPlacement.Bottom">
+                @Track(bar, true)
+                <BbTooltipContent Class="@Tooltips.Panel" data-testid="stacked-bar-tip">@Tip(bar)</BbTooltipContent>
+            </BbTooltip>
+        }
+        else
+        {
+            @Track(bar, false)
+        }
+        @if (ShowLegend)
+        {
+            <span class="sb-keys" data-testid="stacked-bar-legend">
+                @foreach (var segment in bar.Segments)
+                {
+                    <button type="button" @key="segment.Part" class="@(segment.Hidden ? "sb-key is-off" : "sb-key")" aria-pressed="@(segment.Hidden ? "false" : "true")"
+                            data-part="@segment.Part.Name" @onclick="() => ToggleAsync(segment.Part, bar)" @onmouseenter="() => Point(segment.Part)" @onmouseleave="Leave">
+                        <i class="@($"sb-swatch {PatternClass(segment.Part.Pattern)}")" style="@Paint(segment)"></i>
+                        <span class="sb-key-name">@segment.Part.Name</span>
+                        <b>@Format(segment.Part.Value)</b>
+                    </button>
+                }
+            </span>
+        }
+    </span>
+</Deferred>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public BarSize Size { get; set; } = BarSize.Small;
+
+    [Parameter] public bool ShowLegend { get; set; }
+
+    [Parameter] public long? Total { get; set; }
+
+    [Parameter] public string? RestName { get; set; }
+
+    [Parameter] public RenderFragment? Title { get; set; }
+
+    [Parameter] public Func<long, string> Format { get; set; } = StackedBarView.Count;
+
+    [Parameter] public EventCallback<IReadOnlySet<string>> HiddenChanged { get; set; }
+
+    private readonly List<StackedBarPart> _parts = [];
+
+    private readonly HashSet<string> _hidden = [];
+
+    private static readonly TimeSpan OpenDelay = TimeSpan.FromMilliseconds(150);
+
+    private StackedBarPart? _at;
+
+    private bool _atRest;
+
+    private bool _open;
+
+    internal void Add(StackedBarPart part) => _parts.Add(part);
+
+    internal void Remove(StackedBarPart part) => _parts.Remove(part);
+
+    private sealed record Segment(StackedBarPart Part, Optional<string> Color, bool Hidden);
+
+    private sealed record Snapshot(IReadOnlyList<Segment> Segments, IReadOnlyList<Segment> Shown, long Sum, long Total, Optional<string> Rest)
+    {
+        internal int Rows => Shown.Count + Rest.Match(_ => 1, () => 0);
+
+        internal long Left => Total - Sum;
+
+        internal long Base => Rest.Match(_ => Total, () => Sum);
+    }
+
+    private Snapshot Snap()
+    {
+        var colors = StackedBarView.Colors([.. _parts.Select(part => new BarPaint(Optional.Of(part.Color), part.Pattern))]);
+        List<Segment> segments = [.. _parts.Select((part, index) => new Segment(part, colors[index], _hidden.Contains(part.Name))).Where(segment => segment.Part.Value > 0)];
+        List<Segment> shown = [.. segments.Where(segment => !segment.Hidden)];
+        var sum = shown.Sum(segment => segment.Part.Value);
+        var total = Math.Max(Total ?? sum, sum);
+        return new Snapshot(segments, shown, sum, total, Optional.Of(RestName).When(_ => total > sum));
+    }
+
+    private void Point(StackedBarPart part)
+    {
+        _at = part;
+        _atRest = false;
+    }
+
+    private void PointRest()
+    {
+        _at = null;
+        _atRest = true;
+    }
+
+    private async Task PointBarAsync(StackedBarPart part)
+    {
+        Point(part);
+        await OpenSoonAsync();
+    }
+
+    private async Task PointRestAsync()
+    {
+        PointRest();
+        await OpenSoonAsync();
+    }
+
+    private async Task OpenSoonAsync()
+    {
+        if (!_open)
+        {
+            await Task.Delay(OpenDelay);
+            _open = _at is not null || _atRest;
+        }
+    }
+
+    private void Leave()
+    {
+        _at = null;
+        _atRest = false;
+        _open = false;
+    }
+
+    private bool Pointed(Snapshot bar) => bar.Rest.Match(_ => _atRest, () => false) || bar.Shown.Any(segment => segment.Part == _at);
+
+    private bool IsAt(StackedBarPart part) => part == _at;
+
+    private string SegmentClass(Snapshot bar, StackedBarPart part)
+    {
+        var dim = Pointed(bar) && !IsAt(part) ? " is-dim" : string.Empty;
+        return $"sb-part {PatternClass(part.Pattern)}{dim}";
+    }
+
+    private string RestClass(Snapshot bar) => Pointed(bar) && !_atRest ? "sb-rest is-dim" : "sb-rest";
+
+    private static string PatternClass(BarPattern pattern)
+    {
+        return pattern switch
+        {
+            BarPattern.Solid => string.Empty,
+            BarPattern.Hatched => "bar-hatched",
+            BarPattern.Striped => "bar-striped",
+        };
+    }
+
+    private static string Paint(Segment segment) => segment.Color.Map(color => $"background: {color}").GetValueOr(string.Empty);
+
+    private static string Grow(long value) => string.Create(CultureInfo.InvariantCulture, $"flex: {value} 1 0");
+
+    private string TrackStyle => string.Create(CultureInfo.InvariantCulture, $"height: {StackedBarView.Height(Size)}px");
+
+    private string FillStyle(Snapshot bar)
+    {
+        var width = bar.Rest.Match(_ => 100.0, () => StackedBarView.Fill(bar.Sum, bar.Total));
+        return string.Create(CultureInfo.InvariantCulture, $"width: {width:0.###}%; border-radius: {StackedBarView.Radius(Size):0.##}px");
+    }
+
+    private string RowTone(Snapshot bar, bool at)
+    {
+        return (Pointed(bar), at) switch
+        {
+            (true, true) => "font-semibold text-foreground",
+            (true, false) => "opacity-40",
+            (false, _) => string.Empty,
+        };
+    }
+
+    private async Task ToggleAsync(StackedBarPart part, Snapshot bar)
+    {
+        if (!_hidden.Remove(part.Name) && bar.Shown.Count > 1)
+        {
+            _hidden.Add(part.Name);
+        }
+
+        await HiddenChanged.InvokeAsync(_hidden.ToFrozenSet());
+    }
+
+    private RenderFragment Track(Snapshot bar, bool anchored) =>
+        @<span class="sb-track" style="@TrackStyle" data-testid="stacked-bar-track" @onmouseleave="Leave">
+            @if (anchored)
+            {
+                <BbTooltipTrigger Focusable="false" data-sb-anchor></BbTooltipTrigger>
+            }
+            <span class="sb-fill" style="@FillStyle(bar)">
+                @foreach (var segment in bar.Shown)
+                {
+                    <span @key="segment.Part" class="@SegmentClass(bar, segment.Part)" style="@($"{Grow(segment.Part.Value)}; {Paint(segment)}")"
+                          data-part="@segment.Part.Name" @onmouseenter="() => PointBarAsync(segment.Part)"></span>
+                }
+                @if (bar.Rest is Some<string>)
+                {
+                    <span class="@RestClass(bar)" style="@Grow(bar.Left)" data-part="rest" @onmouseenter="PointRestAsync"></span>
+                }
+            </span>
+        </span>;
+
+    private RenderFragment Tip(Snapshot bar) =>
+        @<div>
+            @if (Title is not null)
+            {
+                <div class="mb-1 font-semibold">@Title</div>
+            }
+            <div class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3.5 leading-[1.7]">
+                @foreach (var segment in bar.Shown)
+                {
+                    var at = IsAt(segment.Part);
+                    @Row(bar, at, Swatch(segment), segment.Part.Name, segment.Part.Value)
+                }
+                @if (bar.Rest is Some<string>(var rest))
+                {
+                    @Row(bar, _atRest, RestSwatch, rest, bar.Left)
+                }
+            </div>
+        </div>;
+
+    private RenderFragment Row(Snapshot bar, bool at, RenderFragment swatch, string name, long value) =>
+        @<div class="contents" data-testid="stacked-bar-tip-row" data-at="@(at ? "true" : "false")">
+            <span class="@($"inline-flex items-center gap-[7px] whitespace-nowrap {RowTone(bar, at)}")">@swatch@name</span>
+            <span class="@($"text-right tabular-nums {RowTone(bar, at)}")">@Format(value)</span>
+            <span class="@($"text-right tabular-nums text-muted-foreground {RowTone(bar, at)}")">@Shares.Of(value, bar.Base)</span>
+        </div>;
+
+    private static RenderFragment Swatch(Segment segment) =>
+        @<i class="@($"inline-block size-[9px] shrink-0 rounded-[2px] {PatternClass(segment.Part.Pattern)}")" style="@Paint(segment)"></i>;
+
+    private static readonly RenderFragment RestSwatch =
+        @<i class="inline-block size-[9px] shrink-0 rounded-[2px] bg-secondary shadow-[inset_0_0_0_1px_var(--border)]"></i>;
+}

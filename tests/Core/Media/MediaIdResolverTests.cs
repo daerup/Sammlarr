@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Contracts;
 using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Conversions;
@@ -13,6 +12,7 @@ using Domain.Media.Conversions;
 using Domain.Providers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
 namespace Core.Tests.Media;
@@ -674,14 +674,13 @@ public sealed class MediaIdResolverTests : IDisposable
 
 	private MediaIdResolver Testee(IRemoteCapacity capacity, params Mock<IExternalIdConverter>[] converters)
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(Now);
+		var clock = new FakeTimeProvider(Now);
 		return new MediaIdResolver(
 			[.. converters.Select(converter => new Keyed<RemoteService, IExternalIdConverter>(_remotes[converter], converter.Object))],
 			_cache,
 			capacity,
 			IServiceReadiness.Mock().Object,
-			clock.Object,
+			clock,
 			_logger.Object
 		);
 	}

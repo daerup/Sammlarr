@@ -3,11 +3,11 @@ using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
 using BlazorBlueprint.Primitives.Filtering;
 using Bunit;
-using Contracts;
 using Contracts.Media;
 using Contracts.Processing;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
 using Duration = Domain.Processing.Duration;
@@ -24,7 +24,7 @@ public class FeedFilterBuilderTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddSingleton(IDateTimeProvider.Mock().Object);
+		Services.AddSingleton<TimeProvider>(new FakeTimeProvider());
 		Services.AddSingleton(IMediaService.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

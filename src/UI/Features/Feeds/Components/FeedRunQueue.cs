@@ -2,6 +2,7 @@ using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Wantlist.Sync;
+using Humanizer;
 
 namespace UI.Features.Feeds.Components;
 
@@ -34,5 +35,5 @@ internal static class FeedRunQueue
 			_ => $"Queued {FeedCount(queued)}, {alreadyQueued} already queued. They run one at a time.",
 		};
 
-	private static string FeedCount(int count) => count == 1 ? "1 feed" : $"{count} feeds";
+	private static string FeedCount(int count) => "feed".ToQuantity(count);
 }

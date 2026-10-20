@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Datasets;
 using Contracts.Housekeeping;
 using Contracts.Identity;
@@ -23,7 +22,7 @@ internal sealed class HousekeepingTasks(
 	ITimeTickerManager<TimeTickerEntity> once,
 	TaskActivity activity,
 	ICurrentUser currentUser,
-	IDateTimeProvider clock
+	TimeProvider clock
 ) : IHousekeepingTasks
 {
 	public event Action Changed
@@ -46,20 +45,27 @@ internal sealed class HousekeepingTasks(
 
 		var notes = await conflicts.AllAsync(cancellationToken);
 		var storedTwice = new StoredTwiceCount(notes.Count(note => note.State is Undecided), notes.Count(note => note.State is Distinct));
-		return new HousekeepingOverview(await database.SizeAsync(cancellationToken), pass, datasets, await cache.CountAsync(cancellationToken), storedTwice);
+		return new HousekeepingOverview(
+			await database.SizeAsync(cancellationToken),
+			await database.PartsAsync(cancellationToken),
+			pass,
+			datasets,
+			await cache.CountAsync(cancellationToken),
+			storedTwice
+		);
 	}
 
 	public Task<bool> RunPassAsync(CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
-		return StartAsync(HousekeepingTicker.FunctionName, HousekeepingTicker.Once(clock.Now), cancellationToken);
+		return StartAsync(HousekeepingTicker.FunctionName, HousekeepingTicker.Once(clock.GetUtcNow()), cancellationToken);
 	}
 
 	public Task<bool> LoadDatasetAsync(RemoteService dataset, CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
 		var name = DatasetNames.ByService[dataset];
-		return StartAsync(name, DatasetTicker.Once(name, clock.Now, DatasetRead.Always), cancellationToken);
+		return StartAsync(name, DatasetTicker.Once(name, clock.GetUtcNow(), DatasetRead.Always), cancellationToken);
 	}
 
 	private async Task<bool> StartAsync(string task, TimeTickerEntity ticker, CancellationToken cancellationToken)
@@ -79,5 +85,5 @@ internal sealed class HousekeepingTasks(
 		return true;
 	}
 
-	private Optional<DateTimeOffset> Next(string cron) => new Scheduled(cron).NextRun(clock.Now, clock.Zone);
+	private Optional<DateTimeOffset> Next(string cron) => new Scheduled(cron).NextRun(clock.GetUtcNow(), clock.LocalTimeZone);
 }

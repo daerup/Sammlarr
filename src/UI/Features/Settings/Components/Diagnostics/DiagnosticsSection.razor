@@ -73,13 +73,13 @@
             <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
             <span class="tabular-nums"><span class="text-foreground font-semibold">@_stats.SpanCount.ToString("N0")</span> spans</span>
             <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
-            <span class="tabular-nums"><span class="text-foreground font-semibold">@FormatBytes(_stats.EstimatedBytes)</span> memory</span>
+            <span class="tabular-nums"><span class="text-foreground font-semibold">@_stats.EstimatedBytes.Bytes().Humanize("0.#", Notation.Symbols)</span> memory</span>
             <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
             <span class="tabular-nums">
                 <span class="text-foreground font-semibold">
                     @if (_stats is { Oldest: Some<DateTimeOffset>(var oldest), Newest: Some<DateTimeOffset>(var newest) })
                     {
-                        @FormatDuration(newest - oldest)
+                        @((newest - oldest).Humanize(2, Notation.Symbols))
                     }
                     else
                     {
@@ -327,36 +327,6 @@
             LogLevel.Critical => "font-bold",
             _ => string.Empty,
         };
-
-    private static string FormatBytes(long bytes)
-    {
-        if (bytes < 1024)
-        {
-            return $"{bytes}B";
-        }
-        if (bytes < 1024 * 1024)
-        {
-            return $"{bytes / 1024.0:F1}KB";
-        }
-        return $"{bytes / (1024.0 * 1024.0):F2}MB";
-    }
-
-    private static string FormatDuration(TimeSpan span)
-    {
-        if (span.TotalSeconds < 1)
-        {
-            return $"{span.TotalMilliseconds:F0}ms";
-        }
-        if (span.TotalMinutes < 1)
-        {
-            return $"{span.TotalSeconds:F1}s";
-        }
-        if (span.TotalHours < 1)
-        {
-            return $"{(int)span.TotalMinutes}m{span.Seconds}s";
-        }
-        return $"{(int)span.TotalHours}h{span.Minutes}m";
-    }
 
     public async ValueTask DisposeAsync()
     {

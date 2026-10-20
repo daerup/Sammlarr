@@ -3,6 +3,7 @@ using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using UI.Shared.Changes;
+using UI.Shared.Formatting;
 using UI.Shared.Media;
 
 namespace UI.Features.Feeds.Components;
@@ -207,13 +208,11 @@ internal static class FeedRunView
 
 		if (run.Conclusiveness is not Conclusiveness.Pending)
 		{
-			parts.Add($"took {Took(run.Duration)}");
+			parts.Add($"took {run.Duration.Humanize(2, Notation.Symbols)}");
 		}
 
 		return string.Join(" · ", parts);
 	}
-
-	internal static string Took(TimeSpan duration) => $"{duration.TotalSeconds:0.0} s";
 
 	private static string Subtitle(MatchedMedia media) => media.Details.Year?.ToString() ?? string.Empty;
 }

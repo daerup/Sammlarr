@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Contracts;
 using Contracts.Feed;
 using Contracts.Providers;
 using Domain.Feed;
@@ -13,7 +12,7 @@ internal sealed class FeedRunWatch(
 	Optional<int> previous,
 	IFeedRunTraces traces,
 	IRemoteCapacity capacity,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	StrongBox<bool> hidden
 ) : ILiveRun, IDisposable
 {
@@ -124,7 +123,7 @@ internal sealed class FeedRunWatch(
 		RunProgress progress
 	)
 	{
-		var now = clock.Now;
+		var now = clock.GetUtcNow();
 		_traced = true;
 		lock (_gate)
 		{

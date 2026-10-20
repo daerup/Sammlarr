@@ -41,7 +41,7 @@ else
     private static readonly List<SelectOption<PushoverPriority?>> PriorityOptions =
     [
         new(null, Automatic),
-        .. PushoverPriorities.Ascending.Select(priority => new SelectOption<PushoverPriority?>(priority, priority.GetDescription())),
+        .. PushoverPriorities.Ascending.Select(priority => new SelectOption<PushoverPriority?>(priority, priority.Humanize())),
     ];
 
     [Parameter]

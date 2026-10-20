@@ -4,7 +4,7 @@
         <BbTooltipTrigger data-testid="usage-answer-time-info">
             <LucideIcon Name="info" Size="12" Class="cursor-help text-muted-foreground"/>
         </BbTooltipTrigger>
-        <BbTooltipContent Class="@($"{UsageView.Tip} w-[300px] leading-[1.45]")" data-testid="usage-answer-time-help">
+        <BbTooltipContent Class="@($"{Tooltips.Panel} w-[300px] leading-[1.45]")" data-testid="usage-answer-time-help">
             Each square is a range of answer times, fastest at the left. The stronger its shade, the more of the service's calls took that long.
             <svg width="@SampleWidth" height="26" class="mt-2 mb-0.5 block overflow-visible">
                 @for (var index = 0; index < DurationBuckets.UpToMs.Count; index++)

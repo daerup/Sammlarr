@@ -1,4 +1,3 @@
-@using Contracts
 @using Contracts.Housekeeping
 @using Contracts.Media
 @using global::Shared.Options
@@ -10,7 +9,7 @@
 @inject IUnmatchedMediaCache UnmatchedCache
 @inject HousekeepingOptions Options
 @inject MediaProviderBrandingService Branding
-@inject IDateTimeProvider Clock
+@inject TimeProvider Clock
 @inject Notifier Notifier
 
 @if (_overview is not { } overview)
@@ -19,8 +18,9 @@
 }
 else
 {
-    var now = Clock.Now;
+    var now = Clock.GetUtcNow();
     var cache = overview.Cache;
+    var nextTrim = HousekeepingView.Next(overview.Pass.NextRun, now);
     <div class="overflow-hidden rounded-xl border bg-card">
         <div class="px-[18px] py-3.5">
             <h4 class="text-sm font-semibold">Housekeeping</h4>
@@ -28,6 +28,17 @@ else
                 <b class="@SizeClass(overview.Size)">@HousekeepingView.Size(overview.Size.OnDisk)</b> on disk,
                 <b class="@SizeClass(overview.Size)">@HousekeepingView.Size(overview.Size.Data)</b> of it data@(Compacted(overview, now)).
             </p>
+            <div class="mt-2.5">
+                <StackedBar ShowLegend="true" Format="HousekeepingView.Size">
+                    <Title>@HousekeepingView.Size(overview.Size.OnDisk) on disk</Title>
+                    <ChildContent>
+                        @foreach (var part in HousekeepingView.FileParts(overview, Branding.GetBrandingInfo(RemoteService.ImdbDatasets).BrandColor))
+                        {
+                            <StackedBarPart Name="@part.Name" Value="part.Bytes" Color="@part.Color.ToNullable()" Pattern="part.Pattern"/>
+                        }
+                    </ChildContent>
+                </StackedBar>
+            </div>
         </div>
 
         <div class="@GroupHead">Runs by itself</div>
@@ -44,7 +55,7 @@ else
                 </tr>
             </thead>
             <tbody>
-                <HousekeepingTaskRow Tile="PassTile"
+                <HousekeepingTaskRow Tile="@IconTile("brush")"
                                      Name="Housekeeping"
                                      What="trims history and the cache"
                                      Runs="@HousekeepingView.Runs(overview.Pass.NextRun)"
@@ -74,7 +85,7 @@ else
         {
             var twice = overview.StoredTwice;
             <div class="@GroupHead">Waiting for you</div>
-            <div class="@ClearRow" data-testid="housekeeping-stored-twice">
+            <div class="@ActionRow" data-testid="housekeeping-stored-twice">
                 <LucideIcon Name="copy" Size="18" Class="text-muted-foreground"/>
                 <div>
                     <div class="text-sm font-medium">Titles stored twice</div>
@@ -89,140 +100,70 @@ else
         }
         <TitlesStoredTwiceDialog Open="_reviewing" OpenChanged="ReviewChangedAsync"/>
 
-        <div class="@GroupHead">Clear by hand</div>
-        <div class="@ClearRow" data-testid="housekeeping-clear-details">
-            <LucideIcon Name="film" Size="18" Class="text-muted-foreground"/>
-            <div>
-                <div class="text-sm font-medium">Cached details</div>
-                <div class="max-w-[80ch] text-[12.5px] text-muted-foreground">
-                    Posters, summaries and ratings of @HousekeepingView.Titles(cache.Detailed). Each is fetched from its providers again the next time it is shown; the titles stay matched.
+        <div class="overflow-x-auto">
+            <div class="min-w-max">
+                <div class="@($"{GroupHead} {HousekeepingCacheRow.Grid}")" data-testid="housekeeping-caches-band">
+                    <span>Caches</span>
+                    <span>Holds</span>
+                    <span>Size</span>
+                    <span>Next trim</span>
+                    <span></span>
                 </div>
-                <div class="mt-[3px] flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <LucideIcon Name="moon" Size="12" Class="opacity-80"/>
-                    Nightly: details nobody opened for @HousekeepingView.Days(Options.DetailsUnusedDays)
-                </div>
-            </div>
-            <span class="text-right text-[13px] whitespace-nowrap text-muted-foreground">@HousekeepingView.Size(cache.DetailsBytes)</span>
-            <BbAlertDialog>
-                <BbAlertDialogTrigger>
-                    <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear…" Size="ButtonSize.Small" Disabled="_clearing"/>
-                </BbAlertDialogTrigger>
-                <BbAlertDialogContent>
-                    <BbAlertDialogHeader>
-                        <BbAlertDialogTitle>Clear cached details?</BbAlertDialogTitle>
-                        <BbAlertDialogDescription>
-                            This frees about <b class="font-medium text-foreground">@HousekeepingView.Size(cache.DetailsBytes)</b> of the @HousekeepingView.Size(overview.Size.OnDisk) database.
-                            Every one of these <b class="font-medium text-foreground">@HousekeepingView.Titles(cache.Detailed)</b> is fetched from its providers again the next time it is shown,
-                            so the next feed runs and previews make up to <b class="font-medium text-foreground">@HousekeepingView.Number(cache.Detailed) lookups</b>, and a busy provider may answer 429 for a while.
-                        </BbAlertDialogDescription>
-                    </BbAlertDialogHeader>
-                    <p class="text-[13px] text-muted-foreground">
-                        The nightly pass already clears details nobody opened for @HousekeepingView.Days(Options.DetailsUnusedDays). Clear by hand only when artwork or ratings look wrong now.
-                    </p>
-                    <BbAlertDialogFooter>
-                        <BbAlertDialogCancel>
-                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                        </BbAlertDialogCancel>
-                        <BbAlertDialogAction>
-                            <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear cached details" OnClick="ClearDetailsAsync"/>
-                        </BbAlertDialogAction>
-                    </BbAlertDialogFooter>
-                </BbAlertDialogContent>
-            </BbAlertDialog>
-        </div>
-        <div class="@($"{ClearRow} border-t")" data-testid="housekeeping-clear-ids">
-            <LucideIcon Name="link" Size="18" Class="text-muted-foreground"/>
-            <div>
-                <div class="text-sm font-medium">Title ids and details</div>
-                <div class="max-w-[80ch] text-[12.5px] text-muted-foreground">
-                    The ids tying @HousekeepingView.Titles(cache.Matched) together, with their details. Each title is matched from scratch the next time it is needed; wantlisted, blocklisted and queued titles keep their ids.
-                </div>
-                <div class="mt-[3px] flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <LucideIcon Name="moon" Size="12" Class="opacity-80"/>
-                    Nightly: ids of titles nobody used for @HousekeepingView.Days(Options.IdsUnusedDays)
-                </div>
-            </div>
-            <span class="text-right text-[13px] whitespace-nowrap text-muted-foreground">@HousekeepingView.Size(cache.DetailsBytes + cache.IdsBytes)</span>
-            <BbAlertDialog>
-                <BbAlertDialogTrigger>
-                    <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear…" Size="ButtonSize.Small" Disabled="_clearing"/>
-                </BbAlertDialogTrigger>
-                <BbAlertDialogContent>
-                    <BbAlertDialogHeader>
-                        <BbAlertDialogTitle>Clear title ids and details?</BbAlertDialogTitle>
-                        <BbAlertDialogDescription>
-                            This frees about <b class="font-medium text-foreground">@HousekeepingView.Size(cache.DetailsBytes + cache.IdsBytes)</b> of the @HousekeepingView.Size(overview.Size.OnDisk) database.
-                            Every one of these <b class="font-medium text-foreground">@HousekeepingView.Titles(cache.Matched)</b> is matched against the providers from scratch the next time it is needed:
-                            the slowest to rebuild, with up to <b class="font-medium text-foreground">@HousekeepingView.Number(cache.Matched) lookups</b> and their details on top.
-                            Wantlisted, blocklisted and queued titles keep their ids.
-                        </BbAlertDialogDescription>
-                    </BbAlertDialogHeader>
-                    <p class="text-[13px] text-muted-foreground">
-                        The nightly pass already clears the ids of titles nobody used for @HousekeepingView.Days(Options.IdsUnusedDays). Clear by hand only when titles are matched wrongly.
-                    </p>
-                    <BbAlertDialogFooter>
-                        <BbAlertDialogCancel>
-                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                        </BbAlertDialogCancel>
-                        <BbAlertDialogAction>
-                            <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear title ids and details" OnClick="ClearIdsAsync"/>
-                        </BbAlertDialogAction>
-                    </BbAlertDialogFooter>
-                </BbAlertDialogContent>
-            </BbAlertDialog>
-        </div>
-        <div class="@($"{ClearRow} border-t")" data-testid="housekeeping-clear-show-parts">
-            <LucideIcon Name="layers" Size="18" Class="text-muted-foreground"/>
-            <div>
-                <div class="text-sm font-medium">Show parts</div>
-                <div class="max-w-[80ch] text-[12.5px] text-muted-foreground">
-                    @HousekeepingView.Number(cache.ShowParts) stored: anime seasons, parts and specials matched to their show, and "no earlier season" answers. Cleared, each is looked up again in the Anime ids list, or on AniList.
-                </div>
-                <div class="mt-[3px] flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <LucideIcon Name="moon" Size="12" Class="opacity-80"/>
-                    Nightly: "no earlier season" answers older than @HousekeepingView.Days(Options.NoPrequelDays)
+                <div class="divide-y">
+                    <HousekeepingCacheRow TestId="housekeeping-clear-unmatched"
+                                          Tile="@IconTile("circle-alert")"
+                                          Name="Unmatched lookups"
+                                          Why="@UnmatchedWhy"
+                                          Holds="NoHolds"
+                                          Size="in memory"
+                                          Next="within the hour"
+                                          Removes="each an hour after it failed">
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="ClearUnmatched">
+                            <LucideIcon Name="eraser" Size="13" Class="mr-1.5"/>
+                            <span>Clear</span>
+                        </BbButton>
+                    </HousekeepingCacheRow>
+                    <HousekeepingCacheRow TestId="housekeeping-clear-show-parts"
+                                          Tile="@IconTile("layers")"
+                                          Name="Show parts"
+                                          Why="@ShowPartsWhy"
+                                          Holds="@(Holds(cache.ShowParts, "part"))"
+                                          Size="@HousekeepingView.Size(cache.ShowPartsBytes)"
+                                          Next="@nextTrim"
+                                          Removes="@($"seasons with no show found, after {HousekeepingView.Days(Options.NoPrequelDays)}")">
+                        <HousekeepingClearDialog Title="Clear show parts?" Action="Clear show parts" Disabled="_clearing" OnClear="ClearShowPartsAsync">
+                            Anime feed runs ask AniList again for the seasons the Anime ids list can't place, about <b class="font-medium text-foreground">one call per 50 titles</b>.
+                        </HousekeepingClearDialog>
+                    </HousekeepingCacheRow>
+                    <HousekeepingCacheRow TestId="housekeeping-clear-details"
+                                          Tile="@IconTile("film")"
+                                          Name="Cached details"
+                                          Why="@DetailsWhy"
+                                          Holds="@(Holds(cache.Detailed, "title"))"
+                                          Size="@HousekeepingView.Size(cache.DetailsBytes)"
+                                          Next="@nextTrim"
+                                          Removes="@($"details nobody opened in {HousekeepingView.Days(Options.DetailsUnusedDays)}")">
+                        <HousekeepingClearDialog Title="Clear cached details?" Action="Clear cached details" Disabled="_clearing" OnClear="ClearDetailsAsync">
+                            Each of the <b class="font-medium text-foreground">@HousekeepingView.Titles(cache.Detailed)</b> fetches its posters and ratings again the next time it is shown:
+                            up to <b class="font-medium text-foreground">@HousekeepingView.ProviderCalls(cache.Detailed)</b>, and a busy provider may slow them down.
+                        </HousekeepingClearDialog>
+                    </HousekeepingCacheRow>
+                    <HousekeepingCacheRow TestId="housekeeping-clear-ids"
+                                          Tile="@IconTile("link")"
+                                          Name="Title ids and details"
+                                          Why="@IdsWhy"
+                                          Holds="@(Holds(cache.Matched, "title"))"
+                                          Size="@HousekeepingView.Size(cache.DetailsBytes + cache.IdsBytes)"
+                                          Next="@nextTrim"
+                                          Removes="@($"ids nobody used in {HousekeepingView.Days(Options.IdsUnusedDays)}")">
+                        <HousekeepingClearDialog Title="Clear title ids and details?" Action="Clear title ids and details" Disabled="_clearing" OnClear="ClearIdsAsync">
+                            Each of the <b class="font-medium text-foreground">@HousekeepingView.Titles(cache.Matched)</b> is matched again the next time it is needed, the slowest cache to rebuild:
+                            up to <b class="font-medium text-foreground">@HousekeepingView.ProviderCalls(cache.Matched)</b> plus their details.
+                            Titles on your wantlist or blocklist, or waiting to sync, keep their ids.
+                        </HousekeepingClearDialog>
+                    </HousekeepingCacheRow>
                 </div>
             </div>
-            <span class="text-right text-[13px] whitespace-nowrap text-muted-foreground">@HousekeepingView.Size(cache.ShowPartsBytes)</span>
-            <BbAlertDialog>
-                <BbAlertDialogTrigger>
-                    <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear…" Size="ButtonSize.Small" Disabled="_clearing"/>
-                </BbAlertDialogTrigger>
-                <BbAlertDialogContent>
-                    <BbAlertDialogHeader>
-                        <BbAlertDialogTitle>Clear show parts?</BbAlertDialogTitle>
-                        <BbAlertDialogDescription>
-                            This frees about <b class="font-medium text-foreground">@HousekeepingView.Size(cache.ShowPartsBytes)</b> of the @HousekeepingView.Size(overview.Size.OnDisk) database.
-                            The next anime feed runs and previews ask AniList again for the seasons the Anime ids list cannot place: up to <b class="font-medium text-foreground">one request for every 50 titles</b>, until each is matched to its show again.
-                        </BbAlertDialogDescription>
-                    </BbAlertDialogHeader>
-                    <p class="text-[13px] text-muted-foreground">
-                        The nightly pass already clears "no earlier season" answers older than @HousekeepingView.Days(Options.NoPrequelDays). Clear by hand only when an anime season lands on the wrong show.
-                    </p>
-                    <BbAlertDialogFooter>
-                        <BbAlertDialogCancel>
-                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                        </BbAlertDialogCancel>
-                        <BbAlertDialogAction>
-                            <HoverButton Preset="HoverButtonPreset.Destructive" Icon="eraser" Text="Clear show parts" OnClick="ClearShowPartsAsync"/>
-                        </BbAlertDialogAction>
-                    </BbAlertDialogFooter>
-                </BbAlertDialogContent>
-            </BbAlertDialog>
-        </div>
-        <div class="@($"{ClearRow} border-t")" data-testid="housekeeping-clear-unmatched">
-            <LucideIcon Name="circle-alert" Size="18" Class="text-muted-foreground"/>
-            <div>
-                <div class="text-sm font-medium">Unmatched lookups</div>
-                <div class="max-w-[80ch] text-[12.5px] text-muted-foreground">
-                    Titles no provider could match, skipped for an hour. Cleared, they are tried again on the next run.
-                </div>
-            </div>
-            <span class="text-right text-[13px] whitespace-nowrap text-muted-foreground">in memory</span>
-            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="ClearUnmatched">
-                <LucideIcon Name="eraser" Size="13" Class="mr-1.5"/>
-                <span>Clear</span>
-            </BbButton>
         </div>
     </div>
 }
@@ -230,7 +171,15 @@ else
 @code {
     private const string GroupHead = "border-t bg-foreground/[0.03] px-[18px] pt-2.5 pb-1.5 text-[11px] font-semibold tracking-[.07em] text-muted-foreground uppercase";
 
-    private const string ClearRow = "grid grid-cols-[22px_minmax(0,1fr)_76px_120px] items-center gap-3.5 px-[18px] py-3.5 [&>:last-child]:justify-self-end";
+    private const string ActionRow = "grid grid-cols-[22px_minmax(0,1fr)_76px_120px] items-center gap-3.5 px-[18px] py-3.5 [&>:last-child]:justify-self-end";
+
+    private const string UnmatchedWhy = "Titles no provider recognised. Sammlarr skips them for an hour instead of asking again on every run. Clear it to try them on the next run, for example after a provider was down.";
+
+    private const string ShowPartsWhy = "Which show each anime season, part or special belongs to, so a later season joins its show. Clear it when a season lands on the wrong show.";
+
+    private const string DetailsWhy = "Posters, summaries and ratings, kept so titles open without asking the providers. Clear it when artwork or ratings look wrong.";
+
+    private const string IdsWhy = "Which IMDb, TMDB and other ids belong to each title, with its details. Clear it when titles are matched to the wrong film or show.";
 
     private HousekeepingOverview? _overview;
 
@@ -240,10 +189,8 @@ else
 
     private bool _reviewing;
 
-    private static readonly RenderFragment PassTile =
-        @<span class="inline-flex size-[26px] shrink-0 items-center justify-center rounded-md bg-secondary text-foreground">
-            <LucideIcon Name="brush" Size="14"/>
-        </span>;
+
+    private static readonly RenderFragment NoHolds = @<span>@HousekeepingView.Nothing</span>;
 
     protected override async Task OnInitializedAsync()
     {
@@ -347,4 +294,12 @@ else
     }
 
     private static string SizeClass(DatabaseSize size) => HousekeepingView.Bloated(size) ? "font-semibold text-[color:var(--alert-warning)]" : "font-semibold text-foreground";
+
+    private static RenderFragment Holds(int count, string noun) =>
+        @<span><b class="font-medium text-foreground">@HousekeepingView.Number(count)</b> @noun.ToQuantity(count, ShowQuantityAs.None)</span>;
+
+    private static RenderFragment IconTile(string icon) =>
+        @<span class="inline-flex size-[26px] shrink-0 items-center justify-center rounded-md bg-secondary text-foreground">
+            <LucideIcon Name="@icon" Size="14"/>
+        </span>;
 }

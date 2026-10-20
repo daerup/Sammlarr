@@ -1,6 +1,7 @@
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
+using Humanizer;
 
 namespace UI.Features.Home.Components;
 
@@ -16,8 +17,8 @@ public sealed record ActivityRun(FeedRun Run, string FeedName)
 			Conclusiveness.Conclusive => $"{Run.Counts.Total} seen, {Run.Counts.Kept} kept",
 			Conclusiveness.StillLoading => "the list stopped loading partway, so nothing was removed",
 			Conclusiveness.NoItems => "the list came back empty",
-			Conclusiveness.NoMatches => $"none of the {Run.Counts.Total} titles could be matched",
-			Conclusiveness.NoneAdmitted => $"all {Run.Counts.Total} titles were filtered out",
+			Conclusiveness.NoMatches => $"{"title".ToQuantity(Run.Counts.Total)} seen, none matched",
+			Conclusiveness.NoneAdmitted => $"{"title".ToQuantity(Run.Counts.Total)} seen, all filtered out",
 			Conclusiveness.Pending => "still running",
 			Conclusiveness.Unresolved => "some titles couldn't be looked up, so nothing was removed",
 			Conclusiveness.Stopped => "the run stopped before it finished",

@@ -4,7 +4,6 @@ using System.Text.Json.Nodes;
 using API.Http;
 using API.Http.Lanes;
 using API.Mdblist.Types;
-using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
 using Domain.Auth;
@@ -13,7 +12,7 @@ using Domain.Providers;
 
 namespace API.Mdblist;
 
-internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys, Lanes lanes, IDateTimeProvider clock) : IBurstPrimer
+internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys, Lanes lanes, TimeProvider clock) : IBurstPrimer
 {
 	private const string TitlesLane = "titles";
 
@@ -212,7 +211,7 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 		}
 
 		var sent = failed.Cause.CausedBy<RemoteUnavailableException>().Map(unavailable => unavailable.Sent).GetValueOr(true);
-		return sent && clock.Now - asked.SettledAt < FailureKept;
+		return sent && clock.GetUtcNow() - asked.SettledAt < FailureKept;
 	}
 
 	private Asked Asking(MdblistKey key, Task<LaneAnswer<MdblistTypes.Titles.Title>> answer)
@@ -222,7 +221,7 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 
 	private sealed class Asked
 	{
-		public Asked(MdblistKey key, Task<LaneAnswer<MdblistTypes.Titles.Title>> answer, IDateTimeProvider clock)
+		public Asked(MdblistKey key, Task<LaneAnswer<MdblistTypes.Titles.Title>> answer, TimeProvider clock)
 		{
 			Key = key;
 			Answer = SettledAsync(answer, clock);
@@ -234,10 +233,10 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 
 		public DateTimeOffset SettledAt { get; private set; }
 
-		private async Task<LaneAnswer<MdblistTypes.Titles.Title>> SettledAsync(Task<LaneAnswer<MdblistTypes.Titles.Title>> answer, IDateTimeProvider clock)
+		private async Task<LaneAnswer<MdblistTypes.Titles.Title>> SettledAsync(Task<LaneAnswer<MdblistTypes.Titles.Title>> answer, TimeProvider clock)
 		{
 			await ((Task)answer).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-			SettledAt = clock.Now;
+			SettledAt = clock.GetUtcNow();
 			return await answer;
 		}
 	}

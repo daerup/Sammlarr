@@ -13,7 +13,7 @@
             {
                 <span class="part"><span class="dn">&minus;@Day.Removed.Count.ToString("N0")</span> removed</span>
             }
-            <span class="part">@Day.RunCount @(Day.RunCount == 1 ? "run" : "runs")</span>
+            <span class="part">@("run".ToQuantity(Day.RunCount))</span>
         </span>
     </button>
 
@@ -62,7 +62,7 @@
 
         <button type="button" class="dtoggle" @onclick="@(() => _expanded = !_expanded)">
             <LucideIcon Name="@(_expanded ? "chevron-down" : "chevron-right")" Size="13"/>
-            @(_expanded ? "Hide" : "Show") all @Day.RunCount @(Day.RunCount == 1 ? "run" : "runs")
+            @(_expanded ? "Hide" : "Show") all @("run".ToQuantity(Day.RunCount))
         </button>
 
         @if (_expanded)

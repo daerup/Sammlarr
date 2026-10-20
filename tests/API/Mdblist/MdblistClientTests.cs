@@ -65,7 +65,7 @@ public class MdblistClientTests
 		using var response = await testee.SendAsync(HttpMethod.Get, "lists/1/items", Key);
 
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
-		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().BlockedUntil(Key.Value, LaneClass.Title, MdblistApis.Clock().Now)).IsSome();
+		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().BlockedUntil(Key.Value, LaneClass.Title, MdblistApis.Clock().GetUtcNow())).IsSome();
 	}
 
 	[Test]
@@ -99,7 +99,7 @@ public class MdblistClientTests
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 	}
 
-	private static HttpResponseMessage Spent() => MdblistApis.RateLimited(10, DateTimeOffset.UtcNow.AddDays(1));
+	private static HttpResponseMessage Spent() => MdblistApis.RateLimited(10, MdblistApis.Clock().GetUtcNow().AddDays(1));
 
 	[Test]
 	public async Task SendAsync_WhenUnauthorized_InvalidatesCachedApiKey()

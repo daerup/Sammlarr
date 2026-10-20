@@ -2,8 +2,11 @@ using System.Globalization;
 using Contracts.Datasets;
 using Contracts.Housekeeping;
 using Domain.Providers;
+using Humanizer;
 using Shared.Options;
 using UI.Features.Settings.Components.Usage;
+using UI.Shared.Bars;
+using UI.Shared.Formatting;
 
 namespace UI.Features.Settings.Components.Housekeeping;
 
@@ -19,13 +22,13 @@ public sealed record TaskLine(TaskTone Tone, string When, Optional<string> Count
 
 internal sealed record DatasetLook(string Name, string What, string Noun, string Href);
 
+internal sealed record FilePart(string Name, long Bytes, Optional<string> Color, BarPattern Pattern);
+
 internal static class HousekeepingView
 {
 	internal const string Nothing = "—";
 
 	private const string Waiting = "waiting for its turn";
-
-	private const long Megabyte = 1024 * 1024;
 
 	private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
@@ -61,12 +64,26 @@ internal static class HousekeepingView
 
 	internal static string Next(Optional<DateTimeOffset> next, DateTimeOffset now) => next.Map(at => Day(at, now)).GetValueOr(Nothing);
 
-	internal static string Size(long bytes)
-	{
-		return bytes >= 100 * Megabyte ? string.Create(Invariant, $"{bytes / Megabyte} MB") : string.Create(Invariant, $"{(double)bytes / Megabyte:0.0} MB");
-	}
+	internal static string Size(long bytes) => bytes.Bytes().Humanize("0.#", Notation.Symbols);
 
 	internal static bool Bloated(DatabaseSize size) => size.OnDisk >= size.Data * 3 / 2;
+
+	internal static IReadOnlyList<FilePart> FileParts(HousekeepingOverview overview, string imdb)
+	{
+		var (size, parts, cache) = (overview.Size, overview.Parts, overview.Cache);
+		var counted = parts.ImdbRatings + parts.AnimeIds + cache.DetailsBytes + cache.IdsBytes + cache.ShowPartsBytes + parts.FeedHistory;
+		return
+		[
+			new("IMDb ratings", parts.ImdbRatings, Some.Of(imdb), BarPattern.Solid),
+			new("Anime ids", parts.AnimeIds, new None(), BarPattern.Solid),
+			new("Cached details", cache.DetailsBytes, new None(), BarPattern.Solid),
+			new("Title ids", cache.IdsBytes, new None(), BarPattern.Solid),
+			new("Show parts", cache.ShowPartsBytes, new None(), BarPattern.Solid),
+			new("Feed history", parts.FeedHistory, new None(), BarPattern.Solid),
+			new("Settings, jobs and usage", Math.Max(0, size.Data - counted), new None(), BarPattern.Solid),
+			new("Free pages and write-ahead log", Math.Max(0, size.OnDisk - size.Data), new None(), BarPattern.Hatched),
+		];
+	}
 
 	internal static Optional<DateTimeOffset> CompactedAt(HousekeepingOverview overview)
 	{
@@ -113,9 +130,11 @@ internal static class HousekeepingView
 		return $"{day} {UsageView.Time(at)}";
 	}
 
-	internal static string Days(int days) => days == 365 ? "a year" : $"{days} days";
+	internal static string Days(int days) => "day".ToQuantity(days);
 
-	internal static string Titles(int count) => count == 1 ? "1 title" : $"{Number(count)} titles";
+	internal static string Titles(int count) => "title".ToQuantity(count, "N0", Invariant);
+
+	internal static string ProviderCalls(int count) => "provider call".ToQuantity(count, "N0", Invariant);
 
 	internal static string Number(int count) => count.ToString("N0", Invariant);
 
@@ -189,7 +208,7 @@ internal static class HousekeepingView
 			HousekeepingStep.UsageStats => $"Usage stats older than {Days(options.UsageDays)}",
 			HousekeepingStep.CachedDetails => $"Cached details nobody opened for {Days(options.DetailsUnusedDays)}",
 			HousekeepingStep.TitleIds => $"Title ids nobody used for {Days(options.IdsUnusedDays)}",
-			HousekeepingStep.ShowParts => $"\"No earlier season\" answers older than {Days(options.NoPrequelDays)}",
+			HousekeepingStep.ShowParts => $"Seasons with no show found, older than {Days(options.NoPrequelDays)}",
 			HousekeepingStep.DuplicateTitles => "Titles stored twice, merged once a second source confirms them",
 			HousekeepingStep.SettledJobs or HousekeepingStep.ScheduleEntries => "Finished jobs and schedule entries, 30 days",
 		};
@@ -213,5 +232,5 @@ internal static class HousekeepingView
 			.GetValueOr("the compaction");
 	}
 
-	private static string Rows(int removed) => removed == 1 ? "row removed" : "rows removed";
+	private static string Rows(int removed) => $"{"row".ToQuantity(removed, ShowQuantityAs.None)} removed";
 }

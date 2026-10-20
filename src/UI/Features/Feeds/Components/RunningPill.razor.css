@@ -57,35 +57,6 @@
     cursor: pointer;
 }
 
-.run-track {
+.run-bar ::deep .stacked-bar {
     flex: 1;
-    height: 6px;
-    display: flex;
-    border-radius: 99px;
-    overflow: hidden;
-    background: var(--secondary);
-}
-
-.run-track > i {
-    display: block;
-    height: 100%;
-    transition: width 0.25s linear;
-}
-
-.run-track > .is-flight {
-    background: repeating-linear-gradient(-45deg, var(--alert-warning) 0 5px, color-mix(in oklch, var(--alert-warning) 55%, transparent) 5px 10px);
-    background-size: 14px 14px;
-    animation: run-slide 0.6s linear infinite;
-}
-
-@keyframes run-slide {
-    to {
-        background-position: 14px 0;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .run-track > .is-flight {
-        animation: none;
-    }
 }

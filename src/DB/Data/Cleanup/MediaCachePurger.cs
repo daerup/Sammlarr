@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Media;
@@ -17,7 +16,7 @@ internal sealed class MediaCachePurger(
 	IProviderConfigRepository providerConfigRepository,
 	IKeyedServiceIndex<SinkKind, IMediaSink> sinks,
 	ICurrentUser currentUser,
-	IDateTimeProvider clock,
+	TimeProvider clock,
 	ILogger<MediaCachePurger> logger
 ) : IMediaCachePurger
 {
@@ -46,7 +45,7 @@ internal sealed class MediaCachePurger(
 
 		var protectedMediaIds = await ctx.ProtectedMediaIds().ToListAsync(cancellationToken);
 
-		var detailsDeleted = await ctx.TrimDetailsAsync(ctx.MediaDetails, clock.Now, cancellationToken);
+		var detailsDeleted = await ctx.TrimDetailsAsync(ctx.MediaDetails, clock.GetUtcNow(), cancellationToken);
 		var mediaDeleted = await ctx.Media.Where(m => !protectedMediaIds.Contains(m.Id)).ExecuteDeleteAsync(cancellationToken);
 		var externalsDeleted = 0;
 		foreach (var type in Enum.GetValues<MediaType>())
@@ -79,7 +78,7 @@ internal sealed class MediaCachePurger(
 	{
 		currentUser.EnsureAdmin();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var deleted = await ctx.TrimDetailsAsync(ctx.MediaDetails, clock.Now, cancellationToken);
+		var deleted = await ctx.TrimDetailsAsync(ctx.MediaDetails, clock.GetUtcNow(), cancellationToken);
 		logger.LogInformation("Media details purged: deleted {DetailsDeleted} details records", deleted);
 	}
 

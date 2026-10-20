@@ -1,7 +1,6 @@
 using System.Text.Json;
 using API.Http;
 using API.Tmdb.Types;
-using Contracts;
 using Contracts.Auth;
 using Domain.Auth;
 using Domain.Media;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Tmdb;
 
-internal sealed class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, IDateTimeProvider clock, ILogger<TmdbApi> logger)
+internal sealed class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, TimeProvider clock, ILogger<TmdbApi> logger)
 {
 	private readonly RecentAnswers<TmdbId, TmdbTypes.Details> _details = new(clock);
 

@@ -3,8 +3,9 @@ using BlazorBlueprint.Primitives;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
-using Microsoft.AspNetCore.Components.Web;
+using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
+using UI.Shared.Bars;
 
 namespace UI.Tests.Home;
 
@@ -20,73 +21,25 @@ public class LibrarySourcesPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForEachSource_GrowsTheTooltipTriggerThatIsTheActualFlexItem()
+	public async Task Render_ForEachSource_DrawsAPartOfItsCount()
 	{
 		var cut = Render<Harness>();
 
-		await Assert.That(Grows(cut)).IsEquivalentTo(["flex: 1", "flex: 203"]);
+		await Assert
+			.That(cut.FindComponents<StackedBarPart>().Select(part => (part.Instance.Name, part.Instance.Value)))
+			.IsEquivalentTo([("hdlists/comedy-movies-2001-20207", 1L), ("Added by hand or from Plex", 203L)], CollectionOrdering.Matching);
+		await Assert.That(cut.FindComponent<StackedBar>().Instance.ShowLegend).IsTrue();
 	}
 
 	[Test]
-	public async Task Legend_WhenASourceIsClicked_HidesItsSegmentAndCountsOnlyWhatIsLeft()
+	public async Task Legend_WhenASourceIsHidden_CountsOnlyWhatIsLeft()
 	{
 		var cut = Render<Harness>();
 
-		await cut.FindAll(".key")[1].ClickAsync(new());
+		await cut.FindAll(".sb-key")[1].ClickAsync(new());
 
-		await Assert.That(Grows(cut)).IsEquivalentTo(["flex: 1"]);
-		await Assert.That(cut.FindAll(".key")[1].GetAttribute("aria-pressed")).IsEqualTo("false");
 		await Assert.That(cut.Find(".band-note").TextContent).IsEqualTo($"{1:N0} of {204:N0} titles");
 	}
-
-	[Test]
-	public async Task Legend_WhenAHiddenSourceIsClickedAgain_ShowsItOnceMore()
-	{
-		var cut = Render<Harness>();
-
-		await cut.FindAll(".key")[1].ClickAsync(new());
-		await cut.FindAll(".key")[1].ClickAsync(new());
-
-		await Assert.That(Grows(cut)).IsEquivalentTo(["flex: 1", "flex: 203"]);
-	}
-
-	[Test]
-	public async Task Legend_WhenTheLastShownSourceIsClicked_KeepsItShown()
-	{
-		var cut = Render<Harness>();
-
-		await cut.FindAll(".key")[1].ClickAsync(new());
-		await cut.FindAll(".key")[0].ClickAsync(new());
-
-		await Assert.That(Grows(cut)).IsEquivalentTo(["flex: 1"]);
-	}
-
-	[Test]
-	public async Task Tooltip_ForASegment_GivesItsShareOfWhatIsShownToOneDecimal()
-	{
-		var cut = Render<Harness>();
-
-		await Assert.That(await HoverFirstSegmentAsync(cut)).Contains($"1 of {204:N0} ({1 / 204d:P1})");
-	}
-
-	[Test]
-	public async Task Tooltip_AfterHidingASource_SharesOutOnlyWhatIsLeft()
-	{
-		var cut = Render<Harness>();
-
-		await cut.FindAll(".key")[1].ClickAsync(new());
-
-		await Assert.That(await HoverFirstSegmentAsync(cut)).Contains($"1 of 1 ({1d:P1})");
-	}
-
-	private static async Task<string> HoverFirstSegmentAsync(IRenderedComponent<Harness> cut)
-	{
-		await cut.Find(".stack-part").ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
-		return cut.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]").TextContent;
-	}
-
-	private static IEnumerable<string> Grows(IRenderedComponent<Harness> cut) =>
-		cut.FindAll(".stack .stack-part").Select(part => part.ParentElement!.GetAttribute("style") ?? string.Empty);
 
 	private sealed class Harness : ComponentBase
 	{

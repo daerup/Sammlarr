@@ -7,6 +7,7 @@ using Domain.Media;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Home.Components;
+using UI.Shared.Common;
 using UI.Tests.Media;
 
 namespace UI.Tests.Home;

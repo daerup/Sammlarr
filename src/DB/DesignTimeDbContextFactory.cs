@@ -1,4 +1,3 @@
-using Contracts;
 using DB.Conversion;
 using DB.Data;
 using Microsoft.AspNetCore.DataProtection;
@@ -15,7 +14,6 @@ internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<S
 	public SammlarrDbContext CreateDbContext(string[] args)
 	{
 		var services = new ServiceCollection();
-		services.AddSingleton<IDateTimeProvider, DesignTimeDateTimeProvider>();
 		services.AddModule<ConversionModule>();
 		services.AddDataProtection().UseEphemeralDataProtectionProvider();
 		services.AddModule<DataAccessModule>();
@@ -33,16 +31,7 @@ internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<S
 			new AnonymousCurrentUser(),
 			provider.GetServices<IPropertyAddedConvention>(),
 			provider.GetServices<IModelConfiguration>(),
-			provider.GetRequiredService<IDateTimeProvider>()
+			TimeProvider.System
 		);
-	}
-
-	private sealed class DesignTimeDateTimeProvider : IDateTimeProvider
-	{
-		public DateTimeOffset Now => default;
-
-		public DateOnly Today => default;
-
-		public TimeZoneInfo Zone => TimeZoneInfo.Utc;
 	}
 }

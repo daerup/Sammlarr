@@ -2,6 +2,7 @@ using System.Globalization;
 using BlazorBlueprint.Primitives.Filtering;
 using Contracts.Processing;
 using Domain.Media;
+using UI.Shared.Formatting;
 using UI.Shared.Media.Ratings;
 using FilterOperator = BlazorBlueprint.Primitives.Filtering.FilterOperator;
 
@@ -60,7 +61,7 @@ internal static class FeedRatingReasons
 		{
 			0 => "no votes behind its rating (no vote count came with it)",
 			1 => $"no votes behind its rating ({silent[0]} publishes none)",
-			_ => $"no votes behind its rating ({string.Join(", ", silent)} publish none)",
+			_ => $"no votes behind its rating ({silent.Humanize(Notation.Words)} publish none)",
 		};
 	}
 

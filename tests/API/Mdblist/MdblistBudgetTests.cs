@@ -1,9 +1,9 @@
 using System.Net;
 using API.Mdblist;
-using Contracts;
 using Domain.Providers;
 using Domain.Usage;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
 namespace API.Tests.Mdblist;
@@ -195,13 +195,14 @@ public class MdblistBudgetTests
 	[Test]
 	public async Task Today_WhenAReadingCrossesTheReserve_StampsThatMinuteOnly()
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.ReturnsSequentially([Now, Now, Now.AddMinutes(5), Now.AddMinutes(9), Now.AddMinutes(9)]);
-		var budget = new MdblistBudget(clock.Object, MdblistApis.Options, NullLogger<MdblistBudget>.Instance);
+		var clock = new FakeTimeProvider(Now);
+		var budget = new MdblistBudget(clock, MdblistApis.Options, NullLogger<MdblistBudget>.Instance);
 		budget.Record("mdblist-key", Answer(remaining: 200, Reset));
 		budget.Record("mdblist-key", Answer(remaining: 121, Reset));
 		var before = budget.Today("mdblist-key").Answered.Map(answered => answered.ReserveReachedAt);
+		clock.SetUtcNow(Now.AddMinutes(5));
 		budget.Record("mdblist-key", Answer(remaining: 119, Reset));
+		clock.SetUtcNow(Now.AddMinutes(9));
 		budget.Record("mdblist-key", Answer(remaining: 118, Reset));
 
 		var answered = await Assert.That(budget.Today("mdblist-key").Answered).IsSome();

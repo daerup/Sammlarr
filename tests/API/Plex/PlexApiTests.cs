@@ -4,12 +4,12 @@ using API.Plex;
 using API.Plex.Types;
 using API.Tests.Feeds;
 using Bogus;
-using Contracts;
 using Contracts.Auth;
 using Contracts.Identity;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;
@@ -116,13 +116,11 @@ public class PlexApiTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(ByIdPayloadOf(ObsessionById()));
-		var now = FeedClock.Now;
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Returns(() => now);
-		var testee = BuildPlexApi(handler.CreateClient(PlexBaseUrl), clock.Object);
+		var clock = new FakeTimeProvider(FeedClock.Now);
+		var testee = BuildPlexApi(handler.CreateClient(PlexBaseUrl), clock);
 		var id = PlexId.From(ObsessionById().RatingKey, MediaType.Movie);
 		await testee.ByIdAsync(id);
-		now = now.AddMinutes(10);
+		clock.Advance(TimeSpan.FromMinutes(10));
 
 		await testee.ByIdAsync(id);
 
@@ -305,7 +303,7 @@ public class PlexApiTests
 
 	private static PlexApi BuildPlexApi(HttpClient httpClient) => BuildPlexApi(httpClient, FeedClock.Today());
 
-	private static PlexApi BuildPlexApi(HttpClient httpClient, IDateTimeProvider clock)
+	private static PlexApi BuildPlexApi(HttpClient httpClient, TimeProvider clock)
 	{
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialService.Mock();

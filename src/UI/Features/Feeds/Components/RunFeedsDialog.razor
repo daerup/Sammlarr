@@ -109,7 +109,7 @@
                 <BbButton Variant="ButtonVariant.Outline" OnClick="Cancel">Cancel</BbButton>
                 <BbButton OnClick="Confirm" Disabled="@(_selected.Count == 0)">
                     <LucideIcon Name="play" Size="15" Class="mr-1"/>
-                    @(_selected.Count == 0 ? "Run feeds" : $"Run {_selected.Count} feed{(_selected.Count == 1 ? "" : "s")}")
+                    @(_selected.Count == 0 ? "Run feeds" : $"Run {"feed".ToQuantity(_selected.Count)}")
                 </BbButton>
             </span>
         </div>
