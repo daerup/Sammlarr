@@ -34,7 +34,7 @@ internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, Pl
 		{
 			["clientID"] = clientId.ToString(),
 			["code"] = result.Code,
-			["context%5Bdevice%5D%5Bproduct%5D"] = options.Authentication.ProductName,
+			["context[device][product]"] = options.Authentication.ProductName,
 			["forwardUrl"] = forwardUrl,
 		};
 		return Success.Of(QueryHelpers.AddQueryString(urls.AuthApp, queryParams).Replace("?", "#?"));
