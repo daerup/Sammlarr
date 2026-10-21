@@ -39,7 +39,7 @@ public static class FeedPlans
 	public static IFeedPlan Compute(ClassifiedFeedLoad load, IReadOnlySet<MediaId> owned, IReadOnlyDictionary<MediaId, int> absences, FeedStrategy strategy)
 	{
 		var verdicts = load.Verdicts;
-		var qualifying = verdicts.Where(verdict => verdict.Outcome is QueryOutcome.Qualified).Select(verdict => verdict.Item.Identity.Id).ToHashSet();
+		var qualifying = verdicts.Where(verdict => verdict.Outcome is Qualified).Select(verdict => verdict.Item.Identity.Id).ToHashSet();
 		var seen = qualifying.Union(load.Unmatched.SelectMany(title => title.ConflictsWith)).ToHashSet();
 		var unsure = verdicts.Where(verdict => verdict.Item.Stale).Select(verdict => verdict.Item.Identity.Id).ToHashSet();
 		var missing = owned.Where(id => !seen.Contains(id) && !unsure.Contains(id)).ToList();

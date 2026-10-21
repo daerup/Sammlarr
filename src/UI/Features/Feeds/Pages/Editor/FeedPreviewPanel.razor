@@ -154,8 +154,8 @@
                         <ItemContent>
                         @{
                         var item = result.Item;
-                        var isCulled = result.Outcome is QueryOutcome.Culled;
-                        var isTruncated = result.Outcome is QueryOutcome.Truncated;
+                        var isCulled = result.Outcome is Culled;
+                        var isTruncated = result.Outcome is Truncated;
                         var isAtRisk = IsMirror && result.AtRisk;
                         var isDimmed = (isCulled || isTruncated) && !isAtRisk;
                         var isGreyedOut = result.Bypassed;
@@ -1013,7 +1013,7 @@
         var source = row.Enrollment.InWantlist ? "On your wantlist" : "On your blocklist";
         if ((_appliedConfig ?? Config).Limit is null)
             return $"{source}, will not be imported.";
-        return row.ConsumesSlot ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
+        return row.Outcome is Qualified { ConsumesSlot: true } ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
     }
 
     private void ClearFocus(MediaMatchResult item)

@@ -24,8 +24,9 @@ internal sealed class QueryProcessor<T>
 		var all = options.Sort.Map(sort => Sort(source, sort)).GetValueOr(() => [.. source]);
 		var qualifying = options.Filter.Map(filter => new HashSet<T>(all.Where(Compile(FilterValues.Resolve(filter, options.Today))), ByReference));
 		var verdicts = new QueryVerdict<T>[all.Count];
+		var checks = new Lazy<RuleChecks>(() => new RuleChecks(options.Filter.Map(filter => Checks(filter, options.Today)).GetValueOr(() => [])));
+		var line = options.Limit.Map(limit => new SlotLine(limit));
 
-		var taken = 0;
 		const int cooperativeYieldInterval = 32;
 		foreach (var (i, position) in Slotted(all, options, predicates).Index())
 		{
@@ -45,22 +46,19 @@ internal sealed class QueryProcessor<T>
 
 			if (qualifying.Match(set => !set.Contains(item), () => false))
 			{
-				verdicts[position] = new QueryVerdict<T>(item, QueryOutcome.Culled, enrollment, false);
+				verdicts[position] = new QueryVerdict<T>(item, enrollment, new Culled(checks.Value.Of(item)));
 			}
 			else if (enrollment.Owned && SitsOutTheDraw(options))
 			{
-				verdicts[position] = new QueryVerdict<T>(item, QueryOutcome.Qualified, enrollment, false);
-			}
-			else if (options.Limit.Match(limit => taken >= limit.Count, () => false))
-			{
-				verdicts[position] = new QueryVerdict<T>(item, QueryOutcome.Truncated, enrollment, false);
+				verdicts[position] = new QueryVerdict<T>(item, enrollment, new Qualified(ConsumesSlot: false, Rank: new None()));
 			}
 			else
 			{
-				var consumesSlot = options.Limit.Match(limit => ConsumesSlot(enrollment, limit), () => true);
-				if (consumesSlot)
-					taken++;
-				verdicts[position] = new QueryVerdict<T>(item, QueryOutcome.Qualified, enrollment, consumesSlot);
+				verdicts[position] = new QueryVerdict<T>(
+					item,
+					enrollment,
+					line.Match(slots => slots.Place(enrollment), () => new Qualified(ConsumesSlot: true, Rank: new None()))
+				);
 			}
 		}
 
@@ -103,17 +101,62 @@ internal sealed class QueryProcessor<T>
 		var compiled = _compiled;
 		if (compiled is null || !compiled.Expression.Equals(expression))
 		{
-			compiled = new CompiledFilter(
-				expression,
-				DynamicExpressionParser.ParseLambda<T, bool>(FilterConfig, false, expression.Text, [.. expression.Values]).Compile()
-			);
+			compiled = new CompiledFilter(expression, Lambda(expression));
 			_compiled = compiled;
 		}
 
 		return compiled.Predicate;
 	}
 
+	private static Func<T, bool> Lambda(FilterExpression expression)
+	{
+		return DynamicExpressionParser.ParseLambda<T, bool>(FilterConfig, false, expression.Text, [.. expression.Values]).Compile();
+	}
+
+	private static IReadOnlyList<RuleCheck> Checks(QueryFilter filter, DateOnly today)
+	{
+		return
+		[
+			.. filter
+				.Groups.SelectMany(Rules)
+				.Distinct()
+				.Select(written => FilterEvaluator.Predicate(FilterValues.Resolve(written, today)).Map(expression => new RuleCheck(written, Lambda(expression))))
+				.WhereSome(),
+		];
+	}
+
+	private static IEnumerable<FilterPredicate> Rules(FilterGroup group) => group.Predicates.Concat(group.Groups.SelectMany(Rules));
+
 	private sealed record CompiledFilter(FilterExpression Expression, Func<T, bool> Predicate);
+
+	private sealed record RuleCheck(FilterPredicate Written, Func<T, bool> Passes);
+
+	private sealed class RuleChecks(IReadOnlyList<RuleCheck> rules)
+	{
+		private readonly ValueSet<FilterPredicate> _checked = [.. rules.Select(rule => rule.Written)];
+
+		public FilterChecks Of(T item)
+		{
+			return new FilterChecks(_checked, [.. rules.Where(rule => !rule.Passes(item)).Select(rule => rule.Written)]);
+		}
+	}
+
+	private sealed class SlotLine(QueryLimit limit)
+	{
+		private int _inLine;
+
+		public QueryOutcome Place(Enrollment enrollment)
+		{
+			var rank = new SlotRank(_inLine + 1, limit.Count);
+			var takesSlot = ConsumesSlot(enrollment, limit);
+			if (takesSlot)
+			{
+				_inLine++;
+			}
+
+			return rank.Position > limit.Count ? new Truncated(rank) : new Qualified(takesSlot, Optional.When(takesSlot, () => rank));
+		}
+	}
 
 	private static bool ConsumesSlot(Enrollment enrollment, QueryLimit limit)
 	{

@@ -527,26 +527,25 @@ public class FeedPreviewPanelTests : BunitContext
 		{
 			return index switch
 			{
-				0 => Verdict(item, QueryOutcome.Culled, owned: true),
-				1 => Verdict(item, QueryOutcome.Qualified, owned: true, inBlocklist: true),
-				2 => Verdict(item, QueryOutcome.Culled, owned: true, inBlocklist: true),
-				3 => Verdict(item, QueryOutcome.Qualified, owned: true),
-				_ => Verdict(item, QueryOutcome.Qualified),
+				0 => Verdict(item, OutcomeCase.Culled, owned: true),
+				1 => Verdict(item, OutcomeCase.Qualified, owned: true, inBlocklist: true),
+				2 => Verdict(item, OutcomeCase.Culled, owned: true, inBlocklist: true),
+				3 => Verdict(item, OutcomeCase.Qualified, owned: true),
+				_ => Verdict(item, OutcomeCase.Qualified),
 			};
 		}
 
-		private static QueryVerdict<MatchedMedia> Verdict(MatchedMedia item, QueryOutcome outcome, bool owned = false, bool inBlocklist = false)
+		private static QueryVerdict<MatchedMedia> Verdict(MatchedMedia item, OutcomeCase outcome, bool owned = false, bool inBlocklist = false)
 		{
 			return new(
 				item,
-				outcome,
 				new Enrollment
 				{
 					InWantlist = owned,
 					InBlocklist = inBlocklist,
 					Owned = owned,
 				},
-				ConsumesSlot: true
+				outcome.Outcome
 			);
 		}
 	}
@@ -561,14 +560,13 @@ public class FeedPreviewPanelTests : BunitContext
 				.Matched()
 				.Select(item => new QueryVerdict<MatchedMedia>(
 					item,
-					QueryOutcome.Qualified,
 					new Enrollment
 					{
 						InWantlist = false,
 						InBlocklist = false,
 						Owned = false,
 					},
-					ConsumesSlot: true
+					OutcomeCase.Qualified.Outcome
 				))
 				.ToList();
 
@@ -634,14 +632,13 @@ public class FeedPreviewPanelTests : BunitContext
 		var verdicts = items
 			.Select(item => new QueryVerdict<MatchedMedia>(
 				item,
-				QueryOutcome.Qualified,
 				new Enrollment
 				{
 					InWantlist = false,
 					InBlocklist = false,
 					Owned = false,
 				},
-				ConsumesSlot: true
+				OutcomeCase.Qualified.Outcome
 			))
 			.ToList();
 
@@ -685,11 +682,11 @@ public class FeedPreviewPanelTests : BunitContext
 		{
 			return index switch
 			{
-				0 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Qualified, Enrolled(), true),
-				1 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Qualified, Enrolled(inWantlist: true), true),
-				2 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Culled, Enrolled(), false),
-				3 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Truncated, Enrolled(), false),
-				_ => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Qualified, Enrolled(inBlocklist: true), true),
+				0 => new QueryVerdict<MatchedMedia>(item, Enrolled(), OutcomeCase.Qualified.Outcome),
+				1 => new QueryVerdict<MatchedMedia>(item, Enrolled(inWantlist: true), OutcomeCase.Qualified.Outcome),
+				2 => new QueryVerdict<MatchedMedia>(item, Enrolled(), OutcomeCase.Culled.Outcome),
+				3 => new QueryVerdict<MatchedMedia>(item, Enrolled(), OutcomeCase.Truncated.Outcome),
+				_ => new QueryVerdict<MatchedMedia>(item, Enrolled(inBlocklist: true), OutcomeCase.Qualified.Outcome),
 			};
 		}
 

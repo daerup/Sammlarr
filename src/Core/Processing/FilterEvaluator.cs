@@ -26,6 +26,13 @@ internal static class FilterEvaluator
 		return new FilterExpression(Join(filter.Operator, parts) is { Length: > 0 } expression ? expression : "true", values);
 	}
 
+	public static Optional<FilterExpression> Predicate(FilterPredicate predicate)
+	{
+		List<object?> values = [];
+		var text = Compile(predicate, values);
+		return Optional.When(text.Length > 0, () => new FilterExpression(text, values));
+	}
+
 	private static string BuildGroup(FilterGroup group, List<object?> values)
 	{
 		var predicateParts = group.Predicates.Select(p => Compile(p, values)).Where(p => p.Length > 0).Select(p => $"({p})");

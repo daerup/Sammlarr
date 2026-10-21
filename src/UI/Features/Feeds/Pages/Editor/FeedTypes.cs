@@ -35,15 +35,15 @@ public static class PreviewResultFilter
 	{
 		return verdict.Outcome switch
 		{
-			QueryOutcome.Culled => PreviewBucket.Filtered,
-			QueryOutcome.Truncated => PreviewBucket.Skipped,
-			QueryOutcome.Qualified => Qualified(verdict),
+			Culled => PreviewBucket.Filtered,
+			Truncated => PreviewBucket.Skipped,
+			Qualified => OfQualified(verdict),
 		};
 	}
 
 	public static bool IsVisible(PreviewBucket bucket, IReadOnlyCollection<PreviewBucket> active) => active.Count == 0 || active.Contains(bucket);
 
-	private static PreviewBucket Qualified(QueryVerdict<MatchedMedia> verdict)
+	private static PreviewBucket OfQualified(QueryVerdict<MatchedMedia> verdict)
 	{
 		return verdict.Kept ? PreviewBucket.Kept
 			: verdict.WillImport ? PreviewBucket.Added
@@ -65,9 +65,9 @@ internal static class PreviewCopy
 	{
 		return verdict.Outcome switch
 		{
-			QueryOutcome.Culled => "filter-x",
-			QueryOutcome.Truncated => "scissors",
-			QueryOutcome.Qualified => "circle-question-mark",
+			Culled => "filter-x",
+			Truncated => "scissors",
+			Qualified => "circle-question-mark",
 		};
 	}
 
@@ -75,9 +75,9 @@ internal static class PreviewCopy
 	{
 		return verdict.Outcome switch
 		{
-			QueryOutcome.Culled => "It no longer matches your filter rules.",
-			QueryOutcome.Truncated => "Your import limit no longer reaches it.",
-			QueryOutcome.Qualified => string.Empty,
+			Culled => "It no longer matches your filter rules.",
+			Truncated => "Your import limit no longer reaches it.",
+			Qualified => string.Empty,
 		};
 	}
 

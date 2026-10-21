@@ -3,6 +3,7 @@ using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Media;
 using Domain.Processing;
+using TestInfrastructure;
 
 namespace Domain.Tests.Feed;
 
@@ -13,7 +14,7 @@ public class FeedPlanProperties
 	private sealed record Scenario(IFeedPlan Plan, IReadOnlySet<MediaId> Owned, FeedStrategy Strategy, IReadOnlyDictionary<MediaId, int> Absences);
 
 	private static readonly Gen<Scenario> Scenarios = Gen.Select(
-			Gen.OneOfConst(QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Truncated),
+			Gen.OneOfConst(OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Truncated),
 			Gen.Bool,
 			Gen.Bool,
 			Gen.Bool,
@@ -78,7 +79,7 @@ public class FeedPlanProperties
 		);
 
 	private static Scenario Build(
-		(QueryOutcome Outcome, bool Owned, bool InWantlist, bool InBlocklist, bool InSource, int Absences)[] situations,
+		(OutcomeCase Outcome, bool Owned, bool InWantlist, bool InBlocklist, bool InSource, int Absences)[] situations,
 		FeedStrategy strategy,
 		FeedLoadState state,
 		(UnmatchedReason Reason, int ConflictsWith)[] unmatchedTitles
@@ -107,7 +108,7 @@ public class FeedPlanProperties
 					InBlocklist = inBlocklist,
 					Owned = isOwned,
 				};
-				verdicts.Add(new QueryVerdict<MatchedMedia>(Row(id), outcome, enrollment, ConsumesSlot: true));
+				verdicts.Add(new QueryVerdict<MatchedMedia>(Row(id), enrollment, outcome.Outcome));
 			}
 		}
 

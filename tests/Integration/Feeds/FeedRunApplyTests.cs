@@ -294,7 +294,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var plan = await Assert.That(result).IsOfUnionType<FeedPlanResult, AppendPlan>();
 		string?[] titles = ["Fight Club", "Inception"];
 		await Assert.That(plan!.Verdicts.Select(verdict => verdict.Item.Details.Title)).IsEquivalentTo(titles);
-		await Assert.That(plan.Verdicts.Select(verdict => verdict.Outcome)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified]);
+		await Assert.That(plan.Verdicts.Select(verdict => verdict.Outcome.Case)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified]);
 	}
 
 	[Test]

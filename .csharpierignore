@@ -36,3 +36,4 @@ src/Domain/Media/MergeOutcome.cs
 src/AppHost/arr/radarr/config.xml
 src/AppHost/arr/sonarr/config.xml
 src/Contracts/Identity/PasswordAttempt.cs
+src/Domain/Processing/QueryOutcome.cs

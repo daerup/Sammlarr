@@ -6,8 +6,10 @@ using Contracts.Ratings;
 using Contracts.Wantlist;
 using Core.Feed;
 using Core.Processing;
+using Domain.Blocklist;
 using Domain.Feed.Planning;
 using Domain.Media;
+using Domain.Processing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
@@ -41,11 +43,36 @@ public class FeedRunPlannerTests
 		await Assert.That(plan).IsOfUnionType<FeedPlanResult, FeedPlanFailed>();
 	}
 
-	private static FeedRunPlanner Testee(Mock<IRatingService> ratings)
+	[Test]
+	public async Task PlanAsync_ForADraft_KeepsTheFailedRulesOfACulledTitle()
+	{
+		var fewEpisodes = QueryFilterFactory.Number(nameof(MediaQueryRow.Episodes), FilterPredicateOperator.LessThan, 200);
+		var feed = TestFeeds.Feed(Guid.NewGuid()) with { Filter = Some.Of(QueryFilterFactory.Filter(QueryFilterFactory.Group(fewEpisodes))) };
+		var onePiece = new MatchedMedia(
+			new MediaIdentity(MediaId.New(), [TmdbId.From("37854", MediaType.Show)]),
+			new ShowDetails { Title = "One Piece", Episodes = 1219 }
+		);
+		var ratings = IRatingService.Mock();
+		ratings.GetDefaultAsync(Any()).Returns(new RatingStrategy(AveragedRating.Everything));
+		ratings.GetAvailableAsync(Any()).Returns([RatingSource.Tmdb]);
+		var wantlist = IWantlistRepository.Mock();
+		wantlist.GetAllAsync(Any()).Returns([]);
+		var blocklist = IBlocklistService.Mock();
+		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
+
+		var result = await Testee(ratings, wantlist, blocklist)
+			.PlanAsync(new DraftFeed(feed, new RawFeedLoad([new Listed<MediaMatchResult>(0, onePiece)], FeedLoadState.Finished)), CancellationToken.None);
+
+		var plan = await Assert.That(result).IsOfUnionType<FeedPlanResult, IFeedPlan>();
+		var culled = await Assert.That(plan!.Verdicts.Single().Outcome).IsOfUnionType<QueryOutcome, Culled>();
+		await Assert.That(culled.Checks.Failed).IsEquivalentTo([fewEpisodes]);
+	}
+
+	private static FeedRunPlanner Testee(Mock<IRatingService> ratings, Mock<IWantlistRepository>? wantlist = null, Mock<IBlocklistService>? blocklist = null)
 	{
 		return new FeedRunPlanner(
-			IWantlistRepository.Mock().Object,
-			IBlocklistService.Mock().Object,
+			(wantlist ?? IWantlistRepository.Mock()).Object,
+			(blocklist ?? IBlocklistService.Mock()).Object,
 			new QueryProcessor<MediaQueryRow>(),
 			IFeedRepository.Mock().Object,
 			new ServiceCollection().BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),

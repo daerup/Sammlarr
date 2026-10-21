@@ -144,7 +144,7 @@ internal sealed class FeedRunPlanner(
 		);
 
 		var classified = resolved.Count > 0 ? await processor.ExecuteAsync(resolved, options, predicates, cancellationToken).ToListAsync(cancellationToken) : [];
-		return [.. classified.Select(verdict => new QueryVerdict<MatchedMedia>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot))];
+		return [.. classified.Select(verdict => verdict.Map(row => row.Media))];
 	}
 
 	private async Task<Guid> ShuffleSeedAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken)

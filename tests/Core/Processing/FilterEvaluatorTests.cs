@@ -2,6 +2,7 @@ using System.Text.Json;
 using Core.Processing;
 using Domain.Media;
 using Domain.Processing;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using static TestInfrastructure.QueryFilterFactory;
 
@@ -25,7 +26,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Year = 2020 }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -37,7 +38,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Year = 2020, MediaType = MediaType.Show }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -50,7 +51,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Year = 2021 }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -63,7 +64,7 @@ public class FilterEvaluatorTests
 			new FilterRow()
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -76,7 +77,7 @@ public class FilterEvaluatorTests
 			new FilterRow()
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -92,7 +93,7 @@ public class FilterEvaluatorTests
 
 		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow { Votes = 500 }, new FilterRow { Votes = 501 }, new FilterRow());
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -105,7 +106,7 @@ public class FilterEvaluatorTests
 			new FilterRow { ReleaseDate = new DateOnly(2020, 1, 2) }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -124,7 +125,7 @@ public class FilterEvaluatorTests
 			new FilterRow { ReleaseDate = DateOnly.MinValue.AddDays(1) }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -139,7 +140,7 @@ public class FilterEvaluatorTests
 
 		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow(), new FilterRow { Tagline = "" }, new FilterRow { Tagline = "A dream." });
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -156,10 +157,7 @@ public class FilterEvaluatorTests
 
 		await Assert
 			.That(outcomes)
-			.IsEquivalentTo(
-				[QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled, QueryOutcome.Culled],
-				CollectionOrdering.Matching
-			);
+			.IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Culled, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -175,7 +173,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Genre = "Drama" }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -188,7 +186,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Year = 2020, Genre = "Drama" }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -210,7 +208,7 @@ public class FilterEvaluatorTests
 
 		await Assert
 			.That(outcomes)
-			.IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+			.IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -223,7 +221,7 @@ public class FilterEvaluatorTests
 			new FilterRow()
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -254,8 +252,8 @@ public class FilterEvaluatorTests
 			.ToListAsync();
 
 		await Assert
-			.That(verdicts.Select(verdict => verdict.Outcome))
-			.IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+			.That(verdicts.Select(verdict => verdict.Outcome.Case))
+			.IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -268,7 +266,7 @@ public class FilterEvaluatorTests
 			new FilterRow()
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -281,7 +279,7 @@ public class FilterEvaluatorTests
 			new FilterRow()
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -294,7 +292,7 @@ public class FilterEvaluatorTests
 			new FilterRow()
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -309,7 +307,7 @@ public class FilterEvaluatorTests
 
 		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow(), new FilterRow { Title = "" }, new FilterRow { Title = "Heat" });
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -324,7 +322,7 @@ public class FilterEvaluatorTests
 
 		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow(), new FilterRow { Rating = 0 }, new FilterRow { Rating = 7.5 });
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -337,7 +335,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Genres = [] }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -349,7 +347,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Genres = ["Action Comedy"] }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -364,7 +362,7 @@ public class FilterEvaluatorTests
 
 		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow(), new FilterRow { Genres = [] }, new FilterRow { Genres = ["Drama"] });
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -377,7 +375,7 @@ public class FilterEvaluatorTests
 			new FilterRow { MediaType = MediaType.Unknown }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -389,7 +387,7 @@ public class FilterEvaluatorTests
 			new FilterRow { MediaType = MediaType.Show }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -404,7 +402,7 @@ public class FilterEvaluatorTests
 
 		var outcomes = await OutcomesAsync(Filter(Group(predicate)), new FilterRow(), new FilterRow { ReleaseDate = DateOnly.MinValue });
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -420,7 +418,7 @@ public class FilterEvaluatorTests
 
 		await Assert
 			.That(outcomes)
-			.IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+			.IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -433,7 +431,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Genres = ["Documentary"] }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -446,7 +444,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Genres = ["Drama", "Comedy"] }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -458,7 +456,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Genres = ["zzz"] }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -470,7 +468,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Year = 2020 }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -480,7 +478,7 @@ public class FilterEvaluatorTests
 	{
 		var outcomes = await OutcomesAsync(Filter(Group(Genres(op, GenreMatch.None))), new FilterRow { Genres = ["Drama"] });
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Qualified]);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Qualified]);
 	}
 
 	[Test]
@@ -491,7 +489,7 @@ public class FilterEvaluatorTests
 	{
 		var outcomes = await OutcomesAsync(Filter(Group(Number("Seasons", op, 3))), new FilterRow());
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled]);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled]);
 	}
 
 	[Test]
@@ -503,7 +501,7 @@ public class FilterEvaluatorTests
 			new FilterRow { Episodes = 12 }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -515,7 +513,7 @@ public class FilterEvaluatorTests
 			new FilterRow { ReleaseDate = new DateOnly(2024, 10, 19) }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -533,7 +531,7 @@ public class FilterEvaluatorTests
 			new FilterRow { ReleaseDate = new DateOnly(2016, 10, 19) }
 		);
 
-		await Assert.That(outcomes).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(outcomes).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	private static FilterPredicate Genres(FilterPredicateOperator op, GenreMatch match)
@@ -546,11 +544,11 @@ public class FilterEvaluatorTests
 		};
 	}
 
-	private static async Task<IReadOnlyList<QueryOutcome>> OutcomesAsync(QueryFilter filter, params FilterRow[] rows)
+	private static async Task<IReadOnlyList<OutcomeCase>> OutcomesAsync(QueryFilter filter, params FilterRow[] rows)
 	{
 		var options = new QueryOptions { Filter = Some.Of(filter), Today = new DateOnly(2026, 10, 18) };
 		var verdicts = await new QueryProcessor<FilterRow>().ExecuteAsync(rows, options, NoEnrollment).ToListAsync();
-		return [.. verdicts.Select(verdict => verdict.Outcome)];
+		return [.. verdicts.Select(verdict => verdict.Outcome.Case)];
 	}
 
 	private sealed record FilterRow
