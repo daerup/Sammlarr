@@ -1,0 +1,19 @@
+<VerdictPopover Icon="redo-dot" Title="@Title" Reason="@Reason" ChildContent="@(Limited ? SlotLine : null)"/>
+
+@code {
+    [Parameter] [EditorRequired] public required Enrollment Enrollment { get; set; }
+
+    [Parameter] public bool Counts { get; set; }
+
+    [Parameter] public bool Limited { get; set; }
+
+    private string Title => Enrollment.InWantlist ? "Already on your wantlist" : "On your blocklist";
+
+    private string Reason => Enrollment.InWantlist ? "So this feed does not import it again." : "This feed never imports it.";
+
+    private RenderFragment SlotLine =>
+        @<div class="flex items-center justify-between gap-3">
+            <span class="text-muted-foreground">Counts toward your limit</span>
+            <span class="font-semibold">@(Counts ? "Yes" : "No")</span>
+        </div>;
+}

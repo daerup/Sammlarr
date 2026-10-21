@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using Domain.Media;
-using UI.Features.Settings.Components.Providers;
+using UI.Features.Settings.Components.Providers.Roles;
 
 namespace UI.Features.Settings.Components.Ratings;
 

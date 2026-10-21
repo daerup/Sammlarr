@@ -24,7 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using Observability.Usage;
 using TestInfrastructure;
-using UI.Features.Feeds.Components;
+using UI.Features.Feeds.Components.Runs;
 using UI.Shared.Services;
 using FeedsPage = UI.Features.Feeds.Pages.Feeds;
 

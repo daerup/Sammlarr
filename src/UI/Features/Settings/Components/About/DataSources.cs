@@ -5,7 +5,7 @@ using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
 using UI.Features.Settings.Components.Housekeeping;
-using UI.Features.Settings.Components.Providers;
+using UI.Features.Settings.Components.Providers.Roles;
 using UI.Shared.Formatting;
 using UI.Shared.Media;
 using UI.Shared.Media.Ratings;

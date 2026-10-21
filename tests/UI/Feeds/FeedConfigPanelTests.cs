@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Feeds.Pages.Editor;
+using UI.Features.Feeds.Pages.Editor.Filters;
 using UI.Tests.Media;
 using UI.Tests.Providers;
 

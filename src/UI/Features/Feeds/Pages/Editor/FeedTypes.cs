@@ -4,6 +4,7 @@ using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
+using UI.Features.Feeds.Pages.Editor.Filters;
 
 namespace UI.Features.Feeds.Pages.Editor;
 
