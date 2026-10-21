@@ -25,7 +25,7 @@
 
     [Parameter] [EditorRequired] public required EventCallback<bool> TotalChanged { get; set; }
 
-    private string Name => Total ? "Total runtime" : "Runtime per episode";
+    private string Name => RuleWords.Runtime(Total);
 
     private Task SetAsync(bool? total) => Optional.Of(total).Match(TotalChanged.InvokeAsync, () => Task.CompletedTask);
 }

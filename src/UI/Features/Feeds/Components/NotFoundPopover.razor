@@ -1,0 +1,62 @@
+@using Domain.Media
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<VerdictPopover Icon="circle-alert" Title="@RunBar.Label(Part)" Reason="@Reason" Foot="@Next" ChildContent="@(Unmatched.Externals.Count > 0 ? LookedUpBy : null)"/>
+
+@code {
+    [Parameter] [EditorRequired] public required UnmatchedMedia Unmatched { get; set; }
+
+    private RenderFragment LookedUpBy =>
+        @<div class="flex items-baseline justify-between gap-3">
+            <span class="text-muted-foreground">Looked up by</span>
+            <span class="flex flex-wrap justify-end gap-1">
+                @foreach (var id in Unmatched.Externals)
+                {
+                    <BbBadge Variant="BadgeVariant.Outline" Class="px-1.5 text-[11px] font-normal">@($"{Branding.GetBrandingInfo(id.Source).DisplayName} {id.Value}")</BbBadge>
+                }
+            </span>
+        </div>;
+
+    private RunPart Part
+    {
+        get
+        {
+            return Unmatched.Reason switch
+            {
+                UnmatchedReason.NotFound => RunPart.NotFound,
+                UnmatchedReason.CouldNotLookUp => RunPart.CouldNotLookUp,
+                UnmatchedReason.NotFoundEarlier => RunPart.NotFoundEarlier,
+                UnmatchedReason.Conflict => RunPart.Conflict,
+            };
+        }
+    }
+
+    private string Reason
+    {
+        get
+        {
+            return Unmatched.Reason switch
+            {
+                UnmatchedReason.NotFound => "No service had this title.",
+                UnmatchedReason.CouldNotLookUp => "A service it needed was down, rate-limited or failing.",
+                UnmatchedReason.NotFoundEarlier => "A lookup in the last hour found nothing, so it was not asked again.",
+                UnmatchedReason.Conflict => "Its ids point at a title Sammlarr already holds under other ids.",
+            };
+        }
+    }
+
+    private string Next
+    {
+        get
+        {
+            return Unmatched.Reason switch
+            {
+                UnmatchedReason.NotFound => "It is looked up again after an hour.",
+                UnmatchedReason.CouldNotLookUp => "The next run tries again.",
+                UnmatchedReason.NotFoundEarlier => "It is looked up again after the hour.",
+                UnmatchedReason.Conflict => "Kept apart; both titles stay as they are.",
+            };
+        }
+    }
+}

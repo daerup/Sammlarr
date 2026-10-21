@@ -1,0 +1,95 @@
+@using System.Text.Json
+@using Contracts.Processing
+@using UI.Features.Feeds.Components
+@using UI.Features.Feeds.Pages.Editor
+
+<DemoCard Title="Preview verdicts" Where="Feed editor › preview" Span="2"
+          Note="Every popover a preview row can open, one icon per case; hover an icon to open it. The title is Breaking Bad, which fails every rule here.">
+    <div class="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 text-xs text-muted-foreground">
+        <span>Filtered out</span>
+        <div class="flex flex-wrap items-center gap-4">
+            @Captioned("one rule", @<CulledPopover Filter="ByRule" Checks="Checks" Row="Row" Strategy="DemoRatings.Average"/>)
+            @Captioned("a group", @<CulledPopover Filter="ByGroup" Checks="Checks" Row="Row" Strategy="DemoRatings.Average"/>)
+            @Captioned("two places", @<CulledPopover Filter="InTwoPlaces" Checks="Checks" Row="Row" Strategy="DemoRatings.Average"/>)
+        </div>
+        <span>Past the limit</span>
+        <div class="flex flex-wrap items-center gap-4">
+            @Captioned("sorted", @<TruncatedPopover Rank="new SlotRank(23, 20)" LastIn="Firefly Wedding" Title="@Title" Order="sorted by Rating"/>)
+            @Captioned("random", @<TruncatedPopover Rank="new SlotRank(21, 20)" LastIn="Firefly Wedding" Title="@Title" Order="drawn at random" Random="true"/>)
+        </div>
+        <span>Bypassed</span>
+        <div class="flex flex-wrap items-center gap-4">
+            @Captioned("wantlist", @<BypassedPopover Enrollment="Enrolled with { InWantlist = true }" Counts="true" Limited="true"/>)
+            @Captioned("blocklist", @<BypassedPopover Enrollment="Enrolled with { InBlocklist = true }"/>)
+        </div>
+        <span>Not found</span>
+        <div class="flex flex-wrap items-center gap-4">
+            @foreach (var reason in Enum.GetValues<UnmatchedReason>())
+            {
+                @Captioned(reason.Humanize(LetterCasing.LowerCase), @<NotFoundPopover Unmatched="DemoMedia.Unknown with { Reason = reason }"/>)
+            }
+        </div>
+        <span>Leaving</span>
+        <div class="flex flex-wrap items-center gap-4">
+            @Captioned("gone", @<LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="3" Absences="2"/>)
+            @Captioned("filtered", @<LeavingIndicator Reason="@PreviewCopy.AtRiskReason(Filtered)" Threshold="3" Absences="1">
+                                       <CulledDetail Filter="ByRule" Checks="Checks" Row="Row" Strategy="DemoRatings.Average"/>
+                                   </LeavingIndicator>)
+            @Captioned("past the limit", @<LeavingIndicator Reason="@PreviewCopy.PastTheLimitReason" Threshold="2" Absences="1">
+                                             <SlotLineDetail Rank="new SlotRank(21, 20)" LastIn="Firefly Wedding" Title="@Title"/>
+                                         </LeavingIndicator>)
+        </div>
+    </div>
+</DemoCard>
+
+@code {
+    private static readonly FilterPredicate Recent = new()
+    {
+        Field = nameof(MediaQueryRow.ReleaseDate),
+        Operator = FilterPredicateOperator.GreaterThan,
+        ValueKind = FilterValueKind.Date,
+        Value = JsonSerializer.Serialize(new RelativeDate(1, DateUnit.Years, Ahead: false).ToIso()),
+    };
+
+    private static readonly FilterPredicate Anime = new()
+    {
+        Field = nameof(MediaQueryRow.Genres),
+        Operator = FilterPredicateOperator.In,
+        Value = JsonSerializer.Serialize(new GenreMatch(["Anime"], [])),
+    };
+
+    private static readonly FilterPredicate IsMovie = new()
+    {
+        Field = nameof(MediaQueryRow.MediaType),
+        Operator = FilterPredicateOperator.Equals,
+        Value = JsonSerializer.Serialize(nameof(MediaType.Movie)),
+    };
+
+    private static readonly FilterChecks Checks = new([Recent, Anime, IsMovie], [Recent, Anime, IsMovie]);
+
+    private static readonly FilterGroup RecentOrAnime = new() { Operator = FilterOperator.Or, Predicates = [Recent, Anime] };
+
+    private static readonly QueryFilter ByRule = Filter(new FilterGroup { Operator = FilterOperator.And, Predicates = [Recent] });
+
+    private static readonly QueryFilter ByGroup = Filter(RecentOrAnime);
+
+    private static readonly QueryFilter InTwoPlaces = Filter(new FilterGroup { Operator = FilterOperator.And, Predicates = [IsMovie], Groups = [RecentOrAnime] });
+
+    private static readonly MediaQueryRow Row = MediaQueryRow.From(DemoMedia.Show, DemoRatings.Average, DemoRatings.Everything);
+
+    private static readonly Enrollment Enrolled = new() { InWantlist = false, InBlocklist = false, Owned = false };
+
+    private static readonly QueryVerdict<MatchedMedia> Filtered = new(DemoMedia.Show, Enrolled, new Culled(Checks));
+
+    private static string Title => DemoMedia.Show.Details.Title ?? string.Empty;
+
+    private static QueryFilter Filter(FilterGroup group) => new() { Operator = FilterOperator.And, Groups = [group] };
+
+    private static RenderFragment Captioned(string caption, RenderFragment popover)
+    {
+        return @<span class="flex flex-col items-center gap-0.5">
+                   @popover
+                   <span>@caption</span>
+               </span>;
+    }
+}

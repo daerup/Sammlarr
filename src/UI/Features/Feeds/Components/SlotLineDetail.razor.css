@@ -1,0 +1,55 @@
+.slot-line {
+    display: grid;
+    grid-template-columns: max-content 1fr auto;
+    align-items: baseline;
+    column-gap: 0.5rem;
+    row-gap: 0.25rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.slot-line-rank {
+    text-align: end;
+    opacity: 0.6;
+}
+
+.slot-line-name {
+    font-weight: 500;
+}
+
+.slot-line-note {
+    opacity: 0.55;
+    white-space: nowrap;
+}
+
+.slot-line-cut {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+.slot-line-cut::after {
+    content: "";
+    flex: 1;
+    border-top: 1px dashed currentColor;
+}
+
+.slot-line-gap {
+    grid-column: 2 / -1;
+    font-style: italic;
+    opacity: 0.55;
+}
+
+.slot-line-me {
+    opacity: 1;
+    font-weight: 600;
+}
+
+.slot-line-wide {
+    grid-column: 2 / -1;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    background: color-mix(in srgb, currentColor 8%, transparent);
+}

@@ -59,24 +59,16 @@ internal static class PreviewCopy
 
 	internal const string GoneReason = "The source list no longer contains it.";
 
-	internal static AbsencePhrase Absence => new("Absent from", "of", "runs");
+	internal const string PastTheLimitReason = "Your import limit no longer reaches it.";
 
-	internal static string OutcomeIcon(QueryVerdict<MatchedMedia> verdict)
-	{
-		return verdict.Outcome switch
-		{
-			Culled => "filter-x",
-			Truncated => "scissors",
-			Qualified => "circle-question-mark",
-		};
-	}
+	internal static AbsencePhrase Absence => new("missed", "of", "run");
 
 	internal static string AtRiskReason(QueryVerdict<MatchedMedia> verdict)
 	{
 		return verdict.Outcome switch
 		{
 			Culled => "It no longer matches your filter rules.",
-			Truncated => "Your import limit no longer reaches it.",
+			Truncated => PastTheLimitReason,
 			Qualified => string.Empty,
 		};
 	}

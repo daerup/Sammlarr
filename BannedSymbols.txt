@@ -54,3 +54,4 @@ M:Humanizer.CollectionHumanizeExtensions.Humanize``1(System.Collections.Generic.
 M:Humanizer.CollectionHumanizeExtensions.Humanize``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.String},System.String);Use Humanize(Notation, conjunction)
 M:Humanizer.CollectionHumanizeExtensions.Humanize``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Object},System.String);Use Humanize(Notation, conjunction)
 T:Humanizer.DateHumanizeExtensions;Use Humanize(now)
+T:Humanizer.OrdinalizeExtensions;Use Ordinal, it reads in English whatever the browser's language

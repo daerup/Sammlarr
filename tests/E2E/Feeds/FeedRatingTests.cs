@@ -57,6 +57,6 @@ public class FeedRatingTests
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(9), Wait.Preview);
 		await FeedEditor.Rows(page).First.Locator(".search-result-status-indicator").HoverAsync();
-		await Expect(page.GetByText("no votes behind its rating").First).ToBeVisibleAsync();
+		await Expect(page.Locator("[role=tooltip] .culled-rule-value").First).ToContainTextAsync("publishes none");
 	}
 }

@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
+using BlazorBlueprint.Primitives.Filtering;
 using Bunit;
 using Contracts.Blocklist;
 using Contracts.DI;
@@ -27,6 +28,7 @@ using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
 using UI.Shared.Services;
 using UI.Tests.Media;
+using FilterOperator = BlazorBlueprint.Primitives.Filtering.FilterOperator;
 
 namespace UI.Tests.Feeds;
 
@@ -44,6 +46,27 @@ public class FeedPreviewPanelTests : BunitContext
 
 		await Assert.That(badges.Skip(1).Sum()).IsEqualTo(badges[0]);
 		await Assert.That(badges).IsEquivalentTo([7, 1, 0, 2, 1, 1, 2], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Preview_ForACulledTitle_ExplainsTheRuleItFailed()
+	{
+		var cut = RenderPanel(new CulledPlanner(), resolved: 1, unmatched: 0);
+		var portal = Render<BbPortalHost>();
+		var votes = new FilterCondition
+		{
+			Field = nameof(MediaQueryRow.Votes),
+			Operator = FilterOperator.GreaterThan,
+			Value = 5.0,
+		};
+
+		await ApplyAsync(cut, new Append(), filter: new FilterDefinition { Conditions = [votes] });
+		var indicator = cut.WaitForElement(".search-result-status-indicator");
+		await indicator.ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
+
+		var tip = portal.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]");
+		await Assert.That(tip.QuerySelector(".verdict-popover-title")!.TextContent).IsEqualTo("Filtered out by this rule");
+		await Assert.That(tip.QuerySelector(".culled-rule")!.TextContent.Words()).IsEqualTo("Votes greater than 5 no rating yet, failed");
 	}
 
 	[Test]
@@ -425,6 +448,7 @@ public class FeedPreviewPanelTests : BunitContext
 		QuerySort? sort = null,
 		QueryLimit? limit = null,
 		string identifier = "list",
+		FilterDefinition? filter = null,
 		CancellationToken visit = default
 	)
 	{
@@ -438,6 +462,7 @@ public class FeedPreviewPanelTests : BunitContext
 					Strategy = strategy,
 					Sort = sort,
 					Limit = limit,
+					Filter = filter,
 				},
 				visit
 			)
@@ -663,6 +688,33 @@ public class FeedPreviewPanelTests : BunitContext
 				Ratings = MediaRatings.None,
 			}
 		);
+	}
+
+	private sealed class CulledPlanner : IFeedRunPlanner
+	{
+		public Task<FieldNeeds> NeedsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default) => Task.FromResult(FieldNeeds.None);
+
+		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
+		{
+			ValueSet<FilterPredicate> rules = target is DraftFeed(var feed, _)
+				? [.. feed.Filter.Map(filter => filter.Groups.SelectMany(group => group.Predicates)).GetValueOr([])]
+				: [];
+			var verdicts = Items(target)
+				.Matched()
+				.Select(item => new QueryVerdict<MatchedMedia>(
+					item,
+					new Enrollment
+					{
+						InWantlist = false,
+						InBlocklist = false,
+						Owned = false,
+					},
+					new Culled(new FilterChecks(rules, rules))
+				))
+				.ToList();
+
+			return Task.FromResult<FeedPlanResult>(new AppendPlan(verdicts, [], FeedDelta.None, Conclusiveness.NoneAdmitted));
+		}
 	}
 
 	private sealed class SpreadPlanner : IFeedRunPlanner

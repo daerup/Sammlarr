@@ -1,0 +1,23 @@
+@using Domain.Processing
+
+<div class="slot-line">
+    <span class="slot-line-rank">@Rank.Slots</span>
+    <span class="slot-line-name">@LastIn</span>
+    <span class="slot-line-note">took the last slot</span>
+    <span class="slot-line-cut"><LucideIcon Name="scissors" Size="11"/>limit @Rank.Slots</span>
+    @if (Rank.Position - Rank.Slots > 1)
+    {
+        <span class="slot-line-rank">⋮</span>
+        <span class="slot-line-gap">@(Rank.Position - Rank.Slots - 1) more</span>
+    }
+    <span class="slot-line-rank slot-line-me">@Rank.Position</span>
+    <span class="slot-line-name slot-line-me slot-line-wide">@Title</span>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required SlotRank Rank { get; set; }
+
+    [Parameter] [EditorRequired] public required string LastIn { get; set; }
+
+    [Parameter] [EditorRequired] public required string Title { get; set; }
+}

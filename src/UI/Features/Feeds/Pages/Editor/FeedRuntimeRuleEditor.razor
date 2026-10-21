@@ -5,8 +5,8 @@
         <span class="flex items-center pr-2.5">
             <BbToggleGroup TValue="DurationUnit?" Value="@_unit" ValueChanged="SetUnitAsync" Required="true"
                            Class="h-5 w-fit gap-0 overflow-hidden rounded-[5px] border border-border text-muted-foreground" aria-label="Unit">
-                <BbToggleGroupItem TValue="DurationUnit?" Value="DurationUnit.Minutes" Class="@UnitClass">@Short(DurationUnit.Minutes)</BbToggleGroupItem>
-                <BbToggleGroupItem TValue="DurationUnit?" Value="DurationUnit.Hours" Class="@UnitClass">@Short(DurationUnit.Hours)</BbToggleGroupItem>
+                <BbToggleGroupItem TValue="DurationUnit?" Value="DurationUnit.Minutes" Class="@UnitClass">@RuleWords.Short(DurationUnit.Minutes)</BbToggleGroupItem>
+                <BbToggleGroupItem TValue="DurationUnit?" Value="DurationUnit.Hours" Class="@UnitClass">@RuleWords.Short(DurationUnit.Hours)</BbToggleGroupItem>
             </BbToggleGroup>
         </span>
     </Adornment>
@@ -31,15 +31,6 @@
         {
             _unit = duration.Unit;
         }
-    }
-
-    private static string Short(DurationUnit unit)
-    {
-        return unit switch
-        {
-            DurationUnit.Minutes => "min",
-            DurationUnit.Hours => "h",
-        };
     }
 
     private static double AmountOf(object? value) => value is Duration duration ? duration.Amount : 0;

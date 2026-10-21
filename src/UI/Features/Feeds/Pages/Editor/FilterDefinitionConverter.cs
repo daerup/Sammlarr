@@ -134,7 +134,7 @@ internal static class FilterDefinitionConverter
 		};
 	}
 
-	private static FilterCondition ToCondition(FilterPredicate predicate) =>
+	public static FilterCondition ToCondition(FilterPredicate predicate) =>
 		new()
 		{
 			Field = predicate.Field,

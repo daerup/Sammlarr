@@ -25,6 +25,12 @@ internal static class NotationExtensions
 		(TimeUnit.Millisecond, span => span.Milliseconds),
 	];
 
+	extension(int number)
+	{
+		[SuppressMessage("ApiDesign", "RS0030", Justification = "The one place that asks Humanizer for an ordinal.")]
+		internal string Ordinal => number.Ordinalize(English);
+	}
+
 	extension(TimeSpan span)
 	{
 		[SuppressMessage("ApiDesign", "RS0030", Justification = "The one place that asks Humanizer for its own TimeSpan wording.")]
