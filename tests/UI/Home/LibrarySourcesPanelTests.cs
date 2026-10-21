@@ -11,7 +11,11 @@ namespace UI.Tests.Home;
 
 public class LibrarySourcesPanelTests : BunitContext
 {
-	private static readonly IReadOnlyList<SourceShare> Sources = [new("hdlists/comedy-movies-2001-20207", 1), new("Added by hand or from Plex", 203)];
+	private static readonly IReadOnlyList<SourceShare> Sources =
+	[
+		new("hdlists/comedy-movies-2001-20207", 1, new None()),
+		new("Added by hand", 203, Some.Of(LibraryView.HandColor)),
+	];
 
 	[Before(Test)]
 	public void Setup()
@@ -21,13 +25,13 @@ public class LibrarySourcesPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForEachSource_DrawsAPartOfItsCount()
+	public async Task Render_ForEachSource_DrawsAPartOfItsCountInItsColourOrTheWheels()
 	{
 		var cut = Render<Harness>();
 
 		await Assert
-			.That(cut.FindComponents<StackedBarPart>().Select(part => (part.Instance.Name, part.Instance.Value)))
-			.IsEquivalentTo([("hdlists/comedy-movies-2001-20207", 1L), ("Added by hand or from Plex", 203L)], CollectionOrdering.Matching);
+			.That(cut.FindComponents<StackedBarPart>().Select(part => (part.Instance.Name, part.Instance.Value, part.Instance.Color)))
+			.IsEquivalentTo([("hdlists/comedy-movies-2001-20207", 1L, null), ("Added by hand", 203L, LibraryView.HandColor)], CollectionOrdering.Matching);
 		await Assert.That(cut.FindComponent<StackedBar>().Instance.ShowLegend).IsTrue();
 	}
 

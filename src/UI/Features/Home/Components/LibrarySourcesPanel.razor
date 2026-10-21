@@ -16,7 +16,7 @@
                 <ChildContent>
                     @foreach (var source in Sources)
                     {
-                        <StackedBarPart Name="@source.Name" Value="source.Count"/>
+                        <StackedBarPart Name="@source.Name" Value="source.Count" Color="@source.Color.ToNullable()"/>
                     }
                 </ChildContent>
             </StackedBar>

@@ -1,16 +1,20 @@
 @using UI.Features.Home.Components
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
 
 <DemoCard Title="Library sources" Where="Home"
-          Note="LibrarySourcesPanel: how the wantlist splits across the feeds that filled it, hand-picked titles and the sink.">
+          Note="LibrarySourcesPanel: how the wantlist splits across the feeds that filled it, the media services it came from in their brand colours, and hand-picked titles in grey.">
     <LibrarySourcesPanel Sources="Sources" Total="1263"/>
 </DemoCard>
 
 @code {
-    private static readonly IReadOnlyList<SourceShare> Sources =
+    private IReadOnlyList<SourceShare> Sources =>
     [
-        new("snoak/latest-movies-digital-release", 812),
-        new("hdlists/latest-hd-documentary-movies-1980-to-today", 402),
-        new("Added by hand", 37),
-        new("Plex watchlist", 12),
+        new("snoak/latest-movies-digital-release", 812, new None()),
+        new("hdlists/latest-hd-documentary-movies-1980-to-today", 402, new None()),
+        new("From Plex", 8, Some.Of(Branding.GetBrandingInfo(RemoteService.Plex).BrandColor)),
+        new("From Radarr", 3, Some.Of(Branding.GetBrandingInfo(RemoteService.Radarr).BrandColor)),
+        new("From Sonarr", 2, Some.Of(Branding.GetBrandingInfo(RemoteService.Sonarr).BrandColor)),
+        new("Added by hand", 36, Some.Of(LibraryView.HandColor)),
     ];
 }

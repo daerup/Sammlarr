@@ -333,7 +333,8 @@ else
             var brands = FeedBrands();
             _wantlistCount = _wantlist.Ids.Count;
             _blocklistCount = _blocklist.Ids.Count;
-            _sources = LibraryView.Sources(feeds.Feeds, _wantlistCount, ProviderName);
+            var types = await MediaService.GetTypesAsync(LibraryView.ArrTitles(_wantlist), _cancellation.Token);
+            _sources = LibraryView.Sources(_wantlist, types, BrandingService);
             _queued = UpNextView.InTheQueue(queue, names, brands, Sink);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);
             _scheduled = UpNextView.OnASchedule(_feeds, _now, Clock.LocalTimeZone, BrandingService);
