@@ -147,7 +147,7 @@ public class RandomPickTests(SammlarrTestHost host) : IAsyncDisposable
 	private async Task<IReadOnlyList<MediaId>> WantlistIdsAsync() => [.. (await host.Resolve<IWantlistRepository>().GetAllAsync()).Select(item => item.MediaId)];
 
 	private static IEnumerable<MediaId> Picked(IEnumerable<QueryVerdict<MatchedMedia>> verdicts) =>
-		verdicts.Where(verdict => verdict.Outcome is QueryOutcome.Qualified).Select(verdict => verdict.Item.Identity.Id);
+		verdicts.Where(verdict => verdict.Outcome is Qualified).Select(verdict => verdict.Item.Identity.Id);
 
 	private static FeedItemSpec Listed(MediaSpec title) =>
 		new(title.Title, title.Type, null, title.Ids.Where(id => id.Provider == MediaProvider.Tmdb).ToDictionary(id => id.Provider, id => id.Value));

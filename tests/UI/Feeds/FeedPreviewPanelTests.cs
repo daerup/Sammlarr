@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives;
+using BlazorBlueprint.Primitives.Filtering;
 using Bunit;
 using Contracts.Blocklist;
 using Contracts.DI;
@@ -27,6 +28,7 @@ using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor;
 using UI.Shared.Services;
 using UI.Tests.Media;
+using FilterOperator = BlazorBlueprint.Primitives.Filtering.FilterOperator;
 
 namespace UI.Tests.Feeds;
 
@@ -44,6 +46,27 @@ public class FeedPreviewPanelTests : BunitContext
 
 		await Assert.That(badges.Skip(1).Sum()).IsEqualTo(badges[0]);
 		await Assert.That(badges).IsEquivalentTo([7, 1, 0, 2, 1, 1, 2], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Preview_ForACulledTitle_ExplainsTheRuleItFailed()
+	{
+		var cut = RenderPanel(new CulledPlanner(), resolved: 1, unmatched: 0);
+		var portal = Render<BbPortalHost>();
+		var votes = new FilterCondition
+		{
+			Field = nameof(MediaQueryRow.Votes),
+			Operator = FilterOperator.GreaterThan,
+			Value = 5.0,
+		};
+
+		await ApplyAsync(cut, new Append(), filter: new FilterDefinition { Conditions = [votes] });
+		var indicator = cut.WaitForElement(".search-result-status-indicator");
+		await indicator.ParentElement!.TriggerEventAsync("onmouseenter", new MouseEventArgs());
+
+		var tip = portal.WaitForElement("[data-portal-content][data-state=open] [role=tooltip]");
+		await Assert.That(tip.QuerySelector(".verdict-popover-title")!.TextContent).IsEqualTo("Filtered out by this rule");
+		await Assert.That(tip.QuerySelector(".culled-rule")!.TextContent.Words()).IsEqualTo("Votes greater than 5 no rating yet, failed");
 	}
 
 	[Test]
@@ -137,6 +160,24 @@ public class FeedPreviewPanelTests : BunitContext
 
 		await Assert.That(cut.FindAll(".preview-gone-results button[aria-label='Add to wantlist']")).Count().IsEqualTo(1);
 		await Assert.That(cut.FindAll(".preview-gone-results button[aria-label='Add to blocklist']")).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Preview_ForAWantlistedGoneRow_OffersWhereItCameFrom()
+	{
+		var gone = MediaId.From(new Guid(99, 0, 0, new byte[8]));
+		var cut = RenderPanel(
+			new GonePlanner(gone),
+			resolved: 5,
+			unmatched: 0,
+			gone: gone,
+			wantlisted: [new WantlistItem(gone, DateTimeOffset.UnixEpoch, new ManualOrigin(ManualSource.Search))]
+		);
+
+		await ApplyAsync(cut, new Mirror(3));
+		cut.WaitForState(() => cut.FindAll(".preview-gone-results .search-result-row").Count == 1);
+
+		await Assert.That(cut.FindAll(".preview-gone-results button.provenance-dot[aria-label='Where it came from']")).HasSingleItem();
 	}
 
 	[Test]
@@ -425,6 +466,7 @@ public class FeedPreviewPanelTests : BunitContext
 		QuerySort? sort = null,
 		QueryLimit? limit = null,
 		string identifier = "list",
+		FilterDefinition? filter = null,
 		CancellationToken visit = default
 	)
 	{
@@ -438,6 +480,7 @@ public class FeedPreviewPanelTests : BunitContext
 					Strategy = strategy,
 					Sort = sort,
 					Limit = limit,
+					Filter = filter,
 				},
 				visit
 			)
@@ -462,15 +505,17 @@ public class FeedPreviewPanelTests : BunitContext
 		int unmatched,
 		MediaId? gone = null,
 		IFeedProvider? provider = null,
-		Mock<IMediaService>? media = null
+		Mock<IMediaService>? media = null,
+		IReadOnlyList<WantlistItem>? wantlisted = null
 	)
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(FeedFilterStub.Shipped);
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 		Services.AddSingleton(planner);
 		var wantlist = IWantlistService.Mock();
-		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
+		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot(wantlisted ?? []));
 		var blocklist = IBlocklistService.Mock();
 		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
 		Services.AddSingleton(wantlist.Object);
@@ -527,26 +572,25 @@ public class FeedPreviewPanelTests : BunitContext
 		{
 			return index switch
 			{
-				0 => Verdict(item, QueryOutcome.Culled, owned: true),
-				1 => Verdict(item, QueryOutcome.Qualified, owned: true, inBlocklist: true),
-				2 => Verdict(item, QueryOutcome.Culled, owned: true, inBlocklist: true),
-				3 => Verdict(item, QueryOutcome.Qualified, owned: true),
-				_ => Verdict(item, QueryOutcome.Qualified),
+				0 => Verdict(item, OutcomeCase.Culled, owned: true),
+				1 => Verdict(item, OutcomeCase.Qualified, owned: true, inBlocklist: true),
+				2 => Verdict(item, OutcomeCase.Culled, owned: true, inBlocklist: true),
+				3 => Verdict(item, OutcomeCase.Qualified, owned: true),
+				_ => Verdict(item, OutcomeCase.Qualified),
 			};
 		}
 
-		private static QueryVerdict<MatchedMedia> Verdict(MatchedMedia item, QueryOutcome outcome, bool owned = false, bool inBlocklist = false)
+		private static QueryVerdict<MatchedMedia> Verdict(MatchedMedia item, OutcomeCase outcome, bool owned = false, bool inBlocklist = false)
 		{
 			return new(
 				item,
-				outcome,
 				new Enrollment
 				{
 					InWantlist = owned,
 					InBlocklist = inBlocklist,
 					Owned = owned,
 				},
-				ConsumesSlot: true
+				outcome.Outcome
 			);
 		}
 	}
@@ -561,14 +605,13 @@ public class FeedPreviewPanelTests : BunitContext
 				.Matched()
 				.Select(item => new QueryVerdict<MatchedMedia>(
 					item,
-					QueryOutcome.Qualified,
 					new Enrollment
 					{
 						InWantlist = false,
 						InBlocklist = false,
 						Owned = false,
 					},
-					ConsumesSlot: true
+					OutcomeCase.Qualified.Outcome
 				))
 				.ToList();
 
@@ -634,14 +677,13 @@ public class FeedPreviewPanelTests : BunitContext
 		var verdicts = items
 			.Select(item => new QueryVerdict<MatchedMedia>(
 				item,
-				QueryOutcome.Qualified,
 				new Enrollment
 				{
 					InWantlist = false,
 					InBlocklist = false,
 					Owned = false,
 				},
-				ConsumesSlot: true
+				OutcomeCase.Qualified.Outcome
 			))
 			.ToList();
 
@@ -668,6 +710,33 @@ public class FeedPreviewPanelTests : BunitContext
 		);
 	}
 
+	private sealed class CulledPlanner : IFeedRunPlanner
+	{
+		public Task<FieldNeeds> NeedsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default) => Task.FromResult(FieldNeeds.None);
+
+		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
+		{
+			ValueSet<FilterPredicate> rules = target is DraftFeed(var feed, _)
+				? [.. feed.Filter.Map(filter => filter.Groups.SelectMany(group => group.Predicates)).GetValueOr([])]
+				: [];
+			var verdicts = Items(target)
+				.Matched()
+				.Select(item => new QueryVerdict<MatchedMedia>(
+					item,
+					new Enrollment
+					{
+						InWantlist = false,
+						InBlocklist = false,
+						Owned = false,
+					},
+					new Culled(new FilterChecks(rules, rules))
+				))
+				.ToList();
+
+			return Task.FromResult<FeedPlanResult>(new AppendPlan(verdicts, [], FeedDelta.None, Conclusiveness.NoneAdmitted));
+		}
+	}
+
 	private sealed class SpreadPlanner : IFeedRunPlanner
 	{
 		public Task<FieldNeeds> NeedsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default) => Task.FromResult(FieldNeeds.None);
@@ -685,11 +754,11 @@ public class FeedPreviewPanelTests : BunitContext
 		{
 			return index switch
 			{
-				0 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Qualified, Enrolled(), true),
-				1 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Qualified, Enrolled(inWantlist: true), true),
-				2 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Culled, Enrolled(), false),
-				3 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Truncated, Enrolled(), false),
-				_ => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Qualified, Enrolled(inBlocklist: true), true),
+				0 => new QueryVerdict<MatchedMedia>(item, Enrolled(), OutcomeCase.Qualified.Outcome),
+				1 => new QueryVerdict<MatchedMedia>(item, Enrolled(inWantlist: true), OutcomeCase.Qualified.Outcome),
+				2 => new QueryVerdict<MatchedMedia>(item, Enrolled(), OutcomeCase.Culled.Outcome),
+				3 => new QueryVerdict<MatchedMedia>(item, Enrolled(), OutcomeCase.Truncated.Outcome),
+				_ => new QueryVerdict<MatchedMedia>(item, Enrolled(inBlocklist: true), OutcomeCase.Qualified.Outcome),
 			};
 		}
 

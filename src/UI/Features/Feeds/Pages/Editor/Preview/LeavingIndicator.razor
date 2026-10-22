@@ -1,0 +1,21 @@
+<VerdictPopover Icon="log-out" Title="@PreviewCopy.LeavingHeading" Reason="@Reason" Edge="@((double)Absences / Threshold)" ChildContent="ChildContent">
+    <Header>
+        <span class="leaving-tally">
+            <span>@PreviewCopy.Absence.Lead</span>
+            <b>@Absences</b>
+            <span>@PreviewCopy.Absence.Join</span>
+            <b>@Threshold</b>
+            <span>@PreviewCopy.Absence.Tail.ToQuantity(Threshold, ShowQuantityAs.None)</span>
+        </span>
+    </Header>
+</VerdictPopover>
+
+@code {
+    [Parameter] [EditorRequired] public required string Reason { get; set; }
+
+    [Parameter] [EditorRequired] public required int Threshold { get; set; }
+
+    [Parameter] public int Absences { get; set; } = 3;
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

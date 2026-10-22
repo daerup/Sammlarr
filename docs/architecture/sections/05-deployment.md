@@ -104,6 +104,7 @@ are not configuration: they live in the database, the keys and sign-ins encrypte
 | `Sammlarr__Observability__LogLevel` | `Standard` | `Quiet`, `Standard` or `Verbose`. |
 | `Sammlarr__Accounts__SetupCode` | unset | The code `/setup` asks for before the first admin; unset, Sammlarr makes one and logs it. |
 | `Sammlarr__Accounts__ResetAdminPassword` | unset | Resets an admin's Sammlarr password at startup; remove it afterwards. |
+| `Sammlarr__FeedFilters__Levels__N__Stripe`, `…__Tone` | five levels, from `appsettings.json` | The Tailwind classes for each group level in the feed filter editor, the top-level group first. The editor nests groups as deep as there are levels after the first. A class that is not in the shipped `appsettings.json` has no CSS. |
 
 A deployment is a single instance: the queues share the one file and process
 ([Risks and Technical Debt](08-risks-technical-debt.md)).

@@ -4,7 +4,7 @@ using Domain.Feed.Run;
 using Domain.Feed.Trace;
 using Domain.Processing;
 using Domain.Providers;
-using UI.Features.Feeds.Components;
+using UI.Features.Feeds.Components.Runs;
 
 namespace UI.Features.Settings.Components.Testing;
 

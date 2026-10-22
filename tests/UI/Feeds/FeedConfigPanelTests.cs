@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
 using UI.Features.Feeds.Pages.Editor;
+using UI.Features.Feeds.Pages.Editor.Filters;
 using UI.Tests.Media;
 using UI.Tests.Providers;
 
@@ -35,6 +36,7 @@ public class FeedConfigPanelTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(FeedFilterStub.Shipped);
 		Services.AddProviderBranding();
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton(ReadinessStub.Connected(_connected));

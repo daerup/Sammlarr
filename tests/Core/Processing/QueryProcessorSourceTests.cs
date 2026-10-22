@@ -1,5 +1,6 @@
 using Core.Processing;
 using Domain.Processing;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using static TestInfrastructure.QueryFilterFactory;
 
@@ -18,7 +19,7 @@ public class QueryProcessorSourceTests
 
 		var results = await _testee.ExecuteAsync(lazy, options, predicates).ToListAsync();
 
-		await Assert.That(results.Select(row => row.Outcome)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(results.Select(row => row.Outcome.Case)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 }
 

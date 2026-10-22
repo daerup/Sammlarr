@@ -2,6 +2,7 @@ using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Media;
 using Domain.Processing;
+using TestInfrastructure;
 
 namespace Domain.Tests.Feed;
 
@@ -14,7 +15,7 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_ForAMirrorFeed_DropsAnOwnedItemThatVanishedFromTheSource()
 	{
-		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept, Dropped]);
+		var plan = Compute([Verdict(Kept, OutcomeCase.Qualified, owned: true)], owned: [Kept, Dropped]);
 
 		await Assert.That(plan.Delta.Drops).IsEquivalentTo([Dropped]);
 		await Assert.That(plan.Delta.Keeps).IsEquivalentTo([Kept]);
@@ -23,7 +24,7 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_ForAMirrorFeed_DropsAnOwnedItemThatNoLongerQualifies()
 	{
-		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true), Verdict(Dropped, QueryOutcome.Culled, owned: true)], owned: [Kept, Dropped]);
+		var plan = Compute([Verdict(Kept, OutcomeCase.Qualified, owned: true), Verdict(Dropped, OutcomeCase.Culled, owned: true)], owned: [Kept, Dropped]);
 
 		await Assert.That(plan.Delta.Drops).IsEquivalentTo([Dropped]);
 	}
@@ -32,7 +33,7 @@ public class FeedPlanTests
 	public async Task Compute_WhenAnOwnedItemIsBlocklisted_StillDropsItOnceItStopsQualifying()
 	{
 		var plan = Compute(
-			[Verdict(Kept, QueryOutcome.Qualified, owned: true), Verdict(Dropped, QueryOutcome.Culled, owned: true, inBlocklist: true)],
+			[Verdict(Kept, OutcomeCase.Qualified, owned: true), Verdict(Dropped, OutcomeCase.Culled, owned: true, inBlocklist: true)],
 			owned: [Kept, Dropped]
 		);
 
@@ -42,7 +43,7 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_WhenAnOwnedBlocklistedItemStillQualifies_KeepsIt()
 	{
-		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true, inBlocklist: true)], owned: [Kept]);
+		var plan = Compute([Verdict(Kept, OutcomeCase.Qualified, owned: true, inBlocklist: true)], owned: [Kept]);
 
 		await Assert.That(plan.Delta.Keeps).IsEquivalentTo([Kept]);
 		await Assert.That(plan.Delta.Drops).IsEmpty();
@@ -51,7 +52,7 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_WhenAQualifyingItemIsNotEnrolled_AddsIt()
 	{
-		var plan = Compute([Verdict(Fresh, QueryOutcome.Qualified)], owned: []);
+		var plan = Compute([Verdict(Fresh, OutcomeCase.Qualified)], owned: []);
 
 		await Assert.That(plan.Delta.Adds).IsEquivalentTo([Fresh]);
 	}
@@ -77,7 +78,7 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_WhenTheLimitAdmitsNothing_IsInconclusiveAndDropsNothing()
 	{
-		var plan = Compute([Verdict(Kept, QueryOutcome.Truncated, owned: true), Verdict(Fresh, QueryOutcome.Truncated)], owned: [Kept]);
+		var plan = Compute([Verdict(Kept, OutcomeCase.Truncated, owned: true), Verdict(Fresh, OutcomeCase.Truncated)], owned: [Kept]);
 
 		await Assert.That(plan.Conclusiveness).IsEqualTo(Conclusiveness.NoneAdmitted);
 		await Assert.That(plan.Delta.Drops).IsEmpty();
@@ -86,7 +87,7 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_WhileTheListIsStillLoading_DropsNothingButStillAdds()
 	{
-		var plan = Compute([Verdict(Fresh, QueryOutcome.Qualified)], owned: [Kept, Dropped], state: FeedLoadState.Unfinished);
+		var plan = Compute([Verdict(Fresh, OutcomeCase.Qualified)], owned: [Kept, Dropped], state: FeedLoadState.Unfinished);
 
 		await Assert.That(plan.Conclusiveness).IsEqualTo(Conclusiveness.StillLoading);
 		await Assert.That(plan.Delta.Adds).IsEquivalentTo([Fresh]);
@@ -96,7 +97,7 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_WhenGraceRemains_DropsNothingButCountsTheMissedRun()
 	{
-		var plan = Mirrored([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept, Dropped], absences: []);
+		var plan = Mirrored([Verdict(Kept, OutcomeCase.Qualified, owned: true)], owned: [Kept, Dropped], absences: []);
 
 		await Assert.That(plan.Delta.Drops).IsEmpty();
 		await Assert.That(plan.MissedRuns[Dropped]).IsEqualTo(1);
@@ -105,7 +106,7 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_WhenTheLastRunOfGraceIsSpent_DropsTheItem()
 	{
-		var plan = Mirrored([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept, Dropped], absences: [(Dropped, 2)]);
+		var plan = Mirrored([Verdict(Kept, OutcomeCase.Qualified, owned: true)], owned: [Kept, Dropped], absences: [(Dropped, 2)]);
 
 		await Assert.That(plan.Delta.Drops).IsEquivalentTo([Dropped]);
 		await Assert.That(plan.MissedRuns[Dropped]).IsEqualTo(3);
@@ -114,7 +115,7 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_ForAQualifyingOwnedItem_ReportsNoGraceCountdownAtAll()
 	{
-		var plan = Mirrored([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept], absences: [(Kept, 2)]);
+		var plan = Mirrored([Verdict(Kept, OutcomeCase.Qualified, owned: true)], owned: [Kept], absences: [(Kept, 2)]);
 
 		await Assert.That(plan.MissedRuns).DoesNotContainKey(Kept);
 		await Assert.That(plan.Delta.Keeps).IsEquivalentTo([Kept]);
@@ -124,7 +125,7 @@ public class FeedPlanTests
 	public async Task Compute_WhenATitleCouldNotBeLookedUp_IsUnresolvedAndDropsNothing()
 	{
 		var plan = Compute(
-			[Verdict(Kept, QueryOutcome.Qualified, owned: true)],
+			[Verdict(Kept, OutcomeCase.Qualified, owned: true)],
 			owned: [Kept, Dropped],
 			unmatched: [Unmatched(1) with { Reason = UnmatchedReason.CouldNotLookUp }]
 		);
@@ -137,7 +138,7 @@ public class FeedPlanTests
 	public async Task Compute_ForAnOwnedTitleInConflict_CountsNoAbsence()
 	{
 		var plan = Mirrored(
-			[Verdict(Kept, QueryOutcome.Qualified, owned: true)],
+			[Verdict(Kept, OutcomeCase.Qualified, owned: true)],
 			owned: [Kept, Dropped],
 			absences: [(Dropped, 2)],
 			unmatched: [Unmatched(1) with { Reason = UnmatchedReason.Conflict, ConflictsWith = [Dropped] }]
@@ -151,9 +152,9 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_ForAStaleOwnedTitleThatNoLongerQualifies_CountsNoAbsence()
 	{
-		var stale = Verdict(Dropped, QueryOutcome.Culled, owned: true) with { Item = Row(Dropped) with { Stale = true } };
+		var stale = Verdict(Dropped, OutcomeCase.Culled, owned: true) with { Item = Row(Dropped) with { Stale = true } };
 
-		var plan = Mirrored([Verdict(Kept, QueryOutcome.Qualified, owned: true), stale], owned: [Kept, Dropped], absences: [(Dropped, 2)]);
+		var plan = Mirrored([Verdict(Kept, OutcomeCase.Qualified, owned: true), stale], owned: [Kept, Dropped], absences: [(Dropped, 2)]);
 
 		await Assert.That(plan.MissedRuns).DoesNotContainKey(Dropped);
 		await Assert.That(plan.Delta.Drops).IsEmpty();
@@ -186,18 +187,17 @@ public class FeedPlanTests
 		return (MirrorPlan)Compute(verdicts, owned, absences: absences, unmatched: unmatched);
 	}
 
-	private static QueryVerdict<MatchedMedia> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlocklist = false)
+	private static QueryVerdict<MatchedMedia> Verdict(MediaId id, OutcomeCase outcome, bool owned = false, bool inBlocklist = false)
 	{
 		return new(
 			Row(id),
-			outcome,
 			new Enrollment
 			{
 				InWantlist = owned,
 				InBlocklist = inBlocklist,
 				Owned = owned,
 			},
-			ConsumesSlot: true
+			outcome.Outcome
 		);
 	}
 

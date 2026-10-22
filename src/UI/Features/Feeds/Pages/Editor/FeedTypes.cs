@@ -4,6 +4,7 @@ using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
+using UI.Features.Feeds.Pages.Editor.Filters;
 
 namespace UI.Features.Feeds.Pages.Editor;
 
@@ -35,15 +36,15 @@ public static class PreviewResultFilter
 	{
 		return verdict.Outcome switch
 		{
-			QueryOutcome.Culled => PreviewBucket.Filtered,
-			QueryOutcome.Truncated => PreviewBucket.Skipped,
-			QueryOutcome.Qualified => Qualified(verdict),
+			Culled => PreviewBucket.Filtered,
+			Truncated => PreviewBucket.Skipped,
+			Qualified => OfQualified(verdict),
 		};
 	}
 
 	public static bool IsVisible(PreviewBucket bucket, IReadOnlyCollection<PreviewBucket> active) => active.Count == 0 || active.Contains(bucket);
 
-	private static PreviewBucket Qualified(QueryVerdict<MatchedMedia> verdict)
+	private static PreviewBucket OfQualified(QueryVerdict<MatchedMedia> verdict)
 	{
 		return verdict.Kept ? PreviewBucket.Kept
 			: verdict.WillImport ? PreviewBucket.Added
@@ -59,25 +60,17 @@ internal static class PreviewCopy
 
 	internal const string GoneReason = "The source list no longer contains it.";
 
-	internal static AbsencePhrase Absence => new("Absent from", "of", "runs");
+	internal const string PastTheLimitReason = "Your import limit no longer reaches it.";
 
-	internal static string OutcomeIcon(QueryVerdict<MatchedMedia> verdict)
-	{
-		return verdict.Outcome switch
-		{
-			QueryOutcome.Culled => "filter-x",
-			QueryOutcome.Truncated => "scissors",
-			QueryOutcome.Qualified => "circle-question-mark",
-		};
-	}
+	internal static AbsencePhrase Absence => new("missed", "of", "run");
 
 	internal static string AtRiskReason(QueryVerdict<MatchedMedia> verdict)
 	{
 		return verdict.Outcome switch
 		{
-			QueryOutcome.Culled => "It no longer matches your filter rules.",
-			QueryOutcome.Truncated => "Your import limit no longer reaches it.",
-			QueryOutcome.Qualified => string.Empty,
+			Culled => "It no longer matches your filter rules.",
+			Truncated => PastTheLimitReason,
+			Qualified => string.Empty,
 		};
 	}
 

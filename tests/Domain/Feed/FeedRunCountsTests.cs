@@ -3,6 +3,7 @@ using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Processing;
+using TestInfrastructure;
 
 namespace Domain.Tests.Feed;
 
@@ -54,14 +55,13 @@ public class FeedRunCountsTests
 		var media = new MatchedMedia(new MediaIdentity(MediaId.New(), [TmdbId.From($"matched-{seed}", MediaType.Movie)]), new MovieDetails()) { Known = known };
 		return new QueryVerdict<MatchedMedia>(
 			media,
-			QueryOutcome.Qualified,
 			new Enrollment
 			{
 				InWantlist = false,
 				InBlocklist = false,
 				Owned = false,
 			},
-			ConsumesSlot: true
+			OutcomeCase.Qualified.Outcome
 		);
 	}
 

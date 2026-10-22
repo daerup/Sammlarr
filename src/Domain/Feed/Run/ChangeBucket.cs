@@ -16,12 +16,12 @@ public static class ChangeBuckets
 	public static ChangeBucket Of<T>(QueryVerdict<T> verdict) =>
 		verdict.Outcome switch
 		{
-			QueryOutcome.Culled => ChangeBucket.Filtered,
-			QueryOutcome.Truncated => ChangeBucket.Skipped,
-			QueryOutcome.Qualified => Qualified(verdict),
+			Culled => ChangeBucket.Filtered,
+			Truncated => ChangeBucket.Skipped,
+			Qualified => OfQualified(verdict),
 		};
 
-	private static ChangeBucket Qualified<T>(QueryVerdict<T> verdict) =>
+	private static ChangeBucket OfQualified<T>(QueryVerdict<T> verdict) =>
 		verdict.Kept ? ChangeBucket.Kept
 		: verdict.WillImport ? ChangeBucket.Added
 		: ChangeBucket.Bypassed;

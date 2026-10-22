@@ -1,0 +1,32 @@
+@using Contracts.Processing
+
+<VerdictPopover Icon="filter-x" Title="@Title">
+    <CulledDetail Filter="Filter" Checks="Checks" Row="Row" Strategy="Strategy"/>
+</VerdictPopover>
+
+@code {
+    private FilterBlame _blame = null!;
+
+    [Parameter] [EditorRequired] public required QueryFilter Filter { get; set; }
+
+    [Parameter] [EditorRequired] public required FilterChecks Checks { get; set; }
+
+    [Parameter] [EditorRequired] public required MediaQueryRow Row { get; set; }
+
+    [Parameter] [EditorRequired] public required RatingStrategy Strategy { get; set; }
+
+    private string Title
+    {
+        get
+        {
+            return (_blame.Places, _blame.Rules.Count) switch
+            {
+                (> 1, _) => $"Filtered out in {"place".ToQuantity(_blame.Places)}",
+                (_, 1) => "Filtered out by this rule",
+                _ => "Filtered out by this group",
+            };
+        }
+    }
+
+    protected override void OnParametersSet() => _blame = FilterBlame.Of(Filter, Checks);
+}

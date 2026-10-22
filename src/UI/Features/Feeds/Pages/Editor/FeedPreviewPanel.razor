@@ -5,10 +5,10 @@
 @using Contracts.Feed
 @using Contracts.Identity
 @using Contracts.Media
+@using Contracts.Processing
 @using Contracts.Settings
 @using Contracts.Wantlist
 @using Domain.Feed.Run
-@using UI.Features.Feeds.Components
 @using UI.Shared.Services.Branding
 @using global::Observability.Tracing
 @implements IDisposable
@@ -154,8 +154,8 @@
                         <ItemContent>
                         @{
                         var item = result.Item;
-                        var isCulled = result.Outcome is QueryOutcome.Culled;
-                        var isTruncated = result.Outcome is QueryOutcome.Truncated;
+                        var isCulled = result.Outcome is Culled;
+                        var isTruncated = result.Outcome is Truncated;
                         var isAtRisk = IsMirror && result.AtRisk;
                         var isDimmed = (isCulled || isTruncated) && !isAtRisk;
                         var isGreyedOut = result.Bypassed;
@@ -182,41 +182,18 @@
                                     <Icons>
                                         @if (isAtRisk)
                                         {
-                                            <LeavingIndicator Reason="@PreviewCopy.AtRiskReason(result)" Threshold="MirrorThreshold" Absences="AbsencesOf(item.Identity.Id)"/>
+                                            <LeavingIndicator Reason="@PreviewCopy.AtRiskReason(result)" Threshold="MirrorThreshold" Absences="AbsencesOf(item.Identity.Id)"
+                                                              ChildContent="LeavingDetail(result)"/>
                                         }
-                                        else if (isDimmed)
+                                        else
                                         {
-                                            <BbTooltipProvider>
-                                                <BbTooltip DelayDuration="300">
-                                                    <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                                                        <div class="search-result-status-indicator">
-                                                            <LucideIcon Name="@PreviewCopy.OutcomeIcon(result)" Size="24"/>
-                                                        </div>
-                                                    </BbTooltipTrigger>
-                                                    <BbTooltipContent>
-                                                        @(isCulled ? CulledTooltip(item) : "Excluded by the specified limit.")
-                                                    </BbTooltipContent>
-                                                </BbTooltip>
-                                            </BbTooltipProvider>
+                                            @Verdict(result)
                                         }
-                                        else if (isGreyedOut)
-                                        {
-                                            <BbTooltipProvider>
-                                                <BbTooltip DelayDuration="300">
-                                                    <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                                                        <div class="search-result-status-indicator">
-                                                            <LucideIcon Name="redo-dot" Size="24"/>
-                                                        </div>
-                                                    </BbTooltipTrigger>
-                                                    <BbTooltipContent>@BypassedTooltip(result)</BbTooltipContent>
-                                                </BbTooltip>
-                                            </BbTooltipProvider>
-                                        }
-                                        <WantlistToggleIcon Result="item"
-                                                             IsToggled="isInWantlist"
-                                                             IsToggling="isTogglingWantlist"
-                                                             DotColor="@(result.Enrollment.Owned ? FeedBrandColor : null)"
-                                                             OnToggle="ToggleWantlistAsync"/>
+                                        <WantlistToggle Result="item"
+                                                         IsToggled="isInWantlist"
+                                                         IsToggling="isTogglingWantlist"
+                                                         Item="_wantlist.Find(item.Identity.Id)"
+                                                         OnToggle="ToggleWantlistAsync"/>
                                         <BlocklistToggleIcon Result="item" IsToggled="isBlocklisted" IsToggling="isTogglingBlocklist" OnToggle="ToggleBlocklistAsync"/>
                                     </Icons>
                                 </MediaDetailTile>
@@ -245,11 +222,11 @@
                                                      OnFocusOut="() => ClearFocus(goneItem)">
                                         <Icons>
                                             <LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold" Absences="AbsencesOf(goneItem.Identity.Id)"/>
-                                            <WantlistToggleIcon Result="goneItem"
-                                                                 IsToggled="IsWantlisted(goneItem)"
-                                                                 IsToggling="_togglingWantlistItem == goneItem.Identity.Id"
-                                                                 DotColor="@FeedBrandColor"
-                                                                 OnToggle="ToggleWantlistAsync"/>
+                                            <WantlistToggle Result="goneItem"
+                                                             IsToggled="IsWantlisted(goneItem)"
+                                                             IsToggling="_togglingWantlistItem == goneItem.Identity.Id"
+                                                             Item="_wantlist.Find(goneItem.Identity.Id)"
+                                                             OnToggle="ToggleWantlistAsync"/>
                                             <BlocklistToggleIcon Result="goneItem"
                                                                  IsToggled="IsBlocklisted(goneItem)"
                                                                  IsToggling="_togglingBlocklistItem == goneItem.Identity.Id"
@@ -282,16 +259,10 @@
                                                      OnFocusIn="() => _focusedResult = item.Key"
                                                      OnFocusOut="() => ClearFocus(item)">
                                         <Icons>
-                                            <BbTooltipProvider>
-                                                <BbTooltip DelayDuration="300">
-                                                    <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                                                        <div class="search-result-status-indicator">
-                                                            <LucideIcon Name="circle-alert" Size="24"/>
-                                                        </div>
-                                                    </BbTooltipTrigger>
-                                                    <BbTooltipContent>Could not be matched in your media provider. This item will not be imported.</BbTooltipContent>
-                                                </BbTooltip>
-                                            </BbTooltipProvider>
+                                            @if (item is UnmatchedMedia unmatched)
+                                            {
+                                                <NotFoundPopover Unmatched="unmatched"/>
+                                            }
                                         </Icons>
                                     </MediaDetailTile>
                                 </div>
@@ -400,6 +371,8 @@
     private bool _atRiskOnly;
     private FeedConfig? _appliedConfig;
     private RatingView? _ratingView;
+    private QueryFilter? _appliedFilter;
+    private string _lastIn = string.Empty;
     private CancellationTokenSource? _cts;
     private CancellationToken _visit;
     private PreviewStatus _lastEmittedStatus = new();
@@ -425,7 +398,7 @@
     private string? _focusedResult;
     private MediaId? _togglingWantlistItem;
     private MediaId? _togglingBlocklistItem;
-    private readonly HashSet<MediaId> _wantlisted = [];
+    private WantlistSnapshot _wantlist = new([]);
     private readonly HashSet<MediaId> _blocklistIds = [];
     private bool _refreshDialogOpen;
     private bool _providerUnavailable;
@@ -456,16 +429,64 @@
 
     protected override async Task OnInitializedAsync() => _ratingView = await RatingContext.GetAsync();
 
-    private string CulledTooltip(MatchedMedia item)
+    private RenderFragment? Verdict(QueryVerdict<MatchedMedia> result)
     {
-        var reasons = Optional.Of(_ratingView).Map(view => RatingReasons(item, view, _appliedConfig ?? Config)).GetValueOr([]);
-        return reasons.Count > 0 ? $"Filtered out: {string.Join("; ", reasons)}." : "Filtered out by your filter rules.";
+        return result.Outcome switch
+        {
+            Culled culled => CulledVerdict(result.Item, culled),
+            Truncated truncated => @<TruncatedPopover Rank="truncated.Rank" LastIn="@_lastIn" Title="@TitleOf(result.Item)" Order="@Order" Random="IsRandomPick"/>,
+            Qualified qualified when result.Bypassed => @<BypassedPopover Enrollment="result.Enrollment" Counts="qualified.ConsumesSlot" Limited="HasLimit"/>,
+            Qualified => null,
+        };
     }
 
-    private static IReadOnlyList<string> RatingReasons(MatchedMedia item, RatingView view, FeedConfig applied)
+    private RenderFragment CulledVerdict(MatchedMedia item, Culled culled)
     {
-        var strategy = applied.RatingStrategy.GetValueOr(view.Default);
-        return Optional.Of(applied.Filter).Map(filter => FeedRatingReasons.For(filter, strategy.Resolve(item.Details.Ratings, view.Available), strategy)).GetValueOr([]);
+        return _ratingView is { } view && _appliedFilter is { } filter
+            ? @<CulledPopover Filter="filter" Checks="culled.Checks" Row="RowOf(item, view)" Strategy="StrategyOf(view)"/>
+            : @<VerdictPopover Icon="filter-x" Title="Filtered out by your filter rules"/>;
+    }
+
+    private RenderFragment? LeavingDetail(QueryVerdict<MatchedMedia> result)
+    {
+        return result.Outcome switch
+        {
+            Culled culled when _ratingView is { } view && _appliedFilter is { } filter =>
+                @<CulledDetail Filter="filter" Checks="culled.Checks" Row="RowOf(result.Item, view)" Strategy="StrategyOf(view)"/>,
+            Truncated truncated => @<SlotLineDetail Rank="truncated.Rank" LastIn="@_lastIn" Title="@TitleOf(result.Item)"/>,
+            Culled or Qualified => null,
+        };
+    }
+
+    private MediaQueryRow RowOf(MatchedMedia item, RatingView view) => MediaQueryRow.From(item, StrategyOf(view), view.Available);
+
+    private RatingStrategy StrategyOf(RatingView view) => (_appliedConfig ?? Config).RatingStrategy.GetValueOr(view.Default);
+
+    private static string TitleOf(MatchedMedia item) => item.Details.Title ?? string.Empty;
+
+    private bool HasLimit => (_appliedConfig ?? Config).Limit is not null;
+
+    private bool IsRandomPick => (_appliedConfig ?? Config).Limit is { Pick: LimitPick.Random };
+
+    private string Order
+    {
+        get
+        {
+            return (_appliedConfig ?? Config) switch
+            {
+                { Limit.Pick: LimitPick.Random } => "drawn at random",
+                { Sort: { } sort } => $"sorted by {FeedFields.LabelOf(sort.Property)}",
+                _ => "in the list's order",
+            };
+        }
+    }
+
+    private static string LastIn(IReadOnlyList<QueryVerdict<MatchedMedia>> verdicts)
+    {
+        return verdicts
+            .FirstOrNone(verdict => verdict.Outcome is Qualified qualified && qualified.Rank.Match(rank => rank.Position == rank.Slots, () => false))
+            .Map(verdict => TitleOf(verdict.Item))
+            .GetValueOr(string.Empty);
     }
 
     protected override void OnParametersSet() => _ = EmitStatusIfChangedAsync();
@@ -666,7 +687,7 @@
 
         try
         {
-            _wantlisted.Clear();
+            _wantlist = new([]);
             _blocklistIds.Clear();
             await LoadWantlistAndBlocklistAsync(ct);
 
@@ -783,7 +804,8 @@
     {
         var generation = ++_planGeneration;
         using var marked = UsageCauses.Mark(UsageCause.FeedEditor, Some.Of(PreviewFeedId));
-        var planned = await Planner.PlanAsync(new DraftFeed(SynthesizeFeed(), new RawFeedLoad(_rawResults, state)), cancellationToken);
+        var feed = SynthesizeFeed();
+        var planned = await Planner.PlanAsync(new DraftFeed(feed, new RawFeedLoad(_rawResults, state)), cancellationToken);
         if (generation != _planGeneration)
         {
             return true;
@@ -804,6 +826,8 @@
         }
 
         _processedResults = plan.Verdicts;
+        _appliedFilter = feed.Filter.ToNullable();
+        _lastIn = LastIn(plan.Verdicts);
         _unmatchedResults = plan.Unmatched;
         _missedRuns = plan is MirrorPlan mirrored ? mirrored.MissedRuns : new Dictionary<MediaId, int>();
         _goneResults = gone;
@@ -888,9 +912,6 @@
 
     private int AbsencesOf(MediaId id) => Math.Min(MirrorThreshold, _missedRuns.GetValueOrDefault(id));
 
-    private string FeedBrandColor =>
-        (_appliedConfig ?? Config).Provider is { } provider ? Branding.Color(provider.Service) : "currentColor";
-
     private bool MatchesSearch(string? title)
     {
         return string.IsNullOrWhiteSpace(_searchQuery) || title?.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) is true;
@@ -945,7 +966,7 @@
     {
         try
         {
-            _wantlisted.UnionWith((await WantlistService.GetAsync(cancellationToken)).Ids);
+            _wantlist = await WantlistService.GetAsync(cancellationToken);
             _blocklistIds.UnionWith((await BlocklistService.GetAsync(cancellationToken)).Ids);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -1006,15 +1027,7 @@
     }
 
     private bool IsBlocklisted(MatchedMedia item) => _blocklistIds.Contains(item.Identity.Id);
-    private bool IsWantlisted(MatchedMedia item) => _wantlisted.Contains(item.Identity.Id);
-
-    private string BypassedTooltip(QueryVerdict<MatchedMedia> row)
-    {
-        var source = row.Enrollment.InWantlist ? "On your wantlist" : "On your blocklist";
-        if ((_appliedConfig ?? Config).Limit is null)
-            return $"{source}, will not be imported.";
-        return row.ConsumesSlot ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
-    }
+    private bool IsWantlisted(MatchedMedia item) => _wantlist.Contains(item.Identity.Id);
 
     private void ClearFocus(MediaMatchResult item)
     {
@@ -1076,7 +1089,6 @@
             if (IsWantlisted(item))
             {
                 await WantlistService.RemoveAsync([item.Identity.Id], CancellationToken.None);
-                _wantlisted.Remove(item.Identity.Id);
             }
             else
             {
@@ -1086,11 +1098,9 @@
                     var config = await ProviderConfig.GetAsync(_visit);
                     Notify(notifier => notifier.Warning(WantlistNotices.NoMatch(Branding.Name(config.Sink.Service), item.Details.Title), WantlistNotices.CantUpdate));
                 }
-                else
-                {
-                    _wantlisted.Add(item.Identity.Id);
-                }
             }
+
+            _wantlist = await WantlistService.GetAsync(CancellationToken.None);
         }
         catch (Exception ex)
         {

@@ -1,0 +1,31 @@
+<BbPopover>
+    <BbPopoverTrigger AsChild="false" class="field-segment" aria-label="@Name" data-runtime-mode>
+        <BbTooltip DelayDuration="150">
+            <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+                <LucideIcon Name="@(Total ? "sigma" : "tv")" Size="15"/>
+            </BbTooltipTrigger>
+            <BbTooltipContent>@Name</BbTooltipContent>
+        </BbTooltip>
+    </BbPopoverTrigger>
+    <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="flex w-[300px] flex-col gap-2 px-3.5 py-3 text-[13px] leading-normal" aria-label="Runtime of a show">
+        <h5 class="m-0 text-[13.5px] font-semibold">Runtime of a show</h5>
+        <p class="m-0 text-muted-foreground">One episode, or all episodes together. Movies count with their length.</p>
+        <BbToggleGroup TValue="bool?" Value="Total" ValueChanged="SetAsync" Required="true"
+                       Class="h-[34px] w-full gap-0 rounded-lg bg-muted p-[3px] text-muted-foreground" aria-label="Runtime mode">
+            <BbToggleGroupItem TValue="bool?" Value="false" Class="@TrackClass">Per episode</BbToggleGroupItem>
+            <BbToggleGroupItem TValue="bool?" Value="true" Class="@TrackClass">Total</BbToggleGroupItem>
+        </BbToggleGroup>
+    </BbPopoverContent>
+</BbPopover>
+
+@code {
+    private const string TrackClass = "h-full flex-1 rounded-md text-[13px] font-normal hover:bg-transparent hover:text-foreground focus-visible:ring-inset focus-visible:ring-offset-0 data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm";
+
+    [Parameter] [EditorRequired] public required bool Total { get; set; }
+
+    [Parameter] [EditorRequired] public required EventCallback<bool> TotalChanged { get; set; }
+
+    private string Name => RuleWords.Runtime(Total);
+
+    private Task SetAsync(bool? total) => Optional.Of(total).Match(TotalChanged.InvokeAsync, () => Task.CompletedTask);
+}

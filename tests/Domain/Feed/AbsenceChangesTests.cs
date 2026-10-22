@@ -65,14 +65,13 @@ public class AbsenceChangesTests
 	{
 		var listed = new QueryVerdict<MatchedMedia>(
 			new MatchedMedia(new MediaIdentity(Listed, [TmdbId.From("550", MediaType.Movie)]), new MovieDetails { Title = "Fight Club" }),
-			QueryOutcome.Qualified,
 			new Enrollment
 			{
 				InWantlist = true,
 				InBlocklist = false,
 				Owned = true,
 			},
-			ConsumesSlot: true
+			OutcomeCase.Qualified.Outcome
 		);
 		return FeedPlans.Compute(
 			new ClassifiedFeedLoad([listed], unmatched, state),

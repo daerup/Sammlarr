@@ -3,7 +3,7 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
 using Domain.Providers;
-using UI.Features.Feeds.Components;
+using UI.Features.Feeds.Components.Runs;
 using UI.Features.Feeds.Pages;
 
 namespace UI.Features.Settings.Components.Testing;

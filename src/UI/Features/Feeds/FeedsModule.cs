@@ -1,5 +1,5 @@
 using Shared.DI;
-using UI.Features.Feeds.Components;
+using UI.Features.Feeds.Components.Runs;
 
 namespace UI.Features.Feeds;
 

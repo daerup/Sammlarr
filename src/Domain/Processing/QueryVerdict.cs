@@ -1,12 +1,5 @@
 namespace Domain.Processing;
 
-public enum QueryOutcome
-{
-	Qualified,
-	Culled,
-	Truncated,
-}
-
 public readonly record struct Enrollment
 {
 	public required bool InWantlist { get; init; }
@@ -14,4 +7,7 @@ public readonly record struct Enrollment
 	public required bool Owned { get; init; }
 }
 
-public sealed record QueryVerdict<T>(T Item, QueryOutcome Outcome, Enrollment Enrollment, bool ConsumesSlot);
+public sealed record QueryVerdict<T>(T Item, Enrollment Enrollment, QueryOutcome Outcome)
+{
+	public QueryVerdict<TOut> Map<TOut>(Func<T, TOut> map) => new(map(Item), Enrollment, Outcome);
+}

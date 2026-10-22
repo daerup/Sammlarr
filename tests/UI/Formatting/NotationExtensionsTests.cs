@@ -50,6 +50,16 @@ public class NotationExtensionsTests
 	}
 
 	[Test]
+	public async Task Ordinal_InAGermanBrowser_StaysEnglish()
+	{
+		CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("de-DE");
+
+		await Assert.That(1.Ordinal).IsEqualTo("1st");
+		await Assert.That(22.Ordinal).IsEqualTo("22nd");
+		await Assert.That(86.Ordinal).IsEqualTo("86th");
+	}
+
+	[Test]
 	public async Task Humanize_ASizeInSymbols_InAnyCulture_ReadsInTheLargestWholeUnit()
 	{
 		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");

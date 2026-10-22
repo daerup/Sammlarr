@@ -5,6 +5,7 @@ using Core.Processing;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Processing;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using static TestInfrastructure.QueryFilterFactory;
 
@@ -21,7 +22,7 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync(items, new QueryOptions(), Enrolled()).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -32,7 +33,7 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Truncated], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -43,7 +44,7 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified], CollectionOrdering.Matching);
 		await Assert.That(results.Select(row => row.Item)).IsEquivalentTo([items[1], items[0]], CollectionOrdering.Matching);
 	}
 
@@ -59,9 +60,9 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
-		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([items[2], items[0]], CollectionOrdering.Matching);
-		await Assert.That(Items(results, QueryOutcome.Truncated)).IsEquivalentTo([items[1]]);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified, OutcomeCase.Truncated], CollectionOrdering.Matching);
+		await Assert.That(Items(results, OutcomeCase.Qualified)).IsEquivalentTo([items[2], items[0]], CollectionOrdering.Matching);
+		await Assert.That(Items(results, OutcomeCase.Truncated)).IsEquivalentTo([items[1]]);
 	}
 
 	[Test]
@@ -72,7 +73,7 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified, OutcomeCase.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -103,7 +104,7 @@ public class QueryProcessorTests
 		await Assert
 			.That(Outcomes(results))
 			.IsEquivalentTo(
-				[QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Truncated],
+				[OutcomeCase.Culled, OutcomeCase.Qualified, OutcomeCase.Culled, OutcomeCase.Qualified, OutcomeCase.Truncated],
 				CollectionOrdering.Matching
 			);
 	}
@@ -125,7 +126,7 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Culled, OutcomeCase.Qualified, OutcomeCase.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -137,9 +138,9 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([wantlisted, normal], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified], CollectionOrdering.Matching);
 		await Assert.That(results[0].Bypassed).IsTrue();
-		await Assert.That(results[0].ConsumesSlot).IsFalse();
+		await Assert.That(results[0].Outcome.ConsumesSlot).IsFalse();
 	}
 
 	[Test]
@@ -151,9 +152,9 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([blocklisted, normal], options, Enrolled(blocklisted: blocklisted)).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified], CollectionOrdering.Matching);
 		await Assert.That(results[0].Enrollment.InBlocklist).IsTrue();
-		await Assert.That(results[0].ConsumesSlot).IsFalse();
+		await Assert.That(results[0].Outcome.ConsumesSlot).IsFalse();
 	}
 
 	[Test]
@@ -166,9 +167,9 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([wantlisted, normal1, normal2], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
-		await Assert.That(results[0].ConsumesSlot).IsFalse();
-		await Assert.That(results[1].ConsumesSlot).IsTrue();
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified, OutcomeCase.Truncated], CollectionOrdering.Matching);
+		await Assert.That(results[0].Outcome.ConsumesSlot).IsFalse();
+		await Assert.That(results[1].Outcome.ConsumesSlot).IsTrue();
 	}
 
 	[Test]
@@ -181,7 +182,7 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([normal1, wantlisted, normal2], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated, QueryOutcome.Truncated], CollectionOrdering.Matching);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Truncated, OutcomeCase.Truncated], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -193,10 +194,10 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([wantlisted, normal], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified], CollectionOrdering.Matching);
 		await Assert.That(results[0].Bypassed).IsTrue();
 		await Assert.That(results[0].Enrollment.InWantlist).IsTrue();
-		await Assert.That(results[0].ConsumesSlot).IsTrue();
+		await Assert.That(results[0].Outcome.ConsumesSlot).IsTrue();
 	}
 
 	[Test]
@@ -218,8 +219,8 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([both, normal], options, Enrolled(wantlisted: both, blocklisted: both)).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
-		await Assert.That(results[0].ConsumesSlot).IsFalse();
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Qualified], CollectionOrdering.Matching);
+		await Assert.That(results[0].Outcome.ConsumesSlot).IsFalse();
 	}
 
 	[Test]
@@ -241,8 +242,8 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([both, normal], options, Enrolled(wantlisted: both, blocklisted: both)).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
-		await Assert.That(results[0].ConsumesSlot).IsTrue();
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Truncated], CollectionOrdering.Matching);
+		await Assert.That(results[0].Outcome.ConsumesSlot).IsTrue();
 	}
 
 	[Test]
@@ -254,7 +255,7 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([wantlisted, normal], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
-		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([OutcomeCase.Qualified, OutcomeCase.Truncated], CollectionOrdering.Matching);
 		await Assert.That(results[0].Bypassed).IsTrue();
 	}
 
@@ -265,7 +266,7 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([owned], new QueryOptions(), Enrolled(wantlisted: owned, owned: owned)).ToListAsync();
 
-		await Assert.That(results[0].Outcome).IsEqualTo(QueryOutcome.Qualified);
+		await Assert.That(results[0].Outcome).IsOfUnionType<QueryOutcome, Qualified>();
 		await Assert.That(results[0].Enrollment.Owned).IsTrue();
 		await Assert.That(results[0].Bypassed).IsFalse();
 		await Assert.That(results[0].Kept).IsTrue();
@@ -280,8 +281,8 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([owned, normal], options, Enrolled(wantlisted: owned, owned: owned)).ToListAsync();
 
-		await Assert.That(results[0].ConsumesSlot).IsTrue();
-		await Assert.That(results[1].Outcome).IsEqualTo(QueryOutcome.Truncated);
+		await Assert.That(results[0].Outcome.ConsumesSlot).IsTrue();
+		await Assert.That(results[1].Outcome).IsOfUnionType<QueryOutcome, Truncated>();
 	}
 
 	[Test]
@@ -293,7 +294,7 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([first, owned], options, Enrolled(owned: owned)).ToListAsync();
 
-		await Assert.That(results[1].Outcome).IsEqualTo(QueryOutcome.Truncated);
+		await Assert.That(results[1].Outcome).IsOfUnionType<QueryOutcome, Truncated>();
 		await Assert.That(results[1].AtRisk).IsTrue();
 	}
 
@@ -305,7 +306,7 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([owned], options, Enrolled(owned: owned)).ToListAsync();
 
-		await Assert.That(results[0].Outcome).IsEqualTo(QueryOutcome.Culled);
+		await Assert.That(results[0].Outcome).IsOfUnionType<QueryOutcome, Culled>();
 		await Assert.That(results[0].AtRisk).IsTrue();
 	}
 
@@ -330,8 +331,8 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync(items, AtRandom(3, Seed), Enrolled()).ToListAsync();
 
-		await Assert.That(Items(results, QueryOutcome.Qualified).Count()).IsEqualTo(3);
-		await Assert.That(Items(results, QueryOutcome.Truncated).Count()).IsEqualTo(7);
+		await Assert.That(Items(results, OutcomeCase.Qualified).Count()).IsEqualTo(3);
+		await Assert.That(Items(results, OutcomeCase.Truncated).Count()).IsEqualTo(7);
 	}
 
 	[Test]
@@ -343,8 +344,8 @@ public class QueryProcessorTests
 		var again = await _testee.ExecuteAsync(items, AtRandom(5, Seed), Enrolled()).ToListAsync();
 		var other = await _testee.ExecuteAsync(items, AtRandom(5, OtherSeed), Enrolled()).ToListAsync();
 
-		await Assert.That(Items(again, QueryOutcome.Qualified)).IsEquivalentTo(Items(first, QueryOutcome.Qualified));
-		await Assert.That(Items(other, QueryOutcome.Qualified)).IsNotEquivalentTo(Items(first, QueryOutcome.Qualified));
+		await Assert.That(Items(again, OutcomeCase.Qualified)).IsEquivalentTo(Items(first, OutcomeCase.Qualified));
+		await Assert.That(Items(other, OutcomeCase.Qualified)).IsNotEquivalentTo(Items(first, OutcomeCase.Qualified));
 	}
 
 	[Test]
@@ -352,11 +353,11 @@ public class QueryProcessorTests
 	{
 		var items = Numbered(10);
 		var unowned = await _testee.ExecuteAsync(items, AtRandom(1, Seed), Enrolled()).ToListAsync();
-		var held = Items(unowned, QueryOutcome.Truncated).Last();
+		var held = Items(unowned, OutcomeCase.Truncated).Last();
 
 		var results = await _testee.ExecuteAsync(items, AtRandom(1, Seed), Enrolled(owned: held)).ToListAsync();
 
-		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo(Items(unowned, QueryOutcome.Qualified));
+		await Assert.That(Items(results, OutcomeCase.Qualified)).IsEquivalentTo(Items(unowned, OutcomeCase.Qualified));
 		await Assert.That(results.Single(row => row.Item == held).AtRisk).IsTrue();
 	}
 
@@ -365,14 +366,14 @@ public class QueryProcessorTests
 	{
 		var items = Numbered(10);
 		var unowned = await _testee.ExecuteAsync(items, AtRandom(1, Seed), Enrolled()).ToListAsync();
-		var held = Items(unowned, QueryOutcome.Qualified).Single();
+		var held = Items(unowned, OutcomeCase.Qualified).Single();
 
 		var results = await _testee.ExecuteAsync(items, AtRandom(1, Seed) with { DrawSkipsOwned = true }, Enrolled(owned: held)).ToListAsync();
 
 		var kept = results.Single(row => row.Item == held);
 		await Assert.That(kept.Kept).IsTrue();
-		await Assert.That(kept.ConsumesSlot).IsFalse();
-		await Assert.That(results.Count(row => row.Outcome is QueryOutcome.Qualified && !row.Enrollment.Owned)).IsEqualTo(1);
+		await Assert.That(kept.Outcome.ConsumesSlot).IsFalse();
+		await Assert.That(results.Count(row => row.Outcome is Qualified && !row.Enrollment.Owned)).IsEqualTo(1);
 	}
 
 	[Test]
@@ -384,8 +385,8 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync([first, second], options, Enrolled(owned: first)).ToListAsync();
 
-		await Assert.That(results[0].ConsumesSlot).IsTrue();
-		await Assert.That(results[1].Outcome).IsEqualTo(QueryOutcome.Truncated);
+		await Assert.That(results[0].Outcome.ConsumesSlot).IsTrue();
+		await Assert.That(results[1].Outcome).IsOfUnionType<QueryOutcome, Truncated>();
 	}
 
 	[Test]
@@ -396,8 +397,8 @@ public class QueryProcessorTests
 
 		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
 
-		await Assert.That(Items(results, QueryOutcome.Qualified).Count()).IsEqualTo(4);
-		await Assert.That(Items(results, QueryOutcome.Qualified).All(item => item.Year >= 2006)).IsTrue();
+		await Assert.That(Items(results, OutcomeCase.Qualified).Count()).IsEqualTo(4);
+		await Assert.That(Items(results, OutcomeCase.Qualified).All(item => item.Year >= 2006)).IsTrue();
 	}
 
 	[Test]
@@ -411,6 +412,49 @@ public class QueryProcessorTests
 		await Assert.That(results.Select(row => row.Item)).IsEquivalentTo(items.OrderByDescending(item => item.Year), CollectionOrdering.Matching);
 	}
 
+	[Test]
+	public async Task Execute_PastTheLimit_RanksEachTitleInLine()
+	{
+		Item[] items = [new("A", 2020), new("B", 2021), new("C", 2022), new("D", 2023), new("E", 2024)];
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 2 }) };
+
+		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
+
+		await Assert
+			.That(Ranks(results))
+			.IsEquivalentTo([new SlotRank(1, 2), new SlotRank(2, 2), new SlotRank(3, 2), new SlotRank(4, 2), new SlotRank(5, 2)], CollectionOrdering.Matching);
+		await Assert
+			.That(Outcomes(results))
+			.IsEquivalentTo(
+				[OutcomeCase.Qualified, OutcomeCase.Qualified, OutcomeCase.Truncated, OutcomeCase.Truncated, OutcomeCase.Truncated],
+				CollectionOrdering.Matching
+			);
+	}
+
+	[Test]
+	public async Task Execute_ForAPreservedWantlistedTitle_DoesNotShiftTheLine()
+	{
+		Item[] items = [new("A", 2020), new("B", 2021), new("C", 2022), new("D", 2023)];
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 2, Wantlisted = SlotPolicy.Preserved }) };
+
+		var results = await _testee.ExecuteAsync(items, options, Enrolled(wantlisted: items[0])).ToListAsync();
+
+		await Assert.That(Ranks(results)).IsEquivalentTo([new SlotRank(1, 2), new SlotRank(2, 2), new SlotRank(3, 2)], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Execute_ForAPreservedTitlePastTheLimit_RanksItWhereItWouldStand()
+	{
+		Item[] items = [new("B", 2021), new("C", 2022), new("A", 2020), new("D", 2023)];
+		var options = new QueryOptions { Limit = Some.Of(new QueryLimit { Count = 2, Wantlisted = SlotPolicy.Preserved }) };
+
+		var results = await _testee.ExecuteAsync(items, options, Enrolled(wantlisted: items[2])).ToListAsync();
+
+		await Assert
+			.That(Ranks(results))
+			.IsEquivalentTo([new SlotRank(1, 2), new SlotRank(2, 2), new SlotRank(3, 2), new SlotRank(3, 2)], CollectionOrdering.Matching);
+	}
+
 	private static readonly Guid Seed = new("7c9e6679-7425-40de-944b-e07fc1f90ae7");
 
 	private static readonly Guid OtherSeed = new("e4eaaaf2-d142-11e1-b3e4-080027620cdd");
@@ -418,16 +462,29 @@ public class QueryProcessorTests
 	private static Item[] Numbered(int count) =>
 		[.. Enumerable.Range(0, count).Select(index => new Item($"Title {index}", 2000 + index) { Id = new Guid(index + 1, 0, 0, new byte[8]) })];
 
+	private static IEnumerable<SlotRank> Ranks(IEnumerable<QueryVerdict<Item>> rows)
+	{
+		return rows.Select(row =>
+				row.Outcome switch
+				{
+					Qualified qualified => qualified.Rank,
+					Culled => new None(),
+					Truncated truncated => Some.Of(truncated.Rank),
+				}
+			)
+			.WhereSome();
+	}
+
 	private static QueryOptions AtRandom(int count, Guid seed) =>
 		new() { Limit = Some.Of(new QueryLimit { Count = count, Pick = LimitPick.Random }), ShuffleSeed = seed };
 
 	private static QueryPredicates<Item> Enrolled(Item? wantlisted = null, Item? blocklisted = null, Item? owned = null) =>
 		new(IsWantlisted: item => item == wantlisted, IsBlocklisted: item => item == blocklisted, IsOwned: item => item == owned, Identity: item => item.Id);
 
-	private static IEnumerable<QueryOutcome> Outcomes(IEnumerable<QueryVerdict<Item>> rows) => rows.Select(row => row.Outcome);
+	private static IEnumerable<OutcomeCase> Outcomes(IEnumerable<QueryVerdict<Item>> rows) => rows.Select(row => row.Outcome.Case);
 
-	private static IEnumerable<Item> Items(IEnumerable<QueryVerdict<Item>> rows, QueryOutcome outcome) =>
-		rows.Where(row => row.Outcome == outcome).Select(row => row.Item);
+	private static IEnumerable<Item> Items(IEnumerable<QueryVerdict<Item>> rows, OutcomeCase outcome) =>
+		rows.Where(row => row.Outcome.Case == outcome).Select(row => row.Item);
 }
 
 public class QueryProcessorRatingTests
@@ -460,8 +517,8 @@ public class QueryProcessorRatingTests
 
 		var results = await _testee.ExecuteAsync([high, low, unrated], options, NoEnrollment).ToListAsync();
 
-		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([high]);
-		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([low, unrated]);
+		await Assert.That(Items(results, OutcomeCase.Qualified)).IsEquivalentTo([high]);
+		await Assert.That(Items(results, OutcomeCase.Culled)).IsEquivalentTo([low, unrated]);
 	}
 
 	[Test]
@@ -476,8 +533,8 @@ public class QueryProcessorRatingTests
 		var results = await _testee.ExecuteAsync([exact, halfway, below], options, NoEnrollment).ToListAsync();
 		var strictResults = await _testee.ExecuteAsync([exact, halfway, below], strict, NoEnrollment).ToListAsync();
 
-		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([exact, halfway]);
-		await Assert.That(Items(strictResults, QueryOutcome.Qualified)).IsEquivalentTo([exact]);
+		await Assert.That(Items(results, OutcomeCase.Qualified)).IsEquivalentTo([exact, halfway]);
+		await Assert.That(Items(strictResults, OutcomeCase.Qualified)).IsEquivalentTo([exact]);
 	}
 
 	[Test]
@@ -490,8 +547,8 @@ public class QueryProcessorRatingTests
 
 		var results = await _testee.ExecuteAsync([many, few, unvoted], options, NoEnrollment).ToListAsync();
 
-		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([many]);
-		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([few, unvoted]);
+		await Assert.That(Items(results, OutcomeCase.Qualified)).IsEquivalentTo([many]);
+		await Assert.That(Items(results, OutcomeCase.Culled)).IsEquivalentTo([few, unvoted]);
 	}
 
 	[Test]
@@ -507,8 +564,8 @@ public class QueryProcessorRatingTests
 		var before = await _testee.ExecuteAsync([released], lastDay, NoEnrollment).ToListAsync();
 		var after = await _testee.ExecuteAsync([released], nextDay, NoEnrollment).ToListAsync();
 
-		await Assert.That(before.Single().Outcome).IsEqualTo(QueryOutcome.Qualified);
-		await Assert.That(after.Single().Outcome).IsEqualTo(QueryOutcome.Culled);
+		await Assert.That(before.Single().Outcome).IsOfUnionType<QueryOutcome, Qualified>();
+		await Assert.That(after.Single().Outcome).IsOfUnionType<QueryOutcome, Culled>();
 	}
 
 	[Test]
@@ -527,8 +584,8 @@ public class QueryProcessorRatingTests
 
 		var results = await _testee.ExecuteAsync([miniseries, longRunning, uncounted, movie], options, NoEnrollment).ToListAsync();
 
-		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([miniseries, movie]);
-		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([longRunning, uncounted]);
+		await Assert.That(Items(results, OutcomeCase.Qualified)).IsEquivalentTo([miniseries, movie]);
+		await Assert.That(Items(results, OutcomeCase.Culled)).IsEquivalentTo([longRunning, uncounted]);
 	}
 
 	[Test]
@@ -543,8 +600,8 @@ public class QueryProcessorRatingTests
 
 		var results = await _testee.ExecuteAsync([inside, outside], options, NoEnrollment).ToListAsync();
 
-		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([inside]);
-		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([outside]);
+		await Assert.That(Items(results, OutcomeCase.Qualified)).IsEquivalentTo([inside]);
+		await Assert.That(Items(results, OutcomeCase.Culled)).IsEquivalentTo([outside]);
 	}
 
 	[Test]
@@ -561,8 +618,8 @@ public class QueryProcessorRatingTests
 
 		var results = await _testee.ExecuteAsync([shorter, inside, longer], options, NoEnrollment).ToListAsync();
 
-		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([inside]);
-		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([shorter, longer]);
+		await Assert.That(Items(results, OutcomeCase.Qualified)).IsEquivalentTo([inside]);
+		await Assert.That(Items(results, OutcomeCase.Culled)).IsEquivalentTo([shorter, longer]);
 	}
 
 	private static MediaQueryRow Movie(int minutes) =>
@@ -584,8 +641,8 @@ public class QueryProcessorRatingTests
 	private static QueryPredicates<MediaQueryRow> NoEnrollment =>
 		new(IsWantlisted: _ => false, IsBlocklisted: _ => false, IsOwned: _ => false, Identity: row => row.Media.Identity.Id.Value);
 
-	private static IEnumerable<MediaQueryRow> Items(IEnumerable<QueryVerdict<MediaQueryRow>> rows, QueryOutcome outcome) =>
-		rows.Where(row => row.Outcome == outcome).Select(row => row.Item);
+	private static IEnumerable<MediaQueryRow> Items(IEnumerable<QueryVerdict<MediaQueryRow>> rows, OutcomeCase outcome) =>
+		rows.Where(row => row.Outcome.Case == outcome).Select(row => row.Item);
 
 	private static MediaQueryRow MovieWithRating(int year, float? rating, int? votes = 1)
 	{

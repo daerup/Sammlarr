@@ -1,0 +1,16 @@
+.leaving-tally {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.leaving-tally > span {
+    opacity: 0.55;
+}
+
+.leaving-tally > b {
+    font-weight: 600;
+}

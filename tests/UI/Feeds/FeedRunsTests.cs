@@ -15,7 +15,7 @@ using Domain.Usage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
-using UI.Features.Feeds.Components;
+using UI.Features.Feeds.Components.Runs;
 using UI.Features.Feeds.Pages.Runs;
 using UI.Shared.Common;
 using UI.Shared.Services;

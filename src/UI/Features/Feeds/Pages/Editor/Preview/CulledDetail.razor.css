@@ -1,0 +1,67 @@
+.culled-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.culled-rule {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1.5rem;
+}
+
+.culled-rule-operator {
+    opacity: 0.6;
+}
+
+.culled-rule-value {
+    min-width: 0;
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+    overflow-wrap: anywhere;
+}
+
+.culled-rule-mark {
+    white-space: nowrap;
+}
+
+.culled-rule-mark::before {
+    content: "\2060";
+}
+
+.culled-rule-mark ::deep svg {
+    display: inline-block;
+    margin-inline-start: 3px;
+    vertical-align: -1px;
+}
+
+.culled-fold {
+    font-size: 11px;
+    font-style: italic;
+    opacity: 0.5;
+}
+
+.culled-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.culled-group-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.culled-group-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    border-inline-start-width: 3px;
+    border-inline-start-style: solid;
+    border-radius: 3px;
+    padding-inline-start: 0.5rem;
+}

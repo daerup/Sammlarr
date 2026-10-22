@@ -48,7 +48,7 @@
                                            Media="media"
                                            OnClick="() => SelectMedia(media)"
                                            ShowBookmark="true"
-                                           IsInWantlist="IsInWantlist(media)"
+                                           Wantlisted="WantlistItemOf(media)"
                                            RatingsStoredOnly="true"/>
                         }
                     </div>
@@ -223,7 +223,7 @@
         _cancellationTokenSource.Dispose();
     }
 
-    private bool IsInWantlist(MediaMatchResult media) => media is MatchedMedia matched && _wantlist.Contains(matched.Identity.Id);
+    private Optional<WantlistItem> WantlistItemOf(MediaMatchResult media) => media is MatchedMedia matched ? _wantlist.Find(matched.Identity.Id) : new None();
 
     private void SelectMedia(MediaMatchResult media)
     {

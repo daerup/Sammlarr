@@ -16,7 +16,7 @@ internal static class FilterValues
 		};
 	}
 
-	private static FilterPredicate Resolve(FilterPredicate predicate, DateOnly today)
+	public static FilterPredicate Resolve(FilterPredicate predicate, DateOnly today)
 	{
 		return predicate.ValueKind switch
 		{
