@@ -42,12 +42,12 @@ public class FeedFilterGroupTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForANestedGroupOfOne_ShowsNoLabelButKeepsItsRemoveButton()
+	public async Task Render_ForANestedGroupOfOne_ShowsNoLabelAndRemovesBesideTheAddButtons()
 	{
 		var cut = RenderGroup(new FilterDefinition { Conditions = [FeedFields.NewCondition()] }, depth: 1);
 
 		await Assert.That(cut.FindAll(Operator)).IsEmpty();
-		await Assert.That(cut.FindAll("[aria-label='Remove group']")).HasSingleItem();
+		await Assert.That(cut.Find("[aria-label='Remove group']").ParentElement!.TextContent).Contains("Add condition");
 	}
 
 	[Test]

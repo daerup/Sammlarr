@@ -3,30 +3,20 @@
 @inject FeedFilterOptions Options
 
 <div class="space-y-1" role="group" aria-label="@GroupLabel">
-    @if (HasLabel || Depth > 0)
+    @if (HasLabel)
     {
-        <div class="flex min-h-6 items-center justify-between">
-            @if (HasLabel)
-            {
-                <BbSelect TValue="LogicalOperator" Value="@Group.Operator" ValueChanged="ChangeOperatorAsync" DisplayTextSelector="LogicalText" AriaLabel="Conditions to match" Class="@LabelClass">
-                    <BbSelectTrigger>
-                        <BbSelectValue/>
-                    </BbSelectTrigger>
-                    <BbSelectContent Class="min-w-max">
-                        @foreach (var option in LogicalOptions)
-                        {
-                            <BbSelectItem Value="@option.Value" Text="@option.Text"/>
-                        }
-                    </BbSelectContent>
-                </BbSelect>
-            }
-            @if (Depth > 0)
-            {
-                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Class="ms-auto size-6 shrink-0 text-muted-foreground hover:text-destructive"
-                          AriaLabel="Remove group" OnClick="OnRemove">
-                    <LucideIcon Name="x" Size="14"/>
-                </BbButton>
-            }
+        <div class="flex min-h-6 items-center">
+            <BbSelect TValue="LogicalOperator" Value="@Group.Operator" ValueChanged="ChangeOperatorAsync" DisplayTextSelector="LogicalText" AriaLabel="Conditions to match" Class="@LabelClass">
+                <BbSelectTrigger>
+                    <BbSelectValue/>
+                </BbSelectTrigger>
+                <BbSelectContent Class="min-w-max">
+                    @foreach (var option in LogicalOptions)
+                    {
+                        <BbSelectItem Value="@option.Value" Text="@option.Text"/>
+                    }
+                </BbSelectContent>
+            </BbSelect>
         </div>
     }
     <div class="@GroupClass">
@@ -55,6 +45,14 @@
                 <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="text-xs text-muted-foreground hover:text-foreground" OnClick="AddGroupAsync">
                     <LucideIcon Name="plus" Size="14"/>
                     Add group
+                </BbButton>
+            }
+            @if (Depth > 0)
+            {
+                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="ms-auto text-xs text-muted-foreground hover:text-destructive"
+                          AriaLabel="Remove group" OnClick="OnRemove">
+                    <LucideIcon Name="x" Size="14"/>
+                    Remove group
                 </BbButton>
             }
         </div>
