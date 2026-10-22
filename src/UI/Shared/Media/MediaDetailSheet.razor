@@ -39,12 +39,12 @@
                     @if (media is MatchedMedia matched)
                     {
                         <div class="media-sheet-toggles">
-                            <WantlistProvenanceToggle Result="matched"
-                                                       Size="18"
-                                                       IsToggled="IsWantlisted"
-                                                       IsToggling="_togglingWantlist"
-                                                       Item="_item"
-                                                       OnToggle="ToggleWantlistAsync"/>
+                            <WantlistToggle Result="matched"
+                                             Size="18"
+                                             IsToggled="IsWantlisted"
+                                             IsToggling="_togglingWantlist"
+                                             Item="_item"
+                                             OnToggle="ToggleWantlistAsync"/>
                             <BlocklistToggleIcon Result="matched"
                                                  Size="18"
                                                  IsToggled="_blocklisted"

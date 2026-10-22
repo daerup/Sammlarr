@@ -19,6 +19,18 @@
     pointer-events: auto !important;
 }
 
-.provenance-trigger:has(.provenance-dot:is(:hover, :focus-visible)) ::deep .toggle-dot {
+.toggle-dot {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 2px solid var(--card);
+    pointer-events: none;
+    transition: transform 0.15s ease;
+}
+
+.provenance-trigger:has(.provenance-dot:is(:hover, :focus-visible)) .toggle-dot {
     transform: scale(1.25);
 }

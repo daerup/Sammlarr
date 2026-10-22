@@ -163,6 +163,24 @@ public class FeedPreviewPanelTests : BunitContext
 	}
 
 	[Test]
+	public async Task Preview_ForAWantlistedGoneRow_OffersWhereItCameFrom()
+	{
+		var gone = MediaId.From(new Guid(99, 0, 0, new byte[8]));
+		var cut = RenderPanel(
+			new GonePlanner(gone),
+			resolved: 5,
+			unmatched: 0,
+			gone: gone,
+			wantlisted: [new WantlistItem(gone, DateTimeOffset.UnixEpoch, new ManualOrigin(ManualSource.Search))]
+		);
+
+		await ApplyAsync(cut, new Mirror(3));
+		cut.WaitForState(() => cut.FindAll(".preview-gone-results .search-result-row").Count == 1);
+
+		await Assert.That(cut.FindAll(".preview-gone-results button.provenance-dot[aria-label='Where it came from']")).HasSingleItem();
+	}
+
+	[Test]
 	public async Task Preview_ForAnAppendFeed_MarksNothingAtRiskEvenWhenOwnedRowsNoLongerQualify()
 	{
 		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
@@ -487,7 +505,8 @@ public class FeedPreviewPanelTests : BunitContext
 		int unmatched,
 		MediaId? gone = null,
 		IFeedProvider? provider = null,
-		Mock<IMediaService>? media = null
+		Mock<IMediaService>? media = null,
+		IReadOnlyList<WantlistItem>? wantlisted = null
 	)
 	{
 		Services.AddBlazorBlueprintComponents();
@@ -496,7 +515,7 @@ public class FeedPreviewPanelTests : BunitContext
 		Services.AddLogging();
 		Services.AddSingleton(planner);
 		var wantlist = IWantlistService.Mock();
-		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
+		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot(wantlisted ?? []));
 		var blocklist = IBlocklistService.Mock();
 		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
 		Services.AddSingleton(wantlist.Object);

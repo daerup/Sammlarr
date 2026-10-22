@@ -3,6 +3,7 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Media;
 using Domain.Media;
+using Domain.Wantlist;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Shared.Media;
@@ -19,6 +20,7 @@ public class MediaGridTileTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddProviderBranding();
 		Services.AddSingleton(RatingStub.Context());
 		JSInterop.Mode = JSRuntimeMode.Loose;
 		Services.AddSingleton(IMediaService.Mock().Object);
@@ -114,6 +116,18 @@ public class MediaGridTileTests : BunitContext
 
 		await cut.Find("[data-testid='media-tile']").ClickAsync();
 		await Assert.That(opened).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Bookmark_ForAWantlistedTitle_ShowsWhereItCameFromWithNothingToClick()
+	{
+		var wantlisted = new WantlistItem(MediaId.New(), DateTimeOffset.UnixEpoch, new ManualOrigin(ManualSource.Search));
+		var cut = Render<MediaGridTile>(parameters =>
+			parameters.Add(tile => tile.Media, Movie()).Add(tile => tile.ShowBookmark, true).Add(tile => tile.Wantlisted, Optional.Of(wantlisted))
+		);
+
+		await Assert.That(cut.Find(".tile-bookmark").QuerySelectorAll(".toggle-dot")).HasSingleItem();
+		await Assert.That(cut.Find(".tile-bookmark").QuerySelectorAll("button")).IsEmpty();
 	}
 
 	private static MediaMatchResult Movie(string? backdrop = Backdrop, string? poster = Poster)

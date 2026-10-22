@@ -29,11 +29,11 @@
             @switch (Purpose)
             {
                 case SearchPurpose.Wantlist:
-                    <WantlistProvenanceToggle Result="ctx.Result"
-                                               IsToggled="ctx.IsToggled"
-                                               IsToggling="ctx.IsToggling"
-                                               Item="@ItemFor(ctx.Result.Identity.Id)"
-                                               OnToggle="ctx.OnToggle"/>
+                    <WantlistToggle Result="ctx.Result"
+                                     IsToggled="ctx.IsToggled"
+                                     IsToggling="ctx.IsToggling"
+                                     Item="@ItemFor(ctx.Result.Identity.Id)"
+                                     OnToggle="ctx.OnToggle"/>
                     <BlocklistToggleIcon Result="ctx.Result"
                                          IsToggled="@_blocklist.Contains(ctx.Result.Identity.Id)"
                                          IsToggling="@(_blocklisting == ctx.Result.Identity.Id)"

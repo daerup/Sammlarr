@@ -19,7 +19,7 @@
     <div class="space-y-2 overflow-hidden">
         <MediaDetailTile Media="DemoMedia.Movie">
             <Icons>
-                <WantlistToggleIcon Result="DemoMedia.Movie" IsToggled="@Wantlisted.Contains(DemoMedia.Movie.Identity.Id)" IsToggling="false" OnToggle="OnToggleWantlist"/>
+                <WantlistToggle Result="DemoMedia.Movie" IsToggled="@Wantlisted.Contains(DemoMedia.Movie.Identity.Id)" IsToggling="false" OnToggle="OnToggleWantlist"/>
                 <BlocklistToggleIcon Result="DemoMedia.Movie" IsToggled="@_blocklisted.Contains(DemoMedia.Movie.Identity.Id)" IsToggling="false" OnToggle="ToggleBlocklist"/>
             </Icons>
         </MediaDetailTile>
@@ -35,7 +35,7 @@
                         <BbTooltipContent>Excluded by the specified import limit.</BbTooltipContent>
                     </BbTooltip>
                 </BbTooltipProvider>
-                <WantlistToggleIcon Result="DemoMedia.Show" IsToggled="@Wantlisted.Contains(DemoMedia.Show.Identity.Id)" IsToggling="false" OnToggle="OnToggleWantlist"/>
+                <WantlistToggle Result="DemoMedia.Show" IsToggled="@Wantlisted.Contains(DemoMedia.Show.Identity.Id)" IsToggling="false" OnToggle="OnToggleWantlist"/>
                 <BlocklistToggleIcon Result="DemoMedia.Show" IsToggled="@_blocklisted.Contains(DemoMedia.Show.Identity.Id)" IsToggling="false" OnToggle="ToggleBlocklist"/>
             </Icons>
         </MediaDetailTile>

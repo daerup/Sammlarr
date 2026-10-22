@@ -189,11 +189,11 @@
                                         {
                                             @Verdict(result)
                                         }
-                                        <WantlistToggleIcon Result="item"
-                                                             IsToggled="isInWantlist"
-                                                             IsToggling="isTogglingWantlist"
-                                                             DotColor="@(result.Enrollment.Owned ? FeedBrandColor : null)"
-                                                             OnToggle="ToggleWantlistAsync"/>
+                                        <WantlistToggle Result="item"
+                                                         IsToggled="isInWantlist"
+                                                         IsToggling="isTogglingWantlist"
+                                                         Item="_wantlist.Find(item.Identity.Id)"
+                                                         OnToggle="ToggleWantlistAsync"/>
                                         <BlocklistToggleIcon Result="item" IsToggled="isBlocklisted" IsToggling="isTogglingBlocklist" OnToggle="ToggleBlocklistAsync"/>
                                     </Icons>
                                 </MediaDetailTile>
@@ -222,11 +222,11 @@
                                                      OnFocusOut="() => ClearFocus(goneItem)">
                                         <Icons>
                                             <LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold" Absences="AbsencesOf(goneItem.Identity.Id)"/>
-                                            <WantlistToggleIcon Result="goneItem"
-                                                                 IsToggled="IsWantlisted(goneItem)"
-                                                                 IsToggling="_togglingWantlistItem == goneItem.Identity.Id"
-                                                                 DotColor="@FeedBrandColor"
-                                                                 OnToggle="ToggleWantlistAsync"/>
+                                            <WantlistToggle Result="goneItem"
+                                                             IsToggled="IsWantlisted(goneItem)"
+                                                             IsToggling="_togglingWantlistItem == goneItem.Identity.Id"
+                                                             Item="_wantlist.Find(goneItem.Identity.Id)"
+                                                             OnToggle="ToggleWantlistAsync"/>
                                             <BlocklistToggleIcon Result="goneItem"
                                                                  IsToggled="IsBlocklisted(goneItem)"
                                                                  IsToggling="_togglingBlocklistItem == goneItem.Identity.Id"
@@ -398,7 +398,7 @@
     private string? _focusedResult;
     private MediaId? _togglingWantlistItem;
     private MediaId? _togglingBlocklistItem;
-    private readonly HashSet<MediaId> _wantlisted = [];
+    private WantlistSnapshot _wantlist = new([]);
     private readonly HashSet<MediaId> _blocklistIds = [];
     private bool _refreshDialogOpen;
     private bool _providerUnavailable;
@@ -687,7 +687,7 @@
 
         try
         {
-            _wantlisted.Clear();
+            _wantlist = new([]);
             _blocklistIds.Clear();
             await LoadWantlistAndBlocklistAsync(ct);
 
@@ -912,9 +912,6 @@
 
     private int AbsencesOf(MediaId id) => Math.Min(MirrorThreshold, _missedRuns.GetValueOrDefault(id));
 
-    private string FeedBrandColor =>
-        (_appliedConfig ?? Config).Provider is { } provider ? Branding.Color(provider.Service) : "currentColor";
-
     private bool MatchesSearch(string? title)
     {
         return string.IsNullOrWhiteSpace(_searchQuery) || title?.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) is true;
@@ -969,7 +966,7 @@
     {
         try
         {
-            _wantlisted.UnionWith((await WantlistService.GetAsync(cancellationToken)).Ids);
+            _wantlist = await WantlistService.GetAsync(cancellationToken);
             _blocklistIds.UnionWith((await BlocklistService.GetAsync(cancellationToken)).Ids);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -1030,7 +1027,7 @@
     }
 
     private bool IsBlocklisted(MatchedMedia item) => _blocklistIds.Contains(item.Identity.Id);
-    private bool IsWantlisted(MatchedMedia item) => _wantlisted.Contains(item.Identity.Id);
+    private bool IsWantlisted(MatchedMedia item) => _wantlist.Contains(item.Identity.Id);
 
     private void ClearFocus(MediaMatchResult item)
     {
@@ -1092,7 +1089,6 @@
             if (IsWantlisted(item))
             {
                 await WantlistService.RemoveAsync([item.Identity.Id], CancellationToken.None);
-                _wantlisted.Remove(item.Identity.Id);
             }
             else
             {
@@ -1102,11 +1098,9 @@
                     var config = await ProviderConfig.GetAsync(_visit);
                     Notify(notifier => notifier.Warning(WantlistNotices.NoMatch(Branding.Name(config.Sink.Service), item.Details.Title), WantlistNotices.CantUpdate));
                 }
-                else
-                {
-                    _wantlisted.Add(item.Identity.Id);
-                }
             }
+
+            _wantlist = await WantlistService.GetAsync(CancellationToken.None);
         }
         catch (Exception ex)
         {
