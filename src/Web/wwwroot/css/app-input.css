@@ -13,6 +13,7 @@
 @source "../../../UI/Features";
 @source "../../../UI/Shared";
 @source "../../*.razor";
+@source "../../appsettings.json";
 
 @font-face {
   font-family: 'Roboto';

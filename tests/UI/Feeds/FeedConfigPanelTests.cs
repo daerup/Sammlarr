@@ -36,6 +36,7 @@ public class FeedConfigPanelTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(FeedFilterStub.Shipped);
 		Services.AddProviderBranding();
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton(ReadinessStub.Connected(_connected));

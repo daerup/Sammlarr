@@ -14,6 +14,7 @@ using Shared.Options;
 using UI.Features.Settings.Components.Testing;
 using UI.Features.Settings.Components.Testing.Demos;
 using UI.Shared.Services;
+using UI.Tests.Feeds;
 using UI.Tests.Media;
 
 namespace UI.Tests.Settings;
@@ -33,6 +34,7 @@ public class DemoRenderTests : BunitContext
 		Services.AddScoped<Notifier>();
 		Services.AddScoped<ScrollService>();
 		Services.AddSingleton(new AccountsOptions());
+		Services.AddSingleton(FeedFilterStub.Shipped);
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddSingleton(ArtworkStub.Sizing());
 		var clock = new FakeTimeProvider(new DateTimeOffset(2026, 10, 4, 12, 0, 0, TimeSpan.Zero));

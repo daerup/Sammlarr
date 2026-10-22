@@ -6,6 +6,7 @@ using Domain.Media;
 using Domain.Processing;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Feeds.Pages.Editor.Preview;
 
 namespace UI.Tests.Feeds.Preview;
@@ -23,6 +24,7 @@ public class VerdictPopoversTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(FeedFilterStub.Shipped);
 		Services.AddProviderBranding();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

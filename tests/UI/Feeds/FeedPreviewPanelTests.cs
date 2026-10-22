@@ -491,6 +491,7 @@ public class FeedPreviewPanelTests : BunitContext
 	)
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(FeedFilterStub.Shipped);
 		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 		Services.AddSingleton(planner);

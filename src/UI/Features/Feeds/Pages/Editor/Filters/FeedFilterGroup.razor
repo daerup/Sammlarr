@@ -1,4 +1,6 @@
 @using BlazorBlueprint.Primitives.Filtering
+@using global::Shared.Options
+@inject FeedFilterOptions Options
 
 <div class="space-y-1" role="group" aria-label="@GroupLabel">
     @if (HasLabel || Depth > 0)
@@ -48,7 +50,7 @@
                 <LucideIcon Name="plus" Size="14"/>
                 Add condition
             </BbButton>
-            @if (Depth < MaxDepth)
+            @if (Depth < Options.MaxNesting)
             {
                 <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="text-xs text-muted-foreground hover:text-foreground" OnClick="AddGroupAsync">
                     <LucideIcon Name="plus" Size="14"/>
@@ -60,8 +62,6 @@
 </div>
 
 @code {
-    private const int MaxDepth = 2;
-
     [Parameter] [EditorRequired] public required FilterDefinition Group { get; set; }
 
     [Parameter] public int Depth { get; set; }
@@ -81,14 +81,14 @@
 
     private bool HasLabel => Group.Conditions.Count + Group.Groups.Count > 1;
 
-    private string GroupClass => $"{Frame} {FilterDepth.Stripe(Depth)}";
+    private string GroupClass => $"{Frame} {Options.Stripe(Depth)}";
 
     private string Frame => Depth == 0 ? "space-y-3 rounded-s-md border-s-4 ps-3" : "space-y-3 rounded-lg border border-s-4 bg-muted/30 p-3";
 
     private const string Label =
         "w-auto [&_[role=combobox]]:h-6 [&_[role=combobox]]:w-auto [&_[role=combobox]]:min-w-0 [&_[role=combobox]_svg]:ms-0 [&_[role=combobox]]:gap-1 [&_[role=combobox]]:border-0 [&_[role=combobox]]:bg-transparent [&_[role=combobox]]:px-1 [&_[role=combobox]]:text-xs [&_[role=combobox]]:font-semibold [&_[role=combobox]]:shadow-none [&_[role=combobox]]:text-inherit";
 
-    private string LabelClass => $"{Label} {FilterDepth.Tone(Depth)}";
+    private string LabelClass => $"{Label} {Options.Tone(Depth)}";
 
 
     private Task ChangeOperatorAsync(LogicalOperator chosen)

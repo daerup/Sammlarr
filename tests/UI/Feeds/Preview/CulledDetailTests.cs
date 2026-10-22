@@ -3,6 +3,7 @@ using Bunit;
 using Contracts.Processing;
 using Domain.Media;
 using Domain.Processing;
+using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages.Editor.Preview;
 using static TestInfrastructure.QueryFilterFactory;
@@ -23,7 +24,11 @@ public class CulledDetailTests : BunitContext
 	private static readonly RatingStrategy Average = new(AveragedRating.Everything);
 
 	[Before(Test)]
-	public void Setup() => Services.AddBlazorBlueprintComponents();
+	public void Setup()
+	{
+		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(FeedFilterStub.Shipped);
+	}
 
 	[Test]
 	public async Task Render_ForOnePiece_DrawsTheAnyOfWithBothOptions()

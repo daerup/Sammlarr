@@ -1,24 +1,10 @@
+using Shared.Options;
+
 namespace UI.Features.Feeds.Pages.Editor.Filters;
 
 internal static class FilterDepth
 {
-	public static string Stripe(int depth)
-	{
-		return depth switch
-		{
-			0 => "border-s-muted-foreground/75",
-			1 => "border-s-blue-500",
-			_ => "border-s-purple-500",
-		};
-	}
+	public static string Stripe(this FeedFilterOptions options, int depth) => options.Levels[depth].Stripe;
 
-	public static string Tone(int depth)
-	{
-		return depth switch
-		{
-			0 => "text-muted-foreground",
-			1 => "text-blue-600 dark:text-blue-400",
-			_ => "text-purple-600 dark:text-purple-400",
-		};
-	}
+	public static string Tone(this FeedFilterOptions options, int depth) => options.Levels[depth].Tone;
 }

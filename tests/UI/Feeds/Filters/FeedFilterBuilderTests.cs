@@ -24,6 +24,7 @@ public class FeedFilterBuilderTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(FeedFilterStub.Shipped);
 		Services.AddSingleton<TimeProvider>(new FakeTimeProvider());
 		Services.AddSingleton(IMediaService.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
@@ -314,13 +315,15 @@ public class FeedFilterBuilderTests : BunitContext
 	}
 
 	[Test]
-	public async Task AddGroup_TwoLevelsDown_IsNotOffered()
+	public async Task AddGroup_FourLevelsDown_IsNotOffered()
 	{
 		var deepest = new FilterDefinition { Conditions = [Condition(nameof(MediaQueryRow.Title), FilterOperator.Contains, "Ink")] };
-		var cut = RenderBuilder(new FilterDefinition { Groups = [new FilterDefinition { Groups = [deepest] }] });
+		var cut = RenderBuilder(
+			new FilterDefinition { Groups = [new FilterDefinition { Groups = [new FilterDefinition { Groups = [new FilterDefinition { Groups = [deepest] }] }] }] }
+		);
 
-		await Assert.That(Buttons(cut, "Add group")).Count().IsEqualTo(2);
-		await Assert.That(Buttons(cut, "Add condition")).Count().IsEqualTo(3);
+		await Assert.That(Buttons(cut, "Add group")).Count().IsEqualTo(4);
+		await Assert.That(Buttons(cut, "Add condition")).Count().IsEqualTo(5);
 	}
 
 	[Test]

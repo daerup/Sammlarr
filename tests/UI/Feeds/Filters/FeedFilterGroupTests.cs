@@ -19,6 +19,7 @@ public class FeedFilterGroupTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(FeedFilterStub.Shipped);
 		Services.AddProviderBranding();
 		Services.AddSingleton(RatingStub.Context());
 		JSInterop.Mode = JSRuntimeMode.Loose;
@@ -70,6 +71,17 @@ public class FeedFilterGroupTests : BunitContext
 		await cut.Find(Operator).ClickAsync(new());
 
 		await Assert.That(cut.Find("[role=listbox]").ClassList).Contains("min-w-max");
+	}
+
+	[Test]
+	public async Task AddGroup_PastTheConfiguredLevels_IsNoLongerOffered()
+	{
+		Services.AddSingleton(FeedFilterStub.Shipped with { Levels = [.. FeedFilterStub.Shipped.Levels.Take(2)] });
+		var nested = new FilterDefinition { Conditions = [FeedFields.NewCondition()] };
+
+		var cut = RenderGroup(new FilterDefinition { Conditions = [FeedFields.NewCondition()], Groups = [nested] });
+
+		await Assert.That(cut.FindAll("button").Where(button => button.TextContent.Trim() == "Add group")).HasSingleItem();
 	}
 
 	private IRenderedComponent<IComponent> RenderGroup(FilterDefinition group, int depth = 0)

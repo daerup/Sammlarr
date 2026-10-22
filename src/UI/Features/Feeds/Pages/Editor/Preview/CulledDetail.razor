@@ -1,4 +1,6 @@
 @using Contracts.Processing
+@using global::Shared.Options
+@inject FeedFilterOptions Options
 
 <div class="culled-detail">
     @Draw(_blame.Root, 0)
@@ -50,14 +52,14 @@
 
     private static RenderFragment Fold(int passed) => @<div class="culled-fold">and @("rule".ToQuantity(passed)) that passed</div>;
 
-    private static RenderFragment Bar(FilterGroup group, int depth, List<RenderFragment> parts)
+    private RenderFragment Bar(FilterGroup group, int depth, List<RenderFragment> parts)
     {
         return @<div class="culled-group">
             @if (parts.Count > 1)
             {
-                <span class="@($"culled-group-label {FilterDepth.Tone(depth)}")">@Label(group.Operator)</span>
+                <span class="@($"culled-group-label {Options.Tone(depth)}")">@Label(group.Operator)</span>
             }
-            <div class="@($"culled-group-body {FilterDepth.Stripe(depth)}")">
+            <div class="@($"culled-group-body {Options.Stripe(depth)}")">
                 @foreach (var part in parts)
                 {
                     @part
