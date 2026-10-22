@@ -39,6 +39,15 @@ public class WantlistProvenanceToggleTests : BunitContext
 	}
 
 	[Test]
+	public async Task Render_WhenWantlisted_DrawsOneDotOnTheBookmarkIcon()
+	{
+		var cut = RenderToggle(isToggled: true, item: FeedItem());
+
+		await Assert.That(cut.FindAll(".toggle-dot")).HasSingleItem();
+		await Assert.That(cut.Find("button.search-result-toggle-btn").QuerySelectorAll(".toggle-dot")).HasSingleItem();
+	}
+
+	[Test]
 	public async Task RightClick_WhenWantlisted_RevealsTheProvenanceDetails()
 	{
 		var cut = RenderToggle(isToggled: true, item: FeedItem());
