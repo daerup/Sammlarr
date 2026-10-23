@@ -3,29 +3,29 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/22/2026 - 18:35:07 |
+| Generated on: | 10/23/2026 - 17:25:18 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
-| Classes: | 1567 |
-| Files: | 1106 |
-| **Line coverage:** | 87% (41256 of 47386) |
-| Covered lines: | 41256 |
+| Classes: | 1561 |
+| Files: | 1100 |
+| **Line coverage:** | 87.2% (41853 of 47983) |
+| Covered lines: | 41853 |
 | Uncovered lines: | 6130 |
-| Coverable lines: | 47386 |
-| Total lines: | 70547 |
-| **Branch coverage:** | 79.5% (15590 of 19596) |
-| Covered branches: | 15590 |
-| Total branches: | 19596 |
+| Coverable lines: | 47983 |
+| Total lines: | 70349 |
+| **Branch coverage:** | 79.6% (15736 of 19750) |
+| Covered branches: | 15736 |
+| Total branches: | 19750 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
 </details>
 
 ## Coverage
-<details><summary>API - 91.7%</summary>
+<details><summary>API - 91.8%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**API**|**91.7%**|**81.8%**|
+|**API**|**91.8%**|**81.8%**|
 |API.AniList.AniListAnswerException|100%||
 |API.AniList.AniListClient|91.6%|77.7%|
 |API.AniList.AniListClient<TData>|91.6%|77.7%|
@@ -160,9 +160,9 @@
 |API.Imdb.ImdbRatingsInRun|100%|100%|
 |API.Mal.MalAnime|97.1%|87.5%|
 |API.Mal.MalClient|100%||
-|API.Mal.MalClientIdCheck|16.6%||
+|API.Mal.MalClientIdCheck|100%||
 |API.Mal.MalEnricher|94.2%|62.5%|
-|API.Mal.MalFeedService|96.9%|90.9%|
+|API.Mal.MalFeedService|96.9%|88.6%|
 |API.Mal.MalModule|100%|100%|
 |API.Mal.MalPages|100%|97.2%|
 |API.Mal.Types.MalTypes.AlternativeTitles|100%||
@@ -210,7 +210,7 @@
 |API.Notifications.Pushover.PushoverMessage|100%||
 |API.Notifications.Pushover.PushoverModule|100%||
 |API.Notifications.Webhook.WebhookBlockedException|100%||
-|API.Notifications.Webhook.WebhookChannel|95.9%|83.3%|
+|API.Notifications.Webhook.WebhookChannel|96%|83.3%|
 |API.Notifications.Webhook.WebhookClient|73.3%|81.2%|
 |API.Notifications.Webhook.WebhookConnect|89.3%|88.4%|
 |API.Notifications.Webhook.WebhookModule|100%|100%|
@@ -260,7 +260,7 @@
 |API.Tmdb.TmdbModule|100%|100%|
 |API.Tmdb.TmdbPages|100%|100%|
 |API.Tmdb.TmdbRatings|100%|100%|
-|API.Tmdb.TmdbReadTokenCheck|16.6%||
+|API.Tmdb.TmdbReadTokenCheck|100%||
 |API.Tmdb.TmdbSearch|100%|100%|
 |API.Tmdb.TmdbTrendingService|94.6%|83.3%|
 |API.Tmdb.Types.TmdbTypes|99%|100%|
@@ -305,11 +305,11 @@
 |System.Text.RegularExpressions.Generated.RunnerFactory.Runner|||
 
 </details>
-<details><summary>Contracts - 99.2%</summary>
+<details><summary>Contracts - 99.1%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Contracts**|**99.2%**|**82.3%**|
+|**Contracts**|**99.1%**|**82.3%**|
 |Contracts.Auth.AccountLinkPreview|100%||
 |Contracts.Auth.ExternalLogin|100%||
 |Contracts.Auth.OAuthTokenGrant|100%||
@@ -398,11 +398,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.8%</summary>
+<details><summary>Core - 97.1%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.8%**|**88.2%**|
+|**Core**|**97.1%**|**88.2%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -431,7 +431,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|90.9%|100%|
+|Core.Datasets.DatasetTicker|95.4%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -471,15 +471,15 @@
 |Core.Identity.IdentityModule|100%||
 |Core.Identity.SessionValidator|100%|100%|
 |Core.Identity.SignedInUser|66.6%||
-|Core.Identity.UserManagementService|96.8%|96.6%|
+|Core.Identity.UserManagementService|96.9%|96.6%|
 |Core.Identity.UserScope|100%||
 |Core.Identity.UserScope.Restore|100%||
 |Core.Jobs.DetailsFillJobHandler|100%||
 |Core.Jobs.FeedRunJobHandler|100%|100%|
 |Core.Jobs.JobAlarm|90.2%|83.3%|
 |Core.Jobs.JobQueue|98.4%|88.8%|
-|Core.Jobs.JobRunner|76.1%|83.3%|
-|Core.Jobs.JobRunner<TRequest>|76.1%|83.3%|
+|Core.Jobs.JobRunner|79.5%|83.3%|
+|Core.Jobs.JobRunner<TRequest>|79.5%|83.3%|
 |Core.Jobs.JobRunnerStatus|100%||
 |Core.Jobs.JobRunnerStatus.Session|100%||
 |Core.Jobs.JobSignal|100%||
@@ -554,14 +554,14 @@
 |Core.Settings.ProviderConfigService|100%||
 |Core.Settings.SettingsModule|100%||
 |Core.Setup.OnboardingService|100%|91.6%|
-|Core.Setup.SetupCodeAnnouncer|0%||
+|Core.Setup.SetupCodeAnnouncer|60%||
 |Core.Setup.SetupGate|100%|100%|
 |Core.Setup.SetupGate.Lease|100%||
 |Core.Setup.SetupModule|100%||
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|74.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -584,19 +584,17 @@
 |Core.Wantlist.WantlistService|98%|94.4%|
 
 </details>
-<details><summary>DB - 95.9%</summary>
+<details><summary>DB - 96%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**95.9%**|**85.3%**|
+|**DB**|**96%**|**85.8%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
-|DB.Conversion.Encryption.DataProtectionService|81.8%|50%|
-|DB.Conversion.Encryption.EncryptedGuidConverter|100%||
-|DB.Conversion.Encryption.EncryptedPropertyConvention|94.4%|91.6%|
-|DB.Conversion.Encryption.EncryptedStringConverter|100%||
 |DB.Conversion.Encryption.EncryptionModule|100%|100%|
+|DB.Conversion.Encryption.SecretConvention|100%|100%|
+|DB.Conversion.Encryption.SecretConverter|100%||
 |DB.Conversion.Enums.EnumAsStringConvention|100%|100%|
 |DB.Conversion.Enums.EnumModule|100%||
 |DB.Conversion.Feed.FeedRunTriggerConverter|100%||
@@ -605,11 +603,9 @@
 |DB.Conversion.Jobs.JobRequestConverter|95.4%|92.8%|
 |DB.Conversion.Ratings.RatingStrategyConverter|100%|92.8%|
 |DB.Data.Auth.ApiKeyConfigRepository|100%|100%|
-|DB.Data.Auth.ApiKeyConfigRow|100%||
 |DB.Data.Auth.AuthDataModule|100%||
 |DB.Data.Auth.AuthEntityConfiguration|100%|100%|
 |DB.Data.Auth.CredentialRepository|100%|100%|
-|DB.Data.Auth.CredentialRow|100%||
 |DB.Data.Blocklist.BlocklistModule|100%||
 |DB.Data.Blocklist.BlocklistRepository|100%|92.8%|
 |DB.Data.Blocklist.BlocklistRowConfiguration|100%|100%|
@@ -698,8 +694,8 @@
 |DB.Data.Notifications.NotificationDataModule|100%||
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
-|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
-|DB.Data.Notifications.NotificationTargetRepository|96.4%|66.6%|
+|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|83.3%|
+|DB.Data.Notifications.NotificationTargetRepository|96.4%|81.2%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
 |DB.Data.Ratings.RatingDefaultConfiguration|100%|100%|
@@ -959,11 +955,11 @@
 |Messaging.WolverineMessagePublisher<TMessage>|100%||
 
 </details>
-<details><summary>Observability - 78.6%</summary>
+<details><summary>Observability - 77.7%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Observability**|**78.6%**|**72.2%**|
+|**Observability**|**77.7%**|**70.4%**|
 |Observability.Diagnostics.DiagnosticsLogEntry|100%||
 |Observability.Diagnostics.DiagnosticsModule|0%||
 |Observability.Diagnostics.DiagnosticsSpanEntry|100%||
@@ -978,11 +974,7 @@
 |Observability.Feed.FeedRunSpans<T>|100%|89.2%|
 |Observability.Logging.ActivityStatusSink|100%|100%|
 |Observability.Logging.LoggingModule|0%|0%|
-|Observability.Logging.LogPipeline|74.3%|80%|
-|Observability.Logging.SensitiveDataDestructuringPolicy|100%|93.7%|
-|Observability.Logging.SensitiveDataDestructuringPolicy.PropertyReader|100%||
-|Observability.Logging.SensitiveModel|100%||
-|Observability.Logging.SensitiveModelBuilder|100%|100%|
+|Observability.Logging.LogPipeline|73.6%|80%|
 |Observability.Logging.UnionDestructuringPolicy|100%|100%|
 |Observability.Metrics.MetricsModule|0%||
 |Observability.Metrics.MetricsPipeline|0%|0%|
@@ -1027,11 +1019,12 @@
 |Roslyn.Testing.TestMethodNamingAnalyzer|100%|100%|
 
 </details>
-<details><summary>Shared - 86.7%</summary>
+<details><summary>Shared - 86.4%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Shared**|**86.7%**|**78.1%**|
+|**Shared**|**86.4%**|**78.1%**|
+|Shared|85.5%|78.2%|
 |Shared.AsyncEnumerableOptionalExtensions<T>|100%|100%|
 |Shared.AsyncEnumerableResultExtensions<T, TCompanion>|100%|100%|
 |Shared.AsyncEnumerableResultExtensions<T>|100%|100%|
@@ -1096,10 +1089,11 @@
 |Shared.ResultExtensions|84%|74.1%|
 |Shared.ResultExtensions<T, TResult>|84%|74.1%|
 |Shared.ResultExtensions<T>|84%|74.1%|
+|Shared.Secret|100%||
 |Shared.SharedModule|100%||
 |Shared.Some|100%||
-|Shared.Some<T>|50%||
 |Shared.Some<T>|100%||
+|Shared.Some<T>|50%||
 |Shared.Success|100%||
 |Shared.Success<T>|50%||
 |Shared.SuppliedByAttribute<TSupplier>|100%||
@@ -1109,11 +1103,13 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**UI**|**79.7%**|**75.2%**|
+|**UI**|**79.7%**|**75.3%**|
 |System.Text.RegularExpressions.Generated|76.7%|54.7%|
 |System.Text.RegularExpressions.Generated.RunnerFactory|||
 |System.Text.RegularExpressions.Generated.RunnerFactory.Runner|||
 |UI.Features.Auth.Components.PasswordLinkCard|83.6%|50%|
+|UI.Features.Auth.Pages.Join|100%||
+|UI.Features.Auth.Pages.ResetPassword|100%||
 |UI.Features.Auth.Pages.SignIn|0%|0%|
 |UI.Features.Blocklist.Pages.Blocklist|0%|0%|
 |UI.Features.Browse.Pages.Browse|0%|0%|
@@ -1322,7 +1318,7 @@
 |UI.Features.Settings.Components.Providers.Roles.ServicesMap|95.9%|89.2%|
 |UI.Features.Settings.Components.Providers.Roles.ServicesMapModel|99.1%|95.8%|
 |UI.Features.Settings.Components.Providers.Roles.TracePath|100%|100%|
-|UI.Features.Settings.Components.Providers.Sinks.ArrAppSection|98.1%|90.5%|
+|UI.Features.Settings.Components.Providers.Sinks.ArrAppSection|98.1%|91%|
 |UI.Features.Settings.Components.Providers.Sinks.ArrSettingsLink|100%|100%|
 |UI.Features.Settings.Components.Providers.Sinks.ArrSinkRow|97.1%|93.1%|
 |UI.Features.Settings.Components.Providers.Sinks.ArrSinkRow.AppStatus|100%||
@@ -1618,14 +1614,14 @@
 |UI.UiModule|0%||
 
 </details>
-<details><summary>Web - 52.1%</summary>
+<details><summary>Web - 56.1%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Web**|**52.1%**|**49.4%**|
+|**Web**|**56.1%**|**51.4%**|
 |JasperFx.Generated.DiscoveredEventModels|0%||
 |Program|0%|0%|
-|Web.Auth.AuthEndpoints|11.4%|1.9%|
+|Web.Auth.AuthEndpoints|17.7%|1.9%|
 |Web.Auth.AuthenticationModule|95.2%|100%|
 |Web.Auth.OAuthState|100%|83.3%|
 |Web.Auth.PublicOrigin|100%|100%|
@@ -1636,10 +1632,8 @@
 |Web.Health.HealthModule|0%|0%|
 |Web.Health.JobRunnerHealthCheck|100%|100%|
 |Web.Health.JobRunnerLivenessCheck|0%|0%|
-|Web.Instrumentation|47.8%|53.3%|
-|Web.Instrumentation.BlazorHubActivityFilter|0%|0%|
-|Web.Instrumentation.BlazorRouteTracker|100%|87.5%|
-|Web.Instrumentation.InstrumentationModule|63.6%|68.7%|
+|Web.Instrumentation|86%|80.7%|
+|Web.Instrumentation.InstrumentationModule|100%|93.7%|
 |Web.Licences.NoticesEndpoint|100%|100%|
 |Web.Localization.BrowserLocalization|100%|100%|
 |Web.RateLimiting.RateLimitingModule|100%|90%|
@@ -1653,9 +1647,9 @@
 |Web.Staging.StagedApp|100%||
 |Web.Staging.StagingLibrary|0%|0%|
 |Web.Staging.StagingRun|54.4%|10%|
-|Web.Staging.StagingSeed|95.8%|87.5%|
+|Web.Staging.StagingSeed|96.2%|87.5%|
 |Web.Staging.StagingSeed.SeededKey|100%||
-|Web.Staging.StagingSeed<T>|95.8%|87.5%|
+|Web.Staging.StagingSeed<T>|96.2%|87.5%|
 |Web.Staging.StagingServices|52.1%||
 |Web.Staging.StagingServices.Nobody|0%||
 |Web.Staging.StagingServices.NoSessions|0%||
