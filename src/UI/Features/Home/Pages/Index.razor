@@ -43,7 +43,7 @@ else
 <SignInGuard AccessChanged="HandleSignInChangedAsync"/>
 <SinkGuard Sink="@_settings.Sink" ReadyChanged="HandleConnectionChanged"/>
 
-<PageContainer Heading="Your library" Fill="true">
+<PageContainer Heading="Your library">
     <DescriptionContent>
         @if (_wantlistCount == 0)
         {

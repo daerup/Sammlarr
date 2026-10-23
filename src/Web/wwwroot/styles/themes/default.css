@@ -269,10 +269,6 @@
     width: auto;
 }
 
-.feed-pane {
-    height: 82vh;
-}
-
 /* Blur the page behind dialog overlays only while the .error-dialog component is mounted */
 body:has(.error-dialog) .bb\:fixed.bb\:inset-0.bb\:z-50.bb\:bg-black\/80 {
     backdrop-filter: blur(4px);

@@ -13,7 +13,7 @@ else
     <SignInGuard AccessChanged="OnSignInChanged"/>
     <SinkGuard Sink="@Settings.Sink" ReadyChanged="OnAccessChanged"/>
 
-    <PageContainer Heading="@Heading" Description="@Description" Fill="true">
+    <PageContainer Heading="@Heading" Description="@Description">
         <HeaderActions>
             <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
                 <div class="flex items-center gap-2">
