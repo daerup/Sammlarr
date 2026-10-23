@@ -1,4 +1,4 @@
-@page "/join/{User:guid}/{Token}"
+@page "/join/{User:guid}"
 @layout AuthLayout
 @attribute [AllowAnonymous]
 @using Domain.Identity
@@ -11,7 +11,8 @@
 @code {
     [Parameter] public required Guid User { get; set; }
 
-    [Parameter] public required string Token { get; set; }
+    [SupplyParameterFromQuery(Name = "token")]
+    public string Token { get; set; } = string.Empty;
 
     [SupplyParameterFromQuery(Name = "error")]
     public string? Error { get; set; }

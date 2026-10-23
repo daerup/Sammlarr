@@ -19,6 +19,7 @@ using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Arr;
 using Domain.Wantlist.Sync;
+using Microsoft.AspNetCore.WebUtilities;
 using Shared.Options;
 
 namespace Web.Staging;
@@ -81,13 +82,13 @@ internal static class StagingSeed
 			await scoped.GetRequiredService<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger()), cancellationToken);
 		}
 
-		var link = invite.Path.Reveal().Split('/');
+		var link = new Uri(new Uri("http://staging.test"), invite.Path.Reveal());
 		var member = Require(
 			await scoped
 				.GetRequiredService<IAccountLinkService>()
 				.JoinAsync(
-					UserId.From(Guid.Parse(link[2])),
-					new Secret(link[3]),
+					UserId.From(Guid.Parse(link.Segments[2])),
+					new Secret(QueryHelpers.ParseQuery(link.Query)["token"].ToString()),
 					new Secret(personas.Member.Password),
 					new Secret(personas.Member.Password),
 					cancellationToken

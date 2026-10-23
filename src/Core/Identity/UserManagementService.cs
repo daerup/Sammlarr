@@ -185,11 +185,12 @@ internal sealed class UserManagementService(
 
 	private static Secret LinkPath(AccountLinkKind kind, UserId id, Secret token)
 	{
-		return kind switch
+		var page = kind switch
 		{
-			AccountLinkKind.Invite => new Secret($"/join/{id.Value}/{token.Reveal()}"),
-			AccountLinkKind.Reset => new Secret($"/reset/{id.Value}/{token.Reveal()}"),
+			AccountLinkKind.Invite => "join",
+			AccountLinkKind.Reset => "reset",
 		};
+		return new Secret($"/{page}/{id.Value}?token={Uri.EscapeDataString(token.Reveal())}");
 	}
 
 	private async Task EnsureCallerIsAdminAsync(CancellationToken cancellationToken)

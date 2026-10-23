@@ -216,7 +216,7 @@ internal static class AuthEndpoints
 
 	private static string LinkPage(string page, Guid user, string token, Error error)
 	{
-		return QueryHelpers.AddQueryString($"/{page}/{user}/{Uri.EscapeDataString(token)}", "error", error.Reason);
+		return QueryHelpers.AddQueryString(QueryHelpers.AddQueryString($"/{page}/{user}", "token", token), "error", error.Reason);
 	}
 
 	private static string Failed(Error error, AuthProvider provider, Optional<string> setupCode, string? returnUrl)

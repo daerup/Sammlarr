@@ -1,3 +1,4 @@
+using System.Web;
 using Contracts.Identity;
 using Domain.Identity;
 
@@ -7,7 +8,7 @@ internal sealed record IssuedLinkParts(UserId User, Secret Token)
 {
 	internal static IssuedLinkParts Of(Result<IssuedLink> issued)
 	{
-		var parts = issued.GetOrThrow(error => new InvalidOperationException(error.Reason)).Path.Reveal().Split('/');
-		return new IssuedLinkParts(UserId.From(Guid.Parse(parts[2])), new Secret(parts[3]));
+		var link = new Uri(new Uri("http://sammlarr.test"), issued.GetOrThrow(error => new InvalidOperationException(error.Reason)).Path.Reveal());
+		return new IssuedLinkParts(UserId.From(Guid.Parse(link.Segments[2])), new Secret(HttpUtility.ParseQueryString(link.Query)["token"]!));
 	}
 }

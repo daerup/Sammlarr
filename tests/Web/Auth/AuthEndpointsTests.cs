@@ -44,5 +44,5 @@ public class AuthEndpointsTests
 		cookie.SignOutAsync().WasCalled(Times.Once);
 	}
 
-	private static string LinkPage(string page) => $"/{page}/{Guid.Empty}/token?error={Uri.EscapeDataString(UnusableLink.Message)}";
+	private static string LinkPage(string page) => $"/{page}/{Guid.Empty}?token=token&error={Uri.EscapeDataString(UnusableLink.Message)}";
 }

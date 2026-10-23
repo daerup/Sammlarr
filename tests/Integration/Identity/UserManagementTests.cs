@@ -244,6 +244,27 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task InviteAsync_IssuesALinkWithItsTokenInTheQuery()
+	{
+		await host.SignsInWithSammlarrAccounts();
+
+		var issued = await Testee.InviteAsync("Mira");
+
+		await Assert.That(issued).IsSuccess().And.Multiple(async link => await Assert.That(link.Path.Reveal()).Matches("^/join/[0-9a-f-]{36}\\?token=[^/&]+$"));
+	}
+
+	[Test]
+	public async Task ResetLinkAsync_IssuesALinkWithItsTokenInTheQuery()
+	{
+		await host.SignsInWithSammlarrAccounts();
+		var guest = await host.SeedLocalUser("guest", new Secret("correct horse battery"), UserRole.Member);
+
+		var issued = await Testee.ResetLinkAsync(guest);
+
+		await Assert.That(issued).IsSuccess().And.Multiple(async link => await Assert.That(link.Path.Reveal()).Matches("^/reset/[0-9a-f-]{36}\\?token=[^/&]+$"));
+	}
+
+	[Test]
 	public async Task RenewInviteAsync_MakesALinkThatJoins()
 	{
 		await host.SignsInWithSammlarrAccounts();
