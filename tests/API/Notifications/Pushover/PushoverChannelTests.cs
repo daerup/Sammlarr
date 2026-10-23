@@ -159,7 +159,7 @@ public class PushoverChannelTests
 		var result = await Channel(handler)
 			.SendAsync(
 				Context(),
-				new NotificationTarget(Guid.NewGuid(), "Hook", true, new WebhookConfig("https://example.test/hook", "whsec_x")),
+				new NotificationTarget(Guid.NewGuid(), "Hook", true, new WebhookConfig(new Secret("https://example.test/hook"), new Secret("whsec_x"))),
 				NotificationTemplate.None,
 				CancellationToken.None
 			);
@@ -180,7 +180,7 @@ public class PushoverChannelTests
 		NotificationLevel level = NotificationLevel.Success
 	) => new(Guid.NewGuid(), type, level, Now, "Wantlist sync completed", "Synced.", new NotificationData());
 
-	private static NotificationTarget PushoverTarget() => new(Guid.NewGuid(), "Push", true, new PushoverConfig("app-token", "user-key"));
+	private static NotificationTarget PushoverTarget() => new(Guid.NewGuid(), "Push", true, new PushoverConfig(new Secret("app-token"), new Secret("user-key")));
 
 	private static NotificationTemplate Template(string? title = null, string? message = null, NotificationLevel? level = null, PushoverPriority? priority = null)
 	{

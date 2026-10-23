@@ -27,7 +27,6 @@ internal static class Edges
 		("TypeExtensions", "GetGenericName"),
 		("OptionalReferenceExtensions", "ToNullable"),
 		("OptionalValueExtensions", "ToNullable"),
-		("SensitiveModelBuilder", "Sensitive"),
 		("ObservabilityContext", "ShouldUseOtlp"),
 	];
 

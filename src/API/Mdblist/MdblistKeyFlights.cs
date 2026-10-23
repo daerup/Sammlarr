@@ -5,14 +5,14 @@ namespace API.Mdblist;
 
 internal sealed class MdblistKeyFlights
 {
-	private readonly ConcurrentDictionary<string, Lazy<Task<AccessCheck>>> _flights = new();
+	private readonly ConcurrentDictionary<Secret, Lazy<Task<AccessCheck>>> _flights = new();
 
-	public Task<AccessCheck> JoinAsync(string apiKey, Func<Task<AccessCheck>> check)
+	public Task<AccessCheck> JoinAsync(Secret apiKey, Func<Task<AccessCheck>> check)
 	{
 		return _flights.GetOrAdd(apiKey, _ => new Lazy<Task<AccessCheck>>(() => FlyAsync(apiKey, check))).Value;
 	}
 
-	private async Task<AccessCheck> FlyAsync(string apiKey, Func<Task<AccessCheck>> check)
+	private async Task<AccessCheck> FlyAsync(Secret apiKey, Func<Task<AccessCheck>> check)
 	{
 		try
 		{

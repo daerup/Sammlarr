@@ -3,12 +3,15 @@ using System.Security.Cryptography;
 using System.Text;
 using API.Notifications;
 using API.Notifications.Webhook;
+using API.Observability;
 using Contracts.Identity;
 using Contracts.Notifications;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using Microsoft.Extensions.Time.Testing;
 using TestInfrastructure;
 
@@ -74,6 +77,17 @@ public class WebhookChannelTests
 	}
 
 	[Test]
+	public async Task SendAsync_MarksItsRequestAsHoldingASecretUrl()
+	{
+		var handler = new CapturingHandler(HttpStatusCode.OK);
+
+		await Channel(handler)
+			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Template(null), CancellationToken.None);
+
+		await Assert.That(handler.Request!.Options.TryGetValue(InstrumentationModule.SecretUrl, out var secret) && secret).IsTrue();
+	}
+
+	[Test]
 	public async Task SendAsync_ToAnHttpUrl_SendsIt()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
@@ -136,14 +150,34 @@ public class WebhookChannelTests
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryRetryable>();
 	}
 
-	private static WebhookChannel Channel(HttpMessageHandler handler)
+	[Test]
+	[Arguments(HttpStatusCode.Unauthorized, null)]
+	[Arguments(HttpStatusCode.OK, "{{ unclosed")]
+	public async Task SendAsync_WhenItGivesUp_LogsTheHostAndNotThePath(HttpStatusCode status, string? template)
+	{
+		var logger = new FakeLogger<WebhookChannel>();
+
+		await Channel(new CapturingHandler(status), logger)
+			.SendAsync(
+				Context(),
+				WebhookTarget("https://example.test/hook/canary-token", WebhookSigning.GenerateSecret()),
+				Template(template),
+				CancellationToken.None
+			);
+
+		await Assert.That(logger.LatestRecord.Message).Contains("example.test").And.DoesNotContain("canary-token");
+	}
+
+	private static WebhookChannel Channel(HttpMessageHandler handler) => Channel(handler, NullLogger<WebhookChannel>.Instance);
+
+	private static WebhookChannel Channel(HttpMessageHandler handler, ILogger<WebhookChannel> logger)
 	{
 		var clock = new FakeTimeProvider(Now);
 		var clients = IHttpClientFactory.Mock();
 		clients.CreateClient(Any()).Returns(new HttpClient(handler));
 		var owner = ICurrentUser.Mock();
 		owner.Role.Returns(UserRole.Member);
-		return new WebhookChannel(new WebhookClient(clients.Object, owner.Object), new FluidTemplateRenderer(), clock, NullLogger<WebhookChannel>.Instance);
+		return new WebhookChannel(new WebhookClient(clients.Object, owner.Object), new FluidTemplateRenderer(), clock, logger);
 	}
 
 	private static NotificationContext Context() =>
@@ -157,7 +191,10 @@ public class WebhookChannelTests
 			new NotificationData()
 		);
 
-	private static NotificationTarget WebhookTarget(string url, string secret) => new(Guid.NewGuid(), "Hook", true, new WebhookConfig(url, secret));
+	private static NotificationTarget WebhookTarget(string url, string secret)
+	{
+		return new(Guid.NewGuid(), "Hook", true, new WebhookConfig(new Secret(url), new Secret(secret)));
+	}
 
 	private static NotificationTemplate Template(string? template) =>
 		template is null ? NotificationTemplate.None : new NotificationTemplate(Some.Of(template), new None(), new None(), new None(), new None());

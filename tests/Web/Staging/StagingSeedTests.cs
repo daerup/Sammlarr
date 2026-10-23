@@ -39,7 +39,7 @@ public class StagingSeedTests : IAsyncDisposable
 	private static readonly ArrInstanceConfig Instance = new()
 	{
 		Url = Some.Of("http://radarr:7878"),
-		ApiKey = Some.Of("0123456789abcdef0123456789abcdef"),
+		ApiKey = Some.Of(new Secret("0123456789abcdef0123456789abcdef")),
 		QualityProfileId = Some.Of(4),
 		RootFolderPath = Some.Of("/movies"),
 	};
@@ -88,19 +88,19 @@ public class StagingSeedTests : IAsyncDisposable
 			Notifications = new SeedNotifications
 			{
 				Template = new SeedTemplate { Title = "{{ title }}", Message = "{{ summary }}" },
-				Webhook = new SeedWebhook { Name = "Catcher webhook", Secret = "whsec_c2FtbWxhcnItc3RhZ2luZy13ZWJob29rLXNlY3JldCE=" },
+				Webhook = new SeedWebhook { Name = "Catcher webhook", Secret = new Secret("whsec_c2FtbWxhcnItc3RhZ2luZy13ZWJob29rLXNlY3JldCE=") },
 				Pushover = new SeedPushover
 				{
 					Name = "Catcher Pushover",
-					AppToken = "staging-app-token",
-					UserKey = "staging-user-key",
+					AppToken = new Secret("staging-app-token"),
+					UserKey = new Secret("staging-user-key"),
 				},
 			},
 		},
-		"staging-tmdb-key",
-		Some.Of("staging-mdblist-key"),
-		Some.Of("staging-mal-client-id"),
-		Some.Of("staging-trakt-client-id"),
+		new Secret("staging-tmdb-key"),
+		Some.Of(new Secret("staging-mdblist-key")),
+		Some.Of(new Secret("staging-mal-client-id")),
+		Some.Of(new Secret("staging-trakt-client-id")),
 		ArrSinkConfig.Empty with
 		{
 			Radarr = Instance,
@@ -200,7 +200,7 @@ public class StagingSeedTests : IAsyncDisposable
 			async services =>
 			{
 				var targets = await services.GetRequiredService<INotificationTargetRepository>().GetAllAsync();
-				await Assert.That(targets.Count(target => target.Config is WebhookConfig { Url: $"{Catcher}/webhook" })).IsEqualTo(1);
+				await Assert.That(targets.Count(target => target.Config is WebhookConfig webhook && webhook.Url.Reveal() == $"{Catcher}/webhook")).IsEqualTo(1);
 				await Assert.That(targets.Count(target => target.Config is PushoverConfig)).IsEqualTo(1);
 				var feeds = (await services.GetRequiredService<IFeedService>().GetAsync()).Feeds;
 				await Assert.That(feeds.Select(feed => feed.Feed.Provider).Distinct()).IsEquivalentTo(Enum.GetValues<FeedProvider>());
@@ -265,13 +265,15 @@ public class StagingSeedTests : IAsyncDisposable
 		await using var scope = _services.CreateAsyncScope();
 		var onboarding = scope.ServiceProvider.GetRequiredService<IOnboardingService>();
 		await Assert.That(await onboarding.NeedsAdminAsync()).IsTrue();
-		await Assert.That(await onboarding.CodeProblemAsync("samm-larr")).IsNone();
+		await Assert.That(await onboarding.CodeProblemAsync(new Secret("samm-larr"))).IsNone();
 	}
 
 	private async Task AsAsync(string username, string password, Func<IServiceProvider, Task> check)
 	{
 		await using var scope = _services.CreateAsyncScope();
-		var signedIn = await Assert.That(await scope.ServiceProvider.GetRequiredService<ISignInService>().SignInWithPasswordAsync(username, password)).IsSuccess();
+		var signedIn = await Assert
+			.That(await scope.ServiceProvider.GetRequiredService<ISignInService>().SignInWithPasswordAsync(username, new Secret(password)))
+			.IsSuccess();
 		using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(signedIn!);
 		await check(scope.ServiceProvider);
 	}

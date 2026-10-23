@@ -3,7 +3,6 @@ using DB.Data.Notifications;
 using Domain.Identity;
 using Domain.Notifications;
 using Harness;
-using Integration.Tests.DB.Conversion;
 using TestInfrastructure;
 
 namespace Integration.Tests.Notifications;
@@ -22,7 +21,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	public async Task CreateAsync_ForAWebhookTarget_RoundTripsTheDecryptedConfig()
 	{
 		var id = await _testee.CreateAsync(
-			new NotificationTarget(Guid.Empty, "My Webhook", true, new WebhookConfig("https://example.test/hook", "whsec_topsecret"))
+			new NotificationTarget(Guid.Empty, "My Webhook", true, new WebhookConfig(new Secret("https://example.test/hook"), new Secret("whsec_topsecret")))
 		);
 
 		var target = await Assert.That(await _testee.FindAsync(id)).IsSome();
@@ -35,15 +34,17 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 			.IsOfUnionType<NotificationConfig, WebhookConfig>()
 			.And.Multiple(async webhook =>
 			{
-				await Assert.That(webhook.Url).IsEqualTo("https://example.test/hook");
-				await Assert.That(webhook.SigningSecret).IsEqualTo("whsec_topsecret");
+				await Assert.That(webhook.Url.Reveal()).IsEqualTo("https://example.test/hook");
+				await Assert.That(webhook.SigningSecret.Reveal()).IsEqualTo("whsec_topsecret");
 			});
 	}
 
 	[Test]
 	public async Task CreateAsync_ForAPushoverTarget_RoundTripsTheDecryptedConfig()
 	{
-		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "My Pushover", true, new PushoverConfig("app-token", "user-key")));
+		var id = await _testee.CreateAsync(
+			new NotificationTarget(Guid.Empty, "My Pushover", true, new PushoverConfig(new Secret("app-token"), new Secret("user-key")))
+		);
 
 		var target = await Assert.That(await _testee.FindAsync(id)).IsSome();
 
@@ -53,40 +54,17 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 			.IsOfUnionType<NotificationConfig, PushoverConfig>()
 			.And.Multiple(async pushover =>
 			{
-				await Assert.That(pushover.AppToken).IsEqualTo("app-token");
-				await Assert.That(pushover.UserKey).IsEqualTo("user-key");
+				await Assert.That(pushover.AppToken.Reveal()).IsEqualTo("app-token");
+				await Assert.That(pushover.UserKey.Reveal()).IsEqualTo("user-key");
 			});
-	}
-
-	[Test]
-	public async Task CreateAsync_ForAWebhookTarget_EncryptsTheSigningSecretAtRest()
-	{
-		await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Webhook", true, new WebhookConfig("https://example.test/hook", "whsec_plaintext")));
-
-		var stored = (await fixture.RawContext.Table<NotificationTargetRow>().QueryAsync(row => row.SigningSecret)).Single();
-
-		await Assert.That(stored).IsNotEqualTo("whsec_plaintext");
-		await Assert.That(stored).Satisfies(Ciphertext.IsBase64OrEmpty);
-	}
-
-	[Test]
-	public async Task CreateAsync_ForAPushoverTarget_EncryptsItsSecretsAtRest()
-	{
-		await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Pushover", true, new PushoverConfig("app-token-plain", "user-key-plain")));
-
-		var appToken = (await fixture.RawContext.Table<NotificationTargetRow>().QueryAsync(row => row.AppToken)).Single();
-		var userKey = (await fixture.RawContext.Table<NotificationTargetRow>().QueryAsync(row => row.UserKey)).Single();
-
-		await Assert.That(appToken).IsNotEqualTo("app-token-plain");
-		await Assert.That(userKey).IsNotEqualTo("user-key-plain");
-		await Assert.That(appToken).Satisfies(Ciphertext.IsBase64OrEmpty);
-		await Assert.That(userKey).Satisfies(Ciphertext.IsBase64OrEmpty);
 	}
 
 	[Test]
 	public async Task CreateAsync_WhenATargetIsStored_PersistsTheChannelAsAString()
 	{
-		await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Webhook", true, new WebhookConfig("https://example.test/hook", "whsec_x")));
+		await _testee.CreateAsync(
+			new NotificationTarget(Guid.Empty, "Webhook", true, new WebhookConfig(new Secret("https://example.test/hook"), new Secret("whsec_x")))
+		);
 
 		var channel = (await fixture.RawContext.Table<NotificationTargetRow>().QueryAsync<string>(nameof(NotificationTargetRow.Channel))).Single();
 
@@ -96,9 +74,11 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	[Test]
 	public async Task UpdateAsync_WhenATargetChanges_UpdatesNameEnabledAndConfig()
 	{
-		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Original", true, new WebhookConfig("https://example.test/one", "whsec_one")));
+		var id = await _testee.CreateAsync(
+			new NotificationTarget(Guid.Empty, "Original", true, new WebhookConfig(new Secret("https://example.test/one"), new Secret("whsec_one")))
+		);
 
-		await _testee.UpdateAsync(new NotificationTarget(id, "Renamed", false, new WebhookConfig("https://example.test/two", "whsec_two")));
+		await _testee.UpdateAsync(new NotificationTarget(id, "Renamed", false, new WebhookConfig(new Secret("https://example.test/two"), new Secret("whsec_two"))));
 
 		var target = await Assert.That(await _testee.FindAsync(id)).IsSome();
 		await Assert.That(target!.Name).IsEqualTo("Renamed");
@@ -106,13 +86,13 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 		await Assert
 			.That(target.Config)
 			.IsOfUnionType<NotificationConfig, WebhookConfig>()
-			.And.Multiple(async webhook => await Assert.That(webhook.Url).IsEqualTo("https://example.test/two"));
+			.And.Multiple(async webhook => await Assert.That(webhook.Url.Reveal()).IsEqualTo("https://example.test/two"));
 	}
 
 	[Test]
 	public async Task DeleteAsync_WhenATargetExists_RemovesIt()
 	{
-		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Doomed", true, new PushoverConfig("token", "key")));
+		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Doomed", true, new PushoverConfig(new Secret("token"), new Secret("key"))));
 
 		await _testee.DeleteAsync(id);
 
@@ -122,7 +102,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	[Test]
 	public async Task Targets_WhenTwoUsersExist_AreIsolatedPerUser()
 	{
-		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Owner A", true, new PushoverConfig("token", "key")));
+		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Owner A", true, new PushoverConfig(new Secret("token"), new Secret("key"))));
 
 		fixture.CurrentUser.Id = UserId.From(Guid.NewGuid());
 		await Assert.That(await _testee.GetAllAsync()).IsEmpty();

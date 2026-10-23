@@ -106,13 +106,13 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 				}
 			);
 			seed.Blocklist.Add(new BlocklistRow { Media = media });
-			seed.ApiKeySettings.Add(new ApiKeyConfigRow { Provider = ApiKeyProvider.Tmdb, ApiKey = "victim-key" });
+			seed.ApiKeySettings.Add(new ApiKeyConfigRow { Provider = ApiKeyProvider.Tmdb, ApiKey = new Secret("victim-key") });
 			seed.Credentials.Add(
 				new CredentialRow
 				{
 					Provider = AuthProvider.Plex,
 					ClientId = Guid.NewGuid(),
-					AccessToken = "token",
+					AccessToken = new Secret("token"),
 					ExpiresAt = DateTimeOffset.UtcNow.AddDays(1),
 				}
 			);

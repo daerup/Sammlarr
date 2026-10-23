@@ -16,7 +16,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	private ISignInService Testee => host.Resolve<ISignInService>();
 
-	private string SetupCode => host.Resolve<SetupGate>().Code;
+	private Secret SetupCode => host.Resolve<SetupGate>().Code;
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 

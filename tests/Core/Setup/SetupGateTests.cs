@@ -10,31 +10,31 @@ public class SetupGateTests
 	[Test]
 	public async Task Code_IsTwoGroupsOfFourUnambiguousCharacters()
 	{
-		await Assert.That(Testee.Code).Matches("^[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$");
+		await Assert.That(Testee.Code.Reveal()).Matches("^[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$");
 	}
 
 	[Test]
 	public async Task Accepts_TheCodeTypedInLowerCaseWithoutItsDash()
 	{
-		await Assert.That(Testee.Accepts(Testee.Code.Replace("-", " ").ToLowerInvariant())).IsTrue();
+		await Assert.That(Testee.Accepts(new Secret(Testee.Code.Reveal().Replace("-", " ").ToLowerInvariant()))).IsTrue();
 	}
 
 	[Test]
 	public async Task Accepts_ACodeOneCharacterOff_Refuses()
 	{
-		var last = Testee.Code[^1];
-		var typo = Testee.Code[..^1] + (last == '2' ? '3' : '2');
+		var last = Testee.Code.Reveal()[^1];
+		var typo = Testee.Code.Reveal()[..^1] + (last == '2' ? '3' : '2');
 
-		await Assert.That(Testee.Accepts(typo)).IsFalse();
+		await Assert.That(Testee.Accepts(new Secret(typo))).IsFalse();
 	}
 
 	[Test]
 	public async Task Code_WhenOneIsConfigured_IsThatCodeAndAcceptedAsTyped()
 	{
-		var gate = new SetupGate(new AccountsOptions { SetupCode = "samm larr" });
+		var gate = new SetupGate(new AccountsOptions { SetupCode = new Secret("samm larr") });
 
-		await Assert.That(gate.Code).IsEqualTo("SAMM-LARR");
-		await Assert.That(gate.Accepts("Samm-Larr")).IsTrue();
+		await Assert.That(gate.Code.Reveal()).IsEqualTo("SAMM-LARR");
+		await Assert.That(gate.Accepts(new Secret("Samm-Larr"))).IsTrue();
 	}
 
 	[Test]
@@ -43,6 +43,6 @@ public class SetupGateTests
 	[Arguments("SAMM-L0RR")]
 	public async Task Code_WhenTheConfiguredOneIsNotEightOfItsCharacters_Refuses(string configured)
 	{
-		await Assert.That(() => new SetupGate(new AccountsOptions { SetupCode = configured })).Throws<InvalidOperationException>();
+		await Assert.That(() => new SetupGate(new AccountsOptions { SetupCode = new Secret(configured) })).Throws<InvalidOperationException>();
 	}
 }

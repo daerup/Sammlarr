@@ -23,10 +23,12 @@ public class InviteDialogTests : BunitContext
 	[Test]
 	public async Task CreateLink_ForAFreeUsername_ShowsTheLinkAndHowLongItWorks()
 	{
-		_users.InviteAsync("mira", Any()).Returns(Success.Of(new IssuedLink("/join/6a3c1f4e-2b7d-4e8a-9f10-3c5d7e9a1b2c/abc", TimeSpan.FromDays(1))));
+		_users
+			.InviteAsync("mira", Any())
+			.Returns(Success.Of(new IssuedLink(new Secret("/join/6a3c1f4e-2b7d-4e8a-9f10-3c5d7e9a1b2c?token=abc"), TimeSpan.FromDays(1))));
 		var cut = await OpenAsync("mira");
 
-		await Assert.That(cut.WaitForElement("[data-link]").TextContent).EndsWith("/join/6a3c1f4e-2b7d-4e8a-9f10-3c5d7e9a1b2c/abc");
+		await Assert.That(cut.WaitForElement("[data-link]").TextContent).EndsWith("/join/6a3c1f4e-2b7d-4e8a-9f10-3c5d7e9a1b2c?token=abc");
 		await Assert.That(cut.FindComponent<BbDialogDescription>().Find("*").TextContent).Contains("1 day").And.Contains("mira");
 	}
 

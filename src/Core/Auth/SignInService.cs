@@ -38,12 +38,12 @@ internal sealed class SignInService(
 		return CompleteAsync(provider, callbackQuery, new None(), cancellationToken);
 	}
 
-	public Task<Result<User>> CompleteSetupAsync(AuthProvider provider, string callbackQuery, string setupCode, CancellationToken cancellationToken = default)
+	public Task<Result<User>> CompleteSetupAsync(AuthProvider provider, string callbackQuery, Secret setupCode, CancellationToken cancellationToken = default)
 	{
 		return CompleteAsync(provider, callbackQuery, Some.Of(setupCode), cancellationToken);
 	}
 
-	private async Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, Optional<string> setupCode, CancellationToken cancellationToken)
+	private async Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, Optional<Secret> setupCode, CancellationToken cancellationToken)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
 		if (config.AuthProvider != provider && await users.CountAsync(cancellationToken) > 0)
@@ -83,7 +83,7 @@ internal sealed class SignInService(
 		return Success.Of(user);
 	}
 
-	public async Task<Result<User>> SignInWithPasswordAsync(string username, string password, CancellationToken cancellationToken = default)
+	public async Task<Result<User>> SignInWithPasswordAsync(string username, Secret password, CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
 		if (config.AuthProvider != AuthProvider.Local)
@@ -127,7 +127,7 @@ internal sealed class SignInService(
 		};
 	}
 
-	private async Task<Result<User>> ProvisionAsync(AuthProvider provider, ExternalLogin login, Optional<string> setupCode, CancellationToken cancellationToken)
+	private async Task<Result<User>> ProvisionAsync(AuthProvider provider, ExternalLogin login, Optional<Secret> setupCode, CancellationToken cancellationToken)
 	{
 		return await users
 			.FindByLoginAsync(provider, login.ExternalUserId, cancellationToken)
@@ -137,7 +137,7 @@ internal sealed class SignInService(
 			);
 	}
 
-	private async Task<Result<User>> RegisterAsync(AuthProvider provider, ExternalLogin login, Optional<string> setupCode, CancellationToken cancellationToken)
+	private async Task<Result<User>> RegisterAsync(AuthProvider provider, ExternalLogin login, Optional<Secret> setupCode, CancellationToken cancellationToken)
 	{
 		using var lease = await setupGate.EnterAsync(cancellationToken);
 		var isFirstUser = await users.CountAsync(cancellationToken) == 0;

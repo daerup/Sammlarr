@@ -44,7 +44,7 @@ public class MdblistClientTests
 		using var response = await host.Services.GetRequiredService<MdblistClient>().SendAsync(HttpMethod.Get, "lists/1/items", Key);
 
 		await Assert
-			.That(host.Services.GetRequiredService<MdblistBudget>().Today(Key.Value).Answered.Map(answered => answered.Remaining))
+			.That(host.Services.GetRequiredService<MdblistBudget>().Today(Key.Value.Reveal()).Answered.Map(answered => answered.Remaining))
 			.IsSome()
 			.And.IsEqualTo(962);
 	}
@@ -65,7 +65,9 @@ public class MdblistClientTests
 		using var response = await testee.SendAsync(HttpMethod.Get, "lists/1/items", Key);
 
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
-		await Assert.That(host.Services.GetRequiredService<MdblistBudget>().BlockedUntil(Key.Value, LaneClass.Title, MdblistApis.Clock().GetUtcNow())).IsSome();
+		await Assert
+			.That(host.Services.GetRequiredService<MdblistBudget>().BlockedUntil(Key.Value.Reveal(), LaneClass.Title, MdblistApis.Clock().GetUtcNow()))
+			.IsSome();
 	}
 
 	[Test]
@@ -74,7 +76,7 @@ public class MdblistClientTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond();
 		using var host = MdblistApis.Module(handler);
-		host.Services.GetRequiredService<MdblistBudget>().Record(Key.Value, Spent());
+		host.Services.GetRequiredService<MdblistBudget>().Record(Key.Value.Reveal(), Spent());
 		using var title = LanePriority.Next(LaneClass.Title).Enter();
 
 		var refused = await Assert
@@ -91,7 +93,7 @@ public class MdblistClientTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"movies":[],"shows":[]}""");
 		using var host = MdblistApis.Module(handler);
-		host.Services.GetRequiredService<MdblistBudget>().Record(Key.Value, Spent());
+		host.Services.GetRequiredService<MdblistBudget>().Record(Key.Value.Reveal(), Spent());
 		using var page = LanePriority.Next(LaneClass.Source).Enter();
 
 		using var response = await host.Services.GetRequiredService<MdblistClient>().SendAsync(HttpMethod.Get, "lists/1/items", Key);

@@ -2,7 +2,6 @@ using Contracts.Auth;
 using DB.Data.Auth;
 using Domain.Providers;
 using Harness;
-using Integration.Tests.DB.Conversion;
 using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
 
@@ -16,33 +15,20 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	private IApiKeyConfigRepository Testee => new ApiKeyConfigRepository(fixture.ContextFactory);
 
 	[Test]
-	public async Task StoreAsync_WithEncryption_StoresEncryptedInDatabase()
-	{
-		var plainKey = "secret-api-key";
-
-		await Testee.StoreAsync(ApiKeyProvider.Tmdb, plainKey);
-
-		var encrypted = (await fixture.RawContext.Table<ApiKeyConfigRow>().QueryAsync(x => x.ApiKey)).Single();
-
-		await Assert.That(encrypted).IsNotEqualTo(plainKey);
-		await Assert.That(encrypted).Satisfies(Ciphertext.IsBase64OrEmpty);
-	}
-
-	[Test]
 	public async Task StoreAsync_WithDifferentProviders_StoresIndependently()
 	{
 		var key = "shared-api-key";
 
-		await Testee.StoreAsync(ApiKeyProvider.Tmdb, key);
-		await Testee.StoreAsync(ApiKeyProvider.Mdblist, key);
+		await Testee.StoreAsync(ApiKeyProvider.Tmdb, new Secret(key));
+		await Testee.StoreAsync(ApiKeyProvider.Mdblist, new Secret(key));
 
 		var keys = await fixture.Context.ApiKeySettings.ToListAsync();
 		var tmdb = keys.Single(s => s.Provider == ApiKeyProvider.Tmdb);
 		var mdblist = keys.Single(s => s.Provider == ApiKeyProvider.Mdblist);
 
 		await Assert.That(keys).Count().IsEqualTo(2);
-		await Assert.That(tmdb.ApiKey).IsEqualTo(key);
-		await Assert.That(mdblist.ApiKey).IsEqualTo(key);
+		await Assert.That(tmdb.ApiKey.Reveal()).IsEqualTo(key);
+		await Assert.That(mdblist.ApiKey.Reveal()).IsEqualTo(key);
 	}
 
 	[Test]
@@ -60,7 +46,7 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 
 		var apiKey = await Testee.GetAsync(ApiKeyProvider.Tmdb);
 
-		await Assert.That(apiKey).IsSuccess().And.Multiple(async value => await Assert.That(value).IsEqualTo("secret-api-key"));
+		await Assert.That(apiKey).IsSuccess().And.Multiple(async value => await Assert.That(value.Reveal()).IsEqualTo("secret-api-key"));
 	}
 
 	[Test]
@@ -75,7 +61,7 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 
 	private async Task SetUpApiKeyAsync(ApiKeyProvider provider, string apiKey)
 	{
-		await fixture.Context.ApiKeySettings.AddAsync(new ApiKeyConfigRow { Provider = provider, ApiKey = apiKey });
+		await fixture.Context.ApiKeySettings.AddAsync(new ApiKeyConfigRow { Provider = provider, ApiKey = new Secret(apiKey) });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 	}

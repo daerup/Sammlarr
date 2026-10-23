@@ -87,7 +87,7 @@ public class MediaMergeTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task MergeAsync_ForAnotherUsersWantlistEntryAndOutboxRow_MovesThemToTheSurvivor()
 	{
 		var (older, newer) = await PairAsync();
-		var guest = await host.SeedLocalUser("guest", "a test password", UserRole.Member);
+		var guest = await host.SeedLocalUser("guest", new Secret("a test password"), UserRole.Member);
 		await host.Resolve<IWantlistRepository>().AddAsync([older], new ManualOrigin(ManualSource.Search));
 		host.CurrentUser.Id = guest;
 		await host.Resolve<IWantlistRepository>().AddAsync([newer], new ManualOrigin(ManualSource.Browse));
@@ -207,7 +207,7 @@ public class MediaMergeTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task MergeAsync_WhenOneUserQueuedAnAddAndARemove_KeepsTheOneTheirMergedWantlistAgreesWith()
 	{
 		var (older, newer) = await PairAsync();
-		var guest = await host.SeedLocalUser("guest", "a test password", UserRole.Member);
+		var guest = await host.SeedLocalUser("guest", new Secret("a test password"), UserRole.Member);
 		await host.Resolve<IWantlistRepository>().AddAsync([newer], new ManualOrigin(ManualSource.Search));
 		var outbox = host.Resolve<IWantlistOutbox>();
 		await outbox.EnqueueAsync(SinkKind.Plex, WantlistOperationAction.Add, [newer]);

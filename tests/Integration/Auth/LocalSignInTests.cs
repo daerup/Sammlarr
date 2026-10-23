@@ -12,7 +12,7 @@ namespace Integration.Tests.Auth;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private const string Password = "correct horse battery";
+	private static readonly Secret Password = new("correct horse battery");
 
 	private static readonly DateTimeOffset Now = new(2026, 10, 4, 12, 0, 0, TimeSpan.Zero);
 
@@ -42,7 +42,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.SeedLocalUser("guest", Password, UserRole.Member);
 
-		var result = await Testee.SignInWithPasswordAsync("guest", "wrong password!");
+		var result = await Testee.SignInWithPasswordAsync("guest", new Secret("wrong password!"));
 
 		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("Wrong username or password."));
 	}
@@ -61,7 +61,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.SeedLocalUser("guest", Password, UserRole.Member);
 		for (var attempt = 0; attempt < 5; attempt++)
 		{
-			await Testee.SignInWithPasswordAsync("guest", "wrong password!");
+			await Testee.SignInWithPasswordAsync("guest", new Secret("wrong password!"));
 		}
 
 		var result = await Testee.SignInWithPasswordAsync("guest", Password);
@@ -78,7 +78,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.SeedLocalUser("guest", Password, UserRole.Member);
 		for (var attempt = 0; attempt < 5; attempt++)
 		{
-			await Testee.SignInWithPasswordAsync("guest", "wrong password!");
+			await Testee.SignInWithPasswordAsync("guest", new Secret("wrong password!"));
 		}
 
 		host.SetCurrentTime(Now.AddMinutes(4));
@@ -96,7 +96,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.SeedLocalUser("guest", Password, UserRole.Member);
 		for (var attempt = 0; attempt < 5; attempt++)
 		{
-			await Testee.SignInWithPasswordAsync("guest", "wrong password!");
+			await Testee.SignInWithPasswordAsync("guest", new Secret("wrong password!"));
 		}
 
 		host.SetCurrentTime(Now.AddMinutes(6));
@@ -188,7 +188,7 @@ public class LocalSignInTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		for (var attempt = 0; attempt < count; attempt++)
 		{
-			await Testee.SignInWithPasswordAsync("guest", "wrong password!");
+			await Testee.SignInWithPasswordAsync("guest", new Secret("wrong password!"));
 		}
 	}
 }

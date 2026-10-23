@@ -8,7 +8,7 @@ public sealed record ArrInstanceConfig
 
 	public Optional<string> ExternalUrl { get; init; } = new None();
 
-	public Optional<string> ApiKey { get; init; } = new None();
+	public Optional<Secret> ApiKey { get; init; } = new None();
 
 	public Optional<int> QualityProfileId { get; init; } = new None();
 

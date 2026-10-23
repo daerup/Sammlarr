@@ -10,7 +10,7 @@ internal static class WebhookSigning
 
 	public static string GenerateSecret() => SecretPrefix + Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
 
-	public static (string Id, string Timestamp, string Signature) Sign(Guid id, DateTimeOffset timestamp, byte[] body, string signingSecret)
+	public static (string Id, string Timestamp, string Signature) Sign(Guid id, DateTimeOffset timestamp, byte[] body, Secret signingSecret)
 	{
 		var webhookId = id.ToString();
 		var unixTimestamp = timestamp.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
@@ -20,7 +20,7 @@ internal static class WebhookSigning
 		prefix.CopyTo(signed, 0);
 		body.CopyTo(signed, prefix.Length);
 
-		var signature = HMACSHA256.HashData(DecodeSecret(signingSecret), signed);
+		var signature = HMACSHA256.HashData(DecodeSecret(signingSecret.Reveal()), signed);
 		return (webhookId, unixTimestamp, $"v1,{Convert.ToBase64String(signature)}");
 	}
 

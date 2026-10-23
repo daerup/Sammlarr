@@ -40,7 +40,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using Microsoft.Extensions.Time.Testing;
 using Shared.DI;
 using Shared.Options;
@@ -89,6 +91,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private readonly MutableClock _clock = new();
 
 	private Optional<FakeTimeProvider> _time = new None();
+	private Optional<TelemetryCapture> _capture = new None();
 	private bool _cachesOnTheClock;
 
 	private TimeProvider Clock => _time.Match<FakeTimeProvider, TimeProvider>(time => time, () => _clock);
@@ -303,7 +306,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal async Task WithPlexAccount(string token)
 	{
-		await Resolve<ICredentialService>().StoreAsync(AuthProvider.Plex, new StoredCredential(token, DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid()));
+		await Resolve<ICredentialService>()
+			.StoreAsync(AuthProvider.Plex, new StoredCredential(new Secret(token), DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid()));
 		HttpStub.RequireHeader(TestUrls.PlexApi, "X-Plex-Token", token);
 		HttpStub.RespondWithStatusForUrl($"{TestUrls.PlexApi}/{PlexEndpoints.UserPath}", HttpStatusCode.OK);
 	}
@@ -591,7 +595,9 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	}
 
 	internal void OAuthReturns(string externalUserId, string displayName, string avatarUrl = "avatar") =>
-		_oauth.Returns(new ExternalLogin(externalUserId, displayName, avatarUrl, new OAuthTokenGrant("plex-token", Clock.GetUtcNow().AddDays(30), Guid.NewGuid())));
+		_oauth.Returns(
+			new ExternalLogin(externalUserId, displayName, avatarUrl, new OAuthTokenGrant(new Secret("plex-token"), Clock.GetUtcNow().AddDays(30), Guid.NewGuid()))
+		);
 
 	internal void OAuthFails(string reason) => _oauth.Fails(reason);
 
@@ -655,18 +661,39 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		context.ChangeTracker.Clear();
 	}
 
-	internal Task<UserId> SeedLocalUser(string username, string password, UserRole role)
+	internal Task<UserId> SeedLocalUser(string username, Secret password, UserRole role)
 	{
 		var id = Guid.NewGuid();
 		var context = ScopedDbContext;
 		var user = SeedRows.User(id, Usernames.Normalize(username), username, string.Empty);
-		user.PasswordHash = new PasswordHasher<UserRow>().HashPassword(user, password);
+		user.PasswordHash = new PasswordHasher<UserRow>().HashPassword(user, password.Reveal());
 		SeedRows.Member(context, user, role, new None());
 		context.ChangeTracker.Clear();
 		return Task.FromResult(UserId.From(id));
 	}
 
 	internal void SignOut() => CurrentUser.IsAuthenticated = false;
+
+	internal TelemetryCapture CaptureTelemetry()
+	{
+		var capture = new TelemetryCapture();
+		_capture = Some.Of(capture);
+		return capture;
+	}
+
+	internal bool DatabaseHolds(string text)
+	{
+		var needle = Encoding.UTF8.GetBytes(text);
+		return new[] { _path, $"{_path}-wal" }.Where(File.Exists).Any(file => Bytes(file).AsSpan().IndexOf(needle) >= 0);
+	}
+
+	private static byte[] Bytes(string file)
+	{
+		using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+		using var copy = new MemoryStream();
+		stream.CopyTo(copy);
+		return copy.ToArray();
+	}
 
 	internal async Task<string?> SecurityStampOf(UserId id)
 	{
@@ -682,6 +709,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	public async ValueTask DisposeAsync()
 	{
+		_capture.Apply(capture => capture.Dispose());
 		if (_context is not null)
 		{
 			await _context.DisposeAsync();
@@ -812,7 +840,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddKeyedSingleton<IOAuthProvider>(AuthProvider.Plex, _oauth);
 		services.AddSingleton<ISessionInvalidator>(_sessionInvalidator);
 		services.ConfigureAll<HttpStandardResilienceOptions>(options => options.Retry.ShouldHandle = _ => ValueTask.FromResult(false));
-		services.AddLogging();
+		services.AddLogging(logging => _capture.Apply(capture => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(new FakeLoggerProvider(capture.Logs))));
 		services.AddSingleton(Clock);
 		if (_cachesOnTheClock)
 		{
@@ -885,6 +913,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			}
 		);
 		services.AddSingleton(new MalOptions { BaseUrl = $"https://{TestUrls.Mal}", Http = Unretried() });
+		services.AddSingleton(new PushoverOptions { BaseUrl = $"https://{TestUrls.Pushover}", Http = Unretried() });
+		services.AddSingleton(new WebhookOptions { Http = Unretried() });
 		services.AddSingleton(
 			new TraktOptions
 			{

@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using API.Observability;
 using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging;
@@ -47,18 +48,19 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 		request.Headers.TryAddWithoutValidation("webhook-id", id);
 		request.Headers.TryAddWithoutValidation("webhook-timestamp", timestamp);
 		request.Headers.TryAddWithoutValidation("webhook-signature", signature);
+		request.Options.Set(InstrumentationModule.SecretUrl, true);
 
 		var result = await client.SendAsync(request, cancellationToken);
 		if (result is DeliveryUnrecoverable unrecoverable)
 		{
-			logger.LogWarning("Webhook delivery to {Url} permanently failed: {Reason}", uri, unrecoverable.Reason);
+			logger.LogWarning("Webhook delivery to {Host} permanently failed: {Reason}", uri.Host, unrecoverable.Reason);
 		}
 		return result;
 	}
 
 	private DeliveryResult RenderFailure(Error error, Uri uri)
 	{
-		logger.LogWarning("Webhook body for {Url} could not be rendered: {Reason}", uri, error.Reason);
+		logger.LogWarning("Webhook body for {Host} could not be rendered: {Reason}", uri.Host, error.Reason);
 		return new DeliveryUnrecoverable(error.Reason);
 	}
 

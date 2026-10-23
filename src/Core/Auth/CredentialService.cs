@@ -61,7 +61,7 @@ internal sealed class CredentialService(
 		cache.Reject(provider);
 	}
 
-	private Task<AccessCheck> CheckAsync(AuthProvider provider, Guid clientId, string accessToken, CancellationToken cancellationToken)
+	private Task<AccessCheck> CheckAsync(AuthProvider provider, Guid clientId, Secret accessToken, CancellationToken cancellationToken)
 	{
 		return validators.Find(provider).Match(validator => validator.CheckAsync(clientId, accessToken, cancellationToken), () => AccessCheck.Valid);
 	}

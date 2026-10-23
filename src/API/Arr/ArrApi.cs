@@ -11,7 +11,7 @@ using Polly.Timeout;
 
 namespace API.Arr;
 
-internal sealed record ArrConnection(ArrApp App, Uri BaseUri, string ApiKey)
+internal sealed record ArrConnection(ArrApp App, Uri BaseUri, Secret ApiKey)
 {
 	public string Address => BaseUri.ToString().TrimEnd('/');
 }
@@ -216,7 +216,7 @@ internal abstract class ArrApi(HttpClient http)
 		try
 		{
 			using var request = new HttpRequestMessage(method, new Uri(connection.BaseUri, $"api/v3/{path}"));
-			request.Headers.Add("X-Api-Key", connection.ApiKey);
+			request.Headers.Add("X-Api-Key", connection.ApiKey.Reveal());
 			request.Options.Set(LaneHandler.Owner, connection.Address);
 			body.Apply(content => request.Content = JsonContent.Create(content, options: Json));
 			using var response = await http.SendAsync(request, cancellationToken);

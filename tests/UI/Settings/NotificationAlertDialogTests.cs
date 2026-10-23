@@ -93,7 +93,7 @@ public class NotificationAlertDialogTests : BunitContext
 	[Test]
 	public async Task Save_ForAPushoverAlert_KeepsItsTextAndPriorityAndStoresNoLevel()
 	{
-		var pushover = new NotificationTarget(Guid.NewGuid(), "Phone", true, new PushoverConfig("app-token", "user-key"));
+		var pushover = new NotificationTarget(Guid.NewGuid(), "Phone", true, new PushoverConfig(new Secret("app-token"), new Secret("user-key")));
 		var existing = Subscription(Some.Of(NotificationLevel.Error), Some.Of(PushoverPriority.High)) with { TargetId = pushover.Id };
 		var cut = Render<NotificationAlertDialog>(parameters =>
 			parameters

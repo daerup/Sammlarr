@@ -212,7 +212,7 @@ public class ProvidersSectionTests : BunitContext
 	[Test]
 	public async Task Section_OnPlexWithRadarrAndSonarrConnected_DrawsThemReadyForSearch()
 	{
-		var connected = new ArrInstanceConfig { Url = Some.Of("http://arr:7878"), ApiKey = Some.Of("key") };
+		var connected = new ArrInstanceConfig { Url = Some.Of("http://arr:7878"), ApiKey = Some.Of(new Secret("key")) };
 		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty with { Radarr = connected, Sonarr = connected });
 
 		var cut = RenderSection();
@@ -225,7 +225,7 @@ public class ProvidersSectionTests : BunitContext
 	{
 		var cut = RenderSection();
 		await cut.InvokeAsync(() => Map(cut).Get(map => map.SinkPicked).InvokeAsync(SinkKind.Arr));
-		var connected = new ArrInstanceConfig { Url = Some.Of("http://arr:7878"), ApiKey = Some.Of("key") };
+		var connected = new ArrInstanceConfig { Url = Some.Of("http://arr:7878"), ApiKey = Some.Of(new Secret("key")) };
 		_arrConfigs.GetAsync(Any()).Returns(ArrSinkConfig.Empty with { Radarr = connected, Sonarr = connected });
 
 		await cut.InvokeAsync(() => cut.FindComponent<Stub<ArrSinkRow>>().Instance.Parameters.Get(arr => arr.Changed).InvokeAsync());

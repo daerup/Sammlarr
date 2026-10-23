@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DB.Conversion.Encryption;
 using Domain.Notifications;
 
 namespace DB.Data.Notifications;
@@ -17,18 +16,15 @@ internal sealed record NotificationTargetRow : Entity<Guid>, IUserOwned
 
 	public bool Enabled { get; set; } = true;
 
-	[MaxLength(2048)]
-	public string? Url { get; set; }
+	[MaxLength(4096)]
+	public Secret? Url { get; set; }
 
 	[MaxLength(4096)]
-	[Encrypted]
-	public string? SigningSecret { get; set; }
+	public Secret? SigningSecret { get; set; }
 
 	[MaxLength(4096)]
-	[Encrypted]
-	public string? AppToken { get; set; }
+	public Secret? AppToken { get; set; }
 
 	[MaxLength(4096)]
-	[Encrypted]
-	public string? UserKey { get; set; }
+	public Secret? UserKey { get; set; }
 }

@@ -15,7 +15,7 @@ public class StoredEventTypeFormatTests(SammlarrTestHost fixture) : IAsyncDispos
 	{
 		var targets = new NotificationTargetRepository(fixture.ContextFactory);
 		var subscriptions = new NotificationSubscriptionRepository(fixture.ContextFactory);
-		var targetId = await targets.CreateAsync(new NotificationTarget(Guid.Empty, "Target", true, new PushoverConfig("token", "key")));
+		var targetId = await targets.CreateAsync(new NotificationTarget(Guid.Empty, "Target", true, new PushoverConfig(new Secret("token"), new Secret("key"))));
 
 		await subscriptions.AddAsync(targetId, [NotificationEventType.WantlistSyncCompleted, NotificationEventType.WantlistSyncFailed], NotificationTemplate.None);
 

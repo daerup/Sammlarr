@@ -53,8 +53,26 @@ public class ArrApisTests
 			});
 		var api = new RadarrApi(new HttpClient(radarr), new RadarrOptions());
 
-		await api.StatusAsync(new ArrConnection(ArrApp.Radarr, new Uri("http://radarr:7878/"), "0123456789abcdef0123456789abcdef"), CancellationToken.None);
+		await api.StatusAsync(
+			new ArrConnection(ArrApp.Radarr, new Uri("http://radarr:7878/"), new Secret("0123456789abcdef0123456789abcdef")),
+			CancellationToken.None
+		);
 
 		await Assert.That(owners).IsEquivalentTo(["http://radarr:7878"]);
+	}
+
+	[Test]
+	public async Task StatusAsync_ForAConnection_SendsItsApiKey()
+	{
+		var radarr = Mock.HttpHandler();
+		radarr.OnAnyRequest().RespondWithJson("""{"appName":"Radarr","version":"6.4.4"}""");
+		var api = new RadarrApi(new HttpClient(radarr), new RadarrOptions());
+
+		await api.StatusAsync(
+			new ArrConnection(ArrApp.Radarr, new Uri("http://radarr:7878/"), new Secret("0123456789abcdef0123456789abcdef")),
+			CancellationToken.None
+		);
+
+		radarr.Verify(request => request.Header("X-Api-Key", "0123456789abcdef0123456789abcdef"), Times.Once);
 	}
 }

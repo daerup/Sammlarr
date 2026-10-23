@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Auth;
 using Domain.Identity;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Options;
 using UI.Features.Auth.Components;
@@ -27,7 +28,9 @@ public class PasswordLinkCardTests : BunitContext
 	[Test]
 	public async Task Card_ForAnInvite_NamesTheirAccountAndPostsTheJoin()
 	{
-		_links.InspectAsync(AccountLinkKind.Invite, UserId.From(Invited), "token", Any()).Returns(Some.Of(new AccountLinkPreview(AccountLinkKind.Invite, "mira")));
+		_links
+			.InspectAsync(AccountLinkKind.Invite, UserId.From(Invited), new Secret("token"), Any())
+			.Returns(Some.Of(new AccountLinkPreview(AccountLinkKind.Invite, "mira")));
 
 		var cut = Render<PasswordLinkCard>(parameters =>
 			parameters.Add(card => card.Kind, AccountLinkKind.Invite).Add(card => card.User, Invited).Add(card => card.Token, "token")
@@ -42,15 +45,18 @@ public class PasswordLinkCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Pages_ForEachKindOfLink_RenderTheirCard()
+	public async Task Pages_ForEachKindOfLink_HandTheirCardTheTokenFromTheQuery()
 	{
 		_links.InspectAsync(Any<AccountLinkKind>(), UserId.From(Invited), Any(), Any()).Returns(new None());
+		var navigation = Services.GetRequiredService<NavigationManager>();
 
-		var join = Render<Join>(parameters => parameters.Add(page => page.User, Invited).Add(page => page.Token, "token"));
-		var reset = Render<ResetPassword>(parameters => parameters.Add(page => page.User, Invited).Add(page => page.Token, "token"));
+		navigation.NavigateTo($"/join/{Invited}?token=join-token");
+		var join = Render<Join>(parameters => parameters.Add(page => page.User, Invited));
+		await Assert.That(join.FindComponent<PasswordLinkCard>().Instance.Token).IsEqualTo("join-token");
 
-		await Assert.That(join.FindComponents<PasswordLinkCard>()).Count().IsEqualTo(1);
-		await Assert.That(reset.FindComponents<PasswordLinkCard>()).Count().IsEqualTo(1);
+		navigation.NavigateTo($"/reset/{Invited}?token=reset-token");
+		var reset = Render<ResetPassword>(parameters => parameters.Add(page => page.User, Invited));
+		await Assert.That(reset.FindComponent<PasswordLinkCard>().Instance.Token).IsEqualTo("reset-token");
 	}
 
 	[Test]

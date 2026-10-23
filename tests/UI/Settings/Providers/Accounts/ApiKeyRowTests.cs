@@ -72,7 +72,7 @@ public class ApiKeyRowTests : BunitContext
 	[Test]
 	public async Task Test_WhenTheProviderRejectsTheKey_ShowsInvalidAndLeavesTheReasonToTheBadge()
 	{
-		_keys.TestAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Error.From(Rejection));
+		_keys.TestAsync(Any<ApiKeyProvider>(), Any<Secret>(), Any()).Returns(Error.From(Rejection));
 		var cut = RenderRow();
 		await TypeAsync(cut, "a-wrong-key");
 
@@ -85,7 +85,7 @@ public class ApiKeyRowTests : BunitContext
 	[Test]
 	public async Task Test_WhenTheProviderAcceptsTheKey_ReadsVerifiedAndOffersSaveWithNoSubtext()
 	{
-		_keys.TestAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Success.Of(IApiKey.Mock().Object));
+		_keys.TestAsync(Any<ApiKeyProvider>(), Any<Secret>(), Any()).Returns(Success.Of(IApiKey.Mock().Object));
 		var cut = RenderRow();
 		await TypeAsync(cut, "a-good-key");
 

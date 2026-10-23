@@ -25,7 +25,6 @@ internal static class LogPipeline
 			.Filter.ByExcluding(logEvent => DroppedTemplates.Any(template => logEvent.MessageTemplate.Text.StartsWith(template, StringComparison.Ordinal)))
 			.Enrich.FromLogContext()
 			.Destructure.With(new UnionDestructuringPolicy())
-			.Destructure.With(new SensitiveDataDestructuringPolicy(SensitiveModel.Build()))
 			.Destructure.ToMaximumCollectionCount(50)
 			.Destructure.ToMaximumStringLength(512);
 

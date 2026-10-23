@@ -16,7 +16,7 @@ public class ArrConnectionTesterTests
 	private static readonly ArrInstanceConfig Radarr = ArrInstanceConfig.Empty with
 	{
 		Url = Some.Of("http://radarr:7878/"),
-		ApiKey = Some.Of("0123456789abcdef0123456789abcdef"),
+		ApiKey = Some.Of(new Secret("0123456789abcdef0123456789abcdef")),
 	};
 
 	private readonly MockHttpHandler _radarr = Mock.HttpHandler();

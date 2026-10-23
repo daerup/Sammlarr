@@ -16,7 +16,7 @@ public class WebhookClientEditorTests : BunitContext
 	}
 
 	[Test]
-	public async Task TryBuild_ForAnHttpUrl_BuildsTheWebhook()
+	public async Task TryBuild_ForAnHttpUrl_BuildsTheWebhookWithItsStoredSecret()
 	{
 		var editor = Editor("http://catcher:8080/hook");
 
@@ -24,7 +24,14 @@ public class WebhookClientEditorTests : BunitContext
 
 		await Assert.That(built).IsTrue();
 		await Assert.That(error).IsNull();
-		await Assert.That(config).IsOfUnionType<NotificationConfig, WebhookConfig>();
+		await Assert
+			.That(config)
+			.IsOfUnionType<NotificationConfig, WebhookConfig>()
+			.And.Multiple(async webhook =>
+			{
+				await Assert.That(webhook.Url.Reveal()).IsEqualTo("http://catcher:8080/hook");
+				await Assert.That(webhook.SigningSecret.Reveal()).IsEqualTo("whsec_c2VjcmV0");
+			});
 	}
 
 	[Test]
@@ -40,7 +47,7 @@ public class WebhookClientEditorTests : BunitContext
 
 	private WebhookClientEditor Editor(string url)
 	{
-		var target = new NotificationTarget(Guid.Empty, "Webhook", true, new WebhookConfig(url, "whsec_c2VjcmV0"));
+		var target = new NotificationTarget(Guid.Empty, "Webhook", true, new WebhookConfig(new Secret(url), new Secret("whsec_c2VjcmV0")));
 		return Render<WebhookClientEditor>(parameters => parameters.Add(editor => editor.Target, target)).Instance;
 	}
 }

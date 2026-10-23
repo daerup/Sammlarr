@@ -16,7 +16,7 @@ public class TraktClientIdCheckTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""[{"name":"Action","slug":"action"}]""");
 
-		await Assert.That(await Testee(handler).CheckAsync("trakt-client-id")).IsEqualTo(AccessCheck.Valid);
+		await Assert.That(await Testee(handler).CheckAsync(new Secret("trakt-client-id"))).IsEqualTo(AccessCheck.Valid);
 		handler.Verify(request => request.PathMatches("^/genres/movies$").Header("trakt-api-key", "trakt-client-id"), Times.Once);
 	}
 
@@ -26,7 +26,7 @@ public class TraktClientIdCheckTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("""{"error":"invalid api key"}""", HttpStatusCode.Forbidden);
 
-		await Assert.That(await Testee(handler).CheckAsync("wrong")).IsEqualTo(AccessCheck.Rejected);
+		await Assert.That(await Testee(handler).CheckAsync(new Secret("wrong"))).IsEqualTo(AccessCheck.Rejected);
 	}
 
 	[Test]
@@ -37,7 +37,7 @@ public class TraktClientIdCheckTests
 			.OnAnyRequest()
 			.RespondWith(_ => new HttpResponseMessage(HttpStatusCode.Forbidden) { Content = new StringContent("<html>blocked</html>", Encoding.UTF8, "text/html") });
 
-		await Assert.That(await Testee(handler).CheckAsync("trakt-client-id")).IsEqualTo(AccessCheck.Unreachable);
+		await Assert.That(await Testee(handler).CheckAsync(new Secret("trakt-client-id"))).IsEqualTo(AccessCheck.Unreachable);
 	}
 
 	[Test]
@@ -46,7 +46,7 @@ public class TraktClientIdCheckTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.TooManyRequests);
 
-		await Assert.That(await Testee(handler).CheckAsync("trakt-client-id")).IsEqualTo(AccessCheck.Spent);
+		await Assert.That(await Testee(handler).CheckAsync(new Secret("trakt-client-id"))).IsEqualTo(AccessCheck.Spent);
 	}
 
 	[Test]
@@ -55,7 +55,7 @@ public class TraktClientIdCheckTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Throws(new LaneRefusedException("down"));
 
-		await Assert.That(await Testee(handler).CheckAsync("trakt-client-id")).IsEqualTo(AccessCheck.Unreachable);
+		await Assert.That(await Testee(handler).CheckAsync(new Secret("trakt-client-id"))).IsEqualTo(AccessCheck.Unreachable);
 	}
 
 	private static TraktClientIdCheck Testee(MockHttpHandler handler)

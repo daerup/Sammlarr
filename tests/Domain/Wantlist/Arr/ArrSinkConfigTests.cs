@@ -5,7 +5,11 @@ namespace Domain.Tests.Wantlist.Arr;
 
 public class ArrSinkConfigTests
 {
-	private static readonly ArrInstanceConfig Connectable = ArrInstanceConfig.Empty with { Url = Some.Of("http://radarr:7878"), ApiKey = Some.Of("key") };
+	private static readonly ArrInstanceConfig Connectable = ArrInstanceConfig.Empty with
+	{
+		Url = Some.Of("http://radarr:7878"),
+		ApiKey = Some.Of(new Secret("key")),
+	};
 
 	private static readonly ArrInstanceConfig SetUp = Connectable with { QualityProfileId = Some.Of(4), RootFolderPath = Some.Of("/movies") };
 

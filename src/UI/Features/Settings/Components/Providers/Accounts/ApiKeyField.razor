@@ -98,7 +98,7 @@
         await Task.Yield();
         _savedState = await ApiKeyService
             .GetAsync(Provider)
-            .Apply(key => _savedApiKey = _apiKeyInput = key.Value)
+            .Apply(key => _savedApiKey = _apiKeyInput = key.Value.Reveal())
             .ApplyError(_ => _savedApiKey = _apiKeyInput = string.Empty)
             .Match(CredentialState.Saved, CredentialState.Idle);
         _state = _savedState;
@@ -111,7 +111,7 @@
         await ReportAsync();
 
         _state = await ApiKeyService
-            .TestAsync(Provider, _apiKeyInput)
+            .TestAsync(Provider, new Secret(_apiKeyInput))
             .Apply(key => _validatedKey = key)
             .ApplyError(_ => _validatedKey = null)
             .Match(CredentialState.Success, CredentialState.Failed);

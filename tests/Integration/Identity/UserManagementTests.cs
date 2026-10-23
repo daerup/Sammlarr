@@ -136,10 +136,10 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		host.SetCurrentTime(new DateTimeOffset(2026, 10, 4, 12, 0, 0, TimeSpan.Zero));
 		await host.SignsInWithSammlarrAccounts();
-		var guest = await host.SeedLocalUser("guest", "correct horse battery", UserRole.Member);
+		var guest = await host.SeedLocalUser("guest", new Secret("correct horse battery"), UserRole.Member);
 		for (var attempt = 0; attempt < 5; attempt++)
 		{
-			await host.Resolve<ISignInService>().SignInWithPasswordAsync("guest", "wrong password!");
+			await host.Resolve<ISignInService>().SignInWithPasswordAsync("guest", new Secret("wrong password!"));
 		}
 
 		var locked = Joined(await Testee.GetPeopleAsync(), guest).LockedUntil;
@@ -147,7 +147,7 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(locked).IsSome();
 		await Assert.That(Joined(await Testee.GetPeopleAsync(), guest).LockedUntil).IsNone();
-		await Assert.That(await host.Resolve<ISignInService>().SignInWithPasswordAsync("guest", "correct horse battery")).IsSuccess();
+		await Assert.That(await host.Resolve<ISignInService>().SignInWithPasswordAsync("guest", new Secret("correct horse battery"))).IsSuccess();
 	}
 
 	[Test]
@@ -200,7 +200,7 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task InviteAsync_ForAUsernameThatIsTaken_IsRefused()
 	{
 		await host.SignsInWithSammlarrAccounts();
-		await host.SeedLocalUser("guest", "correct horse battery", UserRole.Member);
+		await host.SeedLocalUser("guest", new Secret("correct horse battery"), UserRole.Member);
 
 		await Assert.That(await Testee.InviteAsync("Guest")).IsError();
 	}
@@ -236,11 +236,32 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task RevokeInviteAsync_WithTheNameOfSomeoneWhoJoined_RemovesNobody()
 	{
 		await host.SignsInWithSammlarrAccounts();
-		var guest = await host.SeedLocalUser("guest", "correct horse battery", UserRole.Member);
+		var guest = await host.SeedLocalUser("guest", new Secret("correct horse battery"), UserRole.Member);
 
 		await Testee.RevokeInviteAsync("guest");
 
 		await Assert.That((await Testee.GetAllAsync()).Select(user => user.Id)).Contains(guest);
+	}
+
+	[Test]
+	public async Task InviteAsync_IssuesALinkWithItsTokenInTheQuery()
+	{
+		await host.SignsInWithSammlarrAccounts();
+
+		var issued = await Testee.InviteAsync("Mira");
+
+		await Assert.That(issued).IsSuccess().And.Multiple(async link => await Assert.That(link.Path.Reveal()).Matches("^/join/[0-9a-f-]{36}\\?token=[^/&]+$"));
+	}
+
+	[Test]
+	public async Task ResetLinkAsync_IssuesALinkWithItsTokenInTheQuery()
+	{
+		await host.SignsInWithSammlarrAccounts();
+		var guest = await host.SeedLocalUser("guest", new Secret("correct horse battery"), UserRole.Member);
+
+		var issued = await Testee.ResetLinkAsync(guest);
+
+		await Assert.That(issued).IsSuccess().And.Multiple(async link => await Assert.That(link.Path.Reveal()).Matches("^/reset/[0-9a-f-]{36}\\?token=[^/&]+$"));
 	}
 
 	[Test]
@@ -251,7 +272,8 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var renewed = IssuedLinkParts.Of(await Testee.RenewInviteAsync("mira"));
 
-		var joined = await host.Resolve<IAccountLinkService>().JoinAsync(renewed.User, renewed.Token, "correct horse battery", "correct horse battery");
+		var joined = await host.Resolve<IAccountLinkService>()
+			.JoinAsync(renewed.User, renewed.Token, new Secret("correct horse battery"), new Secret("correct horse battery"));
 		await Assert.That(joined).IsSuccess();
 	}
 
@@ -259,12 +281,15 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task ResetLinkAsync_ForSomeoneRemovedSince_StopsWorking()
 	{
 		await host.SignsInWithSammlarrAccounts();
-		var guest = await host.SeedLocalUser("guest", "correct horse battery", UserRole.Member);
+		var guest = await host.SeedLocalUser("guest", new Secret("correct horse battery"), UserRole.Member);
 		var link = IssuedLinkParts.Of(await Testee.ResetLinkAsync(guest));
 		await Testee.DeleteAsync(guest);
 
 		await Assert
-			.That(await host.Resolve<IAccountLinkService>().ResetPasswordAsync(link.User, link.Token, "a brand new password", "a brand new password"))
+			.That(
+				await host.Resolve<IAccountLinkService>()
+					.ResetPasswordAsync(link.User, link.Token, new Secret("a brand new password"), new Secret("a brand new password"))
+			)
 			.IsError();
 	}
 

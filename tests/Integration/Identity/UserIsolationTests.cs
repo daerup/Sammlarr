@@ -47,7 +47,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task ApiKeys_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
-		await host.Resolve<IApiKeyConfigRepository>().StoreAsync(ApiKeyProvider.Tmdb, "tmdb-secret");
+		await host.Resolve<IApiKeyConfigRepository>().StoreAsync(ApiKeyProvider.Tmdb, new Secret("tmdb-secret"));
 
 		host.SignOut();
 		await host.SignInAs("Bob");
@@ -58,7 +58,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task Credentials_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
-		await host.Resolve<ICredentialRepository>().StoreAsync(AuthProvider.Plex, "plex-token", DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid());
+		await host.Resolve<ICredentialRepository>().StoreAsync(AuthProvider.Plex, new Secret("plex-token"), DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid());
 
 		host.SignOut();
 		await host.SignInAs("Bob");

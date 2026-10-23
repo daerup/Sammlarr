@@ -14,7 +14,7 @@ internal sealed class TraktClient(HttpClient client, IApiKeyService apiKeys, ICu
 	public async Task<HttpResponseMessage> GetAsync(string endpoint, IApiKey clientId, CancellationToken cancellationToken = default)
 	{
 		using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
-		Sign(request, clientId.Value);
+		Sign(request, clientId.Value.Reveal());
 		request.StampTriggeredBy(currentUser);
 		var response = await client.SendAsync(request, cancellationToken);
 		if (IsRejected(response))

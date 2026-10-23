@@ -52,19 +52,19 @@ public class StagingRunTests
 		var set = StagingRun.Settings(
 			Options() with
 			{
-				MdblistKey = "staging-mdblist-key",
-				MalClientId = "staging-mal-client-id",
-				TraktClientId = "staging-trakt-client-id",
+				MdblistKey = new Secret("staging-mdblist-key"),
+				MalClientId = new Secret("staging-mal-client-id"),
+				TraktClientId = new Secret("staging-trakt-client-id"),
 			},
 			movies: 4,
 			shows: 6
 		);
 		var unset = StagingRun.Settings(Options(), movies: 4, shows: 6);
 
-		await Assert.That(set.MdblistKey).IsSome().And.IsEqualTo("staging-mdblist-key");
-		await Assert.That(set.MalKey).IsSome().And.IsEqualTo("staging-mal-client-id");
+		await Assert.That(set.MdblistKey.Map(key => key.Reveal())).IsSome().And.IsEqualTo("staging-mdblist-key");
+		await Assert.That(set.MalKey.Map(key => key.Reveal())).IsSome().And.IsEqualTo("staging-mal-client-id");
 		await Assert.That(unset.MdblistKey).IsNone();
-		await Assert.That(set.TraktKey).IsSome().And.IsEqualTo("staging-trakt-client-id");
+		await Assert.That(set.TraktKey.Map(key => key.Reveal())).IsSome().And.IsEqualTo("staging-trakt-client-id");
 		await Assert.That(unset.MalKey).IsNone();
 		await Assert.That(unset.TraktKey).IsNone();
 	}
@@ -87,17 +87,17 @@ public class StagingRunTests
 				Notifications = new SeedNotifications
 				{
 					Template = new SeedTemplate { Title = "{{ title }}", Message = "{{ summary }}" },
-					Webhook = new SeedWebhook { Name = "Catcher webhook", Secret = "whsec_c2FtbWxhcnItc3RhZ2luZy13ZWJob29rLXNlY3JldCE=" },
+					Webhook = new SeedWebhook { Name = "Catcher webhook", Secret = new Secret("whsec_c2FtbWxhcnItc3RhZ2luZy13ZWJob29rLXNlY3JldCE=") },
 					Pushover = new SeedPushover
 					{
 						Name = "Catcher Pushover",
-						AppToken = "staging-app-token",
-						UserKey = "staging-user-key",
+						AppToken = new Secret("staging-app-token"),
+						UserKey = new Secret("staging-user-key"),
 					},
 				},
 			},
-			TmdbKey = "staging-tmdb-key",
-			ArrApiKey = "0123456789abcdef0123456789abcdef",
+			TmdbKey = new Secret("staging-tmdb-key"),
+			ArrApiKey = new Secret("0123456789abcdef0123456789abcdef"),
 			IndexerUrl = "http://wiremock:8080/newznab",
 			CatcherUrl = "http://catcher:8080/session",
 			Radarr = new ArrAppOptions

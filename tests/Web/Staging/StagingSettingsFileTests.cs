@@ -69,7 +69,7 @@ public class StagingSettingsFileTests
 	[Test]
 	public async Task Seed_InTheStagingSettings_SignsWebhooksWithAStandardWebhooksSecret()
 	{
-		var secret = Settings.GetSection("Staging:Seed:Notifications:Webhook").Get<SeedWebhook>()!.Secret;
+		var secret = Settings.GetSection("Staging:Seed:Notifications:Webhook").Get<SeedWebhook>()!.Secret.Reveal();
 
 		await Assert.That(secret).StartsWith("whsec_");
 		await Assert.That(Convert.FromBase64String(secret["whsec_".Length..])).Count().IsGreaterThanOrEqualTo(24);

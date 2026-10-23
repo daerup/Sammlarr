@@ -14,7 +14,7 @@ internal sealed record NullableMember(Type Type, MemberInfo Member, string Kind,
 
 internal static class Absence
 {
-	private const BindingFlags Declared = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
+	internal const BindingFlags Declared = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
 	private static readonly Assembly[] Scanned = [.. Projects.All.Except([Projects.Ui]), Projects.Messaging];
 

@@ -22,7 +22,8 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 		_testee = new NotificationDeliveryOutcomeRepository(fixture.ContextFactory);
 	}
 
-	private Task<Guid> CreateTargetAsync() => _targets.CreateAsync(new NotificationTarget(Guid.Empty, "Target", true, new PushoverConfig("token", "key")));
+	private Task<Guid> CreateTargetAsync() =>
+		_targets.CreateAsync(new NotificationTarget(Guid.Empty, "Target", true, new PushoverConfig(new Secret("token"), new Secret("key"))));
 
 	private async Task<IReadOnlyList<NotificationDeliveryOutcome>> RecentAsync(Guid targetId, int count = 10) =>
 		(await _testee.GetRecentByTargetAsync(count)).GetValueOrDefault(targetId, []);

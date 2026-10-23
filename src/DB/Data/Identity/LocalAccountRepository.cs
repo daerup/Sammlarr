@@ -33,7 +33,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		return [.. members.Select(ToAccount)];
 	}
 
-	public async Task<Result<User>> CreateAsync(User user, string username, string password, CancellationToken cancellationToken = default)
+	public async Task<Result<User>> CreateAsync(User user, string username, Secret password, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
 		var row = new UserRow
@@ -48,7 +48,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		return await scope.InTransactionAsync(
 			async users =>
 			{
-				var created = await users.CreateAsync(row, password);
+				var created = await users.CreateAsync(row, password.Reveal());
 				if (created.Succeeded)
 				{
 					(await users.AddToRoleAsync(row, user.Role.ToString())).Ensure();
@@ -60,7 +60,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		);
 	}
 
-	public async Task<PasswordAttempt> CheckPasswordAsync(string username, string password, CancellationToken cancellationToken = default)
+	public async Task<PasswordAttempt> CheckPasswordAsync(string username, Secret password, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
 		var signIns = scope.ServiceProvider.GetRequiredService<SignInManager<UserRow>>();
@@ -70,7 +70,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 			return new PasswordRejected();
 		}
 
-		var result = await signIns.CheckPasswordSignInAsync(row, password, lockoutOnFailure: true);
+		var result = await signIns.CheckPasswordSignInAsync(row, password.Reveal(), lockoutOnFailure: true);
 		if (result.IsLockedOut)
 		{
 			return new AccountLockedOut();
@@ -84,13 +84,13 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		return new PasswordAccepted(Members.ToUser(row, await RoleOfAsync(signIns.UserManager, row)));
 	}
 
-	public async Task<Result<User>> ChangePasswordAsync(UserId id, string current, string next, CancellationToken cancellationToken = default)
+	public async Task<Result<User>> ChangePasswordAsync(UserId id, Secret current, Secret next, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
 		var signIns = scope.ServiceProvider.GetRequiredService<SignInManager<UserRow>>();
 		var users = signIns.UserManager;
 		var row = await users.RequireAsync(id);
-		var check = await signIns.CheckPasswordSignInAsync(row, current, lockoutOnFailure: true);
+		var check = await signIns.CheckPasswordSignInAsync(row, current.Reveal(), lockoutOnFailure: true);
 		if (check.IsLockedOut)
 		{
 			return Error.From(Lockout.Message);
@@ -101,7 +101,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 			return Error.From(users.ErrorDescriber.PasswordMismatch().Description);
 		}
 
-		var changed = await users.ChangePasswordAsync(row, current, next);
+		var changed = await users.ChangePasswordAsync(row, current.Reveal(), next.Reveal());
 		return changed.ToResult(Members.ToUser(row, await RoleOfAsync(users, row)));
 	}
 
@@ -155,7 +155,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
 		var token = await users.GeneratePasswordResetTokenAsync(await users.RequireAsync(id));
 		var lifetime = scope.ServiceProvider.GetRequiredService<IOptions<DataProtectionTokenProviderOptions>>().Value.TokenLifespan;
-		return new IssuedToken(Base64Url.EncodeToString(Encoding.UTF8.GetBytes(token)), lifetime);
+		return new IssuedToken(new Secret(Base64Url.EncodeToString(Encoding.UTF8.GetBytes(token))), lifetime);
 	}
 
 	public async Task RevokeTokensAsync(UserId id, CancellationToken cancellationToken = default)
@@ -165,7 +165,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		(await users.UpdateSecurityStampAsync(await users.RequireAsync(id))).Ensure();
 	}
 
-	public async Task<Optional<string>> LinkHolderAsync(AccountLinkKind kind, UserId id, string token, CancellationToken cancellationToken = default)
+	public async Task<Optional<string>> LinkHolderAsync(AccountLinkKind kind, UserId id, Secret token, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
 		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
@@ -184,7 +184,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		return Optional.When(valid, () => row.DisplayName);
 	}
 
-	public async Task<Result<User>> JoinAsync(UserId id, string token, string password, DateTimeOffset joinedAt, CancellationToken cancellationToken = default)
+	public async Task<Result<User>> JoinAsync(UserId id, Secret token, Secret password, DateTimeOffset joinedAt, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
 		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
@@ -195,11 +195,11 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		}
 
 		row.JoinedAt = joinedAt;
-		var joined = await users.ResetPasswordAsync(row, Decode(token), password);
+		var joined = await users.ResetPasswordAsync(row, Decode(token), password.Reveal());
 		return joined.ToResult(Members.ToUser(row, await RoleOfAsync(users, row)));
 	}
 
-	public async Task<Result<User>> ResetPasswordAsync(UserId id, string token, string password, CancellationToken cancellationToken = default)
+	public async Task<Result<User>> ResetPasswordAsync(UserId id, Secret token, Secret password, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
 		return await scope.InTransactionAsync(
@@ -218,12 +218,12 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		);
 	}
 
-	public async Task<Result<ConfigReset>> ResetFromConfigAsync(UserId id, string password, CancellationToken cancellationToken = default)
+	public async Task<Result<ConfigReset>> ResetFromConfigAsync(UserId id, Secret password, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopes.CreateAsyncScope();
 		var users = scope.ServiceProvider.GetRequiredService<UserManager<UserRow>>();
 		var row = await users.RequireAsync(id);
-		if (row.ConfigResetHash is { } applied && users.PasswordHasher.VerifyHashedPassword(row, applied, password) != PasswordVerificationResult.Failed)
+		if (row.ConfigResetHash is { } applied && users.PasswordHasher.VerifyHashedPassword(row, applied, password.Reveal()) != PasswordVerificationResult.Failed)
 		{
 			return Success.Of(ConfigReset.AlreadyApplied);
 		}
@@ -231,7 +231,7 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		var replaced = await ReplaceAsync(users, row, await users.GeneratePasswordResetTokenAsync(row), password);
 		if (replaced.Succeeded)
 		{
-			row.ConfigResetHash = users.PasswordHasher.HashPassword(row, password);
+			row.ConfigResetHash = users.PasswordHasher.HashPassword(row, password.Reveal());
 			(await users.UpdateAsync(row)).Ensure();
 		}
 
@@ -255,19 +255,19 @@ internal sealed class LocalAccountRepository(IDbContextFactory<SammlarrDbContext
 		};
 	}
 
-	private static async Task<UserRow?> HolderAsync(UserManager<UserRow> users, AccountLinkKind kind, UserId id, string token)
+	private static async Task<UserRow?> HolderAsync(UserManager<UserRow> users, AccountLinkKind kind, UserId id, Secret token)
 	{
 		var row = await users.FindByIdAsync(id.Value.ToString());
-		return row is not null && Holds(kind, row) && Base64Url.IsValid(token) ? row : null;
+		return row is not null && Holds(kind, row) && Base64Url.IsValid(token.Reveal()) ? row : null;
 	}
 
 	private static Result<User> Unusable(UserManager<UserRow> users) => Error.From(users.ErrorDescriber.InvalidToken().Description);
 
-	private static string Decode(string token) => Encoding.UTF8.GetString(Base64Url.DecodeFromChars(token));
+	private static string Decode(Secret token) => Encoding.UTF8.GetString(Base64Url.DecodeFromChars(token.Reveal()));
 
-	private static async Task<IdentityResult> ReplaceAsync(UserManager<UserRow> users, UserRow row, string token, string password)
+	private static async Task<IdentityResult> ReplaceAsync(UserManager<UserRow> users, UserRow row, string token, Secret password)
 	{
-		var reset = await users.ResetPasswordAsync(row, token, password);
+		var reset = await users.ResetPasswordAsync(row, token, password.Reveal());
 		if (reset.Succeeded)
 		{
 			await UnlockAsync(users, row);

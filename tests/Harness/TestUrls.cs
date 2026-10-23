@@ -12,4 +12,6 @@ internal static class TestUrls
 	internal const string AniList = "anilist.test.com";
 	internal const string Mal = "mal.test.com";
 	internal const string Trakt = "trakt.test.com";
+	internal const string Pushover = "pushover.test.com";
+	internal const string Webhook = "hooks.test.com";
 }

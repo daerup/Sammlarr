@@ -101,14 +101,14 @@ internal sealed record SeedWebhook
 {
 	public required string Name { get; init; }
 
-	public required string Secret { get; init; }
+	public required Secret Secret { get; init; }
 }
 
 internal sealed record SeedPushover
 {
 	public required string Name { get; init; }
 
-	public required string AppToken { get; init; }
+	public required Secret AppToken { get; init; }
 
-	public required string UserKey { get; init; }
+	public required Secret UserKey { get; init; }
 }

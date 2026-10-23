@@ -14,15 +14,15 @@ internal sealed record StagingOptions
 
 	public required StagingSeedData Seed { get; init; }
 
-	public required string TmdbKey { get; init; }
+	public required Secret TmdbKey { get; init; }
 
-	public string? MdblistKey { get; init; }
+	public Secret? MdblistKey { get; init; }
 
-	public string? MalClientId { get; init; }
+	public Secret? MalClientId { get; init; }
 
-	public string? TraktClientId { get; init; }
+	public Secret? TraktClientId { get; init; }
 
-	public required string ArrApiKey { get; init; }
+	public required Secret ArrApiKey { get; init; }
 
 	public required string IndexerUrl { get; init; }
 
@@ -128,7 +128,7 @@ internal sealed class StagingRun(IServiceProvider services, IConfiguration confi
 		);
 	}
 
-	private static ArrInstanceConfig Instance(ArrAppOptions app, string apiKey, int profileId)
+	private static ArrInstanceConfig Instance(ArrAppOptions app, Secret apiKey, int profileId)
 	{
 		return new ArrInstanceConfig
 		{

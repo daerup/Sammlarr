@@ -332,7 +332,7 @@ public class NotificationDispatchHandlerTests
 	{
 		await host.SignInAs(name);
 		var target = await host.Resolve<INotificationTargetRepository>()
-			.CreateAsync(new NotificationTarget(Guid.Empty, name, true, new PushoverConfig("token", "key")));
+			.CreateAsync(new NotificationTarget(Guid.Empty, name, true, new PushoverConfig(new Secret("token"), new Secret("key"))));
 		await host.Resolve<INotificationSubscriptionRepository>().AddAsync(target, [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None);
 		return (host.CurrentUser.Id, target);
 	}

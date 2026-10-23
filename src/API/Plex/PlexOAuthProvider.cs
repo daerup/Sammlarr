@@ -67,16 +67,16 @@ internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, Pl
 			return Error.From("Authentication was not completed. Please try again.");
 		}
 
-		return await FetchAccountAsync(authToken, clientId, pin.ExpiresAt, cancellationToken);
+		return await FetchAccountAsync(new Secret(authToken), clientId, pin.ExpiresAt, cancellationToken);
 	}
 
-	public async Task<AccessCheck> CheckAsync(Guid clientId, string accessToken, CancellationToken cancellationToken = default)
+	public async Task<AccessCheck> CheckAsync(Guid clientId, Secret accessToken, CancellationToken cancellationToken = default)
 	{
 		using var request = UserRequest(accessToken, clientId);
 		return await httpClientFactory.CreateClient(PlexClient.Unauthenticated).CheckAccessAsync(request, cancellationToken);
 	}
 
-	private async Task<Result<ExternalLogin>> FetchAccountAsync(string accessToken, Guid clientId, DateTimeOffset expiresAt, CancellationToken cancellationToken)
+	private async Task<Result<ExternalLogin>> FetchAccountAsync(Secret accessToken, Guid clientId, DateTimeOffset expiresAt, CancellationToken cancellationToken)
 	{
 		using var request = UserRequest(accessToken, clientId);
 		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
@@ -102,10 +102,10 @@ internal sealed class PlexOAuthProvider(IHttpClientFactory httpClientFactory, Pl
 		);
 	}
 
-	private HttpRequestMessage UserRequest(string accessToken, Guid clientId)
+	private HttpRequestMessage UserRequest(Secret accessToken, Guid clientId)
 	{
 		var request = new HttpRequestMessage(HttpMethod.Get, urls.User);
-		request.Headers.Add("X-Plex-Token", accessToken);
+		request.Headers.Add("X-Plex-Token", accessToken.Reveal());
 		request.Headers.AddClientId(clientId);
 		return request;
 	}

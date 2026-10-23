@@ -15,7 +15,7 @@ internal sealed class AdminPasswordReset(IServiceProvider services, AccountsOpti
 
 	public async Task StartAsync(CancellationToken cancellationToken)
 	{
-		if (options.ResetAdminPassword.Length == 0)
+		if (options.ResetAdminPassword.Reveal().Length == 0)
 		{
 			return;
 		}

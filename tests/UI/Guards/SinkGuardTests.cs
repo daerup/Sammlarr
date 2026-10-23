@@ -14,7 +14,7 @@ public class SinkGuardTests : BunitContext
 	private static readonly ArrInstanceConfig SetUp = new()
 	{
 		Url = Some.Of("http://radarr:7878"),
-		ApiKey = Some.Of("key"),
+		ApiKey = Some.Of(new Secret("key")),
 		QualityProfileId = Some.Of(1),
 		RootFolderPath = Some.Of("/movies"),
 	};

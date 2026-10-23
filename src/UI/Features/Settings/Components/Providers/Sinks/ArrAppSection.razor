@@ -218,11 +218,11 @@
 
     private string _key = string.Empty;
 
-    private (Optional<string> Url, Optional<string> Key)? _stored;
+    private (Optional<string> Url, Optional<Secret> Key)? _stored;
 
     private string Placeholder => $"http://{App.Name.ToLowerInvariant()}:{App.DefaultPort}";
 
-    private ArrInstanceConfig Typed => Instance with { Url = Text(_url), ApiKey = Text(_key) };
+    private ArrInstanceConfig Typed => Instance with { Url = Text(_url), ApiKey = Text(_key).Map(key => new Secret(key)) };
 
     private IEnumerable<SelectOption<int?>> ProfileOptions => Choices.Profiles.Select(profile => new SelectOption<int?>(profile.Id, profile.Name));
 
@@ -333,7 +333,7 @@
 
         _stored = stored;
         _url = Instance.Url.GetValueOr(string.Empty);
-        _key = Instance.ApiKey.GetValueOr(string.Empty);
+        _key = Instance.ApiKey.Map(key => key.Reveal()).GetValueOr(string.Empty);
     }
 
     private async Task UrlChangedAsync(string? url)

@@ -871,6 +871,7 @@
           "Messaging": "[1.0.0, )",
           "Microsoft.AspNetCore.DataProtection": "[11.0.0-rc.2.26504.105, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[11.0.0-rc.2.26504.105, )",
+          "Microsoft.Extensions.Diagnostics.Testing": "[10.11.0, )",
           "Microsoft.Extensions.TimeProvider.Testing": "[10.11.0, )",
           "TestInfrastructure": "[1.0.0, )"
         }
@@ -965,6 +966,17 @@
         "requested": "[11.0.0-rc.2.26504.105, )",
         "resolved": "11.0.0-rc.2.26504.105",
         "contentHash": "yjotWRNS6RNuJE1UNlVWgRTPfEhavYoGMdORt3Y90rB8bJo+GNVAsrnvclyPn830Ws2etLC94QcYBZ13Naszgw=="
+      },
+      "Microsoft.Extensions.Diagnostics.Testing": {
+        "type": "CentralTransitive",
+        "requested": "[10.11.0, )",
+        "resolved": "10.11.0",
+        "contentHash": "Waxh+cfGkAj6n9gxmnIaYT681UxBXrlQdYF5w9yycofFCuNcmknBml2r65OZxuClrUjI4v8IK85+guWGzUja+A==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "10.0.13",
+          "Microsoft.Extensions.Options.ConfigurationExtensions": "10.0.13",
+          "Microsoft.Extensions.Telemetry.Abstractions": "10.11.0"
+        }
       },
       "Microsoft.Extensions.Http.Resilience": {
         "type": "CentralTransitive",

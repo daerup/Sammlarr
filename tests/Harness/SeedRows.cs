@@ -12,7 +12,7 @@ internal static class SeedRows
 {
 	internal static void ApiKey(SammlarrDbContext context, ApiKeyProvider provider, string apiKey)
 	{
-		context.Set<ApiKeyConfigRow>().Add(new ApiKeyConfigRow { Provider = provider, ApiKey = apiKey });
+		context.Set<ApiKeyConfigRow>().Add(new ApiKeyConfigRow { Provider = provider, ApiKey = new Secret(apiKey) });
 		Save(context);
 	}
 
@@ -25,7 +25,7 @@ internal static class SeedRows
 				{
 					Provider = provider,
 					ClientId = Guid.NewGuid(),
-					AccessToken = token,
+					AccessToken = new Secret(token),
 					ExpiresAt = new DateTimeOffset(2030, 1, 1, 0, 0, 0, TimeSpan.Zero),
 				}
 			);

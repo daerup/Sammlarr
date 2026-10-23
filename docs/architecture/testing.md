@@ -30,6 +30,13 @@ helpers stub what an account brings with it: `WithPlexAccount` accepts the token
 answers title lookups with `[]`. The stub answers with the first pattern registered that matches, so a test overrides
 a default by stubbing the same key (`$"{TestUrls.MdblistApi}/tmdb/movie"`), not a shorter one.
 
+`CaptureTelemetry()`, called before the first `Resolve`, records every log line the app's services write at Trace and
+every span an activity source starts (requests through `HttpStub` start no HttpClient span; `WebhookTracingTests` in
+`tests/API` covers that path), `DatabaseHolds(text)` searches the host's `.db` and `-wal` bytes, and
+`HttpStub.Saw(text)` searches every request's URL, headers and body. `SecretSweepTests` uses each kind of secret the
+way the app does, against a stub that refuses it where it goes out, and proves that no log line, span or database byte
+holds it.
+
 The E2E suite includes the tests on the self-hosted stacks and the staging smoke test, which is skipped by default.
 
 ## Running

@@ -129,7 +129,7 @@
         await Task.Yield();
         _savedState = await Credentials
             .GetAsync(Provider)
-            .Apply(credential => _savedToken = _tokenInput = credential.AccessToken)
+            .Apply(credential => _savedToken = _tokenInput = credential.AccessToken.Reveal())
             .Apply(credential => _clientId = credential.ClientId)
             .ApplyError(_ => _savedToken = _tokenInput = string.Empty)
             .Match(CredentialState.Saved, CredentialState.Idle);
@@ -141,13 +141,13 @@
     {
         _state = CredentialState.Testing;
         _clientId = Guid.NewGuid();
-        _state = await Credentials.TestAsync(Provider, new StoredCredential(_tokenInput, DateTimeOffset.MaxValue, _clientId)).Match(CredentialState.Success, CredentialState.Failed);
+        _state = await Credentials.TestAsync(Provider, new StoredCredential(new Secret(_tokenInput), DateTimeOffset.MaxValue, _clientId)).Match(CredentialState.Success, CredentialState.Failed);
     }
 
     private async Task SaveAsync()
     {
         _state = CredentialState.Saving;
-        await Credentials.StoreAsync(Provider, new StoredCredential(_tokenInput, DateTimeOffset.MaxValue, _clientId));
+        await Credentials.StoreAsync(Provider, new StoredCredential(new Secret(_tokenInput), DateTimeOffset.MaxValue, _clientId));
         _savedToken = _tokenInput;
         _savedState = CredentialState.Saved;
         _state = CredentialState.Saved;

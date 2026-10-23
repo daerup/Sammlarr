@@ -59,7 +59,7 @@ public class NotificationTargetDialogTests : BunitContext
 		cut.InvokeAsync(() => cut.FindComponents<BbInput>().Single(input => input.Instance.Placeholder == placeholder).Instance.ValueChanged.InvokeAsync(text));
 
 	private static bool IsTheWebhook(NotificationTarget? target, string secret) =>
-		target is { Config: WebhookConfig { Url: Url } webhook } && webhook.SigningSecret == secret;
+		target is { Config: WebhookConfig webhook } && webhook.Url.Reveal() == Url && webhook.SigningSecret.Reveal() == secret;
 
 	private static AngleSharp.Dom.IElement Button(IRenderedComponent<NotificationTargetDialog> cut, string text) =>
 		cut.FindAll("button").Single(button => button.TextContent.Trim() == text);

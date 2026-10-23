@@ -17,7 +17,12 @@ namespace Core.Tests.Auth;
 
 public class SignInServiceTests : IDisposable
 {
-	private static readonly ExternalLogin Login = new("plex-uuid", "Zoe", "avatar", new OAuthTokenGrant("token", DateTimeOffset.UnixEpoch, Guid.Empty));
+	private static readonly ExternalLogin Login = new(
+		"plex-uuid",
+		"Zoe",
+		"avatar",
+		new OAuthTokenGrant(new Secret("token"), DateTimeOffset.UnixEpoch, Guid.Empty)
+	);
 
 	private readonly Mock<IOAuthProvider> _plex = IOAuthProvider.Mock();
 	private readonly Mock<IUserRepository> _users = IUserRepository.Mock();
@@ -81,7 +86,7 @@ public class SignInServiceTests : IDisposable
 		_plex.CompleteLoginAsync(Any(), Any()).Returns(Success.Of(Login));
 		_users.FindByLoginAsync(Any<AuthProvider>(), Any(), Any()).Returns(new None());
 
-		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", "AAAA-AAAA");
+		var result = await Testee.CompleteSetupAsync(AuthProvider.Plex, "callback", new Secret("AAAA-AAAA"));
 
 		await Assert.That(result).IsError();
 		_users.CreateAsync(Any<User>(), Any<AuthProvider>(), Any(), Any()).WasCalled(Times.Never);
@@ -91,9 +96,9 @@ public class SignInServiceTests : IDisposable
 	public async Task SignInWithPasswordAsync_ForALockedOutAccount_SaysSoAndWarnsWhichAccount()
 	{
 		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Closed) with { AuthProvider = AuthProvider.Local });
-		_accounts.CheckPasswordAsync("ada", "secret", Any()).Returns(new AccountLockedOut());
+		_accounts.CheckPasswordAsync("ada", new Secret("secret"), Any()).Returns(new AccountLockedOut());
 
-		var result = await Testee.SignInWithPasswordAsync("ada", "secret");
+		var result = await Testee.SignInWithPasswordAsync("ada", new Secret("secret"));
 
 		await Assert
 			.That(result)
@@ -107,9 +112,9 @@ public class SignInServiceTests : IDisposable
 	{
 		const string username = "ada\r\nSign-in completed for Local as user\nadmin";
 		_config.GetAsync(Any()).Returns(Config(RegistrationMode.Closed) with { AuthProvider = AuthProvider.Local });
-		_accounts.CheckPasswordAsync(username, "secret", Any()).Returns(new PasswordRejected());
+		_accounts.CheckPasswordAsync(username, new Secret("secret"), Any()).Returns(new PasswordRejected());
 
-		await Testee.SignInWithPasswordAsync(username, "secret");
+		await Testee.SignInWithPasswordAsync(username, new Secret("secret"));
 
 		await Assert.That(Warnings()).IsEquivalentTo(["Sign-in failed for Local user ada Sign-in completed for Local as user admin: wrong username or password"]);
 	}

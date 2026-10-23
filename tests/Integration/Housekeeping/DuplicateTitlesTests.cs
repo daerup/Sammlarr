@@ -141,7 +141,7 @@ public class DuplicateTitlesTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task RunAsync_WhenOnlyAnotherUserHasAnMdblistKey_AsksWithThatUsersKey()
 	{
-		var guest = await host.SeedLocalUser("guest", "a test password", UserRole.Member);
+		var guest = await host.SeedLocalUser("guest", new Secret("a test password"), UserRole.Member);
 		host.CurrentUser.Id = guest;
 		await host.WithMdblistAccount("guest-mdblist-key");
 		host.CurrentUser.Id = UserId.From(SammlarrTestHost.SeededAdmin.Id);
@@ -158,7 +158,7 @@ public class DuplicateTitlesTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.Resolve<IApiKeyService>().StoreAsync(new TestApiKey(ApiKeyProvider.Mdblist, "valid-mdblist-key"));
 		host.MdblistKeyHasLeft("valid-mdblist-key", 400);
-		var guest = await host.SeedLocalUser("guest", "a test password", UserRole.Member);
+		var guest = await host.SeedLocalUser("guest", new Secret("a test password"), UserRole.Member);
 		host.CurrentUser.Id = guest;
 		await host.WithMdblistAccount("guest-mdblist-key");
 		host.CurrentUser.Id = UserId.From(SammlarrTestHost.SeededAdmin.Id);

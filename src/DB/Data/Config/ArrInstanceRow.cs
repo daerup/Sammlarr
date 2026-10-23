@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using DB.Conversion.Encryption;
 
 namespace DB.Data.Config;
 
@@ -12,8 +11,7 @@ internal sealed record ArrInstanceRow
 	public string? ExternalUrl { get; set; }
 
 	[MaxLength(4096)]
-	[Encrypted]
-	public string? ApiKey { get; set; }
+	public Secret? ApiKey { get; set; }
 
 	public int? QualityProfileId { get; set; }
 

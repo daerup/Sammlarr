@@ -20,7 +20,7 @@ internal sealed class AccountLinkService(
 {
 	private static readonly Error Unusable = Error.From(UnusableLink.Message);
 
-	public async Task<Optional<AccountLinkPreview>> InspectAsync(AccountLinkKind kind, UserId user, string token, CancellationToken cancellationToken = default)
+	public async Task<Optional<AccountLinkPreview>> InspectAsync(AccountLinkKind kind, UserId user, Secret token, CancellationToken cancellationToken = default)
 	{
 		if (!await IsLocalAsync(cancellationToken))
 		{
@@ -31,7 +31,7 @@ internal sealed class AccountLinkService(
 		return holder.Map(name => new AccountLinkPreview(kind, name));
 	}
 
-	public async Task<Result<User>> JoinAsync(UserId user, string token, string password, string confirmation, CancellationToken cancellationToken = default)
+	public async Task<Result<User>> JoinAsync(UserId user, Secret token, Secret password, Secret confirmation, CancellationToken cancellationToken = default)
 	{
 		var problem = await ProblemAsync(password, confirmation, cancellationToken);
 		return await problem.Match(refused => refused, () => JoinedAsync(user, token, password, cancellationToken));
@@ -39,9 +39,9 @@ internal sealed class AccountLinkService(
 
 	public async Task<Result<User>> ResetPasswordAsync(
 		UserId user,
-		string token,
-		string password,
-		string confirmation,
+		Secret token,
+		Secret password,
+		Secret confirmation,
 		CancellationToken cancellationToken = default
 	)
 	{
@@ -54,13 +54,13 @@ internal sealed class AccountLinkService(
 		return (await providerConfig.GetAsync(cancellationToken)).AuthProvider == AuthProvider.Local;
 	}
 
-	private async Task<Optional<Error>> ProblemAsync(string password, string confirmation, CancellationToken cancellationToken)
+	private async Task<Optional<Error>> ProblemAsync(Secret password, Secret confirmation, CancellationToken cancellationToken)
 	{
 		var local = await IsLocalAsync(cancellationToken);
 		return Optional.When(!local, () => Unusable).Or(() => Passwords.Mismatch(password, confirmation));
 	}
 
-	private async Task<Result<User>> JoinedAsync(UserId id, string token, string password, CancellationToken cancellationToken)
+	private async Task<Result<User>> JoinedAsync(UserId id, Secret token, Secret password, CancellationToken cancellationToken)
 	{
 		var joined = await accounts.JoinAsync(id, token, password, clock.GetUtcNow(), cancellationToken);
 		return await joined.Map(user => WelcomeAsync(user, cancellationToken));
@@ -77,7 +77,7 @@ internal sealed class AccountLinkService(
 		return Success.Of(user);
 	}
 
-	private async Task<Result<User>> ResetAsync(UserId id, string token, string password, CancellationToken cancellationToken)
+	private async Task<Result<User>> ResetAsync(UserId id, Secret token, Secret password, CancellationToken cancellationToken)
 	{
 		var reset = await accounts.ResetPasswordAsync(id, token, password, cancellationToken);
 		reset.Apply(_ => Announce(id));

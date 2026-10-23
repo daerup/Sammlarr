@@ -79,6 +79,10 @@ limits and refuses, unsent, when down or blocked too long
 **Wait budget**: How long a load waits on a blocked service: `MaxWait` per id lookup, `EnrichWait` per enricher ask,
 `ShownWait` for fields a card only shows ([Cross-cutting Concepts](06-crosscutting.md#wait-budgets)).
 
+**Secret**: A value that grants access or proves who someone is, such as an API key, a token, a password or the
+setup code. It is a `Secret`, which prints `***` and, where it is stored, is stored encrypted
+([Cross-cutting Concepts](06-crosscutting.md#secrets-and-configuration)).
+
 ## Feeds and ratings
 
 **Feed**: A saved list or chart from MDBList, TMDB, Trakt, AniList or MyAnimeList, with a strategy, optional

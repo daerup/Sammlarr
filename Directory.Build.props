@@ -20,6 +20,7 @@
 		<Using Include="Shared" />
 		<Using Include="Shared.Collections" />
 		<Using Include="Shared.Extensions" />
+		<Using Include="Shared.Secret" Alias="Secret" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Roslyn'">
 		<ProjectReference

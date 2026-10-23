@@ -13,7 +13,11 @@ namespace Core.Tests.Providers;
 
 public sealed class ServiceReadinessTests : IDisposable
 {
-	private static readonly ArrInstanceConfig Reachable = ArrInstanceConfig.Empty with { Url = Some.Of("http://radarr:7878"), ApiKey = Some.Of("arr-key") };
+	private static readonly ArrInstanceConfig Reachable = ArrInstanceConfig.Empty with
+	{
+		Url = Some.Of("http://radarr:7878"),
+		ApiKey = Some.Of(new Secret("arr-key")),
+	};
 
 	private readonly MemoryCache _memory = new(new MemoryCacheOptions());
 	private readonly Mock<IApiKeyConfigRepository> _keys = IApiKeyConfigRepository.Mock();
@@ -53,7 +57,7 @@ public sealed class ServiceReadinessTests : IDisposable
 	[Test]
 	public async Task ConnectedAsync_ForAStoredKey_IsConnected()
 	{
-		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of("tmdb-key"));
+		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(new Secret("tmdb-key")));
 
 		await Assert.That(await Testee.ConnectedAsync([RemoteService.Tmdb, RemoteService.Mdblist])).IsEquivalentTo([RemoteService.Tmdb]);
 	}
@@ -61,7 +65,7 @@ public sealed class ServiceReadinessTests : IDisposable
 	[Test]
 	public async Task ConnectedAsync_ForAKeyTheServiceRejected_IsNotConnected()
 	{
-		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of("tmdb-key"));
+		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(new Secret("tmdb-key")));
 
 		_keyChecks.Reject(ApiKeyProvider.Tmdb);
 
@@ -73,7 +77,7 @@ public sealed class ServiceReadinessTests : IDisposable
 	[Arguments(AccessCheck.Spent)]
 	public async Task ConnectedAsync_ForAKeyItCouldNotCheck_StaysConnected(AccessCheck answer)
 	{
-		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of("tmdb-key"));
+		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(new Secret("tmdb-key")));
 
 		await _keyChecks.GetOrLoadAsync(
 			ApiKeyProvider.Tmdb,
@@ -87,7 +91,9 @@ public sealed class ServiceReadinessTests : IDisposable
 	[Test]
 	public async Task ConnectedAsync_ForAStoredSignIn_IsConnectedUntilItIsRejected()
 	{
-		_credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Success.Of(new StoredCredential("plex-token", DateTimeOffset.MaxValue, Guid.NewGuid())));
+		_credentials
+			.GetAsync(AuthProvider.Plex, Any())
+			.Returns(Success.Of(new StoredCredential(new Secret("plex-token"), DateTimeOffset.MaxValue, Guid.NewGuid())));
 
 		await Assert.That(await Testee.ConnectedAsync([RemoteService.Plex])).IsEquivalentTo([RemoteService.Plex]);
 		_signInChecks.Reject(AuthProvider.Plex);

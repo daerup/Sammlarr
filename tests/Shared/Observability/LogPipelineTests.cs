@@ -10,6 +10,8 @@ namespace Shared.Tests.Observability;
 
 public class LogPipelineTests
 {
+	private const string Canary = "canary-secret";
+
 	[Test]
 	[Arguments("Web.Staging.StagingRun", true)]
 	[Arguments("Core.Media.DetailsFetcher", true)]
@@ -39,6 +41,32 @@ public class LogPipelineTests
 			.IsEquivalentTo(["An exception occurred while processing the key element {Element}."]);
 	}
 
+	[Test]
+	[Arguments("Loaded {Key}")]
+	[Arguments("Loaded {@Key}")]
+	public async Task Configure_ForASecret_WritesNoValue(string template)
+	{
+		var captured = new CapturingSink();
+		using var logger = Pipeline(captured);
+
+		logger.Warning(template, new Secret(Canary));
+
+		await Assert.That(captured.Last.RenderMessage()).DoesNotContain(Canary);
+	}
+
+	[Test]
+	[Arguments("Loaded {Holder}")]
+	[Arguments("Loaded {@Holder}")]
+	public async Task Configure_ForARecordHoldingASecret_WritesNoValue(string template)
+	{
+		var captured = new CapturingSink();
+		using var logger = Pipeline(captured);
+
+		logger.Warning(template, new Holder("radarr", new Secret(Canary), Some.Of(new Secret(Canary))));
+
+		await Assert.That(captured.Last.RenderMessage()).DoesNotContain(Canary).And.Contains("radarr");
+	}
+
 	private static Logger Pipeline(CapturingSink captured)
 	{
 		var provider = new ServiceCollection()
@@ -50,4 +78,6 @@ public class LogPipelineTests
 		LogPipeline.Configure(configuration, provider, new ObservabilityContext(false, "Tests", "0.0.0"));
 		return configuration.CreateLogger();
 	}
+
+	private sealed record Holder(string Name, Secret Key, Optional<Secret> Spare);
 }

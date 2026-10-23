@@ -2,7 +2,6 @@ using Contracts.Settings;
 using DB.Data.Config;
 using Domain.Wantlist.Arr;
 using Harness;
-using Microsoft.EntityFrameworkCore;
 
 namespace Integration.Tests.Settings;
 
@@ -18,7 +17,7 @@ public class ArrSinkConfigRepositoryTests(SammlarrTestHost host) : IAsyncDisposa
 		{
 			Url = Some.Of("http://radarr:7878"),
 			ExternalUrl = Some.Of("http://localhost:7879"),
-			ApiKey = Some.Of(RadarrKey),
+			ApiKey = Some.Of(new Secret(RadarrKey)),
 			QualityProfileId = Some.Of(4),
 			RootFolderPath = Some.Of("/movies"),
 			Monitored = true,
@@ -28,7 +27,7 @@ public class ArrSinkConfigRepositoryTests(SammlarrTestHost host) : IAsyncDisposa
 		new ArrInstanceConfig
 		{
 			Url = Some.Of("http://sonarr:8989"),
-			ApiKey = Some.Of(SonarrKey),
+			ApiKey = Some.Of(new Secret(SonarrKey)),
 			QualityProfileId = Some.Of(6),
 			RootFolderPath = Some.Of("/tv"),
 			AnimeQualityProfileId = Some.Of(8),
@@ -62,17 +61,5 @@ public class ArrSinkConfigRepositoryTests(SammlarrTestHost host) : IAsyncDisposa
 		await Testee.StoreAsync(Connected);
 
 		await Assert.That(await Testee.GetAsync()).IsEqualTo(Connected);
-	}
-
-	[Test]
-	public async Task StoreAsync_KeepsEachAppsApiKeyEncryptedInItsOwnColumn()
-	{
-		await Testee.StoreAsync(Connected);
-
-		var radarr = await host.Context.Database.SqlQuery<string>($"""SELECT "Radarr_ApiKey" AS "Value" FROM "ProviderConfig" """).SingleAsync();
-		var sonarr = await host.Context.Database.SqlQuery<string>($"""SELECT "Sonarr_ApiKey" AS "Value" FROM "ProviderConfig" """).SingleAsync();
-
-		await Assert.That(radarr).IsNotEqualTo(RadarrKey).And.DoesNotContain(RadarrKey);
-		await Assert.That(sonarr).IsNotEqualTo(SonarrKey).And.DoesNotContain(SonarrKey);
 	}
 }

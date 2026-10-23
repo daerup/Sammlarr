@@ -33,14 +33,14 @@ public class ArrSinkTests
 		new ArrInstanceConfig
 		{
 			Url = Some.Of("http://radarr:7878"),
-			ApiKey = Some.Of(Key),
+			ApiKey = Some.Of(new Secret(Key)),
 			QualityProfileId = Some.Of(1),
 			RootFolderPath = Some.Of("/movies"),
 		},
 		new ArrInstanceConfig
 		{
 			Url = Some.Of("http://sonarr:8989"),
-			ApiKey = Some.Of(Key),
+			ApiKey = Some.Of(new Secret(Key)),
 			QualityProfileId = Some.Of(4),
 			RootFolderPath = Some.Of("/tv"),
 		},
