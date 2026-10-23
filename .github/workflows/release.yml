@@ -229,8 +229,8 @@ jobs:
         run: |
           security="https://github.com/$GITHUB_REPOSITORY/blob/main/SECURITY.md#verifying-what-you-run"
           image="\`ghcr.io/daerup/sammlarr:$VERSION\`"
-          page=$(gh api --paginate "users/$GITHUB_REPOSITORY_OWNER/packages/container/sammlarr/versions" --jq ".[] | select(.name == \"$DIGEST\") | .html_url" || true)
-          if [ -n "$page" ]; then image="[$image]($page)"; else echo "::warning::no package version found for $DIGEST"; fi
+          id=$(gh api --paginate "users/$GITHUB_REPOSITORY_OWNER/packages/container/sammlarr/versions" --jq ".[] | select(.name == \"$DIGEST\") | .id" || true)
+          if [ -n "$id" ]; then image="[$image](https://github.com/$GITHUB_REPOSITORY/pkgs/container/sammlarr/$id?tag=$VERSION)"; else echo "::warning::no package version found for $DIGEST"; fi
           previous=$(gh release list --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName // empty')
           previous=${previous#v}
           kept="so the release stays a draft and \`:latest\` on ${previous:-the previous release}"
