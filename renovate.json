@@ -14,7 +14,7 @@
     },
     {
       "description": "Test-only packages come as their own PR",
-      "matchPackageNames": ["TUnit*", "bunit", "Bogus", "CsCheck", "Verify.TUnit", "NetArchTest.eNhancedEdition", "Microsoft.Extensions.TimeProvider.Testing"],
+      "matchPackageNames": ["TUnit*", "bunit", "Bogus", "CsCheck", "Verify.TUnit", "NetArchTest.eNhancedEdition", "Microsoft.Extensions.TimeProvider.Testing", "Microsoft.Extensions.Diagnostics.Testing"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "test packages"
     },

@@ -16,6 +16,7 @@ internal sealed class WebhookModule : IServiceModule
 		{
 			services
 				.AddHttpClient(WebhookClient.Name(role))
+				.RemoveAllLoggers()
 				.AddClientHttp<WebhookOptions>()
 				.ConfigurePrimaryHttpMessageHandler(() =>
 					new SocketsHttpHandler

@@ -310,9 +310,10 @@ report (`ProviderRateLimitReporter`) uses `IMessagePublisher` directly.
 - Sinks: the console; OTLP for logs, traces and the usage meters when `OTEL_EXPORTER_OTLP_ENDPOINT` is set (Aspire
   sets it); an in-memory capture, started in Settings › Diagnostics, that keeps logs and `Sammlarr` spans for the
   admin-only `/diagnostics/export`.
-- Tracing is OpenTelemetry over the `Sammlarr` and `Sammlarr.FeedRun` sources plus ASP.NET Core and HttpClient. A
-  service opts in through `AddTracedScoped` or `AddTracedKeyedScoped`, a proxy that spans each call. Without OTLP,
-  `ActivityLogProcessor` logs spans that errored.
+- Tracing is OpenTelemetry over the `Sammlarr` and `Sammlarr.FeedRun` sources plus ASP.NET Core, its Blazor routes and
+  events (`Microsoft.AspNetCore.Components`) and HttpClient; a request whose URL is a secret (a webhook) gets no
+  HttpClient span. A service opts in through `AddTracedScoped` or `AddTracedKeyedScoped`, a proxy that spans each call.
+  Without OTLP, `ActivityLogProcessor` logs spans that errored.
 
 ## Usage metrics and Settings › Usage
 

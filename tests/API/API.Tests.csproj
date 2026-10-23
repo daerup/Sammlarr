@@ -8,6 +8,7 @@
 	<ItemGroup>
 		<PackageReference Include="Bogus" />
 		<PackageReference Include="CsCheck" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
 		<PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
 		<PackageReference Include="TUnit" />
 		<PackageReference Include="TUnit.Assertions" />
