@@ -9,8 +9,8 @@ public class NotificationConfigBuilderTests
 	{
 		var config = NotificationConfigBuilder.Webhook("  https://example.test/hook  ", "whsec_x");
 
-		await Assert.That(config.Url).IsEqualTo("https://example.test/hook");
-		await Assert.That(config.SigningSecret).IsEqualTo("whsec_x");
+		await Assert.That(config.Url.Reveal()).IsEqualTo("https://example.test/hook");
+		await Assert.That(config.SigningSecret.Reveal()).IsEqualTo("whsec_x");
 	}
 
 	[Test]
@@ -18,7 +18,7 @@ public class NotificationConfigBuilderTests
 	{
 		var config = NotificationConfigBuilder.Pushover("  new-token ", " new-key ");
 
-		await Assert.That(config.AppToken).IsEqualTo("new-token");
-		await Assert.That(config.UserKey).IsEqualTo("new-key");
+		await Assert.That(config.AppToken.Reveal()).IsEqualTo("new-token");
+		await Assert.That(config.UserKey.Reveal()).IsEqualTo("new-key");
 	}
 }

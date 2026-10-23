@@ -10,6 +10,6 @@ internal sealed class MdblistRequestsLeft(IApiKeyConfigRepository keys, MdblistB
 	public async Task<Optional<QuotaToday>> TodayAsync(CancellationToken cancellationToken = default)
 	{
 		var key = await keys.GetAsync(ApiKeyProvider.Mdblist, cancellationToken);
-		return key.ToOptional().Map(budget.Today);
+		return key.ToOptional().Map(found => budget.Today(found.Reveal()));
 	}
 }

@@ -11,9 +11,9 @@ namespace Integration.Tests.Auth;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class AccountLinkTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private const string Password = "correct horse battery";
+	private static readonly Secret Password = new("correct horse battery");
 
-	private const string NewPassword = "staple and a hinge";
+	private static readonly Secret NewPassword = new("staple and a hinge");
 
 	private static readonly DateTimeOffset Now = new(2026, 10, 4, 12, 0, 0, TimeSpan.Zero);
 
@@ -103,7 +103,7 @@ public class AccountLinkTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var link = await InviteAsync("Mira");
 
-		var refused = await Testee.JoinAsync(link.User, link.Token, "too short", "too short");
+		var refused = await Testee.JoinAsync(link.User, link.Token, new Secret("too short"), new Secret("too short"));
 
 		await Assert.That(refused).IsError().And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("A password needs at least 12 characters."));
 		await Assert.That(await Testee.JoinAsync(link.User, link.Token, Password, Password)).IsSuccess();
@@ -190,8 +190,8 @@ public class AccountLinkTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var link = await InviteAsync("Mira");
 
-		await Assert.That(await Testee.InspectAsync(AccountLinkKind.Invite, link.User, token)).IsNone();
-		await Assert.That(await Testee.JoinAsync(link.User, token, Password, Password)).IsError();
+		await Assert.That(await Testee.InspectAsync(AccountLinkKind.Invite, link.User, new Secret(token))).IsNone();
+		await Assert.That(await Testee.JoinAsync(link.User, new Secret(token), Password, Password)).IsError();
 	}
 
 	[Test]

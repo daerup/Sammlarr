@@ -9,10 +9,10 @@ namespace API.Trakt;
 
 internal sealed class TraktClientIdCheck(IHttpClientFactory httpClientFactory, TraktOptions options) : IApiKeyValidator
 {
-	public async Task<AccessCheck> CheckAsync(string value, CancellationToken cancellationToken = default)
+	public async Task<AccessCheck> CheckAsync(Secret value, CancellationToken cancellationToken = default)
 	{
 		using var request = new HttpRequestMessage(HttpMethod.Get, $"{options.BaseUrl.TrimEnd('/')}/genres/movies");
-		TraktClient.Sign(request, value);
+		TraktClient.Sign(request, value.Reveal());
 		request.Headers.UserAgent.ParseAdd(options.UserAgent);
 		try
 		{

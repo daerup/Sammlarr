@@ -21,7 +21,7 @@ public class PushoverModuleTests
 
 		await provider
 			.GetRequiredService<PushoverClient>()
-			.SendAsync(new PushoverMessage("app-token", "user-key", "Title", "Message", PushoverPriority.Normal), CancellationToken.None);
+			.SendAsync(new PushoverMessage(new Secret("app-token"), new Secret("user-key"), "Title", "Message", PushoverPriority.Normal), CancellationToken.None);
 
 		await Assert.That(sentTo?.ToString()).IsEqualTo("http://catcher.test/pushover/1/messages.json");
 	}

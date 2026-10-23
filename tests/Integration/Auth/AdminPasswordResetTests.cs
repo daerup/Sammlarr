@@ -14,9 +14,9 @@ namespace Integration.Tests.Auth;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class AdminPasswordResetTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private const string Password = "correct horse battery";
+	private static readonly Secret Password = new("correct horse battery");
 
-	private const string Reset = "a fresh start for once";
+	private static readonly Secret Reset = new("a fresh start for once");
 
 	private UserId _owner;
 
@@ -43,11 +43,11 @@ public class AdminPasswordResetTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task StartAsync_AgainAfterTheAdminChoseANewPassword_KeepsTheirChoice()
 	{
 		await Testee(Reset).StartAsync(CancellationToken.None);
-		await host.Resolve<ILocalAccountRepository>().ChangePasswordAsync(_owner, Reset, "chosen since then");
+		await host.Resolve<ILocalAccountRepository>().ChangePasswordAsync(_owner, Reset, new Secret("chosen since then"));
 
 		await Testee(Reset).StartAsync(CancellationToken.None);
 
-		await Assert.That(await SignIn.SignInWithPasswordAsync("owner", "chosen since then")).IsSuccess();
+		await Assert.That(await SignIn.SignInWithPasswordAsync("owner", new Secret("chosen since then"))).IsSuccess();
 	}
 
 	[Test]
@@ -55,7 +55,7 @@ public class AdminPasswordResetTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		for (var attempt = 0; attempt < 5; attempt++)
 		{
-			await SignIn.SignInWithPasswordAsync("owner", "wrong password!");
+			await SignIn.SignInWithPasswordAsync("owner", new Secret("wrong password!"));
 		}
 
 		await Testee(Reset).StartAsync(CancellationToken.None);
@@ -66,7 +66,7 @@ public class AdminPasswordResetTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task StartAsync_WithATooShortValue_ChangesNothing()
 	{
-		await Testee("too short").StartAsync(CancellationToken.None);
+		await Testee(new Secret("too short")).StartAsync(CancellationToken.None);
 
 		await Assert.That(await SignIn.SignInWithPasswordAsync("owner", Password)).IsSuccess();
 	}
@@ -83,7 +83,7 @@ public class AdminPasswordResetTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(attempt).IsOfUnionType<PasswordAttempt, PasswordAccepted>();
 	}
 
-	private AdminPasswordReset Testee(string value)
+	private AdminPasswordReset Testee(Secret value)
 	{
 		return new AdminPasswordReset(
 			host.Resolve<IServiceProvider>(),

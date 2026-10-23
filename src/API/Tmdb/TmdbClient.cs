@@ -15,7 +15,7 @@ internal sealed class TmdbClient(HttpClient client, TmdbOptions options, IApiKey
 
 	public async Task<HttpResponseMessage> SendAsync(HttpMethod method, string endpoint, IApiKey apiKey, CancellationToken cancellationToken = default)
 	{
-		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value));
+		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value.Reveal()));
 		request.StampTriggeredBy(currentUser);
 		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.ReportRejected(ApiKeyProvider.Tmdb));
 	}
@@ -23,7 +23,7 @@ internal sealed class TmdbClient(HttpClient client, TmdbOptions options, IApiKey
 	public async Task<HttpResponseMessage> SendWithTokenAsync(HttpMethod method, string url, IApiKey token, CancellationToken cancellationToken = default)
 	{
 		using var request = new HttpRequestMessage(method, url);
-		request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
+		request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value.Reveal());
 		request.StampTriggeredBy(currentUser);
 		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.ReportRejected(ApiKeyProvider.TmdbReadToken));
 	}

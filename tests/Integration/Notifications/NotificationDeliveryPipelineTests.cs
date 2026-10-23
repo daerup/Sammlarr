@@ -83,7 +83,9 @@ public class NotificationDeliveryPipelineTests
 		var targets = INotificationTargetRepository.Mock();
 		targets
 			.FindAsync(Any<Guid>(), Any())
-			.Returns(Some.Of(new NotificationTarget(Guid.NewGuid(), "Hook", true, new WebhookConfig("https://example.test/hook", "whsec_x"))));
+			.Returns(
+				Some.Of(new NotificationTarget(Guid.NewGuid(), "Hook", true, new WebhookConfig(new Secret("https://example.test/hook"), new Secret("whsec_x"))))
+			);
 
 		var index = new FakeKeyedServiceIndex<NotificationChannel, INotificationChannel>().Register(NotificationChannel.Webhook, channel);
 

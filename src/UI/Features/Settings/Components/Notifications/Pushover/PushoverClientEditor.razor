@@ -11,8 +11,8 @@
     {
         if (Target?.Config is PushoverConfig pushover)
         {
-            _appToken = pushover.AppToken;
-            _userKey = pushover.UserKey;
+            _appToken = pushover.AppToken.Reveal();
+            _userKey = pushover.UserKey.Reveal();
         }
     }
 

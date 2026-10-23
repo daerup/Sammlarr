@@ -212,9 +212,11 @@ step and compacts the file; a failing step stops the pass. The windows are
 
 ## Secrets and configuration
 
-- `[Encrypted]` (`DB`) encrypts stored secrets (credentials, API keys, the Radarr and Sonarr keys, notification-target
-  secrets) through an EF converter over ASP.NET Core Data Protection. `[Sensitive]` (`Contracts`) only masks a member
-  as `***` in logs; a Domain type names its secrets in `SensitiveModel` (`Observability`) instead.
+- A secret (an API key or client id, the Plex token, the Radarr and Sonarr keys, a webhook URL and its signing secret,
+  the Pushover token and user key, a password, an invite or reset token and its link, the setup code) is a `Secret`
+  (`Shared`). Its `ToString` prints `***`; only `Reveal()` reads it, at the edge that hands it to a framework or a
+  provider. `SecretConvention` (`DB`) stores every `Secret` column encrypted through `SecretConverter` over ASP.NET Core
+  Data Protection, and `SecretNameTests` fails a `string` member whose name reads like a secret.
 - Static settings (URLs, timeouts, lanes) are options records in `src/Shared/Options`, each an `IOptionsSection` naming
   its section; a generator (`src/Roslyn/Options`) binds them all, so a component injects the record itself.
 - Settings an admin changes at run time (the sink, the Radarr and Sonarr connections with their keys, the trending,
@@ -302,8 +304,9 @@ report (`ProviderRateLimitReporter`) uses `IMessagePublisher` directly.
 
 ## Logging and observability
 
-- Serilog with two destructuring policies: one logs a union's payload instead of the wrapper, the other masks
-  `[Sensitive]` and `SensitiveModel` members as `***`.
+- Serilog with one destructuring policy, which logs a union's payload instead of the wrapper. A `Secret` never renders
+  its value (`***` as text, an empty structure when destructured); the setup code is the one secret logged on purpose,
+  so the first admin can find it.
 - Sinks: the console; OTLP for logs, traces and the usage meters when `OTEL_EXPORTER_OTLP_ENDPOINT` is set (Aspire
   sets it); an in-memory capture, started in Settings › Diagnostics, that keeps logs and `Sammlarr` spans for the
   admin-only `/diagnostics/export`.

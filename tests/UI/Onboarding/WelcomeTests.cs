@@ -50,7 +50,7 @@ public class WelcomeTests : BunitContext
 	[Test]
 	public async Task TestAndContinue_WithAKeyTmdbRefuses_SaysWhyAndStays()
 	{
-		_keys.TestAsync(ApiKeyProvider.Tmdb, "wrong", Any()).Returns(Error.From("TMDB did not accept this key."));
+		_keys.TestAsync(ApiKeyProvider.Tmdb, new Secret("wrong"), Any()).Returns(Error.From("TMDB did not accept this key."));
 		var cut = Render<Welcome>();
 		await TypeAsync(cut, "wrong");
 
@@ -86,7 +86,7 @@ public class WelcomeTests : BunitContext
 	private TestApiKey WorkingKey()
 	{
 		var key = new TestApiKey(ApiKeyProvider.Tmdb, "their-key");
-		_keys.TestAsync(ApiKeyProvider.Tmdb, "their-key", Any()).Returns(Success.Of<IApiKey>(key));
+		_keys.TestAsync(ApiKeyProvider.Tmdb, new Secret("their-key"), Any()).Returns(Success.Of<IApiKey>(key));
 		return key;
 	}
 

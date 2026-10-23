@@ -15,8 +15,8 @@ namespace API.Tests.Arr;
 public class ArrSearchTests
 {
 	private static readonly ArrSinkConfig Connected = new(
-		new ArrInstanceConfig { Url = Some.Of("http://radarr:7878"), ApiKey = Some.Of("key") },
-		new ArrInstanceConfig { Url = Some.Of("http://sonarr:8989"), ApiKey = Some.Of("key") },
+		new ArrInstanceConfig { Url = Some.Of("http://radarr:7878"), ApiKey = Some.Of(new Secret("key")) },
+		new ArrInstanceConfig { Url = Some.Of("http://sonarr:8989"), ApiKey = Some.Of(new Secret("key")) },
 		ArrTagScheme.Default
 	);
 

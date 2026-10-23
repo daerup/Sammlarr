@@ -77,7 +77,7 @@ public class WebUiChannelTests
 	[Test]
 	public async Task SendAsync_WhenTheTargetIsAnotherChannel_FailsUnrecoverablyAndShowsNothing()
 	{
-		var target = new NotificationTarget(Guid.NewGuid(), "Hook", true, new WebhookConfig("https://example.test", "secret"));
+		var target = new NotificationTarget(Guid.NewGuid(), "Hook", true, new WebhookConfig(new Secret("https://example.test"), new Secret("secret")));
 
 		var result = await Testee.SendAsync(Context(NotificationEventType.FeedRunCompleted), target, NotificationTemplate.None);
 

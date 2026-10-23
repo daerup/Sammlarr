@@ -4,7 +4,7 @@ using Domain.Notifications;
 
 namespace API.Notifications.Pushover;
 
-internal sealed record PushoverMessage(string AppToken, string UserKey, string Title, string Message, PushoverPriority Priority)
+internal sealed record PushoverMessage(Secret AppToken, Secret UserKey, string Title, string Message, PushoverPriority Priority)
 {
 	internal const int RetrySeconds = 60;
 	internal const int ExpireSeconds = 3600;
@@ -16,8 +16,8 @@ internal sealed class PushoverClient(HttpClient client)
 	{
 		Dictionary<string, string> fields = new()
 		{
-			["token"] = message.AppToken,
-			["user"] = message.UserKey,
+			["token"] = message.AppToken.Reveal(),
+			["user"] = message.UserKey.Reveal(),
 			["title"] = message.Title,
 			["message"] = message.Message,
 			["priority"] = ((int)message.Priority).ToString(),

@@ -12,8 +12,8 @@
     {
         if (Target?.Config is WebhookConfig webhook)
         {
-            _url = webhook.Url;
-            _signingSecret = webhook.SigningSecret;
+            _url = webhook.Url.Reveal();
+            _signingSecret = webhook.SigningSecret.Reveal();
         }
         else
         {
@@ -24,7 +24,7 @@
     public override bool TryBuild(out NotificationConfig config, out string? error)
     {
         config = default!;
-        if (!new WebhookConfig(_url, _signingSecret).Endpoint().Match(_ => true, () => false))
+        if (!NotificationConfigBuilder.Webhook(_url, _signingSecret).Endpoint().Match(_ => true, () => false))
         {
             error = "Enter an absolute http:// or https:// URL.";
             return false;

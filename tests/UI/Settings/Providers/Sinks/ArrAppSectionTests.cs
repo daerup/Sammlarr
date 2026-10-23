@@ -4,7 +4,6 @@ using Bunit;
 using Contracts.Settings;
 using Domain.Wantlist.Arr;
 using Microsoft.AspNetCore.Components.Web;
-using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Settings.Components.Providers.Sinks;
 
@@ -15,7 +14,7 @@ public class ArrAppSectionTests : BunitContext
 	private static readonly ArrInstanceConfig Stored = ArrInstanceConfig.Empty with
 	{
 		Url = Some.Of("http://sonarr:8989"),
-		ApiKey = Some.Of("0123456789abcdef0123456789abcdef"),
+		ApiKey = Some.Of(new Secret("0123456789abcdef0123456789abcdef")),
 		QualityProfileId = Some.Of(4),
 		RootFolderPath = Some.Of("/tv"),
 	};
@@ -229,7 +228,7 @@ public class ArrAppSectionTests : BunitContext
 		await cut.InvokeAsync(() => cut.FindComponent<BbInput>().Instance.ValueChanged.InvokeAsync("http://sonarr.lan:8989"));
 		await cut.FindAll("button").Single(button => button.TextContent.Trim() == "Test again").ClickAsync();
 
-		await Assert.That(_tested.Single().Url).IsSome().And.IsEqualTo("http://sonarr.lan:8989");
+		await Assert.That(_tested.Single()).IsEqualTo(Stored with { Url = Some.Of("http://sonarr.lan:8989") });
 	}
 
 	[Test]

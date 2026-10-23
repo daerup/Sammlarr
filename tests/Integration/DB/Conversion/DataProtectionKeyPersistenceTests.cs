@@ -8,31 +8,37 @@ namespace Integration.Tests.DB.Conversion;
 
 public class DataProtectionKeyPersistenceTests
 {
-	private static IDataProtectionService CreatePersistingService(DirectoryInfo keyRing)
+	private static ServiceProvider Sammlarr(DirectoryInfo folder)
 	{
 		var services = new ServiceCollection();
-		services.AddDataProtection().PersistKeysToFileSystem(keyRing).SetApplicationName("Sammlarr");
-		var provider = services.BuildServiceProvider();
-		return new DataProtectionService(provider.GetRequiredService<IDataProtectionProvider>());
+		services.AddLogging();
+		services.AddSingleton(new SammlarOptions { ConnectionString = $"Data Source={Path.Combine(folder.FullName, "sammlarr.db")}" });
+		services.AddModule<EncryptionModule>();
+		return services.BuildServiceProvider();
 	}
 
 	[Test]
-	public async Task PersistedKeys_SurviveANewProvider_AndStillDecrypt()
+	[NotInParallel]
+	public async Task PersistedKeys_SurviveARestart_AndStillDecrypt()
 	{
-		var keyRing = new DirectoryInfo(Path.Combine(Path.GetTempPath(), "sammlarr-dp-" + Guid.NewGuid().ToString("N")));
-		keyRing.Create();
+		var folder = new DirectoryInfo(Path.Combine(Path.GetTempPath(), "sammlarr-dp-" + Guid.NewGuid().ToString("N")));
+		folder.Create();
 		try
 		{
 			var plaintext = "provider-access-token";
-			var encrypted = CreatePersistingService(keyRing).Encrypt(plaintext);
+			string encrypted;
+			using (var before = Sammlarr(folder))
+			{
+				encrypted = before.GetRequiredService<IDataProtectionProvider>().CreateProtector("test").Protect(plaintext);
+			}
 
-			var afterRestart = CreatePersistingService(keyRing).Decrypt(encrypted);
+			using var afterRestart = Sammlarr(folder);
 
-			await Assert.That(afterRestart).IsEqualTo(plaintext);
+			await Assert.That(afterRestart.GetRequiredService<IDataProtectionProvider>().CreateProtector("test").Unprotect(encrypted)).IsEqualTo(plaintext);
 		}
 		finally
 		{
-			keyRing.Delete(recursive: true);
+			folder.Delete(recursive: true);
 		}
 	}
 
@@ -44,11 +50,7 @@ public class DataProtectionKeyPersistenceTests
 		folder.Create();
 		try
 		{
-			var services = new ServiceCollection();
-			services.AddLogging();
-			services.AddSingleton(new SammlarOptions { ConnectionString = $"Data Source={Path.Combine(folder.FullName, "sammlarr.db")}" });
-			services.AddModule<EncryptionModule>();
-			using var provider = services.BuildServiceProvider();
+			using var provider = Sammlarr(folder);
 
 			provider.GetRequiredService<IDataProtectionProvider>().CreateProtector("test").Protect("provider-access-token");
 

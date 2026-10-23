@@ -21,14 +21,14 @@ public class ArrSinkRowTests : BunitContext
 		ArrInstanceConfig.Empty with
 		{
 			Url = Some.Of("http://radarr:7878"),
-			ApiKey = Some.Of("0123456789abcdef0123456789abcdef"),
+			ApiKey = Some.Of(new Secret("0123456789abcdef0123456789abcdef")),
 			QualityProfileId = Some.Of(4),
 			RootFolderPath = Some.Of("/movies"),
 		},
 		ArrInstanceConfig.Empty with
 		{
 			Url = Some.Of("http://sonarr:8989"),
-			ApiKey = Some.Of("0123456789abcdef0123456789abcdef"),
+			ApiKey = Some.Of(new Secret("0123456789abcdef0123456789abcdef")),
 			QualityProfileId = Some.Of(4),
 			RootFolderPath = Some.Of("/tv"),
 		},

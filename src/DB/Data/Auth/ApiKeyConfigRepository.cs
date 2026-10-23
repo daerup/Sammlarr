@@ -6,7 +6,7 @@ namespace DB.Data.Auth;
 
 internal sealed class ApiKeyConfigRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IApiKeyConfigRepository
 {
-	public async Task<Result<string>> GetAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
+	public async Task<Result<Secret>> GetAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		return await ctx
@@ -14,7 +14,7 @@ internal sealed class ApiKeyConfigRepository(IDbContextFactory<SammlarrDbContext
 			.Map(stored => stored.ApiKey);
 	}
 
-	public async Task StoreAsync(ApiKeyProvider provider, string value, CancellationToken cancellationToken = default)
+	public async Task StoreAsync(ApiKeyProvider provider, Secret value, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var setting = await ctx.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == provider, cancellationToken);

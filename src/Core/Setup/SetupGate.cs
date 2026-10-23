@@ -16,15 +16,15 @@ internal sealed class SetupGate(AccountsOptions options) : IDisposable
 
 	private volatile bool _adminSeen;
 
-	internal string Code => $"{_code[..4]}-{_code[4..]}";
+	internal Secret Code => new($"{_code[..4]}-{_code[4..]}");
 
 	internal bool AdminSeen => _adminSeen;
 
 	internal void SawAdmin() => _adminSeen = true;
 
-	internal bool Accepts(string candidate)
+	internal bool Accepts(Secret candidate)
 	{
-		return CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(Typed(candidate)), Encoding.ASCII.GetBytes(_code));
+		return CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(Typed(candidate.Reveal())), Encoding.ASCII.GetBytes(_code));
 	}
 
 	internal async Task<IDisposable> EnterAsync(CancellationToken cancellationToken = default)
@@ -35,9 +35,9 @@ internal sealed class SetupGate(AccountsOptions options) : IDisposable
 
 	public void Dispose() => _claim.Dispose();
 
-	private static Optional<string> Configured(string setupCode)
+	private static Optional<string> Configured(Secret setupCode)
 	{
-		var code = Typed(setupCode);
+		var code = Typed(setupCode.Reveal());
 		return Optional.When(code.Length > 0, () => Valid(code));
 	}
 

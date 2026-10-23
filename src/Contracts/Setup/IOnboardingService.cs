@@ -6,7 +6,7 @@ public interface IOnboardingService
 {
 	Task<bool> NeedsAdminAsync(CancellationToken cancellationToken = default);
 
-	Task<Optional<Error>> CodeProblemAsync(string setupCode, CancellationToken cancellationToken = default);
+	Task<Optional<Error>> CodeProblemAsync(Secret setupCode, CancellationToken cancellationToken = default);
 
 	Task<Result<User>> ClaimAsync(AdminClaim claim, CancellationToken cancellationToken = default);
 

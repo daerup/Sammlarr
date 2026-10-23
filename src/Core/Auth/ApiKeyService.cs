@@ -39,7 +39,7 @@ internal sealed class ApiKeyService(
 		return keys.GetAsync(provider, cancellationToken).IsSuccess();
 	}
 
-	public async Task<Result<IApiKey>> TestAsync(ApiKeyProvider provider, string value, CancellationToken cancellationToken = default)
+	public async Task<Result<IApiKey>> TestAsync(ApiKeyProvider provider, Secret value, CancellationToken cancellationToken = default)
 	{
 		using var marked = UsageCauses.Mark(UsageCause.KeyTest);
 		var check = await validators[provider].CheckAsync(value, cancellationToken);
@@ -65,5 +65,5 @@ internal sealed class ApiKeyService(
 		cache.Reject(provider);
 	}
 
-	private static IApiKey KeyOf(ApiKeyProvider provider, string value) => new StoredApiKey(provider, value);
+	private static IApiKey KeyOf(ApiKeyProvider provider, Secret value) => new StoredApiKey(provider, value);
 }

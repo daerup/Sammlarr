@@ -303,7 +303,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal async Task WithPlexAccount(string token)
 	{
-		await Resolve<ICredentialService>().StoreAsync(AuthProvider.Plex, new StoredCredential(token, DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid()));
+		await Resolve<ICredentialService>()
+			.StoreAsync(AuthProvider.Plex, new StoredCredential(new Secret(token), DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid()));
 		HttpStub.RequireHeader(TestUrls.PlexApi, "X-Plex-Token", token);
 		HttpStub.RespondWithStatusForUrl($"{TestUrls.PlexApi}/{PlexEndpoints.UserPath}", HttpStatusCode.OK);
 	}
@@ -591,7 +592,9 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	}
 
 	internal void OAuthReturns(string externalUserId, string displayName, string avatarUrl = "avatar") =>
-		_oauth.Returns(new ExternalLogin(externalUserId, displayName, avatarUrl, new OAuthTokenGrant("plex-token", Clock.GetUtcNow().AddDays(30), Guid.NewGuid())));
+		_oauth.Returns(
+			new ExternalLogin(externalUserId, displayName, avatarUrl, new OAuthTokenGrant(new Secret("plex-token"), Clock.GetUtcNow().AddDays(30), Guid.NewGuid()))
+		);
 
 	internal void OAuthFails(string reason) => _oauth.Fails(reason);
 
@@ -655,12 +658,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		context.ChangeTracker.Clear();
 	}
 
-	internal Task<UserId> SeedLocalUser(string username, string password, UserRole role)
+	internal Task<UserId> SeedLocalUser(string username, Secret password, UserRole role)
 	{
 		var id = Guid.NewGuid();
 		var context = ScopedDbContext;
 		var user = SeedRows.User(id, Usernames.Normalize(username), username, string.Empty);
-		user.PasswordHash = new PasswordHasher<UserRow>().HashPassword(user, password);
+		user.PasswordHash = new PasswordHasher<UserRow>().HashPassword(user, password.Reveal());
 		SeedRows.Member(context, user, role, new None());
 		context.ChangeTracker.Clear();
 		return Task.FromResult(UserId.From(id));

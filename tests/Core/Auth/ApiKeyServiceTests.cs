@@ -25,7 +25,7 @@ public sealed class ApiKeyServiceTests : IDisposable
 
 	public ApiKeyServiceTests()
 	{
-		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of("stored-key"));
+		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(new Secret("stored-key")));
 		_tmdb.CheckAsync(Any(), Any()).Returns(AccessCheck.Valid);
 		Testee = new ApiKeyService(
 			_keys.Object,
@@ -79,7 +79,7 @@ public sealed class ApiKeyServiceTests : IDisposable
 		var cause = UsageCause.Other;
 		_tmdb.CheckAsync(Any(), Any()).Returns(AccessCheck.Valid).Callback(() => cause = UsageCauses.Current.Cause);
 
-		await Testee.TestAsync(ApiKeyProvider.Tmdb, "new-key");
+		await Testee.TestAsync(ApiKeyProvider.Tmdb, new Secret("new-key"));
 
 		await Assert.That(cause).IsEqualTo(UsageCause.KeyTest);
 	}
@@ -91,7 +91,7 @@ public sealed class ApiKeyServiceTests : IDisposable
 
 		await Assert.That(await Testee.GetAsync(ApiKeyProvider.Tmdb)).IsSuccess();
 		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Once);
-		_tmdb.CheckAsync("stored-key", Any()).WasCalled(Times.Once);
+		_tmdb.CheckAsync(new Secret("stored-key"), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -99,7 +99,10 @@ public sealed class ApiKeyServiceTests : IDisposable
 	{
 		_tmdb.CheckAsync(Any(), Any()).Returns(AccessCheck.Unreachable);
 
-		await Assert.That(await Testee.GetAsync(ApiKeyProvider.Tmdb)).IsSuccess().And.Multiple(async key => await Assert.That(key.Value).IsEqualTo("stored-key"));
+		await Assert
+			.That(await Testee.GetAsync(ApiKeyProvider.Tmdb))
+			.IsSuccess()
+			.And.Multiple(async key => await Assert.That(key.Value.Reveal()).IsEqualTo("stored-key"));
 	}
 
 	[Test]
@@ -131,7 +134,7 @@ public sealed class ApiKeyServiceTests : IDisposable
 		await Testee.StoreAsync(saved);
 
 		await Assert.That(await Testee.GetAsync(ApiKeyProvider.Tmdb)).IsSuccess().And.Multiple(async key => await Assert.That(key).IsEqualTo(saved));
-		_keys.StoreAsync(ApiKeyProvider.Tmdb, "new-key", Any()).WasCalled(Times.Once);
+		_keys.StoreAsync(ApiKeyProvider.Tmdb, new Secret("new-key"), Any()).WasCalled(Times.Once);
 		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Never);
 	}
 
@@ -141,10 +144,10 @@ public sealed class ApiKeyServiceTests : IDisposable
 	[Arguments(AccessCheck.Spent, "TMDB is limiting requests right now. Try the API key again in a moment.")]
 	public async Task TestAsync_ForAKeyTmdbDoesNotAccept_SaysWhy(AccessCheck answer, string reason)
 	{
-		_tmdb.CheckAsync("typed-key", Any()).Returns(answer);
+		_tmdb.CheckAsync(new Secret("typed-key"), Any()).Returns(answer);
 
 		await Assert
-			.That(await Testee.TestAsync(ApiKeyProvider.Tmdb, "typed-key"))
+			.That(await Testee.TestAsync(ApiKeyProvider.Tmdb, new Secret("typed-key")))
 			.IsError()
 			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo(reason));
 	}

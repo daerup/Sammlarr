@@ -4,5 +4,5 @@ namespace Contracts.Identity;
 
 public interface ILocalAccountService
 {
-	Task<Result<User>> ChangePasswordAsync(string current, string next, CancellationToken cancellationToken = default);
+	Task<Result<User>> ChangePasswordAsync(Secret current, Secret next, CancellationToken cancellationToken = default);
 }

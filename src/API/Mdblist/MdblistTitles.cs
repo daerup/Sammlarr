@@ -158,7 +158,7 @@ internal sealed class MdblistTitles(MdblistClient client, IApiKeyService apiKeys
 
 	private ILane<MdblistKey, MdblistTypes.Titles.Title> Lane(IApiKey apiKey)
 	{
-		return lanes.Of<MdblistKey, MdblistTypes.Titles.Title>(new LaneName(RemoteService.Mdblist, TitlesLane, apiKey.Value));
+		return lanes.Of<MdblistKey, MdblistTypes.Titles.Title>(new LaneName(RemoteService.Mdblist, TitlesLane, apiKey.Value.Reveal()));
 	}
 
 	private LaneCall<MdblistKey, MdblistTypes.Titles.Title> Call(IApiKey apiKey)

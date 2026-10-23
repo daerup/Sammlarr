@@ -21,7 +21,6 @@ internal sealed class EncryptionModule : IServiceModule
 			.Configure<SammlarOptions, ILoggerFactory>(
 				(keys, sammlarr, loggers) => keys.XmlRepository = new FileSystemXmlRepository(DataProtectionKeyRing.Resolve(sammlarr.ConnectionString), loggers)
 			);
-		services.AddScoped<IDataProtectionService, DataProtectionService>();
-		services.AddScoped<IPropertyAddedConvention, EncryptedPropertyConvention>();
+		services.AddScoped<IPropertyAddedConvention, SecretConvention>();
 	}
 }

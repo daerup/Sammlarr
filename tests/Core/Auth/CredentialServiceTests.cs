@@ -15,7 +15,7 @@ namespace Core.Tests.Auth;
 
 public sealed class CredentialServiceTests : IDisposable
 {
-	private static readonly StoredCredential Stored = new("plex-token", DateTimeOffset.UnixEpoch.AddYears(60), Guid.NewGuid());
+	private static readonly StoredCredential Stored = new(new Secret("plex-token"), DateTimeOffset.UnixEpoch.AddYears(60), Guid.NewGuid());
 
 	private readonly MemoryCache _memory = new(new MemoryCacheOptions());
 	private readonly Mock<ICredentialRepository> _credentials = ICredentialRepository.Mock();
@@ -69,7 +69,7 @@ public sealed class CredentialServiceTests : IDisposable
 		await Assert
 			.That(await Testee.GetAsync(AuthProvider.Plex))
 			.IsSuccess()
-			.And.Multiple(async credential => await Assert.That(credential.AccessToken).IsEqualTo("plex-token"));
+			.And.Multiple(async credential => await Assert.That(credential.AccessToken.Reveal()).IsEqualTo("plex-token"));
 		_credentials.GetAsync(AuthProvider.Plex, Any()).WasCalled(Times.Once);
 	}
 
@@ -91,7 +91,7 @@ public sealed class CredentialServiceTests : IDisposable
 		Testee.ReportRejected(AuthProvider.Plex);
 
 		await Assert.That(await Testee.GetAsync(AuthProvider.Plex)).IsError();
-		await Testee.StoreAsync(AuthProvider.Plex, Stored with { AccessToken = "new-token" });
+		await Testee.StoreAsync(AuthProvider.Plex, Stored with { AccessToken = new Secret("new-token") });
 		await Assert.That(await Testee.GetAsync(AuthProvider.Plex)).IsSuccess();
 	}
 
@@ -106,10 +106,10 @@ public sealed class CredentialServiceTests : IDisposable
 	[Test]
 	public async Task TestAsync_ForATokenPlexRefuses_SaysItIsNotValid()
 	{
-		_plex.CheckAsync(Any(), "typed-token", Any()).Returns(AccessCheck.Rejected);
+		_plex.CheckAsync(Any(), new Secret("typed-token"), Any()).Returns(AccessCheck.Rejected);
 
 		await Assert
-			.That(await Testee.TestAsync(AuthProvider.Plex, Stored with { AccessToken = "typed-token" }))
+			.That(await Testee.TestAsync(AuthProvider.Plex, Stored with { AccessToken = new Secret("typed-token") }))
 			.IsError()
 			.And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("The Plex token is not valid."));
 	}
@@ -118,9 +118,9 @@ public sealed class CredentialServiceTests : IDisposable
 	public async Task TestAsync_ForATokenPlexAccepts_IsThatToken()
 	{
 		await Assert
-			.That(await Testee.TestAsync(AuthProvider.Plex, Stored with { AccessToken = "typed-token" }))
+			.That(await Testee.TestAsync(AuthProvider.Plex, Stored with { AccessToken = new Secret("typed-token") }))
 			.IsSuccess()
-			.And.Multiple(async credential => await Assert.That(credential.AccessToken).IsEqualTo("typed-token"));
+			.And.Multiple(async credential => await Assert.That(credential.AccessToken.Reveal()).IsEqualTo("typed-token"));
 	}
 
 	[Test]
@@ -128,10 +128,10 @@ public sealed class CredentialServiceTests : IDisposable
 	{
 		await Testee.GetAsync(AuthProvider.Plex);
 
-		await Testee.StoreAsync(AuthProvider.Plex, Stored with { AccessToken = "new-token" });
+		await Testee.StoreAsync(AuthProvider.Plex, Stored with { AccessToken = new Secret("new-token") });
 
 		await Testee.GetAsync(AuthProvider.Plex);
-		_credentials.StoreAsync(AuthProvider.Plex, "new-token", Stored.ExpiresAt, Stored.ClientId, Any()).WasCalled(Times.Once);
+		_credentials.StoreAsync(AuthProvider.Plex, new Secret("new-token"), Stored.ExpiresAt, Stored.ClientId, Any()).WasCalled(Times.Once);
 		_credentials.GetAsync(AuthProvider.Plex, Any()).WasCalled(Times.Exactly(2));
 	}
 

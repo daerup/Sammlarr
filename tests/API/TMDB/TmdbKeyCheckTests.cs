@@ -20,7 +20,7 @@ public class TmdbKeyCheckTests
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		var testee = new TmdbKeyCheck(new SingleClientHttpClientFactory(handler.CreateClient(Options.BaseUrl)), Options);
 
-		await Assert.That(await testee.CheckAsync("tmdb-key")).IsEqualTo(AccessCheck.Valid);
+		await Assert.That(await testee.CheckAsync(new Secret("tmdb-key"))).IsEqualTo(AccessCheck.Valid);
 		handler.Verify(request => request.PathMatches(".*api_key=tmdb-key.*"), Times.Once);
 	}
 }

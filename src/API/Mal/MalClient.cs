@@ -15,7 +15,7 @@ internal sealed class MalClient(HttpClient client, IApiKeyService apiKeys, ICurr
 	public async Task<HttpResponseMessage> GetAsync(string endpoint, IApiKey clientId, CancellationToken cancellationToken = default)
 	{
 		using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
-		request.Headers.Add(ClientIdHeader, clientId.Value);
+		request.Headers.Add(ClientIdHeader, clientId.Value.Reveal());
 		request.StampTriggeredBy(currentUser);
 		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.ReportRejected(ApiKeyProvider.Mal));
 	}

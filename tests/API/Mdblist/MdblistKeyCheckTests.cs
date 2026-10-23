@@ -21,7 +21,7 @@ public class MdblistKeyCheckTests
 			new MdblistKeyFlights()
 		);
 
-		await Assert.That(await testee.CheckAsync("mdblist-key")).IsEqualTo(AccessCheck.Valid);
+		await Assert.That(await testee.CheckAsync(new Secret("mdblist-key"))).IsEqualTo(AccessCheck.Valid);
 		handler.Verify(request => request.PathMatches(".*apikey=mdblist-key.*"), Times.Once);
 	}
 
@@ -33,7 +33,7 @@ public class MdblistKeyCheckTests
 		using var host = MdblistApis.Module(handler);
 		using var scope = host.Services.CreateScope();
 
-		var check = await scope.ServiceProvider.GetRequiredService<MdblistKeyCheck>().CheckAsync("mdblist-key");
+		var check = await scope.ServiceProvider.GetRequiredService<MdblistKeyCheck>().CheckAsync(new Secret("mdblist-key"));
 
 		await Assert.That(check).IsEqualTo(AccessCheck.Spent);
 	}
@@ -46,7 +46,7 @@ public class MdblistKeyCheckTests
 		using var host = MdblistApis.Module(handler);
 		using var scope = host.Services.CreateScope();
 
-		await scope.ServiceProvider.GetRequiredService<MdblistKeyCheck>().CheckAsync("mdblist-key");
+		await scope.ServiceProvider.GetRequiredService<MdblistKeyCheck>().CheckAsync(new Secret("mdblist-key"));
 
 		await Assert
 			.That(host.Services.GetRequiredService<MdblistBudget>().Today("mdblist-key").Answered.Map(answered => answered.Remaining))
@@ -62,9 +62,9 @@ public class MdblistKeyCheckTests
 		using var host = MdblistApis.Module(handler);
 		using var scope = host.Services.CreateScope();
 		var testee = scope.ServiceProvider.GetRequiredService<MdblistKeyCheck>();
-		await testee.CheckAsync("mdblist-key");
+		await testee.CheckAsync(new Secret("mdblist-key"));
 
-		var check = await testee.CheckAsync("mdblist-key");
+		var check = await testee.CheckAsync(new Secret("mdblist-key"));
 
 		await Assert.That(check).IsEqualTo(AccessCheck.Valid);
 		handler.Verify(request => request.PathMatches(".*apikey=mdblist-key.*"), Times.Exactly(2));

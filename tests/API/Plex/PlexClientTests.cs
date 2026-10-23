@@ -78,7 +78,7 @@ public class PlexClientTests
 			request =>
 				request
 					.Method(HttpMethod.Get)
-					.Header("X-Plex-Token", credential.AccessToken)
+					.Header("X-Plex-Token", credential.AccessToken.Reveal())
 					.Header("X-Plex-Client-Identifier", credential.ClientId.ToString())
 					.Header("X-Custom", "abc"),
 			Times.Once
@@ -99,7 +99,7 @@ public class PlexClientTests
 
 		await testee.SendAsync(HttpMethod.Get, $"{PlexBaseUrl}/two");
 
-		handler.Verify(request => request.Path("/two").Header("X-Plex-Token", renewed.AccessToken), Times.Once);
+		handler.Verify(request => request.Path("/two").Header("X-Plex-Token", renewed.AccessToken.Reveal()), Times.Once);
 	}
 
 	[Test]

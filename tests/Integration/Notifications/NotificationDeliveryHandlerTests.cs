@@ -135,7 +135,7 @@ public class NotificationDeliveryHandlerTests
 
 	private static Some<NotificationTarget> WebhookTarget(bool enabled)
 	{
-		return Some.Of(new NotificationTarget(Guid.NewGuid(), "Hook", enabled, new WebhookConfig("https://example.test/hook", "whsec_x")));
+		return Some.Of(new NotificationTarget(Guid.NewGuid(), "Hook", enabled, new WebhookConfig(new Secret("https://example.test/hook"), new Secret("whsec_x"))));
 	}
 
 	private sealed class CapturingOutcomes : INotificationDeliveryOutcomeRepository

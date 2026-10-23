@@ -12,7 +12,7 @@ namespace API.Tests.Arr.Sonarr;
 
 public class SonarrApiTests
 {
-	private static readonly ArrConnection Connection = new(ArrApp.Sonarr, new Uri("http://sonarr:8989/"), "key");
+	private static readonly ArrConnection Connection = new(ArrApp.Sonarr, new Uri("http://sonarr:8989/"), new Secret("key"));
 
 	private static readonly ArrAddition Addition = new(4, "/tv", [1]);
 

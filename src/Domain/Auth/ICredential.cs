@@ -4,5 +4,5 @@ public interface ICredential
 {
 	Guid ClientId { get; }
 
-	string AccessToken { get; }
+	Secret AccessToken { get; }
 }

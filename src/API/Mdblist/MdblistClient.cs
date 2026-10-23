@@ -22,9 +22,9 @@ internal sealed class MdblistClient(HttpClient client, MdblistOptions options, I
 		CancellationToken cancellationToken = default
 	)
 	{
-		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value));
+		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value.Reveal()));
 		request.StampTriggeredBy(currentUser);
-		request.Options.Set(LaneHandler.Owner, apiKey.Value);
+		request.Options.Set(LaneHandler.Owner, apiKey.Value.Reveal());
 		request.Content = content;
 		try
 		{

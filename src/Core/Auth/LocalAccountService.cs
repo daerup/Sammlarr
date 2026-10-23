@@ -11,7 +11,7 @@ internal sealed class LocalAccountService(
 	ILogger<LocalAccountService> logger
 ) : ILocalAccountService
 {
-	public async Task<Result<User>> ChangePasswordAsync(string current, string next, CancellationToken cancellationToken = default)
+	public async Task<Result<User>> ChangePasswordAsync(Secret current, Secret next, CancellationToken cancellationToken = default)
 	{
 		var found = await accounts.GetAsync(currentUser.Id, cancellationToken);
 		return await found.Match(
@@ -20,7 +20,7 @@ internal sealed class LocalAccountService(
 		);
 	}
 
-	private async Task<Result<User>> ChangeAsync(LocalAccount account, string current, string next, CancellationToken cancellationToken)
+	private async Task<Result<User>> ChangeAsync(LocalAccount account, Secret current, Secret next, CancellationToken cancellationToken)
 	{
 		var changed = await accounts.ChangePasswordAsync(account.User.Id, current, next, cancellationToken);
 		changed

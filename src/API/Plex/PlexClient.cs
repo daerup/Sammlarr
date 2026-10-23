@@ -27,7 +27,7 @@ internal sealed class PlexClient(HttpClient client, ICredentialService credentia
 			);
 
 		var request = new HttpRequestMessage(method, uri);
-		request.Headers.Add("X-Plex-Token", credential.AccessToken);
+		request.Headers.Add("X-Plex-Token", credential.AccessToken.Reveal());
 		request.Headers.Add("X-Plex-Client-Identifier", credential.ClientId.ToString());
 		customHeaders.ForEach(header => request.Headers.Add(header.Item1, header.Item2));
 		request.Content = content;

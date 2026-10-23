@@ -33,7 +33,10 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await ApiKeys.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "new-key"));
 
-		await Assert.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb)).IsSuccess().And.Multiple(async key => await Assert.That(key.Value).IsEqualTo("new-key"));
+		await Assert
+			.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb))
+			.IsSuccess()
+			.And.Multiple(async key => await Assert.That(key.Value.Reveal()).IsEqualTo("new-key"));
 	}
 
 	[Test]
@@ -59,7 +62,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
 
-		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, "wrong-key")).IsError();
+		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, new Secret("wrong-key"))).IsError();
 	}
 
 	[Test]
@@ -68,7 +71,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithTmdbAccount("valid-tmdb-key");
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.TmdbApi}/{TmdbEndpoints.Configuration}", "{}");
 
-		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, "valid-tmdb-key")).IsSuccess();
+		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, new Secret("valid-tmdb-key"))).IsSuccess();
 	}
 
 	[Test]
@@ -76,7 +79,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
 
-		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Mdblist, "wrong-key")).IsError();
+		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Mdblist, new Secret("wrong-key"))).IsError();
 	}
 
 	[Test]
@@ -85,7 +88,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount("valid-mdblist-key");
 		host.HttpStub.RespondWithJsonForUrl($"{TestUrls.MdblistApi}/{MdblistEndpoints.User}", "{}");
 
-		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Mdblist, "valid-mdblist-key")).IsSuccess();
+		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Mdblist, new Secret("valid-mdblist-key"))).IsSuccess();
 	}
 
 	[Test]
@@ -93,7 +96,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		host.TmdbUnreachable();
 
-		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, "any-key")).IsError();
+		await Assert.That(await ApiKeys.TestAsync(ApiKeyProvider.Tmdb, new Secret("any-key"))).IsError();
 	}
 
 	[Test]

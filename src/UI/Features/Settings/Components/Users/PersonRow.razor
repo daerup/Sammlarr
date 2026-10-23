@@ -267,7 +267,7 @@
     private void Present(Result<IssuedLink> issued, string title, Func<string, string> describe)
     {
         issued
-            .Apply(link => _issued = new Issued(title, describe(LinkText.Lifetime(link.Lifetime)), Navigation.ToAbsoluteUri(link.Path).ToString()))
+            .Apply(link => _issued = new Issued(title, describe(LinkText.Lifetime(link.Lifetime)), Navigation.ToAbsoluteUri(link.Path.Reveal()).ToString()))
             .ApplyError(error => Notifier.Error(error.Reason));
     }
 

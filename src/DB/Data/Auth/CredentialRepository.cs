@@ -16,7 +16,7 @@ internal sealed class CredentialRepository(IDbContextFactory<SammlarrDbContext> 
 
 	public async Task StoreAsync(
 		AuthProvider provider,
-		string accessToken,
+		Secret accessToken,
 		DateTimeOffset accessTokenExpiresAt,
 		Guid clientId,
 		CancellationToken cancellationToken = default

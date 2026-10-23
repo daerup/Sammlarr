@@ -8,10 +8,10 @@ namespace API.Tmdb;
 
 internal sealed class TmdbReadTokenCheck(IHttpClientFactory httpClientFactory, TmdbOptions options) : IApiKeyValidator
 {
-	public async Task<AccessCheck> CheckAsync(string value, CancellationToken cancellationToken = default)
+	public async Task<AccessCheck> CheckAsync(Secret value, CancellationToken cancellationToken = default)
 	{
 		using var request = new HttpRequestMessage(HttpMethod.Get, $"{options.BaseUrl.TrimEnd('/')}/{TmdbEndpoints.Authentication}");
-		request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", value);
+		request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", value.Reveal());
 		return await httpClientFactory.CreateClient(TmdbClient.Unauthenticated).CheckAccessAsync(request, cancellationToken);
 	}
 }

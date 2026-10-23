@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DB.Conversion.Encryption;
 using Domain.Providers;
 
 namespace DB.Data.Auth;
@@ -12,13 +11,11 @@ internal sealed record CredentialRow : Entity<Guid>, IUserOwned
 	public required AuthProvider Provider { get; set; }
 
 	[Required]
-	[Encrypted]
 	public required Guid ClientId { get; set; }
 
 	[Required]
 	[MaxLength(4096)]
-	[Encrypted]
-	public required string AccessToken { get; set; } = string.Empty;
+	public required Secret AccessToken { get; set; }
 
 	public required DateTimeOffset ExpiresAt { get; set; }
 }

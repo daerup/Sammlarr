@@ -32,13 +32,13 @@ public class ApiKeyServiceTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert
 			.That(await Testee.GetAsync(ApiKeyProvider.Tmdb))
 			.IsSuccess()
-			.And.Multiple(async key => await Assert.That(key.Value).IsEqualTo("tmdb-key-12345"));
+			.And.Multiple(async key => await Assert.That(key.Value.Reveal()).IsEqualTo("tmdb-key-12345"));
 	}
 
 	[Test]
 	public async Task ClearAsync_WhenAKeyIsStored_RemovesIt()
 	{
-		await ApiKeys.StoreAsync(ApiKeyProvider.Tmdb, "tmdb-key-12345");
+		await ApiKeys.StoreAsync(ApiKeyProvider.Tmdb, new Secret("tmdb-key-12345"));
 
 		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
 

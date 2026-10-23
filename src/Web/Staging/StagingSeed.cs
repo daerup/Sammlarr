@@ -32,10 +32,10 @@ internal enum StagingScenario
 internal sealed record StagingSettings(
 	StagingPersonas Personas,
 	StagingSeedData Seed,
-	string TmdbKey,
-	Optional<string> MdblistKey,
-	Optional<string> MalKey,
-	Optional<string> TraktKey,
+	Secret TmdbKey,
+	Optional<Secret> MdblistKey,
+	Optional<Secret> MalKey,
+	Optional<Secret> TraktKey,
 	ArrSinkConfig Arr,
 	string CatcherUrl
 );
@@ -60,7 +60,12 @@ internal static class StagingSeed
 	{
 		var users = scoped.GetRequiredService<IUserScope>();
 		var personas = settings.Personas;
-		var claim = new AdminClaim(scoped.GetRequiredService<AccountsOptions>().SetupCode, personas.Admin.Name, personas.Admin.Password, personas.Admin.Password);
+		var claim = new AdminClaim(
+			scoped.GetRequiredService<AccountsOptions>().SetupCode,
+			personas.Admin.Name,
+			new Secret(personas.Admin.Password),
+			new Secret(personas.Admin.Password)
+		);
 		var admin = Require(await scoped.GetRequiredService<IOnboardingService>().ClaimAsync(claim, cancellationToken));
 		IssuedLink invite;
 		using (users.As(admin))
@@ -76,11 +81,17 @@ internal static class StagingSeed
 			await scoped.GetRequiredService<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger()), cancellationToken);
 		}
 
-		var link = invite.Path.Split('/');
+		var link = invite.Path.Reveal().Split('/');
 		var member = Require(
 			await scoped
 				.GetRequiredService<IAccountLinkService>()
-				.JoinAsync(UserId.From(Guid.Parse(link[2])), link[3], personas.Member.Password, personas.Member.Password, cancellationToken)
+				.JoinAsync(
+					UserId.From(Guid.Parse(link[2])),
+					new Secret(link[3]),
+					new Secret(personas.Member.Password),
+					new Secret(personas.Member.Password),
+					cancellationToken
+				)
 		);
 		using (users.As(member))
 		{
@@ -139,7 +150,7 @@ internal static class StagingSeed
 		var subscriptions = scoped.GetRequiredService<INotificationSubscriptionRepository>();
 		(string Name, NotificationConfig Config)[] configs =
 		[
-			(seeded.Webhook.Name, new WebhookConfig($"{catcherUrl}/webhook", seeded.Webhook.Secret)),
+			(seeded.Webhook.Name, new WebhookConfig(new Secret($"{catcherUrl}/webhook"), seeded.Webhook.Secret)),
 			(seeded.Pushover.Name, new PushoverConfig(seeded.Pushover.AppToken, seeded.Pushover.UserKey)),
 		];
 		foreach (var (name, config) in configs)
@@ -155,5 +166,5 @@ internal static class StagingSeed
 		return result.GetOrThrow(error => new InvalidOperationException(error.Reason));
 	}
 
-	private sealed record SeededKey(ApiKeyProvider Provider, string Value) : IApiKey;
+	private sealed record SeededKey(ApiKeyProvider Provider, Secret Value) : IApiKey;
 }

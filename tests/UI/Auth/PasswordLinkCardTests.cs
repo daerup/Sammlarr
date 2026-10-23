@@ -27,7 +27,9 @@ public class PasswordLinkCardTests : BunitContext
 	[Test]
 	public async Task Card_ForAnInvite_NamesTheirAccountAndPostsTheJoin()
 	{
-		_links.InspectAsync(AccountLinkKind.Invite, UserId.From(Invited), "token", Any()).Returns(Some.Of(new AccountLinkPreview(AccountLinkKind.Invite, "mira")));
+		_links
+			.InspectAsync(AccountLinkKind.Invite, UserId.From(Invited), new Secret("token"), Any())
+			.Returns(Some.Of(new AccountLinkPreview(AccountLinkKind.Invite, "mira")));
 
 		var cut = Render<PasswordLinkCard>(parameters =>
 			parameters.Add(card => card.Kind, AccountLinkKind.Invite).Add(card => card.User, Invited).Add(card => card.Token, "token")

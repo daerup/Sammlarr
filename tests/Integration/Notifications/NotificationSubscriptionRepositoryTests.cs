@@ -21,7 +21,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 	}
 
 	private async Task<Guid> CreateTargetAsync() =>
-		await _targets.CreateAsync(new NotificationTarget(Guid.Empty, "Target", true, new PushoverConfig("token", "key")));
+		await _targets.CreateAsync(new NotificationTarget(Guid.Empty, "Target", true, new PushoverConfig(new Secret("token"), new Secret("key"))));
 
 	[Test]
 	public async Task GetAsync_WhenASubscriptionExists_IsReadableByTargetAndEventType()

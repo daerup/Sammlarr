@@ -131,6 +131,7 @@ internal sealed class SammlarrDbContext(
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
 		propertyConventions.ToList().ForEach(convention => configurationBuilder.Conventions.Add(_ => convention));
+		configurationBuilder.Properties<Secret>();
 
 		if (Database.IsSqlite())
 		{

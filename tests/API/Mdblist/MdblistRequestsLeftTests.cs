@@ -25,7 +25,7 @@ public class MdblistRequestsLeftTests
 	[Test]
 	public async Task TodayAsync_WithAKeyButNoAnswerYet_TakesTheNextResetFromTheDailyTime()
 	{
-		_keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of("mdblist-key"));
+		_keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(new Secret("mdblist-key")));
 
 		var today = await Assert.That(await Testee().TodayAsync()).IsSome();
 
@@ -36,7 +36,7 @@ public class MdblistRequestsLeftTests
 	[Test]
 	public async Task TodayAsync_WithAnAnswerFromBeforeTheReset_SaysOnlyWhenTheNextResetIs()
 	{
-		_keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of("mdblist-key"));
+		_keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(new Secret("mdblist-key")));
 		_budget.Record("mdblist-key", MdblistApis.RateLimited(12, Now.AddHours(-12)));
 
 		var today = await Assert.That(await Testee().TodayAsync()).IsSome();
@@ -48,7 +48,7 @@ public class MdblistRequestsLeftTests
 	[Test]
 	public async Task TodayAsync_WithAnAnswerSinceTheReset_CarriesIt()
 	{
-		_keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of("mdblist-key"));
+		_keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(new Secret("mdblist-key")));
 		_budget.Record("mdblist-key", MdblistApis.RateLimited(962, Now.AddHours(5)));
 
 		var today = await Assert.That(await Testee().TodayAsync()).IsSome();
@@ -61,7 +61,7 @@ public class MdblistRequestsLeftTests
 	[Test]
 	public async Task TodayAsync_WithAKeyButNoAnswerYet_TakesTheNextResetFromTheConfiguredTime()
 	{
-		_keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of("mdblist-key"));
+		_keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(new Secret("mdblist-key")));
 		var budget = new MdblistBudget(MdblistApis.Clock(), MdblistApis.Options with { DailyResetUtc = new TimeOnly(2, 0) }, NullLogger<MdblistBudget>.Instance);
 
 		var today = await Assert.That(await new MdblistRequestsLeft(_keys.Object, budget).TodayAsync()).IsSome();

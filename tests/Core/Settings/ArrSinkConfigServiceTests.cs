@@ -13,7 +13,7 @@ public sealed class ArrSinkConfigServiceTests : IDisposable
 {
 	private static readonly ArrSinkConfig Connected = ArrSinkConfig.Empty with
 	{
-		Radarr = ArrInstanceConfig.Empty with { Url = Some.Of("http://radarr:7878"), ApiKey = Some.Of("0123456789abcdef0123456789abcdef") },
+		Radarr = ArrInstanceConfig.Empty with { Url = Some.Of("http://radarr:7878"), ApiKey = Some.Of(new Secret("0123456789abcdef0123456789abcdef")) },
 	};
 
 	private readonly MemoryCache _memory = new(new MemoryCacheOptions());

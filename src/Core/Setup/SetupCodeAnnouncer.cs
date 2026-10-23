@@ -16,7 +16,7 @@ internal sealed class SetupCodeAnnouncer(IServiceProvider services, SetupGate ga
 			return;
 		}
 
-		loggers.CreateLogger("Sammlarr.Onboarding").LogWarning("No admin yet. Open /setup and enter setup code {SetupCode}", gate.Code);
+		loggers.CreateLogger("Sammlarr.Onboarding").LogWarning("No admin yet. Open /setup and enter setup code {SetupCode}", gate.Code.Reveal());
 	}
 
 	public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

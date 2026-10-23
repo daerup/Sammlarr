@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DB.Conversion.Encryption;
 using Domain.Providers;
 
 namespace DB.Data.Auth;
@@ -13,6 +12,5 @@ internal sealed record ApiKeyConfigRow : Entity<Guid>, IUserOwned
 
 	[Required]
 	[MaxLength(4096)]
-	[Encrypted]
-	public required string ApiKey { get; set; } = string.Empty;
+	public required Secret ApiKey { get; set; }
 }

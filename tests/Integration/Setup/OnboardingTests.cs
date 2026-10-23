@@ -13,11 +13,11 @@ namespace Integration.Tests.Setup;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class OnboardingTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private const string Password = "a long enough password";
+	private static readonly Secret Password = new("a long enough password");
 
 	private IOnboardingService Testee => host.Resolve<IOnboardingService>();
 
-	private string SetupCode => host.Resolve<SetupGate>().Code;
+	private Secret SetupCode => host.Resolve<SetupGate>().Code;
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
@@ -38,7 +38,7 @@ public class OnboardingTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.NoUsers();
 
-		var claimed = await Testee.ClaimAsync(new AdminClaim(SetupCode, "Ada", "too short", "too short"));
+		var claimed = await Testee.ClaimAsync(new AdminClaim(SetupCode, "Ada", new Secret("too short"), new Secret("too short")));
 
 		await Assert.That(claimed).IsError().And.Multiple(async error => await Assert.That(error.Reason).IsEqualTo("A password needs at least 12 characters."));
 		await Assert.That(await host.ScopedDbContext.Users.CountAsync()).IsEqualTo(0);
@@ -49,7 +49,7 @@ public class OnboardingTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.NoUsers();
 
-		var claimed = await Testee.ClaimAsync(new AdminClaim("AAAA-AAAA", "Ada", Password, Password));
+		var claimed = await Testee.ClaimAsync(new AdminClaim(new Secret("AAAA-AAAA"), "Ada", Password, Password));
 
 		await Assert.That(claimed).IsError();
 		await Assert.That(await host.ScopedDbContext.Users.CountAsync()).IsEqualTo(0);
@@ -69,7 +69,7 @@ public class OnboardingTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.NoUsers();
 
-		var claimed = await Testee.ClaimAsync(new AdminClaim(SetupCode, "Ada", Password, Password + "!"));
+		var claimed = await Testee.ClaimAsync(new AdminClaim(SetupCode, "Ada", Password, new Secret("a long enough password!")));
 
 		await Assert.That(claimed).IsError();
 		await Assert.That(await Testee.NeedsAdminAsync()).IsTrue();

@@ -31,7 +31,7 @@ public class LocalAccountServiceTests
 		_accounts.GetAsync(Any(), Any()).Returns(Some.Of(new LocalAccount(Member, "mira", new None())));
 		_accounts.ChangePasswordAsync(Any(), Any(), Any(), Any()).Returns(Error.From(reason));
 
-		var changed = await Testee.ChangePasswordAsync("wrong", "a new password");
+		var changed = await Testee.ChangePasswordAsync(new Secret("wrong"), new Secret("a new password"));
 
 		await Assert.That(changed).IsError();
 		await Assert.That(Warnings()).IsEquivalentTo([$"Password change refused for user {Member.Id}: {reason}"]);

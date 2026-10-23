@@ -183,12 +183,12 @@ internal sealed class UserManagementService(
 		return Success.Of(new IssuedLink(LinkPath(kind, id, issued.Token), issued.Lifetime));
 	}
 
-	private static string LinkPath(AccountLinkKind kind, UserId id, string token)
+	private static Secret LinkPath(AccountLinkKind kind, UserId id, Secret token)
 	{
 		return kind switch
 		{
-			AccountLinkKind.Invite => $"/join/{id.Value}/{token}",
-			AccountLinkKind.Reset => $"/reset/{id.Value}/{token}",
+			AccountLinkKind.Invite => new Secret($"/join/{id.Value}/{token.Reveal()}"),
+			AccountLinkKind.Reset => new Secret($"/reset/{id.Value}/{token.Reveal()}"),
 		};
 	}
 

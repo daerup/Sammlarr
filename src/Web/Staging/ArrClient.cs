@@ -62,10 +62,10 @@ internal sealed class ArrClient(HttpClient http)
 	}
 
 	[SuppressMessage("ApiDesign", "RS0030", Justification = "The staging seed sets up its own Radarr and Sonarr, which no ForRemote client serves.")]
-	internal static ArrClient For(string url, string apiKey)
+	internal static ArrClient For(string url, Secret apiKey)
 	{
 		var http = new HttpClient { BaseAddress = new Uri($"{url.TrimEnd('/')}/") };
-		http.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+		http.DefaultRequestHeaders.Add("X-Api-Key", apiKey.Reveal());
 		return new ArrClient(http);
 	}
 }

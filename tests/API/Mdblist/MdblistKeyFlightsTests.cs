@@ -13,8 +13,8 @@ public class MdblistKeyFlightsTests
 		var answer = new TaskCompletionSource<AccessCheck>();
 		var checks = 0;
 
-		var first = Testee.JoinAsync("mdblist-key", () => Checked(ref checks, answer.Task));
-		var second = Testee.JoinAsync("mdblist-key", () => Checked(ref checks, answer.Task));
+		var first = Testee.JoinAsync(new Secret("mdblist-key"), () => Checked(ref checks, answer.Task));
+		var second = Testee.JoinAsync(new Secret("mdblist-key"), () => Checked(ref checks, answer.Task));
 		answer.SetResult(AccessCheck.Valid);
 
 		await Assert.That(await Task.WhenAll(first, second)).IsEquivalentTo([AccessCheck.Valid, AccessCheck.Valid]);
@@ -26,8 +26,8 @@ public class MdblistKeyFlightsTests
 	{
 		var checks = 0;
 
-		await Testee.JoinAsync("mdblist-key", () => Checked(ref checks, Task.FromResult(AccessCheck.Unreachable)));
-		var again = await Testee.JoinAsync("mdblist-key", () => Checked(ref checks, Task.FromResult(AccessCheck.Valid)));
+		await Testee.JoinAsync(new Secret("mdblist-key"), () => Checked(ref checks, Task.FromResult(AccessCheck.Unreachable)));
+		var again = await Testee.JoinAsync(new Secret("mdblist-key"), () => Checked(ref checks, Task.FromResult(AccessCheck.Valid)));
 
 		await Assert.That(again).IsEqualTo(AccessCheck.Valid);
 		await Assert.That(checks).IsEqualTo(2);
@@ -39,8 +39,8 @@ public class MdblistKeyFlightsTests
 		var answer = new TaskCompletionSource<AccessCheck>();
 		var checks = 0;
 
-		var first = Testee.JoinAsync("first-key", () => Checked(ref checks, answer.Task));
-		var second = Testee.JoinAsync("second-key", () => Checked(ref checks, answer.Task));
+		var first = Testee.JoinAsync(new Secret("first-key"), () => Checked(ref checks, answer.Task));
+		var second = Testee.JoinAsync(new Secret("second-key"), () => Checked(ref checks, answer.Task));
 		answer.SetResult(AccessCheck.Valid);
 		await Task.WhenAll(first, second);
 

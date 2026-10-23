@@ -157,7 +157,10 @@ public class WebhookChannelTests
 			new NotificationData()
 		);
 
-	private static NotificationTarget WebhookTarget(string url, string secret) => new(Guid.NewGuid(), "Hook", true, new WebhookConfig(url, secret));
+	private static NotificationTarget WebhookTarget(string url, string secret)
+	{
+		return new(Guid.NewGuid(), "Hook", true, new WebhookConfig(new Secret(url), new Secret(secret)));
+	}
 
 	private static NotificationTemplate Template(string? template) =>
 		template is null ? NotificationTemplate.None : new NotificationTemplate(Some.Of(template), new None(), new None(), new None(), new None());

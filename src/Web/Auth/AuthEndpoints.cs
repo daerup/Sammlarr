@@ -72,7 +72,7 @@ internal static class AuthEndpoints
 						user => signIn.LinkAsync(authProvider, query, user, cancellationToken),
 						() =>
 							setupCode.Match(
-								code => signIn.CompleteSetupAsync(authProvider, query, code, cancellationToken),
+								code => signIn.CompleteSetupAsync(authProvider, query, new Secret(code), cancellationToken),
 								() => signIn.CompleteAsync(authProvider, query, cancellationToken)
 							)
 					)
@@ -94,7 +94,7 @@ internal static class AuthEndpoints
 				) =>
 				{
 					return await signIn
-						.SignInWithPasswordAsync(username, password, cancellationToken)
+						.SignInWithPasswordAsync(username, new Secret(password), cancellationToken)
 						.Map(user => SignInAndRedirectAsync(context, user, returnUrl))
 						.GetValueOr(error => Results.Redirect(SignInPage(error, returnUrl)));
 				}
@@ -115,7 +115,7 @@ internal static class AuthEndpoints
 				) =>
 				{
 					return await onboarding
-						.ClaimAsync(new AdminClaim(code, username, password, confirmation), context.RequestAborted)
+						.ClaimAsync(new AdminClaim(new Secret(code), username, new Secret(password), new Secret(confirmation)), context.RequestAborted)
 						.Map(user => SignInAndRedirectAsync(context, user, SetupPath))
 						.GetValueOr(error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Local)));
 				}
@@ -126,7 +126,7 @@ internal static class AuthEndpoints
 				"/setup/plex",
 				async ([FromForm] string code, HttpContext context, IOnboardingService onboarding) =>
 				{
-					var problem = await onboarding.CodeProblemAsync(code, context.RequestAborted);
+					var problem = await onboarding.CodeProblemAsync(new Secret(code), context.RequestAborted);
 					return problem.Match(
 						error => Results.Redirect(SetupRedirect.For(error, AuthProvider.Plex)),
 						() =>
@@ -156,7 +156,13 @@ internal static class AuthEndpoints
 		IAccountLinkService links
 	)
 	{
-		return RedeemAsync("join", user, token, context, id => links.JoinAsync(id, token, password, confirmation, context.RequestAborted));
+		return RedeemAsync(
+			"join",
+			user,
+			token,
+			context,
+			id => links.JoinAsync(id, new Secret(token), new Secret(password), new Secret(confirmation), context.RequestAborted)
+		);
 	}
 
 	internal static Task<IResult> ResetAsync(
@@ -168,7 +174,13 @@ internal static class AuthEndpoints
 		IAccountLinkService links
 	)
 	{
-		return RedeemAsync("reset", user, token, context, id => links.ResetPasswordAsync(id, token, password, confirmation, context.RequestAborted));
+		return RedeemAsync(
+			"reset",
+			user,
+			token,
+			context,
+			id => links.ResetPasswordAsync(id, new Secret(token), new Secret(password), new Secret(confirmation), context.RequestAborted)
+		);
 	}
 
 	private static async Task<IResult> RedeemAsync(string page, Guid user, string token, HttpContext context, Func<UserId, Task<Result<User>>> redeem)

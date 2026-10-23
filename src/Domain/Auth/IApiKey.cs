@@ -6,5 +6,5 @@ public interface IApiKey
 {
 	ApiKeyProvider Provider { get; }
 
-	string Value { get; }
+	Secret Value { get; }
 }

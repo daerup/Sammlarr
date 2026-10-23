@@ -2,9 +2,9 @@ namespace Shared.Options;
 
 public record AccountsOptions : IOptionsSection
 {
-	public string ResetAdminPassword { get; set; } = string.Empty;
+	public Secret ResetAdminPassword { get; set; } = new(string.Empty);
 
-	public string SetupCode { get; set; } = string.Empty;
+	public Secret SetupCode { get; set; } = new(string.Empty);
 
 	public int MinimumPasswordLength { get; set; } = 12;
 

@@ -4,5 +4,5 @@ namespace Contracts.Auth;
 
 public interface ICredentialValidator
 {
-	Task<AccessCheck> CheckAsync(Guid clientId, string accessToken, CancellationToken cancellationToken = default);
+	Task<AccessCheck> CheckAsync(Guid clientId, Secret accessToken, CancellationToken cancellationToken = default);
 }
