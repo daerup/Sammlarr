@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.1](https://github.com/daerup/Sammlarr/compare/v0.1.0...v0.1.1) (2026-10-23)
+
+
+### Features
+
+* **feeds:** explain every preview verdict in its own popover ([67a2c7c](https://github.com/daerup/Sammlarr/commit/67a2c7c41377ec2b3a3065a92a5b4f376b183516))
+* **feeds:** label filter groups "all of" and "any of" above each card ([67a2c7c](https://github.com/daerup/Sammlarr/commit/67a2c7c41377ec2b3a3065a92a5b4f376b183516))
+* **feeds:** nest filter groups five levels deep with colours from appsettings ([67a2c7c](https://github.com/daerup/Sammlarr/commit/67a2c7c41377ec2b3a3065a92a5b4f376b183516))
+* **home:** split hand-added titles by origin in brand colours ([67a2c7c](https://github.com/daerup/Sammlarr/commit/67a2c7c41377ec2b3a3065a92a5b4f376b183516))
+* **ui:** one wantlist toggle with the provenance dot in the preview and on Browse tiles ([67a2c7c](https://github.com/daerup/Sammlarr/commit/67a2c7c41377ec2b3a3065a92a5b4f376b183516))
+
+
+### Bug Fixes
+
+* **feeds:** drop the empty header above a group with one condition ([67a2c7c](https://github.com/daerup/Sammlarr/commit/67a2c7c41377ec2b3a3065a92a5b4f376b183516))
+* **ui:** draw the provenance dot on the bookmark icon so it lines up everywhere ([67a2c7c](https://github.com/daerup/Sammlarr/commit/67a2c7c41377ec2b3a3065a92a5b4f376b183516))
+
 ## 0.1.0 (2026-10-20)
 
 
