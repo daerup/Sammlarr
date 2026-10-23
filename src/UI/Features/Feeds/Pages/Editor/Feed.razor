@@ -56,14 +56,14 @@
                           FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
             @if (_loadingFeed)
             {
-                <div class="flex-1 min-h-0 flex flex-row gap-4 overflow-hidden" aria-busy="true">
+                <div class="h-full flex flex-row gap-4 overflow-hidden" aria-busy="true">
                     <BbSkeleton Class="flex-1 min-w-0 rounded-lg"/>
                     <BbSkeleton Class="flex-1 min-w-0 rounded-lg"/>
                 </div>
             }
             else
             {
-                <div class="flex-1 min-h-0 flex flex-row gap-4 overflow-hidden"
+                <div class="h-full flex flex-row gap-4 overflow-hidden"
                      data-preview-current="@(PreviewCaughtUp ? "true" : "false")"
                      @onkeydown="HandleContainerKeyDownAsync">
 

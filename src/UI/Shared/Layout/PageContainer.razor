@@ -1,33 +1,16 @@
-@if (Fill)
-{
-    <div class="h-full flex flex-col pt-4 pb-2">
-        @if (Heading is not null || HeaderActions is not null)
-        {
-            <PageHeader Heading="@Heading"
-                        Description="@Description"
-                        DescriptionContent="@DescriptionContent"
-                        Actions="@HeaderActions"
-                        Class="px-6 pb-2 shrink-0"/>
-        }
-        <div class="flex-1 min-h-0 overflow-y-auto px-6 py-2">
-            @ChildContent
-        </div>
-    </div>
-}
-else
-{
-    <div class="px-6 py-4">
-        @if (Heading is not null || HeaderActions is not null)
-        {
-            <PageHeader Heading="@Heading"
-                        Description="@Description"
-                        DescriptionContent="@DescriptionContent"
-                        Actions="@HeaderActions"
-                        Class="pb-4"/>
-        }
+<div class="h-full flex flex-col pt-4 pb-2">
+    @if (Heading is not null || HeaderActions is not null)
+    {
+        <PageHeader Heading="@Heading"
+                    Description="@Description"
+                    DescriptionContent="@DescriptionContent"
+                    Actions="@HeaderActions"
+                    Class="px-6 pb-2 shrink-0"/>
+    }
+    <div class="flex-1 min-h-0 overflow-y-auto px-6 py-2">
         @ChildContent
     </div>
-}
+</div>
 
 @code {
     [Parameter] public string? Heading { get; set; }
@@ -36,5 +19,4 @@ else
     [Parameter] public RenderFragment? HeaderActions { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public string? HeaderClass { get; set; }
-    [Parameter] public bool Fill { get; set; }
 }
