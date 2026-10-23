@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/daerup/Sammlarr/compare/v0.1.1...v0.1.2) (2026-10-23)
+
+
+### Bug Fixes
+
+* **ui:** fill every page down to the footer ([#18](https://github.com/daerup/Sammlarr/issues/18)) ([7f78685](https://github.com/daerup/Sammlarr/commit/7f786855e50d6356078c0b8c4bf846e34663414a))
+
 ## [0.1.1](https://github.com/daerup/Sammlarr/compare/v0.1.0...v0.1.1) (2026-10-23)
 
 
