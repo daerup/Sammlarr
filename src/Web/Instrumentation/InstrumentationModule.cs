@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Trace;
 using Shared.DI;
@@ -11,9 +10,11 @@ internal sealed class InstrumentationModule : IServiceModule
 
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddOpenTelemetry().WithTracing(tracing => tracing.SetSampler(new ExcludeHubNoiseSampler()).AddAspNetCoreInstrumentation(ConfigureAspNetCore));
-
-		services.Configure<HubOptions>(o => o.AddFilter(new BlazorHubActivityFilter()));
+		services
+			.AddOpenTelemetry()
+			.WithTracing(tracing =>
+				tracing.SetSampler(new ExcludeHubNoiseSampler()).AddAspNetCoreInstrumentation(ConfigureAspNetCore).AddSource("Microsoft.AspNetCore.Components")
+			);
 	}
 
 	private static void ConfigureAspNetCore(AspNetCoreTraceInstrumentationOptions options)
