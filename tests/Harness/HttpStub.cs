@@ -19,7 +19,11 @@ internal sealed class HttpStub : HttpMessageHandler
 
 	private readonly ConcurrentQueue<string> _unexpected = new();
 
+	private readonly ConcurrentQueue<string> _seen = new();
+
 	public IReadOnlyCollection<string> Unexpected => _unexpected;
+
+	public bool Saw(string text) => _seen.Any(seen => seen.Contains(text, StringComparison.Ordinal));
 
 	public int Requests(string urlContains) => _requested.Count(url => url.Contains(urlContains, StringComparison.OrdinalIgnoreCase));
 
@@ -69,26 +73,33 @@ internal sealed class HttpStub : HttpMessageHandler
 	public void RequireHeader(string urlContains, string name, string value) =>
 		_credentialValidators.Add((urlContains, req => req.Headers.TryGetValues(name, out var values) && values.Contains(value)));
 
-	protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+	protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 	{
 		var url = request.RequestUri?.AbsoluteUri ?? string.Empty;
 		_requested.Enqueue(url);
 		_causes.Enqueue((url, UsageStamp.Of(request).Map(stamp => stamp.Mark.Cause).GetValueOr(UsageCause.Other)));
+		_seen.Enqueue(await SeenAsync(request, cancellationToken));
 
 		foreach (var (urlContains, validator) in _credentialValidators)
 		{
 			if (url.Contains(urlContains, StringComparison.OrdinalIgnoreCase) && !validator(request))
-				return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized));
+				return new HttpResponseMessage(HttpStatusCode.Unauthorized);
 		}
 
 		foreach (var (pattern, responder) in _urlResponders)
 		{
 			if (MatchesPattern(url, pattern))
-				return responder(request).WaitAsync(cancellationToken);
+				return await responder(request).WaitAsync(cancellationToken);
 		}
 
 		_unexpected.Enqueue(url);
-		return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotImplemented));
+		return new HttpResponseMessage(HttpStatusCode.NotImplemented);
+	}
+
+	private static async Task<string> SeenAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+	{
+		var body = request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken);
+		return $"{request.RequestUri} {request.Headers} {request.Content?.Headers} {body}";
 	}
 
 	private static bool MatchesPattern(string url, string pattern)
