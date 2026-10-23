@@ -7,6 +7,9 @@ inputs:
   labels:
     description: OCI labels
     default: ''
+  annotations:
+    description: OCI annotations
+    default: ''
   tags:
     description: Image tags
     default: ''
@@ -57,6 +60,7 @@ runs:
         platforms: ${{ inputs.platforms }}
         tags: ${{ inputs.tags }}
         labels: ${{ inputs.labels }}
+        annotations: ${{ inputs.annotations }}
         build-args: |
           VERSION=${{ inputs.version }}
           SOURCE_DATE_EPOCH=${{ steps.epoch.outputs.value }}

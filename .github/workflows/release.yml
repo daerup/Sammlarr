@@ -28,6 +28,7 @@ jobs:
       attestation: ${{ steps.provenance.outputs.attestation-url }}
       version: ${{ steps.version.outputs.version }}
       labels: ${{ steps.meta.outputs.labels }}
+      annotations: ${{ steps.meta.outputs.annotations }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -46,11 +47,15 @@ jobs:
 
       - id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
         with:
           images: ghcr.io/daerup/sammlarr
           flavor: latest=false
           tags: type=semver,pattern={{version}}
           labels: |
+            org.opencontainers.image.created=${{ steps.version.outputs.created }}
+          annotations: |
             org.opencontainers.image.created=${{ steps.version.outputs.created }}
 
       - id: build
@@ -58,6 +63,7 @@ jobs:
         with:
           version: ${{ steps.version.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
           outputs: type=image,name=ghcr.io/daerup/sammlarr,push-by-digest=true,push=true,oci-mediatypes=true,rewrite-timestamp=true
 
       - name: Provenance
@@ -118,6 +124,7 @@ jobs:
         with:
           version: ${{ needs.image.outputs.version }}
           labels: ${{ needs.image.outputs.labels }}
+          annotations: ${{ needs.image.outputs.annotations }}
           cache: 'false'
           outputs: type=oci,dest=${{ runner.temp }}/rebuilt-layout,tar=false,oci-mediatypes=true,rewrite-timestamp=true
 

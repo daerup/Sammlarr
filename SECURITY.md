@@ -16,8 +16,8 @@ Each release also rebuilds its tag on a fresh runner without cache, and its note
 BuildKit version and the build arguments. To repeat it, build the tag the way the `rebuild` job in
 `.github/workflows/release.yml` does: `src/Web/Dockerfile` for `linux/amd64,linux/arm64` on the BuildKit image pinned
 in `.github/actions/build-image`, with the build arguments `VERSION` and `SOURCE_DATE_EPOCH` (the tag's commit time),
-the pushed image's labels, OCI media types and `rewrite-timestamp=true`. The digest you get, the index over both
-platforms, is the one in the notes.
+the pushed image's labels and index annotations, OCI media types and `rewrite-timestamp=true`. The digest you get, the
+index over both platforms, is the one in the notes.
 
 ## Supported versions
 
