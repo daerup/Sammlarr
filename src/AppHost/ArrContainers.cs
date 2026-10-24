@@ -8,9 +8,9 @@ internal static class ArrContainers
 
 	private const string LinuxServerId = "911";
 
-	internal static readonly ArrContainer Radarr = new("radarr", "Radarr", "lscr.io/linuxserver/radarr", "version-6.4.4.10685", 7878, "/movies", "/anime-movies");
+	internal static readonly ArrContainer Radarr = new("radarr", "Radarr", "ghcr.io/linuxserver/radarr", "version-6.4.4.10685", 7878, "/movies", "/anime-movies");
 
-	internal static readonly ArrContainer Sonarr = new("sonarr", "Sonarr", "lscr.io/linuxserver/sonarr", "version-4.0.20.3014", 8989, "/tv", "/anime");
+	internal static readonly ArrContainer Sonarr = new("sonarr", "Sonarr", "ghcr.io/linuxserver/sonarr", "version-4.0.20.3014", 8989, "/tv", "/anime");
 
 	public static void AddRadarrAndSonarr(this IDistributedApplicationBuilder builder)
 	{
