@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/23/2026 - 20:11:21 |
+| Generated on: | 10/24/2026 - 09:13:56 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1561 |
 | Files: | 1100 |
-| **Line coverage:** | 87.1% (41831 of 47974) |
-| Covered lines: | 41831 |
-| Uncovered lines: | 6143 |
+| **Line coverage:** | 87.1% (41832 of 47974) |
+| Covered lines: | 41832 |
+| Uncovered lines: | 6142 |
 | Coverable lines: | 47974 |
 | Total lines: | 70331 |
-| **Branch coverage:** | 79.6% (15730 of 19744) |
-| Covered branches: | 15730 |
+| **Branch coverage:** | 79.6% (15732 of 19744) |
+| Covered branches: | 15732 |
 | Total branches: | 19744 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -431,7 +431,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|95.4%|100%|
+|Core.Datasets.DatasetTicker|90.9%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -588,7 +588,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**96%**|**85.7%**|
+|**DB**|**96%**|**85.8%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -694,7 +694,7 @@
 |DB.Data.Notifications.NotificationDataModule|100%||
 |DB.Data.Notifications.NotificationDeliveryOutcomeRepository|100%|81.8%|
 |DB.Data.Notifications.NotificationModelConfiguration|100%|100%|
-|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|66.6%|
+|DB.Data.Notifications.NotificationSubscriptionRepository|88.4%|83.3%|
 |DB.Data.Notifications.NotificationTargetRepository|96.4%|81.2%|
 |DB.Data.Notifications.NotificationTargetRow|100%||
 |DB.Data.QueryableResultExtensions|100%||
@@ -955,11 +955,11 @@
 |Messaging.WolverineMessagePublisher<TMessage>|100%||
 
 </details>
-<details><summary>Observability - 77.7%</summary>
+<details><summary>Observability - 77.8%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Observability**|**77.7%**|**70.4%**|
+|**Observability**|**77.8%**|**70.7%**|
 |Observability.Diagnostics.DiagnosticsLogEntry|100%||
 |Observability.Diagnostics.DiagnosticsModule|0%||
 |Observability.Diagnostics.DiagnosticsSpanEntry|100%||
@@ -990,7 +990,7 @@
 |Observability.Tracing.TracingProxy<T, TItem>|79.5%|100%|
 |Observability.Tracing.TracingProxy<T, TResult>|79.5%|100%|
 |Observability.Tracing.TracingProxy<T>|79.5%|100%|
-|Observability.Tracing.TracingProxy<T>|81.3%|78.5%|
+|Observability.Tracing.TracingProxy<T>|86%|85.7%|
 |Observability.Tracing.TracingRegistration|100%|100%|
 |Observability.Tracing.TracingRegistration<TInterface, TImplementation>|100%|100%|
 |Observability.Tracing.TracingRegistration<TInterface>|100%|100%|
