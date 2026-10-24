@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/24/2026 - 09:13:56 |
+| Generated on: | 10/24/2026 - 22:22:51 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1561 |
 | Files: | 1100 |
-| **Line coverage:** | 87.1% (41832 of 47974) |
-| Covered lines: | 41832 |
-| Uncovered lines: | 6142 |
+| **Line coverage:** | 87.2% (41840 of 47974) |
+| Covered lines: | 41840 |
+| Uncovered lines: | 6134 |
 | Coverable lines: | 47974 |
 | Total lines: | 70331 |
-| **Branch coverage:** | 79.6% (15732 of 19744) |
-| Covered branches: | 15732 |
+| **Branch coverage:** | 79.6% (15734 of 19744) |
+| Covered branches: | 15734 |
 | Total branches: | 19744 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -398,11 +398,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 96.9%</summary>
+<details><summary>Core - 97%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**96.9%**|**88.2%**|
+|**Core**|**97%**|**88.2%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -431,7 +431,7 @@
 |Core.Datasets.DatasetRequest|100%||
 |Core.Datasets.DatasetSchedule|80%|83.3%|
 |Core.Datasets.DatasetsModule|100%||
-|Core.Datasets.DatasetTicker|90.9%|100%|
+|Core.Datasets.DatasetTicker|95.4%|100%|
 |Core.DI.DiModule|100%||
 |Core.DI.KeyedServiceIndex<TKey, TService>|100%||
 |Core.DI.KeyedServiceSet<TKey, TService>|100%||
@@ -561,7 +561,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|74.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
@@ -588,7 +588,7 @@
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**DB**|**96%**|**85.8%**|
+|**DB**|**96%**|**85.9%**|
 |DB.AnonymousCurrentUser|0%||
 |DB.Conversion.ConversionModule|100%||
 |DB.Conversion.Encryption.DataProtectionKeyRing|100%|100%|
@@ -658,8 +658,8 @@
 |DB.Data.Identity.IdentityExtensions<T>|91.3%|83.3%|
 |DB.Data.Identity.LocalAccountRepository|100%|96%|
 |DB.Data.Identity.Members|100%||
-|DB.Data.Identity.UserRepository|99.3%|96.4%|
-|DB.Data.Identity.UserRepository<T>|99.3%|96.4%|
+|DB.Data.Identity.UserRepository|99.3%|100%|
+|DB.Data.Identity.UserRepository<T>|99.3%|100%|
 |DB.Data.Jobs.JobModule|100%||
 |DB.Data.Jobs.JobQueueView|100%||
 |DB.Data.Jobs.JobRepository|92.1%|83.3%|
