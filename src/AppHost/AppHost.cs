@@ -6,7 +6,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 if (builder.Configuration["Staging"] == "true")
 {
-	builder.AddStaging();
+	await builder.AddStagingAsync();
 }
 else
 {
