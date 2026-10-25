@@ -3,18 +3,18 @@
 
 |||
 |:---|:---|
-| Generated on: | 10/25/2026 - 13:45:04 |
+| Generated on: | 10/25/2026 - 13:55:31 |
 | Parser: | MultiReport (9x Cobertura) |
 | Assemblies: | 11 |
 | Classes: | 1572 |
 | Files: | 1111 |
-| **Line coverage:** | 87.5% (42329 of 48321) |
-| Covered lines: | 42329 |
-| Uncovered lines: | 5992 |
+| **Line coverage:** | 87.6% (42331 of 48321) |
+| Covered lines: | 42331 |
+| Uncovered lines: | 5990 |
 | Coverable lines: | 48321 |
 | Total lines: | 70934 |
-| **Branch coverage:** | 80% (15912 of 19881) |
-| Covered branches: | 15912 |
+| **Branch coverage:** | 80% (15911 of 19881) |
+| Covered branches: | 15911 |
 | Total branches: | 19881 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -191,7 +191,7 @@
 |API.Mdblist.MdblistRequestsLeft|100%||
 |API.Mdblist.MdblistService|100%|90.9%|
 |API.Mdblist.MdblistService.FeedItemResolution|100%||
-|API.Mdblist.MdblistTitles|97.7%|96.8%|
+|API.Mdblist.MdblistTitles|94.1%|95.3%|
 |API.Mdblist.MdblistTitles.Asked|100%||
 |API.Mdblist.Types.MdblistTypes.ListItems.Ids|100%||
 |API.Mdblist.Types.MdblistTypes.ListItems.Movie|100%||
@@ -399,11 +399,11 @@
 |Contracts.Wantlist.WantlistAdded|100%||
 
 </details>
-<details><summary>Core - 97%</summary>
+<details><summary>Core - 97.1%</summary>
 
 |**Name**|**Line**|**Branch**|
 |:---|---:|---:|
-|**Core**|**97%**|**88.1%**|
+|**Core**|**97.1%**|**88.1%**|
 |Core.Announcing.Announcer|100%||
 |Core.Announcing.AnnouncingModule|100%||
 |Core.Announcing.EventPublisher|100%|100%|
@@ -563,7 +563,7 @@
 |Core.TickerFunctions.DatasetTicker|0%||
 |Core.TickerFunctions.FeedRunTicker|0%||
 |Core.TickerFunctions.HousekeepingTicker|0%||
-|Core.TickerQInstanceFactoryExtensions|54.2%|100%|
+|Core.TickerQInstanceFactoryExtensions|74.2%|100%|
 |Core.Usage.FeedRunUsage|100%|100%|
 |Core.Usage.FeedRunUsage.Running|100%|100%|
 |Core.Usage.Medians|100%|100%|
